@@ -19,7 +19,7 @@ import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibili
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition";
 
 import type { Id64String } from "@itwin/core-bentley";
-import type { GroupingHierarchyNode, InstancesNodeKey } from "@itwin/presentation-hierarchies";
+import type { GroupingHierarchyNode, HierarchyFilteringPath, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
 import type { ReactElement } from "react";
 import type { Viewport } from "@itwin/core-frontend";
@@ -32,17 +32,14 @@ import type { VisibilityTreeRendererProps } from "../common/components/Visibilit
 type ModelsTreeFilteringError = "tooManyFilterMatches" | "tooManyInstancesFocused" | "unknownFilterError" | "unknownInstanceFocusError";
 
 /** @beta */
-type HierarchyFilteringPaths = Awaited<ReturnType<NonNullable<VisibilityTreeProps["getFilteredPaths"]>>>;
-
-/** @beta */
 export interface UseModelsTreeProps {
   filter?: string;
   activeView: Viewport;
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
   visibilityHandlerOverrides?: ModelsTreeVisibilityHandlerOverrides;
   getFilteredPaths?: (props: {
-    createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<HierarchyFilteringPaths>;
-  }) => Promise<HierarchyFilteringPaths>;
+    createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<HierarchyFilteringPath[]>;
+  }) => Promise<HierarchyFilteringPath[]>;
   onModelsFiltered?: (modelIds: Id64String[] | undefined) => void;
 }
 
@@ -102,7 +99,7 @@ export function useModelsTree({
     setFilteringError(undefined);
     onModelsFiltered?.(undefined);
 
-    const handlePaths = async (filteredPaths: HierarchyFilteringPaths, classInspector: ECClassHierarchyInspector) => {
+    const handlePaths = async (filteredPaths: HierarchyFilteringPath[], classInspector: ECClassHierarchyInspector) => {
       if (!onModelsFiltered) {
         return;
       }
@@ -204,7 +201,7 @@ export function useModelsTree({
   };
 }
 
-async function getModels(paths: HierarchyFilteringPaths, idsCache: ModelsTreeIdsCache, classInspector: ECClassHierarchyInspector) {
+async function getModels(paths: HierarchyFilteringPath[], idsCache: ModelsTreeIdsCache, classInspector: ECClassHierarchyInspector) {
   if (!paths) {
     return undefined;
   }

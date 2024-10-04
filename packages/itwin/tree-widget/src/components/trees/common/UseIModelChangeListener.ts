@@ -18,7 +18,6 @@ export function useIModelChangeListener({ imodel, action }: UseIModelChangeListe
     if (!imodel.isBriefcaseConnection()) {
       return;
     }
-
-    registerTxnListeners(imodel.txns, action);
+    return registerTxnListeners(imodel.txns, action);
   }, [imodel, action]);
 }

@@ -3,26 +3,23 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { createClassBasedHierarchyDefinition, createNodesQueryClauseFactory } from "@itwin/presentation-hierarchies";
+import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import { FilterLimitExceededError } from "../common/TreeErrors";
 
 import type { ECClassHierarchyInspector, ECSchemaProvider, IInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
 import type {
-  createHierarchyProvider,
   DefineHierarchyLevelProps,
   DefineInstanceNodeChildHierarchyLevelProps,
   DefineRootHierarchyLevelProps,
   HierarchyDefinition,
+  HierarchyFilteringPath,
   HierarchyLevelDefinition,
   LimitingECSqlQueryExecutor,
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
 
 const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
-
-type HierarchyProviderProps = Parameters<typeof createHierarchyProvider>[0];
-type HierarchyFilteringPaths = NonNullable<NonNullable<HierarchyProviderProps["filtering"]>["paths"]>;
 
 interface CategoriesTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector;
@@ -41,20 +38,23 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   private _nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
 
   public constructor(props: CategoriesTreeDefinitionProps) {
-    this._impl = createClassBasedHierarchyDefinition({
+    this._impl = createPredicateBasedHierarchyDefinition({
       classHierarchyInspector: props.imodelAccess,
       hierarchy: {
         rootNodes: async (requestProps) => this.createRootHierarchyLevelDefinition({ ...requestProps, viewType: props.viewType }),
         childNodes: [
           {
-            parentNodeClassName: "BisCore.Category",
+            parentInstancesNodePredicate: "BisCore.Category",
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createSubcategoryQuery(requestProps),
           },
         ],
       },
     });
-    this._selectQueryFactory = createNodesQueryClauseFactory({ imodelAccess: props.imodelAccess });
     this._nodeLabelSelectClauseFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
+    this._selectQueryFactory = createNodesQueryClauseFactory({
+      imodelAccess: props.imodelAccess,
+      instanceLabelSelectClauseFactory: this._nodeLabelSelectClauseFactory,
+    });
   }
 
   public async defineHierarchyLevel(props: DefineHierarchyLevelProps) {
@@ -215,7 +215,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
     },
     { restartToken: "tree-widget/categories-tree/filter-by-label-query" },
   );
-  const paths: HierarchyFilteringPaths = [];
+  const paths: HierarchyFilteringPath[] = [];
   for await (const row of reader) {
     const path = { path: [{ className: row.CategoryClass, id: row.CategoryId }], options: { autoExpand: true } };
     row.SubcategoryId && path.path.push({ className: row.SubcategoryClass, id: row.SubcategoryId });
