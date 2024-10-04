@@ -6,7 +6,7 @@
 import { concat, concatAll, defer, distinct, EMPTY, firstValueFrom, forkJoin, from, map, merge, mergeMap, of, reduce } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
-import { HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+import { HierarchyFilteringPath, HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { toggleAllCategories } from "../../common/CategoriesVisibilityUtils";
 import { reduceWhile, toVoidPromise } from "../../common/Rxjs";
 import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility";
@@ -15,19 +15,16 @@ import { ModelsTreeNode } from "./ModelsTreeNode";
 import { createVisibilityStatus } from "./Tooltip";
 import { createVisibilityChangeEventListener } from "./VisibilityChangeEventListener";
 
+import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
 import type { HierarchyVisibilityHandler, HierarchyVisibilityHandlerOverridableMethod, VisibilityStatus } from "../../common/UseHierarchyVisibility";
 import type { Observable, OperatorFunction } from "rxjs";
 import type { ModelsTreeIdsCache } from "./ModelsTreeIdsCache";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
-import type { createHierarchyProvider, GroupingHierarchyNode, HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
 import type { AlwaysOrNeverDrawnElementsQueryProps } from "./AlwaysAndNeverDrawnElementInfo";
 import type { IVisibilityChangeEventListener } from "./VisibilityChangeEventListener";
 import type { Viewport } from "@itwin/core-frontend";
 import type { NonPartialVisibilityStatus, Visibility } from "./Tooltip";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
-
-type HierarchyProviderProps = Parameters<typeof createHierarchyProvider>[0];
-type HierarchyFilteringPaths = NonNullable<NonNullable<HierarchyProviderProps["filtering"]>["paths"]>;
 
 /** @beta */
 interface GetCategoryVisibilityStatusProps {
@@ -61,7 +58,7 @@ interface ChangeModelVisibilityStateProps {
 /** @beta */
 interface GetFilteredNodeVisibilityProps {
   parentKeys: HierarchyNodeKey[];
-  filterPaths: HierarchyFilteringPaths;
+  filterPaths: HierarchyFilteringPath[];
 }
 
 /** @beta */
@@ -943,8 +940,8 @@ function setIntersection<T>(lhs: Set<T>, rhs: Set<T>): Set<T> {
   return result;
 }
 
-function reduceFilterPaths(filteringPaths: HierarchyFilteringPaths) {
-  let paths = filteringPaths.map((filteringPath) => ("path" in filteringPath ? filteringPath.path : filteringPath));
+function reduceFilterPaths(filteringPaths: HierarchyFilteringPath[]) {
+  let paths = filteringPaths.map((filteringPath) => HierarchyFilteringPath.normalize(filteringPath).path);
   const sorted = [...paths].sort((a, b) => a.length - b.length);
   paths = [];
   for (const path of sorted) {

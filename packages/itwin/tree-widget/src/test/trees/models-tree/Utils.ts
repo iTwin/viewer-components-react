@@ -5,22 +5,26 @@
 
 import { concatMap, count, EMPTY, expand, firstValueFrom, from, toArray } from "rxjs";
 import sinon from "sinon";
-import { createHierarchyProvider } from "@itwin/presentation-hierarchies";
+import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { ModelsTreeIdsCache } from "../../../components/trees/models-tree/internal/ModelsTreeIdsCache";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../components/trees/models-tree/ModelsTreeDefinition";
 import { createIModelAccess } from "../Common";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { ClassGroupingNodeKey, GroupingHierarchyNode, HierarchyNodeKey, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+import type {
+  ClassGroupingNodeKey,
+  GroupingHierarchyNode,
+  HierarchyFilteringPath,
+  HierarchyNodeKey,
+  NonGroupingHierarchyNode,
+} from "@itwin/presentation-hierarchies";
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
-type HierarchyProviderProps = Parameters<typeof createHierarchyProvider>[0];
-type HierarchyFilteringPaths = NonNullable<NonNullable<HierarchyProviderProps["filtering"]>["paths"]>;
 
 interface CreateModelsTreeProviderProps {
   imodel: IModelConnection;
-  filteredNodePaths?: HierarchyFilteringPaths;
+  filteredNodePaths?: HierarchyFilteringPath[];
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
 }
 
@@ -28,7 +32,7 @@ export function createModelsTreeProvider({ imodel, filteredNodePaths, hierarchyC
   const config = { ...defaultHierarchyConfiguration, ...hierarchyConfig };
   const imodelAccess = createIModelAccess(imodel);
   const idsCache = new ModelsTreeIdsCache(imodelAccess, config);
-  return createHierarchyProvider({
+  return createIModelHierarchyProvider({
     imodelAccess,
     hierarchyDefinition: new ModelsTreeDefinition({
       imodelAccess,

@@ -4,17 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 import {
-  createClassBasedHierarchyDefinition,
   createNodesQueryClauseFactory,
-  HierarchyNode,
+  createPredicateBasedHierarchyDefinition,
   NodeSelectClauseColumnNames,
+  ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils";
 
-import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlBinding, IInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
 import type {
-  DefineCustomNodeChildHierarchyLevelProps,
+  DefineGenericNodeChildHierarchyLevelProps,
   DefineHierarchyLevelProps,
   DefineInstanceNodeChildHierarchyLevelProps,
   DefineRootHierarchyLevelProps,
@@ -22,8 +21,8 @@ import type {
   HierarchyLevelDefinition,
   HierarchyNodesDefinition,
   NodesQueryClauseFactory,
-  ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
+import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlBinding, IInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
 import type { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache";
 
 interface IModelContentTreeDefinitionProps {
@@ -39,58 +38,58 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
 
   public constructor(props: IModelContentTreeDefinitionProps) {
     this._idsCache = props.idsCache;
-    this._impl = createClassBasedHierarchyDefinition({
+    this._impl = createPredicateBasedHierarchyDefinition({
       classHierarchyInspector: props.imodelAccess,
       hierarchy: {
         rootNodes: async (requestProps) => this.createRootHierarchyLevelDefinition(requestProps),
         childNodes: [
           {
-            parentNodeClassName: "BisCore.Subject",
+            parentInstancesNodePredicate: "BisCore.Subject",
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createSubjectChildrenQuery(requestProps),
           },
           {
-            parentNodeClassName: "BisCore.ISubModeledElement",
+            parentInstancesNodePredicate: "BisCore.ISubModeledElement",
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createISubModeledElementChildrenQuery(requestProps),
           },
           {
-            parentNodeClassName: "BisCore.GeometricModel3d",
+            parentInstancesNodePredicate: "BisCore.GeometricModel3d",
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) =>
               this.createGeometricModelChildrenQuery({ ...requestProps, viewType: "3d" }),
           },
           {
-            parentNodeClassName: "BisCore.GeometricModel2d",
+            parentInstancesNodePredicate: "BisCore.GeometricModel2d",
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) =>
               this.createGeometricModelChildrenQuery({ ...requestProps, viewType: "2d" }),
           },
           {
-            parentNodeClassName: "BisCore.SpatialCategory",
+            parentInstancesNodePredicate: "BisCore.SpatialCategory",
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) =>
               this.createCategoryChildrenQuery({ ...requestProps, viewType: "3d" }),
           },
           {
-            parentNodeClassName: "BisCore.DrawingCategory",
+            parentInstancesNodePredicate: "BisCore.DrawingCategory",
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) =>
               this.createCategoryChildrenQuery({ ...requestProps, viewType: "2d" }),
           },
           {
-            parentNodeClassName: "BisCore.Model",
+            parentInstancesNodePredicate: "BisCore.Model",
             onlyIfNotHandled: true,
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createModelChildrenQuery(requestProps),
           },
           {
-            parentNodeClassName: "BisCore.GroupInformationElement",
+            parentInstancesNodePredicate: "BisCore.GroupInformationElement",
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createGroupInformationElementChildElementsQuery(requestProps),
           },
           {
-            customParentNodeKey: "ChildrenNode",
-            definitions: async (requestProps: DefineCustomNodeChildHierarchyLevelProps) => this.createChildrenNodeChildrenQuery(requestProps),
+            parentGenericNodePredicate: async ({ id }) => id === "ChildrenNode",
+            definitions: async (requestProps: DefineGenericNodeChildHierarchyLevelProps) => this.createChildrenNodeChildrenQuery(requestProps),
           },
           {
-            customParentNodeKey: "MembersNode",
-            definitions: async (requestProps: DefineCustomNodeChildHierarchyLevelProps) => this.createGroupInformationElementMemberElementsQuery(requestProps),
+            parentGenericNodePredicate: async ({ id }) => id === "MembersNode",
+            definitions: async (requestProps: DefineGenericNodeChildHierarchyLevelProps) => this.createGroupInformationElementMemberElementsQuery(requestProps),
           },
           {
-            parentNodeClassName: "BisCore.Element",
+            parentInstancesNodePredicate: "BisCore.Element",
             onlyIfNotHandled: true,
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createElementChildrenQuery(requestProps),
           },
@@ -105,7 +104,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
   }
 
   public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
-    if (HierarchyNode.isClassGroupingNode(node)) {
+    if (ProcessedHierarchyNode.isGroupingNode(node)) {
       const label = node.children.length ? `${node.label} (${node.children.length})` : node.label;
       return { ...node, label, extendedData: { ...node.extendedData, imageId: "icon-ec-class" } };
     }
@@ -503,7 +502,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
     ];
   }
 
-  private async createChildrenNodeChildrenQuery({ parentNode, instanceFilter }: DefineCustomNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
+  private async createChildrenNodeChildrenQuery({ parentNode, instanceFilter }: DefineGenericNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
     const groupIds: string[] = parentNode.extendedData?.groupIds;
     return Promise.all(
       getElementsSelectProps().map(async ({ classFullName, whereClause, selectProps }) => {
@@ -549,7 +548,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
   private async createGroupInformationElementMemberElementsQuery({
     parentNode,
     instanceFilter,
-  }: DefineCustomNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
+  }: DefineGenericNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
     const groupIds: string[] = parentNode.extendedData?.groupIds;
     return Promise.all(
       getElementsSelectProps().map(async ({ classFullName, whereClause, selectProps }) => {

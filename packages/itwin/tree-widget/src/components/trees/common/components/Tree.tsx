@@ -3,10 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { BeEvent } from "@itwin/core-bentley";
 import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { SchemaMetadataContextProvider } from "@itwin/presentation-components";
-import { UnifiedSelectionProvider, useSelectionHandler, useUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
+import { UnifiedSelectionProvider, useIModelUnifiedSelectionTree, useSelectionHandler } from "@itwin/presentation-hierarchies-react";
 import { TreeWidget } from "../../../../TreeWidget";
 import { useHierarchiesLocalization } from "../UseHierarchiesLocalization";
 import { useHierarchyLevelFiltering } from "../UseHierarchyFiltering";
@@ -17,17 +18,17 @@ import { createIModelAccess } from "../Utils";
 import { Delayed } from "./Delayed";
 import { ProgressOverlay } from "./ProgressOverlay";
 
+import type { MarkRequired } from "@itwin/core-bentley";
 import type { FunctionProps } from "../Utils";
 import type { ReactNode } from "react";
-import type { MarkRequired } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
-import type { SelectionStorage, useTree } from "@itwin/presentation-hierarchies-react";
+import type { SelectionStorage, useIModelTree } from "@itwin/presentation-hierarchies-react";
 import type { HighlightInfo } from "../UseNodeHighlighting";
 import type { TreeRendererProps } from "./TreeRenderer";
 
 /** @beta */
-export type TreeProps = Pick<FunctionProps<typeof useTree>, "getFilteredPaths" | "getHierarchyDefinition"> &
+export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPaths" | "getHierarchyDefinition"> &
   Partial<Pick<FunctionProps<typeof useSelectionHandler>, "selectionMode">> & {
     /** iModel connection that should be used to pull data from. */
     imodel: IModelConnection;
@@ -47,7 +48,7 @@ export type TreeProps = Pick<FunctionProps<typeof useTree>, "getFilteredPaths" |
       >,
     ) => ReactNode;
     /** Custom iModel access that is stored outside tree component. If not provided it new iModel access will be created using `imodel` prop. */
-    imodelAccess?: FunctionProps<typeof useTree>["imodelAccess"];
+    imodelAccess?: FunctionProps<typeof useIModelTree>["imodelAccess"];
     /** Size limit that should be applied on each hierarchy level. Default to `1000`. */
     hierarchyLevelSizeLimit?: number;
     /** Modifies the density of tree nodes. `enlarged` tree nodes have bigger button hit boxes. */
@@ -96,6 +97,7 @@ function TreeImpl({
 }: MarkRequired<Omit<TreeProps, "getSchemaContext" | "selectionStorage">, "imodelAccess"> & { defaultHierarchyLevelSizeLimit: number }) {
   const localizedStrings = useHierarchiesLocalization();
   const { onFeatureUsed, onPerformanceMeasured } = useTelemetryContext();
+  const [imodelChanged] = useState(new BeEvent<() => void>());
   const {
     rootNodes,
     isLoading,
@@ -103,11 +105,11 @@ function TreeImpl({
     setFormatter: _setFormatter,
     expandNode,
     ...treeProps
-  } = useUnifiedSelectionTree({
+  } = useIModelUnifiedSelectionTree({
     imodelAccess,
+    imodelChanged,
     getHierarchyDefinition,
     getFilteredPaths,
-    imodelKey: imodel.key,
     sourceName: treeName,
     localizedStrings,
     onPerformanceMeasured: (action, duration) => {
@@ -119,9 +121,8 @@ function TreeImpl({
     onHierarchyLimitExceeded: () => onFeatureUsed({ featureId: "hierarchy-level-size-limit-hit", reportInteraction: false }),
     onHierarchyLoadError: ({ type }) => onFeatureUsed({ featureId: `error-${type}`, reportInteraction: false }),
   });
+  useIModelChangeListener({ imodel, action: useCallback(() => imodelChanged.raiseEvent(), [imodelChanged]) });
 
-  const reloadTree = treeProps.reloadTree;
-  useIModelChangeListener({ imodel, action: useCallback(() => reloadTree({ dataSourceChanged: true }), [reloadTree]) });
   const reportingSelectNodes = useReportingAction({ action: selectNodes });
   const { onNodeClick, onNodeKeyDown } = useSelectionHandler({ rootNodes, selectNodes: reportingSelectNodes, selectionMode: selectionMode ?? "single" });
   const { filteringDialog, onFilterClick } = useHierarchyLevelFiltering({

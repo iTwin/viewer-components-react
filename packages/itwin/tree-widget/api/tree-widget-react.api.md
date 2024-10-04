@@ -11,6 +11,7 @@ import type { ClassGroupingNodeKey } from '@itwin/presentation-hierarchies';
 import type { ComponentPropsWithoutRef } from 'react';
 import type { ECClassHierarchyInspector } from '@itwin/presentation-shared';
 import type { GroupingHierarchyNode } from '@itwin/presentation-hierarchies';
+import type { HierarchyFilteringPath } from '@itwin/presentation-hierarchies';
 import type { HierarchyNode } from '@itwin/presentation-hierarchies-react';
 import type { Id64Arg } from '@itwin/core-bentley';
 import type { Id64Array } from '@itwin/core-bentley';
@@ -29,8 +30,8 @@ import type { SelectionStorage } from '@itwin/presentation-hierarchies-react';
 import type { TranslationOptions } from '@itwin/core-common';
 import { Tree as Tree_2 } from '@itwin/itwinui-react';
 import { TreeNodeRenderer } from '@itwin/presentation-hierarchies-react';
+import type { useIModelTree } from '@itwin/presentation-hierarchies-react';
 import { useSelectionHandler } from '@itwin/presentation-hierarchies-react';
-import type { useTree } from '@itwin/presentation-hierarchies-react';
 import type { Viewport } from '@itwin/core-frontend';
 import type { Widget } from '@itwin/appui-react';
 
@@ -168,9 +169,6 @@ interface GetGeometricElementVisibilityStatusProps {
     // (undocumented)
     modelId: Id64String;
 }
-
-// @beta (undocumented)
-type HierarchyFilteringPaths = Awaited<ReturnType<NonNullable<VisibilityTreeProps["getFilteredPaths"]>>>;
 
 // @beta
 export interface HierarchyVisibilityHandler extends IDisposable {
@@ -393,13 +391,13 @@ type TreeNodeRendererProps = ComponentPropsWithoutRef<typeof TreeNodeRenderer> &
 };
 
 // @beta (undocumented)
-type TreeProps = Pick<FunctionProps<typeof useTree>, "getFilteredPaths" | "getHierarchyDefinition"> & Partial<Pick<FunctionProps<typeof useSelectionHandler>, "selectionMode">> & {
+type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPaths" | "getHierarchyDefinition"> & Partial<Pick<FunctionProps<typeof useSelectionHandler>, "selectionMode">> & {
     imodel: IModelConnection;
     getSchemaContext: (imodel: IModelConnection) => SchemaContext;
     treeName: string;
     selectionStorage: SelectionStorage;
     treeRenderer: (treeProps: Required<Pick<TreeRendererProps, "rootNodes" | "expandNode" | "onNodeClick" | "onNodeKeyDown" | "onFilterClick" | "isNodeSelected" | "getHierarchyLevelDetails" | "size" | "getLabel">>) => ReactNode;
-    imodelAccess?: FunctionProps<typeof useTree>["imodelAccess"];
+    imodelAccess?: FunctionProps<typeof useIModelTree>["imodelAccess"];
     hierarchyLevelSizeLimit?: number;
     density?: "default" | "enlarged";
     noDataMessage?: ReactNode;
@@ -503,8 +501,8 @@ interface UseModelsTreeProps {
             targetItems: Array<InstanceKey | ElementsGroupInfo>;
         } | {
             label: string;
-        }) => Promise<HierarchyFilteringPaths>;
-    }) => Promise<HierarchyFilteringPaths>;
+        }) => Promise<HierarchyFilteringPath[]>;
+    }) => Promise<HierarchyFilteringPath[]>;
     // (undocumented)
     hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
     // (undocumented)

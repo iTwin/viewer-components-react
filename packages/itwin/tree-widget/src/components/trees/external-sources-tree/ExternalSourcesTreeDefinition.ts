@@ -3,12 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { createClassBasedHierarchyDefinition, createNodesQueryClauseFactory, HierarchyNode } from "@itwin/presentation-hierarchies";
+import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 
 import type { ECClassHierarchyInspector, ECSchemaProvider, IInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
 import type {
-  DefineCustomNodeChildHierarchyLevelProps,
+  DefineGenericNodeChildHierarchyLevelProps,
   DefineHierarchyLevelProps,
   DefineInstanceNodeChildHierarchyLevelProps,
   DefineRootHierarchyLevelProps,
@@ -31,22 +31,22 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
   private _isSupported?: Promise<boolean>;
 
   public constructor(props: ExternalSourcesTreeDefinitionProps) {
-    this._impl = createClassBasedHierarchyDefinition({
+    this._impl = createPredicateBasedHierarchyDefinition({
       classHierarchyInspector: props.imodelAccess,
       hierarchy: {
         rootNodes: async (requestProps) => this.createRootHierarchyLevelDefinition(requestProps),
         childNodes: [
           {
-            parentNodeClassName: "BisCore.ExternalSourceGroup",
+            parentInstancesNodePredicate: "BisCore.ExternalSourceGroup",
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createExternalSourcesGroupChildrenQuery(requestProps),
           },
           {
-            parentNodeClassName: "BisCore.ExternalSource",
+            parentInstancesNodePredicate: "BisCore.ExternalSource",
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createExternalSourceChildrenQuery(requestProps),
           },
           {
-            customParentNodeKey: "ElementsNode",
-            definitions: async (requestProps: DefineCustomNodeChildHierarchyLevelProps) => this.createElementsNodeChildrenQuery(requestProps),
+            parentGenericNodePredicate: async ({ id }) => id === "ElementsNode",
+            definitions: async (requestProps: DefineGenericNodeChildHierarchyLevelProps) => this.createElementsNodeChildrenQuery(requestProps),
           },
         ],
       },
@@ -219,7 +219,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
     `;
   }
 
-  private async createElementsNodeChildrenQuery({ parentNode, instanceFilter }: DefineCustomNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
+  private async createElementsNodeChildrenQuery({ parentNode, instanceFilter }: DefineGenericNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
     const sourceIds: string[] = parentNode.extendedData?.sourceIds;
     const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
       filter: instanceFilter,

@@ -8,7 +8,7 @@ import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { createHierarchyProvider } from "@itwin/presentation-hierarchies";
+import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { CategoriesTreeDefinition } from "../../../components/trees/categories-tree/CategoriesTreeDefinition";
 import {
@@ -169,7 +169,7 @@ describe("Categories tree", () => {
 
 function createCategoryTreeProvider(imodel: IModelConnection, viewType: "2d" | "3d") {
   const imodelAccess = createIModelAccess(imodel);
-  return createHierarchyProvider({
+  return createIModelHierarchyProvider({
     imodelAccess,
     hierarchyDefinition: new CategoriesTreeDefinition({ imodelAccess, viewType }),
   });

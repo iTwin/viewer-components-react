@@ -16,7 +16,7 @@
   "dependencies": {
     "@itwin/tree-widget-react": "workspace:*",
     "@itwin/property-grid-react": "workspace:*",
-    "@itwin/presentation-hierarchies": "^0.6.0",
+    "@itwin/presentation-hierarchies": "^0.7.1",
     "@itwin/presentation-shared": "^0.5.0",
     "@itwin/itwinui-react": "3.14.1",
     "@itwin/unified-selection": "^0.5",

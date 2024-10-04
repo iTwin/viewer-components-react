@@ -3,11 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { HierarchyNode } from "@itwin/presentation-hierarchies";
+import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { InstanceKey } from "@itwin/presentation-shared";
 import { collect } from "./Common";
 
-import type { HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+import type { GenericNodeKey, HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 
 export interface HierarchyDef<TNode> {
   node: TNode;
@@ -49,7 +49,7 @@ export namespace NodeValidators {
       );
     }
     if (
-      (HierarchyNode.isInstancesNode(node) || HierarchyNode.isCustom(node)) &&
+      (HierarchyNode.isInstancesNode(node) || HierarchyNode.isGeneric(node)) &&
       expectations.supportsFiltering !== undefined &&
       !!node.supportsFiltering !== !!expectations.supportsFiltering
     ) {
@@ -64,23 +64,32 @@ export namespace NodeValidators {
     }
   }
 
-  export function createForCustomNode<TChildren extends ExpectedHierarchyDef[] | boolean>(
-    expectedNode: Partial<Omit<NonGroupingHierarchyNode, "label" | "children">> & { label?: string; children?: TChildren },
+  export function createForGenericNode<TChildren extends ExpectedHierarchyDef[] | boolean>(
+    expectedNode: Partial<Omit<NonGroupingHierarchyNode, "label" | "children" | "filtering" | "key">> & {
+      key?: string | GenericNodeKey;
+      label?: string | RegExp;
+      supportsFiltering?: boolean;
+      children?: TChildren;
+      autoExpand?: boolean;
+    },
   ) {
     return {
       node: (node: HierarchyNode) => {
-        if (HierarchyNode.isStandard(node)) {
-          throw new Error(`[${node.label}] Expected a custom node, got a standard "${node.key.type}" one`);
+        if (!HierarchyNode.isGeneric(node)) {
+          throw new Error(`[${node.label}] Expected a generic node, got a standard "${node.key.type}" one`);
         }
-        if (expectedNode.key !== undefined && node.key !== expectedNode.key) {
-          throw new Error(`[${node.label}] Expected a custom node, got "${JSON.stringify(node.key)}" one`);
+        if (expectedNode.key !== undefined) {
+          if (typeof expectedNode.key === "string" && node.key.id !== expectedNode.key) {
+            throw new Error(`[${node.label}] Expected a generic node with id "${expectedNode.key}", got "${node.key.id}"`);
+          }
+          if (
+            typeof expectedNode.key === "object" &&
+            !HierarchyNodeKey.equals(node.key, expectedNode.key.source ? expectedNode.key : { ...expectedNode.key, source: node.key.source })
+          ) {
+            throw new Error(`[${node.label}] Expected a generic node with attributes "${JSON.stringify(expectedNode.key)}", got "${JSON.stringify(node.key)}"`);
+          }
         }
-        validateBaseNodeAttributes(node, {
-          label: expectedNode.label,
-          autoExpand: expectedNode.autoExpand,
-          supportsFiltering: expectedNode.supportsFiltering,
-          children: expectedNode.children,
-        });
+        validateBaseNodeAttributes(node, expectedNode);
       },
       children: expectedNode.children,
     };
@@ -95,9 +104,6 @@ export namespace NodeValidators {
   }) {
     return {
       node: (node: HierarchyNode) => {
-        if (!HierarchyNode.isStandard(node)) {
-          throw new Error(`[${node.label}] Expected an instance node, got a non-standard "${node.key as string}"`);
-        }
         if (!HierarchyNode.isInstancesNode(node)) {
           throw new Error(`[${node.label}] Expected an instance node, got "${node.key.type}"`);
         }
@@ -129,9 +135,6 @@ export namespace NodeValidators {
   }) {
     return {
       node: (node: HierarchyNode) => {
-        if (!HierarchyNode.isStandard(node)) {
-          throw new Error(`[${node.label}] Expected a class grouping node, got a non-standard "${node.key as string}"`);
-        }
         if (!HierarchyNode.isClassGroupingNode(node)) {
           throw new Error(`[${node.label}] Expected a class grouping node, got "${node.key.type}"`);
         }
@@ -156,9 +159,6 @@ export namespace NodeValidators {
   }) {
     return {
       node: (node: HierarchyNode) => {
-        if (!HierarchyNode.isStandard(node)) {
-          throw new Error(`[${node.label}] Expected a label grouping node, got a non-standard "${node.key as string}"`);
-        }
         if (!HierarchyNode.isLabelGroupingNode(node)) {
           throw new Error(`[${node.label}] Expected a label grouping node, got "${node.key.type}"`);
         }
@@ -185,9 +185,6 @@ export namespace NodeValidators {
   }) {
     return {
       node: (node: HierarchyNode) => {
-        if (!HierarchyNode.isStandard(node)) {
-          throw new Error(`[${node.label}] Expected a property other values grouping node, got a non-standard "${node.key as string}"`);
-        }
         if (node.key.type !== "property-grouping:other") {
           throw new Error(`[${node.label}] Expected a property other values grouping node, got "${node.key.type}"`);
         }
@@ -213,9 +210,6 @@ export namespace NodeValidators {
   }) {
     return {
       node: (node: HierarchyNode) => {
-        if (!HierarchyNode.isStandard(node)) {
-          throw new Error(`[${node.label}] Expected a property value range grouping node, got a non-standard "${node.key as string}"`);
-        }
         if (node.key.type !== "property-grouping:range") {
           throw new Error(`[${node.label}] Expected a property value range grouping node, got "${node.key.type}"`);
         }
@@ -252,9 +246,6 @@ export namespace NodeValidators {
   }) {
     return {
       node: (node: HierarchyNode) => {
-        if (!HierarchyNode.isStandard(node)) {
-          throw new Error(`[${node.label}] Expected a property value grouping node, got a non-standard "${node.key as string}"`);
-        }
         if (node.key.type !== "property-grouping:value") {
           throw new Error(`[${node.label}] Expected a property value grouping node, got "${node.key.type}"`);
         }
