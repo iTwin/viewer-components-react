@@ -97,6 +97,7 @@ interface ModelsTreeInstanceKeyPathsFromInstanceLabelProps {
   idsCache: ModelsTreeIdsCache;
   label: string;
   hierarchyConfig: ModelsTreeHierarchyConfiguration;
+  limit?: number | "unbounded";
 }
 
 export type ModelsTreeInstanceKeyPathsProps = ModelsTreeInstanceKeyPathsFromTargetItemsProps | ModelsTreeInstanceKeyPathsFromInstanceLabelProps;
@@ -684,7 +685,7 @@ function createGeometricElementInstanceKeyPaths(
       WHERE mce.ParentId IS NULL
     `;
 
-    return imodelAccess.createQueryReader({ ctes, ecsql, bindings }, { rowFormat: "Indexes" });
+    return imodelAccess.createQueryReader({ ctes, ecsql, bindings }, { rowFormat: "Indexes", limit: "unbounded" });
   }).pipe(
     map((row) => ({
       modelId: row[0],
@@ -794,7 +795,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
       `,
       bindings: [{ type: "string", value: props.label.replace(/[%_\\]/g, "\\$&") }],
     },
-    { rowFormat: "Indexes", restartToken: "tree-widget/models-tree/filter-by-label-query" },
+    { rowFormat: "Indexes", restartToken: "tree-widget/models-tree/filter-by-label-query", limit: props.limit },
   );
 
   const targetKeys = new Array<InstanceKey>();
