@@ -105,6 +105,7 @@ export function createIModelAccess(imodel: IModelConnection) {
   schemas.addLocater(new ECSchemaRpcLocater(imodel.getRpcProps()));
   const schemaProvider = createECSchemaProvider(schemas);
   return {
+    imodelKey: imodel.key,
     ...schemaProvider,
     ...createCachingECClassHierarchyInspector({ schemaProvider }),
     ...createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(imodel), 1000),

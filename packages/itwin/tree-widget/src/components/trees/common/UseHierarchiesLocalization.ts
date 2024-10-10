@@ -6,15 +6,15 @@
 import { useMemo } from "react";
 import { TreeWidget } from "../../../TreeWidget";
 
-import type { TreeRenderer, useTree } from "@itwin/presentation-hierarchies-react";
+import type { TreeRenderer, useIModelTree } from "@itwin/presentation-hierarchies-react";
 
-type UseTreeLocalizedStrings = Parameters<typeof useTree>[0]["localizedStrings"];
-type TreeRendererLocalizedStrings = Parameters<typeof TreeRenderer>[0]["localizedStrings"];
+type UseTreeLocalizedStrings = NonNullable<Parameters<typeof useIModelTree>[0]["localizedStrings"]>;
+type TreeRendererLocalizedStrings = NonNullable<Parameters<typeof TreeRenderer>[0]["localizedStrings"]>;
 
 type UseHierarchiesLocalizationResult = UseTreeLocalizedStrings & TreeRendererLocalizedStrings;
 
 export function useHierarchiesLocalization(): UseHierarchiesLocalizationResult {
-  const stringValues = Object.values(getLocalizedStrings()!);
+  const stringValues = Object.values(getLocalizedStrings());
   const localizedStrings = useMemo(getLocalizedStrings, stringValues);
   return localizedStrings;
 }

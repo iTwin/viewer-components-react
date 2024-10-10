@@ -8,7 +8,7 @@ import { IModel, IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itw
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { createHierarchyProvider } from "@itwin/presentation-hierarchies";
+import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { IModelContentTreeDefinition } from "../../../components/trees/imodel-content-tree/IModelContentTreeDefinition";
 import { IModelContentTreeIdsCache } from "../../../components/trees/imodel-content-tree/internal/IModelContentTreeIdsCache";
@@ -660,7 +660,7 @@ describe("iModel content tree", () => {
                           instanceKeys: [keys.parentGroup],
                           supportsFiltering: false,
                           children: [
-                            NodeValidators.createForCustomNode({
+                            NodeValidators.createForGenericNode({
                               label: "Children",
                               supportsFiltering: true,
                               children: [
@@ -747,7 +747,7 @@ describe("iModel content tree", () => {
                           instanceKeys: [keys.group],
                           supportsFiltering: false,
                           children: [
-                            NodeValidators.createForCustomNode({
+                            NodeValidators.createForGenericNode({
                               label: "Members",
                               supportsFiltering: true,
                               children: [
@@ -1000,7 +1000,7 @@ describe("iModel content tree", () => {
 
 function createIModelContentTreeProvider(imodel: IModelConnection) {
   const imodelAccess = createIModelAccess(imodel);
-  return createHierarchyProvider({
+  return createIModelHierarchyProvider({
     imodelAccess,
     hierarchyDefinition: new IModelContentTreeDefinition({
       imodelAccess,

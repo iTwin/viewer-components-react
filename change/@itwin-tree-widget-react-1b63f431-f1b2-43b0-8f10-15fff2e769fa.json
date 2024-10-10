@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Bump dependencies of `@itwin/presentation-core-interop`, `@itwin/presentation-hierarchies` and `@itwin/presentation-hierarchies-react`.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "35135765+grigasp@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

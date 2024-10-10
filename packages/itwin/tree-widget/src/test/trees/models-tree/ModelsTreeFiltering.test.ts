@@ -30,21 +30,18 @@ import { createClassGroupingHierarchyNode, createModelsTreeProvider } from "./Ut
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
-import type { createHierarchyProvider, HierarchyProvider } from "@itwin/presentation-hierarchies";
+import type { HierarchyFilteringPath, HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { TestIModelBuilder } from "@itwin/presentation-testing";
 import type { ExpectedHierarchyDef } from "../HierarchyValidation";
 import type { ElementsGroupInfo } from "../../../components/trees/models-tree/ModelsTreeDefinition";
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
-type HierarchyProviderProps = Parameters<typeof createHierarchyProvider>[0];
-type HierarchyFilteringPaths = NonNullable<NonNullable<HierarchyProviderProps["filtering"]>["paths"]>;
-type HierarchyFilteringPath = HierarchyFilteringPaths[number];
 
 interface TreeFilteringTestCaseDefinition<TIModelSetupResult extends {}> {
   name: string;
   only?: boolean;
   setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[1];
-  getTargetInstancePaths: (setupResult: TIModelSetupResult) => HierarchyFilteringPaths;
+  getTargetInstancePaths: (setupResult: TIModelSetupResult) => HierarchyFilteringPath[];
   getTargetItems: (setupResult: TIModelSetupResult) => Array<InstanceKey | ElementsGroupInfo>;
   getTargetInstanceLabel?: (setupResult: TIModelSetupResult) => string;
   getExpectedHierarchy: (setupResult: TIModelSetupResult) => ExpectedHierarchyDef[];
@@ -56,7 +53,7 @@ namespace TreeFilteringTestCaseDefinition {
   export function create<TIModelSetupResult extends {}>(
     name: string,
     setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[1],
-    getTargetInstancePaths: (setupResult: TIModelSetupResult) => HierarchyFilteringPaths,
+    getTargetInstancePaths: (setupResult: TIModelSetupResult) => HierarchyFilteringPath[],
     getTargetItems: (setupResult: TIModelSetupResult) => Array<InstanceKey | ElementsGroupInfo>,
     getTargetInstanceLabel: ((setupResult: TIModelSetupResult) => string) | undefined,
     getExpectedHierarchy: (setupResult: TIModelSetupResult) => ExpectedHierarchyDef[],
@@ -1291,7 +1288,7 @@ describe("Models tree", () => {
                                   children: [
                                     NodeValidators.createForInstanceNode({ instanceKeys: [x.testElement1] }),
                                     NodeValidators.createForInstanceNode({ instanceKeys: [x.testElement2] }),
-                                  ]
+                                  ],
                                 }),
                               ],
                             }),
@@ -1426,9 +1423,7 @@ describe("Models tree", () => {
                                         NodeValidators.createForClassGroupingNode({
                                           label: "Physical Object",
                                           autoExpand: false,
-                                          children: [
-                                            NodeValidators.createForInstanceNode({ instanceKeys: [x.childElement] }),
-                                          ],
+                                          children: [NodeValidators.createForInstanceNode({ instanceKeys: [x.childElement] })],
                                         }),
                                       ],
                                     }),
@@ -1583,9 +1578,7 @@ describe("Models tree", () => {
                         NodeValidators.createForClassGroupingNode({
                           label: "Physical Object",
                           autoExpand: false,
-                          children: [
-                            NodeValidators.createForInstanceNode({ instanceKeys: [x.element1] }),
-                          ],
+                          children: [NodeValidators.createForInstanceNode({ instanceKeys: [x.element1] })],
                         }),
                       ],
                     }),
@@ -1597,9 +1590,7 @@ describe("Models tree", () => {
                         NodeValidators.createForClassGroupingNode({
                           label: "Physical Object",
                           autoExpand: false,
-                          children: [
-                            NodeValidators.createForInstanceNode({ instanceKeys: [x.element2] }),
-                          ],
+                          children: [NodeValidators.createForInstanceNode({ instanceKeys: [x.element2] })],
                         }),
                       ],
                     }),
@@ -1617,7 +1608,7 @@ describe("Models tree", () => {
     testCases.forEach((testCase: TreeFilteringTestCaseDefinition<any>) => {
       (testCase.only ? describe.only : describe)(testCase.name, () => {
         let imodel: IModelConnection;
-        let instanceKeyPaths!: HierarchyFilteringPaths;
+        let instanceKeyPaths!: HierarchyFilteringPath[];
         let targetItems!: Array<InstanceKey | ElementsGroupInfo>;
         let targetInstanceLabel: string | undefined;
         let expectedHierarchy!: ExpectedHierarchyDef[];
@@ -1793,14 +1784,14 @@ function instanceKeyPathSorter(lhs: HierarchyFilteringPath, rhs: HierarchyFilter
       }
       continue;
     }
-    if (HierarchyNodeIdentifier.isCustomNodeIdentifier(lhsId) && HierarchyNodeIdentifier.isCustomNodeIdentifier(rhsId)) {
-      const keyCmp = lhsId.key.localeCompare(rhsId.key);
+    if (HierarchyNodeIdentifier.isGenericNodeIdentifier(lhsId) && HierarchyNodeIdentifier.isGenericNodeIdentifier(rhsId)) {
+      const keyCmp = lhsId.id.localeCompare(rhsId.id);
       if (0 !== keyCmp) {
         return keyCmp;
       }
       continue;
     }
-    return HierarchyNodeIdentifier.isCustomNodeIdentifier(lhsId) ? -1 : 1;
+    return HierarchyNodeIdentifier.isGenericNodeIdentifier(lhsId) ? -1 : 1;
   }
   return 0;
 }

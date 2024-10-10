@@ -1,7 +1,0 @@
-{
-  "type": "prerelease",
-  "comment": "Do not show hierarchy level filtering button on nodes that don't have direct instance child nodes.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "35135765+grigasp@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fixed tree header layout to make sure action buttons and searchbox button are consistent",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "24278440+saskliutas@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

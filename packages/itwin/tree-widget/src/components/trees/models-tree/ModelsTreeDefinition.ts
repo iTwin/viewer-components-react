@@ -5,7 +5,10 @@
 
 import { defer, EMPTY, from, map, merge, mergeAll, mergeMap } from "rxjs";
 import {
-  createClassBasedHierarchyDefinition, createNodesQueryClauseFactory, HierarchyNode, NodeSelectClauseColumnNames,
+  createNodesQueryClauseFactory,
+  createPredicateBasedHierarchyDefinition,
+  NodeSelectClauseColumnNames,
+  ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import { collect } from "../common/Rxjs";
@@ -15,8 +18,16 @@ import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Observable } from "rxjs";
 import type {
+  ECClassHierarchyInspector,
+  ECSchemaProvider,
+  ECSqlBinding,
+  ECSqlQueryDef,
+  IInstanceLabelSelectClauseFactory,
+  InstanceKey,
+} from "@itwin/presentation-shared";
+import type {
   ClassGroupingNodeKey,
-  createHierarchyProvider,
+  createIModelHierarchyProvider,
   DefineHierarchyLevelProps,
   DefineInstanceNodeChildHierarchyLevelProps,
   DefineRootHierarchyLevelProps,
@@ -27,16 +38,7 @@ import type {
   HierarchyNodesDefinition,
   LimitingECSqlQueryExecutor,
   NodesQueryClauseFactory,
-  ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
-import type {
-  ECClassHierarchyInspector,
-  ECSchemaProvider,
-  ECSqlBinding,
-  ECSqlQueryDef,
-  IInstanceLabelSelectClauseFactory,
-  InstanceKey,
-} from "@itwin/presentation-shared";
 import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
 
 /** @beta */
@@ -97,10 +99,11 @@ interface ModelsTreeInstanceKeyPathsFromInstanceLabelProps {
   idsCache: ModelsTreeIdsCache;
   label: string;
   hierarchyConfig: ModelsTreeHierarchyConfiguration;
+  limit?: number | "unbounded";
 }
 
 export type ModelsTreeInstanceKeyPathsProps = ModelsTreeInstanceKeyPathsFromTargetItemsProps | ModelsTreeInstanceKeyPathsFromInstanceLabelProps;
-type HierarchyProviderProps = Parameters<typeof createHierarchyProvider>[0];
+type HierarchyProviderProps = Parameters<typeof createIModelHierarchyProvider>[0];
 type HierarchyFilteringPaths = NonNullable<NonNullable<HierarchyProviderProps["filtering"]>["paths"]>;
 type HierarchyFilteringPath = HierarchyFilteringPaths[number];
 
@@ -121,29 +124,29 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
   private _isSupported?: Promise<boolean>;
 
   public constructor(props: ModelsTreeDefinitionProps) {
-    this._impl = createClassBasedHierarchyDefinition({
+    this._impl = createPredicateBasedHierarchyDefinition({
       classHierarchyInspector: props.imodelAccess,
       hierarchy: {
         rootNodes: async (requestProps) => this.createRootHierarchyLevelDefinition(requestProps),
         childNodes: [
           {
-            parentNodeClassName: "BisCore.Subject",
+            parentInstancesNodePredicate: "BisCore.Subject",
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createSubjectChildrenQuery(requestProps),
           },
           {
-            parentNodeClassName: "BisCore.ISubModeledElement",
+            parentInstancesNodePredicate: "BisCore.ISubModeledElement",
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createISubModeledElementChildrenQuery(requestProps),
           },
           {
-            parentNodeClassName: "BisCore.GeometricModel3d",
+            parentInstancesNodePredicate: "BisCore.GeometricModel3d",
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createGeometricModel3dChildrenQuery(requestProps),
           },
           {
-            parentNodeClassName: "BisCore.SpatialCategory",
+            parentInstancesNodePredicate: "BisCore.SpatialCategory",
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createSpatialCategoryChildrenQuery(requestProps),
           },
           {
-            parentNodeClassName: "BisCore.GeometricElement3d",
+            parentInstancesNodePredicate: "BisCore.GeometricElement3d",
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createGeometricElement3dChildrenQuery(requestProps),
           },
         ],
@@ -152,12 +155,15 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     this._idsCache = props.idsCache;
     this._queryExecutor = props.imodelAccess;
     this._hierarchyConfig = props.hierarchyConfig;
-    this._selectQueryFactory = createNodesQueryClauseFactory({ imodelAccess: props.imodelAccess });
     this._nodeLabelSelectClauseFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
+    this._selectQueryFactory = createNodesQueryClauseFactory({
+      imodelAccess: props.imodelAccess,
+      instanceLabelSelectClauseFactory: this._nodeLabelSelectClauseFactory,
+    });
   }
 
   public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
-    if (HierarchyNode.isClassGroupingNode(node)) {
+    if (ProcessedHierarchyNode.isGroupingNode(node)) {
       return {
         ...node,
         label: this._hierarchyConfig.elementClassGrouping === "enableWithCounts" ? `${node.label} (${node.children.length})` : node.label,
@@ -684,7 +690,7 @@ function createGeometricElementInstanceKeyPaths(
       WHERE mce.ParentId IS NULL
     `;
 
-    return imodelAccess.createQueryReader({ ctes, ecsql, bindings }, { rowFormat: "Indexes" });
+    return imodelAccess.createQueryReader({ ctes, ecsql, bindings }, { rowFormat: "Indexes", limit: "unbounded" });
   }).pipe(
     map((row) => ({
       modelId: row[0],
@@ -794,7 +800,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
       `,
       bindings: [{ type: "string", value: props.label.replace(/[%_\\]/g, "\\$&") }],
     },
-    { rowFormat: "Indexes", restartToken: "tree-widget/models-tree/filter-by-label-query" },
+    { rowFormat: "Indexes", restartToken: "tree-widget/models-tree/filter-by-label-query", limit: props.limit },
   );
 
   const targetKeys = new Array<InstanceKey>();

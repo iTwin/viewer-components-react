@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Removed spacing after sublabels and fixed labels not being vertically aligned in `StatelessCategoriesTree`.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "33428304+jasdom@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

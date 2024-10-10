@@ -9,7 +9,7 @@ import { BisCodeSpec, IModel, IModelReadRpcInterface, SnapshotIModelRpcInterface
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { createHierarchyProvider } from "@itwin/presentation-hierarchies";
+import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { ExternalSourcesTreeDefinition } from "../../../components/trees/external-sources-tree/ExternalSourcesTreeDefinition";
 import {
@@ -185,7 +185,7 @@ describe("External sources tree", () => {
             autoExpand: true,
             supportsFiltering: false,
             children: [
-              NodeValidators.createForCustomNode({
+              NodeValidators.createForGenericNode({
                 label: "Elements",
                 supportsFiltering: true,
                 children: [
@@ -218,7 +218,7 @@ describe("External sources tree", () => {
 
 function createExternalSourcesTreeProvider(imodel: IModelConnection) {
   const imodelAccess = createIModelAccess(imodel);
-  return createHierarchyProvider({
+  return createIModelHierarchyProvider({
     imodelAccess,
     hierarchyDefinition: new ExternalSourcesTreeDefinition({ imodelAccess }),
   });
