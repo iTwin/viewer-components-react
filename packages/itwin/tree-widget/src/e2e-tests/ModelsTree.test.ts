@@ -6,17 +6,8 @@
 import type { Locator } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import {
-  expandStagePanel,
-  initTreeWidgetTest,
-  locateInstanceFilter,
-  locateNode,
-  scrollTree,
-  selectOperatorInDialog,
-  selectPropertyInDialog,
-  selectTree,
-  selectValueInDialog,
-  takeScreenshot,
-  withDifferentDensities,
+  expandStagePanel, initTreeWidgetTest, locateInstanceFilter, locateNode, scrollTree, selectOperatorInDialog, selectPropertyInDialog, selectTree,
+  selectValueInDialog, takeScreenshot, withDifferentDensities,
 } from "./utils";
 
 test.describe("Models tree", () => {
@@ -38,9 +29,6 @@ test.describe("Models tree", () => {
     test("expanded tree node", async ({ page }) => {
       const physicalModelNode = locateNode(treeWidget, "ProcessPhysicalModel");
       await physicalModelNode.getByLabel("Expand").click();
-
-      // wait for node at the bottom to be visible/loaded
-      await locateNode(treeWidget, "Tag-Category").waitFor();
 
       const pipeSupportNode = locateNode(treeWidget, "PipeSupport");
       await pipeSupportNode.getByLabel("Expand").click();
@@ -115,9 +103,6 @@ test.describe("Models tree", () => {
       const node = locateNode(treeWidget, "ProcessPhysicalModel");
       await node.getByLabel("Expand").click();
 
-      // wait for node at the bottom to be visible/loaded
-      await locateNode(treeWidget, "Tag-Category").waitFor();
-
       await treeWidget.getByRole("button", { name: "Open" }).click();
       await treeWidget.getByPlaceholder("Search...").fill("Test");
 
@@ -129,9 +114,6 @@ test.describe("Models tree", () => {
     test("search - too many results", async ({ page }) => {
       const node = locateNode(treeWidget, "ProcessPhysicalModel");
       await node.getByLabel("Expand").click();
-
-      // wait for node at the bottom to be visible/loaded
-      await locateNode(treeWidget, "Tag-Category").waitFor();
 
       await treeWidget.getByRole("button", { name: "OPen" }).click();
       await treeWidget.getByPlaceholder("Search...").fill("x");

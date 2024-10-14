@@ -62,7 +62,7 @@ function ViewerWithOptions() {
       defaultUiConfig={{
         hideNavigationAid: true,
         hideStatusBar: false,
-        hideToolSettings: true,
+        hideToolSettings: false,
       }}
       mapLayerOptions={{ BingMaps: { key: "key", value: ApiKeys.BingMapsKey } }}
       tileAdmin={{ cesiumIonKey: ApiKeys.CesiumKey }}

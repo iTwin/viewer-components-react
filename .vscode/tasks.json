@@ -1,0 +1,12 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+    {
+      "label": "[TASK] test-viewer start",
+      "type": "npm",
+      "script": "start",
+      "path": "apps/test-viewer/",
+      "problemMatcher": []
+    },
+  ]
+}

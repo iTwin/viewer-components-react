@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Add a tool settings to measuredistance tool allowing consecutive / multi point measurements",
+  "packageName": "@itwin/measure-tools-react",
+  "email": "3418768+a-gagnon@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
