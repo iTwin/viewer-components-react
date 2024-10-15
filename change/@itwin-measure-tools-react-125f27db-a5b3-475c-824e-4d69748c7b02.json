@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fix recursive loop from setState inside useEffect",
-  "packageName": "@itwin/measure-tools-react",
-  "email": "wil.maier@bentley.com",
-  "dependentChangeType": "patch"
-}

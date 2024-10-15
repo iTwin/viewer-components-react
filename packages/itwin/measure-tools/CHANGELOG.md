@@ -1,8 +1,20 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Tue, 24 Sep 2024 11:54:49 GMT and should not be manually modified.
+This log was last generated on Tue, 15 Oct 2024 20:19:11 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.23.0
+
+Tue, 15 Oct 2024 20:19:11 GMT
+
+### Minor changes
+
+- Add a tool settings to measuredistance tool allowing consecutive / multi point measurements ([#1047](https://github.com/iTwin/viewer-components-react/pull/1047))
+
+### Patches
+
+- Fix recursive loop from setState inside useEffect ([#1065](https://github.com/iTwin/viewer-components-react/pull/1065))
 
 ## 0.22.1
 
