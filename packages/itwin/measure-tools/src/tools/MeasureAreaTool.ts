@@ -19,7 +19,7 @@ import {
   ToolAssistanceInputMethod,
 } from "@itwin/core-frontend";
 import type { Feature } from "../api/FeatureTracking";
-import { MeasureToolsFeatures } from "../api/FeatureTracking";
+import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementToolBase } from "../api/MeasurementTool";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
 import type { AreaMeasurement } from "../measurements/AreaMeasurement";
@@ -198,6 +198,8 @@ MeasureAreaToolModel
   ): Promise<EventHandled> {
     // Attempt to close polygon
     if (this.toolModel.tryCommitMeasurement()) {
+      if (this._enableSheetMeasurements)
+        FeatureTracking.notifyFeature(MeasureToolsFeatures.Tools_MeasureDistance_sheetMeasureEnabled)
       await this.onReinitialize();
       return EventHandled.Yes;
     }

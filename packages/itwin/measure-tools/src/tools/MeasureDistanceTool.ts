@@ -18,7 +18,7 @@ import {
   ToolAssistanceInputMethod,
 } from "@itwin/core-frontend";
 import type { Feature } from "../api/FeatureTracking";
-import { MeasureToolsFeatures } from "../api/FeatureTracking";
+import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementToolBase } from "../api/MeasurementTool";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
 import type { DistanceMeasurement } from "../measurements/DistanceMeasurement";
@@ -100,6 +100,8 @@ MeasureDistanceToolModel
       MeasureDistanceToolModel.State.SetEndPoint === this.toolModel.currentState
     ) {
       this.toolModel.setEndPoint(viewType, ev.point, false);
+      if (this._enableSheetMeasurements)
+        FeatureTracking.notifyFeature(MeasureToolsFeatures.Tools_MeasureDistance_sheetMeasureEnabled)
       await this.onReinitialize();
 
       // Trigger another button event to use as the start point of the next measurement

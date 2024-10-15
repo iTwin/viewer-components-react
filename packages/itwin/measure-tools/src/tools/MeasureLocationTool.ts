@@ -23,7 +23,7 @@ import {
   ToolAssistanceInputMethod,
 } from "@itwin/core-frontend";
 import type { Feature } from "../api/FeatureTracking";
-import { MeasureToolsFeatures } from "../api/FeatureTracking";
+import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementToolBase } from "../api/MeasurementTool";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
 import type { LocationMeasurement } from "../measurements/LocationMeasurement";
@@ -92,6 +92,8 @@ MeasureLocationToolModel
 
     const props = await this.createLocationProps(ev, true);
     this.toolModel.addLocation(props, false);
+    if (this._enableSheetMeasurements)
+      FeatureTracking.notifyFeature(MeasureToolsFeatures.Tools_MeasureDistance_sheetMeasureEnabled)
     this.updateToolAssistance();
     return EventHandled.Yes;
   }
