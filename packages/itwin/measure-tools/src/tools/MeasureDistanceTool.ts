@@ -27,7 +27,7 @@ import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel
 import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
 import type { DrawingMetadata } from "../api/Measurement";
 import { type DialogItem, type DialogItemValue, type DialogPropertySyncItem, PropertyDescriptionHelper } from "@itwin/appui-abstract";
-import { ViewHelper } from "../measure-tools-react";
+import { ViewHelper } from "../api/ViewHelper";
 
 export class MeasureDistanceTool extends MeasurementToolBase<
 DistanceMeasurement,

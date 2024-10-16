@@ -4,8 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { GeoServiceStatus } from "@itwin/core-bentley";
-import type { CurvePrimitive } from "@itwin/core-geometry";
-import { GeometryQuery, IModelJson, Vector3d } from "@itwin/core-geometry";
+import { Vector3d } from "@itwin/core-geometry";
 import { IModelError } from "@itwin/core-common";
 import type {
   BeButtonEvent,
@@ -34,8 +33,7 @@ import type { DialogItem, DialogItemValue, DialogPropertySyncItem } from "@itwin
 import { PropertyDescriptionHelper } from "@itwin/appui-abstract";
 import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
 import type { DrawingMetadata, DrawingMetadataProps } from "../api/Measurement";
-import { DrawingDataCache } from "../api/DrawingTypeDataCache";
-import { ViewHelper } from "../measure-tools-react";
+import { ViewHelper } from "../api/ViewHelper";
 
 /** Tool that measure precise locations */
 export class MeasureLocationTool extends MeasurementToolBase<
