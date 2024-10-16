@@ -35,6 +35,7 @@ import { PropertyDescriptionHelper } from "@itwin/appui-abstract";
 import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
 import type { DrawingMetadata, DrawingMetadataProps } from "../api/Measurement";
 import { DrawingDataCache } from "../api/DrawingTypeDataCache";
+import { ViewHelper } from "../measure-tools-react";
 
 /** Tool that measure precise locations */
 export class MeasureLocationTool extends MeasurementToolBase<
@@ -92,8 +93,8 @@ MeasureLocationToolModel
 
     const props = await this.createLocationProps(ev, true);
     this.toolModel.addLocation(props, false);
-    if (this._enableSheetMeasurements)
-      FeatureTracking.notifyFeature(MeasureToolsFeatures.Tools_MeasureDistance_sheetMeasureEnabled)
+    if (this._enableSheetMeasurements && ViewHelper.isSheetView(ev.viewport))
+      FeatureTracking.notifyFeature(MeasureToolsFeatures.Tools_MeasureDistance_createdInSheet)
     this.updateToolAssistance();
     return EventHandled.Yes;
   }

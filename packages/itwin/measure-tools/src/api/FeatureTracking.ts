@@ -218,21 +218,21 @@ export class MeasureToolsFeatures {
   }
 
   // Sheet measurement tools
-  public static get Tools_MeasureDistance_sheetMeasureEnabled(): Feature {
+  public static get Tools_MeasureDistance_createdInSheet(): Feature {
     return {
-      name: "SMT_Tools_MeasureSheetDistance",
+      name: "SMT_Tools_MeasureSheetDistance_createdInSheet",
       guid: "f3fde39b-c9d6-488a-a39a-2a253ff106d5"
     }
   }
-  public static get Tools_MeasureArea_sheetMeasureEnabled(): Feature {
+  public static get Tools_MeasureArea_createdInSheet(): Feature {
     return {
-      name: "SMT_Tools_MeasureSheetDistance",
+      name: "SMT_Tools_MeasureSheetDistance_createdInSheet",
       guid: "cd36e911-a472-4560-94e6-2128fd95f31c"
     }
   }
-  public static get Tools_MeasureLocation_sheetMeasureEnabled(): Feature {
+  public static get Tools_MeasureLocation_createdInSheet(): Feature {
     return {
-      name: "SMT_Tools_MeasureSheetDistance",
+      name: "SMT_Tools_MeasureSheetDistance_createdInSheet",
       guid: "10237379-3f9f-4f4a-93f7-fe453cb730a6"
     }
   }

@@ -28,6 +28,7 @@ import { MeasureTools } from "../MeasureTools";
 import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
 import type { DrawingMetadata } from "../api/Measurement";
 import { DrawingDataCache } from "../api/DrawingTypeDataCache";
+import { ViewHelper } from "../measure-tools-react";
 
 export class MeasureAreaTool extends MeasurementToolBase<
 AreaMeasurement,
@@ -198,8 +199,8 @@ MeasureAreaToolModel
   ): Promise<EventHandled> {
     // Attempt to close polygon
     if (this.toolModel.tryCommitMeasurement()) {
-      if (this._enableSheetMeasurements)
-        FeatureTracking.notifyFeature(MeasureToolsFeatures.Tools_MeasureDistance_sheetMeasureEnabled)
+      if (this._enableSheetMeasurements && ev.viewport !== undefined && ViewHelper.isSheetView(ev.viewport))
+        FeatureTracking.notifyFeature(MeasureToolsFeatures.Tools_MeasureDistance_createdInSheet)
       await this.onReinitialize();
       return EventHandled.Yes;
     }
