@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Bump `presentation` package dependencies for bug fixes and orders of magnitude hierarchy filtering performance improvement.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "35135765+grigasp@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

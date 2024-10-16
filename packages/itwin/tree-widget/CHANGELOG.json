@@ -2,6 +2,21 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Tue, 15 Oct 2024 20:19:11 GMT",
+      "version": "3.0.1",
+      "tag": "@itwin/tree-widget-react_v3.0.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "66cca3837edee3be537eefde2e5b6750ba44186e",
+            "comment": "Bump `presentation` package dependencies for bug fixes and orders of magnitude hierarchy filtering performance improvement."
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 04 Oct 2024 15:06:44 GMT",
       "version": "3.0.0",
       "tag": "@itwin/tree-widget-react_v3.0.0",
