@@ -16,11 +16,8 @@ import { MeasureTools } from "../MeasureTools";
 import { MeasureToolDefinitions } from "../tools/MeasureToolDefinitions";
 import type { RecursiveRequired } from "../utils/types";
 import { MeasurementPropertyWidget, MeasurementPropertyWidgetId } from "./MeasurementPropertyWidget";
-import { IModelApp } from "@itwin/core-frontend";
+import { type ScreenViewport, IModelApp } from "@itwin/core-frontend";
 
-// Note: measure tools cannot pick geometry when a sheet view is active to snap to and therefore must be hidden
-//  to avoid giving the user the impression they should work
-const isSheetViewActive = () => !!IModelApp.viewManager.selectedView?.view?.isSheetView();
 
 export interface MeasureToolsUiProviderOptions {
   itemPriority?: number;
@@ -34,11 +31,16 @@ export interface MeasureToolsUiProviderOptions {
   stageUsageList?: string[];
 }
 
+export interface MeasureToolsCallbacks {
+  /** Check if the measurement tools should be visible or hidden */
+  isHidden?: (activeViewport?: ScreenViewport) => boolean;
+}
+
 export class MeasureToolsUiItemsProvider implements UiItemsProvider {
   public readonly id = "MeasureToolsUiItemsProvider";
-  private _props: RecursiveRequired<MeasureToolsUiProviderOptions>;
+  private _props: RecursiveRequired<MeasureToolsUiProviderOptions> & MeasureToolsCallbacks;
 
-  constructor(props?: MeasureToolsUiProviderOptions) {
+  constructor(props?: MeasureToolsUiProviderOptions & MeasureToolsCallbacks) {
     this._props = {
       itemPriority: props?.itemPriority ?? 20,
       groupPriority: props?.groupPriority ?? 10,
@@ -48,6 +50,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       },
       enableSheetMeasurement: props?.enableSheetMeasurement ?? false,
       stageUsageList: props?.stageUsageList ?? [StageUsage.General],
+      isHidden: props?.isHidden,
     };
   }
 
@@ -92,8 +95,8 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
             {
               groupPriority: this._props.groupPriority,
               isHidden: new ConditionalBooleanValue(
-                isSheetViewActive,
-                [SyncUiEventId.ViewStateChanged],
+                () => !!this._props.isHidden?.(IModelApp.viewManager.selectedView),
+                [SyncUiEventId.ActiveViewportChanged, SyncUiEventId.ViewStateChanged],
               ),
             },
           ),
@@ -107,8 +110,9 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
             MeasureToolDefinitions.clearMeasurementsToolCommand,
             {
               isHidden: new ConditionalBooleanValue(
-                () => isSheetViewActive() || !MeasurementUIEvents.isClearMeasurementButtonVisible,
+                () => !!this._props.isHidden?.(IModelApp.viewManager.selectedView) || !MeasurementUIEvents.isClearMeasurementButtonVisible,
                 [
+                  SyncUiEventId.ActiveViewportChanged,
                   SyncUiEventId.ViewStateChanged,
                   MeasurementSyncUiEventId.MeasurementSelectionSetChanged,
                   MeasurementSyncUiEventId.DynamicMeasurementChanged,
