@@ -15,6 +15,8 @@ import { MeasureAngleTool } from "./tools/MeasureAngleTool";
 import { MeasurePerpendicularTool } from "./tools/MeasurePerpendicularTool";
 import type { Localization } from "@itwin/core-common";
 import { DrawingDataCache } from "./api/DrawingTypeDataCache";
+import { MeasureHeightTool } from "./tools/MeasureHeightTool";
+import { MeasureWidthTool } from "./tools/MeasureWidthTool";
 
 export interface FeatureFlags {
   hideDistanceTool?: boolean;
@@ -24,6 +26,8 @@ export interface FeatureFlags {
   hideAngleTool?: boolean;
   hidePerpendicularTool?: boolean;
   hideToggleDisplayAxesTool?: boolean;
+  showHeightTool?: boolean;
+  showWidthTool?: boolean;
 }
 
 export interface StartupOptions {
@@ -85,6 +89,12 @@ export class MeasureTools {
     }
     if (!featureFlags?.hideToggleDisplayAxesTool) {
       toolsToRegister.push(ToggleDisplayMeasurementAxesTool);
+    }
+    if (featureFlags?.showHeightTool) {
+      toolsToRegister.push(MeasureHeightTool);
+    }
+    if (featureFlags?.showWidthTool) {
+      toolsToRegister.push(MeasureWidthTool);
     }
     if (toolsToRegister.length > 0) {
       toolsToRegister.push(ClearMeasurementsTool);

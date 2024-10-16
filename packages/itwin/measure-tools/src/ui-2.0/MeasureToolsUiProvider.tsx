@@ -78,6 +78,12 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       if (!featureFlags?.hidePerpendicularTool) {
         tools.push(MeasureToolDefinitions.measurePerpendicularToolCommand);
       }
+      if (featureFlags?.showHeightTool) {
+        tools.push(MeasureToolDefinitions.getMeasureHeightToolCommand(this._props?.enableSheetMeasurement ?? false));
+      }
+      if (featureFlags?.showWidthTool) {
+        tools.push(MeasureToolDefinitions.getMeasureWidthToolCommand(this._props?.enableSheetMeasurement ?? false));
+      }
 
       if (toolbarOrientation === ToolbarOrientation.Vertical) {
         return [
