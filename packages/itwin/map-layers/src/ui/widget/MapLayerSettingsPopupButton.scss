@@ -7,7 +7,7 @@
 $hovered-icon-color: $buic-foreground-primary;
 
 .maplayers-settings-popup {
-  z-index: 900; // Used to be higher, but we want this be less than modal dialog z-index
+  z-index: 6001; /* one more than floating widget */
 }
 
 .maplayers-settings-popup-panel {
