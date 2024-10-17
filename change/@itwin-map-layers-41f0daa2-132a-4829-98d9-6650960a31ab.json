@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Fix z-index of map layers settings popup",
+  "packageName": "@itwin/map-layers",
+  "email": "wil.maier@bentley.com",
+  "dependentChangeType": "patch"
+}
