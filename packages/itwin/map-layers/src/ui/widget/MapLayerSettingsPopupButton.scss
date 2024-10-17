@@ -7,6 +7,7 @@
 $hovered-icon-color: $buic-foreground-primary;
 
 .maplayers-settings-popup {
+  /* TODO: z-index workaround while map-layers-react is using the deprecated Popup component from core-react */
   z-index: 6001; /* one more than floating widget */
 }
 
