@@ -2,6 +2,29 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Tue, 15 Oct 2024 20:19:11 GMT",
+      "version": "0.23.0",
+      "tag": "@itwin/measure-tools-react_v0.23.0",
+      "comments": {
+        "patch": [
+          {
+            "author": "wil.maier@bentley.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "449a08855ef5274d410078e17368167f00c8f6ca",
+            "comment": "Fix recursive loop from setState inside useEffect"
+          }
+        ],
+        "minor": [
+          {
+            "author": "3418768+a-gagnon@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "510d8c503643429822b86f5710de83c3469543ff",
+            "comment": "Add a tool settings to measuredistance tool allowing consecutive / multi point measurements"
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 24 Sep 2024 11:54:49 GMT",
       "version": "0.22.1",
       "tag": "@itwin/measure-tools-react_v0.22.1",

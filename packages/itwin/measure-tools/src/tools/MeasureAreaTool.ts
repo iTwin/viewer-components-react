@@ -19,7 +19,7 @@ import {
   ToolAssistanceInputMethod,
 } from "@itwin/core-frontend";
 import type { Feature } from "../api/FeatureTracking";
-import { MeasureToolsFeatures } from "../api/FeatureTracking";
+import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementToolBase } from "../api/MeasurementTool";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
 import type { AreaMeasurement } from "../measurements/AreaMeasurement";
@@ -27,7 +27,7 @@ import { MeasureAreaToolModel } from "../toolmodels/MeasureAreaToolModel";
 import { MeasureTools } from "../MeasureTools";
 import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
 import type { DrawingMetadata } from "../api/Measurement";
-import { DrawingDataCache } from "../api/DrawingTypeDataCache";
+import { ViewHelper } from "../api/ViewHelper";
 
 export class MeasureAreaTool extends MeasurementToolBase<
 AreaMeasurement,
@@ -198,6 +198,8 @@ MeasureAreaToolModel
   ): Promise<EventHandled> {
     // Attempt to close polygon
     if (this.toolModel.tryCommitMeasurement()) {
+      if (this._enableSheetMeasurements && ev.viewport !== undefined && ViewHelper.isSheetView(ev.viewport))
+        FeatureTracking.notifyFeature(MeasureToolsFeatures.Tools_MeasureDistance_createdInSheet)
       await this.onReinitialize();
       return EventHandled.Yes;
     }

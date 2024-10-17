@@ -4,13 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import type { GroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import { createStorage } from "@itwin/unified-selection";
 import { useFocusedInstancesContext } from "../../../components/trees/common/FocusedInstancesContext";
 import { FocusedInstancesContextProvider } from "../../../components/trees/common/FocusedInstancesContextProvider";
 import { act, createAsyncIterator, renderHook, waitFor } from "../../TestUtils";
 
+import type { GroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { PropsWithChildren } from "react";
+
 async function collectKeys<T>(loader?: () => AsyncIterableIterator<T>): Promise<T[]> {
   const items: T[] = [];
   if (!loader) {
@@ -81,7 +82,7 @@ describe("FocusedInstancesContext", () => {
 
     await waitFor(async () => {
       const instanceKeys = await collectKeys(result.current.loadFocusedItems);
-      expect(instanceKeys).to.containSubset([{ className: "Schema:Class", id: "0x1" }]);
+      expect(instanceKeys).to.containSubset([{ className: "Schema.Class", id: "0x1" }]);
     });
   });
 

@@ -18,7 +18,7 @@ import {
   ToolAssistanceInputMethod,
 } from "@itwin/core-frontend";
 import type { Feature } from "../api/FeatureTracking";
-import { MeasureToolsFeatures } from "../api/FeatureTracking";
+import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementToolBase } from "../api/MeasurementTool";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
 import type { DistanceMeasurement } from "../measurements/DistanceMeasurement";
@@ -26,7 +26,8 @@ import { MeasureTools } from "../MeasureTools";
 import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel";
 import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
 import type { DrawingMetadata } from "../api/Measurement";
-import { DrawingDataCache } from "../api/DrawingTypeDataCache";
+import { type DialogItem, type DialogItemValue, type DialogPropertySyncItem, PropertyDescriptionHelper } from "@itwin/appui-abstract";
+import { ViewHelper } from "../api/ViewHelper";
 
 export class MeasureDistanceTool extends MeasurementToolBase<
 DistanceMeasurement,
@@ -34,6 +35,9 @@ MeasureDistanceToolModel
 > {
   public static override toolId = "MeasureTools.MeasureDistance";
   public static override iconSpec = "icon-measure-distance";
+  private static readonly useMultiPointPropertyName = "useMultiPoint";
+
+  private _useMultiPointMeasurement: boolean = false;
   private _enableSheetMeasurements: boolean;
 
   public static override get flyover() {
@@ -97,7 +101,14 @@ MeasureDistanceToolModel
       MeasureDistanceToolModel.State.SetEndPoint === this.toolModel.currentState
     ) {
       this.toolModel.setEndPoint(viewType, ev.point, false);
+      if (this._enableSheetMeasurements && ViewHelper.isSheetView(ev.viewport))
+        FeatureTracking.notifyFeature(MeasureToolsFeatures.Tools_MeasureDistance_createdInSheet)
       await this.onReinitialize();
+
+      // Trigger another button event to use as the start point of the next measurement
+      if (this._useMultiPointMeasurement) {
+        return this.onDataButtonDown(ev);
+      }
     }
 
     ev.viewport.invalidateDecorations();
@@ -246,5 +257,47 @@ MeasureDistanceToolModel
       sections
     );
     IModelApp.notifications.setToolAssistance(instructions);
+  }
+
+  public override async onInstall(): Promise<boolean> {
+    if (!await super.onInstall()) {
+      return false;
+    }
+    const initialValue = IModelApp.toolAdmin.toolSettingsState.getInitialToolSettingValue(this.toolId, MeasureDistanceTool.useMultiPointPropertyName);
+    this._useMultiPointMeasurement = true === initialValue?.value;
+    return true;
+  }
+
+  public override async onCleanup(): Promise<void> {
+    const propertyName = MeasureDistanceTool.useMultiPointPropertyName;
+    const value: DialogItemValue = { value: this._useMultiPointMeasurement };
+    IModelApp.toolAdmin.toolSettingsState.saveToolSettingProperty(this.toolId, { propertyName, value });
+
+    return super.onCleanup();
+  }
+
+  public override supplyToolSettingsProperties(): DialogItem[] {
+    const propertyLabel = MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasureDistance.useMultiPoint"
+    );
+    const toolSettings: DialogItem[] = [{
+      value: { value: this._useMultiPointMeasurement },
+      property: PropertyDescriptionHelper.buildToggleDescription(MeasureDistanceTool.useMultiPointPropertyName, propertyLabel),
+      editorPosition: { rowPriority: 0, columnIndex: 0 },
+      isDisabled: false,
+    }];
+    return toolSettings;
+  }
+
+  public override async applyToolSettingPropertyChange(updatedValue: DialogPropertySyncItem): Promise<boolean> {
+    if (MeasureDistanceTool.useMultiPointPropertyName === updatedValue.propertyName) {
+      const value = updatedValue.value.value;
+      if (typeof value !== "boolean") {
+        return false;
+      }
+      this._useMultiPointMeasurement = value;
+      return true;
+    }
+    return super.applyToolSettingPropertyChange(updatedValue);
   }
 }

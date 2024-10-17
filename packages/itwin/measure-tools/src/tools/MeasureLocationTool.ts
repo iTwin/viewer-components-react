@@ -4,8 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { GeoServiceStatus } from "@itwin/core-bentley";
-import type { CurvePrimitive } from "@itwin/core-geometry";
-import { GeometryQuery, IModelJson, Vector3d } from "@itwin/core-geometry";
+import { Vector3d } from "@itwin/core-geometry";
 import { IModelError } from "@itwin/core-common";
 import type {
   BeButtonEvent,
@@ -23,7 +22,7 @@ import {
   ToolAssistanceInputMethod,
 } from "@itwin/core-frontend";
 import type { Feature } from "../api/FeatureTracking";
-import { MeasureToolsFeatures } from "../api/FeatureTracking";
+import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementToolBase } from "../api/MeasurementTool";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
 import type { LocationMeasurement } from "../measurements/LocationMeasurement";
@@ -34,7 +33,7 @@ import type { DialogItem, DialogItemValue, DialogPropertySyncItem } from "@itwin
 import { PropertyDescriptionHelper } from "@itwin/appui-abstract";
 import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
 import type { DrawingMetadata, DrawingMetadataProps } from "../api/Measurement";
-import { DrawingDataCache } from "../api/DrawingTypeDataCache";
+import { ViewHelper } from "../api/ViewHelper";
 
 /** Tool that measure precise locations */
 export class MeasureLocationTool extends MeasurementToolBase<
@@ -92,6 +91,8 @@ MeasureLocationToolModel
 
     const props = await this.createLocationProps(ev, true);
     this.toolModel.addLocation(props, false);
+    if (this._enableSheetMeasurements && ViewHelper.isSheetView(ev.viewport))
+      FeatureTracking.notifyFeature(MeasureToolsFeatures.Tools_MeasureDistance_createdInSheet)
     this.updateToolAssistance();
     return EventHandled.Yes;
   }
