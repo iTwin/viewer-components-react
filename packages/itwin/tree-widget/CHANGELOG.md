@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Fri, 04 Oct 2024 15:06:44 GMT and should not be manually modified.
+This log was last generated on Tue, 15 Oct 2024 20:19:11 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 3.0.1
+
+Tue, 15 Oct 2024 20:19:11 GMT
+
+### Patches
+
+- Bump `presentation` package dependencies for bug fixes and orders of magnitude hierarchy filtering performance improvement. ([#1067](https://github.com/iTwin/viewer-components-react/pull/1067))
 
 ## 3.0.0
 

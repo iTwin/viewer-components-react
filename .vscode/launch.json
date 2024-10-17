@@ -5,11 +5,23 @@
   "version": "0.2.0",
   "compounds": [
     {
-      "name": "measure-tools tests (chrome)",
+      "name": "test-viewer (chrome)",
       "presentation": {
         "hidden": false,
         "group": "1_ChromeTests",
         "order": 1
+      },
+      "configurations": [
+        "[SCRIPTS] test-viewer",
+        "[FRONTEND] test-viewer",
+      ]
+    },
+    {
+      "name": "measure-tools tests (chrome)",
+      "presentation": {
+        "hidden": false,
+        "group": "1_ChromeTests",
+        "order": 2
       },
       "configurations": [
         "[CERTA] measure-tools tests",
@@ -56,6 +68,31 @@
       "cascadeTerminateToConfigurations": [
         "[CERTA] measure-tools tests"
       ]
+    },
+    { /* Partial */
+      "name": "[FRONTEND] test-viewer",
+      "presentation": {
+        "hidden": true,
+      },
+      "cwd": "${workspaceFolder}/apps/test-viewer",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000/",
+      "sourceMaps": true,
+      "outputCapture": "std",
+      "webRoot": "${workspaceFolder}/apps/test-viewer",
+      "outFiles": [
+        "${workspaceFolder}/apps/test-viewer/lib/**/*.js",
+        "${workspaceFolder}/packages/itwin/*/lib/**/*.js",
+      ],
+    },
+    { /* Partial */
+      "name": "[SCRIPTS] test-viewer",
+      "presentation": {
+        "hidden": true
+      },
+      "type": "node",
+      "preLaunchTask": "[TASK] test-viewer start"
     },
     {
       "name": "Tests: Tree-widget",
