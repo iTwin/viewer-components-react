@@ -191,7 +191,7 @@ export function MapLayerManager(props: MapLayerManagerProps) {
     };
 
     return activeViewport.onMapLayerScaleRangeVisibilityChanged.addListener(handleScaleRangeVisibilityChanged);
-  }, [activeViewport, backgroundMapLayers, loadMapLayerSettingsFromViewport, overlayMapLayers]);
+  }, [activeViewport, backgroundMapLayers, overlayMapLayers]);
 
   // Setup onMapImageryChanged events listening.
 
@@ -203,10 +203,13 @@ export function MapLayerManager(props: MapLayerManagerProps) {
       ) {
         loadMapLayerSettingsFromViewport(activeViewport);
       }
-      IModelApp.toolAdmin.dispatchUiSyncEvent(MapLayersSyncUiEventId.MapImageryChanged);
     };
     return activeViewport?.displayStyle.settings.onMapImageryChanged.addListener(handleMapImageryChanged);
   }, [activeViewport, backgroundMapLayers, loadMapLayerSettingsFromViewport, overlayMapLayers]);
+
+  React.useEffect(() => {
+    IModelApp.toolAdmin.dispatchUiSyncEvent(MapLayersSyncUiEventId.MapImageryChanged);
+  }, [backgroundMapLayers, overlayMapLayers]);
 
   const handleProviderStatusChanged = React.useCallback(
     (_args: MapLayerImageryProvider) => {
