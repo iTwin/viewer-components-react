@@ -2,6 +2,21 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Tue, 22 Oct 2024 14:42:00 GMT",
+      "version": "0.23.1",
+      "tag": "@itwin/measure-tools-react_v0.23.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "email not defined",
+            "package": "@itwin/measure-tools-react",
+            "commit": "00121e45fe9c8be3527b5e5554e2d74397fc4663",
+            "comment": "fixed imports and naming"
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 15 Oct 2024 20:19:11 GMT",
       "version": "0.23.0",
       "tag": "@itwin/measure-tools-react_v0.23.0",

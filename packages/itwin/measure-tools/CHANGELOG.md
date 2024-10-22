@@ -1,8 +1,16 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Tue, 15 Oct 2024 20:19:11 GMT and should not be manually modified.
+This log was last generated on Tue, 22 Oct 2024 14:42:00 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.23.1
+
+Tue, 22 Oct 2024 14:42:00 GMT
+
+### Patches
+
+- fixed imports and naming ([#1068](https://github.com/iTwin/viewer-components-react/pull/1068))
 
 ## 0.23.0
 

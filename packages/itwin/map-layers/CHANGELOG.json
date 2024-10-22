@@ -2,6 +2,21 @@
   "name": "@itwin/map-layers",
   "entries": [
     {
+      "date": "Tue, 22 Oct 2024 14:41:59 GMT",
+      "version": "5.6.1",
+      "tag": "@itwin/map-layers_v5.6.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "wil.maier@bentley.com",
+            "package": "@itwin/map-layers",
+            "commit": "f53aea190cdafd75f321c1258d797ca3c6859634",
+            "comment": "Fix z-index of map layers settings popup"
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 13 Sep 2024 17:50:16 GMT",
       "version": "5.6.0",
       "tag": "@itwin/map-layers_v5.6.0",
