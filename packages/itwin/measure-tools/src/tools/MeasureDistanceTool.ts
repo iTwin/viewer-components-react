@@ -132,8 +132,11 @@ MeasureDistanceToolModel
   }
 
   public override isValidLocation(ev: BeButtonEvent, _isButtonEvent: boolean): boolean {
-    if (!this._enableSheetMeasurements || !ev.viewport?.view.isSheetView())
+    if (!this._enableSheetMeasurements)
       return true;
+
+    if (!ev.viewport?.view.isSheetView())
+      return false;
 
     if (!SheetMeasurementsHelper.checkIfAllowedDrawingType(ev, [SheetMeasurementsHelper.DrawingType.CrossSection, SheetMeasurementsHelper.DrawingType.Plan]))
       return false;
