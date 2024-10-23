@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fix timing issue with map layers feature info tool not always being shown",
-  "packageName": "@itwin/map-layers",
-  "email": "wil.maier@bentley.com",
-  "dependentChangeType": "patch"
-}
