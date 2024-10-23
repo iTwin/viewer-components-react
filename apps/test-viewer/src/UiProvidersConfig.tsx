@@ -218,7 +218,7 @@ const configuredUiItems = new Map<string, UiItem>([
     "measure-tools",
     {
       initialize: async () => {
-        await MeasureTools.startup();
+        await MeasureTools.startup({ featureFlags: { showWidthTool: true, showHeightTool: true } });
         MeasurementActionToolbar.setDefaultActionProvider();
       },
       createUiItemsProviders: () => [new MeasureToolsUiItemsProvider()],

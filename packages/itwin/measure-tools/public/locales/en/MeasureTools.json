@@ -45,6 +45,20 @@
       "mainInstruction": "Enter point to measure from",
       "mainInstruction2": "Enter point to measure to"
     },
+    "MeasureHeight": {
+      "keyin": "Height",
+      "flyover": "Height",
+      "description": "Create height measurements.",
+      "height": "Height:",
+      "toolTitle": "Height Measurement [{{value}}]"
+    },
+    "MeasureWidth": {
+      "keyin": "Width",
+      "flyover": "Width",
+      "description": "Create width measurements.",
+      "width": "Width:",
+      "toolTitle": "Width Measurement [{{value}}]"
+    },
     "MeasureArea": {
       "keyin": "Area",
       "flyover": "Area",

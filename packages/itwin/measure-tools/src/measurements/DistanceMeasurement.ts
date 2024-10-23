@@ -232,7 +232,7 @@ export class DistanceMeasurement extends Measurement {
     );
   }
 
-  private getSnapId(): string | undefined {
+  protected getSnapId(): string | undefined {
     if (!this.transientId)
       this.transientId = MeasurementSelectionSet.nextTransientId;
 
@@ -334,7 +334,7 @@ export class DistanceMeasurement extends Measurement {
     return Point3d.createAdd2Scaled(clampedStartPoint, 0.5, clampedEndPoint, 0.5);
   }
 
-  private buildRunRiseAxes(): void {
+  protected buildRunRiseAxes(): void {
     this._runRiseAxes = [];
 
     if (this.isAxis) return;
@@ -428,7 +428,7 @@ export class DistanceMeasurement extends Measurement {
     this._textMarker.applyStyle(tStyle);
   }
 
-  private async createTextMarker(): Promise<void> {
+  protected async createTextMarker(): Promise<void> {
     const lengthSpec =
       await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
         QuantityType.LengthEngineering
