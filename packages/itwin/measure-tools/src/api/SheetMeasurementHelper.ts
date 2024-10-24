@@ -163,12 +163,12 @@ export namespace SheetMeasurementsHelper {
     if (!ev.viewport)
       return false;
     for (const drawing of DrawingDataCache.getInstance().getSheetDrawingDataForViewport(ev.viewport)) {
-      if (!allowedDrawingTypes.includes(drawing.type)) {
+      if (allowedDrawingTypes.includes(drawing.type)) {
         if (SheetMeasurementsHelper.checkIfInDrawing(ev.point, drawing.origin, drawing.extents)) {
-          return false;
+          return true;
         }
       }
     }
-    return true;
+    return false;
   }
 }
