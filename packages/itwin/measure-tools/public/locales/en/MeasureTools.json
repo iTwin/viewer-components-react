@@ -148,5 +148,16 @@
   "MeasurementGroupButton": {
     "label": "Measurement",
     "tooltip": "Measurement Tools"
+  },
+  "SheetMeasurementTooltip": {
+    "MeasurementNames": {
+      "Profile": "Profile",
+      "CrossSection": "Cross Section",
+      "Plan": "Plan"
+    },
+    "OneMeasurementInvalid": "This measurement can only be used on {{drawingName}} drawings",
+    "MoreMeasurementsInvalidHead": "This measurement can only be used on {{drawingName}}",
+    "MoreMeasurementsInvalidMiddle": ", {{drawingName}}",
+    "MoreMeasurementsInvalidLast": " and {{drawingName}} drawings"
   }
 }

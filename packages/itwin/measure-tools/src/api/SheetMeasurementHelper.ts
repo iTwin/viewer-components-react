@@ -4,8 +4,8 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { ColorDef, QueryBinder } from "@itwin/core-common";
-import type { BeButtonEvent, DecorateContext, GraphicBuilder, IModelConnection } from "@itwin/core-frontend";
-import { GraphicType } from "@itwin/core-frontend";
+import type { BeButtonEvent, DecorateContext, GraphicBuilder, IModelConnection, ScreenViewport } from "@itwin/core-frontend";
+import { GraphicType, IModelApp } from "@itwin/core-frontend";
 import { Point3d } from "@itwin/core-geometry";
 import { Transform } from "@itwin/core-geometry";
 import { Point2d } from "@itwin/core-geometry";
@@ -159,16 +159,46 @@ export namespace SheetMeasurementsHelper {
    * @param allowedDrawingTypes
    * @returns
    */
-  export function checkIfAllowedDrawingType(ev: BeButtonEvent, allowedDrawingTypes: DrawingType[]) {
-    if (!ev.viewport)
+  export function checkIfAllowedDrawingType(viewport: ScreenViewport | undefined, point: Point3d, allowedDrawingTypes: DrawingType[]) {
+    if (!viewport)
       return false;
-    for (const drawing of DrawingDataCache.getInstance().getSheetDrawingDataForViewport(ev.viewport)) {
+    for (const drawing of DrawingDataCache.getInstance().getSheetDrawingDataForViewport(viewport)) {
       if (allowedDrawingTypes.includes(drawing.type)) {
-        if (SheetMeasurementsHelper.checkIfInDrawing(ev.point, drawing.origin, drawing.extents)) {
+        if (SheetMeasurementsHelper.checkIfInDrawing(point, drawing.origin, drawing.extents)) {
           return true;
         }
       }
     }
     return false;
+  }
+
+  function getNameFromDrawingType(type: SheetMeasurementsHelper.DrawingType): string  {
+    if (type === SheetMeasurementsHelper.DrawingType.CrossSection) {
+      return IModelApp.localization.getLocalizedString("CivilReviewTools:SheetMeasurementTooltip.MeasurementNames.CrossSection");
+    } else if (type === SheetMeasurementsHelper.DrawingType.Plan) {
+      return IModelApp.localization.getLocalizedString("CivilReviewTools:SheetMeasurementTooltip.MeasurementNames.Plan");
+    } else if (type === SheetMeasurementsHelper.DrawingType.Profile) {
+      return IModelApp.localization.getLocalizedString("CivilReviewTools:SheetMeasurementTooltip.MeasurementNames.Profile");
+    } else {
+      return "";
+    }
+  }
+
+  export function getToolTipText(allowedDrawingTypesList: SheetMeasurementsHelper.DrawingType[]): string {
+    if (allowedDrawingTypesList.length < 1) {
+      return "";
+    }
+    if (allowedDrawingTypesList.length === 1) {
+      return IModelApp.localization.getLocalizedString("CivilReviewTools:SheetMeasurementTooltip.OneMeasurementInvalid", { drawingName: getNameFromDrawingType(allowedDrawingTypesList[0])});
+    }
+    if (allowedDrawingTypesList.length > 1){
+      let result = IModelApp.localization.getLocalizedString("CivilReviewTools:SheetMeasurementTooltip.MoreMeasurementsInvalidHead", { drawingName: getNameFromDrawingType(allowedDrawingTypesList[0])});
+      for (let i = 1; i < allowedDrawingTypesList.length - 1; i++) {
+        result = result + IModelApp.localization.getLocalizedString("CivilReviewTools:SheetMeasurementTooltip.MoreMeasurementsInvalidMiddle", { drawingName: getNameFromDrawingType(allowedDrawingTypesList[i])});
+      }
+      result = result + IModelApp.localization.getLocalizedString("CivilReviewTools:SheetMeasurementTooltip.MoreMeasurementsInvalidLast", { drawingName: getNameFromDrawingType(allowedDrawingTypesList[allowedDrawingTypesList.length - 1])});
+      return result;
+    }
+    return "";
   }
 }

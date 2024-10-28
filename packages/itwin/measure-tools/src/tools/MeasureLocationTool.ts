@@ -8,6 +8,7 @@ import { Vector3d } from "@itwin/core-geometry";
 import { IModelError } from "@itwin/core-common";
 import type {
   BeButtonEvent,
+  HitDetail,
   ToolAssistanceInstruction,
   ToolAssistanceSection,
 } from "@itwin/core-frontend";
@@ -43,7 +44,9 @@ MeasureLocationToolModel
   public static override toolId = "MeasureTools.MeasureLocation";
   public static override iconSpec = "icon-measure-location";
   private static readonly useDynamicMeasurementPropertyName = "useDynamicMeasurement";
+
   private _enableSheetMeasurements: boolean;
+  private static _allowedDrawingTypes = [SheetMeasurementsHelper.DrawingType.CrossSection, SheetMeasurementsHelper.DrawingType.Plan];
 
   private static _isUserNotifiedOfGeolocationFailure = false;
   private _useDynamicMeasurement: boolean = false;
@@ -152,10 +155,18 @@ MeasureLocationToolModel
     if (!this._enableSheetMeasurements || !ev.viewport?.view.isSheetView())
       return true;
 
-    if (!SheetMeasurementsHelper.checkIfAllowedDrawingType(ev, [SheetMeasurementsHelper.DrawingType.CrossSection, SheetMeasurementsHelper.DrawingType.Plan]))
+    if (!SheetMeasurementsHelper.checkIfAllowedDrawingType(ev.viewport, ev.point, MeasureLocationTool._allowedDrawingTypes))
       return false;
 
     return true;
+  }
+
+  public override async getToolTip(hit: HitDetail): Promise<HTMLElement | string> {
+    if (!this._enableSheetMeasurements || SheetMeasurementsHelper.checkIfAllowedDrawingType(hit.viewport, hit.hitPoint, MeasureLocationTool._allowedDrawingTypes)) {
+      return super.getToolTip(hit);
+    } else {
+      return SheetMeasurementsHelper.getToolTipText(MeasureLocationTool._allowedDrawingTypes);
+    }
   }
 
   protected async requestSnap(
