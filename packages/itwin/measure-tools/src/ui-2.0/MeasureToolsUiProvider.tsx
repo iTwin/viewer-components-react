@@ -32,6 +32,7 @@ export interface MeasureToolsUiProviderOptions {
   // If we check for sheet to 3d transformation when measuring in sheets
   enableSheetMeasurement?: boolean;
   stageUsageList?: string[];
+  additionalToolbarItems?: ToolItemDef[];
 }
 
 export class MeasureToolsUiItemsProvider implements UiItemsProvider {
@@ -49,11 +50,9 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       },
       enableSheetMeasurement: props?.enableSheetMeasurement ?? false,
       stageUsageList: props?.stageUsageList ?? [StageUsage.General],
+      additionalToolbarItems: []
     };
-  }
-
-  public addAdditionalToolbarItems(toolbarItems: ToolItemDef[]): void {
-    this._additionalToolbarItems = toolbarItems;
+    this._additionalToolbarItems = props?.additionalToolbarItems ?? [];
   }
 
   public provideToolbarItems(
