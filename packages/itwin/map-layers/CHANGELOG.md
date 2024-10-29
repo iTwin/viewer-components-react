@@ -1,8 +1,24 @@
 # Change Log - @itwin/map-layers
 
-This log was last generated on Fri, 13 Sep 2024 17:50:16 GMT and should not be manually modified.
+This log was last generated on Wed, 23 Oct 2024 13:32:29 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 5.6.2
+
+Wed, 23 Oct 2024 13:32:29 GMT
+
+### Patches
+
+- Fix timing issue with map layers feature info tool not always being shown ([#1071](https://github.com/iTwin/viewer-components-react/pull/1071))
+
+## 5.6.1
+
+Tue, 22 Oct 2024 14:41:59 GMT
+
+### Patches
+
+- Fix z-index of map layers settings popup ([#1070](https://github.com/iTwin/viewer-components-react/pull/1070))
 
 ## 5.6.0
 

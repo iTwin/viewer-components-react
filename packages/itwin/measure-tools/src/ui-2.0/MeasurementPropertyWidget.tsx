@@ -155,7 +155,7 @@ export const MeasurementPropertyWidget = () => {
     await getData(collapseAll);
   };
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     const remover1 = MeasurementSelectionSet.global.onChanged.addListener(onSelectionChanged);
     const remover2 = MeasurementUIEvents.onMeasurementPropertiesChanged.addListener(onSelectionChanged);
 
