@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Added a property to render a common action button for all groups",
+  "packageName": "@itwin/grouping-mapping-widget",
+  "email": "tejas.sutar@bentley.com",
+  "dependentChangeType": "patch"
+}
