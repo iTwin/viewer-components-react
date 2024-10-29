@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { ColorDef, QueryBinder } from "@itwin/core-common";
-import type { BeButtonEvent, DecorateContext, GraphicBuilder, IModelConnection, ScreenViewport } from "@itwin/core-frontend";
+import type { BeButtonEvent, DecorateContext, GraphicBuilder, HitDetail, IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 import { GraphicType, IModelApp } from "@itwin/core-frontend";
 import { Point3d } from "@itwin/core-geometry";
 import { Transform } from "@itwin/core-geometry";
@@ -184,7 +184,11 @@ export namespace SheetMeasurementsHelper {
     }
   }
 
-  export function getToolTipText(allowedDrawingTypesList: SheetMeasurementsHelper.DrawingType[]): string {
+  export async function getSheetErrorToolTipText(hit: HitDetail, allowedDrawingTypesList: SheetMeasurementsHelper.DrawingType[], defaultToolTip:(hit: HitDetail) => Promise<HTMLElement | string>): Promise<string | HTMLElement> {
+    if (SheetMeasurementsHelper.checkIfAllowedDrawingType(hit.viewport, hit.hitPoint, allowedDrawingTypesList)) {
+      return defaultToolTip(hit);
+    }
+
     if (allowedDrawingTypesList.length < 1) {
       return "";
     }

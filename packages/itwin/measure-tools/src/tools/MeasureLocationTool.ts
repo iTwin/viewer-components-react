@@ -45,8 +45,9 @@ MeasureLocationToolModel
   public static override iconSpec = "icon-measure-location";
   private static readonly useDynamicMeasurementPropertyName = "useDynamicMeasurement";
 
-  private _enableSheetMeasurements: boolean;
-  private static _allowedDrawingTypes = [SheetMeasurementsHelper.DrawingType.CrossSection, SheetMeasurementsHelper.DrawingType.Plan];
+  protected override get allowedDrawingTypes(): SheetMeasurementsHelper.DrawingType[] {
+    return [SheetMeasurementsHelper.DrawingType.CrossSection, SheetMeasurementsHelper.DrawingType.Plan];
+  }
 
   private static _isUserNotifiedOfGeolocationFailure = false;
   private _useDynamicMeasurement: boolean = false;
@@ -155,18 +156,10 @@ MeasureLocationToolModel
     if (!this._enableSheetMeasurements || !ev.viewport?.view.isSheetView())
       return true;
 
-    if (!SheetMeasurementsHelper.checkIfAllowedDrawingType(ev.viewport, ev.point, MeasureLocationTool._allowedDrawingTypes))
+    if (!SheetMeasurementsHelper.checkIfAllowedDrawingType(ev.viewport, ev.point, this.allowedDrawingTypes))
       return false;
 
     return true;
-  }
-
-  public override async getToolTip(hit: HitDetail): Promise<HTMLElement | string> {
-    if (!this._enableSheetMeasurements || SheetMeasurementsHelper.checkIfAllowedDrawingType(hit.viewport, hit.hitPoint, MeasureLocationTool._allowedDrawingTypes)) {
-      return super.getToolTip(hit);
-    } else {
-      return SheetMeasurementsHelper.getToolTipText(MeasureLocationTool._allowedDrawingTypes);
-    }
   }
 
   protected async requestSnap(
