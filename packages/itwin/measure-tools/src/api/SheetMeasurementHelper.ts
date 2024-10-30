@@ -190,7 +190,7 @@ export namespace SheetMeasurementsHelper {
     }
 
     if (allowedDrawingTypesList.length < 1) {
-      return "";
+      return IModelApp.localization.getLocalizedString("CivilReviewTools:SheetMeasurementTooltip.NoAllowedDrawingTypes");;
     }
     if (allowedDrawingTypesList.length > 1){
       let result = IModelApp.localization.getLocalizedString("CivilReviewTools:SheetMeasurementTooltip.MoreMeasurementsInvalidHead", { drawingName: getNameFromDrawingType(allowedDrawingTypesList[0])});
