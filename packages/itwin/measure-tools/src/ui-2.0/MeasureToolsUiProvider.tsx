@@ -63,23 +63,24 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
     if (this._props.stageUsageList.includes(stageUsage) && toolbarUsage === ToolbarUsage.ContentManipulation) {
       const featureFlags = MeasureTools.featureFlags;
       const tools: ToolItemDef[] = [];
+      const callback = this._props.allowedViewportCallback as (vp: ScreenViewport) => boolean;
       if (!featureFlags?.hideDistanceTool) {
-        tools.push(MeasureToolDefinitions.getMeasureDistanceToolCommand(this._props.allowedViewportCallback as (vp: ScreenViewport) => boolean , this._props.enableSheetMeasurement));
+        tools.push(MeasureToolDefinitions.getMeasureDistanceToolCommand(callback, this._props.enableSheetMeasurement));
       }
       if (!featureFlags?.hideAreaTool) {
-        tools.push(MeasureToolDefinitions.getMeasureAreaToolCommand(this._props.allowedViewportCallback as (vp: ScreenViewport) => boolean, this._props.enableSheetMeasurement));
+        tools.push(MeasureToolDefinitions.getMeasureAreaToolCommand(callback, this._props.enableSheetMeasurement));
       }
       if (!featureFlags?.hideLocationTool) {
-        tools.push(MeasureToolDefinitions.getMeasureLocationToolCommand(this._props.allowedViewportCallback as (vp: ScreenViewport) => boolean, this._props.enableSheetMeasurement));
+        tools.push(MeasureToolDefinitions.getMeasureLocationToolCommand(callback, this._props.enableSheetMeasurement));
       }
       if (!featureFlags?.hideRadiusTool) {
-        tools.push(MeasureToolDefinitions.measureRadiusToolCommand);
+        tools.push(MeasureToolDefinitions.getMeasureRadiusToolCommand(callback));
       }
       if (!featureFlags?.hideAngleTool) {
-        tools.push(MeasureToolDefinitions.measureAngleToolCommand);
+        tools.push(MeasureToolDefinitions.getMeasureAngleToolCommand(callback));
       }
       if (!featureFlags?.hidePerpendicularTool) {
-        tools.push(MeasureToolDefinitions.measurePerpendicularToolCommand);
+        tools.push(MeasureToolDefinitions.getMeasurePerpendicularToolCommand(callback));
       }
 
       if (toolbarOrientation === ToolbarOrientation.Vertical) {
