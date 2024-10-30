@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "initiial callback for base and area",
+  "packageName": "@itwin/measure-tools-react",
+  "email": "email not defined",
+  "dependentChangeType": "patch"
+}
