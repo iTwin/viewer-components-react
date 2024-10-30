@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Added helper functions and tooltip",
+  "packageName": "@itwin/measure-tools-react",
+  "email": "email not defined",
+  "dependentChangeType": "patch"
+}
