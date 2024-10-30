@@ -16,7 +16,7 @@ import { MeasureTools } from "../MeasureTools";
 import { MeasureToolDefinitions } from "../tools/MeasureToolDefinitions";
 import type { RecursiveRequired } from "../utils/types";
 import { MeasurementPropertyWidget, MeasurementPropertyWidgetId } from "./MeasurementPropertyWidget";
-import { IModelApp } from "@itwin/core-frontend";
+import { IModelApp, ScreenViewport } from "@itwin/core-frontend";
 
 // Note: measure tools cannot pick geometry when a sheet view is active to snap to and therefore must be hidden
 //  to avoid giving the user the impression they should work
@@ -32,6 +32,8 @@ export interface MeasureToolsUiProviderOptions {
   // If we check for sheet to 3d transformation when measuring in sheets
   enableSheetMeasurement?: boolean;
   stageUsageList?: string[];
+  // Called in the isValidLocation to filter viewports the tool can be used into
+  allowedViewportCallback?: (vp: ScreenViewport) => boolean;
 }
 
 export class MeasureToolsUiItemsProvider implements UiItemsProvider {
@@ -48,6 +50,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       },
       enableSheetMeasurement: props?.enableSheetMeasurement ?? false,
       stageUsageList: props?.stageUsageList ?? [StageUsage.General],
+      allowedViewportCallback: props?.allowedViewportCallback ?? (() => {return true})
     };
   }
 

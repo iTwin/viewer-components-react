@@ -11,6 +11,7 @@ import type {
   DecorateContext,
   HitDetail,
   IModelConnection,
+  ScreenViewport,
   ToolAssistanceInstruction,
 } from "@itwin/core-frontend";
 import {
@@ -195,6 +196,7 @@ export abstract class MeasurementToolBase<
   implements MeasurementTool {
   private _toolModel: ToolModel;
   private _selectionHolder: SelectionHolder;
+  protected _allowedViewportCallback: (vp: ScreenViewport) => boolean;
 
   public get measurements(): ReadonlyArray<Measurement> {
     return this._toolModel.measurements;
@@ -216,9 +218,10 @@ export abstract class MeasurementToolBase<
     return true;
   }
 
-  constructor() {
+  constructor(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true))  {
     super();
 
+    this._allowedViewportCallback = allowedViewportCallback;
     this._toolModel = this.createToolModel();
     this._toolModel.synchMeasurementsWithSelectionSet = true; // Sync by default
     this._selectionHolder = new SelectionHolder();
