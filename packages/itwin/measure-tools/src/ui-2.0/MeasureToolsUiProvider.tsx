@@ -50,7 +50,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       },
       enableSheetMeasurement: props?.enableSheetMeasurement ?? false,
       stageUsageList: props?.stageUsageList ?? [StageUsage.General],
-      allowedViewportCallback: props?.allowedViewportCallback ?? (() => {return true})
+      allowedViewportCallback: props?.allowedViewportCallback ?? ((_vp: ScreenViewport) => {return true})
     };
   }
 
@@ -64,13 +64,13 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       const featureFlags = MeasureTools.featureFlags;
       const tools: ToolItemDef[] = [];
       if (!featureFlags?.hideDistanceTool) {
-        tools.push(MeasureToolDefinitions.getMeasureDistanceToolCommand(this._props.enableSheetMeasurement));
+        tools.push(MeasureToolDefinitions.getMeasureDistanceToolCommand(this._props.allowedViewportCallback as (vp: ScreenViewport) => boolean , this._props.enableSheetMeasurement));
       }
       if (!featureFlags?.hideAreaTool) {
-        tools.push(MeasureToolDefinitions.getMeasureAreaToolCommand(this._props.enableSheetMeasurement));
+        tools.push(MeasureToolDefinitions.getMeasureAreaToolCommand(this._props.allowedViewportCallback as (vp: ScreenViewport) => boolean, this._props.enableSheetMeasurement));
       }
       if (!featureFlags?.hideLocationTool) {
-        tools.push(MeasureToolDefinitions.getMeasureLocationToolCommand(this._props.enableSheetMeasurement));
+        tools.push(MeasureToolDefinitions.getMeasureLocationToolCommand(this._props.allowedViewportCallback as (vp: ScreenViewport) => boolean, this._props.enableSheetMeasurement));
       }
       if (!featureFlags?.hideRadiusTool) {
         tools.push(MeasureToolDefinitions.measureRadiusToolCommand);

@@ -6,6 +6,7 @@
 import type {
   BeButtonEvent,
   DecorateContext,
+  ScreenViewport,
   ToolAssistanceInstruction,
   ToolAssistanceSection,
 } from "@itwin/core-frontend";
@@ -60,8 +61,8 @@ MeasureDistanceToolModel
     return MeasureToolsFeatures.Tools_MeasureDistance;
   }
 
-  constructor(enableSheetMeasurements = false) {
-    super();
+  constructor(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true), enableSheetMeasurements = false) {
+    super(allowedViewportCallback);
     this._enableSheetMeasurements = enableSheetMeasurements;
   }
 
@@ -70,7 +71,7 @@ MeasureDistanceToolModel
   }
 
   public async onRestartTool(): Promise<void> {
-    const tool = new MeasureDistanceTool(this._enableSheetMeasurements);
+    const tool = new MeasureDistanceTool(this._allowedViewportCallback, this._enableSheetMeasurements);
     if (await tool.run()) return;
 
     return this.exitTool();
@@ -131,7 +132,10 @@ MeasureDistanceToolModel
     }
   }
 
-  public override isValidLocation(ev: BeButtonEvent, _isButtonEvent: boolean): boolean {
+  public override isValidLocation(ev: BeButtonEvent, isButtonEvent: boolean): boolean {
+    if (!super.isValidLocation(ev, isButtonEvent))
+      return false;
+
     if (!this._enableSheetMeasurements || !ev.viewport?.view.isSheetView())
       return true;
 

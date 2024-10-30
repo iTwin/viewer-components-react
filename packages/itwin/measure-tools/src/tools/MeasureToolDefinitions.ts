@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { IModelApp } from "@itwin/core-frontend";
+import { IModelApp, ScreenViewport } from "@itwin/core-frontend";
 import { SyncUiEventId, ToolItemDef } from "@itwin/appui-react";
 import { MeasurementPreferences } from "../api/MeasurementPreferences";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
@@ -21,7 +21,7 @@ import { ConditionalBooleanValue } from "@itwin/appui-abstract";
 export class MeasureToolDefinitions {
 
   /**
-   * @deprecated in 0.14.2 use getMeasureDistanceToolCommand(enableSheetMeasurements: boolean) instead
+   * @deprecated in 0.14.2 use getMeasureDistanceToolCommand instead
    */
   public static get measureDistanceToolCommand() {
     return new ToolItemDef({
@@ -35,21 +35,21 @@ export class MeasureToolDefinitions {
     });
   }
 
-  public static getMeasureDistanceToolCommand(enableSheetMeasurements: boolean) {
+  public static getMeasureDistanceToolCommand(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true), enableSheetMeasurements: boolean) {
     return new ToolItemDef({
       toolId: MeasureDistanceTool.toolId,
       iconSpec: MeasureDistanceTool.iconSpec,
       label: () => MeasureDistanceTool.flyover,
       tooltip: () => MeasureDistanceTool.description,
       execute: () => {
-        const tool = new MeasureDistanceTool(enableSheetMeasurements);
+        const tool = new MeasureDistanceTool(allowedViewportCallback, enableSheetMeasurements);
         void tool.run();
       },
     });
   }
 
   /**
-   * @deprecated in 0.14.2 use getMeasureAreaToolCommand(enableSheetMeasurements: boolean) instead
+   * @deprecated in 0.14.2 use getMeasureAreaToolCommand instead
    */
   public static get measureAreaToolCommand() {
     return new ToolItemDef({
@@ -63,21 +63,21 @@ export class MeasureToolDefinitions {
     });
   }
 
-  public static getMeasureAreaToolCommand(enableSheetMeasurements: boolean) {
+  public static getMeasureAreaToolCommand(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true), enableSheetMeasurements: boolean) {
     return new ToolItemDef({
       toolId: MeasureAreaTool.toolId,
       iconSpec: MeasureAreaTool.iconSpec,
       label: () => MeasureAreaTool.flyover,
       tooltip: () => MeasureAreaTool.description,
       execute: () => {
-        const tool = new MeasureAreaTool(enableSheetMeasurements);
+        const tool = new MeasureAreaTool(allowedViewportCallback, enableSheetMeasurements);
         void tool.run();
       },
     });
   }
 
   /**
-   * @deprecated in 0.15.0 use getMeasureLocationToolCommand(enableSheetMeasurements: boolean) instead
+   * @deprecated in 0.15.0 use getMeasureLocationToolCommand instead
    */
   public static get measureLocationToolCommand() {
     return new ToolItemDef({
@@ -91,14 +91,14 @@ export class MeasureToolDefinitions {
     });
   }
 
-  public static getMeasureLocationToolCommand(enableSheetMeasurements: boolean) {
+  public static getMeasureLocationToolCommand(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true), enableSheetMeasurements: boolean) {
     return new ToolItemDef({
       toolId: MeasureLocationTool.toolId,
       iconSpec: MeasureLocationTool.iconSpec,
       label: () => MeasureLocationTool.flyover,
       tooltip: () => MeasureLocationTool.description,
       execute: () => {
-        const tool = new MeasureLocationTool(enableSheetMeasurements);
+        const tool = new MeasureLocationTool(allowedViewportCallback, enableSheetMeasurements);
         void tool.run();
       },
     });
@@ -144,6 +144,9 @@ export class MeasureToolDefinitions {
     });
   }
 
+  /**
+   * @deprecated in 0.23.1 use getMeasureRadiusToolCommand instead
+   */
   public static get measureRadiusToolCommand() {
     return new ToolItemDef({
       toolId: MeasureRadiusTool.toolId,
@@ -156,6 +159,22 @@ export class MeasureToolDefinitions {
     });
   }
 
+  public static getMeasureRadiusToolCommand(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true)) {
+    return new ToolItemDef({
+      toolId: MeasureRadiusTool.toolId,
+      iconSpec: MeasureRadiusTool.iconSpec,
+      label: () => MeasureRadiusTool.flyover,
+      tooltip: () => MeasureRadiusTool.description,
+      execute: () => {
+        const tool = new MeasureRadiusTool(allowedViewportCallback);
+        void tool.run();
+      },
+    });
+  }
+
+  /**
+   * @deprecated in 0.23.1 use getMeasureRadiusToolCommand instead
+   */
   public static get measureAngleToolCommand() {
     return new ToolItemDef({
       toolId: MeasureAngleTool.toolId,
@@ -168,6 +187,22 @@ export class MeasureToolDefinitions {
     });
   }
 
+  public static getMeasureAngleToolCommand(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true)) {
+    return new ToolItemDef({
+      toolId: MeasureAngleTool.toolId,
+      iconSpec: MeasureAngleTool.iconSpec,
+      label: () => MeasureAngleTool.flyover,
+      tooltip: () => MeasureAngleTool.description,
+      execute: () => {
+        const tool = new MeasureAngleTool(allowedViewportCallback);
+        void tool.run();
+      },
+    });
+  }
+
+  /**
+   * @deprecated in 0.23.1 use getMeasureRadiusToolCommand instead
+   */
   public static get measurePerpendicularToolCommand() {
     return new ToolItemDef({
       toolId: MeasurePerpendicularTool.toolId,
@@ -180,6 +215,23 @@ export class MeasureToolDefinitions {
       ),
       execute: () => {
         void IModelApp.tools.run(MeasurePerpendicularTool.toolId);
+      },
+    });
+  }
+
+  public static getMeasurePerpendicularToolCommand(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true)) {
+    return new ToolItemDef({
+      toolId: MeasurePerpendicularTool.toolId,
+      iconSpec: MeasurePerpendicularTool.iconSpec,
+      label: () => MeasurePerpendicularTool.flyover,
+      tooltip: () => MeasurePerpendicularTool.description,
+      isHidden: new ConditionalBooleanValue(
+        () => !!IModelApp.viewManager.selectedView?.view?.is2d(),
+        [SyncUiEventId.ViewStateChanged]
+      ),
+      execute: () => {
+        const tool = new MeasurePerpendicularTool(allowedViewportCallback);
+        void tool.run();
       },
     });
   }

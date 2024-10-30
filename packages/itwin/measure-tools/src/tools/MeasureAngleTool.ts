@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import type {
   BeButtonEvent,
+  ScreenViewport,
   ToolAssistanceInstruction,
   ToolAssistanceSection,
 } from "@itwin/core-frontend";
@@ -55,12 +56,12 @@ MeasureAngleToolModel
     return MeasureToolsFeatures.Tools_MeasureAngle;
   }
 
-  constructor() {
-    super();
+  constructor(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true)) {
+    super(allowedViewportCallback);
   }
 
   public async onRestartTool(): Promise<void> {
-    const tool = new MeasureAngleTool();
+    const tool = new MeasureAngleTool(this._allowedViewportCallback);
     if (await tool.run()) return;
 
     return this.exitTool();

@@ -8,6 +8,7 @@ import { Vector3d } from "@itwin/core-geometry";
 import { IModelError } from "@itwin/core-common";
 import type {
   BeButtonEvent,
+  ScreenViewport,
   ToolAssistanceInstruction,
   ToolAssistanceSection,
 } from "@itwin/core-frontend";
@@ -68,13 +69,13 @@ MeasureLocationToolModel
     return MeasureToolsFeatures.Tools_MeasureLocation;
   }
 
-  constructor(enableSheetMeasurements = false) {
-    super();
+  constructor(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true), enableSheetMeasurements = false) {
+    super(allowedViewportCallback);
     this._enableSheetMeasurements = enableSheetMeasurements;
   }
 
   public async onRestartTool(): Promise<void> {
-    const tool = new MeasureLocationTool(this._enableSheetMeasurements);
+    const tool = new MeasureLocationTool(this._allowedViewportCallback, this._enableSheetMeasurements);
     if (await tool.run()) return;
 
     return this.exitTool();
@@ -148,7 +149,10 @@ MeasureLocationToolModel
     return new MeasureLocationToolModel();
   }
 
-  public override isValidLocation(ev: BeButtonEvent, _isButtonEvent: boolean): boolean {
+  public override isValidLocation(ev: BeButtonEvent, isButtonEvent: boolean): boolean {
+    if (!super.isValidLocation(ev, isButtonEvent))
+      return false;
+
     if (!this._enableSheetMeasurements || !ev.viewport?.view.isSheetView())
       return true;
 

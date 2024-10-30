@@ -233,10 +233,11 @@ export abstract class MeasurementToolBase<
   }
 
   public override isValidLocation(
-    _ev: BeButtonEvent,
+    ev: BeButtonEvent,
     _isButtonEvent: boolean
   ): boolean {
-    // In most cases, the location will be okay even if outside the model extents
+    if (ev.viewport)
+      return this._allowedViewportCallback(ev.viewport);
     return true;
   }
 

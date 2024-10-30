@@ -143,7 +143,10 @@ MeasureAreaToolModel
     }
   }
 
-  public override isValidLocation(ev: BeButtonEvent, _isButtonEvent: boolean): boolean {
+  public override isValidLocation(ev: BeButtonEvent, isButtonEvent: boolean): boolean {
+    if (!super.isValidLocation(ev, isButtonEvent))
+      return false;
+
     if (!this._enableSheetMeasurements || !ev.viewport?.view.isSheetView())
       return true;
 
