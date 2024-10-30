@@ -192,9 +192,6 @@ export namespace SheetMeasurementsHelper {
     if (allowedDrawingTypesList.length < 1) {
       return "";
     }
-    if (allowedDrawingTypesList.length === 1) {
-      return IModelApp.localization.getLocalizedString("CivilReviewTools:SheetMeasurementTooltip.OneMeasurementInvalid", { drawingName: getNameFromDrawingType(allowedDrawingTypesList[0])});
-    }
     if (allowedDrawingTypesList.length > 1){
       let result = IModelApp.localization.getLocalizedString("CivilReviewTools:SheetMeasurementTooltip.MoreMeasurementsInvalidHead", { drawingName: getNameFromDrawingType(allowedDrawingTypesList[0])});
       for (let i = 1; i < allowedDrawingTypesList.length - 1; i++) {
@@ -203,6 +200,6 @@ export namespace SheetMeasurementsHelper {
       result = result + IModelApp.localization.getLocalizedString("CivilReviewTools:SheetMeasurementTooltip.MoreMeasurementsInvalidLast", { drawingName: getNameFromDrawingType(allowedDrawingTypesList[allowedDrawingTypesList.length - 1])});
       return result;
     }
-    return "";
+    return IModelApp.localization.getLocalizedString("CivilReviewTools:SheetMeasurementTooltip.OneMeasurementInvalid", { drawingName: getNameFromDrawingType(allowedDrawingTypesList[0])});
   }
 }

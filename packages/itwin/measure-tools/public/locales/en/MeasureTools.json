@@ -155,6 +155,7 @@
       "CrossSection": "Cross Section",
       "Plan": "Plan"
     },
+    "NoAllowedDrawingTypes": "No allowed drawing types were set for this measurement tool",
     "OneMeasurementInvalid": "This measurement can only be used on {{drawingName}} drawings",
     "MoreMeasurementsInvalidHead": "This measurement can only be used on {{drawingName}}",
     "MoreMeasurementsInvalidMiddle": ", {{drawingName}}",
