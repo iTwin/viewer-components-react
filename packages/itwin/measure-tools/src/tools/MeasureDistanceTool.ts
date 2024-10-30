@@ -61,7 +61,7 @@ MeasureDistanceToolModel
     return MeasureToolsFeatures.Tools_MeasureDistance;
   }
 
-  constructor(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true), enableSheetMeasurements = false) {
+  constructor(enableSheetMeasurements = false, allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true)) {
     super(allowedViewportCallback);
     this._enableSheetMeasurements = enableSheetMeasurements;
   }
@@ -71,7 +71,7 @@ MeasureDistanceToolModel
   }
 
   public async onRestartTool(): Promise<void> {
-    const tool = new MeasureDistanceTool(this._allowedViewportCallback, this._enableSheetMeasurements);
+    const tool = new MeasureDistanceTool(this._enableSheetMeasurements, this._allowedViewportCallback);
     if (await tool.run()) return;
 
     return this.exitTool();

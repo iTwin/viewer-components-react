@@ -42,7 +42,7 @@ export class MeasureToolDefinitions {
       label: () => MeasureDistanceTool.flyover,
       tooltip: () => MeasureDistanceTool.description,
       execute: () => {
-        const tool = new MeasureDistanceTool(allowedViewportCallback, enableSheetMeasurements);
+        const tool = new MeasureDistanceTool(enableSheetMeasurements, allowedViewportCallback);
         void tool.run();
       },
     });
@@ -70,7 +70,7 @@ export class MeasureToolDefinitions {
       label: () => MeasureAreaTool.flyover,
       tooltip: () => MeasureAreaTool.description,
       execute: () => {
-        const tool = new MeasureAreaTool(allowedViewportCallback, enableSheetMeasurements);
+        const tool = new MeasureAreaTool(enableSheetMeasurements, allowedViewportCallback);
         void tool.run();
       },
     });
@@ -98,7 +98,7 @@ export class MeasureToolDefinitions {
       label: () => MeasureLocationTool.flyover,
       tooltip: () => MeasureLocationTool.description,
       execute: () => {
-        const tool = new MeasureLocationTool(allowedViewportCallback, enableSheetMeasurements);
+        const tool = new MeasureLocationTool(enableSheetMeasurements, allowedViewportCallback);
         void tool.run();
       },
     });

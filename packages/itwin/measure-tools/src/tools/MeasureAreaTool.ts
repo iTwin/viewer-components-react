@@ -58,13 +58,13 @@ MeasureAreaToolModel
     return MeasureToolsFeatures.Tools_MeasureArea;
   }
 
-  constructor(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true), enableSheetMeasurements = false) {
+  constructor(enableSheetMeasurements = false, allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true)) {
     super(allowedViewportCallback);
     this._enableSheetMeasurements = enableSheetMeasurements;
   }
 
   public async onRestartTool(): Promise<void> {
-    const tool = new MeasureAreaTool(this._allowedViewportCallback, this._enableSheetMeasurements);
+    const tool = new MeasureAreaTool(this._enableSheetMeasurements,this._allowedViewportCallback);
     if (await tool.run()) return;
 
     return this.exitTool();
