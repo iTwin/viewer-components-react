@@ -356,7 +356,7 @@ export abstract class MeasurementToolBase<
     if (!this._enableSheetMeasurements) {
       return defaultToolTip(hit);
     } else {
-      return SheetMeasurementsHelper.getSheetErrorToolTipText(hit, this.allowedDrawingTypes, defaultToolTip);
+      return SheetMeasurementsHelper.getSheetToolTipText(hit, this.allowedDrawingTypes, defaultToolTip);
     }
   }
 
