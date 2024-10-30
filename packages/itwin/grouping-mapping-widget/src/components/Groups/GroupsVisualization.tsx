@@ -32,7 +32,6 @@ export interface GroupsVisualizationProps extends GroupsProps {
   isNonEmphasizedSelectable?: boolean;
   emphasizeElements?: boolean;
   hideVisualizationToggle?: boolean;
-  hideRefreshIcon?: boolean;
   deleteConfirmationContentFactory?: (group: GroupMinimal) => JSX.Element;
   groupDeleteCallback?: (group: GroupMinimal) => void;
   disableZoom?: boolean;
@@ -50,6 +49,7 @@ export const GroupsVisualization = ({
   mapping,
   hideVisualizationToggle,
   hideRefreshIcon,
+  groupsAction,
   deleteConfirmationContentFactory,
   groupDeleteCallback,
   disableZoom,
@@ -336,6 +336,7 @@ export const GroupsVisualization = ({
         progressConfig={progressConfig}
         alert={overlappedAlert}
         hideRefreshIcon={hideRefreshIcon}
+        groupsAction={groupsAction}
         deleteConfirmationContentFactory={deleteConfirmationContentFactory}
         groupDeleteCallback={groupDeleteCallback}
       />

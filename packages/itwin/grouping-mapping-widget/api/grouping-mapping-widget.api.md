@@ -239,7 +239,7 @@ export interface GroupPropertyActionProps {
 export const GroupQueryBuilderCustomUI: ({ updateQuery, isUpdating, resetView }: GroupingCustomUIProps) => JSX.Element;
 
 // @public
-export const Groups: ({ mapping, actionButtonRenderers, onClickAddGroup, onClickGroupTitle, onClickGroupModify, onClickRenderContextCustomUI, disableActions, progressConfig, alert, hideRefreshIcon, deleteConfirmationContentFactory, groupDeleteCallback, }: GroupsProps) => JSX.Element;
+export const Groups: ({ mapping, actionButtonRenderers, onClickAddGroup, onClickGroupTitle, onClickGroupModify, onClickRenderContextCustomUI, disableActions, progressConfig, alert, hideRefreshIcon, groupsAction, deleteConfirmationContentFactory, groupDeleteCallback, }: GroupsProps) => JSX.Element;
 
 // @internal (undocumented)
 export const GroupsClientContext: Context<IGroupsClient>;
@@ -263,6 +263,8 @@ export interface GroupsProps {
     // (undocumented)
     groupDeleteCallback?: (group: GroupMinimal) => void;
     // (undocumented)
+    groupsAction?: JSX.Element;
+    // (undocumented)
     hideRefreshIcon?: boolean;
     // (undocumented)
     isVisualizing?: boolean;
@@ -281,7 +283,7 @@ export interface GroupsProps {
 }
 
 // @internal
-export const GroupsView: ({ mapping, groups, isLoading, onRefresh, groupUIs, actionButtonRenderers, onClickAddGroup, onClickGroupTitle, onClickGroupModify, onClickRenderContextCustomUI, disableActions, selectedGroupForDeletion, onDeleteGroup, onCloseDeleteModal, setSelectedGroupForDeletion, contextUIs, alert, setActiveOverlapInfoPanelGroup, activeOverlapInfoPanelGroup, overlappedElementsInfo, progressConfig, hideRefreshIcon, deleteConfirmationContentFactory, groupDeleteCallback, }: GroupsViewProps) => JSX.Element;
+export const GroupsView: ({ mapping, groups, isLoading, onRefresh, groupUIs, actionButtonRenderers, onClickAddGroup, onClickGroupTitle, onClickGroupModify, onClickRenderContextCustomUI, disableActions, selectedGroupForDeletion, onDeleteGroup, onCloseDeleteModal, setSelectedGroupForDeletion, contextUIs, alert, setActiveOverlapInfoPanelGroup, activeOverlapInfoPanelGroup, overlappedElementsInfo, progressConfig, hideRefreshIcon, groupsAction, deleteConfirmationContentFactory, groupDeleteCallback, }: GroupsViewProps) => JSX.Element;
 
 // @internal
 export interface GroupsViewProps {
@@ -301,6 +303,8 @@ export interface GroupsViewProps {
     groupDeleteCallback?: (group: GroupMinimal) => void;
     // (undocumented)
     groups: GroupMinimal[];
+    // (undocumented)
+    groupsAction?: JSX.Element;
     // (undocumented)
     groupUIs: GroupingCustomUI[];
     // (undocumented)
@@ -336,7 +340,7 @@ export interface GroupsViewProps {
 }
 
 // @public
-export const GroupsVisualization: ({ emphasizeElements, isNonEmphasizedSelectable, onClickGroupModify, onClickAddGroup, mapping, hideVisualizationToggle, hideRefreshIcon, deleteConfirmationContentFactory, groupDeleteCallback, disableZoom, ...rest }: GroupsVisualizationProps) => JSX.Element;
+export const GroupsVisualization: ({ emphasizeElements, isNonEmphasizedSelectable, onClickGroupModify, onClickAddGroup, mapping, hideVisualizationToggle, hideRefreshIcon, groupsAction, deleteConfirmationContentFactory, groupDeleteCallback, disableZoom, ...rest }: GroupsVisualizationProps) => JSX.Element;
 
 // @public
 export interface GroupsVisualizationProps extends GroupsProps {
@@ -348,8 +352,6 @@ export interface GroupsVisualizationProps extends GroupsProps {
     emphasizeElements?: boolean;
     // (undocumented)
     groupDeleteCallback?: (group: GroupMinimal) => void;
-    // (undocumented)
-    hideRefreshIcon?: boolean;
     // (undocumented)
     hideVisualizationToggle?: boolean;
     // (undocumented)
