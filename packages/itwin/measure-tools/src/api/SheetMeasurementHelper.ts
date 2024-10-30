@@ -174,11 +174,11 @@ export namespace SheetMeasurementsHelper {
 
   function getNameFromDrawingType(type: SheetMeasurementsHelper.DrawingType): string  {
     if (type === SheetMeasurementsHelper.DrawingType.CrossSection) {
-      return IModelApp.localization.getLocalizedString("CivilReviewTools:SheetMeasurementTooltip.MeasurementNames.CrossSection");
+      return IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.MeasurementNames.CrossSection");
     } else if (type === SheetMeasurementsHelper.DrawingType.Plan) {
-      return IModelApp.localization.getLocalizedString("CivilReviewTools:SheetMeasurementTooltip.MeasurementNames.Plan");
+      return IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.MeasurementNames.Plan");
     } else if (type === SheetMeasurementsHelper.DrawingType.Profile) {
-      return IModelApp.localization.getLocalizedString("CivilReviewTools:SheetMeasurementTooltip.MeasurementNames.Profile");
+      return IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.MeasurementNames.Profile");
     } else {
       return "";
     }
@@ -190,16 +190,16 @@ export namespace SheetMeasurementsHelper {
     }
 
     if (allowedDrawingTypesList.length < 1) {
-      return IModelApp.localization.getLocalizedString("CivilReviewTools:SheetMeasurementTooltip.NoAllowedDrawingTypes");;
+      return IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.NoAllowedDrawingTypes");;
     }
     if (allowedDrawingTypesList.length > 1){
-      let result = IModelApp.localization.getLocalizedString("CivilReviewTools:SheetMeasurementTooltip.MoreMeasurementsInvalidHead", { drawingName: getNameFromDrawingType(allowedDrawingTypesList[0])});
+      let result = IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.MoreMeasurementsInvalidHead", { drawingName: getNameFromDrawingType(allowedDrawingTypesList[0])});
       for (let i = 1; i < allowedDrawingTypesList.length - 1; i++) {
-        result = result + IModelApp.localization.getLocalizedString("CivilReviewTools:SheetMeasurementTooltip.MoreMeasurementsInvalidMiddle", { drawingName: getNameFromDrawingType(allowedDrawingTypesList[i])});
+        result = result + IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.MoreMeasurementsInvalidMiddle", { drawingName: getNameFromDrawingType(allowedDrawingTypesList[i])});
       }
-      result = result + IModelApp.localization.getLocalizedString("CivilReviewTools:SheetMeasurementTooltip.MoreMeasurementsInvalidLast", { drawingName: getNameFromDrawingType(allowedDrawingTypesList[allowedDrawingTypesList.length - 1])});
+      result = result + IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.MoreMeasurementsInvalidLast", { drawingName: getNameFromDrawingType(allowedDrawingTypesList[allowedDrawingTypesList.length - 1])});
       return result;
     }
-    return IModelApp.localization.getLocalizedString("CivilReviewTools:SheetMeasurementTooltip.OneMeasurementInvalid", { drawingName: getNameFromDrawingType(allowedDrawingTypesList[0])});
+    return IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.OneMeasurementInvalid", { drawingName: getNameFromDrawingType(allowedDrawingTypesList[0])});
   }
 }
