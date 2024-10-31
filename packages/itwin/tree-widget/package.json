@@ -64,9 +64,9 @@
   "dependencies": {
     "@itwin/itwinui-icons-react": "^2.8.0",
     "@itwin/itwinui-illustrations-react": "^2.1.0",
-    "@itwin/presentation-core-interop": "^1.1.0",
-    "@itwin/presentation-hierarchies": "^1.2.0",
-    "@itwin/presentation-hierarchies-react": "^1.1.0",
+    "@itwin/presentation-core-interop": "^1.1.1",
+    "@itwin/presentation-hierarchies": "^1.2.1",
+    "@itwin/presentation-hierarchies-react": "^1.1.1",
     "@itwin/presentation-shared": "^1.1.0",
     "@itwin/unified-selection": "^1.1.0",
     "classnames": "^2.3.1",
