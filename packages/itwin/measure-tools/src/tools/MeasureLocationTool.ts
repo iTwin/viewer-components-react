@@ -44,7 +44,10 @@ MeasureLocationToolModel
   public static override toolId = "MeasureTools.MeasureLocation";
   public static override iconSpec = "icon-measure-location";
   private static readonly useDynamicMeasurementPropertyName = "useDynamicMeasurement";
-  private _enableSheetMeasurements: boolean;
+
+  protected override get allowedDrawingTypes(): SheetMeasurementsHelper.DrawingType[] {
+    return [SheetMeasurementsHelper.DrawingType.CrossSection, SheetMeasurementsHelper.DrawingType.Plan];
+  }
 
   private static _isUserNotifiedOfGeolocationFailure = false;
   private _useDynamicMeasurement: boolean = false;
@@ -156,7 +159,7 @@ MeasureLocationToolModel
     if (!this._enableSheetMeasurements || !ev.viewport?.view.isSheetView())
       return true;
 
-    if (!SheetMeasurementsHelper.checkIfAllowedDrawingType(ev, [SheetMeasurementsHelper.DrawingType.CrossSection, SheetMeasurementsHelper.DrawingType.Plan]))
+    if (!SheetMeasurementsHelper.checkIfAllowedDrawingType(ev.viewport, ev.point, this.allowedDrawingTypes))
       return false;
 
     return true;

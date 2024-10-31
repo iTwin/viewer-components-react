@@ -1,8 +1,16 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Thu, 26 Sep 2024 20:21:11 GMT and should not be manually modified.
+This log was last generated on Thu, 31 Oct 2024 11:11:57 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.34.0
+
+Thu, 31 Oct 2024 11:11:57 GMT
+
+### Minor changes
+
+- Added a property to render a common action button for all groups ([#1077](https://github.com/iTwin/viewer-components-react/pull/1077))
 
 ## 0.33.0
 

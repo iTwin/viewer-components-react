@@ -30,6 +30,7 @@ import type { Feature } from "./FeatureTracking";
 import { FeatureTracking } from "./FeatureTracking";
 import type { Measurement } from "./Measurement";
 import type { MeasurementToolModel } from "./MeasurementToolModel";
+import { SheetMeasurementsHelper } from "./SheetMeasurementHelper";
 
 /** Interface for any interactive tool that creates measurements. */
 export interface MeasurementTool {
@@ -198,6 +199,8 @@ export abstract class MeasurementToolBase<
   private _selectionHolder: SelectionHolder;
   protected _allowedViewportCallback: (vp: ScreenViewport) => boolean;
 
+  protected _enableSheetMeasurements: boolean;
+
   public get measurements(): ReadonlyArray<Measurement> {
     return this._toolModel.measurements;
   }
@@ -218,10 +221,16 @@ export abstract class MeasurementToolBase<
     return true;
   }
 
+  protected get allowedDrawingTypes(): SheetMeasurementsHelper.DrawingType[] {
+    return [];
+  }
+
   constructor(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true))  {
     super();
 
     this._allowedViewportCallback = allowedViewportCallback;
+
+    this._enableSheetMeasurements = false;
     this._toolModel = this.createToolModel();
     this._toolModel.synchMeasurementsWithSelectionSet = true; // Sync by default
     this._selectionHolder = new SelectionHolder();
@@ -341,14 +350,19 @@ export abstract class MeasurementToolBase<
     return this._toolModel.getDecorationGeometry(hit);
   }
 
-  public override async getToolTip(
-    hit: HitDetail
-  ): Promise<HTMLElement | string> {
-    const toolTip = await this._toolModel.getToolTip(hit);
+  public override async getToolTip(hit: HitDetail): Promise<HTMLElement | string> {
+    const defaultToolTip = async (hit: HitDetail) => {
+      const toolTip = await this._toolModel.getToolTip(hit);
 
-    if (toolTip === "") return super.getToolTip(hit);
+      if (toolTip === "") return super.getToolTip(hit);
 
-    return toolTip;
+      return toolTip;
+    }
+    if (!this._enableSheetMeasurements) {
+      return defaultToolTip(hit);
+    } else {
+      return SheetMeasurementsHelper.getSheetToolTipText(hit, this.allowedDrawingTypes, defaultToolTip);
+    }
   }
 
   public override decorate(context: DecorateContext): void {

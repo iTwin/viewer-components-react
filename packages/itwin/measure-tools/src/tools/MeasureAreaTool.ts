@@ -36,7 +36,10 @@ MeasureAreaToolModel
 > {
   public static override toolId = "MeasureTools.MeasureArea";
   public static override iconSpec = "icon-measure-2d";
-  private _enableSheetMeasurements: boolean;
+
+  protected override get allowedDrawingTypes(): SheetMeasurementsHelper.DrawingType[] {
+    return [SheetMeasurementsHelper.DrawingType.CrossSection, SheetMeasurementsHelper.DrawingType.Plan];
+  }
 
   public static override get flyover() {
     return MeasureTools.localization.getLocalizedString(
@@ -150,7 +153,7 @@ MeasureAreaToolModel
     if (!this._enableSheetMeasurements || !ev.viewport?.view.isSheetView())
       return true;
 
-    if (!SheetMeasurementsHelper.checkIfAllowedDrawingType(ev, [SheetMeasurementsHelper.DrawingType.CrossSection, SheetMeasurementsHelper.DrawingType.Plan]))
+    if (!SheetMeasurementsHelper.checkIfAllowedDrawingType(ev.viewport, ev.point, this.allowedDrawingTypes))
       return false;
 
     if (this.toolModel.drawingMetadata?.drawingId === undefined || this.toolModel.drawingMetadata?.origin === undefined || this.toolModel.drawingMetadata?.extents === undefined)
