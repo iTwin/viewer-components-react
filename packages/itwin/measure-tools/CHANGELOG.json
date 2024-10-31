@@ -2,6 +2,27 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Thu, 31 Oct 2024 11:11:57 GMT",
+      "version": "0.23.2",
+      "tag": "@itwin/measure-tools-react_v0.23.2",
+      "comments": {
+        "patch": [
+          {
+            "author": "email not defined",
+            "package": "@itwin/measure-tools-react",
+            "commit": "259cb0e77b95b0e0c851a9eaa97128dbc549f12e",
+            "comment": "inverted logic from checkAllowedDrawingType"
+          },
+          {
+            "author": "email not defined",
+            "package": "@itwin/measure-tools-react",
+            "commit": "570424097026b6f271340bd4e0f89a14c3074378",
+            "comment": "Added helper functions and tooltip"
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 22 Oct 2024 14:42:00 GMT",
       "version": "0.23.1",
       "tag": "@itwin/measure-tools-react_v0.23.1",

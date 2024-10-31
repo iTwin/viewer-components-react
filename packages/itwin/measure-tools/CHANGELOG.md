@@ -1,8 +1,17 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Tue, 22 Oct 2024 14:42:00 GMT and should not be manually modified.
+This log was last generated on Thu, 31 Oct 2024 11:11:57 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.23.2
+
+Thu, 31 Oct 2024 11:11:57 GMT
+
+### Patches
+
+- inverted logic from checkAllowedDrawingType ([#1073](https://github.com/iTwin/viewer-components-react/pull/1073))
+- Added helper functions and tooltip ([#1075](https://github.com/iTwin/viewer-components-react/pull/1075))
 
 ## 0.23.1
 
