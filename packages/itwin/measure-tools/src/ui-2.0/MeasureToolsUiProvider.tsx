@@ -37,8 +37,7 @@ export interface MeasureToolsUiProviderOptions {
 
 export class MeasureToolsUiItemsProvider implements UiItemsProvider {
   public readonly id = "MeasureToolsUiItemsProvider";
-  private _props: RecursiveRequired<MeasureToolsUiProviderOptions>;
-  private _additionalToolbarItems: ToolItemDef[] = [];
+  private _props: Omit<RecursiveRequired<MeasureToolsUiProviderOptions>, 'additionalToolbarItems'> & { additionalToolbarItems?: ToolItemDef[] };
 
   constructor(props?: MeasureToolsUiProviderOptions) {
     this._props = {
@@ -50,9 +49,8 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       },
       enableSheetMeasurement: props?.enableSheetMeasurement ?? false,
       stageUsageList: props?.stageUsageList ?? [StageUsage.General],
-      additionalToolbarItems: []
+      additionalToolbarItems: props?.additionalToolbarItems
     };
-    this._additionalToolbarItems = props?.additionalToolbarItems ?? [];
   }
 
   public provideToolbarItems(
@@ -82,8 +80,8 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       if (!featureFlags?.hidePerpendicularTool) {
         tools.push(MeasureToolDefinitions.measurePerpendicularToolCommand);
       }
-      if (this._additionalToolbarItems) {
-        tools.push(...this._additionalToolbarItems);
+      if (this._props.additionalToolbarItems) {
+        tools.push(...this._props.additionalToolbarItems);
       }
 
       if (toolbarOrientation === ToolbarOrientation.Vertical) {
