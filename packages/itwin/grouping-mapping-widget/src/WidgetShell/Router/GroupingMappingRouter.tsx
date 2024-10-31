@@ -19,11 +19,13 @@ export const GroupingMappingRouter = ({
   navigateTo,
   goBack,
   hideRefreshIcon,
+  groupsAction,
 }: {
   currentRoute: Route;
   navigateTo: (toRoute: (prev: Route | undefined) => Route) => void;
   goBack: () => void;
   hideRefreshIcon?: boolean;
+  groupsAction?: JSX.Element;
 }) => {
   const { iModelId } = useGroupingMappingApiConfig();
   const { mapping, group, property, groupContextCustomUI, queryGenerationType } = currentRoute.groupingRouteFields;
@@ -87,6 +89,7 @@ export const GroupingMappingRouter = ({
               }))
             }
             hideRefreshIcon={hideRefreshIcon}
+            groupsAction={groupsAction}
           />
         );
       }

@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "inverted logic from checkAllowedDrawingType",
-  "packageName": "@itwin/measure-tools-react",
-  "email": "email not defined",
-  "dependentChangeType": "patch"
-}

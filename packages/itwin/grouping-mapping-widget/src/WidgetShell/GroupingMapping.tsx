@@ -17,6 +17,7 @@ import { defaultGroupingUI } from "../components/customUI/DefaultGroupingUI";
 
 export type GroupingMappingProps = Omit<GroupingMappingContextProps, "iModelId" | "changesetId"> & {
   hideRefreshIcon?: boolean;
+  groupsAction?: JSX.Element;
 };
 
 export enum RouteStep {
@@ -89,7 +90,13 @@ const GroupingMapping = (props: GroupingMappingProps) => {
     <GroupingMappingContext iModelId={iModelId} changeSetId={changeSetId} {...props} customUIs={injectedCustomUI}>
       <div className="gmw-group-mapping-container">
         <GroupingMappingHeader goBack={goBack} currentRoute={currentRoute} />
-        <GroupingMappingContent routingHistory={routingHistory} navigateTo={navigateTo} goBack={goBack} hideRefreshIcon={props.hideRefreshIcon} />
+        <GroupingMappingContent
+          routingHistory={routingHistory}
+          navigateTo={navigateTo}
+          goBack={goBack}
+          hideRefreshIcon={props.hideRefreshIcon}
+          groupsAction={props.groupsAction}
+        />
       </div>
     </GroupingMappingContext>
   );
