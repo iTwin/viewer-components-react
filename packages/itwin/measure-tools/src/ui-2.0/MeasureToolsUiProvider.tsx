@@ -34,11 +34,12 @@ export interface MeasureToolsUiProviderOptions {
   stageUsageList?: string[];
   // Called in the isValidLocation to filter viewports the tool can be used into
   allowedViewportCallback?: (vp: ScreenViewport) => boolean;
+  additionalToolbarItems?: ToolItemDef[];
 }
 
 export class MeasureToolsUiItemsProvider implements UiItemsProvider {
   public readonly id = "MeasureToolsUiItemsProvider";
-  private _props: RecursiveRequired<MeasureToolsUiProviderOptions>;
+  private _props: Omit<RecursiveRequired<MeasureToolsUiProviderOptions>, 'additionalToolbarItems'> & { additionalToolbarItems?: ToolItemDef[] };
 
   constructor(props?: MeasureToolsUiProviderOptions) {
     this._props = {
@@ -50,7 +51,8 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       },
       enableSheetMeasurement: props?.enableSheetMeasurement ?? false,
       stageUsageList: props?.stageUsageList ?? [StageUsage.General],
-      allowedViewportCallback: props?.allowedViewportCallback ?? ((_vp: ScreenViewport) => {return true})
+      allowedViewportCallback: props?.allowedViewportCallback ?? ((_vp: ScreenViewport) => {return true}),
+      additionalToolbarItems: props?.additionalToolbarItems
     };
   }
 
@@ -81,6 +83,9 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       }
       if (!featureFlags?.hidePerpendicularTool) {
         tools.push(MeasureToolDefinitions.getMeasurePerpendicularToolCommand(callback));
+      }
+      if (this._props.additionalToolbarItems) {
+        tools.push(...this._props.additionalToolbarItems);
       }
 
       if (toolbarOrientation === ToolbarOrientation.Vertical) {
