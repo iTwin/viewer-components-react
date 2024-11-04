@@ -32,11 +32,12 @@ export interface MeasureToolsUiProviderOptions {
   // If we check for sheet to 3d transformation when measuring in sheets
   enableSheetMeasurement?: boolean;
   stageUsageList?: string[];
+  additionalToolbarItems?: ToolItemDef[];
 }
 
 export class MeasureToolsUiItemsProvider implements UiItemsProvider {
   public readonly id = "MeasureToolsUiItemsProvider";
-  private _props: RecursiveRequired<MeasureToolsUiProviderOptions>;
+  private _props: Omit<RecursiveRequired<MeasureToolsUiProviderOptions>, 'additionalToolbarItems'> & { additionalToolbarItems?: ToolItemDef[] };
 
   constructor(props?: MeasureToolsUiProviderOptions) {
     this._props = {
@@ -48,6 +49,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       },
       enableSheetMeasurement: props?.enableSheetMeasurement ?? false,
       stageUsageList: props?.stageUsageList ?? [StageUsage.General],
+      additionalToolbarItems: props?.additionalToolbarItems
     };
   }
 
@@ -77,6 +79,9 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       }
       if (!featureFlags?.hidePerpendicularTool) {
         tools.push(MeasureToolDefinitions.measurePerpendicularToolCommand);
+      }
+      if (this._props.additionalToolbarItems) {
+        tools.push(...this._props.additionalToolbarItems);
       }
 
       if (toolbarOrientation === ToolbarOrientation.Vertical) {
