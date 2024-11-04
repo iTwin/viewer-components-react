@@ -652,6 +652,8 @@ function getSchemaContext(imodel: IModelConnection) {
 
 <!-- END EXTRACTION -->
 
+Note: Using `ECSchemaRpcLocater` requires the application to support [ECSchemaRpcInterface](https://github.com/iTwin/itwinjs-core/blob/111ab9053f4718896de17bdaeb8de037bad281bd/core/ecschema-rpc/common/src/ECSchemaRpcInterface.ts#L14). This means [registering the interface](https://www.itwinjs.org/learning/rpcinterface/#configure-interfaces) and, on the backend, [registering the implementation](https://www.itwinjs.org/learning/rpcinterface/#server-side-configuration) by calling [ECSchemaRpcImpl.register()](https://github.com/iTwin/itwinjs-core/blob/111ab9053f4718896de17bdaeb8de037bad281bd/core/ecschema-rpc/impl/src/ECSchemaRpcImpl.ts#L29).
+
 ## Telemetry
 
 ### Performance tracking
