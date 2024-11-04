@@ -16,7 +16,8 @@ import { MeasureTools } from "../MeasureTools";
 import { MeasureToolDefinitions } from "../tools/MeasureToolDefinitions";
 import type { RecursiveRequired } from "../utils/types";
 import { MeasurementPropertyWidget, MeasurementPropertyWidgetId } from "./MeasurementPropertyWidget";
-import { IModelApp, ScreenViewport } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
+import type { ScreenViewport } from "@itwin/core-frontend";
 
 // Note: measure tools cannot pick geometry when a sheet view is active to snap to and therefore must be hidden
 //  to avoid giving the user the impression they should work

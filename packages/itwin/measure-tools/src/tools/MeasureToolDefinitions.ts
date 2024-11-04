@@ -3,7 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { IModelApp, ScreenViewport } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
+import type { ScreenViewport } from "@itwin/core-frontend";
 import { SyncUiEventId, ToolItemDef } from "@itwin/appui-react";
 import { MeasurementPreferences } from "../api/MeasurementPreferences";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
