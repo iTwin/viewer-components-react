@@ -108,6 +108,23 @@ describe("<PropertyGridContent />", () => {
     expect(spy).to.be.calledOnce;
   });
 
+  it("renders with extended props action buttons", async () => {
+    const imodel = {} as IModelConnection;
+    const spy = sinon.spy();
+
+    const renderTestActionButton = (dataProvider: IPresentationPropertyDataProvider) => {
+      spy(dataProvider);
+      return <div>Test action button</div>;
+    };
+
+    const { getAllByText } = renderWithContext(
+      <PropertyGridContent dataProvider={provider} imodel={imodel} actionButtonRenderers={[({ dataProvider }) => renderTestActionButton(dataProvider)]} />,
+    );
+
+    await waitFor(() => expect(spy).to.be.calledWith(provider));
+    await waitFor(() => getAllByText("Test action button"));
+  });
+
   it("allows filtering out empty values", async () => {
     const imodel = {} as IModelConnection;
 

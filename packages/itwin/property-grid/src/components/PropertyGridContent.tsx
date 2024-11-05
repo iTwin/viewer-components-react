@@ -12,6 +12,8 @@ import {
 } from "@itwin/components-react";
 import { ResizableContainerObserver } from "@itwin/core-react";
 import { Text } from "@itwin/itwinui-react";
+import type { PresentationActionButtonsRenderer } from "../hooks/UseActionButtons";
+import { useActionButtons } from "../hooks/UseActionButtons";
 import { useContextMenu } from "../hooks/UseContextMenu";
 import { useLoadedInstanceInfo } from "../hooks/UseInstanceInfo";
 import { useLatest } from "../hooks/UseLatest";
@@ -46,7 +48,15 @@ export interface PropertyGridPropertyUpdatedArgs extends PropertyUpdatedArgs {
 export interface PropertyGridContentBaseProps
   extends Omit<
     FilteringPropertyGridProps,
-    "dataProvider" | "filterer" | "isPropertyHoverEnabled" | "isPropertySelectionEnabled" | "onPropertyContextMenu" | "width" | "height" | "onPropertyUpdated"
+    | "dataProvider"
+    | "filterer"
+    | "isPropertyHoverEnabled"
+    | "isPropertySelectionEnabled"
+    | "onPropertyContextMenu"
+    | "width"
+    | "height"
+    | "onPropertyUpdated"
+    | "actionButtonRenderers"
   > {
   imodel: IModelConnection;
   className?: string;
@@ -55,6 +65,7 @@ export interface PropertyGridContentBaseProps
   onPropertyUpdated?: (args: PropertyGridPropertyUpdatedArgs, category: PropertyCategory) => Promise<boolean>;
   dataProvider: IPresentationPropertyDataProvider;
   dataRenderer?: (props: FilteringPropertyGridProps) => ReactNode;
+  actionButtonRenderers?: PresentationActionButtonsRenderer[];
 }
 
 /**
@@ -77,9 +88,11 @@ export function PropertyGridContent({
   settingsMenuItems,
   dataRenderer,
   onPropertyUpdated,
+  actionButtonRenderers,
   ...props
 }: PropertyGridContentProps) {
   const { item } = useLoadedInstanceInfo({ dataProvider });
+  const actionButtonRenderersWithExtendedProps = useActionButtons({ dataProvider, actionButtonRenderers });
   const { renderContextMenu, onPropertyContextMenu } = useContextMenu({
     dataProvider,
     imodel,
@@ -105,6 +118,7 @@ export function PropertyGridContent({
 
   const dataRendererProps: FilteringPropertyGridProps = {
     ...props,
+    actionButtonRenderers: actionButtonRenderersWithExtendedProps,
     dataProvider,
     filterer,
     highlight: filterText ? { highlightedText: filterText, filteredTypes: [FilteredType.Category, FilteredType.Label, FilteredType.Value] } : undefined,
