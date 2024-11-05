@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Added access to data provider for action button renderers.",
+  "packageName": "@itwin/property-grid-react",
+  "email": "43886789+MartynasStrazdas@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
