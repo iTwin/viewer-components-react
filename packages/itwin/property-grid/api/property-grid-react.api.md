@@ -129,7 +129,7 @@ export interface PropertyGridComponentProps extends Omit<MultiElementPropertyGri
 // @public
 export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGridProps, "dataProvider" | "filterer" | "isPropertyHoverEnabled" | "isPropertySelectionEnabled" | "onPropertyContextMenu" | "width" | "height" | "onPropertyUpdated" | "actionButtonRenderers"> {
     // (undocumented)
-    actionButtonRenderers?: PresentationActionButtonsRenderer[];
+    actionButtonRenderers?: PropertyGridActionButtonRenderer[];
     // (undocumented)
     className?: string;
     // (undocumented)

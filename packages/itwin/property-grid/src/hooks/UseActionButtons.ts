@@ -9,8 +9,7 @@ import { useMemo } from "react";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
 import type { ActionButtonRendererProps } from "@itwin/components-react";
 
-interface PresentationActionButtonRendererProps extends ActionButtonRendererProps {
-  /** Data provider used by property grid. */
+interface PropertyGridActionButtonRendererProps extends ActionButtonRendererProps {
   dataProvider: IPresentationPropertyDataProvider;
 }
 
@@ -18,10 +17,10 @@ interface PresentationActionButtonRendererProps extends ActionButtonRendererProp
  * Action button with extended properties
  * @public
  */
-export type PresentationActionButtonsRenderer = (props: PresentationActionButtonRendererProps) => ReactNode;
+export type PropertyGridActionButtonRenderer = (props: PropertyGridActionButtonRendererProps) => ReactNode;
 
 interface UseActionButtonsProps {
-  actionButtonRenderers?: Array<PresentationActionButtonsRenderer>;
+  actionButtonRenderers?: Array<PropertyGridActionButtonRenderer>;
   dataProvider: IPresentationPropertyDataProvider;
 }
 

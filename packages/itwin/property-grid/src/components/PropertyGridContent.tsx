@@ -12,7 +12,6 @@ import {
 } from "@itwin/components-react";
 import { ResizableContainerObserver } from "@itwin/core-react";
 import { Text } from "@itwin/itwinui-react";
-import type { PresentationActionButtonsRenderer } from "../hooks/UseActionButtons";
 import { useActionButtons } from "../hooks/UseActionButtons";
 import { useContextMenu } from "../hooks/UseContextMenu";
 import { useLoadedInstanceInfo } from "../hooks/UseInstanceInfo";
@@ -23,6 +22,7 @@ import { FilteringPropertyGrid, NonEmptyValuesPropertyDataFilterer } from "./Fil
 import { Header } from "./Header";
 import { SettingsDropdownMenu } from "./SettingsDropdownMenu";
 
+import type { PropertyGridActionButtonRenderer } from "../hooks/UseActionButtons";
 import type { SettingsDropdownMenuProps, SettingsMenuProps } from "./SettingsDropdownMenu";
 import type { ReactNode } from "react";
 import type { PropertyRecord } from "@itwin/appui-abstract";
@@ -65,7 +65,7 @@ export interface PropertyGridContentBaseProps
   onPropertyUpdated?: (args: PropertyGridPropertyUpdatedArgs, category: PropertyCategory) => Promise<boolean>;
   dataProvider: IPresentationPropertyDataProvider;
   dataRenderer?: (props: FilteringPropertyGridProps) => ReactNode;
-  actionButtonRenderers?: PresentationActionButtonsRenderer[];
+  actionButtonRenderers?: PropertyGridActionButtonRenderer[];
 }
 
 /**
