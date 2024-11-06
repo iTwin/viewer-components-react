@@ -6,7 +6,7 @@
 import { AxisOrder, Matrix3d, Vector3d } from "@itwin/core-geometry";
 import type {
   DecorateContext,
-  HitDetail,
+  ScreenViewport,
   ToolAssistanceInstruction,
   ToolAssistanceSection,
 } from "@itwin/core-frontend";
@@ -61,13 +61,13 @@ MeasureAreaToolModel
     return MeasureToolsFeatures.Tools_MeasureArea;
   }
 
-  constructor(enableSheetMeasurements = false) {
-    super();
+  constructor(enableSheetMeasurements = false, allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true)) {
+    super(allowedViewportCallback);
     this._enableSheetMeasurements = enableSheetMeasurements;
   }
 
   public async onRestartTool(): Promise<void> {
-    const tool = new MeasureAreaTool(this._enableSheetMeasurements);
+    const tool = new MeasureAreaTool(this._enableSheetMeasurements,this._allowedViewportCallback);
     if (await tool.run()) return;
 
     return this.exitTool();
@@ -146,7 +146,10 @@ MeasureAreaToolModel
     }
   }
 
-  public override isValidLocation(ev: BeButtonEvent, _isButtonEvent: boolean): boolean {
+  public override isValidLocation(ev: BeButtonEvent, isButtonEvent: boolean): boolean {
+    if (!super.isValidLocation(ev, isButtonEvent))
+      return false;
+
     if (!this._enableSheetMeasurements || !ev.viewport?.view.isSheetView())
       return true;
 

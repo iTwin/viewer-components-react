@@ -11,6 +11,7 @@ import {
 } from "@itwin/core-geometry";
 import type {
   BeButtonEvent,
+  ScreenViewport,
   ToolAssistanceInstruction,
   ToolAssistanceSection,
 } from "@itwin/core-frontend";
@@ -56,12 +57,16 @@ MeasureDistanceToolModel
     );
   }
 
+  constructor(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true)) {
+    super(allowedViewportCallback);
+  }
+
   protected override get feature(): Feature | undefined {
     return MeasureToolsFeatures.Tools_MeasurePerpendicular;
   }
 
   public async onRestartTool(): Promise<void> {
-    const tool = new MeasurePerpendicularTool();
+    const tool = new MeasurePerpendicularTool(this._allowedViewportCallback);
     if (await tool.run()) return;
 
     return this.exitTool();

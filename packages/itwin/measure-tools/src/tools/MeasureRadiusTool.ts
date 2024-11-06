@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import type {
   BeButtonEvent,
+  ScreenViewport,
   ToolAssistanceInstruction,
   ToolAssistanceSection,
 } from "@itwin/core-frontend";
@@ -55,12 +56,12 @@ MeasureRadiusToolModel
     return MeasureToolsFeatures.Tools_MeasureRadius;
   }
 
-  constructor() {
-    super();
+  constructor(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true)) {
+    super(allowedViewportCallback);
   }
 
   public async onRestartTool(): Promise<void> {
-    const tool = new MeasureRadiusTool();
+    const tool = new MeasureRadiusTool(this._allowedViewportCallback);
     if (await tool.run()) return;
 
     return this.exitTool();
