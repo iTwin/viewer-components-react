@@ -110,19 +110,12 @@ describe("<PropertyGridContent />", () => {
 
   it("renders with extended props action buttons", async () => {
     const imodel = {} as IModelConnection;
-    const fake = sinon.fake();
+    const stub = sinon.stub().returns(<div>Test action button</div>);
 
-    const renderTestActionButton = (dataProvider: IPresentationPropertyDataProvider) => {
-      fake(dataProvider);
-      return <div>Test action button</div>;
-    };
-
-    const { getAllByText } = renderWithContext(
-      <PropertyGridContent dataProvider={provider} imodel={imodel} actionButtonRenderers={[({ dataProvider }) => renderTestActionButton(dataProvider)]} />,
-    );
+    const { getAllByText } = renderWithContext(<PropertyGridContent dataProvider={provider} imodel={imodel} actionButtonRenderers={[stub]} />);
 
     await waitFor(() => {
-      expect(fake).to.be.calledWith(provider);
+      expect(stub).to.be.calledWith(sinon.match((arg) => arg.dataProvider === provider));
       getAllByText("Test action button");
     });
   });
