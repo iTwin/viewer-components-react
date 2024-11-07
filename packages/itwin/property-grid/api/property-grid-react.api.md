@@ -6,6 +6,7 @@
 
 /// <reference types="react" />
 
+import type { ActionButtonRendererProps } from '@itwin/components-react';
 import { FavoritePropertiesScope } from '@itwin/presentation-frontend';
 import type { Field } from '@itwin/presentation-common';
 import type { IModelConnection } from '@itwin/core-frontend';
@@ -126,7 +127,9 @@ export interface PropertyGridComponentProps extends Omit<MultiElementPropertyGri
 }
 
 // @public
-export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGridProps, "dataProvider" | "filterer" | "isPropertyHoverEnabled" | "isPropertySelectionEnabled" | "onPropertyContextMenu" | "width" | "height" | "onPropertyUpdated"> {
+export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGridProps, "dataProvider" | "filterer" | "isPropertyHoverEnabled" | "isPropertySelectionEnabled" | "onPropertyContextMenu" | "width" | "height" | "onPropertyUpdated" | "actionButtonRenderers"> {
+    // (undocumented)
+    actionButtonRenderers?: PropertyGridActionButtonRenderer[];
     // (undocumented)
     className?: string;
     // (undocumented)

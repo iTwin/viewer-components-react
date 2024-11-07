@@ -59,6 +59,7 @@ export interface GroupsViewProps {
   overlappedElementsInfo?: Map<string, OverlappedInfo[]>;
   progressConfig?: ProgressConfig;
   hideRefreshIcon?: boolean;
+  groupsAction?: JSX.Element;
   deleteConfirmationContentFactory?: (group: GroupMinimal) => JSX.Element;
   groupDeleteCallback?: (group: GroupMinimal) => void;
 }
@@ -90,6 +91,7 @@ export const GroupsView = ({
   overlappedElementsInfo,
   progressConfig,
   hideRefreshIcon,
+  groupsAction,
   deleteConfirmationContentFactory,
   groupDeleteCallback,
 }: GroupsViewProps) => {
@@ -106,13 +108,16 @@ export const GroupsView = ({
     <InformationPanelWrapper className="gmw-groups-container">
       <div className="gmw-toolbar">
         {onClickAddGroup && groupUIs.length > 0 && <GroupsAddButton disabled={disableActions} groupUIs={groupUIs} onClickAddGroup={onClickAddGroup} />}
-        {!hideRefreshIcon && (
+        {
           <ButtonGroup className="gmw-toolbar-buttons">
-            <IconButton title="Refresh" onClick={onRefresh} disabled={isLoading || disableActions} styleType="borderless">
-              <SvgRefresh />
-            </IconButton>
+            {groupsAction}
+            {!hideRefreshIcon && (
+              <IconButton title="Refresh" onClick={onRefresh} disabled={isLoading || disableActions} styleType="borderless">
+                <SvgRefresh />
+              </IconButton>
+            )}
           </ButtonGroup>
-        )}
+        }
       </div>
       {alert}
       <div className="gmw-groups-border" />

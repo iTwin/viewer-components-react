@@ -2,6 +2,21 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "date": "Thu, 31 Oct 2024 11:11:57 GMT",
+      "version": "0.34.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.34.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "tejas.sutar@bentley.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "2a6ecbca796e741bff2e77fe844ca614169b7c76",
+            "comment": "Added a property to render a common action button for all groups"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 26 Sep 2024 20:21:11 GMT",
       "version": "0.33.0",
       "tag": "@itwin/grouping-mapping-widget_v0.33.0",

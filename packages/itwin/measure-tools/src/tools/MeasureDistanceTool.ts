@@ -6,6 +6,7 @@
 import type {
   BeButtonEvent,
   DecorateContext,
+  ScreenViewport,
   ToolAssistanceInstruction,
   ToolAssistanceSection,
 } from "@itwin/core-frontend";
@@ -38,7 +39,10 @@ MeasureDistanceToolModel
   private static readonly useMultiPointPropertyName = "useMultiPoint";
 
   private _useMultiPointMeasurement: boolean = false;
-  private _enableSheetMeasurements: boolean;
+
+  protected override get allowedDrawingTypes(): SheetMeasurementsHelper.DrawingType[] {
+    return [SheetMeasurementsHelper.DrawingType.CrossSection, SheetMeasurementsHelper.DrawingType.Plan];
+  }
 
   public static override get flyover() {
     return MeasureTools.localization.getLocalizedString(
@@ -60,8 +64,8 @@ MeasureDistanceToolModel
     return MeasureToolsFeatures.Tools_MeasureDistance;
   }
 
-  constructor(enableSheetMeasurements = false) {
-    super();
+  constructor(enableSheetMeasurements = false, allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true)) {
+    super(allowedViewportCallback);
     this._enableSheetMeasurements = enableSheetMeasurements;
   }
 
@@ -70,7 +74,7 @@ MeasureDistanceToolModel
   }
 
   public async onRestartTool(): Promise<void> {
-    const tool = new MeasureDistanceTool(this._enableSheetMeasurements);
+    const tool = new MeasureDistanceTool(this._enableSheetMeasurements, this._allowedViewportCallback);
     if (await tool.run()) return;
 
     return this.exitTool();
@@ -131,11 +135,14 @@ MeasureDistanceToolModel
     }
   }
 
-  public override isValidLocation(ev: BeButtonEvent, _isButtonEvent: boolean): boolean {
+  public override isValidLocation(ev: BeButtonEvent, isButtonEvent: boolean): boolean {
+    if (!super.isValidLocation(ev, isButtonEvent))
+      return false;
+
     if (!this._enableSheetMeasurements || !ev.viewport?.view.isSheetView())
       return true;
 
-    if (!SheetMeasurementsHelper.checkIfAllowedDrawingType(ev, [SheetMeasurementsHelper.DrawingType.CrossSection, SheetMeasurementsHelper.DrawingType.Plan]))
+    if (!SheetMeasurementsHelper.checkIfAllowedDrawingType(ev.viewport, ev.point, this.allowedDrawingTypes))
       return false;
 
     if (this.toolModel.drawingMetadata?.drawingId === undefined || this.toolModel.drawingMetadata?.origin === undefined || this.toolModel.drawingMetadata?.extents === undefined)

@@ -190,7 +190,8 @@ function getInstanceKeys(keys: Readonly<KeySet>) {
     });
   });
 
-  return selectedInstanceKeys;
+  // make sure all instance keys are in `SchemaName:ClassName` format
+  return selectedInstanceKeys.map((key) => ({ id: key.id, className: key.className.replace(".", ":") }));
 }
 
 /**
