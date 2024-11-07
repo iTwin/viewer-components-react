@@ -11,6 +11,7 @@ import type {
   DecorateContext,
   HitDetail,
   IModelConnection,
+  ScreenViewport,
   ToolAssistanceInstruction,
 } from "@itwin/core-frontend";
 import {
@@ -196,6 +197,7 @@ export abstract class MeasurementToolBase<
   implements MeasurementTool {
   private _toolModel: ToolModel;
   private _selectionHolder: SelectionHolder;
+  protected _allowedViewportCallback: (vp: ScreenViewport) => boolean;
 
   protected _enableSheetMeasurements: boolean;
 
@@ -223,8 +225,10 @@ export abstract class MeasurementToolBase<
     return [];
   }
 
-  constructor() {
+  constructor(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true))  {
     super();
+
+    this._allowedViewportCallback = allowedViewportCallback;
 
     this._enableSheetMeasurements = false;
     this._toolModel = this.createToolModel();
@@ -238,10 +242,11 @@ export abstract class MeasurementToolBase<
   }
 
   public override isValidLocation(
-    _ev: BeButtonEvent,
+    ev: BeButtonEvent,
     _isButtonEvent: boolean
   ): boolean {
-    // In most cases, the location will be okay even if outside the model extents
+    if (ev.viewport)
+      return this._allowedViewportCallback(ev.viewport);
     return true;
   }
 
