@@ -80,10 +80,10 @@ export async function selectValueInDialog(page: Page, valueText: string) {
   const filterDialog = page.getByRole("dialog");
 
   // search for one character less to not have to differentiate between entered value and option in dropdown
-  await page.locator(".presentation-async-select-values-container input").fill(valueText);
-  await page.getByRole("list").getByText(valueText).click();
-
-  await filterDialog.getByText(`option ${valueText}, selected.`).waitFor();
+  await filterDialog.getByPlaceholder("Select provided value(s)").fill(valueText);
+  const dropdown = page.getByRole("listbox");
+  await dropdown.getByText(valueText).click();
+  await dropdown.getByRole("option", { name: valueText, selected: true }).waitFor();
 }
 
 export async function selectTree(widget: Locator, treeLabel: string) {
