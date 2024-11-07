@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Updated speed of filtering paths creation in ModelsTree (when large number of paths are created). `ModelsTreeDefinition.createInstanceKeyPaths` now creates paths from 1.1 to 50 times faster.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "100586436+JonasDov@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
