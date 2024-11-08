@@ -1,7 +1,7 @@
 {
-  "name": "@itwin/presentation-learning-snippets",
+  "name": "learning-snippets",
   "version": "0.0.0",
-  "description": "Learning snippets for ReadMes",
+  "description": "Learning snippets for documentation",
   "private": true,
   "scripts": {
     "build": "npm run link:deps && tsc",
