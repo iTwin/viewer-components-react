@@ -5,10 +5,7 @@
 
 import { defer, from, map, merge, mergeAll, mergeMap } from "rxjs";
 import {
-  createNodesQueryClauseFactory,
-  createPredicateBasedHierarchyDefinition,
-  NodeSelectClauseColumnNames,
-  ProcessedHierarchyNode,
+  createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition, NodeSelectClauseColumnNames, ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import { collect } from "../common/Rxjs";
@@ -223,7 +220,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             FROM ${instanceFilterClauses.from} this
             ${instanceFilterClauses.joins}
             WHERE
-              this.Parent IS NULL
+              this.Parent.Id IS NULL
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
         },
@@ -417,7 +414,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 WHERE
                   element.Model.Id IN (${modelIds.map(() => "?").join(",")})
                   AND element.Category.Id = +this.ECInstanceId
-                  AND element.Parent IS NULL
+                  AND element.Parent.Id IS NULL
               )
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
@@ -484,7 +481,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             WHERE
               this.Category.Id IN (${categoryIds.map(() => "?").join(",")})
               AND this.Model.Id IN (${modelIds.map(() => "?").join(",")})
-              AND this.Parent IS NULL
+              AND this.Parent.Id IS NULL
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
           bindings: [...categoryIds.map((id) => ({ type: "id", value: id })), ...modelIds.map((id) => ({ type: "id", value: id }))] as ECSqlBinding[],
