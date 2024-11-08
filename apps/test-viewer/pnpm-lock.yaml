@@ -103,8 +103,8 @@ importers:
         specifier: workspace:*
         version: file:../../packages/itwin/measure-tools(fktcpd52643grq4v7oscdk4y5i)
       '@itwin/oidc-signin-tool':
-        specifier: ^4.3.6
-        version: 4.3.6(@itwin/core-bentley@4.9.5)(@itwin/core-geometry@4.9.5)
+        specifier: ^4.3.7
+        version: 4.3.7(@itwin/core-bentley@4.9.5)(@itwin/core-geometry@4.9.5)
       '@itwin/one-click-lca-react':
         specifier: workspace:*
         version: file:../../packages/itwin/one-click-lca-widget(@itwin/appui-abstract@4.9.5(@itwin/core-bentley@4.9.5))(@itwin/appui-react@4.17.2(37oclppqg5ffimsurufjbfgbdm))(@itwin/core-frontend@4.9.5(@itwin/appui-abstract@4.9.5(@itwin/core-bentley@4.9.5))(@itwin/core-bentley@4.9.5)(@itwin/core-common@4.9.5(@itwin/core-bentley@4.9.5)(@itwin/core-geometry@4.9.5))(@itwin/core-geometry@4.9.5)(@itwin/core-orbitgt@4.9.5)(@itwin/core-quantity@4.9.5(@itwin/core-bentley@4.9.5))(inversify@6.0.3)(reflect-metadata@0.1.14))(@itwin/core-react@4.17.2(@itwin/appui-abstract@4.9.5(@itwin/core-bentley@4.9.5))(@itwin/core-bentley@4.9.5)(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -546,8 +546,8 @@ packages:
   '@itwin/components-react@4.17.2':
     resolution: {integrity: sha512-EaElyMpBb/cZcJ5N6jjCd06Lv4zzkuD2g83+C3z129uAuTzmvpvHQwd3JnIiYVKWPhc9YefJaWgZpgNwQO/bhQ==}
     peerDependencies:
-      '@itwin/appui-abstract': workspace:*
-      '@itwin/core-bentley': workspace:*
+      '@itwin/appui-abstract': ^3.7.0 || ^4.0.0
+      '@itwin/core-bentley': ^3.7.0 || ^4.0.0
       '@itwin/core-react': ^4.17.2
       react: ^17.0.0 || ^18.0.0
       react-dom: ^17.0.0 || ^18.0.0
@@ -598,8 +598,8 @@ packages:
   '@itwin/core-react@4.17.2':
     resolution: {integrity: sha512-wXAiFoBrBYEY82JTn0waUcVecpz11SesXxd8zgwl56JAdEJm8aTQx09zm6dbZHC6miBAOgwZqF5IzVzBJZGHGw==}
     peerDependencies:
-      '@itwin/appui-abstract': workspace:*
-      '@itwin/core-bentley': workspace:*
+      '@itwin/appui-abstract': ^3.7.0 || ^4.0.0
+      '@itwin/core-bentley': ^3.7.0 || ^4.0.0
       react: ^17.0.0 || ^18.0.0
       react-dom: ^17.0.0 || ^18.0.0
 
@@ -664,13 +664,13 @@ packages:
   '@itwin/imodel-components-react@4.17.2':
     resolution: {integrity: sha512-Wj2BfE2h3xIbaiM8KBt/dOuMoVmYhR+FtLS2T0U4VqhoK1E5QtNZqTMPNuyCF7NlfIXX9x0Bg7ZS8nw26vPaZw==}
     peerDependencies:
-      '@itwin/appui-abstract': workspace:*
+      '@itwin/appui-abstract': ^3.7.0 || ^4.0.0
       '@itwin/components-react': ^4.17.2
-      '@itwin/core-bentley': workspace:*
-      '@itwin/core-common': workspace:*
-      '@itwin/core-frontend': workspace:*
-      '@itwin/core-geometry': workspace:*
-      '@itwin/core-quantity': workspace:*
+      '@itwin/core-bentley': ^3.7.0 || ^4.0.0
+      '@itwin/core-common': ^3.7.0 || ^4.0.0
+      '@itwin/core-frontend': ^3.7.0 || ^4.0.0
+      '@itwin/core-geometry': ^3.7.0 || ^4.0.0
+      '@itwin/core-quantity': ^3.7.0 || ^4.0.0
       '@itwin/core-react': ^4.17.2
       react: ^17.0.0 || ^18.0.0
       react-dom: ^17.0.0 || ^18.0.0
@@ -801,8 +801,8 @@ packages:
       inversify: ^6.0.1
       reflect-metadata: ^0.1.13
 
-  '@itwin/oidc-signin-tool@4.3.6':
-    resolution: {integrity: sha512-DUOZNzrueGkz9qoAGAjDnQGrArMsHaHdaG2Tyvp6F9GsgjeAn1YYW+PfnIokm/ihjK7eFURznPEtKzORO4olXw==}
+  '@itwin/oidc-signin-tool@4.3.7':
+    resolution: {integrity: sha512-II5l7FxpgLQUbrzvCQfuul3uq3boH6XZwyb57BsgF6uvjSekAuvAVo2CkR5vlx57sWtM+thsEwiZ4xUMPe7Cmw==}
     peerDependencies:
       '@itwin/core-bentley': ^3.3.0 || ^4.0.0
 
@@ -3803,7 +3803,7 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  '@itwin/oidc-signin-tool@4.3.6(@itwin/core-bentley@4.9.5)(@itwin/core-geometry@4.9.5)':
+  '@itwin/oidc-signin-tool@4.3.7(@itwin/core-bentley@4.9.5)(@itwin/core-geometry@4.9.5)':
     dependencies:
       '@itwin/certa': 4.9.5
       '@itwin/core-bentley': 4.9.5
