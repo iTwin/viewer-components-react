@@ -182,12 +182,12 @@ export class IModelContentTreeIdsCache {
     const query = /* sql */ `
       SELECT Model.Id modelId, Category.Id categoryId
       FROM BisCore.GeometricElement3d
-      WHERE Parent IS NULL
+      WHERE Parent.Id IS NULL
       GROUP BY Model.Id, Category.Id
       UNION ALL
       SELECT Model.Id modelId, Category.Id categoryId
       FROM BisCore.GeometricElement2d
-      WHERE Parent IS NULL
+      WHERE Parent.Id IS NULL
       GROUP BY Model.Id, Category.Id
     `;
     for await (const row of this._queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
