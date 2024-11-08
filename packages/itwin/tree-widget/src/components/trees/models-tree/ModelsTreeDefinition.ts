@@ -3,9 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, from, map, merge, mergeAll, mergeMap } from "rxjs";
+import { defer, from, map, merge, mergeAll, mergeMap } from "rxjs";
 import {
-  createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition, NodeSelectClauseColumnNames, ProcessedHierarchyNode,
+  createNodesQueryClauseFactory,
+  createPredicateBasedHierarchyDefinition,
+  NodeSelectClauseColumnNames,
+  ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import { collect } from "../common/Rxjs";
@@ -650,8 +653,8 @@ function createGeometricElementInstanceKeyPaths(
           e.ModelId,
           e.GroupingNodeIndex,
           IIF(e.ParentId IS NULL,
-            ec_classname([m].[ECClassId], 's.c') || '${separator}' || CAST(IdToHex([m].[ECInstanceId]) AS TEXT) || '${separator}' || ec_classname([c].[ECClassId], 's.c') || '${separator}' || CAST(IdToHex([c].[ECInstanceId]) AS TEXT) || '${separator}' || ec_classname([e].[ECClassId], 's.c') || '${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT),
-            ec_classname([e].[ECClassId], 's.c') || '${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT)
+            'm${separator}' || CAST(IdToHex([m].[ECInstanceId]) AS TEXT) || '${separator}c${separator}' || CAST(IdToHex([c].[ECInstanceId]) AS TEXT) || '${separator}e${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT),
+            'e${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT)
           )
 
         FROM InstanceElementsWithClassGroupingNodes e
@@ -666,8 +669,8 @@ function createGeometricElementInstanceKeyPaths(
           pe.Model.Id,
           ce.GroupingNodeIndex,
           IIF(pe.Parent.Id IS NULL,
-            ec_classname([m].[ECClassId], 's.c') || '${separator}' || CAST(IdToHex([m].[ECInstanceId]) AS TEXT) || '${separator}' || ec_classname([c].[ECClassId], 's.c') || '${separator}' || CAST(IdToHex([c].[ECInstanceId]) AS TEXT) || '${separator}' || ec_classname([pe].[ECClassId], 's.c') || '${separator}' || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT) || '${separator}' || ce.Path,
-            ec_classname([pe].[ECClassId], 's.c') || '${separator}' || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT) || '${separator}' || ce.Path
+            'm${separator}' || CAST(IdToHex([m].[ECInstanceId]) AS TEXT) || '${separator}c${separator}' || CAST(IdToHex([c].[ECInstanceId]) AS TEXT) || '${separator}e${separator}' || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT) || '${separator}' || ce.Path,
+            'e${separator}' || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT) || '${separator}' || ce.Path
           )
         FROM ModelsCategoriesElementsHierarchy ce
         JOIN ${hierarchyConfig.elementClassSpecification} pe ON (pe.ECInstanceId = ce.ParentId OR pe.ECInstanceId = ce.ModelId AND ce.ParentId IS NULL)
@@ -683,7 +686,7 @@ function createGeometricElementInstanceKeyPaths(
 
     return imodelAccess.createQueryReader({ ctes, ecsql }, { rowFormat: "Indexes", limit: "unbounded" });
   }).pipe(
-    map((row) => parseQueryRow(row, groupInfos, separator)),
+    map((row) => parseQueryRow(row, groupInfos, separator, hierarchyConfig.elementClassSpecification)),
     mergeMap(({ modelId, elementHierarchyPath, groupingNode }) =>
       createModelInstanceKeyPaths(modelId, idsCache).pipe(
         map((modelPath) => {
@@ -707,15 +710,25 @@ function createGeometricElementInstanceKeyPaths(
   );
 }
 
-function parseQueryRow(row: ECSqlQueryRow, groupInfos: ElementsGroupInfo[], separator: string) {
+function parseQueryRow(row: ECSqlQueryRow, groupInfos: ElementsGroupInfo[], separator: string, eClassName: string) {
   const rowElements: string[] = row[1].split(separator);
   const path = new Array<InstanceKey>();
   for (let i = 0; i < rowElements.length; i += 2) {
-    path.push({ className: rowElements[i], id: rowElements[i + 1] });
+    switch (rowElements[i]) {
+      case "e":
+        path.push({ className: eClassName, id: rowElements[i + 1] });
+        break;
+      case "c":
+        path.push({ className: "BisCore.SpatialCategory", id: rowElements[i + 1] });
+        break;
+      case "m":
+        path.push({ className: "BisCore.GeometricModel3d", id: rowElements[i + 1] });
+        break;
+    }
   }
   return {
     modelId: row[0],
-    elementHierarchyPath: flatten<InstanceKey>(path),
+    elementHierarchyPath: path,
     groupingNode: row[2] === -1 ? undefined : groupInfos[row[2]].groupingNode,
   };
 }
@@ -751,12 +764,19 @@ async function createInstanceKeyPathsFromTargetItems({
       }
     }),
   );
+  const elementBlocks: Array<Array<Id64String | ElementsGroupInfo>> = [];
+  const elementsLength = ids.elements.length;
+  const blockSize = Math.ceil(elementsLength / Math.ceil(elementsLength / 5000));
+  for (let i = 0; i < ids.elements.length; i += blockSize) {
+    elementBlocks.push(ids.elements.slice(i, i + blockSize));
+  }
+
   return collect(
     merge(
       from(ids.subjects).pipe(mergeMap((id) => createSubjectInstanceKeysPath(id, idsCache))),
       from(ids.models).pipe(mergeMap((id) => createModelInstanceKeyPaths(id, idsCache))),
       from(ids.categories).pipe(mergeMap((id) => createCategoryInstanceKeyPaths(id, idsCache))),
-      ids.elements.length ? createGeometricElementInstanceKeyPaths(imodelAccess, idsCache, hierarchyConfig, ids.elements) : EMPTY,
+      from(elementBlocks).pipe(mergeMap((block) => createGeometricElementInstanceKeyPaths(imodelAccess, idsCache, hierarchyConfig, block))),
     ),
   );
 }
@@ -809,11 +829,4 @@ async function createInstanceKeyPathsFromInstanceLabel(
   }
 
   return createInstanceKeyPathsFromTargetItems({ ...props, targetItems: targetKeys });
-}
-
-type ArrayOrValue<T> = T | Array<ArrayOrValue<T>>;
-function flatten<T>(source: Array<ArrayOrValue<T>>): T[] {
-  return source.reduce<T[]>((flat, item): T[] => {
-    return [...flat, ...(Array.isArray(item) ? flatten(item) : [item])];
-  }, new Array<T>());
 }
