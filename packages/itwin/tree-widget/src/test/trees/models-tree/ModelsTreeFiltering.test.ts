@@ -344,8 +344,8 @@ describe("Models tree", () => {
           return { rootSubject, model1, model2, model3 };
         },
         (x) => [
-          [x.rootSubject, { className: "BisCore.GeometricModel3d", id: x.model1.id }],
-          [x.rootSubject, { className: "BisCore.GeometricModel3d", id: x.model3.id }],
+          [x.rootSubject, adjustedModelKey(x.model1)],
+          [x.rootSubject, adjustedModelKey(x.model3)],
         ],
         (x) => [x.model1, x.model3],
         (_x) => "matching",
@@ -400,8 +400,8 @@ describe("Models tree", () => {
           return { rootSubject, model1, model2, model3 };
         },
         (x) => [
-          [x.rootSubject, { className: "BisCore.GeometricModel3d", id: x.model1.id }],
-          [x.rootSubject, { className: "BisCore.GeometricModel3d", id: x.model3.id }],
+          [x.rootSubject, adjustedModelKey(x.model1)],
+          [x.rootSubject, adjustedModelKey(x.model3)],
         ],
         (x) => [x.model1, x.model3],
         (_x) => "matching",
@@ -508,8 +508,8 @@ describe("Models tree", () => {
           return { rootSubject, model1, model2, category1, category2, category3 };
         },
         (x) => [
-          [x.rootSubject, { className: "BisCore.GeometricModel3d", id: x.model1.id }, x.category1],
-          [x.rootSubject, { className: "BisCore.GeometricModel3d", id: x.model2.id }, x.category3],
+          [x.rootSubject, adjustedModelKey(x.model1), x.category1],
+          [x.rootSubject, adjustedModelKey(x.model2), x.category3],
         ],
         (x) => [x.category1, x.category3],
         (_x) => "matching",
@@ -577,8 +577,8 @@ describe("Models tree", () => {
           return { rootSubject, model1, model2, category1, category2, element11, element12, element21, element22 };
         },
         (x) => [
-          [x.rootSubject, { ...x.model1, className: "BisCore.GeometricModel3d" }, x.category1, { ...x.element11, className: "BisCore.GeometricElement3d" }],
-          [x.rootSubject, { ...x.model2, className: "BisCore.GeometricModel3d" }, x.category2, { ...x.element22, className: "BisCore.GeometricElement3d" }],
+          [x.rootSubject, adjustedModelKey(x.model1), x.category1, adjustedElementKey(x.element11)],
+          [x.rootSubject, adjustedModelKey(x.model2), x.category2, adjustedElementKey(x.element22)],
         ],
         (x) => [x.element11, x.element22],
         (_x) => "matching",
@@ -644,8 +644,8 @@ describe("Models tree", () => {
           return { rootSubject, model1, model2, category1, category2, element11, element12, element21, element22 };
         },
         (x) => [
-          [x.rootSubject, { ...x.model1, className: "BisCore.GeometricModel3d" }, x.category1],
-          [x.rootSubject, { ...x.model1, className: "BisCore.GeometricModel3d" }, x.category1, { ...x.element11, className: "BisCore.GeometricElement3d" }],
+          [x.rootSubject, adjustedModelKey(x.model1), x.category1],
+          [x.rootSubject, adjustedModelKey(x.model1), x.category1, adjustedElementKey(x.element11)],
         ],
         (x) => [x.category1, x.element11],
         (_x) => "matching",
@@ -709,20 +709,8 @@ describe("Models tree", () => {
           return { rootSubject, model, category, rootElement, childElement1, childElement2, childElement3 };
         },
         (x) => [
-          [
-            x.rootSubject,
-            { ...x.model, className: "BisCore.GeometricModel3d" },
-            x.category,
-            { ...x.rootElement, className: "BisCore.GeometricElement3d" },
-            { ...x.childElement1, className: "BisCore.GeometricElement3d" },
-          ],
-          [
-            x.rootSubject,
-            { ...x.model, className: "BisCore.GeometricModel3d" },
-            x.category,
-            { ...x.rootElement, className: "BisCore.GeometricElement3d" },
-            { ...x.childElement3, className: "BisCore.GeometricElement3d" },
-          ],
+          [x.rootSubject, adjustedModelKey(x.model), x.category, adjustedElementKey(x.rootElement), adjustedElementKey(x.childElement1)],
+          [x.rootSubject, adjustedModelKey(x.model), x.category, adjustedElementKey(x.rootElement), adjustedElementKey(x.childElement3)],
         ],
         (x) => [x.childElement1, x.childElement3],
         (_x) => "matching",
@@ -809,18 +797,8 @@ describe("Models tree", () => {
           return { rootSubject, model, category, rootElement1, rootElement2, rootElement3 };
         },
         (x) => [
-          [
-            x.rootSubject,
-            { ...x.model, className: "BisCore.GeometricModel3d" },
-            x.category,
-            { ...x.rootElement1, className: "TestSchema.SubModelablePhysicalObject" },
-          ],
-          [
-            x.rootSubject,
-            { ...x.model, className: "BisCore.GeometricModel3d" },
-            x.category,
-            { ...x.rootElement3, className: "TestSchema.SubModelablePhysicalObject" },
-          ],
+          [x.rootSubject, adjustedModelKey(x.model), x.category, { ...x.rootElement1, className: "TestSchema.SubModelablePhysicalObject" }],
+          [x.rootSubject, adjustedModelKey(x.model), x.category, { ...x.rootElement3, className: "TestSchema.SubModelablePhysicalObject" }],
         ],
         (x) => [x.rootElement1, x.rootElement3],
         (_x) => "matching",
@@ -888,21 +866,21 @@ describe("Models tree", () => {
         (x) => [
           [
             x.rootSubject,
-            { ...x.model, className: "BisCore.GeometricModel3d" },
+            adjustedModelKey(x.model),
             x.category,
-            { ...x.rootElement, className: "BisCore.GeometricElement3d" },
-            { ...x.subModel, className: "BisCore.GeometricModel3d" },
+            adjustedElementKey(x.rootElement),
+            adjustedModelKey(x.subModel),
             x.category,
-            { ...x.subModeledElement1, className: "BisCore.GeometricElement3d" },
+            adjustedElementKey(x.subModeledElement1),
           ],
           [
             x.rootSubject,
-            { ...x.model, className: "BisCore.GeometricModel3d" },
+            adjustedModelKey(x.model),
             x.category,
-            { ...x.rootElement, className: "BisCore.GeometricElement3d" },
-            { ...x.subModel, className: "BisCore.GeometricModel3d" },
+            adjustedElementKey(x.rootElement),
+            adjustedModelKey(x.subModel),
             x.category,
-            { ...x.subModeledElement3, className: "BisCore.GeometricElement3d" },
+            adjustedElementKey(x.subModeledElement3),
           ],
         ],
         (x) => [x.subModeledElement1, x.subModeledElement3],
@@ -992,7 +970,7 @@ describe("Models tree", () => {
           const element2 = insertPhysicalElement({ builder, userLabel: `element 2`, modelId: model.id, categoryId: category.id });
           return { rootSubject, model, category, element1, element2 };
         },
-        (x) => [[x.rootSubject, { ...x.model, className: "BisCore.GeometricModel3d" }, x.category, { ...x.element1, className: "BisCore.GeometricElement3d" }]],
+        (x) => [[x.rootSubject, adjustedModelKey(x.model), x.category, adjustedElementKey(x.element1)]],
         (x) => [x.element1],
         (_x) => "matching",
         (x) => [
@@ -1040,7 +1018,7 @@ describe("Models tree", () => {
               modelId: model2.id,
               categoryId: category.id,
             });
-            const pathUntilTargetElement = [rootSubject, { ...model2, className: "BisCore.GeometricModel3d" }, category];
+            const pathUntilTargetElement = [rootSubject, adjustedModelKey(model2), category];
             const groupingNode = createClassGroupingHierarchyNode({
               className: physicalElement21.className,
               modelId: model2.id,
@@ -1052,7 +1030,7 @@ describe("Models tree", () => {
           },
           (x) =>
             x.groupingNode.groupedInstanceKeys.map((elementKey) => ({
-              path: [...x.pathUntilTargetElement, { ...elementKey, className: "BisCore.GeometricElement3d" }],
+              path: [...x.pathUntilTargetElement, adjustedElementKey(elementKey)],
               options: { autoExpand: { key: x.groupingNode.key, depth: x.pathUntilTargetElement.length } },
             })),
           (x) => [
@@ -1130,12 +1108,7 @@ describe("Models tree", () => {
               categoryId: category.id,
               parentId: rootElement.id,
             });
-            const pathUntilTargetElement = [
-              rootSubject,
-              { ...model, className: "BisCore.GeometricModel3d" },
-              category,
-              { ...rootElement, className: "BisCore.GeometricElement3d" },
-            ];
+            const pathUntilTargetElement = [rootSubject, adjustedModelKey(model), category, adjustedElementKey(rootElement)];
             const groupingNode = createClassGroupingHierarchyNode({
               className: testElement1.className,
               modelId: model.id,
@@ -1147,7 +1120,7 @@ describe("Models tree", () => {
           },
           (x) =>
             x.groupingNode.groupedInstanceKeys.map((elementKey) => ({
-              path: [...x.pathUntilTargetElement, { ...elementKey, className: "BisCore.GeometricElement3d" }],
+              path: [...x.pathUntilTargetElement, adjustedElementKey(elementKey)],
               options: { autoExpand: { key: x.groupingNode.key, depth: x.pathUntilTargetElement.length } },
             })),
           (x) => [
@@ -1245,12 +1218,7 @@ describe("Models tree", () => {
               parentId: rootElement.id,
             });
 
-            const pathUntilTargetElement = [
-              rootSubject,
-              { ...model, className: "BisCore.GeometricModel3d" },
-              category,
-              { ...rootElement, className: "BisCore.GeometricElement3d" },
-            ];
+            const pathUntilTargetElement = [rootSubject, adjustedModelKey(model), category, adjustedElementKey(rootElement)];
             const physicalElementGroupingNode = createClassGroupingHierarchyNode({
               className: physicalElement1.className,
               modelId: model.id,
@@ -1281,11 +1249,11 @@ describe("Models tree", () => {
           },
           (x) => [
             ...x.physicalElementGroupingNode.groupedInstanceKeys.map((elementKey) => ({
-              path: [...x.pathUntilTargetElement, { ...elementKey, className: "BisCore.GeometricElement3d" }],
+              path: [...x.pathUntilTargetElement, adjustedElementKey(elementKey)],
               options: { autoExpand: { key: x.physicalElementGroupingNode.key, depth: x.pathUntilTargetElement.length } },
             })),
             ...x.testElementGroupingNode.groupedInstanceKeys.map((elementKey) => ({
-              path: [...x.pathUntilTargetElement, { ...elementKey, className: "BisCore.GeometricElement3d" }],
+              path: [...x.pathUntilTargetElement, adjustedElementKey(elementKey)],
               options: { autoExpand: { key: x.testElementGroupingNode.key, depth: x.pathUntilTargetElement.length } },
             })),
           ],
@@ -1372,7 +1340,7 @@ describe("Models tree", () => {
               categoryId: category.id,
               parentId: middleElement.id,
             });
-            const pathUntilParentElement = [rootSubject, { ...model, className: "BisCore.GeometricModel3d" }, category];
+            const pathUntilParentElement = [rootSubject, adjustedModelKey(model), category];
             const parentElementGroupingNode = createClassGroupingHierarchyNode({
               className: parentElement.className,
               modelId: model.id,
@@ -1409,24 +1377,15 @@ describe("Models tree", () => {
           },
           (x) => [
             {
-              path: [...x.pathUntilParentElement, { ...x.parentElement, className: "BisCore.GeometricElement3d" }],
+              path: [...x.pathUntilParentElement, adjustedElementKey(x.parentElement)],
               options: { autoExpand: { key: x.parentElementGroupingNode.key, depth: x.parentElementGroupingNode.parentKeys.length } },
             },
             {
-              path: [
-                ...x.pathUntilParentElement,
-                { ...x.parentElement, className: "BisCore.GeometricElement3d" },
-                { ...x.middleElement, className: "BisCore.GeometricElement3d" },
-              ],
+              path: [...x.pathUntilParentElement, adjustedElementKey(x.parentElement), adjustedElementKey(x.middleElement)],
               options: { autoExpand: { key: x.middleElementGroupingNode.key, depth: x.middleElementGroupingNode.parentKeys.length } },
             },
             {
-              path: [
-                ...x.pathUntilParentElement,
-                { ...x.parentElement, className: "BisCore.GeometricElement3d" },
-                { ...x.middleElement, className: "BisCore.GeometricElement3d" },
-                { ...x.childElement, className: "BisCore.GeometricElement3d" },
-              ],
+              path: [...x.pathUntilParentElement, adjustedElementKey(x.parentElement), adjustedElementKey(x.middleElement), adjustedElementKey(x.childElement)],
               options: { autoExpand: { key: x.childElementGroupingNode.key, depth: x.childElementGroupingNode.parentKeys.length } },
             },
           ],
@@ -1506,7 +1465,7 @@ describe("Models tree", () => {
             const model = insertPhysicalModelWithPartition({ builder, codeValue: `model-x`, partitionParentId: rootSubject.id });
             const category = insertSpatialCategory({ builder, codeValue: "category-x" });
             const element = insertPhysicalElement({ builder, userLabel: `parent element`, modelId: model.id, categoryId: category.id });
-            const pathUntilTargetElement = [rootSubject, { ...model, className: "BisCore.GeometricModel3d" }, category];
+            const pathUntilTargetElement = [rootSubject, adjustedModelKey(model), category];
             const groupingNode = createClassGroupingHierarchyNode({
               className: element.className,
               modelId: model.id,
@@ -1517,9 +1476,9 @@ describe("Models tree", () => {
             return { rootSubject, model, category, element, pathUntilTargetElement, groupingNode };
           },
           (x) => [
-            [...x.pathUntilTargetElement, { ...x.element, className: "BisCore.GeometricElement3d" }],
+            [...x.pathUntilTargetElement, adjustedElementKey(x.element)],
             {
-              path: [...x.pathUntilTargetElement, { ...x.element, className: "BisCore.GeometricElement3d" }],
+              path: [...x.pathUntilTargetElement, adjustedElementKey(x.element)],
               options: { autoExpand: { key: x.groupingNode.key, depth: x.groupingNode.parentKeys.length } },
             },
           ],
@@ -1599,21 +1558,11 @@ describe("Models tree", () => {
           },
           (x) => [
             {
-              path: [
-                x.rootSubject,
-                { ...x.model, className: "BisCore.GeometricModel3d" },
-                x.category1,
-                { ...x.element1, className: "BisCore.GeometricElement3d" },
-              ],
+              path: [x.rootSubject, adjustedModelKey(x.model), x.category1, adjustedElementKey(x.element1)],
               options: { autoExpand: { key: x.groupingNode1.key, depth: x.groupingNode1.parentKeys.length } },
             },
             {
-              path: [
-                x.rootSubject,
-                { ...x.model, className: "BisCore.GeometricModel3d" },
-                x.category2,
-                { ...x.element2, className: "BisCore.GeometricElement3d" },
-              ],
+              path: [x.rootSubject, adjustedModelKey(x.model), x.category2, adjustedElementKey(x.element2)],
               options: { autoExpand: { key: x.groupingNode2.key, depth: x.groupingNode2.parentKeys.length } },
             },
           ],
@@ -1755,9 +1704,9 @@ describe("Models tree", () => {
         const elementLocalId = Id64.getLocalId(element.id).toString(36).toLocaleUpperCase();
         return {
           formattedECInstanceId: `[${elementBriefcaseId}-${elementLocalId}]`,
-          expectedPaths: [
-            [rootSubject, { ...model, className: "BisCore.GeometricModel3d" }, category, { ...element, className: "BisCore.GeometricElement3d" }],
-          ].sort(instanceKeyPathSorter),
+          expectedPaths: [[rootSubject, adjustedModelKey(model), category, { ...element, className: "BisCore.GeometricElement3d" }]].sort(
+            instanceKeyPathSorter,
+          ),
         };
       });
 
@@ -1801,14 +1750,7 @@ describe("Models tree", () => {
             hierarchyConfig: defaultHierarchyConfiguration,
           })
         ).sort(instanceKeyPathSorter),
-      ).to.deep.eq([
-        [
-          keys.rootSubject,
-          { ...keys.model, className: "BisCore.GeometricModel3d" },
-          keys.category,
-          { ...keys.element1, className: "BisCore.GeometricElement3d" },
-        ],
-      ]);
+      ).to.deep.eq([[keys.rootSubject, adjustedModelKey(keys.model), keys.category, adjustedElementKey(keys.element1)]]);
 
       expect(
         (
@@ -1819,14 +1761,7 @@ describe("Models tree", () => {
             hierarchyConfig: defaultHierarchyConfiguration,
           })
         ).sort(instanceKeyPathSorter),
-      ).to.deep.eq([
-        [
-          keys.rootSubject,
-          { ...keys.model, className: "BisCore.GeometricModel3d" },
-          keys.category,
-          { ...keys.element2, className: "BisCore.GeometricElement3d" },
-        ],
-      ]);
+      ).to.deep.eq([[keys.rootSubject, adjustedModelKey(keys.model), keys.category, adjustedElementKey(keys.element2)]]);
 
       expect(
         (
@@ -1837,14 +1772,7 @@ describe("Models tree", () => {
             hierarchyConfig: defaultHierarchyConfiguration,
           })
         ).sort(instanceKeyPathSorter),
-      ).to.deep.eq([
-        [
-          keys.rootSubject,
-          { ...keys.model, className: "BisCore.GeometricModel3d" },
-          keys.category,
-          { ...keys.element3, className: "BisCore.GeometricElement3d" },
-        ],
-      ]);
+      ).to.deep.eq([[keys.rootSubject, adjustedModelKey(keys.model), keys.category, adjustedElementKey(keys.element3)]]);
     });
   }
 });
@@ -1886,3 +1814,6 @@ function instanceKeyPathSorter(lhs: HierarchyFilteringPath, rhs: HierarchyFilter
   }
   return 0;
 }
+
+const adjustedModelKey = (source: InstanceKey) => ({ className: "BisCore.GeometricModel3d", id: source.id });
+const adjustedElementKey = (source: InstanceKey) => ({ className: "BisCore.GeometricElement3d", id: source.id });
