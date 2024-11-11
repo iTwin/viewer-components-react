@@ -144,7 +144,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
             FROM ${instanceFilterClauses.from} this
             ${instanceFilterClauses.joins}
             WHERE
-              this.Parent IS NULL
+              this.Parent.Id IS NULL
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
         },
@@ -408,7 +408,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
               WHERE
                 this.Category.Id IN (${categoryIds.map(() => "?").join(",")})
                 AND this.Model.Id IN (${modelIds.map(() => "?").join(",")})
-                AND this.Parent IS NULL
+                AND this.Parent.Id IS NULL
                 ${whereClause ? `AND ${whereClause}` : ""}
                 ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
             `,
@@ -455,7 +455,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
             FROM ${instanceFilterClauses.from} this
             ${instanceFilterClauses.joins}
             WHERE
-              this.Parent IS NULL
+              this.Parent.Id IS NULL
               AND this.Model.Id IN (${modelIds.map(() => "?").join(",")})
               ${whereClause ? `AND ${whereClause}` : ""}
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}

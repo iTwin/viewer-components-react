@@ -222,7 +222,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             FROM ${instanceFilterClauses.from} this
             ${instanceFilterClauses.joins}
             WHERE
-              this.Parent IS NULL
+              this.Parent.Id IS NULL
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
         },
@@ -416,7 +416,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 WHERE
                   element.Model.Id IN (${modelIds.map(() => "?").join(",")})
                   AND element.Category.Id = +this.ECInstanceId
-                  AND element.Parent IS NULL
+                  AND element.Parent.Id IS NULL
               )
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
@@ -483,7 +483,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             WHERE
               this.Category.Id IN (${categoryIds.map(() => "?").join(",")})
               AND this.Model.Id IN (${modelIds.map(() => "?").join(",")})
-              AND this.Parent IS NULL
+              AND this.Parent.Id IS NULL
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
           bindings: [...categoryIds.map((id) => ({ type: "id", value: id })), ...modelIds.map((id) => ({ type: "id", value: id }))] as ECSqlBinding[],
@@ -642,7 +642,7 @@ function createGeometricElementInstanceKeyPaths(
         FROM ${hierarchyConfig.elementClassSpecification} e
         WHERE
           e.ECClassId IS (${groupingNode.key.className})
-          AND ${parent.type === "element" ? bind("e.Parent.Id", parent.ids) : `e.Parent IS NULL AND ${bind("e.Category.Id", parent.ids)} AND ${bind("e.Model.Id", parent.modelIds)}`}
+          AND ${parent.type === "element" ? bind("e.Parent.Id", parent.ids) : `e.Parent.Id IS NULL AND ${bind("e.Category.Id", parent.ids)} AND ${bind("e.Model.Id", parent.modelIds)}`}
         `,
     );
 
