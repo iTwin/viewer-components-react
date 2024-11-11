@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Changed `Next` button on create group form to be disabled until required fields are filled.",
+  "packageName": "@itwin/grouping-mapping-widget",
+  "email": "Aniruddha.Dhavalikar@bentley.com",
+  "dependentChangeType": "patch"
+}
