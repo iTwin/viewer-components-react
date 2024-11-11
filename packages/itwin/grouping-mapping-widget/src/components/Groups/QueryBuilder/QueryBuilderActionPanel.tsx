@@ -7,11 +7,12 @@ import React from "react";
 
 export interface QueryBuilderActionPanelProps {
   onClickNext: () => void;
+  isNextDisabled?: boolean;
 }
 
-export const QueryBuilderActionPanel = ({ onClickNext }: QueryBuilderActionPanelProps) => {
+export const QueryBuilderActionPanel = ({ onClickNext, isNextDisabled }: QueryBuilderActionPanelProps) => {
   return (
-    <Button styleType="high-visibility" id="save-app" onClick={onClickNext}>
+    <Button styleType="high-visibility" id="save-app" onClick={onClickNext} disabled={isNextDisabled}>
       Next
     </Button>
   );
