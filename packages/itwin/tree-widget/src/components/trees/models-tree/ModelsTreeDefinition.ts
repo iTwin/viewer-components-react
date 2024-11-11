@@ -707,13 +707,13 @@ function createGeometricElementInstanceKeyPaths(
   );
 }
 
-function parseQueryRow(row: ECSqlQueryRow, groupInfos: ElementsGroupInfo[], separator: string, eClassName: string) {
+function parseQueryRow(row: ECSqlQueryRow, groupInfos: ElementsGroupInfo[], separator: string, elementClassName: string) {
   const rowElements: string[] = row[1].split(separator);
   const path = new Array<InstanceKey>();
   for (let i = 0; i < rowElements.length; i += 2) {
     switch (rowElements[i]) {
       case "e":
-        path.push({ className: eClassName, id: rowElements[i + 1] });
+        path.push({ className: elementClassName, id: rowElements[i + 1] });
         break;
       case "c":
         path.push({ className: "BisCore.SpatialCategory", id: rowElements[i + 1] });
