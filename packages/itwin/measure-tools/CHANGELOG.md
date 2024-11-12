@@ -1,8 +1,17 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Thu, 31 Oct 2024 11:11:57 GMT and should not be manually modified.
+This log was last generated on Tue, 12 Nov 2024 12:57:13 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.24.0
+
+Tue, 12 Nov 2024 12:57:13 GMT
+
+### Minor changes
+
+- Add support for additional Toolbar items to MeasureToolsUiItemsProvider ([#1074](https://github.com/iTwin/viewer-components-react/pull/1074))
+- initiial callback for base and area ([#1079](https://github.com/iTwin/viewer-components-react/pull/1079))
 
 ## 0.23.2
 

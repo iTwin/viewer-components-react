@@ -2,6 +2,47 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Tue, 12 Nov 2024 12:57:13 GMT",
+      "version": "3.0.2",
+      "tag": "@itwin/tree-widget-react_v3.0.2",
+      "comments": {
+        "none": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "27c48c88a7adc44f34263a4004f68a73f17a40dd",
+            "comment": "Add a mention that `ECSchemaRpcLocater` requires `ECSchemaRpcInterface`"
+          },
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "69092ffded10017826fe3f18fcfa01a110c6b957",
+            "comment": "Bump playwright"
+          }
+        ],
+        "patch": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "318241bd863ed47e678e62efab6af9f96c354f20",
+            "comment": "Update ECSQL queries to always use `.Id` suffix when querying navigation properties - that substantially improves query performance."
+          },
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "342e3126e0325e5823cae7bf0f5cf9fe9ab0d8fa",
+            "comment": "Models tree: Improved performance of creating instance key paths for large numbers of target instances by up to 200x."
+          },
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "48070db66f85d56ab3106f6b6d09d1f802ac64a7",
+            "comment": "Updated `TreeNodeRenderer` to pass `ref` to the underlying `TreeNodeRenderer` from `@itwin/presentation-hierarchies-react`."
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 15 Oct 2024 20:19:11 GMT",
       "version": "3.0.1",
       "tag": "@itwin/tree-widget-react_v3.0.1",

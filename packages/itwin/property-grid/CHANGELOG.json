@@ -2,6 +2,37 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "date": "Tue, 12 Nov 2024 12:57:13 GMT",
+      "version": "1.14.0",
+      "tag": "@itwin/property-grid-react_v1.14.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "43886789+MartynasStrazdas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "4ce5b83d46ab3b50fb386022aaac4928572527d2",
+            "comment": "Added access to data provider for action button renderers."
+          }
+        ],
+        "none": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "69092ffded10017826fe3f18fcfa01a110c6b957",
+            "comment": "Bump playwright"
+          }
+        ],
+        "patch": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "48070db66f85d56ab3106f6b6d09d1f802ac64a7",
+            "comment": "Fixed ancestor navigation and element list not working with the latest unified selection storage."
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 26 Sep 2024 20:21:11 GMT",
       "version": "1.13.0",
       "tag": "@itwin/property-grid-react_v1.13.0",

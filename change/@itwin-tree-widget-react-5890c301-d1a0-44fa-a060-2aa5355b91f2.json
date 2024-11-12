@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Update ECSQL queries to always use `.Id` suffix when querying navigation properties - that substantially improves query performance.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "35135765+grigasp@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

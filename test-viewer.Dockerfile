@@ -2,14 +2,14 @@
 # Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 # Licensed under the MIT License. See LICENSE.md in the project root for license terms.
 #----------------------------------------------------------------------------------------------
-FROM mcr.microsoft.com/playwright:v1.45.1-jammy
+FROM mcr.microsoft.com/playwright:v1.48.2-jammy
 
 # Set the working directory in the container
 WORKDIR /workspaces/viewer-components-react/
 
 # Install pnpm
 RUN corepack enable
-RUN corepack prepare pnpm@9.1.2 --activate
+RUN corepack prepare pnpm@9.12.3 --activate
 
 # Copy the local files to the container (see `test-viewer.Dockerfile.dockerignore` for skipped files)
 COPY . .

@@ -1,7 +1,0 @@
-{
-  "type": "none",
-  "comment": "Add a mention that `ECSchemaRpcLocater` requires `ECSchemaRpcInterface`",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "35135765+grigasp@users.noreply.github.com",
-  "dependentChangeType": "none"
-}
