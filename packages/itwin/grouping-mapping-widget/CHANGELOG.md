@@ -1,8 +1,16 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Thu, 31 Oct 2024 11:11:57 GMT and should not be manually modified.
+This log was last generated on Tue, 12 Nov 2024 12:57:13 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.34.1
+
+Tue, 12 Nov 2024 12:57:13 GMT
+
+### Patches
+
+- Changed `Next` button on create group form to be disabled until required fields are filled. ([#1083](https://github.com/iTwin/viewer-components-react/pull/1083))
 
 ## 0.34.0
 

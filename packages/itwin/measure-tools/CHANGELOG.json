@@ -2,6 +2,27 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Tue, 12 Nov 2024 12:57:13 GMT",
+      "version": "0.24.0",
+      "tag": "@itwin/measure-tools-react_v0.24.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "88331924+saaaaaally@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "8f36e9bbf5802a292799f9af6850a593578cfba7",
+            "comment": "Add support for additional Toolbar items to MeasureToolsUiItemsProvider"
+          },
+          {
+            "author": "email not defined",
+            "package": "@itwin/measure-tools-react",
+            "commit": "814163fcda554199abe426c1cfffe5e6d684f10d",
+            "comment": "initiial callback for base and area"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 31 Oct 2024 11:11:57 GMT",
       "version": "0.23.2",
       "tag": "@itwin/measure-tools-react_v0.23.2",

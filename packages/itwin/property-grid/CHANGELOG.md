@@ -1,8 +1,20 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Thu, 26 Sep 2024 20:21:11 GMT and should not be manually modified.
+This log was last generated on Tue, 12 Nov 2024 12:57:13 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 1.14.0
+
+Tue, 12 Nov 2024 12:57:13 GMT
+
+### Minor changes
+
+- Added access to data provider for action button renderers. ([#1082](https://github.com/iTwin/viewer-components-react/pull/1082))
+
+### Patches
+
+- Fixed ancestor navigation and element list not working with the latest unified selection storage. ([#1078](https://github.com/iTwin/viewer-components-react/pull/1078))
 
 ## 1.13.0
 

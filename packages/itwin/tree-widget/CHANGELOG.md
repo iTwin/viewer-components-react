@@ -1,8 +1,18 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Tue, 15 Oct 2024 20:19:11 GMT and should not be manually modified.
+This log was last generated on Tue, 12 Nov 2024 12:57:13 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 3.0.2
+
+Tue, 12 Nov 2024 12:57:13 GMT
+
+### Patches
+
+- Update ECSQL queries to always use `.Id` suffix when querying navigation properties - that substantially improves query performance. ([#1085](https://github.com/iTwin/viewer-components-react/pull/1085))
+- Models tree: Improved performance of creating instance key paths for large numbers of target instances by up to 200x. ([#1084](https://github.com/iTwin/viewer-components-react/pull/1084))
+- Updated `TreeNodeRenderer` to pass `ref` to the underlying `TreeNodeRenderer` from `@itwin/presentation-hierarchies-react`. ([#1078](https://github.com/iTwin/viewer-components-react/pull/1078))
 
 ## 3.0.1
 

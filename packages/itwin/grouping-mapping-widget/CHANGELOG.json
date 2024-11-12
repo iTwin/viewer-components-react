@@ -2,6 +2,21 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "date": "Tue, 12 Nov 2024 12:57:13 GMT",
+      "version": "0.34.1",
+      "tag": "@itwin/grouping-mapping-widget_v0.34.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "Aniruddha.Dhavalikar@bentley.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "5376176f6b76e0cc65632d3ab09fd07f2c90a839",
+            "comment": "Changed `Next` button on create group form to be disabled until required fields are filled."
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 31 Oct 2024 11:11:57 GMT",
       "version": "0.34.0",
       "tag": "@itwin/grouping-mapping-widget_v0.34.0",
