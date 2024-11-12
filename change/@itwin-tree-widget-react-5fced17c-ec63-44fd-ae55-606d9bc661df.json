@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Models tree: Improved performance of creating instance key paths for large numbers of target instances by up to 200x.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "100586436+JonasDov@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
