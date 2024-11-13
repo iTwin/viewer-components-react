@@ -3,8 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { Fragment, useState } from "react";
-import { ContextMenuItem as CoreContextMenuItem, GlobalContextMenu } from "@itwin/core-react";
+import { useState } from "react";
+import { DropdownMenu, Flex, MenuItem } from "@itwin/itwinui-react";
 import { FavoritePropertiesScope, Presentation } from "@itwin/presentation-frontend";
 import { copyToClipboard } from "../api/WebUtilities";
 import { PropertyGridManager } from "../PropertyGridManager";
@@ -59,9 +59,9 @@ export interface PropertyGridContextMenuItemProps {
  */
 export function PropertyGridContextMenuItem({ id, children, title, onSelect }: PropsWithChildren<PropertyGridContextMenuItemProps>) {
   return (
-    <CoreContextMenuItem key={id} onSelect={onSelect} title={title}>
+    <MenuItem key={id} onClick={onSelect} title={title}>
       {children}
-    </CoreContextMenuItem>
+    </MenuItem>
   );
 }
 
@@ -184,7 +184,7 @@ export interface UseContentMenuProps extends ContextMenuProps {
 
 interface ContextMenuDefinition {
   position: { x: number; y: number };
-  menuItems: ReactNode[];
+  menuItems: (close: () => void) => JSX.Element[];
 }
 
 /**
@@ -202,7 +202,12 @@ export function useContextMenu({ dataProvider, imodel, contextMenuItems }: UseCo
     }
 
     const field = await dataProvider.getFieldByPropertyDescription(args.propertyRecord.property);
-    const items = contextMenuItems.map((item, index) => <Fragment key={index}>{item({ imodel, dataProvider, record: args.propertyRecord, field })}</Fragment>);
+    const items = (close: () => void) =>
+      contextMenuItems.map((item, index) => (
+        <Flex key={index} onClick={close}>
+          {item({ imodel, dataProvider, record: args.propertyRecord, field })}
+        </Flex>
+      ));
 
     onFeatureUsed("context-menu");
     setContextMenu({
@@ -218,17 +223,16 @@ export function useContextMenu({ dataProvider, imodel, contextMenuItems }: UseCo
 
     const close = () => setContextMenu(undefined);
     return (
-      <GlobalContextMenu
-        opened={true}
-        onOutsideClick={close}
-        onEsc={close}
-        onSelect={close}
-        identifier="PropertiesWidget"
-        x={contextMenu.position.x}
-        y={contextMenu.position.y}
+      <DropdownMenu
+        menuItems={contextMenu.menuItems}
+        visible={true}
+        style={{
+          transform: `translate(${contextMenu.position.x}px, ${contextMenu.position.y}px)`,
+        }}
+        onVisibleChange={(visible) => !visible && close()}
       >
-        {contextMenu.menuItems}
-      </GlobalContextMenu>
+        <></>
+      </DropdownMenu>
     );
   };
 
