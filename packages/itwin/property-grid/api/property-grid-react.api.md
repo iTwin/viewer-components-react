@@ -25,7 +25,7 @@ import { StagePanelLocation } from '@itwin/appui-react';
 import { StagePanelSection } from '@itwin/appui-react';
 import type { TranslationOptions } from '@itwin/core-common';
 import type { UiItemsProvider } from '@itwin/appui-react';
-import type { VirtualizedPropertyGridWithDataProviderProps } from '@itwin/components-react';
+import { VirtualizedPropertyGridWithDataProvider } from '@itwin/components-react';
 import type { Widget } from '@itwin/appui-react';
 
 // @public
@@ -77,7 +77,7 @@ export interface FavoritePropertiesContextMenuItemProps extends DefaultContextMe
 }
 
 // @public
-export interface FilteringPropertyGridProps extends VirtualizedPropertyGridWithDataProviderProps {
+export interface FilteringPropertyGridProps extends React.ComponentProps<typeof VirtualizedPropertyGridWithDataProvider> {
     autoExpandChildCategories?: boolean;
     filterer: IPropertyDataFilterer;
 }
