@@ -140,7 +140,9 @@ export function RemoveFavoritePropertyContextMenuItem({ field, imodel, scope, on
       });
   }, [currentScope, field, imodel]);
 
-  if (!hasFavorite || !field) return null;
+  if (!hasFavorite || !field) {
+    return null;
+  }
 
   const defaultAction = async () => Presentation.favoriteProperties.remove(field, imodel, currentScope);
 
