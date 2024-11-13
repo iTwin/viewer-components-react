@@ -96,7 +96,7 @@ export function AddFavoritePropertyContextMenuItem({ field, imodel, scope, onSel
 
   useEffect(() => {
     field &&
-      Presentation.favoriteProperties.hasAsync(field, imodel, currentScope).then((has) => {
+      void Presentation.favoriteProperties.hasAsync(field, imodel, currentScope).then((has) => {
         return setHasFavorite(!has);
       });
   }, [currentScope, field, imodel]);
@@ -133,7 +133,7 @@ export function RemoveFavoritePropertyContextMenuItem({ field, imodel, scope, on
 
   useEffect(() => {
     field &&
-      Presentation.favoriteProperties.hasAsync(field, imodel, currentScope).then((has) => {
+      void Presentation.favoriteProperties.hasAsync(field, imodel, currentScope).then((has) => {
         return setHasFavorite(has);
       });
   }, [currentScope, field, imodel]);
