@@ -210,7 +210,7 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
   }, [models3d, props.viewport]);
 
   return (
-    <IconButton
+    <Button
       size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
       title={TreeWidget.translate("modelsTree.buttons.toggle3d.tooltip")}
@@ -222,7 +222,7 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
       endIcon={is3dToggleActive ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
     >
       {TreeWidget.translate("modelsTree.buttons.toggle3d.label")}
-    </IconButton>
+    </Button>
   );
 }
 
