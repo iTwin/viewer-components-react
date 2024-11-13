@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DropdownMenu, Flex, MenuItem } from "@itwin/itwinui-react";
 import { FavoritePropertiesScope, Presentation } from "@itwin/presentation-frontend";
 import { copyToClipboard } from "../api/WebUtilities";
@@ -92,9 +92,16 @@ export interface FavoritePropertiesContextMenuItemProps extends DefaultContextMe
  */
 export function AddFavoritePropertyContextMenuItem({ field, imodel, scope, onSelect }: FavoritePropertiesContextMenuItemProps) {
   const currentScope = scope ?? FavoritePropertiesScope.IModel;
-  if (!field || Presentation.favoriteProperties.has(field, imodel, currentScope)) {
-    return null;
-  }
+  const [hasFavorite, setHasFavorite] = useState(false);
+
+  useEffect(() => {
+    field &&
+      Presentation.favoriteProperties.hasAsync(field, imodel, currentScope).then((has) => {
+        return setHasFavorite(!has);
+      });
+  }, [currentScope, field, imodel]);
+
+  if (!hasFavorite || !field) return null;
 
   const defaultAction = async () => Presentation.favoriteProperties.add(field, imodel, currentScope);
 
@@ -122,9 +129,16 @@ export function AddFavoritePropertyContextMenuItem({ field, imodel, scope, onSel
  */
 export function RemoveFavoritePropertyContextMenuItem({ field, imodel, scope, onSelect }: FavoritePropertiesContextMenuItemProps) {
   const currentScope = scope ?? FavoritePropertiesScope.IModel;
-  if (!field || !Presentation.favoriteProperties.has(field, imodel, currentScope)) {
-    return null;
-  }
+  const [hasFavorite, setHasFavorite] = useState(false);
+
+  useEffect(() => {
+    field &&
+      Presentation.favoriteProperties.hasAsync(field, imodel, currentScope).then((has) => {
+        return setHasFavorite(has);
+      });
+  }, [currentScope, field, imodel]);
+
+  if (!hasFavorite || !field) return null;
 
   const defaultAction = async () => Presentation.favoriteProperties.remove(field, imodel, currentScope);
 

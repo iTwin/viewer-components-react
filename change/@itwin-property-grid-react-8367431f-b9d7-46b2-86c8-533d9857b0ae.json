@@ -1,7 +1,7 @@
 {
-  "type": "none",
+  "type": "patch",
   "comment": "DevDependency update",
   "packageName": "@itwin/property-grid-react",
   "email": "43886789+MartynasStrazdas@users.noreply.github.com",
-  "dependentChangeType": "none"
+  "dependentChangeType": "patch"
 }
