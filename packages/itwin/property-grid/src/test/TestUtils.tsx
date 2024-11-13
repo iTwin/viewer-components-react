@@ -46,7 +46,7 @@ export function stubSelectionManager() {
 export function stubFavoriteProperties() {
   const favoritePropertiesStub = {
     onFavoritesChanged: new BeEvent<() => void>(),
-    has: createFunctionStub<FavoritePropertiesManager["has"]>().returns(false),
+    hasAsync: createFunctionStub<FavoritePropertiesManager["hasAsync"]>().resolves(false),
     add: createFunctionStub<FavoritePropertiesManager["add"]>(),
     remove: createFunctionStub<FavoritePropertiesManager["remove"]>(),
   };
