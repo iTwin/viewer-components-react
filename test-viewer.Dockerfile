@@ -27,4 +27,4 @@ RUN git init
 RUN git commit -m"Initial" --allow-empty
 
 # Build test-viewer and its dependencies
-RUN pnpm lage build --to test-viewer --no-cache
+RUN pnpm lage build --to test-viewer --no-cache --grouped
