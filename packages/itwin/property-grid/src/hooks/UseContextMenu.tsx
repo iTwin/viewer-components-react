@@ -101,7 +101,9 @@ export function AddFavoritePropertyContextMenuItem({ field, imodel, scope, onSel
       });
   }, [currentScope, field, imodel]);
 
-  if (!hasFavorite || !field) return null;
+  if (!hasFavorite || !field) {
+    return null;
+  }
 
   const defaultAction = async () => Presentation.favoriteProperties.add(field, imodel, currentScope);
 
