@@ -71,7 +71,7 @@ export const GroupQueryBuilderCustomUI = ({ updateQuery, isUpdating, resetView }
     return iModelConnection ? Presentation.selection.selectionChange.addListener(onSelectionChanged) : () => {};
   }, [iModelConnection]);
 
-  const onClickResetButton = async () => {
+  const onClickResetButton = useCallback(async () => {
     queryBuilder?.resetQueryBuilder();
     updateQuery("");
     if (currentPropertyList.length > 0) {
@@ -84,7 +84,7 @@ export const GroupQueryBuilderCustomUI = ({ updateQuery, isUpdating, resetView }
         /* eslint-disable no-console */
         console.error(e),
       );
-  };
+  }, [iModelConnection, currentPropertyList, resetView, queryBuilder, updateQuery]);
 
   const resize = useCallback((width, height) => setSize({ width, height }), []);
 
