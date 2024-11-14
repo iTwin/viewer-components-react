@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { DropdownMenu, Flex, MenuItem } from "@itwin/itwinui-react";
 import { FavoritePropertiesScope, Presentation } from "@itwin/presentation-frontend";
 import { copyToClipboard } from "../api/WebUtilities";
@@ -58,8 +58,15 @@ export interface PropertyGridContextMenuItemProps {
  * @public
  */
 export function PropertyGridContextMenuItem({ id, children, title, onSelect }: PropsWithChildren<PropertyGridContextMenuItemProps>) {
+  const { close } = useContextMenuContext();
+
+  const handleOnClick = () => {
+    onSelect();
+    close();
+  };
+
   return (
-    <MenuItem key={id} onClick={onSelect} title={title}>
+    <MenuItem key={id} onClick={handleOnClick} title={title}>
       {children}
     </MenuItem>
   );
@@ -202,7 +209,7 @@ export interface UseContentMenuProps extends ContextMenuProps {
 
 interface ContextMenuDefinition {
   position: { x: number; y: number };
-  menuItems: (close: () => void) => JSX.Element[];
+  menuItems: JSX.Element[];
 }
 
 /**
@@ -220,12 +227,7 @@ export function useContextMenu({ dataProvider, imodel, contextMenuItems }: UseCo
     }
 
     const field = await dataProvider.getFieldByPropertyDescription(args.propertyRecord.property);
-    const items = (close: () => void) =>
-      contextMenuItems.map((item, index) => (
-        <Flex key={index} onClick={close}>
-          {item({ imodel, dataProvider, record: args.propertyRecord, field })}
-        </Flex>
-      ));
+    const items = contextMenuItems.map((item, index) => <Flex key={index}>{item({ imodel, dataProvider, record: args.propertyRecord, field })}</Flex>);
 
     onFeatureUsed("context-menu");
     setContextMenu({
@@ -241,16 +243,18 @@ export function useContextMenu({ dataProvider, imodel, contextMenuItems }: UseCo
 
     const close = () => setContextMenu(undefined);
     return (
-      <DropdownMenu
-        menuItems={contextMenu.menuItems}
-        visible={true}
-        style={{
-          transform: `translate(${contextMenu.position.x}px, ${contextMenu.position.y}px)`,
-        }}
-        onVisibleChange={(visible) => !visible && close()}
-      >
-        <></>
-      </DropdownMenu>
+      <ContextMenuContextProvider close={close}>
+        <DropdownMenu
+          menuItems={contextMenu.menuItems}
+          visible={true}
+          style={{
+            transform: `translate(${contextMenu.position.x}px, ${contextMenu.position.y}px)`,
+          }}
+          onVisibleChange={(visible) => !visible && close()}
+        >
+          <></>
+        </DropdownMenu>
+      </ContextMenuContextProvider>
     );
   };
 
@@ -258,4 +262,24 @@ export function useContextMenu({ dataProvider, imodel, contextMenuItems }: UseCo
     onPropertyContextMenu,
     renderContextMenu,
   };
+}
+
+interface ContextMenuContext {
+  close: () => void;
+}
+
+const contextMenuContext = createContext<ContextMenuContext>({
+  close: () => {},
+});
+
+function ContextMenuContextProvider({ close, children }: PropsWithChildren<ContextMenuContext>) {
+  const [value] = useState(() => ({
+    close,
+  }));
+
+  return <contextMenuContext.Provider value={value}>{children}</contextMenuContext.Provider>;
+}
+
+function useContextMenuContext() {
+  return useContext(contextMenuContext);
 }

@@ -7,6 +7,13 @@ import globalJsdom from "global-jsdom";
 import * as jsdom from "jsdom";
 import sinonChai from "sinon-chai";
 
+// polyfill ResizeObserver
+global.ResizeObserver = class ResizeObserver {
+  public observe() {}
+  public unobserve() {}
+  public disconnect() {}
+};
+
 // get rid of various xhr errors in the console
 globalJsdom(undefined, {
   virtualConsole: new jsdom.VirtualConsole().sendTo(console, { omitJSDOMErrors: true }),
