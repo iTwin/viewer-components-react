@@ -74,7 +74,11 @@ export const GroupQueryBuilderCustomUI = ({ updateQuery, isUpdating, resetView }
   const onClickResetButton = async () => {
     queryBuilder?.resetQueryBuilder();
     updateQuery("");
-    setCurrentPropertyList([]);
+    if (currentPropertyList.length > 0) {
+      setCurrentPropertyList([]);
+    } else if (iModelConnection) {
+      Presentation.selection.clearSelection("GroupQueryBuilderCustomUI", iModelConnection);
+    }
     if (resetView)
       await resetView().catch((e) =>
         /* eslint-disable no-console */
