@@ -197,45 +197,45 @@ describe("Default context menu items", () => {
   beforeEach(() => {
     favoritesManager.add.reset();
     favoritesManager.remove.reset();
-    favoritesManager.has.reset();
+    favoritesManager.hasAsync.reset();
   });
 
   describe("AddFavoritePropertyContextMenuItem", () => {
     it("renders item with non-favorite property", () => {
-      favoritesManager.has.returns(false);
+      favoritesManager.hasAsync.resolves(false);
       const { queryByText } = render(<AddFavoritePropertyContextMenuItem {...itemProps} />);
       expect(queryByText("context-menu.add-favorite.label"));
     });
 
     it("renders nothing if property is favorite", () => {
-      favoritesManager.has.returns(true);
+      favoritesManager.hasAsync.resolves(true);
       const { container } = render(<AddFavoritePropertyContextMenuItem {...itemProps} />);
       expect(container.children).to.have.lengthOf(0);
     });
 
     it("calls `Presentation.favorites.add` with default scope", async () => {
-      favoritesManager.has.returns(false);
+      favoritesManager.hasAsync.resolves(false);
       const { getByText } = render(<AddFavoritePropertyContextMenuItem {...itemProps} />);
-      const item = getByText("context-menu.add-favorite.label");
+      const item = await waitFor(() => getByText("context-menu.add-favorite.label"));
       await userEvents.click(item);
 
       await waitFor(() => expect(favoritesManager.add).to.be.calledOnceWith(field, imodel, FavoritePropertiesScope.IModel));
     });
 
     it("calls `Presentation.favorites.add` with specified scope", async () => {
-      favoritesManager.has.returns(false);
+      favoritesManager.hasAsync.resolves(false);
       const { getByText } = render(<AddFavoritePropertyContextMenuItem {...itemProps} scope={FavoritePropertiesScope.ITwin} />);
-      const item = getByText("context-menu.add-favorite.label");
+      const item = await waitFor(() => getByText("context-menu.add-favorite.label"));
       await userEvents.click(item);
 
       await waitFor(() => expect(favoritesManager.add).to.be.calledOnceWith(field, imodel, FavoritePropertiesScope.ITwin));
     });
 
     it("calls custom `onSelect` handler", async () => {
-      favoritesManager.has.returns(false);
+      favoritesManager.hasAsync.resolves(false);
       const spy = sinon.spy();
       const { getByText } = render(<AddFavoritePropertyContextMenuItem {...itemProps} onSelect={spy} />);
-      const item = getByText("context-menu.add-favorite.label");
+      const item = await waitFor(() => getByText("context-menu.add-favorite.label"));
       await userEvents.click(item);
 
       expect(spy).to.be.calledOnce;
@@ -243,41 +243,41 @@ describe("Default context menu items", () => {
   });
 
   describe("RemoveFavoritePropertyContextMenuItem", () => {
-    it("renders item with favorite property", () => {
-      favoritesManager.has.returns(true);
+    it("renders item with favorite property", async () => {
+      favoritesManager.hasAsync.resolves(true);
       const { queryByText } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps} />);
-      expect(queryByText("context-menu.remove-favorite.label"));
+      await waitFor(() => expect(queryByText("context-menu.remove-favorite.label")));
     });
 
-    it("renders nothing if property is not favorite", () => {
-      favoritesManager.has.returns(false);
+    it("renders nothing if property is not favorite", async () => {
+      favoritesManager.hasAsync.resolves(false);
       const { container } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps} />);
-      expect(container.children).to.have.lengthOf(0);
+      await waitFor(() => expect(container.children).to.have.lengthOf(0));
     });
 
     it("calls `Presentation.favorites.remove` with default scope", async () => {
-      favoritesManager.has.returns(true);
+      favoritesManager.hasAsync.resolves(true);
       const { getByText } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps} />);
-      const item = getByText("context-menu.remove-favorite.label");
+      const item = await waitFor(() => getByText("context-menu.remove-favorite.label"));
       await userEvents.click(item);
 
       await waitFor(() => expect(favoritesManager.remove).to.be.calledOnceWith(field, imodel, FavoritePropertiesScope.IModel));
     });
 
     it("calls `Presentation.favorites.remove` with specified scope", async () => {
-      favoritesManager.has.returns(true);
+      favoritesManager.hasAsync.resolves(true);
       const { getByText } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps} scope={FavoritePropertiesScope.ITwin} />);
-      const item = getByText("context-menu.remove-favorite.label");
+      const item = await waitFor(() => getByText("context-menu.remove-favorite.label"));
       await userEvents.click(item);
 
       await waitFor(() => expect(favoritesManager.remove).to.be.calledOnceWith(field, imodel, FavoritePropertiesScope.ITwin));
     });
 
     it("calls custom `onSelect` handler", async () => {
-      favoritesManager.has.returns(true);
+      favoritesManager.hasAsync.resolves(true);
       const spy = sinon.spy();
       const { getByText } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps} onSelect={spy} />);
-      const item = getByText("context-menu.remove-favorite.label");
+      const item = await waitFor(() => getByText("context-menu.remove-favorite.label"));
       await userEvents.click(item);
 
       expect(spy).to.be.calledOnce;

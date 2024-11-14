@@ -3,8 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { Fragment, useState } from "react";
-import { ContextMenuItem as CoreContextMenuItem, GlobalContextMenu } from "@itwin/core-react";
+import { createContext, Fragment, useContext, useEffect, useState } from "react";
+import { DropdownMenu, MenuItem } from "@itwin/itwinui-react";
 import { FavoritePropertiesScope, Presentation } from "@itwin/presentation-frontend";
 import { copyToClipboard } from "../api/WebUtilities";
 import { PropertyGridManager } from "../PropertyGridManager";
@@ -58,10 +58,17 @@ export interface PropertyGridContextMenuItemProps {
  * @public
  */
 export function PropertyGridContextMenuItem({ id, children, title, onSelect }: PropsWithChildren<PropertyGridContextMenuItemProps>) {
+  const { close } = useContext(contextMenuContext);
+
+  const handleOnClick = () => {
+    onSelect();
+    close();
+  };
+
   return (
-    <CoreContextMenuItem key={id} onSelect={onSelect} title={title}>
+    <MenuItem key={id} onClick={handleOnClick} title={title}>
       {children}
-    </CoreContextMenuItem>
+    </MenuItem>
   );
 }
 
@@ -92,7 +99,16 @@ export interface FavoritePropertiesContextMenuItemProps extends DefaultContextMe
  */
 export function AddFavoritePropertyContextMenuItem({ field, imodel, scope, onSelect }: FavoritePropertiesContextMenuItemProps) {
   const currentScope = scope ?? FavoritePropertiesScope.IModel;
-  if (!field || Presentation.favoriteProperties.has(field, imodel, currentScope)) {
+  const [hasFavorite, setHasFavorite] = useState(false);
+
+  useEffect(() => {
+    field &&
+      void Presentation.favoriteProperties.hasAsync(field, imodel, currentScope).then((has) => {
+        return setHasFavorite(!has);
+      });
+  }, [currentScope, field, imodel]);
+
+  if (!hasFavorite || !field) {
     return null;
   }
 
@@ -122,7 +138,16 @@ export function AddFavoritePropertyContextMenuItem({ field, imodel, scope, onSel
  */
 export function RemoveFavoritePropertyContextMenuItem({ field, imodel, scope, onSelect }: FavoritePropertiesContextMenuItemProps) {
   const currentScope = scope ?? FavoritePropertiesScope.IModel;
-  if (!field || !Presentation.favoriteProperties.has(field, imodel, currentScope)) {
+  const [hasFavorite, setHasFavorite] = useState(false);
+
+  useEffect(() => {
+    field &&
+      void Presentation.favoriteProperties.hasAsync(field, imodel, currentScope).then((has) => {
+        return setHasFavorite(has);
+      });
+  }, [currentScope, field, imodel]);
+
+  if (!hasFavorite || !field) {
     return null;
   }
 
@@ -184,7 +209,7 @@ export interface UseContentMenuProps extends ContextMenuProps {
 
 interface ContextMenuDefinition {
   position: { x: number; y: number };
-  menuItems: ReactNode[];
+  menuItems: JSX.Element[];
 }
 
 /**
@@ -218,17 +243,18 @@ export function useContextMenu({ dataProvider, imodel, contextMenuItems }: UseCo
 
     const close = () => setContextMenu(undefined);
     return (
-      <GlobalContextMenu
-        opened={true}
-        onOutsideClick={close}
-        onEsc={close}
-        onSelect={close}
-        identifier="PropertiesWidget"
-        x={contextMenu.position.x}
-        y={contextMenu.position.y}
-      >
-        {contextMenu.menuItems}
-      </GlobalContextMenu>
+      <contextMenuContext.Provider value={{ close }}>
+        <DropdownMenu
+          menuItems={contextMenu.menuItems}
+          visible={true}
+          style={{
+            transform: `translate(${contextMenu.position.x}px, ${contextMenu.position.y}px)`,
+          }}
+          onVisibleChange={(visible) => !visible && close()}
+        >
+          <></>
+        </DropdownMenu>
+      </contextMenuContext.Provider>
     );
   };
 
@@ -237,3 +263,11 @@ export function useContextMenu({ dataProvider, imodel, contextMenuItems }: UseCo
     renderContextMenu,
   };
 }
+
+interface ContextMenuContext {
+  close: () => void;
+}
+
+const contextMenuContext = createContext<ContextMenuContext>({
+  close: () => {},
+});
