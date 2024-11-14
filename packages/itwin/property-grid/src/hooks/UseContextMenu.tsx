@@ -3,8 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { createContext, useContext, useEffect, useState } from "react";
-import { DropdownMenu, Flex, MenuItem } from "@itwin/itwinui-react";
+import { createContext, Fragment, useContext, useEffect, useState } from "react";
+import { DropdownMenu, MenuItem } from "@itwin/itwinui-react";
 import { FavoritePropertiesScope, Presentation } from "@itwin/presentation-frontend";
 import { copyToClipboard } from "../api/WebUtilities";
 import { PropertyGridManager } from "../PropertyGridManager";
@@ -58,7 +58,7 @@ export interface PropertyGridContextMenuItemProps {
  * @public
  */
 export function PropertyGridContextMenuItem({ id, children, title, onSelect }: PropsWithChildren<PropertyGridContextMenuItemProps>) {
-  const { close } = useContextMenuContext();
+  const { close } = useContext(contextMenuContext);
 
   const handleOnClick = () => {
     onSelect();
@@ -227,7 +227,7 @@ export function useContextMenu({ dataProvider, imodel, contextMenuItems }: UseCo
     }
 
     const field = await dataProvider.getFieldByPropertyDescription(args.propertyRecord.property);
-    const items = contextMenuItems.map((item, index) => <Flex key={index}>{item({ imodel, dataProvider, record: args.propertyRecord, field })}</Flex>);
+    const items = contextMenuItems.map((item, index) => <Fragment key={index}>{item({ imodel, dataProvider, record: args.propertyRecord, field })}</Fragment>);
 
     onFeatureUsed("context-menu");
     setContextMenu({
@@ -243,7 +243,7 @@ export function useContextMenu({ dataProvider, imodel, contextMenuItems }: UseCo
 
     const close = () => setContextMenu(undefined);
     return (
-      <ContextMenuContextProvider close={close}>
+      <contextMenuContext.Provider value={{ close }}>
         <DropdownMenu
           menuItems={contextMenu.menuItems}
           visible={true}
@@ -254,7 +254,7 @@ export function useContextMenu({ dataProvider, imodel, contextMenuItems }: UseCo
         >
           <></>
         </DropdownMenu>
-      </ContextMenuContextProvider>
+      </contextMenuContext.Provider>
     );
   };
 
@@ -271,15 +271,3 @@ interface ContextMenuContext {
 const contextMenuContext = createContext<ContextMenuContext>({
   close: () => {},
 });
-
-function ContextMenuContextProvider({ close, children }: PropsWithChildren<ContextMenuContext>) {
-  const [value] = useState(() => ({
-    close,
-  }));
-
-  return <contextMenuContext.Provider value={value}>{children}</contextMenuContext.Provider>;
-}
-
-function useContextMenuContext() {
-  return useContext(contextMenuContext);
-}
