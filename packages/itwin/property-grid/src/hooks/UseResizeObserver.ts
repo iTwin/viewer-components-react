@@ -11,7 +11,7 @@ import { assert } from "@itwin/core-bentley";
  */
 export function useResizeObserver<T extends HTMLElement>() {
   const observer = useRef<ResizeObserver>();
-  const [{ width, height }, setSize] = useState<{ width: number; height: number }>({ width: 0, height: 100 });
+  const [{ width, height }, setSize] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
 
   const ref = useCallback((element: T | null) => {
     observer.current?.disconnect();
