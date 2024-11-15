@@ -5,18 +5,23 @@
 
 import "./PropertyGridContent.scss";
 import classnames from "classnames";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
-  CompositeFilterType, CompositePropertyDataFilterer, DisplayValuePropertyDataFilterer, FilteredType, LabelPropertyDataFilterer,
-  PropertyCategoryLabelFilterer, PropertyValueRendererManager,
+  CompositeFilterType,
+  CompositePropertyDataFilterer,
+  DisplayValuePropertyDataFilterer,
+  FilteredType,
+  LabelPropertyDataFilterer,
+  PropertyCategoryLabelFilterer,
+  PropertyValueRendererManager,
 } from "@itwin/components-react";
-import { ResizableContainerObserver } from "@itwin/core-react";
 import { Text } from "@itwin/itwinui-react";
 import { useActionButtons } from "../hooks/UseActionButtons";
 import { useContextMenu } from "../hooks/UseContextMenu";
 import { useLoadedInstanceInfo } from "../hooks/UseInstanceInfo";
 import { useLatest } from "../hooks/UseLatest";
 import { useNullValueSettingContext } from "../hooks/UseNullValuesSetting";
+import { useResizeObserver } from "../hooks/UseResizeObserver";
 import { useTelemetryContext } from "../hooks/UseTelemetryContext";
 import { FilteringPropertyGrid, NonEmptyValuesPropertyDataFilterer } from "./FilteringPropertyGrid";
 import { Header } from "./Header";
@@ -103,11 +108,7 @@ export function PropertyGridContent({
   const { showNullValues } = useNullValueSettingContext();
   const { onFeatureUsed } = useTelemetryContext();
   const filterer = useFilterer({ showNullValues, filterText });
-
-  const [{ width, height }, setSize] = useState({ width: 0, height: 0 });
-  const handleResize = useCallback((w: number, h: number) => {
-    setSize({ width: w, height: h });
-  }, []);
+  const { ref, height, width } = useResizeObserver();
 
   const reportThrottledFiltering = useThrottled(() => onFeatureUsed("filter-properties"), 1000);
 
@@ -144,10 +145,8 @@ export function PropertyGridContent({
           setFilterText(searchText);
         }}
       />
-      <div className="property-grid-react-data">
-        <ResizableContainerObserver onResize={handleResize}>
-          {dataRenderer ? dataRenderer(dataRendererProps) : <FilteringPropertyGrid {...dataRendererProps} />}
-        </ResizableContainerObserver>
+      <div ref={ref} className="property-grid-react-data">
+        {dataRenderer ? dataRenderer(dataRendererProps) : <FilteringPropertyGrid {...dataRendererProps} />}
       </div>
       {renderContextMenu()}
     </div>

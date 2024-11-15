@@ -1,47 +1,47 @@
 sep=;
-Release Tag;API Item
-public;AddFavoritePropertyContextMenuItem({ field, imodel, scope, onSelect }: FavoritePropertiesContextMenuItemProps): JSX.Element | null
-public;AncestorsNavigationControls({ navigateUp, navigateDown, canNavigateDown, canNavigateUp }: AncestorsNavigationControlsProps): JSX.Element | null
-public;AncestorsNavigationControlsProps
-public;ContextMenuItemProps
-public;ContextMenuProps
-public;CopyPropertyTextContextMenuItem({ record, onSelect }: DefaultContextMenuItemProps): JSX.Element
-public;createPropertyGrid(propertyGridProps: PropertyGridWidgetProps): Widget
-public;DataProviderProps
-public;DefaultContextMenuItemProps 
-public;FavoritePropertiesContextMenuItemProps 
-public;FilteringPropertyGridProps 
-public;IModelAppUserPreferencesStorage 
-public;MultiElementPropertyGrid({ ancestorsNavigationControls, ...props }: MultiElementPropertyGridProps): JSX.Element
-public;MultiElementPropertyGridProps 
-public;NullValueSettingContext({ children }: PropsWithChildren
-public;PerformanceTrackedFeatures = "properties-load" | "elements-list-load"
-public;PreferencesStorage
-public;PropertyGrid({ createDataProvider, ...props }: PropertyGridProps): JSX.Element | null
-public;PropertyGridComponent({ preferencesStorage, onPerformanceMeasured, onFeatureUsed, ...props }: PropertyGridComponentProps): JSX.Element | null
-public;PropertyGridComponentProps 
-public;PropertyGridContentBaseProps 
-public;PropertyGridContentProps = PropertyGridContentBaseProps & ContextMenuProps & SettingsMenuProps
-public;PropertyGridContextMenuItem({ id, children, title, onSelect }: PropsWithChildren
-public;PropertyGridContextMenuItemProps
-public;PropertyGridManager
-public;PropertyGridPropertyUpdatedArgs 
-public;PropertyGridProps = Omit
-public;PropertyGridSettingsMenuItem({ id, onClick, title, children }: PropsWithChildren
-public;PropertyGridSettingsMenuItemProps
-public;PropertyGridUiItemsProvider 
-deprecated;PropertyGridUiItemsProvider 
-public;PropertyGridUiItemsProviderProps
-deprecated;PropertyGridUiItemsProviderProps
-public;PropertyGridWidgetId = "vcr:PropertyGridComponent"
-public;PropertyGridWidgetProps 
-public;RemoveFavoritePropertyContextMenuItem({ field, imodel, scope, onSelect }: FavoritePropertiesContextMenuItemProps): JSX.Element | null
-public;SettingsMenuItemProps
-public;SettingsMenuProps
-public;ShowHideNullValuesSettingsMenuItem({ close, persist }: ShowHideNullValuesSettingsMenuItemProps): JSX.Element
-public;ShowHideNullValuesSettingsMenuItemProps 
-public;SingleElementDataProviderProps 
-public;SingleElementPropertyGrid({ instanceKey, createDataProvider, ...props }: SingleElementPropertyGridProps): JSX.Element | null
-public;SingleElementPropertyGridProps = Omit
-public;TelemetryContextProvider({ onPerformanceMeasured, onFeatureUsed, children }: PropsWithChildren
-public;usePropertyGridTransientState
+Release Tag;API Item Type;API Item Name
+public;function;AddFavoritePropertyContextMenuItem
+public;function;AncestorsNavigationControls
+public;interface;AncestorsNavigationControlsProps
+public;interface;ContextMenuItemProps
+public;interface;ContextMenuProps
+public;function;CopyPropertyTextContextMenuItem
+public;function;createPropertyGrid
+public;interface;DataProviderProps
+public;interface;DefaultContextMenuItemProps
+public;interface;FavoritePropertiesContextMenuItemProps
+public;interface;FilteringPropertyGridProps
+public;class;IModelAppUserPreferencesStorage
+public;function;MultiElementPropertyGrid
+public;interface;MultiElementPropertyGridProps
+public;function;NullValueSettingContext
+public;type;PerformanceTrackedFeatures
+public;interface;PreferencesStorage
+public;function;PropertyGrid
+public;function;PropertyGridComponent
+public;interface;PropertyGridComponentProps
+public;interface;PropertyGridContentBaseProps
+public;type;PropertyGridContentProps
+public;function;PropertyGridContextMenuItem
+public;interface;PropertyGridContextMenuItemProps
+public;class;PropertyGridManager
+public;interface;PropertyGridPropertyUpdatedArgs
+public;type;PropertyGridProps
+public;function;PropertyGridSettingsMenuItem
+public;interface;PropertyGridSettingsMenuItemProps
+public;class;PropertyGridUiItemsProvider
+deprecated;class;PropertyGridUiItemsProvider
+public;interface;PropertyGridUiItemsProviderProps
+deprecated;interface;PropertyGridUiItemsProviderProps
+public;const;PropertyGridWidgetId
+public;interface;PropertyGridWidgetProps
+public;function;RemoveFavoritePropertyContextMenuItem
+public;interface;SettingsMenuItemProps
+public;interface;SettingsMenuProps
+public;function;ShowHideNullValuesSettingsMenuItem
+public;interface;ShowHideNullValuesSettingsMenuItemProps
+public;interface;SingleElementDataProviderProps
+public;function;SingleElementPropertyGrid
+public;type;SingleElementPropertyGridProps
+public;function;TelemetryContextProvider
+public;function;usePropertyGridTransientState

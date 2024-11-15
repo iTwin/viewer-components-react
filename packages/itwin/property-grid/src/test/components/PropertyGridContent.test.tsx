@@ -147,14 +147,14 @@ describe("<PropertyGridContent />", () => {
   it("filters properties according to search prompt", async () => {
     const imodel = {} as IModelConnection;
 
-    const { queryByText, user, getByRole, getByTitle } = renderWithContext(<PropertyGridContent dataProvider={provider} imodel={imodel} />);
+    const { queryByText, user, getByRole, getByText } = renderWithContext(<PropertyGridContent dataProvider={provider} imodel={imodel} />);
 
     await waitFor(() => {
       expect(queryByText("Test Prop")).to.not.be.null;
       expect(queryByText("Null Prop")).to.not.be.null;
     });
 
-    const searchButton = await waitFor(() => getByTitle(PropertyGridManager.translate("search-bar.open")));
+    const searchButton = await waitFor(() => getByText(PropertyGridManager.translate("search-bar.open")));
     await user.click(searchButton);
 
     const searchTextInput = await waitFor(() => getByRole("searchbox"));
@@ -178,7 +178,7 @@ describe("<PropertyGridContent />", () => {
   it("successfully clears filter", async () => {
     const imodel = {} as IModelConnection;
 
-    const { queryByText, user, getByRole, getByTitle } = renderWithContext(
+    const { queryByText, user, getByRole, getByText } = renderWithContext(
       <PropertyGridContent dataProvider={provider} imodel={imodel} settingsMenuItems={[(props) => <ShowHideNullValuesSettingsMenuItem {...props} />]} />,
     );
 
@@ -186,7 +186,7 @@ describe("<PropertyGridContent />", () => {
       expect(queryByText("Test Category")).to.not.be.null;
     });
 
-    const searchButton = await waitFor(() => getByTitle(PropertyGridManager.translate("search-bar.open")));
+    const searchButton = await waitFor(() => getByText(PropertyGridManager.translate("search-bar.open")));
     await user.click(searchButton);
 
     // input text that should not match anything, thus rendering nothing
@@ -198,7 +198,7 @@ describe("<PropertyGridContent />", () => {
     });
 
     // press collapse button which should clear the filter
-    const collapseSearchButton = await waitFor(() => getByTitle(PropertyGridManager.translate("search-bar.close")));
+    const collapseSearchButton = await waitFor(() => getByText(PropertyGridManager.translate("search-bar.close")));
     await user.click(collapseSearchButton);
 
     await waitFor(() => {
@@ -238,7 +238,7 @@ describe("<PropertyGridContent />", () => {
       const imodel = {} as IModelConnection;
       const onFeatureUsedSpy = sinon.spy();
 
-      const { queryByText, user, getByRole, getByTitle } = renderWithContext(
+      const { queryByText, user, getByRole, getByText } = renderWithContext(
         <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
           <PropertyGridContent dataProvider={provider} imodel={imodel} />
         </TelemetryContextProvider>,
@@ -249,7 +249,7 @@ describe("<PropertyGridContent />", () => {
         expect(queryByText("Null Prop")).to.not.be.null;
       });
 
-      const searchButton = await waitFor(() => getByTitle(PropertyGridManager.translate("search-bar.open")));
+      const searchButton = await waitFor(() => getByText(PropertyGridManager.translate("search-bar.open")));
       await user.click(searchButton);
 
       const searchTextInput = await waitFor(() => getByRole("searchbox"));
@@ -276,7 +276,7 @@ describe("<PropertyGridContent />", () => {
       const imodel = {} as IModelConnection;
       const onFeatureUsedSpy = sinon.spy();
 
-      const { queryByText, user, getByRole, getByTitle } = renderWithContext(
+      const { queryByText, user, getByRole, getByText } = renderWithContext(
         <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
           <PropertyGridContent dataProvider={provider} imodel={imodel} />
         </TelemetryContextProvider>,
@@ -287,7 +287,7 @@ describe("<PropertyGridContent />", () => {
         expect(queryByText("Null Prop")).to.not.be.null;
       });
 
-      const searchButton = await waitFor(() => getByTitle(PropertyGridManager.translate("search-bar.open")));
+      const searchButton = await waitFor(() => getByText(PropertyGridManager.translate("search-bar.open")));
       await user.click(searchButton);
 
       const searchTextInput = await waitFor(() => getByRole("searchbox"));

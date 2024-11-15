@@ -8,9 +8,9 @@ import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
-import { render, waitFor } from "./TestUtils";
 import * as multiElementPropertyGrid from "../components/MultiElementPropertyGrid";
 import { PropertyGridComponent } from "../PropertyGridComponent";
+import { render, waitFor } from "./TestUtils";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 
@@ -27,8 +27,11 @@ describe("PropertyGridComponent", () => {
     sinon.stub(IModelApp, "viewManager").get(() => ({
       onSelectedViewportChanged: new BeEvent(),
     }));
+    sinon.stub(IModelApp, "toolAdmin").get(() => ({
+      activeToolChanged: new BeEvent(),
+    }));
     sinon.stub(multiElementPropertyGrid, "MultiElementPropertyGrid").returns(<>MultiElementPropertyGrid</>);
-    await UiFramework.initialize(undefined);
+    await UiFramework.initialize();
   });
 
   after(() => {

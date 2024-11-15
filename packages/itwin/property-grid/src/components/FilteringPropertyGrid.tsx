@@ -9,8 +9,7 @@ import {
   FilteredType, FilteringPropertyDataProvider, PropertyDataChangeEvent, PropertyRecordDataFiltererBase, useDebouncedAsyncValue,
   VirtualizedPropertyGridWithDataProvider,
 } from "@itwin/components-react";
-import { FillCentered } from "@itwin/core-react";
-import { Text } from "@itwin/itwinui-react";
+import { Flex, Text } from "@itwin/itwinui-react";
 import { PropertyGridManager } from "../PropertyGridManager";
 
 import type { PropertyRecord } from "@itwin/appui-abstract";
@@ -21,7 +20,6 @@ import type {
   PropertyCategory,
   PropertyData,
   PropertyDataFilterResult,
-  VirtualizedPropertyGridWithDataProviderProps,
 } from "@itwin/components-react";
 import type { IDisposable } from "@itwin/core-bentley";
 
@@ -29,7 +27,7 @@ import type { IDisposable } from "@itwin/core-bentley";
  * Properties for rendering a `FilteringPropertyGrid`.
  * @public
  */
-export interface FilteringPropertyGridProps extends VirtualizedPropertyGridWithDataProviderProps {
+export interface FilteringPropertyGridProps extends React.ComponentProps<typeof VirtualizedPropertyGridWithDataProvider> {
   /** Specifies whether child categories should be auto expanded or not. */
   autoExpandChildCategories?: boolean;
   /** Filterer used to filter data. */
@@ -68,13 +66,13 @@ export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildC
 
   if (!isFiltering && filterMatchesCount === 0) {
     return (
-      <FillCentered style={{ flexDirection: "column" }}>
+      <Flex justifyContent="center" alignItems="center" flexDirection="column" style={{ width: "100%", height: "100%" }}>
         <Text>
           {props.highlight?.highlightedText
             ? PropertyGridManager.translate("filtering.no-matching-properties", { filter: props.highlight.highlightedText })
             : PropertyGridManager.translate("filtering.no-non-null-values")}
         </Text>
-      </FillCentered>
+      </Flex>
     );
   }
 

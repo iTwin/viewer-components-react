@@ -3,8 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { FillCentered } from "@itwin/core-react";
-import { Text } from "@itwin/itwinui-react";
+import { Flex, Text } from "@itwin/itwinui-react";
 import { usePropertyDataProviderWithUnifiedSelection } from "@itwin/presentation-components";
 import { useDataProvider } from "../hooks/UseDataProvider";
 import { PropertyGridManager } from "../PropertyGridManager";
@@ -40,9 +39,9 @@ function UnifiedSelectionPropertyGrid(props: PropertyGridContentProps) {
   const dataRenderer = (dataRendererProps: FilteringPropertyGridProps) => {
     if (isOverLimit) {
       return (
-        <FillCentered style={{ flexDirection: "column" }}>
+        <Flex justifyContent="center" alignItems="center" flexDirection="column" style={{ width: "100%", height: "100%" }}>
           <Text>{PropertyGridManager.translate("selection.too-many-elements-selected")}</Text>
-        </FillCentered>
+        </Flex>
       );
     }
 
