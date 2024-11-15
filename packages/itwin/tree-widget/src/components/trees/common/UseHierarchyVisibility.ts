@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useRef, useState } from "react";
-import { defer, distinct, from, lastValueFrom, mergeMap, Subject, takeUntil } from "rxjs";
+import { asyncScheduler, defer, distinct, from, lastValueFrom, mergeMap, observeOn, Subject, takeUntil, tap, throttleTime } from "rxjs";
 import { useTelemetryContext } from "./UseTelemetryContext";
 
 import type { Observable } from "rxjs";
@@ -79,15 +79,21 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
     const subscription = calculate
       .pipe(
         distinct(undefined, visibilityChanged),
+        observeOn(asyncScheduler),
         mergeMap((node) => defer(async () => ({ node, status: await handler.getVisibilityStatus(node.nodeData) })).pipe(takeUntil(visibilityChanged))),
+        tap({
+          next: ({ node, status }) => {
+            visibilityStatusMap.current.set(node.id, {
+              node,
+              status,
+              needsRefresh: false,
+            });
+          },
+        }),
+        throttleTime(100, undefined, { leading: true, trailing: true }),
       )
       .subscribe({
-        next: ({ node, status }) => {
-          visibilityStatusMap.current.set(node.id, {
-            node,
-            status,
-            needsRefresh: false,
-          });
+        next: () => {
           triggerCheckboxUpdate();
         },
       });
