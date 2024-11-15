@@ -78,7 +78,7 @@ export const GroupQueryBuilderCustomUI = ({ updateQuery, isUpdating, resetView }
     onError: (e) => console.error(e),
   });
 
-  const onClickResetButton = useCallback(async () => {
+  const onClickResetButton = useCallback(() => {
     queryBuilder?.resetQueryBuilder();
     updateQuery("");
     if (currentPropertyList.length > 0) {
