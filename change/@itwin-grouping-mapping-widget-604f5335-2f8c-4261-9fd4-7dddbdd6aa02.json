@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Fixed reset button to clear selected element and simpleSelectionQuery.",
+  "packageName": "@itwin/grouping-mapping-widget",
+  "email": "Aniruddha.Dhavalikar@bentley.com",
+  "dependentChangeType": "patch"
+}
