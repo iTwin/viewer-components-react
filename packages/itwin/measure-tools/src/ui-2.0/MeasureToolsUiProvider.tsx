@@ -120,6 +120,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
                 () => !MeasurementUIEvents.isClearMeasurementButtonVisible,
                 [
                   SyncUiEventId.ActiveViewportChanged,
+                  SyncUiEventId.ViewStateChanged,
                   MeasurementSyncUiEventId.MeasurementSelectionSetChanged,
                   MeasurementSyncUiEventId.DynamicMeasurementChanged,
                 ],
