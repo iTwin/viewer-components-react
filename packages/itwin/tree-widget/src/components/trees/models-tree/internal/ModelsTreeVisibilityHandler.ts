@@ -3,19 +3,20 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, concatAll, defer, distinct, EMPTY, firstValueFrom, forkJoin, from, map, merge, mergeMap, of, reduce } from "rxjs";
+import { bufferCount, concat, concatAll, concatMap, defer, delay, distinct, EMPTY, firstValueFrom, forkJoin, from, map, merge, mergeMap, of, reduce } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
-import { HierarchyFilteringPath, HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { toggleAllCategories } from "../../common/CategoriesVisibilityUtils";
 import { reduceWhile, toVoidPromise } from "../../common/Rxjs";
 import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility";
 import { AlwaysAndNeverDrawnElementInfo } from "./AlwaysAndNeverDrawnElementInfo";
+import { createFilteredTree, parseCategoryKey, parseElementKey } from "./FilteredTree";
 import { ModelsTreeNode } from "./ModelsTreeNode";
 import { createVisibilityStatus } from "./Tooltip";
 import { createVisibilityChangeEventListener } from "./VisibilityChangeEventListener";
 
-import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
+import type { GroupingHierarchyNode, HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { HierarchyVisibilityHandler, HierarchyVisibilityHandlerOverridableMethod, VisibilityStatus } from "../../common/UseHierarchyVisibility";
 import type { Observable, OperatorFunction } from "rxjs";
 import type { ModelsTreeIdsCache } from "./ModelsTreeIdsCache";
@@ -24,7 +25,8 @@ import type { AlwaysOrNeverDrawnElementsQueryProps } from "./AlwaysAndNeverDrawn
 import type { IVisibilityChangeEventListener } from "./VisibilityChangeEventListener";
 import type { Viewport } from "@itwin/core-frontend";
 import type { NonPartialVisibilityStatus, Visibility } from "./Tooltip";
-import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
+import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
+import type { FilteredTree } from "./FilteredTree";
 
 /** @beta */
 interface GetCategoryVisibilityStatusProps {
@@ -57,46 +59,12 @@ interface ChangeModelVisibilityStateProps {
 
 /** @beta */
 interface GetFilteredNodeVisibilityProps {
-  parentKeys: HierarchyNodeKey[];
-  filterPaths: HierarchyFilteringPath[];
+  node: HierarchyNode;
 }
 
 /** @beta */
 interface ChangeFilteredNodeVisibilityProps extends GetFilteredNodeVisibilityProps {
   on: boolean;
-}
-
-export const SUBJECT_CLASS_NAME = "BisCore.Subject" as const;
-export const MODEL_CLASS_NAME = "BisCore.GeometricModel3d" as const;
-export const CATEGORY_CLASS_NAME = "BisCore.SpatialCategory" as const;
-export const ELEMENT_CLASS_NAME = "BisCore.GeometricElement3d" as const;
-
-type CategoryKey = `${Id64String}-${Id64String}`;
-type ElementKey = `${CategoryKey}-${Id64String}`;
-
-function createCategoryKey(modelId: string, categoryId: string): CategoryKey {
-  return `${modelId}-${categoryId}`;
-}
-
-function parseCategoryKey(key: CategoryKey) {
-  const [modelId, categoryId] = key.split("-");
-  return { modelId, categoryId };
-}
-
-function createElementKey(modelId: string, categoryId: string, elementId: string): ElementKey {
-  return `${modelId}-${categoryId}-${elementId}`;
-}
-
-function parseElementKey(key: ElementKey) {
-  const [modelId, categoryId, elementId] = key.split("-");
-  return { modelId, categoryId, elementId };
-}
-
-interface FilterTargets {
-  subjects?: Set<Id64String>;
-  models?: Set<Id64String>;
-  categories?: Set<CategoryKey>;
-  elements?: Set<ElementKey>;
 }
 
 /**
@@ -127,6 +95,7 @@ export interface ModelsTreeVisibilityHandlerProps {
   idsCache: ModelsTreeIdsCache;
   imodelAccess: ECClassHierarchyInspector;
   overrides?: ModelsTreeVisibilityHandlerOverrides;
+  filteredPaths?: HierarchyFilteringPath[];
 }
 
 /**
@@ -141,11 +110,13 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
   private readonly _eventListener: IVisibilityChangeEventListener;
   private readonly _alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo;
   private readonly _idsCache: ModelsTreeIdsCache;
+  private _filteredTree: Promise<FilteredTree> | undefined;
 
   constructor(private readonly _props: ModelsTreeVisibilityHandlerProps) {
     this._eventListener = createVisibilityChangeEventListener(_props.viewport);
     this._alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfo(_props.viewport);
     this._idsCache = this._props.idsCache;
+    this._filteredTree = _props.filteredPaths ? createFilteredTree(this._props.imodelAccess, _props.filteredPaths) : undefined;
   }
 
   // istanbul ignore next
@@ -168,10 +139,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
 
   private getVisibilityStatusObs(node: HierarchyNode): Observable<VisibilityStatus> {
     if (node.filtering?.filteredChildrenIdentifierPaths?.length && !node.filtering.isFilterTarget) {
-      return this.getFilteredNodeVisibility({
-        parentKeys: [...node.parentKeys, node.key],
-        filterPaths: node.filtering.filteredChildrenIdentifierPaths,
-      });
+      return this.getFilteredNodeVisibility({ node });
     }
 
     if (HierarchyNode.isClassGroupingNode(node)) {
@@ -215,8 +183,8 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     });
   }
 
-  private getFilteredNodeVisibility({ parentKeys, filterPaths }: GetFilteredNodeVisibilityProps) {
-    return from(this.getFilterTargets({ parentKeys, filterPaths })).pipe(
+  private getFilteredNodeVisibility(props: GetFilteredNodeVisibilityProps) {
+    return from(this.getFilterTargets(props)).pipe(
       mergeMap(({ subjects, models, categories, elements }) => {
         const observables = new Array<Observable<VisibilityStatus>>();
         if (subjects?.size) {
@@ -241,6 +209,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         if (elements?.size) {
           observables.push(
             from(elements).pipe(
+              releaseMainThreadOnItemsCount(1000),
               mergeMap((key) => {
                 const { modelId, categoryId, elementId } = parseElementKey(key);
                 return this.getElementDisplayStatus({ modelId, categoryId, elementId });
@@ -414,11 +383,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
   /** Changes visibility of the items represented by the tree node. */
   private changeVisibilityObs(node: HierarchyNode, on: boolean): Observable<void> {
     if (node.filtering?.filteredChildrenIdentifierPaths?.length && !node.filtering.isFilterTarget) {
-      return this.changeFilteredNodeVisibility({
-        parentKeys: [...node.parentKeys, node.key],
-        filterPaths: node.filtering.filteredChildrenIdentifierPaths,
-        on,
-      });
+      return this.changeFilteredNodeVisibility({ node, on });
     }
 
     if (HierarchyNode.isClassGroupingNode(node)) {
@@ -470,69 +435,9 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     });
   }
 
-  private async getFilterTargets({ parentKeys, filterPaths }: GetFilteredNodeVisibilityProps) {
-    const filterTargets: FilterTargets = {};
-
-    function addFilterTarget(targetType: "subjects" | "models", value: Id64String): void;
-    function addFilterTarget(targetType: "categories", value: CategoryKey): void;
-    function addFilterTarget(targetType: "elements", value: ElementKey): void;
-    function addFilterTarget(targetType: keyof FilterTargets, value: string) {
-      ((filterTargets as Record<keyof FilterTargets, Set<string>>)[targetType] ??= new Set()).add(value);
-    }
-
-    const imodelAccess = this._props.imodelAccess;
-
-    // Remove all paths such that there are paths to any of the ancestors of the filter target.
-    const paths = reduceFilterPaths(filterPaths);
-
-    await Promise.all(
-      paths.map(async (path) => {
-        const target = path[path.length - 1];
-        if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(target)) {
-          return;
-        }
-
-        const previousPath = path.slice(0, path.length - 1);
-
-        if (await imodelAccess.classDerivesFrom(target.className, SUBJECT_CLASS_NAME)) {
-          addFilterTarget("subjects", target.id);
-          return;
-        }
-
-        if (await imodelAccess.classDerivesFrom(target.className, MODEL_CLASS_NAME)) {
-          addFilterTarget("models", target.id);
-          return;
-        }
-
-        if (await imodelAccess.classDerivesFrom(target.className, CATEGORY_CLASS_NAME)) {
-          // eslint-disable-next-line @typescript-eslint/no-shadow
-          const modelId = await this.findClassIdInFilterPath(previousPath, parentKeys, MODEL_CLASS_NAME);
-          addFilterTarget("categories", createCategoryKey(modelId, target.id));
-          return;
-        }
-
-        const [modelId, categoryId] = await Promise.all([
-          this.findClassIdInFilterPath(previousPath, parentKeys, MODEL_CLASS_NAME),
-          this.findClassIdInFilterPath(previousPath, parentKeys, CATEGORY_CLASS_NAME),
-        ]);
-        addFilterTarget("elements", createElementKey(modelId, categoryId, target.id));
-
-        // Add parent elements to the filter targets as well
-        for (let idx = path.length - 1; idx >= 0; --idx) {
-          const pathIdentifier = path[idx];
-          if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(pathIdentifier)) {
-            continue;
-          }
-
-          if (!(await imodelAccess.classDerivesFrom(pathIdentifier.className, ELEMENT_CLASS_NAME))) {
-            break;
-          }
-          addFilterTarget("elements", createElementKey(modelId, categoryId, pathIdentifier.id));
-        }
-      }),
-    );
-
-    return filterTargets;
+  private async getFilterTargets({ node }: GetFilteredNodeVisibilityProps) {
+    const filteredTree = await this._filteredTree;
+    return filteredTree ? filteredTree.getFilterTargets(node) : {};
   }
 
   private changeFilteredNodeVisibility({ on, ...props }: ChangeFilteredNodeVisibilityProps) {
@@ -561,6 +466,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         if (elements?.size) {
           observables.push(
             from(elements).pipe(
+              releaseMainThreadOnItemsCount(1000),
               mergeMap((key) => {
                 const { modelId, categoryId, elementId } = parseElementKey(key);
                 return this.changeElementState({ modelId, categoryId, elementId, on });
@@ -855,32 +761,6 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     const elementIds = new Set(node.groupedInstanceKeys.map((key) => key.id));
     return { modelId, categoryId, elementIds };
   }
-
-  private async findClassIdInFilterPath(path: HierarchyNodeIdentifiersPath, parentKeys: HierarchyNodeKey[], className: string) {
-    function* keysToCheck(): Iterable<InstanceKey> {
-      for (let i = path.length - 1; i >= 0; --i) {
-        const id = path[i];
-        if (HierarchyNodeIdentifier.isInstanceNodeIdentifier(id)) {
-          yield id;
-        }
-      }
-
-      for (let i = parentKeys.length - 1; i >= 0; --i) {
-        const key = parentKeys[i];
-        if (HierarchyNodeKey.isInstances(key)) {
-          yield* key.instanceKeys;
-        }
-      }
-    }
-
-    for (const parentKey of keysToCheck()) {
-      if (await this._props.imodelAccess.classDerivesFrom(parentKey.className, className)) {
-        return parentKey.id;
-      }
-    }
-
-    assert(false, () => `Cannot find an instance of ${className} in instance keys: ${JSON.stringify([...keysToCheck()], undefined, 2)}`);
-  }
 }
 
 interface GetVisibilityFromAlwaysAndNeverDrawnElementsProps {
@@ -938,39 +818,6 @@ function setIntersection<T>(lhs: Set<T>, rhs: Set<T>): Set<T> {
   const result = new Set<T>();
   lhs.forEach((x) => rhs.has(x) && result.add(x));
   return result;
-}
-
-function reduceFilterPaths(filteringPaths: HierarchyFilteringPath[]) {
-  let paths = filteringPaths.map((filteringPath) => HierarchyFilteringPath.normalize(filteringPath).path);
-  const sorted = [...paths].sort((a, b) => a.length - b.length);
-  paths = [];
-  for (const path of sorted) {
-    if (!arraySortedByLengthContainsPrefix(paths, path)) {
-      paths.push(path);
-    }
-  }
-  return paths;
-}
-
-function arraySortedByLengthContainsPrefix(targetArray: HierarchyNodeIdentifiersPath[], source: HierarchyNodeIdentifiersPath) {
-  for (const targetVal of targetArray) {
-    if (targetVal.length >= source.length) {
-      break;
-    }
-
-    let isPrefix = true;
-    for (let i = 0; i < targetVal.length; ++i) {
-      if (!HierarchyNodeIdentifier.equal(targetVal[i], source[i])) {
-        isPrefix = false;
-        break;
-      }
-    }
-
-    if (isPrefix) {
-      return true;
-    }
-  }
-  return false;
 }
 
 /**
@@ -1033,4 +880,20 @@ export async function toggleModels(models: string[], enable: boolean, viewport: 
  */
 export function areAllModelsVisible(models: string[], viewport: Viewport) {
   return models.length !== 0 ? models.every((id) => viewport.viewsModel(id)) : false;
+}
+
+function releaseMainThreadOnItemsCount<T>(elementCount: number) {
+  return (obs: Observable<T>): Observable<T> => {
+    return obs.pipe(
+      bufferCount(elementCount),
+      concatMap((buff, i) => {
+        const out = of(buff);
+        if (i === 0 && buff.length < elementCount) {
+          return out;
+        }
+        return out.pipe(delay(0));
+      }),
+      concatAll(),
+    );
+  };
 }
