@@ -53,7 +53,6 @@ export function TreeNodeCheckbox({ node, onCheckboxClicked, getCheckboxState, ..
         }}
         indeterminate={checkboxState.state === "partial"}
         disabled={checkboxState.isDisabled}
-        title={checkboxState.tooltip}
       />
     </Tooltip>
   );

@@ -184,7 +184,6 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
       <Button
         size={props.density === "enlarged" ? "large" : "small"}
         styleType="borderless"
-        title={TreeWidget.translate("modelsTree.buttons.toggle2d.tooltip")}
         onClick={() => {
           props.onFeatureUsed?.("models-tree-view2d");
           void toggleModels(models2d, is2dToggleActive, props.viewport);
@@ -216,7 +215,6 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
       <Button
         size={props.density === "enlarged" ? "large" : "small"}
         styleType="borderless"
-        title={TreeWidget.translate("modelsTree.buttons.toggle3d.tooltip")}
         onClick={() => {
           props.onFeatureUsed?.("models-tree-view3d");
           void toggleModels(models3d, is3dToggleActive, props.viewport);
