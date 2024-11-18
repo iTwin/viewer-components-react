@@ -55,7 +55,7 @@ export function createIModelAccess({ imodel, getSchemaContext }: { imodel: IMode
   return {
     imodelKey: imodel.key,
     ...schemaProvider,
-    ...createCachingECClassHierarchyInspector({ schemaProvider }),
+    ...createCachingECClassHierarchyInspector({ schemaProvider, cacheSize: 100 }),
     ...createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(imodel), 1000),
   };
 }

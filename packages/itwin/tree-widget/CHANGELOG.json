@@ -2,6 +2,21 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Fri, 15 Nov 2024 15:03:19 GMT",
+      "version": "3.0.3",
+      "tag": "@itwin/tree-widget-react_v3.0.3",
+      "comments": {
+        "patch": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "c834672dd15fb7cdf0cbf330a63caaaaf989c013",
+            "comment": "Reduce UI blocking when checking visibility status"
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 12 Nov 2024 12:57:13 GMT",
       "version": "3.0.2",
       "tag": "@itwin/tree-widget-react_v3.0.2",

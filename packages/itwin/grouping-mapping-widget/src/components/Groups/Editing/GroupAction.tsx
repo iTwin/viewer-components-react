@@ -197,7 +197,7 @@ export const GroupAction = (props: GroupActionProps) => {
       </div>
       <div className="gmw-action-panel">
         {isLoading && <LoadingSpinner />}
-        {isQueryBuilderStep && <QueryBuilderActionPanel onClickNext={onClickNext} isNextDisabled={!query} />}
+        {isQueryBuilderStep && <QueryBuilderActionPanel onClickNext={onClickNext} isNextDisabled={!(simpleSelectionQuery || query)} />}
         {isGroupDetailsStep && <GroupDetailsActionPanel isSaveDisabled={isBlockingActions} onClickSave={onClickSave} onClickBack={onClickBack} />}
         {props.onClickCancel && (
           <Button type="button" id="cancel" onClick={onClickCancel}>

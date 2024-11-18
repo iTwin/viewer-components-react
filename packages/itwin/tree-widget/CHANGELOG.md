@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Tue, 12 Nov 2024 12:57:13 GMT and should not be manually modified.
+This log was last generated on Fri, 15 Nov 2024 15:03:19 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 3.0.3
+
+Fri, 15 Nov 2024 15:03:19 GMT
+
+### Patches
+
+- Reduce UI blocking when checking visibility status ([#1094](https://github.com/iTwin/viewer-components-react/pull/1094))
 
 ## 3.0.2
 

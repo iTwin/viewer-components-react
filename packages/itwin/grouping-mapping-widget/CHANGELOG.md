@@ -1,8 +1,16 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Tue, 12 Nov 2024 12:57:13 GMT and should not be manually modified.
+This log was last generated on Fri, 15 Nov 2024 15:03:19 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.34.2
+
+Fri, 15 Nov 2024 15:03:19 GMT
+
+### Patches
+
+- Fixed reset button to clear selected element and simpleSelectionQuery. ([#1091](https://github.com/iTwin/viewer-components-react/pull/1091))
 
 ## 0.34.1
 

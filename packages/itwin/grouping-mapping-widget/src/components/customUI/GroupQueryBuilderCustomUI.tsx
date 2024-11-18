@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Presentation } from "@itwin/presentation-frontend";
+import { useMutation } from "@tanstack/react-query";
 import type { ISelectionProvider, SelectionChangeEventArgs } from "@itwin/presentation-frontend";
 import { KeySet } from "@itwin/presentation-common";
 import "./GroupQueryBuilderCustomUI.scss";
@@ -70,17 +71,24 @@ export const GroupQueryBuilderCustomUI = ({ updateQuery, isUpdating, resetView }
 
     return iModelConnection ? Presentation.selection.selectionChange.addListener(onSelectionChanged) : () => {};
   }, [iModelConnection]);
+  
+  const resetMutation = useMutation({
+    mutationFn: resetView,
+    /* eslint-disable no-console */
+    onError: (e) => console.error(e),
+  });
 
-  const onClickResetButton = async () => {
+  const onClickResetButton = useCallback(() => {
     queryBuilder?.resetQueryBuilder();
     updateQuery("");
-    setCurrentPropertyList([]);
-    if (resetView)
-      await resetView().catch((e) =>
-        /* eslint-disable no-console */
-        console.error(e),
-      );
-  };
+    if (currentPropertyList.length > 0) {
+      setCurrentPropertyList([]);
+    } else if (iModelConnection) {
+      Presentation.selection.clearSelection("GroupQueryBuilderCustomUI", iModelConnection);
+    }
+    resetMutation.mutate();
+
+  }, [iModelConnection, currentPropertyList, resetMutation, queryBuilder, updateQuery]);
 
   const resize = useCallback((width, height) => setSize({ width, height }), []);
 
