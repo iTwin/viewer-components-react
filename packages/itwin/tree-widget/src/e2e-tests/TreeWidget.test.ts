@@ -12,9 +12,7 @@ test.describe("Widget", () => {
 
   test.beforeEach(async ({ page, baseURL }) => {
     treeWidget = await initTreeWidgetTest({ page, baseURL });
-    await locateNode(treeWidget, "Visible: All models are visible Collapse BayTown")
-      .getByRole("checkbox", { name: "Visible: All models are visible", exact: true })
-      .waitFor();
+    await locateNode(treeWidget, "BayTown").getByRole("checkbox", { name: "Visible: All models are visible", exact: true }).waitFor();
   });
 
   withDifferentDensities(() => {
