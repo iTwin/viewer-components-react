@@ -16,7 +16,9 @@ test.describe("Models tree", () => {
   test.beforeEach(async ({ page, baseURL }) => {
     treeWidget = await initTreeWidgetTest({ page, baseURL });
     await selectTree(treeWidget, "Models");
-    await locateNode(treeWidget, "BayTown").getByRole("checkbox", { name: "Visible: All models are visible", exact: true }).waitFor();
+    await locateNode(treeWidget, "Visible: All models are visible Collapse BayTown")
+      .getByRole("checkbox", { name: "Visible: All models are visible", exact: true })
+      .waitFor();
   });
 
   withDifferentDensities((density) => {
@@ -183,7 +185,7 @@ test.describe("Models tree", () => {
 
       // ensure instance focus is turned off and hierarchy is visible
       await page.getByRole("button", { name: "Enable instance focus mode" }).waitFor();
-      await locateNode(treeWidget, "BayTown").waitFor();
+      await locateNode(treeWidget, "Visible: All models are visible Collapse BayTown").waitFor();
     });
 
     test("header buttons overflow", async ({ page }) => {
