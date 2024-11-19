@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "provide a callback to allow the application to decide whether to show or hide the measurement tools",
+  "packageName": "@itwin/measure-tools-react",
+  "email": "email not defined",
+  "dependentChangeType": "patch"
+}
