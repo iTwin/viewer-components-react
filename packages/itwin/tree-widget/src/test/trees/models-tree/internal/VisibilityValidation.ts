@@ -10,7 +10,7 @@ import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { toVoidPromise } from "../../../../components/trees/common/Rxjs";
 import { ModelsTreeNode } from "../../../../components/trees/models-tree/internal/ModelsTreeNode";
 
-import type { Visibility } from "../../../../components/trees/models-tree/internal/Tooltip";
+import type { Visibility } from "../../../../components/trees/common/Tooltip";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";

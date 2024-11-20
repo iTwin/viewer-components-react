@@ -9,10 +9,10 @@ import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { HierarchyFilteringPath, HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { toggleAllCategories } from "../../common/CategoriesVisibilityUtils";
 import { reduceWhile, toVoidPromise } from "../../common/Rxjs";
+import { createVisibilityStatus } from "../../common/Tooltip";
 import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility";
 import { AlwaysAndNeverDrawnElementInfo } from "./AlwaysAndNeverDrawnElementInfo";
 import { ModelsTreeNode } from "./ModelsTreeNode";
-import { createVisibilityStatus } from "./Tooltip";
 import { createVisibilityChangeEventListener } from "./VisibilityChangeEventListener";
 
 import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
@@ -23,7 +23,7 @@ import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentle
 import type { AlwaysOrNeverDrawnElementsQueryProps } from "./AlwaysAndNeverDrawnElementInfo";
 import type { IVisibilityChangeEventListener } from "./VisibilityChangeEventListener";
 import type { Viewport } from "@itwin/core-frontend";
-import type { NonPartialVisibilityStatus, Visibility } from "./Tooltip";
+import type { NonPartialVisibilityStatus, Visibility } from "../../common/Tooltip";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
 
 /** @beta */
@@ -263,7 +263,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
   private getSubjectNodeVisibilityStatus(subjectIds: Id64Array): Observable<VisibilityStatus> {
     const result = defer(() => {
       if (!this._props.viewport.view.isSpatialView()) {
-        return of(createVisibilityStatus("disabled", "subject.nonSpatialView"));
+        return of(createVisibilityStatus("disabled", "modelsTree.subject.nonSpatialView"));
       }
 
       return from(this._idsCache.getSubjectModelIds(subjectIds)).pipe(
@@ -272,9 +272,9 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         mergeMap((modelId) => this.getModelVisibilityStatus(modelId)),
         map((x) => x.state),
         getVisibilityStatusFromTreeNodeChildren({
-          visible: "subject.allModelsVisible",
-          hidden: "subject.allModelsHidden",
-          partial: "subject.someModelsHidden",
+          visible: "modelsTree.subject.allModelsVisible",
+          hidden: "modelsTree.subject.allModelsHidden",
+          partial: "modelsTree.subject.someModelsHidden",
         }),
       );
     });
@@ -285,11 +285,11 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     const result = defer(() => {
       const viewport = this._props.viewport;
       if (!viewport.view.isSpatialView()) {
-        return of(createVisibilityStatus("disabled", "model.nonSpatialView"));
+        return of(createVisibilityStatus("disabled", "modelsTree.model.nonSpatialView"));
       }
 
       if (!viewport.view.viewsModel(modelId)) {
-        return of(createVisibilityStatus("hidden", "model.hiddenThroughModelSelector"));
+        return of(createVisibilityStatus("hidden", "modelsTree.model.hiddenThroughModelSelector"));
       }
 
       return from(this._idsCache.getModelCategories(modelId)).pipe(
@@ -299,7 +299,10 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         getVisibilityFromTreeNodeChildren,
         map((visibilityByCategories) => {
           const state = visibilityByCategories === "empty" ? "visible" : visibilityByCategories;
-          return createVisibilityStatus(state, state === "partial" ? "model.someCategoriesHidden" : `model.allCategories${state ? "Visible" : "Hidden"}`);
+          return createVisibilityStatus(
+            state,
+            state === "partial" ? "modelsTree.model.someCategoriesHidden" : `modelsTree.model.allCategories${state ? "Visible" : "Hidden"}`,
+          );
         }),
       );
     });
@@ -310,35 +313,35 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     const viewport = this._props.viewport;
 
     if (!viewport.view.viewsModel(modelId)) {
-      return createVisibilityStatus("hidden", "category.hiddenThroughModel");
+      return createVisibilityStatus("hidden", "modelsTree.category.hiddenThroughModel");
     }
 
     switch (this._props.viewport.perModelCategoryVisibility.getOverride(modelId, categoryId)) {
       case PerModelCategoryVisibility.Override.Show:
-        return createVisibilityStatus("visible", "category.displayedThroughPerModelOverride");
+        return createVisibilityStatus("visible", "modelsTree.category.displayedThroughPerModelOverride");
       case PerModelCategoryVisibility.Override.Hide:
-        return createVisibilityStatus("hidden", "category.hiddenThroughPerModelOverride");
+        return createVisibilityStatus("hidden", "modelsTree.category.hiddenThroughPerModelOverride");
     }
 
     const isVisible = viewport.view.viewsCategory(categoryId);
     return isVisible
-      ? createVisibilityStatus("visible", "category.displayedThroughCategorySelector")
-      : createVisibilityStatus("hidden", "category.hiddenThroughCategorySelector");
+      ? createVisibilityStatus("visible", "modelsTree.category.displayedThroughCategorySelector")
+      : createVisibilityStatus("hidden", "modelsTree.category.hiddenThroughCategorySelector");
   }
 
   private getCategoryDisplayStatus(props: GetCategoryVisibilityStatusProps): Observable<VisibilityStatus> {
     const result = defer(() => {
       if (!this._props.viewport.view.viewsModel(props.modelId)) {
-        return of(createVisibilityStatus("hidden", "category.hiddenThroughModel"));
+        return of(createVisibilityStatus("hidden", "modelsTree.category.hiddenThroughModel"));
       }
 
       return this.getVisibilityFromAlwaysAndNeverDrawnElements({
         queryProps: props,
         tooltips: {
-          allElementsInAlwaysDrawnList: "category.allElementsVisible",
-          allElementsInNeverDrawnList: "category.allElementsHidden",
-          elementsInBothAlwaysAndNeverDrawn: "category.someElementsAreHidden",
-          noElementsInExclusiveAlwaysDrawnList: "category.allElementsHidden",
+          allElementsInAlwaysDrawnList: "modelsTree.category.allElementsVisible",
+          allElementsInNeverDrawnList: "modelsTree.category.allElementsHidden",
+          elementsInBothAlwaysAndNeverDrawn: "modelsTree.category.someElementsAreHidden",
+          noElementsInExclusiveAlwaysDrawnList: "modelsTree.category.allElementsHidden",
         },
         defaultStatus: () => this.getDefaultCategoryVisibilityStatus(props),
       });
@@ -359,13 +362,13 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         elements: elementIds,
         defaultStatus: () => {
           const status = this.getDefaultCategoryVisibilityStatus({ categoryId, modelId });
-          return createVisibilityStatus(status.state, `groupingNode.${status.state}ThroughCategory`);
+          return createVisibilityStatus(status.state, `modelsTree.groupingNode.${status.state}ThroughCategory`);
         },
         tooltips: {
-          allElementsInAlwaysDrawnList: "groupingNode.allElementsVisible",
-          allElementsInNeverDrawnList: "groupingNode.allElementsHidden",
-          elementsInBothAlwaysAndNeverDrawn: "groupingNode.someElementsAreHidden",
-          noElementsInExclusiveAlwaysDrawnList: "groupingNode.allElementsHidden",
+          allElementsInAlwaysDrawnList: "modelsTree.groupingNode.allElementsVisible",
+          allElementsInNeverDrawnList: "modelsTree.groupingNode.allElementsHidden",
+          elementsInBothAlwaysAndNeverDrawn: "modelsTree.groupingNode.someElementsAreHidden",
+          noElementsInExclusiveAlwaysDrawnList: "modelsTree.groupingNode.allElementsHidden",
         },
       });
     });
@@ -375,16 +378,16 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
   private getElementOverriddenVisibility(elementId: string): NonPartialVisibilityStatus | undefined {
     const viewport = this._props.viewport;
     if (viewport.neverDrawn?.has(elementId)) {
-      return createVisibilityStatus("hidden", "element.hiddenThroughNeverDrawnList");
+      return createVisibilityStatus("hidden", "modelsTree.element.hiddenThroughNeverDrawnList");
     }
 
     if (viewport.alwaysDrawn?.size) {
       if (viewport.alwaysDrawn.has(elementId)) {
-        return createVisibilityStatus("visible", "element.displayedThroughAlwaysDrawnList");
+        return createVisibilityStatus("visible", "modelsTree.element.displayedThroughAlwaysDrawnList");
       }
 
       if (viewport.isAlwaysDrawnExclusive) {
-        return createVisibilityStatus("hidden", "element.hiddenDueToOtherElementsExclusivelyAlwaysDrawn");
+        return createVisibilityStatus("hidden", "modelsTree.element.hiddenDueToOtherElementsExclusivelyAlwaysDrawn");
       }
     }
 
@@ -397,7 +400,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       const { elementId, modelId, categoryId } = props;
 
       if (!viewport.view.viewsModel(modelId)) {
-        return of(createVisibilityStatus("hidden", "element.hiddenThroughModel"));
+        return of(createVisibilityStatus("hidden", "modelsTree.element.hiddenThroughModel"));
       }
 
       let status = this.getElementOverriddenVisibility(elementId);
@@ -406,7 +409,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       }
 
       status = this.getDefaultCategoryVisibilityStatus({ categoryId, modelId });
-      return of(createVisibilityStatus(status.state, status.state === "visible" ? undefined : "element.hiddenThroughCategory"));
+      return of(createVisibilityStatus(status.state, status.state === "visible" ? undefined : "modelsTree.element.hiddenThroughCategory"));
     });
     return createVisibilityHandlerResult(this, props, result, this._props.overrides?.getElementDisplayStatus);
   }

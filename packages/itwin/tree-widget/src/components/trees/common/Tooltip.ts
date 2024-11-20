@@ -3,9 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { TreeWidget } from "../../../../TreeWidget";
+import { TreeWidget } from "../../../TreeWidget";
 
-import type { VisibilityStatus } from "../../common/UseHierarchyVisibility";
+import type { VisibilityStatus } from "./UseHierarchyVisibility";
 
 /** @internal */
 export type Visibility = "visible" | "hidden" | "partial";
@@ -26,13 +26,13 @@ export function createVisibilityStatus(status: Visibility | "disabled", tooltipS
 
 /** @internal */
 export function createTooltip(status: Visibility | "disabled", tooltipStringId: string | undefined): string {
-  const statusStringId = `modelsTree.visibilityTooltips.status.${status}`;
+  const statusStringId = `visibilityTooltips.status.${status}`;
   const statusString = TreeWidget.translate(statusStringId);
   if (!tooltipStringId) {
     return statusString;
   }
 
-  tooltipStringId = `modelsTree.visibilityTooltips.${tooltipStringId}`;
+  tooltipStringId = `visibilityTooltips.${tooltipStringId}`;
   const tooltipString = TreeWidget.translate(tooltipStringId);
   return `${statusString}: ${tooltipString}`;
 }

@@ -183,7 +183,7 @@ function HeaderButtons(props: PropsWithChildren<HeaderButtonsProps>) {
           }
           className="tree-header-button-dropdown-container"
         >
-          <IconButton title={TreeWidget.translate("header.dropdownMore")} styleType="borderless" size={props.size}>
+          <IconButton label={TreeWidget.translate("header.dropdownMore")} styleType="borderless" size={props.size}>
             <SvgMore />
           </IconButton>
         </DropdownMenu>
