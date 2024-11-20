@@ -64,9 +64,7 @@
         "someElementsAreHidden": "There are both visible and hidden elements",
         "allElementsVisible": "All elements are in the always drawn list",
         "visibleThroughCategory": "All elements are visible through category",
-        "hiddenThroughCategory": "All elements are hidden through category",
-        "disabledThroughCategory": "All elements are disabled through category",
-        "partialThroughCategory": "Some elements are visible some are hidden through category"
+        "hiddenThroughCategory": "All elements are hidden through category"
       }
     }
   },
