@@ -19,10 +19,6 @@ import { MeasurementPropertyWidget, MeasurementPropertyWidgetId } from "./Measur
 import { IModelApp } from "@itwin/core-frontend";
 import type { ScreenViewport } from "@itwin/core-frontend";
 
-// Note: measure tools cannot pick geometry when a sheet view is active to snap to and therefore must be hidden
-//  to avoid giving the user the impression they should work
-const isSheetViewActive = () => !!IModelApp.viewManager.selectedView?.view?.isSheetView();
-
 export interface MeasureToolsUiProviderOptions {
   itemPriority?: number;
   groupPriority?: number;
@@ -36,6 +32,8 @@ export interface MeasureToolsUiProviderOptions {
   // Called in the isValidLocation to filter viewports the tool can be used into
   allowedViewportCallback?: (vp: ScreenViewport) => boolean;
   additionalToolbarItems?: ToolItemDef[];
+  // Check if the measurement tools should be visible or hidden
+  isHiddenCallback?: (activeViewport?: ScreenViewport) => boolean;
 }
 
 export class MeasureToolsUiItemsProvider implements UiItemsProvider {
@@ -53,7 +51,8 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       enableSheetMeasurement: props?.enableSheetMeasurement ?? false,
       stageUsageList: props?.stageUsageList ?? [StageUsage.General],
       allowedViewportCallback: props?.allowedViewportCallback ?? ((_vp: ScreenViewport) => {return true}),
-      additionalToolbarItems: props?.additionalToolbarItems
+      additionalToolbarItems: props?.additionalToolbarItems,
+      isHiddenCallback: props?.isHiddenCallback ?? ((_activeViewport?: ScreenViewport) => false),
     };
   }
 
@@ -67,6 +66,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       const featureFlags = MeasureTools.featureFlags;
       const tools: ToolItemDef[] = [];
       const callback = this._props.allowedViewportCallback as (vp: ScreenViewport) => boolean;
+      const isHiddenCallbackFunc = this._props.isHiddenCallback as (activeViewport?: ScreenViewport) => boolean;
       if (!featureFlags?.hideDistanceTool) {
         tools.push(MeasureToolDefinitions.getMeasureDistanceToolCommand(callback, this._props.enableSheetMeasurement));
       }
@@ -102,8 +102,8 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
             {
               groupPriority: this._props.groupPriority,
               isHidden: new ConditionalBooleanValue(
-                isSheetViewActive,
-                [SyncUiEventId.ViewStateChanged],
+                () => isHiddenCallbackFunc(IModelApp.viewManager.selectedView),
+                [SyncUiEventId.ActiveViewportChanged, SyncUiEventId.ViewStateChanged],
               ),
             },
           ),
@@ -117,8 +117,9 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
             MeasureToolDefinitions.clearMeasurementsToolCommand,
             {
               isHidden: new ConditionalBooleanValue(
-                () => isSheetViewActive() || !MeasurementUIEvents.isClearMeasurementButtonVisible,
+                () => !MeasurementUIEvents.isClearMeasurementButtonVisible,
                 [
+                  SyncUiEventId.ActiveViewportChanged,
                   SyncUiEventId.ViewStateChanged,
                   MeasurementSyncUiEventId.MeasurementSelectionSetChanged,
                   MeasurementSyncUiEventId.DynamicMeasurementChanged,
