@@ -6,6 +6,7 @@
 import { BeEvent } from "@itwin/core-bentley";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { enableCategoryDisplay, enableSubCategoryDisplay } from "../common/CategoriesVisibilityUtils";
+import { createVisibilityStatus } from "../models-tree/internal/Tooltip";
 
 import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyVisibilityHandler, VisibilityStatus } from "../common/UseHierarchyVisibility";
@@ -38,7 +39,7 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
     if (!HierarchyNode.isInstancesNode(node)) {
       return { state: "hidden", isDisabled: true };
     }
-    return { state: node.parentKeys.length ? this.getSubCategoryVisibility(node) : this.getCategoryVisibility(node) };
+    return createVisibilityStatus(node.parentKeys.length ? this.getSubCategoryVisibility(node) : this.getCategoryVisibility(node));
   }
 
   public async changeVisibility(node: HierarchyNode, on: boolean) {
