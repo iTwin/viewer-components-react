@@ -16,9 +16,9 @@ import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { InstanceKey } from "@itwin/presentation-shared";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
+import { createVisibilityStatus } from "../../../../components/trees/common/Tooltip";
 import { ModelsTreeIdsCache } from "../../../../components/trees/models-tree/internal/ModelsTreeIdsCache";
 import { createModelsTreeVisibilityHandler } from "../../../../components/trees/models-tree/internal/ModelsTreeVisibilityHandler";
-import { createVisibilityStatus } from "../../../../components/trees/models-tree/internal/Tooltip";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../components/trees/models-tree/ModelsTreeDefinition";
 import {
   buildIModel,
@@ -48,7 +48,7 @@ import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { GeometricElement3dProps, QueryBinder } from "@itwin/core-common";
 import type { HierarchyNodeIdentifiersPath, HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { Id64String } from "@itwin/core-bentley";
-import type { Visibility } from "../../../../components/trees/models-tree/internal/Tooltip";
+import type { Visibility } from "../../../../components/trees/common/Tooltip";
 import type { ValidateNodeProps } from "./VisibilityValidation";
 
 interface VisibilityOverrides {
