@@ -44,13 +44,13 @@
     "url": "http://www.bentley.com"
   },
   "peerDependencies": {
-    "@itwin/appui-abstract": "^4.10.0",
+    "@itwin/appui-abstract": "^4.7.0",
     "@itwin/appui-react": "^4.17.0",
     "@itwin/components-react": "^4.17.0",
-    "@itwin/core-bentley": "^4.10.0",
-    "@itwin/core-common": "^4.10.0",
-    "@itwin/core-frontend": "^4.10.0",
-    "@itwin/core-geometry": "^4.10.0",
+    "@itwin/core-bentley": "^4.7.0",
+    "@itwin/core-common": "^4.7.0",
+    "@itwin/core-frontend": "^4.7.0",
+    "@itwin/core-geometry": "^4.7.0",
     "@itwin/core-react": "^4.17.0",
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
@@ -111,7 +111,6 @@
   },
   "dependencies": {
     "@bentley/icons-generic-webfont": "^1.0.29",
-    "@itwin/core-telemetry": "^4.10.0",
     "@itwin/itwinui-icons-react": "^2.6.0",
     "@itwin/itwinui-react": "^3.16.0"
   },
