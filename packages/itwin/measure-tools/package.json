@@ -115,7 +115,7 @@
     "@bentley/icons-generic-webfont": "^1.0.29",
     "@itwin/core-telemetry": "^4.7.0",
     "@itwin/itwinui-icons-react": "^2.6.0",
-    "@itwin/itwinui-react": "^2.11.2"
+    "@itwin/itwinui-react": "^3.16.0"
   },
   "nyc": {
     "nycrc-path": "./node_modules/@itwin/build-tools/.nycrc",
