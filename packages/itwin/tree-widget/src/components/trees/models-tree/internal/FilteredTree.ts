@@ -41,7 +41,6 @@ export const CATEGORY_CLASS_NAME = "BisCore.SpatialCategory" as const;
 export const ELEMENT_CLASS_NAME = "BisCore.GeometricElement3d" as const;
 
 type CategoryKey = `${Id64String}-${Id64String}`;
-type ElementKey = `${CategoryKey}-${Id64String}`;
 
 function createCategoryKey(modelId: string, categoryId: string): CategoryKey {
   return `${modelId}-${categoryId}`;
@@ -52,20 +51,11 @@ export function parseCategoryKey(key: CategoryKey) {
   return { modelId, categoryId };
 }
 
-function createElementKey(modelId: string, categoryId: string, elementId: string): ElementKey {
-  return `${modelId}-${categoryId}-${elementId}`;
-}
-
-export function parseElementKey(key: ElementKey) {
-  const [modelId, categoryId, elementId] = key.split("-");
-  return { modelId, categoryId, elementId };
-}
-
 interface FilterTargets {
   subjects?: Set<Id64String>;
   models?: Set<Id64String>;
   categories?: Set<CategoryKey>;
-  elements?: Set<ElementKey>;
+  elements?: Map<CategoryKey, Set<Id64String>>;
 }
 
 export async function createFilteredTree(imodelAccess: ECClassHierarchyInspector, filteringPaths: HierarchyFilteringPath[]): Promise<FilteredTree> {
@@ -167,7 +157,13 @@ function addTarget(filterTargets: FilterTargets, node: FilteredTreeNode) {
       (filterTargets.categories ??= new Set()).add(createCategoryKey(node.modelId, node.id));
       return;
     case "element":
-      (filterTargets.elements ??= new Set()).add(createElementKey(node.modelId, node.categoryId, node.id));
+      const categoryKey = createCategoryKey(node.modelId, node.categoryId);
+      const elements = (filterTargets.elements ??= new Map()).get(categoryKey);
+      if (elements) {
+        elements.add(node.id);
+        return;
+      }
+      filterTargets.elements.set(categoryKey, new Set([node.id]));
       return;
   }
 }
