@@ -4,8 +4,30 @@
  *--------------------------------------------------------------------------------------------*/
 
 import {
-  bufferCount, concat, concatAll, concatMap, defer, delay, distinct, EMPTY, filter, firstValueFrom, forkJoin, from, fromEventPattern, map, merge,
-  mergeMap, of, reduce, shareReplay, startWith, Subject, take, takeUntil, tap,
+  bufferCount,
+  concat,
+  concatAll,
+  concatMap,
+  defer,
+  delay,
+  distinct,
+  EMPTY,
+  filter,
+  firstValueFrom,
+  forkJoin,
+  from,
+  fromEventPattern,
+  map,
+  merge,
+  mergeMap,
+  of,
+  reduce,
+  shareReplay,
+  startWith,
+  Subject,
+  take,
+  takeUntil,
+  tap,
 } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
@@ -442,7 +464,10 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
 
       status = this.getDefaultCategoryVisibilityStatus({ categoryId, modelId, ignoreTooltip: true });
       return of(
-        createVisibilityStatus(status.state, { tooltipStringId: status.state === "visible" ? undefined : "modelsTree.element.hiddenThroughCategory", ignoreTooltip }),
+        createVisibilityStatus(status.state, {
+          tooltipStringId: status.state === "visible" ? undefined : "modelsTree.element.hiddenThroughCategory",
+          ignoreTooltip,
+        }),
       );
     });
     return createVisibilityHandlerResult(this, props, result, this._props.overrides?.getElementDisplayStatus);
@@ -655,7 +680,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       return concat(
         on && !viewport.view.viewsModel(modelId) ? this.showModelWithoutAnyCategoriesOrElements(modelId) : EMPTY,
         defer(() => {
-          const categoryVisibility = this.getDefaultCategoryVisibilityStatus({ categoryId, modelId,  ignoreTooltip: true });
+          const categoryVisibility = this.getDefaultCategoryVisibilityStatus({ categoryId, modelId, ignoreTooltip: true });
           const isDisplayedByDefault = categoryVisibility.state === "visible";
           return this.queueElementChange(elementIds, on, isDisplayedByDefault);
         }),
