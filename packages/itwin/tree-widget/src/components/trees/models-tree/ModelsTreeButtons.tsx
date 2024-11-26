@@ -5,7 +5,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { SvgCursorClick, SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
-import { Button, IconButton } from "@itwin/itwinui-react";
+import { Button, IconButton, Tooltip } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../../TreeWidget";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, toggleModels } from "./internal/ModelsTreeVisibilityHandler";
@@ -112,7 +112,7 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
     <IconButton
       size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
-      title={TreeWidget.translate("modelsTree.buttons.showAll.tooltip")}
+      label={TreeWidget.translate("modelsTree.buttons.showAll.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("models-tree-showall");
         void showAllModels(
@@ -132,7 +132,7 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
     <IconButton
       size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
-      title={TreeWidget.translate("modelsTree.buttons.hideAll.tooltip")}
+      label={TreeWidget.translate("modelsTree.buttons.hideAll.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("models-tree-hideall");
         void hideAllModels(
@@ -152,7 +152,7 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
     <IconButton
       size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
-      title={TreeWidget.translate("modelsTree.buttons.invert.tooltip")}
+      label={TreeWidget.translate("modelsTree.buttons.invert.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("models-tree-invert");
         void invertAllModels(
@@ -180,19 +180,20 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
   }, [models2d, props.viewport]);
 
   return (
-    <Button
-      size={props.density === "enlarged" ? "large" : "small"}
-      styleType="borderless"
-      title={TreeWidget.translate("modelsTree.buttons.toggle2d.tooltip")}
-      onClick={() => {
-        props.onFeatureUsed?.("models-tree-view2d");
-        void toggleModels(models2d, is2dToggleActive, props.viewport);
-      }}
-      disabled={models2d.length === 0}
-      endIcon={is2dToggleActive ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
-    >
-      {TreeWidget.translate("modelsTree.buttons.toggle2d.label")}
-    </Button>
+    <Tooltip content={TreeWidget.translate("modelsTree.buttons.toggle2d.tooltip")}>
+      <Button
+        size={props.density === "enlarged" ? "large" : "small"}
+        styleType="borderless"
+        onClick={() => {
+          props.onFeatureUsed?.("models-tree-view2d");
+          void toggleModels(models2d, is2dToggleActive, props.viewport);
+        }}
+        disabled={models2d.length === 0}
+        endIcon={is2dToggleActive ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
+      >
+        {TreeWidget.translate("modelsTree.buttons.toggle2d.label")}
+      </Button>
+    </Tooltip>
   );
 }
 
@@ -210,33 +211,34 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
   }, [models3d, props.viewport]);
 
   return (
-    <Button
-      size={props.density === "enlarged" ? "large" : "small"}
-      styleType="borderless"
-      title={TreeWidget.translate("modelsTree.buttons.toggle3d.tooltip")}
-      onClick={() => {
-        props.onFeatureUsed?.("models-tree-view3d");
-        void toggleModels(models3d, is3dToggleActive, props.viewport);
-      }}
-      disabled={models3d.length === 0}
-      endIcon={is3dToggleActive ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
-    >
-      {TreeWidget.translate("modelsTree.buttons.toggle3d.label")}
-    </Button>
+    <Tooltip content={TreeWidget.translate("modelsTree.buttons.toggle3d.tooltip")}>
+      <Button
+        size={props.density === "enlarged" ? "large" : "small"}
+        styleType="borderless"
+        onClick={() => {
+          props.onFeatureUsed?.("models-tree-view3d");
+          void toggleModels(models3d, is3dToggleActive, props.viewport);
+        }}
+        disabled={models3d.length === 0}
+        endIcon={is3dToggleActive ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
+      >
+        {TreeWidget.translate("modelsTree.buttons.toggle3d.label")}
+      </Button>
+    </Tooltip>
   );
 }
 
 /** @public */
 export function ToggleInstancesFocusButton({ density, onFeatureUsed }: { density?: "default" | "enlarged"; onFeatureUsed?: (feature: string) => void }) {
   const { enabled, toggle } = useFocusedInstancesContext();
-  const title = enabled
+  const label = enabled
     ? TreeWidget.translate("modelsTree.buttons.toggleFocusMode.disable.tooltip")
     : TreeWidget.translate("modelsTree.buttons.toggleFocusMode.enable.tooltip");
   return (
     <IconButton
       styleType="borderless"
       size={density === "enlarged" ? "large" : "small"}
-      title={title}
+      label={label}
       onClick={() => {
         onFeatureUsed?.("models-tree-instancesfocus");
         toggle();

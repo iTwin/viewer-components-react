@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import cx from "classnames";
-import { Checkbox } from "@itwin/itwinui-react";
+import { Checkbox, Tooltip } from "@itwin/itwinui-react";
 import { isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
 import type { PresentationHierarchyNode, RenderedTreeNode } from "@itwin/presentation-hierarchies-react";
@@ -40,19 +40,21 @@ export function TreeNodeCheckbox({ node, onCheckboxClicked, getCheckboxState, ..
 
   const checkboxState = getCheckboxState(node);
   return (
-    <Checkbox
-      {...props}
-      className={cx("tw-tree-node-checkbox", props.className)}
-      checked={checkboxState.state === "on"}
-      onClick={(e) => {
-        e.stopPropagation();
-      }}
-      onChange={(e) => {
-        onCheckboxClicked(node, e.currentTarget.checked);
-      }}
-      indeterminate={checkboxState.state === "partial"}
-      disabled={checkboxState.isDisabled}
-      title={checkboxState.tooltip}
-    />
+    <Tooltip content={checkboxState.tooltip} placement="left">
+      <Checkbox
+        {...props}
+        className={cx("tw-tree-node-checkbox", props.className)}
+        checked={checkboxState.state === "on"}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+        onChange={(e) => {
+          onCheckboxClicked(node, e.currentTarget.checked);
+        }}
+        indeterminate={checkboxState.state === "partial"}
+        disabled={checkboxState.isDisabled}
+        aria-label={checkboxState.tooltip}
+      />
+    </Tooltip>
   );
 }

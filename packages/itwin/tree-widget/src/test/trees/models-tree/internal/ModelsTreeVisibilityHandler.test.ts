@@ -18,9 +18,9 @@ import { InstanceKey } from "@itwin/presentation-shared";
 import {
   HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
+import { createVisibilityStatus } from "../../../../components/trees/common/Tooltip";
 import { ModelsTreeIdsCache } from "../../../../components/trees/models-tree/internal/ModelsTreeIdsCache";
 import { createModelsTreeVisibilityHandler } from "../../../../components/trees/models-tree/internal/ModelsTreeVisibilityHandler";
-import { createVisibilityStatus } from "../../../../components/trees/models-tree/internal/Tooltip";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../components/trees/models-tree/ModelsTreeDefinition";
 import {
   buildIModel, importSchema, insertPhysicalElement, insertPhysicalModelWithPartition, insertPhysicalPartition, insertPhysicalSubModel,
@@ -34,13 +34,13 @@ import {
 } from "../Utils";
 import { validateHierarchyVisibility, VisibilityExpectations } from "./VisibilityValidation";
 
+import type { Visibility } from "../../../../components/trees/common/Tooltip";
 import type { HierarchyVisibilityHandler } from "../../../../components/trees/common/UseHierarchyVisibility";
 import type { ModelsTreeVisibilityHandlerProps } from "../../../../components/trees/models-tree/internal/ModelsTreeVisibilityHandler";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { GeometricElement3dProps, QueryBinder } from "@itwin/core-common";
 import type { HierarchyNodeIdentifiersPath, HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { Id64String } from "@itwin/core-bentley";
-import type { Visibility } from "../../../../components/trees/models-tree/internal/Tooltip";
 import type { ValidateNodeProps } from "./VisibilityValidation";
 
 interface VisibilityOverrides {
