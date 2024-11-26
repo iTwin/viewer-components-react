@@ -75,7 +75,11 @@ export function useModelsTree({
   );
   const { onFeatureUsed } = useTelemetryContext();
 
-  const { getModelsTreeIdsCache, visibilityHandlerFactory, onFiltered } = useCachedVisibility(activeView, hierarchyConfiguration, visibilityHandlerOverrides);
+  const { getModelsTreeIdsCache, visibilityHandlerFactory, onFilteredPathsChanged } = useCachedVisibility(
+    activeView,
+    hierarchyConfiguration,
+    visibilityHandlerOverrides,
+  );
   const { loadFocusedItems } = useFocusedInstancesContext();
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
@@ -99,12 +103,13 @@ export function useModelsTree({
     setFilteringError(undefined);
     onModelsFiltered?.(undefined);
 
+    // reset filtered paths if there is no filters applied. This allows to keep current filtered paths until new paths are loaded.
     if (!loadFocusedItems && !getFilteredPaths && !filter) {
-      onFiltered(undefined);
+      onFilteredPathsChanged(undefined);
     }
 
     const handlePaths = async (filteredPaths: HierarchyFilteringPath[], classInspector: ECClassHierarchyInspector) => {
-      onFiltered(filteredPaths);
+      onFilteredPathsChanged(filteredPaths);
       if (!onModelsFiltered) {
         return;
       }
@@ -188,7 +193,7 @@ export function useModelsTree({
       };
     }
     return undefined;
-  }, [filter, loadFocusedItems, getModelsTreeIdsCache, onFeatureUsed, getFilteredPaths, hierarchyConfiguration, onModelsFiltered, onFiltered]);
+  }, [filter, loadFocusedItems, getModelsTreeIdsCache, onFeatureUsed, getFilteredPaths, hierarchyConfiguration, onModelsFiltered, onFilteredPathsChanged]);
 
   return {
     modelsTreeProps: {
@@ -330,7 +335,7 @@ function useCachedVisibility(activeView: Viewport, hierarchyConfig: ModelsTreeHi
   return {
     getModelsTreeIdsCache,
     visibilityHandlerFactory,
-    onFiltered: useCallback((paths: HierarchyFilteringPath[] | undefined) => setFilteredPaths(paths), []),
+    onFilteredPathsChanged: useCallback((paths: HierarchyFilteringPath[] | undefined) => setFilteredPaths(paths), []),
   };
 }
 
