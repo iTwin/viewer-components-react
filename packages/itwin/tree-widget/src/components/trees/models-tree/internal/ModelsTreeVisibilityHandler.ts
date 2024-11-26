@@ -534,11 +534,10 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         if (elements?.size) {
           observables.push(
             from(elements).pipe(
-              releaseMainThreadOnItemsCount(50),
               mergeMap(([categoryKey, elementIds]) => {
                 const { modelId, categoryId } = parseCategoryKey(categoryKey);
                 return this.changeElementsState({ modelId, categoryId, elementIds, on });
-              }, 1),
+              }),
             ),
           );
         }
