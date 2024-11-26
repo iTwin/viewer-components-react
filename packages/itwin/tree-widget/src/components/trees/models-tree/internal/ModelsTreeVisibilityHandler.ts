@@ -390,7 +390,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       return this.getVisibilityFromAlwaysAndNeverDrawnElements({
         elements: elementIds,
         defaultStatus: () => {
-          const status = this.getDefaultCategoryVisibilityStatus({ categoryId, modelId });
+          const status = this.getDefaultCategoryVisibilityStatus({ categoryId, modelId, ignoreTooltip: true });
           return createVisibilityStatus(status.state, { tooltipStringId: `groupingNode.${status.state}ThroughCategory` });
         },
         tooltips: {
@@ -534,7 +534,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         if (elements?.size) {
           observables.push(
             from(elements).pipe(
-              releaseMainThreadOnItemsCount(1000),
+              releaseMainThreadOnItemsCount(50),
               mergeMap(([categoryKey, elementIds]) => {
                 const { modelId, categoryId } = parseCategoryKey(categoryKey);
                 return this.changeElementsState({ modelId, categoryId, elementIds, on });
@@ -656,7 +656,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       return concat(
         on && !viewport.view.viewsModel(modelId) ? this.showModelWithoutAnyCategoriesOrElements(modelId) : EMPTY,
         defer(() => {
-          const categoryVisibility = this.getDefaultCategoryVisibilityStatus({ categoryId, modelId });
+          const categoryVisibility = this.getDefaultCategoryVisibilityStatus({ categoryId, modelId,  ignoreTooltip: true });
           const isDisplayedByDefault = categoryVisibility.state === "visible";
           return this.queueElementChange(elementIds, on, isDisplayedByDefault);
         }),
@@ -676,7 +676,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       return concat(
         props.on && !viewport.view.viewsModel(modelId) ? this.showModelWithoutAnyCategoriesOrElements(modelId) : EMPTY,
         defer(() => {
-          const categoryVisibility = this.getDefaultCategoryVisibilityStatus({ categoryId, modelId });
+          const categoryVisibility = this.getDefaultCategoryVisibilityStatus({ categoryId, modelId, ignoreTooltip: true });
           const isDisplayedByDefault = categoryVisibility.state === "visible";
           return this.queueElementChange(elementIds, on, isDisplayedByDefault);
         }),
