@@ -1,8 +1,14 @@
-import type { Id64String } from "@itwin/core-bentley";
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+
+import { assert } from "@itwin/core-bentley";
 import { HierarchyFilteringPath, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 
+import type { Id64String } from "@itwin/core-bentley";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
+import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
 
 interface FilteredTreeRootNode {
   children: Map<Id64String, FilteredTreeNode>;
@@ -84,7 +90,12 @@ export async function createFilteredTree(imodelAccess: ECClassHierarchyInspector
       }
 
       const type = await getType(imodelAccess, identifier.className);
-      const newNode: FilteredTreeNode = createFilteredTreeNode(type, identifier.id, i === normalizedPath.length - 1, parentNode as FilteredTreeNode);
+      const newNode: FilteredTreeNode = createFilteredTreeNode({
+        type,
+        id: identifier.id,
+        isFilterTarget: i === normalizedPath.length - 1,
+        parent: parentNode as FilteredTreeNode,
+      });
       (parentNode.children ??= new Map()).set(identifier.id, newNode);
       parentNode = newNode;
     }
@@ -96,7 +107,7 @@ export async function createFilteredTree(imodelAccess: ECClassHierarchyInspector
 }
 
 function getFilterTargets(root: FilteredTreeRootNode, node: HierarchyNode) {
-  let currentNode: { children?: Map<Id64String, FilteredTreeNode> } = root;
+  let lookupParents: Array<{ children?: Map<Id64String, FilteredTreeNode> }> = [root];
   const filterTargets: FilterTargets = {};
 
   const nodeKey = node.key;
@@ -104,25 +115,35 @@ function getFilterTargets(root: FilteredTreeRootNode, node: HierarchyNode) {
     return filterTargets;
   }
 
+  // find the filtered parent nodes of the `node`
   for (const parentKey of node.parentKeys) {
     if (!HierarchyNodeKey.isInstances(parentKey)) {
       continue;
     }
 
-    const parentNode = currentNode.children?.get(parentKey.instanceKeys[0].id);
-    if (!parentNode) {
+    // tree node might be merged from multiple instances. As filtered tree stores only one instance per node, we need to find all matching nodes
+    // and use them when checking for matching node in one level deeper.
+    const parentNodes = findMatchingFilteredNodes(lookupParents, parentKey.instanceKeys);
+    if (parentNodes.length === 0) {
       return filterTargets;
     }
-    currentNode = parentNode;
+    lookupParents = parentNodes;
   }
 
-  const filteredNode = currentNode.children?.get(nodeKey.instanceKeys[0].id);
-  if (!filteredNode) {
+  // find filtered nodes that match the `node`
+  const filteredNodes = findMatchingFilteredNodes(lookupParents, nodeKey.instanceKeys);
+  if (filteredNodes.length === 0) {
     return filterTargets;
   }
 
-  collectFilterTargets(filterTargets, filteredNode);
+  filteredNodes.forEach((filteredNode) => collectFilterTargets(filterTargets, filteredNode));
   return filterTargets;
+}
+
+function findMatchingFilteredNodes(lookupParents: Array<{ children?: Map<Id64String, FilteredTreeNode> }>, keys: InstanceKey[]) {
+  return lookupParents
+    .flatMap((lookup) => keys.map((key) => lookup.children?.get(key.id)))
+    .filter((lookupNode): lookupNode is FilteredTreeNode => lookupNode !== undefined);
 }
 
 function collectFilterTargets(filterTargets: FilterTargets, node: FilteredTreeNode) {
@@ -168,11 +189,17 @@ function addTarget(filterTargets: FilterTargets, node: FilteredTreeNode) {
   }
 }
 
-
-function createFilteredTreeNode(type: FilteredTreeNode["type"],
-  id: string,
-  isFilterTarget: boolean,
-  parent: FilteredTreeNode,): FilteredTreeNode {
+function createFilteredTreeNode({
+  type,
+  id,
+  isFilterTarget,
+  parent,
+}: {
+  type: FilteredTreeNode["type"];
+  id: string;
+  isFilterTarget: boolean;
+  parent: FilteredTreeNode | FilteredTreeRootNode;
+}): FilteredTreeNode {
   if (type === "subject" || type === "model") {
     return {
       id,
@@ -182,6 +209,7 @@ function createFilteredTreeNode(type: FilteredTreeNode["type"],
   }
 
   if (type === "category") {
+    assert("type" in parent && parent.type === "model");
     return {
       id,
       isFilterTarget,
@@ -190,7 +218,7 @@ function createFilteredTreeNode(type: FilteredTreeNode["type"],
     };
   }
 
-  if (parent.type === "category") {
+  if ("type" in parent && parent.type === "category") {
     return {
       id,
       isFilterTarget,
@@ -200,7 +228,7 @@ function createFilteredTreeNode(type: FilteredTreeNode["type"],
     };
   }
 
-  if (parent.type === "element") {
+  if ("type" in parent && parent.type === "element") {
     return {
       id,
       isFilterTarget,
