@@ -686,24 +686,31 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
 
   private queueElementChange(elementIds: Id64Set, on: boolean, visibleByDefault: boolean) {
     const finishedSubject = new Subject<boolean>();
+    // observable to track if visibility change is finished/cancelled
     const changeFinished = finishedSubject.pipe(startWith(false), shareReplay(1));
 
     const changeObservable = from(elementIds).pipe(
+      // check if visibility change is not finished (cancelled) due to change overall change request being cancelled
       takeUntil(changeFinished.pipe(filter((finished) => finished))),
       this.changeElementStateNoChildrenOperator({ on, isDisplayedByDefault: visibleByDefault }),
       tap({
         next: () => {
+          // notify that visibility change is finished
           finishedSubject.next(true);
         },
       }),
     );
 
+    // queue visibility change. `changeObservable` will be subscribed to when other queue changes are finished
     this._elementChangeQueue.next(changeObservable);
+
+    // return observable that will emit when visibility change is finished
     return changeFinished.pipe(
       filter((finished) => finished),
       take(1),
       tap({
         unsubscribe: () => {
+          // if this observable is unsubscribed before visibility change is finished, we have to notify that it queued change request is cancelled
           finishedSubject.next(true);
         },
       }),
