@@ -15,29 +15,21 @@ import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { InstanceKey } from "@itwin/presentation-shared";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
+import {
+  HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
+} from "@itwin/presentation-testing";
 import { ModelsTreeIdsCache } from "../../../../components/trees/models-tree/internal/ModelsTreeIdsCache";
 import { createModelsTreeVisibilityHandler } from "../../../../components/trees/models-tree/internal/ModelsTreeVisibilityHandler";
 import { createVisibilityStatus } from "../../../../components/trees/models-tree/internal/Tooltip";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../components/trees/models-tree/ModelsTreeDefinition";
 import {
-  buildIModel,
-  importSchema,
-  insertPhysicalElement,
-  insertPhysicalModelWithPartition,
-  insertPhysicalPartition,
-  insertPhysicalSubModel,
-  insertSpatialCategory,
-  insertSubject,
+  buildIModel, importSchema, insertPhysicalElement, insertPhysicalModelWithPartition, insertPhysicalPartition, insertPhysicalSubModel,
+  insertSpatialCategory, insertSubject,
 } from "../../../IModelUtils";
 import { TestUtils } from "../../../TestUtils";
 import { createFakeSinonViewport, createIModelAccess } from "../../Common";
 import {
-  createCategoryHierarchyNode,
-  createClassGroupingHierarchyNode,
-  createElementHierarchyNode,
-  createFakeIdsCache,
-  createModelHierarchyNode,
+  createCategoryHierarchyNode, createClassGroupingHierarchyNode, createElementHierarchyNode, createFakeIdsCache, createModelHierarchyNode,
   createSubjectHierarchyNode,
 } from "../Utils";
 import { validateHierarchyVisibility, VisibilityExpectations } from "./VisibilityValidation";
@@ -117,7 +109,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
           }),
         changeCategoryState: sinon.fake(async ({ originalImplementation }) => originalImplementation()),
         changeModelState: sinon.fake(async ({ originalImplementation }) => originalImplementation()),
-        changeElementState: sinon.fake(async ({ originalImplementation }) => originalImplementation()),
+        changeElementsState: sinon.fake(async ({ originalImplementation }) => originalImplementation()),
       };
       const handler = createModelsTreeVisibilityHandler({
         viewport: props?.viewport ?? createFakeSinonViewport(),
@@ -1480,7 +1472,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
           const categoryId = "0x2";
           const elementId = "0x10";
           const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
-            changeElementState: sinon.fake.resolves(undefined),
+            changeElementsState: sinon.fake.resolves(undefined),
           };
           const viewport = createFakeSinonViewport();
           const handler = createModelsTreeVisibilityHandler({
@@ -1491,7 +1483,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
           });
 
           await handler.changeVisibility(createElementHierarchyNode({ modelId, categoryId, elementId }), true);
-          expect(overrides.changeElementState).to.be.called;
+          expect(overrides.changeElementsState).to.be.called;
         });
 
         describe("on", () => {
@@ -2672,7 +2664,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
         filterPaths,
       }: Parameters<typeof createVisibilityTestData>[0] & { filterPaths: HierarchyNodeIdentifiersPath[] }) {
         const commonProps = createCommonProps(imodel);
-        const handler = createModelsTreeVisibilityHandler(commonProps);
+        const handler = createModelsTreeVisibilityHandler({ ...commonProps, filteredPaths: filterPaths });
         const defaultProvider = createProvider({ ...commonProps });
         const filteredProvider = createProvider({ ...commonProps, filterPaths });
         return { handler, defaultProvider, filteredProvider, ...commonProps };
