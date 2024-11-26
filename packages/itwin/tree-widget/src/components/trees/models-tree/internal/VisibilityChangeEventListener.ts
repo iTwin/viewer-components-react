@@ -11,14 +11,17 @@ import type { Viewport } from "@itwin/core-frontend";
 /** @internal */
 export interface IVisibilityChangeEventListener extends IDisposable {
   onVisibilityChange: BeEvent<() => void>;
+  suppressChangeEvents(): void;
+  unSuppressChangeEvents(): void;
 }
 
 /** @internal */
 export function createVisibilityChangeEventListener(viewport: Viewport): IVisibilityChangeEventListener {
   const onVisibilityChange = new BeEvent<() => void>();
   let pendingVisibilityChange: undefined | ReturnType<typeof setTimeout>;
+  let suppressChangeEvents: number = 0;
   const handleVisibilityChange = () => {
-    if (pendingVisibilityChange) {
+    if (pendingVisibilityChange || suppressChangeEvents > 0) {
       return;
     }
     pendingVisibilityChange = setTimeout(() => {
@@ -45,6 +48,15 @@ export function createVisibilityChangeEventListener(viewport: Viewport): IVisibi
       }
       listeners.forEach((x) => x());
       listeners.length = 0;
+    },
+    suppressChangeEvents: () => {
+      suppressChangeEvents++;
+    },
+    unSuppressChangeEvents: () => {
+      suppressChangeEvents--;
+      if (suppressChangeEvents === 0) {
+        handleVisibilityChange();
+      }
     },
   };
 }
