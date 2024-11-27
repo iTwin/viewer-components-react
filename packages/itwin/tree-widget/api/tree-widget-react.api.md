@@ -15,6 +15,7 @@ import type { HierarchyFilteringPath } from '@itwin/presentation-hierarchies';
 import type { HierarchyNode } from '@itwin/presentation-hierarchies-react';
 import type { Id64Arg } from '@itwin/core-bentley';
 import type { Id64Array } from '@itwin/core-bentley';
+import type { Id64Set } from '@itwin/core-bentley';
 import type { Id64String } from '@itwin/core-bentley';
 import type { IDisposable } from '@itwin/core-bentley';
 import type { IModelConnection } from '@itwin/core-frontend';
@@ -84,7 +85,13 @@ interface ChangeCategoryVisibilityStateProps extends GetCategoryVisibilityStatus
 }
 
 // @beta (undocumented)
-interface ChangeGeometricElementDisplayStateProps extends GetGeometricElementVisibilityStatusProps {
+interface ChangeGeometricElementsDisplayStateProps {
+    // (undocumented)
+    categoryId: Id64String;
+    // (undocumented)
+    elementIds: Id64Set;
+    // (undocumented)
+    modelId: Id64String;
     // (undocumented)
     on: boolean;
 }
@@ -276,7 +283,7 @@ export interface ModelsTreeVisibilityHandlerOverrides {
         on: boolean;
     }) => Promise<void>>;
     // (undocumented)
-    changeElementState?: HierarchyVisibilityHandlerOverridableMethod<(props: ChangeGeometricElementDisplayStateProps) => Promise<void>>;
+    changeElementsState?: HierarchyVisibilityHandlerOverridableMethod<(props: ChangeGeometricElementsDisplayStateProps) => Promise<void>>;
     // (undocumented)
     changeModelState?: HierarchyVisibilityHandlerOverridableMethod<(props: ChangeModelVisibilityStateProps) => Promise<void>>;
     // (undocumented)
