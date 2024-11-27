@@ -6,7 +6,7 @@ settings:
 
 overrides:
   '@itwin/itwinui-react@^2': 2.12.26
-  '@itwin/itwinui-react@^3': 3.14.0
+  '@itwin/itwinui-react@^3': 3.16.0
 
 importers:
 
@@ -71,7 +71,7 @@ importers:
         version: file:../../packages/itwin/geo-tools(ko5k7t4gc5acngzaignurvjupm)
       '@itwin/grouping-mapping-widget':
         specifier: workspace:*
-        version: file:../../packages/itwin/grouping-mapping-widget(huqpdcb6jga2lqdu4itkfnwmmm)
+        version: file:../../packages/itwin/grouping-mapping-widget(gjkw6gqnniuy6nleaudayp4ori)
       '@itwin/imodel-components-react':
         specifier: ^4.17.3
         version: 4.17.3(75omrradguwm7tyuqa4nqnozdu)
@@ -88,8 +88,8 @@ importers:
         specifier: ^2.1.0
         version: 2.1.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/itwinui-react':
-        specifier: 3.14.0
-        version: 3.14.0(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: 3.16.0
+        version: 3.16.0(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/map-layers':
         specifier: workspace:*
         version: file:../../packages/itwin/map-layers(slo6zkh4wy4fmt5tpht6lzp7ti)
@@ -113,25 +113,25 @@ importers:
         version: 4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-geometry@4.9.7))(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/ecschema-metadata@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7)))
       '@itwin/presentation-components':
         specifier: ^5.6.0
-        version: 5.6.0(c7novkptxpwf4aynu7q2kxl3qm)
+        version: 5.6.0(u5bjhqo6rmc7jigupcyosbfkey)
       '@itwin/presentation-frontend':
         specifier: ^4.9.7
         version: 4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-geometry@4.9.7))(@itwin/core-frontend@4.9.7(@itwin/appui-abstract@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/core-bentley@4.9.7)(@itwin/core-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-geometry@4.9.7))(@itwin/core-geometry@4.9.7)(@itwin/core-orbitgt@4.9.7)(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))(inversify@6.1.1(reflect-metadata@0.1.14))(reflect-metadata@0.1.14))(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/ecschema-metadata@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7)))(@itwin/presentation-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-geometry@4.9.7))(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/ecschema-metadata@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))))
       '@itwin/property-grid-react':
         specifier: workspace:*
-        version: file:../../packages/itwin/property-grid(fupunyrte3a5az5waarnxzh2m4)
+        version: file:../../packages/itwin/property-grid(4htedlbv5nevfnmgot6gllj2wi)
       '@itwin/reports-config-widget-react':
         specifier: workspace:*
         version: file:../../packages/itwin/reports-config-widget(@itwin/appui-abstract@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/appui-react@4.17.3(hrzk54ifbmr6vabjyblwmkhfay))(@itwin/core-bentley@4.9.7)(@itwin/core-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-geometry@4.9.7))(@itwin/core-frontend@4.9.7(@itwin/appui-abstract@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/core-bentley@4.9.7)(@itwin/core-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-geometry@4.9.7))(@itwin/core-geometry@4.9.7)(@itwin/core-orbitgt@4.9.7)(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))(inversify@6.1.1(reflect-metadata@0.1.14))(reflect-metadata@0.1.14))(react-dom@18.2.0(react@18.2.0))(react-redux@7.2.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)
       '@itwin/tree-widget-react':
         specifier: workspace:*
-        version: file:../../packages/itwin/tree-widget(wzx4rqwi4pbgs3ocsfmxvmb7mi)
+        version: file:../../packages/itwin/tree-widget(z24r4msjxskjckfvxy5u64w42e)
       '@itwin/unified-selection':
         specifier: ^1.1.1
         version: 1.1.1
       '@itwin/web-viewer-react':
         specifier: ^4.2.5
-        version: 4.2.5(yqqv22sev53p2osb7k5xfffnli)
+        version: 4.2.5(sdlgrexzn5debooqcjqlzxzouq)
       '@itwin/webgl-compatibility':
         specifier: ^4.9.7
         version: 4.9.7
@@ -740,11 +740,11 @@ packages:
     resolution: {integrity: sha512-SzedS6sz1iupq0JZm0SAfynFPR8xB9/GbTtQz/8XyuTEvrBoXyHMZJGAySR99TdLwpm3r+cxAEpFK5UOpQ+0Vw==}
     deprecated: iTwinUI v2 has reached end-of-life. Please upgrade to the latest version.
     peerDependencies:
-      react: '>=16.8.6 < 19.0.0'
-      react-dom: '>=16.8.6 < 19.0.0'
+      react: ^17.0.2
+      react-dom: ^17.0.2
 
-  '@itwin/itwinui-react@3.14.0':
-    resolution: {integrity: sha512-JEVDGyK9PdhyBBTasz3hrPD/+JYzW/cYEZvPQReTKT424Z3EMfA3PkMifLzFcZHp3JIX9HSGdU6MCtbvT9E83Q==}
+  '@itwin/itwinui-react@3.16.0':
+    resolution: {integrity: sha512-mjQ+gpOEI0zOo5iITybvr0XW+72EB5WH9Xnt8Xi4uz51riLM/6wveqmVJgQcMPpWXfODm97uZQmZ0atGwhykNQ==}
     peerDependencies:
       react: '>= 17.0.0 < 19.0.0'
       react-dom: '>=17.0.0 < 19.0.0'
@@ -842,7 +842,7 @@ packages:
       '@itwin/core-react': ^4.9.0
       '@itwin/ecschema-metadata': ^4.4.0
       '@itwin/imodel-components-react': ^4.9.0
-      '@itwin/itwinui-react': 3.14.0
+      '@itwin/itwinui-react': 3.16.0
       '@itwin/presentation-common': ^4.4.0
       '@itwin/presentation-frontend': ^4.4.0
       react: ^17.0.0 || ^18.0.0
@@ -870,7 +870,7 @@ packages:
   '@itwin/presentation-hierarchies-react@1.1.3':
     resolution: {integrity: sha512-vcNU7KFxoRIghF4Qd6e06uxl4OmaTT+kgiWc2MT0z4Uch84ZNSkDHuEv+D53TJfHZ3SXItAax2g2M51h6uggpg==}
     peerDependencies:
-      '@itwin/itwinui-react': 3.14.0
+      '@itwin/itwinui-react': 3.16.0
       react: ^17.0.0 || ^18.0.0
       react-dom: ^17.0.0 || ^18.0.0
     peerDependenciesMeta:
@@ -929,7 +929,7 @@ packages:
       '@itwin/core-frontend': ^4.0.0
       '@itwin/core-react': ^4.10.0
       '@itwin/ecschema-metadata': ^4.0.0
-      '@itwin/itwinui-react': 3.14.0
+      '@itwin/itwinui-react': 3.16.0
       '@itwin/presentation-components': ^5.0.0
       react: ^17.0.0 || ^18.0.0
       react-dom: ^17.0.0 || ^18.0.0
@@ -3382,7 +3382,7 @@ snapshots:
       '@itwin/imodel-components-react': 4.17.3(75omrradguwm7tyuqa4nqnozdu)
       '@itwin/itwinui-icons-react': 2.9.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@itwin/itwinui-react': 3.14.0(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@itwin/itwinui-react': 3.16.0(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/itwinui-react-v2': '@itwin/itwinui-react@2.12.26(react-dom@18.2.0(react@18.2.0))(react@18.2.0)'
       '@itwin/itwinui-variables': 3.3.0
       classnames: 2.3.1
@@ -3435,7 +3435,7 @@ snapshots:
       '@itwin/core-bentley': 4.9.7
       '@itwin/core-react': 4.17.3(@itwin/appui-abstract@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/core-bentley@4.9.7)(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/itwinui-icons-react': 2.9.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@itwin/itwinui-react': 3.14.0(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@itwin/itwinui-react': 3.16.0(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/itwinui-variables': 3.3.0
       classnames: 2.3.1
       immer: 9.0.6
@@ -3516,7 +3516,7 @@ snapshots:
       '@itwin/appui-abstract': 4.9.7(@itwin/core-bentley@4.9.7)
       '@itwin/core-bentley': 4.9.7
       '@itwin/itwinui-icons-react': 2.9.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@itwin/itwinui-react': 3.14.0(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@itwin/itwinui-react': 3.16.0(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/itwinui-variables': 3.3.0
       classnames: 2.3.1
       dompurify: 2.5.7
@@ -3596,7 +3596,7 @@ snapshots:
       react-dom: 18.2.0(react@18.2.0)
       redux: 4.2.1
 
-  '@itwin/grouping-mapping-widget@file:../../packages/itwin/grouping-mapping-widget(huqpdcb6jga2lqdu4itkfnwmmm)':
+  '@itwin/grouping-mapping-widget@file:../../packages/itwin/grouping-mapping-widget(gjkw6gqnniuy6nleaudayp4ori)':
     dependencies:
       '@dnd-kit/core': 6.1.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@dnd-kit/sortable': 7.0.1(@dnd-kit/core@6.1.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)
@@ -3614,7 +3614,7 @@ snapshots:
       '@itwin/itwinui-icons-color-react': 2.1.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/itwinui-icons-react': 2.9.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/itwinui-react': 2.12.26(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@itwin/presentation-components': 5.6.0(c7novkptxpwf4aynu7q2kxl3qm)
+      '@itwin/presentation-components': 5.6.0(u5bjhqo6rmc7jigupcyosbfkey)
       '@itwin/presentation-frontend': 4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-geometry@4.9.7))(@itwin/core-frontend@4.9.7(@itwin/appui-abstract@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/core-bentley@4.9.7)(@itwin/core-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-geometry@4.9.7))(@itwin/core-geometry@4.9.7)(@itwin/core-orbitgt@4.9.7)(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))(inversify@6.1.1(reflect-metadata@0.1.14))(reflect-metadata@0.1.14))(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/ecschema-metadata@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7)))(@itwin/presentation-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-geometry@4.9.7))(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/ecschema-metadata@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))))
       '@tanstack/query-core': 4.36.1
       '@tanstack/react-query': 4.36.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -3646,7 +3646,7 @@ snapshots:
       '@itwin/core-quantity': 4.9.7(@itwin/core-bentley@4.9.7)
       '@itwin/core-react': 4.17.3(@itwin/appui-abstract@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/core-bentley@4.9.7)(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/itwinui-icons-react': 2.9.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@itwin/itwinui-react': 3.14.0(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@itwin/itwinui-react': 3.16.0(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/itwinui-variables': 3.3.0
       classnames: 2.3.1
       react: 18.2.0
@@ -3734,7 +3734,7 @@ snapshots:
       react-transition-group: 4.4.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       tippy.js: 6.3.7
 
-  '@itwin/itwinui-react@3.14.0(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@itwin/itwinui-react@3.16.0(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@floating-ui/react': 0.26.27(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -3854,7 +3854,7 @@ snapshots:
       '@itwin/core-quantity': 4.9.7(@itwin/core-bentley@4.9.7)
       '@itwin/ecschema-metadata': 4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))
 
-  '@itwin/presentation-components@5.6.0(c7novkptxpwf4aynu7q2kxl3qm)':
+  '@itwin/presentation-components@5.6.0(u5bjhqo6rmc7jigupcyosbfkey)':
     dependencies:
       '@itwin/appui-abstract': 4.9.7(@itwin/core-bentley@4.9.7)
       '@itwin/components-react': 4.17.3(@itwin/appui-abstract@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/core-bentley@4.9.7)(@itwin/core-react@4.17.3(@itwin/appui-abstract@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/core-bentley@4.9.7)(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -3867,7 +3867,7 @@ snapshots:
       '@itwin/imodel-components-react': 4.17.3(75omrradguwm7tyuqa4nqnozdu)
       '@itwin/itwinui-icons-react': 2.9.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@itwin/itwinui-react': 3.14.0(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@itwin/itwinui-react': 3.16.0(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/presentation-common': 4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-geometry@4.9.7))(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/ecschema-metadata@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7)))
       '@itwin/presentation-frontend': 4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-geometry@4.9.7))(@itwin/core-frontend@4.9.7(@itwin/appui-abstract@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/core-bentley@4.9.7)(@itwin/core-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-geometry@4.9.7))(@itwin/core-geometry@4.9.7)(@itwin/core-orbitgt@4.9.7)(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))(inversify@6.1.1(reflect-metadata@0.1.14))(reflect-metadata@0.1.14))(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/ecschema-metadata@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7)))(@itwin/presentation-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-geometry@4.9.7))(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/ecschema-metadata@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))))
       classnames: 2.5.1
@@ -3901,7 +3901,7 @@ snapshots:
       rxjs: 7.8.1
       rxjs-for-await: 1.0.0(rxjs@7.8.1)
 
-  '@itwin/presentation-hierarchies-react@1.1.3(@itwin/itwinui-react@3.14.0(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@itwin/presentation-hierarchies-react@1.1.3(@itwin/itwinui-react@3.16.0(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@itwin/core-bentley': 4.9.7
       '@itwin/itwinui-icons-react': 2.9.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -3916,7 +3916,7 @@ snapshots:
       react-error-boundary: 4.1.2(react@18.2.0)
       rxjs: 7.8.1
     optionalDependencies:
-      '@itwin/itwinui-react': 3.14.0(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@itwin/itwinui-react': 3.16.0(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
 
   '@itwin/presentation-hierarchies@1.2.1':
     dependencies:
@@ -3931,7 +3931,7 @@ snapshots:
     dependencies:
       '@itwin/core-bentley': 4.9.7
 
-  '@itwin/property-grid-react@file:../../packages/itwin/property-grid(fupunyrte3a5az5waarnxzh2m4)':
+  '@itwin/property-grid-react@file:../../packages/itwin/property-grid(4htedlbv5nevfnmgot6gllj2wi)':
     dependencies:
       '@itwin/appui-abstract': 4.9.7(@itwin/core-bentley@4.9.7)
       '@itwin/appui-react': 4.17.3(hrzk54ifbmr6vabjyblwmkhfay)
@@ -3942,9 +3942,9 @@ snapshots:
       '@itwin/core-react': 4.17.3(@itwin/appui-abstract@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/core-bentley@4.9.7)(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/itwinui-icons-react': 2.9.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@itwin/itwinui-react': 3.14.0(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@itwin/itwinui-react': 3.16.0(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/presentation-common': 4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-geometry@4.9.7))(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/ecschema-metadata@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7)))
-      '@itwin/presentation-components': 5.6.0(c7novkptxpwf4aynu7q2kxl3qm)
+      '@itwin/presentation-components': 5.6.0(u5bjhqo6rmc7jigupcyosbfkey)
       '@itwin/presentation-frontend': 4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-geometry@4.9.7))(@itwin/core-frontend@4.9.7(@itwin/appui-abstract@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/core-bentley@4.9.7)(@itwin/core-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-geometry@4.9.7))(@itwin/core-geometry@4.9.7)(@itwin/core-orbitgt@4.9.7)(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))(inversify@6.1.1(reflect-metadata@0.1.14))(reflect-metadata@0.1.14))(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/ecschema-metadata@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7)))(@itwin/presentation-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-geometry@4.9.7))(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/ecschema-metadata@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))))
       classnames: 2.5.1
       react: 18.2.0
@@ -3995,7 +3995,7 @@ snapshots:
       - '@itwin/core-geometry'
       - supports-color
 
-  '@itwin/tree-widget-react@file:../../packages/itwin/tree-widget(wzx4rqwi4pbgs3ocsfmxvmb7mi)':
+  '@itwin/tree-widget-react@file:../../packages/itwin/tree-widget(z24r4msjxskjckfvxy5u64w42e)':
     dependencies:
       '@itwin/appui-abstract': 4.9.7(@itwin/core-bentley@4.9.7)
       '@itwin/appui-react': 4.17.3(hrzk54ifbmr6vabjyblwmkhfay)
@@ -4005,11 +4005,11 @@ snapshots:
       '@itwin/ecschema-metadata': 4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))
       '@itwin/itwinui-icons-react': 2.9.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@itwin/itwinui-react': 3.14.0(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@itwin/presentation-components': 5.6.0(c7novkptxpwf4aynu7q2kxl3qm)
+      '@itwin/itwinui-react': 3.16.0(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@itwin/presentation-components': 5.6.0(u5bjhqo6rmc7jigupcyosbfkey)
       '@itwin/presentation-core-interop': 1.1.1(@itwin/core-bentley@4.9.7)(@itwin/core-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-geometry@4.9.7))(@itwin/core-geometry@4.9.7)(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/ecschema-metadata@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7)))
       '@itwin/presentation-hierarchies': 1.2.1
-      '@itwin/presentation-hierarchies-react': 1.1.3(@itwin/itwinui-react@3.14.0(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@itwin/presentation-hierarchies-react': 1.1.3(@itwin/itwinui-react@3.16.0(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/presentation-shared': 1.1.0
       '@itwin/unified-selection': 1.1.1
       classnames: 2.5.1
@@ -4032,7 +4032,7 @@ snapshots:
       rxjs: 7.8.1
       rxjs-for-await: 1.0.0(rxjs@7.8.1)
 
-  '@itwin/viewer-react@4.7.0(uim57q3nzwisvbioei3oy3u4vq)':
+  '@itwin/viewer-react@4.7.0(rpzmtoqlqnrmq6v6bodpep27vy)':
     dependencies:
       '@bentley/icons-generic-webfont': 1.0.34
       '@itwin/appui-abstract': 4.9.7(@itwin/core-bentley@4.9.7)
@@ -4049,7 +4049,7 @@ snapshots:
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/itwinui-react': 2.12.26(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/presentation-common': 4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-geometry@4.9.7))(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/ecschema-metadata@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7)))
-      '@itwin/presentation-components': 5.6.0(c7novkptxpwf4aynu7q2kxl3qm)
+      '@itwin/presentation-components': 5.6.0(u5bjhqo6rmc7jigupcyosbfkey)
       '@itwin/presentation-frontend': 4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-geometry@4.9.7))(@itwin/core-frontend@4.9.7(@itwin/appui-abstract@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/core-bentley@4.9.7)(@itwin/core-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-geometry@4.9.7))(@itwin/core-geometry@4.9.7)(@itwin/core-orbitgt@4.9.7)(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))(inversify@6.1.1(reflect-metadata@0.1.14))(reflect-metadata@0.1.14))(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/ecschema-metadata@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7)))(@itwin/presentation-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-geometry@4.9.7))(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/ecschema-metadata@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))))
       '@itwin/reality-data-client': 1.2.2(@itwin/core-bentley@4.9.7)
       lodash.isequal: 4.5.0
@@ -4060,7 +4060,7 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  '@itwin/web-viewer-react@4.2.5(yqqv22sev53p2osb7k5xfffnli)':
+  '@itwin/web-viewer-react@4.2.5(sdlgrexzn5debooqcjqlzxzouq)':
     dependencies:
       '@itwin/core-bentley': 4.9.7
       '@itwin/core-common': 4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-geometry@4.9.7)
@@ -4068,7 +4068,7 @@ snapshots:
       '@itwin/core-react': 4.17.3(@itwin/appui-abstract@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/core-bentley@4.9.7)(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/imodels-client-management': 4.0.0
       '@itwin/presentation-common': 4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-common@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-geometry@4.9.7))(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7))(@itwin/ecschema-metadata@4.9.7(@itwin/core-bentley@4.9.7)(@itwin/core-quantity@4.9.7(@itwin/core-bentley@4.9.7)))
-      '@itwin/viewer-react': 4.7.0(uim57q3nzwisvbioei3oy3u4vq)
+      '@itwin/viewer-react': 4.7.0(rpzmtoqlqnrmq6v6bodpep27vy)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       react-redux: 7.2.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
