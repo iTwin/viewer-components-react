@@ -521,7 +521,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     }
 
     return this.changeElementsState({
-      elementIds: new Set([node.key.instanceKeys[0].id]),
+      elementIds: new Set([...node.key.instanceKeys.map(({ id }) => id)]),
       modelId,
       categoryId,
       on,

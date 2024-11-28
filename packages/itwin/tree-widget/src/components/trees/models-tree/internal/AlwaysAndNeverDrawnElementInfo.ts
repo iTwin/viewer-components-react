@@ -126,7 +126,7 @@ export class AlwaysAndNeverDrawnElementInfo implements IDisposable {
       // This will make newly subscribed observers wait for the debounce period to pass
       // instead of consuming the cached value which at this point becomes invalid.
       tap(() => resultSubject.next(undefined)),
-      // Check if cache updated are not suppressed.
+      // Check if cache updates are not suppressed.
       switchMap(() =>
         this._suppressors.pipe(
           filter((suppressors) => suppressors === 0),
