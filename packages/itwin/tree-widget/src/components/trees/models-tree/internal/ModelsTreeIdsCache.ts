@@ -3,6 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import type { Subscription } from "rxjs";
+import { bufferTime, filter, firstValueFrom, mergeAll, mergeMap, ReplaySubject, Subject } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { pushToMap } from "../../common/Utils";
 
@@ -26,7 +28,7 @@ type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeD
 
 /** @internal */
 export class ModelsTreeIdsCache {
-  private readonly _categoryElementCounts = new Map<Id64String, number>();
+  private readonly _categoryElementCounts: ModelCategoryElementsCountCache;
   private _subjectInfos: Promise<Map<Id64String, SubjectInfo>> | undefined;
   private _parentSubjectIds: Promise<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
   private _modelInfos: Promise<Map<Id64String, ModelInfo>> | undefined;
@@ -34,7 +36,13 @@ export class ModelsTreeIdsCache {
   constructor(
     private _queryExecutor: LimitingECSqlQueryExecutor,
     private _hierarchyConfig: ModelsTreeHierarchyConfiguration,
-  ) {}
+  ) {
+    this._categoryElementCounts = new ModelCategoryElementsCountCache(async (input) => this.queryCategoryElementCounts(input));
+  }
+
+  public [Symbol.dispose]() {
+    this._categoryElementCounts[Symbol.dispose]();
+  }
 
   private async *querySubjects(): AsyncIterableIterator<{ id: Id64String; parentId?: Id64String; targetPartitionId?: Id64String; hideInHierarchy: boolean }> {
     const subjectsQuery = `
@@ -300,49 +308,48 @@ export class ModelsTreeIdsCache {
     return result;
   }
 
-  private async queryCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Promise<number> {
+  private async queryCategoryElementCounts(
+    input: Array<{ modelId: Id64String; categoryId: Id64String }>,
+  ): Promise<Array<{ modelId: number; categoryId: number; elementsCount: number }>> {
     const reader = this._queryExecutor.createQueryReader(
       {
         ctes: [
           /* sql */ `
-            CategoryElements(id) AS (
-              SELECT ECInstanceId id
+            CategoryElements(id, modelId, categoryId) AS (
+              SELECT ECInstanceId, Model.Id, Category.Id
               FROM ${this._hierarchyConfig.elementClassSpecification}
               WHERE
-                Model.Id = ?
-                AND Category.Id = ?
-                AND Parent.Id IS NULL
+                Parent.Id IS NULL
+                AND (
+                  ${input.map(({ modelId, categoryId }) => `Model.Id = ${modelId} AND Category.Id = ${categoryId}`).join(" OR ")}
+                )
 
               UNION ALL
 
-              SELECT c.ECInstanceId id
+              SELECT c.ECInstanceId, p.modelId, p.categoryId
               FROM ${this._hierarchyConfig.elementClassSpecification} c
               JOIN CategoryElements p ON c.Parent.Id = p.id
             )
           `,
         ],
-        ecsql: `SELECT COUNT(*) FROM CategoryElements`,
-        bindings: [
-          { type: "id", value: modelId },
-          { type: "id", value: categoryId },
-        ],
+        ecsql: `
+          SELECT modelId, categoryId, COUNT(id) elementsCount
+          FROM CategoryElements
+          GROUP BY modelId, categoryId
+        `,
       },
-      { rowFormat: "Indexes", limit: "unbounded" },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded" },
     );
 
-    return (await reader.next()).value[0];
+    const result = new Array<{ modelId: number; categoryId: number; elementsCount: number }>();
+    for await (const row of reader) {
+      result.push({ modelId: row.modelId, categoryId: row.categoryId, elementsCount: row.elementsCount });
+    }
+    return result;
   }
 
   public async getCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Promise<number> {
-    const cacheKey = `${modelId}${categoryId}`;
-    let result = this._categoryElementCounts.get(cacheKey);
-    if (result !== undefined) {
-      return result;
-    }
-
-    result = await this.queryCategoryElementsCount(modelId, categoryId);
-    this._categoryElementCounts.set(cacheKey, result);
-    return result;
+    return this._categoryElementCounts.getCategoryElementsCount(modelId, categoryId);
   }
 
   public async getCategoryModels(categoryId: Id64String): Promise<Id64Array> {
@@ -371,4 +378,48 @@ function forEachChildSubject(
       }
       forEachChildSubject(subjectInfos, childSubjectInfo, cb);
     });
+}
+
+class ModelCategoryElementsCountCache {
+  private _cache = new Map<string, Subject<number>>();
+  private _requestsStream = new Subject<{ modelId: Id64String; categoryId: Id64String }>();
+  private _subscription: Subscription;
+
+  public constructor(
+    private _loader: (
+      input: Array<{ modelId: Id64String; categoryId: Id64String }>,
+    ) => Promise<Array<{ modelId: number; categoryId: number; elementsCount: number }>>,
+  ) {
+    this._subscription = this._requestsStream
+      .pipe(
+        bufferTime(20),
+        filter((requests) => requests.length > 0),
+        mergeMap(async (requests) => this._loader(requests)),
+        mergeAll(),
+      )
+      .subscribe({
+        next: ({ modelId, categoryId, elementsCount }) => {
+          const subject = this._cache.get(`${modelId}${categoryId}`);
+          assert(!!subject);
+          subject.next(elementsCount);
+        },
+      });
+  }
+
+  public [Symbol.dispose]() {
+    this._subscription.unsubscribe();
+  }
+
+  public async getCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Promise<number> {
+    const cacheKey = `${modelId}${categoryId}`;
+    let result = this._cache.get(cacheKey);
+    if (result !== undefined) {
+      return firstValueFrom(result);
+    }
+
+    result = new ReplaySubject();
+    this._cache.set(cacheKey, result);
+    this._requestsStream.next({ modelId, categoryId });
+    return firstValueFrom(result);
+  }
 }
