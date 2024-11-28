@@ -413,7 +413,7 @@ type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPaths" | 
 };
 
 // @beta
-export function TreeRenderer({ rootNodes, expandNode, onNodeClick, onNodeKeyDown, onNodeDoubleClick, isNodeSelected, onFilterClick, getIcon, getLabel, getSublabel, getHierarchyLevelDetails, checkboxProps, reloadTree, ...props }: TreeRendererProps): JSX.Element;
+export function TreeRenderer({ rootNodes, expandNode, onNodeClick, onNodeKeyDown, onNodeDoubleClick, isNodeSelected, onFilterClick, getIcon, getLabel, getSublabel, getHierarchyLevelDetails, checkboxProps, reloadTree, size, ...props }: TreeRendererProps): JSX.Element;
 
 // @beta (undocumented)
 type TreeRendererProps = Pick<TreeNodeRendererProps, "expandNode" | "onNodeClick" | "onNodeKeyDown" | "onFilterClick" | "getIcon" | "getLabel" | "getSublabel" | "getHierarchyLevelDetails" | "checkboxProps" | "reloadTree"> & Omit<ComponentPropsWithoutRef<typeof Tree_2<RenderedTreeNode>>, "data" | "nodeRenderer" | "getNode"> & {

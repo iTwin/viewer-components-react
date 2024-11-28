@@ -28,7 +28,7 @@
     "@itwin/imodels-client-management": "^4.0.0",
     "@itwin/itwinui-icons-react": "^2.9.0",
     "@itwin/itwinui-illustrations-react": "^2.1.0",
-    "@itwin/itwinui-react": "3.14.0",
+    "@itwin/itwinui-react": "3.16.0",
     "@itwin/map-layers": "workspace:*",
     "@itwin/map-layers-auth": "^4.9.7",
     "@itwin/map-layers-formats": "^4.9.7",
@@ -41,7 +41,7 @@
     "@itwin/property-grid-react": "workspace:*",
     "@itwin/reports-config-widget-react": "workspace:*",
     "@itwin/tree-widget-react": "workspace:*",
-    "@itwin/unified-selection": "^1.1.1",
+    "@itwin/unified-selection": "^1.1.2",
     "@itwin/web-viewer-react": "^4.2.5",
     "@itwin/webgl-compatibility": "^4.9.7",
     "react": "^18.2.0",
@@ -129,7 +129,7 @@
   "pnpm": {
     "overrides": {
       "@itwin/itwinui-react@^2": "2.12.26",
-      "@itwin/itwinui-react@^3": "3.14.0"
+      "@itwin/itwinui-react@^3": "3.16.0"
     }
   }
 }

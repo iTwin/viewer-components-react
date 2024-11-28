@@ -29,7 +29,11 @@ interface CreateModelsTreeProviderProps {
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
 }
 
-export function createModelsTreeProvider({ imodel, filteredNodePaths, hierarchyConfig }: CreateModelsTreeProviderProps) {
+export function createModelsTreeProvider({
+  imodel,
+  filteredNodePaths,
+  hierarchyConfig,
+}: CreateModelsTreeProviderProps): HierarchyProvider & { dispose: () => void; [Symbol.dispose]: () => void } {
   const config = { ...defaultHierarchyConfiguration, ...hierarchyConfig };
   const imodelAccess = createIModelAccess(imodel);
   const idsCache = new ModelsTreeIdsCache(imodelAccess, config);
@@ -58,7 +62,7 @@ export function createModelsTreeProvider({ imodel, filteredNodePaths, hierarchyC
     [Symbol.dispose]() {
       dispose();
     },
-  } satisfies HierarchyProvider & { dispose: () => void; [Symbol.dispose]: () => void };
+  };
 }
 
 interface IdsCacheMockProps {
