@@ -306,6 +306,10 @@ function useCachedVisibility(activeView: Viewport, hierarchyConfig: ModelsTreeHi
   const cacheRef = useRef<ModelsTreeIdsCache>();
   const currentIModelRef = useRef(activeView.iModel);
 
+  const resetModelsTreeIdsCache = () => {
+    cacheRef.current?.[Symbol.dispose]();
+    cacheRef.current = undefined;
+  };
   const getModelsTreeIdsCache = useCallback(() => {
     if (!cacheRef.current) {
       cacheRef.current = new ModelsTreeIdsCache(createECSqlQueryExecutor(currentIModelRef.current), hierarchyConfig);
@@ -321,15 +325,15 @@ function useCachedVisibility(activeView: Viewport, hierarchyConfig: ModelsTreeHi
   useIModelChangeListener({
     imodel: activeView.iModel,
     action: useCallback(() => {
-      cacheRef.current = undefined;
+      resetModelsTreeIdsCache();
       setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache, overrides, filteredPaths));
     }, [activeView, getModelsTreeIdsCache, overrides, filteredPaths]),
   });
 
   useEffect(() => {
     currentIModelRef.current = activeView.iModel;
-    cacheRef.current = undefined;
     setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache, overrides, filteredPaths));
+    return () => resetModelsTreeIdsCache();
   }, [activeView, getModelsTreeIdsCache, overrides, filteredPaths]);
 
   return {

@@ -31,7 +31,7 @@ describe("ModelsTreeIdsCache", () => {
 
       return [];
     });
-    const cache = createIdsCache(stub);
+    using cache = createIdsCache(stub);
     await expect(cache.getModelElementCount(modelId)).to.eventually.eq(elementIds.length);
     expect(stub).to.have.callCount(2);
     await expect(cache.getModelElementCount(modelId)).to.eventually.eq(elementIds.length);
@@ -43,13 +43,12 @@ describe("ModelsTreeIdsCache", () => {
     const categoryId = "0x2";
     const elementIds = ["0x10", "0x20", "0x30"];
     const stub = sinon.fake((query: string) => {
-      if (query.includes("WHERE Model.Id = ? AND Category.Id = ?")) {
-        return [[elementIds.length]];
+      if (query.includes(`WHERE Parent.Id IS NULL AND (Model.Id = ${modelId} AND Category.Id = ${categoryId})`)) {
+        return [{ modelId, categoryId, elementsCount: elementIds.length }];
       }
-
       throw new Error(`Unexpected query: ${query}`);
     });
-    const cache = createIdsCache(stub);
+    using cache = createIdsCache(stub);
     await expect(cache.getCategoryElementsCount(modelId, categoryId)).to.eventually.eq(elementIds.length);
     expect(stub).to.have.callCount(1);
     await expect(cache.getCategoryElementsCount(modelId, categoryId)).to.eventually.eq(elementIds.length);

@@ -150,7 +150,7 @@
     "stylelint": "^15.11.0",
     "stylelint-config-standard-scss": "^11.1.0",
     "typemoq": "^2.1.0",
-    "typescript": "~5.0.0",
+    "typescript": "~5.2.0",
     "xmlhttprequest": "^1.8.0"
   },
   "eslintConfig": {

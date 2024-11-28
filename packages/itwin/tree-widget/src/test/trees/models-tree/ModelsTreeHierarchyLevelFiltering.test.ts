@@ -64,7 +64,7 @@ describe("Models tree", () => {
     it("can filter root level", async function () {
       // eslint-disable-next-line deprecation/deprecation
       const imodel = await buildTestIModel(this, async () => {});
-      const provider = createModelsTreeProvider({ imodel });
+      using provider = createModelsTreeProvider({ imodel });
 
       // validate hierarchy level without filter
       validateHierarchyLevel({
@@ -162,7 +162,7 @@ describe("Models tree", () => {
 
         return { rootSubject, childSubject, model, category };
       });
-      const provider = createModelsTreeProvider({ imodel });
+      using provider = createModelsTreeProvider({ imodel });
       const parentNode = {
         key: {
           type: "instances" as const,
@@ -259,7 +259,7 @@ describe("Models tree", () => {
         insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category2.id });
         return { rootSubject, model, category1, category2 };
       });
-      const provider = createModelsTreeProvider({ imodel });
+      using provider = createModelsTreeProvider({ imodel });
       const parentNode = {
         key: {
           type: "instances" as const,
@@ -325,7 +325,7 @@ describe("Models tree", () => {
         const element = insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category.id });
         return { rootSubject, model, category, element };
       });
-      const provider = createModelsTreeProvider({ imodel });
+      using provider = createModelsTreeProvider({ imodel });
       const parentNode = {
         key: {
           type: "instances" as const,
@@ -416,7 +416,7 @@ describe("Models tree", () => {
         });
         return { rootSubject, model, category, parentElement, childElement };
       });
-      const provider = createModelsTreeProvider({ imodel });
+      using provider = createModelsTreeProvider({ imodel });
       const parentNode = {
         key: {
           type: "instances" as const,
@@ -514,7 +514,7 @@ describe("Models tree", () => {
         });
         return { rootSubject, model, category, modeledElement, modelingElement };
       });
-      const provider = createModelsTreeProvider({ imodel });
+      using provider = createModelsTreeProvider({ imodel });
       const parentNode = {
         key: {
           type: "instances" as const,
@@ -600,7 +600,7 @@ describe("Models tree", () => {
         const aspect = insertExternalSourceAspect({ builder, elementId: element.id, identifier: "test aspect" });
         return { rootSubject, model, category, element, aspect };
       });
-      const provider = createModelsTreeProvider({ imodel });
+      using provider = createModelsTreeProvider({ imodel });
       const parentNode = {
         key: {
           type: "instances" as const,
@@ -678,7 +678,7 @@ describe("Models tree", () => {
 
           return { rootSubject, model };
         });
-        const provider = createModelsTreeProvider({ imodel, hierarchyConfig: { showEmptyModels: true } });
+        using provider = createModelsTreeProvider({ imodel, hierarchyConfig: { showEmptyModels: true } });
         const parentNode = {
           key: {
             type: "instances" as const,
@@ -747,7 +747,7 @@ describe("Models tree", () => {
           });
           return { rootSubject, model, category, element1, element2 };
         });
-        const provider = createModelsTreeProvider({ imodel, hierarchyConfig: { elementClassSpecification: keys.element1.className } });
+        using provider = createModelsTreeProvider({ imodel, hierarchyConfig: { elementClassSpecification: keys.element1.className } });
         const parentNode = {
           key: {
             type: "instances" as const,

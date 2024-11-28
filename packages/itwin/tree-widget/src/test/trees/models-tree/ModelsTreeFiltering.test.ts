@@ -30,7 +30,7 @@ import { createClassGroupingHierarchyNode, createModelsTreeProvider } from "./Ut
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
-import type { HierarchyFilteringPath, HierarchyProvider } from "@itwin/presentation-hierarchies";
+import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { TestIModelBuilder } from "@itwin/presentation-testing";
 import type { ExpectedHierarchyDef } from "../HierarchyValidation";
 import type { ElementsGroupInfo } from "../../../components/trees/models-tree/ModelsTreeDefinition";
@@ -1631,7 +1631,7 @@ describe("Models tree", () => {
         let expectedHierarchy!: ExpectedHierarchyDef[];
 
         let modelsTreeIdsCache: ModelsTreeIdsCache;
-        let hierarchyProvider: HierarchyProvider;
+        let hierarchyProvider: ReturnType<typeof createModelsTreeProvider>;
         let hierarchyConfig: ModelsTreeHierarchyConfiguration;
 
         before(async function () {
@@ -1651,6 +1651,11 @@ describe("Models tree", () => {
         beforeEach(() => {
           modelsTreeIdsCache = new ModelsTreeIdsCache(createIModelAccess(imodel), hierarchyConfig);
           hierarchyProvider = createModelsTreeProvider({ imodel, filteredNodePaths: instanceKeyPaths, hierarchyConfig });
+        });
+
+        afterEach(() => {
+          modelsTreeIdsCache[Symbol.dispose]();
+          hierarchyProvider.dispose();
         });
 
         after(async function () {
@@ -1710,10 +1715,12 @@ describe("Models tree", () => {
         };
       });
 
+      const imodelAccess = createIModelAccess(imodel);
+      using idsCache = new ModelsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration);
       const actualInstanceKeyPaths = (
         await ModelsTreeDefinition.createInstanceKeyPaths({
-          imodelAccess: createIModelAccess(imodel),
-          idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel), defaultHierarchyConfiguration),
+          imodelAccess,
+          idsCache,
           label: formattedECInstanceId,
           hierarchyConfig: defaultHierarchyConfiguration,
         })
@@ -1741,11 +1748,14 @@ describe("Models tree", () => {
         };
       });
 
+      const imodelAccess = createIModelAccess(imodel);
+      using idsCache = new ModelsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration);
+
       expect(
         (
           await ModelsTreeDefinition.createInstanceKeyPaths({
-            imodelAccess: createIModelAccess(imodel),
-            idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel), defaultHierarchyConfiguration),
+            imodelAccess,
+            idsCache,
             label: "_",
             hierarchyConfig: defaultHierarchyConfiguration,
           })
@@ -1755,8 +1765,8 @@ describe("Models tree", () => {
       expect(
         (
           await ModelsTreeDefinition.createInstanceKeyPaths({
-            imodelAccess: createIModelAccess(imodel),
-            idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel), defaultHierarchyConfiguration),
+            imodelAccess,
+            idsCache,
             label: "%",
             hierarchyConfig: defaultHierarchyConfiguration,
           })
@@ -1766,8 +1776,8 @@ describe("Models tree", () => {
       expect(
         (
           await ModelsTreeDefinition.createInstanceKeyPaths({
-            imodelAccess: createIModelAccess(imodel),
-            idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel), defaultHierarchyConfiguration),
+            imodelAccess,
+            idsCache,
             label: "\\",
             hierarchyConfig: defaultHierarchyConfiguration,
           })
