@@ -4,25 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import {
-  BehaviorSubject,
-  debounceTime,
-  EMPTY,
-  filter,
-  first,
-  from,
-  fromEventPattern,
-  map,
-  merge,
-  reduce,
-  scan,
-  share,
-  shareReplay,
-  startWith,
-  Subject,
-  switchMap,
-  take,
-  takeUntil,
-  tap,
+  BehaviorSubject, debounceTime, EMPTY, filter, first, from, fromEventPattern, map, merge, reduce, scan, share, shareReplay, startWith, Subject,
+  switchMap, take, takeUntil, tap,
 } from "rxjs";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { pushToMap } from "../../common/Utils";
@@ -85,7 +68,7 @@ export class AlwaysAndNeverDrawnElementInfo implements IDisposable {
     this._suppress.next(true);
   }
 
-  public unSuppressChangeEvents() {
+  public resumeChangeEvents() {
     this._suppress.next(false);
   }
 

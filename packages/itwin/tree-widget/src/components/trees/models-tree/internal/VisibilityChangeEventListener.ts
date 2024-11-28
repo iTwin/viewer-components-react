@@ -12,7 +12,7 @@ import type { Viewport } from "@itwin/core-frontend";
 export interface IVisibilityChangeEventListener extends IDisposable {
   onVisibilityChange: BeEvent<() => void>;
   suppressChangeEvents(): void;
-  unSuppressChangeEvents(): void;
+  resumeChangeEvents(): void;
 }
 
 /** @internal */
@@ -52,7 +52,7 @@ export function createVisibilityChangeEventListener(viewport: Viewport): IVisibi
     suppressChangeEvents: () => {
       suppressChangeEvents++;
     },
-    unSuppressChangeEvents: () => {
+    resumeChangeEvents: () => {
       suppressChangeEvents--;
       if (suppressChangeEvents === 0) {
         handleVisibilityChange();
