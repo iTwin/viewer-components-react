@@ -38,7 +38,7 @@ interface ElementFilteredTreeNode extends BaseFilteredTreeNode {
 type FilteredTreeNode = GenericFilteredTreeNode | CategoryFilteredTreeNode | ElementFilteredTreeNode;
 
 export interface FilteredTree {
-  getFilterTargets(node: HierarchyNode): FilterTargets;
+  getVisibilityChangeTargets(node: HierarchyNode): VisibilityChangeTargets;
 }
 
 export const SUBJECT_CLASS_NAME = "BisCore.Subject" as const;
@@ -57,7 +57,7 @@ export function parseCategoryKey(key: CategoryKey) {
   return { modelId, categoryId };
 }
 
-interface FilterTargets {
+interface VisibilityChangeTargets {
   subjects?: Set<Id64String>;
   models?: Set<Id64String>;
   categories?: Set<CategoryKey>;
@@ -102,17 +102,17 @@ export async function createFilteredTree(imodelAccess: ECClassHierarchyInspector
   }
 
   return {
-    getFilterTargets: (node: HierarchyNode) => getFilterTargets(root, node),
+    getVisibilityChangeTargets: (node: HierarchyNode) => getVisibilityChangeTargets(root, node),
   };
 }
 
-function getFilterTargets(root: FilteredTreeRootNode, node: HierarchyNode) {
+function getVisibilityChangeTargets(root: FilteredTreeRootNode, node: HierarchyNode) {
   let lookupParents: Array<{ children?: Map<Id64String, FilteredTreeNode> }> = [root];
-  const filterTargets: FilterTargets = {};
+  const changeTargets: VisibilityChangeTargets = {};
 
   const nodeKey = node.key;
   if (!HierarchyNodeKey.isInstances(nodeKey)) {
-    return filterTargets;
+    return changeTargets;
   }
 
   // find the filtered parent nodes of the `node`
@@ -125,7 +125,7 @@ function getFilterTargets(root: FilteredTreeRootNode, node: HierarchyNode) {
     // and use them when checking for matching node in one level deeper.
     const parentNodes = findMatchingFilteredNodes(lookupParents, parentKey.instanceKeys);
     if (parentNodes.length === 0) {
-      return filterTargets;
+      return changeTargets;
     }
     lookupParents = parentNodes;
   }
@@ -133,11 +133,11 @@ function getFilterTargets(root: FilteredTreeRootNode, node: HierarchyNode) {
   // find filtered nodes that match the `node`
   const filteredNodes = findMatchingFilteredNodes(lookupParents, nodeKey.instanceKeys);
   if (filteredNodes.length === 0) {
-    return filterTargets;
+    return changeTargets;
   }
 
-  filteredNodes.forEach((filteredNode) => collectFilterTargets(filterTargets, filteredNode));
-  return filterTargets;
+  filteredNodes.forEach((filteredNode) => collectVisibilityChangeTargets(changeTargets, filteredNode));
+  return changeTargets;
 }
 
 function findMatchingFilteredNodes(lookupParents: Array<{ children?: Map<Id64String, FilteredTreeNode> }>, keys: InstanceKey[]) {
@@ -146,15 +146,15 @@ function findMatchingFilteredNodes(lookupParents: Array<{ children?: Map<Id64Str
     .filter((lookupNode): lookupNode is FilteredTreeNode => lookupNode !== undefined);
 }
 
-function collectFilterTargets(filterTargets: FilterTargets, node: FilteredTreeNode) {
+function collectVisibilityChangeTargets(changeTargets: VisibilityChangeTargets, node: FilteredTreeNode) {
   if (node.isFilterTarget) {
-    addTarget(filterTargets, node);
+    addTarget(changeTargets, node);
     return;
   }
 
   if (node.type === "element") {
     // need to add parent ids as filter target will be an element
-    addTarget(filterTargets, node);
+    addTarget(changeTargets, node);
   }
 
   if (!node.children) {
@@ -162,11 +162,11 @@ function collectFilterTargets(filterTargets: FilterTargets, node: FilteredTreeNo
   }
 
   for (const child of node.children.values()) {
-    collectFilterTargets(filterTargets, child);
+    collectVisibilityChangeTargets(changeTargets, child);
   }
 }
 
-function addTarget(filterTargets: FilterTargets, node: FilteredTreeNode) {
+function addTarget(filterTargets: VisibilityChangeTargets, node: FilteredTreeNode) {
   switch (node.type) {
     case "subject":
       (filterTargets.subjects ??= new Set()).add(node.id);

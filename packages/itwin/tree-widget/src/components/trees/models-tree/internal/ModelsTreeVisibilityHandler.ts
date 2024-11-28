@@ -229,7 +229,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
   }
 
   private getFilteredNodeVisibility(props: GetFilteredNodeVisibilityProps) {
-    return from(this.getFilterTargets(props)).pipe(
+    return from(this.getVisibilityChangeTargets(props)).pipe(
       mergeMap(({ subjects, models, categories, elements }) => {
         const observables = new Array<Observable<VisibilityStatus>>();
         if (subjects?.size) {
@@ -506,13 +506,13 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     });
   }
 
-  private async getFilterTargets({ node }: GetFilteredNodeVisibilityProps) {
+  private async getVisibilityChangeTargets({ node }: GetFilteredNodeVisibilityProps) {
     const filteredTree = await this._filteredTree;
-    return filteredTree ? filteredTree.getFilterTargets(node) : {};
+    return filteredTree ? filteredTree.getVisibilityChangeTargets(node) : {};
   }
 
   private changeFilteredNodeVisibility({ on, ...props }: ChangeFilteredNodeVisibilityProps) {
-    return from(this.getFilterTargets(props)).pipe(
+    return from(this.getVisibilityChangeTargets(props)).pipe(
       mergeMap(({ subjects, models, categories, elements }) => {
         const observables = new Array<Observable<void>>();
         if (subjects?.size) {
