@@ -137,8 +137,8 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
   public async getVisibilityStatus(node: HierarchyNode): Promise<VisibilityStatus> {
     return firstValueFrom(
       this.getVisibilityStatusObs(node).pipe(
-        // unsubscribe from the observable if the change request for this or ancestor node is received
-        takeUntil(this._changeRequest.pipe(filter(({ key, depth }) => depth <= node.parentKeys.length || HierarchyNodeKey.equals(node.key, key)))),
+        // unsubscribe from the observable if the change request for this node is received
+        takeUntil(this._changeRequest.pipe(filter(({ key, depth }) => depth === node.parentKeys.length && HierarchyNodeKey.equals(node.key, key)))),
         // unsubscribe if visibility changes
         takeUntil(
           fromEventPattern(
@@ -156,11 +156,11 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
 
   public async changeVisibility(node: HierarchyNode, shouldDisplay: boolean): Promise<void> {
     // notify about new change request
-    this._changeRequest.next({ key: node.key, depth: node.parentKeys.length + 1 });
+    this._changeRequest.next({ key: node.key, depth: node.parentKeys.length });
 
     const changeObservable = this.changeVisibilityObs(node, shouldDisplay).pipe(
-      // unsubscribe from the observable if the change request for this or ancestor node is received
-      takeUntil(this._changeRequest.pipe(filter(({ key, depth }) => depth <= node.parentKeys.length || HierarchyNodeKey.equals(node.key, key)))),
+      // unsubscribe from the observable if the change request for this node is received
+      takeUntil(this._changeRequest.pipe(filter(({ key, depth }) => depth === node.parentKeys.length && HierarchyNodeKey.equals(node.key, key)))),
       tap({
         subscribe: () => {
           this._eventListener.suppressChangeEvents();
