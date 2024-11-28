@@ -417,7 +417,7 @@ class ModelCategoryElementsCountCache {
       return firstValueFrom(result);
     }
 
-    result = new ReplaySubject();
+    result = new ReplaySubject(1);
     this._cache.set(cacheKey, result);
     this._requestsStream.next({ modelId, categoryId });
     return firstValueFrom(result);
