@@ -126,7 +126,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     this._alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfo(_props.viewport);
     this._idsCache = this._props.idsCache;
     this._filteredTree = _props.filteredPaths ? createFilteredTree(this._props.imodelAccess, _props.filteredPaths) : undefined;
-    this._subscriptions.push(this._elementChangeQueue.pipe(mergeMap((action) => action, 1)).subscribe());
+    this._subscriptions.push(this._elementChangeQueue.pipe(concatAll()).subscribe());
   }
 
   // istanbul ignore next
