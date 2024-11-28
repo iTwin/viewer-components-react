@@ -660,7 +660,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         defer(() => {
           const categoryVisibility = this.getDefaultCategoryVisibilityStatus({ categoryId, modelId, ignoreTooltip: true });
           const isDisplayedByDefault = categoryVisibility.state === "visible";
-          return this.queueElementChange(elementIds, on, isDisplayedByDefault);
+          return this.queueElementsVisibilityChange(elementIds, on, isDisplayedByDefault);
         }),
       );
     });
@@ -680,14 +680,14 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         defer(() => {
           const categoryVisibility = this.getDefaultCategoryVisibilityStatus({ categoryId, modelId, ignoreTooltip: true });
           const isDisplayedByDefault = categoryVisibility.state === "visible";
-          return this.queueElementChange(elementIds, on, isDisplayedByDefault);
+          return this.queueElementsVisibilityChange(elementIds, on, isDisplayedByDefault);
         }),
       );
     });
     return createVisibilityHandlerResult(this, props, result, this._props.overrides?.changeElementsState);
   }
 
-  private queueElementChange(elementIds: Id64Set, on: boolean, visibleByDefault: boolean) {
+  private queueElementsVisibilityChange(elementIds: Id64Set, on: boolean, visibleByDefault: boolean) {
     const finishedSubject = new Subject<boolean>();
     // observable to track if visibility change is finished/cancelled
     const changeFinished = finishedSubject.pipe(startWith(false), shareReplay(1));
