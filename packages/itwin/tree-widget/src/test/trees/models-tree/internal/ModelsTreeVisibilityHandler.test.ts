@@ -42,13 +42,13 @@ import {
 } from "../Utils";
 import { validateHierarchyVisibility, VisibilityExpectations } from "./VisibilityValidation";
 
+import type { Visibility } from "../../../../components/trees/common/Tooltip";
 import type { HierarchyVisibilityHandler } from "../../../../components/trees/common/UseHierarchyVisibility";
 import type { ModelsTreeVisibilityHandlerProps } from "../../../../components/trees/models-tree/internal/ModelsTreeVisibilityHandler";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { GeometricElement3dProps, QueryBinder } from "@itwin/core-common";
 import type { HierarchyNodeIdentifiersPath, HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { Id64String } from "@itwin/core-bentley";
-import type { Visibility } from "../../../../components/trees/common/Tooltip";
 import type { ValidateNodeProps } from "./VisibilityValidation";
 
 interface VisibilityOverrides {
@@ -117,7 +117,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
           }),
         changeCategoryState: sinon.fake(async ({ originalImplementation }) => originalImplementation()),
         changeModelState: sinon.fake(async ({ originalImplementation }) => originalImplementation()),
-        changeElementState: sinon.fake(async ({ originalImplementation }) => originalImplementation()),
+        changeElementsState: sinon.fake(async ({ originalImplementation }) => originalImplementation()),
       };
       const handler = createModelsTreeVisibilityHandler({
         viewport: props?.viewport ?? createFakeSinonViewport(),
@@ -1480,7 +1480,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
           const categoryId = "0x2";
           const elementId = "0x10";
           const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
-            changeElementState: sinon.fake.resolves(undefined),
+            changeElementsState: sinon.fake.resolves(undefined),
           };
           const viewport = createFakeSinonViewport();
           const handler = createModelsTreeVisibilityHandler({
@@ -1491,7 +1491,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
           });
 
           await handler.changeVisibility(createElementHierarchyNode({ modelId, categoryId, elementId }), true);
-          expect(overrides.changeElementState).to.be.called;
+          expect(overrides.changeElementsState).to.be.called;
         });
 
         describe("on", () => {
@@ -2672,7 +2672,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
         filterPaths,
       }: Parameters<typeof createVisibilityTestData>[0] & { filterPaths: HierarchyNodeIdentifiersPath[] }) {
         const commonProps = createCommonProps(imodel);
-        const handler = createModelsTreeVisibilityHandler(commonProps);
+        const handler = createModelsTreeVisibilityHandler({ ...commonProps, filteredPaths: filterPaths });
         const defaultProvider = createProvider({ ...commonProps });
         const filteredProvider = createProvider({ ...commonProps, filterPaths });
         return { handler, defaultProvider, filteredProvider, ...commonProps };

@@ -13,14 +13,20 @@ export type Visibility = "visible" | "hidden" | "partial";
 /** @internal */
 export type NonPartialVisibilityStatus = Omit<VisibilityStatus, "state"> & { state: "visible" | "hidden" };
 
+interface VisibilityStatusOptions {
+  // id of localized string to use as an additional tooltip or false to not use tooltip at all
+  // if undefined tooltip will be created based only on the visibility status
+  useTooltip?: string | false;
+}
+
 /** @internal */
-export function createVisibilityStatus(status: "visible" | "hidden", tooltipStringId?: string): NonPartialVisibilityStatus;
-export function createVisibilityStatus(status: "visible" | "hidden" | "partial" | "disabled", tooltipStringId?: string): VisibilityStatus;
-export function createVisibilityStatus(status: Visibility | "disabled", tooltipStringId?: string): VisibilityStatus {
+export function createVisibilityStatus(status: "visible" | "hidden", options?: VisibilityStatusOptions): NonPartialVisibilityStatus;
+export function createVisibilityStatus(status: "visible" | "hidden" | "partial" | "disabled", options?: VisibilityStatusOptions): VisibilityStatus;
+export function createVisibilityStatus(status: Visibility | "disabled", { useTooltip }: VisibilityStatusOptions = {}): VisibilityStatus {
   return {
     state: status === "disabled" ? "hidden" : status,
     isDisabled: status === "disabled",
-    tooltip: createTooltip(status, tooltipStringId),
+    tooltip: useTooltip === false ? undefined : createTooltip(status, useTooltip),
   };
 }
 

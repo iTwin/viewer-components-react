@@ -100,7 +100,10 @@ export function TreeRenderer({
     ],
   );
 
-  const getNode = useCallback<ComponentPropsWithoutRef<typeof Tree<RenderedTreeNode>>["getNode"]>((node) => createRenderedTreeNodeData(node, isNodeSelected), [isNodeSelected]);
+  const getNode = useCallback<ComponentPropsWithoutRef<typeof Tree<RenderedTreeNode>>["getNode"]>(
+    (node) => createRenderedTreeNodeData(node, isNodeSelected),
+    [isNodeSelected],
+  );
 
   return (
     <LocalizationContextProvider localizedStrings={localizedStrings}>

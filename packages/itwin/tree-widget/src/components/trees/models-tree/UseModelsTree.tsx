@@ -18,8 +18,8 @@ import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
 import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibilityHandler";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition";
 
-import type { Id64String } from "@itwin/core-bentley";
 import type { GroupingHierarchyNode, HierarchyFilteringPath, InstancesNodeKey } from "@itwin/presentation-hierarchies";
+import type { Id64String } from "@itwin/core-bentley";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
 import type { ReactElement } from "react";
 import type { Viewport } from "@itwin/core-frontend";
@@ -75,7 +75,11 @@ export function useModelsTree({
   );
   const { onFeatureUsed } = useTelemetryContext();
 
-  const { getModelsTreeIdsCache, visibilityHandlerFactory } = useCachedVisibility(activeView, hierarchyConfiguration, visibilityHandlerOverrides);
+  const { getModelsTreeIdsCache, visibilityHandlerFactory, onFilteredPathsChanged } = useCachedVisibility(
+    activeView,
+    hierarchyConfiguration,
+    visibilityHandlerOverrides,
+  );
   const { loadFocusedItems } = useFocusedInstancesContext();
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
@@ -99,7 +103,13 @@ export function useModelsTree({
     setFilteringError(undefined);
     onModelsFiltered?.(undefined);
 
+    // reset filtered paths if there is no filters applied. This allows to keep current filtered paths until new paths are loaded.
+    if (!loadFocusedItems && !getFilteredPaths && !filter) {
+      onFilteredPathsChanged(undefined);
+    }
+
     const handlePaths = async (filteredPaths: HierarchyFilteringPath[], classInspector: ECClassHierarchyInspector) => {
+      onFilteredPathsChanged(filteredPaths);
       if (!onModelsFiltered) {
         return;
       }
@@ -183,7 +193,7 @@ export function useModelsTree({
       };
     }
     return undefined;
-  }, [filter, loadFocusedItems, getModelsTreeIdsCache, onFeatureUsed, getFilteredPaths, hierarchyConfiguration, onModelsFiltered]);
+  }, [filter, loadFocusedItems, getModelsTreeIdsCache, onFeatureUsed, getFilteredPaths, hierarchyConfiguration, onModelsFiltered, onFilteredPathsChanged]);
 
   return {
     modelsTreeProps: {
@@ -287,8 +297,9 @@ function createVisibilityHandlerFactory(
   activeView: Viewport,
   idsCacheGetter: () => ModelsTreeIdsCache,
   overrides?: ModelsTreeVisibilityHandlerOverrides,
+  filteredPaths?: HierarchyFilteringPath[],
 ): VisibilityTreeProps["visibilityHandlerFactory"] {
-  return ({ imodelAccess }) => createModelsTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter(), imodelAccess, overrides });
+  return ({ imodelAccess }) => createModelsTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter(), imodelAccess, overrides, filteredPaths });
 }
 
 function useCachedVisibility(activeView: Viewport, hierarchyConfig: ModelsTreeHierarchyConfiguration, overrides?: ModelsTreeVisibilityHandlerOverrides) {
@@ -302,25 +313,29 @@ function useCachedVisibility(activeView: Viewport, hierarchyConfig: ModelsTreeHi
     return cacheRef.current;
   }, [hierarchyConfig]);
 
-  const [visibilityHandlerFactory, setVisibilityHandlerFactory] = useState(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache, overrides));
+  const [filteredPaths, setFilteredPaths] = useState<HierarchyFilteringPath[]>();
+  const [visibilityHandlerFactory, setVisibilityHandlerFactory] = useState<VisibilityTreeProps["visibilityHandlerFactory"]>(() =>
+    createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache, overrides, filteredPaths),
+  );
 
   useIModelChangeListener({
     imodel: activeView.iModel,
     action: useCallback(() => {
       cacheRef.current = undefined;
-      setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache, overrides));
-    }, [activeView, getModelsTreeIdsCache, overrides]),
+      setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache, overrides, filteredPaths));
+    }, [activeView, getModelsTreeIdsCache, overrides, filteredPaths]),
   });
 
   useEffect(() => {
     currentIModelRef.current = activeView.iModel;
     cacheRef.current = undefined;
-    setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache, overrides));
-  }, [activeView, getModelsTreeIdsCache, overrides]);
+    setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache, overrides, filteredPaths));
+  }, [activeView, getModelsTreeIdsCache, overrides, filteredPaths]);
 
   return {
     getModelsTreeIdsCache,
     visibilityHandlerFactory,
+    onFilteredPathsChanged: useCallback((paths: HierarchyFilteringPath[] | undefined) => setFilteredPaths(paths), []),
   };
 }
 
