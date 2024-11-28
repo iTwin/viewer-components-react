@@ -280,7 +280,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
   private getSubjectNodeVisibilityStatus({ subjectIds, ignoreTooltip }: { subjectIds: Id64Array; ignoreTooltip?: boolean }): Observable<VisibilityStatus> {
     const result = defer(() => {
       if (!this._props.viewport.view.isSpatialView()) {
-        return of(createVisibilityStatus("disabled", { tooltipStringId: "modelsTree.subject.nonSpatialView", ignoreTooltip }));
+        return of(createVisibilityStatus("disabled", getTooltipOptions("modelsTree.subject.nonSpatialView", ignoreTooltip)));
       }
 
       return from(this._idsCache.getSubjectModelIds(subjectIds)).pipe(
@@ -305,11 +305,11 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     const result = defer(() => {
       const viewport = this._props.viewport;
       if (!viewport.view.isSpatialView()) {
-        return of(createVisibilityStatus("disabled", { tooltipStringId: "modelsTree.model.nonSpatialView", ignoreTooltip }));
+        return of(createVisibilityStatus("disabled", getTooltipOptions("modelsTree.model.nonSpatialView", ignoreTooltip)));
       }
 
       if (!viewport.view.viewsModel(modelId)) {
-        return of(createVisibilityStatus("hidden", { tooltipStringId: "modelsTree.model.hiddenThroughModelSelector", ignoreTooltip }));
+        return of(createVisibilityStatus("hidden", getTooltipOptions("modelsTree.model.hiddenThroughModelSelector", ignoreTooltip)));
       }
 
       return from(this._idsCache.getModelCategories(modelId)).pipe(
@@ -319,10 +319,13 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         getVisibilityFromTreeNodeChildren,
         map((visibilityByCategories) => {
           const state = visibilityByCategories === "empty" ? "visible" : visibilityByCategories;
-          return createVisibilityStatus(state, {
-            tooltipStringId: state === "partial" ? "modelsTree.model.someCategoriesHidden" : `modelsTree.model.allCategories${state ? "Visible" : "Hidden"}`,
-            ignoreTooltip,
-          });
+          return createVisibilityStatus(
+            state,
+            getTooltipOptions(
+              state === "partial" ? "modelsTree.model.someCategoriesHidden" : `modelsTree.model.allCategories${state ? "Visible" : "Hidden"}`,
+              ignoreTooltip,
+            ),
+          );
         }),
       );
     });
@@ -341,26 +344,26 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     const viewport = this._props.viewport;
 
     if (!viewport.view.viewsModel(modelId)) {
-      return createVisibilityStatus("hidden", { tooltipStringId: "modelsTree.category.hiddenThroughModel", ignoreTooltip });
+      return createVisibilityStatus("hidden", getTooltipOptions("modelsTree.category.hiddenThroughModel", ignoreTooltip));
     }
 
     switch (this._props.viewport.perModelCategoryVisibility.getOverride(modelId, categoryId)) {
       case PerModelCategoryVisibility.Override.Show:
-        return createVisibilityStatus("visible", { tooltipStringId: "modelsTree.category.displayedThroughPerModelOverride", ignoreTooltip });
+        return createVisibilityStatus("visible", getTooltipOptions("modelsTree.category.displayedThroughPerModelOverride", ignoreTooltip));
       case PerModelCategoryVisibility.Override.Hide:
-        return createVisibilityStatus("hidden", { tooltipStringId: "modelsTree.category.hiddenThroughPerModelOverride", ignoreTooltip });
+        return createVisibilityStatus("hidden", getTooltipOptions("modelsTree.category.hiddenThroughPerModelOverride", ignoreTooltip));
     }
 
     const isVisible = viewport.view.viewsCategory(categoryId);
     return isVisible
-      ? createVisibilityStatus("visible", { tooltipStringId: "modelsTree.category.displayedThroughCategorySelector", ignoreTooltip })
-      : createVisibilityStatus("hidden", { tooltipStringId: "modelsTree.category.hiddenThroughCategorySelector", ignoreTooltip });
+      ? createVisibilityStatus("visible", getTooltipOptions("modelsTree.category.displayedThroughCategorySelector", ignoreTooltip))
+      : createVisibilityStatus("hidden", getTooltipOptions("modelsTree.category.hiddenThroughCategorySelector", ignoreTooltip));
   }
 
   private getCategoryDisplayStatus({ ignoreTooltip, ...props }: GetCategoryVisibilityStatusProps & { ignoreTooltip?: boolean }): Observable<VisibilityStatus> {
     const result = defer(() => {
       if (!this._props.viewport.view.viewsModel(props.modelId)) {
-        return of(createVisibilityStatus("hidden", { tooltipStringId: "modelsTree.category.hiddenThroughModel", ignoreTooltip }));
+        return of(createVisibilityStatus("hidden", getTooltipOptions("modelsTree.category.hiddenThroughModel", ignoreTooltip)));
       }
 
       return this.getVisibilityFromAlwaysAndNeverDrawnElements({
@@ -391,7 +394,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         elements: elementIds,
         defaultStatus: () => {
           const status = this.getDefaultCategoryVisibilityStatus({ categoryId, modelId, ignoreTooltip: true });
-          return createVisibilityStatus(status.state, { tooltipStringId: `modelsTree.groupingNode.${status.state}ThroughCategory` });
+          return createVisibilityStatus(status.state, getTooltipOptions(`modelsTree.groupingNode.${status.state}ThroughCategory`));
         },
         tooltips: {
           allElementsInAlwaysDrawnList: "modelsTree.groupingNode.allElementsVisible",
@@ -407,16 +410,16 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
   private getElementOverriddenVisibility(elementId: string, ignoreTooltip?: boolean): NonPartialVisibilityStatus | undefined {
     const viewport = this._props.viewport;
     if (viewport.neverDrawn?.has(elementId)) {
-      return createVisibilityStatus("hidden", { tooltipStringId: "modelsTree.element.hiddenThroughNeverDrawnList", ignoreTooltip });
+      return createVisibilityStatus("hidden", getTooltipOptions("modelsTree.element.hiddenThroughNeverDrawnList", ignoreTooltip));
     }
 
     if (viewport.alwaysDrawn?.size) {
       if (viewport.alwaysDrawn.has(elementId)) {
-        return createVisibilityStatus("visible", { tooltipStringId: "modelsTree.element.displayedThroughAlwaysDrawnList", ignoreTooltip });
+        return createVisibilityStatus("visible", getTooltipOptions("modelsTree.element.displayedThroughAlwaysDrawnList", ignoreTooltip));
       }
 
       if (viewport.isAlwaysDrawnExclusive) {
-        return createVisibilityStatus("hidden", { tooltipStringId: "modelsTree.element.hiddenDueToOtherElementsExclusivelyAlwaysDrawn", ignoreTooltip });
+        return createVisibilityStatus("hidden", getTooltipOptions("modelsTree.element.hiddenDueToOtherElementsExclusivelyAlwaysDrawn", ignoreTooltip));
       }
     }
 
@@ -432,7 +435,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       const { elementId, modelId, categoryId } = props;
 
       if (!viewport.view.viewsModel(modelId)) {
-        return of(createVisibilityStatus("hidden", { tooltipStringId: "modelsTree.element.hiddenThroughModel", ignoreTooltip }));
+        return of(createVisibilityStatus("hidden", getTooltipOptions("modelsTree.element.hiddenThroughModel", ignoreTooltip)));
       }
 
       let status = this.getElementOverriddenVisibility(elementId, ignoreTooltip);
@@ -442,10 +445,10 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
 
       status = this.getDefaultCategoryVisibilityStatus({ categoryId, modelId, ignoreTooltip: true });
       return of(
-        createVisibilityStatus(status.state, {
-          tooltipStringId: status.state === "visible" ? undefined : "modelsTree.element.hiddenThroughCategory",
-          ignoreTooltip,
-        }),
+        createVisibilityStatus(
+          status.state,
+          getTooltipOptions(status.state === "visible" ? undefined : "modelsTree.element.hiddenThroughCategory", ignoreTooltip),
+        ),
       );
     });
     return createVisibilityHandlerResult(this, props, result, this._props.overrides?.getElementDisplayStatus);
@@ -780,23 +783,23 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     const { alwaysDrawn, neverDrawn, totalCount, ignoreTooltip } = props;
 
     if (neverDrawn?.size === totalCount) {
-      return createVisibilityStatus("hidden", { tooltipStringId: props.tooltips.allElementsInNeverDrawnList, ignoreTooltip });
+      return createVisibilityStatus("hidden", getTooltipOptions(props.tooltips.allElementsInNeverDrawnList, ignoreTooltip));
     }
 
     if (alwaysDrawn?.size === totalCount) {
-      return createVisibilityStatus("visible", { tooltipStringId: props.tooltips.allElementsInAlwaysDrawnList, ignoreTooltip });
+      return createVisibilityStatus("visible", getTooltipOptions(props.tooltips.allElementsInAlwaysDrawnList, ignoreTooltip));
     }
 
     const viewport = this._props.viewport;
     if (viewport.isAlwaysDrawnExclusive && viewport.alwaysDrawn?.size) {
       return alwaysDrawn?.size
-        ? createVisibilityStatus("partial", { tooltipStringId: props.tooltips.elementsInBothAlwaysAndNeverDrawn, ignoreTooltip })
-        : createVisibilityStatus("hidden", { tooltipStringId: props.tooltips.noElementsInExclusiveAlwaysDrawnList, ignoreTooltip });
+        ? createVisibilityStatus("partial", getTooltipOptions(props.tooltips.elementsInBothAlwaysAndNeverDrawn, ignoreTooltip))
+        : createVisibilityStatus("hidden", getTooltipOptions(props.tooltips.noElementsInExclusiveAlwaysDrawnList, ignoreTooltip));
     }
 
     const status = props.defaultStatus();
     if ((status.state === "visible" && neverDrawn?.size) || (status.state === "hidden" && alwaysDrawn?.size)) {
-      return createVisibilityStatus("partial", { ignoreTooltip });
+      return createVisibilityStatus("partial", getTooltipOptions(undefined, ignoreTooltip));
     }
     return status;
   }
@@ -809,7 +812,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     const viewport = this._props.viewport;
     if (viewport.isAlwaysDrawnExclusive) {
       if (!viewport?.alwaysDrawn?.size) {
-        return of(createVisibilityStatus("hidden", { tooltipStringId: props.tooltips.noElementsInExclusiveAlwaysDrawnList, ignoreTooltip }));
+        return of(createVisibilityStatus("hidden", getTooltipOptions(props.tooltips.noElementsInExclusiveAlwaysDrawnList, ignoreTooltip)));
       }
     } else if (!viewport?.neverDrawn?.size && !viewport?.alwaysDrawn?.size) {
       return of(props.defaultStatus());
@@ -921,7 +924,7 @@ function getVisibilityStatusFromTreeNodeChildren(
           visibility = "visible";
         }
 
-        return createVisibilityStatus(visibility, { tooltipStringId: tooltipMap[visibility], ignoreTooltip });
+        return createVisibilityStatus(visibility, getTooltipOptions(tooltipMap[visibility], ignoreTooltip));
       }),
     );
   };
@@ -1014,5 +1017,11 @@ function releaseMainThreadOnItemsCount<T>(elementCount: number) {
       }),
       concatAll(),
     );
+  };
+}
+
+function getTooltipOptions(key: string | undefined, ignoreTooltip?: boolean) {
+  return {
+    useTooltip: ignoreTooltip ? (false as const) : key,
   };
 }
