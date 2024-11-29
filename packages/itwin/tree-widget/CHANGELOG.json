@@ -2,6 +2,47 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Fri, 29 Nov 2024 10:43:06 GMT",
+      "version": "3.1.0",
+      "tag": "@itwin/tree-widget-react_v3.1.0",
+      "comments": {
+        "patch": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "c7e031bc771bc9215acef7f8f724c5390e1f9079",
+            "comment": "Bump dependencies"
+          },
+          {
+            "author": "43886789+MartynasStrazdas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "485ec9d4bd818fb9ba6aab08af56287c18f41cb7",
+            "comment": "Add missing tooltips"
+          },
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "b1f0b991b0896611b729ff5082b36d78cdcccc4c",
+            "comment": "Reduce the number of queries being executed when always/never drawn sets change."
+          },
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "c0eb696d30e44cf7ae22d47ac8d8fc1233bae3e9",
+            "comment": "Improve performance of visibility status calculation and visibility changes. Also reduce main thread blocking to avoid UI freezing."
+          }
+        ],
+        "minor": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "c0eb696d30e44cf7ae22d47ac8d8fc1233bae3e9",
+            "comment": "Replaced `ModelsTreeVisibilityHandlerOverrides.changeElementState` with `ModelsTreeVisibilityHandlerOverrides.changeElementsState`. The method is provided with a list of elements instead of single element to allow changing visibility of multiple elements in single batch istead of one by one."
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 15 Nov 2024 15:03:19 GMT",
       "version": "3.0.3",
       "tag": "@itwin/tree-widget-react_v3.0.3",

@@ -1,8 +1,16 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Tue, 12 Nov 2024 12:57:13 GMT and should not be manually modified.
+This log was last generated on Fri, 29 Nov 2024 10:43:06 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.24.1
+
+Fri, 29 Nov 2024 10:43:06 GMT
+
+### Patches
+
+- provide a callback to allow the application to decide whether to show or hide the measurement tools ([#1096](https://github.com/iTwin/viewer-components-react/pull/1096))
 
 ## 0.24.0
 
