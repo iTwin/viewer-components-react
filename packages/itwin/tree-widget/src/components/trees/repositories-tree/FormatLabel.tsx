@@ -11,7 +11,7 @@ import { RootNodeClassnameEnum } from "./GetIcon";
 export function formatLabel(Classname: string) {
   switch (RootNodeClassnameEnum[Classname as keyof typeof RootNodeClassnameEnum]) {
     case RootNodeClassnameEnum.iModels:
-      return "IModels";
+      return "iModels";
     case RootNodeClassnameEnum.RealityData:
       return "Reality data";
     case RootNodeClassnameEnum.Storage:
