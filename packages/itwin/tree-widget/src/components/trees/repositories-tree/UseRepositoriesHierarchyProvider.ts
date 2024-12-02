@@ -36,7 +36,7 @@ export function UseRepositoriesHierarchyProvider({ accessToken, itwinId, setIsLo
                 children: !!repository.uri,
                 extendedData: { url: repository.uri },
                 parentKeys: [],
-              } as HierarchyNode;
+              } satisfies HierarchyNode;
             }
           } else {
             const repositoryData = await getRepositoryData(accessToken, parentNode.extendedData?.url);
