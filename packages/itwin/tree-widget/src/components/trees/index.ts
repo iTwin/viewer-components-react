@@ -15,6 +15,7 @@ export { useModelsTreeButtonProps } from "./models-tree/ModelsTreeButtons";
 export { useCategoriesTreeButtonProps } from "./categories-tree/CategoriesTreeButtons";
 
 export { Tree } from "./common/components/Tree";
+export { RepositoriesTree } from "./repositories-tree/RepositoriesTree";
 export { VisibilityTree } from "./common/components/VisibilityTree";
 export { TreeRenderer } from "./common/components/TreeRenderer";
 export { VisibilityTreeRenderer } from "./common/components/VisibilityTreeRenderer";
