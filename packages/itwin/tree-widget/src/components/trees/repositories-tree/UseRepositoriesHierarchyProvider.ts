@@ -47,7 +47,7 @@ export function UseRepositoriesHierarchyProvider({ accessToken, itwinId, setIsLo
                 children: false,
                 extendedData: { type: data.type },
                 parentKeys: [...parentNode.parentKeys, parentNode.key],
-              } as HierarchyNode;
+              } satisfies HierarchyNode;
             }
           }
         },
