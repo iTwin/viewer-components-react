@@ -2,6 +2,21 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Fri, 29 Nov 2024 10:43:06 GMT",
+      "version": "0.24.1",
+      "tag": "@itwin/measure-tools-react_v0.24.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "email not defined",
+            "package": "@itwin/measure-tools-react",
+            "commit": "53941cd60563dd4b97f981fa3b7324e81417db8f",
+            "comment": "provide a callback to allow the application to decide whether to show or hide the measurement tools"
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 12 Nov 2024 12:57:13 GMT",
       "version": "0.24.0",
       "tag": "@itwin/measure-tools-react_v0.24.0",

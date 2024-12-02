@@ -1,8 +1,23 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Fri, 15 Nov 2024 15:03:19 GMT and should not be manually modified.
+This log was last generated on Fri, 29 Nov 2024 10:43:06 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 3.1.0
+
+Fri, 29 Nov 2024 10:43:06 GMT
+
+### Minor changes
+
+- Replaced `ModelsTreeVisibilityHandlerOverrides.changeElementState` with `ModelsTreeVisibilityHandlerOverrides.changeElementsState`. The method is provided with a list of elements instead of single element to allow changing visibility of multiple elements in single batch istead of one by one. ([#1098](https://github.com/iTwin/viewer-components-react/pull/1098))
+
+### Patches
+
+- Bump dependencies ([#1103](https://github.com/iTwin/viewer-components-react/pull/1103))
+- Add missing tooltips ([#1092](https://github.com/iTwin/viewer-components-react/pull/1092))
+- Reduce the number of queries being executed when always/never drawn sets change. ([#1102](https://github.com/iTwin/viewer-components-react/pull/1102))
+- Improve performance of visibility status calculation and visibility changes. Also reduce main thread blocking to avoid UI freezing. ([#1098](https://github.com/iTwin/viewer-components-react/pull/1098))
 
 ## 3.0.3
 
