@@ -8,8 +8,8 @@ import { BeEvent } from "@itwin/core-bentley";
 import { formatLabel } from "./FormatLabel";
 import { getItwinRepositories, getRepositoryData } from "./RepositoriesService";
 
+import type { EventListener } from "@itwin/presentation-shared";
 import type { HierarchyNode, HierarchyProvider } from "@itwin/presentation-hierarchies";
-
 interface UseRepositoriesHierarchyProviderProps {
   accessToken: string;
   itwinId: string;
@@ -23,6 +23,8 @@ interface UseRepositoriesHierarchyProviderProps {
 export function UseRepositoriesHierarchyProvider({ accessToken, itwinId, setIsLoading, environment }: UseRepositoriesHierarchyProviderProps) {
   return useMemo<() => HierarchyProvider>(
     () => () => {
+      // let rootFilter: Props<HierarchyProvider["setHierarchyFilter"]>;
+      const hierarchyChanged = new BeEvent<EventListener<HierarchyProvider["hierarchyChanged"]>>();
       return {
         async *getNodes({ parentNode }) {
           if (!parentNode) {
@@ -51,10 +53,12 @@ export function UseRepositoriesHierarchyProvider({ accessToken, itwinId, setIsLo
             }
           }
         },
+        setHierarchyFilter() {
+          hierarchyChanged.raiseEvent();
+        },
         async *getNodeInstanceKeys() {},
-        setHierarchyFilter() {},
         setFormatter() {},
-        hierarchyChanged: new BeEvent(),
+        hierarchyChanged,
       };
     },
     [accessToken, environment, itwinId, setIsLoading],
