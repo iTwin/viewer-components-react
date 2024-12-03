@@ -21,22 +21,9 @@ import {
   SvgList,
   SvgRealityMesh,
 } from "@itwin/itwinui-icons-react";
-import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+import { ITwinRepositoryType } from "./RepositoriesType";
 
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
-
-export enum RootNodeClassnameEnum {
-  "iModels" = 0,
-  "RealityData" = 1,
-  "Storage" = 2,
-  "Forms" = 3,
-  "Issues" = 4,
-  "SensorData" = 5,
-  "CesiumCuratedContent" = 6,
-  "GeographicInformationSystem" = 7,
-  "Construction" = 8,
-  "Subsurface" = 9,
-}
 
 const StorageNodeIcons: { [key: string]: JSX.Element } = {
   folder: <SvgFolder />,
@@ -66,19 +53,19 @@ const FormsNodeIcons: { [key: string]: JSX.Element } = {
  * @internal
  */
 export function getRepositoryNodeIcon(node: PresentationHierarchyNode) {
-  if (node.nodeData.parentKeys.length === 0 && HierarchyNodeKey.isGeneric(node.nodeData.key)) {
-    return getRootNodeIcon(node.nodeData.key.id);
+  if (node.nodeData.parentKeys.length === 0) {
+    return getRootNodeIcon(node.nodeData.extendedData?.repositoryType);
   }
 
-  if (HierarchyNodeKey.isGeneric(node.nodeData.parentKeys[0]) && node.nodeData.extendedData?.type) {
-    switch (RootNodeClassnameEnum[node.nodeData.parentKeys[0].id as keyof typeof RootNodeClassnameEnum]) {
-      case RootNodeClassnameEnum.Storage:
+  if (node.nodeData.extendedData?.type) {
+    switch (ITwinRepositoryType[node.nodeData.extendedData?.repositoryType as keyof typeof ITwinRepositoryType]) {
+      case ITwinRepositoryType.Storage:
         return StorageNodeIcons[node.nodeData.extendedData.type];
-      case RootNodeClassnameEnum.Issues:
+      case ITwinRepositoryType.Issues:
         return IssuesNodeIcons[node.nodeData.extendedData.type];
-      case RootNodeClassnameEnum.Forms:
+      case ITwinRepositoryType.Forms:
         return FormsNodeIcons[node.nodeData.extendedData.type];
-      case RootNodeClassnameEnum.RealityData:
+      case ITwinRepositoryType.RealityData:
         return RealityDataNodeIcons[node.nodeData.extendedData.type];
     }
   }
@@ -87,23 +74,23 @@ export function getRepositoryNodeIcon(node: PresentationHierarchyNode) {
 }
 
 function getRootNodeIcon(id: string) {
-  switch (RootNodeClassnameEnum[id as keyof typeof RootNodeClassnameEnum]) {
-    case RootNodeClassnameEnum.iModels:
+  switch (ITwinRepositoryType[id as keyof typeof ITwinRepositoryType]) {
+    case ITwinRepositoryType.iModels:
       return <SvgImodelHollow />;
-    case RootNodeClassnameEnum.RealityData:
+    case ITwinRepositoryType.RealityData:
       return <Svg3D />;
-    case RootNodeClassnameEnum.Storage:
+    case ITwinRepositoryType.Storage:
       return <SvgFolder />;
-    case RootNodeClassnameEnum.Forms:
+    case ITwinRepositoryType.Forms:
       return <SvgDetails />;
-    case RootNodeClassnameEnum.Issues:
+    case ITwinRepositoryType.Issues:
       return <SvgIssueReport />;
-    case RootNodeClassnameEnum.CesiumCuratedContent:
+    case ITwinRepositoryType.CesiumCuratedContent:
       return <SvgGlobe />; // There is no Cesium icon in itwinUI-icons
-    case RootNodeClassnameEnum.SensorData:
-    case RootNodeClassnameEnum.GeographicInformationSystem:
-    case RootNodeClassnameEnum.Construction:
-    case RootNodeClassnameEnum.Subsurface:
+    case ITwinRepositoryType.SensorData:
+    case ITwinRepositoryType.GeographicInformationSystem:
+    case ITwinRepositoryType.Construction:
+    case ITwinRepositoryType.Subsurface:
     default:
       return <SvgItem />;
   }

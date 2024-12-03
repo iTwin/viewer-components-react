@@ -3,32 +3,32 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { RootNodeClassnameEnum } from "./GetIcon";
+import { ITwinRepositoryType } from "./RepositoriesType";
 
 /**
  * @internal
  */
-export function formatLabel(Classname: string) {
-  switch (RootNodeClassnameEnum[Classname as keyof typeof RootNodeClassnameEnum]) {
-    case RootNodeClassnameEnum.iModels:
+export function formatLabel(repositoryClassname: string) {
+  switch (ITwinRepositoryType[repositoryClassname as keyof typeof ITwinRepositoryType]) {
+    case ITwinRepositoryType.iModels:
       return "iModels";
-    case RootNodeClassnameEnum.RealityData:
+    case ITwinRepositoryType.RealityData:
       return "Reality data";
-    case RootNodeClassnameEnum.Storage:
+    case ITwinRepositoryType.Storage:
       return "Storage";
-    case RootNodeClassnameEnum.Forms:
+    case ITwinRepositoryType.Forms:
       return "Forms";
-    case RootNodeClassnameEnum.Issues:
+    case ITwinRepositoryType.Issues:
       return "Issues";
-    case RootNodeClassnameEnum.CesiumCuratedContent:
+    case ITwinRepositoryType.CesiumCuratedContent:
       return "Cesium content";
-    case RootNodeClassnameEnum.SensorData:
+    case ITwinRepositoryType.SensorData:
       return "Sensor data";
-    case RootNodeClassnameEnum.GeographicInformationSystem:
+    case ITwinRepositoryType.GeographicInformationSystem:
       return "Geographic information system";
-    case RootNodeClassnameEnum.Construction:
+    case ITwinRepositoryType.Construction:
       return "Construction";
-    case RootNodeClassnameEnum.Subsurface:
+    case ITwinRepositoryType.Subsurface:
       return "Subsurface";
     default:
       return "Unknown";

@@ -13,32 +13,28 @@ import type { HierarchyNode, HierarchyProvider } from "@itwin/presentation-hiera
 interface UseRepositoriesHierarchyProviderProps {
   accessToken: string;
   itwinId: string;
-  setIsLoading: (isLoading: boolean) => void;
   environment?: "PROD" | "QA" | "DEV";
 }
 
 /**
  * @internal
  */
-export function UseRepositoriesHierarchyProvider({ accessToken, itwinId, setIsLoading, environment }: UseRepositoriesHierarchyProviderProps) {
+export function useRepositoriesHierarchyProvider({ accessToken, itwinId, environment }: UseRepositoriesHierarchyProviderProps) {
   return useMemo<() => HierarchyProvider>(
     () => () => {
-      // let rootFilter: Props<HierarchyProvider["setHierarchyFilter"]>;
       const hierarchyChanged = new BeEvent<EventListener<HierarchyProvider["hierarchyChanged"]>>();
       return {
         async *getNodes({ parentNode }) {
           if (!parentNode) {
-            setIsLoading(true);
             const repositories = await getItwinRepositories(itwinId, accessToken, environment);
-            setIsLoading(false);
             for (const repository of repositories) {
               yield {
                 key: { type: "generic", id: repository.class },
                 label: formatLabel(repository.class),
                 children: !!repository.uri,
-                extendedData: { url: repository.uri },
+                extendedData: { url: repository.uri, repositoryType: repository.class },
                 parentKeys: [],
-              } satisfies HierarchyNode;
+              } as HierarchyNode;
             }
           } else {
             const repositoryData = await getRepositoryData(accessToken, parentNode.extendedData?.url);
@@ -47,9 +43,9 @@ export function UseRepositoriesHierarchyProvider({ accessToken, itwinId, setIsLo
                 key: { type: "generic", id: data.id ?? data.displayName },
                 label: data.displayName ?? data.name,
                 children: false,
-                extendedData: { type: data.type },
+                extendedData: { type: data.type, repositoryType: parentNode.extendedData?.repositoryType },
                 parentKeys: [...parentNode.parentKeys, parentNode.key],
-              } satisfies HierarchyNode;
+              } as HierarchyNode;
             }
           }
         },
@@ -61,6 +57,6 @@ export function UseRepositoriesHierarchyProvider({ accessToken, itwinId, setIsLo
         hierarchyChanged,
       };
     },
-    [accessToken, environment, itwinId, setIsLoading],
+    [accessToken, environment, itwinId],
   );
 }

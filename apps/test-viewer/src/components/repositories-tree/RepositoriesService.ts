@@ -3,25 +3,17 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-/**
- * @internal
- */
-export interface ITwinRepositories {
-  repositories: ITwinRepository[];
-}
-
-interface Repository {
+interface RepositoryData {
   id?: string;
-  displayName?: string;
+  displayName: string;
   type?: string;
   name?: string;
 }
 
 interface ITwinRepository {
-  id?: string;
   class: string;
   subClass?: string;
-  uri?: string;
+  uri: string;
 }
 
 /**
@@ -29,21 +21,21 @@ interface ITwinRepository {
  */
 export async function getItwinRepositories(itwinId: string, accessToken: string, environment?: "PROD" | "QA" | "DEV"): Promise<ITwinRepository[]> {
   const url = getRepositoriesUrl(itwinId, environment);
-  const result = await fetchData<ITwinRepository[]>(url, accessToken);
+  const result = (await fetchData(url, accessToken)) as ITwinRepository[];
   return result;
 }
 
 /**
  * @internal
  */
-export async function getRepositoryData(accessToken: string, url?: string): Promise<Repository[]> {
+export async function getRepositoryData(accessToken: string, url?: string): Promise<RepositoryData[]> {
   if (!url) return [];
 
-  const result = await fetchData<Repository[]>(url, accessToken);
+  const result = (await fetchData(url, accessToken)) as RepositoryData[];
   return result;
 }
 
-async function fetchData<T>(url: string, accessToken: string): Promise<T> {
+async function fetchData(url: string, accessToken: string): Promise<unknown> {
   const headers = {
     Authorization: accessToken,
     "Content-Type": "application/json",
@@ -61,7 +53,7 @@ async function fetchData<T>(url: string, accessToken: string): Promise<T> {
     const values = Object.values(result);
     const data = values[0];
 
-    return data as T;
+    return data;
   } catch (error) {
     throw error;
   }
