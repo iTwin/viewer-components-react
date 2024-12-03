@@ -4,29 +4,33 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useState } from "react";
+import { AccessToken } from "@itwin/core-bentley";
 import { AuthorizationState, useAuthorizationContext } from "./components/Authorization";
 
 export function useAccessToken() {
   const { state, client } = useAuthorizationContext();
   const [accessToken, setAccessToken] = useState<string | undefined>(undefined);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchAccessToken = async () => {
       if (state === AuthorizationState.Pending) {
         setAccessToken(undefined);
-        setLoading(true);
         return;
       }
 
-      setLoading(true);
       const token = await client.getAccessToken();
       setAccessToken(token);
-      setLoading(false);
     };
 
     fetchAccessToken();
   }, [state, client]);
 
-  return { accessToken, loading };
+  useEffect(() => {
+    const removeListener = client?.onAccessTokenChanged.addListener((token: AccessToken) => {
+      setAccessToken(token);
+    });
+    return () => removeListener();
+  }, []);
+
+  return { accessToken };
 }
