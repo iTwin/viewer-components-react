@@ -5,7 +5,6 @@
 
 import { useMemo } from "react";
 import { BeEvent } from "@itwin/core-bentley";
-import { useAccessToken } from "../../UseAccessToken";
 import { formatLabel } from "./FormatLabel";
 import { getItwinRepositories, getRepositoryData } from "./RepositoriesService";
 
@@ -26,8 +25,7 @@ export function useRepositoriesHierarchyProvider({ getAccessToken, itwinId, envi
       const hierarchyChanged = new BeEvent<EventListener<HierarchyProvider["hierarchyChanged"]>>();
       return {
         async *getNodes({ parentNode }) {
-          // const accessToken = await getAccessToken();
-          const { accessToken } = useAccessToken();
+          const accessToken = await getAccessToken();
           if (!accessToken) {
             return;
           }

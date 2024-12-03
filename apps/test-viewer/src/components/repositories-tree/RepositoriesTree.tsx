@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
-import { TreeRenderer, useUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
+import { TreeRenderer, useTree } from "@itwin/presentation-hierarchies-react";
 import { TreeWidget } from "@itwin/tree-widget-react";
 import { getRepositoryNodeIcon } from "./GetIcon";
 import { useRepositoriesHierarchyProvider } from "./UseRepositoriesHierarchyProvider";
@@ -24,8 +24,7 @@ interface RepositoriesTreeProps {
 export function RepositoriesTree({ getAccessToken, itwinId, noDataMessage, environment }: RepositoriesTreeProps) {
   const getHierarchyProvider = useRepositoriesHierarchyProvider({ getAccessToken, itwinId, environment });
 
-  const { rootNodes, isLoading, ...treeProps } = useUnifiedSelectionTree({
-    sourceName: "RepositoriesTree",
+  const { rootNodes, isLoading, ...treeProps } = useTree({
     getHierarchyProvider,
   });
 
