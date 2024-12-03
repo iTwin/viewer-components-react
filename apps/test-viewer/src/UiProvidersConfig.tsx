@@ -30,7 +30,7 @@ import {
   ExternalSourcesTreeComponent,
   IModelContentTreeComponent,
   ModelsTreeComponent,
-  TreeDefinition,
+  SelectableTreeDefinition,
   TreeWidget,
   TreeWidgetComponent,
 } from "@itwin/tree-widget-react";
@@ -108,7 +108,7 @@ const configuredUiItems = new Map<string, UiItem>([
         {
           id: "TreeWidgetUIProvider",
           getWidgets: () => {
-            const trees: TreeDefinition[] = [
+            const trees: SelectableTreeDefinition[] = [
               {
                 id: ModelsTreeComponent.id,
                 getLabel: () => ModelsTreeComponent.getLabel(),
@@ -270,6 +270,7 @@ const configuredUiItems = new Map<string, UiItem>([
       createUiItemsProviders: () => [
         new EC3Provider({
           clientId: import.meta.env.IMJS_EC3_PORTAL_AUTH_CLIENT_ID ?? "",
+          iTwinId: import.meta.env.IMJS_ITWIN_ID ?? "",
           redirectUri: import.meta.env.IMJS_EC3_PORTAL_AUTH_CLIENT_REDIRECT_URI ?? "",
           reportingBasePath: prefixUrl(REPORTS_CONFIG_BASE_URL, import.meta.env.IMJS_URL_PREFIX),
           carbonCalculationBasePath: prefixUrl(REPORTS_CONFIG_BASE_URL, import.meta.env.IMJS_URL_PREFIX),
@@ -286,7 +287,7 @@ const configuredUiItems = new Map<string, UiItem>([
   ],
 ]);
 
-function TreeWidgetWithOptions(props: { trees: TreeDefinition[] }) {
+function TreeWidgetWithOptions(props: { trees: SelectableTreeDefinition[] }) {
   const { density } = useViewerOptionsContext();
   return (
     <TreeWidgetComponent
