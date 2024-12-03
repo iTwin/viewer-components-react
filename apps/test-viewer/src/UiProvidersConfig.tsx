@@ -167,7 +167,7 @@ const configuredUiItems = new Map<string, UiItem>([
               {
                 id: "RepositoriesTree",
                 getLabel: () => "Repositories tree",
-                render: () => <TestRepositoriesTree selectionStorage={unifiedSelectionStorage} />,
+                render: () => <TestRepositoriesTree />,
               },
             ];
             return [

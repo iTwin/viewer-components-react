@@ -1,12 +1,16 @@
-export enum ITwinRepositoryType {
-  "iModels" = 0,
-  "RealityData" = 1,
-  "Storage" = 2,
-  "Forms" = 3,
-  "Issues" = 4,
-  "SensorData" = 5,
-  "CesiumCuratedContent" = 6,
-  "GeographicInformationSystem" = 7,
-  "Construction" = 8,
-  "Subsurface" = 9,
-}
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+
+export type ITwinRepositoryType =
+  | "iModels"
+  | "RealityData"
+  | "Storage"
+  | "Forms"
+  | "Issues"
+  | "SensorData"
+  | "CesiumCuratedContent"
+  | "GeographicInformationSystem"
+  | "Construction"
+  | "Subsurface";

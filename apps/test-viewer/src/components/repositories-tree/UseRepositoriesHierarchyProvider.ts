@@ -5,13 +5,14 @@
 
 import { useMemo } from "react";
 import { BeEvent } from "@itwin/core-bentley";
+import { useAccessToken } from "../../UseAccessToken";
 import { formatLabel } from "./FormatLabel";
 import { getItwinRepositories, getRepositoryData } from "./RepositoriesService";
 
 import type { EventListener } from "@itwin/presentation-shared";
 import type { HierarchyNode, HierarchyProvider } from "@itwin/presentation-hierarchies";
 interface UseRepositoriesHierarchyProviderProps {
-  accessToken: string;
+  getAccessToken: () => Promise<string>;
   itwinId: string;
   environment?: "PROD" | "QA" | "DEV";
 }
@@ -19,12 +20,18 @@ interface UseRepositoriesHierarchyProviderProps {
 /**
  * @internal
  */
-export function useRepositoriesHierarchyProvider({ accessToken, itwinId, environment }: UseRepositoriesHierarchyProviderProps) {
+export function useRepositoriesHierarchyProvider({ getAccessToken, itwinId, environment }: UseRepositoriesHierarchyProviderProps) {
   return useMemo<() => HierarchyProvider>(
     () => () => {
       const hierarchyChanged = new BeEvent<EventListener<HierarchyProvider["hierarchyChanged"]>>();
       return {
         async *getNodes({ parentNode }) {
+          // const accessToken = await getAccessToken();
+          const { accessToken } = useAccessToken();
+          if (!accessToken) {
+            return;
+          }
+
           if (!parentNode) {
             const repositories = await getItwinRepositories(itwinId, accessToken, environment);
             for (const repository of repositories) {
@@ -37,7 +44,7 @@ export function useRepositoriesHierarchyProvider({ accessToken, itwinId, environ
               } as HierarchyNode;
             }
           } else {
-            const repositoryData = await getRepositoryData(accessToken, parentNode.extendedData?.url);
+            const repositoryData = await getRepositoryData(accessToken!, parentNode.extendedData?.url);
             for (const data of repositoryData) {
               yield {
                 key: { type: "generic", id: data.id ?? data.displayName },
@@ -57,6 +64,6 @@ export function useRepositoriesHierarchyProvider({ accessToken, itwinId, environ
         hierarchyChanged,
       };
     },
-    [accessToken, environment, itwinId],
+    [environment, itwinId],
   );
 }

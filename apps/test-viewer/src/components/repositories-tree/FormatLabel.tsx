@@ -8,27 +8,27 @@ import { ITwinRepositoryType } from "./RepositoriesType";
 /**
  * @internal
  */
-export function formatLabel(repositoryClassname: string) {
-  switch (ITwinRepositoryType[repositoryClassname as keyof typeof ITwinRepositoryType]) {
-    case ITwinRepositoryType.iModels:
+export function formatLabel(iTwinRepositoryType: ITwinRepositoryType) {
+  switch (iTwinRepositoryType) {
+    case "iModels":
       return "iModels";
-    case ITwinRepositoryType.RealityData:
+    case "RealityData":
       return "Reality data";
-    case ITwinRepositoryType.Storage:
+    case "Storage":
       return "Storage";
-    case ITwinRepositoryType.Forms:
+    case "Forms":
       return "Forms";
-    case ITwinRepositoryType.Issues:
+    case "Issues":
       return "Issues";
-    case ITwinRepositoryType.CesiumCuratedContent:
+    case "CesiumCuratedContent":
       return "Cesium content";
-    case ITwinRepositoryType.SensorData:
+    case "SensorData":
       return "Sensor data";
-    case ITwinRepositoryType.GeographicInformationSystem:
+    case "GeographicInformationSystem":
       return "Geographic information system";
-    case ITwinRepositoryType.Construction:
+    case "Construction":
       return "Construction";
-    case ITwinRepositoryType.Subsurface:
+    case "Subsurface":
       return "Subsurface";
     default:
       return "Unknown";

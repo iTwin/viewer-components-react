@@ -3,6 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { ITwinRepositoryType } from "./RepositoriesType";
+
 interface RepositoryData {
   id?: string;
   displayName: string;
@@ -11,7 +13,7 @@ interface RepositoryData {
 }
 
 interface ITwinRepository {
-  class: string;
+  class: ITwinRepositoryType;
   subClass?: string;
   uri: string;
 }

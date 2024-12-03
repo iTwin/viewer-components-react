@@ -5,16 +5,13 @@
 
 import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { TreeRenderer, useUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
-import { Delayed } from "../../../../../packages/itwin/tree-widget/src/components/trees/common/components/Delayed";
-import { ProgressOverlay } from "../../../../../packages/itwin/tree-widget/src/components/trees/common/components/ProgressOverlay";
-import { TreeWidget } from "../../../../../packages/itwin/tree-widget/src/TreeWidget";
+import { TreeWidget } from "@itwin/tree-widget-react";
 import { getRepositoryNodeIcon } from "./GetIcon";
 import { useRepositoriesHierarchyProvider } from "./UseRepositoriesHierarchyProvider";
-
-import type { SelectionStorage } from "@itwin/presentation-hierarchies-react";
+import { Delayed, ProgressOverlay } from "./Utils";
 
 interface RepositoriesTreeProps {
-  accessToken: string;
+  getAccessToken: () => Promise<string>;
   itwinId: string;
   environment?: "PROD" | "QA" | "DEV";
   noDataMessage?: string;
@@ -24,10 +21,10 @@ interface RepositoriesTreeProps {
  * @alpha
  */
 
-export function RepositoriesTree({ accessToken, itwinId, noDataMessage, environment }: RepositoriesTreeProps) {
-  const getHierarchyProvider = useRepositoriesHierarchyProvider({ accessToken, itwinId, environment });
+export function RepositoriesTree({ getAccessToken, itwinId, noDataMessage, environment }: RepositoriesTreeProps) {
+  const getHierarchyProvider = useRepositoriesHierarchyProvider({ getAccessToken, itwinId, environment });
 
-  const { rootNodes, ...treeProps } = useUnifiedSelectionTree({
+  const { rootNodes, isLoading, ...treeProps } = useUnifiedSelectionTree({
     sourceName: "RepositoriesTree",
     getHierarchyProvider,
   });
@@ -43,7 +40,7 @@ export function RepositoriesTree({ accessToken, itwinId, noDataMessage, environm
       );
     }
 
-    if (rootNodes.length === 0 && !treeProps.isLoading) {
+    if (rootNodes.length === 0 && !isLoading) {
       return (
         <Flex alignItems="center" justifyContent="center" flexDirection="column" style={{ width: "100%", height: "100%" }}>
           {noDataMessage ? noDataMessage : <Text>{TreeWidget.translate("baseTree.dataIsNotAvailable")}</Text>}
@@ -63,7 +60,7 @@ export function RepositoriesTree({ accessToken, itwinId, noDataMessage, environm
       <div id="tw-tree-renderer-container" style={{ overflow: "auto", height: "100%" }}>
         {treeRenderer()}
       </div>
-      <Delayed show={treeProps.isLoading}>
+      <Delayed show={isLoading}>
         <ProgressOverlay />
       </Delayed>
     </div>

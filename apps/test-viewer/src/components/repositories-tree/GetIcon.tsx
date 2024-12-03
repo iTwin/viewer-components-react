@@ -21,7 +21,6 @@ import {
   SvgList,
   SvgRealityMesh,
 } from "@itwin/itwinui-icons-react";
-import { ITwinRepositoryType } from "./RepositoriesType";
 
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
@@ -58,14 +57,14 @@ export function getRepositoryNodeIcon(node: PresentationHierarchyNode) {
   }
 
   if (node.nodeData.extendedData?.type) {
-    switch (ITwinRepositoryType[node.nodeData.extendedData?.repositoryType as keyof typeof ITwinRepositoryType]) {
-      case ITwinRepositoryType.Storage:
+    switch (node.nodeData.extendedData?.type) {
+      case "Storage":
         return StorageNodeIcons[node.nodeData.extendedData.type];
-      case ITwinRepositoryType.Issues:
+      case "Issues":
         return IssuesNodeIcons[node.nodeData.extendedData.type];
-      case ITwinRepositoryType.Forms:
+      case "Forms":
         return FormsNodeIcons[node.nodeData.extendedData.type];
-      case ITwinRepositoryType.RealityData:
+      case "RealityData":
         return RealityDataNodeIcons[node.nodeData.extendedData.type];
     }
   }
@@ -73,24 +72,24 @@ export function getRepositoryNodeIcon(node: PresentationHierarchyNode) {
   return <SvgItem />;
 }
 
-function getRootNodeIcon(id: string) {
-  switch (ITwinRepositoryType[id as keyof typeof ITwinRepositoryType]) {
-    case ITwinRepositoryType.iModels:
+function getRootNodeIcon(repositoryType: string) {
+  switch (repositoryType) {
+    case "iModels":
       return <SvgImodelHollow />;
-    case ITwinRepositoryType.RealityData:
+    case "RealityData":
       return <Svg3D />;
-    case ITwinRepositoryType.Storage:
+    case "Storage":
       return <SvgFolder />;
-    case ITwinRepositoryType.Forms:
+    case "Forms":
       return <SvgDetails />;
-    case ITwinRepositoryType.Issues:
+    case "Issues":
       return <SvgIssueReport />;
-    case ITwinRepositoryType.CesiumCuratedContent:
+    case "CesiumCuratedContent":
       return <SvgGlobe />; // There is no Cesium icon in itwinUI-icons
-    case ITwinRepositoryType.SensorData:
-    case ITwinRepositoryType.GeographicInformationSystem:
-    case ITwinRepositoryType.Construction:
-    case ITwinRepositoryType.Subsurface:
+    case "SensorData":
+    case "GeographicInformationSystem":
+    case "Construction":
+    case "Subsurface":
     default:
       return <SvgItem />;
   }
