@@ -10,10 +10,7 @@ const watch = process.argv[2] && process.argv[2] === "--watch";
 const scriptName = watch ? "start:dev" : "start:dev:no-watch";
 const options = process.platform === "win32" ? undefined : { shell: "/bin/sh" };
 
-const env = {
-  IMJS_ENABLED_WIDGETS: "tree-widget",
-};
-
+const env = {};
 if (process.env.IS_PW) {
   // We know we're running e2e tests using `IS_PW` env var as it's set through playwright config.
   // The config also supplies some env variables specific to our e2e tests - QA prefixes, iTwinId,
