@@ -31,7 +31,9 @@ export async function getItwinRepositories(itwinId: string, accessToken: string,
  * @internal
  */
 export async function getRepositoryData(accessToken: string, url?: string): Promise<RepositoryData[]> {
-  if (!url) return [];
+  if (!url) {
+    return [];
+  }
 
   const result = (await fetchData(url, accessToken)) as RepositoryData[];
   return result;
