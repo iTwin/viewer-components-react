@@ -11,7 +11,6 @@ import { useRepositoriesHierarchyProvider } from "./UseRepositoriesHierarchyProv
 import { Delayed, ProgressOverlay } from "./Utils";
 
 interface RepositoriesTreeProps {
-  getAccessToken: () => Promise<string>;
   itwinId: string;
   environment?: "PROD" | "QA" | "DEV";
   noDataMessage?: string;
@@ -20,9 +19,8 @@ interface RepositoriesTreeProps {
 /**
  * @alpha
  */
-
-export function RepositoriesTree({ getAccessToken, itwinId, noDataMessage, environment }: RepositoriesTreeProps) {
-  const getHierarchyProvider = useRepositoriesHierarchyProvider({ getAccessToken, itwinId, environment });
+export function RepositoriesTree({ itwinId, noDataMessage, environment }: RepositoriesTreeProps) {
+  const getHierarchyProvider = useRepositoriesHierarchyProvider({ itwinId, environment });
 
   const { rootNodes, isLoading, ...treeProps } = useTree({
     getHierarchyProvider,

@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { IModelApp } from "@itwin/core-frontend";
 import { ITwinRepositoryType } from "./RepositoriesType";
 
 interface RepositoryData {
@@ -21,25 +22,22 @@ interface ITwinRepository {
 /**
  * @internal
  */
-export async function getItwinRepositories(itwinId: string, accessToken: string, environment?: "PROD" | "QA" | "DEV"): Promise<ITwinRepository[]> {
+export async function getItwinRepositories(itwinId: string, environment?: "PROD" | "QA" | "DEV"): Promise<ITwinRepository[]> {
   const url = getRepositoriesUrl(itwinId, environment);
-  const result = (await fetchData(url, accessToken)) as ITwinRepository[];
+  const result = (await fetchData(url)) as ITwinRepository[];
   return result;
 }
 
 /**
  * @internal
  */
-export async function getRepositoryData(accessToken: string, url?: string): Promise<RepositoryData[]> {
-  if (!url) {
-    return [];
-  }
-
-  const result = (await fetchData(url, accessToken)) as RepositoryData[];
+export async function getRepositoryData(url: string): Promise<RepositoryData[]> {
+  const result = (await fetchData(url)) as RepositoryData[];
   return result;
 }
 
-async function fetchData(url: string, accessToken: string): Promise<unknown> {
+async function fetchData(url: string): Promise<unknown> {
+  const accessToken = await IModelApp.getAccessToken();
   const headers = {
     Authorization: accessToken,
     "Content-Type": "application/json",

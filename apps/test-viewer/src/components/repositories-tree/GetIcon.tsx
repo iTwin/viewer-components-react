@@ -21,9 +21,9 @@ import {
   SvgList,
   SvgRealityMesh,
 } from "@itwin/itwinui-icons-react";
+import { ITwinRepositoryType } from "./RepositoriesType";
 
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
-
 const StorageNodeIcons: { [key: string]: JSX.Element } = {
   folder: <SvgFolder />,
   file: <SvgDocument />,
@@ -56,23 +56,21 @@ export function getRepositoryNodeIcon(node: PresentationHierarchyNode) {
     return getRootNodeIcon(node.nodeData.extendedData?.repositoryType);
   }
 
-  if (node.nodeData.extendedData?.type) {
-    switch (node.nodeData.extendedData?.type) {
-      case "Storage":
-        return StorageNodeIcons[node.nodeData.extendedData.type];
-      case "Issues":
-        return IssuesNodeIcons[node.nodeData.extendedData.type];
-      case "Forms":
-        return FormsNodeIcons[node.nodeData.extendedData.type];
-      case "RealityData":
-        return RealityDataNodeIcons[node.nodeData.extendedData.type];
-    }
+  switch (node.nodeData.extendedData?.repositoryType) {
+    case "Storage":
+      return StorageNodeIcons[node.nodeData.extendedData.type];
+    case "Issues":
+      return IssuesNodeIcons[node.nodeData.extendedData.type];
+    case "Forms":
+      return FormsNodeIcons[node.nodeData.extendedData.type];
+    case "RealityData":
+      return RealityDataNodeIcons[node.nodeData.extendedData.type];
   }
 
   return <SvgItem />;
 }
 
-function getRootNodeIcon(repositoryType: string) {
+function getRootNodeIcon(repositoryType: ITwinRepositoryType) {
   switch (repositoryType) {
     case "iModels":
       return <SvgImodelHollow />;
