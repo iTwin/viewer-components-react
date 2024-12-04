@@ -34,9 +34,9 @@ import {
   TreeWidget,
   TreeWidgetComponent,
 } from "@itwin/tree-widget-react";
+import { RepositoriesTreeComponent } from "./components/repositories-tree/RepositoriesTree";
 import { useViewerOptionsContext } from "./components/ViewerOptions";
 import { unifiedSelectionStorage } from "./SelectionStorage";
-import { TestRepositoriesTree } from "./TestRepositoriesTree";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
@@ -167,7 +167,7 @@ const configuredUiItems = new Map<string, UiItem>([
               {
                 id: "RepositoriesTree",
                 getLabel: () => "Repositories tree",
-                render: () => <TestRepositoriesTree />,
+                render: () => <RepositoriesTreeComponent />,
               },
             ];
             return [

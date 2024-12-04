@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { TreeRenderer, useTree } from "@itwin/presentation-hierarchies-react";
 import { TreeWidget } from "@itwin/tree-widget-react";
@@ -19,7 +20,18 @@ interface RepositoriesTreeProps {
 /**
  * @alpha
  */
-export function RepositoriesTree({ itwinId, noDataMessage, environment }: RepositoriesTreeProps) {
+export function RepositoriesTreeComponent() {
+  const iModelConnection = useActiveIModelConnection();
+  const iTwinId = iModelConnection?.iTwinId;
+
+  if (!iTwinId) {
+    return <> No itwin id found</>;
+  }
+
+  return <RepositoriesTree itwinId={iTwinId} environment={"QA"} />;
+}
+
+function RepositoriesTree({ itwinId, noDataMessage, environment }: RepositoriesTreeProps) {
   const getHierarchyProvider = useRepositoriesHierarchyProvider({ itwinId, environment });
 
   const { rootNodes, isLoading, ...treeProps } = useTree({

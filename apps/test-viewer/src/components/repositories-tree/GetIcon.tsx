@@ -65,9 +65,9 @@ export function getRepositoryNodeIcon(node: PresentationHierarchyNode) {
       return FormsNodeIcons[node.nodeData.extendedData.type];
     case "RealityData":
       return RealityDataNodeIcons[node.nodeData.extendedData.type];
+    default:
+      return <SvgItem />;
   }
-
-  return <SvgItem />;
 }
 
 function getRootNodeIcon(repositoryType: ITwinRepositoryType) {
