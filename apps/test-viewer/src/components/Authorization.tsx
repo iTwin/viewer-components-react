@@ -24,50 +24,55 @@ class AccessTokenAuthClient implements WebViewerAuthorizationClient {
 }
 
 class ViewerAuthorizationClient implements WebViewerAuthorizationClient {
-  private _client: WebViewerAuthorizationClient;
+  private _client: WebViewerAuthorizationClient | undefined;
+  public readonly onAccessTokenChanged = new BeEvent<(token: AccessToken) => void>();
 
-  constructor() {
-    const userAccessToken = import.meta.env.IMJS_USER_ACCESS_TOKEN;
-    this._client = userAccessToken
-      ? new AccessTokenAuthClient(userAccessToken)
-      : new BrowserAuthorizationClient({
-          scope: import.meta.env.IMJS_AUTH_CLIENT_SCOPES ?? "",
-          clientId: import.meta.env.IMJS_AUTH_CLIENT_CLIENT_ID ?? "",
-          redirectUri: import.meta.env.IMJS_AUTH_CLIENT_REDIRECT_URI ?? "",
-          postSignoutRedirectUri: import.meta.env.IMJS_AUTH_CLIENT_LOGOUT_URI,
-          responseType: "code",
-          authority: import.meta.env.IMJS_AUTH_AUTHORITY,
-        });
+  private getClient(): WebViewerAuthorizationClient {
+    if (!this._client) {
+      const cookies = document.cookie.split(";").map((c) => c.trim());
+      const userAccessToken = cookies.find((c) => c.startsWith("IMJS_USER_ACCESS_TOKEN="))?.split("=")[1];
+      this._client = userAccessToken
+        ? new AccessTokenAuthClient(userAccessToken)
+        : new BrowserAuthorizationClient({
+            scope: import.meta.env.IMJS_AUTH_CLIENT_SCOPES ?? "",
+            clientId: import.meta.env.IMJS_AUTH_CLIENT_CLIENT_ID ?? "",
+            redirectUri: import.meta.env.IMJS_AUTH_CLIENT_REDIRECT_URI ?? "",
+            postSignoutRedirectUri: import.meta.env.IMJS_AUTH_CLIENT_LOGOUT_URI,
+            responseType: "code",
+            authority: import.meta.env.IMJS_AUTH_AUTHORITY,
+          });
+      this._client.onAccessTokenChanged.addListener((token) => this.onAccessTokenChanged.raiseEvent(token));
+    }
+    return this._client;
   }
 
   public get isTokenClient() {
-    return this._client instanceof AccessTokenAuthClient;
+    return this.getClient() instanceof AccessTokenAuthClient;
   }
 
   public async getAccessToken(): Promise<string> {
-    return this._client.getAccessToken();
+    return (await this.getClient()).getAccessToken();
   }
 
   public async signInSilent() {
-    if (isBrowserAuthorizationClient(this._client)) {
-      await this._client.signInSilent();
+    const client = await this.getClient();
+    if (isBrowserAuthorizationClient(client)) {
+      await client.signInSilent();
     }
   }
 
   public async signInRedirect() {
-    if (isBrowserAuthorizationClient(this._client)) {
-      await this._client.signInRedirect();
+    const client = await this.getClient();
+    if (isBrowserAuthorizationClient(client)) {
+      await client.signInRedirect();
     }
   }
 
   public async handleSigninCallback() {
-    if (isBrowserAuthorizationClient(this._client)) {
-      await this._client.handleSigninCallback();
+    const client = await this.getClient();
+    if (isBrowserAuthorizationClient(client)) {
+      await client.handleSigninCallback();
     }
-  }
-
-  public get onAccessTokenChanged(): BeEvent<(token: AccessToken) => void> {
-    return this._client.onAccessTokenChanged;
   }
 }
 

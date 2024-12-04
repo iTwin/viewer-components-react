@@ -48,10 +48,8 @@ async function buildAndRunDocker() {
     const hostPackageDir = `./${relativePackageDir}`;
     // Copy snapshots from docker container to the local repo
     await execute("docker", ["cp", `${containerPackageDir}/src/e2e-tests`, `${hostPackageDir}/src`]);
-    // Also copy the `test-results` folder
-    await execute("docker", ["cp", `${containerPackageDir}/test-results`, `${hostPackageDir}`]);
-    // ...and `playwright-report` so the report can be served with `playwright show-report`
-    await execute("docker", ["cp", `${containerPackageDir}/playwright-report`, `${hostPackageDir}`]);
+    // Also copy the `e2e-out` folder for reports, traces, etc.
+    await execute("docker", ["cp", `${containerPackageDir}/e2e-out`, `${hostPackageDir}`]);
     // Remove the Docker container
     await execute("docker", ["rm", "-f", `${dockerContainerName}`]);
   }

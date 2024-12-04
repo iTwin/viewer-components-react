@@ -2,13 +2,22 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
+
+import dotenv from "dotenv";
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
+ * Read auth client id and user credentials from `.env.e2e` file.
+ * The auth client must support scopes required by the viewer: "imodelaccess:read imodels:read realitydata:read".
+ * The user must have access to the iTwin and iModel identified below.
  */
-// require('dotenv').config();
+dotenv.config({ path: ".env.e2e" });
+
+const e2eTestsQueryArgs = {
+  iTwinId: "b391ba44-add7-47a0-8375-f2889a3540e8",
+  iModelId: "ba504f88-a479-4156-9d81-658ee169588e",
+  widgets: ["tree-widget"].join(";"),
+};
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -29,16 +38,21 @@ export default defineConfig({
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: [["list"], ["html", { open: "never" }]],
+  reporter: [["list"], ["html", { open: "never", outputFolder: "e2e-out/report" }]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: "http://localhost:3000",
+    baseURL: `http://localhost:3000/?${Object.entries(e2eTestsQueryArgs)
+      .map(([key, value]) => `${key}=${value}`)
+      .join("&")}`,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
   },
+  /** Folder for test artifacts such as screenshots, videos, traces, etc. */
+  outputDir: "e2e-out/test-results",
   /* Configure projects for major browsers */
   projects: [
+    { name: "auth", testMatch: /.*\/auth\.ts/ },
     {
       name: "chromium",
       use: {
@@ -47,7 +61,9 @@ export default defineConfig({
           args: ["--font-render-hinting=none", "--disable-skia-runtime-opts", "--disable-font-subpixel-positioning", "--disable-lcd-text"],
           ignoreDefaultArgs: ["--hide-scrollbars"],
         },
+        storageState: "e2e-out/.auth.json",
       },
+      dependencies: ["auth"],
     },
 
     /* Test against mobile viewports. */
@@ -73,19 +89,10 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: "npm run start:test-viewer",
+    command: "npm run start:dev --prefix ../../../apps/test-viewer",
     url: "http://localhost:3000/",
     reuseExistingServer: !process.env.CI,
     timeout: 5 * 60 * 1000,
-    env: {
-      ...process.env,
-      IS_PW: "true",
-      IMJS_URL_PREFIX: "qa-",
-      IMJS_AUTH_AUTHORITY: "https://qa-ims.bentley.com",
-      IMJS_ITWIN_ID: "b391ba44-add7-47a0-8375-f2889a3540e8",
-      IMJS_IMODEL_ID: "ba504f88-a479-4156-9d81-658ee169588e",
-      IMJS_AUTH_CLIENT_SCOPES: "imodelaccess:read imodels:read realitydata:read",
-    },
     stderr: "pipe",
   },
 });

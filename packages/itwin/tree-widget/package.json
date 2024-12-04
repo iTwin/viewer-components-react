@@ -21,8 +21,6 @@
   "module": "lib/esm/tree-widget-react.js",
   "typings": "lib/cjs/tree-widget-react",
   "scripts": {
-    "start:test-viewer": "node ./scripts/start-test-viewer.js",
-    "start:test-viewer:watch": "node ./scripts/start-test-viewer.js --watch",
     "build": "npm run -s dual-build && npm run -s copy:assets",
     "dual-build": "npm run -s build:cjs && npm run -s build:esm",
     "build:cjs": "tsc 1>&2 --outDir lib/cjs",
@@ -94,6 +92,7 @@
     "@itwin/ecschema-rpcinterface-impl": "^4.9.1",
     "@itwin/eslint-plugin": "^4.1.1",
     "@itwin/imodel-components-react": "^4.17.0",
+    "@itwin/oidc-signin-tool": "^4.4.0",
     "@itwin/presentation-backend": "^4.9.1",
     "@itwin/presentation-common": "^4.9.1",
     "@itwin/presentation-components": "^5.5.0",
@@ -157,5 +156,11 @@
     "extends": [
       ".eslintrc.js"
     ]
+  },
+  "pnpm": {
+    "overrides": {
+      "@itwin/oidc-signin-tool>@itwin/core-common": "4.9.1",
+      "@itwin/service-authorization>@itwin/core-common": "4.9.1"
+    }
   }
 }

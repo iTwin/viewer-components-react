@@ -27,10 +27,10 @@ steps:
       IMJS_USER_EMAIL: $(IMJS_USER_EMAIL)
       IMJS_USER_PASSWORD: $(IMJS_USER_PASSWORD)
 
-  - publish: $(System.DefaultWorkingDirectory)/packages/itwin/tree-widget/test-results
+  - publish: $(System.DefaultWorkingDirectory)/packages/itwin/tree-widget/e2e-out
     artifact: TreeWidgetE2ETestResults
     condition: succeededOrFailed()
 
-  - publish: $(System.DefaultWorkingDirectory)/packages/itwin/property-grid/test-results
+  - publish: $(System.DefaultWorkingDirectory)/packages/itwin/property-grid/e2e-out
     artifact: PropertyGridE2ETestResults
     condition: succeededOrFailed()
