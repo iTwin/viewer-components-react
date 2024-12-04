@@ -4,10 +4,6 @@ on:
   workflow_dispatch:
   pull_request:
     branches: [master]
-    paths:
-      - packages/itwin/property-grid/**
-      - packages/itwin/tree-widget/**
-      - apps/test-viewer/**
     types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
@@ -35,8 +31,10 @@ jobs:
               - 'packages/itwin/property-grid/**'
 
   build-test-viewer:
-    runs-on: ubuntu-latest
     name: Build test-viewer
+    needs: [files-changed]
+    if: ${{ needs.files-changed.outputs.test-viewer == 'true' || needs.files-changed.outputs.tree-widget == 'true' || needs.files-changed.outputs.property-grid == 'true' }}
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
