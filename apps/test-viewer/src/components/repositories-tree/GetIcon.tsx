@@ -83,7 +83,7 @@ function getRootNodeIcon(repositoryType: ITwinRepositoryType) {
     case "Issues":
       return <SvgIssueReport />;
     case "CesiumCuratedContent":
-      return <SvgGlobe />; // There is no Cesium icon in itwinUI-icons
+      return <SvgGlobe />;
     case "SensorData":
     case "GeographicInformationSystem":
     case "Construction":
