@@ -30,14 +30,21 @@ try {
 }
 
 async function buildAndRunDocker() {
-  // A list of environment variables that we want to cary over from the host to the container
-  const envVariableNames = ["CI", "IMJS_AUTH_CLIENT_CLIENT_ID", "IMJS_USER_EMAIL", "IMJS_USER_PASSWORD"];
-  const envVariableArgs = envVariableNames.reduce((args, name) => [...args, "--env", name], []);
+  // A list of build args that we want to pass when building the Docker image
+  const buildArgValues = {
+    PACKAGE_NAME: packageName,
+    TEST_VIEWER_DIST: process.env.TEST_VIEWER_DIST
+      ? path.relative(process.cwd(), process.env.TEST_VIEWER_DIST).replaceAll(path.sep, path.posix.sep)
+      : "/apps/test-viewer/dist",
+  };
+  const buildArgs = Object.entries(buildArgValues).reduce((args, [name, value]) => [...args, "--build-arg", `${name}=${value}`], []);
+  // Build the e2e tests Docker image
+  await execute("docker", ["build", "-t", dockerImageName, "-f", "e2e.Dockerfile", "--progress=plain", ...buildArgs, "."]);
+
   try {
-    // Build the test-viewer Docker image
-    await execute("docker", ["build", "-t", "viewer-components-react/test-viewer", "-f", "test-viewer.Dockerfile", "--progress=plain", "."]);
-    // Build the e2e tests Docker image
-    await execute("docker", ["build", "--build-arg", `PACKAGE_NAME=${packageName}`, "-t", dockerImageName, "-f", "e2e.Dockerfile", "--progress=plain", "."]);
+    // A list of environment variables that we want to cary over from the host to the container
+    const envVariableNames = ["CI", "IMJS_AUTH_CLIENT_CLIENT_ID", "IMJS_USER_EMAIL", "IMJS_USER_PASSWORD"];
+    const envVariableArgs = envVariableNames.reduce((args, name) => [...args, "--env", name], []);
     // Run Docker container
     await execute("docker", ["run", "--name", dockerContainerName, ...envVariableArgs, dockerImageName]);
   } catch {

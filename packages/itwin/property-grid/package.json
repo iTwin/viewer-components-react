@@ -115,6 +115,7 @@
     "eslint-plugin-react": "^7.34.4",
     "eslint-plugin-unused-imports": "^3.2.0",
     "global-jsdom": "^9.2.0",
+    "http-server": "^14.1.1",
     "ignore-styles": "^5.0.1",
     "jsdom": "^23.1.0",
     "mocha": "^10.2.0",

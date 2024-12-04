@@ -9,11 +9,12 @@ change
 test-viewer.Dockerfile
 test-viewer.Dockerfile.dockerignore
 e2e.Dockerfile
+e2e.Dockerfile.dockerignore
 
 # Logs
 *.log
 
-# build output
+# build/test output
 **/.nyc_output
 **/lib
 **/build
@@ -22,6 +23,7 @@ e2e.Dockerfile
 **/full_stack_test_results
 **/integration_test_results
 **/imjs_extensions
+**/e2e-out
 
 # Dependency directories
 **/node_modules
@@ -38,13 +40,3 @@ e2e.Dockerfile
 .editorconfig
 .prettierignore
 .prettierrc
-
-# e2e tests source will be copied when building e2e tests image - we
-# don't want to invalidate viewer image for all e2e tests just because one
-# package's test changes
-**/e2e-tests
-
-# e2e tests output
-**/test-results
-**/playwright-report
-**/playwright/.cache

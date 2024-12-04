@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import dotenv from "dotenv";
+import * as fs from "fs";
 import { defineConfig, devices } from "@playwright/test";
 
 /**
@@ -12,6 +13,11 @@ import { defineConfig, devices } from "@playwright/test";
  * The user must have access to the iTwin and iModel identified below.
  */
 dotenv.config({ path: ".env.e2e" });
+
+const testViewerLocation = process.env.TEST_VIEWER_DIST ?? "../../../apps/test-viewer/dist";
+if (!fs.existsSync(testViewerLocation)) {
+  throw new Error(`Test viewer "dist" output not found at '${testViewerLocation}'. Did you forget to build it?.`);
+}
 
 const e2eTestsQueryArgs = {
   iTwinId: "b391ba44-add7-47a0-8375-f2889a3540e8",
@@ -89,7 +95,7 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: "npm run start:dev --prefix ../../../apps/test-viewer",
+    command: `http-server --port 3000 --proxy http://localhost:3000/? ${testViewerLocation}`,
     url: "http://localhost:3000/",
     reuseExistingServer: !process.env.CI,
     timeout: 5 * 60 * 1000,

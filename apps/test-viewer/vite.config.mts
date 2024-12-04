@@ -60,20 +60,6 @@ export default defineConfig(({ mode }) => {
     define: {
       "process.env.IMJS_URL_PREFIX": env.IMJS_URL_PREFIX ? `"${env.IMJS_URL_PREFIX}"` : `""`,
     },
-    build: {
-      rollupOptions: {
-        output: {
-          manualChunks: (id) => {
-            if (id.includes("@itwin/")) {
-              return "itwin";
-            }
-            if (id.includes("node_modules")) {
-              return "vendor";
-            }
-          },
-        },
-      },
-    },
   };
 });
 
