@@ -30,10 +30,11 @@ import {
   ExternalSourcesTreeComponent,
   IModelContentTreeComponent,
   ModelsTreeComponent,
-  TreeDefinition,
+  SelectableTreeDefinition,
   TreeWidget,
   TreeWidgetComponent,
 } from "@itwin/tree-widget-react";
+import { RepositoriesTreeComponent } from "./components/repositories-tree/RepositoriesTree";
 import { useViewerOptionsContext } from "./components/ViewerOptions";
 import { unifiedSelectionStorage } from "./SelectionStorage";
 
@@ -108,7 +109,7 @@ const configuredUiItems = new Map<string, UiItem>([
         {
           id: "TreeWidgetUIProvider",
           getWidgets: () => {
-            const trees: TreeDefinition[] = [
+            const trees: SelectableTreeDefinition[] = [
               {
                 id: ModelsTreeComponent.id,
                 getLabel: () => ModelsTreeComponent.getLabel(),
@@ -162,6 +163,11 @@ const configuredUiItems = new Map<string, UiItem>([
                     onFeatureUsed={props.onFeatureUsed}
                   />
                 ),
+              },
+              {
+                id: "RepositoriesTree",
+                getLabel: () => "Repositories tree",
+                render: () => <RepositoriesTreeComponent />,
               },
             ];
             return [
@@ -286,7 +292,7 @@ const configuredUiItems = new Map<string, UiItem>([
   ],
 ]);
 
-function TreeWidgetWithOptions(props: { trees: TreeDefinition[] }) {
+function TreeWidgetWithOptions(props: { trees: SelectableTreeDefinition[] }) {
   const { density } = useViewerOptionsContext();
   return (
     <TreeWidgetComponent
