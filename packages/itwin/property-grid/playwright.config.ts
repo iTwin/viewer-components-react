@@ -8,9 +8,15 @@ import * as fs from "fs";
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * Read auth client id and user credentials from `.env.e2e` file.
- * The auth client must support scopes required by the viewer: "imodelaccess:read imodels:read realitydata:read".
- * The user must have access to the iTwin and iModel identified below.
+ * The tests require a logged-in user to access the test iModel. The following environment variables are required:
+ *
+ * # Client ID of E2E test runner. Must support the "itwin-platform" scope
+ * - IMJS_AUTH_CLIENT_CLIENT_ID
+ * # Credentials of a user that has read access to the iModel referenced in `playwright.config.ts` webserver setup script
+ * - IMJS_USER_EMAIL
+ * - IMJS_USER_PASSWORD
+ *
+ * We read the environment variables from a `.env.e2e` file.
  */
 dotenv.config({ path: ".env.e2e" });
 

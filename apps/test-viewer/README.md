@@ -31,19 +31,12 @@ Prior to running the app, you will need to add OIDC client configuration to the 
 IMJS_AUTH_CLIENT_CLIENT_ID=""
 IMJS_AUTH_CLIENT_REDIRECT_URI = "http://localhost:3000/signin-callback"
 IMJS_AUTH_CLIENT_LOGOUT_URI = "http://localhost:3000"
-IMJS_AUTH_CLIENT_SCOPES = "imodelaccess:read imodels:read realitydata:read"
+IMJS_AUTH_CLIENT_SCOPES = "itwin-platform"
 ```
 
 - You can generate a [test client](https://developer.bentley.com/tutorials/web-application-quick-start/#2-register-an-application) to get started.
-
-- Scopes expected by the viewer are:
-
-  - **Visualization**: `imodelaccess:read`
-  - **iModels**: `imodels:read`
-  - **Reality Data**: `realitydata:read`
-
+- The client must support the `itwin-platform` scope.
 - The application will use the path of the redirect URI to handle the redirection, it must simply match what is defined in your client.
-
 - When you are ready to build a production application, [register here](https://developer.bentley.com/register/).
 
 You should also add a valid iTwinId and iModelId for your user in the this file:
