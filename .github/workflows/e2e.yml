@@ -96,6 +96,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: test-viewer-dist
+          path: test-viewer-dist
 
       - name: Run tests in Docker
         env:
@@ -140,6 +141,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: test-viewer-dist
+          path: test-viewer-dist
 
       - name: Run tests in Docker
         env:
