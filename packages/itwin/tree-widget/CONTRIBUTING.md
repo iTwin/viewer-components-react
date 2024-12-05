@@ -14,8 +14,10 @@ Set up steps:
 Often, you'll want to see the widget in a running application. For that, we have a test viewer application. To start it in watch mode:
 
 1. Follow steps 1-3 from above.
-2. `pnpm build --scope test-viewer` to build the viewer an all its dependencies.
-3. `npm run start:test-viewer:watch` in package root to run the viewer. The script should open a browser window with the viewer once it starts. Modifying package code should hot-reload the viewer.
+2. `pnpm build --to test-viewer` to build the viewer an all its dependencies.
+3. `cd apps/test-viewer` to navigate to the viewer app directory.
+4. Fill the details in `.env` file in test viewer directory. See `.env.template` for an example.
+5. `npm run start:dev` to run the viewer.
 
 ## Testing
 
@@ -23,7 +25,7 @@ We have two sets of tests - [unit tests](#unit-tests) and [end-to-end ones](#end
 
 ### Unit tests
 
-Purpose of these tests is to make sure each unit (class, function, component, etc.) works according to its specification. CI job requires the tests to cover package source with 100%.
+Purpose of these tests is to make sure each unit (class, function, component, etc.) works according to its specification.
 
 Relevant scripts:
 
@@ -33,6 +35,11 @@ Relevant scripts:
 ### End-to-end tests
 
 Purpose of end-to-end tests is to make sure the widget and its features work as a whole, taking into account all the dependencies. This is achieved by the test runner ([playwright](https://playwright.dev/)) starting the [test-viewer](../../../apps/test-viewer/README.md) and simulating user actions to test various features of the widget. In addition, our tests take widget screenshots in various situations to ensure we capture all styling changes.
+
+Before running e2e tests, test viewer must be built using QA configuration:
+
+1. Set up `.env` in `test-viewer` directory to use QA configuration. See `.env.template` for an example.
+2. Run `npm run dist` in `test-viewer` directory to create a production build of the app.
 
 Relevant scripts:
 

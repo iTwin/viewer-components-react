@@ -1,0 +1,159 @@
+name: E2E Tests
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  files-changed:
+    runs-on: ubuntu-latest
+    name: Detect what files changed
+    outputs:
+      test-viewer: ${{ steps.changes.outputs.test_viewer }}
+      tree-widget: ${{ steps.changes.outputs.tree_widget }}
+      property-grid: ${{ steps.changes.outputs.property_grid }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for file changes
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            test_viewer:
+              - 'apps/test-viewer/**'
+            tree_widget:
+              - 'packages/itwin/tree-widget/**'
+            property_grid:
+              - 'packages/itwin/property-grid/**'
+
+  build-test-viewer:
+    name: Build test-viewer
+    needs: [files-changed]
+    if: ${{ needs.files-changed.outputs.test-viewer == 'true' || needs.files-changed.outputs.tree-widget == 'true' || needs.files-changed.outputs.property-grid == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build dependencies
+        run: pnpm lage build --to test-viewer
+
+      - name: Build test-viewer
+        env:
+          IMJS_URL_PREFIX: "qa-"
+          IMJS_BUILD_MODE: "e2e"
+        run: pnpm run --dir apps/test-viewer dist
+
+      - name: Create test-viewer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-viewer-dist
+          path: apps/test-viewer/dist
+
+  run-tests-tree-widget:
+    name: Run tree-widget tests
+    needs: [build-test-viewer, files-changed]
+    if: ${{ needs.files-changed.outputs.test-viewer == 'true' || needs.files-changed.outputs.tree-widget == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install -D --filter ./packages/itwin/tree-widget
+
+      - name: Download test-viewer artifact
+        id: test-viewer-artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: test-viewer-dist
+          path: test-viewer-dist
+
+      - name: Run tests in Docker
+        env:
+          CI: true
+          TEST_VIEWER_DIST: ${{ steps.test-viewer-artifact.outputs.download-path }}
+          IMJS_AUTH_CLIENT_CLIENT_ID: ${{ secrets.IMJS_AUTH_CLIENT_CLIENT_ID }}
+          IMJS_USER_EMAIL: ${{ secrets.IMJS_USER_EMAIL }}
+          IMJS_USER_PASSWORD: ${{ secrets.IMJS_USER_PASSWORD }}
+        run: pnpm run --dir packages/itwin/tree-widget test:e2e
+
+      - name: Publish test results artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tree-widget-e2e-test-results
+          path: packages/itwin/tree-widget/e2e-out
+
+  run-tests-property-grid:
+    name: Run property-grid tests
+    needs: [build-test-viewer, files-changed]
+    if: ${{ needs.files-changed.outputs.test-viewer == 'true' || needs.files-changed.outputs.property-grid == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install -D --filter ./packages/itwin/property-grid
+
+      - name: Download test-viewer artifact
+        id: test-viewer-artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: test-viewer-dist
+          path: test-viewer-dist
+
+      - name: Run tests in Docker
+        env:
+          CI: true
+          TEST_VIEWER_DIST: ${{ steps.test-viewer-artifact.outputs.download-path }}
+          IMJS_AUTH_CLIENT_CLIENT_ID: ${{ secrets.IMJS_AUTH_CLIENT_CLIENT_ID }}
+          IMJS_USER_EMAIL: ${{ secrets.IMJS_USER_EMAIL }}
+          IMJS_USER_PASSWORD: ${{ secrets.IMJS_USER_PASSWORD }}
+        run: pnpm run --dir packages/itwin/property-grid test:e2e
+
+      - name: Publish test results artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: property-grid-e2e-test-results
+          path: packages/itwin/property-grid/e2e-out
