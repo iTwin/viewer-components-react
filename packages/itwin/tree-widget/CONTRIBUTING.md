@@ -36,6 +36,11 @@ Relevant scripts:
 
 Purpose of end-to-end tests is to make sure the widget and its features work as a whole, taking into account all the dependencies. This is achieved by the test runner ([playwright](https://playwright.dev/)) starting the [test-viewer](../../../apps/test-viewer/README.md) and simulating user actions to test various features of the widget. In addition, our tests take widget screenshots in various situations to ensure we capture all styling changes.
 
+Before running e2e tests, test viewer must be built using QA configuration:
+
+1. Set up `.env` in `test-viewer` directory to use QA configuration. See `.env.template` for an example.
+2. Run `npm run dist` in `test-viewer` directory to create a production build of the app.
+
 Relevant scripts:
 
 - Run locally: `npm run test:e2e:local`.
