@@ -92,6 +92,7 @@ jobs:
         run: pnpm install -D --filter ./packages/itwin/tree-widget
 
       - name: Download test-viewer artifact
+        id: test-viewer-artifact
         uses: actions/download-artifact@v4
         with:
           name: test-viewer-dist
@@ -99,7 +100,7 @@ jobs:
       - name: Run tests in Docker
         env:
           CI: true
-          TEST_VIEWER_DIST: $(GITHUB_WORKSPACE)/test-viewer-dist
+          TEST_VIEWER_DIST: ${{ steps.test-viewer-artifact.outputs.download-path }}
           IMJS_AUTH_CLIENT_CLIENT_ID: $(IMJS_AUTH_CLIENT_CLIENT_ID)
           IMJS_USER_EMAIL: $(IMJS_USER_EMAIL)
           IMJS_USER_PASSWORD: $(IMJS_USER_PASSWORD)
@@ -135,6 +136,7 @@ jobs:
         run: pnpm install -D --filter ./packages/itwin/property-grid
 
       - name: Download test-viewer artifact
+        id: test-viewer-artifact
         uses: actions/download-artifact@v4
         with:
           name: test-viewer-dist
@@ -142,7 +144,7 @@ jobs:
       - name: Run tests in Docker
         env:
           CI: true
-          TEST_VIEWER_DIST: $(GITHUB_WORKSPACE)/test-viewer-dist
+          TEST_VIEWER_DIST: ${{ steps.test-viewer-artifact.outputs.download-path }}
           IMJS_AUTH_CLIENT_CLIENT_ID: $(IMJS_AUTH_CLIENT_CLIENT_ID)
           IMJS_USER_EMAIL: $(IMJS_USER_EMAIL)
           IMJS_USER_PASSWORD: $(IMJS_USER_PASSWORD)
