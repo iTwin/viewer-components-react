@@ -18,7 +18,7 @@ setup("authenticate", async ({ page }) => {
   const accessToken = await getTestAccessToken(
     {
       authority: "https://qa-ims.bentley.com",
-      scope: "imodelaccess:read imodels:read realitydata:read",
+      scope: "itwin-platform",
       clientId: process.env.IMJS_AUTH_CLIENT_CLIENT_ID,
       redirectUri: "http://localhost:3000/signin-callback",
     },
