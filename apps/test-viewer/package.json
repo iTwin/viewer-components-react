@@ -98,7 +98,7 @@
     "start": "dotenvx run -- vite",
     "start:dev": "run-p start link:deps:watch",
     "start:dev:no-watch": "run-p start link:deps",
-    "build": "tsc --noEmit",
+    "build": "npm run link:deps && tsc --noEmit",
     "clean": "rimraf dist",
     "dist": "vite build",
     "lint": "eslint ./src/**/*.{ts,tsx}",
