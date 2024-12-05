@@ -101,9 +101,9 @@ jobs:
         env:
           CI: true
           TEST_VIEWER_DIST: ${{ steps.test-viewer-artifact.outputs.download-path }}
-          IMJS_AUTH_CLIENT_CLIENT_ID: $(IMJS_AUTH_CLIENT_CLIENT_ID)
-          IMJS_USER_EMAIL: $(IMJS_USER_EMAIL)
-          IMJS_USER_PASSWORD: $(IMJS_USER_PASSWORD)
+          IMJS_AUTH_CLIENT_CLIENT_ID: ${{ secrets.IMJS_AUTH_CLIENT_CLIENT_ID }}
+          IMJS_USER_EMAIL: ${{ secrets.IMJS_USER_EMAIL }}
+          IMJS_USER_PASSWORD: ${{ secrets.IMJS_USER_PASSWORD }}
         run: pnpm run --dir packages/itwin/tree-widget test:e2e
 
       - name: Publish test results artifact
@@ -145,9 +145,9 @@ jobs:
         env:
           CI: true
           TEST_VIEWER_DIST: ${{ steps.test-viewer-artifact.outputs.download-path }}
-          IMJS_AUTH_CLIENT_CLIENT_ID: $(IMJS_AUTH_CLIENT_CLIENT_ID)
-          IMJS_USER_EMAIL: $(IMJS_USER_EMAIL)
-          IMJS_USER_PASSWORD: $(IMJS_USER_PASSWORD)
+          IMJS_AUTH_CLIENT_CLIENT_ID: ${{ secrets.IMJS_AUTH_CLIENT_CLIENT_ID }}
+          IMJS_USER_EMAIL: ${{ secrets.IMJS_USER_EMAIL }}
+          IMJS_USER_PASSWORD: ${{ secrets.IMJS_USER_PASSWORD }}
         run: pnpm run --dir packages/itwin/property-grid test:e2e
 
       - name: Publish test results artifact

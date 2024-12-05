@@ -37,6 +37,11 @@ async function buildAndRunDocker() {
       ? path.relative(process.cwd(), process.env.TEST_VIEWER_DIST).replaceAll(path.sep, path.posix.sep)
       : "/apps/test-viewer/dist",
   };
+  console.log(`
+    Building Docker image with the following build args:
+      PACKAGE_NAME: "${buildArgValues.PACKAGE_NAME}"
+      TEST_VIEWER_DIST: "${buildArgValues.TEST_VIEWER_DIST}" (from env: "${process.env.TEST_VIEWER_DIST}")
+  `);
   const buildArgs = Object.entries(buildArgValues).reduce((args, [name, value]) => [...args, "--build-arg", `${name}=${value}`], []);
   // Build the e2e tests Docker image
   await execute("docker", ["build", "-t", dockerImageName, "-f", "e2e.Dockerfile", "--progress=plain", ...buildArgs, "."]);
