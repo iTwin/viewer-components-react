@@ -43,12 +43,9 @@ export interface UiProvidersConfig {
 }
 
 export function getUiProvidersConfig(): UiProvidersConfig {
-  const urlParams = new URLSearchParams(document.location.href);
-  const enabledWidgets = urlParams.get("widgets");
-  const matchingItems = collectSupportedItems(enabledWidgets ? enabledWidgets.split(";") : ["tree-widget", "property-grid", "measure-tools"]);
-
+  const enabledWidgets = import.meta.env.IMJS_ENABLED_WIDGETS ?? new URLSearchParams(document.location.href).get("widgets") ?? undefined;
+  const matchingItems = enabledWidgets ? collectSupportedItems(enabledWidgets.split(/[\s;]/)) : [...configuredUiItems.values()];
   const uiItemsProviders = matchingItems.map((item) => item.createUiItemsProviders());
-
   return {
     initialize: async () => {
       const promises = matchingItems.map((item) => item.initialize());

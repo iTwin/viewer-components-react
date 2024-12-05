@@ -20,7 +20,14 @@ In order to restore hot reloading for workspace packages [`linkWorkspaceDeps.js`
 
 ### Enabling/disabling widgets
 
-This app has ability to enable/disable predefined widgets through a semi-colon separated list of widget names in `widgets` query parameter, e.g.: `widgets=tree-widget;property-grid`. Widgets supported by this variable and its default values are configured in [`UiProvidersConfig.ts`](./src/UiProvidersConfig.ts#L46).
+This app has ability to enable/disable predefined widgets. There are two ways to achieve this (in the order of precedence):
+
+1. Using the `widgets` URL parameter, e.g.: `widgets=tree-widget;property-grid`.
+2. Using the `IMJS_ENABLED_WIDGETS` environment variable, that can be set to a space-separated list of widget names, e.g.: `IMJS_ENABLED_WIDGETS=tree-widget property-grid`.
+
+Consult [`UiProvidersConfig.tsx`](./src/UiProvidersConfig.tsx#L46) for widget names that can be used to enable/disable widgets.
+
+If enabled widgets are not specified in either of the above ways, all widgets will be enabled by default.
 
 ## Environment Variables
 
