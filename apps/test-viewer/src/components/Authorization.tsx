@@ -3,10 +3,13 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { BrowserAuthorizationClient, isBrowserAuthorizationClient } from "@itwin/browser-authorization";
-import { AccessToken, BeEvent } from "@itwin/core-bentley";
-import { ViewerAuthorizationClient as WebViewerAuthorizationClient } from "@itwin/web-viewer-react";
+import { BeEvent } from "@itwin/core-bentley";
+
+import type { PropsWithChildren } from "react";
+import type { AccessToken } from "@itwin/core-bentley";
+import type { ViewerAuthorizationClient as WebViewerAuthorizationClient } from "@itwin/web-viewer-react";
 
 export enum AuthorizationState {
   Pending,
@@ -14,7 +17,7 @@ export enum AuthorizationState {
 }
 
 class AccessTokenAuthClient implements WebViewerAuthorizationClient {
-  readonly onAccessTokenChanged: BeEvent<(token: AccessToken) => void> = new BeEvent();
+  public readonly onAccessTokenChanged: BeEvent<(token: AccessToken) => void> = new BeEvent();
 
   public constructor(private _accessToken: string) {}
 
@@ -51,25 +54,25 @@ class ViewerAuthorizationClient implements WebViewerAuthorizationClient {
   }
 
   public async getAccessToken(): Promise<string> {
-    return (await this.getClient()).getAccessToken();
+    return this.getClient().getAccessToken();
   }
 
   public async signInSilent() {
-    const client = await this.getClient();
+    const client = this.getClient();
     if (isBrowserAuthorizationClient(client)) {
       await client.signInSilent();
     }
   }
 
   public async signInRedirect() {
-    const client = await this.getClient();
+    const client = this.getClient();
     if (isBrowserAuthorizationClient(client)) {
       await client.signInRedirect();
     }
   }
 
   public async handleSigninCallback() {
-    const client = await this.getClient();
+    const client = this.getClient();
     if (isBrowserAuthorizationClient(client)) {
       await client.handleSigninCallback();
     }
@@ -125,9 +128,7 @@ export function SignInRedirect() {
   const { client } = useAuthorizationContext();
 
   useEffect(() => {
-    (async () => {
-      await client.handleSigninCallback();
-    })();
+    void client.handleSigninCallback();
   }, [client]);
 
   return <></>;

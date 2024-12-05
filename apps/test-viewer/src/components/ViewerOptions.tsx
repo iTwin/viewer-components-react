@@ -3,10 +3,13 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { createContext, PropsWithChildren, useContext, useState } from "react";
-import { StatusBarSection, UiItemsProvider } from "@itwin/appui-react";
+import { createContext, useContext, useState } from "react";
+import { StatusBarSection } from "@itwin/appui-react";
 import { SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
+
+import type { PropsWithChildren } from "react";
+import type { UiItemsProvider } from "@itwin/appui-react";
 
 export interface ViewerOptionsContext {
   density: "default" | "enlarged";

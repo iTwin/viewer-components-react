@@ -3,13 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { StagePanelLocation, StagePanelSection, UiItemsProvider } from "@itwin/appui-react";
-import { IModelConnection } from "@itwin/core-frontend";
+import { StagePanelLocation, StagePanelSection } from "@itwin/appui-react";
 import { EC3Provider, EC3Widget } from "@itwin/ec3-widget-react";
 import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
-import { ClientPrefix, GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
+import { GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
 import { SvgHierarchyTree, SvgTechnicalPreviewMiniBw } from "@itwin/itwinui-icons-react";
 import { FeatureInfoUiItemsProvider, MapLayersPrefBrowserStorage, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
@@ -30,12 +29,16 @@ import {
   ExternalSourcesTreeComponent,
   IModelContentTreeComponent,
   ModelsTreeComponent,
-  SelectableTreeDefinition,
   TreeWidget,
   TreeWidgetComponent,
 } from "@itwin/tree-widget-react";
 import { useViewerOptionsContext } from "./components/ViewerOptions";
 import { unifiedSelectionStorage } from "./SelectionStorage";
+
+import type { IModelConnection } from "@itwin/core-frontend";
+import type { ClientPrefix } from "@itwin/grouping-mapping-widget";
+import type { SelectableTreeDefinition } from "@itwin/tree-widget-react";
+import type { UiItemsProvider } from "@itwin/appui-react";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
@@ -48,7 +51,7 @@ export function getUiProvidersConfig(): UiProvidersConfig {
   const uiItemsProviders = matchingItems.map((item) => item.createUiItemsProviders());
   return {
     initialize: async () => {
-      const promises = matchingItems.map((item) => item.initialize());
+      const promises = matchingItems.map(async (item) => item.initialize());
       await Promise.all(promises);
     },
     uiItemsProviders: uiItemsProviders.flat(),
@@ -236,7 +239,7 @@ const configuredUiItems = new Map<string, UiItem>([
     "geo-tools",
     {
       initialize: async () => {
-        GeoTools.initialize();
+        await GeoTools.initialize();
       },
       createUiItemsProviders: () => [new GeoToolsAddressSearchProvider()],
     },
