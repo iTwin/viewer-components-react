@@ -359,3 +359,7 @@ function ExampleContextMenuItem() {
 ```
 
 <!-- END EXTRACTION -->
+
+## Test
+
+Make a change that only affects property-grid - this should start only its e2e tests, but not tree-widget's.
