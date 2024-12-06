@@ -13,27 +13,25 @@ import { Delayed, ProgressOverlay } from "./Utils";
 
 interface RepositoriesTreeProps {
   itwinId: string;
-  environment?: "PROD" | "QA" | "DEV";
+  baseUrl?: string;
   noDataMessage?: string;
 }
 
 /**
  * @alpha
  */
-export function RepositoriesTreeComponent() {
+export function RepositoriesTreeComponent({ baseUrl, noDataMessage }: Omit<RepositoriesTreeProps, "itwinId">) {
   const iModelConnection = useActiveIModelConnection();
   const iTwinId = iModelConnection?.iTwinId;
 
   if (!iTwinId) {
     return <> No itwin id found</>;
   }
-
-  return <RepositoriesTree itwinId={iTwinId} environment={"QA"} />;
+  return <RepositoriesTree itwinId={iTwinId} baseUrl={baseUrl} noDataMessage={noDataMessage} />;
 }
 
-function RepositoriesTree({ itwinId, noDataMessage, environment }: RepositoriesTreeProps) {
-  const getHierarchyProvider = useRepositoriesHierarchyProvider({ itwinId, environment });
-
+function RepositoriesTree({ itwinId, noDataMessage, baseUrl }: RepositoriesTreeProps) {
+  const getHierarchyProvider = useRepositoriesHierarchyProvider({ itwinId, baseUrl });
   const { rootNodes, isLoading, ...treeProps } = useTree({
     getHierarchyProvider,
   });

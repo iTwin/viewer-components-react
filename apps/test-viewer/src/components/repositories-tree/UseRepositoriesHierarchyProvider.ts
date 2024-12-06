@@ -13,20 +13,20 @@ import type { HierarchyNode, HierarchyProvider } from "@itwin/presentation-hiera
 
 interface UseRepositoriesHierarchyProviderProps {
   itwinId: string;
-  environment?: "PROD" | "QA" | "DEV";
+  baseUrl?: string;
 }
 
 /**
  * @internal
  */
-export function useRepositoriesHierarchyProvider({ itwinId, environment }: UseRepositoriesHierarchyProviderProps) {
+export function useRepositoriesHierarchyProvider({ itwinId, baseUrl }: UseRepositoriesHierarchyProviderProps) {
   return useMemo<() => HierarchyProvider>(
     () => () => {
       const hierarchyChanged = new BeEvent<EventListener<HierarchyProvider["hierarchyChanged"]>>();
       return {
         async *getNodes({ parentNode }) {
           if (!parentNode) {
-            const repositories = await getItwinRepositories(itwinId, environment);
+            const repositories = await getItwinRepositories(itwinId, baseUrl);
             for (const repository of repositories) {
               yield {
                 key: { type: "generic", id: repository.class },
@@ -57,6 +57,6 @@ export function useRepositoriesHierarchyProvider({ itwinId, environment }: UseRe
         hierarchyChanged,
       };
     },
-    [environment, itwinId],
+    [baseUrl, itwinId],
   );
 }

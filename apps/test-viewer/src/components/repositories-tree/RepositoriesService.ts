@@ -22,8 +22,8 @@ interface ITwinRepository {
 /**
  * @internal
  */
-export async function getItwinRepositories(itwinId: string, environment?: "PROD" | "QA" | "DEV"): Promise<ITwinRepository[]> {
-  const url = getRepositoriesUrl(itwinId, environment);
+export async function getItwinRepositories(itwinId: string, baseUrl?: string): Promise<ITwinRepository[]> {
+  const url = getRepositoriesUrl(itwinId, baseUrl);
   const result = (await fetchData(url)) as ITwinRepository[];
   return result;
 }
@@ -61,12 +61,10 @@ async function fetchData(url: string): Promise<unknown> {
   }
 }
 
-function getRepositoriesUrl(itwinId: string, environment?: "PROD" | "QA" | "DEV") {
-  const prefix = {
-    QA: "qa-",
-    DEV: "dev-",
-    PROD: "",
-  };
+function getRepositoriesUrl(itwinId: string, baseUrl?: string) {
+  if (!baseUrl) {
+    return `https://api.bentley.com/itwins/${itwinId}/repositories`;
+  }
 
-  return `https://${prefix[environment ?? "PROD"]}api.bentley.com/itwins/${itwinId}/repositories`;
+  return baseUrl?.includes("https://") ? `${baseUrl}/itwins/${itwinId}/repositories` : `https://${baseUrl}/itwins/${itwinId}/repositories`;
 }
