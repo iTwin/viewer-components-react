@@ -32,6 +32,7 @@ Each one has it's own folder and README describing the package.
 ## Archived
 
 The following packages have been deprecated and will no longer be maintained:
+
 | Name | Folder | Changelog | Version | Replacement |
 | ---------------------------------- | -------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
 | @bentley/imodel-select-react | [imodel-select](./packages/archive/imodel-select/) | [changelog](./packages/archive/imodel-select/CHANGELOG.md) | [![npm version](https://badge.fury.io/js/%40bentley%2Fimodel-select-react.svg)](https://badge.fury.io/js/%40bentley%2Fimodel-select-react) | [@itwin/imodel-browser-react](https://www.npmjs.com/package/@itwin/imodel-browser-react) |
@@ -45,3 +46,7 @@ Please refer to the [section](CONTRIBUTING.md#adding-a-new-project) in the contr
 ## Contributing to this Repository
 
 For information on how to contribute to this project, please read [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
+
+## Test
+
+Now we have branch protection rules to tree-widget and property-grid e2e tests to be run. Let's try to make a change that skips those tests and see if the rules don't block the PR.
