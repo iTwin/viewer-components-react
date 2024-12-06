@@ -32,6 +32,7 @@ Each one has it's own folder and README describing the package.
 ## Archived
 
 The following packages have been deprecated and will no longer be maintained:
+
 | Name | Folder | Changelog | Version | Replacement |
 | ---------------------------------- | -------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
 | @bentley/imodel-select-react | [imodel-select](./packages/archive/imodel-select/) | [changelog](./packages/archive/imodel-select/CHANGELOG.md) | [![npm version](https://badge.fury.io/js/%40bentley%2Fimodel-select-react.svg)](https://badge.fury.io/js/%40bentley%2Fimodel-select-react) | [@itwin/imodel-browser-react](https://www.npmjs.com/package/@itwin/imodel-browser-react) |
@@ -45,3 +46,7 @@ Please refer to the [section](CONTRIBUTING.md#adding-a-new-project) in the contr
 ## Contributing to this Repository
 
 For information on how to contribute to this project, please read [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
+
+## Test
+
+Make a change that doesn't affect tree-widget, property-grid or test-viewer - this should NOT start an e2e tests' run.
