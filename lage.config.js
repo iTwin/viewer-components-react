@@ -50,6 +50,11 @@ module.exports = {
       dependsOn: [],
       outputs: ["learning/**"],
     },
+    "check-extractions": {
+      cache: false,
+      dependsOn: [],
+      outputs: [],
+    },
     clean: {
       cache: false,
     },
