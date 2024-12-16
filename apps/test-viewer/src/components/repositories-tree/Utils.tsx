@@ -4,7 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./Utils.scss";
-import { PropsWithChildren, useLayoutEffect, useState } from "react";
+import type { PropsWithChildren } from "react";
+import { useLayoutEffect, useState } from "react";
 import { ProgressLinear } from "@itwin/itwinui-react";
 
 export function Delayed({ show, children }: PropsWithChildren<{ show: boolean }>) {

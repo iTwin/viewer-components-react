@@ -21,15 +21,15 @@ import {
   SvgList,
   SvgRealityMesh,
 } from "@itwin/itwinui-icons-react";
-import { ITwinRepositoryType } from "./RepositoriesType";
+import type { ITwinRepositoryType } from "./RepositoriesType";
 
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
-const StorageNodeIcons: { [key: string]: JSX.Element } = {
+const StorageNodeIcons: { [key: string]: React.JSX.Element } = {
   folder: <SvgFolder />,
   file: <SvgDocument />,
 };
 
-const IssuesNodeIcons: { [key: string]: JSX.Element } = {
+const IssuesNodeIcons: { [key: string]: React.JSX.Element } = {
   Issue: <SvgFlag />,
   Clash: <SvgClash />,
   Observation: <SvgFind />,
@@ -38,12 +38,12 @@ const IssuesNodeIcons: { [key: string]: JSX.Element } = {
   Punchlist: <SvgList />,
 };
 
-const RealityDataNodeIcons: { [key: string]: JSX.Element } = {
+const RealityDataNodeIcons: { [key: string]: React.JSX.Element } = {
   RealityMesh3DTiles: <SvgRealityMesh />,
   OMR: <SvgItem />,
 };
 
-const FormsNodeIcons: { [key: string]: JSX.Element } = {
+const FormsNodeIcons: { [key: string]: React.JSX.Element } = {
   "Asset Inspection": <SvgClipboard />,
   Other: <SvgDocumentation />,
 };

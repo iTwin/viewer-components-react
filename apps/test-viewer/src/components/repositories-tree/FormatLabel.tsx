@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { ITwinRepositoryType } from "./RepositoriesType";
+import type { ITwinRepositoryType } from "./RepositoriesType";
 
 /**
  * @internal
