@@ -168,7 +168,7 @@ const configuredUiItems = new Map<string, UiItem>([
               {
                 id: "RepositoriesTree",
                 getLabel: () => "Repositories tree",
-                render: () => <RepositoriesTreeComponent baseUrl={"https://qa-api.bentley.com"} />,
+                render: () => <RepositoriesTreeComponent baseUrl={`https://${globalThis.IMJS_URL_PREFIX ?? ""}api.bentley.com`} />,
               },
             ];
             return [
