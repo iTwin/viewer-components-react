@@ -22,8 +22,6 @@
   "module": "lib/esm/property-grid-react.js",
   "typings": "lib/cjs/property-grid-react",
   "scripts": {
-    "start:test-viewer": "node ./scripts/start-test-viewer.js",
-    "start:test-viewer:watch": "node ./scripts/start-test-viewer.js --watch",
     "build": "npm run -s dual-build && npm run -s copy:assets",
     "dual-build": "npm run -s build:cjs && npm run -s build:esm",
     "build:cjs": "tsc 1>&2 --outDir lib/cjs",
@@ -88,6 +86,7 @@
     "@itwin/ecschema-metadata": "^4.9.7",
     "@itwin/eslint-plugin": "^4.1.1",
     "@itwin/imodel-components-react": "^4.17.3",
+    "@itwin/oidc-signin-tool": "^4.4.0",
     "@itwin/presentation-common": "^4.9.7",
     "@itwin/presentation-components": "^5.6.0",
     "@itwin/presentation-frontend": "^4.9.7",
@@ -116,6 +115,7 @@
     "eslint-plugin-react": "^7.34.4",
     "eslint-plugin-unused-imports": "^3.2.0",
     "global-jsdom": "^9.2.0",
+    "http-server": "^14.1.1",
     "ignore-styles": "^5.0.1",
     "jsdom": "^23.1.0",
     "mocha": "^10.2.0",
@@ -139,5 +139,11 @@
     "extends": [
       ".eslintrc.js"
     ]
+  },
+  "pnpm": {
+    "overrides": {
+      "@itwin/oidc-signin-tool>@itwin/core-common": "4.9.7",
+      "@itwin/service-authorization>@itwin/core-common": "4.9.7"
+    }
   }
 }

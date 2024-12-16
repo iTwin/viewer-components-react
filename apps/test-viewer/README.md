@@ -20,7 +20,14 @@ In order to restore hot reloading for workspace packages [`linkWorkspaceDeps.js`
 
 ### Enabling/disabling widgets
 
-This app has ability to enable/disable predefined widgets through environment variable. [`IMJS_ENABLED_WIDGETS`](.env.template) variable can be used to specify a list of widgets that should be added to viewer. Widgets supported by this variable are configured in [`UiProvidersConfig.ts`](./src/UiProvidersConfig.ts#L46).
+This app has ability to enable/disable predefined widgets. There are two ways to achieve this (in the order of precedence):
+
+1. Using the `widgets` URL parameter, e.g.: `widgets=tree-widget;property-grid`.
+2. Using the `IMJS_ENABLED_WIDGETS` environment variable, that can be set to a space-separated list of widget names, e.g.: `IMJS_ENABLED_WIDGETS=tree-widget property-grid`.
+
+Consult [`UiProvidersConfig.tsx`](./src/UiProvidersConfig.tsx#L46) for widget names that can be used to enable/disable widgets.
+
+If enabled widgets are not specified in either of the above ways, all widgets will be enabled by default.
 
 ## Environment Variables
 
@@ -31,19 +38,12 @@ Prior to running the app, you will need to add OIDC client configuration to the 
 IMJS_AUTH_CLIENT_CLIENT_ID=""
 IMJS_AUTH_CLIENT_REDIRECT_URI = "http://localhost:3000/signin-callback"
 IMJS_AUTH_CLIENT_LOGOUT_URI = "http://localhost:3000"
-IMJS_AUTH_CLIENT_SCOPES = "imodelaccess:read imodels:read realitydata:read"
+IMJS_AUTH_CLIENT_SCOPES = "itwin-platform"
 ```
 
 - You can generate a [test client](https://developer.bentley.com/tutorials/web-application-quick-start/#2-register-an-application) to get started.
-
-- Scopes expected by the viewer are:
-
-  - **Visualization**: `imodelaccess:read`
-  - **iModels**: `imodels:read`
-  - **Reality Data**: `realitydata:read`
-
+- The client must support the `itwin-platform` scope.
 - The application will use the path of the redirect URI to handle the redirection, it must simply match what is defined in your client.
-
 - When you are ready to build a production application, [register here](https://developer.bentley.com/register/).
 
 You should also add a valid iTwinId and iModelId for your user in the this file:

@@ -14,14 +14,17 @@ const ENV_PREFIX = "IMJS_";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), ENV_PREFIX);
 
-  if (!env.IMJS_AUTH_CLIENT_CLIENT_ID) {
-    throw new Error("Please add a valid OIDC client id to the .env file and restart. See the README for more information.");
-  }
-  if (!env.IMJS_AUTH_CLIENT_SCOPES) {
-    throw new Error("Please add valid scopes for your OIDC client to the .env file and restart. See the README for more information.");
-  }
-  if (!env.IMJS_AUTH_CLIENT_REDIRECT_URI) {
-    throw new Error("Please add a valid redirect URI to the .env file and restart. See the README for more information.");
+  // For e2e tests, we don't do auth, so no need to supply these values
+  if (env.IMJS_BUILD_MODE !== "e2e") {
+    if (!env.IMJS_AUTH_CLIENT_CLIENT_ID) {
+      throw new Error("Please add a valid OIDC client id to the .env file and restart. See the README for more information.");
+    }
+    if (!env.IMJS_AUTH_CLIENT_SCOPES) {
+      throw new Error("Please add valid scopes for your OIDC client to the .env file and restart. See the README for more information.");
+    }
+    if (!env.IMJS_AUTH_CLIENT_REDIRECT_URI) {
+      throw new Error("Please add a valid redirect URI to the .env file and restart. See the README for more information.");
+    }
   }
 
   const reloadConfig = getReloadConfig(env.IMJS_ENABLE_HOT_RELOAD);
