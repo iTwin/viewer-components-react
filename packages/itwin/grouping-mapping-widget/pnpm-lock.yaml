@@ -27,8 +27,8 @@ importers:
         specifier: ^4.2.1
         version: 4.2.1
       '@itwin/insights-client':
-        specifier: ^0.13.0
-        version: 0.13.0
+        specifier: ^0.15.0
+        version: 0.15.0
       '@itwin/itwins-client':
         specifier: ^1.1.0
         version: 1.1.0
@@ -686,8 +686,8 @@ packages:
   '@itwin/imodels-client-management@4.2.1':
     resolution: {integrity: sha512-1rDDb2hl5eLmL/32fgvur45UAkOH9Yy3zrWyqEZzcFKaz+VlIyiG5dZH5QSYyBkSvBB1yRf+V1JehptEJyEWTA==}
 
-  '@itwin/insights-client@0.13.0':
-    resolution: {integrity: sha512-tgXHVf4xse/sliNLlyJYt0x+e51YLRMo4hHj4vmbk9WqwDZR/T5quFcL5IXuf/gfNNQwtRm45JyLYC4uR7SGUg==}
+  '@itwin/insights-client@0.15.0':
+    resolution: {integrity: sha512-XR3sKx1VLer2aHsBxfOgJfkqCiLSh1VArScTghXpeDV0/Fxr1yfpn8R9IZF09IKKSqJvscOfl6/l++vPCfNwnA==}
 
   '@itwin/itwins-client@1.1.0':
     resolution: {integrity: sha512-xZKB+wN3mZ5XOK+B7ZrIOivVRZk6728eQzZRiy5i+mWDAVCHaxq1NJKtsyDpVgPfPbrD24cYWzs63hM3huY/2w==}
@@ -1595,6 +1595,9 @@ packages:
 
   cross-fetch@3.1.8:
     resolution: {integrity: sha512-cvA+JwZoU0Xq+h6WkMvAUqPEYy92Obet6UdKLfW60qn99ftItKjB5T+BkyWOFWe2pUyfQ+IJHmpOTznqk1M6Kg==}
+
+  cross-fetch@4.0.0:
+    resolution: {integrity: sha512-e4a5N8lVvuLgAWgnCrLr2PP0YyDOTHa9H/Rj54dirp61qXnNq46m82bRhNqIA5VccJtWBvPTFRV3TtvHUKPB1g==}
 
   cross-spawn@7.0.3:
     resolution: {integrity: sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==}
@@ -4241,7 +4244,7 @@ snapshots:
       rimraf: 3.0.2
       tree-kill: 1.2.2
       typedoc: 0.23.28(typescript@5.0.4)
-      typedoc-plugin-merge-modules: 4.1.0(typedoc@0.23.28(typescript@4.6.2))
+      typedoc-plugin-merge-modules: 4.1.0(typedoc@0.23.28(typescript@5.0.4))
       typescript: 5.0.4
       wtfnode: 0.9.1
       yargs: 17.7.2
@@ -4427,9 +4430,9 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  '@itwin/insights-client@0.13.0':
+  '@itwin/insights-client@0.15.0':
     dependencies:
-      cross-fetch: 3.1.8
+      cross-fetch: 4.0.0
       fast-xml-parser: 4.3.2
     transitivePeerDependencies:
       - encoding
@@ -5631,6 +5634,12 @@ snapshots:
       - encoding
 
   cross-fetch@3.1.8:
+    dependencies:
+      node-fetch: 2.7.0
+    transitivePeerDependencies:
+      - encoding
+
+  cross-fetch@4.0.0:
     dependencies:
       node-fetch: 2.7.0
     transitivePeerDependencies:
@@ -7962,7 +7971,7 @@ snapshots:
     dependencies:
       is-typedarray: 1.0.0
 
-  typedoc-plugin-merge-modules@4.1.0(typedoc@0.23.28(typescript@4.6.2)):
+  typedoc-plugin-merge-modules@4.1.0(typedoc@0.23.28(typescript@5.0.4)):
     dependencies:
       typedoc: 0.23.28(typescript@5.0.4)
 
