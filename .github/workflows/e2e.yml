@@ -108,6 +108,7 @@ jobs:
         run: pnpm run --dir packages/itwin/tree-widget test:e2e
 
       - name: Publish test results artifact
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: tree-widget-e2e-test-results
@@ -153,6 +154,7 @@ jobs:
         run: pnpm run --dir packages/itwin/property-grid test:e2e
 
       - name: Publish test results artifact
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: property-grid-e2e-test-results
