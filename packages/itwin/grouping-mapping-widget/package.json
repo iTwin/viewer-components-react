@@ -150,7 +150,7 @@
     "@itwin/core-react": "^4.1.0",
     "@itwin/presentation-components": "^4.1.0 || ^5.0.0",
     "@itwin/presentation-frontend": "^4.1.0",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react": "^17.0.2 || ^18.0.0",
+    "react-dom": "^17.0.2 || ^18.0.0"
   }
 }
