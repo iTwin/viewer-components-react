@@ -1,0 +1,21 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+
+.tw-progress-overlay-container {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+
+  .tw-progress-overlay-backdrop {
+    opacity: 0.5;
+    background-color: var(--iui-color-background-backdrop);
+    height: 100%;
+    width: 100%;
+  }
+}
