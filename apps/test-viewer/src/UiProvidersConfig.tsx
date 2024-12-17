@@ -32,6 +32,7 @@ import {
   TreeWidget,
   TreeWidgetComponent,
 } from "@itwin/tree-widget-react";
+import { RepositoriesTreeComponent } from "./components/repositories-tree/RepositoriesTree";
 import { useViewerOptionsContext } from "./components/ViewerOptions";
 import { unifiedSelectionStorage } from "./SelectionStorage";
 
@@ -163,6 +164,11 @@ const configuredUiItems = new Map<string, UiItem>([
                     onFeatureUsed={props.onFeatureUsed}
                   />
                 ),
+              },
+              {
+                id: "RepositoriesTree",
+                getLabel: () => "Repositories tree",
+                render: () => <RepositoriesTreeComponent baseUrl={`https://${globalThis.IMJS_URL_PREFIX ?? ""}api.bentley.com`} />,
               },
             ];
             return [
