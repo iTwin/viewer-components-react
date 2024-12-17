@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Reduced main thread blockage ~3 times when creating filtering paths from target items.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "100586436+JonasDov@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
