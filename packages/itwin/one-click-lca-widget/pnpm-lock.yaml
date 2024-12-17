@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@itwin/insights-client':
-        specifier: ^0.15.0
-        version: 0.15.0
+        specifier: ^0.15.1
+        version: 0.15.1
       '@itwin/itwinui-icons-react':
         specifier: ^2.2.0
         version: 2.2.0(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
@@ -555,8 +555,8 @@ packages:
       react: ^17.0.0 || ^18.0.0
       react-dom: ^17.0.0 || ^18.0.0
 
-  '@itwin/insights-client@0.15.0':
-    resolution: {integrity: sha512-XR3sKx1VLer2aHsBxfOgJfkqCiLSh1VArScTghXpeDV0/Fxr1yfpn8R9IZF09IKKSqJvscOfl6/l++vPCfNwnA==}
+  '@itwin/insights-client@0.15.1':
+    resolution: {integrity: sha512-UQl/JDwwFVL9jZyygyRyuuhtLZyJilGy+OsoIUdKrmkX5FF7ND2h+ShIxSOabzIqFhzwxEzkge4MJBKPYjL4xQ==}
 
   '@itwin/itwinui-css@1.12.6':
     resolution: {integrity: sha512-Y32ksKaIFfym5ZcoBMfH89eCUh3VgcHpKtUDgQgCT3g6j9tzaUycsHkui63s0bLreSGChPoEuCKB5CUP+DSPOg==}
@@ -4256,7 +4256,7 @@ snapshots:
       rimraf: 3.0.2
       tree-kill: 1.2.2
       typedoc: 0.23.28(typescript@5.0.4)
-      typedoc-plugin-merge-modules: 4.1.0(typedoc@0.23.28(typescript@5.0.4))
+      typedoc-plugin-merge-modules: 4.1.0(typedoc@0.23.28(typescript@4.6.2))
       typescript: 5.0.4
       wtfnode: 0.9.1
       yargs: 17.7.2
@@ -4438,7 +4438,7 @@ snapshots:
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
 
-  '@itwin/insights-client@0.15.0':
+  '@itwin/insights-client@0.15.1':
     dependencies:
       cross-fetch: 4.0.0
       fast-xml-parser: 4.3.2
@@ -8196,7 +8196,7 @@ snapshots:
     dependencies:
       is-typedarray: 1.0.0
 
-  typedoc-plugin-merge-modules@4.1.0(typedoc@0.23.28(typescript@5.0.4)):
+  typedoc-plugin-merge-modules@4.1.0(typedoc@0.23.28(typescript@4.6.2)):
     dependencies:
       typedoc: 0.23.28(typescript@5.0.4)
 

@@ -62,7 +62,7 @@
     "@itwin/imodels-access-common": "^4.1.4",
     "@itwin/imodels-access-frontend": "^4.1.4",
     "@itwin/imodels-client-management": "^4.2.3",
-    "@itwin/insights-client": "^0.15.0",
+    "@itwin/insights-client": "^0.15.1",
     "@itwin/itwinui-icons-color-react": "^2.1.0",
     "@itwin/itwinui-icons-react": "^2.4.0",
     "@itwin/itwinui-react": "^2.11.0",

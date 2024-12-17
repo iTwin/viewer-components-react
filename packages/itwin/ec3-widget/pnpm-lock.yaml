@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@itwin/insights-client':
-        specifier: ^0.15.0
-        version: 0.15.0
+        specifier: ^0.15.1
+        version: 0.15.1
       '@itwin/itwinui-icons-react':
         specifier: ^2.4.0
         version: 2.4.0(react-dom@17.0.0(react@17.0.0))(react@17.0.0)
@@ -548,8 +548,8 @@ packages:
       react: ^17.0.0 || ^18.0.0
       react-dom: ^17.0.0 || ^18.0.0
 
-  '@itwin/insights-client@0.15.0':
-    resolution: {integrity: sha512-XR3sKx1VLer2aHsBxfOgJfkqCiLSh1VArScTghXpeDV0/Fxr1yfpn8R9IZF09IKKSqJvscOfl6/l++vPCfNwnA==}
+  '@itwin/insights-client@0.15.1':
+    resolution: {integrity: sha512-UQl/JDwwFVL9jZyygyRyuuhtLZyJilGy+OsoIUdKrmkX5FF7ND2h+ShIxSOabzIqFhzwxEzkge4MJBKPYjL4xQ==}
 
   '@itwin/itwinui-icons-react@2.4.0':
     resolution: {integrity: sha512-m1oX5Lxws40+IoySenzcV9hwBXk6oMpEGFMPr/XgbKpmMCsT6+ZnvLOf7WLFjz0gbsX3iD+IqLG/QA1dJ+AjRQ==}
@@ -4049,7 +4049,7 @@ snapshots:
       react: 17.0.0
       react-dom: 17.0.0(react@17.0.0)
 
-  '@itwin/insights-client@0.15.0':
+  '@itwin/insights-client@0.15.1':
     dependencies:
       cross-fetch: 4.0.0
       fast-xml-parser: 4.3.2
