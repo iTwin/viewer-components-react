@@ -41,7 +41,7 @@ export function useDataProvider({ imodel, createDataProvider }: DataProviderProp
     );
     setState(provider);
     return () => {
-      provider.dispose();
+      provider[Symbol.dispose]();
     };
   }, [imodel, createDataProvider, onPerformanceMeasured]);
 
@@ -87,9 +87,11 @@ class PerformanceTrackingProvider implements IPresentationPropertyDataProvider {
     this._wrappedProvider.selectionInfo = selectionInfo;
   }
 
-  public dispose(): void {
-    this._wrappedProvider.dispose();
+  public [Symbol.dispose](): void {
+    safeDispose(this._wrappedProvider);
   }
+  // istanbul ignore next
+  public dispose() {}
 
   // istanbul ignore next
   public async getContentDescriptor() {
@@ -134,5 +136,21 @@ class PerformanceTrackingProvider implements IPresentationPropertyDataProvider {
 
     finish();
     return result;
+  }
+}
+
+/**
+ * A helper that disposes the given object, if it's disposable.
+ *
+ * The first option is to dispose using the deprecated `dispose` method if it exists on the object.
+ * If not, we use the new `Symbol.dispose` method. If that doesn't exist either, the object is
+ * considered as non-disposable and nothing is done with it.
+ */
+function safeDispose(disposable: {} | { [Symbol.dispose]: () => void } | { dispose: () => void }) {
+  // istanbul ignore else
+  if ("dispose" in disposable) {
+    disposable.dispose();
+  } else if (Symbol.dispose in disposable) {
+    disposable[Symbol.dispose]();
   }
 }
