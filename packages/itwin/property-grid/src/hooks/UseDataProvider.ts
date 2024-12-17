@@ -41,7 +41,7 @@ export function useDataProvider({ imodel, createDataProvider }: DataProviderProp
     );
     setState(provider);
     return () => {
-      provider.dispose();
+      provider[Symbol.dispose]();
     };
   }, [imodel, createDataProvider, onPerformanceMeasured]);
 
@@ -87,9 +87,11 @@ class PerformanceTrackingProvider implements IPresentationPropertyDataProvider {
     this._wrappedProvider.selectionInfo = selectionInfo;
   }
 
-  public dispose(): void {
-    this._wrappedProvider.dispose();
+  public [Symbol.dispose](): void {
+    this._wrappedProvider[Symbol.dispose]?.();
   }
+  // istanbul ignore next
+  public dispose() {}
 
   // istanbul ignore next
   public async getContentDescriptor() {
