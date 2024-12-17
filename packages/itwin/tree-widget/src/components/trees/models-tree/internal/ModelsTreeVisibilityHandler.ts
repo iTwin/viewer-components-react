@@ -4,12 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import {
-  bufferCount,
   concat,
   concatAll,
-  concatMap,
   defer,
-  delay,
   distinct,
   EMPTY,
   filter,
@@ -36,6 +33,7 @@ import { toggleAllCategories } from "../../common/CategoriesVisibilityUtils";
 import { reduceWhile, toVoidPromise } from "../../common/Rxjs";
 import { createVisibilityStatus } from "../../common/Tooltip";
 import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility";
+import { releaseMainThreadOnItemsCount } from "../Utils";
 import { AlwaysAndNeverDrawnElementInfo } from "./AlwaysAndNeverDrawnElementInfo";
 import { createFilteredTree, parseCategoryKey } from "./FilteredTree";
 import { ModelsTreeNode } from "./ModelsTreeNode";
@@ -1024,22 +1022,6 @@ export async function toggleModels(models: string[], enable: boolean, viewport: 
  */
 export function areAllModelsVisible(models: string[], viewport: Viewport) {
   return models.length !== 0 ? models.every((id) => viewport.viewsModel(id)) : false;
-}
-
-function releaseMainThreadOnItemsCount<T>(elementCount: number) {
-  return (obs: Observable<T>): Observable<T> => {
-    return obs.pipe(
-      bufferCount(elementCount),
-      concatMap((buff, i) => {
-        const out = of(buff);
-        if (i === 0 && buff.length < elementCount) {
-          return out;
-        }
-        return out.pipe(delay(0));
-      }),
-      concatAll(),
-    );
-  };
 }
 
 function getTooltipOptions(key: string | undefined, ignoreTooltip?: boolean) {
