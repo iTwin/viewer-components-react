@@ -49,7 +49,7 @@ export function createModelsTreeProvider({
       : undefined),
   });
   const dispose = () => {
-    provider.dispose();
+    provider[Symbol.dispose]();
     idsCache[Symbol.dispose]();
   };
   return {
