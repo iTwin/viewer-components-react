@@ -37,6 +37,7 @@ interface ModelsTreeComponentProps
     | "density"
     | "hierarchyLevelConfig"
     | "selectionMode"
+    | "selectionPredicate"
     | "hierarchyConfig"
     | "visibilityHandlerOverrides"
     | "getFilteredPaths"
