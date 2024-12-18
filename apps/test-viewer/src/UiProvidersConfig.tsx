@@ -114,16 +114,21 @@ const configuredUiItems = new Map<string, UiItem>([
               {
                 id: ModelsTreeComponent.id,
                 getLabel: () => ModelsTreeComponent.getLabel(),
-                render: (props) => (
-                  <ModelsTreeComponent
-                    getSchemaContext={getSchemaContext}
-                    density={props.density}
-                    selectionStorage={unifiedSelectionStorage}
-                    selectionMode={"extended"}
-                    onPerformanceMeasured={props.onPerformanceMeasured}
-                    onFeatureUsed={props.onFeatureUsed}
-                  />
-                ),
+                render: (props) => {
+                  // eslint-disable-next-line react-hooks/rules-of-hooks
+                  const { disableNodesSelection } = useViewerOptionsContext();
+                  return (
+                    <ModelsTreeComponent
+                      getSchemaContext={getSchemaContext}
+                      density={props.density}
+                      selectionStorage={unifiedSelectionStorage}
+                      selectionMode={"extended"}
+                      selectionPredicate={disableNodesSelection ? disabledSelectionPredicate : undefined}
+                      onPerformanceMeasured={props.onPerformanceMeasured}
+                      onFeatureUsed={props.onFeatureUsed}
+                    />
+                  );
+                },
               },
               {
                 id: CategoriesTreeComponent.id,
@@ -308,4 +313,8 @@ function TreeWidgetWithOptions(props: { trees: SelectableTreeDefinition[] }) {
       }}
     />
   );
+}
+
+function disabledSelectionPredicate() {
+  return false;
 }

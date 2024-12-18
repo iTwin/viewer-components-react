@@ -28,7 +28,7 @@ export function createIModelMock(queryHandler?: (query: string, params?: QueryBi
 
 export function createFakeSinonViewport(
   props?: Partial<Omit<Viewport, "view" | "perModelCategoryVisibility">> & {
-    view?: Partial<ViewState>;
+    view?: Partial<Omit<ViewState, "isSpatialView">> & { isSpatialView?: () => boolean; };
     perModelCategoryVisibility?: Partial<PerModelCategoryVisibility.Overrides>;
     queryHandler?: Parameters<typeof createIModelMock>[0];
   },
@@ -44,7 +44,7 @@ export function createFakeSinonViewport(
     ...props?.perModelCategoryVisibility,
   };
 
-  const view: Partial<ViewState> = {
+  const view: NonNullable<typeof props>["view"] = {
     isSpatialView: sinon.fake.returns(true),
     viewsCategory: sinon.fake.returns(true),
     viewsModel: sinon.fake.returns(true),

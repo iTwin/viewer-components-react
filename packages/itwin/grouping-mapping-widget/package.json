@@ -65,7 +65,7 @@
     "@itwin/imodels-access-common": "^4.1.2",
     "@itwin/imodels-access-frontend": "^4.1.2",
     "@itwin/imodels-client-management": "^4.2.1",
-    "@itwin/insights-client": "^0.13.0",
+    "@itwin/insights-client": "^0.15.1",
     "@itwin/itwins-client": "^1.1.0",
     "@itwin/itwinui-icons-color-react": "2.1.0",
     "@itwin/itwinui-icons-react": "^2.2.0",
@@ -73,7 +73,6 @@
     "@tanstack/query-core": "^4.36.1",
     "@tanstack/react-query": "^4.36.1",
     "classnames": "^2.3.1",
-    "cross-fetch": "^3.1.8",
     "fast-equals": "^4.0.2",
     "immer": "^9.0.7",
     "lodash": "^4.17.21",
@@ -148,9 +147,9 @@
     "@itwin/components-react": "^4.1.0",
     "@itwin/core-frontend": "^4.1.0",
     "@itwin/core-react": "^4.1.0",
-    "@itwin/presentation-components": "^4.1.0",
+    "@itwin/presentation-components": "^4.1.0 || ^5.0.0",
     "@itwin/presentation-frontend": "^4.1.0",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react": "^17.0.2 || ^18.0.0",
+    "react-dom": "^17.0.2 || ^18.0.0"
   }
 }
