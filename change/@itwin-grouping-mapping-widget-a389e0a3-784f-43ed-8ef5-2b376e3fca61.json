@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Upgraded insights-client to version 0.15.1",
-  "packageName": "@itwin/grouping-mapping-widget",
-  "email": "Mindaugas.Butkus@bentley.com",
-  "dependentChangeType": "patch"
-}

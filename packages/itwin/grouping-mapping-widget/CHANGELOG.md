@@ -1,8 +1,16 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Fri, 15 Nov 2024 15:03:19 GMT and should not be manually modified.
+This log was last generated on Wed, 18 Dec 2024 12:42:56 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.35.0
+
+Wed, 18 Dec 2024 12:42:56 GMT
+
+### Minor changes
+
+- Upgraded insights-client to version 0.15.1 ([#1119](https://github.com/iTwin/viewer-components-react/pull/1119))
 
 ## 0.34.2
 

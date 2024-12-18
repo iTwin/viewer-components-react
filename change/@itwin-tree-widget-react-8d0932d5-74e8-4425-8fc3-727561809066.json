@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Added an optional `selectionPredicate` function prop to `ModelsTreeComponent`, `ModelsTree`, `useModelsTree` and `Tree` components. When provided, it allows consumers to conditionally enable/disable selection of tree nodes.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "35135765+grigasp@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

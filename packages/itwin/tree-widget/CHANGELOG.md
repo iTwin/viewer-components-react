@@ -1,8 +1,20 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Fri, 29 Nov 2024 10:43:06 GMT and should not be manually modified.
+This log was last generated on Wed, 18 Dec 2024 12:42:56 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 3.2.0
+
+Wed, 18 Dec 2024 12:42:56 GMT
+
+### Minor changes
+
+- Added an optional `selectionPredicate` function prop to `ModelsTreeComponent`, `ModelsTree`, `useModelsTree` and `Tree` components. When provided, it allows consumers to conditionally enable/disable selection of tree nodes. ([#1124](https://github.com/iTwin/viewer-components-react/pull/1124))
+
+### Patches
+
+- Bump dependencies ([#1122](https://github.com/iTwin/viewer-components-react/pull/1122))
 
 ## 3.1.0
 

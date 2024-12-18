@@ -2,6 +2,43 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Wed, 18 Dec 2024 12:42:56 GMT",
+      "version": "3.2.0",
+      "tag": "@itwin/tree-widget-react_v3.2.0",
+      "comments": {
+        "patch": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "72abd12703feb2f29791e853f023c5e853931be2",
+            "comment": "Bump dependencies"
+          }
+        ],
+        "minor": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "db4ec4ae0fc5b62aa6a200a38cac0c4724b836dd",
+            "comment": "Added an optional `selectionPredicate` function prop to `ModelsTreeComponent`, `ModelsTree`, `useModelsTree` and `Tree` components. When provided, it allows consumers to conditionally enable/disable selection of tree nodes."
+          }
+        ],
+        "none": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "afbd086947adf7be897a249be4952637037217e8",
+            "comment": ""
+          },
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "20a3d0768000d74e7330fca886c711165acdefa9",
+            "comment": "Fix code snippets in README"
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 29 Nov 2024 10:43:06 GMT",
       "version": "3.1.0",
       "tag": "@itwin/tree-widget-react_v3.1.0",

@@ -2,6 +2,21 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "date": "Wed, 18 Dec 2024 12:42:56 GMT",
+      "version": "0.35.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.35.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "Mindaugas.Butkus@bentley.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "5005c67ccfdce58dca1b9d45bb025aeacf430cc9",
+            "comment": "Upgraded insights-client to version 0.15.1"
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 15 Nov 2024 15:03:19 GMT",
       "version": "0.34.2",
       "tag": "@itwin/grouping-mapping-widget_v0.34.2",
