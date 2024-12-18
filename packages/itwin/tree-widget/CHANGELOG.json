@@ -118,78 +118,12 @@
       "version": "3.0.0",
       "tag": "@itwin/tree-widget-react_v3.0.0",
       "comments": {
-        "minor": [
-          {
-            "author": "24278440+saskliutas@users.noreply.github.com",
-            "package": "@itwin/tree-widget-react",
-            "commit": "dd5e1d7fe575902d04e57cd3818ae4befb18b1a6",
-            "comment": "Add ability to focus nodes in `ModelsTree`"
-          },
-          {
-            "author": "33428304+jasdom@users.noreply.github.com",
-            "package": "@itwin/tree-widget-react",
-            "commit": "aea2b129cb02a6615c174268dd787995e7d5d5b3",
-            "comment": "Added ability to display a subset of `ModelsTree`."
-          },
-          {
-            "author": "24278440+saskliutas@users.noreply.github.com",
-            "package": "@itwin/tree-widget-react",
-            "commit": "9058584e2381260c7a875ddaa3f95677de4e7d8c",
-            "comment": "Added ability to retry loading failed hierarchy levels"
-          },
-          {
-            "author": "33428304+jasdom@users.noreply.github.com",
-            "package": "@itwin/tree-widget-react",
-            "commit": "a1daf0bb1fd7d0e59414cbbacb92dbb5e8d7f3ff",
-            "comment": "Added error reporting to feature telemetry in tree components."
-          }
-        ],
-        "patch": [
-          {
-            "author": "33428304+jasdom@users.noreply.github.com",
-            "package": "@itwin/tree-widget-react",
-            "commit": "f1105d4bfe2d10bf3507a6596ec32ab19b236fb8",
-            "comment": "Added a loading indicator when matching instances count is being calculated in hierarchy level filtering dialog."
-          },
-          {
-            "author": "yato333@users.noreply.github.com",
-            "package": "@itwin/tree-widget-react",
-            "commit": "2a9fd605764965d04028c9642cf84d4091a8bad2",
-            "comment": "Add thousands separator to filter dialog result count"
-          }
-        ],
-        "none": [
+        "major": [
           {
             "author": "35135765+grigasp@users.noreply.github.com",
             "package": "@itwin/tree-widget-react",
-            "commit": "16de2f8c6770bed8e50b08ec6a69b14ec952529b",
-            "comment": "bump presentation deps to `1.0`"
-          }
-        ],
-        "major": [
-          {
-            "author": "24278440+saskliutas@users.noreply.github.com",
-            "package": "@itwin/tree-widget-react",
-            "commit": "b000452486923b460635dd7f2376207de5157db0",
-            "comment": "Updated `ModelsTree` and `CategoriesTree` header buttons to apply action on filtered tree."
-          },
-          {
-            "author": "24278440+saskliutas@users.noreply.github.com",
-            "package": "@itwin/tree-widget-react",
-            "commit": "64f057b411622d2165e5fe3c6dff8373368c8dc9",
-            "comment": "Made `@itwin/itwinui-react` a peer dependency, bumped its version to `^3.11.0`."
-          },
-          {
-            "author": "yato333@users.noreply.github.com",
-            "package": "@itwin/tree-widget-react",
-            "commit": "c9b58123e5042751d835643eb53b13ff25c84a4f",
-            "comment": "Models Tree: Changed the tree to determine status of node visibility using not just the element the node represents, but also its children. This also introduces partial visibility state for cases when visibility states of different elements are different."
-          },
-          {
-            "author": "24278440+saskliutas@users.noreply.github.com",
-            "package": "@itwin/tree-widget-react",
-            "commit": "cd1dd1d80189b79e141ac8844f007dda8fcc929b",
-            "comment": "Refactor tree components to use `@itwin/presentation-hierarchies-react`. Add an `@itwin/ecschema-metadata@^4.0.0` peer dependency."
+            "commit": "f42e53a666d74e8bc0850b9fd19424633a1167c7",
+            "comment": "The `3.0` release affects nearly all components in this package, usually in a breaking way. As a result, we suggest treating this version as a completely new package rather than an incremental upgrade - please have a look at the [README](./README.md) for a list of new features and examples on how to consume the new version"
           }
         ]
       }

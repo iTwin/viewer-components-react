@@ -51,22 +51,7 @@ Fri, 04 Oct 2024 15:06:44 GMT
 
 ### Major changes
 
-- Updated `ModelsTree` and `CategoriesTree` header buttons to apply action on filtered tree. ([#1034](https://github.com/iTwin/viewer-components-react/pull/1034))
-- Made `@itwin/itwinui-react` a peer dependency, bumped its version to `^3.11.0`. ([#1004](https://github.com/iTwin/viewer-components-react/pull/1004))
-- Models Tree: Changed the tree to determine status of node visibility using not just the element the node represents, but also its children. This also introduces partial visibility state for cases when visibility states of different elements are different. ([#829](https://github.com/iTwin/viewer-components-react/pull/829))
-- Refactor tree components to use `@itwin/presentation-hierarchies-react`. Add an `@itwin/ecschema-metadata@^4.0.0` peer dependency. ([#840](https://github.com/iTwin/viewer-components-react/pull/840))
-
-### Minor changes
-
-- Add ability to focus nodes in `ModelsTree` ([#943](https://github.com/iTwin/viewer-components-react/pull/943))
-- Added ability to display a subset of `ModelsTree`. ([#994](https://github.com/iTwin/viewer-components-react/pull/994))
-- Added ability to retry loading failed hierarchy levels ([#976](https://github.com/iTwin/viewer-components-react/pull/976))
-- Added error reporting to feature telemetry in tree components. ([#988](https://github.com/iTwin/viewer-components-react/pull/988))
-
-### Patches
-
-- Added a loading indicator when matching instances count is being calculated in hierarchy level filtering dialog. ([#962](https://github.com/iTwin/viewer-components-react/pull/962))
-- Add thousands separator to filter dialog result count ([#960](https://github.com/iTwin/viewer-components-react/pull/960))
+- The `3.0` release affects nearly all components in this package, usually in a breaking way. As a result, we suggest treating this version as a completely new package rather than an incremental upgrade - please have a look at the [README](./README.md) for a list of new features and examples on how to consume the new version ([#966](https://github.com/iTwin/viewer-components-react/pull/966))
 
 ## 2.3.2
 
@@ -247,7 +232,7 @@ Mon, 31 Jul 2023 14:10:09 GMT
 - Handle errors thrown from tree components.
 - Persist tree scroll position when switching between widgets.
 - `Tree Header`: Fixed dropdown buttons menu not theming correctly.
-- `ModelsTree`: Refactor ruleset to not use deprecated `ImageIdOverride` rule. 
+- `ModelsTree`: Refactor ruleset to not use deprecated `ImageIdOverride` rule.
 - `ModelsTree`: Always render checkbox to avoid UI shifting when checkbox appear.
 
 ## 0.10.0
