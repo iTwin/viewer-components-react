@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, defer, from, lastValueFrom, map, merge, mergeAll, mergeMap, switchMap, toArray } from "rxjs";
+import { bufferCount, defer, from, lastValueFrom, map, merge, mergeAll, mergeMap, reduce, switchMap } from "rxjs";
 import {
   createNodesQueryClauseFactory,
   createPredicateBasedHierarchyDefinition,
@@ -754,50 +754,45 @@ async function createInstanceKeyPathsFromTargetItems({
           return { key, type: 0 };
         }
 
-        const subjectCheck = imodelAccess.classDerivesFrom(key.className, "BisCore.Subject");
-        const isSubject = subjectCheck instanceof Promise ? await subjectCheck : subjectCheck;
-        if (isSubject) {
+        if (await imodelAccess.classDerivesFrom(key.className, "BisCore.Subject")) {
           return { key: key.id, type: 1 };
         }
 
-        const modelCheck = imodelAccess.classDerivesFrom(key.className, "BisCore.Model");
-        const isModel = modelCheck instanceof Promise ? await modelCheck : modelCheck;
-        if (isModel) {
+        if (await imodelAccess.classDerivesFrom(key.className, "BisCore.Model")) {
           return { key: key.id, type: 2 };
         }
 
-        const spatialCategoryCheck = imodelAccess.classDerivesFrom(key.className, "BisCore.SpatialCategory");
-        const isSpatialCategoryCheck = spatialCategoryCheck instanceof Promise ? await spatialCategoryCheck : spatialCategoryCheck;
-        if (isSpatialCategoryCheck) {
+        if (await imodelAccess.classDerivesFrom(key.className, "BisCore.SpatialCategory")) {
           return { key: key.id, type: 3 };
         }
 
         return { key: key.id, type: 0 };
       }, 2),
-      toArray(),
-      switchMap(async (keysParsed) => {
-        const ids = {
+      reduce(
+        (acc, value) => {
+          if (value.type === 1) {
+            acc.subjects.push(value.key);
+            return acc;
+          }
+          if (value.type === 2) {
+            acc.models.push(value.key);
+            return acc;
+          }
+          if (value.type === 3) {
+            acc.categories.push(value.key);
+            return acc;
+          }
+          acc.elements.push(value.key);
+          return acc;
+        },
+        {
           models: new Array<Id64String>(),
           categories: new Array<Id64String>(),
           subjects: new Array<Id64String>(),
           elements: new Array<Id64String | ElementsGroupInfo>(),
-        };
-        for (const keyParsed of keysParsed) {
-          if (keyParsed.type === 1) {
-            ids.subjects.push(keyParsed.key);
-            continue;
-          }
-          if (keyParsed.type === 2) {
-            ids.models.push(keyParsed.key);
-            continue;
-          }
-          if (keyParsed.type === 3) {
-            ids.categories.push(keyParsed.key);
-            continue;
-          }
-          ids.elements.push(keyParsed.key);
-        }
-
+        },
+      ),
+      switchMap(async (ids) => {
         const elementsLength = ids.elements.length;
         return collect(
           merge(
@@ -806,8 +801,7 @@ async function createInstanceKeyPathsFromTargetItems({
             from(ids.categories).pipe(mergeMap((id) => createCategoryInstanceKeyPaths(id, idsCache))),
             from(ids.elements).pipe(
               bufferCount(Math.ceil(elementsLength / Math.ceil(elementsLength / 5000))),
-              releaseMainThreadOnItemsCount(2),
-              mergeMap((block) => createGeometricElementInstanceKeyPaths(imodelAccess, idsCache, hierarchyConfig, block)),
+              mergeMap((block) => createGeometricElementInstanceKeyPaths(imodelAccess, idsCache, hierarchyConfig, block), 10),
             ),
           ),
         );
