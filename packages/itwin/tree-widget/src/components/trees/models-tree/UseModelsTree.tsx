@@ -15,6 +15,7 @@ import { FilterLimitExceededError } from "../common/TreeErrors";
 import { useIModelChangeListener } from "../common/UseIModelChangeListener";
 import { useTelemetryContext } from "../common/UseTelemetryContext";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
+import { ModelsTreeNode } from "./internal/ModelsTreeNode";
 import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibilityHandler";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition";
 
@@ -41,13 +42,18 @@ export interface UseModelsTreeProps {
     createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<HierarchyFilteringPath[]>;
   }) => Promise<HierarchyFilteringPath[]>;
   onModelsFiltered?: (modelIds: Id64String[] | undefined) => void;
+  /**
+   * An optional predicate to allow or prohibit selection of a node.
+   * When not supplied, all nodes are selectable.
+   */
+  selectionPredicate?: (props: { node: PresentationHierarchyNode; type: "subject" | "model" | "category" | "element" | "elements-class-group" }) => boolean;
 }
 
 /** @beta */
 interface UseModelsTreeResult {
   modelsTreeProps: Pick<
     VisibilityTreeProps,
-    "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlight" | "noDataMessage"
+    "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlight" | "noDataMessage" | "selectionPredicate"
   >;
   rendererProps: Required<Pick<VisibilityTreeRendererProps, "getIcon" | "onNodeDoubleClick">>;
 }
@@ -63,6 +69,7 @@ export function useModelsTree({
   visibilityHandlerOverrides,
   getFilteredPaths,
   onModelsFiltered,
+  selectionPredicate: nodeTypeSelectionPredicate,
 }: UseModelsTreeProps): UseModelsTreeResult {
   const [filteringError, setFilteringError] = useState<ModelsTreeFilteringError | undefined>(undefined);
   const hierarchyConfiguration = useMemo<ModelsTreeHierarchyConfiguration>(
@@ -195,6 +202,16 @@ export function useModelsTree({
     return undefined;
   }, [filter, loadFocusedItems, getModelsTreeIdsCache, onFeatureUsed, getFilteredPaths, hierarchyConfiguration, onModelsFiltered, onFilteredPathsChanged]);
 
+  const nodeSelectionPredicate = useCallback<NonNullable<VisibilityTreeProps["selectionPredicate"]>>(
+    (node) => {
+      if (!nodeTypeSelectionPredicate) {
+        return true;
+      }
+      return nodeTypeSelectionPredicate({ node, type: ModelsTreeNode.getType(node.nodeData) });
+    },
+    [nodeTypeSelectionPredicate],
+  );
+
   return {
     modelsTreeProps: {
       treeName: "models-tree-v2",
@@ -203,6 +220,7 @@ export function useModelsTree({
       getFilteredPaths: getPaths,
       noDataMessage: getNoDataMessage(filter, filteringError),
       highlight: filter ? { text: filter } : undefined,
+      selectionPredicate: nodeSelectionPredicate,
     },
     rendererProps: {
       onNodeDoubleClick,

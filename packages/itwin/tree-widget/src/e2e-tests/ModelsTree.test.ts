@@ -28,6 +28,34 @@ test.describe("Models tree", () => {
     await locateNode(treeWidget, "BayTown").getByRole("checkbox", { name: "Visible: All models are visible", exact: true }).waitFor();
   });
 
+  test("disabled selection", async ({ page }) => {
+    // disable nodes' selection
+    await page.getByRole("button", { name: "Toggle tree nodes' selection" }).click();
+
+    const subjectNode = locateNode(treeWidget, "BayTown");
+    await subjectNode.click();
+    await expect(subjectNode).toHaveAttribute("aria-selected", "false");
+
+    const physicalModelNode = locateNode(treeWidget, "ProcessPhysicalModel");
+    await physicalModelNode.click();
+    await expect(physicalModelNode).toHaveAttribute("aria-selected", "false");
+
+    await physicalModelNode.getByLabel("Expand").click();
+    const equipmentNode = locateNode(treeWidget, "Equipment");
+    await equipmentNode.click();
+    await expect(equipmentNode).toHaveAttribute("aria-selected", "false");
+
+    await equipmentNode.getByLabel("Expand").click();
+    const parReboilerGroupingNode = locateNode(treeWidget, "Par. Reboiler");
+    await parReboilerGroupingNode.click();
+    await expect(parReboilerGroupingNode).toHaveAttribute("aria-selected", "false");
+
+    await parReboilerGroupingNode.getByLabel("Expand").click();
+    const parReboilerInstanceNode = locateNode(treeWidget, "EX-302 [4-106]");
+    await parReboilerInstanceNode.click();
+    await expect(parReboilerInstanceNode).toHaveAttribute("aria-selected", "false");
+  });
+
   withDifferentDensities((density) => {
     test("initial tree", async ({ page }) => {
       // wait for element to be visible in the tree
