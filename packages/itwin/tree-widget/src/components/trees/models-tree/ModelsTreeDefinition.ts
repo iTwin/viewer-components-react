@@ -36,7 +36,6 @@ import type {
   GroupingHierarchyNode,
   HierarchyDefinition,
   HierarchyLevelDefinition,
-  HierarchyNodeIdentifiersPath,
   HierarchyNodesDefinition,
   LimitingECSqlQueryExecutor,
   NodesQueryClauseFactory,
@@ -589,30 +588,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
   }
 }
 
-function createSubjectInstanceKeysPath(subjectId: Id64String, idsCache: ModelsTreeIdsCache): Observable<HierarchyNodeIdentifiersPath> {
-  return from(idsCache.getSubjectAncestorsPath(subjectId)).pipe(map((idsPath) => idsPath.map((id) => ({ className: "BisCore.Subject", id }))));
-}
-
-function createModelInstanceKeyPaths(modelId: Id64String, idsCache: ModelsTreeIdsCache): Observable<HierarchyNodeIdentifiersPath> {
-  return from(idsCache.getModelSubjects(modelId)).pipe(
-    mergeAll(),
-    mergeMap((modelSubjectId) =>
-      createSubjectInstanceKeysPath(modelSubjectId, idsCache).pipe(
-        map((subjectPath) => [...subjectPath, { className: "BisCore.GeometricModel3d", id: modelId }]),
-      ),
-    ),
-  );
-}
-
-function createCategoryInstanceKeyPaths(categoryId: Id64String, idsCache: ModelsTreeIdsCache): Observable<HierarchyNodeIdentifiersPath> {
-  return from(idsCache.getCategoryModels(categoryId)).pipe(
-    mergeAll(),
-    mergeMap((categoryModelId) =>
-      createModelInstanceKeyPaths(categoryModelId, idsCache).pipe(map((modelPath) => [...modelPath, { className: "BisCore.SpatialCategory", id: categoryId }])),
-    ),
-  );
-}
-
 function createGeometricElementInstanceKeyPaths(
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor,
   idsCache: ModelsTreeIdsCache,
@@ -690,7 +665,8 @@ function createGeometricElementInstanceKeyPaths(
     releaseMainThreadOnItemsCount(300),
     map((row) => parseQueryRow(row, groupInfos, separator, hierarchyConfig.elementClassSpecification)),
     mergeMap(({ modelId, elementHierarchyPath, groupingNode }) =>
-      createModelInstanceKeyPaths(modelId, idsCache).pipe(
+      from(idsCache.createModelInstanceKeyPaths(modelId)).pipe(
+        mergeAll(),
         map((modelPath) => {
           modelPath.pop(); // model is already included in the element hierarchy path
           const path = [...modelPath, ...elementHierarchyPath];
@@ -796,11 +772,12 @@ async function createInstanceKeyPathsFromTargetItems({
         const elementsLength = ids.elements.length;
         return collect(
           merge(
-            from(ids.subjects).pipe(mergeMap((id) => createSubjectInstanceKeysPath(id, idsCache))),
-            from(ids.models).pipe(mergeMap((id) => createModelInstanceKeyPaths(id, idsCache))),
-            from(ids.categories).pipe(mergeMap((id) => createCategoryInstanceKeyPaths(id, idsCache))),
+            from(ids.subjects).pipe(mergeMap((id) => from(idsCache.createSubjectInstanceKeysPath(id)))),
+            from(ids.models).pipe(mergeMap((id) => from(idsCache.createModelInstanceKeyPaths(id)).pipe(mergeAll()))),
+            from(ids.categories).pipe(mergeMap((id) => from(idsCache.createCategoryInstanceKeyPaths(id)).pipe(mergeAll()))),
             from(ids.elements).pipe(
               bufferCount(Math.ceil(elementsLength / Math.ceil(elementsLength / 5000))),
+              releaseMainThreadOnItemsCount(1),
               mergeMap((block) => createGeometricElementInstanceKeyPaths(imodelAccess, idsCache, hierarchyConfig, block), 10),
             ),
           ),
