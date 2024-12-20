@@ -33,9 +33,9 @@ export class ModelsTreeIdsCache {
   private _subjectInfos: Promise<Map<Id64String, SubjectInfo>> | undefined;
   private _parentSubjectIds: Promise<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
   private _modelInfos: Promise<Map<Id64String, ModelInfo>> | undefined;
-  private _modelKeyPaths: Map<Id64String, HierarchyNodeIdentifiersPath[]>;
-  private _subjectKeyPaths: Map<Id64String, HierarchyNodeIdentifiersPath>;
-  private _categoryKeyPaths: Map<Id64String, HierarchyNodeIdentifiersPath[]>;
+  private _modelKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath[]>>;
+  private _subjectKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath>>;
+  private _categoryKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath[]>>;
 
   constructor(
     private _queryExecutor: LimitingECSqlQueryExecutor,
@@ -222,24 +222,22 @@ export class ModelsTreeIdsCache {
     return modelIds;
   }
 
-  /**
-   * Returns a list of Subject ancestor ECInstanceIds from root to target Subject as displayed in the
-   * hierarchy  - taking into account `hideInHierarchy` flag.
-   */
   public async createSubjectInstanceKeysPath(targetSubjectId: Id64String): Promise<HierarchyNodeIdentifiersPath> {
     let entry = this._subjectKeyPaths.get(targetSubjectId);
     if (!entry) {
-      const subjectInfos = await this.getSubjectInfos();
-      const result = new Array<InstanceKey>();
-      let currParentId: Id64String | undefined = targetSubjectId;
-      while (currParentId) {
-        const parentInfo = subjectInfos.get(currParentId);
-        if (!parentInfo?.hideInHierarchy) {
-          result.push({ className: "BisCore.Subject", id: currParentId });
+      entry = (async () => {
+        const subjectInfos = await this.getSubjectInfos();
+        const result = new Array<InstanceKey>();
+        let currParentId: Id64String | undefined = targetSubjectId;
+        while (currParentId) {
+          const parentInfo = subjectInfos.get(currParentId);
+          if (!parentInfo?.hideInHierarchy) {
+            result.push({ className: "BisCore.Subject", id: currParentId });
+          }
+          currParentId = parentInfo?.parentSubject;
         }
-        currParentId = parentInfo?.parentSubject;
-      }
-      entry = result.reverse();
+        return result.reverse();
+      })();
       this._subjectKeyPaths.set(targetSubjectId, entry);
     }
     return entry;
@@ -312,15 +310,18 @@ export class ModelsTreeIdsCache {
   public async createModelInstanceKeyPaths(modelId: Id64String): Promise<HierarchyNodeIdentifiersPath[]> {
     let entry = this._modelKeyPaths.get(modelId);
     if (!entry) {
-      const result = new Array<HierarchyNodeIdentifiersPath>();
-      const subjectInfos = (await this.getSubjectInfos()).entries();
-      for (const [modelSubjectId, subjectInfo] of subjectInfos) {
-        if (subjectInfo.childModels.has(modelId)) {
-          const subjectPath = await this.createSubjectInstanceKeysPath(modelSubjectId);
-          result.push([...subjectPath, { className: "BisCore.GeometricModel3d", id: modelId }]);
+      entry = (async () => {
+        const result = new Array<HierarchyNodeIdentifiersPath>();
+        const subjectInfos = (await this.getSubjectInfos()).entries();
+        for (const [modelSubjectId, subjectInfo] of subjectInfos) {
+          if (subjectInfo.childModels.has(modelId)) {
+            const subjectPath = await this.createSubjectInstanceKeysPath(modelSubjectId);
+            result.push([...subjectPath, { className: "BisCore.GeometricModel3d", id: modelId }]);
+          }
         }
-      }
-      entry = result;
+        return result;
+      })();
+
       this._modelKeyPaths.set(modelId, entry);
     }
     return entry;
@@ -373,23 +374,24 @@ export class ModelsTreeIdsCache {
   public async createCategoryInstanceKeyPaths(categoryId: Id64String): Promise<HierarchyNodeIdentifiersPath[]> {
     let entry = this._categoryKeyPaths.get(categoryId);
     if (!entry) {
-      const result = new Set<Id64String>();
-      const modelInfos = await this.getModelInfos();
-      modelInfos?.forEach((modelInfo, modelId) => {
-        if (modelInfo.categories.has(categoryId)) {
-          result.add(modelId);
-        }
-      });
+      entry = (async () => {
+        const result = new Set<Id64String>();
+        const modelInfos = await this.getModelInfos();
+        modelInfos?.forEach((modelInfo, modelId) => {
+          if (modelInfo.categories.has(categoryId)) {
+            result.add(modelId);
+          }
+        });
 
-      const categoryPaths = new Array<HierarchyNodeIdentifiersPath>();
-      for (const categoryModelId of [...result]) {
-        const modelPaths = await this.createModelInstanceKeyPaths(categoryModelId);
-        for (const modelPath of modelPaths) {
-          categoryPaths.push([...modelPath, { className: "BisCore.SpatialCategory", id: categoryId }]);
+        const categoryPaths = new Array<HierarchyNodeIdentifiersPath>();
+        for (const categoryModelId of [...result]) {
+          const modelPaths = await this.createModelInstanceKeyPaths(categoryModelId);
+          for (const modelPath of modelPaths) {
+            categoryPaths.push([...modelPath, { className: "BisCore.SpatialCategory", id: categoryId }]);
+          }
         }
-      }
-
-      entry = categoryPaths;
+        return categoryPaths;
+      })();
       this._categoryKeyPaths.set(categoryId, entry);
     }
     return entry;

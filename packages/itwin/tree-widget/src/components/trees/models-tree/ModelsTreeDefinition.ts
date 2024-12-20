@@ -668,8 +668,10 @@ function createGeometricElementInstanceKeyPaths(
       from(idsCache.createModelInstanceKeyPaths(modelId)).pipe(
         mergeAll(),
         map((modelPath) => {
-          modelPath.pop(); // model is already included in the element hierarchy path
-          const path = [...modelPath, ...elementHierarchyPath];
+          // We dont want to modify the original path, we create a copy that we can modify
+          const newModelPath = [...modelPath];
+          newModelPath.pop(); // model is already included in the element hierarchy path
+          const path = [...newModelPath, ...elementHierarchyPath];
           if (!groupingNode) {
             return path;
           }
