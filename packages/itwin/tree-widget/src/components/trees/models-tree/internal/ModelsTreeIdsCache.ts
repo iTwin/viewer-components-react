@@ -8,9 +8,10 @@ import { bufferTime, filter, firstValueFrom, mergeAll, mergeMap, ReplaySubject, 
 import { assert } from "@itwin/core-bentley";
 import { pushToMap } from "../../common/Utils";
 
+import type { InstanceKey } from "@itwin/presentation-shared";
 import type { ModelsTreeDefinition } from "../ModelsTreeDefinition";
 import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
-import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 
 interface SubjectInfo {
   parentSubject: Id64String | undefined;
@@ -32,12 +33,18 @@ export class ModelsTreeIdsCache {
   private _subjectInfos: Promise<Map<Id64String, SubjectInfo>> | undefined;
   private _parentSubjectIds: Promise<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
   private _modelInfos: Promise<Map<Id64String, ModelInfo>> | undefined;
+  private _modelKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath[]>>;
+  private _subjectKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath>>;
+  private _categoryKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath[]>>;
 
   constructor(
     private _queryExecutor: LimitingECSqlQueryExecutor,
     private _hierarchyConfig: ModelsTreeHierarchyConfiguration,
   ) {
     this._categoryElementCounts = new ModelCategoryElementsCountCache(async (input) => this.queryCategoryElementCounts(input));
+    this._modelKeyPaths = new Map();
+    this._subjectKeyPaths = new Map();
+    this._categoryKeyPaths = new Map();
   }
 
   public [Symbol.dispose]() {
@@ -215,22 +222,25 @@ export class ModelsTreeIdsCache {
     return modelIds;
   }
 
-  /**
-   * Returns a list of Subject ancestor ECInstanceIds from root to target Subject as displayed in the
-   * hierarchy  - taking into account `hideInHierarchy` flag.
-   */
-  public async getSubjectAncestorsPath(targetSubjectId: Id64String): Promise<Id64Array> {
-    const subjectInfos = await this.getSubjectInfos();
-    const result = new Array<Id64String>();
-    let currParentId: Id64String | undefined = targetSubjectId;
-    while (currParentId) {
-      const parentInfo = subjectInfos.get(currParentId);
-      if (!parentInfo?.hideInHierarchy) {
-        result.push(currParentId);
-      }
-      currParentId = parentInfo?.parentSubject;
+  public async createSubjectInstanceKeysPath(targetSubjectId: Id64String): Promise<HierarchyNodeIdentifiersPath> {
+    let entry = this._subjectKeyPaths.get(targetSubjectId);
+    if (!entry) {
+      entry = (async () => {
+        const subjectInfos = await this.getSubjectInfos();
+        const result = new Array<InstanceKey>();
+        let currParentId: Id64String | undefined = targetSubjectId;
+        while (currParentId) {
+          const parentInfo = subjectInfos.get(currParentId);
+          if (!parentInfo?.hideInHierarchy) {
+            result.push({ className: "BisCore.Subject", id: currParentId });
+          }
+          currParentId = parentInfo?.parentSubject;
+        }
+        return result.reverse();
+      })();
+      this._subjectKeyPaths.set(targetSubjectId, entry);
     }
-    return result.reverse();
+    return entry;
   }
 
   private async *queryModelElementCounts() {
@@ -297,15 +307,24 @@ export class ModelsTreeIdsCache {
     return modelInfos.get(modelId)?.elementCount ?? 0;
   }
 
-  public async getModelSubjects(modelId: Id64String): Promise<Id64Array> {
-    const result = new Array<Id64String>();
-    const subjectInfos = await this.getSubjectInfos();
-    subjectInfos.forEach((subjectInfo, subjectId) => {
-      if (subjectInfo.childModels.has(modelId)) {
-        result.push(subjectId);
-      }
-    });
-    return result;
+  public async createModelInstanceKeyPaths(modelId: Id64String): Promise<HierarchyNodeIdentifiersPath[]> {
+    let entry = this._modelKeyPaths.get(modelId);
+    if (!entry) {
+      entry = (async () => {
+        const result = new Array<HierarchyNodeIdentifiersPath>();
+        const subjectInfos = (await this.getSubjectInfos()).entries();
+        for (const [modelSubjectId, subjectInfo] of subjectInfos) {
+          if (subjectInfo.childModels.has(modelId)) {
+            const subjectPath = await this.createSubjectInstanceKeysPath(modelSubjectId);
+            result.push([...subjectPath, { className: "BisCore.GeometricModel3d", id: modelId }]);
+          }
+        }
+        return result;
+      })();
+
+      this._modelKeyPaths.set(modelId, entry);
+    }
+    return entry;
   }
 
   private async queryCategoryElementCounts(
@@ -352,15 +371,30 @@ export class ModelsTreeIdsCache {
     return this._categoryElementCounts.getCategoryElementsCount(modelId, categoryId);
   }
 
-  public async getCategoryModels(categoryId: Id64String): Promise<Id64Array> {
-    const result = new Set<Id64String>();
-    const modelInfos = await this.getModelInfos();
-    modelInfos?.forEach((modelInfo, modelId) => {
-      if (modelInfo.categories.has(categoryId)) {
-        result.add(modelId);
-      }
-    });
-    return [...result];
+  public async createCategoryInstanceKeyPaths(categoryId: Id64String): Promise<HierarchyNodeIdentifiersPath[]> {
+    let entry = this._categoryKeyPaths.get(categoryId);
+    if (!entry) {
+      entry = (async () => {
+        const result = new Set<Id64String>();
+        const modelInfos = await this.getModelInfos();
+        modelInfos?.forEach((modelInfo, modelId) => {
+          if (modelInfo.categories.has(categoryId)) {
+            result.add(modelId);
+          }
+        });
+
+        const categoryPaths = new Array<HierarchyNodeIdentifiersPath>();
+        for (const categoryModelId of [...result]) {
+          const modelPaths = await this.createModelInstanceKeyPaths(categoryModelId);
+          for (const modelPath of modelPaths) {
+            categoryPaths.push([...modelPath, { className: "BisCore.SpatialCategory", id: categoryId }]);
+          }
+        }
+        return categoryPaths;
+      })();
+      this._categoryKeyPaths.set(categoryId, entry);
+    }
+    return entry;
   }
 }
 
