@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Pass `enableVirtualization` flag to itwinui `Tree`",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "anmolshres98@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
