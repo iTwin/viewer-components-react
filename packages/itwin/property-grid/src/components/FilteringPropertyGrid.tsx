@@ -3,16 +3,21 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useEffect, useState } from "react";
-import { PropertyValueFormat } from "@itwin/appui-abstract";
+import { useEffect, useState } from "react";
+import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import {
-  FilteredType, FilteringPropertyDataProvider, PropertyDataChangeEvent, PropertyRecordDataFiltererBase, useDebouncedAsyncValue,
+  FilteredType,
+  FilteringPropertyDataProvider,
+  PropertyDataChangeEvent,
+  PropertyRecordDataFiltererBase,
+  usePropertyData,
   VirtualizedPropertyGridWithDataProvider,
 } from "@itwin/components-react";
+import { BeEvent } from "@itwin/core-bentley";
 import { Flex, Text } from "@itwin/itwinui-react";
 import { PropertyGridManager } from "../PropertyGridManager";
 
-import type { PropertyRecord } from "@itwin/appui-abstract";
+import type { IDisposable } from "@itwin/core-bentley";
 import type {
   FilteredPropertyData,
   IPropertyDataFilterer,
@@ -21,8 +26,6 @@ import type {
   PropertyData,
   PropertyDataFilterResult,
 } from "@itwin/components-react";
-import type { IDisposable } from "@itwin/core-bentley";
-
 /**
  * Properties for rendering a `FilteringPropertyGrid`.
  * @public
@@ -49,12 +52,9 @@ export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildC
     };
   }, [filterer, dataProvider, autoExpandChildCategories]);
 
-  const { value: filterMatchesCount, inProgress: isFiltering } = useDebouncedAsyncValue(
-    useCallback(async () => {
-      const filteredData = (await filteringDataProvider?.getData()) as FilteredPropertyData;
-      return filteredData?.matchesCount;
-    }, [filteringDataProvider]),
-  );
+  const { value: propertyData, inProgress: isFiltering } = usePropertyData({
+    dataProvider: filteringDataProvider ?? emptyDataProvider,
+  });
 
   if (!filteringDataProvider) {
     return null;
@@ -64,6 +64,7 @@ export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildC
   // istanbul ignore next
   const actionButtonWidth = props.actionButtonWidth !== undefined ? props.actionButtonWidth : props.actionButtonRenderers !== undefined ? undefined : 0;
 
+  const filterMatchesCount = (propertyData as FilteredPropertyData | undefined)?.matchesCount;
   if (!isFiltering && filterMatchesCount === 0) {
     return (
       <Flex justifyContent="center" alignItems="center" flexDirection="column" style={{ width: "100%", height: "100%" }}>
@@ -77,17 +78,25 @@ export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildC
   }
 
   return (
-    <>
-      <VirtualizedPropertyGridWithDataProvider
-        {...props}
-        minLabelWidth={10}
-        minValueWidth={10}
-        actionButtonWidth={actionButtonWidth}
-        dataProvider={filteringDataProvider}
-      />
-    </>
+    <VirtualizedPropertyGridWithDataProvider
+      {...props}
+      minLabelWidth={10}
+      minValueWidth={10}
+      actionButtonWidth={actionButtonWidth}
+      dataProvider={filteringDataProvider}
+    />
   );
 }
+
+const emptyDataProvider: IPropertyDataProvider = {
+  getData: async () => emptyPropertyData,
+  onDataChanged: new BeEvent(),
+};
+const emptyPropertyData: PropertyData = {
+  label: PropertyRecord.fromString(""),
+  categories: [],
+  records: {},
+};
 
 /**
  * Filterer that does nothing.
