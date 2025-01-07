@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Tue, 07 Jan 2025 12:53:32 GMT and should not be manually modified.
+This log was last generated on Tue, 07 Jan 2025 16:30:55 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 3.2.2
+
+Tue, 07 Jan 2025 16:30:55 GMT
+
+### Patches
+
+- Propagate `enableVirtualization` flag down to the underlying `Tree` component from `iTwinUI` ([#1133](https://github.com/iTwin/viewer-components-react/pull/1133))
 
 ## 3.2.1
 
