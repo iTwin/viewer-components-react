@@ -38,8 +38,8 @@
   },
   "dependencies": {
     "@itwin/itwinui-icons-color-react": "^2.1.0",
-    "@itwin/itwinui-icons-react": "^2.6.0",
-    "@itwin/itwinui-react": "^2.11.2",
+    "@itwin/itwinui-icons-react": "^2.8.0",
+    "@itwin/itwinui-react": "^3.15.5",
     "classnames": "^2.3.1",
     "react-beautiful-dnd": "^13.1.1"
   },
@@ -59,7 +59,7 @@
     "@itwin/core-telemetry": "^4.3.0",
     "@itwin/eslint-plugin": "^4.0.0-dev.38",
     "@itwin/imodel-components-react": "^4.0.1",
-    "@itwin/itwinui-variables": "^2.0.0",
+    "@itwin/itwinui-variables": "^3.3.0",
     "@itwin/map-layers-formats": "^4.3.0",
     "@itwin/webgl-compatibility": "^4.3.0",
     "@testing-library/dom": "^8.12.0",
@@ -105,7 +105,7 @@
     "source-map-support": "^0.5.6",
     "ts-node": "^10.9.1",
     "typemoq": "^2.1.0",
-    "typescript": "~4.6.0"
+    "typescript": "~5.0.0"
   },
   "peerDependencies": {
     "@itwin/appui-abstract": "^4.0.0",

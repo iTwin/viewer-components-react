@@ -4,20 +4,20 @@
  *--------------------------------------------------------------------------------------------*/
 // cSpell:ignore droppable Sublayer Basemap
 
-import * as React from "react";
-import { NumberInput } from "@itwin/core-react";
-import type { ViewState3d } from "@itwin/core-frontend";
-import { QuantityType } from "@itwin/core-frontend";
-import type { BackgroundMapProps, BackgroundMapSettings, TerrainProps } from "@itwin/core-common";
-import { PlanarClipMaskMode, PlanarClipMaskPriority, TerrainHeightOriginMode } from "@itwin/core-common";
-import { useSourceMapContext } from "./MapLayerManager";
 import "./MapManagerSettings.scss";
-import type { SelectOption } from "@itwin/itwinui-react";
-import { Select, Slider, Tab, Tabs, ToggleSwitch } from "@itwin/itwinui-react";
+import * as React from "react";
+import { PlanarClipMaskMode, PlanarClipMaskPriority, TerrainHeightOriginMode } from "@itwin/core-common";
+import { QuantityType } from "@itwin/core-frontend";
+import { NumberInput } from "@itwin/core-react";
 import { QuantityNumberInput } from "@itwin/imodel-components-react";
+import { Select, Slider, Tab, Tabs, ToggleSwitch } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
 import { CustomParamsSettingsPanel } from "./CustomParamsSettings";
+import { useSourceMapContext } from "./MapLayerManager";
 
+import type { ViewState3d } from "@itwin/core-frontend";
+import type { BackgroundMapProps, BackgroundMapSettings, TerrainProps } from "@itwin/core-common";
+import type { SelectOption } from "@itwin/itwinui-react";
 /* eslint-disable deprecation/deprecation */
 
 enum MapMaskingOption {
@@ -320,9 +320,7 @@ export function MapManagerSettings() {
                 />
 
                 <span className="map-manager-settings-label">{heightOriginLabel}</span>
-                {/* elevation correction component:  'popoverProps' is needed here otherwise selecting an option closes the menu popup.*/}
                 <Select
-                  popoverProps={{ appendTo: "parent" }}
                   options={terrainHeightOptions.current}
                   disabled={!applyTerrain}
                   value={heightOriginMode}

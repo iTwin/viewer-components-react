@@ -13,13 +13,7 @@ import { Draggable, Droppable } from "react-beautiful-dnd";
 import { UiFramework } from "@itwin/appui-react";
 import { assert } from "@itwin/core-bentley";
 import { ImageMapLayerSettings } from "@itwin/core-common";
-import {
-  IModelApp,
-  MapLayerImageryProviderStatus,
-  MapTileTreeScaleRangeVisibility,
-  NotifyMessageDetails,
-  OutputMessagePriority,
-} from "@itwin/core-frontend";
+import { IModelApp, MapLayerImageryProviderStatus, MapTileTreeScaleRangeVisibility, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 import { Icon } from "@itwin/core-react";
 import { Button, Checkbox } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
@@ -249,7 +243,6 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
             activeViewport={props.activeViewport}
             mapLayerSettings={activeLayer}
             onMenuItemSelection={props.onMenuItemSelected}
-            disabled={props.disabled}
           />
         </div>
       </div>
