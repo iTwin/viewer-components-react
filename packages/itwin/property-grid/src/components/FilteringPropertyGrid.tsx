@@ -89,7 +89,7 @@ export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildC
 }
 
 const emptyDataProvider: IPropertyDataProvider = {
-  getData: async () => emptyPropertyData,
+  getData: /* istanbul ignore next */ async () => emptyPropertyData,
   onDataChanged: new BeEvent(),
 };
 const emptyPropertyData: PropertyData = {
