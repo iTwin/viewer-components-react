@@ -1,8 +1,17 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Wed, 18 Dec 2024 12:42:56 GMT and should not be manually modified.
+This log was last generated on Tue, 07 Jan 2025 12:53:32 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 3.2.1
+
+Tue, 07 Jan 2025 12:53:32 GMT
+
+### Patches
+
+- Increase performance consistency when creating filtering paths from target items. ([#1130](https://github.com/iTwin/viewer-components-react/pull/1130))
+- Reduced main thread blockage ~3 times when creating filtering paths from target items. ([#1123](https://github.com/iTwin/viewer-components-react/pull/1123))
 
 ## 3.2.0
 

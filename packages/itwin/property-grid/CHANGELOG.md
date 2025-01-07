@@ -1,8 +1,16 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Wed, 18 Dec 2024 12:42:56 GMT and should not be manually modified.
+This log was last generated on Tue, 07 Jan 2025 12:53:32 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 1.14.3
+
+Tue, 07 Jan 2025 12:53:32 GMT
+
+### Patches
+
+- Fix property grid always showing "There are no properties containing non-empty values" message, when initial render is made with hidden empty values. ([#1134](https://github.com/iTwin/viewer-components-react/pull/1134))
 
 ## 1.14.2
 
