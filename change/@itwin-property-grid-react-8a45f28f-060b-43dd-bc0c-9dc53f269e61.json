@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fix property grid always showing \"There are no properties containing non-empty values\" message, when initial render is made with hidden empty values.",
-  "packageName": "@itwin/property-grid-react",
-  "email": "35135765+grigasp@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

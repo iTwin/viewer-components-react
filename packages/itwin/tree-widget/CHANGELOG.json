@@ -2,6 +2,27 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Tue, 07 Jan 2025 12:53:32 GMT",
+      "version": "3.2.1",
+      "tag": "@itwin/tree-widget-react_v3.2.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "f6b3a561da16553d1e83a1167bf0c3e9679c4de9",
+            "comment": "Increase performance consistency when creating filtering paths from target items."
+          },
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "109ddfcf614e55d69907fd610bb83b8628f51809",
+            "comment": "Reduced main thread blockage ~3 times when creating filtering paths from target items."
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 18 Dec 2024 12:42:56 GMT",
       "version": "3.2.0",
       "tag": "@itwin/tree-widget-react_v3.2.0",
