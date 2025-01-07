@@ -1,6 +1,6 @@
 {
   "type": "patch",
-  "comment": "Pass `enableVirtualization` flag to itwinui `Tree`",
+  "comment": "Propagate `enableVirtualization` flag down to the underlying `Tree` component from `iTwinUI`",
   "packageName": "@itwin/tree-widget-react",
   "email": "anmolshres98@users.noreply.github.com",
   "dependentChangeType": "patch"
