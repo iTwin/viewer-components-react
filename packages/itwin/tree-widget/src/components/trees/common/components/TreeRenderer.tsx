@@ -57,6 +57,7 @@ export function TreeRenderer({
   checkboxProps,
   reloadTree,
   size,
+  enableVirtualization,
   ...props
 }: TreeRendererProps) {
   const localizedStrings = useHierarchiesLocalization();
@@ -116,7 +117,7 @@ export function TreeRenderer({
         data={rootNodes}
         nodeRenderer={nodeRenderer}
         getNode={getNode}
-        enableVirtualization={true}
+        enableVirtualization={enableVirtualization ?? true}
         style={{ height: "100%" }}
         size={size}
       />
