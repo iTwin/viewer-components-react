@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Added support for getpersistenceunit and getpresentationunits formula functions.",
+  "packageName": "@itwin/grouping-mapping-widget",
+  "email": "Mindaugas.Butkus@bentley.com",
+  "dependentChangeType": "patch"
+}
