@@ -126,7 +126,11 @@ function TreeImpl({
       onPerformanceMeasured(action, duration);
     },
     onHierarchyLimitExceeded: () => onFeatureUsed({ featureId: "hierarchy-level-size-limit-hit", reportInteraction: false }),
-    onHierarchyLoadError: ({ type }) => onFeatureUsed({ featureId: `error-${type}`, reportInteraction: false }),
+    onHierarchyLoadError: ({ type, error }) => {
+      // eslint-disable-next-line no-console
+      console.error(error);
+      onFeatureUsed({ featureId: `error-${type}`, reportInteraction: false });
+    },
   });
   useIModelChangeListener({ imodel, action: useCallback(() => imodelChanged.raiseEvent(), [imodelChanged]) });
 
