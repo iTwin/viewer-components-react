@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Tue, 07 Jan 2025 16:30:55 GMT and should not be manually modified.
+This log was last generated on Wed, 08 Jan 2025 13:28:10 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 3.2.3
+
+Wed, 08 Jan 2025 13:28:10 GMT
+
+### Patches
+
+- Changed `onHierarchyLoad` to log errors to console ([#1135](https://github.com/iTwin/viewer-components-react/pull/1135))
 
 ## 3.2.2
 

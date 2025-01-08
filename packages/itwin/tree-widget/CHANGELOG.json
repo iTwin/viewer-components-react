@@ -2,6 +2,21 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Wed, 08 Jan 2025 13:28:10 GMT",
+      "version": "3.2.3",
+      "tag": "@itwin/tree-widget-react_v3.2.3",
+      "comments": {
+        "patch": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "f7d3af2ddb8b2ce1af9c8429e26886821efa1bd7",
+            "comment": "Changed `onHierarchyLoad` to log errors to console"
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 07 Jan 2025 16:30:55 GMT",
       "version": "3.2.2",
       "tag": "@itwin/tree-widget-react_v3.2.2",
