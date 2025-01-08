@@ -56,6 +56,8 @@ export function TreeRenderer({
   getHierarchyLevelDetails,
   checkboxProps,
   reloadTree,
+  size,
+  enableVirtualization,
   ...props
 }: TreeRendererProps) {
   const localizedStrings = useHierarchiesLocalization();
@@ -82,6 +84,7 @@ export function TreeRenderer({
           checkboxProps={checkboxProps}
           reloadTree={reloadTree}
           className={getSublabel ? "with-description" : "without-description"}
+          size={size}
         />
       );
     },
@@ -97,10 +100,14 @@ export function TreeRenderer({
       onFilterClick,
       checkboxProps,
       reloadTree,
+      size,
     ],
   );
 
-  const getNode = useCallback<ComponentPropsWithoutRef<typeof Tree<RenderedTreeNode>>["getNode"]>((node) => createRenderedTreeNodeData(node, isNodeSelected), [isNodeSelected]);
+  const getNode = useCallback<ComponentPropsWithoutRef<typeof Tree<RenderedTreeNode>>["getNode"]>(
+    (node) => createRenderedTreeNodeData(node, isNodeSelected),
+    [isNodeSelected],
+  );
 
   return (
     <LocalizationContextProvider localizedStrings={localizedStrings}>
@@ -110,8 +117,9 @@ export function TreeRenderer({
         data={rootNodes}
         nodeRenderer={nodeRenderer}
         getNode={getNode}
-        enableVirtualization={true}
+        enableVirtualization={enableVirtualization ?? true}
         style={{ height: "100%" }}
+        size={size}
       />
     </LocalizationContextProvider>
   );

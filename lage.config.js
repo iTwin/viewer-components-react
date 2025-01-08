@@ -16,7 +16,7 @@ module.exports = {
       inputs: ["lib/**"],
     },
     "test:e2e": {
-      dependsOn: [],
+      dependsOn: ["test-viewer#build"],
       outputs: [],
       inputs: [],
     },
@@ -49,6 +49,11 @@ module.exports = {
       cache: false,
       dependsOn: [],
       outputs: ["learning/**"],
+    },
+    "check-extractions": {
+      cache: false,
+      dependsOn: [],
+      outputs: [],
     },
     clean: {
       cache: false,

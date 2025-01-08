@@ -4,7 +4,21 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useRef, useState } from "react";
-import { asyncScheduler, defer, distinct, from, lastValueFrom, mergeMap, observeOn, Subject, takeUntil, tap, throttleTime } from "rxjs";
+import {
+  asyncScheduler,
+  defer,
+  distinct,
+  EMPTY,
+  from,
+  lastValueFrom,
+  mergeMap,
+  observeOn,
+  onErrorResumeNextWith,
+  Subject,
+  takeUntil,
+  tap,
+  throttleTime,
+} from "rxjs";
 import { useTelemetryContext } from "./UseTelemetryContext";
 
 import type { Observable } from "rxjs";
@@ -80,17 +94,22 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
       .pipe(
         distinct(undefined, visibilityChanged),
         observeOn(asyncScheduler),
-        mergeMap((node) => defer(async () => ({ node, status: await handler.getVisibilityStatus(node.nodeData) })).pipe(takeUntil(visibilityChanged))),
-        tap({
-          next: ({ node, status }) => {
-            visibilityStatusMap.current.set(node.id, {
-              node,
-              status,
-              needsRefresh: false,
-            });
-          },
-        }),
-        throttleTime(100, undefined, { leading: true, trailing: true }),
+        mergeMap((node) =>
+          defer(async () => handler.getVisibilityStatus(node.nodeData)).pipe(
+            tap({
+              next: (status) => {
+                visibilityStatusMap.current.set(node.id, {
+                  node,
+                  status,
+                  needsRefresh: false,
+                });
+              },
+            }),
+            takeUntil(visibilityChanged),
+            onErrorResumeNextWith(EMPTY),
+          ),
+        ),
+        throttleTime(100, undefined, { leading: false, trailing: true }),
       )
       .subscribe({
         next: () => {

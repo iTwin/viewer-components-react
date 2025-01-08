@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./App.scss";
-import { ErrorBoundary, FallbackProps } from "react-error-boundary";
+import { ErrorBoundary } from "react-error-boundary";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { FillCentered } from "@itwin/core-react";
 import { SvgError } from "@itwin/itwinui-illustrations-react";
@@ -13,6 +13,8 @@ import { ArcGisOauthRedirect } from "./ArcGisOauthRedirect";
 import { AuthorizationProvider, AuthorizationState, SignInRedirect, useAuthorizationContext } from "./Authorization";
 import { EC3AuthRedirect } from "./EC3AuthRedirect";
 import { Viewer } from "./Viewer";
+
+import type { FallbackProps } from "react-error-boundary";
 
 export function App() {
   return (
@@ -47,6 +49,7 @@ function Main() {
 
 function Loader() {
   return (
+    // eslint-disable-next-line deprecation/deprecation
     <FillCentered>
       <div className="signin-content">
         <ProgressLinear indeterminate={true} labels={["Signing in..."]} />

@@ -23,7 +23,7 @@ import type { FunctionProps } from "../Utils";
 import type { ReactNode } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
-import type { SelectionStorage, useIModelTree } from "@itwin/presentation-hierarchies-react";
+import type { PresentationHierarchyNode, SelectionStorage, useIModelTree } from "@itwin/presentation-hierarchies-react";
 import type { HighlightInfo } from "../UseNodeHighlighting";
 import type { TreeRendererProps } from "./TreeRenderer";
 
@@ -38,6 +38,11 @@ export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPa
     treeName: string;
     /** Unified selection storage that should be used by tree to handle tree selection changes. */
     selectionStorage: SelectionStorage;
+    /**
+     * An optional predicate to allow or prohibit selection of a node.
+     * When not supplied, all nodes are selectable.
+     */
+    selectionPredicate?: (node: PresentationHierarchyNode) => boolean;
     /** Tree renderer that should be used to render tree data. */
     treeRenderer: (
       treeProps: Required<
@@ -89,6 +94,7 @@ function TreeImpl({
   getFilteredPaths,
   defaultHierarchyLevelSizeLimit,
   getHierarchyDefinition,
+  selectionPredicate,
   selectionMode,
   onReload,
   treeRenderer,
@@ -100,8 +106,9 @@ function TreeImpl({
   const [imodelChanged] = useState(new BeEvent<() => void>());
   const {
     rootNodes,
+    getNode,
     isLoading,
-    selectNodes,
+    selectNodes: selectNodesAction,
     setFormatter: _setFormatter,
     expandNode,
     ...treeProps
@@ -119,12 +126,20 @@ function TreeImpl({
       onPerformanceMeasured(action, duration);
     },
     onHierarchyLimitExceeded: () => onFeatureUsed({ featureId: "hierarchy-level-size-limit-hit", reportInteraction: false }),
-    onHierarchyLoadError: ({ type }) => onFeatureUsed({ featureId: `error-${type}`, reportInteraction: false }),
+    onHierarchyLoadError: ({ type, error }) => {
+      // eslint-disable-next-line no-console
+      console.error(error);
+      onFeatureUsed({ featureId: `error-${type}`, reportInteraction: false });
+    },
   });
   useIModelChangeListener({ imodel, action: useCallback(() => imodelChanged.raiseEvent(), [imodelChanged]) });
 
-  const reportingSelectNodes = useReportingAction({ action: selectNodes });
-  const { onNodeClick, onNodeKeyDown } = useSelectionHandler({ rootNodes, selectNodes: reportingSelectNodes, selectionMode: selectionMode ?? "single" });
+  const selectNodes = useSelectionPredicate({
+    action: useReportingAction({ action: selectNodesAction }),
+    predicate: selectionPredicate,
+    getNode,
+  });
+  const { onNodeClick, onNodeKeyDown } = useSelectionHandler({ rootNodes, selectNodes, selectionMode: selectionMode ?? "single" });
   const { filteringDialog, onFilterClick } = useHierarchyLevelFiltering({
     imodel,
     defaultHierarchyLevelSizeLimit,
@@ -172,5 +187,27 @@ function TreeImpl({
         <ProgressOverlay />
       </Delayed>
     </div>
+  );
+}
+
+function useSelectionPredicate({
+  action,
+  predicate,
+  getNode,
+}: {
+  action: (...args: any[]) => void;
+  predicate?: (node: PresentationHierarchyNode) => boolean;
+  getNode: (nodeId: string) => PresentationHierarchyNode | undefined;
+}): ReturnType<typeof useIModelUnifiedSelectionTree>["selectNodes"] {
+  return useCallback(
+    (nodeIds, changeType) =>
+      action(
+        nodeIds.filter((nodeId) => {
+          const node = getNode(nodeId);
+          return node && (!predicate || predicate(node));
+        }),
+        changeType,
+      ),
+    [action, getNode, predicate],
   );
 }

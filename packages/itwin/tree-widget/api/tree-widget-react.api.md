@@ -15,6 +15,7 @@ import type { HierarchyFilteringPath } from '@itwin/presentation-hierarchies';
 import type { HierarchyNode } from '@itwin/presentation-hierarchies-react';
 import type { Id64Arg } from '@itwin/core-bentley';
 import type { Id64Array } from '@itwin/core-bentley';
+import type { Id64Set } from '@itwin/core-bentley';
 import type { Id64String } from '@itwin/core-bentley';
 import type { IDisposable } from '@itwin/core-bentley';
 import type { IModelConnection } from '@itwin/core-frontend';
@@ -84,7 +85,13 @@ interface ChangeCategoryVisibilityStateProps extends GetCategoryVisibilityStatus
 }
 
 // @beta (undocumented)
-interface ChangeGeometricElementDisplayStateProps extends GetGeometricElementVisibilityStatusProps {
+interface ChangeGeometricElementsDisplayStateProps {
+    // (undocumented)
+    categoryId: Id64String;
+    // (undocumented)
+    elementIds: Id64Set;
+    // (undocumented)
+    modelId: Id64String;
     // (undocumented)
     on: boolean;
 }
@@ -236,7 +243,7 @@ export const ModelsTreeComponent: {
 };
 
 // @public (undocumented)
-interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode" | "hierarchyConfig" | "visibilityHandlerOverrides" | "getFilteredPaths"> {
+interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode" | "selectionPredicate" | "hierarchyConfig" | "visibilityHandlerOverrides" | "getFilteredPaths"> {
     headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
@@ -276,7 +283,7 @@ export interface ModelsTreeVisibilityHandlerOverrides {
         on: boolean;
     }) => Promise<void>>;
     // (undocumented)
-    changeElementState?: HierarchyVisibilityHandlerOverridableMethod<(props: ChangeGeometricElementDisplayStateProps) => Promise<void>>;
+    changeElementsState?: HierarchyVisibilityHandlerOverridableMethod<(props: ChangeGeometricElementsDisplayStateProps) => Promise<void>>;
     // (undocumented)
     changeModelState?: HierarchyVisibilityHandlerOverridableMethod<(props: ChangeModelVisibilityStateProps) => Promise<void>>;
     // (undocumented)
@@ -396,6 +403,7 @@ type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPaths" | 
     getSchemaContext: (imodel: IModelConnection) => SchemaContext;
     treeName: string;
     selectionStorage: SelectionStorage;
+    selectionPredicate?: (node: PresentationHierarchyNode) => boolean;
     treeRenderer: (treeProps: Required<Pick<TreeRendererProps, "rootNodes" | "expandNode" | "onNodeClick" | "onNodeKeyDown" | "onFilterClick" | "isNodeSelected" | "getHierarchyLevelDetails" | "size" | "getLabel">>) => ReactNode;
     imodelAccess?: FunctionProps<typeof useIModelTree>["imodelAccess"];
     hierarchyLevelSizeLimit?: number;
@@ -406,7 +414,7 @@ type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPaths" | 
 };
 
 // @beta
-export function TreeRenderer({ rootNodes, expandNode, onNodeClick, onNodeKeyDown, onNodeDoubleClick, isNodeSelected, onFilterClick, getIcon, getLabel, getSublabel, getHierarchyLevelDetails, checkboxProps, reloadTree, ...props }: TreeRendererProps): JSX.Element;
+export function TreeRenderer({ rootNodes, expandNode, onNodeClick, onNodeKeyDown, onNodeDoubleClick, isNodeSelected, onFilterClick, getIcon, getLabel, getSublabel, getHierarchyLevelDetails, checkboxProps, reloadTree, size, enableVirtualization, ...props }: TreeRendererProps): JSX.Element;
 
 // @beta (undocumented)
 type TreeRendererProps = Pick<TreeNodeRendererProps, "expandNode" | "onNodeClick" | "onNodeKeyDown" | "onFilterClick" | "getIcon" | "getLabel" | "getSublabel" | "getHierarchyLevelDetails" | "checkboxProps" | "reloadTree"> & Omit<ComponentPropsWithoutRef<typeof Tree_2<RenderedTreeNode>>, "data" | "nodeRenderer" | "getNode"> & {
@@ -478,7 +486,7 @@ interface UseCategoriesTreeResult {
 }
 
 // @beta
-export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getFilteredPaths, onModelsFiltered, }: UseModelsTreeProps): UseModelsTreeResult;
+export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getFilteredPaths, onModelsFiltered, selectionPredicate: nodeTypeSelectionPredicate, }: UseModelsTreeProps): UseModelsTreeResult;
 
 // @public
 export function useModelsTreeButtonProps({ imodel, viewport }: {
@@ -507,6 +515,10 @@ interface UseModelsTreeProps {
     hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
     // (undocumented)
     onModelsFiltered?: (modelIds: Id64String[] | undefined) => void;
+    selectionPredicate?: (props: {
+        node: PresentationHierarchyNode;
+        type: "subject" | "model" | "category" | "element" | "elements-class-group";
+    }) => boolean;
     // (undocumented)
     visibilityHandlerOverrides?: ModelsTreeVisibilityHandlerOverrides;
 }
@@ -514,7 +526,7 @@ interface UseModelsTreeProps {
 // @beta (undocumented)
 interface UseModelsTreeResult {
     // (undocumented)
-    modelsTreeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlight" | "noDataMessage">;
+    modelsTreeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlight" | "noDataMessage" | "selectionPredicate">;
     // (undocumented)
     rendererProps: Required<Pick<VisibilityTreeRendererProps, "getIcon" | "onNodeDoubleClick">>;
 }

@@ -14,7 +14,13 @@ import { useFiltering } from "../common/UseFiltering";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext";
 import { ModelsTree } from "./ModelsTree";
 import {
-  HideAllButton, InvertButton, ShowAllButton, ToggleInstancesFocusButton, useModelsTreeButtonProps, View2DButton, View3DButton,
+  HideAllButton,
+  InvertButton,
+  ShowAllButton,
+  ToggleInstancesFocusButton,
+  useModelsTreeButtonProps,
+  View2DButton,
+  View3DButton,
 } from "./ModelsTreeButtons";
 
 import type { ModelsTreeProps } from "./ModelsTree";
@@ -31,6 +37,7 @@ interface ModelsTreeComponentProps
     | "density"
     | "hierarchyLevelConfig"
     | "selectionMode"
+    | "selectionPredicate"
     | "hierarchyConfig"
     | "visibilityHandlerOverrides"
     | "getFilteredPaths"

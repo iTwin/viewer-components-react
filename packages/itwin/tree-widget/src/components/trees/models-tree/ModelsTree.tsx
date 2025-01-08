@@ -29,6 +29,7 @@ export function ModelsTree({
   hierarchyLevelConfig,
   hierarchyConfig,
   selectionMode,
+  selectionPredicate,
   visibilityHandlerOverrides,
   getFilteredPaths,
   onModelsFiltered,
@@ -40,6 +41,7 @@ export function ModelsTree({
     visibilityHandlerOverrides,
     getFilteredPaths,
     onModelsFiltered,
+    selectionPredicate,
   });
 
   return (

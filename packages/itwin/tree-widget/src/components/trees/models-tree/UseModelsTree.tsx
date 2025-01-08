@@ -6,7 +6,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IModelApp } from "@itwin/core-frontend";
 import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
-import { Anchor, Icon, Text } from "@itwin/itwinui-react";
+import { Anchor, Text } from "@itwin/itwinui-react";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { TreeWidget } from "../../../TreeWidget";
@@ -15,11 +15,12 @@ import { FilterLimitExceededError } from "../common/TreeErrors";
 import { useIModelChangeListener } from "../common/UseIModelChangeListener";
 import { useTelemetryContext } from "../common/UseTelemetryContext";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
+import { ModelsTreeNode } from "./internal/ModelsTreeNode";
 import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibilityHandler";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition";
 
-import type { Id64String } from "@itwin/core-bentley";
 import type { GroupingHierarchyNode, HierarchyFilteringPath, InstancesNodeKey } from "@itwin/presentation-hierarchies";
+import type { Id64String } from "@itwin/core-bentley";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
 import type { ReactElement } from "react";
 import type { Viewport } from "@itwin/core-frontend";
@@ -41,13 +42,18 @@ export interface UseModelsTreeProps {
     createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<HierarchyFilteringPath[]>;
   }) => Promise<HierarchyFilteringPath[]>;
   onModelsFiltered?: (modelIds: Id64String[] | undefined) => void;
+  /**
+   * An optional predicate to allow or prohibit selection of a node.
+   * When not supplied, all nodes are selectable.
+   */
+  selectionPredicate?: (props: { node: PresentationHierarchyNode; type: "subject" | "model" | "category" | "element" | "elements-class-group" }) => boolean;
 }
 
 /** @beta */
 interface UseModelsTreeResult {
   modelsTreeProps: Pick<
     VisibilityTreeProps,
-    "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlight" | "noDataMessage"
+    "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlight" | "noDataMessage" | "selectionPredicate"
   >;
   rendererProps: Required<Pick<VisibilityTreeRendererProps, "getIcon" | "onNodeDoubleClick">>;
 }
@@ -63,6 +69,7 @@ export function useModelsTree({
   visibilityHandlerOverrides,
   getFilteredPaths,
   onModelsFiltered,
+  selectionPredicate: nodeTypeSelectionPredicate,
 }: UseModelsTreeProps): UseModelsTreeResult {
   const [filteringError, setFilteringError] = useState<ModelsTreeFilteringError | undefined>(undefined);
   const hierarchyConfiguration = useMemo<ModelsTreeHierarchyConfiguration>(
@@ -75,7 +82,11 @@ export function useModelsTree({
   );
   const { onFeatureUsed } = useTelemetryContext();
 
-  const { getModelsTreeIdsCache, visibilityHandlerFactory } = useCachedVisibility(activeView, hierarchyConfiguration, visibilityHandlerOverrides);
+  const { getModelsTreeIdsCache, visibilityHandlerFactory, onFilteredPathsChanged } = useCachedVisibility(
+    activeView,
+    hierarchyConfiguration,
+    visibilityHandlerOverrides,
+  );
   const { loadFocusedItems } = useFocusedInstancesContext();
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
@@ -99,7 +110,13 @@ export function useModelsTree({
     setFilteringError(undefined);
     onModelsFiltered?.(undefined);
 
+    // reset filtered paths if there is no filters applied. This allows to keep current filtered paths until new paths are loaded.
+    if (!loadFocusedItems && !getFilteredPaths && !filter) {
+      onFilteredPathsChanged(undefined);
+    }
+
     const handlePaths = async (filteredPaths: HierarchyFilteringPath[], classInspector: ECClassHierarchyInspector) => {
+      onFilteredPathsChanged(filteredPaths);
       if (!onModelsFiltered) {
         return;
       }
@@ -183,7 +200,17 @@ export function useModelsTree({
       };
     }
     return undefined;
-  }, [filter, loadFocusedItems, getModelsTreeIdsCache, onFeatureUsed, getFilteredPaths, hierarchyConfiguration, onModelsFiltered]);
+  }, [filter, loadFocusedItems, getModelsTreeIdsCache, onFeatureUsed, getFilteredPaths, hierarchyConfiguration, onModelsFiltered, onFilteredPathsChanged]);
+
+  const nodeSelectionPredicate = useCallback<NonNullable<VisibilityTreeProps["selectionPredicate"]>>(
+    (node) => {
+      if (!nodeTypeSelectionPredicate) {
+        return true;
+      }
+      return nodeTypeSelectionPredicate({ node, type: ModelsTreeNode.getType(node.nodeData) });
+    },
+    [nodeTypeSelectionPredicate],
+  );
 
   return {
     modelsTreeProps: {
@@ -193,6 +220,7 @@ export function useModelsTree({
       getFilteredPaths: getPaths,
       noDataMessage: getNoDataMessage(filter, filteringError),
       highlight: filter ? { text: filter } : undefined,
+      selectionPredicate: nodeSelectionPredicate,
     },
     rendererProps: {
       onNodeDoubleClick,
@@ -287,14 +315,19 @@ function createVisibilityHandlerFactory(
   activeView: Viewport,
   idsCacheGetter: () => ModelsTreeIdsCache,
   overrides?: ModelsTreeVisibilityHandlerOverrides,
+  filteredPaths?: HierarchyFilteringPath[],
 ): VisibilityTreeProps["visibilityHandlerFactory"] {
-  return ({ imodelAccess }) => createModelsTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter(), imodelAccess, overrides });
+  return ({ imodelAccess }) => createModelsTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter(), imodelAccess, overrides, filteredPaths });
 }
 
 function useCachedVisibility(activeView: Viewport, hierarchyConfig: ModelsTreeHierarchyConfiguration, overrides?: ModelsTreeVisibilityHandlerOverrides) {
   const cacheRef = useRef<ModelsTreeIdsCache>();
   const currentIModelRef = useRef(activeView.iModel);
 
+  const resetModelsTreeIdsCache = () => {
+    cacheRef.current?.[Symbol.dispose]();
+    cacheRef.current = undefined;
+  };
   const getModelsTreeIdsCache = useCallback(() => {
     if (!cacheRef.current) {
       cacheRef.current = new ModelsTreeIdsCache(createECSqlQueryExecutor(currentIModelRef.current), hierarchyConfig);
@@ -302,35 +335,37 @@ function useCachedVisibility(activeView: Viewport, hierarchyConfig: ModelsTreeHi
     return cacheRef.current;
   }, [hierarchyConfig]);
 
-  const [visibilityHandlerFactory, setVisibilityHandlerFactory] = useState(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache, overrides));
+  const [filteredPaths, setFilteredPaths] = useState<HierarchyFilteringPath[]>();
+  const [visibilityHandlerFactory, setVisibilityHandlerFactory] = useState<VisibilityTreeProps["visibilityHandlerFactory"]>(() =>
+    createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache, overrides, filteredPaths),
+  );
 
   useIModelChangeListener({
     imodel: activeView.iModel,
     action: useCallback(() => {
-      cacheRef.current = undefined;
-      setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache, overrides));
-    }, [activeView, getModelsTreeIdsCache, overrides]),
+      resetModelsTreeIdsCache();
+      setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache, overrides, filteredPaths));
+    }, [activeView, getModelsTreeIdsCache, overrides, filteredPaths]),
   });
 
   useEffect(() => {
     currentIModelRef.current = activeView.iModel;
-    cacheRef.current = undefined;
-    setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache, overrides));
-  }, [activeView, getModelsTreeIdsCache, overrides]);
+    setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache, overrides, filteredPaths));
+    return () => resetModelsTreeIdsCache();
+  }, [activeView, getModelsTreeIdsCache, overrides, filteredPaths]);
 
   return {
     getModelsTreeIdsCache,
     visibilityHandlerFactory,
+    onFilteredPathsChanged: useCallback((paths: HierarchyFilteringPath[] | undefined) => setFilteredPaths(paths), []),
   };
 }
 
 function SvgClassGrouping() {
   return (
-    <Icon>
-      <svg id="Calque_1" data-name="Calque 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-        <path d="M8.00933,0,0,3.97672V11.986L8.00933,16,16,11.93V3.97651ZM1.66173,11.27642c-.26155.03734-.59754-.26154-.76553-.69085-.168-.41066-.09334-.784.168-.82152.26154-.03734.59754.26154.76553.67219C1.99772,10.86577,1.92306,11.23909,1.66173,11.27642Zm0-3.32319c-.26155.03733-.59754-.28-.76553-.69086-.168-.42932-.09334-.80285.168-.84.26133-.03733.59754.28.76532.69086C1.99772,7.54236,1.92306,7.89723,1.66173,7.95323Zm4.31276,5.52621a.18186.18186,0,0,1-.16821-.01866L3.41657,12.15394a.94275.94275,0,0,1-.29887-.80285c.03754-.33621.22421-.52265.41108-.41066L5.9185,12.24727a.88656.88656,0,0,1,.28.80285A.5057.5057,0,0,1,5.97449,13.47944Zm0-3.37919a.18184.18184,0,0,1-.16821-.01867L3.41657,8.77475a.943.943,0,0,1-.29887-.80286c.03754-.3362.22421-.52286.41108-.42953L5.9185,8.86786a.83112.83112,0,0,1,.28.78419A.51684.51684,0,0,1,5.97449,10.10025Z" />
-      </svg>
-    </Icon>
+    <svg id="Calque_1" data-name="Calque 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+      <path d="M8.00933,0,0,3.97672V11.986L8.00933,16,16,11.93V3.97651ZM1.66173,11.27642c-.26155.03734-.59754-.26154-.76553-.69085-.168-.41066-.09334-.784.168-.82152.26154-.03734.59754.26154.76553.67219C1.99772,10.86577,1.92306,11.23909,1.66173,11.27642Zm0-3.32319c-.26155.03733-.59754-.28-.76553-.69086-.168-.42932-.09334-.80285.168-.84.26133-.03733.59754.28.76532.69086C1.99772,7.54236,1.92306,7.89723,1.66173,7.95323Zm4.31276,5.52621a.18186.18186,0,0,1-.16821-.01866L3.41657,12.15394a.94275.94275,0,0,1-.29887-.80285c.03754-.33621.22421-.52265.41108-.41066L5.9185,12.24727a.88656.88656,0,0,1,.28.80285A.5057.5057,0,0,1,5.97449,13.47944Zm0-3.37919a.18184.18184,0,0,1-.16821-.01867L3.41657,8.77475a.943.943,0,0,1-.29887-.80286c.03754-.3362.22421-.52286.41108-.42953L5.9185,8.86786a.83112.83112,0,0,1,.28.78419A.51684.51684,0,0,1,5.97449,10.10025Z" />
+    </svg>
   );
 }
 

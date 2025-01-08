@@ -16,10 +16,8 @@ variables:
 
 jobs:
   - job: Build
-    condition: succeeded()
     workspace:
       clean: all
-
     strategy:
       matrix:
         "Windows":
@@ -28,37 +26,25 @@ jobs:
           OS: ubuntu-latest
         "Mac":
           OS: macOS-latest
-
     pool:
       vmImage: $(OS)
-
     steps:
       - template: templates/build-steps.yaml
 
-  - job: Run_e2e_tests
-    displayName: "Run e2e tests"
-    condition: succeeded()
-    timeoutInMinutes: 120
+  - job: Validate_docs
+    displayName: "Validate docs"
     workspace:
       clean: all
-
     pool:
       vmImage: ubuntu-latest
-
-    variables:
-      - group: "viewer-components-react e2e tests env"
-
     steps:
-      - template: templates/e2e-steps.yaml
+      - template: templates/validate-docs-steps.yaml
 
   - job: Check_change_files
     displayName: "Check change files"
-    condition: succeeded()
     workspace:
       clean: all
-
     pool:
       vmImage: ubuntu-latest
-
     steps:
       - template: templates/change-files-steps.yaml

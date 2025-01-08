@@ -25,7 +25,8 @@
     "editor.tabSize": 4,
   },
 
-  "importSorter.importStringConfiguration.maximumNumberOfImportExpressionsPerLine.count": 150,
+  "importSorter.importStringConfiguration.maximumNumberOfImportExpressionsPerLine.count": 160,
+  "importSorter.importStringConfiguration.maximumNumberOfImportExpressionsPerLine.type": "newLineEachExpressionAfterCountLimitExceptIfOnlyOne",
   "importSorter.importStringConfiguration.quoteMark": "double",
   "importSorter.importStringConfiguration.tabSize": 2,
   "importSorter.importStringConfiguration.trailingComma": "multiLine",

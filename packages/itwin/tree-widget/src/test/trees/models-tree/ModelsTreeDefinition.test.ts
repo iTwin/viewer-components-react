@@ -73,8 +73,9 @@ describe("Models tree", () => {
         const modelingElement = insertPhysicalElement({ builder, userLabel: `modeling element`, modelId: subModel.id, categoryId: category.id });
         return { rootSubject, childSubject, model, category, rootElement1, rootElement2, childElement, modelingElement };
       });
+      using provider = createModelsTreeProvider({ imodel });
       await validateHierarchy({
-        provider: createModelsTreeProvider({ imodel }),
+        provider,
         expect: [
           NodeValidators.createForInstanceNode({
             instanceKeys: [keys.rootSubject],
@@ -173,8 +174,9 @@ describe("Models tree", () => {
           const element = insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category.id });
           return { rootSubject, childSubject, model, category, element };
         });
+        using provider = createModelsTreeProvider({ imodel });
         await validateHierarchy({
-          provider: createModelsTreeProvider({ imodel }),
+          provider,
           expect: [
             NodeValidators.createForInstanceNode({
               instanceKeys: [keys.rootSubject],
@@ -209,8 +211,9 @@ describe("Models tree", () => {
           const childSubject = insertSubject({ builder, codeValue: "child subject", parentId: rootSubject.id });
           return { rootSubject, childSubject };
         });
+        using provider = createModelsTreeProvider({ imodel });
         await validateHierarchy({
-          provider: createModelsTreeProvider({ imodel }),
+          provider,
           expect: [
             NodeValidators.createForInstanceNode({
               instanceKeys: [keys.rootSubject],
@@ -236,8 +239,9 @@ describe("Models tree", () => {
           });
           return { rootSubject, childSubject1, childSubject2, model };
         });
+        using provider = createModelsTreeProvider({ imodel });
         await validateHierarchy({
-          provider: createModelsTreeProvider({ imodel }),
+          provider,
           expect: [
             NodeValidators.createForInstanceNode({
               instanceKeys: [keys.rootSubject],
@@ -266,8 +270,9 @@ describe("Models tree", () => {
           insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category.id });
           return { rootSubject, childSubject1, childSubject2, model };
         });
+        using provider = createModelsTreeProvider({ imodel });
         await validateHierarchy({
-          provider: createModelsTreeProvider({ imodel }),
+          provider,
           expect: [
             NodeValidators.createForInstanceNode({
               instanceKeys: [keys.rootSubject],
@@ -295,8 +300,9 @@ describe("Models tree", () => {
           });
           return { rootSubject, childSubject1, childSubject2, model, category, element };
         });
+        using provider = createModelsTreeProvider({ imodel });
         await validateHierarchy({
-          provider: createModelsTreeProvider({ imodel }),
+          provider,
           expect: [
             NodeValidators.createForInstanceNode({
               instanceKeys: [keys.rootSubject],
@@ -379,8 +385,9 @@ describe("Models tree", () => {
           const element2 = insertPhysicalElement({ builder, userLabel: `element1`, modelId: model2.id, categoryId: category.id });
           return { rootSubject, mergedSubject1, mergedSubject2, model1, model2, category, element1, element2 };
         });
+        using provider = createModelsTreeProvider({ imodel });
         await validateHierarchy({
-          provider: createModelsTreeProvider({ imodel }),
+          provider,
           expect: [
             NodeValidators.createForInstanceNode({
               instanceKeys: [keys.rootSubject],
@@ -448,8 +455,9 @@ describe("Models tree", () => {
           const element = insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category.id });
           return { rootSubject, model, category, element };
         });
+        using provider = createModelsTreeProvider({ imodel });
         await validateHierarchy({
-          provider: createModelsTreeProvider({ imodel }),
+          provider,
           expect: [
             NodeValidators.createForInstanceNode({
               instanceKeys: [keys.rootSubject],
@@ -487,8 +495,9 @@ describe("Models tree", () => {
           const element = insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category.id });
           return { rootSubject, model, category, element };
         });
+        using provider = createModelsTreeProvider({ imodel });
         await validateHierarchy({
-          provider: createModelsTreeProvider({ imodel }),
+          provider,
           expect: [
             NodeValidators.createForInstanceNode({
               instanceKeys: [keys.rootSubject],
@@ -520,8 +529,9 @@ describe("Models tree", () => {
           const element = insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category.id });
           return { rootSubject, model, category, element };
         });
+        using provider = createModelsTreeProvider({ imodel });
         await validateHierarchy({
-          provider: createModelsTreeProvider({ imodel }),
+          provider,
           expect: [
             NodeValidators.createForInstanceNode({
               instanceKeys: [keys.rootSubject],
@@ -540,8 +550,9 @@ describe("Models tree", () => {
           const model = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
           return { rootSubject, model };
         });
+        using provider = createModelsTreeProvider({ imodel });
         await validateHierarchy({
-          provider: createModelsTreeProvider({ imodel }),
+          provider,
           expect: [
             NodeValidators.createForInstanceNode({
               instanceKeys: [keys.rootSubject],
@@ -594,8 +605,9 @@ describe("Models tree", () => {
           const element2 = insertPhysicalElement({ builder, userLabel: `element2`, modelId: model2.id, categoryId: category2.id });
           return { rootSubject, model1, model2, category1, category2, element1, element2 };
         });
+        using provider = createModelsTreeProvider({ imodel });
         await validateHierarchy({
-          provider: createModelsTreeProvider({ imodel }),
+          provider,
           expect: [
             NodeValidators.createForInstanceNode({
               instanceKeys: [keys.rootSubject],
@@ -630,8 +642,9 @@ describe("Models tree", () => {
           const model = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
           return { rootSubject, model };
         });
+        using provider = createModelsTreeProvider({ imodel, hierarchyConfig: { showEmptyModels: true } });
         await validateHierarchy({
-          provider: createModelsTreeProvider({ imodel, hierarchyConfig: { showEmptyModels: true } }),
+          provider,
           expect: [
             NodeValidators.createForInstanceNode({
               instanceKeys: [keys.rootSubject],
@@ -674,8 +687,9 @@ describe("Models tree", () => {
           const modelingElement = insertPhysicalElement({ builder, userLabel: `modeling element`, modelId: subModel.id, categoryId: category.id });
           return { rootSubject, childSubject, model, category, rootElement1, rootElement2, childElement, modelingElement };
         });
+        using provider = createModelsTreeProvider({ imodel, hierarchyConfig: { elementClassGrouping: "disable" } });
         await validateHierarchy({
-          provider: createModelsTreeProvider({ imodel, hierarchyConfig: { elementClassGrouping: "disable" } }),
+          provider,
           expect: [
             NodeValidators.createForInstanceNode({
               instanceKeys: [keys.rootSubject],
@@ -766,8 +780,9 @@ describe("Models tree", () => {
           const modelingElement = insertPhysicalElement({ builder, userLabel: `modeling element`, modelId: subModel.id, categoryId: category.id });
           return { rootSubject, childSubject, model, category, rootElement1, rootElement2, childElement1, childElement2, modelingElement };
         });
+        using provider = createModelsTreeProvider({ imodel, hierarchyConfig: { elementClassGrouping: "enableWithCounts" } });
         await validateHierarchy({
-          provider: createModelsTreeProvider({ imodel, hierarchyConfig: { elementClassGrouping: "enableWithCounts" } }),
+          provider,
           expect: [
             NodeValidators.createForInstanceNode({
               instanceKeys: [keys.rootSubject],
@@ -890,11 +905,12 @@ describe("Models tree", () => {
           });
           return { rootSubject, model, category, parentElement1, childElement1, parentElement2, childElement2 };
         });
+        using provider = createModelsTreeProvider({
+          imodel,
+          hierarchyConfig: { elementClassSpecification: keys.parentElement2.className, elementClassGrouping: "disable" },
+        });
         await validateHierarchy({
-          provider: createModelsTreeProvider({
-            imodel,
-            hierarchyConfig: { elementClassSpecification: keys.parentElement2.className, elementClassGrouping: "disable" },
-          }),
+          provider,
           expect: [
             NodeValidators.createForInstanceNode({
               instanceKeys: [keys.rootSubject],
@@ -937,8 +953,9 @@ describe("Models tree", () => {
           const model = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
           return { rootSubject, model };
         });
+        using provider = createModelsTreeProvider({ imodel, hierarchyConfig: { elementClassSpecification: "BisCore.GeometricElement2d" } });
         await validateHierarchy({
-          provider: createModelsTreeProvider({ imodel, hierarchyConfig: { elementClassSpecification: "BisCore.GeometricElement2d" } }),
+          provider,
           expect: [],
         });
       });

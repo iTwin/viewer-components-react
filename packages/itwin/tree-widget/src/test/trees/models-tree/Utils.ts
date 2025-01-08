@@ -17,6 +17,7 @@ import type {
   GroupingHierarchyNode,
   HierarchyFilteringPath,
   HierarchyNodeKey,
+  HierarchyProvider,
   NonGroupingHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 
@@ -28,11 +29,15 @@ interface CreateModelsTreeProviderProps {
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
 }
 
-export function createModelsTreeProvider({ imodel, filteredNodePaths, hierarchyConfig }: CreateModelsTreeProviderProps) {
+export function createModelsTreeProvider({
+  imodel,
+  filteredNodePaths,
+  hierarchyConfig,
+}: CreateModelsTreeProviderProps): HierarchyProvider & { dispose: () => void; [Symbol.dispose]: () => void } {
   const config = { ...defaultHierarchyConfiguration, ...hierarchyConfig };
   const imodelAccess = createIModelAccess(imodel);
   const idsCache = new ModelsTreeIdsCache(imodelAccess, config);
-  return createIModelHierarchyProvider({
+  const provider = createIModelHierarchyProvider({
     imodelAccess,
     hierarchyDefinition: new ModelsTreeDefinition({
       imodelAccess,
@@ -43,6 +48,21 @@ export function createModelsTreeProvider({ imodel, filteredNodePaths, hierarchyC
       ? { filtering: { paths: filteredNodePaths.map((path) => ("path" in path ? path : { path, options: { autoExpand: true } })) } }
       : undefined),
   });
+  const dispose = () => {
+    provider[Symbol.dispose]();
+    idsCache[Symbol.dispose]();
+  };
+  return {
+    hierarchyChanged: provider.hierarchyChanged,
+    getNodes: (props) => provider.getNodes(props),
+    getNodeInstanceKeys: (props) => provider.getNodeInstanceKeys(props),
+    setFormatter: (formatter) => provider.setFormatter(formatter),
+    setHierarchyFilter: (props) => provider.setHierarchyFilter(props),
+    dispose,
+    [Symbol.dispose]() {
+      dispose();
+    },
+  };
 }
 
 interface IdsCacheMockProps {

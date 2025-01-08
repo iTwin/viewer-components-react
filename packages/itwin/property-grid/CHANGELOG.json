@@ -2,6 +2,44 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "date": "Tue, 07 Jan 2025 12:53:32 GMT",
+      "version": "1.14.3",
+      "tag": "@itwin/property-grid-react_v1.14.3",
+      "comments": {
+        "patch": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "bce8ee9835be9d9fa4d869f0b7229d0a6d1babdd",
+            "comment": "Fix property grid always showing \"There are no properties containing non-empty values\" message, when initial render is made with hidden empty values."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Wed, 18 Dec 2024 12:42:56 GMT",
+      "version": "1.14.2",
+      "tag": "@itwin/property-grid-react_v1.14.2",
+      "comments": {
+        "patch": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "72abd12703feb2f29791e853f023c5e853931be2",
+            "comment": "Bump dependencies"
+          }
+        ],
+        "none": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "afbd086947adf7be897a249be4952637037217e8",
+            "comment": ""
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 15 Nov 2024 15:03:19 GMT",
       "version": "1.14.1",
       "tag": "@itwin/property-grid-react_v1.14.1",

@@ -9,6 +9,10 @@ import { OperationsBase } from "@itwin/insights-client";
  * @internal
  */
 export class OCLCAApiHelper extends OperationsBase  {
+  constructor() {
+    super("https://oneclicklcaapp.com/app/api");
+  }
+
   public async getOCLCAAccessToken(username: string, apiPassword: string) {
     if (username === undefined || apiPassword === undefined) {
       return undefined;

@@ -19,12 +19,6 @@
     align-items: center;
   }
 
-  .tw-tree-node-checkbox::before {
-    background-color: var(--iui-color-background);
-    inset: calc(-1 * var(--iui-size-xs)) calc(-1 * var(--iui-size-xs) / 2);
-    z-index: -1;
-  }
-
   .tw-tree-node-action-buttons {
     position: sticky;
     right: 0;

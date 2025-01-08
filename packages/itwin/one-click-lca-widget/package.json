@@ -1,6 +1,6 @@
 {
   "name": "@itwin/one-click-lca-react",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "description": "An iTwin.js 3D Viewer Widget that interfaces with the iTwin Carbon Calculation.",
   "keywords": [
     "Bentley",
@@ -38,7 +38,7 @@
     "cover": "nyc npm test"
   },
   "dependencies": {
-    "@itwin/insights-client": "^0.13.0",
+    "@itwin/insights-client": "^0.15.1",
     "@itwin/itwinui-icons-react": "^2.2.0",
     "@itwin/itwinui-react": "^2.11.2"
   },
@@ -98,8 +98,8 @@
     "@itwin/appui-react": "^4.0.0",
     "@itwin/core-frontend": "^4.0.0",
     "@itwin/core-react": "^4.0.0",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react": "^17.0.2 || ^18.0.0",
+    "react-dom": "^17.0.2 || ^18.0.0"
   },
   "nyc": {
     "nycrc-path": "./node_modules/@itwin/build-tools/.nycrc",

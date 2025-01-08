@@ -2,6 +2,135 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Wed, 08 Jan 2025 13:28:10 GMT",
+      "version": "3.2.3",
+      "tag": "@itwin/tree-widget-react_v3.2.3",
+      "comments": {
+        "patch": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "f7d3af2ddb8b2ce1af9c8429e26886821efa1bd7",
+            "comment": "Changed `onHierarchyLoad` to log errors to console"
+          }
+        ]
+      }
+    },
+    {
+      "date": "Tue, 07 Jan 2025 16:30:55 GMT",
+      "version": "3.2.2",
+      "tag": "@itwin/tree-widget-react_v3.2.2",
+      "comments": {
+        "patch": [
+          {
+            "author": "anmolshres98@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "3058f26b574dd9312d81545e8ab949f0c5222de7",
+            "comment": "Propagate `enableVirtualization` flag down to the underlying `Tree` component from `iTwinUI`"
+          }
+        ]
+      }
+    },
+    {
+      "date": "Tue, 07 Jan 2025 12:53:32 GMT",
+      "version": "3.2.1",
+      "tag": "@itwin/tree-widget-react_v3.2.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "f6b3a561da16553d1e83a1167bf0c3e9679c4de9",
+            "comment": "Increase performance consistency when creating filtering paths from target items."
+          },
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "109ddfcf614e55d69907fd610bb83b8628f51809",
+            "comment": "Reduced main thread blockage ~3 times when creating filtering paths from target items."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Wed, 18 Dec 2024 12:42:56 GMT",
+      "version": "3.2.0",
+      "tag": "@itwin/tree-widget-react_v3.2.0",
+      "comments": {
+        "patch": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "72abd12703feb2f29791e853f023c5e853931be2",
+            "comment": "Bump dependencies"
+          }
+        ],
+        "minor": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "db4ec4ae0fc5b62aa6a200a38cac0c4724b836dd",
+            "comment": "Added an optional `selectionPredicate` function prop to `ModelsTreeComponent`, `ModelsTree`, `useModelsTree` and `Tree` components. When provided, it allows consumers to conditionally enable/disable selection of tree nodes."
+          }
+        ],
+        "none": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "afbd086947adf7be897a249be4952637037217e8",
+            "comment": ""
+          },
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "20a3d0768000d74e7330fca886c711165acdefa9",
+            "comment": "Fix code snippets in README"
+          }
+        ]
+      }
+    },
+    {
+      "date": "Fri, 29 Nov 2024 10:43:06 GMT",
+      "version": "3.1.0",
+      "tag": "@itwin/tree-widget-react_v3.1.0",
+      "comments": {
+        "patch": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "c7e031bc771bc9215acef7f8f724c5390e1f9079",
+            "comment": "Bump dependencies"
+          },
+          {
+            "author": "43886789+MartynasStrazdas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "485ec9d4bd818fb9ba6aab08af56287c18f41cb7",
+            "comment": "Add missing tooltips"
+          },
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "b1f0b991b0896611b729ff5082b36d78cdcccc4c",
+            "comment": "Reduce the number of queries being executed when always/never drawn sets change."
+          },
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "c0eb696d30e44cf7ae22d47ac8d8fc1233bae3e9",
+            "comment": "Improve performance of visibility status calculation and visibility changes. Also reduce main thread blocking to avoid UI freezing."
+          }
+        ],
+        "minor": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "c0eb696d30e44cf7ae22d47ac8d8fc1233bae3e9",
+            "comment": "Replaced `ModelsTreeVisibilityHandlerOverrides.changeElementState` with `ModelsTreeVisibilityHandlerOverrides.changeElementsState`. The method is provided with a list of elements instead of single element to allow changing visibility of multiple elements in single batch istead of one by one."
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 15 Nov 2024 15:03:19 GMT",
       "version": "3.0.3",
       "tag": "@itwin/tree-widget-react_v3.0.3",
@@ -77,78 +206,12 @@
       "version": "3.0.0",
       "tag": "@itwin/tree-widget-react_v3.0.0",
       "comments": {
-        "minor": [
-          {
-            "author": "24278440+saskliutas@users.noreply.github.com",
-            "package": "@itwin/tree-widget-react",
-            "commit": "dd5e1d7fe575902d04e57cd3818ae4befb18b1a6",
-            "comment": "Add ability to focus nodes in `ModelsTree`"
-          },
-          {
-            "author": "33428304+jasdom@users.noreply.github.com",
-            "package": "@itwin/tree-widget-react",
-            "commit": "aea2b129cb02a6615c174268dd787995e7d5d5b3",
-            "comment": "Added ability to display a subset of `ModelsTree`."
-          },
-          {
-            "author": "24278440+saskliutas@users.noreply.github.com",
-            "package": "@itwin/tree-widget-react",
-            "commit": "9058584e2381260c7a875ddaa3f95677de4e7d8c",
-            "comment": "Added ability to retry loading failed hierarchy levels"
-          },
-          {
-            "author": "33428304+jasdom@users.noreply.github.com",
-            "package": "@itwin/tree-widget-react",
-            "commit": "a1daf0bb1fd7d0e59414cbbacb92dbb5e8d7f3ff",
-            "comment": "Added error reporting to feature telemetry in tree components."
-          }
-        ],
-        "patch": [
-          {
-            "author": "33428304+jasdom@users.noreply.github.com",
-            "package": "@itwin/tree-widget-react",
-            "commit": "f1105d4bfe2d10bf3507a6596ec32ab19b236fb8",
-            "comment": "Added a loading indicator when matching instances count is being calculated in hierarchy level filtering dialog."
-          },
-          {
-            "author": "yato333@users.noreply.github.com",
-            "package": "@itwin/tree-widget-react",
-            "commit": "2a9fd605764965d04028c9642cf84d4091a8bad2",
-            "comment": "Add thousands separator to filter dialog result count"
-          }
-        ],
-        "none": [
+        "major": [
           {
             "author": "35135765+grigasp@users.noreply.github.com",
             "package": "@itwin/tree-widget-react",
-            "commit": "16de2f8c6770bed8e50b08ec6a69b14ec952529b",
-            "comment": "bump presentation deps to `1.0`"
-          }
-        ],
-        "major": [
-          {
-            "author": "24278440+saskliutas@users.noreply.github.com",
-            "package": "@itwin/tree-widget-react",
-            "commit": "b000452486923b460635dd7f2376207de5157db0",
-            "comment": "Updated `ModelsTree` and `CategoriesTree` header buttons to apply action on filtered tree."
-          },
-          {
-            "author": "24278440+saskliutas@users.noreply.github.com",
-            "package": "@itwin/tree-widget-react",
-            "commit": "64f057b411622d2165e5fe3c6dff8373368c8dc9",
-            "comment": "Made `@itwin/itwinui-react` a peer dependency, bumped its version to `^3.11.0`."
-          },
-          {
-            "author": "yato333@users.noreply.github.com",
-            "package": "@itwin/tree-widget-react",
-            "commit": "c9b58123e5042751d835643eb53b13ff25c84a4f",
-            "comment": "Models Tree: Changed the tree to determine status of node visibility using not just the element the node represents, but also its children. This also introduces partial visibility state for cases when visibility states of different elements are different."
-          },
-          {
-            "author": "24278440+saskliutas@users.noreply.github.com",
-            "package": "@itwin/tree-widget-react",
-            "commit": "cd1dd1d80189b79e141ac8844f007dda8fcc929b",
-            "comment": "Refactor tree components to use `@itwin/presentation-hierarchies-react`. Add an `@itwin/ecschema-metadata@^4.0.0` peer dependency."
+            "commit": "f42e53a666d74e8bc0850b9fd19424633a1167c7",
+            "comment": "The `3.0` release affects nearly all components in this package, usually in a breaking way. As a result, we suggest treating this version as a completely new package rather than an incremental upgrade - please have a look at the [README](./README.md) for a list of new features and examples on how to consume the new version"
           }
         ]
       }

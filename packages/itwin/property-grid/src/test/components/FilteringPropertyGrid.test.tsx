@@ -4,54 +4,62 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
+import { act } from "react-dom/test-utils";
+import sinon from "sinon";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { PropertyDataChangeEvent } from "@itwin/components-react";
 import { FilteringPropertyGrid, NonEmptyValuesPropertyDataFilterer, NoopPropertyDataFilterer } from "../../components/FilteringPropertyGrid";
+import { PropertyGridManager } from "../../PropertyGridManager";
 import { createPropertyRecord, render, waitFor } from "../TestUtils";
 
-import type { IPropertyDataProvider } from "@itwin/components-react";
-
+import type { IPropertyDataProvider, PropertyData } from "@itwin/components-react";
 describe("<FilteringPropertyGrid />", () => {
-  const provider = {
+  const provider: IPropertyDataProvider = {
     onDataChanged: new PropertyDataChangeEvent(),
-    getData: async () => {
-      return {
-        categories: [
-          {
-            expand: true,
-            label: "Test Category",
-            name: "test-category",
-            childCategories: [
-              {
-                expand: false,
-                label: "Child Category",
-                name: "child-category",
-              },
-            ],
-          },
-        ],
-        label: PropertyRecord.fromString("Test Instance"),
-        records: {
-          ["test-category"]: [
-            createPropertyRecord(
-              { valueFormat: PropertyValueFormat.Primitive, value: "Non-null Value", displayValue: "Non-null Value" },
-              { name: "test-prop1", displayLabel: "Non-null Prop" },
-            ),
-            createPropertyRecord(
-              { valueFormat: PropertyValueFormat.Primitive, value: undefined, displayValue: undefined },
-              { name: "test-prop2", displayLabel: "Null Prop" },
-            ),
-          ],
-          ["child-category"]: [
-            createPropertyRecord(
-              { valueFormat: PropertyValueFormat.Primitive, value: "Child Value", displayValue: "Child Value" },
-              { name: "child-prop1", displayLabel: "Child Prop" },
-            ),
+    getData: async () => ({
+      categories: [
+        {
+          expand: true,
+          label: "Test Category",
+          name: "test-category",
+          childCategories: [
+            {
+              expand: false,
+              label: "Child Category",
+              name: "child-category",
+            },
           ],
         },
-      };
-    },
-  } as IPropertyDataProvider;
+      ],
+      label: PropertyRecord.fromString("Test Instance"),
+      records: {
+        ["test-category"]: [
+          createPropertyRecord(
+            { valueFormat: PropertyValueFormat.Primitive, value: "Non-null Value", displayValue: "Non-null Value" },
+            { name: "test-prop1", displayLabel: "Non-null Prop" },
+          ),
+          createPropertyRecord(
+            { valueFormat: PropertyValueFormat.Primitive, value: undefined, displayValue: undefined },
+            { name: "test-prop2", displayLabel: "Null Prop" },
+          ),
+        ],
+        ["child-category"]: [
+          createPropertyRecord(
+            { valueFormat: PropertyValueFormat.Primitive, value: "Child Value", displayValue: "Child Value" },
+            { name: "child-prop1", displayLabel: "Child Prop" },
+          ),
+        ],
+      },
+    }),
+  };
+
+  before(() => {
+    sinon.stub(PropertyGridManager, "translate").callsFake((key) => key);
+  });
+
+  after(() => {
+    sinon.restore();
+  });
 
   it("renders with `NoopPropertyDataFilterer`", async () => {
     const filterer = new NoopPropertyDataFilterer();
@@ -302,6 +310,58 @@ describe("<FilteringPropertyGrid />", () => {
 
       await waitFor(() => getByText("Non-Empty Struct Prop"));
       expect(queryByText("Empty Struct Prop")).to.be.null;
+    });
+
+    it("re-renders when underlying data changes", async () => {
+      const filterer = new NonEmptyValuesPropertyDataFilterer();
+
+      const nullPropertyRecord = createPropertyRecord(
+        { valueFormat: PropertyValueFormat.Primitive, value: undefined, displayValue: undefined },
+        { name: "test-prop2", displayLabel: "Null Prop" },
+      );
+      const propertyRecord1 = createPropertyRecord(
+        { valueFormat: PropertyValueFormat.Primitive, value: "Value 1", displayValue: "Value 1" },
+        { name: "prop1", displayLabel: "Prop 1" },
+      );
+      const propertyRecord2 = createPropertyRecord(
+        { valueFormat: PropertyValueFormat.Primitive, value: "Value 2", displayValue: "Value 2" },
+        { name: "prop2", displayLabel: "Prop 2" },
+      );
+      const propertyData: PropertyData = {
+        categories: [
+          {
+            expand: true,
+            label: "Test Category",
+            name: "test-category",
+            childCategories: [],
+          },
+        ],
+        label: PropertyRecord.fromString(""),
+        records: {
+          ["test-category"]: [],
+        },
+      };
+      const mutatingProvider: IPropertyDataProvider = {
+        onDataChanged: new PropertyDataChangeEvent(),
+        getData: async () => propertyData,
+      };
+
+      const { getByText, queryByText } = render(<FilteringPropertyGrid height={100} width={100} filterer={filterer} dataProvider={mutatingProvider} />);
+      await waitFor(() => getByText("filtering.no-non-null-values"));
+
+      act(() => {
+        propertyData.records["test-category"] = [nullPropertyRecord, propertyRecord1];
+        mutatingProvider.onDataChanged.raiseEvent();
+      });
+      await waitFor(() => getByText("Prop 1"));
+      expect(queryByText("Null Prop")).to.be.null;
+
+      act(() => {
+        propertyData.records["test-category"] = [propertyRecord2, nullPropertyRecord];
+        mutatingProvider.onDataChanged.raiseEvent();
+      });
+      await waitFor(() => getByText("Prop 2"));
+      expect(queryByText("Null Prop")).to.be.null;
     });
   });
 });

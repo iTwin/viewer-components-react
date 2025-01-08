@@ -2,6 +2,21 @@
   "name": "@itwin/ec3-widget-react",
   "entries": [
     {
+      "date": "Wed, 18 Dec 2024 12:42:56 GMT",
+      "version": "0.10.0",
+      "tag": "@itwin/ec3-widget-react_v0.10.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "Mindaugas.Butkus@bentley.com",
+            "package": "@itwin/ec3-widget-react",
+            "commit": "5005c67ccfdce58dca1b9d45bb025aeacf430cc9",
+            "comment": "Upgraded insights-client to version 0.15.1"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 12 Sep 2024 12:18:49 GMT",
       "version": "0.9.3",
       "tag": "@itwin/ec3-widget-react_v0.9.3",

@@ -3,14 +3,18 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, from, map, merge, mergeAll, mergeMap } from "rxjs";
+import { bufferCount, defer, from, lastValueFrom, map, merge, mergeAll, mergeMap, reduce, switchMap } from "rxjs";
 import {
-  createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition, NodeSelectClauseColumnNames, ProcessedHierarchyNode,
+  createNodesQueryClauseFactory,
+  createPredicateBasedHierarchyDefinition,
+  NodeSelectClauseColumnNames,
+  ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import { collect } from "../common/Rxjs";
 import { FilterLimitExceededError } from "../common/TreeErrors";
 import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils";
+import { releaseMainThreadOnItemsCount } from "./Utils";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { Observable } from "rxjs";
@@ -32,7 +36,6 @@ import type {
   GroupingHierarchyNode,
   HierarchyDefinition,
   HierarchyLevelDefinition,
-  HierarchyNodeIdentifiersPath,
   HierarchyNodesDefinition,
   LimitingECSqlQueryExecutor,
   NodesQueryClauseFactory,
@@ -585,30 +588,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
   }
 }
 
-function createSubjectInstanceKeysPath(subjectId: Id64String, idsCache: ModelsTreeIdsCache): Observable<HierarchyNodeIdentifiersPath> {
-  return from(idsCache.getSubjectAncestorsPath(subjectId)).pipe(map((idsPath) => idsPath.map((id) => ({ className: "BisCore.Subject", id }))));
-}
-
-function createModelInstanceKeyPaths(modelId: Id64String, idsCache: ModelsTreeIdsCache): Observable<HierarchyNodeIdentifiersPath> {
-  return from(idsCache.getModelSubjects(modelId)).pipe(
-    mergeAll(),
-    mergeMap((modelSubjectId) =>
-      createSubjectInstanceKeysPath(modelSubjectId, idsCache).pipe(
-        map((subjectPath) => [...subjectPath, { className: "BisCore.GeometricModel3d", id: modelId }]),
-      ),
-    ),
-  );
-}
-
-function createCategoryInstanceKeyPaths(categoryId: Id64String, idsCache: ModelsTreeIdsCache): Observable<HierarchyNodeIdentifiersPath> {
-  return from(idsCache.getCategoryModels(categoryId)).pipe(
-    mergeAll(),
-    mergeMap((categoryModelId) =>
-      createModelInstanceKeyPaths(categoryModelId, idsCache).pipe(map((modelPath) => [...modelPath, { className: "BisCore.SpatialCategory", id: categoryId }])),
-    ),
-  );
-}
-
 function createGeometricElementInstanceKeyPaths(
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor,
   idsCache: ModelsTreeIdsCache,
@@ -683,12 +662,16 @@ function createGeometricElementInstanceKeyPaths(
 
     return imodelAccess.createQueryReader({ ctes, ecsql }, { rowFormat: "Indexes", limit: "unbounded" });
   }).pipe(
+    releaseMainThreadOnItemsCount(300),
     map((row) => parseQueryRow(row, groupInfos, separator, hierarchyConfig.elementClassSpecification)),
     mergeMap(({ modelId, elementHierarchyPath, groupingNode }) =>
-      createModelInstanceKeyPaths(modelId, idsCache).pipe(
+      from(idsCache.createModelInstanceKeyPaths(modelId)).pipe(
+        mergeAll(),
         map((modelPath) => {
-          modelPath.pop(); // model is already included in the element hierarchy path
-          const path = [...modelPath, ...elementHierarchyPath];
+          // We dont want to modify the original path, we create a copy that we can modify
+          const newModelPath = [...modelPath];
+          newModelPath.pop(); // model is already included in the element hierarchy path
+          const path = [...newModelPath, ...elementHierarchyPath];
           if (!groupingNode) {
             return path;
           }
@@ -740,40 +723,68 @@ async function createInstanceKeyPathsFromTargetItems({
   if (limit !== "unbounded" && targetItems.length > (limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT)) {
     throw new FilterLimitExceededError(limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT);
   }
-  const ids = {
-    models: new Array<Id64String>(),
-    categories: new Array<Id64String>(),
-    subjects: new Array<Id64String>(),
-    elements: new Array<Id64String | ElementsGroupInfo>(),
-  };
-  await Promise.all(
-    targetItems.map(async (key) => {
-      if ("parent" in key) {
-        ids.elements.push(key);
-      } else if (await imodelAccess.classDerivesFrom(key.className, "BisCore.Subject")) {
-        ids.subjects.push(key.id);
-      } else if (await imodelAccess.classDerivesFrom(key.className, "BisCore.Model")) {
-        ids.models.push(key.id);
-      } else if (await imodelAccess.classDerivesFrom(key.className, "BisCore.SpatialCategory")) {
-        ids.categories.push(key.id);
-      } else {
-        ids.elements.push(key.id);
-      }
-    }),
-  );
-  const elementBlocks: Array<Array<Id64String | ElementsGroupInfo>> = [];
-  const elementsLength = ids.elements.length;
-  const blockSize = Math.ceil(elementsLength / Math.ceil(elementsLength / 5000));
-  for (let i = 0; i < ids.elements.length; i += blockSize) {
-    elementBlocks.push(ids.elements.slice(i, i + blockSize));
-  }
 
-  return collect(
-    merge(
-      from(ids.subjects).pipe(mergeMap((id) => createSubjectInstanceKeysPath(id, idsCache))),
-      from(ids.models).pipe(mergeMap((id) => createModelInstanceKeyPaths(id, idsCache))),
-      from(ids.categories).pipe(mergeMap((id) => createCategoryInstanceKeyPaths(id, idsCache))),
-      from(elementBlocks).pipe(mergeMap((block) => createGeometricElementInstanceKeyPaths(imodelAccess, idsCache, hierarchyConfig, block))),
+  return lastValueFrom(
+    from(targetItems).pipe(
+      releaseMainThreadOnItemsCount(2000),
+      mergeMap(async (key): Promise<{ key: string; type: number } | { key: ElementsGroupInfo; type: 0 }> => {
+        if ("parent" in key) {
+          return { key, type: 0 };
+        }
+
+        if (await imodelAccess.classDerivesFrom(key.className, "BisCore.Subject")) {
+          return { key: key.id, type: 1 };
+        }
+
+        if (await imodelAccess.classDerivesFrom(key.className, "BisCore.Model")) {
+          return { key: key.id, type: 2 };
+        }
+
+        if (await imodelAccess.classDerivesFrom(key.className, "BisCore.SpatialCategory")) {
+          return { key: key.id, type: 3 };
+        }
+
+        return { key: key.id, type: 0 };
+      }, 2),
+      reduce(
+        (acc, value) => {
+          if (value.type === 1) {
+            acc.subjects.push(value.key);
+            return acc;
+          }
+          if (value.type === 2) {
+            acc.models.push(value.key);
+            return acc;
+          }
+          if (value.type === 3) {
+            acc.categories.push(value.key);
+            return acc;
+          }
+          acc.elements.push(value.key);
+          return acc;
+        },
+        {
+          models: new Array<Id64String>(),
+          categories: new Array<Id64String>(),
+          subjects: new Array<Id64String>(),
+          elements: new Array<Id64String | ElementsGroupInfo>(),
+        },
+      ),
+      switchMap(async (ids) => {
+        const elementsLength = ids.elements.length;
+        return collect(
+          merge(
+            from(ids.subjects).pipe(mergeMap((id) => from(idsCache.createSubjectInstanceKeysPath(id)))),
+            from(ids.models).pipe(mergeMap((id) => from(idsCache.createModelInstanceKeyPaths(id)).pipe(mergeAll()))),
+            from(ids.categories).pipe(mergeMap((id) => from(idsCache.createCategoryInstanceKeyPaths(id)).pipe(mergeAll()))),
+            from(ids.elements).pipe(
+              bufferCount(Math.ceil(elementsLength / Math.ceil(elementsLength / 5000))),
+              releaseMainThreadOnItemsCount(1),
+              mergeMap((block) => createGeometricElementInstanceKeyPaths(imodelAccess, idsCache, hierarchyConfig, block), 10),
+            ),
+          ),
+        );
+      }),
     ),
   );
 }

@@ -3,12 +3,15 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import type { Subscription } from "rxjs";
+import { bufferTime, filter, firstValueFrom, mergeAll, mergeMap, ReplaySubject, Subject } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { pushToMap } from "../../common/Utils";
 
+import type { InstanceKey } from "@itwin/presentation-shared";
 import type { ModelsTreeDefinition } from "../ModelsTreeDefinition";
 import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
-import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 
 interface SubjectInfo {
   parentSubject: Id64String | undefined;
@@ -26,15 +29,27 @@ type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeD
 
 /** @internal */
 export class ModelsTreeIdsCache {
-  private readonly _categoryElementCounts = new Map<Id64String, number>();
+  private readonly _categoryElementCounts: ModelCategoryElementsCountCache;
   private _subjectInfos: Promise<Map<Id64String, SubjectInfo>> | undefined;
   private _parentSubjectIds: Promise<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
   private _modelInfos: Promise<Map<Id64String, ModelInfo>> | undefined;
+  private _modelKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath[]>>;
+  private _subjectKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath>>;
+  private _categoryKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath[]>>;
 
   constructor(
     private _queryExecutor: LimitingECSqlQueryExecutor,
     private _hierarchyConfig: ModelsTreeHierarchyConfiguration,
-  ) {}
+  ) {
+    this._categoryElementCounts = new ModelCategoryElementsCountCache(async (input) => this.queryCategoryElementCounts(input));
+    this._modelKeyPaths = new Map();
+    this._subjectKeyPaths = new Map();
+    this._categoryKeyPaths = new Map();
+  }
+
+  public [Symbol.dispose]() {
+    this._categoryElementCounts[Symbol.dispose]();
+  }
 
   private async *querySubjects(): AsyncIterableIterator<{ id: Id64String; parentId?: Id64String; targetPartitionId?: Id64String; hideInHierarchy: boolean }> {
     const subjectsQuery = `
@@ -207,22 +222,25 @@ export class ModelsTreeIdsCache {
     return modelIds;
   }
 
-  /**
-   * Returns a list of Subject ancestor ECInstanceIds from root to target Subject as displayed in the
-   * hierarchy  - taking into account `hideInHierarchy` flag.
-   */
-  public async getSubjectAncestorsPath(targetSubjectId: Id64String): Promise<Id64Array> {
-    const subjectInfos = await this.getSubjectInfos();
-    const result = new Array<Id64String>();
-    let currParentId: Id64String | undefined = targetSubjectId;
-    while (currParentId) {
-      const parentInfo = subjectInfos.get(currParentId);
-      if (!parentInfo?.hideInHierarchy) {
-        result.push(currParentId);
-      }
-      currParentId = parentInfo?.parentSubject;
+  public async createSubjectInstanceKeysPath(targetSubjectId: Id64String): Promise<HierarchyNodeIdentifiersPath> {
+    let entry = this._subjectKeyPaths.get(targetSubjectId);
+    if (!entry) {
+      entry = (async () => {
+        const subjectInfos = await this.getSubjectInfos();
+        const result = new Array<InstanceKey>();
+        let currParentId: Id64String | undefined = targetSubjectId;
+        while (currParentId) {
+          const parentInfo = subjectInfos.get(currParentId);
+          if (!parentInfo?.hideInHierarchy) {
+            result.push({ className: "BisCore.Subject", id: currParentId });
+          }
+          currParentId = parentInfo?.parentSubject;
+        }
+        return result.reverse();
+      })();
+      this._subjectKeyPaths.set(targetSubjectId, entry);
     }
-    return result.reverse();
+    return entry;
   }
 
   private async *queryModelElementCounts() {
@@ -289,71 +307,94 @@ export class ModelsTreeIdsCache {
     return modelInfos.get(modelId)?.elementCount ?? 0;
   }
 
-  public async getModelSubjects(modelId: Id64String): Promise<Id64Array> {
-    const result = new Array<Id64String>();
-    const subjectInfos = await this.getSubjectInfos();
-    subjectInfos.forEach((subjectInfo, subjectId) => {
-      if (subjectInfo.childModels.has(modelId)) {
-        result.push(subjectId);
-      }
-    });
-    return result;
+  public async createModelInstanceKeyPaths(modelId: Id64String): Promise<HierarchyNodeIdentifiersPath[]> {
+    let entry = this._modelKeyPaths.get(modelId);
+    if (!entry) {
+      entry = (async () => {
+        const result = new Array<HierarchyNodeIdentifiersPath>();
+        const subjectInfos = (await this.getSubjectInfos()).entries();
+        for (const [modelSubjectId, subjectInfo] of subjectInfos) {
+          if (subjectInfo.childModels.has(modelId)) {
+            const subjectPath = await this.createSubjectInstanceKeysPath(modelSubjectId);
+            result.push([...subjectPath, { className: "BisCore.GeometricModel3d", id: modelId }]);
+          }
+        }
+        return result;
+      })();
+
+      this._modelKeyPaths.set(modelId, entry);
+    }
+    return entry;
   }
 
-  private async queryCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Promise<number> {
+  private async queryCategoryElementCounts(
+    input: Array<{ modelId: Id64String; categoryId: Id64String }>,
+  ): Promise<Array<{ modelId: number; categoryId: number; elementsCount: number }>> {
     const reader = this._queryExecutor.createQueryReader(
       {
         ctes: [
           /* sql */ `
-            CategoryElements(id) AS (
-              SELECT ECInstanceId id
+            CategoryElements(id, modelId, categoryId) AS (
+              SELECT ECInstanceId, Model.Id, Category.Id
               FROM ${this._hierarchyConfig.elementClassSpecification}
               WHERE
-                Model.Id = ?
-                AND Category.Id = ?
-                AND Parent.Id IS NULL
+                Parent.Id IS NULL
+                AND (
+                  ${input.map(({ modelId, categoryId }) => `Model.Id = ${modelId} AND Category.Id = ${categoryId}`).join(" OR ")}
+                )
 
               UNION ALL
 
-              SELECT c.ECInstanceId id
+              SELECT c.ECInstanceId, p.modelId, p.categoryId
               FROM ${this._hierarchyConfig.elementClassSpecification} c
               JOIN CategoryElements p ON c.Parent.Id = p.id
             )
           `,
         ],
-        ecsql: `SELECT COUNT(*) FROM CategoryElements`,
-        bindings: [
-          { type: "id", value: modelId },
-          { type: "id", value: categoryId },
-        ],
+        ecsql: `
+          SELECT modelId, categoryId, COUNT(id) elementsCount
+          FROM CategoryElements
+          GROUP BY modelId, categoryId
+        `,
       },
-      { rowFormat: "Indexes", limit: "unbounded" },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded" },
     );
 
-    return (await reader.next()).value[0];
-  }
-
-  public async getCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Promise<number> {
-    const cacheKey = `${modelId}${categoryId}`;
-    let result = this._categoryElementCounts.get(cacheKey);
-    if (result !== undefined) {
-      return result;
+    const result = new Array<{ modelId: number; categoryId: number; elementsCount: number }>();
+    for await (const row of reader) {
+      result.push({ modelId: row.modelId, categoryId: row.categoryId, elementsCount: row.elementsCount });
     }
-
-    result = await this.queryCategoryElementsCount(modelId, categoryId);
-    this._categoryElementCounts.set(cacheKey, result);
     return result;
   }
 
-  public async getCategoryModels(categoryId: Id64String): Promise<Id64Array> {
-    const result = new Set<Id64String>();
-    const modelInfos = await this.getModelInfos();
-    modelInfos?.forEach((modelInfo, modelId) => {
-      if (modelInfo.categories.has(categoryId)) {
-        result.add(modelId);
-      }
-    });
-    return [...result];
+  public async getCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Promise<number> {
+    return this._categoryElementCounts.getCategoryElementsCount(modelId, categoryId);
+  }
+
+  public async createCategoryInstanceKeyPaths(categoryId: Id64String): Promise<HierarchyNodeIdentifiersPath[]> {
+    let entry = this._categoryKeyPaths.get(categoryId);
+    if (!entry) {
+      entry = (async () => {
+        const result = new Set<Id64String>();
+        const modelInfos = await this.getModelInfos();
+        modelInfos?.forEach((modelInfo, modelId) => {
+          if (modelInfo.categories.has(categoryId)) {
+            result.add(modelId);
+          }
+        });
+
+        const categoryPaths = new Array<HierarchyNodeIdentifiersPath>();
+        for (const categoryModelId of [...result]) {
+          const modelPaths = await this.createModelInstanceKeyPaths(categoryModelId);
+          for (const modelPath of modelPaths) {
+            categoryPaths.push([...modelPath, { className: "BisCore.SpatialCategory", id: categoryId }]);
+          }
+        }
+        return categoryPaths;
+      })();
+      this._categoryKeyPaths.set(categoryId, entry);
+    }
+    return entry;
   }
 }
 
@@ -371,4 +412,48 @@ function forEachChildSubject(
       }
       forEachChildSubject(subjectInfos, childSubjectInfo, cb);
     });
+}
+
+class ModelCategoryElementsCountCache {
+  private _cache = new Map<string, Subject<number>>();
+  private _requestsStream = new Subject<{ modelId: Id64String; categoryId: Id64String }>();
+  private _subscription: Subscription;
+
+  public constructor(
+    private _loader: (
+      input: Array<{ modelId: Id64String; categoryId: Id64String }>,
+    ) => Promise<Array<{ modelId: number; categoryId: number; elementsCount: number }>>,
+  ) {
+    this._subscription = this._requestsStream
+      .pipe(
+        bufferTime(20),
+        filter((requests) => requests.length > 0),
+        mergeMap(async (requests) => this._loader(requests)),
+        mergeAll(),
+      )
+      .subscribe({
+        next: ({ modelId, categoryId, elementsCount }) => {
+          const subject = this._cache.get(`${modelId}${categoryId}`);
+          assert(!!subject);
+          subject.next(elementsCount);
+        },
+      });
+  }
+
+  public [Symbol.dispose]() {
+    this._subscription.unsubscribe();
+  }
+
+  public async getCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Promise<number> {
+    const cacheKey = `${modelId}${categoryId}`;
+    let result = this._cache.get(cacheKey);
+    if (result !== undefined) {
+      return firstValueFrom(result);
+    }
+
+    result = new ReplaySubject(1);
+    this._cache.set(cacheKey, result);
+    this._requestsStream.next({ modelId, categoryId });
+    return firstValueFrom(result);
+  }
 }
