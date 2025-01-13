@@ -119,6 +119,81 @@ describe("Categories tree", () => {
       ).to.deep.eq([{ path: [keys.category, keys.subCategory2], options: { autoExpand: true } }]);
     });
 
+    it("finds 3d categories by label when subCategory count is 1 and labels of category and subCategory differ", async function () {
+      const { imodel, keys } = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        // SubCategory gets inserted by default
+        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", userLabel: "Test" });
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+
+        return {
+          keys: {
+            category,
+          },
+        };
+      });
+      expect(
+        await CategoriesTreeDefinition.createInstanceKeyPaths({
+          imodelAccess: createIModelAccess(imodel),
+          label: "Test",
+          viewType: "3d",
+        }),
+      ).to.deep.eq([{ path: [keys.category], options: { autoExpand: true } }]);
+
+      expect(
+        await CategoriesTreeDefinition.createInstanceKeyPaths({
+          imodelAccess: createIModelAccess(imodel),
+          label: "SpatialCategory",
+          viewType: "3d",
+        }),
+      ).to.deep.eq([]);
+    });
+
+    it("finds 3d categories and subCategories by label when subCategory count is > 1", async function () {
+      const { imodel, keys } = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+
+        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", userLabel: "Test" });
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+
+        const subCategory1 = insertSubCategory({ builder, codeValue: "SubCategory1", parentCategoryId: category.id });
+
+        const subCategory2 = insertSubCategory({ builder, codeValue: "SubCategory2", parentCategoryId: category.id });
+
+        return {
+          keys: {
+            category,
+            subCategory1,
+            subCategory2,
+          },
+        };
+      });
+
+      expect(
+        await CategoriesTreeDefinition.createInstanceKeyPaths({
+          imodelAccess: createIModelAccess(imodel),
+          label: "Test",
+          viewType: "3d",
+        }),
+      ).to.deep.eq([{ path: [keys.category], options: { autoExpand: true } }]);
+
+      expect(
+        await CategoriesTreeDefinition.createInstanceKeyPaths({
+          imodelAccess: createIModelAccess(imodel),
+          label: "SubCategory1",
+          viewType: "3d",
+        }),
+      ).to.deep.eq([{ path: [keys.category, keys.subCategory1], options: { autoExpand: true } }]);
+
+      expect(
+        await CategoriesTreeDefinition.createInstanceKeyPaths({
+          imodelAccess: createIModelAccess(imodel),
+          label: "SubCategory2",
+          viewType: "3d",
+        }),
+      ).to.deep.eq([{ path: [keys.category, keys.subCategory2], options: { autoExpand: true } }]);
+    });
+
     it("finds 2d categories by label containing special SQLite characters", async function () {
       const { imodel, keys } = await buildIModel(this, async (builder) => {
         const drawingModel = insertDrawingModelWithPartition({ builder, codeValue: "TestDrawingModel" });

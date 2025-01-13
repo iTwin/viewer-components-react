@@ -247,9 +247,11 @@ export function insertDrawingSubModel(
 }
 
 export function insertSpatialCategory(
-  props: BaseInstanceInsertProps & { codeValue: string; modelId?: Id64String } & Partial<Omit<CategoryProps, "id" | "model" | "parent" | "code">>,
+  props: BaseInstanceInsertProps & { codeValue: string; modelId?: Id64String; userLabel?: string } & Partial<
+      Omit<CategoryProps, "id" | "model" | "parent" | "code">
+    >,
 ) {
-  const { builder, classFullName, modelId, codeValue, ...categoryProps } = props;
+  const { builder, classFullName, modelId, codeValue, userLabel, ...categoryProps } = props;
   const defaultClassName = `BisCore${props.fullClassNameSeparator ?? "."}SpatialCategory`;
   const className = classFullName ?? defaultClassName;
   const model = modelId ?? IModel.dictionaryId;
@@ -257,6 +259,7 @@ export function insertSpatialCategory(
     classFullName: className,
     model,
     code: builder.createCode(model, BisCodeSpec.spatialCategory, codeValue),
+    userLabel,
     ...categoryProps,
   });
   return { className, id };
