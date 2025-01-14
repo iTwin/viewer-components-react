@@ -2,6 +2,21 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Tue, 14 Jan 2025 02:51:04 GMT",
+      "version": "3.2.4",
+      "tag": "@itwin/tree-widget-react_v3.2.4",
+      "comments": {
+        "patch": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "d8b0b849449e67b67c5ea39c880a8a4a486065f6",
+            "comment": "Fixed a bug in `CategoriesTreeDefinition.createInstanceKeyPaths`, where sometimes incorrect key paths would be created. Because of this, `CategoriesTree` would show incorrect categories with applied label filter."
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 08 Jan 2025 13:28:10 GMT",
       "version": "3.2.3",
       "tag": "@itwin/tree-widget-react_v3.2.3",

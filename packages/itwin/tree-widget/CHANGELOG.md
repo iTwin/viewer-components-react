@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Wed, 08 Jan 2025 13:28:10 GMT and should not be manually modified.
+This log was last generated on Tue, 14 Jan 2025 02:51:04 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 3.2.4
+
+Tue, 14 Jan 2025 02:51:04 GMT
+
+### Patches
+
+- Fixed a bug in `CategoriesTreeDefinition.createInstanceKeyPaths`, where sometimes incorrect key paths would be created. Because of this, `CategoriesTree` would show incorrect categories with applied label filter. ([#1139](https://github.com/iTwin/viewer-components-react/pull/1139))
 
 ## 3.2.3
 

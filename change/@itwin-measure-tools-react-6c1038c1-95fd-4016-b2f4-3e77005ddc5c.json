@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Update to iTwinUI@3. Bumps AppUI peer deps to ^4.17 and move iTwinUI to peer dep",
-  "packageName": "@itwin/measure-tools-react",
-  "email": "aruniverse@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
