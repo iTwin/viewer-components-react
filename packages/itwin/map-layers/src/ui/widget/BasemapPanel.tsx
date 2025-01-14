@@ -313,6 +313,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
           <WebFontIcon iconName={baseMapVisible ? "icon-visibility" : "icon-visibility-hide-2"} />
         </Button>
         <Select
+          data-testid="base-map-select"
           className="map-manager-base-item-select"
           options={baseMapOptions}
           placeholder={selectBaseMapLabel}

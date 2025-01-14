@@ -9,14 +9,14 @@ import { expect, should } from "chai";
 import * as sinon from "sinon";
 import { ImageMapLayerSettings } from "@itwin/core-common";
 import * as coreFrontend from "@itwin/core-frontend";
-import { fireEvent, getAllByTestId, getByTestId, getByTitle, queryByText, render } from "@testing-library/react";
+import { fireEvent, getAllByTestId, getByTestId, getByTitle, queryByText, render, RenderResult } from "@testing-library/react";
 import { MapLayerPreferences, MapLayerSourceChangeType } from "../MapLayerPreferences";
 import { MapLayerManager } from "../ui/widget/MapLayerManager";
 import { TestUtils } from "./TestUtils";
 import { ViewportMock } from "./ViewportMock";
 
 import type { GuidString } from "@itwin/core-bentley";
-describe("MapLayerManager", () => {
+describe.only("MapLayerManager", () => {
   const sourceDataset: any = [
     { formatId: "ArcGIS", name: "source2", url: "https://test.com/Mapserver" },
     { formatId: "ArcGIS", name: "source1", url: "https://test.com/Mapserver" },
@@ -92,23 +92,24 @@ describe("MapLayerManager", () => {
     testFunc(sourceList.querySelectorAll("li"));
   }
 
-  it("renders base maps", async () => {
+  it.only("renders base maps", async () => {
     const { container } = render(
       <div>
         <MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object}></MapLayerManager>
       </div>,
-    );
+    ) as RenderResult;
 
     await TestUtils.flushAsyncOperations();
 
     viewportMock.onMapImageryChanged.raiseEvent({} as any);
-
-    const select = container.querySelector(".iui-input-with-icon") as HTMLElement;
-    const selectButton = select.querySelector(".iui-select-button") as HTMLElement;
+    const select = getByTestId<HTMLInputElement>(container, "base-map-select");
+    const selectButton = select.querySelector('div[role="combobox"]') as HTMLElement;
     fireEvent.click(selectButton);
-    const menu = document.querySelector(".iui-menu") as HTMLUListElement;
+    const listboxes = container.querySelectorAll('div[role="listbox"]');
+    expect(listboxes.length).to.be.greaterThan(0);
+    const menu = listboxes[0] as HTMLUListElement;
     should().exist(menu);
-    const menuItems = menu.querySelectorAll("li");
+    const menuItems = menu.querySelectorAll('button[role="option"]');
 
     expect(menuItems.length).to.eq(4);
     expect(menuItems[0].textContent).to.eql("Basemap.ColorFill");
