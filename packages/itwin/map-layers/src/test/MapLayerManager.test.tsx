@@ -8,15 +8,15 @@
 import { expect, should } from "chai";
 import * as sinon from "sinon";
 import { ImageMapLayerSettings } from "@itwin/core-common";
-import * as coreFrontend from "@itwin/core-frontend";
-import { fireEvent, getAllByTestId, getByTestId, getByTitle, queryByText, render, RenderResult } from "@testing-library/react";
+import { MapLayerIndex, MapLayerSource, MapLayerSources, MockRender } from "@itwin/core-frontend";
+import { fireEvent, getAllByTestId, getByTestId, queryByText, render, RenderResult } from "@testing-library/react";
 import { MapLayerPreferences, MapLayerSourceChangeType } from "../MapLayerPreferences";
 import { MapLayerManager } from "../ui/widget/MapLayerManager";
 import { TestUtils } from "./TestUtils";
 import { ViewportMock } from "./ViewportMock";
 
 import type { GuidString } from "@itwin/core-bentley";
-describe.only("MapLayerManager", () => {
+describe("MapLayerManager", () => {
   const sourceDataset: any = [
     { formatId: "ArcGIS", name: "source2", url: "https://test.com/Mapserver" },
     { formatId: "ArcGIS", name: "source1", url: "https://test.com/Mapserver" },
@@ -29,13 +29,13 @@ describe.only("MapLayerManager", () => {
   const sourceListSelector = ".map-manager-source-list";
 
   before(async () => {
-    await coreFrontend.MockRender.App.startup();
+    await MockRender.App.startup();
     await TestUtils.initialize();
     window.HTMLElement.prototype.scrollIntoView = function () {}; // needed by <Select> UI component
   });
 
   after(async () => {
-    await coreFrontend.MockRender.App.shutdown();
+    await MockRender.App.shutdown();
     TestUtils.terminateUiComponents();
   });
 
@@ -51,7 +51,7 @@ describe.only("MapLayerManager", () => {
   async function testSourceItems(testFunc: (menuItems: NodeListOf<HTMLLIElement>) => void, customDataset?: any, nbRender?: number, extraFunc?: () => void) {
     sandbox.stub(MapLayerPreferences, "getSources").callsFake(async function (_iTwinId: GuidString, _iModelId?: GuidString) {
       const dataset = customDataset ? customDataset : sourceDataset;
-      return dataset.map((source: any) => coreFrontend.MapLayerSource.fromJSON(source)!);
+      return dataset.map((source: any) => MapLayerSource.fromJSON(source)!);
     });
 
     render(
@@ -92,7 +92,7 @@ describe.only("MapLayerManager", () => {
     testFunc(sourceList.querySelectorAll("li"));
   }
 
-  it.only("renders base maps", async () => {
+  it("renders base maps", async () => {
     const { container } = render(
       <div>
         <MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object}></MapLayerManager>
@@ -139,9 +139,9 @@ describe.only("MapLayerManager", () => {
   });
 
   it("renders source list without duplicates", async () => {
-    const customDataset: coreFrontend.MapLayerSources[] = [...sourceDataset, sourceDataset[0]];
+    const customDataset: MapLayerSources[] = [...sourceDataset, sourceDataset[0]];
     sandbox.stub(MapLayerPreferences, "getSources").callsFake(async function (_iTwinId: GuidString, _iModelId?: GuidString) {
-      return customDataset.map((source: any) => coreFrontend.MapLayerSource.fromJSON(source)!);
+      return customDataset.map((source: any) => MapLayerSource.fromJSON(source)!);
     });
 
     render(
@@ -178,7 +178,7 @@ describe.only("MapLayerManager", () => {
       undefined,
       1,
       () => {
-        MapLayerPreferences.onLayerSourceChanged.raiseEvent(MapLayerSourceChangeType.Removed, coreFrontend.MapLayerSource.fromJSON(sourceDataset[0]));
+        MapLayerPreferences.onLayerSourceChanged.raiseEvent(MapLayerSourceChangeType.Removed, MapLayerSource.fromJSON(sourceDataset[0]));
       },
     );
   });
@@ -196,8 +196,8 @@ describe.only("MapLayerManager", () => {
       () => {
         MapLayerPreferences.onLayerSourceChanged.raiseEvent(
           MapLayerSourceChangeType.Replaced,
-          coreFrontend.MapLayerSource.fromJSON(sourceDataset[0]),
-          coreFrontend.MapLayerSource.fromJSON({ ...sourceDataset[0], name: renamedName }),
+          MapLayerSource.fromJSON(sourceDataset[0]),
+          MapLayerSource.fromJSON({ ...sourceDataset[0], name: renamedName }),
         );
       },
     );
@@ -218,7 +218,7 @@ describe.only("MapLayerManager", () => {
       undefined,
       1,
       () => {
-        MapLayerPreferences.onLayerSourceChanged.raiseEvent(MapLayerSourceChangeType.Added, coreFrontend.MapLayerSource.fromJSON(newSourceProps));
+        MapLayerPreferences.onLayerSourceChanged.raiseEvent(MapLayerSourceChangeType.Added, MapLayerSource.fromJSON(newSourceProps));
       },
     );
   });
@@ -296,7 +296,7 @@ describe.only("MapLayerManager", () => {
     const overlayLayerSetting = ImageMapLayerSettings.fromJSON({ ...backgroundLayerSettings.toJSON(), name: "overlay" });
     viewportMock.backgroundLayers = [backgroundLayerSettings];
     viewportMock.overlayLayers = [overlayLayerSetting];
-    viewportMock.detachMapLayerByIndexFunc = (mapLayerIndex: coreFrontend.MapLayerIndex) => {
+    viewportMock.detachMapLayerByIndexFunc = (mapLayerIndex: MapLayerIndex) => {
       mapLayerIndex.isOverlay ? (viewportMock.overlayLayers = []) : (viewportMock.backgroundLayers = []);
     };
     viewportMock.setup();
@@ -311,7 +311,7 @@ describe.only("MapLayerManager", () => {
     const checkLayerSection = async (section: HTMLElement, sectionName: string) => {
       let listItem = queryByText(container, sectionName);
       should().exist(listItem);
-      const detachAllButton = getByTitle(section, "MapLayerActionButtons.DetachSelectedLabel");
+      const detachAllButton = getByTestId(section, "detach-label-button");
       should().exist(detachAllButton);
 
       const checkbox = getByTestId(section, "select-item-checkbox");
@@ -365,23 +365,21 @@ describe.only("MapLayerManager", () => {
       checkLayerItemsVisibility(section, 1, 0);
 
       // Click on the HideAll  it should change the eye icon
-
-      // const hideAllButtons = getAllByTitle(container, "MapLayerActionButtons.HideAllLabel");
-      const hideAllButton = getByTitle(section, "MapLayerActionButtons.HideAllLabel");
+      const hideAllButton = getByTestId(section, "hide-all-label-button");
       should().exist(hideAllButton);
       hideAllButton.click();
       await TestUtils.flushAsyncOperations();
       checkLayerItemsVisibility(section, 0, 1);
 
-      // Click on the HideAll  it should change the eye icon
-      const showAllButton = getByTitle(section, "MapLayerActionButtons.ShowAllLabel");
+      // Click on the ShowAll  it should change the eye icon
+      const showAllButton = getByTestId(section, "show-all-label-button");
       should().exist(showAllButton);
       showAllButton.click();
       await TestUtils.flushAsyncOperations();
       checkLayerItemsVisibility(section, 1, 0);
 
-      // Click on the HideAll  it should change the eye icon
-      const InvertButton = getByTitle(section, "MapLayerActionButtons.InvertAllLabel");
+      // Click on the InvertAll  it should change the eye icon
+      const InvertButton = getByTestId(section, "invert-all-label-button");
       should().exist(InvertButton);
       InvertButton.click();
       await TestUtils.flushAsyncOperations();

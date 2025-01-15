@@ -1,10 +1,10 @@
+import * as React from "react";
+import { SvgUnlink, SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 /*---------------------------------------------------------------------------------------------
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { ButtonGroup, Checkbox, IconButton } from "@itwin/itwinui-react";
-import * as React from "react";
-import { SvgUnlink, SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { MapLayersUI } from "../../mapLayers";
 
 interface MapLayerActionButtonsProps {
@@ -27,18 +27,18 @@ export const MapLayerActionButtons = ({ disabled, showAll, hideAll, invert, sele
     <div className="map-manager-layer-action-buttons">
       <Checkbox data-testid={"select-all-checkbox"} checked={checked} onChange={selectAll} className="map-manager-layer-action-unlink-button"></Checkbox>
       <ButtonGroup>
-        <IconButton disabled={disabled || disabledUnlink} title={detachSelectedLabel} size="small" styleType="borderless" onClick={unlink}>
+        <IconButton disabled={disabled || disabledUnlink} data-testid="detach-label-button" label={detachSelectedLabel} size="small" styleType="borderless" onClick={unlink}>
           <SvgUnlink />
         </IconButton>
       </ButtonGroup>
       <ButtonGroup className="map-manager-layer-action-buttons-inside-separator">
-        <IconButton disabled={disabled} size="small" title={showAllLabel} onClick={showAll} styleType="borderless">
+        <IconButton disabled={disabled} data-testid="show-all-label-button" label={showAllLabel} size="small" onClick={showAll} styleType="borderless">
           <SvgVisibilityShow />
         </IconButton>
-        <IconButton disabled={disabled} title={invertAllLabel} size="small" styleType="borderless" onClick={invert}>
+        <IconButton disabled={disabled} data-testid="invert-all-label-button" label={invertAllLabel} size="small" styleType="borderless" onClick={invert}>
           <SvgVisibilityHalf />
         </IconButton>
-        <IconButton disabled={disabled} title={hideAllLabel} size="small" styleType="borderless" onClick={hideAll}>
+        <IconButton disabled={disabled} data-testid="hide-all-label-button" label={hideAllLabel} size="small" styleType="borderless" onClick={hideAll}>
           <SvgVisibilityHide />
         </IconButton>
       </ButtonGroup>

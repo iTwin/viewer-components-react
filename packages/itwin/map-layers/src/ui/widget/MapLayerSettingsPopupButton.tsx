@@ -3,15 +3,15 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import "./MapLayerSettingsPopupButton.scss";
 import * as React from "react";
 import { RelativePosition } from "@itwin/appui-abstract";
 import { Popup } from "@itwin/core-react";
+import { SvgSettings } from "@itwin/itwinui-icons-react";
+import { IconButton } from "@itwin/itwinui-react";
+import { MapLayersUI } from "../../mapLayers";
 import { MapManagerSettings } from "./MapManagerSettings";
 
-import "./MapLayerSettingsPopupButton.scss";
-import { MapLayersUI } from "../../mapLayers";
-import { IconButton } from "@itwin/itwinui-react";
-import { SvgSettings } from "@itwin/itwinui-icons-react";
 export interface MapLayerSettingsPopupButtonProps {
   disabled?: boolean;
 }

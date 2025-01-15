@@ -306,6 +306,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
           className="map-manager-basemap-visibility map-manager-visibility-icon"
           size="small"
           styleType="borderless"
+          data-testid="toggle-visibility"
           title={toggleVisibility}
           onClick={handleVisibilityChange}
           disabled={props.disabled || !activeViewport || !(activeViewport.displayStyle.backgroundMapBase instanceof ImageMapLayerSettings)}

@@ -255,7 +255,7 @@ export function MapManagerSettings() {
   const [tabIndex, setTabIndex] = React.useState(0);
 
   return (
-    <Tabs labels={[<Tab key={"general"} label="General" />, <Tab key={"advanced"} label="Advanced" />]} onTabSelected={setTabIndex}>
+    <Tabs activeIndex={tabIndex} orientation="horizontal" labels={[<Tab key="general" label="General" />, <Tab key="advanced" label="Advanced" />]} onTabSelected={setTabIndex}>
       {tabIndex === 0 && (
         <>
           <div className="maplayers-settings-container">

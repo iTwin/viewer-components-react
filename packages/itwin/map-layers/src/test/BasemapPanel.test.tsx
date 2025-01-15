@@ -7,9 +7,17 @@
 
 import { expect, should } from "chai";
 import * as sinon from "sinon";
-import * as coreCommon from "@itwin/core-common";
-import * as coreFrontend from "@itwin/core-frontend";
-import { fireEvent, render } from "@testing-library/react";
+import {
+  BackgroundMapProvider,
+  BackgroundMapType,
+  BaseLayerSettings,
+  BaseMapLayerSettings,
+  ColorByName,
+  ColorDef,
+  MapImagerySettings,
+} from "@itwin/core-common";
+import { MockRender } from "@itwin/core-frontend";
+import { fireEvent, getByTestId, render } from "@testing-library/react";
 import { BasemapPanel } from "../ui/widget/BasemapPanel";
 import { defaultBaseMapLayers, SourceMapContext } from "../ui/widget/MapLayerManager";
 import { TestUtils } from "./TestUtils";
@@ -19,7 +27,7 @@ describe("BasemapPanel", () => {
   const sandbox = sinon.createSandbox();
   const viewportMock = new ViewportMock();
 
-  const customBaseMap: coreCommon.BaseMapLayerSettings = coreCommon.BaseMapLayerSettings.fromJSON({
+  const customBaseMap: BaseMapLayerSettings = BaseMapLayerSettings.fromJSON({
     formatId: "WMS",
     name: "Custom Layer",
     visible: true,
@@ -31,13 +39,13 @@ describe("BasemapPanel", () => {
   });
 
   before(async () => {
-    await coreFrontend.MockRender.App.startup();
+    await MockRender.App.startup();
     await TestUtils.initialize();
     window.HTMLElement.prototype.scrollIntoView = function () {};
   });
 
   after(async () => {
-    await coreFrontend.MockRender.App.shutdown();
+    await MockRender.App.shutdown();
     TestUtils.terminateUiComponents();
   });
 
@@ -65,11 +73,11 @@ describe("BasemapPanel", () => {
       </SourceMapContext.Provider>,
     );
     await TestUtils.flushAsyncOperations();
-
-    const iconVisibility = container.querySelector(".icon-visibility");
+    const iconVisibility = getByTestId(container, "toggle-visibility");
+    //  container.querySelector(".icon-visibility");
     should().exist(iconVisibility);
 
-    const selectContent = container.querySelector(".iui-content") as HTMLElement;
+    const selectContent = getByTestId(container, "base-map-select") as HTMLElement;
     should().exist(selectContent);
     expect(selectContent.textContent).to.eql("WellKnownBaseMaps.BingProvider.Hybrid");
   });
@@ -89,33 +97,33 @@ describe("BasemapPanel", () => {
       </SourceMapContext.Provider>,
     );
 
-    // let baseMap = coreCommon.BaseMapLayerSettings.fromProvider(coreCommon.BackgroundMapProvider.fromJSON({name: "BingProvider", type: coreCommon.BackgroundMapType.Street}));
-    let baseMap: coreCommon.BaseLayerSettings = defaultBaseMapLayers[2];
+    // let baseMap = BaseMapLayerSettings.fromProvider(BackgroundMapProvider.fromJSON({name: "BingProvider", type: BackgroundMapType.Street}));
+    let baseMap: BaseLayerSettings = defaultBaseMapLayers[2];
     viewportMock.baseMap = baseMap;
-    viewportMock.onMapImageryChanged.raiseEvent(coreCommon.MapImagerySettings.fromJSON({ backgroundBase: baseMap }));
+    viewportMock.onMapImageryChanged.raiseEvent(MapImagerySettings.fromJSON({ backgroundBase: baseMap }));
     await TestUtils.flushAsyncOperations();
 
-    let selectContent = container.querySelector(".iui-content");
+    let selectContent = getByTestId(container, "base-map-select");
     should().exist(selectContent);
     expect(selectContent!.textContent).to.eql("WellKnownBaseMaps.BingProvider.Street");
 
     // Now test with a custom map-layer definition
     baseMap = customBaseMap;
     viewportMock.baseMap = baseMap;
-    viewportMock.onMapImageryChanged.raiseEvent(coreCommon.MapImagerySettings.fromJSON({ backgroundBase: baseMap }));
+    viewportMock.onMapImageryChanged.raiseEvent(MapImagerySettings.fromJSON({ backgroundBase: baseMap }));
     await TestUtils.flushAsyncOperations();
 
-    selectContent = container.querySelector(".iui-content");
+    selectContent = getByTestId(container, "base-map-select");
     should().exist(selectContent);
     expect(selectContent!.textContent).to.eql(customBaseMap.name);
 
     // Now test with a ColorDef
-    const color = coreCommon.ColorDef.create(coreCommon.ColorByName.aliceBlue);
+    const color = ColorDef.create(ColorByName.aliceBlue);
     viewportMock.baseMap = color;
-    viewportMock.onMapImageryChanged.raiseEvent(coreCommon.MapImagerySettings.fromJSON({ backgroundBase: color.toJSON() }));
+    viewportMock.onMapImageryChanged.raiseEvent(MapImagerySettings.fromJSON({ backgroundBase: color.toJSON() }));
     await TestUtils.flushAsyncOperations();
 
-    selectContent = container.querySelector(".iui-content");
+    selectContent = getByTestId(container, "base-map-select");
     should().exist(selectContent);
     expect(selectContent!.textContent).to.eql("Basemap.ColorFill");
   });
@@ -135,12 +143,12 @@ describe("BasemapPanel", () => {
       </SourceMapContext.Provider>,
     );
 
-    const baseMap = coreCommon.BaseMapLayerSettings.fromProvider(
-      coreCommon.BackgroundMapProvider.fromJSON({ name: "BingProvider", type: coreCommon.BackgroundMapType.Street }),
+    const baseMap = BaseMapLayerSettings.fromProvider(
+      BackgroundMapProvider.fromJSON({ name: "BingProvider", type: BackgroundMapType.Street }),
       { invisible: true, transparency: 0.5 },
     );
     viewportMock.baseMap = baseMap; // mock needs to be updated too because the component refresh from the viewport too .
-    viewportMock.onMapImageryChanged.raiseEvent(coreCommon.MapImagerySettings.fromJSON({ backgroundBase: baseMap }));
+    viewportMock.onMapImageryChanged.raiseEvent(MapImagerySettings.fromJSON({ backgroundBase: baseMap }));
     await TestUtils.flushAsyncOperations();
 
     const iconVisibilityHide = container.querySelector(".icon-visibility-hide-2");
@@ -150,7 +158,7 @@ describe("BasemapPanel", () => {
     const transparencyButton = container.querySelector(".map-transparency-popup-button") as HTMLElement;
     should().exist(transparencyButton);
     fireEvent.click(transparencyButton);
-    const sliderThumb = document.querySelector(".iui-slider-thumb");
+    const sliderThumb = document.querySelector('div[role="slider"]');
     expect(sliderThumb?.getAttribute("aria-valuenow")).to.eql((baseMap.transparency * 100).toString());
   });
 });
