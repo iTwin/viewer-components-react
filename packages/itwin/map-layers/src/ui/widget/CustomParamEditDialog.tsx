@@ -10,6 +10,7 @@ import { Dialog } from "@itwin/core-react";
 import { Button, LabeledInput, ToggleSwitch } from "@itwin/itwinui-react";
 import { CustomParamsStorage } from "../../CustomParamsStorage";
 import { MapLayersUI } from "../../mapLayers";
+
 import type { CustomParamItem } from "../Interfaces";
 
 interface CustomParamEditDialogProps {
@@ -17,7 +18,6 @@ interface CustomParamEditDialogProps {
   onOkResult?: (newItem: CustomParamItem, oldIem?: CustomParamItem) => void;
   onCancelResult?: () => void;
 }
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function CustomParamEditDialog(props: CustomParamEditDialogProps) {
   const [originalItemName] = React.useState<string | undefined>(() => (props.item ? props.item.name : undefined));
   const [item, setItem] = React.useState<CustomParamItem>(() => props.item ?? { name: "", key: "", value: "", secret: true });

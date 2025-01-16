@@ -6,7 +6,6 @@
 
 import "./MapUrlDialog.scss";
 import * as React from "react";
-import { SpecialKey } from "@itwin/appui-abstract";
 import { BeEvent, Guid } from "@itwin/core-bentley";
 import { IModelApp, MapLayerSource, MapLayerSourceStatus, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 import { Dialog, useCrossOriginPopup } from "@itwin/core-react";
@@ -61,7 +60,6 @@ export interface SourceState {
   privateCustomParamIdx?: { [key: string]: string };
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function MapUrlDialog(props: MapUrlDialogProps) {
   const { onOkResult, mapLayerOptions } = props;
 
@@ -220,6 +218,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
               setExternalLoginUrl(loginUrl);
               hasTokenEndPoint = true;
             }
+          // eslint-disable-next-line unused-imports/no-unused-vars
           } catch (_error) {}
         } else if (userName.length > 0 || password.length > 0) {
           // This is a patch until @itwin\core-frontend return the expected 'InvalidCredentials' status.
@@ -330,6 +329,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
           if (isSettingsStorageAvailable && vp?.iModel?.iTwinId) {
             try {
               await MapLayerPreferences.replaceSource(props.mapLayerSourceToEdit!, source, vp.iModel.iTwinId, vp?.iModel.iModelId);
+            // eslint-disable-next-line unused-imports/no-unused-vars
             } catch (err: any) {
               const errorMessage = IModelApp.localization.getLocalizedString("mapLayers:Messages.MapLayerEditError", {
                 layerName: props.mapLayerSourceToEdit?.name,
@@ -494,7 +494,8 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
             setShouldAutoAttachSource(false);
             await updateAuthState(source, validation);
           }
-        } catch (_error) {}
+        // eslint-disable-next-line unused-imports/no-unused-vars
+        } catch (err) {}
       }
     })();
   }, [isAccessClientInitialized, props.signInModeArgs, shouldAutoAttachSource, updateAuthState]);
@@ -527,8 +528,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
 
   const handleOnKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
-      // eslint-disable-next-line deprecation/deprecation
-      if (event.key === SpecialKey.Enter) {
+      if (event.key === "Enter") {
         if (readyToSave()) {
           handleOk();
         }

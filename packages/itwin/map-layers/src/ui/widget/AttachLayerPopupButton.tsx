@@ -32,7 +32,6 @@ interface AttachLayerPanelProps {
   onHandleOutsideClick?: (shouldHandle: boolean) => void;
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: AttachLayerPanelProps) {
   const [layerNameToAdd, setLayerNameToAdd] = React.useState<string | undefined>();
   const [sourceFilterString, setSourceFilterString] = React.useState<string | undefined>();
@@ -389,6 +388,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
           await MapLayerPreferences.deleteByName(source, iTwinId, iModelId);
           const msg = MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.RemoveLayerDefSuccess", { layerName });
           IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Info, msg));
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (err: any) {
           const msg = MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.RemoveLayerDefError", { layerName });
           IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msg));
@@ -549,7 +549,6 @@ export interface AttachLayerPopupButtonProps {
 }
 
 /** @internal */
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function AttachLayerPopupButton(props: AttachLayerPopupButtonProps) {
   const { showAttachLayerLabel, hideAttachLayerLabel, addCustomLayerButtonLabel } = React.useMemo(() => {
     return {

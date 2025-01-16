@@ -20,7 +20,6 @@ import type { CustomParamItem } from "../Interfaces";
 interface CustomParamsMap {
   [paramName: string]: CustomParamItem;
 }
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function CustomParamsSettingsPanel() {
   const [storage] = React.useState(() => new CustomParamsStorage());
   const [mappingStorage] = React.useState(() => new CustomParamsMappingStorage());

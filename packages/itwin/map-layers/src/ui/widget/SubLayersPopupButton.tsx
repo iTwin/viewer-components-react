@@ -3,15 +3,14 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
-
 import { RelativePosition } from "@itwin/appui-abstract";
-import type { OutsideClickEvent } from "@itwin/core-react";
 import { Popup, useOnOutsideClick, WebFontIcon } from "@itwin/core-react";
-import type { SubLayersPanelProps } from "./SubLayersTree";
-import { SubLayersPanel } from "./SubLayersTree";
-import { MapLayersUI } from "../../mapLayers";
 import { Button } from "@itwin/itwinui-react";
+import { MapLayersUI } from "../../mapLayers";
+import { SubLayersPanel } from "./SubLayersTree";
 
+import type { OutsideClickEvent } from "@itwin/core-react";
+import type { SubLayersPanelProps } from "./SubLayersTree";
 // cSpell:ignore droppable Sublayer
 
 /** @internal */
@@ -19,7 +18,6 @@ import { Button } from "@itwin/itwinui-react";
 export type SubLayersPopupButtonProps = SubLayersPanelProps;
 
 /** @internal */
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function SubLayersPopupButton(props: SubLayersPopupButtonProps) {
   const [showSubLayersLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:SubLayers.Show"));
   const [hideSubLayersLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:SubLayers.Hide"));

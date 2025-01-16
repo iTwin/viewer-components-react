@@ -48,7 +48,6 @@ const changeVisibilityByElementId = (element: Element | null, visible: boolean) 
 };
 
 /** @internal */
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function MapLayerDroppable(props: MapLayerDroppableProps) {
   const containsLayer = props.layersList && props.layersList.length > 0;
   const droppableId = props.isOverlay ? "overlayMapLayers" : "backgroundMapLayers";

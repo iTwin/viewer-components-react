@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ConditionalBooleanValue } from "@itwin/appui-abstract";
-import type { ToolbarItem, UiItemsProvider } from "@itwin/appui-react";
 import {
   StagePanelLocation,
   StagePanelSection,
@@ -16,16 +15,16 @@ import {
   WidgetState,
 } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
-import type { ScreenViewport } from "@itwin/core-frontend";
-import type { MapLayerProps } from "@itwin/core-common";
 import { SvgMapInfo } from "@itwin/itwinui-icons-react";
 import { MapFeatureInfoTool } from "@itwin/map-layers-formats";
-
 import { MapLayersUI } from "../mapLayers";
-import { MapFeatureInfoWidget } from "./widget/FeatureInfoWidget";
-import type { MapFeatureInfoOptions } from "./Interfaces";
 import { MapLayersSyncUiEventId } from "../MapLayersActionIds";
+import { MapFeatureInfoWidget } from "./widget/FeatureInfoWidget";
 
+import type { ToolbarItem, UiItemsProvider } from "@itwin/appui-react";
+import type { ScreenViewport } from "@itwin/core-frontend";
+import type { MapLayerProps } from "@itwin/core-common";
+import type { MapFeatureInfoOptions } from "./Interfaces";
 const supportsMapFeatureInfo = (vp: ScreenViewport, isOverlay: boolean, mapLayerProps: MapLayerProps[]): boolean => {
   for (let mapLayerIndex = 0; mapLayerIndex < mapLayerProps.length; mapLayerIndex++) {
     if (mapLayerProps[mapLayerIndex].visible && mapLayerProps[mapLayerIndex].transparency !== 1.0) {
@@ -70,7 +69,6 @@ export const getMapFeatureInfoToolItemDef = (): ToolItemDef =>
   });
 
 export class FeatureInfoUiItemsProvider implements UiItemsProvider {
-  // eslint-disable-line deprecation/deprecation
   public readonly id = "FeatureInfoUiItemsProvider";
   public static readonly widgetId = "map-layers:mapFeatureInfoWidget";
 

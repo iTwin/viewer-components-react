@@ -17,7 +17,6 @@ export interface MapLayerSettingsPopupButtonProps {
 }
 
 /** @alpha */
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function MapLayerSettingsPopupButton(props: MapLayerSettingsPopupButtonProps) {
   const panelRef = React.useRef<HTMLDivElement>(null);
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);

@@ -2,7 +2,6 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-/* eslint-disable deprecation/deprecation */
 // cSpell:ignore droppable Sublayer Basemap
 
 import "./BasemapPanel.scss";
@@ -28,7 +27,6 @@ interface BasemapPanelProps {
 }
 
 /** @internal */
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function BasemapPanel(props: BasemapPanelProps) {
   const [useColorLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Basemap.ColorFill"));
   const { activeViewport, bases } = useSourceMapContext();
@@ -255,7 +253,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
       );
     },
     [colorDialogTitle, presetColors, handleBackgroundColorDialogOk, handleBackgroundColorDialogCancel],
-  ); // eslint-disable-line react-hooks/exhaustive-deps
+  );
 
   const handleBaseMapSelection = React.useCallback(
     (value: string) => {

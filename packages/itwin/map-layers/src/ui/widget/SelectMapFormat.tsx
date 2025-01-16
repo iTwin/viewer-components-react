@@ -7,8 +7,9 @@
 import "./MapUrlDialog.scss";
 import * as React from "react";
 import { IModelApp } from "@itwin/core-frontend";
-import type { SelectOption } from "@itwin/itwinui-react";
 import { LabeledSelect, MenuItem } from "@itwin/itwinui-react";
+
+import type { SelectOption } from "@itwin/itwinui-react";
 import type { MapTypesOptions } from "../Interfaces";
 
 // TODO:
@@ -39,7 +40,6 @@ interface SelectMapFormatProps {
   status?: "positive" | "warning" | "negative";
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function SelectMapFormat(props: SelectMapFormatProps) {
   const [mapFormat, setMapFormat] = React.useState(props.value ?? MAP_TYPES.arcGis);
 

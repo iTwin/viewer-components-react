@@ -16,7 +16,6 @@ interface MapLayerSettingsMenuProps {
   activeViewport: ScreenViewport;
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function MapLayerSettingsMenu({ mapLayerSettings, onMenuItemSelection, activeViewport }: MapLayerSettingsMenuProps) {
   const [labelDetach] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:LayerMenu.Detach"));
   const [labelZoomToLayer] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:LayerMenu.ZoomToLayer"));

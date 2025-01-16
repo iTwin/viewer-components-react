@@ -4,17 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 // cSpell:ignore Modeless WMTS
 
-import { Dialog } from "@itwin/core-react";
-import * as React from "react";
 import "./MapSelectFeaturesDialog.scss";
-
+import * as React from "react";
+import { Dialog } from "@itwin/core-react";
+import { SvgStatusWarning } from "@itwin/itwinui-icons-color-react";
+import { Button, Icon } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
+import { SubLayersTree } from "./SubLayersTree";
+
 import type { MapLayerSource } from "@itwin/core-frontend";
 import type { MapSubLayerProps } from "@itwin/core-common";
-import { SubLayersTree } from "./SubLayersTree";
-import { Button, Icon } from "@itwin/itwinui-react";
-import { SvgStatusWarning } from "@itwin/itwinui-icons-color-react";
-
 export interface MapSelectFeaturesProps {
   source: MapLayerSource;
   subLayers: MapSubLayerProps[];
@@ -24,7 +23,6 @@ export interface MapSelectFeaturesProps {
 const minHeight = 250;
 const maxSubLayers = 30;
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function MapSelectFeaturesDialog(props: MapSelectFeaturesProps) {
   const [subLayers, setSubLayers] = React.useState(props.subLayers);
 

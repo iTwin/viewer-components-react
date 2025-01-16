@@ -4,18 +4,18 @@
  *--------------------------------------------------------------------------------------------*/
 // cSpell:ignore Modeless WMTS
 
-import { Select } from "@itwin/itwinui-react";
-import * as React from "react";
-import { CustomParamsStorage } from "../../CustomParamsStorage";
 import "./MapUrlDialog.scss";
+import * as React from "react";
+import { Select } from "@itwin/itwinui-react";
+import { CustomParamsStorage } from "../../CustomParamsStorage";
 import { MapLayersUI } from "../../mapLayers";
+
 interface SelectCustomParamProps {
   value?: string[];
   disabled?: boolean;
   onChange?: (value: string[]) => void;
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function SelectCustomParam(props: SelectCustomParamProps) {
   const [storage] = React.useState(() => new CustomParamsStorage());
 

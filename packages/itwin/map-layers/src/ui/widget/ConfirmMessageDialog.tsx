@@ -4,13 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 // cSpell:ignore Modeless WMTS
 
+import "./MapUrlDialog.scss";
 import * as React from "react";
-import type { CommonProps } from "@itwin/core-react";
+import { DialogButtonType } from "@itwin/appui-abstract";
 import { Dialog } from "@itwin/core-react";
 
-import "./MapUrlDialog.scss";
-import { DialogButtonType } from "@itwin/appui-abstract";
-
+import type { CommonProps } from "@itwin/core-react";
 interface ConfirmMessageDialogProps extends CommonProps {
   /** Title to show in title bar of dialog */
   title?: string | JSX.Element;
@@ -28,7 +27,6 @@ interface ConfirmMessageDialogProps extends CommonProps {
   maxHeight?: string | number;
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function ConfirmMessageDialog(props: ConfirmMessageDialogProps) {
   const buttonCluster = React.useMemo(
     () => [

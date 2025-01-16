@@ -4,17 +4,17 @@
  *--------------------------------------------------------------------------------------------*/
 // cSpell:ignore Modeless WMTS
 
-import { Select } from "@itwin/itwinui-react";
-import * as React from "react";
-import { CustomParamsStorage } from "../../CustomParamsStorage";
 import "./MapUrlDialog.scss";
+import * as React from "react";
+import { Select } from "@itwin/itwinui-react";
+import { CustomParamsStorage } from "../../CustomParamsStorage";
+
 interface SelectApiKeyProps {
   value?: string;
   disabled?: boolean;
   onChange?: (value: string) => void;
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function SelectApiKey(props: SelectApiKeyProps) {
   const [keyValue, setKeyValue] = React.useState<string | undefined>(props.value);
 

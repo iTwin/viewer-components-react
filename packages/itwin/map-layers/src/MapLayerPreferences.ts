@@ -3,11 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { IModelApp, MapLayerSource, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
-import type { GuidString } from "@itwin/core-bentley";
 import { BeEvent } from "@itwin/core-bentley";
+import { IModelApp, MapLayerSource, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 import { MapLayersUI } from "./mapLayers";
 
+import type { GuidString } from "@itwin/core-bentley";
 /** @internal */
 export interface MapLayerPreferencesContent {
   url: string;
@@ -113,7 +113,8 @@ export class MapLayerPreferences {
         iTwinId,
         iModelId,
       });
-    } catch (_err) {
+    // eslint-disable-next-line unused-imports/no-unused-vars
+    } catch (err) {
       await MapLayersUI.iTwinConfig.delete({
         accessToken,
         namespace: MapLayerPreferences._preferenceNamespace,
@@ -162,6 +163,7 @@ export class MapLayerPreferences {
         iTwinId,
         iModelId,
       });
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (_err) {
       // failed to store based on iModelId, attempt using iTwinId
       await MapLayersUI.iTwinConfig.delete({

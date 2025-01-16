@@ -3,13 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import "./TransparencyPopupButton.scss";
 import * as React from "react";
 import { RelativePosition } from "@itwin/appui-abstract";
 import { IModelApp } from "@itwin/core-frontend";
 import { Popup } from "@itwin/core-react";
 import { Button, Slider } from "@itwin/itwinui-react";
-
-import "./TransparencyPopupButton.scss";
 
 /** @alpha */
 export interface TransparencyPopupButtonProps {
@@ -23,7 +22,7 @@ export interface TransparencyPopupButtonProps {
 }
 
 /** @alpha */
-// eslint-disable-next-line @typescript-eslint/naming-convention
+// eslint-disable-next-line @typescript-eslint/unbound-method
 export function TransparencyPopupButton({ transparency, onTransparencyChange, buttonToolTip, disabled }: TransparencyPopupButtonProps) {
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
   const [defaultTransparencyLabel] = React.useState(IModelApp.localization.getLocalizedString("mapLayers:TransparencyPopup.SetTransparency"));
