@@ -1,7 +1,7 @@
 {
-  "type": "patch",
+  "type": "minor",
   "comment": "migrate map-layers to iTwinUI 3",
   "packageName": "@itwin/map-layers",
   "email": "hoangnam.le@bentley.com",
-  "dependentChangeType": "patch"
+  "dependentChangeType": "minor"
 }
