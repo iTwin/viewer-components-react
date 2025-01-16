@@ -18,7 +18,6 @@ import { useSourceMapContext } from "./MapLayerManager";
 import type { ViewState3d } from "@itwin/core-frontend";
 import type { BackgroundMapProps, BackgroundMapSettings, TerrainProps } from "@itwin/core-common";
 import type { SelectOption } from "@itwin/itwinui-react";
-/* eslint-disable deprecation/deprecation */
 
 enum MapMaskingOption {
   None,
@@ -54,7 +53,6 @@ function getHeightOriginModeFromKey(mode: string): TerrainHeightOriginMode {
   return TerrainHeightOriginMode.Ground;
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function MapManagerSettings() {
   const { activeViewport } = useSourceMapContext();
   const backgroundMapSettings = (activeViewport!.view as ViewState3d).getDisplayStyle3d().settings.backgroundMap;
@@ -224,7 +222,8 @@ export function MapManagerSettings() {
 
   /** Disable commas and letters */
   const onKeyDown = React.useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.keyCode === 188 || (event.keyCode >= 65 && event.keyCode <= 90)) {
+    const isLetter = /^[a-zA-Z]$/.test(event.key);
+    if (event.key === "," || isLetter) {
       event.preventDefault();
     }
   }, []);
@@ -263,11 +262,9 @@ export function MapManagerSettings() {
             <Slider min={0} max={100} values={[transparency * 100]} onChange={handleAlphaChange} step={1} />
 
             <span className="map-manager-settings-label">{locatableLabel}</span>
-            {/* eslint-disable-next-line deprecation/deprecation */}
             <ToggleSwitch onChange={onLocatableToggle} checked={isLocatable} />
 
             <span className="map-manager-settings-label">{maskingLabel}</span>
-            {/* eslint-disable-next-line deprecation/deprecation */}
             <ToggleSwitch onChange={onMaskingToggle} checked={masking !== MapMaskingOption.None} />
 
             <span className="map-manager-settings-label">{overrideMaskTransparencyLabel}</span>
@@ -296,7 +293,6 @@ export function MapManagerSettings() {
               />
 
               <span className="map-manager-settings-label">{useDepthBufferLabel}</span>
-              {/* eslint-disable-next-line deprecation/deprecation */}
               <ToggleSwitch disabled={applyTerrain} onChange={onToggleUseDepthBuffer} checked={useDepthBuffer} />
             </>
           </div>
@@ -306,7 +302,6 @@ export function MapManagerSettings() {
 
               <div className="maplayers-settings-container">
                 <span className="map-manager-settings-label">{enableLabel}</span>
-                {/* eslint-disable-next-line deprecation/deprecation */}
                 <ToggleSwitch onChange={onToggleTerrain} checked={applyTerrain} />
 
                 <span className="map-manager-settings-label">{modelHeightLabel}</span>
