@@ -1,8 +1,16 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Fri, 29 Nov 2024 10:43:06 GMT and should not be manually modified.
+This log was last generated on Tue, 14 Jan 2025 02:51:04 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.25.0
+
+Tue, 14 Jan 2025 02:51:04 GMT
+
+### Minor changes
+
+- Update to iTwinUI@3. Bumps AppUI peer deps to ^4.17 and move iTwinUI to peer dep ([#1097](https://github.com/iTwin/viewer-components-react/pull/1097))
 
 ## 0.24.1
 

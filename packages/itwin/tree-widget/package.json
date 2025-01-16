@@ -1,6 +1,6 @@
 {
   "name": "@itwin/tree-widget-react",
-  "version": "3.2.2",
+  "version": "3.2.4",
   "description": "Tree Widget React",
   "keywords": [
     "Bentley",
@@ -64,7 +64,7 @@
     "@itwin/itwinui-illustrations-react": "^2.1.0",
     "@itwin/presentation-core-interop": "^1.1.2",
     "@itwin/presentation-hierarchies": "^1.4.0",
-    "@itwin/presentation-hierarchies-react": "^1.3.0",
+    "@itwin/presentation-hierarchies-react": "^1.4.0",
     "@itwin/presentation-shared": "^1.2.0",
     "@itwin/unified-selection": "^1.2.0",
     "classnames": "^2.5.1",

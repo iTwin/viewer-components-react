@@ -2,6 +2,21 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Tue, 14 Jan 2025 02:51:04 GMT",
+      "version": "0.25.0",
+      "tag": "@itwin/measure-tools-react_v0.25.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "aruniverse@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "f76b21b63816a389b5e6f4946fd3214076fac2ef",
+            "comment": "Update to iTwinUI@3. Bumps AppUI peer deps to ^4.17 and move iTwinUI to peer dep"
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 29 Nov 2024 10:43:06 GMT",
       "version": "0.24.1",
       "tag": "@itwin/measure-tools-react_v0.24.1",

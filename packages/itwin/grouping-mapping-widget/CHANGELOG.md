@@ -1,8 +1,16 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Wed, 18 Dec 2024 12:42:56 GMT and should not be manually modified.
+This log was last generated on Wed, 08 Jan 2025 13:28:10 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.35.1
+
+Wed, 08 Jan 2025 13:28:10 GMT
+
+### Patches
+
+- Added support for getpersistenceunit and getpresentationunits formula functions. ([#1138](https://github.com/iTwin/viewer-components-react/pull/1138))
 
 ## 0.35.0
 

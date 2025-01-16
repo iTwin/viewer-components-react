@@ -170,14 +170,19 @@ async function createInstanceKeyPathsFromInstanceLabel(
   props: CategoriesTreeInstanceKeyPathsFromInstanceLabelProps & { labelsFactory: IInstanceLabelSelectClauseFactory },
 ) {
   const { categoryClass, categoryElementClass } = getClassesByView(props.viewType);
+  const adjustedLabel = props.label.replace(/[%_\\]/g, "\\$&");
   const reader = props.imodelAccess.createQueryReader(
     {
       ctes: [
-        `RootCategories(ClassName, ECInstanceId, ChildCount) as (
+        `RootCategoriesWithLabels(ClassName, ECInstanceId, ChildCount, DisplayLabel) as (
           SELECT
             ec_classname(this.ECClassId, 's.c'),
             this.ECInstanceId,
-            COUNT(sc.ECInstanceId)
+            COUNT(sc.ECInstanceId),
+            ${await props.labelsFactory.createSelectClause({
+              classAlias: "this",
+              className: categoryClass,
+            })}
           FROM ${categoryClass} this
           JOIN BisCore.Model m ON m.ECInstanceId = this.Model.Id
           JOIN BisCore.SubCategory sc ON sc.Parent.Id = this.ECInstanceId
@@ -201,17 +206,30 @@ async function createInstanceKeyPathsFromInstanceLabel(
         )`,
       ],
       ecsql: `
+      SELECT * FROM (
         SELECT
           c.ClassName AS CategoryClass,
           c.ECInstanceId AS CategoryId,
-          IIF(c.ChildCount > 1, sc.ClassName, NULL) AS SubcategoryClass,
-          IIF(c.ChildCount > 1, sc.ECInstanceId, NULL) AS SubcategoryId
-        FROM RootCategories c
+          sc.ClassName AS SubcategoryClass,
+          sc.ECInstanceId AS SubcategoryId
+        FROM RootCategoriesWithLabels c
         JOIN SubCategoriesWithLabels sc ON sc.ParentId = c.ECInstanceId
-        WHERE sc.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
+        WHERE c.ChildCount > 1 AND sc.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
+        UNION ALL
+        SELECT
+          c.ClassName AS CategoryClass,
+          c.ECInstanceId AS CategoryId,
+          CAST(NULL AS TEXT) AS SubcategoryClass,
+          CAST(NULL AS TEXT) AS SubcategoryId
+        FROM RootCategoriesWithLabels c
+        WHERE c.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
+        )
         LIMIT ${MAX_FILTERING_INSTANCE_KEY_COUNT + 1}
       `,
-      bindings: [{ type: "string", value: props.label.replace(/[%_\\]/g, "\\$&") }],
+      bindings: [
+        { type: "string", value: adjustedLabel },
+        { type: "string", value: adjustedLabel },
+      ],
     },
     { restartToken: "tree-widget/categories-tree/filter-by-label-query" },
   );
