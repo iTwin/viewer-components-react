@@ -29,7 +29,6 @@ const supportsMapFeatureInfo = (vp: ScreenViewport, isOverlay: boolean, mapLayer
   for (let mapLayerIndex = 0; mapLayerIndex < mapLayerProps.length; mapLayerIndex++) {
     if (mapLayerProps[mapLayerIndex].visible && mapLayerProps[mapLayerIndex].transparency !== 1.0) {
       const layerProvider = vp.getMapLayerImageryProvider({ index: mapLayerIndex, isOverlay });
-      // eslint-disable-next-line @itwin/no-internal
       if (layerProvider?.supportsMapFeatureInfo) {
         return true;
       }
