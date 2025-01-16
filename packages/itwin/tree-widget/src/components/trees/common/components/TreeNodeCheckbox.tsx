@@ -40,7 +40,7 @@ export function TreeNodeCheckbox({ node, onCheckboxClicked, getCheckboxState, ..
 
   const checkboxState = getCheckboxState(node);
   return (
-    <Tooltip content={checkboxState.tooltip} placement="left">
+    <TooltipWrapper content={checkboxState.tooltip}>
       <Checkbox
         {...props}
         className={cx("tw-tree-node-checkbox", props.className)}
@@ -55,6 +55,16 @@ export function TreeNodeCheckbox({ node, onCheckboxClicked, getCheckboxState, ..
         disabled={checkboxState.isDisabled}
         aria-label={checkboxState.tooltip}
       />
+    </TooltipWrapper>
+  );
+}
+
+function TooltipWrapper({ content, children }: { content?: string; children?: React.ReactNode }) {
+  return !!content ? (
+    <Tooltip content={content} placement="left">
+      {children}
     </Tooltip>
+  ) : (
+    <>{children}</>
   );
 }
