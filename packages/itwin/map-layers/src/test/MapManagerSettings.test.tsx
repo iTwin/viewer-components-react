@@ -84,6 +84,7 @@ describe("MapManagerSettings", () => {
   });
 
   beforeEach(() => {
+    window.HTMLElement.prototype.scrollTo = () => {};
     terrainSettingsMock.reset();
     terrainSettingsMock.setup((ts) => ts.heightOriginMode).returns(() => TerrainHeightOriginMode.Geodetic);
     terrainSettingsMock.setup((ts) => ts.heightOrigin).returns(() => 0);
@@ -208,7 +209,7 @@ describe("MapManagerSettings", () => {
       </SourceMapContext.Provider>,
     );
 
-    const sliders = container.querySelectorAll(".iui-slider-thumb");
+    const sliders = container.querySelectorAll('div[role="slider"]');
     expect(sliders.length).to.eq(2);
     act(() => {
       fireEvent.keyUp(sliders[0], { key: "ArrowLeft" });
@@ -232,7 +233,7 @@ describe("MapManagerSettings", () => {
       </SourceMapContext.Provider>,
     );
 
-    const sliders = container.querySelectorAll(".iui-slider-thumb");
+    const sliders = container.querySelectorAll('div[role="slider"]');
     expect(sliders.length).to.eq(2);
 
     const sliderThumb = sliders[1];
@@ -241,7 +242,7 @@ describe("MapManagerSettings", () => {
     expect(sliderThumb?.getAttribute("aria-disabled")).to.eql("true");
 
     // Turn on the mask toggle
-    const toggles = container.querySelectorAll(".iui-toggle-switch");
+    const toggles = container.querySelectorAll('input[role="switch"]');
     const maskToggle = toggles[getToggleIndex("mask")];
     should().exist(maskToggle);
     fireEvent.click(maskToggle);
