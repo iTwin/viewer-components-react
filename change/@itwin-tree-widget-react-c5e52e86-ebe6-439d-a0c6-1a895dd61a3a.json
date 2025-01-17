@@ -1,6 +1,6 @@
 {
   "type": "patch",
-  "comment": "Node visibility button will no longer generate an empty tooltip, when tooltip content is empty.",
+  "comment": "Fix visibility button with no content rendering empty tooltip.",
   "packageName": "@itwin/tree-widget-react",
   "email": "43886789+MartynasStrazdas@users.noreply.github.com",
   "dependentChangeType": "patch"
