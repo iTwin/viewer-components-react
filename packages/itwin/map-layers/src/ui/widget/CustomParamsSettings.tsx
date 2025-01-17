@@ -63,7 +63,7 @@ export function CustomParamsSettingsPanel() {
    Handle Remove layer button clicked
    */
   const onItemRemoveButtonClicked = React.useCallback(
-    (name: string, event) => {
+    (name: string, event: React.MouseEvent) => {
       event.stopPropagation(); // We don't want the owning ListBox to react on mouse click.
       deleteMapping(name);
     },

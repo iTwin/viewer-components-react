@@ -8,7 +8,7 @@ import { UiFramework } from "@itwin/appui-react";
 import { IModelApp, MapLayerSource, MapLayerSourceStatus, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 import * as UiCore from "@itwin/core-react";
 import { SvgAdd } from "@itwin/itwinui-icons-react";
-import { Button, IconButton, Input } from "@itwin/itwinui-react";
+import { Button, IconButton, Input, ProgressRadial } from "@itwin/itwinui-react";
 import { MapLayerPreferences } from "../../MapLayerPreferences";
 import { MapLayersUI } from "../../mapLayers";
 import { ConfirmMessageDialog } from "./ConfirmMessageDialog";
@@ -405,7 +405,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
    Handle Remove layer button clicked
    */
   const onItemRemoveButtonClicked = React.useCallback(
-    (source, event) => {
+    (source: MapLayerSource, event: React.MouseEvent) => {
       event.stopPropagation(); // We don't want the owning ListBox to react on mouse click.
 
       const layerName = source.name;
@@ -434,10 +434,10 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
  Handle Edit layer button clicked
  */
   const onItemEditButtonClicked = React.useCallback(
-    (event) => {
+    (event: React.MouseEvent) => {
       event.stopPropagation(); // We don't want the owning ListBox to react on mouse click.
 
-      const targetLayerName = event?.currentTarget?.parentNode?.dataset?.value;
+      const targetLayerName = (event?.currentTarget?.parentNode as HTMLElement)?.dataset?.value;
       const matchingSource = sources.find((layerSource) => layerSource.name === targetLayerName);
 
       // we expect a single layer source matching this name
@@ -464,7 +464,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
 
   return (
     <div className="map-manager-header">
-      {(loading || loadingSources) && <UiCore.LoadingSpinner message={loadingMapSources} />}
+      {(loading || loadingSources) && <ProgressRadial as="div" labels={[loadingMapSources]} />}
       <div className="map-manager-source-listbox-header">
         <Input
           type="text"

@@ -8,7 +8,6 @@ import { assert, expect, should } from "chai";
 import * as enzyme from "enzyme";
 import * as sinon from "sinon";
 import * as moq from "typemoq";
-import { SpecialKey } from "@itwin/appui-abstract";
 import { PlanarClipMaskMode, PlanarClipMaskPriority, TerrainHeightOriginMode } from "@itwin/core-common";
 import { MockRender } from "@itwin/core-frontend";
 import { NumberInput } from "@itwin/core-react";
@@ -69,7 +68,7 @@ describe("MapManagerSettings", () => {
     component.find("input").props().onChange!({ currentTarget: { value } } as any);
 
     // Handler is not triggered until there is a key press
-    component.find("input").simulate("keydown", { key: SpecialKey.Enter });
+    component.find("input").simulate("keydown", { key: "Enter" });
     component.update();
   };
 

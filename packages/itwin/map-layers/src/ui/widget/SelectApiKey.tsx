@@ -43,7 +43,7 @@ export function SelectApiKey(props: SelectApiKeyProps) {
     [props],
   );
 
-  const handleKeyDown = React.useCallback((e) => {
+  const handleKeyDown = React.useCallback((e: React.KeyboardEvent) => {
     if (e.code === "Delete" || e.key === "Backspace") {
       setKeyValue(undefined);
     }

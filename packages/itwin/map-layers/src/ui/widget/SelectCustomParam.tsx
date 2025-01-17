@@ -10,6 +10,8 @@ import { Select } from "@itwin/itwinui-react";
 import { CustomParamsStorage } from "../../CustomParamsStorage";
 import { MapLayersUI } from "../../mapLayers";
 
+import type { SelectValueChangeEvent } from "@itwin/itwinui-react";
+
 interface SelectCustomParamProps {
   value?: string[];
   disabled?: boolean;
@@ -37,7 +39,7 @@ export function SelectCustomParam(props: SelectCustomParamProps) {
   }, [props.value]);
 
   const handleOnChange = React.useCallback(
-    (val, event) => {
+    (val: string, event: SelectValueChangeEvent) => {
       const stateSetter = (prev: string[] | undefined) => {
         const getValue = (): string[] => {
           if (!prev) {
@@ -57,7 +59,7 @@ export function SelectCustomParam(props: SelectCustomParamProps) {
     [props],
   );
 
-  const handleKeyDown = React.useCallback((e) => {
+  const handleKeyDown = React.useCallback((e: React.KeyboardEvent) => {
     if (e.code === "Delete" || e.key === "Backspace") {
       setParamValues(undefined);
     }

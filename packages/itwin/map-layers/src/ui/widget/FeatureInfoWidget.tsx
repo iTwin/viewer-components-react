@@ -26,7 +26,7 @@ interface MapFeatureInfoWidgetProps {
 }
 
 export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetProps) {
-  const dataProvider = React.useRef<FeatureInfoDataProvider>();
+  const dataProvider = React.useRef<FeatureInfoDataProvider>(undefined);
   const [hasData, setHasData] = React.useState<boolean>(false);
 
   const [noRecordsMessage] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:FeatureInfoWidget.NoRecords"));
