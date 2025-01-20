@@ -10,9 +10,9 @@ import * as moq from "typemoq";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { EmptyLocalization } from "@itwin/core-common";
-import { renderHook as renderHookRTL, render as renderRTL } from "@testing-library/react";
+import { render as renderRTL, renderHook as renderHookRTL } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { TreeWidget } from "../TreeWidget";
+import { TreeWidget } from "../TreeWidget.js";
 
 import type { IModelConnection, PerModelCategoryVisibility, Viewport, ViewState } from "@itwin/core-frontend";
 import type { RegisteredRuleset, Ruleset, VariableValue } from "@itwin/presentation-common";

@@ -1,7 +1,5 @@
 {
-  "include": ["src/**/*", "lib/cjs/**/*"],
-  "exclude": ["src/test/**", "lib/cjs/test/**"],
-  "extension": [".ts", ".tsx"],
+  "include": ["src/tree-widget-react/**/*", "lib/cjs/tree-widget-react/**/*"],
   "temp-dir": "./lib/cjs/test/coverage/.nyc_output",
   "report-dir": "./lib/cjs/test/coverage",
   "reporter": ["text-summary", "lcov", "cobertura"]

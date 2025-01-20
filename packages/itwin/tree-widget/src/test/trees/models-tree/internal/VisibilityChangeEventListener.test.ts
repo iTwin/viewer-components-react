@@ -7,8 +7,8 @@ import { expect } from "chai";
 import sinon from "sinon";
 import { using } from "@itwin/core-bentley";
 import { waitFor } from "@testing-library/react";
-import { createVisibilityChangeEventListener } from "../../../../components/trees/models-tree/internal/VisibilityChangeEventListener";
-import { createFakeSinonViewport } from "../../Common";
+import { createVisibilityChangeEventListener } from "../../../../components/trees/models-tree/internal/VisibilityChangeEventListener.js";
+import { createFakeSinonViewport } from "../../Common.js";
 
 describe("VisibilityChangeEventListener", () => {
   it("raises event on `onAlwaysDrawnChanged` event", async () => {

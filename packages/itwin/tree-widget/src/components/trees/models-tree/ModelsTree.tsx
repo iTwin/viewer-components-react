@@ -3,12 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { VisibilityTree } from "../common/components/VisibilityTree";
-import { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRenderer";
-import { useModelsTree } from "./UseModelsTree";
+import { VisibilityTree } from "../common/components/VisibilityTree.js";
+import { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRenderer.js";
+import { useModelsTree } from "./UseModelsTree.js";
 
-import type { UseModelsTreeProps } from "./UseModelsTree";
-import type { VisibilityTreeProps } from "../common/components/VisibilityTree";
+import type { UseModelsTreeProps } from "./UseModelsTree.js";
+import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 
 /** @beta */
 export type ModelsTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode"> &

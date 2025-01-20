@@ -2,50 +2,29 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
+// WARNING: The order of imports in this file is important!
 
+// setup chai
 import chai from "chai";
 import chaiAsPromised from "chai-as-promised";
 import chaiJestSnapshot from "chai-jest-snapshot";
 import chaiSubset from "chai-subset";
-import globalJsdom from "global-jsdom";
-import * as jsdom from "jsdom";
-import path from "path";
 import sinonChai from "sinon-chai";
-
-// get rid of various xhr errors in the console
-globalJsdom(undefined, {
-  virtualConsole: new jsdom.VirtualConsole().sendTo(console, { omitJSDOMErrors: true }),
-});
-
-// setup chai
-chai.should();
 chai.use(chaiJestSnapshot);
 chai.use(chaiSubset);
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
 
-before(async function () {
-  chaiJestSnapshot.resetSnapshotRegistry();
-  getGlobalThis().IS_REACT_ACT_ENVIRONMENT = true;
+// get rid of various xhr errors in the console
+import globalJsdom from "global-jsdom";
+import * as jsdom from "jsdom";
+globalJsdom(undefined, {
+  virtualConsole: new jsdom.VirtualConsole().sendTo(console, { omitJSDOMErrors: true }),
 });
 
-after(() => {
-  delete getGlobalThis().IS_REACT_ACT_ENVIRONMENT;
-});
-
-beforeEach(function () {
-  const currentTest = this.currentTest!;
-
-  // set up snapshot name
-  const sourceFilePath = currentTest.file?.replace(`lib${path.sep}cjs${path.sep}test`, `src${path.sep}test`).replace(/\.(jsx?|tsx?)$/, "");
-  const snapPath = `${sourceFilePath}.snap`;
-  chaiJestSnapshot.setFilename(snapPath);
-  chaiJestSnapshot.setTestName(currentTest.fullTitle());
-});
-
-// This is required by I18n module
+// setup browser environment
+// required by I18n module
 global.XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest; // eslint-disable-line @typescript-eslint/no-var-requires
-
 // needed for context menu to work in tests
 global.DOMRect = class DOMRect {
   public bottom: number = 0;
@@ -64,6 +43,33 @@ global.DOMRect = class DOMRect {
   public toJSON() {
     return JSON.stringify(this);
   }
+};
+
+// supply mocha hooks
+import path from "path";
+import { cleanup, configure } from "@testing-library/react";
+export const mochaHooks = {
+  beforeAll() {
+    chaiJestSnapshot.resetSnapshotRegistry();
+    getGlobalThis().IS_REACT_ACT_ENVIRONMENT = true;
+  },
+  beforeEach() {
+    // enable strict mode for each test by default
+    configure({ reactStrictMode: !process.env.DISABLE_STRICT_MODE });
+
+    // set up snapshot name
+    const currentTest = (this as unknown as Mocha.Context).currentTest!;
+    const sourceFilePath = currentTest.file?.replace(`lib${path.sep}cjs${path.sep}test`, `src${path.sep}test`).replace(/\.(jsx?|tsx?)$/, "");
+    const snapPath = `${sourceFilePath}.snap`;
+    chaiJestSnapshot.setFilename(snapPath);
+    chaiJestSnapshot.setTestName(currentTest.fullTitle());
+  },
+  afterEach() {
+    cleanup();
+  },
+  afterAll() {
+    delete getGlobalThis().IS_REACT_ACT_ENVIRONMENT;
+  },
 };
 
 function getGlobalThis(): typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean } {

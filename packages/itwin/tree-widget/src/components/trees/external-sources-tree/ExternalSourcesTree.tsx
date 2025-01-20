@@ -4,12 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { SvgDetails, SvgDocument, SvgItem } from "@itwin/itwinui-icons-react";
-import { Tree } from "../common/components/Tree";
-import { TreeRenderer } from "../common/components/TreeRenderer";
-import { ExternalSourcesTreeComponent } from "./ExternalSourcesTreeComponent";
-import { ExternalSourcesTreeDefinition } from "./ExternalSourcesTreeDefinition";
+import { Tree } from "../common/components/Tree.js";
+import { TreeRenderer } from "../common/components/TreeRenderer.js";
+import { ExternalSourcesTreeComponent } from "./ExternalSourcesTreeComponent.js";
+import { ExternalSourcesTreeDefinition } from "./ExternalSourcesTreeDefinition.js";
 
-import type { TreeProps } from "../common/components/Tree";
+import type { TreeProps } from "../common/components/Tree.js";
 import type { ReactElement } from "react";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 

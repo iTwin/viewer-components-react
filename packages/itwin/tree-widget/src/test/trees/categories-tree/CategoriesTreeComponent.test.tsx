@@ -10,15 +10,15 @@ import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { Presentation } from "@itwin/presentation-frontend";
-import * as treeHeader from "../../../components/tree-header/TreeHeader";
-import * as categoryTree from "../../../components/trees/categories-tree/CategoriesTree";
-import { CategoriesTreeComponent } from "../../../components/trees/categories-tree/CategoriesTreeComponent";
-import * as categoriesVisibilityUtilsModule from "../../../components/trees/common/CategoriesVisibilityUtils";
-import { TreeWidget } from "../../../TreeWidget";
-import { mockPresentationManager, render, TestUtils, waitFor } from "../../TestUtils";
+import * as treeHeader from "../../../components/tree-header/TreeHeader.js";
+import * as categoryTree from "../../../components/trees/categories-tree/CategoriesTree.js";
+import { CategoriesTreeComponent } from "../../../components/trees/categories-tree/CategoriesTreeComponent.js";
+import * as categoriesVisibilityUtilsModule from "../../../components/trees/common/CategoriesVisibilityUtils.js";
+import { TreeWidget } from "../../../TreeWidget.js";
+import { mockPresentationManager, render, TestUtils, waitFor } from "../../TestUtils.js";
 
 import type { ComponentPropsWithoutRef } from "react";
-import type { CategoryInfo } from "../../../components/trees/common/CategoriesVisibilityUtils";
+import type { CategoryInfo } from "../../../components/trees/common/CategoriesVisibilityUtils.js";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 

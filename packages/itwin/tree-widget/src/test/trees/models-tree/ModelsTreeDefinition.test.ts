@@ -8,18 +8,15 @@ import { IModel, IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itw
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import {
-  buildIModel,
-  insertPhysicalElement,
-  insertPhysicalModelWithPartition,
-  insertPhysicalPartition,
-  insertPhysicalSubModel,
-  insertSpatialCategory,
+  HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
+} from "@itwin/presentation-testing";
+import {
+  buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertPhysicalPartition, insertPhysicalSubModel, insertSpatialCategory,
   insertSubject,
-} from "../../IModelUtils";
-import { NodeValidators, validateHierarchy } from "../HierarchyValidation";
-import { createModelsTreeProvider } from "./Utils";
+} from "../../IModelUtils.js";
+import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
+import { createModelsTreeProvider } from "./Utils.js";
 
 import type { InstanceKey } from "@itwin/presentation-shared";
 

@@ -7,12 +7,12 @@ import "./SelectableTree.scss";
 import { useEffect, useState } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Flex, ProgressLinear } from "@itwin/itwinui-react";
-import { TreeWidget } from "../TreeWidget";
-import { TreeSelector } from "./TreeSelector";
+import { TreeWidget } from "../TreeWidget.js";
+import { TreeSelector } from "./TreeSelector.js";
 
 import type { PropsWithChildren } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { TreeContentDefinition, TreeSelectorProps } from "./TreeSelector";
+import type { TreeContentDefinition, TreeSelectorProps } from "./TreeSelector.js";
 
 /**
  * Props for rendering trees

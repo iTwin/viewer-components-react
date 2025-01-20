@@ -5,7 +5,7 @@
 
 import type { Locator } from "@playwright/test";
 import { test } from "@playwright/test";
-import { initTreeWidgetTest, selectTree, takeScreenshot, withDifferentDensities } from "./utils";
+import { initTreeWidgetTest, selectTree, takeScreenshot, withDifferentDensities } from "./utils.js";
 
 test.describe("External sources tree", () => {
   let treeWidget: Locator;

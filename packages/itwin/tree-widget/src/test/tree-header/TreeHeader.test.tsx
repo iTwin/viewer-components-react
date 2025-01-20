@@ -7,13 +7,12 @@ import { expect } from "chai";
 import sinon from "sinon";
 import { EmptyLocalization } from "@itwin/core-common";
 import { Button } from "@itwin/itwinui-react";
-import userEvents from "@testing-library/user-event";
-import { TreeHeader } from "../../components/tree-header/TreeHeader";
-import { TreeWidget } from "../../TreeWidget";
-import { render, stubCancelAnimationFrame, waitFor } from "../TestUtils";
+import { TreeHeader } from "../../components/tree-header/TreeHeader.js";
+import { TreeWidget } from "../../TreeWidget.js";
+import { render, stubCancelAnimationFrame, waitFor } from "../TestUtils.js";
 
 import type { ComponentPropsWithoutRef } from "react";
-import type { TreeFilteringProps } from "../../components/tree-header/TreeHeader";
+import type { TreeFilteringProps } from "../../components/tree-header/TreeHeader.js";
 
 describe("<TreeHeader />", () => {
   stubCancelAnimationFrame();
@@ -88,11 +87,11 @@ describe("<TreeHeader />", () => {
 
   describe("search box", () => {
     it("renders search box", async () => {
-      const { getByRole } = render(<TreeHeader {...defaultProps} filteringProps={{ ...filteringProps, selectedIndex: 5, resultCount: 10 }} />);
+      const { getByRole, user } = render(<TreeHeader {...defaultProps} filteringProps={{ ...filteringProps, selectedIndex: 5, resultCount: 10 }} />);
 
       const openButton = getByRole("button", { name: TreeWidget.translate("header.searchBox.open") });
       expect(openButton).to.not.be.null;
-      await userEvents.click(openButton);
+      await user.click(openButton);
 
       const closeButton = getByRole("button", { name: TreeWidget.translate("header.searchBox.close") });
       const nextButton = getByRole("button", { name: TreeWidget.translate("header.searchBox.next") });
@@ -104,132 +103,134 @@ describe("<TreeHeader />", () => {
     });
 
     it("opens and closes search box", async () => {
-      const { getByRole, queryByRole } = render(<TreeHeader {...defaultProps} />);
+      const { getByRole, queryByRole, user } = render(<TreeHeader {...defaultProps} />);
 
       const openButton = getByRole("button", { name: TreeWidget.translate("header.searchBox.open") });
-      await userEvents.click(openButton);
+      await user.click(openButton);
 
       await waitFor(() => expect(queryByRole("button", { name: TreeWidget.translate("header.searchBox.close") })).to.not.be.null);
 
       const closeButton = getByRole("button", { name: TreeWidget.translate("header.searchBox.close") });
-      await userEvents.click(closeButton);
+      await user.click(closeButton);
 
       await waitFor(() => expect(queryByRole("button", { name: TreeWidget.translate("header.searchBox.close") })).to.be.null);
     });
 
     it("invokes 'onFilterStart' when text is entered", async () => {
       const spy = sinon.spy();
-      const { getByRole } = render(<TreeHeader {...defaultProps} filteringProps={{ ...filteringProps, onFilterStart: spy }} />);
+      const { getByRole, user } = render(<TreeHeader {...defaultProps} filteringProps={{ ...filteringProps, onFilterStart: spy }} />);
       const openButton = getByRole("button", { name: TreeWidget.translate("header.searchBox.open") });
-      await userEvents.click(openButton);
+      await user.click(openButton);
 
       const input = getByRole("searchbox");
-      await userEvents.type(input, "SearchString");
+      await user.type(input, "SearchString");
       await waitFor(() => expect(spy).to.be.calledOnceWithExactly("SearchString"));
     });
 
     it("invokes 'onFilterClear' when search box is cleared", async () => {
       const filterStartSpy = sinon.spy();
       const filterClearSpy = sinon.spy();
-      const { getByRole } = render(
+      const { getByRole, user } = render(
         <TreeHeader {...defaultProps} filteringProps={{ ...filteringProps, onFilterStart: filterStartSpy, onFilterClear: filterClearSpy }} />,
       );
       filterClearSpy.resetHistory();
 
       const openButton = getByRole("button", { name: TreeWidget.translate("header.searchBox.open") });
-      await userEvents.click(openButton);
+      await user.click(openButton);
 
       const input = getByRole("searchbox");
-      await userEvents.type(input, "SearchString");
+      await user.type(input, "SearchString");
       await waitFor(() => expect(filterStartSpy).to.be.calledWithExactly("SearchString"));
 
-      await userEvents.clear(input);
+      await user.clear(input);
       await waitFor(() => expect(filterClearSpy).to.be.calledOnce);
     });
 
     it("invokes 'onFilterClear' when search box is closed", async () => {
       const filterStartSpy = sinon.spy();
       const filterClearSpy = sinon.spy();
-      const { getByRole } = render(
+      const { getByRole, user } = render(
         <TreeHeader {...defaultProps} filteringProps={{ ...filteringProps, onFilterStart: filterStartSpy, onFilterClear: filterClearSpy }} />,
       );
       filterClearSpy.resetHistory();
 
       const openButton = getByRole("button", { name: TreeWidget.translate("header.searchBox.open") });
-      await userEvents.click(openButton);
+      await user.click(openButton);
 
       const input = getByRole("searchbox");
-      await userEvents.type(input, "SearchString");
+      await user.type(input, "SearchString");
       await waitFor(() => expect(filterStartSpy).to.be.calledWithExactly("SearchString"));
 
-      await userEvents.click(getByRole("button", { name: TreeWidget.translate("header.searchBox.close") }));
+      await user.click(getByRole("button", { name: TreeWidget.translate("header.searchBox.close") }));
       await waitFor(() => expect(filterClearSpy).to.be.calledOnce);
     });
 
     it("renders matches selector", async () => {
-      const { getByRole, queryByText } = render(<TreeHeader {...defaultProps} filteringProps={{ ...filteringProps, resultCount: 10, selectedIndex: 5 }} />);
+      const { getByRole, queryByText, user } = render(
+        <TreeHeader {...defaultProps} filteringProps={{ ...filteringProps, resultCount: 10, selectedIndex: 5 }} />,
+      );
       const openButton = getByRole("button", { name: TreeWidget.translate("header.searchBox.open") });
-      await userEvents.click(openButton);
+      await user.click(openButton);
 
       await waitFor(() => expect(queryByText("5/10")).to.not.be.null);
     });
 
     it("defaults to first match if `selectedIndex` is `undefined`", async () => {
-      const { getByRole, queryByText } = render(<TreeHeader {...defaultProps} filteringProps={{ ...filteringProps, resultCount: 10 }} />);
+      const { getByRole, queryByText, user } = render(<TreeHeader {...defaultProps} filteringProps={{ ...filteringProps, resultCount: 10 }} />);
       const openButton = getByRole("button", { name: TreeWidget.translate("header.searchBox.open") });
-      await userEvents.click(openButton);
+      await user.click(openButton);
 
       await waitFor(() => expect(queryByText("1/10")).to.not.be.null);
     });
     it("invokes `onSelectedChanged` when 'Next' button is clicked", async () => {
       const spy = sinon.spy();
-      const { getByRole } = render(
+      const { getByRole, user } = render(
         <TreeHeader {...defaultProps} filteringProps={{ ...filteringProps, onSelectedChanged: spy, resultCount: 10, selectedIndex: 5 }} />,
       );
       const openButton = getByRole("button", { name: TreeWidget.translate("header.searchBox.open") });
-      await userEvents.click(openButton);
+      await user.click(openButton);
 
       const button = await waitFor(() => getByRole("button", { name: TreeWidget.translate("header.searchBox.next") }));
-      await userEvents.click(button);
+      await user.click(button);
       expect(spy).to.be.calledOnceWithExactly(6);
     });
 
     it("does not invoke `onSelectedChanged` when 'Next' button is clicked on last index", async () => {
       const spy = sinon.spy();
-      const { getByRole } = render(
+      const { getByRole, user } = render(
         <TreeHeader {...defaultProps} filteringProps={{ ...filteringProps, onSelectedChanged: spy, resultCount: 10, selectedIndex: 10 }} />,
       );
       const openButton = getByRole("button", { name: TreeWidget.translate("header.searchBox.open") });
-      await userEvents.click(openButton);
+      await user.click(openButton);
 
       const button = await waitFor(() => getByRole("button", { name: TreeWidget.translate("header.searchBox.next") }));
-      await userEvents.click(button);
+      await user.click(button);
       expect(spy).to.not.be.called;
     });
 
     it("invokes `onSelectedChanged` when 'Previous' button is clicked", async () => {
       const spy = sinon.spy();
-      const { getByRole } = render(
+      const { getByRole, user } = render(
         <TreeHeader {...defaultProps} filteringProps={{ ...filteringProps, onSelectedChanged: spy, resultCount: 10, selectedIndex: 5 }} />,
       );
       const openButton = getByRole("button", { name: TreeWidget.translate("header.searchBox.open") });
-      await userEvents.click(openButton);
+      await user.click(openButton);
 
       const button = await waitFor(() => getByRole("button", { name: TreeWidget.translate("header.searchBox.previous") }));
-      await userEvents.click(button);
+      await user.click(button);
       expect(spy).to.be.calledOnceWithExactly(4);
     });
 
     it("does not invoke `onSelectedChanged` when 'Previous' button is clicked on first index", async () => {
       const spy = sinon.spy();
-      const { getByRole } = render(
+      const { getByRole, user } = render(
         <TreeHeader {...defaultProps} filteringProps={{ ...filteringProps, onSelectedChanged: spy, resultCount: 10, selectedIndex: 1 }} />,
       );
       const openButton = getByRole("button", { name: TreeWidget.translate("header.searchBox.open") });
-      await userEvents.click(openButton);
+      await user.click(openButton);
 
       const button = await waitFor(() => getByRole("button", { name: TreeWidget.translate("header.searchBox.previous") }));
-      await userEvents.click(button);
+      await user.click(button);
       expect(spy).to.not.be.called;
     });
   });

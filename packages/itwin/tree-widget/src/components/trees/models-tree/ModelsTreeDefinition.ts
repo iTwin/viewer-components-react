@@ -5,16 +5,13 @@
 
 import { bufferCount, defer, from, lastValueFrom, map, merge, mergeAll, mergeMap, reduce, switchMap } from "rxjs";
 import {
-  createNodesQueryClauseFactory,
-  createPredicateBasedHierarchyDefinition,
-  NodeSelectClauseColumnNames,
-  ProcessedHierarchyNode,
+  createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition, NodeSelectClauseColumnNames, ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
-import { collect } from "../common/Rxjs";
-import { FilterLimitExceededError } from "../common/TreeErrors";
-import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils";
-import { releaseMainThreadOnItemsCount } from "./Utils";
+import { collect } from "../common/Rxjs.js";
+import { FilterLimitExceededError } from "../common/TreeErrors.js";
+import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils.js";
+import { releaseMainThreadOnItemsCount } from "./Utils.js";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { Observable } from "rxjs";
@@ -40,7 +37,7 @@ import type {
   LimitingECSqlQueryExecutor,
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
-import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
+import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
 
 /** @beta */
 export type ClassGroupingHierarchyNode = GroupingHierarchyNode & { key: ClassGroupingNodeKey };

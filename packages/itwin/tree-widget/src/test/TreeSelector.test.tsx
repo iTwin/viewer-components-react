@@ -5,8 +5,8 @@
 
 import { expect } from "chai";
 import sinon from "sinon";
-import { TreeSelector } from "../components/TreeSelector";
-import { render, waitFor } from "./TestUtils";
+import { TreeSelector } from "../components/TreeSelector.js";
+import { render, waitFor } from "./TestUtils.js";
 
 before(async () => {
   window.HTMLElement.prototype.scrollIntoView = function () {};

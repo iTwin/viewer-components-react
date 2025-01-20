@@ -9,20 +9,16 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-import { CategoriesTreeDefinition } from "../../../components/trees/categories-tree/CategoriesTreeDefinition";
 import {
-  buildIModel,
-  insertDrawingCategory,
-  insertDrawingGraphic,
-  insertDrawingModelWithPartition,
-  insertPhysicalElement,
-  insertPhysicalModelWithPartition,
-  insertSpatialCategory,
-  insertSubCategory,
-} from "../../IModelUtils";
-import { createIModelAccess } from "../Common";
-import { NodeValidators, validateHierarchy } from "../HierarchyValidation";
+  HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
+} from "@itwin/presentation-testing";
+import { CategoriesTreeDefinition } from "../../../components/trees/categories-tree/CategoriesTreeDefinition.js";
+import {
+  buildIModel, insertDrawingCategory, insertDrawingGraphic, insertDrawingModelWithPartition, insertPhysicalElement, insertPhysicalModelWithPartition,
+  insertSpatialCategory, insertSubCategory,
+} from "../../IModelUtils.js";
+import { createIModelAccess } from "../Common.js";
+import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 

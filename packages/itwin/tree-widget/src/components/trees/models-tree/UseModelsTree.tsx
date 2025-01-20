@@ -9,15 +9,15 @@ import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin
 import { Anchor, Text } from "@itwin/itwinui-react";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
-import { TreeWidget } from "../../../TreeWidget";
-import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
-import { FilterLimitExceededError } from "../common/TreeErrors";
-import { useIModelChangeListener } from "../common/UseIModelChangeListener";
-import { useTelemetryContext } from "../common/UseTelemetryContext";
-import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
-import { ModelsTreeNode } from "./internal/ModelsTreeNode";
-import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibilityHandler";
-import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition";
+import { TreeWidget } from "../../../TreeWidget.js";
+import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
+import { FilterLimitExceededError } from "../common/TreeErrors.js";
+import { useIModelChangeListener } from "../common/UseIModelChangeListener.js";
+import { useTelemetryContext } from "../common/UseTelemetryContext.js";
+import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
+import { ModelsTreeNode } from "./internal/ModelsTreeNode.js";
+import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibilityHandler.js";
+import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition.js";
 
 import type { GroupingHierarchyNode, HierarchyFilteringPath, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { Id64String } from "@itwin/core-bentley";
@@ -25,10 +25,10 @@ import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation
 import type { ReactElement } from "react";
 import type { Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
-import type { ClassGroupingHierarchyNode, ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition";
-import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/ModelsTreeVisibilityHandler";
-import type { VisibilityTreeProps } from "../common/components/VisibilityTree";
-import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer";
+import type { ClassGroupingHierarchyNode, ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition.js";
+import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/ModelsTreeVisibilityHandler.js";
+import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
+import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 
 type ModelsTreeFilteringError = "tooManyFilterMatches" | "tooManyInstancesFocused" | "unknownFilterError" | "unknownInstanceFocusError";
 

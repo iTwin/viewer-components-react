@@ -9,12 +9,9 @@ import * as moq from "typemoq";
 import { SubCategoryAppearance } from "@itwin/core-common";
 import { IModelApp, NoRenderApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
 import {
-  enableCategoryDisplay,
-  enableSubCategoryDisplay,
-  loadCategoriesFromViewport,
-  toggleAllCategories,
-} from "../../components/trees/common/CategoriesVisibilityUtils";
-import { TestUtils } from "../TestUtils";
+  enableCategoryDisplay, enableSubCategoryDisplay, loadCategoriesFromViewport, toggleAllCategories,
+} from "../../components/trees/common/CategoriesVisibilityUtils.js";
+import { TestUtils } from "../TestUtils.js";
 
 import type { ECSqlReader } from "@itwin/core-common";
 import type { IModelConnection, SpatialViewState, Viewport } from "@itwin/core-frontend";

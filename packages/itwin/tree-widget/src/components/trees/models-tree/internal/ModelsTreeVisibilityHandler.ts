@@ -4,52 +4,33 @@
  *--------------------------------------------------------------------------------------------*/
 
 import {
-  concat,
-  concatAll,
-  defer,
-  distinct,
-  EMPTY,
-  filter,
-  firstValueFrom,
-  forkJoin,
-  from,
-  fromEventPattern,
-  map,
-  merge,
-  mergeMap,
-  of,
-  reduce,
-  shareReplay,
-  startWith,
-  Subject,
-  take,
-  takeUntil,
-  tap,
+  concat, concatAll, defer, distinct, EMPTY, filter, firstValueFrom, forkJoin, from, fromEventPattern, map, merge, mergeMap, of, reduce, shareReplay,
+  startWith, Subject, take, takeUntil, tap,
 } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
-import { toggleAllCategories } from "../../common/CategoriesVisibilityUtils";
-import { reduceWhile, toVoidPromise } from "../../common/Rxjs";
-import { createVisibilityStatus } from "../../common/Tooltip";
-import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility";
-import { releaseMainThreadOnItemsCount } from "../Utils";
-import { AlwaysAndNeverDrawnElementInfo } from "./AlwaysAndNeverDrawnElementInfo";
-import { createFilteredTree, parseCategoryKey } from "./FilteredTree";
-import { ModelsTreeNode } from "./ModelsTreeNode";
-import { createVisibilityChangeEventListener } from "./VisibilityChangeEventListener";
+import { toggleAllCategories } from "../../common/CategoriesVisibilityUtils.js";
+import { reduceWhile, toVoidPromise } from "../../common/Rxjs.js";
+import { createVisibilityStatus } from "../../common/Tooltip.js";
+import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility.js";
+import { releaseMainThreadOnItemsCount } from "../Utils.js";
+import { AlwaysAndNeverDrawnElementInfo } from "./AlwaysAndNeverDrawnElementInfo.js";
+import { createFilteredTree, parseCategoryKey } from "./FilteredTree.js";
+import { ModelsTreeNode } from "./ModelsTreeNode.js";
+import { createVisibilityChangeEventListener } from "./VisibilityChangeEventListener.js";
 
 import type { Observable, OperatorFunction, Subscription } from "rxjs";
 import type { GroupingHierarchyNode, HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
-import type { HierarchyVisibilityHandler, HierarchyVisibilityHandlerOverridableMethod, VisibilityStatus } from "../../common/UseHierarchyVisibility";
-import type { ModelsTreeIdsCache } from "./ModelsTreeIdsCache";
+import type { HierarchyVisibilityHandler, HierarchyVisibilityHandlerOverridableMethod, VisibilityStatus } from "../../common/UseHierarchyVisibility.js";
+import type { ModelsTreeIdsCache } from "./ModelsTreeIdsCache.js";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
-import type { AlwaysOrNeverDrawnElementsQueryProps } from "./AlwaysAndNeverDrawnElementInfo";
-import type { IVisibilityChangeEventListener } from "./VisibilityChangeEventListener";
+import type { AlwaysOrNeverDrawnElementsQueryProps } from "./AlwaysAndNeverDrawnElementInfo.js";
+import type { IVisibilityChangeEventListener } from "./VisibilityChangeEventListener.js";
 import type { Viewport } from "@itwin/core-frontend";
-import type { NonPartialVisibilityStatus, Visibility } from "../../common/Tooltip";
+import type { NonPartialVisibilityStatus, Visibility } from "../../common/Tooltip.js";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
-import type { FilteredTree } from "./FilteredTree";
+import type { FilteredTree } from "./FilteredTree.js";
 
 /** @beta */
 interface GetCategoryVisibilityStatusProps {

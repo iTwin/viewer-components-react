@@ -9,27 +9,18 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-import { IModelContentTreeDefinition } from "../../../components/trees/imodel-content-tree/IModelContentTreeDefinition";
-import { IModelContentTreeIdsCache } from "../../../components/trees/imodel-content-tree/internal/IModelContentTreeIdsCache";
 import {
-  buildIModel,
-  insertDrawingCategory,
-  insertDrawingElement,
-  insertDrawingGraphic,
-  insertDrawingSubModel,
-  insertGroupInformationElement,
-  insertGroupInformationModelWithPartition,
-  insertModelWithPartition,
-  insertPhysicalElement,
-  insertPhysicalModelWithPartition,
-  insertPhysicalSubModel,
-  insertSpatialCategory,
-  insertSubject,
-  insertSubModel,
-} from "../../IModelUtils";
-import { createIModelAccess } from "../Common";
-import { NodeValidators, validateHierarchy } from "../HierarchyValidation";
+  HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
+} from "@itwin/presentation-testing";
+import { IModelContentTreeDefinition } from "../../../components/trees/imodel-content-tree/IModelContentTreeDefinition.js";
+import { IModelContentTreeIdsCache } from "../../../components/trees/imodel-content-tree/internal/IModelContentTreeIdsCache.js";
+import {
+  buildIModel, insertDrawingCategory, insertDrawingElement, insertDrawingGraphic, insertDrawingSubModel, insertGroupInformationElement,
+  insertGroupInformationModelWithPartition, insertModelWithPartition, insertPhysicalElement, insertPhysicalModelWithPartition, insertPhysicalSubModel,
+  insertSpatialCategory, insertSubject, insertSubModel,
+} from "../../IModelUtils.js";
+import { createIModelAccess } from "../Common.js";
+import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
 
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { IModelConnection } from "@itwin/core-frontend";

@@ -7,19 +7,19 @@ import { useCallback, useMemo, useState } from "react";
 import { SvgLayers } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react";
 import { HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
-import { TreeWidget } from "../../../TreeWidget";
-import { FilterLimitExceededError } from "../common/TreeErrors";
-import { useTelemetryContext } from "../common/UseTelemetryContext";
-import { CategoriesTreeDefinition } from "./CategoriesTreeDefinition";
-import { CategoriesVisibilityHandler } from "./CategoriesVisibilityHandler";
+import { TreeWidget } from "../../../TreeWidget.js";
+import { FilterLimitExceededError } from "../common/TreeErrors.js";
+import { useTelemetryContext } from "../common/UseTelemetryContext.js";
+import { CategoriesTreeDefinition } from "./CategoriesTreeDefinition.js";
+import { CategoriesVisibilityHandler } from "./CategoriesVisibilityHandler.js";
 
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
-import type { VisibilityTreeProps } from "../common/components/VisibilityTree";
+import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
-import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer";
+import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { Id64String } from "@itwin/core-bentley";
-import type { CategoryInfo } from "../common/CategoriesVisibilityUtils";
+import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 
 type CategoriesTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError";
 type HierarchyFilteringPaths = Awaited<ReturnType<Required<VisibilityTreeProps>["getFilteredPaths"]>>;

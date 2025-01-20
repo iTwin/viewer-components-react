@@ -12,24 +12,15 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { DefaultContentDisplayTypes, KeySet, PresentationRpcInterface, PropertyValueFormat } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
 import {
-  buildTestIModel,
-  HierarchyCacheMode,
-  initialize as initializePresentationTesting,
-  terminate as terminatePresentationTesting,
+  buildTestIModel, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
 import {
-  buildIModel,
-  insertExternalSourceAspect,
-  insertPhysicalElement,
-  insertPhysicalModelWithPartition,
-  insertPhysicalPartition,
-  insertPhysicalSubModel,
-  insertSpatialCategory,
-  insertSubject,
-} from "../../IModelUtils";
-import { collect } from "../Common";
-import { NodeValidators, validateHierarchyLevel } from "../HierarchyValidation";
-import { createModelsTreeProvider } from "./Utils";
+  buildIModel, insertExternalSourceAspect, insertPhysicalElement, insertPhysicalModelWithPartition, insertPhysicalPartition, insertPhysicalSubModel,
+  insertSpatialCategory, insertSubject,
+} from "../../IModelUtils.js";
+import { collect } from "../Common.js";
+import { NodeValidators, validateHierarchyLevel } from "../HierarchyValidation.js";
+import { createModelsTreeProvider } from "./Utils.js";
 
 import type { GenericInstanceFilter, GenericInstanceFilterRule } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";

@@ -11,9 +11,9 @@ import { DefaultContentDisplayTypes, KeySet } from "@itwin/presentation-common";
 import { PresentationInstanceFilter, PresentationInstanceFilterDialog } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { GenericInstanceFilter, RowsLimitExceededError } from "@itwin/presentation-hierarchies";
-import { TreeWidget } from "../../../TreeWidget";
-import { Delayed } from "./components/Delayed";
-import { useTelemetryContext } from "./UseTelemetryContext";
+import { TreeWidget } from "../../../TreeWidget.js";
+import { Delayed } from "./components/Delayed.js";
+import { useTelemetryContext } from "./UseTelemetryContext.js";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";

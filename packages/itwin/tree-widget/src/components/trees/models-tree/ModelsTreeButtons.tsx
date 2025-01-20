@@ -6,14 +6,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { SvgCursorClick, SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { Button, IconButton, Tooltip } from "@itwin/itwinui-react";
-import { TreeWidget } from "../../../TreeWidget";
-import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
-import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, toggleModels } from "./internal/ModelsTreeVisibilityHandler";
+import { TreeWidget } from "../../../TreeWidget.js";
+import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
+import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, toggleModels } from "./internal/ModelsTreeVisibilityHandler.js";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
+import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader.js";
 
 /**
  * Information about a single Model.

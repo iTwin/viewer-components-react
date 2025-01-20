@@ -5,11 +5,11 @@
 
 import { BeEvent } from "@itwin/core-bentley";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
-import { enableCategoryDisplay, enableSubCategoryDisplay } from "../common/CategoriesVisibilityUtils";
-import { createVisibilityStatus } from "../common/Tooltip";
+import { enableCategoryDisplay, enableSubCategoryDisplay } from "../common/CategoriesVisibilityUtils.js";
+import { createVisibilityStatus } from "../common/Tooltip.js";
 
 import type { Viewport } from "@itwin/core-frontend";
-import type { HierarchyVisibilityHandler, VisibilityStatus } from "../common/UseHierarchyVisibility";
+import type { HierarchyVisibilityHandler, VisibilityStatus } from "../common/UseHierarchyVisibility.js";
 
 interface CategoriesVisibilityHandlerProps {
   viewport: Viewport;

@@ -7,11 +7,11 @@ import { useMemo, useState } from "react";
 import { useAsyncValue } from "@itwin/components-react";
 import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
-import { TreeWidget } from "../../../TreeWidget";
-import { hideAllCategories, invertAllCategories, loadCategoriesFromViewport, showAllCategories } from "../common/CategoriesVisibilityUtils";
+import { TreeWidget } from "../../../TreeWidget.js";
+import { hideAllCategories, invertAllCategories, loadCategoriesFromViewport, showAllCategories } from "../common/CategoriesVisibilityUtils.js";
 
-import type { CategoryInfo } from "../common/CategoriesVisibilityUtils";
-import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
+import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
+import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader.js";
 import type { Viewport } from "@itwin/core-frontend";
 
 /**

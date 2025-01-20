@@ -6,12 +6,12 @@
 import { useEffect, useState } from "react";
 import { HierarchyNode } from "@itwin/presentation-hierarchies-react";
 import { Selectable, Selectables } from "@itwin/unified-selection";
-import { focusedInstancesContext } from "./FocusedInstancesContext";
+import { focusedInstancesContext } from "./FocusedInstancesContext.js";
 
 import type { SelectionStorage } from "@itwin/presentation-hierarchies-react";
 import type { PropsWithChildren } from "react";
 import type { InstanceKey } from "@itwin/presentation-common";
-import type { FocusedInstancesContext } from "./FocusedInstancesContext";
+import type { FocusedInstancesContext } from "./FocusedInstancesContext.js";
 import type { GroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 
 export function FocusedInstancesContextProvider({

@@ -8,10 +8,10 @@ import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
-import * as selectableTreeModule from "../components/SelectableTree";
-import { createTreeWidget } from "../components/TreeWidgetUiItemsProvider";
-import { TreeWidget } from "../TreeWidget";
-import { render, TestUtils, waitFor } from "./TestUtils";
+import * as selectableTreeModule from "../components/SelectableTree.js";
+import { createTreeWidget } from "../components/TreeWidgetUiItemsProvider.js";
+import { TreeWidget } from "../TreeWidget.js";
+import { render, TestUtils, waitFor } from "./TestUtils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 

@@ -10,15 +10,15 @@ import * as moq from "typemoq";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
-import * as treeHeader from "../../../components/tree-header/TreeHeader";
-import * as modelsVisibilityHandler from "../../../components/trees/models-tree/internal/ModelsTreeVisibilityHandler";
-import * as modelsTree from "../../../components/trees/models-tree/ModelsTree";
-import { ModelsTreeComponent } from "../../../components/trees/models-tree/ModelsTreeComponent";
-import { TreeWidget } from "../../../TreeWidget";
-import { act, mockViewport, render, TestUtils, waitFor } from "../../TestUtils";
+import * as treeHeader from "../../../components/tree-header/TreeHeader.js";
+import * as modelsVisibilityHandler from "../../../components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
+import * as modelsTree from "../../../components/trees/models-tree/ModelsTree.js";
+import { ModelsTreeComponent } from "../../../components/trees/models-tree/ModelsTreeComponent.js";
+import { TreeWidget } from "../../../TreeWidget.js";
+import { act, mockViewport, render, TestUtils, waitFor } from "../../TestUtils.js";
 
 import type { ComponentPropsWithoutRef } from "react";
-import type { ModelInfo, ModelsTreeHeaderButtonProps } from "../../../components/trees/models-tree/ModelsTreeButtons";
+import type { ModelInfo, ModelsTreeHeaderButtonProps } from "../../../components/trees/models-tree/ModelsTreeButtons.js";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 
 type TreeHeaderProps = ComponentPropsWithoutRef<typeof treeHeader.TreeHeader>;
