@@ -5,7 +5,7 @@
 // WARNING: The order of imports in this file is important!
 
 // setup chai
-import chai from "chai";
+import * as chai from "chai";
 import chaiAsPromised from "chai-as-promised";
 import chaiJestSnapshot from "chai-jest-snapshot";
 import chaiSubset from "chai-subset";
@@ -23,8 +23,6 @@ globalJsdom(undefined, {
 });
 
 // setup browser environment
-// required by I18n module
-global.XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest; // eslint-disable-line @typescript-eslint/no-var-requires
 // needed for context menu to work in tests
 global.DOMRect = class DOMRect {
   public bottom: number = 0;
@@ -47,7 +45,8 @@ global.DOMRect = class DOMRect {
 
 // supply mocha hooks
 import path from "path";
-import { cleanup, configure } from "@testing-library/react";
+const { cleanup, configure } = await import("@testing-library/react");
+import v8 from "node:v8";
 export const mochaHooks = {
   beforeAll() {
     chaiJestSnapshot.resetSnapshotRegistry();
@@ -69,6 +68,7 @@ export const mochaHooks = {
   },
   afterAll() {
     delete getGlobalThis().IS_REACT_ACT_ENVIRONMENT;
+    v8.takeCoverage();
   },
 };
 

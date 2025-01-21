@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { join } from "path";
 import { Id64 } from "@itwin/core-bentley";
 import { BisCodeSpec, IModel, IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
@@ -35,10 +34,6 @@ describe("External sources tree", () => {
               mode: HierarchyCacheMode.Memory,
             },
           },
-        },
-        testOutputDir: join(__dirname, "output"),
-        backendHostProps: {
-          cacheDir: join(__dirname, "cache"),
         },
         rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
       });

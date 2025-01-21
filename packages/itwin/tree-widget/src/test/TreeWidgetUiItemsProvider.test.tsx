@@ -5,12 +5,12 @@
 
 import { expect } from "chai";
 import sinon from "sinon";
+import * as td from "testdouble";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
 import * as selectableTreeModule from "../components/SelectableTree.js";
-import { createTreeWidget } from "../components/TreeWidgetUiItemsProvider.js";
-import { TreeWidget } from "../TreeWidget.js";
+import * as treeWidgetModule from "../TreeWidget.js";
 import { render, TestUtils, waitFor } from "./TestUtils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -18,16 +18,23 @@ import type { IModelConnection } from "@itwin/core-frontend";
 describe("createTreeWidget", () => {
   beforeEach(async () => {
     sinon.stub(IModelApp, "viewManager").get(() => ({ onSelectedViewportChanged: new BeEvent() }));
+    sinon.stub(IModelApp, "toolAdmin").get(() => ({ activeToolChanged: new BeEvent() }));
+    await td.replaceEsm("../TreeWidget.js", { ...treeWidgetModule });
     await TestUtils.initialize();
   });
 
   afterEach(() => {
     TestUtils.terminate();
     sinon.restore();
+    td.reset();
   });
 
-  it("renders supplied trees", () => {
-    const widgetComponentStub = sinon.stub(selectableTreeModule, "SelectableTree").returns(null);
+  it("renders supplied trees", async () => {
+    const stubSelectableTree = sinon.stub().returns(null);
+    await td.replaceEsm("../components/SelectableTree.js", {
+      ...selectableTreeModule,
+      SelectableTree: stubSelectableTree,
+    });
     const trees: selectableTreeModule.SelectableTreeDefinition[] = [
       {
         id: "tree",
@@ -35,11 +42,12 @@ describe("createTreeWidget", () => {
         render: () => <div>Tree Content</div>,
       },
     ];
+    const createTreeWidget = (await import("../components/TreeWidgetUiItemsProvider.js")).createTreeWidget;
     const widget = createTreeWidget({ trees });
     render(<>{widget.content}</>);
 
-    expect(widgetComponentStub).to.be.called;
-    const [props] = widgetComponentStub.args[0];
+    expect(stubSelectableTree).to.be.called;
+    const [props] = stubSelectableTree.args[0];
     expect(props.trees).to.be.eq(trees);
   });
 
@@ -63,9 +71,10 @@ describe("createTreeWidget", () => {
         render: () => <TestTree />,
       },
     ];
+    const createTreeWidget = (await import("../components/TreeWidgetUiItemsProvider.js")).createTreeWidget;
     const widget = createTreeWidget({ trees });
     const { queryByText } = render(<>{widget.content}</>);
 
-    await waitFor(() => expect(queryByText(TreeWidget.translate("errorState.title"))).to.not.be.null);
+    await waitFor(() => expect(queryByText(treeWidgetModule.TreeWidget.translate("errorState.title"))).to.not.be.null);
   });
 });

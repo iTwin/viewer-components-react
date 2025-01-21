@@ -90,7 +90,6 @@ function useActiveTrees(treeDefinitions: SelectableTreeDefinition[], imodel: IMo
     let disposed = false;
     void (async () => {
       const visibleTrees = await getActiveTrees(treeDefinitions, imodel);
-      // istanbul ignore else
       if (!disposed) {
         setTrees(visibleTrees);
       }

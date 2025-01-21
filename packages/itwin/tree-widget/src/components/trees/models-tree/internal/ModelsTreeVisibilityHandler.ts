@@ -130,7 +130,6 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     this._subscriptions.push(this._elementChangeQueue.pipe(concatAll()).subscribe());
   }
 
-  // istanbul ignore next
   public get onVisibilityChange() {
     return this._eventListener.onVisibilityChange;
   }
@@ -465,7 +464,6 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       return this.changeElementGroupingNodeState(node, on);
     }
 
-    // istanbul ignore if
     if (!HierarchyNode.isInstancesNode(node)) {
       return EMPTY;
     }
@@ -482,7 +480,6 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     }
 
     const modelId = ModelsTreeNode.getModelId(node);
-    // istanbul ignore if
     if (!modelId) {
       return EMPTY;
     }
@@ -496,9 +493,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     }
 
     const categoryId = ModelsTreeNode.getCategoryId(node);
-    // istanbul ignore if
     if (!categoryId) {
-      // istanbul ignore next
       return EMPTY;
     }
 
@@ -556,7 +551,6 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
 
   private changeSubjectNodeState(ids: Id64Array, on: boolean): Observable<void> {
     const result = defer(() => {
-      // istanbul ignore if
       if (!this._props.viewport.view.isSpatialView()) {
         return EMPTY;
       }
@@ -569,7 +563,6 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
   private changeModelState(props: ChangeModelVisibilityStateProps): Observable<void> {
     const result = defer(() => {
       const viewport = this._props.viewport;
-      // istanbul ignore if
       if (!viewport.view.isSpatialView()) {
         return EMPTY;
       }
@@ -986,7 +979,6 @@ export async function invertAllModels(models: string[], viewport: Viewport) {
  * @public
  */
 export async function toggleModels(models: string[], enable: boolean, viewport: Viewport) {
-  // istanbul ignore if
   if (!models) {
     return;
   }

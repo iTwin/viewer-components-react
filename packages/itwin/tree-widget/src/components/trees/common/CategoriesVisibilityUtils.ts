@@ -46,7 +46,6 @@ export async function enableCategoryDisplay(viewport: Viewport, ids: string[], e
   // remove category overrides per model
   const modelsContainingOverrides: string[] = [];
   for (const ovr of viewport.perModelCategoryVisibility) {
-    // istanbul ignore else
     if (ids.findIndex((id) => id === ovr.categoryId) !== -1) {
       modelsContainingOverrides.push(ovr.modelId);
     }

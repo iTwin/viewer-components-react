@@ -51,7 +51,6 @@ export function TreeHeader(props: PropsWithChildren<TreeHeaderProps>) {
   const size = density === "enlarged" ? "large" : "small";
 
   useEffect(() => {
-    // istanbul ignore if
     if (filteringProps?.isDisabled) {
       setIsSearchOpen(false);
     }
