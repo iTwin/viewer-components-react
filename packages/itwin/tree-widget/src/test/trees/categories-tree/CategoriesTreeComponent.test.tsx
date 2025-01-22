@@ -7,15 +7,13 @@ import { expect } from "chai";
 import { Children } from "react";
 import sinon from "sinon";
 import * as td from "testdouble";
-import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
-import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { Presentation } from "@itwin/presentation-frontend";
 import * as treeHeaderModule from "../../../components/tree-header/TreeHeader.js";
 import * as categoriesTreeModule from "../../../components/trees/categories-tree/CategoriesTree.js";
 import * as categoriesVisibilityUtilsModule from "../../../components/trees/common/CategoriesVisibilityUtils.js";
 import * as treeWidgetModule from "../../../TreeWidget.js";
-import { mockPresentationManager, render, TestUtils, waitFor } from "../../TestUtils.js";
+import { mockPresentationManager, render, waitFor } from "../../TestUtils.js";
 
 import type * as categoriesTreeComponentModule from "../../../components/trees/categories-tree/CategoriesTreeComponent.js";
 import type { ComponentPropsWithoutRef } from "react";
@@ -26,15 +24,15 @@ import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 type TreeHeaderProps = ComponentPropsWithoutRef<typeof treeHeaderModule.TreeHeader>;
 
 describe("<CategoriesTreeComponent />", () => {
-  before(async () => {
+  async function initialize() {
+    const { IModelApp, NoRenderApp } = await import("@itwin/core-frontend");
     await NoRenderApp.startup();
-    await TestUtils.initialize();
-  });
 
-  after(async () => {
-    TestUtils.terminate();
-    await IModelApp.shutdown();
-  });
+    const { UiFramework } = await import("@itwin/appui-react");
+    await UiFramework.initialize();
+
+    return { IModelApp, UiFramework };
+  }
 
   const defaultCategoriesTreeComponentProps: ComponentPropsWithoutRef<typeof categoriesTreeComponentModule.CategoriesTreeComponent> = {
     getSchemaContext: () => ({}) as any,
@@ -121,6 +119,7 @@ describe("<CategoriesTreeComponent />", () => {
   } as unknown as Viewport;
 
   it("returns null if iModel is undefined", async () => {
+    const { IModelApp } = await initialize();
     sinon.stub(IModelApp.viewManager, "selectedView").get(() => ({}) as Viewport);
     const result = render(<CategoriesTreeComponent {...defaultCategoriesTreeComponentProps} />);
     expect(result.container.children).to.be.empty;
@@ -128,6 +127,7 @@ describe("<CategoriesTreeComponent />", () => {
   });
 
   it("returns null if viewport is undefined", async () => {
+    const { UiFramework } = await initialize();
     sinon.stub(UiFramework, "getIModelConnection").returns({} as IModelConnection);
     const result = render(<CategoriesTreeComponent {...defaultCategoriesTreeComponentProps} />);
     expect(result.container.children).to.be.empty;
@@ -135,6 +135,7 @@ describe("<CategoriesTreeComponent />", () => {
   });
 
   it("renders `CategoryTree` when iModel and viewport are defined", async () => {
+    const { IModelApp, UiFramework } = await initialize();
     sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
     sinon.stub(UiFramework, "getIModelConnection").returns(iModel);
     const result = render(<CategoriesTreeComponent {...defaultCategoriesTreeComponentProps} density="enlarged" />);
@@ -151,6 +152,7 @@ describe("<CategoriesTreeComponent />", () => {
 
   describe("header buttons", () => {
     it("renders default tree header buttons", async () => {
+      const { IModelApp, UiFramework } = await initialize();
       sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
       sinon.stub(UiFramework, "getIModelConnection").returns(iModel);
       render(<CategoriesTreeComponent {...defaultCategoriesTreeComponentProps} />);
@@ -160,6 +162,7 @@ describe("<CategoriesTreeComponent />", () => {
     });
 
     it("renders user provided tree header buttons", async () => {
+      const { IModelApp, UiFramework } = await initialize();
       const spy = sinon.stub().returns(<></>);
       sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
       sinon.stub(UiFramework, "getIModelConnection").returns(iModel);

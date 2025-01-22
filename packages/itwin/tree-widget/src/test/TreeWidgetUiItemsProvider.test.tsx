@@ -6,12 +6,11 @@
 import { expect } from "chai";
 import sinon from "sinon";
 import * as td from "testdouble";
-import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
+import { EmptyLocalization } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
 import * as selectableTreeModule from "../components/SelectableTree.js";
-import * as treeWidgetModule from "../TreeWidget.js";
-import { render, TestUtils, waitFor } from "./TestUtils.js";
+import { render, waitFor } from "./TestUtils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 
@@ -19,12 +18,9 @@ describe("createTreeWidget", () => {
   beforeEach(async () => {
     sinon.stub(IModelApp, "viewManager").get(() => ({ onSelectedViewportChanged: new BeEvent() }));
     sinon.stub(IModelApp, "toolAdmin").get(() => ({ activeToolChanged: new BeEvent() }));
-    await td.replaceEsm("../TreeWidget.js", { ...treeWidgetModule });
-    await TestUtils.initialize();
   });
 
   afterEach(() => {
-    TestUtils.terminate();
     sinon.restore();
     td.reset();
   });
@@ -35,6 +31,8 @@ describe("createTreeWidget", () => {
       ...selectableTreeModule,
       SelectableTree: stubSelectableTree,
     });
+    const { createTreeWidget } = await initialize();
+
     const trees: selectableTreeModule.SelectableTreeDefinition[] = [
       {
         id: "tree",
@@ -42,16 +40,15 @@ describe("createTreeWidget", () => {
         render: () => <div>Tree Content</div>,
       },
     ];
-    const createTreeWidget = (await import("../components/TreeWidgetUiItemsProvider.js")).createTreeWidget;
     const widget = createTreeWidget({ trees });
     render(<>{widget.content}</>);
-
     expect(stubSelectableTree).to.be.called;
     const [props] = stubSelectableTree.args[0];
     expect(props.trees).to.be.eq(trees);
   });
 
   it("renders error message if tree component throws", async () => {
+    const { UiFramework, TreeWidget, createTreeWidget } = await initialize();
     UiFramework.setIModelConnection({
       isBlankConnection: () => true,
       selectionSet: {
@@ -71,10 +68,20 @@ describe("createTreeWidget", () => {
         render: () => <TestTree />,
       },
     ];
-    const createTreeWidget = (await import("../components/TreeWidgetUiItemsProvider.js")).createTreeWidget;
     const widget = createTreeWidget({ trees });
     const { queryByText } = render(<>{widget.content}</>);
-
-    await waitFor(() => expect(queryByText(treeWidgetModule.TreeWidget.translate("errorState.title"))).to.not.be.null);
+    await waitFor(() => expect(queryByText(TreeWidget.translate("errorState.title"))).to.not.be.null);
   });
+
+  async function initialize() {
+    const UiFramework = (await import("@itwin/appui-react")).UiFramework;
+    await UiFramework.initialize();
+
+    const TreeWidget = (await import("../TreeWidget.js")).TreeWidget;
+    await TreeWidget.initialize(new EmptyLocalization());
+
+    const createTreeWidget = (await import("../components/TreeWidgetUiItemsProvider.js")).createTreeWidget;
+
+    return { UiFramework, TreeWidget, createTreeWidget };
+  }
 });

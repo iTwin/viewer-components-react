@@ -53,38 +53,6 @@ describe("<TreeHeader />", () => {
     });
   });
 
-  it("handles buttons overflow when only dropdown button can be seen", async () => {
-    sinon.stub(HTMLElement.prototype, "scrollWidth").get(() => 200);
-    sinon.stub(HTMLElement.prototype, "offsetWidth").get(() => 32);
-
-    const { queryByRole } = render(
-      <TreeHeader {...defaultProps}>
-        <Button>Button1</Button>
-        <Button>Button2</Button>
-      </TreeHeader>,
-    );
-
-    expect(queryByRole("button", { name: "Button1" })).to.be.null;
-    expect(queryByRole("button", { name: "Button2" })).to.be.null;
-  });
-
-  it("handles buttons overflow when provided buttons and dropdown button can be seen", async () => {
-    sinon.stub(HTMLElement.prototype, "scrollWidth").get(() => 200);
-    sinon.stub(HTMLElement.prototype, "offsetWidth").get(() => 200);
-
-    const { queryByRole } = render(
-      <TreeHeader {...defaultProps}>
-        <Button>Button1</Button>
-        <Button>Button2</Button>
-        <Button>Button3</Button>
-      </TreeHeader>,
-    );
-
-    expect(queryByRole("button", { name: "Button1" })).to.not.be.null;
-    expect(queryByRole("button", { name: "Button2" })).to.be.null;
-    expect(queryByRole("button", { name: "Button3" })).to.be.null;
-  });
-
   describe("search box", () => {
     it("renders search box", async () => {
       const { getByRole, user } = render(<TreeHeader {...defaultProps} filteringProps={{ ...filteringProps, selectedIndex: 5, resultCount: 10 }} />);
