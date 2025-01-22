@@ -305,6 +305,7 @@ test.describe("Models tree", () => {
       await selectValueInDialog(page, "PipeSupport");
 
       await page.getByRole("button", { name: "Apply" }).click();
+      await locateNode(treeWidget, "PipeSupport").waitFor();
       await expect(applyFilterButton).toBeFocused();
 
       // navigate to clear filter button
