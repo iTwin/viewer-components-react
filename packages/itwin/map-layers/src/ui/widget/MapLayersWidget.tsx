@@ -5,7 +5,6 @@
 
 import * as React from "react";
 import { useActiveViewport } from "@itwin/appui-react";
-import { FillCentered } from "@itwin/core-react";
 import { MapLayersUI } from "../../mapLayers";
 import { MapLayerManager } from "./MapLayerManager";
 
@@ -22,7 +21,6 @@ export function MapLayersWidget(props: MapLayersWidgetProps) {
   const activeViewport = useActiveViewport();
   const ref = React.useRef<HTMLDivElement>(null);
   const [isGeoLocated, setIsGeoLocated] = React.useState(!!activeViewport?.iModel.isGeoLocated);
-
   React.useEffect(() => {
     const updateIsGeoLocated = () => setIsGeoLocated(!!activeViewport?.iModel.isGeoLocated);
     // call immediately in case the activeViewport changes after its iModel.onEcefLocationChanged has already emitted
@@ -45,8 +43,8 @@ export function MapLayersWidget(props: MapLayersWidgetProps) {
   }
 
   return (
-    <FillCentered>
-      <div className="map-manager-not-geo-located-text">{notGeoLocatedMsg}</div>
-    </FillCentered>
+    <div className="uicore-fill-centered">
+        <div className="map-manager-not-geo-located-text">{notGeoLocatedMsg}</div>
+    </div>
   );
 }

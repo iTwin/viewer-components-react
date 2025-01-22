@@ -4,16 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ConditionalBooleanValue } from "@itwin/appui-abstract";
-import {
-  StagePanelLocation,
-  StagePanelSection,
-  StageUsage,
-  ToolbarHelper,
-  ToolbarOrientation,
-  ToolbarUsage,
-  ToolItemDef,
-  WidgetState,
-} from "@itwin/appui-react";
+import { StagePanelLocation, StagePanelSection, StageUsage, ToolbarItemUtilities, ToolbarOrientation, ToolbarUsage, WidgetState } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
 import { SvgMapInfo } from "@itwin/itwinui-icons-react";
 import { MapFeatureInfoTool } from "@itwin/map-layers-formats";
@@ -21,7 +12,7 @@ import { MapLayersUI } from "../mapLayers";
 import { MapLayersSyncUiEventId } from "../MapLayersActionIds";
 import { MapFeatureInfoWidget } from "./widget/FeatureInfoWidget";
 
-import type { ToolbarItem, UiItemsProvider } from "@itwin/appui-react";
+import type { ToolbarActionItem, ToolbarItem, UiItemsProvider } from "@itwin/appui-react";
 import type { ScreenViewport } from "@itwin/core-frontend";
 import type { MapLayerProps } from "@itwin/core-common";
 import type { MapFeatureInfoOptions } from "./Interfaces";
@@ -52,12 +43,13 @@ const isMapFeatureInfoSupported = (): boolean => {
   return false;
 };
 
-export const getMapFeatureInfoToolItemDef = (): ToolItemDef =>
-  new ToolItemDef({
-    toolId: MapFeatureInfoTool.toolId,
-    iconSpec: <SvgMapInfo />,
+export const getMapFeatureInfoToolItemDef = (itemPriority: number): ToolbarActionItem => {
+  return ToolbarItemUtilities.createActionItem({
+    id: MapFeatureInfoTool.toolId,
+    icon: <SvgMapInfo />, // TODO: Update to iconNode when moving to 5.x appui-react
     label: MapLayersUI.localization.getLocalizedString("mapLayers:FeatureInfoWidget.Label"),
-    description: () => MapFeatureInfoTool.description,
+    description: MapFeatureInfoTool.description,
+    itemPriority,
     execute: async () => {
       await IModelApp.tools.run(MapFeatureInfoTool.toolId);
     },
@@ -65,7 +57,14 @@ export const getMapFeatureInfoToolItemDef = (): ToolItemDef =>
       // Hide the MapFeatureInfoTool if the Map Layers toggle is off or no ArcGISFeature layers are active
       return !isMapFeatureInfoSupported();
     }, [MapLayersSyncUiEventId.MapImageryChanged]),
+    layouts: {
+      standard: {
+        orientation: ToolbarOrientation.Vertical,
+        usage: ToolbarUsage.ContentManipulation,
+      }
+    }
   });
+};
 
 export class FeatureInfoUiItemsProvider implements UiItemsProvider {
   public readonly id = "FeatureInfoUiItemsProvider";
@@ -73,19 +72,9 @@ export class FeatureInfoUiItemsProvider implements UiItemsProvider {
 
   public constructor(private _featureInfoOpts: MapFeatureInfoOptions) {}
 
-  public provideToolbarItems(
-    _stageId: string,
-    stageUsage: string,
-    toolbarUsage: ToolbarUsage,
-    toolbarOrientation: ToolbarOrientation,
-  ): ReadonlyArray<ToolbarItem> {
-    if (
-      !this._featureInfoOpts?.disableDefaultFeatureInfoTool &&
-      stageUsage === StageUsage.General &&
-      toolbarUsage === ToolbarUsage.ContentManipulation &&
-      toolbarOrientation === ToolbarOrientation.Vertical
-    ) {
-      return [ToolbarHelper.createToolbarItemFromItemDef(60, getMapFeatureInfoToolItemDef())];
+  public getToolbarItems(): ReadonlyArray<ToolbarItem> {
+    if (!this._featureInfoOpts?.disableDefaultFeatureInfoTool) {
+      return [getMapFeatureInfoToolItemDef(60)];
     }
 
     return [];

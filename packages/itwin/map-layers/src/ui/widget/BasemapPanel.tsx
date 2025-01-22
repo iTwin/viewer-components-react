@@ -8,8 +8,8 @@ import "./BasemapPanel.scss";
 import * as React from "react";
 import { UiFramework } from "@itwin/appui-react";
 import { BackgroundMapType, BaseMapLayerSettings, ColorByName, ColorDef, ImageMapLayerSettings } from "@itwin/core-common";
-import { WebFontIcon } from "@itwin/core-react";
 import { ColorPickerDialog, ColorSwatch } from "@itwin/imodel-components-react";
+import { SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { Button, Select } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
 import { useSourceMapContext } from "./MapLayerManager";
@@ -242,6 +242,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
     (newColor: ColorDef, e: React.MouseEvent<Element, MouseEvent>) => {
       e.preventDefault();
       UiFramework.dialogs.modal.open(
+        // eslint-disable-next-line @typescript-eslint/no-deprecated
         <ColorPickerDialog
           dialogTitle={colorDialogTitle}
           color={newColor}
@@ -309,7 +310,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
           onClick={handleVisibilityChange}
           disabled={props.disabled || !activeViewport || !(activeViewport.displayStyle.backgroundMapBase instanceof ImageMapLayerSettings)}
         >
-          <WebFontIcon iconName={baseMapVisible ? "icon-visibility" : "icon-visibility-hide-2"} />
+          {baseMapVisible ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
         </Button>
         <Select
           data-testid="base-map-select"
@@ -322,6 +323,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
           disabled={props.disabled}
         />
         {baseIsColor && (
+          // eslint-disable-next-line @typescript-eslint/no-deprecated
           <ColorSwatch className="map-manager-base-item-color" colorDef={ColorDef.fromJSON(bgColor)} round={false} onColorPick={handleBgColorClick} />
         )}
         <TransparencyPopupButton disabled={props.disabled} transparency={baseMapTransparencyValue} onTransparencyChange={handleBasemapTransparencyChange} />

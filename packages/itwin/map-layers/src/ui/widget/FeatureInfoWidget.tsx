@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import { useActiveFrontstageDef, WidgetState } from "@itwin/appui-react";
-import { VirtualizedPropertyGridWithDataProvider } from "@itwin/components-react";
-import { FillCentered, Orientation, ResizableContainerObserver } from "@itwin/core-react";
+import { Orientation, VirtualizedPropertyGridWithDataProvider } from "@itwin/components-react";
+import { ResizableContainerObserver } from "@itwin/core-react";
 import { SvgCopy } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
@@ -82,6 +82,7 @@ export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetPr
 
   if (hasData && dataProvider.current) {
     return (
+      // eslint-disable-next-line @typescript-eslint/no-deprecated
       <ResizableContainerObserver onResize={handleResize}>
         <VirtualizedPropertyGridWithDataProvider
           width={width}
@@ -96,11 +97,11 @@ export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetPr
     );
   } else {
     return (
-      <FillCentered>
+      <div className="uicore-fill-centered">
         <span>
           <i>{noRecordsMessage}</i>
         </span>
-      </FillCentered>
+      </div>
     );
   }
 }
