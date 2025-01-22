@@ -58,7 +58,7 @@ export const mochaHooks = {
 
     // set up snapshot name
     const currentTest = (this as unknown as Mocha.Context).currentTest!;
-    const sourceFilePath = currentTest.file?.replace(`lib${path.sep}cjs${path.sep}test`, `src${path.sep}test`).replace(/\.(jsx?|tsx?)$/, "");
+    const sourceFilePath = currentTest.file?.replace(`lib${path.sep}esm${path.sep}test`, `src${path.sep}test`).replace(/\.(jsx?|tsx?)$/, "");
     const snapPath = `${sourceFilePath}.snap`;
     chaiJestSnapshot.setFilename(snapPath);
     chaiJestSnapshot.setTestName(currentTest.fullTitle());
