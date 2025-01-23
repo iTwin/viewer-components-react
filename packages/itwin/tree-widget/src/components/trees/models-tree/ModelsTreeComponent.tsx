@@ -5,28 +5,22 @@
 
 import { Fragment, useEffect } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { TreeWidget } from "../../../TreeWidget";
-import { TreeWithHeader } from "../../tree-header/TreeWithHeader";
-import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
-import { FocusedInstancesContextProvider } from "../common/FocusedInstancesContextProvider";
-import { useActiveViewport } from "../common/UseActiveViewport";
-import { useFiltering } from "../common/UseFiltering";
-import { TelemetryContextProvider } from "../common/UseTelemetryContext";
-import { ModelsTree } from "./ModelsTree";
+import { TreeWidget } from "../../../TreeWidget.js";
+import { TreeWithHeader } from "../../tree-header/TreeWithHeader.js";
+import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
+import { FocusedInstancesContextProvider } from "../common/FocusedInstancesContextProvider.js";
+import { useActiveViewport } from "../common/UseActiveViewport.js";
+import { useFiltering } from "../common/UseFiltering.js";
+import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
+import { ModelsTree } from "./ModelsTree.js";
 import {
-  HideAllButton,
-  InvertButton,
-  ShowAllButton,
-  ToggleInstancesFocusButton,
-  useModelsTreeButtonProps,
-  View2DButton,
-  View3DButton,
-} from "./ModelsTreeButtons";
+  HideAllButton, InvertButton, ShowAllButton, ToggleInstancesFocusButton, useModelsTreeButtonProps, View2DButton, View3DButton,
+} from "./ModelsTreeButtons.js";
 
-import type { ModelsTreeProps } from "./ModelsTree";
+import type { ModelsTreeProps } from "./ModelsTree.js";
 import type { ReactNode } from "react";
 import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
-import type { ModelsTreeHeaderButtonProps, ModelsTreeHeaderButtonType } from "./ModelsTreeButtons";
+import type { ModelsTreeHeaderButtonProps, ModelsTreeHeaderButtonType } from "./ModelsTreeButtons.js";
 
 /** @public */
 interface ModelsTreeComponentProps

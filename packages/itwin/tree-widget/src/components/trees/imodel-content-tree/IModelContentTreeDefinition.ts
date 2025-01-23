@@ -4,13 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import {
-  createNodesQueryClauseFactory,
-  createPredicateBasedHierarchyDefinition,
-  NodeSelectClauseColumnNames,
-  ProcessedHierarchyNode,
+  createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition, NodeSelectClauseColumnNames, ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
-import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils";
+import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils.js";
 
 import type {
   DefineGenericNodeChildHierarchyLevelProps,
@@ -23,7 +20,7 @@ import type {
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlBinding, IInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
-import type { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache";
+import type { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache.js";
 
 interface IModelContentTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector;

@@ -5,18 +5,18 @@
 
 import { Fragment } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { TreeWidget } from "../../../TreeWidget";
-import { TreeWithHeader } from "../../tree-header/TreeWithHeader";
-import { useActiveViewport } from "../common/UseActiveViewport";
-import { useFiltering } from "../common/UseFiltering";
-import { TelemetryContextProvider } from "../common/UseTelemetryContext";
-import { CategoriesTree } from "./CategoriesTree";
-import { HideAllButton, InvertAllButton, ShowAllButton, useCategoriesTreeButtonProps } from "./CategoriesTreeButtons";
+import { TreeWidget } from "../../../TreeWidget.js";
+import { TreeWithHeader } from "../../tree-header/TreeWithHeader.js";
+import { useActiveViewport } from "../common/UseActiveViewport.js";
+import { useFiltering } from "../common/UseFiltering.js";
+import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
+import { CategoriesTree } from "./CategoriesTree.js";
+import { HideAllButton, InvertAllButton, ShowAllButton, useCategoriesTreeButtonProps } from "./CategoriesTreeButtons.js";
 
-import type { CategoriesTreeProps } from "./CategoriesTree";
+import type { CategoriesTreeProps } from "./CategoriesTree.js";
 import type { ReactNode } from "react";
 import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
-import type { CategoriesTreeHeaderButtonProps, CategoriesTreeHeaderButtonType } from "./CategoriesTreeButtons";
+import type { CategoriesTreeHeaderButtonProps, CategoriesTreeHeaderButtonType } from "./CategoriesTreeButtons.js";
 
 /** @public */
 interface CategoriesTreeComponentProps

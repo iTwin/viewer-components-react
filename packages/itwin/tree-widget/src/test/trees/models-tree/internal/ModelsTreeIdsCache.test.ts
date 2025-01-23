@@ -7,9 +7,9 @@ import { expect } from "chai";
 import sinon from "sinon";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import { ModelsTreeIdsCache } from "../../../../components/trees/models-tree/internal/ModelsTreeIdsCache";
-import { defaultHierarchyConfiguration } from "../../../../components/trees/models-tree/ModelsTreeDefinition";
-import { createIModelMock } from "../../Common";
+import { ModelsTreeIdsCache } from "../../../../components/trees/models-tree/internal/ModelsTreeIdsCache.js";
+import { defaultHierarchyConfiguration } from "../../../../components/trees/models-tree/ModelsTreeDefinition.js";
+import { createIModelMock } from "../../Common.js";
 
 describe("ModelsTreeIdsCache", () => {
   function createIdsCache(queryHandler: (query: string) => any[]) {

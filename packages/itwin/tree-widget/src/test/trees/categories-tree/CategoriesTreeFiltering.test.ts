@@ -4,13 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { join } from "node:path";
 import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-import { CategoriesTreeDefinition } from "../../../components/trees/categories-tree/CategoriesTreeDefinition";
+import { CategoriesTreeDefinition } from "../../../components/trees/categories-tree/CategoriesTreeDefinition.js";
 import {
   buildIModel,
   insertDrawingCategory,
@@ -20,8 +19,8 @@ import {
   insertPhysicalModelWithPartition,
   insertSpatialCategory,
   insertSubCategory,
-} from "../../IModelUtils";
-import { createIModelAccess } from "../Common";
+} from "../../IModelUtils.js";
+import { createIModelAccess } from "../Common.js";
 
 describe("Categories tree", () => {
   describe("Hierarchy filtering", () => {
@@ -33,10 +32,6 @@ describe("Categories tree", () => {
               mode: HierarchyCacheMode.Memory,
             },
           },
-        },
-        testOutputDir: join(__dirname, "output"),
-        backendHostProps: {
-          cacheDir: join(__dirname, "cache"),
         },
         rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
       });

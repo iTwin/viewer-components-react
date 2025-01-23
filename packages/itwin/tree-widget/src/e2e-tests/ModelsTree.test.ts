@@ -6,18 +6,9 @@
 import type { Locator } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import {
-  expandStagePanel,
-  initTreeWidgetTest,
-  locateInstanceFilter,
-  locateNode,
-  scrollTree,
-  selectOperatorInDialog,
-  selectPropertyInDialog,
-  selectTree,
-  selectValueInDialog,
-  takeScreenshot,
-  withDifferentDensities,
-} from "./utils";
+  expandStagePanel, initTreeWidgetTest, locateInstanceFilter, locateNode, scrollTree, selectOperatorInDialog, selectPropertyInDialog, selectTree,
+  selectValueInDialog, takeScreenshot, withDifferentDensities,
+} from "./utils.js";
 
 test.describe("Models tree", () => {
   let treeWidget: Locator;
@@ -314,6 +305,7 @@ test.describe("Models tree", () => {
       await selectValueInDialog(page, "PipeSupport");
 
       await page.getByRole("button", { name: "Apply" }).click();
+      await locateNode(treeWidget, "PipeSupport").waitFor();
       await expect(applyFilterButton).toBeFocused();
 
       // navigate to clear filter button

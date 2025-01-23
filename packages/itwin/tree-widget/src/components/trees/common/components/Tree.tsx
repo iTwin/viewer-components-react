@@ -8,24 +8,24 @@ import { BeEvent } from "@itwin/core-bentley";
 import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { SchemaMetadataContextProvider } from "@itwin/presentation-components";
 import { UnifiedSelectionProvider, useIModelUnifiedSelectionTree, useSelectionHandler } from "@itwin/presentation-hierarchies-react";
-import { TreeWidget } from "../../../../TreeWidget";
-import { useHierarchiesLocalization } from "../UseHierarchiesLocalization";
-import { useHierarchyLevelFiltering } from "../UseHierarchyFiltering";
-import { useIModelChangeListener } from "../UseIModelChangeListener";
-import { useNodeHighlighting } from "../UseNodeHighlighting";
-import { useReportingAction, useTelemetryContext } from "../UseTelemetryContext";
-import { createIModelAccess } from "../Utils";
-import { Delayed } from "./Delayed";
-import { ProgressOverlay } from "./ProgressOverlay";
+import { TreeWidget } from "../../../../TreeWidget.js";
+import { useHierarchiesLocalization } from "../UseHierarchiesLocalization.js";
+import { useHierarchyLevelFiltering } from "../UseHierarchyFiltering.js";
+import { useIModelChangeListener } from "../UseIModelChangeListener.js";
+import { useNodeHighlighting } from "../UseNodeHighlighting.js";
+import { useReportingAction, useTelemetryContext } from "../UseTelemetryContext.js";
+import { createIModelAccess } from "../Utils.js";
+import { Delayed } from "./Delayed.js";
+import { ProgressOverlay } from "./ProgressOverlay.js";
 
 import type { MarkRequired } from "@itwin/core-bentley";
-import type { FunctionProps } from "../Utils";
+import type { FunctionProps } from "../Utils.js";
 import type { ReactNode } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type { PresentationHierarchyNode, SelectionStorage, useIModelTree } from "@itwin/presentation-hierarchies-react";
-import type { HighlightInfo } from "../UseNodeHighlighting";
-import type { TreeRendererProps } from "./TreeRenderer";
+import type { HighlightInfo } from "../UseNodeHighlighting.js";
+import type { TreeRendererProps } from "./TreeRenderer.js";
 
 /** @beta */
 export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPaths" | "getHierarchyDefinition"> &

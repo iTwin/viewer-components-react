@@ -5,7 +5,7 @@
 
 import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { InstanceKey } from "@itwin/presentation-shared";
-import { collect } from "./Common";
+import { collect } from "./Common.js";
 
 import type { GenericNodeKey, HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 

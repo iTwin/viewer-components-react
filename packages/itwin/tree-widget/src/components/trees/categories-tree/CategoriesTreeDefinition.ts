@@ -5,7 +5,7 @@
 
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
-import { FilterLimitExceededError } from "../common/TreeErrors";
+import { FilterLimitExceededError } from "../common/TreeErrors.js";
 
 import type { ECClassHierarchyInspector, ECSchemaProvider, IInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
 import type {

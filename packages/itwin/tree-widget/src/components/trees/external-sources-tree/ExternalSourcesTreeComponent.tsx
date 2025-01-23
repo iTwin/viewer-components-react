@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { TreeWidget } from "../../../TreeWidget";
-import { TelemetryContextProvider } from "../common/UseTelemetryContext";
-import { ExternalSourcesTree } from "./ExternalSourcesTree";
+import { TreeWidget } from "../../../TreeWidget.js";
+import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
+import { ExternalSourcesTree } from "./ExternalSourcesTree.js";
 
-import type { ExternalSourcesTreeProps } from "./ExternalSourcesTree";
+import type { ExternalSourcesTreeProps } from "./ExternalSourcesTree.js";
 
 /** @beta */
 interface ExternalSourcesTreeComponentProps

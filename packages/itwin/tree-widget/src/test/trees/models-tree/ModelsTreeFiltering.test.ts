@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { join } from "node:path";
 import { Id64 } from "@itwin/core-bentley";
 import { IModel, IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
@@ -12,8 +11,8 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-import { ModelsTreeIdsCache } from "../../../components/trees/models-tree/internal/ModelsTreeIdsCache";
-import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../components/trees/models-tree/ModelsTreeDefinition";
+import { ModelsTreeIdsCache } from "../../../components/trees/models-tree/internal/ModelsTreeIdsCache.js";
+import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../components/trees/models-tree/ModelsTreeDefinition.js";
 import {
   buildIModel,
   insertPhysicalElement,
@@ -22,18 +21,18 @@ import {
   insertPhysicalSubModel,
   insertSpatialCategory,
   insertSubject,
-} from "../../IModelUtils";
-import { createIModelAccess } from "../Common";
-import { NodeValidators, validateHierarchy } from "../HierarchyValidation";
-import { createClassGroupingHierarchyNode, createModelsTreeProvider } from "./Utils";
+} from "../../IModelUtils.js";
+import { createIModelAccess } from "../Common.js";
+import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
+import { createClassGroupingHierarchyNode, createModelsTreeProvider } from "./Utils.js";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { TestIModelBuilder } from "@itwin/presentation-testing";
-import type { ExpectedHierarchyDef } from "../HierarchyValidation";
-import type { ElementsGroupInfo } from "../../../components/trees/models-tree/ModelsTreeDefinition";
+import type { ExpectedHierarchyDef } from "../HierarchyValidation.js";
+import type { ElementsGroupInfo } from "../../../components/trees/models-tree/ModelsTreeDefinition.js";
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
@@ -90,10 +89,6 @@ describe("Models tree", () => {
               mode: HierarchyCacheMode.Memory,
             },
           },
-        },
-        testOutputDir: join(__dirname, "output"),
-        backendHostProps: {
-          cacheDir: join(__dirname, "cache"),
         },
         rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
       });

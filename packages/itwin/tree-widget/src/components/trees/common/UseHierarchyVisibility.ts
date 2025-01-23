@@ -5,27 +5,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  asyncScheduler,
-  defer,
-  distinct,
-  EMPTY,
-  from,
-  lastValueFrom,
-  mergeMap,
-  observeOn,
-  onErrorResumeNextWith,
-  Subject,
-  takeUntil,
-  tap,
-  throttleTime,
+  asyncScheduler, defer, distinct, EMPTY, from, lastValueFrom, mergeMap, observeOn, onErrorResumeNextWith, Subject, takeUntil, tap, throttleTime,
 } from "rxjs";
-import { useTelemetryContext } from "./UseTelemetryContext";
+import { useTelemetryContext } from "./UseTelemetryContext.js";
 
 import type { Observable } from "rxjs";
 import type { MutableRefObject } from "react";
 import type { BeEvent, IDisposable } from "@itwin/core-bentley";
 import type { HierarchyNode, PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
-import type { TreeCheckboxProps } from "./components/TreeNodeCheckbox";
+import type { TreeCheckboxProps } from "./components/TreeNodeCheckbox.js";
 
 /**
  * Data structure that describes instance visibility status.

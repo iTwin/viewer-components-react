@@ -41,7 +41,6 @@ export function createVisibilityChangeEventListener(viewport: Viewport): IVisibi
   return {
     onVisibilityChange,
     dispose: () => {
-      // istanbul ignore if
       if (pendingVisibilityChange) {
         clearTimeout(pendingVisibilityChange);
         pendingVisibilityChange = undefined;

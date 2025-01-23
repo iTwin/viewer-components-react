@@ -4,28 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import {
-  BehaviorSubject,
-  debounceTime,
-  EMPTY,
-  filter,
-  first,
-  from,
-  fromEventPattern,
-  map,
-  merge,
-  reduce,
-  scan,
-  share,
-  shareReplay,
-  startWith,
-  Subject,
-  switchMap,
-  take,
-  takeUntil,
-  tap,
+  BehaviorSubject, debounceTime, EMPTY, filter, first, from, fromEventPattern, map, merge, reduce, scan, share, shareReplay, startWith, Subject,
+  switchMap, take, takeUntil, tap,
 } from "rxjs";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { pushToMap } from "../../common/Utils";
+import { pushToMap } from "../../common/Utils.js";
 
 import type { Observable, Subscription } from "rxjs";
 import type { Viewport } from "@itwin/core-frontend";

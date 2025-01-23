@@ -10,11 +10,11 @@ import { StagePanelLocation, StagePanelSection, useTransientState } from "@itwin
 import { SvgHierarchyTree } from "@itwin/itwinui-icons-react";
 import { SvgError } from "@itwin/itwinui-illustrations-react";
 import { Button, NonIdealState } from "@itwin/itwinui-react";
-import { TreeWidget } from "../TreeWidget";
-import { SelectableTree } from "./SelectableTree";
+import { TreeWidget } from "../TreeWidget.js";
+import { SelectableTree } from "./SelectableTree.js";
 
 import type { Widget } from "@itwin/appui-react";
-import type { SelectableTreeDefinition, SelectableTreeProps } from "./SelectableTree";
+import type { SelectableTreeDefinition, SelectableTreeProps } from "./SelectableTree.js";
 import type { FallbackProps } from "react-error-boundary";
 import type { Ref } from "react";
 

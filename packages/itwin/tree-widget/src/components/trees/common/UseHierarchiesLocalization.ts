@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useMemo } from "react";
-import { TreeWidget } from "../../../TreeWidget";
+import { TreeWidget } from "../../../TreeWidget.js";
 
 import type { TreeRenderer, useIModelTree } from "@itwin/presentation-hierarchies-react";
 

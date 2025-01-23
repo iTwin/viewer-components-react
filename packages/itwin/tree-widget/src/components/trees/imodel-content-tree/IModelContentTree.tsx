@@ -4,13 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { SvgFolder, SvgGroup, SvgHierarchyTree, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
-import { Tree } from "../common/components/Tree";
-import { TreeRenderer } from "../common/components/TreeRenderer";
-import { IModelContentTreeComponent } from "./IModelContentTreeComponent";
-import { IModelContentTreeDefinition } from "./IModelContentTreeDefinition";
-import { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache";
+import { Tree } from "../common/components/Tree.js";
+import { TreeRenderer } from "../common/components/TreeRenderer.js";
+import { IModelContentTreeComponent } from "./IModelContentTreeComponent.js";
+import { IModelContentTreeDefinition } from "./IModelContentTreeDefinition.js";
+import { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache.js";
 
-import type { TreeProps } from "../common/components/Tree";
+import type { TreeProps } from "../common/components/Tree.js";
 import type { ReactElement } from "react";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 

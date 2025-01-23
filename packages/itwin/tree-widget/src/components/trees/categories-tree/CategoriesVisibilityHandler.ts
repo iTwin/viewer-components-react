@@ -5,11 +5,11 @@
 
 import { BeEvent } from "@itwin/core-bentley";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
-import { enableCategoryDisplay, enableSubCategoryDisplay } from "../common/CategoriesVisibilityUtils";
-import { createVisibilityStatus } from "../common/Tooltip";
+import { enableCategoryDisplay, enableSubCategoryDisplay } from "../common/CategoriesVisibilityUtils.js";
+import { createVisibilityStatus } from "../common/Tooltip.js";
 
 import type { Viewport } from "@itwin/core-frontend";
-import type { HierarchyVisibilityHandler, VisibilityStatus } from "../common/UseHierarchyVisibility";
+import type { HierarchyVisibilityHandler, VisibilityStatus } from "../common/UseHierarchyVisibility.js";
 
 interface CategoriesVisibilityHandlerProps {
   viewport: Viewport;
@@ -103,7 +103,7 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
   }
 
   public static getInstanceIdFromHierarchyNode(node: HierarchyNode) {
-    return HierarchyNode.isInstancesNode(node) && node.key.instanceKeys.length > 0 ? node.key.instanceKeys[0].id : /* istanbul ignore next */ "";
+    return HierarchyNode.isInstancesNode(node) && node.key.instanceKeys.length > 0 ? node.key.instanceKeys[0].id : "";
   }
 
   public async enableCategory(ids: string[], enabled: boolean, enableAllSubCategories = true) {

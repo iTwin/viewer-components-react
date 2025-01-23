@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { join } from "node:path";
 import { ElementOwnsMultiAspects, ExternalSourceAspect, PhysicalModel, SpatialCategory, Subject } from "@itwin/core-backend";
 import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
@@ -26,10 +25,10 @@ import {
   insertPhysicalSubModel,
   insertSpatialCategory,
   insertSubject,
-} from "../../IModelUtils";
-import { collect } from "../Common";
-import { NodeValidators, validateHierarchyLevel } from "../HierarchyValidation";
-import { createModelsTreeProvider } from "./Utils";
+} from "../../IModelUtils.js";
+import { collect } from "../Common.js";
+import { NodeValidators, validateHierarchyLevel } from "../HierarchyValidation.js";
+import { createModelsTreeProvider } from "./Utils.js";
 
 import type { GenericInstanceFilter, GenericInstanceFilterRule } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -46,10 +45,6 @@ describe("Models tree", () => {
               mode: HierarchyCacheMode.Memory,
             },
           },
-        },
-        testOutputDir: join(__dirname, "output"),
-        backendHostProps: {
-          cacheDir: join(__dirname, "cache"),
         },
         rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
       });

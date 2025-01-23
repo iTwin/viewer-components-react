@@ -5,10 +5,10 @@
 
 import "./TreeWithHeader.scss";
 import classNames from "classnames";
-import { TreeHeader } from "./TreeHeader";
+import { TreeHeader } from "./TreeHeader.js";
 
 import type { PropsWithChildren, ReactNode } from "react";
-import type { TreeFilteringProps } from "./TreeHeader";
+import type { TreeFilteringProps } from "./TreeHeader.js";
 
 /** @beta */
 interface TreeWithHeaderProps {

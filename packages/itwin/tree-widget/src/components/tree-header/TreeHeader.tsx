@@ -8,8 +8,8 @@ import classnames from "classnames";
 import { Children, useEffect, useRef, useState } from "react";
 import { SvgCaretDownSmall, SvgCaretUpSmall, SvgMore } from "@itwin/itwinui-icons-react";
 import { ButtonGroup, Divider, DropdownMenu, IconButton, SearchBox } from "@itwin/itwinui-react";
-import { TreeWidget } from "../../TreeWidget";
-import { useFocusedInstancesContext } from "../trees/common/FocusedInstancesContext";
+import { TreeWidget } from "../../TreeWidget.js";
+import { useFocusedInstancesContext } from "../trees/common/FocusedInstancesContext.js";
 
 import type { PropsWithChildren } from "react";
 import type { Viewport } from "@itwin/core-frontend";
@@ -51,7 +51,6 @@ export function TreeHeader(props: PropsWithChildren<TreeHeaderProps>) {
   const size = density === "enlarged" ? "large" : "small";
 
   useEffect(() => {
-    // istanbul ignore if
     if (filteringProps?.isDisabled) {
       setIsSearchOpen(false);
     }

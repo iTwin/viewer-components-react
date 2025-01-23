@@ -3,23 +3,23 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-export { ModelsTreeComponent } from "./models-tree/ModelsTreeComponent";
-export { CategoriesTreeComponent } from "./categories-tree/CategoriesTreeComponent";
-export { IModelContentTreeComponent } from "./imodel-content-tree/IModelContentTreeComponent";
-export { ExternalSourcesTreeComponent } from "./external-sources-tree/ExternalSourcesTreeComponent";
+export { ModelsTreeComponent } from "./models-tree/ModelsTreeComponent.js";
+export { CategoriesTreeComponent } from "./categories-tree/CategoriesTreeComponent.js";
+export { IModelContentTreeComponent } from "./imodel-content-tree/IModelContentTreeComponent.js";
+export { ExternalSourcesTreeComponent } from "./external-sources-tree/ExternalSourcesTreeComponent.js";
 
-export { useModelsTree } from "./models-tree/UseModelsTree";
-export { useCategoriesTree } from "./categories-tree/UseCategoriesTree";
+export { useModelsTree } from "./models-tree/UseModelsTree.js";
+export { useCategoriesTree } from "./categories-tree/UseCategoriesTree.js";
 
-export { useModelsTreeButtonProps } from "./models-tree/ModelsTreeButtons";
-export { useCategoriesTreeButtonProps } from "./categories-tree/CategoriesTreeButtons";
+export { useModelsTreeButtonProps } from "./models-tree/ModelsTreeButtons.js";
+export { useCategoriesTreeButtonProps } from "./categories-tree/CategoriesTreeButtons.js";
 
-export { Tree } from "./common/components/Tree";
-export { VisibilityTree } from "./common/components/VisibilityTree";
-export { TreeRenderer } from "./common/components/TreeRenderer";
-export { VisibilityTreeRenderer } from "./common/components/VisibilityTreeRenderer";
-export { HierarchyVisibilityHandler, VisibilityStatus } from "./common/UseHierarchyVisibility";
-export { TelemetryContextProvider } from "./common/UseTelemetryContext";
-export { FilterLimitExceededError } from "./common/TreeErrors";
+export { Tree } from "./common/components/Tree.js";
+export { VisibilityTree } from "./common/components/VisibilityTree.js";
+export { TreeRenderer } from "./common/components/TreeRenderer.js";
+export { VisibilityTreeRenderer } from "./common/components/VisibilityTreeRenderer.js";
+export { HierarchyVisibilityHandler, VisibilityStatus } from "./common/UseHierarchyVisibility.js";
+export { TelemetryContextProvider } from "./common/UseTelemetryContext.js";
+export { FilterLimitExceededError } from "./common/TreeErrors.js";
 
-export { ModelsTreeVisibilityHandlerOverrides } from "./models-tree/internal/ModelsTreeVisibilityHandler";
+export { ModelsTreeVisibilityHandlerOverrides } from "./models-tree/internal/ModelsTreeVisibilityHandler.js";

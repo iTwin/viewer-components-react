@@ -5,14 +5,20 @@
 
 import { expect } from "chai";
 import sinon from "sinon";
-import { TreeSelector } from "../components/TreeSelector";
-import { render, waitFor } from "./TestUtils";
-
-before(async () => {
-  window.HTMLElement.prototype.scrollIntoView = function () {};
-});
+import { TreeSelector } from "../components/TreeSelector.js";
+import { render, waitFor } from "./TestUtils.js";
 
 describe("<TreeSelector />", () => {
+  const originalScrollIntoView = HTMLElement.prototype.scrollIntoView;
+
+  before(() => {
+    HTMLElement.prototype.scrollIntoView = sinon.stub();
+  });
+
+  after(() => {
+    HTMLElement.prototype.scrollIntoView = originalScrollIntoView;
+  });
+
   it("lists all given content components in select box", async () => {
     const { user, getByText, queryAllByText, getByRole } = render(
       <TreeSelector

@@ -6,9 +6,9 @@
 import { concatMap, count, EMPTY, expand, firstValueFrom, from, toArray } from "rxjs";
 import sinon from "sinon";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { ModelsTreeIdsCache } from "../../../components/trees/models-tree/internal/ModelsTreeIdsCache";
-import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../components/trees/models-tree/ModelsTreeDefinition";
-import { createIModelAccess } from "../Common";
+import { ModelsTreeIdsCache } from "../../../components/trees/models-tree/internal/ModelsTreeIdsCache.js";
+import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../components/trees/models-tree/ModelsTreeDefinition.js";
+import { createIModelAccess } from "../Common.js";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";

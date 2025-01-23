@@ -6,10 +6,10 @@
 import cx from "classnames";
 import { forwardRef } from "react";
 import { TreeNodeRenderer as CoreTreeNodeRenderer } from "@itwin/presentation-hierarchies-react";
-import { TreeNodeCheckbox } from "./TreeNodeCheckbox";
+import { TreeNodeCheckbox } from "./TreeNodeCheckbox.js";
 
 import type { ComponentPropsWithoutRef, ForwardRefExoticComponent, RefAttributes } from "react";
-import type { TreeCheckboxProps } from "./TreeNodeCheckbox";
+import type { TreeCheckboxProps } from "./TreeNodeCheckbox.js";
 
 /** @beta */
 export type TreeNodeRendererProps = ComponentPropsWithoutRef<typeof CoreTreeNodeRenderer> & {
