@@ -16,7 +16,7 @@ export default defineConfig({
     coverage: {
       exclude: ["lib/*", "src/test/*"],
       include: ["src/*"],
-      provider: "istanbul",
+      provider: "v8",
       reportsDirectory: "lib/coverage",
       reporter: ["html", "text-summary"],
       thresholds: {
