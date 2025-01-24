@@ -23,10 +23,6 @@
     "measurements": "Measurements",
     "name": "Name"
   },
-  "Formatting": {
-    "xyzPoint": "{{- x}}, {{- y}}, {{- z}}",
-    "xyPoint": "{{- x}}, {{- y}}"
-  },
   "tools": {
     "MeasureDistance": {
       "keyin": "Distance",
