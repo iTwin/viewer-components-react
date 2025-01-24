@@ -5,6 +5,7 @@
 export * from "./mapLayers";
 export * from "./MapLayersActionIds";
 export * from "./MapLayersPrefBrowserStorage";
+export * from "./PreferencesBrowserStorage"
 export * from "./ui/Interfaces";
 export * from "./ui/MapLayersUiItemsProvider";
 export * from "./ui/FeatureInfoUiItemsProvider";
