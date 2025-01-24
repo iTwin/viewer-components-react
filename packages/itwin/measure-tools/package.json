@@ -24,11 +24,9 @@
     "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
     "lint:fix": "npm run lint -- --fix",
     "lint:table": "eslint ./**/*.{ts,tsx} 1>&2 -f ./node_modules/@itwin/eslint-plugin/dist/formatters/no-internal-summary-with-table.js",
-    "test": "npm run webpack:tests && npm run test:certa",
-    "test:certa": "certa -r chrome",
-    "cover": "nyc npm test",
-    "madge": "madge --circular --extensions ts,tsx src",
-    "webpack:tests": "webpack --config webpack.config.js 1>&2"
+    "test": "vitest run",
+    "cover": "vitest run --coverage",
+    "madge": "madge --circular --extensions ts,tsx src"
   },
   "keywords": [
     "Bentley",
@@ -61,7 +59,6 @@
     "@itwin/appui-abstract": "^4.10.0",
     "@itwin/appui-react": "^4.17.0",
     "@itwin/build-tools": "^4.10.0",
-    "@itwin/certa": "^4.10.0",
     "@itwin/components-react": "^4.17.0",
     "@itwin/core-bentley": "^4.10.0",
     "@itwin/core-common": "^4.10.0",
@@ -82,11 +79,13 @@
     "@itwin/webgl-compatibility": "^4.10.0",
     "@types/chai": "^4.2.0",
     "@types/chai-as-promised": "^7.1.1",
-    "@types/mocha": "^10.0.6",
+    "@types/jest": "^27.5.1",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "@typescript-eslint/eslint-plugin": "^5.59.8",
     "@typescript-eslint/parser": "^5.59.8",
+    "@vitejs/plugin-react": "^4.3.1",
+    "@vitest/coverage-istanbul": "^2.1.1",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "cpx2": "4.2.0",
@@ -95,32 +94,19 @@
     "eslint-plugin-import": "^2.29.0",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-unused-imports": "^2.0.0",
-    "glob": "^7.1.2",
+    "jsdom": "^25.0.1",
     "madge": "4.0.2",
-    "mocha": "^10.2.0",
-    "null-loader": "^4.0.1",
-    "nyc": "^15.1.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-redux": "^7.2.2",
     "redux": "^4.2.1",
     "rimraf": "^3.0.2",
-    "source-map-loader": "^1.0.0",
     "typescript": "~5.7.2",
-    "url-loader": "^4.1.1",
-    "webpack": "5.76.0",
-    "webpack-cli": "^5.0.1"
+    "vite": "^5.3.1",
+    "vitest": "^2.1.1"
   },
   "dependencies": {
     "@bentley/icons-generic-webfont": "^1.0.29",
     "@itwin/itwinui-icons-react": "^2.6.0"
-  },
-  "nyc": {
-    "nycrc-path": "./node_modules/@itwin/build-tools/.nycrc",
-    "check-coverage": true,
-    "statements": 20,
-    "branches": 20,
-    "functions": 20,
-    "lines": 20
   }
 }
