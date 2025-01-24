@@ -1,5 +1,5 @@
 {
-  "type": "patch",
+  "type": "none",
   "comment": "Drop certa in favor of vitest.",
   "packageName": "@itwin/measure-tools-react",
   "email": "3418768+a-gagnon@users.noreply.github.com",
