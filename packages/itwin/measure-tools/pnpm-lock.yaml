@@ -101,7 +101,7 @@ importers:
         version: 5.59.8(eslint@8.56.0)(typescript@5.7.2)
       '@vitejs/plugin-react':
         specifier: ^4.3.1
-        version: 4.3.1(vite@5.3.1(@types/node@20.10.5)(terser@5.26.0))
+        version: 4.3.1(vite@5.4.12(@types/node@20.10.5)(terser@5.26.0))
       '@vitest/coverage-v8':
         specifier: ^2.1.1
         version: 2.1.1(vitest@2.1.1(@types/node@20.10.5)(jsdom@25.0.1)(terser@5.26.0))
@@ -155,7 +155,7 @@ importers:
         version: 5.7.2
       vite:
         specifier: ^5.3.1
-        version: 5.3.1(@types/node@20.10.5)(terser@5.26.0)
+        version: 5.4.12(@types/node@20.10.5)(terser@5.26.0)
       vitest:
         specifier: ^2.1.1
         version: 2.1.1(@types/node@20.10.5)(jsdom@25.0.1)(terser@5.26.0)
@@ -661,8 +661,8 @@ packages:
       react: '>=16.8.6'
       react-dom: '>=16.8.6'
 
-  '@itwin/itwinui-react@2.12.18':
-    resolution: {integrity: sha512-M14g7su8Nv69znAnf7ix659xOO+X/i6RsCERiz7FhbJR/krDS9/9DV0nT6XR8FYKlOLWGyi+zC3TijmkjmxdUA==}
+  '@itwin/itwinui-react@2.12.26':
+    resolution: {integrity: sha512-SzedS6sz1iupq0JZm0SAfynFPR8xB9/GbTtQz/8XyuTEvrBoXyHMZJGAySR99TdLwpm3r+cxAEpFK5UOpQ+0Vw==}
     deprecated: iTwinUI v2 has reached end-of-life. Please upgrade to the latest version.
     peerDependencies:
       react: '>=16.8.6 < 19.0.0'
@@ -748,8 +748,8 @@ packages:
     resolution: {integrity: sha512-R8gLRTZeyp03ymzP/6Lil/28tGeGEzhx1q2k703KGWRAI1VdvPIXdG70VJc2pAMw3NA6JKL5hhFu1sJX0Mnn/A==}
     engines: {node: '>=6.0.0'}
 
-  '@jridgewell/source-map@0.3.5':
-    resolution: {integrity: sha512-UTYAUj/wviwdsMfzoSJspJxbkH5o1snzwX0//0ENX1u/55kkZZkcTZP6u9bwKGkv+dkk9at4m1Cpt0uY80kcpQ==}
+  '@jridgewell/source-map@0.3.6':
+    resolution: {integrity: sha512-1ZJTZebgqllO79ue2bm3rIGud/bOe0pP5BjSRCRxxYkEZS8STV7zN84UBbiYu7jy+eCKSnVIUgoWWE/tt+shMQ==}
 
   '@jridgewell/sourcemap-codec@1.4.15':
     resolution: {integrity: sha512-eF2rxCRulEKXHTRiDrDy6erMYWqNw4LPdQ8UQA4huuxaQsVeRPFl2oM8oDGxMFhJUWZf9McpLtJasDDZb/Bpeg==}
@@ -985,9 +985,6 @@ packages:
   '@types/eslint@8.56.10':
     resolution: {integrity: sha512-Shavhk87gCtY2fhXDctcfS3e6FdxWkCx1iUZ9eEUbh7rTqlZT0/IzOkCOVt0fCjcFuZ9FPYfuezTBImfHCDBGQ==}
 
-  '@types/estree@1.0.5':
-    resolution: {integrity: sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==}
-
   '@types/estree@1.0.6':
     resolution: {integrity: sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw==}
 
@@ -1012,8 +1009,8 @@ packages:
   '@types/react-dom@17.0.0':
     resolution: {integrity: sha512-lUqY7OlkF/RbNtD5nIq7ot8NquXrdFrjSOR6+w9a9RFQevGi1oZO1dcJbXMeONAPKtZ2UrZOEJ5UOCVsxbLk/g==}
 
-  '@types/react-table@7.7.18':
-    resolution: {integrity: sha512-OncztdDERQ35pjcQCpNoQe8KPOE8Rg2Ox4PlZHMGNgHTEaM1JyT2lWfNNbj2sCnOtQOHrOH7SzUnGUAXzqdksg==}
+  '@types/react-table@7.7.20':
+    resolution: {integrity: sha512-ahMp4pmjVlnExxNwxyaDrFgmKxSbPwU23sGQw2gJK4EhCvnvmib2s/O/+y1dfV57dXOwpr2plfyBol+vEHbi2w==}
 
   '@types/react@17.0.0':
     resolution: {integrity: sha512-aj/L7RIMsRlWML3YB6KZiXB3fV2t41+5RBGYF8z+tAKU43Px8C3cYUZsDvf1/+Bm4FK21QWBrDutu8ZJ/70qOw==}
@@ -1246,6 +1243,11 @@ packages:
 
   acorn@8.11.2:
     resolution: {integrity: sha512-nc0Axzp/0FILLEVsm4fNwLCwMttvhEI263QtVPQcbpfZZ3ts0hLsZGOpE6czNlid7CJ9MlyH8reXkpsf3YUY4w==}
+    engines: {node: '>=0.4.0'}
+    hasBin: true
+
+  acorn@8.14.0:
+    resolution: {integrity: sha512-cl669nCJTZBsL97OF4kUQm5g5hC2uihk0NxY3WENAC0TYdILVkAyHymAntgxGkl7K+t0cXIrH5siy5S4XkFycA==}
     engines: {node: '>=0.4.0'}
     hasBin: true
 
@@ -1912,6 +1914,7 @@ packages:
   eslint@8.56.0:
     resolution: {integrity: sha512-Go19xM6T9puCOWntie1/P997aXxFsOi37JIHRWI514Hc6ZnaHGKY9xFhrU65RT6CcBEzZoGG1e6Nq+DT04ZtZQ==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
 
   espree@9.6.1:
@@ -2114,6 +2117,7 @@ packages:
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
+    deprecated: Glob versions prior to v9 are no longer supported
 
   globals@11.12.0:
     resolution: {integrity: sha512-WOBp/EEGUiIsJSp7wcv/y6MO+lV9UoncWqxuFfm8eBwzWNgyfBd6Gz+IeKQ9jCmyhoH99g15M3T+QaVHFjizVA==}
@@ -2248,6 +2252,7 @@ packages:
 
   inflight@1.0.6:
     resolution: {integrity: sha512-k92I/b08q4wvFscXCLvqfsHCrjrF7yiXsQuIVvVE7N82W3+aqpzuUdBbfhWcy/FZR3/4IgflMgKLOsvPDrGCJA==}
+    deprecated: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
 
   inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
@@ -2687,11 +2692,6 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  nanoid@3.3.7:
-    resolution: {integrity: sha512-eSRppjcPIatRIMC1U6UngP8XFcz8MQWGQdt1MTBQ7NaAmvXDfvNxbvWV3x2y6CdEUciCSsDHDQZbhYaB8QEo2g==}
-    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
-    hasBin: true
-
   nanoid@3.3.8:
     resolution: {integrity: sha512-WNLf5Sd8oZxOm+TzppcYk8gVOgP+l58xNy58D0nbUnOxOWRWvlcCV4kUF7ltmI6PsrLl/BgKEyS4mqsGChFN0w==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
@@ -2847,9 +2847,6 @@ packages:
     resolution: {integrity: sha512-vE7JKRyES09KiunauX7nd2Q9/L7lhok4smP9RZTDeD4MVs72Dp2qNFVz39Nz5a0FVEW0BJR6C0DYrq6unoziZA==}
     engines: {node: '>= 14.16'}
 
-  picocolors@1.0.0:
-    resolution: {integrity: sha512-1fygroTLlHu66zi26VoTDv8yRgm0Fccecssto+MhsZ0D/DGW2sm8E8AjW7NU5VVTRt5GxbeZ5qBuJr+HyLYkjQ==}
-
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
 
@@ -2864,10 +2861,6 @@ packages:
   postcss-values-parser@2.0.1:
     resolution: {integrity: sha512-2tLuBsA6P4rYTNKCXYG/71C7j1pU6pK503suYOmn4xYrQIzW+opD+7FAFNuGSdZC/3Qfy334QbeMu7MEb8gOxg==}
     engines: {node: '>=6.14.4'}
-
-  postcss@8.4.32:
-    resolution: {integrity: sha512-D/kj5JNu6oo2EIy+XL/26JEDTlIbB8hw85G8StOE6L74RQAVVP5rej6wxCNqyMbR4RkPfqvezVbPw81Ngd6Kcw==}
-    engines: {node: ^10 || ^12 || >=14}
 
   postcss@8.5.1:
     resolution: {integrity: sha512-6oz2beyjc5VMn/KV1pPw8fliQkhBXrVn1Z3TVyqZxU8kZpzEKhBdmCFqI6ZbmGtamQvQGuU1sgPTk8ZrXDD7jQ==}
@@ -3061,6 +3054,7 @@ packages:
 
   rimraf@3.0.2:
     resolution: {integrity: sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==}
+    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
 
   rollup@4.32.0:
@@ -3174,10 +3168,6 @@ packages:
 
   slashes@3.0.12:
     resolution: {integrity: sha512-Q9VME8WyGkc7pJf6QEkj3wE+2CnvZMI+XJhwdTPR8Z/kWQRXi7boAWLDibRPyHRTUTPx5FaU7MsyrjI3yLB4HA==}
-
-  source-map-js@1.0.2:
-    resolution: {integrity: sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==}
-    engines: {node: '>=0.10.0'}
 
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
@@ -3493,8 +3483,8 @@ packages:
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
 
-  vite@5.3.1:
-    resolution: {integrity: sha512-XBmSKRLXLxiaPYamLv3/hnP/KXDai1NDexN0FpkTaZXTfycHvkRHoenpgl/fvuK/kPbB6xAgoyiryAhQNxYmAQ==}
+  vite@5.4.12:
+    resolution: {integrity: sha512-KwUaKB27TvWwDJr1GjjWthLMATbGEbeWYZIbGZ5qFIsgPP3vWzLu4cVooqhm5/Z2SPDUMjyPVjTztm5tYKwQxA==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
     peerDependencies:
@@ -3502,6 +3492,7 @@ packages:
       less: '*'
       lightningcss: ^1.21.0
       sass: '*'
+      sass-embedded: '*'
       stylus: '*'
       sugarss: '*'
       terser: ^5.4.0
@@ -3513,6 +3504,8 @@ packages:
       lightningcss:
         optional: true
       sass:
+        optional: true
+      sass-embedded:
         optional: true
       stylus:
         optional: true
@@ -3731,7 +3724,7 @@ snapshots:
     dependencies:
       '@babel/helper-validator-identifier': 7.25.9
       js-tokens: 4.0.0
-      picocolors: 1.0.0
+      picocolors: 1.1.1
 
   '@babel/compat-data@7.26.5': {}
 
@@ -3884,7 +3877,7 @@ snapshots:
   '@es-joy/jsdoccomment@0.43.1':
     dependencies:
       '@types/eslint': 8.56.10
-      '@types/estree': 1.0.5
+      '@types/estree': 1.0.6
       '@typescript-eslint/types': 7.15.0
       comment-parser: 1.4.1
       esquery: 1.5.0
@@ -4052,7 +4045,7 @@ snapshots:
       '@itwin/itwinui-icons-react': 2.8.0(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
       '@itwin/itwinui-react': 3.16.0(@types/react@17.0.0)(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
-      '@itwin/itwinui-react-v2': '@itwin/itwinui-react@2.12.18(react-dom@18.0.0(react@18.0.0))(react@18.0.0)'
+      '@itwin/itwinui-react-v2': '@itwin/itwinui-react@2.12.26(react-dom@18.0.0(react@18.0.0))(react@18.0.0)'
       '@itwin/itwinui-variables': 3.3.0
       classnames: 2.3.1
       immer: 9.0.6
@@ -4265,12 +4258,12 @@ snapshots:
       react: 18.0.0
       react-dom: 18.0.0(react@18.0.0)
 
-  '@itwin/itwinui-react@2.12.18(react-dom@18.0.0(react@18.0.0))(react@18.0.0)':
+  '@itwin/itwinui-react@2.12.26(react-dom@18.0.0(react@18.0.0))(react@18.0.0)':
     dependencies:
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
       '@tippyjs/react': 4.2.6(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
-      '@types/react-table': 7.7.18
-      classnames: 2.5.1
+      '@types/react-table': 7.7.20
+      classnames: 2.3.1
       react: 18.0.0
       react-dom: 18.0.0(react@18.0.0)
       react-table: 7.8.0(react@18.0.0)
@@ -4380,7 +4373,7 @@ snapshots:
 
   '@jridgewell/set-array@1.2.1': {}
 
-  '@jridgewell/source-map@0.3.5':
+  '@jridgewell/source-map@0.3.6':
     dependencies:
       '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
@@ -4638,10 +4631,8 @@ snapshots:
 
   '@types/eslint@8.56.10':
     dependencies:
-      '@types/estree': 1.0.5
+      '@types/estree': 1.0.6
       '@types/json-schema': 7.0.15
-
-  '@types/estree@1.0.5': {}
 
   '@types/estree@1.0.6': {}
 
@@ -4667,7 +4658,7 @@ snapshots:
     dependencies:
       '@types/react': 17.0.0
 
-  '@types/react-table@7.7.18':
+  '@types/react-table@7.7.20':
     dependencies:
       '@types/react': 17.0.0
 
@@ -4914,14 +4905,14 @@ snapshots:
 
   '@ungap/structured-clone@1.2.0': {}
 
-  '@vitejs/plugin-react@4.3.1(vite@5.3.1(@types/node@20.10.5)(terser@5.26.0))':
+  '@vitejs/plugin-react@4.3.1(vite@5.4.12(@types/node@20.10.5)(terser@5.26.0))':
     dependencies:
       '@babel/core': 7.26.7
       '@babel/plugin-transform-react-jsx-self': 7.25.9(@babel/core@7.26.7)
       '@babel/plugin-transform-react-jsx-source': 7.25.9(@babel/core@7.26.7)
       '@types/babel__core': 7.20.5
       react-refresh: 0.14.2
-      vite: 5.3.1(@types/node@20.10.5)(terser@5.26.0)
+      vite: 5.4.12(@types/node@20.10.5)(terser@5.26.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -4950,13 +4941,13 @@ snapshots:
       chai: 5.1.2
       tinyrainbow: 1.2.0
 
-  '@vitest/mocker@2.1.1(@vitest/spy@2.1.1)(vite@5.3.1(@types/node@20.10.5)(terser@5.26.0))':
+  '@vitest/mocker@2.1.1(@vitest/spy@2.1.1)(vite@5.4.12(@types/node@20.10.5)(terser@5.26.0))':
     dependencies:
       '@vitest/spy': 2.1.1
       estree-walker: 3.0.3
       magic-string: 0.30.17
     optionalDependencies:
-      vite: 5.3.1(@types/node@20.10.5)(terser@5.26.0)
+      vite: 5.4.12(@types/node@20.10.5)(terser@5.26.0)
 
   '@vitest/pretty-format@2.1.1':
     dependencies:
@@ -4994,6 +4985,9 @@ snapshots:
       acorn: 8.11.2
 
   acorn@8.11.2: {}
+
+  acorn@8.14.0:
+    optional: true
 
   agent-base@7.1.3: {}
 
@@ -5464,7 +5458,7 @@ snapshots:
     dependencies:
       debug: 4.3.4(supports-color@8.1.1)
       is-url: 1.2.4
-      postcss: 8.4.32
+      postcss: 8.5.1
       postcss-values-parser: 2.0.1
     transitivePeerDependencies:
       - supports-color
@@ -5914,7 +5908,7 @@ snapshots:
 
   estree-walker@3.0.3:
     dependencies:
-      '@types/estree': 1.0.5
+      '@types/estree': 1.0.6
 
   esutils@2.0.3: {}
 
@@ -6719,8 +6713,6 @@ snapshots:
 
   nanoid@3.3.3: {}
 
-  nanoid@3.3.7: {}
-
   nanoid@3.3.8: {}
 
   natural-compare-lite@1.4.0: {}
@@ -6873,8 +6865,6 @@ snapshots:
 
   pathval@2.0.0: {}
 
-  picocolors@1.0.0: {}
-
   picocolors@1.1.1: {}
 
   picomatch@2.3.1: {}
@@ -6886,12 +6876,6 @@ snapshots:
       flatten: 1.0.3
       indexes-of: 1.0.1
       uniq: 1.0.1
-
-  postcss@8.4.32:
-    dependencies:
-      nanoid: 3.3.7
-      picocolors: 1.0.0
-      source-map-js: 1.0.2
 
   postcss@8.5.1:
     dependencies:
@@ -7248,8 +7232,6 @@ snapshots:
 
   slashes@3.0.12: {}
 
-  source-map-js@1.0.2: {}
-
   source-map-js@1.2.1: {}
 
   source-map-support@0.5.21:
@@ -7379,8 +7361,8 @@ snapshots:
 
   terser@5.26.0:
     dependencies:
-      '@jridgewell/source-map': 0.3.5
-      acorn: 8.11.2
+      '@jridgewell/source-map': 0.3.6
+      acorn: 8.14.0
       commander: 2.20.3
       source-map-support: 0.5.21
     optional: true
@@ -7556,18 +7538,19 @@ snapshots:
       cac: 6.7.14
       debug: 4.4.0
       pathe: 1.1.2
-      vite: 5.3.1(@types/node@20.10.5)(terser@5.26.0)
+      vite: 5.4.12(@types/node@20.10.5)(terser@5.26.0)
     transitivePeerDependencies:
       - '@types/node'
       - less
       - lightningcss
       - sass
+      - sass-embedded
       - stylus
       - sugarss
       - supports-color
       - terser
 
-  vite@5.3.1(@types/node@20.10.5)(terser@5.26.0):
+  vite@5.4.12(@types/node@20.10.5)(terser@5.26.0):
     dependencies:
       esbuild: 0.21.5
       postcss: 8.5.1
@@ -7580,7 +7563,7 @@ snapshots:
   vitest@2.1.1(@types/node@20.10.5)(jsdom@25.0.1)(terser@5.26.0):
     dependencies:
       '@vitest/expect': 2.1.1
-      '@vitest/mocker': 2.1.1(@vitest/spy@2.1.1)(vite@5.3.1(@types/node@20.10.5)(terser@5.26.0))
+      '@vitest/mocker': 2.1.1(@vitest/spy@2.1.1)(vite@5.4.12(@types/node@20.10.5)(terser@5.26.0))
       '@vitest/pretty-format': 2.1.8
       '@vitest/runner': 2.1.1
       '@vitest/snapshot': 2.1.1
@@ -7595,7 +7578,7 @@ snapshots:
       tinyexec: 0.3.2
       tinypool: 1.0.2
       tinyrainbow: 1.2.0
-      vite: 5.3.1(@types/node@20.10.5)(terser@5.26.0)
+      vite: 5.4.12(@types/node@20.10.5)(terser@5.26.0)
       vite-node: 2.1.1(@types/node@20.10.5)(terser@5.26.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
@@ -7606,6 +7589,7 @@ snapshots:
       - lightningcss
       - msw
       - sass
+      - sass-embedded
       - stylus
       - sugarss
       - supports-color
