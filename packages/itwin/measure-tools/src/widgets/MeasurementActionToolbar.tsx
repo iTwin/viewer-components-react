@@ -9,15 +9,15 @@ import { Point2d } from "@itwin/core-geometry";
 import { RelativePosition } from "@itwin/appui-abstract";
 import type { ItemProps, ToolbarActionItem } from "@itwin/appui-react";
 import { ActionButtonItemDef, CursorInformation, CursorPopupManager, ToolbarItemUtilities } from "@itwin/appui-react";
-import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking";
-import type { Measurement, MeasurementPickContext } from "../api/Measurement";
-import { MeasurementManager } from "../api/MeasurementManager";
-import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
-import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
-import { ShimFunctions } from "../api/ShimFunctions";
-import { DistanceMeasurement } from "../measurements/DistanceMeasurement";
-import { PopupToolbar } from "./PopupToolbar";
-import { MeasureTools } from "../MeasureTools";
+import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking.js";
+import type { Measurement, MeasurementPickContext } from "../api/Measurement.js";
+import { MeasurementManager } from "../api/MeasurementManager.js";
+import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet.js";
+import { MeasurementUIEvents } from "../api/MeasurementUIEvents.js";
+import { ShimFunctions } from "../api/ShimFunctions.js";
+import { DistanceMeasurement } from "../measurements/DistanceMeasurement.js";
+import { PopupToolbar } from "./PopupToolbar.js";
+import { MeasureTools } from "../MeasureTools.js";
 
 /** Props for MeasurementActionItemDef, when the toolbar button is clicked, it passes the measurement that your execute function will handle. */
 export interface MeasurementActionItemProps extends ItemProps {

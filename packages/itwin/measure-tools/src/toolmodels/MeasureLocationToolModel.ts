@@ -4,11 +4,11 @@
 *--------------------------------------------------------------------------------------------*/
 
 import type { Point3d } from "@itwin/core-geometry";
-import { MeasurementToolModel } from "../api/MeasurementToolModel";
-import type { LocationMeasurementProps } from "../measurements/LocationMeasurement";
-import { LocationMeasurement } from "../measurements/LocationMeasurement";
-import type { MeasurementProps } from "../api/MeasurementProps";
-import type { DrawingMetadataProps } from "../api/Measurement";
+import { MeasurementToolModel } from "../api/MeasurementToolModel.js";
+import type { LocationMeasurementProps } from "../measurements/LocationMeasurement.js";
+import { LocationMeasurement } from "../measurements/LocationMeasurement.js";
+import type { MeasurementProps } from "../api/MeasurementProps.js";
+import type { DrawingMetadataProps } from "../api/Measurement.js";
 
 // Properties of LocationMeasurementProps that are NOT inherited from MeasurementProps
 // We don't want to expose anything from the MeasurementProps for addLocation

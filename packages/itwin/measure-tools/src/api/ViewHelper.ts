@@ -6,8 +6,8 @@
 import type { Point3d, Ray3d } from "@itwin/core-geometry";
 import type { Viewport, ViewRect } from "@itwin/core-frontend";
 import { DrawingViewState, SheetViewState, SpatialViewState } from "@itwin/core-frontend";
-import { WellKnownViewType } from "./MeasurementEnums";
-import { MeasurementViewTarget } from "./MeasurementViewTarget";
+import { WellKnownViewType } from "./MeasurementEnums.js";
+import { MeasurementViewTarget } from "./MeasurementViewTarget.js";
 
 /**
  * Helper methods for working with views.

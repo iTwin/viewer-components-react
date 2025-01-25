@@ -10,12 +10,12 @@ import {
   StagePanelLocation, StagePanelSection, StageUsage, SyncUiEventId, ToolbarHelper, ToolbarItemUtilities,
   ToolbarOrientation, ToolbarUsage, WidgetState,
 } from "@itwin/appui-react";
-import { MeasurementSyncUiEventId } from "../api/MeasurementEnums";
-import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
-import { MeasureTools } from "../MeasureTools";
-import { MeasureToolDefinitions } from "../tools/MeasureToolDefinitions";
-import type { RecursiveRequired } from "../utils/types";
-import { MeasurementPropertyWidget, MeasurementPropertyWidgetId } from "./MeasurementPropertyWidget";
+import { MeasurementSyncUiEventId } from "../api/MeasurementEnums.js";
+import { MeasurementUIEvents } from "../api/MeasurementUIEvents.js";
+import { MeasureTools } from "../MeasureTools.js";
+import { MeasureToolDefinitions } from "../tools/MeasureToolDefinitions.js";
+import type { RecursiveRequired } from "../utils/types.js";
+import { MeasurementPropertyWidget, MeasurementPropertyWidgetId } from "./MeasurementPropertyWidget.js";
 import { IModelApp } from "@itwin/core-frontend";
 import type { ScreenViewport } from "@itwin/core-frontend";
 

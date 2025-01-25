@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { DrawingMetadataProps } from "./Measurement";
+import type { DrawingMetadataProps } from "./Measurement.js";
 
 /** Properties for a Measurement that can be serialized. */
 export interface MeasurementProps {

@@ -4,17 +4,17 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { IModelApp } from "@itwin/core-frontend";
-import { MeasureDistanceTool } from "./tools/MeasureDistanceTool";
-import { MeasureAreaTool } from "./tools/MeasureAreaTool";
-import { MeasureLocationTool } from "./tools/MeasureLocationTool";
-import { ClearMeasurementsTool } from "./tools/ClearMeasurementsTool";
-import { ToggleDisplayMeasurementAxesTool } from "./tools/ToggleDisplayMeasurementAxesTool";
-import { MeasurementManager } from "./api/MeasurementManager";
-import { MeasureRadiusTool } from "./tools/MeasureRadiusTool";
-import { MeasureAngleTool } from "./tools/MeasureAngleTool";
-import { MeasurePerpendicularTool } from "./tools/MeasurePerpendicularTool";
+import { MeasureDistanceTool } from "./tools/MeasureDistanceTool.js";
+import { MeasureAreaTool } from "./tools/MeasureAreaTool.js";
+import { MeasureLocationTool } from "./tools/MeasureLocationTool.js";
+import { ClearMeasurementsTool } from "./tools/ClearMeasurementsTool.js";
+import { ToggleDisplayMeasurementAxesTool } from "./tools/ToggleDisplayMeasurementAxesTool.js";
+import { MeasurementManager } from "./api/MeasurementManager.js";
+import { MeasureRadiusTool } from "./tools/MeasureRadiusTool.js";
+import { MeasureAngleTool } from "./tools/MeasureAngleTool.js";
+import { MeasurePerpendicularTool } from "./tools/MeasurePerpendicularTool.js";
 import type { Localization } from "@itwin/core-common";
-import { DrawingDataCache } from "./api/DrawingTypeDataCache";
+import { DrawingDataCache } from "./api/DrawingTypeDataCache.js";
 
 export interface FeatureFlags {
   hideDistanceTool?: boolean;

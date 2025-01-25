@@ -4,10 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { Viewport } from "@itwin/core-frontend";
-import type { Feature } from "../api/FeatureTracking";
-import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking";
-import { MeasurementPreferences } from "../api/MeasurementPreferences";
-import { PrimitiveToolBase } from "../api/MeasurementTool";
+import type { Feature } from "../api/FeatureTracking.js";
+import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking.js";
+import { MeasurementPreferences } from "../api/MeasurementPreferences.js";
+import { PrimitiveToolBase } from "../api/MeasurementTool.js";
 
 export class ToggleDisplayMeasurementAxesTool extends PrimitiveToolBase {
   public static override toolId = "MeasureTools.ToggleDisplayMeasurementAxes";

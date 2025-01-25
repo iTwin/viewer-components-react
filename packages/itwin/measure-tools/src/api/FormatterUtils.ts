@@ -7,7 +7,7 @@ import type { Point3d, XAndY } from "@itwin/core-geometry";
 import type { Cartographic } from "@itwin/core-common";
 import { IModelApp, QuantityType } from "@itwin/core-frontend";
 import type { FormatterSpec } from "@itwin/core-quantity";
-import { MeasureTools } from "../MeasureTools";
+import { MeasureTools } from "../MeasureTools.js";
 
 export class FormatterUtils {
   private static removeUnitSuffixes(s: string) {

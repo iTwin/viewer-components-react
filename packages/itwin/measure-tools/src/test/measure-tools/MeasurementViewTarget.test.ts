@@ -4,8 +4,8 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { assert } from "chai";
-import { WellKnownViewType } from "../../api/MeasurementEnums";
-import { MeasurementViewTarget } from "../../api/MeasurementViewTarget";
+import { WellKnownViewType } from "../../api/MeasurementEnums.js";
+import { MeasurementViewTarget } from "../../api/MeasurementViewTarget.js";
 
 describe("MeasurementViewTarget tests", () => {
   it("Test add/remove", () => {

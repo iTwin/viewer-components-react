@@ -7,16 +7,17 @@
     "type": "git",
     "url": "https://github.com/iTwin/viewer-components-react/tree/master/packages/itwin/measure-tools"
   },
-  "main": "lib/cjs/measure-tools-react.js",
-  "module": "lib/esm/measure-tools-react.js",
-  "typings": "lib/cjs/measure-tools-react",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./lib/measure-tools-react.d.ts",
+      "default": "./lib/measure-tools-react.js"
+    }
+  },
   "scripts": {
-    "build": "npm run copy:public && npm run -s build:cjs && npm run -s build:esm",
-    "build:cjs": "tsc 1>&2 --outDir lib/cjs && npm run -s copy:cjs",
-    "build:esm": "tsc 1>&2 --outDir lib/esm --module ES2020 && npm run -s copy:esm",
+    "build": "npm run copy:public && tsc 1>&2 && npm run copy:css",
     "copy:public": "cpx \"./public/**/*\" ./lib/public",
-    "copy:cjs": "cpx \"./src/**/*.*css\" ./lib/cjs",
-    "copy:esm": "cpx \"./src/**/*.*css\" ./lib/esm",
+    "copy:css": "cpx \"./src/**/*.*css\" ./lib",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
     "watch": "tsc --w",
     "clean": "rimraf lib",

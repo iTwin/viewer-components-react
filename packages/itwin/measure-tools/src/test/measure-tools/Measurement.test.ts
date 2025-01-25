@@ -4,14 +4,14 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { assert } from "chai";
-import { Measurement } from "../../api/Measurement";
-import { WellKnownMeasurementStyle, WellKnownViewType } from "../../api/MeasurementEnums";
-import { MeasurementManager } from "../../api/MeasurementManager";
-import { MeasurementPreferences } from "../../api/MeasurementPreferences";
-import type { DistanceMeasurementProps } from "../../measurements/DistanceMeasurement";
-import { DistanceMeasurement } from "../../measurements/DistanceMeasurement";
-import { DistanceMeasurementSubClass } from "./MeasurementSerialization.test";
-import { MeasurementActionToolbar } from "../../widgets/MeasurementActionToolbar";
+import { Measurement } from "../../api/Measurement.js";
+import { WellKnownMeasurementStyle, WellKnownViewType } from "../../api/MeasurementEnums.js";
+import { MeasurementManager } from "../../api/MeasurementManager.js";
+import { MeasurementPreferences } from "../../api/MeasurementPreferences.js";
+import type { DistanceMeasurementProps } from "../../measurements/DistanceMeasurement.js";
+import { DistanceMeasurement } from "../../measurements/DistanceMeasurement.js";
+import { DistanceMeasurementSubClass } from "./MeasurementSerialization.test.js";
+import { MeasurementActionToolbar } from "../../widgets/MeasurementActionToolbar.js";
 import { Point2d } from "@itwin/core-geometry";
 
 describe("Measurement tests", () => {

@@ -25,12 +25,12 @@ import {
   ToolAssistance,
   ToolAssistanceInputMethod,
 } from "@itwin/core-frontend";
-import { MeasureTools } from "../MeasureTools";
-import type { Feature } from "./FeatureTracking";
-import { FeatureTracking } from "./FeatureTracking";
-import type { Measurement } from "./Measurement";
-import type { MeasurementToolModel } from "./MeasurementToolModel";
-import { SheetMeasurementsHelper } from "./SheetMeasurementHelper";
+import { MeasureTools } from "../MeasureTools.js";
+import type { Feature } from "./FeatureTracking.js";
+import { FeatureTracking } from "./FeatureTracking.js";
+import type { Measurement } from "./Measurement.js";
+import type { MeasurementToolModel } from "./MeasurementToolModel.js";
+import { SheetMeasurementsHelper } from "./SheetMeasurementHelper.js";
 
 /** Interface for any interactive tool that creates measurements. */
 export interface MeasurementTool {
