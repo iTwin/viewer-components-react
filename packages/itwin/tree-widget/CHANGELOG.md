@@ -1,8 +1,21 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Tue, 14 Jan 2025 02:51:04 GMT and should not be manually modified.
+This log was last generated on Mon, 27 Jan 2025 18:30:40 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 3.3.0
+
+Mon, 27 Jan 2025 18:30:40 GMT
+
+### Minor changes
+
+- Define `type` and `exports` attributes in `package.json`. The `exports attribute prohibits access to APIs that are not intended to be used by external consumers. The `type: "module"` attribute addition moves this package a step closer towards dropping CommonJS support - it's now transpiled from ESM to CommonJS instead of the opposite. ([#1147](https://github.com/iTwin/viewer-components-react/pull/1147))
+- Add support for AppUI 5.x ([#1147](https://github.com/iTwin/viewer-components-react/pull/1147))
+
+### Patches
+
+- Fix visibility button with no content rendering empty tooltip. ([#1145](https://github.com/iTwin/viewer-components-react/pull/1145))
 
 ## 3.2.4
 
