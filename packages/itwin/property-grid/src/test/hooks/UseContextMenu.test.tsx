@@ -206,16 +206,22 @@ describe("Default context menu items", () => {
   });
 
   describe("AddFavoritePropertyContextMenuItem", () => {
-    it("renders item with non-favorite property", () => {
+    it("renders item with non-favorite property", async () => {
       favoritesManager.hasAsync.resolves(false);
       const { queryByText } = render(<AddFavoritePropertyContextMenuItem {...itemProps} />);
-      expect(queryByText("context-menu.add-favorite.label"));
+      await waitFor(() => {
+        expect(favoritesManager.hasAsync).to.be.called;
+        expect(queryByText("context-menu.add-favorite.label")).to.not.be.undefined;
+      });
     });
 
-    it("renders nothing if property is favorite", () => {
+    it("renders nothing if property is favorite", async () => {
       favoritesManager.hasAsync.resolves(true);
       const { container } = render(<AddFavoritePropertyContextMenuItem {...itemProps} />);
-      expect(container.children).to.have.lengthOf(0);
+      await waitFor(() => {
+        expect(favoritesManager.hasAsync).to.be.called;
+        expect(container.children).to.have.lengthOf(0);
+      });
     });
 
     it("calls `Presentation.favorites.add` with default scope", async () => {
@@ -251,13 +257,19 @@ describe("Default context menu items", () => {
     it("renders item with favorite property", async () => {
       favoritesManager.hasAsync.resolves(true);
       const { queryByText } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps} />);
-      await waitFor(() => expect(queryByText("context-menu.remove-favorite.label")));
+      await waitFor(() => {
+        expect(favoritesManager.hasAsync).to.be.called;
+        expect(queryByText("context-menu.remove-favorite.label")).to.not.be.undefined;
+      });
     });
 
     it("renders nothing if property is not favorite", async () => {
       favoritesManager.hasAsync.resolves(false);
       const { container } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps} />);
-      await waitFor(() => expect(container.children).to.have.lengthOf(0));
+      await waitFor(() => {
+        expect(favoritesManager.hasAsync).to.be.called;
+        expect(container.children).to.have.lengthOf(0);
+      });
     });
 
     it("calls `Presentation.favorites.remove` with default scope", async () => {

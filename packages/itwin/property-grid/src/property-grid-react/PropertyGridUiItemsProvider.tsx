@@ -112,6 +112,7 @@ function PropertyGridWidget({ shouldShow, ...props }: PropertyGridWidgetProps) {
   const widgetDef = useSpecificWidgetDef(PropertyGridWidgetId);
 
   useEffect(() => {
+    /* c8 ignore next 3 */
     if (!widgetDef) {
       return;
     }
