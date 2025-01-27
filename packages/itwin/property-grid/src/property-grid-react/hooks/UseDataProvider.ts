@@ -58,7 +58,7 @@ class PerformanceTrackingProvider implements IPresentationPropertyDataProvider {
     this.onDataChanged = this._wrappedProvider.onDataChanged;
   }
 
-  // istanbul ignore next
+  /* c8 ignore next 3 */
   public get displayType() {
     return this._wrappedProvider.displayType;
   }
@@ -78,11 +78,11 @@ class PerformanceTrackingProvider implements IPresentationPropertyDataProvider {
     this._wrappedProvider.keys = keys;
   }
 
-  // istanbul ignore next
+  /* c8 ignore next 3 */
   public get selectionInfo() {
     return this._wrappedProvider.selectionInfo;
   }
-  // istanbul ignore next
+  /* c8 ignore next 3 */
   public set keyselectionInfos(selectionInfo: SelectionInfo | undefined) {
     this._wrappedProvider.selectionInfo = selectionInfo;
   }
@@ -90,31 +90,31 @@ class PerformanceTrackingProvider implements IPresentationPropertyDataProvider {
   public [Symbol.dispose](): void {
     safeDispose(this._wrappedProvider);
   }
-  // istanbul ignore next
+  /* c8 ignore next */
   public dispose() {}
 
-  // istanbul ignore next
+  /* c8 ignore next 3 */
   public async getContentDescriptor() {
     return this._wrappedProvider.getContentDescriptor();
   }
 
-  // istanbul ignore next
+  /* c8 ignore next 3 */
   public async getContentSetSize() {
     return this._wrappedProvider.getContentSetSize();
   }
 
-  // istanbul ignore next
+  /* c8 ignore next 3 */
   public async getContent(pageOptions?: PageOptions | undefined) {
     return this._wrappedProvider.getContent(pageOptions);
   }
 
-  // istanbul ignore next
+  /* c8 ignore next 4 */
   public async getFieldByPropertyRecord(propertyRecord: PropertyRecord) {
     // eslint-disable-next-line deprecation/deprecation
     return this._wrappedProvider.getFieldByPropertyRecord(propertyRecord);
   }
 
-  // istanbul ignore next
+  /* c8 ignore next 3 */
   public async getFieldByPropertyDescription(descr: PropertyDescription) {
     return this._wrappedProvider.getFieldByPropertyDescription(descr);
   }
@@ -147,9 +147,9 @@ class PerformanceTrackingProvider implements IPresentationPropertyDataProvider {
  * considered as non-disposable and nothing is done with it.
  */
 function safeDispose(disposable: {} | { [Symbol.dispose]: () => void } | { dispose: () => void }) {
-  // istanbul ignore else
   if ("dispose" in disposable) {
     disposable.dispose();
+    /* c8 ignore next 3 */
   } else if (Symbol.dispose in disposable) {
     disposable[Symbol.dispose]();
   }

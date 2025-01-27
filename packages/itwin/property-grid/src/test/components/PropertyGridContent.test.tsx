@@ -31,31 +31,32 @@ describe("<PropertyGridContent />", () => {
     sinon.restore();
   });
 
-  const provider = {
-    keys: new KeySet([{ className: "class", id: "id" }]),
-    onDataChanged: new PropertyDataChangeEvent(),
-    getData: async () => {
-      return {
-        categories: [
-          {
-            expand: true,
-            label: "Test Category",
-            name: "test-category",
-          },
-        ],
-        label: PropertyRecord.fromString("Test Instance"),
-        records: {
-          ["test-category"]: [
-            createPropertyRecord(
-              { valueFormat: PropertyValueFormat.Primitive, value: "Prop Value", displayValue: "Prop Value" },
-              { name: "test-prop", displayLabel: "Test Prop" },
-            ),
-            createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: undefined }, { name: "null-prop", displayLabel: "Null Prop" }),
+  const createProvider = () =>
+    ({
+      keys: new KeySet([{ className: "class", id: "id" }]),
+      onDataChanged: new PropertyDataChangeEvent(),
+      getData: async () => {
+        return {
+          categories: [
+            {
+              expand: true,
+              label: "Test Category",
+              name: "test-category",
+            },
           ],
-        },
-      };
-    },
-  } as unknown as IPresentationPropertyDataProvider;
+          label: PropertyRecord.fromString("Test Instance"),
+          records: {
+            ["test-category"]: [
+              createPropertyRecord(
+                { valueFormat: PropertyValueFormat.Primitive, value: "Prop Value", displayValue: "Prop Value" },
+                { name: "test-prop", displayLabel: "Test Prop" },
+              ),
+              createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: undefined }, { name: "null-prop", displayLabel: "Null Prop" }),
+            ],
+          },
+        };
+      },
+    }) as unknown as IPresentationPropertyDataProvider;
 
   function renderWithContext(ui: ReactElement) {
     return render(<NullValueSettingContext>{ui}</NullValueSettingContext>);
@@ -63,6 +64,7 @@ describe("<PropertyGridContent />", () => {
 
   it("renders header with instance label", async () => {
     const imodel = {} as IModelConnection;
+    const provider = createProvider();
     const { getByText, queryByText } = renderWithContext(<PropertyGridContent dataProvider={provider} imodel={imodel} />);
 
     await waitFor(() => getByText("Test Prop"));
@@ -71,6 +73,7 @@ describe("<PropertyGridContent />", () => {
 
   it("renders header with back button", async () => {
     const imodel = {} as IModelConnection;
+    const provider = createProvider();
     const onBackClickSpy = sinon.spy();
 
     const { getByText, getByRole, user } = renderWithContext(<PropertyGridContent dataProvider={provider} imodel={imodel} onBackButton={onBackClickSpy} />);
@@ -83,6 +86,7 @@ describe("<PropertyGridContent />", () => {
 
   it("renders header with settings dropdown", async () => {
     const imodel = {} as IModelConnection;
+    const provider = createProvider();
     const spy = sinon.spy();
 
     const { getByText, getByRole, user } = renderWithContext(
@@ -110,6 +114,7 @@ describe("<PropertyGridContent />", () => {
 
   it("renders with extended props action buttons", async () => {
     const imodel = {} as IModelConnection;
+    const provider = createProvider();
     const stub = sinon.stub().returns(<div>Test action button</div>);
 
     const { getAllByText } = renderWithContext(<PropertyGridContent dataProvider={provider} imodel={imodel} actionButtonRenderers={[stub]} />);
@@ -122,6 +127,7 @@ describe("<PropertyGridContent />", () => {
 
   it("allows filtering out empty values", async () => {
     const imodel = {} as IModelConnection;
+    const provider = createProvider();
 
     const { getByText, getByRole, queryByText, user } = renderWithContext(
       <PropertyGridContent dataProvider={provider} imodel={imodel} settingsMenuItems={[(props) => <ShowHideNullValuesSettingsMenuItem {...props} />]} />,
@@ -146,6 +152,7 @@ describe("<PropertyGridContent />", () => {
 
   it("filters properties according to search prompt", async () => {
     const imodel = {} as IModelConnection;
+    const provider = createProvider();
 
     const { queryByText, user, getByRole, getByText } = renderWithContext(<PropertyGridContent dataProvider={provider} imodel={imodel} />);
 
@@ -177,10 +184,9 @@ describe("<PropertyGridContent />", () => {
 
   it("successfully clears filter", async () => {
     const imodel = {} as IModelConnection;
+    const provider = createProvider();
 
-    const { queryByText, user, getByRole, getByText } = renderWithContext(
-      <PropertyGridContent dataProvider={provider} imodel={imodel} settingsMenuItems={[(props) => <ShowHideNullValuesSettingsMenuItem {...props} />]} />,
-    );
+    const { queryByText, user, getByRole, getByText } = renderWithContext(<PropertyGridContent dataProvider={provider} imodel={imodel} />);
 
     await waitFor(() => {
       expect(queryByText("Test Category")).to.not.be.null;
@@ -208,6 +214,7 @@ describe("<PropertyGridContent />", () => {
 
   it("allows editing property", async () => {
     const imodel = {} as IModelConnection;
+    const provider = createProvider();
     const stub = sinon
       .stub<Parameters<Required<PropertyGridContentProps>["onPropertyUpdated"]>, ReturnType<Required<PropertyGridContentProps>["onPropertyUpdated"]>>()
       .resolves(true);
@@ -236,6 +243,7 @@ describe("<PropertyGridContent />", () => {
   describe("feature usage reporting", () => {
     it("reports when filters properties according to search prompt", async () => {
       const imodel = {} as IModelConnection;
+      const provider = createProvider();
       const onFeatureUsedSpy = sinon.spy();
 
       const { queryByText, user, getByRole, getByText } = renderWithContext(
@@ -274,6 +282,7 @@ describe("<PropertyGridContent />", () => {
 
     it("reports once when filter keeps changing", async () => {
       const imodel = {} as IModelConnection;
+      const provider = createProvider();
       const onFeatureUsedSpy = sinon.spy();
 
       const { queryByText, user, getByRole, getByText } = renderWithContext(

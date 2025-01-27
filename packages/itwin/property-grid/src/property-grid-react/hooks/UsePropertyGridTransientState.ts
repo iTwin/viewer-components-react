@@ -6,7 +6,7 @@
 import { useTransientState } from "@itwin/appui-react";
 import { useVirtualizedPropertyGridLayoutStorage } from "@itwin/components-react";
 
-// istanbul ignore file
+/* c8 ignore start */
 
 /**
  * Allows to persist property grid scroll position when it is used in `@itwin/appui-react` Widgets.

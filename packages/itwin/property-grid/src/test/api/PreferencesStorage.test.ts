@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
 import sinon from "sinon";
@@ -46,12 +46,10 @@ describe("IModelAppUserPreferencesStorage", () => {
   describe("set", () => {
     it("saves value in `IModelApp.userPreferences`", async () => {
       await storage.set("test-key", "test-value");
-      expect(imodelUserPreferences.save).to.be.calledWith(
-        sinon.match((props: PreferenceArg) =>  props.key === "test-key" && props.content === "test-value")
-      );
+      expect(imodelUserPreferences.save).to.be.calledWith(sinon.match((props: PreferenceArg) => props.key === "test-key" && props.content === "test-value"));
     });
 
-    it("logs error if `IModelApp.userPreferences.save` throws" , async () => {
+    it("logs error if `IModelApp.userPreferences.save` throws", async () => {
       imodelUserPreferences.save.throws(new Error("Invalid Key"));
       await storage.set("test-key", "test-value");
       expect(loggerStub).to.be.calledWith("PropertyGrid", sinon.match("Invalid Key"));
@@ -71,7 +69,7 @@ describe("IModelAppUserPreferencesStorage", () => {
       expect(await storage.get("test-key")).to.be.eq("test-value");
     });
 
-    it("logs error if `IModelApp.userPreferences.get` throws" , async () => {
+    it("logs error if `IModelApp.userPreferences.get` throws", async () => {
       imodelUserPreferences.get.throws(new Error("Invalid Key"));
       await storage.get("test-key");
       expect(loggerStub).to.be.calledWith("PropertyGrid", sinon.match("Invalid Key"));

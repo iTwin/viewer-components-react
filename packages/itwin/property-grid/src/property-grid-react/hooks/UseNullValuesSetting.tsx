@@ -91,7 +91,7 @@ export interface NullValueSettingContextValue {
   setShowNullValues: (value: boolean, options?: { persist?: boolean }) => Promise<void>;
 }
 
-// istanbul ignore next
+/* c8 ignore next */
 const nullValueSettingContext = createContext<NullValueSettingContextValue>({ showNullValues: true, setShowNullValues: async () => {} });
 
 /** @internal */

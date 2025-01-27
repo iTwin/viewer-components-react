@@ -5,7 +5,7 @@
 // WARNING: The order of imports in this file is important!
 
 // setup chai
-import chai from "chai";
+import * as chai from "chai";
 import sinonChai from "sinon-chai";
 chai.use(sinonChai);
 
@@ -22,8 +22,6 @@ global.ResizeObserver = class ResizeObserver {
   public unobserve() {}
   public disconnect() {}
 };
-// This is required by I18n module
-global.XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest; // eslint-disable-line @typescript-eslint/no-var-requires
 // needed for context menu to work in tests
 global.DOMRect = class DOMRect {
   public bottom: number = 0;
@@ -45,7 +43,8 @@ global.DOMRect = class DOMRect {
 };
 
 // supply mocha hooks
-import { cleanup, configure } from "@testing-library/react";
+const { cleanup, configure } = await import("@testing-library/react");
+import v8 from "node:v8";
 export const mochaHooks = {
   beforeAll() {
     getGlobalThis().IS_REACT_ACT_ENVIRONMENT = true;
@@ -59,6 +58,7 @@ export const mochaHooks = {
   },
   afterAll() {
     delete getGlobalThis().IS_REACT_ACT_ENVIRONMENT;
+    v8.takeCoverage();
   },
 };
 

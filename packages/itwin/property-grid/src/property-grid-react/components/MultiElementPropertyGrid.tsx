@@ -152,7 +152,7 @@ export interface AncestorsNavigationControlsProps {
  * @public
  */
 export function AncestorsNavigationControls({ navigateUp, navigateDown, canNavigateDown, canNavigateUp }: AncestorsNavigationControlsProps) {
-  // istanbul ignore if
+  /* c8 ignore next 3 */
   if (!canNavigateDown && !canNavigateUp) {
     return null;
   }

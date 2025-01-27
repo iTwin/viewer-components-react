@@ -19,4 +19,4 @@ pnpm-workspace.yaml
 .github
 
 # Ignore extracted api definitions
-api
+./packages/itwin/**/api

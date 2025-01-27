@@ -5,10 +5,11 @@
 
 import { expect } from "chai";
 import sinon from "sinon";
+import * as td from "testdouble";
 import { PropertyValueFormat } from "@itwin/appui-abstract";
 import { Field, PropertyValueFormat as PresentationPropertyValueFormat } from "@itwin/presentation-common";
 import { FavoritePropertiesScope } from "@itwin/presentation-frontend";
-import * as webUtilities from "../../property-grid-react/api/WebUtilities.js";
+import * as webUtilitiesModule from "../../property-grid-react/api/WebUtilities.js";
 import {
   AddFavoritePropertyContextMenuItem,
   CopyPropertyTextContextMenuItem,
@@ -289,19 +290,34 @@ describe("Default context menu items", () => {
   });
 
   describe("CopyPropertyTextContextMenuItem", () => {
+    afterEach(() => {
+      td.reset();
+    });
+
     it("renders item", () => {
       const { queryByText } = render(<CopyPropertyTextContextMenuItem {...itemProps} />);
       expect(queryByText("context-menu.copy-text.label"));
     });
 
     it("copies text when clicked", async () => {
-      const copyStub = sinon.stub(webUtilities, "copyToClipboard");
-      const { getByText, user } = render(<CopyPropertyTextContextMenuItem {...itemProps} />);
+      const spy = sinon.spy();
+      await td.replaceEsm("../../property-grid-react/api/WebUtilities.js", {
+        ...webUtilitiesModule,
+        copyToClipboard: spy,
+      });
+      await td.replaceEsm("../../property-grid-react/PropertyGridManager.js", {
+        PropertyGridManager: {
+          translate: (key: string) => key,
+        },
+      });
+      const { CopyPropertyTextContextMenuItem: TestedComponent } = await import("../../property-grid-react/hooks/UseContextMenu.js");
+      // const copyStub = sinon.stub(webUtilitiesModule, "copyToClipboard");
+      const { getByText, user } = render(<TestedComponent {...itemProps} />);
       const item = getByText("context-menu.copy-text.label");
 
       await user.click(item);
 
-      expect(copyStub).to.be.calledOnceWithExactly(record.description);
+      expect(spy).to.be.calledOnceWithExactly(record.description);
     });
 
     it("calls custom `onSelect` handler", async () => {

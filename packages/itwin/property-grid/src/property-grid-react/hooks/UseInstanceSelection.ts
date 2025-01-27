@@ -57,7 +57,7 @@ export function useInstanceSelection({ imodel }: InstanceSelectionProps) {
   useEffect(() => {
     const onSelectionChange = async (eventSource?: string) => {
       // do not handle selection event that were caused by this hook.
-      // istanbul ignore if
+      /* c8 ignore next 3 */
       if (eventSource === PropertyGridSelectionScope) {
         return;
       }
@@ -89,7 +89,7 @@ export function useInstanceSelection({ imodel }: InstanceSelectionProps) {
 
     const removePresentationListener = Presentation.selection.selectionChange.addListener(async (args) => onSelectionChange(args.source));
     // if the frontstage changes and a selection set is already active we need to resync this widget's state with that selection
-    // istanbul ignore next
+    /* c8 ignore next */
     const removeFrontstageReadyListener = UiFramework.frontstages.onFrontstageReadyEvent.addListener(async () => onSelectionChange());
     return () => {
       removePresentationListener();

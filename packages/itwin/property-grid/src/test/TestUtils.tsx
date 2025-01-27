@@ -28,7 +28,7 @@ export function createPropertyRecord(value: PropertyValue, description: Partial<
   return new PropertyRecord(value, propertyDescription);
 }
 
-export function stubSelectionManager() {
+export function stubSelectionManager(presentationSingleton?: typeof Presentation) {
   const selectionManagerStub = {
     selectionChange: new SelectionChangeEvent(),
     getSelectionLevels: createFunctionStub<SelectionManager["getSelectionLevels"]>().returns([0]),
@@ -39,7 +39,7 @@ export function stubSelectionManager() {
     },
   };
 
-  sinon.stub(Presentation, "selection").get(() => selectionManagerStub);
+  sinon.stub(presentationSingleton ?? Presentation, "selection").get(() => selectionManagerStub);
   return selectionManagerStub;
 }
 

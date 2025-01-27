@@ -4,5 +4,9 @@
     "module": "CommonJS",
     "moduleResolution": "Node",
     "outDir": "lib/cjs"
-  }
+  },
+  "exclude": [
+    "src/test/**/*",
+    "src/e2e-tests/**/*"
+  ]
 }

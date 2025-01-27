@@ -5,48 +5,52 @@
 
 import { expect } from "chai";
 import sinon from "sinon";
-import { UiFramework } from "@itwin/appui-react";
+import * as td from "testdouble";
+import * as appuiReactModule from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
-import { IModelApp } from "@itwin/core-frontend";
-import * as multiElementPropertyGrid from "../property-grid-react/components/MultiElementPropertyGrid.js";
-import { PropertyGridComponent } from "../property-grid-react/PropertyGridComponent.js";
+import * as multiElementPropertyGridModule from "../property-grid-react/components/MultiElementPropertyGrid.js";
 import { render, waitFor } from "./TestUtils.js";
 
+import type * as propertyGridComponentModule from "../property-grid-react/PropertyGridComponent.js";
 import type { IModelConnection } from "@itwin/core-frontend";
 
 describe("PropertyGridComponent", () => {
-  const imodel = {
-    isBlankConnection: () => true,
-    selectionSet: {
-      onChanged: new BeEvent(),
-      elements: { size: 0 },
-    },
-  } as IModelConnection;
+  const createIModel = () =>
+    ({
+      isBlankConnection: () => true,
+      selectionSet: {
+        onChanged: new BeEvent(),
+        elements: { size: 0 },
+      },
+    }) as IModelConnection;
+  let imodel: IModelConnection | undefined;
+  let PropertyGridComponent: typeof propertyGridComponentModule.PropertyGridComponent;
 
-  before(async () => {
-    sinon.stub(IModelApp, "viewManager").get(() => ({
-      onSelectedViewportChanged: new BeEvent(),
-    }));
-    sinon.stub(IModelApp, "toolAdmin").get(() => ({
-      activeToolChanged: new BeEvent(),
-    }));
-    sinon.stub(multiElementPropertyGrid, "MultiElementPropertyGrid").returns(<>MultiElementPropertyGrid</>);
-    await UiFramework.initialize();
+  beforeEach(async () => {
+    imodel = undefined;
+    await td.replaceEsm("@itwin/appui-react", {
+      ...appuiReactModule,
+      useActiveIModelConnection: () => imodel,
+    });
+    await td.replaceEsm("../property-grid-react/components/MultiElementPropertyGrid.js", {
+      ...multiElementPropertyGridModule,
+      MultiElementPropertyGrid: () => <>MultiElementPropertyGrid</>,
+    });
+    PropertyGridComponent = (await import("../property-grid-react/PropertyGridComponent.js")).PropertyGridComponent;
   });
 
-  after(() => {
-    UiFramework.terminate();
+  afterEach(() => {
     sinon.restore();
+    td.reset();
   });
 
   it("returns `null` if there is no active imodel", async () => {
-    UiFramework.setIModelConnection(undefined);
     const { container } = render(<PropertyGridComponent />);
     expect(container.children).to.be.empty;
   });
 
   it("renders `MultiElementPropertyGrid` for active imodel", async () => {
-    UiFramework.setIModelConnection(imodel);
+    imodel = createIModel();
     const { getByText } = render(<PropertyGridComponent />);
     await waitFor(() => getByText("MultiElementPropertyGrid"));
   });

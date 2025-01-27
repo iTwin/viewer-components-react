@@ -61,8 +61,8 @@ export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildC
   }
 
   // in order to allow resize values column fully we need to override default width reserved for action buttons.
-  // istanbul ignore next
-  const actionButtonWidth = props.actionButtonWidth !== undefined ? props.actionButtonWidth : props.actionButtonRenderers !== undefined ? undefined : 0;
+  const actionButtonWidth =
+    props.actionButtonWidth !== undefined ? /* c8 ignore next */ props.actionButtonWidth : props.actionButtonRenderers !== undefined ? undefined : 0;
 
   const filterMatchesCount = (propertyData as FilteredPropertyData | undefined)?.matchesCount;
   if (!isFiltering && filterMatchesCount === 0) {
@@ -89,7 +89,7 @@ export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildC
 }
 
 const emptyDataProvider: IPropertyDataProvider = {
-  getData: /* istanbul ignore next */ async () => emptyPropertyData,
+  getData: /* c8 ignore next */ async () => emptyPropertyData,
   onDataChanged: new BeEvent(),
 };
 const emptyPropertyData: PropertyData = {
@@ -106,7 +106,7 @@ export class NoopPropertyDataFilterer extends PropertyRecordDataFiltererBase {
   public get isActive() {
     return false;
   }
-  // istanbul ignore next
+  /* c8 ignore next 3 */
   public async recordMatchesFilter(): Promise<PropertyDataFilterResult> {
     return { matchesFilter: true };
   }
@@ -145,7 +145,7 @@ class AutoExpandingPropertyFilterDataProvider implements IPropertyDataProvider, 
     private _wrapped: FilteringPropertyDataProvider,
     autoExpandChildCategories?: boolean,
   ) {
-    // istanbul ignore next
+    /* c8 ignore next*/
     this._removeListener = this._wrapped.onDataChanged.addListener(() => this.onDataChanged.raiseEvent());
     if (undefined !== autoExpandChildCategories) {
       this._autoExpandChildCategories = autoExpandChildCategories;

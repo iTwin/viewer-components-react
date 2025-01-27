@@ -1,5 +1,5 @@
 {
-  "include": ["src/property-grid-react/**/*", "lib/cjs/property-grid-react/**/*"],
+  "include": ["src/property-grid-react/**/*", "lib/esm/property-grid-react/**/*"],
   "reporter": ["text-summary", "lcov", "cobertura"],
   "temp-dir": "./lib/test/coverage/.nyc_output",
   "report-dir": "./lib/test/coverage",
