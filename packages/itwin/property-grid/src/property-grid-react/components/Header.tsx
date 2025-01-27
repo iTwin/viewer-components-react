@@ -8,7 +8,7 @@ import classnames from "classnames";
 import { useEffect, useRef, useState } from "react";
 import { SvgProgressBackwardCircular } from "@itwin/itwinui-icons-react";
 import { IconButton, SearchBox } from "@itwin/itwinui-react";
-import { PropertyGridManager } from "../PropertyGridManager";
+import { PropertyGridManager } from "../PropertyGridManager.js";
 
 import type { PropsWithChildren, ReactNode } from "react";
 

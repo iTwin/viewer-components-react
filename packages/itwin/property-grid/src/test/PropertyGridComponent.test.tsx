@@ -8,9 +8,9 @@ import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
-import * as multiElementPropertyGrid from "../components/MultiElementPropertyGrid";
-import { PropertyGridComponent } from "../PropertyGridComponent";
-import { render, waitFor } from "./TestUtils";
+import * as multiElementPropertyGrid from "../property-grid-react/components/MultiElementPropertyGrid.js";
+import { PropertyGridComponent } from "../property-grid-react/PropertyGridComponent.js";
+import { render, waitFor } from "./TestUtils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 

@@ -5,15 +5,14 @@
 
 import { expect } from "chai";
 import sinon from "sinon";
-import userEvents from "@testing-library/user-event";
-import { useNullValueSetting } from "../../hooks/UseNullValuesSetting";
-import { TelemetryContextProvider } from "../../hooks/UseTelemetryContext";
-import { PreferencesContextProvider } from "../../PropertyGridPreferencesContext";
-import { createFunctionStub, render, waitFor } from "../TestUtils";
+import { useNullValueSetting } from "../../property-grid-react/hooks/UseNullValuesSetting.js";
+import { TelemetryContextProvider } from "../../property-grid-react/hooks/UseTelemetryContext.js";
+import { PreferencesContextProvider } from "../../property-grid-react/PropertyGridPreferencesContext.js";
+import { createFunctionStub, render, waitFor } from "../TestUtils.js";
 
 import type { ReactNode } from "react";
-import type { PreferencesContextProviderProps } from "../../PropertyGridPreferencesContext";
-import type { PreferencesStorage } from "../../api/PreferencesStorage";
+import type { PreferencesContextProviderProps } from "../../property-grid-react/PropertyGridPreferencesContext.js";
+import type { PreferencesStorage } from "../../property-grid-react/api/PreferencesStorage.js";
 
 function renderWithContext(element: ReactNode, contextProps: Partial<PreferencesContextProviderProps>) {
   return render(<PreferencesContextProvider {...contextProps}>{element}</PreferencesContextProvider>);
@@ -47,10 +46,10 @@ describe("useNullValuesSetting", () => {
   });
 
   it("updates value", async () => {
-    const { getByRole } = renderWithContext(<TestComponent />, { storage });
+    const { getByRole, user } = renderWithContext(<TestComponent />, { storage });
 
     const button = await waitFor(() => getByRole("button", { name: "Hide Null Values" }));
-    await userEvents.click(button);
+    await user.click(button);
 
     await waitFor(() => getByRole("button", { name: "Show Null Values" }));
   });
@@ -75,10 +74,10 @@ describe("useNullValuesSetting", () => {
     it("stores persisted value", async () => {
       storage.get.resolves(JSON.stringify(false));
 
-      const { getByRole } = renderWithContext(<TestComponent persistOnClick={true} />, { storage });
+      const { getByRole, user } = renderWithContext(<TestComponent persistOnClick={true} />, { storage });
 
       const button = await waitFor(() => getByRole("button", { name: "Show Null Values" }));
-      await userEvents.click(button);
+      await user.click(button);
 
       await waitFor(() => getByRole("button", { name: "Hide Null Values" }));
       expect(storage.set).to.be.calledWith("showNullValues", JSON.stringify(true));
@@ -104,7 +103,7 @@ describe("useNullValuesSetting", () => {
 
   it("reports when updates value", async () => {
     const onFeatureUsedSpy = sinon.spy();
-    const { getByRole } = renderWithContext(
+    const { getByRole, user } = renderWithContext(
       <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
         <TestComponent />
       </TelemetryContextProvider>,
@@ -112,13 +111,13 @@ describe("useNullValuesSetting", () => {
     );
 
     const hideButton = await waitFor(() => getByRole("button", { name: "Hide Null Values" }));
-    await userEvents.click(hideButton);
+    await user.click(hideButton);
 
     await waitFor(() => getByRole("button", { name: "Show Null Values" }));
     expect(onFeatureUsedSpy).to.be.calledWith("hide-empty-values-enabled");
 
     const showButton = await waitFor(() => getByRole("button", { name: "Show Null Values" }));
-    await userEvents.click(showButton);
+    await user.click(showButton);
 
     await waitFor(() => getByRole("button", { name: "Hide Null Values" }));
     expect(onFeatureUsedSpy).to.be.calledWith("hide-empty-values-disabled");

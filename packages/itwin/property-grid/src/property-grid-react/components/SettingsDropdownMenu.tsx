@@ -6,8 +6,8 @@
 import { Fragment } from "react";
 import { SvgMoreVertical } from "@itwin/itwinui-icons-react";
 import { DropdownMenu, IconButton, MenuItem } from "@itwin/itwinui-react";
-import { useNullValueSettingContext } from "../hooks/UseNullValuesSetting";
-import { PropertyGridManager } from "../PropertyGridManager";
+import { useNullValueSettingContext } from "../hooks/UseNullValuesSetting.js";
+import { PropertyGridManager } from "../PropertyGridManager.js";
 
 import type { PropsWithChildren, ReactNode } from "react";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";

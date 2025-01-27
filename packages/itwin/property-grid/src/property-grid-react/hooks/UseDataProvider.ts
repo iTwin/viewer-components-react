@@ -5,8 +5,8 @@
 
 import { useEffect, useState } from "react";
 import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
-import { trackTime } from "../common/TimeTracker";
-import { useTelemetryContext } from "./UseTelemetryContext";
+import { trackTime } from "../common/TimeTracker.js";
+import { useTelemetryContext } from "./UseTelemetryContext.js";
 
 import type { PropertyDataChangeEvent } from "@itwin/components-react";
 import type { PropertyDescription, PropertyRecord } from "@itwin/appui-abstract";

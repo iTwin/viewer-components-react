@@ -5,7 +5,7 @@
 
 import assert from "assert";
 import { test } from "@playwright/test";
-import { expandStagePanel, locateWidget, takeScreenshot } from "./utils";
+import { expandStagePanel, locateWidget, takeScreenshot } from "./utils.js";
 
 import type { Page } from "@playwright/test";
 test.beforeEach(async ({ page, baseURL }) => {

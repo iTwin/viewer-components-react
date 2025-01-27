@@ -1,6 +1,7 @@
 # Ignore artifacts
 change
 lib
+dist
 
 # Ignore auto-generated files
 CHANGELOG.md

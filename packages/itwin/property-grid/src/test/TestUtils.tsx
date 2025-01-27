@@ -10,7 +10,7 @@ import { BeEvent } from "@itwin/core-bentley";
 import { KeySet } from "@itwin/presentation-common";
 import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
 import { renderHook as renderHookRTL, render as renderRTL } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { userEvent } from "@testing-library/user-event";
 
 import type { PropsWithChildren, ReactElement } from "react";
 import type { RenderHookOptions, RenderHookResult, RenderOptions, RenderResult } from "@testing-library/react";

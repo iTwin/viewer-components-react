@@ -5,13 +5,13 @@
 
 import { useEffect } from "react";
 import { KeySet } from "@itwin/presentation-common";
-import { useDataProvider } from "../hooks/UseDataProvider";
-import { PropertyGridContent } from "./PropertyGridContent";
+import { useDataProvider } from "../hooks/UseDataProvider.js";
+import { PropertyGridContent } from "./PropertyGridContent.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
-import type { PropertyGridContentProps } from "./PropertyGridContent";
-import type { DataProviderProps } from "../hooks/UseDataProvider";
+import type { PropertyGridContentProps } from "./PropertyGridContent.js";
+import type { DataProviderProps } from "../hooks/UseDataProvider.js";
 
 /**
  * Props for data provider used by `SingleElementPropertyGrid`.

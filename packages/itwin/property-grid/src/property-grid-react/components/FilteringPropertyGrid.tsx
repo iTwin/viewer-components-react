@@ -15,7 +15,7 @@ import {
 } from "@itwin/components-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { Flex, Text } from "@itwin/itwinui-react";
-import { PropertyGridManager } from "../PropertyGridManager";
+import { PropertyGridManager } from "../PropertyGridManager.js";
 
 import type { IDisposable } from "@itwin/core-bentley";
 import type {

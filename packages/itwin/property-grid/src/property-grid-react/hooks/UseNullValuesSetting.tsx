@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import { usePreferencesContext } from "../PropertyGridPreferencesContext";
-import { useTelemetryContext } from "./UseTelemetryContext";
+import { usePreferencesContext } from "../PropertyGridPreferencesContext.js";
+import { useTelemetryContext } from "./UseTelemetryContext.js";
 
 import type { PropsWithChildren } from "react";
 

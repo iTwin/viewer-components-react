@@ -9,20 +9,20 @@ import { useEffect, useState } from "react";
 import { SvgArrowDown, SvgArrowUp, SvgPropertiesList } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
 import { Presentation } from "@itwin/presentation-frontend";
-import { useInstanceSelection } from "../hooks/UseInstanceSelection";
-import { NullValueSettingContext } from "../hooks/UseNullValuesSetting";
-import { useTelemetryContext } from "../hooks/UseTelemetryContext";
-import { PropertyGridManager } from "../PropertyGridManager";
-import { ElementList as ElementListComponent } from "./ElementList";
-import { PropertyGrid as PropertyGridComponent } from "./PropertyGrid";
-import { SingleElementPropertyGrid as SingleElementPropertyGridComponent } from "./SingleElementPropertyGrid";
+import { useInstanceSelection } from "../hooks/UseInstanceSelection.js";
+import { NullValueSettingContext } from "../hooks/UseNullValuesSetting.js";
+import { useTelemetryContext } from "../hooks/UseTelemetryContext.js";
+import { PropertyGridManager } from "../PropertyGridManager.js";
+import { ElementList as ElementListComponent } from "./ElementList.js";
+import { PropertyGrid as PropertyGridComponent } from "./PropertyGrid.js";
+import { SingleElementPropertyGrid as SingleElementPropertyGridComponent } from "./SingleElementPropertyGrid.js";
 
-import type { ElementListProps } from "./ElementList";
+import type { ElementListProps } from "./ElementList.js";
 import type { ReactNode } from "react";
-import type { PropertyGridProps } from "./PropertyGrid";
-import type { SingleElementPropertyGridProps } from "./SingleElementPropertyGrid";
+import type { PropertyGridProps } from "./PropertyGrid.js";
+import type { SingleElementPropertyGridProps } from "./SingleElementPropertyGrid.js";
 import type { InstanceKey } from "@itwin/presentation-common";
-import type { UsageTrackedFeatures } from "../hooks/UseTelemetryContext";
+import type { UsageTrackedFeatures } from "../hooks/UseTelemetryContext.js";
 
 enum MultiElementPropertyContent {
   PropertyGrid = 0,

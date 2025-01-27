@@ -1,10 +1,8 @@
 {
-  "require": ["raf/polyfill", "source-map-support/register", "ignore-styles"],
+  "require": ["raf/polyfill", "ignore-styles", "lib/cjs/test/setup.js"],
   "check-leaks": true,
   "timeout": "60000",
   "globals": ["IS_REACT_ACT_ENVIRONMENT"],
-  "file": ["lib/cjs/test/setup.js"],
-  "ignore": ["lib/test/coverage/**/*"],
-  "reporter": "node_modules/@itwin/build-tools/mocha-reporter",
-  "reporter-option": ["mochaFile=lib/test/junit_results.xml"]
+  "spec": ["./lib/cjs/test/**/*.test.js"],
+  "exclude": ["./lib/test/coverage/**/*"]
 }

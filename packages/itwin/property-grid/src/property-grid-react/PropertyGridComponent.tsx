@@ -4,13 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { MultiElementPropertyGrid } from "./components/MultiElementPropertyGrid";
-import { TelemetryContextProvider } from "./hooks/UseTelemetryContext";
-import { PreferencesContextProvider } from "./PropertyGridPreferencesContext";
+import { MultiElementPropertyGrid } from "./components/MultiElementPropertyGrid.js";
+import { TelemetryContextProvider } from "./hooks/UseTelemetryContext.js";
+import { PreferencesContextProvider } from "./PropertyGridPreferencesContext.js";
 
-import type { PerformanceTrackedFeatures, UsageTrackedFeatures } from "./hooks/UseTelemetryContext";
-import type { MultiElementPropertyGridProps } from "./components/MultiElementPropertyGrid";
-import type { PreferencesStorage } from "./api/PreferencesStorage";
+import type { PerformanceTrackedFeatures, UsageTrackedFeatures } from "./hooks/UseTelemetryContext.js";
+import type { MultiElementPropertyGridProps } from "./components/MultiElementPropertyGrid.js";
+import type { PreferencesStorage } from "./api/PreferencesStorage.js";
 
 /**
  * Props for `PropertyGridComponent`.

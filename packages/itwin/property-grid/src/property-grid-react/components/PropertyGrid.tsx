@@ -5,14 +5,14 @@
 
 import { Flex, Text } from "@itwin/itwinui-react";
 import { usePropertyDataProviderWithUnifiedSelection } from "@itwin/presentation-components";
-import { useDataProvider } from "../hooks/UseDataProvider";
-import { PropertyGridManager } from "../PropertyGridManager";
-import { FilteringPropertyGrid } from "./FilteringPropertyGrid";
-import { PropertyGridContent } from "./PropertyGridContent";
+import { useDataProvider } from "../hooks/UseDataProvider.js";
+import { PropertyGridManager } from "../PropertyGridManager.js";
+import { FilteringPropertyGrid } from "./FilteringPropertyGrid.js";
+import { PropertyGridContent } from "./PropertyGridContent.js";
 
-import type { DataProviderProps } from "../hooks/UseDataProvider";
-import type { FilteringPropertyGridProps } from "./FilteringPropertyGrid";
-import type { PropertyGridContentProps } from "./PropertyGridContent";
+import type { DataProviderProps } from "../hooks/UseDataProvider.js";
+import type { FilteringPropertyGridProps } from "./FilteringPropertyGrid.js";
+import type { PropertyGridContentProps } from "./PropertyGridContent.js";
 
 /**
  * Props for `PropertyGrid` component.

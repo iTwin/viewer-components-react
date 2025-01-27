@@ -8,13 +8,19 @@ import sinon from "sinon";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { KeySet } from "@itwin/presentation-common";
 import { PresentationLabelsProvider, PresentationPropertyDataProvider } from "@itwin/presentation-components";
-import userEvents from "@testing-library/user-event";
-import { AncestorsNavigationControls, MultiElementPropertyGrid } from "../../components/MultiElementPropertyGrid";
-import { TelemetryContextProvider } from "../../hooks/UseTelemetryContext";
-import { PropertyGridManager } from "../../PropertyGridManager";
+import { AncestorsNavigationControls, MultiElementPropertyGrid } from "../../property-grid-react/components/MultiElementPropertyGrid.js";
+import { TelemetryContextProvider } from "../../property-grid-react/hooks/UseTelemetryContext.js";
+import { PropertyGridManager } from "../../property-grid-react/PropertyGridManager.js";
 import {
-  act, createPropertyRecord, getByRole as getByRoleRTL, render, stubFavoriteProperties, stubPresentation, stubSelectionManager, waitFor,
-} from "../TestUtils";
+  act,
+  createPropertyRecord,
+  getByRole as getByRoleRTL,
+  render,
+  stubFavoriteProperties,
+  stubPresentation,
+  stubSelectionManager,
+  waitFor,
+} from "../TestUtils.js";
 
 import type { ISelectionProvider, SelectionChangeEventArgs } from "@itwin/presentation-frontend";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -90,12 +96,12 @@ describe("<MultiElementPropertGrid />", () => {
     setupMultiInstanceData(instancekeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
     getLabelsStub.callsFake(async (keys) => keys.map(buildLabel));
 
-    const { getByText, getByRole } = render(<MultiElementPropertyGrid imodel={imodel} />);
+    const { getByText, getByRole, user } = render(<MultiElementPropertyGrid imodel={imodel} />);
 
     await waitFor(() => getByText("MultiInstances"));
     const button = getByRole("button", { name: "element-list.title" });
 
-    await userEvents.click(button);
+    await user.click(button);
     // verify element list is rendered
     for (const expected of expectedLabels) {
       await waitFor(() => getByText(expected));
@@ -112,18 +118,18 @@ describe("<MultiElementPropertGrid />", () => {
     setupMultiInstanceData(instancekeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
     getLabelsStub.callsFake(async (keys) => keys.map(buildLabel));
 
-    const { getByText, getByRole } = render(<MultiElementPropertyGrid imodel={imodel} />);
+    const { getByText, getByRole, user } = render(<MultiElementPropertyGrid imodel={imodel} />);
 
     await waitFor(() => getByText("MultiInstances"));
     const button = getByRole("button", { name: "element-list.title" });
 
-    await userEvents.click(button);
+    await user.click(button);
     const element = await waitFor(() => getByText(expectedLabels[1]));
 
     // setup data provider for single element property grid
     setupSingleElementData(expectedLabels[1], "Test-Value-2");
 
-    await userEvents.click(element);
+    await user.click(element);
     await waitFor(() => getByText("Test-Value-2"));
   });
 
@@ -137,34 +143,34 @@ describe("<MultiElementPropertGrid />", () => {
     setupMultiInstanceData(instancekeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
     getLabelsStub.callsFake(async (keys) => keys.map(buildLabel));
 
-    const { getByText, getByRole, container } = render(<MultiElementPropertyGrid imodel={imodel} />);
+    const { getByText, getByRole, container, user } = render(<MultiElementPropertyGrid imodel={imodel} />);
 
     await waitFor(() => getByText("MultiInstances"));
     const listButton = getByRole("button", { name: "element-list.title" });
 
     // navigate to element list
-    await userEvents.click(listButton);
+    await user.click(listButton);
     const element = await waitFor(() => getByText(expectedLabels[1]));
 
     // setup data provider for single element property grid
     setupSingleElementData(expectedLabels[1], "Test-Value-2");
 
     // navigate to specific element properties
-    await userEvents.click(element);
+    await user.click(element);
     await waitFor(() => getByText("Test-Value-2"));
 
     // navigate back to element list
     const singleElementGrid = container.querySelector<HTMLButtonElement>(".property-grid-react-single-element-property-grid"); // eslint-disable-line deprecation/deprecation
     expect(singleElementGrid).to.not.be.null;
     const singleElementBackButton = getByRoleRTL(singleElementGrid!, "button", { name: "header.back" });
-    await userEvents.click(singleElementBackButton);
+    await user.click(singleElementBackButton);
     await waitFor(() => getByText(expectedLabels[0]));
 
     // navigate back to multi instances properties grid
     const elementList = container.querySelector<HTMLDivElement>(".property-grid-react-element-list"); // eslint-disable-line deprecation/deprecation
     expect(element).to.not.be.null;
     const elementListBackButton = getByRoleRTL(elementList!, "button", { name: "header.back" });
-    await userEvents.click(elementListBackButton);
+    await user.click(elementListBackButton);
     await waitFor(() => getByText("MultiInstances"));
   });
 
@@ -288,7 +294,7 @@ describe("<MultiElementPropertGrid />", () => {
       setupMultiInstanceData(instancekeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
       getLabelsStub.callsFake(async (keys) => keys.map(buildLabel));
 
-      const { getByText, getByRole } = render(
+      const { getByText, getByRole, user } = render(
         <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
           <MultiElementPropertyGrid imodel={imodel} />
         </TelemetryContextProvider>,
@@ -297,7 +303,7 @@ describe("<MultiElementPropertGrid />", () => {
       await waitFor(() => getByText("MultiInstances"));
       const button = getByRole("button", { name: "element-list.title" });
 
-      await userEvents.click(button);
+      await user.click(button);
       // verify element list is rendered
       for (const expected of expectedLabels) {
         await waitFor(() => getByText(expected));
@@ -316,7 +322,7 @@ describe("<MultiElementPropertGrid />", () => {
       setupMultiInstanceData(instancekeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
       getLabelsStub.callsFake(async (keys) => keys.map(buildLabel));
 
-      const { getByText, getByRole } = render(
+      const { getByText, getByRole, user } = render(
         <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
           <MultiElementPropertyGrid imodel={imodel} />
         </TelemetryContextProvider>,
@@ -325,13 +331,13 @@ describe("<MultiElementPropertGrid />", () => {
       await waitFor(() => getByText("MultiInstances"));
       const button = getByRole("button", { name: "element-list.title" });
 
-      await userEvents.click(button);
+      await user.click(button);
       const element = await waitFor(() => getByText(expectedLabels[1]));
 
       // setup data provider for single element property grid
       setupSingleElementData(expectedLabels[1], "Test-Value-2");
 
-      await userEvents.click(element);
+      await user.click(element);
       await waitFor(() => getByText("Test-Value-2"));
       expect(onFeatureUsedSpy).to.be.calledWith("single-element-from-list");
     });
@@ -347,7 +353,7 @@ describe("<MultiElementPropertGrid />", () => {
       setupMultiInstanceData(instancekeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
       getLabelsStub.callsFake(async (keys) => keys.map(buildLabel));
 
-      const { container, getByText, getByRole } = render(
+      const { container, getByText, getByRole, user } = render(
         <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
           <MultiElementPropertyGrid imodel={imodel} />
         </TelemetryContextProvider>,
@@ -357,14 +363,14 @@ describe("<MultiElementPropertGrid />", () => {
       const listButton = getByRole("button", { name: "element-list.title" });
 
       // navigate to element list
-      await userEvents.click(listButton);
+      await user.click(listButton);
       const element = await waitFor(() => getByText(expectedLabels[1]));
 
       // setup data provider for single element property grid
       setupSingleElementData(expectedLabels[1], "Test-Value-2");
 
       // navigate to specific element properties
-      await userEvents.click(element);
+      await user.click(element);
       await waitFor(() => getByText("Test-Value-2"));
 
       // navigate back to element list
@@ -372,7 +378,7 @@ describe("<MultiElementPropertGrid />", () => {
       const singleElementGrid = container.querySelector<HTMLButtonElement>(".property-grid-react-single-element-property-grid"); // eslint-disable-line deprecation/deprecation
       expect(singleElementGrid).to.not.be.null;
       const singleElementBackButton = getByRoleRTL(singleElementGrid!, "button", { name: "header.back" });
-      await userEvents.click(singleElementBackButton);
+      await user.click(singleElementBackButton);
       await waitFor(() => getByText(expectedLabels[0]));
       expect(onFeatureUsedSpy).to.be.calledWith("elements-list");
 
@@ -381,7 +387,7 @@ describe("<MultiElementPropertGrid />", () => {
       const elementList = container.querySelector<HTMLDivElement>(".property-grid-react-element-list"); // eslint-disable-line deprecation/deprecation
       expect(element).to.not.be.null;
       const elementListBackButton = getByRoleRTL(elementList!, "button", { name: "header.back" });
-      await userEvents.click(elementListBackButton);
+      await user.click(elementListBackButton);
       await waitFor(() => getByText("MultiInstances"));
       expect(onFeatureUsedSpy).to.be.calledWith("multiple-elements");
     });

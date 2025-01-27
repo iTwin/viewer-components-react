@@ -8,18 +8,18 @@ import sinon from "sinon";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { PropertyDataChangeEvent } from "@itwin/components-react";
 import { KeySet } from "@itwin/presentation-common";
-import { PropertyGridContent } from "../../components/PropertyGridContent";
-import { PropertyGridSettingsMenuItem, ShowHideNullValuesSettingsMenuItem } from "../../components/SettingsDropdownMenu";
-import { NullValueSettingContext } from "../../hooks/UseNullValuesSetting";
-import { TelemetryContextProvider } from "../../hooks/UseTelemetryContext";
-import { PropertyGridManager } from "../../PropertyGridManager";
-import { createPropertyRecord, render, stubSelectionManager, waitFor } from "../TestUtils";
+import { PropertyGridContent } from "../../property-grid-react/components/PropertyGridContent.js";
+import { PropertyGridSettingsMenuItem, ShowHideNullValuesSettingsMenuItem } from "../../property-grid-react/components/SettingsDropdownMenu.js";
+import { NullValueSettingContext } from "../../property-grid-react/hooks/UseNullValuesSetting.js";
+import { TelemetryContextProvider } from "../../property-grid-react/hooks/UseTelemetryContext.js";
+import { PropertyGridManager } from "../../property-grid-react/PropertyGridManager.js";
+import { createPropertyRecord, render, stubSelectionManager, waitFor } from "../TestUtils.js";
 
 import type { ReactElement } from "react";
 import type { PrimitiveValue } from "@itwin/appui-abstract";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
-import type { PropertyGridContentProps } from "../../components/PropertyGridContent";
+import type { PropertyGridContentProps } from "../../property-grid-react/components/PropertyGridContent.js";
 
 describe("<PropertyGridContent />", () => {
   before(() => {
