@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { Measurement, MeasurementPickContext } from "./Measurement";
+import type { Measurement, MeasurementPickContext } from "./Measurement.js";
 
 // DO NOT export this file for third parties. Using this to avoid circular dependencies.
 

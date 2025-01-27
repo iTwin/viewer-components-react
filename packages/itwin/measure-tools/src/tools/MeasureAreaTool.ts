@@ -19,16 +19,16 @@ import {
   ToolAssistanceImage,
   ToolAssistanceInputMethod,
 } from "@itwin/core-frontend";
-import type { Feature } from "../api/FeatureTracking";
-import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking";
-import { MeasurementToolBase } from "../api/MeasurementTool";
-import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
-import type { AreaMeasurement } from "../measurements/AreaMeasurement";
-import { MeasureAreaToolModel } from "../toolmodels/MeasureAreaToolModel";
-import { MeasureTools } from "../MeasureTools";
-import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
-import type { DrawingMetadata } from "../api/Measurement";
-import { ViewHelper } from "../api/ViewHelper";
+import type { Feature } from "../api/FeatureTracking.js";
+import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking.js";
+import { MeasurementToolBase } from "../api/MeasurementTool.js";
+import { MeasurementViewTarget } from "../api/MeasurementViewTarget.js";
+import type { AreaMeasurement } from "../measurements/AreaMeasurement.js";
+import { MeasureAreaToolModel } from "../toolmodels/MeasureAreaToolModel.js";
+import { MeasureTools } from "../MeasureTools.js";
+import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper.js";
+import type { DrawingMetadata } from "../api/Measurement.js";
+import { ViewHelper } from "../api/ViewHelper.js";
 
 export class MeasureAreaTool extends MeasurementToolBase<
 AreaMeasurement,

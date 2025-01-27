@@ -15,13 +15,13 @@ import {
   ToolAssistanceImage,
   ToolAssistanceInputMethod,
 } from "@itwin/core-frontend";
-import type { Feature } from "../api/FeatureTracking";
-import { MeasureToolsFeatures } from "../api/FeatureTracking";
-import { MeasurementToolBase } from "../api/MeasurementTool";
-import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
-import type { AngleMeasurement } from "../measurements/AngleMeasurement";
-import { MeasureTools } from "../MeasureTools";
-import { MeasureAngleToolModel } from "../toolmodels/MeasureAngleToolModel";
+import type { Feature } from "../api/FeatureTracking.js";
+import { MeasureToolsFeatures } from "../api/FeatureTracking.js";
+import { MeasurementToolBase } from "../api/MeasurementTool.js";
+import { MeasurementViewTarget } from "../api/MeasurementViewTarget.js";
+import type { AngleMeasurement } from "../measurements/AngleMeasurement.js";
+import { MeasureTools } from "../MeasureTools.js";
+import { MeasureAngleToolModel } from "../toolmodels/MeasureAngleToolModel.js";
 
 /** Tool for measuring angles using start, center and end point */
 export class MeasureAngleTool extends MeasurementToolBase<

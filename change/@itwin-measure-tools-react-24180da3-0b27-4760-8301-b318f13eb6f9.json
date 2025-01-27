@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Drop CJS in measure-tools. Add .js suffixes per ESM requirement.",
+  "packageName": "@itwin/measure-tools-react",
+  "email": "3418768+a-gagnon@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

@@ -17,32 +17,32 @@ import {
 import type { GeometryStreamProps } from "@itwin/core-common";
 import type { BeButtonEvent, DecorateContext } from "@itwin/core-frontend";
 import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
-import { FormatterUtils } from "../api/FormatterUtils";
+import { FormatterUtils } from "../api/FormatterUtils.js";
 import {
   StyleSet,
   TextOffsetType,
   WellKnownGraphicStyleType,
   WellKnownTextStyleType,
-} from "../api/GraphicStyle";
+} from "../api/GraphicStyle.js";
 import type {
   MeasurementEqualityOptions,
   MeasurementWidgetData,
-} from "../api/Measurement";
+} from "../api/Measurement.js";
 import {
   Measurement,
   MeasurementPickContext,
   MeasurementSerializer,
-} from "../api/Measurement";
-import { MeasurementManager } from "../api/MeasurementManager";
+} from "../api/Measurement.js";
+import { MeasurementManager } from "../api/MeasurementManager.js";
 import {
   MeasurementPreferences,
   MeasurementPreferencesProperty,
-} from "../api/MeasurementPreferences";
-import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper";
-import type { MeasurementProps } from "../api/MeasurementProps";
-import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
-import { TextMarker } from "../api/TextMarker";
-import { MeasureTools } from "../MeasureTools";
+} from "../api/MeasurementPreferences.js";
+import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper.js";
+import type { MeasurementProps } from "../api/MeasurementProps.js";
+import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet.js";
+import { TextMarker } from "../api/TextMarker.js";
+import { MeasureTools } from "../MeasureTools.js";
 
 /**
  * Props for serializing a [[DistanceMeasurement]].

@@ -18,17 +18,17 @@ import {
   ToolAssistanceImage,
   ToolAssistanceInputMethod,
 } from "@itwin/core-frontend";
-import type { Feature } from "../api/FeatureTracking";
-import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking";
-import { MeasurementToolBase } from "../api/MeasurementTool";
-import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
-import type { DistanceMeasurement } from "../measurements/DistanceMeasurement";
-import { MeasureTools } from "../MeasureTools";
-import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel";
-import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
-import type { DrawingMetadata } from "../api/Measurement";
+import type { Feature } from "../api/FeatureTracking.js";
+import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking.js";
+import { MeasurementToolBase } from "../api/MeasurementTool.js";
+import { MeasurementViewTarget } from "../api/MeasurementViewTarget.js";
+import type { DistanceMeasurement } from "../measurements/DistanceMeasurement.js";
+import { MeasureTools } from "../MeasureTools.js";
+import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel.js";
+import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper.js";
+import type { DrawingMetadata } from "../api/Measurement.js";
 import { type DialogItem, type DialogItemValue, type DialogPropertySyncItem, PropertyDescriptionHelper } from "@itwin/appui-abstract";
-import { ViewHelper } from "../api/ViewHelper";
+import { ViewHelper } from "../api/ViewHelper.js";
 
 export class MeasureDistanceTool extends MeasurementToolBase<
 DistanceMeasurement,

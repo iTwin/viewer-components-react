@@ -2,9 +2,9 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-const iTwinPlugin = require("@itwin/eslint-plugin");
+import iTwinPlugin from "@itwin/eslint-plugin";
 
-module.exports = [
+export default [
   {
     files: ["**/*.{ts,tsx}"],
     ...iTwinPlugin.configs.uiConfig,

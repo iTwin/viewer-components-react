@@ -20,22 +20,22 @@ import type {
   RenderGraphicOwner,
 } from "@itwin/core-frontend";
 import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
-import { StyleSet, WellKnownGraphicStyleType } from "../api/GraphicStyle";
+import { StyleSet, WellKnownGraphicStyleType } from "../api/GraphicStyle.js";
 import type {
   MeasurementEqualityOptions,
   MeasurementWidgetData,
-} from "../api/Measurement";
+} from "../api/Measurement.js";
 import {
   Measurement,
   MeasurementPickContext,
   MeasurementSerializer,
-} from "../api/Measurement";
-import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper";
-import type { MeasurementProps } from "../api/MeasurementProps";
-import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
-import { Polygon } from "../api/Polygon";
-import { DistanceMeasurement } from "./DistanceMeasurement";
-import { MeasureTools } from "../MeasureTools";
+} from "../api/Measurement.js";
+import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper.js";
+import type { MeasurementProps } from "../api/MeasurementProps.js";
+import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet.js";
+import { Polygon } from "../api/Polygon.js";
+import { DistanceMeasurement } from "./DistanceMeasurement.js";
+import { MeasureTools } from "../MeasureTools.js";
 
 /**
  * Props for serializing a [[AreaMeasurement]].

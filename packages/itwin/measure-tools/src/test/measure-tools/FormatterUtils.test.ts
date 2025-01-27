@@ -7,7 +7,7 @@ import { Cartographic } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
 import { Point3d } from "@itwin/core-geometry";
 import { assert } from "chai";
-import { FormatterUtils } from "../../api/FormatterUtils";
+import { FormatterUtils } from "../../api/FormatterUtils.js";
 
 // NOTE: the quantityFormatter (and FormatterUtils) uses the 'apostrophe' and 'quotation mark' rather than the 'prime' and 'double prime'
 enum Symbols {

@@ -9,8 +9,8 @@ import { GraphicType, IModelApp } from "@itwin/core-frontend";
 import { Point3d } from "@itwin/core-geometry";
 import { Transform } from "@itwin/core-geometry";
 import { Point2d } from "@itwin/core-geometry";
-import type { DrawingMetadata } from "./Measurement";
-import { DrawingDataCache } from "./DrawingTypeDataCache";
+import type { DrawingMetadata } from "./Measurement.js";
+import { DrawingDataCache } from "./DrawingTypeDataCache.js";
 
 export namespace SheetMeasurementsHelper {
 

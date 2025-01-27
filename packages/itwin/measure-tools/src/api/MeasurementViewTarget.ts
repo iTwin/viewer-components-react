@@ -5,9 +5,9 @@
 
 import type { Viewport, ViewState } from "@itwin/core-frontend";
 import { DrawingViewState, IModelApp, SheetViewState, SpatialViewState } from "@itwin/core-frontend";
-import { MeasurementCachedGraphicsHandler } from "./MeasurementCachedGraphicsHandler";
-import { WellKnownViewType } from "./MeasurementEnums";
-import type { MeasurementViewTargetProps } from "./MeasurementProps";
+import { MeasurementCachedGraphicsHandler } from "./MeasurementCachedGraphicsHandler.js";
+import { WellKnownViewType } from "./MeasurementEnums.js";
+import type { MeasurementViewTargetProps } from "./MeasurementProps.js";
 
 /** Base class for view type classifiers. This returns either a well-known type or an app-defined one that measurements use identify what viewports they are compatible with (e.g. to draw in). */
 export abstract class MeasurementViewTypeClassifier {

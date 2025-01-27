@@ -6,10 +6,10 @@
 import { Point3d } from "@itwin/core-geometry";
 import { Cartographic } from "@itwin/core-common";
 import { assert } from "chai";
-import { Measurement, MeasurementPickContext } from "../../api/Measurement";
-import { WellKnownViewType } from "../../api/MeasurementEnums";
-import { LocationMeasurement, LocationMeasurementSerializer } from "../../measurements/LocationMeasurement";
-import { MeasureLocationToolModel } from "../../toolmodels/MeasureLocationToolModel";
+import { Measurement, MeasurementPickContext } from "../../api/Measurement.js";
+import { WellKnownViewType } from "../../api/MeasurementEnums.js";
+import { LocationMeasurement, LocationMeasurementSerializer } from "../../measurements/LocationMeasurement.js";
+import { MeasureLocationToolModel } from "../../toolmodels/MeasureLocationToolModel.js";
 
 describe("LocationMeasurement tests", () => {
   it("Test serialization/clone/equals", async () => {
