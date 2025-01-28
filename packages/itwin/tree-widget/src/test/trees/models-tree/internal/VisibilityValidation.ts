@@ -7,14 +7,14 @@ import { assert, expect } from "chai";
 import { expand, from, mergeMap } from "rxjs";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
-import { toVoidPromise } from "../../../../components/trees/common/Rxjs.js";
-import { ModelsTreeNode } from "../../../../components/trees/models-tree/internal/ModelsTreeNode.js";
+import { toVoidPromise } from "../../../../tree-widget/components/trees/common/Rxjs.js";
+import { ModelsTreeNode } from "../../../../tree-widget/components/trees/models-tree/internal/ModelsTreeNode.js";
 
-import type { Visibility } from "../../../../components/trees/common/Tooltip.js";
+import type { Visibility } from "../../../../tree-widget/components/trees/common/Tooltip.js";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
-import type { HierarchyVisibilityHandler } from "../../../../components/trees/common/UseHierarchyVisibility.js";
+import type { HierarchyVisibilityHandler } from "../../../../tree-widget/components/trees/common/UseHierarchyVisibility.js";
 
 interface VisibilityExpectations {
   subject(id: string): Visibility;

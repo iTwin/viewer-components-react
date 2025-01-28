@@ -9,7 +9,7 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-import { CategoriesTreeDefinition } from "../../../components/trees/categories-tree/CategoriesTreeDefinition.js";
+import { CategoriesTreeDefinition } from "../../../tree-widget/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import {
   buildIModel,
   insertDrawingCategory,

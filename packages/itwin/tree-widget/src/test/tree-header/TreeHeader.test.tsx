@@ -7,12 +7,12 @@ import { expect } from "chai";
 import sinon from "sinon";
 import { EmptyLocalization } from "@itwin/core-common";
 import { Button } from "@itwin/itwinui-react";
-import { TreeHeader } from "../../components/tree-header/TreeHeader.js";
-import { TreeWidget } from "../../TreeWidget.js";
+import { TreeHeader } from "../../tree-widget/components/tree-header/TreeHeader.js";
+import { TreeWidget } from "../../tree-widget/TreeWidget.js";
 import { render, stubCancelAnimationFrame, waitFor } from "../TestUtils.js";
 
 import type { ComponentPropsWithoutRef } from "react";
-import type { TreeFilteringProps } from "../../components/tree-header/TreeHeader.js";
+import type { TreeFilteringProps } from "../../tree-widget/components/tree-header/TreeHeader.js";
 
 describe("<TreeHeader />", () => {
   stubCancelAnimationFrame();

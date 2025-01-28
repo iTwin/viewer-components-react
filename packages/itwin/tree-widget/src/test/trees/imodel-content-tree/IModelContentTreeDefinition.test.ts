@@ -11,8 +11,8 @@ import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import {
   HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
-import { IModelContentTreeDefinition } from "../../../components/trees/imodel-content-tree/IModelContentTreeDefinition.js";
-import { IModelContentTreeIdsCache } from "../../../components/trees/imodel-content-tree/internal/IModelContentTreeIdsCache.js";
+import { IModelContentTreeDefinition } from "../../../tree-widget/components/trees/imodel-content-tree/IModelContentTreeDefinition.js";
+import { IModelContentTreeIdsCache } from "../../../tree-widget/components/trees/imodel-content-tree/internal/IModelContentTreeIdsCache.js";
 import {
   buildIModel, insertDrawingCategory, insertDrawingElement, insertDrawingGraphic, insertDrawingSubModel, insertGroupInformationElement,
   insertGroupInformationModelWithPartition, insertModelWithPartition, insertPhysicalElement, insertPhysicalModelWithPartition, insertPhysicalSubModel,
