@@ -12,7 +12,7 @@ import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import {
   HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
-import { ExternalSourcesTreeDefinition } from "../../../tree-widget/components/trees/external-sources-tree/ExternalSourcesTreeDefinition.js";
+import { ExternalSourcesTreeDefinition } from "../../../tree-widget-react/components/trees/external-sources-tree/ExternalSourcesTreeDefinition.js";
 import {
   buildIModel, insertExternalSource, insertExternalSourceAspect, insertExternalSourceAttachment, insertPhysicalElement,
   insertPhysicalModelWithPartition, insertRepositoryLink, insertSpatialCategory,

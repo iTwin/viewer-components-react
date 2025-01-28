@@ -8,12 +8,12 @@ import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
-import { SelectableTree } from "../tree-widget/components/SelectableTree.js";
-import { TreeWidget } from "../tree-widget/TreeWidget.js";
+import { SelectableTree } from "../tree-widget-react/components/SelectableTree.js";
+import { TreeWidget } from "../tree-widget-react/TreeWidget.js";
 import { createResolvablePromise, render, stubCancelAnimationFrame, TestUtils, waitFor } from "./TestUtils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { SelectableTreeDefinition } from "../tree-widget/components/SelectableTree.js";
+import type { SelectableTreeDefinition } from "../tree-widget-react/components/SelectableTree.js";
 
 describe("<SelectableTree />", () => {
   stubCancelAnimationFrame();

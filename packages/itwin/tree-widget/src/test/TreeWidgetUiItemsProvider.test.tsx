@@ -9,7 +9,7 @@ import * as td from "testdouble";
 import { BeEvent } from "@itwin/core-bentley";
 import { EmptyLocalization } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
-import * as selectableTreeModule from "../tree-widget/components/SelectableTree.js";
+import * as selectableTreeModule from "../tree-widget-react/components/SelectableTree.js";
 import { render, waitFor } from "./TestUtils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -27,7 +27,7 @@ describe("createTreeWidget", () => {
 
   it("renders supplied trees", async () => {
     const stubSelectableTree = sinon.stub().returns(null);
-    await td.replaceEsm("../tree-widget/components/SelectableTree.js", {
+    await td.replaceEsm("../tree-widget-react/components/SelectableTree.js", {
       ...selectableTreeModule,
       SelectableTree: stubSelectableTree,
     });
@@ -77,10 +77,10 @@ describe("createTreeWidget", () => {
     const UiFramework = (await import("@itwin/appui-react")).UiFramework;
     await UiFramework.initialize();
 
-    const TreeWidget = (await import("../tree-widget/TreeWidget.js")).TreeWidget;
+    const TreeWidget = (await import("../tree-widget-react/TreeWidget.js")).TreeWidget;
     await TreeWidget.initialize(new EmptyLocalization());
 
-    const createTreeWidget = (await import("../tree-widget/components/TreeWidgetUiItemsProvider.js")).createTreeWidget;
+    const createTreeWidget = (await import("../tree-widget-react/components/TreeWidgetUiItemsProvider.js")).createTreeWidget;
 
     return { UiFramework, TreeWidget, createTreeWidget };
   }

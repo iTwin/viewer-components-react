@@ -9,15 +9,15 @@ import sinon from "sinon";
 import * as td from "testdouble";
 import { BeEvent } from "@itwin/core-bentley";
 import { Presentation } from "@itwin/presentation-frontend";
-import * as treeHeaderModule from "../../../tree-widget/components/tree-header/TreeHeader.js";
-import * as categoriesTreeModule from "../../../tree-widget/components/trees/categories-tree/CategoriesTree.js";
-import * as categoriesVisibilityUtilsModule from "../../../tree-widget/components/trees/common/CategoriesVisibilityUtils.js";
-import * as treeWidgetModule from "../../../tree-widget/TreeWidget.js";
+import * as treeHeaderModule from "../../../tree-widget-react/components/tree-header/TreeHeader.js";
+import * as categoriesTreeModule from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTree.js";
+import * as categoriesVisibilityUtilsModule from "../../../tree-widget-react/components/trees/common/CategoriesVisibilityUtils.js";
+import * as treeWidgetModule from "../../../tree-widget-react/TreeWidget.js";
 import { mockPresentationManager, render, waitFor } from "../../TestUtils.js";
 
-import type * as categoriesTreeComponentModule from "../../../tree-widget/components/trees/categories-tree/CategoriesTreeComponent.js";
+import type * as categoriesTreeComponentModule from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeComponent.js";
 import type { ComponentPropsWithoutRef } from "react";
-import type { CategoryInfo } from "../../../tree-widget/components/trees/common/CategoriesVisibilityUtils.js";
+import type { CategoryInfo } from "../../../tree-widget-react/components/trees/common/CategoriesVisibilityUtils.js";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 
@@ -54,19 +54,19 @@ describe("<CategoriesTreeComponent />", () => {
     sinon.stub(Presentation, "presentation").get(() => presentationManager.object);
 
     stubCategoriesTree = sinon.stub().returns(<></>);
-    await td.replaceEsm("../../../tree-widget/components/trees/categories-tree/CategoriesTree.js", {
+    await td.replaceEsm("../../../tree-widget-react/components/trees/categories-tree/CategoriesTree.js", {
       ...categoriesTreeModule,
       CategoriesTree: stubCategoriesTree,
     });
 
     stubTreeHeader = sinon.stub().returns(<></>);
-    await td.replaceEsm("../../../tree-widget/components/tree-header/TreeHeader.js", {
+    await td.replaceEsm("../../../tree-widget-react/components/tree-header/TreeHeader.js", {
       ...treeHeaderModule,
       TreeHeader: stubTreeHeader,
     });
 
     stubTreeWidgetTranslate = sinon.stub().returns("test translated string");
-    await td.replaceEsm("../../../tree-widget/TreeWidget.js", {
+    await td.replaceEsm("../../../tree-widget-react/TreeWidget.js", {
       ...treeWidgetModule,
       TreeWidget: {
         ...treeWidgetModule.TreeWidget,
@@ -79,12 +79,12 @@ describe("<CategoriesTreeComponent />", () => {
       invertAllCategories: sinon.stub(),
       hideAllCategories: sinon.stub(),
     };
-    await td.replaceEsm("../../../tree-widget/components/trees/common/CategoriesVisibilityUtils.js", {
+    await td.replaceEsm("../../../tree-widget-react/components/trees/common/CategoriesVisibilityUtils.js", {
       ...categoriesVisibilityUtilsModule,
       ...stubCategoriesVisibilityUtils,
     });
 
-    CategoriesTreeComponent = (await import("../../../tree-widget/components/trees/categories-tree/CategoriesTreeComponent.js")).CategoriesTreeComponent;
+    CategoriesTreeComponent = (await import("../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeComponent.js")).CategoriesTreeComponent;
   });
 
   afterEach(() => {

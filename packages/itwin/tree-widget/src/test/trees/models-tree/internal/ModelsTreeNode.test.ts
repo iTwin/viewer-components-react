@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { ModelsTreeNode } from "../../../../tree-widget/components/trees/models-tree/internal/ModelsTreeNode.js";
+import { ModelsTreeNode } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeNode.js";
 
 describe("Node utils", () => {
   it("getModelId", () => {

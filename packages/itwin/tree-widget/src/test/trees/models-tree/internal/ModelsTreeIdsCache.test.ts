@@ -7,8 +7,8 @@ import { expect } from "chai";
 import sinon from "sinon";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import { ModelsTreeIdsCache } from "../../../../tree-widget/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
-import { defaultHierarchyConfiguration } from "../../../../tree-widget/components/trees/models-tree/ModelsTreeDefinition.js";
+import { ModelsTreeIdsCache } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
+import { defaultHierarchyConfiguration } from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import { createIModelMock } from "../../Common.js";
 
 describe("ModelsTreeIdsCache", () => {

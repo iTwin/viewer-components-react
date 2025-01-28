@@ -9,16 +9,16 @@ import sinon from "sinon";
 import * as td from "testdouble";
 import * as moq from "typemoq";
 import { BeEvent } from "@itwin/core-bentley";
-import * as treeHeaderModule from "../../../tree-widget/components/tree-header/TreeHeader.js";
-import * as modelsVisibilityHandlerModule from "../../../tree-widget/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
-import * as modelsTreeModule from "../../../tree-widget/components/trees/models-tree/ModelsTree.js";
-import * as treeWidgetModule from "../../../tree-widget/TreeWidget.js";
+import * as treeHeaderModule from "../../../tree-widget-react/components/tree-header/TreeHeader.js";
+import * as modelsVisibilityHandlerModule from "../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
+import * as modelsTreeModule from "../../../tree-widget-react/components/trees/models-tree/ModelsTree.js";
+import * as treeWidgetModule from "../../../tree-widget-react/TreeWidget.js";
 import { mockViewport, render, waitFor } from "../../TestUtils.js";
 
 import type { ComponentPropsWithoutRef } from "react";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { ModelInfo, ModelsTreeHeaderButtonProps } from "../../../tree-widget/components/trees/models-tree/ModelsTreeButtons.js";
-import type * as modelsTreeComponentModule from "../../../tree-widget/components/trees/models-tree/ModelsTreeComponent.js";
+import type { ModelInfo, ModelsTreeHeaderButtonProps } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeButtons.js";
+import type * as modelsTreeComponentModule from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeComponent.js";
 
 type TreeHeaderProps = ComponentPropsWithoutRef<typeof treeHeaderModule.TreeHeader>;
 
@@ -65,19 +65,19 @@ describe("<ModelsTreeComponent />", () => {
     vpMock = mockViewport();
 
     stubModelsTree = sinon.stub().returns(<></>);
-    await td.replaceEsm("../../../tree-widget/components/trees/models-tree/ModelsTree.js", {
+    await td.replaceEsm("../../../tree-widget-react/components/trees/models-tree/ModelsTree.js", {
       ...modelsTreeModule,
       ModelsTree: stubModelsTree,
     });
 
     stubTreeHeader = sinon.stub().returns(<></>);
-    await td.replaceEsm("../../../tree-widget/components/tree-header/TreeHeader.js", {
+    await td.replaceEsm("../../../tree-widget-react/components/tree-header/TreeHeader.js", {
       ...treeHeaderModule,
       TreeHeader: stubTreeHeader,
     });
 
     stubTreeWidgetTranslate = sinon.stub().returns("test translated string");
-    await td.replaceEsm("../../../tree-widget/TreeWidget.js", {
+    await td.replaceEsm("../../../tree-widget-react/TreeWidget.js", {
       ...treeWidgetModule,
       TreeWidget: {
         ...treeWidgetModule.TreeWidget,
@@ -90,12 +90,12 @@ describe("<ModelsTreeComponent />", () => {
       hideAllModels: sinon.stub(),
       invertAllModels: sinon.stub(),
     };
-    await td.replaceEsm("../../../tree-widget/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js", {
+    await td.replaceEsm("../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js", {
       ...modelsVisibilityHandlerModule,
       ...stubModelsVisibilityHandler,
     });
 
-    ModelsTreeComponent = (await import("../../../tree-widget/components/trees/models-tree/ModelsTreeComponent.js")).ModelsTreeComponent;
+    ModelsTreeComponent = (await import("../../../tree-widget-react/components/trees/models-tree/ModelsTreeComponent.js")).ModelsTreeComponent;
   });
 
   afterEach(() => {

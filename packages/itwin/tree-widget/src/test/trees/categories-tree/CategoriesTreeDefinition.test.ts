@@ -11,7 +11,7 @@ import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import {
   HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
-import { CategoriesTreeDefinition } from "../../../tree-widget/components/trees/categories-tree/CategoriesTreeDefinition.js";
+import { CategoriesTreeDefinition } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import {
   buildIModel, insertDrawingCategory, insertDrawingGraphic, insertDrawingModelWithPartition, insertPhysicalElement, insertPhysicalModelWithPartition,
   insertSpatialCategory, insertSubCategory,

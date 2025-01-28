@@ -13,7 +13,7 @@ import {
   enableSubCategoryDisplay,
   loadCategoriesFromViewport,
   toggleAllCategories,
-} from "../../tree-widget/components/trees/common/CategoriesVisibilityUtils.js";
+} from "../../tree-widget-react/components/trees/common/CategoriesVisibilityUtils.js";
 import { TestUtils } from "../TestUtils.js";
 
 import type { ECSqlReader } from "@itwin/core-common";

@@ -10,7 +10,7 @@ import { using } from "@itwin/core-bentley";
 import {
   AlwaysAndNeverDrawnElementInfo,
   SET_CHANGE_DEBOUNCE_TIME,
-} from "../../../../tree-widget/components/trees/models-tree/internal/AlwaysAndNeverDrawnElementInfo.js";
+} from "../../../../tree-widget-react/components/trees/models-tree/internal/AlwaysAndNeverDrawnElementInfo.js";
 import { createResolvablePromise } from "../../../TestUtils.js";
 import { createFakeSinonViewport } from "../../Common.js";
 
