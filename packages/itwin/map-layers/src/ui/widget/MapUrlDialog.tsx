@@ -492,7 +492,6 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
             setShouldAutoAttachSource(false);
             await updateAuthState(source, validation);
           }
-        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch {}
       }
     })();

@@ -17,12 +17,13 @@ import {
   TreeRenderer,
   useTreeModel,
 } from "@itwin/components-react";
-import { ImageCheckBox, NodeCheckboxRenderProps, ResizableContainerObserver } from "@itwin/core-react";
+import { ImageCheckBox, ResizableContainerObserver } from "@itwin/core-react";
 import { SvgCheckboxDeselect, SvgCheckboxSelect, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { IconButton, Input } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
 import { SubLayersDataProvider } from "./SubLayersDataProvider";
 
+import type { NodeCheckboxRenderProps} from "@itwin/core-react";
 import type {
   AbstractTreeNodeLoaderWithProvider,
   DelayLoadedTreeNodeItem,

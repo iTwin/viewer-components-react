@@ -324,6 +324,7 @@ export function MapManagerSettings() {
                 />
 
                 <span className="map-manager-settings-label">{exaggerationLabel}</span>
+                {/*eslint-disable-next-line @typescript-eslint/no-deprecated */}
                 <NumberInput value={exaggeration} disabled={!applyTerrain} onChange={handleExaggerationChange} onKeyDown={onKeyDown} />
               </div>
             </fieldset>

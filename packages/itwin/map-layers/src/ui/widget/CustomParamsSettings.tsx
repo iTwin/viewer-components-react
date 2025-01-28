@@ -34,7 +34,6 @@ export function CustomParamsSettingsPanel() {
   });
 
   const [listItemUnderCursor, setListItemUnderCursor] = React.useState<string | undefined>();
-  const [selectedValue, setSelectedValue] = React.useState<string | undefined>();
 
   const deleteMapping = React.useCallback(
     (name: string) => {
@@ -70,7 +69,6 @@ export function CustomParamsSettingsPanel() {
 
   const onCancelEdit = React.useCallback(() => {
     UiFramework.dialogs.modal.close();
-    setSelectedValue(undefined); // clear listbox focus
   }, []);
 
   const onOkEdit = React.useCallback(
@@ -99,7 +97,6 @@ export function CustomParamsSettingsPanel() {
 
       tmpParams[newItem.name] = newItem;
       setParams(tmpParams);
-      setSelectedValue(undefined); // clear listbox focus
     },
     [mappingStorage, params, storage],
   );
@@ -116,7 +113,6 @@ export function CustomParamsSettingsPanel() {
         UiFramework.dialogs.modal.open(<CustomParamEditDialog item={item} onOkResult={onOkEdit} onCancelResult={onCancelEdit} />);
       }
 
-      setSelectedValue(newValue);
       return;
     },
     [params, onCancelEdit, onOkEdit],

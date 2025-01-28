@@ -6,9 +6,8 @@
 
 import "./MapSelectFeaturesDialog.scss";
 import * as React from "react";
-import { Dialog } from "@itwin/core-react";
 import { SvgStatusWarning } from "@itwin/itwinui-icons-color-react";
-import { Button, Icon } from "@itwin/itwinui-react";
+import { Button, Icon, Modal, ModalContent } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
 import { SubLayersTree } from "./SubLayersTree";
 
@@ -83,14 +82,13 @@ export function MapSelectFeaturesDialog(props: MapSelectFeaturesProps) {
 
   return (
     <div ref={dialogContainer}>
-      <Dialog
+      <Modal
+        as="div"
         className="map-layer-select-features-dialog"
         title={MapLayersUI.translate("CustomAttach.SelectLayersToCreate")}
-        opened={true}
-        resizable={true}
-        movable={true}
-        modal={true}
-        footer={getFooter()}
+        isOpen={true}
+        isResizable
+        isDraggable
         onClose={handleCancel}
         onEscape={handleCancel}
         minHeight={minHeight}
@@ -98,10 +96,14 @@ export function MapSelectFeaturesDialog(props: MapSelectFeaturesProps) {
         titleStyle={{ paddingLeft: "10px" }}
         footerStyle={{ paddingBottom: "10px", paddingRight: "10px" }}
         trapFocus={false}
+        portal
       >
         {/* 'onSubLayerStateChange' is used to trigger hook state change only, no need to update subLayer objects */}
-        <SubLayersTree expandMode="full" checkboxStyle="standard" subLayers={subLayers} onSubLayerStateChange={() => setSubLayers([...subLayers])} />
-      </Dialog>
+        <ModalContent>
+          <SubLayersTree expandMode="full" checkboxStyle="standard" subLayers={subLayers} onSubLayerStateChange={() => setSubLayers([...subLayers])} />
+          {getFooter()}
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

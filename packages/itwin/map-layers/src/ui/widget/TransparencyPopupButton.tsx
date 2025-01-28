@@ -72,6 +72,7 @@ export function TransparencyPopupButton({ transparency, onTransparencyChange, bu
           </svg>
         </div>
       </Button>
+      {/*eslint-disable-next-line @typescript-eslint/no-deprecated */}
       <Popup isOpen={isSettingsOpen} position={RelativePosition.BottomRight} onClose={handleCloseSetting} target={buttonRef.current}>
         <div className="map-transparency-popup-panel">
           <div className="map-transparency-slider-container">

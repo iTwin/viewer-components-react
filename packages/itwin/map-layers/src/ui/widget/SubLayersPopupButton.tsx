@@ -4,7 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import { RelativePosition } from "@itwin/appui-abstract";
-import { Popup, useOnOutsideClick, WebFontIcon } from "@itwin/core-react";
+import { Popup, useOnOutsideClick } from "@itwin/core-react";
+import { SvgLayers } from "@itwin/itwinui-icons-react";
 import { Button } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
 import { SubLayersPanel } from "./SubLayersTree";
@@ -32,11 +33,13 @@ export function SubLayersPopupButton(props: SubLayersPopupButtonProps) {
     setPopupOpen(false);
   }, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   const isOutsideEvent = React.useCallback((e: OutsideClickEvent) => {
     // if clicking on button that open panel - don't trigger outside click processing
     return !!buttonRef.current && e.target instanceof Node && !buttonRef.current.contains(e.target);
   }, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   const panelRef = useOnOutsideClick<HTMLDivElement>(onOutsideClick, isOutsideEvent);
 
   return (
@@ -49,8 +52,9 @@ export function SubLayersPopupButton(props: SubLayersPopupButtonProps) {
         title={popupOpen ? hideSubLayersLabel : showSubLayersLabel}
         onClick={togglePopup}
       >
-        <WebFontIcon iconName="icon-layers" />
+        <SvgLayers />
       </Button>
+      {/*eslint-disable-next-line @typescript-eslint/no-deprecated */}
       <Popup isOpen={popupOpen} position={RelativePosition.BottomRight} onClose={onOutsideClick} target={buttonRef.current}>
         <div className="map-transparency-popup-panel">
           <div ref={panelRef} className="map-manager-sublayer-panel">

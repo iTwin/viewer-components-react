@@ -1,13 +1,13 @@
+import { PropertyRecord } from "@itwin/appui-abstract";
+import { CheckBoxState } from "@itwin/components-react";
 /*---------------------------------------------------------------------------------------------
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { compareStringsOrUndefined } from "@itwin/core-bentley";
-import type { MapSubLayerProps, SubLayerId } from "@itwin/core-common";
-import { PropertyRecord } from "@itwin/appui-abstract";
-import type { DelayLoadedTreeNodeItem, ITreeDataProvider, TreeNodeItem } from "@itwin/components-react";
-import { CheckBoxState } from "@itwin/core-react";
 
+import type { MapSubLayerProps, SubLayerId } from "@itwin/core-common";
+import type { DelayLoadedTreeNodeItem, ITreeDataProvider, TreeNodeItem } from "@itwin/components-react";
 export type SubLayersTreeExpandMode = "full" | "rootGroupOnly";
 
 /**
