@@ -7,7 +7,7 @@ import { expect } from "chai";
 import sinon from "sinon";
 import { EmptyLocalization } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
-import { PropertyGridManager } from "../PropertyGridManager";
+import { PropertyGridManager } from "../property-grid-react/PropertyGridManager.js";
 
 describe("PropertyGridManager", () => {
   afterEach(() => {

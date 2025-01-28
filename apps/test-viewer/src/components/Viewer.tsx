@@ -5,7 +5,7 @@
 
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { IModelApp } from "@itwin/core-frontend";
+import { IModelApp, IModelConnection } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { FrontendDevTools } from "@itwin/frontend-devtools";
 import { ArcGisAccessClient } from "@itwin/map-layers-auth";
@@ -72,6 +72,7 @@ function ViewerWithOptions() {
           rpcInterfaces: [ECSchemaRpcInterface],
         },
       }}
+      onIModelConnected={onIModelConnected}
       presentationProps={{
         selection: {
           selectionStorage: unifiedSelectionStorage,
@@ -79,6 +80,13 @@ function ViewerWithOptions() {
       }}
     />
   );
+}
+
+function onIModelConnected(imodel: IModelConnection) {
+  // need this temporarily for e2e tests, until a fix for https://github.com/iTwin/itwinjs-core/issues/7496 is consumed
+  setTimeout(() => {
+    IModelConnection.onOpen.raiseEvent(imodel);
+  }, 1000);
 }
 
 function useIModelInfo() {

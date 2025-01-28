@@ -17,7 +17,7 @@ export function useResizeObserver<T extends HTMLElement>() {
     observer.current?.disconnect();
     if (element) {
       observer.current = new ResizeObserver(
-        /* istanbul ignore next */
+        /* c8 ignore next 6 */
         (entries) => {
           window.requestAnimationFrame(() => {
             assert(entries.length === 1);

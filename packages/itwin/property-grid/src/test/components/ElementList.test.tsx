@@ -6,14 +6,13 @@
 import { expect } from "chai";
 import sinon from "sinon";
 import { PresentationLabelsProvider } from "@itwin/presentation-components";
-import userEvents from "@testing-library/user-event";
-import { ElementList } from "../../components/ElementList";
-import { TelemetryContextProvider } from "../../hooks/UseTelemetryContext";
-import { PropertyGridManager } from "../../PropertyGridManager";
-import { act, createResolvablePromise, render, waitFor } from "../TestUtils";
+import { ElementList } from "../../property-grid-react/components/ElementList.js";
+import { TelemetryContextProvider } from "../../property-grid-react/hooks/UseTelemetryContext.js";
+import { PropertyGridManager } from "../../property-grid-react/PropertyGridManager.js";
+import { act, createResolvablePromise, render, waitFor } from "../TestUtils.js";
 
 import type { PropsWithChildren } from "react";
-import type { PerformanceTrackedFeatures } from "../../hooks/UseTelemetryContext";
+import type { PerformanceTrackedFeatures } from "../../property-grid-react/hooks/UseTelemetryContext.js";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
 
@@ -90,11 +89,11 @@ describe("<ElementList />", () => {
     const expectedLabels = instanceKeys.map(buildLabel);
     const onSelectSpy = sinon.spy();
 
-    const { getByText } = render(<ElementList imodel={imodel} instanceKeys={instanceKeys} onBack={() => {}} onSelect={onSelectSpy} />);
+    const { getByText, user } = render(<ElementList imodel={imodel} instanceKeys={instanceKeys} onBack={() => {}} onSelect={onSelectSpy} />);
 
     // wait for element to be rendered
     const item = await waitFor(() => getByText(expectedLabels[2]));
-    await userEvents.click(item);
+    await user.click(item);
 
     expect(onSelectSpy).to.be.calledOnceWithExactly(instanceKeys[2]);
   });
@@ -106,12 +105,12 @@ describe("<ElementList />", () => {
     const expectedLabels = instanceKeys.map(buildLabel);
     const onBackSpy = sinon.spy();
 
-    const { getByText, getByRole } = render(<ElementList imodel={imodel} instanceKeys={instanceKeys} onBack={onBackSpy} onSelect={() => {}} />);
+    const { getByText, getByRole, user } = render(<ElementList imodel={imodel} instanceKeys={instanceKeys} onBack={onBackSpy} onSelect={() => {}} />);
 
     // wait for element to be rendered
     await waitFor(() => getByText(expectedLabels[2]));
     const button = getByRole("button", { name: "header.back" });
-    await userEvents.click(button);
+    await user.click(button);
 
     expect(onBackSpy).to.be.calledOnce;
   });

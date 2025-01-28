@@ -3,16 +3,20 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-export * from "./PropertyGridManager";
-export * from "./PropertyGridComponent";
-export * from "./api/PreferencesStorage";
-export * from "./PropertyGridUiItemsProvider";
+export * from "./property-grid-react/PropertyGridManager.js";
+export * from "./property-grid-react/PropertyGridComponent.js";
+export * from "./property-grid-react/api/PreferencesStorage.js";
+export * from "./property-grid-react/PropertyGridUiItemsProvider.js";
 
-export * from "./components/PropertyGrid";
-export * from "./components/MultiElementPropertyGrid";
-export * from "./components/SingleElementPropertyGrid";
-export { FilteringPropertyGridProps } from "./components/FilteringPropertyGrid";
-export { PropertyGridPropertyUpdatedArgs, PropertyGridContentBaseProps, PropertyGridContentProps } from "./components/PropertyGridContent";
+export * from "./property-grid-react/components/PropertyGrid.js";
+export * from "./property-grid-react/components/MultiElementPropertyGrid.js";
+export * from "./property-grid-react/components/SingleElementPropertyGrid.js";
+export { FilteringPropertyGridProps } from "./property-grid-react/components/FilteringPropertyGrid.js";
+export {
+  PropertyGridPropertyUpdatedArgs,
+  PropertyGridContentBaseProps,
+  PropertyGridContentProps,
+} from "./property-grid-react/components/PropertyGridContent.js";
 export {
   SettingsMenuItemProps,
   SettingsMenuProps,
@@ -20,12 +24,12 @@ export {
   PropertyGridSettingsMenuItem,
   ShowHideNullValuesSettingsMenuItemProps,
   ShowHideNullValuesSettingsMenuItem,
-} from "./components/SettingsDropdownMenu";
+} from "./property-grid-react/components/SettingsDropdownMenu.js";
 
-export { DataProviderProps } from "./hooks/UseDataProvider";
-export { NullValueSettingContext } from "./hooks/UseNullValuesSetting";
-export { TelemetryContextProvider, PerformanceTrackedFeatures } from "./hooks/UseTelemetryContext";
-export * from "./hooks/UsePropertyGridTransientState";
+export { DataProviderProps } from "./property-grid-react/hooks/UseDataProvider.js";
+export { NullValueSettingContext } from "./property-grid-react/hooks/UseNullValuesSetting.js";
+export { TelemetryContextProvider, PerformanceTrackedFeatures } from "./property-grid-react/hooks/UseTelemetryContext.js";
+export * from "./property-grid-react/hooks/UsePropertyGridTransientState.js";
 export {
   ContextMenuItemProps,
   ContextMenuProps,
@@ -36,4 +40,4 @@ export {
   AddFavoritePropertyContextMenuItem,
   RemoveFavoritePropertyContextMenuItem,
   CopyPropertyTextContextMenuItem,
-} from "./hooks/UseContextMenu";
+} from "./property-grid-react/hooks/UseContextMenu.js";

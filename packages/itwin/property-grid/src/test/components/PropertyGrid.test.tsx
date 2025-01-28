@@ -7,9 +7,9 @@ import sinon from "sinon";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { KeySet } from "@itwin/presentation-common";
 import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
-import { PropertyGrid } from "../../components/PropertyGrid";
-import { PropertyGridManager } from "../../PropertyGridManager";
-import { createPropertyRecord, render, stubFavoriteProperties, stubPresentation, stubSelectionManager, waitFor } from "../TestUtils";
+import { PropertyGrid } from "../../property-grid-react/components/PropertyGrid.js";
+import { PropertyGridManager } from "../../property-grid-react/PropertyGridManager.js";
+import { createPropertyRecord, render, stubFavoriteProperties, stubPresentation, stubSelectionManager, waitFor } from "../TestUtils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 

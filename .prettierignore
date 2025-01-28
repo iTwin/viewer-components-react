@@ -1,6 +1,7 @@
 # Ignore artifacts
 change
 lib
+dist
 
 # Ignore auto-generated files
 CHANGELOG.md
@@ -18,4 +19,4 @@ pnpm-workspace.yaml
 .github
 
 # Ignore extracted api definitions
-api
+./packages/itwin/**/api

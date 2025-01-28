@@ -8,10 +8,10 @@ import classnames from "classnames";
 import * as React from "react";
 import { MenuItem, Text } from "@itwin/itwinui-react";
 import { PresentationLabelsProvider } from "@itwin/presentation-components";
-import { trackTime } from "../common/TimeTracker";
-import { useTelemetryContext } from "../hooks/UseTelemetryContext";
-import { PropertyGridManager } from "../PropertyGridManager";
-import { Header } from "./Header";
+import { trackTime } from "../common/TimeTracker.js";
+import { useTelemetryContext } from "../hooks/UseTelemetryContext.js";
+import { PropertyGridManager } from "../PropertyGridManager.js";
+import { Header } from "./Header.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
