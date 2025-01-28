@@ -1,9 +1,9 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
-// istanbul ignore file
+/* c8 ignore start */
 
 /**
  * Copies a string to the clipboard. Works in iOS as well
@@ -18,19 +18,13 @@ export const copyToClipboard = (data: string) => {
 };
 
 function isiOsDevice(): boolean {
-  const iDevices = [
-    "iPad Simulator",
-    "iPhone Simulator",
-    "iPad",
-    "iPhone",
-    "iPod",
-  ];
+  const iDevices = ["iPad Simulator", "iPhone Simulator", "iPad", "iPhone", "iPod"];
 
   let iOS = false;
   if (window.navigator.platform !== undefined) { // eslint-disable-line deprecation/deprecation
     if (
       iDevices.find(
-        (device: string) => device.indexOf(window.navigator.platform) !== -1 // eslint-disable-line deprecation/deprecation
+        (device: string) => device.indexOf(window.navigator.platform) !== -1, // eslint-disable-line deprecation/deprecation
       )
     ) {
       iOS = true;
@@ -54,8 +48,8 @@ const copyToClipboardWin = (info: string) => {
 };
 
 const copyToClipboardiOS = (info: string) => {
-  const el: HTMLTextAreaElement = document.createElement( // eslint-disable-line deprecation/deprecation
-    "textArea"
+  const el: HTMLTextAreaElement = document.createElement(
+    "textArea",
   ) as HTMLTextAreaElement;
   el.value = info;
   document.body.appendChild(el);

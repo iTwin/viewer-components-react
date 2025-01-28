@@ -4,10 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { createContext, useContext, useState } from "react";
-import { IModelAppUserPreferencesStorage } from "./api/PreferencesStorage";
+import { IModelAppUserPreferencesStorage } from "./api/PreferencesStorage.js";
 
 import type { PropsWithChildren } from "react";
-import type { PreferencesStorage } from "./api/PreferencesStorage";
+import type { PreferencesStorage } from "./api/PreferencesStorage.js";
 
 /** @internal */
 export interface PreferencesContext {

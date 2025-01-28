@@ -18,15 +18,15 @@ export type PerformanceTrackedFeatures = "properties-load" | "elements-list-load
  * @public
  */
 export type UsageTrackedFeatures =
-  "single-element" |
-  "multiple-elements" |
-  "elements-list" |
-  "single-element-from-list" |
-  "ancestor-navigation" |
-  "context-menu" |
-  "hide-empty-values-enabled" |
-  "hide-empty-values-disabled" |
-  "filter-properties";
+  | "single-element"
+  | "multiple-elements"
+  | "elements-list"
+  | "single-element-from-list"
+  | "ancestor-navigation"
+  | "context-menu"
+  | "hide-empty-values-enabled"
+  | "hide-empty-values-disabled"
+  | "filter-properties";
 
 /** @internal */
 export interface TelemetryContext {

@@ -16,26 +16,26 @@ import {
   PropertyValueRendererManager,
 } from "@itwin/components-react";
 import { Text } from "@itwin/itwinui-react";
-import { useActionButtons } from "../hooks/UseActionButtons";
-import { useContextMenu } from "../hooks/UseContextMenu";
-import { useLoadedInstanceInfo } from "../hooks/UseInstanceInfo";
-import { useLatest } from "../hooks/UseLatest";
-import { useNullValueSettingContext } from "../hooks/UseNullValuesSetting";
-import { useResizeObserver } from "../hooks/UseResizeObserver";
-import { useTelemetryContext } from "../hooks/UseTelemetryContext";
-import { FilteringPropertyGrid, NonEmptyValuesPropertyDataFilterer } from "./FilteringPropertyGrid";
-import { Header } from "./Header";
-import { SettingsDropdownMenu } from "./SettingsDropdownMenu";
+import { useActionButtons } from "../hooks/UseActionButtons.js";
+import { useContextMenu } from "../hooks/UseContextMenu.js";
+import { useLoadedInstanceInfo } from "../hooks/UseInstanceInfo.js";
+import { useLatest } from "../hooks/UseLatest.js";
+import { useNullValueSettingContext } from "../hooks/UseNullValuesSetting.js";
+import { useResizeObserver } from "../hooks/UseResizeObserver.js";
+import { useTelemetryContext } from "../hooks/UseTelemetryContext.js";
+import { FilteringPropertyGrid, NonEmptyValuesPropertyDataFilterer } from "./FilteringPropertyGrid.js";
+import { Header } from "./Header.js";
+import { SettingsDropdownMenu } from "./SettingsDropdownMenu.js";
 
-import type { PropertyGridActionButtonRenderer } from "../hooks/UseActionButtons";
-import type { SettingsDropdownMenuProps, SettingsMenuProps } from "./SettingsDropdownMenu";
+import type { PropertyGridActionButtonRenderer } from "../hooks/UseActionButtons.js";
+import type { SettingsDropdownMenuProps, SettingsMenuProps } from "./SettingsDropdownMenu.js";
 import type { ReactNode } from "react";
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { PropertyCategory, PropertyUpdatedArgs } from "@itwin/components-react";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
-import type { FilteringPropertyGridProps } from "./FilteringPropertyGrid";
-import type { ContextMenuProps } from "../hooks/UseContextMenu";
+import type { FilteringPropertyGridProps } from "./FilteringPropertyGrid.js";
+import type { ContextMenuProps } from "../hooks/UseContextMenu.js";
 
 /**
  * Arguments for the `onPropertyUpdated` callback.

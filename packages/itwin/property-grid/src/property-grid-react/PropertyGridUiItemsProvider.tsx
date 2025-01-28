@@ -13,19 +13,19 @@ import { SvgError } from "@itwin/itwinui-illustrations-react";
 import { Button, NonIdealState } from "@itwin/itwinui-react";
 import { Key } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
-import { usePropertyGridTransientState } from "./hooks/UsePropertyGridTransientState";
-import { PropertyGridComponent } from "./PropertyGridComponent";
-import { PropertyGridManager } from "./PropertyGridManager";
+import { usePropertyGridTransientState } from "./hooks/UsePropertyGridTransientState.js";
+import { PropertyGridComponent } from "./PropertyGridComponent.js";
+import { PropertyGridManager } from "./PropertyGridManager.js";
 
 import type { KeySet } from "@itwin/presentation-common";
 import type { FallbackProps } from "react-error-boundary";
 import type { UiItemsProvider, Widget } from "@itwin/appui-react";
-import type { PropertyGridComponentProps } from "./PropertyGridComponent";
+import type { PropertyGridComponentProps } from "./PropertyGridComponent.js";
 
 /**
-* Creates a property grid definition that should be returned from `UiItemsProvider.getWidgets()`.
-* @public
-*/
+ * Creates a property grid definition that should be returned from `UiItemsProvider.getWidgets()`.
+ * @public
+ */
 export function createPropertyGrid(propertyGridProps: PropertyGridWidgetProps): Widget {
   return {
     id: "vcr:PropertyGridComponent",
@@ -103,7 +103,7 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
  */
 export interface PropertyGridWidgetProps extends PropertyGridComponentProps {
   /** Predicate indicating if the widget should be shown for the current selection set. */
-  shouldShow?: (selection: Readonly<KeySet>) => boolean
+  shouldShow?: (selection: Readonly<KeySet>) => boolean;
 }
 
 /** Component that renders `PropertyGridComponent` an hides/shows widget based on `UnifiedSelection`. */
@@ -112,6 +112,7 @@ function PropertyGridWidget({ shouldShow, ...props }: PropertyGridWidgetProps) {
   const widgetDef = useSpecificWidgetDef(PropertyGridWidgetId);
 
   useEffect(() => {
+    /* c8 ignore next 3 */
     if (!widgetDef) {
       return;
     }

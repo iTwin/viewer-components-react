@@ -6,14 +6,14 @@
 import { expect } from "chai";
 import sinon from "sinon";
 import { KeySet } from "@itwin/presentation-common";
-import { useInstanceSelection } from "../../hooks/UseInstanceSelection";
-import { act, createResolvablePromise, renderHook, stubSelectionManager, waitFor } from "../TestUtils";
+import { useInstanceSelection } from "../../property-grid-react/hooks/UseInstanceSelection.js";
+import { TelemetryContextProvider } from "../../property-grid-react/hooks/UseTelemetryContext.js";
+import { act, createResolvablePromise, renderHook, stubSelectionManager, waitFor } from "../TestUtils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ISelectionProvider, SelectionChangeEventArgs } from "@itwin/presentation-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
-import type { InstanceSelectionProps } from "../../hooks/UseInstanceSelection";
-import { TelemetryContextProvider } from "../../hooks/UseTelemetryContext";
+import type { InstanceSelectionProps } from "../../property-grid-react/hooks/UseInstanceSelection.js";
 
 describe("useInstanceSelection", () => {
   const imodel = {} as IModelConnection;

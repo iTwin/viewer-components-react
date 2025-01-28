@@ -6,9 +6,9 @@
 import { createContext, Fragment, useContext, useEffect, useState } from "react";
 import { DropdownMenu, MenuItem } from "@itwin/itwinui-react";
 import { FavoritePropertiesScope, Presentation } from "@itwin/presentation-frontend";
-import { copyToClipboard } from "../api/WebUtilities";
-import { PropertyGridManager } from "../PropertyGridManager";
-import { useTelemetryContext } from "./UseTelemetryContext";
+import { copyToClipboard } from "../api/WebUtilities.js";
+import { PropertyGridManager } from "../PropertyGridManager.js";
+import { useTelemetryContext } from "./UseTelemetryContext.js";
 
 import type { PropsWithChildren, ReactNode } from "react";
 import type { PropertyRecord } from "@itwin/appui-abstract";

@@ -6,8 +6,8 @@
 import { expect } from "chai";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { BeEvent } from "@itwin/core-bentley";
-import { useLoadedInstanceInfo } from "../../hooks/UseInstanceInfo";
-import { act, createFunctionStub, createResolvablePromise, renderHook, waitFor } from "../TestUtils";
+import { useLoadedInstanceInfo } from "../../property-grid-react/hooks/UseInstanceInfo.js";
+import { act, createFunctionStub, createResolvablePromise, renderHook, waitFor } from "../TestUtils.js";
 
 import type { PrimitiveValue } from "@itwin/appui-abstract";
 import type { IPresentationPropertyDataProvider, PresentationPropertyDataProvider } from "@itwin/presentation-components";

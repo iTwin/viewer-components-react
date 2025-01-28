@@ -8,9 +8,13 @@ import { act } from "react-dom/test-utils";
 import sinon from "sinon";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { PropertyDataChangeEvent } from "@itwin/components-react";
-import { FilteringPropertyGrid, NonEmptyValuesPropertyDataFilterer, NoopPropertyDataFilterer } from "../../components/FilteringPropertyGrid";
-import { PropertyGridManager } from "../../PropertyGridManager";
-import { createPropertyRecord, render, waitFor } from "../TestUtils";
+import {
+  FilteringPropertyGrid,
+  NonEmptyValuesPropertyDataFilterer,
+  NoopPropertyDataFilterer,
+} from "../../property-grid-react/components/FilteringPropertyGrid.js";
+import { PropertyGridManager } from "../../property-grid-react/PropertyGridManager.js";
+import { createPropertyRecord, render, waitFor } from "../TestUtils.js";
 
 import type { IPropertyDataProvider, PropertyData } from "@itwin/components-react";
 describe("<FilteringPropertyGrid />", () => {
