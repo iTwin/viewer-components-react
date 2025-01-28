@@ -12,7 +12,7 @@ import { BeEvent } from "@itwin/core-bentley";
 import { EmptyLocalization } from "@itwin/core-common";
 import { renderHook as renderHookRTL, render as renderRTL } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { TreeWidget } from "../TreeWidget.js";
+import { TreeWidget } from "../tree-widget-react/TreeWidget.js";
 
 import type { IModelConnection, PerModelCategoryVisibility, Viewport, ViewState } from "@itwin/core-frontend";
 import type { RegisteredRuleset, Ruleset, VariableValue } from "@itwin/presentation-common";

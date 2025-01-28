@@ -15,10 +15,10 @@ import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { InstanceKey } from "@itwin/presentation-shared";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-import { createVisibilityStatus } from "../../../../components/trees/common/Tooltip.js";
-import { ModelsTreeIdsCache } from "../../../../components/trees/models-tree/internal/ModelsTreeIdsCache.js";
-import { createModelsTreeVisibilityHandler } from "../../../../components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
-import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../components/trees/models-tree/ModelsTreeDefinition.js";
+import { createVisibilityStatus } from "../../../../tree-widget-react/components/trees/common/Tooltip.js";
+import { ModelsTreeIdsCache } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
+import { createModelsTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
+import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import {
   buildIModel,
   importSchema,
@@ -41,9 +41,9 @@ import {
 } from "../Utils.js";
 import { validateHierarchyVisibility, VisibilityExpectations } from "./VisibilityValidation.js";
 
-import type { Visibility } from "../../../../components/trees/common/Tooltip.js";
-import type { HierarchyVisibilityHandler } from "../../../../components/trees/common/UseHierarchyVisibility.js";
-import type { ModelsTreeVisibilityHandlerProps } from "../../../../components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
+import type { Visibility } from "../../../../tree-widget-react/components/trees/common/Tooltip.js";
+import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
+import type { ModelsTreeVisibilityHandlerProps } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { GeometricElement3dProps, QueryBinder } from "@itwin/core-common";
 import type { HierarchyNodeIdentifiersPath, HierarchyProvider } from "@itwin/presentation-hierarchies";

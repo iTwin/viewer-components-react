@@ -11,8 +11,8 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-import { ModelsTreeIdsCache } from "../../../components/trees/models-tree/internal/ModelsTreeIdsCache.js";
-import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../components/trees/models-tree/ModelsTreeDefinition.js";
+import { ModelsTreeIdsCache } from "../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
+import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import {
   buildIModel,
   insertPhysicalElement,
@@ -32,7 +32,7 @@ import type { InstanceKey } from "@itwin/presentation-common";
 import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { TestIModelBuilder } from "@itwin/presentation-testing";
 import type { ExpectedHierarchyDef } from "../HierarchyValidation.js";
-import type { ElementsGroupInfo } from "../../../components/trees/models-tree/ModelsTreeDefinition.js";
+import type { ElementsGroupInfo } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 

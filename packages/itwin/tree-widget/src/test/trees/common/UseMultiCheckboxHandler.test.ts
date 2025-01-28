@@ -6,7 +6,7 @@
 import { expect } from "chai";
 import { act } from "react-dom/test-utils";
 import sinon from "sinon";
-import { useMultiCheckboxHandler } from "../../../components/trees/common/UseMultiCheckboxHandler.js";
+import { useMultiCheckboxHandler } from "../../../tree-widget-react/components/trees/common/UseMultiCheckboxHandler.js";
 import { renderHook, waitFor } from "../../TestUtils.js";
 import { createPresentationHierarchyNode } from "../TreeUtils.js";
 

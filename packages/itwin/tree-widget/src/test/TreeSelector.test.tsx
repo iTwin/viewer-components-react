@@ -5,7 +5,7 @@
 
 import { expect } from "chai";
 import sinon from "sinon";
-import { TreeSelector } from "../components/TreeSelector.js";
+import { TreeSelector } from "../tree-widget-react/components/TreeSelector.js";
 import { render, waitFor } from "./TestUtils.js";
 
 describe("<TreeSelector />", () => {

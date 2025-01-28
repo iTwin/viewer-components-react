@@ -7,7 +7,7 @@ import { expect } from "chai";
 import sinon from "sinon";
 import { EmptyLocalization } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
-import { TreeWidget } from "../TreeWidget.js";
+import { TreeWidget } from "../tree-widget-react/TreeWidget.js";
 
 describe("TreeWidget", () => {
   afterEach(() => {
