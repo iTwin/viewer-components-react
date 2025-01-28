@@ -323,7 +323,6 @@ describe("Default context menu items", () => {
         },
       });
       const { CopyPropertyTextContextMenuItem: TestedComponent } = await import("../../property-grid-react/hooks/UseContextMenu.js");
-      // const copyStub = sinon.stub(webUtilitiesModule, "copyToClipboard");
       const { getByText, user } = render(<TestedComponent {...itemProps} />);
       const item = getByText("context-menu.copy-text.label");
 
