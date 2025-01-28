@@ -6,16 +6,14 @@
 import "./CustomParamsSettings.scss";
 import * as React from "react";
 import { UiFramework } from "@itwin/appui-react";
-import { Listbox, ListboxItem } from "@itwin/core-react";
 import { SvgTechnicalPreviewMini } from "@itwin/itwinui-icons-color-react";
 import { SvgAdd, SvgDelete, SvgEdit } from "@itwin/itwinui-icons-react";
-import { Icon, IconButton } from "@itwin/itwinui-react";
+import { Icon, IconButton, List, ListItem } from "@itwin/itwinui-react";
 import { CustomParamsMappingStorage } from "../../CustomParamsMappingStorage";
 import { CustomParamsStorage } from "../../CustomParamsStorage";
 import { MapLayersUI } from "../../mapLayers";
 import { CustomParamEditDialog } from "./CustomParamEditDialog";
 
-import type { ListboxValue } from "@itwin/core-react";
 import type { CustomParamItem } from "../Interfaces";
 interface CustomParamsMap {
   [paramName: string]: CustomParamItem;
@@ -112,7 +110,7 @@ export function CustomParamsSettingsPanel() {
   }, [onCancelEdit, onOkEdit]);
 
   const onListboxValueChange = React.useCallback(
-    (newValue: ListboxValue, _isControlOrCommandPressed?: boolean) => {
+    (newValue: string, _isControlOrCommandPressed?: boolean) => {
       const item = params[newValue];
       if (item) {
         UiFramework.dialogs.modal.open(<CustomParamEditDialog item={item} onOkResult={onOkEdit} onCancelResult={onCancelEdit} />);
@@ -136,25 +134,26 @@ export function CustomParamsSettingsPanel() {
           </div>
         </span>
 
-        <IconButton size="small" styleType="borderless" className="customParamsSettings-header-add-button" onClick={handleAddClick}>
+        <IconButton label="Add" size="small" styleType="borderless" className="customParamsSettings-header-add-button" onClick={handleAddClick}>
           <SvgAdd />
         </IconButton>
       </div>
       <div className="customParamsSettings-content">
-      {/* eslint-disable-next-line @itwin/no-internal */}
-        <Listbox selectedValue={selectedValue} onListboxValueChange={onListboxValueChange} className="customParamsSettings-content-listbox">
+        <List as="div" className="customParamsSettings-content-listbox" selectedValue={selectedValue}>
           {Object.keys(params).map((keyName) => (
-            // eslint-disable-next-line @itwin/no-internal
-            <ListboxItem
+            <ListItem
+              as="div"
               key={keyName}
-              className="customParamsSettings-content-entry"
               value={keyName}
+              actionable
+              className="customParamsSettings-content-entry"
+              onClick={() => onListboxValueChange(keyName)}
               onMouseEnter={() => setListItemUnderCursor(keyName)}
               onMouseLeave={() => setListItemUnderCursor(undefined)}
             >
-              <span className="customParamsSettings-content-entry-name" title={keyName}>
+              <ListItem.Content className="customParamsSettings-content-entry-name">
                 {keyName}
-              </span>
+              </ListItem.Content>
               {
                 // Display the delete icon only when the mouse over a specific item otherwise list feels cluttered.
                 listItemUnderCursor && listItemUnderCursor === keyName && (
@@ -163,7 +162,7 @@ export function CustomParamsSettingsPanel() {
                       size="small"
                       styleType="borderless"
                       className="map-source-list-entry-button"
-                      title={MapLayersUI.translate("CustomParamSettings.EditButtonTitle")}
+                      label={MapLayersUI.translate("CustomParamSettings.EditButtonTitle")}
                     >
                       <SvgEdit />
                     </IconButton>
@@ -171,7 +170,7 @@ export function CustomParamsSettingsPanel() {
                       size="small"
                       styleType="borderless"
                       className="customParamsSettings-content-entry-button"
-                      title={MapLayersUI.translate("CustomParamSettings.DeleteButtonTitle")}
+                      label={MapLayersUI.translate("CustomParamSettings.DeleteButtonTitle")}
                       onClick={(event) => {
                         onItemRemoveButtonClicked(keyName, event);
                       }}
@@ -181,9 +180,9 @@ export function CustomParamsSettingsPanel() {
                   </>
                 )
               }
-            </ListboxItem>
+            </ListItem>
           ))}
-        </Listbox>
+        </List>
       </div>
     </div>
   );
