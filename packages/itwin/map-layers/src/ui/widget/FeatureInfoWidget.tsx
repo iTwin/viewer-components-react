@@ -66,6 +66,7 @@ export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetPr
         <div>
           <IconButton
             styleType="borderless"
+            label="Copy"
             onClick={() => {
               const value = props.property.value;
               if (value !== undefined && value.hasOwnProperty("displayValue")) {

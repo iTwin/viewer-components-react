@@ -5,7 +5,6 @@
 // cSpell:ignore droppable Sublayer Basemap
 
 // the following quiet warning caused by react-beautiful-dnd package
-/* eslint-disable @typescript-eslint/unbound-method */
 
 import "./MapLayerManager.scss";
 import * as React from "react";
@@ -14,7 +13,7 @@ import { UiFramework } from "@itwin/appui-react";
 import { assert } from "@itwin/core-bentley";
 import { ImageMapLayerSettings } from "@itwin/core-common";
 import { IModelApp, MapLayerImageryProviderStatus, MapTileTreeScaleRangeVisibility, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
-import { Icon } from "@itwin/core-react";
+import { SvgStatusWarning, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { Button, Checkbox } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
 import { AttachLayerButtonType, AttachLayerPopupButton } from "./AttachLayerPopupButton";
@@ -139,7 +138,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
             props.onItemVisibilityToggleClicked(activeLayer);
           }}
         >
-          <Icon iconSpec={activeLayer.visible ? "icon-visibility" : "icon-visibility-hide-2"} />
+          {activeLayer.visible ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
         </Button>
 
         {/* Label */}
@@ -182,7 +181,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
               }}
               title={requireAuthTooltip}
             >
-              <Icon className="map-layer-source-item-warnMessage-icon" iconSpec="icon-status-warning" />
+              <SvgStatusWarning />
             </Button>
           )}
         </span>
@@ -234,7 +233,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
             }}
             title={requireAuthTooltip}
           >
-            <Icon className="map-layer-source-item-warnMessage-icon" iconSpec="icon-status-warning" />
+            <SvgStatusWarning />
           </Button>
         )}
         <div id="MapLayerSettingsMenuWrapper" style={{ visibility: "hidden" }}>

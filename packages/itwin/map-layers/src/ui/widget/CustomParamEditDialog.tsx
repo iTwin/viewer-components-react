@@ -6,8 +6,7 @@
 import "./CustomParamEditDialog.scss";
 import * as React from "react";
 import { UiFramework } from "@itwin/appui-react";
-import { Dialog } from "@itwin/core-react";
-import { Button, LabeledInput, ToggleSwitch } from "@itwin/itwinui-react";
+import { Button, LabeledInput, Modal, ModalContent, ToggleSwitch } from "@itwin/itwinui-react";
 import { CustomParamsStorage } from "../../CustomParamsStorage";
 import { MapLayersUI } from "../../mapLayers";
 
@@ -63,19 +62,21 @@ export function CustomParamEditDialog(props: CustomParamEditDialogProps) {
     );
   }
   return (
-    <Dialog
+    <Modal
+      as="div"
       title={MapLayersUI.translate(props.item ? "CustomParamEditDialog.DialogTitleEdit" : "CustomParamEditDialog.DialogTitleAdd")}
-      opened={true}
-      resizable={true}
-      movable={true}
-      modal={true}
+      isOpen={true}
+      isResizable
+      isDraggable
       onClose={handleCancel}
       onEscape={handleCancel}
       minHeight={120}
       maxWidth={120}
-      trapFocus={false}
+      trapFocus
+      setFocus
+      portal
     >
-      <>
+      <ModalContent>
         <LabeledInput
           className="custom-param-edit-dialog-input"
           label={MapLayersUI.translate("CustomParamEditDialog.ParamNameLabel")}
@@ -109,7 +110,7 @@ export function CustomParamEditDialog(props: CustomParamEditDialogProps) {
           />
         </div>
         {renderFooter()}
-      </>
-    </Dialog>
+      </ModalContent>
+    </Modal>
   );
 }

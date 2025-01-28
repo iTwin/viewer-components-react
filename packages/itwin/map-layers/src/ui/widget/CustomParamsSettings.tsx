@@ -139,7 +139,7 @@ export function CustomParamsSettingsPanel() {
         </IconButton>
       </div>
       <div className="customParamsSettings-content">
-        <List as="div" className="customParamsSettings-content-listbox" selectedValue={selectedValue}>
+        <List as="div" className="customParamsSettings-content-listbox">
           {Object.keys(params).map((keyName) => (
             <ListItem
               as="div"

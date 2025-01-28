@@ -79,13 +79,14 @@ export function MapLayerSettingsPopupButton(props: MapLayerSettingsPopupButtonPr
       <IconButton
         disabled={props.disabled}
         styleType="borderless"
-        title={buttonTooltip}
+        label={buttonTooltip}
         className="maplayers-settings-popup-button"
         onClick={togglePopupDisplay}
         ref={buttonRef}
       >
         <SvgSettings />
       </IconButton>
+      {/*eslint-disable-next-line @typescript-eslint/no-deprecated */}
       <Popup
         className="maplayers-settings-popup"
         isOpen={isSettingsOpen}
