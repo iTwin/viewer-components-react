@@ -7,11 +7,11 @@ import type { DecorateContext, HitDetail } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
 import type { GeometryStreamProps } from "@itwin/core-common";
 import { BeUiEvent } from "@itwin/core-bentley";
-import type { Measurement } from "./Measurement";
-import { MeasurementPickContext } from "./Measurement";
-import { MeasurementSelectionSet } from "./MeasurementSelectionSet";
-import { MeasurementSyncUiEventId, WellKnownViewType } from "./MeasurementEnums";
-import { MeasurementManager } from "./MeasurementManager";
+import type { Measurement } from "./Measurement.js";
+import { MeasurementPickContext } from "./Measurement.js";
+import { MeasurementSelectionSet } from "./MeasurementSelectionSet.js";
+import { MeasurementSyncUiEventId, WellKnownViewType } from "./MeasurementEnums.js";
+import { MeasurementManager } from "./MeasurementManager.js";
 import { SyncUiEventDispatcher } from "@itwin/appui-react";
 
 class Stack<T> {

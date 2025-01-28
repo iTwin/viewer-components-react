@@ -5,8 +5,8 @@
 import { afterAll, beforeAll } from "vitest";
 
 import { NoRenderApp } from "@itwin/core-frontend";
-import { MeasureTools } from "../../MeasureTools";
-import { TestUtils } from "../TestUtils";
+import { MeasureTools } from "../../MeasureTools.js";
+import { TestUtils } from "../TestUtils.js";
 import { EmptyLocalization } from "@itwin/core-common";
 
 // Before all tests, initialize any global services

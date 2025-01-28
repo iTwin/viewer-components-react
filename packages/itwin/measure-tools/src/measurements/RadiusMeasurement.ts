@@ -23,22 +23,22 @@ import {
   StyleSet,
   WellKnownGraphicStyleType,
   WellKnownTextStyleType,
-} from "../api/GraphicStyle";
+} from "../api/GraphicStyle.js";
 import type {
   MeasurementEqualityOptions,
   MeasurementWidgetData,
-} from "../api/Measurement";
+} from "../api/Measurement.js";
 import {
   Measurement,
   MeasurementPickContext,
   MeasurementSerializer,
-} from "../api/Measurement";
-import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper";
-import type { MeasurementProps } from "../api/MeasurementProps";
-import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
-import { TextMarker } from "../api/TextMarker";
-import { ViewHelper } from "../api/ViewHelper";
-import { MeasureTools } from "../MeasureTools";
+} from "../api/Measurement.js";
+import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper.js";
+import type { MeasurementProps } from "../api/MeasurementProps.js";
+import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet.js";
+import { TextMarker } from "../api/TextMarker.js";
+import { ViewHelper } from "../api/ViewHelper.js";
+import { MeasureTools } from "../MeasureTools.js";
 
 export interface RadiusMeasurementProps extends MeasurementProps {
   startPoint?: XYZProps;

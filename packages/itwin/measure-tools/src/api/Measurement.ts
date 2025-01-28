@@ -12,12 +12,12 @@ import type { TransformProps, XYProps, XYZProps } from "@itwin/core-geometry";
 import { Point3d, Transform } from "@itwin/core-geometry";
 import { Point2d } from "@itwin/core-geometry";
 import type { FormatterSpec } from "@itwin/core-quantity";
-import { MeasurementButtonHandledEvent, WellKnownMeasurementStyle, WellKnownViewType } from "./MeasurementEnums";
-import { MeasurementPreferences } from "./MeasurementPreferences";
-import type { MeasurementProps } from "./MeasurementProps";
-import { MeasurementViewTarget } from "./MeasurementViewTarget";
-import { ShimFunctions } from "./ShimFunctions";
-import { SheetMeasurementsHelper } from "./SheetMeasurementHelper";
+import { MeasurementButtonHandledEvent, WellKnownMeasurementStyle, WellKnownViewType } from "./MeasurementEnums.js";
+import { MeasurementPreferences } from "./MeasurementPreferences.js";
+import type { MeasurementProps } from "./MeasurementProps.js";
+import { MeasurementViewTarget } from "./MeasurementViewTarget.js";
+import { ShimFunctions } from "./ShimFunctions.js";
+import { SheetMeasurementsHelper } from "./SheetMeasurementHelper.js";
 
 /** A property value on a measurement that can be aggregated with other similarly-named properties from other measurements so aggregate totals can be displayed in the UI. */
 export interface AggregatableValue {

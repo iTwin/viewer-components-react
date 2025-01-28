@@ -11,8 +11,8 @@ import type { BeButtonEvent, CanvasDecoration, DecorateContext, Viewport } from 
 import {
   BeButton, IModelApp, SelectionMode, SelectionTool,
 } from "@itwin/core-frontend";
-import type { IconStyleProps, TextOffsetProps, TextStyleProps } from "./GraphicStyle";
-import { IconAlignment, StyleSet, TextOffsetType, WellKnownTextStyleType } from "./GraphicStyle";
+import type { IconStyleProps, TextOffsetProps, TextStyleProps } from "./GraphicStyle.js";
+import { IconAlignment, StyleSet, TextOffsetType, WellKnownTextStyleType } from "./GraphicStyle.js";
 
 /**
  * TextEntry for the TextMarker

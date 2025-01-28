@@ -7,9 +7,9 @@ import type { Ray3d } from "@itwin/core-geometry";
 import { Point3d, PolygonOps } from "@itwin/core-geometry";
 import type { DecorateContext, GraphicBuilder} from "@itwin/core-frontend";
 import { IModelApp, QuantityType } from "@itwin/core-frontend";
-import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "./GraphicStyle";
-import type { TextEntry} from "./TextMarker";
-import { TextMarker } from "./TextMarker";
+import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "./GraphicStyle.js";
+import type { TextEntry} from "./TextMarker.js";
+import { TextMarker } from "./TextMarker.js";
 
 export class Polygon {
   public isSelected: boolean;

@@ -5,14 +5,14 @@
 
 import { Geometry, Point3d } from "@itwin/core-geometry";
 import { assert } from "chai";
-import type { MeasurementEqualityOptions } from "../../api/Measurement";
-import { Measurement } from "../../api/Measurement";
-import { WellKnownViewType } from "../../api/MeasurementEnums";
-import type { MeasurementProps } from "../../api/MeasurementProps";
-import { AreaMeasurement, AreaMeasurementSerializer } from "../../measurements/AreaMeasurement";
-import type { DistanceMeasurementProps } from "../../measurements/DistanceMeasurement";
-import { DistanceMeasurement, DistanceMeasurementSerializer } from "../../measurements/DistanceMeasurement";
-import { LocationMeasurement, LocationMeasurementSerializer } from "../../measurements/LocationMeasurement";
+import type { MeasurementEqualityOptions } from "../../api/Measurement.js";
+import { Measurement } from "../../api/Measurement.js";
+import { WellKnownViewType } from "../../api/MeasurementEnums.js";
+import type { MeasurementProps } from "../../api/MeasurementProps.js";
+import { AreaMeasurement, AreaMeasurementSerializer } from "../../measurements/AreaMeasurement.js";
+import type { DistanceMeasurementProps } from "../../measurements/DistanceMeasurement.js";
+import { DistanceMeasurement, DistanceMeasurementSerializer } from "../../measurements/DistanceMeasurement.js";
+import { LocationMeasurement, LocationMeasurementSerializer } from "../../measurements/LocationMeasurement.js";
 
 function assertIsArrayWithCount(json: any, ofLength: number) {
   assert.isArray(json);

@@ -4,13 +4,13 @@
 *--------------------------------------------------------------------------------------------*/
 
 import type { Viewport } from "@itwin/core-frontend";
-import { MeasurementManager } from "../api/MeasurementManager";
-import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
-import type { Measurement } from "../api/Measurement";
-import { PrimitiveToolBase } from "../api/MeasurementTool";
-import type { Feature } from "../api/FeatureTracking";
-import { MeasureToolsFeatures } from "../api/FeatureTracking";
-import { MeasureTools } from "../MeasureTools";
+import { MeasurementManager } from "../api/MeasurementManager.js";
+import { MeasurementUIEvents } from "../api/MeasurementUIEvents.js";
+import type { Measurement } from "../api/Measurement.js";
+import { PrimitiveToolBase } from "../api/MeasurementTool.js";
+import type { Feature } from "../api/FeatureTracking.js";
+import { MeasureToolsFeatures } from "../api/FeatureTracking.js";
+import { MeasureTools } from "../MeasureTools.js";
 
 export class ClearMeasurementsTool extends PrimitiveToolBase {
   public static override toolId = "MeasureTools.ClearMeasurements";

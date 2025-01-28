@@ -8,13 +8,13 @@ import type { GeometryStreamProps } from "@itwin/core-common";
 import type { BeButtonEvent, DecorateContext, Decorator, HitDetail, ScreenViewport, Viewport } from "@itwin/core-frontend";
 import type { IModelConnection } from "@itwin/core-frontend";
 import { EventHandled, IModelApp } from "@itwin/core-frontend";
-import type { Measurement} from "./Measurement";
-import { MeasurementPickContext } from "./Measurement";
-import { MeasurementCachedGraphicsHandler } from "./MeasurementCachedGraphicsHandler";
-import { MeasurementButtonHandledEvent, WellKnownViewType } from "./MeasurementEnums";
-import { MeasurementSelectionSet } from "./MeasurementSelectionSet";
-import { MeasurementUIEvents } from "./MeasurementUIEvents";
-import { ShimFunctions } from "./ShimFunctions";
+import type { Measurement} from "./Measurement.js";
+import { MeasurementPickContext } from "./Measurement.js";
+import { MeasurementCachedGraphicsHandler } from "./MeasurementCachedGraphicsHandler.js";
+import { MeasurementButtonHandledEvent, WellKnownViewType } from "./MeasurementEnums.js";
+import { MeasurementSelectionSet } from "./MeasurementSelectionSet.js";
+import { MeasurementUIEvents } from "./MeasurementUIEvents.js";
+import { ShimFunctions } from "./ShimFunctions.js";
 
 /** Handler for overriding what is returned for the tooltip of a measurement. */
 export type MeasurementToolTipHandler = (measurement: Measurement, pickContext: MeasurementPickContext) => Promise<HTMLElement | string>;

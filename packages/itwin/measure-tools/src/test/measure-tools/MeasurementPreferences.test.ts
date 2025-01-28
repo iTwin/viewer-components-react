@@ -4,9 +4,9 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { assert } from "chai";
-import { MeasurementManager } from "../../api/MeasurementManager";
-import { MeasurementPreferences } from "../../api/MeasurementPreferences";
-import { DistanceMeasurement } from "../../measurements/DistanceMeasurement";
+import { MeasurementManager } from "../../api/MeasurementManager.js";
+import { MeasurementPreferences } from "../../api/MeasurementPreferences.js";
+import { DistanceMeasurement } from "../../measurements/DistanceMeasurement.js";
 
 describe("MeasurementPreferences tests", () => {
   it("Test showAxes", () => {
