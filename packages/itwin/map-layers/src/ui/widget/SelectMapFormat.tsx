@@ -7,7 +7,7 @@
 import "./MapUrlDialog.scss";
 import * as React from "react";
 import { IModelApp } from "@itwin/core-frontend";
-import { LabeledSelect, MenuItem } from "@itwin/itwinui-react";
+import { LabeledSelect } from "@itwin/itwinui-react";
 
 import type { SelectOption } from "@itwin/itwinui-react";
 import type { MapTypesOptions } from "../Interfaces";
@@ -56,7 +56,6 @@ export function SelectMapFormat(props: SelectMapFormatProps) {
     if (IModelApp.mapLayerFormatRegistry.isRegistered(MAP_TYPES.arcGisFeature)) {
       formats.push({ value: MAP_TYPES.arcGisFeature, label: MAP_TYPES.arcGisFeature });
     }
-
     return formats;
   });
 
@@ -75,10 +74,10 @@ export function SelectMapFormat(props: SelectMapFormatProps) {
       className="map-layer-source-select"
       options={mapFormats}
       value={mapFormat}
+      menuStyle={{ zIndex: 100000 }}
       disabled={props.disabled}
       onChange={handleOnChange}
       size="small"
-      itemRenderer={(option) => <MenuItem>{option.label}</MenuItem>}
     />
   );
 }

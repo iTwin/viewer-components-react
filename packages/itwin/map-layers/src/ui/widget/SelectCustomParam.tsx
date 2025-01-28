@@ -72,6 +72,7 @@ export function SelectCustomParam(props: SelectCustomParamProps) {
         options={customParams}
         value={paramValues}
         disabled={props.disabled || customParams.length === 0}
+        menuStyle={{ zIndex: 100000 }}
         onChange={handleOnChange}
         size="small"
         onKeyDown={handleKeyDown}

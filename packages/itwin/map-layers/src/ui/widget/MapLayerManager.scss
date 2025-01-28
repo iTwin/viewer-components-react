@@ -373,9 +373,6 @@ $default-font-size: --iui-font-size-1;
   text-align: center;
 }
 
-.map-sources-delete-confirmation {
-  @include uicore-z-index(status-popup);
-}
 
 .map-sources-popup-panel {
   padding: 4px;

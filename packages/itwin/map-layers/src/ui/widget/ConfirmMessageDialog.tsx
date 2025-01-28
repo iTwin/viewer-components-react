@@ -13,10 +13,9 @@ interface ConfirmMessageDialogProps {
   title?: string | React.JSX.Element;
   className?: string;
   message?: string | React.JSX.Element;
+  opened: boolean;
   onYesResult?: () => void;
   onNoResult?: () => void;
-  onClose?: () => void;
-  onEscape?: () => void;
   minWidth?: string | number;
   /** Minimum height that the dialog may be resized to. Displayed in px if value is a number; otherwise, displayed in specified CSS unit. Default: 100px */
   minHeight?: string | number;
@@ -27,7 +26,7 @@ interface ConfirmMessageDialogProps {
 }
 
 export function ConfirmMessageDialog(props: ConfirmMessageDialogProps) {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = React.useState(props.opened);
 
   const handleNo = () => {
     setIsOpen(false);
@@ -53,6 +52,7 @@ export function ConfirmMessageDialog(props: ConfirmMessageDialogProps) {
       preventDocumentScroll
       trapFocus
       setFocus
+      portal
       isDismissible
       minHeight={props.minHeight}
       minWidth={props.minWidth}
@@ -60,14 +60,16 @@ export function ConfirmMessageDialog(props: ConfirmMessageDialogProps) {
       maxWidth={props.maxWidth}
     >
       <Dialog.Backdrop />
-      <Dialog.TitleBar titleText={props.title} />
-      <Dialog.Content>
-        <div>{props.message}</div>
-      </Dialog.Content>
-      <Dialog.ButtonBar>
-        <Button styleType='high-visibility' onClick={handleYes}>Yes</Button>
-        <Button onClick={handleNo}>No</Button>
-      </Dialog.ButtonBar>
+      <Dialog.Main>
+        <Dialog.TitleBar titleText={props.title} />
+        <Dialog.Content>
+          <div>{props.message}</div>
+        </Dialog.Content>
+        <Dialog.ButtonBar>
+          <Button styleType='high-visibility' onClick={handleYes}>Yes</Button>
+          <Button onClick={handleNo}>No</Button>
+        </Dialog.ButtonBar>
+      </Dialog.Main>
     </Dialog>
   );
 }
