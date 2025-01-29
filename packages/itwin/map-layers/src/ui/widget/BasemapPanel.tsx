@@ -6,11 +6,9 @@
 
 import "./BasemapPanel.scss";
 import * as React from "react";
-import { UiFramework } from "@itwin/appui-react";
 import { BackgroundMapType, BaseMapLayerSettings, ColorByName, ColorDef, ImageMapLayerSettings } from "@itwin/core-common";
-import { ColorPickerDialog, ColorSwatch } from "@itwin/imodel-components-react";
 import { SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
-import { Button, Select } from "@itwin/itwinui-react";
+import { Button, ColorBuilder, ColorInputPanel, ColorPalette, ColorPicker, ColorSwatch, ColorValue, IconButton, Popover, Select } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
 import { useSourceMapContext } from "./MapLayerManager";
 import { TransparencyPopupButton } from "./TransparencyPopupButton";
@@ -166,23 +164,23 @@ export function BasemapPanel(props: BasemapPanelProps) {
   }, [baseMapOptions, selectedBaseMap]);
 
   const [presetColors] = React.useState([
-    ColorDef.create(ColorByName.grey),
-    ColorDef.create(ColorByName.lightGrey),
-    ColorDef.create(ColorByName.darkGrey),
-    ColorDef.create(ColorByName.lightBlue),
-    ColorDef.create(ColorByName.lightGreen),
-    ColorDef.create(ColorByName.darkGreen),
-    ColorDef.create(ColorByName.tan),
-    ColorDef.create(ColorByName.darkBrown),
+    ColorValue.fromTbgr(ColorByName.grey),
+    ColorValue.fromTbgr(ColorByName.lightGrey),
+    ColorValue.fromTbgr(ColorByName.darkGrey),
+    ColorValue.fromTbgr(ColorByName.lightBlue),
+    ColorValue.fromTbgr(ColorByName.lightGreen),
+    ColorValue.fromTbgr(ColorByName.darkGreen),
+    ColorValue.fromTbgr(ColorByName.tan),
+    ColorValue.fromTbgr(ColorByName.darkBrown),
   ]);
 
   const baseIsColor = React.useMemo(() => selectedBaseMap instanceof ColorDef, [selectedBaseMap]);
   const baseIsMap = React.useMemo(() => !baseIsColor && selectedBaseMap !== undefined, [baseIsColor, selectedBaseMap]);
+  // bgColor is a 32 bit number represented in TBGR format
   const bgColor = React.useMemo(
-    () => (baseIsColor ? (selectedBaseMap as ColorDef).toJSON() : presetColors[0].toJSON()),
+    () => (baseIsColor ? (selectedBaseMap as ColorDef).toJSON() : presetColors[0].toTbgr()),
     [baseIsColor, selectedBaseMap, presetColors],
   );
-  const [colorDialogTitle] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:ColorDialog.Title"));
   const [selectedBaseMapValue, setSelectedBaseMapValue] = React.useState<SelectOption<string>>({ value: "", label: "" });
 
   React.useEffect(() => {
@@ -220,9 +218,9 @@ export function BasemapPanel(props: BasemapPanelProps) {
   }, [baseIsColor, baseIsMap, baseMapOptions, selectedBaseMap]);
 
   const handleBackgroundColorDialogOk = React.useCallback(
-    (bgColorDef: ColorDef) => {
-      UiFramework.dialogs.modal.close();
+    (bgColorValue: ColorValue) => {
       if (activeViewport) {
+        const bgColorDef = ColorDef.fromTbgr(bgColorValue.toTbgr());
         // change color and make sure previously set transparency is not lost.
         const curTransparency =
           activeViewport.displayStyle.backgroundMapBase instanceof ColorDef ? activeViewport.displayStyle.backgroundMapBase.getTransparency() : 0;
@@ -232,28 +230,6 @@ export function BasemapPanel(props: BasemapPanelProps) {
       }
     },
     [activeViewport],
-  );
-
-  const handleBackgroundColorDialogCancel = React.useCallback(() => {
-    UiFramework.dialogs.modal.close();
-  }, []);
-
-  const handleBgColorClick = React.useCallback(
-    (newColor: ColorDef, e: React.MouseEvent<Element, MouseEvent>) => {
-      e.preventDefault();
-      UiFramework.dialogs.modal.open(
-        // eslint-disable-next-line @typescript-eslint/no-deprecated
-        <ColorPickerDialog
-          dialogTitle={colorDialogTitle}
-          color={newColor}
-          colorPresets={presetColors}
-          colorInputType={"rgb"}
-          onOkResult={handleBackgroundColorDialogOk}
-          onCancelResult={handleBackgroundColorDialogCancel}
-        />,
-      );
-    },
-    [colorDialogTitle, presetColors, handleBackgroundColorDialogOk, handleBackgroundColorDialogCancel],
   );
 
   const handleBaseMapSelection = React.useCallback(
@@ -323,8 +299,25 @@ export function BasemapPanel(props: BasemapPanelProps) {
           disabled={props.disabled}
         />
         {baseIsColor && (
-          // eslint-disable-next-line @typescript-eslint/no-deprecated
-          <ColorSwatch className="map-manager-base-item-color" colorDef={ColorDef.fromJSON(bgColor)} round={false} onColorPick={handleBgColorClick} />
+          <Popover
+            content={
+              <ColorPicker
+                selectedColor={ColorValue.fromTbgr(bgColor)}
+                onChangeComplete={handleBackgroundColorDialogOk}
+              >
+                <ColorBuilder />
+                <ColorInputPanel defaultColorFormat='rgb' />
+                <ColorPalette
+                  label="Preset Colors"
+                  colors={presetColors}
+                />
+              </ColorPicker>
+            }
+          >
+            <IconButton label='Show color picker'>
+              <ColorSwatch style={{ pointerEvents: 'none' }} color={ColorValue.fromTbgr(bgColor)} />
+            </IconButton>
+          </Popover>
         )}
         <TransparencyPopupButton disabled={props.disabled} transparency={baseMapTransparencyValue} onTransparencyChange={handleBasemapTransparencyChange} />
       </div>
