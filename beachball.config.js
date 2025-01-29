@@ -9,7 +9,7 @@ module.exports = {
   bumpDeps: false,
   access: "public",
   tag: "latest",
-  scope: ["packages/itwin/*"],
+  scope: ["packages/itwin/*", "!packages/itwin/map-layers"],
   ignorePatterns: [
     ".nycrc",
     "eslint.config.js",
