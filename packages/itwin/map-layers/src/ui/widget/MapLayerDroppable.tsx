@@ -241,6 +241,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
             activeViewport={props.activeViewport}
             mapLayerSettings={activeLayer}
             onMenuItemSelection={props.onMenuItemSelected}
+            disabled={props.disabled}
           />
         </div>
       </div>

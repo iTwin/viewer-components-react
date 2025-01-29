@@ -14,9 +14,10 @@ interface MapLayerSettingsMenuProps {
   mapLayerSettings: StyleMapLayerSettings;
   onMenuItemSelection: (action: string, mapLayerSettings: StyleMapLayerSettings) => void;
   activeViewport: ScreenViewport;
+  disabled?: boolean;
 }
 
-export function MapLayerSettingsMenu({ mapLayerSettings, onMenuItemSelection, activeViewport }: MapLayerSettingsMenuProps) {
+export function MapLayerSettingsMenu({ mapLayerSettings, onMenuItemSelection, activeViewport, disabled }: MapLayerSettingsMenuProps) {
   const [labelDetach] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:LayerMenu.Detach"));
   const [labelZoomToLayer] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:LayerMenu.ZoomToLayer"));
   const [hasRangeData, setHasRangeData] = React.useState<boolean | undefined>();
@@ -92,7 +93,7 @@ export function MapLayerSettingsMenu({ mapLayerSettings, onMenuItemSelection, ac
 
   return (
     <>
-      <DropdownMenu placement="bottom-start" menuItems={dropdownMenuItems}>
+      <DropdownMenu as="div" placement="bottom-start" menuItems={dropdownMenuItems} disabled={disabled}>
         <IconButton size="small" styleType="borderless">
           <SvgMoreVertical />
         </IconButton>

@@ -113,8 +113,7 @@ export class MapLayerPreferences {
         iTwinId,
         iModelId,
       });
-    // eslint-disable-next-line unused-imports/no-unused-vars
-    } catch (err) {
+    } catch {
       await MapLayersUI.iTwinConfig.delete({
         accessToken,
         namespace: MapLayerPreferences._preferenceNamespace,
@@ -163,8 +162,7 @@ export class MapLayerPreferences {
         iTwinId,
         iModelId,
       });
-    // eslint-disable-next-line unused-imports/no-unused-vars
-    } catch (_err) {
+    } catch {
       // failed to store based on iModelId, attempt using iTwinId
       await MapLayersUI.iTwinConfig.delete({
         accessToken,

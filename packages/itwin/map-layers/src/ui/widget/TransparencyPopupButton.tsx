@@ -15,14 +15,13 @@ export interface TransparencyPopupButtonProps {
   /** initialValue range 0-1 */
   transparency: number;
   /** function called when value changes. Returned value range 0-1 */
-  onTransparencyChange(value: number): void;
+  onTransparencyChange: (value: number) => void;
   /** optional tooltip */
   buttonToolTip?: string;
   disabled?: boolean;
 }
 
 /** @alpha */
-// eslint-disable-next-line @typescript-eslint/unbound-method
 export function TransparencyPopupButton({ transparency, onTransparencyChange, buttonToolTip, disabled }: TransparencyPopupButtonProps) {
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
   const [defaultTransparencyLabel] = React.useState(IModelApp.localization.getLocalizedString("mapLayers:TransparencyPopup.SetTransparency"));
