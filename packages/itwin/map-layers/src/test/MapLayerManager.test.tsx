@@ -9,7 +9,7 @@ import { expect, should } from "chai";
 import * as sinon from "sinon";
 import { ImageMapLayerSettings } from "@itwin/core-common";
 import { MapLayerIndex, MapLayerSource, MapLayerSources, MockRender } from "@itwin/core-frontend";
-import { fireEvent, getAllByTestId, getByTestId, queryByText, render, RenderResult } from "@testing-library/react";
+import { fireEvent, getAllByTestId, getByTestId, queryAllByTestId, queryByText, render, RenderResult } from "@testing-library/react";
 import { MapLayerPreferences, MapLayerSourceChangeType } from "../MapLayerPreferences";
 import { MapLayerManager } from "../ui/widget/MapLayerManager";
 import { TestUtils } from "./TestUtils";
@@ -25,7 +25,7 @@ describe("MapLayerManager", () => {
   const sandbox = sinon.createSandbox();
   const viewportMock = new ViewportMock();
 
-  const attachLAyerButtonSelector = ".map-manager-attach-layer-button";
+  const attachLayerButtonSelector = ".map-manager-attach-layer-button";
   const sourceListSelector = ".map-manager-source-list";
 
   before(async () => {
@@ -83,7 +83,7 @@ describe("MapLayerManager", () => {
       extraFunc();
     }
 
-    const addButton = container.querySelector(attachLAyerButtonSelector) as HTMLElement;
+    const addButton = container.querySelector(attachLayerButtonSelector) as HTMLElement;
     should().exist(addButton);
     fireEvent.click(addButton);
 
@@ -157,13 +157,13 @@ describe("MapLayerManager", () => {
 
     await TestUtils.flushAsyncOperations();
 
-    const addButton = container.querySelector(attachLAyerButtonSelector) as HTMLElement;
+    const addButton = container.querySelector(attachLayerButtonSelector) as HTMLElement;
     should().exist(addButton);
     fireEvent.click(addButton);
 
     const sourceList = document.querySelector(sourceListSelector) as HTMLUListElement;
     should().exist(sourceList);
-    const sourceItems = sourceList.querySelectorAll("li");
+    const sourceItems = sourceList.querySelectorAll('div[role="listitem"]');
 
     // this should still be 2 even though we added a duplicate
     expect(sourceItems.length).to.eq(2);
@@ -331,9 +331,9 @@ describe("MapLayerManager", () => {
 
   it("should change layers visibility", async () => {
     const checkLayerItemsVisibility = (element: HTMLElement, nbVisibleLayers: number, nbNonVisibleLayers: number) => {
-      const iconVisibilityIcons = element.querySelectorAll("i.icon-visibility");
+      const iconVisibilityIcons = queryAllByTestId(element, "layer-visibility-icon-show");
       expect(iconVisibilityIcons.length).to.eq(nbVisibleLayers);
-      const iconInvisibilityIcons = element.querySelectorAll("i.icon-visibility-hide-2");
+      const iconInvisibilityIcons = queryAllByTestId(element, "layer-visibility-icon-hide");
       expect(iconInvisibilityIcons.length).to.eq(nbNonVisibleLayers);
     };
 

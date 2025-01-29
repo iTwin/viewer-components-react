@@ -138,7 +138,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
             props.onItemVisibilityToggleClicked(activeLayer);
           }}
         >
-          {activeLayer.visible ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
+          {activeLayer.visible ? <SvgVisibilityShow data-testid="layer-visibility-icon-show" /> : <SvgVisibilityHide data-testid="layer-visibility-icon-hide" />}
         </Button>
 
         {/* Label */}

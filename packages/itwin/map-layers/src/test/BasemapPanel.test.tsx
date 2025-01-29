@@ -17,7 +17,7 @@ import {
   MapImagerySettings,
 } from "@itwin/core-common";
 import { MockRender } from "@itwin/core-frontend";
-import { fireEvent, getByTestId, render } from "@testing-library/react";
+import { findByTestId, fireEvent, getByTestId, render } from "@testing-library/react";
 import { BasemapPanel } from "../ui/widget/BasemapPanel";
 import { defaultBaseMapLayers, SourceMapContext } from "../ui/widget/MapLayerManager";
 import { TestUtils } from "./TestUtils";
@@ -152,7 +152,7 @@ describe("BasemapPanel", () => {
     viewportMock.onMapImageryChanged.raiseEvent(MapImagerySettings.fromJSON({ backgroundBase: baseMap }));
     await TestUtils.flushAsyncOperations();
 
-    const iconVisibilityHide = container.querySelector(".icon-visibility-hide-2");
+    const iconVisibilityHide = await findByTestId(container, "layer-visibility-icon-hide");
     should().exist(iconVisibilityHide);
 
     // check transparency slider has been updated

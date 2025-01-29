@@ -310,7 +310,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
           onClick={handleVisibilityChange}
           disabled={props.disabled || !activeViewport || !(activeViewport.displayStyle.backgroundMapBase instanceof ImageMapLayerSettings)}
         >
-          {baseMapVisible ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
+          {baseMapVisible ? <SvgVisibilityShow data-testid="layer-visibility-icon-show" /> : <SvgVisibilityHide data-testid="layer-visibility-icon-hide" />}
         </Button>
         <Select
           data-testid="base-map-select"
