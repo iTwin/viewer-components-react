@@ -1,10 +1,11 @@
-import "./SubLayersTree.scss";
-import * as React from "react";
+
 /*---------------------------------------------------------------------------------------------
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { PropertyValueFormat } from "@itwin/appui-abstract";
+import "./SubLayersTree.scss";
+import * as React from "react";
 import {
   CheckBoxState,
   ControlledTree,
