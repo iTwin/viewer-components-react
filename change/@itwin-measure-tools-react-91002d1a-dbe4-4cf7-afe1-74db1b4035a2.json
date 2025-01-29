@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "sheets are not required to have jsonProperties",
+  "packageName": "@itwin/measure-tools-react",
+  "email": "30239292+Ellord207@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

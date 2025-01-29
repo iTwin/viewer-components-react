@@ -3,8 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { Point3d } from "@itwin/core-geometry";
-import { MeasurementToolModel } from "../api/MeasurementToolModel";
-import { AngleMeasurement } from "../measurements/AngleMeasurement";
+import { MeasurementToolModel } from "../api/MeasurementToolModel.js";
+import { AngleMeasurement } from "../measurements/AngleMeasurement.js";
 
 enum State {
   SetMeasurementViewport,

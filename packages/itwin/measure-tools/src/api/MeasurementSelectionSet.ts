@@ -8,9 +8,9 @@ import { BeUiEvent, Id64 } from "@itwin/core-bentley";
 import type { IModelConnection, SelectAddEvent, SelectionSetEvent, SelectRemoveEvent, SelectReplaceEvent } from "@itwin/core-frontend";
 import { SelectionSetEventType } from "@itwin/core-frontend";
 import { SessionStateActionId, SyncUiEventDispatcher, UiFramework } from "@itwin/appui-react";
-import { Measurement } from "./Measurement";
-import { MeasurementSyncUiEventId } from "./MeasurementEnums";
-import { ShimFunctions } from "./ShimFunctions";
+import { Measurement } from "./Measurement.js";
+import { MeasurementSyncUiEventId } from "./MeasurementEnums.js";
+import { ShimFunctions } from "./ShimFunctions.js";
 import type { UiSyncEventArgs } from "@itwin/appui-abstract";
 
 export interface MeasurementSelectAddEvent {

@@ -5,10 +5,10 @@
 
 import { Point3d } from "@itwin/core-geometry";
 import { assert } from "chai";
-import { Measurement, MeasurementPickContext } from "../../api/Measurement";
-import { WellKnownViewType } from "../../api/MeasurementEnums";
-import { DistanceMeasurement, DistanceMeasurementSerializer } from "../../measurements/DistanceMeasurement";
-import { MeasureDistanceToolModel } from "../../toolmodels/MeasureDistanceToolModel";
+import { Measurement, MeasurementPickContext } from "../../api/Measurement.js";
+import { WellKnownViewType } from "../../api/MeasurementEnums.js";
+import { DistanceMeasurement, DistanceMeasurementSerializer } from "../../measurements/DistanceMeasurement.js";
+import { MeasureDistanceToolModel } from "../../toolmodels/MeasureDistanceToolModel.js";
 
 describe("DistanceMeasurement tests", () => {
   it("Test serialization/clone/equals", async () => {

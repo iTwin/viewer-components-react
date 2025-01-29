@@ -4,9 +4,9 @@
 *--------------------------------------------------------------------------------------------*/
 
 import type { Point3d } from "@itwin/core-geometry";
-import { AreaMeasurement } from "../measurements/AreaMeasurement";
-import { MeasurementToolModel } from "../api/MeasurementToolModel";
-import type { DrawingMetadata } from "../api/Measurement";
+import { AreaMeasurement } from "../measurements/AreaMeasurement.js";
+import { MeasurementToolModel } from "../api/MeasurementToolModel.js";
+import type { DrawingMetadata } from "../api/Measurement.js";
 
 enum State {
   SetMeasurementViewport,

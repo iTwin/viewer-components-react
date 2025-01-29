@@ -2,6 +2,29 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Mon, 27 Jan 2025 18:30:40 GMT",
+      "version": "0.26.0",
+      "tag": "@itwin/measure-tools-react_v0.26.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "3418768+a-gagnon@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "ad32e6f3ed0f580a745a61e0126abcde7c7c27a3",
+            "comment": "Drop CJS in measure-tools. Add .js suffixes per ESM requirement."
+          }
+        ],
+        "none": [
+          {
+            "author": "3418768+a-gagnon@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "f41b8032256e71a1b82916eb1524e22764dbf192",
+            "comment": ""
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 14 Jan 2025 02:51:04 GMT",
       "version": "0.25.0",
       "tag": "@itwin/measure-tools-react_v0.25.0",

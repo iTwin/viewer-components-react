@@ -8,14 +8,14 @@ import sinon from "sinon";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { KeySet } from "@itwin/presentation-common";
 import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
-import { useDataProvider } from "../../hooks/UseDataProvider";
-import { TelemetryContextProvider } from "../../hooks/UseTelemetryContext";
-import { createPropertyRecord, createResolvablePromise, renderHook, stubFavoriteProperties, stubPresentation } from "../TestUtils";
+import { useDataProvider } from "../../property-grid-react/hooks/UseDataProvider.js";
+import { TelemetryContextProvider } from "../../property-grid-react/hooks/UseTelemetryContext.js";
+import { createPropertyRecord, createResolvablePromise, renderHook, stubFavoriteProperties, stubPresentation } from "../TestUtils.js";
 
 import type { PropsWithChildren } from "react";
 import type { PropertyData } from "@itwin/components-react";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { PerformanceTrackedFeatures } from "../../hooks/UseTelemetryContext";
+import type { PerformanceTrackedFeatures } from "../../property-grid-react/hooks/UseTelemetryContext.js";
 
 describe("useDataProvider", () => {
   const imodel = {} as IModelConnection;

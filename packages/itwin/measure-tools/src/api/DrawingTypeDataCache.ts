@@ -6,7 +6,7 @@
 import type { Viewport } from "@itwin/core-frontend";
 import { IModelConnection } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
-import { SheetMeasurementsHelper } from "./SheetMeasurementHelper";
+import { SheetMeasurementsHelper } from "./SheetMeasurementHelper.js";
 import type { Id64String } from "@itwin/core-bentley";
 
 export class DrawingDataCache {

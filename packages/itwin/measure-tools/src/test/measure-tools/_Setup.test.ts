@@ -2,20 +2,20 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+import { afterAll, beforeAll } from "vitest";
 
 import { NoRenderApp } from "@itwin/core-frontend";
-import { MeasureTools } from "../../MeasureTools";
-import { ITwinLocalization } from "@itwin/core-i18n";
-import { TestUtils } from "../TestUtils";
+import { MeasureTools } from "../../MeasureTools.js";
+import { TestUtils } from "../TestUtils.js";
+import { EmptyLocalization } from "@itwin/core-common";
 
-function supplyI18NOptions() { return { urlTemplate: `${window.location.origin}/locales/{{lng}}/{{ns}}.json` }; }
 // Before all tests, initialize any global services
-before(async () => {
-  const local: ITwinLocalization = new ITwinLocalization(supplyI18NOptions());
-  await NoRenderApp.startup({ localization: local });
-  await MeasureTools.startup({ localization: local });
+beforeAll(async () => {
+  const localization = new EmptyLocalization();
+  await NoRenderApp.startup({ localization });
+  await MeasureTools.startup({ localization });
 });
 
-after(async () => {
+afterAll(async () => {
   await TestUtils.cleanup();
 });

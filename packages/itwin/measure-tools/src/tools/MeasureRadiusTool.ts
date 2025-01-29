@@ -15,13 +15,13 @@ import {
   ToolAssistanceImage,
   ToolAssistanceInputMethod,
 } from "@itwin/core-frontend";
-import type { Feature } from "../api/FeatureTracking";
-import { MeasureToolsFeatures } from "../api/FeatureTracking";
-import { MeasurementToolBase } from "../api/MeasurementTool";
-import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
-import type { RadiusMeasurement } from "../measurements/RadiusMeasurement";
-import { MeasureTools } from "../MeasureTools";
-import { MeasureRadiusToolModel } from "../toolmodels/MeasureRadiusToolModel";
+import type { Feature } from "../api/FeatureTracking.js";
+import { MeasureToolsFeatures } from "../api/FeatureTracking.js";
+import { MeasurementToolBase } from "../api/MeasurementTool.js";
+import { MeasurementViewTarget } from "../api/MeasurementViewTarget.js";
+import type { RadiusMeasurement } from "../measurements/RadiusMeasurement.js";
+import { MeasureTools } from "../MeasureTools.js";
+import { MeasureRadiusToolModel } from "../toolmodels/MeasureRadiusToolModel.js";
 
 /** Tool for measuring radius using 3-points */
 export class MeasureRadiusTool extends MeasurementToolBase<

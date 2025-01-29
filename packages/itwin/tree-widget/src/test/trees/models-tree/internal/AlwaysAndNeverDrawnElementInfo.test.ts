@@ -7,9 +7,12 @@ import { expect } from "chai";
 import { firstValueFrom } from "rxjs";
 import sinon from "sinon";
 import { using } from "@itwin/core-bentley";
-import { AlwaysAndNeverDrawnElementInfo, SET_CHANGE_DEBOUNCE_TIME } from "../../../../components/trees/models-tree/internal/AlwaysAndNeverDrawnElementInfo";
-import { createResolvablePromise } from "../../../TestUtils";
-import { createFakeSinonViewport } from "../../Common";
+import {
+  AlwaysAndNeverDrawnElementInfo,
+  SET_CHANGE_DEBOUNCE_TIME,
+} from "../../../../tree-widget-react/components/trees/models-tree/internal/AlwaysAndNeverDrawnElementInfo.js";
+import { createResolvablePromise } from "../../../TestUtils.js";
+import { createFakeSinonViewport } from "../../Common.js";
 
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
 

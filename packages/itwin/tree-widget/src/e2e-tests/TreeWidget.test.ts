@@ -5,7 +5,7 @@
 
 import type { Locator } from "@playwright/test";
 import { test } from "@playwright/test";
-import { initTreeWidgetTest, locateNode, selectTree, takeScreenshot, withDifferentDensities } from "./utils";
+import { initTreeWidgetTest, locateNode, selectTree, takeScreenshot, withDifferentDensities } from "./utils.js";
 
 test.describe("Widget", () => {
   let treeWidget: Locator;

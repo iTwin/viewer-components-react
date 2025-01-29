@@ -3,12 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { Measurement } from "./Measurement";
-import { MeasurementSyncUiEventId } from "./MeasurementEnums";
+import type { Measurement } from "./Measurement.js";
+import { MeasurementSyncUiEventId } from "./MeasurementEnums.js";
 import { BeUiEvent } from "@itwin/core-bentley";
-import { DistanceMeasurement } from "../measurements/DistanceMeasurement";
+import { DistanceMeasurement } from "../measurements/DistanceMeasurement.js";
 import { SyncUiEventDispatcher } from "@itwin/appui-react";
-import { ShimFunctions } from "./ShimFunctions";
+import { ShimFunctions } from "./ShimFunctions.js";
 
 export type AcceptMeasurementHandler = (args: Measurement) => boolean;
 

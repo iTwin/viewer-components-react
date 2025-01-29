@@ -24,13 +24,13 @@ import {
   ToolAssistanceImage,
   ToolAssistanceInputMethod,
 } from "@itwin/core-frontend";
-import type { Feature } from "../api/FeatureTracking";
-import { MeasureToolsFeatures } from "../api/FeatureTracking";
-import { MeasurementToolBase } from "../api/MeasurementTool";
-import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
-import type { DistanceMeasurement } from "../measurements/DistanceMeasurement";
-import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel";
-import { MeasureTools } from "../MeasureTools";
+import type { Feature } from "../api/FeatureTracking.js";
+import { MeasureToolsFeatures } from "../api/FeatureTracking.js";
+import { MeasurementToolBase } from "../api/MeasurementTool.js";
+import { MeasurementViewTarget } from "../api/MeasurementViewTarget.js";
+import type { DistanceMeasurement } from "../measurements/DistanceMeasurement.js";
+import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel.js";
+import { MeasureTools } from "../MeasureTools.js";
 
 export class MeasurePerpendicularTool extends MeasurementToolBase<
 DistanceMeasurement,

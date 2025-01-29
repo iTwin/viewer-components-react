@@ -9,8 +9,8 @@ import { GraphicType, IModelApp } from "@itwin/core-frontend";
 import { Point3d } from "@itwin/core-geometry";
 import { Transform } from "@itwin/core-geometry";
 import { Point2d } from "@itwin/core-geometry";
-import type { DrawingMetadata } from "./Measurement";
-import { DrawingDataCache } from "./DrawingTypeDataCache";
+import type { DrawingMetadata } from "./Measurement.js";
+import { DrawingDataCache } from "./DrawingTypeDataCache.js";
 
 export namespace SheetMeasurementsHelper {
 
@@ -140,8 +140,8 @@ export namespace SheetMeasurementsHelper {
     for await (const row of iter) {
       const highX = row[3].X - row[2].X;
       const highY = row[3].Y - row[2].Y;
-      const jsonProp = JSON.parse(row[4]);
-      if (jsonProp.civilimodelconn) {
+      const jsonProp = row[4] && JSON.parse(row[4]);
+      if (jsonProp && jsonProp.civilimodelconn) {
         const origin = new Point2d(row[1].X, row[1].Y);
         const extents = new Point2d(highX, highY);
         const viewType = jsonProp.civilimodelconn.viewType;

@@ -22,19 +22,19 @@ import {
   ToolAssistanceImage,
   ToolAssistanceInputMethod,
 } from "@itwin/core-frontend";
-import type { Feature } from "../api/FeatureTracking";
-import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking";
-import { MeasurementToolBase } from "../api/MeasurementTool";
-import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
-import type { LocationMeasurement } from "../measurements/LocationMeasurement";
-import type { AddLocationProps } from "../toolmodels/MeasureLocationToolModel";
-import { MeasureLocationToolModel } from "../toolmodels/MeasureLocationToolModel";
-import { MeasureTools } from "../MeasureTools";
+import type { Feature } from "../api/FeatureTracking.js";
+import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking.js";
+import { MeasurementToolBase } from "../api/MeasurementTool.js";
+import { MeasurementViewTarget } from "../api/MeasurementViewTarget.js";
+import type { LocationMeasurement } from "../measurements/LocationMeasurement.js";
+import type { AddLocationProps } from "../toolmodels/MeasureLocationToolModel.js";
+import { MeasureLocationToolModel } from "../toolmodels/MeasureLocationToolModel.js";
+import { MeasureTools } from "../MeasureTools.js";
 import type { DialogItem, DialogItemValue, DialogPropertySyncItem } from "@itwin/appui-abstract";
 import { PropertyDescriptionHelper } from "@itwin/appui-abstract";
-import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
-import type { DrawingMetadata, DrawingMetadataProps } from "../api/Measurement";
-import { ViewHelper } from "../api/ViewHelper";
+import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper.js";
+import type { DrawingMetadata, DrawingMetadataProps } from "../api/Measurement.js";
+import { ViewHelper } from "../api/ViewHelper.js";
 
 /** Tool that measure precise locations */
 export class MeasureLocationTool extends MeasurementToolBase<

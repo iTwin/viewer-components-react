@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { assert, expect } from "chai";
-import path from "path";
 import sinon from "sinon";
 import { CompressedId64Set, using } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, IModelReadRpcInterface, RenderMode, SnapshotIModelRpcInterface } from "@itwin/core-common";
@@ -16,10 +15,10 @@ import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { InstanceKey } from "@itwin/presentation-shared";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-import { createVisibilityStatus } from "../../../../components/trees/common/Tooltip";
-import { ModelsTreeIdsCache } from "../../../../components/trees/models-tree/internal/ModelsTreeIdsCache";
-import { createModelsTreeVisibilityHandler } from "../../../../components/trees/models-tree/internal/ModelsTreeVisibilityHandler";
-import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../components/trees/models-tree/ModelsTreeDefinition";
+import { createVisibilityStatus } from "../../../../tree-widget-react/components/trees/common/Tooltip.js";
+import { ModelsTreeIdsCache } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
+import { createModelsTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
+import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import {
   buildIModel,
   importSchema,
@@ -29,9 +28,9 @@ import {
   insertPhysicalSubModel,
   insertSpatialCategory,
   insertSubject,
-} from "../../../IModelUtils";
-import { TestUtils } from "../../../TestUtils";
-import { createFakeSinonViewport, createIModelAccess } from "../../Common";
+} from "../../../IModelUtils.js";
+import { TestUtils } from "../../../TestUtils.js";
+import { createFakeSinonViewport, createIModelAccess } from "../../Common.js";
 import {
   createCategoryHierarchyNode,
   createClassGroupingHierarchyNode,
@@ -39,17 +38,17 @@ import {
   createFakeIdsCache,
   createModelHierarchyNode,
   createSubjectHierarchyNode,
-} from "../Utils";
-import { validateHierarchyVisibility, VisibilityExpectations } from "./VisibilityValidation";
+} from "../Utils.js";
+import { validateHierarchyVisibility, VisibilityExpectations } from "./VisibilityValidation.js";
 
-import type { Visibility } from "../../../../components/trees/common/Tooltip";
-import type { HierarchyVisibilityHandler } from "../../../../components/trees/common/UseHierarchyVisibility";
-import type { ModelsTreeVisibilityHandlerProps } from "../../../../components/trees/models-tree/internal/ModelsTreeVisibilityHandler";
+import type { Visibility } from "../../../../tree-widget-react/components/trees/common/Tooltip.js";
+import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
+import type { ModelsTreeVisibilityHandlerProps } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { GeometricElement3dProps, QueryBinder } from "@itwin/core-common";
 import type { HierarchyNodeIdentifiersPath, HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { Id64String } from "@itwin/core-bentley";
-import type { ValidateNodeProps } from "./VisibilityValidation";
+import type { ValidateNodeProps } from "./VisibilityValidation.js";
 
 interface VisibilityOverrides {
   models?: Map<Id64String, Visibility>;
@@ -1712,10 +1711,6 @@ describe("HierarchyBasedVisibilityHandler", () => {
               mode: HierarchyCacheMode.Memory,
             },
           },
-        },
-        testOutputDir: path.join(__dirname, "output"),
-        backendHostProps: {
-          cacheDir: path.join(__dirname, "cache"),
         },
         rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
       });

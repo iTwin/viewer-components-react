@@ -4,11 +4,11 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { assert } from "chai";
-import type { Measurement } from "../../api/Measurement";
-import { MeasurementManager } from "../../api/MeasurementManager";
-import { MeasurementUIEvents } from "../../api/MeasurementUIEvents";
-import { AreaMeasurement } from "../../measurements/AreaMeasurement";
-import { DistanceMeasurement } from "../../measurements/DistanceMeasurement";
+import type { Measurement } from "../../api/Measurement.js";
+import { MeasurementManager } from "../../api/MeasurementManager.js";
+import { MeasurementUIEvents } from "../../api/MeasurementUIEvents.js";
+import { AreaMeasurement } from "../../measurements/AreaMeasurement.js";
+import { DistanceMeasurement } from "../../measurements/DistanceMeasurement.js";
 
 describe("MeasurementUIEvents tests", () => {
   it("Test isToggleMeasurementAxesButtonVisible", () => {

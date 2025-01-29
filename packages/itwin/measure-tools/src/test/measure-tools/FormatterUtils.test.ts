@@ -7,12 +7,18 @@ import { Cartographic } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
 import { Point3d } from "@itwin/core-geometry";
 import { assert } from "chai";
-import { FormatterUtils } from "../../api/FormatterUtils";
+import { FormatterUtils } from "../../api/FormatterUtils.js";
 
 // NOTE: the quantityFormatter (and FormatterUtils) uses the 'apostrophe' and 'quotation mark' rather than the 'prime' and 'double prime'
-const deg = "\xB0";
-const min = "\u0027";
-const sec = "\u0022";
+enum Symbols {
+  Deg = "\xB0",
+  Min = "\u0027",
+  Sec = "\u0022",
+  N = "Generic.latitudeNorthSuffix",
+  S = "Generic.latitudeSouthSuffix",
+  E = "Generic.longitudeEastSuffix",
+  W = "Generic.longitudeWestSuffix",
+}
 
 describe("FormatterUtils", () => {
   it("test formatCoordinates", async () => {
@@ -34,38 +40,38 @@ describe("FormatterUtils", () => {
 
   it("test formatAngleToDMS", () => {
     let fAngle = FormatterUtils.formatAngleToDMS(0.0);
-    assert.strictEqual(fAngle, `0${deg}00${min}00.00${sec}`);
+    assert.strictEqual(fAngle, `0${Symbols.Deg}00${Symbols.Min}00.00${Symbols.Sec}`);
 
     fAngle = FormatterUtils.formatAngleToDMS(45.12345678);
-    assert.strictEqual(fAngle, `45${deg}07${min}24.44${sec}`);
+    assert.strictEqual(fAngle, `45${Symbols.Deg}07${Symbols.Min}24.44${Symbols.Sec}`);
 
     fAngle = FormatterUtils.formatAngleToDMS(-32.567891);
-    assert.strictEqual(fAngle, `-32${deg}34${min}04.41${sec}`);
+    assert.strictEqual(fAngle, `-32${Symbols.Deg}34${Symbols.Min}04.41${Symbols.Sec}`);
   });
 
   it("test formatCartographicToLatLongDMS", async () => {
     await IModelApp.quantityFormatter.setActiveUnitSystem("metric");
 
     let fLatLong = FormatterUtils.formatCartographicToLatLongDMS(Cartographic.fromDegrees({ latitude: 12.345678, longitude: 12.345678 }));
-    assert.strictEqual(fLatLong, `12${deg}20${min}44.44${sec}N, 12${deg}20${min}44.44${sec}E`);
+    assert.strictEqual(fLatLong, `12${Symbols.Deg}20${Symbols.Min}44.44${Symbols.Sec}${Symbols.N}, 12${Symbols.Deg}20${Symbols.Min}44.44${Symbols.Sec}${Symbols.E}`);
 
     fLatLong = FormatterUtils.formatCartographicToLatLongDMS(Cartographic.fromDegrees({ latitude: -82.5467, longitude: -172.43525 }));
-    assert.strictEqual(fLatLong, `82${deg}32${min}48.12${sec}S, 172${deg}26${min}06.90${sec}W`);
+    assert.strictEqual(fLatLong, `82${Symbols.Deg}32${Symbols.Min}48.12${Symbols.Sec}${Symbols.S}, 172${Symbols.Deg}26${Symbols.Min}06.90${Symbols.Sec}${Symbols.W}`);
 
     fLatLong = FormatterUtils.formatCartographicToLatLongDMS(Cartographic.fromDegrees({ latitude: -1.23456, longitude: 0.123456 }));
-    assert.strictEqual(fLatLong, `1${deg}14${min}04.42${sec}S, 0${deg}07${min}24.44${sec}E`);
+    assert.strictEqual(fLatLong, `1${Symbols.Deg}14${Symbols.Min}04.42${Symbols.Sec}${Symbols.S}, 0${Symbols.Deg}07${Symbols.Min}24.44${Symbols.Sec}${Symbols.E}`);
 
     // Changing the activeUnitSystem shouldn't change the output
     await IModelApp.quantityFormatter.setActiveUnitSystem("metric");
 
     fLatLong = FormatterUtils.formatCartographicToLatLongDMS(Cartographic.fromDegrees({ latitude: 12.345678, longitude: 12.345678 }));
-    assert.strictEqual(fLatLong, `12${deg}20${min}44.44${sec}N, 12${deg}20${min}44.44${sec}E`);
+    assert.strictEqual(fLatLong, `12${Symbols.Deg}20${Symbols.Min}44.44${Symbols.Sec}${Symbols.N}, 12${Symbols.Deg}20${Symbols.Min}44.44${Symbols.Sec}${Symbols.E}`);
 
     fLatLong = FormatterUtils.formatCartographicToLatLongDMS(Cartographic.fromDegrees({ latitude: -82.5467, longitude: -172.43525 }));
-    assert.strictEqual(fLatLong, `82${deg}32${min}48.12${sec}S, 172${deg}26${min}06.90${sec}W`);
+    assert.strictEqual(fLatLong, `82${Symbols.Deg}32${Symbols.Min}48.12${Symbols.Sec}${Symbols.S}, 172${Symbols.Deg}26${Symbols.Min}06.90${Symbols.Sec}${Symbols.W}`);
 
     fLatLong = FormatterUtils.formatCartographicToLatLongDMS(Cartographic.fromDegrees({ latitude: -1.23456, longitude: 0.123456 }));
-    assert.strictEqual(fLatLong, `1${deg}14${min}04.42${sec}S, 0${deg}07${min}24.44${sec}E`);
+    assert.strictEqual(fLatLong, `1${Symbols.Deg}14${Symbols.Min}04.42${Symbols.Sec}${Symbols.S}, 0${Symbols.Deg}07${Symbols.Min}24.44${Symbols.Sec}${Symbols.E}`);
 
   });
 
@@ -73,25 +79,25 @@ describe("FormatterUtils", () => {
     await IModelApp.quantityFormatter.setActiveUnitSystem("metric");
 
     let fLatLong = await FormatterUtils.formatCartographicToLatLong(Cartographic.fromDegrees({ latitude: 12.345678, longitude: 12.345678 }));
-    assert.strictEqual(fLatLong, `12${deg}20${min}44.4408${sec}N, 12${deg}20${min}44.4408${sec}E`);
+    assert.strictEqual(fLatLong, `12${Symbols.Deg}20${Symbols.Min}44.4408${Symbols.Sec}${Symbols.N}, 12${Symbols.Deg}20${Symbols.Min}44.4408${Symbols.Sec}${Symbols.E}`);
 
     fLatLong = await FormatterUtils.formatCartographicToLatLong(Cartographic.fromDegrees({ latitude: -82.5467, longitude: -172.43525 }));
-    assert.strictEqual(fLatLong, `82${deg}32${min}48.12${sec}S, 172${deg}26${min}6.9${sec}W`);
+    assert.strictEqual(fLatLong, `82${Symbols.Deg}32${Symbols.Min}48.12${Symbols.Sec}${Symbols.S}, 172${Symbols.Deg}26${Symbols.Min}6.9${Symbols.Sec}${Symbols.W}`);
 
     fLatLong = await FormatterUtils.formatCartographicToLatLong(Cartographic.fromDegrees({ latitude: -1.23456, longitude: 0.123456 }));
-    assert.strictEqual(fLatLong, `1${deg}14${min}4.416${sec}S, 0${deg}7${min}24.4416${sec}E`);
+    assert.strictEqual(fLatLong, `1${Symbols.Deg}14${Symbols.Min}4.416${Symbols.Sec}${Symbols.S}, 0${Symbols.Deg}7${Symbols.Min}24.4416${Symbols.Sec}${Symbols.E}`);
 
     // Changing the activeUnitSystem shouldn't change the output
     await IModelApp.quantityFormatter.setActiveUnitSystem("imperial");
 
     fLatLong = await FormatterUtils.formatCartographicToLatLong(Cartographic.fromDegrees({ latitude: 12.345678, longitude: 12.345678 }));
-    assert.strictEqual(fLatLong, `12${deg}20${min}44.4408${sec}N, 12${deg}20${min}44.4408${sec}E`);
+    assert.strictEqual(fLatLong, `12${Symbols.Deg}20${Symbols.Min}44.4408${Symbols.Sec}${Symbols.N}, 12${Symbols.Deg}20${Symbols.Min}44.4408${Symbols.Sec}${Symbols.E}`);
 
     fLatLong = await FormatterUtils.formatCartographicToLatLong(Cartographic.fromDegrees({ latitude: -82.5467, longitude: -172.43525 }));
-    assert.strictEqual(fLatLong, `82${deg}32${min}48.12${sec}S, 172${deg}26${min}6.9${sec}W`);
+    assert.strictEqual(fLatLong, `82${Symbols.Deg}32${Symbols.Min}48.12${Symbols.Sec}${Symbols.S}, 172${Symbols.Deg}26${Symbols.Min}6.9${Symbols.Sec}${Symbols.W}`);
 
     fLatLong = await FormatterUtils.formatCartographicToLatLong(Cartographic.fromDegrees({ latitude: -1.23456, longitude: 0.123456 }));
-    assert.strictEqual(fLatLong, `1${deg}14${min}4.416${sec}S, 0${deg}7${min}24.4416${sec}E`);
+    assert.strictEqual(fLatLong, `1${Symbols.Deg}14${Symbols.Min}4.416${Symbols.Sec}${Symbols.S}, 0${Symbols.Deg}7${Symbols.Min}24.4416${Symbols.Sec}${Symbols.E}`);
   });
 
   it("test formatSlope", () => {

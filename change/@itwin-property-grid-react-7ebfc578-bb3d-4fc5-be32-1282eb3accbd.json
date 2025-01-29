@@ -1,0 +1,7 @@
+{
+  "type": "none",
+  "comment": "Parallelize property grid unit / integration tests",
+  "packageName": "@itwin/property-grid-react",
+  "email": "35135765+grigasp@users.noreply.github.com",
+  "dependentChangeType": "none"
+}

@@ -4,10 +4,10 @@
 *--------------------------------------------------------------------------------------------*/
 
 import type { Point3d } from "@itwin/core-geometry";
-import { MeasurementPreferences } from "../api/MeasurementPreferences";
-import { MeasurementToolModel } from "../api/MeasurementToolModel";
-import { DistanceMeasurement } from "../measurements/DistanceMeasurement";
-import type { DrawingMetadata } from "../api/Measurement";
+import { MeasurementPreferences } from "../api/MeasurementPreferences.js";
+import { MeasurementToolModel } from "../api/MeasurementToolModel.js";
+import { DistanceMeasurement } from "../measurements/DistanceMeasurement.js";
+import type { DrawingMetadata } from "../api/Measurement.js";
 
 enum State {
   SetMeasurementViewport,

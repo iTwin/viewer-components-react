@@ -3,27 +3,22 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { join } from "path";
 import { Id64 } from "@itwin/core-bentley";
 import { BisCodeSpec, IModel, IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-import { ExternalSourcesTreeDefinition } from "../../../components/trees/external-sources-tree/ExternalSourcesTreeDefinition";
 import {
-  buildIModel,
-  insertExternalSource,
-  insertExternalSourceAspect,
-  insertExternalSourceAttachment,
-  insertPhysicalElement,
-  insertPhysicalModelWithPartition,
-  insertRepositoryLink,
-  insertSpatialCategory,
-} from "../../IModelUtils";
-import { createIModelAccess } from "../Common";
-import { NodeValidators, validateHierarchy } from "../HierarchyValidation";
+  HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
+} from "@itwin/presentation-testing";
+import { ExternalSourcesTreeDefinition } from "../../../tree-widget-react/components/trees/external-sources-tree/ExternalSourcesTreeDefinition.js";
+import {
+  buildIModel, insertExternalSource, insertExternalSourceAspect, insertExternalSourceAttachment, insertPhysicalElement,
+  insertPhysicalModelWithPartition, insertRepositoryLink, insertSpatialCategory,
+} from "../../IModelUtils.js";
+import { createIModelAccess } from "../Common.js";
+import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -39,10 +34,6 @@ describe("External sources tree", () => {
               mode: HierarchyCacheMode.Memory,
             },
           },
-        },
-        testOutputDir: join(__dirname, "output"),
-        backendHostProps: {
-          cacheDir: join(__dirname, "cache"),
         },
         rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
       });

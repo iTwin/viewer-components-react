@@ -47,7 +47,7 @@ export interface UiProvidersConfig {
 }
 
 export function getUiProvidersConfig(): UiProvidersConfig {
-  const enabledWidgets = import.meta.env.IMJS_ENABLED_WIDGETS ?? new URLSearchParams(document.location.href).get("widgets") ?? undefined;
+  const enabledWidgets = new URLSearchParams(document.location.href).get("widgets") ?? import.meta.env.IMJS_ENABLED_WIDGETS ?? undefined;
   const matchingItems = enabledWidgets ? collectSupportedItems(enabledWidgets.split(/[\s;]/)) : [...configuredUiItems.values()];
   const uiItemsProviders = matchingItems.map((item) => item.createUiItemsProviders());
   return {

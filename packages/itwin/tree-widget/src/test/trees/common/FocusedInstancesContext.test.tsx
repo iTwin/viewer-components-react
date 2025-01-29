@@ -5,9 +5,9 @@
 
 import { expect } from "chai";
 import { createStorage } from "@itwin/unified-selection";
-import { useFocusedInstancesContext } from "../../../components/trees/common/FocusedInstancesContext";
-import { FocusedInstancesContextProvider } from "../../../components/trees/common/FocusedInstancesContextProvider";
-import { act, createAsyncIterator, renderHook, waitFor } from "../../TestUtils";
+import { useFocusedInstancesContext } from "../../../tree-widget-react/components/trees/common/FocusedInstancesContext.js";
+import { FocusedInstancesContextProvider } from "../../../tree-widget-react/components/trees/common/FocusedInstancesContextProvider.js";
+import { act, createAsyncIterator, renderHook, waitFor } from "../../TestUtils.js";
 
 import type { GroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { PropsWithChildren } from "react";

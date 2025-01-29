@@ -3,8 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { MeasureTools } from "../MeasureTools";
-import type { Measurement, WidgetValue } from "./Measurement";
+import { MeasureTools } from "../MeasureTools.js";
+import type { Measurement, WidgetValue } from "./Measurement.js";
 
 export class MeasurementPropertyHelper {
   public static buildNameProperty(name: string): WidgetValue {

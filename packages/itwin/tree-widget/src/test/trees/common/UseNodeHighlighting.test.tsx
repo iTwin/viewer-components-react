@@ -5,9 +5,9 @@
 
 import { expect } from "chai";
 import sinon from "sinon";
-import { useNodeHighlighting } from "../../../components/trees/common/UseNodeHighlighting";
-import { render, renderHook } from "../../TestUtils";
-import { createPresentationHierarchyNode } from "../TreeUtils";
+import { useNodeHighlighting } from "../../../tree-widget-react/components/trees/common/UseNodeHighlighting.js";
+import { render, renderHook } from "../../TestUtils.js";
+import { createPresentationHierarchyNode } from "../TreeUtils.js";
 
 describe("useNodeHighlighting", () => {
   it("does not highlight text when no matches found", () => {

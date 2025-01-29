@@ -6,17 +6,17 @@
 import { IModelApp } from "@itwin/core-frontend";
 import type { ScreenViewport } from "@itwin/core-frontend";
 import { SyncUiEventId, ToolItemDef } from "@itwin/appui-react";
-import { MeasurementPreferences } from "../api/MeasurementPreferences";
-import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
-import { ClearMeasurementsTool } from "./ClearMeasurementsTool";
-import { MeasureAngleTool } from "./MeasureAngleTool";
-import { MeasureAreaTool } from "./MeasureAreaTool";
-import { MeasureDistanceTool } from "./MeasureDistanceTool";
-import { MeasureLocationTool } from "./MeasureLocationTool";
-import { MeasurePerpendicularTool } from "./MeasurePerpendicularTool";
-import { MeasureRadiusTool } from "./MeasureRadiusTool";
-import { ToggleDisplayMeasurementAxesTool } from "./ToggleDisplayMeasurementAxesTool";
-import { MeasureTools } from "../MeasureTools";
+import { MeasurementPreferences } from "../api/MeasurementPreferences.js";
+import { MeasurementUIEvents } from "../api/MeasurementUIEvents.js";
+import { ClearMeasurementsTool } from "./ClearMeasurementsTool.js";
+import { MeasureAngleTool } from "./MeasureAngleTool.js";
+import { MeasureAreaTool } from "./MeasureAreaTool.js";
+import { MeasureDistanceTool } from "./MeasureDistanceTool.js";
+import { MeasureLocationTool } from "./MeasureLocationTool.js";
+import { MeasurePerpendicularTool } from "./MeasurePerpendicularTool.js";
+import { MeasureRadiusTool } from "./MeasureRadiusTool.js";
+import { ToggleDisplayMeasurementAxesTool } from "./ToggleDisplayMeasurementAxesTool.js";
+import { MeasureTools } from "../MeasureTools.js";
 import { ConditionalBooleanValue } from "@itwin/appui-abstract";
 
 export class MeasureToolDefinitions {

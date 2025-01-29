@@ -7,7 +7,7 @@ import type { Point3d, XAndY } from "@itwin/core-geometry";
 import type { Cartographic } from "@itwin/core-common";
 import { IModelApp, QuantityType } from "@itwin/core-frontend";
 import type { FormatterSpec } from "@itwin/core-quantity";
-import { MeasureTools } from "../MeasureTools";
+import { MeasureTools } from "../MeasureTools.js";
 
 export class FormatterUtils {
   private static removeUnitSuffixes(s: string) {
@@ -29,11 +29,7 @@ export class FormatterUtils {
     const zStr = FormatterUtils.removeUnitSuffixes(
       IModelApp.quantityFormatter.formatQuantity(point.z, spec)
     );
-
-    return MeasureTools.localization.getLocalizedString(
-      "MeasureTools:Formatting.xyzPoint",
-      { x: xStr, y: yStr, z: zStr }
-    );
+    return `${xStr}, ${yStr}, ${zStr}`;
   }
 
   private static formatCoordinatesXYWithSpec(
@@ -46,11 +42,7 @@ export class FormatterUtils {
     const yStr = FormatterUtils.removeUnitSuffixes(
       IModelApp.quantityFormatter.formatQuantity(point.y, spec)
     );
-
-    return MeasureTools.localization.getLocalizedString(
-      "MeasureTools:Formatting.xyPoint",
-      { x: xStr, y: yStr }
-    );
+    return `${xStr}, ${yStr}`;
   }
 
   public static async formatCoordinates(point: Point3d): Promise<string> {

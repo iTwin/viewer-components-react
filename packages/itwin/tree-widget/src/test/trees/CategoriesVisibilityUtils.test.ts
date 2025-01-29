@@ -13,8 +13,8 @@ import {
   enableSubCategoryDisplay,
   loadCategoriesFromViewport,
   toggleAllCategories,
-} from "../../components/trees/common/CategoriesVisibilityUtils";
-import { TestUtils } from "../TestUtils";
+} from "../../tree-widget-react/components/trees/common/CategoriesVisibilityUtils.js";
+import { TestUtils } from "../TestUtils.js";
 
 import type { ECSqlReader } from "@itwin/core-common";
 import type { IModelConnection, SpatialViewState, Viewport } from "@itwin/core-frontend";
