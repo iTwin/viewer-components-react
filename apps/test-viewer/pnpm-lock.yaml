@@ -5,6 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
+  '@itwin/itwinui-react@^2': 2.12.26
   '@itwin/itwinui-react@^3': 3.16.0
 
 importers:
@@ -864,7 +865,7 @@ packages:
       '@itwin/imodel-components-react': ^4.17.6
       '@itwin/itwinui-react': 3.16.0
       '@itwin/map-layers-formats': ^4.10.4
-      react: ^18.0.0
+      react: ^17.0.0 || ^18.0.0
       react-dom: ^18.0.0
 
   '@itwin/measure-tools-react@file:../../packages/itwin/measure-tools':

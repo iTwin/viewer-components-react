@@ -7,7 +7,7 @@ import { useActiveFrontstageDef, WidgetState } from "@itwin/appui-react";
 import { Orientation, VirtualizedPropertyGridWithDataProvider } from "@itwin/components-react";
 import { ResizableContainerObserver } from "@itwin/core-react";
 import { SvgCopy } from "@itwin/itwinui-icons-react";
-import { IconButton } from "@itwin/itwinui-react";
+import { Flex, IconButton } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
 import { FeatureInfoUiItemsProvider } from "../FeatureInfoUiItemsProvider";
 import { FeatureInfoDataProvider } from "./FeatureInfoDataProvider";
@@ -98,11 +98,11 @@ export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetPr
     );
   } else {
     return (
-      <div className="uicore-fill-centered">
+      <Flex justifyContent="center" style={{ width: "100%", height: "100%" }}>
         <span>
           <i>{noRecordsMessage}</i>
         </span>
-      </div>
+      </Flex>
     );
   }
 }

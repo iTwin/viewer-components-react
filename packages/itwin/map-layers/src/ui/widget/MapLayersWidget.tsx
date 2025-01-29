@@ -5,6 +5,7 @@
 
 import * as React from "react";
 import { useActiveViewport } from "@itwin/appui-react";
+import { Flex } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
 import { MapLayerManager } from "./MapLayerManager";
 
@@ -43,8 +44,8 @@ export function MapLayersWidget(props: MapLayersWidgetProps) {
   }
 
   return (
-    <div className="uicore-fill-centered">
-        <div className="map-manager-not-geo-located-text">{notGeoLocatedMsg}</div>
-    </div>
+    <Flex justifyContent="center" style={{ width: "100%", height: "100%" }}>
+      <div className="map-manager-not-geo-located-text">{notGeoLocatedMsg}</div>
+    </Flex>
   );
 }

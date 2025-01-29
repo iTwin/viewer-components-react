@@ -636,7 +636,7 @@ export function AttachLayerPopupButton(props: AttachLayerPopupButtonProps) {
     <>
       {renderButton()}
       {/*eslint-disable-next-line @typescript-eslint/no-deprecated */}
-      <UiCore.Popup
+      <UiCore.Popup // TODO: Replace all deprecated UiCore components with iTwinUI components
         isOpen={popupOpen}
         position={RelativePosition.BottomRight}
         onClose={handleClosePopup}

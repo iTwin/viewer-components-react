@@ -74,7 +74,7 @@ export function SelectMapFormat(props: SelectMapFormatProps) {
       className="map-layer-source-select"
       options={mapFormats}
       value={mapFormat}
-      menuStyle={{ zIndex: 100000 }}
+      menuStyle={{ zIndex: 100000 }} // Ensure the dropdown selection is on top of the Modal that utilizes this component
       disabled={props.disabled}
       onChange={handleOnChange}
       size="small"

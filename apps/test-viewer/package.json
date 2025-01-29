@@ -136,6 +136,7 @@
   },
   "pnpm": {
     "overrides": {
+      "@itwin/itwinui-react@^2": "2.12.26",
       "@itwin/itwinui-react@^3": "3.16.0"
     }
   }
