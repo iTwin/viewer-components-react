@@ -9,7 +9,7 @@
     "noImplicitOverride": false,
     "resolveJsonModule": true,
     "noUnusedParameters": false,
-    "lib": ["DOM", "ES2019"],
+    "lib": ["DOM", "ES2023"],
     "outDir": "lib"
   },
   "include": ["src"]
