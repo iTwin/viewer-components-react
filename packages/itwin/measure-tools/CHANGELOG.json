@@ -2,6 +2,21 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Wed, 29 Jan 2025 21:54:15 GMT",
+      "version": "0.26.1",
+      "tag": "@itwin/measure-tools-react_v0.26.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "30239292+Ellord207@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "82aa14fce73bc39e3338d67288471bd0eceba85e",
+            "comment": "sheets are not required to have jsonProperties"
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 27 Jan 2025 18:30:40 GMT",
       "version": "0.26.0",
       "tag": "@itwin/measure-tools-react_v0.26.0",

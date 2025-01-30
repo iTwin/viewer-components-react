@@ -2,6 +2,35 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "date": "Wed, 29 Jan 2025 21:54:15 GMT",
+      "version": "1.15.0",
+      "tag": "@itwin/property-grid-react_v1.15.0",
+      "comments": {
+        "none": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "94e33324053b8f957d47e7fd8903eefd44cc42c7",
+            "comment": "Parallelize property grid unit / integration tests"
+          }
+        ],
+        "minor": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "02eedfb7c2d4ce74ca388129dd8fe6a35e90b835",
+            "comment": "Add support for AppUI 5.x"
+          },
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "02eedfb7c2d4ce74ca388129dd8fe6a35e90b835",
+            "comment": "Define `type` and `exports` attributes in `package.json`. The `exports attribute prohibits access to APIs that are not intended to be used by external consumers. The `type: \\\"module\\\"` attribute addition moves this package a step closer towards dropping CommonJS support - it's now transpiled from ESM to CommonJS instead of the opposite."
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 07 Jan 2025 12:53:32 GMT",
       "version": "1.14.3",
       "tag": "@itwin/property-grid-react_v1.14.3",
