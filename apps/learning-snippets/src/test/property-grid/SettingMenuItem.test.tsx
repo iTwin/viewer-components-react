@@ -28,7 +28,7 @@ describe("Property grid", () => {
 
       after(async function () {
         await terminateLearningSnippetsTests();
-        PropertyGridTestUtils.terminate();
+        await PropertyGridTestUtils.terminate();
       });
 
       afterEach(async () => {

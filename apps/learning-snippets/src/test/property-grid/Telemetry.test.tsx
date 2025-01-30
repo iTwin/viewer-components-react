@@ -30,7 +30,7 @@ describe("Property grid", () => {
 
       afterEach(async () => {
         await terminateLearningSnippetsTests();
-        PropertyGridTestUtils.terminate();
+        await PropertyGridTestUtils.terminate();
         sinon.restore();
       });
 

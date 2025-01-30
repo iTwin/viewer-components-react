@@ -10,8 +10,7 @@ import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { HierarchyCacheMode } from "@itwin/presentation-testing";
-import { initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
+import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 
 export async function initializeLearningSnippetsTests() {
   const outDir = path.join(path.dirname(url.fileURLToPath(import.meta.url)), "..", "..", "lib", "test", "out", `${process.pid}`);
