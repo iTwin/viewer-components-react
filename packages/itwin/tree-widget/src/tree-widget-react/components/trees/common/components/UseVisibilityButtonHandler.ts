@@ -9,7 +9,7 @@ import { isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-rea
 import type { PresentationHierarchyNode, PresentationTreeNode } from "@itwin/presentation-hierarchies-react";
 import type { TreeItemVisibilityButtonProps } from "./TreeNodeVisibilityButton.js";
 
-interface UseMultiCheckboxHandlerProps {
+interface UseVisibilityButtonHandlerProps {
   rootNodes: PresentationTreeNode[] | undefined;
   isNodeSelected?: (nodeId: string) => boolean;
   onClick: TreeItemVisibilityButtonProps["onVisibilityButtonClick"];
@@ -19,7 +19,7 @@ interface UseVisibilityButtonHandlerResult {
   onVisibilityButtonClick: TreeItemVisibilityButtonProps["onVisibilityButtonClick"];
 }
 
-export function useVisibilityButtonHandler({ rootNodes, isNodeSelected, onClick }: UseMultiCheckboxHandlerProps): UseVisibilityButtonHandlerResult {
+export function useVisibilityButtonHandler({ rootNodes, isNodeSelected, onClick }: UseVisibilityButtonHandlerProps): UseVisibilityButtonHandlerResult {
   const onVisibilityButtonClick = useCallback<TreeItemVisibilityButtonProps["onVisibilityButtonClick"]>(
     (clickedNode, state) => {
       if (!isNodeSelected?.(clickedNode.id)) {
