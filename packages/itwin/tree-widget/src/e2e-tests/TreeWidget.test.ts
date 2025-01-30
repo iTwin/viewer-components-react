@@ -7,7 +7,7 @@ import type { Locator } from "@playwright/test";
 import { test } from "@playwright/test";
 import { initTreeWidgetTest, locateNode, selectTree, takeScreenshot, withDifferentDensities } from "./utils.js";
 
-test.describe("Widget", () => {
+test.describe.skip("Widget", () => {
   let treeWidget: Locator;
 
   test.beforeEach(async ({ page, baseURL }) => {

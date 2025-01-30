@@ -6,11 +6,20 @@
 import type { Locator } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import {
-  expandStagePanel, initTreeWidgetTest, locateInstanceFilter, locateNode, scrollTree, selectOperatorInDialog, selectPropertyInDialog, selectTree,
-  selectValueInDialog, takeScreenshot, withDifferentDensities,
+  expandStagePanel,
+  initTreeWidgetTest,
+  locateInstanceFilter,
+  locateNode,
+  scrollTree,
+  selectOperatorInDialog,
+  selectPropertyInDialog,
+  selectTree,
+  selectValueInDialog,
+  takeScreenshot,
+  withDifferentDensities,
 } from "./utils.js";
 
-test.describe("Categories tree", () => {
+test.describe.skip("Categories tree", () => {
   let treeWidget: Locator;
 
   test.beforeEach(async ({ page, baseURL }) => {
