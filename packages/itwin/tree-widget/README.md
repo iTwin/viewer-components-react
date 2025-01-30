@@ -162,6 +162,7 @@ Example:
 <!-- BEGIN EXTRACTION -->
 
 ```tsx
+import { useCallback } from "react";
 import { TreeWithHeader, useModelsTree, useModelsTreeButtonProps, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
 import type { SelectionStorage } from "@itwin/unified-selection";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
@@ -324,11 +325,9 @@ function CustomCategoriesTreeRenderer(props: CustomCategoriesTreeRendererProps) 
     },
     [getLabel],
   );
-
   const getSublabel = useCallback<Required<VisibilityTreeRendererProps>["getSublabel"]>(() => {
     return <>Custom sub label</>;
   }, []);
-
   return <VisibilityTreeRenderer {...props} getLabel={getLabelCallback} getSublabel={getSublabel} />;
 }
 
@@ -342,7 +341,6 @@ interface CustomCategoriesTreeProps {
 function CustomCategoriesTreeComponent({ imodel, viewport, getSchemaContext, selectionStorage }: CustomCategoriesTreeProps) {
   const { buttonProps } = useCategoriesTreeButtonProps({ viewport });
   const { categoriesTreeProps, rendererProps } = useCategoriesTree({ activeView: viewport, filter: "" });
-
   return (
     <TreeWithHeader
       buttons={[

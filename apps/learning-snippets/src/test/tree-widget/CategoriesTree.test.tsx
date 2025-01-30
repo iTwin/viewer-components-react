@@ -4,27 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
 /* eslint-disable @typescript-eslint/no-shadow */
-import { join } from "path";
+
 import { useCallback } from "react";
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
-import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
-import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
-import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
-import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
-import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
+import { IModelApp } from "@itwin/core-frontend";
 // __PUBLISH_EXTRACT_START__ TreeWidget.CategoriesTreeExampleImports
 import { CategoriesTreeComponent } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
 // __PUBLISH_EXTRACT_START__ TreeWidget.CustomCategoriesTreeExampleImports
-import {
-  TreeWithHeader,
-  useCategoriesTree,
-  useCategoriesTreeButtonProps,
-  VisibilityTree,
-  VisibilityTreeRenderer,
-} from "@itwin/tree-widget-react";
+import { TreeWithHeader, useCategoriesTree, useCategoriesTreeButtonProps, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { SelectionStorage } from "@itwin/unified-selection";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
@@ -32,56 +21,35 @@ import type { ComponentPropsWithoutRef } from "react";
 // __PUBLISH_EXTRACT_END__
 import { createStorage } from "@itwin/unified-selection";
 import { cleanup, render, waitFor } from "@testing-library/react";
-import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
-import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils";
+import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils.js";
+import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
+import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils.js";
 
 describe("Tree widget", () => {
   describe("Learning snippets", () => {
     describe("Components", () => {
       describe("Categories tree", () => {
         before(async function () {
-          await initializePresentationTesting({
-            backendProps: {
-              caching: {
-                hierarchies: {
-                  mode: HierarchyCacheMode.Memory,
-                },
-              },
-            },
-            testOutputDir: join(__dirname, "output"),
-            backendHostProps: {
-              cacheDir: join(__dirname, "cache"),
-            },
-            rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
-          });
-          // eslint-disable-next-line @itwin/no-internal
-          ECSchemaRpcImpl.register();
-        });
-
-        after(async function () {
-          await terminatePresentationTesting();
-        });
-
-        beforeEach(async () => {
-          await NoRenderApp.startup();
+          await initializeLearningSnippetsTests();
           await TreeWidgetTestUtils.initialize();
         });
 
-        afterEach(async () => {
+        after(async function () {
+          await terminateLearningSnippetsTests();
           TreeWidgetTestUtils.terminate();
-          await IModelApp.shutdown();
+        });
+
+        afterEach(async () => {
           sinon.restore();
         });
 
-        it("Renders <CategoriesTreeComponent />", async function () {
-          const imodel = (
-            await buildIModel(this, async (builder) => {
-              const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-              const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
-              insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-              return { category };
-            })
-          ).imodel;
+        it("renders <CategoriesTreeComponent />", async function () {
+          const { imodel } = await buildIModel(this, async (builder) => {
+            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+            const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
+            insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+            return { category };
+          });
           const testViewport = getTestViewer(imodel);
           const unifiedSelectionStorage = createStorage();
           sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
@@ -104,25 +72,23 @@ describe("Tree widget", () => {
             );
           }
           // __PUBLISH_EXTRACT_END__
-          const { getByText } = render(<MyWidget />);
 
+          using _ = { [Symbol.dispose]: cleanup };
+          const { getByText } = render(<MyWidget />);
           await waitFor(() => getByText("Test SpatialCategory"));
-          cleanup();
         });
 
-        it("Renders custom categories tree", async function () {
-          const imodelConnection = (
-            await buildIModel(this, async (builder) => {
-              const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-              const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
-              insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-              return { category };
-            })
-          ).imodel;
-          const testViewport = getTestViewer(imodelConnection);
+        it("renders custom categories tree", async function () {
+          const { imodel } = await buildIModel(this, async (builder) => {
+            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+            const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
+            insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+            return { category };
+          });
+          const testViewport = getTestViewer(imodel);
           const unifiedSelectionStorage = createStorage();
           sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
-          sinon.stub(UiFramework, "getIModelConnection").returns(imodelConnection);
+          sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
           mockGetBoundingClientRect();
 
           // __PUBLISH_EXTRACT_START__ TreeWidget.CustomCategoriesTreeExample
@@ -138,11 +104,9 @@ describe("Tree widget", () => {
               },
               [getLabel],
             );
-
             const getSublabel = useCallback<Required<VisibilityTreeRendererProps>["getSublabel"]>(() => {
               return <>Custom sub label</>;
             }, []);
-
             return <VisibilityTreeRenderer {...props} getLabel={getLabelCallback} getSublabel={getSublabel} />;
           }
 
@@ -156,7 +120,6 @@ describe("Tree widget", () => {
           function CustomCategoriesTreeComponent({ imodel, viewport, getSchemaContext, selectionStorage }: CustomCategoriesTreeProps) {
             const { buttonProps } = useCategoriesTreeButtonProps({ viewport });
             const { categoriesTreeProps, rendererProps } = useCategoriesTree({ activeView: viewport, filter: "" });
-
             return (
               <TreeWithHeader
                 buttons={[
@@ -175,17 +138,20 @@ describe("Tree widget", () => {
             );
           }
           // __PUBLISH_EXTRACT_END__
+
+          using _ = { [Symbol.dispose]: cleanup };
           const { getByText } = render(
             <CustomCategoriesTreeComponent
-              imodel={imodelConnection}
+              imodel={imodel}
               viewport={testViewport}
               getSchemaContext={getSchemaContext}
               selectionStorage={unifiedSelectionStorage}
             />,
           );
-
-          await waitFor(() => getByText("Test SpatialCategory"));
-          cleanup();
+          await waitFor(() => {
+            getByText("Test SpatialCategory");
+            getByText("Custom sub label");
+          });
         });
       });
     });

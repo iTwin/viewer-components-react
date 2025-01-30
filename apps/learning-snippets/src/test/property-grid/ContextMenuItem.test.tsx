@@ -4,16 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable unused-imports/no-unused-vars */
 /* eslint-disable import/no-duplicates */
+
 import { expect } from "chai";
-import { join } from "path";
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
-import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
-import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
-import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
-import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 // __PUBLISH_EXTRACT_START__ PropertyGrid.ExampleContextMenuItemImports
 import { PropertyGridContextMenuItem } from "@itwin/property-grid-react";
 import type { ContextMenuItemProps } from "@itwin/property-grid-react";
@@ -22,46 +17,29 @@ import type { ContextMenuItemProps } from "@itwin/property-grid-react";
 import { PropertyGridComponent } from "@itwin/property-grid-react";
 // __PUBLISH_EXTRACT_END__
 import { cleanup, queryByText, render, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
-import { PropertyGridTestUtils } from "../../utils/PropertyGridTestUtils";
+import { userEvent } from "@testing-library/user-event";
+import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils.js";
+import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
+import { PropertyGridTestUtils } from "../../utils/PropertyGridTestUtils.js";
 
 describe("Property grid", () => {
   describe("Learning snippets", () => {
     describe("Context menu item", () => {
       before(async function () {
-        await initializePresentationTesting({
-          backendProps: {
-            caching: {
-              hierarchies: {
-                mode: HierarchyCacheMode.Memory,
-              },
-            },
-          },
-          testOutputDir: join(__dirname, "output"),
-          backendHostProps: {
-            cacheDir: join(__dirname, "cache"),
-          },
-          rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
-        });
-        // eslint-disable-next-line @itwin/no-internal
-        ECSchemaRpcImpl.register();
-      });
-
-      after(async function () {
-        await terminatePresentationTesting();
-      });
-
-      beforeEach(async () => {
+        await initializeLearningSnippetsTests();
         await PropertyGridTestUtils.initialize();
       });
 
+      after(async function () {
+        await terminateLearningSnippetsTests();
+        PropertyGridTestUtils.terminate();
+      });
+
       afterEach(async () => {
-        await PropertyGridTestUtils.terminate();
         sinon.restore();
       });
 
-      it("Renders context menu item", async function () {
+      it("renders context menu item", async function () {
         const imodel = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
@@ -90,17 +68,18 @@ describe("Property grid", () => {
 
         // __PUBLISH_EXTRACT_START__ PropertyGrid.PropertyGridWithContextMenuItem
         function MyPropertyGrid() {
-          return <PropertyGridComponent contextMenuItems={[(props) => <ExampleContextMenuItem {...props} />]}/>
+          return <PropertyGridComponent contextMenuItems={[(props) => <ExampleContextMenuItem {...props} />]} />;
         }
         // __PUBLISH_EXTRACT_END__
+
         Presentation.selection.addToSelection("", imodel.imodel, [imodel.category]);
+
+        using _ = { [Symbol.dispose]: cleanup };
         const { baseElement, getAllByText } = render(<MyPropertyGrid />);
         await waitFor(async () => {
           await user.pointer({ keys: "[MouseRight>]", target: getAllByText("Test SpatialCategory")[1] });
           expect(queryByText(baseElement, "Click me!")).to.not.be.null;
         });
-        Presentation.selection.clearSelection("", imodel.imodel);
-        cleanup();
       });
     });
   });

@@ -2,10 +2,19 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
+// WARNING: The order of imports in this file is important!
+
+// setup chai
 import chai from "chai";
+import sinonChai from "sinon-chai";
+chai.use(sinonChai);
+
+// get rid of various xhr errors in the console
 import globalJsdom from "global-jsdom";
 import * as jsdom from "jsdom";
-import sinonChai from "sinon-chai";
+globalJsdom(undefined, {
+  virtualConsole: new jsdom.VirtualConsole().sendTo(console, { omitJSDOMErrors: true }),
+});
 
 // polyfill ResizeObserver
 global.ResizeObserver = class ResizeObserver {
@@ -13,26 +22,6 @@ global.ResizeObserver = class ResizeObserver {
   public unobserve() {}
   public disconnect() {}
 };
-
-// get rid of various xhr errors in the console
-globalJsdom(undefined, {
-  virtualConsole: new jsdom.VirtualConsole().sendTo(console, { omitJSDOMErrors: true }),
-});
-
-// setup chai
-chai.should();
-chai.use(sinonChai);
-
-before(async function () {
-  getGlobalThis().IS_REACT_ACT_ENVIRONMENT = true;
-});
-
-after(() => {
-  delete getGlobalThis().IS_REACT_ACT_ENVIRONMENT;
-});
-// This is required by I18n module
-global.XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest; // eslint-disable-line @typescript-eslint/no-var-requires
-
 // needed for context menu to work in tests
 global.DOMRect = class DOMRect {
   public bottom: number = 0;
@@ -51,6 +40,24 @@ global.DOMRect = class DOMRect {
   public toJSON() {
     return JSON.stringify(this);
   }
+};
+
+// supply mocha hooks
+const { cleanup, configure } = await import("@testing-library/react");
+export const mochaHooks = {
+  beforeAll() {
+    getGlobalThis().IS_REACT_ACT_ENVIRONMENT = true;
+  },
+  beforeEach() {
+    // enable strict mode for each test by default
+    configure({ reactStrictMode: !process.env.DISABLE_STRICT_MODE });
+  },
+  afterEach() {
+    cleanup();
+  },
+  afterAll() {
+    delete getGlobalThis().IS_REACT_ACT_ENVIRONMENT;
+  },
 };
 
 function getGlobalThis(): typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean } {

@@ -4,24 +4,21 @@
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
 /* eslint-disable unused-imports/no-unused-vars */
+
 import { expect } from "chai";
-import { join } from "path";
 import sinon from "sinon";
 // __PUBLISH_EXTRACT_START__ TreeWidget.RegisterExampleImports
 import { UiItemsManager } from "@itwin/appui-react";
-import { createTreeWidget, ModelsTreeComponent } from "@itwin/tree-widget-react"
+import { createTreeWidget, ModelsTreeComponent } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
-import {UiFramework} from "@itwin/appui-react";
-import { IModel, IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
-import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
-import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
-import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
-import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
+import { UiFramework } from "@itwin/appui-react";
+import { IModel } from "@itwin/core-common";
+import { IModelApp } from "@itwin/core-frontend";
 import { createStorage } from "@itwin/unified-selection";
 import { render, waitFor } from "@testing-library/react";
-import { buildIModel, insertPhysicalModelWithPartition, insertSubject } from "../../utils/IModelUtils";
-import { getSchemaContext, getTestViewer, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils";
+import { buildIModel, insertPhysicalModelWithPartition, insertSubject } from "../../utils/IModelUtils.js";
+import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
+import { getSchemaContext, getTestViewer, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils.js";
 
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { Widget } from "@itwin/appui-react";
@@ -30,40 +27,20 @@ describe("Tree widget", () => {
   describe("Learning snippets", () => {
     describe("Usage", () => {
       before(async function () {
-        await initializePresentationTesting({
-          backendProps: {
-            caching: {
-              hierarchies: {
-                mode: HierarchyCacheMode.Memory,
-              },
-            },
-          },
-          testOutputDir: join(__dirname, "output"),
-          backendHostProps: {
-            cacheDir: join(__dirname, "cache"),
-          },
-          rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
-        });
-        // eslint-disable-next-line @itwin/no-internal
-        ECSchemaRpcImpl.register();
-      });
-
-      after(async function () {
-        await terminatePresentationTesting();
-      });
-
-      beforeEach(async () => {
-        await NoRenderApp.startup();
+        await initializeLearningSnippetsTests();
         await TreeWidgetTestUtils.initialize();
       });
 
-      afterEach(async () => {
+      after(async function () {
+        await terminateLearningSnippetsTests();
         TreeWidgetTestUtils.terminate();
-        await IModelApp.shutdown();
+      });
+
+      afterEach(async () => {
         sinon.restore();
       });
 
-      it("Registers tree widget", async function () {
+      it("registers tree widget", async function () {
         const imodel = (
           await buildIModel(this, async (builder) => {
             const model = insertPhysicalModelWithPartition({ builder, codeValue: "model" });

@@ -3,144 +3,124 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
+
 import { expect } from "chai";
-import { join } from "path";
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
-import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
-import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
-import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
-import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
+import { Presentation } from "@itwin/presentation-frontend";
 // __PUBLISH_EXTRACT_START__ PropertyGrid.ComponentWithTelemetryImports
 import { PropertyGridComponent } from "@itwin/property-grid-react";
 // __PUBLISH_EXTRACT_END__
 // __PUBLISH_EXTRACT_START__ PropertyGrid.ComponentWithTelemetryWrapperImports
-import {  PropertyGrid, TelemetryContextProvider } from "@itwin/property-grid-react";
+import { PropertyGrid, TelemetryContextProvider } from "@itwin/property-grid-react";
 // __PUBLISH_EXTRACT_END__
-import { cleanup, render, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
-import { PropertyGridTestUtils } from "../../utils/PropertyGridTestUtils";
-import { Presentation } from "@itwin/presentation-frontend";
+import { act, cleanup, render, waitFor } from "@testing-library/react";
+import { userEvent } from "@testing-library/user-event";
+import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils.js";
+import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
+import { PropertyGridTestUtils } from "../../utils/PropertyGridTestUtils.js";
 
 describe("Property grid", () => {
   describe("Learning snippets", () => {
     describe("Telemetry", () => {
-      before(async function () {
-        await initializePresentationTesting({
-          backendProps: {
-            caching: {
-              hierarchies: {
-                mode: HierarchyCacheMode.Memory,
-              },
-            },
-          },
-          testOutputDir: join(__dirname, "output"),
-          backendHostProps: {
-            cacheDir: join(__dirname, "cache"),
-          },
-          rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
-        });
-        // eslint-disable-next-line @itwin/no-internal
-        ECSchemaRpcImpl.register();
-      });
-
-      after(async function () {
-        await terminatePresentationTesting();
-      });
-
       beforeEach(async () => {
+        await initializeLearningSnippetsTests();
         await PropertyGridTestUtils.initialize();
       });
 
       afterEach(async () => {
-        await PropertyGridTestUtils.terminate();
+        await terminateLearningSnippetsTests();
+        PropertyGridTestUtils.terminate();
         sinon.restore();
       });
 
-      it("Renders component with feature usage and performance tracking", async function () {
-        const imodel = (
-          await buildIModel(this, async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-            const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
-            insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-            return { category };
-          })
-        );
-        sinon.stub(UiFramework, "getIModelConnection").returns(imodel.imodel);
+      it("renders component with feature usage and performance tracking", async function () {
+        const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+          const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
+          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          return { category };
+        });
+        sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
         const logPerformance = sinon.spy();
         const logUsage = sinon.spy();
+
         // __PUBLISH_EXTRACT_START__ PropertyGrid.ComponentWithTelemetry
         function MyPropertyGrid() {
           return (
             <PropertyGridComponent
               onPerformanceMeasured={(feature, elapsedTime) => {
-                // user-defined function to handle performance logging. 
-                logPerformance(feature, elapsedTime)
+                // user-defined function to handle performance logging.
+                logPerformance(feature, elapsedTime);
               }}
               onFeatureUsed={(feature) => {
-                // user-defined function to handle usage logging. 
+                // user-defined function to handle usage logging.
                 logUsage(feature);
               }}
             />
           );
-        };
+        }
         // __PUBLISH_EXTRACT_END__
+
+        using _ = { [Symbol.dispose]: cleanup };
         render(<MyPropertyGrid />);
-        Presentation.selection.addToSelection("", imodel.imodel, [imodel.category]);
-        await waitFor(() => {
-          expect(logUsage).to.be.calledTwice;
-          expect(logPerformance).to.be.calledOnce;
+        act(() => {
+          Presentation.selection.addToSelection("", imodel, [keys.category]);
         });
-        Presentation.selection.clearSelection("", imodel.imodel);
-        cleanup();
+        await waitFor(() => {
+          expect(logUsage)
+            .to.be.calledThrice.and.calledWith("hide-empty-values-disabled") // two times (due to React strict mode)
+            .and.calledWith("single-element");
+          expect(logPerformance).to.be.calledOnceWith("properties-load");
+        });
       });
 
-      it("Renders property grid with telemetry context", async function () {
-        const imodel = (
-          await buildIModel(this, async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-            const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
-            insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-            return { category };
-          })
-        );
-        const imodelConnection = imodel.imodel;
-        sinon.stub(UiFramework, "getIModelConnection").returns(imodelConnection);
+      it("renders property grid with telemetry context", async function () {
+        const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+          const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
+          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          return { category };
+        });
+        sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
         const logPerformance = sinon.spy();
         const logUsage = sinon.spy();
+
         // __PUBLISH_EXTRACT_START__ PropertyGrid.ComponentWithTelemetryWrapper
-        function ExampleContextMenuItem() {
+        function ExampleComponent() {
           return (
             <TelemetryContextProvider
               onPerformanceMeasured={(feature, elapsedTime) => {
-                // user-defined function to handle performance logging. 
-                logPerformance(feature, elapsedTime)
+                // user-defined function to handle performance logging.
+                logPerformance(feature, elapsedTime);
               }}
               onFeatureUsed={(feature) => {
-                // user-defined function to handle usage logging. 
+                // user-defined function to handle usage logging.
                 logUsage(feature);
               }}
             >
-              <PropertyGrid imodel={imodelConnection} />
+              <PropertyGrid imodel={imodel} />
             </TelemetryContextProvider>
           );
         }
         // __PUBLISH_EXTRACT_END__
+
+        Presentation.selection.addToSelection("", imodel, [keys.category]);
+
+        using _ = { [Symbol.dispose]: cleanup };
         const user = userEvent.setup();
-        const { getByRole, getByText } = render(<ExampleContextMenuItem />);
-        Presentation.selection.addToSelection("", imodel.imodel, [imodel.category]);
+        const { getByRole, getByText, queryByText } = render(<ExampleComponent />);
+
         // trigger a feature
         const button = await waitFor(() => getByText("search-bar.open"));
         await user.click(button);
-        await user.type(getByRole("searchbox"), "A");
+        await user.type(getByRole("searchbox"), "Test SpatialCategory");
+
         await waitFor(async () => {
-          expect(logPerformance).to.be.calledOnce;
-          expect(logUsage).to.be.calledOnce;
+          expect(logUsage).to.be.calledOnceWith("filter-properties");
+          expect(logPerformance).to.be.calledOnceWith("properties-load");
+          expect(queryByText("User Label")).to.be.null; // all properties except Code should be filtered-out
         });
-        Presentation.selection.clearSelection("", imodel.imodel);
-        cleanup();
       });
     });
   });

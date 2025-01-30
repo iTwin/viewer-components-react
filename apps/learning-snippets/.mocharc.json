@@ -1,22 +1,13 @@
 {
   "require": [
     "raf/polyfill",
-    "ignore-styles"
+    "ignore-styles",
+    "./lib/setup.js"
   ],
   "check-leaks": true,
   "timeout": "60000",
   "globals": [
     "IS_REACT_ACT_ENVIRONMENT"
-  ],
-  "file": [
-    "./lib/test/setup.js"
-  ],
-  "ignore": [
-    "lib/coverage/**/*"
-  ],
-  "reporter": "node_modules/@itwin/build-tools/mocha-reporter",
-  "reporter-option": [
-    "mochaFile=lib/test/junit_results.xml"
   ],
   "spec": [
     "./lib/test/**/*.test.js"
