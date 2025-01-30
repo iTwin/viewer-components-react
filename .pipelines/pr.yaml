@@ -7,6 +7,7 @@ pr:
   branches:
     include:
       - master
+      - tree-widget/next
 
 variables:
   - name: NodeVersion
