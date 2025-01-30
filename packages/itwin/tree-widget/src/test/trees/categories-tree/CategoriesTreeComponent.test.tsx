@@ -176,7 +176,7 @@ describe("<CategoriesTreeComponent />", () => {
 
     describe("<ShowAllButton />", () => {
       it("click on ShowAllButton calls expected function", async () => {
-        const { user, getByRole } = render(<CategoriesTreeComponent.ShowAllButton categories={categories} viewport={viewport} density="enlarged" />);
+        const { user, getByRole } = render(<CategoriesTreeComponent.ShowAllButton categories={categories} viewport={viewport} />);
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
         expect(stubCategoriesVisibilityUtils.showAllCategories).to.be.calledWith(["CategoryId"], viewport);
@@ -185,7 +185,7 @@ describe("<CategoriesTreeComponent />", () => {
       it("report on click", async () => {
         const onFeatureUsedSpy = sinon.spy();
         const { user, getByRole } = render(
-          <CategoriesTreeComponent.ShowAllButton categories={categories} viewport={viewport} density="enlarged" onFeatureUsed={onFeatureUsedSpy} />,
+          <CategoriesTreeComponent.ShowAllButton categories={categories} viewport={viewport} onFeatureUsed={onFeatureUsedSpy} />,
         );
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
@@ -195,7 +195,7 @@ describe("<CategoriesTreeComponent />", () => {
 
     describe("<HideAllButton />", () => {
       it("click on HideAllButton calls expected function", async () => {
-        const { user, getByRole } = render(<CategoriesTreeComponent.HideAllButton categories={categories} viewport={viewport} density="enlarged" />);
+        const { user, getByRole } = render(<CategoriesTreeComponent.HideAllButton categories={categories} viewport={viewport} />);
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
         expect(stubCategoriesVisibilityUtils.hideAllCategories).to.be.calledWith(["CategoryId"], viewport);
@@ -204,7 +204,7 @@ describe("<CategoriesTreeComponent />", () => {
       it("reports on click", async () => {
         const onFeatureUsedSpy = sinon.spy();
         const { user, getByRole } = render(
-          <CategoriesTreeComponent.HideAllButton categories={categories} viewport={viewport} density="enlarged" onFeatureUsed={onFeatureUsedSpy} />,
+          <CategoriesTreeComponent.HideAllButton categories={categories} viewport={viewport} onFeatureUsed={onFeatureUsedSpy} />,
         );
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
@@ -214,7 +214,7 @@ describe("<CategoriesTreeComponent />", () => {
 
     describe("<InvertAllButton />", () => {
       it("click on InvertAllButton calls expected function", async () => {
-        const { user, getByRole } = render(<CategoriesTreeComponent.InvertAllButton categories={categories} viewport={viewport} density="enlarged" />);
+        const { user, getByRole } = render(<CategoriesTreeComponent.InvertAllButton categories={categories} viewport={viewport} />);
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
         expect(stubCategoriesVisibilityUtils.invertAllCategories).to.be.calledWith(categories, viewport);
@@ -223,7 +223,7 @@ describe("<CategoriesTreeComponent />", () => {
       it("reports on click", async () => {
         const onFeatureUsedSpy = sinon.spy();
         const { user, getByRole } = render(
-          <CategoriesTreeComponent.InvertAllButton categories={categories} viewport={viewport} density="enlarged" onFeatureUsed={onFeatureUsedSpy} />,
+          <CategoriesTreeComponent.InvertAllButton categories={categories} viewport={viewport} onFeatureUsed={onFeatureUsedSpy} />,
         );
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);

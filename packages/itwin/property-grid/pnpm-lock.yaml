@@ -8,6 +8,8 @@ overrides:
   '@itwin/oidc-signin-tool>@itwin/core-common': 4.10.2
   '@itwin/service-authorization>@itwin/core-common': 4.10.2
 
+pnpmfileChecksum: bsrt55xe4xulgwvoijxhogq3re
+
 importers:
 
   .:

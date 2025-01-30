@@ -4,11 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { IModelApp } from "@itwin/core-frontend";
 import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
-import { Anchor, Text } from "@itwin/itwinui-react";
+import { Anchor, Icon, Text } from "@itwin/itwinui-react/bricks";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+import { HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
@@ -55,7 +54,7 @@ interface UseModelsTreeResult {
     VisibilityTreeProps,
     "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlight" | "noDataMessage" | "selectionPredicate"
   >;
-  rendererProps: Required<Pick<VisibilityTreeRendererProps, "getIcon" | "onNodeDoubleClick">>;
+  rendererProps: Required<Pick<VisibilityTreeRendererProps, "getIcon">>; // TODO FIGURE THIS OUT | "onDoubleClick"
 }
 
 /**
@@ -94,17 +93,17 @@ export function useModelsTree({
     [getModelsTreeIdsCache, hierarchyConfiguration],
   );
 
-  const onNodeDoubleClick = useCallback(
-    async ({ nodeData, extendedData }: PresentationHierarchyNode) => {
-      if (!HierarchyNode.isInstancesNode(nodeData) || (extendedData && (extendedData.isSubject || extendedData.isModel || extendedData.isCategory))) {
-        return;
-      }
-      const instanceIds = nodeData.key.instanceKeys.map((instanceKey) => instanceKey.id);
-      await IModelApp.viewManager.selectedView?.zoomToElements(instanceIds);
-      onFeatureUsed({ featureId: "zoom-to-node", reportInteraction: false });
-    },
-    [onFeatureUsed],
-  );
+  // const onDoubleClick = useCallback(
+  //   async ({ nodeData, extendedData }: PresentationHierarchyNode) => {
+  //     if (!HierarchyNode.isInstancesNode(nodeData) || (extendedData && (extendedData.isSubject || extendedData.isModel || extendedData.isCategory))) {
+  //       return;
+  //     }
+  //     const instanceIds = nodeData.key.instanceKeys.map((instanceKey) => instanceKey.id);
+  //     await IModelApp.viewManager.selectedView?.zoomToElements(instanceIds);
+  //     onFeatureUsed({ featureId: "zoom-to-node", reportInteraction: false });
+  //   },
+  //   [onFeatureUsed],
+  // );
 
   const getPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
     setFilteringError(undefined);
@@ -223,7 +222,7 @@ export function useModelsTree({
       selectionPredicate: nodeSelectionPredicate,
     },
     rendererProps: {
-      onNodeDoubleClick,
+      // onDoubleClick,
       getIcon,
     },
   };
@@ -362,11 +361,8 @@ function useCachedVisibility(activeView: Viewport, hierarchyConfig: ModelsTreeHi
 }
 
 function SvgClassGrouping() {
-  return (
-    <svg id="Calque_1" data-name="Calque 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-      <path d="M8.00933,0,0,3.97672V11.986L8.00933,16,16,11.93V3.97651ZM1.66173,11.27642c-.26155.03734-.59754-.26154-.76553-.69085-.168-.41066-.09334-.784.168-.82152.26154-.03734.59754.26154.76553.67219C1.99772,10.86577,1.92306,11.23909,1.66173,11.27642Zm0-3.32319c-.26155.03733-.59754-.28-.76553-.69086-.168-.42932-.09334-.80285.168-.84.26133-.03733.59754.28.76532.69086C1.99772,7.54236,1.92306,7.89723,1.66173,7.95323Zm4.31276,5.52621a.18186.18186,0,0,1-.16821-.01866L3.41657,12.15394a.94275.94275,0,0,1-.29887-.80285c.03754-.33621.22421-.52265.41108-.41066L5.9185,12.24727a.88656.88656,0,0,1,.28.80285A.5057.5057,0,0,1,5.97449,13.47944Zm0-3.37919a.18184.18184,0,0,1-.16821-.01867L3.41657,8.77475a.943.943,0,0,1-.29887-.80286c.03754-.3362.22421-.52286.41108-.42953L5.9185,8.86786a.83112.83112,0,0,1,.28.78419A.51684.51684,0,0,1,5.97449,10.10025Z" />
-    </svg>
-  );
+  const groupingClassIcon = new URL("@itwin/itwinui-icons/placeholder.svg", import.meta.url).href; // TODO: need an icon for grouping nodes
+  return <Icon href={groupingClassIcon} />;
 }
 
 async function collectFocusedItems(loadFocusedItems: () => AsyncIterableIterator<InstanceKey | GroupingHierarchyNode>) {
@@ -423,7 +419,6 @@ function createLocalizedMessage(message: string, onClick?: () => void) {
     <>
       {textBefore ? textBefore : null}
       <Anchor
-        underline
         onClick={(e) => {
           e.stopPropagation();
           onClick?.();

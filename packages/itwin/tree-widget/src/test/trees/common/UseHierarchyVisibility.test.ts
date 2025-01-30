@@ -2,6 +2,7 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
+/* eslint-disable deprecation/deprecation */
 
 import { expect } from "chai";
 import { act } from "react-dom/test-utils";
@@ -47,7 +48,7 @@ describe("useHierarchyVisibility", () => {
 
     act(() => {
       // expect initial state to be `off` and disabled
-      const state = result.current.getCheckboxState(node);
+      const state = result.current.getVisibilityButtonState(node);
       expect(state.state).to.be.eq("off");
       expect(state.isDisabled).to.be.true;
     });
@@ -55,11 +56,11 @@ describe("useHierarchyVisibility", () => {
     await waitFor(() => {
       // wait for visibility status to be calculated
       expect(visibilityHandler.getVisibilityStatus).to.be.called;
-      const state = result.current.getCheckboxState(node);
+      const state = result.current.getVisibilityButtonState(node);
       expect(state.state).to.be.eq("on");
     });
 
-    expect(result.current.getCheckboxState(node).state).to.be.eq("on");
+    expect(result.current.getVisibilityButtonState(node).state).to.be.eq("on");
     expect(visibilityHandler.getVisibilityStatus).to.be.calledOnce;
   });
 
@@ -72,7 +73,7 @@ describe("useHierarchyVisibility", () => {
 
     act(() => {
       // expect initial state to be `off` and disabled
-      const state = result.current.getCheckboxState(node);
+      const state = result.current.getVisibilityButtonState(node);
       expect(state.state).to.be.eq("off");
       expect(state.isDisabled).to.be.true;
     });
@@ -80,7 +81,7 @@ describe("useHierarchyVisibility", () => {
     await waitFor(() => {
       // wait for visibility status to calculated
       expect(visibilityHandler.getVisibilityStatus).to.be.called;
-      const state = result.current.getCheckboxState(node);
+      const state = result.current.getVisibilityButtonState(node);
       expect(state.state).to.be.eq("on");
     });
 
@@ -96,18 +97,18 @@ describe("useHierarchyVisibility", () => {
     act(() => {
       // expect visibility state to be same
       expect(visibilityHandler.getVisibilityStatus).to.be.called;
-      const state = result.current.getCheckboxState(node);
+      const state = result.current.getVisibilityButtonState(node);
       expect(state.state).to.be.eq("on");
     });
 
     await waitFor(() => {
       // wait for visibility status to calculated
       expect(visibilityHandler.getVisibilityStatus).to.be.calledTwice;
-      const state = result.current.getCheckboxState(node);
+      const state = result.current.getVisibilityButtonState(node);
       expect(state.state).to.be.eq("partial");
     });
 
-    expect(result.current.getCheckboxState(node).state).to.be.eq("partial");
+    expect(result.current.getVisibilityButtonState(node).state).to.be.eq("partial");
     expect(visibilityHandler.getVisibilityStatus).to.be.calledTwice;
   });
 
@@ -120,7 +121,7 @@ describe("useHierarchyVisibility", () => {
 
     act(() => {
       // expect initial state to be `off` and disabled
-      const state = result.current.getCheckboxState(node);
+      const state = result.current.getVisibilityButtonState(node);
       expect(state.state).to.be.eq("off");
       expect(state.isDisabled).to.be.true;
     });
@@ -128,13 +129,13 @@ describe("useHierarchyVisibility", () => {
     await waitFor(() => {
       // wait for visibility status to calculated
       expect(visibilityHandler.getVisibilityStatus).to.be.called;
-      const state = result.current.getCheckboxState(node);
+      const state = result.current.getVisibilityButtonState(node);
       expect(state.state).to.be.eq("on");
     });
 
     expect(visibilityHandler.getVisibilityStatus).to.be.calledOnce;
     act(() => {
-      result.current.onCheckboxClicked(node, false);
+      result.current.onVisibilityButtonClick(node, 'hidden');
     });
 
     expect(visibilityHandler.changeVisibility).to.be.called;
@@ -151,14 +152,14 @@ describe("useHierarchyVisibility", () => {
     act(() => {
       // expect visibility state to be optimistically updated to 'off'
       expect(visibilityHandler.getVisibilityStatus).to.be.calledOnce;
-      const state = result.current.getCheckboxState(node);
+      const state = result.current.getVisibilityButtonState(node);
       expect(state.state).to.be.eq("off");
     });
 
     await waitFor(() => {
       // wait for visibility status to recalculated
       expect(visibilityHandler.getVisibilityStatus).to.be.calledTwice;
-      const state = result.current.getCheckboxState(node);
+      const state = result.current.getVisibilityButtonState(node);
       expect(state.state).to.be.eq("off");
     });
 

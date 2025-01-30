@@ -137,7 +137,7 @@ describe("Tree widget", () => {
           function CustomModelsTreeRenderer(props: CustomModelsTreeRendererProps) {
             const getLabel = props.getLabel;
             const getLabelCallback = useCallback<Required<VisibilityTreeRendererProps>["getLabel"]>(
-              (node) => {
+              (node: any) => {
                 const originalLabel = getLabel(node);
                 return <>Custom node - {originalLabel}</>;
               },

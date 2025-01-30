@@ -4,8 +4,27 @@
  *--------------------------------------------------------------------------------------------*/
 
 import {
-  concat, concatAll, defer, distinct, EMPTY, filter, firstValueFrom, forkJoin, from, fromEventPattern, map, merge, mergeMap, of, reduce, shareReplay,
-  startWith, Subject, take, takeUntil, tap,
+  concat,
+  concatAll,
+  defer,
+  distinct,
+  EMPTY,
+  filter,
+  firstValueFrom,
+  forkJoin,
+  from,
+  fromEventPattern,
+  map,
+  merge,
+  mergeMap,
+  of,
+  reduce,
+  shareReplay,
+  startWith,
+  Subject,
+  take,
+  takeUntil,
+  tap,
 } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";

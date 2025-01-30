@@ -207,7 +207,7 @@ describe("<ModelsTreeComponent />", () => {
 
     describe("<ShowAllButton />", () => {
       it("click on ShowAllButton calls expected function", async () => {
-        const { user, getByRole } = render(<ModelsTreeComponent.ShowAllButton models={models} viewport={vpMock.object} density="enlarged" />);
+        const { user, getByRole } = render(<ModelsTreeComponent.ShowAllButton models={models} viewport={vpMock.object} />);
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
         expect(stubModelsVisibilityHandler.showAllModels).to.be.calledWith(["testModelId1", "testModelId2"], vpMock.object);
@@ -215,9 +215,7 @@ describe("<ModelsTreeComponent />", () => {
 
       it("reports when clicked", async () => {
         const onFeatureUsedSpy = sinon.spy();
-        const { user, getByRole } = render(
-          <ModelsTreeComponent.ShowAllButton models={models} viewport={vpMock.object} density="enlarged" onFeatureUsed={onFeatureUsedSpy} />,
-        );
+        const { user, getByRole } = render(<ModelsTreeComponent.ShowAllButton models={models} viewport={vpMock.object} onFeatureUsed={onFeatureUsedSpy} />);
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
         expect(onFeatureUsedSpy).to.be.calledWith("models-tree-showall");
@@ -226,7 +224,7 @@ describe("<ModelsTreeComponent />", () => {
 
     describe("<HideAllButton />", () => {
       it("click on HideAllButton calls expected function", async () => {
-        const { user, getByRole } = render(<ModelsTreeComponent.HideAllButton models={models} viewport={vpMock.object} density="enlarged" />);
+        const { user, getByRole } = render(<ModelsTreeComponent.HideAllButton models={models} viewport={vpMock.object} />);
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
         expect(stubModelsVisibilityHandler.hideAllModels).to.be.calledWith(["testModelId1", "testModelId2"], vpMock.object);
@@ -234,9 +232,7 @@ describe("<ModelsTreeComponent />", () => {
 
       it("reports when clicked", async () => {
         const onFeatureUsedSpy = sinon.spy();
-        const { user, getByRole } = render(
-          <ModelsTreeComponent.HideAllButton models={models} viewport={vpMock.object} density="enlarged" onFeatureUsed={onFeatureUsedSpy} />,
-        );
+        const { user, getByRole } = render(<ModelsTreeComponent.HideAllButton models={models} viewport={vpMock.object} onFeatureUsed={onFeatureUsedSpy} />);
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
         expect(onFeatureUsedSpy).to.be.calledWith("models-tree-hideall");
@@ -245,7 +241,7 @@ describe("<ModelsTreeComponent />", () => {
 
     describe("<InvertAllButton />", () => {
       it("click on InvertAllButton calls expected function", async () => {
-        const { user, getByRole } = render(<ModelsTreeComponent.InvertButton models={models} viewport={vpMock.object} density="enlarged" />);
+        const { user, getByRole } = render(<ModelsTreeComponent.InvertButton models={models} viewport={vpMock.object} />);
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
         expect(stubModelsVisibilityHandler.invertAllModels).to.be.calledWith(["testModelId1", "testModelId2"], vpMock.object);
@@ -253,9 +249,7 @@ describe("<ModelsTreeComponent />", () => {
 
       it("reports when clicked", async () => {
         const onFeatureUsedSpy = sinon.spy();
-        const { user, getByRole } = render(
-          <ModelsTreeComponent.InvertButton models={models} viewport={vpMock.object} density="enlarged" onFeatureUsed={onFeatureUsedSpy} />,
-        );
+        const { user, getByRole } = render(<ModelsTreeComponent.InvertButton models={models} viewport={vpMock.object} onFeatureUsed={onFeatureUsedSpy} />);
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
         expect(onFeatureUsedSpy).to.be.calledWith("models-tree-invert");
@@ -297,7 +291,6 @@ describe("<ModelsTreeComponent />", () => {
           <ModelsTreeComponent.View2DButton
             models={[{ id: "modelTestId", isPlanProjection: true }]}
             viewport={mockViewport().object}
-            density="enlarged"
             onFeatureUsed={onFeatureUsedSpy}
           />,
         );
@@ -342,7 +335,6 @@ describe("<ModelsTreeComponent />", () => {
           <ModelsTreeComponent.View3DButton
             models={[{ id: "modelTestId", isPlanProjection: false }]}
             viewport={mockViewport().object}
-            density="enlarged"
             onFeatureUsed={onFeatureUsedSpy}
           />,
         );

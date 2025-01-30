@@ -4,8 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useMemo, useState } from "react";
-import { SvgCursorClick, SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
-import { Button, IconButton, Tooltip } from "@itwin/itwinui-react";
+import { Button, Icon, IconButton, Tooltip } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
 import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, toggleModels } from "./internal/ModelsTreeVisibilityHandler.js";
@@ -14,6 +13,11 @@ import type { Id64String } from "@itwin/core-bentley";
 import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader.js";
+
+const visibilityShowIcon = new URL("@itwin/itwinui-icons/visibility-show.svg", import.meta.url).href;
+const visibilityHideIcon = new URL("@itwin/itwinui-icons/visibility-hide.svg", import.meta.url).href;
+const visibilityHalfIcon = new URL("@itwin/itwinui-icons/state-inherited-dot.svg", import.meta.url).href; // temporary icon
+const cursorClickIcon = new URL("@itwin/itwinui-icons/placeholder.svg", import.meta.url).href; // temporary icon
 
 /**
  * Information about a single Model.
@@ -104,14 +108,13 @@ async function queryModelsForHeaderActions(iModel: IModelConnection) {
 }
 
 /** @public */
-export type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) => JSX.Element | null;
+export type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) => React.ReactElement | null;
 
 /** @public */
 export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
-      size={props.density === "enlarged" ? "large" : "small"}
-      styleType="borderless"
+      style={{ position: "relative" }} // temporary fix, should be removed with new itwinUI alpha release
       label={TreeWidget.translate("modelsTree.buttons.showAll.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("models-tree-showall");
@@ -120,9 +123,8 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
           props.viewport,
         );
       }}
-    >
-      <SvgVisibilityShow />
-    </IconButton>
+      icon={visibilityShowIcon}
+    />
   );
 }
 
@@ -130,8 +132,7 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
 export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
-      size={props.density === "enlarged" ? "large" : "small"}
-      styleType="borderless"
+      style={{ position: "relative" }} // temporary fix, should be removed with new itwinUI alpha release
       label={TreeWidget.translate("modelsTree.buttons.hideAll.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("models-tree-hideall");
@@ -140,9 +141,8 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
           props.viewport,
         );
       }}
-    >
-      <SvgVisibilityHide />
-    </IconButton>
+      icon={visibilityHideIcon}
+    />
   );
 }
 
@@ -150,8 +150,7 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
 export function InvertButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
-      size={props.density === "enlarged" ? "large" : "small"}
-      styleType="borderless"
+      style={{ position: "relative" }} // temporary fix, should be removed with new itwinUI alpha release
       label={TreeWidget.translate("modelsTree.buttons.invert.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("models-tree-invert");
@@ -160,9 +159,8 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
           props.viewport,
         );
       }}
-    >
-      <SvgVisibilityHalf />
-    </IconButton>
+      icon={visibilityHalfIcon}
+    />
   );
 }
 
@@ -182,16 +180,14 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <Tooltip content={TreeWidget.translate("modelsTree.buttons.toggle2d.tooltip")}>
       <Button
-        size={props.density === "enlarged" ? "large" : "small"}
-        styleType="borderless"
         onClick={() => {
           props.onFeatureUsed?.("models-tree-view2d");
           void toggleModels(models2d, is2dToggleActive, props.viewport);
         }}
         disabled={models2d.length === 0}
-        endIcon={is2dToggleActive ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
       >
         {TreeWidget.translate("modelsTree.buttons.toggle2d.label")}
+        <Icon href={is2dToggleActive ? visibilityShowIcon : visibilityHideIcon} />
       </Button>
     </Tooltip>
   );
@@ -213,39 +209,36 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <Tooltip content={TreeWidget.translate("modelsTree.buttons.toggle3d.tooltip")}>
       <Button
-        size={props.density === "enlarged" ? "large" : "small"}
-        styleType="borderless"
         onClick={() => {
           props.onFeatureUsed?.("models-tree-view3d");
           void toggleModels(models3d, is3dToggleActive, props.viewport);
         }}
         disabled={models3d.length === 0}
-        endIcon={is3dToggleActive ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
       >
         {TreeWidget.translate("modelsTree.buttons.toggle3d.label")}
+        <Icon href={is3dToggleActive ? visibilityShowIcon : visibilityHideIcon} />
       </Button>
     </Tooltip>
   );
 }
 
 /** @public */
-export function ToggleInstancesFocusButton({ density, onFeatureUsed }: { density?: "default" | "enlarged"; onFeatureUsed?: (feature: string) => void }) {
+export function ToggleInstancesFocusButton({ onFeatureUsed }: { onFeatureUsed?: (feature: string) => void }) {
   const { enabled, toggle } = useFocusedInstancesContext();
   const label = enabled
     ? TreeWidget.translate("modelsTree.buttons.toggleFocusMode.disable.tooltip")
     : TreeWidget.translate("modelsTree.buttons.toggleFocusMode.enable.tooltip");
   return (
     <IconButton
-      styleType="borderless"
-      size={density === "enlarged" ? "large" : "small"}
+      variant="ghost"
+      style={{ position: "relative" }} // temporary fix, should be removed with new itwinUI alpha release
       label={label}
       onClick={() => {
         onFeatureUsed?.("models-tree-instancesfocus");
         toggle();
       }}
       isActive={enabled}
-    >
-      <SvgCursorClick />
-    </IconButton>
+      icon={cursorClickIcon}
+    />
   );
 }

@@ -8,8 +8,6 @@ import { useRef } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { StagePanelLocation, StagePanelSection, useTransientState } from "@itwin/appui-react";
 import { SvgHierarchyTree } from "@itwin/itwinui-icons-react";
-import { SvgError } from "@itwin/itwinui-illustrations-react";
-import { Button, NonIdealState } from "@itwin/itwinui-react";
 import { TreeWidget } from "../TreeWidget.js";
 import { SelectableTree } from "./SelectableTree.js";
 
@@ -80,19 +78,8 @@ export function TreeWidgetComponent(props: SelectableTreeProps) {
   );
 }
 
-function ErrorState({ resetErrorBoundary }: FallbackProps) {
-  return (
-    <NonIdealState
-      svg={<SvgError />}
-      heading={TreeWidget.translate("errorState.title")}
-      description={TreeWidget.translate("errorState.description")}
-      actions={
-        <Button styleType={"high-visibility"} onClick={resetErrorBoundary}>
-          {TreeWidget.translate("errorState.retryButtonLabel")}
-        </Button>
-      }
-    />
-  );
+function ErrorState({}: FallbackProps) {
+  return <> ERROR WINDOW TBD </>;
 }
 
 function useTreeWidgetTransientState() {

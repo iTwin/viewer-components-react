@@ -21,7 +21,7 @@ export type VisibilityTreeProps = Omit<TreeProps, "treeRenderer" | "imodelAccess
   visibilityHandlerFactory: (props: { imodelAccess: ECClassHierarchyInspector }) => HierarchyVisibilityHandler;
   /** Tree renderer that should be used to render tree data. */
   treeRenderer: (
-    treeProps: FunctionProps<TreeProps["treeRenderer"]> & Pick<VisibilityTreeRendererProps, "getCheckboxState" | "onCheckboxClicked">,
+    treeProps: FunctionProps<TreeProps["treeRenderer"]> & Pick<VisibilityTreeRendererProps, "getVisibilityButtonState" | "onVisibilityButtonClick">,
   ) => ReactNode;
 };
 
@@ -32,7 +32,7 @@ export type VisibilityTreeProps = Omit<TreeProps, "treeRenderer" | "imodelAccess
 export function VisibilityTree({ visibilityHandlerFactory, treeRenderer, ...props }: VisibilityTreeProps) {
   const { imodel, getSchemaContext } = props;
   const imodelAccess = useMemo(() => createIModelAccess({ imodel, getSchemaContext }), [imodel, getSchemaContext]);
-  const { getCheckboxState, onCheckboxClicked, triggerRefresh } = useHierarchyVisibility({
+  const { getVisibilityButtonState, onVisibilityButtonClick, triggerRefresh } = useHierarchyVisibility({
     visibilityHandlerFactory: useCallback(() => visibilityHandlerFactory({ imodelAccess }), [visibilityHandlerFactory, imodelAccess]),
   });
 
@@ -41,7 +41,7 @@ export function VisibilityTree({ visibilityHandlerFactory, treeRenderer, ...prop
       {...props}
       onReload={triggerRefresh}
       imodelAccess={imodelAccess}
-      treeRenderer={(treeProps) => treeRenderer({ ...treeProps, getCheckboxState, onCheckboxClicked })}
+      treeRenderer={(treeProps) => treeRenderer({ ...treeProps, getVisibilityButtonState, onVisibilityButtonClick })}
     />
   );
 }

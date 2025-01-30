@@ -58,5 +58,6 @@
       "mode": "auto"
     }
   ],
-  "editor.formatOnSaveMode": "modifications"
+  "editor.formatOnSaveMode": "modifications",
+  "terminal.integrated.scrollback": 10000,
 }

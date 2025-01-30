@@ -5,14 +5,17 @@
 
 import { useMemo, useState } from "react";
 import { useAsyncValue } from "@itwin/components-react";
-import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
-import { IconButton } from "@itwin/itwinui-react";
+import { IconButton } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { hideAllCategories, invertAllCategories, loadCategoriesFromViewport, showAllCategories } from "../common/CategoriesVisibilityUtils.js";
 
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader.js";
 import type { Viewport } from "@itwin/core-frontend";
+
+const visibilityShowIcon = new URL("@itwin/itwinui-icons/visibility-show.svg", import.meta.url).href;
+const visibilityHideIcon = new URL("@itwin/itwinui-icons/visibility-hide.svg", import.meta.url).href;
+const visibilityHalfIcon = new URL("@itwin/itwinui-icons/state-inherited-dot.svg", import.meta.url).href;
 
 /**
  * Props that get passed to `CategoriesTreeComponent` header button renderer.
@@ -58,14 +61,13 @@ export function useCategoriesTreeButtonProps({ viewport }: { viewport: Viewport 
 }
 
 /** @public */
-export type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonProps) => JSX.Element | null;
+export type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonProps) => React.ReactElement | null;
 
 /** @public */
 export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
   return (
     <IconButton
-      size={props.density === "enlarged" ? "large" : "small"}
-      styleType="borderless"
+      style={{ position: "relative" }} // temporary fix, should be removed with new itwinUI alpha release
       label={TreeWidget.translate("categoriesTree.buttons.showAll.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.(`categories-tree-showall`);
@@ -74,9 +76,8 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
           props.viewport,
         );
       }}
-    >
-      <SvgVisibilityShow />
-    </IconButton>
+      icon={visibilityShowIcon}
+    />
   );
 }
 
@@ -84,8 +85,7 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
 export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
   return (
     <IconButton
-      size={props.density === "enlarged" ? "large" : "small"}
-      styleType="borderless"
+      style={{ position: "relative" }} // temporary fix, should be removed with new itwinUI alpha release
       label={TreeWidget.translate("categoriesTree.buttons.hideAll.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.(`categories-tree-hideall`);
@@ -94,9 +94,8 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
           props.viewport,
         );
       }}
-    >
-      <SvgVisibilityHide />
-    </IconButton>
+      icon={visibilityHideIcon}
+    />
   );
 }
 
@@ -104,16 +103,14 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
 export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
   return (
     <IconButton
+      style={{ position: "relative" }} // temporary fix, should be removed with new itwinUI alpha release
       label={TreeWidget.translate("categoriesTree.buttons.invert.tooltip")}
-      size={props.density === "enlarged" ? "large" : "small"}
-      styleType="borderless"
       onClick={() => {
         props.onFeatureUsed?.(`categories-tree-invert`);
         void invertAllCategories(props.categories, props.viewport);
       }}
-    >
-      <SvgVisibilityHalf />
-    </IconButton>
+      icon={visibilityHalfIcon}
+    />
   );
 }
 

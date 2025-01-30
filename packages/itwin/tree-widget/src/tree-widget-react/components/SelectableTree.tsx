@@ -6,14 +6,13 @@
 import "./SelectableTree.scss";
 import { useEffect, useState } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { Flex, ProgressLinear } from "@itwin/itwinui-react";
+import { Spinner } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../TreeWidget.js";
 import { TreeSelector } from "./TreeSelector.js";
 
 import type { PropsWithChildren } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { TreeContentDefinition, TreeSelectorProps } from "./TreeSelector.js";
-
 /**
  * Props for rendering trees
  * @public
@@ -73,12 +72,7 @@ function SelectableTreeContent(props: SelectableTreeProps & { imodel: IModelConn
 
   return (
     <div className="tree-widget-selectable-tree">
-      <TreeSelector
-        {...getTreeSelectorProps(trees)}
-        density={props.density}
-        onPerformanceMeasured={props.onPerformanceMeasured}
-        onFeatureUsed={props.onFeatureUsed}
-      />
+      <TreeSelector {...getTreeSelectorProps(trees)} onPerformanceMeasured={props.onPerformanceMeasured} onFeatureUsed={props.onFeatureUsed} />
     </div>
   );
 }
@@ -129,7 +123,8 @@ function getTreeSelectorProps(trees?: TreeContentDefinition[]): TreeSelectorProp
           label: "",
           render: () => (
             <Delayed>
-              <ProgressLinear indeterminate={true} />
+              {/* <ProgressLinear indeterminate={true} /> */}
+              <Spinner />
             </Delayed>
           ),
         },
@@ -145,9 +140,9 @@ function getTreeSelectorProps(trees?: TreeContentDefinition[]): TreeSelectorProp
           id: "no-trees",
           label: "",
           render: () => (
-            <Flex justifyContent="center" alignItems="center" className="tree-widget-no-trees-container">
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }} className="tree-widget-no-trees-container">
               {TreeWidget.translate("selectableTree.noTrees")}
-            </Flex>
+            </div>
           ),
         },
       ],
