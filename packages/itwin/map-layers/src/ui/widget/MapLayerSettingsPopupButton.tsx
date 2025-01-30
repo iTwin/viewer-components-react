@@ -3,21 +3,20 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import "./MapLayerSettingsPopupButton.scss";
 import * as React from "react";
 import { RelativePosition } from "@itwin/appui-abstract";
 import { Popup } from "@itwin/core-react";
+import { SvgSettings } from "@itwin/itwinui-icons-react";
+import { IconButton } from "@itwin/itwinui-react";
+import { MapLayersUI } from "../../mapLayers";
 import { MapManagerSettings } from "./MapManagerSettings";
 
-import "./MapLayerSettingsPopupButton.scss";
-import { MapLayersUI } from "../../mapLayers";
-import { IconButton } from "@itwin/itwinui-react";
-import { SvgSettings } from "@itwin/itwinui-icons-react";
 export interface MapLayerSettingsPopupButtonProps {
   disabled?: boolean;
 }
 
 /** @alpha */
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function MapLayerSettingsPopupButton(props: MapLayerSettingsPopupButtonProps) {
   const panelRef = React.useRef<HTMLDivElement>(null);
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
@@ -80,13 +79,14 @@ export function MapLayerSettingsPopupButton(props: MapLayerSettingsPopupButtonPr
       <IconButton
         disabled={props.disabled}
         styleType="borderless"
-        title={buttonTooltip}
+        label={buttonTooltip}
         className="maplayers-settings-popup-button"
         onClick={togglePopupDisplay}
         ref={buttonRef}
       >
         <SvgSettings />
       </IconButton>
+      {/*eslint-disable-next-line @typescript-eslint/no-deprecated */}
       <Popup
         className="maplayers-settings-popup"
         isOpen={isSettingsOpen}

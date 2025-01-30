@@ -5,30 +5,28 @@
 // cSpell:ignore droppable Sublayer Basemap
 
 // the following quiet warning caused by react-beautiful-dnd package
-/* eslint-disable @typescript-eslint/unbound-method */
-
 import "./MapLayerManager.scss";
 import * as React from "react";
-import type { DropResult } from "react-beautiful-dnd";
 import { DragDropContext } from "react-beautiful-dnd";
 import { BentleyError, compareStrings } from "@itwin/core-bentley";
-import type { MapImagerySettings, MapSubLayerProps, MapSubLayerSettings } from "@itwin/core-common";
 import { BackgroundMapProvider, BackgroundMapType, BaseMapLayerSettings, ImageMapLayerSettings } from "@itwin/core-common";
-import type { MapLayerImageryProvider, MapLayerScaleRangeVisibility, MapLayerSource, ScreenViewport, TileTreeOwner, Viewport } from "@itwin/core-frontend";
 import { ImageryMapTileTree, IModelApp, MapLayerSources, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 import { ToggleSwitch } from "@itwin/itwinui-react";
 import { CustomParamsMappingStorage } from "../../CustomParamsMappingStorage";
 import { CustomParamUtils } from "../../CustomParamUtils";
 import { MapLayerPreferences, MapLayerSourceChangeType } from "../../MapLayerPreferences";
 import { MapLayersUI } from "../../mapLayers";
-import type { MapLayerOptions, StyleMapLayerSettings } from "../Interfaces";
+import { MapLayersSyncUiEventId } from "../../MapLayersActionIds";
 import { BasemapPanel } from "./BasemapPanel";
 import { MapLayerActionButtons } from "./MapLayerActionButtons";
 import { MapLayerDroppable } from "./MapLayerDroppable";
 import { MapLayerSettingsPopupButton } from "./MapLayerSettingsPopupButton";
 import { MapManagerLayersHeader } from "./MapManagerMapLayersHeader";
-import { MapLayersSyncUiEventId } from "../../MapLayersActionIds";
 
+import type { DropResult } from "react-beautiful-dnd";
+import type { MapImagerySettings, MapSubLayerProps, MapSubLayerSettings } from "@itwin/core-common";
+import type { MapLayerImageryProvider, MapLayerScaleRangeVisibility, MapLayerSource, ScreenViewport, TileTreeOwner, Viewport } from "@itwin/core-frontend";
+import type { MapLayerOptions, StyleMapLayerSettings } from "../Interfaces";
 /** @internal */
 export interface SourceMapContextProps {
   readonly sources: MapLayerSource[];
@@ -50,7 +48,6 @@ export const defaultBaseMapLayers = [
 
 /** @internal */
 export const SourceMapContext = React.createContext<SourceMapContextProps>({
-  // eslint-disable-line @typescript-eslint/naming-convention
   sources: [],
   loadingSources: false,
   bases: [],
@@ -107,7 +104,6 @@ interface MapLayerManagerProps {
   mapLayerOptions?: MapLayerOptions;
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function MapLayerManager(props: MapLayerManagerProps) {
   const [mapSources, setMapSources] = React.useState<MapLayerSource[] | undefined>();
   const [loadingSources, setLoadingSources] = React.useState(false);

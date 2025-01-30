@@ -7,8 +7,8 @@ import { RelativePosition } from "@itwin/appui-abstract";
 import { UiFramework } from "@itwin/appui-react";
 import { IModelApp, MapLayerSource, MapLayerSourceStatus, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 import * as UiCore from "@itwin/core-react";
-import { SvgAdd } from "@itwin/itwinui-icons-react";
-import { Button, IconButton, Input } from "@itwin/itwinui-react";
+import { SvgAdd, SvgDelete, SvgEdit } from "@itwin/itwinui-icons-react";
+import { Button, IconButton, Input, List, ListItem, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { MapLayerPreferences } from "../../MapLayerPreferences";
 import { MapLayersUI } from "../../mapLayers";
 import { ConfirmMessageDialog } from "./ConfirmMessageDialog";
@@ -32,7 +32,6 @@ interface AttachLayerPanelProps {
   onHandleOutsideClick?: (shouldHandle: boolean) => void;
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: AttachLayerPanelProps) {
   const [layerNameToAdd, setLayerNameToAdd] = React.useState<string | undefined>();
   const [sourceFilterString, setSourceFilterString] = React.useState<string | undefined>();
@@ -355,24 +354,6 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
     setLayerNameToAdd(mapName);
   }, []);
 
-  const handleKeypressOnSourceList = React.useCallback(
-    (event: React.KeyboardEvent<HTMLUListElement>) => {
-      const key = event.key;
-      if (key === "Enter") {
-        event.preventDefault();
-        const mapName = event.currentTarget?.dataset?.value;
-        if (mapName && mapName.length) {
-          handleAttach(mapName);
-        }
-      }
-    },
-    [handleAttach],
-  );
-
-  const onListboxValueChange = React.useCallback((mapName: string) => {
-    setLayerNameToAdd(mapName);
-  }, []);
-
   const handleNoConfirmation = React.useCallback(
     (_layerName: string) => {
       UiFramework.dialogs.modal.close();
@@ -389,7 +370,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
           await MapLayerPreferences.deleteByName(source, iTwinId, iModelId);
           const msg = MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.RemoveLayerDefSuccess", { layerName });
           IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Info, msg));
-        } catch (err: any) {
+        } catch {
           const msg = MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.RemoveLayerDefError", { layerName });
           IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msg));
         }
@@ -405,7 +386,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
    Handle Remove layer button clicked
    */
   const onItemRemoveButtonClicked = React.useCallback(
-    (source, event) => {
+    (source: MapLayerSource, event: React.MouseEvent) => {
       event.stopPropagation(); // We don't want the owning ListBox to react on mouse click.
 
       const layerName = source.name;
@@ -417,8 +398,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
           title={removeLayerDefDialogTitle}
           message={msg}
           maxWidth={400}
-          onClose={() => handleNoConfirmation(layerName)}
-          onEscape={() => handleNoConfirmation(layerName)}
+          opened
           onYesResult={async () => handleYesConfirmation(source)}
           onNoResult={() => handleNoConfirmation(layerName)}
         />,
@@ -434,10 +414,9 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
  Handle Edit layer button clicked
  */
   const onItemEditButtonClicked = React.useCallback(
-    (event) => {
+    (event: React.MouseEvent) => {
       event.stopPropagation(); // We don't want the owning ListBox to react on mouse click.
-
-      const targetLayerName = event?.currentTarget?.parentNode?.dataset?.value;
+      const targetLayerName = (event?.currentTarget?.parentNode as HTMLElement)?.textContent;
       const matchingSource = sources.find((layerSource) => layerSource.name === targetLayerName);
 
       // we expect a single layer source matching this name
@@ -464,7 +443,11 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
 
   return (
     <div className="map-manager-header">
-      {(loading || loadingSources) && <UiCore.LoadingSpinner message={loadingMapSources} />}
+      {(loading || loadingSources) && (
+        <ProgressRadial as="div">
+          <Text variant='small'>{loadingMapSources}</Text>
+        </ProgressRadial>
+      )}
       <div className="map-manager-source-listbox-header">
         <Input
           type="text"
@@ -479,27 +462,22 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
         </Button>
       </div>
       <div className="map-manager-sources">
-        {/* eslint-disable-next-line @itwin/no-internal */}
-        <UiCore.Listbox
+        <List
           id="map-sources"
-          selectedValue={layerNameToAdd}
+          as="div"
           className="map-manager-source-list"
-          onKeyPress={handleKeypressOnSourceList}
-          onListboxValueChange={onListboxValueChange}
         >
           {filteredOptions?.map((source) => (
-            // eslint-disable-next-line @itwin/no-internal
-            <UiCore.ListboxItem
+            <ListItem
+              as="div"
               key={source.name}
               className="map-source-list-entry"
-              value={source.name}
+              actionable
+              onClick={() => handleAttach(source.name)}
               onMouseEnter={() => setLayerNameUnderCursor(source.name)}
               onMouseLeave={() => setLayerNameUnderCursor(undefined)}
             >
-              <span className="map-source-list-entry-name" title={source.name}>
-                {source.name}
-              </span>
-
+              <ListItem.Content>{source.name}</ListItem.Content>
               {
                 // Display the delete icon only when the mouse over a specific item
                 // otherwise list feels cluttered.
@@ -512,7 +490,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
                       title={editLayerDefButtonTitle}
                       onClick={onItemEditButtonClicked}
                     >
-                      <UiCore.Icon iconSpec="icon-edit" />
+                      <SvgEdit />
                     </Button>
                     <Button
                       size="small"
@@ -523,14 +501,14 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
                         onItemRemoveButtonClicked(source, event);
                       }}
                     >
-                      <UiCore.Icon iconSpec="icon-delete" />
+                      <SvgDelete />
                     </Button>
                   </>
                 )
               }
-            </UiCore.ListboxItem>
+            </ListItem>
           ))}
-        </UiCore.Listbox>
+        </List>
       </div>
     </div>
   );
@@ -549,7 +527,6 @@ export interface AttachLayerPopupButtonProps {
 }
 
 /** @internal */
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function AttachLayerPopupButton(props: AttachLayerPopupButtonProps) {
   const { showAttachLayerLabel, hideAttachLayerLabel, addCustomLayerButtonLabel } = React.useMemo(() => {
     return {
@@ -587,7 +564,6 @@ export function AttachLayerPopupButton(props: AttachLayerPopupButtonProps) {
       if (!handleOutsideClick) {
         return;
       }
-
       // If clicking on button that open panel -  don't trigger outside click processing
       if (buttonRef?.current && buttonRef?.current.contains(event.target as Node)) {
         return;
@@ -625,7 +601,7 @@ export function AttachLayerPopupButton(props: AttachLayerPopupButtonProps) {
           styleType="borderless"
           ref={buttonRef}
           className="map-manager-attach-layer-button"
-          title={popupOpen ? hideAttachLayerLabel : showAttachLayerLabel}
+          label={popupOpen ? hideAttachLayerLabel : showAttachLayerLabel}
           onClick={togglePopup}
         >
           <SvgAdd />
@@ -661,7 +637,8 @@ export function AttachLayerPopupButton(props: AttachLayerPopupButtonProps) {
   return (
     <>
       {renderButton()}
-      <UiCore.Popup
+      {/*eslint-disable-next-line @typescript-eslint/no-deprecated */}
+      <UiCore.Popup // TODO: Replace all deprecated UiCore components with iTwinUI components
         isOpen={popupOpen}
         position={RelativePosition.BottomRight}
         onClose={handleClosePopup}
@@ -674,6 +651,7 @@ export function AttachLayerPopupButton(props: AttachLayerPopupButtonProps) {
         <div ref={panelRef} className="map-sources-popup-panel">
           <AttachLayerPanel isOverlay={props.isOverlay} onLayerAttached={handleLayerAttached} onHandleOutsideClick={setHandleOutsideClick} />
         </div>
+      {/*eslint-disable-next-line @typescript-eslint/no-deprecated */}
       </UiCore.Popup>
     </>
   );

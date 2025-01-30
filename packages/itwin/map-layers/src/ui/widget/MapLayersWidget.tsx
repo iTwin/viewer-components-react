@@ -5,11 +5,11 @@
 
 import * as React from "react";
 import { useActiveViewport } from "@itwin/appui-react";
-import { FillCentered } from "@itwin/core-react";
-import type { MapLayerOptions } from "../Interfaces";
-import { MapLayerManager } from "./MapLayerManager";
+import { Flex } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
+import { MapLayerManager } from "./MapLayerManager";
 
+import type { MapLayerOptions } from "../Interfaces";
 /**
  * Widget to Manage Map Layers
  * @beta
@@ -17,13 +17,11 @@ import { MapLayersUI } from "../../mapLayers";
 interface MapLayersWidgetProps {
   mapLayerOptions?: MapLayerOptions;
 }
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function MapLayersWidget(props: MapLayersWidgetProps) {
   const [notGeoLocatedMsg] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Messages.NotSupported"));
   const activeViewport = useActiveViewport();
   const ref = React.useRef<HTMLDivElement>(null);
   const [isGeoLocated, setIsGeoLocated] = React.useState(!!activeViewport?.iModel.isGeoLocated);
-
   React.useEffect(() => {
     const updateIsGeoLocated = () => setIsGeoLocated(!!activeViewport?.iModel.isGeoLocated);
     // call immediately in case the activeViewport changes after its iModel.onEcefLocationChanged has already emitted
@@ -46,8 +44,8 @@ export function MapLayersWidget(props: MapLayersWidgetProps) {
   }
 
   return (
-    <FillCentered>
+    <Flex justifyContent="center" style={{ width: "100%", height: "100%" }}>
       <div className="map-manager-not-geo-located-text">{notGeoLocatedMsg}</div>
-    </FillCentered>
+    </Flex>
   );
 }

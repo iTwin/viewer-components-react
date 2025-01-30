@@ -3,27 +3,25 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import "./TransparencyPopupButton.scss";
 import * as React from "react";
 import { RelativePosition } from "@itwin/appui-abstract";
 import { IModelApp } from "@itwin/core-frontend";
 import { Popup } from "@itwin/core-react";
 import { Button, Slider } from "@itwin/itwinui-react";
 
-import "./TransparencyPopupButton.scss";
-
 /** @alpha */
 export interface TransparencyPopupButtonProps {
   /** initialValue range 0-1 */
   transparency: number;
   /** function called when value changes. Returned value range 0-1 */
-  onTransparencyChange(value: number): void;
+  onTransparencyChange: (value: number) => void;
   /** optional tooltip */
   buttonToolTip?: string;
   disabled?: boolean;
 }
 
 /** @alpha */
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function TransparencyPopupButton({ transparency, onTransparencyChange, buttonToolTip, disabled }: TransparencyPopupButtonProps) {
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
   const [defaultTransparencyLabel] = React.useState(IModelApp.localization.getLocalizedString("mapLayers:TransparencyPopup.SetTransparency"));
@@ -73,6 +71,7 @@ export function TransparencyPopupButton({ transparency, onTransparencyChange, bu
           </svg>
         </div>
       </Button>
+      {/*eslint-disable-next-line @typescript-eslint/no-deprecated */}
       <Popup isOpen={isSettingsOpen} position={RelativePosition.BottomRight} onClose={handleCloseSetting} target={buttonRef.current}>
         <div className="map-transparency-popup-panel">
           <div className="map-transparency-slider-container">

@@ -4,33 +4,22 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ConditionalBooleanValue } from "@itwin/appui-abstract";
-import type { ToolbarItem, UiItemsProvider } from "@itwin/appui-react";
-import {
-  StagePanelLocation,
-  StagePanelSection,
-  StageUsage,
-  ToolbarHelper,
-  ToolbarOrientation,
-  ToolbarUsage,
-  ToolItemDef,
-  WidgetState,
-} from "@itwin/appui-react";
+import { StagePanelLocation, StagePanelSection, StageUsage, ToolbarItemUtilities, ToolbarOrientation, ToolbarUsage, WidgetState } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
-import type { ScreenViewport } from "@itwin/core-frontend";
-import type { MapLayerProps } from "@itwin/core-common";
 import { SvgMapInfo } from "@itwin/itwinui-icons-react";
 import { MapFeatureInfoTool } from "@itwin/map-layers-formats";
-
 import { MapLayersUI } from "../mapLayers";
-import { MapFeatureInfoWidget } from "./widget/FeatureInfoWidget";
-import type { MapFeatureInfoOptions } from "./Interfaces";
 import { MapLayersSyncUiEventId } from "../MapLayersActionIds";
+import { MapFeatureInfoWidget } from "./widget/FeatureInfoWidget";
 
+import type { ToolbarActionItem, ToolbarItem, UiItemsProvider } from "@itwin/appui-react";
+import type { ScreenViewport } from "@itwin/core-frontend";
+import type { MapLayerProps } from "@itwin/core-common";
+import type { MapFeatureInfoOptions } from "./Interfaces";
 const supportsMapFeatureInfo = (vp: ScreenViewport, isOverlay: boolean, mapLayerProps: MapLayerProps[]): boolean => {
   for (let mapLayerIndex = 0; mapLayerIndex < mapLayerProps.length; mapLayerIndex++) {
     if (mapLayerProps[mapLayerIndex].visible && mapLayerProps[mapLayerIndex].transparency !== 1.0) {
       const layerProvider = vp.getMapLayerImageryProvider({ index: mapLayerIndex, isOverlay });
-      // eslint-disable-next-line @itwin/no-internal
       if (layerProvider?.supportsMapFeatureInfo) {
         return true;
       }
@@ -54,12 +43,13 @@ const isMapFeatureInfoSupported = (): boolean => {
   return false;
 };
 
-export const getMapFeatureInfoToolItemDef = (): ToolItemDef =>
-  new ToolItemDef({
-    toolId: MapFeatureInfoTool.toolId,
-    iconSpec: <SvgMapInfo />,
+export const getMapFeatureInfoToolItemDef = (itemPriority: number): ToolbarActionItem => {
+  return ToolbarItemUtilities.createActionItem({
+    id: MapFeatureInfoTool.toolId,
+    icon: <SvgMapInfo />, // TODO: Update to iconNode when moving to 5.x appui-react
     label: MapLayersUI.localization.getLocalizedString("mapLayers:FeatureInfoWidget.Label"),
-    description: () => MapFeatureInfoTool.description,
+    description: MapFeatureInfoTool.description,
+    itemPriority,
     execute: async () => {
       await IModelApp.tools.run(MapFeatureInfoTool.toolId);
     },
@@ -67,28 +57,24 @@ export const getMapFeatureInfoToolItemDef = (): ToolItemDef =>
       // Hide the MapFeatureInfoTool if the Map Layers toggle is off or no ArcGISFeature layers are active
       return !isMapFeatureInfoSupported();
     }, [MapLayersSyncUiEventId.MapImageryChanged]),
+    layouts: {
+      standard: {
+        orientation: ToolbarOrientation.Vertical,
+        usage: ToolbarUsage.ContentManipulation,
+      }
+    }
   });
+};
 
 export class FeatureInfoUiItemsProvider implements UiItemsProvider {
-  // eslint-disable-line deprecation/deprecation
   public readonly id = "FeatureInfoUiItemsProvider";
   public static readonly widgetId = "map-layers:mapFeatureInfoWidget";
 
   public constructor(private _featureInfoOpts: MapFeatureInfoOptions) {}
 
-  public provideToolbarItems(
-    _stageId: string,
-    stageUsage: string,
-    toolbarUsage: ToolbarUsage,
-    toolbarOrientation: ToolbarOrientation,
-  ): ReadonlyArray<ToolbarItem> {
-    if (
-      !this._featureInfoOpts?.disableDefaultFeatureInfoTool &&
-      stageUsage === StageUsage.General &&
-      toolbarUsage === ToolbarUsage.ContentManipulation &&
-      toolbarOrientation === ToolbarOrientation.Vertical
-    ) {
-      return [ToolbarHelper.createToolbarItemFromItemDef(60, getMapFeatureInfoToolItemDef())];
+  public getToolbarItems(): ReadonlyArray<ToolbarItem> {
+    if (!this._featureInfoOpts?.disableDefaultFeatureInfoTool) {
+      return [getMapFeatureInfoToolItemDef(60)];
     }
 
     return [];

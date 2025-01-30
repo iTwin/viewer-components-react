@@ -3,18 +3,18 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
-import type { PrimitiveValue } from "@itwin/appui-abstract";
 import { useActiveFrontstageDef, WidgetState } from "@itwin/appui-react";
-import type { ActionButtonRendererProps } from "@itwin/components-react";
-import { VirtualizedPropertyGridWithDataProvider } from "@itwin/components-react";
-import { FillCentered, Orientation, ResizableContainerObserver } from "@itwin/core-react";
+import { Orientation, VirtualizedPropertyGridWithDataProvider } from "@itwin/components-react";
+import { ResizableContainerObserver } from "@itwin/core-react";
 import { SvgCopy } from "@itwin/itwinui-icons-react";
-import { IconButton } from "@itwin/itwinui-react";
+import { Flex, IconButton } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
 import { FeatureInfoUiItemsProvider } from "../FeatureInfoUiItemsProvider";
-import type { MapFeatureInfoOptions } from "../Interfaces";
 import { FeatureInfoDataProvider } from "./FeatureInfoDataProvider";
 
+import type { PrimitiveValue } from "@itwin/appui-abstract";
+import type { ActionButtonRendererProps } from "@itwin/components-react";
+import type { MapFeatureInfoOptions } from "../Interfaces";
 export function useSpecificWidgetDef(id: string) {
   const frontstageDef = useActiveFrontstageDef();
   return frontstageDef?.findWidgetDef(id);
@@ -25,9 +25,8 @@ interface MapFeatureInfoWidgetProps {
   featureInfoOpts: MapFeatureInfoOptions;
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetProps) {
-  const dataProvider = React.useRef<FeatureInfoDataProvider>();
+  const dataProvider = React.useRef<FeatureInfoDataProvider | null>(null);
   const [hasData, setHasData] = React.useState<boolean>(false);
 
   const [noRecordsMessage] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:FeatureInfoWidget.NoRecords"));
@@ -36,7 +35,7 @@ export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetPr
 
   const widgetDef = useSpecificWidgetDef(FeatureInfoUiItemsProvider.widgetId);
   const handleDataChanged = React.useCallback(() => {
-    const dataAvailable = dataProvider.current !== undefined && dataProvider.current.hasRecords;
+    const dataAvailable = dataProvider.current !== null && dataProvider.current.hasRecords;
     setHasData(dataAvailable);
     if (widgetDef) {
       widgetDef.setWidgetState(dataAvailable ? WidgetState.Open : WidgetState.Hidden);
@@ -67,6 +66,7 @@ export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetPr
         <div>
           <IconButton
             styleType="borderless"
+            label="Copy"
             onClick={() => {
               const value = props.property.value;
               if (value !== undefined && value.hasOwnProperty("displayValue")) {
@@ -83,6 +83,7 @@ export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetPr
 
   if (hasData && dataProvider.current) {
     return (
+      // eslint-disable-next-line @typescript-eslint/no-deprecated
       <ResizableContainerObserver onResize={handleResize}>
         <VirtualizedPropertyGridWithDataProvider
           width={width}
@@ -97,11 +98,11 @@ export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetPr
     );
   } else {
     return (
-      <FillCentered>
+      <Flex justifyContent="center" style={{ width: "100%", height: "100%" }}>
         <span>
           <i>{noRecordsMessage}</i>
         </span>
-      </FillCentered>
+      </Flex>
     );
   }
 }
