@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Add support for AppUI 5.x",
-  "packageName": "@itwin/property-grid-react",
-  "email": "35135765+grigasp@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

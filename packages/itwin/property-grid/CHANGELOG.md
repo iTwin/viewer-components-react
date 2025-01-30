@@ -1,8 +1,17 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Tue, 07 Jan 2025 12:53:32 GMT and should not be manually modified.
+This log was last generated on Wed, 29 Jan 2025 21:54:15 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 1.15.0
+
+Wed, 29 Jan 2025 21:54:15 GMT
+
+### Minor changes
+
+- Add support for AppUI 5.x ([#1161](https://github.com/iTwin/viewer-components-react/pull/1161))
+- Define `type` and `exports` attributes in `package.json`. The `exports attribute prohibits access to APIs that are not intended to be used by external consumers. The `type: \"module\"` attribute addition moves this package a step closer towards dropping CommonJS support - it's now transpiled from ESM to CommonJS instead of the opposite. ([#1161](https://github.com/iTwin/viewer-components-react/pull/1161))
 
 ## 1.14.3
 
