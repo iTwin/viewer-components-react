@@ -117,7 +117,6 @@ const configuredUiItems = new Map<string, UiItem>([
                 render: (props) => {
                   // eslint-disable-next-line react-hooks/rules-of-hooks
                   const { disableNodesSelection } = useViewerOptionsContext();
-
                   return (
                     <ModelsTreeComponent
                       getSchemaContext={getSchemaContext}
