@@ -627,12 +627,8 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
         className="map-layer-url-dialog"
         title={dialogTitle}
         isOpen={true}
-        isResizable
-        isDraggable
-        minHeight={120}
-        maxWidth={600}
-        trapFocus
-        setFocus
+        onClose={handleCancel}
+        style={{ minHeight: 120, maxWidth: 600 }}
         portal
       >
         <ModalContent>

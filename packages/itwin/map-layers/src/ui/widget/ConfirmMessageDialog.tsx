@@ -54,10 +54,6 @@ export function ConfirmMessageDialog(props: ConfirmMessageDialogProps) {
       setFocus
       portal
       isDismissible
-      minHeight={props.minHeight}
-      minWidth={props.minWidth}
-      maxHeight={props.maxHeight}
-      maxWidth={props.maxWidth}
     >
       <Dialog.Backdrop />
       <Dialog.Main>

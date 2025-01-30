@@ -8,7 +8,7 @@ import { UiFramework } from "@itwin/appui-react";
 import { IModelApp, MapLayerSource, MapLayerSourceStatus, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 import * as UiCore from "@itwin/core-react";
 import { SvgAdd, SvgDelete, SvgEdit } from "@itwin/itwinui-icons-react";
-import { Button, IconButton, Input, List, ListItem, ProgressRadial } from "@itwin/itwinui-react";
+import { Button, IconButton, Input, List, ListItem, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { MapLayerPreferences } from "../../MapLayerPreferences";
 import { MapLayersUI } from "../../mapLayers";
 import { ConfirmMessageDialog } from "./ConfirmMessageDialog";
@@ -443,7 +443,11 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
 
   return (
     <div className="map-manager-header">
-      {(loading || loadingSources) && <ProgressRadial as="div" labels={[loadingMapSources]} />}
+      {(loading || loadingSources) && (
+        <ProgressRadial as="div">
+          <Text variant='small'>{loadingMapSources}</Text>
+        </ProgressRadial>
+      )}
       <div className="map-manager-source-listbox-header">
         <Input
           type="text"
@@ -461,7 +465,6 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
         <List
           id="map-sources"
           as="div"
-          selectedValue={layerNameToAdd}
           className="map-manager-source-list"
         >
           {filteredOptions?.map((source) => (
@@ -470,7 +473,6 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
               key={source.name}
               className="map-source-list-entry"
               actionable
-              value={source.name}
               onClick={() => handleAttach(source.name)}
               onMouseEnter={() => setLayerNameUnderCursor(source.name)}
               onMouseLeave={() => setLayerNameUnderCursor(undefined)}

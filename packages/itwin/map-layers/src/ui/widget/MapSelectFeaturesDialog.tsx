@@ -87,15 +87,8 @@ export function MapSelectFeaturesDialog(props: MapSelectFeaturesProps) {
         className="map-layer-select-features-dialog"
         title={MapLayersUI.translate("CustomAttach.SelectLayersToCreate")}
         isOpen={true}
-        isResizable
-        isDraggable
         onClose={handleCancel}
-        onEscape={handleCancel}
-        minHeight={minHeight}
-        maxWidth={600}
-        titleStyle={{ paddingLeft: "10px" }}
-        footerStyle={{ paddingBottom: "10px", paddingRight: "10px" }}
-        trapFocus={false}
+        style={{ minHeight, maxWidth: 600 }}
         portal
       >
         {/* 'onSubLayerStateChange' is used to trigger hook state change only, no need to update subLayer objects */}

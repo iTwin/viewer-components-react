@@ -140,7 +140,6 @@ export function CustomParamsSettingsPanel() {
             <ListItem
               as="div"
               key={keyName}
-              value={keyName}
               actionable
               className="customParamsSettings-content-entry"
               onClick={() => onListboxValueChange(keyName)}

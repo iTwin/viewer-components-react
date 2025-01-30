@@ -26,7 +26,7 @@ interface MapFeatureInfoWidgetProps {
 }
 
 export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetProps) {
-  const dataProvider = React.useRef<FeatureInfoDataProvider>(undefined);
+  const dataProvider = React.useRef<FeatureInfoDataProvider | null>(null);
   const [hasData, setHasData] = React.useState<boolean>(false);
 
   const [noRecordsMessage] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:FeatureInfoWidget.NoRecords"));
@@ -35,7 +35,7 @@ export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetPr
 
   const widgetDef = useSpecificWidgetDef(FeatureInfoUiItemsProvider.widgetId);
   const handleDataChanged = React.useCallback(() => {
-    const dataAvailable = dataProvider.current !== undefined && dataProvider.current.hasRecords;
+    const dataAvailable = dataProvider.current !== null && dataProvider.current.hasRecords;
     setHasData(dataAvailable);
     if (widgetDef) {
       widgetDef.setWidgetState(dataAvailable ? WidgetState.Open : WidgetState.Hidden);
