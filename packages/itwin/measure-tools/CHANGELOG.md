@@ -1,8 +1,16 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Mon, 27 Jan 2025 18:30:40 GMT and should not be manually modified.
+This log was last generated on Wed, 29 Jan 2025 21:54:15 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.26.1
+
+Wed, 29 Jan 2025 21:54:15 GMT
+
+### Patches
+
+- sheets are not required to have jsonProperties ([#1165](https://github.com/iTwin/viewer-components-react/pull/1165))
 
 ## 0.26.0
 
