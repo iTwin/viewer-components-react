@@ -23,6 +23,7 @@ export interface SelectableTreeRenderProps {
   onFeatureUsed?: (feature: string) => void;
 }
 
+// TODO: fix interface so startIcon type is taken from this interface for `TreeSelector`
 /**
  * Definition of a tree component displayed in `SelectableTree`.
  * @public
