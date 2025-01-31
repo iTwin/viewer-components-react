@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { join } from "path";
+
 import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
@@ -42,10 +42,6 @@ describe("CategoriesVisibilityHandler", () => {
             mode: HierarchyCacheMode.Memory,
           },
         },
-      },
-      testOutputDir: join(__dirname, "output"),
-      backendHostProps: {
-        cacheDir: join(__dirname, "cache"),
       },
       rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
     });

@@ -219,7 +219,7 @@ describe("Categories tree", () => {
             children: [
               NodeValidators.createForInstanceNode({
                 instanceKeys: [keys.definitionContainerChild],
-                label: "DcChild",
+                label: "DefinitionContainerChild",
                 children: [
                   NodeValidators.createForInstanceNode({
                     instanceKeys: [keys.category],

@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { join } from "path";
 import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
@@ -31,10 +30,6 @@ describe("CategoriesTreeIdsCache", () => {
             mode: HierarchyCacheMode.Memory,
           },
         },
-      },
-      testOutputDir: join(__dirname, "output"),
-      backendHostProps: {
-        cacheDir: join(__dirname, "cache"),
       },
       rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
     });
