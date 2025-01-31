@@ -3,14 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
-import { join } from "path";
+
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
-import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
-import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
-import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
-import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 // __PUBLISH_EXTRACT_START__ PropertyGrid.ExampleSettingsMenuItemImports
 import { PropertyGridSettingsMenuItem } from "@itwin/property-grid-react";
 // __PUBLISH_EXTRACT_END__
@@ -18,46 +13,29 @@ import { PropertyGridSettingsMenuItem } from "@itwin/property-grid-react";
 import { PropertyGridComponent } from "@itwin/property-grid-react";
 // __PUBLISH_EXTRACT_END__
 import { render, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
-import { PropertyGridTestUtils } from "../../utils/PropertyGridTestUtils";
+import { userEvent } from "@testing-library/user-event";
+import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils.js";
+import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
+import { PropertyGridTestUtils } from "../../utils/PropertyGridTestUtils.js";
 
 describe("Property grid", () => {
   describe("Learning snippets", () => {
     describe("Settings menu item", () => {
       before(async function () {
-        await initializePresentationTesting({
-          backendProps: {
-            caching: {
-              hierarchies: {
-                mode: HierarchyCacheMode.Memory,
-              },
-            },
-          },
-          testOutputDir: join(__dirname, "output"),
-          backendHostProps: {
-            cacheDir: join(__dirname, "cache"),
-          },
-          rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
-        });
-        // eslint-disable-next-line @itwin/no-internal
-        ECSchemaRpcImpl.register();
-      });
-
-      after(async function () {
-        await terminatePresentationTesting();
-      });
-
-      beforeEach(async () => {
+        await initializeLearningSnippetsTests();
         await PropertyGridTestUtils.initialize();
       });
 
-      afterEach(async () => {
+      after(async function () {
+        await terminateLearningSnippetsTests();
         await PropertyGridTestUtils.terminate();
+      });
+
+      afterEach(async () => {
         sinon.restore();
       });
 
-      it("Renders settings menu item", async function () {
+      it("renders settings menu item", async function () {
         const imodel = (
           await buildIModel(this, async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
@@ -68,6 +46,7 @@ describe("Property grid", () => {
         ).imodel;
         const user = userEvent.setup();
         sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
+
         // __PUBLISH_EXTRACT_START__ PropertyGrid.ExampleSettingsMenuItem
         function ExampleSettingsMenuItem() {
           return (
@@ -86,9 +65,10 @@ describe("Property grid", () => {
 
         // __PUBLISH_EXTRACT_START__ PropertyGrid.PropertyGridWithSettingsMenuItem
         function MyPropertyGrid() {
-          return <PropertyGridComponent settingsMenuItems={[() => <ExampleSettingsMenuItem />]}/>
+          return <PropertyGridComponent settingsMenuItems={[() => <ExampleSettingsMenuItem />]} />;
         }
         // __PUBLISH_EXTRACT_END__
+
         const { getByText } = render(<MyPropertyGrid />);
         await waitFor(async () => {
           await user.click(getByText("settings.label"));

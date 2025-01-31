@@ -3,48 +3,30 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
+
 import { expect } from "chai";
-import { join } from "path";
-import { IModel, IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
-import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
-import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
-import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
+import { IModel } from "@itwin/core-common";
 // __PUBLISH_EXTRACT_START__ TreeWidget.GetSchemaContextExampleImports
 import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 import type { IModelConnection } from "@itwin/core-frontend";
 // __PUBLISH_EXTRACT_END__
+import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils.js";
+import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
 
 describe("Tree widget", () => {
   describe("Learning snippets", () => {
     describe("Components", () => {
       describe("GetSchemaContext", () => {
         before(async function () {
-          await initializePresentationTesting({
-            backendProps: {
-              caching: {
-                hierarchies: {
-                  mode: HierarchyCacheMode.Memory,
-                },
-              },
-            },
-            testOutputDir: join(__dirname, "output"),
-            backendHostProps: {
-              cacheDir: join(__dirname, "cache"),
-            },
-            rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
-          });
-          // eslint-disable-next-line @itwin/no-internal
-          ECSchemaRpcImpl.register();
+          await initializeLearningSnippetsTests();
         });
 
         after(async function () {
-          await terminatePresentationTesting();
+          await terminateLearningSnippetsTests();
         });
 
-        it("Returns schema context", async function () {
+        it("returns schema context", async function () {
           const imodelConnection = (
             await buildIModel(this, async (builder) => {
               const model = insertPhysicalModelWithPartition({ builder, codeValue: "model", partitionParentId: IModel.rootSubjectId });
@@ -53,6 +35,7 @@ describe("Tree widget", () => {
               return { model, category };
             })
           ).imodel;
+
           // __PUBLISH_EXTRACT_START__ TreeWidget.GetSchemaContextExample
           const schemaContextCache = new Map<string, SchemaContext>();
           function getSchemaContext(imodel: IModelConnection) {
@@ -68,8 +51,8 @@ describe("Tree widget", () => {
             return schemaContext;
           }
           // __PUBLISH_EXTRACT_END__
-          const result = getSchemaContext(imodelConnection);
 
+          const result = getSchemaContext(imodelConnection);
           expect(result).to.be.eq(schemaContextCache.get(imodelConnection.getRpcProps().key));
         });
       });

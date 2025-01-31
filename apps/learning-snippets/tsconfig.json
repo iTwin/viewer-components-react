@@ -1,13 +1,15 @@
 {
   "extends": "./node_modules/@itwin/build-tools/tsconfig-base.json",
   "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "jsx": "react-jsx",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "noImplicitOverride": false,
     "resolveJsonModule": true,
     "noUnusedParameters": false,
-    "lib": ["DOM"],
+    "lib": ["DOM", "ES2023"],
     "outDir": "lib"
   },
   "include": ["src"]

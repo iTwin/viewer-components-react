@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
-import { join } from "path";
+
 // __PUBLISH_EXTRACT_START__ TreeWidget.CustomTreeExampleImports
 import type { ComponentPropsWithoutRef } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -13,55 +13,31 @@ import { createBisInstanceLabelSelectClauseFactory } from "@itwin/presentation-s
 // __PUBLISH_EXTRACT_END__
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
-import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
-import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
-import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
-import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
-import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
+import { IModelApp } from "@itwin/core-frontend";
 import { createStorage } from "@itwin/unified-selection";
 import { cleanup, render, waitFor } from "@testing-library/react";
-import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
-import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils";
+import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils.js";
+import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
+import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils.js";
 
 describe("Tree widget", () => {
   describe("Learning snippets", () => {
     describe("Components", () => {
       before(async function () {
-        await initializePresentationTesting({
-          backendProps: {
-            caching: {
-              hierarchies: {
-                mode: HierarchyCacheMode.Memory,
-              },
-            },
-          },
-          testOutputDir: join(__dirname, "output"),
-          backendHostProps: {
-            cacheDir: join(__dirname, "cache"),
-          },
-          rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
-        });
-        // eslint-disable-next-line @itwin/no-internal
-        ECSchemaRpcImpl.register();
-      });
-
-      after(async function () {
-        await terminatePresentationTesting();
-      });
-
-      beforeEach(async () => {
-        await NoRenderApp.startup();
+        await initializeLearningSnippetsTests();
         await TreeWidgetTestUtils.initialize();
       });
 
-      afterEach(async () => {
+      after(async function () {
+        await terminateLearningSnippetsTests();
         TreeWidgetTestUtils.terminate();
-        await IModelApp.shutdown();
+      });
+
+      afterEach(async () => {
         sinon.restore();
       });
 
-      it("Renders custom tree", async function () {
+      it("renders custom tree", async function () {
         const imodelConnection = (
           await buildIModel(this, async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
@@ -127,10 +103,10 @@ describe("Tree widget", () => {
           );
         }
         // __PUBLISH_EXTRACT_END__
-        const result = render(<MyTree imodel={imodelConnection} />);
 
+        using _ = { [Symbol.dispose]: cleanup };
+        const result = render(<MyTree imodel={imodelConnection} />);
         await waitFor(() => result.getByText("TestPhysicalModel"));
-        cleanup();
       });
     });
   });

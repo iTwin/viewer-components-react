@@ -4,24 +4,18 @@
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
 /* eslint-disable @typescript-eslint/no-shadow */
+
 import { expect } from "chai";
-import { join } from "path";
 import sinon from "sinon";
 import { useCallback } from "react";
 import { UiFramework } from "@itwin/appui-react";
-import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
-import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
-import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
-import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
-import { PresentationRpcInterface } from "@itwin/presentation-common";
-import {
-  HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
-} from "@itwin/presentation-testing";
+import { IModelApp } from "@itwin/core-frontend";
 import { useModelsTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
 import { createStorage } from "@itwin/unified-selection";
 import { cleanup, render, waitFor } from "@testing-library/react";
-import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
-import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils";
+import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils.js";
+import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
+import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils.js";
 
 import type { SelectionStorage } from "@itwin/unified-selection";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
@@ -67,40 +61,20 @@ describe("Tree widget", () => {
     describe("Components", () => {
       describe("Filtered paths", () => {
         before(async function () {
-          await initializePresentationTesting({
-            backendProps: {
-              caching: {
-                hierarchies: {
-                  mode: HierarchyCacheMode.Memory,
-                },
-              },
-            },
-            testOutputDir: join(__dirname, "output"),
-            backendHostProps: {
-              cacheDir: join(__dirname, "cache"),
-            },
-            rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
-          });
-          // eslint-disable-next-line @itwin/no-internal
-          ECSchemaRpcImpl.register();
-        });
-
-        after(async function () {
-          await terminatePresentationTesting();
-        });
-
-        beforeEach(async () => {
-          await NoRenderApp.startup();
+          await initializeLearningSnippetsTests();
           await TreeWidgetTestUtils.initialize();
         });
 
-        afterEach(async () => {
+        after(async function () {
+          await terminateLearningSnippetsTests();
           TreeWidgetTestUtils.terminate();
-          await IModelApp.shutdown();
+        });
+
+        afterEach(async () => {
           sinon.restore();
         });
 
-        it("Renders custom models tree component with filtered paths", async function () {
+        it("renders custom models tree component with filtered paths", async function () {
           const imodel = await buildIModel(this, async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
             const physicalModel2 = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel 2" });
@@ -116,6 +90,7 @@ describe("Tree widget", () => {
           sinon.stub(UiFramework, "getIModelConnection").returns(imodel.imodel);
           mockGetBoundingClientRect();
 
+          using _ = { [Symbol.dispose]: cleanup };
           const { getByText, queryByText } = render(
             <CustomModelsTreeComponent
               selectionStorage={unifiedSelectionStorage}
@@ -129,7 +104,6 @@ describe("Tree widget", () => {
             getByText("TestPhysicalModel");
             expect(queryByText("TestPhysicalModel 2")).to.be.null;
           });
-          cleanup();
         });
       });
     });

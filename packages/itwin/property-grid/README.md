@@ -340,7 +340,7 @@ To track performance or usage of individual components when using them directly,
 ```tsx
 import { PropertyGrid, TelemetryContextProvider } from "@itwin/property-grid-react";
 
-function ExampleContextMenuItem() {
+function ExampleComponent() {
   return (
     <TelemetryContextProvider
       onPerformanceMeasured={(feature, elapsedTime) => {
@@ -352,7 +352,7 @@ function ExampleContextMenuItem() {
         logUsage(feature);
       }}
     >
-      <PropertyGrid imodel={imodelConnection} />
+      <PropertyGrid imodel={imodel} />
     </TelemetryContextProvider>
   );
 }
