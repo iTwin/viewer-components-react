@@ -360,7 +360,7 @@ describe("Categories tree", () => {
       });
 
       const imodelAccess = createIModelAccess(imodel);
-      const viewType = "3d";
+      const viewType = "2d";
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
 
       expect(
@@ -402,7 +402,7 @@ describe("Categories tree", () => {
       });
 
       const imodelAccess = createIModelAccess(imodel);
-      const viewType = "3d";
+      const viewType = "2d";
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
 
       expect(
