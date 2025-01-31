@@ -2050,8 +2050,8 @@ packages:
     resolution: {integrity: sha512-y655CeyUQ+jj7KBbYMc4FG01V8ZQqjN+gDYGJ50RtfsUB8iG9AmwmwoAgeKLJdmueKKMrH1RJ7yXHTSoczdv5w==}
     hasBin: true
 
-  fastq@1.18.0:
-    resolution: {integrity: sha512-QKHXPW0hD8g4UET03SdOdunzSouc9N4AuHdsX8XNcTsuz+yYFILVNIX4l9yHABMhiEI9Db0JTTIpu0wB+Y1QQw==}
+  fastq@1.19.0:
+    resolution: {integrity: sha512-7SFSRCNjBQIZH/xZR3iy5iQYR8aGBE0h3VG6/cwlbrpdciNYBMotQav8c1XI3HjHH+NikUpP53nPdlZSdWmFzA==}
 
   fdir@6.4.3:
     resolution: {integrity: sha512-PMXmW2y1hDDfTSRc9gaXIuCCRpuoz3Kaz8cUelp3smouvfT632ozg2vrT6lJsHKKOF59YLbOGfAWGUcKEfRMQw==}
@@ -2426,8 +2426,8 @@ packages:
   jju@1.4.0:
     resolution: {integrity: sha512-8wb9Yw966OSxApiCt0K3yNJL8pnNeIv+OEq2YMidz4FKP6nonSRoOXc80iXY4JaN2FC11B9qsNmDsm+ZOfMROA==}
 
-  jotai@2.11.1:
-    resolution: {integrity: sha512-41Su098mpHIX29hF/XOpDb0SqF6EES7+HXfrhuBqVSzRkxX48hD5i8nGsEewWZNAsBWJCTTmuz8M946Ih2PfcQ==}
+  jotai@2.11.2:
+    resolution: {integrity: sha512-H3xOvsdqjBJnXTvpgAWfff2y1B3wabi1iSA6FFd0FrLaM4ENsRJd+RJQtkNhY4PZgvAODa4PQhau9dheK+pUkw==}
     engines: {node: '>=12.20.0'}
     peerDependencies:
       '@types/react': '>=17.0.0'
@@ -4097,7 +4097,7 @@ snapshots:
       '@swc/helpers': 0.5.15
       '@tanstack/react-virtual': 3.11.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       classnames: 2.5.1
-      jotai: 2.11.1(@types/react@18.2.57)(react@18.2.0)
+      jotai: 2.11.2(@types/react@18.2.57)(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       react-table: 7.8.0(react@18.2.0)
@@ -4533,7 +4533,7 @@ snapshots:
   '@nodelib/fs.walk@1.2.8':
     dependencies:
       '@nodelib/fs.scandir': 2.1.5
-      fastq: 1.18.0
+      fastq: 1.19.0
 
   '@pkgr/core@0.1.1': {}
 
@@ -5712,7 +5712,7 @@ snapshots:
     dependencies:
       strnum: 1.0.5
 
-  fastq@1.18.0:
+  fastq@1.19.0:
     dependencies:
       reusify: 1.0.4
 
@@ -6087,7 +6087,7 @@ snapshots:
 
   jju@1.4.0: {}
 
-  jotai@2.11.1(@types/react@18.2.57)(react@18.2.0):
+  jotai@2.11.2(@types/react@18.2.57)(react@18.2.0):
     optionalDependencies:
       '@types/react': 18.2.57
       react: 18.2.0
