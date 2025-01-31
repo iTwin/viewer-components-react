@@ -19,7 +19,7 @@ export type VisibilityTreeRendererProps = TreeRendererProps & TreeItemVisibility
  */
 export function VisibilityTreeRenderer({ getVisibilityButtonState, onVisibilityButtonClick: onClick, ...props }: VisibilityTreeRendererProps) {
   const { onVisibilityButtonClick } = useVisibilityButtonHandler({ rootNodes: props.rootNodes, isNodeSelected: props.isNodeSelected, onClick });
-  const checkboxProps: TreeItemVisibilityButtonProps = useMemo(
+  const visibilityButtonProps: TreeItemVisibilityButtonProps = useMemo(
     () => ({
       variant: "eyeball",
       getVisibilityButtonState,
@@ -28,5 +28,5 @@ export function VisibilityTreeRenderer({ getVisibilityButtonState, onVisibilityB
     [getVisibilityButtonState, onVisibilityButtonClick],
   );
 
-  return <TreeRenderer {...props} checkboxProps={checkboxProps} />;
+  return <TreeRenderer {...props} visibilityButtonProps={visibilityButtonProps} />;
 }
