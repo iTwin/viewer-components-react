@@ -114,7 +114,6 @@ export type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) =>
 export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
-      style={{ position: "relative" }} // temporary fix, should be removed with new itwinUI alpha release
       label={TreeWidget.translate("modelsTree.buttons.showAll.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("models-tree-showall");
@@ -132,7 +131,6 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
 export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
-      style={{ position: "relative" }} // temporary fix, should be removed with new itwinUI alpha release
       label={TreeWidget.translate("modelsTree.buttons.hideAll.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("models-tree-hideall");
@@ -150,7 +148,6 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
 export function InvertButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
-      style={{ position: "relative" }} // temporary fix, should be removed with new itwinUI alpha release
       label={TreeWidget.translate("modelsTree.buttons.invert.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("models-tree-invert");
@@ -231,7 +228,6 @@ export function ToggleInstancesFocusButton({ onFeatureUsed }: { onFeatureUsed?: 
   return (
     <IconButton
       variant="ghost"
-      style={{ position: "relative" }} // temporary fix, should be removed with new itwinUI alpha release
       label={label}
       onClick={() => {
         onFeatureUsed?.("models-tree-instancesfocus");

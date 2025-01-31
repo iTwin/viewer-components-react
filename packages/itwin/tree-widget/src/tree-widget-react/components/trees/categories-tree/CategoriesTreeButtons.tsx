@@ -67,7 +67,6 @@ export type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonP
 export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
   return (
     <IconButton
-      style={{ position: "relative" }} // temporary fix, should be removed with new itwinUI alpha release
       label={TreeWidget.translate("categoriesTree.buttons.showAll.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.(`categories-tree-showall`);
@@ -85,7 +84,6 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
 export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
   return (
     <IconButton
-      style={{ position: "relative" }} // temporary fix, should be removed with new itwinUI alpha release
       label={TreeWidget.translate("categoriesTree.buttons.hideAll.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.(`categories-tree-hideall`);
@@ -103,7 +101,6 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
 export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
   return (
     <IconButton
-      style={{ position: "relative" }} // temporary fix, should be removed with new itwinUI alpha release
       label={TreeWidget.translate("categoriesTree.buttons.invert.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.(`categories-tree-invert`);

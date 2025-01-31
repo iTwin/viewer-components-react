@@ -30,7 +30,7 @@
     "@itwin/itwinui-icons": "5.0.0-alpha.0",
     "@itwin/itwinui-illustrations-react": "^2.1.0",
     "@itwin/itwinui-react": "3.17.0-dev.1",
-    "@itwin/itwinui-react-v5": "npm:@itwin/itwinui-react@5.0.0-alpha.2",
+    "@itwin/itwinui-react-v5": "npm:@itwin/itwinui-react@5.0.0-alpha.3",
     "@itwin/map-layers": "workspace:*",
     "@itwin/map-layers-auth": "^4.10.2",
     "@itwin/map-layers-formats": "^4.10.2",

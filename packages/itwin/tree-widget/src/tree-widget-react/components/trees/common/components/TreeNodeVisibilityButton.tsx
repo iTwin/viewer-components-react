@@ -62,7 +62,6 @@ export function TreeItemVisibilityButton({
   return (
     <IconButton
       {...props}
-      style={{ position: "relative" }}
       label={checkboxState.tooltip ?? "Determining visibility..."}
       variant={"ghost"}
       className={cx(`tw-tree-node-visibility-button-${checkboxState.state}`, props.className)}
