@@ -8,7 +8,7 @@ import { BeEvent } from "@itwin/core-bentley";
 import { Spinner, Text } from "@itwin/itwinui-react/bricks";
 import { SchemaMetadataContextProvider } from "@itwin/presentation-components";
 import { useIModelUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
-import { UnifiedSelectionContextProvider, useUnifiedSelectionContext } from "@itwin/unified-selection-react";
+import { UnifiedSelectionContextProvider } from "@itwin/unified-selection-react";
 import { TreeWidget } from "../../../../TreeWidget.js";
 import { useHierarchiesLocalization } from "../UseHierarchiesLocalization.js";
 import { useHierarchyLevelFiltering } from "../UseHierarchyFiltering.js";
@@ -88,9 +88,7 @@ export function Tree({ getSchemaContext, hierarchyLevelSizeLimit, selectionStora
 
   return (
     <SchemaMetadataContextProvider imodel={props.imodel} schemaContextProvider={getSchemaContext}>
-      <UnifiedSelectionContextProvider storage={selectionStorage}>
-        <TreeImpl {...props} imodelAccess={imodelAccess} defaultHierarchyLevelSizeLimit={defaultHierarchyLevelSizeLimit} />
-      </UnifiedSelectionContextProvider>
+      <TreeImpl {...props} selectionStorage={selectionStorage} imodelAccess={imodelAccess} defaultHierarchyLevelSizeLimit={defaultHierarchyLevelSizeLimit} />
     </SchemaMetadataContextProvider>
   );
 }
@@ -107,11 +105,11 @@ function TreeImpl({
   selectionMode,
   onReload,
   treeRenderer,
+  selectionStorage,
   highlight,
-}: MarkRequired<Omit<TreeProps, "getSchemaContext" | "selectionStorage">, "imodelAccess"> & { defaultHierarchyLevelSizeLimit: number }) {
+}: MarkRequired<Omit<TreeProps, "getSchemaContext">, "imodelAccess"> & { defaultHierarchyLevelSizeLimit: number }) {
   const localizedStrings = useHierarchiesLocalization();
   const { onFeatureUsed, onPerformanceMeasured } = useTelemetryContext();
-  const unifiedSelectionContext = useUnifiedSelectionContext();
   const [imodelChanged] = useState(new BeEvent<() => void>());
   const {
     rootNodes,
@@ -124,7 +122,7 @@ function TreeImpl({
   } = useIModelUnifiedSelectionTree({
     imodelAccess,
     imodelChanged,
-    selectionStorage: unifiedSelectionContext?.storage,
+    selectionStorage,
     getHierarchyDefinition,
     getFilteredPaths,
     sourceName: treeName,
@@ -186,15 +184,17 @@ function TreeImpl({
   };
 
   return (
-    <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>
-      <div id="tw-tree-renderer-container" style={{ overflow: "auto", height: "100%" }}>
-        {treeRenderer(treeRendererProps)}
-        {filteringDialog}
+    <UnifiedSelectionContextProvider storage={selectionStorage}>
+      <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>
+        <div id="tw-tree-renderer-container" style={{ overflow: "auto", height: "100%" }}>
+          {treeRenderer(treeRendererProps)}
+          {filteringDialog}
+        </div>
+        <Delayed show={isLoading}>
+          <ProgressOverlay />
+        </Delayed>
       </div>
-      <Delayed show={isLoading}>
-        <ProgressOverlay />
-      </Delayed>
-    </div>
+    </UnifiedSelectionContextProvider>
   );
 }
 
