@@ -3,10 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
-import { NoRenderApp } from "@itwin/core-frontend";
+import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 // __PUBLISH_EXTRACT_START__ PropertyGrid.PropertyGridManagerInitializeImports
 import { PropertyGridManager } from "@itwin/property-grid-react";
-import { IModelApp } from "@itwin/core-frontend";
+
 // __PUBLISH_EXTRACT_END__
 
 export class PropertyGridTestUtils {

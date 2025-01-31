@@ -42,9 +42,6 @@ Typically, the package is used with an [AppUI](https://github.com/iTwin/appui/tr
 
 In any case, **before** using any APIs or components delivered with the package, it needs to be initialized:
 
-<!-- [[include: [TreeWidget.TreeWidgetInitializeImports, TreeWidget.TreeWidgetInitialize], tsx]] -->
-<!-- BEGIN EXTRACTION -->
-
 ```tsx
 import { TreeWidget } from "@itwin/tree-widget-react";
 import { IModelApp } from "@itwin/core-frontend";
@@ -52,12 +49,7 @@ import { IModelApp } from "@itwin/core-frontend";
 await TreeWidget.initialize(IModelApp.localization);
 ```
 
-<!-- END EXTRACTION -->
-
 In [AppUI](https://github.com/iTwin/appui/tree/master/ui/appui-react) based applications widgets are typically provided using `UiItemsProvider` implementations. The `@itwin/tree-widget-react` package delivers `createTreeWidget` function that can be used to add the tree widget to UI through a `UiItemsProvider`:
-
-<!-- [[include: [TreeWidget.RegisterExampleImports, TreeWidget.RegisterExample], tsx]] -->
-<!-- BEGIN EXTRACTION -->
 
 ```tsx
 import { UiItemsManager } from "@itwin/appui-react";
@@ -90,8 +82,6 @@ UiItemsManager.register({
 });
 ```
 
-<!-- END EXTRACTION -->
-
 As seen in the above code snippet, `createTreeWidget` takes a list of trees that are displayed in the widget. This package delivers a number of tree components for everyone's use (see below), but providing custom trees is also an option.
 
 ## Components
@@ -109,9 +99,6 @@ The component renders a tree that tries to replicate how a typical "Models" tree
 ![Models tree example](./media/models-tree.png)
 
 Typical usage:
-
-<!-- [[include: [TreeWidget.ModelsTreeExampleImports, TreeWidget.ModelsTreeExample], tsx]] -->
-<!-- BEGIN EXTRACTION -->
 
 ```tsx
 import { ModelsTreeComponent } from "@itwin/tree-widget-react";
@@ -131,8 +118,6 @@ function MyWidget() {
   );
 }
 ```
-
-<!-- END EXTRACTION -->
 
 Available header buttons:
 
@@ -157,9 +142,6 @@ This package provides building blocks for custom models tree:
 - `useModelsTreeButtonProps` - hook for creating props for models tree buttons.
 
 Example:
-
-<!-- [[include: [TreeWidget.CustomModelsTreeExampleImports, TreeWidget.CustomModelsTreeExample], tsx]] -->
-<!-- BEGIN EXTRACTION -->
 
 ```tsx
 import { TreeWithHeader, useModelsTree, useModelsTreeButtonProps, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
@@ -212,14 +194,9 @@ function CustomModelsTreeComponent({ imodel, viewport, getSchemaContext, selecti
 }
 ```
 
-<!-- END EXTRACTION -->
-
 #### Displaying a subset of the tree
 
 Models tree allows displaying a subset of all nodes by providing a `getFilteredPaths` function, which receives a `createInstanceKeyPaths` function for creating hierarchy node paths from instance keys or an instance label and returns a list of hierarchy node paths targeting some nodes. When these paths are provided, the displayed hierarchy consists only of the targeted nodes, their ancestors, and their children. Example implementation of `getFilteredPaths`:
-
-<!-- [[include: [TreeWidget.GetFilteredPathsComponentExample], tsx]] -->
-<!-- BEGIN EXTRACTION -->
 
 ```tsx
 type UseModelsTreeProps = Parameters<typeof useModelsTree>[0];
@@ -256,8 +233,6 @@ function CustomModelsTreeComponent({ viewport, selectionStorage, imodel, targetI
 }
 ```
 
-<!-- END EXTRACTION -->
-
 ### Categories tree
 
 The component, based on the active view, renders a hierarchy of either spatial (3d) or drawing (2d) categories. The hierarchy consists of two levels - the category (spatial or drawing) and its sub-categories. There's also a header that renders categories search box and various visibility control buttons.
@@ -265,9 +240,6 @@ The component, based on the active view, renders a hierarchy of either spatial (
 ![Categories tree example](./media/categories-tree.png)
 
 Typical usage:
-
-<!-- [[include: [TreeWidget.CategoriesTreeExampleImports, TreeWidget.CategoriesTreeExample], tsx]] -->
-<!-- BEGIN EXTRACTION -->
 
 ```tsx
 import { CategoriesTreeComponent } from "@itwin/tree-widget-react";
@@ -285,8 +257,6 @@ function MyWidget() {
 }
 ```
 
-<!-- END EXTRACTION -->
-
 Available header buttons:
 
 - `ModelsTreeComponent.ShowAllButton` makes all categories and their subcategories displayed.
@@ -301,9 +271,6 @@ This package provides building blocks for custom categories tree:
 - `useCategoriesTreeButtonProps` - hook for creating props for categories tree buttons.
 
 Example:
-
-<!-- [[include: [TreeWidget.CustomCategoriesTreeExampleImports, TreeWidget.CustomCategoriesTreeExample], tsx]] -->
-<!-- BEGIN EXTRACTION -->
 
 ```tsx
 import { TreeWithHeader, useCategoriesTree, useCategoriesTreeButtonProps, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
@@ -362,8 +329,6 @@ function CustomCategoriesTreeComponent({ imodel, viewport, getSchemaContext, sel
 }
 ```
 
-<!-- END EXTRACTION -->
-
 ### iModel content tree
 
 The component renders a similar hierarchy to [Models tree](#models-tree), but with the following changes:
@@ -378,9 +343,6 @@ In general, the component is expected to be used by advanced users to inspect co
 ![IModel content tree example](./media/imodel-content-tree.png)
 
 Typical usage:
-
-<!-- [[include: [TreeWidget.ImodelContentTreeExampleImports, TreeWidget.ImodelContentTreeExample], tsx]] -->
-<!-- BEGIN EXTRACTION -->
 
 ```tsx
 import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
@@ -397,8 +359,6 @@ function MyWidget() {
 }
 ```
 
-<!-- END EXTRACTION -->
-
 ### Custom trees
 
 The package delivers a set of building blocks for creating trees that look and feel similar to the tree components provided by this package.
@@ -411,9 +371,6 @@ A "basic" tree is a tree that renders the hierarchy without visibility control -
 - `TreeRenderer` - default renderer for tree data.
 
 Example:
-
-<!-- [[include: [TreeWidget.CustomTreeExampleImports, TreeWidget.CustomTreeExample], tsx]] -->
-<!-- BEGIN EXTRACTION -->
 
 ```tsx
 import type { ComponentPropsWithoutRef } from "react";
@@ -473,8 +430,6 @@ function MyTree({ imodel }: MyTreeProps) {
 }
 ```
 
-<!-- END EXTRACTION -->
-
 #### Custom visibility tree
 
 A visibility tree is a tree that renders the hierarchy and allows controlling visibility control through the use of "eye" checkboxes - see [Models](#models-tree) and [Categories](#categories-tree) trees. Core components:
@@ -483,9 +438,6 @@ A visibility tree is a tree that renders the hierarchy and allows controlling vi
 - `VisibilityTreeRenderer` - same as `TreeRenderer` but additionally renders checkboxes for visibility control.
 
 Example:
-
-<!-- [[include: [TreeWidget.CustomVisibilityTreeExampleImports, TreeWidget.CustomVisibilityTreeExample], tsx]] -->
-<!-- BEGIN EXTRACTION -->
 
 ```tsx
 import { BeEvent } from "@itwin/core-bentley";
@@ -564,8 +516,6 @@ function MyVisibilityTree({ imodel }: MyVisibilityTreeProps) {
 }
 ```
 
-<!-- END EXTRACTION -->
-
 ### Hierarchy level size limiting
 
 All tree components in this package enforce a hierarchy level size limit. This means that when a node is expanded, only a certain number of child nodes are loaded. The limit is enforced to prevent loading too many nodes at once and to keep the performance of the tree components at an acceptable level.
@@ -586,9 +536,6 @@ Tree components that support selection synchronization, require a unified select
 
 Typically, we want one unified selection storage per application - this makes sure that selection in all application's components is synchronized. Below is an example implementation of `getUnifiedSelectionStorage` function that creates the storage and clears it when an iModel is closed:
 
-<!-- [[include: [TreeWidget.SelectionStorageExampleImports, TreeWidget.SelectionStorageExample], tsx]] -->
-<!-- BEGIN EXTRACTION -->
-
 ```tsx
 import { IModelConnection } from "@itwin/core-frontend";
 import { createStorage } from "@itwin/unified-selection";
@@ -606,12 +553,7 @@ function getUnifiedSelectionStorage(): SelectionStorage {
 }
 ```
 
-<!-- END EXTRACTION -->
-
 In case the application is also using components driven by APIs from `@itwin/presentation-frontend` package, which has its own selection manager, the single unified selection storage object should be passed to [`initialize`](https://www.itwinjs.org/reference/presentation-frontend/core/presentation/initializestatic/) function, e.g.:
-
-<!-- [[include: [TreeWidget.SelectionStorageInitializeExampleImports, TreeWidget.SelectionStorageInitializeExample], tsx]] -->
-<!-- BEGIN EXTRACTION -->
 
 ```tsx
 import { Presentation } from "@itwin/presentation-frontend";
@@ -619,16 +561,11 @@ import { Presentation } from "@itwin/presentation-frontend";
 await Presentation.initialize({ selection: { selectionStorage: getUnifiedSelectionStorage() } });
 ```
 
-<!-- END EXTRACTION -->
-
 ### Creating schema context
 
 All tree components delivered with the package require a [`SchemaContext`](https://www.itwinjs.org/reference/ecschema-metadata/context/schemacontext/) to be able to access iModels metadata.
 
 Typically, we want one schema context per iModel per application - this allows schema information to be shared across components, saving memory and time required to access the metadata. Below is an example implementation of `getSchemaContext` function, required by tree components:
-
-<!-- [[include: [TreeWidget.GetSchemaContextExampleImports, TreeWidget.GetSchemaContextExample], tsx]] -->
-<!-- BEGIN EXTRACTION -->
 
 ```tsx
 import { SchemaContext } from "@itwin/ecschema-metadata";
@@ -649,8 +586,6 @@ function getSchemaContext(imodel: IModelConnection) {
   return schemaContext;
 }
 ```
-
-<!-- END EXTRACTION -->
 
 Note: Using `ECSchemaRpcLocater` requires the application to support [ECSchemaRpcInterface](https://github.com/iTwin/itwinjs-core/blob/111ab9053f4718896de17bdaeb8de037bad281bd/core/ecschema-rpc/common/src/ECSchemaRpcInterface.ts#L14). This means [registering the interface](https://www.itwinjs.org/learning/rpcinterface/#configure-interfaces) and, on the backend, [registering the implementation](https://www.itwinjs.org/learning/rpcinterface/#server-side-configuration) by calling [ECSchemaRpcImpl.register()](https://github.com/iTwin/itwinjs-core/blob/111ab9053f4718896de17bdaeb8de037bad281bd/core/ecschema-rpc/impl/src/ECSchemaRpcImpl.ts#L29).
 
@@ -699,9 +634,6 @@ Where `{tree}` specifies which tree component the feature is of.
 
 For individual tree components the callbacks should be supplied through props:
 
-<!-- [[include: [TreeWidget.TelemetryTreeComponentExampleImports, TreeWidget.TelemetryTreeComponentExample], tsx]] -->
-<!-- BEGIN EXTRACTION -->
-
 ```tsx
 import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
 
@@ -721,12 +653,7 @@ function MyWidget() {
 }
 ```
 
-<!-- END EXTRACTION -->
-
 For custom tree components `TelemetryContextProvider` should be used:
-
-<!-- [[include: [TreeWidget.TelemetryCustomTreeExampleImports, TreeWidget.TelemetryCustomTreeExample], tsx]] -->
-<!-- BEGIN EXTRACTION -->
 
 ```tsx
 import { TelemetryContextProvider, useCategoriesTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
@@ -762,5 +689,3 @@ function MyTree() {
   // see "Custom trees" section for more example implementations
 }
 ```
-
-<!-- END EXTRACTION -->
