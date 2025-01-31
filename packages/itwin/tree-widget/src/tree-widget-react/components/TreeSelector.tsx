@@ -5,7 +5,7 @@
 
 import "./TreeSelector.scss";
 import { useState } from "react";
-import { Icon, Select } from "@itwin/itwinui-react/bricks";
+import { Select } from "@itwin/itwinui-react/bricks";
 
 import type { SelectableTreeRenderProps } from "./SelectableTree.js";
 
@@ -17,7 +17,7 @@ export interface TreeContentDefinition {
   id: string;
   label: string;
   render: (props: SelectableTreeRenderProps) => React.ReactNode;
-  startIcon?: string;
+  startIcon?: React.ReactNode;
 }
 
 /**
@@ -55,7 +55,7 @@ export function TreeSelector({ defaultSelectedContentId, trees, onFeatureUsed, o
             >
               {trees.map((tree) => (
                 <option key={tree.id} value={tree.id}>
-                  <Icon href={tree.startIcon} />
+                  {tree.startIcon}
                   {tree.label}
                 </option>
               ))}
