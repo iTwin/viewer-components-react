@@ -54,7 +54,7 @@ interface UseModelsTreeResult {
     VisibilityTreeProps,
     "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlight" | "noDataMessage" | "selectionPredicate"
   >;
-  rendererProps: Required<Pick<VisibilityTreeRendererProps, "getIcon">>; // TODO FIGURE THIS OUT | "onDoubleClick"
+  rendererProps: Required<Pick<VisibilityTreeRendererProps, "getIcon">>;
 }
 
 /**
@@ -92,18 +92,6 @@ export function useModelsTree({
     ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache: getModelsTreeIdsCache(), hierarchyConfig: hierarchyConfiguration }),
     [getModelsTreeIdsCache, hierarchyConfiguration],
   );
-
-  // const onDoubleClick = useCallback(
-  //   async ({ nodeData, extendedData }: PresentationHierarchyNode) => {
-  //     if (!HierarchyNode.isInstancesNode(nodeData) || (extendedData && (extendedData.isSubject || extendedData.isModel || extendedData.isCategory))) {
-  //       return;
-  //     }
-  //     const instanceIds = nodeData.key.instanceKeys.map((instanceKey) => instanceKey.id);
-  //     await IModelApp.viewManager.selectedView?.zoomToElements(instanceIds);
-  //     onFeatureUsed({ featureId: "zoom-to-node", reportInteraction: false });
-  //   },
-  //   [onFeatureUsed],
-  // );
 
   const getPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
     setFilteringError(undefined);
@@ -211,6 +199,7 @@ export function useModelsTree({
     [nodeTypeSelectionPredicate],
   );
 
+  // TODO: add double click logic
   return {
     modelsTreeProps: {
       treeName: "models-tree-v2",

@@ -10,13 +10,13 @@ import { TreeItemVisibilityButton } from "./TreeNodeVisibilityButton.js";
 
 import type { TreeItemVisibilityButtonProps } from "./TreeNodeVisibilityButton.js";
 /** @beta */
-export type TreeRendererProps = React.ComponentPropsWithoutRef<typeof PresentationTree> & { checkboxProps?: TreeItemVisibilityButtonProps };
+export type TreeRendererProps = React.ComponentPropsWithoutRef<typeof PresentationTree> & { visibilityButtonProps?: TreeItemVisibilityButtonProps };
 
 /**
  * Default renderer for rendering tree data.
  * @beta
  */
-export function TreeRenderer({ rootNodes, onNodeClick, expandNode, checkboxProps, ...props }: TreeRendererProps) {
+export function TreeRenderer({ rootNodes, onNodeClick, expandNode, visibilityButtonProps, ...props }: TreeRendererProps) {
   const localizedStrings = useHierarchiesLocalization();
   return (
     <LocalizationContextProvider localizedStrings={localizedStrings}>
@@ -25,7 +25,7 @@ export function TreeRenderer({ rootNodes, onNodeClick, expandNode, checkboxProps
         onNodeClick={onNodeClick}
         expandNode={expandNode}
         rootNodes={rootNodes}
-        actionsRenderer={checkboxProps ? (node) => <TreeItemVisibilityButton {...checkboxProps} node={node} /> : undefined}
+        actionsRenderer={visibilityButtonProps ? (node) => <TreeItemVisibilityButton {...visibilityButtonProps} node={node} /> : undefined}
       />
     </LocalizationContextProvider>
   );

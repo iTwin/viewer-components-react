@@ -18,24 +18,19 @@
     "url": "http://www.bentley.com"
   },
   "type": "module",
-  "main": "lib/cjs/tree-widget-react.js",
-  "types": "lib/cjs/tree-widget-react",
-  "module": "lib/esm/tree-widget-react.js",
+  "types": "lib/esm/tree-widget-react.d.ts",
   "exports": {
     ".": {
-      "import": "./lib/esm/tree-widget-react.js",
-      "require": "./lib/cjs/tree-widget-react.js"
+      "import": "./lib/esm/tree-widget-react.js"
     },
     "./package.json": "./package.json"
   },
   "scripts": {
     "build": "npm run -s dual-build && npm run -s copy:assets",
     "dual-build": "npm run -s build:esm",
-    "build:cjs": "node ../../../scripts/package-cjs.js ./lib/cjs && tsc 1>&2 -p tsconfig.cjs.json",
     "build:esm": "tsc 1>&2 -p tsconfig.esm.json",
-    "copy:assets": "npm run -s copy:public && npm run -s copy:cjs && npm run -s copy:esm",
+    "copy:assets": "npm run -s copy:public && npm run -s copy:esm",
     "copy:public": "cpx \"./public/**/*\" ./lib/public",
-    "copy:cjs": "cpx \"./src/**/*.{scss,json}\" ./lib/cjs",
     "copy:esm": "cpx \"./src/**/*.{css,scss,json}\" ./lib/esm",
     "cover": "c8 npm run test",
     "extract-api": "betools extract-api --entry=tree-widget-react --apiReportFolder=./api --apiReportTempFolder=./api/temp --apiSummaryFolder=./api --includeUnexportedApis",

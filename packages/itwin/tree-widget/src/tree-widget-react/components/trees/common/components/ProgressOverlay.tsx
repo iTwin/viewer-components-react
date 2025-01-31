@@ -6,10 +6,10 @@
 import "./ProgressOverlay.scss";
 import { Spinner } from "@itwin/itwinui-react/bricks";
 
+// TODO: replace spinner with ProgressLinear equivalent
 export function ProgressOverlay() {
   return (
     <div className="tw-progress-overlay-container">
-      {/* <ProgressLinear indeterminate /> */}
       <Spinner />
       <div className="tw-progress-overlay-backdrop" />
     </div>

@@ -19,7 +19,7 @@ const visibilityPartialIcon = new URL("@itwin/itwinui-icons/state-inherited-dot.
  * Data structure that describes tree node checkbox state.
  * @beta
  */
-interface TreeNodeCheckboxState {
+interface TreeItemVisibilityButtonState {
   state: "visible" | "partial" | "hidden";
   isDisabled?: boolean;
   tooltip?: string;
@@ -28,9 +28,9 @@ interface TreeNodeCheckboxState {
 /** @beta */
 export interface TreeItemVisibilityButtonProps {
   /** Callback that should be invoked when checkbox is clicked. */
-  onVisibilityButtonClick: (node: PresentationHierarchyNode, state: TreeNodeCheckboxState["state"]) => void;
+  onVisibilityButtonClick: (node: PresentationHierarchyNode, state: TreeItemVisibilityButtonState["state"]) => void;
   /** Callback that should be used to determine current checkbox state. */
-  getVisibilityButtonState: (node: PresentationHierarchyNode) => TreeNodeCheckboxState;
+  getVisibilityButtonState: (node: PresentationHierarchyNode) => TreeItemVisibilityButtonState;
 }
 
 /** @internal */

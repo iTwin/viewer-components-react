@@ -5,13 +5,10 @@
 
 import "./TreeHeader.scss";
 import classnames from "classnames";
-import { useEffect, useState } from "react";
-
-// import { useFocusedInstancesContext } from "../trees/common/FocusedInstancesContext.js";
+import React, { useEffect, useState } from "react";
 
 import type { PropsWithChildren } from "react";
 import type { Viewport } from "@itwin/core-frontend";
-
 /** @public */
 export interface TreeHeaderButtonProps {
   viewport: Viewport;
@@ -42,6 +39,7 @@ interface TreeHeaderProps {
   className?: string;
 }
 
+/// TODO: ADD SEARCH BOX
 export function TreeHeader(props: PropsWithChildren<TreeHeaderProps>) {
   const { filteringProps, density, className, children } = props;
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
@@ -59,104 +57,9 @@ export function TreeHeader(props: PropsWithChildren<TreeHeaderProps>) {
       <HeaderButtons contracted={isSearchOpen} size={size}>
         {children}
       </HeaderButtons>
-      {/* {filteringProps ? (
-        <DebouncedSearchBox
-          isOpened={isSearchOpen}
-          onOpen={() => setIsSearchOpen(true)}
-          onClose={() => setIsSearchOpen(false)}
-          onChange={(value) => (value ? filteringProps.onFilterStart(value) : filteringProps.onFilterClear())}
-          delay={500}
-          selectedResultIndex={filteringProps.selectedIndex}
-          resultCount={filteringProps.resultCount}
-          onSelectedResultChanged={(index) => filteringProps.onSelectedChanged?.(index)}
-          size={size}
-          isDisabled={instanceFocusEnabled || props.filteringProps?.isDisabled}
-        />
-      ) : null} */}
     </div>
   );
 }
-
-/// TODO: SEARCH BOX NOT ADDED YET
-
-// interface DebouncedSearchBoxProps {
-//   isOpened: boolean;
-//   onOpen: () => void;
-//   onClose: () => void;
-//   onChange: (value: string) => void;
-//   delay: number;
-//   selectedResultIndex?: number;
-//   resultCount?: number;
-//   onSelectedResultChanged: (index: number) => void;
-//   size: "large" | "small";
-//   isDisabled?: boolean;
-// }
-
-// function DebouncedSearchBox({
-//   isOpened,
-//   selectedResultIndex,
-//   resultCount,
-//   onSelectedResultChanged,
-//   onChange,
-//   onOpen,
-//   onClose,
-//   delay,
-//   size,
-//   isDisabled,
-// }: DebouncedSearchBoxProps) {
-//   const [inputValue, setInputValue] = useState<string>("");
-//   const onChangeRef = useRef(onChange);
-//   // save latest `onChange` reference into `useRef` to avoid restarting timeout when `onChange` reference changes.
-//   onChangeRef.current = onChange;
-
-//   useEffect(() => {
-//     if (!inputValue) {
-//       onChangeRef.current("");
-//       return;
-//     }
-
-//     const timeoutId = setTimeout(() => {
-//       onChangeRef.current(inputValue);
-//     }, delay);
-
-//     return () => {
-//       clearTimeout(timeoutId);
-//     };
-//   }, [inputValue, delay]);
-
-//   return (
-//     <SearchBox
-//       expandable
-//       isExpanded={isOpened}
-//       onExpand={onOpen}
-//       onCollapse={onClose}
-//       size={size}
-//       className={classnames("tree-widget-search-box", !isOpened && "contracted")}
-//       isDisabled={isDisabled}
-//     >
-//       <SearchBox.CollapsedState>
-//         <SearchBox.ExpandButton
-//           title={TreeWidget.translate("header.searchBox.searchForSomething")}
-//           aria-label={TreeWidget.translate("header.searchBox.open")}
-//           size={size}
-//           styleType="borderless"
-//         />
-//       </SearchBox.CollapsedState>
-//       <SearchBox.ExpandedState>
-//         <SearchBox.Input placeholder={TreeWidget.translate("header.searchBox.search")} onChange={(e) => setInputValue(e.currentTarget.value)} />
-//         <SearchResultStepper selectedIndex={selectedResultIndex} total={resultCount} onStep={onSelectedResultChanged} size={size} />
-//         <SearchBox.CollapseButton
-//           onClick={() => {
-//             setInputValue("");
-//             onClose();
-//           }}
-//           size={size}
-//           aria-label={TreeWidget.translate("header.searchBox.close")}
-//         />
-//       </SearchBox.ExpandedState>
-//     </SearchBox>
-//   );
-// }
 
 interface HeaderButtonsProps {
   contracted: boolean;
@@ -164,73 +67,5 @@ interface HeaderButtonsProps {
 }
 
 function HeaderButtons(props: PropsWithChildren<HeaderButtonsProps>) {
-  // const className = classnames("button-container", props.contracted && "contracted");
-
-  // Button group has not been to kiwi, dropdown menu
-  return (
-    // <ButtonGroup
-    //   className={className}
-    //   overflowButton={(overflowStart) => (
-    //     <DropdownMenu
-    //       menuItems={() =>
-    //         Children.toArray(props.children)
-    //           .slice(overflowStart)
-    //           .map((btn, index) => (
-    //             <li key={index} className="dropdown-item" role="menuitem">
-    //               {btn}
-    //             </li>
-    //           ))
-    //       }
-    //       className="tree-header-button-dropdown-container"
-    //     >
-    //       <IconButton icon={<SvgMore />} label={TreeWidget.translate("header.dropdownMore")} />
-    //     </DropdownMenu>
-    //   )}
-    // >
-    <>{props.children}</>
-    // </ButtonGroup>
-  );
+  return <>{props.children}</>;
 }
-
-// interface SearchResultStepperProps {
-//   total?: number;
-//   onStep: (newIndex: number) => void;
-//   selectedIndex?: number;
-//   size: "large" | "small";
-// }
-
-// function SearchResultStepper(props: SearchResultStepperProps) {
-//   const { selectedIndex = 1, total, onStep } = props;
-//   if (!total) {
-//     return null;
-//   }
-
-//   return (
-//     <>
-//       <span className="searchbox-stepping-count">{`${selectedIndex}/${total}`}</span>
-//       <Divider orientation="vertical" />
-//       <SearchBox.Button
-//         title={TreeWidget.translate("header.searchBox.previous")}
-//         size={props.size}
-//         onClick={() => {
-//           if (selectedIndex > 1) {
-//             onStep(selectedIndex - 1);
-//           }
-//         }}
-//       >
-//         <SvgCaretUpSmall />
-//       </SearchBox.Button>
-//       <SearchBox.Button
-//         title={TreeWidget.translate("header.searchBox.next")}
-//         size={props.size}
-//         onClick={() => {
-//           if (selectedIndex < total) {
-//             onStep(selectedIndex + 1);
-//           }
-//         }}
-//       >
-//         <SvgCaretDownSmall />
-//       </SearchBox.Button>
-//     </>
-//   );
-// }
