@@ -8,19 +8,20 @@ import { assert, expect, should } from "chai";
 import * as enzyme from "enzyme";
 import * as sinon from "sinon";
 import * as moq from "typemoq";
-import type { BackgroundMapSettings, DisplayStyle3dSettings, TerrainSettings } from "@itwin/core-common";
 import { PlanarClipMaskMode, PlanarClipMaskPriority, TerrainHeightOriginMode } from "@itwin/core-common";
-import type { DisplayStyle3dState, IModelConnection, ScreenViewport, ViewState3d } from "@itwin/core-frontend";
 import { MockRender } from "@itwin/core-frontend";
-import { SpecialKey } from "@itwin/appui-abstract";
 import { NumberInput } from "@itwin/core-react";
+import { QuantityNumberInput } from "@itwin/imodel-components-react";
 import { Select, ToggleSwitch } from "@itwin/itwinui-react";
+import { act, fireEvent, render } from "@testing-library/react";
 import { SourceMapContext } from "../ui/widget/MapLayerManager";
 import { MapManagerSettings } from "../ui/widget/MapManagerSettings";
 import { TestUtils } from "./TestUtils";
-import { QuantityNumberInput } from "@itwin/imodel-components-react";
-import { act, fireEvent, render } from "@testing-library/react";
 
+import type { ChangeEvent } from "react";
+import type { SelectValueChangeEvent } from "@itwin/itwinui-react";
+import type { BackgroundMapSettings, DisplayStyle3dSettings, TerrainSettings } from "@itwin/core-common";
+import type { DisplayStyle3dState, IModelConnection, ScreenViewport, ViewState3d } from "@itwin/core-frontend";
 describe("MapManagerSettings", () => {
   const viewportMock = moq.Mock.ofType<ScreenViewport>();
   const viewMock = moq.Mock.ofType<ViewState3d>();
@@ -67,7 +68,7 @@ describe("MapManagerSettings", () => {
     component.find("input").props().onChange!({ currentTarget: { value } } as any);
 
     // Handler is not triggered until there is a key press
-    component.find("input").simulate("keydown", { key: SpecialKey.Enter });
+    component.find("input").simulate("keydown", { key: "Enter" });
     component.update();
   };
 
@@ -82,6 +83,7 @@ describe("MapManagerSettings", () => {
   });
 
   beforeEach(() => {
+    window.HTMLElement.prototype.scrollTo = () => {};
     terrainSettingsMock.reset();
     terrainSettingsMock.setup((ts) => ts.heightOriginMode).returns(() => TerrainHeightOriginMode.Geodetic);
     terrainSettingsMock.setup((ts) => ts.heightOrigin).returns(() => 0);
@@ -206,7 +208,7 @@ describe("MapManagerSettings", () => {
       </SourceMapContext.Provider>,
     );
 
-    const sliders = container.querySelectorAll(".iui-slider-thumb");
+    const sliders = container.querySelectorAll('div[role="slider"]');
     expect(sliders.length).to.eq(2);
     act(() => {
       fireEvent.keyUp(sliders[0], { key: "ArrowLeft" });
@@ -230,7 +232,7 @@ describe("MapManagerSettings", () => {
       </SourceMapContext.Provider>,
     );
 
-    const sliders = container.querySelectorAll(".iui-slider-thumb");
+    const sliders = container.querySelectorAll('div[role="slider"]');
     expect(sliders.length).to.eq(2);
 
     const sliderThumb = sliders[1];
@@ -239,7 +241,7 @@ describe("MapManagerSettings", () => {
     expect(sliderThumb?.getAttribute("aria-disabled")).to.eql("true");
 
     // Turn on the mask toggle
-    const toggles = container.querySelectorAll(".iui-toggle-switch");
+    const toggles = container.querySelectorAll('input[role="switch"]');
     const maskToggle = toggles[getToggleIndex("mask")];
     should().exist(maskToggle);
     fireEvent.click(maskToggle);
@@ -440,7 +442,9 @@ describe("MapManagerSettings", () => {
       .simulate("change", { target: { checked: true } });
 
     const select = component.find(Select);
-    select.props().onChange!("geoid", "added");
+    select.props().onChange!("geoid", {
+      target: { value: "added" }
+    } as ChangeEvent<HTMLSelectElement> & SelectValueChangeEvent);
     viewportMock.verify((x) => x.changeBackgroundMapProps({ terrainSettings: { heightOriginMode: TerrainHeightOriginMode.Geoid } }), moq.Times.once());
     component.unmount();
   });
@@ -458,7 +462,9 @@ describe("MapManagerSettings", () => {
       .simulate("change", { target: { checked: true } });
 
     const select = component.find(Select);
-    select.props().onChange!("geodetic", "added");
+    select.props().onChange!("geodetic", {
+      target: { value: "added" }
+    } as ChangeEvent<HTMLSelectElement> & SelectValueChangeEvent);
     viewportMock.verify((x) => x.changeBackgroundMapProps({ terrainSettings: { heightOriginMode: TerrainHeightOriginMode.Geodetic } }), moq.Times.once());
     component.unmount();
   });
@@ -476,7 +482,9 @@ describe("MapManagerSettings", () => {
       .simulate("change", { target: { checked: true } });
 
     const select = component.find(Select);
-    select.props().onChange!("ground", "added");
+    select.props().onChange!("ground", {
+      target: { value: "added" }
+    } as ChangeEvent<HTMLSelectElement> & SelectValueChangeEvent);
     viewportMock.verify((x) => x.changeBackgroundMapProps({ terrainSettings: { heightOriginMode: TerrainHeightOriginMode.Ground } }), moq.Times.once());
     component.unmount();
   });

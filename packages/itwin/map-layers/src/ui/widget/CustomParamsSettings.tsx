@@ -6,21 +6,18 @@
 import "./CustomParamsSettings.scss";
 import * as React from "react";
 import { UiFramework } from "@itwin/appui-react";
-import { Listbox, ListboxItem } from "@itwin/core-react";
 import { SvgTechnicalPreviewMini } from "@itwin/itwinui-icons-color-react";
 import { SvgAdd, SvgDelete, SvgEdit } from "@itwin/itwinui-icons-react";
-import { Icon, IconButton } from "@itwin/itwinui-react";
+import { Icon, IconButton, List, ListItem } from "@itwin/itwinui-react";
 import { CustomParamsMappingStorage } from "../../CustomParamsMappingStorage";
 import { CustomParamsStorage } from "../../CustomParamsStorage";
 import { MapLayersUI } from "../../mapLayers";
 import { CustomParamEditDialog } from "./CustomParamEditDialog";
 
-import type { ListboxValue } from "@itwin/core-react";
 import type { CustomParamItem } from "../Interfaces";
 interface CustomParamsMap {
   [paramName: string]: CustomParamItem;
 }
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function CustomParamsSettingsPanel() {
   const [storage] = React.useState(() => new CustomParamsStorage());
   const [mappingStorage] = React.useState(() => new CustomParamsMappingStorage());
@@ -37,7 +34,6 @@ export function CustomParamsSettingsPanel() {
   });
 
   const [listItemUnderCursor, setListItemUnderCursor] = React.useState<string | undefined>();
-  const [selectedValue, setSelectedValue] = React.useState<string | undefined>();
 
   const deleteMapping = React.useCallback(
     (name: string) => {
@@ -64,7 +60,7 @@ export function CustomParamsSettingsPanel() {
    Handle Remove layer button clicked
    */
   const onItemRemoveButtonClicked = React.useCallback(
-    (name: string, event) => {
+    (name: string, event: React.MouseEvent) => {
       event.stopPropagation(); // We don't want the owning ListBox to react on mouse click.
       deleteMapping(name);
     },
@@ -73,7 +69,6 @@ export function CustomParamsSettingsPanel() {
 
   const onCancelEdit = React.useCallback(() => {
     UiFramework.dialogs.modal.close();
-    setSelectedValue(undefined); // clear listbox focus
   }, []);
 
   const onOkEdit = React.useCallback(
@@ -102,7 +97,6 @@ export function CustomParamsSettingsPanel() {
 
       tmpParams[newItem.name] = newItem;
       setParams(tmpParams);
-      setSelectedValue(undefined); // clear listbox focus
     },
     [mappingStorage, params, storage],
   );
@@ -113,13 +107,12 @@ export function CustomParamsSettingsPanel() {
   }, [onCancelEdit, onOkEdit]);
 
   const onListboxValueChange = React.useCallback(
-    (newValue: ListboxValue, _isControlOrCommandPressed?: boolean) => {
+    (newValue: string, _isControlOrCommandPressed?: boolean) => {
       const item = params[newValue];
       if (item) {
         UiFramework.dialogs.modal.open(<CustomParamEditDialog item={item} onOkResult={onOkEdit} onCancelResult={onCancelEdit} />);
       }
 
-      setSelectedValue(newValue);
       return;
     },
     [params, onCancelEdit, onOkEdit],
@@ -137,25 +130,25 @@ export function CustomParamsSettingsPanel() {
           </div>
         </span>
 
-        <IconButton size="small" styleType="borderless" className="customParamsSettings-header-add-button" onClick={handleAddClick}>
+        <IconButton label="Add" size="small" styleType="borderless" className="customParamsSettings-header-add-button" onClick={handleAddClick}>
           <SvgAdd />
         </IconButton>
       </div>
       <div className="customParamsSettings-content">
-      {/* eslint-disable-next-line @itwin/no-internal */}
-        <Listbox selectedValue={selectedValue} onListboxValueChange={onListboxValueChange} className="customParamsSettings-content-listbox">
+        <List as="div" className="customParamsSettings-content-listbox">
           {Object.keys(params).map((keyName) => (
-            // eslint-disable-next-line @itwin/no-internal
-            <ListboxItem
+            <ListItem
+              as="div"
               key={keyName}
+              actionable
               className="customParamsSettings-content-entry"
-              value={keyName}
+              onClick={() => onListboxValueChange(keyName)}
               onMouseEnter={() => setListItemUnderCursor(keyName)}
               onMouseLeave={() => setListItemUnderCursor(undefined)}
             >
-              <span className="customParamsSettings-content-entry-name" title={keyName}>
+              <ListItem.Content className="customParamsSettings-content-entry-name">
                 {keyName}
-              </span>
+              </ListItem.Content>
               {
                 // Display the delete icon only when the mouse over a specific item otherwise list feels cluttered.
                 listItemUnderCursor && listItemUnderCursor === keyName && (
@@ -164,7 +157,7 @@ export function CustomParamsSettingsPanel() {
                       size="small"
                       styleType="borderless"
                       className="map-source-list-entry-button"
-                      title={MapLayersUI.translate("CustomParamSettings.EditButtonTitle")}
+                      label={MapLayersUI.translate("CustomParamSettings.EditButtonTitle")}
                     >
                       <SvgEdit />
                     </IconButton>
@@ -172,7 +165,7 @@ export function CustomParamsSettingsPanel() {
                       size="small"
                       styleType="borderless"
                       className="customParamsSettings-content-entry-button"
-                      title={MapLayersUI.translate("CustomParamSettings.DeleteButtonTitle")}
+                      label={MapLayersUI.translate("CustomParamSettings.DeleteButtonTitle")}
                       onClick={(event) => {
                         onItemRemoveButtonClicked(keyName, event);
                       }}
@@ -182,9 +175,9 @@ export function CustomParamsSettingsPanel() {
                   </>
                 )
               }
-            </ListboxItem>
+            </ListItem>
           ))}
-        </Listbox>
+        </List>
       </div>
     </div>
   );

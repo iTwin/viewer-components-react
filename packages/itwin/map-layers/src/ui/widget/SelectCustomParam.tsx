@@ -4,18 +4,20 @@
  *--------------------------------------------------------------------------------------------*/
 // cSpell:ignore Modeless WMTS
 
-import { Select } from "@itwin/itwinui-react";
-import * as React from "react";
-import { CustomParamsStorage } from "../../CustomParamsStorage";
 import "./MapUrlDialog.scss";
+import * as React from "react";
+import { Select } from "@itwin/itwinui-react";
+import { CustomParamsStorage } from "../../CustomParamsStorage";
 import { MapLayersUI } from "../../mapLayers";
+
+import type { SelectValueChangeEvent } from "@itwin/itwinui-react";
+
 interface SelectCustomParamProps {
   value?: string[];
   disabled?: boolean;
   onChange?: (value: string[]) => void;
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function SelectCustomParam(props: SelectCustomParamProps) {
   const [storage] = React.useState(() => new CustomParamsStorage());
 
@@ -37,7 +39,7 @@ export function SelectCustomParam(props: SelectCustomParamProps) {
   }, [props.value]);
 
   const handleOnChange = React.useCallback(
-    (val, event) => {
+    (val: string, event: SelectValueChangeEvent) => {
       const stateSetter = (prev: string[] | undefined) => {
         const getValue = (): string[] => {
           if (!prev) {
@@ -57,7 +59,7 @@ export function SelectCustomParam(props: SelectCustomParamProps) {
     [props],
   );
 
-  const handleKeyDown = React.useCallback((e) => {
+  const handleKeyDown = React.useCallback((e: React.KeyboardEvent) => {
     if (e.code === "Delete" || e.key === "Backspace") {
       setParamValues(undefined);
     }
@@ -70,6 +72,7 @@ export function SelectCustomParam(props: SelectCustomParamProps) {
         options={customParams}
         value={paramValues}
         disabled={props.disabled || customParams.length === 0}
+        menuStyle={{ zIndex: 100000 }} // Ensure the dropdown selection is on top of the Modal that utilizes this component
         onChange={handleOnChange}
         size="small"
         onKeyDown={handleKeyDown}

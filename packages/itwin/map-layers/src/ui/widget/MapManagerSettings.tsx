@@ -4,21 +4,20 @@
  *--------------------------------------------------------------------------------------------*/
 // cSpell:ignore droppable Sublayer Basemap
 
-import * as React from "react";
-import { NumberInput } from "@itwin/core-react";
-import type { ViewState3d } from "@itwin/core-frontend";
-import { QuantityType } from "@itwin/core-frontend";
-import type { BackgroundMapProps, BackgroundMapSettings, TerrainProps } from "@itwin/core-common";
-import { PlanarClipMaskMode, PlanarClipMaskPriority, TerrainHeightOriginMode } from "@itwin/core-common";
-import { useSourceMapContext } from "./MapLayerManager";
 import "./MapManagerSettings.scss";
-import type { SelectOption } from "@itwin/itwinui-react";
-import { Select, Slider, Tab, Tabs, ToggleSwitch } from "@itwin/itwinui-react";
+import * as React from "react";
+import { PlanarClipMaskMode, PlanarClipMaskPriority, TerrainHeightOriginMode } from "@itwin/core-common";
+import { QuantityType } from "@itwin/core-frontend";
+import { NumberInput } from "@itwin/core-react";
 import { QuantityNumberInput } from "@itwin/imodel-components-react";
+import { Select, Slider, Tab, Tabs, ToggleSwitch } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
 import { CustomParamsSettingsPanel } from "./CustomParamsSettings";
+import { useSourceMapContext } from "./MapLayerManager";
 
-/* eslint-disable deprecation/deprecation */
+import type { ViewState3d } from "@itwin/core-frontend";
+import type { BackgroundMapProps, BackgroundMapSettings, TerrainProps } from "@itwin/core-common";
+import type { SelectOption } from "@itwin/itwinui-react";
 
 enum MapMaskingOption {
   None,
@@ -54,7 +53,6 @@ function getHeightOriginModeFromKey(mode: string): TerrainHeightOriginMode {
   return TerrainHeightOriginMode.Ground;
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function MapManagerSettings() {
   const { activeViewport } = useSourceMapContext();
   const backgroundMapSettings = (activeViewport!.view as ViewState3d).getDisplayStyle3d().settings.backgroundMap;
@@ -224,7 +222,8 @@ export function MapManagerSettings() {
 
   /** Disable commas and letters */
   const onKeyDown = React.useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.keyCode === 188 || (event.keyCode >= 65 && event.keyCode <= 90)) {
+    const isLetter = /^[a-zA-Z]$/.test(event.key);
+    if (event.key === "," || isLetter) {
       event.preventDefault();
     }
   }, []);
@@ -255,7 +254,7 @@ export function MapManagerSettings() {
   const [tabIndex, setTabIndex] = React.useState(0);
 
   return (
-    <Tabs labels={[<Tab key={"general"} label="General" />, <Tab key={"advanced"} label="Advanced" />]} onTabSelected={setTabIndex}>
+    <Tabs activeIndex={tabIndex} orientation="horizontal" labels={[<Tab key="general" label="General" />, <Tab key="advanced" label="Advanced" />]} onTabSelected={setTabIndex}>
       {tabIndex === 0 && (
         <>
           <div className="maplayers-settings-container">
@@ -263,11 +262,9 @@ export function MapManagerSettings() {
             <Slider min={0} max={100} values={[transparency * 100]} onChange={handleAlphaChange} step={1} />
 
             <span className="map-manager-settings-label">{locatableLabel}</span>
-            {/* eslint-disable-next-line deprecation/deprecation */}
             <ToggleSwitch onChange={onLocatableToggle} checked={isLocatable} />
 
             <span className="map-manager-settings-label">{maskingLabel}</span>
-            {/* eslint-disable-next-line deprecation/deprecation */}
             <ToggleSwitch onChange={onMaskingToggle} checked={masking !== MapMaskingOption.None} />
 
             <span className="map-manager-settings-label">{overrideMaskTransparencyLabel}</span>
@@ -296,7 +293,6 @@ export function MapManagerSettings() {
               />
 
               <span className="map-manager-settings-label">{useDepthBufferLabel}</span>
-              {/* eslint-disable-next-line deprecation/deprecation */}
               <ToggleSwitch disabled={applyTerrain} onChange={onToggleUseDepthBuffer} checked={useDepthBuffer} />
             </>
           </div>
@@ -306,7 +302,6 @@ export function MapManagerSettings() {
 
               <div className="maplayers-settings-container">
                 <span className="map-manager-settings-label">{enableLabel}</span>
-                {/* eslint-disable-next-line deprecation/deprecation */}
                 <ToggleSwitch onChange={onToggleTerrain} checked={applyTerrain} />
 
                 <span className="map-manager-settings-label">{modelHeightLabel}</span>
@@ -320,9 +315,7 @@ export function MapManagerSettings() {
                 />
 
                 <span className="map-manager-settings-label">{heightOriginLabel}</span>
-                {/* elevation correction component:  'popoverProps' is needed here otherwise selecting an option closes the menu popup.*/}
                 <Select
-                  popoverProps={{ appendTo: "parent" }}
                   options={terrainHeightOptions.current}
                   disabled={!applyTerrain}
                   value={heightOriginMode}
@@ -331,6 +324,7 @@ export function MapManagerSettings() {
                 />
 
                 <span className="map-manager-settings-label">{exaggerationLabel}</span>
+                {/*eslint-disable-next-line @typescript-eslint/no-deprecated */}
                 <NumberInput value={exaggeration} disabled={!applyTerrain} onChange={handleExaggerationChange} onKeyDown={onKeyDown} />
               </div>
             </fieldset>
