@@ -5,7 +5,7 @@
 
 import "./TreeNodeVisibilityButton.css";
 import cx from "classnames";
-import { IconButton, Tooltip } from "@itwin/itwinui-react/bricks";
+import { IconButton } from "@itwin/itwinui-react/bricks";
 import { isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
 import type { PresentationHierarchyNode, PresentationTreeNode } from "@itwin/presentation-hierarchies-react";
@@ -60,24 +60,18 @@ export function TreeItemVisibilityButton({
     }
   };
   return (
-    <TooltipWrapper content={checkboxState.tooltip}>
-      <IconButton
-        {...props}
-        style={{ position: "relative" }}
-        label={checkboxState.tooltip ?? "loading..."} // itwinUI needs to fix label above tooltip
-        variant={"ghost"}
-        className={cx(`tw-tree-node-visibility-button-${checkboxState.state}`, props.className)}
-        onClick={(e) => {
-          e.stopPropagation();
-          onVisibilityButtonClick(node, checkboxState.state);
-        }}
-        aria-disabled={checkboxState.isDisabled}
-        icon={getIcon()}
-      />
-    </TooltipWrapper>
+    <IconButton
+      {...props}
+      style={{ position: "relative" }}
+      label={checkboxState.tooltip ?? "Determining visibility..."}
+      variant={"ghost"}
+      className={cx(`tw-tree-node-visibility-button-${checkboxState.state}`, props.className)}
+      onClick={(e) => {
+        e.stopPropagation();
+        onVisibilityButtonClick(node, checkboxState.state);
+      }}
+      aria-disabled={checkboxState.isDisabled}
+      icon={getIcon()}
+    />
   );
-}
-
-function TooltipWrapper({ content, children }: { content?: string; children: React.ReactElement }) {
-  return !!content ? <Tooltip content={content}>{children}</Tooltip> : <>{children}</>;
 }
