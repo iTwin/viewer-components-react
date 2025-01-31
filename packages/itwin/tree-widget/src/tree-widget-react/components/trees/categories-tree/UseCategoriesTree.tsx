@@ -3,16 +3,19 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useMemo, useState } from "react";
-import { SvgLayers } from "@itwin/itwinui-icons-react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { SvgArchive, SvgLayers } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react";
+import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 import { useTelemetryContext } from "../common/UseTelemetryContext.js";
 import { CategoriesTreeDefinition } from "./CategoriesTreeDefinition.js";
-import { CategoriesVisibilityHandler } from "./CategoriesVisibilityHandler.js";
+import { CategoriesTreeIdsCache, DEFINITION_CONTAINER_CLASS, SUB_CATEGORY_CLASS } from "./internal/CategoriesTreeIdsCache.js";
+import { CategoriesVisibilityHandler } from "./internal/CategoriesVisibilityHandler.js";
 
+import type { ReactElement } from "react";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { Viewport } from "@itwin/core-frontend";
@@ -46,9 +49,22 @@ interface UseCategoriesTreeResult {
  */
 export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: UseCategoriesTreeProps): UseCategoriesTreeResult {
   const [filteringError, setFilteringError] = useState<CategoriesTreeFilteringError | undefined>();
+  const idsCacheRef = useRef<CategoriesTreeIdsCache>();
+  const activeViewRef = useRef<Viewport>();
+
+  const getCategoriesTreeIdsCache = useCallback(() => {
+    if (activeViewRef.current !== activeView || !idsCacheRef.current) {
+      const viewType = activeView.view.is2d() ? "2d" : "3d";
+      activeViewRef.current = activeView;
+      idsCacheRef.current = new CategoriesTreeIdsCache(createECSqlQueryExecutor(activeView.iModel), viewType);
+    }
+    return idsCacheRef.current;
+  }, [activeView]);
+
   const visibilityHandlerFactory = useCallback(() => {
     const visibilityHandler = new CategoriesVisibilityHandler({
       viewport: activeView,
+      idsCache: getCategoriesTreeIdsCache(),
     });
     return {
       getVisibilityStatus: async (node: HierarchyNode) => visibilityHandler.getVisibilityStatus(node),
@@ -56,14 +72,15 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
       onVisibilityChange: visibilityHandler.onVisibilityChange,
       dispose: () => visibilityHandler.dispose(),
     };
-  }, [activeView]);
+  }, [activeView, getCategoriesTreeIdsCache]);
   const { onFeatureUsed } = useTelemetryContext();
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
     (props) => {
-      return new CategoriesTreeDefinition({ ...props, viewType: activeView.view.is2d() ? "2d" : "3d" });
+      const viewType = activeView.view.is2d() ? "2d" : "3d";
+      return new CategoriesTreeDefinition({ ...props, viewType, idsCache: getCategoriesTreeIdsCache() });
     },
-    [activeView],
+    [activeView, getCategoriesTreeIdsCache],
   );
 
   const getFilteredPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
@@ -75,8 +92,9 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
     return async ({ imodelAccess }) => {
       onFeatureUsed({ featureId: "filtering", reportInteraction: true });
       try {
-        const paths = await CategoriesTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, viewType: activeView.view.is2d() ? "2d" : "3d" });
-        onCategoriesFiltered?.(getCategories(paths));
+        const viewType = activeView.view.is2d() ? "2d" : "3d";
+        const paths = await CategoriesTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, viewType, idsCache: getCategoriesTreeIdsCache() });
+        onCategoriesFiltered?.(getCategoriesFromPaths(paths));
         return paths;
       } catch (e) {
         const newError = e instanceof FilterLimitExceededError ? "tooManyFilterMatches" : "unknownFilterError";
@@ -88,7 +106,7 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
         return [];
       }
     };
-  }, [filter, activeView, onFeatureUsed, onCategoriesFiltered]);
+  }, [filter, activeView, onFeatureUsed, onCategoriesFiltered, getCategoriesTreeIdsCache]);
 
   return {
     categoriesTreeProps: {
@@ -106,7 +124,7 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
   };
 }
 
-function getCategories(paths: HierarchyFilteringPaths): CategoryInfo[] | undefined {
+function getCategoriesFromPaths(paths: HierarchyFilteringPaths): CategoryInfo[] | undefined {
   if (!paths) {
     return undefined;
   }
@@ -114,18 +132,41 @@ function getCategories(paths: HierarchyFilteringPaths): CategoryInfo[] | undefin
   const categories = new Map<Id64String, Id64String[]>();
   for (const path of paths) {
     const currPath = Array.isArray(path) ? path : path.path;
-    const [category, subCategory] = currPath;
-
-    if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(category)) {
+    if (currPath.length === 0) {
       continue;
     }
 
-    if (!categories.has(category.id)) {
-      categories.set(category.id, []);
+    let category: HierarchyNodeIdentifier;
+    let subCategory: HierarchyNodeIdentifier | undefined;
+    const lastNode = currPath[currPath.length - 1];
+
+    if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(lastNode) || lastNode.className === DEFINITION_CONTAINER_CLASS) {
+      continue;
     }
 
-    if (subCategory && HierarchyNodeIdentifier.isInstanceNodeIdentifier(subCategory)) {
-      categories.get(category.id)!.push(subCategory.id);
+    if (lastNode.className === SUB_CATEGORY_CLASS) {
+      const secondToLastNode = currPath.length > 1 ? currPath[currPath.length - 2] : undefined;
+      if (
+        secondToLastNode === undefined ||
+        !HierarchyNodeIdentifier.isInstanceNodeIdentifier(secondToLastNode) ||
+        secondToLastNode.className === DEFINITION_CONTAINER_CLASS
+      ) {
+        continue;
+      }
+      subCategory = lastNode;
+      category = secondToLastNode;
+    } else {
+      category = lastNode;
+    }
+
+    let entry = categories.get(category.id);
+    if (entry === undefined) {
+      entry = [];
+      categories.set(category.id, entry);
+    }
+
+    if (subCategory) {
+      entry.push(subCategory.id);
     }
   }
 
@@ -145,8 +186,40 @@ function getNoDataMessage(filter: string, error?: CategoriesTreeFilteringError) 
   return undefined;
 }
 
-function getIcon() {
-  return <SvgLayers />;
+function SvgLayersIsolate() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+      <g>
+        <path d="M13,3.4938L6.5,0L0,3.4938l6.5,3.4938L13,3.4938z" />
+        <polygon points="6.5,8.21 7,7.94 7,9.24 6.5,9.51 0,6.01 1.22,5.36  " />
+        <polygon points="13,6.01 11.16,7 8.74,7 11.78,5.36  " />
+        <polygon points="7,10.37 7,11.67 6.5,11.94 0,8.45 1.22,7.8 6.5,10.64  " />
+      </g>
+      <g transform="translate(-1-1)">
+        <path d="M9,13.5714h3.4286V17H9V13.5714z" />
+        <path d="M9,9v3.4286h3.4286V9H9z M11.8571,11.8571H9.5714V9.5714h2.2857V11.8571z" />
+        <path d="M13.5714,9v3.4286H17V9H13.5714 M16.4286,11.8571h-2.2857V9.5714h2.2857V11.8571" />
+        <path d="M13.5714,13.5714V17H17v-3.4286H13.5714z M16.4286,16.4286h-2.2857v-2.2857h2.2857V16.4286z" />
+      </g>
+    </svg>
+  );
+}
+
+function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
+  if (node.extendedData?.imageId === undefined) {
+    return undefined;
+  }
+
+  switch (node.extendedData.imageId) {
+    case "icon-layers":
+      return <SvgLayers />;
+    case "icon-layers-isolate":
+      return <SvgLayersIsolate />;
+    case "icon-archive":
+      return <SvgArchive />;
+  }
+
+  return undefined;
 }
 
 function getSublabel(node: PresentationHierarchyNode) {

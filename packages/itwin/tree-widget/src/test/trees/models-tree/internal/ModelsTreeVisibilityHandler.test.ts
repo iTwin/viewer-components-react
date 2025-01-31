@@ -3080,7 +3080,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
   });
 });
 
-/** Copied from https://github.com/iTwin/appui/blob/master/test-apps/appui-test-app/appui-test-handlers/src/createBlankConnection.ts#L26 */
+/** Copied from https://github.com/iTwin/appui/blob/c3683b8acef46572c661c4fa1b7933747a76d3c1/apps/test-providers/src/createBlankConnection.ts#L26 */
 function createBlankViewState(iModel: IModelConnection) {
   const ext = iModel.projectExtents;
   const viewState = SpatialViewState.createBlank(iModel, ext.low, ext.high.minus(ext.low));

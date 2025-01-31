@@ -10,8 +10,10 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { CategoriesTreeDefinition } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
+import { CategoriesTreeIdsCache } from "../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 import {
   buildIModel,
+  insertDefinitionContainer,
   insertDrawingCategory,
   insertDrawingGraphic,
   insertDrawingModelWithPartition,
@@ -19,6 +21,7 @@ import {
   insertPhysicalModelWithPartition,
   insertSpatialCategory,
   insertSubCategory,
+  insertSubModel,
 } from "../../IModelUtils.js";
 import { createIModelAccess } from "../Common.js";
 
@@ -43,6 +46,129 @@ describe("Categories tree", () => {
       await terminatePresentationTesting();
     });
 
+    it("finds definitionContainer by label", async function () {
+      const { imodel, keys } = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer", userLabel: "Test" });
+        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id });
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+
+        return { keys: { definitionContainer } };
+      });
+      const imodelAccess = createIModelAccess(imodel);
+      const viewType = "3d";
+      const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      expect(
+        await CategoriesTreeDefinition.createInstanceKeyPaths({
+          imodelAccess,
+          label: "Test",
+          viewType,
+          idsCache,
+        }),
+      ).to.deep.eq([{ path: [keys.definitionContainer], options: { autoExpand: true } }]);
+    });
+
+    it("finds definitionContainer by label when it is contained by another definitionContainer", async function () {
+      const { imodel, keys } = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+        const definitionContainerChild = insertDefinitionContainer({
+          builder,
+          codeValue: "DefinitionContainerChild",
+          userLabel: "Test",
+          modelId: definitionModel.id,
+        });
+        const definitionModelChild = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
+        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+
+        return { keys: { definitionContainer, definitionContainerChild } };
+      });
+      const imodelAccess = createIModelAccess(imodel);
+      const viewType = "3d";
+      const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      expect(
+        await CategoriesTreeDefinition.createInstanceKeyPaths({
+          imodelAccess,
+          label: "Test",
+          viewType,
+          idsCache,
+        }),
+      ).to.deep.eq([{ path: [keys.definitionContainer, keys.definitionContainerChild], options: { autoExpand: true } }]);
+    });
+
+    it("does not find definitionContainer by label when it doesn't contain categories", async function () {
+      const { imodel } = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer", userLabel: "Test" });
+        insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+
+        return { keys: { definitionContainer } };
+      });
+      const imodelAccess = createIModelAccess(imodel);
+      const viewType = "3d";
+      const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      expect(
+        await CategoriesTreeDefinition.createInstanceKeyPaths({
+          imodelAccess,
+          label: "Test",
+          viewType,
+          idsCache,
+        }),
+      ).to.deep.eq([]);
+    });
+
+    it("finds category by label when it is contained by definitionContainer", async function () {
+      const { imodel, keys } = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", userLabel: "Test", modelId: definitionModel.id });
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+
+        return { keys: { definitionContainer, category } };
+      });
+      const imodelAccess = createIModelAccess(imodel);
+      const viewType = "3d";
+      const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      expect(
+        await CategoriesTreeDefinition.createInstanceKeyPaths({
+          imodelAccess,
+          label: "Test",
+          viewType,
+          idsCache,
+        }),
+      ).to.deep.eq([{ path: [keys.definitionContainer, keys.category], options: { autoExpand: true } }]);
+    });
+
+    it("finds subCategory by label when its parent category is contained by definitionContainer", async function () {
+      const { imodel, keys } = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id });
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+        const subCategory1 = insertSubCategory({ builder, codeValue: "SubCategory1", parentCategoryId: category.id, modelId: definitionModel.id });
+
+        return { keys: { definitionContainer, category, subCategory1 } };
+      });
+      const imodelAccess = createIModelAccess(imodel);
+      const viewType = "3d";
+      const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      expect(
+        await CategoriesTreeDefinition.createInstanceKeyPaths({
+          imodelAccess,
+          label: "SubCategory1",
+          viewType,
+          idsCache,
+        }),
+      ).to.deep.eq([{ path: [keys.definitionContainer, keys.category, keys.subCategory1], options: { autoExpand: true } }]);
+    });
+
     it("finds 3d categories by label containing special SQLite characters", async function () {
       const { imodel, keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
@@ -61,19 +187,25 @@ describe("Categories tree", () => {
         };
       });
 
+      const imodelAccess = createIModelAccess(imodel);
+      const viewType = "3d";
+      const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess: createIModelAccess(imodel),
+          imodelAccess,
           label: "_",
           viewType: "3d",
+          idsCache,
         }),
       ).to.deep.eq([{ path: [keys.category1], options: { autoExpand: true } }]);
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess: createIModelAccess(imodel),
+          imodelAccess,
           label: "%",
           viewType: "3d",
+          idsCache,
         }),
       ).to.deep.eq([{ path: [keys.category2], options: { autoExpand: true } }]);
     });
@@ -97,19 +229,25 @@ describe("Categories tree", () => {
         };
       });
 
+      const imodelAccess = createIModelAccess(imodel);
+      const viewType = "3d";
+      const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess: createIModelAccess(imodel),
+          imodelAccess,
           label: "_",
           viewType: "3d",
+          idsCache,
         }),
       ).to.deep.eq([{ path: [keys.category, keys.subCategory1], options: { autoExpand: true } }]);
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess: createIModelAccess(imodel),
+          imodelAccess,
           label: "%",
           viewType: "3d",
+          idsCache,
         }),
       ).to.deep.eq([{ path: [keys.category, keys.subCategory2], options: { autoExpand: true } }]);
     });
@@ -127,19 +265,26 @@ describe("Categories tree", () => {
           },
         };
       });
+
+      const imodelAccess = createIModelAccess(imodel);
+      const viewType = "3d";
+      const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess: createIModelAccess(imodel),
+          imodelAccess,
           label: "Test",
           viewType: "3d",
+          idsCache,
         }),
       ).to.deep.eq([{ path: [keys.category], options: { autoExpand: true } }]);
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess: createIModelAccess(imodel),
+          imodelAccess,
           label: "SpatialCategory",
           viewType: "3d",
+          idsCache,
         }),
       ).to.deep.eq([]);
     });
@@ -164,27 +309,34 @@ describe("Categories tree", () => {
         };
       });
 
+      const imodelAccess = createIModelAccess(imodel);
+      const viewType = "3d";
+      const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess: createIModelAccess(imodel),
+          imodelAccess,
           label: "Test",
           viewType: "3d",
+          idsCache,
         }),
       ).to.deep.eq([{ path: [keys.category], options: { autoExpand: true } }]);
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess: createIModelAccess(imodel),
+          imodelAccess,
           label: "SubCategory1",
           viewType: "3d",
+          idsCache,
         }),
       ).to.deep.eq([{ path: [keys.category, keys.subCategory1], options: { autoExpand: true } }]);
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess: createIModelAccess(imodel),
+          imodelAccess,
           label: "SubCategory2",
           viewType: "3d",
+          idsCache,
         }),
       ).to.deep.eq([{ path: [keys.category, keys.subCategory2], options: { autoExpand: true } }]);
     });
@@ -207,19 +359,25 @@ describe("Categories tree", () => {
         };
       });
 
+      const imodelAccess = createIModelAccess(imodel);
+      const viewType = "3d";
+      const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess: createIModelAccess(imodel),
+          imodelAccess,
           label: "_",
           viewType: "2d",
+          idsCache,
         }),
       ).to.deep.eq([{ path: [keys.category1], options: { autoExpand: true } }]);
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess: createIModelAccess(imodel),
+          imodelAccess,
           label: "%",
           viewType: "2d",
+          idsCache,
         }),
       ).to.deep.eq([{ path: [keys.category2], options: { autoExpand: true } }]);
     });
@@ -243,19 +401,25 @@ describe("Categories tree", () => {
         };
       });
 
+      const imodelAccess = createIModelAccess(imodel);
+      const viewType = "3d";
+      const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess: createIModelAccess(imodel),
+          imodelAccess,
           label: "_",
           viewType: "2d",
+          idsCache,
         }),
       ).to.deep.eq([{ path: [keys.category, keys.subCategory1], options: { autoExpand: true } }]);
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
-          imodelAccess: createIModelAccess(imodel),
+          imodelAccess,
           label: "%",
           viewType: "2d",
+          idsCache,
         }),
       ).to.deep.eq([{ path: [keys.category, keys.subCategory2], options: { autoExpand: true } }]);
     });
