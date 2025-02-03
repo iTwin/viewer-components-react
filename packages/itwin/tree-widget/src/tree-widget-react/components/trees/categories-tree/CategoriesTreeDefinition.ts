@@ -7,7 +7,8 @@ import { defer, EMPTY, from, lastValueFrom, map, mergeMap, toArray } from "rxjs"
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
-import { DEFINITION_CONTAINER_CLASS, getClassesByView, SUB_CATEGORY_CLASS } from "./internal/CategoriesTreeIdsCache.js";
+import { getClassesByView } from "./internal/CategoriesTreeIdsCache.js";
+import { DEFINITION_CONTAINER_CLASS, DEFINITION_ELEMENT_CLASS, SUB_CATEGORY_CLASS } from "./internal/ClassNameDefinitions.js";
 
 import type { Id64Array } from "@itwin/core-bentley";
 import type { Observable } from "rxjs";
@@ -25,7 +26,6 @@ import type {
 } from "@itwin/presentation-hierarchies";
 
 const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
-const DEFINITION_ELEMENT_CLASS = "BisCore.DefinitionElement";
 
 interface CategoriesTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;

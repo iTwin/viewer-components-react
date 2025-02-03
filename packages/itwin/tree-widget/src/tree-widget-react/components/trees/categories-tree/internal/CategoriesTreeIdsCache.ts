@@ -6,6 +6,7 @@
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
+import { DEFINITION_CONTAINER_CLASS, SUB_CATEGORY_CLASS } from "./ClassNameDefinitions.js";
 
 interface DefinitionContainerInfo {
   modelId: Id64String;
@@ -27,11 +28,6 @@ interface CategoryInfo {
 interface SubCategoryInfo {
   categoryId: Id64String;
 }
-
-/** @internal */
-export const SUB_CATEGORY_CLASS = "BisCore.SubCategory";
-/** @internal */
-export const DEFINITION_CONTAINER_CLASS = "BisCore.DefinitionContainer";
 
 /** @internal */
 export class CategoriesTreeIdsCache {

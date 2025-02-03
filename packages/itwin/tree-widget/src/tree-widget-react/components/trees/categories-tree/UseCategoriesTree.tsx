@@ -12,8 +12,9 @@ import { TreeWidget } from "../../../TreeWidget.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 import { useTelemetryContext } from "../common/UseTelemetryContext.js";
 import { CategoriesTreeDefinition } from "./CategoriesTreeDefinition.js";
-import { CategoriesTreeIdsCache, DEFINITION_CONTAINER_CLASS, SUB_CATEGORY_CLASS } from "./internal/CategoriesTreeIdsCache.js";
+import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
 import { CategoriesVisibilityHandler } from "./internal/CategoriesVisibilityHandler.js";
+import { DEFINITION_CONTAINER_CLASS, SUB_CATEGORY_CLASS } from "./internal/ClassNameDefinitions.js";
 
 import type { ReactElement } from "react";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
