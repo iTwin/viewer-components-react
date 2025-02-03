@@ -3,12 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
-import { RelativePosition } from "@itwin/appui-abstract";
 import { UiFramework } from "@itwin/appui-react";
 import { IModelApp, MapLayerSource, MapLayerSourceStatus, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
-import * as UiCore from "@itwin/core-react";
 import { SvgAdd, SvgDelete, SvgEdit } from "@itwin/itwinui-icons-react";
-import { Button, IconButton, Input, List, ListItem, ProgressRadial, Text } from "@itwin/itwinui-react";
+import { Button, IconButton, Input, List, ListItem, Popover, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { MapLayerPreferences } from "../../MapLayerPreferences";
 import { MapLayersUI } from "../../mapLayers";
 import { ConfirmMessageDialog } from "./ConfirmMessageDialog";
@@ -268,7 +266,6 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
                 UiFramework.dialogs.modal.open(
                   <MapUrlDialog
                     activeViewport={activeViewport}
-                    isOverlay={isOverlay}
                     signInModeArgs={{ layer, validation: sourceValidation, source: foundSource }}
                     onOkResult={(sourceState?: SourceState) => handleModalUrlDialogOk(LayerAction.New, sourceState)}
                     onCancelResult={handleModalUrlDialogCancel}
@@ -334,11 +331,11 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
     }
   }, [options, sourceFilterString]);
 
-  const handleAddNewMapSource = React.useCallback(() => {
+  const handleAddNewMapSource = React.useCallback((event: React.MouseEvent) => {
+    event.stopPropagation(); // We don't want the owning ListBox to react on mouse click.
     UiFramework.dialogs.modal.open(
       <MapUrlDialog
         activeViewport={activeViewport}
-        isOverlay={isOverlay}
         onOkResult={(result?: SourceState) => handleModalUrlDialogOk(LayerAction.New, result)}
         onCancelResult={handleModalUrlDialogCancel}
         mapLayerOptions={mapLayerOptions}
@@ -347,8 +344,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
     if (onHandleOutsideClick) {
       onHandleOutsideClick(false);
     }
-    return;
-  }, [activeViewport, handleModalUrlDialogCancel, handleModalUrlDialogOk, isOverlay, mapLayerOptions, onHandleOutsideClick]);
+  }, [activeViewport, handleModalUrlDialogCancel, handleModalUrlDialogOk, mapLayerOptions, onHandleOutsideClick]);
 
   const handleAttach = React.useCallback((mapName: string) => {
     setLayerNameToAdd(mapName);
@@ -426,7 +422,6 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
       UiFramework.dialogs.modal.open(
         <MapUrlDialog
           activeViewport={activeViewport}
-          isOverlay={isOverlay}
           mapLayerSourceToEdit={matchingSource}
           onOkResult={(result?: SourceState) => handleModalUrlDialogOk(LayerAction.Edit, result)}
           onCancelResult={handleModalUrlDialogCancel}
@@ -438,7 +433,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
         onHandleOutsideClick(false);
       }
     },
-    [activeViewport, handleModalUrlDialogCancel, handleModalUrlDialogOk, isOverlay, mapLayerOptions, onHandleOutsideClick, sources],
+    [activeViewport, handleModalUrlDialogCancel, handleModalUrlDialogOk, mapLayerOptions, onHandleOutsideClick, sources],
   );
 
   return (
@@ -555,30 +550,6 @@ export function AttachLayerPopupButton(props: AttachLayerPopupButtonProps) {
     setPopupOpen(!popupOpen);
   }, [popupOpen]);
 
-  const handleClosePopup = React.useCallback(() => {
-    setPopupOpen(false);
-  }, []);
-
-  const onHandleOutsideClick = React.useCallback(
-    (event: MouseEvent) => {
-      if (!handleOutsideClick) {
-        return;
-      }
-      // If clicking on button that open panel -  don't trigger outside click processing
-      if (buttonRef?.current && buttonRef?.current.contains(event.target as Node)) {
-        return;
-      }
-
-      // If clicking the panel, this is not an outside clicked
-      if (panelRef.current && panelRef?.current.contains(event.target as Node)) {
-        return;
-      }
-
-      // If we reach this point, we got an outside clicked, no close the popup
-      setPopupOpen(false);
-    },
-    [handleOutsideClick],
-  );
 
   const { refreshFromStyle } = useSourceMapContext();
 
@@ -636,23 +607,20 @@ export function AttachLayerPopupButton(props: AttachLayerPopupButtonProps) {
 
   return (
     <>
-      {renderButton()}
-      {/*eslint-disable-next-line @typescript-eslint/no-deprecated */}
-      <UiCore.Popup // TODO: Replace all deprecated UiCore components with iTwinUI components
-        isOpen={popupOpen}
-        position={RelativePosition.BottomRight}
-        onClose={handleClosePopup}
-        onOutsideClick={onHandleOutsideClick}
-        closeOnWheel={false}
-        target={buttonRef.current}
-        closeOnEnter={false}
-        closeOnContextMenu={false}
+      <Popover
+        content={
+          <div ref={panelRef} className="map-sources-popup-panel">
+            <AttachLayerPanel isOverlay={props.isOverlay} onLayerAttached={handleLayerAttached} onHandleOutsideClick={setHandleOutsideClick} />
+          </div>
+        }
+        applyBackground
+        visible={popupOpen}
+        onVisibleChange={setPopupOpen}
+        closeOnOutsideClick={handleOutsideClick}
+        placement={"bottom-end"}
       >
-        <div ref={panelRef} className="map-sources-popup-panel">
-          <AttachLayerPanel isOverlay={props.isOverlay} onLayerAttached={handleLayerAttached} onHandleOutsideClick={setHandleOutsideClick} />
-        </div>
-      {/*eslint-disable-next-line @typescript-eslint/no-deprecated */}
-      </UiCore.Popup>
+        {renderButton()}
+      </Popover>
     </>
   );
 }
