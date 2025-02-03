@@ -102,7 +102,7 @@ export class CategoriesTreeIdsCache {
     ];
     const categoriesQuery = `
       SELECT
-        this.ECInstanceId  id,
+        this.ECInstanceId id,
         this.CategoryModelId modelId,
         this.ParentDefinitionContainerExists parentDefinitionContainerExists,
         this.ChildCount childCound
