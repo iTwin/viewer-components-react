@@ -21,7 +21,7 @@ steps:
       pnpm config set store-dir $(pnpm_config_cache)
     displayName: "Setup pnpm"
 
-  - script: pnpm install
+  - script: pnpm install --no-frozen-lockfile #TODO remove --no-frozen-lockfile back when corepack issue is solved
     displayName: pnpm install
 
   - script: pnpm check && pnpm check:dev
