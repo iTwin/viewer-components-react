@@ -15,7 +15,7 @@ interface CategoriesTreeNode {
  */
 export namespace CategoriesTreeNode {
   /**
-   * Determines if node represents a definitionContainer.
+   * Determines if node represents a definition container.
    */
   export const isDefinitionContainerNode = (node: Pick<CategoriesTreeNode, "extendedData">) =>
     node.extendedData && "isDefinitionContainer" in node.extendedData && !!node.extendedData.isDefinitionContainer;
@@ -27,7 +27,7 @@ export namespace CategoriesTreeNode {
     node.extendedData && "isCategory" in node.extendedData && !!node.extendedData.isCategory;
 
   /**
-   * Determines if node represents a subCategory.
+   * Determines if node represents a sub-category.
    */
   export const isSubCategoryNode = (node: Pick<CategoriesTreeNode, "extendedData">) =>
     node.extendedData && "isSubCategory" in node.extendedData && !!node.extendedData.isSubCategory;
