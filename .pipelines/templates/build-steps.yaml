@@ -5,10 +5,16 @@ steps:
     inputs:
       version: "$(NodeVersion)"
 
+  - script: |
+      corepack enable
+      corepack -v
+    displayName: "Enable corepack"
+
   # Workaround for https://github.com/nodejs/corepack/issues/612
-  # - script: |
-  #     npm install corepack@^0.31.0
-  #   displayName: "Install Corepack"
+  - script: |
+      npm install corepack@^0.31.0 -g
+      corepack -v
+    displayName: "Install Corepack"
 
   - task: Cache@2
     displayName: Cache pnpm
@@ -17,15 +23,10 @@ steps:
       path: $(pnpm_config_cache)
 
   - script: |
-      corepack enable
-      corepack prepare pnpm@9.15.5+sha1.cb1f6372ef64e2ba352f2f46325adead1c99ff8f --activate
-    displayName: "Setup pnpm"
-
-  - script: |
       pnpm config set store-dir $(pnpm_config_cache)
     displayName: "Setup pnpm config"
 
-  - script: pnpm install --no-frozen-lockfile #TODO remove --no-frozen-lockfile back when corepack issue is solved
+  - script: pnpm install
     displayName: pnpm install
 
   - script: pnpm audit --registry=https://registry.npmjs.org --audit-level=high --production
