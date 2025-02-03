@@ -102,7 +102,7 @@ export class CategoriesTreeIdsCache {
     ];
     const categoriesQuery = `
       SELECT
-        this.ECInstanceId  id,
+        this.ECInstanceId id,
         this.CategoryModelId modelId,
         this.ParentDefinitionContainerExists parentDefinitionContainerExists,
         this.ChildCount childCount
@@ -261,22 +261,22 @@ export class CategoriesTreeIdsCache {
     return result;
   }
 
-  public async getAllContainedCategories(definitionContainerId: Id64String): Promise<Id64Array> {
+  public async getAllContainedCategories(definitionContainerIds: Id64Array): Promise<Id64Array> {
     const result = new Array<Id64String>();
 
     const definitionContainersInfo = await this.getDefinitionContainersInfo();
-    const definitionContainerInfo = definitionContainersInfo.get(definitionContainerId);
-    if (definitionContainerInfo === undefined) {
-      return result;
-    }
-
-    const directChildCategories = definitionContainerInfo.childCategories;
-    const directChildDefinitionContainers = definitionContainerInfo.childDefinitionContainers;
-
-    result.push(...directChildCategories);
-    for (const definitionContainer of directChildDefinitionContainers) {
-      const definitionContainerResult = await this.getAllContainedCategories(definitionContainer);
-      result.push(...definitionContainerResult);
+    const indirectCategories = await Promise.all(
+      definitionContainerIds.map(async (definitionContainerId) => {
+        const definitionContainerInfo = definitionContainersInfo.get(definitionContainerId);
+        if (definitionContainerInfo === undefined) {
+          return [];
+        }
+        result.push(...definitionContainerInfo.childCategories);
+        return this.getAllContainedCategories(definitionContainerInfo.childDefinitionContainers);
+      }),
+    );
+    for (const categories of indirectCategories) {
+      result.push(...categories);
     }
 
     return result;

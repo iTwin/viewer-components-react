@@ -183,7 +183,7 @@ describe("CategoriesTreeIdsCache", () => {
         return { definitionContainer };
       });
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      expect(await idsCache.getAllContainedCategories(keys.definitionContainer.id)).to.deep.eq([]);
+      expect(await idsCache.getAllContainedCategories([keys.definitionContainer.id])).to.deep.eq([]);
     });
 
     it("when definitionContainer contains definitionContainer that has categories", async function () {
@@ -199,7 +199,7 @@ describe("CategoriesTreeIdsCache", () => {
         return { definitionContainerRoot, category };
       });
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      expect(await idsCache.getAllContainedCategories(keys.definitionContainerRoot.id)).to.deep.eq([keys.category.id]);
+      expect(await idsCache.getAllContainedCategories([keys.definitionContainerRoot.id])).to.deep.eq([keys.category.id]);
     });
 
     it("when definitionContainer contains categories", async function () {
@@ -213,7 +213,7 @@ describe("CategoriesTreeIdsCache", () => {
         return { definitionContainer, category };
       });
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      expect(await idsCache.getAllContainedCategories(keys.definitionContainer.id)).to.deep.eq([keys.category.id]);
+      expect(await idsCache.getAllContainedCategories([keys.definitionContainer.id])).to.deep.eq([keys.category.id]);
     });
 
     it("when definitionContainer contains categories and definitionContainers that contain categories", async function () {
@@ -232,7 +232,7 @@ describe("CategoriesTreeIdsCache", () => {
         return { definitionContainerRoot, directCategory, indirectCategory };
       });
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      const result = await idsCache.getAllContainedCategories(keys.definitionContainerRoot.id);
+      const result = await idsCache.getAllContainedCategories([keys.definitionContainerRoot.id]);
       const expectedResult = [keys.indirectCategory.id, keys.directCategory.id];
       expect(result.every((id) => expectedResult.includes(id))).to.be.true;
     });

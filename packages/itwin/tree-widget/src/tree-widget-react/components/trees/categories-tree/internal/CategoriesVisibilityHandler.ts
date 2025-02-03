@@ -10,7 +10,7 @@ import { enableCategoryDisplay, enableSubCategoryDisplay } from "../../common/Ca
 import { createVisibilityStatus } from "../../common/Tooltip.js";
 import { CategoriesTreeNode } from "./CategoriesTreeNode.js";
 
-import type { Id64String } from "@itwin/core-bentley";
+import type { Id64Array } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyVisibilityHandler, VisibilityStatus } from "../../common/UseHierarchyVisibility.js";
 import type { CategoriesTreeIdsCache } from "./CategoriesTreeIdsCache.js";
@@ -57,7 +57,7 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
     }
 
     if (CategoriesTreeNode.isCategoryNode(node)) {
-      return createVisibilityStatus(await this.getCategoryVisibility(CategoriesVisibilityHandler.getInstanceIdFromHierarchyNode(node)));
+      return createVisibilityStatus(await this.getCategoriesVisibility(CategoriesVisibilityHandler.getInstanceIdsFromHierarchyNode(node)));
     }
 
     if (CategoriesTreeNode.isDefinitionContainerNode(node)) {
@@ -91,22 +91,22 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
       return "hidden";
     }
 
-    const subcategoryId = CategoriesVisibilityHandler.getInstanceIdFromHierarchyNode(node);
     const categoryOverrideResult = this.getCategoryVisibilityFromOverrides(parentCategoryId);
     if (categoryOverrideResult === "hidden" || categoryOverrideResult === "visible") {
       return categoryOverrideResult;
     }
 
-    const isVisible = this._viewport.isSubCategoryVisible(subcategoryId) && this._viewport.view.viewsCategory(parentCategoryId);
+    const subcategoryIds = CategoriesVisibilityHandler.getInstanceIdsFromHierarchyNode(node);
+    const isVisible = subcategoryIds.every((id) => this._viewport.isSubCategoryVisible(id)) && this._viewport.view.viewsCategory(parentCategoryId);
     return isVisible ? "visible" : "hidden";
   }
 
   private async getDefinitionContainerVisibility(node: HierarchyNode): Promise<VisibilityStatus["state"]> {
-    const childrenResult = this._idsCache.getAllContainedCategories(CategoriesVisibilityHandler.getInstanceIdFromHierarchyNode(node));
+    const childrenResult = this._idsCache.getAllContainedCategories(CategoriesVisibilityHandler.getInstanceIdsFromHierarchyNode(node));
     let hiddenCount = 0;
     let visibleCount = 0;
     for (const categoryId of await childrenResult) {
-      const categoryVisibility = await this.getCategoryVisibility(categoryId);
+      const categoryVisibility = await this.getCategoriesVisibility([categoryId]);
       if (categoryVisibility === "partial") {
         return "partial";
       }
@@ -125,17 +125,17 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
     return hiddenCount > 0 ? "hidden" : "visible";
   }
 
-  private async getCategoryVisibility(categoryId: Id64String): Promise<VisibilityStatus["state"]> {
-    const overrideResult = this.getCategoryVisibilityFromOverrides(categoryId);
+  private async getCategoriesVisibility(categoryIds: Id64Array): Promise<VisibilityStatus["state"]> {
+    const overrideResult = this.getCategoryVisibilityFromOverrides(categoryIds);
     if (overrideResult !== "none") {
       return overrideResult;
     }
 
-    if (!this._viewport.view.viewsCategory(categoryId)) {
+    if (!categoryIds.every((id) => this._viewport.view.viewsCategory(id))) {
       return "hidden";
     }
 
-    const subCategories = await this._idsCache.getSubCategories(categoryId);
+    const subCategories = (await Promise.all(categoryIds.map(async (id) => this._idsCache.getSubCategories(id)))).reduce((acc, val) => acc.concat(val), []);
     let visibleSubCategoryCount = 0;
     let hiddenSubCategoryCount = 0;
 
@@ -154,12 +154,12 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
     return hiddenSubCategoryCount > 0 ? "hidden" : "visible";
   }
 
-  private getCategoryVisibilityFromOverrides(categoryId: Id64String): VisibilityStatus["state"] | "none" {
+  private getCategoryVisibilityFromOverrides(categoryIds: Id64Array): VisibilityStatus["state"] | "none" {
     let showOverrides = 0;
     let hideOverrides = 0;
 
     for (const currentOverride of this._viewport.perModelCategoryVisibility) {
-      if (currentOverride.categoryId === categoryId) {
+      if (categoryIds.includes(currentOverride.categoryId)) {
         const currentVisibilityOverride = this._viewport.perModelCategoryVisibility.getOverride(currentOverride.modelId, currentOverride.categoryId);
 
         if (currentVisibilityOverride === PerModelCategoryVisibility.Override.Hide) {
@@ -182,7 +182,6 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
   }
 
   private async changeSubCategoryVisibility(node: HierarchyNode, on: boolean) {
-    const subCategoryId = CategoriesVisibilityHandler.getInstanceIdFromHierarchyNode(node);
     const parentCategoryId = node.extendedData?.categoryId;
 
     // make sure parent category is enabled
@@ -190,16 +189,19 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
       await this.changeCategoryState([parentCategoryId], true, false);
     }
 
-    this.changeSubCategoryState(subCategoryId, on);
+    const subCategoryIds = CategoriesVisibilityHandler.getInstanceIdsFromHierarchyNode(node);
+    subCategoryIds.forEach((id) => {
+      this.changeSubCategoryState(id, on);
+    });
   }
 
   private async changeCategoryVisibility(node: HierarchyNode, on: boolean) {
-    const categoryId = CategoriesVisibilityHandler.getInstanceIdFromHierarchyNode(node);
-    return this.changeCategoryState([categoryId], on, on);
+    const categoryIds = CategoriesVisibilityHandler.getInstanceIdsFromHierarchyNode(node);
+    return this.changeCategoryState(categoryIds, on, on);
   }
 
   private async changeDefinitionContainerVisibility(node: HierarchyNode, on: boolean) {
-    const definitionContainerId = CategoriesVisibilityHandler.getInstanceIdFromHierarchyNode(node);
+    const definitionContainerId = CategoriesVisibilityHandler.getInstanceIdsFromHierarchyNode(node);
     const childCategories = await this._idsCache.getAllContainedCategories(definitionContainerId);
     return this.changeCategoryState(childCategories, on, on);
   }
@@ -225,8 +227,10 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
     }, 0);
   }
 
-  private static getInstanceIdFromHierarchyNode(node: HierarchyNode) {
-    return HierarchyNode.isInstancesNode(node) && node.key.instanceKeys.length > 0 ? node.key.instanceKeys[0].id : /* istanbul ignore next */ "";
+  private static getInstanceIdsFromHierarchyNode(node: HierarchyNode) {
+    return HierarchyNode.isInstancesNode(node) && node.key.instanceKeys.length > 0
+      ? node.key.instanceKeys.map((instanceKey) => instanceKey.id)
+      : /* istanbul ignore next */ [];
   }
 
   private async changeCategoryState(ids: string[], enabled: boolean, enableAllSubCategories: boolean) {
