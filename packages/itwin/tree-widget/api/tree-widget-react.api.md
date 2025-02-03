@@ -156,6 +156,19 @@ export class FilterLimitExceededError extends Error {
     readonly limit: number;
 }
 
+// @public (undocumented)
+interface FocusedInstancesContext {
+    enabled: boolean;
+    loadFocusedItems?: () => AsyncIterableIterator<InstanceKey | GroupingHierarchyNode>;
+    toggle: () => void;
+}
+
+// @public
+export function FocusedInstancesContextProvider({ selectionStorage, imodelKey, children, }: PropsWithChildren<{
+    selectionStorage: SelectionStorage;
+    imodelKey: string;
+}>): JSX.Element;
+
 // @beta (undocumented)
 type FunctionProps<THook extends (props: any) => any> = Parameters<THook>[0];
 
@@ -484,6 +497,9 @@ interface UseCategoriesTreeResult {
     // (undocumented)
     rendererProps: Required<Pick<VisibilityTreeRendererProps, "getIcon" | "getSublabel">>;
 }
+
+// @public
+export function useFocusedInstancesContext(): FocusedInstancesContext;
 
 // @beta
 export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getFilteredPaths, onModelsFiltered, selectionPredicate: nodeTypeSelectionPredicate, }: UseModelsTreeProps): UseModelsTreeResult;

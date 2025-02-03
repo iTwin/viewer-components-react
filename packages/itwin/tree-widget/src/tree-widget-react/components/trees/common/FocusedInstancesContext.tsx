@@ -3,17 +3,48 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { HierarchyNode } from "@itwin/presentation-hierarchies-react";
 import { Selectable, Selectables } from "@itwin/unified-selection";
-import { focusedInstancesContext } from "./FocusedInstancesContext.js";
 
-import type { SelectionStorage } from "@itwin/presentation-hierarchies-react";
 import type { PropsWithChildren } from "react";
-import type { InstanceKey } from "@itwin/presentation-common";
-import type { FocusedInstancesContext } from "./FocusedInstancesContext.js";
 import type { GroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+import type { SelectionStorage } from "@itwin/presentation-hierarchies-react";
+import type { InstanceKey } from "@itwin/presentation-shared";
 
+/** @public */
+interface FocusedInstancesContext {
+  /**
+   * A function, returning an async iterator of items that should be focused. The function is not set
+   * when instances focus mode is disabled or selection is empty.
+   */
+  loadFocusedItems?: () => AsyncIterableIterator<InstanceKey | GroupingHierarchyNode>;
+
+  /** A flag indicating whether instances focus mode is enabled. */
+  enabled: boolean;
+
+  /** Toggle enable or disable instances focus mode. */
+  toggle: () => void;
+}
+
+const focusedInstancesContext = createContext<FocusedInstancesContext>({ enabled: false, toggle: () => {} });
+
+/**
+ * A React hook for getting focused instances context. The context must be provided
+ * using `FocusedInstancesContextProvider`.
+ *
+ * @public
+ */
+export function useFocusedInstancesContext(): FocusedInstancesContext {
+  return useContext(focusedInstancesContext);
+}
+
+/**
+ * A React context provider for setting up focused instances context, which can then be acquired
+ * using `useFocusedInstancesContext` hook.
+ *
+ * @public
+ */
 export function FocusedInstancesContextProvider({
   selectionStorage,
   imodelKey,
