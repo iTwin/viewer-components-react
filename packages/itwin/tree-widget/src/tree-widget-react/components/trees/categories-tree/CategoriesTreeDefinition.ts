@@ -246,9 +246,9 @@ async function createInstanceKeyPathsFromInstanceLabel(
   const { categoryClass } = getClassesByView(props.viewType);
   const adjustedLabel = props.label.replace(/[%_\\]/g, "\\$&");
 
-  const definitionContainersCteName = "DefinitionContainersWithLabels";
-  const categoriesCteName = "CategoriesWithLabels";
-  const subCategoriesCteName = "SubCategoriesWithLabels";
+  const CATEGORIES_WITH_LABELS_CTE = "CategoriesWithLabels";
+  const SUBCATEGORIES_WITH_LABELS_CTE = "SubCategoriesWithLabels";
+  const DEFINITION_CONTAINERS_WITH_LABELS_CTE = "DefinitionContainersWithLabels";
   const [categoryLabelSelectClause, subCategoryLabelSelectClause, definitionContainerLabelSelectClause] = await Promise.all([
     props.labelsFactory.createSelectClause({
       classAlias: "this",
@@ -266,7 +266,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
   return lastValueFrom(
     defer(() => {
       const ctes = [
-        `${categoriesCteName}(ClassName, ECInstanceId, ChildCount, DisplayLabel) as (
+        `${CATEGORIES_WITH_LABELS_CTE}(ClassName, ECInstanceId, ChildCount, DisplayLabel) as (
             SELECT
               'c',
               this.ECInstanceId,
@@ -279,7 +279,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
               this.ECInstanceId IN (${categories.join(", ")})
               GROUP BY this.ECInstanceId
           )`,
-        `${subCategoriesCteName}(ClassName, ECInstanceId, ParentId, DisplayLabel) as (
+        `${SUBCATEGORIES_WITH_LABELS_CTE}(ClassName, ECInstanceId, ParentId, DisplayLabel) as (
             SELECT
               'sc',
               this.ECInstanceId,
@@ -293,7 +293,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
           )`,
         ...(definitionContainers.length > 0
           ? [
-              `${definitionContainersCteName}(ClassName, ECInstanceId, DisplayLabel) as (
+              `${DEFINITION_CONTAINERS_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) as (
                 SELECT
                   'dc',
                   this.ECInstanceId,
@@ -312,8 +312,8 @@ async function createInstanceKeyPathsFromInstanceLabel(
               sc.ClassName AS ClassName,
               sc.ECInstanceId AS ECInstanceId
             FROM
-              ${categoriesCteName} c
-              JOIN ${subCategoriesCteName} sc ON sc.ParentId = c.ECInstanceId
+              ${CATEGORIES_WITH_LABELS_CTE} c
+              JOIN ${SUBCATEGORIES_WITH_LABELS_CTE} sc ON sc.ParentId = c.ECInstanceId
             WHERE
               c.ChildCount > 1
               AND sc.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
@@ -324,7 +324,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
               c.ClassName AS ClassName,
               c.ECInstanceId AS ECInstanceId
             FROM
-              ${categoriesCteName} c
+              ${CATEGORIES_WITH_LABELS_CTE} c
             WHERE
               c.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
 
@@ -336,7 +336,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
                     dc.ClassName AS ClassName,
                     dc.ECInstanceId AS ECInstanceId
                   FROM
-                    ${definitionContainersCteName} dc
+                    ${DEFINITION_CONTAINERS_WITH_LABELS_CTE} dc
                   WHERE
                     dc.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
                 `

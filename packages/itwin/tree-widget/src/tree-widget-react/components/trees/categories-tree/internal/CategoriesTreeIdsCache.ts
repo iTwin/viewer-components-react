@@ -56,11 +56,11 @@ export class CategoriesTreeIdsCache {
     parentDefinitionContainerExists: boolean;
     childCount: number;
   }> {
-    const categoriesCteName = "AllVisibleCategories";
-    const categoriesWithChildCountCteName = "CategoriesWithChildCount";
+    const CATEGORIES_CTE = "AllVisibleCategories";
+    const CATEGORIES_WITH_CHILD_COUNT_CTE = "CategoriesWithChildCount";
 
     const ctes = [
-      `${categoriesWithChildCountCteName}(ECInstanceId, ChildCount, ModelId) as (
+      `${CATEGORIES_WITH_CHILD_COUNT_CTE}(ECInstanceId, ChildCount, ModelId) as (
         SELECT
           this.ECInstanceId,
           COUNT(sc.ECInstanceId),
@@ -75,7 +75,7 @@ export class CategoriesTreeIdsCache {
           AND EXISTS (SELECT 1 FROM ${this._categoryElementClass} e WHERE e.Category.Id = this.ECInstanceId)
         GROUP BY this.ECInstanceId
       )`,
-      `${categoriesCteName}(ECInstanceId, CategoryModelId, CurrentModelId, ParentDefinitionContainerExists, ChildCount) AS (
+      `${CATEGORIES_CTE}(ECInstanceId, CategoryModelId, CurrentModelId, ParentDefinitionContainerExists, ChildCount) AS (
         SELECT
           this.ECInstanceId,
           this.ModelId,
@@ -83,7 +83,7 @@ export class CategoriesTreeIdsCache {
           false,
           this.ChildCount
         FROM
-          ${categoriesWithChildCountCteName} this
+          ${CATEGORIES_WITH_CHILD_COUNT_CTE} this
 
         UNION ALL
 
@@ -94,7 +94,7 @@ export class CategoriesTreeIdsCache {
           true,
           ce.ChildCount
         FROM
-          ${categoriesCteName} ce
+          ${CATEGORIES_CTE} ce
           JOIN ${DEFINITION_CONTAINER_CLASS} pe ON ce.CurrentModelId = pe.ECInstanceId
         WHERE
           NOT pe.IsPrivate
@@ -107,7 +107,7 @@ export class CategoriesTreeIdsCache {
         this.ParentDefinitionContainerExists parentDefinitionContainerExists,
         this.ChildCount childCount
       FROM
-        ${categoriesCteName} this
+        ${CATEGORIES_CTE} this
       WHERE
         this.CurrentModelId NOT IN (SELECT dm.ECInstanceId FROM ${DEFINITION_CONTAINER_CLASS} dm)
     `;
@@ -121,10 +121,10 @@ export class CategoriesTreeIdsCache {
     //  JOIN BisCore.DefinitionModel dm ON dm.ECInstanceId = ${modelIdAccessor}
     //  JOIN BisCore.DefinitionModelBreaksDownDefinitionContainer dr ON dr.SourceECInstanceId = dm.ECInstanceId
     //  JOIN BisCore.DefinitionContainer dc ON dc.ECInstanceId = dr.TargetECInstanceId
-    const definitionContainersCteName = "DefinitionContainers";
+    const DEFINITION_CONTAINERS_CTE = "DefinitionContainers";
     const ctes = [
       `
-        ${definitionContainersCteName}(ECInstanceId, ModelId) AS (
+        ${DEFINITION_CONTAINERS_CTE}(ECInstanceId, ModelId) AS (
           SELECT
             dc.ECInstanceId,
             dc.Model.Id
@@ -140,7 +140,7 @@ export class CategoriesTreeIdsCache {
             pdc.ECInstanceId,
             pdc.Model.Id
           FROM
-            ${definitionContainersCteName} cdc
+            ${DEFINITION_CONTAINERS_CTE} cdc
             JOIN ${DEFINITION_CONTAINER_CLASS} pdc ON pdc.ECInstanceId = cdc.ModelId
           WHERE
             NOT pdc.IsPrivate
@@ -148,7 +148,7 @@ export class CategoriesTreeIdsCache {
       `,
     ];
     const definitionsQuery = `
-      SELECT dc.ECInstanceId id, dc.ModelId modelId FROM ${definitionContainersCteName} dc GROUP BY dc.ECInstanceId
+      SELECT dc.ECInstanceId id, dc.ModelId modelId FROM ${DEFINITION_CONTAINERS_CTE} dc GROUP BY dc.ECInstanceId
     `;
     for await (const row of this._queryExecutor.createQueryReader({ ctes, ecsql: definitionsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
       yield { id: row.id, modelId: row.modelId };
