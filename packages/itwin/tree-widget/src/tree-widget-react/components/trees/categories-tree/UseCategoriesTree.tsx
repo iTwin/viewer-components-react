@@ -51,16 +51,15 @@ interface UseCategoriesTreeResult {
 export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: UseCategoriesTreeProps): UseCategoriesTreeResult {
   const [filteringError, setFilteringError] = useState<CategoriesTreeFilteringError | undefined>();
   const idsCacheRef = useRef<CategoriesTreeIdsCache>();
-  const activeViewRef = useRef<Viewport>();
 
+  const viewType = activeView.view.is2d() ? "2d" : "3d";
+  const iModel = activeView.iModel;
   const getCategoriesTreeIdsCache = useCallback(() => {
-    if (activeViewRef.current !== activeView || !idsCacheRef.current) {
-      const viewType = activeView.view.is2d() ? "2d" : "3d";
-      activeViewRef.current = activeView;
-      idsCacheRef.current = new CategoriesTreeIdsCache(createECSqlQueryExecutor(activeView.iModel), viewType);
+    if (!idsCacheRef.current) {
+      idsCacheRef.current = new CategoriesTreeIdsCache(createECSqlQueryExecutor(iModel), viewType);
     }
     return idsCacheRef.current;
-  }, [activeView]);
+  }, [viewType, iModel]);
 
   const visibilityHandlerFactory = useCallback(() => {
     const visibilityHandler = new CategoriesVisibilityHandler({
@@ -78,10 +77,9 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
     (props) => {
-      const viewType = activeView.view.is2d() ? "2d" : "3d";
       return new CategoriesTreeDefinition({ ...props, viewType, idsCache: getCategoriesTreeIdsCache() });
     },
-    [activeView, getCategoriesTreeIdsCache],
+    [viewType, getCategoriesTreeIdsCache],
   );
 
   const getFilteredPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
@@ -93,7 +91,6 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
     return async ({ imodelAccess }) => {
       onFeatureUsed({ featureId: "filtering", reportInteraction: true });
       try {
-        const viewType = activeView.view.is2d() ? "2d" : "3d";
         const paths = await CategoriesTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, viewType, idsCache: getCategoriesTreeIdsCache() });
         onCategoriesFiltered?.(getCategoriesFromPaths(paths));
         return paths;
@@ -107,7 +104,7 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
         return [];
       }
     };
-  }, [filter, activeView, onFeatureUsed, onCategoriesFiltered, getCategoriesTreeIdsCache]);
+  }, [filter, viewType, onFeatureUsed, onCategoriesFiltered, getCategoriesTreeIdsCache]);
 
   return {
     categoriesTreeProps: {
