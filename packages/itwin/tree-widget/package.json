@@ -32,7 +32,6 @@
     "copy:assets": "npm run -s copy:public && npm run -s copy:esm",
     "copy:public": "cpx \"./public/**/*\" ./lib/public",
     "copy:esm": "cpx \"./src/**/*.{css,scss,json}\" ./lib/esm",
-    "cover": "c8 npm run test",
     "extract-api": "betools extract-api --entry=lib/esm/tree-widget-react --apiReportFolder=./api --apiReportTempFolder=./api/temp --apiSummaryFolder=./api --includeUnexportedApis",
     "check-internal": "node ../../../scripts/checkInternal.js --apiSummary ./api/tree-widget-react.api.md",
     "lint": "npm run lint:eslint && npm run lint:stylelint",
