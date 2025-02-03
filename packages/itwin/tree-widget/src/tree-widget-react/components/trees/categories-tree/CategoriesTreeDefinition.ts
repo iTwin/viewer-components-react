@@ -250,19 +250,10 @@ async function createInstanceKeyPathsFromInstanceLabel(
   const categoriesCteName = "CategoriesWithLabels";
   const subCategoriesCteName = "SubCategoriesWithLabels";
   const [categoryLabelSelectClause, subCategoryLabelSelectClause, definitionContainerLabelSelectClause] = await Promise.all([
-    props.labelsFactory.createSelectClause({
-      classAlias: "this",
-      className: categoryClass,
-    }),
-    props.labelsFactory.createSelectClause({
-      classAlias: "this",
-      className: SUB_CATEGORY_CLASS,
-    }),
-    props.labelsFactory.createSelectClause({
-      classAlias: "this",
-      className: DEFINITION_CONTAINER_CLASS,
-    }),
-  ]);
+    categoryClass,
+    SUB_CATEGORY_CLASS,
+    DEFINITION_CONTAINER_CLASS,
+  ].map(async (className) => props.labelsFactory.createSelectClause({ classAlias: "this", className })));
   return lastValueFrom(
     defer(() => {
       const ctes = [
