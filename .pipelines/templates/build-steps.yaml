@@ -13,7 +13,9 @@ steps:
 
   - script: |
       corepack enable
-      corepack install
+    displayName: "Enable corepack"
+
+  - script: |
       pnpm config set store-dir $(pnpm_config_cache)
     displayName: "Setup pnpm"
     env:
