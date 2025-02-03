@@ -102,10 +102,10 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
   }
 
   private async getDefinitionContainerVisibility(node: HierarchyNode): Promise<VisibilityStatus["state"]> {
-    const childrenResult = this._idsCache.getAllContainedCategories(CategoriesVisibilityHandler.getInstanceIdsFromHierarchyNode(node));
+    const childrenResult = await this._idsCache.getAllContainedCategories(CategoriesVisibilityHandler.getInstanceIdsFromHierarchyNode(node));
     let hiddenCount = 0;
     let visibleCount = 0;
-    for (const categoryId of await childrenResult) {
+    for (const categoryId of childrenResult) {
       const categoryVisibility = await this.getCategoriesVisibility([categoryId]);
       if (categoryVisibility === "partial") {
         return "partial";
