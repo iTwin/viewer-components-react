@@ -12,12 +12,8 @@ steps:
 
   - script: |
       corepack enable
-      corepack prepare pnpm@9.12.3 --activate
-    displayName: "Setup pnpm"
-
-  - script: |
       pnpm config set store-dir $(pnpm_config_cache)
-    displayName: "Setup pnpm config"
+    displayName: "Setup pnpm"
 
   - script: pnpm install --frozen-lockfile
     displayName: pnpm install

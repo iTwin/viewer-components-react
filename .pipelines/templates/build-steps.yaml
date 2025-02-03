@@ -5,6 +5,10 @@ steps:
     inputs:
       version: "$(NodeVersion)"
 
+  - script: |
+      npm install -g corepack@0.31.0
+    displayName: "Update corepack"
+
   - task: Cache@2
     displayName: Cache pnpm
     inputs:
@@ -13,12 +17,8 @@ steps:
 
   - script: |
       corepack enable
-      corepack prepare pnpm@9.12.3 --activate
-    displayName: "Setup pnpm"
-
-  - script: |
       pnpm config set store-dir $(pnpm_config_cache)
-    displayName: "Setup pnpm config"
+    displayName: "Setup pnpm"
 
   - script: pnpm install --frozen-lockfile
     displayName: pnpm install
