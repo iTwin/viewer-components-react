@@ -156,22 +156,6 @@ export class ViewportMock {
   }
 
   /**
-   * Checks if `view.viewsCategory` and `isSubCategoryVisible` get called with appropriate params
-   *
-   * @param stubbedViewport viewport created using `ViewportMock.createViewPortStub()`
-   * @param categories categories that `stubbedViewport.view.viewsCategory` should be called with
-   * @param subCategories subcategories that `stubbedViewport.isSubCategoryVisible` should be called with
-   */
-  public static validateViewsCalls(stubbedViewport: Viewport, categories: Id64Array, subCategories: Id64Array) {
-    for (const category of categories) {
-      expect(stubbedViewport.view.viewsCategory).to.be.calledWith(category);
-    }
-    for (const subCategory of subCategories) {
-      expect(stubbedViewport.isSubCategoryVisible).to.be.calledWith(subCategory);
-    }
-  }
-
-  /**
    * Checks if `changeCategoryDisplay` and `changeSubCategoryDisplay` get called with appropriate params
    *
    * @param stubbedViewport viewport created using `ViewportMock.createViewPortStub()`

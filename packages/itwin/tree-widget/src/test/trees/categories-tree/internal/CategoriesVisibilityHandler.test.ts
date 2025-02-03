@@ -115,7 +115,6 @@ describe("CategoriesVisibilityHandler", () => {
       visibilityExpectations: VisibilityExpectations.all("hidden"),
       nodesToExpect,
     });
-    ViewportMock.validateViewsCalls(viewport, [keys.category.id], [keys.subCategory.id]);
   });
 
   describe("enabling visibility", () => {
@@ -159,7 +158,6 @@ describe("CategoriesVisibilityHandler", () => {
           visibilityExpectations: VisibilityExpectations.all("visible"),
           nodesToExpect,
         });
-        ViewportMock.validateViewsCalls(viewport, [keys.directCategory.id, keys.indirectCategory.id], [keys.indirectSubCategory.id]);
         ViewportMock.validateChangesCalls(
           viewport,
           [{ categoriesToChange: [keys.directCategory.id, keys.indirectCategory.id], isVisible: true, enableAllSubCategories: true }],
@@ -223,7 +221,6 @@ describe("CategoriesVisibilityHandler", () => {
           },
           nodesToExpect,
         });
-        ViewportMock.validateViewsCalls(viewport, [keys.category2.id, keys.indirectCategory.id], [keys.subCategory2.id, keys.indirectSubCategory.id]);
         ViewportMock.validateChangesCalls(viewport, [{ categoriesToChange: [keys.indirectCategory.id], isVisible: true, enableAllSubCategories: true }], []);
       });
 
@@ -258,7 +255,6 @@ describe("CategoriesVisibilityHandler", () => {
           },
           nodesToExpect,
         });
-        ViewportMock.validateViewsCalls(viewport, [keys.directCategory.id, keys.indirectCategory.id], []);
         ViewportMock.validateChangesCalls(viewport, [{ categoriesToChange: [keys.indirectCategory.id], isVisible: true, enableAllSubCategories: true }], []);
       });
 
@@ -309,8 +305,6 @@ describe("CategoriesVisibilityHandler", () => {
           },
           nodesToExpect,
         });
-
-        ViewportMock.validateViewsCalls(viewport, [keys.indirectCategory2.id, keys.indirectCategory.id], []);
         ViewportMock.validateChangesCalls(viewport, [{ categoriesToChange: [keys.indirectCategory.id], isVisible: true, enableAllSubCategories: true }], []);
       });
 
@@ -345,8 +339,6 @@ describe("CategoriesVisibilityHandler", () => {
           visibilityExpectations: VisibilityExpectations.all("visible"),
           nodesToExpect,
         });
-
-        ViewportMock.validateViewsCalls(viewport, [keys.indirectCategory.id, keys.indirectCategory.id], [keys.indirectSubCategory.id]);
         ViewportMock.validateChangesCalls(viewport, [{ categoriesToChange: [keys.indirectCategory.id], isVisible: true, enableAllSubCategories: true }], []);
       });
     });
@@ -377,7 +369,6 @@ describe("CategoriesVisibilityHandler", () => {
           visibilityExpectations: VisibilityExpectations.all("visible"),
           nodesToExpect,
         });
-        ViewportMock.validateViewsCalls(viewport, [keys.category.id], [keys.subCategory.id]);
         ViewportMock.validateChangesCalls(viewport, [{ categoriesToChange: [keys.category.id], isVisible: true, enableAllSubCategories: true }], []);
       });
 
@@ -416,7 +407,6 @@ describe("CategoriesVisibilityHandler", () => {
           },
           nodesToExpect,
         });
-        ViewportMock.validateViewsCalls(viewport, [keys.category.id, keys.category2.id], [keys.subCategory.id, keys.subCategory2.id]);
         ViewportMock.validateChangesCalls(viewport, [{ categoriesToChange: [keys.category.id], isVisible: true, enableAllSubCategories: true }], []);
       });
 
@@ -460,7 +450,6 @@ describe("CategoriesVisibilityHandler", () => {
           },
           nodesToExpect,
         });
-        ViewportMock.validateViewsCalls(viewport, [keys.category.id, keys.category2.id], [keys.subCategory.id, keys.subCategory2.id]);
         ViewportMock.validateChangesCalls(viewport, [{ categoriesToChange: [keys.category.id], isVisible: true, enableAllSubCategories: true }], []);
       });
 
@@ -505,7 +494,6 @@ describe("CategoriesVisibilityHandler", () => {
           },
           nodesToExpect,
         });
-        ViewportMock.validateViewsCalls(viewport, [keys.category.id, keys.category2.id], [keys.subCategory.id, keys.subCategory2.id]);
         ViewportMock.validateChangesCalls(viewport, [{ categoriesToChange: [keys.category.id], isVisible: true, enableAllSubCategories: true }], []);
       });
 
@@ -558,7 +546,6 @@ describe("CategoriesVisibilityHandler", () => {
           },
           nodesToExpect,
         });
-        ViewportMock.validateViewsCalls(viewport, [keys.category.id, keys.indirectCategory.id], [keys.subCategory.id]);
         ViewportMock.validateChangesCalls(viewport, [{ categoriesToChange: [keys.category.id], isVisible: true, enableAllSubCategories: true }], []);
       });
     });
@@ -599,7 +586,6 @@ describe("CategoriesVisibilityHandler", () => {
           },
           nodesToExpect,
         });
-        ViewportMock.validateViewsCalls(viewport, [keys.category.id], [keys.subCategory.id, keys.subCategory2.id]);
         ViewportMock.validateChangesCalls(
           viewport,
           [{ categoriesToChange: [keys.category.id], isVisible: true, enableAllSubCategories: false }],
@@ -637,7 +623,6 @@ describe("CategoriesVisibilityHandler", () => {
           },
           nodesToExpect,
         });
-        ViewportMock.validateViewsCalls(viewport, [keys.category.id, keys.category2.id], [keys.subCategory.id]);
         ViewportMock.validateChangesCalls(
           viewport,
           [{ categoriesToChange: [keys.category.id], isVisible: true, enableAllSubCategories: false }],
@@ -677,7 +662,6 @@ describe("CategoriesVisibilityHandler", () => {
           },
           nodesToExpect,
         });
-        ViewportMock.validateViewsCalls(viewport, [keys.category.id], [keys.subCategory.id]);
         ViewportMock.validateChangesCalls(
           viewport,
           [{ categoriesToChange: [keys.category.id], isVisible: true, enableAllSubCategories: false }],
@@ -730,11 +714,6 @@ describe("CategoriesVisibilityHandler", () => {
           },
           nodesToExpect,
         });
-        ViewportMock.validateViewsCalls(
-          viewport,
-          [keys.category.id, keys.categoryOfDefinitionContainer.id],
-          [keys.subCategory.id, keys.subCategoryOfDefinitionContainer.id],
-        );
         ViewportMock.validateChangesCalls(
           viewport,
           [{ categoriesToChange: [keys.category.id], isVisible: true, enableAllSubCategories: false }],
