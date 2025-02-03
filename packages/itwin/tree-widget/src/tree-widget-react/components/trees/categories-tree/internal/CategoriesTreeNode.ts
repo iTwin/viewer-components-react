@@ -15,7 +15,7 @@ interface CategoriesTreeNode {
  */
 export namespace CategoriesTreeNode {
   /**
-   * Determines if node represents a definitionContainer.
+   * Determines if node represents a definition container.
    */
   export const isDefinitionContainerNode = (node: Pick<CategoriesTreeNode, "extendedData">) =>
     node.extendedData && "isDefinitionContainer" in node.extendedData && !!node.extendedData.isDefinitionContainer;
