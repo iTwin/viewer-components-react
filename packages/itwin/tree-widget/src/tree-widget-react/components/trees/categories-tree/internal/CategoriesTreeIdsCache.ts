@@ -338,15 +338,13 @@ export class CategoriesTreeIdsCache {
   }
 
   public async getRootDefinitionContainersAndCategories(): Promise<{ categories: Id64Array; definitionContainers: Id64Array }> {
-    const modelsCategoriesInfo = await this.getModelsCategoriesInfo();
+    const [modelsCategoriesInfo, definitionContainersInfo] = await Promise.all([this.getModelsCategoriesInfo(), this.getDefinitionContainersInfo()]);
     const result = { definitionContainers: new Array<Id64String>(), categories: new Array<Id64String>() };
     for (const modelCategoriesInfo of modelsCategoriesInfo.values()) {
       if (!modelCategoriesInfo.parentDefinitionContainerExists) {
         result.categories.push(...modelCategoriesInfo.childCategories.map((childCategory) => childCategory.id));
       }
     }
-
-    const definitionContainersInfo = await this.getDefinitionContainersInfo();
 
     for (const [definitionContainerId, definitionContainerInfo] of definitionContainersInfo) {
       if (!definitionContainerInfo.parentDefinitionContainerExists) {
