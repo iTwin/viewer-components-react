@@ -1,14 +1,14 @@
 steps:
-    # Workaround for https://github.com/nodejs/corepack/issues/612
-  - script: |
-      npm install corepack@^0.31.0
-    displayName: "Install Corepack"
-
   # 1. Configure node
   - task: UseNode@1
     displayName: "Use Node $(NodeVersion)"
     inputs:
       version: "$(NodeVersion)"
+
+  # Workaround for https://github.com/nodejs/corepack/issues/612
+  - script: |
+      npm install corepack@^0.31.0
+    displayName: "Install Corepack"
 
   - task: Cache@2
     displayName: Cache pnpm
@@ -18,7 +18,6 @@ steps:
 
   - script: |
       corepack enable
-      corepack prepare pnpm@9.15.0 --activate
     displayName: "Setup pnpm"
 
   - script: |
