@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { BeEvent } from "@itwin/core-bentley";
-import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { enableCategoryDisplay, enableSubCategoryDisplay } from "../../common/CategoriesVisibilityUtils.js";
 import { createVisibilityStatus } from "../../common/Tooltip.js";
@@ -96,9 +95,24 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
       return categoryOverrideResult;
     }
 
-    const subcategoryIds = CategoriesVisibilityHandler.getInstanceIdsFromHierarchyNode(node);
-    const isVisible = subcategoryIds.every((id) => this._viewport.isSubCategoryVisible(id)) && this._viewport.view.viewsCategory(parentCategoryId);
-    return isVisible ? "visible" : "hidden";
+    if (!this._viewport.view.viewsCategory(parentCategoryId)) {
+      return "hidden";
+    }
+    const subCategoryIds = CategoriesVisibilityHandler.getInstanceIdsFromHierarchyNode(node);
+    let visibleCount = 0;
+    let hiddenCount = 0;
+    for (const subCategoryId of subCategoryIds) {
+      const isVisible = this._viewport.isSubCategoryVisible(subCategoryId);
+      if (isVisible) {
+        ++visibleCount;
+      } else {
+        ++hiddenCount;
+      }
+      if (visibleCount > 0 && hiddenCount > 0) {
+        return "partial";
+      }
+    }
+    return visibleCount > 0 ? "visible" : "hidden";
   }
 
   private async getDefinitionContainerVisibility(node: HierarchyNode): Promise<VisibilityStatus["state"]> {
@@ -130,8 +144,21 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
     if (overrideResult !== "none") {
       return overrideResult;
     }
+    let visibleCount = 0;
+    let hiddenCount = 0;
+    for (const categoryId of categoryIds) {
+      const isVisible = this._viewport.view.viewsCategory(categoryId);
+      if (isVisible) {
+        ++visibleCount;
+      } else {
+        ++hiddenCount;
+      }
+      if (visibleCount > 0 && hiddenCount > 0) {
+        return "partial";
+      }
+    }
 
-    if (!categoryIds.every((id) => this._viewport.view.viewsCategory(id))) {
+    if (hiddenCount > 0) {
       return "hidden";
     }
 
@@ -160,12 +187,10 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
 
     for (const currentOverride of this._viewport.perModelCategoryVisibility) {
       if (categoryIds.includes(currentOverride.categoryId)) {
-        const currentVisibilityOverride = this._viewport.perModelCategoryVisibility.getOverride(currentOverride.modelId, currentOverride.categoryId);
-
-        if (currentVisibilityOverride === PerModelCategoryVisibility.Override.Hide) {
-          ++hideOverrides;
-        } else if (currentVisibilityOverride === PerModelCategoryVisibility.Override.Show) {
+        if (currentOverride.visible) {
           ++showOverrides;
+        } else {
+          ++hideOverrides;
         }
 
         if (showOverrides > 0 && hideOverrides > 0) {
