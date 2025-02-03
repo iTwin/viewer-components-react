@@ -4,6 +4,7 @@ public;const;CategoriesTreeComponent
 public;function;createTreeWidget
 beta;const;ExternalSourcesTreeComponent
 beta;class;FilterLimitExceededError
+public;function;FocusedInstancesContextProvider
 beta;interface;HierarchyVisibilityHandler
 beta;const;IModelContentTreeComponent
 public;const;ModelsTreeComponent
@@ -18,6 +19,7 @@ public;function;TreeWidgetComponent
 beta;function;TreeWithHeader
 beta;function;useCategoriesTree
 public;function;useCategoriesTreeButtonProps
+public;function;useFocusedInstancesContext
 beta;function;useModelsTree
 public;function;useModelsTreeButtonProps
 beta;interface;VisibilityStatus
