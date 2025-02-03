@@ -73,7 +73,7 @@ describe("Categories tree", () => {
       });
     });
 
-    it("does not show definitionContainer when it doesn't contain category", async function () {
+    it("does not show definition container when it doesn't contain category", async function () {
       const { imodel, ...keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
@@ -97,7 +97,7 @@ describe("Categories tree", () => {
       });
     });
 
-    it("does not show definitionContainer when it contains definitionContainer without categories", async function () {
+    it("does not show definition container when it contains definition container without categories", async function () {
       const { imodel } = await buildIModel(this, async (builder) => {
         insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
@@ -111,7 +111,7 @@ describe("Categories tree", () => {
       });
     });
 
-    it("does not show definitionContainer or category when category is private", async function () {
+    it("does not show definition container or category when category is private", async function () {
       const { imodel } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
@@ -127,7 +127,7 @@ describe("Categories tree", () => {
       });
     });
 
-    it("does not show definitionContainer or category when definitionContainer is private", async function () {
+    it("does not show definition container or category when definition container is private", async function () {
       const { imodel } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer", isPrivate: true });
@@ -143,7 +143,7 @@ describe("Categories tree", () => {
       });
     });
 
-    it("does not show definitionContainers or categories when definitionContainer contains another definitionContainer that is private", async function () {
+    it("does not show definition containers or categories when definition container contains another definition container that is private", async function () {
       const { imodel } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
@@ -166,7 +166,7 @@ describe("Categories tree", () => {
       });
     });
 
-    it("shows definitionContainer when it contains category", async function () {
+    it("shows definition container when it contains category", async function () {
       const { imodel, ...keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
@@ -196,7 +196,7 @@ describe("Categories tree", () => {
       });
     });
 
-    it("shows all definitionContainers when they contain category directly or indirectly", async function () {
+    it("shows all definition containers when they contain category directly or indirectly", async function () {
       const { imodel, ...keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
@@ -234,7 +234,7 @@ describe("Categories tree", () => {
       });
     });
 
-    it("shows root categories and definitionContainer", async function () {
+    it("shows root categories and definition container", async function () {
       const { imodel, ...keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });

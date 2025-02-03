@@ -46,7 +46,7 @@ describe("Categories tree", () => {
       await terminatePresentationTesting();
     });
 
-    it("finds definitionContainer by label", async function () {
+    it("finds definition container by label", async function () {
       const { imodel, keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer", userLabel: "Test" });
@@ -69,7 +69,7 @@ describe("Categories tree", () => {
       ).to.deep.eq([{ path: [keys.definitionContainer], options: { autoExpand: true } }]);
     });
 
-    it("finds definitionContainer by label when it is contained by another definitionContainer", async function () {
+    it("finds definition container by label when it is contained by another definition container", async function () {
       const { imodel, keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
@@ -99,7 +99,7 @@ describe("Categories tree", () => {
       ).to.deep.eq([{ path: [keys.definitionContainer, keys.definitionContainerChild], options: { autoExpand: true } }]);
     });
 
-    it("does not find definitionContainer by label when it doesn't contain categories", async function () {
+    it("does not find definition container by label when it doesn't contain categories", async function () {
       const { imodel } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer", userLabel: "Test" });
@@ -122,7 +122,7 @@ describe("Categories tree", () => {
       ).to.deep.eq([]);
     });
 
-    it("finds category by label when it is contained by definitionContainer", async function () {
+    it("finds category by label when it is contained by definition container", async function () {
       const { imodel, keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
@@ -145,7 +145,7 @@ describe("Categories tree", () => {
       ).to.deep.eq([{ path: [keys.definitionContainer, keys.category], options: { autoExpand: true } }]);
     });
 
-    it("finds subCategory by label when its parent category is contained by definitionContainer", async function () {
+    it("finds subCategory by label when its parent category is contained by definition container", async function () {
       const { imodel, keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });

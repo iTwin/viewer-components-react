@@ -119,7 +119,7 @@ describe("CategoriesVisibilityHandler", () => {
 
   describe("enabling visibility", () => {
     describe("definitionContainers", () => {
-      it("showing definitionContainer makes it and all of its contained elements visible", async function () {
+      it("showing definition container makes it and all of its contained elements visible", async function () {
         const { imodel, ...keys } = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
@@ -165,7 +165,7 @@ describe("CategoriesVisibilityHandler", () => {
         );
       });
 
-      it("showing definitionContainer makes it and all of its contained elements visible and doesn't affect non contained definitionContainers", async function () {
+      it("showing definition container makes it and all of its contained elements visible and doesn't affect non contained definition containers", async function () {
         const { imodel, ...keys } = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
@@ -224,7 +224,7 @@ describe("CategoriesVisibilityHandler", () => {
         ViewportMock.validateChangesCalls(viewport, [{ categoriesToChange: [keys.indirectCategory.id], isVisible: true, enableAllSubCategories: true }], []);
       });
 
-      it("showing definitionContainer makes it and all of its contained elements visible, and parent container partially visible if it has more direct child categories", async function () {
+      it("showing definition container makes it and all of its contained elements visible, and parent container partially visible if it has more direct child categories", async function () {
         const { imodel, ...keys } = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
@@ -258,7 +258,7 @@ describe("CategoriesVisibilityHandler", () => {
         ViewportMock.validateChangesCalls(viewport, [{ categoriesToChange: [keys.indirectCategory.id], isVisible: true, enableAllSubCategories: true }], []);
       });
 
-      it("showing definitionContainer makes it and all of its contained elements visible, and parent container partially visible if it has more definitionContainers", async function () {
+      it("showing definition container makes it and all of its contained elements visible, and parent container partially visible if it has more definition containers", async function () {
         const { imodel, ...keys } = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
@@ -308,7 +308,7 @@ describe("CategoriesVisibilityHandler", () => {
         ViewportMock.validateChangesCalls(viewport, [{ categoriesToChange: [keys.indirectCategory.id], isVisible: true, enableAllSubCategories: true }], []);
       });
 
-      it("showing child definitionContainer makes it, all of its contained elements and its parent definitionContainer visible", async function () {
+      it("showing child definition container makes it, all of its contained elements and its parent definition container visible", async function () {
         const { imodel, ...keys } = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
@@ -410,7 +410,7 @@ describe("CategoriesVisibilityHandler", () => {
         ViewportMock.validateChangesCalls(viewport, [{ categoriesToChange: [keys.category.id], isVisible: true, enableAllSubCategories: true }], []);
       });
 
-      it("showing category makes it, all of its contained subCategories visible and doesn't affect non related definitionContainer", async function () {
+      it("showing category makes it, all of its contained subCategories visible and doesn't affect non related definition container", async function () {
         const { imodel, ...keys } = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
@@ -497,7 +497,7 @@ describe("CategoriesVisibilityHandler", () => {
         ViewportMock.validateChangesCalls(viewport, [{ categoriesToChange: [keys.category.id], isVisible: true, enableAllSubCategories: true }], []);
       });
 
-      it("showing category makes it and all of its subCategories visible, and parent container partially visible if it has more definitionContainers", async function () {
+      it("showing category makes it and all of its subCategories visible, and parent container partially visible if it has more definition containers", async function () {
         const { imodel, ...keys } = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
@@ -669,7 +669,7 @@ describe("CategoriesVisibilityHandler", () => {
         );
       });
 
-      it("showing subCategory makes it visible and doesn't affect non related definitionContainers", async function () {
+      it("showing subCategory makes it visible and doesn't affect non related definition containers", async function () {
         const { imodel, ...keys } = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
@@ -725,7 +725,7 @@ describe("CategoriesVisibilityHandler", () => {
 
   describe("disabling visibility", () => {
     describe("definitionContainers", () => {
-      it("hiding definitionContainer makes it and all of its contained elements hidden", async function () {
+      it("hiding definition container makes it and all of its contained elements hidden", async function () {
         const { imodel, ...keys } = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
@@ -779,7 +779,7 @@ describe("CategoriesVisibilityHandler", () => {
         );
       });
 
-      it("hiding definitionContainer makes it and all of its contained elements hidden and doesn't affect non contained definitionContainers", async function () {
+      it("hiding definition container makes it and all of its contained elements hidden and doesn't affect non contained definition containers", async function () {
         const { imodel, ...keys } = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
@@ -847,7 +847,7 @@ describe("CategoriesVisibilityHandler", () => {
         ViewportMock.validateChangesCalls(viewport, [{ categoriesToChange: [keys.indirectCategory.id], isVisible: false, enableAllSubCategories: false }], []);
       });
 
-      it("hiding definitionContainer makes it and all of its contained elements hidden, and parent container partially visible if it has more direct child categories", async function () {
+      it("hiding definition container makes it and all of its contained elements hidden, and parent container partially visible if it has more direct child categories", async function () {
         const { imodel, ...keys } = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
@@ -890,7 +890,7 @@ describe("CategoriesVisibilityHandler", () => {
         ViewportMock.validateChangesCalls(viewport, [{ categoriesToChange: [keys.indirectCategory.id], isVisible: false, enableAllSubCategories: false }], []);
       });
 
-      it("hiding definitionContainer makes it and all of its contained elements hidden, and parent container partially visible if it has more definitionContainers", async function () {
+      it("hiding definition container makes it and all of its contained elements hidden, and parent container partially visible if it has more definition containers", async function () {
         const { imodel, ...keys } = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
@@ -949,7 +949,7 @@ describe("CategoriesVisibilityHandler", () => {
         ViewportMock.validateChangesCalls(viewport, [{ categoriesToChange: [keys.indirectCategory.id], isVisible: false, enableAllSubCategories: false }], []);
       });
 
-      it("hiding child definitionContainer makes it, all of its contained elements and its parent definitionContainer hidden", async function () {
+      it("hiding child definition container makes it, all of its contained elements and its parent definition container hidden", async function () {
         const { imodel, ...keys } = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
@@ -1079,7 +1079,7 @@ describe("CategoriesVisibilityHandler", () => {
         ViewportMock.validateChangesCalls(viewport, [{ categoriesToChange: [keys.category.id], isVisible: false, enableAllSubCategories: false }], []);
       });
 
-      it("hiding category makes it, all of its contained subCategories hidden and doesn't affect non related definitionContainer", async function () {
+      it("hiding category makes it, all of its contained subCategories hidden and doesn't affect non related definition container", async function () {
         const { imodel, ...keys } = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
@@ -1185,7 +1185,7 @@ describe("CategoriesVisibilityHandler", () => {
         ViewportMock.validateChangesCalls(viewport, [{ categoriesToChange: [keys.category.id], isVisible: false, enableAllSubCategories: false }], []);
       });
 
-      it("hiding category makes it and all of its subCategories hidden, and parent container partially visible if it has more definitionContainers", async function () {
+      it("hiding category makes it and all of its subCategories hidden, and parent container partially visible if it has more definition containers", async function () {
         const { imodel, ...keys } = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
@@ -1382,7 +1382,7 @@ describe("CategoriesVisibilityHandler", () => {
         ViewportMock.validateChangesCalls(viewport, [], [{ subCategoryId: keys.subCategory.id, isVisible: false }]);
       });
 
-      it("hiding subCategory makes it hidden and doesn't affect non related definitionContainers", async function () {
+      it("hiding subCategory makes it hidden and doesn't affect non related definition containers", async function () {
         const { imodel, ...keys } = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });

@@ -42,7 +42,7 @@ describe("CategoriesTreeIdsCache", () => {
   });
 
   describe("getDirectChildDefinitionContainersAndCategories", () => {
-    it("when definitionContainer contains nothing", async function () {
+    it("when definition container contains nothing", async function () {
       const { imodel, ...keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -75,7 +75,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
     });
 
-    it("when definitionContainer contains definitionContainer, that has categories", async function () {
+    it("when definition container contains definition container, that has categories", async function () {
       const { imodel, ...keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -94,7 +94,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
     });
 
-    it("when definitionContainer contains categories", async function () {
+    it("when definition container contains categories", async function () {
       const { imodel, ...keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -111,7 +111,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
     });
 
-    it("when definitionContainer contains categories and definitionContainers that contain nothing", async function () {
+    it("when definition container contains categories and definition containers that contain nothing", async function () {
       const { imodel, ...keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -130,7 +130,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
     });
 
-    it("when definitionContainer contains categories and definitionContainers that contain categories", async function () {
+    it("when definition container contains categories and definition containers that contain categories", async function () {
       const { imodel, ...keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -152,7 +152,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
     });
 
-    it("when definitionContainer with categories is contained by definitionContainer", async function () {
+    it("when definition container with categories is contained by definition container", async function () {
       const { imodel, ...keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -174,7 +174,7 @@ describe("CategoriesTreeIdsCache", () => {
   });
 
   describe("getAllContainedCategories", () => {
-    it("when definitionContainer contains nothing", async function () {
+    it("when definition container contains nothing", async function () {
       const { imodel, ...keys } = await buildIModel(this, async (builder) => {
         insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -186,7 +186,7 @@ describe("CategoriesTreeIdsCache", () => {
       expect(await idsCache.getAllContainedCategories([keys.definitionContainer.id])).to.deep.eq([]);
     });
 
-    it("when definitionContainer contains definitionContainer that has categories", async function () {
+    it("when definition container contains definition container that has categories", async function () {
       const { imodel, ...keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -202,7 +202,7 @@ describe("CategoriesTreeIdsCache", () => {
       expect(await idsCache.getAllContainedCategories([keys.definitionContainerRoot.id])).to.deep.eq([keys.category.id]);
     });
 
-    it("when definitionContainer contains categories", async function () {
+    it("when definition container contains categories", async function () {
       const { imodel, ...keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -216,7 +216,7 @@ describe("CategoriesTreeIdsCache", () => {
       expect(await idsCache.getAllContainedCategories([keys.definitionContainer.id])).to.deep.eq([keys.category.id]);
     });
 
-    it("when definitionContainer contains categories and definitionContainers that contain categories", async function () {
+    it("when definition container contains categories and definition containers that contain categories", async function () {
       const { imodel, ...keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -261,7 +261,7 @@ describe("CategoriesTreeIdsCache", () => {
         expect(await idsCache.getInstanceKeyPaths({ subCategoryId: keys.subCategory.id })).to.deep.eq([keys.category, keys.subCategory]);
       });
 
-      it("with definitionContainer > category > subCategory hierarchy", async function () {
+      it("with definition container > category > subCategory hierarchy", async function () {
         const { imodel, ...keys } = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainer = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -280,7 +280,7 @@ describe("CategoriesTreeIdsCache", () => {
         ]);
       });
 
-      it("with definitionContainer > definitionContainer > category > subCategory hierarchy", async function () {
+      it("with definition container > definition container > category > subCategory hierarchy", async function () {
         const { imodel, ...keys } = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -331,7 +331,7 @@ describe("CategoriesTreeIdsCache", () => {
         expect(await idsCache.getInstanceKeyPaths({ categoryId: keys.category.id })).to.deep.eq([keys.category]);
       });
 
-      it("with definitionContainer > category hierarchy", async function () {
+      it("with definition container > category hierarchy", async function () {
         const { imodel, ...keys } = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainer = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -345,7 +345,7 @@ describe("CategoriesTreeIdsCache", () => {
         expect(await idsCache.getInstanceKeyPaths({ categoryId: keys.category.id })).to.deep.eq([keys.definitionContainer, keys.category]);
       });
 
-      it("with definitionContainer > definitionContainer > category hierarchy", async function () {
+      it("with definition container > definition container > category hierarchy", async function () {
         const { imodel, ...keys } = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -366,8 +366,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
     });
 
-    describe("from definitionContainer", () => {
-      it("when definitionContainer doesn't exist", async function () {
+    describe("from definition container", () => {
+      it("when definition container doesn't exist", async function () {
         const { imodel } = await buildIModel(this, async (builder) => {
           insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         });
@@ -375,7 +375,7 @@ describe("CategoriesTreeIdsCache", () => {
         expect(await idsCache.getInstanceKeyPaths({ definitionContainerId: "0x123" })).to.deep.eq([]);
       });
 
-      it("when only a single definitionContainer exists", async function () {
+      it("when only a single definition container exists", async function () {
         const { imodel, ...keys } = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainer = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -389,7 +389,7 @@ describe("CategoriesTreeIdsCache", () => {
         expect(await idsCache.getInstanceKeyPaths({ definitionContainerId: keys.definitionContainer.id })).to.deep.eq([keys.definitionContainer]);
       });
 
-      it("with definitionContainer > definitionContainer hierarchy", async function () {
+      it("with definition container > definition container hierarchy", async function () {
         const { imodel, ...keys } = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -411,7 +411,7 @@ describe("CategoriesTreeIdsCache", () => {
   });
 
   describe("getAllDefinitionContainersAndCategories", () => {
-    it("hierarchy without categories or definitionContainers", async function () {
+    it("hierarchy without categories or definition containers", async function () {
       const { imodel } = await buildIModel(this, async (builder) => {
         insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
       });
@@ -436,7 +436,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
     });
 
-    it("with category and definitionContainers (that dont contain categories)", async function () {
+    it("with category and definition containers (that dont contain categories)", async function () {
       const { imodel, ...keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -455,7 +455,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
     });
 
-    it("with definitionContainer that contains definitionContainer that contains categories", async function () {
+    it("with definition container that contains definition container that contains categories", async function () {
       const { imodel, ...keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -477,7 +477,7 @@ describe("CategoriesTreeIdsCache", () => {
       expect(result.definitionContainers.every((dc) => expectedResult.definitionContainers.includes(dc))).to.be.true;
     });
 
-    it("with definitionContainer that contains category", async function () {
+    it("with definition container that contains category", async function () {
       const { imodel, ...keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -494,7 +494,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
     });
 
-    it("with definitionContainer that contains category and definitionContainer that doesn't contain category", async function () {
+    it("with definition container that contains category and definition container that doesn't contain category", async function () {
       const { imodel, ...keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -513,7 +513,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
     });
 
-    it("with definitionContainer that contains categories and definitionContainers that contain categories", async function () {
+    it("with definition container that contains categories and definition containers that contain categories", async function () {
       const { imodel, ...keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -540,7 +540,7 @@ describe("CategoriesTreeIdsCache", () => {
   });
 
   describe("getRootDefinitionContainersAndCategories", () => {
-    it("hierarchy without categories or definitionContainers", async function () {
+    it("hierarchy without categories or definition containers", async function () {
       const { imodel } = await buildIModel(this, async (builder) => {
         insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
       });
@@ -548,7 +548,7 @@ describe("CategoriesTreeIdsCache", () => {
       expect(await idsCache.getRootDefinitionContainersAndCategories()).to.deep.eq({ categories: [], definitionContainers: [] });
     });
 
-    it("with category and definitionContainer that doesn't contain anything", async function () {
+    it("with category and definition container that doesn't contain anything", async function () {
       const { imodel, ...keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -565,7 +565,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
     });
 
-    it("with category and definitionContainers that contains definitionContainer that doesn't contain categories", async function () {
+    it("with category and definition containers that contains definition container that doesn't contain categories", async function () {
       const { imodel, ...keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -584,7 +584,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
     });
 
-    it("with definitionContainer that contains definitionContainer that contains categories", async function () {
+    it("with definition container that contains definition container that contains categories", async function () {
       const { imodel, ...keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -603,7 +603,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
     });
 
-    it("with definitionContainer that containts category", async function () {
+    it("with definition container that containts category", async function () {
       const { imodel, ...keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -620,7 +620,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
     });
 
-    it("with definitionContainers and categories", async function () {
+    it("with definition containers and categories", async function () {
       const { imodel, ...keys } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
