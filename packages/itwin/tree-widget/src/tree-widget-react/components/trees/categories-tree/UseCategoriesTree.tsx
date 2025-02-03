@@ -92,7 +92,7 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
       onFeatureUsed({ featureId: "filtering", reportInteraction: true });
       try {
         const paths = await CategoriesTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, viewType, idsCache: getCategoriesTreeIdsCache() });
-        onCategoriesFiltered?.(getCategoriesFromPaths(paths));
+        onCategoriesFiltered?.(await getCategoriesFromPaths(paths, getCategoriesTreeIdsCache()));
         return paths;
       } catch (e) {
         const newError = e instanceof FilterLimitExceededError ? "tooManyFilterMatches" : "unknownFilterError";
@@ -122,7 +122,7 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
   };
 }
 
-function getCategoriesFromPaths(paths: HierarchyFilteringPaths): CategoryInfo[] | undefined {
+async function getCategoriesFromPaths(paths: HierarchyFilteringPaths, idsCache: CategoriesTreeIdsCache): Promise<CategoryInfo[] | undefined> {
   if (!paths) {
     return undefined;
   }
@@ -138,7 +138,18 @@ function getCategoriesFromPaths(paths: HierarchyFilteringPaths): CategoryInfo[] 
     let subCategory: HierarchyNodeIdentifier | undefined;
     const lastNode = currPath[currPath.length - 1];
 
-    if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(lastNode) || lastNode.className === DEFINITION_CONTAINER_CLASS) {
+    if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(lastNode)) {
+      continue;
+    }
+
+    if (lastNode.className === DEFINITION_CONTAINER_CLASS) {
+      const definitionContainerCategories = await idsCache.getAllContainedCategories([lastNode.id]);
+      for (const categoryId of definitionContainerCategories) {
+        const value = categories.get(categoryId);
+        if (value === undefined) {
+          categories.set(categoryId, []);
+        }
+      }
       continue;
     }
 
