@@ -11,7 +11,7 @@ pr:
 
 variables:
   - name: NodeVersion
-    value: 20.x
+    value: 20.18.2
   - name: pnpm_config_cache
     value: $(Pipeline.Workspace)/.pnpm-store
 
