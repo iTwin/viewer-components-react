@@ -19,7 +19,7 @@ variables:
   - name: REPO_URL
     value: github.com/iTwin/viewer-components-react
   - name: NodeVersion
-    value: 20.x
+    value: 22.x
   - name: pnpm_config_cache
     value: $(Pipeline.Workspace)/.pnpm-store
 

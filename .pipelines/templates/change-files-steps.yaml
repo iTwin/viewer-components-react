@@ -17,9 +17,13 @@ steps:
 
   - script: |
       corepack enable
-      corepack prepare pnpm@9.15.5+sha1.cb1f6372ef64e2ba352f2f46325adead1c99ff8f --activate
+    displayName: "Enable corepack"
+
+  - script: |
       pnpm config set store-dir $(pnpm_config_cache)
     displayName: "Setup pnpm"
+    env:
+      COREPACK_INTEGRITY_KEYS: 0
 
   - script: pnpm install --no-frozen-lockfile #TODO remove --no-frozen-lockfile back when corepack issue is solved
     displayName: pnpm install
