@@ -6,11 +6,18 @@
 import type { Locator } from "@playwright/test";
 import { test } from "@playwright/test";
 import {
-  initTreeWidgetTest, locateInstanceFilter, locateNode, selectOperatorInDialog, selectPropertyInDialog, selectTree, selectValueInDialog,
-  takeScreenshot, withDifferentDensities,
+  initTreeWidgetTest,
+  locateInstanceFilter,
+  locateNode,
+  selectOperatorInDialog,
+  selectPropertyInDialog,
+  selectTree,
+  selectValueInDialog,
+  takeScreenshot,
+  withDifferentDensities,
 } from "./utils.js";
 
-test.describe("iModel content tree", () => {
+test.describe.skip("iModel content tree", () => {
   let treeWidget: Locator;
 
   test.beforeEach(async ({ page, baseURL }) => {

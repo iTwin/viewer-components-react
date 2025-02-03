@@ -2,32 +2,31 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
+/* eslint-disable @itwin/no-internal */
 
 import { useMemo } from "react";
-import { useMultiCheckboxHandler } from "../UseMultiCheckboxHandler.js";
 import { TreeRenderer } from "./TreeRenderer.js";
+import { useVisibilityButtonHandler } from "./UseVisibilityButtonHandler.js";
 
 import type { TreeRendererProps } from "./TreeRenderer.js";
-import type { TreeCheckboxProps } from "./TreeNodeCheckbox.js";
-
+import type { TreeItemVisibilityButtonProps } from "./TreeNodeVisibilityButton.js";
 /** @beta */
-export type VisibilityTreeRendererProps = TreeRendererProps & TreeCheckboxProps;
+export type VisibilityTreeRendererProps = TreeRendererProps & TreeItemVisibilityButtonProps;
 
 /**
  * Tree renderer that renders tree nodes with eye checkboxes for controlling visibility of instances represented by tree nodes.
  * @beta
  */
-export function VisibilityTreeRenderer({ getCheckboxState, onCheckboxClicked: onClick, ...props }: VisibilityTreeRendererProps) {
-  const { onCheckboxClicked } = useMultiCheckboxHandler({ rootNodes: props.rootNodes, isNodeSelected: props.isNodeSelected, onClick });
-
-  const checkboxProps: TreeRendererProps["checkboxProps"] = useMemo(
+export function VisibilityTreeRenderer({ getVisibilityButtonState, onVisibilityButtonClick: onClick, ...props }: VisibilityTreeRendererProps) {
+  const { onVisibilityButtonClick } = useVisibilityButtonHandler({ rootNodes: props.rootNodes, isNodeSelected: props.isNodeSelected, onClick });
+  const visibilityButtonProps: TreeItemVisibilityButtonProps = useMemo(
     () => ({
       variant: "eyeball",
-      getCheckboxState,
-      onCheckboxClicked,
+      getVisibilityButtonState,
+      onVisibilityButtonClick,
     }),
-    [getCheckboxState, onCheckboxClicked],
+    [getVisibilityButtonState, onVisibilityButtonClick],
   );
 
-  return <TreeRenderer {...props} checkboxProps={checkboxProps} />;
+  return <TreeRenderer {...props} visibilityButtonProps={visibilityButtonProps} />;
 }

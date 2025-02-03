@@ -5,9 +5,10 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { BeEvent } from "@itwin/core-bentley";
-import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
+import { Spinner, Text } from "@itwin/itwinui-react/bricks";
 import { SchemaMetadataContextProvider } from "@itwin/presentation-components";
-import { UnifiedSelectionProvider, useIModelUnifiedSelectionTree, useSelectionHandler } from "@itwin/presentation-hierarchies-react";
+import { useIModelUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
+import { UnifiedSelectionContextProvider } from "@itwin/unified-selection-react";
 import { TreeWidget } from "../../../../TreeWidget.js";
 import { useHierarchiesLocalization } from "../UseHierarchiesLocalization.js";
 import { useHierarchyLevelFiltering } from "../UseHierarchyFiltering.js";
@@ -23,7 +24,7 @@ import type { FunctionProps } from "../Utils.js";
 import type { ReactNode } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
-import type { PresentationHierarchyNode, SelectionStorage, useIModelTree } from "@itwin/presentation-hierarchies-react";
+import type { PresentationHierarchyNode, SelectionStorage, useIModelTree, useSelectionHandler } from "@itwin/presentation-hierarchies-react";
 import type { HighlightInfo } from "../UseNodeHighlighting.js";
 import type { TreeRendererProps } from "./TreeRenderer.js";
 
@@ -48,7 +49,15 @@ export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPa
       treeProps: Required<
         Pick<
           TreeRendererProps,
-          "rootNodes" | "expandNode" | "onNodeClick" | "onNodeKeyDown" | "onFilterClick" | "isNodeSelected" | "getHierarchyLevelDetails" | "size" | "getLabel"
+          | "rootNodes"
+          | "expandNode"
+          | "getLabel"
+          | "onFilterClick"
+          | "selectNodes"
+          | "selectionMode"
+          | "isNodeSelected"
+          | "getHierarchyLevelDetails"
+          | "getLabel"
         >
       >,
     ) => ReactNode;
@@ -79,9 +88,7 @@ export function Tree({ getSchemaContext, hierarchyLevelSizeLimit, selectionStora
 
   return (
     <SchemaMetadataContextProvider imodel={props.imodel} schemaContextProvider={getSchemaContext}>
-      <UnifiedSelectionProvider storage={selectionStorage}>
-        <TreeImpl {...props} imodelAccess={imodelAccess} defaultHierarchyLevelSizeLimit={defaultHierarchyLevelSizeLimit} />
-      </UnifiedSelectionProvider>
+      <TreeImpl {...props} selectionStorage={selectionStorage} imodelAccess={imodelAccess} defaultHierarchyLevelSizeLimit={defaultHierarchyLevelSizeLimit} />
     </SchemaMetadataContextProvider>
   );
 }
@@ -98,9 +105,9 @@ function TreeImpl({
   selectionMode,
   onReload,
   treeRenderer,
-  density,
+  selectionStorage,
   highlight,
-}: MarkRequired<Omit<TreeProps, "getSchemaContext" | "selectionStorage">, "imodelAccess"> & { defaultHierarchyLevelSizeLimit: number }) {
+}: MarkRequired<Omit<TreeProps, "getSchemaContext">, "imodelAccess"> & { defaultHierarchyLevelSizeLimit: number }) {
   const localizedStrings = useHierarchiesLocalization();
   const { onFeatureUsed, onPerformanceMeasured } = useTelemetryContext();
   const [imodelChanged] = useState(new BeEvent<() => void>());
@@ -115,6 +122,7 @@ function TreeImpl({
   } = useIModelUnifiedSelectionTree({
     imodelAccess,
     imodelChanged,
+    selectionStorage,
     getHierarchyDefinition,
     getFilteredPaths,
     sourceName: treeName,
@@ -139,7 +147,6 @@ function TreeImpl({
     predicate: selectionPredicate,
     getNode,
   });
-  const { onNodeClick, onNodeKeyDown } = useSelectionHandler({ rootNodes, selectNodes, selectionMode: selectionMode ?? "single" });
   const { filteringDialog, onFilterClick } = useHierarchyLevelFiltering({
     imodel,
     defaultHierarchyLevelSizeLimit,
@@ -150,43 +157,44 @@ function TreeImpl({
 
   if (rootNodes === undefined) {
     return (
-      <Flex alignItems="center" justifyContent="center" flexDirection="column" style={{ width: "100%", height: "100%" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", width: "100%", height: "100%" }}>
         <Delayed show={true}>
-          <ProgressRadial size="large" />
+          <Spinner />
         </Delayed>
-      </Flex>
+      </div>
     );
   }
 
   if (rootNodes.length === 0 && !isLoading) {
     return (
-      <Flex alignItems="center" justifyContent="center" flexDirection="column" style={{ width: "100%", height: "100%" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", width: "100%", height: "100%" }}>
         {noDataMessage ? noDataMessage : <Text>{TreeWidget.translate("baseTree.dataIsNotAvailable")}</Text>}
-      </Flex>
+      </div>
     );
   }
 
   const treeRendererProps: FunctionProps<TreeProps["treeRenderer"]> = {
     ...treeProps,
     rootNodes,
-    onNodeClick,
-    onNodeKeyDown,
+    selectionMode: selectionMode ?? "single",
+    selectNodes,
     expandNode: reportingExpandNode,
     onFilterClick: reportingOnFilterClicked,
     getLabel,
-    size: density === "enlarged" ? "default" : "small",
   };
 
   return (
-    <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>
-      <div id="tw-tree-renderer-container" style={{ overflow: "auto", height: "100%" }}>
-        {treeRenderer(treeRendererProps)}
-        {filteringDialog}
+    <UnifiedSelectionContextProvider storage={selectionStorage}>
+      <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>
+        <div id="tw-tree-renderer-container" style={{ overflow: "auto", height: "100%" }}>
+          {treeRenderer(treeRendererProps)}
+          {filteringDialog}
+        </div>
+        <Delayed show={isLoading}>
+          <ProgressOverlay />
+        </Delayed>
       </div>
-      <Delayed show={isLoading}>
-        <ProgressOverlay />
-      </Delayed>
-    </div>
+    </UnifiedSelectionContextProvider>
   );
 }
 

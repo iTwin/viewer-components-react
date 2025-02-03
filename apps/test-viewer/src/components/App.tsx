@@ -9,6 +9,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { FillCentered } from "@itwin/core-react";
 import { SvgError } from "@itwin/itwinui-illustrations-react";
 import { NonIdealState, ProgressLinear, ThemeProvider } from "@itwin/itwinui-react";
+import { Root } from "@itwin/itwinui-react-v5/bricks";
 import { ArcGisOauthRedirect } from "./ArcGisOauthRedirect";
 import { AuthorizationProvider, AuthorizationState, SignInRedirect, useAuthorizationContext } from "./Authorization";
 import { EC3AuthRedirect } from "./EC3AuthRedirect";
@@ -19,13 +20,15 @@ import type { FallbackProps } from "react-error-boundary";
 export function App() {
   return (
     <BrowserRouter>
-      <ThemeProvider theme="light">
-        <ErrorBoundary FallbackComponent={ErrorState}>
-          <AuthorizationProvider>
-            <AppRoutes />
-          </AuthorizationProvider>
-        </ErrorBoundary>
-      </ThemeProvider>
+      <Root colorScheme={"light"} density={"dense"}>
+        <ThemeProvider theme="light" future={{ themeBridge: true }}>
+          <ErrorBoundary FallbackComponent={ErrorState}>
+            <AuthorizationProvider>
+              <AppRoutes />
+            </AuthorizationProvider>
+          </ErrorBoundary>
+        </ThemeProvider>
+      </Root>
     </BrowserRouter>
   );
 }

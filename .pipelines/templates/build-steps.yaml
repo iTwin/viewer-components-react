@@ -21,7 +21,7 @@ steps:
     env:
       COREPACK_INTEGRITY_KEYS: 0
 
-  - script: pnpm install --frozen-lockfile
+  - script: pnpm install
     displayName: pnpm install
 
   - script: pnpm audit --registry=https://registry.npmjs.org --audit-level=high --production

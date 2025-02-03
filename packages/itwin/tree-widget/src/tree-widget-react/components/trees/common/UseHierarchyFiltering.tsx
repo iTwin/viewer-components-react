@@ -6,7 +6,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { useDebouncedAsyncValue } from "@itwin/components-react";
 import { CompressedId64Set } from "@itwin/core-bentley";
-import { ProgressRadial } from "@itwin/itwinui-react";
+import { Spinner } from "@itwin/itwinui-react/bricks";
 import { DefaultContentDisplayTypes, KeySet } from "@itwin/presentation-common";
 import { PresentationInstanceFilter, PresentationInstanceFilterDialog } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
@@ -145,7 +145,7 @@ function MatchingInstancesCount({ filter, defaultHierarchyLevelSizeLimit, hierar
     return (
       <Delayed show={true}>
         {TreeWidget.translate("filteringDialog.matchingInstancesCount", { instanceCount: "" })}
-        <ProgressRadial size="x-small" />
+        <Spinner size="small" />
       </Delayed>
     );
   }

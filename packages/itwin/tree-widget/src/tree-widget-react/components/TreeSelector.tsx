@@ -4,10 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./TreeSelector.scss";
-import { useMemo, useState } from "react";
-import { MenuItem, Select } from "@itwin/itwinui-react";
+import { useState } from "react";
+import { Select } from "@itwin/itwinui-react/bricks";
 
-import type { SelectOption } from "@itwin/itwinui-react";
 import type { SelectableTreeRenderProps } from "./SelectableTree.js";
 
 /**
@@ -28,7 +27,6 @@ export interface TreeContentDefinition {
 export interface TreeSelectorProps {
   defaultSelectedContentId: string;
   trees: TreeContentDefinition[];
-  density?: "enlarged" | "default";
   onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }
@@ -38,38 +36,34 @@ export interface TreeSelectorProps {
  * allowing to choose which of the provided tree components should be rendered at the bottom.
  * @internal
  */
-export function TreeSelector(props: TreeSelectorProps) {
-  const [selectedContentId, setSelectedContentId] = useState(props.defaultSelectedContentId);
-  const selectedContent = props.trees.find((c) => c.id === selectedContentId) ?? props.trees[0];
-  const isEnlarged = props.density === "enlarged";
-
-  const options = useMemo(() => {
-    return props.trees.map((c) => ({ label: c.label, value: c.id, startIcon: c.startIcon })) as SelectOption<string>[];
-  }, [props.trees]);
+export function TreeSelector({ defaultSelectedContentId, trees, onFeatureUsed, onPerformanceMeasured }: TreeSelectorProps) {
+  const [selectedContentId, setSelectedContentId] = useState(defaultSelectedContentId);
+  const selectedContent = trees.find((c) => c.id === selectedContentId) ?? trees[0];
 
   return (
     <div className="presentation-components-tree-selector-content">
       <div className="presentation-components-tree-selector-content-header">
-        {options.length > 0 && (
-          <Select
-            options={options}
-            value={selectedContent.id}
-            size={isEnlarged ? "large" : "small"}
-            onChange={(treeId: string) => {
-              props.onFeatureUsed?.(`choose-${treeId}`);
-              setSelectedContentId(treeId);
-            }}
-            itemRenderer={(option, itemProps) => (
-              <MenuItem {...option} isSelected={itemProps.isSelected} size={isEnlarged ? "large" : "default"}>
-                {option.label}
-              </MenuItem>
-            )}
-          />
+        {trees.length > 0 && (
+          <Select.Root>
+            <Select.HtmlSelect
+              value={selectedContent.id}
+              onChange={(e) => {
+                const treeId = e.target.value;
+                onFeatureUsed?.(`choose-${treeId}`);
+                setSelectedContentId(treeId);
+              }}
+            >
+              {trees.map((tree) => (
+                <option key={tree.id} value={tree.id}>
+                  {tree.startIcon}
+                  {tree.label}
+                </option>
+              ))}
+            </Select.HtmlSelect>
+          </Select.Root>
         )}
       </div>
-      <div className="presentation-components-tree-selector-content-wrapper">
-        {selectedContent?.render({ density: props.density, onPerformanceMeasured: props.onPerformanceMeasured, onFeatureUsed: props.onFeatureUsed })}
-      </div>
+      <div className="presentation-components-tree-selector-content-wrapper">{selectedContent?.render({ onPerformanceMeasured, onFeatureUsed })}</div>
     </div>
   );
 }

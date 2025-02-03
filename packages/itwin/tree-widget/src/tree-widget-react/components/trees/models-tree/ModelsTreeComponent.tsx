@@ -14,7 +14,13 @@ import { useFiltering } from "../common/UseFiltering.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { ModelsTree } from "./ModelsTree.js";
 import {
-  HideAllButton, InvertButton, ShowAllButton, ToggleInstancesFocusButton, useModelsTreeButtonProps, View2DButton, View3DButton,
+  HideAllButton,
+  InvertButton,
+  ShowAllButton,
+  ToggleInstancesFocusButton,
+  useModelsTreeButtonProps,
+  View2DButton,
+  View3DButton,
 } from "./ModelsTreeButtons.js";
 
 import type { ModelsTreeProps } from "./ModelsTree.js";
@@ -139,12 +145,12 @@ function ModelsTreeComponentImpl({
   const buttons: ReactNode = headerButtons
     ? headerButtons.map((btn, index) => <Fragment key={index}>{btn({ ...buttonProps, onFeatureUsed })}</Fragment>)
     : [
-        <ShowAllButton {...buttonProps} key="show-all-btn" density={density} onFeatureUsed={onFeatureUsed} />,
-        <HideAllButton {...buttonProps} key="hide-all-btn" density={density} onFeatureUsed={onFeatureUsed} />,
-        <InvertButton {...buttonProps} key="invert-all-btn" density={density} onFeatureUsed={onFeatureUsed} />,
-        <View2DButton {...buttonProps} key="view-2d-btn" density={density} onFeatureUsed={onFeatureUsed} />,
-        <View3DButton {...buttonProps} key="view-3d-btn" density={density} onFeatureUsed={onFeatureUsed} />,
-        <ToggleInstancesFocusButton key="toggle-instances-focus-btn" density={density} onFeatureUsed={onFeatureUsed} />,
+        <ShowAllButton {...buttonProps} key="show-all-btn" onFeatureUsed={onFeatureUsed} />,
+        <HideAllButton {...buttonProps} key="hide-all-btn" onFeatureUsed={onFeatureUsed} />,
+        <InvertButton {...buttonProps} key="invert-all-btn" onFeatureUsed={onFeatureUsed} />,
+        <View2DButton {...buttonProps} key="view-2d-btn" onFeatureUsed={onFeatureUsed} />,
+        <View3DButton {...buttonProps} key="view-3d-btn" onFeatureUsed={onFeatureUsed} />,
+        <ToggleInstancesFocusButton key="toggle-instances-focus-btn" onFeatureUsed={onFeatureUsed} />,
       ];
 
   useEffect(() => {

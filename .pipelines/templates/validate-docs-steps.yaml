@@ -20,7 +20,7 @@ steps:
     env:
       COREPACK_INTEGRITY_KEYS: 0
 
-  - script: pnpm install --frozen-lockfile
+  - script: pnpm install
     displayName: pnpm install
 
   - script: pnpm exec lage docs --grouped

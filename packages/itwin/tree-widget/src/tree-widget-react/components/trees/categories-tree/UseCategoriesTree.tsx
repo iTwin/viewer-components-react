@@ -5,7 +5,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { SvgLayers } from "@itwin/itwinui-icons-react";
-import { Text } from "@itwin/itwinui-react";
+import { Text } from "@itwin/itwinui-react/bricks";
 import { HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";

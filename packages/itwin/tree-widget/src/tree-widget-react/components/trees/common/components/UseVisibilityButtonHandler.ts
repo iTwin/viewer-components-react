@@ -7,30 +7,31 @@ import { useCallback } from "react";
 import { isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
 import type { PresentationHierarchyNode, PresentationTreeNode } from "@itwin/presentation-hierarchies-react";
+import type { TreeItemVisibilityButtonProps } from "./TreeNodeVisibilityButton.js";
 
-interface UseMultiCheckboxHandlerProps {
+interface UseVisibilityButtonHandlerProps {
   rootNodes: PresentationTreeNode[] | undefined;
-  isNodeSelected: (nodeId: string) => boolean;
-  onClick: (node: PresentationHierarchyNode, checked: boolean) => void;
+  isNodeSelected?: (nodeId: string) => boolean;
+  onClick: TreeItemVisibilityButtonProps["onVisibilityButtonClick"];
 }
 
-interface UseMultiCheckboxHandlerResult {
-  onCheckboxClicked: (node: PresentationHierarchyNode, checked: boolean) => void;
+interface UseVisibilityButtonHandlerResult {
+  onVisibilityButtonClick: TreeItemVisibilityButtonProps["onVisibilityButtonClick"];
 }
 
-export function useMultiCheckboxHandler({ rootNodes, isNodeSelected, onClick }: UseMultiCheckboxHandlerProps): UseMultiCheckboxHandlerResult {
-  const onCheckboxClicked = useCallback(
-    (clickedNode: PresentationHierarchyNode, checked: boolean) => {
-      if (!isNodeSelected(clickedNode.id)) {
-        onClick(clickedNode, checked);
+export function useVisibilityButtonHandler({ rootNodes, isNodeSelected, onClick }: UseVisibilityButtonHandlerProps): UseVisibilityButtonHandlerResult {
+  const onVisibilityButtonClick = useCallback<TreeItemVisibilityButtonProps["onVisibilityButtonClick"]>(
+    (clickedNode, state) => {
+      if (!isNodeSelected?.(clickedNode.id)) {
+        onClick(clickedNode, state);
         return;
       }
-      rootNodes && forEachSelectedNode(rootNodes, isNodeSelected, (node) => onClick(node, checked));
+      rootNodes && forEachSelectedNode(rootNodes, isNodeSelected, (node) => onClick(node, state));
     },
     [rootNodes, isNodeSelected, onClick],
   );
 
-  return { onCheckboxClicked };
+  return { onVisibilityButtonClick };
 }
 
 function forEachSelectedNode(

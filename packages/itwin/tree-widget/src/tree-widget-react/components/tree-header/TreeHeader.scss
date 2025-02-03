@@ -27,7 +27,6 @@
   display: flex;
   align-items: center;
   height: var(--tree-header-height-inner);
-  justify-content: space-between;
 
   .tree-widget-search-box {
     width: calc(100% - var(--tree-header-contracted-width-inner));
