@@ -6,7 +6,6 @@
 import { defer, EMPTY, from, lastValueFrom, map, mergeMap, toArray } from "rxjs";
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
-import { collect } from "../common/Rxjs.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 import { DEFINITION_CONTAINER_CLASS, getClassesByView, SUB_CATEGORY_CLASS } from "./internal/CategoriesTreeIdsCache.js";
 
@@ -249,11 +248,11 @@ async function createInstanceKeyPathsFromInstanceLabel(
   const CATEGORIES_WITH_LABELS_CTE = "CategoriesWithLabels";
   const SUBCATEGORIES_WITH_LABELS_CTE = "SubCategoriesWithLabels";
   const DEFINITION_CONTAINERS_WITH_LABELS_CTE = "DefinitionContainersWithLabels";
-  const [categoryLabelSelectClause, subCategoryLabelSelectClause, definitionContainerLabelSelectClause] = await Promise.all([
-    categoryClass,
-    SUB_CATEGORY_CLASS,
-    DEFINITION_CONTAINER_CLASS,
-  ].map(async (className) => props.labelsFactory.createSelectClause({ classAlias: "this", className })));
+  const [categoryLabelSelectClause, subCategoryLabelSelectClause, definitionContainerLabelSelectClause] = await Promise.all(
+    [categoryClass, SUB_CATEGORY_CLASS, DEFINITION_CONTAINER_CLASS].map(async (className) =>
+      props.labelsFactory.createSelectClause({ classAlias: "this", className }),
+    ),
+  );
   return lastValueFrom(
     defer(() => {
       const ctes = [
@@ -353,9 +352,8 @@ async function createInstanceKeyPathsFromInstanceLabel(
         }),
       ),
       toArray(),
-      mergeMap(async (targetItems) => {
-        return collect(createInstanceKeyPathsFromTargetItems({ ...props, targetItems }));
-      }),
+      mergeMap((targetItems): Observable<HierarchyFilteringPath> => createInstanceKeyPathsFromTargetItems({ ...props, targetItems })),
+      toArray(),
     ),
   );
 }
