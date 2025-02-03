@@ -21,7 +21,7 @@ interface CategoriesInfo {
 
 interface CategoryInfo {
   id: Id64String;
-  childCound: number;
+  childCount: number;
 }
 
 interface SubCategoryInfo {
@@ -105,14 +105,14 @@ export class CategoriesTreeIdsCache {
         this.ECInstanceId  id,
         this.CategoryModelId modelId,
         this.ParentDefinitionContainerExists parentDefinitionContainerExists,
-        this.ChildCount childCound
+        this.ChildCount childCount
       FROM
         ${categoriesCteName} this
       WHERE
         this.CurrentModelId NOT IN (SELECT dm.ECInstanceId FROM ${DEFINITION_CONTAINER_CLASS} dm)
     `;
     for await (const row of this._queryExecutor.createQueryReader({ ctes, ecsql: categoriesQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
-      yield { id: row.id, modelId: row.modelId, parentDefinitionContainerExists: row.parentDefinitionContainerExists, childCount: row.childCound };
+      yield { id: row.id, modelId: row.modelId, parentDefinitionContainerExists: row.parentDefinitionContainerExists, childCount: row.childCount };
     }
   }
 
@@ -180,7 +180,7 @@ export class CategoriesTreeIdsCache {
           modelCategories = { parentDefinitionContainerExists: queriedCategory.parentDefinitionContainerExists, childCategories: [] };
           allModelsCategories.set(queriedCategory.modelId, modelCategories);
         }
-        modelCategories.childCategories.push({ id: queriedCategory.id, childCound: queriedCategory.childCount });
+        modelCategories.childCategories.push({ id: queriedCategory.id, childCount: queriedCategory.childCount });
       }
       return allModelsCategories;
     })();
@@ -194,7 +194,7 @@ export class CategoriesTreeIdsCache {
       const categoriesWithMoreThanOneSubCategory = new Array<Id64String>();
       for (const modelCategoriesInfo of modelsCategoriesInfo.values()) {
         categoriesWithMoreThanOneSubCategory.push(
-          ...modelCategoriesInfo.childCategories.filter((categoryInfo) => categoryInfo.childCound > 1).map((categoryInfo) => categoryInfo.id),
+          ...modelCategoriesInfo.childCategories.filter((categoryInfo) => categoryInfo.childCount > 1).map((categoryInfo) => categoryInfo.id),
         );
       }
 
