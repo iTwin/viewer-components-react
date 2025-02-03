@@ -5,17 +5,6 @@ steps:
     inputs:
       version: "$(NodeVersion)"
 
-  - script: |
-      corepack enable
-      corepack -v
-    displayName: "Enable corepack"
-
-  # Workaround for https://github.com/nodejs/corepack/issues/612
-  - script: |
-      npm install corepack@^0.31.0 -g
-      corepack -v
-    displayName: "Install Corepack"
-
   - task: Cache@2
     displayName: Cache pnpm
     inputs:
