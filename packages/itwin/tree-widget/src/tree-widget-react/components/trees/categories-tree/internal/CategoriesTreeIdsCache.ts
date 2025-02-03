@@ -60,7 +60,7 @@ export class CategoriesTreeIdsCache {
     const CATEGORIES_WITH_CHILD_COUNT_CTE = "CategoriesWithChildCount";
 
     const ctes = [
-      `${CATEGORIES_WITH_CHILD_COUNT_CTE}(ECInstanceId, ChildCount, ModelId) as (
+      `${CATEGORIES_WITH_CHILD_COUNT_CTE}(ECInstanceId, ChildCount, ModelId) AS (
         SELECT
           this.ECInstanceId,
           COUNT(sc.ECInstanceId),

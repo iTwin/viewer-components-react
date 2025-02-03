@@ -257,7 +257,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
   return lastValueFrom(
     defer(() => {
       const ctes = [
-        `${CATEGORIES_WITH_LABELS_CTE}(ClassName, ECInstanceId, ChildCount, DisplayLabel) as (
+        `${CATEGORIES_WITH_LABELS_CTE}(ClassName, ECInstanceId, ChildCount, DisplayLabel) AS (
             SELECT
               'c',
               this.ECInstanceId,
@@ -270,7 +270,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
               this.ECInstanceId IN (${categories.join(", ")})
               GROUP BY this.ECInstanceId
           )`,
-        `${SUBCATEGORIES_WITH_LABELS_CTE}(ClassName, ECInstanceId, ParentId, DisplayLabel) as (
+        `${SUBCATEGORIES_WITH_LABELS_CTE}(ClassName, ECInstanceId, ParentId, DisplayLabel) AS (
             SELECT
               'sc',
               this.ECInstanceId,
@@ -284,7 +284,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
           )`,
         ...(definitionContainers.length > 0
           ? [
-              `${DEFINITION_CONTAINERS_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) as (
+              `${DEFINITION_CONTAINERS_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (
                 SELECT
                   'dc',
                   this.ECInstanceId,
