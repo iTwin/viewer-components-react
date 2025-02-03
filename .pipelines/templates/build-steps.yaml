@@ -2,7 +2,6 @@ steps:
     # Workaround for https://github.com/nodejs/corepack/issues/612
   - script: |
       npm install corepack@^0.31.0
-      pnpm install
     displayName: "Install Corepack"
 
   # 1. Configure node
@@ -26,7 +25,7 @@ steps:
       pnpm config set store-dir $(pnpm_config_cache)
     displayName: "Setup pnpm config"
 
-  - script: pnpm install --frozen-lockfile
+  - script: pnpm install #TODO add --frozen-lockfile back when corepack issue is solved
     displayName: pnpm install
 
   - script: pnpm audit --registry=https://registry.npmjs.org --audit-level=high --production

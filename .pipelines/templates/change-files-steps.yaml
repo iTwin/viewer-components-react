@@ -2,7 +2,6 @@ steps:
     # Workaround for https://github.com/nodejs/corepack/issues/612
   - script: |
       npm install corepack@^0.31.0
-      pnpm install
     displayName: "Install Corepack"
 
   - task: UseNode@1
