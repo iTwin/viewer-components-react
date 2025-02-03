@@ -59,7 +59,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
     });
 
-    it("when definitionContainer contains definitionContainer", async function () {
+    it("returns empty lists when definition container contains empty definition container", async function () {
       const { imodel, ...keys } = await buildIModel(this, async (builder) => {
         insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
