@@ -7,7 +7,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { SvgArchive, SvgLayers } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
+import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 import { useTelemetryContext } from "../common/UseTelemetryContext.js";
@@ -129,7 +129,7 @@ function getCategoriesFromPaths(paths: HierarchyFilteringPaths): CategoryInfo[] 
 
   const categories = new Map<Id64String, Id64String[]>();
   for (const path of paths) {
-    const currPath = Array.isArray(path) ? path : path.path;
+    const currPath = HierarchyFilteringPath.normalize(path).path;
     if (currPath.length === 0) {
       continue;
     }
