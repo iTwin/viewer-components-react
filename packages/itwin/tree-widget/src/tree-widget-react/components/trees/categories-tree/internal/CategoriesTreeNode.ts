@@ -27,7 +27,7 @@ export namespace CategoriesTreeNode {
     node.extendedData && "isCategory" in node.extendedData && !!node.extendedData.isCategory;
 
   /**
-   * Determines if node represents a subCategory.
+   * Determines if node represents a sub-category.
    */
   export const isSubCategoryNode = (node: Pick<CategoriesTreeNode, "extendedData">) =>
     node.extendedData && "isSubCategory" in node.extendedData && !!node.extendedData.isSubCategory;
