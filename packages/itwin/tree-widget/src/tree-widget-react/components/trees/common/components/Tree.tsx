@@ -179,7 +179,7 @@ function TreeImpl({
 
   return (
     <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>
-      <div id="tw-tree-renderer-container" style={{ overflow: "auto", height: "100%" }}>
+      <div id="tw-tree-renderer-container" style={{ height: "100%" }}>
         {treeRenderer(treeRendererProps)}
         {filteringDialog}
       </div>

@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import cx from "classnames";
 import { forwardRef } from "react";
 import { TreeNodeRenderer as CoreTreeNodeRenderer } from "@itwin/presentation-hierarchies-react";
 import { TreeNodeCheckbox } from "./TreeNodeCheckbox.js";
@@ -24,11 +23,8 @@ export const TreeNodeRenderer: ForwardRefExoticComponent<TreeNodeRendererProps &
       <CoreTreeNodeRenderer
         {...props}
         ref={forwardedRef}
-        nodeProps={{ className: cx("tw-tree-node", props.isSelected && "selected", props.className) }}
-        actionButtonsClassName="tw-tree-node-action-buttons"
+        nodeProps={{ className: props.className }}
         checkbox={checkboxProps ? <TreeNodeCheckbox {...checkboxProps} node={props.node} /> : null}
-        contentProps={{ className: "tw-tree-node-content" }}
-        checkboxProps={{ className: "tw-tree-node-checkbox-container" }}
       />
     );
   },
