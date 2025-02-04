@@ -58,7 +58,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createSubcategoryQuery(requestProps),
           },
           {
-            parentInstancesNodePredicate: DEFINITION_CONTAINER_CLASS,
+            parentInstancesNodePredicate: async (instanceKey) => instanceKey.instanceKeys[0].className === DEFINITION_CONTAINER_CLASS,
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) =>
               this.createDefinitionContainersAndCategoriesQuery({
                 ...requestProps,
@@ -97,7 +97,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     const { categoryClass } = getClassesByView(viewType);
 
     const [categoriesInstanceFilterClauses, definitionContainersInstanceFilterClauses] = await Promise.all(
-      [categoryClass, DEFINITION_CONTAINER_CLASS].map(async (className) =>
+      [categoryClass, ...(definitionContainers.length > 0 ? [DEFINITION_CONTAINER_CLASS] : [])].map(async (className) =>
         this._selectQueryFactory.createFilterClauses({
           filter: instanceFilter,
           contentClass: { fullName: className, alias: "this" },
@@ -249,7 +249,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
   const SUBCATEGORIES_WITH_LABELS_CTE = "SubCategoriesWithLabels";
   const DEFINITION_CONTAINERS_WITH_LABELS_CTE = "DefinitionContainersWithLabels";
   const [categoryLabelSelectClause, subCategoryLabelSelectClause, definitionContainerLabelSelectClause] = await Promise.all(
-    [categoryClass, SUB_CATEGORY_CLASS, DEFINITION_CONTAINER_CLASS].map(async (className) =>
+    [categoryClass, SUB_CATEGORY_CLASS, ...(definitionContainers.length > 0 ? [DEFINITION_CONTAINER_CLASS] : [])].map(async (className) =>
       props.labelsFactory.createSelectClause({ classAlias: "this", className }),
     ),
   );
