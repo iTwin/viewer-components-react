@@ -28,6 +28,7 @@ export type TreeRendererProps = Pick<
   | "getHierarchyLevelDetails"
   | "checkboxProps"
   | "reloadTree"
+  | "filterButtonsVisibility"
 > &
   Omit<ComponentPropsWithoutRef<typeof Tree<RenderedTreeNode>>, "data" | "nodeRenderer" | "getNode"> & {
     /** Tree nodes to render. */
@@ -55,6 +56,7 @@ export function TreeRenderer({
   getSublabel,
   getHierarchyLevelDetails,
   checkboxProps,
+  filterButtonsVisibility,
   reloadTree,
   size,
   enableVirtualization,
@@ -85,6 +87,7 @@ export function TreeRenderer({
           reloadTree={reloadTree}
           className={getSublabel ? "with-description" : "without-description"}
           size={size}
+          filterButtonsVisibility={filterButtonsVisibility}
         />
       );
     },
@@ -99,6 +102,7 @@ export function TreeRenderer({
       getSublabel,
       onFilterClick,
       checkboxProps,
+      filterButtonsVisibility,
       reloadTree,
       size,
     ],

@@ -156,6 +156,19 @@ export class FilterLimitExceededError extends Error {
     readonly limit: number;
 }
 
+// @public (undocumented)
+interface FocusedInstancesContext {
+    enabled: boolean;
+    loadFocusedItems?: () => AsyncIterableIterator<InstanceKey | GroupingHierarchyNode>;
+    toggle: () => void;
+}
+
+// @public
+export function FocusedInstancesContextProvider({ selectionStorage, imodelKey, children, }: PropsWithChildren<{
+    selectionStorage: SelectionStorage;
+    imodelKey: string;
+}>): JSX.Element;
+
 // @beta (undocumented)
 type FunctionProps<THook extends (props: any) => any> = Parameters<THook>[0];
 
@@ -414,10 +427,10 @@ type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPaths" | 
 };
 
 // @beta
-export function TreeRenderer({ rootNodes, expandNode, onNodeClick, onNodeKeyDown, onNodeDoubleClick, isNodeSelected, onFilterClick, getIcon, getLabel, getSublabel, getHierarchyLevelDetails, checkboxProps, reloadTree, size, enableVirtualization, ...props }: TreeRendererProps): JSX.Element;
+export function TreeRenderer({ rootNodes, expandNode, onNodeClick, onNodeKeyDown, onNodeDoubleClick, isNodeSelected, onFilterClick, getIcon, getLabel, getSublabel, getHierarchyLevelDetails, checkboxProps, filterButtonsVisibility, reloadTree, size, enableVirtualization, ...props }: TreeRendererProps): JSX.Element;
 
 // @beta (undocumented)
-type TreeRendererProps = Pick<TreeNodeRendererProps, "expandNode" | "onNodeClick" | "onNodeKeyDown" | "onFilterClick" | "getIcon" | "getLabel" | "getSublabel" | "getHierarchyLevelDetails" | "checkboxProps" | "reloadTree"> & Omit<ComponentPropsWithoutRef<typeof Tree_2<RenderedTreeNode>>, "data" | "nodeRenderer" | "getNode"> & {
+type TreeRendererProps = Pick<TreeNodeRendererProps, "expandNode" | "onNodeClick" | "onNodeKeyDown" | "onFilterClick" | "getIcon" | "getLabel" | "getSublabel" | "getHierarchyLevelDetails" | "checkboxProps" | "reloadTree" | "filterButtonsVisibility"> & Omit<ComponentPropsWithoutRef<typeof Tree_2<RenderedTreeNode>>, "data" | "nodeRenderer" | "getNode"> & {
     rootNodes: PresentationTreeNode[];
     isNodeSelected: (nodeId: string) => boolean;
     onNodeDoubleClick?: (node: PresentationHierarchyNode, isSelected: boolean) => void;
@@ -484,6 +497,9 @@ interface UseCategoriesTreeResult {
     // (undocumented)
     rendererProps: Required<Pick<VisibilityTreeRendererProps, "getIcon" | "getSublabel">>;
 }
+
+// @public
+export function useFocusedInstancesContext(): FocusedInstancesContext;
 
 // @beta
 export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getFilteredPaths, onModelsFiltered, selectionPredicate: nodeTypeSelectionPredicate, }: UseModelsTreeProps): UseModelsTreeResult;

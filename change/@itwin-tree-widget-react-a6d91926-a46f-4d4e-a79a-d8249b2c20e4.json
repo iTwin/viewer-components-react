@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Add `filterButtonsVisibility` prop to `TreeRenderer`. The prop allows to control visibility of hierarchy level filtering buttons in the tree: `show-on-hover` (default) shows them on hover or focus, `hide` only shows them when a node is filtered.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "35135765+grigasp@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
