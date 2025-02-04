@@ -332,6 +332,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
   }, [options, sourceFilterString]);
 
   const handleAddNewMapSource = React.useCallback((event: React.MouseEvent) => {
+    // TODO: Investigate why this event is not stopping propagation. The test app opens and closes the modal immediately.
     event.stopPropagation(); // We don't want the owning ListBox to react on mouse click.
     UiFramework.dialogs.modal.open(
       <MapUrlDialog

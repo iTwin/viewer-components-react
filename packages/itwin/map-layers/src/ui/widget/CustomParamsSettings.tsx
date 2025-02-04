@@ -18,7 +18,11 @@ import type { CustomParamItem } from "../Interfaces";
 interface CustomParamsMap {
   [paramName: string]: CustomParamItem;
 }
-export function CustomParamsSettingsPanel() {
+
+interface CustomParamsSettingsPanelProps {
+  onHandleOutsideClick?: (shouldHandle: boolean) => void;
+}
+export function CustomParamsSettingsPanel({ onHandleOutsideClick }: CustomParamsSettingsPanelProps) {
   const [storage] = React.useState(() => new CustomParamsStorage());
   const [mappingStorage] = React.useState(() => new CustomParamsMappingStorage());
 
@@ -56,6 +60,11 @@ export function CustomParamsSettingsPanel() {
     [mappingStorage, params, storage],
   );
 
+  const resumeOutsideClick = React.useCallback(() => {
+    if (onHandleOutsideClick) {
+      onHandleOutsideClick(true);
+    }
+  }, [onHandleOutsideClick]);
   /*
    Handle Remove layer button clicked
    */
@@ -63,13 +72,17 @@ export function CustomParamsSettingsPanel() {
     (name: string, event: React.MouseEvent) => {
       event.stopPropagation(); // We don't want the owning ListBox to react on mouse click.
       deleteMapping(name);
+      if (onHandleOutsideClick) {
+        onHandleOutsideClick(false);
+      };
     },
-    [deleteMapping],
+    [deleteMapping, onHandleOutsideClick],
   );
 
   const onCancelEdit = React.useCallback(() => {
     UiFramework.dialogs.modal.close();
-  }, []);
+    resumeOutsideClick();
+  }, [resumeOutsideClick]);
 
   const onOkEdit = React.useCallback(
     (newItem: CustomParamItem, oldItem?: CustomParamItem) => {
@@ -96,26 +109,36 @@ export function CustomParamsSettingsPanel() {
       storage.save(newItem.name, newItem);
 
       tmpParams[newItem.name] = newItem;
+      if (onHandleOutsideClick) {
+        onHandleOutsideClick(false);
+      };
       setParams(tmpParams);
     },
-    [mappingStorage, params, storage],
+    [mappingStorage, params, storage, onHandleOutsideClick],
   );
 
   const handleAddClick = React.useCallback(() => {
+    if (onHandleOutsideClick) {
+      onHandleOutsideClick(false);
+    }
     UiFramework.dialogs.modal.open(<CustomParamEditDialog onOkResult={onOkEdit} onCancelResult={onCancelEdit} />);
+
     return;
-  }, [onCancelEdit, onOkEdit]);
+  }, [onCancelEdit, onOkEdit, onHandleOutsideClick]);
 
   const onListboxValueChange = React.useCallback(
-    (newValue: string, _isControlOrCommandPressed?: boolean) => {
+    (newValue: string, event: React.MouseEvent) => {
+      event.stopPropagation();;
       const item = params[newValue];
       if (item) {
         UiFramework.dialogs.modal.open(<CustomParamEditDialog item={item} onOkResult={onOkEdit} onCancelResult={onCancelEdit} />);
       }
-
+      if (onHandleOutsideClick) {
+        onHandleOutsideClick(false);
+      }
       return;
     },
-    [params, onCancelEdit, onOkEdit],
+    [params, onCancelEdit, onOkEdit, onHandleOutsideClick],
   );
 
   return (
@@ -142,7 +165,7 @@ export function CustomParamsSettingsPanel() {
               key={keyName}
               actionable
               className="customParamsSettings-content-entry"
-              onClick={() => onListboxValueChange(keyName)}
+              onClick={(e: React.MouseEvent) => onListboxValueChange(keyName, e)}
               onMouseEnter={() => setListItemUnderCursor(keyName)}
               onMouseLeave={() => setListItemUnderCursor(undefined)}
             >
