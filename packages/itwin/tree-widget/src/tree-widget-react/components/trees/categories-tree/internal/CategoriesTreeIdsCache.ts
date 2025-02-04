@@ -365,7 +365,7 @@ export class CategoriesTreeIdsCache {
     return result;
   }
 
-  private async getIsDefinitionContainerSupported(): Promise<boolean> {
+  public async getIsDefinitionContainerSupported(): Promise<boolean> {
     this._isDefinitionContainerSupported ??= this.queryIsDefinitionContainersSupported();
     return this._isDefinitionContainerSupported;
   }
