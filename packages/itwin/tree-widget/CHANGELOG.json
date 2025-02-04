@@ -2,6 +2,35 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Tue, 04 Feb 2025 15:29:52 GMT",
+      "version": "3.4.0",
+      "tag": "@itwin/tree-widget-react_v3.4.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "0dda93bfc4870eff594bb5d2151cbdf4a0871c6c",
+            "comment": "Expose `FocusedInstancesContextProvider` and `useFocusedInstancesContext` to allow using `ModelsTreeComponent.ToggleInstancesFocusButton` from outside of `ModelsTreeComponent` and accesing the context from other React components."
+          },
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "96fa8d0ffca2a120e68d30dbeacaae939bd56e27",
+            "comment": "Add `filterButtonsVisibility` prop to `TreeRenderer`. The prop allows to control visibility of hierarchy level filtering buttons in the tree: `show-on-hover` (default) shows them on hover or focus, `hide` only shows them when a node is filtered."
+          }
+        ],
+        "none": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "979142b18ae359fe762ed25dc33f9f2c3bd5c460",
+            "comment": "Update code snippets"
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 29 Jan 2025 21:54:15 GMT",
       "version": "3.3.0",
       "tag": "@itwin/tree-widget-react_v3.3.0",
