@@ -96,14 +96,14 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
 
     const { categoryClass } = getClassesByView(viewType);
 
-    const categoriesInstanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
-      filter: instanceFilter,
-      contentClass: { fullName: categoryClass, alias: "this" },
-    });
-    const definitionContainersInstanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
-      filter: instanceFilter,
-      contentClass: { fullName: DEFINITION_CONTAINER_CLASS, alias: "this" },
-    });
+    const [categoriesInstanceFilterClauses, definitionContainersInstanceFilterClauses] = await Promise.all(
+      [categoryClass, DEFINITION_CONTAINER_CLASS].map(async (className) =>
+        this._selectQueryFactory.createFilterClauses({
+          filter: instanceFilter,
+          contentClass: { fullName: className, alias: "this" },
+        }),
+      ),
+    );
 
     const definitionContainersQuery =
       definitionContainers.length > 0
