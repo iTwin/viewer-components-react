@@ -35,7 +35,7 @@ export interface ValidateNodeProps {
   handler: HierarchyVisibilityHandler;
   viewport: Viewport;
   visibilityExpectations: VisibilityExpectations;
-  nodesToExpect: Id64Array;
+  expectedIds: Id64Array;
 }
 
 export async function validateNodeVisibility({ node, handler, visibilityExpectations }: ValidateNodeProps & { node: HierarchyNode }) {
@@ -89,5 +89,5 @@ export async function validateHierarchyVisibility({
       mergeMap(async (node) => validateNodeVisibility({ ...props, node })),
     ),
   );
-  expect(props.nodesToExpect.every((nodeId) => nodesFound.includes(nodeId))).to.be.true;
+  expect(props.expectedIds.every((nodeId) => nodesFound.includes(nodeId))).to.be.true;
 }
