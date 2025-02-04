@@ -234,7 +234,7 @@ describe("CategoriesTreeIdsCache", () => {
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
       const result = await idsCache.getAllContainedCategories([keys.definitionContainerRoot.id]);
       const expectedResult = [keys.indirectCategory.id, keys.directCategory.id];
-      expect(result.every((id) => expectedResult.includes(id))).to.be.true;
+      expect(expectedResult.every((id) => result.includes(id))).to.be.true;
     });
   });
 
@@ -474,7 +474,7 @@ describe("CategoriesTreeIdsCache", () => {
         definitionContainers: [keys.definitionContainerRoot.id, keys.definitionContainerChild.id],
       };
       expect(result.categories).to.deep.eq(expectedResult.categories);
-      expect(result.definitionContainers.every((dc) => expectedResult.definitionContainers.includes(dc))).to.be.true;
+      expect(expectedResult.definitionContainers.every((dc) => result.definitionContainers.includes(dc))).to.be.true;
     });
 
     it("returns definition container and category when definition container contains category", async function () {
@@ -534,8 +534,8 @@ describe("CategoriesTreeIdsCache", () => {
         categories: [keys.directCategory.id, keys.indirectCategory.id],
         definitionContainers: [keys.definitionModelChild.id, keys.definitionContainerRoot.id],
       };
-      expect(result.categories.every((c) => expectedResult.categories.includes(c))).to.be.true;
-      expect(result.definitionContainers.every((dc) => expectedResult.definitionContainers.includes(dc))).to.be.true;
+      expect(expectedResult.categories.every((c) => result.categories.includes(c))).to.be.true;
+      expect(expectedResult.definitionContainers.every((dc) => result.definitionContainers.includes(dc))).to.be.true;
     });
   });
 
@@ -650,8 +650,8 @@ describe("CategoriesTreeIdsCache", () => {
         categories: [keys.rootCategory1.id, keys.rootCategory2.id],
         definitionContainers: [keys.definitionContainerRoot.id, keys.definitionContainerRoot2.id],
       };
-      expect(result.categories.every((c) => expectedResult.categories.includes(c))).to.be.true;
-      expect(result.definitionContainers.every((dc) => expectedResult.definitionContainers.includes(dc))).to.be.true;
+      expect(expectedResult.categories.every((c) => result.categories.includes(c))).to.be.true;
+      expect(expectedResult.definitionContainers.every((dc) => result.definitionContainers.includes(dc))).to.be.true;
     });
   });
 
