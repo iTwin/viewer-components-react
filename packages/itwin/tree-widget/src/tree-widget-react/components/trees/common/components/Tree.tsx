@@ -68,7 +68,7 @@ export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPa
 
 /**
  * Default tree component that manages tree state and renders using supplied `treeRenderer`.
- * @Beta
+ * @beta
  */
 export function Tree({ getSchemaContext, hierarchyLevelSizeLimit, selectionStorage, imodelAccess: providedIModelAccess, ...props }: TreeProps) {
   const defaultHierarchyLevelSizeLimit = hierarchyLevelSizeLimit ?? 1000;
