@@ -53,14 +53,17 @@ export class CategoriesTreeIdsCache {
     childCount: number;
   }> {
     const CATEGORIES_CTE = "AllVisibleCategories";
-    const CATEGORIES_WITH_CHILD_COUNT_CTE = "CategoriesWithChildCount";
 
     const ctes = [
-      `${CATEGORIES_WITH_CHILD_COUNT_CTE}(ECInstanceId, ChildCount, ModelId) AS (
+      `${CATEGORIES_CTE}(ECInstanceId, ChildCount, ModelId, ParentDefinitionContainerExists) AS (
         SELECT
           this.ECInstanceId,
           COUNT(sc.ECInstanceId),
-          this.Model.Id
+          this.Model.Id,
+          IIF(this.Model.Id IN (SELECT dc.ECInstanceId FROM ${DEFINITION_CONTAINER_CLASS} dc),
+            true,
+            false
+          )
         FROM
           ${this._categoryClass} this
           JOIN ${SUB_CATEGORY_CLASS} sc ON sc.Parent.Id = this.ECInstanceId
@@ -71,41 +74,15 @@ export class CategoriesTreeIdsCache {
           AND EXISTS (SELECT 1 FROM ${this._categoryElementClass} e WHERE e.Category.Id = this.ECInstanceId)
         GROUP BY this.ECInstanceId
       )`,
-      `${CATEGORIES_CTE}(ECInstanceId, CategoryModelId, CurrentModelId, ParentDefinitionContainerExists, ChildCount) AS (
-        SELECT
-          this.ECInstanceId,
-          this.ModelId,
-          this.ModelId,
-          false,
-          this.ChildCount
-        FROM
-          ${CATEGORIES_WITH_CHILD_COUNT_CTE} this
-
-        UNION ALL
-
-        SELECT
-          ce.ECInstanceId,
-          ce.CategoryModelId,
-          pe.Model.Id,
-          true,
-          ce.ChildCount
-        FROM
-          ${CATEGORIES_CTE} ce
-          JOIN ${DEFINITION_CONTAINER_CLASS} pe ON ce.CurrentModelId = pe.ECInstanceId
-        WHERE
-          NOT pe.IsPrivate
-      )`,
     ];
     const categoriesQuery = `
       SELECT
         this.ECInstanceId id,
-        this.CategoryModelId modelId,
+        this.ModelId modelId,
         this.ParentDefinitionContainerExists parentDefinitionContainerExists,
         this.ChildCount childCount
       FROM
         ${CATEGORIES_CTE} this
-      WHERE
-        this.CurrentModelId NOT IN (SELECT dm.ECInstanceId FROM ${DEFINITION_CONTAINER_CLASS} dm)
     `;
     for await (const row of this._queryExecutor.createQueryReader({ ctes, ecsql: categoriesQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
       yield { id: row.id, modelId: row.modelId, parentDefinitionContainerExists: row.parentDefinitionContainerExists, childCount: row.childCount };
