@@ -16,19 +16,7 @@ import type { Visibility } from "../../../../tree-widget-react/components/trees/
 import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
 
 interface VisibilityExpectations {
-  subCategory?(parentCategoryId: Id64String, subCategoryId?: Id64String): Omit<Visibility, "partial">;
-  definitionContainer?(id: Id64String): Visibility;
-  category(id: Id64String): Visibility;
-}
-
-export namespace VisibilityExpectations {
-  export function all(visibility: "visible" | "hidden"): VisibilityExpectations {
-    return {
-      subCategory: () => visibility,
-      category: () => visibility,
-      definitionContainer: () => visibility,
-    };
-  }
+  [id: string]: Visibility;
 }
 
 export interface ValidateNodeProps {
@@ -36,33 +24,35 @@ export interface ValidateNodeProps {
   viewport: Viewport;
   visibilityExpectations: VisibilityExpectations;
   expectedIds: Id64Array;
+  all?: "visible" | "hidden";
 }
 
-export async function validateNodeVisibility({ node, handler, visibilityExpectations }: ValidateNodeProps & { node: HierarchyNode }) {
+export async function validateNodeVisibility({ node, handler, visibilityExpectations, all }: ValidateNodeProps & { node: HierarchyNode }) {
   const actualVisibility = await handler.getVisibilityStatus(node);
   if (!HierarchyNode.isInstancesNode(node)) {
     throw new Error(`Expected hierarchy to only have instance nodes, got ${JSON.stringify(node)}`);
   }
 
+  if (all !== undefined) {
+    expect(actualVisibility.state).to.eq(all);
+    return;
+  }
+
   const { id } = node.key.instanceKeys[0];
 
   if (CategoriesTreeNode.isCategoryNode(node)) {
-    expect(actualVisibility.state).to.eq(visibilityExpectations.category(id));
+    expect(actualVisibility.state).to.eq(visibilityExpectations[id]);
     return;
   }
   if (CategoriesTreeNode.isSubCategoryNode(node)) {
-    const parentCategoryId = node.extendedData?.categoryId;
-    if (visibilityExpectations.subCategory === undefined) {
-      throw new Error(`Expected hierarchy to not have subCategory nodes, got ${JSON.stringify(node)}`);
+    // One subCategory gets added when category is inserted
+    if (visibilityExpectations[id] !== undefined) {
+      expect(actualVisibility.state).to.eq(visibilityExpectations[id]);
     }
-    expect(actualVisibility.state).to.eq(visibilityExpectations.subCategory(parentCategoryId, id));
     return;
   }
   if (CategoriesTreeNode.isDefinitionContainerNode(node)) {
-    if (visibilityExpectations.definitionContainer === undefined) {
-      throw new Error(`Expected hierarchy to not have definitionContainer nodes, got ${JSON.stringify(node)}`);
-    }
-    expect(actualVisibility.state).to.eq(visibilityExpectations.definitionContainer(id));
+    expect(actualVisibility.state).to.eq(visibilityExpectations[id]);
     return;
   }
 

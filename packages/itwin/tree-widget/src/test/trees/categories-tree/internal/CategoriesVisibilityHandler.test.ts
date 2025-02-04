@@ -26,7 +26,7 @@ import {
 import { TestUtils } from "../../../TestUtils.js";
 import { createIModelAccess } from "../../Common.js";
 import { createCategoryHierarchyNode, createDefinitionContainerHierarchyNode, createSubCategoryHierarchyNode, createViewportStub } from "./Utils.js";
-import { validateHierarchyVisibility, VisibilityExpectations } from "./VisibilityValidation.js";
+import { validateHierarchyVisibility } from "./VisibilityValidation.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
@@ -115,8 +115,9 @@ describe("CategoriesVisibilityHandler", () => {
         provider,
         handler,
         viewport,
-        visibilityExpectations: VisibilityExpectations.all("hidden"),
+        visibilityExpectations: {},
         expectedIds,
+        all: "hidden",
       });
     });
     describe("definitionContainers", () => {
@@ -156,8 +157,9 @@ describe("CategoriesVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          visibilityExpectations: VisibilityExpectations.all("visible"),
+          visibilityExpectations: {},
           expectedIds,
+          all: "visible",
         });
         viewport.validateChangesCalls(
           [{ categoriesToChange: [keys.directCategory.id, keys.indirectCategory.id], isVisible: true, enableAllSubCategories: true }],
@@ -215,9 +217,13 @@ describe("CategoriesVisibilityHandler", () => {
           handler,
           viewport,
           visibilityExpectations: {
-            category: (categoryId) => (categoryId === keys.category2.id ? "hidden" : "visible"),
-            subCategory: (parentCategoryId) => (parentCategoryId === keys.category2.id ? "hidden" : "visible"),
-            definitionContainer: (definitionContainerId) => (definitionContainerId === keys.definitionContainerRoot2.id ? "hidden" : "visible"),
+            [keys.definitionContainerRoot2.id]: "hidden",
+            [keys.definitionContainerRoot.id]: "visible",
+            [keys.definitionContainerChild.id]: "visible",
+            [keys.category2.id]: "hidden",
+            [keys.indirectCategory.id]: "visible",
+            [keys.subCategory2.id]: "hidden",
+            [keys.indirectSubCategory.id]: "visible",
           },
           expectedIds,
         });
@@ -250,8 +256,10 @@ describe("CategoriesVisibilityHandler", () => {
           handler,
           viewport,
           visibilityExpectations: {
-            category: (categoryId) => (categoryId === keys.directCategory.id ? "hidden" : "visible"),
-            definitionContainer: (definitionContainerId) => (definitionContainerId === keys.definitionContainerRoot.id ? "partial" : "visible"),
+            [keys.definitionContainerRoot.id]: "partial",
+            [keys.definitionContainerChild.id]: "visible",
+            [keys.directCategory.id]: "hidden",
+            [keys.indirectCategory.id]: "visible",
           },
           expectedIds,
         });
@@ -292,16 +300,11 @@ describe("CategoriesVisibilityHandler", () => {
           handler,
           viewport,
           visibilityExpectations: {
-            category: (categoryId) => (categoryId === keys.indirectCategory2.id ? "hidden" : "visible"),
-            definitionContainer: (definitionContainerId) => {
-              if (definitionContainerId === keys.definitionContainerRoot.id) {
-                return "partial";
-              }
-              if (definitionContainerId === keys.definitionContainerChild2.id) {
-                return "hidden";
-              }
-              return "visible";
-            },
+            [keys.definitionContainerRoot.id]: "partial",
+            [keys.definitionContainerChild.id]: "visible",
+            [keys.definitionContainerChild2.id]: "hidden",
+            [keys.indirectCategory2.id]: "hidden",
+            [keys.indirectCategory.id]: "visible",
           },
           expectedIds,
         });
@@ -336,8 +339,9 @@ describe("CategoriesVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          visibilityExpectations: VisibilityExpectations.all("visible"),
+          visibilityExpectations: {},
           expectedIds,
+          all: "visible",
         });
         viewport.validateChangesCalls([{ categoriesToChange: [keys.indirectCategory.id], isVisible: true, enableAllSubCategories: true }], []);
       });
@@ -366,8 +370,9 @@ describe("CategoriesVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          visibilityExpectations: VisibilityExpectations.all("visible"),
+          visibilityExpectations: {},
           expectedIds,
+          all: "visible",
         });
         viewport.validateChangesCalls([{ categoriesToChange: [keys.category.id], isVisible: true, enableAllSubCategories: true }], []);
       });
@@ -402,8 +407,10 @@ describe("CategoriesVisibilityHandler", () => {
           handler,
           viewport,
           visibilityExpectations: {
-            category: (categoryId) => (categoryId === keys.category2.id ? "hidden" : "visible"),
-            subCategory: (parentCategoryId) => (parentCategoryId === keys.category2.id ? "hidden" : "visible"),
+            [keys.category2.id]: "hidden",
+            [keys.category.id]: "visible",
+            [keys.subCategory2.id]: "hidden",
+            [keys.subCategory.id]: "visible",
           },
           expectedIds,
         });
@@ -444,9 +451,11 @@ describe("CategoriesVisibilityHandler", () => {
           handler,
           viewport,
           visibilityExpectations: {
-            category: (categoryId) => (categoryId === keys.category2.id ? "hidden" : "visible"),
-            subCategory: (parentCategoryId) => (parentCategoryId === keys.category2.id ? "hidden" : "visible"),
-            definitionContainer: () => "hidden",
+            [keys.definitionContainer.id]: "hidden",
+            [keys.category2.id]: "hidden",
+            [keys.category.id]: "visible",
+            [keys.subCategory2.id]: "hidden",
+            [keys.subCategory.id]: "visible",
           },
           expectedIds,
         });
@@ -488,9 +497,11 @@ describe("CategoriesVisibilityHandler", () => {
           handler,
           viewport,
           visibilityExpectations: {
-            category: (categoryId) => (categoryId === keys.category2.id ? "hidden" : "visible"),
-            subCategory: (parentCategoryId) => (parentCategoryId === keys.category2.id ? "hidden" : "visible"),
-            definitionContainer: () => "partial",
+            [keys.definitionContainerRoot.id]: "partial",
+            [keys.category2.id]: "hidden",
+            [keys.category.id]: "visible",
+            [keys.subCategory2.id]: "hidden",
+            [keys.subCategory.id]: "visible",
           },
           expectedIds,
         });
@@ -535,14 +546,11 @@ describe("CategoriesVisibilityHandler", () => {
           handler,
           viewport,
           visibilityExpectations: {
-            category: (categoryId) => (categoryId === keys.indirectCategory.id ? "hidden" : "visible"),
-            subCategory: () => "visible",
-            definitionContainer: (definitionContainerId) => {
-              if (definitionContainerId === keys.definitionContainerRoot.id) {
-                return "partial";
-              }
-              return "hidden";
-            },
+            [keys.definitionContainerRoot.id]: "partial",
+            [keys.definitionContainerChild.id]: "hidden",
+            [keys.indirectCategory.id]: "hidden",
+            [keys.category.id]: "visible",
+            [keys.subCategory.id]: "visible",
           },
           expectedIds,
         });
@@ -581,8 +589,9 @@ describe("CategoriesVisibilityHandler", () => {
           handler,
           viewport,
           visibilityExpectations: {
-            category: () => "partial",
-            subCategory: (_, subCategoryId) => (subCategoryId === keys.subCategory.id ? "visible" : "hidden"),
+            [keys.category.id]: "partial",
+            [keys.subCategory.id]: "visible",
+            [keys.subCategory2.id]: "hidden",
           },
           expectedIds,
         });
@@ -617,8 +626,9 @@ describe("CategoriesVisibilityHandler", () => {
           handler,
           viewport,
           visibilityExpectations: {
-            category: (categoryId) => (categoryId === keys.category.id ? "partial" : "hidden"),
-            subCategory: (_, subCategoryId) => (subCategoryId === keys.subCategory.id ? "visible" : "hidden"),
+            [keys.category2.id]: "hidden",
+            [keys.category.id]: "partial",
+            [keys.subCategory.id]: "visible",
           },
           expectedIds,
         });
@@ -654,9 +664,9 @@ describe("CategoriesVisibilityHandler", () => {
           handler,
           viewport,
           visibilityExpectations: {
-            category: () => "partial",
-            subCategory: (_, subCategoryId) => (subCategoryId === keys.subCategory.id ? "visible" : "hidden"),
-            definitionContainer: () => "partial",
+            [keys.definitionContainerRoot.id]: "partial",
+            [keys.category.id]: "partial",
+            [keys.subCategory.id]: "visible",
           },
           expectedIds,
         });
@@ -705,9 +715,11 @@ describe("CategoriesVisibilityHandler", () => {
           handler,
           viewport,
           visibilityExpectations: {
-            category: (categoryId) => (categoryId === keys.category.id ? "partial" : "hidden"),
-            subCategory: (_, subCategoryId) => (subCategoryId === keys.subCategory.id ? "visible" : "hidden"),
-            definitionContainer: () => "hidden",
+            [keys.definitionContainerRoot.id]: "hidden",
+            [keys.categoryOfDefinitionContainer.id]: "hidden",
+            [keys.subCategoryOfDefinitionContainer.id]: "hidden",
+            [keys.category.id]: "partial",
+            [keys.subCategory.id]: "visible",
           },
           expectedIds,
         });
@@ -740,8 +752,9 @@ describe("CategoriesVisibilityHandler", () => {
         provider,
         handler,
         viewport,
-        visibilityExpectations: VisibilityExpectations.all("visible"),
+        visibilityExpectations: {},
         expectedIds,
+        all: "visible",
       });
     });
     describe("definitionContainers", () => {
@@ -781,8 +794,9 @@ describe("CategoriesVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          visibilityExpectations: VisibilityExpectations.all("hidden"),
+          visibilityExpectations: {},
           expectedIds,
+          all: "hidden",
         });
         viewport.validateChangesCalls(
           [{ categoriesToChange: [keys.directCategory.id, keys.indirectCategory.id], isVisible: false, enableAllSubCategories: false }],
@@ -840,9 +854,13 @@ describe("CategoriesVisibilityHandler", () => {
           handler,
           viewport,
           visibilityExpectations: {
-            category: (categoryId) => (categoryId === keys.indirectCategory.id ? "hidden" : "visible"),
-            subCategory: (parentCategoryId) => (parentCategoryId === keys.indirectCategory.id ? "hidden" : "visible"),
-            definitionContainer: (definitionContainerId) => (definitionContainerId !== keys.definitionContainerRoot2.id ? "hidden" : "visible"),
+            [keys.definitionContainerRoot2.id]: "visible",
+            [keys.definitionContainerRoot.id]: "hidden",
+            [keys.definitionContainerChild.id]: "hidden",
+            [keys.indirectCategory.id]: "hidden",
+            [keys.category2.id]: "visible",
+            [keys.indirectSubCategory.id]: "hidden",
+            [keys.subCategory2.id]: "visible",
           },
           expectedIds,
         });
@@ -876,8 +894,10 @@ describe("CategoriesVisibilityHandler", () => {
           handler,
           viewport,
           visibilityExpectations: {
-            category: (categoryId) => (categoryId === keys.indirectCategory.id ? "hidden" : "visible"),
-            definitionContainer: (definitionContainerId) => (definitionContainerId === keys.definitionContainerRoot.id ? "partial" : "hidden"),
+            [keys.definitionContainerRoot.id]: "partial",
+            [keys.definitionContainerChild.id]: "hidden",
+            [keys.indirectCategory.id]: "hidden",
+            [keys.directCategory.id]: "visible",
           },
           expectedIds,
         });
@@ -919,16 +939,11 @@ describe("CategoriesVisibilityHandler", () => {
           handler,
           viewport,
           visibilityExpectations: {
-            category: (categoryId) => (categoryId === keys.indirectCategory.id ? "hidden" : "visible"),
-            definitionContainer: (definitionContainerId) => {
-              if (definitionContainerId === keys.definitionContainerRoot.id) {
-                return "partial";
-              }
-              if (definitionContainerId === keys.definitionContainerChild.id) {
-                return "hidden";
-              }
-              return "visible";
-            },
+            [keys.definitionContainerRoot.id]: "partial",
+            [keys.definitionContainerChild.id]: "hidden",
+            [keys.definitionContainerChild2.id]: "visible",
+            [keys.indirectCategory.id]: "hidden",
+            [keys.indirectCategory2.id]: "visible",
           },
           expectedIds,
         });
@@ -964,8 +979,9 @@ describe("CategoriesVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          visibilityExpectations: VisibilityExpectations.all("hidden"),
+          visibilityExpectations: {},
           expectedIds,
+          all: "hidden",
         });
         viewport.validateChangesCalls([{ categoriesToChange: [keys.indirectCategory.id], isVisible: false, enableAllSubCategories: false }], []);
       });
@@ -995,8 +1011,9 @@ describe("CategoriesVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          visibilityExpectations: VisibilityExpectations.all("hidden"),
+          visibilityExpectations: {},
           expectedIds,
+          all: "hidden",
         });
         viewport.validateChangesCalls([{ categoriesToChange: [keys.category.id], isVisible: false, enableAllSubCategories: false }], []);
       });
@@ -1032,8 +1049,10 @@ describe("CategoriesVisibilityHandler", () => {
           handler,
           viewport,
           visibilityExpectations: {
-            category: (categoryId) => (categoryId === keys.category.id ? "hidden" : "visible"),
-            subCategory: (parentCategoryId) => (parentCategoryId === keys.category.id ? "hidden" : "visible"),
+            [keys.category.id]: "hidden",
+            [keys.category2.id]: "visible",
+            [keys.subCategory2.id]: "visible",
+            [keys.subCategory.id]: "hidden",
           },
           expectedIds,
         });
@@ -1075,9 +1094,11 @@ describe("CategoriesVisibilityHandler", () => {
           handler,
           viewport,
           visibilityExpectations: {
-            category: (categoryId) => (categoryId === keys.category.id ? "hidden" : "visible"),
-            subCategory: (parentCategoryId) => (parentCategoryId === keys.category.id ? "hidden" : "visible"),
-            definitionContainer: () => "visible",
+            [keys.definitionContainer.id]: "visible",
+            [keys.category2.id]: "visible",
+            [keys.category.id]: "hidden",
+            [keys.subCategory2.id]: "visible",
+            [keys.subCategory.id]: "hidden",
           },
           expectedIds,
         });
@@ -1120,9 +1141,11 @@ describe("CategoriesVisibilityHandler", () => {
           handler,
           viewport,
           visibilityExpectations: {
-            category: (categoryId) => (categoryId === keys.category.id ? "hidden" : "visible"),
-            subCategory: (parentCategoryId) => (parentCategoryId === keys.category.id ? "hidden" : "visible"),
-            definitionContainer: () => "partial",
+            [keys.definitionContainerRoot.id]: "partial",
+            [keys.category.id]: "hidden",
+            [keys.category2.id]: "visible",
+            [keys.subCategory.id]: "hidden",
+            [keys.subCategory2.id]: "visible",
           },
           expectedIds,
         });
@@ -1168,14 +1191,11 @@ describe("CategoriesVisibilityHandler", () => {
           handler,
           viewport,
           visibilityExpectations: {
-            category: (categoryId) => (categoryId === keys.category.id ? "hidden" : "visible"),
-            subCategory: () => "hidden",
-            definitionContainer: (definitionContainerId) => {
-              if (definitionContainerId === keys.definitionContainerRoot.id) {
-                return "partial";
-              }
-              return "visible";
-            },
+            [keys.definitionContainerRoot.id]: "partial",
+            [keys.definitionContainerChild.id]: "visible",
+            [keys.category.id]: "hidden",
+            [keys.indirectCategory.id]: "visible",
+            [keys.subCategory.id]: "hidden",
           },
           expectedIds,
         });
@@ -1213,15 +1233,16 @@ describe("CategoriesVisibilityHandler", () => {
           handler,
           viewport,
           visibilityExpectations: {
-            category: () => "partial",
-            subCategory: (_, subCategoryId) => (subCategoryId === keys.subCategory.id ? "hidden" : "visible"),
+            [keys.category.id]: "partial",
+            [keys.subCategory.id]: "hidden",
+            [keys.subCategory2.id]: "visible",
           },
           expectedIds,
         });
         viewport.validateChangesCalls([], [{ subCategoryId: keys.subCategory.id, isVisible: false }]);
       });
 
-      it("showing subCategory makes it visible and its parent category partially visible, and doesn't affect other categories", async function () {
+      it("hiding subCategory makes it hidden and its parent category partially visible, and doesn't affect other categories", async function () {
         const { imodel, ...keys } = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
@@ -1247,8 +1268,9 @@ describe("CategoriesVisibilityHandler", () => {
           handler,
           viewport,
           visibilityExpectations: {
-            category: (categoryId) => (categoryId === keys.category.id ? "partial" : "visible"),
-            subCategory: (_, subCategoryId) => (subCategoryId === keys.subCategory.id ? "hidden" : "visible"),
+            [keys.category.id]: "partial",
+            [keys.category2.id]: "visible",
+            [keys.subCategory.id]: "hidden",
           },
           expectedIds,
         });
@@ -1282,9 +1304,9 @@ describe("CategoriesVisibilityHandler", () => {
           handler,
           viewport,
           visibilityExpectations: {
-            category: () => "partial",
-            subCategory: (_, subCategoryId) => (subCategoryId === keys.subCategory.id ? "hidden" : "visible"),
-            definitionContainer: () => "partial",
+            [keys.definitionContainerRoot.id]: "partial",
+            [keys.category.id]: "partial",
+            [keys.subCategory.id]: "hidden",
           },
           expectedIds,
         });
@@ -1331,9 +1353,11 @@ describe("CategoriesVisibilityHandler", () => {
           handler,
           viewport,
           visibilityExpectations: {
-            category: (categoryId) => (categoryId === keys.category.id ? "partial" : "visible"),
-            subCategory: (_, subCategoryId) => (subCategoryId === keys.subCategory.id ? "hidden" : "visible"),
-            definitionContainer: () => "visible",
+            [keys.definitionContainerRoot.id]: "visible",
+            [keys.categoryOfDefinitionContainer.id]: "visible",
+            [keys.subCategoryOfDefinitionContainer.id]: "visible",
+            [keys.category.id]: "partial",
+            [keys.subCategory.id]: "hidden",
           },
           expectedIds,
         });
