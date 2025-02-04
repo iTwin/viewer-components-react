@@ -90,6 +90,7 @@ describe("CategoriesVisibilityHandler", () => {
       ...commonProps,
       [Symbol.dispose]() {
         handler[Symbol.dispose]();
+        provider[Symbol.dispose]();
       },
     };
   }
