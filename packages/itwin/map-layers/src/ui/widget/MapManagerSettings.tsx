@@ -24,6 +24,10 @@ enum MapMaskingOption {
   AllModels,
 }
 
+interface MapManagerSettingsProps {
+  onHandleOutsideClick?: (shouldHandle: boolean) => void;
+}
+
 function getMapMaskingFromBackgroundMapSetting(backgroundMapSettings: BackgroundMapSettings): MapMaskingOption {
   if (backgroundMapSettings.planarClipMask.mode === PlanarClipMaskMode.Priority && backgroundMapSettings.planarClipMask.priority) {
     if (backgroundMapSettings.planarClipMask.priority >= PlanarClipMaskPriority.BackgroundMap) {
@@ -53,7 +57,7 @@ function getHeightOriginModeFromKey(mode: string): TerrainHeightOriginMode {
   return TerrainHeightOriginMode.Ground;
 }
 
-export function MapManagerSettings() {
+export function MapManagerSettings({ onHandleOutsideClick }: MapManagerSettingsProps) {
   const { activeViewport } = useSourceMapContext();
   const backgroundMapSettings = (activeViewport!.view as ViewState3d).getDisplayStyle3d().settings.backgroundMap;
 
@@ -331,7 +335,7 @@ export function MapManagerSettings() {
           </div>
         </>
       )}
-      {tabIndex === 1 && <CustomParamsSettingsPanel></CustomParamsSettingsPanel>}
+      {tabIndex === 1 && <CustomParamsSettingsPanel onHandleOutsideClick={onHandleOutsideClick}></CustomParamsSettingsPanel>}
     </Tabs>
   );
 }

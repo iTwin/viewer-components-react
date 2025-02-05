@@ -167,7 +167,6 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
                     UiFramework.dialogs.modal.open(
                       <MapUrlDialog
                         activeViewport={props.activeViewport}
-                        isOverlay={props.isOverlay}
                         signInModeArgs={{ layer }}
                         onOkResult={(sourceState?: SourceState) => handleOk(index, sourceState)}
                         onCancelResult={() => {
@@ -219,7 +218,6 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
                   UiFramework.dialogs.modal.open(
                     <MapUrlDialog
                       activeViewport={props.activeViewport}
-                      isOverlay={props.isOverlay}
                       signInModeArgs={{ layer }}
                       onOkResult={(sourceState?: SourceState) => handleOk(index, sourceState)}
                       onCancelResult={() => {

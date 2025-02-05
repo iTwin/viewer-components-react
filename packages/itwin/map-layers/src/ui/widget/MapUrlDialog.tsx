@@ -38,7 +38,6 @@ const URL_SCHEMES = {
 export type LayerCreationMode = "single" | "multiple";
 interface MapUrlDialogProps {
   activeViewport?: ScreenViewport;
-  isOverlay: boolean;
   onOkResult: (result?: SourceState) => void;
   onCancelResult?: () => void;
   mapLayerOptions?: MapLayerOptions;
