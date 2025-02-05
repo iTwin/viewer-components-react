@@ -40,6 +40,7 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import type { ClientPrefix } from "@itwin/grouping-mapping-widget";
 import type { SelectableTreeDefinition } from "@itwin/tree-widget-react";
 import type { UiItemsProvider } from "@itwin/appui-react";
+import type { ComponentPropsWithRef } from "react";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
@@ -115,15 +116,12 @@ const configuredUiItems = new Map<string, UiItem>([
                 id: ModelsTreeComponent.id,
                 getLabel: () => ModelsTreeComponent.getLabel(),
                 render: (props) => {
-                  // eslint-disable-next-line react-hooks/rules-of-hooks
-                  const { disableNodesSelection } = useViewerOptionsContext();
                   return (
-                    <ModelsTreeComponent
+                    <ModelsTreeWithOption
                       getSchemaContext={getSchemaContext}
                       density={props.density}
                       selectionStorage={unifiedSelectionStorage}
                       selectionMode={"extended"}
-                      selectionPredicate={disableNodesSelection ? disabledSelectionPredicate : undefined}
                       onPerformanceMeasured={props.onPerformanceMeasured}
                       onFeatureUsed={props.onFeatureUsed}
                     />
@@ -298,6 +296,11 @@ const configuredUiItems = new Map<string, UiItem>([
     },
   ],
 ]);
+
+function ModelsTreeWithOption(props: ComponentPropsWithRef<typeof ModelsTreeComponent>) {
+  const { disableNodesSelection } = useViewerOptionsContext();
+  return <ModelsTreeComponent {...props} selectionPredicate={disableNodesSelection ? disabledSelectionPredicate : undefined} />;
+}
 
 function TreeWidgetWithOptions(props: { trees: SelectableTreeDefinition[] }) {
   const { density } = useViewerOptionsContext();

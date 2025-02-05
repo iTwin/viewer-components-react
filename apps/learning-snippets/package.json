@@ -38,7 +38,7 @@
     "@itwin/imodel-components-react": "^5.0.5",
     "@itwin/presentation-backend": "^4.10.2",
     "@itwin/presentation-common": "^4.10.2",
-    "@itwin/presentation-components": "^5.10.0",
+    "@itwin/presentation-components": "^5.11.0",
     "@itwin/presentation-frontend": "^4.10.2",
     "@itwin/presentation-testing": "^5.3.1",
     "@itwin/presentation-hierarchies": "^1.4.1",
