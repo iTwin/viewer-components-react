@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import cx from "classnames";
 import { Checkbox, Tooltip } from "@itwin/itwinui-react";
 import { isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
@@ -43,7 +42,6 @@ export function TreeNodeCheckbox({ node, onCheckboxClicked, getCheckboxState, ..
     <TooltipWrapper content={checkboxState.tooltip}>
       <Checkbox
         {...props}
-        className={cx("tw-tree-node-checkbox", props.className)}
         checked={checkboxState.state === "on"}
         onClick={(e) => {
           e.stopPropagation();
