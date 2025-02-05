@@ -42,7 +42,6 @@ export function TreeNodeCheckbox({ node, onCheckboxClicked, getCheckboxState, ..
     <TooltipWrapper content={checkboxState.tooltip}>
       <Checkbox
         {...props}
-        className={props.className}
         checked={checkboxState.state === "on"}
         onClick={(e) => {
           e.stopPropagation();
