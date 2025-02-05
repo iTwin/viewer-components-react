@@ -32,7 +32,7 @@ export async function toggleAllCategories(viewport: Viewport, display: boolean) 
 /**
  * Gets ids of all categories from specified imodel and viewport.
  */
-export async function getCategories(viewport: Viewport) {
+async function getCategories(viewport: Viewport) {
   const categories = await loadCategoriesFromViewport(viewport);
   return categories.map((category) => category.categoryId);
 }
