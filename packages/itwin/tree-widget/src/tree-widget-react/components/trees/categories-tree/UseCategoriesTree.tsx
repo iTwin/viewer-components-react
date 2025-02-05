@@ -55,9 +55,7 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
   const viewType = activeView.view.is2d() ? "2d" : "3d";
   const iModel = activeView.iModel;
   const getCategoriesTreeIdsCache = useCallback(() => {
-    if (!idsCacheRef.current) {
-      idsCacheRef.current = new CategoriesTreeIdsCache(createECSqlQueryExecutor(iModel), viewType);
-    }
+    idsCacheRef.current = new CategoriesTreeIdsCache(createECSqlQueryExecutor(iModel), viewType);
     return idsCacheRef.current;
   }, [viewType, iModel]);
 
