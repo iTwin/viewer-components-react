@@ -331,9 +331,10 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
     }
   }, [options, sourceFilterString]);
 
-  const handleAddNewMapSource = React.useCallback((event: React.MouseEvent) => {
+  const handleAddNewMapSource = React.useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     // TODO: Investigate why this event is not stopping propagation. The test app opens and closes the modal immediately.
     event.stopPropagation(); // We don't want the owning ListBox to react on mouse click.
+    console.log("Add new map source");
     UiFramework.dialogs.modal.open(
       <MapUrlDialog
         activeViewport={activeViewport}
@@ -365,6 +366,21 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
       if (!!iTwinId) {
         try {
           await MapLayerPreferences.deleteByName(source, iTwinId, iModelId);
+          // Detach from Map Base layer
+          if (activeViewport) {
+            const indexInDisplayStyle = activeViewport.displayStyle.findMapLayerIndexByNameAndSource(
+              layerName,
+              source.url,
+              isOverlay
+            );
+            console.log(`Detaching ${source.url} from ${indexInDisplayStyle}`);
+            if (indexInDisplayStyle >= 0) {
+              activeViewport.displayStyle.detachMapLayerByIndex({
+                index: indexInDisplayStyle,
+                isOverlay
+              });
+            }
+          }
           const msg = MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.RemoveLayerDefSuccess", { layerName });
           IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Info, msg));
         } catch {
