@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { SvgArchive, SvgLayers } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
@@ -50,19 +50,18 @@ interface UseCategoriesTreeResult {
  */
 export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: UseCategoriesTreeProps): UseCategoriesTreeResult {
   const [filteringError, setFilteringError] = useState<CategoriesTreeFilteringError | undefined>();
-  const idsCacheRef = useRef<CategoriesTreeIdsCache>();
 
   const viewType = activeView.view.is2d() ? "2d" : "3d";
   const iModel = activeView.iModel;
-  const getCategoriesTreeIdsCache = useCallback(() => {
-    idsCacheRef.current = new CategoriesTreeIdsCache(createECSqlQueryExecutor(iModel), viewType);
-    return idsCacheRef.current;
+
+  const idsCache = useMemo(() => {
+    return new CategoriesTreeIdsCache(createECSqlQueryExecutor(iModel), viewType);
   }, [viewType, iModel]);
 
   const visibilityHandlerFactory = useCallback(() => {
     const visibilityHandler = new CategoriesVisibilityHandler({
       viewport: activeView,
-      idsCache: getCategoriesTreeIdsCache(),
+      idsCache,
     });
     return {
       getVisibilityStatus: async (node: HierarchyNode) => visibilityHandler.getVisibilityStatus(node),
@@ -70,14 +69,14 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
       onVisibilityChange: visibilityHandler.onVisibilityChange,
       dispose: () => visibilityHandler.dispose(),
     };
-  }, [activeView, getCategoriesTreeIdsCache]);
+  }, [activeView, idsCache]);
   const { onFeatureUsed } = useTelemetryContext();
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
     (props) => {
-      return new CategoriesTreeDefinition({ ...props, viewType, idsCache: getCategoriesTreeIdsCache() });
+      return new CategoriesTreeDefinition({ ...props, viewType, idsCache });
     },
-    [viewType, getCategoriesTreeIdsCache],
+    [viewType, idsCache],
   );
 
   const getFilteredPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
@@ -89,8 +88,8 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
     return async ({ imodelAccess }) => {
       onFeatureUsed({ featureId: "filtering", reportInteraction: true });
       try {
-        const paths = await CategoriesTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, viewType, idsCache: getCategoriesTreeIdsCache() });
-        onCategoriesFiltered?.(await getCategoriesFromPaths(paths, getCategoriesTreeIdsCache()));
+        const paths = await CategoriesTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, viewType, idsCache });
+        onCategoriesFiltered?.(await getCategoriesFromPaths(paths, idsCache));
         return paths;
       } catch (e) {
         const newError = e instanceof FilterLimitExceededError ? "tooManyFilterMatches" : "unknownFilterError";
@@ -102,7 +101,7 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
         return [];
       }
     };
-  }, [filter, viewType, onFeatureUsed, onCategoriesFiltered, getCategoriesTreeIdsCache]);
+  }, [filter, viewType, onFeatureUsed, onCategoriesFiltered, idsCache]);
 
   return {
     categoriesTreeProps: {
