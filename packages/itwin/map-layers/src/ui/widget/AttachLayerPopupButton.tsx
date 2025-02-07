@@ -28,9 +28,10 @@ interface AttachLayerPanelProps {
   isOverlay: boolean;
   onLayerAttached: () => void;
   onHandleOutsideClick?: (shouldHandle: boolean) => void;
+  setMapUrlModalOpen: (open: boolean) => void;
 }
 
-function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: AttachLayerPanelProps) {
+function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick, setMapUrlModalOpen}: AttachLayerPanelProps) {
   const [layerNameToAdd, setLayerNameToAdd] = React.useState<string | undefined>();
   const [sourceFilterString, setSourceFilterString] = React.useState<string | undefined>();
 
@@ -332,20 +333,27 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
   }, [options, sourceFilterString]);
 
   const handleAddNewMapSource = React.useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-    // TODO: Investigate why this event is not stopping propagation. The test app opens and closes the modal immediately.
-    event.stopPropagation(); // We don't want the owning ListBox to react on mouse click.
+    console.log("add new map source 2");
+    event.stopPropagation();
+    setMapUrlModalOpen(true);
     UiFramework.dialogs.modal.open(
       <MapUrlDialog
         activeViewport={activeViewport}
-        onOkResult={(result?: SourceState) => handleModalUrlDialogOk(LayerAction.New, result)}
-        onCancelResult={handleModalUrlDialogCancel}
+        onOkResult={(result?: SourceState) => {
+          setMapUrlModalOpen(false);
+          handleModalUrlDialogOk(LayerAction.New, result);
+        }}
+        onCancelResult={() => {
+          setMapUrlModalOpen(false);
+          handleModalUrlDialogCancel();
+        }}
         mapLayerOptions={mapLayerOptions}
       />,
     );
     if (onHandleOutsideClick) {
       onHandleOutsideClick(false);
     }
-  }, [activeViewport, handleModalUrlDialogCancel, handleModalUrlDialogOk, mapLayerOptions, onHandleOutsideClick]);
+}, [activeViewport, handleModalUrlDialogCancel, handleModalUrlDialogOk, mapLayerOptions, onHandleOutsideClick, setMapUrlModalOpen]);
 
   const handleAttach = React.useCallback((mapName: string) => {
     setLayerNameToAdd(mapName);
@@ -547,6 +555,7 @@ export function AttachLayerPopupButton(props: AttachLayerPopupButtonProps) {
   }, []);
 
   const [handleOutsideClick, setHandleOutsideClick] = React.useState(true);
+  const [mapUrlModalOpen, setMapUrlModalOpen] = React.useState(false);
   const [popupOpen, setPopupOpen] = React.useState(false);
   const buttonRef = React.useRef<HTMLButtonElement>(null);
   const panelRef = React.useRef<HTMLDivElement>(null);
@@ -625,11 +634,11 @@ export function AttachLayerPopupButton(props: AttachLayerPopupButtonProps) {
       <Popover
         content={
           <div ref={panelRef} className="map-sources-popup-panel">
-            <AttachLayerPanel isOverlay={props.isOverlay} onLayerAttached={handleLayerAttached} onHandleOutsideClick={setHandleOutsideClick} />
+            <AttachLayerPanel isOverlay={props.isOverlay} onLayerAttached={handleLayerAttached} onHandleOutsideClick={setHandleOutsideClick} setMapUrlModalOpen={setMapUrlModalOpen} />
           </div>
         }
         applyBackground
-        visible={popupOpen}
+        visible={popupOpen || mapUrlModalOpen}
         onVisibleChange={setPopupOpen}
         closeOnOutsideClick={handleOutsideClick}
         placement={"bottom-end"}
