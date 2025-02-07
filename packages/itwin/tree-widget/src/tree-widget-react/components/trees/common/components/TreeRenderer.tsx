@@ -3,8 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import "./TreeRenderer.scss";
-
 import { useCallback } from "react";
 import { Tree } from "@itwin/itwinui-react";
 import { createRenderedTreeNodeData, LocalizationContextProvider } from "@itwin/presentation-hierarchies-react";
@@ -85,7 +83,6 @@ export function TreeRenderer({
           getHierarchyLevelDetails={getHierarchyLevelDetails}
           checkboxProps={checkboxProps}
           reloadTree={reloadTree}
-          className={getSublabel ? "with-description" : "without-description"}
           size={size}
           filterButtonsVisibility={filterButtonsVisibility}
         />
@@ -117,7 +114,6 @@ export function TreeRenderer({
     <LocalizationContextProvider localizedStrings={localizedStrings}>
       <Tree<RenderedTreeNode>
         {...props}
-        className="tw-tree-renderer"
         data={rootNodes}
         nodeRenderer={nodeRenderer}
         getNode={getNode}

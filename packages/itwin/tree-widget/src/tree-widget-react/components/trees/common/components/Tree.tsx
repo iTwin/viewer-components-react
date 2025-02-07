@@ -7,7 +7,7 @@ import { useCallback, useMemo, useState } from "react";
 import { BeEvent } from "@itwin/core-bentley";
 import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { SchemaMetadataContextProvider } from "@itwin/presentation-components";
-import { UnifiedSelectionProvider, useIModelUnifiedSelectionTree, useSelectionHandler } from "@itwin/presentation-hierarchies-react";
+import { useIModelUnifiedSelectionTree, useSelectionHandler } from "@itwin/presentation-hierarchies-react";
 import { TreeWidget } from "../../../../TreeWidget.js";
 import { useHierarchiesLocalization } from "../UseHierarchiesLocalization.js";
 import { useHierarchyLevelFiltering } from "../UseHierarchyFiltering.js";
@@ -79,9 +79,7 @@ export function Tree({ getSchemaContext, hierarchyLevelSizeLimit, selectionStora
 
   return (
     <SchemaMetadataContextProvider imodel={props.imodel} schemaContextProvider={getSchemaContext}>
-      <UnifiedSelectionProvider storage={selectionStorage}>
-        <TreeImpl {...props} imodelAccess={imodelAccess} defaultHierarchyLevelSizeLimit={defaultHierarchyLevelSizeLimit} />
-      </UnifiedSelectionProvider>
+      <TreeImpl {...props} selectionStorage={selectionStorage} imodelAccess={imodelAccess} defaultHierarchyLevelSizeLimit={defaultHierarchyLevelSizeLimit} />
     </SchemaMetadataContextProvider>
   );
 }
@@ -100,7 +98,8 @@ function TreeImpl({
   treeRenderer,
   density,
   highlight,
-}: MarkRequired<Omit<TreeProps, "getSchemaContext" | "selectionStorage">, "imodelAccess"> & { defaultHierarchyLevelSizeLimit: number }) {
+  selectionStorage,
+}: MarkRequired<Omit<TreeProps, "getSchemaContext">, "imodelAccess"> & { defaultHierarchyLevelSizeLimit: number }) {
   const localizedStrings = useHierarchiesLocalization();
   const { onFeatureUsed, onPerformanceMeasured } = useTelemetryContext();
   const [imodelChanged] = useState(new BeEvent<() => void>());
@@ -119,6 +118,7 @@ function TreeImpl({
     getFilteredPaths,
     sourceName: treeName,
     localizedStrings,
+    selectionStorage,
     onPerformanceMeasured: (action, duration) => {
       if (action === "reload") {
         onReload?.();
@@ -179,7 +179,7 @@ function TreeImpl({
 
   return (
     <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>
-      <div id="tw-tree-renderer-container" style={{ overflow: "auto", height: "100%" }}>
+      <div id="tw-tree-renderer-container" style={{ height: "100%" }}>
         {treeRenderer(treeRendererProps)}
         {filteringDialog}
       </div>

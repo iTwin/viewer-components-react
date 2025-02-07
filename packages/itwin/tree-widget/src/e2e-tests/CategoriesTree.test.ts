@@ -6,8 +6,17 @@
 import type { Locator } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import {
-  expandStagePanel, initTreeWidgetTest, locateInstanceFilter, locateNode, scrollTree, selectOperatorInDialog, selectPropertyInDialog, selectTree,
-  selectValueInDialog, takeScreenshot, withDifferentDensities,
+  expandStagePanel,
+  initTreeWidgetTest,
+  locateInstanceFilter,
+  locateNode,
+  scrollTree,
+  selectOperatorInDialog,
+  selectPropertyInDialog,
+  selectTree,
+  selectValueInDialog,
+  takeScreenshot,
+  withDifferentDensities,
 } from "./utils.js";
 
 test.describe("Categories tree", () => {
@@ -102,7 +111,7 @@ test.describe("Categories tree", () => {
       await page.keyboard.press("Tab");
 
       // ensure checkbox is focused
-      const checkbox = node.locator(".tw-tree-node-checkbox");
+      const checkbox = node.getByRole("checkbox");
       await expect(checkbox).toBeFocused();
 
       await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
