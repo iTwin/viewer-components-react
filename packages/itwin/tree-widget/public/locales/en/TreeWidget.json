@@ -50,21 +50,27 @@
         "allElementsHidden": "All category elements are in the never drawn list or none of the category elements are in the exclusive always drawn list",
         "someElementsAreHidden": "There are both visible and hidden elements in this category",
         "allElementsVisible": "All category elements are in the always drawn list",
-        "hiddenThroughModel": "Model is hidden"
+        "hiddenThroughModel": "Model is hidden",
+        "allModeledElementsHidden": "All modeled and regular elements in the category are hidden",
+        "someModeledElementsHidden": "There are both visible and hidden modeled and regular elements in this category"
       },
       "element": {
         "hiddenThroughNeverDrawnList": "Element(s) in \"never drawn\" list",
         "displayedThroughAlwaysDrawnList": "Element(s) in \"always drawn\" list",
         "hiddenDueToOtherElementsExclusivelyAlwaysDrawn": "Other elements in \"exclusively always drawn\" list",
         "hiddenThroughModel": "Model is not displayed",
-        "hiddenThroughCategory": "Category is not displayed"
+        "hiddenThroughCategory": "Category is not displayed",
+        "hiddenThroughSubModel": "Modeled elements subModel is hidden",
+        "someElementsAreHidden": "Modeled elements subModel has partial state"
       },
       "groupingNode": {
         "allElementsHidden": "All elements are in the never drawn list or none of the elements are in the exclusive always drawn list",
         "someElementsAreHidden": "There are both visible and hidden elements",
         "allElementsVisible": "All elements are in the always drawn list",
         "visibleThroughCategory": "All elements are visible through category",
-        "hiddenThroughCategory": "All elements are hidden through category"
+        "hiddenThroughCategory": "All elements are hidden through category",
+        "allModeledElementsHidden": "All elements are hidden",
+        "someModeledElementsHidden": "There are both visible and hidden elements"
       }
     }
   },
