@@ -82,7 +82,10 @@ interface ViewportStubValidation {
  * This stub allows changing and saving the display of categories and subcategories
  * @returns stubbed `Viewport`
  */
-export async function createViewportStub(idsCache: CategoriesTreeIdsCache, isVisibleOnInitialize = false): Promise<Viewport & ViewportStubValidation> {
+export async function createViewportStub(props: {
+  idsCache: CategoriesTreeIdsCache;
+  isVisibleOnInitialize: boolean;
+}): Promise<Viewport & ViewportStubValidation> {
   const subCategoriesMap = new Map<Id64String, boolean>();
 
   const categoriesMap = new Map<
@@ -93,13 +96,13 @@ export async function createViewportStub(idsCache: CategoriesTreeIdsCache, isVis
     }
   >();
 
-  const { categories: categoriesFromCache } = await idsCache.getAllDefinitionContainersAndCategories();
+  const { categories: categoriesFromCache } = await props.idsCache.getAllDefinitionContainersAndCategories();
   for (const category of categoriesFromCache) {
-    const subCategoriesFromCache = await idsCache.getSubCategories(category);
+    const subCategoriesFromCache = await props.idsCache.getSubCategories(category);
     subCategoriesFromCache.forEach((subCategoryId) => {
-      subCategoriesMap.set(subCategoryId, isVisibleOnInitialize);
+      subCategoriesMap.set(subCategoryId, props.isVisibleOnInitialize);
     });
-    categoriesMap.set(category, { isVisible: isVisibleOnInitialize, subCategories: subCategoriesFromCache });
+    categoriesMap.set(category, { isVisible: props.isVisibleOnInitialize, subCategories: subCategoriesFromCache });
   }
   const changeCategoryDisplayStub = sinon.stub().callsFake((categoriesToChange: Id64Array, isVisible: boolean, enableAllSubCategories: boolean) => {
     for (const category of categoriesToChange) {

@@ -3,10 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { DEFINITION_CONTAINER_CLASS, SUB_CATEGORY_CLASS } from "./ClassNameDefinitions.js";
+
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
-import { DEFINITION_CONTAINER_CLASS, SUB_CATEGORY_CLASS } from "./ClassNameDefinitions.js";
 
 interface DefinitionContainerInfo {
   modelId: Id64String;
@@ -56,19 +57,19 @@ export class CategoriesTreeIdsCache {
     const CATEGORIES_CTE = "AllVisibleCategories";
     const isDefinitionContainerSupported = await this.getIsDefinitionContainerSupported();
     const ctes = [
-      `${CATEGORIES_CTE}(ECInstanceId, ChildCount, ModelId ${isDefinitionContainerSupported ? ", ParentDefinitionContainerExists" : ""}) AS (
+      `${CATEGORIES_CTE}(ECInstanceId, ChildCount, ModelId, ParentDefinitionContainerExists) AS (
         SELECT
           this.ECInstanceId,
           COUNT(sc.ECInstanceId),
-          this.Model.Id
+          this.Model.Id,
           ${
             isDefinitionContainerSupported
-              ? `,
-            IIF(this.Model.Id IN (SELECT dc.ECInstanceId FROM ${DEFINITION_CONTAINER_CLASS} dc),
-              true,
-              false
-            )`
-              : ""
+              ? `
+              IIF(this.Model.Id IN (SELECT dc.ECInstanceId FROM ${DEFINITION_CONTAINER_CLASS} dc),
+                true,
+                false
+              )`
+              : "false"
           }
         FROM
           ${this._categoryClass} this
@@ -85,7 +86,7 @@ export class CategoriesTreeIdsCache {
       SELECT
         this.ECInstanceId id,
         this.ModelId modelId,
-        ${isDefinitionContainerSupported ? "this.ParentDefinitionContainerExists" : "false"} parentDefinitionContainerExists,
+        this.ParentDefinitionContainerExists parentDefinitionContainerExists,
         this.ChildCount childCount
       FROM
         ${CATEGORIES_CTE} this

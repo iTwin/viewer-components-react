@@ -43,47 +43,16 @@ interface CategoriesTreeInstanceKeyPathsFromInstanceLabelProps {
 }
 
 export class CategoriesTreeDefinition implements HierarchyDefinition {
-  private _implWithoutDefinitionContainers: HierarchyDefinition;
-  private _implWithDefinitionContainers: HierarchyDefinition;
+  private _impl: Promise<HierarchyDefinition> | undefined;
   private _selectQueryFactory: NodesQueryClauseFactory;
   private _nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
   private _idsCache: CategoriesTreeIdsCache;
+  private _viewType: "2d" | "3d";
+  private _iModelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
 
   public constructor(props: CategoriesTreeDefinitionProps) {
-    this._implWithoutDefinitionContainers = createPredicateBasedHierarchyDefinition({
-      classHierarchyInspector: props.imodelAccess,
-      hierarchy: {
-        rootNodes: async (requestProps: DefineRootHierarchyLevelProps) =>
-          this.createDefinitionContainersAndCategoriesQuery({ ...requestProps, viewType: props.viewType }),
-        childNodes: [
-          {
-            parentInstancesNodePredicate: "BisCore.Category",
-            definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createSubcategoryQuery(requestProps),
-          },
-        ],
-      },
-    });
-    this._implWithDefinitionContainers = createPredicateBasedHierarchyDefinition({
-      classHierarchyInspector: props.imodelAccess,
-      hierarchy: {
-        rootNodes: async (requestProps: DefineRootHierarchyLevelProps) =>
-          this.createDefinitionContainersAndCategoriesQuery({ ...requestProps, viewType: props.viewType }),
-        childNodes: [
-          {
-            parentInstancesNodePredicate: "BisCore.Category",
-            definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createSubcategoryQuery(requestProps),
-          },
-          {
-            parentInstancesNodePredicate: DEFINITION_CONTAINER_CLASS,
-            definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) =>
-              this.createDefinitionContainersAndCategoriesQuery({
-                ...requestProps,
-                viewType: props.viewType,
-              }),
-          },
-        ],
-      },
-    });
+    this._iModelAccess = props.imodelAccess;
+    this._viewType = props.viewType;
     this._idsCache = props.idsCache;
     this._nodeLabelSelectClauseFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
     this._selectQueryFactory = createNodesQueryClauseFactory({
@@ -92,12 +61,40 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     });
   }
 
-  public async defineHierarchyLevel(props: DefineHierarchyLevelProps) {
-    const isDefinitionContainerSupported = await this._idsCache.getIsDefinitionContainerSupported();
+  private async getHierarchyDefinition(): Promise<HierarchyDefinition> {
+    this._impl ??= (async () => {
+      const isDefinitionContainerSupported = await this._idsCache.getIsDefinitionContainerSupported();
+      return createPredicateBasedHierarchyDefinition({
+        classHierarchyInspector: this._iModelAccess,
+        hierarchy: {
+          rootNodes: async (requestProps: DefineRootHierarchyLevelProps) =>
+            this.createDefinitionContainersAndCategoriesQuery({ ...requestProps, viewType: this._viewType }),
+          childNodes: [
+            {
+              parentInstancesNodePredicate: "BisCore.Category",
+              definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createSubcategoryQuery(requestProps),
+            },
+            ...(isDefinitionContainerSupported
+              ? [
+                  {
+                    parentInstancesNodePredicate: DEFINITION_CONTAINER_CLASS,
+                    definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) =>
+                      this.createDefinitionContainersAndCategoriesQuery({
+                        ...requestProps,
+                        viewType: this._viewType,
+                      }),
+                  },
+                ]
+              : []),
+          ],
+        },
+      });
+    })();
+    return this._impl;
+  }
 
-    return isDefinitionContainerSupported
-      ? this._implWithDefinitionContainers.defineHierarchyLevel(props)
-      : this._implWithoutDefinitionContainers.defineHierarchyLevel(props);
+  public async defineHierarchyLevel(props: DefineHierarchyLevelProps) {
+    return (await this.getHierarchyDefinition()).defineHierarchyLevel(props);
   }
 
   private async createDefinitionContainersAndCategoriesQuery(props: {

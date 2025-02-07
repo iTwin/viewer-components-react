@@ -59,7 +59,7 @@ describe("CategoriesVisibilityHandler", () => {
     const imodelAccess = createIModelAccess(imodel);
     const idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d");
 
-    const viewport = await createViewportStub(idsCache, isVisibleOnInitialize);
+    const viewport = await createViewportStub({ idsCache, isVisibleOnInitialize });
     return {
       imodelAccess,
       viewport,
@@ -98,26 +98,24 @@ describe("CategoriesVisibilityHandler", () => {
     const isVisibleOnInitialize = false;
 
     it("by default everything is hidden", async function () {
-      const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+      const { imodel } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
         const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
 
         const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id });
         insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-        const subCategory = insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "subCategory", modelId: definitionModel.id });
-        return { definitionContainer, category, subCategory };
+        insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "subCategory", modelId: definitionModel.id });
       });
-      const expectedIds = [keys.category.id, keys.definitionContainer.id, keys.subCategory.id];
+
       using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
       const { handler, provider, viewport } = visibilityTestData;
+
       await validateHierarchyVisibility({
         provider,
         handler,
         viewport,
-        visibilityExpectations: {},
-        expectedIds,
-        all: "hidden",
+        expectations: "all-hidden",
       });
     });
     describe("definitionContainers", () => {
@@ -143,23 +141,15 @@ describe("CategoriesVisibilityHandler", () => {
           return { definitionContainerRoot, definitionContainerChild, directCategory, indirectCategory, indirectSubCategory };
         });
 
-        const expectedIds = [
-          keys.definitionContainerRoot.id,
-          keys.definitionContainerChild.id,
-          keys.directCategory.id,
-          keys.indirectCategory.id,
-          keys.indirectSubCategory.id,
-        ];
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
+
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerRoot.id), true);
         await validateHierarchyVisibility({
           provider,
           handler,
           viewport,
-          visibilityExpectations: {},
-          expectedIds,
-          all: "visible",
+          expectations: "all-visible",
         });
         viewport.validateChangesCalls(
           [{ categoriesToChange: [keys.directCategory.id, keys.indirectCategory.id], isVisible: true, enableAllSubCategories: true }],
@@ -200,23 +190,15 @@ describe("CategoriesVisibilityHandler", () => {
           };
         });
 
-        const expectedIds = [
-          keys.definitionContainerRoot.id,
-          keys.definitionContainerChild.id,
-          keys.definitionContainerRoot2.id,
-          keys.category2.id,
-          keys.indirectCategory.id,
-          keys.indirectSubCategory.id,
-          keys.subCategory2.id,
-        ];
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
+
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerRoot.id), true);
         await validateHierarchyVisibility({
           provider,
           handler,
           viewport,
-          visibilityExpectations: {
+          expectations: {
             [keys.definitionContainerRoot2.id]: "hidden",
             [keys.definitionContainerRoot.id]: "visible",
             [keys.definitionContainerChild.id]: "visible",
@@ -225,7 +207,6 @@ describe("CategoriesVisibilityHandler", () => {
             [keys.subCategory2.id]: "hidden",
             [keys.indirectSubCategory.id]: "visible",
           },
-          expectedIds,
         });
         viewport.validateChangesCalls([{ categoriesToChange: [keys.indirectCategory.id], isVisible: true, enableAllSubCategories: true }], []);
       });
@@ -246,22 +227,20 @@ describe("CategoriesVisibilityHandler", () => {
           return { definitionContainerRoot, definitionContainerChild, directCategory, indirectCategory };
         });
 
-        const expectedIds = [keys.definitionContainerRoot.id, keys.definitionContainerChild.id, keys.directCategory.id, keys.indirectCategory.id];
-
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
+
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), true);
         await validateHierarchyVisibility({
           provider,
           handler,
           viewport,
-          visibilityExpectations: {
+          expectations: {
             [keys.definitionContainerRoot.id]: "partial",
             [keys.definitionContainerChild.id]: "visible",
             [keys.directCategory.id]: "hidden",
             [keys.indirectCategory.id]: "visible",
           },
-          expectedIds,
         });
         viewport.validateChangesCalls([{ categoriesToChange: [keys.indirectCategory.id], isVisible: true, enableAllSubCategories: true }], []);
       });
@@ -284,29 +263,21 @@ describe("CategoriesVisibilityHandler", () => {
           return { definitionContainerRoot, definitionContainerChild, indirectCategory2, indirectCategory, definitionContainerChild2 };
         });
 
-        const expectedIds = [
-          keys.definitionContainerRoot.id,
-          keys.definitionContainerChild.id,
-          keys.indirectCategory.id,
-          keys.definitionContainerChild2.id,
-          keys.indirectCategory2.id,
-        ];
-
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
+
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), true);
         await validateHierarchyVisibility({
           provider,
           handler,
           viewport,
-          visibilityExpectations: {
+          expectations: {
             [keys.definitionContainerRoot.id]: "partial",
             [keys.definitionContainerChild.id]: "visible",
             [keys.definitionContainerChild2.id]: "hidden",
             [keys.indirectCategory2.id]: "hidden",
             [keys.indirectCategory.id]: "visible",
           },
-          expectedIds,
         });
         viewport.validateChangesCalls([{ categoriesToChange: [keys.indirectCategory.id], isVisible: true, enableAllSubCategories: true }], []);
       });
@@ -330,18 +301,15 @@ describe("CategoriesVisibilityHandler", () => {
           return { definitionContainerRoot, definitionContainerChild, indirectCategory, indirectSubCategory };
         });
 
-        const expectedIds = [keys.definitionContainerRoot.id, keys.definitionContainerChild.id, keys.indirectCategory.id, keys.indirectSubCategory.id];
-
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
+
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), true);
         await validateHierarchyVisibility({
           provider,
           handler,
           viewport,
-          visibilityExpectations: {},
-          expectedIds,
-          all: "visible",
+          expectations: "all-visible",
         });
         viewport.validateChangesCalls([{ categoriesToChange: [keys.indirectCategory.id], isVisible: true, enableAllSubCategories: true }], []);
       });
@@ -362,17 +330,15 @@ describe("CategoriesVisibilityHandler", () => {
           return { category, subCategory };
         });
 
-        const expectedIds = [keys.category.id, keys.subCategory.id];
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
+
         await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
         await validateHierarchyVisibility({
           provider,
           handler,
           viewport,
-          visibilityExpectations: {},
-          expectedIds,
-          all: "visible",
+          expectations: "all-visible",
         });
         viewport.validateChangesCalls([{ categoriesToChange: [keys.category.id], isVisible: true, enableAllSubCategories: true }], []);
       });
@@ -398,21 +364,20 @@ describe("CategoriesVisibilityHandler", () => {
           return { category, category2, subCategory, subCategory2 };
         });
 
-        const expectedIds = [keys.category.id, keys.category2.id, keys.subCategory.id, keys.subCategory2.id];
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
+
         await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
         await validateHierarchyVisibility({
           provider,
           handler,
           viewport,
-          visibilityExpectations: {
+          expectations: {
             [keys.category2.id]: "hidden",
             [keys.category.id]: "visible",
             [keys.subCategory2.id]: "hidden",
             [keys.subCategory.id]: "visible",
           },
-          expectedIds,
         });
         viewport.validateChangesCalls([{ categoriesToChange: [keys.category.id], isVisible: true, enableAllSubCategories: true }], []);
       });
@@ -442,22 +407,21 @@ describe("CategoriesVisibilityHandler", () => {
           return { definitionContainer, category, category2, subCategory, subCategory2 };
         });
 
-        const expectedIds = [keys.definitionContainer.id, keys.category.id, keys.category2.id, keys.subCategory.id, keys.subCategory2.id];
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
+
         await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
         await validateHierarchyVisibility({
           provider,
           handler,
           viewport,
-          visibilityExpectations: {
+          expectations: {
             [keys.definitionContainer.id]: "hidden",
             [keys.category2.id]: "hidden",
             [keys.category.id]: "visible",
             [keys.subCategory2.id]: "hidden",
             [keys.subCategory.id]: "visible",
           },
-          expectedIds,
         });
         viewport.validateChangesCalls([{ categoriesToChange: [keys.category.id], isVisible: true, enableAllSubCategories: true }], []);
       });
@@ -487,23 +451,21 @@ describe("CategoriesVisibilityHandler", () => {
           return { definitionContainerRoot, category, category2, subCategory, subCategory2 };
         });
 
-        const expectedIds = [keys.definitionContainerRoot.id, keys.category.id, keys.category2.id, keys.subCategory.id, keys.subCategory2.id];
-
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
+
         await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
         await validateHierarchyVisibility({
           provider,
           handler,
           viewport,
-          visibilityExpectations: {
+          expectations: {
             [keys.definitionContainerRoot.id]: "partial",
             [keys.category2.id]: "hidden",
             [keys.category.id]: "visible",
             [keys.subCategory2.id]: "hidden",
             [keys.subCategory.id]: "visible",
           },
-          expectedIds,
         });
         viewport.validateChangesCalls([{ categoriesToChange: [keys.category.id], isVisible: true, enableAllSubCategories: true }], []);
       });
@@ -530,29 +492,21 @@ describe("CategoriesVisibilityHandler", () => {
           return { definitionContainerRoot, definitionContainerChild, category, indirectCategory, subCategory };
         });
 
-        const expectedIds = [
-          keys.definitionContainerRoot.id,
-          keys.definitionContainerChild.id,
-          keys.indirectCategory.id,
-          keys.category.id,
-          keys.subCategory.id,
-        ];
-
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
+
         await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
         await validateHierarchyVisibility({
           provider,
           handler,
           viewport,
-          visibilityExpectations: {
+          expectations: {
             [keys.definitionContainerRoot.id]: "partial",
             [keys.definitionContainerChild.id]: "hidden",
             [keys.indirectCategory.id]: "hidden",
             [keys.category.id]: "visible",
             [keys.subCategory.id]: "visible",
           },
-          expectedIds,
         });
         viewport.validateChangesCalls([{ categoriesToChange: [keys.category.id], isVisible: true, enableAllSubCategories: true }], []);
       });
@@ -578,7 +532,6 @@ describe("CategoriesVisibilityHandler", () => {
           return { category, subCategory, subCategory2 };
         });
 
-        const expectedIds = [keys.category.id, keys.subCategory.id, keys.subCategory2.id];
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
 
@@ -588,12 +541,11 @@ describe("CategoriesVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          visibilityExpectations: {
+          expectations: {
             [keys.category.id]: "partial",
             [keys.subCategory.id]: "visible",
             [keys.subCategory2.id]: "hidden",
           },
-          expectedIds,
         });
         viewport.validateChangesCalls(
           [{ categoriesToChange: [keys.category.id], isVisible: true, enableAllSubCategories: false }],
@@ -617,20 +569,19 @@ describe("CategoriesVisibilityHandler", () => {
           return { category, subCategory, category2 };
         });
 
-        const expectedIds = [keys.category.id, keys.subCategory.id, keys.category2.id];
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
+
         await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
         await validateHierarchyVisibility({
           provider,
           handler,
           viewport,
-          visibilityExpectations: {
+          expectations: {
             [keys.category2.id]: "hidden",
             [keys.category.id]: "partial",
             [keys.subCategory.id]: "visible",
           },
-          expectedIds,
         });
         viewport.validateChangesCalls(
           [{ categoriesToChange: [keys.category.id], isVisible: true, enableAllSubCategories: false }],
@@ -655,20 +606,19 @@ describe("CategoriesVisibilityHandler", () => {
           return { category, subCategory, definitionContainerRoot };
         });
 
-        const expectedIds = [keys.category.id, keys.subCategory.id, keys.definitionContainerRoot.id];
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
+
         await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
         await validateHierarchyVisibility({
           provider,
           handler,
           viewport,
-          visibilityExpectations: {
+          expectations: {
             [keys.definitionContainerRoot.id]: "partial",
             [keys.category.id]: "partial",
             [keys.subCategory.id]: "visible",
           },
-          expectedIds,
         });
         viewport.validateChangesCalls(
           [{ categoriesToChange: [keys.category.id], isVisible: true, enableAllSubCategories: false }],
@@ -700,28 +650,21 @@ describe("CategoriesVisibilityHandler", () => {
           return { category, subCategory, definitionContainerRoot, categoryOfDefinitionContainer, subCategoryOfDefinitionContainer };
         });
 
-        const expectedIds = [
-          keys.category.id,
-          keys.subCategory.id,
-          keys.definitionContainerRoot.id,
-          keys.categoryOfDefinitionContainer.id,
-          keys.subCategoryOfDefinitionContainer.id,
-        ];
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
+
         await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
         await validateHierarchyVisibility({
           provider,
           handler,
           viewport,
-          visibilityExpectations: {
+          expectations: {
             [keys.definitionContainerRoot.id]: "hidden",
             [keys.categoryOfDefinitionContainer.id]: "hidden",
             [keys.subCategoryOfDefinitionContainer.id]: "hidden",
             [keys.category.id]: "partial",
             [keys.subCategory.id]: "visible",
           },
-          expectedIds,
         });
         viewport.validateChangesCalls(
           [{ categoriesToChange: [keys.category.id], isVisible: true, enableAllSubCategories: false }],
@@ -735,26 +678,24 @@ describe("CategoriesVisibilityHandler", () => {
     const isVisibleOnInitialize = true;
 
     it("by default everything is visible", async function () {
-      const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+      const { imodel } = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
         const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
 
         const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id });
         insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-        const subCategory = insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "subCategory", modelId: definitionModel.id });
-        return { definitionContainer, category, subCategory };
+        insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "subCategory", modelId: definitionModel.id });
       });
-      const expectedIds = [keys.category.id, keys.definitionContainer.id, keys.subCategory.id];
+
       using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
       const { handler, provider, viewport } = visibilityTestData;
+
       await validateHierarchyVisibility({
         provider,
         handler,
         viewport,
-        visibilityExpectations: {},
-        expectedIds,
-        all: "visible",
+        expectations: "all-visible",
       });
     });
     describe("definitionContainers", () => {
@@ -780,13 +721,6 @@ describe("CategoriesVisibilityHandler", () => {
           return { definitionContainerRoot, definitionContainerChild, directCategory, indirectCategory, indirectSubCategory };
         });
 
-        const expectedIds = [
-          keys.definitionContainerRoot.id,
-          keys.definitionContainerChild.id,
-          keys.directCategory.id,
-          keys.indirectCategory.id,
-          keys.indirectSubCategory.id,
-        ];
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerRoot.id), false);
@@ -794,9 +728,7 @@ describe("CategoriesVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          visibilityExpectations: {},
-          expectedIds,
-          all: "hidden",
+          expectations: "all-hidden",
         });
         viewport.validateChangesCalls(
           [{ categoriesToChange: [keys.directCategory.id, keys.indirectCategory.id], isVisible: false, enableAllSubCategories: false }],
@@ -837,23 +769,15 @@ describe("CategoriesVisibilityHandler", () => {
           };
         });
 
-        const expectedIds = [
-          keys.definitionContainerRoot.id,
-          keys.definitionContainerChild.id,
-          keys.definitionContainerRoot2.id,
-          keys.category2.id,
-          keys.indirectCategory.id,
-          keys.indirectSubCategory.id,
-          keys.subCategory2.id,
-        ];
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
+
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerRoot.id), false);
         await validateHierarchyVisibility({
           provider,
           handler,
           viewport,
-          visibilityExpectations: {
+          expectations: {
             [keys.definitionContainerRoot2.id]: "visible",
             [keys.definitionContainerRoot.id]: "hidden",
             [keys.definitionContainerChild.id]: "hidden",
@@ -862,7 +786,6 @@ describe("CategoriesVisibilityHandler", () => {
             [keys.indirectSubCategory.id]: "hidden",
             [keys.subCategory2.id]: "visible",
           },
-          expectedIds,
         });
         viewport.validateChangesCalls([{ categoriesToChange: [keys.indirectCategory.id], isVisible: false, enableAllSubCategories: false }], []);
       });
@@ -883,8 +806,6 @@ describe("CategoriesVisibilityHandler", () => {
           return { definitionContainerRoot, definitionContainerChild, directCategory, indirectCategory };
         });
 
-        const expectedIds = [keys.definitionContainerRoot.id, keys.definitionContainerChild.id, keys.directCategory.id, keys.indirectCategory.id];
-
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
 
@@ -893,13 +814,12 @@ describe("CategoriesVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          visibilityExpectations: {
+          expectations: {
             [keys.definitionContainerRoot.id]: "partial",
             [keys.definitionContainerChild.id]: "hidden",
             [keys.indirectCategory.id]: "hidden",
             [keys.directCategory.id]: "visible",
           },
-          expectedIds,
         });
         viewport.validateChangesCalls([{ categoriesToChange: [keys.indirectCategory.id], isVisible: false, enableAllSubCategories: false }], []);
       });
@@ -922,14 +842,6 @@ describe("CategoriesVisibilityHandler", () => {
           return { definitionContainerRoot, definitionContainerChild, indirectCategory2, indirectCategory, definitionContainerChild2 };
         });
 
-        const expectedIds = [
-          keys.definitionContainerRoot.id,
-          keys.definitionContainerChild.id,
-          keys.indirectCategory.id,
-          keys.definitionContainerChild2.id,
-          keys.indirectCategory2.id,
-        ];
-
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
 
@@ -938,14 +850,13 @@ describe("CategoriesVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          visibilityExpectations: {
+          expectations: {
             [keys.definitionContainerRoot.id]: "partial",
             [keys.definitionContainerChild.id]: "hidden",
             [keys.definitionContainerChild2.id]: "visible",
             [keys.indirectCategory.id]: "hidden",
             [keys.indirectCategory2.id]: "visible",
           },
-          expectedIds,
         });
         viewport.validateChangesCalls([{ categoriesToChange: [keys.indirectCategory.id], isVisible: false, enableAllSubCategories: false }], []);
       });
@@ -969,8 +880,6 @@ describe("CategoriesVisibilityHandler", () => {
           return { definitionContainerRoot, definitionContainerChild, indirectCategory, indirectSubCategory };
         });
 
-        const expectedIds = [keys.definitionContainerRoot.id, keys.definitionContainerChild.id, keys.indirectCategory.id, keys.indirectSubCategory.id];
-
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
 
@@ -979,9 +888,7 @@ describe("CategoriesVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          visibilityExpectations: {},
-          expectedIds,
-          all: "hidden",
+          expectations: "all-hidden",
         });
         viewport.validateChangesCalls([{ categoriesToChange: [keys.indirectCategory.id], isVisible: false, enableAllSubCategories: false }], []);
       });
@@ -1002,7 +909,6 @@ describe("CategoriesVisibilityHandler", () => {
           return { category, subCategory };
         });
 
-        const expectedIds = [keys.category.id, keys.subCategory.id];
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
 
@@ -1011,9 +917,7 @@ describe("CategoriesVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          visibilityExpectations: {},
-          expectedIds,
-          all: "hidden",
+          expectations: "all-hidden",
         });
         viewport.validateChangesCalls([{ categoriesToChange: [keys.category.id], isVisible: false, enableAllSubCategories: false }], []);
       });
@@ -1039,7 +943,6 @@ describe("CategoriesVisibilityHandler", () => {
           return { category, category2, subCategory, subCategory2 };
         });
 
-        const expectedIds = [keys.category.id, keys.category2.id, keys.subCategory.id, keys.subCategory2.id];
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
 
@@ -1048,13 +951,12 @@ describe("CategoriesVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          visibilityExpectations: {
+          expectations: {
             [keys.category.id]: "hidden",
             [keys.category2.id]: "visible",
             [keys.subCategory2.id]: "visible",
             [keys.subCategory.id]: "hidden",
           },
-          expectedIds,
         });
         viewport.validateChangesCalls([{ categoriesToChange: [keys.category.id], isVisible: false, enableAllSubCategories: false }], []);
       });
@@ -1084,7 +986,6 @@ describe("CategoriesVisibilityHandler", () => {
           return { definitionContainer, category, category2, subCategory, subCategory2 };
         });
 
-        const expectedIds = [keys.definitionContainer.id, keys.category.id, keys.category2.id, keys.subCategory.id, keys.subCategory2.id];
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
 
@@ -1093,14 +994,13 @@ describe("CategoriesVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          visibilityExpectations: {
+          expectations: {
             [keys.definitionContainer.id]: "visible",
             [keys.category2.id]: "visible",
             [keys.category.id]: "hidden",
             [keys.subCategory2.id]: "visible",
             [keys.subCategory.id]: "hidden",
           },
-          expectedIds,
         });
         viewport.validateChangesCalls([{ categoriesToChange: [keys.category.id], isVisible: false, enableAllSubCategories: false }], []);
       });
@@ -1130,8 +1030,6 @@ describe("CategoriesVisibilityHandler", () => {
           return { definitionContainerRoot, category, category2, subCategory, subCategory2 };
         });
 
-        const expectedIds = [keys.definitionContainerRoot.id, keys.category.id, keys.category2.id, keys.subCategory.id, keys.subCategory2.id];
-
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
 
@@ -1140,14 +1038,13 @@ describe("CategoriesVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          visibilityExpectations: {
+          expectations: {
             [keys.definitionContainerRoot.id]: "partial",
             [keys.category.id]: "hidden",
             [keys.category2.id]: "visible",
             [keys.subCategory.id]: "hidden",
             [keys.subCategory2.id]: "visible",
           },
-          expectedIds,
         });
         viewport.validateChangesCalls([{ categoriesToChange: [keys.category.id], isVisible: false, enableAllSubCategories: false }], []);
       });
@@ -1174,14 +1071,6 @@ describe("CategoriesVisibilityHandler", () => {
           return { definitionContainerRoot, definitionContainerChild, category, indirectCategory, subCategory };
         });
 
-        const expectedIds = [
-          keys.definitionContainerRoot.id,
-          keys.definitionContainerChild.id,
-          keys.indirectCategory.id,
-          keys.category.id,
-          keys.subCategory.id,
-        ];
-
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
 
@@ -1190,14 +1079,13 @@ describe("CategoriesVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          visibilityExpectations: {
+          expectations: {
             [keys.definitionContainerRoot.id]: "partial",
             [keys.definitionContainerChild.id]: "visible",
             [keys.category.id]: "hidden",
             [keys.indirectCategory.id]: "visible",
             [keys.subCategory.id]: "hidden",
           },
-          expectedIds,
         });
         viewport.validateChangesCalls([{ categoriesToChange: [keys.category.id], isVisible: false, enableAllSubCategories: false }], []);
       });
@@ -1223,7 +1111,6 @@ describe("CategoriesVisibilityHandler", () => {
           return { category, subCategory, subCategory2 };
         });
 
-        const expectedIds = [keys.category.id, keys.subCategory.id, keys.subCategory2.id];
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
 
@@ -1232,12 +1119,11 @@ describe("CategoriesVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          visibilityExpectations: {
+          expectations: {
             [keys.category.id]: "partial",
             [keys.subCategory.id]: "hidden",
             [keys.subCategory2.id]: "visible",
           },
-          expectedIds,
         });
         viewport.validateChangesCalls([], [{ subCategoryId: keys.subCategory.id, isVisible: false }]);
       });
@@ -1258,7 +1144,6 @@ describe("CategoriesVisibilityHandler", () => {
           return { category, subCategory, category2 };
         });
 
-        const expectedIds = [keys.category.id, keys.subCategory.id, keys.category2.id];
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
 
@@ -1267,12 +1152,11 @@ describe("CategoriesVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          visibilityExpectations: {
+          expectations: {
             [keys.category.id]: "partial",
             [keys.category2.id]: "visible",
             [keys.subCategory.id]: "hidden",
           },
-          expectedIds,
         });
         viewport.validateChangesCalls([], [{ subCategoryId: keys.subCategory.id, isVisible: false }]);
       });
@@ -1294,7 +1178,6 @@ describe("CategoriesVisibilityHandler", () => {
           return { category, subCategory, definitionContainerRoot };
         });
 
-        const expectedIds = [keys.category.id, keys.subCategory.id, keys.definitionContainerRoot.id];
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
 
@@ -1303,12 +1186,11 @@ describe("CategoriesVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          visibilityExpectations: {
+          expectations: {
             [keys.definitionContainerRoot.id]: "partial",
             [keys.category.id]: "partial",
             [keys.subCategory.id]: "hidden",
           },
-          expectedIds,
         });
         viewport.validateChangesCalls([], [{ subCategoryId: keys.subCategory.id, isVisible: false }]);
       });
@@ -1337,13 +1219,6 @@ describe("CategoriesVisibilityHandler", () => {
           return { category, subCategory, definitionContainerRoot, categoryOfDefinitionContainer, subCategoryOfDefinitionContainer };
         });
 
-        const expectedIds = [
-          keys.category.id,
-          keys.subCategory.id,
-          keys.definitionContainerRoot.id,
-          keys.categoryOfDefinitionContainer.id,
-          keys.subCategoryOfDefinitionContainer.id,
-        ];
         using visibilityTestData = await createVisibilityTestData({ imodel, isVisibleOnInitialize });
         const { handler, provider, viewport } = visibilityTestData;
 
@@ -1352,14 +1227,13 @@ describe("CategoriesVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          visibilityExpectations: {
+          expectations: {
             [keys.definitionContainerRoot.id]: "visible",
             [keys.categoryOfDefinitionContainer.id]: "visible",
             [keys.subCategoryOfDefinitionContainer.id]: "visible",
             [keys.category.id]: "partial",
             [keys.subCategory.id]: "hidden",
           },
-          expectedIds,
         });
         viewport.validateChangesCalls([], [{ subCategoryId: keys.subCategory.id, isVisible: false }]);
       });

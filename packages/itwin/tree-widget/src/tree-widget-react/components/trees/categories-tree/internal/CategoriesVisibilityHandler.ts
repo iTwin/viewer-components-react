@@ -253,9 +253,7 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
   }
 
   private static getInstanceIdsFromHierarchyNode(node: HierarchyNode) {
-    return HierarchyNode.isInstancesNode(node) && node.key.instanceKeys.length > 0
-      ? node.key.instanceKeys.map((instanceKey) => instanceKey.id)
-      : /* istanbul ignore next */ [];
+    return HierarchyNode.isInstancesNode(node) ? node.key.instanceKeys.map((instanceKey) => instanceKey.id) : /* istanbul ignore next */ [];
   }
 
   private async changeCategoryState(ids: string[], enabled: boolean, enableAllSubCategories: boolean) {

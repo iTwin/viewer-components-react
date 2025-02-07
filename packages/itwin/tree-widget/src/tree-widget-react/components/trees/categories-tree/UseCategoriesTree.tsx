@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useMemo, useState } from "react";
+import { assert } from "@itwin/core-bentley";
 import { SvgArchive, SvgLayers } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
@@ -16,13 +17,13 @@ import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
 import { CategoriesVisibilityHandler } from "./internal/CategoriesVisibilityHandler.js";
 import { DEFINITION_CONTAINER_CLASS, SUB_CATEGORY_CLASS } from "./internal/ClassNameDefinitions.js";
 
+import type { Id64String } from "@itwin/core-bentley";
 import type { ReactElement } from "react";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
-import type { Id64String } from "@itwin/core-bentley";
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 
 type CategoriesTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError";
@@ -152,13 +153,8 @@ async function getCategoriesFromPaths(paths: HierarchyFilteringPaths, idsCache: 
 
     if (lastNode.className === SUB_CATEGORY_CLASS) {
       const secondToLastNode = currPath.length > 1 ? currPath[currPath.length - 2] : undefined;
-      if (
-        secondToLastNode === undefined ||
-        !HierarchyNodeIdentifier.isInstanceNodeIdentifier(secondToLastNode) ||
-        secondToLastNode.className === DEFINITION_CONTAINER_CLASS
-      ) {
-        continue;
-      }
+      assert(secondToLastNode !== undefined && HierarchyNodeIdentifier.isInstanceNodeIdentifier(secondToLastNode));
+
       subCategory = lastNode;
       category = secondToLastNode;
     } else {
