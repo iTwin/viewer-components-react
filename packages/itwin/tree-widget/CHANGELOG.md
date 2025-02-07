@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Tue, 04 Feb 2025 15:29:52 GMT and should not be manually modified.
+This log was last generated on Thu, 06 Feb 2025 13:36:20 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 3.4.1
+
+Thu, 06 Feb 2025 13:36:20 GMT
+
+### Patches
+
+- Removed horizontal scroll from trees. ([#1180](https://github.com/iTwin/viewer-components-react/pull/1180))
 
 ## 3.4.0
 

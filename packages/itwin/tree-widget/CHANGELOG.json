@@ -2,6 +2,21 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Thu, 06 Feb 2025 13:36:20 GMT",
+      "version": "3.4.1",
+      "tag": "@itwin/tree-widget-react_v3.4.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "15548c121dfbb7fa6726df446cc6a9fe2097ed42",
+            "comment": "Removed horizontal scroll from trees."
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 04 Feb 2025 15:29:52 GMT",
       "version": "3.4.0",
       "tag": "@itwin/tree-widget-react_v3.4.0",
