@@ -215,6 +215,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick, se
 
   const handleModalUrlDialogOk = React.useCallback(
     (action: LayerAction, sourceState?: SourceState) => {
+      setMapUrlModalOpen(false);
       UiFramework.dialogs.modal.close();
       if (LayerAction.New === action && sourceState && sourceState.validation.status === MapLayerSourceStatus.Valid) {
         if (needsFeatureSelection(sourceState.source, sourceState.validation)) {
@@ -226,15 +227,16 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick, se
         resumeOutsideClick();
       }
     },
-    [attachLayer, needsFeatureSelection, openFeatureSelectionDialog, resumeOutsideClick],
+    [attachLayer, needsFeatureSelection, openFeatureSelectionDialog, resumeOutsideClick, setMapUrlModalOpen],
   );
 
   const handleModalUrlDialogCancel = React.useCallback(() => {
     // close popup and refresh UI
     setLoading(false);
+    setMapUrlModalOpen(false);
     UiFramework.dialogs.modal.close();
     resumeOutsideClick();
-  }, [setLoading, resumeOutsideClick]);
+  }, [setLoading, resumeOutsideClick, setMapUrlModalOpen]);
 
   React.useEffect(() => {
     async function attemptToAddLayer() {
@@ -264,6 +266,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick, se
             } else if (sourceValidation.status === MapLayerSourceStatus.RequireAuth && isMounted.current) {
               const layer = foundSource.toLayerSettings();
               if (layer) {
+                setMapUrlModalOpen(true);
                 UiFramework.dialogs.modal.open(
                   <MapUrlDialog
                     activeViewport={activeViewport}
@@ -320,6 +323,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick, se
     onHandleOutsideClick,
     openFeatureSelectionDialog,
     mapLayerOptions,
+    setMapUrlModalOpen,
   ]);
 
   const options = React.useMemo(() => sources, [sources]);
@@ -332,21 +336,14 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick, se
     }
   }, [options, sourceFilterString]);
 
-  const handleAddNewMapSource = React.useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-    console.log("add new map source 2");
-    event.stopPropagation();
+  const handleAddNewMapSource = React.useCallback((event: React.MouseEvent) => {
+    event.stopPropagation(); // We don't want the owning ListBox to react on mouse click.
     setMapUrlModalOpen(true);
     UiFramework.dialogs.modal.open(
       <MapUrlDialog
         activeViewport={activeViewport}
-        onOkResult={(result?: SourceState) => {
-          setMapUrlModalOpen(false);
-          handleModalUrlDialogOk(LayerAction.New, result);
-        }}
-        onCancelResult={() => {
-          setMapUrlModalOpen(false);
-          handleModalUrlDialogCancel();
-        }}
+        onOkResult={(result?: SourceState) => handleModalUrlDialogOk(LayerAction.New, result)}
+        onCancelResult={handleModalUrlDialogCancel}
         mapLayerOptions={mapLayerOptions}
       />,
     );
@@ -373,7 +370,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick, se
       if (!!iTwinId) {
         try {
           await MapLayerPreferences.deleteByName(source, iTwinId, iModelId);
-          // Detach from Map Base layer
+          // Detach from active viewport
           if (activeViewport) {
             const indexInDisplayStyle = activeViewport.displayStyle.findMapLayerIndexByNameAndSource(
               layerName,
@@ -403,7 +400,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick, se
 
   /*
    Handle Remove layer button clicked
-   */
+  */
   const onItemRemoveButtonClicked = React.useCallback(
     (source: MapLayerSource, event: React.MouseEvent) => {
       event.stopPropagation(); // We don't want the owning ListBox to react on mouse click.
@@ -442,6 +439,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick, se
       if (matchingSource === undefined) {
         return;
       }
+      setMapUrlModalOpen(true);
       UiFramework.dialogs.modal.open(
         <MapUrlDialog
           activeViewport={activeViewport}
@@ -456,7 +454,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick, se
         onHandleOutsideClick(false);
       }
     },
-    [activeViewport, handleModalUrlDialogCancel, handleModalUrlDialogOk, mapLayerOptions, onHandleOutsideClick, sources],
+    [activeViewport, handleModalUrlDialogCancel, handleModalUrlDialogOk, mapLayerOptions, onHandleOutsideClick,setMapUrlModalOpen, sources],
   );
 
   return (
@@ -638,7 +636,7 @@ export function AttachLayerPopupButton(props: AttachLayerPopupButtonProps) {
           </div>
         }
         applyBackground
-        visible={popupOpen || mapUrlModalOpen}
+        visible={popupOpen || mapUrlModalOpen} //Fix- keep the Popover open while the mapUrlModal is active
         onVisibleChange={setPopupOpen}
         closeOnOutsideClick={handleOutsideClick}
         placement={"bottom-end"}
