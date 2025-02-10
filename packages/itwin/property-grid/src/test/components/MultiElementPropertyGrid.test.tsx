@@ -5,12 +5,9 @@
 
 import { expect } from "chai";
 import sinon from "sinon";
+import * as td from "testdouble";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { KeySet } from "@itwin/presentation-common";
-import { PresentationLabelsProvider, PresentationPropertyDataProvider } from "@itwin/presentation-components";
-import { AncestorsNavigationControls, MultiElementPropertyGrid } from "../../property-grid-react/components/MultiElementPropertyGrid.js";
-import { TelemetryContextProvider } from "../../property-grid-react/hooks/UseTelemetryContext.js";
-import { PropertyGridManager } from "../../property-grid-react/PropertyGridManager.js";
 import {
   act,
   createPropertyRecord,
@@ -22,20 +19,34 @@ import {
   waitFor,
 } from "../TestUtils.js";
 
+import type * as MultiElementPropertyGridModule from "../../property-grid-react/components/MultiElementPropertyGrid.js";
+import type * as UseTelemetryContextModule from "../../property-grid-react/hooks/UseTelemetryContext.js";
 import type { ISelectionProvider, SelectionChangeEventArgs } from "@itwin/presentation-frontend";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
 
-describe("<MultiElementPropertGrid />", () => {
+describe("<MultiElementPropertyGrid />", () => {
   const imodel = {} as IModelConnection;
 
-  let getDataStub: sinon.SinonStub<Parameters<PresentationPropertyDataProvider["getData"]>, ReturnType<PresentationPropertyDataProvider["getData"]>>;
-  let getLabelsStub: sinon.SinonStub<Parameters<PresentationLabelsProvider["getLabels"]>, ReturnType<PresentationLabelsProvider["getLabels"]>>;
+  let getDataStub: sinon.SinonStub;
+  let getLabelsStub: sinon.SinonStub;
   let selectionManager: ReturnType<typeof stubSelectionManager>;
+  let MultiElementPropertyGrid: typeof MultiElementPropertyGridModule.MultiElementPropertyGrid;
 
-  before(() => {
+  const computeSelectionStub = sinon.stub<[], AsyncIterableIterator<InstanceKey>>();
+
+  before(async () => {
+    await td.replaceEsm("@itwin/unified-selection", {
+      ...(await import("@itwin/unified-selection")),
+      computeSelection: computeSelectionStub,
+    });
+    MultiElementPropertyGrid = (await import("../../property-grid-react/components/MultiElementPropertyGrid.js")).MultiElementPropertyGrid;
+
+    const { PresentationLabelsProvider, PresentationPropertyDataProvider } = await import("@itwin/presentation-components");
     getDataStub = sinon.stub(PresentationPropertyDataProvider.prototype, "getData");
     getLabelsStub = sinon.stub(PresentationLabelsProvider.prototype, "getLabels");
+
+    const { PropertyGridManager } = await import("../../property-grid-react/PropertyGridManager.js");
     sinon.stub(PropertyGridManager, "translate").callsFake((key) => key);
 
     selectionManager = stubSelectionManager();
@@ -45,11 +56,17 @@ describe("<MultiElementPropertGrid />", () => {
 
   after(() => {
     sinon.restore();
+    td.reset();
+  });
+
+  beforeEach(() => {
+    computeSelectionStub.callsFake(async function* () {});
   });
 
   afterEach(() => {
     getDataStub.reset();
     getLabelsStub.reset();
+    computeSelectionStub.reset();
   });
 
   it("renders properties for a single instance", async () => {
@@ -202,10 +219,14 @@ describe("<MultiElementPropertGrid />", () => {
   });
 
   it("renders buttons for ancestor navigation", async () => {
+    const { AncestorsNavigationControls } = await import("../../property-grid-react/components/MultiElementPropertyGrid.js");
+
     const instancekey = { id: "0x1", className: "TestClass" };
     setupMultiInstanceData([{ key: instancekey, value: "Test-Value-1" }]);
-    selectionManager.scopes.computeSelection.reset();
-    selectionManager.scopes.computeSelection.resolves(new KeySet([{ id: "0x2", className: "ParentClass" }]));
+    computeSelectionStub.reset();
+    computeSelectionStub.callsFake(async function* () {
+      yield { id: "0x2", className: "ParentClass" };
+    });
 
     const { getByText, queryByRole } = render(
       <MultiElementPropertyGrid imodel={imodel} ancestorsNavigationControls={(props) => <AncestorsNavigationControls {...props} />} />,
@@ -217,6 +238,12 @@ describe("<MultiElementPropertGrid />", () => {
   });
 
   describe("feature usage reporting", () => {
+    let TelemetryContextProvider: typeof UseTelemetryContextModule.TelemetryContextProvider;
+
+    before(async () => {
+      TelemetryContextProvider = (await import("../../property-grid-react/hooks/UseTelemetryContext.js")).TelemetryContextProvider;
+    });
+
     it("reports when properties for a single instance are shown", async () => {
       const onFeatureUsedSpy = sinon.spy();
       setupMultiInstanceData([

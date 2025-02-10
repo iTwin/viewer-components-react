@@ -16,7 +16,7 @@ import type { PropsWithChildren, ReactElement } from "react";
 import type { RenderHookOptions, RenderHookResult, RenderOptions, RenderResult } from "@testing-library/react";
 import type { UserEvent } from "@testing-library/user-event";
 import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
-import type { FavoritePropertiesManager, SelectionManager, SelectionScopesManager } from "@itwin/presentation-frontend";
+import type { FavoritePropertiesManager, SelectionManager } from "@itwin/presentation-frontend";
 
 export function createPropertyRecord(value: PropertyValue, description: Partial<PropertyDescription>) {
   const propertyDescription: PropertyDescription = {
@@ -34,11 +34,7 @@ export function stubSelectionManager(presentationSingleton?: typeof Presentation
     getSelectionLevels: createFunctionStub<SelectionManager["getSelectionLevels"]>().returns([0]),
     getSelection: createFunctionStub<SelectionManager["getSelection"]>().returns(new KeySet()),
     replaceSelection: createFunctionStub<SelectionManager["replaceSelection"]>(),
-    scopes: {
-      computeSelection: createFunctionStub<SelectionScopesManager["computeSelection"]>().resolves(new KeySet()),
-    },
   };
-
   sinon.stub(presentationSingleton ?? Presentation, "selection").get(() => selectionManagerStub);
   return selectionManagerStub;
 }

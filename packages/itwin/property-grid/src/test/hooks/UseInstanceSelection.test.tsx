@@ -5,18 +5,22 @@
 
 import { expect } from "chai";
 import sinon from "sinon";
+import * as td from "testdouble";
+import { Id64 } from "@itwin/core-bentley";
 import { KeySet } from "@itwin/presentation-common";
-import { useInstanceSelection } from "../../property-grid-react/hooks/UseInstanceSelection.js";
-import { TelemetryContextProvider } from "../../property-grid-react/hooks/UseTelemetryContext.js";
 import { act, createResolvablePromise, renderHook, stubSelectionManager, waitFor } from "../TestUtils.js";
 
+import type { Id64Arg } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ISelectionProvider, SelectionChangeEventArgs } from "@itwin/presentation-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
-import type { InstanceSelectionProps } from "../../property-grid-react/hooks/UseInstanceSelection.js";
+
+import type * as UseInstanceSelectionModule from "../../property-grid-react/hooks/UseInstanceSelection.js";
+import type { SelectableInstanceKey } from "@itwin/unified-selection";
 
 describe("useInstanceSelection", () => {
   const imodel = {} as IModelConnection;
+  const computeSelectionStub = sinon.stub<[{ elementIds: Id64Arg }], AsyncIterableIterator<InstanceKey>>();
 
   const parentKey: InstanceKey = { id: "0x1", className: "TestClass" };
   const childKey: InstanceKey = { id: "0x2", className: "TestClass" };
@@ -25,32 +29,48 @@ describe("useInstanceSelection", () => {
 
   let selectionManager: ReturnType<typeof stubSelectionManager>;
 
-  before(() => {
+  let useInstanceSelection: typeof UseInstanceSelectionModule.useInstanceSelection;
+
+  before(async () => {
+    await td.replaceEsm("@itwin/unified-selection", {
+      ...(await import("@itwin/unified-selection")),
+      computeSelection: computeSelectionStub,
+    });
+    useInstanceSelection = (await import("../../property-grid-react/hooks/UseInstanceSelection.js")).useInstanceSelection;
+
     selectionManager = stubSelectionManager();
   });
 
-  beforeEach(() => {
+  after(() => {
+    sinon.restore();
+    td.reset();
+  });
+
+  beforeEach(async () => {
     selectionManager.getSelection.reset();
     selectionManager.replaceSelection.reset();
-    selectionManager.scopes.computeSelection.reset();
-    selectionManager.scopes.computeSelection.callsFake(async (_, ids) => {
-      if (typeof ids !== "string") {
-        return new KeySet();
+    computeSelectionStub.callsFake(async function* ({ elementIds }: { elementIds: Id64Arg }): AsyncIterableIterator<SelectableInstanceKey> {
+      for (const id of Id64.iterable(elementIds)) {
+        switch (id) {
+          case parentKey.id:
+            yield parentKey;
+            break;
+          case childKey.id:
+            yield parentKey;
+            break;
+          case grandChildKey.id:
+            yield childKey;
+            break;
+          case noParentKey.id:
+            yield noParentKey;
+            break;
+        }
       }
-
-      switch (ids) {
-        case parentKey.id:
-          return new KeySet([parentKey]);
-        case childKey.id:
-          return new KeySet([parentKey]);
-        case grandChildKey.id:
-          return new KeySet([childKey]);
-        case noParentKey.id:
-          return new KeySet([noParentKey]);
-      }
-
-      return new KeySet();
     });
+  });
+
+  afterEach(() => {
+    computeSelectionStub.reset();
   });
 
   it("returns selected instance keys", async () => {
@@ -135,7 +155,7 @@ describe("useInstanceSelection", () => {
   });
 
   describe("ancestors navigation", () => {
-    const initialProps: InstanceSelectionProps = {
+    const initialProps: UseInstanceSelectionModule.InstanceSelectionProps = {
       imodel,
     };
 
@@ -243,9 +263,11 @@ describe("useInstanceSelection", () => {
       selectionManager.getSelection.returns(new KeySet([grandChildKey]));
       const { result } = renderHook(useInstanceSelection, { initialProps });
 
-      selectionManager.scopes.computeSelection.reset();
-      const computeSelection = createResolvablePromise<KeySet>();
-      selectionManager.scopes.computeSelection.returns(computeSelection.promise);
+      computeSelectionStub.reset();
+      const computeSelectionResult = createResolvablePromise<InstanceKey[]>();
+      computeSelectionStub.callsFake(async function* () {
+        yield* await computeSelectionResult.promise;
+      });
 
       // wait until navigating up is possible
       await waitFor(() => {
@@ -261,7 +283,7 @@ describe("useInstanceSelection", () => {
       });
 
       // finish navigating up
-      await act(async () => computeSelection.resolve(new KeySet([childKey])));
+      await act(async () => computeSelectionResult.resolve([childKey]));
 
       // expect navigating up to be possible again
       await waitFor(() => {
@@ -279,22 +301,26 @@ describe("useInstanceSelection", () => {
       expect(result.current.selectedKeys).to.have.lengthOf(0);
     });
 
-    selectionManager.scopes.computeSelection.reset();
-    const firstComputeSelection = createResolvablePromise<KeySet>();
-    const secondComputeSelection = createResolvablePromise<KeySet>();
+    computeSelectionStub.reset();
+    const firstComputeSelection = createResolvablePromise<InstanceKey[]>();
+    const secondComputeSelection = createResolvablePromise<InstanceKey[]>();
 
     // simulate first selection change
     selectionManager.getSelection.returns(new KeySet([noParentKey]));
-    selectionManager.scopes.computeSelection.returns(firstComputeSelection.promise);
+    computeSelectionStub.callsFake(async function* () {
+      yield* await firstComputeSelection.promise;
+    });
     act(() => selectionManager.selectionChange.raiseEvent({ source: "OtherSource" } as unknown as SelectionChangeEventArgs, {} as ISelectionProvider));
 
     // simulate second selection change
     selectionManager.getSelection.returns(new KeySet([childKey]));
-    selectionManager.scopes.computeSelection.returns(secondComputeSelection.promise);
+    computeSelectionStub.callsFake(async function* () {
+      yield* await secondComputeSelection.promise;
+    });
     act(() => selectionManager.selectionChange.raiseEvent({ source: "OtherSource" } as unknown as SelectionChangeEventArgs, {} as ISelectionProvider));
 
     // resolve promise for second selection change
-    await act(async () => secondComputeSelection.resolve(new KeySet([parentKey])));
+    await act(async () => secondComputeSelection.resolve([parentKey]));
 
     // make sure state matches result of second selection change
     await waitFor(() => {
@@ -304,7 +330,7 @@ describe("useInstanceSelection", () => {
     });
 
     // resolve promise for first selection change
-    await act(async () => firstComputeSelection.resolve(new KeySet()));
+    await act(async () => firstComputeSelection.resolve([]));
 
     // make sure state still matches result of second selection change
     await waitFor(() => {
@@ -315,11 +341,13 @@ describe("useInstanceSelection", () => {
   });
 
   describe("feature usage reporting", () => {
-    const initialProps: InstanceSelectionProps = {
+    const initialProps: UseInstanceSelectionModule.InstanceSelectionProps = {
       imodel,
     };
 
     it("reports when navigates up and down", async () => {
+      const { TelemetryContextProvider } = await import("../../property-grid-react/hooks/UseTelemetryContext.js");
+
       const onFeatureUsedSpy = sinon.spy();
       selectionManager.getSelection.returns(new KeySet([childKey]));
 
