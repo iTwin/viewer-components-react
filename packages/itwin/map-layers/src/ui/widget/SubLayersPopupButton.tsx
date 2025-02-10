@@ -33,7 +33,7 @@ export function SubLayersPopupButton(props: SubLayersPopupButtonProps) {
             <div className="map-manager-sublayer-panel">
               <SubLayersPanel {...props} width={390} height={350} />
             </div>
-        </div>
+          </div>
         }
         visible={popupOpen}
         onVisibleChange={setPopupOpen}
