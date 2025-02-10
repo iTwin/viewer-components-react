@@ -370,20 +370,6 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick, se
       if (!!iTwinId) {
         try {
           await MapLayerPreferences.deleteByName(source, iTwinId, iModelId);
-          // Detach from active viewport
-          if (activeViewport) {
-            const indexInDisplayStyle = activeViewport.displayStyle.findMapLayerIndexByNameAndSource(
-              layerName,
-              source.url,
-              isOverlay
-            );
-            if (indexInDisplayStyle >= 0) {
-              activeViewport.displayStyle.detachMapLayerByIndex({
-                index: indexInDisplayStyle,
-                isOverlay
-              });
-            }
-          }
           const msg = MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.RemoveLayerDefSuccess", { layerName });
           IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Info, msg));
         } catch {
@@ -636,7 +622,7 @@ export function AttachLayerPopupButton(props: AttachLayerPopupButtonProps) {
           </div>
         }
         applyBackground
-        visible={popupOpen || mapUrlModalOpen} //Fix- keep the Popover open while the mapUrlModal is active
+        visible={popupOpen || mapUrlModalOpen} // keep the Popover open while the mapUrlModal is active
         onVisibleChange={setPopupOpen}
         closeOnOutsideClick={handleOutsideClick}
         placement={"bottom-end"}
