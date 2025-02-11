@@ -1,5 +1,5 @@
 {
-  "type": "patch",
+  "type": "none",
   "comment": "Replace usage of Popup with iTwinUI Popover",
   "packageName": "@itwin/map-layers",
   "email": "50554904+hl662@users.noreply.github.com",
