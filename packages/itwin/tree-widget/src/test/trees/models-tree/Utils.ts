@@ -106,7 +106,6 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
     }),
     hasSubModel: sinon.stub<[Id64String], Promise<boolean>>().callsFake(async () => false),
     getCategoriesModeledElements: sinon.stub<[Id64String, Id64Array], Promise<Id64Array>>().callsFake(async () => []),
-    getModeledElementCategoryAndModel: sinon.stub<[Id64String], Promise<undefined>>().callsFake(async () => undefined),
   });
 }
 

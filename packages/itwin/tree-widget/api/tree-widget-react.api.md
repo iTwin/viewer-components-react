@@ -94,8 +94,6 @@ interface ChangeGeometricElementsDisplayStateProps {
     modelId: Id64String;
     // (undocumented)
     on: boolean;
-    // (undocumented)
-    skipSubModels?: boolean;
 }
 
 // @beta (undocumented)

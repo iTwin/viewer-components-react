@@ -356,17 +356,6 @@ export class ModelsTreeIdsCache {
     return result;
   }
 
-  public async getModeledElementCategoryAndModel(modeledElementId: Id64String): Promise<{ modelId: Id64String; categoryId: Id64String } | undefined> {
-    const modelWithCategoryModeledElements = await this.getModelWithCategoryModeledElements();
-    for (const [key, modeledElementIds] of modelWithCategoryModeledElements) {
-      if (modeledElementIds.has(modeledElementId)) {
-        const [modelId, categoryId] = key.split("-");
-        return { modelId, categoryId };
-      }
-    }
-    return undefined;
-  }
-
   public async createModelInstanceKeyPaths(modelId: Id64String): Promise<HierarchyNodeIdentifiersPath[]> {
     let entry = this._modelKeyPaths.get(modelId);
     if (!entry) {

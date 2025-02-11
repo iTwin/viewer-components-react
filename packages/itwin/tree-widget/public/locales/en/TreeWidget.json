@@ -40,7 +40,8 @@
         "hiddenThroughModelSelector": "Model display is hidden through model selector",
         "someCategoriesHidden": "Some categories are visible and some are hidden",
         "allCategoriesVisible": "All categories visible",
-        "allCategoriesHidden": "All categories hidden"
+        "allCategoriesHidden": "All categories hidden",
+        "someSubModelsVisible": "Some subModels are visible"
       },
       "category": {
         "displayedThroughPerModelOverride": "Per-model category override set to 'Show'",
@@ -50,6 +51,8 @@
         "allElementsHidden": "All category elements are in the never drawn list or none of the category elements are in the exclusive always drawn list",
         "someElementsAreHidden": "There are both visible and hidden elements in this category",
         "allElementsVisible": "All category elements are in the always drawn list",
+        "allElementsAndSubModelsHidden": "All elements are hidden",
+        "someElementsOrSubModelsHidden": "Some elements are hidden and some are visible",
         "hiddenThroughModel": "Model is hidden",
         "allModeledElementsHidden": "All elements in the category are hidden",
         "someModeledElementsHidden": "There are both visible and hidden elements in this category"
@@ -61,7 +64,10 @@
         "hiddenThroughModel": "Model is not displayed",
         "hiddenThroughCategory": "Category is not displayed",
         "hiddenThroughSubModel": "Modeled elements subModel is hidden",
-        "someElementsAreHidden": "Modeled elements subModel has partial state"
+        "someElementsAreHidden": "Modeled elements subModel has partial state",
+        "partialThroughSubModel": "Modeled element is hidden, but its subModel is visible",
+        "partialThroughElement": "Modeled element is visible due to override, but its subModel is hidden",
+        "partialThroughCategory": "Modeled element is visible due to category visibility, but its subModel is hidden"
       },
       "groupingNode": {
         "allElementsHidden": "All elements are in the never drawn list or none of the elements are in the exclusive always drawn list",
@@ -69,8 +75,8 @@
         "allElementsVisible": "All elements are in the always drawn list",
         "visibleThroughCategory": "All elements are visible through category",
         "hiddenThroughCategory": "All elements are hidden through category",
-        "allModeledElementsHidden": "All elements are hidden",
-        "someModeledElementsHidden": "There are both visible and hidden elements"
+        "allElementsAndSubModelsHidden": "All elements are hidden",
+        "someElementsOrSubModelsHidden": "There are both visible and hidden elements"
       }
     }
   },
