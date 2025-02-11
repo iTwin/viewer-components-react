@@ -75,7 +75,7 @@ interface ChangeGeometricElementsDisplayStateProps {
   modelId: Id64String;
   categoryId: Id64String;
   on: boolean;
-  shouldntChangeSubModels?: boolean;
+  skipSubModels?: boolean;
 }
 
 /** @beta */
@@ -527,8 +527,8 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       }
 
       return from(this._idsCache.hasSubModel(elementId)).pipe(
-        mergeMap((doesSubModelExist) => {
-          if (doesSubModelExist) {
+        mergeMap((hasSubModel) => {
+          if (hasSubModel) {
             return this.getModelVisibilityStatus({ modelId: elementId }).pipe(
               map((visibilityStatus) => {
                 const tooltipKey =
@@ -711,7 +711,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
                       categoryId: modeledElementInfo.categoryId,
                       elementIds: new Set([modelId]),
                       on: true,
-                      shouldntChangeSubModels: true,
+                      skipSubModels: true,
                     })
                   : EMPTY,
               ),
@@ -747,7 +747,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
                 categoryId: modeledElementInfo.categoryId,
                 elementIds: new Set([modelId]),
                 on: true,
-                shouldntChangeSubModels: true,
+                skipSubModels: true,
               })
             : EMPTY,
         );
@@ -835,7 +835,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
           const isDisplayedByDefault = categoryVisibility.state === "visible";
           return this.queueElementsVisibilityChange(elementIds, on, isDisplayedByDefault);
         }),
-        props.shouldntChangeSubModels !== true
+        props.skipSubModels !== true
           ? from(elementIds).pipe(
               mergeMap((elementId) =>
                 from(this._idsCache.hasSubModel(elementId)).pipe(

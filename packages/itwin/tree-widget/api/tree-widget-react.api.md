@@ -95,7 +95,7 @@ interface ChangeGeometricElementsDisplayStateProps {
     // (undocumented)
     on: boolean;
     // (undocumented)
-    shouldntChangeSubModels?: boolean;
+    skipSubModels?: boolean;
 }
 
 // @beta (undocumented)
