@@ -364,8 +364,8 @@ export class ModelsTreeIdsCache {
     const modelWithCategoryModeledElements = await this.getModelWithCategoryModeledElements();
     for (const [key, modeledElementIds] of modelWithCategoryModeledElements) {
       if (modeledElementIds.has(modelId)) {
-        const keySplit = key.split("-");
-        return { modelId: keySplit[0], categoryId: keySplit[1] };
+        const [modelId, categoryId] = key.split("-");
+        return { modelId, categoryId };
       }
     }
     return undefined;
