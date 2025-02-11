@@ -1,8 +1,25 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Mon, 27 Jan 2025 18:30:40 GMT and should not be manually modified.
+This log was last generated on Thu, 06 Feb 2025 13:36:20 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 3.4.1
+
+Thu, 06 Feb 2025 13:36:20 GMT
+
+### Patches
+
+- Removed horizontal scroll from trees. ([#1180](https://github.com/iTwin/viewer-components-react/pull/1180))
+
+## 3.4.0
+
+Tue, 04 Feb 2025 15:29:52 GMT
+
+### Minor changes
+
+- Expose `FocusedInstancesContextProvider` and `useFocusedInstancesContext` to allow using `ModelsTreeComponent.ToggleInstancesFocusButton` from outside of `ModelsTreeComponent` and accesing the context from other React components. ([#1175](https://github.com/iTwin/viewer-components-react/pull/1175))
+- Add `filterButtonsVisibility` prop to `TreeRenderer`. The prop allows to control visibility of hierarchy level filtering buttons in the tree: `show-on-hover` (default) shows them on hover or focus, `hide` only shows them when a node is filtered. ([#1178](https://github.com/iTwin/viewer-components-react/pull/1178))
 
 ## 3.3.0
 
