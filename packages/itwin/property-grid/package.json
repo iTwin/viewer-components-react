@@ -39,7 +39,7 @@
     "copy:cjs": "cpx \"./src/**/*.scss\" ./lib/cjs",
     "copy:esm": "cpx \"./src/**/*.scss\" ./lib/esm",
     "cover": "c8 npm run test",
-    "extract-api": "betools extract-api --entry=property-grid-react --apiReportFolder=./api --apiReportTempFolder=./api/temp --apiSummaryFolder=./api",
+    "extract-api": "betools extract-api --entry=lib/esm/property-grid-react --apiReportFolder=./api --apiReportTempFolder=./api/temp --apiSummaryFolder=./api",
     "check-internal": "node ../../../scripts/checkInternal.js --apiSummary ./api/property-grid-react.api.md",
     "lint": "npm run lint:eslint && npm run lint:stylelint",
     "lint:eslint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",

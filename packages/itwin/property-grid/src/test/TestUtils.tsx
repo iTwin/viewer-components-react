@@ -9,6 +9,7 @@ import { PropertyRecord } from "@itwin/appui-abstract";
 import { BeEvent } from "@itwin/core-bentley";
 import { KeySet } from "@itwin/presentation-common";
 import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
+import { Selectables } from "@itwin/unified-selection";
 import { renderHook as renderHookRTL, render as renderRTL } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 
@@ -17,6 +18,7 @@ import type { RenderHookOptions, RenderHookResult, RenderOptions, RenderResult }
 import type { UserEvent } from "@testing-library/user-event";
 import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
 import type { FavoritePropertiesManager, SelectionManager } from "@itwin/presentation-frontend";
+import type { SelectionStorage, StorageSelectionChangesListener } from "@itwin/unified-selection";
 
 export function createPropertyRecord(value: PropertyValue, description: Partial<PropertyDescription>) {
   const propertyDescription: PropertyDescription = {
@@ -37,6 +39,19 @@ export function stubSelectionManager(presentationSingleton?: typeof Presentation
   };
   sinon.stub(presentationSingleton ?? Presentation, "selection").get(() => selectionManagerStub);
   return selectionManagerStub;
+}
+
+export function stubSelectionStorage(): sinon.SinonStubbedInstance<SelectionStorage> & { selectionChangeEvent: BeEvent<StorageSelectionChangesListener> } {
+  return {
+    addToSelection: sinon.stub(),
+    clearSelection: sinon.stub(),
+    clearStorage: sinon.stub(),
+    getSelectionLevels: sinon.stub<Parameters<SelectionStorage["getSelectionLevels"]>, number[]>().returns([0]),
+    getSelection: sinon.stub<Parameters<SelectionStorage["getSelectionLevels"]>, Selectables>().returns(Selectables.create([])),
+    removeFromSelection: sinon.stub(),
+    replaceSelection: sinon.stub(),
+    selectionChangeEvent: new BeEvent<StorageSelectionChangesListener>(),
+  };
 }
 
 export function stubFavoriteProperties() {

@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Added optional `selectionStorage` prop to `createPropertyGrid` function and `MultiElementPropertyGrid` component. This allows using `@itwin/unified-selection` to manage selection state, rather than relying on soon-to-be deprecated unified selection API from `@itwin/presentation-frontend`. The prop will be made required in next major release.",
+  "packageName": "@itwin/property-grid-react",
+  "email": "35135765+grigasp@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

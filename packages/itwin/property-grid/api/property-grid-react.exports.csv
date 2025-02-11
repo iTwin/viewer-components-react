@@ -34,7 +34,7 @@ deprecated;class;PropertyGridUiItemsProvider
 public;interface;PropertyGridUiItemsProviderProps
 deprecated;interface;PropertyGridUiItemsProviderProps
 public;const;PropertyGridWidgetId
-public;interface;PropertyGridWidgetProps
+public;type;PropertyGridWidgetProps
 public;function;RemoveFavoritePropertyContextMenuItem
 public;interface;SettingsMenuItemProps
 public;interface;SettingsMenuProps
