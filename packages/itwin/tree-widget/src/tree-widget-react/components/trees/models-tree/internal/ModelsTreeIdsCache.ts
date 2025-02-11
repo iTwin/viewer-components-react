@@ -273,7 +273,7 @@ export class ModelsTreeIdsCache {
         pe.ECInstanceId modeledElementId,
         pe.Category.Id categoryId,
         pe.Model.Id modelId
-      FROM BisCore.Model m 
+      FROM BisCore.Model m
       JOIN ${this._hierarchyConfig.elementClassSpecification} pe ON pe.ECInstanceId = m.ModeledElement.Id
     `;
     for await (const row of this._queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
@@ -284,19 +284,15 @@ export class ModelsTreeIdsCache {
   private async getModelWithCategoryModeledElements() {
     this._modelWithCategoryModeledElements ??= (async () => {
       const modelWithCategoryModeledElements = new Map<Id64String, Id64Set>();
-      const getKey = (modelId: Id64String, categoryId: Id64String) => `${modelId}-${categoryId}`;
-      await Promise.all([
-        (async () => {
-          for await (const { modelId, categoryId, modeledElementId } of this.queryModeledElements()) {
-            const entry = modelWithCategoryModeledElements.get(getKey(modelId, categoryId));
-            if (entry === undefined) {
-              modelWithCategoryModeledElements.set(getKey(modelId, categoryId), new Set([modeledElementId]));
-            } else {
-              entry.add(modeledElementId);
-            }
-          }
-        })(),
-      ]);
+      for await (const { modelId, categoryId, modeledElementId } of this.queryModeledElements()) {
+        const key = `${modelId}-${categoryId}`;
+        const entry = modelWithCategoryModeledElements.get(key);
+        if (entry === undefined) {
+          modelWithCategoryModeledElements.set(key, new Set([modeledElementId]));
+        } else {
+          entry.add(modeledElementId);
+        }
+      }
       return modelWithCategoryModeledElements;
     })();
     return this._modelWithCategoryModeledElements;
