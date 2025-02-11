@@ -273,8 +273,8 @@ export class ModelsTreeIdsCache {
         pe.ECInstanceId modeledElementId,
         pe.Category.Id categoryId,
         pe.Model.Id modelId
-      FROM
-        BisCore.Model m JOIN ${this._hierarchyConfig.elementClassSpecification} pe ON pe.ECInstanceId = m.ModeledElement.Id
+      FROM BisCore.Model m 
+      JOIN ${this._hierarchyConfig.elementClassSpecification} pe ON pe.ECInstanceId = m.ModeledElement.Id
     `;
     for await (const row of this._queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
       yield { modelId: row.modelId, categoryId: row.categoryId, modeledElementId: row.modeledElementId };
