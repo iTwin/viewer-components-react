@@ -63,7 +63,6 @@
         "hiddenDueToOtherElementsExclusivelyAlwaysDrawn": "Other elements in \"exclusively always drawn\" list",
         "hiddenThroughModel": "Model is not displayed",
         "hiddenThroughCategory": "Category is not displayed",
-        "hiddenThroughSubModel": "Modeled elements subModel is hidden",
         "someElementsAreHidden": "Modeled elements subModel has partial state",
         "partialThroughSubModel": "Modeled element is hidden, but its subModel is visible",
         "partialThroughElement": "Modeled element is visible due to override, but its subModel is hidden",
