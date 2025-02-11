@@ -339,7 +339,7 @@ export class ModelsTreeIdsCache {
     return modelInfos.get(modelId)?.elementCount ?? 0;
   }
 
-  public async getDoesSubModelExist(elementId: Id64String): Promise<boolean> {
+  public async hasSubModel(elementId: Id64String): Promise<boolean> {
     const modelInfos = await this.getModelInfos();
     return modelInfos.has(elementId);
   }

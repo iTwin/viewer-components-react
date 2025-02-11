@@ -465,7 +465,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
           if (visibilityStatusAlwaysAndNeverDraw.state === "visible") {
             return from(elementIds).pipe(
               mergeMap((elementId) =>
-                from(this._idsCache.getDoesSubModelExist(elementId)).pipe(
+                from(this._idsCache.hasSubModel(elementId)).pipe(
                   mergeMap((isSubModel) => (isSubModel ? this.getModelVisibilityStatus({ modelId: elementId }) : of(visibilityStatusAlwaysAndNeverDraw))),
                 ),
               ),
@@ -526,7 +526,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         return of(elementStatus);
       }
 
-      return from(this._idsCache.getDoesSubModelExist(elementId)).pipe(
+      return from(this._idsCache.hasSubModel(elementId)).pipe(
         mergeMap((doesSubModelExist) => {
           if (doesSubModelExist) {
             return this.getModelVisibilityStatus({ modelId: elementId }).pipe(
@@ -809,7 +809,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         }),
         from(elementIds).pipe(
           mergeMap((elementId) =>
-            from(this._idsCache.getDoesSubModelExist(elementId)).pipe(
+            from(this._idsCache.hasSubModel(elementId)).pipe(
               filter((isSubModel) => isSubModel),
               mergeMap(() => this.changeModelState({ ids: elementId, on })),
             ),
@@ -838,7 +838,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         props.shouldntChangeSubModels !== true
           ? from(elementIds).pipe(
               mergeMap((elementId) =>
-                from(this._idsCache.getDoesSubModelExist(elementId)).pipe(
+                from(this._idsCache.hasSubModel(elementId)).pipe(
                   filter((isSubModel) => isSubModel),
                   mergeMap(() => this.changeModelState({ ids: elementId, on })),
                 ),
