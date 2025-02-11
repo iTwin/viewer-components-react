@@ -356,10 +356,10 @@ export class ModelsTreeIdsCache {
     return result;
   }
 
-  public async getModeledElementCategoryAndModel(modelId: Id64String): Promise<{ modelId: Id64String; categoryId: Id64String } | undefined> {
+  public async getModeledElementCategoryAndModel(modeledElementId: Id64String): Promise<{ modelId: Id64String; categoryId: Id64String } | undefined> {
     const modelWithCategoryModeledElements = await this.getModelWithCategoryModeledElements();
     for (const [key, modeledElementIds] of modelWithCategoryModeledElements) {
-      if (modeledElementIds.has(modelId)) {
+      if (modeledElementIds.has(modeledElementId)) {
         const [modelId, categoryId] = key.split("-");
         return { modelId, categoryId };
       }
