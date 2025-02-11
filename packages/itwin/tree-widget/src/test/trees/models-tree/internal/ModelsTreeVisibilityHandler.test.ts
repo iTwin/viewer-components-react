@@ -1763,7 +1763,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
       };
     }
 
-    describe("with modeledElements", () => {
+    describe("with modeled elements", () => {
       const testCases: Array<{
         name: string;
         nodeCreatorFunc: (ids: {
