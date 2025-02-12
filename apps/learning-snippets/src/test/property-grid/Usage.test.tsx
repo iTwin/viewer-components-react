@@ -8,6 +8,7 @@ import { expect } from "chai";
 import sinon from "sinon";
 import { StagePanelLocation, StagePanelSection, StageUsage } from "@itwin/appui-react";
 import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
+import { createStorage } from "@itwin/unified-selection";
 // __PUBLISH_EXTRACT_START__ PropertyGrid.RegisterPropertyGridWidgetImports
 import { createPropertyGrid } from "@itwin/property-grid-react";
 import { UiItemsManager } from "@itwin/appui-react";
@@ -50,6 +51,9 @@ describe("Property grid", () => {
       it("registers customizable property grid", async function () {
         const MY_CUSTOM_RULESET = undefined;
 
+        const selectionStorage = createStorage();
+        const getGlobalSelectionStorage = () => selectionStorage;
+
         // __PUBLISH_EXTRACT_START__ PropertyGrid.RegisterCustomPropertyGridWidget
         UiItemsManager.register({
           id: "property-grid-provider",
@@ -81,6 +85,10 @@ describe("Property grid", () => {
 
                 // supply an optional custom storage for user preferences, e.g. the show/hide null values used above
                 preferencesStorage: new IModelAppUserPreferencesStorage("my-favorites-namespace"),
+
+                // supply the global selection storage that the widget will use to listen to selection
+                // changes (more details: https://github.com/iTwin/presentation/blob/master/packages/unified-selection/README.md)
+                selectionStorage: getGlobalSelectionStorage(),
 
                 // supply an optional data provider factory method to create a custom property data provider
                 createDataProvider: (imodel: IModelConnection) => new PresentationPropertyDataProvider({ imodel, ruleset: MY_CUSTOM_RULESET }),

@@ -7,17 +7,17 @@ import { assert, expect } from "chai";
 import * as enzyme from "enzyme";
 import * as sinon from "sinon";
 import * as moq from "typemoq";
-import type { MapSubLayerProps } from "@itwin/core-common";
 import { ImageMapLayerSettings } from "@itwin/core-common";
-import type { DisplayStyle3dState, IModelConnection, MapLayerTokenEndpoint, ScreenViewport, ViewState3d } from "@itwin/core-frontend";
 import { IModelApp, MapLayerSource, MapLayerSourceStatus, MockRender, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 import { Select } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../mapLayers";
-import type { SourceState } from "../ui/widget/MapUrlDialog";
 import { MapUrlDialog } from "../ui/widget/MapUrlDialog";
 import { AccessClientMock, TokenEndpointMock } from "./AccessClientMock";
 import { TestUtils } from "./TestUtils";
 
+import type { MapSubLayerProps } from "@itwin/core-common";
+import type { DisplayStyle3dState, IModelConnection, MapLayerTokenEndpoint, ScreenViewport, ViewState3d } from "@itwin/core-frontend";
+import type { SourceState } from "../ui/widget/MapUrlDialog";
 describe("MapUrlDialog", () => {
   const sandbox = sinon.createSandbox();
   const viewportMock = moq.Mock.ofType<ScreenViewport>();
@@ -62,7 +62,7 @@ describe("MapUrlDialog", () => {
     });
 
     const spyOnOkResult = sandbox.fake();
-    const component = enzyme.mount(<MapUrlDialog isOverlay={false} activeViewport={viewportMock.object} onOkResult={spyOnOkResult} />);
+    const component = enzyme.mount(<MapUrlDialog activeViewport={viewportMock.object} onOkResult={spyOnOkResult} />);
     const layerTypeSelect = component.find(Select).at(0);
     await (layerTypeSelect.props() as any).onChange(format);
 
@@ -159,7 +159,7 @@ describe("MapUrlDialog", () => {
   const mockModalUrlDialogOk = (_result?: SourceState) => {};
 
   it("renders", () => {
-    const component = enzyme.mount(<MapUrlDialog activeViewport={viewportMock.object} isOverlay={false} onOkResult={mockModalUrlDialogOk} />);
+    const component = enzyme.mount(<MapUrlDialog activeViewport={viewportMock.object} onOkResult={mockModalUrlDialogOk} />);
     const allInputs = component.find("input");
 
     expect(allInputs.length).to.equals(defaultNumberOfInput);
@@ -186,7 +186,7 @@ describe("MapUrlDialog", () => {
       return Promise.resolve({ status: MapLayerSourceStatus.Valid, subLayers: sampleWmsLayerSettings.subLayers });
     });
 
-    const component = enzyme.mount(<MapUrlDialog isOverlay={false} activeViewport={viewportMock.object} onOkResult={spyOnOkResult} />);
+    const component = enzyme.mount(<MapUrlDialog activeViewport={viewportMock.object} onOkResult={spyOnOkResult} />);
     const layerTypeSelect = component.find(Select).at(0);
     await (layerTypeSelect.props() as any).onChange("WMS");
 
@@ -229,7 +229,7 @@ describe("MapUrlDialog", () => {
   });
 
   it("should not display user preferences options if iTwinConfig is undefined ", () => {
-    const component = enzyme.mount(<MapUrlDialog activeViewport={viewportMock.object} isOverlay={false} onOkResult={mockModalUrlDialogOk} />);
+    const component = enzyme.mount(<MapUrlDialog activeViewport={viewportMock.object} onOkResult={mockModalUrlDialogOk} />);
     const allRadios = component.find('input[type="radio"]');
     expect(allRadios.length).equals(0);
     allRadios.forEach((radio) => {
@@ -243,7 +243,7 @@ describe("MapUrlDialog", () => {
       save: undefined,
       delete: undefined,
     }));
-    const component = enzyme.mount(<MapUrlDialog activeViewport={viewportMock.object} isOverlay={false} onOkResult={mockModalUrlDialogOk} />);
+    const component = enzyme.mount(<MapUrlDialog activeViewport={viewportMock.object} onOkResult={mockModalUrlDialogOk} />);
     const allRadios = component.find('input[type="radio"]');
     expect(allRadios.length).equals(0);
     allRadios.forEach((radio) => {
@@ -261,7 +261,6 @@ describe("MapUrlDialog", () => {
       <MapUrlDialog
         mapLayerOptions={{ showUserPreferencesStorageOptions: true }}
         activeViewport={viewportMock.object}
-        isOverlay={false}
         onOkResult={mockModalUrlDialogOk}
       />,
     );
@@ -285,7 +284,7 @@ describe("MapUrlDialog", () => {
       return Promise.resolve({ status: MapLayerSourceStatus.Valid, subLayers: sampleLayerSettings.subLayers });
     });
 
-    const component = enzyme.mount(<MapUrlDialog isOverlay={false} activeViewport={viewportMock.object} onOkResult={mockModalUrlDialogOk} />);
+    const component = enzyme.mount(<MapUrlDialog activeViewport={viewportMock.object} onOkResult={mockModalUrlDialogOk} />);
     const layerTypeSelect = component.find(Select).at(0);
     await (layerTypeSelect.props() as any).onChange("WMS");
 

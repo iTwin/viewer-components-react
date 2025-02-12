@@ -87,6 +87,10 @@ UiItemsManager.register({
         // supply an optional custom storage for user preferences, e.g. the show/hide null values used above
         preferencesStorage: new IModelAppUserPreferencesStorage("my-favorites-namespace"),
 
+        // supply the global selection storage that the widget will use to listen to selection
+        // changes (more details: https://github.com/iTwin/presentation/blob/master/packages/unified-selection/README.md)
+        selectionStorage: getGlobalSelectionStorage(),
+
         // supply an optional data provider factory method to create a custom property data provider
         createDataProvider: (imodel: IModelConnection) => new PresentationPropertyDataProvider({ imodel, ruleset: MY_CUSTOM_RULESET }),
 
@@ -99,7 +103,19 @@ UiItemsManager.register({
 
 <!-- END EXTRACTION -->
 
-As seen in the above code snippet, `createPropertyGrid` takes a number of props that allow customizing not only how the widget behaves, but also how it looks. The package delivers commonly used building blocks:
+As seen in the above code snippet, `createPropertyGrid` takes a number of props that allow customizing not only how the widget behaves, but also how it looks.
+
+### Hooking into unified selection
+
+The widget and its components rely on [unified selection](https://github.com/iTwin/presentation/blob/master/packages/unified-selection/README.md#basic-concepts) system to tell them which element(s) are currently selected and when the selection changes. As of version `1.16`, there are two ways to hook into unified selection:
+
+- Supply the `selectionStorage` prop to components that use the unified selection system. See [Basic usage](https://github.com/iTwin/presentation/blob/master/packages/unified-selection/README.md#basic-usage) example for how to set up the storage. At the moment the prop is optional and will only be made required in version `2.0`; the components fall back to the legacy system described below if it's not provided.
+
+- The legacy `SelectionManager` from `@itwin/presentation-frontend` package, accessed through `Presentation.selection` API.
+
+### Building blocks
+
+The package delivers commonly used building blocks:
 
 - context and setting menu items
 - ancestor navigation controls
