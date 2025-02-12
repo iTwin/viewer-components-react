@@ -217,6 +217,7 @@ const configuredUiItems = new Map<string, UiItem>([
                 onFeatureUsed: (feature) => {
                   console.log(`PropertyGrid [${feature}] used`);
                 },
+                selectionStorage: unifiedSelectionStorage,
               }),
             ];
           },
