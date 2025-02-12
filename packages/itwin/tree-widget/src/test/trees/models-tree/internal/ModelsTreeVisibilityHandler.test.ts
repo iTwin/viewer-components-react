@@ -1837,7 +1837,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
           expectations: () => VisibilityExpectations.all("visible"),
         },
         {
-          name: "modeled elements children display is turned on / off when modeled elements class grouping node display is turned on / off",
+          name: "modeled element's children display is turned on / off when its class grouping node display is turned on / off",
           nodeCreatorFunc: (ids) => createClassGroupingHierarchyNode({ modelId: ids.modelId, categoryId: ids.categoryId, elements: [ids.modeledElementId] }),
           expectations: () => VisibilityExpectations.all("visible"),
         },
