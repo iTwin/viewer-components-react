@@ -1853,7 +1853,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
           expectations: () => VisibilityExpectations.all("visible"),
         },
         {
-          name: "modeled elements children display is turned on / off when subModel display is turned on / off",
+          name: "modeled element's children display is turned on / off when its sub-model display is turned on / off",
           nodeCreatorFunc: (ids) => createModelHierarchyNode(ids.modeledElementId, true),
           expectations: (ids) => ({
             subject: () => "partial",
