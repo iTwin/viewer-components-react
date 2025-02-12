@@ -1805,7 +1805,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
 
       const testCases: Array<{
         name: string;
-        nodeCreatorFunc: (ids: {
+        getTargetNode: (ids: {
           subjectId: Id64String;
           modelId: Id64String;
           categoryId: Id64String;
@@ -1822,28 +1822,28 @@ describe("HierarchyBasedVisibilityHandler", () => {
         }) => ReturnType<typeof VisibilityExpectations.all>;
       }> = [
         {
-          name: "modeled element's children display is turned on / off when its subject display is turned on / off",
-          nodeCreatorFunc: (ids) => createSubjectHierarchyNode(ids.subjectId),
+          name: "modeled element's children display is turned on when its subject display is turned on",
+          getTargetNode: (ids) => createSubjectHierarchyNode(ids.subjectId),
           expectations: () => VisibilityExpectations.all("visible"),
         },
         {
-          name: "modeled element's children display is turned on / off when its model display is turned on / off",
-          nodeCreatorFunc: (ids) => createModelHierarchyNode(ids.modelId, true),
+          name: "modeled element's children display is turned on when its model display is turned on",
+          getTargetNode: (ids) => createModelHierarchyNode(ids.modelId, true),
           expectations: () => VisibilityExpectations.all("visible"),
         },
         {
-          name: "modeled element's children display is turned on / off when its category display is turned on / off",
-          nodeCreatorFunc: (ids) => createCategoryHierarchyNode(ids.modelId, ids.categoryId, true),
+          name: "modeled element's children display is turned on when its category display is turned on",
+          getTargetNode: (ids) => createCategoryHierarchyNode(ids.modelId, ids.categoryId, true),
           expectations: () => VisibilityExpectations.all("visible"),
         },
         {
-          name: "modeled element's children display is turned on / off when its class grouping node display is turned on / off",
-          nodeCreatorFunc: (ids) => createClassGroupingHierarchyNode({ modelId: ids.modelId, categoryId: ids.categoryId, elements: [ids.modeledElementId] }),
+          name: "modeled element's children display is turned on when its class grouping node display is turned on",
+          getTargetNode: (ids) => createClassGroupingHierarchyNode({ modelId: ids.modelId, categoryId: ids.categoryId, elements: [ids.modeledElementId] }),
           expectations: () => VisibilityExpectations.all("visible"),
         },
         {
-          name: "modeled element's children display is turned on / off when its display is turned on / off",
-          nodeCreatorFunc: (ids) =>
+          name: "modeled element's children display is turned on when its display is turned on",
+          getTargetNode: (ids) =>
             createElementHierarchyNode({
               modelId: ids.modelId,
               categoryId: ids.categoryId,
@@ -1853,17 +1853,14 @@ describe("HierarchyBasedVisibilityHandler", () => {
           expectations: () => VisibilityExpectations.all("visible"),
         },
         {
-          name: "modeled element's children display is turned on / off when its sub-model display is turned on / off",
-          nodeCreatorFunc: (ids) => createModelHierarchyNode(ids.modeledElementId, true),
+          name: "modeled element's children display is turned on when its sub-model display is turned on",
+          getTargetNode: (ids) => createModelHierarchyNode(ids.modeledElementId, true),
           expectations: (ids) => ({
             subject: () => "partial",
             model: (modelId) => (modelId === ids.modelId ? "partial" : "visible"),
-            category: ({ categoryId, modelId }) => {
+            category: ({ categoryId }) => {
               if (categoryId === ids.subModelCategoryId) {
                 return "visible";
-              }
-              if (modelId === ids.modeledElementId) {
-                return "hidden";
               }
               return "partial";
             },
@@ -1882,17 +1879,14 @@ describe("HierarchyBasedVisibilityHandler", () => {
           }),
         },
         {
-          name: "modeled element, its model and category have partial visibility when its sub-model element's category display is turned on / off",
-          nodeCreatorFunc: (ids) => createCategoryHierarchyNode(ids.modeledElementId, ids.subModelCategoryId, true),
+          name: "modeled element, its model and category have partial visibility when its sub-model element's category display is turned on",
+          getTargetNode: (ids) => createCategoryHierarchyNode(ids.modeledElementId, ids.subModelCategoryId, true),
           expectations: (ids) => ({
             subject: () => "partial",
             model: () => "partial",
-            category: ({ categoryId, modelId }) => {
+            category: ({ categoryId }) => {
               if (categoryId === ids.subModelCategoryId) {
                 return "visible";
-              }
-              if (modelId === ids.modeledElementId) {
-                return "hidden";
               }
               return "partial";
             },
@@ -1911,8 +1905,8 @@ describe("HierarchyBasedVisibilityHandler", () => {
           }),
         },
         {
-          name: "modeled element, its model and category have partial visibility when its sub-model element's display is turned on / off",
-          nodeCreatorFunc: (ids) =>
+          name: "modeled element, its model and category have partial visibility when its sub-model element's display is turned on",
+          getTargetNode: (ids) =>
             createElementHierarchyNode({
               modelId: ids.modeledElementId,
               categoryId: ids.subModelCategoryId,
@@ -1943,13 +1937,13 @@ describe("HierarchyBasedVisibilityHandler", () => {
         },
       ];
 
-      testCases.forEach(({ name, nodeCreatorFunc, expectations }) => {
+      testCases.forEach(({ name, getTargetNode, expectations }) => {
         it(name, async function () {
           using visibilityTestData = createVisibilityTestData({ imodel: iModel });
           const { handler, provider, viewport } = visibilityTestData;
 
           await using(handler, async (_) => {
-            const nodeToChangeVisibility = nodeCreatorFunc(createdIds);
+            const nodeToChangeVisibility = getTargetNode(createdIds);
             await validateHierarchyVisibility({
               provider,
               handler,
