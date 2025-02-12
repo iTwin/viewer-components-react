@@ -3,21 +3,27 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-.presentation-components-tree-selector-content {
+.tw-content {
   display: flex;
   flex-direction: column;
   flex: 1;
   overflow: hidden;
 
-  .presentation-components-tree-selector-content-header {
+  .tw-content-header {
+    display: flex;
+    vertical-align: middle;
     padding-bottom: var(--iui-size-2xs);
 
-    .presentation-components-tree-selector-content-selector {
+    .tw-content-header-selector {
+      width: 100%;
+    }
+
+    .tw-content-header-search {
       width: 100%;
     }
   }
 
-  .presentation-components-tree-selector-content-wrapper {
+  .tw-content-wrapper {
     display: flex;
     flex-direction: column;
     flex-grow: 1;

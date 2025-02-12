@@ -3,14 +3,15 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import "./TreeSelector.scss";
+import "./WidgetWithHeader.scss";
 import { useState } from "react";
 import { Select } from "@itwin/itwinui-react/bricks";
+import { DebouncedSearchBox } from "./SearchBox.js";
 
-import type { SelectableTreeRenderProps } from "./SelectableTree.js";
+import type { SelectableTreeRenderProps } from "../SelectableTree.js";
 
 /**
- * A definition for trees displayed in `TreeSelector`
+ * A definition for trees displayed in `WidgetWithHeader`
  * @internal
  */
 export interface TreeContentDefinition {
@@ -21,10 +22,10 @@ export interface TreeContentDefinition {
 }
 
 /**
- * Props for `TreeSelector`
+ * Props for `WidgetWithHeader`
  * @internal
  */
-export interface TreeSelectorProps {
+export interface WidgetWithHeaderProps {
   defaultSelectedContentId: string;
   trees: TreeContentDefinition[];
   onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
@@ -36,15 +37,17 @@ export interface TreeSelectorProps {
  * allowing to choose which of the provided tree components should be rendered at the bottom.
  * @internal
  */
-export function TreeSelector({ defaultSelectedContentId, trees, onFeatureUsed, onPerformanceMeasured }: TreeSelectorProps) {
+export function WidgetWithHeader({ defaultSelectedContentId, trees, onFeatureUsed, onPerformanceMeasured }: WidgetWithHeaderProps) {
   const [selectedContentId, setSelectedContentId] = useState(defaultSelectedContentId);
   const selectedContent = trees.find((c) => c.id === selectedContentId) ?? trees[0];
+  const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
+  const [searchValue, setSearchValue] = useState<string>("");
 
   return (
-    <div className="presentation-components-tree-selector-content">
-      <div className="presentation-components-tree-selector-content-header">
-        {trees.length > 0 && (
-          <Select.Root>
+    <div className="tw-content">
+      <div className="tw-content-header">
+        {trees.length > 0 && !isSearchOpen && (
+          <Select.Root className={"tw-content-header-selector"}>
             <Select.HtmlSelect
               value={selectedContent.id}
               onChange={(e) => {
@@ -62,8 +65,9 @@ export function TreeSelector({ defaultSelectedContentId, trees, onFeatureUsed, o
             </Select.HtmlSelect>
           </Select.Root>
         )}
+        <DebouncedSearchBox className={"tw-content-header-search"} isOpened={isSearchOpen} setIsOpened={setIsSearchOpen} onSearch={setSearchValue} delay={20} />
       </div>
-      <div className="presentation-components-tree-selector-content-wrapper">{selectedContent?.render({ onPerformanceMeasured, onFeatureUsed })}</div>
+      <div className=".tw-content-wrapper">{selectedContent?.render({ onPerformanceMeasured, onFeatureUsed, filter: searchValue })}</div>
     </div>
   );
 }

@@ -15,7 +15,7 @@ import type { Viewport } from "@itwin/core-frontend";
 
 const visibilityShowIcon = new URL("@itwin/itwinui-icons/visibility-show.svg", import.meta.url).href;
 const visibilityHideIcon = new URL("@itwin/itwinui-icons/visibility-hide.svg", import.meta.url).href;
-const visibilityHalfIcon = new URL("@itwin/itwinui-icons/state-inherited-dot.svg", import.meta.url).href;
+const visibilityHalfIcon = new URL("@itwin/itwinui-icons/placeholder.svg", import.meta.url).href;
 
 /**
  * Props that get passed to `CategoriesTreeComponent` header button renderer.
@@ -67,6 +67,7 @@ export type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonP
 export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
   return (
     <IconButton
+      variant={"ghost"}
       label={TreeWidget.translate("categoriesTree.buttons.showAll.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.(`categories-tree-showall`);
@@ -84,6 +85,7 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
 export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
   return (
     <IconButton
+      variant={"ghost"}
       label={TreeWidget.translate("categoriesTree.buttons.hideAll.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.(`categories-tree-hideall`);
@@ -101,6 +103,7 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
 export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
   return (
     <IconButton
+      variant={"ghost"}
       label={TreeWidget.translate("categoriesTree.buttons.invert.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.(`categories-tree-invert`);

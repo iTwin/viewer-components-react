@@ -4,9 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable @itwin/no-internal */
 
-import { LocalizationContextProvider, TreeRenderer as PresentationTree } from "@itwin/presentation-hierarchies-react";
+import { createFilterAction, LocalizationContextProvider, TreeRenderer as PresentationTree } from "@itwin/presentation-hierarchies-react";
 import { useHierarchiesLocalization } from "../UseHierarchiesLocalization.js";
-import { TreeItemVisibilityButton } from "./TreeNodeVisibilityButton.js";
+import { createVisibilityAction } from "./TreeNodeVisibilityButton.js";
 
 import type { TreeItemVisibilityButtonProps } from "./TreeNodeVisibilityButton.js";
 /** @beta */
@@ -25,7 +25,10 @@ export function TreeRenderer({ rootNodes, onNodeClick, expandNode, visibilityBut
         onNodeClick={onNodeClick}
         expandNode={expandNode}
         rootNodes={rootNodes}
-        actionsRenderer={visibilityButtonProps ? (node) => <TreeItemVisibilityButton {...visibilityButtonProps} node={node} /> : undefined}
+        actions={[
+          ...(visibilityButtonProps ? [createVisibilityAction(visibilityButtonProps)] : []),
+          createFilterAction({ onFilter: props.onFilterClick, getHierarchyLevelDetails: props.getHierarchyLevelDetails, label: "Filter" }),
+        ]}
       />
     </LocalizationContextProvider>
   );
