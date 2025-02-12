@@ -18,10 +18,10 @@ import { createKeysFromSelectable, useSelectionHandler } from "./hooks/UseUnifie
 import { PropertyGridComponent } from "./PropertyGridComponent.js";
 import { PropertyGridManager } from "./PropertyGridManager.js";
 
+import type { SelectionStorage } from "./hooks/UseUnifiedSelectionHandler.js";
 import type { FallbackProps } from "react-error-boundary";
 import type { UiItemsProvider, Widget } from "@itwin/appui-react";
 import type { PropertyGridComponentProps } from "./PropertyGridComponent.js";
-import type { SelectionStorage } from "@itwin/unified-selection";
 
 /**
  * Creates a property grid definition that should be returned from `UiItemsProvider.getWidgets()`.

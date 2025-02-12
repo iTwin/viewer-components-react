@@ -22,7 +22,7 @@ import type { PropsWithChildren } from 'react';
 import type { ReactNode } from 'react';
 import { Ref } from 'react';
 import { Selectables } from '@itwin/unified-selection';
-import type { SelectionStorage } from '@itwin/unified-selection';
+import type { SelectionStorage as SelectionStorage_2 } from '@itwin/unified-selection';
 import { StagePanelLocation } from '@itwin/appui-react';
 import { StagePanelSection } from '@itwin/appui-react';
 import type { TranslationOptions } from '@itwin/core-common';

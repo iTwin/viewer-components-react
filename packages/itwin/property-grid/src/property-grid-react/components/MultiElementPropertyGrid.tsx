@@ -17,13 +17,13 @@ import { ElementList as ElementListComponent } from "./ElementList.js";
 import { PropertyGrid as PropertyGridComponent } from "./PropertyGrid.js";
 import { SingleElementPropertyGrid as SingleElementPropertyGridComponent } from "./SingleElementPropertyGrid.js";
 
+import type { SelectionStorage } from "../hooks/UseUnifiedSelectionHandler.js";
 import type { ElementListProps } from "./ElementList.js";
 import type { ReactNode } from "react";
 import type { PropertyGridProps } from "./PropertyGrid.js";
 import type { SingleElementPropertyGridProps } from "./SingleElementPropertyGrid.js";
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { UsageTrackedFeatures } from "../hooks/UseTelemetryContext.js";
-import type { SelectionStorage } from "@itwin/unified-selection";
 
 enum MultiElementPropertyContent {
   PropertyGrid = 0,
