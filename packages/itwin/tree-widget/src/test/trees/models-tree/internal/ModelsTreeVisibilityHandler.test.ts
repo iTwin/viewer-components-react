@@ -1882,7 +1882,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
           }),
         },
         {
-          name: "model, category and modeled element have partial / off visibility when subModels category display is turned on / off",
+          name: "modeled element, its model and category have partial visibility when its sub-model element's category display is turned on / off",
           nodeCreatorFunc: (ids) => createCategoryHierarchyNode(ids.modeledElementId, ids.subModelCategoryId, true),
           expectations: (ids) => ({
             subject: () => "partial",
