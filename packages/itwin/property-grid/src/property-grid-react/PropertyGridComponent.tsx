@@ -8,7 +8,7 @@ import { MultiElementPropertyGrid } from "./components/MultiElementPropertyGrid.
 import { TelemetryContextProvider } from "./hooks/UseTelemetryContext.js";
 import { PreferencesContextProvider } from "./PropertyGridPreferencesContext.js";
 
-import type { PerformanceTrackedFeatures, UsageTrackedFeatures } from "./hooks/UseTelemetryContext.js";
+import type { TelemetryContextProviderProps } from "./hooks/UseTelemetryContext.js";
 import type { MultiElementPropertyGridProps } from "./components/MultiElementPropertyGrid.js";
 import type { PreferencesStorage } from "./api/PreferencesStorage.js";
 
@@ -16,22 +16,12 @@ import type { PreferencesStorage } from "./api/PreferencesStorage.js";
  * Props for `PropertyGridComponent`.
  * @public
  */
-export interface PropertyGridComponentProps extends Omit<MultiElementPropertyGridProps, "imodel"> {
+export interface PropertyGridComponentProps extends Omit<MultiElementPropertyGridProps, "imodel">, TelemetryContextProviderProps {
   /**
    * Custom storage that should be used for persisting preferences.
    * Defaults to `IModelAppUserPreferencesStorage` that uses `IModelApp.userPreferences`.
    */
   preferencesStorage?: PreferencesStorage;
-
-  /**
-   * Callback that is invoked when performance of tracked feature is measured.
-   */
-  onPerformanceMeasured?: (feature: PerformanceTrackedFeatures, elapsedTime: number) => void;
-
-  /**
-   * Callback that is invoked when a tracked feature is used.
-   */
-  onFeatureUsed?: (featureId: UsageTrackedFeatures) => void;
 }
 
 /**
