@@ -124,7 +124,6 @@ type PropertyGridActionButtonRenderer = (props: PropertyGridActionButtonRenderer
 
 // @public (undocumented)
 interface PropertyGridActionButtonRendererProps extends ActionButtonRendererProps {
-    // (undocumented)
     dataProvider: IPresentationPropertyDataProvider;
 }
 
