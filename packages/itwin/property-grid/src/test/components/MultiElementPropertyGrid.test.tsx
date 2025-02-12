@@ -9,6 +9,7 @@ import * as td from "testdouble";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { KeySet } from "@itwin/presentation-common";
 import { SelectionChangeType } from "@itwin/presentation-frontend";
+import { normalizeFullClassName } from "@itwin/presentation-shared";
 import { Selectables } from "@itwin/unified-selection";
 import {
   act,
@@ -22,13 +23,13 @@ import {
   waitFor,
 } from "../TestUtils.js";
 
+import type { EventArgs } from "@itwin/presentation-shared";
 import type * as MultiElementPropertyGridModule from "../../property-grid-react/components/MultiElementPropertyGrid.js";
 import type * as UseTelemetryContextModule from "../../property-grid-react/hooks/UseTelemetryContext.js";
 import type { ISelectionProvider } from "@itwin/presentation-frontend";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { SelectableInstanceKey } from "@itwin/unified-selection";
-import type { EventArgs } from "@itwin/presentation-shared";
 
 describe("<MultiElementPropertyGrid />", () => {
   const imodel = {
@@ -475,7 +476,7 @@ describe("<MultiElementPropertyGrid />", () => {
         });
       });
 
-      const buildLabel = (key: InstanceKey) => `${key.className}-${key.id}`;
+      const buildLabel = (key: InstanceKey) => `${normalizeFullClassName(key.className)}-${key.id}`;
 
       interface InstanceData {
         key: InstanceKey;

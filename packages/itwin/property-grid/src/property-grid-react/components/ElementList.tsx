@@ -107,15 +107,20 @@ async function getSortedLabelInstanceKeyPairs(labelsProvider: PresentationLabels
 async function getLabels(labelsProvider: PresentationLabelsProvider, instanceKeys: InstanceKey[]): Promise<string[]> {
   const chunkSize = 1000;
   if (instanceKeys.length < chunkSize) {
-    return labelsProvider.getLabels(instanceKeys);
+    return labelsProvider.getLabels(instanceKeys.map(normalizeInstanceKey));
   } else {
     const labels: string[] = [];
     for (let i = 0; i < instanceKeys.length; i += chunkSize) {
       const end = Math.min(i + chunkSize, instanceKeys.length);
-      const chunk = instanceKeys.slice(i, end);
+      const chunk = instanceKeys.slice(i, end).map(normalizeInstanceKey);
       const currentLabels = await labelsProvider.getLabels(chunk);
       labels.push(...currentLabels);
     }
     return labels;
   }
+}
+
+function normalizeInstanceKey(instanceKey: InstanceKey) {
+  // Presentation content APIs expect `:` instead of `.` in full class names...
+  return { className: instanceKey.className.replace(".", ":"), id: instanceKey.id };
 }
