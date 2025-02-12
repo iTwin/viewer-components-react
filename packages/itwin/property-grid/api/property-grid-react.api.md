@@ -120,6 +120,15 @@ export interface PreferencesStorage {
 export function PropertyGrid({ createDataProvider, ...props }: PropertyGridProps): JSX.Element | null;
 
 // @public
+type PropertyGridActionButtonRenderer = (props: PropertyGridActionButtonRendererProps) => ReactNode;
+
+// @public (undocumented)
+interface PropertyGridActionButtonRendererProps extends ActionButtonRendererProps {
+    // (undocumented)
+    dataProvider: IPresentationPropertyDataProvider;
+}
+
+// @public
 export function PropertyGridComponent({ preferencesStorage, onPerformanceMeasured, onFeatureUsed, ...props }: PropertyGridComponentProps): JSX.Element | null;
 
 // @public
@@ -221,6 +230,9 @@ export type PropertyGridWidgetProps = PropertyGridComponentProps & ({
 // @public
 export function RemoveFavoritePropertyContextMenuItem({ field, imodel, scope, onSelect }: FavoritePropertiesContextMenuItemProps): JSX.Element | null;
 
+// @public (undocumented)
+type SelectionStorage = Pick<SelectionStorage_2, "getSelection" | "replaceSelection" | "selectionChangeEvent">;
+
 // @public
 export interface SettingsMenuItemProps {
     close: () => void;
@@ -253,6 +265,17 @@ export type SingleElementPropertyGridProps = Omit<PropertyGridContentProps, "dat
 
 // @public
 export function TelemetryContextProvider({ onPerformanceMeasured, onFeatureUsed, children }: PropsWithChildren<TelemetryContextProviderProps>): JSX.Element;
+
+// @public (undocumented)
+interface TelemetryContextProviderProps {
+    // (undocumented)
+    onFeatureUsed?: (featureId: UsageTrackedFeatures) => void;
+    // (undocumented)
+    onPerformanceMeasured?: (featureId: PerformanceTrackedFeatures, elapsedTime: number) => void;
+}
+
+// @public
+type UsageTrackedFeatures = "single-element" | "multiple-elements" | "elements-list" | "single-element-from-list" | "ancestor-navigation" | "context-menu" | "hide-empty-values-enabled" | "hide-empty-values-disabled" | "filter-properties";
 
 // @public
 export function usePropertyGridTransientState<T extends Element>(): Ref<T>;
