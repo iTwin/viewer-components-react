@@ -1822,7 +1822,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
         }) => ReturnType<typeof VisibilityExpectations.all>;
       }> = [
         {
-          name: "modeled elements children display is turned on / off when subject display is turned on / off",
+          name: "modeled element's children display is turned on / off when its subject display is turned on / off",
           nodeCreatorFunc: (ids) => createSubjectHierarchyNode(ids.subjectId),
           expectations: () => VisibilityExpectations.all("visible"),
         },
