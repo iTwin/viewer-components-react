@@ -132,9 +132,7 @@ interface PropertyGridActionButtonRendererProps extends ActionButtonRendererProp
 export function PropertyGridComponent({ preferencesStorage, onPerformanceMeasured, onFeatureUsed, ...props }: PropertyGridComponentProps): JSX.Element | null;
 
 // @public
-export interface PropertyGridComponentProps extends Omit<MultiElementPropertyGridProps, "imodel"> {
-    onFeatureUsed?: (featureId: UsageTrackedFeatures) => void;
-    onPerformanceMeasured?: (feature: PerformanceTrackedFeatures, elapsedTime: number) => void;
+export interface PropertyGridComponentProps extends Omit<MultiElementPropertyGridProps, "imodel">, TelemetryContextProviderProps {
     preferencesStorage?: PreferencesStorage;
 }
 
@@ -268,9 +266,7 @@ export function TelemetryContextProvider({ onPerformanceMeasured, onFeatureUsed,
 
 // @public (undocumented)
 interface TelemetryContextProviderProps {
-    // (undocumented)
     onFeatureUsed?: (featureId: UsageTrackedFeatures) => void;
-    // (undocumented)
     onPerformanceMeasured?: (featureId: PerformanceTrackedFeatures, elapsedTime: number) => void;
 }
 
