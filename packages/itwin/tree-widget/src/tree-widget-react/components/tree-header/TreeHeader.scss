@@ -4,13 +4,10 @@
 *--------------------------------------------------------------------------------------------*/
 
 .tree-widget-tree-header {
-  --tree-header-height-inner: var(--tree-header-height, --iui-size-xl);
-  --tree-header-contracted-width-inner: var(--tree-header-contracted-width, --iui-size-xl);
-
+  padding-top: var(--iui-size-xs);
   padding-bottom: var(--iui-size-xs);
   border-bottom: 1px solid #d3d3d3;
 
   display: flex;
   align-items: center;
-  height: var(--tree-header-height-inner);
 }

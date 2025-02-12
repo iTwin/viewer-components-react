@@ -67,7 +67,7 @@ export function WidgetWithHeader({ defaultSelectedContentId, trees, onFeatureUse
         )}
         <DebouncedSearchBox className={"tw-content-header-search"} isOpened={isSearchOpen} setIsOpened={setIsSearchOpen} onSearch={setSearchValue} delay={20} />
       </div>
-      <div className=".tw-content-wrapper">{selectedContent?.render({ onPerformanceMeasured, onFeatureUsed, filter: searchValue })}</div>
+      <div className="tw-content-wrapper">{selectedContent?.render({ onPerformanceMeasured, onFeatureUsed, filter: searchValue })}</div>
     </div>
   );
 }

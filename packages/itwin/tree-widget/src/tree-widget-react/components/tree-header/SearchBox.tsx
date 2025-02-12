@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import "./SearchBox.css";
 import { useEffect, useRef, useState } from "react";
 import { IconButton, TextBox } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../../TreeWidget.js";
@@ -40,13 +41,22 @@ export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, cla
   }, [inputValue, delay]);
 
   return !isOpened ? (
-    <IconButton variant={"ghost"} label={"search"} icon={searchIcon} onClick={() => setIsOpened(true)} />
+    <IconButton className={"tw-search-box-button"} variant={"ghost"} label={"search"} icon={searchIcon} onClick={() => setIsOpened(true)} />
   ) : (
     <>
       <TextBox.Root className={className}>
-        <TextBox.Input type={"search"} onChange={(e) => setInputValue(e.currentTarget.value)} placeholder={TreeWidget.translate("header.searchBox.search")} />
+        <TextBox.Input type={"text"} onChange={(e) => setInputValue(e.currentTarget.value)} placeholder={TreeWidget.translate("header.searchBox.search")} />
       </TextBox.Root>
-      <IconButton variant={"ghost"} label={"close search"} icon={dismissIcon} onClick={() => setIsOpened(false)} />
+      <IconButton
+        className={"tw-search-box-button"}
+        variant={"ghost"}
+        label={"close search"}
+        icon={dismissIcon}
+        onClick={() => {
+          setIsOpened(false);
+          setInputValue("");
+        }}
+      />
     </>
   );
 }
