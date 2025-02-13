@@ -8,13 +8,13 @@ $hovered-icon-color: $buic-foreground-primary;
 
 .maplayers-settings-popup {
   overflow: auto;
+}
 
-  .maplayers-settings-popup-panel {
-    font-size: 12px;
-    margin: 0.5em;
-    width: 340px;
-    height: inherit;
-  }
+.maplayers-settings-popup-panel {
+  font-size: 12px;
+  margin: 0.5em;
+  width: 340px;
+  height: inherit;
 }
 
 .map-manager-header-buttons-group {
