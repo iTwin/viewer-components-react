@@ -18,7 +18,7 @@ import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/c
 
 interface VisibilityExpectations {
   subject(id: string): Visibility;
-  element(props: { modelId: Id64String; categoryId: Id64String; elementId: Id64String }): "visible" | "hidden";
+  element(props: { modelId: Id64String; categoryId: Id64String; elementId: Id64String }): Visibility;
   groupingNode(props: { modelId: Id64String; categoryId: Id64String; elementIds: Id64Array }): Visibility;
   category(props: { modelId: Id64String; categoryId: Id64String }):
     | Visibility
