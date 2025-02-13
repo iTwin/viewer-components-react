@@ -438,7 +438,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       const { modelId, categoryId, elementIds } = info;
       if (!this._props.viewport.view.viewsModel(modelId)) {
         return from(elementIds).pipe(
-          this.getPotentialSubModelVisibilityStatus(
+          this.getPotentialSubModelsVisibilityStatus(
             {
               visible: undefined,
               hidden: undefined,
@@ -464,7 +464,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       }).pipe(
         mergeMap((visibilityStatusAlwaysAndNeverDraw) => {
           return from(elementIds).pipe(
-            this.getPotentialSubModelVisibilityStatus(
+            this.getPotentialSubModelsVisibilityStatus(
               {
                 visible: undefined,
                 hidden: "modelsTree.groupingNode.allElementsAndSubModelsHidden",
@@ -1029,7 +1029,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     };
   }
 
-  private getPotentialSubModelVisibilityStatus(
+  private getPotentialSubModelsVisibilityStatus(
     tooltipMap: { [key in Visibility]: string | undefined },
     defaultValue: VisibilityStatus,
     ignoreTooltip?: boolean,
