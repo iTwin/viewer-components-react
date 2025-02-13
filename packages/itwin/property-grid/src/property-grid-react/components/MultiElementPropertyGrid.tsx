@@ -8,15 +8,16 @@ import classnames from "classnames";
 import { useEffect, useState } from "react";
 import { SvgArrowDown, SvgArrowUp, SvgPropertiesList } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
-import { Presentation } from "@itwin/presentation-frontend";
 import { useInstanceSelection } from "../hooks/UseInstanceSelection.js";
 import { NullValueSettingContext } from "../hooks/UseNullValuesSetting.js";
 import { useTelemetryContext } from "../hooks/UseTelemetryContext.js";
+import { useSelectionHandler } from "../hooks/UseUnifiedSelectionHandler.js";
 import { PropertyGridManager } from "../PropertyGridManager.js";
 import { ElementList as ElementListComponent } from "./ElementList.js";
 import { PropertyGrid as PropertyGridComponent } from "./PropertyGrid.js";
 import { SingleElementPropertyGrid as SingleElementPropertyGridComponent } from "./SingleElementPropertyGrid.js";
 
+import type { SelectionStorage } from "../hooks/UseUnifiedSelectionHandler.js";
 import type { ElementListProps } from "./ElementList.js";
 import type { ReactNode } from "react";
 import type { PropertyGridProps } from "./PropertyGrid.js";
@@ -35,6 +36,14 @@ enum MultiElementPropertyContent {
  * @public
  */
 export interface MultiElementPropertyGridProps extends Omit<PropertyGridProps, "headerControls" | "onBackButton"> {
+  /**
+   * Unified selection storage to use for listening and getting active selection.
+   *
+   * When not specified, the deprecated `SelectionManager` from `@itwin/presentation-frontend` package
+   * is used.
+   */
+  selectionStorage?: SelectionStorage;
+
   /** Renders controls for ancestors navigation. If set to `undefined`, ancestors navigation is disabled. */
   ancestorsNavigationControls?: (props: AncestorsNavigationControlsProps) => ReactNode;
 }
@@ -46,7 +55,11 @@ export interface MultiElementPropertyGridProps extends Omit<PropertyGridProps, "
  * @public
  */
 export function MultiElementPropertyGrid({ ancestorsNavigationControls, ...props }: MultiElementPropertyGridProps) {
-  const { selectedKeys, focusedInstanceKey, focusInstance, ancestorsNavigationProps } = useInstanceSelection({ imodel: props.imodel });
+  const { selectionChange } = useSelectionHandler({ selectionStorage: props.selectionStorage });
+  const { selectedKeys, focusedInstanceKey, focusInstance, ancestorsNavigationProps } = useInstanceSelection({
+    imodel: props.imodel,
+    selectionStorage: props.selectionStorage,
+  });
   const [content, setContent] = useState<MultiElementPropertyContent>(MultiElementPropertyContent.PropertyGrid);
   const { onFeatureUsed } = useTelemetryContext();
 
@@ -57,10 +70,10 @@ export function MultiElementPropertyGrid({ ancestorsNavigationControls, ...props
 
   useEffect(() => {
     // show standard property grid when selection changes
-    return Presentation.selection.selectionChange.addListener(() => {
+    return selectionChange.addListener(() => {
       setContent(MultiElementPropertyContent.PropertyGrid);
     });
-  }, []);
+  }, [selectionChange]);
 
   const openElementList = () => {
     onFeatureUsed("elements-list");
