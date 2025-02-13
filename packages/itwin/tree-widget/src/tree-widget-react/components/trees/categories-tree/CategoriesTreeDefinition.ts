@@ -10,10 +10,10 @@ import { FilterLimitExceededError } from "../common/TreeErrors.js";
 import { getClassesByView } from "./internal/CategoriesTreeIdsCache.js";
 import { DEFINITION_CONTAINER_CLASS, DEFINITION_ELEMENT_CLASS, SUB_CATEGORY_CLASS } from "./internal/ClassNameDefinitions.js";
 
-import type { Id64Array } from "@itwin/core-bentley";
 import type { Observable } from "rxjs";
-import type { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { ECClassHierarchyInspector, ECSchemaProvider, IInstanceLabelSelectClauseFactory, InstanceKey } from "@itwin/presentation-shared";
+import type { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
 import type {
   DefineHierarchyLevelProps,
   DefineInstanceNodeChildHierarchyLevelProps,
@@ -111,6 +111,20 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
       return [];
     }
 
+    const categoriesWithSingleChild = new Array<Id64String>();
+    const categoriesWithMultipleChildren = new Array<Id64String>();
+    categories.forEach((category) => {
+      if (category.childCount > 1) {
+        categoriesWithMultipleChildren.push(category.id);
+      } else {
+        categoriesWithSingleChild.push(category.id);
+      }
+    });
+    const dataToDetermineHasChildren =
+      categoriesWithSingleChild.length > categoriesWithMultipleChildren.length
+        ? { ids: categoriesWithMultipleChildren, ifTrue: 1, ifFalse: 0 }
+        : { ids: categoriesWithSingleChild, ifTrue: 0, ifFalse: 1 };
+
     const { categoryClass } = getClassesByView(viewType);
 
     const [categoriesInstanceFilterClauses, definitionContainersInstanceFilterClauses] = await Promise.all(
@@ -164,19 +178,18 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                     className: categoryClass,
                   }),
                 },
-                hasChildren: {
-                  selector: `
-                    IFNULL((
-                      SELECT 1
-                      FROM (
-                        SELECT COUNT(1) AS ChildCount
-                        FROM BisCore.SubCategory sc
-                        WHERE sc.Parent.Id = this.ECInstanceId
-                      )
-                      WHERE ChildCount > 1
-                    ), 0)
-                  `,
-                },
+                ...(dataToDetermineHasChildren.ids.length > 0
+                  ? {
+                      hasChildren: {
+                        selector: `
+                            IIF(this.ECInstanceId IN (${dataToDetermineHasChildren.ids.join(",")}),
+                              ${dataToDetermineHasChildren.ifTrue},
+                              ${dataToDetermineHasChildren.ifFalse}
+                            )
+                          `,
+                      },
+                    }
+                  : { hasChildren: !!dataToDetermineHasChildren.ifFalse }),
                 extendedData: {
                   description: { selector: "this.Description" },
                   isCategory: true,
@@ -188,7 +201,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
               ${categoriesInstanceFilterClauses.from} this
               ${categoriesInstanceFilterClauses.joins}
             WHERE
-              this.ECInstanceId IN (${categories.join(", ")})
+              this.ECInstanceId IN (${categories.map((category) => category.id).join(", ")})
               ${categoriesInstanceFilterClauses.where ? `AND ${categoriesInstanceFilterClauses.where}` : ""}
         `
         : undefined;

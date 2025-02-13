@@ -12,7 +12,7 @@ import type { InstanceKey } from "@itwin/presentation-shared";
 interface DefinitionContainerInfo {
   modelId: Id64String;
   parentDefinitionContainerExists: boolean;
-  childCategories: Id64Array;
+  childCategories: CategoryInfo[];
   childDefinitionContainers: Id64Array;
 }
 
@@ -54,44 +54,32 @@ export class CategoriesTreeIdsCache {
     parentDefinitionContainerExists: boolean;
     childCount: number;
   }> {
-    const CATEGORIES_CTE = "AllVisibleCategories";
     const isDefinitionContainerSupported = await this.getIsDefinitionContainerSupported();
-    const ctes = [
-      `${CATEGORIES_CTE}(ECInstanceId, ChildCount, ModelId, ParentDefinitionContainerExists) AS (
-        SELECT
-          this.ECInstanceId,
-          COUNT(sc.ECInstanceId),
-          this.Model.Id,
-          ${
-            isDefinitionContainerSupported
-              ? `
-              IIF(this.Model.Id IN (SELECT dc.ECInstanceId FROM ${DEFINITION_CONTAINER_CLASS} dc),
-                true,
-                false
-              )`
-              : "false"
-          }
-        FROM
-          ${this._categoryClass} this
-          JOIN ${SUB_CATEGORY_CLASS} sc ON sc.Parent.Id = this.ECInstanceId
-          JOIN BisCore.Model m ON m.ECInstanceId = this.Model.Id
-        WHERE
-          NOT this.IsPrivate
-          AND (NOT m.IsPrivate OR m.ECClassId IS (BisCore.DictionaryModel))
-          AND EXISTS (SELECT 1 FROM ${this._categoryElementClass} e WHERE e.Category.Id = this.ECInstanceId)
-        GROUP BY this.ECInstanceId
-      )`,
-    ];
     const categoriesQuery = `
       SELECT
         this.ECInstanceId id,
-        this.ModelId modelId,
-        this.ParentDefinitionContainerExists parentDefinitionContainerExists,
-        this.ChildCount childCount
+        COUNT(sc.ECInstanceId) childCount,
+        this.Model.Id modelId,
+        ${
+          isDefinitionContainerSupported
+            ? `
+            IIF(this.Model.Id IN (SELECT dc.ECInstanceId FROM ${DEFINITION_CONTAINER_CLASS} dc),
+              true,
+              false
+            )`
+            : "false"
+        } parentDefinitionContainerExists
       FROM
-        ${CATEGORIES_CTE} this
+        ${this._categoryClass} this
+        JOIN ${SUB_CATEGORY_CLASS} sc ON sc.Parent.Id = this.ECInstanceId
+        JOIN BisCore.Model m ON m.ECInstanceId = this.Model.Id
+      WHERE
+        NOT this.IsPrivate
+        AND (NOT m.IsPrivate OR m.ECClassId IS (BisCore.DictionaryModel))
+        AND EXISTS (SELECT 1 FROM ${this._categoryElementClass} e WHERE e.Category.Id = this.ECInstanceId)
+      GROUP BY this.ECInstanceId
     `;
-    for await (const row of this._queryExecutor.createQueryReader({ ctes, ecsql: categoriesQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this._queryExecutor.createQueryReader({ ecsql: categoriesQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
       yield { id: row.id, modelId: row.modelId, parentDefinitionContainerExists: row.parentDefinitionContainerExists, childCount: row.childCount };
     }
   }
@@ -114,7 +102,7 @@ export class CategoriesTreeIdsCache {
     return false;
   }
 
-  private async *queryDefinitionContainers(categoriesModelIds: Id64Array): AsyncIterableIterator<{ id: Id64String; modelId: Id64String }> {
+  private async *queryDefinitionContainers(): AsyncIterableIterator<{ id: Id64String; modelId: Id64String }> {
     // DefinitionModel ECInstanceId will always be the same as modeled DefinitionContainer ECInstanceId, if this wasn't the case, we would need to do something like:
     //  JOIN BisCore.DefinitionModel dm ON dm.ECInstanceId = ${modelIdAccessor}
     //  JOIN BisCore.DefinitionModelBreaksDownDefinitionContainer dr ON dr.SourceECInstanceId = dm.ECInstanceId
@@ -129,7 +117,7 @@ export class CategoriesTreeIdsCache {
           FROM
             ${DEFINITION_CONTAINER_CLASS} dc
           WHERE
-            dc.ECInstanceId IN (${categoriesModelIds.join(", ")})
+            dc.ECInstanceId IN (SELECT c.Model.Id FROM ${this._categoryClass} c WHERE NOT c.IsPrivate)
             AND NOT dc.IsPrivate
 
           UNION ALL
@@ -211,24 +199,19 @@ export class CategoriesTreeIdsCache {
   private async getDefinitionContainersInfo() {
     this._definitionContainersInfo ??= (async () => {
       const definitionContainersInfo = new Map<Id64String, DefinitionContainerInfo>();
-      const isDefinitionContainerSupported = await this.getIsDefinitionContainerSupported();
-
-      if (!isDefinitionContainerSupported) {
+      const [isDefinitionContainerSupported, modelsCategoriesInfo] = await Promise.all([
+        this.getIsDefinitionContainerSupported(),
+        this.getModelsCategoriesInfo(),
+      ]);
+      if (!isDefinitionContainerSupported || modelsCategoriesInfo.size === 0) {
         return definitionContainersInfo;
       }
 
-      const modelsCategoriesInfo = await this.getModelsCategoriesInfo();
-      if (modelsCategoriesInfo.size === 0) {
-        return definitionContainersInfo;
-      }
-
-      const categoriesModelIds = [...modelsCategoriesInfo.keys()];
-
-      for await (const queriedDefinitionContainer of this.queryDefinitionContainers(categoriesModelIds)) {
+      for await (const queriedDefinitionContainer of this.queryDefinitionContainers()) {
         const modelCategoriesInfo = modelsCategoriesInfo.get(queriedDefinitionContainer.id);
 
         definitionContainersInfo.set(queriedDefinitionContainer.id, {
-          childCategories: modelCategoriesInfo?.childCategories.map((childCategory) => childCategory.id) ?? [],
+          childCategories: modelCategoriesInfo?.childCategories ?? [],
           modelId: queriedDefinitionContainer.modelId,
           childDefinitionContainers: [],
           parentDefinitionContainerExists: false,
@@ -250,10 +233,10 @@ export class CategoriesTreeIdsCache {
 
   public async getDirectChildDefinitionContainersAndCategories(
     parentDefinitionContainerIds: Id64Array,
-  ): Promise<{ categories: Id64Array; definitionContainers: Id64Array }> {
+  ): Promise<{ categories: CategoryInfo[]; definitionContainers: Id64Array }> {
     const definitionContainersInfo = await this.getDefinitionContainersInfo();
 
-    const result = { definitionContainers: new Array<Id64String>(), categories: new Array<Id64String>() };
+    const result = { definitionContainers: new Array<Id64String>(), categories: new Array<CategoryInfo>() };
 
     parentDefinitionContainerIds.forEach((parentDefinitionContainerId) => {
       const parentDefinitionContainerInfo = definitionContainersInfo.get(parentDefinitionContainerId);
@@ -275,7 +258,7 @@ export class CategoriesTreeIdsCache {
         if (definitionContainerInfo === undefined) {
           return [];
         }
-        result.push(...definitionContainerInfo.childCategories);
+        result.push(...definitionContainerInfo.childCategories.map((category) => category.id));
         return this.getAllContainedCategories(definitionContainerInfo.childDefinitionContainers);
       }),
     );
@@ -338,12 +321,12 @@ export class CategoriesTreeIdsCache {
     return result;
   }
 
-  public async getRootDefinitionContainersAndCategories(): Promise<{ categories: Id64Array; definitionContainers: Id64Array }> {
+  public async getRootDefinitionContainersAndCategories(): Promise<{ categories: CategoryInfo[]; definitionContainers: Id64Array }> {
     const [modelsCategoriesInfo, definitionContainersInfo] = await Promise.all([this.getModelsCategoriesInfo(), this.getDefinitionContainersInfo()]);
-    const result = { definitionContainers: new Array<Id64String>(), categories: new Array<Id64String>() };
+    const result = { definitionContainers: new Array<Id64String>(), categories: new Array<CategoryInfo>() };
     for (const modelCategoriesInfo of modelsCategoriesInfo.values()) {
       if (!modelCategoriesInfo.parentDefinitionContainerExists) {
-        result.categories.push(...modelCategoriesInfo.childCategories.map((childCategory) => childCategory.id));
+        result.categories.push(...modelCategoriesInfo.childCategories);
       }
     }
 

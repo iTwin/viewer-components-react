@@ -106,7 +106,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
       expect(await idsCache.getDirectChildDefinitionContainersAndCategories([keys.definitionContainerRoot.id])).to.deep.eq({
-        categories: [keys.category.id],
+        categories: [{ id: keys.category.id, childCount: 1 }],
         definitionContainers: [],
       });
     });
@@ -125,7 +125,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
       expect(await idsCache.getDirectChildDefinitionContainersAndCategories([keys.definitionContainerRoot.id])).to.deep.eq({
-        categories: [keys.category.id],
+        categories: [{ id: keys.category.id, childCount: 1 }],
         definitionContainers: [],
       });
     });
@@ -147,7 +147,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
       expect(await idsCache.getDirectChildDefinitionContainersAndCategories([keys.definitionContainerRoot.id])).to.deep.eq({
-        categories: [keys.directCategory.id],
+        categories: [{ id: keys.directCategory.id, childCount: 1 }],
         definitionContainers: [keys.definitionModelChild.id],
       });
     });
@@ -167,7 +167,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
       expect(await idsCache.getDirectChildDefinitionContainersAndCategories([keys.definitionModelChild.id])).to.deep.eq({
-        categories: [keys.indirectCategory.id],
+        categories: [{ id: keys.indirectCategory.id, childCount: 1 }],
         definitionContainers: [],
       });
     });
@@ -560,7 +560,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
       expect(await idsCache.getRootDefinitionContainersAndCategories()).to.deep.eq({
-        categories: [keys.category.id],
+        categories: [{ id: keys.category.id, childCount: 1 }],
         definitionContainers: [],
       });
     });
@@ -579,7 +579,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
       expect(await idsCache.getRootDefinitionContainersAndCategories()).to.deep.eq({
-        categories: [keys.category.id],
+        categories: [{ id: keys.category.id, childCount: 1 }],
         definitionContainers: [],
       });
     });
@@ -647,10 +647,17 @@ describe("CategoriesTreeIdsCache", () => {
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
       const result = await idsCache.getRootDefinitionContainersAndCategories();
       const expectedResult = {
-        categories: [keys.rootCategory1.id, keys.rootCategory2.id],
+        categories: [
+          { id: keys.rootCategory1.id, childCount: 1 },
+          { id: keys.rootCategory2.id, childCount: 1 },
+        ],
         definitionContainers: [keys.definitionContainerRoot.id, keys.definitionContainerRoot2.id],
       };
-      expect(expectedResult.categories.every((c) => result.categories.includes(c))).to.be.true;
+      expect(
+        expectedResult.categories.every((expectedCategory) =>
+          result.categories.find((category) => category.id === expectedCategory.id && category.childCount === expectedCategory.childCount),
+        ),
+      ).to.be.true;
       expect(expectedResult.definitionContainers.every((dc) => result.definitionContainers.includes(dc))).to.be.true;
     });
   });
