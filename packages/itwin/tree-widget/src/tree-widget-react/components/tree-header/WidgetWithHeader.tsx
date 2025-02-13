@@ -41,7 +41,7 @@ export function WidgetWithHeader({ defaultSelectedContentId, trees, onFeatureUse
   const [selectedContentId, setSelectedContentId] = useState(defaultSelectedContentId);
   const selectedContent = trees.find((c) => c.id === selectedContentId) ?? trees[0];
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
-  const [searchValue, setSearchValue] = useState<string>("");
+  const [searchValue, setSearchValue] = useState<string | undefined>(undefined);
 
   return (
     <div className="tw-content">

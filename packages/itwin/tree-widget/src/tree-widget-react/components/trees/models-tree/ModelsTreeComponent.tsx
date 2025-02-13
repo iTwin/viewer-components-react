@@ -149,11 +149,11 @@ function ModelsTreeComponentImpl({
         <InvertButton {...buttonProps} key="invert-all-btn" onFeatureUsed={onFeatureUsed} />,
         <View2DButton {...buttonProps} key="view-2d-btn" onFeatureUsed={onFeatureUsed} />,
         <View3DButton {...buttonProps} key="view-3d-btn" onFeatureUsed={onFeatureUsed} />,
-        <ToggleInstancesFocusButton disabled={!!filter} key="toggle-instances-focus-btn" onFeatureUsed={onFeatureUsed} />,
+        <ToggleInstancesFocusButton disabled={filter !== undefined} key="toggle-instances-focus-btn" onFeatureUsed={onFeatureUsed} />,
       ];
 
   useEffect(() => {
-    if (instanceFocusEnabled && !!filter) {
+    if (instanceFocusEnabled && filter !== undefined) {
       toggleInstanceFocus();
     }
   }, [instanceFocusEnabled, filter, toggleInstanceFocus]);

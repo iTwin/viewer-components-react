@@ -14,23 +14,18 @@ const dismissIcon = new URL("@itwin/itwinui-icons/dismiss.svg", import.meta.url)
 interface DebouncedSearchBoxProps {
   isOpened: boolean;
   setIsOpened: (value: boolean) => void;
-  onSearch: (value: string) => void;
+  onSearch: (value?: string) => void;
   delay: number;
   className?: string;
 }
 
 export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, className }: DebouncedSearchBoxProps) {
-  const [inputValue, setInputValue] = useState<string>("");
+  const [inputValue, setInputValue] = useState<string | undefined>(undefined);
   const onChangeRef = useRef(onSearch);
   // save latest `onChange` reference into `useRef` to avoid restarting timeout when `onChange` reference changes.
   onChangeRef.current = onSearch;
 
   useEffect(() => {
-    if (!inputValue) {
-      onChangeRef.current("");
-      return;
-    }
-
     const timeoutId = setTimeout(() => {
       onChangeRef.current(inputValue);
     }, delay);
@@ -46,7 +41,10 @@ export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, cla
       variant={"ghost"}
       label={TreeWidget.translate("header.searchBox.searchForSomething")}
       icon={searchIcon}
-      onClick={() => setIsOpened(true)}
+      onClick={() => {
+        setIsOpened(true);
+        setInputValue("");
+      }}
     />
   ) : (
     <>
@@ -60,7 +58,7 @@ export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, cla
         icon={dismissIcon}
         onClick={() => {
           setIsOpened(false);
-          setInputValue("");
+          setInputValue(undefined);
         }}
       />
     </>

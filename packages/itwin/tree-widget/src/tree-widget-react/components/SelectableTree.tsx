@@ -18,7 +18,7 @@ import type { TreeContentDefinition, WidgetWithHeaderProps } from "./tree-header
  * @public
  */
 export interface SelectableTreeRenderProps {
-  filter: string;
+  filter?: string;
   onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }

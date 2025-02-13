@@ -26,9 +26,9 @@ type HierarchyFilteringPaths = Awaited<ReturnType<Required<VisibilityTreeProps>[
 
 /** @beta */
 export interface UseCategoriesTreeProps {
-  filter: string;
   activeView: Viewport;
   onCategoriesFiltered?: (categories: CategoryInfo[] | undefined) => void;
+  filter?: string;
 }
 
 /** @beta */
@@ -96,7 +96,7 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
       getHierarchyDefinition,
       getFilteredPaths,
       visibilityHandlerFactory,
-      noDataMessage: getNoDataMessage(filter, filteringError),
+      noDataMessage: getNoDataMessage(filter ?? "", filteringError),
       highlight: filter ? { text: filter } : undefined,
     },
     rendererProps: {
