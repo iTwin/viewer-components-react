@@ -41,7 +41,7 @@
         "someCategoriesHidden": "Some categories are visible and some are hidden",
         "allCategoriesVisible": "All categories visible",
         "allCategoriesHidden": "All categories hidden",
-        "someSubModelsVisible": "Some subModels are visible"
+        "someSubModelsVisible": "Some sub-models are visible"
       },
       "category": {
         "displayedThroughPerModelOverride": "Per-model category override set to 'Show'",
