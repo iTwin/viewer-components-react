@@ -5,7 +5,6 @@
 
 
 import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
-import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
@@ -33,8 +32,6 @@ import type { HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchi
 
 describe("CategoriesVisibilityHandler", () => {
   before(async () => {
-    await NoRenderApp.startup();
-    await TestUtils.initialize();
     await initializePresentationTesting({
       backendProps: {
         caching: {
@@ -45,13 +42,13 @@ describe("CategoriesVisibilityHandler", () => {
       },
       rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
     });
+    await TestUtils.initialize();
     // eslint-disable-next-line @itwin/no-internal
     ECSchemaRpcImpl.register();
   });
 
   after(async () => {
     TestUtils.terminate();
-    await IModelApp.shutdown();
     await terminatePresentationTesting();
   });
 
