@@ -41,7 +41,13 @@ export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, cla
   }, [inputValue, delay]);
 
   return !isOpened ? (
-    <IconButton className={"tw-search-box-button"} variant={"ghost"} label={"search"} icon={searchIcon} onClick={() => setIsOpened(true)} />
+    <IconButton
+      className={"tw-search-box-button"}
+      variant={"ghost"}
+      label={TreeWidget.translate("header.searchBox.searchForSomething")}
+      icon={searchIcon}
+      onClick={() => setIsOpened(true)}
+    />
   ) : (
     <>
       <TextBox.Root className={className}>
@@ -50,7 +56,7 @@ export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, cla
       <IconButton
         className={"tw-search-box-button"}
         variant={"ghost"}
-        label={"close search"}
+        label={TreeWidget.translate("header.searchBox.close")}
         icon={dismissIcon}
         onClick={() => {
           setIsOpened(false);

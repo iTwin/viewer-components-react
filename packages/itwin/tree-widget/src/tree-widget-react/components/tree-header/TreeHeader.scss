@@ -3,10 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-.tree-widget-tree-header {
-  padding-top: var(--iui-size-xs);
-  padding-bottom: var(--iui-size-xs);
-  border-bottom: 1px solid #d3d3d3;
+.tw-tree-header {
+  padding: var(--iui-size-xs) var(--iui-size-s);
 
   display: flex;
   align-items: center;

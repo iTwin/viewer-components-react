@@ -5,6 +5,7 @@
 
 import "./TreeHeader.scss";
 import classnames from "classnames";
+import { Divider } from "@itwin/itwinui-react/bricks";
 
 import type { PropsWithChildren } from "react";
 import type { Viewport } from "@itwin/core-frontend";
@@ -22,9 +23,12 @@ export function TreeHeader(props: PropsWithChildren<TreeHeaderProps>) {
   const { className, children } = props;
 
   return (
-    <div className={classnames("tree-widget-tree-header", className)}>
-      <HeaderButtons>{children}</HeaderButtons>
-    </div>
+    <>
+      <div className={classnames("tw-tree-header", className)}>
+        <HeaderButtons>{children}</HeaderButtons>
+      </div>
+      <Divider />
+    </>
   );
 }
 
