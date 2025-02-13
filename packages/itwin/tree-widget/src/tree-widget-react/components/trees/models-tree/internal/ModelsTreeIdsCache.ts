@@ -33,6 +33,7 @@ export class ModelsTreeIdsCache {
   private _subjectInfos: Promise<Map<Id64String, SubjectInfo>> | undefined;
   private _parentSubjectIds: Promise<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
   private _modelInfos: Promise<Map<Id64String, ModelInfo>> | undefined;
+  private _modelWithCategoryModeledElements: Promise<Map<Id64String, Id64Set>> | undefined;
   private _modelKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath[]>>;
   private _subjectKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath>>;
   private _categoryKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath[]>>;
@@ -266,6 +267,37 @@ export class ModelsTreeIdsCache {
     }
   }
 
+  private async *queryModeledElements() {
+    const query = `
+      SELECT
+        pe.ECInstanceId modeledElementId,
+        pe.Category.Id categoryId,
+        pe.Model.Id modelId
+      FROM BisCore.Model m
+      JOIN ${this._hierarchyConfig.elementClassSpecification} pe ON pe.ECInstanceId = m.ModeledElement.Id
+    `;
+    for await (const row of this._queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+      yield { modelId: row.modelId, categoryId: row.categoryId, modeledElementId: row.modeledElementId };
+    }
+  }
+
+  private async getModelWithCategoryModeledElements() {
+    this._modelWithCategoryModeledElements ??= (async () => {
+      const modelWithCategoryModeledElements = new Map<Id64String, Id64Set>();
+      for await (const { modelId, categoryId, modeledElementId } of this.queryModeledElements()) {
+        const key = `${modelId}-${categoryId}`;
+        const entry = modelWithCategoryModeledElements.get(key);
+        if (entry === undefined) {
+          modelWithCategoryModeledElements.set(key, new Set([modeledElementId]));
+        } else {
+          entry.add(modeledElementId);
+        }
+      }
+      return modelWithCategoryModeledElements;
+    })();
+    return this._modelWithCategoryModeledElements;
+  }
+
   private async getModelInfos() {
     this._modelInfos ??= (async () => {
       const modelInfos = new Map<Id64String, { categories: Id64Set; elementCount: number }>();
@@ -305,6 +337,23 @@ export class ModelsTreeIdsCache {
   public async getModelElementCount(modelId: Id64String): Promise<number> {
     const modelInfos = await this.getModelInfos();
     return modelInfos.get(modelId)?.elementCount ?? 0;
+  }
+
+  public async hasSubModel(elementId: Id64String): Promise<boolean> {
+    const modelInfos = await this.getModelInfos();
+    return modelInfos.has(elementId);
+  }
+
+  public async getCategoriesModeledElements(modelId: Id64String, categoryIds: Id64Array): Promise<Id64Array> {
+    const modelWithCategoryModeledElements = await this.getModelWithCategoryModeledElements();
+    const result = new Array<Id64String>();
+    for (const categoryId of categoryIds) {
+      const entry = modelWithCategoryModeledElements.get(`${modelId}-${categoryId}`);
+      if (entry !== undefined) {
+        result.push(...entry);
+      }
+    }
+    return result;
   }
 
   public async createModelInstanceKeyPaths(modelId: Id64String): Promise<HierarchyNodeIdentifiersPath[]> {
