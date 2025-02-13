@@ -44,7 +44,7 @@ export const CategoriesTreeComponent: {
 };
 
 // @public (undocumented)
-interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
+interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode" | "filter"> {
     headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode>;
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
@@ -240,7 +240,7 @@ export const ModelsTreeComponent: {
 };
 
 // @public (undocumented)
-interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode" | "selectionPredicate" | "hierarchyConfig" | "visibilityHandlerOverrides" | "getFilteredPaths"> {
+interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode" | "selectionPredicate" | "hierarchyConfig" | "visibilityHandlerOverrides" | "getFilteredPaths" | "filter"> {
     headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
@@ -333,7 +333,7 @@ interface SelectableTreeProps {
 // @public
 interface SelectableTreeRenderProps {
     // (undocumented)
-    density?: "enlarged" | "default";
+    filter?: string;
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
@@ -352,16 +352,6 @@ interface TelemetryContextProviderProps {
 
 // @beta
 export function Tree({ getSchemaContext, hierarchyLevelSizeLimit, selectionStorage, imodelAccess: providedIModelAccess, ...props }: TreeProps): JSX_2.Element;
-
-// @beta (undocumented)
-interface TreeFilteringProps {
-    isDisabled?: boolean;
-    onFilterClear: () => void;
-    onFilterStart: (newFilter: string) => void;
-    onSelectedChanged?: (index: number) => void;
-    resultCount?: number;
-    selectedIndex?: number;
-}
 
 // @public (undocumented)
 interface TreeHeaderButtonProps {
@@ -432,16 +422,12 @@ interface TreeWidgetProps {
 }
 
 // @beta (undocumented)
-export function TreeWithHeader({ filteringProps, buttons, density, children }: PropsWithChildren<TreeWithHeaderProps>): JSX_2.Element;
+export function TreeWithHeader({ buttons, children }: PropsWithChildren<TreeWithHeaderProps>): JSX_2.Element;
 
 // @beta (undocumented)
 interface TreeWithHeaderProps {
     // (undocumented)
     buttons?: ReactNode;
-    // (undocumented)
-    density?: "enlarged" | "default";
-    // (undocumented)
-    filteringProps?: TreeFilteringProps;
 }
 
 // @beta
@@ -460,7 +446,7 @@ interface UseCategoriesTreeProps {
     // (undocumented)
     activeView: Viewport;
     // (undocumented)
-    filter: string;
+    filter?: string;
     // (undocumented)
     onCategoriesFiltered?: (categories: CategoryInfo[] | undefined) => void;
 }

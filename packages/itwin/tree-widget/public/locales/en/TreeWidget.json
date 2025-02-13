@@ -5,7 +5,7 @@
   "header": {
     "dropdownMore": "More",
     "searchBox": {
-      "searchForSomething": "Search for something",
+      "searchForSomething": "Search the tree",
       "search": "Search...",
       "open": "Open",
       "close": "Close",
@@ -113,6 +113,9 @@
         },
         "disable": {
           "tooltip": "Disable instance focus mode"
+        },
+        "disabled": {
+          "tooltip": "Instance focus mode is disabled while search is active"
         }
       }
     },

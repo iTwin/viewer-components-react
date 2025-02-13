@@ -120,7 +120,7 @@ const configuredUiItems = new Map<string, UiItem>([
                   return (
                     <ModelsTreeComponent
                       getSchemaContext={getSchemaContext}
-                      density={props.density}
+                      filter={props.filter}
                       selectionStorage={unifiedSelectionStorage}
                       selectionMode={"extended"}
                       selectionPredicate={disableNodesSelection ? disabledSelectionPredicate : undefined}
@@ -135,8 +135,8 @@ const configuredUiItems = new Map<string, UiItem>([
                 getLabel: () => CategoriesTreeComponent.getLabel(),
                 render: (props) => (
                   <CategoriesTreeComponent
+                    filter={props.filter}
                     getSchemaContext={getSchemaContext}
-                    density={props.density}
                     selectionStorage={unifiedSelectionStorage}
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}
@@ -149,7 +149,6 @@ const configuredUiItems = new Map<string, UiItem>([
                 render: (props) => (
                   <IModelContentTreeComponent
                     getSchemaContext={getSchemaContext}
-                    density={props.density}
                     selectionStorage={unifiedSelectionStorage}
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}
@@ -163,7 +162,6 @@ const configuredUiItems = new Map<string, UiItem>([
                 render: (props) => (
                   <ExternalSourcesTreeComponent
                     getSchemaContext={getSchemaContext}
-                    density={props.density}
                     selectionStorage={unifiedSelectionStorage}
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}

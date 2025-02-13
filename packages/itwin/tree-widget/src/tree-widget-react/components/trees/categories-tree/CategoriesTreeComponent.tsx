@@ -8,7 +8,6 @@ import { useActiveIModelConnection } from "@itwin/appui-react";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { TreeWithHeader } from "../../tree-header/TreeWithHeader.js";
 import { useActiveViewport } from "../common/UseActiveViewport.js";
-import { useFiltering } from "../common/UseFiltering.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { CategoriesTree } from "./CategoriesTree.js";
 import { HideAllButton, InvertAllButton, ShowAllButton, useCategoriesTreeButtonProps } from "./CategoriesTreeButtons.js";
@@ -20,7 +19,7 @@ import type { CategoriesTreeHeaderButtonProps, CategoriesTreeHeaderButtonType } 
 
 /** @public */
 interface CategoriesTreeComponentProps
-  extends Pick<CategoriesTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
+  extends Pick<CategoriesTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode" | "filter"> {
   /**
    * Renderers of header buttons. Defaults to:
    * ```ts
@@ -87,11 +86,10 @@ function CategoriesTreeComponentImpl({
   headerButtons,
   onPerformanceMeasured,
   onFeatureUsed,
+  filter,
   ...treeProps
 }: CategoriesTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
   const { buttonProps, onCategoriesFiltered } = useCategoriesTreeButtonProps({ viewport });
-  const { filter, applyFilter, clearFilter } = useFiltering();
-  const density = treeProps.density;
 
   const buttons: ReactNode = headerButtons
     ? headerButtons.map((btn, index) => <Fragment key={index}>{btn({ ...buttonProps, onFeatureUsed })}</Fragment>)
@@ -103,14 +101,7 @@ function CategoriesTreeComponentImpl({
 
   return (
     <TelemetryContextProvider componentIdentifier={CategoriesTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
-      <TreeWithHeader
-        buttons={buttons}
-        density={density}
-        filteringProps={{
-          onFilterStart: applyFilter,
-          onFilterClear: clearFilter,
-        }}
-      >
+      <TreeWithHeader buttons={buttons}>
         <CategoriesTree {...treeProps} imodel={iModel} activeView={viewport} filter={filter} onCategoriesFiltered={onCategoriesFiltered} />
       </TreeWithHeader>
     </TelemetryContextProvider>
