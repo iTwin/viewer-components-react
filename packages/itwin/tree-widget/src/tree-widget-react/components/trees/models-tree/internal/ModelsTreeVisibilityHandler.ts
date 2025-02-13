@@ -720,7 +720,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         return EMPTY;
       }
 
-      const idsObs = typeof ids === "string" ? of(ids) : from(ids);
+      const idsObs = from(Id64.iterable(ids));
       if (!on) {
         viewport.changeModelDisplay(ids, false);
         return idsObs.pipe(
