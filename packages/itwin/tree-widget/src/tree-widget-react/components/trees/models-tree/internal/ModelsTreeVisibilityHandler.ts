@@ -441,8 +441,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
 
       const { modelId, categoryId, elementIds } = info;
       if (!this._props.viewport.view.viewsModel(modelId)) {
-        return from(elementIds).pipe(
-          toArray(),
+        return of([...elementIds]).pipe(
           this.getSubModeledElementsVisibilityStatus({
             tooltips: {
               visible: undefined,
@@ -469,8 +468,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         },
       }).pipe(
         mergeMap((visibilityStatusAlwaysAndNeverDraw) => {
-          return from(elementIds).pipe(
-            toArray(),
+          return of([...elementIds]).pipe(
             this.getSubModeledElementsVisibilityStatus({
               tooltips: {
                 visible: undefined,
