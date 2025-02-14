@@ -6,7 +6,7 @@
 import { Fragment } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { TreeWidget } from "../../../TreeWidget.js";
-import { TreeWithHeader } from "../../tree-header/TreeWithHeader.js";
+import { TreeWithToolbar } from "../../tree-header/TreeWithToolbar.js";
 import { useActiveViewport } from "../common/UseActiveViewport.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { CategoriesTree } from "./CategoriesTree.js";
@@ -101,9 +101,9 @@ function CategoriesTreeComponentImpl({
 
   return (
     <TelemetryContextProvider componentIdentifier={CategoriesTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
-      <TreeWithHeader buttons={buttons}>
+      <TreeWithToolbar buttons={buttons}>
         <CategoriesTree {...treeProps} imodel={iModel} activeView={viewport} filter={filter} onCategoriesFiltered={onCategoriesFiltered} />
-      </TreeWithHeader>
+      </TreeWithToolbar>
     </TelemetryContextProvider>
   );
 }

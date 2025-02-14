@@ -3,15 +3,14 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-.tree-widget-selectable-tree {
+.tw-tree-with-toolbar {
   width: 100%;
   height: 100%;
-  box-sizing: border-box;
   display: flex;
   flex-direction: column;
 
-  .tree-widget-no-trees-container {
-    width: 100%;
+  .tw-tree-content {
+    padding-top: var(--iui-size-xs);
     height: 100%;
   }
 }

@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import "./WidgetWithHeader.scss";
+import "./WidgetWithHeader.css";
 import { useState } from "react";
 import { Select } from "@itwin/itwinui-react/bricks";
 import { DebouncedSearchBox } from "./SearchBox.js";

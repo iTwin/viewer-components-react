@@ -6,7 +6,7 @@
 import { Fragment, useEffect } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { TreeWidget } from "../../../TreeWidget.js";
-import { TreeWithHeader } from "../../tree-header/TreeWithHeader.js";
+import { TreeWithToolbar } from "../../tree-header/TreeWithToolbar.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
 import { FocusedInstancesContextProvider } from "../common/FocusedInstancesContextProvider.js";
 import { useActiveViewport } from "../common/UseActiveViewport.js";
@@ -160,9 +160,9 @@ function ModelsTreeComponentImpl({
 
   return (
     <TelemetryContextProvider componentIdentifier={ModelsTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
-      <TreeWithHeader buttons={buttons}>
+      <TreeWithToolbar buttons={buttons}>
         <ModelsTree {...treeProps} imodel={iModel} activeView={viewport} filter={filter} onModelsFiltered={onModelsFiltered} />
-      </TreeWithHeader>
+      </TreeWithToolbar>
     </TelemetryContextProvider>
   );
 }

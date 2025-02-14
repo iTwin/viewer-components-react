@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-.tw-tree-header {
+.tw-tree-toolbar {
   padding: var(--iui-size-xs) var(--iui-size-s);
   display: flex;
   align-items: center;

@@ -12,7 +12,7 @@ import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, tog
 import type { Id64String } from "@itwin/core-bentley";
 import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader.js";
+import type { TreeToolbarButtonProps } from "../../tree-header/TreeToolbar.js";
 
 const visibilityShowIcon = new URL("@itwin/itwinui-icons/visibility-show.svg", import.meta.url).href;
 const visibilityHideIcon = new URL("@itwin/itwinui-icons/visibility-hide.svg", import.meta.url).href;
@@ -33,7 +33,7 @@ export interface ModelInfo {
  * @see ModelTreeComponentProps.headerButtons
  * @public
  */
-export interface ModelsTreeHeaderButtonProps extends TreeHeaderButtonProps {
+export interface ModelsTreeHeaderButtonProps extends TreeToolbarButtonProps {
   /** A list of models available in the iModel. */
   models: ModelInfo[];
 }

@@ -3,8 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import "./TreeWithHeader.scss";
-import { TreeHeader } from "./TreeHeader.js";
+import "./TreeWithToolbar.css";
+import { TreeToolbar } from "./TreeToolbar.js";
 
 import type { PropsWithChildren, ReactNode } from "react";
 
@@ -14,10 +14,10 @@ interface TreeWithHeaderProps {
 }
 
 /** @beta */
-export function TreeWithHeader({ buttons, children }: PropsWithChildren<TreeWithHeaderProps>) {
+export function TreeWithToolbar({ buttons, children }: PropsWithChildren<TreeWithHeaderProps>) {
   return (
-    <div className={"tw-tree-with-header"}>
-      <TreeHeader>{buttons}</TreeHeader>
+    <div className={"tw-tree-with-toolbar"}>
+      <TreeToolbar>{buttons}</TreeToolbar>
       <div className="tw-tree-content">{children}</div>
     </div>
   );

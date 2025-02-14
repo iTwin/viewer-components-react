@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import "./ProgressOverlay.scss";
+import "./ProgressOverlay.css";
 import { Spinner } from "@itwin/itwinui-react/bricks";
 
 // TODO: replace spinner with ProgressLinear equivalent

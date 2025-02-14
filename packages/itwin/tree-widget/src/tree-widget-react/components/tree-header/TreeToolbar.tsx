@@ -3,35 +3,29 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import "./TreeHeader.scss";
+import "./TreeToolbar.css";
 import classnames from "classnames";
 import { Divider } from "@itwin/itwinui-react/bricks";
 
 import type { PropsWithChildren } from "react";
 import type { Viewport } from "@itwin/core-frontend";
 /** @public */
-export interface TreeHeaderButtonProps {
+export interface TreeToolbarButtonProps {
   viewport: Viewport;
   onFeatureUsed?: (feature: string) => void;
 }
 
-interface TreeHeaderProps {
+interface TreeToolbarProps {
   className?: string;
 }
 
-export function TreeHeader(props: PropsWithChildren<TreeHeaderProps>) {
+export function TreeToolbar(props: PropsWithChildren<TreeToolbarProps>) {
   const { className, children } = props;
 
   return (
     <>
-      <div className={classnames("tw-tree-header", className)}>
-        <HeaderButtons>{children}</HeaderButtons>
-      </div>
+      <div className={classnames("tw-tree-toolbar", className)}>{children}</div>
       <Divider />
     </>
   );
-}
-
-function HeaderButtons(props: PropsWithChildren) {
-  return <>{props.children}</>;
 }
