@@ -4,12 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./TreeNodeVisibilityButton.css";
-import cx from "classnames";
-import { IconButton } from "@itwin/itwinui-react/bricks";
-import { isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
-import type { PresentationHierarchyNode, PresentationTreeNode } from "@itwin/presentation-hierarchies-react";
-import type { ComponentPropsWithoutRef } from "react";
+import type { PresentationHierarchyNode, TreeItemAction } from "@itwin/presentation-hierarchies-react";
 
 const visibilityShowIcon = new URL("@itwin/itwinui-icons/visibility-show.svg", import.meta.url).href;
 const visibilityHideIcon = new URL("@itwin/itwinui-icons/visibility-hide.svg", import.meta.url).href;
@@ -34,43 +30,30 @@ export interface TreeItemVisibilityButtonProps {
 }
 
 /** @internal */
-type TreeNodeCheckboxProps = TreeItemVisibilityButtonProps &
-  Omit<ComponentPropsWithoutRef<typeof IconButton>, "onClick" | "aria-disabled" | "title" | "label" | "icon">;
-
-/** @internal */
-export function TreeItemVisibilityButton({
-  node,
-  onVisibilityButtonClick,
+export function createVisibilityAction({
   getVisibilityButtonState,
-  ...props
-}: TreeNodeCheckboxProps & { node: PresentationTreeNode }) {
-  if ("type" in node || !isPresentationHierarchyNode(node)) {
-    return null;
-  }
-  const checkboxState = getVisibilityButtonState(node);
+  onVisibilityButtonClick,
+}: TreeItemVisibilityButtonProps): (node: PresentationHierarchyNode) => TreeItemAction {
+  return (node) => {
+    const state = getVisibilityButtonState(node);
 
-  const getIcon = () => {
-    switch (checkboxState.state) {
-      case "visible":
-        return visibilityShowIcon;
-      case "hidden":
-        return visibilityHideIcon;
-      case "partial":
-        return visibilityPartialIcon;
-    }
+    const getIcon = () => {
+      switch (state.state) {
+        case "visible":
+          return visibilityShowIcon;
+        case "hidden":
+          return visibilityHideIcon;
+        case "partial":
+          return visibilityPartialIcon;
+      }
+    };
+    return {
+      label: state.tooltip ?? "Determining visibility...",
+      action: () => {
+        onVisibilityButtonClick(node, state.state);
+      },
+      show: true,
+      icon: getIcon(),
+    };
   };
-  return (
-    <IconButton
-      {...props}
-      label={checkboxState.tooltip ?? "Determining visibility..."}
-      variant={"ghost"}
-      className={cx(`tw-tree-node-visibility-button-${checkboxState.state}`, props.className)}
-      onClick={(e) => {
-        e.stopPropagation();
-        onVisibilityButtonClick(node, checkboxState.state);
-      }}
-      aria-disabled={checkboxState.isDisabled}
-      icon={getIcon()}
-    />
-  );
 }

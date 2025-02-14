@@ -6,11 +6,10 @@
 import { Fragment, useEffect } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { TreeWidget } from "../../../TreeWidget.js";
-import { TreeWithHeader } from "../../tree-header/TreeWithHeader.js";
+import { TreeWithToolbar } from "../../tree-header/TreeWithToolbar.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
 import { FocusedInstancesContextProvider } from "../common/FocusedInstancesContextProvider.js";
 import { useActiveViewport } from "../common/UseActiveViewport.js";
-import { useFiltering } from "../common/UseFiltering.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { ModelsTree } from "./ModelsTree.js";
 import {
@@ -41,6 +40,7 @@ interface ModelsTreeComponentProps
     | "hierarchyConfig"
     | "visibilityHandlerOverrides"
     | "getFilteredPaths"
+    | "filter"
   > {
   /**
    * Renderers of header buttons. Defaults to:
@@ -135,12 +135,11 @@ function ModelsTreeComponentImpl({
   headerButtons,
   onFeatureUsed,
   onPerformanceMeasured,
+  filter,
   ...treeProps
 }: ModelsTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
   const { buttonProps, onModelsFiltered } = useModelsTreeButtonProps({ imodel: iModel, viewport });
-  const { filter, applyFilter, clearFilter } = useFiltering();
-  const { enabled: instanceFocusEnabled } = useFocusedInstancesContext();
-  const density = treeProps.density;
+  const { enabled: instanceFocusEnabled, toggle: toggleInstanceFocus } = useFocusedInstancesContext();
 
   const buttons: ReactNode = headerButtons
     ? headerButtons.map((btn, index) => <Fragment key={index}>{btn({ ...buttonProps, onFeatureUsed })}</Fragment>)
@@ -150,28 +149,20 @@ function ModelsTreeComponentImpl({
         <InvertButton {...buttonProps} key="invert-all-btn" onFeatureUsed={onFeatureUsed} />,
         <View2DButton {...buttonProps} key="view-2d-btn" onFeatureUsed={onFeatureUsed} />,
         <View3DButton {...buttonProps} key="view-3d-btn" onFeatureUsed={onFeatureUsed} />,
-        <ToggleInstancesFocusButton key="toggle-instances-focus-btn" onFeatureUsed={onFeatureUsed} />,
+        <ToggleInstancesFocusButton disabled={filter !== undefined} key="toggle-instances-focus-btn" onFeatureUsed={onFeatureUsed} />,
       ];
 
   useEffect(() => {
-    if (instanceFocusEnabled) {
-      clearFilter();
+    if (instanceFocusEnabled && filter !== undefined) {
+      toggleInstanceFocus();
     }
-  }, [instanceFocusEnabled, clearFilter]);
+  }, [instanceFocusEnabled, filter, toggleInstanceFocus]);
 
   return (
     <TelemetryContextProvider componentIdentifier={ModelsTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
-      <TreeWithHeader
-        filteringProps={{
-          onFilterStart: applyFilter,
-          onFilterClear: clearFilter,
-          isDisabled: instanceFocusEnabled || !!treeProps.getFilteredPaths,
-        }}
-        buttons={buttons}
-        density={density}
-      >
+      <TreeWithToolbar buttons={buttons}>
         <ModelsTree {...treeProps} imodel={iModel} activeView={viewport} filter={filter} onModelsFiltered={onModelsFiltered} />
-      </TreeWithHeader>
+      </TreeWithToolbar>
     </TelemetryContextProvider>
   );
 }

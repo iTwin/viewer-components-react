@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import "./TreeWidgetUiItemsProvider.scss";
+import "./TreeWidgetUiItemsProvider.css";
 import { useRef } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { StagePanelLocation, StagePanelSection, useTransientState } from "@itwin/appui-react";

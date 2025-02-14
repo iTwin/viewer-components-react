@@ -3,22 +3,22 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import "./SelectableTree.scss";
+import "./SelectableTree.css";
 import { useEffect, useState } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Spinner } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../TreeWidget.js";
-import { TreeSelector } from "./TreeSelector.js";
+import { WidgetWithHeader } from "./tree-header/WidgetWithHeader.js";
 
 import type { PropsWithChildren } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { TreeContentDefinition, TreeSelectorProps } from "./TreeSelector.js";
+import type { TreeContentDefinition, WidgetWithHeaderProps } from "./tree-header/WidgetWithHeader.js";
 /**
  * Props for rendering trees
  * @public
  */
 export interface SelectableTreeRenderProps {
-  density?: "enlarged" | "default";
+  filter?: string;
   onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }
@@ -73,7 +73,7 @@ function SelectableTreeContent(props: SelectableTreeProps & { imodel: IModelConn
 
   return (
     <div className="tree-widget-selectable-tree">
-      <TreeSelector {...getTreeSelectorProps(trees)} onPerformanceMeasured={props.onPerformanceMeasured} onFeatureUsed={props.onFeatureUsed} />
+      <WidgetWithHeader {...getWidgetWithHeaderProps(trees)} onPerformanceMeasured={props.onPerformanceMeasured} onFeatureUsed={props.onFeatureUsed} />
     </div>
   );
 }
@@ -114,7 +114,7 @@ async function getActiveTrees(treeDefinitions: SelectableTreeDefinition[], imode
   return (await Promise.all(treeDefinitions.map(handleDefinition))).filter((tree) => tree !== undefined) as TreeContentDefinition[];
 }
 
-function getTreeSelectorProps(trees?: TreeContentDefinition[]): TreeSelectorProps {
+function getWidgetWithHeaderProps(trees?: TreeContentDefinition[]): WidgetWithHeaderProps {
   if (trees === undefined) {
     return {
       defaultSelectedContentId: "loading",
