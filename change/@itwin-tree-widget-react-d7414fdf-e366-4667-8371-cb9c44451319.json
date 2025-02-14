@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Adjusted modeled element / sub-model visibility controls. Now, if visibility of modeled element is changed, visibility of sub-model is adjusted accordingly and vice versa.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "100586436+JonasDov@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
