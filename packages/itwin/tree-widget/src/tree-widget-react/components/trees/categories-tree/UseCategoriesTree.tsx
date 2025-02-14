@@ -5,7 +5,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { assert } from "@itwin/core-bentley";
-import { SvgArchive, SvgLayers } from "@itwin/itwinui-icons-react";
+import { SvgLayers } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
@@ -207,6 +207,19 @@ function SvgLayersIsolate() {
   );
 }
 
+function SvgBisDefinitionContainer() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" style={{ color: "#7d7d7d" }} viewBox="0 0 16 16">
+      <path
+        fill="currentColor"
+        fillRule="evenodd"
+        d="M7.748 1.726a.5.5 0 0 1 .504 0L13.008 4.5 8 7.421l-5.008-2.92 4.756-2.775ZM2.5 5.37v2.342l2 1.166V6.537l-2-1.166Zm3 1.75v2.342l2 1.167V8.287l-2-1.166Zm3 1.166v2.342l2-1.166V7.12l-2 1.166Zm3-1.75V8.88l2-1.166V5.37l-2 1.166Zm0 3.5 2-1.166v2.055a.5.5 0 0 1-.248.432L11.5 12.379v-2.342Zm-3 1.75 2-1.167v2.343l-2 1.167v-2.343Zm-3-1.167 2 1.167v2.342l-2-1.166V10.62Zm-3-1.75 2 1.167v2.342l-1.752-1.021a.5.5 0 0 1-.248-.432V8.87ZM8.756.863a1.5 1.5 0 0 0-1.512 0l-5 2.917A1.5 1.5 0 0 0 1.5 5.074v5.852a1.5 1.5 0 0 0 .744 1.295l5 2.917a1.5 1.5 0 0 0 1.512 0l5-2.917a1.5 1.5 0 0 0 .744-1.295V5.074a1.5 1.5 0 0 0-.744-1.295l-5-2.917Z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
 function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
   if (node.extendedData?.imageId === undefined) {
     return undefined;
@@ -217,8 +230,8 @@ function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
       return <SvgLayers />;
     case "icon-layers-isolate":
       return <SvgLayersIsolate />;
-    case "icon-archive":
-      return <SvgArchive />;
+    case "icon-definition-container":
+      return <SvgBisDefinitionContainer />;
   }
 
   return undefined;

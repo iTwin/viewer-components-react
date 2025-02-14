@@ -151,7 +151,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
               },
               extendedData: {
                 isDefinitionContainer: true,
-                imageId: "icon-archive",
+                imageId: "icon-definition-container",
               },
               hasChildren: true,
               supportsFiltering: true,
