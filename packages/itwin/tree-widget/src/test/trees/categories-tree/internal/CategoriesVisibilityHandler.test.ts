@@ -48,8 +48,8 @@ describe("CategoriesVisibilityHandler", () => {
   });
 
   after(async () => {
-    TestUtils.terminate();
     await terminatePresentationTesting();
+    TestUtils.terminate();
   });
 
   async function createCommonProps(imodel: IModelConnection, isVisibleOnInitialize: boolean) {

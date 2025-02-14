@@ -61,8 +61,11 @@ describe("Categories tree", () => {
 
         return { category, privateCategory };
       });
+
+      using provider = createCategoryTreeProvider(imodel, "3d");
+
       await validateHierarchy({
-        provider: createCategoryTreeProvider(imodel, "3d"),
+        provider,
         expect: [
           NodeValidators.createForInstanceNode({
             instanceKeys: [keys.category],
@@ -85,8 +88,11 @@ describe("Categories tree", () => {
 
         return { category };
       });
+
+      using provider = createCategoryTreeProvider(imodel, "3d");
+
       await validateHierarchy({
-        provider: createCategoryTreeProvider(imodel, "3d"),
+        provider,
         expect: [
           NodeValidators.createForInstanceNode({
             instanceKeys: [keys.category],
@@ -105,8 +111,11 @@ describe("Categories tree", () => {
         const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild", modelId: definitionModel.id });
         insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
       });
+
+      using provider = createCategoryTreeProvider(imodel, "3d");
+
       await validateHierarchy({
-        provider: createCategoryTreeProvider(imodel, "3d"),
+        provider,
         expect: [],
       });
     });
@@ -121,8 +130,11 @@ describe("Categories tree", () => {
 
         insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
       });
+
+      using provider = createCategoryTreeProvider(imodel, "3d");
+
       await validateHierarchy({
-        provider: createCategoryTreeProvider(imodel, "3d"),
+        provider,
         expect: [],
       });
     });
@@ -137,8 +149,11 @@ describe("Categories tree", () => {
 
         insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
       });
+
+      using provider = createCategoryTreeProvider(imodel, "3d");
+
       await validateHierarchy({
-        provider: createCategoryTreeProvider(imodel, "3d"),
+        provider,
         expect: [],
       });
     });
@@ -160,8 +175,11 @@ describe("Categories tree", () => {
 
         insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
       });
+
+      using provider = createCategoryTreeProvider(imodel, "3d");
+
       await validateHierarchy({
-        provider: createCategoryTreeProvider(imodel, "3d"),
+        provider,
         expect: [],
       });
     });
@@ -178,8 +196,11 @@ describe("Categories tree", () => {
 
         return { definitionContainer, category };
       });
+
+      using provider = createCategoryTreeProvider(imodel, "3d");
+
       await validateHierarchy({
-        provider: createCategoryTreeProvider(imodel, "3d"),
+        provider,
         expect: [
           NodeValidators.createForInstanceNode({
             instanceKeys: [keys.definitionContainer],
@@ -210,8 +231,11 @@ describe("Categories tree", () => {
 
         return { definitionContainer, definitionContainerChild, category };
       });
+
+      using provider = createCategoryTreeProvider(imodel, "3d");
+
       await validateHierarchy({
-        provider: createCategoryTreeProvider(imodel, "3d"),
+        provider,
         expect: [
           NodeValidators.createForInstanceNode({
             instanceKeys: [keys.definitionContainer],
@@ -248,8 +272,11 @@ describe("Categories tree", () => {
 
         return { category, definitionContainer, childCategory };
       });
+
+      using provider = createCategoryTreeProvider(imodel, "3d");
+
       await validateHierarchy({
-        provider: createCategoryTreeProvider(imodel, "3d"),
+        provider,
         expect: [
           NodeValidators.createForInstanceNode({
             instanceKeys: [keys.definitionContainer],
@@ -283,8 +310,11 @@ describe("Categories tree", () => {
 
         return { category, subCategory, privateSubCategory };
       });
+
+      using provider = createCategoryTreeProvider(imodel, "3d");
+
       await validateHierarchy({
-        provider: createCategoryTreeProvider(imodel, "3d"),
+        provider,
         expect: [
           NodeValidators.createForInstanceNode({
             instanceKeys: [keys.category],
@@ -316,8 +346,11 @@ describe("Categories tree", () => {
 
         return { category, privateCategory };
       });
+
+      using provider = createCategoryTreeProvider(imodel, "2d");
+
       await validateHierarchy({
-        provider: createCategoryTreeProvider(imodel, "2d"),
+        provider,
         expect: [
           NodeValidators.createForInstanceNode({
             instanceKeys: [keys.category],
@@ -340,8 +373,11 @@ describe("Categories tree", () => {
 
         return { category, subCategory, privateSubCategory };
       });
+
+      using provider = createCategoryTreeProvider(imodel, "2d");
+
       await validateHierarchy({
-        provider: createCategoryTreeProvider(imodel, "2d"),
+        provider,
         expect: [
           NodeValidators.createForInstanceNode({
             instanceKeys: [keys.category],
