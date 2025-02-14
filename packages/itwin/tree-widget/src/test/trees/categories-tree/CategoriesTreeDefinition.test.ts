@@ -8,13 +8,20 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import {
-  HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
-} from "@itwin/presentation-testing";
+import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { CategoriesTreeDefinition } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
+import { CategoriesTreeIdsCache } from "../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 import {
-  buildIModel, insertDrawingCategory, insertDrawingGraphic, insertDrawingModelWithPartition, insertPhysicalElement, insertPhysicalModelWithPartition,
-  insertSpatialCategory, insertSubCategory,
+  buildIModel,
+  insertDefinitionContainer,
+  insertDrawingCategory,
+  insertDrawingGraphic,
+  insertDrawingModelWithPartition,
+  insertPhysicalElement,
+  insertPhysicalModelWithPartition,
+  insertSpatialCategory,
+  insertSubCategory,
+  insertSubModel,
 } from "../../IModelUtils.js";
 import { createIModelAccess } from "../Common.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
@@ -54,9 +61,234 @@ describe("Categories tree", () => {
 
         return { category, privateCategory };
       });
+
+      using provider = createCategoryTreeProvider(imodel, "3d");
+
       await validateHierarchy({
-        provider: createCategoryTreeProvider(imodel, "3d"),
+        provider,
         expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.category],
+            supportsFiltering: true,
+            children: false,
+          }),
+        ],
+      });
+    });
+
+    it("does not show definition container when it doesn't contain category", async function () {
+      const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
+        insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+
+        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
+
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+
+        return { category };
+      });
+
+      using provider = createCategoryTreeProvider(imodel, "3d");
+
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.category],
+            supportsFiltering: true,
+            children: false,
+          }),
+        ],
+      });
+    });
+
+    it("does not show definition container when it contains definition container without categories", async function () {
+      const { imodel } = await buildIModel(this, async (builder) => {
+        insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+        const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild", modelId: definitionModel.id });
+        insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
+      });
+
+      using provider = createCategoryTreeProvider(imodel, "3d");
+
+      await validateHierarchy({
+        provider,
+        expect: [],
+      });
+    });
+
+    it("does not show definition container or category when category is private", async function () {
+      const { imodel } = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+
+        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id, isPrivate: true });
+
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+      });
+
+      using provider = createCategoryTreeProvider(imodel, "3d");
+
+      await validateHierarchy({
+        provider,
+        expect: [],
+      });
+    });
+
+    it("does not show definition container or category when definition container is private", async function () {
+      const { imodel } = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer", isPrivate: true });
+        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+
+        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id });
+
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+      });
+
+      using provider = createCategoryTreeProvider(imodel, "3d");
+
+      await validateHierarchy({
+        provider,
+        expect: [],
+      });
+    });
+
+    it("does not show definition containers or categories when definition container contains another definition container that is private", async function () {
+      const { imodel } = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+        const definitionContainerChild = insertDefinitionContainer({
+          builder,
+          codeValue: "DefinitionContainerChild",
+          isPrivate: true,
+          modelId: definitionModel.id,
+        });
+        const defintionModelChild = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
+
+        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: defintionModelChild.id });
+
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+      });
+
+      using provider = createCategoryTreeProvider(imodel, "3d");
+
+      await validateHierarchy({
+        provider,
+        expect: [],
+      });
+    });
+
+    it("shows definition container when it contains category", async function () {
+      const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+
+        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id });
+
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+
+        return { definitionContainer, category };
+      });
+
+      using provider = createCategoryTreeProvider(imodel, "3d");
+
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.definitionContainer],
+            supportsFiltering: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.category],
+                label: "SpatialCategory",
+                children: false,
+              }),
+            ],
+          }),
+        ],
+      });
+    });
+
+    it("shows all definition containers when they contain category directly or indirectly", async function () {
+      const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+        const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild", modelId: definitionModel.id });
+        const definitionModelChild = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
+
+        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
+
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+
+        return { definitionContainer, definitionContainerChild, category };
+      });
+
+      using provider = createCategoryTreeProvider(imodel, "3d");
+
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.definitionContainer],
+            supportsFiltering: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.definitionContainerChild],
+                label: "DefinitionContainerChild",
+                children: [
+                  NodeValidators.createForInstanceNode({
+                    instanceKeys: [keys.category],
+                    label: "SpatialCategory",
+                    children: false,
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      });
+    });
+
+    it("shows root categories and definition container", async function () {
+      const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+
+        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
+        const childCategory = insertSpatialCategory({ builder, codeValue: "ScChild", modelId: definitionModel.id });
+
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: childCategory.id });
+
+        return { category, definitionContainer, childCategory };
+      });
+
+      using provider = createCategoryTreeProvider(imodel, "3d");
+
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.definitionContainer],
+            supportsFiltering: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.childCategory],
+                label: "ScChild",
+                children: false,
+              }),
+            ],
+          }),
           NodeValidators.createForInstanceNode({
             instanceKeys: [keys.category],
             supportsFiltering: true,
@@ -78,8 +310,11 @@ describe("Categories tree", () => {
 
         return { category, subCategory, privateSubCategory };
       });
+
+      using provider = createCategoryTreeProvider(imodel, "3d");
+
       await validateHierarchy({
-        provider: createCategoryTreeProvider(imodel, "3d"),
+        provider,
         expect: [
           NodeValidators.createForInstanceNode({
             instanceKeys: [keys.category],
@@ -111,8 +346,11 @@ describe("Categories tree", () => {
 
         return { category, privateCategory };
       });
+
+      using provider = createCategoryTreeProvider(imodel, "2d");
+
       await validateHierarchy({
-        provider: createCategoryTreeProvider(imodel, "2d"),
+        provider,
         expect: [
           NodeValidators.createForInstanceNode({
             instanceKeys: [keys.category],
@@ -135,8 +373,11 @@ describe("Categories tree", () => {
 
         return { category, subCategory, privateSubCategory };
       });
+
+      using provider = createCategoryTreeProvider(imodel, "2d");
+
       await validateHierarchy({
-        provider: createCategoryTreeProvider(imodel, "2d"),
+        provider,
         expect: [
           NodeValidators.createForInstanceNode({
             instanceKeys: [keys.category],
@@ -162,6 +403,6 @@ function createCategoryTreeProvider(imodel: IModelConnection, viewType: "2d" | "
   const imodelAccess = createIModelAccess(imodel);
   return createIModelHierarchyProvider({
     imodelAccess,
-    hierarchyDefinition: new CategoriesTreeDefinition({ imodelAccess, viewType }),
+    hierarchyDefinition: new CategoriesTreeDefinition({ imodelAccess, viewType, idsCache: new CategoriesTreeIdsCache(imodelAccess, viewType) }),
   });
 }
