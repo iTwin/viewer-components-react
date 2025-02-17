@@ -9,6 +9,7 @@ import { Divider } from "@itwin/itwinui-react/bricks";
 import type { Viewport } from "@itwin/core-frontend";
 import type { PropsWithChildren, ReactNode } from "react";
 
+/** @public */
 export interface TreeToolbarButtonProps {
   viewport: Viewport;
   onFeatureUsed?: (feature: string) => void;

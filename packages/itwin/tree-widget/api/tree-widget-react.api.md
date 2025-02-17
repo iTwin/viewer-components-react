@@ -33,6 +33,12 @@ import type { useSelectionHandler } from '@itwin/presentation-hierarchies-react'
 import type { Viewport } from '@itwin/core-frontend';
 import type { Widget } from '@itwin/appui-react';
 
+// @internal (undocumented)
+function BaseTreeRenderer({ rootNodes, onNodeClick, expandNode, actions, ...props }: BaseTreeRendererProps): JSX_2.Element;
+
+// @internal (undocumented)
+type BaseTreeRendererProps = React.ComponentPropsWithoutRef<typeof TreeRenderer_2>;
+
 // @public
 export const CategoriesTreeComponent: {
     (props: CategoriesTreeComponentProps): JSX_2.Element | null;
@@ -44,7 +50,7 @@ export const CategoriesTreeComponent: {
 };
 
 // @public (undocumented)
-interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode" | "filter"> {
+interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "getSchemaContext" | "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "filter"> {
     headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode>;
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
@@ -53,7 +59,7 @@ interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "getSch
 }
 
 // @public
-interface CategoriesTreeHeaderButtonProps extends TreeHeaderButtonProps {
+interface CategoriesTreeHeaderButtonProps extends TreeToolbarButtonProps {
     categories: CategoryInfo[];
 }
 
@@ -61,7 +67,7 @@ interface CategoriesTreeHeaderButtonProps extends TreeHeaderButtonProps {
 type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonProps) => React.ReactElement | null;
 
 // @beta (undocumented)
-type CategoriesTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode"> & UseCategoriesTreeProps & {
+type CategoriesTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode"> & Pick<VisibilityTreeRendererProps, "actions"> & UseCategoriesTreeProps & {
     hierarchyLevelConfig?: {
         sizeLimit?: number;
     };
@@ -132,7 +138,7 @@ export const ExternalSourcesTreeComponent: {
 };
 
 // @beta (undocumented)
-interface ExternalSourcesTreeComponentProps extends Pick<ExternalSourcesTreeProps, "getSchemaContext" | "selectionStorage" | "selectionMode" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
+interface ExternalSourcesTreeComponentProps extends Pick<ExternalSourcesTreeProps, "getSchemaContext" | "selectionStorage" | "selectionMode" | "hierarchyLevelConfig" | "selectionMode"> {
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
@@ -140,7 +146,7 @@ interface ExternalSourcesTreeComponentProps extends Pick<ExternalSourcesTreeProp
 }
 
 // @beta (undocumented)
-type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode"> & {
+type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode"> & Pick<TreeRendererProps, "actions"> & {
     hierarchyLevelConfig?: {
         sizeLimit?: number;
     };
@@ -204,7 +210,7 @@ export const IModelContentTreeComponent: {
 };
 
 // @beta (undocumented)
-interface IModelContentTreeComponentProps extends Pick<IModelContentTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
+interface IModelContentTreeComponentProps extends Pick<IModelContentTreeProps, "getSchemaContext" | "selectionStorage" | "hierarchyLevelConfig" | "selectionMode"> {
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
@@ -212,7 +218,7 @@ interface IModelContentTreeComponentProps extends Pick<IModelContentTreeProps, "
 }
 
 // @beta (undocumented)
-type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode"> & {
+type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode"> & Pick<TreeRendererProps, "actions"> & {
     hierarchyLevelConfig?: {
         sizeLimit?: number;
     };
@@ -240,7 +246,7 @@ export const ModelsTreeComponent: {
 };
 
 // @public (undocumented)
-interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode" | "selectionPredicate" | "hierarchyConfig" | "visibilityHandlerOverrides" | "getFilteredPaths" | "filter"> {
+interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "getSchemaContext" | "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "selectionPredicate" | "hierarchyConfig" | "visibilityHandlerOverrides" | "getFilteredPaths" | "filter"> {
     headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
@@ -249,7 +255,7 @@ interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "getSchemaConte
 }
 
 // @public
-interface ModelsTreeHeaderButtonProps extends TreeHeaderButtonProps {
+interface ModelsTreeHeaderButtonProps extends TreeToolbarButtonProps {
     models: ModelInfo[];
 }
 
@@ -264,7 +270,7 @@ interface ModelsTreeHierarchyConfiguration {
 }
 
 // @beta (undocumented)
-type ModelsTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode"> & UseModelsTreeProps & {
+type ModelsTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode"> & Pick<VisibilityTreeRendererProps, "actions"> & UseModelsTreeProps & {
     hierarchyLevelConfig?: {
         sizeLimit?: number;
     };
@@ -306,39 +312,8 @@ export interface ModelsTreeVisibilityHandlerOverrides {
     }) => Promise<VisibilityStatus>>;
 }
 
-// @public
-export function SelectableTree(props: SelectableTreeProps): JSX_2.Element | null;
-
-// @public
-export interface SelectableTreeDefinition {
-    getLabel: () => string;
-    id: string;
-    render: (props: SelectableTreeRenderProps) => React.ReactNode;
-    shouldShow?: (imodel: IModelConnection) => Promise<boolean>;
-    startIcon?: React.ReactNode;
-}
-
-// @public
-interface SelectableTreeProps {
-    // (undocumented)
-    density?: "enlarged" | "default";
-    // (undocumented)
-    onFeatureUsed?: (feature: string) => void;
-    // (undocumented)
-    onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
-    // (undocumented)
-    trees: SelectableTreeDefinition[];
-}
-
-// @public
-interface SelectableTreeRenderProps {
-    // (undocumented)
-    filter?: string;
-    // (undocumented)
-    onFeatureUsed?: (feature: string) => void;
-    // (undocumented)
-    onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
-}
+// @beta (undocumented)
+export function SelectableTree({ buttons, children }: PropsWithChildren<TreehHeaderProps>): JSX_2.Element;
 
 // @beta (undocumented)
 export function TelemetryContextProvider({ children, onPerformanceMeasured, onFeatureUsed, componentIdentifier, }: PropsWithChildren<TelemetryContextProviderProps>): JSX_2.Element;
@@ -353,12 +328,10 @@ interface TelemetryContextProviderProps {
 // @beta
 export function Tree({ getSchemaContext, hierarchyLevelSizeLimit, selectionStorage, imodelAccess: providedIModelAccess, ...props }: TreeProps): JSX_2.Element;
 
-// @public (undocumented)
-interface TreeHeaderButtonProps {
+// @beta (undocumented)
+interface TreehHeaderProps {
     // (undocumented)
-    onFeatureUsed?: (feature: string) => void;
-    // (undocumented)
-    viewport: Viewport;
+    buttons?: ReactNode;
 }
 
 // @beta (undocumented)
@@ -387,19 +360,24 @@ type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPaths" | 
     treeRenderer: (treeProps: Required<Pick<TreeRendererProps, "rootNodes" | "expandNode" | "getLabel" | "onFilterClick" | "selectNodes" | "selectionMode" | "isNodeSelected" | "getHierarchyLevelDetails" | "getLabel">>) => ReactNode;
     imodelAccess?: FunctionProps<typeof useIModelTree>["imodelAccess"];
     hierarchyLevelSizeLimit?: number;
-    density?: "default" | "enlarged";
     noDataMessage?: ReactNode;
     onReload?: () => void;
     highlight?: HighlightInfo;
 };
 
 // @beta
-export function TreeRenderer({ rootNodes, onNodeClick, expandNode, visibilityButtonProps, ...props }: TreeRendererProps): JSX_2.Element;
+export function TreeRenderer({ actions, ...props }: TreeRendererProps): JSX_2.Element;
 
 // @beta (undocumented)
-type TreeRendererProps = React.ComponentPropsWithoutRef<typeof TreeRenderer_2> & {
-    visibilityButtonProps?: TreeItemVisibilityButtonProps;
-};
+type TreeRendererProps = React.ComponentPropsWithoutRef<typeof BaseTreeRenderer>;
+
+// @public (undocumented)
+interface TreeToolbarButtonProps {
+    // (undocumented)
+    onFeatureUsed?: (feature: string) => void;
+    // (undocumented)
+    viewport: Viewport;
+}
 
 // @public
 export class TreeWidget {
@@ -411,23 +389,48 @@ export class TreeWidget {
 }
 
 // @public
-export function TreeWidgetComponent(props: SelectableTreeProps): JSX_2.Element;
+export function TreeWidgetComponent(props: TreeWidgetComponentProps): JSX_2.Element | null;
+
+// @public
+export interface TreeWidgetComponentDefinition {
+    getLabel: () => string;
+    id: string;
+    render: (props: TreeWidgetComponentRenderProps) => React.ReactNode;
+    shouldShow?: (imodel: IModelConnection) => Promise<boolean>;
+    startIcon?: React.ReactNode;
+}
+
+// @public
+interface TreeWidgetComponentProps {
+    // (undocumented)
+    density?: "enlarged" | "default";
+    // (undocumented)
+    onFeatureUsed?: (feature: string) => void;
+    // (undocumented)
+    onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
+    // (undocumented)
+    trees: TreeWidgetComponentDefinition[];
+}
+
+// @public
+export function TreeWidgetComponentProvider(props: TreeWidgetComponentProps): JSX_2.Element;
+
+// @public
+interface TreeWidgetComponentRenderProps {
+    // (undocumented)
+    filter?: string;
+    // (undocumented)
+    onFeatureUsed?: (feature: string) => void;
+    // (undocumented)
+    onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
+}
 
 // @public
 interface TreeWidgetProps {
     density?: "enlarged" | "default";
     onFeatureUsed?: (feature: string) => void;
     onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
-    trees: SelectableTreeDefinition[];
-}
-
-// @beta (undocumented)
-export function TreeWithHeader({ buttons, children }: PropsWithChildren<TreeWithHeaderProps>): JSX_2.Element;
-
-// @beta (undocumented)
-interface TreeWithHeaderProps {
-    // (undocumented)
-    buttons?: ReactNode;
+    trees: TreeWidgetComponentDefinition[];
 }
 
 // @beta
@@ -524,10 +527,10 @@ type VisibilityTreeProps = Omit<TreeProps, "treeRenderer" | "imodelAccess"> & {
 };
 
 // @beta
-export function VisibilityTreeRenderer({ getVisibilityButtonState, onVisibilityButtonClick: onClick, ...props }: VisibilityTreeRendererProps): JSX_2.Element;
+export function VisibilityTreeRenderer({ getVisibilityButtonState, onVisibilityButtonClick: onClick, actions, ...props }: VisibilityTreeRendererProps): JSX_2.Element;
 
 // @beta (undocumented)
-type VisibilityTreeRendererProps = TreeRendererProps & TreeItemVisibilityButtonProps;
+type VisibilityTreeRendererProps = BaseTreeRendererProps & TreeItemVisibilityButtonProps;
 
 // (No @packageDocumentation comment for this package)
 
