@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 export { TreeWidget } from "./tree-widget-react/TreeWidget.js";
-export { createTreeWidget, TreeWidgetComponentProvider } from "./tree-widget-react/components/TreeWidgetUiItemsProvider.js";
-export { TreeWidgetComponent, TreeWidgetComponentDefinition } from "./tree-widget-react/components/TreeWidgetComponent.js";
+export { createTreeWidget, TreeWidgetComponent } from "./tree-widget-react/components/TreeWidgetUiItemsProvider.js";
+export { TreeDefinition } from "./tree-widget-react/components/TreeWidgetComponentImpl.js";
 export { SelectableTree } from "./tree-widget-react/components/tree-header/SelectableTree.js";
 export * from "./tree-widget-react/components/trees/index.js";

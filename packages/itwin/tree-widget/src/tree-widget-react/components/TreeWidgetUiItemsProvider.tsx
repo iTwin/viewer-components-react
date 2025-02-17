@@ -9,10 +9,10 @@ import { ErrorBoundary } from "react-error-boundary";
 import { StagePanelLocation, StagePanelSection, useTransientState } from "@itwin/appui-react";
 import { SvgHierarchyTree } from "@itwin/itwinui-icons-react";
 import { TreeWidget } from "../TreeWidget.js";
-import { TreeWidgetComponent } from "./TreeWidgetComponent.js";
+import { TreeWidgetComponentImpl } from "./TreeWidgetComponentImpl.js";
 
+import type { TreeDefinition } from "./TreeWidgetComponentImpl.js";
 import type { Widget } from "@itwin/appui-react";
-import type { TreeWidgetComponentDefinition, TreeWidgetComponentProps } from "./TreeWidgetComponent.js";
 import type { FallbackProps } from "react-error-boundary";
 import type { Ref } from "react";
 
@@ -28,9 +28,7 @@ interface TreeWidgetProps {
    * @see ExternalSourcesTreeComponent
    * @see IModelContentTreeComponent
    */
-  trees: TreeWidgetComponentDefinition[];
-  /** Modifies the density of the tree widget. `enlarged` widget contains larger content */
-  density?: "enlarged" | "default";
+  trees: TreeDefinition[];
   /** Callback that is invoked when performance of tracked feature is measured. */
   onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
   /** Callback that is invoked when a tracked feature is used. */
@@ -52,14 +50,7 @@ export function createTreeWidget(props: TreeWidgetProps): Widget {
         location: StagePanelLocation.Right,
       },
     },
-    content: (
-      <TreeWidgetComponentProvider
-        trees={props.trees}
-        density={props.density}
-        onPerformanceMeasured={props.onPerformanceMeasured}
-        onFeatureUsed={props.onFeatureUsed}
-      />
-    ),
+    content: <TreeWidgetComponent trees={props.trees} onPerformanceMeasured={props.onPerformanceMeasured} onFeatureUsed={props.onFeatureUsed} />,
   };
 }
 
@@ -67,12 +58,12 @@ export function createTreeWidget(props: TreeWidgetProps): Widget {
  * Tree widget component which allows selecting which tree to render.
  * @public
  */
-export function TreeWidgetComponentProvider(props: TreeWidgetComponentProps) {
+export function TreeWidgetComponent(props: TreeWidgetProps) {
   const ref = useTreeWidgetTransientState();
   return (
     <div ref={ref} className="tree-widget">
       <ErrorBoundary FallbackComponent={ErrorState}>
-        <TreeWidgetComponent {...props} />
+        <TreeWidgetComponentImpl {...props} />
       </ErrorBoundary>
     </div>
   );

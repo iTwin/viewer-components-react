@@ -8,7 +8,7 @@ import { useState } from "react";
 import { Select } from "@itwin/itwinui-react/bricks";
 import { DebouncedSearchBox } from "./SearchBox.js";
 
-import type { TreeWidgetComponentRenderProps } from "../TreeWidgetComponent.js";
+import type { TreeRenderProps } from "../TreeWidgetComponentImpl.js";
 
 /**
  * A definition for trees displayed in `WidgetWithHeader`
@@ -17,7 +17,7 @@ import type { TreeWidgetComponentRenderProps } from "../TreeWidgetComponent.js";
 export interface TreeContentDefinition {
   id: string;
   label: string;
-  render: (props: TreeWidgetComponentRenderProps) => React.ReactNode;
+  render: (props: TreeRenderProps) => React.ReactNode;
   startIcon?: React.ReactNode;
 }
 

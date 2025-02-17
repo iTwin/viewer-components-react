@@ -7,7 +7,7 @@
 import { LocalizationContextProvider, TreeRenderer as PresentationTree } from "@itwin/presentation-hierarchies-react";
 import { useHierarchiesLocalization } from "../UseHierarchiesLocalization.js";
 
-/** @internal */
+/** @beta */
 export type BaseTreeRendererProps = React.ComponentPropsWithoutRef<typeof PresentationTree>;
 
 /** @internal */

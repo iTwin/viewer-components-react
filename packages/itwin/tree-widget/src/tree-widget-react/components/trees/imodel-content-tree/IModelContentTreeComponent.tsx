@@ -31,7 +31,7 @@ export const IModelContentTreeComponent = ({ onFeatureUsed, onPerformanceMeasure
   return (
     <TelemetryContextProvider componentIdentifier={IModelContentTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
       <SelectableTree>
-        <IModelContentTree {...props} imodel={imodel} />
+        <IModelContentTree actions={undefined} {...props} imodel={imodel} />
       </SelectableTree>
     </TelemetryContextProvider>
   );

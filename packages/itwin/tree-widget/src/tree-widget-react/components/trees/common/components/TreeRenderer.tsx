@@ -5,16 +5,14 @@
 /* eslint-disable @itwin/no-internal */
 
 import { createFilterAction } from "@itwin/presentation-hierarchies-react";
+import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
 import { BaseTreeRenderer } from "./BaseTreeRenderer.js";
-
-/** @beta */
-export type TreeRendererProps = React.ComponentPropsWithoutRef<typeof BaseTreeRenderer>;
 
 /**
  * Default renderer for rendering tree data.
  * @beta
  */
-export function TreeRenderer({ actions, ...props }: TreeRendererProps) {
+export function TreeRenderer({ actions, ...props }: BaseTreeRendererProps) {
   return (
     <BaseTreeRenderer
       {...props}

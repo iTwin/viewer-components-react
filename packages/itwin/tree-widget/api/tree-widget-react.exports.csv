@@ -1,5 +1,6 @@
 sep=;
 Release Tag;API Item Type;API Item Name
+beta;type;BaseTreeRendererProps
 public;const;CategoriesTreeComponent
 public;function;createTreeWidget
 beta;const;ExternalSourcesTreeComponent
@@ -11,11 +12,10 @@ beta;interface;ModelsTreeVisibilityHandlerOverrides
 beta;function;SelectableTree
 beta;function;TelemetryContextProvider
 beta;function;Tree
+public;interface;TreeDefinition
 beta;function;TreeRenderer
 public;class;TreeWidget
 public;function;TreeWidgetComponent
-public;interface;TreeWidgetComponentDefinition
-public;function;TreeWidgetComponentProvider
 beta;function;useCategoriesTree
 public;function;useCategoriesTreeButtonProps
 beta;function;useModelsTree

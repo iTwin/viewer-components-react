@@ -14,6 +14,7 @@ export { useCategoriesTree } from "./categories-tree/UseCategoriesTree.js";
 export { useModelsTreeButtonProps } from "./models-tree/ModelsTreeButtons.js";
 export { useCategoriesTreeButtonProps } from "./categories-tree/CategoriesTreeButtons.js";
 
+export { BaseTreeRendererProps } from "./common/components/BaseTreeRenderer.js";
 export { Tree } from "./common/components/Tree.js";
 export { VisibilityTree } from "./common/components/VisibilityTree.js";
 export { TreeRenderer } from "./common/components/TreeRenderer.js";
