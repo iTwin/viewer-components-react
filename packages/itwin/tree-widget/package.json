@@ -36,7 +36,7 @@
     "check-internal": "node ../../../scripts/checkInternal.js --apiSummary ./api/tree-widget-react.api.md",
     "lint": "npm run lint:eslint && npm run lint:stylelint",
     "lint:eslint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
-    "lint:stylelint": "stylelint \"./src/**/*.scss\"",
+    "lint:stylelint": "stylelint \"./src/**/*.css\"",
     "lint:fix": "npm run lint:eslint -- --fix && npm run lint:stylelint -- --fix",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
     "test:e2e": "node ../../../scripts/run-e2e-with-docker.js tree-widget",
