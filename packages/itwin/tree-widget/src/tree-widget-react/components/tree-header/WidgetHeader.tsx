@@ -3,12 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import "./WidgetWithHeader.css";
+import "./WidgetHeader.css";
 import { useState } from "react";
 import { Select } from "@itwin/itwinui-react/bricks";
 import { DebouncedSearchBox } from "./SearchBox.js";
 
-import type { SelectableTreeRenderProps } from "../SelectableTree.js";
+import type { TreeWidgetComponentRenderProps } from "../TreeWidgetComponent.js";
 
 /**
  * A definition for trees displayed in `WidgetWithHeader`
@@ -17,7 +17,7 @@ import type { SelectableTreeRenderProps } from "../SelectableTree.js";
 export interface TreeContentDefinition {
   id: string;
   label: string;
-  render: (props: SelectableTreeRenderProps) => React.ReactNode;
+  render: (props: TreeWidgetComponentRenderProps) => React.ReactNode;
   startIcon?: React.ReactNode;
 }
 
@@ -25,19 +25,20 @@ export interface TreeContentDefinition {
  * Props for `WidgetWithHeader`
  * @internal
  */
-export interface WidgetWithHeaderProps {
+export interface WidgetHeaderProps {
   defaultSelectedContentId: string;
   trees: TreeContentDefinition[];
   onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }
 
+// TODO: move tree content rendering outside
 /**
  * A component that accepts a list of trees and renders a select box at the top,
  * allowing to choose which of the provided tree components should be rendered at the bottom.
  * @internal
  */
-export function WidgetWithHeader({ defaultSelectedContentId, trees, onFeatureUsed, onPerformanceMeasured }: WidgetWithHeaderProps) {
+export function WidgetHeader({ defaultSelectedContentId, trees, onFeatureUsed, onPerformanceMeasured }: WidgetHeaderProps) {
   const [selectedContentId, setSelectedContentId] = useState(defaultSelectedContentId);
   const selectedContent = trees.find((c) => c.id === selectedContentId) ?? trees[0];
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);

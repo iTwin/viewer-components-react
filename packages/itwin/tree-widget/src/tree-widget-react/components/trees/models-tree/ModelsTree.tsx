@@ -4,14 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { VisibilityTree } from "../common/components/VisibilityTree.js";
+import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRenderer.js";
 import { useModelsTree } from "./UseModelsTree.js";
 
 import type { UseModelsTreeProps } from "./UseModelsTree.js";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
-
 /** @beta */
-export type ModelsTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode"> &
+export type ModelsTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode"> &
+  Pick<VisibilityTreeRendererProps, "actions"> &
   UseModelsTreeProps & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
@@ -25,7 +26,6 @@ export function ModelsTree({
   selectionStorage,
   activeView,
   filter,
-  density,
   hierarchyLevelConfig,
   hierarchyConfig,
   selectionMode,
@@ -33,6 +33,7 @@ export function ModelsTree({
   visibilityHandlerOverrides,
   getFilteredPaths,
   onModelsFiltered,
+  actions,
 }: ModelsTreeProps) {
   const { modelsTreeProps, rendererProps } = useModelsTree({
     activeView,
@@ -51,9 +52,8 @@ export function ModelsTree({
       selectionStorage={selectionStorage}
       getSchemaContext={getSchemaContext}
       hierarchyLevelSizeLimit={hierarchyLevelConfig?.sizeLimit}
-      density={density}
       selectionMode={selectionMode}
-      treeRenderer={(treeProps) => <VisibilityTreeRenderer {...treeProps} {...rendererProps} />}
+      treeRenderer={(treeProps) => <VisibilityTreeRenderer {...treeProps} {...rendererProps} actions={actions} />}
     />
   );
 }

@@ -5,14 +5,14 @@
 
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { TreeWidget } from "../../../TreeWidget.js";
+import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { IModelContentTree } from "./IModelContentTree.js";
 
 import type { IModelContentTreeProps } from "./IModelContentTree.js";
-
 /** @beta */
 interface IModelContentTreeComponentProps
-  extends Pick<IModelContentTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
+  extends Pick<IModelContentTreeProps, "getSchemaContext" | "selectionStorage" | "hierarchyLevelConfig" | "selectionMode"> {
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }
@@ -30,7 +30,9 @@ export const IModelContentTreeComponent = ({ onFeatureUsed, onPerformanceMeasure
 
   return (
     <TelemetryContextProvider componentIdentifier={IModelContentTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
-      <IModelContentTree {...props} imodel={imodel} />
+      <SelectableTree>
+        <IModelContentTree {...props} imodel={imodel} />
+      </SelectableTree>
     </TelemetryContextProvider>
   );
 };

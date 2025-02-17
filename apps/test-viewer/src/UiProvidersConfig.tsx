@@ -30,7 +30,7 @@ import {
   IModelContentTreeComponent,
   ModelsTreeComponent,
   TreeWidget,
-  TreeWidgetComponent,
+  TreeWidgetComponentProvider,
 } from "@itwin/tree-widget-react";
 import { RepositoriesTreeComponent } from "./components/repositories-tree/RepositoriesTree";
 import { useViewerOptionsContext } from "./components/ViewerOptions";
@@ -38,7 +38,7 @@ import { unifiedSelectionStorage } from "./SelectionStorage";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ClientPrefix } from "@itwin/grouping-mapping-widget";
-import type { SelectableTreeDefinition } from "@itwin/tree-widget-react";
+import type { TreeWidgetComponentDefinition } from "@itwin/tree-widget-react";
 import type { UiItemsProvider } from "@itwin/appui-react";
 
 export interface UiProvidersConfig {
@@ -110,7 +110,7 @@ const configuredUiItems = new Map<string, UiItem>([
         {
           id: "TreeWidgetUIProvider",
           getWidgets: () => {
-            const trees: SelectableTreeDefinition[] = [
+            const trees: TreeWidgetComponentDefinition[] = [
               {
                 id: ModelsTreeComponent.id,
                 getLabel: () => ModelsTreeComponent.getLabel(),
@@ -297,10 +297,10 @@ const configuredUiItems = new Map<string, UiItem>([
   ],
 ]);
 
-function TreeWidgetWithOptions(props: { trees: SelectableTreeDefinition[] }) {
+function TreeWidgetWithOptions(props: { trees: TreeWidgetComponentDefinition[] }) {
   const { density } = useViewerOptionsContext();
   return (
-    <TreeWidgetComponent
+    <TreeWidgetComponentProvider
       trees={props.trees}
       density={density}
       onPerformanceMeasured={(feature: string, elapsedTime: number) => {

@@ -8,16 +8,16 @@ import { useEffect, useState } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Spinner } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../TreeWidget.js";
-import { WidgetWithHeader } from "./tree-header/WidgetWithHeader.js";
+import { WidgetHeader } from "./tree-header/WidgetHeader.js";
 
 import type { PropsWithChildren } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { TreeContentDefinition, WidgetWithHeaderProps } from "./tree-header/WidgetWithHeader.js";
+import type { TreeContentDefinition, WidgetHeaderProps } from "./tree-header/WidgetHeader.js";
 /**
  * Props for rendering trees
  * @public
  */
-export interface SelectableTreeRenderProps {
+export interface TreeWidgetComponentRenderProps {
   filter?: string;
   onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
   onFeatureUsed?: (feature: string) => void;
@@ -28,13 +28,13 @@ export interface SelectableTreeRenderProps {
  * Definition of a tree component displayed in `SelectableTree`.
  * @public
  */
-export interface SelectableTreeDefinition {
+export interface TreeWidgetComponentDefinition {
   /** Id of the tree */
   id: string;
   /** Callback that is used to get tree label */
   getLabel: () => string;
   /** Callback that is used to render tree component */
-  render: (props: SelectableTreeRenderProps) => React.ReactNode;
+  render: (props: TreeWidgetComponentRenderProps) => React.ReactNode;
   /**
    * Callback that is used to determine if tree should be shown for current active iModel connection.
    * If callback is `undefined` tree is shown for all iModel connections.
@@ -45,11 +45,11 @@ export interface SelectableTreeDefinition {
 }
 
 /**
- * Props for `SelectableTree`
+ * Props for `TreeWidgetComponent`
  * @public
  */
-export interface SelectableTreeProps {
-  trees: SelectableTreeDefinition[];
+export interface TreeWidgetComponentProps {
+  trees: TreeWidgetComponentDefinition[];
   density?: "enlarged" | "default";
   onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
   onFeatureUsed?: (feature: string) => void;
@@ -59,7 +59,7 @@ export interface SelectableTreeProps {
  * A component that renders a tree (combo box) selector and the selected tree component.
  * @public
  */
-export function SelectableTree(props: SelectableTreeProps) {
+export function TreeWidgetComponent(props: TreeWidgetComponentProps) {
   const imodel = useActiveIModelConnection();
   if (!imodel) {
     return null;
@@ -67,18 +67,19 @@ export function SelectableTree(props: SelectableTreeProps) {
   return <SelectableTreeContent {...props} imodel={imodel} />;
 }
 
-function SelectableTreeContent(props: SelectableTreeProps & { imodel: IModelConnection }) {
+function SelectableTreeContent(props: TreeWidgetComponentProps & { imodel: IModelConnection }) {
   const { trees: treeDefinitions, imodel } = props;
   const trees = useActiveTrees(treeDefinitions, imodel);
 
+  // TODO: move tree content rendering here
   return (
     <div className="tree-widget-selectable-tree">
-      <WidgetWithHeader {...getWidgetWithHeaderProps(trees)} onPerformanceMeasured={props.onPerformanceMeasured} onFeatureUsed={props.onFeatureUsed} />
+      <WidgetHeader {...getWidgetWithHeaderProps(trees)} onPerformanceMeasured={props.onPerformanceMeasured} onFeatureUsed={props.onFeatureUsed} />
     </div>
   );
 }
 
-function useActiveTrees(treeDefinitions: SelectableTreeDefinition[], imodel: IModelConnection) {
+function useActiveTrees(treeDefinitions: TreeWidgetComponentDefinition[], imodel: IModelConnection) {
   const [trees, setTrees] = useState<TreeContentDefinition[]>();
 
   useEffect(() => {
@@ -98,8 +99,8 @@ function useActiveTrees(treeDefinitions: SelectableTreeDefinition[], imodel: IMo
   return trees;
 }
 
-async function getActiveTrees(treeDefinitions: SelectableTreeDefinition[], imodel: IModelConnection): Promise<TreeContentDefinition[]> {
-  const handleDefinition = async (treeDef: SelectableTreeDefinition) => {
+async function getActiveTrees(treeDefinitions: TreeWidgetComponentDefinition[], imodel: IModelConnection): Promise<TreeContentDefinition[]> {
+  const handleDefinition = async (treeDef: TreeWidgetComponentDefinition) => {
     if (treeDef.shouldShow !== undefined && !(await treeDef.shouldShow(imodel))) {
       return undefined;
     }
@@ -114,7 +115,7 @@ async function getActiveTrees(treeDefinitions: SelectableTreeDefinition[], imode
   return (await Promise.all(treeDefinitions.map(handleDefinition))).filter((tree) => tree !== undefined) as TreeContentDefinition[];
 }
 
-function getWidgetWithHeaderProps(trees?: TreeContentDefinition[]): WidgetWithHeaderProps {
+function getWidgetWithHeaderProps(trees?: TreeContentDefinition[]): WidgetHeaderProps {
   if (trees === undefined) {
     return {
       defaultSelectedContentId: "loading",

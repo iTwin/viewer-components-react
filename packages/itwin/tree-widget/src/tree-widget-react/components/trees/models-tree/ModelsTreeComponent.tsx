@@ -6,7 +6,7 @@
 import { Fragment, useEffect } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { TreeWidget } from "../../../TreeWidget.js";
-import { TreeWithToolbar } from "../../tree-header/TreeWithToolbar.js";
+import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
 import { FocusedInstancesContextProvider } from "../common/FocusedInstancesContextProvider.js";
 import { useActiveViewport } from "../common/UseActiveViewport.js";
@@ -33,7 +33,6 @@ interface ModelsTreeComponentProps
     ModelsTreeProps,
     | "getSchemaContext"
     | "selectionStorage"
-    | "density"
     | "hierarchyLevelConfig"
     | "selectionMode"
     | "selectionPredicate"
@@ -160,9 +159,9 @@ function ModelsTreeComponentImpl({
 
   return (
     <TelemetryContextProvider componentIdentifier={ModelsTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
-      <TreeWithToolbar buttons={buttons}>
+      <SelectableTree buttons={buttons}>
         <ModelsTree {...treeProps} imodel={iModel} activeView={viewport} filter={filter} onModelsFiltered={onModelsFiltered} />
-      </TreeWithToolbar>
+      </SelectableTree>
     </TelemetryContextProvider>
   );
 }

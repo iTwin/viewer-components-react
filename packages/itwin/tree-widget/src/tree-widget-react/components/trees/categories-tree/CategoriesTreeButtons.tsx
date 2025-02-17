@@ -10,7 +10,7 @@ import { TreeWidget } from "../../../TreeWidget.js";
 import { hideAllCategories, invertAllCategories, loadCategoriesFromViewport, showAllCategories } from "../common/CategoriesVisibilityUtils.js";
 
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
-import type { TreeToolbarButtonProps } from "../../tree-header/TreeToolbar.js";
+import type { TreeToolbarButtonProps } from "../../tree-header/SelectableTree.js";
 import type { Viewport } from "@itwin/core-frontend";
 
 const visibilityShowIcon = new URL("@itwin/itwinui-icons/visibility-show.svg", import.meta.url).href;

@@ -6,7 +6,7 @@
 import { Fragment } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { TreeWidget } from "../../../TreeWidget.js";
-import { TreeWithToolbar } from "../../tree-header/TreeWithToolbar.js";
+import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { useActiveViewport } from "../common/UseActiveViewport.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { CategoriesTree } from "./CategoriesTree.js";
@@ -19,7 +19,7 @@ import type { CategoriesTreeHeaderButtonProps, CategoriesTreeHeaderButtonType } 
 
 /** @public */
 interface CategoriesTreeComponentProps
-  extends Pick<CategoriesTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode" | "filter"> {
+  extends Pick<CategoriesTreeProps, "getSchemaContext" | "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "filter"> {
   /**
    * Renderers of header buttons. Defaults to:
    * ```ts
@@ -101,9 +101,9 @@ function CategoriesTreeComponentImpl({
 
   return (
     <TelemetryContextProvider componentIdentifier={CategoriesTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
-      <TreeWithToolbar buttons={buttons}>
+      <SelectableTree buttons={buttons}>
         <CategoriesTree {...treeProps} imodel={iModel} activeView={viewport} filter={filter} onCategoriesFiltered={onCategoriesFiltered} />
-      </TreeWithToolbar>
+      </SelectableTree>
     </TelemetryContextProvider>
   );
 }

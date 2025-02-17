@@ -9,10 +9,10 @@ import { ErrorBoundary } from "react-error-boundary";
 import { StagePanelLocation, StagePanelSection, useTransientState } from "@itwin/appui-react";
 import { SvgHierarchyTree } from "@itwin/itwinui-icons-react";
 import { TreeWidget } from "../TreeWidget.js";
-import { SelectableTree } from "./SelectableTree.js";
+import { TreeWidgetComponent } from "./TreeWidgetComponent.js";
 
 import type { Widget } from "@itwin/appui-react";
-import type { SelectableTreeDefinition, SelectableTreeProps } from "./SelectableTree.js";
+import type { TreeWidgetComponentDefinition, TreeWidgetComponentProps } from "./TreeWidgetComponent.js";
 import type { FallbackProps } from "react-error-boundary";
 import type { Ref } from "react";
 
@@ -28,7 +28,7 @@ interface TreeWidgetProps {
    * @see ExternalSourcesTreeComponent
    * @see IModelContentTreeComponent
    */
-  trees: SelectableTreeDefinition[];
+  trees: TreeWidgetComponentDefinition[];
   /** Modifies the density of the tree widget. `enlarged` widget contains larger content */
   density?: "enlarged" | "default";
   /** Callback that is invoked when performance of tracked feature is measured. */
@@ -53,7 +53,7 @@ export function createTreeWidget(props: TreeWidgetProps): Widget {
       },
     },
     content: (
-      <TreeWidgetComponent
+      <TreeWidgetComponentProvider
         trees={props.trees}
         density={props.density}
         onPerformanceMeasured={props.onPerformanceMeasured}
@@ -67,12 +67,12 @@ export function createTreeWidget(props: TreeWidgetProps): Widget {
  * Tree widget component which allows selecting which tree to render.
  * @public
  */
-export function TreeWidgetComponent(props: SelectableTreeProps) {
+export function TreeWidgetComponentProvider(props: TreeWidgetComponentProps) {
   const ref = useTreeWidgetTransientState();
   return (
     <div ref={ref} className="tree-widget">
       <ErrorBoundary FallbackComponent={ErrorState}>
-        <SelectableTree {...props} />
+        <TreeWidgetComponent {...props} />
       </ErrorBoundary>
     </div>
   );

@@ -65,8 +65,6 @@ export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPa
     imodelAccess?: FunctionProps<typeof useIModelTree>["imodelAccess"];
     /** Size limit that should be applied on each hierarchy level. Default to `1000`. */
     hierarchyLevelSizeLimit?: number;
-    /** Modifies the density of tree nodes. `enlarged` tree nodes have bigger button hit boxes. */
-    density?: "default" | "enlarged";
     /** Message that should be renderer if there are no tree nodes. */
     noDataMessage?: ReactNode;
     /** Callback that this invoked when tree reloads. */
