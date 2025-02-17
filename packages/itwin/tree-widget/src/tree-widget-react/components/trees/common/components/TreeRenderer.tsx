@@ -4,29 +4,22 @@
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable @itwin/no-internal */
 
-import { LocalizationContextProvider, TreeRenderer as PresentationTree } from "@itwin/presentation-hierarchies-react";
-import { useHierarchiesLocalization } from "../UseHierarchiesLocalization.js";
-import { TreeItemVisibilityButton } from "./TreeNodeVisibilityButton.js";
-
-import type { TreeItemVisibilityButtonProps } from "./TreeNodeVisibilityButton.js";
-/** @beta */
-export type TreeRendererProps = React.ComponentPropsWithoutRef<typeof PresentationTree> & { visibilityButtonProps?: TreeItemVisibilityButtonProps };
+import { createFilterAction } from "@itwin/presentation-hierarchies-react";
+import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
+import { BaseTreeRenderer } from "./BaseTreeRenderer.js";
 
 /**
  * Default renderer for rendering tree data.
  * @beta
  */
-export function TreeRenderer({ rootNodes, onNodeClick, expandNode, visibilityButtonProps, ...props }: TreeRendererProps) {
-  const localizedStrings = useHierarchiesLocalization();
+export function TreeRenderer({ actions, ...props }: BaseTreeRendererProps) {
   return (
-    <LocalizationContextProvider localizedStrings={localizedStrings}>
-      <PresentationTree
-        {...props}
-        onNodeClick={onNodeClick}
-        expandNode={expandNode}
-        rootNodes={rootNodes}
-        actionsRenderer={visibilityButtonProps ? (node) => <TreeItemVisibilityButton {...visibilityButtonProps} node={node} /> : undefined}
-      />
-    </LocalizationContextProvider>
+    <BaseTreeRenderer
+      {...props}
+      actions={[
+        createFilterAction({ onFilter: props.onFilterClick, getHierarchyLevelDetails: props.getHierarchyLevelDetails, label: "Filter" }),
+        ...(actions ? actions : []),
+      ]}
+    />
   );
 }

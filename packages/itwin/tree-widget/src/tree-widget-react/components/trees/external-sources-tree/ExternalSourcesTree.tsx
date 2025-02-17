@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { SvgDetails, SvgDocument, SvgItem } from "@itwin/itwinui-icons-react";
+import type { BaseTreeRendererProps } from "../common/components/BaseTreeRenderer.js";
 import { Tree } from "../common/components/Tree.js";
 import { TreeRenderer } from "../common/components/TreeRenderer.js";
 import { ExternalSourcesTreeComponent } from "./ExternalSourcesTreeComponent.js";
@@ -12,13 +13,13 @@ import { ExternalSourcesTreeDefinition } from "./ExternalSourcesTreeDefinition.j
 import type { TreeProps } from "../common/components/Tree.js";
 import type { ReactElement } from "react";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
-
 /** @beta */
-export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode"> & {
-  hierarchyLevelConfig?: {
-    sizeLimit?: number;
+export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode"> &
+  Pick<BaseTreeRendererProps, "actions"> & {
+    hierarchyLevelConfig?: {
+      sizeLimit?: number;
+    };
   };
-};
 
 /** @beta */
 export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {

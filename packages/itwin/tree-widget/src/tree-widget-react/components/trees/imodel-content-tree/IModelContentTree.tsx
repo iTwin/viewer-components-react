@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { SvgFolder, SvgGroup, SvgHierarchyTree, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
+import type { BaseTreeRendererProps } from "../common/components/BaseTreeRenderer.js";
 import { Tree } from "../common/components/Tree.js";
 import { TreeRenderer } from "../common/components/TreeRenderer.js";
 import { IModelContentTreeComponent } from "./IModelContentTreeComponent.js";
@@ -13,13 +14,13 @@ import { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache.
 import type { TreeProps } from "../common/components/Tree.js";
 import type { ReactElement } from "react";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
-
 /** @beta */
-export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode"> & {
-  hierarchyLevelConfig?: {
-    sizeLimit?: number;
+export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode"> &
+  Pick<BaseTreeRendererProps, "actions"> & {
+    hierarchyLevelConfig?: {
+      sizeLimit?: number;
+    };
   };
-};
 
 /** @beta */
 export function IModelContentTree(props: IModelContentTreeProps) {

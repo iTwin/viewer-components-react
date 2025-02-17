@@ -5,14 +5,14 @@
 
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { TreeWidget } from "../../../TreeWidget.js";
+import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { ExternalSourcesTree } from "./ExternalSourcesTree.js";
 
 import type { ExternalSourcesTreeProps } from "./ExternalSourcesTree.js";
-
 /** @beta */
 interface ExternalSourcesTreeComponentProps
-  extends Pick<ExternalSourcesTreeProps, "getSchemaContext" | "selectionStorage" | "selectionMode" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
+  extends Pick<ExternalSourcesTreeProps, "getSchemaContext" | "selectionStorage" | "selectionMode" | "hierarchyLevelConfig" | "selectionMode"> {
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }
@@ -30,7 +30,9 @@ export const ExternalSourcesTreeComponent = ({ onFeatureUsed, onPerformanceMeasu
 
   return (
     <TelemetryContextProvider componentIdentifier={ExternalSourcesTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
-      <ExternalSourcesTree {...props} imodel={imodel} />
+      <SelectableTree>
+        <ExternalSourcesTree {...props} imodel={imodel} />
+      </SelectableTree>
     </TelemetryContextProvider>
   );
 };

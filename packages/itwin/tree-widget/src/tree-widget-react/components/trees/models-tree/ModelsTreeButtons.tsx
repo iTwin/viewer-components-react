@@ -12,11 +12,11 @@ import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, tog
 import type { Id64String } from "@itwin/core-bentley";
 import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader.js";
+import type { TreeToolbarButtonProps } from "../../tree-header/SelectableTree.js";
 
 const visibilityShowIcon = new URL("@itwin/itwinui-icons/visibility-show.svg", import.meta.url).href;
 const visibilityHideIcon = new URL("@itwin/itwinui-icons/visibility-hide.svg", import.meta.url).href;
-const visibilityHalfIcon = new URL("@itwin/itwinui-icons/state-inherited-dot.svg", import.meta.url).href; // temporary icon
+const visibilityHalfIcon = new URL("@itwin/itwinui-icons/placeholder.svg", import.meta.url).href; // temporary icon
 const cursorClickIcon = new URL("@itwin/itwinui-icons/placeholder.svg", import.meta.url).href; // temporary icon
 
 /**
@@ -33,7 +33,7 @@ export interface ModelInfo {
  * @see ModelTreeComponentProps.headerButtons
  * @public
  */
-export interface ModelsTreeHeaderButtonProps extends TreeHeaderButtonProps {
+export interface ModelsTreeHeaderButtonProps extends TreeToolbarButtonProps {
   /** A list of models available in the iModel. */
   models: ModelInfo[];
 }
@@ -114,6 +114,7 @@ export type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) =>
 export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
+      variant={"ghost"}
       label={TreeWidget.translate("modelsTree.buttons.showAll.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("models-tree-showall");
@@ -131,6 +132,7 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
 export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
+      variant={"ghost"}
       label={TreeWidget.translate("modelsTree.buttons.hideAll.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("models-tree-hideall");
@@ -148,6 +150,7 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
 export function InvertButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
+      variant={"ghost"}
       label={TreeWidget.translate("modelsTree.buttons.invert.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("models-tree-invert");
@@ -177,6 +180,7 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <Tooltip content={TreeWidget.translate("modelsTree.buttons.toggle2d.tooltip")}>
       <Button
+        variant={"ghost"}
         onClick={() => {
           props.onFeatureUsed?.("models-tree-view2d");
           void toggleModels(models2d, is2dToggleActive, props.viewport);
@@ -206,6 +210,7 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <Tooltip content={TreeWidget.translate("modelsTree.buttons.toggle3d.tooltip")}>
       <Button
+        variant={"ghost"}
         onClick={() => {
           props.onFeatureUsed?.("models-tree-view3d");
           void toggleModels(models3d, is3dToggleActive, props.viewport);
@@ -220,19 +225,22 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
 }
 
 /** @public */
-export function ToggleInstancesFocusButton({ onFeatureUsed }: { onFeatureUsed?: (feature: string) => void }) {
+export function ToggleInstancesFocusButton({ onFeatureUsed, disabled }: { onFeatureUsed?: (feature: string) => void; disabled?: boolean }) {
   const { enabled, toggle } = useFocusedInstancesContext();
-  const label = enabled
-    ? TreeWidget.translate("modelsTree.buttons.toggleFocusMode.disable.tooltip")
-    : TreeWidget.translate("modelsTree.buttons.toggleFocusMode.enable.tooltip");
+  const label = disabled
+    ? TreeWidget.translate("modelsTree.buttons.toggleFocusMode.disabled.tooltip")
+    : enabled
+      ? TreeWidget.translate("modelsTree.buttons.toggleFocusMode.disable.tooltip")
+      : TreeWidget.translate("modelsTree.buttons.toggleFocusMode.enable.tooltip");
   return (
     <IconButton
-      variant="ghost"
+      variant={"ghost"}
       label={label}
       onClick={() => {
         onFeatureUsed?.("models-tree-instancesfocus");
         toggle();
       }}
+      aria-disabled={disabled}
       isActive={enabled}
       icon={cursorClickIcon}
     />

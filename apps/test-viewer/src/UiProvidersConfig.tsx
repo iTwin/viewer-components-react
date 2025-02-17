@@ -36,9 +36,9 @@ import { RepositoriesTreeComponent } from "./components/repositories-tree/Reposi
 import { useViewerOptionsContext } from "./components/ViewerOptions";
 import { unifiedSelectionStorage } from "./SelectionStorage";
 
+import type { TreeDefinition } from "@itwin/tree-widget-react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ClientPrefix } from "@itwin/grouping-mapping-widget";
-import type { SelectableTreeDefinition } from "@itwin/tree-widget-react";
 import type { UiItemsProvider } from "@itwin/appui-react";
 
 export interface UiProvidersConfig {
@@ -110,7 +110,7 @@ const configuredUiItems = new Map<string, UiItem>([
         {
           id: "TreeWidgetUIProvider",
           getWidgets: () => {
-            const trees: SelectableTreeDefinition[] = [
+            const trees: TreeDefinition[] = [
               {
                 id: ModelsTreeComponent.id,
                 getLabel: () => ModelsTreeComponent.getLabel(),
@@ -120,7 +120,7 @@ const configuredUiItems = new Map<string, UiItem>([
                   return (
                     <ModelsTreeComponent
                       getSchemaContext={getSchemaContext}
-                      density={props.density}
+                      filter={props.filter}
                       selectionStorage={unifiedSelectionStorage}
                       selectionMode={"extended"}
                       selectionPredicate={disableNodesSelection ? disabledSelectionPredicate : undefined}
@@ -135,8 +135,8 @@ const configuredUiItems = new Map<string, UiItem>([
                 getLabel: () => CategoriesTreeComponent.getLabel(),
                 render: (props) => (
                   <CategoriesTreeComponent
+                    filter={props.filter}
                     getSchemaContext={getSchemaContext}
-                    density={props.density}
                     selectionStorage={unifiedSelectionStorage}
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}
@@ -149,7 +149,6 @@ const configuredUiItems = new Map<string, UiItem>([
                 render: (props) => (
                   <IModelContentTreeComponent
                     getSchemaContext={getSchemaContext}
-                    density={props.density}
                     selectionStorage={unifiedSelectionStorage}
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}
@@ -163,7 +162,6 @@ const configuredUiItems = new Map<string, UiItem>([
                 render: (props) => (
                   <ExternalSourcesTreeComponent
                     getSchemaContext={getSchemaContext}
-                    density={props.density}
                     selectionStorage={unifiedSelectionStorage}
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}
@@ -299,12 +297,10 @@ const configuredUiItems = new Map<string, UiItem>([
   ],
 ]);
 
-function TreeWidgetWithOptions(props: { trees: SelectableTreeDefinition[] }) {
-  const { density } = useViewerOptionsContext();
+function TreeWidgetWithOptions(props: { trees: TreeDefinition[] }) {
   return (
     <TreeWidgetComponent
       trees={props.trees}
-      density={density}
       onPerformanceMeasured={(feature: string, elapsedTime: number) => {
         console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
       }}

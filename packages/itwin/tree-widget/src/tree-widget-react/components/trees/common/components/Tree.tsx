@@ -16,6 +16,7 @@ import { useIModelChangeListener } from "../UseIModelChangeListener.js";
 import { useNodeHighlighting } from "../UseNodeHighlighting.js";
 import { useReportingAction, useTelemetryContext } from "../UseTelemetryContext.js";
 import { createIModelAccess } from "../Utils.js";
+import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
 import { Delayed } from "./Delayed.js";
 import { ProgressOverlay } from "./ProgressOverlay.js";
 
@@ -26,8 +27,6 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type { PresentationHierarchyNode, SelectionStorage, useIModelTree, useSelectionHandler } from "@itwin/presentation-hierarchies-react";
 import type { HighlightInfo } from "../UseNodeHighlighting.js";
-import type { TreeRendererProps } from "./TreeRenderer.js";
-
 /** @beta */
 export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPaths" | "getHierarchyDefinition"> &
   Partial<Pick<FunctionProps<typeof useSelectionHandler>, "selectionMode">> & {
@@ -48,7 +47,7 @@ export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPa
     treeRenderer: (
       treeProps: Required<
         Pick<
-          TreeRendererProps,
+          BaseTreeRendererProps,
           | "rootNodes"
           | "expandNode"
           | "getLabel"
@@ -65,8 +64,6 @@ export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPa
     imodelAccess?: FunctionProps<typeof useIModelTree>["imodelAccess"];
     /** Size limit that should be applied on each hierarchy level. Default to `1000`. */
     hierarchyLevelSizeLimit?: number;
-    /** Modifies the density of tree nodes. `enlarged` tree nodes have bigger button hit boxes. */
-    density?: "default" | "enlarged";
     /** Message that should be renderer if there are no tree nodes. */
     noDataMessage?: ReactNode;
     /** Callback that this invoked when tree reloads. */
