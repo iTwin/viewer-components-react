@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Add 'types' field in package.json. This fixes some issues for consumers when importing the esm package with moduleResolution: node. (export map support seems flaky in those cases.)",
+  "packageName": "@itwin/measure-tools-react",
+  "email": "3418768+a-gagnon@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
