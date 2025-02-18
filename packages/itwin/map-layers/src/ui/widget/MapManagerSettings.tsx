@@ -8,9 +8,8 @@ import "./MapManagerSettings.scss";
 import * as React from "react";
 import { PlanarClipMaskMode, PlanarClipMaskPriority, TerrainHeightOriginMode } from "@itwin/core-common";
 import { QuantityType } from "@itwin/core-frontend";
-import { NumberInput } from "@itwin/core-react";
 import { QuantityNumberInput } from "@itwin/imodel-components-react";
-import { Select, Slider, Tab, Tabs, ToggleSwitch } from "@itwin/itwinui-react";
+import { Input, Select, Slider, Tab, Tabs, ToggleSwitch } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
 import { CustomParamsSettingsPanel } from "./CustomParamsSettings";
 import { useSourceMapContext } from "./MapLayerManager";
@@ -193,15 +192,18 @@ export function MapManagerSettings({ onHandleOutsideClick }: MapManagerSettingsP
   const [exaggeration, setExaggeration] = React.useState(() => terrainSettings.exaggeration);
 
   const handleExaggerationChange = React.useCallback(
-    (value: number | undefined, _stringValue: string) => {
-      if (undefined !== value) {
-        updateTerrainSettings({ exaggeration: value });
-        setExaggeration(value);
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const numValue = Number(e.target.value);
+      if (isNaN(numValue) || numValue === undefined) {
+        e.preventDefault();
+        return;
       }
+      updateTerrainSettings({ exaggeration: numValue });
+      setExaggeration(numValue);
     },
     [updateTerrainSettings],
   );
-
+  
   const [terrainOrigin, setTerrainOrigin] = React.useState(() => terrainSettings.heightOrigin);
 
   const handleHeightOriginChange = React.useCallback(
@@ -328,8 +330,14 @@ export function MapManagerSettings({ onHandleOutsideClick }: MapManagerSettingsP
                 />
 
                 <span className="map-manager-settings-label">{exaggerationLabel}</span>
-                {/*eslint-disable-next-line @typescript-eslint/no-deprecated */}
-                <NumberInput value={exaggeration} disabled={!applyTerrain} onChange={handleExaggerationChange} onKeyDown={onKeyDown} />
+                <Input
+                  type="number"
+                  value={exaggeration.toString()}
+                  disabled={!applyTerrain}
+                  onChange={handleExaggerationChange}
+                  onKeyDown={onKeyDown}
+                  size="small"
+                />
               </div>
             </fieldset>
           </div>
