@@ -7,11 +7,14 @@ import { IModel, IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itw
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
+import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import {
-  HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
-} from "@itwin/presentation-testing";
-import {
-  buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertPhysicalPartition, insertPhysicalSubModel, insertSpatialCategory,
+  buildIModel,
+  insertPhysicalElement,
+  insertPhysicalModelWithPartition,
+  insertPhysicalPartition,
+  insertPhysicalSubModel,
+  insertSpatialCategory,
   insertSubject,
 } from "../../IModelUtils.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
@@ -41,7 +44,7 @@ describe("Models tree", () => {
     });
 
     it("creates Subject - Model - Category - Element hierarchy", async function () {
-      const { imodel, ...keys } = await buildIModel(this, async (builder, testSchema) => {
+      await using buildIModelResult = await buildIModel(this, async (builder, testSchema) => {
         const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
         const childSubject = insertSubject({ builder, codeValue: "child subject", parentId: rootSubject.id });
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: childSubject.id });
@@ -65,6 +68,7 @@ describe("Models tree", () => {
         const modelingElement = insertPhysicalElement({ builder, userLabel: `modeling element`, modelId: subModel.id, categoryId: category.id });
         return { rootSubject, childSubject, model, category, rootElement1, rootElement2, childElement, modelingElement };
       });
+      const { imodel, ...keys } = buildIModelResult;
       using provider = createModelsTreeProvider({ imodel });
       await validateHierarchy({
         provider,
@@ -152,7 +156,7 @@ describe("Models tree", () => {
 
     describe("Subjects", () => {
       it(`hides subjects with \`Subject.Model.Type = "Hierarchy"\` json property`, async function () {
-        const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
           const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
           const childSubject = insertSubject({
             builder,
@@ -166,6 +170,7 @@ describe("Models tree", () => {
           const element = insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category.id });
           return { rootSubject, childSubject, model, category, element };
         });
+        const { imodel, ...keys } = buildIModelResult;
         using provider = createModelsTreeProvider({ imodel });
         await validateHierarchy({
           provider,
@@ -198,11 +203,12 @@ describe("Models tree", () => {
       });
 
       it("hides childless subjects", async function () {
-        const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
           const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
           const childSubject = insertSubject({ builder, codeValue: "child subject", parentId: rootSubject.id });
           return { rootSubject, childSubject };
         });
+        const { imodel, ...keys } = buildIModelResult;
         using provider = createModelsTreeProvider({ imodel });
         await validateHierarchy({
           provider,
@@ -218,7 +224,7 @@ describe("Models tree", () => {
       });
 
       it("hides subjects with childless models", async function () {
-        const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
           const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
           const childSubject1 = insertSubject({ builder, codeValue: "child subject 1", parentId: rootSubject.id });
           const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: childSubject1.id });
@@ -231,6 +237,7 @@ describe("Models tree", () => {
           });
           return { rootSubject, childSubject1, childSubject2, model };
         });
+        const { imodel, ...keys } = buildIModelResult;
         using provider = createModelsTreeProvider({ imodel });
         await validateHierarchy({
           provider,
@@ -246,7 +253,7 @@ describe("Models tree", () => {
       });
 
       it("hides subjects with private models", async function () {
-        const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
           const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
           const childSubject1 = insertSubject({ builder, codeValue: "child subject 1", parentId: rootSubject.id });
           const partition = insertPhysicalPartition({ builder, codeValue: "model", parentId: rootSubject.id });
@@ -262,6 +269,7 @@ describe("Models tree", () => {
           insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category.id });
           return { rootSubject, childSubject1, childSubject2, model };
         });
+        const { imodel, ...keys } = buildIModelResult;
         using provider = createModelsTreeProvider({ imodel });
         await validateHierarchy({
           provider,
@@ -277,7 +285,7 @@ describe("Models tree", () => {
       });
 
       it("shows subjects with child models related with subject through `Subject.Model.TargetPartition` json property", async function () {
-        const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
           const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
           const childSubject1 = insertSubject({ builder, codeValue: "child subject 1", parentId: rootSubject.id });
           const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: childSubject1.id });
@@ -292,6 +300,7 @@ describe("Models tree", () => {
           });
           return { rootSubject, childSubject1, childSubject2, model, category, element };
         });
+        const { imodel, ...keys } = buildIModelResult;
         using provider = createModelsTreeProvider({ imodel });
         await validateHierarchy({
           provider,
@@ -352,7 +361,7 @@ describe("Models tree", () => {
       });
 
       it("merges subjects from different parts of hierarchy", async function () {
-        const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
           const category = insertSpatialCategory({ builder, codeValue: "category" });
           const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
           const hiddenSubject1 = insertSubject({
@@ -377,6 +386,7 @@ describe("Models tree", () => {
           const element2 = insertPhysicalElement({ builder, userLabel: `element1`, modelId: model2.id, categoryId: category.id });
           return { rootSubject, mergedSubject1, mergedSubject2, model1, model2, category, element1, element2 };
         });
+        const { imodel, ...keys } = buildIModelResult;
         using provider = createModelsTreeProvider({ imodel });
         await validateHierarchy({
           provider,
@@ -433,7 +443,7 @@ describe("Models tree", () => {
 
     describe("Models", () => {
       it("hides models with `PhysicalPartition.Model.Content` json property", async function () {
-        const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
           const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
           const partition = insertPhysicalPartition({
             builder,
@@ -447,6 +457,7 @@ describe("Models tree", () => {
           const element = insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category.id });
           return { rootSubject, model, category, element };
         });
+        const { imodel, ...keys } = buildIModelResult;
         using provider = createModelsTreeProvider({ imodel });
         await validateHierarchy({
           provider,
@@ -473,7 +484,7 @@ describe("Models tree", () => {
       });
 
       it("hides models with `GraphicalPartition3d.Model.Content` json property", async function () {
-        const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
           const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
           const partition = insertPhysicalPartition({
             builder,
@@ -487,6 +498,7 @@ describe("Models tree", () => {
           const element = insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category.id });
           return { rootSubject, model, category, element };
         });
+        const { imodel, ...keys } = buildIModelResult;
         using provider = createModelsTreeProvider({ imodel });
         await validateHierarchy({
           provider,
@@ -513,7 +525,7 @@ describe("Models tree", () => {
       });
 
       it("hides private models and their content", async function () {
-        const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
           const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
           const partition = insertPhysicalPartition({ builder, codeValue: "model", parentId: rootSubject.id });
           const model = insertPhysicalSubModel({ builder, modeledElementId: partition.id, isPrivate: true });
@@ -521,6 +533,7 @@ describe("Models tree", () => {
           const element = insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category.id });
           return { rootSubject, model, category, element };
         });
+        const { imodel, ...keys } = buildIModelResult;
         using provider = createModelsTreeProvider({ imodel });
         await validateHierarchy({
           provider,
@@ -536,12 +549,13 @@ describe("Models tree", () => {
       });
 
       it("hides empty models", async function () {
-        const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
           const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
           const partition = insertPhysicalPartition({ builder, codeValue: "model", parentId: rootSubject.id });
           const model = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
           return { rootSubject, model };
         });
+        const { imodel, ...keys } = buildIModelResult;
         using provider = createModelsTreeProvider({ imodel });
         await validateHierarchy({
           provider,
@@ -559,7 +573,7 @@ describe("Models tree", () => {
 
     describe("Categories", () => {
       it("merges categories from different parts of hierarchy", async function () {
-        const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
           const category1 = insertSpatialCategory({ builder, codeValue: "category1", userLabel: "merged category" });
           const category2 = insertSpatialCategory({ builder, codeValue: "category2", userLabel: "merged category" });
           const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
@@ -597,6 +611,7 @@ describe("Models tree", () => {
           const element2 = insertPhysicalElement({ builder, userLabel: `element2`, modelId: model2.id, categoryId: category2.id });
           return { rootSubject, model1, model2, category1, category2, element1, element2 };
         });
+        const { imodel, ...keys } = buildIModelResult;
         using provider = createModelsTreeProvider({ imodel });
         await validateHierarchy({
           provider,
@@ -628,12 +643,13 @@ describe("Models tree", () => {
 
     describe("Hierarchy customization", () => {
       it("shows empty models when `showEmptyModels` is set to true", async function () {
-        const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
           const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
           const partition = insertPhysicalPartition({ builder, codeValue: "model", parentId: rootSubject.id });
           const model = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
           return { rootSubject, model };
         });
+        const { imodel, ...keys } = buildIModelResult;
         using provider = createModelsTreeProvider({ imodel, hierarchyConfig: { showEmptyModels: true } });
         await validateHierarchy({
           provider,
@@ -655,7 +671,7 @@ describe("Models tree", () => {
       });
 
       it("does not group elements when `elementClassGrouping` set to `disable`", async function () {
-        const { imodel, ...keys } = await buildIModel(this, async (builder, testSchema) => {
+        await using buildIModelResult = await buildIModel(this, async (builder, testSchema) => {
           const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
           const childSubject = insertSubject({ builder, codeValue: "child subject", parentId: rootSubject.id });
           const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: childSubject.id });
@@ -679,6 +695,7 @@ describe("Models tree", () => {
           const modelingElement = insertPhysicalElement({ builder, userLabel: `modeling element`, modelId: subModel.id, categoryId: category.id });
           return { rootSubject, childSubject, model, category, rootElement1, rootElement2, childElement, modelingElement };
         });
+        const { imodel, ...keys } = buildIModelResult;
         using provider = createModelsTreeProvider({ imodel, hierarchyConfig: { elementClassGrouping: "disable" } });
         await validateHierarchy({
           provider,
@@ -741,7 +758,7 @@ describe("Models tree", () => {
       });
 
       it("displays element count for grouping nodes when `elementClassGrouping` set to `enableWithCounts`", async function () {
-        const { imodel, ...keys } = await buildIModel(this, async (builder, testSchema) => {
+        await using buildIModelResult = await buildIModel(this, async (builder, testSchema) => {
           const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
           const childSubject = insertSubject({ builder, codeValue: "child subject", parentId: rootSubject.id });
           const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: childSubject.id });
@@ -772,6 +789,7 @@ describe("Models tree", () => {
           const modelingElement = insertPhysicalElement({ builder, userLabel: `modeling element`, modelId: subModel.id, categoryId: category.id });
           return { rootSubject, childSubject, model, category, rootElement1, rootElement2, childElement1, childElement2, modelingElement };
         });
+        const { imodel, ...keys } = buildIModelResult;
         using provider = createModelsTreeProvider({ imodel, hierarchyConfig: { elementClassGrouping: "enableWithCounts" } });
         await validateHierarchy({
           provider,
@@ -863,7 +881,7 @@ describe("Models tree", () => {
       });
 
       it("uses custom element class specification", async function () {
-        const { imodel, ...keys } = await buildIModel(this, async (builder, testSchema) => {
+        await using buildIModelResult = await buildIModel(this, async (builder, testSchema) => {
           const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
           const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
           const category = insertSpatialCategory({ builder, codeValue: "category" });
@@ -897,6 +915,8 @@ describe("Models tree", () => {
           });
           return { rootSubject, model, category, parentElement1, childElement1, parentElement2, childElement2 };
         });
+
+        const { imodel, ...keys } = buildIModelResult;
         using provider = createModelsTreeProvider({
           imodel,
           hierarchyConfig: { elementClassSpecification: keys.parentElement2.className, elementClassGrouping: "disable" },
@@ -939,12 +959,13 @@ describe("Models tree", () => {
       });
 
       it("returns empty hierarchy when the iModel doesn't have any elements of `elementClassSpecification` class", async function () {
-        const { imodel } = await buildIModel(this, async (builder) => {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
           const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
           const partition = insertPhysicalPartition({ builder, codeValue: "model", parentId: rootSubject.id });
           const model = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
           return { rootSubject, model };
         });
+        const { imodel } = buildIModelResult;
         using provider = createModelsTreeProvider({ imodel, hierarchyConfig: { elementClassSpecification: "BisCore.GeometricElement2d" } });
         await validateHierarchy({
           provider,

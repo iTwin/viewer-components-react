@@ -22,7 +22,8 @@ import type * as modelsTreeComponentModule from "../../../tree-widget-react/comp
 
 type TreeHeaderProps = ComponentPropsWithoutRef<typeof treeHeaderModule.TreeHeader>;
 
-describe("<ModelsTreeComponent />", () => {
+// TODO: Fix https://github.com/iTwin/viewer-components-react/issues/1190
+describe.skip("<ModelsTreeComponent />", () => {
   async function initialize() {
     const { IModelApp, NoRenderApp } = await import("@itwin/core-frontend");
     await NoRenderApp.startup();

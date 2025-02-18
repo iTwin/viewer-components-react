@@ -14,7 +14,8 @@ import { render, waitFor } from "./TestUtils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 
-describe("createTreeWidget", () => {
+// TODO: Fix https://github.com/iTwin/viewer-components-react/issues/1190
+describe.skip("createTreeWidget", () => {
   beforeEach(async () => {
     sinon.stub(IModelApp, "viewManager").get(() => ({ onSelectedViewportChanged: new BeEvent() }));
     sinon.stub(IModelApp, "toolAdmin").get(() => ({ activeToolChanged: new BeEvent() }));

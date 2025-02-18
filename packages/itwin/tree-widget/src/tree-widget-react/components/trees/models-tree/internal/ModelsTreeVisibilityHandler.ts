@@ -129,7 +129,7 @@ export interface ModelsTreeVisibilityHandlerProps {
  * Creates an instance if `ModelsTreeVisibilityHandler`.
  * @internal
  */
-export function createModelsTreeVisibilityHandler(props: ModelsTreeVisibilityHandlerProps): HierarchyVisibilityHandler {
+export function createModelsTreeVisibilityHandler(props: ModelsTreeVisibilityHandlerProps): HierarchyVisibilityHandler & Disposable {
   return new ModelsTreeVisibilityHandlerImpl(props);
 }
 
@@ -196,7 +196,11 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     return toVoidPromise(changeObservable);
   }
 
-  public dispose(): void {
+  public dispose() {
+    this[Symbol.dispose]();
+  }
+
+  public [Symbol.dispose]() {
     this._eventListener.dispose();
     this._alwaysAndNeverDrawnElements.dispose();
     this._subscriptions.forEach((x) => x.unsubscribe());

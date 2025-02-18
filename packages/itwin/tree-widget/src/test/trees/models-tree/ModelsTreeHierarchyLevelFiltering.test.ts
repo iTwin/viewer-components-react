@@ -56,9 +56,20 @@ describe("Models tree", () => {
       await terminatePresentationTesting();
     });
 
+    const createIModel = async (mochaContext: Mocha.Context) => {
+      // eslint-disable-next-line deprecation/deprecation
+      const imodel = await buildTestIModel(mochaContext, async () => {});
+      return {
+        imodel,
+        async [Symbol.asyncDispose]() {
+          await imodel.close();
+        },
+      };
+    };
     it("can filter root level", async function () {
       // eslint-disable-next-line deprecation/deprecation
-      const imodel = await buildTestIModel(this, async () => {});
+      await using imodelResult = await createIModel(this);
+      const { imodel } = imodelResult;
       using provider = createModelsTreeProvider({ imodel });
 
       // validate hierarchy level without filter
@@ -120,8 +131,7 @@ describe("Models tree", () => {
     });
 
     it("can filter Subject children level", async function () {
-      // eslint-disable-next-line deprecation/deprecation
-      const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
         const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
         const category = insertSpatialCategory({ builder, codeValue: "category" });
 
@@ -157,6 +167,7 @@ describe("Models tree", () => {
 
         return { rootSubject, childSubject, model, category };
       });
+      const { imodel, ...keys } = buildIModelResult;
       using provider = createModelsTreeProvider({ imodel });
       const parentNode = {
         key: {
@@ -244,8 +255,7 @@ describe("Models tree", () => {
     });
 
     it("can filter Model children level", async function () {
-      // eslint-disable-next-line deprecation/deprecation
-      const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
         const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
         const category1 = insertSpatialCategory({ builder, codeValue: "category1" });
         const category2 = insertSpatialCategory({ builder, codeValue: "category2" });
@@ -254,6 +264,7 @@ describe("Models tree", () => {
         insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category2.id });
         return { rootSubject, model, category1, category2 };
       });
+      const { imodel, ...keys } = buildIModelResult;
       using provider = createModelsTreeProvider({ imodel });
       const parentNode = {
         key: {
@@ -312,14 +323,14 @@ describe("Models tree", () => {
     });
 
     it("can filter Category children level", async function () {
-      // eslint-disable-next-line deprecation/deprecation
-      const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
         const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
         const category = insertSpatialCategory({ builder, codeValue: "category" });
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
         const element = insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category.id });
         return { rootSubject, model, category, element };
       });
+      const { imodel, ...keys } = buildIModelResult;
       using provider = createModelsTreeProvider({ imodel });
       const parentNode = {
         key: {
@@ -396,8 +407,7 @@ describe("Models tree", () => {
     });
 
     it("can filter Element children level with child elements", async function () {
-      // eslint-disable-next-line deprecation/deprecation
-      const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
         const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
         const category = insertSpatialCategory({ builder, codeValue: "category" });
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
@@ -411,6 +421,7 @@ describe("Models tree", () => {
         });
         return { rootSubject, model, category, parentElement, childElement };
       });
+      const { imodel, ...keys } = buildIModelResult;
       using provider = createModelsTreeProvider({ imodel });
       const parentNode = {
         key: {
@@ -488,8 +499,7 @@ describe("Models tree", () => {
     });
 
     it("can filter Element children level with modeling elements", async function () {
-      // eslint-disable-next-line deprecation/deprecation
-      const { imodel, ...keys } = await buildIModel(this, async (builder, testSchema) => {
+      await using buildIModelResult = await buildIModel(this, async (builder, testSchema) => {
         const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
         const category = insertSpatialCategory({ builder, codeValue: "category" });
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
@@ -509,6 +519,7 @@ describe("Models tree", () => {
         });
         return { rootSubject, model, category, modeledElement, modelingElement };
       });
+      const { imodel, ...keys } = buildIModelResult;
       using provider = createModelsTreeProvider({ imodel });
       const parentNode = {
         key: {
@@ -586,8 +597,7 @@ describe("Models tree", () => {
     });
 
     it("creates descriptor with related properties", async function () {
-      // eslint-disable-next-line deprecation/deprecation
-      const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
         const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
         const category = insertSpatialCategory({ builder, codeValue: "category" });
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
@@ -595,6 +605,7 @@ describe("Models tree", () => {
         const aspect = insertExternalSourceAspect({ builder, elementId: element.id, identifier: "test aspect" });
         return { rootSubject, model, category, element, aspect };
       });
+      const { imodel, ...keys } = buildIModelResult;
       using provider = createModelsTreeProvider({ imodel });
       const parentNode = {
         key: {
@@ -664,8 +675,7 @@ describe("Models tree", () => {
 
     describe("Hierarchy configuration", () => {
       it("filters empty models when `showEmptyModels` set to true", async function () {
-        // eslint-disable-next-line deprecation/deprecation
-        const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
           const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
 
           // set up child model node
@@ -673,6 +683,7 @@ describe("Models tree", () => {
 
           return { rootSubject, model };
         });
+        const { imodel, ...keys } = buildIModelResult;
         using provider = createModelsTreeProvider({ imodel, hierarchyConfig: { showEmptyModels: true } });
         const parentNode = {
           key: {
@@ -722,8 +733,7 @@ describe("Models tree", () => {
       });
 
       it("filters elements when `elementClassSpecification` is provided", async function () {
-        // eslint-disable-next-line deprecation/deprecation
-        const { imodel, ...keys } = await buildIModel(this, async (builder, testSchema) => {
+        await using buildIModelResult = await buildIModel(this, async (builder, testSchema) => {
           const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
           const category = insertSpatialCategory({ builder, codeValue: "category" });
           const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
@@ -742,6 +752,7 @@ describe("Models tree", () => {
           });
           return { rootSubject, model, category, element1, element2 };
         });
+        const { imodel, ...keys } = buildIModelResult;
         using provider = createModelsTreeProvider({ imodel, hierarchyConfig: { elementClassSpecification: keys.element1.className } });
         const parentNode = {
           key: {

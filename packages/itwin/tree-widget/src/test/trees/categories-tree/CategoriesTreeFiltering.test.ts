@@ -47,15 +47,16 @@ describe("Categories tree", () => {
     });
 
     it("finds definition container by label", async function () {
-      const { imodel, keys } = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer", userLabel: "Test" });
         const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
         const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id });
         insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
 
-        return { keys: { definitionContainer } };
+        return { definitionContainer };
       });
+      const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
@@ -70,7 +71,7 @@ describe("Categories tree", () => {
     });
 
     it("finds definition container by label when it is contained by another definition container", async function () {
-      const { imodel, keys } = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
         const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
@@ -84,8 +85,9 @@ describe("Categories tree", () => {
         const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
         insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
 
-        return { keys: { definitionContainer, definitionContainerChild } };
+        return { definitionContainer, definitionContainerChild };
       });
+      const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
@@ -100,15 +102,14 @@ describe("Categories tree", () => {
     });
 
     it("does not find definition container by label when it doesn't contain categories", async function () {
-      const { imodel } = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer", userLabel: "Test" });
         insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
         const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
         insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-
-        return { keys: { definitionContainer } };
       });
+      const { imodel } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
@@ -123,15 +124,16 @@ describe("Categories tree", () => {
     });
 
     it("finds category by label when it is contained by definition container", async function () {
-      const { imodel, keys } = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
         const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
         const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", userLabel: "Test", modelId: definitionModel.id });
         insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
 
-        return { keys: { definitionContainer, category } };
+        return { definitionContainer, category };
       });
+      const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
@@ -146,7 +148,7 @@ describe("Categories tree", () => {
     });
 
     it("finds subCategory by label when its parent category is contained by definition container", async function () {
-      const { imodel, keys } = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
         const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
@@ -154,8 +156,9 @@ describe("Categories tree", () => {
         insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
         const subCategory1 = insertSubCategory({ builder, codeValue: "SubCategory1", parentCategoryId: category.id, modelId: definitionModel.id });
 
-        return { keys: { definitionContainer, category, subCategory1 } };
+        return { definitionContainer, category, subCategory1 };
       });
+      const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
@@ -170,7 +173,7 @@ describe("Categories tree", () => {
     });
 
     it("finds 3d categories by label containing special SQLite characters", async function () {
-      const { imodel, keys } = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
         const category1 = insertSpatialCategory({ builder, codeValue: "Test SpatialCat_egory" });
@@ -179,14 +182,10 @@ describe("Categories tree", () => {
         const category2 = insertSpatialCategory({ builder, codeValue: "Test SpatialCat%egory" });
         insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category2.id });
 
-        return {
-          keys: {
-            category1,
-            category2,
-          },
-        };
+        return { category1, category2 };
       });
 
+      const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
@@ -211,7 +210,7 @@ describe("Categories tree", () => {
     });
 
     it("finds 3d subcategories by label containing special SQLite characters", async function () {
-      const { imodel, keys } = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
         const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
@@ -220,15 +219,10 @@ describe("Categories tree", () => {
         const subCategory1 = insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "SubCat_egory1" });
         const subCategory2 = insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "SubCat%egory2" });
 
-        return {
-          keys: {
-            category,
-            subCategory1,
-            subCategory2,
-          },
-        };
+        return { category, subCategory1, subCategory2 };
       });
 
+      const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
@@ -253,19 +247,16 @@ describe("Categories tree", () => {
     });
 
     it("finds 3d categories by label when subCategory count is 1 and labels of category and subCategory differ", async function () {
-      const { imodel, keys } = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         // SubCategory gets inserted by default
         const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", userLabel: "Test" });
         insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
 
-        return {
-          keys: {
-            category,
-          },
-        };
+        return { category };
       });
 
+      const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
@@ -290,7 +281,7 @@ describe("Categories tree", () => {
     });
 
     it("finds 3d categories and subCategories by label when subCategory count is > 1", async function () {
-      const { imodel, keys } = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
         const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", userLabel: "Test" });
@@ -300,15 +291,10 @@ describe("Categories tree", () => {
 
         const subCategory2 = insertSubCategory({ builder, codeValue: "SubCategory2", parentCategoryId: category.id });
 
-        return {
-          keys: {
-            category,
-            subCategory1,
-            subCategory2,
-          },
-        };
+        return { category, subCategory1, subCategory2 };
       });
 
+      const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
@@ -342,7 +328,7 @@ describe("Categories tree", () => {
     });
 
     it("finds 2d categories by label containing special SQLite characters", async function () {
-      const { imodel, keys } = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
         const drawingModel = insertDrawingModelWithPartition({ builder, codeValue: "TestDrawingModel" });
 
         const category1 = insertDrawingCategory({ builder, codeValue: "Test Drawing Cat_egory" });
@@ -351,14 +337,10 @@ describe("Categories tree", () => {
         const category2 = insertDrawingCategory({ builder, codeValue: "Test Drawing Cat%egory" });
         insertDrawingGraphic({ builder, modelId: drawingModel.id, categoryId: category2.id });
 
-        return {
-          keys: {
-            category1,
-            category2,
-          },
-        };
+        return { category1, category2 };
       });
 
+      const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "2d";
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
@@ -383,7 +365,7 @@ describe("Categories tree", () => {
     });
 
     it("finds 2d subcategories by label containing special SQLite characters", async function () {
-      const { imodel, keys } = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
         const drawingModel = insertDrawingModelWithPartition({ builder, codeValue: "TestDrawingModel" });
 
         const category = insertDrawingCategory({ builder, codeValue: "Test Drawing Category" });
@@ -392,15 +374,10 @@ describe("Categories tree", () => {
         const subCategory1 = insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "Test Drawing SubCat_egory" });
         const subCategory2 = insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "Test Drawing SubCat%egory" });
 
-        return {
-          keys: {
-            category,
-            subCategory1,
-            subCategory2,
-          },
-        };
+        return { category, subCategory1, subCategory2 };
       });
 
+      const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "2d";
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
