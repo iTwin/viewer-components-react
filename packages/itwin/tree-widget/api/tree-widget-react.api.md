@@ -4,6 +4,7 @@
 
 ```ts
 
+/// <reference types="node" />
 /// <reference types="react" />
 
 import type { BeEvent } from '@itwin/core-bentley';
