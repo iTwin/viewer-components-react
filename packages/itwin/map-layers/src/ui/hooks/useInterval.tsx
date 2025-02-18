@@ -7,7 +7,8 @@ import * as React from "react";
 
 /** Hook that create an interval and clears it when unloaded
  * Reference: https://github.com/gaearon/overreacted.io/blob/master/src/pages/making-setinterval-declarative-with-react-hooks/index.md
- * @beta
+ * @internal
+ * Logic Extracted from: https://github.com/iTwin/appui/blob/master/ui/core-react/src/core-react/utils/hooks/useInterval.tsx
  */
 export function useInterval(
   callback: (...args: any[]) => void,
