@@ -1,8 +1,16 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Wed, 29 Jan 2025 21:54:15 GMT and should not be manually modified.
+This log was last generated on Tue, 18 Feb 2025 21:33:04 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.26.2
+
+Tue, 18 Feb 2025 21:33:04 GMT
+
+### Patches
+
+- Add 'types' field in package.json. This fixes some issues for consumers when importing the esm package with moduleResolution: node. (export map support seems flaky in those cases.) ([#1192](https://github.com/iTwin/viewer-components-react/pull/1192))
 
 ## 0.26.1
 
