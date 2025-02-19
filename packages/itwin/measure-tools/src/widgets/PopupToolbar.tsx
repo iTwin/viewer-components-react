@@ -24,7 +24,7 @@ export const PopupToolbar: React.FC<PopupToolbarProps> = ({ items, onClose }: Po
     }
   }, [isClosing, onClose]);
 
-  const handleMouseDown = useCallback(() => {
+  const handleClick = useCallback(() => {
     if (!isClosing && onClose) {
       onClose();
       setIsClosing(true);
@@ -32,15 +32,15 @@ export const PopupToolbar: React.FC<PopupToolbarProps> = ({ items, onClose }: Po
   }, [isClosing, onClose]);
 
   useEffect(() => {
-    document.addEventListener("mousedown", handleMouseDown);
+    document.addEventListener("click", handleClick);
     document.addEventListener("wheel", handleMouseWheel);
 
     return () => {
-      document.removeEventListener("mousedown", handleMouseDown);
+      document.removeEventListener("click", handleClick);
       document.removeEventListener("wheel", handleMouseWheel);
       setIsClosing(false);
     };
-  }, [handleMouseWheel, handleMouseDown]);
+  }, [handleMouseWheel, handleClick]);
 
   return <div ref={ref}>
     <Toolbar items={items}/>
