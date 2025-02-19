@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Switch to mouse click event to close popup toolbar since new toolbar buttons need to use mouse down event to execute callback functions.",
-  "packageName": "@itwin/measure-tools-react",
-  "email": "wil.maier@bentley.com",
-  "dependentChangeType": "patch"
-}

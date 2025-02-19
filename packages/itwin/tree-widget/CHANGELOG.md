@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Fri, 14 Feb 2025 15:54:49 GMT and should not be manually modified.
+This log was last generated on Wed, 19 Feb 2025 21:08:10 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 3.5.0
+
+Wed, 19 Feb 2025 21:08:10 GMT
+
+### Minor changes
+
+- `CategoriesTree` component rendered `Categories` as a flat list, where each `Category` had zero or more child `SubCategories`. Some iTwin.js applications started to group `Categories` under `DefinitionContainers` and wanted to see them displayed in `CategoriesTree` component. Added `DefinitionContainers` to `CategoriesTree` component. This change doesn't affect applications that don't have `DefinitionContainers`. ([#1172](https://github.com/iTwin/viewer-components-react/pull/1172))
 
 ## 3.4.2
 
