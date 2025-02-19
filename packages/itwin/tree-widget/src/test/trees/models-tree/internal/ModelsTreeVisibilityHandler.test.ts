@@ -2535,7 +2535,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
               // FIXME: This is strange from the UX perspective
               groupingNode: ({ elementIds }) => (elementIds.includes(parentElementId) ? "visible" : "hidden"),
               element: ({ elementId }) => (elementId === parentElementId ? "visible" : "hidden"),
-              category: ({ categoryId }) => (categoryId === childCategoryId ? "hidden" : "visible"),
+              category: ({ categoryId }) => (categoryId === parentCategoryId ? "visible" : "hidden"),
             },
           });
         });
