@@ -48,7 +48,6 @@ describe("MapManagerSettings", () => {
         return 4;
     }
     assert.fail("invalid name provided.");
-    return 0;
   };
 
   const getQuantityNumericInputIndex = (name: string) => {
@@ -59,7 +58,6 @@ describe("MapManagerSettings", () => {
         return 1;
     }
     assert.fail("invalid name provided.");
-    return 0;
   };
 
   const changeNumericInputValue = (component: any, value: number) => {
@@ -144,7 +142,7 @@ describe("MapManagerSettings", () => {
     expect(quantityNumericInputs.at(getQuantityNumericInputIndex("terrainOrigin")).find("input").html().includes("disabled")).to.be.true;
 
     // exaggeration is disabled initially
-    const exaggerationInput = component.find(Input).last();
+    const exaggerationInput = component.find(Input).filterWhere((input) =>input.props()["data-testid"] === "exaggeration-input");
     expect(exaggerationInput.props().disabled).to.be.true;
 
     // Make sure the 'useDepthBuffer' toggle is NOT disabled
@@ -181,7 +179,7 @@ describe("MapManagerSettings", () => {
     expect(quantityInputs.at(getQuantityNumericInputIndex("terrainOrigin")).find("input").html().includes("disabled")).to.be.false;
 
     // terrainOrigin and exaggeration should be enable after terrain was toggled
-    const exaggerationInputAfter = component.find(Input).last();
+    const exaggerationInputAfter = component.find(Input).filterWhere((input) =>input.props()["data-testid"] === "exaggeration-input");
     expect(exaggerationInputAfter.props().disabled).to.be.false;
 
     // Elevation type should be enabled
@@ -413,7 +411,7 @@ describe("MapManagerSettings", () => {
 
   it("exaggeration", () => {
     const component = mountComponent();
-    const exaggerationInput = component.find(Input).last();;
+    const exaggerationInput = component.find(Input).filterWhere((input) =>input.props()["data-testid"] === "exaggeration-input");
 
     viewportMock.verify((x) => x.changeBackgroundMapProps(moq.It.isAny()), moq.Times.never());
 

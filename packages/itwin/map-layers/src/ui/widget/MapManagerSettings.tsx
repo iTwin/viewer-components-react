@@ -203,7 +203,7 @@ export function MapManagerSettings({ onHandleOutsideClick }: MapManagerSettingsP
     },
     [updateTerrainSettings],
   );
-  
+
   const [terrainOrigin, setTerrainOrigin] = React.useState(() => terrainSettings.heightOrigin);
 
   const handleHeightOriginChange = React.useCallback(
@@ -331,6 +331,7 @@ export function MapManagerSettings({ onHandleOutsideClick }: MapManagerSettingsP
 
                 <span className="map-manager-settings-label">{exaggerationLabel}</span>
                 <Input
+                  data-testid="exaggeration-input"
                   type="number"
                   value={exaggeration.toString()}
                   disabled={!applyTerrain}
