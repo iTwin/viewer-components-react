@@ -639,6 +639,133 @@ describe("Models tree", () => {
           ],
         });
       });
+
+      it("shows element's children category when it differs from parent element's category", async function () {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
+          const subject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+          const model = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel", partitionParentId: subject.id });
+          const parentCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
+          const childCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory2" });
+          const parentElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: parentCategory.id });
+          const childElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: childCategory.id, parentId: parentElement.id });
+          return { subject, model, parentCategory, childCategory, parentElement, childElement };
+        });
+        const { imodel, ...keys } = buildIModelResult;
+        using provider = createModelsTreeProvider({ imodel });
+        await validateHierarchy({
+          provider,
+          expect: [
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.subject],
+              autoExpand: true,
+              supportsFiltering: true,
+              children: [
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.model],
+                  supportsFiltering: true,
+                  children: [
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.parentCategory],
+                      supportsFiltering: true,
+                      children: [
+                        NodeValidators.createForClassGroupingNode({
+                          className: keys.parentElement.className,
+                          label: "Physical Object",
+                          children: [
+                            NodeValidators.createForInstanceNode({
+                              instanceKeys: [keys.parentElement],
+                              supportsFiltering: true,
+                              children: [
+                                NodeValidators.createForInstanceNode({
+                                  instanceKeys: [keys.childCategory],
+                                  supportsFiltering: true,
+                                  children: [
+                                    NodeValidators.createForClassGroupingNode({
+                                      className: keys.childElement.className,
+                                      label: "Physical Object",
+                                      children: [
+                                        NodeValidators.createForInstanceNode({
+                                          instanceKeys: [keys.childElement],
+                                          supportsFiltering: true,
+                                          children: false,
+                                        }),
+                                      ],
+                                    }),
+                                  ],
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        });
+      });
+
+      it("hides element's children category when it is the same as parent element's category", async function () {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
+          const subject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+          const model = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel", partitionParentId: subject.id });
+          const parentCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
+          const parentElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: parentCategory.id });
+          const childElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: parentCategory.id, parentId: parentElement.id });
+          return { subject, model, parentCategory, parentElement, childElement };
+        });
+        const { imodel, ...keys } = buildIModelResult;
+        using provider = createModelsTreeProvider({ imodel });
+        await validateHierarchy({
+          provider,
+          expect: [
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.subject],
+              autoExpand: true,
+              supportsFiltering: true,
+              children: [
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.model],
+                  supportsFiltering: true,
+                  children: [
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.parentCategory],
+                      supportsFiltering: true,
+                      children: [
+                        NodeValidators.createForClassGroupingNode({
+                          className: keys.parentElement.className,
+                          label: "Physical Object",
+                          children: [
+                            NodeValidators.createForInstanceNode({
+                              instanceKeys: [keys.parentElement],
+                              supportsFiltering: true,
+                              children: [
+                                NodeValidators.createForClassGroupingNode({
+                                  className: keys.childElement.className,
+                                  label: "Physical Object",
+                                  children: [
+                                    NodeValidators.createForInstanceNode({
+                                      instanceKeys: [keys.childElement],
+                                      supportsFiltering: true,
+                                      children: false,
+                                    }),
+                                  ],
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        });
+      });
     });
 
     describe("Hierarchy customization", () => {

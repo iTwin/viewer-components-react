@@ -2516,9 +2516,9 @@ describe("HierarchyBasedVisibilityHandler", () => {
 
           const parentElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: parentCategory.id });
           insertPhysicalElement({ builder, modelId: model.id, categoryId: childCategory.id, parentId: parentElement.id });
-          return { modelId: model.id, parentCategoryId: parentCategory.id, parentElementId: parentElement.id };
+          return { modelId: model.id, parentCategoryId: parentCategory.id, parentElementId: parentElement.id, childCategoryId: childCategory.id };
         });
-        const { imodel, modelId, parentCategoryId, parentElementId } = buildIModelResult;
+        const { imodel, modelId, parentCategoryId, parentElementId, childCategoryId } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodel });
         const { handler, viewport, ...props } = visibilityTestData;
         const parentCategoryNode = createCategoryHierarchyNode(modelId, parentCategoryId);
@@ -2535,6 +2535,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
               // FIXME: This is strange from the UX perspective
               groupingNode: ({ elementIds }) => (elementIds.includes(parentElementId) ? "visible" : "hidden"),
               element: ({ elementId }) => (elementId === parentElementId ? "visible" : "hidden"),
+              category: ({ categoryId }) => (categoryId === childCategoryId ? "hidden" : "visible"),
             },
           });
         });

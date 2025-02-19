@@ -437,6 +437,13 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       filter: instanceFilter,
       contentClass: { fullName: this._hierarchyConfig.elementClassSpecification, alias: "this" },
     });
+    const elementWhereClause = parentNode.extendedData?.childElements ?
+      `this.ECInstanceId IN (${parentNode.extendedData.childElements})` :
+      `
+        this.Category.Id IN (${categoryIds.map(() => "?").join(",")})
+        AND this.Model.Id IN (${modelIds.map(() => "?").join(",")})
+        AND this.Parent.Id IS NULL
+      `;
     return [
       {
         fullClassName: this._hierarchyConfig.elementClassSpecification,
@@ -479,12 +486,10 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             FROM ${instanceFilterClauses.from} this
             ${instanceFilterClauses.joins}
             WHERE
-              this.Category.Id IN (${categoryIds.map(() => "?").join(",")})
-              AND this.Model.Id IN (${modelIds.map(() => "?").join(",")})
-              AND this.Parent.Id IS NULL
+              ${elementWhereClause}
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
-          bindings: [...categoryIds.map((id) => ({ type: "id", value: id })), ...modelIds.map((id) => ({ type: "id", value: id }))] as ECSqlBinding[],
+          bindings: parentNode.extendedData?.childElements === undefined ? [...categoryIds.map((id) => ({ type: "id", value: id })), ...modelIds.map((id) => ({ type: "id", value: id }))] as ECSqlBinding[] : undefined,
         },
       },
     ];
@@ -494,14 +499,60 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     parentNodeInstanceIds: elementIds,
     instanceFilter,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
+    const categoryInstanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
+      filter: instanceFilter,
+      contentClass: { fullName: "BisCore.SpatialCategory", alias: "this" },
+    });
+    const elementInstanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
       filter: instanceFilter,
       contentClass: { fullName: this._hierarchyConfig.elementClassSpecification, alias: "this" },
     });
+    const ctes = [
+      `ParentElementCategory(Id) AS (
+        SELECT this.Category.Id FROM ${this._hierarchyConfig.elementClassSpecification} this WHERE this.ECInstanceId IN (${elementIds.join(", ")})
+      )`
+    ]
     return [
+      {
+        fullClassName: "BisCore.Element",
+        query: {
+          ctes,
+          ecsql: `
+            SELECT
+              ${await this._selectQueryFactory.createSelectClause({
+                ecClassId: { selector: "this.ECClassId" },
+                ecInstanceId: { selector: "this.ECInstanceId" },
+                nodeLabel: {
+                  selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
+                    classAlias: "this",
+                    className: "BisCore.SpatialCategory",
+                  }),
+                },
+                grouping: { byLabel: { action: "merge", groupId: "category" } },
+                hasChildren: true,
+                extendedData: {
+                  imageId: "icon-layers",
+                  isCategory: true,
+                  modelIds: { selector: "json_array(json_array(CAST(IdToHex(el.Model.Id) AS TEXT)))" },
+                  childElements: {selector: `(SELECT STRING_AGG(CAST(geo.ECInstanceId AS TEXT), ', ') from ${this._hierarchyConfig.elementClassSpecification} geo WHERE geo.Category.Id = this.ECInstanceId AND geo.Parent.Id IN(${elementIds.join(", ")}))`}
+                },
+                supportsFiltering: true,
+              })}
+            FROM ${categoryInstanceFilterClauses.from} this
+            JOIN ${this._hierarchyConfig.elementClassSpecification} el ON el.Category.Id = this.ECInstanceId
+            ${categoryInstanceFilterClauses.joins}
+            WHERE
+              el.Parent.Id IN(${elementIds.join(", ")})
+              AND this.ECInstanceId NOT IN(SELECT Id FROM ParentElementCategory)
+              ${categoryInstanceFilterClauses.where ? `AND ${categoryInstanceFilterClauses.where}` : ""}
+            GROUP BY this.ECInstanceId
+          `,
+        },
+      },
       {
         fullClassName: this._hierarchyConfig.elementClassSpecification,
         query: {
+          ctes,
           ecsql: `
             SELECT
               ${await this._selectQueryFactory.createSelectClause({
@@ -537,11 +588,12 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 },
                 supportsFiltering: true,
               })}
-            FROM ${instanceFilterClauses.from} this
-            ${instanceFilterClauses.joins}
+            FROM ${elementInstanceFilterClauses.from} this
+            ${elementInstanceFilterClauses.joins}
             WHERE
               this.Parent.Id IN (${elementIds.map(() => "?").join(",")})
-              ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+              AND this.Category.Id IN(SELECT Id FROM ParentElementCategory)
+              ${elementInstanceFilterClauses.where ? `AND ${elementInstanceFilterClauses.where}` : ""}
           `,
           bindings: elementIds.map((id) => ({ type: "id", value: id })),
         },
