@@ -2,14 +2,13 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-
 import * as React from "react";
 import { useInterval } from "./useInterval";
 
 /** Hook that will show a popup window
  * @internal
  * Reference: https://github.com/iTwin/appui/commit/b8c0ac6eec4b8f1551cde3b7913df135ccd0f4f5
- * Logic Extracted From: https://github.com/iTwin/appui/blob/master/ui/core-react/src/core-react/utils/hooks/useCrossOriginPopup.tsx
+ * Copied from: https://github.com/iTwin/appui/blob/master/ui/core-react/src/core-react/utils/hooks/useCrossOriginPopup.tsx
  */
 export function useCrossOriginPopup(
   visible: boolean,
