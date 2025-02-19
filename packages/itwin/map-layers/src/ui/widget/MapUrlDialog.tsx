@@ -616,8 +616,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
 
   // Use a hook to display the popup.
   // The display of the popup is controlled by the 'showOauthPopup' state variable.
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  useCrossOriginPopup(showOauthPopup, externalLoginUrl, externalLoginTitle, 450, 450, handleOAuthPopupClose);
+  useCrossOriginPopup(true, externalLoginUrl, externalLoginTitle, 450, 450, handleOAuthPopupClose);
 
   return (
     <div ref={dialogContainer}>

@@ -44,7 +44,6 @@ export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetPr
 
   React.useEffect(() => {
     dataProvider.current = new FeatureInfoDataProvider();
-
     return () => {
       dataProvider?.current?.onUnload();
     };
