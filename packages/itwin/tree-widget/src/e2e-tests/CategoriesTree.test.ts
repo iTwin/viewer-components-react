@@ -107,11 +107,14 @@ test.describe("Categories tree", () => {
       await node.click();
       const treeContainer = page.locator("#tw-tree-renderer-container");
 
+      // ensure checkbox is not disabled
+      const checkbox = node.getByRole("checkbox");
+      await expect(checkbox).toBeEnabled();
+
       // focus on checkbox using keyboard
       await page.keyboard.press("Tab");
 
       // ensure checkbox is focused
-      const checkbox = node.getByRole("checkbox");
       await expect(checkbox).toBeFocused();
 
       await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
