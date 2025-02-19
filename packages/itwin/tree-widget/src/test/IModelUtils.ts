@@ -37,11 +37,11 @@ import type {
 export async function buildIModel(
   mochaContext: Mocha.Context,
   setup?: (builder: TestIModelBuilder, testSchema: TestSchemaDefinition, mochaContext: Mocha.Context) => Promise<void>,
-): Promise<{ imodel: IModelConnection }>;
+): Promise<{ imodel: IModelConnection } & AsyncDisposable>;
 export async function buildIModel<TResult extends {}>(
   mochaContext: Mocha.Context,
   setup: (builder: TestIModelBuilder, testSchema: TestSchemaDefinition, mochaContext: Mocha.Context) => Promise<TResult>,
-): Promise<{ imodel: IModelConnection } & TResult>;
+): Promise<{ imodel: IModelConnection } & TResult & AsyncDisposable>;
 export async function buildIModel<TResult extends {} | undefined>(
   mochaContext: Mocha.Context,
   setup?: (builder: TestIModelBuilder, testSchema: TestSchemaDefinition, mochaContext: Mocha.Context) => Promise<TResult>,
@@ -66,7 +66,13 @@ export async function buildIModel<TResult extends {} | undefined>(
       res = await setup(builder, testSchema, mochaContext);
     }
   });
-  return { ...res, imodel };
+  return {
+    ...res,
+    imodel,
+    [Symbol.asyncDispose]: async () => {
+      await imodel.close();
+    },
+  };
 }
 
 interface TestSchemaDefinition extends ImportSchemaResult {
@@ -261,6 +267,24 @@ export function insertSpatialCategory(
     code: builder.createCode(model, BisCodeSpec.spatialCategory, codeValue),
     userLabel,
     ...categoryProps,
+  });
+  return { className, id };
+}
+
+export function insertDefinitionContainer(
+  props: BaseInstanceInsertProps & { codeValue: string; modelId?: Id64String; isPrivate?: boolean } & Partial<
+      Omit<ElementProps, "id" | "model" | "parent" | "code">
+    >,
+) {
+  const { builder, classFullName, modelId, codeValue, ...elementProps } = props;
+  const defaultClassName = `BisCore${props.fullClassNameSeparator ?? "."}DefinitionContainer`;
+  const className = classFullName ?? defaultClassName;
+  const model = modelId ?? IModel.dictionaryId;
+  const id = builder.insertElement({
+    classFullName: className,
+    model,
+    code: builder.createCode(model, BisCodeSpec.nullCodeSpec, codeValue),
+    ...elementProps,
   });
   return { className, id };
 }

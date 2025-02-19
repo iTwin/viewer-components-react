@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Thu, 06 Feb 2025 13:36:20 GMT and should not be manually modified.
+This log was last generated on Fri, 14 Feb 2025 15:54:49 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 3.4.2
+
+Fri, 14 Feb 2025 15:54:49 GMT
+
+### Patches
+
+- Adjusted modeled element / sub-model visibility controls. Now, if visibility of modeled element is changed, visibility of sub-model is adjusted accordingly and vice versa. ([#1183](https://github.com/iTwin/viewer-components-react/pull/1183))
 
 ## 3.4.1
 

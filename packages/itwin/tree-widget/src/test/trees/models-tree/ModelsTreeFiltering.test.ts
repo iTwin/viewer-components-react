@@ -1695,7 +1695,7 @@ describe("Models tree", () => {
     });
 
     it("finds elements by base36 ECInstanceId suffix", async function () {
-      const { imodel, expectedPaths, formattedECInstanceId } = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
         const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
         const category = insertSpatialCategory({ builder, codeValue: "category" });
@@ -1709,6 +1709,7 @@ describe("Models tree", () => {
           ),
         };
       });
+      const { imodel, expectedPaths, formattedECInstanceId } = buildIModelResult;
 
       const imodelAccess = createIModelAccess(imodel);
       using idsCache = new ModelsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration);
@@ -1724,7 +1725,7 @@ describe("Models tree", () => {
     });
 
     it("finds elements by label containing special SQLite characters", async function () {
-      const { imodel, keys } = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
         const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
         const category = insertSpatialCategory({ builder, codeValue: "category" });
@@ -1742,6 +1743,7 @@ describe("Models tree", () => {
           },
         };
       });
+      const { imodel, keys } = buildIModelResult;
 
       const imodelAccess = createIModelAccess(imodel);
       using idsCache = new ModelsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration);

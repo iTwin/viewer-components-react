@@ -9,13 +9,17 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import {
-  HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
-} from "@itwin/presentation-testing";
+import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { ExternalSourcesTreeDefinition } from "../../../tree-widget-react/components/trees/external-sources-tree/ExternalSourcesTreeDefinition.js";
 import {
-  buildIModel, insertExternalSource, insertExternalSourceAspect, insertExternalSourceAttachment, insertPhysicalElement,
-  insertPhysicalModelWithPartition, insertRepositoryLink, insertSpatialCategory,
+  buildIModel,
+  insertExternalSource,
+  insertExternalSourceAspect,
+  insertExternalSourceAttachment,
+  insertPhysicalElement,
+  insertPhysicalModelWithPartition,
+  insertRepositoryLink,
+  insertSpatialCategory,
 } from "../../IModelUtils.js";
 import { createIModelAccess } from "../Common.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
@@ -47,7 +51,7 @@ describe("External sources tree", () => {
 
     it("creates auto-expanded root nodes", async function () {
       // eslint-disable-next-line deprecation/deprecation
-      const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
         const { externalSource: rootExternalSource } = insertRootExternalSource({
           builder,
           repositoryLinkProps: { codeValue: "Test repo link" },
@@ -55,8 +59,10 @@ describe("External sources tree", () => {
         });
         return { rootExternalSource };
       });
+      const { imodel, ...keys } = buildIModelResult;
+      using provider = createExternalSourcesTreeProvider(imodel);
       await validateHierarchy({
-        provider: createExternalSourcesTreeProvider(imodel),
+        provider,
         expect: [
           NodeValidators.createForInstanceNode({
             instanceKeys: [keys.rootExternalSource],
@@ -71,7 +77,7 @@ describe("External sources tree", () => {
 
     it("creates external sources as external source group node children", async function () {
       // eslint-disable-next-line deprecation/deprecation
-      const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
         const { externalSource: rootExternalSource, repositoryLink: rootRepositoryLink } = insertRootExternalSource({
           builder,
           externalSourceProps: { codeValue: "Root external source" },
@@ -86,8 +92,10 @@ describe("External sources tree", () => {
         groupExternalSources(builder, externalSourceGroup.id, [childExternalSource.id]);
         return { rootExternalSource, rootRepositoryLink, externalSourceGroup, externalSourceAttachment, childExternalSource };
       });
+      const { imodel, ...keys } = buildIModelResult;
+      using provider = createExternalSourcesTreeProvider(imodel);
       await validateHierarchy({
-        provider: createExternalSourcesTreeProvider(imodel),
+        provider,
         expect: [
           NodeValidators.createForInstanceNode({
             instanceKeys: [keys.rootExternalSource],
@@ -116,7 +124,7 @@ describe("External sources tree", () => {
 
     it("creates attached external sources as external source node children", async function () {
       // eslint-disable-next-line deprecation/deprecation
-      const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
         const { externalSource: rootExternalSource } = insertRootExternalSource({ builder });
         const childExternalSource = insertExternalSource({ builder, codeValue: "Child external source" });
         const attachment = insertExternalSourceAttachment({
@@ -126,8 +134,10 @@ describe("External sources tree", () => {
         });
         return { rootExternalSource, childExternalSource, attachment };
       });
+      const { imodel, ...keys } = buildIModelResult;
+      using provider = createExternalSourcesTreeProvider(imodel);
       await validateHierarchy({
-        provider: createExternalSourcesTreeProvider(imodel),
+        provider,
         expect: [
           NodeValidators.createForInstanceNode({
             instanceKeys: [keys.rootExternalSource],
@@ -148,7 +158,7 @@ describe("External sources tree", () => {
 
     it("creates elements as external source node children", async function () {
       // eslint-disable-next-line deprecation/deprecation
-      const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
         const { externalSource: rootExternalSource } = insertRootExternalSource({ builder });
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "Model" });
         const category = insertSpatialCategory({ builder, codeValue: "Category" });
@@ -168,8 +178,10 @@ describe("External sources tree", () => {
         insertExternalSourceAspect({ builder, elementId: element2.id, sourceId: rootExternalSource.id });
         return { rootExternalSource, physicalModel, category, element1, element2 };
       });
+      const { imodel, ...keys } = buildIModelResult;
+      using provider = createExternalSourcesTreeProvider(imodel);
       await validateHierarchy({
-        provider: createExternalSourcesTreeProvider(imodel),
+        provider,
         expect: [
           NodeValidators.createForInstanceNode({
             instanceKeys: [keys.rootExternalSource],
