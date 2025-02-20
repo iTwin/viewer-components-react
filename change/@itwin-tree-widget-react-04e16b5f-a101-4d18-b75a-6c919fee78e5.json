@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Changed models tree to show child element's category node when it differs from parent element's category.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "100586436+JonasDov@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

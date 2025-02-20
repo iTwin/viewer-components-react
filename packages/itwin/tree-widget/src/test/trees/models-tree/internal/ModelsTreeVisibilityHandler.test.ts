@@ -2533,8 +2533,11 @@ describe("HierarchyBasedVisibilityHandler", () => {
             visibilityExpectations: {
               ...VisibilityExpectations.all("visible"),
               // FIXME: This is strange from the UX perspective
+              subject: () => "partial",
+              model: () => "partial",
               groupingNode: ({ elementIds }) => (elementIds.includes(parentElementId) ? "visible" : "hidden"),
               element: ({ elementId }) => (elementId === parentElementId ? "visible" : "hidden"),
+              category: ({ categoryId }) => (categoryId === parentCategoryId ? "visible" : "hidden"),
             },
           });
         });
