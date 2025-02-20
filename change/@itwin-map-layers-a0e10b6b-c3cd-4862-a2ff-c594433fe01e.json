@@ -1,0 +1,7 @@
+{
+  "type": "none",
+  "comment": "Removed/Replaced deprecated components",
+  "packageName": "@itwin/map-layers",
+  "email": "bipin.pachhai@bentley.com",
+  "dependentChangeType": "none"
+}

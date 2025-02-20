@@ -18,13 +18,12 @@ import {
   TreeRenderer,
   useTreeModel,
 } from "@itwin/components-react";
-import { ImageCheckBox, ResizableContainerObserver } from "@itwin/core-react";
 import { SvgCheckboxDeselect, SvgCheckboxSelect, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
-import { IconButton, Input } from "@itwin/itwinui-react";
+import { Checkbox, IconButton, Input } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
 import { SubLayersDataProvider } from "./SubLayersDataProvider";
+import { useResizeObserver } from "../hooks/useResizeObserver";
 
-import type { NodeCheckboxRenderProps} from "@itwin/core-react";
 import type {
   AbstractTreeNodeLoaderWithProvider,
   DelayLoadedTreeNodeItem,
@@ -42,6 +41,13 @@ import type {
 } from "@itwin/components-react";
 import type { MapSubLayerProps, SubLayerId } from "@itwin/core-common";
 import type { SubLayersTreeExpandMode } from "./SubLayersDataProvider";
+
+type CheckboxProps = React.ComponentPropsWithoutRef<typeof Checkbox>;
+type CheckboxRendererProps = Omit<CheckboxProps, "onChange" | "onClick"> & {
+  onChange: (checked: boolean) => void;
+  onClick: (e: React.MouseEvent) => void;
+};
+
 interface ToolbarProps {
   searchField?: React.ReactNode;
   children?: React.ReactNode[];
@@ -113,6 +119,11 @@ export function SubLayersTree(props: SubLayersTreeProps) {
   // it selects/deselects node when checkbox is checked/unchecked and vice versa.
   const [eventHandler, setEventHandler] = React.useState<SubLayerCheckboxHandler | undefined>(undefined);
 
+  const [elementRef] = useResizeObserver<HTMLDivElement>((size) => {
+    setWidth(size.width);
+    setHeight(size.height);
+  });
+
   React.useEffect(() => {
     const handler = new SubLayerCheckboxHandler(subLayers, props.singleVisibleSubLayer ?? false, nodeLoader, props.onSubLayerStateChange);
     setEventHandler(handler);
@@ -183,16 +194,7 @@ export function SubLayersTree(props: SubLayersTreeProps) {
                 </IconButton>,
               ]}
         </Toolbar>
-        <div className="map-manager-sublayer-tree-content">
-          {props.width === undefined && props.height === undefined && (
-            // eslint-disable-next-line @typescript-eslint/no-deprecated
-            <ResizableContainerObserver
-              onResize={(w, h) => {
-                setWidth(w);
-                setHeight(h);
-              }}
-            />
-          )}
+        <div className="map-manager-sublayer-tree-content" ref={elementRef}>
           {width !== undefined && height !== undefined && (
             <ControlledTree
               nodeLoader={nodeLoader}
@@ -396,16 +398,15 @@ class SubLayerCheckboxHandler extends TreeEventHandler {
 }
 
 /** Custom checkbox renderer that renders checkbox as an eye */
-// eslint-disable-next-line @typescript-eslint/no-deprecated
-const eyeCheckboxRenderer = (props: NodeCheckboxRenderProps) => (
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  <ImageCheckBox
+const eyeCheckboxRenderer = (props: CheckboxRendererProps) => (
+  <Checkbox
+    className="core-image-checkbox"
+    variant="eyeball"
     checked={props.checked}
     disabled={props.disabled}
-    imageOn="icon-visibility"
-    imageOff="icon-visibility-hide-2"
-    onClick={props.onChange}
-    tooltip={props.title}
+    onChange={(e) => {
+      props.onChange(e.target.checked);
+    }}
   />
 );
 

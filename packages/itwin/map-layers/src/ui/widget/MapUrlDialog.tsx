@@ -8,7 +8,6 @@ import "./MapUrlDialog.scss";
 import * as React from "react";
 import { BeEvent, Guid } from "@itwin/core-bentley";
 import { IModelApp, MapLayerSource, MapLayerSourceStatus, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
-import { useCrossOriginPopup } from "@itwin/core-react";
 import { SvgStatusWarning, SvgTechnicalPreviewMini } from "@itwin/itwinui-icons-color-react";
 import { Button, Icon, Input, LabeledInput, Modal, ModalButtonBar, ModalContent, ProgressLinear } from "@itwin/itwinui-react";
 import { CustomParamsMappingStorage } from "../../CustomParamsMappingStorage";
@@ -19,6 +18,7 @@ import { MapLayersUI } from "../../mapLayers";
 import { SelectCustomParam } from "./SelectCustomParam";
 import { SelectMapFormat } from "./SelectMapFormat";
 import { UserPreferencesStorageOptions } from "./UserPreferencesStorageOptions";
+import { useCrossOriginPopup } from "../hooks/useCrossOriginPopup";
 
 import type { ImageMapLayerSettings } from "@itwin/core-common";
 import type { MapLayerAccessClient, MapLayerSourceValidation, ScreenViewport } from "@itwin/core-frontend";
@@ -616,7 +616,6 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
 
   // Use a hook to display the popup.
   // The display of the popup is controlled by the 'showOauthPopup' state variable.
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
   useCrossOriginPopup(showOauthPopup, externalLoginUrl, externalLoginTitle, 450, 450, handleOAuthPopupClose);
 
   return (

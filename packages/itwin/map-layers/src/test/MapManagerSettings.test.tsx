@@ -10,9 +10,8 @@ import * as sinon from "sinon";
 import * as moq from "typemoq";
 import { PlanarClipMaskMode, PlanarClipMaskPriority, TerrainHeightOriginMode } from "@itwin/core-common";
 import { MockRender } from "@itwin/core-frontend";
-import { NumberInput } from "@itwin/core-react";
 import { QuantityNumberInput } from "@itwin/imodel-components-react";
-import { Select, ToggleSwitch } from "@itwin/itwinui-react";
+import { Input, Select, ToggleSwitch } from "@itwin/itwinui-react";
 import { act, fireEvent, render } from "@testing-library/react";
 import { SourceMapContext } from "../ui/widget/MapLayerManager";
 import { MapManagerSettings } from "../ui/widget/MapManagerSettings";
@@ -49,7 +48,6 @@ describe("MapManagerSettings", () => {
         return 4;
     }
     assert.fail("invalid name provided.");
-    return 0;
   };
 
   const getQuantityNumericInputIndex = (name: string) => {
@@ -60,7 +58,6 @@ describe("MapManagerSettings", () => {
         return 1;
     }
     assert.fail("invalid name provided.");
-    return 0;
   };
 
   const changeNumericInputValue = (component: any, value: number) => {
@@ -145,8 +142,8 @@ describe("MapManagerSettings", () => {
     expect(quantityNumericInputs.at(getQuantityNumericInputIndex("terrainOrigin")).find("input").html().includes("disabled")).to.be.true;
 
     // exaggeration is disabled initially
-    const numericInputs = component.find(NumberInput);
-    expect(numericInputs.at(0).find("input").html().includes("disabled")).to.be.true;
+    const exaggerationInput = component.find(Input).filterWhere((input) =>input.props()["data-testid"] === "exaggeration-input");
+    expect(exaggerationInput.props().disabled).to.be.true;
 
     // Make sure the 'useDepthBuffer' toggle is NOT disabled
     let toggles = component.find(ToggleSwitch);
@@ -182,7 +179,8 @@ describe("MapManagerSettings", () => {
     expect(quantityInputs.at(getQuantityNumericInputIndex("terrainOrigin")).find("input").html().includes("disabled")).to.be.false;
 
     // terrainOrigin and exaggeration should be enable after terrain was toggled
-    expect(numericInputs.at(0).find("input").html().includes("disabled")).to.be.false;
+    const exaggerationInputAfter = component.find(Input).filterWhere((input) =>input.props()["data-testid"] === "exaggeration-input");
+    expect(exaggerationInputAfter.props().disabled).to.be.false;
 
     // Elevation type should be enabled
     select = component.find(Select);
@@ -413,7 +411,7 @@ describe("MapManagerSettings", () => {
 
   it("exaggeration", () => {
     const component = mountComponent();
-    const numericInputs = component.find(NumberInput);
+    const exaggerationInput = component.find(Input).filterWhere((input) =>input.props()["data-testid"] === "exaggeration-input");
 
     viewportMock.verify((x) => x.changeBackgroundMapProps(moq.It.isAny()), moq.Times.never());
 
@@ -423,7 +421,10 @@ describe("MapManagerSettings", () => {
       .at(getToggleIndex("terrain"))
       .find("input")
       .simulate("change", { target: { checked: true } });
-    changeNumericInputValue(numericInputs.at(0), 1);
+
+    exaggerationInput.props().onChange!({ target: { value: "1" } } as React.ChangeEvent<HTMLInputElement>);
+    exaggerationInput.simulate("keydown", { key: "Enter" });
+    exaggerationInput.update();
 
     viewportMock.verify((x) => x.changeBackgroundMapProps({ terrainSettings: { exaggeration: 1 } }), moq.Times.once());
     component.unmount();

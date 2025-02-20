@@ -5,12 +5,12 @@
 import * as React from "react";
 import { useActiveFrontstageDef, WidgetState } from "@itwin/appui-react";
 import { Orientation, VirtualizedPropertyGridWithDataProvider } from "@itwin/components-react";
-import { ResizableContainerObserver } from "@itwin/core-react";
 import { SvgCopy } from "@itwin/itwinui-icons-react";
 import { Flex, IconButton } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
 import { FeatureInfoUiItemsProvider } from "../FeatureInfoUiItemsProvider";
 import { FeatureInfoDataProvider } from "./FeatureInfoDataProvider";
+import { useResizeObserver } from "../hooks/useResizeObserver";
 
 import type { PrimitiveValue } from "@itwin/appui-abstract";
 import type { ActionButtonRendererProps } from "@itwin/components-react";
@@ -60,6 +60,10 @@ export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetPr
     setSize({ width: w, height: h });
   }, []);
 
+  const [elementRef] = useResizeObserver<HTMLDivElement>((size) => {
+    handleResize(size.width, size.height);
+  });
+
   const copyButton = React.useCallback(
     (props: ActionButtonRendererProps) =>
       props.isPropertyHovered && (
@@ -83,8 +87,7 @@ export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetPr
 
   if (hasData && dataProvider.current) {
     return (
-      // eslint-disable-next-line @typescript-eslint/no-deprecated
-      <ResizableContainerObserver onResize={handleResize}>
+      <div ref={elementRef}>
         <VirtualizedPropertyGridWithDataProvider
           width={width}
           height={height}
@@ -94,7 +97,7 @@ export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetPr
           isPropertyHoverEnabled // This need to be turned on to have the action button appears only when property hovered
           actionButtonRenderers={[copyButton]}
         />
-      </ResizableContainerObserver>
+      </div>
     );
   } else {
     return (
