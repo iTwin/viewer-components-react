@@ -2,6 +2,21 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Wed, 19 Feb 2025 21:08:10 GMT",
+      "version": "0.26.3",
+      "tag": "@itwin/measure-tools-react_v0.26.3",
+      "comments": {
+        "patch": [
+          {
+            "author": "wil.maier@bentley.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "73ac78f07b848bbaa686d9c0108e2ca343ac896a",
+            "comment": "Switch to mouse click event to close popup toolbar since new toolbar buttons need to use mouse down event to execute callback functions."
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 18 Feb 2025 21:33:04 GMT",
       "version": "0.26.2",
       "tag": "@itwin/measure-tools-react_v0.26.2",
