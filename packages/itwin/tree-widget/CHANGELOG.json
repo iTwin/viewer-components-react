@@ -2,6 +2,21 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Wed, 19 Feb 2025 21:08:10 GMT",
+      "version": "3.5.0",
+      "tag": "@itwin/tree-widget-react_v3.5.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "4bf0890cbe72eb77f3e3256af1c55de625857a5b",
+            "comment": "`CategoriesTree` component rendered `Categories` as a flat list, where each `Category` had zero or more child `SubCategories`. Some iTwin.js applications started to group `Categories` under `DefinitionContainers` and wanted to see them displayed in `CategoriesTree` component. Added `DefinitionContainers` to `CategoriesTree` component. This change doesn't affect applications that don't have `DefinitionContainers`."
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 14 Feb 2025 15:54:49 GMT",
       "version": "3.4.2",
       "tag": "@itwin/tree-widget-react_v3.4.2",

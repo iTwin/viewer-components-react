@@ -1,8 +1,16 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Tue, 18 Feb 2025 21:33:04 GMT and should not be manually modified.
+This log was last generated on Wed, 19 Feb 2025 21:08:10 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.26.3
+
+Wed, 19 Feb 2025 21:08:10 GMT
+
+### Patches
+
+- Switch to mouse click event to close popup toolbar since new toolbar buttons need to use mouse down event to execute callback functions. ([#1208](https://github.com/iTwin/viewer-components-react/pull/1208))
 
 ## 0.26.2
 
