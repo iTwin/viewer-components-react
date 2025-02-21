@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Fixing tests for imodel-react-hooks that were being skipped",
+  "packageName": "@itwin/imodel-react-hooks",
+  "email": "70723971+ben-bartholomew@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
