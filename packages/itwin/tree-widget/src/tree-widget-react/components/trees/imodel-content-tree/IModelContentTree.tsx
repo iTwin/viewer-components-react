@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-
 import { Tree } from "../common/components/Tree.js";
 import { TreeRenderer } from "../common/components/TreeRenderer.js";
 import { IModelContentTreeComponent } from "./IModelContentTreeComponent.js";
@@ -13,6 +12,7 @@ import { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache.
 import type { BaseTreeRendererProps } from "../common/components/BaseTreeRenderer.js";
 import type { TreeProps } from "../common/components/Tree.js";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+
 /** @beta */
 export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode"> &
   Pick<BaseTreeRendererProps, "actions"> & {
@@ -46,7 +46,6 @@ const classIcon = new URL("@itwin/itwinui-icons/tree-class.svg", import.meta.url
 const modelIcon = new URL("@itwin/itwinui-icons/model-cube.svg", import.meta.url).href;
 const categoryIcon = new URL("@itwin/itwinui-icons/tree-category.svg", import.meta.url).href;
 const elementIcon = new URL("@itwin/itwinui-icons/tree-element.svg", import.meta.url).href;
-const iModelIcon = new URL("@itwin/itwinui-icons/imodel.svg", import.meta.url).href;
 const hierarchyTreeIcon = new URL("@itwin/itwinui-icons/selection-children.svg", import.meta.url).href;
 const groupIcon = new URL("@itwin/itwinui-icons/group.svg", import.meta.url).href;
 
@@ -62,8 +61,6 @@ function getIcon(node: PresentationHierarchyNode): string | undefined {
       return elementIcon;
     case "icon-ec-class":
       return classIcon;
-    case "icon-imodel-hollow-2":
-      return iModelIcon;
     case "icon-folder":
       return subjectIcon;
     case "icon-model":
