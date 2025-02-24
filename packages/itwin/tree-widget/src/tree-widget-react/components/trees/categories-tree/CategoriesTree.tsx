@@ -30,11 +30,13 @@ export function CategoriesTree({
   hierarchyLevelConfig,
   selectionMode,
   onCategoriesFiltered,
+  noDataMessage,
 }: CategoriesTreeProps) {
   const { categoriesTreeProps, rendererProps } = useCategoriesTree({
     filter,
     activeView,
     onCategoriesFiltered,
+    noDataMessage,
   });
 
   return (

@@ -4,14 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 
+import { NoDataRenderer } from "../common/components/NoDataRenderer.js";
 import { Tree } from "../common/components/Tree.js";
 import { TreeRenderer } from "../common/components/TreeRenderer.js";
 import { ExternalSourcesTreeComponent } from "./ExternalSourcesTreeComponent.js";
 import { ExternalSourcesTreeDefinition } from "./ExternalSourcesTreeDefinition.js";
 
+import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { BaseTreeRendererProps } from "../common/components/BaseTreeRenderer.js";
 import type { TreeProps } from "../common/components/Tree.js";
-import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+
 /** @beta */
 export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode" | "noDataMessage"> &
   Pick<BaseTreeRendererProps, "actions"> & {
@@ -24,6 +26,7 @@ export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "getSchemaCont
 export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
   return (
     <Tree
+      noDataMessage={<NoDataRenderer icon={documentIcon} />}
       {...props}
       treeName={ExternalSourcesTreeComponent.id}
       getHierarchyDefinition={getDefinitionsProvider}

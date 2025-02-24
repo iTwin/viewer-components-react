@@ -34,6 +34,7 @@ export function ModelsTree({
   getFilteredPaths,
   onModelsFiltered,
   actions,
+  noDataMessage,
 }: ModelsTreeProps) {
   const { modelsTreeProps, rendererProps } = useModelsTree({
     activeView,
@@ -43,6 +44,7 @@ export function ModelsTree({
     getFilteredPaths,
     onModelsFiltered,
     selectionPredicate,
+    noDataMessage,
   });
 
   return (

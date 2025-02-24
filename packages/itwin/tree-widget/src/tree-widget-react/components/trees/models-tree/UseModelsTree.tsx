@@ -8,6 +8,7 @@ import { Anchor, Text } from "@itwin/itwinui-react/bricks";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { TreeWidget } from "../../../TreeWidget.js";
+import { NoDataRenderer } from "../common/components/NoDataRenderer.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 import { useIModelChangeListener } from "../common/UseIModelChangeListener.js";
@@ -17,6 +18,7 @@ import { ModelsTreeNode } from "./internal/ModelsTreeNode.js";
 import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibilityHandler.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition.js";
 
+import type { ReactNode} from "react";
 import type { GroupingHierarchyNode, HierarchyFilteringPath, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { Id64String } from "@itwin/core-bentley";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
@@ -44,6 +46,7 @@ export interface UseModelsTreeProps {
    * When not supplied, all nodes are selectable.
    */
   selectionPredicate?: (props: { node: PresentationHierarchyNode; type: "subject" | "model" | "category" | "element" | "elements-class-group" }) => boolean;
+  noDataMessage?: ReactNode;
 }
 
 /** @beta */
@@ -67,6 +70,7 @@ export function useModelsTree({
   getFilteredPaths,
   onModelsFiltered,
   selectionPredicate: nodeTypeSelectionPredicate,
+  noDataMessage,
 }: UseModelsTreeProps): UseModelsTreeResult {
   const [filteringError, setFilteringError] = useState<ModelsTreeFilteringError | undefined>(undefined);
   const hierarchyConfiguration = useMemo<ModelsTreeHierarchyConfiguration>(
@@ -204,7 +208,7 @@ export function useModelsTree({
       visibilityHandlerFactory,
       getHierarchyDefinition,
       getFilteredPaths: getPaths,
-      noDataMessage: getNoDataMessage(filter, filteringError),
+      noDataMessage: getNoDataMessage(filter, filteringError, noDataMessage),
       highlight: filter ? { text: filter } : undefined,
       selectionPredicate: nodeSelectionPredicate,
     },
@@ -247,7 +251,7 @@ async function getModels(paths: HierarchyFilteringPath[], idsCache: ModelsTreeId
   return [...targetModels, ...matchingModels];
 }
 
-function getNoDataMessage(filter?: string, error?: ModelsTreeFilteringError) {
+function getNoDataMessage(filter?: string, error?: ModelsTreeFilteringError, noDataMessage?: React.ReactNode) {
   if (isInstanceFocusError(error)) {
     return <InstanceFocusError error={error!} />;
   }
@@ -257,7 +261,10 @@ function getNoDataMessage(filter?: string, error?: ModelsTreeFilteringError) {
   if (filter) {
     return <Text>{TreeWidget.translate("modelsTree.filtering.noMatches", { filter })}</Text>;
   }
-  return undefined;
+  if (noDataMessage) {
+    return noDataMessage;
+  }
+  return <NoDataRenderer icon={modelIcon} />;
 }
 
 function isFilterError(error: ModelsTreeFilteringError | undefined) {
