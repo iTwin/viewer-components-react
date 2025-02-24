@@ -3,18 +3,20 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+
+import { EmptyTreeContent } from "../common/components/EmptyTreeContent.js";
 import { Tree } from "../common/components/Tree.js";
 import { TreeRenderer } from "../common/components/TreeRenderer.js";
 import { IModelContentTreeComponent } from "./IModelContentTreeComponent.js";
 import { IModelContentTreeDefinition } from "./IModelContentTreeDefinition.js";
 import { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache.js";
 
+import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { BaseTreeRendererProps } from "../common/components/BaseTreeRenderer.js";
 import type { TreeProps } from "../common/components/Tree.js";
-import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
 /** @beta */
-export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode"> &
+export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
   Pick<BaseTreeRendererProps, "actions"> & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
@@ -25,6 +27,7 @@ export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContex
 export function IModelContentTree(props: IModelContentTreeProps) {
   return (
     <Tree
+      emptyTreeContent={<EmptyTreeContent icon={modelIcon} />}
       {...props}
       treeName={IModelContentTreeComponent.id}
       getHierarchyDefinition={getDefinitionsProvider}

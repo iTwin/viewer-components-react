@@ -4,14 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { VisibilityTree } from "../common/components/VisibilityTree.js";
-import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRenderer.js";
 import { useModelsTree } from "./UseModelsTree.js";
 
+import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { UseModelsTreeProps } from "./UseModelsTree.js";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 /** @beta */
-export type ModelsTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode"> &
+export type ModelsTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
   Pick<VisibilityTreeRendererProps, "actions"> &
   UseModelsTreeProps & {
     hierarchyLevelConfig?: {
@@ -34,6 +34,7 @@ export function ModelsTree({
   getFilteredPaths,
   onModelsFiltered,
   actions,
+  emptyTreeContent,
 }: ModelsTreeProps) {
   const { modelsTreeProps, rendererProps } = useModelsTree({
     activeView,
@@ -43,6 +44,7 @@ export function ModelsTree({
     getFilteredPaths,
     onModelsFiltered,
     selectionPredicate,
+    emptyTreeContent,
   });
 
   return (
