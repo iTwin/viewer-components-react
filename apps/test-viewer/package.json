@@ -29,7 +29,7 @@
     "@itwin/itwinui-icons-react": "^2.9.0",
     "@itwin/itwinui-icons": "5.0.0-alpha.3",
     "@itwin/itwinui-illustrations-react": "^2.1.0",
-    "@itwin/itwinui-react": "3.17.1",
+    "@itwin/itwinui-react": "3.17.2",
     "@itwin/itwinui-react-v5": "npm:@itwin/itwinui-react@5.0.0-alpha.6",
     "@itwin/map-layers": "workspace:*",
     "@itwin/map-layers-auth": "^4.10.2",
@@ -140,7 +140,7 @@
   "pnpm": {
     "overrides": {
       "@itwin/itwinui-react@^2": "2.12.26",
-      "@itwin/itwinui-react@^3": "3.17.1"
+      "@itwin/itwinui-react@^3": "3.17.2"
     }
   }
 }

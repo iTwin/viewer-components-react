@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useMemo, useState } from "react";
-import { SvgLayers } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react/bricks";
 import { HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
 import { TreeWidget } from "../../../TreeWidget.js";
@@ -145,8 +144,9 @@ function getNoDataMessage(filter: string, error?: CategoriesTreeFilteringError) 
   return undefined;
 }
 
+const categoryIcon = new URL("@itwin/itwinui-icons/tree-category.svg", import.meta.url).href;
 function getIcon() {
-  return <SvgLayers />;
+  return categoryIcon;
 }
 
 function getSublabel(node: PresentationHierarchyNode) {

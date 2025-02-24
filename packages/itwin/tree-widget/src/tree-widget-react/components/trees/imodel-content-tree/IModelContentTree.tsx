@@ -3,16 +3,15 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { SvgFolder, SvgGroup, SvgHierarchyTree, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
-import type { BaseTreeRendererProps } from "../common/components/BaseTreeRenderer.js";
+
 import { Tree } from "../common/components/Tree.js";
 import { TreeRenderer } from "../common/components/TreeRenderer.js";
 import { IModelContentTreeComponent } from "./IModelContentTreeComponent.js";
 import { IModelContentTreeDefinition } from "./IModelContentTreeDefinition.js";
 import { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache.js";
 
+import type { BaseTreeRendererProps } from "../common/components/BaseTreeRenderer.js";
 import type { TreeProps } from "../common/components/Tree.js";
-import type { ReactElement } from "react";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 /** @beta */
 export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode"> &
@@ -42,28 +41,37 @@ const getDefinitionsProvider: TreeProps["getHierarchyDefinition"] = ({ imodelAcc
   });
 };
 
-function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
+const subjectIcon = new URL("@itwin/itwinui-icons/tree-subject.svg", import.meta.url).href;
+const classIcon = new URL("@itwin/itwinui-icons/tree-class.svg", import.meta.url).href;
+const modelIcon = new URL("@itwin/itwinui-icons/model-cube.svg", import.meta.url).href;
+const categoryIcon = new URL("@itwin/itwinui-icons/tree-category.svg", import.meta.url).href;
+const elementIcon = new URL("@itwin/itwinui-icons/tree-element.svg", import.meta.url).href;
+const iModelIcon = new URL("@itwin/itwinui-icons/imodel.svg", import.meta.url).href;
+const hierarchyTreeIcon = new URL("@itwin/itwinui-icons/selection-children.svg", import.meta.url).href;
+const groupIcon = new URL("@itwin/itwinui-icons/group.svg", import.meta.url).href;
+
+function getIcon(node: PresentationHierarchyNode): string | undefined {
   if (node.extendedData?.imageId === undefined) {
     return undefined;
   }
 
   switch (node.extendedData.imageId) {
     case "icon-layers":
-      return <SvgLayers />;
+      return categoryIcon;
     case "icon-item":
-      return <SvgItem />;
+      return elementIcon;
     case "icon-ec-class":
-      return <SvgItem />;
+      return classIcon;
     case "icon-imodel-hollow-2":
-      return <SvgImodelHollow />;
+      return iModelIcon;
     case "icon-folder":
-      return <SvgFolder />;
+      return subjectIcon;
     case "icon-model":
-      return <SvgModel />;
+      return modelIcon;
     case "icon-hierarchy-tree":
-      return <SvgHierarchyTree />;
+      return hierarchyTreeIcon;
     case "icon-group":
-      return <SvgGroup />;
+      return groupIcon;
   }
 
   return undefined;
