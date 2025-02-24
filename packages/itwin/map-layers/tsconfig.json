@@ -8,8 +8,9 @@
     "resolveJsonModule": true,
     "module": "commonjs",
     "jsx": "react-jsx",
-    "types": ["sinon-chai", "mocha"]
+    "types": ["vitest/globals"]
   },
   "include": ["./src/**/*.ts*"],
-  "exclude": ["lib", "node_modules"]
+  "exclude": ["lib", "node_modules",
+  "src/test/**/*"]
 }
