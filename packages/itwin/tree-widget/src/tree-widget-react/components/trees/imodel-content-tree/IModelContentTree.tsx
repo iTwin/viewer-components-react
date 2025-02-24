@@ -14,7 +14,7 @@ import type { BaseTreeRendererProps } from "../common/components/BaseTreeRendere
 import type { TreeProps } from "../common/components/Tree.js";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 /** @beta */
-export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode"> &
+export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode" | "noDataMessage"> &
   Pick<BaseTreeRendererProps, "actions"> & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;

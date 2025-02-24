@@ -4,15 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { VisibilityTree } from "../common/components/VisibilityTree.js";
-import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRenderer.js";
 import { useCategoriesTree } from "./UseCategoriesTree.js";
 
+import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { UseCategoriesTreeProps } from "./UseCategoriesTree.js";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 
 /** @beta */
-export type CategoriesTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode"> &
+export type CategoriesTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode" | "noDataMessage"> &
   Pick<VisibilityTreeRendererProps, "actions"> &
   UseCategoriesTreeProps & {
     hierarchyLevelConfig?: {
