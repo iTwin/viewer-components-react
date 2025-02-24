@@ -52,7 +52,7 @@ export function createVisibilityAction({
       action: () => {
         onVisibilityButtonClick(node, state.state);
       },
-      show: state.state === "hidden" ? true : undefined,
+      show: state.state !== "visible" ? true : undefined,
       icon: getIcon(),
     };
   };
