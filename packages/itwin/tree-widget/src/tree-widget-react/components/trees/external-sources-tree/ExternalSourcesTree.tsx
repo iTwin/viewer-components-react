@@ -4,16 +4,18 @@
  *--------------------------------------------------------------------------------------------*/
 
 
+import { EmptyTreeContent } from "../common/components/EmptyTreeContent.js";
 import { Tree } from "../common/components/Tree.js";
 import { TreeRenderer } from "../common/components/TreeRenderer.js";
 import { ExternalSourcesTreeComponent } from "./ExternalSourcesTreeComponent.js";
 import { ExternalSourcesTreeDefinition } from "./ExternalSourcesTreeDefinition.js";
 
+import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { BaseTreeRendererProps } from "../common/components/BaseTreeRenderer.js";
 import type { TreeProps } from "../common/components/Tree.js";
-import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+
 /** @beta */
-export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode"> &
+export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
   Pick<BaseTreeRendererProps, "actions"> & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
@@ -24,6 +26,7 @@ export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "getSchemaCont
 export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
   return (
     <Tree
+      emptyTreeContent={<EmptyTreeContent icon={documentIcon} />}
       {...props}
       treeName={ExternalSourcesTreeComponent.id}
       getHierarchyDefinition={getDefinitionsProvider}

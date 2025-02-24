@@ -5,21 +5,21 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { BeEvent } from "@itwin/core-bentley";
-import { Spinner, Text } from "@itwin/itwinui-react/bricks";
+import { Spinner } from "@itwin/itwinui-react/bricks";
 import { SchemaMetadataContextProvider } from "@itwin/presentation-components";
 import { useIModelUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
 import { UnifiedSelectionContextProvider } from "@itwin/unified-selection-react";
-import { TreeWidget } from "../../../../TreeWidget.js";
 import { useHierarchiesLocalization } from "../UseHierarchiesLocalization.js";
 import { useHierarchyLevelFiltering } from "../UseHierarchyFiltering.js";
 import { useIModelChangeListener } from "../UseIModelChangeListener.js";
 import { useNodeHighlighting } from "../UseNodeHighlighting.js";
 import { useReportingAction, useTelemetryContext } from "../UseTelemetryContext.js";
 import { createIModelAccess } from "../Utils.js";
-import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
 import { Delayed } from "./Delayed.js";
+import { EmptyTreeContent } from "./EmptyTreeContent.js";
 import { ProgressOverlay } from "./ProgressOverlay.js";
 
+import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
 import type { MarkRequired } from "@itwin/core-bentley";
 import type { FunctionProps } from "../Utils.js";
 import type { ReactNode } from "react";
@@ -27,6 +27,7 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type { PresentationHierarchyNode, SelectionStorage, useIModelTree, useSelectionHandler } from "@itwin/presentation-hierarchies-react";
 import type { HighlightInfo } from "../UseNodeHighlighting.js";
+
 /** @beta */
 export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPaths" | "getHierarchyDefinition"> &
   Partial<Pick<FunctionProps<typeof useSelectionHandler>, "selectionMode">> & {
@@ -64,8 +65,8 @@ export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPa
     imodelAccess?: FunctionProps<typeof useIModelTree>["imodelAccess"];
     /** Size limit that should be applied on each hierarchy level. Default to `1000`. */
     hierarchyLevelSizeLimit?: number;
-    /** Message that should be renderer if there are no tree nodes. */
-    noDataMessage?: ReactNode;
+    /** Component that should be renderer if there are no tree nodes. */
+    emptyTreeContent?: ReactNode;
     /** Callback that this invoked when tree reloads. */
     onReload?: () => void;
     /** Options for highlighting node labels. */
@@ -94,7 +95,7 @@ function TreeImpl({
   imodel,
   imodelAccess,
   treeName,
-  noDataMessage,
+  emptyTreeContent,
   getFilteredPaths,
   defaultHierarchyLevelSizeLimit,
   getHierarchyDefinition,
@@ -165,7 +166,7 @@ function TreeImpl({
   if (rootNodes.length === 0 && !isLoading) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", width: "100%", height: "100%" }}>
-        {noDataMessage ? noDataMessage : <Text>{TreeWidget.translate("baseTree.dataIsNotAvailable")}</Text>}
+        {emptyTreeContent ? emptyTreeContent : <EmptyTreeContent />}
       </div>
     );
   }
