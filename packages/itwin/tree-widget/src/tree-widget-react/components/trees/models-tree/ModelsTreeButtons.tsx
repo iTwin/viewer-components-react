@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useMemo, useState } from "react";
-import { Button, Icon, IconButton, Tooltip } from "@itwin/itwinui-react/bricks";
+import { IconButton } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
 import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, toggleModels } from "./internal/ModelsTreeVisibilityHandler.js";
@@ -16,8 +16,10 @@ import type { TreeToolbarButtonProps } from "../../tree-header/SelectableTree.js
 
 const visibilityShowIcon = new URL("@itwin/itwinui-icons/visibility-show.svg", import.meta.url).href;
 const visibilityHideIcon = new URL("@itwin/itwinui-icons/visibility-hide.svg", import.meta.url).href;
-const visibilityHalfIcon = new URL("@itwin/itwinui-icons/placeholder.svg", import.meta.url).href; // temporary icon
-const cursorClickIcon = new URL("@itwin/itwinui-icons/placeholder.svg", import.meta.url).href; // temporary icon
+const visibilityInvertIcon = new URL("@itwin/itwinui-icons/visibilty-invert.svg", import.meta.url).href;
+const focusModeIcon = new URL("@itwin/itwinui-icons/cursor-click.svg", import.meta.url).href;
+const toggle3DIcon = new URL("@itwin/itwinui-icons/3d.svg", import.meta.url).href;
+const toggle2DIcon = new URL("@itwin/itwinui-icons/2d.svg", import.meta.url).href;
 
 /**
  * Information about a single Model.
@@ -159,7 +161,7 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
           props.viewport,
         );
       }}
-      icon={visibilityHalfIcon}
+      icon={visibilityInvertIcon}
     />
   );
 }
@@ -178,19 +180,17 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
   }, [models2d, props.viewport]);
 
   return (
-    <Tooltip content={TreeWidget.translate("modelsTree.buttons.toggle2d.tooltip")}>
-      <Button
-        variant={"ghost"}
-        onClick={() => {
-          props.onFeatureUsed?.("models-tree-view2d");
-          void toggleModels(models2d, is2dToggleActive, props.viewport);
-        }}
-        disabled={models2d.length === 0}
-      >
-        {TreeWidget.translate("modelsTree.buttons.toggle2d.label")}
-        <Icon href={is2dToggleActive ? visibilityShowIcon : visibilityHideIcon} />
-      </Button>
-    </Tooltip>
+    <IconButton
+      variant={"ghost"}
+      label={TreeWidget.translate("modelsTree.buttons.toggle2d.tooltip")}
+      onClick={() => {
+        props.onFeatureUsed?.("models-tree-view2d");
+        void toggleModels(models2d, is2dToggleActive, props.viewport);
+      }}
+      aria-disabled={models2d.length === 0}
+      isActive={is2dToggleActive}
+      icon={toggle2DIcon}
+    />
   );
 }
 
@@ -208,19 +208,17 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
   }, [models3d, props.viewport]);
 
   return (
-    <Tooltip content={TreeWidget.translate("modelsTree.buttons.toggle3d.tooltip")}>
-      <Button
-        variant={"ghost"}
-        onClick={() => {
-          props.onFeatureUsed?.("models-tree-view3d");
-          void toggleModels(models3d, is3dToggleActive, props.viewport);
-        }}
-        disabled={models3d.length === 0}
-      >
-        {TreeWidget.translate("modelsTree.buttons.toggle3d.label")}
-        <Icon href={is3dToggleActive ? visibilityShowIcon : visibilityHideIcon} />
-      </Button>
-    </Tooltip>
+    <IconButton
+      variant={"ghost"}
+      label={TreeWidget.translate("modelsTree.buttons.toggle3d.tooltip")}
+      onClick={() => {
+        props.onFeatureUsed?.("models-tree-view3d");
+        void toggleModels(models3d, is3dToggleActive, props.viewport);
+      }}
+      aria-disabled={models3d.length === 0}
+      isActive={is3dToggleActive}
+      icon={toggle3DIcon}
+    />
   );
 }
 
@@ -242,7 +240,7 @@ export function ToggleInstancesFocusButton({ onFeatureUsed, disabled }: { onFeat
       }}
       aria-disabled={disabled}
       isActive={enabled}
-      icon={cursorClickIcon}
+      icon={focusModeIcon}
     />
   );
 }

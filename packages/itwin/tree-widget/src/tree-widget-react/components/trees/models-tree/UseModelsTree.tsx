@@ -4,8 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
-import { Anchor, Icon, Text } from "@itwin/itwinui-react/bricks";
+import { Anchor, Text } from "@itwin/itwinui-react/bricks";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { TreeWidget } from "../../../TreeWidget.js";
@@ -21,7 +20,6 @@ import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTre
 import type { GroupingHierarchyNode, HierarchyFilteringPath, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { Id64String } from "@itwin/core-bentley";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
-import type { ReactElement } from "react";
 import type { Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { ClassGroupingHierarchyNode, ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition.js";
@@ -276,24 +274,31 @@ function InstanceFocusError({ error }: { error: ModelsTreeFilteringError }) {
   return <Text>{localizedMessage}</Text>;
 }
 
-function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
+const subjectIcon = new URL("@itwin/itwinui-icons/tree-subject.svg", import.meta.url).href;
+const classIcon = new URL("@itwin/itwinui-icons/tree-class.svg", import.meta.url).href;
+const modelIcon = new URL("@itwin/itwinui-icons/model-cube.svg", import.meta.url).href;
+const categoryIcon = new URL("@itwin/itwinui-icons/tree-category.svg", import.meta.url).href;
+const elementIcon = new URL("@itwin/itwinui-icons/tree-element.svg", import.meta.url).href;
+const iModelIcon = new URL("@itwin/itwinui-icons/imodel.svg", import.meta.url).href;
+
+function getIcon(node: PresentationHierarchyNode): string | undefined {
   if (node.extendedData?.imageId === undefined) {
     return undefined;
   }
 
   switch (node.extendedData.imageId) {
     case "icon-layers":
-      return <SvgLayers />;
+      return categoryIcon;
     case "icon-item":
-      return <SvgItem />;
+      return elementIcon;
     case "icon-ec-class":
-      return <SvgClassGrouping />;
+      return classIcon;
     case "icon-imodel-hollow-2":
-      return <SvgImodelHollow />;
+      return iModelIcon;
     case "icon-folder":
-      return <SvgFolder />;
+      return subjectIcon;
     case "icon-model":
-      return <SvgModel />;
+      return modelIcon;
   }
 
   return undefined;
@@ -347,11 +352,6 @@ function useCachedVisibility(activeView: Viewport, hierarchyConfig: ModelsTreeHi
     visibilityHandlerFactory,
     onFilteredPathsChanged: useCallback((paths: HierarchyFilteringPath[] | undefined) => setFilteredPaths(paths), []),
   };
-}
-
-function SvgClassGrouping() {
-  const groupingClassIcon = new URL("@itwin/itwinui-icons/placeholder.svg", import.meta.url).href; // TODO: need an icon for grouping nodes
-  return <Icon href={groupingClassIcon} />;
 }
 
 async function collectFocusedItems(loadFocusedItems: () => AsyncIterableIterator<InstanceKey | GroupingHierarchyNode>) {
