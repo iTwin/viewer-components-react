@@ -412,7 +412,7 @@ interface TreeWidgetProps {
 }
 
 // @beta
-export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: UseCategoriesTreeProps): UseCategoriesTreeResult;
+export function useCategoriesTree({ filter, activeView, onCategoriesFiltered, noDataMessage }: UseCategoriesTreeProps): UseCategoriesTreeResult;
 
 // @public
 export function useCategoriesTreeButtonProps({ viewport }: {
@@ -429,6 +429,8 @@ interface UseCategoriesTreeProps {
     // (undocumented)
     filter?: string;
     // (undocumented)
+    noDataMessage?: ReactNode;
+    // (undocumented)
     onCategoriesFiltered?: (categories: CategoryInfo[] | undefined) => void;
 }
 
@@ -441,7 +443,7 @@ interface UseCategoriesTreeResult {
 }
 
 // @beta
-export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getFilteredPaths, onModelsFiltered, selectionPredicate: nodeTypeSelectionPredicate, }: UseModelsTreeProps): UseModelsTreeResult;
+export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getFilteredPaths, onModelsFiltered, selectionPredicate: nodeTypeSelectionPredicate, noDataMessage, }: UseModelsTreeProps): UseModelsTreeResult;
 
 // @public
 export function useModelsTreeButtonProps({ imodel, viewport }: {
@@ -468,6 +470,8 @@ interface UseModelsTreeProps {
     }) => Promise<HierarchyFilteringPath[]>;
     // (undocumented)
     hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
+    // (undocumented)
+    noDataMessage?: ReactNode;
     // (undocumented)
     onModelsFiltered?: (modelIds: Id64String[] | undefined) => void;
     selectionPredicate?: (props: {
