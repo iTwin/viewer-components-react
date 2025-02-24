@@ -49,7 +49,6 @@ const classIcon = new URL("@itwin/itwinui-icons/tree-class.svg", import.meta.url
 const modelIcon = new URL("@itwin/itwinui-icons/model-cube.svg", import.meta.url).href;
 const categoryIcon = new URL("@itwin/itwinui-icons/tree-category.svg", import.meta.url).href;
 const elementIcon = new URL("@itwin/itwinui-icons/tree-element.svg", import.meta.url).href;
-const iModelIcon = new URL("@itwin/itwinui-icons/imodel.svg", import.meta.url).href;
 const hierarchyTreeIcon = new URL("@itwin/itwinui-icons/selection-children.svg", import.meta.url).href;
 const groupIcon = new URL("@itwin/itwinui-icons/group.svg", import.meta.url).href;
 
@@ -65,8 +64,6 @@ function getIcon(node: PresentationHierarchyNode): string | undefined {
       return elementIcon;
     case "icon-ec-class":
       return classIcon;
-    case "icon-imodel-hollow-2":
-      return iModelIcon;
     case "icon-folder":
       return subjectIcon;
     case "icon-model":
