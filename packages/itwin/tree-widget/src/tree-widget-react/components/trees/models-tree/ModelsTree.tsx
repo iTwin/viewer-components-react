@@ -11,7 +11,7 @@ import type { VisibilityTreeRendererProps } from "../common/components/Visibilit
 import type { UseModelsTreeProps } from "./UseModelsTree.js";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 /** @beta */
-export type ModelsTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode" | "noDataMessage"> &
+export type ModelsTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
   Pick<VisibilityTreeRendererProps, "actions"> &
   UseModelsTreeProps & {
     hierarchyLevelConfig?: {
@@ -34,7 +34,7 @@ export function ModelsTree({
   getFilteredPaths,
   onModelsFiltered,
   actions,
-  noDataMessage,
+  emptyTreeContent,
 }: ModelsTreeProps) {
   const { modelsTreeProps, rendererProps } = useModelsTree({
     activeView,
@@ -44,7 +44,7 @@ export function ModelsTree({
     getFilteredPaths,
     onModelsFiltered,
     selectionPredicate,
-    noDataMessage,
+    emptyTreeContent,
   });
 
   return (

@@ -7,13 +7,13 @@ import { useCallback, useMemo, useState } from "react";
 import { Text } from "@itwin/itwinui-react/bricks";
 import { HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
 import { TreeWidget } from "../../../TreeWidget.js";
-import { NoDataRenderer } from "../common/components/NoDataRenderer.js";
+import { EmptyTreeContent } from "../common/components/EmptyTreeContent.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 import { useTelemetryContext } from "../common/UseTelemetryContext.js";
 import { CategoriesTreeDefinition } from "./CategoriesTreeDefinition.js";
 import { CategoriesVisibilityHandler } from "./CategoriesVisibilityHandler.js";
 
-import type { ReactNode} from "react";
+import type { ReactNode } from "react";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { Viewport } from "@itwin/core-frontend";
@@ -30,14 +30,14 @@ export interface UseCategoriesTreeProps {
   activeView: Viewport;
   onCategoriesFiltered?: (categories: CategoryInfo[] | undefined) => void;
   filter?: string;
-  noDataMessage?: ReactNode;
+  emptyTreeContent?: ReactNode;
 }
 
 /** @beta */
 interface UseCategoriesTreeResult {
   categoriesTreeProps: Pick<
     VisibilityTreeProps,
-    "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlight" | "noDataMessage"
+    "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlight" | "emptyTreeContent"
   >;
   rendererProps: Required<Pick<VisibilityTreeRendererProps, "getIcon" | "getSublabel">>;
 }
@@ -46,7 +46,7 @@ interface UseCategoriesTreeResult {
  * Custom hook to create and manage state for the categories tree.
  * @beta
  */
-export function useCategoriesTree({ filter, activeView, onCategoriesFiltered, noDataMessage }: UseCategoriesTreeProps): UseCategoriesTreeResult {
+export function useCategoriesTree({ filter, activeView, onCategoriesFiltered, emptyTreeContent }: UseCategoriesTreeProps): UseCategoriesTreeResult {
   const [filteringError, setFilteringError] = useState<CategoriesTreeFilteringError | undefined>();
   const visibilityHandlerFactory = useCallback(() => {
     const visibilityHandler = new CategoriesVisibilityHandler({
@@ -98,7 +98,7 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered, no
       getHierarchyDefinition,
       getFilteredPaths,
       visibilityHandlerFactory,
-      noDataMessage: getNoDataMessage(filter, filteringError, noDataMessage),
+      emptyTreeContent: getEmptyTreeContentComponent(filter, filteringError, emptyTreeContent),
       highlight: filter ? { text: filter } : undefined,
     },
     rendererProps: {
@@ -137,17 +137,17 @@ function getCategories(paths: HierarchyFilteringPaths): CategoryInfo[] | undefin
   }));
 }
 
-function getNoDataMessage(filter?: string, error?: CategoriesTreeFilteringError, noDataMessage?: React.ReactNode) {
+function getEmptyTreeContentComponent(filter?: string, error?: CategoriesTreeFilteringError, emptyTreeContent?: React.ReactNode) {
   if (error) {
     return <Text>{TreeWidget.translate(`categoriesTree.filtering.${error}`)}</Text>;
   }
   if (filter) {
     return <Text>{TreeWidget.translate("categoriesTree.filtering.noMatches", { filter })}</Text>;
   }
-  if (noDataMessage) {
-    return noDataMessage;
+  if (emptyTreeContent) {
+    return emptyTreeContent;
   }
-  return <NoDataRenderer icon={categoryIcon} />;
+  return <EmptyTreeContent icon={categoryIcon} />;
 }
 
 const categoryIcon = new URL("@itwin/itwinui-icons/tree-category.svg", import.meta.url).href;

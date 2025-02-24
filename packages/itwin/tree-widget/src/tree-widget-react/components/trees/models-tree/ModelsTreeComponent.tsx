@@ -40,7 +40,7 @@ interface ModelsTreeComponentProps
     | "visibilityHandlerOverrides"
     | "getFilteredPaths"
     | "filter"
-    | "noDataMessage"
+    | "emptyTreeContent"
   > {
   /**
    * Renderers of header buttons. Defaults to:

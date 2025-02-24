@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 
-import { NoDataRenderer } from "../common/components/NoDataRenderer.js";
+import { EmptyTreeContent } from "../common/components/EmptyTreeContent.js";
 import { Tree } from "../common/components/Tree.js";
 import { TreeRenderer } from "../common/components/TreeRenderer.js";
 import { ExternalSourcesTreeComponent } from "./ExternalSourcesTreeComponent.js";
@@ -15,7 +15,7 @@ import type { BaseTreeRendererProps } from "../common/components/BaseTreeRendere
 import type { TreeProps } from "../common/components/Tree.js";
 
 /** @beta */
-export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode" | "noDataMessage"> &
+export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
   Pick<BaseTreeRendererProps, "actions"> & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
@@ -26,7 +26,7 @@ export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "getSchemaCont
 export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
   return (
     <Tree
-      noDataMessage={<NoDataRenderer icon={documentIcon} />}
+      emptyTreeContent={<EmptyTreeContent icon={documentIcon} />}
       {...props}
       treeName={ExternalSourcesTreeComponent.id}
       getHierarchyDefinition={getDefinitionsProvider}

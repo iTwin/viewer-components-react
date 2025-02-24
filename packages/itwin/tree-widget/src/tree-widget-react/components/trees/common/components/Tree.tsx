@@ -16,7 +16,7 @@ import { useNodeHighlighting } from "../UseNodeHighlighting.js";
 import { useReportingAction, useTelemetryContext } from "../UseTelemetryContext.js";
 import { createIModelAccess } from "../Utils.js";
 import { Delayed } from "./Delayed.js";
-import { NoDataRenderer } from "./NoDataRenderer.js";
+import { EmptyTreeContent } from "./EmptyTreeContent.js";
 import { ProgressOverlay } from "./ProgressOverlay.js";
 
 import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
@@ -65,8 +65,8 @@ export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPa
     imodelAccess?: FunctionProps<typeof useIModelTree>["imodelAccess"];
     /** Size limit that should be applied on each hierarchy level. Default to `1000`. */
     hierarchyLevelSizeLimit?: number;
-    /** Message that should be renderer if there are no tree nodes. */
-    noDataMessage?: ReactNode;
+    /** Component that should be renderer if there are no tree nodes. */
+    emptyTreeContent?: ReactNode;
     /** Callback that this invoked when tree reloads. */
     onReload?: () => void;
     /** Options for highlighting node labels. */
@@ -95,7 +95,7 @@ function TreeImpl({
   imodel,
   imodelAccess,
   treeName,
-  noDataMessage,
+  emptyTreeContent,
   getFilteredPaths,
   defaultHierarchyLevelSizeLimit,
   getHierarchyDefinition,
@@ -166,7 +166,7 @@ function TreeImpl({
   if (rootNodes.length === 0 && !isLoading) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", width: "100%", height: "100%" }}>
-        {noDataMessage ? noDataMessage : <NoDataRenderer />}
+        {emptyTreeContent ? emptyTreeContent : <EmptyTreeContent />}
       </div>
     );
   }

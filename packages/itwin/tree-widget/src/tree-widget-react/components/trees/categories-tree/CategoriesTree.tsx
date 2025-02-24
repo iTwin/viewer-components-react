@@ -12,7 +12,7 @@ import type { UseCategoriesTreeProps } from "./UseCategoriesTree.js";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 
 /** @beta */
-export type CategoriesTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode" | "noDataMessage"> &
+export type CategoriesTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
   Pick<VisibilityTreeRendererProps, "actions"> &
   UseCategoriesTreeProps & {
     hierarchyLevelConfig?: {
@@ -30,13 +30,13 @@ export function CategoriesTree({
   hierarchyLevelConfig,
   selectionMode,
   onCategoriesFiltered,
-  noDataMessage,
+  emptyTreeContent,
 }: CategoriesTreeProps) {
   const { categoriesTreeProps, rendererProps } = useCategoriesTree({
     filter,
     activeView,
     onCategoriesFiltered,
-    noDataMessage,
+    emptyTreeContent,
   });
 
   return (
