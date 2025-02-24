@@ -15,7 +15,7 @@ import type { Viewport } from "@itwin/core-frontend";
 
 const visibilityShowIcon = new URL("@itwin/itwinui-icons/visibility-show.svg", import.meta.url).href;
 const visibilityHideIcon = new URL("@itwin/itwinui-icons/visibility-hide.svg", import.meta.url).href;
-const visibilityHalfIcon = new URL("@itwin/itwinui-icons/placeholder.svg", import.meta.url).href;
+const visibilityInvertIcon = new URL("@itwin/itwinui-icons/visibilty-invert.svg", import.meta.url).href;
 
 /**
  * Props that get passed to `CategoriesTreeComponent` header button renderer.
@@ -109,7 +109,7 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
         props.onFeatureUsed?.(`categories-tree-invert`);
         void invertAllCategories(props.categories, props.viewport);
       }}
-      icon={visibilityHalfIcon}
+      icon={visibilityInvertIcon}
     />
   );
 }

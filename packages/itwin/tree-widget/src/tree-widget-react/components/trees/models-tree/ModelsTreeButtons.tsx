@@ -16,8 +16,8 @@ import type { TreeToolbarButtonProps } from "../../tree-header/SelectableTree.js
 
 const visibilityShowIcon = new URL("@itwin/itwinui-icons/visibility-show.svg", import.meta.url).href;
 const visibilityHideIcon = new URL("@itwin/itwinui-icons/visibility-hide.svg", import.meta.url).href;
-const visibilityHalfIcon = new URL("@itwin/itwinui-icons/placeholder.svg", import.meta.url).href; // temporary icon
-const cursorClickIcon = new URL("@itwin/itwinui-icons/placeholder.svg", import.meta.url).href; // temporary icon
+const visibilityInvertIcon = new URL("@itwin/itwinui-icons/visibilty-invert.svg", import.meta.url).href;
+const focusModeIcon = new URL("@itwin/itwinui-icons/cursor-click.svg", import.meta.url).href;
 
 /**
  * Information about a single Model.
@@ -159,7 +159,7 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
           props.viewport,
         );
       }}
-      icon={visibilityHalfIcon}
+      icon={visibilityInvertIcon}
     />
   );
 }
@@ -242,7 +242,7 @@ export function ToggleInstancesFocusButton({ onFeatureUsed, disabled }: { onFeat
       }}
       aria-disabled={disabled}
       isActive={enabled}
-      icon={cursorClickIcon}
+      icon={focusModeIcon}
     />
   );
 }

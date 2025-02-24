@@ -35,7 +35,7 @@ export function VisibilityTreeRenderer({ getVisibilityButtonState, onVisibilityB
       {...props}
       actions={[
         ...(visibilityButtonProps ? [createVisibilityAction(visibilityButtonProps)] : []),
-        createFilterAction({ onFilter: props.onFilterClick, getHierarchyLevelDetails: props.getHierarchyLevelDetails, label: "Filter" }),
+        createFilterAction({ onFilter: props.onFilterClick, getHierarchyLevelDetails: props.getHierarchyLevelDetails }),
         ...(actions ? actions : []),
       ]}
     />

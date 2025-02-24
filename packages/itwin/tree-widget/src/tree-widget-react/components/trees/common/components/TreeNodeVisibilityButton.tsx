@@ -9,7 +9,7 @@ import type { PresentationHierarchyNode, TreeItemAction } from "@itwin/presentat
 
 const visibilityShowIcon = new URL("@itwin/itwinui-icons/visibility-show.svg", import.meta.url).href;
 const visibilityHideIcon = new URL("@itwin/itwinui-icons/visibility-hide.svg", import.meta.url).href;
-const visibilityPartialIcon = new URL("@itwin/itwinui-icons/state-inherited-dot.svg", import.meta.url).href;
+const visibilityPartialIcon = new URL("@itwin/itwinui-icons/visibility-partial.svg", import.meta.url).href;
 
 /**
  * Data structure that describes tree node checkbox state.
@@ -52,7 +52,7 @@ export function createVisibilityAction({
       action: () => {
         onVisibilityButtonClick(node, state.state);
       },
-      show: true,
+      show: state.state === "hidden" ? true : undefined,
       icon: getIcon(),
     };
   };
