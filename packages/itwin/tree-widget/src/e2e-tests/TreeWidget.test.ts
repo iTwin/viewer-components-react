@@ -20,7 +20,8 @@ test.describe("Widget", () => {
     await takeScreenshot(page, treeWidget);
   });
 
-  test("tree selector badge", async ({ page }) => {
+  // Skipped because tree selector does not support icons at the moment
+  test.skip("tree selector badge", async ({ page }) => {
     await selectTree(treeWidget, "External sources");
     await page.getByText("The data required for this tree layout is not available in this iModel.").waitFor();
     await takeScreenshot(page, treeWidget);

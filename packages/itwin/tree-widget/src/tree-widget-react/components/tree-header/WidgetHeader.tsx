@@ -18,7 +18,6 @@ export interface TreeContentDefinition {
   id: string;
   label: string;
   render: (props: TreeRenderProps) => React.ReactNode;
-  startIcon?: React.ReactNode;
 }
 
 /**
@@ -59,7 +58,6 @@ export function WidgetHeader({ defaultSelectedContentId, trees, onFeatureUsed, o
             >
               {trees.map((tree) => (
                 <option key={tree.id} value={tree.id}>
-                  {tree.startIcon}
                   {tree.label}
                 </option>
               ))}

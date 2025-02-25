@@ -9,7 +9,7 @@ import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
 import { GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
-import { SvgHierarchyTree, SvgTechnicalPreviewMiniBw } from "@itwin/itwinui-icons-react";
+import { SvgHierarchyTree } from "@itwin/itwinui-icons-react";
 import { FeatureInfoUiItemsProvider, MapLayersPrefBrowserStorage, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
 import { MeasurementActionToolbar, MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
@@ -153,7 +153,6 @@ const configuredUiItems = new Map<string, UiItem>([
               },
               {
                 id: ExternalSourcesTreeComponent.id,
-                startIcon: <SvgTechnicalPreviewMiniBw />,
                 getLabel: () => ExternalSourcesTreeComponent.getLabel(),
                 render: (props) => (
                   <ExternalSourcesTreeComponent
