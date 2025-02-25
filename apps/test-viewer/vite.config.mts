@@ -63,6 +63,12 @@ export default defineConfig(({ mode }) => {
     define: {
       "process.env.IMJS_URL_PREFIX": env.IMJS_URL_PREFIX ? `"${env.IMJS_URL_PREFIX}"` : `""`,
     },
+    build: {
+      assetsInlineLimit: (filePath) => {
+        if (filePath.includes("@itwin/itwinui-icons/")) return false;
+        return undefined;
+      },
+    },
   };
 });
 
