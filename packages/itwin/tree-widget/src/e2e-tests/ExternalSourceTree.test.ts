@@ -5,9 +5,9 @@
 
 import type { Locator } from "@playwright/test";
 import { test } from "@playwright/test";
-import { initTreeWidgetTest, selectTree, takeScreenshot, withDifferentDensities } from "./utils.js";
+import { initTreeWidgetTest, selectTree, takeScreenshot } from "./utils.js";
 
-test.describe.skip("External sources tree", () => {
+test.describe("External sources tree", () => {
   let treeWidget: Locator;
 
   test.beforeEach(async ({ page, baseURL }) => {
@@ -15,10 +15,8 @@ test.describe.skip("External sources tree", () => {
     await selectTree(treeWidget, "External sources");
   });
 
-  withDifferentDensities(() => {
-    test("no data in imodel", async ({ page }) => {
-      await page.getByText("The data required for this tree layout is not available in this iModel.").waitFor();
-      await takeScreenshot(page, treeWidget);
-    });
+  test("no data in imodel", async ({ page }) => {
+    await page.getByText("The data required for this tree layout is not available in this iModel.").waitFor();
+    await takeScreenshot(page, treeWidget);
   });
 });

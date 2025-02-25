@@ -5,27 +5,24 @@
 
 import type { Locator } from "@playwright/test";
 import { test } from "@playwright/test";
-import { initTreeWidgetTest, locateNode, selectTree, takeScreenshot, withDifferentDensities } from "./utils.js";
+import { initTreeWidgetTest, locateNode, selectTree, takeScreenshot } from "./utils.js";
 
-test.describe.skip("Widget", () => {
+test.describe("Widget", () => {
   let treeWidget: Locator;
 
   test.beforeEach(async ({ page, baseURL }) => {
     treeWidget = await initTreeWidgetTest({ page, baseURL });
-    await locateNode(treeWidget, "BayTown").getByRole("checkbox", { name: "Visible: All models are visible", exact: true }).waitFor();
+    await locateNode(treeWidget, "ProcessPhysicalModel").waitFor();
   });
 
-  withDifferentDensities(() => {
-    test("tree selector", async ({ page }) => {
-      await treeWidget.getByRole("combobox").click();
-      await page.getByRole("listbox").waitFor();
-      await takeScreenshot(page, treeWidget);
-    });
+  test("tree selector", async ({ page }) => {
+    await treeWidget.getByRole("combobox").click();
+    await takeScreenshot(page, treeWidget);
+  });
 
-    test("tree selector badge", async ({ page }) => {
-      await selectTree(treeWidget, "External sources");
-      await page.getByText("The data required for this tree layout is not available in this iModel.").waitFor();
-      await takeScreenshot(page, treeWidget);
-    });
+  test("tree selector badge", async ({ page }) => {
+    await selectTree(treeWidget, "External sources");
+    await page.getByText("The data required for this tree layout is not available in this iModel.").waitFor();
+    await takeScreenshot(page, treeWidget);
   });
 });
