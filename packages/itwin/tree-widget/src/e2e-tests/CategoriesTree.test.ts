@@ -111,6 +111,19 @@ test.describe("Categories tree", () => {
     const applyFilterButton = node.getByRole("button", { name: "Apply filter" });
     await expect(applyFilterButton).toBeFocused();
     await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
+
+    // open filtering dialog
+    await page.keyboard.press("Enter");
+
+    await locateInstanceFilter(page).waitFor();
+    await selectPropertyInDialog(page, "Code");
+    await selectOperatorInDialog(page, "Equal");
+    await selectValueInDialog(page, "Equipment - Insulation");
+
+    await page.getByRole("button", { name: "Apply" }).click();
+    await locateNode(treeWidget, "Equipment - Insulation").waitFor();
+
+    await takeScreenshot(page, node, { resetScroll: true, boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
   });
 
   test("hides all categories", async ({ page }) => {
