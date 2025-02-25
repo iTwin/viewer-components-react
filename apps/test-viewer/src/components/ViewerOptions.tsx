@@ -5,7 +5,7 @@
 
 import { createContext, useContext, useState } from "react";
 import { StatusBarSection } from "@itwin/appui-react";
-import { SvgSelection } from "@itwin/itwinui-icons-react";
+import { SvgSelection, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { IconButton, Select } from "@itwin/itwinui-react";
 import { Presentation } from "@itwin/presentation-frontend";
 
@@ -48,19 +48,34 @@ export const statusBarActionsProvider: UiItemsProvider = {
   id: "ViewerOptionsUiItemsProvider",
   getStatusBarItems: () => [
     {
+      id: `toggleExpandedLayoutButton`,
+      content: <ToggleExpandedLayoutButton />,
+      itemPriority: 1,
+      section: StatusBarSection.Left,
+    },
+    {
       id: `toggleTreeNodesSelectionButton`,
       content: <ToggleTreeNodesSelectionButton />,
-      itemPriority: 1,
+      itemPriority: 2,
       section: StatusBarSection.Left,
     },
     {
       id: `selectionScopeSelectorButton`,
       content: <SelectionScopeSelectorButton />,
-      itemPriority: 2,
+      itemPriority: 3,
       section: StatusBarSection.Left,
     },
   ],
 };
+
+function ToggleExpandedLayoutButton() {
+  const { setDensity } = useViewerActionsContext();
+  return (
+    <IconButton label="Toggle expanded layout" styleType="borderless" onClick={() => setDensity((prev) => (prev === "default" ? "enlarged" : "default"))}>
+      <SvgVisibilityShow />
+    </IconButton>
+  );
+}
 
 function ToggleTreeNodesSelectionButton() {
   const { setDisableNodesSelection } = useViewerActionsContext();
