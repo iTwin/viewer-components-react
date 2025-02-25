@@ -5,7 +5,8 @@
 /* eslint-disable deprecation/deprecation */
 /* eslint-disable @itwin/no-internal */
 
-import { describe, it, beforeEach, afterEach, beforeAll, afterAll, expect, vi } from "vitest";
+import fs from "fs";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { ImageMapLayerSettings } from "@itwin/core-common";
 import { MapLayerIndex, MapLayerSource, MapLayerSources, MockRender } from "@itwin/core-frontend";
 import { fireEvent, getAllByTestId, getByTestId, queryAllByTestId, queryByText, render, RenderResult } from "@testing-library/react";
@@ -13,8 +14,8 @@ import { MapLayerPreferences, MapLayerSourceChangeType } from "../MapLayerPrefer
 import { MapLayerManager } from "../ui/widget/MapLayerManager";
 import { TestUtils } from "./TestUtils";
 import { ViewportMock } from "./ViewportMock";
+
 import type { GuidString } from "@itwin/core-bentley";
-import fs from 'fs';
 const logFile = fs.createWriteStream('test.log', { flags: 'a' });
 
 function logToFile(message: any) {
@@ -26,9 +27,8 @@ describe("MapLayerManager", () => {
     { formatId: "ArcGIS", name: "source2", url: "https://test.com/Mapserver" },
     { formatId: "ArcGIS", name: "source1", url: "https://test.com/Mapserver" },
   ];
-  
+
   const viewportMock = new ViewportMock();
-  const sandbox = vi.createSandbox();
 
   const attachLayerButtonSelector = ".map-manager-attach-layer-button";
   const sourceListSelector = ".map-manager-source-list";
@@ -199,7 +199,7 @@ describe("MapLayerManager", () => {
 
   it("should rename source item after 'onLayerSourceChanged' renamed event", async () => {
     const renamedName = "RenamedSource";
-    
+
     await testSourceItems(
       async (sourceItems: NodeListOf<HTMLLIElement>) => {
         expect(sourceItems.length).toBe(2);
@@ -276,11 +276,11 @@ describe("MapLayerManager", () => {
     const doLayerSectionTests = (section: HTMLElement) => {
       const selectAllCheckbox = getByTestId<HTMLInputElement>(section, "select-all-checkbox");
       const layerCheckboxes = getAllByTestId<HTMLInputElement>(section, "select-item-checkbox");
-      
+
       // Make sure that initially all checkboxes are not checked
       layerCheckboxes.every((value) => expect(value.checked).toBe(false));
       expect(selectAllCheckbox.checked).toBe(false);
-      
+
       // Clicking on the 'select all' checkbox in the header, should check all layer checkboxes
       selectAllCheckbox.click();
       expect(layerCheckboxes.every((value) => value.checked)).toBe(true);
