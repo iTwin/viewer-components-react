@@ -26,8 +26,9 @@ describe("MapLayerManager", () => {
     { formatId: "ArcGIS", name: "source2", url: "https://test.com/Mapserver" },
     { formatId: "ArcGIS", name: "source1", url: "https://test.com/Mapserver" },
   ];
-
+  
   const viewportMock = new ViewportMock();
+  const sandbox = vi.createSandbox();
 
   const attachLayerButtonSelector = ".map-manager-attach-layer-button";
   const sourceListSelector = ".map-manager-source-list";
@@ -82,9 +83,11 @@ describe("MapLayerManager", () => {
     }
     const { container } = renderResult;
     await TestUtils.flushAsyncOperations();
-
+    logToFile(`extraFunc exists:, ${!!extraFunc}`);
     if (extraFunc) {
+      logToFile("Extra function called");
       extraFunc();
+      await TestUtils.flushAsyncOperations();
     }
 
     const addButton = container.querySelector(attachLayerButtonSelector) as HTMLElement;
@@ -100,7 +103,7 @@ describe("MapLayerManager", () => {
       logToFile(`Tag: ${item.tagName}, Role: ${item.getAttribute('role')}`);
     });
     expect(sourceList).toBeDefined();
-    testFunc(sourceList.querySelectorAll("li"));
+    testFunc(sourceList.querySelectorAll('div[role="listitem"]'));
   }
 
   it("renders base maps", async () => {
@@ -180,7 +183,7 @@ describe("MapLayerManager", () => {
     expect(sourceItems.length).toBe(2);
   });
 
-  it.only("should remove source item after 'onLayerSourceChanged' delete event", async () => {
+  it("should remove source item after 'onLayerSourceChanged' delete event", async () => {
     await testSourceItems(
       async (sourceItems: NodeListOf<HTMLLIElement>) => {
         expect(sourceItems.length).toBe(1);
@@ -226,13 +229,19 @@ describe("MapLayerManager", () => {
 
     await testSourceItems(
       async (sourceItems: NodeListOf<HTMLLIElement>) => {
+        logToFile('sourceItems length after event: ' + sourceItems.length);
+        logToFile('sourceItems content: ' + Array.from(sourceItems).map(item => item.textContent));
         expect(sourceItems.length).toBe(3);
         expect(sourceItems[2].textContent).toBe(newSourceProps.name);
       },
       undefined,
       1,
-      () => {
-        MapLayerPreferences.onLayerSourceChanged.raiseEvent(MapLayerSourceChangeType.Added, MapLayerSource.fromJSON(newSourceProps));
+      async () => {
+        const newSource = MapLayerSource.fromJSON(newSourceProps);
+        logToFile('Raising onLayerSourceChanged event');
+        MapLayerPreferences.onLayerSourceChanged.raiseEvent(MapLayerSourceChangeType.Added, undefined,  newSource);
+          // Give React time to process the state update
+        await TestUtils.flushAsyncOperations();
       },
     );
   });
