@@ -9,12 +9,12 @@ import { ErrorBoundary } from "react-error-boundary";
 import { StagePanelLocation, StagePanelSection, useTransientState } from "@itwin/appui-react";
 import { SvgHierarchyTree } from "@itwin/itwinui-icons-react";
 import { TreeWidget } from "../TreeWidget.js";
+import { ErrorState } from "./tree-header/ErrorState.js";
 import { TreeWidgetComponentImpl } from "./TreeWidgetComponentImpl.js";
 
-import type { TreeDefinition } from "./TreeWidgetComponentImpl.js";
-import type { Widget } from "@itwin/appui-react";
-import type { FallbackProps } from "react-error-boundary";
 import type { Ref } from "react";
+import type { Widget } from "@itwin/appui-react";
+import type { TreeDefinition } from "./TreeWidgetComponentImpl.js";
 
 /**
  * Props for `createWidget`.
@@ -67,10 +67,6 @@ export function TreeWidgetComponent(props: TreeWidgetProps) {
       </ErrorBoundary>
     </div>
   );
-}
-
-function ErrorState({}: FallbackProps) {
-  return <> ERROR WINDOW TBD </>;
 }
 
 function useTreeWidgetTransientState() {

@@ -18,7 +18,7 @@
   },
   "errorState": {
     "title": "Error",
-    "description": "An error occurred while loading tree content.",
+    "description": "Failed to load tree",
     "retryButtonLabel": "Retry"
   },
   "visibilityTooltips": {

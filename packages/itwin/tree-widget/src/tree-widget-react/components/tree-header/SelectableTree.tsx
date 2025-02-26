@@ -4,7 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./SelectableTree.css";
+import { ErrorBoundary } from "react-error-boundary";
 import { Divider } from "@itwin/itwinui-react/bricks";
+import { ErrorState } from "./ErrorState.js";
 
 import type { Viewport } from "@itwin/core-frontend";
 import type { PropsWithChildren, ReactNode } from "react";
@@ -26,7 +28,9 @@ export function SelectableTree({ buttons, children }: PropsWithChildren<TreehHea
     <div className={"tw-tree-with-toolbar"}>
       {buttons ? <div className={"tw-tree-toolbar"}>{buttons}</div> : <></>}
       <Divider />
-      <div className="tw-tree-content">{children}</div>
+      <ErrorBoundary FallbackComponent={ErrorState}>
+        <div className="tw-tree-content">{children}</div>
+      </ErrorBoundary>
     </div>
   );
 }
