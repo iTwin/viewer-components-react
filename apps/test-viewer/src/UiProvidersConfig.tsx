@@ -9,7 +9,7 @@ import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
 import { GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
-import { SvgHierarchyTree, SvgTechnicalPreviewMiniBw } from "@itwin/itwinui-icons-react";
+import { SvgHierarchyTree } from "@itwin/itwinui-icons-react";
 import { FeatureInfoUiItemsProvider, MapLayersPrefBrowserStorage, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
 import { MeasurementActionToolbar, MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
@@ -36,6 +36,7 @@ import { RepositoriesTreeComponent } from "./components/repositories-tree/Reposi
 import { useViewerOptionsContext } from "./components/ViewerOptions";
 import { unifiedSelectionStorage } from "./SelectionStorage";
 
+import type { ComponentProps } from "react";
 import type { TreeDefinition } from "@itwin/tree-widget-react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ClientPrefix } from "@itwin/grouping-mapping-widget";
@@ -114,21 +115,16 @@ const configuredUiItems = new Map<string, UiItem>([
               {
                 id: ModelsTreeComponent.id,
                 getLabel: () => ModelsTreeComponent.getLabel(),
-                render: (props) => {
-                  // eslint-disable-next-line react-hooks/rules-of-hooks
-                  const { disableNodesSelection } = useViewerOptionsContext();
-                  return (
-                    <ModelsTreeComponent
-                      getSchemaContext={getSchemaContext}
-                      filter={props.filter}
-                      selectionStorage={unifiedSelectionStorage}
-                      selectionMode={"extended"}
-                      selectionPredicate={disableNodesSelection ? disabledSelectionPredicate : undefined}
-                      onPerformanceMeasured={props.onPerformanceMeasured}
-                      onFeatureUsed={props.onFeatureUsed}
-                    />
-                  );
-                },
+                render: (props) => (
+                  <ModelsTreeWithOptions
+                    getSchemaContext={getSchemaContext}
+                    filter={props.filter}
+                    selectionStorage={unifiedSelectionStorage}
+                    selectionMode={"extended"}
+                    onPerformanceMeasured={props.onPerformanceMeasured}
+                    onFeatureUsed={props.onFeatureUsed}
+                  />
+                ),
               },
               {
                 id: CategoriesTreeComponent.id,
@@ -157,7 +153,6 @@ const configuredUiItems = new Map<string, UiItem>([
               },
               {
                 id: ExternalSourcesTreeComponent.id,
-                startIcon: <SvgTechnicalPreviewMiniBw />,
                 getLabel: () => ExternalSourcesTreeComponent.getLabel(),
                 render: (props) => (
                   <ExternalSourcesTreeComponent
@@ -296,6 +291,11 @@ const configuredUiItems = new Map<string, UiItem>([
     },
   ],
 ]);
+
+function ModelsTreeWithOptions(props: ComponentProps<typeof ModelsTreeComponent>) {
+  const { disableNodesSelection } = useViewerOptionsContext();
+  return <ModelsTreeComponent {...props} selectionPredicate={disableNodesSelection ? disabledSelectionPredicate : undefined} />;
+}
 
 function TreeWidgetWithOptions(props: { trees: TreeDefinition[] }) {
   return (

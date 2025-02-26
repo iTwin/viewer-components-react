@@ -87,9 +87,8 @@ export async function selectValueInDialog(page: Page, valueText: string) {
 }
 
 export async function selectTree(widget: Locator, treeLabel: string) {
-  await widget.getByText("BayTown").waitFor();
-  await widget.getByRole("combobox").click();
-  await widget.page().getByRole("listbox").getByText(treeLabel, { exact: true }).click();
+  await widget.getByText("ProcessPhysicalModel").waitFor();
+  await widget.getByRole("combobox").selectOption({ label: treeLabel });
 }
 
 export async function scrollTree(page: Page, x: number, y: number) {
