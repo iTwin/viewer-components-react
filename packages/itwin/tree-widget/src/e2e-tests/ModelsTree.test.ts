@@ -22,7 +22,7 @@ test.describe("Models tree", () => {
   test.beforeEach(async ({ page, baseURL }) => {
     treeWidget = await initTreeWidgetTest({ page, baseURL });
     await selectTree(treeWidget, "Models");
-    await locateNode(treeWidget, "ProcessPhysicalModel").waitFor();
+    await locateNode(treeWidget, "ProcessPhysicalModel").getByRole("button", { name: "Determining visibility..." }).waitFor({ state: "detached" });
   });
 
   test("disabled selection", async ({ page }) => {
@@ -51,7 +51,7 @@ test.describe("Models tree", () => {
 
   test("initial tree", async ({ page }) => {
     // wait for element to be visible in the tree
-    await locateNode(treeWidget, "ProcessPhysicalModel").waitFor();
+    await locateNode(treeWidget, "ProcessPhysicalModel").getByRole("button", { name: "Determining visibility..." }).waitFor({ state: "detached" });
     await takeScreenshot(page, treeWidget);
   });
 
@@ -72,6 +72,7 @@ test.describe("Models tree", () => {
 
   test("selected node", async ({ page }) => {
     const node = locateNode(treeWidget, "ProcessPhysicalModel");
+    await node.getByRole("button", { name: "Determining visibility..." }).waitFor({ state: "detached" });
     await node.click();
 
     // wait for node to become selected
