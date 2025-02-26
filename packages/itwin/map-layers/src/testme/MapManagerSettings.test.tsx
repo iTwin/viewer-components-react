@@ -2,31 +2,17 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-/* eslint-disable deprecation/deprecation */
-
-import { describe, it, beforeEach, afterEach, beforeAll, afterAll, expect, vi } from "vitest";
 import * as moq from "typemoq";
 import { PlanarClipMaskMode, PlanarClipMaskPriority, TerrainHeightOriginMode } from "@itwin/core-common";
 import { MockRender } from "@itwin/core-frontend";
-import { QuantityNumberInput } from "@itwin/imodel-components-react";
-import { Input, Select, ToggleSwitch } from "@itwin/itwinui-react";
-import { act, fireEvent, getByTestId, render, userEvent  } from "@testing-library/react";
+import { act, fireEvent, getByTestId, render, screen, within } from "@testing-library/react";
+import userEvent from '@testing-library/user-event';
 import { SourceMapContext } from "../ui/widget/MapLayerManager";
 import { MapManagerSettings } from "../ui/widget/MapManagerSettings";
 import { TestUtils } from "./TestUtils";
 
-import type { ChangeEvent } from "react";
-import type { SelectValueChangeEvent } from "@itwin/itwinui-react";
 import type { BackgroundMapSettings, DisplayStyle3dSettings, TerrainSettings } from "@itwin/core-common";
 import type { DisplayStyle3dState, IModelConnection, ScreenViewport, ViewState3d } from "@itwin/core-frontend";
-import fs from 'fs';
-import { log } from "console";
-
-const logFile = fs.createWriteStream('test.log', { flags: 'a' });
-
-function logToFile(message: any) {
-  logFile.write(`${message}\n`);
-}
 
 describe("MapManagerSettings", () => {
   const viewportMock = moq.Mock.ofType<ScreenViewport>();
@@ -36,45 +22,6 @@ describe("MapManagerSettings", () => {
   const displayStyleSettingsMock = moq.Mock.ofType<DisplayStyle3dSettings>();
   const backgroundMapSettingsMock = moq.Mock.ofType<BackgroundMapSettings>();
   const terrainSettingsMock = moq.Mock.ofType<TerrainSettings>();
-
-  // Utility methods that give the index of components rendered by
-  // MapManagerSettings.
-  // Any re-ordering inside the component render will invalidate
-  // this and will need to be revisited.
-  const getToggleIndex = (toggleName: string) => {
-    switch (toggleName) {
-      case "locatable":
-        return 0;
-      case "mask":
-        return 1;
-      case "overrideMaskTransparency":
-        return 2;
-      case "depthBuffer":
-        return 3;
-      case "terrain":
-        return 4;
-    }
-    throw new Error("invalid name provided.");
-  };
-
-  const getQuantityNumericInputIndex = (name: string) => {
-    switch (name) {
-      case "groundBias":
-        return 0;
-      case "terrainOrigin":
-        return 1;
-    }
-    throw new Error("invalid name provided.");
-  };
-
-  const changeNumericInputValue = (component: any, value: number) => {
-    // For some reasons could not get 'simulate' and 'change' to work here, so calling directly the onChange prop instead.
-    component.find("input").props().onChange!({ currentTarget: { value } } as any);
-
-    // Handler is not triggered until there is a key press
-    component.find("input").simulate("keydown", { key: "Enter" });
-    component.update();
-  };
 
   beforeAll(async () => {
     await MockRender.App.startup();
@@ -87,7 +34,8 @@ describe("MapManagerSettings", () => {
   });
 
   beforeEach(() => {
-    window.HTMLElement.prototype.scrollTo = () => {};
+    window.HTMLElement.prototype.scrollTo = vi.fn();
+    window.HTMLElement.prototype.scrollIntoView = vi.fn();
     terrainSettingsMock.reset();
     terrainSettingsMock.setup((ts) => ts.heightOriginMode).returns(() => TerrainHeightOriginMode.Geodetic);
     terrainSettingsMock.setup((ts) => ts.heightOrigin).returns(() => 0);
@@ -186,7 +134,7 @@ describe("MapManagerSettings", () => {
   it("Transparency slider", () => {
     viewportMock.verify((x) => x.changeBackgroundMapProps(moq.It.isAny()), moq.Times.never());
   
-    const { container } = renderComponent();
+    const { container, unmount } = renderComponent();
   
     const sliders = container.querySelectorAll('div[role="slider"]');
     expect(sliders.length).toBe(2);
@@ -196,13 +144,13 @@ describe("MapManagerSettings", () => {
     });
   
     viewportMock.verify((x) => x.changeBackgroundMapProps({ transparency: 0 }), moq.Times.once());
-    container.remove();
+    unmount();
   });
 
   it("Mask Transparency slider", () => {
     viewportMock.verify((x) => x.changeBackgroundMapProps(moq.It.isAny()), moq.Times.never());
   
-    const { container } = renderComponent();
+    const { container, unmount } = renderComponent();
   
     const sliders = container.querySelectorAll('div[role="slider"]');
     expect(sliders.length).toBe(2);
@@ -249,6 +197,7 @@ describe("MapManagerSettings", () => {
         x.changeBackgroundMapProps({ planarClipMask: { mode: PlanarClipMaskMode.Priority, priority: PlanarClipMaskPriority.BackgroundMap, transparency: 0 } }),
       moq.Times.exactly(2),
     );
+    unmount();
   });
 
   it("Locatable toggle", () => {
@@ -343,6 +292,7 @@ describe("MapManagerSettings", () => {
     fireEvent.keyDown(groundBiasInput, { key: "Enter" });
   
     viewportMock.verify((x) => x.changeBackgroundMapProps({ groundBias: oneStepFiredValue }), moq.Times.once());
+
     unmount();
   });
 
@@ -362,6 +312,7 @@ describe("MapManagerSettings", () => {
     fireEvent.keyDown(terrainOriginInput, { key: "Enter" });
   
     viewportMock.verify((x) => x.changeBackgroundMapProps({ terrainSettings: { heightOrigin: oneStepFiredValue } }), moq.Times.once());
+
     unmount();
   });
 
@@ -378,10 +329,12 @@ describe("MapManagerSettings", () => {
     fireEvent.keyDown(exaggerationInput, { key: "Enter" });
   
     viewportMock.verify((x) => x.changeBackgroundMapProps({ terrainSettings: { exaggeration: 1 } }), moq.Times.once());
+
     unmount();
   });
 
-  it.only("heightOriginMode geoid", () => {
+  it("heightOriginMode geoid", async () => {
+    const user = userEvent.setup();
     const { container, unmount } = renderComponent();
     
     viewportMock.verify((x) => x.changeBackgroundMapProps(moq.It.isAny()), moq.Times.never());
@@ -390,20 +343,20 @@ describe("MapManagerSettings", () => {
     const terrainToggle = getByTestId(container, "terrain") as HTMLInputElement;
     fireEvent.click(terrainToggle);
 
-    // Get the Select component and simulate change
-    const select = getByTestId(container, "terrain-height-mode");
+    // Open the height mode dropdown and select 'Geoid'
+    const select = getByTestId(container, "terrain-height-mode").querySelector('[role="combobox"]');
+    await user.click(select!);
 
-    // Create a properly typed custom event
-    const customEvent = new CustomEvent('change', {
-      bubbles: true,
-      detail: {
-        value: "geoid",
-        event: "added" as SelectValueChangeEvent
-      }
-    });
+    // Need to use screen to get the listbox as the dropdown is rendered outside the component it seems
+    const dropdownId = select?.getAttribute('aria-controls');
+    const listboxes = screen.getAllByRole('listbox');
+    const targetListbox = listboxes.find(box => box.getAttribute('id') === dropdownId!);
+    
+    const dropdownOptions = within(targetListbox!);
+    
+    await user.click(dropdownOptions.getByText("Settings.ElevationTypeGeoid")); 
 
-    fireEvent(select, customEvent);
-
+    // Verify that the height origin mode is set to 'Geoid'
     viewportMock.verify(
       (x) => x.changeBackgroundMapProps({ 
         terrainSettings: { heightOriginMode: TerrainHeightOriginMode.Geoid } 
@@ -414,12 +367,58 @@ describe("MapManagerSettings", () => {
     unmount();
   });
 
+  it("heightOriginMode geodetic", async () => {
+    const user = userEvent.setup();
+    const { container, unmount } = renderComponent();
 
+    const terrainToggle = getByTestId(container, "terrain") as HTMLInputElement;
+    fireEvent.click(terrainToggle);
 
+    const select = getByTestId(container, "terrain-height-mode").querySelector('[role="combobox"]');
+    await user.click(select!);
 
+    // Need to use screen to get the listbox as the dropdown is rendered outside the component it seems
+    const dropdownId = select?.getAttribute('aria-controls');
+    const listboxes = screen.getAllByRole('listbox');
+    const targetListbox = listboxes.find(box => box.getAttribute('id') === dropdownId!);
+    const dropdownOptions = within(targetListbox!);
+    
+    await user.click(dropdownOptions.getByText("Settings.ElevationTypeGeodetic")); 
 
-  
-  
-  
+    viewportMock.verify(
+      (x) => x.changeBackgroundMapProps({ 
+        terrainSettings: { heightOriginMode: TerrainHeightOriginMode.Geodetic } 
+      }), 
+      moq.Times.once()
+    );
 
+    unmount();
+  });
+
+  it("heightOriginMode ground", async () => {
+      const user = userEvent.setup();
+      const { container, unmount } = renderComponent();
+
+      const terrainToggle = getByTestId(container, "terrain") as HTMLInputElement;
+      fireEvent.click(terrainToggle);
+
+      const select = getByTestId(container, "terrain-height-mode").querySelector('[role="combobox"]');
+      await user.click(select!);
+
+      const dropdownId = select?.getAttribute('aria-controls');
+      const listboxes = screen.getAllByRole('listbox');
+      const targetListbox = listboxes.find(box => box.getAttribute('id') === dropdownId!);
+      const dropdownOptions = within(targetListbox!);
+      
+      await user.click(dropdownOptions.getByText("Settings.ElevationTypeGround")); 
+
+      viewportMock.verify(
+        (x) => x.changeBackgroundMapProps({ 
+          terrainSettings: { heightOriginMode: TerrainHeightOriginMode.Ground } 
+        }), 
+        moq.Times.once()
+      );
+
+      unmount();
+  });
 });

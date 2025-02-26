@@ -309,4 +309,5 @@ describe("MapUrlDialog", () => {
 
     component.unmount();
   });
+  
 });

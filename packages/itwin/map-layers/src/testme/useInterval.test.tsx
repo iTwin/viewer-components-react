@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { renderHook } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
 import { useInterval } from "../../src/ui/hooks/useInterval";
 
 describe("useInterval", () => {

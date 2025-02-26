@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { renderHook } from "@testing-library/react";
-import { describe, expect, it} from "vitest";
 import { useCrossOriginPopup } from "../../src/ui/hooks/useCrossOriginPopup";
 
 describe("useCrossOriginPopup", () => {

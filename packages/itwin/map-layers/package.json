@@ -19,7 +19,7 @@
     "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
     "lintfix": "eslint --fix -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
     "pseudolocalize": "betools pseudolocalize --englishDir=./src/public/locales/en --out=./src/public/locales/en-PSEUDO",
-    "test": "vitest --run src/testme/MapLayerManager.test.tsx",
+    "test": "vitest --run src/testme/",
     "rebuild": "npm run -s clean && npm run -s build"
   },
   "repository": {
@@ -62,6 +62,7 @@
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.2.0",
     "@testing-library/react-hooks": "^8.0.1",
+    "@testing-library/user-event": "^14.6.1",
     "@types/jsdom-global": "^3.0.4",
     "@types/node": "^18.11.5",
     "@types/react": "^18.3.2",

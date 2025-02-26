@@ -2,11 +2,6 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-/* eslint-disable deprecation/deprecation */
-/* eslint-disable @itwin/no-internal */
-
-import fs from "fs";
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { ImageMapLayerSettings } from "@itwin/core-common";
 import { MapLayerIndex, MapLayerSource, MapLayerSources, MockRender } from "@itwin/core-frontend";
 import { fireEvent, getAllByTestId, getByTestId, queryAllByTestId, queryByText, render, RenderResult } from "@testing-library/react";
@@ -16,11 +11,6 @@ import { TestUtils } from "./TestUtils";
 import { ViewportMock } from "./ViewportMock";
 
 import type { GuidString } from "@itwin/core-bentley";
-const logFile = fs.createWriteStream('test.log', { flags: 'a' });
-
-function logToFile(message: any) {
-  logFile.write(`${message}\n`);
-}
 
 describe("MapLayerManager", () => {
   const sourceDataset: any = [
@@ -83,9 +73,8 @@ describe("MapLayerManager", () => {
     }
     const { container } = renderResult;
     await TestUtils.flushAsyncOperations();
-    logToFile(`extraFunc exists:, ${!!extraFunc}`);
+
     if (extraFunc) {
-      logToFile("Extra function called");
       extraFunc();
       await TestUtils.flushAsyncOperations();
     }
@@ -95,13 +84,6 @@ describe("MapLayerManager", () => {
     fireEvent.click(addButton);
 
     const sourceList = document.querySelector(sourceListSelector) as HTMLUListElement;
-    logToFile(`sourceList HTML:', ${sourceList?.innerHTML}`);
-    logToFile(`sourceList 1 children:', ${sourceList?.children[0]}`);
-    logToFile(`sourceList 1 children:', ${sourceList?.children[1]}`);
-    const items = sourceList.querySelectorAll('*');
-    items.forEach(item => {
-      logToFile(`Tag: ${item.tagName}, Role: ${item.getAttribute('role')}`);
-    });
     expect(sourceList).toBeDefined();
     testFunc(sourceList.querySelectorAll('div[role="listitem"]'));
   }
@@ -203,8 +185,6 @@ describe("MapLayerManager", () => {
     await testSourceItems(
       async (sourceItems: NodeListOf<HTMLLIElement>) => {
         expect(sourceItems.length).toBe(2);
-        console.log("0th index was renamed ", sourceItems[0].textContent);
-        console.log("1 index", sourceItems[1].textContent);
         expect(sourceItems[1].textContent).toBe(sourceDataset[1].name);
         expect(sourceItems[0].textContent).toBe(renamedName);
       },
@@ -229,8 +209,6 @@ describe("MapLayerManager", () => {
 
     await testSourceItems(
       async (sourceItems: NodeListOf<HTMLLIElement>) => {
-        logToFile('sourceItems length after event: ' + sourceItems.length);
-        logToFile('sourceItems content: ' + Array.from(sourceItems).map(item => item.textContent));
         expect(sourceItems.length).toBe(3);
         expect(sourceItems[2].textContent).toBe(newSourceProps.name);
       },
@@ -238,9 +216,8 @@ describe("MapLayerManager", () => {
       1,
       async () => {
         const newSource = MapLayerSource.fromJSON(newSourceProps);
-        logToFile('Raising onLayerSourceChanged event');
         MapLayerPreferences.onLayerSourceChanged.raiseEvent(MapLayerSourceChangeType.Added, undefined,  newSource);
-          // Give React time to process the state update
+        // Give React time to process the state update
         await TestUtils.flushAsyncOperations();
       },
     );

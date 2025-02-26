@@ -2,7 +2,6 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-import { describe, it, beforeEach, afterEach, expect, vi } from "vitest";
 import type { GuidString } from "@itwin/core-bentley";
 import { Guid } from "@itwin/core-bentley";
 import { MapLayerSource, MockRender } from "@itwin/core-frontend";

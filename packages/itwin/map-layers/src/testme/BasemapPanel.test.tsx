@@ -2,9 +2,6 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-/* eslint-disable deprecation/deprecation */
-/* eslint-disable @itwin/no-internal */
-import { describe, it, beforeEach, afterEach, beforeAll, afterAll, expect, vi } from "vitest";
 import {
   BackgroundMapProvider,
   BackgroundMapType,
@@ -101,7 +98,8 @@ describe("BasemapPanel", () => {
     let selectContent = getByTestId(container, "base-map-select");
     expect(selectContent).toBeDefined();
     expect(selectContent!.textContent).toBe("WellKnownBaseMaps.BingProvider.Street");
-
+    
+    // Now test with a custom map-layer definition
     baseMap = customBaseMap;
     viewportMock.baseMap = baseMap;
     viewportMock.onMapImageryChanged.raiseEvent(MapImagerySettings.fromJSON({ backgroundBase: baseMap }));
@@ -111,6 +109,7 @@ describe("BasemapPanel", () => {
     expect(selectContent).toBeDefined();
     expect(selectContent!.textContent).toBe(customBaseMap.name);
 
+    // Now test with a ColorDef
     const color = ColorDef.create(ColorByName.aliceBlue);
     viewportMock.baseMap = color;
     viewportMock.onMapImageryChanged.raiseEvent(MapImagerySettings.fromJSON({ backgroundBase: color.toJSON() }));
@@ -147,6 +146,7 @@ describe("BasemapPanel", () => {
     const iconVisibilityHide = await findByTestId(container, "layer-visibility-icon-hide");
     expect(iconVisibilityHide).toBeDefined();
 
+    // check transparency slider has been updated
     const transparencyButton = container.querySelector(".map-transparency-popup-button") as HTMLElement;
     expect(transparencyButton).toBeDefined();
     fireEvent.click(transparencyButton);
