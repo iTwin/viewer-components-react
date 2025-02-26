@@ -96,7 +96,6 @@ test.describe("Models tree", () => {
 
     // wait for filtered children to appear
     await locateNode(treeWidget, "PipeSupport").waitFor();
-    await treeWidget.getByRole("button", { name: "Apply filter" }).waitFor();
 
     await takeScreenshot(page, treeWidget, { resetScroll: true });
   });
@@ -115,7 +114,6 @@ test.describe("Models tree", () => {
 
     // wait for message to appear
     await treeWidget.getByText("No child nodes match current filter").waitFor();
-    await treeWidget.getByRole("button", { name: "Apply filter" }).waitFor();
 
     await takeScreenshot(page, treeWidget, { resetScroll: true });
   });

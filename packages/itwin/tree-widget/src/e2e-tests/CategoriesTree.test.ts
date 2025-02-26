@@ -55,7 +55,6 @@ test.describe("Categories tree", () => {
 
     // wait for filtered children to appear
     await locateNode(treeWidget, "Equipment - Insulation").waitFor();
-    await treeWidget.getByRole("button", { name: "Apply filter" }).waitFor();
 
     await takeScreenshot(page, treeWidget, { resetScroll: true });
   });
@@ -74,7 +73,6 @@ test.describe("Categories tree", () => {
 
     // wait for message to appear
     await treeWidget.getByText("No child nodes match current filter").waitFor();
-    await treeWidget.getByRole("button", { name: "Apply filter" }).waitFor();
 
     await takeScreenshot(page, treeWidget, { resetScroll: true });
   });
