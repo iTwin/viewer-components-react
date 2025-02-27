@@ -41,6 +41,7 @@ interface ModelsTreeComponentProps
     | "getFilteredPaths"
     | "filter"
     | "emptyTreeContent"
+    | "actions"
   > {
   /**
    * Renderers of header buttons. Defaults to:
