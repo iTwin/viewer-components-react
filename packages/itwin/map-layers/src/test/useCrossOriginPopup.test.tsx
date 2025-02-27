@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { renderHook } from "@testing-library/react";
-import { useCrossOriginPopup } from "../../src/ui/hooks/useCrossOriginPopup";
+import { useCrossOriginPopup } from "../ui/hooks/useCrossOriginPopup";
 
 describe("useCrossOriginPopup", () => {
   const fakeUrl = "https://test.com";

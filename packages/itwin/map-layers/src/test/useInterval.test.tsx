@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { renderHook } from "@testing-library/react";
-import { useInterval } from "../../src/ui/hooks/useInterval";
+import { useInterval } from "../ui/hooks/useInterval";
 
 describe("useInterval", () => {
   it("should call interval's callback when timeout is reached", () => {
