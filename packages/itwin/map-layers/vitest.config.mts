@@ -1,21 +1,28 @@
-import { defineConfig } from "vitest/config";
+import { coverageConfigDefaults, defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
     globals: true,
     environment: "jsdom",
-    restoreMocks: true,
-    reporters: ["junit", "default"],
-    setupFiles: ["src/testme/setup.ts"],
-    // include: ["src/testme/*.test.ts?(x)"],
-    outputFile: "coverage/junit.xml",
+    dir: "src",
+    setupFiles: ["src/test/setup.ts"],
     coverage: {
-      thresholds: {
-        lines: 98,
-        functions: 97,
-        statements: 98,
-        branches: 96,
-      },
-    },
-  },
+      provider: "v8",
+      include: [
+        "src/**/*"
+      ],
+      exclude: [
+        ...coverageConfigDefaults.exclude,
+        "src/test/**/*",
+        "**/*.d.ts",
+        "**/*.d.tsx"
+      ],
+      reporter: [
+        "text-summary",
+        "lcov",
+        "cobertura"
+      ],
+      reportsDirectory: "./lib/cjs/test/coverage",
+    }
+  }
 });

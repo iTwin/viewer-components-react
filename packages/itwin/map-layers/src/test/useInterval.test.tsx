@@ -2,40 +2,30 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-import { expect } from "chai";
-import sinon from "sinon";
 import { renderHook } from "@testing-library/react";
-import { useInterval } from "../ui/hooks/useInterval";
+import { useInterval } from "../../src/ui/hooks/useInterval";
 
 describe("useInterval", () => {
-  let clock: sinon.SinonFakeTimers;
-
-  beforeEach(() => {
-    clock = sinon.useFakeTimers();
-  });
-
-  afterEach(() => {
-    clock.restore();
-  });
-
   it("should call interval's callback when timeout is reached", () => {
-    const spy = sinon.spy();
+    vi.useFakeTimers();
+    const spy = vi.fn();
     const delay = 100;
     renderHook(() => useInterval(spy, delay));
 
-    // Advance clock by to the same number of tick as the internal delay
-    clock.tick(delay);
+    // Advance clock by to the same number of tick as the internal delay.
+    vi.advanceTimersByTime(delay);
 
-    expect(spy.calledOnce).to.be.true;
+    expect(spy).toHaveBeenCalledOnce();
   });
 
   it("should NOT call interval's callback when timeout has not been reached yet", () => {
-    const spy = sinon.spy();
+    vi.useFakeTimers();
+    const spy = vi.fn();
     renderHook(() => useInterval(spy, 100));
 
     // Advance clock by only 50 clicks, so interval should not have reached time out
-    clock.tick(50);
+    vi.advanceTimersByTime(50);
 
-    expect(spy.called).to.be.false;
+    expect(spy).not.toBeCalled();
   });
 });
