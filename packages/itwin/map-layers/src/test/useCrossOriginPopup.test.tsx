@@ -2,6 +2,7 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
+//Copied From: https://github.com/iTwin/appui/blob/master/ui/core-react/src/test/utils/hooks/useCrossOriginPopup.test.tsx
 import { renderHook } from "@testing-library/react";
 import { useCrossOriginPopup } from "../ui/hooks/useCrossOriginPopup";
 
