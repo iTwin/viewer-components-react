@@ -29,7 +29,7 @@ import type { PropertyGridComponentProps } from "./PropertyGridComponent.js";
  */
 export function createPropertyGrid(propertyGridProps: PropertyGridWidgetProps): Widget {
   return {
-    id: "vcr:PropertyGridComponent",
+    id: propertyGridProps.widgetId ?? PropertyGridWidgetId,
     label: PropertyGridManager.translate("widget-label"),
     icon: <SvgInfoCircular />,
     defaultState: WidgetState.Hidden,
@@ -44,7 +44,9 @@ export function createPropertyGrid(propertyGridProps: PropertyGridWidgetProps): 
 }
 
 /**
- * Id of the property grid widget created by `createPropertyGrid`.
+ * Default id for the property grid widget created by `createPropertyGrid`, if a custom on
+ * is not supplied through `widgetId` prop.
+ *
  * @public
  */
 export const PropertyGridWidgetId = "vcr:PropertyGridComponent";
@@ -99,11 +101,18 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
 }
 
 /**
- * Props for creating `PropertyGridWidget`.
+ * Props for `createPropertyGrid`.
  * @public
  */
-export type PropertyGridWidgetProps = PropertyGridComponentProps &
-  (
+export type PropertyGridWidgetProps = PropertyGridComponentProps & {
+  /**
+   * A custom id to use for the created widget. Should be supplied when creating multiple property grid widgets to
+   * make sure they don't conflict with each other in AppUI system.
+   *
+   * Defaults to `PropertyGridWidgetId`.
+   */
+  widgetId?: string;
+} & (
     | {
         /**
          * Predicate indicating if the widget should be shown for the current selection set.
@@ -128,9 +137,9 @@ export type PropertyGridWidgetProps = PropertyGridComponentProps &
 
 /** Component that renders `PropertyGridComponent` an hides/shows widget based on `UnifiedSelection`. */
 // eslint-disable-next-line deprecation/deprecation
-function PropertyGridWidget({ shouldShow, ...props }: PropertyGridWidgetProps) {
+function PropertyGridWidget({ shouldShow, widgetId, ...props }: PropertyGridWidgetProps) {
   const ref = usePropertyGridTransientState<HTMLDivElement>();
-  const widgetDef = useSpecificWidgetDef(PropertyGridWidgetId);
+  const widgetDef = useSpecificWidgetDef(widgetId ?? PropertyGridWidgetId);
   const selectionStorage = props.selectionStorage;
   const { selectionChange } = useSelectionHandler({ selectionStorage });
 
