@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Introduce `widgetId` prop for `createPropertyWidget` to allow creating multiple property grid widgets in an application.",
+  "packageName": "@itwin/property-grid-react",
+  "email": "35135765+grigasp@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
