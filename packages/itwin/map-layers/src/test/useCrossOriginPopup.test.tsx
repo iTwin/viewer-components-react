@@ -2,8 +2,7 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-import { expect } from "chai";
-import sinon from "sinon";
+//Copied From: https://github.com/iTwin/appui/blob/master/ui/core-react/src/test/utils/hooks/useCrossOriginPopup.test.tsx
 import { renderHook } from "@testing-library/react";
 import { useCrossOriginPopup } from "../ui/hooks/useCrossOriginPopup";
 
@@ -12,20 +11,10 @@ describe("useCrossOriginPopup", () => {
   const fakeTitle = "test";
   const fakeWidth = 100;
   const fakeHeight = 100;
-  let clock: sinon.SinonFakeTimers;
-
-  beforeEach(() => {
-    clock = sinon.useFakeTimers();
-  });
-
-  afterEach(() => {
-    clock.restore();
-    sinon.restore();
-  });
 
   it("should open popup if initial visibility is 'ON'", () => {
-    const spy = sinon.spy(window, "open");
-    const onClosePopup = sinon.spy();
+    const spy = vi.spyOn(window, "open");
+    const onClosePopup = vi.fn();
     const result = renderHook(() =>
       useCrossOriginPopup(
         true,
@@ -38,17 +27,17 @@ describe("useCrossOriginPopup", () => {
     );
     result.result.current;
 
-    expect(spy.calledOnce).to.be.true;
-    expect(spy.calledWith(
+    expect(spy).toHaveBeenCalledOnce();
+    expect(spy).toHaveBeenCalledWith(
       fakeUrl,
       fakeTitle,
       `width=${fakeWidth},height=${fakeHeight}`
-    )).to.be.true;
+    );
   });
 
   it("should not open popup if initial visibility is 'OFF'", () => {
-    const spy = sinon.spy(window, "open");
-    const onClosePopup = sinon.spy();
+    const spy = vi.spyOn(window, "open");
+    const onClosePopup = vi.fn();
     renderHook(() =>
       useCrossOriginPopup(
         false,
@@ -60,13 +49,14 @@ describe("useCrossOriginPopup", () => {
       )
     );
 
-    expect(onClosePopup.called).to.be.false;
-    expect(spy.called).to.be.false;
+    // Popup has never been opened, so close callback should not have been called.
+    expect(onClosePopup).not.toHaveBeenCalled();
+    expect(spy).not.toHaveBeenCalled();
   });
 
   it("should open the popup after visibility change (OFF->ON)", () => {
-    const spy = sinon.spy(window, "open");
-    const onClosePopup = sinon.spy();
+    const spy = vi.spyOn(window, "open");
+    const onClosePopup = vi.fn();
     let visible = false;
     const { rerender } = renderHook(() =>
       useCrossOriginPopup(
@@ -79,27 +69,28 @@ describe("useCrossOriginPopup", () => {
       )
     );
 
-    expect(spy.called).to.be.false;
+    expect(spy).not.toHaveBeenCalled();
     visible = true;
     rerender();
 
-    expect(onClosePopup.called).to.be.false;
-    expect(spy.calledWith(
+    // Popup should be still opened, and 'OnClose'' callback should not have been called.
+    expect(onClosePopup).not.toHaveBeenCalled();
+    expect(spy).toHaveBeenCalledWith(
       fakeUrl,
       fakeTitle,
       `width=${fakeWidth},height=${fakeHeight}`
-    )).to.be.true;
+    );
   });
 
   it("should close popup when visibility change (ON->OFF)", () => {
-    const close = sinon.spy();
-    sinon.stub(window, "open").returns({
+    const close = vi.fn();
+    vi.spyOn(window, "open").mockReturnValue({
       focus: () => {},
       close,
       closed: false,
     } as unknown as Window);
 
-    const onClosePopup = sinon.spy();
+    const onClosePopup = vi.fn();
     let visible = true;
     const { rerender } = renderHook(() =>
       useCrossOriginPopup(
@@ -115,18 +106,19 @@ describe("useCrossOriginPopup", () => {
     visible = false;
     rerender();
 
-    expect(onClosePopup.calledOnce).to.be.true;
-    expect(close.calledOnce).to.be.true;
+    // Popup should be now closed and 'OnClose' been called.
+    expect(onClosePopup).toHaveBeenCalledOnce();
+    expect(close).toHaveBeenCalledOnce();
   });
 
   it("should close popup when hook is unmounted", () => {
-    const close = sinon.spy();
-    sinon.stub(window, "open").returns({
+    const close = vi.fn();
+    vi.spyOn(window, "open").mockReturnValue({
       focus: () => {},
       close,
       closed: false,
     } as unknown as Window);
-    const onClosePopup = sinon.spy();
+    const onClosePopup = vi.fn();
     const visible = true;
     const result = renderHook(() =>
       useCrossOriginPopup(
@@ -141,17 +133,20 @@ describe("useCrossOriginPopup", () => {
 
     result.unmount();
 
-    expect(onClosePopup.calledOnce).to.be.true;
-    expect(close.calledOnce).to.be.true;
+    // Popup should be still open, so close callback should not have been called.
+    expect(onClosePopup).toHaveBeenCalledOnce();
+    expect(close).toHaveBeenCalledOnce();
   });
 
   it("should call the 'onClose' callback when the popup is closed by the end-user", () => {
-    sinon.stub(window, "open").returns({
+    vi.useFakeTimers();
+
+    vi.spyOn(window, "open").mockReturnValue({
       focus: () => {},
-      close: sinon.spy(),
-      closed: true,
+      close: vi.fn(),
+      closed: true, // Mark it as already 'closed' to simulate user-user closing immediately the popup window
     } as unknown as Window);
-    const onClosePopup = sinon.spy();
+    const onClosePopup = vi.fn();
     const visible = true;
     renderHook(() =>
       useCrossOriginPopup(
@@ -164,19 +159,21 @@ describe("useCrossOriginPopup", () => {
       )
     );
 
-    clock.tick(2000);
+    // Advance clocks, so popup's internal timer has time to check for popup closure
+    vi.advanceTimersByTime(2000);
 
-    expect(onClosePopup.calledOnce).to.be.true;
+    // Popup was closed by end-user, the 'onClose' callback should have been called.
+    expect(onClosePopup).toHaveBeenCalledOnce();
   });
 
   it("should call the 'onClose' callback when the parent's browser window get closed", () => {
-    sinon.stub(window, "open").returns({
+    vi.spyOn(window, "open").mockReturnValue({
       focus: () => {},
       close: () => {},
-      closed: true,
+      closed: true, // Mark it as already 'closed' to simulate user-user closing immediately the popup window
     } as unknown as Window);
 
-    const onClosePopup = sinon.spy();
+    const onClosePopup = vi.fn();
     const visible = true;
     renderHook(() =>
       useCrossOriginPopup(
@@ -191,6 +188,7 @@ describe("useCrossOriginPopup", () => {
 
     window.onbeforeunload?.(new Event("beforeunload"));
 
-    expect(onClosePopup.calledOnce).to.be.true;
+    // We simulated that parent window has been closed, the 'onClose' callback should have been called.
+    expect(onClosePopup).toHaveBeenCalledOnce();
   });
 });

@@ -268,13 +268,13 @@ export function MapManagerSettings({ onHandleOutsideClick }: MapManagerSettingsP
             <Slider min={0} max={100} values={[transparency * 100]} onChange={handleAlphaChange} step={1} />
 
             <span className="map-manager-settings-label">{locatableLabel}</span>
-            <ToggleSwitch onChange={onLocatableToggle} checked={isLocatable} />
+            <ToggleSwitch data-testid="locatable" onChange={onLocatableToggle} checked={isLocatable} />
 
             <span className="map-manager-settings-label">{maskingLabel}</span>
-            <ToggleSwitch onChange={onMaskingToggle} checked={masking !== MapMaskingOption.None} />
+            <ToggleSwitch data-testid="mask" onChange={onMaskingToggle} checked={masking !== MapMaskingOption.None} />
 
             <span className="map-manager-settings-label">{overrideMaskTransparencyLabel}</span>
-            <ToggleSwitch disabled={masking === MapMaskingOption.None} onChange={onOverrideMaskTransparencyToggle} checked={overrideMaskTransparency} />
+            <ToggleSwitch data-testid="overrideMaskTransparency" disabled={masking === MapMaskingOption.None} onChange={onOverrideMaskTransparencyToggle} checked={overrideMaskTransparency} />
 
             <span className="map-manager-settings-label">{maskTransparencyLabel}</span>
             <Slider
@@ -289,6 +289,7 @@ export function MapManagerSettings({ onHandleOutsideClick }: MapManagerSettingsP
             <>
               <span className="map-manager-settings-label">{elevationOffsetLabel}</span>
               <QuantityNumberInput
+                data-testid="ground-bias"
                 disabled={applyTerrain}
                 persistenceValue={groundBias}
                 step={1}
@@ -299,7 +300,7 @@ export function MapManagerSettings({ onHandleOutsideClick }: MapManagerSettingsP
               />
 
               <span className="map-manager-settings-label">{useDepthBufferLabel}</span>
-              <ToggleSwitch disabled={applyTerrain} onChange={onToggleUseDepthBuffer} checked={useDepthBuffer} />
+              <ToggleSwitch data-testid="depthBuffer" disabled={applyTerrain} onChange={onToggleUseDepthBuffer} checked={useDepthBuffer} />
             </>
           </div>
           <div className="map-manager-settings-group">
@@ -308,10 +309,11 @@ export function MapManagerSettings({ onHandleOutsideClick }: MapManagerSettingsP
 
               <div className="maplayers-settings-container">
                 <span className="map-manager-settings-label">{enableLabel}</span>
-                <ToggleSwitch onChange={onToggleTerrain} checked={applyTerrain} />
+                <ToggleSwitch data-testid="terrain" onChange={onToggleTerrain} checked={applyTerrain} />
 
                 <span className="map-manager-settings-label">{modelHeightLabel}</span>
                 <QuantityNumberInput
+                  data-testid="terrain-origin"
                   disabled={!applyTerrain}
                   persistenceValue={terrainOrigin}
                   snap
@@ -322,6 +324,7 @@ export function MapManagerSettings({ onHandleOutsideClick }: MapManagerSettingsP
 
                 <span className="map-manager-settings-label">{heightOriginLabel}</span>
                 <Select
+                  data-testid="terrain-height-mode"
                   options={terrainHeightOptions.current}
                   disabled={!applyTerrain}
                   value={heightOriginMode}

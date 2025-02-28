@@ -14,12 +14,12 @@
     "copy:locale": "cpx \"./src/public/**/*\" ./lib/public",
     "copy:cjs": "cpx \"./src/**/*.{*css,json,svg}\" \"./lib/cjs\"",
     "copy:esm": "cpx \"./src/**/*.{*css,json,svg}\" \"./lib/esm\"",
-    "cover": "nyc npm -s test",
+    "cover": "vitest --run --coverage",
     "docs": "",
     "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
     "lintfix": "eslint --fix -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
     "pseudolocalize": "betools pseudolocalize --englishDir=./src/public/locales/en --out=./src/public/locales/en-PSEUDO",
-    "test": "mocha \"./lib/cjs/test/**/*.test.js\" --globals __iui,IS_REACT_ACT_ENVIRONMENT",
+    "test": "vitest --run",
     "rebuild": "npm run -s clean && npm run -s build"
   },
   "repository": {
@@ -62,25 +62,15 @@
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.2.0",
     "@testing-library/react-hooks": "^8.0.1",
-    "@typescript-eslint/eslint-plugin": "^8.20.0",
-    "@typescript-eslint/parser": "^8.20.0",
-    "@types/chai": "4.3.5",
+    "@testing-library/user-event": "^14.6.1",
     "@types/jsdom-global": "^3.0.4",
-    "@types/enzyme": "3.9.3",
-    "@types/mocha": "^10.0.6",
     "@types/node": "^18.11.5",
     "@types/react": "^18.3.2",
     "@types/react-beautiful-dnd": "^13.1.8",
-    "@types/sinon": "^17.0.2",
-    "@types/sinon-chai": "^3.2.12",
-    "@wojtekmaj/enzyme-adapter-react-17": "^0.6.3",
-    "chai": "^4.3.7",
-    "chai-as-promised": "^7",
-    "chai-jest-snapshot": "^2.0.0",
-    "chai-spies": "1.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.20.0",
+    "@typescript-eslint/parser": "^8.20.0",
+    "@vitest/coverage-v8": "^2.1.1",
     "cpx2": "^3.0.0",
-    "enzyme": "3.11.0",
-    "enzyme-to-json": "^3.3.4",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-import": "^2.31.0",
@@ -89,20 +79,18 @@
     "ignore-styles": "^5.0.1",
     "jsdom": "^22.1.0",
     "jsdom-global": "^3.0.2",
-    "mocha": "^10.2.0",
-    "nyc": "^15.1.0",
     "raf": "^3.4.1",
     "react": "^18.2.7",
     "react-dom": "^18.2.7",
     "react-redux": "^7.2.2",
     "redux": "^4.1.0",
     "rimraf": "^3.0.2",
-    "sinon": "^17.0.1",
-    "sinon-chai": "^3.7.0",
+    "sass-embedded": "^1.85.0",
     "source-map-support": "^0.5.6",
     "ts-node": "^10.9.1",
     "typemoq": "^2.1.0",
-    "typescript": "~5.4.0"
+    "typescript": "~5.4.0",
+    "vitest": "^2.1.1"
   },
   "peerDependencies": {
     "@itwin/appui-abstract": "^4.10.4",
@@ -117,31 +105,5 @@
     "@itwin/map-layers-formats": "^4.10.4",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0"
-  },
-  "nyc": {
-    "extends": "./node_modules/@itwin/build-tools/.nycrc",
-    "check-coverage": false
-  },
-  "mocha": {
-    "require": [
-      "scripts/copy-test-setup.js",
-      "raf/polyfill",
-      "source-map-support/register",
-      "ignore-styles"
-    ],
-    "checkLeaks": true,
-    "timeout": 60000,
-    "file": [
-      "lib/cjs/test/setup.js"
-    ],
-    "exclude": [
-      "lib/cjs/test/coverage/**/*"
-    ],
-    "reporter": [
-      "node_modules/@itwin/build-tools/mocha-reporter"
-    ],
-    "reporterOptions": [
-      "mochaFile=lib/test/junit_results.xml"
-    ]
   }
 }

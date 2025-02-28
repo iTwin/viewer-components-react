@@ -1,8 +1,8 @@
-import * as moq from "typemoq";
 /*---------------------------------------------------------------------------------------------
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
+import * as moq from "typemoq";
 import { BeEvent } from "@itwin/core-bentley";
 import * as coreCommon from "@itwin/core-common";
 

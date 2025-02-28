@@ -2,11 +2,6 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-/* eslint-disable deprecation/deprecation */
-/* eslint-disable @itwin/no-internal */
-
-import { expect, should } from "chai";
-import * as sinon from "sinon";
 import {
   BackgroundMapProvider,
   BackgroundMapType,
@@ -24,7 +19,6 @@ import { TestUtils } from "./TestUtils";
 import { ViewportMock } from "./ViewportMock";
 
 describe("BasemapPanel", () => {
-  const sandbox = sinon.createSandbox();
   const viewportMock = new ViewportMock();
 
   const customBaseMap: BaseMapLayerSettings = BaseMapLayerSettings.fromJSON({
@@ -38,19 +32,19 @@ describe("BasemapPanel", () => {
     url: "https://server/MapServer",
   });
 
-  before(async () => {
+  beforeAll(async () => {
     await MockRender.App.startup();
     await TestUtils.initialize();
-    window.HTMLElement.prototype.scrollIntoView = function () {};
+    window.HTMLElement.prototype.scrollIntoView = () => {};
   });
 
-  after(async () => {
+  afterAll(async () => {
     await MockRender.App.shutdown();
     TestUtils.terminateUiComponents();
   });
 
   afterEach(() => {
-    sandbox.restore();
+    vi.restoreAllMocks();
     viewportMock.reset();
   });
 
@@ -70,19 +64,17 @@ describe("BasemapPanel", () => {
         }}
       >
         <BasemapPanel />
-      </SourceMapContext.Provider>,
+      </SourceMapContext.Provider>
     );
     await TestUtils.flushAsyncOperations();
     const iconVisibility = getByTestId(container, "toggle-visibility");
-    //  container.querySelector(".icon-visibility");
-    should().exist(iconVisibility);
+    expect(iconVisibility).toBeDefined();
 
     const selectContent = getByTestId(container, "base-map-select") as HTMLElement;
-    should().exist(selectContent);
-    expect(selectContent.textContent).to.eql("WellKnownBaseMaps.BingProvider.Hybrid");
+    expect(selectContent).toBeDefined();
+    expect(selectContent.textContent).toBe("WellKnownBaseMaps.BingProvider.Hybrid");
   });
 
-  // TODO: Re-enable this once moved off of enzyme and @testing-library/react-hooks. This is failing with no consistent returns values, highlighting async issues.
   it.skip("should refresh select content after API call", async () => {
     const { container } = render(
       <SourceMapContext.Provider
@@ -95,19 +87,18 @@ describe("BasemapPanel", () => {
         }}
       >
         <BasemapPanel />
-      </SourceMapContext.Provider>,
+      </SourceMapContext.Provider>
     );
 
-    // let baseMap = BaseMapLayerSettings.fromProvider(BackgroundMapProvider.fromJSON({name: "BingProvider", type: BackgroundMapType.Street}));
     let baseMap: BaseLayerSettings = defaultBaseMapLayers[2];
     viewportMock.baseMap = baseMap;
     viewportMock.onMapImageryChanged.raiseEvent(MapImagerySettings.fromJSON({ backgroundBase: baseMap }));
     await TestUtils.flushAsyncOperations();
 
     let selectContent = getByTestId(container, "base-map-select");
-    should().exist(selectContent);
-    expect(selectContent!.textContent).to.eql("WellKnownBaseMaps.BingProvider.Street");
-
+    expect(selectContent).toBeDefined();
+    expect(selectContent!.textContent).toBe("WellKnownBaseMaps.BingProvider.Street");
+    
     // Now test with a custom map-layer definition
     baseMap = customBaseMap;
     viewportMock.baseMap = baseMap;
@@ -115,8 +106,8 @@ describe("BasemapPanel", () => {
     await TestUtils.flushAsyncOperations();
 
     selectContent = getByTestId(container, "base-map-select");
-    should().exist(selectContent);
-    expect(selectContent!.textContent).to.eql(customBaseMap.name);
+    expect(selectContent).toBeDefined();
+    expect(selectContent!.textContent).toBe(customBaseMap.name);
 
     // Now test with a ColorDef
     const color = ColorDef.create(ColorByName.aliceBlue);
@@ -125,8 +116,8 @@ describe("BasemapPanel", () => {
     await TestUtils.flushAsyncOperations();
 
     selectContent = getByTestId(container, "base-map-select");
-    should().exist(selectContent);
-    expect(selectContent!.textContent).to.eql("Basemap.ColorFill");
+    expect(selectContent).toBeDefined();
+    expect(selectContent!.textContent).toBe("Basemap.ColorFill");
   });
 
   it("should refresh transparency slider and visibility icon after API call", async () => {
@@ -141,25 +132,25 @@ describe("BasemapPanel", () => {
         }}
       >
         <BasemapPanel />
-      </SourceMapContext.Provider>,
+      </SourceMapContext.Provider>
     );
 
     const baseMap = BaseMapLayerSettings.fromProvider(
       BackgroundMapProvider.fromJSON({ name: "BingProvider", type: BackgroundMapType.Street }),
-      { invisible: true, transparency: 0.5 },
+      { invisible: true, transparency: 0.5 }
     );
-    viewportMock.baseMap = baseMap; // mock needs to be updated too because the component refresh from the viewport too .
+    viewportMock.baseMap = baseMap;
     viewportMock.onMapImageryChanged.raiseEvent(MapImagerySettings.fromJSON({ backgroundBase: baseMap }));
     await TestUtils.flushAsyncOperations();
 
     const iconVisibilityHide = await findByTestId(container, "layer-visibility-icon-hide");
-    should().exist(iconVisibilityHide);
+    expect(iconVisibilityHide).toBeDefined();
 
     // check transparency slider has been updated
     const transparencyButton = container.querySelector(".map-transparency-popup-button") as HTMLElement;
-    should().exist(transparencyButton);
+    expect(transparencyButton).toBeDefined();
     fireEvent.click(transparencyButton);
     const sliderThumb = document.querySelector('div[role="slider"]');
-    expect(sliderThumb?.getAttribute("aria-valuenow")).to.eql((baseMap.transparency * 100).toString());
+    expect(sliderThumb?.getAttribute("aria-valuenow")).toBe((baseMap.transparency * 100).toString());
   });
 });
