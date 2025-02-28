@@ -27,7 +27,7 @@
     "@itwin/imodels-access-frontend": "^5.2.3",
     "@itwin/imodels-client-management": "^5.9.0",
     "@itwin/itwinui-icons-react": "^2.9.0",
-    "@itwin/itwinui-icons": "5.0.0-alpha.3",
+    "@itwin/itwinui-icons": "5.0.0-alpha.4",
     "@itwin/itwinui-illustrations-react": "^2.1.0",
     "@itwin/itwinui-react": "3.17.2",
     "@itwin/itwinui-react-v5": "npm:@itwin/itwinui-react@5.0.0-alpha.7",

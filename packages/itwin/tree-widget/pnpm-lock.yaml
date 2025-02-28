@@ -25,8 +25,8 @@ importers:
         specifier: ^1.4.1
         version: 1.4.1
       '@itwin/presentation-hierarchies-react':
-        specifier: ^2.0.0-alpha.5
-        version: 2.0.0-alpha.5(@itwin/itwinui-icons@5.0.0-alpha.3)(@itwin/itwinui-react@5.0.0-alpha.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 2.0.0-alpha.6
+        version: 2.0.0-alpha.6(@itwin/itwinui-icons@5.0.0-alpha.4)(@itwin/itwinui-react@5.0.0-alpha.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@itwin/presentation-shared':
         specifier: ^1.2.0
         version: 1.2.0
@@ -107,10 +107,10 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5(tv2eb3nrpdxxzsz3nrtuj5a3qe)
       '@itwin/itwinui-icons':
-        specifier: ^5.0.0-alpha.3
-        version: 5.0.0-alpha.3
+        specifier: 5.0.0-alpha.4
+        version: 5.0.0-alpha.4
       '@itwin/itwinui-react':
-        specifier: ^5.0.0-alpha.7
+        specifier: 5.0.0-alpha.7
         version: 5.0.0-alpha.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@itwin/oidc-signin-tool':
         specifier: ^4.4.0
@@ -661,8 +661,8 @@ packages:
       react: '>=16.8.6'
       react-dom: '>=16.8.6'
 
-  '@itwin/itwinui-icons@5.0.0-alpha.3':
-    resolution: {integrity: sha512-MR7t1H1KZ3m9thlRKUvPVnSTCl4q9SEjJ5ovRpLwvh4k6EYKXmiccR59CoulqoSZdTR8/u0hjLMfT0bQVO2HLA==}
+  '@itwin/itwinui-icons@5.0.0-alpha.4':
+    resolution: {integrity: sha512-vEb2C/0LEyWDn57zPgMgxyVDcwNDTYOsO0DBM13dlL7pm0U+ZLAgZwsa+AAJOxBAaP5VL05N+sCJqIgWJG9L5A==}
 
   '@itwin/itwinui-illustrations-react@2.1.0':
     resolution: {integrity: sha512-5JR2A3mZy0d0qwwHpveSG3fsXLheJkO6a0GoWb8NQWw5edNZMRynJg0l3hVw3CHMgaaCGbUoKC77MuG0jWDzuA==}
@@ -758,11 +758,11 @@ packages:
       '@itwin/ecschema-metadata': ^4.10.2
       '@itwin/presentation-common': ^4.10.2
 
-  '@itwin/presentation-hierarchies-react@2.0.0-alpha.5':
-    resolution: {integrity: sha512-gdjyfXP9ia9+NDhQLml5E4rLJs5bvjCfMUXO8Ziuzw/4cI/dcAr6+XUnSEYR9j8IfZpxVXw0UkkKv0qFbBQylg==}
+  '@itwin/presentation-hierarchies-react@2.0.0-alpha.6':
+    resolution: {integrity: sha512-FZRzEqqQhB/xSEUDDbh0aF51V9R4maQ+SVlhZZm1E7LM+TejOBWRqGgnKdQhnJjf3uOhwzx1SUBZRVox95wtsA==}
     peerDependencies:
-      '@itwin/itwinui-icons': ^5.0.0-alpha.3
-      '@itwin/itwinui-react': ^5.0.0-alpha.7
+      '@itwin/itwinui-icons': 5.0.0-alpha.4
+      '@itwin/itwinui-react': 5.0.0-alpha.7
       react: ^17.0.0 || ^18.0.0
       react-dom: ^17.0.0 || ^18.0.0
     peerDependenciesMeta:
@@ -4738,7 +4738,7 @@ snapshots:
       rimraf: 3.0.2
       tree-kill: 1.2.2
       typedoc: 0.26.11(typescript@5.6.3)
-      typedoc-plugin-merge-modules: 6.1.0(typedoc@0.26.11(typescript@5.6.3))
+      typedoc-plugin-merge-modules: 6.1.0(typedoc@0.26.11(typescript@5.2.2))
       typescript: 5.6.3
       wtfnode: 0.9.4
       yargs: 17.7.2
@@ -4955,7 +4955,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@itwin/itwinui-icons@5.0.0-alpha.3': {}
+  '@itwin/itwinui-icons@5.0.0-alpha.4': {}
 
   '@itwin/itwinui-illustrations-react@2.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
@@ -5075,7 +5075,7 @@ snapshots:
       rxjs: 7.8.1
       rxjs-for-await: 1.0.0(rxjs@7.8.1)
 
-  '@itwin/presentation-hierarchies-react@2.0.0-alpha.5(@itwin/itwinui-icons@5.0.0-alpha.3)(@itwin/itwinui-react@5.0.0-alpha.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@itwin/presentation-hierarchies-react@2.0.0-alpha.6(@itwin/itwinui-icons@5.0.0-alpha.4)(@itwin/itwinui-react@5.0.0-alpha.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@itwin/core-bentley': 5.0.0-dev.73
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -5090,7 +5090,7 @@ snapshots:
       react-error-boundary: 4.1.2(react@18.3.1)
       rxjs: 7.8.1
     optionalDependencies:
-      '@itwin/itwinui-icons': 5.0.0-alpha.3
+      '@itwin/itwinui-icons': 5.0.0-alpha.4
       '@itwin/itwinui-react': 5.0.0-alpha.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   '@itwin/presentation-hierarchies@1.4.1':
@@ -9172,7 +9172,7 @@ snapshots:
       possible-typed-array-names: 1.0.0
       reflect.getprototypeof: 1.0.10
 
-  typedoc-plugin-merge-modules@6.1.0(typedoc@0.26.11(typescript@5.6.3)):
+  typedoc-plugin-merge-modules@6.1.0(typedoc@0.26.11(typescript@5.2.2)):
     dependencies:
       typedoc: 0.26.11(typescript@5.6.3)
 
