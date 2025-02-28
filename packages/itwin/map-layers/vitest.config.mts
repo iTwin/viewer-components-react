@@ -6,6 +6,14 @@ export default defineConfig({
     environment: "jsdom",
     dir: "src",
     setupFiles: ["src/test/setup.ts"],
+    deps: { // https://github.com/vitest-dev/vitest/discussions/2609
+      inline: [
+        "@itwin/appui-react",
+        "@itwin/components-react",
+        "@itwin/core-react",
+        "@itwin/imodel-components-react"
+      ]
+    },
     coverage: {
       provider: "v8",
       include: [
