@@ -14,6 +14,7 @@ export default defineConfig({
         "@itwin/imodel-components-react"
       ]
     },
+    testTimeout: 10000, // 10 seconds
     coverage: {
       provider: "v8",
       include: [

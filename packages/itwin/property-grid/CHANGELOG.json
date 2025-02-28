@@ -2,6 +2,21 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "date": "Thu, 27 Feb 2025 12:34:52 GMT",
+      "version": "1.17.0",
+      "tag": "@itwin/property-grid-react_v1.17.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "71bec908120f60584711da2ef3af70f6be128919",
+            "comment": "Introduce `widgetId` prop for `createPropertyWidget` to allow creating multiple property grid widgets in an application."
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 14 Feb 2025 15:54:49 GMT",
       "version": "1.16.0",
       "tag": "@itwin/property-grid-react_v1.16.0",

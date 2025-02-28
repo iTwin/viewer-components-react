@@ -216,7 +216,9 @@ export interface PropertyGridUiItemsProviderProps {
 export const PropertyGridWidgetId = "vcr:PropertyGridComponent";
 
 // @public
-export type PropertyGridWidgetProps = PropertyGridComponentProps & ({
+export type PropertyGridWidgetProps = PropertyGridComponentProps & {
+    widgetId?: string;
+} & ({
     shouldShow?: (selection: Readonly<KeySet>) => boolean;
     selectionStorage?: never;
 } | {
