@@ -150,7 +150,7 @@ function getEmptyTreeContentComponent(filter?: string, error?: CategoriesTreeFil
   return <EmptyTreeContent icon={categoryIcon} />;
 }
 
-const categoryIcon = new URL("@itwin/itwinui-icons/tree-category.svg", import.meta.url).href;
+const categoryIcon = new URL("@itwin/itwinui-icons/bis-category-3d.svg", import.meta.url).href;
 function getIcon() {
   return categoryIcon;
 }

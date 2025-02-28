@@ -41,9 +41,9 @@ const getDefinitionsProvider: TreeProps["getHierarchyDefinition"] = (props) => {
 };
 
 const ecSchemaIcon = new URL("@itwin/itwinui-icons/selection-children.svg", import.meta.url).href;
-const elementIcon = new URL("@itwin/itwinui-icons/tree-element.svg", import.meta.url).href;
-const documentIcon = new URL("@itwin/itwinui-icons/document-reference.svg", import.meta.url).href;
-const classIcon = new URL("@itwin/itwinui-icons/tree-class.svg", import.meta.url).href;
+const elementIcon = new URL("@itwin/itwinui-icons/bis-element.svg", import.meta.url).href;
+const documentIcon = new URL("@itwin/itwinui-icons/document.svg", import.meta.url).href;
+const classIcon = new URL("@itwin/itwinui-icons/bis-class.svg", import.meta.url).href;
 
 function getIcon(node: PresentationHierarchyNode): string | undefined {
   if (node.extendedData?.imageId === undefined) {

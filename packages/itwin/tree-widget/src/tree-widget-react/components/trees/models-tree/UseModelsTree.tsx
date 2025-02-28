@@ -281,11 +281,11 @@ function InstanceFocusError({ error }: { error: ModelsTreeFilteringError }) {
   return <Text>{localizedMessage}</Text>;
 }
 
-const subjectIcon = new URL("@itwin/itwinui-icons/tree-subject.svg", import.meta.url).href;
-const classIcon = new URL("@itwin/itwinui-icons/tree-class.svg", import.meta.url).href;
+const subjectIcon = new URL("@itwin/itwinui-icons/bis-subject.svg", import.meta.url).href;
+const classIcon = new URL("@itwin/itwinui-icons/bis-class.svg", import.meta.url).href;
 const modelIcon = new URL("@itwin/itwinui-icons/model-cube.svg", import.meta.url).href;
-const categoryIcon = new URL("@itwin/itwinui-icons/tree-category.svg", import.meta.url).href;
-const elementIcon = new URL("@itwin/itwinui-icons/tree-element.svg", import.meta.url).href;
+const categoryIcon = new URL("@itwin/itwinui-icons/bis-category-3d.svg", import.meta.url).href;
+const elementIcon = new URL("@itwin/itwinui-icons/bis-element.svg", import.meta.url).href;
 
 function getIcon(node: PresentationHierarchyNode): string | undefined {
   if (node.extendedData?.imageId === undefined) {
