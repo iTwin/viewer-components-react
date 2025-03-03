@@ -450,7 +450,8 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick, se
           position: "absolute",
           inset: 0,
           display: "grid",
-          placeItems: "center"
+          placeItems: "center",
+          zIndex: 100,
         }}>
           <ProgressRadial as="div">
             <Text variant='small'>{loadingMapSources}</Text>
