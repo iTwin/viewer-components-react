@@ -2,6 +2,59 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "date": "Thu, 27 Feb 2025 12:34:52 GMT",
+      "version": "1.17.0",
+      "tag": "@itwin/property-grid-react_v1.17.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "71bec908120f60584711da2ef3af70f6be128919",
+            "comment": "Introduce `widgetId` prop for `createPropertyWidget` to allow creating multiple property grid widgets in an application."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Fri, 14 Feb 2025 15:54:49 GMT",
+      "version": "1.16.0",
+      "tag": "@itwin/property-grid-react_v1.16.0",
+      "comments": {
+        "patch": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "6da64c76a25c88c23343260b1a73943ab865c24c",
+            "comment": "Improve API docs"
+          }
+        ],
+        "minor": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "376fd652bc3ad81b690ac5dcbec24fe48e7f4042",
+            "comment": "Added optional `selectionStorage` prop to `createPropertyGrid` function and `MultiElementPropertyGrid` component. This allows using `@itwin/unified-selection` to manage selection state, rather than relying on soon-to-be deprecated unified selection API from `@itwin/presentation-frontend`. The prop will be made required in next major release."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Tue, 04 Feb 2025 15:29:52 GMT",
+      "version": "1.15.0",
+      "tag": "@itwin/property-grid-react_v1.15.0",
+      "comments": {
+        "none": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "979142b18ae359fe762ed25dc33f9f2c3bd5c460",
+            "comment": "Update code snippets"
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 29 Jan 2025 21:54:15 GMT",
       "version": "1.15.0",
       "tag": "@itwin/property-grid-react_v1.15.0",

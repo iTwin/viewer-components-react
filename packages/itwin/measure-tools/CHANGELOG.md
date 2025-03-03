@@ -1,8 +1,24 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Wed, 29 Jan 2025 21:54:15 GMT and should not be manually modified.
+This log was last generated on Wed, 19 Feb 2025 21:08:10 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.26.3
+
+Wed, 19 Feb 2025 21:08:10 GMT
+
+### Patches
+
+- Switch to mouse click event to close popup toolbar since new toolbar buttons need to use mouse down event to execute callback functions. ([#1208](https://github.com/iTwin/viewer-components-react/pull/1208))
+
+## 0.26.2
+
+Tue, 18 Feb 2025 21:33:04 GMT
+
+### Patches
+
+- Add 'types' field in package.json. This fixes some issues for consumers when importing the esm package with moduleResolution: node. (export map support seems flaky in those cases.) ([#1192](https://github.com/iTwin/viewer-components-react/pull/1192))
 
 ## 0.26.1
 

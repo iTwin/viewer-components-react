@@ -1,6 +1,6 @@
 {
   "name": "@itwin/measure-tools-react",
-  "version": "0.26.1",
+  "version": "0.26.3",
   "license": "MIT",
   "description": "Frontend framework and tools for measurements",
   "repository": {
@@ -8,6 +8,7 @@
     "url": "https://github.com/iTwin/viewer-components-react/tree/master/packages/itwin/measure-tools"
   },
   "type": "module",
+  "types": "./lib/measure-tools-react.d.ts",
   "exports": {
     ".": {
       "types": "./lib/measure-tools-react.d.ts",

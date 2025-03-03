@@ -8,7 +8,6 @@ import { BeEvent } from "@itwin/core-bentley";
 import { Spinner } from "@itwin/itwinui-react/bricks";
 import { SchemaMetadataContextProvider } from "@itwin/presentation-components";
 import { useIModelUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
-import { UnifiedSelectionContextProvider } from "@itwin/unified-selection-react";
 import { useHierarchiesLocalization } from "../UseHierarchiesLocalization.js";
 import { useHierarchyLevelFiltering } from "../UseHierarchyFiltering.js";
 import { useIModelChangeListener } from "../UseIModelChangeListener.js";
@@ -75,7 +74,7 @@ export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPa
 
 /**
  * Default tree component that manages tree state and renders using supplied `treeRenderer`.
- * @Beta
+ * @beta
  */
 export function Tree({ getSchemaContext, hierarchyLevelSizeLimit, selectionStorage, imodelAccess: providedIModelAccess, ...props }: TreeProps) {
   const defaultHierarchyLevelSizeLimit = hierarchyLevelSizeLimit ?? 1000;
@@ -120,11 +119,11 @@ function TreeImpl({
   } = useIModelUnifiedSelectionTree({
     imodelAccess,
     imodelChanged,
-    selectionStorage,
     getHierarchyDefinition,
     getFilteredPaths,
     sourceName: treeName,
     localizedStrings,
+    selectionStorage,
     onPerformanceMeasured: (action, duration) => {
       if (action === "reload") {
         onReload?.();
@@ -182,17 +181,15 @@ function TreeImpl({
   };
 
   return (
-    <UnifiedSelectionContextProvider storage={selectionStorage}>
-      <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>
-        <div id="tw-tree-renderer-container" style={{ overflow: "auto", height: "100%" }}>
-          {treeRenderer(treeRendererProps)}
-          {filteringDialog}
-        </div>
-        <Delayed show={isLoading}>
-          <ProgressOverlay />
-        </Delayed>
+    <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>
+      <div id="tw-tree-renderer-container" style={{ overflow: "auto", height: "100%" }}>
+        {treeRenderer(treeRendererProps)}
+        {filteringDialog}
       </div>
-    </UnifiedSelectionContextProvider>
+      <Delayed show={isLoading}>
+        <ProgressOverlay />
+      </Delayed>
+    </div>
   );
 }
 

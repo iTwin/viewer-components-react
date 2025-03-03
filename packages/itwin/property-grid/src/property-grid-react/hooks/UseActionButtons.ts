@@ -9,7 +9,9 @@ import { useMemo } from "react";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
 import type { ActionButtonRendererProps } from "@itwin/components-react";
 
+/** @public */
 interface PropertyGridActionButtonRendererProps extends ActionButtonRendererProps {
+  /** Data provider used by the property grid. */
   dataProvider: IPresentationPropertyDataProvider;
 }
 

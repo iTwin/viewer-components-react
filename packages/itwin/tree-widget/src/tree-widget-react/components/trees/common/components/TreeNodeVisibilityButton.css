@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-.tw-tree-node-visibility-button-hidden, .tw-tree-node-visibility-button-partial  {
+.tw-tree-node-visibility-button-hidden,
+.tw-tree-node-visibility-button-partial {
   visibility: visible;
 }

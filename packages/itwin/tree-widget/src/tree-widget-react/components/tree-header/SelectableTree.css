@@ -10,7 +10,7 @@
   flex-direction: column;
 
   .tw-tree-toolbar {
-    padding: 0 var(--iui-size-s) var(--iui-size-xs)  var(--iui-size-s);
+    padding: 0 var(--iui-size-s) var(--iui-size-xs) var(--iui-size-s);
     display: flex;
     align-items: center;
     gap: var(--iui-size-2xs);

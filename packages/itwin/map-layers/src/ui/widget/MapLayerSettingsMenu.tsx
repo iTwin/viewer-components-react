@@ -2,14 +2,14 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-import * as React from "react";
-import type { ScreenViewport } from "@itwin/core-frontend";
-import { DropdownMenu, IconButton, MenuItem, Slider } from "@itwin/itwinui-react";
 import "./MapLayerManager.scss";
-import type { StyleMapLayerSettings } from "../Interfaces";
-import { MapLayersUI } from "../../mapLayers";
+import * as React from "react";
 import { SvgMoreVertical } from "@itwin/itwinui-icons-react";
+import { DropdownMenu, IconButton, MenuItem, Slider } from "@itwin/itwinui-react";
+import { MapLayersUI } from "../../mapLayers";
 
+import type { ScreenViewport } from "@itwin/core-frontend";
+import type { StyleMapLayerSettings } from "../Interfaces";
 interface MapLayerSettingsMenuProps {
   mapLayerSettings: StyleMapLayerSettings;
   onMenuItemSelection: (action: string, mapLayerSettings: StyleMapLayerSettings) => void;
@@ -17,7 +17,6 @@ interface MapLayerSettingsMenuProps {
   disabled?: boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function MapLayerSettingsMenu({ mapLayerSettings, onMenuItemSelection, activeViewport, disabled }: MapLayerSettingsMenuProps) {
   const [labelDetach] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:LayerMenu.Detach"));
   const [labelZoomToLayer] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:LayerMenu.ZoomToLayer"));
@@ -94,7 +93,7 @@ export function MapLayerSettingsMenu({ mapLayerSettings, onMenuItemSelection, ac
 
   return (
     <>
-      <DropdownMenu placement="auto-start" menuItems={dropdownMenuItems} disabled={disabled}>
+      <DropdownMenu as="div" placement="bottom-start" menuItems={dropdownMenuItems} aria-disabled={disabled}>
         <IconButton size="small" styleType="borderless">
           <SvgMoreVertical />
         </IconButton>

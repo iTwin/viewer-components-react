@@ -39,8 +39,12 @@ const telemetryContext = createContext<TelemetryContext>({
   onFeatureUsed: () => {},
 });
 
-interface TelemetryContextProviderProps {
+/** @public */
+export interface TelemetryContextProviderProps {
+  /** Callback that is invoked when performance of tracked feature is measured. */
   onPerformanceMeasured?: (featureId: PerformanceTrackedFeatures, elapsedTime: number) => void;
+
+  /** Callback that is invoked when a tracked feature is used. */
   onFeatureUsed?: (featureId: UsageTrackedFeatures) => void;
 }
 

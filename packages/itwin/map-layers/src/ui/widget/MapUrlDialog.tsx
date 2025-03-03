@@ -6,12 +6,10 @@
 
 import "./MapUrlDialog.scss";
 import * as React from "react";
-import { SpecialKey } from "@itwin/appui-abstract";
 import { BeEvent, Guid } from "@itwin/core-bentley";
 import { IModelApp, MapLayerSource, MapLayerSourceStatus, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
-import { Dialog, useCrossOriginPopup } from "@itwin/core-react";
 import { SvgStatusWarning, SvgTechnicalPreviewMini } from "@itwin/itwinui-icons-color-react";
-import { Button, Icon, Input, LabeledInput, ProgressLinear } from "@itwin/itwinui-react";
+import { Button, Icon, Input, LabeledInput, Modal, ModalButtonBar, ModalContent, ProgressLinear } from "@itwin/itwinui-react";
 import { CustomParamsMappingStorage } from "../../CustomParamsMappingStorage";
 import { CustomParamsStorage } from "../../CustomParamsStorage";
 import { CustomParamUtils } from "../../CustomParamUtils";
@@ -20,6 +18,7 @@ import { MapLayersUI } from "../../mapLayers";
 import { SelectCustomParam } from "./SelectCustomParam";
 import { SelectMapFormat } from "./SelectMapFormat";
 import { UserPreferencesStorageOptions } from "./UserPreferencesStorageOptions";
+import { useCrossOriginPopup } from "../hooks/useCrossOriginPopup";
 
 import type { ImageMapLayerSettings } from "@itwin/core-common";
 import type { MapLayerAccessClient, MapLayerSourceValidation, ScreenViewport } from "@itwin/core-frontend";
@@ -39,7 +38,6 @@ const URL_SCHEMES = {
 export type LayerCreationMode = "single" | "multiple";
 interface MapUrlDialogProps {
   activeViewport?: ScreenViewport;
-  isOverlay: boolean;
   onOkResult: (result?: SourceState) => void;
   onCancelResult?: () => void;
   mapLayerOptions?: MapLayerOptions;
@@ -61,7 +59,6 @@ export interface SourceState {
   privateCustomParamIdx?: { [key: string]: string };
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function MapUrlDialog(props: MapUrlDialogProps) {
   const { onOkResult, mapLayerOptions } = props;
 
@@ -220,7 +217,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
               setExternalLoginUrl(loginUrl);
               hasTokenEndPoint = true;
             }
-          } catch (_error) {}
+          } catch {}
         } else if (userName.length > 0 || password.length > 0) {
           // This is a patch until @itwin\core-frontend return the expected 'InvalidCredentials' status.
           invalidCredentials = true;
@@ -330,7 +327,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
           if (isSettingsStorageAvailable && vp?.iModel?.iTwinId) {
             try {
               await MapLayerPreferences.replaceSource(props.mapLayerSourceToEdit!, source, vp.iModel.iTwinId, vp?.iModel.iModelId);
-            } catch (err: any) {
+            } catch {
               const errorMessage = IModelApp.localization.getLocalizedString("mapLayers:Messages.MapLayerEditError", {
                 layerName: props.mapLayerSourceToEdit?.name,
               });
@@ -494,7 +491,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
             setShouldAutoAttachSource(false);
             await updateAuthState(source, validation);
           }
-        } catch (_error) {}
+        } catch {}
       }
     })();
   }, [isAccessClientInitialized, props.signInModeArgs, shouldAutoAttachSource, updateAuthState]);
@@ -527,8 +524,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
 
   const handleOnKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
-      // eslint-disable-next-line deprecation/deprecation
-      if (event.key === SpecialKey.Enter) {
+      if (event.key === "Enter") {
         if (readyToSave()) {
           handleOk();
         }
@@ -622,41 +618,18 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
   // The display of the popup is controlled by the 'showOauthPopup' state variable.
   useCrossOriginPopup(showOauthPopup, externalLoginUrl, externalLoginTitle, 450, 450, handleOAuthPopupClose);
 
-  function getFooter() {
-    return (
-      <div className="map-layer-source-footer">
-        <div className="map-layer-source-footer-status" />
-        <div>
-          <Button className="map-layer-features-footer-button" styleType="high-visibility" onClick={handleOk} disabled={!readyToSave()}>
-            {props?.mapLayerSourceToEdit ? MapLayersUI.translate("Dialog.Edit") : MapLayersUI.translate("Dialog.Add")}
-          </Button>
-          <Button className="map-layer-source-footer-button" styleType="default" onClick={handleCancel}>
-            {MapLayersUI.translate("Dialog.Cancel")}
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div ref={dialogContainer}>
-      <Dialog
+      <Modal
+        as="div"
         className="map-layer-url-dialog"
         title={dialogTitle}
-        opened={true}
-        resizable={true}
-        movable={true}
-        modal={true}
-        footer={getFooter()}
+        isOpen={true}
         onClose={handleCancel}
-        onEscape={handleCancel}
-        minHeight={120}
-        maxWidth={600}
-        titleStyle={{ paddingLeft: "10px" }}
-        footerStyle={{ paddingBottom: "10px", paddingRight: "10px" }}
-        trapFocus={false}
+        style={{ minHeight: 120, maxWidth: 600 }}
+        portal
       >
-        <div className="map-layer-url-dialog-content">
+        <ModalContent>
           <div className="map-layer-source-url">
             <span className="map-layer-source-label">{typeLabel}</span>
             <SelectMapFormat
@@ -679,7 +652,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
             <Input
               className="map-layer-source-input"
               placeholder={urlInputPlaceHolder}
-              onKeyPress={handleOnKeyDown}
+              onKeyDown={handleOnKeyDown}
               onChange={onUrlChange}
               disabled={!!props.signInModeArgs || props.mapLayerSourceToEdit !== undefined || layerAttachPending || layerAuthPending}
               value={mapUrl}
@@ -727,7 +700,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
                     status={(!password && serverRequireCredentials) || invalidCredentialsProvided ? "warning" : undefined}
                     disabled={layerAttachPending || layerAuthPending}
                     onChange={onPasswordChange}
-                    onKeyPress={handleOnKeyDown}
+                    onKeyDown={handleOnKeyDown}
                     value={password}
                     size="small"
                   />
@@ -748,7 +721,15 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
               </div>
             )}
           </div>
-        </div>
+          <ModalButtonBar>
+            <Button className="map-layer-features-footer-button" styleType="high-visibility" onClick={handleOk} disabled={!readyToSave()}>
+              {props?.mapLayerSourceToEdit ? MapLayersUI.translate("Dialog.Edit") : MapLayersUI.translate("Dialog.Add")}
+            </Button>
+            <Button className="map-layer-source-footer-button" styleType="default" onClick={handleCancel}>
+              {MapLayersUI.translate("Dialog.Cancel")}
+            </Button>
+          </ModalButtonBar>
+        </ModalContent>
 
         {/* Warning message */}
         {renderWarningMessage()}
@@ -759,7 +740,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
             <ProgressLinear indeterminate />
           </div>
         )}
-      </Dialog>
+      </Modal>
     </div>
   );
 }

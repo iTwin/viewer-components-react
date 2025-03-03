@@ -3,9 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { createContext, useContext, useState } from "react";
-import { StatusBarSection } from "@itwin/appui-react";
-import { SvgSelection, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
+import { createContext, useContext, useEffect, useState } from "react";
+import { StatusBarSection, useActiveIModelConnection } from "@itwin/appui-react";
+import { TransientIdSequence } from "@itwin/core-bentley";
+import { SvgSelection, SvgVisibilityShow, SvgZoomInCircular } from "@itwin/itwinui-icons-react";
 import { IconButton, Select } from "@itwin/itwinui-react";
 import { Presentation } from "@itwin/presentation-frontend";
 
@@ -64,6 +65,18 @@ export const statusBarActionsProvider: UiItemsProvider = {
       content: <SelectionScopeSelectorButton />,
       itemPriority: 3,
       section: StatusBarSection.Left,
+    },
+    {
+      id: `addTransientElementToSelectionButton`,
+      content: <AddTransientElementToSelectionButton />,
+      itemPriority: 4,
+      section: StatusBarSection.Left,
+    },
+    {
+      id: `selectedElementsCount`,
+      content: <SelectedElementsCountField />,
+      itemPriority: 1,
+      section: StatusBarSection.Right,
     },
   ],
 };
@@ -143,3 +156,27 @@ const scopes = {
     label: "Category",
   },
 };
+
+function AddTransientElementToSelectionButton() {
+  const [sequence] = useState(new TransientIdSequence());
+  const imodel = useActiveIModelConnection();
+  const onClick = () => {
+    imodel?.selectionSet.add(sequence.getNext());
+  };
+  return (
+    <IconButton label="Add transient element to selection" styleType="borderless" onClick={onClick}>
+      <SvgZoomInCircular />
+    </IconButton>
+  );
+}
+
+function SelectedElementsCountField() {
+  const imodel = useActiveIModelConnection();
+  const [count, setCount] = useState(imodel?.selectionSet.size ?? 0);
+  useEffect(() => {
+    return imodel?.selectionSet.onChanged.addListener(() => {
+      setCount(imodel.selectionSet.size);
+    });
+  }, [imodel]);
+  return `Selected elements: ${count}`;
+}

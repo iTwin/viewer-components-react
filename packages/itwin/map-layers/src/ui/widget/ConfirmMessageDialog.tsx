@@ -4,21 +4,18 @@
  *--------------------------------------------------------------------------------------------*/
 // cSpell:ignore Modeless WMTS
 
-import * as React from "react";
-import type { CommonProps } from "@itwin/core-react";
-import { Dialog } from "@itwin/core-react";
-
 import "./MapUrlDialog.scss";
-import { DialogButtonType } from "@itwin/appui-abstract";
+import * as React from "react";
+import { Button, Dialog } from "@itwin/itwinui-react";
 
-interface ConfirmMessageDialogProps extends CommonProps {
+interface ConfirmMessageDialogProps {
   /** Title to show in title bar of dialog */
-  title?: string | JSX.Element;
-  message?: string | JSX.Element;
+  title?: string | React.JSX.Element;
+  className?: string;
+  message?: string | React.JSX.Element;
+  opened: boolean;
   onYesResult?: () => void;
   onNoResult?: () => void;
-  onClose?: () => void;
-  onEscape?: () => void;
   minWidth?: string | number;
   /** Minimum height that the dialog may be resized to. Displayed in px if value is a number; otherwise, displayed in specified CSS unit. Default: 100px */
   minHeight?: string | number;
@@ -28,34 +25,47 @@ interface ConfirmMessageDialogProps extends CommonProps {
   maxHeight?: string | number;
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function ConfirmMessageDialog(props: ConfirmMessageDialogProps) {
-  const buttonCluster = React.useMemo(
-    () => [
-      { type: DialogButtonType.Yes, onClick: props.onYesResult ?? (() => {}) },
-      { type: DialogButtonType.No, onClick: props.onNoResult ?? (() => {}) },
-    ],
-    [props.onYesResult, props.onNoResult],
-  );
+  const [isOpen, setIsOpen] = React.useState(props.opened);
 
+  const handleNo = () => {
+    setIsOpen(false);
+    if (props.onNoResult) {
+      props.onNoResult();
+    }
+  };
+
+  const handleYes = () => {
+    setIsOpen(false);
+    if (props.onYesResult) {
+      props.onYesResult();
+    }
+  }
   return (
     <Dialog
+      as="div"
       className={props.className}
-      title={props.title}
-      opened={true}
-      resizable={false}
-      movable={true}
-      modal={true}
-      buttonCluster={buttonCluster}
-      onClose={props.onClose}
-      onEscape={props.onEscape}
-      minHeight={props.minHeight}
-      maxHeight={props.maxHeight}
-      minWidth={props.minWidth}
-      maxWidth={props.maxWidth}
-      trapFocus={false}
+      isOpen={isOpen}
+      onClose={handleNo}
+      closeOnEsc
+      closeOnExternalClick
+      preventDocumentScroll
+      trapFocus
+      setFocus
+      portal
+      isDismissible
     >
-      <div>{props.message}</div>
+      <Dialog.Backdrop />
+      <Dialog.Main>
+        <Dialog.TitleBar titleText={props.title} />
+        <Dialog.Content>
+          <div>{props.message}</div>
+        </Dialog.Content>
+        <Dialog.ButtonBar>
+          <Button styleType='high-visibility' onClick={handleYes}>Yes</Button>
+          <Button onClick={handleNo}>No</Button>
+        </Dialog.ButtonBar>
+      </Dialog.Main>
     </Dialog>
   );
 }

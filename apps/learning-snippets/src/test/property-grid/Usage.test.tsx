@@ -3,10 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
+
 import { expect } from "chai";
 import sinon from "sinon";
-import { StagePanelLocation, StagePanelSection, StageUsage,  } from "@itwin/appui-react";
+import { StagePanelLocation, StagePanelSection, StageUsage } from "@itwin/appui-react";
 import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
+import { createStorage } from "@itwin/unified-selection";
 // __PUBLISH_EXTRACT_START__ PropertyGrid.RegisterPropertyGridWidgetImports
 import { createPropertyGrid } from "@itwin/property-grid-react";
 import { UiItemsManager } from "@itwin/appui-react";
@@ -22,7 +24,7 @@ import {
 } from "@itwin/property-grid-react";
 import type { IModelConnection } from "@itwin/core-frontend";
 // __PUBLISH_EXTRACT_END__
-import { PropertyGridTestUtils } from "../../utils/PropertyGridTestUtils";
+import { PropertyGridTestUtils } from "../../utils/PropertyGridTestUtils.js";
 
 describe("Property grid", () => {
   describe("Learning snippets", () => {
@@ -38,16 +40,20 @@ describe("Property grid", () => {
         UiItemsManager.clearAllProviders();
       });
 
-      it("Registers property grid", async function () {
+      it("registers property grid", async function () {
         // __PUBLISH_EXTRACT_START__ PropertyGrid.RegisterPropertyGridWidget
         UiItemsManager.register({ id: "property-grid-provider", getWidgets: () => [createPropertyGrid({})] });
         // __PUBLISH_EXTRACT_END__
 
-        expect(UiItemsManager.getWidgets?.("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.End)).to.not.be.empty;
+        expect(UiItemsManager.getWidgets("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.End)).to.not.be.empty;
       });
 
-      it("Registers customizable property grid", async function () {
+      it("registers customizable property grid", async function () {
         const MY_CUSTOM_RULESET = undefined;
+
+        const selectionStorage = createStorage();
+        const getGlobalSelectionStorage = () => selectionStorage;
+
         // __PUBLISH_EXTRACT_START__ PropertyGrid.RegisterCustomPropertyGridWidget
         UiItemsManager.register({
           id: "property-grid-provider",
@@ -80,6 +86,10 @@ describe("Property grid", () => {
                 // supply an optional custom storage for user preferences, e.g. the show/hide null values used above
                 preferencesStorage: new IModelAppUserPreferencesStorage("my-favorites-namespace"),
 
+                // supply the global selection storage that the widget will use to listen to selection
+                // changes (more details: https://github.com/iTwin/presentation/blob/master/packages/unified-selection/README.md)
+                selectionStorage: getGlobalSelectionStorage(),
+
                 // supply an optional data provider factory method to create a custom property data provider
                 createDataProvider: (imodel: IModelConnection) => new PresentationPropertyDataProvider({ imodel, ruleset: MY_CUSTOM_RULESET }),
 
@@ -89,7 +99,8 @@ describe("Property grid", () => {
           ],
         });
         // __PUBLISH_EXTRACT_END__
-        expect(UiItemsManager.getWidgets?.("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.End)).to.not.be.empty;
+
+        expect(UiItemsManager.getWidgets("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.End)).to.not.be.empty;
       });
     });
   });

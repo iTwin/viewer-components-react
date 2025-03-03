@@ -1,8 +1,28 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Wed, 29 Jan 2025 21:54:15 GMT and should not be manually modified.
+This log was last generated on Thu, 27 Feb 2025 12:34:52 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 1.17.0
+
+Thu, 27 Feb 2025 12:34:52 GMT
+
+### Minor changes
+
+- Introduce `widgetId` prop for `createPropertyWidget` to allow creating multiple property grid widgets in an application. ([#1223](https://github.com/iTwin/viewer-components-react/pull/1223))
+
+## 1.16.0
+
+Fri, 14 Feb 2025 15:54:49 GMT
+
+### Minor changes
+
+- Added optional `selectionStorage` prop to `createPropertyGrid` function and `MultiElementPropertyGrid` component. This allows using `@itwin/unified-selection` to manage selection state, rather than relying on soon-to-be deprecated unified selection API from `@itwin/presentation-frontend`. The prop will be made required in next major release. ([#1184](https://github.com/iTwin/viewer-components-react/pull/1184))
+
+### Patches
+
+- Improve API docs ([#1185](https://github.com/iTwin/viewer-components-react/pull/1185))
 
 ## 1.15.0
 

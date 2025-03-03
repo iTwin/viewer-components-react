@@ -4,25 +4,27 @@
  *--------------------------------------------------------------------------------------------*/
 // cSpell:ignore droppable Sublayer Basemap
 
-import * as React from "react";
-import { NumberInput } from "@itwin/core-react";
-import type { ViewState3d } from "@itwin/core-frontend";
-import { QuantityType } from "@itwin/core-frontend";
-import type { BackgroundMapProps, BackgroundMapSettings, TerrainProps } from "@itwin/core-common";
-import { PlanarClipMaskMode, PlanarClipMaskPriority, TerrainHeightOriginMode } from "@itwin/core-common";
-import { useSourceMapContext } from "./MapLayerManager";
 import "./MapManagerSettings.scss";
-import type { SelectOption } from "@itwin/itwinui-react";
-import { Select, Slider, Tab, Tabs, ToggleSwitch } from "@itwin/itwinui-react";
+import * as React from "react";
+import { PlanarClipMaskMode, PlanarClipMaskPriority, TerrainHeightOriginMode } from "@itwin/core-common";
+import { QuantityType } from "@itwin/core-frontend";
 import { QuantityNumberInput } from "@itwin/imodel-components-react";
+import { Input, Select, Slider, Tab, Tabs, ToggleSwitch } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
 import { CustomParamsSettingsPanel } from "./CustomParamsSettings";
+import { useSourceMapContext } from "./MapLayerManager";
 
-/* eslint-disable deprecation/deprecation */
+import type { ViewState3d } from "@itwin/core-frontend";
+import type { BackgroundMapProps, BackgroundMapSettings, TerrainProps } from "@itwin/core-common";
+import type { SelectOption } from "@itwin/itwinui-react";
 
 enum MapMaskingOption {
   None,
   AllModels,
+}
+
+interface MapManagerSettingsProps {
+  onHandleOutsideClick?: (shouldHandle: boolean) => void;
 }
 
 function getMapMaskingFromBackgroundMapSetting(backgroundMapSettings: BackgroundMapSettings): MapMaskingOption {
@@ -54,8 +56,7 @@ function getHeightOriginModeFromKey(mode: string): TerrainHeightOriginMode {
   return TerrainHeightOriginMode.Ground;
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export function MapManagerSettings() {
+export function MapManagerSettings({ onHandleOutsideClick }: MapManagerSettingsProps) {
   const { activeViewport } = useSourceMapContext();
   const backgroundMapSettings = (activeViewport!.view as ViewState3d).getDisplayStyle3d().settings.backgroundMap;
 
@@ -191,11 +192,14 @@ export function MapManagerSettings() {
   const [exaggeration, setExaggeration] = React.useState(() => terrainSettings.exaggeration);
 
   const handleExaggerationChange = React.useCallback(
-    (value: number | undefined, _stringValue: string) => {
-      if (undefined !== value) {
-        updateTerrainSettings({ exaggeration: value });
-        setExaggeration(value);
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const numValue = Number(e.target.value);
+      if (isNaN(numValue) || numValue === undefined) {
+        e.preventDefault();
+        return;
       }
+      updateTerrainSettings({ exaggeration: numValue });
+      setExaggeration(numValue);
     },
     [updateTerrainSettings],
   );
@@ -224,7 +228,8 @@ export function MapManagerSettings() {
 
   /** Disable commas and letters */
   const onKeyDown = React.useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.keyCode === 188 || (event.keyCode >= 65 && event.keyCode <= 90)) {
+    const isLetter = /^[a-zA-Z]$/.test(event.key);
+    if (event.key === "," || isLetter) {
       event.preventDefault();
     }
   }, []);
@@ -255,7 +260,7 @@ export function MapManagerSettings() {
   const [tabIndex, setTabIndex] = React.useState(0);
 
   return (
-    <Tabs labels={[<Tab key={"general"} label="General" />, <Tab key={"advanced"} label="Advanced" />]} onTabSelected={setTabIndex}>
+    <Tabs activeIndex={tabIndex} orientation="horizontal" labels={[<Tab key="general" label="General" />, <Tab key="advanced" label="Advanced" />]} onTabSelected={setTabIndex}>
       {tabIndex === 0 && (
         <>
           <div className="maplayers-settings-container">
@@ -263,15 +268,13 @@ export function MapManagerSettings() {
             <Slider min={0} max={100} values={[transparency * 100]} onChange={handleAlphaChange} step={1} />
 
             <span className="map-manager-settings-label">{locatableLabel}</span>
-            {/* eslint-disable-next-line deprecation/deprecation */}
-            <ToggleSwitch onChange={onLocatableToggle} checked={isLocatable} />
+            <ToggleSwitch data-testid="locatable" onChange={onLocatableToggle} checked={isLocatable} />
 
             <span className="map-manager-settings-label">{maskingLabel}</span>
-            {/* eslint-disable-next-line deprecation/deprecation */}
-            <ToggleSwitch onChange={onMaskingToggle} checked={masking !== MapMaskingOption.None} />
+            <ToggleSwitch data-testid="mask" onChange={onMaskingToggle} checked={masking !== MapMaskingOption.None} />
 
             <span className="map-manager-settings-label">{overrideMaskTransparencyLabel}</span>
-            <ToggleSwitch disabled={masking === MapMaskingOption.None} onChange={onOverrideMaskTransparencyToggle} checked={overrideMaskTransparency} />
+            <ToggleSwitch data-testid="overrideMaskTransparency" disabled={masking === MapMaskingOption.None} onChange={onOverrideMaskTransparencyToggle} checked={overrideMaskTransparency} />
 
             <span className="map-manager-settings-label">{maskTransparencyLabel}</span>
             <Slider
@@ -286,6 +289,7 @@ export function MapManagerSettings() {
             <>
               <span className="map-manager-settings-label">{elevationOffsetLabel}</span>
               <QuantityNumberInput
+                data-testid="ground-bias"
                 disabled={applyTerrain}
                 persistenceValue={groundBias}
                 step={1}
@@ -296,8 +300,7 @@ export function MapManagerSettings() {
               />
 
               <span className="map-manager-settings-label">{useDepthBufferLabel}</span>
-              {/* eslint-disable-next-line deprecation/deprecation */}
-              <ToggleSwitch disabled={applyTerrain} onChange={onToggleUseDepthBuffer} checked={useDepthBuffer} />
+              <ToggleSwitch data-testid="depthBuffer" disabled={applyTerrain} onChange={onToggleUseDepthBuffer} checked={useDepthBuffer} />
             </>
           </div>
           <div className="map-manager-settings-group">
@@ -306,11 +309,11 @@ export function MapManagerSettings() {
 
               <div className="maplayers-settings-container">
                 <span className="map-manager-settings-label">{enableLabel}</span>
-                {/* eslint-disable-next-line deprecation/deprecation */}
-                <ToggleSwitch onChange={onToggleTerrain} checked={applyTerrain} />
+                <ToggleSwitch data-testid="terrain" onChange={onToggleTerrain} checked={applyTerrain} />
 
                 <span className="map-manager-settings-label">{modelHeightLabel}</span>
                 <QuantityNumberInput
+                  data-testid="terrain-origin"
                   disabled={!applyTerrain}
                   persistenceValue={terrainOrigin}
                   snap
@@ -320,9 +323,8 @@ export function MapManagerSettings() {
                 />
 
                 <span className="map-manager-settings-label">{heightOriginLabel}</span>
-                {/* elevation correction component:  'popoverProps' is needed here otherwise selecting an option closes the menu popup.*/}
                 <Select
-                  popoverProps={{ appendTo: "parent" }}
+                  data-testid="terrain-height-mode"
                   options={terrainHeightOptions.current}
                   disabled={!applyTerrain}
                   value={heightOriginMode}
@@ -331,13 +333,21 @@ export function MapManagerSettings() {
                 />
 
                 <span className="map-manager-settings-label">{exaggerationLabel}</span>
-                <NumberInput value={exaggeration} disabled={!applyTerrain} onChange={handleExaggerationChange} onKeyDown={onKeyDown} />
+                <Input
+                  data-testid="exaggeration-input"
+                  type="number"
+                  value={exaggeration.toString()}
+                  disabled={!applyTerrain}
+                  onChange={handleExaggerationChange}
+                  onKeyDown={onKeyDown}
+                  size="small"
+                />
               </div>
             </fieldset>
           </div>
         </>
       )}
-      {tabIndex === 1 && <CustomParamsSettingsPanel></CustomParamsSettingsPanel>}
+      {tabIndex === 1 && <CustomParamsSettingsPanel onHandleOutsideClick={onHandleOutsideClick}></CustomParamsSettingsPanel>}
     </Tabs>
   );
 }

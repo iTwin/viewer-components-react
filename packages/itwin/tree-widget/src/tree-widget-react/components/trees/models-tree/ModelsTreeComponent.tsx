@@ -7,8 +7,7 @@ import { Fragment, useEffect } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
-import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
-import { FocusedInstancesContextProvider } from "../common/FocusedInstancesContextProvider.js";
+import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
 import { useActiveViewport } from "../common/UseActiveViewport.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { ModelsTree } from "./ModelsTree.js";
@@ -113,7 +112,12 @@ ModelsTreeComponent.View2DButton = View2DButton as ModelsTreeHeaderButtonType;
 ModelsTreeComponent.View3DButton = View3DButton as ModelsTreeHeaderButtonType;
 
 /**
- * Renders a "Enable/Disable instances focus" button that enables/disables instances focusing mode.
+ * Renders an "Instance focus" toggle button that enables/disables instances focusing mode.
+ *
+ * Requires instances focus context to be provided using `FocusedInstancesContextProvider`. The context
+ * is provided automatically, when using `ModelsTreeComponent`, but needs to be provided by consumers
+ * when rendering `ToggleInstancesFocusButton` outside of `ModelsTreeComponent`.
+ *
  * @public
  */
 ModelsTreeComponent.ToggleInstancesFocusButton = ToggleInstancesFocusButton as ModelsTreeHeaderButtonType;

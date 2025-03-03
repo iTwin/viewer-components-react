@@ -1,8 +1,41 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Mon, 27 Jan 2025 18:30:40 GMT and should not be manually modified.
+This log was last generated on Wed, 19 Feb 2025 21:08:10 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 3.5.0
+
+Wed, 19 Feb 2025 21:08:10 GMT
+
+### Minor changes
+
+- `CategoriesTree` component rendered `Categories` as a flat list, where each `Category` had zero or more child `SubCategories`. Some iTwin.js applications started to group `Categories` under `DefinitionContainers` and wanted to see them displayed in `CategoriesTree` component. Added `DefinitionContainers` to `CategoriesTree` component. This change doesn't affect applications that don't have `DefinitionContainers`. ([#1172](https://github.com/iTwin/viewer-components-react/pull/1172))
+
+## 3.4.2
+
+Fri, 14 Feb 2025 15:54:49 GMT
+
+### Patches
+
+- Adjusted modeled element / sub-model visibility controls. Now, if visibility of modeled element is changed, visibility of sub-model is adjusted accordingly and vice versa. ([#1183](https://github.com/iTwin/viewer-components-react/pull/1183))
+
+## 3.4.1
+
+Thu, 06 Feb 2025 13:36:20 GMT
+
+### Patches
+
+- Removed horizontal scroll from trees. ([#1180](https://github.com/iTwin/viewer-components-react/pull/1180))
+
+## 3.4.0
+
+Tue, 04 Feb 2025 15:29:52 GMT
+
+### Minor changes
+
+- Expose `FocusedInstancesContextProvider` and `useFocusedInstancesContext` to allow using `ModelsTreeComponent.ToggleInstancesFocusButton` from outside of `ModelsTreeComponent` and accesing the context from other React components. ([#1175](https://github.com/iTwin/viewer-components-react/pull/1175))
+- Add `filterButtonsVisibility` prop to `TreeRenderer`. The prop allows to control visibility of hierarchy level filtering buttons in the tree: `show-on-hover` (default) shows them on hover or focus, `hide` only shows them when a node is filtered. ([#1178](https://github.com/iTwin/viewer-components-react/pull/1178))
 
 ## 3.3.0
 

@@ -3,38 +3,31 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import "./MapLayerSettingsPopupButton.scss";
 import * as React from "react";
-import { RelativePosition } from "@itwin/appui-abstract";
-import { Popup } from "@itwin/core-react";
+import { SvgSettings } from "@itwin/itwinui-icons-react";
+import { IconButton, Popover } from "@itwin/itwinui-react";
+import { MapLayersUI } from "../../mapLayers";
 import { MapManagerSettings } from "./MapManagerSettings";
 
-import "./MapLayerSettingsPopupButton.scss";
-import { MapLayersUI } from "../../mapLayers";
-import { IconButton } from "@itwin/itwinui-react";
-import { SvgSettings } from "@itwin/itwinui-icons-react";
 export interface MapLayerSettingsPopupButtonProps {
   disabled?: boolean;
 }
 
 /** @alpha */
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function MapLayerSettingsPopupButton(props: MapLayerSettingsPopupButtonProps) {
   const panelRef = React.useRef<HTMLDivElement>(null);
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
   const [buttonTooltip] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Widget.SettingsButtonTooltip"));
+  const [handleOutsideClick, setHandleOutsideClick] = React.useState(true);
 
   const buttonRef = React.useRef<HTMLButtonElement>(null);
   const togglePopupDisplay = React.useCallback(
-    (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-      event.preventDefault();
-      setIsSettingsOpen((prev) => !prev);
+    () => {
+      setIsSettingsOpen(!isSettingsOpen);
     },
-    [setIsSettingsOpen],
+    [isSettingsOpen],
   );
-
-  const handleCloseSetting = React.useCallback(() => {
-    setIsSettingsOpen(false);
-  }, [setIsSettingsOpen]);
 
   const isInsideCoreDialog = React.useCallback((element: HTMLElement) => {
     if (element.nodeName === "DIV") {
@@ -53,53 +46,33 @@ export function MapLayerSettingsPopupButton(props: MapLayerSettingsPopupButtonPr
     return false;
   }, []);
 
-  const handleOutsideClick = React.useCallback(
-    (event: MouseEvent) => {
-      if (isInsideCoreDialog(event.target as HTMLElement)) {
-        return;
-      }
-
-      // If clicking on button that open panel -  don't trigger outside click processing
-      if (buttonRef?.current && buttonRef?.current.contains(event.target as Node)) {
-        return;
-      }
-
-      // If clicking the panel, this is not an outside clicked
-      if (panelRef.current && panelRef?.current.contains(event.target as Node)) {
-        return;
-      }
-
-      // If we reach this point, we got an outside clicked, no close the popup
-      setIsSettingsOpen(false);
-    },
-    [isInsideCoreDialog],
-  );
 
   return (
     <>
-      <IconButton
-        disabled={props.disabled}
-        styleType="borderless"
-        title={buttonTooltip}
-        className="maplayers-settings-popup-button"
-        onClick={togglePopupDisplay}
-        ref={buttonRef}
-      >
-        <SvgSettings />
-      </IconButton>
-      <Popup
+      <Popover
         className="maplayers-settings-popup"
-        isOpen={isSettingsOpen}
-        position={RelativePosition.BottomRight}
-        onClose={handleCloseSetting}
-        target={buttonRef.current}
-        onOutsideClick={handleOutsideClick}
-        repositionOnResize={true}
+        content={
+          <div ref={panelRef} className="maplayers-settings-popup-panel">
+            <MapManagerSettings onHandleOutsideClick={setHandleOutsideClick}/>
+          </div>
+        }
+        visible={isSettingsOpen}
+        onVisibleChange={setIsSettingsOpen}
+        placement="bottom-end"
+        closeOnOutsideClick={handleOutsideClick}
+        applyBackground
       >
-        <div ref={panelRef} className="maplayers-settings-popup-panel">
-          <MapManagerSettings />
-        </div>
-      </Popup>
+        <IconButton
+          disabled={props.disabled}
+          styleType="borderless"
+          label={buttonTooltip}
+          className="maplayers-settings-popup-button"
+          onClick={togglePopupDisplay}
+          ref={buttonRef}
+        >
+          <SvgSettings />
+        </IconButton>
+      </Popover>
     </>
   );
 }

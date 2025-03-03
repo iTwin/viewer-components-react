@@ -1,8 +1,29 @@
+
 /*---------------------------------------------------------------------------------------------
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { PropertyValueFormat } from "@itwin/appui-abstract";
+import "./SubLayersTree.scss";
+import * as React from "react";
+import {
+  CheckBoxState,
+  ControlledTree,
+  SelectionMode,
+  TreeEventHandler,
+  TreeImageLoader,
+  TreeModelSource,
+  TreeNodeLoader,
+  TreeNodeRenderer,
+  TreeRenderer,
+  useTreeModel,
+} from "@itwin/components-react";
+import { SvgCheckboxDeselect, SvgCheckboxSelect, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
+import { Checkbox, IconButton, Input } from "@itwin/itwinui-react";
+import { MapLayersUI } from "../../mapLayers";
+import { SubLayersDataProvider } from "./SubLayersDataProvider";
+import { useResizeObserver } from "../hooks/useResizeObserver";
+
 import type {
   AbstractTreeNodeLoaderWithProvider,
   DelayLoadedTreeNodeItem,
@@ -18,34 +39,20 @@ import type {
   TreeNodeRendererProps,
   TreeRendererProps,
 } from "@itwin/components-react";
-import {
-  ControlledTree,
-  SelectionMode,
-  TreeEventHandler,
-  TreeImageLoader,
-  TreeModelSource,
-  TreeNodeLoader,
-  TreeNodeRenderer,
-  TreeRenderer,
-  useTreeModel,
-} from "@itwin/components-react";
 import type { MapSubLayerProps, SubLayerId } from "@itwin/core-common";
-import type { NodeCheckboxRenderProps } from "@itwin/core-react";
-import { CheckBoxState, ImageCheckBox, ResizableContainerObserver, useDisposable } from "@itwin/core-react";
-import { IconButton, Input } from "@itwin/itwinui-react";
-import * as React from "react";
 import type { SubLayersTreeExpandMode } from "./SubLayersDataProvider";
-import { SubLayersDataProvider } from "./SubLayersDataProvider";
-import "./SubLayersTree.scss";
-import { MapLayersUI } from "../../mapLayers";
-import { SvgCheckboxDeselect, SvgCheckboxSelect, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
+
+type CheckboxProps = React.ComponentPropsWithoutRef<typeof Checkbox>;
+type CheckboxRendererProps = Omit<CheckboxProps, "onChange" | "onClick"> & {
+  onChange: (checked: boolean) => void;
+  onClick: (e: React.MouseEvent) => void;
+};
 
 interface ToolbarProps {
   searchField?: React.ReactNode;
   children?: React.ReactNode[];
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 function Toolbar(props: ToolbarProps) {
   return (
     <div className="map-manager-sublayer-tree-toolbar">
@@ -60,7 +67,6 @@ export interface SubLayersPanelProps extends Omit<SubLayersTreeProps, "subLayers
   subLayers?: MapSubLayerProps[];
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function SubLayersPanel(props: SubLayersPanelProps) {
   const [noneAvailableLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:SubLayers.NoSubLayers"));
   if (undefined === props.subLayers || 0 === props.subLayers.length) {
@@ -88,7 +94,6 @@ export interface SubLayersTreeProps {
  * Tree Control that displays sub-layer hierarchy
  * @internal
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function SubLayersTree(props: SubLayersTreeProps) {
   const [width, setWidth] = React.useState<number | undefined>(props.width);
   const [height, setHeight] = React.useState<number | undefined>(props.height);
@@ -112,14 +117,20 @@ export function SubLayersTree(props: SubLayersTreeProps) {
 
   // create custom event handler. It handles all tree event same as `TreeEventHandler` but additionally
   // it selects/deselects node when checkbox is checked/unchecked and vice versa.
-  // `useDisposable` takes care of disposing old event handler when new is created in case 'nodeLoader' has changed
-  // `React.useCallback` is used to avoid creating new callback that creates handler on each render
-  const eventHandler = useDisposable(
-    React.useCallback(
-      () => new SubLayerCheckboxHandler(subLayers, props.singleVisibleSubLayer ?? false, nodeLoader, props.onSubLayerStateChange),
-      [nodeLoader, subLayers, props.onSubLayerStateChange, props.singleVisibleSubLayer],
-    ),
-  );
+  const [eventHandler, setEventHandler] = React.useState<SubLayerCheckboxHandler | undefined>(undefined);
+
+  const [elementRef] = useResizeObserver<HTMLDivElement>((size) => {
+    setWidth(size.width);
+    setHeight(size.height);
+  });
+
+  React.useEffect(() => {
+    const handler = new SubLayerCheckboxHandler(subLayers, props.singleVisibleSubLayer ?? false, nodeLoader, props.onSubLayerStateChange);
+    setEventHandler(handler);
+    return () => {
+      handler.dispose();
+    };
+  }, [nodeLoader, subLayers, props.onSubLayerStateChange, props.singleVisibleSubLayer]);
 
   // Get an immutable tree model from the model source. The model is regenerated every time the model source
   // emits the `onModelChanged` event.
@@ -167,7 +178,7 @@ export function SubLayersTree(props: SubLayersTreeProps) {
                 <IconButton
                   key="show-all-btn"
                   size="small"
-                  title={props.checkboxStyle === "eye" ? MapLayersUI.translate("SubLayers.AllOn") : MapLayersUI.translate("SelectFeaturesDialog.AllOn")}
+                  label={props.checkboxStyle === "eye" ? MapLayersUI.translate("SubLayers.AllOn") : MapLayersUI.translate("SelectFeaturesDialog.AllOn")}
                   onClick={async () => changeAll(true)}
                 >
                   {props.checkboxStyle === "eye" ? <SvgVisibilityShow /> : <SvgCheckboxSelect />}
@@ -176,27 +187,19 @@ export function SubLayersTree(props: SubLayersTreeProps) {
                   style={{ marginLeft: "5px" }}
                   key="hide-all-btn"
                   size="small"
-                  title={props.checkboxStyle === "eye" ? MapLayersUI.translate("SubLayers.AllOff") : MapLayersUI.translate("SelectFeaturesDialog.AllOff")}
+                  label={props.checkboxStyle === "eye" ? MapLayersUI.translate("SubLayers.AllOff") : MapLayersUI.translate("SelectFeaturesDialog.AllOff")}
                   onClick={async () => changeAll(false)}
                 >
                   {props.checkboxStyle === "eye" ? <SvgVisibilityHide /> : <SvgCheckboxDeselect />}
                 </IconButton>,
               ]}
         </Toolbar>
-        <div className="map-manager-sublayer-tree-content">
-          {props.width === undefined && props.height === undefined && (
-            <ResizableContainerObserver
-              onResize={(w, h) => {
-                setWidth(w);
-                setHeight(h);
-              }}
-            />
-          )}
+        <div className="map-manager-sublayer-tree-content" ref={elementRef}>
           {width !== undefined && height !== undefined && (
             <ControlledTree
               nodeLoader={nodeLoader}
               selectionMode={SelectionMode.None}
-              eventsHandler={eventHandler}
+              eventsHandler={eventHandler!}
               model={treeModel}
               treeRenderer={props.checkboxStyle === "eye" ? nodeWithEyeCheckboxTreeRenderer : undefined}
               nodeHighlightingProps={nodeHighlightingProps}
@@ -395,14 +398,15 @@ class SubLayerCheckboxHandler extends TreeEventHandler {
 }
 
 /** Custom checkbox renderer that renders checkbox as an eye */
-const eyeCheckboxRenderer = (props: NodeCheckboxRenderProps) => (
-  <ImageCheckBox
+const eyeCheckboxRenderer = (props: CheckboxRendererProps) => (
+  <Checkbox
+    className="core-image-checkbox"
+    variant="eyeball"
     checked={props.checked}
     disabled={props.disabled}
-    imageOn="icon-visibility"
-    imageOff="icon-visibility-hide-2"
-    onClick={props.onChange}
-    tooltip={props.title}
+    onChange={(e) => {
+      props.onChange(e.target.checked);
+    }}
   />
 );
 

@@ -6,11 +6,17 @@
 import { useEffect, useRef, useState } from "react";
 import { UiFramework } from "@itwin/appui-react";
 import { Guid, Id64 } from "@itwin/core-bentley";
-import { Presentation } from "@itwin/presentation-frontend";
+import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
+import { normalizeFullClassName } from "@itwin/presentation-shared";
+import { computeSelection, Selectables } from "@itwin/unified-selection";
 import { useTelemetryContext } from "./UseTelemetryContext.js";
+import { useSelectionHandler } from "./UseUnifiedSelectionHandler.js";
 
+import type { SelectionStorage } from "./UseUnifiedSelectionHandler.js";
+import type { ECSqlQueryExecutor } from "@itwin/presentation-shared";
+import type { InstanceKey } from "@itwin/presentation-common";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { InstanceKey, KeySet } from "@itwin/presentation-common";
+import type { SelectableInstanceKey } from "@itwin/unified-selection";
 
 const PropertyGridSelectionScope = "Property Grid";
 
@@ -20,6 +26,7 @@ const PropertyGridSelectionScope = "Property Grid";
  */
 export interface InstanceSelectionProps {
   imodel: IModelConnection;
+  selectionStorage?: SelectionStorage;
 }
 
 /** Data structure that contains information about instances selection. */
@@ -44,7 +51,7 @@ interface InstanceSelectionInfo {
  * - Focus single instance until `UnifiedSelection` is changed.
  * @internal
  */
-export function useInstanceSelection({ imodel }: InstanceSelectionProps) {
+export function useInstanceSelection({ imodel, selectionStorage }: InstanceSelectionProps) {
   const { state, updateStateAsync, updateStateImmediate } = useLatestState<InstanceSelectionInfo>({
     selectedKeys: [],
     previousKeys: [],
@@ -53,6 +60,12 @@ export function useInstanceSelection({ imodel }: InstanceSelectionProps) {
   });
   const { selectedKeys, previousKeys, canNavigateUp, focusedInstanceKey } = state;
   const { onFeatureUsed } = useTelemetryContext();
+  const { selectionChange, getSelection, replaceSelection } = useSelectionHandler({ selectionStorage });
+
+  const [queryExecutor, setQueryExecutor] = useState(() => createECSqlQueryExecutor(imodel));
+  useEffect(() => {
+    setQueryExecutor(createECSqlQueryExecutor(imodel));
+  }, [imodel]);
 
   useEffect(() => {
     const onSelectionChange = async (eventSource?: string) => {
@@ -64,10 +77,13 @@ export function useInstanceSelection({ imodel }: InstanceSelectionProps) {
 
       await updateStateAsync(
         async () => {
-          const selectionSet = Presentation.selection.getSelection(imodel);
-          const selectedInstanceKeys = getInstanceKeys(selectionSet);
+          const allInstanceKeys = [];
+          for await (const key of Selectables.load(getSelection({ imodel, level: 0 }))) {
+            allInstanceKeys.push(key);
+          }
+          const selectedInstanceKeys = omitTransientKeys(allInstanceKeys);
           // if only single instance is selected and navigation through ancestors is enabled determine if selected instance has single parent and we can navigate up
-          const hasAncestor = selectedInstanceKeys.length === 1 && (await hasParent(imodel, selectedInstanceKeys[0]));
+          const hasAncestor = selectedInstanceKeys.length === 1 && (await hasParent(queryExecutor, selectedInstanceKeys[0]));
           return {
             selectedInstanceKeys,
             hasAncestor,
@@ -87,7 +103,7 @@ export function useInstanceSelection({ imodel }: InstanceSelectionProps) {
     // ensure this selection handling runs if component mounts after the selection event fires.
     void onSelectionChange();
 
-    const removePresentationListener = Presentation.selection.selectionChange.addListener(async (args) => onSelectionChange(args.source));
+    const removePresentationListener = selectionChange.addListener(async (args) => onSelectionChange(args.source));
     // if the frontstage changes and a selection set is already active we need to resync this widget's state with that selection
     /* c8 ignore next */
     const removeFrontstageReadyListener = UiFramework.frontstages.onFrontstageReadyEvent.addListener(async () => onSelectionChange());
@@ -95,7 +111,7 @@ export function useInstanceSelection({ imodel }: InstanceSelectionProps) {
       removePresentationListener();
       removeFrontstageReadyListener();
     };
-  }, [imodel, updateStateAsync]);
+  }, [imodel, queryExecutor, selectionChange, getSelection, updateStateAsync]);
 
   const navigateUp = async () => {
     if (!canNavigateUp || selectedKeys.length !== 1) {
@@ -108,12 +124,18 @@ export function useInstanceSelection({ imodel }: InstanceSelectionProps) {
 
     await updateStateAsync(
       async () => {
-        const parentKeys = await Presentation.selection.scopes.computeSelection(imodel, selectedKey.id, { id: "element", ancestorLevel: 1 });
+        let parentInstanceKeys: SelectableInstanceKey[] = [];
+        for await (const key of computeSelection({
+          queryExecutor,
+          elementIds: [selectedKey.id],
+          scope: { id: "element", ancestorLevel: 1 },
+        })) {
+          parentInstanceKeys.push(key);
+        }
+        parentInstanceKeys = omitTransientKeys(parentInstanceKeys);
+        const hasGrandParent = parentInstanceKeys.length === 1 && (await hasParent(queryExecutor, parentInstanceKeys[0]));
 
-        const parentInstanceKeys = getInstanceKeys(parentKeys);
-        const hasGrandParent = parentInstanceKeys.length === 1 && (await hasParent(imodel, parentInstanceKeys[0]));
-
-        Presentation.selection.replaceSelection(PropertyGridSelectionScope, imodel, parentKeys);
+        replaceSelection({ source: PropertyGridSelectionScope, imodel, selectables: parentInstanceKeys, level: 0 });
         return {
           parentInstanceKeys,
           hasGrandParent,
@@ -136,7 +158,7 @@ export function useInstanceSelection({ imodel }: InstanceSelectionProps) {
     const newPreviousKeys = [...previousKeys];
     const currentKey = newPreviousKeys.pop() as InstanceKey;
     // select the current instance key
-    Presentation.selection.replaceSelection(PropertyGridSelectionScope, imodel, [currentKey]);
+    replaceSelection({ source: PropertyGridSelectionScope, imodel, selectables: [currentKey], level: 0 });
 
     onFeatureUsed("ancestor-navigation");
     updateStateImmediate(() => ({
@@ -169,29 +191,23 @@ export function useInstanceSelection({ imodel }: InstanceSelectionProps) {
   };
 }
 
-async function hasParent(imodel: IModelConnection, key: InstanceKey) {
-  const parentKeys = await Presentation.selection.scopes.computeSelection(imodel, key.id, { id: "element", ancestorLevel: 1 });
-
-  // current instance key is returned from `computeSelection` if it does not have parent. Need to filter it out.
-  const instanceKeys = getInstanceKeys(parentKeys).filter((parentKey) => parentKey.className !== key.className || parentKey.id !== key.id);
-  return instanceKeys.length === 1;
+async function hasParent(queryExecutor: ECSqlQueryExecutor, key: InstanceKey): Promise<boolean> {
+  const parentKeys = computeSelection({
+    queryExecutor,
+    elementIds: [key.id],
+    scope: { id: "element", ancestorLevel: 1 },
+  });
+  for await (const parentKey of parentKeys) {
+    // current instance key is returned from `computeSelection` if it does not have parent. Need to filter it out.
+    if (normalizeFullClassName(parentKey.className) !== normalizeFullClassName(key.className) || parentKey.id !== key.id) {
+      return true;
+    }
+  }
+  return false;
 }
 
-function getInstanceKeys(keys: Readonly<KeySet>) {
-  const selectedInstanceKeys: InstanceKey[] = [];
-  keys.instanceKeys.forEach((ids: Set<string>, className: string) => {
-    ids.forEach((id: string) => {
-      if (!Id64.isTransient(id)) {
-        selectedInstanceKeys.push({
-          id,
-          className,
-        });
-      }
-    });
-  });
-
-  // make sure all instance keys are in `SchemaName:ClassName` format
-  return selectedInstanceKeys.map((key) => ({ id: key.id, className: key.className.replace(".", ":") }));
+function omitTransientKeys(keys: SelectableInstanceKey[]) {
+  return keys.filter((key) => !Id64.isTransient(key.id));
 }
 
 /**

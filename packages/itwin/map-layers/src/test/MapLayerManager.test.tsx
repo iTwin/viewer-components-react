@@ -2,45 +2,40 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-/* eslint-disable deprecation/deprecation */
-/* eslint-disable @itwin/no-internal */
-
-import { expect, should } from "chai";
-import * as sinon from "sinon";
 import { ImageMapLayerSettings } from "@itwin/core-common";
-import * as coreFrontend from "@itwin/core-frontend";
-import { fireEvent, getAllByTestId, getByTestId, getByTitle, queryByText, render } from "@testing-library/react";
+import { MapLayerIndex, MapLayerSource, MapLayerSources, MockRender } from "@itwin/core-frontend";
+import { fireEvent, getAllByTestId, getByTestId, queryAllByTestId, queryByText, render, RenderResult } from "@testing-library/react";
 import { MapLayerPreferences, MapLayerSourceChangeType } from "../MapLayerPreferences";
 import { MapLayerManager } from "../ui/widget/MapLayerManager";
 import { TestUtils } from "./TestUtils";
 import { ViewportMock } from "./ViewportMock";
 
 import type { GuidString } from "@itwin/core-bentley";
+
 describe("MapLayerManager", () => {
   const sourceDataset: any = [
     { formatId: "ArcGIS", name: "source2", url: "https://test.com/Mapserver" },
     { formatId: "ArcGIS", name: "source1", url: "https://test.com/Mapserver" },
   ];
 
-  const sandbox = sinon.createSandbox();
   const viewportMock = new ViewportMock();
 
-  const attachLAyerButtonSelector = ".map-manager-attach-layer-button";
+  const attachLayerButtonSelector = ".map-manager-attach-layer-button";
   const sourceListSelector = ".map-manager-source-list";
 
-  before(async () => {
-    await coreFrontend.MockRender.App.startup();
+  beforeAll(async () => {
+    await MockRender.App.startup();
     await TestUtils.initialize();
-    window.HTMLElement.prototype.scrollIntoView = function () {}; // needed by <Select> UI component
+    window.HTMLElement.prototype.scrollIntoView = () => {};
   });
 
-  after(async () => {
-    await coreFrontend.MockRender.App.shutdown();
+  afterAll(async () => {
+    await MockRender.App.shutdown();
     TestUtils.terminateUiComponents();
   });
 
   afterEach(() => {
-    sandbox.restore();
+    vi.restoreAllMocks();
     viewportMock.reset();
   });
 
@@ -49,9 +44,9 @@ describe("MapLayerManager", () => {
   });
 
   async function testSourceItems(testFunc: (menuItems: NodeListOf<HTMLLIElement>) => void, customDataset?: any, nbRender?: number, extraFunc?: () => void) {
-    sandbox.stub(MapLayerPreferences, "getSources").callsFake(async function (_iTwinId: GuidString, _iModelId?: GuidString) {
+    vi.spyOn(MapLayerPreferences, "getSources").mockImplementation(async (_iTwinId: GuidString, _iModelId?: GuidString) => {
       const dataset = customDataset ? customDataset : sourceDataset;
-      return dataset.map((source: any) => coreFrontend.MapLayerSource.fromJSON(source)!);
+      return dataset.map((source: any) => MapLayerSource.fromJSON(source)!);
     });
 
     render(
@@ -81,15 +76,16 @@ describe("MapLayerManager", () => {
 
     if (extraFunc) {
       extraFunc();
+      await TestUtils.flushAsyncOperations();
     }
 
-    const addButton = container.querySelector(attachLAyerButtonSelector) as HTMLElement;
-    should().exist(addButton);
+    const addButton = container.querySelector(attachLayerButtonSelector) as HTMLElement;
+    expect(addButton).toBeDefined();
     fireEvent.click(addButton);
 
     const sourceList = document.querySelector(sourceListSelector) as HTMLUListElement;
-    should().exist(sourceList);
-    testFunc(sourceList.querySelectorAll("li"));
+    expect(sourceList).toBeDefined();
+    testFunc(sourceList.querySelectorAll('div[role="listitem"]'));
   }
 
   it("renders base maps", async () => {
@@ -97,40 +93,41 @@ describe("MapLayerManager", () => {
       <div>
         <MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object}></MapLayerManager>
       </div>,
-    );
+    ) as RenderResult;
 
     await TestUtils.flushAsyncOperations();
 
     viewportMock.onMapImageryChanged.raiseEvent({} as any);
-
-    const select = container.querySelector(".iui-input-with-icon") as HTMLElement;
-    const selectButton = select.querySelector(".iui-select-button") as HTMLElement;
+    const select = getByTestId<HTMLInputElement>(container, "base-map-select");
+    const selectButton = select.querySelector('div[role="combobox"]') as HTMLElement;
     fireEvent.click(selectButton);
-    const menu = document.querySelector(".iui-menu") as HTMLUListElement;
-    should().exist(menu);
-    const menuItems = menu.querySelectorAll("li");
+    const listboxes = container.querySelectorAll('div[role="listbox"]');
+    expect(listboxes.length).toBeGreaterThan(0);
+    const menu = listboxes[0] as HTMLUListElement;
+    expect(menu).toBeDefined();
+    const menuItems = menu.querySelectorAll('button[role="option"]');
 
-    expect(menuItems.length).to.eq(4);
-    expect(menuItems[0].textContent).to.eql("Basemap.ColorFill");
-    expect(menuItems[1].textContent).to.eql("WellKnownBaseMaps.BingProvider.Aerial");
-    expect(menuItems[2].textContent).to.eql("WellKnownBaseMaps.BingProvider.Hybrid");
-    expect(menuItems[3].textContent).to.eql("WellKnownBaseMaps.BingProvider.Street");
+    expect(menuItems.length).toBe(4);
+    expect(menuItems[0].textContent).toBe("Basemap.ColorFill");
+    expect(menuItems[1].textContent).toBe("WellKnownBaseMaps.BingProvider.Aerial");
+    expect(menuItems[2].textContent).toBe("WellKnownBaseMaps.BingProvider.Hybrid");
+    expect(menuItems[3].textContent).toBe("WellKnownBaseMaps.BingProvider.Street");
   });
 
   it("renders source list", async () => {
     await testSourceItems(async (sourceItems: NodeListOf<HTMLLIElement>) => {
-      expect(sourceItems.length).to.eq(2);
+      expect(sourceItems.length).toBe(2);
 
       // reverse order because sources should be sorted by name
-      expect(sourceItems[0].textContent).to.eql(sourceDataset[1].name);
-      expect(sourceItems[1].textContent).to.eql(sourceDataset[0].name);
+      expect(sourceItems[0].textContent).toBe(sourceDataset[1].name);
+      expect(sourceItems[1].textContent).toBe(sourceDataset[0].name);
     });
   });
 
-  it("renders source list once when loaded twice  ", async () => {
+  it("renders source list once when loaded twice", async () => {
     await testSourceItems(
       async (sourceItems: NodeListOf<HTMLLIElement>) => {
-        expect(sourceItems.length).to.eq(2);
+        expect(sourceItems.length).toBe(2);
       },
       undefined,
       2,
@@ -138,9 +135,9 @@ describe("MapLayerManager", () => {
   });
 
   it("renders source list without duplicates", async () => {
-    const customDataset: coreFrontend.MapLayerSources[] = [...sourceDataset, sourceDataset[0]];
-    sandbox.stub(MapLayerPreferences, "getSources").callsFake(async function (_iTwinId: GuidString, _iModelId?: GuidString) {
-      return customDataset.map((source: any) => coreFrontend.MapLayerSource.fromJSON(source)!);
+    const customDataset: MapLayerSources[] = [...sourceDataset, sourceDataset[0]];
+    vi.spyOn(MapLayerPreferences, "getSources").mockImplementation(async (_iTwinId: GuidString, _iModelId?: GuidString) => {
+      return customDataset.map((source: any) => MapLayerSource.fromJSON(source)!);
     });
 
     render(
@@ -156,47 +153,48 @@ describe("MapLayerManager", () => {
 
     await TestUtils.flushAsyncOperations();
 
-    const addButton = container.querySelector(attachLAyerButtonSelector) as HTMLElement;
-    should().exist(addButton);
+    const addButton = container.querySelector(attachLayerButtonSelector) as HTMLElement;
+    expect(addButton).toBeDefined();
     fireEvent.click(addButton);
 
     const sourceList = document.querySelector(sourceListSelector) as HTMLUListElement;
-    should().exist(sourceList);
-    const sourceItems = sourceList.querySelectorAll("li");
+    expect(sourceList).toBeDefined();
+    const sourceItems = sourceList.querySelectorAll('div[role="listitem"]');
 
     // this should still be 2 even though we added a duplicate
-    expect(sourceItems.length).to.eq(2);
+    expect(sourceItems.length).toBe(2);
   });
 
   it("should remove source item after 'onLayerSourceChanged' delete event", async () => {
     await testSourceItems(
       async (sourceItems: NodeListOf<HTMLLIElement>) => {
-        expect(sourceItems.length).to.eq(1);
-        expect(sourceItems[0].textContent).to.eql(sourceDataset[1].name);
+        expect(sourceItems.length).toBe(1);
+        expect(sourceItems[0].textContent).toBe(sourceDataset[1].name);
       },
       undefined,
       1,
       () => {
-        MapLayerPreferences.onLayerSourceChanged.raiseEvent(MapLayerSourceChangeType.Removed, coreFrontend.MapLayerSource.fromJSON(sourceDataset[0]));
+        MapLayerPreferences.onLayerSourceChanged.raiseEvent(MapLayerSourceChangeType.Removed, MapLayerSource.fromJSON(sourceDataset[0]));
       },
     );
   });
 
   it("should rename source item after 'onLayerSourceChanged' renamed event", async () => {
     const renamedName = "RenamedSource";
+
     await testSourceItems(
       async (sourceItems: NodeListOf<HTMLLIElement>) => {
-        expect(sourceItems.length).to.eq(2);
-        expect(sourceItems[0].textContent).to.eql(sourceDataset[1].name);
-        expect(sourceItems[1].textContent).to.eql(renamedName);
+        expect(sourceItems.length).toBe(2);
+        expect(sourceItems[1].textContent).toBe(sourceDataset[1].name);
+        expect(sourceItems[0].textContent).toBe(renamedName);
       },
       undefined,
       1,
       () => {
         MapLayerPreferences.onLayerSourceChanged.raiseEvent(
           MapLayerSourceChangeType.Replaced,
-          coreFrontend.MapLayerSource.fromJSON(sourceDataset[0]),
-          coreFrontend.MapLayerSource.fromJSON({ ...sourceDataset[0], name: renamedName }),
+          MapLayerSource.fromJSON(sourceDataset[0]),
+          MapLayerSource.fromJSON({ ...sourceDataset[0], name: renamedName }),
         );
       },
     );
@@ -211,13 +209,16 @@ describe("MapLayerManager", () => {
 
     await testSourceItems(
       async (sourceItems: NodeListOf<HTMLLIElement>) => {
-        expect(sourceItems.length).to.eq(3);
-        expect(sourceItems[2].textContent).to.eql(newSourceProps.name);
+        expect(sourceItems.length).toBe(3);
+        expect(sourceItems[2].textContent).toBe(newSourceProps.name);
       },
       undefined,
       1,
-      () => {
-        MapLayerPreferences.onLayerSourceChanged.raiseEvent(MapLayerSourceChangeType.Added, coreFrontend.MapLayerSource.fromJSON(newSourceProps));
+      async () => {
+        const newSource = MapLayerSource.fromJSON(newSourceProps);
+        MapLayerPreferences.onLayerSourceChanged.raiseEvent(MapLayerSourceChangeType.Added, undefined,  newSource);
+        // Give React time to process the state update
+        await TestUtils.flushAsyncOperations();
       },
     );
   });
@@ -254,27 +255,27 @@ describe("MapLayerManager", () => {
       const layerCheckboxes = getAllByTestId<HTMLInputElement>(section, "select-item-checkbox");
 
       // Make sure that initially all checkboxes are not checked
-      layerCheckboxes.every((value) => !value.checked);
-      expect(selectAllCheckbox.checked).to.be.false;
+      layerCheckboxes.every((value) => expect(value.checked).toBe(false));
+      expect(selectAllCheckbox.checked).toBe(false);
 
       // Clicking on the 'select all' checkbox in the header, should check all layer checkboxes
       selectAllCheckbox.click();
-      expect(layerCheckboxes.every((value) => value.checked)).to.be.true;
-      expect(selectAllCheckbox.checked).to.be.true;
+      expect(layerCheckboxes.every((value) => value.checked)).toBe(true);
+      expect(selectAllCheckbox.checked).toBe(true);
 
       // Clicking again should deselect all layer checkboxes
       selectAllCheckbox.click();
-      expect(layerCheckboxes.every((value) => !value.checked)).to.be.true;
-      expect(selectAllCheckbox.checked).to.be.false;
+      expect(layerCheckboxes.every((value) => !value.checked)).toBe(true);
+      expect(selectAllCheckbox.checked).toBe(false);
 
       // 'Select all checkbox' should be check when a single layer is checked
       layerCheckboxes[0].click();
-      expect(layerCheckboxes[0].checked).to.be.true;
-      expect(selectAllCheckbox.checked).to.be.true;
+      expect(layerCheckboxes[0].checked).toBe(true);
+      expect(selectAllCheckbox.checked).toBe(true);
 
       // Clicking 'Select all checkbox' at this point should deselect all layers checkbox
       selectAllCheckbox.click();
-      expect(layerCheckboxes.every((value) => value.checked)).to.be.false;
+      expect(layerCheckboxes.every((value) => value.checked)).toBe(false);
     };
     doLayerSectionTests(layerSections[0]);
     doLayerSectionTests(layerSections[1]);
@@ -295,7 +296,7 @@ describe("MapLayerManager", () => {
     const overlayLayerSetting = ImageMapLayerSettings.fromJSON({ ...backgroundLayerSettings.toJSON(), name: "overlay" });
     viewportMock.backgroundLayers = [backgroundLayerSettings];
     viewportMock.overlayLayers = [overlayLayerSetting];
-    viewportMock.detachMapLayerByIndexFunc = (mapLayerIndex: coreFrontend.MapLayerIndex) => {
+    viewportMock.detachMapLayerByIndexFunc = (mapLayerIndex: MapLayerIndex) => {
       mapLayerIndex.isOverlay ? (viewportMock.overlayLayers = []) : (viewportMock.backgroundLayers = []);
     };
     viewportMock.setup();
@@ -309,9 +310,9 @@ describe("MapLayerManager", () => {
 
     const checkLayerSection = async (section: HTMLElement, sectionName: string) => {
       let listItem = queryByText(container, sectionName);
-      should().exist(listItem);
-      const detachAllButton = getByTitle(section, "MapLayerActionButtons.DetachSelectedLabel");
-      should().exist(detachAllButton);
+      expect(listItem).toBeDefined();
+      const detachAllButton = getByTestId(section, "detach-label-button");
+      expect(detachAllButton).toBeDefined();
 
       const checkbox = getByTestId(section, "select-item-checkbox");
       checkbox.click();
@@ -321,7 +322,7 @@ describe("MapLayerManager", () => {
       await TestUtils.flushAsyncOperations();
 
       listItem = queryByText(container, sectionName);
-      should().not.exist(listItem);
+      expect(listItem).toBeNull();
     };
     const layersSections = container.querySelectorAll<HTMLElement>(".map-manager-layer-wrapper");
     await checkLayerSection(layersSections[0], backgroundLayerSettings.name);
@@ -330,10 +331,10 @@ describe("MapLayerManager", () => {
 
   it("should change layers visibility", async () => {
     const checkLayerItemsVisibility = (element: HTMLElement, nbVisibleLayers: number, nbNonVisibleLayers: number) => {
-      const iconVisibilityIcons = element.querySelectorAll("i.icon-visibility");
-      expect(iconVisibilityIcons.length).to.eq(nbVisibleLayers);
-      const iconInvisibilityIcons = element.querySelectorAll("i.icon-visibility-hide-2");
-      expect(iconInvisibilityIcons.length).to.eq(nbNonVisibleLayers);
+      const iconVisibilityIcons = queryAllByTestId(element, "layer-visibility-icon-show");
+      expect(iconVisibilityIcons.length).toBe(nbVisibleLayers);
+      const iconInvisibilityIcons = queryAllByTestId(element, "layer-visibility-icon-hide");
+      expect(iconInvisibilityIcons.length).toBe(nbNonVisibleLayers);
     };
 
     viewportMock.reset();
@@ -364,24 +365,22 @@ describe("MapLayerManager", () => {
       checkLayerItemsVisibility(section, 1, 0);
 
       // Click on the HideAll  it should change the eye icon
-
-      // const hideAllButtons = getAllByTitle(container, "MapLayerActionButtons.HideAllLabel");
-      const hideAllButton = getByTitle(section, "MapLayerActionButtons.HideAllLabel");
-      should().exist(hideAllButton);
+      const hideAllButton = getByTestId(section, "hide-all-label-button");
+      expect(hideAllButton).toBeDefined();
       hideAllButton.click();
       await TestUtils.flushAsyncOperations();
       checkLayerItemsVisibility(section, 0, 1);
 
-      // Click on the HideAll  it should change the eye icon
-      const showAllButton = getByTitle(section, "MapLayerActionButtons.ShowAllLabel");
-      should().exist(showAllButton);
+      // Click on the ShowAll  it should change the eye icon
+      const showAllButton = getByTestId(section, "show-all-label-button");
+      expect(showAllButton).toBeDefined();
       showAllButton.click();
       await TestUtils.flushAsyncOperations();
       checkLayerItemsVisibility(section, 1, 0);
 
-      // Click on the HideAll  it should change the eye icon
-      const InvertButton = getByTitle(section, "MapLayerActionButtons.InvertAllLabel");
-      should().exist(InvertButton);
+      // Click on the InvertAll  it should change the eye icon
+      const InvertButton = getByTestId(section, "invert-all-label-button");
+      expect(InvertButton).toBeDefined();
       InvertButton.click();
       await TestUtils.flushAsyncOperations();
       checkLayerItemsVisibility(section, 0, 1);

@@ -2,13 +2,13 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-
-import * as sinon from "sinon";
+import { vi } from 'vitest';
 import { MapLayersUI } from "../mapLayers";
 import type { ITwinIdArg, PreferenceArg, PreferenceKeyArg, TokenArg } from "@itwin/core-frontend";
 
 let iModelPrefs: Map<string, any> | undefined;
 let iTwinPrefs: Map<string, any> | undefined;
+
 export function setup() {
   if (undefined === iModelPrefs || undefined === iTwinPrefs) {
     iModelPrefs = new Map<string, any>();
@@ -72,14 +72,15 @@ export function setup() {
     }
   };
 
-  sinon.stub(MapLayersUI, "iTwinConfig").get(() => ({
+  vi.spyOn(MapLayersUI, 'iTwinConfig', 'get').mockReturnValue({
     get: getStub,
     save: saveStub,
     delete: deleteStub,
-  }));
+  });
 }
 
 export function restore() {
   iModelPrefs = undefined;
   iTwinPrefs = undefined;
+  vi.resetAllMocks();
 }

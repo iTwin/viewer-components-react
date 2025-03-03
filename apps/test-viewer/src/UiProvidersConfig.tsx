@@ -41,6 +41,7 @@ import type { TreeDefinition } from "@itwin/tree-widget-react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ClientPrefix } from "@itwin/grouping-mapping-widget";
 import type { UiItemsProvider } from "@itwin/appui-react";
+import type { ComponentPropsWithRef } from "react";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
@@ -212,6 +213,7 @@ const configuredUiItems = new Map<string, UiItem>([
                 onFeatureUsed: (feature) => {
                   console.log(`PropertyGrid [${feature}] used`);
                 },
+                selectionStorage: unifiedSelectionStorage,
               }),
             ];
           },

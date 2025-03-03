@@ -6,10 +6,10 @@
 import "./CustomParamEditDialog.scss";
 import * as React from "react";
 import { UiFramework } from "@itwin/appui-react";
-import { Dialog } from "@itwin/core-react";
-import { Button, LabeledInput, ToggleSwitch } from "@itwin/itwinui-react";
+import { Button, LabeledInput, Modal, ModalContent, ToggleSwitch } from "@itwin/itwinui-react";
 import { CustomParamsStorage } from "../../CustomParamsStorage";
 import { MapLayersUI } from "../../mapLayers";
+
 import type { CustomParamItem } from "../Interfaces";
 
 interface CustomParamEditDialogProps {
@@ -17,7 +17,6 @@ interface CustomParamEditDialogProps {
   onOkResult?: (newItem: CustomParamItem, oldIem?: CustomParamItem) => void;
   onCancelResult?: () => void;
 }
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function CustomParamEditDialog(props: CustomParamEditDialogProps) {
   const [originalItemName] = React.useState<string | undefined>(() => (props.item ? props.item.name : undefined));
   const [item, setItem] = React.useState<CustomParamItem>(() => props.item ?? { name: "", key: "", value: "", secret: true });
@@ -63,19 +62,15 @@ export function CustomParamEditDialog(props: CustomParamEditDialogProps) {
     );
   }
   return (
-    <Dialog
+    <Modal
+      as="div"
       title={MapLayersUI.translate(props.item ? "CustomParamEditDialog.DialogTitleEdit" : "CustomParamEditDialog.DialogTitleAdd")}
-      opened={true}
-      resizable={true}
-      movable={true}
-      modal={true}
+      isOpen={true}
       onClose={handleCancel}
-      onEscape={handleCancel}
-      minHeight={120}
-      maxWidth={120}
-      trapFocus={false}
+      style={{ minHeight: 120, minWidth: 120 }}
+      portal
     >
-      <>
+      <ModalContent>
         <LabeledInput
           className="custom-param-edit-dialog-input"
           label={MapLayersUI.translate("CustomParamEditDialog.ParamNameLabel")}
@@ -109,7 +104,7 @@ export function CustomParamEditDialog(props: CustomParamEditDialogProps) {
           />
         </div>
         {renderFooter()}
-      </>
-    </Dialog>
+      </ModalContent>
+    </Modal>
   );
 }
