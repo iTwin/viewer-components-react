@@ -4,6 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useMemo, useState } from "react";
+import toggle2DSvg from "@itwin/itwinui-icons/2d.svg";
+import toggle3DSvg from "@itwin/itwinui-icons/3d.svg";
+import focusModeSvg from "@itwin/itwinui-icons/cursor-click.svg";
+import visibilityHideSvg from "@itwin/itwinui-icons/visibility-hide.svg";
+import visibilityShowSvg from "@itwin/itwinui-icons/visibility-show.svg";
+import visibilityInvertSvg from "@itwin/itwinui-icons/visibilty-invert.svg";
 import { IconButton } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
@@ -13,13 +19,6 @@ import type { Id64String } from "@itwin/core-bentley";
 import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { TreeToolbarButtonProps } from "../../tree-header/SelectableTree.js";
-
-const visibilityShowIcon = new URL("@itwin/itwinui-icons/visibility-show.svg", import.meta.url).href;
-const visibilityHideIcon = new URL("@itwin/itwinui-icons/visibility-hide.svg", import.meta.url).href;
-const visibilityInvertIcon = new URL("@itwin/itwinui-icons/visibilty-invert.svg", import.meta.url).href;
-const focusModeIcon = new URL("@itwin/itwinui-icons/cursor-click.svg", import.meta.url).href;
-const toggle3DIcon = new URL("@itwin/itwinui-icons/3d.svg", import.meta.url).href;
-const toggle2DIcon = new URL("@itwin/itwinui-icons/2d.svg", import.meta.url).href;
 
 /**
  * Information about a single Model.
@@ -125,7 +124,7 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
           props.viewport,
         );
       }}
-      icon={visibilityShowIcon}
+      icon={visibilityShowSvg}
     />
   );
 }
@@ -143,7 +142,7 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
           props.viewport,
         );
       }}
-      icon={visibilityHideIcon}
+      icon={visibilityHideSvg}
     />
   );
 }
@@ -161,7 +160,7 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
           props.viewport,
         );
       }}
-      icon={visibilityInvertIcon}
+      icon={visibilityInvertSvg}
     />
   );
 }
@@ -189,7 +188,7 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
       }}
       aria-disabled={models2d.length === 0}
       isActive={is2dToggleActive}
-      icon={toggle2DIcon}
+      icon={toggle2DSvg}
     />
   );
 }
@@ -217,7 +216,7 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
       }}
       aria-disabled={models3d.length === 0}
       isActive={is3dToggleActive}
-      icon={toggle3DIcon}
+      icon={toggle3DSvg}
     />
   );
 }
@@ -240,7 +239,7 @@ export function ToggleInstancesFocusButton({ onFeatureUsed, disabled }: { onFeat
       }}
       aria-disabled={disabled}
       isActive={enabled}
-      icon={focusModeIcon}
+      icon={focusModeSvg}
     />
   );
 }

@@ -168,7 +168,7 @@ interface FocusedInstancesContext {
 export function FocusedInstancesContextProvider({ selectionStorage, imodelKey, children, }: PropsWithChildren<{
     selectionStorage: SelectionStorage;
     imodelKey: string;
-}>): JSX.Element;
+}>): JSX_2.Element;
 
 // @beta (undocumented)
 type FunctionProps<THook extends (props: any) => any> = Parameters<THook>[0];

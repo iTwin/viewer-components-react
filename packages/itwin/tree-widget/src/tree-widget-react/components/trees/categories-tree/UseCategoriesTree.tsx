@@ -5,6 +5,9 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { assert } from "@itwin/core-bentley";
+import categorySvg from "@itwin/itwinui-icons/bis-category-3d.svg";
+import subcategorySvg from "@itwin/itwinui-icons/bis-category-subcategory.svg";
+import definitionContainerSvg from "@itwin/itwinui-icons/bis-definitions-container.svg";
 import { Text } from "@itwin/itwinui-react/bricks";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
@@ -189,12 +192,9 @@ function getEmptyTreeContentComponent(filter?: string, error?: CategoriesTreeFil
   if (emptyTreeContent) {
     return emptyTreeContent;
   }
-  return <EmptyTreeContent icon={categoryIcon} />;
+  return <EmptyTreeContent icon={categorySvg} />;
 }
 
-const categoryIcon = new URL("@itwin/itwinui-icons/bis-category-3d.svg", import.meta.url).href;
-const subcategoryIcon = new URL("@itwin/itwinui-icons/bis-category-subcategory.svg", import.meta.url).href;
-const definitionContainerIcon = new URL("@itwin/itwinui-icons/bis-definitions-container.svg", import.meta.url).href;
 
 function getIcon(node: PresentationHierarchyNode): string | undefined {
   if (node.extendedData?.imageId === undefined) {
@@ -203,11 +203,11 @@ function getIcon(node: PresentationHierarchyNode): string | undefined {
 
   switch (node.extendedData.imageId) {
     case "icon-layers":
-      return categoryIcon;
+      return categorySvg;
     case "icon-layers-isolate":
-      return subcategoryIcon;
+      return subcategorySvg;
     case "icon-definition-container":
-      return definitionContainerIcon;
+      return definitionContainerSvg;
   }
 
   return undefined;

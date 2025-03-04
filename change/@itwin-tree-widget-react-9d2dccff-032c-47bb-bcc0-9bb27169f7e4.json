@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Use default import for importing svg.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "24278440+saskliutas@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

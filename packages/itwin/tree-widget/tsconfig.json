@@ -10,5 +10,5 @@
     "resolveJsonModule": true,
     "lib": ["DOM"]
   },
-  "include": ["src"]
+  "include": ["src", "types.d.ts"]
 }

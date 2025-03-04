@@ -4,6 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import categorySvg from "@itwin/itwinui-icons/bis-category-3d.svg";
+import classSvg from "@itwin/itwinui-icons/bis-class.svg";
+import elementSvg from "@itwin/itwinui-icons/bis-element.svg";
+import subjectSvg from "@itwin/itwinui-icons/bis-subject.svg";
+import modelSvg from "@itwin/itwinui-icons/model-cube.svg";
 import { Anchor, Text } from "@itwin/itwinui-react/bricks";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
@@ -264,7 +269,7 @@ function getEmptyTreeContentComponent(filter?: string, error?: ModelsTreeFilteri
   if (emptyTreeContent) {
     return emptyTreeContent;
   }
-  return <EmptyTreeContent icon={modelIcon} />;
+  return <EmptyTreeContent icon={modelSvg} />;
 }
 
 function isFilterError(error: ModelsTreeFilteringError | undefined) {
@@ -281,12 +286,6 @@ function InstanceFocusError({ error }: { error: ModelsTreeFilteringError }) {
   return <Text>{localizedMessage}</Text>;
 }
 
-const subjectIcon = new URL("@itwin/itwinui-icons/bis-subject.svg", import.meta.url).href;
-const classIcon = new URL("@itwin/itwinui-icons/bis-class.svg", import.meta.url).href;
-const modelIcon = new URL("@itwin/itwinui-icons/model-cube.svg", import.meta.url).href;
-const categoryIcon = new URL("@itwin/itwinui-icons/bis-category-3d.svg", import.meta.url).href;
-const elementIcon = new URL("@itwin/itwinui-icons/bis-element.svg", import.meta.url).href;
-
 function getIcon(node: PresentationHierarchyNode): string | undefined {
   if (node.extendedData?.imageId === undefined) {
     return undefined;
@@ -294,15 +293,15 @@ function getIcon(node: PresentationHierarchyNode): string | undefined {
 
   switch (node.extendedData.imageId) {
     case "icon-layers":
-      return categoryIcon;
+      return categorySvg;
     case "icon-item":
-      return elementIcon;
+      return elementSvg;
     case "icon-ec-class":
-      return classIcon;
+      return classSvg;
     case "icon-folder":
-      return subjectIcon;
+      return subjectSvg;
     case "icon-model":
-      return modelIcon;
+      return modelSvg;
   }
 
   return undefined;
