@@ -7,7 +7,8 @@ import "./TreeWidgetUiItemsProvider.css";
 import { useRef } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { StagePanelLocation, StagePanelSection, useTransientState } from "@itwin/appui-react";
-import { SvgHierarchyTree } from "@itwin/itwinui-icons-react";
+import hierarchyTreeSvg from "@itwin/itwinui-icons/hierarchy-tree.svg";
+import { Icon } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../TreeWidget.js";
 import { ErrorState } from "./tree-header/ErrorState.js";
 import { TreeWidgetComponentImpl } from "./TreeWidgetComponentImpl.js";
@@ -15,7 +16,6 @@ import { TreeWidgetComponentImpl } from "./TreeWidgetComponentImpl.js";
 import type { Ref } from "react";
 import type { Widget } from "@itwin/appui-react";
 import type { TreeDefinition } from "./TreeWidgetComponentImpl.js";
-
 /**
  * Props for `createWidget`.
  * @public
@@ -43,7 +43,7 @@ export function createTreeWidget(props: TreeWidgetProps): Widget {
   return {
     id: "tree-widget-react:trees",
     label: TreeWidget.translate("widget.label"),
-    icon: <SvgHierarchyTree />,
+    icon: <Icon href={hierarchyTreeSvg} />,
     layouts: {
       standard: {
         section: StagePanelSection.Start,

@@ -4,12 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./TreeNodeVisibilityButton.css";
+import visibilityHideSvg from "@itwin/itwinui-icons/visibility-hide.svg";
+import visibilityPartialSvg from "@itwin/itwinui-icons/visibility-partial.svg";
+import visibilityShowSvg from "@itwin/itwinui-icons/visibility-show.svg";
 
 import type { PresentationHierarchyNode, TreeItemAction } from "@itwin/presentation-hierarchies-react";
-
-const visibilityShowIcon = new URL("@itwin/itwinui-icons/visibility-show.svg", import.meta.url).href;
-const visibilityHideIcon = new URL("@itwin/itwinui-icons/visibility-hide.svg", import.meta.url).href;
-const visibilityPartialIcon = new URL("@itwin/itwinui-icons/visibility-partial.svg", import.meta.url).href;
 
 /**
  * Data structure that describes tree node checkbox state.
@@ -40,11 +39,11 @@ export function createVisibilityAction({
     const getIcon = () => {
       switch (state.state) {
         case "visible":
-          return visibilityShowIcon;
+          return visibilityShowSvg;
         case "hidden":
-          return visibilityHideIcon;
+          return visibilityHideSvg;
         case "partial":
-          return visibilityPartialIcon;
+          return visibilityPartialSvg;
       }
     };
     return {

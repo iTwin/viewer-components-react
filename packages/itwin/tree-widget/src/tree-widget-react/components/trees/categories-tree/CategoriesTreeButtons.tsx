@@ -5,6 +5,9 @@
 
 import { useMemo, useState } from "react";
 import { useAsyncValue } from "@itwin/components-react";
+import visibilityHideSvg from "@itwin/itwinui-icons/visibility-hide.svg";
+import visibilityShowSvg from "@itwin/itwinui-icons/visibility-show.svg";
+import visibilityInvertSvg from "@itwin/itwinui-icons/visibilty-invert.svg";
 import { IconButton } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { hideAllCategories, invertAllCategories, loadCategoriesFromViewport, showAllCategories } from "../common/CategoriesVisibilityUtils.js";
@@ -12,10 +15,6 @@ import { hideAllCategories, invertAllCategories, loadCategoriesFromViewport, sho
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { TreeToolbarButtonProps } from "../../tree-header/SelectableTree.js";
 import type { Viewport } from "@itwin/core-frontend";
-
-const visibilityShowIcon = new URL("@itwin/itwinui-icons/visibility-show.svg", import.meta.url).href;
-const visibilityHideIcon = new URL("@itwin/itwinui-icons/visibility-hide.svg", import.meta.url).href;
-const visibilityInvertIcon = new URL("@itwin/itwinui-icons/visibilty-invert.svg", import.meta.url).href;
 
 /**
  * Props that get passed to `CategoriesTreeComponent` header button renderer.
@@ -76,7 +75,7 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
           props.viewport,
         );
       }}
-      icon={visibilityShowIcon}
+      icon={visibilityShowSvg}
     />
   );
 }
@@ -94,7 +93,7 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
           props.viewport,
         );
       }}
-      icon={visibilityHideIcon}
+      icon={visibilityHideSvg}
     />
   );
 }
@@ -109,7 +108,7 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
         props.onFeatureUsed?.(`categories-tree-invert`);
         void invertAllCategories(props.categories, props.viewport);
       }}
-      icon={visibilityInvertIcon}
+      icon={visibilityInvertSvg}
     />
   );
 }

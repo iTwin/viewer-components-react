@@ -3,6 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import classSvg from "@itwin/itwinui-icons/bis-class.svg";
+import elementSvg from "@itwin/itwinui-icons/bis-element.svg";
+import documentSvg from "@itwin/itwinui-icons/document.svg";
+import ecSchemaSvg from "@itwin/itwinui-icons/selection-children.svg";
 import { EmptyTreeContent } from "../common/components/EmptyTreeContent.js";
 import { Tree } from "../common/components/Tree.js";
 import { TreeRenderer } from "../common/components/TreeRenderer.js";
@@ -25,7 +29,7 @@ export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "getSchemaCont
 export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
   return (
     <Tree
-      emptyTreeContent={<EmptyTreeContent icon={documentIcon} />}
+      emptyTreeContent={<EmptyTreeContent icon={documentSvg} />}
       {...props}
       treeName={ExternalSourcesTreeComponent.id}
       getHierarchyDefinition={getDefinitionsProvider}
@@ -39,11 +43,6 @@ const getDefinitionsProvider: TreeProps["getHierarchyDefinition"] = (props) => {
   return new ExternalSourcesTreeDefinition(props);
 };
 
-const ecSchemaIcon = new URL("@itwin/itwinui-icons/selection-children.svg", import.meta.url).href;
-const elementIcon = new URL("@itwin/itwinui-icons/bis-element.svg", import.meta.url).href;
-const documentIcon = new URL("@itwin/itwinui-icons/document.svg", import.meta.url).href;
-const classIcon = new URL("@itwin/itwinui-icons/bis-class.svg", import.meta.url).href;
-
 function getIcon(node: PresentationHierarchyNode): string | undefined {
   if (node.extendedData?.imageId === undefined) {
     return undefined;
@@ -51,13 +50,13 @@ function getIcon(node: PresentationHierarchyNode): string | undefined {
 
   switch (node.extendedData.imageId) {
     case "icon-item":
-      return elementIcon;
+      return elementSvg;
     case "icon-ec-class":
-      return classIcon;
+      return classSvg;
     case "icon-document":
-      return documentIcon;
+      return documentSvg;
     case "icon-ec-schema":
-      return ecSchemaIcon;
+      return ecSchemaSvg;
   }
 
   return undefined;
