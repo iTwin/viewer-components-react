@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Update geo-tools-react to appui 5.2.0 and itwinui 3.16.5.  Replace deprecated components with itwinui components. Fix broken geo tools search address ui.",
+  "packageName": "@itwin/geo-tools-react",
+  "email": "wil.maier@bentley.com",
+  "dependentChangeType": "patch"
+}
