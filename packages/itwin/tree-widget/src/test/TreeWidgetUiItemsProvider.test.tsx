@@ -4,36 +4,62 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
+import { mock } from "node:test";
+import React from "react";
 import sinon from "sinon";
-import * as td from "testdouble";
+import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { EmptyLocalization } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
 import * as selectableTreeModule from "../tree-widget-react/components/SelectableTree.js";
+import { TreeWidget } from "../tree-widget-react/TreeWidget.js";
 import { render, waitFor } from "./TestUtils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
+import type { createTreeWidget as TCreateTreeWidget } from "../tree-widget-react/components/TreeWidgetUiItemsProvider.js";
 
-// TODO: Fix https://github.com/iTwin/viewer-components-react/issues/1190
-describe.skip("createTreeWidget", () => {
-  beforeEach(async () => {
+describe("createTreeWidget", () => {
+  const selectableTreeStub = sinon.stub<[selectableTreeModule.SelectableTreeProps], React.ReactElement | null>();
+  let createTreeWidget: typeof TCreateTreeWidget;
+
+  before(async () => {
     sinon.stub(IModelApp, "viewManager").get(() => ({ onSelectedViewportChanged: new BeEvent() }));
     sinon.stub(IModelApp, "toolAdmin").get(() => ({ activeToolChanged: new BeEvent() }));
+
+    await UiFramework.initialize();
+    UiFramework.setIModelConnection({
+      isBlankConnection: () => true,
+      selectionSet: {
+        onChanged: new BeEvent(),
+        elements: { size: 0 },
+      },
+    } as IModelConnection);
+
+    await TreeWidget.initialize(new EmptyLocalization());
+
+    mock.module("../tree-widget-react/components/SelectableTree.js", {
+      namedExports: {
+        ...selectableTreeModule,
+        SelectableTree: selectableTreeStub,
+      },
+    });
+    createTreeWidget = (await import("../tree-widget-react/components/TreeWidgetUiItemsProvider.js")).createTreeWidget;
+  });
+
+  after(() => {
+    mock.reset();
+    sinon.restore();
+  });
+
+  beforeEach(() => {
+    selectableTreeStub.callsFake((props) => selectableTreeModule.SelectableTree(props));
   });
 
   afterEach(() => {
-    sinon.restore();
-    td.reset();
+    selectableTreeStub.reset();
   });
 
   it("renders supplied trees", async () => {
-    const stubSelectableTree = sinon.stub().returns(null);
-    await td.replaceEsm("../tree-widget-react/components/SelectableTree.js", {
-      ...selectableTreeModule,
-      SelectableTree: stubSelectableTree,
-    });
-    const { createTreeWidget } = await initialize();
-
     const trees: selectableTreeModule.SelectableTreeDefinition[] = [
       {
         id: "tree",
@@ -43,25 +69,15 @@ describe.skip("createTreeWidget", () => {
     ];
     const widget = createTreeWidget({ trees });
     render(<>{widget.content}</>);
-    expect(stubSelectableTree).to.be.called;
-    const [props] = stubSelectableTree.args[0];
+    expect(selectableTreeStub).to.be.called;
+    const [props] = selectableTreeStub.args[0];
     expect(props.trees).to.be.eq(trees);
   });
 
   it("renders error message if tree component throws", async () => {
-    const { UiFramework, TreeWidget, createTreeWidget } = await initialize();
-    UiFramework.setIModelConnection({
-      isBlankConnection: () => true,
-      selectionSet: {
-        onChanged: new BeEvent(),
-        elements: { size: 0 },
-      },
-    } as IModelConnection);
-
     function TestTree(): React.ReactElement {
       throw new Error("Error");
     }
-
     const trees: selectableTreeModule.SelectableTreeDefinition[] = [
       {
         id: "tree",
@@ -73,16 +89,4 @@ describe.skip("createTreeWidget", () => {
     const { queryByText } = render(<>{widget.content}</>);
     await waitFor(() => expect(queryByText(TreeWidget.translate("errorState.title"))).to.not.be.null);
   });
-
-  async function initialize() {
-    const UiFramework = (await import("@itwin/appui-react")).UiFramework;
-    await UiFramework.initialize();
-
-    const TreeWidget = (await import("../tree-widget-react/TreeWidget.js")).TreeWidget;
-    await TreeWidget.initialize(new EmptyLocalization());
-
-    const createTreeWidget = (await import("../tree-widget-react/components/TreeWidgetUiItemsProvider.js")).createTreeWidget;
-
-    return { UiFramework, TreeWidget, createTreeWidget };
-  }
 });
