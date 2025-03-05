@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import type { LocalizationOptions } from "@itwin/core-i18n";
-import { BentleyError, BentleyStatus } from "@itwin/core-common";
+import { BentleyError, BentleyStatus } from "@itwin/core-bentley";
 import type { Localization } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
 

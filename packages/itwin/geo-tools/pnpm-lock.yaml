@@ -14,52 +14,52 @@ dependencies:
 
 devDependencies:
   '@itwin/appui-abstract':
-    specifier: ^4.10.7
+    specifier: ^4.0.0
     version: 4.10.7(@itwin/core-bentley@4.10.7)
   '@itwin/appui-react':
-    specifier: ^5.2.0
+    specifier: ^5.0.0
     version: 5.2.0(@itwin/appui-abstract@4.10.7)(@itwin/components-react@5.2.0)(@itwin/core-bentley@4.10.7)(@itwin/core-common@4.10.7)(@itwin/core-frontend@4.10.7)(@itwin/core-geometry@4.10.7)(@itwin/core-quantity@4.10.7)(@itwin/core-react@5.2.0)(@itwin/imodel-components-react@5.2.0)(@itwin/itwinui-react@3.17.2)(@types/react@18.3.1)(react-dom@18.3.1)(react-redux@7.2.9)(react@18.3.1)(redux@4.2.1)
   '@itwin/build-tools':
-    specifier: ^4.10.7
+    specifier: ^4.0.0
     version: 4.10.7(@types/node@14.14.20)
   '@itwin/components-react':
-    specifier: ^5.2.0
+    specifier: ^5.0.0
     version: 5.2.0(@itwin/appui-abstract@4.10.7)(@itwin/core-bentley@4.10.7)(@itwin/core-react@5.2.0)(@itwin/itwinui-react@3.17.2)(react-dom@18.3.1)(react@18.3.1)
   '@itwin/core-bentley':
-    specifier: ^4.10.7
+    specifier: ^4.0.0
     version: 4.10.7
   '@itwin/core-common':
-    specifier: ^4.10.7
+    specifier: ^4.0.0
     version: 4.10.7(@itwin/core-bentley@4.10.7)(@itwin/core-geometry@4.10.7)
   '@itwin/core-frontend':
-    specifier: ^4.10.7
+    specifier: ^4.0.0
     version: 4.10.7(@itwin/appui-abstract@4.10.7)(@itwin/core-bentley@4.10.7)(@itwin/core-common@4.10.7)(@itwin/core-geometry@4.10.7)(@itwin/core-orbitgt@4.10.7)(@itwin/core-quantity@4.10.7)
   '@itwin/core-geometry':
-    specifier: ^4.10.7
+    specifier: ^4.0.0
     version: 4.10.7
   '@itwin/core-i18n':
-    specifier: ^4.10.7
+    specifier: ^4.0.0
     version: 4.10.7(@itwin/core-bentley@4.10.7)
   '@itwin/core-markup':
-    specifier: ^4.10.7
+    specifier: ^4.0.0
     version: 4.10.7(@itwin/core-bentley@4.10.7)(@itwin/core-common@4.10.7)(@itwin/core-frontend@4.10.7)(@itwin/core-geometry@4.10.7)
   '@itwin/core-orbitgt':
-    specifier: ^4.10.7
+    specifier: ^4.0.0
     version: 4.10.7
   '@itwin/core-quantity':
-    specifier: ^4.10.7
+    specifier: ^4.0.0
     version: 4.10.7(@itwin/core-bentley@4.10.7)
   '@itwin/core-react':
-    specifier: ^5.2.0
+    specifier: ^5.0.0
     version: 5.2.0(@itwin/appui-abstract@4.10.7)(@itwin/core-bentley@4.10.7)(@itwin/itwinui-react@3.17.2)(react-dom@18.3.1)(react@18.3.1)
   '@itwin/core-telemetry':
-    specifier: ^4.10.7
+    specifier: ^4.0.0
     version: 4.10.7(@itwin/core-geometry@4.10.7)
   '@itwin/eslint-plugin':
     specifier: ^4.0.1
     version: 4.0.1(eslint@8.41.0)(typescript@5.7.2)
   '@itwin/imodel-components-react':
-    specifier: ^5.2.0
+    specifier: ^5.0.0
     version: 5.2.0(@itwin/appui-abstract@4.10.7)(@itwin/components-react@5.2.0)(@itwin/core-bentley@4.10.7)(@itwin/core-common@4.10.7)(@itwin/core-frontend@4.10.7)(@itwin/core-geometry@4.10.7)(@itwin/core-quantity@4.10.7)(@itwin/core-react@5.2.0)(@itwin/itwinui-react@3.17.2)(react-dom@18.3.1)(react@18.3.1)
   '@itwin/itwinui-icons-react':
     specifier: ^2.1.0
@@ -68,7 +68,7 @@ devDependencies:
     specifier: ^3.16.5
     version: 3.17.2(@types/react@18.3.1)(react-dom@18.3.1)(react@18.3.1)
   '@itwin/webgl-compatibility':
-    specifier: ^4.10.7
+    specifier: ^4.0.0
     version: 4.10.7
   '@testing-library/react':
     specifier: ^8.0.1
