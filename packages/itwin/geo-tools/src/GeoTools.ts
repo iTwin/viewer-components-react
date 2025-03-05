@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import type { LocalizationOptions } from "@itwin/core-i18n";
-import { getClassName, UiError } from "@itwin/appui-abstract";
+import { BentleyError, BentleyStatus } from "@itwin/core-common";
 import type { Localization } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
 
@@ -26,15 +26,13 @@ export class GeoTools {
 
   /** Unregisters the GeoTools internationalization service namespace */
   public static terminate() {
-    if (GeoTools._i18n)
-      GeoTools._i18n.unregisterNamespace(GeoTools.i18nNamespace);
+    if (GeoTools._i18n) GeoTools._i18n.unregisterNamespace(GeoTools.i18nNamespace);
     GeoTools._i18n = undefined;
   }
 
   /** The internationalization service created by the IModelApp. */
   public static get i18n(): Localization {
-    if (!GeoTools._i18n)
-      throw new UiError(GeoTools.loggerCategory(this), "GeoTools not initialized");
+    if (!GeoTools._i18n) throw new BentleyError(BentleyStatus.ERROR, "GeoTools not initialized");
     return GeoTools._i18n;
   }
 
@@ -49,17 +47,7 @@ export class GeoTools {
 
   /** Calls i18n.translateWithNamespace with the "GeoTools" namespace. Do NOT include the namespace in the key.
    */
-  public static translate(
-    key: string | string[],
-    options?: LocalizationOptions
-  ): string {
+  public static translate(key: string | string[], options?: LocalizationOptions): string {
     return GeoTools.i18n.getLocalizedString(`${GeoTools.i18nNamespace}:${key}`, options);
-  }
-
-  public static loggerCategory(obj: any): string {
-    const className = getClassName(obj);
-    const category =
-      GeoTools.packageName + (className ? `.${className}` : "");
-    return category;
   }
 }

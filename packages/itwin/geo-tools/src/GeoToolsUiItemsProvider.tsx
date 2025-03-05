@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { StageUsage, ToolbarHelper, ToolbarOrientation, ToolbarUsage } from "@itwin/appui-react";
+import { ToolbarItemUtilities, ToolbarOrientation, ToolbarUsage } from "@itwin/appui-react";
 import type { ToolbarItem, UiItemsProvider } from "@itwin/appui-react";
 
 import { GeoToolsItemDef } from "./GeoToolsItemDef";
@@ -10,25 +10,23 @@ import { GeoToolsItemDef } from "./GeoToolsItemDef";
 export class GeoToolsAddressSearchProvider implements UiItemsProvider {
   public readonly id = "GeoToolsAddressSearchProvider";
 
-  public  provideToolbarItems(
-    _stageId: string,
-    stageUsage: string,
-    toolbarUsage: ToolbarUsage,
-    toolbarOrientation: ToolbarOrientation
-  ): ToolbarItem[] {
-    if (
-      stageUsage === StageUsage.General &&
-      toolbarUsage === ToolbarUsage.ViewNavigation &&
-      toolbarOrientation === ToolbarOrientation.Horizontal
-    ) {
-      return [
-        ToolbarHelper.createToolbarItemFromItemDef(
-          70,
-          GeoToolsItemDef.geoAddressSearchButtonItemDef,
-        ),
-      ];
-    }
-
-    return [];
+  public getToolbarItems(): ToolbarItem[] {
+    const horizontalLayoutOverride = {
+      standard: {
+        orientation: ToolbarOrientation.Horizontal,
+        usage: ToolbarUsage.ViewNavigation,
+      },
+    };
+    GeoToolsItemDef.geoAddressSearchButtonItemDef
+    return [
+      ToolbarItemUtilities.createCustomItem({
+        id: GeoToolsItemDef.geoAddressSearchButtonItemDef.id,
+        itemPriority: 70,
+        icon: GeoToolsItemDef.geoAddressSearchButtonItemDef.iconNode,
+        label: GeoToolsItemDef.geoAddressSearchButtonItemDef.label,
+        panelContent: GeoToolsItemDef.geoAddressSearchButtonItemDef.panelContent,
+        layouts: horizontalLayoutOverride,
+      }),
+    ];
   }
 }
