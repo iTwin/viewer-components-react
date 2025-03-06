@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Add support for AppUI@5.x and React@18.x. Switch to using iTwinUI components. Fix broken geo tools search address UI.",
-  "packageName": "@itwin/geo-tools-react",
-  "email": "wil.maier@bentley.com",
-  "dependentChangeType": "patch"
-}

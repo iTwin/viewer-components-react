@@ -1,8 +1,16 @@
 # Change Log - @itwin/geo-tools-react
 
-This log was last generated on Mon, 29 Apr 2024 14:59:26 GMT and should not be manually modified.
+This log was last generated on Thu, 06 Mar 2025 23:36:28 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 5.2.0
+
+Thu, 06 Mar 2025 23:36:28 GMT
+
+### Minor changes
+
+- Add support for AppUI@5.x and React@18.x. Switch to using iTwinUI components. Fix broken geo tools search address UI. ([#1231](https://github.com/iTwin/viewer-components-react/pull/1231))
 
 ## 5.1.0
 
