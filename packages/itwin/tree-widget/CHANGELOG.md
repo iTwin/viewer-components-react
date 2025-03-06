@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Wed, 19 Feb 2025 21:08:10 GMT and should not be manually modified.
+This log was last generated on Thu, 06 Mar 2025 12:37:44 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 3.5.1
+
+Thu, 06 Mar 2025 12:37:44 GMT
+
+### Patches
+
+- Update import to use `@itwin/core-bentley` for types that are reexported by `@itwin/core-common` ([#1232](https://github.com/iTwin/viewer-components-react/pull/1232))
 
 ## 3.5.0
 
