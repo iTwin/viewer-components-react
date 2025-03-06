@@ -41,7 +41,7 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
     return [];
   };
 
-  void React.useEffect(() => {
+  React.useEffect(() => {
     void (async () => {
       const items = await getAddressesFunc(inputValue);
       setOptions(items.map((value) => ({ label: value.formattedAddress ?? "", value: value.formattedAddress ?? "" })));
