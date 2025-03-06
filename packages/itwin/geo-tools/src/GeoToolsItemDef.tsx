@@ -8,7 +8,8 @@
  */
 import * as React from "react";
 
-import { ToolbarCustomItem, ToolbarItemUtilities } from "@itwin/appui-react";
+import type { ToolbarCustomItem} from "@itwin/appui-react";
+import { ToolbarItemUtilities } from "@itwin/appui-react";
 import { GeoAddressSearch } from "./components/GeoAddressSearch";
 import { SvgGeosearch } from "@itwin/itwinui-icons-react";
 import { GeoTools } from "./GeoTools";

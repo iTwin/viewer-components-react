@@ -5,7 +5,8 @@
 
 import * as React from "react";
 import { SvgCloseSmall, SvgSearch } from "@itwin/itwinui-icons-react";
-import { ComboBox, IconButton, SelectOption } from "@itwin/itwinui-react";
+import type { SelectOption } from "@itwin/itwinui-react";
+import { ComboBox, IconButton } from "@itwin/itwinui-react";
 
 import type { AddressData, AddressProvider } from "../AddressProvider";
 import { BingAddressProvider } from "../AddressProvider";
@@ -20,7 +21,6 @@ export interface GeoAddressSearchProps {
   setFocus?: boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function GeoAddressSearch(props: GeoAddressSearchProps) {
   const [inputValue, setInputValue] = React.useState("");
   const [options, setOptions] = React.useState<SelectOption<string>[]>([]);
@@ -30,7 +30,6 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
 
   const onAddressSelected = (selected: string) => {
     setInputValue(selected);
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     IModelGeoView.locateAddress(selected);
   };
 

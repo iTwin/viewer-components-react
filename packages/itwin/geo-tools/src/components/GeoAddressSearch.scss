@@ -6,16 +6,19 @@
 
 .geotools-geoaddresssearch__container {
   width: 300px;
+  margin-left: -7px;
+  margin-right: -7px;
 }
 
 .geotools-geoaddresssearch__button {
   background-color: transparent;
   position: absolute;
-  top: 6px;
+  top: 8px;
   right: 0px;
   border: none;
+  padding-right: 9px;
 }
 
 .geotools-geoaddresssearch__combobox {
-  width: 90%;
+  width: 92%;
 }

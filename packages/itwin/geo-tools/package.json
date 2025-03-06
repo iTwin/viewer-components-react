@@ -39,8 +39,7 @@
     "test": "mocha \"./lib/cjs/test/**/*.test.js\""
   },
   "dependencies": {
-    "i18next": "^10.2.2",
-    "react-autosuggest": "^10.1.0"
+    "i18next": "^10.2.2"
   },
   "devDependencies": {
     "@itwin/appui-abstract": "^4.0.0",
@@ -60,7 +59,7 @@
     "@itwin/imodel-components-react": "^5.0.0",
     "@itwin/itwinui-icons-react": "^2.1.0",
     "@itwin/itwinui-react": "^3.16.5",
-    "@itwin/eslint-plugin": "^4.0.1",
+    "@itwin/eslint-plugin": "^5.0.0",
     "@itwin/webgl-compatibility": "^4.0.0",
     "@testing-library/react": "^8.0.1",
     "@testing-library/react-hooks": "^3.2.1",
@@ -70,7 +69,6 @@
     "@types/mocha": "^10.0.6",
     "@types/node": "^14.14.20",
     "@types/react": "^18.3.1",
-    "@types/react-autosuggest": "10.1.2",
     "@types/react-dom": "^17.0.9",
     "@types/sinon": "^17.0.2",
     "@types/sinon-chai": "^3.2.12",
@@ -82,7 +80,11 @@
     "cpx2": "^4.2.2",
     "enzyme": "^3.4.0",
     "enzyme-to-json": "^3.3.4",
-    "eslint": "^8.41.0",
+    "eslint": "^9.18.0",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-react": "^7.37.4",
+    "eslint-plugin-unused-imports": "^4.1.4",
     "ignore-styles": "^5.0.1",
     "jsdom": "^11.12.0",
     "jsdom-global": "3.0.2",
@@ -130,17 +132,6 @@
     "branches": 25,
     "functions": 50,
     "lines": 50
-  },
-  "eslintConfig": {
-    "plugins": [
-      "@itwin"
-    ],
-    "extends": "plugin:@itwin/ui",
-    "rules": {
-      "@typescript-eslint/no-shadow": "off",
-      "no-duplicate-imports": "off",
-      "@typescript-eslint/consistent-type-imports": "error"
-    }
   },
   "mocha": {
     "require": [
