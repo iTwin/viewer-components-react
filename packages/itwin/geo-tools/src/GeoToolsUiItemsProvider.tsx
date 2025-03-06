@@ -17,7 +17,6 @@ export class GeoToolsAddressSearchProvider implements UiItemsProvider {
         usage: ToolbarUsage.ViewNavigation,
       },
     };
-    GeoToolsItemDef.geoAddressSearchButtonItemDef
     return [
       ToolbarItemUtilities.createCustomItem({
         id: GeoToolsItemDef.geoAddressSearchButtonItemDef.id,
