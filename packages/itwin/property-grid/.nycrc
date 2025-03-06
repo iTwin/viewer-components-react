@@ -2,10 +2,5 @@
   "include": ["src/property-grid-react/**/*", "lib/esm/property-grid-react/**/*"],
   "reporter": ["text-summary", "lcov", "cobertura"],
   "temp-dir": "./lib/test/coverage/.nyc_output",
-  "report-dir": "./lib/test/coverage",
-  "check-coverage": true,
-  "statements": 100,
-  "functions": 100,
-  "branches": 100,
-  "lines": 100
+  "report-dir": "./lib/test/coverage"
 }

@@ -175,9 +175,9 @@ export function RemoveFavoritePropertyContextMenuItem({ field, imodel, scope, on
  * Renders `Copy Text` context menu item.
  * @public
  */
-export function CopyPropertyTextContextMenuItem({ record, onSelect }: DefaultContextMenuItemProps) {
+export function CopyPropertyTextContextMenuItem({ record, onSelect, onCopy }: DefaultContextMenuItemProps & { onCopy?: (text: string) => void }) {
   const defaultAction = async () => {
-    record.description && copyToClipboard(record.description);
+    record.description && (onCopy ?? copyToClipboard)(record.description);
   };
 
   return (
