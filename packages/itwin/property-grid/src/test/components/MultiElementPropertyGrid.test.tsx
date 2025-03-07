@@ -5,12 +5,14 @@
 
 import { expect } from "chai";
 import sinon from "sinon";
-import * as td from "testdouble";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { KeySet } from "@itwin/presentation-common";
+import { PresentationLabelsProvider, PresentationPropertyDataProvider } from "@itwin/presentation-components";
 import { SelectionChangeType } from "@itwin/presentation-frontend";
 import { normalizeFullClassName } from "@itwin/presentation-shared";
 import { Selectables } from "@itwin/unified-selection";
+import { MultiElementPropertyGrid } from "../../property-grid-react/components/MultiElementPropertyGrid.js";
+import { PropertyGridManager } from "../../property-grid-react/PropertyGridManager.js";
 import {
   act,
   createPropertyRecord,
@@ -24,7 +26,6 @@ import {
 } from "../TestUtils.js";
 
 import type { EventArgs } from "@itwin/presentation-shared";
-import type * as MultiElementPropertyGridModule from "../../property-grid-react/components/MultiElementPropertyGrid.js";
 import type * as UseTelemetryContextModule from "../../property-grid-react/hooks/UseTelemetryContext.js";
 import type { ISelectionProvider } from "@itwin/presentation-frontend";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -40,22 +41,12 @@ describe("<MultiElementPropertyGrid />", () => {
   let getLabelsStub: sinon.SinonStub;
   let selectionStorage: ReturnType<typeof stubSelectionStorage>;
   let selectionManager: ReturnType<typeof stubSelectionManager>;
-  let MultiElementPropertyGrid: typeof MultiElementPropertyGridModule.MultiElementPropertyGrid;
-
-  const computeSelectionStub = sinon.stub<[], AsyncIterableIterator<InstanceKey>>();
+  const getParentInstanceKeyStub = sinon.stub<[InstanceKey], Promise<InstanceKey | undefined>>();
 
   before(async () => {
-    await td.replaceEsm("@itwin/unified-selection", {
-      ...(await import("@itwin/unified-selection")),
-      computeSelection: computeSelectionStub,
-    });
-    MultiElementPropertyGrid = (await import("../../property-grid-react/components/MultiElementPropertyGrid.js")).MultiElementPropertyGrid;
-
-    const { PresentationLabelsProvider, PresentationPropertyDataProvider } = await import("@itwin/presentation-components");
     getDataStub = sinon.stub(PresentationPropertyDataProvider.prototype, "getData");
     getLabelsStub = sinon.stub(PresentationLabelsProvider.prototype, "getLabels");
 
-    const { PropertyGridManager } = await import("../../property-grid-react/PropertyGridManager.js");
     sinon.stub(PropertyGridManager, "translate").callsFake((key) => key);
 
     stubFavoriteProperties();
@@ -64,25 +55,24 @@ describe("<MultiElementPropertyGrid />", () => {
 
   after(() => {
     sinon.restore();
-    td.reset();
   });
 
   beforeEach(() => {
     selectionStorage = stubSelectionStorage();
     selectionManager = stubSelectionManager();
-    computeSelectionStub.callsFake(async function* () {});
+    getParentInstanceKeyStub.resolves(undefined);
   });
 
   afterEach(() => {
     getDataStub.reset();
     getLabelsStub.reset();
-    computeSelectionStub.reset();
+    getParentInstanceKeyStub.reset();
   });
 
   [
     {
       name: "with unified selection storage",
-      getProps: () => ({ imodel, selectionStorage }),
+      getProps: () => ({ imodel, selectionStorage, getParentInstanceKey: getParentInstanceKeyStub }),
       setupSelection(keys: SelectableInstanceKey[]) {
         selectionStorage.getSelection.reset();
         selectionStorage.getSelection.returns(Selectables.create(keys));
@@ -103,7 +93,7 @@ describe("<MultiElementPropertyGrid />", () => {
     },
     {
       name: "with deprecated selection manager",
-      getProps: () => ({ imodel }),
+      getProps: () => ({ imodel, getParentInstanceKey: getParentInstanceKeyStub }),
       setupSelection(keys: SelectableInstanceKey[]) {
         selectionManager.getSelection.reset();
         selectionManager.getSelection.returns(new KeySet(keys));
@@ -279,18 +269,19 @@ describe("<MultiElementPropertyGrid />", () => {
 
         const instancekey = { id: "0x1", className: "TestSchema.TestClass" };
         setupMultiInstanceData([{ key: instancekey, value: "Test-Value-1" }]);
-        computeSelectionStub.reset();
-        computeSelectionStub.callsFake(async function* () {
-          yield { id: "0x2", className: "TestSchema.ParentClass" };
-        });
+
+        getParentInstanceKeyStub.reset();
+        getParentInstanceKeyStub.resolves({ id: "0x2", className: "TestSchema.ParentClass" });
 
         const { getByText, queryByRole } = render(
           <MultiElementPropertyGrid {...getProps()} ancestorsNavigationControls={(navigationProps) => <AncestorsNavigationControls {...navigationProps} />} />,
         );
 
-        await waitFor(() => getByText("Test-Value-1"));
-        expect(queryByRole("button", { name: "header.navigateUp" })).to.not.be.null;
-        expect(queryByRole("button", { name: "header.navigateDown" })).to.not.be.null;
+        await waitFor(() => {
+          getByText("Test-Value-1");
+          expect(queryByRole("button", { name: "header.navigateUp" })).to.not.be.null;
+          expect(queryByRole("button", { name: "header.navigateDown" })).to.not.be.null;
+        });
       });
 
       describe("feature usage reporting", () => {

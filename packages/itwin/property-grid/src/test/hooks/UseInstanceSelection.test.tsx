@@ -5,27 +5,24 @@
 
 import { expect } from "chai";
 import * as sinon from "sinon";
-import * as td from "testdouble";
-import { Id64 } from "@itwin/core-bentley";
 import { KeySet, StandardNodeTypes } from "@itwin/presentation-common";
 import { Selectables, TRANSIENT_ELEMENT_CLASSNAME } from "@itwin/unified-selection";
+import { useInstanceSelection } from "../../property-grid-react/hooks/UseInstanceSelection.js";
+import { TelemetryContextProvider } from "../../property-grid-react/hooks/UseTelemetryContext.js";
 import { createKeysFromSelectable } from "../../property-grid-react/hooks/UseUnifiedSelectionHandler.js";
 import { act, createResolvablePromise, renderHook, stubSelectionManager, stubSelectionStorage, waitFor } from "../TestUtils.js";
 
-import type { ISelectionProvider } from "@itwin/presentation-frontend";
 import type { Selectable, SelectableInstanceKey } from "@itwin/unified-selection";
-import type { Id64Arg } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ECInstancesNodeKey, InstanceKey } from "@itwin/presentation-common";
-
-import type * as UseInstanceSelectionModule from "../../property-grid-react/hooks/UseInstanceSelection.js";
 import type { EventArgs } from "@itwin/presentation-shared";
+import type { ISelectionProvider } from "@itwin/presentation-frontend";
 
 describe("useInstanceSelection", () => {
   const imodel = {
     key: "test-imodel",
   } as IModelConnection;
-  const computeSelectionStub = sinon.stub<[{ elementIds: Id64Arg }], AsyncIterableIterator<InstanceKey>>();
+  const getParentInstanceKeyStub = sinon.stub<[SelectableInstanceKey], Promise<SelectableInstanceKey | undefined>>();
 
   const parentKey: InstanceKey = { id: "0x1", className: "TestSchema.TestClass" };
   const childKey: InstanceKey = { id: "0x2", className: "TestSchema.TestClass" };
@@ -35,42 +32,28 @@ describe("useInstanceSelection", () => {
   let selectionManager: ReturnType<typeof stubSelectionManager>;
   let selectionStorage: ReturnType<typeof stubSelectionStorage>;
 
-  let useInstanceSelection: typeof UseInstanceSelectionModule.useInstanceSelection;
-
   before(async () => {
-    await td.replaceEsm("@itwin/unified-selection", {
-      ...(await import("@itwin/unified-selection")),
-      computeSelection: computeSelectionStub,
-    });
-    useInstanceSelection = (await import("../../property-grid-react/hooks/UseInstanceSelection.js")).useInstanceSelection;
-
     selectionManager = stubSelectionManager();
     selectionStorage = stubSelectionStorage();
   });
 
   after(() => {
     sinon.restore();
-    td.reset();
   });
 
   beforeEach(async () => {
-    computeSelectionStub.callsFake(async function* ({ elementIds }: { elementIds: Id64Arg }): AsyncIterableIterator<SelectableInstanceKey> {
-      for (const id of Id64.iterable(elementIds)) {
-        switch (id) {
-          case parentKey.id:
-            yield parentKey;
-            break;
-          case childKey.id:
-            yield parentKey;
-            break;
-          case grandChildKey.id:
-            yield childKey;
-            break;
-          case noParentKey.id:
-            yield noParentKey;
-            break;
-        }
+    getParentInstanceKeyStub.callsFake(async ({ id }) => {
+      switch (id) {
+        case parentKey.id:
+          return parentKey;
+        case childKey.id:
+          return parentKey;
+        case grandChildKey.id:
+          return childKey;
+        case noParentKey.id:
+          return noParentKey;
       }
+      return undefined;
     });
   });
 
@@ -81,7 +64,7 @@ describe("useInstanceSelection", () => {
   [
     {
       name: "with unified selection storage",
-      getProps: () => ({ imodel, selectionStorage }),
+      getProps: () => ({ imodel, selectionStorage, getParentInstanceKey: getParentInstanceKeyStub }),
       async setupSelection(keys: Selectable[]) {
         selectionStorage.getSelection.reset();
         selectionStorage.getSelection.returns(Selectables.create(keys));
@@ -100,7 +83,7 @@ describe("useInstanceSelection", () => {
     },
     {
       name: "with deprecated selection manager",
-      getProps: () => ({ imodel }),
+      getProps: () => ({ imodel, getParentInstanceKey: getParentInstanceKeyStub }),
       async setupSelection(keys: Selectable[]) {
         selectionManager.getSelection.reset();
         selectionManager.getSelection.returns(new KeySet((await Promise.all(keys.map(createKeysFromSelectable))).flat()));
@@ -317,21 +300,17 @@ describe("useInstanceSelection", () => {
           await setupSelection([grandChildKey]);
           const { result } = renderHook(useInstanceSelection, { initialProps: getProps() });
 
-          computeSelectionStub.reset();
-          computeSelectionStub.callsFake(async function* () {
-            yield childKey;
-          });
+          getParentInstanceKeyStub.reset();
+          getParentInstanceKeyStub.resolves(childKey);
 
           // wait until navigating up is possible
           await waitFor(() => {
             expect(result.current.ancestorsNavigationProps.canNavigateUp).to.be.true;
           });
 
-          computeSelectionStub.reset();
-          const computeSelectionResult = createResolvablePromise<InstanceKey[]>();
-          computeSelectionStub.callsFake(async function* () {
-            yield* await computeSelectionResult.promise;
-          });
+          const getParentInstanceKeyResult = createResolvablePromise<InstanceKey | undefined>();
+          getParentInstanceKeyStub.reset();
+          getParentInstanceKeyStub.returns(getParentInstanceKeyResult.promise);
 
           // initiate navigation up
           act(() => void result.current.ancestorsNavigationProps.navigateUp());
@@ -342,7 +321,7 @@ describe("useInstanceSelection", () => {
           });
 
           // finish navigating up
-          await act(async () => computeSelectionResult.resolve([childKey]));
+          await act(async () => getParentInstanceKeyResult.resolve(childKey));
 
           // expect navigating up to be possible again
           await waitFor(() => {
@@ -360,28 +339,24 @@ describe("useInstanceSelection", () => {
           expect(result.current.selectedKeys).to.have.lengthOf(0);
         });
 
-        computeSelectionStub.reset();
-        const firstComputeSelection = createResolvablePromise<InstanceKey[]>();
-        const secondComputeSelection = createResolvablePromise<InstanceKey[]>();
+        getParentInstanceKeyStub.reset();
+        const getParentInstanceKeyCall1 = createResolvablePromise<InstanceKey | undefined>();
+        const getParentInstanceKeyCall2 = createResolvablePromise<InstanceKey | undefined>();
 
         // simulate first selection change
         await setupSelection([noParentKey]);
-        computeSelectionStub.callsFake(async function* () {
-          yield* await firstComputeSelection.promise;
-        });
+        getParentInstanceKeyStub.returns(getParentInstanceKeyCall1.promise);
         act(() => triggerSelectionChange({ source: "OtherSource" }));
         assertReplaceNotCalled();
 
         // simulate second selection change
         await setupSelection([childKey]);
-        computeSelectionStub.callsFake(async function* () {
-          yield* await secondComputeSelection.promise;
-        });
+        getParentInstanceKeyStub.returns(getParentInstanceKeyCall2.promise);
         act(() => triggerSelectionChange({ source: "OtherSource" }));
         assertReplaceNotCalled();
 
         // resolve promise for second selection change
-        await act(async () => secondComputeSelection.resolve([parentKey]));
+        await act(async () => getParentInstanceKeyCall2.resolve(parentKey));
 
         // make sure state matches result of second selection change
         await waitFor(() => {
@@ -391,7 +366,7 @@ describe("useInstanceSelection", () => {
         });
 
         // resolve promise for first selection change
-        await act(async () => firstComputeSelection.resolve([]));
+        await act(async () => getParentInstanceKeyCall1.resolve(undefined));
 
         // make sure state still matches result of second selection change
         await waitFor(() => {
@@ -405,15 +380,16 @@ describe("useInstanceSelection", () => {
 
   describe("feature usage reporting", () => {
     it("reports when navigates up and down", async () => {
-      const { TelemetryContextProvider } = await import("../../property-grid-react/hooks/UseTelemetryContext.js");
-
       const onFeatureUsedSpy = sinon.spy();
       selectionStorage.getSelection.returns(Selectables.create([childKey]));
 
       const wrapper = ({ children }: { children: React.ReactNode }) => (
         <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>{children}</TelemetryContextProvider>
       );
-      const { result } = renderHook(useInstanceSelection, { initialProps: { imodel, selectionStorage }, wrapper });
+      const { result } = renderHook(useInstanceSelection, {
+        initialProps: { imodel, selectionStorage, getParentInstanceKey: getParentInstanceKeyStub },
+        wrapper,
+      });
 
       await waitFor(() => {
         expect(result.current.selectedKeys[0].id).to.be.eq(childKey.id);

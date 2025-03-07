@@ -2,83 +2,42 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-/* eslint-disable deprecation/deprecation */
 
 import { expect } from "chai";
-import { createRef } from "react";
 import { act } from "react-dom/test-utils";
 import sinon from "sinon";
-import * as td from "testdouble";
 import * as appuiReactModule from "@itwin/appui-react";
+import { EmptyLocalization } from "@itwin/core-common";
 import { KeySet, StandardNodeTypes } from "@itwin/presentation-common";
+import { Presentation } from "@itwin/presentation-frontend";
 import { Selectables, TRANSIENT_ELEMENT_CLASSNAME } from "@itwin/unified-selection";
-import * as usePropertyGridTransientStateModule from "../property-grid-react/hooks/UsePropertyGridTransientState.js";
 import { createKeysFromSelectable } from "../property-grid-react/hooks/UseUnifiedSelectionHandler.js";
-import * as propertyGridComponentModule from "../property-grid-react/PropertyGridComponent.js";
-import * as propertyGridUiItemsProviderModule from "../property-grid-react/PropertyGridUiItemsProvider.js";
+import { PropertyGridManager } from "../property-grid-react/PropertyGridManager.js";
+import {
+  createPropertyGrid,
+  PropertyGridUiItemsProvider,
+  PropertyGridWidget,
+  PropertyGridWidgetId,
+} from "../property-grid-react/PropertyGridUiItemsProvider.js";
 import { render, stubSelectionManager, stubSelectionStorage, waitFor } from "./TestUtils.js";
 
 import type { Selectable } from "@itwin/unified-selection";
 import type { ECClassGroupingNodeKey } from "@itwin/presentation-common";
 import type { ISelectionProvider } from "@itwin/presentation-frontend";
-import type { EventArgs } from "@itwin/presentation-shared";
+import type { EventArgs, Props } from "@itwin/presentation-shared";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { PropertyGridWidgetProps } from "../property-grid-react/PropertyGridUiItemsProvider.js";
+import type { ReactElement } from "react";
+import type { WidgetDef } from "@itwin/appui-react";
 
+/* eslint-disable deprecation/deprecation */
 describe("PropertyGridUiItemsProvider", () => {
-  const widgetDef = {
-    id: propertyGridUiItemsProviderModule.PropertyGridWidgetId,
-    state: appuiReactModule.WidgetState.Hidden,
-    setWidgetState: sinon.stub<Parameters<appuiReactModule.WidgetDef["setWidgetState"]>, ReturnType<appuiReactModule.WidgetDef["setWidgetState"]>>(),
-  };
-
-  let selectionManager: ReturnType<typeof stubSelectionManager>;
-  let selectionStorage: ReturnType<typeof stubSelectionStorage>;
-  let propertyGridComponentStub: sinon.SinonStub<
-    Parameters<(typeof propertyGridComponentModule)["PropertyGridComponent"]>,
-    ReturnType<(typeof propertyGridComponentModule)["PropertyGridComponent"]>
-  >;
-  let PropertyGridUiItemsProvider: typeof propertyGridUiItemsProviderModule.PropertyGridUiItemsProvider;
-
-  beforeEach(async () => {
-    await td.replaceEsm("@itwin/appui-react", {
-      ...appuiReactModule,
-      useSpecificWidgetDef: () => widgetDef,
-    });
-
-    await td.replaceEsm("../property-grid-react/PropertyGridManager.js", {
-      PropertyGridManager: {
-        translate: (key: string) => key,
-      },
-    });
-
-    propertyGridComponentStub = sinon
-      .stub<
-        Parameters<(typeof propertyGridComponentModule)["PropertyGridComponent"]>,
-        ReturnType<(typeof propertyGridComponentModule)["PropertyGridComponent"]>
-      >()
-      .returns(<></>);
-    await td.replaceEsm("../property-grid-react/PropertyGridComponent.js", {
-      ...propertyGridComponentModule,
-      PropertyGridComponent: propertyGridComponentStub,
-    });
-
-    const ref = createRef<HTMLDivElement>();
-    await td.replaceEsm("../property-grid-react/hooks/UsePropertyGridTransientState.js", {
-      ...usePropertyGridTransientStateModule,
-      usePropertyGridTransientState: () => ref,
-    });
-
-    const { Presentation } = await import("@itwin/presentation-frontend");
-    selectionManager = stubSelectionManager(Presentation);
-    selectionStorage = stubSelectionStorage();
-
-    PropertyGridUiItemsProvider = (await import("../property-grid-react/PropertyGridUiItemsProvider.js")).PropertyGridUiItemsProvider;
+  before(async () => {
+    await PropertyGridManager.initialize(new EmptyLocalization());
   });
 
-  afterEach(() => {
-    sinon.restore();
-    td.reset();
+  after(() => {
+    PropertyGridManager.terminate();
   });
 
   it("provides widgets to default location", () => {
@@ -106,43 +65,59 @@ describe("PropertyGridUiItemsProvider", () => {
     expect(provider.provideWidgets("", appuiReactModule.StageUsage.General, appuiReactModule.StagePanelLocation.Left, appuiReactModule.StagePanelSection.Start))
       .to.be.empty;
   });
+});
+/* eslint-enable deprecation/deprecation */
 
-  it("renders property grid component", () => {
-    const provider = new PropertyGridUiItemsProvider();
-    const [widget] = provider.provideWidgets(
-      "",
-      appuiReactModule.StageUsage.General,
-      appuiReactModule.StagePanelLocation.Right,
-      appuiReactModule.StagePanelSection.End,
-    );
-    render(<>{widget.content}</>);
+describe("createPropertyGrid", () => {
+  function TestPropertyGridComponent() {
+    return <>Test PropertyGridComponent</>;
+  }
 
-    expect(propertyGridComponentStub).to.be.called;
+  let selectionManager: ReturnType<typeof stubSelectionManager>;
+  let selectionStorage: ReturnType<typeof stubSelectionStorage>;
+
+  before(async () => {
+    await PropertyGridManager.initialize(new EmptyLocalization());
+  });
+
+  after(() => {
+    PropertyGridManager.terminate();
+  });
+
+  beforeEach(async () => {
+    selectionManager = stubSelectionManager(Presentation);
+    selectionStorage = stubSelectionStorage();
+  });
+
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  it("creates a basic widget", async () => {
+    const widget = createPropertyGrid({});
+    expect(widget.content).to.not.be.undefined;
+  });
+
+  it("renders property grid component", async () => {
+    const { getByText } = render(<PropertyGridWidget widgetId="x" propertyGridComponent={<TestPropertyGridComponent />} />);
+    await waitFor(() => getByText("Test PropertyGridComponent"));
   });
 
   it("renders error message if property grid component throws", async () => {
-    propertyGridComponentStub.reset();
-    propertyGridComponentStub.callsFake(() => {
-      throw new Error("Error");
-    });
-
-    const provider = new PropertyGridUiItemsProvider();
-    const [widget] = provider.provideWidgets(
-      "",
-      appuiReactModule.StageUsage.General,
-      appuiReactModule.StagePanelLocation.Right,
-      appuiReactModule.StagePanelSection.End,
-    );
-    const { queryByText } = render(<>{widget.content}</>);
-
-    await waitFor(() => {
-      expect(propertyGridComponentStub).to.be.called;
-      expect(queryByText("error")).to.not.be.null;
-    });
+    function ThrowingComponent(): ReactElement | null {
+      throw new Error("Test error");
+    }
+    const { getByText } = render(<PropertyGridWidget widgetId="x" propertyGridComponent={<ThrowingComponent />} />);
+    await waitFor(() => getByText("error"));
   });
 
   describe("widget state", () => {
     const imodel = { key: "test-imodel" } as IModelConnection;
+    const widgetDef = {
+      id: PropertyGridWidgetId,
+      state: appuiReactModule.WidgetState.Hidden,
+      setWidgetState: sinon.stub<Parameters<appuiReactModule.WidgetDef["setWidgetState"]>, ReturnType<appuiReactModule.WidgetDef["setWidgetState"]>>(),
+    };
 
     beforeEach(async () => {
       widgetDef.state = appuiReactModule.WidgetState.Hidden;
@@ -178,18 +153,15 @@ describe("PropertyGridUiItemsProvider", () => {
         },
       },
     ].forEach(({ name, getProps, setupSelection, triggerSelectionChange }) => {
-      function renderWidget(props?: propertyGridUiItemsProviderModule.PropertyGridUiItemsProviderProps) {
-        const provider = new PropertyGridUiItemsProvider({
-          ...props,
-          propertyGridProps: { ...getProps(), ...props?.propertyGridProps } as PropertyGridWidgetProps,
-        });
-        const [widget] = provider.provideWidgets(
-          "",
-          appuiReactModule.StageUsage.General,
-          appuiReactModule.StagePanelLocation.Right,
-          appuiReactModule.StagePanelSection.End,
-        );
-        render(<>{widget.content}</>);
+      function renderWidget(widgetProps?: PropertyGridWidgetProps) {
+        const props = {
+          widgetId: "test",
+          widgetDef: widgetDef as unknown as WidgetDef,
+          propertyGridComponent: <TestPropertyGridComponent />,
+          ...getProps(),
+          ...widgetProps,
+        } as Props<typeof PropertyGridWidget>;
+        render(<PropertyGridWidget {...props} />);
       }
 
       describe(name, () => {
@@ -261,7 +233,7 @@ describe("PropertyGridUiItemsProvider", () => {
         });
 
         it("opens widget if unified selection changes to non-empty instance keys and `shouldShow` return true", async () => {
-          renderWidget({ propertyGridProps: { shouldShow: () => true } });
+          renderWidget({ shouldShow: () => true });
 
           await setupSelection([{ id: "0x1", className: "TestSchema.TestClass" }]);
           act(() => triggerSelectionChange());
@@ -273,7 +245,7 @@ describe("PropertyGridUiItemsProvider", () => {
         });
 
         it("opens widget if unified selection changes to non-empty node keys and `shouldShow` returns true", async () => {
-          renderWidget({ propertyGridProps: { shouldShow: () => true } });
+          renderWidget({ shouldShow: () => true });
 
           const key: ECClassGroupingNodeKey = {
             className: "TestSchema.TestClass",
@@ -292,7 +264,7 @@ describe("PropertyGridUiItemsProvider", () => {
         });
 
         it("hides widget if unified selection changes to non-empty and `shouldShow` returns false", async () => {
-          renderWidget({ propertyGridProps: { shouldShow: () => false } });
+          renderWidget({ shouldShow: () => false });
 
           await setupSelection([{ id: "0x1", className: "TestSchema.TestClass" }]);
           act(() => triggerSelectionChange());
@@ -303,14 +275,6 @@ describe("PropertyGridUiItemsProvider", () => {
           });
         });
       });
-    });
-  });
-
-  describe("createPropertyGrid", () => {
-    it("creates a basic widget", async () => {
-      const { createPropertyGrid } = await import("../property-grid-react/PropertyGridUiItemsProvider.js");
-      const widget = createPropertyGrid({});
-      expect(widget.content).to.not.be.undefined;
     });
   });
 });

@@ -109,7 +109,7 @@
     "@types/chai": "^4.3.16",
     "@types/jsdom": "^21.1.6",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^22.13.1",
+    "@types/node": "^22.13.9",
     "@types/react": "^18.0.34",
     "@types/react-dom": "^18.0.11",
     "@types/sinon": "^17.0.3",
@@ -142,7 +142,6 @@
     "sinon-chai": "^3.7.0",
     "stylelint": "^15.11.0",
     "stylelint-config-standard-scss": "^11.1.0",
-    "testdouble": "^3.20.2",
     "typescript": "~5.0.0",
     "xmlhttprequest": "^1.8.0"
   },

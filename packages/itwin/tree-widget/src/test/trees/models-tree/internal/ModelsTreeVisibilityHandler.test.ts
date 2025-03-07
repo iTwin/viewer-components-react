@@ -58,7 +58,7 @@ interface VisibilityOverrides {
 
 type ModelsTreeHierarchyConfiguration = Partial<ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"]>;
 
-describe("HierarchyBasedVisibilityHandler", () => {
+describe("ModelsTreeVisibilityHandler", () => {
   function createIdsCache(iModel: IModelConnection, hierarchyConfig?: ModelsTreeHierarchyConfiguration) {
     return new ModelsTreeIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded"), {
       ...defaultHierarchyConfiguration,

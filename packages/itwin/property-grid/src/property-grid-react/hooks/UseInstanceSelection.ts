@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { UiFramework } from "@itwin/appui-react";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
@@ -27,6 +27,7 @@ const PropertyGridSelectionScope = "Property Grid";
 export interface InstanceSelectionProps {
   imodel: IModelConnection;
   selectionStorage?: SelectionStorage;
+  getParentInstanceKey?: (key: InstanceKey) => Promise<InstanceKey | undefined>;
 }
 
 /** Data structure that contains information about instances selection. */
@@ -51,7 +52,8 @@ interface InstanceSelectionInfo {
  * - Focus single instance until `UnifiedSelection` is changed.
  * @internal
  */
-export function useInstanceSelection({ imodel, selectionStorage }: InstanceSelectionProps) {
+export function useInstanceSelection(props: InstanceSelectionProps) {
+  const { imodel, selectionStorage } = props;
   const { state, updateStateAsync, updateStateImmediate } = useLatestState<InstanceSelectionInfo>({
     selectedKeys: [],
     previousKeys: [],
@@ -62,10 +64,18 @@ export function useInstanceSelection({ imodel, selectionStorage }: InstanceSelec
   const { onFeatureUsed } = useTelemetryContext();
   const { selectionChange, getSelection, replaceSelection } = useSelectionHandler({ selectionStorage });
 
-  const [queryExecutor, setQueryExecutor] = useState(() => createECSqlQueryExecutor(imodel));
+  const [queryExecutor, setQueryExecutor] = useState(createECSqlQueryExecutor(imodel));
   useEffect(() => {
     setQueryExecutor(createECSqlQueryExecutor(imodel));
   }, [imodel]);
+
+  const getParentInstanceKey = useCallback(
+    async (key: InstanceKey) => {
+      const impl = props.getParentInstanceKey ?? createDefaultGetParentInstanceKey(queryExecutor);
+      return impl(key);
+    },
+    [props.getParentInstanceKey, queryExecutor],
+  );
 
   useEffect(() => {
     const onSelectionChange = async (eventSource?: string) => {
@@ -83,7 +93,7 @@ export function useInstanceSelection({ imodel, selectionStorage }: InstanceSelec
           }
           const selectedInstanceKeys = omitTransientKeys(allInstanceKeys);
           // if only single instance is selected and navigation through ancestors is enabled determine if selected instance has single parent and we can navigate up
-          const hasAncestor = selectedInstanceKeys.length === 1 && (await hasParent(queryExecutor, selectedInstanceKeys[0]));
+          const hasAncestor = selectedInstanceKeys.length === 1 && (await getParentInstanceKey(selectedInstanceKeys[0])) !== undefined;
           return {
             selectedInstanceKeys,
             hasAncestor,
@@ -111,7 +121,7 @@ export function useInstanceSelection({ imodel, selectionStorage }: InstanceSelec
       removePresentationListener();
       removeFrontstageReadyListener();
     };
-  }, [imodel, queryExecutor, selectionChange, getSelection, updateStateAsync]);
+  }, [imodel, queryExecutor, selectionChange, getSelection, updateStateAsync, getParentInstanceKey]);
 
   const navigateUp = async () => {
     if (!canNavigateUp || selectedKeys.length !== 1) {
@@ -124,16 +134,9 @@ export function useInstanceSelection({ imodel, selectionStorage }: InstanceSelec
 
     await updateStateAsync(
       async () => {
-        let parentInstanceKeys: SelectableInstanceKey[] = [];
-        for await (const key of computeSelection({
-          queryExecutor,
-          elementIds: [selectedKey.id],
-          scope: { id: "element", ancestorLevel: 1 },
-        })) {
-          parentInstanceKeys.push(key);
-        }
-        parentInstanceKeys = omitTransientKeys(parentInstanceKeys);
-        const hasGrandParent = parentInstanceKeys.length === 1 && (await hasParent(queryExecutor, parentInstanceKeys[0]));
+        const parentInstanceKey = await getParentInstanceKey(selectedKey);
+        const parentInstanceKeys = parentInstanceKey ? omitTransientKeys([parentInstanceKey]) : [];
+        const hasGrandParent = parentInstanceKeys.length === 1 && (await getParentInstanceKey(parentInstanceKeys[0])) !== undefined;
 
         replaceSelection({ source: PropertyGridSelectionScope, imodel, selectables: parentInstanceKeys, level: 0 });
         return {
@@ -191,21 +194,6 @@ export function useInstanceSelection({ imodel, selectionStorage }: InstanceSelec
   };
 }
 
-async function hasParent(queryExecutor: ECSqlQueryExecutor, key: InstanceKey): Promise<boolean> {
-  const parentKeys = computeSelection({
-    queryExecutor,
-    elementIds: [key.id],
-    scope: { id: "element", ancestorLevel: 1 },
-  });
-  for await (const parentKey of parentKeys) {
-    // current instance key is returned from `computeSelection` if it does not have parent. Need to filter it out.
-    if (normalizeFullClassName(parentKey.className) !== normalizeFullClassName(key.className) || parentKey.id !== key.id) {
-      return true;
-    }
-  }
-  return false;
-}
-
 function omitTransientKeys(keys: SelectableInstanceKey[]) {
   return keys.filter((key) => !Id64.isTransient(key.id));
 }
@@ -239,5 +227,22 @@ function useLatestState<TState>(initialValue: TState) {
     state,
     updateStateImmediate: updateStateImmediate.current,
     updateStateAsync: updateStateAsync.current,
+  };
+}
+
+function createDefaultGetParentInstanceKey(queryExecutor: ECSqlQueryExecutor) {
+  return async (key: InstanceKey): Promise<InstanceKey | undefined> => {
+    const parentKeys = computeSelection({
+      queryExecutor,
+      elementIds: [key.id],
+      scope: { id: "element", ancestorLevel: 1 },
+    });
+    for await (const parentKey of parentKeys) {
+      // current instance key is returned from `computeSelection` if it does not have parent. Need to filter it out.
+      if (normalizeFullClassName(parentKey.className) !== normalizeFullClassName(key.className) || parentKey.id !== key.id) {
+        return parentKey;
+      }
+    }
+    return undefined;
   };
 }

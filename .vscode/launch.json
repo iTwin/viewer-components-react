@@ -60,15 +60,22 @@
       "cwd": "${workspaceFolder}/packages/itwin/tree-widget",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/packages/itwin/tree-widget/node_modules/mocha/bin/_mocha",
+      "runtimeExecutable": "node",
+      "runtimeVersion": "22",
+      "runtimeArgs": [
+        "--experimental-test-module-mocks",
+        "--enable-source-maps",
+        "--import",
+        "../../../node-hooks/ignore-styles/register.cjs",
+        "${workspaceFolder}/packages/itwin/tree-widget/node_modules/mocha/bin/mocha.js"
+      ],
       "args": [
         "--config",
         "./.mocharc.json",
         "--no-timeouts"
       ],
       "env": {
-        "NODE_ENV": "development",
-        "NODE_OPTIONS": "--enable-source-maps --import ../../../node-hooks/ignore-styles/register.cjs"
+        "NODE_ENV": "development"
       },
       "outFiles": [
         "${workspaceFolder}/packages/itwin/tree-widget/lib/**/*.js"
