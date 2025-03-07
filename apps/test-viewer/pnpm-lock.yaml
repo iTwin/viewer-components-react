@@ -96,8 +96,8 @@ importers:
         specifier: 3.17.2
         version: 3.17.2(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/itwinui-react-v5':
-        specifier: npm:@itwin/itwinui-react@5.0.0-alpha.7
-        version: '@itwin/itwinui-react@5.0.0-alpha.7(react-dom@18.2.0(react@18.2.0))(react@18.2.0)'
+        specifier: npm:@itwin/itwinui-react@5.0.0-alpha.8
+        version: '@itwin/itwinui-react@5.0.0-alpha.8(react-dom@18.2.0(react@18.2.0))(react@18.2.0)'
       '@itwin/map-layers':
         specifier: workspace:*
         version: file:../../packages/itwin/map-layers(dfgtjw4ehs53en56dgfr4egaqi)
@@ -861,8 +861,8 @@ packages:
       react: '>=17.0.0'
       react-dom: '>=17.0.0'
 
-  '@itwin/itwinui-react@5.0.0-alpha.7':
-    resolution: {integrity: sha512-2vTZrWChBrcxK/U41DtYixRun02ylSKgCFRrBhsnXZlAirnYBJGZo97+9+lvPjjVXFsYEqSJfIPitouCaJZM3w==}
+  '@itwin/itwinui-react@5.0.0-alpha.8':
+    resolution: {integrity: sha512-hgKlTs6KvEmiY2AI3R6G48yjAHulbA6jEBuhJQS2lFxFevFpF6sht0VufI9UkTEu7vh83Y5o06EMBCfEYIhD0A==}
     peerDependencies:
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
@@ -999,11 +999,11 @@ packages:
       '@itwin/itwinui-react':
         optional: true
 
-  '@itwin/presentation-hierarchies-react@2.0.0-alpha.6':
-    resolution: {integrity: sha512-FZRzEqqQhB/xSEUDDbh0aF51V9R4maQ+SVlhZZm1E7LM+TejOBWRqGgnKdQhnJjf3uOhwzx1SUBZRVox95wtsA==}
+  '@itwin/presentation-hierarchies-react@2.0.0-alpha.7':
+    resolution: {integrity: sha512-0DiZi9oBPSnEdT2lAQ6yBHDtpl285IiAtkl6PZdL82U1rXzztmpyic0ePmlVGpksYd25MOGzIK/qWjq8paslig==}
     peerDependencies:
       '@itwin/itwinui-icons': 5.0.0-alpha.4
-      '@itwin/itwinui-react': 5.0.0-alpha.7
+      '@itwin/itwinui-react': 5.0.0-alpha.8
       react: ^17.0.0 || ^18.0.0
       react-dom: ^17.0.0 || ^18.0.0
     peerDependenciesMeta:
@@ -4104,7 +4104,7 @@ snapshots:
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@tippyjs/react': 4.2.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@types/react-table': 7.7.20
-      classnames: 2.3.1
+      classnames: 2.5.1
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       react-table: 7.8.0(react@18.2.0)
@@ -4125,7 +4125,7 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
 
-  '@itwin/itwinui-react@5.0.0-alpha.7(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@itwin/itwinui-react@5.0.0-alpha.8(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@ariakit/react': 0.4.15(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       classnames: 2.5.1
@@ -4286,7 +4286,7 @@ snapshots:
     optionalDependencies:
       '@itwin/itwinui-react': 3.17.2(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
 
-  '@itwin/presentation-hierarchies-react@2.0.0-alpha.6(@itwin/itwinui-icons@5.0.0-alpha.4)(@itwin/itwinui-react@5.0.0-alpha.7(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@itwin/presentation-hierarchies-react@2.0.0-alpha.7(@itwin/itwinui-icons@5.0.0-alpha.4)(@itwin/itwinui-react@5.0.0-alpha.8(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@itwin/core-bentley': 5.0.0-dev.74
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -4302,7 +4302,7 @@ snapshots:
       rxjs: 7.8.2
     optionalDependencies:
       '@itwin/itwinui-icons': 5.0.0-alpha.4
-      '@itwin/itwinui-react': 5.0.0-alpha.7(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@itwin/itwinui-react': 5.0.0-alpha.8(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
 
   '@itwin/presentation-hierarchies@1.4.1':
     dependencies:
@@ -4385,11 +4385,11 @@ snapshots:
       '@itwin/itwinui-icons': 5.0.0-alpha.4
       '@itwin/itwinui-icons-react': 2.9.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@itwin/itwinui-react': 5.0.0-alpha.7(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@itwin/itwinui-react': 5.0.0-alpha.8(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/presentation-components': 5.11.0(yitst5s7lo3u7ehu5mr5pi463y)
       '@itwin/presentation-core-interop': 1.3.0(@itwin/core-bentley@4.10.2)(@itwin/core-common@4.10.2(@itwin/core-bentley@4.10.2)(@itwin/core-geometry@4.10.2))(@itwin/core-geometry@4.10.2)(@itwin/core-quantity@4.10.2(@itwin/core-bentley@4.10.2))(@itwin/ecschema-metadata@4.10.2(@itwin/core-bentley@4.10.2)(@itwin/core-quantity@4.10.2(@itwin/core-bentley@4.10.2)))
       '@itwin/presentation-hierarchies': 1.4.1
-      '@itwin/presentation-hierarchies-react': 2.0.0-alpha.6(@itwin/itwinui-icons@5.0.0-alpha.4)(@itwin/itwinui-react@5.0.0-alpha.7(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@itwin/presentation-hierarchies-react': 2.0.0-alpha.7(@itwin/itwinui-icons@5.0.0-alpha.4)(@itwin/itwinui-react@5.0.0-alpha.8(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/presentation-shared': 1.2.0
       '@itwin/unified-selection': 1.3.0
       classnames: 2.5.1

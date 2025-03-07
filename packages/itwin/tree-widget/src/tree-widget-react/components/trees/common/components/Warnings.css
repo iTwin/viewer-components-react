@@ -1,0 +1,13 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+
+.tw-filter-warning-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--iui-size-s);
+  text-align: center;
+  padding-right: var(--iui-size-xl);
+  padding-left: var(--iui-size-xl);
+}
