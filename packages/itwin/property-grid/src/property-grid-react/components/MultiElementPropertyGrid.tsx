@@ -49,7 +49,8 @@ export interface MultiElementPropertyGridProps extends Omit<PropertyGridProps, "
 
   /**
    * An optional callback to get parent instance key of the given instance. Defaults
-   * to using `computeSelection` from `@itwin/unified-selection`.
+   * to using `computeSelection` from `@itwin/unified-selection`. When supplied, it should be
+   * memoized to avoid unnecessary re-renders.
    */
   getParentInstanceKey?: (key: InstanceKey) => Promise<InstanceKey | undefined>;
 }
