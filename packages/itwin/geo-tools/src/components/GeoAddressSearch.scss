@@ -5,21 +5,20 @@
 
 
 .geotools-geoaddresssearch__container {
-  width: 300px
+  width: 300px;
+  margin-left: -7px;
+  margin-right: -7px;
 }
 
 .geotools-geoaddresssearch__button {
   background-color: transparent;
   position: absolute;
-  top: 6px;
-  right: 5px;
+  top: 8px;
+  right: 0px;
   border: none;
-  z-index: 1;   // Make it display over the input
+  padding-right: 9px;
 }
 
-.geotools-geoaddresssearch__autosuggest {
-  width: 100%;
-  .uicore-autosuggest__input {
-    width: 100%;
-  }
+.geotools-geoaddresssearch__combobox {
+  width: 92%;
 }
