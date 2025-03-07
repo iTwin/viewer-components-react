@@ -86,21 +86,15 @@
       "cwd": "${workspaceFolder}/packages/itwin/property-grid",
       "type": "node",
       "request": "launch",
-      "runtimeExecutable": "node",
-      "runtimeVersion": "22",
-      "runtimeArgs": [
-        "--enable-source-maps",
-        "--import",
-        "../../../node-hooks/ignore-styles/register.cjs",
-        "${workspaceFolder}/packages/itwin/property-grid/node_modules/mocha/bin/mocha.js"
-      ],
+      "program": "${workspaceFolder}/packages/itwin/property-grid/node_modules/mocha/bin/_mocha",
       "args": [
         "--config",
         "./.mocharc.json",
         "--no-timeouts"
       ],
       "env": {
-        "NODE_ENV": "development"
+        "NODE_ENV": "development",
+        "NODE_OPTIONS": "--enable-source-maps --import ../../../node-hooks/ignore-styles/register.cjs"
       },
       "outFiles": [
         "${workspaceFolder}/packages/itwin/property-grid/lib/**/*.js"
