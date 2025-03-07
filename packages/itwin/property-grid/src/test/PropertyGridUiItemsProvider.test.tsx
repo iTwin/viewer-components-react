@@ -69,7 +69,9 @@ describe("PropertyGridUiItemsProvider", () => {
 /* eslint-enable deprecation/deprecation */
 
 describe("createPropertyGrid", () => {
-  const testPropertyGridComponent = <>Test PropertyGridComponent</>;
+  function TestPropertyGridComponent() {
+    return <>Test PropertyGridComponent</>;
+  }
 
   let selectionManager: ReturnType<typeof stubSelectionManager>;
   let selectionStorage: ReturnType<typeof stubSelectionStorage>;
@@ -97,7 +99,7 @@ describe("createPropertyGrid", () => {
   });
 
   it("renders property grid component", async () => {
-    const { getByText } = render(<PropertyGridWidget widgetId="x" PropertyGridComponent={testPropertyGridComponent} />);
+    const { getByText } = render(<PropertyGridWidget widgetId="x" propertyGridComponent={<TestPropertyGridComponent />} />);
     await waitFor(() => getByText("Test PropertyGridComponent"));
   });
 
@@ -105,7 +107,7 @@ describe("createPropertyGrid", () => {
     function ThrowingComponent(): ReactElement | null {
       throw new Error("Test error");
     }
-    const { getByText } = render(<PropertyGridWidget widgetId="x" PropertyGridComponent={<ThrowingComponent />} />);
+    const { getByText } = render(<PropertyGridWidget widgetId="x" propertyGridComponent={<ThrowingComponent />} />);
     await waitFor(() => getByText("error"));
   });
 
@@ -155,7 +157,7 @@ describe("createPropertyGrid", () => {
         const props = {
           widgetId: "test",
           widgetDef: widgetDef as unknown as WidgetDef,
-          PropertyGridComponent: testPropertyGridComponent,
+          propertyGridComponent: <TestPropertyGridComponent />,
           ...getProps(),
           ...widgetProps,
         } as Props<typeof PropertyGridWidget>;

@@ -15,7 +15,7 @@ import { KeySet } from "@itwin/presentation-common";
 import { Selectable, Selectables } from "@itwin/unified-selection";
 import { usePropertyGridTransientState } from "./hooks/UsePropertyGridTransientState.js";
 import { createKeysFromSelectable, useSelectionHandler } from "./hooks/UseUnifiedSelectionHandler.js";
-import { PropertyGridComponent as OurPropertyGridComponent } from "./PropertyGridComponent.js";
+import { PropertyGridComponent } from "./PropertyGridComponent.js";
 import { PropertyGridManager } from "./PropertyGridManager.js";
 
 import type { ReactNode } from "react";
@@ -36,7 +36,7 @@ export function createPropertyGrid(propertyGridProps: PropertyGridWidgetProps): 
     widgetId,
     selectionStorage,
     shouldShow,
-    PropertyGridComponent: <OurPropertyGridComponent {...propertyGridComponentProps} />,
+    propertyGridComponent: <PropertyGridComponent {...propertyGridComponentProps} />,
   } as PropertyWidgetInternalProps;
   return {
     id: widgetId,
@@ -146,13 +146,13 @@ export type PropertyGridWidgetProps = PropertyGridComponentProps & PropertyGridW
 
 /** @internal */
 type PropertyWidgetInternalProps = PropertyGridWidgetOwnProps & {
-  PropertyGridComponent: ReactNode;
+  propertyGridComponent: ReactNode;
   widgetId: string;
   widgetDef?: WidgetDef;
 };
 
 /**
- * Component that renders given `PropertyGridComponent` an hides/shows widget based on unified selection.
+ * Component that renders given `propertyGridComponent` an hides/shows widget based on unified selection.
  * @internal
  */
 export function PropertyGridWidget({
@@ -161,7 +161,7 @@ export function PropertyGridWidget({
   // eslint-disable-next-line deprecation/deprecation
   shouldShow,
   selectionStorage,
-  PropertyGridComponent,
+  propertyGridComponent,
 }: PropertyWidgetInternalProps) {
   const ref = usePropertyGridTransientState<HTMLDivElement>();
   const appuiWidgetDef = useSpecificWidgetDef(widgetId);
@@ -207,7 +207,7 @@ export function PropertyGridWidget({
 
   return (
     <div ref={ref} className="property-grid-widget">
-      <ErrorBoundary FallbackComponent={ErrorState}>{PropertyGridComponent}</ErrorBoundary>
+      <ErrorBoundary FallbackComponent={ErrorState}>{propertyGridComponent}</ErrorBoundary>
     </div>
   );
 }
