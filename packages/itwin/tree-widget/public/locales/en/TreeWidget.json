@@ -131,10 +131,12 @@
       }
     },
     "filtering": {
-      "noMatches": "There are no nodes matching filter \"{{filter}}\"",
+      "noMatches": "No results were found for your search query.",
+      "noMatchesRetry": "Please modify your search and try again.",
       "unknownFilterError": "An unknown error occurred while filtering the tree.",
       "unknownInstanceFocusError": "An unknown error occurred while focusing instances. <link>Disable the focus mode</link>.",
-      "tooManyFilterMatches": "There are too many matches for the given filter. Please be more specific.",
+      "tooManyFilterMatches": "There are too many matches for your search query.",
+      "tooManyFilterMatchesRetry": "Please refine your search and try again.",
       "tooManyInstancesFocused": "There are too many elements selected for focus mode. Please select fewer elements or <link>disable the focus mode</link>."
     }
   },

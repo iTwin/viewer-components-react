@@ -14,6 +14,7 @@ import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { EmptyTreeContent } from "../common/components/EmptyTreeContent.js";
+import { WarningFilterUnknown, WarningNoMatches, WarningTooManyFilterMatches } from "../common/components/Warnings.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 import { useIModelChangeListener } from "../common/UseIModelChangeListener.js";
@@ -261,10 +262,13 @@ function getEmptyTreeContentComponent(filter?: string, error?: ModelsTreeFilteri
     return <InstanceFocusError error={error!} />;
   }
   if (isFilterError(error)) {
-    return <Text>{TreeWidget.translate(`modelsTree.filtering.${error}`)}</Text>;
+    if (error === "tooManyFilterMatches") {
+      return <WarningTooManyFilterMatches base={"modelsTree"} />;
+    }
+    return <WarningFilterUnknown base={"modelsTree"} />;
   }
   if (filter) {
-    return <Text>{TreeWidget.translate("modelsTree.filtering.noMatches", { filter })}</Text>;
+    return <WarningNoMatches base={"modelsTree"} />;
   }
   if (emptyTreeContent) {
     return emptyTreeContent;
@@ -283,7 +287,7 @@ function isInstanceFocusError(error: ModelsTreeFilteringError | undefined) {
 function InstanceFocusError({ error }: { error: ModelsTreeFilteringError }) {
   const { toggle } = useFocusedInstancesContext();
   const localizedMessage = createLocalizedMessage(TreeWidget.translate(`modelsTree.filtering.${error}`), () => toggle());
-  return <Text>{localizedMessage}</Text>;
+  return <Text variant={"body-sm"}>{localizedMessage}</Text>;
 }
 
 function getIcon(node: PresentationHierarchyNode): string | undefined {

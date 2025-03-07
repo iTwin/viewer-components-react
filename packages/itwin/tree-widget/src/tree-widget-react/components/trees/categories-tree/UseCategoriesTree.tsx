@@ -184,10 +184,10 @@ async function getCategoriesFromPaths(paths: HierarchyFilteringPaths, idsCache: 
 
 function getEmptyTreeContentComponent(filter?: string, error?: CategoriesTreeFilteringError, emptyTreeContent?: React.ReactNode) {
   if (error) {
-    return <Text>{TreeWidget.translate(`categoriesTree.filtering.${error}`)}</Text>;
+    return <Text variant={"body-sm"}>{TreeWidget.translate(`categoriesTree.filtering.${error}`)}</Text>;
   }
   if (filter) {
-    return <Text>{TreeWidget.translate("categoriesTree.filtering.noMatches", { filter })}</Text>;
+    return <Text variant={"body-sm"}>{TreeWidget.translate("categoriesTree.filtering.noMatches", { filter })}</Text>;
   }
   if (emptyTreeContent) {
     return emptyTreeContent;
