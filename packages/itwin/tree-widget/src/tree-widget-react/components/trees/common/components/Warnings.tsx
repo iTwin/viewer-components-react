@@ -14,7 +14,7 @@ export interface WarningProps {
 export function WarningTooManyFilterMatches({ base }: WarningProps) {
   return (
     <div className={"tw-filter-warning-container"}>
-      <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.filtering.tooManyFilterMatchesWarning`)}</Text>
+      <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.filtering.tooManyFilterMatches`)}</Text>
       <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.filtering.tooManyFilterMatchesRetry`)}</Text>
     </div>
   );

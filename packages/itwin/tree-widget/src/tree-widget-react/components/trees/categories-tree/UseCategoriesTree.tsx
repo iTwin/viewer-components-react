@@ -8,11 +8,10 @@ import { assert } from "@itwin/core-bentley";
 import categorySvg from "@itwin/itwinui-icons/bis-category-3d.svg";
 import subcategorySvg from "@itwin/itwinui-icons/bis-category-subcategory.svg";
 import definitionContainerSvg from "@itwin/itwinui-icons/bis-definitions-container.svg";
-import { Text } from "@itwin/itwinui-react/bricks";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
-import { TreeWidget } from "../../../TreeWidget.js";
 import { EmptyTreeContent } from "../common/components/EmptyTreeContent.js";
+import { WarningFilterUnknown, WarningNoMatches, WarningTooManyFilterMatches } from "../common/components/Warnings.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 import { useTelemetryContext } from "../common/UseTelemetryContext.js";
 import { CategoriesTreeDefinition } from "./CategoriesTreeDefinition.js";
@@ -28,7 +27,6 @@ import type { Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
-
 type CategoriesTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError";
 type HierarchyFilteringPaths = Awaited<ReturnType<Required<VisibilityTreeProps>["getFilteredPaths"]>>;
 
@@ -184,10 +182,13 @@ async function getCategoriesFromPaths(paths: HierarchyFilteringPaths, idsCache: 
 
 function getEmptyTreeContentComponent(filter?: string, error?: CategoriesTreeFilteringError, emptyTreeContent?: React.ReactNode) {
   if (error) {
-    return <Text variant={"body-sm"}>{TreeWidget.translate(`categoriesTree.filtering.${error}`)}</Text>;
+    if (error === "tooManyFilterMatches") {
+      return <WarningTooManyFilterMatches base={"categoriesTree"} />;
+    }
+    return <WarningFilterUnknown base={"categoriesTree"} />;
   }
   if (filter) {
-    return <Text variant={"body-sm"}>{TreeWidget.translate("categoriesTree.filtering.noMatches", { filter })}</Text>;
+    return <WarningNoMatches base={"categoriesTree"} />;
   }
   if (emptyTreeContent) {
     return emptyTreeContent;

@@ -163,11 +163,7 @@ function TreeImpl({
   }
 
   if (rootNodes.length === 0 && !isLoading) {
-    return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", width: "100%", height: "100%" }}>
-        {emptyTreeContent ? emptyTreeContent : <EmptyTreeContent />}
-      </div>
-    );
+    return <>{emptyTreeContent ? emptyTreeContent : <EmptyTreeContent />}</>;
   }
 
   const treeRendererProps: FunctionProps<TreeProps["treeRenderer"]> = {
