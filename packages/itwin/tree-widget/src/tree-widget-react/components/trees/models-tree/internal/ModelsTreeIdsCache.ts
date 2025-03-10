@@ -36,7 +36,6 @@ export class ModelsTreeIdsCache {
   private _modelWithCategoryModeledElements: Promise<Map<Id64String, Id64Set>> | undefined;
   private _modelKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath[]>>;
   private _subjectKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath>>;
-  private _categoryKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath[]>>;
 
   constructor(
     private _queryExecutor: LimitingECSqlQueryExecutor,
@@ -45,7 +44,6 @@ export class ModelsTreeIdsCache {
     this._categoryElementCounts = new ModelCategoryElementsCountCache(async (input) => this.queryCategoryElementCounts(input));
     this._modelKeyPaths = new Map();
     this._subjectKeyPaths = new Map();
-    this._categoryKeyPaths = new Map();
   }
 
   public [Symbol.dispose]() {
@@ -259,7 +257,6 @@ export class ModelsTreeIdsCache {
     const query = /* sql */ `
       SELECT Model.Id modelId, Category.Id categoryId
       FROM ${this._hierarchyConfig.elementClassSpecification}
-      WHERE Parent.Id IS NULL
       GROUP BY modelId, categoryId
     `;
     for await (const row of this._queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
@@ -418,32 +415,6 @@ export class ModelsTreeIdsCache {
 
   public async getCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Promise<number> {
     return this._categoryElementCounts.getCategoryElementsCount(modelId, categoryId);
-  }
-
-  public async createCategoryInstanceKeyPaths(categoryId: Id64String): Promise<HierarchyNodeIdentifiersPath[]> {
-    let entry = this._categoryKeyPaths.get(categoryId);
-    if (!entry) {
-      entry = (async () => {
-        const result = new Set<Id64String>();
-        const modelInfos = await this.getModelInfos();
-        modelInfos?.forEach((modelInfo, modelId) => {
-          if (modelInfo.categories.has(categoryId)) {
-            result.add(modelId);
-          }
-        });
-
-        const categoryPaths = new Array<HierarchyNodeIdentifiersPath>();
-        for (const categoryModelId of [...result]) {
-          const modelPaths = await this.createModelInstanceKeyPaths(categoryModelId);
-          for (const modelPath of modelPaths) {
-            categoryPaths.push([...modelPath, { className: "BisCore.SpatialCategory", id: categoryId }]);
-          }
-        }
-        return categoryPaths;
-      })();
-      this._categoryKeyPaths.set(categoryId, entry);
-    }
-    return entry;
   }
 }
 
