@@ -26,7 +26,7 @@ export function EmptyTreeContent({ icon }: EmptyTreeContentProps) {
       }}
     >
       {icon ? <Icon size="large" href={icon} /> : null}
-      <Text variant={"body-sm"} style={{ textAlign: "center" }}>
+      <Text variant={"body-md"} style={{ textAlign: "center" }}>
         {TreeWidget.translate("baseTree.dataIsNotAvailable")}
       </Text>
     </div>

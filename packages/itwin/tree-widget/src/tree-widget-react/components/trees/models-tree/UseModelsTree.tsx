@@ -287,7 +287,7 @@ function isInstanceFocusError(error: ModelsTreeFilteringError | undefined) {
 function InstanceFocusError({ error }: { error: ModelsTreeFilteringError }) {
   const { toggle } = useFocusedInstancesContext();
   const localizedMessage = createLocalizedMessage(TreeWidget.translate(`modelsTree.filtering.${error}`), () => toggle());
-  return <Text variant={"body-sm"}>{localizedMessage}</Text>;
+  return <Text variant={"body-md"}>{localizedMessage}</Text>;
 }
 
 function getIcon(node: PresentationHierarchyNode): string | undefined {
