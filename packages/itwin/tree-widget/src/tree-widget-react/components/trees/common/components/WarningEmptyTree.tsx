@@ -47,7 +47,7 @@ interface EmptyTreeContentProps {
 /** @internal */
 export function EmptyTreeContent({ icon }: EmptyTreeContentProps) {
   return (
-    <div className={"tw-empty-tree-warning-container"} style={{}}>
+    <div className={"tw-empty-tree-warning-container"}>
       {icon ? <Icon size="large" href={icon} /> : null}
       <Text variant={"body-sm"} style={{ textAlign: "center" }}>
         {TreeWidget.translate("baseTree.dataIsNotAvailable")}
