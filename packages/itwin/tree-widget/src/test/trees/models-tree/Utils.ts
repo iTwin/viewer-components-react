@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concatMap, count, EMPTY, expand, firstValueFrom, from, toArray } from "rxjs";
+import { concatMap, EMPTY, expand, firstValueFrom, from, toArray } from "rxjs";
 import sinon from "sinon";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { ModelsTreeIdsCache } from "../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
@@ -20,6 +20,8 @@ import type {
   HierarchyProvider,
   NonGroupingHierarchyNode,
 } from "@itwin/presentation-hierarchies";
+import type { ModelParentMap } from "../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
+import type { CategoryId, ElementId, ModelId, ParentId, SubjectId } from "../../../tree-widget-react/components/trees/common/internal/Types.js";
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
@@ -67,9 +69,10 @@ export function createModelsTreeProvider({
 
 interface IdsCacheMockProps {
   subjectsHierarchy?: Map<Id64String, Id64String[]>;
-  subjectModels?: Map<Id64String, Id64String[]>;
-  modelCategories?: Map<Id64String, Id64Array>;
-  categoryElements?: Map<Id64String, Id64Array>;
+  subjectModels?: Map<SubjectId, Array<ModelId>>;
+  modelCategories?: Map<ModelId, Array<{ categoryId: CategoryId; isAtRoot: boolean }>>;
+  categoryElements?: Map<CategoryId, Array<ElementId>>;
+  childrenInfo?: Map<ModelId, ModelParentMap>;
 }
 
 export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCache {
@@ -91,17 +94,32 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
       );
       return firstValueFrom(obs);
     }),
-    getModelCategories: sinon.stub<[Id64String], Promise<Id64Array>>().callsFake(async (modelId) => {
-      return props?.modelCategories?.get(modelId) ?? [];
-    }),
-    getModelElementCount: sinon.stub<[Id64String], Promise<number>>().callsFake(async (modelId) => {
-      const obs = from(props?.modelCategories?.get(modelId) ?? EMPTY).pipe(
-        concatMap((categoryId) => props?.categoryElements?.get(categoryId) ?? EMPTY),
-        count(),
+    getModelCategories: sinon.stub<[ModelId], Promise<Array<CategoryId>>>().callsFake(async (modelId) => {
+      return (
+        props?.modelCategories
+          ?.get(modelId)
+          ?.filter(({ isAtRoot }) => isAtRoot)
+          .map(({ categoryId }) => categoryId) ?? []
       );
-      return firstValueFrom(obs);
     }),
-    getCategoryElementsCount: sinon.stub<[Id64String, Id64String], Promise<number>>().callsFake(async (_, categoryId) => {
+    getAllModelCategories: sinon.stub<[ModelId], Promise<Array<CategoryId>>>().callsFake(async (modelId) => {
+      return props?.modelCategories?.get(modelId)?.map(({ categoryId }) => categoryId) ?? [];
+    }),
+    getElementRootCategory: sinon.stub<[{ modelId: ModelId; childElementId: ElementId }], Promise<CategoryId | undefined>>().callsFake(async () => {
+      return undefined;
+    }),
+    getElementsChildrenInfo: sinon
+      .stub<[{ modelId: ModelId; parentElementIds: Set<ElementId> }], Promise<Map<CategoryId, Map<ElementId, boolean>>>>()
+      .callsFake(async () => {
+        return new Map();
+      }),
+    getAllChildrenInfo: sinon.stub<[], Promise<Map<ModelId, ModelParentMap>>>().callsFake(async () => props?.childrenInfo ?? new Map()),
+    getCategoryChildrenInfo: sinon
+      .stub<[{ categoryId: CategoryId; modelId: ModelId; parentElementIds: Array<ParentId> }], Promise<Map<ElementId, boolean>>>()
+      .callsFake(async () => {
+        return new Map();
+      }),
+    getRootCategoryElementsCount: sinon.stub<[ModelId, CategoryId], Promise<number>>().callsFake(async (_, categoryId) => {
       return props?.categoryElements?.get(categoryId)?.length ?? 0;
     }),
     hasSubModel: sinon.stub<[Id64String], Promise<boolean>>().callsFake(async () => false),
@@ -138,7 +156,7 @@ export function createModelHierarchyNode(modelId?: Id64String, hasChildren?: boo
     },
   };
 }
-export function createCategoryHierarchyNode(modelId?: Id64String, categoryId?: Id64String, hasChildren?: boolean): NonGroupingHierarchyNode {
+export function createCategoryHierarchyNode(modelId?: ModelId, categoryId?: CategoryId, hasChildren?: boolean, parentId?: ParentId): NonGroupingHierarchyNode {
   return {
     key: {
       type: "instances",
@@ -146,7 +164,7 @@ export function createCategoryHierarchyNode(modelId?: Id64String, categoryId?: I
     },
     children: !!hasChildren,
     label: "",
-    parentKeys: [],
+    parentKeys: parentId ? [{ type: "instances", instanceKeys: [{ className: "bis:GeometricalElement3d", id: parentId }] }] : [],
     extendedData: {
       isCategory: true,
       modelId: modelId ?? "0x1",
@@ -155,10 +173,11 @@ export function createCategoryHierarchyNode(modelId?: Id64String, categoryId?: I
   };
 }
 export function createElementHierarchyNode(props: {
-  modelId: Id64String | undefined;
-  categoryId: Id64String | undefined;
+  modelId: ModelId | undefined;
+  categoryId: CategoryId | undefined;
   hasChildren?: boolean;
-  elementId?: Id64String;
+  elementId?: ElementId;
+  parentId?: ParentId;
 }): NonGroupingHierarchyNode {
   return {
     key: {
@@ -167,7 +186,7 @@ export function createElementHierarchyNode(props: {
     },
     children: !!props.hasChildren,
     label: "",
-    parentKeys: [],
+    parentKeys: props.parentId ? [{ type: "instances", instanceKeys: [{ className: "bis:GeometricalElement3d", id: props.parentId }] }] : [],
     extendedData: {
       modelId: props.modelId,
       categoryId: props.categoryId,
