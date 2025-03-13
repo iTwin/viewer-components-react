@@ -60,7 +60,7 @@ interface VisibilityOverrides {
 
 type ModelsTreeHierarchyConfiguration = Partial<ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"]>;
 
-describe("HierarchyBasedVisibilityHandler", () => {
+describe("ModelsTreeVisibilityHandler", () => {
   before(async () => {
     await NoRenderApp.startup();
     await TestUtils.initialize();

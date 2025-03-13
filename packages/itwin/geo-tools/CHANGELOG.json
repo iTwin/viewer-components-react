@@ -2,6 +2,21 @@
   "name": "@itwin/geo-tools-react",
   "entries": [
     {
+      "date": "Thu, 06 Mar 2025 23:36:28 GMT",
+      "version": "5.2.0",
+      "tag": "@itwin/geo-tools-react_v5.2.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "wil.maier@bentley.com",
+            "package": "@itwin/geo-tools-react",
+            "commit": "4b1c98724d51a3bac8088c160fd20ba9b9679a6e",
+            "comment": "Add support for AppUI@5.x and React@18.x. Switch to using iTwinUI components. Fix broken geo tools search address UI."
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 29 Apr 2024 14:59:26 GMT",
       "version": "5.1.0",
       "tag": "@itwin/geo-tools-react_v5.1.0",

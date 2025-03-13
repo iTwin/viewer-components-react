@@ -24,7 +24,7 @@ export class TestUtils {
   public static async initializeGeoTools() {
     if (!TestUtils._uiComponentsInitialized) {
       // This is required by our I18n module (specifically the i18next package).
-      (global as any).XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest; // eslint-disable-line @typescript-eslint/no-var-requires
+      (global as any).XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
       await GeoTools.initialize(TestUtils.localization);
       TestUtils._uiComponentsInitialized = true;

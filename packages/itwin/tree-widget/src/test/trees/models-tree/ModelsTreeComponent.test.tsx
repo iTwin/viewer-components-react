@@ -4,15 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { Children } from "react";
+import { mock } from "node:test";
 import sinon from "sinon";
-import * as td from "testdouble";
 import * as moq from "typemoq";
+import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
-import * as treeHeaderModule from "../../../tree-widget-react/components/tree-header/TreeHeader.js";
+import { EmptyLocalization } from "@itwin/core-common";
+import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import * as modelsVisibilityHandlerModule from "../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
 import * as modelsTreeModule from "../../../tree-widget-react/components/trees/models-tree/ModelsTree.js";
-import * as treeWidgetModule from "../../../tree-widget-react/TreeWidget.js";
+import { TreeWidget } from "../../../tree-widget-react/TreeWidget.js";
 import { mockViewport, render, waitFor } from "../../TestUtils.js";
 
 import type { ComponentPropsWithoutRef } from "react";
@@ -20,23 +21,11 @@ import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { ModelInfo, ModelsTreeHeaderButtonProps } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeButtons.js";
 import type * as modelsTreeComponentModule from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeComponent.js";
 
-type TreeHeaderProps = ComponentPropsWithoutRef<typeof treeHeaderModule.TreeHeader>;
-
-// TODO: Fix https://github.com/iTwin/viewer-components-react/issues/1190
-describe.skip("<ModelsTreeComponent />", () => {
-  async function initialize() {
-    const { IModelApp, NoRenderApp } = await import("@itwin/core-frontend");
-    await NoRenderApp.startup();
-
-    const { UiFramework } = await import("@itwin/appui-react");
-    await UiFramework.initialize();
-
-    return { IModelApp, UiFramework };
-  }
-
+describe("<ModelsTreeComponent />", () => {
   const defaultModelsTreeComponentProps: ComponentPropsWithoutRef<typeof modelsTreeComponentModule.ModelsTreeComponent> = {
     getSchemaContext: () => ({}) as any,
     selectionStorage: {} as any,
+    headerButtons: [],
   };
 
   const models: ModelInfo[] = [{ id: "testModelId1" }, { id: "testModelId2" }];
@@ -53,59 +42,50 @@ describe.skip("<ModelsTreeComponent />", () => {
   let vpMock: ReturnType<typeof mockViewport>;
 
   let ModelsTreeComponent: typeof modelsTreeComponentModule.ModelsTreeComponent;
-  let stubModelsTree: sinon.SinonStub;
-  let stubTreeHeader: sinon.SinonStub;
-  let stubTreeWidgetTranslate: sinon.SinonStub;
-  let stubModelsVisibilityHandler: {
-    showAllModels: sinon.SinonStub;
-    hideAllModels: sinon.SinonStub;
-    invertAllModels: sinon.SinonStub;
+  const stubModelsTree = sinon.stub();
+  const stubModelsVisibilityHandler = {
+    showAllModels: sinon.stub(),
+    hideAllModels: sinon.stub(),
+    invertAllModels: sinon.stub(),
   };
+
+  before(async () => {
+    mock.module("../../../tree-widget-react/components/trees/models-tree/ModelsTree.js", {
+      namedExports: {
+        ...modelsTreeModule,
+        ModelsTree: stubModelsTree,
+      },
+    });
+    mock.module("../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js", {
+      namedExports: {
+        ...modelsVisibilityHandlerModule,
+        ...stubModelsVisibilityHandler,
+      },
+    });
+    ModelsTreeComponent = (await import("../../../tree-widget-react/components/trees/models-tree/ModelsTreeComponent.js")).ModelsTreeComponent;
+
+    await NoRenderApp.startup({ localization: new EmptyLocalization() });
+    await UiFramework.initialize();
+    await TreeWidget.initialize();
+  });
+
+  after(async () => {
+    TreeWidget.terminate();
+    UiFramework.terminate();
+    await IModelApp.shutdown();
+    mock.reset();
+  });
 
   beforeEach(async () => {
     vpMock = mockViewport();
-
-    stubModelsTree = sinon.stub().returns(<></>);
-    await td.replaceEsm("../../../tree-widget-react/components/trees/models-tree/ModelsTree.js", {
-      ...modelsTreeModule,
-      ModelsTree: stubModelsTree,
-    });
-
-    stubTreeHeader = sinon.stub().returns(<></>);
-    await td.replaceEsm("../../../tree-widget-react/components/tree-header/TreeHeader.js", {
-      ...treeHeaderModule,
-      TreeHeader: stubTreeHeader,
-    });
-
-    stubTreeWidgetTranslate = sinon.stub().returns("test translated string");
-    await td.replaceEsm("../../../tree-widget-react/TreeWidget.js", {
-      ...treeWidgetModule,
-      TreeWidget: {
-        ...treeWidgetModule.TreeWidget,
-        translate: stubTreeWidgetTranslate,
-      },
-    });
-
-    stubModelsVisibilityHandler = {
-      showAllModels: sinon.stub(),
-      hideAllModels: sinon.stub(),
-      invertAllModels: sinon.stub(),
-    };
-    await td.replaceEsm("../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js", {
-      ...modelsVisibilityHandlerModule,
-      ...stubModelsVisibilityHandler,
-    });
-
-    ModelsTreeComponent = (await import("../../../tree-widget-react/components/trees/models-tree/ModelsTreeComponent.js")).ModelsTreeComponent;
+    stubModelsTree.returns(<>Tree stub</>);
   });
 
   afterEach(() => {
-    td.reset();
     sinon.restore();
   });
 
   it("returns null if iModel is undefined", async () => {
-    const { IModelApp } = await initialize();
     sinon.stub(IModelApp.viewManager, "selectedView").get(() => ({}) as Viewport);
     const result = render(<ModelsTreeComponent {...defaultModelsTreeComponentProps} />);
     await waitFor(() => {
@@ -115,7 +95,6 @@ describe.skip("<ModelsTreeComponent />", () => {
   });
 
   it("returns null if viewport is undefined", async () => {
-    const { UiFramework } = await initialize();
     sinon.stub(UiFramework, "getIModelConnection").returns({} as IModelConnection);
     const result = render(<ModelsTreeComponent {...defaultModelsTreeComponentProps} />);
     await waitFor(() => {
@@ -125,7 +104,6 @@ describe.skip("<ModelsTreeComponent />", () => {
   });
 
   it("renders `ModelsTree` when iModel and viewport are defined", async () => {
-    const { IModelApp, UiFramework } = await initialize();
     sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
     sinon.stub(UiFramework, "getIModelConnection").returns({} as IModelConnection);
     const result = render(<ModelsTreeComponent {...defaultModelsTreeComponentProps} />);
@@ -135,14 +113,8 @@ describe.skip("<ModelsTreeComponent />", () => {
     });
   });
 
-  it("getLabel returns translated label of the component", () => {
-    expect(ModelsTreeComponent.getLabel()).to.be.eq("test translated string");
-    expect(stubTreeWidgetTranslate).to.be.calledWith("modelsTree.label");
-  });
-
   describe("available models", () => {
     it("renders button with available models", async () => {
-      const { IModelApp, UiFramework } = await initialize();
       const iModel = {
         models: {
           queryProps: async () => [
@@ -168,7 +140,6 @@ describe.skip("<ModelsTreeComponent />", () => {
     });
 
     it("renders button with empty available models list if error if thrown while querying available models", async () => {
-      const { IModelApp, UiFramework } = await initialize();
       const spy = sinon.stub().returns(<></>);
       sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
       sinon.stub(UiFramework, "getIModelConnection").returns({
@@ -185,24 +156,30 @@ describe.skip("<ModelsTreeComponent />", () => {
 
   describe("header buttons", () => {
     it("renders default tree header buttons", async () => {
-      const { IModelApp, UiFramework } = await initialize();
       sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
       sinon.stub(UiFramework, "getIModelConnection").returns({} as IModelConnection);
-      render(<ModelsTreeComponent {...defaultModelsTreeComponentProps} />);
+      const { getByText, container } = render(<ModelsTreeComponent {...defaultModelsTreeComponentProps} headerButtons={undefined} />);
       await waitFor(() => {
-        expect(stubTreeHeader).to.be.calledWith(sinon.match((props: TreeHeaderProps) => Children.count(props.children) === 6));
+        getByText("modelsTree.buttons.showAll.tooltip");
+        getByText("modelsTree.buttons.hideAll.tooltip");
+        getByText("modelsTree.buttons.invert.tooltip");
+        getByText("modelsTree.buttons.toggle2d.tooltip");
+        getByText("modelsTree.buttons.toggle3d.tooltip");
+        getByText("modelsTree.buttons.toggleFocusMode.enable.tooltip");
+        expect(container.querySelectorAll(".tree-widget-tree-header > .button-container button").length).to.eq(6);
       });
     });
 
     it("renders user provided tree header buttons", async () => {
-      const { IModelApp, UiFramework } = await initialize();
-      const spy = sinon.stub().returns(<></>);
+      const button = () => {
+        return <button>Test button</button>;
+      };
       sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
       sinon.stub(UiFramework, "getIModelConnection").returns({} as IModelConnection);
-      render(<ModelsTreeComponent {...defaultModelsTreeComponentProps} headerButtons={[spy]} />);
+      const { getByText, container } = render(<ModelsTreeComponent {...defaultModelsTreeComponentProps} headerButtons={[button]} />);
       await waitFor(() => {
-        expect(stubTreeHeader).to.be.calledWith(sinon.match((props: TreeHeaderProps) => Children.count(props.children) === 1));
-        expect(spy).to.be.called;
+        getByText("Test button");
+        expect(container.querySelectorAll(".tree-widget-tree-header > .button-container button").length).to.eq(1);
       });
     });
 

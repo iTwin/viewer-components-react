@@ -2,26 +2,18 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-/* eslint-disable deprecation/deprecation */
-
-import { assert, expect, should } from "chai";
-import * as enzyme from "enzyme";
-import * as sinon from "sinon";
 import * as moq from "typemoq";
 import { PlanarClipMaskMode, PlanarClipMaskPriority, TerrainHeightOriginMode } from "@itwin/core-common";
 import { MockRender } from "@itwin/core-frontend";
-import { NumberInput } from "@itwin/core-react";
-import { QuantityNumberInput } from "@itwin/imodel-components-react";
-import { Select, ToggleSwitch } from "@itwin/itwinui-react";
-import { act, fireEvent, render } from "@testing-library/react";
+import { act, fireEvent, getByTestId, render, screen, within } from "@testing-library/react";
+import userEvent from '@testing-library/user-event';
 import { SourceMapContext } from "../ui/widget/MapLayerManager";
 import { MapManagerSettings } from "../ui/widget/MapManagerSettings";
 import { TestUtils } from "./TestUtils";
 
-import type { ChangeEvent } from "react";
-import type { SelectValueChangeEvent } from "@itwin/itwinui-react";
 import type { BackgroundMapSettings, DisplayStyle3dSettings, TerrainSettings } from "@itwin/core-common";
 import type { DisplayStyle3dState, IModelConnection, ScreenViewport, ViewState3d } from "@itwin/core-frontend";
+
 describe("MapManagerSettings", () => {
   const viewportMock = moq.Mock.ofType<ScreenViewport>();
   const viewMock = moq.Mock.ofType<ViewState3d>();
@@ -31,59 +23,19 @@ describe("MapManagerSettings", () => {
   const backgroundMapSettingsMock = moq.Mock.ofType<BackgroundMapSettings>();
   const terrainSettingsMock = moq.Mock.ofType<TerrainSettings>();
 
-  // Utility methods that give the index of components rendered by
-  // MapManagerSettings.
-  // Any re-ordering inside the component render will invalidate
-  // this and will need to be revisited.
-  const getToggleIndex = (toggleName: string) => {
-    switch (toggleName) {
-      case "locatable":
-        return 0;
-      case "mask":
-        return 1;
-      case "overrideMaskTransparency":
-        return 2;
-      case "depthBuffer":
-        return 3;
-      case "terrain":
-        return 4;
-    }
-    assert.fail("invalid name provided.");
-    return 0;
-  };
-
-  const getQuantityNumericInputIndex = (name: string) => {
-    switch (name) {
-      case "groundBias":
-        return 0;
-      case "terrainOrigin":
-        return 1;
-    }
-    assert.fail("invalid name provided.");
-    return 0;
-  };
-
-  const changeNumericInputValue = (component: any, value: number) => {
-    // For some reasons could not get 'simulate' and 'change' to work here, so calling directly the onChange prop instead.
-    component.find("input").props().onChange!({ currentTarget: { value } } as any);
-
-    // Handler is not triggered until there is a key press
-    component.find("input").simulate("keydown", { key: "Enter" });
-    component.update();
-  };
-
-  before(async () => {
+  beforeAll(async () => {
     await MockRender.App.startup();
     await TestUtils.initialize();
   });
 
-  after(async () => {
+  afterAll(async () => {
     await MockRender.App.shutdown();
     TestUtils.terminateUiComponents();
   });
 
   beforeEach(() => {
-    window.HTMLElement.prototype.scrollTo = () => {};
+    window.HTMLElement.prototype.scrollTo = vi.fn();
+    window.HTMLElement.prototype.scrollIntoView = vi.fn();
     terrainSettingsMock.reset();
     terrainSettingsMock.setup((ts) => ts.heightOriginMode).returns(() => TerrainHeightOriginMode.Geodetic);
     terrainSettingsMock.setup((ts) => ts.heightOrigin).returns(() => 0);
@@ -109,10 +61,11 @@ describe("MapManagerSettings", () => {
     viewportMock.setup((viewport) => viewport.view).returns(() => viewMock.object);
     viewportMock.setup((viewport) => viewport.changeBackgroundMapProps(moq.It.isAny()));
   });
-  const refreshFromStyle = sinon.spy();
 
-  const mountComponent = () => {
-    return enzyme.mount(
+  const refreshFromStyle = vi.fn();
+
+  const renderComponent = () => {
+    return render(
       <SourceMapContext.Provider
         value={{
           activeViewport: viewportMock.object,
@@ -123,128 +76,97 @@ describe("MapManagerSettings", () => {
         }}
       >
         <MapManagerSettings />
-      </SourceMapContext.Provider>,
+      </SourceMapContext.Provider>
     );
   };
 
   it("renders", () => {
-    const wrapper = mountComponent();
-    wrapper.unmount();
+    const { unmount } = renderComponent();
+    unmount();
   });
 
   it("Terrain toggle", () => {
-    const component = mountComponent();
+    const { container, unmount } = renderComponent();
 
-    const quantityNumericInputs = component.find(QuantityNumberInput);
-
-    // Make sure groundBias is NOT disabled
-    // Note: Ideally I would use a CSS selector instead of searching html, but could not find any that would work.
-    expect(quantityNumericInputs.at(getQuantityNumericInputIndex("groundBias")).find("input").html().includes("disabled")).to.be.false;
-
-    // terrainOrigin is disabled initially
-    expect(quantityNumericInputs.at(getQuantityNumericInputIndex("terrainOrigin")).find("input").html().includes("disabled")).to.be.true;
-
-    // exaggeration is disabled initially
-    const numericInputs = component.find(NumberInput);
-    expect(numericInputs.at(0).find("input").html().includes("disabled")).to.be.true;
-
-    // Make sure the 'useDepthBuffer' toggle is NOT disabled
-    let toggles = component.find(ToggleSwitch);
-
-    // Elevation type should be disabled initially
-    let select = component.find(Select);
-    expect(select.props().disabled).to.be.true;
-
-    expect(toggles.at(getToggleIndex("depthBuffer")).find(".iui-disabled").exists()).to.be.false;
+    const terrainHeightSelectBefore = getByTestId(container, "terrain-height-mode").querySelector('[role="combobox"]');
+    expect(terrainHeightSelectBefore!.getAttribute("aria-disabled")).toBe("true");
+   
+    expect({
+      groundBias: (getByTestId(container, "ground-bias") as HTMLInputElement).disabled,
+      terrainOrigin: (getByTestId(container, "terrain-origin") as HTMLInputElement).disabled,
+      exaggeration: (getByTestId(container, "exaggeration-input") as HTMLInputElement).disabled,
+    }).toEqual({
+      groundBias: false,
+      terrainOrigin: true,
+      exaggeration: true,
+    });
+    expect(getByTestId(container, "depthBuffer").getAttribute("disabled")).toBe(null);
 
     // 'changeBackgroundMapProps' should not have been called before terrain is toggled
     viewportMock.verify((x) => x.changeBackgroundMapProps(moq.It.isAny()), moq.Times.never());
-
-    // Toggle 'enable' terrain
-    toggles
-      .at(getToggleIndex("terrain"))
-      .find("input")
-      .simulate("change", { target: { checked: true } });
-    component.update();
+  
+    // Toggle terrain
+    const terrainToggle = getByTestId(container, "terrain") as HTMLInputElement;
+    fireEvent.click(terrainToggle);
+    expect(terrainToggle.checked).toBe(true);
 
     // 'changeBackgroundMapProps' should have been called once now
     viewportMock.verify((x) => x.changeBackgroundMapProps(moq.It.isAny()), moq.Times.once());
 
-    // 'useDepthBuffer' toggle should now be disabled
-    toggles = component.find(ToggleSwitch);
-    expect(toggles.at(getToggleIndex("depthBuffer")).find(".iui-disabled").exists()).to.be.true;
+    const terrainHeightSelectAfter = getByTestId(container, "terrain-height-mode").querySelector('[role="combobox"]');
+    expect(terrainHeightSelectAfter!.getAttribute("aria-disabled")).toBe(null);
 
-    const quantityInputs = component.find(QuantityNumberInput);
-    // Make sure groundBias is now disabled
-    expect(quantityInputs.at(getQuantityNumericInputIndex("groundBias")).find("input").html().includes("disabled")).to.be.true;
+    expect({
+      groundBias: (getByTestId(container, "ground-bias") as HTMLInputElement).disabled,
+      terrainOrigin: (getByTestId(container, "terrain-origin") as HTMLInputElement).disabled,
+      exaggeration: (getByTestId(container, "exaggeration-input") as HTMLInputElement).disabled,
+    }).toEqual({
+      groundBias: true,
+      terrainOrigin: false,
+      exaggeration: false,
+    });
 
-    // terrainOrigin and exaggeration should be enable after terrain was toggled
-    expect(quantityInputs.at(getQuantityNumericInputIndex("terrainOrigin")).find("input").html().includes("disabled")).to.be.false;
-
-    // terrainOrigin and exaggeration should be enable after terrain was toggled
-    expect(numericInputs.at(0).find("input").html().includes("disabled")).to.be.false;
-
-    // Elevation type should be enabled
-    select = component.find(Select);
-    expect(select.props().disabled).to.be.false;
-    component.unmount();
+    expect(getByTestId(container, "depthBuffer").getAttribute("disabled")).toBe("");
+    
+    unmount();
   });
 
   // Disabled slider testing until we find a reliable way to 'move' the slider
   it("Transparency slider", () => {
     viewportMock.verify((x) => x.changeBackgroundMapProps(moq.It.isAny()), moq.Times.never());
-
-    const { container } = render(
-      <SourceMapContext.Provider
-        value={{
-          activeViewport: viewportMock.object,
-          loadingSources: false,
-          sources: [],
-          bases: [],
-          refreshFromStyle,
-        }}
-      >
-        <MapManagerSettings />
-      </SourceMapContext.Provider>,
-    );
-
+  
+    const { container, unmount } = renderComponent();
+  
     const sliders = container.querySelectorAll('div[role="slider"]');
-    expect(sliders.length).to.eq(2);
+    expect(sliders.length).toBe(2);
+  
     act(() => {
       fireEvent.keyUp(sliders[0], { key: "ArrowLeft" });
     });
+  
     viewportMock.verify((x) => x.changeBackgroundMapProps({ transparency: 0 }), moq.Times.once());
+
+    unmount();
   });
 
   it("Mask Transparency slider", () => {
     viewportMock.verify((x) => x.changeBackgroundMapProps(moq.It.isAny()), moq.Times.never());
-    const { container } = render(
-      <SourceMapContext.Provider
-        value={{
-          activeViewport: viewportMock.object,
-          loadingSources: false,
-          sources: [],
-          bases: [],
-          refreshFromStyle,
-        }}
-      >
-        <MapManagerSettings />
-      </SourceMapContext.Provider>,
-    );
-
+  
+    const { container, unmount } = renderComponent();
+  
     const sliders = container.querySelectorAll('div[role="slider"]');
-    expect(sliders.length).to.eq(2);
-
+    expect(sliders.length).toBe(2);
+  
     const sliderThumb = sliders[1];
-
+  
     // Make sure the slider is disabled by default
-    expect(sliderThumb?.getAttribute("aria-disabled")).to.eql("true");
-
+    expect(sliderThumb?.getAttribute("aria-disabled")).toBe("true");
+  
     // Turn on the mask toggle
-    const toggles = container.querySelectorAll('input[role="switch"]');
-    const maskToggle = toggles[getToggleIndex("mask")];
-    should().exist(maskToggle);
+    const maskToggle = getByTestId(container, "mask");
+    expect(maskToggle).toBeTruthy();
     fireEvent.click(maskToggle);
+  
     // Enabling the 'mask' toggle should set mask transparency to undefined
     viewportMock.verify(
       (x) =>
@@ -253,59 +175,56 @@ describe("MapManagerSettings", () => {
         }),
       moq.Times.once(),
     );
-
-    const overrideMaskTransToggle = toggles[getToggleIndex("overrideMaskTransparency")];
-    should().exist(overrideMaskTransToggle);
+  
+    const overrideMaskTransToggle = getByTestId(container, "overrideMaskTransparency");
+    expect(overrideMaskTransToggle).toBeTruthy();
     fireEvent.click(overrideMaskTransToggle);
-
+  
     // Enabling the 'overrideMaskTransparency' toggle should set mask transparency to 0
     viewportMock.verify(
       (x) =>
         x.changeBackgroundMapProps({ planarClipMask: { mode: PlanarClipMaskMode.Priority, priority: PlanarClipMaskPriority.BackgroundMap, transparency: 0 } }),
       moq.Times.once(),
     );
-
-    expect(sliderThumb?.getAttribute("aria-disabled")).to.eql("false");
-
-    // Make sure the slider event are handled
+  
+    expect(sliderThumb?.getAttribute("aria-disabled")).toBe("false");
+  
+    // Make sure the slider events are handled
     act(() => {
       fireEvent.keyUp(sliderThumb, { key: "ArrowLeft" });
     });
+  
     viewportMock.verify(
       (x) =>
         x.changeBackgroundMapProps({ planarClipMask: { mode: PlanarClipMaskMode.Priority, priority: PlanarClipMaskPriority.BackgroundMap, transparency: 0 } }),
       moq.Times.exactly(2),
     );
+
+    unmount();
   });
 
   it("Locatable toggle", () => {
-    const component = mountComponent();
-    const toggles = component.find(ToggleSwitch);
-
+    const { container, unmount } = renderComponent();
+  
     viewportMock.verify((x) => x.changeBackgroundMapProps(moq.It.isAny()), moq.Times.never());
-    toggles
-      .at(getToggleIndex("locatable"))
-      .find("input")
-      .simulate("change", { target: { checked: false } });
-    component.update();
+  
+    const locatableToggle = getByTestId(container, "locatable");
+    fireEvent.click(locatableToggle);
 
     // 'changeBackgroundMapProps' should have been called once now
     viewportMock.verify((x) => x.changeBackgroundMapProps({ nonLocatable: true }), moq.Times.once());
-    component.unmount();
+    
+    unmount();
   });
 
   it("Mask toggle", () => {
-    const component = mountComponent();
-
-    const toggles = component.find(ToggleSwitch);
-
+    const { container, unmount } = renderComponent();
+  
     viewportMock.verify((x) => x.changeBackgroundMapProps(moq.It.isAny()), moq.Times.never());
-    toggles
-      .at(getToggleIndex("mask"))
-      .find("input")
-      .simulate("change", { target: { checked: true } });
-    component.update();
-
+  
+    const maskToggle = getByTestId(container, "mask");
+    fireEvent.click(maskToggle);
+  
     // 'changeBackgroundMapProps' should have been called once now
     viewportMock.verify(
       (x) =>
@@ -314,59 +233,45 @@ describe("MapManagerSettings", () => {
         }),
       moq.Times.once(),
     );
-
-    toggles
-      .at(getToggleIndex("mask"))
-      .find("input")
-      .simulate("change", { target: { checked: false } });
-    component.update();
-
-    viewportMock.verify((x) => x.changeBackgroundMapProps({ planarClipMask: { mode: PlanarClipMaskMode.None } }), moq.Times.once());
-    component.unmount();
+  
+    fireEvent.click(maskToggle);
+  
+    viewportMock.verify(
+      (x) => x.changeBackgroundMapProps({ planarClipMask: { mode: PlanarClipMaskMode.None } }), 
+      moq.Times.once()
+    );
+  
+    unmount();
   });
 
   it("Override Mask Transparency Toggle", () => {
     viewportMock.verify((x) => x.changeBackgroundMapProps(moq.It.isAny()), moq.Times.never());
-    const component = mountComponent();
-
-    let toggles = component.find(ToggleSwitch);
-
-    // By default, the toggle should be disabled
-    expect(toggles.at(getToggleIndex("overrideMaskTransparency")).find(".iui-disabled").exists()).to.be.true;
-
+    
+    const { container, unmount } = renderComponent();
+  
+    // By default, the override toggle should be disabled
+    const overrideToggle = getByTestId(container, "overrideMaskTransparency") as HTMLInputElement;
+    expect(overrideToggle.disabled).toBe(true);
+  
     // First turn ON the masking toggle
-    toggles
-      .at(getToggleIndex("mask"))
-      .find("input")
-      .simulate("change", { target: { checked: true } });
-    component.update();
-
-    toggles = component.find(ToggleSwitch);
-
+    const maskToggle = getByTestId(container, "mask");
+    fireEvent.click(maskToggle);
+  
     // Toggle should be enabled now
-    expect(toggles.at(getToggleIndex("overrideMaskTransparency")).find(".iui-disabled").exists()).to.be.false;
-
-    // .. then we can turn ON the override mask transparency
-    toggles
-      .at(getToggleIndex("overrideMaskTransparency"))
-      .find("input")
-      .simulate("change", { target: { checked: true } });
-    component.update();
-
-    // 'changeBackgroundMapProps' should have been called once now
+    expect(overrideToggle.disabled).toBe(false);
+  
+    // Turn ON the override mask transparency
+    fireEvent.click(overrideToggle);
+  
     viewportMock.verify(
       (x) =>
         x.changeBackgroundMapProps({ planarClipMask: { mode: PlanarClipMaskMode.Priority, priority: PlanarClipMaskPriority.BackgroundMap, transparency: 0 } }),
       moq.Times.once(),
     );
-
-    // turn if OFF again
-    toggles
-      .at(getToggleIndex("overrideMaskTransparency"))
-      .find("input")
-      .simulate("change", { target: { checked: false } });
-    component.update();
-
+  
+    // Turn it OFF again
+    fireEvent.click(overrideToggle);
+  
     viewportMock.verify(
       (x) =>
         x.changeBackgroundMapProps({
@@ -374,118 +279,149 @@ describe("MapManagerSettings", () => {
         }),
       moq.Times.exactly(2),
     );
-    component.unmount();
+  
+    unmount();
   });
-
+  
   it("ground bias", () => {
-    const component = mountComponent();
-    const numericInputs = component.find(QuantityNumberInput);
-
+    const { container, unmount } = renderComponent();
+  
     viewportMock.verify((x) => x.changeBackgroundMapProps(moq.It.isAny()), moq.Times.never());
     const oneStepIncrementValue = 1; // 1 foot
     const oneStepFiredValue = oneStepIncrementValue * 0.3048; // .. in meters
-
-    changeNumericInputValue(numericInputs.at(getQuantityNumericInputIndex("groundBias")), oneStepIncrementValue);
+  
+    const groundBiasInput = getByTestId(container, "ground-bias") as HTMLInputElement;
+    fireEvent.change(groundBiasInput, { target: { value: oneStepIncrementValue.toString() } });
+    fireEvent.keyDown(groundBiasInput, { key: "Enter" });
+  
     viewportMock.verify((x) => x.changeBackgroundMapProps({ groundBias: oneStepFiredValue }), moq.Times.once());
-    component.unmount();
+
+    unmount();
   });
 
   it("terrainOrigin", () => {
-    const component = mountComponent();
-    const numericInputs = component.find(QuantityNumberInput);
+    const { container, unmount } = renderComponent();
     viewportMock.verify((x) => x.changeBackgroundMapProps(moq.It.isAny()), moq.Times.never());
-
+  
     // turn on the 'terrain' toggle then change the input value
-    const toggles = component.find(ToggleSwitch);
-    toggles
-      .at(getToggleIndex("terrain"))
-      .find("input")
-      .simulate("change", { target: { checked: true } });
-
+    const terrainToggle = getByTestId(container, "terrain") as HTMLInputElement;
+    fireEvent.click(terrainToggle);
+  
     const oneStepIncrementValue = 1; // 1 foot
     const oneStepFiredValue = oneStepIncrementValue * 0.3048; // .. in meters
-
-    changeNumericInputValue(numericInputs.at(getQuantityNumericInputIndex("terrainOrigin")), oneStepIncrementValue);
-
+  
+    const terrainOriginInput = getByTestId(container, "terrain-origin") as HTMLInputElement;
+    fireEvent.change(terrainOriginInput, { target: { value: oneStepIncrementValue.toString() } });
+    fireEvent.keyDown(terrainOriginInput, { key: "Enter" });
+  
     viewportMock.verify((x) => x.changeBackgroundMapProps({ terrainSettings: { heightOrigin: oneStepFiredValue } }), moq.Times.once());
-    component.unmount();
+
+    unmount();
   });
 
   it("exaggeration", () => {
-    const component = mountComponent();
-    const numericInputs = component.find(NumberInput);
-
+    const { container, unmount } = renderComponent();
     viewportMock.verify((x) => x.changeBackgroundMapProps(moq.It.isAny()), moq.Times.never());
-
+  
     // turn ON the 'terrain' toggle then change the input value
-    const toggles = component.find(ToggleSwitch);
-    toggles
-      .at(getToggleIndex("terrain"))
-      .find("input")
-      .simulate("change", { target: { checked: true } });
-    changeNumericInputValue(numericInputs.at(0), 1);
-
+    const terrainToggle = getByTestId(container, "terrain") as HTMLInputElement;
+    fireEvent.click(terrainToggle);
+  
+    const exaggerationInput = getByTestId(container, "exaggeration-input") as HTMLInputElement;
+    fireEvent.change(exaggerationInput, { target: { value: "1" } });
+    fireEvent.keyDown(exaggerationInput, { key: "Enter" });
+  
     viewportMock.verify((x) => x.changeBackgroundMapProps({ terrainSettings: { exaggeration: 1 } }), moq.Times.once());
-    component.unmount();
+
+    unmount();
   });
 
-  it("heightOriginMode geoid", () => {
-    const component = mountComponent();
-
+  it("heightOriginMode geoid", async () => {
+    const user = userEvent.setup();
+    const { container, unmount } = renderComponent();
+    
     viewportMock.verify((x) => x.changeBackgroundMapProps(moq.It.isAny()), moq.Times.never());
 
-    // turn ON the 'terrain' toggle then change the combo box value
-    const toggles = component.find(ToggleSwitch);
-    toggles
-      .at(getToggleIndex("terrain"))
-      .find("input")
-      .simulate("change", { target: { checked: true } });
+    // Turn on terrain toggle first
+    const terrainToggle = getByTestId(container, "terrain") as HTMLInputElement;
+    fireEvent.click(terrainToggle);
 
-    const select = component.find(Select);
-    select.props().onChange!("geoid", {
-      target: { value: "added" }
-    } as ChangeEvent<HTMLSelectElement> & SelectValueChangeEvent);
-    viewportMock.verify((x) => x.changeBackgroundMapProps({ terrainSettings: { heightOriginMode: TerrainHeightOriginMode.Geoid } }), moq.Times.once());
-    component.unmount();
+    // Open the height mode dropdown and select 'Geoid'
+    const select = getByTestId(container, "terrain-height-mode").querySelector('[role="combobox"]');
+    await user.click(select!);
+
+    // Need to use screen to get the listbox as the dropdown is rendered outside the component it seems
+    const dropdownId = select?.getAttribute('aria-controls');
+    const listboxes = screen.getAllByRole('listbox');
+    const targetListbox = listboxes.find(box => box.getAttribute('id') === dropdownId!);
+    
+    const dropdownOptions = within(targetListbox!);
+    
+    await user.click(dropdownOptions.getByText("Settings.ElevationTypeGeoid")); 
+
+    // Verify that the height origin mode is set to 'Geoid'
+    viewportMock.verify(
+      (x) => x.changeBackgroundMapProps({ 
+        terrainSettings: { heightOriginMode: TerrainHeightOriginMode.Geoid } 
+      }), 
+      moq.Times.once()
+    );
+
+    unmount();
   });
 
-  it("heightOriginMode geodetic", () => {
-    const component = mountComponent();
+  it("heightOriginMode geodetic", async () => {
+    const user = userEvent.setup();
+    const { container, unmount } = renderComponent();
 
-    viewportMock.verify((x) => x.changeBackgroundMapProps(moq.It.isAny()), moq.Times.never());
+    const terrainToggle = getByTestId(container, "terrain") as HTMLInputElement;
+    fireEvent.click(terrainToggle);
 
-    // turn ON the 'terrain' toggle then change the combo box value
-    const toggles = component.find(ToggleSwitch);
-    toggles
-      .at(getToggleIndex("terrain"))
-      .find("input")
-      .simulate("change", { target: { checked: true } });
+    const select = getByTestId(container, "terrain-height-mode").querySelector('[role="combobox"]');
+    await user.click(select!);
 
-    const select = component.find(Select);
-    select.props().onChange!("geodetic", {
-      target: { value: "added" }
-    } as ChangeEvent<HTMLSelectElement> & SelectValueChangeEvent);
-    viewportMock.verify((x) => x.changeBackgroundMapProps({ terrainSettings: { heightOriginMode: TerrainHeightOriginMode.Geodetic } }), moq.Times.once());
-    component.unmount();
+    // Need to use screen to get the listbox as the dropdown is rendered outside the component it seems
+    const dropdownId = select?.getAttribute('aria-controls');
+    const listboxes = screen.getAllByRole('listbox');
+    const targetListbox = listboxes.find(box => box.getAttribute('id') === dropdownId!);
+    const dropdownOptions = within(targetListbox!);
+    
+    await user.click(dropdownOptions.getByText("Settings.ElevationTypeGeodetic")); 
+
+    viewportMock.verify(
+      (x) => x.changeBackgroundMapProps({ 
+        terrainSettings: { heightOriginMode: TerrainHeightOriginMode.Geodetic } 
+      }), 
+      moq.Times.once()
+    );
+
+    unmount();
   });
 
-  it("heightOriginMode ground", () => {
-    const component = mountComponent();
+  it("heightOriginMode ground", async () => {
+      const user = userEvent.setup();
+      const { container, unmount } = renderComponent();
 
-    viewportMock.verify((x) => x.changeBackgroundMapProps(moq.It.isAny()), moq.Times.never());
+      const terrainToggle = getByTestId(container, "terrain") as HTMLInputElement;
+      fireEvent.click(terrainToggle);
 
-    // turn ON the 'terrain' toggle then change the combo box value
-    const toggles = component.find(ToggleSwitch);
-    toggles
-      .at(getToggleIndex("terrain"))
-      .find("input")
-      .simulate("change", { target: { checked: true } });
+      const select = getByTestId(container, "terrain-height-mode").querySelector('[role="combobox"]');
+      await user.click(select!);
 
-    const select = component.find(Select);
-    select.props().onChange!("ground", {
-      target: { value: "added" }
-    } as ChangeEvent<HTMLSelectElement> & SelectValueChangeEvent);
-    viewportMock.verify((x) => x.changeBackgroundMapProps({ terrainSettings: { heightOriginMode: TerrainHeightOriginMode.Ground } }), moq.Times.once());
-    component.unmount();
+      const dropdownId = select?.getAttribute('aria-controls');
+      const listboxes = screen.getAllByRole('listbox');
+      const targetListbox = listboxes.find(box => box.getAttribute('id') === dropdownId!);
+      const dropdownOptions = within(targetListbox!);
+      
+      await user.click(dropdownOptions.getByText("Settings.ElevationTypeGround")); 
+
+      viewportMock.verify(
+        (x) => x.changeBackgroundMapProps({ 
+          terrainSettings: { heightOriginMode: TerrainHeightOriginMode.Ground } 
+        }), 
+        moq.Times.once()
+      );
+
+    unmount();
   });
 });

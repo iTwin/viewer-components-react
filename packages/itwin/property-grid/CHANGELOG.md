@@ -1,8 +1,24 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Fri, 14 Feb 2025 15:54:49 GMT and should not be manually modified.
+This log was last generated on Thu, 06 Mar 2025 12:37:44 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 1.17.1
+
+Thu, 06 Mar 2025 12:37:44 GMT
+
+### Patches
+
+- Update import to use `@itwin/core-bentley` for types that are reexported by `@itwin/core-common` ([#1232](https://github.com/iTwin/viewer-components-react/pull/1232))
+
+## 1.17.0
+
+Thu, 27 Feb 2025 12:34:52 GMT
+
+### Minor changes
+
+- Introduce `widgetId` prop for `createPropertyWidget` to allow creating multiple property grid widgets in an application. ([#1223](https://github.com/iTwin/viewer-components-react/pull/1223))
 
 ## 1.16.0
 

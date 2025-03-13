@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Add an optional `getParentInstanceKey` prop to `MultiElementPropertyGrid` to allow supplying a custom implementation for getting parent instance key.",
+  "packageName": "@itwin/property-grid-react",
+  "email": "35135765+grigasp@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

@@ -1,6 +1,6 @@
 {
   "name": "@itwin/tree-widget-react",
-  "version": "3.5.0",
+  "version": "3.5.1",
   "description": "Tree Widget React",
   "keywords": [
     "Bentley",
@@ -45,7 +45,7 @@
     "lint:stylelint": "stylelint \"./src/**/*.scss\"",
     "lint:fix": "npm run lint:eslint -- --fix && npm run lint:stylelint -- --fix",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
-    "test:dev": "cross-env NODE_OPTIONS=\"--import ../../../node-hooks/ignore-styles/register.cjs\" mocha --enable-source-maps --config ./.mocharc.json",
+    "test:dev": "node --experimental-test-module-mocks --enable-source-maps --import ../../../node-hooks/ignore-styles/register.cjs ./node_modules/mocha/bin/mocha.js --config ./.mocharc.json",
     "test": "npm run test:dev -- --parallel --jobs=4",
     "test:e2e": "node ../../../scripts/run-e2e-with-docker.js tree-widget",
     "test:e2e:local": "node ../../../scripts/run-e2e-tests.js",
@@ -118,7 +118,7 @@
     "@types/deep-equal": "^1.0.1",
     "@types/jsdom": "^21.1.6",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^18.18.10",
+    "@types/node": "^22.13.9",
     "@types/react": "^18.0.34",
     "@types/react-dom": "^18.0.11",
     "@types/sinon": "^17.0.3",
@@ -156,7 +156,6 @@
     "sinon-chai": "^3.7.0",
     "stylelint": "^15.11.0",
     "stylelint-config-standard-scss": "^11.1.0",
-    "testdouble": "^3.20.2",
     "typemoq": "^2.1.0",
     "typescript": "~5.2.0"
   },

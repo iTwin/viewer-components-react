@@ -18,9 +18,10 @@ import { createKeysFromSelectable, useSelectionHandler } from "./hooks/UseUnifie
 import { PropertyGridComponent } from "./PropertyGridComponent.js";
 import { PropertyGridManager } from "./PropertyGridManager.js";
 
+import type { ReactNode } from "react";
 import type { SelectionStorage } from "./hooks/UseUnifiedSelectionHandler.js";
 import type { FallbackProps } from "react-error-boundary";
-import type { UiItemsProvider, Widget } from "@itwin/appui-react";
+import type { UiItemsProvider, Widget, WidgetDef } from "@itwin/appui-react";
 import type { PropertyGridComponentProps } from "./PropertyGridComponent.js";
 
 /**
@@ -28,8 +29,17 @@ import type { PropertyGridComponentProps } from "./PropertyGridComponent.js";
  * @public
  */
 export function createPropertyGrid(propertyGridProps: PropertyGridWidgetProps): Widget {
+  // eslint-disable-next-line deprecation/deprecation
+  const { widgetId: widgetIdProp, selectionStorage, shouldShow, ...propertyGridComponentProps } = propertyGridProps;
+  const widgetId = widgetIdProp ?? PropertyGridWidgetId;
+  const widgetProps = {
+    widgetId,
+    selectionStorage,
+    shouldShow,
+    propertyGridComponent: <PropertyGridComponent {...propertyGridComponentProps} />,
+  } as PropertyWidgetInternalProps;
   return {
-    id: "vcr:PropertyGridComponent",
+    id: widgetId,
     label: PropertyGridManager.translate("widget-label"),
     icon: <SvgInfoCircular />,
     defaultState: WidgetState.Hidden,
@@ -39,12 +49,14 @@ export function createPropertyGrid(propertyGridProps: PropertyGridWidgetProps): 
         location: StagePanelLocation.Right,
       },
     },
-    content: <PropertyGridWidget {...propertyGridProps} />,
+    content: <PropertyGridWidget {...widgetProps} />,
   };
 }
 
 /**
- * Id of the property grid widget created by `createPropertyGrid`.
+ * Default id for the property grid widget created by `createPropertyGrid`, if a custom on
+ * is not supplied through `widgetId` prop.
+ *
  * @public
  */
 export const PropertyGridWidgetId = "vcr:PropertyGridComponent";
@@ -87,51 +99,73 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
 
     return [
       {
-        id: PropertyGridWidgetId,
-        label: PropertyGridManager.translate("widget-label"),
-        content: <PropertyGridWidget {...propertyGridProps} />,
-        defaultState: WidgetState.Hidden,
-        icon: <SvgInfoCircular />,
+        ...createPropertyGrid({ ...propertyGridProps }),
         priority: defaultPanelWidgetPriority,
       },
     ];
   }
 }
 
+/** @public */
+type PropertyGridWidgetOwnProps = {
+  /**
+   * A custom id to use for the created widget. Should be supplied when creating multiple property grid widgets to
+   * make sure they don't conflict with each other in AppUI system.
+   *
+   * Defaults to `PropertyGridWidgetId`.
+   */
+  widgetId?: string;
+} & (
+  | {
+      /**
+       * Predicate indicating if the widget should be shown for the current selection set.
+       * @deprecated in 1.16. Use the overload taking `Selectables` instead.
+       */
+      shouldShow?: (selection: Readonly<KeySet>) => boolean;
+      selectionStorage?: never;
+    }
+  | {
+      /** Predicate indicating if the widget should be shown for the current selection set. */
+      shouldShow?: (selection: Selectables) => Promise<boolean>;
+
+      /**
+       * Unified selection storage to use for listening and getting active selection.
+       *
+       * When not specified, the deprecated `SelectionManager` from `@itwin/presentation-frontend` package
+       * is used.
+       */
+      selectionStorage: SelectionStorage;
+    }
+);
+
 /**
- * Props for creating `PropertyGridWidget`.
+ * Props for `createPropertyGrid`.
  * @public
  */
-export type PropertyGridWidgetProps = PropertyGridComponentProps &
-  (
-    | {
-        /**
-         * Predicate indicating if the widget should be shown for the current selection set.
-         * @deprecated in 1.16. Use the overload taking `Selectables` instead.
-         */
-        shouldShow?: (selection: Readonly<KeySet>) => boolean;
-        selectionStorage?: never;
-      }
-    | {
-        /** Predicate indicating if the widget should be shown for the current selection set. */
-        shouldShow?: (selection: Selectables) => Promise<boolean>;
+export type PropertyGridWidgetProps = PropertyGridComponentProps & PropertyGridWidgetOwnProps;
 
-        /**
-         * Unified selection storage to use for listening and getting active selection.
-         *
-         * When not specified, the deprecated `SelectionManager` from `@itwin/presentation-frontend` package
-         * is used.
-         */
-        selectionStorage: SelectionStorage;
-      }
-  );
+/** @internal */
+type PropertyWidgetInternalProps = PropertyGridWidgetOwnProps & {
+  propertyGridComponent: ReactNode;
+  widgetId: string;
+  widgetDef?: WidgetDef;
+};
 
-/** Component that renders `PropertyGridComponent` an hides/shows widget based on `UnifiedSelection`. */
-// eslint-disable-next-line deprecation/deprecation
-function PropertyGridWidget({ shouldShow, ...props }: PropertyGridWidgetProps) {
+/**
+ * Component that renders given `propertyGridComponent` an hides/shows widget based on unified selection.
+ * @internal
+ */
+export function PropertyGridWidget({
+  widgetId,
+  widgetDef: widgetDefOverride,
+  // eslint-disable-next-line deprecation/deprecation
+  shouldShow,
+  selectionStorage,
+  propertyGridComponent,
+}: PropertyWidgetInternalProps) {
   const ref = usePropertyGridTransientState<HTMLDivElement>();
-  const widgetDef = useSpecificWidgetDef(PropertyGridWidgetId);
-  const selectionStorage = props.selectionStorage;
+  const appuiWidgetDef = useSpecificWidgetDef(widgetId);
+  const widgetDef = widgetDefOverride ?? appuiWidgetDef;
   const { selectionChange } = useSelectionHandler({ selectionStorage });
 
   useEffect(() => {
@@ -173,9 +207,7 @@ function PropertyGridWidget({ shouldShow, ...props }: PropertyGridWidgetProps) {
 
   return (
     <div ref={ref} className="property-grid-widget">
-      <ErrorBoundary FallbackComponent={ErrorState}>
-        <PropertyGridComponent {...props} />
-      </ErrorBoundary>
+      <ErrorBoundary FallbackComponent={ErrorState}>{propertyGridComponent}</ErrorBoundary>
     </div>
   );
 }

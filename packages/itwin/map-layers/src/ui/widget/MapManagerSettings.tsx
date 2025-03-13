@@ -8,9 +8,8 @@ import "./MapManagerSettings.scss";
 import * as React from "react";
 import { PlanarClipMaskMode, PlanarClipMaskPriority, TerrainHeightOriginMode } from "@itwin/core-common";
 import { QuantityType } from "@itwin/core-frontend";
-import { NumberInput } from "@itwin/core-react";
 import { QuantityNumberInput } from "@itwin/imodel-components-react";
-import { Select, Slider, Tab, Tabs, ToggleSwitch } from "@itwin/itwinui-react";
+import { Input, Select, Slider, Tab, Tabs, ToggleSwitch } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
 import { CustomParamsSettingsPanel } from "./CustomParamsSettings";
 import { useSourceMapContext } from "./MapLayerManager";
@@ -193,11 +192,14 @@ export function MapManagerSettings({ onHandleOutsideClick }: MapManagerSettingsP
   const [exaggeration, setExaggeration] = React.useState(() => terrainSettings.exaggeration);
 
   const handleExaggerationChange = React.useCallback(
-    (value: number | undefined, _stringValue: string) => {
-      if (undefined !== value) {
-        updateTerrainSettings({ exaggeration: value });
-        setExaggeration(value);
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const numValue = Number(e.target.value);
+      if (isNaN(numValue) || numValue === undefined) {
+        e.preventDefault();
+        return;
       }
+      updateTerrainSettings({ exaggeration: numValue });
+      setExaggeration(numValue);
     },
     [updateTerrainSettings],
   );
@@ -266,13 +268,13 @@ export function MapManagerSettings({ onHandleOutsideClick }: MapManagerSettingsP
             <Slider min={0} max={100} values={[transparency * 100]} onChange={handleAlphaChange} step={1} />
 
             <span className="map-manager-settings-label">{locatableLabel}</span>
-            <ToggleSwitch onChange={onLocatableToggle} checked={isLocatable} />
+            <ToggleSwitch data-testid="locatable" onChange={onLocatableToggle} checked={isLocatable} />
 
             <span className="map-manager-settings-label">{maskingLabel}</span>
-            <ToggleSwitch onChange={onMaskingToggle} checked={masking !== MapMaskingOption.None} />
+            <ToggleSwitch data-testid="mask" onChange={onMaskingToggle} checked={masking !== MapMaskingOption.None} />
 
             <span className="map-manager-settings-label">{overrideMaskTransparencyLabel}</span>
-            <ToggleSwitch disabled={masking === MapMaskingOption.None} onChange={onOverrideMaskTransparencyToggle} checked={overrideMaskTransparency} />
+            <ToggleSwitch data-testid="overrideMaskTransparency" disabled={masking === MapMaskingOption.None} onChange={onOverrideMaskTransparencyToggle} checked={overrideMaskTransparency} />
 
             <span className="map-manager-settings-label">{maskTransparencyLabel}</span>
             <Slider
@@ -287,6 +289,7 @@ export function MapManagerSettings({ onHandleOutsideClick }: MapManagerSettingsP
             <>
               <span className="map-manager-settings-label">{elevationOffsetLabel}</span>
               <QuantityNumberInput
+                data-testid="ground-bias"
                 disabled={applyTerrain}
                 persistenceValue={groundBias}
                 step={1}
@@ -297,7 +300,7 @@ export function MapManagerSettings({ onHandleOutsideClick }: MapManagerSettingsP
               />
 
               <span className="map-manager-settings-label">{useDepthBufferLabel}</span>
-              <ToggleSwitch disabled={applyTerrain} onChange={onToggleUseDepthBuffer} checked={useDepthBuffer} />
+              <ToggleSwitch data-testid="depthBuffer" disabled={applyTerrain} onChange={onToggleUseDepthBuffer} checked={useDepthBuffer} />
             </>
           </div>
           <div className="map-manager-settings-group">
@@ -306,10 +309,11 @@ export function MapManagerSettings({ onHandleOutsideClick }: MapManagerSettingsP
 
               <div className="maplayers-settings-container">
                 <span className="map-manager-settings-label">{enableLabel}</span>
-                <ToggleSwitch onChange={onToggleTerrain} checked={applyTerrain} />
+                <ToggleSwitch data-testid="terrain" onChange={onToggleTerrain} checked={applyTerrain} />
 
                 <span className="map-manager-settings-label">{modelHeightLabel}</span>
                 <QuantityNumberInput
+                  data-testid="terrain-origin"
                   disabled={!applyTerrain}
                   persistenceValue={terrainOrigin}
                   snap
@@ -320,6 +324,7 @@ export function MapManagerSettings({ onHandleOutsideClick }: MapManagerSettingsP
 
                 <span className="map-manager-settings-label">{heightOriginLabel}</span>
                 <Select
+                  data-testid="terrain-height-mode"
                   options={terrainHeightOptions.current}
                   disabled={!applyTerrain}
                   value={heightOriginMode}
@@ -328,8 +333,15 @@ export function MapManagerSettings({ onHandleOutsideClick }: MapManagerSettingsP
                 />
 
                 <span className="map-manager-settings-label">{exaggerationLabel}</span>
-                {/*eslint-disable-next-line @typescript-eslint/no-deprecated */}
-                <NumberInput value={exaggeration} disabled={!applyTerrain} onChange={handleExaggerationChange} onKeyDown={onKeyDown} />
+                <Input
+                  data-testid="exaggeration-input"
+                  type="number"
+                  value={exaggeration.toString()}
+                  disabled={!applyTerrain}
+                  onChange={handleExaggerationChange}
+                  onKeyDown={onKeyDown}
+                  size="small"
+                />
               </div>
             </fieldset>
           </div>

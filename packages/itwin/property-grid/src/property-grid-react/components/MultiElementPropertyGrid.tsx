@@ -46,6 +46,13 @@ export interface MultiElementPropertyGridProps extends Omit<PropertyGridProps, "
 
   /** Renders controls for ancestors navigation. If set to `undefined`, ancestors navigation is disabled. */
   ancestorsNavigationControls?: (props: AncestorsNavigationControlsProps) => ReactNode;
+
+  /**
+   * An optional callback to get parent instance key of the given instance. Defaults
+   * to using `computeSelection` from `@itwin/unified-selection`. When supplied, it should be
+   * memoized to avoid unnecessary re-renders.
+   */
+  getParentInstanceKey?: (key: InstanceKey) => Promise<InstanceKey | undefined>;
 }
 
 /**
@@ -59,6 +66,7 @@ export function MultiElementPropertyGrid({ ancestorsNavigationControls, ...props
   const { selectedKeys, focusedInstanceKey, focusInstance, ancestorsNavigationProps } = useInstanceSelection({
     imodel: props.imodel,
     selectionStorage: props.selectionStorage,
+    getParentInstanceKey: props.getParentInstanceKey,
   });
   const [content, setContent] = useState<MultiElementPropertyContent>(MultiElementPropertyContent.PropertyGrid);
   const { onFeatureUsed } = useTelemetryContext();
