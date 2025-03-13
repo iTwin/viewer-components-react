@@ -12,8 +12,8 @@ import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/present
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 
-import type { IModelConnection, Viewport, ViewState } from "@itwin/core-frontend";
 import type { QueryBinder, QueryOptions } from "@itwin/core-common";
+import type { CategorySelectorState, IModelConnection, Viewport, ViewState } from "@itwin/core-frontend";
 
 export function createIModelMock(queryHandler?: (query: string, params?: QueryBinder, config?: QueryOptions) => any[] | Promise<any[]>) {
   return {
@@ -28,7 +28,7 @@ export function createIModelMock(queryHandler?: (query: string, params?: QueryBi
 
 export function createFakeSinonViewport(
   props?: Partial<Omit<Viewport, "view" | "perModelCategoryVisibility">> & {
-    view?: Partial<Omit<ViewState, "isSpatialView">> & { isSpatialView?: () => boolean; };
+    view?: Partial<Omit<ViewState, "isSpatialView">> & { isSpatialView?: () => boolean };
     perModelCategoryVisibility?: Partial<PerModelCategoryVisibility.Overrides>;
     queryHandler?: Parameters<typeof createIModelMock>[0];
   },
@@ -41,6 +41,7 @@ export function createFakeSinonViewport(
     getOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.None),
     setOverride: sinon.fake(),
     clearOverrides: sinon.fake(),
+    *[Symbol.iterator]() {},
     ...props?.perModelCategoryVisibility,
   };
 
@@ -48,6 +49,10 @@ export function createFakeSinonViewport(
     isSpatialView: sinon.fake.returns(true),
     viewsCategory: sinon.fake.returns(true),
     viewsModel: sinon.fake.returns(true),
+    forEachModel: () => {},
+    categorySelector: {
+      categories: new Set(),
+    } as CategorySelectorState,
     ...props?.view,
   };
 

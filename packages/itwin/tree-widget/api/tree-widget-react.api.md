@@ -16,7 +16,6 @@ import type { HierarchyFilteringPath } from '@itwin/presentation-hierarchies';
 import type { HierarchyNode } from '@itwin/presentation-hierarchies-react';
 import type { Id64Arg } from '@itwin/core-bentley';
 import type { Id64Array } from '@itwin/core-bentley';
-import type { Id64Set } from '@itwin/core-bentley';
 import type { Id64String } from '@itwin/core-bentley';
 import type { IDisposable } from '@itwin/core-bentley';
 import type { IModelConnection } from '@itwin/core-frontend';
@@ -90,7 +89,7 @@ interface ChangeGeometricElementsDisplayStateProps {
     // (undocumented)
     categoryId: Id64String;
     // (undocumented)
-    elementIds: Id64Set;
+    elementIds: Map<Id64String, boolean>;
     // (undocumented)
     modelId: Id64String;
     // (undocumented)
@@ -179,6 +178,8 @@ interface GetCategoryVisibilityStatusProps {
     categoryId: Id64String;
     // (undocumented)
     modelId: Id64String;
+    // (undocumented)
+    parentElementIds: Id64Array;
 }
 
 // @beta (undocumented)

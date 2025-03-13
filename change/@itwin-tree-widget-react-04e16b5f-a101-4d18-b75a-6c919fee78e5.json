@@ -1,6 +1,6 @@
 {
   "type": "minor",
-  "comment": "Changed models tree to show child element's category node when it differs from parent element's category.",
+  "comment": "Changed models tree to show child element's category node when it differs from parent element's category. Parent visibility is now affected by children visibility and changing parent visibility also changes children visibility.",
   "packageName": "@itwin/tree-widget-react",
   "email": "100586436+JonasDov@users.noreply.github.com",
   "dependentChangeType": "patch"

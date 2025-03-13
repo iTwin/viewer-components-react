@@ -7,6 +7,7 @@ import { BeEvent } from "@itwin/core-bentley";
 
 import type { IDisposable } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
+import type { ModelsTreeChildrenVisibilityCache } from "./ModelsTreeChildrenVisibilityCache.js";
 
 /** @internal */
 export interface IVisibilityChangeEventListener extends IDisposable {
@@ -16,7 +17,10 @@ export interface IVisibilityChangeEventListener extends IDisposable {
 }
 
 /** @internal */
-export function createVisibilityChangeEventListener(viewport: Viewport): IVisibilityChangeEventListener {
+export function createVisibilityChangeEventListener(
+  viewport: Viewport,
+  childrenVisibilityCache?: ModelsTreeChildrenVisibilityCache,
+): IVisibilityChangeEventListener {
   const onVisibilityChange = new BeEvent<() => void>();
   let pendingVisibilityChange: undefined | ReturnType<typeof setTimeout>;
   let suppressChangeEvents: number = 0;
@@ -24,7 +28,8 @@ export function createVisibilityChangeEventListener(viewport: Viewport): IVisibi
     if (pendingVisibilityChange || suppressChangeEvents > 0) {
       return;
     }
-    pendingVisibilityChange = setTimeout(() => {
+    pendingVisibilityChange = setTimeout(async () => {
+      await childrenVisibilityCache?.clearChangedValues();
       onVisibilityChange.raiseEvent();
       pendingVisibilityChange = undefined;
     });

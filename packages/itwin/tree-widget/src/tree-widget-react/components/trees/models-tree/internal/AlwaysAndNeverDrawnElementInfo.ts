@@ -4,32 +4,54 @@
  *--------------------------------------------------------------------------------------------*/
 
 import {
-  BehaviorSubject, debounceTime, EMPTY, filter, first, from, fromEventPattern, map, merge, reduce, scan, share, shareReplay, startWith, Subject,
-  switchMap, take, takeUntil, tap,
+  BehaviorSubject,
+  debounceTime,
+  EMPTY,
+  filter,
+  first,
+  from,
+  fromEventPattern,
+  map,
+  merge,
+  reduce,
+  scan,
+  share,
+  shareReplay,
+  startWith,
+  Subject,
+  switchMap,
+  take,
+  takeUntil,
+  tap,
 } from "rxjs";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
+import { ELEMENT_3D_CLASS_NAME } from "../../common/internal/ClassNames.js";
 import { pushToMap } from "../../common/Utils.js";
 
 import type { Observable, Subscription } from "rxjs";
+import type { BeEvent } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
-import type { BeEvent, Id64Array, Id64Set, Id64String, IDisposable } from "@itwin/core-bentley";
+import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
 
 interface ElementInfo {
-  elementId: Id64String;
-  modelId: Id64String;
-  categoryId: Id64String;
+  elementId: ElementId;
+  modelId: ModelId;
+  categoryId: CategoryId;
 }
 
-type CacheEntry = Map<Id64String, Map<Id64String, Id64Set>>;
+type CacheEntry = Map<ModelId, Map<CategoryId, Set<ElementId>>>;
 
+/** @internal */
 export interface AlwaysOrNeverDrawnElementsQueryProps {
-  modelId: Id64String;
-  categoryId?: Id64String;
+  modelId: ModelId;
+  categoryId?: CategoryId;
 }
 
+/** @internal */
 export const SET_CHANGE_DEBOUNCE_TIME = 20;
 
-export class AlwaysAndNeverDrawnElementInfo implements IDisposable {
+/** @internal */
+export class AlwaysAndNeverDrawnElementInfo implements Disposable {
   private _subscriptions: Subscription[];
   private _alwaysDrawn: Observable<CacheEntry>;
   private _neverDrawn: Observable<CacheEntry>;
@@ -72,25 +94,23 @@ export class AlwaysAndNeverDrawnElementInfo implements IDisposable {
     this._suppress.next(false);
   }
 
-  public getElements({ setType, modelId, categoryId }: { setType: "always" | "never" } & AlwaysOrNeverDrawnElementsQueryProps): Observable<Id64Set> {
+  public getElements({ setType, modelId, categoryId }: { setType: "always" | "never" } & AlwaysOrNeverDrawnElementsQueryProps): Observable<Set<ElementId>> {
     const cache = setType === "always" ? this._alwaysDrawn : this._neverDrawn;
     const getElements = categoryId
-      ? (entry: CacheEntry | undefined) => {
+      ? (entry: CacheEntry | undefined): Set<ElementId> => {
           return entry?.get(modelId)?.get(categoryId) ?? new Set();
         }
       : (entry: CacheEntry | undefined) => {
-          const modelEntry = entry?.get(modelId);
-          const elements = new Set<Id64String>();
-          for (const set of modelEntry?.values() ?? []) {
-            set.forEach((id) => elements.add(id));
-          }
+          const categoriesMap = entry?.get(modelId);
+          const elements = new Set<ElementId>();
+          categoriesMap?.forEach((elementIds) => elementIds.forEach((id) => elements.add(id)));
           return elements;
         };
 
     return cache.pipe(map(getElements));
   }
 
-  private createCacheEntryObservable(props: { event: BeEvent<() => void>; getSet(): Id64Set | undefined; id: string }) {
+  private createCacheEntryObservable(props: { event: BeEvent<() => void>; getSet(): Set<ElementId> | undefined; id: string }) {
     const event = props.event;
     const resultSubject = new BehaviorSubject<CacheEntry | undefined>(undefined);
 
@@ -132,59 +152,41 @@ export class AlwaysAndNeverDrawnElementInfo implements IDisposable {
     return obs;
   }
 
-  public dispose(): void {
+  public [Symbol.dispose]() {
     this._subscriptions.forEach((x) => x.unsubscribe());
     this._subscriptions = [];
     this._disposeSubject.next();
   }
 
-  private queryAlwaysOrNeverDrawnElementInfo(set: Id64Set | undefined, requestId: string): Observable<CacheEntry> {
+  private queryAlwaysOrNeverDrawnElementInfo(set: Set<ElementId> | undefined, requestId: string): Observable<CacheEntry> {
     const elementInfo = set?.size ? this.queryElementInfo([...set], requestId) : EMPTY;
     return elementInfo.pipe(
-      reduce((state, val) => {
-        let entry = state.get(val.modelId);
-        if (!entry) {
-          entry = new Map();
-          state.set(val.modelId, entry);
+      reduce((state, { categoryId, modelId, elementId }) => {
+        let categoryMap = state.get(modelId);
+        if (!categoryMap) {
+          categoryMap = new Map();
+          state.set(modelId, categoryMap);
         }
-        pushToMap(entry, val.categoryId, val.elementId);
+
+        pushToMap(categoryMap, categoryId, elementId);
         return state;
-      }, new Map<Id64String, Map<Id64String, Id64Set>>()),
+      }, new Map<ModelId, Map<CategoryId, Set<ElementId>>>()),
     );
   }
 
-  private queryElementInfo(elementIds: Id64Array, requestId: string): Observable<ElementInfo> {
+  private queryElementInfo(elementIds: Array<ElementId>, requestId: string): Observable<ElementInfo> {
     const executor = createECSqlQueryExecutor(this._viewport.iModel);
     const reader = executor.createQueryReader(
       {
-        ctes: [
-          `
-        ElementInfo(elementId, modelId, categoryId, parentId) AS (
+        ecsql: `
           SELECT
             ECInstanceId elementId,
             Model.Id modelId,
-            Category.Id categoryId,
-            Parent.Id parentId
-          FROM bis.GeometricElement3d
+            Category.Id categoryId
+          FROM ${ELEMENT_3D_CLASS_NAME}
           WHERE InVirtualSet(?, ECInstanceId)
-
-          UNION ALL
-
-          SELECT
-            e.elementId,
-            e.modelId,
-            p.Category.Id categoryId,
-            p.Parent.Id parentId
-          FROM bis.GeometricElement3d p
-          JOIN ElementInfo e ON p.ECInstanceId = e.parentId
-        )
+          AND Parent.Id IS NULL
         `,
-        ],
-        ecsql: `
-        SELECT elementId, modelId, categoryId
-        FROM ElementInfo
-        WHERE parentId IS NULL
-      `,
         bindings: [{ type: "idset", value: elementIds }],
       },
       {
@@ -192,6 +194,12 @@ export class AlwaysAndNeverDrawnElementInfo implements IDisposable {
       },
     );
 
-    return from(reader).pipe(map((row) => ({ elementId: row.elementId, modelId: row.modelId, categoryId: row.categoryId })));
+    return from(reader).pipe(
+      map((row) => ({
+        elementId: row.elementId,
+        modelId: row.modelId,
+        categoryId: row.categoryId,
+      })),
+    );
   }
 }

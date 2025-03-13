@@ -5,10 +5,12 @@
 
 import { assert } from "@itwin/core-bentley";
 import { HierarchyFilteringPath, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+import { MODEL_3D_CLASS_NAME, SPATIAL_CATEGORY_CLASS_NAME, SUBJECT_CLASS_NAME } from "../../common/internal/ClassNames.js";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
+import type { CategoryId, ElementId, ModelId, ParentId, SubjectId } from "../../common/internal/Types.js";
 
 interface FilteredTreeRootNode {
   children: Map<Id64String, FilteredTreeNode>;
@@ -26,13 +28,15 @@ interface GenericFilteredTreeNode extends BaseFilteredTreeNode {
 
 interface CategoryFilteredTreeNode extends BaseFilteredTreeNode {
   type: "category";
-  modelId: Id64String;
+  modelId: ModelId;
+  parentId: ParentId | undefined;
 }
 
 interface ElementFilteredTreeNode extends BaseFilteredTreeNode {
   type: "element";
-  modelId: Id64String;
-  categoryId: Id64String;
+  modelId: ModelId;
+  categoryId: CategoryId;
+  parentId: ParentId | undefined;
 }
 
 type FilteredTreeNode = GenericFilteredTreeNode | CategoryFilteredTreeNode | ElementFilteredTreeNode;
@@ -41,27 +45,22 @@ export interface FilteredTree {
   getVisibilityChangeTargets(node: HierarchyNode): VisibilityChangeTargets;
 }
 
-export const SUBJECT_CLASS_NAME = "BisCore.Subject" as const;
-export const MODEL_CLASS_NAME = "BisCore.GeometricModel3d" as const;
-export const CATEGORY_CLASS_NAME = "BisCore.SpatialCategory" as const;
-export const ELEMENT_CLASS_NAME = "BisCore.GeometricElement3d" as const;
+type CategoryKey = `${ModelId}-${ParentId}-${CategoryId}`;
 
-type CategoryKey = `${Id64String}-${Id64String}`;
-
-function createCategoryKey(modelId: string, categoryId: string): CategoryKey {
-  return `${modelId}-${categoryId}`;
+function createCategoryKey(modelId: ModelId, categoryId: CategoryId, parentId: ParentId | undefined): CategoryKey {
+  return `${modelId}-${parentId ?? ""}-${categoryId}`;
 }
 
 export function parseCategoryKey(key: CategoryKey) {
-  const [modelId, categoryId] = key.split("-");
-  return { modelId, categoryId };
+  const [modelId, parentId, categoryId] = key.split("-");
+  return { modelId, categoryId, parentId: parentId !== "" ? parentId : undefined };
 }
 
 interface VisibilityChangeTargets {
-  subjects?: Set<Id64String>;
-  models?: Set<Id64String>;
+  subjects?: Set<SubjectId>;
+  models?: Set<ModelId>;
   categories?: Set<CategoryKey>;
-  elements?: Map<CategoryKey, Set<Id64String>>;
+  elements?: Map<CategoryKey, Set<ElementId>>;
 }
 
 export async function createFilteredTree(imodelAccess: ECClassHierarchyInspector, filteringPaths: HierarchyFilteringPath[]): Promise<FilteredTree> {
@@ -175,10 +174,10 @@ function addTarget(filterTargets: VisibilityChangeTargets, node: FilteredTreeNod
       (filterTargets.models ??= new Set()).add(node.id);
       return;
     case "category":
-      (filterTargets.categories ??= new Set()).add(createCategoryKey(node.modelId, node.id));
+      (filterTargets.categories ??= new Set()).add(createCategoryKey(node.modelId, node.id, node.parentId));
       return;
     case "element":
-      const categoryKey = createCategoryKey(node.modelId, node.categoryId);
+      const categoryKey = createCategoryKey(node.modelId, node.categoryId, node.parentId);
       const elements = (filterTargets.elements ??= new Map()).get(categoryKey);
       if (elements) {
         elements.add(node.id);
@@ -209,12 +208,13 @@ function createFilteredTreeNode({
   }
 
   if (type === "category") {
-    assert("type" in parent && parent.type === "model");
+    assert("id" in parent);
     return {
       id,
       isFilterTarget,
       type,
-      modelId: parent.id,
+      modelId: "modelId" in parent ? parent.modelId : parent.id,
+      parentId: parent.id,
     };
   }
 
@@ -225,6 +225,7 @@ function createFilteredTreeNode({
       type,
       modelId: parent.modelId,
       categoryId: parent.id,
+      parentId: parent.parentId,
     };
   }
 
@@ -235,6 +236,7 @@ function createFilteredTreeNode({
       type,
       modelId: parent.modelId,
       categoryId: parent.categoryId,
+      parentId: parent.id,
     };
   }
 
@@ -245,10 +247,10 @@ async function getType(hierarchyChecker: ECClassHierarchyInspector, className: s
   if (await hierarchyChecker.classDerivesFrom(className, SUBJECT_CLASS_NAME)) {
     return "subject";
   }
-  if (await hierarchyChecker.classDerivesFrom(className, MODEL_CLASS_NAME)) {
+  if (await hierarchyChecker.classDerivesFrom(className, MODEL_3D_CLASS_NAME)) {
     return "model";
   }
-  if (await hierarchyChecker.classDerivesFrom(className, CATEGORY_CLASS_NAME)) {
+  if (await hierarchyChecker.classDerivesFrom(className, SPATIAL_CATEGORY_CLASS_NAME)) {
     return "category";
   }
   return "element";

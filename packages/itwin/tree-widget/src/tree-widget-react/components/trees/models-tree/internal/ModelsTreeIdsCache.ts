@@ -3,39 +3,44 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Subscription } from "rxjs";
 import { bufferTime, filter, firstValueFrom, mergeAll, mergeMap, ReplaySubject, Subject } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { pushToMap } from "../../common/Utils.js";
 
-import type { InstanceKey } from "@itwin/presentation-shared";
-import type { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
-import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { Subscription } from "rxjs";
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import type { InstanceKey } from "@itwin/presentation-shared";
+import type { CategoryId, ElementId, ModelId, ParentId, SubjectId } from "../../common/internal/Types.js";
+import type { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
 
 interface SubjectInfo {
-  parentSubject: Id64String | undefined;
+  parentSubject: SubjectId | undefined;
   hideInHierarchy: boolean;
-  childSubjects: Id64Set;
-  childModels: Id64Set;
-}
-
-interface ModelInfo {
-  categories: Id64Set;
-  elementCount: number;
+  childSubjects: Set<SubjectId>;
+  childModels: Set<ModelId>;
 }
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
+type ModelCategoryKey = `${ModelId}-${CategoryId}`;
+
+/** @internal */
+export type ModelParentMap = Map<
+  ParentId,
+  { categoryChildrenMap: Map<CategoryId, Array<{ childElementId: ElementId; hasChildren: boolean }>>; rootElementCategoryId: CategoryId; hasParent: boolean }
+>;
+
 /** @internal */
 export class ModelsTreeIdsCache {
   private readonly _categoryElementCounts: ModelCategoryElementsCountCache;
-  private _subjectInfos: Promise<Map<Id64String, SubjectInfo>> | undefined;
-  private _parentSubjectIds: Promise<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
-  private _modelInfos: Promise<Map<Id64String, ModelInfo>> | undefined;
-  private _modelWithCategoryModeledElements: Promise<Map<Id64String, Id64Set>> | undefined;
-  private _modelKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath[]>>;
-  private _subjectKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath>>;
+  private _subjectInfos: Promise<Map<SubjectId, SubjectInfo>> | undefined;
+  private _parentSubjectIds: Promise<Array<SubjectId>> | undefined; // the list should contain a subject id if its node should be shown as having children
+  private _modelsCategoriesInfos: Promise<Map<ModelId, Map<CategoryId, boolean>>> | undefined;
+  private _modelWithCategoryModeledElements: Promise<Map<ModelCategoryKey, Set<ElementId>>> | undefined;
+  private _modelKeyPaths: Map<ModelId, Promise<HierarchyNodeIdentifiersPath[]>>;
+  private _subjectKeyPaths: Map<SubjectId, Promise<HierarchyNodeIdentifiersPath>>;
+  private _childElementInfos: Map<ModelId, Promise<ModelParentMap>>;
 
   constructor(
     private _queryExecutor: LimitingECSqlQueryExecutor,
@@ -44,6 +49,7 @@ export class ModelsTreeIdsCache {
     this._categoryElementCounts = new ModelCategoryElementsCountCache(async (input) => this.queryCategoryElementCounts(input));
     this._modelKeyPaths = new Map();
     this._subjectKeyPaths = new Map();
+    this._childElementInfos = new Map();
   }
 
   public [Symbol.dispose]() {
@@ -242,29 +248,18 @@ export class ModelsTreeIdsCache {
     return entry;
   }
 
-  private async *queryModelElementCounts() {
-    const query = /* sql */ `
-      SELECT Model.Id modelId, COUNT(*) elementCount
-      FROM ${this._hierarchyConfig.elementClassSpecification}
-      GROUP BY Model.Id
-    `;
-    for await (const row of this._queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
-      yield { modelId: row.modelId, elementCount: row.elementCount };
-    }
-  }
-
-  private async *queryModelCategories() {
-    const query = /* sql */ `
-      SELECT Model.Id modelId, Category.Id categoryId
+  private async *queryModelsCategories(): AsyncIterableIterator<{ modelId: ModelId; categoryId: CategoryId; isCategoryOfRootElement: boolean }> {
+    const query = `
+      SELECT Model.Id modelId, Category.Id categoryId, MAX(IIF(Parent.Id IS NULL, 1, 0)) isCategoryOfRootElement
       FROM ${this._hierarchyConfig.elementClassSpecification}
       GROUP BY modelId, categoryId
     `;
     for await (const row of this._queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
-      yield { modelId: row.modelId, categoryId: row.categoryId };
+      yield { modelId: row.modelId, categoryId: row.categoryId, isCategoryOfRootElement: !!row.isCategoryOfRootElement };
     }
   }
 
-  private async *queryModeledElements() {
+  private async *queryModeledElements(): AsyncIterableIterator<{ modelId: ModelId; categoryId: CategoryId; modeledElementId: ElementId }> {
     const query = `
       SELECT
         pe.ECInstanceId modeledElementId,
@@ -280,9 +275,9 @@ export class ModelsTreeIdsCache {
 
   private async getModelWithCategoryModeledElements() {
     this._modelWithCategoryModeledElements ??= (async () => {
-      const modelWithCategoryModeledElements = new Map<Id64String, Id64Set>();
+      const modelWithCategoryModeledElements = new Map<ModelCategoryKey, Set<ElementId>>();
       for await (const { modelId, categoryId, modeledElementId } of this.queryModeledElements()) {
-        const key = `${modelId}-${categoryId}`;
+        const key: ModelCategoryKey = `${modelId}-${categoryId}`;
         const entry = modelWithCategoryModeledElements.get(key);
         if (entry === undefined) {
           modelWithCategoryModeledElements.set(key, new Set([modeledElementId]));
@@ -295,49 +290,36 @@ export class ModelsTreeIdsCache {
     return this._modelWithCategoryModeledElements;
   }
 
-  private async getModelInfos() {
-    this._modelInfos ??= (async () => {
-      const modelInfos = new Map<Id64String, { categories: Id64Set; elementCount: number }>();
-      await Promise.all([
-        (async () => {
-          for await (const { modelId, categoryId } of this.queryModelCategories()) {
-            const entry = modelInfos.get(modelId);
-            if (entry) {
-              entry.categories.add(categoryId);
-            } else {
-              modelInfos.set(modelId, { categories: new Set([categoryId]), elementCount: 0 });
-            }
-          }
-        })(),
-        (async () => {
-          for await (const { modelId, elementCount } of this.queryModelElementCounts()) {
-            const entry = modelInfos.get(modelId);
-            if (entry) {
-              entry.elementCount = elementCount;
-            } else {
-              modelInfos.set(modelId, { categories: new Set(), elementCount });
-            }
-          }
-        })(),
-      ]);
+  private async getModelsCategoriesInfos() {
+    this._modelsCategoriesInfos ??= (async () => {
+      const modelInfos = new Map<ModelId, Map<CategoryId, boolean>>();
+      for await (const { modelId, categoryId, isCategoryOfRootElement } of this.queryModelsCategories()) {
+        const entry = modelInfos.get(modelId);
+        if (entry) {
+          entry.set(categoryId, isCategoryOfRootElement);
+        } else {
+          modelInfos.set(modelId, new Map([[categoryId, isCategoryOfRootElement]]));
+        }
+      }
       return modelInfos;
     })();
-    return this._modelInfos;
+    return this._modelsCategoriesInfos;
   }
 
-  public async getModelCategories(modelId: Id64String): Promise<Id64Array> {
-    const modelInfos = await this.getModelInfos();
-    const categories = modelInfos.get(modelId)?.categories;
-    return categories ? [...categories] : [];
+  public async getModelCategories(modelId: ModelId): Promise<Array<CategoryId>> {
+    const modelInfos = await this.getModelsCategoriesInfos();
+    const categories = modelInfos.get(modelId);
+    return categories ? [...categories].filter(([, isCategoryOfRootElement]) => isCategoryOfRootElement).map(([categoryId]) => categoryId) : [];
   }
 
-  public async getModelElementCount(modelId: Id64String): Promise<number> {
-    const modelInfos = await this.getModelInfos();
-    return modelInfos.get(modelId)?.elementCount ?? 0;
+  public async getAllModelCategories(modelId: ModelId): Promise<Array<CategoryId>> {
+    const modelInfos = await this.getModelsCategoriesInfos();
+    const categories = modelInfos.get(modelId);
+    return categories ? [...categories.keys()] : [];
   }
 
   public async hasSubModel(elementId: Id64String): Promise<boolean> {
-    const modelInfos = await this.getModelInfos();
+    const modelInfos = await this.getModelsCategoriesInfos();
     return modelInfos.has(elementId);
   }
 
@@ -373,48 +355,194 @@ export class ModelsTreeIdsCache {
     return entry;
   }
 
-  private async queryCategoryElementCounts(
-    input: Array<{ modelId: Id64String; categoryId: Id64String }>,
-  ): Promise<Array<{ modelId: number; categoryId: number; elementsCount: number }>> {
+  private async queryCategoryElementCounts(input: Array<{ modelId: ModelId; categoryId: CategoryId }>): Promise<Map<ModelCategoryKey, number>> {
+    const result = new Map<ModelCategoryKey, number>();
+    if (input.length === 0) {
+      return result;
+    }
+
     const reader = this._queryExecutor.createQueryReader(
       {
-        ctes: [
-          /* sql */ `
-            CategoryElements(id, modelId, categoryId) AS (
-              SELECT ECInstanceId, Model.Id, Category.Id
-              FROM ${this._hierarchyConfig.elementClassSpecification}
-              WHERE
-                Parent.Id IS NULL
-                AND (
-                  ${input.map(({ modelId, categoryId }) => `Model.Id = ${modelId} AND Category.Id = ${categoryId}`).join(" OR ")}
-                )
-
-              UNION ALL
-
-              SELECT c.ECInstanceId, p.modelId, p.categoryId
-              FROM ${this._hierarchyConfig.elementClassSpecification} c
-              JOIN CategoryElements p ON c.Parent.Id = p.id
-            )
-          `,
-        ],
         ecsql: `
-          SELECT modelId, categoryId, COUNT(id) elementsCount
-          FROM CategoryElements
-          GROUP BY modelId, categoryId
+          SELECT COUNT(*) elementsCount, e.Category.Id categoryId, e.Model.Id modelId
+          FROM ${this._hierarchyConfig.elementClassSpecification} e
+          WHERE
+            e.Parent.Id IS NULL AND (
+              ${input.map(({ modelId, categoryId }) => `e.Model.Id = ${modelId} AND e.Category.Id = ${categoryId}`).join(" OR ")}
+            )
+          GROUP BY e.Model.Id, e.Category.Id
         `,
       },
       { rowFormat: "ECSqlPropertyNames", limit: "unbounded" },
     );
 
-    const result = new Array<{ modelId: number; categoryId: number; elementsCount: number }>();
     for await (const row of reader) {
-      result.push({ modelId: row.modelId, categoryId: row.categoryId, elementsCount: row.elementsCount });
+      const key: ModelCategoryKey = `${row.modelId}-${row.categoryId}`;
+      result.set(key, row.elementsCount);
     }
     return result;
   }
 
-  public async getCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Promise<number> {
-    return this._categoryElementCounts.getCategoryElementsCount(modelId, categoryId);
+  public async getRootCategoryElementsCount(modelId: ModelId, categoryId: CategoryId): Promise<number> {
+    return this._categoryElementCounts.getRootCategoryElementsCount(modelId, categoryId);
+  }
+
+  private async queryElementsChildrenInfo({ modelId }: { modelId: ModelId }): Promise<ModelParentMap> {
+    const reader = this._queryExecutor.createQueryReader(
+      {
+        ctes: [
+          `
+          ElementsChildrenInfo(Id, CategoryId, ParentId, RootElementCategoryId, ParentHasParent) AS (
+              SELECT ECInstanceId, Category.Id, Parent.Id, Category.Id, false
+              FROM ${this._hierarchyConfig.elementClassSpecification}
+              WHERE
+                Parent.Id IS NULL AND Model.Id = ${modelId}
+
+              UNION ALL
+
+              SELECT c.ECInstanceId, c.Category.Id, c.Parent.Id, p.RootElementCategoryId, IIF(p.ParentId IS NULL, false, true)
+              FROM ${this._hierarchyConfig.elementClassSpecification} c
+              JOIN ElementsChildrenInfo p ON c.Parent.Id = p.Id
+            )
+          `,
+        ],
+        ecsql: `
+          SELECT
+            this.CategoryId categoryId,
+            this.ParentId parentId,
+            this.Id id,
+            this.RootElementCategoryId rootElementCategoryId,
+            IFNULL((
+              SELECT 1
+              FROM (
+                SELECT ParentId FROM ElementsChildrenInfo
+              )
+              WHERE ParentId = this.Id
+              LIMIT 1
+            ), 0) hasChildren,
+            this.ParentHasParent parentHasParent
+          FROM ElementsChildrenInfo this
+          WHERE this.ParentId IS NOT NULL
+        `,
+      },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded" },
+    );
+
+    const result: ModelParentMap = new Map();
+    for await (const row of reader) {
+      const parentKey = row.parentId ?? undefined;
+      let parentEntry = result.get(parentKey);
+      if (!parentEntry) {
+        parentEntry = { categoryChildrenMap: new Map(), rootElementCategoryId: row.rootElementCategoryId, hasParent: row.parentHasParent };
+        result.set(parentKey, parentEntry);
+      }
+      let childInfos = parentEntry.categoryChildrenMap.get(row.categoryId);
+      if (!childInfos) {
+        childInfos = [];
+        parentEntry.categoryChildrenMap.set(row.categoryId, childInfos);
+      }
+      childInfos.push({
+        childElementId: row.id,
+        hasChildren: !!row.hasChildren,
+      });
+    }
+    return result;
+  }
+
+  private async getChildrenInfo(modelId: ModelId): Promise<ModelParentMap> {
+    let parentMap = this._childElementInfos.get(modelId);
+    if (!parentMap) {
+      parentMap = this.queryElementsChildrenInfo({ modelId });
+      this._childElementInfos.set(modelId, parentMap);
+    }
+    return parentMap;
+  }
+
+  public async getAllChildrenInfo(): Promise<Map<ModelId, ModelParentMap>> {
+    const result = new Map();
+    await Promise.all(
+      [...this._childElementInfos.entries()].map(async ([modelId, parentMapPromise]) => {
+        result.set(modelId, await parentMapPromise);
+      }),
+    );
+    return result;
+  }
+
+  /**
+   * Returns elements that are display under the category in models tree.
+   *
+   * There can be two different cases:
+   * 1. If category is directly under model, then it returns only those elements that have children.
+   * 2. If category is under element, then it returns all child elements.
+   *
+   * `boolean` values in map tell if node has children or not.
+   */
+  public async getCategoryChildrenInfo(props: {
+    modelId: ModelId;
+    categoryId: CategoryId;
+    parentElementIds: Array<ParentId>;
+  }): Promise<Map<ElementId, boolean>> {
+    const { modelId, categoryId, parentElementIds } = props;
+    const parentMap = await this.getChildrenInfo(modelId);
+
+    if (parentElementIds.length === 0) {
+      const noParentResult = new Map<ElementId, boolean>();
+      for (const [parentId, parentEntry] of parentMap) {
+        if (!parentEntry.hasParent && parentEntry.rootElementCategoryId === categoryId) {
+          noParentResult.set(parentId, true);
+        }
+      }
+      return noParentResult;
+    }
+
+    const result = new Map<ElementId, boolean>();
+    for (const parentId of parentElementIds) {
+      const childInfos = parentMap.get(parentId)?.categoryChildrenMap.get(categoryId);
+      if (childInfos) {
+        childInfos.forEach((childInfo) => result.set(childInfo.childElementId, childInfo.hasChildren));
+        break;
+      }
+    }
+    return result;
+  }
+
+  public async getElementRootCategory({ modelId, childElementId }: { modelId: ModelId; childElementId: ElementId }): Promise<CategoryId | undefined> {
+    const parentMap = await this.getChildrenInfo(modelId);
+
+    for (const [, parentEntry] of parentMap) {
+      for (const [, childInfos] of parentEntry.categoryChildrenMap) {
+        if (childInfos.some((childInfo) => childInfo.childElementId === childElementId)) {
+          return parentEntry.rootElementCategoryId;
+        }
+      }
+    }
+    return undefined;
+  }
+
+  public async getElementsChildrenInfo({
+    modelId,
+    parentElementIds,
+  }: {
+    modelId: ModelId;
+    parentElementIds: Set<ParentId>;
+  }): Promise<Map<CategoryId, Map<ElementId, boolean>>> {
+    const parentMap = await this.getChildrenInfo(modelId);
+
+    const result = new Map<CategoryId, Map<ElementId, boolean>>();
+    for (const parentId of parentElementIds) {
+      const parentEntry = parentMap.get(parentId);
+      if (parentEntry) {
+        for (const [categoryId, childInfos] of parentEntry.categoryChildrenMap) {
+          let categoryEntry = result.get(categoryId);
+          if (!categoryEntry) {
+            categoryEntry = new Map();
+            result.set(categoryId, categoryEntry);
+          }
+          childInfos.forEach((childInfo) => categoryEntry?.set(childInfo.childElementId, childInfo.hasChildren));
+        }
+      }
+    }
+    return result;
   }
 }
 
@@ -435,15 +563,11 @@ function forEachChildSubject(
 }
 
 class ModelCategoryElementsCountCache {
-  private _cache = new Map<string, Subject<number>>();
+  private _cache = new Map<ModelCategoryKey, Subject<number>>();
   private _requestsStream = new Subject<{ modelId: Id64String; categoryId: Id64String }>();
   private _subscription: Subscription;
 
-  public constructor(
-    private _loader: (
-      input: Array<{ modelId: Id64String; categoryId: Id64String }>,
-    ) => Promise<Array<{ modelId: number; categoryId: number; elementsCount: number }>>,
-  ) {
+  public constructor(private _loader: (input: Array<{ modelId: ModelId; categoryId: CategoryId }>) => Promise<Map<ModelCategoryKey, number>>) {
     this._subscription = this._requestsStream
       .pipe(
         bufferTime(20),
@@ -452,8 +576,8 @@ class ModelCategoryElementsCountCache {
         mergeAll(),
       )
       .subscribe({
-        next: ({ modelId, categoryId, elementsCount }) => {
-          const subject = this._cache.get(`${modelId}${categoryId}`);
+        next: ([key, elementsCount]) => {
+          const subject = this._cache.get(key);
           assert(!!subject);
           subject.next(elementsCount);
         },
@@ -464,8 +588,9 @@ class ModelCategoryElementsCountCache {
     this._subscription.unsubscribe();
   }
 
-  public async getCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Promise<number> {
-    const cacheKey = `${modelId}${categoryId}`;
+  public async getRootCategoryElementsCount(modelId: ModelId, categoryId: CategoryId): Promise<number> {
+    const cacheKey: ModelCategoryKey = `${modelId}-${categoryId}`;
+
     let result = this._cache.get(cacheKey);
     if (result !== undefined) {
       return firstValueFrom(result);
