@@ -2396,30 +2396,28 @@ describe("ModelsTreeVisibilityHandler", () => {
             using visibilityTestData = createVisibilityTestData({ imodel: iModel });
             const { handler, provider, viewport } = visibilityTestData;
 
-            await using(handler, async (_) => {
-              const nodeToChangeVisibility = getTargetNode(createdIds as any);
-              await validateHierarchyVisibility({
-                provider,
-                handler,
-                viewport,
-                visibilityExpectations: VisibilityExpectations.all("hidden"),
-              });
-              await handler.changeVisibility(nodeToChangeVisibility, true);
-              viewport.renderFrame();
-              await validateHierarchyVisibility({
-                provider,
-                handler,
-                viewport,
-                visibilityExpectations: expectations(createdIds as any),
-              });
-              await handler.changeVisibility(nodeToChangeVisibility, false);
-              viewport.renderFrame();
-              await validateHierarchyVisibility({
-                provider,
-                handler,
-                viewport,
-                visibilityExpectations: VisibilityExpectations.all("hidden"),
-              });
+            const nodeToChangeVisibility = getTargetNode(createdIds as any);
+            await validateHierarchyVisibility({
+              provider,
+              handler,
+              viewport,
+              visibilityExpectations: VisibilityExpectations.all("hidden"),
+            });
+            await handler.changeVisibility(nodeToChangeVisibility, true);
+            viewport.renderFrame();
+            await validateHierarchyVisibility({
+              provider,
+              handler,
+              viewport,
+              visibilityExpectations: expectations(createdIds as any),
+            });
+            await handler.changeVisibility(nodeToChangeVisibility, false);
+            viewport.renderFrame();
+            await validateHierarchyVisibility({
+              provider,
+              handler,
+              viewport,
+              visibilityExpectations: VisibilityExpectations.all("hidden"),
             });
           });
         });
