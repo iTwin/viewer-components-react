@@ -13,7 +13,7 @@ import { Anchor, Text } from "@itwin/itwinui-react/bricks";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { TreeWidget } from "../../../TreeWidget.js";
-import { EmptyTreeContent, WarningFilterUnknown, WarningNoMatches, WarningTooManyFilterMatches } from "../common/components/WarningEmptyTree.js";
+import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMatches } from "../common/components/WarningEmptyTree.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 import { useIModelChangeListener } from "../common/UseIModelChangeListener.js";
@@ -262,12 +262,12 @@ function getEmptyTreeContentComponent(filter?: string, error?: ModelsTreeFilteri
   }
   if (isFilterError(error)) {
     if (error === "tooManyFilterMatches") {
-      return <WarningTooManyFilterMatches base={"modelsTree"} />;
+      return <TooManyFilterMatches base={"modelsTree"} />;
     }
-    return <WarningFilterUnknown base={"modelsTree"} />;
+    return <FilterUnknownError base={"modelsTree"} />;
   }
   if (filter) {
-    return <WarningNoMatches base={"modelsTree"} />;
+    return <NoFilterMatches base={"modelsTree"} />;
   }
   if (emptyTreeContent) {
     return emptyTreeContent;

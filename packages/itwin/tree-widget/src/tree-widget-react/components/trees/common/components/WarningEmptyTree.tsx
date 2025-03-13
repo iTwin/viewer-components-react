@@ -12,7 +12,7 @@ interface WarningProps {
 }
 
 /** @internal */
-export function WarningTooManyFilterMatches({ base }: WarningProps) {
+export function TooManyFilterMatches({ base }: WarningProps) {
   return (
     <div className={"tw-filter-warning-container"}>
       <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.filtering.tooManyFilterMatches`)}</Text>
@@ -22,7 +22,7 @@ export function WarningTooManyFilterMatches({ base }: WarningProps) {
 }
 
 /** @internal */
-export function WarningNoMatches({ base }: WarningProps) {
+export function NoFilterMatches({ base }: WarningProps) {
   return (
     <div className={"tw-filter-warning-container"}>
       <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.filtering.noMatches`)}</Text>
@@ -32,7 +32,7 @@ export function WarningNoMatches({ base }: WarningProps) {
 }
 
 /** @internal */
-export function WarningFilterUnknown({ base }: WarningProps) {
+export function FilterUnknownError({ base }: WarningProps) {
   return (
     <div className={"tw-filter-warning-container"}>
       <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.filtering.unknownFilterError`)}</Text>

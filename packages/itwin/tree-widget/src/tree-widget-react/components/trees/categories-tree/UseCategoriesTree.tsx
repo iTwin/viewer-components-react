@@ -10,7 +10,7 @@ import subcategorySvg from "@itwin/itwinui-icons/bis-category-subcategory.svg";
 import definitionContainerSvg from "@itwin/itwinui-icons/bis-definitions-container.svg";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
-import { EmptyTreeContent, WarningFilterUnknown, WarningNoMatches, WarningTooManyFilterMatches } from "../common/components/WarningEmptyTree.js";
+import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMatches } from "../common/components/WarningEmptyTree.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 import { useTelemetryContext } from "../common/UseTelemetryContext.js";
 import { CategoriesTreeDefinition } from "./CategoriesTreeDefinition.js";
@@ -182,12 +182,12 @@ async function getCategoriesFromPaths(paths: HierarchyFilteringPaths, idsCache: 
 function getEmptyTreeContentComponent(filter?: string, error?: CategoriesTreeFilteringError, emptyTreeContent?: React.ReactNode) {
   if (error) {
     if (error === "tooManyFilterMatches") {
-      return <WarningTooManyFilterMatches base={"categoriesTree"} />;
+      return <TooManyFilterMatches base={"categoriesTree"} />;
     }
-    return <WarningFilterUnknown base={"categoriesTree"} />;
+    return <FilterUnknownError base={"categoriesTree"} />;
   }
   if (filter) {
-    return <WarningNoMatches base={"categoriesTree"} />;
+    return <NoFilterMatches base={"categoriesTree"} />;
   }
   if (emptyTreeContent) {
     return emptyTreeContent;

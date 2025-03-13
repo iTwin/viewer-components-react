@@ -92,6 +92,8 @@ test.describe("Categories tree", () => {
     const node = locateNode(treeWidget, "Equipment", 0);
     await node.focus();
     const treeContainer = page.locator("#tw-tree-renderer-container");
+    const visibilityAction = node.getByRole("button", { name: "Visible" });
+    await expect(visibilityAction).toBeVisible();
 
     await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
 
@@ -99,7 +101,6 @@ test.describe("Categories tree", () => {
     await page.keyboard.press("Tab");
 
     // ensure visibility action is focused
-    const visibilityAction = node.getByRole("button", { name: "Visible" });
     await expect(visibilityAction).toBeFocused();
     await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
 
