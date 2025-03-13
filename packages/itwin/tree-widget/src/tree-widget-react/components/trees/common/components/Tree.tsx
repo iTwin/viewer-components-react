@@ -15,8 +15,8 @@ import { useNodeHighlighting } from "../UseNodeHighlighting.js";
 import { useReportingAction, useTelemetryContext } from "../UseTelemetryContext.js";
 import { createIModelAccess } from "../Utils.js";
 import { Delayed } from "./Delayed.js";
-import { EmptyTreeContent } from "./EmptyTreeContent.js";
 import { ProgressOverlay } from "./ProgressOverlay.js";
+import { EmptyTreeContent } from "./WarningEmptyTree.js";
 
 import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
 import type { MarkRequired } from "@itwin/core-bentley";
@@ -26,7 +26,6 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type { PresentationHierarchyNode, SelectionStorage, useIModelTree, useSelectionHandler } from "@itwin/presentation-hierarchies-react";
 import type { HighlightInfo } from "../UseNodeHighlighting.js";
-
 /** @beta */
 export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPaths" | "getHierarchyDefinition"> &
   Partial<Pick<FunctionProps<typeof useSelectionHandler>, "selectionMode">> & {
