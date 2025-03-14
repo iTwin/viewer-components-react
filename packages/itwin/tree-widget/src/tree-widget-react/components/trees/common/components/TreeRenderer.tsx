@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable @itwin/no-internal */
 
-import { createFilterAction } from "@itwin/presentation-hierarchies-react";
+import { useFilterAction } from "@itwin/presentation-hierarchies-react";
 import { BaseTreeRenderer } from "./BaseTreeRenderer.js";
 
 import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
@@ -14,10 +14,6 @@ import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
  * @beta
  */
 export function TreeRenderer({ actions, ...props }: BaseTreeRendererProps) {
-  return (
-    <BaseTreeRenderer
-      {...props}
-      actions={[createFilterAction({ onFilter: props.onFilterClick, getHierarchyLevelDetails: props.getHierarchyLevelDetails }), ...(actions ? actions : [])]}
-    />
-  );
+  const filterAction = useFilterAction({ onFilter: props.onFilterClick, getHierarchyLevelDetails: props.getHierarchyLevelDetails });
+  return <BaseTreeRenderer {...props} actions={[filterAction, ...(actions ? actions : [])]} />;
 }
