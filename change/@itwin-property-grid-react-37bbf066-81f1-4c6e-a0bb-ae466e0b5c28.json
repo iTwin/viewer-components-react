@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Add an optional `onCopy` prop to `CopyPropertyTextContextMenuItem` to allow supplying a custom value copying function.",
-  "packageName": "@itwin/property-grid-react",
-  "email": "35135765+grigasp@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

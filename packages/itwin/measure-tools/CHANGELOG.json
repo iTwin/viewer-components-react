@@ -2,6 +2,21 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Fri, 14 Mar 2025 21:21:43 GMT",
+      "version": "0.26.4",
+      "tag": "@itwin/measure-tools-react_v0.26.4",
+      "comments": {
+        "patch": [
+          {
+            "author": "aruniverse@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "2f239d122fa4e226db14b0af2a93eb2027dc79e3",
+            "comment": "Resolve GHSA-9crc-q9x8-hgqq"
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 19 Feb 2025 21:08:10 GMT",
       "version": "0.26.3",
       "tag": "@itwin/measure-tools-react_v0.26.3",

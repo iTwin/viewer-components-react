@@ -1,7 +1,0 @@
-{
-  "type": "none",
-  "comment": "Stop using `testdouble` for mocking modules",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "35135765+grigasp@users.noreply.github.com",
-  "dependentChangeType": "none"
-}
