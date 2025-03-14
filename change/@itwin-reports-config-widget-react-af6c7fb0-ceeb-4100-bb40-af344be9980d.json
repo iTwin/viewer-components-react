@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "resolve cves",
+  "packageName": "@itwin/reports-config-widget-react",
+  "email": "aruniverse@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

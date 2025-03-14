@@ -3,7 +3,7 @@
   "editor.tabSize": 2,
   "editor.trimAutoWhitespace": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.formatOnSave": true,
+  // "editor.formatOnSave": true,
   "editor.codeActionsOnSave": [
     "source.fixAll"
   ],
@@ -58,5 +58,5 @@
       "mode": "auto"
     }
   ],
-  "editor.formatOnSaveMode": "modifications"
+  // "editor.formatOnSaveMode": "modifications"
 }

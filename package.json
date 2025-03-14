@@ -12,6 +12,7 @@
     "test": "lage test --grouped --continue",
     "test:e2e": "lage test:e2e --continue --verbose",
     "lint": "lage lint --grouped --continue",
+    "audit:all": "lage audit --continue --grouped --verbose",
     "clean": "lage clean --grouped --continue",
     "extract-api": "lage extract-api --grouped --continue",
     "check": "beachball check",
@@ -26,10 +27,10 @@
     "check-extractions": "npm run docs:all && lage check-extractions"
   },
   "devDependencies": {
-    "beachball": "^2.43.1",
-    "cpx2": "^7.0.1",
-    "lage": "^2.7.16",
-    "prettier": "^3.2.5",
+    "beachball": "^2.51.0",
+    "cpx2": "^7.0.2",
+    "lage": "^2.13.0",
+    "prettier": "^3.5.3",
     "yargs": "^17.7.2"
   }
 }
