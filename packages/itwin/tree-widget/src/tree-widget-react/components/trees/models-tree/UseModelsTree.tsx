@@ -9,11 +9,16 @@ import classSvg from "@itwin/itwinui-icons/bis-class.svg";
 import elementSvg from "@itwin/itwinui-icons/bis-element.svg";
 import subjectSvg from "@itwin/itwinui-icons/bis-subject.svg";
 import modelSvg from "@itwin/itwinui-icons/model-cube.svg";
-import { Anchor, Text } from "@itwin/itwinui-react/bricks";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
-import { TreeWidget } from "../../../TreeWidget.js";
-import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMatches } from "../common/components/EmptyTree.js";
+import {
+  EmptyTreeContent,
+  FilterUnknownError,
+  NoFilterMatches,
+  TooManyFilterMatches,
+  TooManyInstancesFocused,
+  UnknownInstanceFocusError,
+} from "../common/components/EmptyTree.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 import { useIModelChangeListener } from "../common/UseIModelChangeListener.js";
@@ -284,9 +289,8 @@ function isInstanceFocusError(error: ModelsTreeFilteringError | undefined) {
 }
 
 function InstanceFocusError({ error }: { error: ModelsTreeFilteringError }) {
-  const { toggle } = useFocusedInstancesContext();
-  const localizedMessage = createLocalizedMessage(TreeWidget.translate(`modelsTree.filtering.${error}`), () => toggle());
-  return <Text variant={"body-md"}>{localizedMessage}</Text>;
+  if (error === "tooManyInstancesFocused") return <TooManyInstancesFocused base={"modelsTree"} />;
+  return <UnknownInstanceFocusError base={"modelsTree"} />;
 }
 
 function getIcon(node: PresentationHierarchyNode): string | undefined {
@@ -398,30 +402,4 @@ async function collectFocusedItems(loadFocusedItems: () => AsyncIterableIterator
     })),
   );
   return focusedItems;
-}
-
-function createLocalizedMessage(message: string, onClick?: () => void) {
-  const exp = new RegExp("<link>(.*)</link>");
-  const match = message.match(exp);
-  if (!match) {
-    return message;
-  }
-
-  const [fullText, innerText] = match;
-  const [textBefore, textAfter] = message.split(fullText);
-
-  return (
-    <>
-      {textBefore ? textBefore : null}
-      <Anchor
-        onClick={(e) => {
-          e.stopPropagation();
-          onClick?.();
-        }}
-      >
-        {innerText}
-      </Anchor>
-      {textAfter ? textAfter : null}
-    </>
-  );
 }
