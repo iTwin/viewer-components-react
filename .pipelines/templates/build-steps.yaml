@@ -24,7 +24,7 @@ steps:
   - script: pnpm install --frozen-lockfile
     displayName: pnpm install
 
-  - script: pnpm audit --registry=https://registry.npmjs.org --audit-level=high --production
+  - script: pnpm run audit # TODO: Review if npm registry needs to be added, and --production flag passed through
     displayName: Audit
 
   # - script: pnpm exec prettier . --check

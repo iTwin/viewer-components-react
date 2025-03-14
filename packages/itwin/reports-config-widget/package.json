@@ -36,6 +36,7 @@
     "extract-api": "betools extract-api --entry=reports-config-widget-react --apiReportFolder=./api --apiReportTempFolder=./api/temp --apiSummaryFolder=./api",
     "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
     "lint:fix": "npm run lint -- --fix",
+    "audit": "pnpm audit --audit-level=high",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./public/locales/en-PSEUDO",
     "rebuild": "npm run clean && npm run build",
     "test": "jest",

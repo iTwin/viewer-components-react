@@ -113,6 +113,7 @@
     "clean": "rimraf dist",
     "dist": "vite build",
     "lint": "eslint ./src/**/*.{ts,tsx}",
+    "audit": "pnpm audit --audit-level=high",
     "link:deps": "node ./scripts/linkWorkspaceDeps.js",
     "link:deps:watch": "node ./scripts/linkWorkspaceDeps.js --watch"
   },

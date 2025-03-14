@@ -33,6 +33,7 @@
     "cover": "npm test -- --coverage",
     "lint": "",
     "lint:fix": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2 --fix",
+    "audit": "pnpm audit --audit-level=high",
     "start": "",
     "test": "jest"
   },

@@ -25,6 +25,7 @@
     "rebuild": "npm run clean && npm run build",
     "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
     "lint:fix": "npm run lint -- --fix",
+    "audit": "pnpm audit --audit-level=high",
     "lint:table": "eslint ./**/*.{ts,tsx} 1>&2 -f ./node_modules/@itwin/eslint-plugin/dist/formatters/no-internal-summary-with-table.js",
     "test": "vitest run",
     "cover": "vitest run --coverage",

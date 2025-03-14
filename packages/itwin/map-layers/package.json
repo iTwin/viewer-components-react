@@ -18,6 +18,7 @@
     "docs": "",
     "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
     "lintfix": "eslint --fix -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
+    "audit": "pnpm audit --audit-level=high",
     "pseudolocalize": "betools pseudolocalize --englishDir=./src/public/locales/en --out=./src/public/locales/en-PSEUDO",
     "test": "vitest --run",
     "rebuild": "npm run -s clean && npm run -s build"

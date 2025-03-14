@@ -35,7 +35,8 @@
     "//test": "mocha \"./lib/cjs/test/**/*.test.js\"",
     "test:watch": "npm test -- --reporter min --watch-extensions ts,tsx --watch",
     "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
-    "lint:fix": "npm run lint -- --fix"
+    "lint:fix": "npm run lint -- --fix",
+    "audit": "pnpm audit"
   },
   "dependencies": {
     "@itwin/itwinui-icons-react": "^2.1.0",

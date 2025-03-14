@@ -11,6 +11,7 @@
     "cover": "npm run -s test",
     "lint": "eslint ./src/**/*.{ts,tsx}",
     "test": "cross-env NODE_OPTIONS=\"--import ../../node-hooks/ignore-styles/register.cjs\" mocha --enable-source-maps --config ./.mocharc.json",
+    "audit": "pnpm audit --audit-level=high",
     "docs": "betools extract --fileExt=ts,tsx --extractFrom=./src --recursive --out=./build/docs/extract",
     "link:deps": "node ./scripts/linkWorkspaceDeps.cjs"
   },

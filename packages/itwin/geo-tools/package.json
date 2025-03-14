@@ -35,6 +35,7 @@
     "//cover": "nyc npm -s test",
     "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
     "lint:fix": "npm run lint -- --fix",
+    "audit": "pnpm audit --audit-level=high",
     "pseudolocalize": "betools pseudolocalize --englishDir=./src/public/locales/en --out=./src/public/locales/en-PSEUDO",
     "test": "mocha \"./lib/cjs/test/**/*.test.js\""
   },

@@ -33,6 +33,7 @@
     "dual-build": "npm run -s build:cjs && npm run -s build:esm",
     "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
     "lint:fix": "npm run lint -- --fix",
+    "audit": "pnpm audit --audit-level=high",
     "rebuild": "npm run clean && npm run build",
     "test": "jest",
     "cover": "nyc npm test"

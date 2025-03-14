@@ -44,6 +44,7 @@
     "lint:eslint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
     "lint:stylelint": "stylelint \"./src/**/*.scss\"",
     "lint:fix": "npm run lint:eslint -- --fix && npm run lint:stylelint -- --fix",
+    "audit": "pnpm audit --audit-level=high",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
     "test:dev": "node --experimental-test-module-mocks --enable-source-maps --import ../../../node-hooks/ignore-styles/register.cjs ./node_modules/mocha/bin/mocha.js --config ./.mocharc.json",
     "test": "npm run test:dev -- --parallel --jobs=4",

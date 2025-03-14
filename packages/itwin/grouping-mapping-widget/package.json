@@ -34,6 +34,7 @@
     "dual-build": "npm run -s build:cjs && npm run -s build:esm",
     "extract-api": "betools extract-api --entry=grouping-mapping-widget --apiReportFolder=./api --apiReportTempFolder=./api/temp --apiSummaryFolder=./api",
     "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
+    "audit": "pnpm audit --audit-level=high",
     "lint:fix": "npm run lint -- --fix",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./public/locales/en-PSEUDO",
     "rebuild": "npm run clean && npm run build",
