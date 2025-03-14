@@ -87,7 +87,7 @@
     "@typescript-eslint/eslint-plugin": "^5.59.8",
     "@typescript-eslint/parser": "^5.59.8",
     "@vitejs/plugin-react": "^4.3.1",
-    "@vitest/coverage-v8": "^2.1.1",
+    "@vitest/coverage-v8": "^2.1.9",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "cpx2": "4.2.0",
@@ -105,7 +105,7 @@
     "rimraf": "^3.0.2",
     "typescript": "~5.7.2",
     "vite": "^5.3.1",
-    "vitest": "^2.1.1"
+    "vitest": "^2.1.9"
   },
   "dependencies": {
     "@bentley/icons-generic-webfont": "^1.0.29",
