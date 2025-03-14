@@ -24,7 +24,7 @@ steps:
   - script: pnpm install --frozen-lockfile
     displayName: pnpm install
 
-  - script: pnpm run audit # TODO: Review if npm registry needs to be added, and --production flag passed through
+  - script: pnpm run audit:all
     displayName: Audit
 
   # - script: pnpm exec prettier . --check
