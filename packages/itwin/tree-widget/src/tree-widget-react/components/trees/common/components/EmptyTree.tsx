@@ -3,18 +3,18 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import "./WarningEmptyTree.css";
+import "./EmptyTree.css";
 import { Icon, Text } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../../../../TreeWidget.js";
 
-interface WarningProps {
+interface FilterEmptyTreeProps {
   base: string;
 }
 
 /** @internal */
-export function TooManyFilterMatches({ base }: WarningProps) {
+export function TooManyFilterMatches({ base }: FilterEmptyTreeProps) {
   return (
-    <div className={"tw-filter-warning-container"}>
+    <div className={"tw-filter-empty-tree-container"}>
       <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.filtering.tooManyFilterMatches`)}</Text>
       <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.filtering.tooManyFilterMatchesRetry`)}</Text>
     </div>
@@ -22,9 +22,9 @@ export function TooManyFilterMatches({ base }: WarningProps) {
 }
 
 /** @internal */
-export function NoFilterMatches({ base }: WarningProps) {
+export function NoFilterMatches({ base }: FilterEmptyTreeProps) {
   return (
-    <div className={"tw-filter-warning-container"}>
+    <div className={"tw-filter-empty-tree-container"}>
       <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.filtering.noMatches`)}</Text>
       <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.filtering.noMatchesRetry`)}</Text>
     </div>
@@ -32,9 +32,9 @@ export function NoFilterMatches({ base }: WarningProps) {
 }
 
 /** @internal */
-export function FilterUnknownError({ base }: WarningProps) {
+export function FilterUnknownError({ base }: FilterEmptyTreeProps) {
   return (
-    <div className={"tw-filter-warning-container"}>
+    <div className={"tw-filter-empty-tree-container"}>
       <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.filtering.unknownFilterError`)}</Text>
     </div>
   );
@@ -47,7 +47,7 @@ interface EmptyTreeContentProps {
 /** @internal */
 export function EmptyTreeContent({ icon }: EmptyTreeContentProps) {
   return (
-    <div className={"tw-empty-tree-warning-container"}>
+    <div className={"tw-empty-tree-container"}>
       {icon ? <Icon size="large" href={icon} /> : null}
       <Text variant={"body-sm"} style={{ textAlign: "center" }}>
         {TreeWidget.translate("baseTree.dataIsNotAvailable")}

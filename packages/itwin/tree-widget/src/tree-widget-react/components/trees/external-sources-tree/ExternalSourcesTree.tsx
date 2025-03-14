@@ -7,9 +7,9 @@ import classSvg from "@itwin/itwinui-icons/bis-class.svg";
 import elementSvg from "@itwin/itwinui-icons/bis-element.svg";
 import documentSvg from "@itwin/itwinui-icons/document.svg";
 import ecSchemaSvg from "@itwin/itwinui-icons/selection-children.svg";
+import { EmptyTreeContent } from "../common/components/EmptyTree.js";
 import { Tree } from "../common/components/Tree.js";
 import { TreeRenderer } from "../common/components/TreeRenderer.js";
-import { EmptyTreeContent } from "../common/components/WarningEmptyTree.js";
 import { ExternalSourcesTreeComponent } from "./ExternalSourcesTreeComponent.js";
 import { ExternalSourcesTreeDefinition } from "./ExternalSourcesTreeDefinition.js";
 

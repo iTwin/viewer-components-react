@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-.tw-filter-warning-container {
+.tw-filter-empty-tree-container {
   display: flex;
   flex-direction: column;
   gap: var(--iui-size-s);
@@ -12,7 +12,7 @@
   padding-left: var(--iui-size-xl);
 }
 
-.tw-empty-tree-warning-container {
+.tw-empty-tree-container {
   display: flex;
   flex-direction: column;
   justify-content: center;

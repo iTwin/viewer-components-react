@@ -15,8 +15,8 @@ import { useNodeHighlighting } from "../UseNodeHighlighting.js";
 import { useReportingAction, useTelemetryContext } from "../UseTelemetryContext.js";
 import { createIModelAccess } from "../Utils.js";
 import { Delayed } from "./Delayed.js";
+import { EmptyTreeContent } from "./EmptyTree.js";
 import { ProgressOverlay } from "./ProgressOverlay.js";
-import { EmptyTreeContent } from "./WarningEmptyTree.js";
 
 import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
 import type { MarkRequired } from "@itwin/core-bentley";
