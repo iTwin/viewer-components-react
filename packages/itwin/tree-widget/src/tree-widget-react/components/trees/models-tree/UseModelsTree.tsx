@@ -289,7 +289,9 @@ function isInstanceFocusError(error: ModelsTreeFilteringError | undefined) {
 }
 
 function InstanceFocusError({ error }: { error: ModelsTreeFilteringError }) {
-  if (error === "tooManyInstancesFocused") return <TooManyInstancesFocused base={"modelsTree"} />;
+  if (error === "tooManyInstancesFocused") {
+    return <TooManyInstancesFocused base={"modelsTree"} />;
+  }
   return <UnknownInstanceFocusError base={"modelsTree"} />;
 }
 
