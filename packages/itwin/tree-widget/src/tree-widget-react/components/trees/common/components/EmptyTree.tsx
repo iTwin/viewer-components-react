@@ -4,8 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./EmptyTree.css";
-import { Icon, Text } from "@itwin/itwinui-react/bricks";
+import { Anchor, Icon, Text } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../../../../TreeWidget.js";
+import { useFocusedInstancesContext } from "../FocusedInstancesContext.js";
 
 interface FilterEmptyTreeProps {
   base: string;
@@ -39,6 +40,46 @@ export function FilterUnknownError({ base }: FilterEmptyTreeProps) {
     </div>
   );
 }
+
+/** @internal */
+export function TooManyInstancesFocused({ base }: FilterEmptyTreeProps) {
+  const { toggle } = useFocusedInstancesContext();
+  return (
+    <div className={"tw-filter-empty-tree-container"}>
+      <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.filtering.tooManyInstancesFocused`)}</Text>
+      <Anchor
+        style={{ textDecoration: "underline" }}
+        onClick={(e) => {
+          e.stopPropagation();
+          toggle();
+        }}
+      >
+        {TreeWidget.translate(`${base}.filtering.disableInstanceFocusMode`)}
+      </Anchor>
+    </div>
+  );
+}
+
+/** @internal */
+export function UnknownInstanceFocusError({ base }: FilterEmptyTreeProps) {
+  const { toggle } = useFocusedInstancesContext();
+  return (
+    <div className={"tw-filter-empty-tree-container"}>
+      <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.filtering.unknownInstanceFocusError`)}</Text>
+      <Anchor
+        style={{ textDecoration: "underline" }}
+        onClick={(e) => {
+          e.stopPropagation();
+          toggle();
+        }}
+      >
+        {TreeWidget.translate(`${base}.filtering.disableInstanceFocusMode`)}
+      </Anchor>
+    </div>
+  );
+}
+
+
 
 interface EmptyTreeContentProps {
   icon?: string;
