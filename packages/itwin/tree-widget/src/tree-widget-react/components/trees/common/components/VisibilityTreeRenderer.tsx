@@ -5,7 +5,7 @@
 /* eslint-disable @itwin/no-internal */
 
 import { useMemo } from "react";
-import { createFilterAction } from "@itwin/presentation-hierarchies-react";
+import { useFilterAction } from "@itwin/presentation-hierarchies-react";
 import { BaseTreeRenderer } from "./BaseTreeRenderer.js";
 import { createVisibilityAction } from "./TreeNodeVisibilityButton.js";
 import { useVisibilityButtonHandler } from "./UseVisibilityButtonHandler.js";
@@ -30,14 +30,12 @@ export function VisibilityTreeRenderer({ getVisibilityButtonState, onVisibilityB
     [getVisibilityButtonState, onVisibilityButtonClick],
   );
 
+  const filterAction = useFilterAction({ onFilter: props.onFilterClick, getHierarchyLevelDetails: props.getHierarchyLevelDetails });
+
   return (
     <BaseTreeRenderer
       {...props}
-      actions={[
-        ...(visibilityButtonProps ? [createVisibilityAction(visibilityButtonProps)] : []),
-        createFilterAction({ onFilter: props.onFilterClick, getHierarchyLevelDetails: props.getHierarchyLevelDetails }),
-        ...(actions ? actions : []),
-      ]}
+      actions={[...(visibilityButtonProps ? [createVisibilityAction(visibilityButtonProps)] : []), filterAction, ...(actions ? actions : [])]}
     />
   );
 }
