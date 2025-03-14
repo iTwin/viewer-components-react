@@ -10,7 +10,7 @@ import subjectSvg from "@itwin/itwinui-icons/bis-subject.svg";
 import groupSvg from "@itwin/itwinui-icons/group.svg";
 import modelSvg from "@itwin/itwinui-icons/model-cube.svg";
 import hierarchyTreeSvg from "@itwin/itwinui-icons/selection-children.svg";
-import { EmptyTreeContent } from "../common/components/EmptyTreeContent.js";
+import { EmptyTreeContent } from "../common/components/EmptyTree.js";
 import { Tree } from "../common/components/Tree.js";
 import { TreeRenderer } from "../common/components/TreeRenderer.js";
 import { IModelContentTreeComponent } from "./IModelContentTreeComponent.js";
@@ -20,7 +20,6 @@ import { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache.
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { BaseTreeRendererProps } from "../common/components/BaseTreeRenderer.js";
 import type { TreeProps } from "../common/components/Tree.js";
-
 /** @beta */
 export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
   Pick<BaseTreeRendererProps, "actions"> & {

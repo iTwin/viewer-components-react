@@ -135,7 +135,7 @@ test.describe("Models tree", () => {
     await treeWidget.getByPlaceholder("Search...").fill("Test");
 
     // wait for no nodes to be found matching search input
-    await treeWidget.getByText(`There are no nodes matching filter "Test"`).waitFor();
+    await treeWidget.getByText(`No results were found for your search query.`).waitFor();
     await takeScreenshot(page, treeWidget);
   });
 
@@ -147,7 +147,7 @@ test.describe("Models tree", () => {
     await treeWidget.getByPlaceholder("Search...").fill("x");
 
     // wait for error message to be displayed
-    await treeWidget.getByText(`There are too many matches for the given filter. Please be more specific.`).waitFor();
+    await treeWidget.getByText(`There are too many matches for your search query.`).waitFor();
     await takeScreenshot(page, treeWidget);
   });
 

@@ -7,7 +7,7 @@ import classSvg from "@itwin/itwinui-icons/bis-class.svg";
 import elementSvg from "@itwin/itwinui-icons/bis-element.svg";
 import documentSvg from "@itwin/itwinui-icons/document.svg";
 import ecSchemaSvg from "@itwin/itwinui-icons/selection-children.svg";
-import { EmptyTreeContent } from "../common/components/EmptyTreeContent.js";
+import { EmptyTreeContent } from "../common/components/EmptyTree.js";
 import { Tree } from "../common/components/Tree.js";
 import { TreeRenderer } from "../common/components/TreeRenderer.js";
 import { ExternalSourcesTreeComponent } from "./ExternalSourcesTreeComponent.js";
@@ -16,7 +16,6 @@ import { ExternalSourcesTreeDefinition } from "./ExternalSourcesTreeDefinition.j
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { BaseTreeRendererProps } from "../common/components/BaseTreeRenderer.js";
 import type { TreeProps } from "../common/components/Tree.js";
-
 /** @beta */
 export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
   Pick<BaseTreeRendererProps, "actions"> & {

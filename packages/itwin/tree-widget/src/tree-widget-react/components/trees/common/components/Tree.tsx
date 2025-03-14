@@ -15,7 +15,7 @@ import { useNodeHighlighting } from "../UseNodeHighlighting.js";
 import { useReportingAction, useTelemetryContext } from "../UseTelemetryContext.js";
 import { createIModelAccess } from "../Utils.js";
 import { Delayed } from "./Delayed.js";
-import { EmptyTreeContent } from "./EmptyTreeContent.js";
+import { EmptyTreeContent } from "./EmptyTree.js";
 import { ProgressOverlay } from "./ProgressOverlay.js";
 
 import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
@@ -26,7 +26,6 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type { PresentationHierarchyNode, SelectionStorage, useIModelTree, useSelectionHandler } from "@itwin/presentation-hierarchies-react";
 import type { HighlightInfo } from "../UseNodeHighlighting.js";
-
 /** @beta */
 export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPaths" | "getHierarchyDefinition"> &
   Partial<Pick<FunctionProps<typeof useSelectionHandler>, "selectionMode">> & {
@@ -163,11 +162,7 @@ function TreeImpl({
   }
 
   if (rootNodes.length === 0 && !isLoading) {
-    return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", width: "100%", height: "100%" }}>
-        {emptyTreeContent ? emptyTreeContent : <EmptyTreeContent />}
-      </div>
-    );
+    return <>{emptyTreeContent ? emptyTreeContent : <EmptyTreeContent />}</>;
   }
 
   const treeRendererProps: FunctionProps<TreeProps["treeRenderer"]> = {
