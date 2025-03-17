@@ -32,19 +32,24 @@ test.describe("iModel content tree", () => {
 
   test("expanded tree node", async ({ page }) => {
     const plantDocumentModelNode = locateNode(treeWidget, "PlantDocumentModel");
-    await plantDocumentModelNode.getByRole("button", { name: "Toggle", includeHidden: true }).click();
+    await plantDocumentModelNode.click();
+    await page.keyboard.press("ArrowRight");
 
     const pipeSupportNode = locateNode(treeWidget, "Drawing (4)");
-    await pipeSupportNode.getByRole("button", { name: "Toggle", includeHidden: true }).click();
+    await pipeSupportNode.click();
+    await page.keyboard.press("ArrowRight");
 
     const coolersNode = locateNode(treeWidget, "OPPID-04-COOLERS");
-    await coolersNode.getByRole("button", { name: "Toggle", includeHidden: true }).click();
+    await coolersNode.click();
+    await page.keyboard.press("ArrowRight");
 
     const bordersNode = locateNode(treeWidget, "Border");
-    await bordersNode.getByRole("button", { name: "Toggle", includeHidden: true }).click();
+    await bordersNode.click();
+    await page.keyboard.press("ArrowRight");
 
     const graphicNode = locateNode(treeWidget, "Pid Graphic (1)");
-    await graphicNode.getByRole("button", { name: "Toggle", includeHidden: true }).click();
+    await graphicNode.click();
+    await page.keyboard.press("ArrowRight");
 
     await locateNode(treeWidget, "D_SIZE [3-T4]").waitFor();
     await takeScreenshot(page, treeWidget);

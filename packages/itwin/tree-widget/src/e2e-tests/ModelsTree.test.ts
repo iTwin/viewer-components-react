@@ -33,17 +33,20 @@ test.describe("Models tree", () => {
     await physicalModelNode.click();
     await expect(physicalModelNode).toHaveAttribute("aria-selected", "false");
 
-    await physicalModelNode.getByRole("button", { name: "Toggle", includeHidden: true }).click();
+    await physicalModelNode.click();
+    await page.keyboard.press("ArrowRight");
     const equipmentNode = locateNode(treeWidget, "Equipment");
     await equipmentNode.click();
     await expect(equipmentNode).toHaveAttribute("aria-selected", "false");
 
-    await equipmentNode.getByRole("button", { name: "Toggle", includeHidden: true }).click();
+    await equipmentNode.click();
+    await page.keyboard.press("ArrowRight");
     const parReboilerGroupingNode = locateNode(treeWidget, "Par. Reboiler");
     await parReboilerGroupingNode.click();
     await expect(parReboilerGroupingNode).toHaveAttribute("aria-selected", "false");
 
-    await parReboilerGroupingNode.getByRole("button", { name: "Toggle", includeHidden: true }).click();
+    await parReboilerGroupingNode.click();
+    await page.keyboard.press("ArrowRight");
     const parReboilerInstanceNode = locateNode(treeWidget, "EX-302 [4-106]");
     await parReboilerInstanceNode.click();
     await expect(parReboilerInstanceNode).toHaveAttribute("aria-selected", "false");
@@ -57,13 +60,16 @@ test.describe("Models tree", () => {
 
   test("expanded tree node", async ({ page }) => {
     const physicalModelNode = locateNode(treeWidget, "ProcessPhysicalModel");
-    await physicalModelNode.getByRole("button", { name: "Toggle", includeHidden: true }).click();
+    await physicalModelNode.click();
+    await page.keyboard.press("ArrowRight");
 
     const pipeSupportNode = locateNode(treeWidget, "PipeSupport");
-    await pipeSupportNode.getByRole("button", { name: "Toggle", includeHidden: true }).click();
+    await pipeSupportNode.click();
+    await page.keyboard.press("ArrowRight");
 
     const hangerRodNode = locateNode(treeWidget, "Hanger Rod");
-    await hangerRodNode.getByRole("button", { name: "Toggle", includeHidden: true }).click();
+    await hangerRodNode.click();
+    await page.keyboard.press("ArrowRight");
 
     // wait for node children to be visible/loaded
     await locateNode(treeWidget, "Hanger Rod [4-2UH]").waitFor();
@@ -129,7 +135,8 @@ test.describe("Models tree", () => {
 
   test("search - not found", async ({ page }) => {
     const node = locateNode(treeWidget, "ProcessPhysicalModel");
-    await node.getByRole("button", { name: "Toggle", includeHidden: true }).click();
+    await node.click();
+    await page.keyboard.press("ArrowRight");
 
     await treeWidget.getByRole("button", { name: "Search the tree" }).click();
     await treeWidget.getByPlaceholder("Search...").fill("Test");
@@ -141,7 +148,8 @@ test.describe("Models tree", () => {
 
   test("search - too many results", async ({ page }) => {
     const node = locateNode(treeWidget, "ProcessPhysicalModel");
-    await node.getByRole("button", { name: "Toggle", includeHidden: true }).click();
+    await node.click();
+    await page.keyboard.press("ArrowRight");
 
     await treeWidget.getByRole("button", { name: "Search the tree" }).click();
     await treeWidget.getByPlaceholder("Search...").fill("x");
@@ -153,7 +161,9 @@ test.describe("Models tree", () => {
 
   test("instances focus", async ({ page }) => {
     const physicalModelNode = locateNode(treeWidget, "ProcessPhysicalModel");
-    await physicalModelNode.getByRole("button", { name: "Toggle", includeHidden: true }).click();
+    await physicalModelNode.click();
+    await page.keyboard.press("ArrowRight");
+    await physicalModelNode.click({ modifiers: ["Control"] });
 
     // wait for all children nodes to be visible
     await locateNode(treeWidget, "Structure").waitFor();
@@ -170,7 +180,8 @@ test.describe("Models tree", () => {
 
   test("instances focus - too many results", async ({ page }) => {
     const physicalModelNode = locateNode(treeWidget, "ProcessPhysicalModel");
-    await physicalModelNode.getByRole("button", { name: "Toggle", includeHidden: true }).click();
+    await physicalModelNode.click();
+    await page.keyboard.press("ArrowRight");
 
     // wait for all children nodes to be visible
     await locateNode(treeWidget, "Structure").waitFor();

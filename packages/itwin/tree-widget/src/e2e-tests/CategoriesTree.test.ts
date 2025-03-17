@@ -32,7 +32,8 @@ test.describe("Categories tree", () => {
 
   test("expanded tree node", async ({ page }) => {
     const node = locateNode(treeWidget, "Equipment");
-    await node.getByRole("button", { name: "Toggle", includeHidden: true }).click();
+    await node.click();
+    await page.keyboard.press("ArrowRight");
 
     // wait for node at the bottom to be visible/loaded
     await locateNode(treeWidget, "Equipment - Insulation").waitFor();
