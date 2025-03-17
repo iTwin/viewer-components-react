@@ -6,6 +6,7 @@
 import type { Locator } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import {
+  expandNode,
   initTreeWidgetTest,
   locateInstanceFilter,
   locateNode,
@@ -32,7 +33,7 @@ test.describe("Categories tree", () => {
 
   test("expanded tree node", async ({ page }) => {
     const node = locateNode(treeWidget, "Equipment");
-    await node.getByRole("button", { name: "Toggle", includeHidden: true }).click();
+    await expandNode(page, node);
 
     // wait for node at the bottom to be visible/loaded
     await locateNode(treeWidget, "Equipment - Insulation").waitFor();

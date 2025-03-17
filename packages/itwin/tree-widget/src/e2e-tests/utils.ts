@@ -159,3 +159,8 @@ async function getBoundedBoundingBox(component: Locator, boundingComponent?: Loc
 
   return box;
 }
+
+export async function expandNode(page: Page, node: Locator) {
+  await node.focus();
+  await page.keyboard.press("ArrowRight");
+}
