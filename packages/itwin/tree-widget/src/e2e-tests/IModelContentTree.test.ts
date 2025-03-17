@@ -6,6 +6,7 @@
 import type { Locator } from "@playwright/test";
 import { test } from "@playwright/test";
 import {
+  expandNode,
   initTreeWidgetTest,
   locateInstanceFilter,
   locateNode,
@@ -32,24 +33,19 @@ test.describe("iModel content tree", () => {
 
   test("expanded tree node", async ({ page }) => {
     const plantDocumentModelNode = locateNode(treeWidget, "PlantDocumentModel");
-    await plantDocumentModelNode.focus();
-    await page.keyboard.press("ArrowRight");
+    await expandNode(page, plantDocumentModelNode);
 
     const pipeSupportNode = locateNode(treeWidget, "Drawing (4)");
-    await pipeSupportNode.focus();
-    await page.keyboard.press("ArrowRight");
+    await expandNode(page, pipeSupportNode);
 
     const coolersNode = locateNode(treeWidget, "OPPID-04-COOLERS");
-    await coolersNode.focus();
-    await page.keyboard.press("ArrowRight");
+    await expandNode(page, coolersNode);
 
     const bordersNode = locateNode(treeWidget, "Border");
-    await bordersNode.focus();
-    await page.keyboard.press("ArrowRight");
+    await expandNode(page, bordersNode);
 
     const graphicNode = locateNode(treeWidget, "Pid Graphic (1)");
-    await graphicNode.focus();
-    await page.keyboard.press("ArrowRight");
+    await expandNode(page, graphicNode);
 
     await locateNode(treeWidget, "D_SIZE [3-T4]").waitFor();
     await takeScreenshot(page, treeWidget);
