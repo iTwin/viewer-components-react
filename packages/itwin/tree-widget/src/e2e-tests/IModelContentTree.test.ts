@@ -32,23 +32,23 @@ test.describe("iModel content tree", () => {
 
   test("expanded tree node", async ({ page }) => {
     const plantDocumentModelNode = locateNode(treeWidget, "PlantDocumentModel");
-    await plantDocumentModelNode.click();
+    await plantDocumentModelNode.focus();
     await page.keyboard.press("ArrowRight");
 
     const pipeSupportNode = locateNode(treeWidget, "Drawing (4)");
-    await pipeSupportNode.click();
+    await pipeSupportNode.focus();
     await page.keyboard.press("ArrowRight");
 
     const coolersNode = locateNode(treeWidget, "OPPID-04-COOLERS");
-    await coolersNode.click();
+    await coolersNode.focus();
     await page.keyboard.press("ArrowRight");
 
     const bordersNode = locateNode(treeWidget, "Border");
-    await bordersNode.click();
+    await bordersNode.focus();
     await page.keyboard.press("ArrowRight");
 
     const graphicNode = locateNode(treeWidget, "Pid Graphic (1)");
-    await graphicNode.click();
+    await graphicNode.focus();
     await page.keyboard.press("ArrowRight");
 
     await locateNode(treeWidget, "D_SIZE [3-T4]").waitFor();

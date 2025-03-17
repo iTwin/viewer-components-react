@@ -33,19 +33,19 @@ test.describe("Models tree", () => {
     await physicalModelNode.click();
     await expect(physicalModelNode).toHaveAttribute("aria-selected", "false");
 
-    await physicalModelNode.click();
+    await physicalModelNode.focus();
     await page.keyboard.press("ArrowRight");
     const equipmentNode = locateNode(treeWidget, "Equipment");
     await equipmentNode.click();
     await expect(equipmentNode).toHaveAttribute("aria-selected", "false");
 
-    await equipmentNode.click();
+    await equipmentNode.focus();
     await page.keyboard.press("ArrowRight");
     const parReboilerGroupingNode = locateNode(treeWidget, "Par. Reboiler");
     await parReboilerGroupingNode.click();
     await expect(parReboilerGroupingNode).toHaveAttribute("aria-selected", "false");
 
-    await parReboilerGroupingNode.click();
+    await parReboilerGroupingNode.focus();
     await page.keyboard.press("ArrowRight");
     const parReboilerInstanceNode = locateNode(treeWidget, "EX-302 [4-106]");
     await parReboilerInstanceNode.click();
@@ -60,15 +60,15 @@ test.describe("Models tree", () => {
 
   test("expanded tree node", async ({ page }) => {
     const physicalModelNode = locateNode(treeWidget, "ProcessPhysicalModel");
-    await physicalModelNode.click();
+    await physicalModelNode.focus();
     await page.keyboard.press("ArrowRight");
 
     const pipeSupportNode = locateNode(treeWidget, "PipeSupport");
-    await pipeSupportNode.click();
+    await pipeSupportNode.focus();
     await page.keyboard.press("ArrowRight");
 
     const hangerRodNode = locateNode(treeWidget, "Hanger Rod");
-    await hangerRodNode.click();
+    await hangerRodNode.focus();
     await page.keyboard.press("ArrowRight");
 
     // wait for node children to be visible/loaded
@@ -135,7 +135,7 @@ test.describe("Models tree", () => {
 
   test("search - not found", async ({ page }) => {
     const node = locateNode(treeWidget, "ProcessPhysicalModel");
-    await node.click();
+    await node.focus();
     await page.keyboard.press("ArrowRight");
 
     await treeWidget.getByRole("button", { name: "Search the tree" }).click();
@@ -148,7 +148,7 @@ test.describe("Models tree", () => {
 
   test("search - too many results", async ({ page }) => {
     const node = locateNode(treeWidget, "ProcessPhysicalModel");
-    await node.click();
+    await node.focus();
     await page.keyboard.press("ArrowRight");
 
     await treeWidget.getByRole("button", { name: "Search the tree" }).click();
@@ -161,9 +161,8 @@ test.describe("Models tree", () => {
 
   test("instances focus", async ({ page }) => {
     const physicalModelNode = locateNode(treeWidget, "ProcessPhysicalModel");
-    await physicalModelNode.click();
+    await physicalModelNode.focus();
     await page.keyboard.press("ArrowRight");
-    await physicalModelNode.click({ modifiers: ["Control"] });
 
     // wait for all children nodes to be visible
     await locateNode(treeWidget, "Structure").waitFor();
@@ -180,7 +179,7 @@ test.describe("Models tree", () => {
 
   test("instances focus - too many results", async ({ page }) => {
     const physicalModelNode = locateNode(treeWidget, "ProcessPhysicalModel");
-    await physicalModelNode.click();
+    await physicalModelNode.focus();
     await page.keyboard.press("ArrowRight");
 
     // wait for all children nodes to be visible

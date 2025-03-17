@@ -32,7 +32,7 @@ test.describe("Categories tree", () => {
 
   test("expanded tree node", async ({ page }) => {
     const node = locateNode(treeWidget, "Equipment");
-    await node.click();
+    await node.focus();
     await page.keyboard.press("ArrowRight");
 
     // wait for node at the bottom to be visible/loaded
