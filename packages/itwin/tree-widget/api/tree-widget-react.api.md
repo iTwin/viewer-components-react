@@ -51,6 +51,8 @@ export const CategoriesTreeComponent: {
 interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
     headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode>;
     // (undocumented)
+    hideSubCategories?: boolean;
+    // (undocumented)
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
     onPerformanceMeasured?: (featureId: string, duration: number) => void;
@@ -69,6 +71,7 @@ type CategoriesTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContex
     hierarchyLevelConfig?: {
         sizeLimit?: number;
     };
+    hideSubCategories?: boolean;
 };
 
 // @beta
@@ -471,7 +474,7 @@ interface TreeWithHeaderProps {
 }
 
 // @beta
-export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: UseCategoriesTreeProps): UseCategoriesTreeResult;
+export function useCategoriesTree({ filter, activeView, onCategoriesFiltered, hideSubCategories }: UseCategoriesTreeProps): UseCategoriesTreeResult;
 
 // @public
 export function useCategoriesTreeButtonProps({ viewport }: {
@@ -487,6 +490,8 @@ interface UseCategoriesTreeProps {
     activeView: Viewport;
     // (undocumented)
     filter: string;
+    // (undocumented)
+    hideSubCategories?: boolean;
     // (undocumented)
     onCategoriesFiltered?: (categories: CategoryInfo[] | undefined) => void;
 }

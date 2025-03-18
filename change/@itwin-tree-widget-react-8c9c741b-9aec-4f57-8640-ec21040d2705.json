@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Added optional 'hideSubCategories' parameter to 'CategoriesTreeComponentProps', 'CategoriesTreeProps' and 'UseCategoriesTreeProps'. When it is set to true, CategoriesTree does not show SubCategories.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "100586436+JonasDov@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

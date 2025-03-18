@@ -307,6 +307,33 @@ describe("Categories tree", () => {
       });
     });
 
+    it("does not show subCategories if hideSubCategories is set to true", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+
+        const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+
+        insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "Test SpatialSubCategory" });
+
+        return { category };
+      });
+
+      const { imodel, ...keys } = buildIModelResult;
+      using provider = createCategoryTreeProvider(imodel, "3d", true);
+
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.category],
+            supportsFiltering: true,
+            children: false,
+          }),
+        ],
+      });
+    });
+
     it("does not show private 3d subCategories", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
@@ -411,10 +438,15 @@ describe("Categories tree", () => {
   });
 });
 
-function createCategoryTreeProvider(imodel: IModelConnection, viewType: "2d" | "3d") {
+function createCategoryTreeProvider(imodel: IModelConnection, viewType: "2d" | "3d", hideSubCategories?: boolean) {
   const imodelAccess = createIModelAccess(imodel);
   return createIModelHierarchyProvider({
     imodelAccess,
-    hierarchyDefinition: new CategoriesTreeDefinition({ imodelAccess, viewType, idsCache: new CategoriesTreeIdsCache(imodelAccess, viewType) }),
+    hierarchyDefinition: new CategoriesTreeDefinition({
+      imodelAccess,
+      viewType,
+      idsCache: new CategoriesTreeIdsCache(imodelAccess, viewType),
+      hideSubCategories,
+    }),
   });
 }

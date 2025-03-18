@@ -16,6 +16,7 @@ export type CategoriesTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchem
     hierarchyLevelConfig?: {
       sizeLimit?: number;
     };
+    hideSubCategories?: boolean;
   };
 
 /** @beta */
@@ -29,11 +30,13 @@ export function CategoriesTree({
   hierarchyLevelConfig,
   selectionMode,
   onCategoriesFiltered,
+  hideSubCategories,
 }: CategoriesTreeProps) {
   const { categoriesTreeProps, rendererProps } = useCategoriesTree({
     filter,
     activeView,
     onCategoriesFiltered,
+    hideSubCategories,
   });
 
   return (
