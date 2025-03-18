@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Fixed a bug in categories tree. Categories tree would show definition containers, that contain categories without elements. Categories tree now displays definition containers only when they have categories that contain elements.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "100586436+JonasDov@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

@@ -143,6 +143,34 @@ describe("Categories tree", () => {
       });
     });
 
+    it("does not show definition container or category when category does not have elements", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+
+        insertSpatialCategory({ builder, codeValue: "SpatialCategory1", modelId: definitionModel.id });
+        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
+
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+        return { category };
+      });
+
+      const { imodel, ...keys } = buildIModelResult;
+      using provider = createCategoryTreeProvider(imodel, "3d");
+
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.category],
+            supportsFiltering: true,
+            children: false,
+          }),
+        ],
+      });
+    });
+
     it("does not show definition container or category when definition container is private", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });

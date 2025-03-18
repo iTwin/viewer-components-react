@@ -117,7 +117,7 @@ export class CategoriesTreeIdsCache {
           FROM
             ${DEFINITION_CONTAINER_CLASS} dc
           WHERE
-            dc.ECInstanceId IN (SELECT c.Model.Id FROM ${this._categoryClass} c WHERE NOT c.IsPrivate)
+            dc.ECInstanceId IN (SELECT c.Model.Id FROM ${this._categoryClass} c WHERE NOT c.IsPrivate AND EXISTS (SELECT 1 FROM ${this._categoryElementClass} e WHERE e.Category.Id = c.ECInstanceId))
             AND NOT dc.IsPrivate
 
           UNION ALL
