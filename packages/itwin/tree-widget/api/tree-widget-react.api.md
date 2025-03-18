@@ -66,7 +66,7 @@ type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonProps) =
 
 // @beta
 interface CategoriesTreeHierarchyConfiguration {
-    hideSubCategories?: boolean;
+    hideSubCategories: boolean;
 }
 
 // @beta (undocumented)

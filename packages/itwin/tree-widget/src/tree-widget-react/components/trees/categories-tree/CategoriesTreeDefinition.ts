@@ -50,7 +50,7 @@ interface CategoriesTreeInstanceKeyPathsFromInstanceLabelProps {
  */
 export interface CategoriesTreeHierarchyConfiguration {
   /** Should SubCategories be hidden. Defaults to `false` */
-  hideSubCategories?: boolean;
+  hideSubCategories: boolean;
 }
 
 /** @internal */
