@@ -51,6 +51,8 @@ export const CategoriesTreeComponent: {
 interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "getSchemaContext" | "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "filter" | "emptyTreeContent" | "actions"> {
     headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode>;
     // (undocumented)
+    hideSubCategories?: boolean;
+    // (undocumented)
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
     onPerformanceMeasured?: (featureId: string, duration: number) => void;
@@ -426,7 +428,7 @@ interface TreeWidgetProps {
 }
 
 // @beta
-export function useCategoriesTree({ filter, activeView, onCategoriesFiltered, emptyTreeContent }: UseCategoriesTreeProps): UseCategoriesTreeResult;
+export function useCategoriesTree({ filter, activeView, onCategoriesFiltered, emptyTreeContent, hideSubCategories, }: UseCategoriesTreeProps): UseCategoriesTreeResult;
 
 // @public
 export function useCategoriesTreeButtonProps({ viewport }: {
@@ -444,6 +446,8 @@ interface UseCategoriesTreeProps {
     emptyTreeContent?: ReactNode;
     // (undocumented)
     filter?: string;
+    // (undocumented)
+    hideSubCategories?: boolean;
     // (undocumented)
     onCategoriesFiltered?: (categories: CategoryInfo[] | undefined) => void;
 }

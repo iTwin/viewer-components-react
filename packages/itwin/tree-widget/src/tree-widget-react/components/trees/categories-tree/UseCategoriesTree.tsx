@@ -35,6 +35,7 @@ export interface UseCategoriesTreeProps {
   onCategoriesFiltered?: (categories: CategoryInfo[] | undefined) => void;
   filter?: string;
   emptyTreeContent?: ReactNode;
+  hideSubCategories?: boolean;
 }
 
 /** @beta */
@@ -50,7 +51,13 @@ interface UseCategoriesTreeResult {
  * Custom hook to create and manage state for the categories tree.
  * @beta
  */
-export function useCategoriesTree({ filter, activeView, onCategoriesFiltered, emptyTreeContent }: UseCategoriesTreeProps): UseCategoriesTreeResult {
+export function useCategoriesTree({
+  filter,
+  activeView,
+  onCategoriesFiltered,
+  emptyTreeContent,
+  hideSubCategories,
+}: UseCategoriesTreeProps): UseCategoriesTreeResult {
   const [filteringError, setFilteringError] = useState<CategoriesTreeFilteringError | undefined>();
 
   const viewType = activeView.view.is2d() ? "2d" : "3d";
@@ -76,9 +83,9 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered, em
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
     (props) => {
-      return new CategoriesTreeDefinition({ ...props, viewType, idsCache });
+      return new CategoriesTreeDefinition({ ...props, viewType, idsCache, hideSubCategories });
     },
-    [viewType, idsCache],
+    [viewType, idsCache, hideSubCategories],
   );
 
   const getFilteredPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
@@ -90,7 +97,7 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered, em
     return async ({ imodelAccess }) => {
       onFeatureUsed({ featureId: "filtering", reportInteraction: true });
       try {
-        const paths = await CategoriesTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, viewType, idsCache });
+        const paths = await CategoriesTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, viewType, idsCache, hideSubCategories });
         onCategoriesFiltered?.(await getCategoriesFromPaths(paths, idsCache));
         return paths;
       } catch (e) {
@@ -103,7 +110,7 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered, em
         return [];
       }
     };
-  }, [filter, viewType, onFeatureUsed, onCategoriesFiltered, idsCache]);
+  }, [filter, viewType, onFeatureUsed, onCategoriesFiltered, idsCache, hideSubCategories]);
 
   return {
     categoriesTreeProps: {

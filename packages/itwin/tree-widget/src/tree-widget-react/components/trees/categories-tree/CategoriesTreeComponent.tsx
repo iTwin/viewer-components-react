@@ -36,6 +36,7 @@ interface CategoriesTreeComponentProps
   headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode>;
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
+  hideSubCategories?: boolean;
 }
 
 /**
