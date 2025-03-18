@@ -62,7 +62,6 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
       imodelAccess: props.imodelAccess,
       instanceLabelSelectClauseFactory: this._nodeLabelSelectClauseFactory,
     });
-    console.log("hideSubCategories", props.hideSubCategories);
     this._hideSubCategories = !!props.hideSubCategories;
   }
 
