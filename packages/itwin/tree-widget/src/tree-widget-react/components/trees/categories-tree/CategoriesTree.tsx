@@ -31,14 +31,14 @@ export function CategoriesTree({
   selectionMode,
   onCategoriesFiltered,
   emptyTreeContent,
-  hideSubCategories,
+  hierarchyConfig,
 }: CategoriesTreeProps) {
   const { categoriesTreeProps, rendererProps } = useCategoriesTree({
     filter,
     activeView,
     onCategoriesFiltered,
     emptyTreeContent,
-    hideSubCategories,
+    hierarchyConfig,
   });
 
   return (

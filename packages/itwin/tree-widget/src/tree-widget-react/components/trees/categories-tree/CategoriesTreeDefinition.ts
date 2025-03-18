@@ -32,7 +32,7 @@ interface CategoriesTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   viewType: "2d" | "3d";
   idsCache: CategoriesTreeIdsCache;
-  hideSubCategories?: boolean;
+  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
 }
 
 interface CategoriesTreeInstanceKeyPathsFromInstanceLabelProps {
@@ -41,8 +41,22 @@ interface CategoriesTreeInstanceKeyPathsFromInstanceLabelProps {
   viewType: "2d" | "3d";
   limit?: number | "unbounded";
   idsCache: CategoriesTreeIdsCache;
+  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
+}
+
+/**
+ * Defines hierarchy configuration supported by `CategoriesTree`.
+ * @beta
+ */
+export interface CategoriesTreeHierarchyConfiguration {
+  /** Should SubCategories be hidden. Defaults to `false` */
   hideSubCategories?: boolean;
 }
+
+/** @internal */
+export const defaultHierarchyConfiguration: CategoriesTreeHierarchyConfiguration = {
+  hideSubCategories: false,
+};
 
 export class CategoriesTreeDefinition implements HierarchyDefinition {
   private _impl: Promise<HierarchyDefinition> | undefined;
@@ -50,7 +64,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   private _nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
   private _idsCache: CategoriesTreeIdsCache;
   private _viewType: "2d" | "3d";
-  private _hideSubCategories: boolean;
+  private _hierarchyConfig: CategoriesTreeHierarchyConfiguration;
   private _iModelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
 
   public constructor(props: CategoriesTreeDefinitionProps) {
@@ -62,7 +76,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
       imodelAccess: props.imodelAccess,
       instanceLabelSelectClauseFactory: this._nodeLabelSelectClauseFactory,
     });
-    this._hideSubCategories = !!props.hideSubCategories;
+    this._hierarchyConfig = props.hierarchyConfig;
   }
 
   private async getHierarchyDefinition(): Promise<HierarchyDefinition> {
@@ -74,7 +88,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
           rootNodes: async (requestProps: DefineRootHierarchyLevelProps) =>
             this.createDefinitionContainersAndCategoriesQuery({ ...requestProps, viewType: this._viewType }),
           childNodes: [
-            ...(this._hideSubCategories
+            ...(this._hierarchyConfig.hideSubCategories
               ? []
               : [
                   {
@@ -186,7 +200,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                     className: categoryClass,
                   }),
                 },
-                ...(this._hideSubCategories
+                ...(this._hierarchyConfig.hideSubCategories
                   ? { hasChildren: false }
                   : dataToDetermineHasChildren.ids.length > 0
                     ? {
@@ -309,7 +323,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
               this.ECInstanceId IN (${categories.join(", ")})
               GROUP BY this.ECInstanceId
           )`,
-        ...(props.hideSubCategories
+        ...(props.hierarchyConfig.hideSubCategories
           ? []
           : [
               `${SUBCATEGORIES_WITH_LABELS_CTE}(ClassName, ECInstanceId, ParentId, DisplayLabel) AS (
@@ -350,7 +364,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
             WHERE
               c.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
             ${
-              props.hideSubCategories
+              props.hierarchyConfig.hideSubCategories
                 ? ""
                 : `
                   UNION ALL
@@ -384,7 +398,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
       `;
       const bindings = [
         { type: "string" as const, value: adjustedLabel },
-        ...(props.hideSubCategories ? [] : [{ type: "string" as const, value: adjustedLabel }]),
+        ...(props.hierarchyConfig.hideSubCategories ? [] : [{ type: "string" as const, value: adjustedLabel }]),
         ...(definitionContainers.length > 0 ? [{ type: "string" as const, value: adjustedLabel }] : []),
       ];
       return props.imodelAccess.createQueryReader(
@@ -406,11 +420,11 @@ async function createInstanceKeyPathsFromInstanceLabel(
 }
 
 function createInstanceKeyPathsFromTargetItems(
-  props: Pick<CategoriesTreeInstanceKeyPathsFromInstanceLabelProps, "idsCache" | "limit" | "viewType" | "hideSubCategories"> & {
+  props: Pick<CategoriesTreeInstanceKeyPathsFromInstanceLabelProps, "idsCache" | "limit" | "viewType" | "hierarchyConfig"> & {
     targetItems: InstanceKey[];
   },
 ): Observable<HierarchyFilteringPath> {
-  const { limit, targetItems, viewType, idsCache } = props;
+  const { limit, targetItems, viewType, idsCache, hierarchyConfig } = props;
   if (limit !== "unbounded" && targetItems.length > (limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT)) {
     throw new FilterLimitExceededError(limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT);
   }
@@ -428,7 +442,9 @@ function createInstanceKeyPathsFromTargetItems(
       if (targetItem.className === categoryClass) {
         return { path: await idsCache.getInstanceKeyPaths({ categoryId: targetItem.id }), options: { autoExpand: true } };
       }
-      return props.hideSubCategories ? [] : { path: await idsCache.getInstanceKeyPaths({ subCategoryId: targetItem.id }), options: { autoExpand: true } };
+      return hierarchyConfig.hideSubCategories
+        ? []
+        : { path: await idsCache.getInstanceKeyPaths({ subCategoryId: targetItem.id }), options: { autoExpand: true } };
     }),
   );
 }
