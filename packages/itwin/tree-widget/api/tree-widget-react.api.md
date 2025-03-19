@@ -48,7 +48,7 @@ export const CategoriesTreeComponent: {
 };
 
 // @public (undocumented)
-interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "getSchemaContext" | "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "filter" | "emptyTreeContent" | "actions"> {
+interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "getSchemaContext" | "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "filter" | "emptyTreeContent" | "actions" | "hierarchyConfig"> {
     headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode>;
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
@@ -63,6 +63,11 @@ interface CategoriesTreeHeaderButtonProps extends TreeToolbarButtonProps {
 
 // @public (undocumented)
 type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonProps) => React.ReactElement | null;
+
+// @beta
+interface CategoriesTreeHierarchyConfiguration {
+    hideSubCategories: boolean;
+}
 
 // @beta (undocumented)
 type CategoriesTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> & Pick<VisibilityTreeRendererProps, "actions"> & UseCategoriesTreeProps & {
@@ -426,7 +431,7 @@ interface TreeWidgetProps {
 }
 
 // @beta
-export function useCategoriesTree({ filter, activeView, onCategoriesFiltered, emptyTreeContent }: UseCategoriesTreeProps): UseCategoriesTreeResult;
+export function useCategoriesTree({ filter, activeView, onCategoriesFiltered, emptyTreeContent, hierarchyConfig, }: UseCategoriesTreeProps): UseCategoriesTreeResult;
 
 // @public
 export function useCategoriesTreeButtonProps({ viewport }: {
@@ -444,6 +449,8 @@ interface UseCategoriesTreeProps {
     emptyTreeContent?: ReactNode;
     // (undocumented)
     filter?: string;
+    // (undocumented)
+    hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>;
     // (undocumented)
     onCategoriesFiltered?: (categories: CategoryInfo[] | undefined) => void;
 }

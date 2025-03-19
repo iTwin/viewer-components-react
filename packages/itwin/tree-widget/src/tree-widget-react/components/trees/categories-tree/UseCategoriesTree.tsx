@@ -13,7 +13,7 @@ import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presenta
 import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMatches } from "../common/components/EmptyTree.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 import { useTelemetryContext } from "../common/UseTelemetryContext.js";
-import { CategoriesTreeDefinition } from "./CategoriesTreeDefinition.js";
+import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
 import { CategoriesVisibilityHandler } from "./internal/CategoriesVisibilityHandler.js";
 import { DEFINITION_CONTAINER_CLASS, SUB_CATEGORY_CLASS } from "./internal/ClassNameDefinitions.js";
@@ -26,6 +26,8 @@ import type { Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
+import type { CategoriesTreeHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
+
 type CategoriesTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError";
 type HierarchyFilteringPaths = Awaited<ReturnType<Required<VisibilityTreeProps>["getFilteredPaths"]>>;
 
@@ -35,6 +37,7 @@ export interface UseCategoriesTreeProps {
   onCategoriesFiltered?: (categories: CategoryInfo[] | undefined) => void;
   filter?: string;
   emptyTreeContent?: ReactNode;
+  hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>;
 }
 
 /** @beta */
@@ -50,8 +53,22 @@ interface UseCategoriesTreeResult {
  * Custom hook to create and manage state for the categories tree.
  * @beta
  */
-export function useCategoriesTree({ filter, activeView, onCategoriesFiltered, emptyTreeContent }: UseCategoriesTreeProps): UseCategoriesTreeResult {
+export function useCategoriesTree({
+  filter,
+  activeView,
+  onCategoriesFiltered,
+  emptyTreeContent,
+  hierarchyConfig,
+}: UseCategoriesTreeProps): UseCategoriesTreeResult {
   const [filteringError, setFilteringError] = useState<CategoriesTreeFilteringError | undefined>();
+  const hierarchyConfiguration = useMemo<CategoriesTreeHierarchyConfiguration>(
+    () => ({
+      ...defaultHierarchyConfiguration,
+      ...hierarchyConfig,
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    Object.values(hierarchyConfig ?? {}),
+  );
 
   const viewType = activeView.view.is2d() ? "2d" : "3d";
   const iModel = activeView.iModel;
@@ -76,9 +93,9 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered, em
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
     (props) => {
-      return new CategoriesTreeDefinition({ ...props, viewType, idsCache });
+      return new CategoriesTreeDefinition({ ...props, viewType, idsCache, hierarchyConfig: hierarchyConfiguration });
     },
-    [viewType, idsCache],
+    [viewType, idsCache, hierarchyConfiguration],
   );
 
   const getFilteredPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
@@ -90,7 +107,13 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered, em
     return async ({ imodelAccess }) => {
       onFeatureUsed({ featureId: "filtering", reportInteraction: true });
       try {
-        const paths = await CategoriesTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, viewType, idsCache });
+        const paths = await CategoriesTreeDefinition.createInstanceKeyPaths({
+          imodelAccess,
+          label: filter,
+          viewType,
+          idsCache,
+          hierarchyConfig: hierarchyConfiguration,
+        });
         onCategoriesFiltered?.(await getCategoriesFromPaths(paths, idsCache));
         return paths;
       } catch (e) {
@@ -103,7 +126,7 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered, em
         return [];
       }
     };
-  }, [filter, viewType, onFeatureUsed, onCategoriesFiltered, idsCache]);
+  }, [filter, viewType, onFeatureUsed, onCategoriesFiltered, idsCache, hierarchyConfiguration]);
 
   return {
     categoriesTreeProps: {
