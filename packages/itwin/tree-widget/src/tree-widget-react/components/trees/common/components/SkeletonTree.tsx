@@ -9,11 +9,11 @@ import { Skeleton } from "@itwin/itwinui-react/bricks";
 /** @internal */
 export function SkeletonTree() {
   return (
-    <>
+    <div className="tw-skeleton-container">
       {Array.from({ length: 20 }, (_, index) => (
         <SkeletonRow key={index} />
       ))}
-    </>
+    </div>
   );
 }
 

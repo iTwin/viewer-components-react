@@ -14,7 +14,7 @@
     }
   },
   "loading": {
-    "search": "Search in progress"
+    "filter": "Filtering in progress"
   },
   "selectableTree": {
     "noTrees": "There are no trees available for this iModel."
