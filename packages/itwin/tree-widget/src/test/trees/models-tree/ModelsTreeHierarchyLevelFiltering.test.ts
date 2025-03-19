@@ -10,12 +10,7 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { DefaultContentDisplayTypes, KeySet, PresentationRpcInterface, PropertyValueFormat } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
-import {
-  buildTestIModel,
-  HierarchyCacheMode,
-  initialize as initializePresentationTesting,
-  terminate as terminatePresentationTesting,
-} from "@itwin/presentation-testing";
+import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import {
   buildIModel,
   insertExternalSourceAspect,
@@ -56,20 +51,23 @@ describe("Models tree", () => {
       await terminatePresentationTesting();
     });
 
-    const createIModel = async (mochaContext: Mocha.Context) => {
-      // eslint-disable-next-line deprecation/deprecation
-      const imodel = await buildTestIModel(mochaContext, async () => {});
-      return {
-        imodel,
-        async [Symbol.asyncDispose]() {
-          await imodel.close();
-        },
-      };
-    };
     it("can filter root level", async function () {
       // eslint-disable-next-line deprecation/deprecation
-      await using imodelResult = await createIModel(this);
-      const { imodel } = imodelResult;
+      await using imodelResult = await buildIModel(this, async (builder) => {
+        const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
+        const childSubject = insertSubject({ builder, codeValue: "child subject 1", description: "", parentId: rootSubject.id });
+        const category = insertSpatialCategory({ builder, codeValue: "category" });
+        const model = insertPhysicalModelWithPartition({ builder, codeValue: `model 1`, partitionParentId: childSubject.id });
+        insertPhysicalElement({
+          builder,
+          userLabel: `element`,
+          modelId: model.id,
+          categoryId: category.id,
+        });
+
+        return { rootSubject, childSubject, model, category };
+      });
+      const { imodel, ...keys } = imodelResult;
       using provider = createModelsTreeProvider({ imodel });
 
       // validate hierarchy level without filter
@@ -79,7 +77,7 @@ describe("Models tree", () => {
             parentNode: undefined,
           }),
         ),
-        expect: [NodeValidators.createForInstanceNode({ instanceKeys: [{ className: Subject.classFullName.replace(":", "."), id: "0x1" }] })],
+        expect: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.childSubject] })],
       });
 
       // validate descriptor, that is required for creating the filter
@@ -111,7 +109,7 @@ describe("Models tree", () => {
             }),
           }),
         ),
-        expect: [NodeValidators.createForInstanceNode({ instanceKeys: [{ className: Subject.classFullName.replace(":", "."), id: "0x1" }] })],
+        expect: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.childSubject] })],
       });
       validateHierarchyLevel({
         nodes: await collect(

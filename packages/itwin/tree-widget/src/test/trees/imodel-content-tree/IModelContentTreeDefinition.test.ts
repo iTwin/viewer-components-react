@@ -72,32 +72,25 @@ describe("iModel content tree", () => {
           provider,
           expect: [
             NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.rootSubject],
-              autoExpand: true,
+              instanceKeys: [keys.subjectA],
+              supportsFiltering: true,
+              children: false,
+            }),
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.subjectB],
               supportsFiltering: true,
               children: [
                 NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.subjectA],
-                  supportsFiltering: true,
-                  children: false,
-                }),
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.subjectB],
-                  supportsFiltering: true,
-                  children: [
-                    NodeValidators.createForInstanceNode({
-                      instanceKeys: [keys.subjectC],
-                      supportsFiltering: true,
-                      children: false,
-                    }),
-                  ],
-                }),
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.dictionaryModel],
+                  instanceKeys: [keys.subjectC],
                   supportsFiltering: true,
                   children: false,
                 }),
               ],
+            }),
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.dictionaryModel],
+              supportsFiltering: true,
+              children: false,
             }),
           ],
         });
@@ -115,21 +108,14 @@ describe("iModel content tree", () => {
           provider,
           expect: [
             NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.rootSubject],
-              autoExpand: true,
+              instanceKeys: [keys.dictionaryModel],
               supportsFiltering: true,
-              children: [
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.dictionaryModel],
-                  supportsFiltering: true,
-                  children: false,
-                }),
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.physicalModel],
-                  supportsFiltering: true,
-                  children: false,
-                }),
-              ],
+              children: false,
+            }),
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.physicalModel],
+              supportsFiltering: true,
+              children: false,
             }),
           ],
         });
@@ -162,29 +148,22 @@ describe("iModel content tree", () => {
           provider,
           expect: [
             NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.rootSubject],
-              autoExpand: true,
+              instanceKeys: [keys.dictionaryModel],
               supportsFiltering: true,
               children: [
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.dictionaryModel],
-                  supportsFiltering: true,
+                NodeValidators.createForClassGroupingNode({
+                  className: keys.drawingCategory.className,
                   children: [
-                    NodeValidators.createForClassGroupingNode({
-                      className: keys.drawingCategory.className,
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.drawingCategory],
+                      supportsFiltering: true,
                       children: [
-                        NodeValidators.createForInstanceNode({
-                          instanceKeys: [keys.drawingCategory],
-                          supportsFiltering: true,
+                        NodeValidators.createForClassGroupingNode({
+                          className: "BisCore.SubCategory",
                           children: [
-                            NodeValidators.createForClassGroupingNode({
-                              className: "BisCore.SubCategory",
-                              children: [
-                                NodeValidators.createForInstanceNode({
-                                  label: "drawing category",
-                                  children: false,
-                                }),
-                              ],
+                            NodeValidators.createForInstanceNode({
+                              label: "drawing category",
+                              children: false,
                             }),
                           ],
                         }),
@@ -192,30 +171,30 @@ describe("iModel content tree", () => {
                     }),
                   ],
                 }),
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.documentModel],
-                  supportsFiltering: true,
+              ],
+            }),
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.documentModel],
+              supportsFiltering: true,
+              children: [
+                NodeValidators.createForClassGroupingNode({
+                  className: keys.drawingElement.className,
                   children: [
-                    NodeValidators.createForClassGroupingNode({
-                      className: keys.drawingElement.className,
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.drawingElement],
+                      supportsFiltering: true,
                       children: [
                         NodeValidators.createForInstanceNode({
-                          instanceKeys: [keys.drawingElement],
+                          instanceKeys: [keys.drawingCategory],
                           supportsFiltering: true,
                           children: [
-                            NodeValidators.createForInstanceNode({
-                              instanceKeys: [keys.drawingCategory],
-                              supportsFiltering: true,
+                            NodeValidators.createForClassGroupingNode({
+                              className: keys.drawingGraphic.className,
                               children: [
-                                NodeValidators.createForClassGroupingNode({
-                                  className: keys.drawingGraphic.className,
-                                  children: [
-                                    NodeValidators.createForInstanceNode({
-                                      instanceKeys: [keys.drawingGraphic],
-                                      supportsFiltering: true,
-                                      children: false,
-                                    }),
-                                  ],
+                                NodeValidators.createForInstanceNode({
+                                  instanceKeys: [keys.drawingGraphic],
+                                  supportsFiltering: true,
+                                  children: false,
                                 }),
                               ],
                             }),
@@ -273,44 +252,37 @@ describe("iModel content tree", () => {
           provider,
           expect: [
             NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.rootSubject],
-              autoExpand: true,
+              instanceKeys: [keys.dictionaryModel],
               supportsFiltering: true,
               children: [
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.dictionaryModel],
-                  supportsFiltering: true,
+                NodeValidators.createForClassGroupingNode({
+                  className: keys.drawingCategory1.className,
                   children: [
-                    NodeValidators.createForClassGroupingNode({
-                      className: keys.drawingCategory1.className,
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.drawingCategory1],
+                      supportsFiltering: true,
                       children: [
-                        NodeValidators.createForInstanceNode({
-                          instanceKeys: [keys.drawingCategory1],
-                          supportsFiltering: true,
+                        NodeValidators.createForClassGroupingNode({
+                          className: "BisCore.SubCategory",
                           children: [
-                            NodeValidators.createForClassGroupingNode({
-                              className: "BisCore.SubCategory",
-                              children: [
-                                NodeValidators.createForInstanceNode({
-                                  label: "drawing category 1",
-                                  children: false,
-                                }),
-                              ],
+                            NodeValidators.createForInstanceNode({
+                              label: "drawing category 1",
+                              children: false,
                             }),
                           ],
                         }),
-                        NodeValidators.createForInstanceNode({
-                          instanceKeys: [keys.drawingCategory2],
-                          supportsFiltering: true,
+                      ],
+                    }),
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.drawingCategory2],
+                      supportsFiltering: true,
+                      children: [
+                        NodeValidators.createForClassGroupingNode({
+                          className: "BisCore.SubCategory",
                           children: [
-                            NodeValidators.createForClassGroupingNode({
-                              className: "BisCore.SubCategory",
-                              children: [
-                                NodeValidators.createForInstanceNode({
-                                  label: "drawing category 2",
-                                  children: false,
-                                }),
-                              ],
+                            NodeValidators.createForInstanceNode({
+                              label: "drawing category 2",
+                              children: false,
                             }),
                           ],
                         }),
@@ -318,37 +290,37 @@ describe("iModel content tree", () => {
                     }),
                   ],
                 }),
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.documentModel],
-                  supportsFiltering: true,
+              ],
+            }),
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.documentModel],
+              supportsFiltering: true,
+              children: [
+                NodeValidators.createForClassGroupingNode({
+                  className: keys.drawingElement.className,
                   children: [
-                    NodeValidators.createForClassGroupingNode({
-                      className: keys.drawingElement.className,
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.drawingElement],
+                      supportsFiltering: true,
                       children: [
                         NodeValidators.createForInstanceNode({
-                          instanceKeys: [keys.drawingElement],
+                          instanceKeys: [keys.drawingCategory1],
                           supportsFiltering: true,
                           children: [
-                            NodeValidators.createForInstanceNode({
-                              instanceKeys: [keys.drawingCategory1],
-                              supportsFiltering: true,
+                            NodeValidators.createForClassGroupingNode({
+                              className: keys.parentDrawingGraphic.className,
                               children: [
-                                NodeValidators.createForClassGroupingNode({
-                                  className: keys.parentDrawingGraphic.className,
+                                NodeValidators.createForInstanceNode({
+                                  instanceKeys: [keys.parentDrawingGraphic],
+                                  supportsFiltering: true,
                                   children: [
-                                    NodeValidators.createForInstanceNode({
-                                      instanceKeys: [keys.parentDrawingGraphic],
-                                      supportsFiltering: true,
+                                    NodeValidators.createForClassGroupingNode({
+                                      className: keys.childDrawingGraphic.className,
                                       children: [
-                                        NodeValidators.createForClassGroupingNode({
-                                          className: keys.childDrawingGraphic.className,
-                                          children: [
-                                            NodeValidators.createForInstanceNode({
-                                              instanceKeys: [keys.childDrawingGraphic],
-                                              supportsFiltering: true,
-                                              children: false,
-                                            }),
-                                          ],
+                                        NodeValidators.createForInstanceNode({
+                                          instanceKeys: [keys.childDrawingGraphic],
+                                          supportsFiltering: true,
+                                          children: false,
                                         }),
                                       ],
                                     }),
@@ -384,29 +356,22 @@ describe("iModel content tree", () => {
           provider,
           expect: [
             NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.rootSubject],
-              autoExpand: true,
+              instanceKeys: [keys.dictionaryModel],
               supportsFiltering: true,
               children: [
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.dictionaryModel],
-                  supportsFiltering: true,
+                NodeValidators.createForClassGroupingNode({
+                  className: keys.category.className,
                   children: [
-                    NodeValidators.createForClassGroupingNode({
-                      className: keys.category.className,
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.category],
+                      supportsFiltering: true,
                       children: [
-                        NodeValidators.createForInstanceNode({
-                          instanceKeys: [keys.category],
-                          supportsFiltering: true,
+                        NodeValidators.createForClassGroupingNode({
+                          className: "BisCore.SubCategory",
                           children: [
-                            NodeValidators.createForClassGroupingNode({
-                              className: "BisCore.SubCategory",
-                              children: [
-                                NodeValidators.createForInstanceNode({
-                                  label: "test category",
-                                  children: false,
-                                }),
-                              ],
+                            NodeValidators.createForInstanceNode({
+                              label: "test category",
+                              children: false,
                             }),
                           ],
                         }),
@@ -414,23 +379,23 @@ describe("iModel content tree", () => {
                     }),
                   ],
                 }),
+              ],
+            }),
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.physicalModel],
+              supportsFiltering: true,
+              children: [
                 NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.physicalModel],
+                  instanceKeys: [keys.category],
                   supportsFiltering: true,
                   children: [
-                    NodeValidators.createForInstanceNode({
-                      instanceKeys: [keys.category],
-                      supportsFiltering: true,
+                    NodeValidators.createForClassGroupingNode({
+                      className: keys.element.className,
                       children: [
-                        NodeValidators.createForClassGroupingNode({
-                          className: keys.element.className,
-                          children: [
-                            NodeValidators.createForInstanceNode({
-                              instanceKeys: [keys.element],
-                              supportsFiltering: true,
-                              children: false,
-                            }),
-                          ],
+                        NodeValidators.createForInstanceNode({
+                          instanceKeys: [keys.element],
+                          supportsFiltering: true,
+                          children: false,
                         }),
                       ],
                     }),
@@ -458,44 +423,37 @@ describe("iModel content tree", () => {
           provider,
           expect: [
             NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.rootSubject],
-              autoExpand: true,
+              instanceKeys: [keys.dictionaryModel],
               supportsFiltering: true,
               children: [
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.dictionaryModel],
-                  supportsFiltering: true,
+                NodeValidators.createForClassGroupingNode({
+                  className: keys.category1.className,
                   children: [
-                    NodeValidators.createForClassGroupingNode({
-                      className: keys.category1.className,
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.category1],
+                      supportsFiltering: true,
                       children: [
-                        NodeValidators.createForInstanceNode({
-                          instanceKeys: [keys.category1],
-                          supportsFiltering: true,
+                        NodeValidators.createForClassGroupingNode({
+                          className: "BisCore.SubCategory",
                           children: [
-                            NodeValidators.createForClassGroupingNode({
-                              className: "BisCore.SubCategory",
-                              children: [
-                                NodeValidators.createForInstanceNode({
-                                  label: "test category 1",
-                                  children: false,
-                                }),
-                              ],
+                            NodeValidators.createForInstanceNode({
+                              label: "test category 1",
+                              children: false,
                             }),
                           ],
                         }),
-                        NodeValidators.createForInstanceNode({
-                          instanceKeys: [keys.category2],
-                          supportsFiltering: true,
+                      ],
+                    }),
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.category2],
+                      supportsFiltering: true,
+                      children: [
+                        NodeValidators.createForClassGroupingNode({
+                          className: "BisCore.SubCategory",
                           children: [
-                            NodeValidators.createForClassGroupingNode({
-                              className: "BisCore.SubCategory",
-                              children: [
-                                NodeValidators.createForInstanceNode({
-                                  label: "test category 2",
-                                  children: false,
-                                }),
-                              ],
+                            NodeValidators.createForInstanceNode({
+                              label: "test category 2",
+                              children: false,
                             }),
                           ],
                         }),
@@ -503,30 +461,30 @@ describe("iModel content tree", () => {
                     }),
                   ],
                 }),
+              ],
+            }),
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.physicalModel],
+              supportsFiltering: true,
+              children: [
                 NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.physicalModel],
+                  instanceKeys: [keys.category1],
                   supportsFiltering: true,
                   children: [
-                    NodeValidators.createForInstanceNode({
-                      instanceKeys: [keys.category1],
-                      supportsFiltering: true,
+                    NodeValidators.createForClassGroupingNode({
+                      className: keys.parentElement.className,
                       children: [
-                        NodeValidators.createForClassGroupingNode({
-                          className: keys.parentElement.className,
+                        NodeValidators.createForInstanceNode({
+                          instanceKeys: [keys.parentElement],
+                          supportsFiltering: true,
                           children: [
-                            NodeValidators.createForInstanceNode({
-                              instanceKeys: [keys.parentElement],
-                              supportsFiltering: true,
+                            NodeValidators.createForClassGroupingNode({
+                              className: keys.childElement.className,
                               children: [
-                                NodeValidators.createForClassGroupingNode({
-                                  className: keys.childElement.className,
-                                  children: [
-                                    NodeValidators.createForInstanceNode({
-                                      instanceKeys: [keys.childElement],
-                                      supportsFiltering: true,
-                                      children: false,
-                                    }),
-                                  ],
+                                NodeValidators.createForInstanceNode({
+                                  instanceKeys: [keys.childElement],
+                                  supportsFiltering: true,
+                                  children: false,
                                 }),
                               ],
                             }),
@@ -562,28 +520,21 @@ describe("iModel content tree", () => {
           provider,
           expect: [
             NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.rootSubject],
-              autoExpand: true,
+              instanceKeys: [keys.dictionaryModel],
+              supportsFiltering: true,
+              children: false,
+            }),
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.documentModel],
               supportsFiltering: true,
               children: [
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.dictionaryModel],
-                  supportsFiltering: true,
-                  children: false,
-                }),
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.documentModel],
-                  supportsFiltering: true,
+                NodeValidators.createForClassGroupingNode({
+                  className: keys.drawingElement.className,
                   children: [
-                    NodeValidators.createForClassGroupingNode({
-                      className: keys.drawingElement.className,
-                      children: [
-                        NodeValidators.createForInstanceNode({
-                          instanceKeys: [keys.drawingElement],
-                          supportsFiltering: true,
-                          children: false,
-                        }),
-                      ],
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.drawingElement],
+                      supportsFiltering: true,
+                      children: false,
                     }),
                   ],
                 }),
@@ -608,28 +559,21 @@ describe("iModel content tree", () => {
           provider,
           expect: [
             NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.rootSubject],
-              autoExpand: true,
+              instanceKeys: [keys.dictionaryModel],
+              supportsFiltering: true,
+              children: false,
+            }),
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.groupModel],
               supportsFiltering: true,
               children: [
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.dictionaryModel],
-                  supportsFiltering: true,
-                  children: false,
-                }),
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.groupModel],
-                  supportsFiltering: true,
+                NodeValidators.createForClassGroupingNode({
+                  className: keys.groupElement.className,
                   children: [
-                    NodeValidators.createForClassGroupingNode({
-                      className: keys.groupElement.className,
-                      children: [
-                        NodeValidators.createForInstanceNode({
-                          instanceKeys: [keys.groupElement],
-                          supportsFiltering: false,
-                          children: false,
-                        }),
-                      ],
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.groupElement],
+                      supportsFiltering: false,
+                      children: false,
                     }),
                   ],
                 }),
@@ -653,39 +597,32 @@ describe("iModel content tree", () => {
           provider,
           expect: [
             NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.rootSubject],
-              autoExpand: true,
+              instanceKeys: [keys.dictionaryModel],
+              supportsFiltering: true,
+              children: false,
+            }),
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.groupModel],
               supportsFiltering: true,
               children: [
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.dictionaryModel],
-                  supportsFiltering: true,
-                  children: false,
-                }),
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.groupModel],
-                  supportsFiltering: true,
+                NodeValidators.createForClassGroupingNode({
+                  className: keys.parentGroup.className,
                   children: [
-                    NodeValidators.createForClassGroupingNode({
-                      className: keys.parentGroup.className,
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.parentGroup],
+                      supportsFiltering: false,
                       children: [
-                        NodeValidators.createForInstanceNode({
-                          instanceKeys: [keys.parentGroup],
-                          supportsFiltering: false,
+                        NodeValidators.createForGenericNode({
+                          label: "Children",
+                          supportsFiltering: true,
                           children: [
-                            NodeValidators.createForGenericNode({
-                              label: "Children",
-                              supportsFiltering: true,
+                            NodeValidators.createForClassGroupingNode({
+                              className: keys.childGroup.className,
                               children: [
-                                NodeValidators.createForClassGroupingNode({
-                                  className: keys.childGroup.className,
-                                  children: [
-                                    NodeValidators.createForInstanceNode({
-                                      instanceKeys: [keys.childGroup],
-                                      supportsFiltering: false,
-                                      children: false,
-                                    }),
-                                  ],
+                                NodeValidators.createForInstanceNode({
+                                  instanceKeys: [keys.childGroup],
+                                  supportsFiltering: false,
+                                  children: false,
                                 }),
                               ],
                             }),
@@ -726,55 +663,48 @@ describe("iModel content tree", () => {
           provider,
           expect: [
             NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.rootSubject],
-              autoExpand: true,
+              instanceKeys: [keys.dictionaryModel],
+              supportsFiltering: true,
+              children: false,
+            }),
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.documentModel],
               supportsFiltering: true,
               children: [
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.dictionaryModel],
-                  supportsFiltering: true,
-                  children: false,
-                }),
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.documentModel],
-                  supportsFiltering: true,
+                NodeValidators.createForClassGroupingNode({
+                  className: keys.document.className,
                   children: [
-                    NodeValidators.createForClassGroupingNode({
-                      className: keys.document.className,
-                      children: [
-                        NodeValidators.createForInstanceNode({
-                          instanceKeys: [keys.document],
-                          supportsFiltering: true,
-                          children: false,
-                        }),
-                      ],
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.document],
+                      supportsFiltering: true,
+                      children: false,
                     }),
                   ],
                 }),
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.groupModel],
-                  supportsFiltering: true,
+              ],
+            }),
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.groupModel],
+              supportsFiltering: true,
+              children: [
+                NodeValidators.createForClassGroupingNode({
+                  className: keys.group.className,
                   children: [
-                    NodeValidators.createForClassGroupingNode({
-                      className: keys.group.className,
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.group],
+                      supportsFiltering: false,
                       children: [
-                        NodeValidators.createForInstanceNode({
-                          instanceKeys: [keys.group],
-                          supportsFiltering: false,
+                        NodeValidators.createForGenericNode({
+                          label: "Members",
+                          supportsFiltering: true,
                           children: [
-                            NodeValidators.createForGenericNode({
-                              label: "Members",
-                              supportsFiltering: true,
+                            NodeValidators.createForClassGroupingNode({
+                              className: keys.document.className,
                               children: [
-                                NodeValidators.createForClassGroupingNode({
-                                  className: keys.document.className,
-                                  children: [
-                                    NodeValidators.createForInstanceNode({
-                                      instanceKeys: [keys.document],
-                                      supportsFiltering: true,
-                                      children: false,
-                                    }),
-                                  ],
+                                NodeValidators.createForInstanceNode({
+                                  instanceKeys: [keys.document],
+                                  supportsFiltering: true,
+                                  children: false,
                                 }),
                               ],
                             }),
@@ -812,29 +742,22 @@ describe("iModel content tree", () => {
           provider,
           expect: [
             NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.rootSubject],
-              autoExpand: true,
+              instanceKeys: [keys.dictionaryModel],
               supportsFiltering: true,
               children: [
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.dictionaryModel],
-                  supportsFiltering: true,
+                NodeValidators.createForClassGroupingNode({
+                  className: keys.category.className,
                   children: [
-                    NodeValidators.createForClassGroupingNode({
-                      className: keys.category.className,
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.category],
+                      supportsFiltering: true,
                       children: [
-                        NodeValidators.createForInstanceNode({
-                          instanceKeys: [keys.category],
-                          supportsFiltering: true,
+                        NodeValidators.createForClassGroupingNode({
+                          className: "BisCore.SubCategory",
                           children: [
-                            NodeValidators.createForClassGroupingNode({
-                              className: "BisCore.SubCategory",
-                              children: [
-                                NodeValidators.createForInstanceNode({
-                                  label: "test category",
-                                  children: false,
-                                }),
-                              ],
+                            NodeValidators.createForInstanceNode({
+                              label: "test category",
+                              children: false,
                             }),
                           ],
                         }),
@@ -842,23 +765,23 @@ describe("iModel content tree", () => {
                     }),
                   ],
                 }),
+              ],
+            }),
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.physicalModel],
+              supportsFiltering: true,
+              children: [
                 NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.physicalModel],
+                  instanceKeys: [keys.category],
                   supportsFiltering: true,
                   children: [
-                    NodeValidators.createForInstanceNode({
-                      instanceKeys: [keys.category],
-                      supportsFiltering: true,
+                    NodeValidators.createForClassGroupingNode({
+                      className: keys.physicalElement.className,
                       children: [
-                        NodeValidators.createForClassGroupingNode({
-                          className: keys.physicalElement.className,
-                          children: [
-                            NodeValidators.createForInstanceNode({
-                              instanceKeys: [keys.physicalElement],
-                              supportsFiltering: true,
-                              children: false,
-                            }),
-                          ],
+                        NodeValidators.createForInstanceNode({
+                          instanceKeys: [keys.physicalElement],
+                          supportsFiltering: true,
+                          children: false,
                         }),
                       ],
                     }),
@@ -885,29 +808,22 @@ describe("iModel content tree", () => {
           provider,
           expect: [
             NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.rootSubject],
-              autoExpand: true,
+              instanceKeys: [keys.dictionaryModel],
               supportsFiltering: true,
               children: [
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.dictionaryModel],
-                  supportsFiltering: true,
+                NodeValidators.createForClassGroupingNode({
+                  className: keys.category.className,
                   children: [
-                    NodeValidators.createForClassGroupingNode({
-                      className: keys.category.className,
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.category],
+                      supportsFiltering: true,
                       children: [
-                        NodeValidators.createForInstanceNode({
-                          instanceKeys: [keys.category],
-                          supportsFiltering: true,
+                        NodeValidators.createForClassGroupingNode({
+                          className: "BisCore.SubCategory",
                           children: [
-                            NodeValidators.createForClassGroupingNode({
-                              className: "BisCore.SubCategory",
-                              children: [
-                                NodeValidators.createForInstanceNode({
-                                  label: "test category",
-                                  children: false,
-                                }),
-                              ],
+                            NodeValidators.createForInstanceNode({
+                              label: "test category",
+                              children: false,
                             }),
                           ],
                         }),
@@ -915,30 +831,30 @@ describe("iModel content tree", () => {
                     }),
                   ],
                 }),
+              ],
+            }),
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.physicalModel],
+              supportsFiltering: true,
+              children: [
                 NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.physicalModel],
+                  instanceKeys: [keys.category],
                   supportsFiltering: true,
                   children: [
-                    NodeValidators.createForInstanceNode({
-                      instanceKeys: [keys.category],
-                      supportsFiltering: true,
+                    NodeValidators.createForClassGroupingNode({
+                      className: keys.parentElement.className,
                       children: [
-                        NodeValidators.createForClassGroupingNode({
-                          className: keys.parentElement.className,
+                        NodeValidators.createForInstanceNode({
+                          instanceKeys: [keys.parentElement],
+                          supportsFiltering: true,
                           children: [
-                            NodeValidators.createForInstanceNode({
-                              instanceKeys: [keys.parentElement],
-                              supportsFiltering: true,
+                            NodeValidators.createForClassGroupingNode({
+                              className: keys.childElement.className,
                               children: [
-                                NodeValidators.createForClassGroupingNode({
-                                  className: keys.childElement.className,
-                                  children: [
-                                    NodeValidators.createForInstanceNode({
-                                      instanceKeys: [keys.childElement],
-                                      supportsFiltering: true,
-                                      children: false,
-                                    }),
-                                  ],
+                                NodeValidators.createForInstanceNode({
+                                  instanceKeys: [keys.childElement],
+                                  supportsFiltering: true,
+                                  children: false,
                                 }),
                               ],
                             }),
@@ -974,35 +890,28 @@ describe("iModel content tree", () => {
           provider,
           expect: [
             NodeValidators.createForInstanceNode({
-              instanceKeys: [keys.rootSubject],
-              autoExpand: true,
+              instanceKeys: [keys.dictionaryModel],
+              supportsFiltering: true,
+              children: false,
+            }),
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.documentModel],
               supportsFiltering: true,
               children: [
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.dictionaryModel],
-                  supportsFiltering: true,
-                  children: false,
-                }),
-                NodeValidators.createForInstanceNode({
-                  instanceKeys: [keys.documentModel],
-                  supportsFiltering: true,
+                NodeValidators.createForClassGroupingNode({
+                  className: keys.parentDocument.className,
                   children: [
-                    NodeValidators.createForClassGroupingNode({
-                      className: keys.parentDocument.className,
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.parentDocument],
+                      supportsFiltering: true,
                       children: [
-                        NodeValidators.createForInstanceNode({
-                          instanceKeys: [keys.parentDocument],
-                          supportsFiltering: true,
+                        NodeValidators.createForClassGroupingNode({
+                          className: keys.childDocument.className,
                           children: [
-                            NodeValidators.createForClassGroupingNode({
-                              className: keys.childDocument.className,
-                              children: [
-                                NodeValidators.createForInstanceNode({
-                                  instanceKeys: [keys.childDocument],
-                                  supportsFiltering: true,
-                                  children: false,
-                                }),
-                              ],
+                            NodeValidators.createForInstanceNode({
+                              instanceKeys: [keys.childDocument],
+                              supportsFiltering: true,
+                              children: false,
                             }),
                           ],
                         }),
