@@ -1,0 +1,25 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+
+.tw-skeleton-row {
+  display: flex;
+  gap: var(--iui-size-2xs);
+  height: 28px;
+  align-items: center;
+  padding: 0 var(--iui-size-s);
+
+  .tw-skeleton-icon, .tw-skeleton-label {
+    height: 16px;
+    border-radius: 2px;
+  }
+
+  .tw-skeleton-icon {
+    width: 16px;
+  }
+
+  .tw-skeleton-label {
+    width: 100%;
+  }
+}

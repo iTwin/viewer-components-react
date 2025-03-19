@@ -4,13 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./ProgressOverlay.css";
-import { Spinner } from "@itwin/itwinui-react/bricks";
+import { ProgressBar } from "@itwin/itwinui-react/bricks";
 
 // TODO: replace spinner with ProgressLinear equivalent
 export function ProgressOverlay() {
   return (
     <div className="tw-progress-overlay-container">
-      <Spinner />
+      <ProgressBar aria-labelledby={"tw-search-box-button"} />
       <div className="tw-progress-overlay-backdrop" />
     </div>
   );

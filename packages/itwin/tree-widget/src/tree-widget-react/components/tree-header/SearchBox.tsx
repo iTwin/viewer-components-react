@@ -36,6 +36,7 @@ export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, cla
 
   return !isOpened ? (
     <IconButton
+      id={"tw-search-box-button"}
       className={"tw-search-box-button"}
       variant={"ghost"}
       label={TreeWidget.translate("header.searchBox.searchForSomething")}
