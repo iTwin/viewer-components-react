@@ -5,7 +5,10 @@
 
 import { bufferCount, defer, from, lastValueFrom, map, merge, mergeAll, mergeMap, reduce, switchMap } from "rxjs";
 import {
-  createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition, NodeSelectClauseColumnNames, ProcessedHierarchyNode,
+  createNodesQueryClauseFactory,
+  createPredicateBasedHierarchyDefinition,
+  NodeSelectClauseColumnNames,
+  ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import { collect } from "../common/Rxjs.js";
@@ -437,6 +440,15 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       filter: instanceFilter,
       contentClass: { fullName: this._hierarchyConfig.elementClassSpecification, alias: "this" },
     });
+    const modeledElements = new Array<Id64String>();
+    const foundModeledElements = await Promise.all(
+      modelIds.map(async (modelId) => {
+        return this._idsCache.getCategoriesModeledElements(modelId, categoryIds);
+      }),
+    );
+    foundModeledElements.forEach((foundElements) => {
+      modeledElements.push(...foundElements);
+    });
     return [
       {
         fullClassName: this._hierarchyConfig.elementClassSpecification,
@@ -461,8 +473,14 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                       SELECT 1
                       FROM (
                         SELECT Parent.Id ParentId FROM ${this._hierarchyConfig.elementClassSpecification}
-                        UNION ALL
-                        SELECT ModeledElement.Id ParentId FROM bis.GeometricModel3d
+                        ${
+                          modeledElements.length === 0
+                            ? ""
+                            : `
+                              UNION ALL
+                              SELECT ModeledElement.Id ParentId FROM BisCore.GeometricModel3d WHERE ModeledElement.Id IN (${modeledElements.join(",")})
+                            `
+                        }
                       )
                       WHERE ParentId = this.ECInstanceId
                       LIMIT 1
@@ -498,6 +516,14 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       filter: instanceFilter,
       contentClass: { fullName: this._hierarchyConfig.elementClassSpecification, alias: "this" },
     });
+    let hasSubModel = false;
+    await Promise.all(
+      elementIds.map(async (elementId) => {
+        if (await this._idsCache.hasSubModel(elementId)) {
+          hasSubModel = true;
+        }
+      }),
+    );
     return [
       {
         fullClassName: this._hierarchyConfig.elementClassSpecification,
@@ -522,8 +548,14 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                       SELECT 1
                       FROM (
                         SELECT Parent.Id ParentId FROM ${this._hierarchyConfig.elementClassSpecification}
-                        UNION ALL
-                        SELECT ModeledElement.Id ParentId FROM bis.GeometricModel3d
+                        ${
+                          hasSubModel
+                            ? `
+                              UNION ALL
+                              SELECT ModeledElement.Id ParentId FROM bis.GeometricModel3d WHERE IsPrivate = false
+                            `
+                            : ""
+                        }
                       )
                       WHERE ParentId = this.ECInstanceId
                       LIMIT 1

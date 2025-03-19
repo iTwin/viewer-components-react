@@ -569,6 +569,120 @@ describe("Models tree", () => {
           ],
         });
       });
+
+      it("children of element is set to false when it's subModel is private", async function () {
+        await using buildIModelResult = await buildIModel(this, async (builder, testSchema) => {
+          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+          const partition = insertPhysicalPartition({ builder, codeValue: "model", parentId: rootSubject.id });
+          const model = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
+          const category = insertSpatialCategory({ builder, codeValue: "category" });
+          const rootElement = insertPhysicalElement({
+            builder,
+            userLabel: `root element`,
+            modelId: model.id,
+            categoryId: category.id,
+            classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+          });
+          const subModel = insertPhysicalSubModel({ builder, modeledElementId: rootElement.id, isPrivate: true });
+          insertPhysicalElement({
+            builder,
+            userLabel: `root element`,
+            modelId: subModel.id,
+            categoryId: category.id,
+          });
+          return { rootSubject, model, category, rootElement };
+        });
+        const { imodel, ...keys } = buildIModelResult;
+        using provider = createModelsTreeProvider({ imodel });
+        await validateHierarchy({
+          provider,
+          expect: [
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.rootSubject],
+              autoExpand: true,
+              supportsFiltering: true,
+              children: [
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.model],
+                  supportsFiltering: true,
+                  children: [
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.category],
+                      supportsFiltering: true,
+                      children: [
+                        NodeValidators.createForClassGroupingNode({
+                          className: keys.rootElement.className,
+                          children: [
+                            NodeValidators.createForInstanceNode({
+                              instanceKeys: [keys.rootElement],
+                              supportsFiltering: true,
+                              children: false,
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        });
+      });
+
+      it("children of element is set to false when it's subModel has no children", async function () {
+        await using buildIModelResult = await buildIModel(this, async (builder, testSchema) => {
+          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+          const partition = insertPhysicalPartition({ builder, codeValue: "model", parentId: rootSubject.id });
+          const model = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
+          const category = insertSpatialCategory({ builder, codeValue: "category" });
+          const rootElement = insertPhysicalElement({
+            builder,
+            userLabel: `root element`,
+            modelId: model.id,
+            categoryId: category.id,
+            classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+          });
+          insertPhysicalSubModel({ builder, modeledElementId: rootElement.id });
+          return { rootSubject, model, category, rootElement };
+        });
+        const { imodel, ...keys } = buildIModelResult;
+        using provider = createModelsTreeProvider({ imodel });
+        await validateHierarchy({
+          provider,
+          expect: [
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.rootSubject],
+              autoExpand: true,
+              supportsFiltering: true,
+              children: [
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.model],
+                  supportsFiltering: true,
+                  children: [
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.category],
+                      supportsFiltering: true,
+                      children: [
+                        NodeValidators.createForClassGroupingNode({
+                          className: keys.rootElement.className,
+                          children: [
+                            NodeValidators.createForInstanceNode({
+                              instanceKeys: [keys.rootElement],
+                              supportsFiltering: true,
+                              children: false,
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        });
+      });
     });
 
     describe("Categories", () => {
