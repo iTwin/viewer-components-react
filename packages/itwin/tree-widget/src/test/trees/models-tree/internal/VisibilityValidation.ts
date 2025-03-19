@@ -9,25 +9,26 @@ import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { toVoidPromise } from "../../../../tree-widget-react/components/trees/common/Rxjs.js";
 import { ModelsTreeNode } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeNode.js";
+import { getParentElementIds } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
 
-import type { Visibility } from "../../../../tree-widget-react/components/trees/common/Tooltip.js";
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
+import type { Visibility } from "../../../../tree-widget-react/components/trees/common/Tooltip.js";
 import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
+import type { CategoryId, ElementId, ModelId } from "../../../../tree-widget-react/components/trees/common/internal/Types.js";
 
 interface VisibilityExpectations {
   subject(id: string): Visibility;
-  element(props: { modelId: Id64String; categoryId: Id64String; elementId: Id64String }): Visibility;
-  groupingNode(props: { modelId: Id64String; categoryId: Id64String; elementIds: Id64Array }): Visibility;
-  category(props: { modelId: Id64String; categoryId: Id64String }):
+  element(props: { modelId: ModelId; categoryId: CategoryId; elementId: ElementId }): Visibility;
+  groupingNode(props: { modelId: ModelId; categoryId: CategoryId; elementIds: Array<ElementId> }): Visibility;
+  category(props: { modelId: ModelId; categoryId: CategoryId; parentElementId: ElementId | undefined }):
     | Visibility
     | {
         tree: Visibility;
         categorySelector: boolean;
         perModelCategoryOverride: "show" | "hide" | "none";
       };
-  model(modelId: Id64String):
+  model(modelId: ModelId):
     | Visibility
     | {
         tree: Visibility;
@@ -92,7 +93,12 @@ export async function validateNodeVisibility({ node, handler, visibilityExpectat
 
   if (ModelsTreeNode.isCategoryNode(node)) {
     const modelId = ModelsTreeNode.getModelId(node)!;
-    const expected = visibilityExpectations.category({ modelId, categoryId: id });
+    const parentElementIds = getParentElementIds(node.parentKeys, modelId);
+    const expected = visibilityExpectations.category({
+      modelId,
+      categoryId: id,
+      parentElementId: parentElementIds.length > 0 ? parentElementIds[0] : undefined,
+    });
     if (typeof expected === "string") {
       expect(actualVisibility.state).to.eq(expected, JSON.stringify({ modelId, categoryId: id }));
       return;
@@ -109,7 +115,11 @@ export async function validateNodeVisibility({ node, handler, visibilityExpectat
 
   const modelId = ModelsTreeNode.getModelId(node)!;
   const categoryId = ModelsTreeNode.getCategoryId(node)!;
-  const expected = visibilityExpectations.element({ modelId, categoryId, elementId: id });
+  const expected = visibilityExpectations.element({
+    modelId,
+    categoryId,
+    elementId: id,
+  });
   expect(actualVisibility.state).to.eq(expected, JSON.stringify({ modelId, categoryId, elementId: id }));
 }
 

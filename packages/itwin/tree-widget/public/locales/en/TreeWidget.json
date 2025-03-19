@@ -64,6 +64,8 @@
         "hiddenThroughModel": "Model is not displayed",
         "hiddenThroughCategory": "Category is not displayed",
         "someElementsAreHidden": "Modeled elements subModel has partial state",
+        "someChildrenAreHidden": "Some elements are hidden",
+        "allChildrenAreHidden": "All elements are hidden",
         "partialThroughSubModel": "Modeled element is hidden, but its subModel is visible",
         "partialThroughElement": "Modeled element is visible due to override, but its subModel is hidden",
         "partialThroughCategory": "Modeled element is visible due to category visibility, but its subModel is hidden"
