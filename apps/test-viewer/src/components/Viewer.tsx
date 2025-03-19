@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { IModelApp, IModelConnection } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
@@ -16,10 +16,12 @@ import { ApiKeys } from "./ApiKeys";
 import { useAuthorizationContext } from "./Authorization";
 import { statusBarActionsProvider, ViewerOptionsProvider } from "./ViewerOptions";
 
+import type { AuthorizationClient } from "@itwin/core-common";
+
 const uiConfig = getUiProvidersConfig();
 
-async function onIModelAppInit() {
-  await uiConfig.initialize();
+async function onIModelAppInit(auth: AuthorizationClient) {
+  await uiConfig.initialize(auth);
   await FrontendDevTools.initialize();
   // ArcGIS Oauth setup
   const accessClient = new ArcGisAccessClient();
@@ -47,6 +49,10 @@ function ViewerWithOptions() {
   const { client: authClient } = useAuthorizationContext();
   const { iTwinId, iModelId } = useIModelInfo();
 
+  const onInit = useCallback(async () => {
+    await onIModelAppInit(authClient);
+  }, [authClient]);
+
   if (!iTwinId || !iModelId) {
     return null;
   }
@@ -57,7 +63,7 @@ function ViewerWithOptions() {
       iModelId={iModelId}
       authClient={authClient}
       enablePerformanceMonitors={false}
-      onIModelAppInit={onIModelAppInit}
+      onIModelAppInit={onInit}
       uiProviders={[...uiConfig.uiItemsProviders, statusBarActionsProvider]}
       defaultUiConfig={{
         hideNavigationAid: true,
