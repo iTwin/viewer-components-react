@@ -8,6 +8,7 @@ import { assert } from "@itwin/core-bentley";
 import categorySvg from "@itwin/itwinui-icons/bis-category-3d.svg";
 import subcategorySvg from "@itwin/itwinui-icons/bis-category-subcategory.svg";
 import definitionContainerSvg from "@itwin/itwinui-icons/bis-definitions-container.svg";
+import { Icon } from "@itwin/itwinui-react/bricks";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
 import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMatches } from "../common/components/EmptyTree.js";
@@ -27,7 +28,6 @@ import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { CategoriesTreeHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
-
 type CategoriesTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError";
 type HierarchyFilteringPaths = Awaited<ReturnType<Required<VisibilityTreeProps>["getFilteredPaths"]>>;
 
@@ -46,7 +46,7 @@ interface UseCategoriesTreeResult {
     VisibilityTreeProps,
     "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlight" | "emptyTreeContent"
   >;
-  rendererProps: Required<Pick<VisibilityTreeRendererProps, "getIcon" | "getSublabel">>;
+  rendererProps: Required<Pick<VisibilityTreeRendererProps, "getDecorations" | "getSublabel">>;
 }
 
 /**
@@ -138,7 +138,7 @@ export function useCategoriesTree({
       highlight: filter ? { text: filter } : undefined,
     },
     rendererProps: {
-      getIcon,
+      getDecorations: (node) => <Icon href={getIcon(node)} />,
       getSublabel,
     },
   };
