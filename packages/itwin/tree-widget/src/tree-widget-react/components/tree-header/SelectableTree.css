@@ -17,7 +17,6 @@
   }
 
   .tw-tree-content {
-    padding-top: var(--iui-size-xs);
     height: 100%;
   }
 }

@@ -4,13 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./ProgressOverlay.css";
-import { ProgressBar } from "@itwin/itwinui-react/bricks";
+import { ProgressBar, VisuallyHidden } from "@itwin/itwinui-react/bricks";
+import { TreeWidget } from "../../../../TreeWidget.js";
 
 // TODO: replace spinner with ProgressLinear equivalent
 export function ProgressOverlay() {
   return (
     <div className="tw-progress-overlay-container">
-      <ProgressBar aria-labelledby={"tw-search-box-button"} />
+      <VisuallyHidden aria-label={TreeWidget.translate("loading.search")} id={"tw-progress-bar"} />
+      <ProgressBar aria-labelledby={"tw-progress-bar"} />
       <div className="tw-progress-overlay-backdrop" />
     </div>
   );

@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import "./Tree.css";
 import { useCallback, useMemo, useState } from "react";
 import { BeEvent } from "@itwin/core-bentley";
 import { SchemaMetadataContextProvider } from "@itwin/presentation-components";
@@ -171,7 +172,7 @@ function TreeImpl({
 
   return (
     <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>
-      <div id="tw-tree-renderer-container" style={{ overflow: "auto", height: "100%" }}>
+      <div className={"tw-tree-renderer-container"} id="tw-tree-renderer-container">
         {treeRenderer(treeRendererProps)}
         {filteringDialog}
       </div>
