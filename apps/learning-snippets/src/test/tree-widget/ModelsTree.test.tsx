@@ -48,7 +48,7 @@ describe("Tree widget", () => {
         it("renders <ModelsTreeComponent />", async function () {
           const imodel = (
             await buildIModel(this, async (builder) => {
-              const model = insertPhysicalModelWithPartition({ builder, codeValue: "model", partitionParentId: IModel.rootSubjectId });
+              const model = insertPhysicalModelWithPartition({ builder, codeValue: "Test model X", partitionParentId: IModel.rootSubjectId });
               const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
               insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category.id });
               return { model };
@@ -80,19 +80,20 @@ describe("Tree widget", () => {
 
           using _ = { [Symbol.dispose]: cleanup };
           const { getByText } = render(<MyWidget />);
-          await waitFor(async () => getByText("tree-widget-learning-snippets-components-models-tree-renders-modelstreecomponent-"));
+          await waitFor(async () => getByText("Test model X"));
         });
 
         it("renders custom models tree", async function () {
           const testImodel = (
             await buildIModel(this, async (builder) => {
-              const model = insertPhysicalModelWithPartition({ builder, codeValue: "model" });
               const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
               const childSubject = insertSubject({
                 builder,
-                codeValue: "test subject",
+                codeValue: "Test subject X",
                 parentId: rootSubject.id,
               });
+              const model = insertPhysicalModelWithPartition({ builder, codeValue: "model", partitionParentId: childSubject.id });
+              insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" }).id });
               return { model, childSubject };
             })
           ).imodel;
@@ -158,7 +159,7 @@ describe("Tree widget", () => {
             />,
           );
           await waitFor(() => {
-            getByText("tree-widget-learning-snippets-components-models-tree-renders-custom-models-tree");
+            getByText("Test subject X");
             getByText("Sub label");
           });
         });
