@@ -16,16 +16,12 @@ test.describe("Models tree", () => {
   test.beforeEach(async ({ page, baseURL }) => {
     treeWidget = await initTreeWidgetTest({ page, baseURL });
     await selectTree(treeWidget, "Models");
-    await locateNode(treeWidget, "BayTown").getByRole("checkbox", { name: "Visible: All models are visible", exact: true }).waitFor();
+    await locateNode(treeWidget, "ProcessPhysicalModel").getByRole("checkbox", { name: "Visible: All categories visible", exact: true }).waitFor();
   });
 
   test("disabled selection", async ({ page }) => {
     // disable nodes' selection
     await page.getByRole("button", { name: "Toggle tree nodes' selection" }).click();
-
-    const subjectNode = locateNode(treeWidget, "BayTown");
-    await subjectNode.click();
-    await expect(subjectNode).toHaveAttribute("aria-selected", "false");
 
     const physicalModelNode = locateNode(treeWidget, "ProcessPhysicalModel");
     await physicalModelNode.click();
@@ -70,7 +66,7 @@ test.describe("Models tree", () => {
     });
 
     test("selected node", async ({ page }) => {
-      const node = locateNode(treeWidget, "BayTown");
+      const node = locateNode(treeWidget, "ProcessPhysicalModel");
       await node.click();
 
       // wait for node to become selected
@@ -211,7 +207,7 @@ test.describe("Models tree", () => {
 
       // ensure instance focus is turned off and hierarchy is visible
       await page.getByRole("button", { name: "Enable instance focus mode" }).waitFor();
-      await locateNode(treeWidget, "BayTown").waitFor();
+      await locateNode(treeWidget, "ProcessPhysicalModel").waitFor();
     });
 
     test("header buttons overflow", async ({ page }) => {
@@ -276,15 +272,9 @@ test.describe("Models tree", () => {
 
       await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
 
-      // click on a different node to avoid showing filtering buttons due to hover
-      const bayTownNode = locateNode(treeWidget, "BayTown");
-      await bayTownNode.click();
-
-      // deselect the node so the outline would not be shown
-      await bayTownNode.click({ modifiers: ["Control"] });
-
-      // focus back on the node we want to filter
-      await page.keyboard.press("ArrowDown");
+      // deselect the node
+      await node.click({ modifiers: ["Control"] });
+      await expect(node).not.toHaveAttribute("aria-selected", "true");
 
       // Focus on apply filter button
       await page.keyboard.press("Tab");
