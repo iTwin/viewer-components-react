@@ -4,7 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./SkeletonTree.css";
-import { Skeleton } from "@itwin/itwinui-react/bricks";
+import { Skeleton, VisuallyHidden } from "@itwin/itwinui-react/bricks";
+import { TreeWidget } from "../../../../TreeWidget.js";
 
 /** @internal */
 export function SkeletonTree() {
@@ -13,6 +14,7 @@ export function SkeletonTree() {
       {Array.from({ length: 20 }, (_, index) => (
         <SkeletonRow key={index} />
       ))}
+      <VisuallyHidden id={"tw-progress-bar"}> {TreeWidget.translate("loading.skeleton")} </VisuallyHidden>
     </div>
   );
 }
