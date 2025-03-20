@@ -1997,7 +1997,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         ],
       },
       {
-        describeName: "with modeled elements who have private subModel",
+        describeName: "with modeled elements that have private subModel",
         createIModel: async function createIModel(context: Mocha.Context): Promise<{ imodel: IModelConnection } & IModelWithSubModelIds> {
           return buildIModel(context, async (builder, testSchema) => {
             const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
