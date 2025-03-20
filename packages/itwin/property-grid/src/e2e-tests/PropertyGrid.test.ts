@@ -5,7 +5,7 @@
 
 import assert from "assert";
 import { test } from "@playwright/test";
-import { expandStagePanel, locateWidget, takeScreenshot } from "./utils.js";
+import { expandStagePanel, locateNode, locateWidget, takeScreenshot } from "./utils.js";
 
 import type { Page } from "@playwright/test";
 test.beforeEach(async ({ page, baseURL }) => {
@@ -18,10 +18,11 @@ test.describe("property grid", () => {
   const testCases = () => {
     const selectSingleElement = async (page: Page) => {
       const treeWidget = locateWidget(page, "tree");
-      await treeWidget.getByText("BayTown").click();
+      await locateNode(treeWidget, "ProcessPhysicalModel").getByLabel("Expand").click();
+      await locateNode(treeWidget, "Equipment").click();
 
       const propertyWidget = locateWidget(page, "property-grid");
-      await propertyWidget.getByText("BayTown").first().waitFor();
+      await propertyWidget.getByText("Equipment").first().waitFor();
 
       return propertyWidget;
     };
@@ -42,8 +43,7 @@ test.describe("property grid", () => {
 
     const selectSingleElementWithAncestry = async (page: Page) => {
       const treeWidget = locateWidget(page, "tree");
-      await treeWidget.getByText("BayTown").waitFor();
-      await treeWidget.getByText("ProcessPhysicalModel").click();
+      await locateNode(treeWidget, "ProcessPhysicalModel").click();
 
       const propertyWidget = locateWidget(page, "property-grid");
       await propertyWidget.getByText("ProcessPhysicalModel").first().waitFor();
@@ -69,9 +69,11 @@ test.describe("property grid", () => {
     const selectMultipleElements = async (page: Page) => {
       const treeWidget = locateWidget(page, "tree");
       const propertyWidget = locateWidget(page, "property-grid");
+      const modelNode = locateNode(treeWidget, "ProcessPhysicalModel");
 
-      await treeWidget.getByText("BayTown").click();
-      await treeWidget.getByText("ProcessPhysicalModel").click({ modifiers: ["Control"] });
+      await modelNode.getByLabel("Expand").click();
+      await modelNode.click();
+      await locateNode(treeWidget, "Equipment").click({ modifiers: ["Control"] });
 
       await propertyWidget.getByText("Multiple items").first().waitFor();
       return propertyWidget;
@@ -101,9 +103,9 @@ test.describe("property grid", () => {
       await propertyWidget.getByRole("button", { name: "Selected Elements" }).click();
 
       const elementList = propertyWidget.getByRole("list");
-      await elementList.getByRole("listitem").filter({ hasText: "BayTown" }).click();
+      await elementList.getByRole("listitem").filter({ hasText: "Equipment" }).click();
 
-      await propertyWidget.getByTitle("Empty seed file.").waitFor();
+      await propertyWidget.getByTitle("BisCore.DictionaryModel").waitFor();
 
       return propertyWidget;
     };
@@ -139,7 +141,7 @@ test.describe("property grid", () => {
       await propertyWidget.getByRole("button", { name: "Settings" }).click();
       await page.getByRole("menuitem", { name: "Hide Empty Values" }).click();
 
-      await propertyWidget.getByText("BayTown").first().waitFor();
+      await propertyWidget.getByText("Is Private").first().waitFor();
 
       await takeScreenshot(page, propertyWidget);
     });
@@ -147,7 +149,7 @@ test.describe("property grid", () => {
     test("single element selected - context menu", async ({ page }) => {
       const propertyWidget = await selectSingleElement(page);
 
-      await propertyWidget.getByTitle("Description").click({ button: "right", position: { x: 5, y: 10 } });
+      await propertyWidget.getByTitle("Is Private").click({ button: "right", position: { x: 5, y: 10 } });
       await page.getByRole("menuitem", { name: "Add to Favorite" }).waitFor();
 
       await takeScreenshot(page, propertyWidget);
@@ -156,7 +158,7 @@ test.describe("property grid", () => {
     test("single element selected - context menu - add to favorites", async ({ page }) => {
       const propertyWidget = await selectSingleElement(page);
 
-      await propertyWidget.getByTitle("Description").click({ button: "right", position: { x: 5, y: 10 } });
+      await propertyWidget.getByTitle("Is Private").click({ button: "right", position: { x: 5, y: 10 } });
       await page.getByRole("menuitem", { name: "Add to Favorite" }).click();
       await propertyWidget.getByRole("button", { name: "Favorite" }).first().waitFor();
 
@@ -165,20 +167,20 @@ test.describe("property grid", () => {
 
     test("single element selected - search", async ({ page }) => {
       const propertyWidget = await selectSingleElement(page);
-      await propertyWidget.getByTitle("Description").waitFor();
+      await propertyWidget.getByTitle("Is Private").waitFor();
 
       await propertyWidget.getByRole("button", { name: "Expand searchbox" }).click();
       const searchBox = propertyWidget.getByRole("searchbox");
 
-      await searchBox.fill("BayTown");
-      await propertyWidget.getByTitle("Description").waitFor({ state: "hidden" });
+      await searchBox.fill("Dictionary");
+      await propertyWidget.getByTitle("Is Private").waitFor({ state: "hidden" });
 
       await takeScreenshot(page, propertyWidget);
     });
 
     test("single element selected - search - no matches", async ({ page }) => {
       const propertyWidget = await selectSingleElement(page);
-      await propertyWidget.getByTitle("Description").waitFor();
+      await propertyWidget.getByTitle("Is Private").waitFor();
 
       await propertyWidget.getByRole("button", { name: "Expand searchbox" }).click();
       const searchBox = propertyWidget.getByRole("searchbox");
