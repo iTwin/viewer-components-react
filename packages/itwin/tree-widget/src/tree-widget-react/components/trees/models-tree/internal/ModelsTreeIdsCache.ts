@@ -232,7 +232,10 @@ export class ModelsTreeIdsCache {
         const subjectInfos = await this.getSubjectInfos();
         const result = new Array<InstanceKey>();
         let currParentId: Id64String | undefined = targetSubjectId;
-        while (currParentId && currParentId !== IModel.rootSubjectId) {
+        while (currParentId) {
+          if (this._hierarchyConfig.hideRootSubject && currParentId === IModel.rootSubjectId) {
+            break;
+          }
           const parentInfo = subjectInfos.get(currParentId);
           if (!parentInfo?.hideInHierarchy) {
             result.push({ className: "BisCore.Subject", id: currParentId });

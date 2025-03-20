@@ -1787,10 +1787,11 @@ describe("ModelsTreeVisibilityHandler", () => {
       await terminatePresentationTesting();
     });
 
-    function createCommonProps(imodel: IModelConnection, hierarchyConfig = defaultHierarchyConfiguration) {
-      const imodelAccess = createIModelAccess(imodel);
+    function createCommonProps(props: { imodel: IModelConnection; hierarchyConfig?: typeof defaultHierarchyConfiguration }) {
+      const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true, ...props.hierarchyConfig };
+      const imodelAccess = createIModelAccess(props.imodel);
       const viewport = OffScreenViewport.create({
-        view: createBlankViewState(imodel),
+        view: createBlankViewState(props.imodel),
         viewRect: new ViewRect(),
       });
       const idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig);
@@ -1798,26 +1799,27 @@ describe("ModelsTreeVisibilityHandler", () => {
         imodelAccess,
         viewport,
         idsCache,
+        hierarchyConfig,
       };
     }
 
     function createProvider(props: {
       idsCache: ModelsTreeIdsCache;
       imodelAccess: ReturnType<typeof createIModelAccess>;
-      hierarchyConfig?: typeof defaultHierarchyConfiguration;
+      hierarchyConfig: typeof defaultHierarchyConfiguration;
       filterPaths?: HierarchyNodeIdentifiersPath[];
     }) {
       return createIModelHierarchyProvider({
-        hierarchyDefinition: new ModelsTreeDefinition({ ...props, hierarchyConfig: props.hierarchyConfig ?? defaultHierarchyConfiguration }),
+        hierarchyDefinition: new ModelsTreeDefinition({ ...props }),
         imodelAccess: props.imodelAccess,
         ...(props.filterPaths ? { filtering: { paths: props.filterPaths } } : undefined),
       });
     }
 
-    function createVisibilityTestData({ imodel, hierarchyConfig }: { imodel: IModelConnection; hierarchyConfig?: typeof defaultHierarchyConfiguration }) {
-      const commonProps = createCommonProps(imodel, hierarchyConfig);
+    function createVisibilityTestData(props: { imodel: IModelConnection; hierarchyConfig?: typeof defaultHierarchyConfiguration }) {
+      const commonProps = createCommonProps(props);
       const handler = createModelsTreeVisibilityHandler(commonProps);
-      const provider = createProvider({ ...commonProps, hierarchyConfig });
+      const provider = createProvider(commonProps);
       return {
         handler,
         provider,
@@ -3141,9 +3143,9 @@ describe("ModelsTreeVisibilityHandler", () => {
         imodel,
         filterPaths,
       }: Parameters<typeof createVisibilityTestData>[0] & { filterPaths: HierarchyNodeIdentifiersPath[] }) {
-        const commonProps = createCommonProps(imodel);
+        const commonProps = createCommonProps({ imodel });
         const handler = createModelsTreeVisibilityHandler({ ...commonProps, filteredPaths: filterPaths });
-        const defaultProvider = createProvider({ ...commonProps });
+        const defaultProvider = createProvider(commonProps);
         const filteredProvider = createProvider({ ...commonProps, filterPaths });
         return {
           handler,

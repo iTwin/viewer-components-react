@@ -221,11 +221,16 @@ export const IModelContentTreeComponent: {
 };
 
 // @beta (undocumented)
-interface IModelContentTreeComponentProps extends Pick<IModelContentTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
+interface IModelContentTreeComponentProps extends Pick<IModelContentTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyConfig" | "hierarchyLevelConfig" | "selectionMode"> {
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
     onPerformanceMeasured?: (featureId: string, duration: number) => void;
+}
+
+// @beta
+interface IModelContentTreeHierarchyConfiguration {
+    hideRootSubject: boolean;
 }
 
 // @beta (undocumented)
@@ -233,6 +238,7 @@ type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "s
     hierarchyLevelConfig?: {
         sizeLimit?: number;
     };
+    hierarchyConfig?: Partial<IModelContentTreeHierarchyConfiguration>;
 };
 
 // @public
@@ -277,6 +283,7 @@ type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) => JSX.El
 interface ModelsTreeHierarchyConfiguration {
     elementClassGrouping: "enable" | "enableWithCounts" | "disable";
     elementClassSpecification: string;
+    hideRootSubject: boolean;
     showEmptyModels: boolean;
 }
 

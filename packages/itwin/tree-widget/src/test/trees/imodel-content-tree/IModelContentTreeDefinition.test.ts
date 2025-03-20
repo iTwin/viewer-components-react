@@ -30,6 +30,7 @@ import {
 import { createIModelAccess } from "../Common.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
 
+import type { IModelContentTreeHierarchyConfiguration } from "../../../tree-widget-react/components/trees/imodel-content-tree/IModelContentTreeDefinition.js";
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { IModelConnection } from "@itwin/core-frontend";
 
@@ -58,7 +59,52 @@ describe("iModel content tree", () => {
     });
 
     describe("subjects' children", () => {
-      it("creates subjects hierarchy", async function () {
+      it("creates subjects hierarchy with root subject", async function () {
+        // eslint-disable-next-line deprecation/deprecation
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
+          const subjectA = insertSubject({ builder, codeValue: "A", parentId: IModel.rootSubjectId });
+          const subjectB = insertSubject({ builder, codeValue: "B", parentId: IModel.rootSubjectId });
+          const subjectC = insertSubject({ builder, codeValue: "C", parentId: subjectB.id });
+          return { rootSubject, dictionaryModel, subjectA, subjectB, subjectC };
+        });
+        const { imodel, ...keys } = buildIModelResult;
+        using provider = createIModelContentTreeProvider(imodel, { hideRootSubject: false });
+        await validateHierarchy({
+          provider,
+          expect: [
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.rootSubject],
+              autoExpand: true,
+              supportsFiltering: true,
+              children: [
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.subjectA],
+                  supportsFiltering: true,
+                  children: false,
+                }),
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.subjectB],
+                  supportsFiltering: true,
+                  children: [
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.subjectC],
+                      supportsFiltering: true,
+                      children: false,
+                    }),
+                  ],
+                }),
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.dictionaryModel],
+                  supportsFiltering: true,
+                  children: false,
+                }),
+              ],
+            }),
+          ],
+        });
+      });
+
+      it("creates subjects hierarchy without root subject", async function () {
         // eslint-disable-next-line deprecation/deprecation
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           const subjectA = insertSubject({ builder, codeValue: "A", parentId: IModel.rootSubjectId });
@@ -928,13 +974,14 @@ describe("iModel content tree", () => {
   });
 });
 
-function createIModelContentTreeProvider(imodel: IModelConnection) {
+function createIModelContentTreeProvider(imodel: IModelConnection, config?: Partial<IModelContentTreeHierarchyConfiguration>) {
   const imodelAccess = createIModelAccess(imodel);
   return createIModelHierarchyProvider({
     imodelAccess,
     hierarchyDefinition: new IModelContentTreeDefinition({
       imodelAccess,
       idsCache: new IModelContentTreeIdsCache(imodelAccess),
+      hierarchyConfig: { hideRootSubject: true, ...config },
     }),
   });
 }
