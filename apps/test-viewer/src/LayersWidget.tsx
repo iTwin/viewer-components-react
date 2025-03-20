@@ -16,8 +16,7 @@ import { Tree, TreeRenderer, useCategoriesTree } from "@itwin/tree-widget-react"
 import { getSchemaContext } from "./SchemaContext";
 import { unifiedSelectionStorage } from "./SelectionStorage";
 
-import type {
-  UiItemsProvider} from "@itwin/appui-react";
+import type { UiItemsProvider } from "@itwin/appui-react";
 import type { ComponentProps, PropsWithChildren, ReactNode } from "react";
 import type { Viewport } from "@itwin/core-frontend";
 import type { AuthorizationClient } from "@itwin/core-common";
@@ -96,7 +95,16 @@ function Layers({ blocks }: { blocks: LayersBlockDefinition[] }) {
   };
 
   return (
-    <div style={{ padding: "var(--iui-size-2xs)", display: "flex", flexDirection: "column", gap: "var(--iui-size-2xs)" }}>
+    <div
+      style={{
+        padding: "var(--iui-size-2xs)",
+        display: "flex",
+        flexDirection: "column",
+        gap: "var(--iui-size-2xs)",
+        height: "100%",
+        overflow: "hidden",
+      }}
+    >
       {blocks.map((block, index) => (
         <LayerBlock key={index} label={block.label} icon={block.icon} expanded={index === activeBlock} onExpanded={() => handleBlockToggle(index)}>
           {block.content}
@@ -114,7 +122,13 @@ function LayerBlock({
   children,
 }: PropsWithChildren<{ label: string; icon: ReactNode; expanded: boolean; onExpanded: () => void }>) {
   return (
-    <ExpandableBlock.Wrapper size="small" styleType="borderless" isExpanded={expanded} onToggle={onExpanded}>
+    <ExpandableBlock.Wrapper
+      style={expanded ? { overflow: "hidden" } : undefined}
+      size="small"
+      styleType="borderless"
+      isExpanded={expanded}
+      onToggle={onExpanded}
+    >
       <ExpandableBlock.Trigger>
         <ExpandableBlock.ExpandIcon />
         <ExpandableBlock.LabelArea style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "var(--iui-size-2xs)" }}>
@@ -122,7 +136,7 @@ function LayerBlock({
           <ExpandableBlock.Title>{label}</ExpandableBlock.Title>
         </ExpandableBlock.LabelArea>
       </ExpandableBlock.Trigger>
-      <ExpandableBlock.Content>{children}</ExpandableBlock.Content>
+      <ExpandableBlock.Content innerProps={{ style: { height: "100%" } }}>{children}</ExpandableBlock.Content>
     </ExpandableBlock.Wrapper>
   );
 }
