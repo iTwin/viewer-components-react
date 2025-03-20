@@ -99,7 +99,6 @@ describe("Tree widget", () => {
           ).imodel;
           const testViewport = getTestViewer(testImodel, true);
           const unifiedSelectionStorage = createStorage();
-          const getSublabel = () => <>Sub label</>;
           sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
           sinon.stub(UiFramework, "getIModelConnection").returns(testImodel);
           mockGetBoundingClientRect();
@@ -116,7 +115,8 @@ describe("Tree widget", () => {
               },
               [getLabel],
             );
-            return <VisibilityTreeRenderer {...props} getLabel={getLabelCallback} getSublabel={getSublabel} />;
+            const getSublabelCallback = useCallback<Required<VisibilityTreeRendererProps>["getSublabel"]>((node) => <>Sublabel - {node.label}</>, []);
+            return <VisibilityTreeRenderer {...props} getLabel={getLabelCallback} getSublabel={getSublabelCallback} />;
           }
 
           interface CustomModelsTreeProps {
@@ -160,7 +160,7 @@ describe("Tree widget", () => {
           );
           await waitFor(() => {
             getByText("Test subject X");
-            getByText("Sub label");
+            getByText("Sublabel - Test subject X");
           });
         });
       });

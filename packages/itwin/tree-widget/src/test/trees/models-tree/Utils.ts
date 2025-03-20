@@ -34,7 +34,7 @@ export function createModelsTreeProvider({
   filteredNodePaths,
   hierarchyConfig,
 }: CreateModelsTreeProviderProps): HierarchyProvider & { dispose: () => void; [Symbol.dispose]: () => void } {
-  const config = { ...defaultHierarchyConfiguration, ...hierarchyConfig };
+  const config = { ...defaultHierarchyConfiguration, hideRootSubject: true, ...hierarchyConfig };
   const imodelAccess = createIModelAccess(imodel);
   const idsCache = new ModelsTreeIdsCache(imodelAccess, config);
   const provider = createIModelHierarchyProvider({

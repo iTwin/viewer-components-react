@@ -1510,7 +1510,7 @@ describe("Models tree", () => {
               targetItems = testCase.getTargetItems(imodelSetupResult);
               targetInstanceLabel = testCase.getTargetInstanceLabel?.(imodelSetupResult);
               expectedHierarchy = testCase.getExpectedHierarchy(imodelSetupResult);
-              hierarchyConfig = { ...defaultHierarchyConfiguration, ...testCase.getHierarchyConfig?.(imodelSetupResult) };
+              hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true, ...testCase.getHierarchyConfig?.(imodelSetupResult) };
             })
           ).imodel;
         });
@@ -1580,15 +1580,16 @@ describe("Models tree", () => {
         };
       });
       const { imodel, expectedPaths, formattedECInstanceId } = buildIModelResult;
+      const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
 
       const imodelAccess = createIModelAccess(imodel);
-      using idsCache = new ModelsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration);
+      using idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig);
       const actualInstanceKeyPaths = (
         await ModelsTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
           idsCache,
           label: formattedECInstanceId,
-          hierarchyConfig: defaultHierarchyConfiguration,
+          hierarchyConfig,
         })
       ).sort(instanceKeyPathSorter);
       expect(actualInstanceKeyPaths).to.deep.eq(expectedPaths);
@@ -1614,9 +1615,10 @@ describe("Models tree", () => {
         };
       });
       const { imodel, keys } = buildIModelResult;
+      const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
 
       const imodelAccess = createIModelAccess(imodel);
-      using idsCache = new ModelsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration);
+      using idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig);
 
       expect(
         (
@@ -1624,7 +1626,7 @@ describe("Models tree", () => {
             imodelAccess,
             idsCache,
             label: "_",
-            hierarchyConfig: defaultHierarchyConfiguration,
+            hierarchyConfig,
           })
         ).sort(instanceKeyPathSorter),
       ).to.deep.eq([[adjustedModelKey(keys.model), keys.category, adjustedElementKey(keys.element1)]]);
@@ -1635,7 +1637,7 @@ describe("Models tree", () => {
             imodelAccess,
             idsCache,
             label: "%",
-            hierarchyConfig: defaultHierarchyConfiguration,
+            hierarchyConfig,
           })
         ).sort(instanceKeyPathSorter),
       ).to.deep.eq([[adjustedModelKey(keys.model), keys.category, adjustedElementKey(keys.element2)]]);
@@ -1646,7 +1648,7 @@ describe("Models tree", () => {
             imodelAccess,
             idsCache,
             label: "\\",
-            hierarchyConfig: defaultHierarchyConfiguration,
+            hierarchyConfig,
           })
         ).sort(instanceKeyPathSorter),
       ).to.deep.eq([[adjustedModelKey(keys.model), keys.category, adjustedElementKey(keys.element3)]]);

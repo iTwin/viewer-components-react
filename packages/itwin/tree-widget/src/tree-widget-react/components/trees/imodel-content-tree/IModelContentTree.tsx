@@ -3,15 +3,17 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { useCallback, useMemo } from "react";
 import { SvgFolder, SvgGroup, SvgHierarchyTree, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
 import { Tree } from "../common/components/Tree.js";
 import { TreeRenderer } from "../common/components/TreeRenderer.js";
 import { IModelContentTreeComponent } from "./IModelContentTreeComponent.js";
-import { IModelContentTreeDefinition } from "./IModelContentTreeDefinition.js";
+import { defaultHierarchyConfiguration, IModelContentTreeDefinition } from "./IModelContentTreeDefinition.js";
 import { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache.js";
 
-import type { TreeProps } from "../common/components/Tree.js";
 import type { ReactElement } from "react";
+import type { IModelContentTreeHierarchyConfiguration } from "./IModelContentTreeDefinition.js";
+import type { TreeProps } from "../common/components/Tree.js";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
 /** @beta */
@@ -19,27 +21,36 @@ export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContex
   hierarchyLevelConfig?: {
     sizeLimit?: number;
   };
+  hierarchyConfig?: Partial<IModelContentTreeHierarchyConfiguration>;
 };
 
 /** @beta */
-export function IModelContentTree(props: IModelContentTreeProps) {
+export function IModelContentTree({ hierarchyConfig, ...props }: IModelContentTreeProps) {
+  const hierarchyConfiguration = useMemo<IModelContentTreeHierarchyConfiguration>(
+    () => ({
+      ...defaultHierarchyConfiguration,
+      ...hierarchyConfig,
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    Object.values(hierarchyConfig ?? {}),
+  );
+
+  const getHierarchyDefinition = useCallback<TreeProps["getHierarchyDefinition"]>(
+    ({ imodelAccess }) =>
+      new IModelContentTreeDefinition({ imodelAccess, idsCache: new IModelContentTreeIdsCache(imodelAccess), hierarchyConfig: hierarchyConfiguration }),
+    [hierarchyConfiguration],
+  );
+
   return (
     <Tree
       {...props}
       treeName={IModelContentTreeComponent.id}
-      getHierarchyDefinition={getDefinitionsProvider}
+      getHierarchyDefinition={getHierarchyDefinition}
       selectionMode={props.selectionMode ?? "extended"}
       treeRenderer={(treeProps) => <TreeRenderer {...treeProps} getIcon={getIcon} />}
     />
   );
 }
-
-const getDefinitionsProvider: TreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
-  return new IModelContentTreeDefinition({
-    imodelAccess,
-    idsCache: new IModelContentTreeIdsCache(imodelAccess),
-  });
-};
 
 function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
   if (node.extendedData?.imageId === undefined) {
