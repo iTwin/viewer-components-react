@@ -260,7 +260,7 @@ export class ModelsTreeIdsCache {
     const query = /* sql */ `
       SELECT this.Model.Id modelId, this.Category.Id categoryId, m.IsPrivate isPrivate
       FROM BisCore.Model m
-        JOIN ${this._hierarchyConfig.elementClassSpecification} this ON m.ECInstanceId = this.Model.Id
+      JOIN ${this._hierarchyConfig.elementClassSpecification} this ON m.ECInstanceId = this.Model.Id
       WHERE this.Parent.Id IS NULL
       GROUP BY modelId, categoryId, isPrivate
     `;
