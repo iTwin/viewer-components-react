@@ -14,25 +14,29 @@ import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { InstanceKey } from "@itwin/presentation-shared";
-import {
-  HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
-} from "@itwin/presentation-testing";
+import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { createVisibilityStatus } from "../../../../tree-widget-react/components/trees/common/Tooltip.js";
 import { ModelsTreeIdsCache } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
+import { createModelsTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
+import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import {
-  createModelsTreeVisibilityHandler,
-} from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
-import {
-  defaultHierarchyConfiguration, ModelsTreeDefinition,
-} from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
-import {
-  buildIModel, importSchema, insertPhysicalElement, insertPhysicalModelWithPartition, insertPhysicalPartition, insertPhysicalSubModel,
-  insertSpatialCategory, insertSubject,
+  buildIModel,
+  importSchema,
+  insertPhysicalElement,
+  insertPhysicalModelWithPartition,
+  insertPhysicalPartition,
+  insertPhysicalSubModel,
+  insertSpatialCategory,
+  insertSubject,
 } from "../../../IModelUtils.js";
 import { TestUtils } from "../../../TestUtils.js";
 import { createFakeSinonViewport, createIModelAccess } from "../../Common.js";
 import {
-  createCategoryHierarchyNode, createClassGroupingHierarchyNode, createElementHierarchyNode, createFakeIdsCache, createModelHierarchyNode,
+  createCategoryHierarchyNode,
+  createClassGroupingHierarchyNode,
+  createElementHierarchyNode,
+  createFakeIdsCache,
+  createModelHierarchyNode,
   createSubjectHierarchyNode,
 } from "../Utils.js";
 import { validateHierarchyVisibility, VisibilityExpectations } from "./VisibilityValidation.js";
@@ -1783,10 +1787,11 @@ describe("ModelsTreeVisibilityHandler", () => {
       await terminatePresentationTesting();
     });
 
-    function createCommonProps(imodel: IModelConnection, hierarchyConfig = defaultHierarchyConfiguration) {
-      const imodelAccess = createIModelAccess(imodel);
+    function createCommonProps(props: { imodel: IModelConnection; hierarchyConfig?: typeof defaultHierarchyConfiguration }) {
+      const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true, ...props.hierarchyConfig };
+      const imodelAccess = createIModelAccess(props.imodel);
       const viewport = OffScreenViewport.create({
-        view: createBlankViewState(imodel),
+        view: createBlankViewState(props.imodel),
         viewRect: new ViewRect(),
       });
       const idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig);
@@ -1794,26 +1799,27 @@ describe("ModelsTreeVisibilityHandler", () => {
         imodelAccess,
         viewport,
         idsCache,
+        hierarchyConfig,
       };
     }
 
     function createProvider(props: {
       idsCache: ModelsTreeIdsCache;
       imodelAccess: ReturnType<typeof createIModelAccess>;
-      hierarchyConfig?: typeof defaultHierarchyConfiguration;
+      hierarchyConfig: typeof defaultHierarchyConfiguration;
       filterPaths?: HierarchyNodeIdentifiersPath[];
     }) {
       return createIModelHierarchyProvider({
-        hierarchyDefinition: new ModelsTreeDefinition({ ...props, hierarchyConfig: props.hierarchyConfig ?? defaultHierarchyConfiguration }),
+        hierarchyDefinition: new ModelsTreeDefinition({ ...props }),
         imodelAccess: props.imodelAccess,
         ...(props.filterPaths ? { filtering: { paths: props.filterPaths } } : undefined),
       });
     }
 
-    function createVisibilityTestData({ imodel, hierarchyConfig }: { imodel: IModelConnection; hierarchyConfig?: typeof defaultHierarchyConfiguration }) {
-      const commonProps = createCommonProps(imodel, hierarchyConfig);
+    function createVisibilityTestData(props: { imodel: IModelConnection; hierarchyConfig?: typeof defaultHierarchyConfiguration }) {
+      const commonProps = createCommonProps(props);
       const handler = createModelsTreeVisibilityHandler(commonProps);
-      const provider = createProvider({ ...commonProps, hierarchyConfig });
+      const provider = createProvider(commonProps);
       return {
         handler,
         provider,
@@ -3012,9 +3018,9 @@ describe("ModelsTreeVisibilityHandler", () => {
         imodel,
         filterPaths,
       }: Parameters<typeof createVisibilityTestData>[0] & { filterPaths: HierarchyNodeIdentifiersPath[] }) {
-        const commonProps = createCommonProps(imodel);
+        const commonProps = createCommonProps({ imodel });
         const handler = createModelsTreeVisibilityHandler({ ...commonProps, filteredPaths: filterPaths });
-        const defaultProvider = createProvider({ ...commonProps });
+        const defaultProvider = createProvider(commonProps);
         const filteredProvider = createProvider({ ...commonProps, filterPaths });
         return {
           handler,

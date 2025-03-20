@@ -180,7 +180,8 @@ function CustomModelsTreeRenderer(props: CustomModelsTreeRendererProps) {
     },
     [getLabel],
   );
-  return <VisibilityTreeRenderer {...props} getLabel={getLabelCallback} getSublabel={getSublabel} />;
+  const getSublabelCallback = useCallback<Required<VisibilityTreeRendererProps>["getSublabel"]>((node) => <>Sublabel - {node.label}</>, []);
+  return <VisibilityTreeRenderer {...props} getLabel={getLabelCallback} getSublabel={getSublabelCallback} />;
 }
 
 interface CustomModelsTreeProps {

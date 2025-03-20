@@ -12,7 +12,7 @@ import type { IModelContentTreeProps } from "./IModelContentTree.js";
 
 /** @beta */
 interface IModelContentTreeComponentProps
-  extends Pick<IModelContentTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
+  extends Pick<IModelContentTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyConfig" | "hierarchyLevelConfig" | "selectionMode"> {
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }

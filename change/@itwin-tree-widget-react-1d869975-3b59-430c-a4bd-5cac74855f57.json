@@ -1,6 +1,6 @@
 {
-  "type": "patch",
-  "comment": "Remove root Subject node from Models and iModel content trees",
+  "type": "minor",
+  "comment": "Add ability to remove root Subject node from Models and iModel content trees by setting `hideRootSubject: true` in the `hierarchyConfig` prop.",
   "packageName": "@itwin/tree-widget-react",
   "email": "35135765+grigasp@users.noreply.github.com",
   "dependentChangeType": "patch"
