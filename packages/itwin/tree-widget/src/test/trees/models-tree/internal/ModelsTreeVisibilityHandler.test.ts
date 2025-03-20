@@ -2060,7 +2060,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         ],
       },
       {
-        describeName: "with modeled elements who have subModel with no children",
+        describeName: "with modeled elements that have subModel with no children",
         createIModel: async function createIModel(context: Mocha.Context): Promise<{ imodel: IModelConnection } & IModelWithSubModelIds> {
           return buildIModel(context, async (builder, testSchema) => {
             const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
