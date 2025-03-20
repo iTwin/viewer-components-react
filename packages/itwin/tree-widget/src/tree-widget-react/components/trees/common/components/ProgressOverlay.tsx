@@ -10,7 +10,7 @@ import { TreeWidget } from "../../../../TreeWidget.js";
 export function ProgressOverlay() {
   return (
     <div className="tw-progress-overlay-container">
-      <ProgressBar aria-labelledby={"tw-progress-bar"} />
+      <ProgressBar aria-labelledby={"tw-progress-bar"} tone={"accent"} />
       <VisuallyHidden id={"tw-progress-bar"}>{TreeWidget.translate("loading.filter")}</VisuallyHidden>
       <div className="tw-progress-overlay-backdrop" />
     </div>
