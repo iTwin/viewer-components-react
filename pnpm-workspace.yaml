@@ -1,5 +1,13 @@
 packages:
-  - "packages/itwin/*"
-  - "!packages/itwin/breakdown-trees"
-  - "apps/test-viewer"
-  - "apps/learning-snippets"
+  - packages/itwin/*
+  - '!packages/itwin/breakdown-trees'
+  - apps/test-viewer
+  - apps/learning-snippets
+
+onlyBuiltDependencies:
+  - '@bentley/imodeljs-native'
+  - '@itwin/oidc-signin-tool'
+  - core-js-pure
+  - esbuild
+  - puppeteer
+  - typemoq

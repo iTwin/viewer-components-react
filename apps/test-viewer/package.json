@@ -76,45 +76,12 @@
     "vite": "^5.4.12",
     "vite-plugin-static-copy": "^2.0.0"
   },
-  "dependenciesMeta": {
-    "@itwin/property-grid-react": {
-      "injected": true
-    },
-    "@itwin/tree-widget-react": {
-      "injected": true
-    },
-    "@itwin/measure-tools-react": {
-      "injected": true
-    },
-    "@itwin/map-layers": {
-      "injected": true
-    },
-    "@itwin/geo-tools-react": {
-      "injected": true
-    },
-    "@itwin/grouping-mapping-widget": {
-      "injected": true
-    },
-    "@itwin/reports-config-widget-react": {
-      "injected": true
-    },
-    "@itwin/ec3-widget-react": {
-      "injected": true
-    },
-    "@itwin/one-click-lca-react": {
-      "injected": true
-    }
-  },
   "scripts": {
     "start": "dotenvx run -- vite",
-    "start:dev": "run-p start link:deps:watch",
-    "start:dev:no-watch": "run-p start link:deps",
-    "build": "npm run link:deps && tsc --noEmit",
+    "build": "tsc --noEmit",
     "clean": "rimraf dist",
     "dist": "vite build",
-    "lint": "eslint ./src/**/*.{ts,tsx}",
-    "link:deps": "node ./scripts/linkWorkspaceDeps.js",
-    "link:deps:watch": "node ./scripts/linkWorkspaceDeps.js --watch"
+    "lint": "eslint ./src/**/*.{ts,tsx}"
   },
   "eslintConfig": {
     "extends": [
