@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { SvgFolder, SvgGroup, SvgHierarchyTree, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
 import { Tree } from "../common/components/Tree.js";
 import { TreeRenderer } from "../common/components/TreeRenderer.js";
@@ -25,20 +25,17 @@ export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContex
 };
 
 /** @beta */
-export function IModelContentTree({ hierarchyConfig, ...props }: IModelContentTreeProps) {
-  const hierarchyConfiguration = useMemo<IModelContentTreeHierarchyConfiguration>(
-    () => ({
-      ...defaultHierarchyConfiguration,
-      ...hierarchyConfig,
-    }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    Object.values(hierarchyConfig ?? {}),
-  );
-
+export function IModelContentTree({ hierarchyConfig: hierarchyConfigProp, ...props }: IModelContentTreeProps) {
   const getHierarchyDefinition = useCallback<TreeProps["getHierarchyDefinition"]>(
-    ({ imodelAccess }) =>
-      new IModelContentTreeDefinition({ imodelAccess, idsCache: new IModelContentTreeIdsCache(imodelAccess), hierarchyConfig: hierarchyConfiguration }),
-    [hierarchyConfiguration],
+    ({ imodelAccess }) => {
+      const hierarchyConfig = {
+        ...defaultHierarchyConfiguration,
+        ...hierarchyConfigProp,
+      };
+      return new IModelContentTreeDefinition({ imodelAccess, idsCache: new IModelContentTreeIdsCache(imodelAccess), hierarchyConfig });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    Object.values(hierarchyConfigProp ?? {}),
   );
 
   return (
