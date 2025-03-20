@@ -14,7 +14,7 @@ export function SkeletonTree() {
       {Array.from({ length: 20 }, (_, index) => (
         <SkeletonRow key={index} />
       ))}
-      <VisuallyHidden id={"tw-progress-bar"}> {TreeWidget.translate("loading.skeleton")} </VisuallyHidden>
+      <VisuallyHidden id={"tw-progress-bar"}>{TreeWidget.translate("loading.skeleton")}</VisuallyHidden>
     </div>
   );
 }
