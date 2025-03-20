@@ -469,22 +469,28 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 },
                 hasChildren: {
                   selector: `
-                    IFNULL((
-                      SELECT 1
-                      FROM (
-                        SELECT Parent.Id ParentId FROM ${this._hierarchyConfig.elementClassSpecification}
-                        ${
-                          modeledElements.length === 0
-                            ? ""
-                            : `
-                              UNION ALL
-                              SELECT ModeledElement.Id ParentId FROM BisCore.GeometricModel3d WHERE ModeledElement.Id IN (${modeledElements.join(",")})
-                            `
-                        }
-                      )
-                      WHERE ParentId = this.ECInstanceId
-                      LIMIT 1
-                    ), 0)
+                    ${
+                      modeledElements.length === 0
+                        ? `
+                          IFNULL((
+                            SELECT 1
+                            FROM ${this._hierarchyConfig.elementClassSpecification} ce
+                            WHERE ce.Parent.Id = this.ECInstanceId
+                            LIMIT 1
+                          ), 0)`
+                        : `
+                          IIF(
+                            this.ECInstanceId IN (${modeledElements.join(",")}),
+                            1,
+                            IFNULL((
+                              SELECT 1
+                              FROM ${this._hierarchyConfig.elementClassSpecification} ce
+                              WHERE ce.Parent.Id = this.ECInstanceId
+                              LIMIT 1
+                            ), 0)
+                          )
+                        `
+                    }
                   `,
                 },
                 extendedData: {
@@ -542,26 +548,18 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 grouping: {
                   byClass: this._hierarchyConfig.elementClassGrouping !== "disable",
                 },
-                hasChildren: {
-                  selector: `
-                    IFNULL((
-                      SELECT 1
-                      FROM (
-                        SELECT Parent.Id ParentId FROM ${this._hierarchyConfig.elementClassSpecification}
-                        ${
-                          hasSubModel
-                            ? `
-                              UNION ALL
-                              SELECT ModeledElement.Id ParentId FROM bis.GeometricModel3d WHERE IsPrivate = false
-                            `
-                            : ""
-                        }
-                      )
-                      WHERE ParentId = this.ECInstanceId
-                      LIMIT 1
-                    ), 0)
-                  `,
-                },
+                hasChildren: hasSubModel
+                  ? true
+                  : {
+                      selector: `
+                        IFNULL((
+                          SELECT 1
+                          FROM ${this._hierarchyConfig.elementClassSpecification} ce
+                          WHERE ce.Parent.Id = this.ECInstanceId
+                          LIMIT 1
+                        ), 0)
+                      `,
+                    },
                 extendedData: {
                   modelId: { selector: "IdToHex(this.Model.Id)" },
                   categoryId: { selector: "IdToHex(this.Category.Id)" },

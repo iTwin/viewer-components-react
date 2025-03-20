@@ -21,7 +21,7 @@ interface SubjectInfo {
 }
 
 interface ModelInfo {
-  isPrivate: boolean;
+  isModelPrivate: boolean;
   categories: Id64Set;
   elementCount: number;
 }
@@ -258,14 +258,14 @@ export class ModelsTreeIdsCache {
 
   private async *queryModelCategories() {
     const query = /* sql */ `
-      SELECT this.Model.Id modelId, this.Category.Id categoryId, m.IsPrivate isPrivate
+      SELECT this.Model.Id modelId, this.Category.Id categoryId, m.IsPrivate isModelPrivate
       FROM BisCore.Model m
       JOIN ${this._hierarchyConfig.elementClassSpecification} this ON m.ECInstanceId = this.Model.Id
       WHERE this.Parent.Id IS NULL
-      GROUP BY modelId, categoryId, isPrivate
+      GROUP BY modelId, categoryId, isModelPrivate
     `;
     for await (const row of this._queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
-      yield { modelId: row.modelId, categoryId: row.categoryId, isPrivate: !!row.isPrivate };
+      yield { modelId: row.modelId, categoryId: row.categoryId, isModelPrivate: !!row.isModelPrivate };
     }
   }
 
@@ -276,29 +276,24 @@ export class ModelsTreeIdsCache {
         pe.Category.Id categoryId,
         pe.Model.Id modelId,
         IFNULL((
-          SELECT false
-          FROM (
-            SELECT ECInstanceId id, IsPrivate isPrivate FROM BisCore.Model
-          )
-          WHERE id = pe.ECInstanceId AND isPrivate = false
+          SELECT true
+          FROM ${this._hierarchyConfig.elementClassSpecification} ce
+          WHERE ce.Model.Id = pe.ECInstanceId
           LIMIT 1
-        ), true) isModeledElementPrivate
+        ), false) hasChildren
       FROM BisCore.Model m
       JOIN ${this._hierarchyConfig.elementClassSpecification} pe ON pe.ECInstanceId = m.ModeledElement.Id
-      JOIN ${this._hierarchyConfig.elementClassSpecification} ce ON ce.Model.Id = m.ECInstanceId
+      WHERE m.IsPrivate = false AND hasChildren = true
     `;
     for await (const row of this._queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
-      yield { modelId: row.modelId, categoryId: row.categoryId, modeledElementId: row.modeledElementId, isPrivate: !!row.isModeledElementPrivate };
+      yield { modelId: row.modelId, categoryId: row.categoryId, modeledElementId: row.modeledElementId };
     }
   }
 
   private async getModelWithCategoryModeledElements() {
     this._modelWithCategoryModeledElements ??= (async () => {
       const modelWithCategoryModeledElements = new Map<Id64String, Id64Set>();
-      for await (const { modelId, categoryId, modeledElementId, isPrivate } of this.queryModeledElements()) {
-        if (isPrivate) {
-          continue;
-        }
+      for await (const { modelId, categoryId, modeledElementId } of this.queryModeledElements()) {
         const key = `${modelId}-${categoryId}`;
         const entry = modelWithCategoryModeledElements.get(key);
         if (entry === undefined) {
@@ -314,16 +309,16 @@ export class ModelsTreeIdsCache {
 
   private async getModelInfos() {
     this._modelInfos ??= (async () => {
-      const modelInfos = new Map<Id64String, { categories: Id64Set; elementCount: number; isPrivate: boolean }>();
+      const modelInfos = new Map<Id64String, { categories: Id64Set; elementCount: number; isModelPrivate: boolean }>();
       await Promise.all([
         (async () => {
-          for await (const { modelId, categoryId, isPrivate } of this.queryModelCategories()) {
+          for await (const { modelId, categoryId, isModelPrivate } of this.queryModelCategories()) {
             const entry = modelInfos.get(modelId);
             if (entry) {
               entry.categories.add(categoryId);
-              entry.isPrivate = isPrivate;
+              entry.isModelPrivate = isModelPrivate;
             } else {
-              modelInfos.set(modelId, { categories: new Set([categoryId]), elementCount: 0, isPrivate });
+              modelInfos.set(modelId, { categories: new Set([categoryId]), elementCount: 0, isModelPrivate });
             }
           }
         })(),
@@ -333,7 +328,7 @@ export class ModelsTreeIdsCache {
             if (entry) {
               entry.elementCount = elementCount;
             } else {
-              modelInfos.set(modelId, { categories: new Set(), elementCount, isPrivate: false });
+              modelInfos.set(modelId, { categories: new Set(), elementCount, isModelPrivate: false });
             }
           }
         })(),
@@ -360,7 +355,7 @@ export class ModelsTreeIdsCache {
     if (!modeledElementInfo) {
       return false;
     }
-    return !modeledElementInfo.isPrivate;
+    return !modeledElementInfo.isModelPrivate;
   }
 
   public async getCategoriesModeledElements(modelId: Id64String, categoryIds: Id64Array): Promise<Id64Array> {
