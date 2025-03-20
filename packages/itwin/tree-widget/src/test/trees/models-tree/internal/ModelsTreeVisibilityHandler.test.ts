@@ -3137,8 +3137,6 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
 
     describe("filtered nodes", () => {
-      const rootSubjectInstanceKey: InstanceKey = { id: IModel.rootSubjectId, className: "BisCore.Subject" };
-
       function createFilteredVisibilityTestData({
         imodel,
         filterPaths,
@@ -3189,8 +3187,6 @@ describe("ModelsTreeVisibilityHandler", () => {
         return parentNode;
       }
 
-      const getRootNode = async (provider: HierarchyProvider) => getNodeMatchingPath(provider, [rootSubjectInstanceKey]);
-
       describe("single path to element", () => {
         it("switches on only filtered hierarchy when root node is clicked", async function () {
           await using buildIModelResult = await buildIModel(this, async (builder) => {
@@ -3206,7 +3202,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               model,
               category,
               filterTargetElement,
-              filterPaths: [[rootSubjectInstanceKey, model, category, filterTargetElement]],
+              filterPaths: [[model, category, filterTargetElement]],
             };
           });
 
@@ -3214,7 +3210,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           using visibilityTestData = createFilteredVisibilityTestData({ imodel, filterPaths });
           const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
           await using(handler, async (_) => {
-            const node = await getRootNode(filteredProvider);
+            const node = await getNodeMatchingPath(filteredProvider, [keys.model]);
             await handler.changeVisibility(node, true);
             viewport.renderFrame();
 
@@ -3254,7 +3250,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             const filterTargets = new Set<Id64String>();
             filteredCategories.forEach((category) => {
               const filterTarget = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
-              paths.push([rootSubjectInstanceKey, model, category, filterTarget]);
+              paths.push([model, category, filterTarget]);
               filterTargets.add(filterTarget.id);
 
               insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
@@ -3280,7 +3276,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
 
           await using(handler, async (_) => {
-            const node = await getRootNode(filteredProvider);
+            const node = await getNodeMatchingPath(filteredProvider, [keys.model]);
             await handler.changeVisibility(node, true);
             viewport.renderFrame();
 
@@ -3313,7 +3309,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
 
           await using(handler, async (_) => {
-            const pathToCategory = [rootSubjectInstanceKey, keys.model, filteredCategories[0]];
+            const pathToCategory = [keys.model, filteredCategories[0]];
             const node = await getNodeMatchingPath(filteredProvider, pathToCategory);
             await handler.changeVisibility(node, true);
             viewport.renderFrame();
@@ -3352,12 +3348,14 @@ describe("ModelsTreeVisibilityHandler", () => {
       describe("multiple paths to a category and element under it", () => {
         async function createIModel(context: Mocha.Context) {
           return buildIModel(context, async (builder) => {
-            const paths = new Array<InstanceKey[]>();
+            const filterPaths = new Array<InstanceKey[]>();
             const subjectIds = new Array<Id64String>();
             const modelIds = new Array<Id64String>();
 
+            const parentSubject = insertSubject({ builder, codeValue: `parent subject`, parentId: IModel.rootSubjectId });
+
             for (let i = 0; i < 2; ++i) {
-              const subject = insertSubject({ builder, codeValue: `subject${i}` });
+              const subject = insertSubject({ builder, codeValue: `subject${i}`, parentId: parentSubject.id });
               const model = insertPhysicalModelWithPartition({ builder, partitionParentId: subject.id, codeValue: `model${i}` });
               const category = insertSpatialCategory({ builder, codeValue: `category${i}` });
               const elements = [
@@ -3366,26 +3364,26 @@ describe("ModelsTreeVisibilityHandler", () => {
               ];
               subjectIds.push(subject.id);
               modelIds.push(model.id);
-              paths.push([rootSubjectInstanceKey, subject, model, category]);
-              paths.push([rootSubjectInstanceKey, subject, model, category, elements[0]]);
+              filterPaths.push([parentSubject, subject, model, category], [parentSubject, subject, model, category, elements[0]]);
             }
 
             return {
+              parentSubject,
               subjectIds,
               modelIds,
-              filterPaths: paths,
+              filterPaths,
             };
           });
         }
 
-        it("when clicking on root subject turns on category and all its elements", async function () {
+        it("when clicking on model turns on category and all its elements", async function () {
           await using buildIModelResult = await createIModel(this);
-          const { imodel, filterPaths } = buildIModelResult;
+          const { imodel, filterPaths, parentSubject } = buildIModelResult;
           using visibilityTestData = createFilteredVisibilityTestData({ imodel, filterPaths });
           const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
 
           await using(handler, async (_) => {
-            const node = await getRootNode(filteredProvider);
+            const node = await getNodeMatchingPath(filteredProvider, [parentSubject]);
             await handler.changeVisibility(node, true);
             viewport.renderFrame();
 
@@ -3407,7 +3405,7 @@ describe("ModelsTreeVisibilityHandler", () => {
 
         it("when clicking on one of the categories it turns on only that category", async function () {
           await using buildIModelResult = await createIModel(this);
-          const { imodel, filterPaths, subjectIds, modelIds } = buildIModelResult;
+          const { imodel, filterPaths, parentSubject, subjectIds, modelIds } = buildIModelResult;
           using visibilityTestData = createFilteredVisibilityTestData({ imodel, filterPaths });
           const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
 
@@ -3416,18 +3414,18 @@ describe("ModelsTreeVisibilityHandler", () => {
           await handler.changeVisibility(node, true);
           viewport.renderFrame();
 
-          const visibilityExpectations: ValidateNodeProps["visibilityExpectations"] = {
-            subject: (id) => {
-              if (id === rootSubjectInstanceKey.id) {
-                return "partial";
-              }
-              return id === subjectIds[0] ? "visible" : "hidden";
-            },
-            model: (id) => (id === modelIds[0] ? "visible" : "hidden"),
-            category: ({ modelId }) => (modelId === modelIds[0] ? "visible" : "hidden"),
-            groupingNode: ({ modelId }) => (modelId === modelIds[0] ? "visible" : "hidden"),
-            element: ({ modelId }) => (modelId === modelIds[0] ? "visible" : "hidden"),
-          };
+            const visibilityExpectations: ValidateNodeProps["visibilityExpectations"] = {
+              subject: (id) => {
+                if (id === parentSubject.id) {
+                  return "partial";
+                }
+                return id === subjectIds[0] ? "visible" : "hidden";
+              },
+              model: (id) => (id === modelIds[0] ? "visible" : "hidden"),
+              category: ({ modelId }) => (modelId === modelIds[0] ? "visible" : "hidden"),
+              groupingNode: ({ modelId }) => (modelId === modelIds[0] ? "visible" : "hidden"),
+              element: ({ modelId }) => (modelId === modelIds[0] ? "visible" : "hidden"),
+            };
 
           await validateHierarchyVisibility({
             provider: filteredProvider,
@@ -3472,8 +3470,8 @@ describe("ModelsTreeVisibilityHandler", () => {
           const element2 = insertPhysicalElement({ builder, classFullName: PhysicalElement2.fullName, modelId: model.id, categoryId: category.id });
 
           const paths = [
-            [rootSubjectInstanceKey, model, category, element1],
-            [rootSubjectInstanceKey, model, category, element2],
+            [model, category, element1],
+            [model, category, element2],
           ];
 
           return {

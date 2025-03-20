@@ -37,7 +37,7 @@ describe("Tree widget", () => {
         it("renders <IModelContentTreeComponent />", async function () {
           const imodel = (
             await buildIModel(this, async (builder) => {
-              const subjectA = insertSubject({ builder, codeValue: "A", parentId: IModel.rootSubjectId });
+              const subjectA = insertSubject({ builder, codeValue: "Test subject A", parentId: IModel.rootSubjectId });
               return { subjectA };
             })
           ).imodel;
@@ -62,7 +62,7 @@ describe("Tree widget", () => {
 
           using _ = { [Symbol.dispose]: cleanup };
           const { getByText } = render(<MyWidget />);
-          await waitFor(() => getByText("tree-widget-learning-snippets-components-imodel-content-tree-renders-imodelcontenttreecomponent-"));
+          await waitFor(() => getByText("Test subject A"));
         });
       });
     });

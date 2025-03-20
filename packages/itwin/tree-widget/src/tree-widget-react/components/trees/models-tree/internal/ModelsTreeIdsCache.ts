@@ -6,6 +6,7 @@
 import type { Subscription } from "rxjs";
 import { bufferTime, filter, firstValueFrom, mergeAll, mergeMap, ReplaySubject, Subject } from "rxjs";
 import { assert } from "@itwin/core-bentley";
+import { IModel } from "@itwin/core-common";
 import { pushToMap } from "../../common/Utils.js";
 
 import type { InstanceKey } from "@itwin/presentation-shared";
@@ -231,7 +232,7 @@ export class ModelsTreeIdsCache {
         const subjectInfos = await this.getSubjectInfos();
         const result = new Array<InstanceKey>();
         let currParentId: Id64String | undefined = targetSubjectId;
-        while (currParentId) {
+        while (currParentId && currParentId !== IModel.rootSubjectId) {
           const parentInfo = subjectInfos.get(currParentId);
           if (!parentInfo?.hideInHierarchy) {
             result.push({ className: "BisCore.Subject", id: currParentId });

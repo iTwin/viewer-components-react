@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { bufferCount, defer, from, lastValueFrom, map, merge, mergeAll, mergeMap, reduce, switchMap } from "rxjs";
+import { IModel } from "@itwin/core-common";
 import {
   createNodesQueryClauseFactory,
   createPredicateBasedHierarchyDefinition,
@@ -32,7 +33,6 @@ import type {
   createIModelHierarchyProvider,
   DefineHierarchyLevelProps,
   DefineInstanceNodeChildHierarchyLevelProps,
-  DefineRootHierarchyLevelProps,
   GroupingHierarchyNode,
   HierarchyDefinition,
   HierarchyLevelDefinition,
@@ -128,7 +128,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     this._impl = createPredicateBasedHierarchyDefinition({
       classHierarchyInspector: props.imodelAccess,
       hierarchy: {
-        rootNodes: async (requestProps) => this.createRootHierarchyLevelDefinition(requestProps),
+        rootNodes: async (requestProps) => this.createSubjectChildrenQuery({ ...requestProps, parentNodeInstanceIds: [IModel.rootSubjectId] }),
         childNodes: [
           {
             parentInstancesNodePredicate: "BisCore.Subject",
@@ -193,48 +193,10 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     return this._impl.defineHierarchyLevel(props);
   }
 
-  private async createRootHierarchyLevelDefinition(props: DefineRootHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
-      filter: props.instanceFilter,
-      contentClass: { fullName: "BisCore.Subject", alias: "this" },
-    });
-    return [
-      {
-        fullClassName: "BisCore.Subject",
-        query: {
-          ecsql: `
-            SELECT
-              ${await this._selectQueryFactory.createSelectClause({
-                ecClassId: { selector: ECSql.createRawPropertyValueSelector("this", "ECClassId") },
-                ecInstanceId: { selector: "this.ECInstanceId" },
-                nodeLabel: {
-                  selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
-                    classAlias: "this",
-                    className: "BisCore.Subject",
-                  }),
-                },
-                extendedData: {
-                  imageId: "icon-imodel-hollow-2",
-                  isSubject: true,
-                },
-                autoExpand: true,
-                supportsFiltering: true,
-              })}
-            FROM ${instanceFilterClauses.from} this
-            ${instanceFilterClauses.joins}
-            WHERE
-              this.Parent.Id IS NULL
-              ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
-          `,
-        },
-      },
-    ];
-  }
-
   private async createSubjectChildrenQuery({
     parentNodeInstanceIds: subjectIds,
     instanceFilter,
-  }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
+  }: Pick<DefineInstanceNodeChildHierarchyLevelProps, "parentNodeInstanceIds" | "instanceFilter">): Promise<HierarchyLevelDefinition> {
     const [subjectFilterClauses, modelFilterClauses] = await Promise.all([
       this._selectQueryFactory.createFilterClauses({
         filter: instanceFilter,
