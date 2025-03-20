@@ -189,11 +189,6 @@ importers:
       typescript:
         specifier: ~5.6.0
         version: 5.6.3
-    dependenciesMeta:
-      '@itwin/property-grid-react':
-        injected: true
-      '@itwin/tree-widget-react':
-        injected: true
 
 packages:
 
