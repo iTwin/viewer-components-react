@@ -20,8 +20,8 @@ export function SkeletonTree() {
 function SkeletonRow() {
   return (
     <div className="tw-skeleton-row">
-      <Skeleton className={"tw-skeleton-icon"} variant={"text"} />
-      <Skeleton className={"tw-skeleton-label"} variant={"text"} />
+      <Skeleton variant={"object"} size={"small"} />
+      <Skeleton variant={"text"} />
     </div>
   );
 }
