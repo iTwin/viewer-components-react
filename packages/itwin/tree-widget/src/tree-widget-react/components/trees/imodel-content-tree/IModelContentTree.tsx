@@ -10,6 +10,7 @@ import subjectSvg from "@itwin/itwinui-icons/bis-subject.svg";
 import groupSvg from "@itwin/itwinui-icons/group.svg";
 import modelSvg from "@itwin/itwinui-icons/model-cube.svg";
 import hierarchyTreeSvg from "@itwin/itwinui-icons/selection-children.svg";
+import { Icon } from "@itwin/itwinui-react/bricks";
 import { EmptyTreeContent } from "../common/components/EmptyTree.js";
 import { Tree } from "../common/components/Tree.js";
 import { TreeRenderer } from "../common/components/TreeRenderer.js";
@@ -37,7 +38,7 @@ export function IModelContentTree(props: IModelContentTreeProps) {
       treeName={IModelContentTreeComponent.id}
       getHierarchyDefinition={getDefinitionsProvider}
       selectionMode={props.selectionMode ?? "extended"}
-      treeRenderer={(treeProps) => <TreeRenderer {...treeProps} getIcon={getIcon} />}
+      treeRenderer={(treeProps) => <TreeRenderer {...treeProps} getDecorations={(node) => <Icon href={getIcon(node)} />} />}
     />
   );
 }

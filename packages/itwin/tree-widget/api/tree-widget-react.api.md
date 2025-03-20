@@ -460,7 +460,7 @@ interface UseCategoriesTreeResult {
     // (undocumented)
     categoriesTreeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlight" | "emptyTreeContent">;
     // (undocumented)
-    rendererProps: Required<Pick<VisibilityTreeRendererProps, "getIcon" | "getSublabel">>;
+    rendererProps: Required<Pick<VisibilityTreeRendererProps, "getDecorations" | "getSublabel">>;
 }
 
 // @public
@@ -511,7 +511,7 @@ interface UseModelsTreeResult {
     // (undocumented)
     modelsTreeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlight" | "emptyTreeContent" | "selectionPredicate">;
     // (undocumented)
-    rendererProps: Required<Pick<VisibilityTreeRendererProps, "getIcon">>;
+    rendererProps: Required<Pick<VisibilityTreeRendererProps, "getDecorations">>;
 }
 
 // @beta

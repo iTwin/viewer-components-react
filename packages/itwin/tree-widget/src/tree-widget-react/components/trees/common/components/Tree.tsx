@@ -3,9 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import "./Tree.css";
 import { useCallback, useMemo, useState } from "react";
 import { BeEvent } from "@itwin/core-bentley";
-import { Spinner } from "@itwin/itwinui-react/bricks";
 import { SchemaMetadataContextProvider } from "@itwin/presentation-components";
 import { useIModelUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
 import { useHierarchiesLocalization } from "../UseHierarchiesLocalization.js";
@@ -17,6 +17,7 @@ import { createIModelAccess } from "../Utils.js";
 import { Delayed } from "./Delayed.js";
 import { EmptyTreeContent } from "./EmptyTree.js";
 import { ProgressOverlay } from "./ProgressOverlay.js";
+import { SkeletonTree } from "./SkeletonTree.js";
 
 import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
 import type { MarkRequired } from "@itwin/core-bentley";
@@ -152,13 +153,7 @@ function TreeImpl({
   const { getLabel } = useNodeHighlighting({ rootNodes, highlight });
 
   if (rootNodes === undefined) {
-    return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", width: "100%", height: "100%" }}>
-        <Delayed show={true}>
-          <Spinner />
-        </Delayed>
-      </div>
-    );
+    return <SkeletonTree />;
   }
 
   if (rootNodes.length === 0 && !isLoading) {
@@ -177,7 +172,7 @@ function TreeImpl({
 
   return (
     <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>
-      <div id="tw-tree-renderer-container" style={{ overflow: "auto", height: "100%" }}>
+      <div className={"tw-tree-renderer-container"} id="tw-tree-renderer-container">
         {treeRenderer(treeRendererProps)}
         {filteringDialog}
       </div>

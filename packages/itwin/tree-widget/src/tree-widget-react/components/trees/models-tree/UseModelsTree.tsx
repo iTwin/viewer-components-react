@@ -9,6 +9,7 @@ import classSvg from "@itwin/itwinui-icons/bis-class.svg";
 import elementSvg from "@itwin/itwinui-icons/bis-element.svg";
 import subjectSvg from "@itwin/itwinui-icons/bis-subject.svg";
 import modelSvg from "@itwin/itwinui-icons/model-cube.svg";
+import { Icon } from "@itwin/itwinui-react/bricks";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import {
@@ -38,7 +39,6 @@ import type { ClassGroupingHierarchyNode, ElementsGroupInfo, ModelsTreeHierarchy
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/ModelsTreeVisibilityHandler.js";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
-
 type ModelsTreeFilteringError = "tooManyFilterMatches" | "tooManyInstancesFocused" | "unknownFilterError" | "unknownInstanceFocusError";
 
 /** @beta */
@@ -65,7 +65,7 @@ interface UseModelsTreeResult {
     VisibilityTreeProps,
     "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlight" | "emptyTreeContent" | "selectionPredicate"
   >;
-  rendererProps: Required<Pick<VisibilityTreeRendererProps, "getIcon">>;
+  rendererProps: Required<Pick<VisibilityTreeRendererProps, "getDecorations">>;
 }
 
 /**
@@ -224,7 +224,7 @@ export function useModelsTree({
     },
     rendererProps: {
       // onDoubleClick,
-      getIcon,
+      getDecorations: (node) => <Icon href={getIcon(node)} />,
     },
   };
 }
