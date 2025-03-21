@@ -436,28 +436,16 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 },
                 hasChildren: {
                   selector: `
-                    ${
-                      modeledElements.length === 0
-                        ? `
-                          IFNULL((
-                            SELECT 1
-                            FROM ${this._hierarchyConfig.elementClassSpecification} ce
-                            WHERE ce.Parent.Id = this.ECInstanceId
-                            LIMIT 1
-                          ), 0)`
-                        : `
-                          IIF(
-                            this.ECInstanceId IN (${modeledElements.join(",")}),
-                            1,
-                            IFNULL((
-                              SELECT 1
-                              FROM ${this._hierarchyConfig.elementClassSpecification} ce
-                              WHERE ce.Parent.Id = this.ECInstanceId
-                              LIMIT 1
-                            ), 0)
-                          )
-                        `
-                    }
+                    IIF(
+                      ${modeledElements.length ? `this.ECInstanceId IN (${modeledElements.join(",")})` : `FALSE`},
+                      1,
+                      IFNULL((
+                        SELECT 1
+                        FROM ${this._hierarchyConfig.elementClassSpecification} ce
+                        WHERE ce.Parent.Id = this.ECInstanceId
+                        LIMIT 1
+                      ), 0)
+                    )
                   `,
                 },
                 extendedData: {
@@ -489,14 +477,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       filter: instanceFilter,
       contentClass: { fullName: this._hierarchyConfig.elementClassSpecification, alias: "this" },
     });
-    let hasSubModel = false;
-    await Promise.all(
-      elementIds.map(async (elementId) => {
-        if (await this._idsCache.hasSubModel(elementId)) {
-          hasSubModel = true;
-        }
-      }),
-    );
     return [
       {
         fullClassName: this._hierarchyConfig.elementClassSpecification,
@@ -515,18 +495,17 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 grouping: {
                   byClass: this._hierarchyConfig.elementClassGrouping !== "disable",
                 },
-                hasChildren: hasSubModel
-                  ? true
-                  : {
-                      selector: `
-                        IFNULL((
-                          SELECT 1
-                          FROM ${this._hierarchyConfig.elementClassSpecification} ce
-                          WHERE ce.Parent.Id = this.ECInstanceId
-                          LIMIT 1
-                        ), 0)
-                      `,
-                    },
+                hasChildren: {
+                  selector: `
+                    IFNULL((
+                      SELECT 1
+                      FROM ${this._hierarchyConfig.elementClassSpecification} ce
+                      JOIN BisCore.Model m ON ce.Model.Id = m.ECInstanceId
+                      WHERE ce.Parent.Id = this.ECInstanceId OR (ce.Model.Id = this.ECInstanceId AND m.IsPrivate = false)
+                      LIMIT 1
+                    ), 0)
+                  `,
+                },
                 extendedData: {
                   modelId: { selector: "IdToHex(this.Model.Id)" },
                   categoryId: { selector: "IdToHex(this.Category.Id)" },

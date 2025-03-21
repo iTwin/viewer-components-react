@@ -278,16 +278,12 @@ export class ModelsTreeIdsCache {
       SELECT
         pe.ECInstanceId modeledElementId,
         pe.Category.Id categoryId,
-        pe.Model.Id modelId,
-        IFNULL((
-          SELECT true
-          FROM ${this._hierarchyConfig.elementClassSpecification} ce
-          WHERE ce.Model.Id = pe.ECInstanceId
-          LIMIT 1
-        ), false) hasChildren
+        pe.Model.Id modelId
       FROM BisCore.Model m
       JOIN ${this._hierarchyConfig.elementClassSpecification} pe ON pe.ECInstanceId = m.ModeledElement.Id
-      WHERE m.IsPrivate = false AND hasChildren = true
+      WHERE
+        m.IsPrivate = false
+        AND m.ECInstanceId IN (SELECT Model.Id FROM ${this._hierarchyConfig.elementClassSpecification})
     `;
     for await (const row of this._queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
       yield { modelId: row.modelId, categoryId: row.categoryId, modeledElementId: row.modeledElementId };
