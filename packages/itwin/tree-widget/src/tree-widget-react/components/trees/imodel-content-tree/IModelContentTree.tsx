@@ -30,16 +30,16 @@ export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContex
   };
 
 /** @beta */
-export function IModelContentTree(props: IModelContentTreeProps) {
+export function IModelContentTree({ actions, getDecorations, selectionMode, ...rest }: IModelContentTreeProps) {
   return (
     <Tree
       emptyTreeContent={<EmptyTreeContent icon={modelSvg} />}
-      {...props}
+      {...rest}
       treeName={IModelContentTreeComponent.id}
       getHierarchyDefinition={getDefinitionsProvider}
-      selectionMode={props.selectionMode ?? "extended"}
+      selectionMode={selectionMode ?? "extended"}
       treeRenderer={(treeProps) => (
-        <TreeRenderer {...treeProps} actions={props.actions} getDecorations={props.getDecorations ?? ((node) => <IModelContentTreeIcon node={node} />)} />
+        <TreeRenderer {...treeProps} actions={actions} getDecorations={getDecorations ?? ((node) => <IModelContentTreeIcon node={node} />)} />
       )}
     />
   );

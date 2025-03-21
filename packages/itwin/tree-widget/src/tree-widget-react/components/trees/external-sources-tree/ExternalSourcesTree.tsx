@@ -27,16 +27,16 @@ export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "getSchemaCont
   };
 
 /** @beta */
-export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
+export function ExternalSourcesTree({ actions, getDecorations, selectionMode, ...rest }: ExternalSourcesTreeProps) {
   return (
     <Tree
       emptyTreeContent={<EmptyTreeContent icon={documentSvg} />}
-      {...props}
+      {...rest}
       treeName={ExternalSourcesTreeComponent.id}
       getHierarchyDefinition={getDefinitionsProvider}
-      selectionMode={props.selectionMode ?? "none"}
+      selectionMode={selectionMode ?? "none"}
       treeRenderer={(treeProps) => (
-        <TreeRenderer {...treeProps} actions={props.actions} getDecorations={props.getDecorations ?? ((node) => <ExternalSourcesTreeIcon node={node} />)} />
+        <TreeRenderer {...treeProps} actions={actions} getDecorations={getDecorations ?? ((node) => <ExternalSourcesTreeIcon node={node} />)} />
       )}
     />
   );
