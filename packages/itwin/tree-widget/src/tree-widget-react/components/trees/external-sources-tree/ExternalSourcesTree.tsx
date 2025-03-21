@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import React from "react";
 import classSvg from "@itwin/itwinui-icons/bis-class.svg";
 import elementSvg from "@itwin/itwinui-icons/bis-element.svg";
 import documentSvg from "@itwin/itwinui-icons/document.svg";
