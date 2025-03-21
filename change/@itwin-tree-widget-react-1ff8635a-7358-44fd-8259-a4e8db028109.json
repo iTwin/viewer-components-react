@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Fixed Models tree showing that modeled elements have children, when their sub model is private or when sub model does not have any elements. Now it shows that modeled element has children only when it's sub model has children and is not private.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "100586436+JonasDov@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
