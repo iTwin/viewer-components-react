@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import React from "react";
 import classSvg from "@itwin/itwinui-icons/bis-class.svg";
 import elementSvg from "@itwin/itwinui-icons/bis-element.svg";
 import documentSvg from "@itwin/itwinui-icons/document.svg";
@@ -19,7 +20,7 @@ import type { BaseTreeRendererProps } from "../common/components/BaseTreeRendere
 import type { TreeProps } from "../common/components/Tree.js";
 /** @beta */
 export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
-  Pick<BaseTreeRendererProps, "actions"> & {
+  Pick<BaseTreeRendererProps, "actions" | "getDecorations"> & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
     };
@@ -34,7 +35,9 @@ export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
       treeName={ExternalSourcesTreeComponent.id}
       getHierarchyDefinition={getDefinitionsProvider}
       selectionMode={props.selectionMode ?? "none"}
-      treeRenderer={(treeProps) => <TreeRenderer {...treeProps} getDecorations={(node) => <Icon href={getIcon(node)} />} />}
+      treeRenderer={(treeProps) => (
+        <TreeRenderer {...treeProps} actions={props.actions} getDecorations={props.getDecorations ?? ((node) => <ExternalSourcesTreeIcon node={node} />)} />
+      )}
     />
   );
 }
@@ -43,21 +46,25 @@ const getDefinitionsProvider: TreeProps["getHierarchyDefinition"] = (props) => {
   return new ExternalSourcesTreeDefinition(props);
 };
 
-function getIcon(node: PresentationHierarchyNode): string | undefined {
+/** @beta */
+export function ExternalSourcesTreeIcon({ node }: { node: PresentationHierarchyNode }) {
   if (node.extendedData?.imageId === undefined) {
     return undefined;
   }
+  const getIcon = () => {
+    switch (node.extendedData!.imageId) {
+      case "icon-item":
+        return elementSvg;
+      case "icon-ec-class":
+        return classSvg;
+      case "icon-document":
+        return documentSvg;
+      case "icon-ec-schema":
+        return ecSchemaSvg;
+      default:
+        return undefined;
+    }
+  };
 
-  switch (node.extendedData.imageId) {
-    case "icon-item":
-      return elementSvg;
-    case "icon-ec-class":
-      return classSvg;
-    case "icon-document":
-      return documentSvg;
-    case "icon-ec-schema":
-      return ecSchemaSvg;
-  }
-
-  return undefined;
+  return <Icon href={getIcon()} />;
 }

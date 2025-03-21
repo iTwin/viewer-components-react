@@ -138,7 +138,7 @@ export function useCategoriesTree({
       highlight: filter ? { text: filter } : undefined,
     },
     rendererProps: {
-      getDecorations: (node) => <Icon href={getIcon(node)} />,
+      getDecorations: (node) => <CategoriesTreeIcon node={node} />,
       getSublabel,
     },
   };
@@ -218,22 +218,26 @@ function getEmptyTreeContentComponent(filter?: string, error?: CategoriesTreeFil
   return <EmptyTreeContent icon={categorySvg} />;
 }
 
-
-function getIcon(node: PresentationHierarchyNode): string | undefined {
+/** @beta */
+export function CategoriesTreeIcon({ node }: { node: PresentationHierarchyNode }) {
   if (node.extendedData?.imageId === undefined) {
     return undefined;
   }
 
-  switch (node.extendedData.imageId) {
-    case "icon-layers":
-      return categorySvg;
-    case "icon-layers-isolate":
-      return subcategorySvg;
-    case "icon-definition-container":
-      return definitionContainerSvg;
-  }
+  const getIcon = () => {
+    switch (node.extendedData!.imageId) {
+      case "icon-layers":
+        return categorySvg;
+      case "icon-layers-isolate":
+        return subcategorySvg;
+      case "icon-definition-container":
+        return definitionContainerSvg;
+      default:
+        return undefined;
+    }
+  };
 
-  return undefined;
+  return <Icon href={getIcon()} />;
 }
 
 function getSublabel(node: PresentationHierarchyNode) {

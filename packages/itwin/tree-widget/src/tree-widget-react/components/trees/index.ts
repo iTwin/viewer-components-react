@@ -6,10 +6,12 @@
 export { ModelsTreeComponent } from "./models-tree/ModelsTreeComponent.js";
 export { CategoriesTreeComponent } from "./categories-tree/CategoriesTreeComponent.js";
 export { IModelContentTreeComponent } from "./imodel-content-tree/IModelContentTreeComponent.js";
+export { IModelContentTreeIcon } from "./imodel-content-tree/IModelContentTree.js";
 export { ExternalSourcesTreeComponent } from "./external-sources-tree/ExternalSourcesTreeComponent.js";
+export { ExternalSourcesTreeIcon } from "./external-sources-tree/ExternalSourcesTree.js";
 
-export { useModelsTree } from "./models-tree/UseModelsTree.js";
-export { useCategoriesTree } from "./categories-tree/UseCategoriesTree.js";
+export { useModelsTree, ModelsTreeIcon } from "./models-tree/UseModelsTree.js";
+export { useCategoriesTree, CategoriesTreeIcon } from "./categories-tree/UseCategoriesTree.js";
 
 export { useModelsTreeButtonProps } from "./models-tree/ModelsTreeButtons.js";
 export { useCategoriesTreeButtonProps } from "./categories-tree/CategoriesTreeButtons.js";

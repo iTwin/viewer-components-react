@@ -224,7 +224,7 @@ export function useModelsTree({
     },
     rendererProps: {
       // onDoubleClick,
-      getDecorations: (node) => <Icon href={getIcon(node)} />,
+      getDecorations: (node) => <ModelsTreeIcon node={node} />,
     },
   };
 }
@@ -295,25 +295,30 @@ function InstanceFocusError({ error }: { error: ModelsTreeFilteringError }) {
   return <UnknownInstanceFocusError base={"modelsTree"} />;
 }
 
-function getIcon(node: PresentationHierarchyNode): string | undefined {
+/** @beta */
+export function ModelsTreeIcon({ node }: { node: PresentationHierarchyNode }) {
   if (node.extendedData?.imageId === undefined) {
     return undefined;
   }
 
-  switch (node.extendedData.imageId) {
-    case "icon-layers":
-      return categorySvg;
-    case "icon-item":
-      return elementSvg;
-    case "icon-ec-class":
-      return classSvg;
-    case "icon-folder":
-      return subjectSvg;
-    case "icon-model":
-      return modelSvg;
-  }
+  const getIcon = () => {
+    switch (node.extendedData!.imageId) {
+      case "icon-layers":
+        return categorySvg;
+      case "icon-item":
+        return elementSvg;
+      case "icon-ec-class":
+        return classSvg;
+      case "icon-folder":
+        return subjectSvg;
+      case "icon-model":
+        return modelSvg;
+      default:
+        return undefined;
+    }
+  };
 
-  return undefined;
+  return <Icon href={getIcon()} />;
 }
 
 function createVisibilityHandlerFactory(
