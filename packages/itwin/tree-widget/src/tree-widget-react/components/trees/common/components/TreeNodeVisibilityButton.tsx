@@ -4,9 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./TreeNodeVisibilityButton.css";
-import visibilityHideSvg from "@itwin/itwinui-icons/visibility-hide.svg";
-import visibilityPartialSvg from "@itwin/itwinui-icons/visibility-partial.svg";
-import visibilityShowSvg from "@itwin/itwinui-icons/visibility-show.svg";
 
 import type { PresentationHierarchyNode, TreeItemAction } from "@itwin/presentation-hierarchies-react";
 
@@ -27,6 +24,10 @@ export interface TreeItemVisibilityButtonProps {
   /** Callback that should be used to determine current checkbox state. */
   getVisibilityButtonState: (node: PresentationHierarchyNode) => TreeItemVisibilityButtonState;
 }
+
+const visibilityHideSvg = new URL("@itwin/itwinui-icons/visibility-hide.svg", import.meta.url).href;
+const visibilityPartialSvg = new URL("@itwin/itwinui-icons/visibility-partial.svg", import.meta.url).href;
+const visibilityShowSvg = new URL("@itwin/itwinui-icons/visibility-show.svg", import.meta.url).href;
 
 /** @internal */
 export function createVisibilityAction({

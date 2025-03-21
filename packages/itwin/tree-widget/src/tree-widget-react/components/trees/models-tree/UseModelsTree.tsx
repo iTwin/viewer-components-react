@@ -4,11 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import categorySvg from "@itwin/itwinui-icons/bis-category-3d.svg";
-import classSvg from "@itwin/itwinui-icons/bis-class.svg";
-import elementSvg from "@itwin/itwinui-icons/bis-element.svg";
-import subjectSvg from "@itwin/itwinui-icons/bis-subject.svg";
-import modelSvg from "@itwin/itwinui-icons/model-cube.svg";
 import { Icon } from "@itwin/itwinui-react/bricks";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
@@ -294,6 +289,12 @@ function InstanceFocusError({ error }: { error: ModelsTreeFilteringError }) {
   }
   return <UnknownInstanceFocusError base={"modelsTree"} />;
 }
+
+const subjectSvg = new URL("@itwin/itwinui-icons/bis-subject.svg", import.meta.url).href;
+const classSvg = new URL("@itwin/itwinui-icons/bis-class.svg", import.meta.url).href;
+const modelSvg = new URL("@itwin/itwinui-icons/model-cube.svg", import.meta.url).href;
+const categorySvg = new URL("@itwin/itwinui-icons/bis-category-3d.svg", import.meta.url).href;
+const elementSvg = new URL("@itwin/itwinui-icons/bis-element.svg", import.meta.url).href;
 
 /** @beta */
 export function ModelsTreeIcon({ node }: { node: PresentationHierarchyNode }) {

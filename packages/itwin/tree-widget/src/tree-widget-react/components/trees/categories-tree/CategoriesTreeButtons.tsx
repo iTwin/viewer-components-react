@@ -5,9 +5,6 @@
 
 import { useMemo, useState } from "react";
 import { useAsyncValue } from "@itwin/components-react";
-import visibilityHideSvg from "@itwin/itwinui-icons/visibility-hide.svg";
-import visibilityShowSvg from "@itwin/itwinui-icons/visibility-show.svg";
-import visibilityInvertSvg from "@itwin/itwinui-icons/visibilty-invert.svg";
 import { IconButton } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { hideAllCategories, invertAllCategories, loadCategoriesFromViewport, showAllCategories } from "../common/CategoriesVisibilityUtils.js";
@@ -62,6 +59,8 @@ export function useCategoriesTreeButtonProps({ viewport }: { viewport: Viewport 
 /** @public */
 export type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonProps) => React.ReactElement | null;
 
+const visibilityShowSvg = new URL("@itwin/itwinui-icons/visibility-show.svg", import.meta.url).href;
+
 /** @public */
 export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
   return (
@@ -80,6 +79,8 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
   );
 }
 
+const visibilityHideSvg = new URL("@itwin/itwinui-icons/visibility-hide.svg", import.meta.url).href;
+
 /** @public */
 export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
   return (
@@ -97,6 +98,8 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
     />
   );
 }
+
+const visibilityInvertSvg = new URL("@itwin/itwinui-icons/visibilty-invert.svg", import.meta.url).href;
 
 /** @public */
 export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {

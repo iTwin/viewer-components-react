@@ -27,7 +27,10 @@ test.describe("Categories tree", () => {
 
   test("initial tree", async ({ page }) => {
     // wait for element to be visible in the tree
-    await locateNode(treeWidget, "Equipment").waitFor();
+    const node = locateNode(treeWidget, "Equipment");
+    await node.hover();
+    const visibilityAction = node.getByRole("button", { name: "Visible" });
+    await expect(visibilityAction).toBeVisible();
     await takeScreenshot(page, treeWidget);
   });
 
