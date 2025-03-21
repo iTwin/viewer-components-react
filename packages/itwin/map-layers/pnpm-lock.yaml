@@ -3,6 +3,7 @@ lockfileVersion: '9.0'
 settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
+  injectWorkspacePackages: true
 
 importers:
 
@@ -23,7 +24,7 @@ importers:
         version: 4.10.10(@itwin/core-bentley@4.10.10)
       '@itwin/appui-react':
         specifier: ^5.3.0
-        version: 5.3.0(vroquqr3z23ybaigawo4wl6zqu)
+        version: 5.3.0(893bb8484608a3de8c3de1ace63b8753)
       '@itwin/build-tools':
         specifier: ^4.10.10
         version: 4.10.10(@types/node@18.19.80)
@@ -59,7 +60,7 @@ importers:
         version: 5.0.0(eslint@9.22.0)(typescript@5.4.5)
       '@itwin/imodel-components-react':
         specifier: ^5.3.0
-        version: 5.3.0(flxfgony5ylmwkpg6tz3vkwpau)
+        version: 5.3.0(9f969e0704e5c36a24226b4d0f6c3f56)
       '@itwin/itwinui-react':
         specifier: ^3.17.3
         version: 3.17.3(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -3745,7 +3746,7 @@ snapshots:
     dependencies:
       '@itwin/core-bentley': 4.10.10
 
-  '@itwin/appui-react@5.3.0(vroquqr3z23ybaigawo4wl6zqu)':
+  '@itwin/appui-react@5.3.0(893bb8484608a3de8c3de1ace63b8753)':
     dependencies:
       '@itwin/appui-abstract': 4.10.10(@itwin/core-bentley@4.10.10)
       '@itwin/components-react': 5.3.0(@itwin/appui-abstract@4.10.10(@itwin/core-bentley@4.10.10))(@itwin/core-bentley@4.10.10)(@itwin/core-react@5.3.0(@itwin/appui-abstract@4.10.10(@itwin/core-bentley@4.10.10))(@itwin/core-bentley@4.10.10)(@itwin/itwinui-react@3.17.3(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@itwin/itwinui-react@3.17.3(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -3755,7 +3756,7 @@ snapshots:
       '@itwin/core-geometry': 4.10.10
       '@itwin/core-quantity': 4.10.10(@itwin/core-bentley@4.10.10)
       '@itwin/core-react': 5.3.0(@itwin/appui-abstract@4.10.10(@itwin/core-bentley@4.10.10))(@itwin/core-bentley@4.10.10)(@itwin/itwinui-react@3.17.3(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@itwin/imodel-components-react': 5.3.0(flxfgony5ylmwkpg6tz3vkwpau)
+      '@itwin/imodel-components-react': 5.3.0(9f969e0704e5c36a24226b4d0f6c3f56)
       '@itwin/itwinui-icons-react': 2.10.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@itwin/itwinui-react': 3.17.3(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -3787,7 +3788,7 @@ snapshots:
       rimraf: 3.0.2
       tree-kill: 1.2.2
       typedoc: 0.26.11(typescript@5.6.3)
-      typedoc-plugin-merge-modules: 6.1.0(typedoc@0.26.11(typescript@5.6.3))
+      typedoc-plugin-merge-modules: 6.1.0(typedoc@0.26.11(typescript@5.4.5))
       typescript: 5.6.3
       wtfnode: 0.9.4
       yargs: 17.7.2
@@ -3911,7 +3912,7 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  '@itwin/imodel-components-react@5.3.0(flxfgony5ylmwkpg6tz3vkwpau)':
+  '@itwin/imodel-components-react@5.3.0(9f969e0704e5c36a24226b4d0f6c3f56)':
     dependencies:
       '@itwin/appui-abstract': 4.10.10(@itwin/core-bentley@4.10.10)
       '@itwin/components-react': 5.3.0(@itwin/appui-abstract@4.10.10(@itwin/core-bentley@4.10.10))(@itwin/core-bentley@4.10.10)(@itwin/core-react@5.3.0(@itwin/appui-abstract@4.10.10(@itwin/core-bentley@4.10.10))(@itwin/core-bentley@4.10.10)(@itwin/itwinui-react@3.17.3(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@itwin/itwinui-react@3.17.3(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -7021,7 +7022,7 @@ snapshots:
       possible-typed-array-names: 1.1.0
       reflect.getprototypeof: 1.0.10
 
-  typedoc-plugin-merge-modules@6.1.0(typedoc@0.26.11(typescript@5.6.3)):
+  typedoc-plugin-merge-modules@6.1.0(typedoc@0.26.11(typescript@5.4.5)):
     dependencies:
       typedoc: 0.26.11(typescript@5.6.3)
 

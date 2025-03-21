@@ -59,5 +59,6 @@ module.exports = {
       cache: false,
     },
   },
+  npmClient: "pnpm",
   cache: true,
 };
