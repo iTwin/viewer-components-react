@@ -2,13 +2,17 @@ sep=;
 Release Tag;API Item Type;API Item Name
 beta;type;BaseTreeRendererProps
 public;const;CategoriesTreeComponent
+beta;function;CategoriesTreeIcon
 public;function;createTreeWidget
 beta;const;ExternalSourcesTreeComponent
+beta;function;ExternalSourcesTreeIcon
 beta;class;FilterLimitExceededError
 public;function;FocusedInstancesContextProvider
 beta;interface;HierarchyVisibilityHandler
 beta;const;IModelContentTreeComponent
+beta;function;IModelContentTreeIcon
 public;const;ModelsTreeComponent
+beta;function;ModelsTreeIcon
 beta;interface;ModelsTreeVisibilityHandlerOverrides
 beta;function;SelectableTree
 beta;function;TelemetryContextProvider

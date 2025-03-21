@@ -23,22 +23,24 @@ import type { BaseTreeRendererProps } from "../common/components/BaseTreeRendere
 import type { TreeProps } from "../common/components/Tree.js";
 /** @beta */
 export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
-  Pick<BaseTreeRendererProps, "actions"> & {
+  Pick<BaseTreeRendererProps, "actions" | "getDecorations"> & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
     };
   };
 
 /** @beta */
-export function IModelContentTree(props: IModelContentTreeProps) {
+export function IModelContentTree({ actions, getDecorations, selectionMode, ...rest }: IModelContentTreeProps) {
   return (
     <Tree
       emptyTreeContent={<EmptyTreeContent icon={modelSvg} />}
-      {...props}
+      {...rest}
       treeName={IModelContentTreeComponent.id}
       getHierarchyDefinition={getDefinitionsProvider}
-      selectionMode={props.selectionMode ?? "extended"}
-      treeRenderer={(treeProps) => <TreeRenderer {...treeProps} getDecorations={(node) => <Icon href={getIcon(node)} />} />}
+      selectionMode={selectionMode ?? "extended"}
+      treeRenderer={(treeProps) => (
+        <TreeRenderer {...treeProps} actions={actions} getDecorations={getDecorations ?? ((node) => <IModelContentTreeIcon node={node} />)} />
+      )}
     />
   );
 }
@@ -50,27 +52,32 @@ const getDefinitionsProvider: TreeProps["getHierarchyDefinition"] = ({ imodelAcc
   });
 };
 
-function getIcon(node: PresentationHierarchyNode): string | undefined {
+/** @beta */
+export function IModelContentTreeIcon({ node }: { node: PresentationHierarchyNode }) {
   if (node.extendedData?.imageId === undefined) {
     return undefined;
   }
 
-  switch (node.extendedData.imageId) {
-    case "icon-layers":
-      return categorySvg;
-    case "icon-item":
-      return elementSvg;
-    case "icon-ec-class":
-      return classSvg;
-    case "icon-folder":
-      return subjectSvg;
-    case "icon-model":
-      return modelSvg;
-    case "icon-hierarchy-tree":
-      return hierarchyTreeSvg;
-    case "icon-group":
-      return groupSvg;
-  }
+  const getIcon = () => {
+    switch (node.extendedData!.imageId) {
+      case "icon-layers":
+        return categorySvg;
+      case "icon-item":
+        return elementSvg;
+      case "icon-ec-class":
+        return classSvg;
+      case "icon-folder":
+        return subjectSvg;
+      case "icon-model":
+        return modelSvg;
+      case "icon-hierarchy-tree":
+        return hierarchyTreeSvg;
+      case "icon-group":
+        return groupSvg;
+      default:
+        return undefined;
+    }
+  };
 
-  return undefined;
+  return <Icon href={getIcon()} />;
 }

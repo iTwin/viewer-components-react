@@ -41,6 +41,7 @@ interface ModelsTreeComponentProps
     | "filter"
     | "emptyTreeContent"
     | "actions"
+    | "getDecorations"
   > {
   /**
    * Renderers of header buttons. Defaults to:
