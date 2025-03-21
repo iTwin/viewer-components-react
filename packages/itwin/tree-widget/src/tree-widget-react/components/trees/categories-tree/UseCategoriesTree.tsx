@@ -5,9 +5,6 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { assert } from "@itwin/core-bentley";
-import categorySvg from "@itwin/itwinui-icons/bis-category-3d.svg";
-import subcategorySvg from "@itwin/itwinui-icons/bis-category-subcategory.svg";
-import definitionContainerSvg from "@itwin/itwinui-icons/bis-definitions-container.svg";
 import { Icon } from "@itwin/itwinui-react/bricks";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
@@ -202,6 +199,8 @@ async function getCategoriesFromPaths(paths: HierarchyFilteringPaths, idsCache: 
   }));
 }
 
+const categorySvg = new URL("@itwin/itwinui-icons/bis-category-3d.svg", import.meta.url).href;
+
 function getEmptyTreeContentComponent(filter?: string, error?: CategoriesTreeFilteringError, emptyTreeContent?: React.ReactNode) {
   if (error) {
     if (error === "tooManyFilterMatches") {
@@ -217,6 +216,9 @@ function getEmptyTreeContentComponent(filter?: string, error?: CategoriesTreeFil
   }
   return <EmptyTreeContent icon={categorySvg} />;
 }
+
+const subcategorySvg = new URL("@itwin/itwinui-icons/bis-category-subcategory.svg", import.meta.url).href;
+const definitionContainerSvg = new URL("@itwin/itwinui-icons/bis-definitions-container.svg", import.meta.url).href;
 
 /** @beta */
 export function CategoriesTreeIcon({ node }: { node: PresentationHierarchyNode }) {
