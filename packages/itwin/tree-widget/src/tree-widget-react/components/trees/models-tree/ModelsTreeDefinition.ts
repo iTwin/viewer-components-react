@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, defer, from, lastValueFrom, map, merge, mergeAll, mergeMap, reduce, switchMap } from "rxjs";
+import { bufferCount, defer, firstValueFrom, from, lastValueFrom, map, merge, mergeAll, mergeMap, reduce, switchMap } from "rxjs";
 import { IModel } from "@itwin/core-common";
 import {
   createNodesQueryClauseFactory,
@@ -407,15 +407,14 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       filter: instanceFilter,
       contentClass: { fullName: this._hierarchyConfig.elementClassSpecification, alias: "this" },
     });
-    const modeledElements = new Array<Id64String>();
-    const foundModeledElements = await Promise.all(
-      modelIds.map(async (modelId) => {
-        return this._idsCache.getCategoriesModeledElements(modelId, categoryIds);
-      }),
+    const modeledElements = await firstValueFrom(
+      from(modelIds).pipe(
+        mergeMap(async (modelId) => this._idsCache.getCategoriesModeledElements(modelId, categoryIds)),
+        reduce((acc, foundModeledElements) => {
+          return acc.concat(foundModeledElements);
+        }, new Array<Id64String>()),
+      ),
     );
-    foundModeledElements.forEach((foundElements) => {
-      modeledElements.push(...foundElements);
-    });
     return [
       {
         fullClassName: this._hierarchyConfig.elementClassSpecification,
