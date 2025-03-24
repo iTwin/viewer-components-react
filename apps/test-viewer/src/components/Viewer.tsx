@@ -43,7 +43,7 @@ export function Viewer() {
   );
 }
 
-const uiProviders = [...uiConfig.uiItemsProviders(), statusBarActionsProvider];
+const uiProviders = [...uiConfig.uiItemsProviders, statusBarActionsProvider];
 
 function ViewerWithOptions() {
   const { client: authClient } = useAuthorizationContext();
@@ -64,7 +64,7 @@ function ViewerWithOptions() {
       defaultUiConfig={{
         hideNavigationAid: true,
         hideStatusBar: false,
-        hideToolSettings: true,
+        hideToolSettings: false,
       }}
       mapLayerOptions={{ BingMaps: { key: "key", value: ApiKeys.BingMapsKey } }}
       tileAdmin={{ cesiumIonKey: ApiKeys.CesiumKey }}

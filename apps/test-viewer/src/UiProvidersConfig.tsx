@@ -42,7 +42,7 @@ import type { ClientPrefix } from "@itwin/grouping-mapping-widget";
 import type { UiItemsProvider } from "@itwin/appui-react";
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
-  uiItemsProviders: () => UiItemsProvider[];
+  uiItemsProviders: UiItemsProvider[];
 }
 
 export function getUiProvidersConfig(): UiProvidersConfig {
@@ -53,7 +53,7 @@ export function getUiProvidersConfig(): UiProvidersConfig {
       const promises = matchingItems.map(async (item) => item.initialize());
       await Promise.all(promises);
     },
-    uiItemsProviders: () => matchingItems.flatMap((item) => item.createUiItemsProviders()),
+    uiItemsProviders: matchingItems.flatMap((item) => item.createUiItemsProviders()),
   };
 }
 
