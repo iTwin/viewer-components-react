@@ -7,17 +7,16 @@ import { useState } from "react";
 import { StagePanelLocation, StagePanelSection, useActiveViewport, WidgetState } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
 import { ExpandableBlock } from "@itwin/itwinui-react";
-import { Icon } from "@itwin/itwinui-react-v5/bricks";
+import { Chip, Icon } from "@itwin/itwinui-react-v5/bricks";
 import { MapLayersPrefBrowserStorage, MapLayersUI, MapLayersWidget } from "@itwin/map-layers";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
-import { Tree, TreeRenderer, TreeWidget, useCategoriesTree } from "@itwin/tree-widget-react";
-import { getSchemaContext } from "./SchemaContext";
-import { unifiedSelectionStorage } from "./SelectionStorage";
+import { CategoriesTreeIcon, Tree, TreeRenderer, TreeWidget, useCategoriesTree } from "@itwin/tree-widget-react";
+import { getSchemaContext } from "../SchemaContext";
+import { unifiedSelectionStorage } from "../SelectionStorage";
 
 import type { UiItemsProvider } from "@itwin/appui-react";
 import type { ComponentProps, PropsWithChildren, ReactNode } from "react";
 import type { Viewport } from "@itwin/core-frontend";
-
 const mapIcon = new URL("@itwin/itwinui-icons/map.svg", import.meta.url).href;
 const element3dIcon = new URL("@itwin/itwinui-icons/3d.svg", import.meta.url).href;
 
@@ -135,5 +134,24 @@ type ElementsProps = Pick<ComponentProps<typeof Tree>, "getSchemaContext" | "sel
 
 function Elements({ view, ...rest }: ElementsProps) {
   const { categoriesTreeProps, rendererProps } = useCategoriesTree({ activeView: view });
-  return <Tree {...rest} {...categoriesTreeProps} imodel={view.iModel} treeRenderer={(treeProps) => <TreeRenderer {...treeProps} {...rendererProps} />} />;
+  return (
+    <Tree
+      {...rest}
+      {...categoriesTreeProps}
+      imodel={view.iModel}
+      treeRenderer={(treeProps) => (
+        <TreeRenderer
+          {...treeProps}
+          {...rendererProps}
+          getSublabel={undefined}
+          getDecorations={(node) => (
+            <>
+              <Chip label={node.label.substring(0, 1)} variant="outline"/>
+              <CategoriesTreeIcon node={node} />
+            </>
+          )}
+        />
+      )}
+    />
+  );
 }

@@ -30,9 +30,9 @@ import {
   TreeWidget,
   TreeWidgetComponent,
 } from "@itwin/tree-widget-react";
+import { createLayersUiProvider, initializeLayers } from "./components/LayersWidget";
 import { RepositoriesTreeComponent } from "./components/repositories-tree/RepositoriesTree";
 import { useViewerOptionsContext } from "./components/ViewerOptions";
-import { createLayersUiProvider, initializeLayers } from "./LayersWidget";
 import { getSchemaContext } from "./SchemaContext";
 import { unifiedSelectionStorage } from "./SelectionStorage";
 
@@ -40,7 +40,6 @@ import type { ComponentProps } from "react";
 import type { TreeDefinition } from "@itwin/tree-widget-react";
 import type { ClientPrefix } from "@itwin/grouping-mapping-widget";
 import type { UiItemsProvider } from "@itwin/appui-react";
-
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
   uiItemsProviders: () => UiItemsProvider[];
