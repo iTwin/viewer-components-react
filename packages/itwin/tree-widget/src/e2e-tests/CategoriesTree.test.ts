@@ -27,7 +27,10 @@ test.describe("Categories tree", () => {
 
   test("initial tree", async ({ page }) => {
     // wait for element to be visible in the tree
-    await locateNode(treeWidget, "Equipment").waitFor();
+    const node = locateNode(treeWidget, "Equipment");
+    await node.hover();
+    const visibilityAction = node.getByRole("button", { name: "Visible" });
+    await expect(visibilityAction).toBeVisible();
     await takeScreenshot(page, treeWidget);
   });
 
@@ -41,7 +44,7 @@ test.describe("Categories tree", () => {
   });
 
   test("node with active filtering", async ({ page }) => {
-    const node = locateNode(treeWidget, "Equipment", 0);
+    const node = locateNode(treeWidget, "Equipment", 1);
 
     // hover the node for the button to appear
     await node.hover();
@@ -61,7 +64,7 @@ test.describe("Categories tree", () => {
   });
 
   test("node with active filtering - information message", async ({ page }) => {
-    const node = locateNode(treeWidget, "Equipment", 0);
+    const node = locateNode(treeWidget, "Equipment", 1);
 
     // hover the node for the button to appear
     await node.hover();
@@ -90,7 +93,7 @@ test.describe("Categories tree", () => {
 
   test("shows outlines when focused using keyboard", async ({ page }) => {
     // click to focus on node
-    const node = locateNode(treeWidget, "Equipment", 0);
+    const node = locateNode(treeWidget, "Equipment", 1);
     await node.focus();
     const treeContainer = page.locator("#tw-tree-renderer-container");
     const visibilityAction = node.getByRole("button", { name: "Visible" });

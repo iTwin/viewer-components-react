@@ -21,7 +21,15 @@ import type { CategoriesTreeHeaderButtonProps, CategoriesTreeHeaderButtonType } 
 interface CategoriesTreeComponentProps
   extends Pick<
     CategoriesTreeProps,
-    "getSchemaContext" | "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "filter" | "emptyTreeContent" | "actions" | "hierarchyConfig"
+    | "getSchemaContext"
+    | "selectionStorage"
+    | "hierarchyLevelConfig"
+    | "selectionMode"
+    | "filter"
+    | "emptyTreeContent"
+    | "actions"
+    | "getDecorations"
+    | "hierarchyConfig"
   > {
   /**
    * Renderers of header buttons. Defaults to:

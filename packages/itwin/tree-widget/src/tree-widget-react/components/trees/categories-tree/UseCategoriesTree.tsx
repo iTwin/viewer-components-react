@@ -5,9 +5,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { assert } from "@itwin/core-bentley";
-import categorySvg from "@itwin/itwinui-icons/bis-category-3d.svg";
-import subcategorySvg from "@itwin/itwinui-icons/bis-category-subcategory.svg";
-import definitionContainerSvg from "@itwin/itwinui-icons/bis-definitions-container.svg";
+import { Icon } from "@itwin/itwinui-react/bricks";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
 import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMatches } from "../common/components/EmptyTree.js";
@@ -27,7 +25,6 @@ import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { CategoriesTreeHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
-
 type CategoriesTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError";
 type HierarchyFilteringPaths = Awaited<ReturnType<Required<VisibilityTreeProps>["getFilteredPaths"]>>;
 
@@ -46,7 +43,7 @@ interface UseCategoriesTreeResult {
     VisibilityTreeProps,
     "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlight" | "emptyTreeContent"
   >;
-  rendererProps: Required<Pick<VisibilityTreeRendererProps, "getIcon" | "getSublabel">>;
+  rendererProps: Required<Pick<VisibilityTreeRendererProps, "getDecorations" | "getSublabel">>;
 }
 
 /**
@@ -138,7 +135,7 @@ export function useCategoriesTree({
       highlight: filter ? { text: filter } : undefined,
     },
     rendererProps: {
-      getIcon,
+      getDecorations: (node) => <CategoriesTreeIcon node={node} />,
       getSublabel,
     },
   };
@@ -202,6 +199,8 @@ async function getCategoriesFromPaths(paths: HierarchyFilteringPaths, idsCache: 
   }));
 }
 
+const categorySvg = new URL("@itwin/itwinui-icons/bis-category-3d.svg", import.meta.url).href;
+
 function getEmptyTreeContentComponent(filter?: string, error?: CategoriesTreeFilteringError, emptyTreeContent?: React.ReactNode) {
   if (error) {
     if (error === "tooManyFilterMatches") {
@@ -218,22 +217,29 @@ function getEmptyTreeContentComponent(filter?: string, error?: CategoriesTreeFil
   return <EmptyTreeContent icon={categorySvg} />;
 }
 
+const subcategorySvg = new URL("@itwin/itwinui-icons/bis-category-subcategory.svg", import.meta.url).href;
+const definitionContainerSvg = new URL("@itwin/itwinui-icons/bis-definitions-container.svg", import.meta.url).href;
 
-function getIcon(node: PresentationHierarchyNode): string | undefined {
+/** @beta */
+export function CategoriesTreeIcon({ node }: { node: PresentationHierarchyNode }) {
   if (node.extendedData?.imageId === undefined) {
     return undefined;
   }
 
-  switch (node.extendedData.imageId) {
-    case "icon-layers":
-      return categorySvg;
-    case "icon-layers-isolate":
-      return subcategorySvg;
-    case "icon-definition-container":
-      return definitionContainerSvg;
-  }
+  const getIcon = () => {
+    switch (node.extendedData!.imageId) {
+      case "icon-layers":
+        return categorySvg;
+      case "icon-layers-isolate":
+        return subcategorySvg;
+      case "icon-definition-container":
+        return definitionContainerSvg;
+      default:
+        return undefined;
+    }
+  };
 
-  return undefined;
+  return <Icon href={getIcon()} />;
 }
 
 function getSublabel(node: PresentationHierarchyNode) {

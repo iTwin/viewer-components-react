@@ -10,6 +10,7 @@
   text-align: center;
   padding-right: var(--iui-size-xl);
   padding-left: var(--iui-size-xl);
+  padding-top: var(--iui-size-xs);
 }
 
 .tw-empty-tree-container {
