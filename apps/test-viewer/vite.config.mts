@@ -39,11 +39,6 @@ export default defineConfig(({ mode }) => {
             src: "./node_modules/@itwin/*/lib/public/*",
             dest: ".",
           },
-          {
-            // copy assets from `@bentley` dependencies
-            src: "./node_modules/@bentley/*/lib/public/*",
-            dest: ".",
-          },
         ],
       }),
       ...(reloadConfig ? [reloadInjectedPackages(reloadConfig)] : []),

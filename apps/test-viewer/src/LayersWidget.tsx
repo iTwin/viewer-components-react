@@ -4,41 +4,27 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useState } from "react";
-import { RealityData, RealityDataWidget } from "@bentley/reality-data";
 import { StagePanelLocation, StagePanelSection, useActiveViewport, WidgetState } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
 import { ExpandableBlock } from "@itwin/itwinui-react";
 import { Icon } from "@itwin/itwinui-react-v5/bricks";
 import { MapLayersPrefBrowserStorage, MapLayersUI, MapLayersWidget } from "@itwin/map-layers";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
-import { RealityDataAccessClient } from "@itwin/reality-data-client";
-import { Tree, TreeRenderer, useCategoriesTree } from "@itwin/tree-widget-react";
+import { Tree, TreeRenderer, TreeWidget, useCategoriesTree } from "@itwin/tree-widget-react";
 import { getSchemaContext } from "./SchemaContext";
 import { unifiedSelectionStorage } from "./SelectionStorage";
 
 import type { UiItemsProvider } from "@itwin/appui-react";
 import type { ComponentProps, PropsWithChildren, ReactNode } from "react";
 import type { Viewport } from "@itwin/core-frontend";
-import type { AuthorizationClient } from "@itwin/core-common";
 
-const realityIcon = new URL("@itwin/itwinui-icons/reality-mesh.svg", import.meta.url).href;
 const mapIcon = new URL("@itwin/itwinui-icons/map.svg", import.meta.url).href;
 const element3dIcon = new URL("@itwin/itwinui-icons/3d.svg", import.meta.url).href;
 
-export async function initializeLayers(auth: AuthorizationClient) {
+export async function initializeLayers() {
   await MapLayersFormats.initialize();
   await MapLayersUI.initialize({ iTwinConfig: new MapLayersPrefBrowserStorage() });
-
-  const realityDataAccess = new RealityDataAccessClient({
-    baseUrl: "https://qa-api.bentley.com/reality-management/reality-data",
-  });
-
-  await RealityData.initialize({
-    authorizationClient: auth,
-    i18n: IModelApp.localization,
-    store: undefined,
-    realityDataAccess,
-  });
+  await TreeWidget.initialize(IModelApp.localization);
 }
 
 export function createLayersUiProvider(): UiItemsProvider {
@@ -55,11 +41,6 @@ export function createLayersUiProvider(): UiItemsProvider {
           icon: <Icon href={mapIcon} />,
           label: "Map layers",
           content: <MapLayersWidget />,
-        },
-        {
-          icon: <Icon href={realityIcon} />,
-          label: "Reality data",
-          content: <RealityDataWidget appContext={{}} />,
         },
       ];
 
@@ -88,7 +69,7 @@ interface LayersBlockDefinition {
 }
 
 function Layers({ blocks }: { blocks: LayersBlockDefinition[] }) {
-  const [activeBlock, setActiveBlock] = useState<number | undefined>(undefined);
+  const [activeBlock, setActiveBlock] = useState<number | undefined>(0);
 
   const handleBlockToggle = (index: number) => {
     setActiveBlock(index === activeBlock ? undefined : index);

@@ -40,23 +40,21 @@ import type { ComponentProps } from "react";
 import type { TreeDefinition } from "@itwin/tree-widget-react";
 import type { ClientPrefix } from "@itwin/grouping-mapping-widget";
 import type { UiItemsProvider } from "@itwin/appui-react";
-import type { AuthorizationClient } from "@itwin/core-common";
 
 export interface UiProvidersConfig {
-  initialize: (auth: AuthorizationClient) => Promise<void>;
-  uiItemsProviders: UiItemsProvider[];
+  initialize: () => Promise<void>;
+  uiItemsProviders: () => UiItemsProvider[];
 }
 
 export function getUiProvidersConfig(): UiProvidersConfig {
   const enabledWidgets = new URLSearchParams(document.location.href).get("widgets") ?? import.meta.env.IMJS_ENABLED_WIDGETS ?? undefined;
   const matchingItems = enabledWidgets ? collectSupportedItems(enabledWidgets.split(/[\s;]/)) : [...configuredUiItems.values()];
-  const uiItemsProviders = matchingItems.map((item) => item.createUiItemsProviders());
   return {
-    initialize: async (auth: AuthorizationClient) => {
-      const promises = matchingItems.map(async (item) => item.initialize(auth));
+    initialize: async () => {
+      const promises = matchingItems.map(async (item) => item.initialize());
       await Promise.all(promises);
     },
-    uiItemsProviders: uiItemsProviders.flat(),
+    uiItemsProviders: () => matchingItems.flatMap((item) => item.createUiItemsProviders()),
   };
 }
 
@@ -82,7 +80,7 @@ const prefixUrl = (baseUrl?: string, prefix?: string) => {
 };
 
 interface UiItem {
-  initialize: (auth: AuthorizationClient) => Promise<void>;
+  initialize: () => Promise<void>;
   createUiItemsProviders: () => UiItemsProvider[];
 }
 
@@ -109,7 +107,6 @@ const configuredUiItems = new Map<string, UiItem>([
                     selectionMode={"extended"}
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}
-                    actions={[]}
                   />
                 ),
               },
@@ -123,7 +120,6 @@ const configuredUiItems = new Map<string, UiItem>([
                     selectionStorage={unifiedSelectionStorage}
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}
-                    actions={[]}
                   />
                 ),
               },
@@ -136,7 +132,6 @@ const configuredUiItems = new Map<string, UiItem>([
                     selectionStorage={unifiedSelectionStorage}
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}
-                    actions={[]}
                   />
                 ),
               },
@@ -149,7 +144,6 @@ const configuredUiItems = new Map<string, UiItem>([
                     selectionStorage={unifiedSelectionStorage}
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}
-                    actions={[]}
                   />
                 ),
               },
@@ -284,8 +278,8 @@ const configuredUiItems = new Map<string, UiItem>([
   [
     "layers-widget",
     {
-      initialize: async (auth) => {
-        await initializeLayers(auth);
+      initialize: async () => {
+        await initializeLayers();
       },
       createUiItemsProviders: () => [createLayersUiProvider()],
     },

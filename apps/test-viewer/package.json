@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@bentley/reality-data": "^19.0.0",
-    "@itwin/reality-data-client": "^1.2.2",
     "@itwin/appui-abstract": "^4.10.10",
     "@itwin/appui-react": "^4.17.6",
     "@itwin/browser-authorization": "^1.1.4",
