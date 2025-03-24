@@ -5,8 +5,6 @@
 
 import { StagePanelLocation, StagePanelSection } from "@itwin/appui-react";
 import { EC3Provider, EC3Widget } from "@itwin/ec3-widget-react";
-import { SchemaContext } from "@itwin/ecschema-metadata";
-import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
 import { GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
 import { SvgHierarchyTree } from "@itwin/itwinui-icons-react";
@@ -32,16 +30,16 @@ import {
   TreeWidget,
   TreeWidgetComponent,
 } from "@itwin/tree-widget-react";
+import { createLayersUiProvider, initializeLayers } from "./components/LayersWidget";
 import { RepositoriesTreeComponent } from "./components/repositories-tree/RepositoriesTree";
 import { useViewerOptionsContext } from "./components/ViewerOptions";
+import { getSchemaContext } from "./SchemaContext";
 import { unifiedSelectionStorage } from "./SelectionStorage";
 
 import type { ComponentProps } from "react";
 import type { TreeDefinition } from "@itwin/tree-widget-react";
-import type { IModelConnection } from "@itwin/core-frontend";
 import type { ClientPrefix } from "@itwin/grouping-mapping-widget";
 import type { UiItemsProvider } from "@itwin/appui-react";
-
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
   uiItemsProviders: UiItemsProvider[];
@@ -50,13 +48,12 @@ export interface UiProvidersConfig {
 export function getUiProvidersConfig(): UiProvidersConfig {
   const enabledWidgets = new URLSearchParams(document.location.href).get("widgets") ?? import.meta.env.IMJS_ENABLED_WIDGETS ?? undefined;
   const matchingItems = enabledWidgets ? collectSupportedItems(enabledWidgets.split(/[\s;]/)) : [...configuredUiItems.values()];
-  const uiItemsProviders = matchingItems.map((item) => item.createUiItemsProviders());
   return {
     initialize: async () => {
       const promises = matchingItems.map(async (item) => item.initialize());
       await Promise.all(promises);
     },
-    uiItemsProviders: uiItemsProviders.flat(),
+    uiItemsProviders: matchingItems.flatMap((item) => item.createUiItemsProviders()),
   };
 }
 
@@ -84,20 +81,6 @@ const prefixUrl = (baseUrl?: string, prefix?: string) => {
 interface UiItem {
   initialize: () => Promise<void>;
   createUiItemsProviders: () => UiItemsProvider[];
-}
-
-const schemaContextCache = new Map<string, SchemaContext>();
-function getSchemaContext(imodel: IModelConnection) {
-  const key = imodel.getRpcProps().key;
-  let schemaContext = schemaContextCache.get(key);
-  if (!schemaContext) {
-    const schemaLocater = new ECSchemaRpcLocater(imodel.getRpcProps());
-    schemaContext = new SchemaContext();
-    schemaContext.addLocater(schemaLocater);
-    schemaContextCache.set(key, schemaContext);
-    imodel.onClose.addOnce(() => schemaContextCache.delete(key));
-  }
-  return schemaContext;
 }
 
 const configuredUiItems = new Map<string, UiItem>([
@@ -289,6 +272,15 @@ const configuredUiItems = new Map<string, UiItem>([
     {
       initialize: async () => Promise.resolve(),
       createUiItemsProviders: () => [new OneClickLCAProvider()],
+    },
+  ],
+  [
+    "layers-widget",
+    {
+      initialize: async () => {
+        await initializeLayers();
+      },
+      createUiItemsProviders: () => [createLayersUiProvider()],
     },
   ],
 ]);
