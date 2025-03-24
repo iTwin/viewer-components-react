@@ -655,8 +655,6 @@ export function MapLayerManager(props: MapLayerManagerProps) {
     ],
   );
 
-  const [baseMapPanelLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Basemap.BaseMapPanelTitle"));
-
   return (
     <SourceMapContext.Provider
       value={{
