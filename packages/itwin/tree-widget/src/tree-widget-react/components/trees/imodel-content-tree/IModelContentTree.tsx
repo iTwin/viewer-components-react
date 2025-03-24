@@ -3,33 +3,50 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { useCallback } from "react";
 import { Icon } from "@itwin/itwinui-react/bricks";
 import { EmptyTreeContent } from "../common/components/EmptyTree.js";
 import { Tree } from "../common/components/Tree.js";
 import { TreeRenderer } from "../common/components/TreeRenderer.js";
 import { IModelContentTreeComponent } from "./IModelContentTreeComponent.js";
-import { IModelContentTreeDefinition } from "./IModelContentTreeDefinition.js";
+import { defaultHierarchyConfiguration, IModelContentTreeDefinition } from "./IModelContentTreeDefinition.js";
 import { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache.js";
 
+import type { IModelContentTreeHierarchyConfiguration } from "./IModelContentTreeDefinition.js";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { BaseTreeRendererProps } from "../common/components/BaseTreeRenderer.js";
 import type { TreeProps } from "../common/components/Tree.js";
+
+
 /** @beta */
 export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
   Pick<BaseTreeRendererProps, "actions" | "getDecorations"> & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
     };
-  };
+  hierarchyConfig?: Partial<IModelContentTreeHierarchyConfiguration>;
+};
 
 /** @beta */
-export function IModelContentTree({ actions, getDecorations, selectionMode, ...rest }: IModelContentTreeProps) {
+export function IModelContentTree({ actions, getDecorations, selectionMode, hierarchyConfig: hierarchyConfigProp, ...rest }: IModelContentTreeProps) {
+  const getHierarchyDefinition = useCallback<TreeProps["getHierarchyDefinition"]>(
+    ({ imodelAccess }) => {
+      const hierarchyConfig = {
+        ...defaultHierarchyConfiguration,
+        ...hierarchyConfigProp,
+      };
+      return new IModelContentTreeDefinition({ imodelAccess, idsCache: new IModelContentTreeIdsCache(imodelAccess), hierarchyConfig });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    Object.values(hierarchyConfigProp ?? {}),
+  );
+
   return (
     <Tree
       emptyTreeContent={<EmptyTreeContent icon={modelSvg} />}
       {...rest}
       treeName={IModelContentTreeComponent.id}
-      getHierarchyDefinition={getDefinitionsProvider}
+      getHierarchyDefinition={getHierarchyDefinition}
       selectionMode={selectionMode ?? "extended"}
       treeRenderer={(treeProps) => (
         <TreeRenderer {...treeProps} actions={actions} getDecorations={getDecorations ?? ((node) => <IModelContentTreeIcon node={node} />)} />
@@ -37,13 +54,6 @@ export function IModelContentTree({ actions, getDecorations, selectionMode, ...r
     />
   );
 }
-
-const getDefinitionsProvider: TreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
-  return new IModelContentTreeDefinition({
-    imodelAccess,
-    idsCache: new IModelContentTreeIdsCache(imodelAccess),
-  });
-};
 
 const categorySvg = new URL("@itwin/itwinui-icons/bis-category-3d.svg", import.meta.url).href;
 const classSvg = new URL("@itwin/itwinui-icons/bis-class.svg", import.meta.url).href;

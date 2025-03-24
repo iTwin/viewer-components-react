@@ -101,6 +101,9 @@ const configuredUiItems = new Map<string, UiItem>([
                 render: (props) => (
                   <ModelsTreeWithOptions
                     getSchemaContext={getSchemaContext}
+                    hierarchyConfig={{
+                      hideRootSubject: true,
+                    }}
                     filter={props.filter}
                     selectionStorage={unifiedSelectionStorage}
                     selectionMode={"extended"}
@@ -128,6 +131,9 @@ const configuredUiItems = new Map<string, UiItem>([
                 render: (props) => (
                   <IModelContentTreeComponent
                     getSchemaContext={getSchemaContext}
+                    hierarchyConfig={{
+                      hideRootSubject: true,
+                    }}
                     selectionStorage={unifiedSelectionStorage}
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}

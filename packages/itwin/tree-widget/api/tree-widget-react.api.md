@@ -243,6 +243,11 @@ interface IModelContentTreeComponentProps extends Pick<IModelContentTreeProps, "
     onPerformanceMeasured?: (featureId: string, duration: number) => void;
 }
 
+// @beta
+interface IModelContentTreeHierarchyConfiguration {
+    hideRootSubject: boolean;
+}
+
 // @beta (undocumented)
 export function IModelContentTreeIcon({ node }: {
     node: PresentationHierarchyNode;
@@ -253,6 +258,7 @@ type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "s
     hierarchyLevelConfig?: {
         sizeLimit?: number;
     };
+    hierarchyConfig?: Partial<IModelContentTreeHierarchyConfiguration>;
 };
 
 // @public
@@ -297,6 +303,7 @@ type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) => React.
 interface ModelsTreeHierarchyConfiguration {
     elementClassGrouping: "enable" | "enableWithCounts" | "disable";
     elementClassSpecification: string;
+    hideRootSubject: boolean;
     showEmptyModels: boolean;
 }
 

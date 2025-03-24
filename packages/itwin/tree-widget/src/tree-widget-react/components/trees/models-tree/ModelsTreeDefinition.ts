@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, defer, from, lastValueFrom, map, merge, mergeAll, mergeMap, reduce, switchMap } from "rxjs";
+import { bufferCount, defer, firstValueFrom, from, lastValueFrom, map, merge, mergeAll, mergeMap, reduce, switchMap } from "rxjs";
 import { IModel } from "@itwin/core-common";
 import {
   createNodesQueryClauseFactory,
@@ -54,16 +54,20 @@ const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
 export interface ModelsTreeHierarchyConfiguration {
   /** Should element nodes be grouped by class. Defaults to `enable`. */
   elementClassGrouping: "enable" | "enableWithCounts" | "disable";
-  /** Full class name of a `GeometricElement3d` sub-class that should be used to load element nodes. Defaults to `BisCore.GeometricElement3d` */
+  /** Full class name of a `GeometricElement3d` sub-class that should be used to load element nodes. Defaults to `BisCore.GeometricElement3d`. */
   elementClassSpecification: string;
-  /** Should models without elements be shown. Defaults to `false` */
+  /** Should models without elements be shown. Defaults to `false`. */
   showEmptyModels: boolean;
+  /** Should the root Subject node be hidden. Defaults to `false`. */
+  hideRootSubject: boolean;
 }
 
+/** @internal */
 export const defaultHierarchyConfiguration: ModelsTreeHierarchyConfiguration = {
   elementClassGrouping: "enable",
   elementClassSpecification: "BisCore.GeometricElement3d",
   showEmptyModels: false,
+  hideRootSubject: false,
 };
 
 interface ModelsTreeDefinitionProps {
@@ -128,7 +132,8 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     this._impl = createPredicateBasedHierarchyDefinition({
       classHierarchyInspector: props.imodelAccess,
       hierarchy: {
-        rootNodes: async (requestProps) => this.createSubjectChildrenQuery({ ...requestProps, parentNodeInstanceIds: [IModel.rootSubjectId] }),
+        rootNodes: async (requestProps) =>
+          this.createSubjectChildrenQuery({ ...requestProps, parentNodeInstanceIds: this._hierarchyConfig.hideRootSubject ? [IModel.rootSubjectId] : [] }),
         childNodes: [
           {
             parentInstancesNodePredicate: "BisCore.Subject",
@@ -194,7 +199,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
   }
 
   private async createSubjectChildrenQuery({
-    parentNodeInstanceIds: subjectIds,
+    parentNodeInstanceIds: parentSubjectIds,
     instanceFilter,
   }: Pick<DefineInstanceNodeChildHierarchyLevelProps, "parentNodeInstanceIds" | "instanceFilter">): Promise<HierarchyLevelDefinition> {
     const [subjectFilterClauses, modelFilterClauses] = await Promise.all([
@@ -207,10 +212,9 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         contentClass: { fullName: "BisCore.GeometricModel3d", alias: "this" },
       }),
     ]);
-    const [childSubjectIds, childModelIds] = await Promise.all([
-      this._idsCache.getChildSubjectIds(subjectIds),
-      this._idsCache.getChildSubjectModelIds(subjectIds),
-    ]);
+    const [childSubjectIds, childModelIds] = parentSubjectIds.length
+      ? await Promise.all([this._idsCache.getChildSubjectIds(parentSubjectIds), this._idsCache.getChildSubjectModelIds(parentSubjectIds)])
+      : [[IModel.rootSubjectId], []];
     const defs = new Array<HierarchyNodesDefinition>();
     childSubjectIds.length &&
       defs.push({
@@ -231,9 +235,10 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 hasChildren: { selector: `InVirtualSet(?, this.ECInstanceId)` },
                 grouping: { byLabel: { action: "merge", groupId: "subject" } },
                 extendedData: {
-                  imageId: "icon-folder",
+                  imageId: { selector: `IIF(this.ECInstanceId = ${IModel.rootSubjectId}, 'icon-imodel-hollow-2', 'icon-folder')` },
                   isSubject: true,
                 },
+                autoExpand: { selector: `IIF(this.ECInstanceId = ${IModel.rootSubjectId}, true, false)` },
                 supportsFiltering: true,
               })}
             FROM ${subjectFilterClauses.from} this
@@ -402,6 +407,14 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       filter: instanceFilter,
       contentClass: { fullName: this._hierarchyConfig.elementClassSpecification, alias: "this" },
     });
+    const modeledElements = await firstValueFrom(
+      from(modelIds).pipe(
+        mergeMap(async (modelId) => this._idsCache.getCategoriesModeledElements(modelId, categoryIds)),
+        reduce((acc, foundModeledElements) => {
+          return acc.concat(foundModeledElements);
+        }, new Array<Id64String>()),
+      ),
+    );
     return [
       {
         fullClassName: this._hierarchyConfig.elementClassSpecification,
@@ -422,16 +435,16 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 },
                 hasChildren: {
                   selector: `
-                    IFNULL((
-                      SELECT 1
-                      FROM (
-                        SELECT Parent.Id ParentId FROM ${this._hierarchyConfig.elementClassSpecification}
-                        UNION ALL
-                        SELECT ModeledElement.Id ParentId FROM bis.GeometricModel3d
-                      )
-                      WHERE ParentId = this.ECInstanceId
-                      LIMIT 1
-                    ), 0)
+                    IIF(
+                      ${modeledElements.length ? `this.ECInstanceId IN (${modeledElements.join(",")})` : `FALSE`},
+                      1,
+                      IFNULL((
+                        SELECT 1
+                        FROM ${this._hierarchyConfig.elementClassSpecification} ce
+                        WHERE ce.Parent.Id = this.ECInstanceId
+                        LIMIT 1
+                      ), 0)
+                    )
                   `,
                 },
                 extendedData: {
@@ -485,12 +498,9 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   selector: `
                     IFNULL((
                       SELECT 1
-                      FROM (
-                        SELECT Parent.Id ParentId FROM ${this._hierarchyConfig.elementClassSpecification}
-                        UNION ALL
-                        SELECT ModeledElement.Id ParentId FROM bis.GeometricModel3d
-                      )
-                      WHERE ParentId = this.ECInstanceId
+                      FROM ${this._hierarchyConfig.elementClassSpecification} ce
+                      JOIN BisCore.Model m ON ce.Model.Id = m.ECInstanceId
+                      WHERE ce.Parent.Id = this.ECInstanceId OR (ce.Model.Id = this.ECInstanceId AND m.IsPrivate = false)
                       LIMIT 1
                     ), 0)
                   `,

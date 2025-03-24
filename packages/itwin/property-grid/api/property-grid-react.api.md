@@ -58,7 +58,9 @@ export interface ContextMenuProps {
 }
 
 // @public
-export function CopyPropertyTextContextMenuItem({ record, onSelect }: DefaultContextMenuItemProps): JSX.Element;
+export function CopyPropertyTextContextMenuItem({ record, onSelect, onCopy }: DefaultContextMenuItemProps & {
+    onCopy?: (text: string) => void;
+}): JSX.Element;
 
 // @public
 export function createPropertyGrid(propertyGridProps: PropertyGridWidgetProps): Widget;
@@ -99,6 +101,7 @@ export function MultiElementPropertyGrid({ ancestorsNavigationControls, ...props
 // @public
 export interface MultiElementPropertyGridProps extends Omit<PropertyGridProps, "headerControls" | "onBackButton"> {
     ancestorsNavigationControls?: (props: AncestorsNavigationControlsProps) => ReactNode;
+    getParentInstanceKey?: (key: InstanceKey) => Promise<InstanceKey | undefined>;
     selectionStorage?: SelectionStorage;
 }
 
@@ -215,8 +218,8 @@ export interface PropertyGridUiItemsProviderProps {
 // @public
 export const PropertyGridWidgetId = "vcr:PropertyGridComponent";
 
-// @public
-export type PropertyGridWidgetProps = PropertyGridComponentProps & {
+// @public (undocumented)
+type PropertyGridWidgetOwnProps = {
     widgetId?: string;
 } & ({
     shouldShow?: (selection: Readonly<KeySet>) => boolean;
@@ -225,6 +228,9 @@ export type PropertyGridWidgetProps = PropertyGridComponentProps & {
     shouldShow?: (selection: Selectables) => Promise<boolean>;
     selectionStorage: SelectionStorage;
 });
+
+// @public
+export type PropertyGridWidgetProps = PropertyGridComponentProps & PropertyGridWidgetOwnProps;
 
 // @public
 export function RemoveFavoritePropertyContextMenuItem({ field, imodel, scope, onSelect }: FavoritePropertiesContextMenuItemProps): JSX.Element | null;

@@ -446,9 +446,17 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick, se
   return (
     <div className="map-manager-header">
       {(loading || loadingSources) && (
-        <ProgressRadial as="div">
-          <Text variant='small'>{loadingMapSources}</Text>
-        </ProgressRadial>
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          display: "grid",
+          placeItems: "center",
+          zIndex: 100,
+        }}>
+          <ProgressRadial as="div">
+            <Text variant='small'>{loadingMapSources}</Text>
+          </ProgressRadial>
+        </div>
       )}
       <div className="map-manager-source-listbox-header">
         <Input
