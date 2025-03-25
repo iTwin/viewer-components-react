@@ -3,9 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
 import { DEFINITION_CONTAINER_CLASS, SUB_CATEGORY_CLASS } from "./ClassNameDefinitions.js";
 
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
 
@@ -23,7 +24,7 @@ interface CategoriesInfo {
 
 interface CategoryInfo {
   id: Id64String;
-  childCount: number;
+  subCategoryChildCount: number;
 }
 
 interface SubCategoryInfo {
@@ -34,10 +35,14 @@ interface SubCategoryInfo {
 export class CategoriesTreeIdsCache {
   private _definitionContainersInfo: Promise<Map<Id64String, DefinitionContainerInfo>> | undefined;
   private _modelsCategoriesInfo: Promise<Map<Id64String, CategoriesInfo>> | undefined;
+  private _elementModelsCategories: Promise<Map<Id64String, { categories: Id64Set; isSubModel: boolean; isModelPrivate: boolean }>> | undefined;
   private _subCategoriesInfo: Promise<Map<Id64String, SubCategoryInfo>> | undefined;
+  private readonly _categoryElementCounts: ModelCategoryElementsCountCache;
+  private _modelWithCategoryModeledElements: Promise<Map<string, Id64Set>> | undefined;
   private _categoryClass: string;
   private _categoryElementClass: string;
   private _isDefinitionContainerSupported: Promise<boolean> | undefined;
+  private _filteredElementsModels: Promise<Map<Id64String, Id64String>> | undefined;
 
   constructor(
     private _queryExecutor: LimitingECSqlQueryExecutor,
@@ -46,6 +51,60 @@ export class CategoriesTreeIdsCache {
     const { categoryClass, categoryElementClass } = getClassesByView(viewType);
     this._categoryClass = categoryClass;
     this._categoryElementClass = categoryElementClass;
+    this._categoryElementCounts = new ModelCategoryElementsCountCache(_queryExecutor, categoryElementClass);
+  }
+
+  public [Symbol.dispose]() {
+    this._filteredElementsModels = undefined;
+  }
+
+  private async *queryFilteredElementsModels(filteredElements: Id64Array): AsyncIterableIterator<{
+    modelId: Id64String;
+    id: Id64String;
+  }> {
+    const query = `
+      SELECT Model.Id modelId, ECInstanceId id
+      FROM ${this._categoryElementClass}
+      WHERE ECInstanceId IN (${filteredElements.join(", ")})
+    `;
+    for await (const row of this._queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+      yield { modelId: row.modelId, id: row.id };
+    }
+  }
+
+  public async getFilteredElementsModels(filteredElements: Id64Array) {
+    if (filteredElements.length === 0) {
+      return new Map<Id64String, Id64String>();
+    }
+
+    this._filteredElementsModels ??= (async () => {
+      const filteredElementsModels = new Map();
+      for await (const { modelId, id } of this.queryFilteredElementsModels(filteredElements)) {
+        filteredElementsModels.set(id, modelId);
+      }
+      return filteredElementsModels;
+    })();
+    return this._filteredElementsModels;
+  }
+
+  public clearFilteredElementsModels() {
+    this._filteredElementsModels = undefined;
+  }
+
+  private async *queryElementModelCategories() {
+    const query = `
+      SELECT this.Model.Id modelId, this.Category.Id categoryId, m.IsPrivate isModelPrivate
+      FROM BisCore.Model m
+      JOIN ${this._categoryElementClass} this ON m.ECInstanceId = this.Model.Id
+      WHERE this.Parent.Id IS NULL
+      GROUP BY modelId, categoryId, isModelPrivate
+    `;
+    for await (const row of this._queryExecutor.createQueryReader(
+      { ecsql: query },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: "tree-widget/categories-tree/element-models-and-categories-query" },
+    )) {
+      yield { modelId: row.modelId, categoryId: row.categoryId, isModelPrivate: !!row.isModelPrivate };
+    }
   }
 
   private async *queryCategories(): AsyncIterableIterator<{
@@ -79,7 +138,10 @@ export class CategoriesTreeIdsCache {
         AND EXISTS (SELECT 1 FROM ${this._categoryElementClass} e WHERE e.Category.Id = this.ECInstanceId)
       GROUP BY this.ECInstanceId
     `;
-    for await (const row of this._queryExecutor.createQueryReader({ ecsql: categoriesQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this._queryExecutor.createQueryReader(
+      { ecsql: categoriesQuery },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: "tree-widget/categories-tree/root-categories-query" },
+    )) {
       yield { id: row.id, modelId: row.modelId, parentDefinitionContainerExists: row.parentDefinitionContainerExists, childCount: row.childCount };
     }
   }
@@ -96,7 +158,10 @@ export class CategoriesTreeIdsCache {
         AND c.Name = 'DefinitionContainer'
     `;
 
-    for await (const _row of this._queryExecutor.createQueryReader({ ecsql: query })) {
+    for await (const _row of this._queryExecutor.createQueryReader(
+      { ecsql: query },
+      { restartToken: "tree-widget/categories-tree/is-definition-container-supported-query" },
+    )) {
       return true;
     }
     return false;
@@ -136,7 +201,10 @@ export class CategoriesTreeIdsCache {
     const definitionsQuery = `
       SELECT dc.ECInstanceId id, dc.ModelId modelId FROM ${DEFINITION_CONTAINERS_CTE} dc GROUP BY dc.ECInstanceId
     `;
-    for await (const row of this._queryExecutor.createQueryReader({ ctes, ecsql: definitionsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this._queryExecutor.createQueryReader(
+      { ctes, ecsql: definitionsQuery },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: "tree-widget/categories-tree/definition-containers-query" },
+    )) {
       yield { id: row.id, modelId: row.modelId };
     }
   }
@@ -152,7 +220,10 @@ export class CategoriesTreeIdsCache {
         NOT sc.IsPrivate
         AND sc.Parent.Id IN (${categoriesInfo.join(",")})
     `;
-    for await (const row of this._queryExecutor.createQueryReader({ ecsql: definitionsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this._queryExecutor.createQueryReader(
+      { ecsql: definitionsQuery },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: "tree-widget/categories-tree/sub-categories-query" },
+    )) {
       yield { id: row.id, parentId: row.categoryId };
     }
   }
@@ -166,11 +237,91 @@ export class CategoriesTreeIdsCache {
           modelCategories = { parentDefinitionContainerExists: queriedCategory.parentDefinitionContainerExists, childCategories: [] };
           allModelsCategories.set(queriedCategory.modelId, modelCategories);
         }
-        modelCategories.childCategories.push({ id: queriedCategory.id, childCount: queriedCategory.childCount });
+        modelCategories.childCategories.push({ id: queriedCategory.id, subCategoryChildCount: queriedCategory.childCount });
       }
       return allModelsCategories;
     })();
     return this._modelsCategoriesInfo;
+  }
+
+  private async getElementModelsCategories() {
+    this._elementModelsCategories ??= (async () => {
+      const [modelCategories, modelWithCategoryModeledElements] = await Promise.all([
+        (async () => {
+          const elementModelsCategories = new Map<Id64String, { categories: Id64Set, isModelPrivate: boolean}>();
+          for await (const queriedCategory of this.queryElementModelCategories()) {
+            let modelEntry = elementModelsCategories.get(queriedCategory.modelId);
+            if (modelEntry === undefined) {
+              modelEntry = { categories: new Set(), isModelPrivate: queriedCategory.isModelPrivate};
+              elementModelsCategories.set(queriedCategory.modelId, modelEntry);
+            }
+            modelEntry.categories.add(queriedCategory.categoryId);
+          }
+          return elementModelsCategories;
+        })(),
+        this.getModelWithCategoryModeledElements(),
+      ]);
+      const result = new Map<Id64String, { categories: Id64Set; isSubModel: boolean, isModelPrivate: boolean }>();
+      for (const [modelId, modelEntry] of modelCategories) {
+        const subModels = [...modelWithCategoryModeledElements.values()].reduce((acc, modeledElements) => {
+          modeledElements.forEach((modeledElement) => acc.add(modeledElement));
+          return acc;
+        }, new Set<Id64String>());
+        const isSubModel = subModels.has(modelId);
+        result.set(modelId, { categories: modelEntry.categories, isSubModel, isModelPrivate: modelEntry.isModelPrivate });
+      }
+      return result;
+    })();
+    return this._elementModelsCategories;
+  }
+
+  private async *queryModeledElements() {
+    const query = `
+      SELECT
+        pe.ECInstanceId modeledElementId,
+        pe.Category.Id categoryId,
+        pe.Model.Id modelId
+      FROM BisCore.Model m
+      JOIN ${this._categoryElementClass} pe ON pe.ECInstanceId = m.ModeledElement.Id
+      WHERE
+        m.IsPrivate = false
+        AND m.ECInstanceId IN (SELECT Model.Id FROM ${this._categoryElementClass})
+    `;
+    for await (const row of this._queryExecutor.createQueryReader(
+      { ecsql: query },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: "tree-widget/categories-tree/modeled-elements-query" },
+    )) {
+      yield { modelId: row.modelId, categoryId: row.categoryId, modeledElementId: row.modeledElementId, rootCategoryId: row.rootCategoryId };
+    }
+  }
+
+  private async getModelWithCategoryModeledElements() {
+    this._modelWithCategoryModeledElements ??= (async () => {
+      const modelWithCategoryModeledElements = new Map<Id64String, Id64Set>();
+      for await (const { modelId, categoryId, modeledElementId } of this.queryModeledElements()) {
+        const key = `${modelId}-${categoryId}`;
+        const entry = modelWithCategoryModeledElements.get(key);
+        if (entry === undefined) {
+          modelWithCategoryModeledElements.set(key, new Set([modeledElementId]));
+        } else {
+          entry.add(modeledElementId);
+        }
+      }
+      return modelWithCategoryModeledElements;
+    })();
+    return this._modelWithCategoryModeledElements;
+  }
+
+  public async getCategoriesModeledElements(modelId: Id64String, categoryIds: Id64Array): Promise<Id64Array> {
+    const modelWithCategoryModeledElements = await this.getModelWithCategoryModeledElements();
+    const result = new Array<Id64String>();
+    for (const categoryId of categoryIds) {
+      const entry = modelWithCategoryModeledElements.get(`${modelId}-${categoryId}`);
+      if (entry !== undefined) {
+        result.push(...entry);
+      }
+    }
+    return result;
   }
 
   private async getSubCategoriesInfo() {
@@ -180,7 +331,7 @@ export class CategoriesTreeIdsCache {
       const categoriesWithMoreThanOneSubCategory = new Array<Id64String>();
       for (const modelCategoriesInfo of modelsCategoriesInfo.values()) {
         categoriesWithMoreThanOneSubCategory.push(
-          ...modelCategoriesInfo.childCategories.filter((categoryInfo) => categoryInfo.childCount > 1).map((categoryInfo) => categoryInfo.id),
+          ...modelCategoriesInfo.childCategories.filter((categoryInfo) => categoryInfo.subCategoryChildCount > 1).map((categoryInfo) => categoryInfo.id),
         );
       }
 
@@ -248,6 +399,38 @@ export class CategoriesTreeIdsCache {
     return result;
   }
 
+  public async getCategoriesElementModels(categoryIds: Id64Array, includeSubModels?: boolean): Promise<Map<Id64String, Id64Array>> {
+    const elementModelsCategories = await this.getElementModelsCategories();
+    const result = new Map<Id64String, Id64Array>();
+    for (const categoryId of categoryIds) {
+      for (const [modelId, { categories, isSubModel }] of elementModelsCategories) {
+        if ((includeSubModels || !isSubModel) && categories.has(categoryId)) {
+          let categoryModels = result.get(categoryId);
+          if (!categoryModels) {
+            categoryModels = new Array<Id64String>();
+            result.set(categoryId, categoryModels);
+          }
+          categoryModels.push(modelId);
+        }
+      }
+    }
+    return result;
+  }
+
+  public async getModelCategories(modelId: Id64String): Promise<Id64Array> {
+    const elementModelsCategories = await this.getElementModelsCategories();
+    return [...(elementModelsCategories.get(modelId)?.categories ?? [])];
+  }
+
+  public async hasSubModel(elementId: Id64String): Promise<boolean> {
+    const elementModelsCategories = await this.getElementModelsCategories();
+    const modeledElementInfo = elementModelsCategories.get(elementId);
+    if (!modeledElementInfo) {
+      return false;
+    }
+    return !modeledElementInfo.isModelPrivate;
+  }
+
   public async getAllContainedCategories(definitionContainerIds: Id64Array): Promise<Id64Array> {
     const result = new Array<Id64String>();
 
@@ -311,6 +494,10 @@ export class CategoriesTreeIdsCache {
     ];
   }
 
+  public async getCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Promise<number> {
+    return this._categoryElementCounts.getCategoryElementsCount(modelId, categoryId);
+  }
+
   public async getAllDefinitionContainersAndCategories(): Promise<{ categories: Id64Array; definitionContainers: Id64Array }> {
     const [modelsCategoriesInfo, definitionContainersInfo] = await Promise.all([this.getModelsCategoriesInfo(), this.getDefinitionContainersInfo()]);
     const result = { definitionContainers: [...definitionContainersInfo.keys()], categories: new Array<Id64String>() };
@@ -338,14 +525,22 @@ export class CategoriesTreeIdsCache {
     return result;
   }
 
-  public async getSubCategories(categoryId: Id64String): Promise<Id64Array> {
+  public async getSubCategories(categoryIds: Id64Array): Promise<Map<Id64String, Id64Array>> {
     const subCategoriesInfo = await this.getSubCategoriesInfo();
-    const result = new Array<Id64String>();
-    for (const [subCategoryId, subCategoryInfo] of subCategoriesInfo) {
-      if (subCategoryInfo.categoryId === categoryId) {
-        result.push(subCategoryId);
+    const result = new Map<Id64String, Id64Array>();
+    for (const categoryId of categoryIds) {
+      for (const [subCategoryId, subCategoryInfo] of subCategoriesInfo) {
+        if (subCategoryInfo.categoryId === categoryId) {
+          let categoryEntry = result.get(categoryId);
+          if (!categoryEntry) {
+            categoryEntry = [];
+            result.set(categoryId, categoryEntry);
+          }
+          categoryEntry.push(subCategoryId);
+        }
       }
     }
+
     return result;
   }
 
