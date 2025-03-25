@@ -1,8 +1,16 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Wed, 19 Feb 2025 21:08:10 GMT and should not be manually modified.
+This log was last generated on Fri, 14 Mar 2025 21:21:43 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.26.4
+
+Fri, 14 Mar 2025 21:21:43 GMT
+
+### Patches
+
+- Resolve GHSA-9crc-q9x8-hgqq ([#1244](https://github.com/iTwin/viewer-components-react/pull/1244))
 
 ## 0.26.3
 

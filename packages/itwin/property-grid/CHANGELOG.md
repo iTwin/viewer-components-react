@@ -1,8 +1,25 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Thu, 27 Feb 2025 12:34:52 GMT and should not be manually modified.
+This log was last generated on Fri, 14 Mar 2025 21:21:43 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 1.18.0
+
+Fri, 14 Mar 2025 21:21:43 GMT
+
+### Minor changes
+
+- Add an optional `onCopy` prop to `CopyPropertyTextContextMenuItem` to allow supplying a custom value copying function. ([#1233](https://github.com/iTwin/viewer-components-react/pull/1233))
+- Add an optional `getParentInstanceKey` prop to `MultiElementPropertyGrid` to allow supplying a custom implementation for getting parent instance key. ([#1233](https://github.com/iTwin/viewer-components-react/pull/1233))
+
+## 1.17.1
+
+Thu, 06 Mar 2025 12:37:44 GMT
+
+### Patches
+
+- Update import to use `@itwin/core-bentley` for types that are reexported by `@itwin/core-common` ([#1232](https://github.com/iTwin/viewer-components-react/pull/1232))
 
 ## 1.17.0
 

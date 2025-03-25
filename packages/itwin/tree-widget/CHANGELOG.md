@@ -1,8 +1,29 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Wed, 19 Feb 2025 21:08:10 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Mar 2025 11:37:20 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 3.6.0
+
+Fri, 21 Mar 2025 11:37:20 GMT
+
+### Minor changes
+
+- Add ability to remove root Subject node from Models and iModel content trees by setting `hideRootSubject: true` in the `hierarchyConfig` prop. ([#1251](https://github.com/iTwin/viewer-components-react/pull/1251))
+
+### Patches
+
+- Fixed Models tree showing that modeled elements have children, when their sub model is private or when sub model does not have any elements. Now it shows that modeled element has children only when it's sub model has children and is not private. ([#1253](https://github.com/iTwin/viewer-components-react/pull/1253))
+- Fixed Categories tree showing definition containers that contain categories without elements. Now it displays definition containers only when they have categories that contain elements. ([#1248](https://github.com/iTwin/viewer-components-react/pull/1248))
+
+## 3.5.1
+
+Thu, 06 Mar 2025 12:37:44 GMT
+
+### Patches
+
+- Update import to use `@itwin/core-bentley` for types that are reexported by `@itwin/core-common` ([#1232](https://github.com/iTwin/viewer-components-react/pull/1232))
 
 ## 3.5.0
 

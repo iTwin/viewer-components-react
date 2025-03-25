@@ -25,23 +25,41 @@ import type {
 import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlBinding, IInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
 import type { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache.js";
 
+/**
+ * Defines hierarchy configuration supported by `IModelContentTree`.
+ * @beta
+ */
+export interface IModelContentTreeHierarchyConfiguration {
+  /** Should the root Subject node be hidden. Defaults to `false`. */
+  hideRootSubject: boolean;
+}
+
+/** @internal */
+export const defaultHierarchyConfiguration: IModelContentTreeHierarchyConfiguration = {
+  hideRootSubject: false,
+};
+
 interface IModelContentTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector;
   idsCache: IModelContentTreeIdsCache;
+  hierarchyConfig: IModelContentTreeHierarchyConfiguration;
 }
 
 export class IModelContentTreeDefinition implements HierarchyDefinition {
   private _impl: HierarchyDefinition;
   private _idsCache: IModelContentTreeIdsCache;
+  private _hierarchyConfig: IModelContentTreeHierarchyConfiguration;
   private _selectQueryFactory: NodesQueryClauseFactory;
   private _nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
 
   public constructor(props: IModelContentTreeDefinitionProps) {
     this._idsCache = props.idsCache;
+    this._hierarchyConfig = props.hierarchyConfig;
     this._impl = createPredicateBasedHierarchyDefinition({
       classHierarchyInspector: props.imodelAccess,
       hierarchy: {
-        rootNodes: async (requestProps) => this.createSubjectChildrenQuery({ ...requestProps, parentNodeInstanceIds: [IModel.rootSubjectId] }),
+        rootNodes: async (requestProps) =>
+          this.createSubjectChildrenQuery({ ...requestProps, parentNodeInstanceIds: this._hierarchyConfig.hideRootSubject ? [IModel.rootSubjectId] : [] }),
         childNodes: [
           {
             parentInstancesNodePredicate: "BisCore.Subject",
@@ -116,7 +134,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
   }
 
   private async createSubjectChildrenQuery({
-    parentNodeInstanceIds: subjectIds,
+    parentNodeInstanceIds: parentSubjectIds,
     instanceFilter,
   }: Pick<DefineInstanceNodeChildHierarchyLevelProps, "parentNodeInstanceIds" | "instanceFilter">): Promise<HierarchyLevelDefinition> {
     const [subjectFilterClauses, modelFilterClauses] = await Promise.all([
@@ -129,10 +147,9 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
         contentClass: { fullName: "BisCore.Model", alias: "this" },
       }),
     ]);
-    const [childSubjectIds, childModelIds] = await Promise.all([
-      this._idsCache.getChildSubjectIds(subjectIds),
-      this._idsCache.getChildSubjectModelIds(subjectIds),
-    ]);
+    const [childSubjectIds, childModelIds] = parentSubjectIds.length
+      ? await Promise.all([this._idsCache.getChildSubjectIds(parentSubjectIds), this._idsCache.getChildSubjectModelIds(parentSubjectIds)])
+      : [[IModel.rootSubjectId], []];
     const defs = new Array<HierarchyNodesDefinition>();
     childSubjectIds.length &&
       defs.push({
@@ -152,8 +169,9 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                 hasChildren: { selector: `InVirtualSet(?, this.ECInstanceId)` },
                 grouping: { byLabel: { action: "merge", groupId: "subject" } },
                 extendedData: {
-                  imageId: "icon-folder",
+                  imageId: { selector: `IIF(this.ECInstanceId = ${IModel.rootSubjectId}, 'icon-imodel-hollow-2', 'icon-folder')` },
                 },
+                autoExpand: { selector: `IIF(this.ECInstanceId = ${IModel.rootSubjectId}, true, false)` },
                 supportsFiltering: true,
               })}
             FROM ${subjectFilterClauses.from} this

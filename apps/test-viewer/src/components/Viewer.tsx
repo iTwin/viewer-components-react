@@ -43,6 +43,8 @@ export function Viewer() {
   );
 }
 
+const uiProviders = [...uiConfig.uiItemsProviders, statusBarActionsProvider];
+
 function ViewerWithOptions() {
   const { client: authClient } = useAuthorizationContext();
   const { iTwinId, iModelId } = useIModelInfo();
@@ -58,7 +60,7 @@ function ViewerWithOptions() {
       authClient={authClient}
       enablePerformanceMonitors={false}
       onIModelAppInit={onIModelAppInit}
-      uiProviders={[...uiConfig.uiItemsProviders, statusBarActionsProvider]}
+      uiProviders={uiProviders}
       defaultUiConfig={{
         hideNavigationAid: true,
         hideStatusBar: false,

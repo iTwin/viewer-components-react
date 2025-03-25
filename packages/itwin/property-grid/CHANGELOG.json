@@ -2,6 +2,42 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "date": "Fri, 14 Mar 2025 21:21:43 GMT",
+      "version": "1.18.0",
+      "tag": "@itwin/property-grid-react_v1.18.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "c12795a07c67161918ba99c85008062695957b0c",
+            "comment": "Add an optional `onCopy` prop to `CopyPropertyTextContextMenuItem` to allow supplying a custom value copying function."
+          },
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "c12795a07c67161918ba99c85008062695957b0c",
+            "comment": "Add an optional `getParentInstanceKey` prop to `MultiElementPropertyGrid` to allow supplying a custom implementation for getting parent instance key."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Thu, 06 Mar 2025 12:37:44 GMT",
+      "version": "1.17.1",
+      "tag": "@itwin/property-grid-react_v1.17.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "36faf619fe35c4b8ed85cc78134ab5d2d5bae682",
+            "comment": "Update import to use `@itwin/core-bentley` for types that are reexported by `@itwin/core-common`"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 27 Feb 2025 12:34:52 GMT",
       "version": "1.17.0",
       "tag": "@itwin/property-grid-react_v1.17.0",

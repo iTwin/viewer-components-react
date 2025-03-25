@@ -22,6 +22,7 @@ interface SubjectInfo {
 }
 
 interface ModelInfo {
+  isModelPrivate: boolean;
   categories: Id64Set;
   elementCount: number;
 }
@@ -34,7 +35,7 @@ export class ModelsTreeIdsCache {
   private _subjectInfos: Promise<Map<Id64String, SubjectInfo>> | undefined;
   private _parentSubjectIds: Promise<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
   private _modelInfos: Promise<Map<Id64String, ModelInfo>> | undefined;
-  private _modelWithCategoryModeledElements: Promise<Map<Id64String, Id64Set>> | undefined;
+  private _modelWithCategoryModeledElements: Promise<Map<string, Id64Set>> | undefined;
   private _modelKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath[]>>;
   private _subjectKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath>>;
   private _categoryKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath[]>>;
@@ -231,7 +232,10 @@ export class ModelsTreeIdsCache {
         const subjectInfos = await this.getSubjectInfos();
         const result = new Array<InstanceKey>();
         let currParentId: Id64String | undefined = targetSubjectId;
-        while (currParentId && currParentId !== IModel.rootSubjectId) {
+        while (currParentId) {
+          if (this._hierarchyConfig.hideRootSubject && currParentId === IModel.rootSubjectId) {
+            break;
+          }
           const parentInfo = subjectInfos.get(currParentId);
           if (!parentInfo?.hideInHierarchy) {
             result.push({ className: "BisCore.Subject", id: currParentId });
@@ -258,13 +262,14 @@ export class ModelsTreeIdsCache {
 
   private async *queryModelCategories() {
     const query = /* sql */ `
-      SELECT Model.Id modelId, Category.Id categoryId
-      FROM ${this._hierarchyConfig.elementClassSpecification}
-      WHERE Parent.Id IS NULL
-      GROUP BY modelId, categoryId
+      SELECT this.Model.Id modelId, this.Category.Id categoryId, m.IsPrivate isModelPrivate
+      FROM BisCore.Model m
+      JOIN ${this._hierarchyConfig.elementClassSpecification} this ON m.ECInstanceId = this.Model.Id
+      WHERE this.Parent.Id IS NULL
+      GROUP BY modelId, categoryId, isModelPrivate
     `;
     for await (const row of this._queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
-      yield { modelId: row.modelId, categoryId: row.categoryId };
+      yield { modelId: row.modelId, categoryId: row.categoryId, isModelPrivate: !!row.isModelPrivate };
     }
   }
 
@@ -276,6 +281,9 @@ export class ModelsTreeIdsCache {
         pe.Model.Id modelId
       FROM BisCore.Model m
       JOIN ${this._hierarchyConfig.elementClassSpecification} pe ON pe.ECInstanceId = m.ModeledElement.Id
+      WHERE
+        m.IsPrivate = false
+        AND m.ECInstanceId IN (SELECT Model.Id FROM ${this._hierarchyConfig.elementClassSpecification})
     `;
     for await (const row of this._queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
       yield { modelId: row.modelId, categoryId: row.categoryId, modeledElementId: row.modeledElementId };
@@ -301,15 +309,16 @@ export class ModelsTreeIdsCache {
 
   private async getModelInfos() {
     this._modelInfos ??= (async () => {
-      const modelInfos = new Map<Id64String, { categories: Id64Set; elementCount: number }>();
+      const modelInfos = new Map<Id64String, { categories: Id64Set; elementCount: number; isModelPrivate: boolean }>();
       await Promise.all([
         (async () => {
-          for await (const { modelId, categoryId } of this.queryModelCategories()) {
+          for await (const { modelId, categoryId, isModelPrivate } of this.queryModelCategories()) {
             const entry = modelInfos.get(modelId);
             if (entry) {
               entry.categories.add(categoryId);
+              entry.isModelPrivate = isModelPrivate;
             } else {
-              modelInfos.set(modelId, { categories: new Set([categoryId]), elementCount: 0 });
+              modelInfos.set(modelId, { categories: new Set([categoryId]), elementCount: 0, isModelPrivate });
             }
           }
         })(),
@@ -319,7 +328,7 @@ export class ModelsTreeIdsCache {
             if (entry) {
               entry.elementCount = elementCount;
             } else {
-              modelInfos.set(modelId, { categories: new Set(), elementCount });
+              modelInfos.set(modelId, { categories: new Set(), elementCount, isModelPrivate: false });
             }
           }
         })(),
@@ -342,7 +351,11 @@ export class ModelsTreeIdsCache {
 
   public async hasSubModel(elementId: Id64String): Promise<boolean> {
     const modelInfos = await this.getModelInfos();
-    return modelInfos.has(elementId);
+    const modeledElementInfo = modelInfos.get(elementId);
+    if (!modeledElementInfo) {
+      return false;
+    }
+    return !modeledElementInfo.isModelPrivate;
   }
 
   public async getCategoriesModeledElements(modelId: Id64String, categoryIds: Id64Array): Promise<Id64Array> {

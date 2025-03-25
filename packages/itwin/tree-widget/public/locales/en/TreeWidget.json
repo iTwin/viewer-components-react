@@ -13,6 +13,10 @@
       "previous": "Previous"
     }
   },
+  "loading": {
+    "filter": "Filtering in progress",
+    "skeleton": "Loading tree"
+  },
   "selectableTree": {
     "noTrees": "There are no trees available for this iModel."
   },

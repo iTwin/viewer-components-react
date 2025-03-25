@@ -2,6 +2,73 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Fri, 21 Mar 2025 11:37:20 GMT",
+      "version": "3.6.0",
+      "tag": "@itwin/tree-widget-react_v3.6.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "d237886aa76866b8794b1fdacbbade0dd5518ad3",
+            "comment": "Add ability to remove root Subject node from Models and iModel content trees by setting `hideRootSubject: true` in the `hierarchyConfig` prop."
+          }
+        ],
+        "patch": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "23f4f29e1f92a6310272ecc1a6da49e5eb34e612",
+            "comment": "Fixed Models tree showing that modeled elements have children, when their sub model is private or when sub model does not have any elements. Now it shows that modeled element has children only when it's sub model has children and is not private."
+          },
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "4b8a044926962a16b6ac3dc311b3080c3aca837e",
+            "comment": "Fixed Categories tree showing definition containers that contain categories without elements. Now it displays definition containers only when they have categories that contain elements."
+          }
+        ],
+        "none": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "0b4168d221ea5ac65ec4b026b504b4a59b5ec74f",
+            "comment": "Make hiding root subject in Models and iModel content trees opt-in"
+          }
+        ]
+      }
+    },
+    {
+      "date": "Fri, 14 Mar 2025 21:21:43 GMT",
+      "version": "3.5.1",
+      "tag": "@itwin/tree-widget-react_v3.5.1",
+      "comments": {
+        "none": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "c12795a07c67161918ba99c85008062695957b0c",
+            "comment": "Stop using `testdouble` for mocking modules"
+          }
+        ]
+      }
+    },
+    {
+      "date": "Thu, 06 Mar 2025 12:37:44 GMT",
+      "version": "3.5.1",
+      "tag": "@itwin/tree-widget-react_v3.5.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "36faf619fe35c4b8ed85cc78134ab5d2d5bae682",
+            "comment": "Update import to use `@itwin/core-bentley` for types that are reexported by `@itwin/core-common`"
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 19 Feb 2025 21:08:10 GMT",
       "version": "3.5.0",
       "tag": "@itwin/tree-widget-react_v3.5.0",
