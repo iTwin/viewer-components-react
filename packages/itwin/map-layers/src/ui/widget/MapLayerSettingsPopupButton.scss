@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/core-react/lib/cjs/core-react/index";
 
-$hovered-icon-color: $buic-foreground-primary;
+$hovered-icon-color: var(--iui-color-icon-accent);
 
 .maplayers-settings-popup {
   overflow: auto;
