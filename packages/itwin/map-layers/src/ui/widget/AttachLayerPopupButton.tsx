@@ -6,7 +6,7 @@ import * as React from "react";
 import { UiFramework } from "@itwin/appui-react";
 import { IModelApp, MapLayerSource, MapLayerSourceStatus, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 import { SvgAdd, SvgDelete, SvgEdit } from "@itwin/itwinui-icons-react";
-import { Button, IconButton, Input, List, ListItem, Popover, ProgressRadial, Text } from "@itwin/itwinui-react";
+import { Button, IconButton, Input, List, ListItem, Popover, ProgressRadial } from "@itwin/itwinui-react";
 import { MapLayerPreferences } from "../../MapLayerPreferences";
 import { MapLayersUI } from "../../mapLayers";
 import { ConfirmMessageDialog } from "./ConfirmMessageDialog";
@@ -39,7 +39,6 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick, se
     placeholderLabel,
     addCustomLayerLabel,
     addCustomLayerToolTip,
-    loadingMapSources,
     removeLayerDefButtonTitle,
     editLayerDefButtonTitle,
     removeLayerDefDialogTitle,
@@ -48,7 +47,6 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick, se
       placeholderLabel: MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.SearchPlaceholder"),
       addCustomLayerLabel: MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.Custom"),
       addCustomLayerToolTip: MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.AttachCustomLayer"),
-      loadingMapSources: MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.LoadingMapSources"),
       removeLayerDefButtonTitle: MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.RemoveLayerDefButtonTitle"),
       editLayerDefButtonTitle: MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.EditLayerDefButtonTitle"),
       removeLayerDefDialogTitle: MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.RemoveLayerDefDialogTitle"),
@@ -416,20 +414,18 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick, se
  Handle Edit layer button clicked
  */
   const onItemEditButtonClicked = React.useCallback(
-    (event: React.MouseEvent) => {
+    (event: React.MouseEvent, source: MapLayerSource) => {
       event.stopPropagation(); // We don't want the owning ListBox to react on mouse click.
-      const targetLayerName = (event?.currentTarget?.parentNode as HTMLElement)?.textContent;
-      const matchingSource = sources.find((layerSource) => layerSource.name === targetLayerName);
 
       // we expect a single layer source matching this name
-      if (matchingSource === undefined) {
+      if (source === undefined) {
         return;
       }
       setMapUrlModalOpen(true);
       UiFramework.dialogs.modal.open(
         <MapUrlDialog
           activeViewport={activeViewport}
-          mapLayerSourceToEdit={matchingSource}
+          mapLayerSourceToEdit={source}
           onOkResult={(result?: SourceState) => handleModalUrlDialogOk(LayerAction.Edit, result)}
           onCancelResult={handleModalUrlDialogCancel}
           mapLayerOptions={mapLayerOptions}
@@ -440,7 +436,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick, se
         onHandleOutsideClick(false);
       }
     },
-    [activeViewport, handleModalUrlDialogCancel, handleModalUrlDialogOk, mapLayerOptions, onHandleOutsideClick,setMapUrlModalOpen, sources],
+    [activeViewport, handleModalUrlDialogCancel, handleModalUrlDialogOk, mapLayerOptions, onHandleOutsideClick, setMapUrlModalOpen],
   );
 
   return (
@@ -453,9 +449,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick, se
           placeItems: "center",
           zIndex: 100,
         }}>
-          <ProgressRadial as="div">
-            <Text variant='small'>{loadingMapSources}</Text>
-          </ProgressRadial>
+          <ProgressRadial as="div"/>
         </div>
       )}
       <div className="map-manager-source-listbox-header">
@@ -493,26 +487,26 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick, se
                 // otherwise list feels cluttered.
                 !!iTwinId && layerNameUnderCursor && layerNameUnderCursor === source.name && (
                   <>
-                    <Button
+                    <IconButton
                       size="small"
                       styleType="borderless"
                       className="map-source-list-entry-button"
-                      title={editLayerDefButtonTitle}
-                      onClick={onItemEditButtonClicked}
+                      label={editLayerDefButtonTitle}
+                      onClick={(e)=>onItemEditButtonClicked(e, source)}
                     >
                       <SvgEdit />
-                    </Button>
-                    <Button
+                    </IconButton>
+                    <IconButton
                       size="small"
                       styleType="borderless"
                       className="map-source-list-entry-button"
-                      title={removeLayerDefButtonTitle}
+                      label={removeLayerDefButtonTitle}
                       onClick={(event: React.MouseEvent) => {
                         onItemRemoveButtonClicked(source, event);
                       }}
                     >
                       <SvgDelete />
-                    </Button>
+                    </IconButton>
                   </>
                 )
               }
@@ -613,7 +607,7 @@ export function AttachLayerPopupButton(props: AttachLayerPopupButtonProps) {
           title={popupOpen ? hideAttachLayerLabel : showAttachLayerLabel}
           onClick={togglePopup}
         >
-          {addCustomLayerButtonLabel}
+          <span className="map-manager-attach-layer-label">{addCustomLayerButtonLabel}</span>
         </Button>
       );
     }

@@ -14,7 +14,7 @@ import { assert } from "@itwin/core-bentley";
 import { ImageMapLayerSettings } from "@itwin/core-common";
 import { IModelApp, MapLayerImageryProviderStatus, MapTileTreeScaleRangeVisibility, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 import { SvgStatusWarning, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
-import { Button, Checkbox } from "@itwin/itwinui-react";
+import { Checkbox, IconButton } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
 import { AttachLayerButtonType, AttachLayerPopupButton } from "./AttachLayerPopupButton";
 import { MapLayerSettingsMenu } from "./MapLayerSettingsMenu";
@@ -128,18 +128,18 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
           }}
         ></Checkbox>
         {/* Visibility icon */}
-        <Button
+        <IconButton
           disabled={props.disabled}
           size="small"
           styleType="borderless"
-          className="map-manager-item-visibility map-manager-visibility-icon"
-          title={toggleVisibility}
+          className="map-manager-item-visibility"
+          label={toggleVisibility}
           onClick={() => {
             props.onItemVisibilityToggleClicked(activeLayer);
           }}
         >
           {activeLayer.visible ? <SvgVisibilityShow data-testid="layer-visibility-icon-show" /> : <SvgVisibilityHide data-testid="layer-visibility-icon-hide" />}
-        </Button>
+        </IconButton>
 
         {/* Label */}
         <span
@@ -150,7 +150,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
           {activeLayer.name}
           {/* eslint-disable-next-line @itwin/no-internal */}
           {activeLayer.provider?.status === MapLayerImageryProviderStatus.RequireAuth && (
-            <Button
+            <IconButton
               disabled={props.disabled}
               size="small"
               styleType="borderless"
@@ -181,7 +181,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
               title={requireAuthTooltip}
             >
               <SvgStatusWarning />
-            </Button>
+            </IconButton>
           )}
         </span>
 
@@ -201,7 +201,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
         </div>
         {/* eslint-disable-next-line @itwin/no-internal */}
         {activeLayer.provider?.status === MapLayerImageryProviderStatus.RequireAuth && (
-          <Button
+          <IconButton
             disabled={props.disabled}
             size="small"
             styleType="borderless"
@@ -232,7 +232,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
             title={requireAuthTooltip}
           >
             <SvgStatusWarning />
-          </Button>
+          </IconButton>
         )}
         <div id="MapLayerSettingsMenuWrapper" style={{ visibility: "hidden" }}>
           <MapLayerSettingsMenu

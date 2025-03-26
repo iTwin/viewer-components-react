@@ -2,14 +2,12 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/core-react/lib/cjs/core-react/index";
-
-$divider-color: $buic-background-toolbutton-stroke;
-$hovered-icon-color: $buic-foreground-primary-tone;
-$default-font-size: --iui-font-size-1;
+$divider-color: var(--iui-color-background-disabled);
+$hovered-icon-color: var(--iui-color-text-accent-hover);
+$default-font-size: var(--iui-font-size-1);
 
 .map-layer-url-dialog {
-  z-index: 21000;
+  z-index: var(--uicore-z-index-cursor-overlay);
 }
 
 .map-layer-url-dialog-content {
@@ -53,7 +51,6 @@ $default-font-size: --iui-font-size-1;
 
   .map-layer-source-label {
     font-size: $default-font-size;
-    color: $buic-foreground-body;
     padding-right: 6px;
     flex: initial;
     width: fit-content;
