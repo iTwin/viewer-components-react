@@ -7,8 +7,8 @@ import { filter, from, map, mergeMap, of, startWith, toArray } from "rxjs";
 import { reduceWhile } from "../Rxjs.js";
 import { createVisibilityStatus } from "../Tooltip.js";
 
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Observable, OperatorFunction } from "rxjs";
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Visibility } from "../Tooltip.js";
 import type { VisibilityStatus } from "../UseHierarchyVisibility.js";
 

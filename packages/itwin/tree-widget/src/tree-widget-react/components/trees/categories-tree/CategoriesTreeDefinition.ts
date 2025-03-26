@@ -13,6 +13,8 @@ import { releaseMainThreadOnItemsCount } from "../models-tree/Utils.js";
 import { getClassesByView } from "./internal/CategoriesTreeIdsCache.js";
 import { DEFINITION_CONTAINER_CLASS, DEFINITION_ELEMENT_CLASS, MODEL_3D_CLASS, SUB_CATEGORY_CLASS } from "./internal/ClassNameDefinitions.js";
 
+import type { Observable } from "rxjs";
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type {
   DefineHierarchyLevelProps,
   DefineInstanceNodeChildHierarchyLevelProps,
@@ -25,8 +27,6 @@ import type {
   LimitingECSqlQueryExecutor,
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
-import type { Observable } from "rxjs";
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type {
   ECClassHierarchyInspector,
   ECSchemaProvider,
@@ -334,7 +334,10 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                   description: { selector: "this.Description" },
                   isCategory: true,
                   imageId: "icon-layers",
-                  hasSubCategories: { selector: `IIF(this.ECInstanceId IN (${categoriesWithMultipleSubCategories.join(",")}), true, false) ` },
+                  hasSubCategories:
+                    categoriesWithMultipleSubCategories.length > 0
+                      ? { selector: `IIF(this.ECInstanceId IN (${categoriesWithMultipleSubCategories.join(",")}), true, false) ` }
+                      : false,
                 },
                 supportsFiltering: true,
               })}

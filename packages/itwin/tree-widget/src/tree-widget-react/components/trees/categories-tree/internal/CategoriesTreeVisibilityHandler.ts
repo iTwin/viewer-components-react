@@ -35,24 +35,24 @@ import { getSubModeledElementsVisibilityStatus, getTooltipOptions, mergeVisibili
 import { toVoidPromise } from "../../common/Rxjs.js";
 import { createVisibilityStatus } from "../../common/Tooltip.js";
 import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility.js";
-import { createVisibilityChangeEventListener } from "../../models-tree/internal/VisibilityChangeEventListener.js";
 import { releaseMainThreadOnItemsCount } from "../../models-tree/Utils.js";
 import { getClassesByView } from "./CategoriesTreeIdsCache.js";
 import { CategoriesTreeNode } from "./CategoriesTreeNode.js";
 import { createFilteredTree, parseCategoryKey, parseSubCategoryKey } from "./FilteredTree.js";
+import { createVisibilityChangeEventListener } from "./VisibilityChangeEventListener.js";
 
-import type { CategoriesTreeIdsCache} from "./CategoriesTreeIdsCache.js";
-import type { AlwaysOrNeverDrawnElementsQueryProps } from "../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
-import type { CategoriesTreeHierarchyConfiguration } from "../CategoriesTreeDefinition.js";
 import type { Observable, OperatorFunction, Subscription } from "rxjs";
-import type { GroupingHierarchyNode, HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
-import type { HierarchyVisibilityHandler, VisibilityStatus } from "../../common/UseHierarchyVisibility.js";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
-import type { NonPartialVisibilityStatus } from "../../common/Tooltip.js";
+import type { GroupingHierarchyNode, HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
+import type { AlwaysOrNeverDrawnElementsQueryProps } from "../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
+import type { HierarchyVisibilityHandler, VisibilityStatus } from "../../common/UseHierarchyVisibility.js";
+import type { NonPartialVisibilityStatus } from "../../common/Tooltip.js";
+import type { CategoriesTreeHierarchyConfiguration } from "../CategoriesTreeDefinition.js";
+import type { CategoriesTreeIdsCache } from "./CategoriesTreeIdsCache.js";
 import type { FilteredTree } from "./FilteredTree.js";
-import type { IVisibilityChangeEventListener } from "../../models-tree/internal/VisibilityChangeEventListener.js";
+import type { IVisibilityChangeEventListener } from "./VisibilityChangeEventListener.js";
 
 /** @alpha */
 interface GetCategoryVisibilityStatusProps {
@@ -127,11 +127,13 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
   private _changeRequest = new Subject<{ key: HierarchyNodeKey; depth: number }>();
 
   constructor(private readonly _props: CategoriesTreeVisibilityHandlerProps) {
-    this._eventListener = createVisibilityChangeEventListener(_props.viewport);
+    this._eventListener = createVisibilityChangeEventListener(_props.viewport, _props.hierarchyConfig.showElements);
     this._alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfo(_props.viewport);
     this._idsCache = this._props.idsCache;
     const { categoryClass, categoryElementClass } = getClassesByView(_props.viewport.view.is2d() ? "2d" : "3d");
-    this._filteredTree = _props.filteredPaths ? createFilteredTree(this._props.imodelAccess, _props.filteredPaths, categoryClass, categoryElementClass, this._idsCache) : undefined;
+    this._filteredTree = _props.filteredPaths
+      ? createFilteredTree(this._props.imodelAccess, _props.filteredPaths, categoryClass, categoryElementClass, this._idsCache)
+      : undefined;
     this._subscriptions.push(this._elementChangeQueue.pipe(concatAll()).subscribe());
   }
 
@@ -206,7 +208,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
 
     if (CategoriesTreeNode.isDefinitionContainerNode(node)) {
       return this.getDefinitionContainerDisplayStatus({
-        definitionContainerIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id)
+        definitionContainerIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
       });
     }
 
@@ -214,7 +216,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
       return this.getCategoryDisplayStatus({
         categoryIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
         modelId: node.extendedData?.modelIds?.[0],
-        ignoreSubCategories: node.extendedData?.isCategoryOfSubModel
+        ignoreSubCategories: node.extendedData?.isCategoryOfSubModel,
       });
     }
 
@@ -225,7 +227,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     if (CategoriesTreeNode.isSubCategoryNode(node)) {
       return this.getSubCategoryDisplayStatus({
         categoryId: node.extendedData?.categoryId,
-        subCategoryIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id)
+        subCategoryIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
       });
     }
 
@@ -241,7 +243,13 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
       mergeMap(({ definitionContainers, subCategories, models, categories, elements }) => {
         const observables = new Array<Observable<VisibilityStatus>>();
         if (definitionContainers?.size) {
-          observables.push(from(definitionContainers).pipe(mergeMap((definitionContainerId) => this.getDefinitionContainerDisplayStatus({ definitionContainerIds: [definitionContainerId], ignoreTooltip: true }))));
+          observables.push(
+            from(definitionContainers).pipe(
+              mergeMap((definitionContainerId) =>
+                this.getDefinitionContainerDisplayStatus({ definitionContainerIds: [definitionContainerId], ignoreTooltip: true }),
+              ),
+            ),
+          );
         }
 
         if (models?.size) {
@@ -253,7 +261,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
             from(categories).pipe(
               mergeMap((key) => {
                 const { modelId, categoryId } = parseCategoryKey(key);
-                return this.getCategoryDisplayStatus({ignoreTooltip: true, ignoreSubCategories: !!modelId, modelId, categoryIds: [categoryId]});
+                return this.getCategoryDisplayStatus({ ignoreTooltip: true, ignoreSubCategories: !!modelId, modelId, categoryIds: [categoryId] });
               }),
             ),
           );
@@ -288,11 +296,11 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
 
         return merge(...observables);
       }),
-      mergeVisibilityStatuses({ visible: undefined, hidden: undefined, partial: undefined}),
+      mergeVisibilityStatuses({ visible: undefined, hidden: undefined, partial: undefined }),
     );
   }
 
-  private getModelVisibilityStatus({ modelId }: { modelId: Id64String; }): Observable<VisibilityStatus> {
+  private getModelVisibilityStatus({ modelId }: { modelId: Id64String }): Observable<VisibilityStatus> {
     const result = defer(() => {
       const viewport = this._props.viewport;
       if (!viewport.view.isSpatialView()) {
@@ -308,44 +316,54 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
             tooltips: { visible: undefined, hidden: undefined, partial: undefined },
             parentNodeVisibilityStatus: createVisibilityStatus("hidden"),
             getModelVisibilityStatus: this.getModelVisibilityStatus,
-            doesSubModelExist: async (id) => this._idsCache.hasSubModel(id)
+            doesSubModelExist: async (id) => this._idsCache.hasSubModel(id),
           }),
         );
       }
 
       return from(this._idsCache.getModelCategories(modelId)).pipe(
         mergeMap((categoryIds) => this.getCategoryDisplayStatus({ modelId, categoryIds, ignoreSubCategories: true, ignoreTooltip: true })),
-        mergeVisibilityStatuses({
-          visible: undefined,
-          hidden: undefined,
-          partial: undefined,
-        }, true)
-
+        mergeVisibilityStatuses(
+          {
+            visible: undefined,
+            hidden: undefined,
+            partial: undefined,
+          },
+          true,
+        ),
       );
     });
     return createVisibilityHandlerResult(this, { id: modelId }, result, undefined);
   }
 
-  private getDefinitionContainerDisplayStatus(props: {definitionContainerIds: Id64Array, ignoreTooltip?: boolean }): Observable<VisibilityStatus> {
+  private getDefinitionContainerDisplayStatus(props: { definitionContainerIds: Id64Array; ignoreTooltip?: boolean }): Observable<VisibilityStatus> {
     const result = defer(() => {
       return from(this._idsCache.getAllContainedCategories(props.definitionContainerIds)).pipe(
-        mergeMap((categoryIds) => {
-          return this.getCategoryDisplayStatus({categoryIds, ignoreSubCategories: false, ignoreTooltip: true});
+        concatAll(),
+        mergeMap((categoryId) => {
+          return this.getCategoryDisplayStatus({ categoryIds: [categoryId], ignoreSubCategories: false, ignoreTooltip: true });
         }),
-        map((visibilityStatus) => {
-          return createVisibilityStatus(visibilityStatus.state, getTooltipOptions(`categoriesTree.definitionContainer.${visibilityStatus.state}ThroughCategories`, props.ignoreTooltip))
-        })
-      )
+        mergeVisibilityStatuses({
+          visible: "categoriesTree.definitionContainer.visibleThroughCategories",
+          hidden: "categoriesTree.definitionContainer.hiddenThroughCategories",
+          partial: "categoriesTree.definitionContainer.partialThroughCategories",
+        }),
+      );
     });
     return createVisibilityHandlerResult(this, props, result, undefined);
   }
 
-  private getSubCategoryDisplayStatus(props: {categoryId: Id64String, subCategoryIds: Id64Array, ignoreTooltip?: boolean}): Observable<VisibilityStatus> {
+  private getSubCategoryDisplayStatus(props: { categoryId: Id64String; subCategoryIds: Id64Array; ignoreTooltip?: boolean }): Observable<VisibilityStatus> {
     const result = defer(() => {
       const { categoryId, subCategoryIds, ignoreTooltip } = props;
       const categoryOverrideResult = this.getCategoryVisibilityFromOverrides([categoryId], ignoreTooltip);
       if (categoryOverrideResult !== "none" && (categoryOverrideResult.state === "hidden" || categoryOverrideResult.state === "visible")) {
-        return of(createVisibilityStatus(categoryOverrideResult.state, getTooltipOptions(`categoriesTree.subCategory.${categoryOverrideResult.state}ThroughCategoryOverride`)));
+        return of(
+          createVisibilityStatus(
+            categoryOverrideResult.state,
+            getTooltipOptions(`categoriesTree.subCategory.${categoryOverrideResult.state}ThroughCategoryOverride`),
+          ),
+        );
       }
 
       if (!this._props.viewport.view.viewsCategory(categoryId)) {
@@ -392,7 +410,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
       return "none";
     }
     const visibility = showOverrides > 0 ? "visible" : "hidden";
-    return  createVisibilityStatus(visibility, getTooltipOptions(`categoriesTree.category.${visibility}ThroughOverrides`, ignoreTooltip));
+    return createVisibilityStatus(visibility, getTooltipOptions(`categoriesTree.category.${visibility}ThroughOverrides`, ignoreTooltip));
   }
 
   private getDefaultModelsCategoryVisibilityStatus({
@@ -418,7 +436,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
         ++visibleThroughCategorySelectorCount;
       }
 
-      const override = this._props.viewport.perModelCategoryVisibility.getOverride(modelId, categoryId)
+      const override = this._props.viewport.perModelCategoryVisibility.getOverride(modelId, categoryId);
       if (override === PerModelCategoryVisibility.Override.Show) {
         ++visibleCount;
         continue;
@@ -444,11 +462,11 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
   private async getDefaultCategoryVisibilityStatus({
     categoryIds,
     ignoreTooltip,
-    ignoreSubCategories
+    ignoreSubCategories,
   }: {
     categoryIds: Id64Array;
     ignoreTooltip?: boolean;
-    ignoreSubCategories?: boolean
+    ignoreSubCategories?: boolean;
   }): Promise<VisibilityStatus> {
     const overrideResult = this.getCategoryVisibilityFromOverrides(categoryIds);
     if (overrideResult !== "none") {
@@ -485,38 +503,61 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     const subCategoryVisiblity = hiddenSubCategoryCount > 0 ? "hidden" : "visible";
     const reason = subCategories.length > 0 ? "ThroughSubCategories" : "ThroughCategorySelector";
 
-    return createVisibilityStatus(subCategoryVisiblity, getTooltipOptions(`categoriesTree.category.${subCategoryVisiblity}${reason}`, ignoreTooltip))
+    return createVisibilityStatus(subCategoryVisiblity, getTooltipOptions(`categoriesTree.category.${subCategoryVisiblity}${reason}`, ignoreTooltip));
   }
 
   private getCategoryDisplayStatus({ ignoreTooltip, ...props }: GetCategoryVisibilityStatusProps & { ignoreTooltip?: boolean }): Observable<VisibilityStatus> {
     const result = defer(() => {
       if (!this._props.hierarchyConfig.showElements) {
-        return from(this.getDefaultCategoryVisibilityStatus({categoryIds: props.categoryIds, ignoreTooltip}));
+        return from(this.getDefaultCategoryVisibilityStatus({ categoryIds: props.categoryIds, ignoreTooltip }));
       }
-      const modelsObservable = props.modelId ? of(new Map(props.categoryIds.map((id) => [id, [props.modelId as string]]))) : from(this._idsCache.getCategoriesElementModels(props.categoryIds));
+      const modelsObservable = props.modelId
+        ? of(new Map(props.categoryIds.map((id) => [id, [props.modelId as string]])))
+        : from(this._idsCache.getCategoriesElementModels(props.categoryIds));
       return merge(
         // get visibility status from always and never drawn elements
-        this._props.hierarchyConfig.showElements ? modelsObservable.pipe(
-          mergeMap((categoryModelsMap) => {
-            if (categoryModelsMap.size === 0) {
-              return props.modelId ? of(this.getDefaultModelsCategoryVisibilityStatus({ modelId: props.modelId, categoryIds: props.categoryIds, ignoreTooltip})) : from(this.getDefaultCategoryVisibilityStatus({categoryIds: props.categoryIds, ignoreTooltip}));
-            }
-            return from(categoryModelsMap).pipe(
-              mergeMap(([category, models]) => from(models).pipe(
-                mergeMap((model) => {
-                  if (this._props.viewport.view.viewsModel(model)) {
-                    return this.getVisibilityFromAlwaysAndNeverDrawnElements({
-                      queryProps: props,
-                      tooltips: {
-                        allElementsInAlwaysDrawnList: "categoriesTree.category.allElementsVisible",
-                        allElementsInNeverDrawnList: "categoriesTree.category.allElementsHidden",
-                        elementsInBothAlwaysAndNeverDrawn: "categoriesTree.category.someElementsAreHidden",
-                        noElementsInExclusiveAlwaysDrawnList: "categoriesTree.category.allElementsHidden",
-                      },
-                      defaultStatus: () => this.getDefaultModelsCategoryVisibilityStatus({modelId: model, categoryIds: [category], ignoreTooltip}),
-                      ignoreTooltip: true,
-                    }).pipe(
-                      mergeMap((visibilityStatusAlwaysAndNeverDraw) => {
+        this._props.hierarchyConfig.showElements
+          ? modelsObservable.pipe(
+              mergeMap((categoryModelsMap) => {
+                if (categoryModelsMap.size === 0) {
+                  return props.modelId
+                    ? of(this.getDefaultModelsCategoryVisibilityStatus({ modelId: props.modelId, categoryIds: props.categoryIds, ignoreTooltip }))
+                    : from(this.getDefaultCategoryVisibilityStatus({ categoryIds: props.categoryIds, ignoreTooltip }));
+                }
+                return from(categoryModelsMap).pipe(
+                  mergeMap(([category, models]) =>
+                    from(models).pipe(
+                      mergeMap((model) => {
+                        if (this._props.viewport.view.viewsModel(model)) {
+                          return this.getVisibilityFromAlwaysAndNeverDrawnElements({
+                            queryProps: props,
+                            tooltips: {
+                              allElementsInAlwaysDrawnList: "categoriesTree.category.allElementsVisible",
+                              allElementsInNeverDrawnList: "categoriesTree.category.allElementsHidden",
+                              elementsInBothAlwaysAndNeverDrawn: "categoriesTree.category.someElementsAreHidden",
+                              noElementsInExclusiveAlwaysDrawnList: "categoriesTree.category.allElementsHidden",
+                            },
+                            defaultStatus: () => this.getDefaultModelsCategoryVisibilityStatus({ modelId: model, categoryIds: [category], ignoreTooltip }),
+                            ignoreTooltip: true,
+                          }).pipe(
+                            mergeMap((visibilityStatusAlwaysAndNeverDraw) => {
+                              return from(this._idsCache.getCategoriesModeledElements(model, [category])).pipe(
+                                getSubModeledElementsVisibilityStatus({
+                                  tooltips: {
+                                    visible: undefined,
+                                    hidden: undefined,
+                                    partial: undefined,
+                                  },
+                                  haveSubModel: "yes",
+                                  parentNodeVisibilityStatus: visibilityStatusAlwaysAndNeverDraw,
+                                  ignoreTooltips: true,
+                                  getModelVisibilityStatus: this.getModelVisibilityStatus,
+                                  doesSubModelExist: async (id) => this._idsCache.hasSubModel(id),
+                                }),
+                              );
+                            }),
+                          );
+                        }
                         return from(this._idsCache.getCategoriesModeledElements(model, [category])).pipe(
                           getSubModeledElementsVisibilityStatus({
                             tooltips: {
@@ -525,104 +566,98 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
                               partial: undefined,
                             },
                             haveSubModel: "yes",
-                            parentNodeVisibilityStatus: visibilityStatusAlwaysAndNeverDraw,
+                            parentNodeVisibilityStatus: createVisibilityStatus("hidden"),
                             ignoreTooltips: true,
                             getModelVisibilityStatus: this.getModelVisibilityStatus,
-                            doesSubModelExist: async (id) => this._idsCache.hasSubModel(id)
+                            doesSubModelExist: async (id) => this._idsCache.hasSubModel(id),
                           }),
                         );
                       }),
-                    )
-                  }
-                  return from(this._idsCache.getCategoriesModeledElements(model, [category])).pipe(
-                    getSubModeledElementsVisibilityStatus({
-                      tooltips: {
-                        visible: undefined,
-                        hidden: undefined,
-                        partial: undefined,
-                      },
-                      haveSubModel: "yes",
-                      parentNodeVisibilityStatus: createVisibilityStatus("hidden"),
-                      ignoreTooltips: true,
-                      getModelVisibilityStatus: this.getModelVisibilityStatus,
-                      doesSubModelExist: async (id) => this._idsCache.hasSubModel(id)
-                    }),
-                  );
-                }),
-                mergeVisibilityStatuses({visible: undefined, hidden: undefined, partial: undefined}),
-              )),
-              mergeVisibilityStatuses({
-                visible: "categoriesTree.category.allElementsVisible",
-                hidden: "categoriesTree.category.allElementsHidden",
-                partial: "categoriesTree.category.someElementsHidden"
-              }, ignoreTooltip)
+                      mergeVisibilityStatuses({ visible: undefined, hidden: undefined, partial: undefined }),
+                    ),
+                  ),
+                  mergeVisibilityStatuses(
+                    {
+                      visible: "categoriesTree.category.allElementsVisible",
+                      hidden: "categoriesTree.category.allElementsHidden",
+                      partial: "categoriesTree.category.someElementsHidden",
+                    },
+                    ignoreTooltip,
+                  ),
+                );
+              }),
+              map((visibilityStatus) => {
+                return { visibilityStatus, type: 0 as const };
+              }),
             )
-
-          }),
-          map((visibilityStatus) => {
-            return { visibilityStatus, type: 0 as const}
-          }),
-        ) : EMPTY,
+          : EMPTY,
         // get category status
-        (props.modelId ? of(this.getDefaultModelsCategoryVisibilityStatus({ modelId: props.modelId, categoryIds: props.categoryIds, ignoreTooltip})) : from(this.getDefaultCategoryVisibilityStatus({categoryIds: props.categoryIds, ignoreTooltip }))).pipe(
+        (props.modelId
+          ? of(this.getDefaultModelsCategoryVisibilityStatus({ modelId: props.modelId, categoryIds: props.categoryIds, ignoreTooltip }))
+          : from(this.getDefaultCategoryVisibilityStatus({ categoryIds: props.categoryIds, ignoreTooltip }))
+        ).pipe(
           map((visibilityStatus) => {
-            return { visibilityStatus, type: 1 as const};
-          })
+            return { visibilityStatus, type: 1 as const };
+          }),
         ),
       ).pipe(
         toArray(),
-        mergeMap(async (visibilityStatusesInfo: Array<{visibilityStatus: VisibilityStatus, type: 1 } | {visibilityStatus: VisibilityStatus | undefined, type: 0 }>) => {
-          let defaultStatus: VisibilityStatus | undefined;
-          let alwaysNeverDrawStatus: VisibilityStatus | undefined;
-          visibilityStatusesInfo.forEach((visibilityStatusInfo) => {
-            switch (visibilityStatusInfo.type) {
-              case 0:
-                alwaysNeverDrawStatus = visibilityStatusInfo.visibilityStatus
-                break;
-              case 1:
-                defaultStatus = visibilityStatusInfo.visibilityStatus
-                break;
+        mergeMap(
+          async (
+            visibilityStatusesInfo: Array<{ visibilityStatus: VisibilityStatus; type: 1 } | { visibilityStatus: VisibilityStatus | undefined; type: 0 }>,
+          ) => {
+            let defaultStatus: VisibilityStatus | undefined;
+            let alwaysNeverDrawStatus: VisibilityStatus | undefined;
+            visibilityStatusesInfo.forEach((visibilityStatusInfo) => {
+              switch (visibilityStatusInfo.type) {
+                case 0:
+                  alwaysNeverDrawStatus = visibilityStatusInfo.visibilityStatus;
+                  break;
+                case 1:
+                  defaultStatus = visibilityStatusInfo.visibilityStatus;
+                  break;
+              }
+            });
+            assert(defaultStatus !== undefined);
+
+            if (defaultStatus.state === "partial") {
+              return defaultStatus;
             }
-          });
-          assert(defaultStatus !== undefined);
 
-          if (defaultStatus.state === "partial") {
-            return defaultStatus;
-          }
+            // This can happen if:
+            // a) showElements is set to false
+            // b) root category does not have any elements (that dont have Parent)
+            // In both cases we don't need to look at modeled elements visibility
+            if (alwaysNeverDrawStatus === undefined) {
+              return defaultStatus;
+            }
+            // In cases where
+            // a) SubCategories are hidden
+            // b) Category needs to ignore subCategories
+            // c) Category has model (it means that category is under hidden subModel)
+            // We dont need to look at default category status, it is already accounted for in always/never drawn visibility
+            if (this._props.hierarchyConfig.hideSubCategories || props.ignoreSubCategories || props.modelId) {
+              return alwaysNeverDrawStatus;
+            }
+            if ((await this._idsCache.getSubCategories(props.categoryIds)).size === 0) {
+              return alwaysNeverDrawStatus;
+            }
 
-          // This can happen if:
-          // a) showElements is set to false
-          // b) root category does not have any elements (that dont have Parent)
-          // In both cases we don't need to look at modeled elements visibility
-          if (alwaysNeverDrawStatus === undefined) {
-            return defaultStatus;
-          }
-          // In cases where
-          // a) SubCategories are hidden
-          // b) Category needs to ignore subCategories
-          // c) Category has model (it means that category is under hidden subModel)
-          // We dont need to look at default category status, it is already accounted for in always/never drawn visibility
-          if (this._props.hierarchyConfig.hideSubCategories || props.ignoreSubCategories || props.modelId) {
-            return alwaysNeverDrawStatus;
-          }
-          if ((await this._idsCache.getSubCategories(props.categoryIds)).size === 0) {
-            return alwaysNeverDrawStatus;
-          }
-
-          if (alwaysNeverDrawStatus.state === "partial") {
-            return createVisibilityStatus("partial", getTooltipOptions("categoriesTree.category.someChildrenVisible", ignoreTooltip))
-          }
-          if (alwaysNeverDrawStatus.state === "hidden") {
+            if (alwaysNeverDrawStatus.state === "partial") {
+              return createVisibilityStatus("partial", getTooltipOptions("categoriesTree.category.someChildrenVisible", ignoreTooltip));
+            }
+            if (alwaysNeverDrawStatus.state === "hidden") {
+              if (defaultStatus.state === "hidden") {
+                return createVisibilityStatus("hidden", getTooltipOptions("categoriesTree.category.allChildrenHidden", ignoreTooltip));
+              }
+              return createVisibilityStatus("partial", getTooltipOptions("categoriesTree.category.partialThroughSubCategories", ignoreTooltip));
+            }
             if (defaultStatus.state === "hidden") {
-              return createVisibilityStatus("hidden", getTooltipOptions("categoriesTree.category.allChildrenHidden", ignoreTooltip))
+              return createVisibilityStatus("partial", getTooltipOptions("categoriesTree.category.someChildrenVisible", ignoreTooltip));
             }
-            return createVisibilityStatus("partial", getTooltipOptions("categoriesTree.category.partialThroughSubCategories", ignoreTooltip))
-          }
-          if (defaultStatus.state === "hidden") {
-            return createVisibilityStatus("partial", getTooltipOptions("categoriesTree.category.someChildrenVisible", ignoreTooltip))
-          }
-          return createVisibilityStatus("visible", getTooltipOptions("categoriesTree.category.allChildrenVisible", ignoreTooltip))
-        })
+            return createVisibilityStatus("visible", getTooltipOptions("categoriesTree.category.allChildrenVisible", ignoreTooltip));
+          },
+        ),
       );
     });
     return createVisibilityHandlerResult(this, props, result, undefined);
@@ -644,7 +679,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
             parentNodeVisibilityStatus: createVisibilityStatus("hidden"),
             haveSubModel: "unknown",
             getModelVisibilityStatus: this.getModelVisibilityStatus,
-            doesSubModelExist: async (id) => this._idsCache.hasSubModel(id)
+            doesSubModelExist: async (id) => this._idsCache.hasSubModel(id),
           }),
         );
       }
@@ -673,7 +708,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
               parentNodeVisibilityStatus: visibilityStatusAlwaysAndNeverDraw,
               haveSubModel: "unknown",
               doesSubModelExist: async (id) => this._idsCache.hasSubModel(id),
-              getModelVisibilityStatus: this.getModelVisibilityStatus
+              getModelVisibilityStatus: this.getModelVisibilityStatus,
             }),
           );
         }),
@@ -780,7 +815,6 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
 
   /** Changes visibility of the items represented by the tree node. */
   private changeVisibilityObs(node: HierarchyNode, on: boolean): Observable<void> {
-
     if (node.filtering?.filteredChildrenIdentifierPaths?.length && !node.filtering.isFilterTarget) {
       return this.changeFilteredNodeVisibility({ node, on });
     }
@@ -796,7 +830,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     if (CategoriesTreeNode.isDefinitionContainerNode(node)) {
       return this.changeDefinitionContainerState({
         definitionContainerIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
-        on
+        on,
       });
     }
 
@@ -817,7 +851,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
       return this.changeSubCategoryState({
         categoryId: node.extendedData.categoryId,
         subCategoryIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
-        on
+        on,
       });
     }
 
@@ -839,7 +873,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
       mergeMap(({ definitionContainers, subCategories, models, categories, elements }) => {
         const observables = new Array<Observable<void>>();
         if (definitionContainers?.size) {
-          observables.push(this.changeDefinitionContainerState({definitionContainerIds: [...definitionContainers], on}));
+          observables.push(this.changeDefinitionContainerState({ definitionContainerIds: [...definitionContainers], on }));
         }
 
         if (models?.size) {
@@ -962,51 +996,52 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     }
   }
 
-  private changeSubCategoryState(props: {categoryId: Id64String, subCategoryIds: Id64Array, on: boolean}): Observable<void> {
+  private changeSubCategoryState(props: { categoryId: Id64String; subCategoryIds: Id64Array; on: boolean }): Observable<void> {
     const result = defer(() => {
       return concat(
         // make sure parent category is enabled
         props.on ? from(enableCategoryDisplay(this._props.viewport, [props.categoryId], props.on, false)) : EMPTY,
-        from(props.subCategoryIds).pipe(
-          map((subCategoryId) => enableSubCategoryDisplay(this._props.viewport, subCategoryId, props.on))
-        )
-      )
+        from(props.subCategoryIds).pipe(map((subCategoryId) => enableSubCategoryDisplay(this._props.viewport, subCategoryId, props.on))),
+      );
     });
     return createVisibilityHandlerResult(this, props, result, undefined);
   }
 
-  private changeDefinitionContainerState(props:{definitionContainerIds: Id64Array, on: boolean}): Observable<void> {
+  private changeDefinitionContainerState(props: { definitionContainerIds: Id64Array; on: boolean }): Observable<void> {
     const result = defer(() => {
       return from(this._idsCache.getAllContainedCategories(props.definitionContainerIds)).pipe(
         mergeMap((categoryIds) => {
-          return this.changeCategoryState({categoryIds, ignoreSubCategories: false, on: props.on})
-        })
-      )
+          return this.changeCategoryState({ categoryIds, ignoreSubCategories: false, on: props.on });
+        }),
+      );
     });
     return createVisibilityHandlerResult(this, props, result, undefined);
   }
-
 
   private changeCategoryState(props: ChangeCategoryVisibilityStateProps): Observable<void> {
     const result = defer(() => {
       const viewport = this._props.viewport;
       if (!this._props.hierarchyConfig.showElements) {
-        return from(enableCategoryDisplay(viewport, props.categoryIds, props.on, props.on))
+        return from(enableCategoryDisplay(viewport, props.categoryIds, props.on, props.on));
       }
 
       const { modelId, categoryIds, on } = props;
-      const modelIdsObservable = modelId ? of(new Map(categoryIds.map((id) => [id, [modelId]]))) : from(this._idsCache.getCategoriesElementModels(categoryIds, true))
+      const modelIdsObservable = modelId
+        ? of(new Map(categoryIds.map((id) => [id, [modelId]])))
+        : from(this._idsCache.getCategoriesElementModels(categoryIds, true));
       return concat(
-        props.on ? modelIdsObservable.pipe(
-          mergeMap((categoriesMap) => from(categoriesMap.values())),
-          map((modelIds) => {
-            for (const modelIdToCheck of modelIds) {
-              if(!viewport.view.viewsModel(modelIdToCheck)) {
-                this.showModelWithoutAnyCategoriesOrElements(modelIdToCheck)
-              }
-            }
-          })
-        ) : EMPTY,
+        props.on
+          ? modelIdsObservable.pipe(
+              mergeMap((categoriesMap) => from(categoriesMap.values())),
+              map((modelIds) => {
+                for (const modelIdToCheck of modelIds) {
+                  if (!viewport.view.viewsModel(modelIdToCheck)) {
+                    this.showModelWithoutAnyCategoriesOrElements(modelIdToCheck);
+                  }
+                }
+              }),
+            )
+          : EMPTY,
         defer(() => {
           return modelIdsObservable.pipe(
             mergeMap((categoriesMap) => from(categoriesMap.entries())),
@@ -1014,15 +1049,17 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
               return from(modelIds).pipe(
                 mergeMap((modelOfCategory) => {
                   this.changeCategoryStateInViewportAccordingToModelVisibility(modelOfCategory, categoryId, on);
-                  return this.clearAlwaysAndNeverDrawnElements({modelId: modelOfCategory, categoryIds: [categoryId]});
-                })
-              )
-            })
-          )
+                  return this.clearAlwaysAndNeverDrawnElements({ modelId: modelOfCategory, categoryIds: [categoryId] });
+                }),
+              );
+            }),
+          );
         }),
-        props.modelId ? from(this._idsCache.getCategoriesModeledElements(props.modelId, categoryIds)).pipe(
-          mergeMap((modeledElementIds) => this.changeModelState({ ids: modeledElementIds, on })),
-        ) : EMPTY
+        props.modelId
+          ? from(this._idsCache.getCategoriesModeledElements(props.modelId, categoryIds)).pipe(
+              mergeMap((modeledElementIds) => this.changeModelState({ ids: modeledElementIds, on })),
+            )
+          : EMPTY,
       );
     });
     return createVisibilityHandlerResult(this, props, result, undefined);
@@ -1209,14 +1246,18 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     }
     const { modelId, categoryIds } = props.queryProps;
 
-    const totalCount = (modelId ? of(new Map(categoryIds.map((categoryId) => [categoryId, [modelId]])))  : from(this._idsCache.getCategoriesElementModels(categoryIds))).pipe(
+    const totalCount = (
+      modelId ? of(new Map(categoryIds.map((categoryId) => [categoryId, [modelId]]))) : from(this._idsCache.getCategoriesElementModels(categoryIds))
+    ).pipe(
       mergeMap((categoriesMap) => from(categoriesMap)),
       mergeMap(([categoryId, modelIds]) => {
         return from(modelIds).pipe(
           mergeMap((modelOfCategory) => from(this._idsCache.getCategoryElementsCount(modelOfCategory, categoryId))),
-          reduce((acc, specificModelCategoryCount) => { return acc + specificModelCategoryCount }, 0)
+          reduce((acc, specificModelCategoryCount) => {
+            return acc + specificModelCategoryCount;
+          }, 0),
         );
-      })
+      }),
     );
     return forkJoin({
       totalCount,

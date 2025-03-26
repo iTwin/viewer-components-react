@@ -19,9 +19,9 @@ import { DEFINITION_CONTAINER_CLASS, SUB_CATEGORY_CLASS } from "./internal/Class
 
 import type { ReactNode } from "react";
 import type { Id64String } from "@itwin/core-bentley";
-import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { CategoriesTreeHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
