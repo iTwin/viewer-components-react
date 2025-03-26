@@ -31,5 +31,8 @@
     "lage": "^2.13.0",
     "prettier": "^3.2.5",
     "yargs": "^17.7.2"
+  },
+  "pnpm": {
+    "neverBuiltDependencies": []
   }
 }
