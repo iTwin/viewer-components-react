@@ -3,6 +3,7 @@ lockfileVersion: '9.0'
 settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
+  injectWorkspacePackages: true
 
 importers:
 
@@ -15,8 +16,8 @@ importers:
         specifier: ^7.0.1
         version: 7.0.1
       lage:
-        specifier: ^2.7.16
-        version: 2.7.16
+        specifier: ^2.13.0
+        version: 2.13.0
       prettier:
         specifier: ^3.2.5
         version: 3.2.5
@@ -369,8 +370,8 @@ packages:
     resolution: {integrity: sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==}
     engines: {node: '>=6'}
 
-  lage@2.7.16:
-    resolution: {integrity: sha512-yi9LZm6XEWiLNA6LcrcVSbsjAZw30bbQW6cppZKDYOrdbR0f2mYjpFNOdElRhJctkx8YFbP2xYg1Hsf61bc+Cg==}
+  lage@2.13.0:
+    resolution: {integrity: sha512-qWaBxHoEzo/SHeHBu28MTdAYyX8QwqGIe8U/yuPRVFIrCm8hunSawaiLRSqfj2wmvkSz2NVgJHiuI7N8wVUHGA==}
     hasBin: true
 
   lines-and-columns@1.2.4:
@@ -967,7 +968,7 @@ snapshots:
 
   kleur@3.0.3: {}
 
-  lage@2.7.16:
+  lage@2.13.0:
     dependencies:
       glob-hasher: 1.4.2
     optionalDependencies:
