@@ -5,9 +5,10 @@
 
 import assert from "assert";
 import { test } from "@playwright/test";
-import { expandStagePanel, locateNode, locateWidget, takeScreenshot } from "./utils.js";
+import { expandNode, expandStagePanel, locateNode, locateWidget, takeScreenshot } from "./utils.js";
 
 import type { Page } from "@playwright/test";
+
 test.beforeEach(async ({ page, baseURL }) => {
   assert(baseURL);
   await page.goto(baseURL, { waitUntil: "networkidle" });
@@ -18,7 +19,7 @@ test.describe("property grid", () => {
   const testCases = () => {
     const selectSingleElement = async (page: Page) => {
       const treeWidget = locateWidget(page, "tree");
-      await locateNode(treeWidget, "ProcessPhysicalModel").getByLabel("Expand").click();
+      await expandNode(page, locateNode(treeWidget, "ProcessPhysicalModel"));
       await locateNode(treeWidget, "Equipment").click();
 
       const propertyWidget = locateWidget(page, "property-grid");
@@ -70,8 +71,8 @@ test.describe("property grid", () => {
       const treeWidget = locateWidget(page, "tree");
       const propertyWidget = locateWidget(page, "property-grid");
       const modelNode = locateNode(treeWidget, "ProcessPhysicalModel");
+      await expandNode(page, modelNode);
 
-      await modelNode.getByLabel("Expand").click();
       await modelNode.click();
       await locateNode(treeWidget, "Equipment").click({ modifiers: ["Control"] });
 

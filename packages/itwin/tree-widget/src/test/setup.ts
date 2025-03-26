@@ -8,10 +8,8 @@
 import * as chai from "chai";
 import chaiAsPromised from "chai-as-promised";
 import chaiJestSnapshot from "chai-jest-snapshot";
-import chaiSubset from "chai-subset";
 import sinonChai from "sinon-chai";
 chai.use(chaiJestSnapshot);
-chai.use(chaiSubset);
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
 
@@ -42,6 +40,10 @@ global.DOMRect = class DOMRect {
     return JSON.stringify(this);
   }
 };
+
+global.CSS = {
+  supports: (_k: string, _v: string) => false,
+} as any;
 
 // supply mocha hooks
 import path from "path";
