@@ -86,7 +86,7 @@ export async function createFilteredTree(imodelAccess: ECClassHierarchyInspector
   const root: FilteredTreeRootNode = {
     children: new Map(),
   };
-  idsCache.clearFilteredElementsModels();
+
   const filteredElements = new Array<ElementFilteredTreeNode>();
   for (const filteringPath of filteringPaths) {
     const normalizedPath = HierarchyFilteringPath.normalize(filteringPath).path;
@@ -114,7 +114,7 @@ export async function createFilteredTree(imodelAccess: ECClassHierarchyInspector
         type,
         id: identifier.id,
         isFilterTarget: i === normalizedPath.length - 1,
-        parent: parentNode as FilteredTreeNode,
+        parent: parentNode,
       });
       (parentNode.children ??= new Map()).set(identifier.id, newNode);
       parentNode = newNode;

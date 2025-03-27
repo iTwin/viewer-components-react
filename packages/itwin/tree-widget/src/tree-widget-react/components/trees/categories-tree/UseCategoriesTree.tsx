@@ -66,9 +66,7 @@ function useCachedVisibility(activeView: Viewport, hierarchyConfig: CategoriesTr
   };
 
   const getCategoriesTreeIdsCache = useCallback(() => {
-    if (!cacheRef.current) {
-      cacheRef.current = new CategoriesTreeIdsCache(createECSqlQueryExecutor(currentIModelRef.current), viewType);
-    }
+    cacheRef.current = new CategoriesTreeIdsCache(createECSqlQueryExecutor(currentIModelRef.current), viewType);
     return cacheRef.current;
   }, [viewType]);
 

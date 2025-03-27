@@ -4,12 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
+import { getDistinctMapValues } from "../../common/internal/Utils.js";
 import { DEFINITION_CONTAINER_CLASS, SUB_CATEGORY_CLASS } from "./ClassNameDefinitions.js";
 
 import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
-
 interface DefinitionContainerInfo {
   modelId: Id64String;
   parentDefinitionContainerExists: boolean;
@@ -22,7 +22,8 @@ interface CategoriesInfo {
   parentDefinitionContainerExists: boolean;
 }
 
-interface CategoryInfo {
+/** @internal */
+export interface CategoryInfo {
   id: Id64String;
   subCategoryChildCount: number;
 }
@@ -52,10 +53,6 @@ export class CategoriesTreeIdsCache {
     this._categoryClass = categoryClass;
     this._categoryElementClass = categoryElementClass;
     this._categoryElementCounts = new ModelCategoryElementsCountCache(_queryExecutor, categoryElementClass);
-  }
-
-  public [Symbol.dispose]() {
-    this._filteredElementsModels = undefined;
   }
 
   private async *queryFilteredElementsModels(filteredElements: Id64Array): AsyncIterableIterator<{
@@ -111,13 +108,13 @@ export class CategoriesTreeIdsCache {
     id: Id64String;
     modelId: Id64String;
     parentDefinitionContainerExists: boolean;
-    childCount: number;
+    subCategoryChildCount: number;
   }> {
     const isDefinitionContainerSupported = await this.getIsDefinitionContainerSupported();
     const categoriesQuery = `
       SELECT
         this.ECInstanceId id,
-        COUNT(sc.ECInstanceId) childCount,
+        COUNT(sc.ECInstanceId) subCategoryChildCount,
         this.Model.Id modelId,
         ${
           isDefinitionContainerSupported
@@ -140,9 +137,14 @@ export class CategoriesTreeIdsCache {
     `;
     for await (const row of this._queryExecutor.createQueryReader(
       { ecsql: categoriesQuery },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: "tree-widget/categories-tree/root-categories-query" },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: "tree-widget/categories-tree/categories-query" },
     )) {
-      yield { id: row.id, modelId: row.modelId, parentDefinitionContainerExists: row.parentDefinitionContainerExists, childCount: row.childCount };
+      yield {
+        id: row.id,
+        modelId: row.modelId,
+        parentDefinitionContainerExists: row.parentDefinitionContainerExists,
+        subCategoryChildCount: row.subCategoryChildCount,
+      };
     }
   }
 
@@ -237,7 +239,7 @@ export class CategoriesTreeIdsCache {
           modelCategories = { parentDefinitionContainerExists: queriedCategory.parentDefinitionContainerExists, childCategories: [] };
           allModelsCategories.set(queriedCategory.modelId, modelCategories);
         }
-        modelCategories.childCategories.push({ id: queriedCategory.id, subCategoryChildCount: queriedCategory.childCount });
+        modelCategories.childCategories.push({ id: queriedCategory.id, subCategoryChildCount: queriedCategory.subCategoryChildCount });
       }
       return allModelsCategories;
     })();
@@ -248,11 +250,11 @@ export class CategoriesTreeIdsCache {
     this._elementModelsCategories ??= (async () => {
       const [modelCategories, modelWithCategoryModeledElements] = await Promise.all([
         (async () => {
-          const elementModelsCategories = new Map<Id64String, { categories: Id64Set, isModelPrivate: boolean}>();
+          const elementModelsCategories = new Map<Id64String, { categories: Id64Set; isModelPrivate: boolean }>();
           for await (const queriedCategory of this.queryElementModelCategories()) {
             let modelEntry = elementModelsCategories.get(queriedCategory.modelId);
             if (modelEntry === undefined) {
-              modelEntry = { categories: new Set(), isModelPrivate: queriedCategory.isModelPrivate};
+              modelEntry = { categories: new Set(), isModelPrivate: queriedCategory.isModelPrivate };
               elementModelsCategories.set(queriedCategory.modelId, modelEntry);
             }
             modelEntry.categories.add(queriedCategory.categoryId);
@@ -261,12 +263,9 @@ export class CategoriesTreeIdsCache {
         })(),
         this.getModelWithCategoryModeledElements(),
       ]);
-      const result = new Map<Id64String, { categories: Id64Set; isSubModel: boolean, isModelPrivate: boolean }>();
+      const result = new Map<Id64String, { categories: Id64Set; isSubModel: boolean; isModelPrivate: boolean }>();
+      const subModels = getDistinctMapValues(modelWithCategoryModeledElements);
       for (const [modelId, modelEntry] of modelCategories) {
-        const subModels = [...modelWithCategoryModeledElements.values()].reduce((acc, modeledElements) => {
-          modeledElements.forEach((modeledElement) => acc.add(modeledElement));
-          return acc;
-        }, new Set<Id64String>());
         const isSubModel = subModels.has(modelId);
         result.set(modelId, { categories: modelEntry.categories, isSubModel, isModelPrivate: modelEntry.isModelPrivate });
       }

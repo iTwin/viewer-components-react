@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import type { Id64String } from "@itwin/core-bentley";
 import type { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 
 interface CategoriesTreeNode {
@@ -10,9 +11,7 @@ interface CategoriesTreeNode {
   extendedData?: { [id: string]: any };
 }
 
-/**
- * @internal
- */
+/** @internal */
 export namespace CategoriesTreeNode {
   /**
    * Determines if node represents a definition container.
@@ -32,3 +31,13 @@ export namespace CategoriesTreeNode {
   export const isSubCategoryNode = (node: Pick<CategoriesTreeNode, "extendedData">) =>
     node.extendedData && "isSubCategory" in node.extendedData && !!node.extendedData.isSubCategory;
 }
+
+/** @internal */
+export const getModelId = (node: Pick<CategoriesTreeNode, "extendedData">): Id64String | undefined => {
+  if (node.extendedData?.modelId) {
+    return node.extendedData?.modelId;
+  }
+
+  const modelIds = node.extendedData?.modelIds?.[0];
+  return modelIds && (Array.isArray(modelIds) ? modelIds[0] : modelIds);
+};

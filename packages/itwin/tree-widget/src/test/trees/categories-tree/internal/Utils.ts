@@ -5,12 +5,13 @@
 
 import { expect } from "chai";
 import sinon from "sinon";
-import { BeEvent } from "@itwin/core-bentley";
+import { BeEvent, Id64 } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
+import { getDistinctMapValues } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
 
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
-import type { Viewport } from "@itwin/core-frontend";
-import type { NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { ClassGroupingNodeKey, GroupingHierarchyNode, HierarchyNodeKey, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { CategoriesTreeIdsCache } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 
 /** @internal */
@@ -30,6 +31,23 @@ export function createCategoryHierarchyNode(categoryId: Id64String, hasChildren 
 }
 
 /** @internal */
+export function createSubModelCategoryHierarchyNode(modelId?: Id64String, categoryId?: Id64String, hasChildren?: boolean): NonGroupingHierarchyNode {
+  return {
+    key: {
+      type: "instances",
+      instanceKeys: [{ className: "bis:SpatialCategory", id: categoryId ?? "" }],
+    },
+    children: !!hasChildren,
+    label: "",
+    parentKeys: [],
+    extendedData: {
+      isCategory: true,
+      modelId: modelId ?? "0x1",
+      categoryId: categoryId ?? "0x2",
+    },
+  };
+}
+/** @internal */
 export function createSubCategoryHierarchyNode(subCategoryId: Id64String, categoryId: Id64String): NonGroupingHierarchyNode {
   return {
     key: {
@@ -42,6 +60,34 @@ export function createSubCategoryHierarchyNode(subCategoryId: Id64String, catego
     extendedData: {
       isSubCategory: true,
       categoryId,
+    },
+  };
+}
+
+/** @internal */
+export function createClassGroupingHierarchyNode({
+  modelElementsMap,
+  parentKeys,
+  ...props
+}: {
+  categoryId: Id64String | undefined;
+  modelElementsMap: Map<Id64String, Id64Array>;
+  className?: string;
+  parentKeys?: HierarchyNodeKey[];
+}): GroupingHierarchyNode & { key: ClassGroupingNodeKey } {
+  const className = props.className ?? "Bis:Element";
+  return {
+    key: {
+      type: "class-grouping",
+      className,
+    },
+    children: !!modelElementsMap.size,
+    groupedInstanceKeys: [...getDistinctMapValues(modelElementsMap)].map((elementId) => ({ className, id: elementId })),
+    label: "",
+    parentKeys: parentKeys ?? [],
+    extendedData: {
+      categoryId: props.categoryId,
+      modelElementsMap,
     },
   };
 }
@@ -62,6 +108,27 @@ export function createDefinitionContainerHierarchyNode(definitionContainerId: Id
   };
 }
 
+/** @internal */
+export function createElementHierarchyNode(props: {
+  modelId: Id64String | undefined;
+  categoryId: Id64String | undefined;
+  hasChildren?: boolean;
+  elementId?: Id64String;
+}): NonGroupingHierarchyNode {
+  return {
+    key: {
+      type: "instances",
+      instanceKeys: [{ className: "bis:GeometricalElement3d", id: props.elementId ?? "" }],
+    },
+    children: !!props.hasChildren,
+    label: "",
+    parentKeys: [],
+    extendedData: {
+      modelId: props.modelId,
+      categoryId: props.categoryId,
+    },
+  };
+}
 
 interface ViewportStubValidation {
   /**
@@ -85,6 +152,7 @@ interface ViewportStubValidation {
 export async function createViewportStub(props: {
   idsCache: CategoriesTreeIdsCache;
   isVisibleOnInitialize: boolean;
+  imodel: IModelConnection;
 }): Promise<Viewport & ViewportStubValidation> {
   const subCategoriesMap = new Map<Id64String, boolean>();
 
@@ -95,15 +163,25 @@ export async function createViewportStub(props: {
       isVisible: boolean;
     }
   >();
+  const alwaysDrawn = new Set<Id64String>();
+  const neverDrawn = new Set<Id64String>();
+
+  const modelCategoriesOverrides = new Map<Id64String, Map<Id64String, PerModelCategoryVisibility.Override>>();
 
   const { categories: categoriesFromCache } = await props.idsCache.getAllDefinitionContainersAndCategories();
-  for (const category of categoriesFromCache) {
-    const subCategoriesFromCache = await props.idsCache.getSubCategories(category);
+  const categorySubCategoriesMap = await props.idsCache.getSubCategories(categoriesFromCache);
+  for (const [category, subCategoriesFromCache] of categorySubCategoriesMap) {
     subCategoriesFromCache.forEach((subCategoryId) => {
       subCategoriesMap.set(subCategoryId, props.isVisibleOnInitialize);
     });
     categoriesMap.set(category, { isVisible: props.isVisibleOnInitialize, subCategories: subCategoriesFromCache });
   }
+  for (const categoryFromCache of categoriesFromCache) {
+    if (!categoriesMap.has(categoryFromCache)) {
+      categoriesMap.set(categoryFromCache, { isVisible: props.isVisibleOnInitialize, subCategories: [] });
+    }
+  }
+
   const changeCategoryDisplayStub = sinon.stub().callsFake((categoriesToChange: Id64Array, isVisible: boolean, enableAllSubCategories: boolean) => {
     for (const category of categoriesToChange) {
       const value = categoriesMap.get(category);
@@ -114,6 +192,8 @@ export async function createViewportStub(props: {
             subCategoriesMap.set(subCategory, true);
           }
         }
+      } else {
+        categoriesMap.set(category, { isVisible, subCategories: [] });
       }
     }
   });
@@ -124,41 +204,87 @@ export async function createViewportStub(props: {
 
   return {
     isSubCategoryVisible: sinon.stub().callsFake((subCategoryId: Id64String) => !!subCategoriesMap.get(subCategoryId)),
-    iModel: {
-      categories: {
-        getCategoryInfo: sinon.stub().callsFake(async (ids: Id64Array) => {
-          const subCategories = [];
-          for (const id of ids) {
-            const subCategoriesToUse = categoriesMap.get(id);
-            if (subCategoriesToUse !== undefined) {
-              subCategories.push(...subCategoriesToUse.subCategories);
-            }
-          }
-          return [
-            {
-              subCategories: subCategories.map((subCategory) => {
-                return {
-                  id: subCategory,
-                };
-              }),
-            },
-          ];
-        }),
-      },
-    },
+    iModel: props.imodel,
     view: {
-      viewsCategory: sinon.stub().callsFake((categoryId: Id64String) => !!categoriesMap.get(categoryId)?.isVisible),
+      viewsCategory: sinon.stub().callsFake((categoryId: Id64String) => {
+        return !!categoriesMap.get(categoryId)?.isVisible;
+      }),
+      is2d: () => false,
+      viewsModel: () => true,
+    },
+    addViewedModels: async () => {},
+    changeModelDisplay: (modelIds: Id64Arg, on: boolean) => {
+      for (const modelId of Id64.iterable(modelIds)) {
+        const modelEntry = modelCategoriesOverrides.get(modelId);
+        for (const [category, _] of modelEntry ?? []) {
+          modelEntry?.set(category, on ? PerModelCategoryVisibility.Override.Show : PerModelCategoryVisibility.Override.Hide);
+        }
+      }
     },
     changeSubCategoryDisplay: changeSubCategoryDisplayStub,
     changeCategoryDisplay: changeCategoryDisplayStub,
+    setAlwaysDrawn: (elements: Id64Set, _?: boolean) => {
+      for (const element of elements) {
+        alwaysDrawn.add(element);
+        neverDrawn.delete(element);
+      }
+    },
+    setNeverDrawn: (elements: Id64Set) => {
+      for (const element of elements) {
+        neverDrawn.add(element);
+        alwaysDrawn.delete(element);
+      }
+    },
+    isAlwaysDrawnExclusive: false,
+    alwaysDrawn,
+    neverDrawn,
     perModelCategoryVisibility: {
-      getOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.None),
-      setOverride: sinon.fake(),
-      clearOverrides: sinon.fake(),
-      *[Symbol.iterator]() {},
+      getOverride: (modelId: Id64String, categoryId: Id64String) => {
+        const override = modelCategoriesOverrides.get(modelId)?.get(categoryId);
+        if (override !== undefined) {
+          return override;
+        }
+        return PerModelCategoryVisibility.Override.None;
+      },
+      setOverride: (modelIds: Id64Arg, categoryIds: Id64Arg, override: PerModelCategoryVisibility.Override) => {
+        for (const modelId of Id64.iterable(modelIds)) {
+          let modelEntry = modelCategoriesOverrides.get(modelId);
+          if (!modelEntry) {
+            modelEntry = new Map();
+            modelCategoriesOverrides.set(modelId, modelEntry);
+          }
+          for (const categoryId of Id64.iterable(categoryIds)) {
+            if (override === PerModelCategoryVisibility.Override.None) {
+              modelEntry.delete(categoryId);
+            } else {
+              modelEntry.set(categoryId, override);
+            }
+          }
+        }
+      },
+      clearOverrides: (modelIds?: Id64Arg) => {
+        if (!modelIds) {
+          modelCategoriesOverrides.clear();
+          return;
+        }
+        for (const modelId of Id64.iterable(modelIds)) {
+          modelCategoriesOverrides.delete(modelId);
+        }
+      },
+      *[Symbol.iterator](): Iterator<{ modelId: Id64String; categoryId: Id64String; visible: boolean }> {
+        for (const [modelId, categoriesOverridesMap] of modelCategoriesOverrides) {
+          for (const [categoryId, categoryOverride] of categoriesOverridesMap) {
+            yield { modelId, categoryId, visible: categoryOverride === PerModelCategoryVisibility.Override.Show };
+          }
+        }
+      },
     },
     onDisplayStyleChanged: new BeEvent<() => void>(),
     onViewedCategoriesChanged: new BeEvent<() => void>(),
+    onViewedCategoriesPerModelChanged: new BeEvent<() => void>(),
+    onViewedModelsChanged: new BeEvent<() => void>(),
+    onAlwaysDrawnChanged: new BeEvent<() => void>(),
+    onNeverDrawnChanged: new BeEvent<() => void>(),
     validateChangesCalls(
       categoriesToValidate: { categoriesToChange: Id64Array; isVisible: boolean; enableAllSubCategories: boolean }[],
       subCategories: { subCategoryId: Id64String; isVisible: boolean }[],
