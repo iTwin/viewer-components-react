@@ -9,6 +9,7 @@ import {
   EMPTY,
   filter,
   first,
+  forkJoin,
   from,
   fromEventPattern,
   map,
@@ -25,11 +26,11 @@ import {
   tap,
 } from "rxjs";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { pushToMap } from "../../common/Utils.js";
+import { pushToMap, setDifference } from "./Utils.js";
 
 import type { Observable, Subscription } from "rxjs";
+import type { BeEvent, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
-import type { BeEvent, Id64Array, Id64Set, Id64String, IDisposable } from "@itwin/core-bentley";
 
 interface ElementInfo {
   elementId: Id64String;
@@ -39,14 +40,23 @@ interface ElementInfo {
 
 type CacheEntry = Map<Id64String, Map<Id64String, Id64Set>>;
 
-export interface AlwaysOrNeverDrawnElementsQueryProps {
+/** @internal */
+export interface ModelAlwaysOrNeverDrawnElementsQueryProps {
   modelId: Id64String;
-  categoryId?: Id64String;
 }
+
+/** @internal */
+export interface CategoryAlwaysOrNeverDrawnElementsQueryProps {
+  modelId?: Id64String;
+  categoryIds: Id64Array;
+}
+
+/** @internal */
+export type AlwaysOrNeverDrawnElementsQueryProps = ModelAlwaysOrNeverDrawnElementsQueryProps | CategoryAlwaysOrNeverDrawnElementsQueryProps;
 
 export const SET_CHANGE_DEBOUNCE_TIME = 20;
 
-export class AlwaysAndNeverDrawnElementInfo implements IDisposable {
+export class AlwaysAndNeverDrawnElementInfo implements Disposable {
   private _subscriptions: Subscription[];
   private _alwaysDrawn: Observable<CacheEntry>;
   private _neverDrawn: Observable<CacheEntry>;
@@ -89,20 +99,47 @@ export class AlwaysAndNeverDrawnElementInfo implements IDisposable {
     this._suppress.next(false);
   }
 
-  public getElements({ setType, modelId, categoryId }: { setType: "always" | "never" } & AlwaysOrNeverDrawnElementsQueryProps): Observable<Id64Set> {
-    const cache = setType === "always" ? this._alwaysDrawn : this._neverDrawn;
-    const getElements = categoryId
-      ? (entry: CacheEntry | undefined) => {
-          return entry?.get(modelId)?.get(categoryId) ?? new Set();
-        }
-      : (entry: CacheEntry | undefined) => {
-          const modelEntry = entry?.get(modelId);
-          const elements = new Set<Id64String>();
-          for (const set of modelEntry?.values() ?? []) {
-            set.forEach((id) => elements.add(id));
+  public getElements(props: { setType: "always" | "never" } & AlwaysOrNeverDrawnElementsQueryProps): Observable<Id64Set> {
+    const cache = props.setType === "always" ? this._alwaysDrawn : this._neverDrawn;
+    const getElements =
+      "categoryIds" in props
+        ? (entry: CacheEntry | undefined) => {
+            const result = new Set<Id64String>();
+            if (props.modelId) {
+              const categoryMap = entry?.get(props.modelId);
+              if (!categoryMap) {
+                return result;
+              }
+              for (const categoryId of props.categoryIds) {
+                const elements = categoryMap.get(categoryId);
+                if (elements) {
+                  elements.forEach((element) => {
+                    result.add(element);
+                  });
+                }
+              }
+              return result;
+            }
+            for (const [, categoryMap] of entry ?? []) {
+              for (const categoryId of props.categoryIds) {
+                const elements = categoryMap.get(categoryId);
+                if (elements) {
+                  elements.forEach((element) => {
+                    result.add(element);
+                  });
+                }
+              }
+            }
+            return result;
           }
-          return elements;
-        };
+        : (entry: CacheEntry | undefined) => {
+            const modelEntry = entry?.get(props.modelId);
+            const elements = new Set<Id64String>();
+            for (const set of modelEntry?.values() ?? []) {
+              set.forEach((id) => elements.add(id));
+            }
+            return elements;
+          };
 
     return cache.pipe(map(getElements));
   }
@@ -149,7 +186,7 @@ export class AlwaysAndNeverDrawnElementInfo implements IDisposable {
     return obs;
   }
 
-  public dispose(): void {
+  public [Symbol.dispose](): void {
     this._subscriptions.forEach((x) => x.unsubscribe());
     this._subscriptions = [];
     this._disposeSubject.next();
@@ -176,32 +213,32 @@ export class AlwaysAndNeverDrawnElementInfo implements IDisposable {
       {
         ctes: [
           `
-        ElementInfo(elementId, modelId, categoryId, parentId) AS (
-          SELECT
-            ECInstanceId elementId,
-            Model.Id modelId,
-            Category.Id categoryId,
-            Parent.Id parentId
-          FROM bis.GeometricElement3d
-          WHERE InVirtualSet(?, ECInstanceId)
+            ElementInfo(elementId, modelId, categoryId, parentId) AS (
+              SELECT
+                ECInstanceId elementId,
+                Model.Id modelId,
+                Category.Id categoryId,
+                Parent.Id parentId
+              FROM bis.GeometricElement3d
+              WHERE InVirtualSet(?, ECInstanceId)
 
-          UNION ALL
+              UNION ALL
 
-          SELECT
-            e.elementId,
-            e.modelId,
-            p.Category.Id categoryId,
-            p.Parent.Id parentId
-          FROM bis.GeometricElement3d p
-          JOIN ElementInfo e ON p.ECInstanceId = e.parentId
-        )
-        `,
+              SELECT
+                e.elementId,
+                e.modelId,
+                p.Category.Id categoryId,
+                p.Parent.Id parentId
+              FROM bis.GeometricElement3d p
+              JOIN ElementInfo e ON p.ECInstanceId = e.parentId
+            )
+          `,
         ],
         ecsql: `
-        SELECT elementId, modelId, categoryId
-        FROM ElementInfo
-        WHERE parentId IS NULL
-      `,
+          SELECT elementId, modelId, categoryId
+          FROM ElementInfo
+          WHERE parentId IS NULL
+        `,
         bindings: [{ type: "idset", value: elementIds }],
       },
       {
@@ -210,5 +247,30 @@ export class AlwaysAndNeverDrawnElementInfo implements IDisposable {
     );
 
     return from(reader).pipe(map((row) => ({ elementId: row.elementId, modelId: row.modelId, categoryId: row.categoryId })));
+  }
+
+  public getAlwaysDrawnElements(props: AlwaysOrNeverDrawnElementsQueryProps) {
+    return this.getElements({ ...props, setType: "always" });
+  }
+
+  public getNeverDrawnElements(props: AlwaysOrNeverDrawnElementsQueryProps) {
+    return this.getElements({ ...props, setType: "never" });
+  }
+
+  public clearAlwaysAndNeverDrawnElements(props: AlwaysOrNeverDrawnElementsQueryProps) {
+    return forkJoin({
+      alwaysDrawn: this.getAlwaysDrawnElements(props),
+      neverDrawn: this.getNeverDrawnElements(props),
+    }).pipe(
+      map(({ alwaysDrawn, neverDrawn }) => {
+        const viewport = this._viewport;
+        if (viewport.alwaysDrawn?.size && alwaysDrawn.size) {
+          viewport.setAlwaysDrawn(setDifference(viewport.alwaysDrawn, alwaysDrawn));
+        }
+        if (viewport.neverDrawn?.size && neverDrawn.size) {
+          viewport.setNeverDrawn(setDifference(viewport.neverDrawn, neverDrawn));
+        }
+      }),
+    );
   }
 }

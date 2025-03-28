@@ -6,11 +6,10 @@
 import { expect } from "chai";
 import { firstValueFrom } from "rxjs";
 import sinon from "sinon";
-import { using } from "@itwin/core-bentley";
 import {
   AlwaysAndNeverDrawnElementInfo,
   SET_CHANGE_DEBOUNCE_TIME,
-} from "../../../../tree-widget-react/components/trees/models-tree/internal/AlwaysAndNeverDrawnElementInfo.js";
+} from "../../../../tree-widget-react/components/trees/common/internal/AlwaysAndNeverDrawnElementInfo.js";
 import { createResolvablePromise } from "../../../TestUtils.js";
 import { createFakeSinonViewport } from "../../Common.js";
 
@@ -37,20 +36,19 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       neverDrawn: new Set(["2"]),
       queryHandler,
     });
-    await using(new AlwaysAndNeverDrawnElementInfo(vp), async (_) => {
-      await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
-      expect(queryHandler).to.be.calledTwice;
-    });
+    using _ = new AlwaysAndNeverDrawnElementInfo(vp);
+    await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
+    expect(queryHandler).to.be.calledTwice;
   });
 
   function runTests(setType: "always" | "never") {
     it(`subscribes to ${setType} drawn list changes and unsubscribes on dispose`, async () => {
       const vp = createFakeSinonViewport();
       const event = setType === "always" ? vp.onAlwaysDrawnChanged : vp.onNeverDrawnChanged;
-      await using(new AlwaysAndNeverDrawnElementInfo(vp), async (_) => {
+      (() => {
+        using _ = new AlwaysAndNeverDrawnElementInfo(vp);
         expect(event.numberOfListeners).to.eq(1);
-      });
-      await sinon.clock.runAllAsync();
+      })();
       expect(event.numberOfListeners).to.eq(0);
     });
 
@@ -60,10 +58,9 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       const vp = createFakeSinonViewport({
         [`${setType}Drawn`]: set,
       });
-      await using(new AlwaysAndNeverDrawnElementInfo(vp), async (_) => {
-        await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
-        expect(vp.iModel.createQueryReader).to.be.calledOnceWith(sinon.match(queryRegex));
-      });
+      using _ = new AlwaysAndNeverDrawnElementInfo(vp);
+      await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
+      expect(vp.iModel.createQueryReader).to.be.calledOnceWith(sinon.match(queryRegex));
     });
 
     it(`retrieves and caches ${setType} drawn elements by model`, async () => {
@@ -81,14 +78,13 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
         [`${setType}Drawn`]: new Set(elements),
         queryHandler,
       });
-      await using(new AlwaysAndNeverDrawnElementInfo(viewport), async (info) => {
-        await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
-        for (let i = 0; i < 3; ++i) {
-          const obs = info.getElements({ setType, modelId });
-          await expect(firstValueFrom(obs)).to.eventually.deep.eq(new Set(elements));
-          expect(queryHandler).to.be.calledOnce;
-        }
-      });
+      using alwaysAndNeverDrawnElementInfo = new AlwaysAndNeverDrawnElementInfo(viewport);
+      await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
+      for (let i = 0; i < 3; ++i) {
+        const obs = alwaysAndNeverDrawnElementInfo.getElements({ setType, modelId });
+        await expect(firstValueFrom(obs)).to.eventually.deep.eq(new Set(elements));
+        expect(queryHandler).to.be.calledOnce;
+      }
     });
 
     it(`returns empty set when model has no ${setType} drawn elements`, async () => {
@@ -100,25 +96,23 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
         [`${setType}Drawn`]: new Set(["0x30"]),
         queryHandler,
       });
-      await using(new AlwaysAndNeverDrawnElementInfo(viewport), async (info) => {
-        await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
-        for (let i = 0; i < 3; ++i) {
-          const obs = info.getElements({ setType, modelId });
-          await expect(firstValueFrom(obs)).to.eventually.deep.eq(new Set());
-          expect(queryHandler).to.be.calledOnce;
-        }
-      });
+      using alwaysAndNeverDrawnElementInfo = new AlwaysAndNeverDrawnElementInfo(viewport);
+      await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
+      for (let i = 0; i < 3; ++i) {
+        const obs = alwaysAndNeverDrawnElementInfo.getElements({ setType, modelId });
+        await expect(firstValueFrom(obs)).to.eventually.deep.eq(new Set());
+        expect(queryHandler).to.be.calledOnce;
+      }
     });
 
     it(`returns empty set when ${setType} drawn set is empty`, async () => {
       const vp = createFakeSinonViewport();
       const modelId = "0x1";
-      await using(new AlwaysAndNeverDrawnElementInfo(vp), async (info) => {
-        await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
-        const obs = info.getElements({ setType, modelId });
-        await expect(firstValueFrom(obs)).to.eventually.deep.eq(new Set());
-        expect(vp.iModel.createQueryReader).not.to.be.called;
-      });
+      using alwaysAndNeverDrawnElementInfo = new AlwaysAndNeverDrawnElementInfo(vp);
+      await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
+      const obs = alwaysAndNeverDrawnElementInfo.getElements({ setType, modelId });
+      await expect(firstValueFrom(obs)).to.eventually.deep.eq(new Set());
+      expect(vp.iModel.createQueryReader).not.to.be.called;
     });
 
     it(`retrieves and caches ${setType} drawn elements by category`, async () => {
@@ -132,14 +126,13 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
         [`${setType}Drawn`]: new Set(elements),
         queryHandler,
       });
-      await using(new AlwaysAndNeverDrawnElementInfo(viewport), async (info) => {
-        await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
-        for (let i = 0; i < 3; ++i) {
-          const obs = info.getElements({ setType, categoryId, modelId });
-          await expect(firstValueFrom(obs)).to.eventually.deep.eq(new Set(elements));
-          expect(queryHandler).to.be.calledOnce;
-        }
-      });
+      using alwaysAndNeverDrawnElementInfo = new AlwaysAndNeverDrawnElementInfo(viewport);
+      await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
+      for (let i = 0; i < 3; ++i) {
+        const obs = alwaysAndNeverDrawnElementInfo.getElements({ setType, categoryIds: [categoryId], modelId });
+        await expect(firstValueFrom(obs)).to.eventually.deep.eq(new Set(elements));
+        expect(queryHandler).to.be.calledOnce;
+      }
     });
 
     it(`updates cache when ${setType} drawn set is changed`, async () => {
@@ -153,15 +146,14 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
         .onSecondCall()
         .returns([{ elementId: elements[1], modelId, categoryId }]);
       const viewport = createFakeSinonViewport({ queryHandler });
-      await using(new AlwaysAndNeverDrawnElementInfo(viewport), async (info) => {
-        for (let i = 0; i < 2; ++i) {
-          const newSet = new Set([elements[i]]);
-          setType === "always" ? viewport.setAlwaysDrawn(newSet) : viewport.setNeverDrawn(newSet);
-          await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
-          expect(queryHandler).to.have.callCount(i + 1);
-          await expect(firstValueFrom(info.getElements({ setType, modelId, categoryId }))).to.eventually.deep.eq(newSet);
-        }
-      });
+      using alwaysAndNeverDrawnElementInfo = new AlwaysAndNeverDrawnElementInfo(viewport);
+      for (let i = 0; i < 2; ++i) {
+        const newSet = new Set([elements[i]]);
+        setType === "always" ? viewport.setAlwaysDrawn(newSet) : viewport.setNeverDrawn(newSet);
+        await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
+        expect(queryHandler).to.have.callCount(i + 1);
+        await expect(firstValueFrom(alwaysAndNeverDrawnElementInfo.getElements({ setType, modelId, categoryIds: [categoryId] }))).to.eventually.deep.eq(newSet);
+      }
     });
 
     it(`doesn't query elements if ${setType} drawn set gets empty`, async () => {
@@ -172,16 +164,14 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
         return elements.map((elementId) => ({ elementId, modelId, categoryId }));
       });
       const viewport = createFakeSinonViewport();
+      using alwaysAndNeverDrawnElementInfo = new AlwaysAndNeverDrawnElementInfo(viewport);
+      const newSet = new Set<Id64String>();
+      setType === "always" ? viewport.setAlwaysDrawn(newSet) : viewport.setNeverDrawn(newSet);
+      await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
 
-      await using(new AlwaysAndNeverDrawnElementInfo(viewport), async (info) => {
-        const newSet = new Set<Id64String>();
-        setType === "always" ? viewport.setAlwaysDrawn(newSet) : viewport.setNeverDrawn(newSet);
-        await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
-
-        expect(queryHandler).not.to.be.called;
-        const obs = info.getElements({ setType, modelId, categoryId });
-        expect((await firstValueFrom(obs))?.size ?? 0).to.eq(0);
-      });
+      expect(queryHandler).not.to.be.called;
+      const obs = alwaysAndNeverDrawnElementInfo.getElements({ setType, modelId, categoryIds: [categoryId] });
+      expect((await firstValueFrom(obs))?.size ?? 0).to.eq(0);
     });
 
     it(`debounces frequent changes to the ${setType} drawn set`, async () => {
@@ -191,19 +181,18 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       const queryHandler = sinon.stub<[string], any[]>().returns([{ elementId: elements[2], modelId, categoryId }]);
       const viewport = createFakeSinonViewport({ queryHandler });
 
-      await using(new AlwaysAndNeverDrawnElementInfo(viewport), async (info) => {
-        expect(queryHandler).not.to.be.called;
+      using alwaysAndNeverDrawnElementInfo = new AlwaysAndNeverDrawnElementInfo(viewport);
+      expect(queryHandler).not.to.be.called;
 
-        const updateSet = (set: Id64Set) => (setType === "always" ? viewport.setAlwaysDrawn(set) : viewport.setNeverDrawn(set));
-        updateSet(new Set<Id64String>(["0x10"]));
-        updateSet(new Set<Id64String>(["0x20"]));
-        const finalSet = new Set<Id64String>(["0x30"]);
-        updateSet(finalSet);
-        await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
+      const updateSet = (set: Id64Set) => (setType === "always" ? viewport.setAlwaysDrawn(set) : viewport.setNeverDrawn(set));
+      updateSet(new Set<Id64String>(["0x10"]));
+      updateSet(new Set<Id64String>(["0x20"]));
+      const finalSet = new Set<Id64String>(["0x30"]);
+      updateSet(finalSet);
+      await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
 
-        expect(queryHandler).to.be.calledOnce;
-        await expect(firstValueFrom(info.getElements({ setType, modelId, categoryId }))).to.eventually.deep.eq(finalSet);
-      });
+      expect(queryHandler).to.be.calledOnce;
+      await expect(firstValueFrom(alwaysAndNeverDrawnElementInfo.getElements({ setType, modelId, categoryIds: [categoryId] }))).to.eventually.deep.eq(finalSet);
     });
 
     it("waits until debounce period is passed and resolves with the newest result", async () => {
@@ -215,16 +204,15 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       const queryHandler = sinon.stub<[string], any[]>().returns([{ elementId: elements[1], modelId, categoryId }]);
       const viewport = createFakeSinonViewport({ queryHandler });
 
-      await using(new AlwaysAndNeverDrawnElementInfo(viewport), async (info) => {
-        const updateSet = (set: Id64Set) => (setType === "always" ? viewport.setAlwaysDrawn(set) : viewport.setNeverDrawn(set));
+      using alwaysAndNeverDrawnElementInfo = new AlwaysAndNeverDrawnElementInfo(viewport);
+      const updateSet = (set: Id64Set) => (setType === "always" ? viewport.setAlwaysDrawn(set) : viewport.setNeverDrawn(set));
 
-        const resultPromise = firstValueFrom(info.getElements({ setType, modelId, categoryId }));
-        updateSet(firstSet);
-        updateSet(secondSet);
-        await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
+      const resultPromise = firstValueFrom(alwaysAndNeverDrawnElementInfo.getElements({ setType, modelId, categoryIds: [categoryId] }));
+      updateSet(firstSet);
+      updateSet(secondSet);
+      await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
 
-        await expect(resultPromise).to.eventually.deep.eq(secondSet);
-      });
+      await expect(resultPromise).to.eventually.deep.eq(secondSet);
     });
 
     it(`returns newest result if ${setType} drawn set is changed during the query`, async () => {
@@ -244,21 +232,20 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
         .returns(secondSetInfoPromise.promise);
       const viewport = createFakeSinonViewport({ queryHandler });
 
-      await using(new AlwaysAndNeverDrawnElementInfo(viewport), async (info) => {
-        const updateSet = (set: Id64Set) => (setType === "always" ? viewport.setAlwaysDrawn(set) : viewport.setNeverDrawn(set));
+      using alwaysAndNeverDrawnElementInfo = new AlwaysAndNeverDrawnElementInfo(viewport);
+      const updateSet = (set: Id64Set) => (setType === "always" ? viewport.setAlwaysDrawn(set) : viewport.setNeverDrawn(set));
 
-        updateSet(firstSet);
-        await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
-        const resultPromise = firstValueFrom(info.getElements({ setType, modelId, categoryId }));
+      updateSet(firstSet);
+      await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
+      const resultPromise = firstValueFrom(alwaysAndNeverDrawnElementInfo.getElements({ setType, modelId, categoryIds: [categoryId] }));
 
-        updateSet(secondSet);
-        await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
+      updateSet(secondSet);
+      await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
 
-        firstSetInfoPromise.resolve([{ elementId: elements[0], categoryId, modelId }]);
-        secondSetInfoPromise.resolve([{ elementId: elements[1], categoryId, modelId }]);
+      firstSetInfoPromise.resolve([{ elementId: elements[0], categoryId, modelId }]);
+      secondSetInfoPromise.resolve([{ elementId: elements[1], categoryId, modelId }]);
 
-        await expect(resultPromise).to.eventually.deep.eq(secondSet);
-      });
+      await expect(resultPromise).to.eventually.deep.eq(secondSet);
     });
   }
 

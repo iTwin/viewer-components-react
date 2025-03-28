@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { createContext, useCallback, useContext, useMemo } from "react";
-import { useLatest } from "./Utils.js";
+import { useLatest } from "./internal/Utils.js";
 
 import type { PropsWithChildren } from "react";
 

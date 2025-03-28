@@ -15,7 +15,7 @@ import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { InstanceKey } from "@itwin/presentation-shared";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-import { createVisibilityStatus } from "../../../../tree-widget-react/components/trees/common/Tooltip.js";
+import { createVisibilityStatus } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
 import { ModelsTreeIdsCache } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import { createModelsTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
@@ -41,7 +41,7 @@ import {
 } from "../Utils.js";
 import { validateHierarchyVisibility, VisibilityExpectations } from "./VisibilityValidation.js";
 
-import type { Visibility } from "../../../../tree-widget-react/components/trees/common/Tooltip.js";
+import type { Visibility } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
 import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
 import type { ModelsTreeVisibilityHandlerProps } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
@@ -3416,18 +3416,18 @@ describe("ModelsTreeVisibilityHandler", () => {
           await handler.changeVisibility(node, true);
           viewport.renderFrame();
 
-            const visibilityExpectations: ValidateNodeProps["visibilityExpectations"] = {
-              subject: (id) => {
-                if (id === parentSubject.id) {
-                  return "partial";
-                }
-                return id === subjectIds[0] ? "visible" : "hidden";
-              },
-              model: (id) => (id === modelIds[0] ? "visible" : "hidden"),
-              category: ({ modelId }) => (modelId === modelIds[0] ? "visible" : "hidden"),
-              groupingNode: ({ modelId }) => (modelId === modelIds[0] ? "visible" : "hidden"),
-              element: ({ modelId }) => (modelId === modelIds[0] ? "visible" : "hidden"),
-            };
+          const visibilityExpectations: ValidateNodeProps["visibilityExpectations"] = {
+            subject: (id) => {
+              if (id === parentSubject.id) {
+                return "partial";
+              }
+              return id === subjectIds[0] ? "visible" : "hidden";
+            },
+            model: (id) => (id === modelIds[0] ? "visible" : "hidden"),
+            category: ({ modelId }) => (modelId === modelIds[0] ? "visible" : "hidden"),
+            groupingNode: ({ modelId }) => (modelId === modelIds[0] ? "visible" : "hidden"),
+            element: ({ modelId }) => (modelId === modelIds[0] ? "visible" : "hidden"),
+          };
 
           await validateHierarchyVisibility({
             provider: filteredProvider,

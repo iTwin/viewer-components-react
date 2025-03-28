@@ -5,18 +5,25 @@
 
 import { BeEvent } from "@itwin/core-bentley";
 
-import type { IDisposable } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 
 /** @internal */
-export interface IVisibilityChangeEventListener extends IDisposable {
+export interface IVisibilityChangeEventListener extends Disposable {
   onVisibilityChange: BeEvent<() => void>;
   suppressChangeEvents(): void;
   resumeChangeEvents(): void;
 }
 
 /** @internal */
-export function createVisibilityChangeEventListener(viewport: Viewport): IVisibilityChangeEventListener {
+export function createVisibilityChangeEventListener(props: {
+  viewport: Viewport;
+  listeners: {
+    elements?: boolean;
+    categories?: boolean;
+    displayStyle?: boolean;
+    models?: boolean;
+  };
+}): IVisibilityChangeEventListener {
   const onVisibilityChange = new BeEvent<() => void>();
   let pendingVisibilityChange: undefined | ReturnType<typeof setTimeout>;
   let suppressChangeEvents: number = 0;
@@ -30,17 +37,26 @@ export function createVisibilityChangeEventListener(viewport: Viewport): IVisibi
     });
   };
 
-  const listeners = [
-    viewport.onViewedCategoriesPerModelChanged.addListener(handleVisibilityChange),
-    viewport.onViewedCategoriesChanged.addListener(handleVisibilityChange),
-    viewport.onViewedModelsChanged.addListener(handleVisibilityChange),
-    viewport.onAlwaysDrawnChanged.addListener(handleVisibilityChange),
-    viewport.onNeverDrawnChanged.addListener(handleVisibilityChange),
-  ];
+  const listeners = new Array<() => void>();
+
+  if (props.listeners.elements) {
+    listeners.push(props.viewport.onAlwaysDrawnChanged.addListener(handleVisibilityChange));
+    listeners.push(props.viewport.onNeverDrawnChanged.addListener(handleVisibilityChange));
+  }
+  if (props.listeners.categories) {
+    listeners.push(props.viewport.onViewedCategoriesPerModelChanged.addListener(handleVisibilityChange));
+    listeners.push(props.viewport.onViewedCategoriesChanged.addListener(handleVisibilityChange));
+  }
+  if (props.listeners.displayStyle) {
+    listeners.push(props.viewport.onDisplayStyleChanged.addListener(handleVisibilityChange));
+  }
+  if (props.listeners.models) {
+    listeners.push(props.viewport.onViewedModelsChanged.addListener(handleVisibilityChange));
+  }
 
   return {
     onVisibilityChange,
-    dispose: () => {
+    [Symbol.dispose]() {
       if (pendingVisibilityChange) {
         clearTimeout(pendingVisibilityChange);
         pendingVisibilityChange = undefined;

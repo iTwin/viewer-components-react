@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { assert } from "@itwin/core-bentley";
-import { pushToMap } from "../../common/Utils.js";
+import { pushToMap } from "../../common/internal/Utils.js";
 
 import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";

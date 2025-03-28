@@ -7,7 +7,8 @@ import { useEffect, useMemo, useState } from "react";
 import { IconButton } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
-import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, toggleModels } from "./internal/ModelsTreeVisibilityHandler.js";
+import { hideAllModels, invertAllModels } from "../common/Utils.js";
+import { areAllModelsVisible, showAllModels, toggleModels } from "./internal/ModelsTreeVisibilityHandler.js";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";

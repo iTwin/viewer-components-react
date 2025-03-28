@@ -3,68 +3,33 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useEffect, useRef } from "react";
-import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
-
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
-import type { IModelConnection } from "@itwin/core-frontend";
-import type { SchemaContext } from "@itwin/ecschema-metadata";
+import type { Viewport } from "@itwin/core-frontend";
 
 /** @beta */
 export type FunctionProps<THook extends (props: any) => any> = Parameters<THook>[0];
 
-/** @internal */
-export function createIdsSelector(ids: Id64Array): string {
-  // Note: `json_array` function only accepts up to 127 arguments and we may have more `ids` than that. As a workaround,
-  // we're creating an array of arrays
-  const slices = new Array<Id64String[]>();
-  for (let sliceStartIndex = 0; sliceStartIndex < ids.length; sliceStartIndex += 127) {
-    let sliceEndIndex: number | undefined = sliceStartIndex + 127;
-    if (sliceEndIndex > ids.length) {
-      sliceEndIndex = undefined;
+/**
+ * Disables display of all given models.
+ * @public
+ */
+export async function hideAllModels(models: string[], viewport: Viewport) {
+  viewport.changeModelDisplay(models, false);
+}
+
+/**
+ * Inverts display of all given models.
+ * @public
+ */
+export async function invertAllModels(models: string[], viewport: Viewport) {
+  const notViewedModels: string[] = [];
+  const viewedModels: string[] = [];
+  models.forEach((modelId) => {
+    if (viewport.viewsModel(modelId)) {
+      viewedModels.push(modelId);
+    } else {
+      notViewedModels.push(modelId);
     }
-    slices.push(ids.slice(sliceStartIndex, sliceEndIndex));
-  }
-  return `json_array(${slices.map((sliceIds) => `json_array(${sliceIds.map((id) => `'${id}'`).join(",")})`).join(",")})`;
-}
-
-/** @internal */
-export function parseIdsSelectorResult(selectorResult: any): Id64Array {
-  if (!Array.isArray(selectorResult)) {
-    return [];
-  }
-  return selectorResult.reduce((arr, ids: Id64String | Id64String[]) => [...arr, ...(Array.isArray(ids) ? ids : [ids])], new Array<Id64String>());
-}
-
-/** @internal */
-export function pushToMap<TKey, TValue>(targetMap: Map<TKey, Set<TValue>>, key: TKey, value: TValue) {
-  let set = targetMap.get(key);
-  if (!set) {
-    set = new Set();
-    targetMap.set(key, set);
-  }
-  set.add(value);
-}
-
-/** @internal */
-export function createIModelAccess({ imodel, getSchemaContext }: { imodel: IModelConnection; getSchemaContext: (imodel: IModelConnection) => SchemaContext }) {
-  const schemas = getSchemaContext(imodel);
-  const schemaProvider = createECSchemaProvider(schemas);
-  return {
-    imodelKey: imodel.key,
-    ...schemaProvider,
-    ...createCachingECClassHierarchyInspector({ schemaProvider, cacheSize: 100 }),
-    ...createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(imodel), 1000),
-  };
-}
-
-/** @internal */
-export function useLatest<T>(value: T) {
-  const ref = useRef(value);
-  useEffect(() => {
-    ref.current = value;
-  }, [value]);
-  return ref;
+  });
+  await viewport.addViewedModels(notViewedModels);
+  viewport.changeModelDisplay(viewedModels, false);
 }
