@@ -30,14 +30,28 @@ export namespace CategoriesTreeNode {
    */
   export const isSubCategoryNode = (node: Pick<CategoriesTreeNode, "extendedData">) =>
     node.extendedData && "isSubCategory" in node.extendedData && !!node.extendedData.isSubCategory;
+
+  /**
+   * Retrieves model ID from node's extended data.
+   */
+  export const getModelId = (node: Pick<CategoriesTreeNode, "extendedData">): Id64String | undefined => {
+    // Elements have modelId property set
+    if (node.extendedData?.modelId) {
+      return node.extendedData?.modelId;
+    }
+
+    // This is for categories:
+    // a) If category is at root, then it won't have 'modelId' or 'modelIds' set - it will return undefined;
+    // b) If category is under subModel then it will have 'modelIds' set just like in models tree.
+    const modelIds = node.extendedData?.modelIds?.[0];
+    return modelIds && (Array.isArray(modelIds) ? modelIds[0] : modelIds);
+  };
+
+  /**
+   * Retrieves category ID from node's extended data.
+   */
+  export const getCategoryId = (node: Pick<CategoriesTreeNode, "extendedData">): Id64String | undefined => {
+    // Elements have modelId property set
+    return node.extendedData?.categoryId;
+  };
 }
-
-/** @internal */
-export const getModelId = (node: Pick<CategoriesTreeNode, "extendedData">): Id64String | undefined => {
-  if (node.extendedData?.modelId) {
-    return node.extendedData?.modelId;
-  }
-
-  const modelIds = node.extendedData?.modelIds?.[0];
-  return modelIds && (Array.isArray(modelIds) ? modelIds[0] : modelIds);
-};

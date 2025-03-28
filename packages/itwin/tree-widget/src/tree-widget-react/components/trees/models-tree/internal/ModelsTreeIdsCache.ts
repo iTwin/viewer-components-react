@@ -6,7 +6,7 @@
 import { assert } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
-import { pushToMap } from "../../common/Utils.js";
+import { pushToMap } from "../../common/internal/Utils.js";
 
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";

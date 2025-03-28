@@ -5,7 +5,7 @@
 
 import { assert } from "@itwin/core-bentley";
 import { HierarchyFilteringPath, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
-import { MODEL_3D_CLASS, SUB_CATEGORY_CLASS } from "./ClassNameDefinitions.js";
+import { SUB_CATEGORY_CLASS } from "./ClassNameDefinitions.js";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
@@ -43,15 +43,19 @@ interface DefinitionContainerFilteredTreeNode extends BaseFilteredTreeNode {
 interface ElementFilteredTreeNode extends BaseFilteredTreeNode {
   type: "element";
   categoryId: Id64String;
-  modelId?: Id64String
+  modelId?: Id64String;
 }
 
-type FilteredTreeNode = DefinitionContainerFilteredTreeNode | SubCategoryFilteredTreeNode | CategoryFilteredTreeNode | ElementFilteredTreeNode | ModelFilteredTreeNode;
+type FilteredTreeNode =
+  | DefinitionContainerFilteredTreeNode
+  | SubCategoryFilteredTreeNode
+  | CategoryFilteredTreeNode
+  | ElementFilteredTreeNode
+  | ModelFilteredTreeNode;
 
 export interface FilteredTree {
   getVisibilityChangeTargets(node: HierarchyNode): VisibilityChangeTargets;
 }
-
 
 type CategoryKey = `${Id64String}-${Id64String}`;
 type SubCategoryKey = `${Id64String}-${Id64String}`;
@@ -64,7 +68,7 @@ function createSubCategoryKey(categoryId: string, subCategoryId: string): SubCat
   return `${categoryId}-${subCategoryId}`;
 }
 
-export function parseCategoryKey(key: CategoryKey): { modelId: Id64String | undefined, categoryId: Id64String} {
+export function parseCategoryKey(key: CategoryKey): { modelId: Id64String | undefined; categoryId: Id64String } {
   const [modelId, categoryId] = key.split("-");
   return { modelId: modelId !== "" ? modelId : undefined, categoryId };
 }
@@ -82,7 +86,15 @@ interface VisibilityChangeTargets {
   subCategories?: Set<SubCategoryKey>;
 }
 
-export async function createFilteredTree(imodelAccess: ECClassHierarchyInspector, filteringPaths: HierarchyFilteringPath[], categoryClassName: string, categoryElementClassName: string, idsCache: CategoriesTreeIdsCache): Promise<FilteredTree> {
+export async function createFilteredTree(props: {
+  imodelAccess: ECClassHierarchyInspector;
+  filteringPaths: HierarchyFilteringPath[];
+  categoryClassName: string;
+  categoryElementClassName: string;
+  categoryModelClassName: string;
+  idsCache: CategoriesTreeIdsCache;
+}): Promise<FilteredTree> {
+  const { imodelAccess, filteringPaths, categoryClassName, categoryElementClassName, categoryModelClassName, idsCache } = props;
   const root: FilteredTreeRootNode = {
     children: new Map(),
   };
@@ -98,6 +110,7 @@ export async function createFilteredTree(imodelAccess: ECClassHierarchyInspector
       }
 
       const identifier = normalizedPath[i];
+
       if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(identifier)) {
         break;
       }
@@ -108,7 +121,7 @@ export async function createFilteredTree(imodelAccess: ECClassHierarchyInspector
         continue;
       }
 
-      const type = await getType(imodelAccess, identifier.className, categoryClassName, categoryElementClassName);
+      const type = await getType(imodelAccess, identifier.className, categoryClassName, categoryElementClassName, categoryModelClassName);
 
       const newNode: FilteredTreeNode = createFilteredTreeNode({
         type,
@@ -123,10 +136,11 @@ export async function createFilteredTree(imodelAccess: ECClassHierarchyInspector
       }
     }
   }
-  const filteredElementsModels = await idsCache.getFilteredElementsModels(filteredElements.map(({id}) => id));
+  const filteredElementsModels = await idsCache.getFilteredElementsModels(filteredElements.map(({ id }) => id));
+  // We populate filtered elements array with references, this causes root to change accordingly
   filteredElements.forEach((element) => {
     element.modelId = filteredElementsModels.get(element.id);
-  })
+  });
 
   return {
     getVisibilityChangeTargets: (node: HierarchyNode) => getVisibilityChangeTargets(root, node),
@@ -164,7 +178,7 @@ function getVisibilityChangeTargets(root: FilteredTreeRootNode, node: HierarchyN
   }
 
   for (const filteredNode of filteredNodes) {
-    collectVisibilityChangeTargets(changeTargets, filteredNode)
+    collectVisibilityChangeTargets(changeTargets, filteredNode);
   }
   return changeTargets;
 }
@@ -237,16 +251,16 @@ function createFilteredTreeNode({
       id,
       isFilterTarget,
       type,
-    }
+    };
   }
   if (type === "subCategory") {
-    assert("id" in parent)
-      return {
-        id,
-        isFilterTarget,
-        type,
-        categoryId: parent.id,
-      }
+    assert("id" in parent);
+    return {
+      id,
+      isFilterTarget,
+      type,
+      categoryId: parent.id,
+    };
   }
   if (type === "category") {
     if ("type" in parent && parent.type === "model") {
@@ -255,13 +269,13 @@ function createFilteredTreeNode({
         isFilterTarget,
         type,
         modelId: parent.id,
-      }
+      };
     }
     return {
       id,
       isFilterTarget,
       type,
-    }
+    };
   }
   if (type === "model") {
     assert("id" in parent);
@@ -269,7 +283,7 @@ function createFilteredTreeNode({
       id,
       isFilterTarget,
       type,
-      categoryId: parent.type === "category" ? parent.id : undefined
+      categoryId: parent.type === "category" ? parent.id : undefined,
     };
   }
 
@@ -280,7 +294,7 @@ function createFilteredTreeNode({
         isFilterTarget,
         type,
         categoryId: parent.id,
-      }
+      };
     }
     assert(parent.type === "element");
     return {
@@ -294,7 +308,13 @@ function createFilteredTreeNode({
   throw new Error("Invalid parent node type");
 }
 
-async function getType(hierarchyChecker: ECClassHierarchyInspector, className: string, categoryClassName: string, categoryElementClass: string) {
+async function getType(
+  hierarchyChecker: ECClassHierarchyInspector,
+  className: string,
+  categoryClassName: string,
+  categoryElementClass: string,
+  categoryModelClassName: string,
+) {
   if (await hierarchyChecker.classDerivesFrom(className, SUB_CATEGORY_CLASS)) {
     return "subCategory";
   }
@@ -304,7 +324,7 @@ async function getType(hierarchyChecker: ECClassHierarchyInspector, className: s
   if (await hierarchyChecker.classDerivesFrom(className, categoryClassName)) {
     return "category";
   }
-  if (await hierarchyChecker.classDerivesFrom(className, MODEL_3D_CLASS)) {
+  if (await hierarchyChecker.classDerivesFrom(className, categoryModelClassName)) {
     return "model";
   }
   return "definitionContainer";

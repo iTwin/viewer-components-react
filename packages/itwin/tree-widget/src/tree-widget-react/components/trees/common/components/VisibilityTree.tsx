@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useMemo } from "react";
+import { createIModelAccess } from "../internal/Utils.js";
 import { useHierarchyVisibility } from "../UseHierarchyVisibility.js";
-import { createIModelAccess } from "../Utils.js";
 import { Tree } from "./Tree.js";
 
 import type { FunctionProps } from "../Utils.js";

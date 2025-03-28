@@ -3,10 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concatAll, filter, from, map, mergeMap, of, reduce, startWith, toArray } from "rxjs";
-import { releaseMainThreadOnItemsCount } from "../../models-tree/Utils.js";
+import { filter, from, map, mergeAll, mergeMap, of, reduce, startWith, toArray } from "rxjs";
 import { reduceWhile } from "../Rxjs.js";
 import { createVisibilityStatus, getTooltipOptions } from "./Tooltip.js";
+import { releaseMainThreadOnItemsCount } from "./Utils.js";
 
 import type { Observable, OperatorFunction } from "rxjs";
 import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
@@ -90,7 +90,7 @@ export function filterSubModeledElementIds({
 }): OperatorFunction<Id64Array, Id64Array> {
   return (obs) => {
     return obs.pipe(
-      concatAll(),
+      mergeAll(),
       mergeMap(async (elementId) => ({ elementId, hasSubModel: await doesSubModelExist(elementId) })),
       filter(({ hasSubModel }) => hasSubModel),
       map(({ elementId }) => elementId),

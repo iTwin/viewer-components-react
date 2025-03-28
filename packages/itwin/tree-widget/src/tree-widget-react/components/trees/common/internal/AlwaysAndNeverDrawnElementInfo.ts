@@ -26,8 +26,7 @@ import {
   tap,
 } from "rxjs";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { pushToMap } from "../Utils.js";
-import { setDifference } from "./Utils.js";
+import { pushToMap, setDifference } from "./Utils.js";
 
 import type { Observable, Subscription } from "rxjs";
 import type { BeEvent, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";

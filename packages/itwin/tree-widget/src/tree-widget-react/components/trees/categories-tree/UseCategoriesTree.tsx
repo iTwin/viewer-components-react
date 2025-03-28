@@ -18,7 +18,7 @@ import { createCategoriesTreeVisibilityHandler } from "./internal/CategoriesTree
 import { DEFINITION_CONTAINER_CLASS, SUB_CATEGORY_CLASS } from "./internal/ClassNameDefinitions.js";
 
 import type { ReactNode } from "react";
-import type { Id64String } from "@itwin/core-bentley";
+import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
@@ -32,7 +32,7 @@ type HierarchyFilteringPaths = Awaited<ReturnType<Required<VisibilityTreeProps>[
 /** @beta */
 export interface UseCategoriesTreeProps {
   activeView: Viewport;
-  onCategoriesFiltered?: (categories: CategoryInfo[] | undefined) => void;
+  onCategoriesFiltered?: (props: { categories: CategoryInfo[] | undefined; models?: Id64Array }) => void;
   filter?: string;
   emptyTreeContent?: ReactNode;
   hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>;
@@ -62,11 +62,18 @@ function useCachedVisibility(activeView: Viewport, hierarchyConfig: CategoriesTr
   const currentIModelRef = useRef(activeView.iModel);
 
   const resetCategoriesTreeIdsCache = () => {
+    cacheRef.current?.[Symbol.dispose]();
     cacheRef.current = undefined;
   };
 
+  useEffect(() => {
+    resetCategoriesTreeIdsCache();
+  }, [viewType]);
+
   const getCategoriesTreeIdsCache = useCallback(() => {
-    cacheRef.current = new CategoriesTreeIdsCache(createECSqlQueryExecutor(currentIModelRef.current), viewType);
+    if (!cacheRef.current) {
+      cacheRef.current = new CategoriesTreeIdsCache(createECSqlQueryExecutor(currentIModelRef.current), viewType);
+    }
     return cacheRef.current;
   }, [viewType]);
 
@@ -74,6 +81,10 @@ function useCachedVisibility(activeView: Viewport, hierarchyConfig: CategoriesTr
   const [visibilityHandlerFactory, setVisibilityHandlerFactory] = useState<VisibilityTreeProps["visibilityHandlerFactory"]>(() =>
     createVisibilityHandlerFactory(activeView, getCategoriesTreeIdsCache, hierarchyConfig, filteredPaths),
   );
+
+  useEffect(() => {
+    cacheRef.current?.clearFilteredElementsModels();
+  }, [filteredPaths]);
 
   useIModelChangeListener({
     imodel: activeView.iModel,
@@ -131,7 +142,7 @@ export function useCategoriesTree({
 
   const getFilteredPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
     setFilteringError(undefined);
-    onCategoriesFiltered?.(undefined);
+    onCategoriesFiltered?.({ categories: undefined, models: undefined });
     if (!filter) {
       onFilteredPathsChanged(undefined);
       return undefined;
@@ -178,10 +189,16 @@ export function useCategoriesTree({
   };
 }
 
-async function getCategoriesFromPaths(paths: HierarchyFilteringPaths, idsCache: CategoriesTreeIdsCache, elementClassName: string): Promise<CategoryInfo[] | undefined> {
+async function getCategoriesFromPaths(
+  paths: HierarchyFilteringPaths,
+  idsCache: CategoriesTreeIdsCache,
+  elementClassName: string,
+): Promise<{ categories: CategoryInfo[] | undefined; models?: Id64Array }> {
   if (!paths) {
-    return undefined;
+    return { categories: undefined };
   }
+
+  // const filteredElements = new Set<Id64String>();
 
   const categories = new Map<Id64String, Id64String[]>();
   for (const path of paths) {
@@ -194,12 +211,22 @@ async function getCategoriesFromPaths(paths: HierarchyFilteringPaths, idsCache: 
     let subCategory: HierarchyNodeIdentifier | undefined;
 
     let lastNodeInfo: { lastNode: HierarchyNodeIdentifier; nodeIndex: number } | undefined;
+
     for (let i = 0; i < currPath.length; ++i) {
       const currentNode = currPath[i];
       if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(currentNode)) {
         continue;
       }
       if (currentNode.className === elementClassName) {
+        // for (let j = i + 1; j < currPath.length; ++j) {
+        //   const childNode = currPath[j];
+        //   if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(childNode)) {
+        //     continue;
+        //   }
+        //   if (childNode.className === elementClassName) {
+        //     filteredElements.add(childNode.id);
+        //   }
+        // }
         break;
       }
       lastNodeInfo = { lastNode: currentNode, nodeIndex: i };
@@ -238,11 +265,24 @@ async function getCategoriesFromPaths(paths: HierarchyFilteringPaths, idsCache: 
       entry.push(subCategory.id);
     }
   }
+  let models: Id64Set | undefined;
+  // if (filteredElements.size > 0) {
+  //   if (!models) {
+  //     models = new Set();
+  //   }
 
-  return [...categories.entries()].map(([categoryId, subCategoryIds]) => ({
-    categoryId,
-    subCategoryIds: subCategoryIds.length === 0 ? undefined : subCategoryIds,
-  }));
+  //   const elementModelMap = await idsCache.getFilteredElementsModels([...filteredElements]);
+  //   for (const modelId of elementModelMap.values()) {
+  //     models.add(modelId);
+  //   }
+  // }
+  return {
+    categories: [...categories.entries()].map(([categoryId, subCategoryIds]) => ({
+      categoryId,
+      subCategoryIds: subCategoryIds.length === 0 ? undefined : subCategoryIds,
+    })),
+    models: models ? [...models] : undefined,
+  };
 }
 
 const categorySvg = new URL("@itwin/itwinui-icons/bis-category-3d.svg", import.meta.url).href;

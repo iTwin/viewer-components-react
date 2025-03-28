@@ -32,7 +32,7 @@ import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies
 import { toggleAllCategories } from "../../common/CategoriesVisibilityUtils.js";
 import { AlwaysAndNeverDrawnElementInfo } from "../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
 import { createVisibilityStatus, getTooltipOptions } from "../../common/internal/Tooltip.js";
-import { setDifference, setIntersection } from "../../common/internal/Utils.js";
+import { releaseMainThreadOnItemsCount, setDifference, setIntersection } from "../../common/internal/Utils.js";
 import { createVisibilityChangeEventListener } from "../../common/internal/VisibilityChangeEventListener.js";
 import {
   changeElementStateNoChildrenOperator,
@@ -45,7 +45,6 @@ import {
 } from "../../common/internal/VisibilityUtils.js";
 import { toVoidPromise } from "../../common/Rxjs.js";
 import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility.js";
-import { releaseMainThreadOnItemsCount } from "../Utils.js";
 import { createFilteredTree, parseCategoryKey } from "./FilteredTree.js";
 import { ModelsTreeNode } from "./ModelsTreeNode.js";
 
@@ -514,11 +513,16 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       const { elementId, modelId, categoryId } = props;
 
       const viewsModel = viewport.view.viewsModel(modelId);
-      const elementStatus = getElementOverriddenVisibility({elementId, ignoreTooltip, viewport, tooltips: {
-        visibileThorughAlwaysDrawn: "modelsTree.element.displayedThroughAlwaysDrawnList",
-        hiddenThroughAlwaysDrawnExclusive: "modelsTree.element.hiddenDueToOtherElementsExclusivelyAlwaysDrawn",
-        hiddenThroughNeverDrawn: "modelsTree.element.hiddenThroughNeverDrawnList"
-      }});
+      const elementStatus = getElementOverriddenVisibility({
+        elementId,
+        ignoreTooltip,
+        viewport,
+        tooltips: {
+          visibileThorughAlwaysDrawn: "modelsTree.element.displayedThroughAlwaysDrawnList",
+          hiddenThroughAlwaysDrawnExclusive: "modelsTree.element.hiddenDueToOtherElementsExclusivelyAlwaysDrawn",
+          hiddenThroughNeverDrawn: "modelsTree.element.hiddenThroughNeverDrawnList",
+        },
+      });
 
       return from(this._idsCache.hasSubModel(elementId)).pipe(
         mergeMap((hasSubModel) => (hasSubModel ? this.getModelVisibilityStatus({ modelId: elementId }) : of(undefined))),
@@ -880,32 +884,6 @@ export async function showAllModels(models: string[], viewport: Viewport) {
   viewport.clearNeverDrawn();
   viewport.clearAlwaysDrawn();
   await toggleAllCategories(viewport, true);
-}
-
-/**
- * Disables display of all given models.
- * @public
- */
-export async function hideAllModels(models: string[], viewport: Viewport) {
-  viewport.changeModelDisplay(models, false);
-}
-
-/**
- * Inverts display of all given models.
- * @public
- */
-export async function invertAllModels(models: string[], viewport: Viewport) {
-  const notViewedModels: string[] = [];
-  const viewedModels: string[] = [];
-  models.forEach((modelId) => {
-    if (viewport.viewsModel(modelId)) {
-      viewedModels.push(modelId);
-    } else {
-      notViewedModels.push(modelId);
-    }
-  });
-  await viewport.addViewedModels(notViewedModels);
-  viewport.changeModelDisplay(viewedModels, false);
 }
 
 /**

@@ -29,10 +29,10 @@ import {
 import { assert, Id64 } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
-import { enableCategoryDisplay, enableSubCategoryDisplay, toggleAllCategories } from "../../common/CategoriesVisibilityUtils.js";
+import { enableCategoryDisplay, enableSubCategoryDisplay } from "../../common/CategoriesVisibilityUtils.js";
 import { AlwaysAndNeverDrawnElementInfo } from "../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
 import { createVisibilityStatus, getTooltipOptions } from "../../common/internal/Tooltip.js";
-import { getDistinctMapValues, setDifference, setIntersection } from "../../common/internal/Utils.js";
+import { getDistinctMapValues, releaseMainThreadOnItemsCount, setDifference, setIntersection } from "../../common/internal/Utils.js";
 import { createVisibilityChangeEventListener } from "../../common/internal/VisibilityChangeEventListener.js";
 import {
   changeElementStateNoChildrenOperator,
@@ -45,9 +45,8 @@ import {
 } from "../../common/internal/VisibilityUtils.js";
 import { toVoidPromise } from "../../common/Rxjs.js";
 import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility.js";
-import { releaseMainThreadOnItemsCount } from "../../models-tree/Utils.js";
 import { getClassesByView } from "./CategoriesTreeIdsCache.js";
-import { CategoriesTreeNode, getModelId } from "./CategoriesTreeNode.js";
+import { CategoriesTreeNode } from "./CategoriesTreeNode.js";
 import { createFilteredTree, parseCategoryKey, parseSubCategoryKey } from "./FilteredTree.js";
 
 import type { CategoryAlwaysOrNeverDrawnElementsQueryProps } from "../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
@@ -148,10 +147,16 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     });
     this._alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfo(_props.viewport);
     this._idsCache = this._props.idsCache;
-    const { categoryClass, categoryElementClass } = getClassesByView(_props.viewport.view.is2d() ? "2d" : "3d");
+    const { categoryClass, categoryElementClass, categoryModelClass } = getClassesByView(_props.viewport.view.is2d() ? "2d" : "3d");
     if (_props.filteredPaths) {
-      this._idsCache.clearFilteredElementsModels();
-      this._filteredTree = createFilteredTree(this._props.imodelAccess, _props.filteredPaths, categoryClass, categoryElementClass, this._idsCache);
+      this._filteredTree = createFilteredTree({
+        idsCache: this._idsCache,
+        filteringPaths: _props.filteredPaths,
+        categoryClassName: categoryClass,
+        categoryElementClassName: categoryElementClass,
+        categoryModelClassName: categoryModelClass,
+        imodelAccess: this._props.imodelAccess,
+      });
     }
     this._subscriptions.push(this._elementChangeQueue.pipe(concatAll()).subscribe());
   }
@@ -234,26 +239,31 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     if (CategoriesTreeNode.isCategoryNode(node)) {
       return this.getCategoryDisplayStatus({
         categoryIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
-        modelId: getModelId(node),
+        modelId: CategoriesTreeNode.getModelId(node),
         ignoreSubCategories: node.extendedData?.isCategoryOfSubModel,
       });
     }
 
-    if (!node.extendedData?.categoryId) {
+    const categoryId = CategoriesTreeNode.getCategoryId(node);
+    if (!categoryId) {
       return of(createVisibilityStatus("disabled"));
     }
 
     if (CategoriesTreeNode.isSubCategoryNode(node)) {
       return this.getSubCategoryDisplayStatus({
-        categoryId: node.extendedData?.categoryId,
+        categoryId,
         subCategoryIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
       });
     }
 
+    const modelId = CategoriesTreeNode.getModelId(node);
+    if (!modelId) {
+      return of(createVisibilityStatus("disabled"));
+    }
     return this.getElementDisplayStatus({
       elementId: node.key.instanceKeys[0].id,
-      modelId: node.extendedData?.modelId,
-      categoryId: node.extendedData?.categoryId,
+      modelId,
+      categoryId,
     });
   }
 
@@ -797,13 +807,14 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     if (CategoriesTreeNode.isCategoryNode(node)) {
       return this.changeCategoryState({
         categoryIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
-        modelId: getModelId(node),
+        modelId: CategoriesTreeNode.getModelId(node),
         on,
         ignoreSubCategories: node.extendedData?.isCategoryOfSubModel,
       });
     }
 
-    if (!node.extendedData?.categoryId) {
+    const categoryId = CategoriesTreeNode.getCategoryId(node);
+    if (!categoryId) {
       return EMPTY;
     }
 
@@ -812,7 +823,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
         return EMPTY;
       }
       return this.changeSubCategoryState({
-        categoryId: node.extendedData.categoryId,
+        categoryId,
         subCategoryIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
         on,
       });
@@ -821,10 +832,16 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     if (!this._props.hierarchyConfig.showElements) {
       return EMPTY;
     }
+
+    const modelId = CategoriesTreeNode.getModelId(node);
+    if (!modelId) {
+      return EMPTY;
+    }
+
     return this.changeElementsState({
       elementIds: new Set([...node.key.instanceKeys.map(({ id }) => id)]),
-      modelId: node.extendedData.modelId,
-      categoryId: node.extendedData.categoryId,
+      modelId,
+      categoryId,
       on,
     });
   }
@@ -1178,64 +1195,13 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
   }
 }
 
-
 /**
- * Enables display of all given models. Also enables display of all categories and clears always and
+ * Enables display of all given models. Also clears always and
  * never drawn lists in the viewport.
  * @public
  */
-export async function showAllModels(models: string[], viewport: Viewport) {
+export async function showAllModelsCategoriesTree(models: string[], viewport: Viewport) {
   await viewport.addViewedModels(models);
   viewport.clearNeverDrawn();
   viewport.clearAlwaysDrawn();
-  await toggleAllCategories(viewport, true);
-}
-
-/**
- * Disables display of all given models.
- * @public
- */
-export async function hideAllModels(models: string[], viewport: Viewport) {
-  viewport.changeModelDisplay(models, false);
-}
-
-/**
- * Inverts display of all given models.
- * @public
- */
-export async function invertAllModels(models: string[], viewport: Viewport) {
-  const notViewedModels: string[] = [];
-  const viewedModels: string[] = [];
-  models.forEach((modelId) => {
-    if (viewport.viewsModel(modelId)) {
-      viewedModels.push(modelId);
-    } else {
-      notViewedModels.push(modelId);
-    }
-  });
-  await viewport.addViewedModels(notViewedModels);
-  viewport.changeModelDisplay(viewedModels, false);
-}
-
-/**
- * Based on the value of `enable` argument, either enables or disables display of given models.
- * @public
- */
-export async function toggleModels(models: string[], enable: boolean, viewport: Viewport) {
-  if (!models) {
-    return;
-  }
-  if (enable) {
-    viewport.changeModelDisplay(models, false);
-  } else {
-    await viewport.addViewedModels(models);
-  }
-}
-
-/**
- * Checks if all given models are displayed in given viewport.
- * @public
- */
-export function areAllModelsVisible(models: string[], viewport: Viewport) {
-  return models.length !== 0 ? models.every((id) => viewport.viewsModel(id)) : false;
 }

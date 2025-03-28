@@ -4,17 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { bufferCount, defer, firstValueFrom, from, lastValueFrom, map, merge, mergeMap, of, reduce, toArray } from "rxjs";
+import { assert } from "@itwin/core-bentley";
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition, ProcessedHierarchyNode } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
-import { getDistinctMapValues } from "../common/internal/Utils.js";
+import { createIdsSelector, getDistinctMapValues, parseIdsSelectorResult, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
-import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils.js";
-import { releaseMainThreadOnItemsCount } from "../models-tree/Utils.js";
 import { getClassesByView } from "./internal/CategoriesTreeIdsCache.js";
-import { DEFINITION_CONTAINER_CLASS, GEOMETRIC_MODEL_CLASS, MODEL_3D_CLASS, SUB_CATEGORY_CLASS } from "./internal/ClassNameDefinitions.js";
+import { DEFINITION_CONTAINER_CLASS, SUB_CATEGORY_CLASS } from "./internal/ClassNameDefinitions.js";
 
-import type { Observable } from "rxjs";
 import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { Observable } from "rxjs";
 import type {
   DefineHierarchyLevelProps,
   DefineInstanceNodeChildHierarchyLevelProps,
@@ -81,6 +80,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   private _iModelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   private _categoryClass: string;
   private _categoryElementClass: string;
+  private _categoryModelClass: string;
 
   public constructor(props: CategoriesTreeDefinitionProps) {
     this._iModelAccess = props.imodelAccess;
@@ -91,9 +91,10 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
       instanceLabelSelectClauseFactory: this._nodeLabelSelectClauseFactory,
     });
     this._hierarchyConfig = props.hierarchyConfig;
-    const { categoryClass, categoryElementClass } = getClassesByView(props.viewType);
+    const { categoryClass, categoryElementClass, categoryModelClass } = getClassesByView(props.viewType);
     this._categoryClass = categoryClass;
     this._categoryElementClass = categoryElementClass;
+    this._categoryModelClass = categoryModelClass;
   }
 
   public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
@@ -105,8 +106,9 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
           modelEntry = new Set();
           modelElementsMap.set(child.extendedData?.modelId, modelEntry);
         }
-        if (child.key.type === "instances") {
-          modelEntry.add(child.key.instanceKeys[0].id);
+        assert(child.key.type === "instances");
+        for (const { id } of child.key.instanceKeys) {
+          modelEntry.add(id);
         }
       });
       return {
@@ -114,8 +116,8 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         label: node.label,
         extendedData: {
           ...node.extendedData,
-          // add `modelId` and `categoryId` from the first grouped element
-          ...node.children[0].extendedData,
+          // add `categoryId` from the first grouped element
+          categoryId: node.children[0].extendedData?.categoryId,
           modelElementsMap,
           // `imageId` is assigned to instance nodes at query time, but grouping ones need to
           // be handled during post-processing
@@ -145,7 +147,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                     definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createISubModeledElementChildrenQuery(requestProps),
                   },
                   {
-                    parentInstancesNodePredicate: MODEL_3D_CLASS,
+                    parentInstancesNodePredicate: this._categoryModelClass,
                     definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createGeometricModel3dChildrenQuery(requestProps),
                   },
                 ]
@@ -185,7 +187,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     // hidden - the filter will get applied on the child hierarchy levels
     return [
       {
-        fullClassName: GEOMETRIC_MODEL_CLASS,
+        fullClassName: this._categoryModelClass,
         query: {
           ecsql: `
             SELECT
@@ -196,7 +198,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 hideNodeInHierarchy: true,
                 hasChildren: true,
               })}
-            FROM ${GEOMETRIC_MODEL_CLASS} this
+            FROM ${this._categoryModelClass} this
             WHERE
               this.ModeledElement.Id IN (${elementIds.map(() => "?").join(",")})
               AND NOT this.IsPrivate
@@ -352,7 +354,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
             FROM ${this._categoryElementClass} e
             WHERE
               e.Parent.Id IS NULL
-              AND e.ECInstanceId NOT IN (SELECT m.ECInstanceId FROM ${GEOMETRIC_MODEL_CLASS} m)
+              AND e.ECInstanceId NOT IN (SELECT m.ECInstanceId FROM ${this._categoryModelClass} m)
           )`);
       }
       return conditions.length > 0
@@ -843,7 +845,7 @@ function createGeometricElementInstanceKeyPaths(
   targetItems: Array<Id64String>,
 ): Observable<HierarchyFilteringPath> {
   const separator = ";";
-  const { categoryClass, categoryElementClass } = getClassesByView(viewType);
+  const { categoryClass, categoryElementClass, categoryModelClass } = getClassesByView(viewType);
   if (targetItems.length === 0 || !hierarchyConfig.showElements) {
     return of([]);
   }
@@ -860,7 +862,7 @@ function createGeometricElementInstanceKeyPaths(
             'e${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT)
           )
         FROM ${categoryElementClass} e
-        LEFT JOIN ${GEOMETRIC_MODEL_CLASS} m ON (e.Parent.Id IS NULL AND m.ECInstanceId = e.Model.Id)
+        LEFT JOIN ${categoryModelClass} m ON (e.Parent.Id IS NULL AND m.ECInstanceId = e.Model.Id)
         LEFT JOIN ${categoryClass} c ON (e.Parent.Id IS NULL AND c.ECInstanceId = e.Category.Id)
         WHERE e.ECInstanceId IN (${targetItems.join(",")})
 
@@ -876,7 +878,7 @@ function createGeometricElementInstanceKeyPaths(
           )
         FROM CategoriesElementsHierarchy ce
         JOIN ${categoryElementClass} pe ON (pe.ECInstanceId = ce.ParentId OR pe.ECInstanceId = ce.ModelId AND ce.ParentId IS NULL)
-        LEFT JOIN ${GEOMETRIC_MODEL_CLASS} m ON (pe.Parent.Id IS NULL AND m.ECInstanceId = pe.Model.Id)
+        LEFT JOIN ${categoryModelClass} m ON (pe.Parent.Id IS NULL AND m.ECInstanceId = pe.Model.Id)
         LEFT JOIN ${categoryClass} c ON (pe.Parent.Id IS NULL AND c.ECInstanceId = pe.Category.Id)
       )`,
     ];
@@ -892,7 +894,7 @@ function createGeometricElementInstanceKeyPaths(
     );
   }).pipe(
     releaseMainThreadOnItemsCount(300),
-    map((row) => parseQueryRow(row, separator, categoryElementClass, categoryClass)),
+    map((row) => parseQueryRow(row, separator, categoryElementClass, categoryClass, categoryModelClass)),
     mergeMap(async (elementHierarchyPath) => {
       const pathToCategory = await idsCache.getInstanceKeyPaths({ categoryId: elementHierarchyPath[0].id });
       pathToCategory.pop(); // category is already included in the element hierarchy path
@@ -902,7 +904,7 @@ function createGeometricElementInstanceKeyPaths(
   );
 }
 
-function parseQueryRow(row: ECSqlQueryRow, separator: string, elementClassName: string, categoryClassName: string) {
+function parseQueryRow(row: ECSqlQueryRow, separator: string, elementClassName: string, categoryClassName: string, modelClassName: string) {
   const rowElements: string[] = row[0].split(separator);
   const path = new Array<InstanceKey>();
   for (let i = 0; i < rowElements.length; i += 2) {
@@ -918,7 +920,7 @@ function parseQueryRow(row: ECSqlQueryRow, separator: string, elementClassName: 
         if (i === 0) {
           break;
         }
-        path.push({ className: MODEL_3D_CLASS, id: rowElements[i + 1] });
+        path.push({ className: modelClassName, id: rowElements[i + 1] });
         break;
     }
   }

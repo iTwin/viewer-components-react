@@ -33,7 +33,7 @@ interface SubCategoryInfo {
 }
 
 /** @internal */
-export class CategoriesTreeIdsCache {
+export class CategoriesTreeIdsCache implements Disposable {
   private _definitionContainersInfo: Promise<Map<Id64String, DefinitionContainerInfo>> | undefined;
   private _modelsCategoriesInfo: Promise<Map<Id64String, CategoriesInfo>> | undefined;
   private _elementModelsCategories: Promise<Map<Id64String, { categories: Id64Set; isSubModel: boolean; isModelPrivate: boolean }>> | undefined;
@@ -53,6 +53,10 @@ export class CategoriesTreeIdsCache {
     this._categoryClass = categoryClass;
     this._categoryElementClass = categoryElementClass;
     this._categoryElementCounts = new ModelCategoryElementsCountCache(_queryExecutor, categoryElementClass);
+  }
+
+  public [Symbol.dispose]() {
+    this._categoryElementCounts[Symbol.dispose]();
   }
 
   private async *queryFilteredElementsModels(filteredElements: Id64Array): AsyncIterableIterator<{
@@ -552,6 +556,6 @@ export class CategoriesTreeIdsCache {
 /** @internal */
 export function getClassesByView(viewType: "2d" | "3d") {
   return viewType === "2d"
-    ? { categoryClass: "BisCore.DrawingCategory", categoryElementClass: "BisCore.GeometricElement2d" }
-    : { categoryClass: "BisCore.SpatialCategory", categoryElementClass: "BisCore.GeometricElement3d" };
+    ? { categoryClass: "BisCore.DrawingCategory", categoryElementClass: "BisCore.GeometricElement2d", categoryModelClass: "BisCore.GeometricModel2d" }
+    : { categoryClass: "BisCore.SpatialCategory", categoryElementClass: "BisCore.GeometricElement3d", categoryModelClass: "BisCore.GeometricModel3d" };
 }
