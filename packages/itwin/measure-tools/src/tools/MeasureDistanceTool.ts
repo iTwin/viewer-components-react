@@ -128,7 +128,7 @@ MeasureDistanceToolModel
         this.toolModel.sheetViewId = ev.viewport.view.id;
 
         if (drawingInfo?.drawingId !== undefined && drawingInfo.origin !== undefined && drawingInfo.worldScale !== undefined) {
-          const data: DrawingMetadata = { origin: drawingInfo.origin, drawingId: drawingInfo.drawingId, worldScale: drawingInfo.worldScale, extents: drawingInfo.extents};
+          const data: DrawingMetadata = { origin: drawingInfo.origin, drawingId: drawingInfo.drawingId, worldScale: drawingInfo.worldScale, extents: drawingInfo.extents, sheetToWorldTransform: drawingInfo.sheetToWorldTransform, sheetToProfileTransform: drawingInfo.sheetToProfileTransform};
           this.toolModel.drawingMetadata = data;
         }
       }
