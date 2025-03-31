@@ -89,10 +89,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       imodelAccess,
       viewport,
       idsCache,
-      hierarchyConfig: {
-        hideSubCategories: hierarchyConfig.hideSubCategories,
-        showElements: hierarchyConfig.showElements,
-      },
+      hierarchyConfig,
     };
   }
 
