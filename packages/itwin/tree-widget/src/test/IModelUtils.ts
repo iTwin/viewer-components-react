@@ -326,6 +326,7 @@ export function insertSubCategory(
   const id = builder.insertElement({
     classFullName: className,
     model,
+    appearance: { weight: 1 },
     code: builder.createCode(model, BisCodeSpec.subCategory, codeValue),
     parent: {
       id: parentCategoryId,

@@ -197,6 +197,9 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 nodeLabel: "", // doesn't matter - the node is always hidden
                 hideNodeInHierarchy: true,
                 hasChildren: true,
+                extendedData: {
+                  isModel: true
+                }
               })}
             FROM ${this._categoryModelClass} this
             WHERE

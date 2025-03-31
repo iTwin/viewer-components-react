@@ -9,10 +9,7 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-import {
-  CategoriesTreeDefinition,
-  defaultHierarchyConfiguration,
-} from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
+import { CategoriesTreeDefinition } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 import {
   buildIModel,
@@ -255,6 +252,148 @@ describe("Categories tree", () => {
       });
     });
 
+    it("shows element when showElements is set to true", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+
+        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id });
+
+        const element = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+
+        return { definitionContainer, category, element };
+      });
+
+      const { imodel, ...keys } = buildIModelResult;
+      using provider = createCategoryTreeProvider(imodel, "3d", true);
+
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.definitionContainer],
+            supportsFiltering: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.category],
+                label: "SpatialCategory",
+                children: [
+                  NodeValidators.createForClassGroupingNode({
+                    className: keys.element.className,
+                    children: [
+                      NodeValidators.createForInstanceNode({
+                        instanceKeys: [keys.element],
+                        children: false,
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      });
+    });
+
+    it("shows element and subCategories when showElements is set to true", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+
+        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id });
+
+        const element = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+        const subCategory = insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "Test SpatialSubCategory", modelId: definitionModel.id });
+
+        return { definitionContainer, category, element, subCategory };
+      });
+
+      const { imodel, ...keys } = buildIModelResult;
+      using provider = createCategoryTreeProvider(imodel, "3d", true);
+
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.definitionContainer],
+            supportsFiltering: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.category],
+                label: "SpatialCategory",
+                children: [
+                  NodeValidators.createForClassGroupingNode({
+                    className: keys.element.className,
+                    children: [
+                      NodeValidators.createForInstanceNode({
+                        instanceKeys: [keys.element],
+                        children: false,
+                      }),
+                    ],
+                  }),
+                  NodeValidators.createForInstanceNode({
+                    label: "SpatialCategory",
+                    children: false,
+                  }),
+                  NodeValidators.createForInstanceNode({
+                    instanceKeys: [keys.subCategory],
+                    children: false,
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      });
+    });
+
+    it("shows element and hides subCategories when showElements and hideSubCategories are set to true", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+
+        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id });
+
+        const element = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+        const subCategory = insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "Test SpatialSubCategory", modelId: definitionModel.id });
+
+        return { definitionContainer, category, element, subCategory };
+      });
+
+      const { imodel, ...keys } = buildIModelResult;
+      using provider = createCategoryTreeProvider(imodel, "3d", true, true);
+
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.definitionContainer],
+            supportsFiltering: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.category],
+                label: "SpatialCategory",
+                children: [
+                  NodeValidators.createForClassGroupingNode({
+                    className: keys.element.className,
+                    children: [
+                      NodeValidators.createForInstanceNode({
+                        instanceKeys: [keys.element],
+                        children: false,
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      });
+    });
+
     it("shows all definition containers when they contain category directly or indirectly", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
@@ -442,10 +581,15 @@ describe("Categories tree", () => {
   });
 });
 
-function createCategoryTreeProvider(imodel: IModelConnection, viewType: "2d" | "3d") {
+function createCategoryTreeProvider(imodel: IModelConnection, viewType: "2d" | "3d", showElements?: boolean, hideSubCategories?: boolean) {
   const imodelAccess = createIModelAccess(imodel);
   return createIModelHierarchyProvider({
     imodelAccess,
-    hierarchyDefinition: new CategoriesTreeDefinition({ imodelAccess, viewType, hierarchyConfig: defaultHierarchyConfiguration, idsCache: new CategoriesTreeIdsCache(imodelAccess, viewType) }),
+    hierarchyDefinition: new CategoriesTreeDefinition({
+      imodelAccess,
+      viewType,
+      idsCache: new CategoriesTreeIdsCache(imodelAccess, viewType),
+      hierarchyConfig: { showElements: !!showElements, hideSubCategories: !!hideSubCategories },
+    }),
   });
 }
