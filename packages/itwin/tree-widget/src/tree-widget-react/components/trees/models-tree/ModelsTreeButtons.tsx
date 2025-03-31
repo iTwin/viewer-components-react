@@ -7,8 +7,8 @@ import { useEffect, useMemo, useState } from "react";
 import { IconButton } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
-import { hideAllModels, invertAllModels } from "../common/Utils.js";
-import { areAllModelsVisible, showAllModels, toggleModels } from "./internal/ModelsTreeVisibilityHandler.js";
+import { hideAllModels, invertAllModels, showAll } from "../common/Utils.js";
+import { areAllModelsVisible, toggleModels } from "./internal/ModelsTreeVisibilityHandler.js";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
@@ -116,10 +116,10 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
       label={TreeWidget.translate("modelsTree.buttons.showAll.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("models-tree-showall");
-        void showAllModels(
-          props.models.map((model) => model.id),
-          props.viewport,
-        );
+        void showAll({
+          models: props.models.map((model) => model.id),
+          viewport: props.viewport,
+        });
       }}
       icon={visibilityShowSvg}
     />

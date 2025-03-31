@@ -7,17 +7,16 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAsyncValue } from "@itwin/components-react";
 import { IconButton } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../../../TreeWidget.js";
-import { hideAllCategories, invertAllCategories, loadCategoriesFromViewport, showAllCategories } from "../common/CategoriesVisibilityUtils.js";
-import { hideAllModels, invertAllModels } from "../common/Utils.js";
+import { hideAllCategories, invertAllCategories, loadCategoriesFromViewport } from "../common/CategoriesVisibilityUtils.js";
+import { createIModelAccess } from "../common/internal/Utils.js";
+import { hideAllModels, showAll } from "../common/Utils.js";
 import { getClassesByView } from "./internal/CategoriesTreeIdsCache.js";
-import { showAllModelsCategoriesTree } from "./internal/CategoriesTreeVisibilityHandler.js";
 
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { TreeToolbarButtonProps } from "../../tree-header/SelectableTree.js";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { ModelQueryParams } from "@itwin/core-common";
-import type { CategoriesTreeHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { SchemaContext } from "@itwin/ecschema-metadata";
 
 /**
  * Props that get passed to `CategoriesTreeComponent` header button renderer.
@@ -28,9 +27,7 @@ export interface CategoriesTreeHeaderButtonProps extends TreeToolbarButtonProps 
   /** A list of categories available in the iModel */
   categories: CategoryInfo[];
   /** A list of models available in the iModel. */
-  models?: Id64Array;
-  /**  */
-  hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>;
+  models: Id64Array;
 }
 
 /**
@@ -53,24 +50,23 @@ export interface CategoriesTreeHeaderButtonProps extends TreeToolbarButtonProps 
  */
 export function useCategoriesTreeButtonProps({
   viewport,
-  hierarchyConfig,
+  getSchemaContext,
 }: {
   viewport: Viewport;
-  hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>;
+  getSchemaContext: (imodel: IModelConnection) => SchemaContext;
 }): {
-  buttonProps: Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport" | "models" | "hierarchyConfig">;
+  buttonProps: Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport" | "models">;
   onCategoriesFiltered: (props: { categories: CategoryInfo[] | undefined; models?: Id64Array }) => void;
 } {
   const [filteredCategories, setFilteredCategories] = useState<CategoryInfo[] | undefined>();
   const [filteredModels, setFilteredModels] = useState<Id64Array | undefined>();
   const categories = useCategories(viewport);
-  const models = useAvailableModels(viewport, hierarchyConfig?.showElements);
+  const models = useAvailableModels(viewport, getSchemaContext);
   return {
     buttonProps: {
       viewport,
       categories: filteredCategories ?? categories,
       models: filteredModels ?? models,
-      hierarchyConfig,
     },
     onCategoriesFiltered: useCallback((props) => {
       setFilteredCategories(props.categories);
@@ -92,13 +88,7 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
       label={TreeWidget.translate("categoriesTree.buttons.showAll.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.(`categories-tree-showall`);
-        void showAllCategories(
-          props.categories.map((category) => category.categoryId),
-          props.viewport,
-        );
-        if (props.hierarchyConfig?.showElements && props.models) {
-          void showAllModelsCategoriesTree(props.models, props.viewport);
-        }
+        void showAll({ models: props.models, viewport: props.viewport, categories: props.categories.map((category) => category.categoryId) });
       }}
       icon={visibilityShowSvg}
     />
@@ -119,9 +109,7 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
           props.categories.map((category) => category.categoryId),
           props.viewport,
         );
-        if (props.models && props.hierarchyConfig?.showElements) {
-          void hideAllModels(props.models, props.viewport);
-        }
+        void hideAllModels(props.models, props.viewport);
       }}
       icon={visibilityHideSvg}
     />
@@ -139,9 +127,6 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
       onClick={() => {
         props.onFeatureUsed?.(`categories-tree-invert`);
         void invertAllCategories(props.categories, props.viewport);
-        if (props.hierarchyConfig?.showElements && props.models) {
-          void invertAllModels(props.models, props.viewport);
-        }
       }}
       icon={visibilityInvertSvg}
     />
@@ -155,40 +140,44 @@ export function useCategories(viewport: Viewport) {
   return useAsyncValue(categoriesPromise) ?? EMPTY_CATEGORIES_ARRAY;
 }
 
-function useAvailableModels(viewport: Viewport, getModels?: boolean): Id64Array | undefined {
-  const [availableModels, setAvailableModels] = useState<Id64Array | undefined>();
+function useAvailableModels(viewport: Viewport, getSchemaContext: (imodel: IModelConnection) => SchemaContext): Id64Array {
+  const [availableModels, setAvailableModels] = useState<Id64Array>([]);
   const imodel = viewport.iModel;
   const viewType = viewport.view.is2d() ? "2d" : "3d";
   useEffect(() => {
-    if (getModels) {
-      queryModelsForHeaderActions(imodel, viewType)
-        .then((models) => {
-          setAvailableModels(models);
-        })
-        .catch(() => {
-          setAvailableModels([]);
-        });
-    }
-  }, [imodel, viewType, getModels]);
+    queryModelsForHeaderActions(imodel, viewType, getSchemaContext)
+      .then((models) => {
+        setAvailableModels(models);
+      })
+      .catch(() => {
+        setAvailableModels([]);
+      });
+  }, [imodel, viewType, getSchemaContext]);
 
   return availableModels;
 }
 
-async function queryModelsForHeaderActions(iModel: IModelConnection, viewType: "2d" | "3d"): Promise<Id64Array> {
+async function queryModelsForHeaderActions(
+  iModel: IModelConnection,
+  viewType: "2d" | "3d",
+  getSchemaContext: (imodel: IModelConnection) => SchemaContext,
+): Promise<Id64Array> {
   const { categoryModelClass } = getClassesByView(viewType);
-  const queryParams: ModelQueryParams = {
-    from: categoryModelClass,
-    where: `
-        EXISTS (
-          SELECT 1
-          FROM BisCore.Element e
-          WHERE e.ECClassId IS (${categoryModelClass}, BisCore.InformationPartitionElement)
-            AND e.ECInstanceId = GeometricModel${viewType}.ModeledElement.Id
-        )
-      `,
-    wantPrivate: false,
-  };
-
-  const modelProps = await iModel.models.queryProps(queryParams);
-  return modelProps.map(({ id }) => id).filter((id): id is Id64String => id !== undefined);
+  const models = new Array<Id64String>();
+  const query = `
+    SELECT
+      m.ECInstanceId id
+    FROM
+      ${categoryModelClass} m
+    WHERE
+      m.IsPrivate = false
+  `;
+  const imodelAccess = createIModelAccess({ imodel: iModel, getSchemaContext });
+  for await (const _row of imodelAccess.createQueryReader(
+    { ecsql: query },
+    { restartToken: "tree-widget/categories-tree/is-definition-container-supported-query", rowFormat: "ECSqlPropertyNames" },
+  )) {
+    models.push(_row.id);
+  }
+  return models;
 }

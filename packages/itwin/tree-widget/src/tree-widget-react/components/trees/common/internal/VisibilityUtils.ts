@@ -231,11 +231,12 @@ export function getElementVisibility(
   viewsModel: boolean,
   overridenVisibility: NonPartialVisibilityStatus | undefined,
   categoryVisibility: NonPartialVisibilityStatus,
+  treeType: "modelsTree" | "categoriesTree",
   subModelVisibilityStatus?: VisibilityStatus,
 ): VisibilityStatus {
   if (subModelVisibilityStatus === undefined) {
     if (!viewsModel) {
-      return createVisibilityStatus("hidden", getTooltipOptions("modelsTree.element.hiddenThroughModel", ignoreTooltip));
+      return createVisibilityStatus("hidden", getTooltipOptions(`${treeType}.element.hiddenThroughModel`, ignoreTooltip));
     }
 
     if (overridenVisibility) {
@@ -244,34 +245,34 @@ export function getElementVisibility(
 
     return createVisibilityStatus(
       categoryVisibility.state,
-      getTooltipOptions(categoryVisibility.state === "visible" ? undefined : "modelsTree.element.hiddenThroughCategory", ignoreTooltip),
+      getTooltipOptions(categoryVisibility.state === "visible" ? undefined : `${treeType}.element.hiddenThroughCategory`, ignoreTooltip),
     );
   }
 
   if (subModelVisibilityStatus.state === "partial") {
-    return createVisibilityStatus("partial", getTooltipOptions("modelsTree.element.someElementsAreHidden", ignoreTooltip));
+    return createVisibilityStatus("partial", getTooltipOptions(`${treeType}.element.someElementsAreHidden`, ignoreTooltip));
   }
 
   if (subModelVisibilityStatus.state === "visible") {
     if (!viewsModel || overridenVisibility?.state === "hidden" || (categoryVisibility.state === "hidden" && !overridenVisibility)) {
-      return createVisibilityStatus("partial", getTooltipOptions("modelsTree.element.partialThroughSubModel", ignoreTooltip));
+      return createVisibilityStatus("partial", getTooltipOptions(`${treeType}.element.partialThroughSubModel`, ignoreTooltip));
     }
     return createVisibilityStatus("visible", getTooltipOptions(undefined, ignoreTooltip));
   }
 
   if (!viewsModel) {
-    return createVisibilityStatus("hidden", getTooltipOptions("modelsTree.element.hiddenThroughModel", ignoreTooltip));
+    return createVisibilityStatus("hidden", getTooltipOptions(`${treeType}.element.hiddenThroughModel`, ignoreTooltip));
   }
 
   if (overridenVisibility) {
     if (overridenVisibility.state === "hidden") {
       return overridenVisibility;
     }
-    return createVisibilityStatus("partial", getTooltipOptions("modelsTree.element.partialThroughElement", ignoreTooltip));
+    return createVisibilityStatus("partial", getTooltipOptions(`${treeType}.element.partialThroughElement`, ignoreTooltip));
   }
 
   if (categoryVisibility.state === "visible") {
-    return createVisibilityStatus("partial", getTooltipOptions("modelsTree.element.partialThroughCategory", ignoreTooltip));
+    return createVisibilityStatus("partial", getTooltipOptions(`${treeType}.element.partialThroughCategory`, ignoreTooltip));
   }
-  return createVisibilityStatus("hidden", getTooltipOptions("modelsTree.element.hiddenThroughCategory", ignoreTooltip));
+  return createVisibilityStatus("hidden", getTooltipOptions(`${treeType}.element.hiddenThroughCategory`, ignoreTooltip));
 }

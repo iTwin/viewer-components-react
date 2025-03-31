@@ -30,7 +30,6 @@ import {
 import { assert, Id64 } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
-import { toggleAllCategories } from "../../common/CategoriesVisibilityUtils.js";
 import { AlwaysAndNeverDrawnElementInfo } from "../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
 import { createVisibilityStatus, getTooltipOptions } from "../../common/internal/Tooltip.js";
 import { releaseMainThreadOnItemsCount, setDifference, setIntersection } from "../../common/internal/Utils.js";
@@ -534,6 +533,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
             viewsModel,
             elementStatus,
             this.getDefaultCategoryVisibilityStatus({ categoryId, modelId, ignoreTooltip: true }),
+            "modelsTree",
             subModelVisibilityStatus,
           ),
         ),
@@ -874,18 +874,6 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     const elementIds = new Set(node.groupedInstanceKeys.map((key) => key.id));
     return { modelId, categoryId, elementIds };
   }
-}
-
-/**
- * Enables display of all given models. Also enables display of all categories and clears always and
- * never drawn lists in the viewport.
- * @public
- */
-export async function showAllModels(models: string[], viewport: Viewport) {
-  await viewport.addViewedModels(models);
-  viewport.clearNeverDrawn();
-  viewport.clearAlwaysDrawn();
-  await toggleAllCategories(viewport, true);
 }
 
 /**

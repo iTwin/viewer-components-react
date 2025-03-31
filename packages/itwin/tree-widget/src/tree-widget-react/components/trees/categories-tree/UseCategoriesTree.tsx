@@ -266,16 +266,6 @@ async function getCategoriesFromPaths(
     }
   }
   let models: Id64Set | undefined;
-  // if (filteredElements.size > 0) {
-  //   if (!models) {
-  //     models = new Set();
-  //   }
-
-  //   const elementModelMap = await idsCache.getFilteredElementsModels([...filteredElements]);
-  //   for (const modelId of elementModelMap.values()) {
-  //     models.add(modelId);
-  //   }
-  // }
   return {
     categories: [...categories.entries()].map(([categoryId, subCategoryIds]) => ({
       categoryId,

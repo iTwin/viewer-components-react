@@ -785,6 +785,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
             viewsModel,
             elementStatus,
             this.getDefaultModelsCategoryVisibilityStatus({ categoryIds: [categoryId], modelId, ignoreTooltip: true }) as unknown as NonPartialVisibilityStatus,
+            "categoriesTree",
             subModelVisibilityStatus,
           ),
         ),
@@ -1210,15 +1211,4 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
 
     return { modelElementsMap, categoryId };
   }
-}
-
-/**
- * Enables display of all given models. Also clears always and
- * never drawn lists in the viewport.
- * @public
- */
-export async function showAllModelsCategoriesTree(models: string[], viewport: Viewport) {
-  await viewport.addViewedModels(models);
-  viewport.clearNeverDrawn();
-  viewport.clearAlwaysDrawn();
 }

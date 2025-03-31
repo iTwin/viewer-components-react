@@ -31,12 +31,12 @@ import {
 } from "../../../IModelUtils.js";
 import { TestUtils, waitFor } from "../../../TestUtils.js";
 import { createIModelAccess } from "../../Common.js";
-import { createModelHierarchyNode } from "../../models-tree/Utils.js";
 import {
   createCategoryHierarchyNode,
   createClassGroupingHierarchyNode,
   createDefinitionContainerHierarchyNode,
   createElementHierarchyNode,
+  createModelHierarchyNode,
   createSubCategoryHierarchyNode,
   createSubModelCategoryHierarchyNode,
 } from "./Utils.js";
@@ -72,13 +72,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
   async function createCommonProps({
     imodel,
-    showElements,
-    hideSubCategories,
+    hierarchyConfig,
     categoryIds,
   }: {
     imodel: IModelConnection;
-    showElements?: boolean;
-    hideSubCategories?: boolean;
+    hierarchyConfig: CategoriesTreeHierarchyConfiguration;
     categoryIds: Id64Array;
   }) {
     const imodelAccess = createIModelAccess(imodel);
@@ -92,8 +90,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
       viewport,
       idsCache,
       hierarchyConfig: {
-        hideSubCategories: hideSubCategories === undefined ? defaultHierarchyConfiguration.hideSubCategories : hideSubCategories,
-        showElements: showElements === undefined ? defaultHierarchyConfiguration.showElements : showElements,
+        hideSubCategories: hierarchyConfig.hideSubCategories,
+        showElements: hierarchyConfig.showElements,
       },
     };
   }
@@ -113,18 +111,20 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
   async function createVisibilityTestData({
     imodel,
-    showElements,
-    hideSubCategories,
+    hierarchyConfig,
     categoryIds,
     testDataVisibilityInitializer,
   }: {
     imodel: IModelConnection;
     testDataVisibilityInitializer?: TestDataVisibilityInitializer;
-    showElements?: boolean;
-    hideSubCategories?: boolean;
+    hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>;
     categoryIds: Id64Array;
   }) {
-    const commonProps = await createCommonProps({ imodel, showElements, hideSubCategories, categoryIds });
+    const hierarchyConfiguration = {
+      ...defaultHierarchyConfiguration,
+      ...hierarchyConfig,
+    };
+    const commonProps = await createCommonProps({ imodel, hierarchyConfig: hierarchyConfiguration, categoryIds });
     const handler = createCategoriesTreeVisibilityHandler(commonProps);
     const provider = createProvider({ ...commonProps });
     testDataVisibilityInitializer?.initialize(commonProps.viewport);
@@ -831,7 +831,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         using visibilityTestData = await createVisibilityTestData({
           imodel,
           categoryIds: getCategoryIds(keys),
-          hideSubCategories: true,
+          hierarchyConfig: { hideSubCategories: true },
           testDataVisibilityInitializer,
         });
         const { handler, provider, viewport } = visibilityTestData;
@@ -878,7 +878,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             imodel,
             categoryIds: getCategoryIds(keys),
             testDataVisibilityInitializer,
-            showElements: true,
+            hierarchyConfig: { showElements: true },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -935,7 +935,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             imodel,
             categoryIds: getCategoryIds(keys),
             testDataVisibilityInitializer,
-            showElements: true,
+            hierarchyConfig: { showElements: true },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -982,7 +982,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             imodel,
             categoryIds: getCategoryIds(keys),
             testDataVisibilityInitializer,
-            showElements: true,
+            hierarchyConfig: { showElements: true },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1037,7 +1037,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             imodel,
             categoryIds: getCategoryIds(keys),
             testDataVisibilityInitializer,
-            showElements: true,
+            hierarchyConfig: { showElements: true },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1085,7 +1085,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             imodel,
             categoryIds: getCategoryIds(keys),
             testDataVisibilityInitializer,
-            showElements: true,
+            hierarchyConfig: { showElements: true },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1122,7 +1122,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             imodel,
             categoryIds: getCategoryIds(keys),
             testDataVisibilityInitializer,
-            showElements: true,
+            hierarchyConfig: { showElements: true },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1164,7 +1164,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             imodel,
             categoryIds: getCategoryIds(keys),
             testDataVisibilityInitializer,
-            showElements: true,
+            hierarchyConfig: { showElements: true },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1217,7 +1217,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             imodel,
             categoryIds: getCategoryIds(keys),
             testDataVisibilityInitializer,
-            showElements: true,
+            hierarchyConfig: { showElements: true },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1271,7 +1271,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             imodel,
             categoryIds: getCategoryIds(keys),
             testDataVisibilityInitializer,
-            showElements: true,
+            hierarchyConfig: { showElements: true },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1322,7 +1322,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             imodel,
             categoryIds: getCategoryIds(keys),
             testDataVisibilityInitializer,
-            showElements: true,
+            hierarchyConfig: { showElements: true },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1372,7 +1372,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             imodel,
             categoryIds: getCategoryIds(keys),
             testDataVisibilityInitializer,
-            showElements: true,
+            hierarchyConfig: { showElements: true },
           });
           const { handler, provider, viewport } = visibilityTestData;
           await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
@@ -1414,7 +1414,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             imodel,
             categoryIds: getCategoryIds(keys),
             testDataVisibilityInitializer,
-            showElements: true,
+            hierarchyConfig: { showElements: true },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1458,7 +1458,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             imodel,
             categoryIds: getCategoryIds(keys),
             testDataVisibilityInitializer,
-            showElements: true,
+            hierarchyConfig: { showElements: true },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1517,7 +1517,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             imodel,
             categoryIds: getCategoryIds(keys),
             testDataVisibilityInitializer,
-            showElements: true,
+            hierarchyConfig: { showElements: true },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1568,7 +1568,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             imodel,
             categoryIds: getCategoryIds(keys),
             testDataVisibilityInitializer,
-            showElements: true,
+            hierarchyConfig: { showElements: true },
           });
           const { handler, provider, viewport } = visibilityTestData;
           await handler.changeVisibility(
@@ -1614,7 +1614,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             imodel,
             categoryIds: getCategoryIds(keys),
             testDataVisibilityInitializer,
-            showElements: true,
+            hierarchyConfig: { showElements: true },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1661,7 +1661,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             imodel,
             categoryIds: getCategoryIds(keys),
             testDataVisibilityInitializer,
-            showElements: true,
+            hierarchyConfig: { showElements: true },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1723,7 +1723,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             imodel,
             categoryIds: getCategoryIds(keys),
             testDataVisibilityInitializer,
-            showElements: true,
+            hierarchyConfig: { showElements: true },
           });
           const { handler, provider, viewport } = visibilityTestData;
 
@@ -1997,7 +1997,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               using visibilityTestData = await createVisibilityTestData({
                 imodel: iModel,
                 categoryIds: getCategoryIds(createdIds as any),
-                showElements: true,
+                hierarchyConfig: { showElements: true },
                 testDataVisibilityInitializer,
               });
               const { handler, provider, viewport } = visibilityTestData;
@@ -2644,7 +2644,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
 
         const { imodel, ...keys } = buildIModelResult;
-        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), hideSubCategories: true });
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), hierarchyConfig: { hideSubCategories: true } });
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);

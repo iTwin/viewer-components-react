@@ -518,6 +518,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 modelId: { selector: "IdToHex(this.Model.Id)" },
                 categoryId: { selector: "IdToHex(this.Category.Id)" },
                 imageId: "icon-item",
+                isElement: true,
               },
               supportsFiltering: true,
             })}
@@ -576,6 +577,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                   modelId: { selector: "IdToHex(this.Model.Id)" },
                   categoryId: { selector: "IdToHex(this.Category.Id)" },
                   imageId: "icon-item",
+                  isElement: true,
                 },
                 supportsFiltering: true,
               })}

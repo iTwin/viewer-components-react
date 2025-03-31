@@ -98,6 +98,7 @@
         "hiddenThroughModel": "Model is hidden",
         "partialThroughSubCategories": "Some subCategories are visible",
         "hiddenThroughSubCategories": "All subCategories are hidden",
+        "visibleThroughSubCategories": "All subCategories are visible",
         "allChildrenHidden": "All subCategories and child elements are hidden",
         "someChildrenVisible": "Some subCategories or child elements are visible and some are hidden",
         "allChildrenVisible": "All subCategories and child elements are visible",
@@ -108,7 +109,8 @@
         "hiddenThroughCategorySelector": "Category display disabled through category selector",
         "allElementsHidden": "All category elements are in the never drawn list or none of the category elements are in the exclusive always drawn list",
         "someElementsHidden": "There are both visible and hidden elements in this category",
-        "allElementsVisible": "All category elements are in the always drawn list"
+        "allElementsVisible": "All category elements are in the always drawn list",
+        "someElementsAreHidden": "There are both visible and hidden elements in this category"
       },
       "element": {
         "hiddenThroughNeverDrawnList": "Element(s) in \"never drawn\" list",

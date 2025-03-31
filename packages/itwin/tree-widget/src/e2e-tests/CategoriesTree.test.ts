@@ -23,6 +23,7 @@ test.describe("Categories tree", () => {
   test.beforeEach(async ({ page, baseURL }) => {
     treeWidget = await initTreeWidgetTest({ page, baseURL });
     await selectTree(treeWidget, "Categories");
+    await locateNode(treeWidget, "Equipment").getByRole("button", { name: "Determining visibility..." }).waitFor({ state: "detached" });
   });
 
   test("initial tree", async ({ page }) => {
@@ -87,6 +88,7 @@ test.describe("Categories tree", () => {
     await treeWidget.getByPlaceholder("Search...").fill("PipeSupport");
 
     // wait for non searched for nodes to disappear
+    await locateNode(treeWidget, "PipeSupport").getByRole("button", { name: "Visible: Category display enabled through category selector", includeHidden: true }).waitFor({ state: "attached"});
     await locateNode(treeWidget, "Equipment").waitFor({ state: "hidden" });
     await takeScreenshot(page, treeWidget);
   });
@@ -150,7 +152,9 @@ test.describe("Categories tree", () => {
 
     await searchBox.clear();
 
-    await locateNode(treeWidget, "Equipment").waitFor({ state: "visible" });
+    const node = locateNode(treeWidget, "Equipment");
+    await node.waitFor({ state: "visible" });
+    await node.getByRole("button", { name: "Visible: All subCategories are visible", includeHidden: true }).waitFor({ state: "attached"});
     await takeScreenshot(page, treeWidget);
   });
 });

@@ -78,7 +78,11 @@ export async function validateNodeVisibility({ node, handler, expectations }: Va
     expect(actualVisibility.state).to.eq(expectations[idToUse]);
     return;
   }
-  expect(actualVisibility.state).to.eq(expectations[id]);
+  if (CategoriesTreeNode.isModelNode(node) || CategoriesTreeNode.isDefinitionContainerNode(node) || CategoriesTreeNode.isElementNode(node)) {
+    expect(actualVisibility.state).to.eq(expectations[id]);
+    return;
+  }
+  throw new Error(`Expected hierarchy to contain only definitionContainers, categories, subcategories, models and elements got ${JSON.stringify(node)}`);
 }
 
 export async function validateHierarchyVisibility({

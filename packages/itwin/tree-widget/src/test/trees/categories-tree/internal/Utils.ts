@@ -120,6 +120,24 @@ export function createElementHierarchyNode(props: {
     extendedData: {
       modelId: props.modelId,
       categoryId: props.categoryId,
+      isElement: true,
+    },
+  };
+}
+
+/** @internal */
+export function createModelHierarchyNode(modelId?: Id64String, hasChildren?: boolean): NonGroupingHierarchyNode {
+  return {
+    key: {
+      type: "instances",
+      instanceKeys: [{ className: "bis:Model", id: modelId ?? "" }],
+    },
+    children: !!hasChildren,
+    label: "",
+    parentKeys: [],
+    extendedData: {
+      isModel: true,
+      modelId: modelId ?? "0x1",
     },
   };
 }
