@@ -3,35 +3,36 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { assert } from "@itwin/core-bentley";
 import { Icon } from "@itwin/itwinui-react/bricks";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
 import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMatches } from "../common/components/EmptyTree.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
+import { useIModelChangeListener } from "../common/UseIModelChangeListener.js";
 import { useTelemetryContext } from "../common/UseTelemetryContext.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
-import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
-import { CategoriesVisibilityHandler } from "./internal/CategoriesVisibilityHandler.js";
+import { CategoriesTreeIdsCache, getClassesByView } from "./internal/CategoriesTreeIdsCache.js";
+import { createCategoriesTreeVisibilityHandler } from "./internal/CategoriesTreeVisibilityHandler.js";
 import { DEFINITION_CONTAINER_CLASS, SUB_CATEGORY_CLASS } from "./internal/ClassNameDefinitions.js";
 
 import type { ReactNode } from "react";
-import type { Id64String } from "@itwin/core-bentley";
-import type { HierarchyNode } from "@itwin/presentation-hierarchies";
-import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
-import type { Viewport } from "@itwin/core-frontend";
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { CategoriesTreeHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
+
 type CategoriesTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError";
 type HierarchyFilteringPaths = Awaited<ReturnType<Required<VisibilityTreeProps>["getFilteredPaths"]>>;
 
 /** @beta */
 export interface UseCategoriesTreeProps {
   activeView: Viewport;
-  onCategoriesFiltered?: (categories: CategoryInfo[] | undefined) => void;
+  onCategoriesFiltered?: (props: { categories: CategoryInfo[] | undefined; models?: Id64Array }) => void;
   filter?: string;
   emptyTreeContent?: ReactNode;
   hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>;
@@ -44,6 +45,79 @@ interface UseCategoriesTreeResult {
     "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlight" | "emptyTreeContent"
   >;
   rendererProps: Required<Pick<VisibilityTreeRendererProps, "getDecorations" | "getSublabel">>;
+}
+
+function createVisibilityHandlerFactory(
+  activeView: Viewport,
+  idsCacheGetter: () => CategoriesTreeIdsCache,
+  hierarchyConfig: CategoriesTreeHierarchyConfiguration,
+  filteredPaths?: HierarchyFilteringPath[],
+): VisibilityTreeProps["visibilityHandlerFactory"] {
+  return ({ imodelAccess }) =>
+    createCategoriesTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter(), imodelAccess, filteredPaths, hierarchyConfig });
+}
+
+function useIdsCache(imodel: IModelConnection, viewType: "2d" | "3d", filteredPaths?: HierarchyFilteringPath[]) {
+  const cacheRef = useRef<CategoriesTreeIdsCache | undefined>(undefined);
+  const clearCacheRef = useRef(() => () => {
+    cacheRef.current?.[Symbol.dispose]?.();
+    cacheRef.current = undefined;
+  });
+  const createCacheGetterRef = useRef((currImodel: IModelConnection, currViewType: "2d" | "3d") => () => {
+    if (cacheRef.current === undefined) {
+      cacheRef.current = new CategoriesTreeIdsCache(createECSqlQueryExecutor(currImodel), currViewType);
+    }
+    return cacheRef.current;
+  });
+  const [getCache, setCacheGetter] = useState<() => CategoriesTreeIdsCache>(() => createCacheGetterRef.current(imodel, viewType));
+
+  useEffect(() => {
+    // clear cache in case it was created before `useEffect` was run first time
+    clearCacheRef.current();
+
+    // make sure all cache users rerender
+    setCacheGetter(() => createCacheGetterRef.current(imodel, viewType));
+    return () => {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      clearCacheRef.current();
+    };
+  }, [imodel, viewType]);
+
+  useEffect(() => {
+    cacheRef.current?.clearFilteredElementsModels();
+  }, [filteredPaths]);
+
+  useIModelChangeListener({
+    imodel,
+    action: useCallback(() => {
+      clearCacheRef.current();
+      // make sure all cache users rerender
+      setCacheGetter(() => createCacheGetterRef.current(imodel, viewType));
+    }, [imodel, viewType]),
+  });
+
+  return {
+    getCache,
+  };
+}
+
+function useCachedVisibility(activeView: Viewport, hierarchyConfig: CategoriesTreeHierarchyConfiguration, viewType: "2d" | "3d") {
+  const [filteredPaths, setFilteredPaths] = useState<HierarchyFilteringPath[]>();
+  const { getCache: getCategoriesTreeIdsCache } = useIdsCache(activeView.iModel, viewType, filteredPaths);
+
+  const [visibilityHandlerFactory, setVisibilityHandlerFactory] = useState<VisibilityTreeProps["visibilityHandlerFactory"]>(() =>
+    createVisibilityHandlerFactory(activeView, getCategoriesTreeIdsCache, hierarchyConfig, filteredPaths),
+  );
+
+  useEffect(() => {
+    setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getCategoriesTreeIdsCache, hierarchyConfig, filteredPaths));
+  }, [activeView, getCategoriesTreeIdsCache, hierarchyConfig, filteredPaths]);
+
+  return {
+    getCategoriesTreeIdsCache,
+    visibilityHandlerFactory,
+    onFilteredPathsChanged: useCallback((paths: HierarchyFilteringPath[] | undefined) => setFilteredPaths(paths), []),
+  };
 }
 
 /**
@@ -66,39 +140,24 @@ export function useCategoriesTree({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     Object.values(hierarchyConfig ?? {}),
   );
-
   const viewType = activeView.view.is2d() ? "2d" : "3d";
-  const iModel = activeView.iModel;
 
-  const idsCache = useMemo(() => {
-    return new CategoriesTreeIdsCache(createECSqlQueryExecutor(iModel), viewType);
-  }, [viewType, iModel]);
+  const { getCategoriesTreeIdsCache, visibilityHandlerFactory, onFilteredPathsChanged } = useCachedVisibility(activeView, hierarchyConfiguration, viewType);
 
-  const visibilityHandlerFactory = useCallback(() => {
-    const visibilityHandler = new CategoriesVisibilityHandler({
-      viewport: activeView,
-      idsCache,
-    });
-    return {
-      getVisibilityStatus: async (node: HierarchyNode) => visibilityHandler.getVisibilityStatus(node),
-      changeVisibility: async (node: HierarchyNode, on: boolean) => visibilityHandler.changeVisibility(node, on),
-      onVisibilityChange: visibilityHandler.onVisibilityChange,
-      dispose: () => visibilityHandler.dispose(),
-    };
-  }, [activeView, idsCache]);
   const { onFeatureUsed } = useTelemetryContext();
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
     (props) => {
-      return new CategoriesTreeDefinition({ ...props, viewType, idsCache, hierarchyConfig: hierarchyConfiguration });
+      return new CategoriesTreeDefinition({ ...props, viewType, idsCache: getCategoriesTreeIdsCache(), hierarchyConfig: hierarchyConfiguration });
     },
-    [viewType, idsCache, hierarchyConfiguration],
+    [viewType, getCategoriesTreeIdsCache, hierarchyConfiguration],
   );
 
   const getFilteredPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
     setFilteringError(undefined);
-    onCategoriesFiltered?.(undefined);
+    onCategoriesFiltered?.({ categories: undefined, models: undefined });
     if (!filter) {
+      onFilteredPathsChanged(undefined);
       return undefined;
     }
     return async ({ imodelAccess }) => {
@@ -108,10 +167,12 @@ export function useCategoriesTree({
           imodelAccess,
           label: filter,
           viewType,
-          idsCache,
+          idsCache: getCategoriesTreeIdsCache(),
           hierarchyConfig: hierarchyConfiguration,
         });
-        onCategoriesFiltered?.(await getCategoriesFromPaths(paths, idsCache));
+        onFilteredPathsChanged(paths);
+        const { categoryElementClass, categoryModelClass } = getClassesByView(viewType);
+        onCategoriesFiltered?.(await getCategoriesFromPaths(paths, getCategoriesTreeIdsCache(), categoryElementClass, categoryModelClass));
         return paths;
       } catch (e) {
         const newError = e instanceof FilterLimitExceededError ? "tooManyFilterMatches" : "unknownFilterError";
@@ -123,7 +184,7 @@ export function useCategoriesTree({
         return [];
       }
     };
-  }, [filter, viewType, onFeatureUsed, onCategoriesFiltered, idsCache, hierarchyConfiguration]);
+  }, [onCategoriesFiltered, filter, onFilteredPathsChanged, onFeatureUsed, viewType, getCategoriesTreeIdsCache, hierarchyConfiguration]);
 
   return {
     categoriesTreeProps: {
@@ -141,10 +202,18 @@ export function useCategoriesTree({
   };
 }
 
-async function getCategoriesFromPaths(paths: HierarchyFilteringPaths, idsCache: CategoriesTreeIdsCache): Promise<CategoryInfo[] | undefined> {
+async function getCategoriesFromPaths(
+  paths: HierarchyFilteringPaths,
+  idsCache: CategoriesTreeIdsCache,
+  elementClassName: string,
+  modelsClassName: string,
+): Promise<{ categories: CategoryInfo[] | undefined; models?: Id64Array }> {
   if (!paths) {
-    return undefined;
+    return { categories: undefined };
   }
+
+  const rootFilteredElements = new Set<Id64String>();
+  const subModels = new Set<Id64String>();
 
   const categories = new Map<Id64String, Id64String[]>();
   for (const path of paths) {
@@ -155,14 +224,34 @@ async function getCategoriesFromPaths(paths: HierarchyFilteringPaths, idsCache: 
 
     let category: HierarchyNodeIdentifier;
     let subCategory: HierarchyNodeIdentifier | undefined;
-    const lastNode = currPath[currPath.length - 1];
 
-    if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(lastNode)) {
-      continue;
+    let lastNodeInfo: { lastNode: HierarchyNodeIdentifier; nodeIndex: number } | undefined;
+
+    for (let i = 0; i < currPath.length; ++i) {
+      const currentNode = currPath[i];
+      if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(currentNode)) {
+        continue;
+      }
+      if (currentNode.className === elementClassName) {
+        rootFilteredElements.add(currentNode.id);
+        for (let j = i + 1; j < currPath.length; ++j) {
+          const childNode = currPath[j];
+          if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(childNode)) {
+            continue;
+          }
+          if (childNode.className === modelsClassName) {
+            subModels.add(childNode.id);
+          }
+        }
+        break;
+      }
+      lastNodeInfo = { lastNode: currentNode, nodeIndex: i };
     }
 
-    if (lastNode.className === DEFINITION_CONTAINER_CLASS) {
-      const definitionContainerCategories = await idsCache.getAllContainedCategories([lastNode.id]);
+    assert(lastNodeInfo !== undefined && HierarchyNodeIdentifier.isInstanceNodeIdentifier(lastNodeInfo.lastNode));
+
+    if (lastNodeInfo.lastNode.className === DEFINITION_CONTAINER_CLASS) {
+      const definitionContainerCategories = await idsCache.getAllContainedCategories([lastNodeInfo.lastNode.id]);
       for (const categoryId of definitionContainerCategories) {
         const value = categories.get(categoryId);
         if (value === undefined) {
@@ -172,14 +261,14 @@ async function getCategoriesFromPaths(paths: HierarchyFilteringPaths, idsCache: 
       continue;
     }
 
-    if (lastNode.className === SUB_CATEGORY_CLASS) {
-      const secondToLastNode = currPath.length > 1 ? currPath[currPath.length - 2] : undefined;
+    if (lastNodeInfo.lastNode.className === SUB_CATEGORY_CLASS) {
+      const secondToLastNode = lastNodeInfo.nodeIndex > 0 ? currPath[lastNodeInfo.nodeIndex - 1] : undefined;
       assert(secondToLastNode !== undefined && HierarchyNodeIdentifier.isInstanceNodeIdentifier(secondToLastNode));
 
-      subCategory = lastNode;
+      subCategory = lastNodeInfo.lastNode;
       category = secondToLastNode;
     } else {
-      category = lastNode;
+      category = lastNodeInfo.lastNode;
     }
 
     let entry = categories.get(category.id);
@@ -192,11 +281,15 @@ async function getCategoriesFromPaths(paths: HierarchyFilteringPaths, idsCache: 
       entry.push(subCategory.id);
     }
   }
-
-  return [...categories.entries()].map(([categoryId, subCategoryIds]) => ({
-    categoryId,
-    subCategoryIds: subCategoryIds.length === 0 ? undefined : subCategoryIds,
-  }));
+  const rootElementModelMap = await idsCache.getFilteredElementsModels([...rootFilteredElements]);
+  const models = [...subModels, ...new Set(rootElementModelMap.values())];
+  return {
+    categories: [...categories.entries()].map(([categoryId, subCategoryIds]) => ({
+      categoryId,
+      subCategoryIds: subCategoryIds.length === 0 ? undefined : subCategoryIds,
+    })),
+    models,
+  };
 }
 
 const categorySvg = new URL("@itwin/itwinui-icons/bis-category-3d.svg", import.meta.url).href;
@@ -219,6 +312,8 @@ function getEmptyTreeContentComponent(filter?: string, error?: CategoriesTreeFil
 
 const subcategorySvg = new URL("@itwin/itwinui-icons/bis-category-subcategory.svg", import.meta.url).href;
 const definitionContainerSvg = new URL("@itwin/itwinui-icons/bis-definitions-container.svg", import.meta.url).href;
+const classSvg = new URL("@itwin/itwinui-icons/bis-class.svg", import.meta.url).href;
+const elementSvg = new URL("@itwin/itwinui-icons/bis-element.svg", import.meta.url).href;
 
 /** @beta */
 export function CategoriesTreeIcon({ node }: { node: PresentationHierarchyNode }) {
@@ -234,6 +329,10 @@ export function CategoriesTreeIcon({ node }: { node: PresentationHierarchyNode }
         return subcategorySvg;
       case "icon-definition-container":
         return definitionContainerSvg;
+      case "icon-item":
+        return elementSvg;
+      case "icon-ec-class":
+        return classSvg;
       default:
         return undefined;
     }

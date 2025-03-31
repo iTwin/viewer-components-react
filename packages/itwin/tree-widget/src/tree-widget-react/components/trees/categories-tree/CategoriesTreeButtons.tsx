@@ -3,15 +3,19 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAsyncValue } from "@itwin/components-react";
+import { QueryRowFormat } from "@itwin/core-common";
 import { IconButton } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../../../TreeWidget.js";
-import { hideAllCategories, invertAllCategories, loadCategoriesFromViewport, showAllCategories } from "../common/CategoriesVisibilityUtils.js";
+import { hideAllCategories, invertAllCategories, loadCategoriesFromViewport } from "../common/CategoriesVisibilityUtils.js";
+import { hideAllModels, showAll } from "../common/Utils.js";
+import { getClassesByView } from "./internal/CategoriesTreeIdsCache.js";
 
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { TreeToolbarButtonProps } from "../../tree-header/SelectableTree.js";
-import type { Viewport } from "@itwin/core-frontend";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
 
 /**
  * Props that get passed to `CategoriesTreeComponent` header button renderer.
@@ -21,6 +25,8 @@ import type { Viewport } from "@itwin/core-frontend";
 export interface CategoriesTreeHeaderButtonProps extends TreeToolbarButtonProps {
   /** A list of categories available in the iModel */
   categories: CategoryInfo[];
+  /** A list of models available in the iModel. */
+  models: Id64Array;
 }
 
 /**
@@ -42,17 +48,23 @@ export interface CategoriesTreeHeaderButtonProps extends TreeToolbarButtonProps 
  * @public
  */
 export function useCategoriesTreeButtonProps({ viewport }: { viewport: Viewport }): {
-  buttonProps: Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport">;
-  onCategoriesFiltered: (categories: CategoryInfo[] | undefined) => void;
+  buttonProps: Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport" | "models">;
+  onCategoriesFiltered: (props: { categories: CategoryInfo[] | undefined; models?: Id64Array }) => void;
 } {
   const [filteredCategories, setFilteredCategories] = useState<CategoryInfo[] | undefined>();
+  const [filteredModels, setFilteredModels] = useState<Id64Array | undefined>();
   const categories = useCategories(viewport);
+  const models = useAvailableModels(viewport);
   return {
     buttonProps: {
       viewport,
       categories: filteredCategories ?? categories,
+      models: filteredModels ?? models,
     },
-    onCategoriesFiltered: setFilteredCategories,
+    onCategoriesFiltered: useCallback((props) => {
+      setFilteredCategories(props.categories);
+      setFilteredModels(props.models);
+    }, []),
   };
 }
 
@@ -69,10 +81,7 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
       label={TreeWidget.translate("categoriesTree.buttons.showAll.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.(`categories-tree-showall`);
-        void showAllCategories(
-          props.categories.map((category) => category.categoryId),
-          props.viewport,
-        );
+        void showAll({ models: props.models, viewport: props.viewport, categories: props.categories.map((category) => category.categoryId) });
       }}
       icon={visibilityShowSvg}
     />
@@ -93,6 +102,7 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
           props.categories.map((category) => category.categoryId),
           props.viewport,
         );
+        void hideAllModels(props.models, props.viewport);
       }}
       icon={visibilityHideSvg}
     />
@@ -121,4 +131,41 @@ const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
 export function useCategories(viewport: Viewport) {
   const categoriesPromise = useMemo(async () => loadCategoriesFromViewport(viewport), [viewport]);
   return useAsyncValue(categoriesPromise) ?? EMPTY_CATEGORIES_ARRAY;
+}
+
+function useAvailableModels(viewport: Viewport): Id64Array {
+  const [availableModels, setAvailableModels] = useState<Id64Array>([]);
+  const imodel = viewport.iModel;
+  const viewType = viewport.view.is2d() ? "2d" : "3d";
+  useEffect(() => {
+    queryModelsForHeaderActions(imodel, viewType)
+      .then((models) => {
+        setAvailableModels(models);
+      })
+      .catch(() => {
+        setAvailableModels([]);
+      });
+  }, [imodel, viewType]);
+
+  return availableModels;
+}
+
+async function queryModelsForHeaderActions(iModel: IModelConnection, viewType: "2d" | "3d"): Promise<Id64Array> {
+  const { categoryModelClass } = getClassesByView(viewType);
+  const models = new Array<Id64String>();
+  const query = `
+    SELECT
+      m.ECInstanceId id
+    FROM
+      ${categoryModelClass} m
+    WHERE
+      m.IsPrivate = false
+  `;
+  for await (const _row of iModel.createQueryReader(query, undefined, {
+    restartToken: "tree-widget/categories-tree/all-models-query",
+    rowFormat: QueryRowFormat.UseECSqlPropertyNames,
+  })) {
+    models.push(_row.id);
+  }
+  return models;
 }

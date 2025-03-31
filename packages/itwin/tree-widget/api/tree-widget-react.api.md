@@ -59,6 +59,7 @@ interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "getSch
 // @public
 interface CategoriesTreeHeaderButtonProps extends TreeToolbarButtonProps {
     categories: CategoryInfo[];
+    models: Id64Array;
 }
 
 // @public (undocumented)
@@ -67,6 +68,7 @@ type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonProps) =
 // @beta
 interface CategoriesTreeHierarchyConfiguration {
     hideSubCategories: boolean;
+    showElements: boolean;
 }
 
 // @beta (undocumented)
@@ -464,8 +466,11 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered, em
 export function useCategoriesTreeButtonProps({ viewport }: {
     viewport: Viewport;
 }): {
-    buttonProps: Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport">;
-    onCategoriesFiltered: (categories: CategoryInfo[] | undefined) => void;
+    buttonProps: Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport" | "models">;
+    onCategoriesFiltered: (props: {
+        categories: CategoryInfo[] | undefined;
+        models?: Id64Array;
+    }) => void;
 };
 
 // @beta (undocumented)
@@ -479,7 +484,10 @@ interface UseCategoriesTreeProps {
     // (undocumented)
     hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>;
     // (undocumented)
-    onCategoriesFiltered?: (categories: CategoryInfo[] | undefined) => void;
+    onCategoriesFiltered?: (props: {
+        categories: CategoryInfo[] | undefined;
+        models?: Id64Array;
+    }) => void;
 }
 
 // @beta (undocumented)

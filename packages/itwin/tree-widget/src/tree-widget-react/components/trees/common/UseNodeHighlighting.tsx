@@ -5,7 +5,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
-import { useLatest } from "./Utils.js";
+import { useLatest } from "./internal/Utils.js";
 
 import type { PresentationHierarchyNode, PresentationTreeNode } from "@itwin/presentation-hierarchies-react";
 

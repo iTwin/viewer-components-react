@@ -11,7 +11,7 @@ import {
   ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
-import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils.js";
+import { createIdsSelector, parseIdsSelectorResult } from "../common/internal/Utils.js";
 
 import type {
   DefineGenericNodeChildHierarchyLevelProps,
@@ -24,7 +24,6 @@ import type {
 } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlBinding, IInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
 import type { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache.js";
-
 /**
  * Defines hierarchy configuration supported by `IModelContentTree`.
  * @beta

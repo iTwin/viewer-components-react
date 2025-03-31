@@ -12,10 +12,9 @@ import {
   ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
+import { createIdsSelector, parseIdsSelectorResult, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { collect } from "../common/Rxjs.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
-import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils.js";
-import { releaseMainThreadOnItemsCount } from "./Utils.js";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { Observable } from "rxjs";

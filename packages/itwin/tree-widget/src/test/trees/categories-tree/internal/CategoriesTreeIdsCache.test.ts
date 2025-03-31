@@ -10,6 +10,7 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { CategoriesTreeIdsCache } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
+import { getDistinctMapValues } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
 import {
   buildIModel,
   insertDefinitionContainer,
@@ -110,7 +111,7 @@ describe("CategoriesTreeIdsCache", () => {
       const { imodel, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
       expect(await idsCache.getDirectChildDefinitionContainersAndCategories([keys.definitionContainerRoot.id])).to.deep.eq({
-        categories: [{ id: keys.category.id, childCount: 1 }],
+        categories: [{ id: keys.category.id, subCategoryChildCount: 1 }],
         definitionContainers: [],
       });
     });
@@ -130,7 +131,7 @@ describe("CategoriesTreeIdsCache", () => {
       const { imodel, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
       expect(await idsCache.getDirectChildDefinitionContainersAndCategories([keys.definitionContainerRoot.id])).to.deep.eq({
-        categories: [{ id: keys.category.id, childCount: 1 }],
+        categories: [{ id: keys.category.id, subCategoryChildCount: 1 }],
         definitionContainers: [],
       });
     });
@@ -153,7 +154,7 @@ describe("CategoriesTreeIdsCache", () => {
       const { imodel, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
       expect(await idsCache.getDirectChildDefinitionContainersAndCategories([keys.definitionContainerRoot.id])).to.deep.eq({
-        categories: [{ id: keys.directCategory.id, childCount: 1 }],
+        categories: [{ id: keys.directCategory.id, subCategoryChildCount: 1 }],
         definitionContainers: [keys.definitionModelChild.id],
       });
     });
@@ -174,7 +175,7 @@ describe("CategoriesTreeIdsCache", () => {
       const { imodel, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
       expect(await idsCache.getDirectChildDefinitionContainersAndCategories([keys.definitionModelChild.id])).to.deep.eq({
-        categories: [{ id: keys.indirectCategory.id, childCount: 1 }],
+        categories: [{ id: keys.indirectCategory.id, subCategoryChildCount: 1 }],
         definitionContainers: [],
       });
     });
@@ -591,7 +592,7 @@ describe("CategoriesTreeIdsCache", () => {
       const { imodel, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
       expect(await idsCache.getRootDefinitionContainersAndCategories()).to.deep.eq({
-        categories: [{ id: keys.category.id, childCount: 1 }],
+        categories: [{ id: keys.category.id, subCategoryChildCount: 1 }],
         definitionContainers: [],
       });
     });
@@ -611,7 +612,7 @@ describe("CategoriesTreeIdsCache", () => {
       const { imodel, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
       expect(await idsCache.getRootDefinitionContainersAndCategories()).to.deep.eq({
-        categories: [{ id: keys.category.id, childCount: 1 }],
+        categories: [{ id: keys.category.id, subCategoryChildCount: 1 }],
         definitionContainers: [],
       });
     });
@@ -683,14 +684,16 @@ describe("CategoriesTreeIdsCache", () => {
       const result = await idsCache.getRootDefinitionContainersAndCategories();
       const expectedResult = {
         categories: [
-          { id: keys.rootCategory1.id, childCount: 1 },
-          { id: keys.rootCategory2.id, childCount: 1 },
+          { id: keys.rootCategory1.id, subCategoryChildCount: 1 },
+          { id: keys.rootCategory2.id, subCategoryChildCount: 1 },
         ],
         definitionContainers: [keys.definitionContainerRoot.id, keys.definitionContainerRoot2.id],
       };
       expect(
         expectedResult.categories.every((expectedCategory) =>
-          result.categories.find((category) => category.id === expectedCategory.id && category.childCount === expectedCategory.childCount),
+          result.categories.find(
+            (category) => category.id === expectedCategory.id && category.subCategoryChildCount === expectedCategory.subCategoryChildCount,
+          ),
         ),
       ).to.be.true;
       expect(expectedResult.definitionContainers.every((dc) => result.definitionContainers.includes(dc))).to.be.true;
@@ -704,7 +707,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      expect(await idsCache.getSubCategories("0x123")).to.deep.eq([]);
+      expect([...getDistinctMapValues(await idsCache.getSubCategories(["0x123"]))]).to.deep.eq([]);
     });
 
     it("returns empty list when category has one subCategory", async function () {
@@ -716,7 +719,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      expect(await idsCache.getSubCategories(keys.category.id)).to.deep.eq([]);
+      expect([...getDistinctMapValues(await idsCache.getSubCategories([keys.category.id]))]).to.deep.eq([]);
     });
 
     it("returns subCategories when category has multiple subCategories", async function () {
@@ -730,7 +733,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      const result = await idsCache.getSubCategories(keys.category.id);
+      const result = [...getDistinctMapValues(await idsCache.getSubCategories([keys.category.id]))];
       expect(result.includes(keys.subCategory.id)).to.be.true;
       expect(result.length).to.be.eq(2);
     });
@@ -750,7 +753,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      const result = await idsCache.getSubCategories(keys.category2.id);
+      const result = [...getDistinctMapValues(await idsCache.getSubCategories([keys.category2.id]))];
       expect(result.includes(keys.subCategory2.id)).to.be.true;
       expect(result.length).to.be.eq(2);
     });

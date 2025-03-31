@@ -3,11 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Subscription } from "rxjs";
-import { bufferTime, filter, firstValueFrom, mergeAll, mergeMap, ReplaySubject, Subject } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
-import { pushToMap } from "../../common/Utils.js";
+import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
+import { pushToMap } from "../../common/internal/Utils.js";
 
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
@@ -44,7 +43,7 @@ export class ModelsTreeIdsCache {
     private _queryExecutor: LimitingECSqlQueryExecutor,
     private _hierarchyConfig: ModelsTreeHierarchyConfiguration,
   ) {
-    this._categoryElementCounts = new ModelCategoryElementsCountCache(async (input) => this.queryCategoryElementCounts(input));
+    this._categoryElementCounts = new ModelCategoryElementsCountCache(_queryExecutor, this._hierarchyConfig.elementClassSpecification);
     this._modelKeyPaths = new Map();
     this._subjectKeyPaths = new Map();
     this._categoryKeyPaths = new Map();
@@ -390,46 +389,6 @@ export class ModelsTreeIdsCache {
     return entry;
   }
 
-  private async queryCategoryElementCounts(
-    input: Array<{ modelId: Id64String; categoryId: Id64String }>,
-  ): Promise<Array<{ modelId: number; categoryId: number; elementsCount: number }>> {
-    const reader = this._queryExecutor.createQueryReader(
-      {
-        ctes: [
-          /* sql */ `
-            CategoryElements(id, modelId, categoryId) AS (
-              SELECT ECInstanceId, Model.Id, Category.Id
-              FROM ${this._hierarchyConfig.elementClassSpecification}
-              WHERE
-                Parent.Id IS NULL
-                AND (
-                  ${input.map(({ modelId, categoryId }) => `Model.Id = ${modelId} AND Category.Id = ${categoryId}`).join(" OR ")}
-                )
-
-              UNION ALL
-
-              SELECT c.ECInstanceId, p.modelId, p.categoryId
-              FROM ${this._hierarchyConfig.elementClassSpecification} c
-              JOIN CategoryElements p ON c.Parent.Id = p.id
-            )
-          `,
-        ],
-        ecsql: `
-          SELECT modelId, categoryId, COUNT(id) elementsCount
-          FROM CategoryElements
-          GROUP BY modelId, categoryId
-        `,
-      },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded" },
-    );
-
-    const result = new Array<{ modelId: number; categoryId: number; elementsCount: number }>();
-    for await (const row of reader) {
-      result.push({ modelId: row.modelId, categoryId: row.categoryId, elementsCount: row.elementsCount });
-    }
-    return result;
-  }
-
   public async getCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Promise<number> {
     return this._categoryElementCounts.getCategoryElementsCount(modelId, categoryId);
   }
@@ -475,48 +434,4 @@ function forEachChildSubject(
       }
       forEachChildSubject(subjectInfos, childSubjectInfo, cb);
     });
-}
-
-class ModelCategoryElementsCountCache {
-  private _cache = new Map<string, Subject<number>>();
-  private _requestsStream = new Subject<{ modelId: Id64String; categoryId: Id64String }>();
-  private _subscription: Subscription;
-
-  public constructor(
-    private _loader: (
-      input: Array<{ modelId: Id64String; categoryId: Id64String }>,
-    ) => Promise<Array<{ modelId: number; categoryId: number; elementsCount: number }>>,
-  ) {
-    this._subscription = this._requestsStream
-      .pipe(
-        bufferTime(20),
-        filter((requests) => requests.length > 0),
-        mergeMap(async (requests) => this._loader(requests)),
-        mergeAll(),
-      )
-      .subscribe({
-        next: ({ modelId, categoryId, elementsCount }) => {
-          const subject = this._cache.get(`${modelId}${categoryId}`);
-          assert(!!subject);
-          subject.next(elementsCount);
-        },
-      });
-  }
-
-  public [Symbol.dispose]() {
-    this._subscription.unsubscribe();
-  }
-
-  public async getCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Promise<number> {
-    const cacheKey = `${modelId}${categoryId}`;
-    let result = this._cache.get(cacheKey);
-    if (result !== undefined) {
-      return firstValueFrom(result);
-    }
-
-    result = new ReplaySubject(1);
-    this._cache.set(cacheKey, result);
-    this._requestsStream.next({ modelId, categoryId });
-    return firstValueFrom(result);
-  }
 }

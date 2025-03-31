@@ -3,15 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
-import sinon from "sinon";
-import { BeEvent } from "@itwin/core-bentley";
-import { PerModelCategoryVisibility } from "@itwin/core-frontend";
+import { getDistinctMapValues } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
-import type { Viewport } from "@itwin/core-frontend";
-import type { NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
-import type { CategoriesTreeIdsCache } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
+import type { ClassGroupingNodeKey, GroupingHierarchyNode, HierarchyNodeKey, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 
 /** @internal */
 export function createCategoryHierarchyNode(categoryId: Id64String, hasChildren = false): NonGroupingHierarchyNode {
@@ -30,6 +25,23 @@ export function createCategoryHierarchyNode(categoryId: Id64String, hasChildren 
 }
 
 /** @internal */
+export function createSubModelCategoryHierarchyNode(modelId?: Id64String, categoryId?: Id64String, hasChildren?: boolean): NonGroupingHierarchyNode {
+  return {
+    key: {
+      type: "instances",
+      instanceKeys: [{ className: "bis:SpatialCategory", id: categoryId ?? "" }],
+    },
+    children: !!hasChildren,
+    label: "",
+    parentKeys: [],
+    extendedData: {
+      isCategory: true,
+      modelId: modelId ?? "0x1",
+      categoryId: categoryId ?? "0x2",
+    },
+  };
+}
+/** @internal */
 export function createSubCategoryHierarchyNode(subCategoryId: Id64String, categoryId: Id64String): NonGroupingHierarchyNode {
   return {
     key: {
@@ -42,6 +54,34 @@ export function createSubCategoryHierarchyNode(subCategoryId: Id64String, catego
     extendedData: {
       isSubCategory: true,
       categoryId,
+    },
+  };
+}
+
+/** @internal */
+export function createClassGroupingHierarchyNode({
+  modelElementsMap,
+  parentKeys,
+  ...props
+}: {
+  categoryId: Id64String | undefined;
+  modelElementsMap: Map<Id64String, Id64Array>;
+  className?: string;
+  parentKeys?: HierarchyNodeKey[];
+}): GroupingHierarchyNode & { key: ClassGroupingNodeKey } {
+  const className = props.className ?? "Bis:Element";
+  return {
+    key: {
+      type: "class-grouping",
+      className,
+    },
+    children: !!modelElementsMap.size,
+    groupedInstanceKeys: [...getDistinctMapValues(modelElementsMap)].map((elementId) => ({ className, id: elementId })),
+    label: "",
+    parentKeys: parentKeys ?? [],
+    extendedData: {
+      categoryId: props.categoryId,
+      modelElementsMap,
     },
   };
 }
@@ -62,113 +102,42 @@ export function createDefinitionContainerHierarchyNode(definitionContainerId: Id
   };
 }
 
-
-interface ViewportStubValidation {
-  /**
-   * Checks if `changeCategoryDisplay` and `changeSubCategoryDisplay` get called with appropriate params
-   *
-   * @param categories categories parameters that `changeCategoryDisplay` should be called with
-   * @param subCategories subcategories parameters that `changeSubCategoryDisplay` should be called with
-   */
-  validateChangesCalls: (
-    categories: { categoriesToChange: Id64Array; isVisible: boolean; enableAllSubCategories: boolean }[],
-    subCategories: { subCategoryId: Id64String; isVisible: boolean }[],
-  ) => void;
+/** @internal */
+export function createElementHierarchyNode(props: {
+  modelId: Id64String | undefined;
+  categoryId: Id64String | undefined;
+  hasChildren?: boolean;
+  elementId?: Id64String;
+}): NonGroupingHierarchyNode {
+  return {
+    key: {
+      type: "instances",
+      instanceKeys: [{ className: "bis:GeometricalElement3d", id: props.elementId ?? "" }],
+    },
+    children: !!props.hasChildren,
+    label: "",
+    parentKeys: [],
+    extendedData: {
+      modelId: props.modelId,
+      categoryId: props.categoryId,
+      isElement: true,
+    },
+  };
 }
 
-/**
- * Creates a stubbed `Viewport` with that has only necessary properties defined for determening CategoriesTree visibility.
- *
- * This stub allows changing and saving the display of categories and subcategories
- * @returns stubbed `Viewport`
- */
-export async function createViewportStub(props: {
-  idsCache: CategoriesTreeIdsCache;
-  isVisibleOnInitialize: boolean;
-}): Promise<Viewport & ViewportStubValidation> {
-  const subCategoriesMap = new Map<Id64String, boolean>();
-
-  const categoriesMap = new Map<
-    Id64String,
-    {
-      subCategories: Id64Array;
-      isVisible: boolean;
-    }
-  >();
-
-  const { categories: categoriesFromCache } = await props.idsCache.getAllDefinitionContainersAndCategories();
-  for (const category of categoriesFromCache) {
-    const subCategoriesFromCache = await props.idsCache.getSubCategories(category);
-    subCategoriesFromCache.forEach((subCategoryId) => {
-      subCategoriesMap.set(subCategoryId, props.isVisibleOnInitialize);
-    });
-    categoriesMap.set(category, { isVisible: props.isVisibleOnInitialize, subCategories: subCategoriesFromCache });
-  }
-  const changeCategoryDisplayStub = sinon.stub().callsFake((categoriesToChange: Id64Array, isVisible: boolean, enableAllSubCategories: boolean) => {
-    for (const category of categoriesToChange) {
-      const value = categoriesMap.get(category);
-      if (value) {
-        value.isVisible = isVisible;
-        if (enableAllSubCategories) {
-          for (const subCategory of value.subCategories) {
-            subCategoriesMap.set(subCategory, true);
-          }
-        }
-      }
-    }
-  });
-
-  const changeSubCategoryDisplayStub = sinon.stub().callsFake((subCategoryId: Id64String, isVisible: boolean) => {
-    subCategoriesMap.set(subCategoryId, isVisible);
-  });
-
+/** @internal */
+export function createModelHierarchyNode(modelId?: Id64String, hasChildren?: boolean): NonGroupingHierarchyNode {
   return {
-    isSubCategoryVisible: sinon.stub().callsFake((subCategoryId: Id64String) => !!subCategoriesMap.get(subCategoryId)),
-    iModel: {
-      categories: {
-        getCategoryInfo: sinon.stub().callsFake(async (ids: Id64Array) => {
-          const subCategories = [];
-          for (const id of ids) {
-            const subCategoriesToUse = categoriesMap.get(id);
-            if (subCategoriesToUse !== undefined) {
-              subCategories.push(...subCategoriesToUse.subCategories);
-            }
-          }
-          return [
-            {
-              subCategories: subCategories.map((subCategory) => {
-                return {
-                  id: subCategory,
-                };
-              }),
-            },
-          ];
-        }),
-      },
+    key: {
+      type: "instances",
+      instanceKeys: [{ className: "bis:Model", id: modelId ?? "" }],
     },
-    view: {
-      viewsCategory: sinon.stub().callsFake((categoryId: Id64String) => !!categoriesMap.get(categoryId)?.isVisible),
+    children: !!hasChildren,
+    label: "",
+    parentKeys: [],
+    extendedData: {
+      isModel: true,
+      modelId: modelId ?? "0x1",
     },
-    changeSubCategoryDisplay: changeSubCategoryDisplayStub,
-    changeCategoryDisplay: changeCategoryDisplayStub,
-    perModelCategoryVisibility: {
-      getOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.None),
-      setOverride: sinon.fake(),
-      clearOverrides: sinon.fake(),
-      *[Symbol.iterator]() {},
-    },
-    onDisplayStyleChanged: new BeEvent<() => void>(),
-    onViewedCategoriesChanged: new BeEvent<() => void>(),
-    validateChangesCalls(
-      categoriesToValidate: { categoriesToChange: Id64Array; isVisible: boolean; enableAllSubCategories: boolean }[],
-      subCategories: { subCategoryId: Id64String; isVisible: boolean }[],
-    ) {
-      for (const category of categoriesToValidate) {
-        expect(changeCategoryDisplayStub).to.be.calledWith(category.categoriesToChange, category.isVisible, category.enableAllSubCategories);
-      }
-      for (const subCategory of subCategories) {
-        expect(changeSubCategoryDisplayStub).to.be.calledWith(subCategory.subCategoryId, subCategory.isVisible);
-      }
-    },
-  } as unknown as Viewport & ViewportStubValidation;
+  };
 }

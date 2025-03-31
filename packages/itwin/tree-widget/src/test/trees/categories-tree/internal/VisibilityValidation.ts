@@ -11,10 +11,11 @@ import { toVoidPromise } from "../../../../tree-widget-react/components/trees/co
 
 import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
-import type { Visibility } from "../../../../tree-widget-react/components/trees/common/Tooltip.js";
+import type { Visibility } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
 import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
+import type { Id64Array } from "@itwin/core-bentley";
 
-interface VisibilityExpectations {
+export interface VisibilityExpectations {
   [id: string]: Visibility;
 }
 
@@ -26,21 +27,41 @@ export interface ValidateNodeProps {
 
 export async function validateNodeVisibility({ node, handler, expectations }: ValidateNodeProps & { node: HierarchyNode }) {
   const actualVisibility = await handler.getVisibilityStatus(node);
-  if (!HierarchyNode.isInstancesNode(node)) {
-    throw new Error(`Expected hierarchy to only have instance nodes, got ${JSON.stringify(node)}`);
-  }
 
   if (expectations === "all-hidden" || expectations === "all-visible") {
     expect(actualVisibility.state).to.eq(expectations === "all-hidden" ? "hidden" : "visible");
     return;
   }
 
-  const { id } = node.key.instanceKeys[0];
+  if (HierarchyNode.isClassGroupingNode(node)) {
+    const elementIds = node.groupedInstanceKeys.map(({ id: elementId }) => elementId);
+    let visibleCount = 0;
+    let hiddenCount = 0;
 
-  if (CategoriesTreeNode.isCategoryNode(node)) {
-    expect(actualVisibility.state).to.eq(expectations[id]);
+    for (const elementId of elementIds) {
+      if (expectations[elementId] === "visible") {
+        ++visibleCount;
+      } else if (expectations[elementId] === "hidden") {
+        ++hiddenCount;
+      } else {
+        ++hiddenCount;
+        ++visibleCount;
+      }
+      if (visibleCount > 0 && hiddenCount > 0) {
+        expect(actualVisibility.state).to.eq("partial");
+        return;
+      }
+    }
+    expect(actualVisibility.state).to.eq(visibleCount > 0 ? "visible" : "hidden");
     return;
   }
+
+  if (!HierarchyNode.isInstancesNode(node)) {
+    throw new Error(`Expected hierarchy to only have instance nodes, got ${JSON.stringify(node)}`);
+  }
+
+  const { id } = node.key.instanceKeys[0];
+
   if (CategoriesTreeNode.isSubCategoryNode(node)) {
     // One subCategory gets added when category is inserted
     if (expectations[id] !== undefined) {
@@ -48,12 +69,20 @@ export async function validateNodeVisibility({ node, handler, expectations }: Va
     }
     return;
   }
-  if (CategoriesTreeNode.isDefinitionContainerNode(node)) {
+  if (CategoriesTreeNode.isCategoryNode(node)) {
+    const modelIds: Id64Array | undefined = node.extendedData?.modelIds;
+    let idToUse = id;
+    if (modelIds !== undefined) {
+      idToUse = `${modelIds[0]}-${id}`;
+    }
+    expect(actualVisibility.state).to.eq(expectations[idToUse]);
+    return;
+  }
+  if (CategoriesTreeNode.isModelNode(node) || CategoriesTreeNode.isDefinitionContainerNode(node) || CategoriesTreeNode.isElementNode(node)) {
     expect(actualVisibility.state).to.eq(expectations[id]);
     return;
   }
-
-  throw new Error(`Expected hierarchy to contain only definitionContainers, categories and subcategories, got ${JSON.stringify(node)}`);
+  throw new Error(`Expected hierarchy to contain only definitionContainers, categories, subcategories, models and elements got ${JSON.stringify(node)}`);
 }
 
 export async function validateHierarchyVisibility({
