@@ -5,10 +5,10 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAsyncValue } from "@itwin/components-react";
+import { QueryRowFormat } from "@itwin/core-common";
 import { IconButton } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { hideAllCategories, invertAllCategories, loadCategoriesFromViewport } from "../common/CategoriesVisibilityUtils.js";
-import { createIModelAccess } from "../common/internal/Utils.js";
 import { hideAllModels, showAll } from "../common/Utils.js";
 import { getClassesByView } from "./internal/CategoriesTreeIdsCache.js";
 
@@ -16,7 +16,6 @@ import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { TreeToolbarButtonProps } from "../../tree-header/SelectableTree.js";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
-import type { SchemaContext } from "@itwin/ecschema-metadata";
 
 /**
  * Props that get passed to `CategoriesTreeComponent` header button renderer.
@@ -48,14 +47,14 @@ export interface CategoriesTreeHeaderButtonProps extends TreeToolbarButtonProps 
  *
  * @public
  */
-export function useCategoriesTreeButtonProps({ viewport, getSchemaContext }: { viewport: Viewport; getSchemaContext: (imodel: IModelConnection) => SchemaContext }): {
+export function useCategoriesTreeButtonProps({ viewport }: { viewport: Viewport }): {
   buttonProps: Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport" | "models">;
   onCategoriesFiltered: (props: { categories: CategoryInfo[] | undefined; models?: Id64Array }) => void;
 } {
   const [filteredCategories, setFilteredCategories] = useState<CategoryInfo[] | undefined>();
   const [filteredModels, setFilteredModels] = useState<Id64Array | undefined>();
   const categories = useCategories(viewport);
-  const models = useAvailableModels(viewport, getSchemaContext);
+  const models = useAvailableModels(viewport);
   return {
     buttonProps: {
       viewport,
@@ -134,28 +133,24 @@ export function useCategories(viewport: Viewport) {
   return useAsyncValue(categoriesPromise) ?? EMPTY_CATEGORIES_ARRAY;
 }
 
-function useAvailableModels(viewport: Viewport, getSchemaContext: (imodel: IModelConnection) => SchemaContext): Id64Array {
+function useAvailableModels(viewport: Viewport): Id64Array {
   const [availableModels, setAvailableModels] = useState<Id64Array>([]);
   const imodel = viewport.iModel;
   const viewType = viewport.view.is2d() ? "2d" : "3d";
   useEffect(() => {
-    queryModelsForHeaderActions(imodel, viewType, getSchemaContext)
+    queryModelsForHeaderActions(imodel, viewType)
       .then((models) => {
         setAvailableModels(models);
       })
       .catch(() => {
         setAvailableModels([]);
       });
-  }, [imodel, viewType, getSchemaContext]);
+  }, [imodel, viewType]);
 
   return availableModels;
 }
 
-async function queryModelsForHeaderActions(
-  iModel: IModelConnection,
-  viewType: "2d" | "3d",
-  getSchemaContext: (imodel: IModelConnection) => SchemaContext,
-): Promise<Id64Array> {
+async function queryModelsForHeaderActions(iModel: IModelConnection, viewType: "2d" | "3d"): Promise<Id64Array> {
   const { categoryModelClass } = getClassesByView(viewType);
   const models = new Array<Id64String>();
   const query = `
@@ -166,11 +161,10 @@ async function queryModelsForHeaderActions(
     WHERE
       m.IsPrivate = false
   `;
-  const imodelAccess = createIModelAccess({ imodel: iModel, getSchemaContext });
-  for await (const _row of imodelAccess.createQueryReader(
-    { ecsql: query },
-    { restartToken: "tree-widget/categories-tree/is-definition-container-supported-query", rowFormat: "ECSqlPropertyNames" },
-  )) {
+  for await (const _row of iModel.createQueryReader(query, undefined, {
+    restartToken: "tree-widget/categories-tree/all-models-query",
+    rowFormat: QueryRowFormat.UseECSqlPropertyNames,
+  })) {
     models.push(_row.id);
   }
   return models;

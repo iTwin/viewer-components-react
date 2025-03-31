@@ -100,7 +100,7 @@ function CategoriesTreeComponentImpl({
   filter,
   ...treeProps
 }: CategoriesTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
-  const { buttonProps, onCategoriesFiltered } = useCategoriesTreeButtonProps({ viewport, getSchemaContext: treeProps.getSchemaContext });
+  const { buttonProps, onCategoriesFiltered } = useCategoriesTreeButtonProps({ viewport });
 
   const buttons: ReactNode = headerButtons
     ? headerButtons.map((btn, index) => <Fragment key={index}>{btn({ ...buttonProps, onFeatureUsed })}</Fragment>)

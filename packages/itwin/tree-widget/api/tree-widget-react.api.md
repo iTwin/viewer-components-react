@@ -463,9 +463,8 @@ interface TreeWidgetProps {
 export function useCategoriesTree({ filter, activeView, onCategoriesFiltered, emptyTreeContent, hierarchyConfig, }: UseCategoriesTreeProps): UseCategoriesTreeResult;
 
 // @public
-export function useCategoriesTreeButtonProps({ viewport, getSchemaContext }: {
+export function useCategoriesTreeButtonProps({ viewport }: {
     viewport: Viewport;
-    getSchemaContext: (imodel: IModelConnection) => SchemaContext;
 }): {
     buttonProps: Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport" | "models">;
     onCategoriesFiltered: (props: {

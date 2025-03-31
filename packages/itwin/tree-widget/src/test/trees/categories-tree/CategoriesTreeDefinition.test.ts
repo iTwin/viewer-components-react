@@ -9,7 +9,10 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-import { CategoriesTreeDefinition } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
+import {
+  CategoriesTreeDefinition,
+  defaultHierarchyConfiguration,
+} from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 import {
   buildIModel,
@@ -26,6 +29,7 @@ import {
 import { createIModelAccess } from "../Common.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
 
+import type { CategoriesTreeHierarchyConfiguration } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import type { IModelConnection } from "@itwin/core-frontend";
 
 describe("Categories tree", () => {
@@ -266,7 +270,7 @@ describe("Categories tree", () => {
       });
 
       const { imodel, ...keys } = buildIModelResult;
-      using provider = createCategoryTreeProvider(imodel, "3d", true);
+      using provider = createCategoryTreeProvider(imodel, "3d", { showElements: true });
 
       await validateHierarchy({
         provider,
@@ -311,7 +315,7 @@ describe("Categories tree", () => {
       });
 
       const { imodel, ...keys } = buildIModelResult;
-      using provider = createCategoryTreeProvider(imodel, "3d", true);
+      using provider = createCategoryTreeProvider(imodel, "3d", { showElements: true });
 
       await validateHierarchy({
         provider,
@@ -364,7 +368,7 @@ describe("Categories tree", () => {
       });
 
       const { imodel, ...keys } = buildIModelResult;
-      using provider = createCategoryTreeProvider(imodel, "3d", true, true);
+      using provider = createCategoryTreeProvider(imodel, "3d", { showElements: true, hideSubCategories: true });
 
       await validateHierarchy({
         provider,
@@ -581,7 +585,7 @@ describe("Categories tree", () => {
   });
 });
 
-function createCategoryTreeProvider(imodel: IModelConnection, viewType: "2d" | "3d", showElements?: boolean, hideSubCategories?: boolean) {
+function createCategoryTreeProvider(imodel: IModelConnection, viewType: "2d" | "3d", hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>) {
   const imodelAccess = createIModelAccess(imodel);
   return createIModelHierarchyProvider({
     imodelAccess,
@@ -589,7 +593,10 @@ function createCategoryTreeProvider(imodel: IModelConnection, viewType: "2d" | "
       imodelAccess,
       viewType,
       idsCache: new CategoriesTreeIdsCache(imodelAccess, viewType),
-      hierarchyConfig: { showElements: !!showElements, hideSubCategories: !!hideSubCategories },
+      hierarchyConfig: {
+        ...defaultHierarchyConfiguration,
+        ...hierarchyConfig,
+      },
     }),
   });
 }

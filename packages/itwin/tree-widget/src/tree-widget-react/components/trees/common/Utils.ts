@@ -37,9 +37,9 @@ export async function showAll(props: {
   viewport.clearAlwaysDrawn();
   if (categories) {
     await showAllCategories(categories, viewport);
-    return;
+  } else {
+    await toggleAllCategories(viewport, true);
   }
-  await toggleAllCategories(viewport, true);
 }
 
 
