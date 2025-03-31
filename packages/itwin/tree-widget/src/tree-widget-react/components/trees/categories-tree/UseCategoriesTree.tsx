@@ -19,7 +19,7 @@ import { DEFINITION_CONTAINER_CLASS, SUB_CATEGORY_CLASS } from "./internal/Class
 
 import type { ReactNode } from "react";
 import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
-import type { Viewport } from "@itwin/core-frontend";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
@@ -57,47 +57,60 @@ function createVisibilityHandlerFactory(
     createCategoriesTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter(), imodelAccess, filteredPaths, hierarchyConfig });
 }
 
-function useCachedVisibility(activeView: Viewport, hierarchyConfig: CategoriesTreeHierarchyConfiguration, viewType: "2d" | "3d") {
-  const cacheRef = useRef<CategoriesTreeIdsCache>();
-  const currentIModelRef = useRef(activeView.iModel);
-
-  const resetCategoriesTreeIdsCache = () => {
-    cacheRef.current?.[Symbol.dispose]();
+function useIdsCache(imodel: IModelConnection, viewType: "2d" | "3d", filteredPaths?: HierarchyFilteringPath[]) {
+  const cacheRef = useRef<CategoriesTreeIdsCache | undefined>(undefined);
+  const clearCacheRef = useRef(() => () => {
+    cacheRef.current?.[Symbol.dispose]?.();
     cacheRef.current = undefined;
-  };
-
-  useEffect(() => {
-    resetCategoriesTreeIdsCache();
-  }, [viewType]);
-
-  const getCategoriesTreeIdsCache = useCallback(() => {
-    if (!cacheRef.current) {
-      cacheRef.current = new CategoriesTreeIdsCache(createECSqlQueryExecutor(currentIModelRef.current), viewType);
+  });
+  const createCacheGetterRef = useRef((currImodel: IModelConnection, currViewType: "2d" | "3d") => () => {
+    if (cacheRef.current === undefined) {
+      cacheRef.current = new CategoriesTreeIdsCache(createECSqlQueryExecutor(currImodel), currViewType);
     }
     return cacheRef.current;
-  }, [viewType]);
+  });
+  const [getCache, setCacheGetter] = useState<() => CategoriesTreeIdsCache>(() => createCacheGetterRef.current(imodel, viewType));
 
-  const [filteredPaths, setFilteredPaths] = useState<HierarchyFilteringPath[]>();
-  const [visibilityHandlerFactory, setVisibilityHandlerFactory] = useState<VisibilityTreeProps["visibilityHandlerFactory"]>(() =>
-    createVisibilityHandlerFactory(activeView, getCategoriesTreeIdsCache, hierarchyConfig, filteredPaths),
-  );
+  useEffect(() => {
+    // clear cache in case it was created before `useEffect` was run first time
+    clearCacheRef.current();
+
+    // make sure all cache users rerender
+    setCacheGetter(() => createCacheGetterRef.current(imodel, viewType));
+    return () => {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      clearCacheRef.current();
+    };
+  }, [imodel, viewType]);
 
   useEffect(() => {
     cacheRef.current?.clearFilteredElementsModels();
   }, [filteredPaths]);
 
   useIModelChangeListener({
-    imodel: activeView.iModel,
+    imodel,
     action: useCallback(() => {
-      resetCategoriesTreeIdsCache();
-      setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getCategoriesTreeIdsCache, hierarchyConfig, filteredPaths));
-    }, [activeView, getCategoriesTreeIdsCache, hierarchyConfig, filteredPaths]),
+      clearCacheRef.current();
+      // make sure all cache users rerender
+      setCacheGetter(() => createCacheGetterRef.current(imodel, viewType));
+    }, [imodel, viewType]),
   });
 
+  return {
+    getCache,
+  };
+}
+
+function useCachedVisibility(activeView: Viewport, hierarchyConfig: CategoriesTreeHierarchyConfiguration, viewType: "2d" | "3d") {
+  const [filteredPaths, setFilteredPaths] = useState<HierarchyFilteringPath[]>();
+  const { getCache: getCategoriesTreeIdsCache } = useIdsCache(activeView.iModel, viewType, filteredPaths);
+
+  const [visibilityHandlerFactory, setVisibilityHandlerFactory] = useState<VisibilityTreeProps["visibilityHandlerFactory"]>(() =>
+    createVisibilityHandlerFactory(activeView, getCategoriesTreeIdsCache, hierarchyConfig, filteredPaths),
+  );
+
   useEffect(() => {
-    currentIModelRef.current = activeView.iModel;
     setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getCategoriesTreeIdsCache, hierarchyConfig, filteredPaths));
-    return () => resetCategoriesTreeIdsCache();
   }, [activeView, getCategoriesTreeIdsCache, hierarchyConfig, filteredPaths]);
 
   return {

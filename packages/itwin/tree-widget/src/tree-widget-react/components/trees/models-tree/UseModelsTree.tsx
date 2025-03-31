@@ -28,7 +28,7 @@ import type { ReactNode } from "react";
 import type { GroupingHierarchyNode, HierarchyFilteringPath, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { Id64String } from "@itwin/core-bentley";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
-import type { Viewport } from "@itwin/core-frontend";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { ClassGroupingHierarchyNode, ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition.js";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/ModelsTreeVisibilityHandler.js";
@@ -331,38 +331,57 @@ function createVisibilityHandlerFactory(
   return ({ imodelAccess }) => createModelsTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter(), imodelAccess, overrides, filteredPaths });
 }
 
-function useCachedVisibility(activeView: Viewport, hierarchyConfig: ModelsTreeHierarchyConfiguration, overrides?: ModelsTreeVisibilityHandlerOverrides) {
-  const cacheRef = useRef<ModelsTreeIdsCache>();
-  const currentIModelRef = useRef(activeView.iModel);
-
-  const resetModelsTreeIdsCache = () => {
-    cacheRef.current?.[Symbol.dispose]();
+function useIdsCache(imodel: IModelConnection, hierarchyConfig: ModelsTreeHierarchyConfiguration) {
+  const cacheRef = useRef<ModelsTreeIdsCache | undefined>(undefined);
+  const clearCacheRef = useRef(() => {
+    cacheRef.current?.[Symbol.dispose]?.();
     cacheRef.current = undefined;
-  };
-  const getModelsTreeIdsCache = useCallback(() => {
-    if (!cacheRef.current) {
-      cacheRef.current = new ModelsTreeIdsCache(createECSqlQueryExecutor(currentIModelRef.current), hierarchyConfig);
-    }
-    return cacheRef.current;
-  }, [hierarchyConfig]);
+  });
+  const createCacheGetterRef = useRef((currImodel: IModelConnection, currHierarchyConfig: ModelsTreeHierarchyConfiguration) => {
+    return () => {
+      if (cacheRef.current === undefined) {
+        cacheRef.current = new ModelsTreeIdsCache(createECSqlQueryExecutor(currImodel), currHierarchyConfig);
+      }
+      return cacheRef.current;
+    };
+  });
+  const [getCache, setCacheGetter] = useState<() => ModelsTreeIdsCache>(() => createCacheGetterRef.current(imodel, hierarchyConfig));
 
+  useEffect(() => {
+    // clear cache in case it was created before `useEffect` was run first time
+    clearCacheRef.current();
+
+    // make sure all cache users rerender
+    setCacheGetter(() => createCacheGetterRef.current(imodel, hierarchyConfig));
+    return () => {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      clearCacheRef.current();
+    };
+  }, [imodel, hierarchyConfig]);
+
+  useIModelChangeListener({
+    imodel,
+    action: useCallback(() => {
+      clearCacheRef.current();
+      // make sure all cache users rerender
+      setCacheGetter(() => createCacheGetterRef.current(imodel, hierarchyConfig));
+    }, [imodel, hierarchyConfig]),
+  });
+
+  return {
+    getCache,
+  };
+}
+
+function useCachedVisibility(activeView: Viewport, hierarchyConfig: ModelsTreeHierarchyConfiguration, overrides?: ModelsTreeVisibilityHandlerOverrides) {
+  const { getCache: getModelsTreeIdsCache } = useIdsCache(activeView.iModel, hierarchyConfig);
   const [filteredPaths, setFilteredPaths] = useState<HierarchyFilteringPath[]>();
   const [visibilityHandlerFactory, setVisibilityHandlerFactory] = useState<VisibilityTreeProps["visibilityHandlerFactory"]>(() =>
     createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache, overrides, filteredPaths),
   );
 
-  useIModelChangeListener({
-    imodel: activeView.iModel,
-    action: useCallback(() => {
-      resetModelsTreeIdsCache();
-      setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache, overrides, filteredPaths));
-    }, [activeView, getModelsTreeIdsCache, overrides, filteredPaths]),
-  });
-
   useEffect(() => {
-    currentIModelRef.current = activeView.iModel;
     setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache, overrides, filteredPaths));
-    return () => resetModelsTreeIdsCache();
   }, [activeView, getModelsTreeIdsCache, overrides, filteredPaths]);
 
   return {
