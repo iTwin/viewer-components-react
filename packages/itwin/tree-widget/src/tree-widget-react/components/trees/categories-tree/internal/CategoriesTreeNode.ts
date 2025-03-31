@@ -51,7 +51,7 @@ export namespace CategoriesTreeNode {
    * Retrieves category ID from node's extended data.
    */
   export const getCategoryId = (node: Pick<CategoriesTreeNode, "extendedData">): Id64String | undefined => {
-    // Elements have modelId property set
+    // Elements have categoryId property set
     return node.extendedData?.categoryId;
   };
 }
