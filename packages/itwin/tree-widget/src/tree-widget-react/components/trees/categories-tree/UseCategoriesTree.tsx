@@ -18,7 +18,7 @@ import { createCategoriesTreeVisibilityHandler } from "./internal/CategoriesTree
 import { DEFINITION_CONTAINER_CLASS, SUB_CATEGORY_CLASS } from "./internal/ClassNameDefinitions.js";
 
 import type { ReactNode } from "react";
-import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
@@ -171,8 +171,8 @@ export function useCategoriesTree({
           hierarchyConfig: hierarchyConfiguration,
         });
         onFilteredPathsChanged(paths);
-        const { categoryElementClass } = getClassesByView(viewType);
-        onCategoriesFiltered?.(await getCategoriesFromPaths(paths, getCategoriesTreeIdsCache(), categoryElementClass));
+        const { categoryElementClass, categoryModelClass } = getClassesByView(viewType);
+        onCategoriesFiltered?.(await getCategoriesFromPaths(paths, getCategoriesTreeIdsCache(), categoryElementClass, categoryModelClass));
         return paths;
       } catch (e) {
         const newError = e instanceof FilterLimitExceededError ? "tooManyFilterMatches" : "unknownFilterError";
@@ -206,12 +206,14 @@ async function getCategoriesFromPaths(
   paths: HierarchyFilteringPaths,
   idsCache: CategoriesTreeIdsCache,
   elementClassName: string,
+  modelsClassName: string,
 ): Promise<{ categories: CategoryInfo[] | undefined; models?: Id64Array }> {
   if (!paths) {
     return { categories: undefined };
   }
 
-  // const filteredElements = new Set<Id64String>();
+  const rootFilteredElements = new Set<Id64String>();
+  const subModels = new Set<Id64String>();
 
   const categories = new Map<Id64String, Id64String[]>();
   for (const path of paths) {
@@ -231,15 +233,16 @@ async function getCategoriesFromPaths(
         continue;
       }
       if (currentNode.className === elementClassName) {
-        // for (let j = i + 1; j < currPath.length; ++j) {
-        //   const childNode = currPath[j];
-        //   if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(childNode)) {
-        //     continue;
-        //   }
-        //   if (childNode.className === elementClassName) {
-        //     filteredElements.add(childNode.id);
-        //   }
-        // }
+        rootFilteredElements.add(currentNode.id);
+        for (let j = i + 1; j < currPath.length; ++j) {
+          const childNode = currPath[j];
+          if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(childNode)) {
+            continue;
+          }
+          if (childNode.className === modelsClassName) {
+            subModels.add(childNode.id);
+          }
+        }
         break;
       }
       lastNodeInfo = { lastNode: currentNode, nodeIndex: i };
@@ -278,13 +281,14 @@ async function getCategoriesFromPaths(
       entry.push(subCategory.id);
     }
   }
-  let models: Id64Set | undefined;
+  const rootElementModelMap = await idsCache.getFilteredElementsModels([...rootFilteredElements]);
+  const models = [...subModels, ...new Set(rootElementModelMap.values())];
   return {
     categories: [...categories.entries()].map(([categoryId, subCategoryIds]) => ({
       categoryId,
       subCategoryIds: subCategoryIds.length === 0 ? undefined : subCategoryIds,
     })),
-    models: models ? [...models] : undefined,
+    models,
   };
 }
 
