@@ -16,6 +16,7 @@ import {
   UnknownInstanceFocusError,
 } from "../common/components/EmptyTree.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
+import { GEOMETRIC_MODEL_3D_CLASS_NAME, SUBJECT_CLASS_NAME } from "../common/internal/ClassNameDefinitions.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 import { useIModelChangeListener } from "../common/UseIModelChangeListener.js";
 import { useTelemetryContext } from "../common/UseTelemetryContext.js";
@@ -240,13 +241,13 @@ async function getModels(paths: HierarchyFilteringPath[], idsCache: ModelsTreeId
       }
 
       // if paths end with subject need to get all models under that subject
-      if (i === currPath.length - 1 && currStep.className === "BisCore.Subject") {
+      if (i === currPath.length - 1 && currStep.className === SUBJECT_CLASS_NAME) {
         targetSubjects.add(currStep.id);
         break;
       }
 
       // collect all the models from the filtered path
-      if (await classInspector.classDerivesFrom(currStep.className, "BisCore.GeometricModel3d")) {
+      if (await classInspector.classDerivesFrom(currStep.className, GEOMETRIC_MODEL_3D_CLASS_NAME)) {
         targetModels.add(currStep.id);
       }
     }

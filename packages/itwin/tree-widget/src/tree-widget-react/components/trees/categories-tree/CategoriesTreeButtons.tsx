@@ -9,8 +9,8 @@ import { QueryRowFormat } from "@itwin/core-common";
 import { IconButton } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { hideAllCategories, invertAllCategories, loadCategoriesFromViewport } from "../common/CategoriesVisibilityUtils.js";
+import { getClassesByView } from "../common/internal/Utils.js";
 import { hideAllModels, showAll } from "../common/Utils.js";
-import { getClassesByView } from "./internal/CategoriesTreeIdsCache.js";
 
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { TreeToolbarButtonProps } from "../../tree-header/SelectableTree.js";
@@ -151,13 +151,13 @@ function useAvailableModels(viewport: Viewport): Id64Array {
 }
 
 async function queryModelsForHeaderActions(iModel: IModelConnection, viewType: "2d" | "3d"): Promise<Id64Array> {
-  const { categoryModelClass } = getClassesByView(viewType);
+  const { modelClass } = getClassesByView(viewType);
   const models = new Array<Id64String>();
   const query = `
     SELECT
       m.ECInstanceId id
     FROM
-      ${categoryModelClass} m
+      ${modelClass} m
     WHERE
       m.IsPrivate = false
   `;

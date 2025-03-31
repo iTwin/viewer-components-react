@@ -15,6 +15,7 @@ import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { InstanceKey } from "@itwin/presentation-shared";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
+import { SUBJECT_CLASS_NAME } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import { createVisibilityStatus } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
 import { ModelsTreeIdsCache } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import { createModelsTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
@@ -1856,7 +1857,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         describeName: "with modeled elements",
         createIModel: async function createIModel(context: Mocha.Context): Promise<{ imodel: IModelConnection } & IModelWithSubModelIds> {
           return buildIModel(context, async (builder, testSchema) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+            const rootSubject: InstanceKey = { className: SUBJECT_CLASS_NAME, id: IModel.rootSubjectId };
             const partition = insertPhysicalPartition({ builder, codeValue: "model", parentId: rootSubject.id });
             const model = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
             const category = insertSpatialCategory({ builder, codeValue: "category" });
@@ -2002,7 +2003,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         describeName: "with modeled elements that have private subModel",
         createIModel: async function createIModel(context: Mocha.Context): Promise<{ imodel: IModelConnection } & IModelWithSubModelIds> {
           return buildIModel(context, async (builder, testSchema) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+            const rootSubject: InstanceKey = { className: SUBJECT_CLASS_NAME, id: IModel.rootSubjectId };
             const partition = insertPhysicalPartition({ builder, codeValue: "model", parentId: rootSubject.id });
             const model = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
             const category = insertSpatialCategory({ builder, codeValue: "category" });
@@ -2065,7 +2066,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         describeName: "with modeled elements that have subModel with no children",
         createIModel: async function createIModel(context: Mocha.Context): Promise<{ imodel: IModelConnection } & IModelWithSubModelIds> {
           return buildIModel(context, async (builder, testSchema) => {
-            const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+            const rootSubject: InstanceKey = { className: SUBJECT_CLASS_NAME, id: IModel.rootSubjectId };
             const partition = insertPhysicalPartition({ builder, codeValue: "model", parentId: rootSubject.id });
             const model = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
             const category = insertSpatialCategory({ builder, codeValue: "category" });

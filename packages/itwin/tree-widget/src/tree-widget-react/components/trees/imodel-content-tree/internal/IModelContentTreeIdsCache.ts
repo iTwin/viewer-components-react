@@ -4,6 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { assert } from "@itwin/core-bentley";
+import {
+  GEOMETRIC_ELEMENT_2D_CLASS_NAME,
+  GEOMETRIC_ELEMENT_3D_CLASS_NAME,
+  INFORMATION_PARTITION_ELEMENT_CLASS_NAME,
+  MODEL_CLASS_NAME,
+  SUBJECT_CLASS_NAME,
+} from "../../common/internal/ClassNameDefinitions.js";
 import { pushToMap } from "../../common/internal/Utils.js";
 
 import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
@@ -35,7 +42,7 @@ export class IModelContentTreeIdsCache {
         s.Parent.Id parentId,
         (
           SELECT m.ECInstanceId
-          FROM bis.Model m
+          FROM ${MODEL_CLASS_NAME} m
           WHERE
             m.ECInstanceId = HexToId(json_extract(s.JsonProperties, '$.Subject.Model.TargetPartition'))
             AND NOT m.IsPrivate
@@ -47,7 +54,7 @@ export class IModelContentTreeIdsCache {
           ) THEN 1
           ELSE 0
         END hideInHierarchy
-      FROM bis.Subject s
+      FROM ${SUBJECT_CLASS_NAME} s
     `;
     for await (const row of this._queryExecutor.createQueryReader({ ecsql: subjectsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
       yield { id: row.id, parentId: row.parentId, targetPartitionId: row.targetPartitionId, hideInHierarchy: !!row.hideInHierarchy };
@@ -57,8 +64,8 @@ export class IModelContentTreeIdsCache {
   private async *queryModels(): AsyncIterableIterator<{ id: Id64String; parentId: Id64String }> {
     const modelsQuery = `
       SELECT p.ECInstanceId id, p.Parent.Id parentId
-      FROM bis.InformationPartitionElement p
-      INNER JOIN bis.Model m ON m.ModeledElement.Id = p.ECInstanceId
+      FROM ${INFORMATION_PARTITION_ELEMENT_CLASS_NAME} p
+      INNER JOIN ${MODEL_CLASS_NAME} m ON m.ModeledElement.Id = p.ECInstanceId
       WHERE NOT m.IsPrivate
     `;
     for await (const row of this._queryExecutor.createQueryReader({ ecsql: modelsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
@@ -181,12 +188,12 @@ export class IModelContentTreeIdsCache {
   private async *queryModelCategories() {
     const query = /* sql */ `
       SELECT Model.Id modelId, Category.Id categoryId
-      FROM BisCore.GeometricElement3d
+      FROM ${GEOMETRIC_ELEMENT_3D_CLASS_NAME}
       WHERE Parent.Id IS NULL
       GROUP BY Model.Id, Category.Id
       UNION ALL
       SELECT Model.Id modelId, Category.Id categoryId
-      FROM BisCore.GeometricElement2d
+      FROM ${GEOMETRIC_ELEMENT_2D_CLASS_NAME}
       WHERE Parent.Id IS NULL
       GROUP BY Model.Id, Category.Id
     `;

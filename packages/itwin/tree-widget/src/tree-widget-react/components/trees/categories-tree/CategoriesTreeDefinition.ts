@@ -7,10 +7,15 @@ import { bufferCount, defer, firstValueFrom, from, lastValueFrom, map, merge, me
 import { assert } from "@itwin/core-bentley";
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition, ProcessedHierarchyNode } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
-import { createIdsSelector, getDistinctMapValues, parseIdsSelectorResult, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
+import {
+  DEFINITION_CONTAINER_CLASS_NAME,
+  INFORMATION_PARTITION_ELEMENT_CLASS_NAME,
+  MODEL_CLASS_NAME,
+  SUB_CATEGORY_CLASS_NAME,
+  SUB_MODELED_ELEMENT_CLASS_NAME,
+} from "../common/internal/ClassNameDefinitions.js";
+import { createIdsSelector, getClassesByView, getDistinctMapValues, parseIdsSelectorResult, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
-import { getClassesByView } from "./internal/CategoriesTreeIdsCache.js";
-import { DEFINITION_CONTAINER_CLASS, SUB_CATEGORY_CLASS } from "./internal/ClassNameDefinitions.js";
 
 import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { Observable } from "rxjs";
@@ -91,10 +96,10 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
       instanceLabelSelectClauseFactory: this._nodeLabelSelectClauseFactory,
     });
     this._hierarchyConfig = props.hierarchyConfig;
-    const { categoryClass, categoryElementClass, categoryModelClass } = getClassesByView(props.viewType);
+    const { categoryClass, elementClass, modelClass } = getClassesByView(props.viewType);
     this._categoryClass = categoryClass;
-    this._categoryElementClass = categoryElementClass;
-    this._categoryModelClass = categoryModelClass;
+    this._categoryElementClass = elementClass;
+    this._categoryModelClass = modelClass;
   }
 
   public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
@@ -143,7 +148,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                     definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createElementChildrenQuery(requestProps),
                   },
                   {
-                    parentInstancesNodePredicate: "BisCore.ISubModeledElement",
+                    parentInstancesNodePredicate: SUB_MODELED_ELEMENT_CLASS_NAME,
                     definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createISubModeledElementChildrenQuery(requestProps),
                   },
                   {
@@ -163,7 +168,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
             ...(isDefinitionContainerSupported
               ? [
                   {
-                    parentInstancesNodePredicate: DEFINITION_CONTAINER_CLASS,
+                    parentInstancesNodePredicate: DEFINITION_CONTAINER_CLASS_NAME,
                     definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) =>
                       this.createDefinitionContainersAndCategoriesQuery(requestProps),
                   },
@@ -198,8 +203,8 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 hideNodeInHierarchy: true,
                 hasChildren: true,
                 extendedData: {
-                  isModel: true
-                }
+                  isModel: true,
+                },
               })}
             FROM ${this._categoryModelClass} this
             WHERE
@@ -293,12 +298,12 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   }): Promise<HierarchyLevelDefinition> {
     const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
       filter: instanceFilter,
-      contentClass: { fullName: DEFINITION_CONTAINER_CLASS, alias: "this" },
+      contentClass: { fullName: DEFINITION_CONTAINER_CLASS_NAME, alias: "this" },
     });
 
     return [
       {
-        fullClassName: DEFINITION_CONTAINER_CLASS,
+        fullClassName: DEFINITION_CONTAINER_CLASS_NAME,
         query: {
           ecsql: `
             SELECT
@@ -308,7 +313,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 nodeLabel: {
                   selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
                     classAlias: "this",
-                    className: DEFINITION_CONTAINER_CLASS,
+                    className: DEFINITION_CONTAINER_CLASS_NAME,
                   }),
                 },
                 extendedData: {
@@ -421,12 +426,12 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
     const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
       filter: instanceFilter,
-      contentClass: { fullName: SUB_CATEGORY_CLASS, alias: "this" },
+      contentClass: { fullName: SUB_CATEGORY_CLASS_NAME, alias: "this" },
     });
 
     return [
       {
-        fullClassName: SUB_CATEGORY_CLASS,
+        fullClassName: SUB_CATEGORY_CLASS_NAME,
         query: {
           ecsql: `
             SELECT
@@ -436,7 +441,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 nodeLabel: {
                   selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
                     classAlias: "this",
-                    className: SUB_CATEGORY_CLASS,
+                    className: SUB_CATEGORY_CLASS_NAME,
                   }),
                 },
                 extendedData: {
@@ -523,7 +528,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
               supportsFiltering: true,
             })}
           FROM ${instanceFilterClauses.from} this
-          ${parentNode.extendedData?.isCategoryOfSubModel ? "" : "JOIN BisCore.InformationPartitionElement ipe ON ipe.ECInstanceId = this.Model.Id"}
+          ${parentNode.extendedData?.isCategoryOfSubModel ? "" : `JOIN ${INFORMATION_PARTITION_ELEMENT_CLASS_NAME} ipe ON ipe.ECInstanceId = this.Model.Id`}
           ${instanceFilterClauses.joins}
           WHERE
             this.Category.Id IN (${categoryIds.join(",")})
@@ -564,7 +569,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                     IFNULL((
                       SELECT 1
                       FROM ${this._categoryElementClass} ce
-                      JOIN BisCore.Model m ON ce.Model.Id = m.ECInstanceId
+                      JOIN ${MODEL_CLASS_NAME} m ON ce.Model.Id = m.ECInstanceId
                       WHERE ce.Parent.Id = this.ECInstanceId OR (ce.Model.Id = this.ECInstanceId AND m.IsPrivate = false)
                       LIMIT 1
                     ), 0)
@@ -605,7 +610,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
   if (categories.length === 0) {
     return [];
   }
-  const { categoryClass, categoryElementClass } = getClassesByView(props.viewType);
+  const { categoryClass, elementClass } = getClassesByView(props.viewType);
   const adjustedLabel = props.label.replace(/[%_\\]/g, "\\$&");
 
   const CATEGORIES_WITH_LABELS_CTE = "CategoriesWithLabels";
@@ -613,8 +618,8 @@ async function createInstanceKeyPathsFromInstanceLabel(
   const SUBCATEGORIES_WITH_LABELS_CTE = "SubCategoriesWithLabels";
   const DEFINITION_CONTAINERS_WITH_LABELS_CTE = "DefinitionContainersWithLabels";
   const [categoryLabelSelectClause, subCategoryLabelSelectClause, elementLabelSelectClause, definitionContainerLabelSelectClause] = await Promise.all(
-    [categoryClass, SUB_CATEGORY_CLASS, categoryElementClass, ...(definitionContainers.length > 0 ? [DEFINITION_CONTAINER_CLASS] : [])].map(async (className) =>
-      props.labelsFactory.createSelectClause({ classAlias: "this", className }),
+    [categoryClass, SUB_CATEGORY_CLASS_NAME, elementClass, ...(definitionContainers.length > 0 ? [DEFINITION_CONTAINER_CLASS_NAME] : [])].map(
+      async (className) => props.labelsFactory.createSelectClause({ classAlias: "this", className }),
     ),
   );
   return lastValueFrom(
@@ -628,7 +633,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
               ${categoryLabelSelectClause}
             FROM
               ${categoryClass} this
-              JOIN ${SUB_CATEGORY_CLASS} sc ON sc.Parent.Id = this.ECInstanceId
+              JOIN ${SUB_CATEGORY_CLASS_NAME} sc ON sc.Parent.Id = this.ECInstanceId
             WHERE
               this.ECInstanceId IN (${categories.join(", ")})
               GROUP BY this.ECInstanceId
@@ -642,8 +647,8 @@ async function createInstanceKeyPathsFromInstanceLabel(
                     this.Parent.Id,
                     ${elementLabelSelectClause}
                   FROM
-                    ${categoryElementClass} this
-                    JOIN BisCore.Model m ON this.Model.Id = m.ECInstanceId
+                    ${elementClass} this
+                    JOIN ${MODEL_CLASS_NAME} m ON this.Model.Id = m.ECInstanceId
                   WHERE
                     NOT m.IsPrivate
                     AND this.Category.Id IN (${categories.join(", ")})
@@ -660,7 +665,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
                   this.Parent.Id,
                   ${subCategoryLabelSelectClause}
                 FROM
-                  ${SUB_CATEGORY_CLASS} this
+                  ${SUB_CATEGORY_CLASS_NAME} this
                 WHERE
                   NOT this.IsPrivate
                   AND this.Parent.Id IN (${categories.join(", ")})
@@ -674,7 +679,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
                   this.ECInstanceId,
                   ${definitionContainerLabelSelectClause}
                 FROM
-                  ${DEFINITION_CONTAINER_CLASS} this
+                  ${DEFINITION_CONTAINER_CLASS_NAME} this
                 WHERE
                   this.ECInstanceId IN (${definitionContainers.join(", ")})
               )`,
@@ -755,13 +760,13 @@ async function createInstanceKeyPathsFromInstanceLabel(
             className = categoryClass;
             break;
           case "sc":
-            className = SUB_CATEGORY_CLASS;
+            className = SUB_CATEGORY_CLASS_NAME;
             break;
           case "e":
-            className = categoryElementClass;
+            className = elementClass;
             break;
           default:
-            className = DEFINITION_CONTAINER_CLASS;
+            className = DEFINITION_CONTAINER_CLASS_NAME;
             break;
         }
         return {
@@ -797,11 +802,11 @@ function createInstanceKeyPathsFromTargetItems({
           acc.categories.push(id);
           return acc;
         }
-        if (className === DEFINITION_CONTAINER_CLASS) {
+        if (className === DEFINITION_CONTAINER_CLASS_NAME) {
           acc.definitionContainers.push(id);
           return acc;
         }
-        if (className === SUB_CATEGORY_CLASS) {
+        if (className === SUB_CATEGORY_CLASS_NAME) {
           if (hierarchyConfig.hideSubCategories) {
             return acc;
           }
@@ -850,7 +855,7 @@ function createGeometricElementInstanceKeyPaths(
   targetItems: Array<Id64String>,
 ): Observable<HierarchyFilteringPath> {
   const separator = ";";
-  const { categoryClass, categoryElementClass, categoryModelClass } = getClassesByView(viewType);
+  const { categoryClass, elementClass, modelClass } = getClassesByView(viewType);
   if (targetItems.length === 0 || !hierarchyConfig.showElements) {
     return of([]);
   }
@@ -866,8 +871,8 @@ function createGeometricElementInstanceKeyPaths(
             'm${separator}' || CAST(IdToHex([m].[ECInstanceId]) AS TEXT) || '${separator}c${separator}' || CAST(IdToHex([c].[ECInstanceId]) AS TEXT) || '${separator}e${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT),
             'e${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT)
           )
-        FROM ${categoryElementClass} e
-        LEFT JOIN ${categoryModelClass} m ON (e.Parent.Id IS NULL AND m.ECInstanceId = e.Model.Id)
+        FROM ${elementClass} e
+        LEFT JOIN ${modelClass} m ON (e.Parent.Id IS NULL AND m.ECInstanceId = e.Model.Id)
         LEFT JOIN ${categoryClass} c ON (e.Parent.Id IS NULL AND c.ECInstanceId = e.Category.Id)
         WHERE e.ECInstanceId IN (${targetItems.join(",")})
 
@@ -882,8 +887,8 @@ function createGeometricElementInstanceKeyPaths(
             'e${separator}' || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT) || '${separator}' || ce.Path
           )
         FROM CategoriesElementsHierarchy ce
-        JOIN ${categoryElementClass} pe ON (pe.ECInstanceId = ce.ParentId OR pe.ECInstanceId = ce.ModelId AND ce.ParentId IS NULL)
-        LEFT JOIN ${categoryModelClass} m ON (pe.Parent.Id IS NULL AND m.ECInstanceId = pe.Model.Id)
+        JOIN ${elementClass} pe ON (pe.ECInstanceId = ce.ParentId OR pe.ECInstanceId = ce.ModelId AND ce.ParentId IS NULL)
+        LEFT JOIN ${modelClass} m ON (pe.Parent.Id IS NULL AND m.ECInstanceId = pe.Model.Id)
         LEFT JOIN ${categoryClass} c ON (pe.Parent.Id IS NULL AND c.ECInstanceId = pe.Category.Id)
       )`,
     ];
@@ -899,7 +904,7 @@ function createGeometricElementInstanceKeyPaths(
     );
   }).pipe(
     releaseMainThreadOnItemsCount(300),
-    map((row) => parseQueryRow(row, separator, categoryElementClass, categoryClass, categoryModelClass)),
+    map((row) => parseQueryRow(row, separator, elementClass, categoryClass, modelClass)),
     mergeMap(async (elementHierarchyPath) => {
       const pathToCategory = await idsCache.getInstanceKeyPaths({ categoryId: elementHierarchyPath[0].id });
       pathToCategory.pop(); // category is already included in the element hierarchy path

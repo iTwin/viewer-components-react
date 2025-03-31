@@ -5,6 +5,7 @@
 
 import { assert } from "@itwin/core-bentley";
 import { HierarchyFilteringPath, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+import { CATEGORY_CLASS_NAME, MODEL_CLASS_NAME, SUBJECT_CLASS_NAME } from "../../common/internal/ClassNameDefinitions.js";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
@@ -40,11 +41,6 @@ type FilteredTreeNode = GenericFilteredTreeNode | CategoryFilteredTreeNode | Ele
 export interface FilteredTree {
   getVisibilityChangeTargets(node: HierarchyNode): VisibilityChangeTargets;
 }
-
-export const SUBJECT_CLASS_NAME = "BisCore.Subject" as const;
-export const MODEL_CLASS_NAME = "BisCore.GeometricModel3d" as const;
-export const CATEGORY_CLASS_NAME = "BisCore.SpatialCategory" as const;
-export const ELEMENT_CLASS_NAME = "BisCore.GeometricElement3d" as const;
 
 type CategoryKey = `${Id64String}-${Id64String}`;
 

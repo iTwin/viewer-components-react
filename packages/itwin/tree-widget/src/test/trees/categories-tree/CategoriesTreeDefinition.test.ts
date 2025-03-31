@@ -14,6 +14,7 @@ import {
   defaultHierarchyConfiguration,
 } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
+import { DEFINITION_MODEL_CLASS_NAME } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import {
   buildIModel,
   insertDefinitionContainer,
@@ -85,7 +86,7 @@ describe("Categories tree", () => {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+        insertSubModel({ builder, classFullName: DEFINITION_MODEL_CLASS_NAME, modeledElementId: definitionContainer.id });
 
         const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
 
@@ -113,9 +114,9 @@ describe("Categories tree", () => {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+        const definitionModel = insertSubModel({ builder, classFullName: DEFINITION_MODEL_CLASS_NAME, modeledElementId: definitionContainer.id });
         const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild", modelId: definitionModel.id });
-        insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
+        insertSubModel({ builder, classFullName: DEFINITION_MODEL_CLASS_NAME, modeledElementId: definitionContainerChild.id });
       });
 
       const { imodel } = buildIModelResult;
@@ -131,7 +132,7 @@ describe("Categories tree", () => {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+        const definitionModel = insertSubModel({ builder, classFullName: DEFINITION_MODEL_CLASS_NAME, modeledElementId: definitionContainer.id });
 
         const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id, isPrivate: true });
 
@@ -151,7 +152,7 @@ describe("Categories tree", () => {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+        const definitionModel = insertSubModel({ builder, classFullName: DEFINITION_MODEL_CLASS_NAME, modeledElementId: definitionContainer.id });
 
         insertSpatialCategory({ builder, codeValue: "SpatialCategory1", modelId: definitionModel.id });
         const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
@@ -179,7 +180,7 @@ describe("Categories tree", () => {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer", isPrivate: true });
-        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+        const definitionModel = insertSubModel({ builder, classFullName: DEFINITION_MODEL_CLASS_NAME, modeledElementId: definitionContainer.id });
 
         const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id });
 
@@ -199,14 +200,14 @@ describe("Categories tree", () => {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+        const definitionModel = insertSubModel({ builder, classFullName: DEFINITION_MODEL_CLASS_NAME, modeledElementId: definitionContainer.id });
         const definitionContainerChild = insertDefinitionContainer({
           builder,
           codeValue: "DefinitionContainerChild",
           isPrivate: true,
           modelId: definitionModel.id,
         });
-        const defintionModelChild = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
+        const defintionModelChild = insertSubModel({ builder, classFullName: DEFINITION_MODEL_CLASS_NAME, modeledElementId: definitionContainerChild.id });
 
         const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: defintionModelChild.id });
 
@@ -226,7 +227,7 @@ describe("Categories tree", () => {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+        const definitionModel = insertSubModel({ builder, classFullName: DEFINITION_MODEL_CLASS_NAME, modeledElementId: definitionContainer.id });
 
         const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id });
 
@@ -260,7 +261,7 @@ describe("Categories tree", () => {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+        const definitionModel = insertSubModel({ builder, classFullName: DEFINITION_MODEL_CLASS_NAME, modeledElementId: definitionContainer.id });
 
         const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id });
 
@@ -304,7 +305,7 @@ describe("Categories tree", () => {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+        const definitionModel = insertSubModel({ builder, classFullName: DEFINITION_MODEL_CLASS_NAME, modeledElementId: definitionContainer.id });
 
         const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id });
 
@@ -357,7 +358,7 @@ describe("Categories tree", () => {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+        const definitionModel = insertSubModel({ builder, classFullName: DEFINITION_MODEL_CLASS_NAME, modeledElementId: definitionContainer.id });
 
         const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id });
 
@@ -402,9 +403,9 @@ describe("Categories tree", () => {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+        const definitionModel = insertSubModel({ builder, classFullName: DEFINITION_MODEL_CLASS_NAME, modeledElementId: definitionContainer.id });
         const definitionContainerChild = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerChild", modelId: definitionModel.id });
-        const definitionModelChild = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
+        const definitionModelChild = insertSubModel({ builder, classFullName: DEFINITION_MODEL_CLASS_NAME, modeledElementId: definitionContainerChild.id });
 
         const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
 
@@ -444,7 +445,7 @@ describe("Categories tree", () => {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+        const definitionModel = insertSubModel({ builder, classFullName: DEFINITION_MODEL_CLASS_NAME, modeledElementId: definitionContainer.id });
 
         const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
         const childCategory = insertSpatialCategory({ builder, codeValue: "ScChild", modelId: definitionModel.id });

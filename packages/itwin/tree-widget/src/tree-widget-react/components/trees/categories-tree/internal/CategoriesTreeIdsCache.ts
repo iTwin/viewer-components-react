@@ -3,13 +3,14 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { DEFINITION_CONTAINER_CLASS_NAME, SUB_CATEGORY_CLASS_NAME } from "../../common/internal/ClassNameDefinitions.js";
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
-import { getDistinctMapValues } from "../../common/internal/Utils.js";
-import { DEFINITION_CONTAINER_CLASS, SUB_CATEGORY_CLASS } from "./ClassNameDefinitions.js";
+import { getClassesByView, getDistinctMapValues } from "../../common/internal/Utils.js";
 
 import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
+
 interface DefinitionContainerInfo {
   modelId: Id64String;
   parentDefinitionContainerExists: boolean;
@@ -42,6 +43,7 @@ export class CategoriesTreeIdsCache implements Disposable {
   private _modelWithCategoryModeledElements: Promise<Map<string, Id64Set>> | undefined;
   private _categoryClass: string;
   private _categoryElementClass: string;
+  private _categoryModelClass: string;
   private _isDefinitionContainerSupported: Promise<boolean> | undefined;
   private _filteredElementsModels: Promise<Map<Id64String, Id64String>> | undefined;
 
@@ -49,10 +51,11 @@ export class CategoriesTreeIdsCache implements Disposable {
     private _queryExecutor: LimitingECSqlQueryExecutor,
     viewType: "3d" | "2d",
   ) {
-    const { categoryClass, categoryElementClass } = getClassesByView(viewType);
+    const { categoryClass, elementClass, modelClass } = getClassesByView(viewType);
     this._categoryClass = categoryClass;
-    this._categoryElementClass = categoryElementClass;
-    this._categoryElementCounts = new ModelCategoryElementsCountCache(_queryExecutor, categoryElementClass);
+    this._categoryElementClass = elementClass;
+    this._categoryModelClass = modelClass;
+    this._categoryElementCounts = new ModelCategoryElementsCountCache(_queryExecutor, elementClass);
   }
 
   public [Symbol.dispose]() {
@@ -95,7 +98,7 @@ export class CategoriesTreeIdsCache implements Disposable {
   private async *queryElementModelCategories() {
     const query = `
       SELECT this.Model.Id modelId, this.Category.Id categoryId, m.IsPrivate isModelPrivate
-      FROM BisCore.Model m
+      FROM ${this._categoryModelClass} m
       JOIN ${this._categoryElementClass} this ON m.ECInstanceId = this.Model.Id
       WHERE this.Parent.Id IS NULL
       GROUP BY modelId, categoryId, isModelPrivate
@@ -123,7 +126,7 @@ export class CategoriesTreeIdsCache implements Disposable {
         ${
           isDefinitionContainerSupported
             ? `
-            IIF(this.Model.Id IN (SELECT dc.ECInstanceId FROM ${DEFINITION_CONTAINER_CLASS} dc),
+            IIF(this.Model.Id IN (SELECT dc.ECInstanceId FROM ${DEFINITION_CONTAINER_CLASS_NAME} dc),
               true,
               false
             )`
@@ -131,8 +134,8 @@ export class CategoriesTreeIdsCache implements Disposable {
         } parentDefinitionContainerExists
       FROM
         ${this._categoryClass} this
-        JOIN ${SUB_CATEGORY_CLASS} sc ON sc.Parent.Id = this.ECInstanceId
-        JOIN BisCore.Model m ON m.ECInstanceId = this.Model.Id
+        JOIN ${SUB_CATEGORY_CLASS_NAME} sc ON sc.Parent.Id = this.ECInstanceId
+        JOIN ${this._categoryModelClass} m ON m.ECInstanceId = this.Model.Id
       WHERE
         NOT this.IsPrivate
         AND (NOT m.IsPrivate OR m.ECClassId IS (BisCore.DictionaryModel))
@@ -186,7 +189,7 @@ export class CategoriesTreeIdsCache implements Disposable {
             dc.ECInstanceId,
             dc.Model.Id
           FROM
-            ${DEFINITION_CONTAINER_CLASS} dc
+            ${DEFINITION_CONTAINER_CLASS_NAME} dc
           WHERE
             dc.ECInstanceId IN (SELECT c.Model.Id FROM ${this._categoryClass} c WHERE NOT c.IsPrivate AND EXISTS (SELECT 1 FROM ${this._categoryElementClass} e WHERE e.Category.Id = c.ECInstanceId))
             AND NOT dc.IsPrivate
@@ -198,7 +201,7 @@ export class CategoriesTreeIdsCache implements Disposable {
             pdc.Model.Id
           FROM
             ${DEFINITION_CONTAINERS_CTE} cdc
-            JOIN ${DEFINITION_CONTAINER_CLASS} pdc ON pdc.ECInstanceId = cdc.ModelId
+            JOIN ${DEFINITION_CONTAINER_CLASS_NAME} pdc ON pdc.ECInstanceId = cdc.ModelId
           WHERE
             NOT pdc.IsPrivate
         )
@@ -221,7 +224,7 @@ export class CategoriesTreeIdsCache implements Disposable {
         sc.ECInstanceId id,
         sc.Parent.Id categoryId
       FROM
-        ${SUB_CATEGORY_CLASS} sc
+        ${SUB_CATEGORY_CLASS_NAME} sc
       WHERE
         NOT sc.IsPrivate
         AND sc.Parent.Id IN (${categoriesInfo.join(",")})
@@ -284,7 +287,7 @@ export class CategoriesTreeIdsCache implements Disposable {
         pe.ECInstanceId modeledElementId,
         pe.Category.Id categoryId,
         pe.Model.Id modelId
-      FROM BisCore.Model m
+      FROM ${this._categoryModelClass} m
       JOIN ${this._categoryElementClass} pe ON pe.ECInstanceId = m.ModeledElement.Id
       WHERE
         m.IsPrivate = false
@@ -464,7 +467,7 @@ export class CategoriesTreeIdsCache implements Disposable {
       if (subCategoryInfo === undefined) {
         return [];
       }
-      return [...(await this.getInstanceKeyPaths({ categoryId: subCategoryInfo.categoryId })), { id: props.subCategoryId, className: SUB_CATEGORY_CLASS }];
+      return [...(await this.getInstanceKeyPaths({ categoryId: subCategoryInfo.categoryId })), { id: props.subCategoryId, className: SUB_CATEGORY_CLASS_NAME }];
     }
 
     if ("categoryId" in props) {
@@ -488,12 +491,12 @@ export class CategoriesTreeIdsCache implements Disposable {
     }
 
     if (!definitionContainerInfo.parentDefinitionContainerExists) {
-      return [{ id: props.definitionContainerId, className: DEFINITION_CONTAINER_CLASS }];
+      return [{ id: props.definitionContainerId, className: DEFINITION_CONTAINER_CLASS_NAME }];
     }
 
     return [
       ...(await this.getInstanceKeyPaths({ definitionContainerId: definitionContainerInfo.modelId })),
-      { id: props.definitionContainerId, className: DEFINITION_CONTAINER_CLASS },
+      { id: props.definitionContainerId, className: DEFINITION_CONTAINER_CLASS_NAME },
     ];
   }
 
@@ -551,11 +554,4 @@ export class CategoriesTreeIdsCache implements Disposable {
     this._isDefinitionContainerSupported ??= this.queryIsDefinitionContainersSupported();
     return this._isDefinitionContainerSupported;
   }
-}
-
-/** @internal */
-export function getClassesByView(viewType: "2d" | "3d") {
-  return viewType === "2d"
-    ? { categoryClass: "BisCore.DrawingCategory", categoryElementClass: "BisCore.GeometricElement2d", categoryModelClass: "BisCore.GeometricModel2d" }
-    : { categoryClass: "BisCore.SpatialCategory", categoryElementClass: "BisCore.GeometricElement3d", categoryModelClass: "BisCore.GeometricModel3d" };
 }

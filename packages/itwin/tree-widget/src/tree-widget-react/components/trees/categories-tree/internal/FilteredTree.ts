@@ -5,7 +5,7 @@
 
 import { assert } from "@itwin/core-bentley";
 import { HierarchyFilteringPath, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
-import { SUB_CATEGORY_CLASS } from "./ClassNameDefinitions.js";
+import { SUB_CATEGORY_CLASS_NAME } from "../../common/internal/ClassNameDefinitions.js";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
@@ -315,7 +315,7 @@ async function getType(
   categoryElementClass: string,
   categoryModelClassName: string,
 ) {
-  if (await hierarchyChecker.classDerivesFrom(className, SUB_CATEGORY_CLASS)) {
+  if (await hierarchyChecker.classDerivesFrom(className, SUB_CATEGORY_CLASS_NAME)) {
     return "subCategory";
   }
   if (await hierarchyChecker.classDerivesFrom(className, categoryElementClass)) {

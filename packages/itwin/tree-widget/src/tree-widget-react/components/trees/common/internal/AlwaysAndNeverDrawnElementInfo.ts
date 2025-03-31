@@ -26,7 +26,7 @@ import {
   tap,
 } from "rxjs";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { pushToMap, setDifference } from "./Utils.js";
+import { getClassesByView, pushToMap, setDifference } from "./Utils.js";
 
 import type { Observable, Subscription } from "rxjs";
 import type { BeEvent, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
@@ -65,8 +65,10 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
   private _suppressors: Observable<number>;
   private _suppress = new Subject<boolean>();
   private _forceUpdate = new Subject<void>();
+  private _viewType: "2d" | "3d";
 
   constructor(private readonly _viewport: Viewport) {
+    this._viewType = _viewport.view.is2d() ? "2d" : "3d";
     this._alwaysDrawn = this.createCacheEntryObservable({
       event: this._viewport.onAlwaysDrawnChanged,
       getSet: () => this._viewport.alwaysDrawn,
@@ -209,6 +211,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
 
   private queryElementInfo(elementIds: Id64Array, requestId: string): Observable<ElementInfo> {
     const executor = createECSqlQueryExecutor(this._viewport.iModel);
+    const { elementClass } = getClassesByView(this._viewType);
     const reader = executor.createQueryReader(
       {
         ctes: [
@@ -219,7 +222,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
                 Model.Id modelId,
                 Category.Id categoryId,
                 Parent.Id parentId
-              FROM bis.GeometricElement3d
+              FROM ${elementClass}
               WHERE InVirtualSet(?, ECInstanceId)
 
               UNION ALL
@@ -229,7 +232,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
                 e.modelId,
                 p.Category.Id categoryId,
                 p.Parent.Id parentId
-              FROM bis.GeometricElement3d p
+              FROM${elementClass} p
               JOIN ElementInfo e ON p.ECInstanceId = e.parentId
             )
           `,

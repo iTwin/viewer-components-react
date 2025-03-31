@@ -5,6 +5,12 @@
 
 import { QueryRowFormat } from "@itwin/core-common";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
+import {
+  DRAWING_CATEGORY_CLASS_NAME,
+  GEOMETRIC_ELEMENT_2D_CLASS_NAME,
+  GEOMETRIC_ELEMENT_3D_CLASS_NAME,
+  SPATIAL_CATEGORY_CLASS_NAME,
+} from "./internal/ClassNameDefinitions.js";
 
 import type { Viewport } from "@itwin/core-frontend";
 
@@ -69,12 +75,10 @@ export function enableSubCategoryDisplay(viewport: Viewport, key: string, enable
 
 export async function loadCategoriesFromViewport(vp: Viewport) {
   // Query categories and add them to state
-  const selectUsedSpatialCategoryIds =
-    "SELECT DISTINCT Category.Id as id from BisCore.GeometricElement3d WHERE Category.Id IN (SELECT ECInstanceId from BisCore.SpatialCategory)";
-  const selectUsedDrawingCategoryIds =
-    "SELECT DISTINCT Category.Id as id from BisCore.GeometricElement2d WHERE Model.Id=? AND Category.Id IN (SELECT ECInstanceId from BisCore.DrawingCategory)";
+  const selectUsedSpatialCategoryIds = `SELECT DISTINCT Category.Id as id from ${GEOMETRIC_ELEMENT_3D_CLASS_NAME} WHERE Category.Id IN (SELECT ECInstanceId from ${SPATIAL_CATEGORY_CLASS_NAME})`;
+  const selectUsedDrawingCategoryIds = `SELECT DISTINCT Category.Id as id from ${GEOMETRIC_ELEMENT_2D_CLASS_NAME} WHERE Model.Id=? AND Category.Id IN (SELECT ECInstanceId from ${DRAWING_CATEGORY_CLASS_NAME})`;
   const ecsql = vp.view.is3d() ? selectUsedSpatialCategoryIds : selectUsedDrawingCategoryIds;
-  const ecsql2 = `SELECT ECInstanceId as id FROM ${vp.view.is3d() ? "BisCore.SpatialCategory" : "BisCore.DrawingCategory"} WHERE ECInstanceId IN (${ecsql})`;
+  const ecsql2 = `SELECT ECInstanceId as id FROM ${vp.view.is3d() ? SPATIAL_CATEGORY_CLASS_NAME : DRAWING_CATEGORY_CLASS_NAME} WHERE ECInstanceId IN (${ecsql})`;
 
   const categories: CategoryInfo[] = [];
 

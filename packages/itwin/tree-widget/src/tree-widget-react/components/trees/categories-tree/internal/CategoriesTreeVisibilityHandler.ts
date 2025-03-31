@@ -34,7 +34,7 @@ import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies
 import { enableCategoryDisplay, enableSubCategoryDisplay } from "../../common/CategoriesVisibilityUtils.js";
 import { AlwaysAndNeverDrawnElementInfo } from "../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
 import { createVisibilityStatus, getTooltipOptions } from "../../common/internal/Tooltip.js";
-import { getDistinctMapValues, releaseMainThreadOnItemsCount, setDifference, setIntersection } from "../../common/internal/Utils.js";
+import { getClassesByView, getDistinctMapValues, releaseMainThreadOnItemsCount, setDifference, setIntersection } from "../../common/internal/Utils.js";
 import { createVisibilityChangeEventListener } from "../../common/internal/VisibilityChangeEventListener.js";
 import {
   changeElementStateNoChildrenOperator,
@@ -47,7 +47,6 @@ import {
 } from "../../common/internal/VisibilityUtils.js";
 import { toVoidPromise } from "../../common/Rxjs.js";
 import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility.js";
-import { getClassesByView } from "./CategoriesTreeIdsCache.js";
 import { CategoriesTreeNode } from "./CategoriesTreeNode.js";
 import { createFilteredTree, parseCategoryKey, parseSubCategoryKey } from "./FilteredTree.js";
 
@@ -149,14 +148,14 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     });
     this._alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfo(_props.viewport);
     this._idsCache = this._props.idsCache;
-    const { categoryClass, categoryElementClass, categoryModelClass } = getClassesByView(_props.viewport.view.is2d() ? "2d" : "3d");
+    const { categoryClass, elementClass, modelClass } = getClassesByView(_props.viewport.view.is2d() ? "2d" : "3d");
     if (_props.filteredPaths) {
       this._filteredTree = createFilteredTree({
         idsCache: this._idsCache,
         filteringPaths: _props.filteredPaths,
         categoryClassName: categoryClass,
-        categoryElementClassName: categoryElementClass,
-        categoryModelClassName: categoryModelClass,
+        categoryElementClassName: elementClass,
+        categoryModelClassName: modelClass,
         imodelAccess: this._props.imodelAccess,
       });
     }

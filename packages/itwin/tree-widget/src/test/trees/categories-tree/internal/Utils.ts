@@ -3,17 +3,23 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { getDistinctMapValues } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
+import {
+  DEFINITION_CONTAINER_CLASS_NAME,
+  ELEMENT_CLASS_NAME,
+  SUB_CATEGORY_CLASS_NAME,
+} from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
+import { getClassesByView, getDistinctMapValues } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { ClassGroupingNodeKey, GroupingHierarchyNode, HierarchyNodeKey, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 
 /** @internal */
-export function createCategoryHierarchyNode(categoryId: Id64String, hasChildren = false): NonGroupingHierarchyNode {
+export function createCategoryHierarchyNode(categoryId: Id64String, hasChildren = false, viewType: "2d" | "3d" = "3d"): NonGroupingHierarchyNode {
+  const { categoryClass } = getClassesByView(viewType);
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: "bis:SpatialCategory", id: categoryId }],
+      instanceKeys: [{ className: categoryClass, id: categoryId }],
     },
     children: hasChildren,
     label: "",
@@ -25,11 +31,17 @@ export function createCategoryHierarchyNode(categoryId: Id64String, hasChildren 
 }
 
 /** @internal */
-export function createSubModelCategoryHierarchyNode(modelId?: Id64String, categoryId?: Id64String, hasChildren?: boolean): NonGroupingHierarchyNode {
+export function createSubModelCategoryHierarchyNode(
+  modelId?: Id64String,
+  categoryId?: Id64String,
+  hasChildren?: boolean,
+  viewType: "2d" | "3d" = "3d",
+): NonGroupingHierarchyNode {
+  const { categoryClass } = getClassesByView(viewType);
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: "bis:SpatialCategory", id: categoryId ?? "" }],
+      instanceKeys: [{ className: categoryClass, id: categoryId ?? "" }],
     },
     children: !!hasChildren,
     label: "",
@@ -46,7 +58,7 @@ export function createSubCategoryHierarchyNode(subCategoryId: Id64String, catego
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: "bis:SubCategory", id: subCategoryId }],
+      instanceKeys: [{ className: SUB_CATEGORY_CLASS_NAME, id: subCategoryId }],
     },
     children: false,
     label: "",
@@ -69,7 +81,7 @@ export function createClassGroupingHierarchyNode({
   className?: string;
   parentKeys?: HierarchyNodeKey[];
 }): GroupingHierarchyNode & { key: ClassGroupingNodeKey } {
-  const className = props.className ?? "Bis:Element";
+  const className = props.className ?? ELEMENT_CLASS_NAME;
   return {
     key: {
       type: "class-grouping",
@@ -91,7 +103,7 @@ export function createDefinitionContainerHierarchyNode(definitionContainerId: Id
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: "bis:DefinitionContainer", id: definitionContainerId }],
+      instanceKeys: [{ className: DEFINITION_CONTAINER_CLASS_NAME, id: definitionContainerId }],
     },
     children: true,
     label: "",
@@ -108,11 +120,13 @@ export function createElementHierarchyNode(props: {
   categoryId: Id64String | undefined;
   hasChildren?: boolean;
   elementId?: Id64String;
+  viewType?: "2d" | "3d";
 }): NonGroupingHierarchyNode {
+  const { elementClass } = getClassesByView(props.viewType ?? "3d");
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: "bis:GeometricalElement3d", id: props.elementId ?? "" }],
+      instanceKeys: [{ className: elementClass, id: props.elementId ?? "" }],
     },
     children: !!props.hasChildren,
     label: "",
@@ -126,11 +140,12 @@ export function createElementHierarchyNode(props: {
 }
 
 /** @internal */
-export function createModelHierarchyNode(modelId?: Id64String, hasChildren?: boolean): NonGroupingHierarchyNode {
+export function createModelHierarchyNode(modelId?: Id64String, hasChildren?: boolean, viewType: "2d" | "3d" = "3d"): NonGroupingHierarchyNode {
+  const { modelClass } = getClassesByView(viewType);
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: "bis:Model", id: modelId ?? "" }],
+      instanceKeys: [{ className: modelClass, id: modelId ?? "" }],
     },
     children: !!hasChildren,
     label: "",

@@ -9,13 +9,14 @@ import { Icon } from "@itwin/itwinui-react/bricks";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
 import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMatches } from "../common/components/EmptyTree.js";
+import { DEFINITION_CONTAINER_CLASS_NAME, SUB_CATEGORY_CLASS_NAME } from "../common/internal/ClassNameDefinitions.js";
+import { getClassesByView } from "../common/internal/Utils.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 import { useIModelChangeListener } from "../common/UseIModelChangeListener.js";
 import { useTelemetryContext } from "../common/UseTelemetryContext.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
-import { CategoriesTreeIdsCache, getClassesByView } from "./internal/CategoriesTreeIdsCache.js";
+import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
 import { createCategoriesTreeVisibilityHandler } from "./internal/CategoriesTreeVisibilityHandler.js";
-import { DEFINITION_CONTAINER_CLASS, SUB_CATEGORY_CLASS } from "./internal/ClassNameDefinitions.js";
 
 import type { ReactNode } from "react";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
@@ -171,8 +172,8 @@ export function useCategoriesTree({
           hierarchyConfig: hierarchyConfiguration,
         });
         onFilteredPathsChanged(paths);
-        const { categoryElementClass, categoryModelClass } = getClassesByView(viewType);
-        onCategoriesFiltered?.(await getCategoriesFromPaths(paths, getCategoriesTreeIdsCache(), categoryElementClass, categoryModelClass));
+        const { elementClass, modelClass } = getClassesByView(viewType);
+        onCategoriesFiltered?.(await getCategoriesFromPaths(paths, getCategoriesTreeIdsCache(), elementClass, modelClass));
         return paths;
       } catch (e) {
         const newError = e instanceof FilterLimitExceededError ? "tooManyFilterMatches" : "unknownFilterError";
@@ -250,7 +251,7 @@ async function getCategoriesFromPaths(
 
     assert(lastNodeInfo !== undefined && HierarchyNodeIdentifier.isInstanceNodeIdentifier(lastNodeInfo.lastNode));
 
-    if (lastNodeInfo.lastNode.className === DEFINITION_CONTAINER_CLASS) {
+    if (lastNodeInfo.lastNode.className === DEFINITION_CONTAINER_CLASS_NAME) {
       const definitionContainerCategories = await idsCache.getAllContainedCategories([lastNodeInfo.lastNode.id]);
       for (const categoryId of definitionContainerCategories) {
         const value = categories.get(categoryId);
@@ -261,7 +262,7 @@ async function getCategoriesFromPaths(
       continue;
     }
 
-    if (lastNodeInfo.lastNode.className === SUB_CATEGORY_CLASS) {
+    if (lastNodeInfo.lastNode.className === SUB_CATEGORY_CLASS_NAME) {
       const secondToLastNode = lastNodeInfo.nodeIndex > 0 ? currPath[lastNodeInfo.nodeIndex - 1] : undefined;
       assert(secondToLastNode !== undefined && HierarchyNodeIdentifier.isInstanceNodeIdentifier(secondToLastNode));
 
