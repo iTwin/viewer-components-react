@@ -48,13 +48,7 @@ export interface CategoriesTreeHeaderButtonProps extends TreeToolbarButtonProps 
  *
  * @public
  */
-export function useCategoriesTreeButtonProps({
-  viewport,
-  getSchemaContext,
-}: {
-  viewport: Viewport;
-  getSchemaContext: (imodel: IModelConnection) => SchemaContext;
-}): {
+export function useCategoriesTreeButtonProps({ viewport, getSchemaContext }: { viewport: Viewport; getSchemaContext: (imodel: IModelConnection) => SchemaContext }): {
   buttonProps: Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport" | "models">;
   onCategoriesFiltered: (props: { categories: CategoryInfo[] | undefined; models?: Id64Array }) => void;
 } {
