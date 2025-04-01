@@ -21,7 +21,7 @@ steps:
     env:
       COREPACK_INTEGRITY_KEYS: 0
 
-  - script: pnpm install
+  - script: pnpm --filter ./packages/itwin/tree-widget install
     displayName: pnpm install
 
   # - script: pnpm audit --registry=https://registry.npmjs.org --audit-level=high --production
@@ -30,5 +30,5 @@ steps:
   # - script: pnpm exec prettier . --check
   #   displayName: Check formatting
 
-  - script: pnpm cover
+  - script: pnpm test
     displayName: Build, Lint, Cover and check for unexpected API changes
