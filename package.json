@@ -7,9 +7,9 @@
   "packageManager": "pnpm@9.15.0",
   "scripts": {
     "build": "lage build --grouped",
-    "cover": "pnpm --filter ./packages/itwin/tree-widget build && pnpm --filter ./packages/itwin/tree-widget cover",
+    "cover": "lage cover --grouped --continue --to @itwin/tree-widget-react",
     "docs:all": "lage docs",
-    "test": "pnpm --filter ./packages/itwin/tree-widget build && pnpm --filter ./packages/itwin/tree-widget test",
+    "test": "lage test --grouped --continue",
     "test:e2e": "lage test:e2e --continue --verbose",
     "lint": "lage lint --grouped --continue",
     "clean": "lage clean --grouped --continue",
