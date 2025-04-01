@@ -11,29 +11,30 @@ import type { Id64String } from "@itwin/core-bentley";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
 import type { CategoriesTreeIdsCache } from "./CategoriesTreeIdsCache.js";
+import type { CategoryId, DefinitionContainerId, ElementId, ModelId, SubCategoryId } from "../../common/internal/Types.js";
 
 interface FilteredTreeRootNode {
   children: Map<Id64String, FilteredTreeNode>;
 }
 
 interface BaseFilteredTreeNode {
-  id: string;
+  id: Id64String;
   children?: Map<Id64String, FilteredTreeNode>;
   isFilterTarget: boolean;
 }
 
 interface CategoryFilteredTreeNode extends BaseFilteredTreeNode {
   type: "category";
-  modelId?: Id64String;
+  modelId?: ModelId;
 }
 
 interface ModelFilteredTreeNode extends BaseFilteredTreeNode {
   type: "model";
-  categoryId?: Id64String;
+  categoryId?: CategoryId;
 }
 interface SubCategoryFilteredTreeNode extends BaseFilteredTreeNode {
   type: "subCategory";
-  categoryId: Id64String;
+  categoryId: SubCategoryId;
 }
 
 interface DefinitionContainerFilteredTreeNode extends BaseFilteredTreeNode {
@@ -42,8 +43,8 @@ interface DefinitionContainerFilteredTreeNode extends BaseFilteredTreeNode {
 
 interface ElementFilteredTreeNode extends BaseFilteredTreeNode {
   type: "element";
-  categoryId: Id64String;
-  modelId?: Id64String;
+  categoryId: CategoryId;
+  modelId?: ModelId;
 }
 
 type FilteredTreeNode =
@@ -57,35 +58,38 @@ export interface FilteredTree {
   getVisibilityChangeTargets(node: HierarchyNode): VisibilityChangeTargets;
 }
 
-type CategoryKey = `${Id64String}-${Id64String}`;
-type SubCategoryKey = `${Id64String}-${Id64String}`;
+type CategoryKey = `${ModelId}-${CategoryId}`;
+type SubCategoryKey = `${CategoryId}-${SubCategoryId}`;
 
-function createCategoryKey(modelId: string | undefined, categoryId: string): CategoryKey {
+function createCategoryKey(modelId: ModelId | undefined, categoryId: CategoryId): CategoryKey {
   return `${modelId ?? ""}-${categoryId}`;
 }
 
-function createSubCategoryKey(categoryId: string, subCategoryId: string): SubCategoryKey {
+function createSubCategoryKey(categoryId: CategoryId, subCategoryId: SubCategoryId): SubCategoryKey {
   return `${categoryId}-${subCategoryId}`;
 }
 
-export function parseCategoryKey(key: CategoryKey): { modelId: Id64String | undefined; categoryId: Id64String } {
+/** @internal */
+export function parseCategoryKey(key: CategoryKey): { modelId: ModelId | undefined; categoryId: CategoryId } {
   const [modelId, categoryId] = key.split("-");
   return { modelId: modelId !== "" ? modelId : undefined, categoryId };
 }
 
+/** @internal */
 export function parseSubCategoryKey(key: SubCategoryKey) {
   const [categoryId, subCategoryId] = key.split("-");
   return { categoryId, subCategoryId };
 }
 
 interface VisibilityChangeTargets {
-  definitionContainers?: Set<Id64String>;
-  models?: Set<Id64String>;
+  definitionContainers?: Set<DefinitionContainerId>;
+  models?: Set<ModelId>;
   categories?: Set<CategoryKey>;
-  elements?: Map<CategoryKey, Set<Id64String>>;
+  elements?: Map<CategoryKey, Set<ElementId>>;
   subCategories?: Set<SubCategoryKey>;
 }
 
+/** @internal */
 export async function createFilteredTree(props: {
   imodelAccess: ECClassHierarchyInspector;
   filteringPaths: HierarchyFilteringPath[];
@@ -242,7 +246,7 @@ function createFilteredTreeNode({
   parent,
 }: {
   type: FilteredTreeNode["type"];
-  id: string;
+  id: Id64String;
   isFilterTarget: boolean;
   parent: FilteredTreeNode | FilteredTreeRootNode;
 }): FilteredTreeNode {

@@ -7,7 +7,7 @@ import { expect } from "chai";
 import { EMPTY, expand, from, mergeMap } from "rxjs";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { CategoriesTreeNode } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeNode.js";
-import { toVoidPromise } from "../../../../tree-widget-react/components/trees/common/Rxjs.js";
+import { toVoidPromise } from "../../../../tree-widget-react/components/trees/common/internal/Rxjs.js";
 
 import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";

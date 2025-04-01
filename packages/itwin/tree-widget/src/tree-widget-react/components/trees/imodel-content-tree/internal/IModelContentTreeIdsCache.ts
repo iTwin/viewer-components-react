@@ -13,8 +13,9 @@ import {
 } from "../../common/internal/ClassNameDefinitions.js";
 import { pushToMap } from "../../common/internal/Utils.js";
 
-import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import type { CategoryId, ModelId, SubjectId } from "../../common/internal/Types.js";
 
 interface SubjectInfo {
   parentSubject: Id64String | undefined;
@@ -29,13 +30,13 @@ interface ModelInfo {
 
 /** @internal */
 export class IModelContentTreeIdsCache {
-  private _subjectInfos: Promise<Map<Id64String, SubjectInfo>> | undefined;
-  private _parentSubjectIds: Promise<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
-  private _modelInfos: Promise<Map<Id64String, ModelInfo>> | undefined;
+  private _subjectInfos: Promise<Map<SubjectId, SubjectInfo>> | undefined;
+  private _parentSubjectIds: Promise<Array<SubjectId>> | undefined; // the list should contain a subject id if its node should be shown as having children
+  private _modelInfos: Promise<Map<ModelId, ModelInfo>> | undefined;
 
   constructor(private _queryExecutor: LimitingECSqlQueryExecutor) {}
 
-  private async *querySubjects(): AsyncIterableIterator<{ id: Id64String; parentId?: Id64String; targetPartitionId?: Id64String; hideInHierarchy: boolean }> {
+  private async *querySubjects(): AsyncIterableIterator<{ id: SubjectId; parentId?: SubjectId; targetPartitionId?: ModelId; hideInHierarchy: boolean }> {
     const subjectsQuery = `
       SELECT
         s.ECInstanceId id,
@@ -61,7 +62,7 @@ export class IModelContentTreeIdsCache {
     }
   }
 
-  private async *queryModels(): AsyncIterableIterator<{ id: Id64String; parentId: Id64String }> {
+  private async *queryModels(): AsyncIterableIterator<{ id: ModelId; parentId: SubjectId }> {
     const modelsQuery = `
       SELECT p.ECInstanceId id, p.Parent.Id parentId
       FROM ${INFORMATION_PARTITION_ELEMENT_CLASS_NAME} p
@@ -77,7 +78,7 @@ export class IModelContentTreeIdsCache {
     this._subjectInfos ??= (async () => {
       const [subjectInfos, targetPartitionSubjects] = await Promise.all([
         (async () => {
-          const result = new Map<Id64String, SubjectInfo>();
+          const result = new Map<SubjectId, SubjectInfo>();
           for await (const subject of this.querySubjects()) {
             const subjectInfo: SubjectInfo = {
               parentSubject: subject.parentId,
@@ -93,7 +94,7 @@ export class IModelContentTreeIdsCache {
           return result;
         })(),
         (async () => {
-          const result = new Map<Id64String, Set<Id64String>>();
+          const result = new Map<ModelId, Set<SubjectId>>();
           for await (const model of this.queryModels()) {
             pushToMap(result, model.id, model.parentId);
           }
@@ -123,10 +124,10 @@ export class IModelContentTreeIdsCache {
   }
 
   /** Returns ECInstanceIDs of Subjects that either have direct Model or at least one child Subject with a Model. */
-  public async getParentSubjectIds(): Promise<Id64String[]> {
+  public async getParentSubjectIds(): Promise<Array<SubjectId>> {
     this._parentSubjectIds ??= (async () => {
       const subjectInfos = await this.getSubjectInfos();
-      const parentSubjectIds = new Set<Id64String>();
+      const parentSubjectIds = new Set<SubjectId>();
       subjectInfos.forEach((subjectInfo, subjectId) => {
         if (subjectInfo.childModels.size === 0 && subjectInfo.childSubjects.size === 0) {
           return;
@@ -147,8 +148,8 @@ export class IModelContentTreeIdsCache {
    * Returns child subjects of the specified parent subjects as they're displayed in the hierarchy - taking into
    * account `hideInHierarchy` flag.
    */
-  public async getChildSubjectIds(parentSubjectIds: Id64String[]): Promise<Id64String[]> {
-    const childSubjectIds = new Array<Id64String>();
+  public async getChildSubjectIds(parentSubjectIds: Array<SubjectId>): Promise<Array<SubjectId>> {
+    const childSubjectIds = new Array<SubjectId>();
     const subjectInfos = await this.getSubjectInfos();
     parentSubjectIds.forEach((subjectId) => {
       forEachChildSubject(subjectInfos, subjectId, (childSubjectId, childSubjectInfo) => {
@@ -163,10 +164,10 @@ export class IModelContentTreeIdsCache {
   }
 
   /** Returns ECInstanceIDs of Models under specific parent Subjects as they are displayed in the hierarchy. */
-  public async getChildSubjectModelIds(parentSubjectIds: Id64String[]): Promise<Id64String[]> {
+  public async getChildSubjectModelIds(parentSubjectIds: Array<SubjectId>): Promise<Array<ModelId>> {
     const subjectInfos = await this.getSubjectInfos();
 
-    const hiddenSubjectIds = new Array<Id64String>();
+    const hiddenSubjectIds = new Array<SubjectId>();
     parentSubjectIds.forEach((subjectId) => {
       forEachChildSubject(subjectInfos, subjectId, (childSubjectId, childSubjectInfo) => {
         if (childSubjectInfo.hideInHierarchy) {
@@ -177,7 +178,7 @@ export class IModelContentTreeIdsCache {
       });
     });
 
-    const modelIds = new Array<Id64String>();
+    const modelIds = new Array<ModelId>();
     [...parentSubjectIds, ...hiddenSubjectIds].forEach((subjectId) => {
       const subjectInfo = subjectInfos.get(subjectId);
       subjectInfo && modelIds.push(...subjectInfo.childModels);
@@ -185,8 +186,8 @@ export class IModelContentTreeIdsCache {
     return modelIds;
   }
 
-  private async *queryModelCategories() {
-    const query = /* sql */ `
+  private async *queryModelCategories(): AsyncIterableIterator<{ modelId: ModelId; categoryId: CategoryId }> {
+    const query = `
       SELECT Model.Id modelId, Category.Id categoryId
       FROM ${GEOMETRIC_ELEMENT_3D_CLASS_NAME}
       WHERE Parent.Id IS NULL
@@ -204,7 +205,7 @@ export class IModelContentTreeIdsCache {
 
   private async getModelInfos() {
     this._modelInfos ??= (async () => {
-      const modelInfos = new Map<Id64String, { categories: Id64Set; elementCount: number }>();
+      const modelInfos = new Map<ModelId, { categories: Set<CategoryId>; elementCount: number }>();
       for await (const { modelId, categoryId } of this.queryModelCategories()) {
         const entry = modelInfos.get(modelId);
         if (entry) {
@@ -218,16 +219,16 @@ export class IModelContentTreeIdsCache {
     return this._modelInfos;
   }
 
-  public async getModelCategories(modelIds: Id64String[]): Promise<Id64Array> {
+  public async getModelCategories(modelIds: Array<ModelId>): Promise<Array<CategoryId>> {
     const modelInfos = await this.getModelInfos();
     return modelIds.map((modelId) => modelInfos.get(modelId)?.categories).flatMap((categories) => (categories ? [...categories] : []));
   }
 }
 
 function forEachChildSubject(
-  subjectInfos: Map<Id64String, SubjectInfo>,
-  parentSubject: Id64String | SubjectInfo,
-  cb: (childSubjectId: Id64String, childSubjectInfo: SubjectInfo) => "break" | "continue",
+  subjectInfos: Map<SubjectId, SubjectInfo>,
+  parentSubject: SubjectId | SubjectInfo,
+  cb: (childSubjectId: SubjectId, childSubjectInfo: SubjectInfo) => "break" | "continue",
 ) {
   const parentSubjectInfo = typeof parentSubject === "string" ? subjectInfos.get(parentSubject) : parentSubject;
   parentSubjectInfo &&

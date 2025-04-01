@@ -4,9 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { Viewport } from "@itwin/core-frontend";
-import { showAllCategories, toggleAllCategories } from "./CategoriesVisibilityUtils.js";
+import { showAllCategories } from "./CategoriesVisibilityUtils.js";
+import { toggleAllCategories } from "./internal/VisibilityUtils.js";
 
-import type { Id64Array } from "@itwin/core-bentley";
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
 
 /** @beta */
 export type FunctionProps<THook extends (props: any) => any> = Parameters<THook>[0];
@@ -42,14 +43,13 @@ export async function showAll(props: {
   }
 }
 
-
 /**
  * Inverts display of all given models.
  * @public
  */
-export async function invertAllModels(models: string[], viewport: Viewport) {
-  const notViewedModels: string[] = [];
-  const viewedModels: string[] = [];
+export async function invertAllModels(models: Id64Array, viewport: Viewport) {
+  const notViewedModels = new Array<Id64String>();
+  const viewedModels = new Array<Id64String>();
   models.forEach((modelId) => {
     if (viewport.viewsModel(modelId)) {
       viewedModels.push(modelId);
@@ -59,4 +59,27 @@ export async function invertAllModels(models: string[], viewport: Viewport) {
   });
   await viewport.addViewedModels(notViewedModels);
   viewport.changeModelDisplay(viewedModels, false);
+}
+
+/**
+ * Based on the value of `enable` argument, either enables or disables display of given models.
+ * @public
+ */
+export async function toggleModels(models: string[], enable: boolean, viewport: Viewport) {
+  if (!models) {
+    return;
+  }
+  if (enable) {
+    viewport.changeModelDisplay(models, false);
+  } else {
+    await viewport.addViewedModels(models);
+  }
+}
+
+/**
+ * Checks if all given models are displayed in given viewport.
+ * @public
+ */
+export function areAllModelsVisible(models: string[], viewport: Viewport) {
+  return models.length !== 0 ? models.every((id) => viewport.viewsModel(id)) : false;
 }

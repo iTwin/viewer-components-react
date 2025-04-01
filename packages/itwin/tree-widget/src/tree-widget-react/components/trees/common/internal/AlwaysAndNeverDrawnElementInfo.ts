@@ -29,26 +29,27 @@ import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { getClassesByView, pushToMap, setDifference } from "./Utils.js";
 
 import type { Observable, Subscription } from "rxjs";
-import type { BeEvent, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { BeEvent } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
+import type { CategoryId, ElementId, ModelId } from "./Types.js";
 
 interface ElementInfo {
-  elementId: Id64String;
-  modelId: Id64String;
-  categoryId: Id64String;
+  elementId: ElementId;
+  modelId: ModelId;
+  categoryId: CategoryId;
 }
 
-type CacheEntry = Map<Id64String, Map<Id64String, Id64Set>>;
+type CacheEntry = Map<ModelId, Map<CategoryId, Set<ElementId>>>;
 
 /** @internal */
 export interface ModelAlwaysOrNeverDrawnElementsQueryProps {
-  modelId: Id64String;
+  modelId: ModelId;
 }
 
 /** @internal */
 export interface CategoryAlwaysOrNeverDrawnElementsQueryProps {
-  modelId?: Id64String;
-  categoryIds: Id64Array;
+  modelId?: ModelId;
+  categoryIds: Array<CategoryId>;
 }
 
 /** @internal */
@@ -101,12 +102,12 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
     this._suppress.next(false);
   }
 
-  public getElements(props: { setType: "always" | "never" } & AlwaysOrNeverDrawnElementsQueryProps): Observable<Id64Set> {
+  public getElements(props: { setType: "always" | "never" } & AlwaysOrNeverDrawnElementsQueryProps): Observable<Set<ElementId>> {
     const cache = props.setType === "always" ? this._alwaysDrawn : this._neverDrawn;
     const getElements =
       "categoryIds" in props
         ? (entry: CacheEntry | undefined) => {
-            const result = new Set<Id64String>();
+            const result = new Set<ElementId>();
             if (props.modelId) {
               const categoryMap = entry?.get(props.modelId);
               if (!categoryMap) {
@@ -136,7 +137,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
           }
         : (entry: CacheEntry | undefined) => {
             const modelEntry = entry?.get(props.modelId);
-            const elements = new Set<Id64String>();
+            const elements = new Set<ElementId>();
             for (const set of modelEntry?.values() ?? []) {
               set.forEach((id) => elements.add(id));
             }
@@ -146,7 +147,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
     return cache.pipe(map(getElements));
   }
 
-  private createCacheEntryObservable(props: { event: BeEvent<() => void>; getSet(): Id64Set | undefined; id: string }) {
+  private createCacheEntryObservable(props: { event: BeEvent<() => void>; getSet(): Set<ElementId> | undefined; id: string }) {
     const event = props.event;
     const resultSubject = new BehaviorSubject<CacheEntry | undefined>(undefined);
 
@@ -194,7 +195,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
     this._disposeSubject.next();
   }
 
-  private queryAlwaysOrNeverDrawnElementInfo(set: Id64Set | undefined, requestId: string): Observable<CacheEntry> {
+  private queryAlwaysOrNeverDrawnElementInfo(set: Set<ElementId> | undefined, requestId: string): Observable<CacheEntry> {
     const elementInfo = set?.size ? this.queryElementInfo([...set], requestId) : EMPTY;
     return elementInfo.pipe(
       reduce((state, val) => {
@@ -205,11 +206,11 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
         }
         pushToMap(entry, val.categoryId, val.elementId);
         return state;
-      }, new Map<Id64String, Map<Id64String, Id64Set>>()),
+      }, new Map<ModelId, Map<CategoryId, Set<ElementId>>>()),
     );
   }
 
-  private queryElementInfo(elementIds: Id64Array, requestId: string): Observable<ElementInfo> {
+  private queryElementInfo(elementIds: Array<ElementId>, requestId: string): Observable<ElementInfo> {
     const executor = createECSqlQueryExecutor(this._viewport.iModel);
     const { elementClass } = getClassesByView(this._viewType);
     const reader = executor.createQueryReader(

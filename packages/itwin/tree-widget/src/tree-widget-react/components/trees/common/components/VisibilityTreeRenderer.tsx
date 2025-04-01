@@ -12,6 +12,7 @@ import { useVisibilityButtonHandler } from "./UseVisibilityButtonHandler.js";
 
 import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
 import type { TreeItemVisibilityButtonProps } from "./TreeNodeVisibilityButton.js";
+
 /** @beta */
 export type VisibilityTreeRendererProps = BaseTreeRendererProps & TreeItemVisibilityButtonProps;
 

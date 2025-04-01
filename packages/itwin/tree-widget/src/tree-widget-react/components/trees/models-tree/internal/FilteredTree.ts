@@ -10,13 +10,14 @@ import { CATEGORY_CLASS_NAME, MODEL_CLASS_NAME, SUBJECT_CLASS_NAME } from "../..
 import type { Id64String } from "@itwin/core-bentley";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
+import type { CategoryId, ElementId, ModelId, SubjectId } from "../../common/internal/Types.js";
 
 interface FilteredTreeRootNode {
   children: Map<Id64String, FilteredTreeNode>;
 }
 
 interface BaseFilteredTreeNode {
-  id: string;
+  id: Id64String;
   children?: Map<Id64String, FilteredTreeNode>;
   isFilterTarget: boolean;
 }
@@ -27,13 +28,13 @@ interface GenericFilteredTreeNode extends BaseFilteredTreeNode {
 
 interface CategoryFilteredTreeNode extends BaseFilteredTreeNode {
   type: "category";
-  modelId: Id64String;
+  modelId: ModelId;
 }
 
 interface ElementFilteredTreeNode extends BaseFilteredTreeNode {
   type: "element";
-  modelId: Id64String;
-  categoryId: Id64String;
+  modelId: ModelId;
+  categoryId: CategoryId;
 }
 
 type FilteredTreeNode = GenericFilteredTreeNode | CategoryFilteredTreeNode | ElementFilteredTreeNode;
@@ -42,22 +43,23 @@ export interface FilteredTree {
   getVisibilityChangeTargets(node: HierarchyNode): VisibilityChangeTargets;
 }
 
-type CategoryKey = `${Id64String}-${Id64String}`;
+type CategoryKey = `${ModelId}-${CategoryId}`;
 
-function createCategoryKey(modelId: string, categoryId: string): CategoryKey {
+function createCategoryKey(modelId: ModelId, categoryId: CategoryId): CategoryKey {
   return `${modelId}-${categoryId}`;
 }
 
+/** @internal */
 export function parseCategoryKey(key: CategoryKey) {
   const [modelId, categoryId] = key.split("-");
   return { modelId, categoryId };
 }
 
 interface VisibilityChangeTargets {
-  subjects?: Set<Id64String>;
-  models?: Set<Id64String>;
+  subjects?: Set<SubjectId>;
+  models?: Set<ModelId>;
   categories?: Set<CategoryKey>;
-  elements?: Map<CategoryKey, Set<Id64String>>;
+  elements?: Map<CategoryKey, Set<ElementId>>;
 }
 
 export async function createFilteredTree(imodelAccess: ECClassHierarchyInspector, filteringPaths: HierarchyFilteringPath[]): Promise<FilteredTree> {
@@ -90,7 +92,7 @@ export async function createFilteredTree(imodelAccess: ECClassHierarchyInspector
         type,
         id: identifier.id,
         isFilterTarget: i === normalizedPath.length - 1,
-        parent: parentNode as FilteredTreeNode,
+        parent: parentNode,
       });
       (parentNode.children ??= new Map()).set(identifier.id, newNode);
       parentNode = newNode;

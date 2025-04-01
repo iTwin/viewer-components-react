@@ -10,22 +10,23 @@ import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
 import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMatches } from "../common/components/EmptyTree.js";
 import { DEFINITION_CONTAINER_CLASS_NAME, SUB_CATEGORY_CLASS_NAME } from "../common/internal/ClassNameDefinitions.js";
+import { useIModelChangeListener } from "../common/internal/UseIModelChangeListener.js";
 import { getClassesByView } from "../common/internal/Utils.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
-import { useIModelChangeListener } from "../common/UseIModelChangeListener.js";
 import { useTelemetryContext } from "../common/UseTelemetryContext.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
 import { createCategoriesTreeVisibilityHandler } from "./internal/CategoriesTreeVisibilityHandler.js";
 
 import type { ReactNode } from "react";
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { Id64Array } from "@itwin/core-bentley";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { CategoriesTreeHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
+import type { CategoryId, ElementId, ModelId, SubCategoryId, SubModelId } from "../common/internal/Types.js";
 
 type CategoriesTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError";
 type HierarchyFilteringPaths = Awaited<ReturnType<Required<VisibilityTreeProps>["getFilteredPaths"]>>;
@@ -208,15 +209,15 @@ async function getCategoriesFromPaths(
   idsCache: CategoriesTreeIdsCache,
   elementClassName: string,
   modelsClassName: string,
-): Promise<{ categories: CategoryInfo[] | undefined; models?: Id64Array }> {
+): Promise<{ categories: CategoryInfo[] | undefined; models?: Array<ModelId> }> {
   if (!paths) {
     return { categories: undefined };
   }
 
-  const rootFilteredElements = new Set<Id64String>();
-  const subModels = new Set<Id64String>();
+  const rootFilteredElements = new Set<ElementId>();
+  const subModels = new Set<SubModelId>();
 
-  const categories = new Map<Id64String, Id64String[]>();
+  const categories = new Map<CategoryId, Array<SubCategoryId>>();
   for (const path of paths) {
     const currPath = HierarchyFilteringPath.normalize(path).path;
     if (currPath.length === 0) {

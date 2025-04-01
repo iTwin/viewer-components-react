@@ -13,8 +13,7 @@ import {
   GEOMETRIC_MODEL_3D_CLASS_NAME,
   INFORMATION_PARTITION_ELEMENT_CLASS_NAME,
 } from "../common/internal/ClassNameDefinitions.js";
-import { hideAllModels, invertAllModels, showAll } from "../common/Utils.js";
-import { areAllModelsVisible, toggleModels } from "./internal/ModelsTreeVisibilityHandler.js";
+import { areAllModelsVisible, hideAllModels, invertAllModels, showAll, toggleModels } from "../common/Utils.js";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";

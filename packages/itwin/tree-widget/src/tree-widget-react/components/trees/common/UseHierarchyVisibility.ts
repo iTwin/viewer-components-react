@@ -57,6 +57,7 @@ interface UseHierarchyVisibilityProps {
   visibilityHandlerFactory: () => HierarchyVisibilityHandler;
 }
 
+/** @internal */
 export function useHierarchyVisibility({
   visibilityHandlerFactory,
 }: UseHierarchyVisibilityProps): TreeItemVisibilityButtonProps & { triggerRefresh: () => void } {

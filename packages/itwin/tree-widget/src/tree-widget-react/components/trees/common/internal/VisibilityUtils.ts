@@ -4,15 +4,25 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { filter, from, map, mergeAll, mergeMap, of, reduce, startWith, toArray } from "rxjs";
-import { reduceWhile } from "../Rxjs.js";
+import { QueryRowFormat } from "@itwin/core-common";
+import { PerModelCategoryVisibility } from "@itwin/core-frontend";
+import {
+  DRAWING_CATEGORY_CLASS_NAME,
+  GEOMETRIC_ELEMENT_2D_CLASS_NAME,
+  GEOMETRIC_ELEMENT_3D_CLASS_NAME,
+  SPATIAL_CATEGORY_CLASS_NAME,
+} from "./ClassNameDefinitions.js";
+import { reduceWhile } from "./Rxjs.js";
 import { createVisibilityStatus, getTooltipOptions } from "./Tooltip.js";
 import { releaseMainThreadOnItemsCount } from "./Utils.js";
 
+import type { Viewport } from "@itwin/core-frontend";
 import type { Observable, OperatorFunction } from "rxjs";
-import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { NonPartialVisibilityStatus, Visibility } from "./Tooltip.js";
 import type { VisibilityStatus } from "../UseHierarchyVisibility.js";
-import type { Viewport } from "@itwin/core-frontend";
+import type { CategoryId, ElementId, ModelId, SubCategoryId, SubModelId } from "./Types.js";
+import type { CategoryInfo } from "../CategoriesVisibilityUtils.js";
 
 function mergeVisibilities(obs: Observable<Visibility>): Observable<Visibility | "empty"> {
   return obs.pipe(
@@ -86,8 +96,8 @@ export function getSubModeledElementsVisibilityStatus({
 export function filterSubModeledElementIds({
   doesSubModelExist,
 }: {
-  doesSubModelExist: (elementId: Id64String) => Promise<boolean>;
-}): OperatorFunction<Id64Array, Id64Array> {
+  doesSubModelExist: (elementId: ElementId) => Promise<boolean>;
+}): OperatorFunction<Array<ElementId>, Array<SubModelId>> {
   return (obs) => {
     return obs.pipe(
       mergeAll(),
@@ -105,12 +115,15 @@ export function changeElementStateNoChildrenOperator(props: {
   isDisplayedByDefault: boolean;
   viewport: Viewport;
 }): OperatorFunction<string, void> {
-  return (elementIds: Observable<Id64String>) => {
+  return (elementIds: Observable<ElementId>) => {
     const { on, isDisplayedByDefault } = props;
     const isAlwaysDrawnExclusive = props.viewport.isAlwaysDrawnExclusive;
     return elementIds.pipe(
       releaseMainThreadOnItemsCount(500),
-      reduce<string, { changedNeverDrawn: boolean; changedAlwaysDrawn: boolean; neverDrawn: Id64Set | undefined; alwaysDrawn: Id64Set | undefined }>(
+      reduce<
+        string,
+        { changedNeverDrawn: boolean; changedAlwaysDrawn: boolean; neverDrawn: Set<ElementId> | undefined; alwaysDrawn: Set<ElementId> | undefined }
+      >(
         (acc, elementId) => {
           if (acc.alwaysDrawn === undefined || acc.neverDrawn === undefined) {
             acc.alwaysDrawn = new Set(props.viewport.alwaysDrawn || []);
@@ -153,8 +166,8 @@ export function changeElementStateNoChildrenOperator(props: {
 /** @internal */
 export function getVisibilityFromAlwaysAndNeverDrawnElementsImpl(
   props: {
-    alwaysDrawn: Id64Set | undefined;
-    neverDrawn: Id64Set | undefined;
+    alwaysDrawn: Set<ElementId> | undefined;
+    neverDrawn: Set<ElementId> | undefined;
     totalCount: number;
     ignoreTooltip?: boolean;
     viewport: Viewport;
@@ -186,7 +199,7 @@ export function getVisibilityFromAlwaysAndNeverDrawnElementsImpl(
 
 /** @internal */
 export function getElementOverriddenVisibility(props: {
-  elementId: string;
+  elementId: ElementId;
   ignoreTooltip?: boolean;
   viewport: Viewport;
   tooltips: {
@@ -275,4 +288,75 @@ export function getElementVisibility(
     return createVisibilityStatus("partial", getTooltipOptions(`${treeType}.element.partialThroughCategory`, ignoreTooltip));
   }
   return createVisibilityStatus("hidden", getTooltipOptions(`${treeType}.element.hiddenThroughCategory`, ignoreTooltip));
+}
+
+/**
+ * Toggles visibility of categories to show or hide.
+ * @internal
+ */
+export async function toggleAllCategories(viewport: Viewport, display: boolean) {
+  const ids = await getCategories(viewport);
+  if (ids.length === 0) {
+    return;
+  }
+
+  await enableCategoryDisplay(viewport, ids, display);
+}
+
+/**
+ * Gets ids of all categories from specified imodel and viewport.
+ * @internal
+ */
+async function getCategories(viewport: Viewport): Promise<Array<CategoryId>> {
+  const categories = await loadCategoriesFromViewport(viewport);
+  return categories.map((category) => category.categoryId);
+}
+
+/**
+ * Changes category display in the viewport.
+ * @internal
+ */
+export async function enableCategoryDisplay(viewport: Viewport, ids: Array<CategoryId>, enabled: boolean, enableAllSubCategories = true) {
+  viewport.changeCategoryDisplay(ids, enabled, enableAllSubCategories);
+
+  // remove category overrides per model
+  const modelsContainingOverrides = new Array<ModelId>();
+  for (const ovr of viewport.perModelCategoryVisibility) {
+    if (ids.findIndex((id) => id === ovr.categoryId) !== -1) {
+      modelsContainingOverrides.push(ovr.modelId);
+    }
+  }
+  viewport.perModelCategoryVisibility.setOverride(modelsContainingOverrides, ids, PerModelCategoryVisibility.Override.None);
+
+  // changeCategoryDisplay only enables subcategories, it does not disabled them. So we must do that ourselves.
+  if (false === enabled) {
+    (await viewport.iModel.categories.getCategoryInfo(ids)).forEach((categoryInfo) => {
+      categoryInfo.subCategories.forEach((value) => enableSubCategoryDisplay(viewport, value.id, false));
+    });
+  }
+}
+
+/**
+ * Changes subcategory display in the viewport
+ * @internal
+ */
+export function enableSubCategoryDisplay(viewport: Viewport, key: SubCategoryId, enabled: boolean) {
+  viewport.changeSubCategoryDisplay(key, enabled);
+}
+
+/** @internal */
+export async function loadCategoriesFromViewport(vp: Viewport) {
+  // Query categories and add them to state
+  const selectUsedSpatialCategoryIds = `SELECT DISTINCT Category.Id as id from ${GEOMETRIC_ELEMENT_3D_CLASS_NAME} WHERE Category.Id IN (SELECT ECInstanceId from ${SPATIAL_CATEGORY_CLASS_NAME})`;
+  const selectUsedDrawingCategoryIds = `SELECT DISTINCT Category.Id as id from ${GEOMETRIC_ELEMENT_2D_CLASS_NAME} WHERE Model.Id=? AND Category.Id IN (SELECT ECInstanceId from ${DRAWING_CATEGORY_CLASS_NAME})`;
+  const ecsql = vp.view.is3d() ? selectUsedSpatialCategoryIds : selectUsedDrawingCategoryIds;
+  const ecsql2 = `SELECT ECInstanceId as id FROM ${vp.view.is3d() ? SPATIAL_CATEGORY_CLASS_NAME : DRAWING_CATEGORY_CLASS_NAME} WHERE ECInstanceId IN (${ecsql})`;
+
+  const categories: CategoryInfo[] = [];
+
+  const rows = await vp.iModel.createQueryReader(ecsql2, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }).toArray();
+  (await vp.iModel.categories.getCategoryInfo(rows.map((row) => row.id))).forEach((val) => {
+    categories.push({ categoryId: val.id, subCategoryIds: val.subCategories.size ? [...val.subCategories.keys()] : undefined });
+  });
+  return categories;
 }

@@ -31,13 +31,15 @@ import {
 import { assert, Id64 } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
-import { enableCategoryDisplay, enableSubCategoryDisplay } from "../../common/CategoriesVisibilityUtils.js";
 import { AlwaysAndNeverDrawnElementInfo } from "../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
+import { toVoidPromise } from "../../common/internal/Rxjs.js";
 import { createVisibilityStatus, getTooltipOptions } from "../../common/internal/Tooltip.js";
 import { getClassesByView, getDistinctMapValues, releaseMainThreadOnItemsCount, setDifference, setIntersection } from "../../common/internal/Utils.js";
 import { createVisibilityChangeEventListener } from "../../common/internal/VisibilityChangeEventListener.js";
 import {
   changeElementStateNoChildrenOperator,
+  enableCategoryDisplay,
+  enableSubCategoryDisplay,
   filterSubModeledElementIds,
   getElementOverriddenVisibility,
   getElementVisibility,
@@ -45,7 +47,6 @@ import {
   getVisibilityFromAlwaysAndNeverDrawnElementsImpl,
   mergeVisibilityStatuses,
 } from "../../common/internal/VisibilityUtils.js";
-import { toVoidPromise } from "../../common/Rxjs.js";
 import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility.js";
 import { CategoriesTreeNode } from "./CategoriesTreeNode.js";
 import { createFilteredTree, parseCategoryKey, parseSubCategoryKey } from "./FilteredTree.js";
@@ -63,6 +64,7 @@ import type { CategoriesTreeHierarchyConfiguration } from "../CategoriesTreeDefi
 import type { CategoriesTreeIdsCache } from "./CategoriesTreeIdsCache.js";
 import type { FilteredTree } from "./FilteredTree.js";
 import type { IVisibilityChangeEventListener } from "../../common/internal/VisibilityChangeEventListener.js";
+import type { CategoryId, DefinitionContainerId, ElementId, ModelId, SubCategoryId } from "../../common/internal/Types.js";
 
 /** @alpha */
 interface GetCategoryVisibilityStatusProps {
@@ -337,7 +339,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     );
   }
 
-  private getModelVisibilityStatus({ modelId }: { modelId: Id64String }): Observable<VisibilityStatus> {
+  private getModelVisibilityStatus({ modelId }: { modelId: ModelId }): Observable<VisibilityStatus> {
     const result = defer(() => {
       const viewport = this._props.viewport;
 
@@ -369,7 +371,10 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     return createVisibilityHandlerResult(this, { id: modelId }, result, undefined);
   }
 
-  private getDefinitionContainerDisplayStatus(props: { definitionContainerIds: Id64Array; ignoreTooltip?: boolean }): Observable<VisibilityStatus> {
+  private getDefinitionContainerDisplayStatus(props: {
+    definitionContainerIds: Array<DefinitionContainerId>;
+    ignoreTooltip?: boolean;
+  }): Observable<VisibilityStatus> {
     const result = defer(() => {
       return from(this._idsCache.getAllContainedCategories(props.definitionContainerIds)).pipe(
         mergeAll(),
@@ -386,7 +391,11 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     return createVisibilityHandlerResult(this, props, result, undefined);
   }
 
-  private getSubCategoryDisplayStatus(props: { categoryId: Id64String; subCategoryIds: Id64Array; ignoreTooltip?: boolean }): Observable<VisibilityStatus> {
+  private getSubCategoryDisplayStatus(props: {
+    categoryId: CategoryId;
+    subCategoryIds: Array<SubCategoryId>;
+    ignoreTooltip?: boolean;
+  }): Observable<VisibilityStatus> {
     const result = defer(() => {
       const { categoryId, subCategoryIds, ignoreTooltip } = props;
       const categoryOverrideResult = this.getCategoryVisibilityFromOverrides([categoryId], ignoreTooltip);
@@ -421,7 +430,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     return createVisibilityHandlerResult(this, props, result, undefined);
   }
 
-  private getCategoryVisibilityFromOverrides(categoryIds: Id64Array, ignoreTooltip?: boolean): VisibilityStatus | "none" {
+  private getCategoryVisibilityFromOverrides(categoryIds: Array<CategoryId>, ignoreTooltip?: boolean): VisibilityStatus | "none" {
     let showOverrides = 0;
     let hideOverrides = 0;
 
@@ -451,8 +460,8 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     categoryIds,
     ignoreTooltip,
   }: {
-    categoryIds: Id64Array;
-    modelId: Id64String;
+    categoryIds: Array<CategoryId>;
+    modelId: ModelId;
     ignoreTooltip?: boolean;
   }): VisibilityStatus {
     const viewport = this._props.viewport;
@@ -497,7 +506,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     ignoreTooltip,
     ignoreSubCategories,
   }: {
-    categoryIds: Id64Array;
+    categoryIds: Array<CategoryId>;
     ignoreTooltip?: boolean;
     ignoreSubCategories?: boolean;
   }): Promise<VisibilityStatus> {
@@ -955,7 +964,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     return createVisibilityHandlerResult(this, props, result, undefined);
   }
 
-  private showModelWithoutAnyCategoriesOrElements(modelId: Id64String): Observable<void> {
+  private showModelWithoutAnyCategoriesOrElements(modelId: ModelId): Observable<void> {
     const viewport = this._props.viewport;
     return forkJoin({
       categories: this._idsCache.getModelCategories(modelId),
@@ -992,7 +1001,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     }
   }
 
-  private changeSubCategoryState(props: { categoryId: Id64String; subCategoryIds: Id64Array; on: boolean }): Observable<void> {
+  private changeSubCategoryState(props: { categoryId: CategoryId; subCategoryIds: Array<SubCategoryId>; on: boolean }): Observable<void> {
     const result = defer(() => {
       return concat(
         // make sure parent category is enabled
@@ -1003,7 +1012,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     return createVisibilityHandlerResult(this, props, result, undefined);
   }
 
-  private changeDefinitionContainerState(props: { definitionContainerIds: Id64Array; on: boolean }): Observable<void> {
+  private changeDefinitionContainerState(props: { definitionContainerIds: Array<DefinitionContainerId>; on: boolean }): Observable<void> {
     const result = defer(() => {
       return from(this._idsCache.getAllContainedCategories(props.definitionContainerIds)).pipe(
         mergeAll(),
@@ -1109,7 +1118,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     return createVisibilityHandlerResult(this, props, result, undefined);
   }
 
-  private queueElementsVisibilityChange(elementIds: Id64Set, on: boolean, visibleByDefault: boolean) {
+  private queueElementsVisibilityChange(elementIds: Set<ElementId>, on: boolean, visibleByDefault: boolean) {
     const finishedSubject = new Subject<boolean>();
     // observable to track if visibility change is finished/cancelled
     const changeFinished = finishedSubject.pipe(
@@ -1150,7 +1159,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     ignoreTooltip,
     ...props
   }: GetVisibilityFromAlwaysAndNeverDrawnElementsProps &
-    ({ elements: Id64Set } | { queryProps: CategoryAlwaysOrNeverDrawnElementsQueryProps }) & { ignoreTooltip?: boolean }): Observable<VisibilityStatus> {
+    ({ elements: Set<ElementId> } | { queryProps: CategoryAlwaysOrNeverDrawnElementsQueryProps }) & { ignoreTooltip?: boolean }): Observable<VisibilityStatus> {
     const viewport = this._props.viewport;
     if (viewport.isAlwaysDrawnExclusive) {
       if (!viewport?.alwaysDrawn?.size) {
@@ -1204,7 +1213,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
   }
 
   private getGroupingNodeInfo(node: GroupingHierarchyNode) {
-    const modelElementsMap: Map<Id64String, Id64Set> = node.extendedData?.modelElementsMap;
+    const modelElementsMap: Map<ModelId, Set<ElementId>> = node.extendedData?.modelElementsMap;
     const categoryId = node.extendedData?.categoryId;
     assert(!!modelElementsMap && !!categoryId);
 

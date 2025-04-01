@@ -17,7 +17,7 @@ import {
 import { createIdsSelector, getClassesByView, getDistinctMapValues, parseIdsSelectorResult, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 
-import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Observable } from "rxjs";
 import type {
   DefineHierarchyLevelProps,
@@ -40,6 +40,7 @@ import type {
   InstanceKey,
 } from "@itwin/presentation-shared";
 import type { CategoriesTreeIdsCache, CategoryInfo } from "./internal/CategoriesTreeIdsCache.js";
+import type { CategoryId, DefinitionContainerId, ElementId, ModelId, SubCategoryId } from "../common/internal/Types.js";
 
 const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
 
@@ -104,7 +105,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
 
   public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
     if (ProcessedHierarchyNode.isGroupingNode(node)) {
-      const modelElementsMap = new Map<Id64String, Id64Set>();
+      const modelElementsMap = new Map<ModelId, Set<ElementId>>();
       node.children.forEach((child) => {
         let modelEntry = modelElementsMap.get(child.extendedData?.modelId);
         if (!modelEntry) {
@@ -293,7 +294,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     definitionContainers,
     instanceFilter,
   }: {
-    definitionContainers: Id64Array;
+    definitionContainers: Array<DefinitionContainerId>;
     instanceFilter?: GenericInstanceFilter;
   }): Promise<HierarchyLevelDefinition> {
     const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
@@ -471,7 +472,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
       filter: instanceFilter,
       contentClass: { fullName: this._categoryElementClass, alias: "this" },
     });
-    const modelIds: Id64Array = parentNode.extendedData?.isCategoryOfSubModel
+    const modelIds: Array<ModelId> = parentNode.extendedData?.isCategoryOfSubModel
       ? parseIdsSelectorResult(parentNode.extendedData?.modelIds)
       : [...getDistinctMapValues(await this._idsCache.getCategoriesElementModels(categoryIds))];
 
@@ -483,7 +484,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         mergeMap(async (modelId) => this._idsCache.getCategoriesModeledElements(modelId, categoryIds)),
         reduce((acc, foundModeledElements) => {
           return acc.concat(foundModeledElements);
-        }, new Array<Id64String>()),
+        }, new Array<ElementId>()),
       ),
     );
 
@@ -821,10 +822,10 @@ function createInstanceKeyPathsFromTargetItems({
         return acc;
       },
       {
-        definitionContainers: new Array<Id64String>(),
-        categories: new Array<Id64String>(),
-        subCategories: new Array<Id64String>(),
-        elements: new Array<Id64String>(),
+        definitionContainers: new Array<DefinitionContainerId>(),
+        categories: new Array<CategoryId>(),
+        subCategories: new Array<SubCategoryId>(),
+        elements: new Array<ElementId>(),
       },
     ),
     mergeMap((ids) => {

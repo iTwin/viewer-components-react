@@ -31,6 +31,7 @@ import { assert, Id64 } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { AlwaysAndNeverDrawnElementInfo } from "../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
+import { toVoidPromise } from "../../common/internal/Rxjs.js";
 import { createVisibilityStatus, getTooltipOptions } from "../../common/internal/Tooltip.js";
 import { releaseMainThreadOnItemsCount, setDifference, setIntersection } from "../../common/internal/Utils.js";
 import { createVisibilityChangeEventListener } from "../../common/internal/VisibilityChangeEventListener.js";
@@ -43,7 +44,6 @@ import {
   getVisibilityFromAlwaysAndNeverDrawnElementsImpl,
   mergeVisibilityStatuses,
 } from "../../common/internal/VisibilityUtils.js";
-import { toVoidPromise } from "../../common/Rxjs.js";
 import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility.js";
 import { createFilteredTree, parseCategoryKey } from "./FilteredTree.js";
 import { ModelsTreeNode } from "./ModelsTreeNode.js";
@@ -60,6 +60,7 @@ import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { FilteredTree } from "./FilteredTree.js";
 import type { CategoryAlwaysOrNeverDrawnElementsQueryProps } from "../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
 import type { IVisibilityChangeEventListener } from "../../common/internal/VisibilityChangeEventListener.js";
+import type { CategoryId, ElementId, ModelId, SubjectId } from "../../common/internal/Types.js";
 
 /** @beta */
 interface GetCategoryVisibilityStatusProps {
@@ -320,7 +321,13 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     );
   }
 
-  private getSubjectNodeVisibilityStatus({ subjectIds, ignoreTooltip }: { subjectIds: Id64Array; ignoreTooltip?: boolean }): Observable<VisibilityStatus> {
+  private getSubjectNodeVisibilityStatus({
+    subjectIds,
+    ignoreTooltip,
+  }: {
+    subjectIds: Array<SubjectId>;
+    ignoreTooltip?: boolean;
+  }): Observable<VisibilityStatus> {
     const result = defer(() => {
       if (!this._props.viewport.view.isSpatialView()) {
         return of(createVisibilityStatus("disabled", getTooltipOptions("modelsTree.subject.nonSpatialView", ignoreTooltip)));
@@ -343,7 +350,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     return createVisibilityHandlerResult(this, { ids: subjectIds }, result, this._props.overrides?.getSubjectNodeVisibility);
   }
 
-  private getModelVisibilityStatus({ modelId, ignoreTooltip }: { modelId: Id64String; ignoreTooltip?: boolean }): Observable<VisibilityStatus> {
+  private getModelVisibilityStatus({ modelId, ignoreTooltip }: { modelId: ModelId; ignoreTooltip?: boolean }): Observable<VisibilityStatus> {
     const result = defer(() => {
       const viewport = this._props.viewport;
       if (!viewport.view.isSpatialView()) {
@@ -380,8 +387,8 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     categoryId,
     ignoreTooltip,
   }: {
-    categoryId: Id64String;
-    modelId: Id64String;
+    categoryId: CategoryId;
+    modelId: ModelId;
     ignoreTooltip?: boolean;
   }): NonPartialVisibilityStatus {
     const viewport = this._props.viewport;
@@ -637,7 +644,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     );
   }
 
-  private changeSubjectNodeState(ids: Id64Array, on: boolean): Observable<void> {
+  private changeSubjectNodeState(ids: Array<SubjectId>, on: boolean): Observable<void> {
     const result = defer(() => {
       if (!this._props.viewport.view.isSpatialView()) {
         return EMPTY;
@@ -689,7 +696,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     return createVisibilityHandlerResult(this, props, result, this._props.overrides?.changeModelState);
   }
 
-  private showModelWithoutAnyCategoriesOrElements(modelId: Id64String): Observable<void> {
+  private showModelWithoutAnyCategoriesOrElements(modelId: ModelId): Observable<void> {
     const viewport = this._props.viewport;
     return forkJoin({
       categories: this._idsCache.getModelCategories(modelId),
@@ -708,7 +715,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     );
   }
 
-  private changeCategoryStateInViewportAccordingToModelVisibility(modelId: string, categoryId: string, on: boolean) {
+  private changeCategoryStateInViewportAccordingToModelVisibility(modelId: ModelId, categoryId: CategoryId, on: boolean) {
     const viewport = this._props.viewport;
     const isDisplayedInSelector = viewport.view.viewsCategory(categoryId);
     const override =
@@ -783,7 +790,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     return createVisibilityHandlerResult(this, props, result, this._props.overrides?.changeElementsState);
   }
 
-  private queueElementsVisibilityChange(elementIds: Id64Set, on: boolean, visibleByDefault: boolean) {
+  private queueElementsVisibilityChange(elementIds: Set<ElementId>, on: boolean, visibleByDefault: boolean) {
     const finishedSubject = new Subject<boolean>();
     // observable to track if visibility change is finished/cancelled
     const changeFinished = finishedSubject.pipe(
@@ -824,7 +831,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     ignoreTooltip,
     ...props
   }: GetVisibilityFromAlwaysAndNeverDrawnElementsProps &
-    ({ elements: Id64Set } | { queryProps: CategoryAlwaysOrNeverDrawnElementsQueryProps }) & { ignoreTooltip?: boolean }): Observable<VisibilityStatus> {
+    ({ elements: Set<ElementId> } | { queryProps: CategoryAlwaysOrNeverDrawnElementsQueryProps }) & { ignoreTooltip?: boolean }): Observable<VisibilityStatus> {
     const viewport = this._props.viewport;
     if (viewport.isAlwaysDrawnExclusive) {
       if (!viewport?.alwaysDrawn?.size) {
@@ -874,27 +881,4 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     const elementIds = new Set(node.groupedInstanceKeys.map((key) => key.id));
     return { modelId, categoryId, elementIds };
   }
-}
-
-/**
- * Based on the value of `enable` argument, either enables or disables display of given models.
- * @public
- */
-export async function toggleModels(models: string[], enable: boolean, viewport: Viewport) {
-  if (!models) {
-    return;
-  }
-  if (enable) {
-    viewport.changeModelDisplay(models, false);
-  } else {
-    await viewport.addViewedModels(models);
-  }
-}
-
-/**
- * Checks if all given models are displayed in given viewport.
- * @public
- */
-export function areAllModelsVisible(models: string[], viewport: Viewport) {
-  return models.length !== 0 ? models.every((id) => viewport.viewsModel(id)) : false;
 }

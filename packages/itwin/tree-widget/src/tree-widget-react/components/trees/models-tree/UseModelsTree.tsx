@@ -17,8 +17,8 @@ import {
 } from "../common/components/EmptyTree.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
 import { GEOMETRIC_MODEL_3D_CLASS_NAME, SUBJECT_CLASS_NAME } from "../common/internal/ClassNameDefinitions.js";
+import { useIModelChangeListener } from "../common/internal/UseIModelChangeListener.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
-import { useIModelChangeListener } from "../common/UseIModelChangeListener.js";
 import { useTelemetryContext } from "../common/UseTelemetryContext.js";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
 import { ModelsTreeNode } from "./internal/ModelsTreeNode.js";
@@ -35,6 +35,8 @@ import type { ClassGroupingHierarchyNode, ElementsGroupInfo, ModelsTreeHierarchy
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/ModelsTreeVisibilityHandler.js";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
+import type { ModelId, SubjectId } from "../common/internal/Types.js";
+
 type ModelsTreeFilteringError = "tooManyFilterMatches" | "tooManyInstancesFocused" | "unknownFilterError" | "unknownInstanceFocusError";
 
 /** @beta */
@@ -230,8 +232,8 @@ async function getModels(paths: HierarchyFilteringPath[], idsCache: ModelsTreeId
     return undefined;
   }
 
-  const targetModels = new Set<Id64String>();
-  const targetSubjects = new Set<Id64String>();
+  const targetModels = new Set<ModelId>();
+  const targetSubjects = new Set<SubjectId>();
   for (const path of paths) {
     const currPath = Array.isArray(path) ? path : path.path;
     for (let i = 0; i < currPath.length; i++) {
@@ -398,7 +400,7 @@ async function collectFocusedItems(loadFocusedItems: () => AsyncIterableIterator
     parentKey: InstancesNodeKey;
     parentType: "element" | "category";
     groupingNode: ClassGroupingHierarchyNode;
-    modelIds: Id64String[];
+    modelIds: Array<ModelId>;
   }> = [];
   for await (const key of loadFocusedItems()) {
     if ("id" in key) {

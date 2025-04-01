@@ -22,8 +22,8 @@ import {
   SUB_MODELED_ELEMENT_CLASS_NAME,
   SUBJECT_CLASS_NAME,
 } from "../common/internal/ClassNameDefinitions.js";
+import { collect } from "../common/internal/Rxjs.js";
 import { createIdsSelector, parseIdsSelectorResult, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
-import { collect } from "../common/Rxjs.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 
 import type { Id64String } from "@itwin/core-bentley";
@@ -50,6 +50,7 @@ import type {
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
 import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
+import type { CategoryId, ElementId, ModelId, SubjectId } from "../common/internal/Types.js";
 
 /** @beta */
 export type ClassGroupingHierarchyNode = GroupingHierarchyNode & { key: ClassGroupingNodeKey };
@@ -421,7 +422,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         mergeMap(async (modelId) => this._idsCache.getCategoriesModeledElements(modelId, categoryIds)),
         reduce((acc, foundModeledElements) => {
           return acc.concat(foundModeledElements);
-        }, new Array<Id64String>()),
+        }, new Array<ElementId>()),
       ),
     );
     return [
@@ -575,7 +576,7 @@ function createGeometricElementInstanceKeyPaths(
   hierarchyConfig: ModelsTreeHierarchyConfiguration,
   targetItems: Array<Id64String | ElementsGroupInfo>,
 ): Observable<HierarchyFilteringPath> {
-  const elementIds = targetItems.filter((info): info is Id64String => typeof info === "string");
+  const elementIds = targetItems.filter((info): info is ElementId => typeof info === "string");
   const groupInfos = targetItems.filter((info): info is ElementsGroupInfo => typeof info !== "string");
   const separator = ";";
 
@@ -708,7 +709,7 @@ async function createInstanceKeyPathsFromTargetItems({
   return lastValueFrom(
     from(targetItems).pipe(
       releaseMainThreadOnItemsCount(2000),
-      mergeMap(async (key): Promise<{ key: string; type: number } | { key: ElementsGroupInfo; type: 0 }> => {
+      mergeMap(async (key): Promise<{ key: Id64String; type: number } | { key: ElementsGroupInfo; type: 0 }> => {
         if ("parent" in key) {
           return { key, type: 0 };
         }
@@ -745,10 +746,10 @@ async function createInstanceKeyPathsFromTargetItems({
           return acc;
         },
         {
-          models: new Array<Id64String>(),
-          categories: new Array<Id64String>(),
-          subjects: new Array<Id64String>(),
-          elements: new Array<Id64String | ElementsGroupInfo>(),
+          models: new Array<ModelId>(),
+          categories: new Array<CategoryId>(),
+          subjects: new Array<SubjectId>(),
+          elements: new Array<ElementId | ElementsGroupInfo>(),
         },
       ),
       switchMap(async (ids) => {

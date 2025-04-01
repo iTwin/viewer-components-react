@@ -13,6 +13,7 @@ import { ExternalSourcesTreeDefinition } from "./ExternalSourcesTreeDefinition.j
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { BaseTreeRendererProps } from "../common/components/BaseTreeRenderer.js";
 import type { TreeProps } from "../common/components/Tree.js";
+
 /** @beta */
 export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
   Pick<BaseTreeRendererProps, "actions" | "getDecorations"> & {

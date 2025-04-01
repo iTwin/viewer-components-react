@@ -66,6 +66,7 @@ const defaultContextValue: TelemetryContext = {
   onFeatureUsed: () => {},
 };
 
+/** @internal */
 export function useTelemetryContext() {
   return useContext(telemetryContext) ?? defaultContextValue;
 }
