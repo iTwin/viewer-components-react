@@ -47,7 +47,7 @@
     "lint:fix": "npm run lint:eslint -- --fix && npm run lint:stylelint -- --fix",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
     "test:dev": "cross-env NODE_OPTIONS=\"--import ../../../node-hooks/ignore-styles/register.cjs\" mocha --enable-source-maps --config ./.mocharc.json",
-
+    "test": "npm run test:dev -- --parallel --jobs=4",
     "test:e2e": "node ../../../scripts/run-e2e-with-docker.js property-grid",
     "test:e2e:local": "node ../../../scripts/run-e2e-tests.js",
     "test:e2e:debug": "cross-env PWDEBUG=1 playwright test --ui",
