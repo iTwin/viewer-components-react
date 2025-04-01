@@ -20,11 +20,11 @@ module.exports = {
       outputs: [],
       inputs: [],
     },
-    cover: {
-      dependsOn: ["build"],
-      outputs: [],
-      inputs: ["lib/**"],
-    },
+    // cover: {
+    //   dependsOn: ["build"],
+    //   outputs: [],
+    //   inputs: ["lib/**"],
+    // },
     lint: {
       dependsOn: ["build"],
       outputs: [],

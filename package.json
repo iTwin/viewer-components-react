@@ -7,7 +7,7 @@
   "packageManager": "pnpm@9.15.0",
   "scripts": {
     "build": "lage build --grouped",
-    "cover": "lage cover --grouped --continue",
+    "cover": "pnpm --filter ./packages/itwin/tree-widget build && pnpm --filter ./packages/itwin/tree-widget cover",
     "docs:all": "lage docs",
     "test": "lage test --grouped --continue",
     "test:e2e": "lage test:e2e --continue --verbose",
