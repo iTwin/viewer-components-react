@@ -24,6 +24,10 @@ steps:
   - script: pnpm --filter ./packages/itwin/tree-widget install
     displayName: pnpm install
 
+  - script: pnpm -w install
+    displayName: pnpm install lage
+
+
   # - script: pnpm audit --registry=https://registry.npmjs.org --audit-level=high --production
   #   displayName: Audit
 
