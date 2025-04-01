@@ -21,7 +21,7 @@ module.exports = {
       inputs: [],
     },
     cover: {
-      dependsOn: ["build"],
+      dependsOn: [],
       outputs: [],
       inputs: ["lib/**"],
     },

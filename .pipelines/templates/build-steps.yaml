@@ -34,6 +34,9 @@ steps:
   # - script: pnpm exec prettier . --check
   #   displayName: Check formatting
 
+  - script: pnpm build --grouped --to @itwin/tree-widget-react
+    displayName: pnpm build tree widget
+
   - script: pnpm exec lage cover --grouped --to @itwin/tree-widget-react
     displayName: Cover 1
 
@@ -45,3 +48,51 @@ steps:
 
   - script: pnpm exec lage cover --grouped --to @itwin/tree-widget-react
     displayName: Cover 4
+
+  - script: pnpm exec lage cover --grouped --to @itwin/tree-widget-react
+    displayName: Cover 5
+
+  - script: pnpm exec lage cover --grouped --to @itwin/tree-widget-react
+    displayName: Cover 6
+
+  - script: pnpm exec lage cover --grouped --to @itwin/tree-widget-react
+    displayName: Cover 7
+
+  - script: pnpm exec lage cover --grouped --to @itwin/tree-widget-react
+    displayName: Cover 8
+
+  - script: pnpm exec lage cover --grouped --to @itwin/tree-widget-react
+    displayName: Cover 9
+
+  - script: pnpm exec lage cover --grouped --to @itwin/tree-widget-react
+    displayName: Cover 10
+
+  - script: pnpm exec lage cover --grouped --to @itwin/tree-widget-react
+    displayName: Cover 11
+
+  - script: pnpm exec lage cover --grouped --to @itwin/tree-widget-react
+    displayName: Cover 12
+
+  - script: pnpm exec lage cover --grouped --to @itwin/tree-widget-react
+    displayName: Cover 13
+
+  - script: pnpm exec lage cover --grouped --to @itwin/tree-widget-react
+    displayName: Cover 14
+
+  - script: pnpm exec lage cover --grouped --to @itwin/tree-widget-react
+    displayName: Cover 15
+
+  - script: pnpm exec lage cover --grouped --to @itwin/tree-widget-react
+    displayName: Cover 16
+
+  - script: pnpm exec lage cover --grouped --to @itwin/tree-widget-react
+    displayName: Cover 17
+
+  - script: pnpm exec lage cover --grouped --to @itwin/tree-widget-react
+    displayName: Cover 18
+
+  - script: pnpm exec lage cover --grouped --to @itwin/tree-widget-react
+    displayName: Cover 19
+
+  - script: pnpm exec lage cover --grouped --to @itwin/tree-widget-react
+    displayName: Cover 20
