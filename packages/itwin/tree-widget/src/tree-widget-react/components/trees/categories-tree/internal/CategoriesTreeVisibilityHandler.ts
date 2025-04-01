@@ -183,7 +183,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
             },
           ),
         ),
-        defaultIfEmpty(createVisibilityStatus("hidden")),
+        defaultIfEmpty(createVisibilityStatus("disabled")),
       ),
     );
   }
