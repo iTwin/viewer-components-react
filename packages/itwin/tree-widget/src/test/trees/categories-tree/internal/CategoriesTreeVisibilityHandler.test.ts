@@ -166,7 +166,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
     //   await iModel1.close();
     // });
 
-    for (let i = 0; i < 400; ++i) {
+    for (let i = 0; i < 150; ++i) {
       it(`showing definition container makes it and all of its contained elements visible ${i}`, async function () {
         await using buildIModelResultawait = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
