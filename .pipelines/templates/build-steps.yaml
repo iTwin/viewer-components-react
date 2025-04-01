@@ -35,4 +35,13 @@ steps:
   #   displayName: Check formatting
 
   - script: pnpm exec lage cover --grouped --to @itwin/tree-widget-react
-    displayName: Build, Lint, Cover and check for unexpected API changes
+    displayName: Cover 1
+
+  - script: pnpm exec lage cover --grouped --to @itwin/tree-widget-react
+    displayName: Cover 2
+
+  - script: pnpm exec lage cover --grouped --to @itwin/tree-widget-react
+    displayName: Cover 3
+
+  - script: pnpm exec lage cover --grouped --to @itwin/tree-widget-react
+    displayName: Cover 4

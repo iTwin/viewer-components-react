@@ -137,8 +137,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       },
     };
   }
-  for (let i = 0; i < 10; ++i) {
-    describe(`enabling visibility ${i}`, () => {
+    describe("enabling visibility", () => {
       it("by default everything is hidden", async function () {
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
@@ -2035,7 +2034,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
     });
 
-    describe(`disabling visibility ${i}`, () => {
+    describe("disabling visibility", () => {
       it("by default everything is visible", async function () {
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
@@ -2664,8 +2663,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
       });
     });
-  }
-
 });
 
 async function createViewState(iModel: IModelConnection, categoryIds: Id64Array) {
