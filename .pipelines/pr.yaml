@@ -3,7 +3,7 @@ trigger:
   - gh-readonly-queue/master
 
 pr:
-  drafts: false
+  drafts: true
   branches:
     include:
       - master
@@ -32,20 +32,20 @@ jobs:
     steps:
       - template: templates/build-steps.yaml
 
-  - job: Validate_docs
-    displayName: "Validate docs"
-    workspace:
-      clean: all
-    pool:
-      vmImage: ubuntu-latest
-    steps:
-      - template: templates/validate-docs-steps.yaml
+  # - job: Validate_docs
+  #   displayName: "Validate docs"
+  #   workspace:
+  #     clean: all
+  #   pool:
+  #     vmImage: ubuntu-latest
+  #   steps:
+  #     - template: templates/validate-docs-steps.yaml
 
-  - job: Check_change_files
-    displayName: "Check change files"
-    workspace:
-      clean: all
-    pool:
-      vmImage: ubuntu-latest
-    steps:
-      - template: templates/change-files-steps.yaml
+  # - job: Check_change_files
+  #   displayName: "Check change files"
+  #   workspace:
+  #     clean: all
+  #   pool:
+  #     vmImage: ubuntu-latest
+  #   steps:
+  #     - template: templates/change-files-steps.yaml

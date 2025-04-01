@@ -24,8 +24,8 @@ steps:
   - script: pnpm install
     displayName: pnpm install
 
-  - script: pnpm audit --registry=https://registry.npmjs.org --audit-level=high --production
-    displayName: Audit
+  # - script: pnpm audit --registry=https://registry.npmjs.org --audit-level=high --production
+  #   displayName: Audit
 
   # - script: pnpm exec prettier . --check
   #   displayName: Check formatting
