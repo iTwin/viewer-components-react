@@ -10,6 +10,7 @@ import {
   initTreeWidgetTest,
   locateInstanceFilter,
   locateNode,
+  openErrorDropdown,
   selectOperatorInDialog,
   selectPropertyInDialog,
   selectTree,
@@ -77,7 +78,7 @@ test.describe("Categories tree", () => {
     await page.getByRole("button", { name: "Apply" }).click();
 
     // wait for message to appear
-    await treeWidget.getByText("No child nodes match current filter").waitFor();
+    await openErrorDropdown(treeWidget);
 
     await takeScreenshot(page, treeWidget, { resetScroll: true });
   });
@@ -88,7 +89,9 @@ test.describe("Categories tree", () => {
     await treeWidget.getByPlaceholder("Search...").fill("PipeSupport");
 
     // wait for non searched for nodes to disappear
-    await locateNode(treeWidget, "PipeSupport").getByRole("button", { name: "Visible: Category display enabled through category selector", includeHidden: true }).waitFor({ state: "attached"});
+    await locateNode(treeWidget, "PipeSupport")
+      .getByRole("button", { name: "Visible: Category display enabled through category selector", includeHidden: true })
+      .waitFor({ state: "attached" });
     await locateNode(treeWidget, "Equipment").waitFor({ state: "hidden" });
     await takeScreenshot(page, treeWidget);
   });
@@ -154,7 +157,7 @@ test.describe("Categories tree", () => {
 
     const node = locateNode(treeWidget, "Equipment");
     await node.waitFor({ state: "visible" });
-    await node.getByRole("button", { name: "Visible: All subCategories are visible", includeHidden: true }).waitFor({ state: "attached"});
+    await node.getByRole("button", { name: "Visible: All subCategories are visible", includeHidden: true }).waitFor({ state: "attached" });
     await takeScreenshot(page, treeWidget);
   });
 });

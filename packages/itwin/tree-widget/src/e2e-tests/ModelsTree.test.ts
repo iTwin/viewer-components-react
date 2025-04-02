@@ -10,6 +10,7 @@ import {
   initTreeWidgetTest,
   locateInstanceFilter,
   locateNode,
+  openErrorDropdown,
   selectOperatorInDialog,
   selectPropertyInDialog,
   selectTree,
@@ -114,7 +115,7 @@ test.describe("Models tree", () => {
     await page.getByRole("button", { name: "Apply" }).click();
 
     // wait for message to appear
-    await treeWidget.getByText("No child nodes match current filter").waitFor();
+    await openErrorDropdown(treeWidget);
 
     await takeScreenshot(page, treeWidget, { resetScroll: true });
   });
