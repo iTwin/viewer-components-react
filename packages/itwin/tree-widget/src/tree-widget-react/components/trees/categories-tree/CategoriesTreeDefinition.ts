@@ -77,6 +77,7 @@ export const defaultHierarchyConfiguration: CategoriesTreeHierarchyConfiguration
   showElements: false,
 };
 
+/** @internal */
 export class CategoriesTreeDefinition implements HierarchyDefinition {
   private _impl: Promise<HierarchyDefinition> | undefined;
   private _selectQueryFactory: NodesQueryClauseFactory;

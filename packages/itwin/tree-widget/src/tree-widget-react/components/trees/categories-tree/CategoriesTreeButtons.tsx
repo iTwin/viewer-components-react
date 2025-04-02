@@ -130,6 +130,7 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
 
 const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
 
+/** @internal */
 export function useCategories(viewport: Viewport) {
   const categoriesPromise = useMemo(async () => loadCategoriesFromViewport(viewport), [viewport]);
   return useAsyncValue(categoriesPromise) ?? EMPTY_CATEGORIES_ARRAY;

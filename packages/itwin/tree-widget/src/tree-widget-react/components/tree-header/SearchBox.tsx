@@ -19,6 +19,7 @@ interface DebouncedSearchBoxProps {
 const dismissSvg = new URL("@itwin/itwinui-icons/dismiss.svg", import.meta.url).href;
 const searchSvg = new URL("@itwin/itwinui-icons/search.svg", import.meta.url).href;
 
+/** @internal */
 export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, className }: DebouncedSearchBoxProps) {
   const [inputValue, setInputValue] = useState<string | undefined>(undefined);
   const onChangeRef = useRef(onSearch);

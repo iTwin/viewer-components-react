@@ -205,6 +205,7 @@ export type HierarchyVisibilityHandlerOverridableMethod<TFunc> = TFunc extends (
   ? (props: HierarchyVisibilityHandlerOverridableMethodProps<TFunc>) => TResult
   : never;
 
+/** @internal */
 export function createVisibilityHandlerResult<TResult, TOverrideProps>(
   handler: HierarchyVisibilityHandler,
   props: TOverrideProps,

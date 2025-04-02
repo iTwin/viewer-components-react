@@ -7,6 +7,7 @@ import "./ProgressOverlay.css";
 import { ProgressBar, VisuallyHidden } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../../../../TreeWidget.js";
 
+/** @internal */
 export function ProgressOverlay() {
   return (
     <div className="tw-progress-overlay-container">

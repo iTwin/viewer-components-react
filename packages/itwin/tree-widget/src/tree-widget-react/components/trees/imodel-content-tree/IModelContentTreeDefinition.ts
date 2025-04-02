@@ -56,6 +56,7 @@ interface IModelContentTreeDefinitionProps {
   hierarchyConfig: IModelContentTreeHierarchyConfiguration;
 }
 
+/** @internal */
 export class IModelContentTreeDefinition implements HierarchyDefinition {
   private _impl: HierarchyDefinition;
   private _idsCache: IModelContentTreeIdsCache;

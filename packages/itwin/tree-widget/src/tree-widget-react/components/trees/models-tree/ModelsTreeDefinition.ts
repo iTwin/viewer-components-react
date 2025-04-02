@@ -117,6 +117,7 @@ interface ModelsTreeInstanceKeyPathsFromInstanceLabelProps {
   limit?: number | "unbounded";
 }
 
+/** @internal */
 export type ModelsTreeInstanceKeyPathsProps = ModelsTreeInstanceKeyPathsFromTargetItemsProps | ModelsTreeInstanceKeyPathsFromInstanceLabelProps;
 type HierarchyProviderProps = Parameters<typeof createIModelHierarchyProvider>[0];
 type HierarchyFilteringPaths = NonNullable<NonNullable<HierarchyProviderProps["filtering"]>["paths"]>;
@@ -129,6 +130,7 @@ export namespace ModelsTreeInstanceKeyPathsProps {
   }
 }
 
+/** @internal */
 export class ModelsTreeDefinition implements HierarchyDefinition {
   private _impl: HierarchyDefinition;
   private _idsCache: ModelsTreeIdsCache;
