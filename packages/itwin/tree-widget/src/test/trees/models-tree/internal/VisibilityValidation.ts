@@ -7,6 +7,7 @@ import { assert, expect } from "chai";
 import { expand, from, mergeMap } from "rxjs";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
+import { waitFor } from "@testing-library/react";
 import { toVoidPromise } from "../../../../tree-widget-react/components/trees/common/Rxjs.js";
 import { ModelsTreeNode } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeNode.js";
 
@@ -123,7 +124,7 @@ export async function validateHierarchyVisibility({
   await toVoidPromise(
     from(provider.getNodes({ parentNode: undefined })).pipe(
       expand((node) => provider.getNodes({ parentNode: node })),
-      mergeMap(async (node) => validateNodeVisibility({ ...props, node })),
+      mergeMap(async (node) => waitFor(async () => validateNodeVisibility({ ...props, node }))),
     ),
   );
 }
