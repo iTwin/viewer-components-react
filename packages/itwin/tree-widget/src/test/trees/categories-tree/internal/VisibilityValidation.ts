@@ -6,6 +6,7 @@
 import { expect } from "chai";
 import { EMPTY, expand, from, mergeMap } from "rxjs";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
+import { waitFor } from "@testing-library/react";
 import { CategoriesTreeNode } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeNode.js";
 import { toVoidPromise } from "../../../../tree-widget-react/components/trees/common/internal/Rxjs.js";
 
@@ -94,7 +95,7 @@ export async function validateHierarchyVisibility({
   await toVoidPromise(
     from(provider.getNodes({ parentNode: undefined })).pipe(
       expand((node) => (node.children ? provider.getNodes({ parentNode: node }) : EMPTY)),
-      mergeMap(async (node) => validateNodeVisibility({ ...props, node })),
+      mergeMap(async (node) => waitFor(async () => validateNodeVisibility({ ...props, node }))),
     ),
   );
 }

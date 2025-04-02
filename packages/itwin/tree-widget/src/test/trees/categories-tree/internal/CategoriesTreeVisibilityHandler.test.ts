@@ -29,7 +29,7 @@ import {
   insertSubCategory,
   insertSubModel,
 } from "../../../IModelUtils.js";
-import { TestUtils, waitFor } from "../../../TestUtils.js";
+import { TestUtils } from "../../../TestUtils.js";
 import { createIModelAccess } from "../../Common.js";
 import {
   createCategoryHierarchyNode,
@@ -200,14 +200,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerRoot.id), true);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: "all-visible",
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: "all-visible",
+        });
       });
 
       it("showing definition container makes it and all of its contained elements visible and doesn't affect non contained definition containers", async function () {
@@ -253,22 +251,20 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerRoot.id), true);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: {
-              [keys.definitionContainerRoot2.id]: "hidden",
-              [keys.definitionContainerRoot.id]: "visible",
-              [keys.definitionContainerChild.id]: "visible",
-              [keys.category2.id]: "hidden",
-              [keys.indirectCategory.id]: "visible",
-              [keys.subCategory2.id]: "hidden",
-              [keys.indirectSubCategory.id]: "visible",
-            },
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: {
+            [keys.definitionContainerRoot2.id]: "hidden",
+            [keys.definitionContainerRoot.id]: "visible",
+            [keys.definitionContainerChild.id]: "visible",
+            [keys.category2.id]: "hidden",
+            [keys.indirectCategory.id]: "visible",
+            [keys.subCategory2.id]: "hidden",
+            [keys.indirectSubCategory.id]: "visible",
+          },
+        });
       });
 
       it("showing definition container makes it and all of its contained elements visible, and parent container partially visible if it has more direct child categories", async function () {
@@ -297,19 +293,17 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), true);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: {
-              [keys.definitionContainerRoot.id]: "partial",
-              [keys.definitionContainerChild.id]: "visible",
-              [keys.directCategory.id]: "hidden",
-              [keys.indirectCategory.id]: "visible",
-            },
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: {
+            [keys.definitionContainerRoot.id]: "partial",
+            [keys.definitionContainerChild.id]: "visible",
+            [keys.directCategory.id]: "hidden",
+            [keys.indirectCategory.id]: "visible",
+          },
+        });
       });
 
       it("showing definition container makes it and all of its contained elements visible, and parent container partially visible if it has more definition containers", async function () {
@@ -340,20 +334,18 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), true);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: {
-              [keys.definitionContainerRoot.id]: "partial",
-              [keys.definitionContainerChild.id]: "visible",
-              [keys.definitionContainerChild2.id]: "hidden",
-              [keys.indirectCategory2.id]: "hidden",
-              [keys.indirectCategory.id]: "visible",
-            },
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: {
+            [keys.definitionContainerRoot.id]: "partial",
+            [keys.definitionContainerChild.id]: "visible",
+            [keys.definitionContainerChild2.id]: "hidden",
+            [keys.indirectCategory2.id]: "hidden",
+            [keys.indirectCategory.id]: "visible",
+          },
+        });
       });
 
       it("showing child definition container makes it, all of its contained elements and its parent definition container visible", async function () {
@@ -385,14 +377,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), true);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: "all-visible",
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: "all-visible",
+        });
       });
     });
 
@@ -421,14 +411,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: "all-visible",
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: "all-visible",
+        });
       });
 
       it("showing category makes it, all of its contained subCategories visible and doesn't affect other categories", async function () {
@@ -462,19 +450,17 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: {
-              [keys.category2.id]: "hidden",
-              [keys.category.id]: "visible",
-              [keys.subCategory2.id]: "hidden",
-              [keys.subCategory.id]: "visible",
-            },
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: {
+            [keys.category2.id]: "hidden",
+            [keys.category.id]: "visible",
+            [keys.subCategory2.id]: "hidden",
+            [keys.subCategory.id]: "visible",
+          },
+        });
       });
 
       it("showing category makes it, all of its contained subCategories visible and doesn't affect non related definition container", async function () {
@@ -512,20 +498,18 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: {
-              [keys.definitionContainer.id]: "hidden",
-              [keys.category2.id]: "hidden",
-              [keys.category.id]: "visible",
-              [keys.subCategory2.id]: "hidden",
-              [keys.subCategory.id]: "visible",
-            },
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: {
+            [keys.definitionContainer.id]: "hidden",
+            [keys.category2.id]: "hidden",
+            [keys.category.id]: "visible",
+            [keys.subCategory2.id]: "hidden",
+            [keys.subCategory.id]: "visible",
+          },
+        });
       });
 
       it("showing category makes it and all of its subcategories visible, and parent container partially visible if it has more direct child categories", async function () {
@@ -563,20 +547,18 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: {
-              [keys.definitionContainerRoot.id]: "partial",
-              [keys.category2.id]: "hidden",
-              [keys.category.id]: "visible",
-              [keys.subCategory2.id]: "hidden",
-              [keys.subCategory.id]: "visible",
-            },
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: {
+            [keys.definitionContainerRoot.id]: "partial",
+            [keys.category2.id]: "hidden",
+            [keys.category.id]: "visible",
+            [keys.subCategory2.id]: "hidden",
+            [keys.subCategory.id]: "visible",
+          },
+        });
       });
 
       it("showing category makes it and all of its subCategories visible, and parent container partially visible if it has more definition containers", async function () {
@@ -611,20 +593,18 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: {
-              [keys.definitionContainerRoot.id]: "partial",
-              [keys.definitionContainerChild.id]: "hidden",
-              [keys.indirectCategory.id]: "hidden",
-              [keys.category.id]: "visible",
-              [keys.subCategory.id]: "visible",
-            },
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: {
+            [keys.definitionContainerRoot.id]: "partial",
+            [keys.definitionContainerChild.id]: "hidden",
+            [keys.indirectCategory.id]: "hidden",
+            [keys.category.id]: "visible",
+            [keys.subCategory.id]: "visible",
+          },
+        });
       });
     });
 
@@ -659,18 +639,16 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
         await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
 
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: {
-              [keys.category.id]: "partial",
-              [keys.subCategory.id]: "visible",
-              [keys.subCategory2.id]: "hidden",
-            },
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: {
+            [keys.category.id]: "partial",
+            [keys.subCategory.id]: "visible",
+            [keys.subCategory2.id]: "hidden",
+          },
+        });
       });
 
       it("showing subCategory makes it visible and its parent category partially visible, and doesn't affect other categories", async function () {
@@ -699,18 +677,16 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: {
-              [keys.category2.id]: "hidden",
-              [keys.category.id]: "partial",
-              [keys.subCategory.id]: "visible",
-            },
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: {
+            [keys.category2.id]: "hidden",
+            [keys.category.id]: "partial",
+            [keys.subCategory.id]: "visible",
+          },
+        });
       });
 
       it("showing subCategory makes it visible and parents partially visible", async function () {
@@ -740,18 +716,16 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: {
-              [keys.definitionContainerRoot.id]: "partial",
-              [keys.category.id]: "partial",
-              [keys.subCategory.id]: "visible",
-            },
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: {
+            [keys.definitionContainerRoot.id]: "partial",
+            [keys.category.id]: "partial",
+            [keys.subCategory.id]: "visible",
+          },
+        });
       });
 
       it("showing subCategory makes it visible and doesn't affect non related definition containers", async function () {
@@ -788,20 +762,18 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: {
-              [keys.definitionContainerRoot.id]: "hidden",
-              [keys.categoryOfDefinitionContainer.id]: "hidden",
-              [keys.subCategoryOfDefinitionContainer.id]: "hidden",
-              [keys.category.id]: "partial",
-              [keys.subCategory.id]: "visible",
-            },
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: {
+            [keys.definitionContainerRoot.id]: "hidden",
+            [keys.categoryOfDefinitionContainer.id]: "hidden",
+            [keys.subCategoryOfDefinitionContainer.id]: "hidden",
+            [keys.category.id]: "partial",
+            [keys.subCategory.id]: "visible",
+          },
+        });
       });
     });
 
@@ -834,14 +806,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: "all-hidden",
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: "all-hidden",
+        });
       });
     });
 
@@ -880,14 +850,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
           const { handler, provider, viewport } = visibilityTestData;
 
           await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerRoot.id), true);
-          await waitFor(async () =>
-            validateHierarchyVisibility({
-              provider,
-              handler,
-              viewport,
-              expectations: "all-visible",
-            }),
-          );
+          await validateHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            expectations: "all-visible",
+          });
         });
 
         it("showing definition container makes it and all of its contained elements visible and doesn't affect non contained definition containers", async function () {
@@ -937,24 +905,22 @@ describe("CategoriesTreeVisibilityHandler", () => {
           const { handler, provider, viewport } = visibilityTestData;
 
           await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerRoot.id), true);
-          await waitFor(async () =>
-            validateHierarchyVisibility({
-              provider,
-              handler,
-              viewport,
-              expectations: {
-                [keys.definitionContainerRoot2.id]: "hidden",
-                [keys.definitionContainerRoot.id]: "visible",
-                [keys.definitionContainerChild.id]: "visible",
-                [keys.category2.id]: "hidden",
-                [keys.element2.id]: "hidden",
-                [keys.indirectCategory.id]: "visible",
-                [keys.indirectElement.id]: "visible",
-                [keys.subCategory2.id]: "hidden",
-                [keys.indirectSubCategory.id]: "visible",
-              },
-            }),
-          );
+          await validateHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            expectations: {
+              [keys.definitionContainerRoot2.id]: "hidden",
+              [keys.definitionContainerRoot.id]: "visible",
+              [keys.definitionContainerChild.id]: "visible",
+              [keys.category2.id]: "hidden",
+              [keys.element2.id]: "hidden",
+              [keys.indirectCategory.id]: "visible",
+              [keys.indirectElement.id]: "visible",
+              [keys.subCategory2.id]: "hidden",
+              [keys.indirectSubCategory.id]: "visible",
+            },
+          });
         });
 
         it("showing definition container makes it and all of its contained elements visible, and parent container partially visible if it has more direct child categories", async function () {
@@ -984,21 +950,19 @@ describe("CategoriesTreeVisibilityHandler", () => {
           const { handler, provider, viewport } = visibilityTestData;
 
           await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), true);
-          await waitFor(async () =>
-            validateHierarchyVisibility({
-              provider,
-              handler,
-              viewport,
-              expectations: {
-                [keys.definitionContainerRoot.id]: "partial",
-                [keys.definitionContainerChild.id]: "visible",
-                [keys.directCategory.id]: "hidden",
-                [keys.indirectCategory.id]: "visible",
-                [keys.indirectElement.id]: "visible",
-                [keys.directElement.id]: "hidden",
-              },
-            }),
-          );
+          await validateHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            expectations: {
+              [keys.definitionContainerRoot.id]: "partial",
+              [keys.definitionContainerChild.id]: "visible",
+              [keys.directCategory.id]: "hidden",
+              [keys.indirectCategory.id]: "visible",
+              [keys.indirectElement.id]: "visible",
+              [keys.directElement.id]: "hidden",
+            },
+          });
         });
 
         it("showing definition container makes it and all of its contained elements visible, and parent container partially visible if it has more definition containers", async function () {
@@ -1043,22 +1007,20 @@ describe("CategoriesTreeVisibilityHandler", () => {
           const { handler, provider, viewport } = visibilityTestData;
 
           await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), true);
-          await waitFor(async () =>
-            validateHierarchyVisibility({
-              provider,
-              handler,
-              viewport,
-              expectations: {
-                [keys.definitionContainerRoot.id]: "partial",
-                [keys.definitionContainerChild.id]: "visible",
-                [keys.definitionContainerChild2.id]: "hidden",
-                [keys.indirectCategory2.id]: "hidden",
-                [keys.indirectCategory.id]: "visible",
-                [keys.indirectElement.id]: "visible",
-                [keys.indirectElement2.id]: "hidden",
-              },
-            }),
-          );
+          await validateHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            expectations: {
+              [keys.definitionContainerRoot.id]: "partial",
+              [keys.definitionContainerChild.id]: "visible",
+              [keys.definitionContainerChild2.id]: "hidden",
+              [keys.indirectCategory2.id]: "hidden",
+              [keys.indirectCategory.id]: "visible",
+              [keys.indirectElement.id]: "visible",
+              [keys.indirectElement2.id]: "hidden",
+            },
+          });
         });
 
         it("showing child definition container makes it, all of its contained elements and its parent definition container visible", async function () {
@@ -1091,14 +1053,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
           const { handler, provider, viewport } = visibilityTestData;
 
           await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), true);
-          await waitFor(async () =>
-            validateHierarchyVisibility({
-              provider,
-              handler,
-              viewport,
-              expectations: "all-visible",
-            }),
-          );
+          await validateHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            expectations: "all-visible",
+          });
         });
       });
 
@@ -1128,14 +1088,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
           const { handler, provider, viewport } = visibilityTestData;
 
           await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
-          await waitFor(async () =>
-            validateHierarchyVisibility({
-              provider,
-              handler,
-              viewport,
-              expectations: "all-visible",
-            }),
-          );
+          await validateHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            expectations: "all-visible",
+          });
         });
 
         it("showing category makes it, all of its contained subCategories and elements visible and doesn't affect other categories", async function () {
@@ -1170,21 +1128,19 @@ describe("CategoriesTreeVisibilityHandler", () => {
           const { handler, provider, viewport } = visibilityTestData;
 
           await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
-          await waitFor(async () =>
-            validateHierarchyVisibility({
-              provider,
-              handler,
-              viewport,
-              expectations: {
-                [keys.category2.id]: "hidden",
-                [keys.category.id]: "visible",
-                [keys.element.id]: "visible",
-                [keys.element2.id]: "hidden",
-                [keys.subCategory2.id]: "hidden",
-                [keys.subCategory.id]: "visible",
-              },
-            }),
-          );
+          await validateHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            expectations: {
+              [keys.category2.id]: "hidden",
+              [keys.category.id]: "visible",
+              [keys.element.id]: "visible",
+              [keys.element2.id]: "hidden",
+              [keys.subCategory2.id]: "hidden",
+              [keys.subCategory.id]: "visible",
+            },
+          });
         });
 
         it("showing category makes it, all of its contained subCategories and elements visible and doesn't affect non related definition container", async function () {
@@ -1223,22 +1179,20 @@ describe("CategoriesTreeVisibilityHandler", () => {
           const { handler, provider, viewport } = visibilityTestData;
 
           await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
-          await waitFor(async () =>
-            validateHierarchyVisibility({
-              provider,
-              handler,
-              viewport,
-              expectations: {
-                [keys.definitionContainer.id]: "hidden",
-                [keys.category2.id]: "hidden",
-                [keys.category.id]: "visible",
-                [keys.subCategory2.id]: "hidden",
-                [keys.subCategory.id]: "visible",
-                [keys.element.id]: "visible",
-                [keys.element2.id]: "hidden",
-              },
-            }),
-          );
+          await validateHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            expectations: {
+              [keys.definitionContainer.id]: "hidden",
+              [keys.category2.id]: "hidden",
+              [keys.category.id]: "visible",
+              [keys.subCategory2.id]: "hidden",
+              [keys.subCategory.id]: "visible",
+              [keys.element.id]: "visible",
+              [keys.element2.id]: "hidden",
+            },
+          });
         });
 
         it("showing category makes it, all of its subcategories and elements visible, and parent container partially visible if it has more direct child categories", async function () {
@@ -1277,22 +1231,20 @@ describe("CategoriesTreeVisibilityHandler", () => {
           const { handler, provider, viewport } = visibilityTestData;
 
           await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
-          await waitFor(async () =>
-            validateHierarchyVisibility({
-              provider,
-              handler,
-              viewport,
-              expectations: {
-                [keys.definitionContainerRoot.id]: "partial",
-                [keys.category2.id]: "hidden",
-                [keys.category.id]: "visible",
-                [keys.subCategory2.id]: "hidden",
-                [keys.subCategory.id]: "visible",
-                [keys.element2.id]: "hidden",
-                [keys.element.id]: "visible",
-              },
-            }),
-          );
+          await validateHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            expectations: {
+              [keys.definitionContainerRoot.id]: "partial",
+              [keys.category2.id]: "hidden",
+              [keys.category.id]: "visible",
+              [keys.subCategory2.id]: "hidden",
+              [keys.subCategory.id]: "visible",
+              [keys.element2.id]: "hidden",
+              [keys.element.id]: "visible",
+            },
+          });
         });
 
         it("showing category makes it, all of its subCategories and elements visible, and parent container partially visible if it has more definition containers", async function () {
@@ -1328,22 +1280,20 @@ describe("CategoriesTreeVisibilityHandler", () => {
           const { handler, provider, viewport } = visibilityTestData;
 
           await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
-          await waitFor(async () =>
-            validateHierarchyVisibility({
-              provider,
-              handler,
-              viewport,
-              expectations: {
-                [keys.definitionContainerRoot.id]: "partial",
-                [keys.definitionContainerChild.id]: "hidden",
-                [keys.indirectCategory.id]: "hidden",
-                [keys.category.id]: "visible",
-                [keys.subCategory.id]: "visible",
-                [keys.indirectElement.id]: "hidden",
-                [keys.element.id]: "visible",
-              },
-            }),
-          );
+          await validateHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            expectations: {
+              [keys.definitionContainerRoot.id]: "partial",
+              [keys.definitionContainerChild.id]: "hidden",
+              [keys.indirectCategory.id]: "hidden",
+              [keys.category.id]: "visible",
+              [keys.subCategory.id]: "visible",
+              [keys.indirectElement.id]: "hidden",
+              [keys.element.id]: "visible",
+            },
+          });
         });
       });
 
@@ -1378,19 +1328,17 @@ describe("CategoriesTreeVisibilityHandler", () => {
           const { handler, provider, viewport } = visibilityTestData;
           await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
 
-          await waitFor(async () =>
-            validateHierarchyVisibility({
-              provider,
-              handler,
-              viewport,
-              expectations: {
-                [keys.category.id]: "partial",
-                [keys.subCategory.id]: "visible",
-                [keys.subCategory2.id]: "hidden",
-                [keys.element.id]: "hidden",
-              },
-            }),
-          );
+          await validateHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            expectations: {
+              [keys.category.id]: "partial",
+              [keys.subCategory.id]: "visible",
+              [keys.subCategory2.id]: "hidden",
+              [keys.element.id]: "hidden",
+            },
+          });
         });
 
         it("showing subCategory makes it visible and its parent category partially visible, and doesn't affect elements of other categories", async function () {
@@ -1420,20 +1368,18 @@ describe("CategoriesTreeVisibilityHandler", () => {
           const { handler, provider, viewport } = visibilityTestData;
 
           await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
-          await waitFor(async () =>
-            validateHierarchyVisibility({
-              provider,
-              handler,
-              viewport,
-              expectations: {
-                [keys.category2.id]: "hidden",
-                [keys.category.id]: "partial",
-                [keys.subCategory.id]: "visible",
-                [keys.element.id]: "hidden",
-                [keys.element2.id]: "hidden",
-              },
-            }),
-          );
+          await validateHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            expectations: {
+              [keys.category2.id]: "hidden",
+              [keys.category.id]: "partial",
+              [keys.subCategory.id]: "visible",
+              [keys.element.id]: "hidden",
+              [keys.element2.id]: "hidden",
+            },
+          });
         });
 
         it("showing subCategory makes it visible and parents partially visible", async function () {
@@ -1464,19 +1410,17 @@ describe("CategoriesTreeVisibilityHandler", () => {
           const { handler, provider, viewport } = visibilityTestData;
 
           await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
-          await waitFor(async () =>
-            validateHierarchyVisibility({
-              provider,
-              handler,
-              viewport,
-              expectations: {
-                [keys.definitionContainerRoot.id]: "partial",
-                [keys.category.id]: "partial",
-                [keys.subCategory.id]: "visible",
-                [keys.element.id]: "hidden",
-              },
-            }),
-          );
+          await validateHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            expectations: {
+              [keys.definitionContainerRoot.id]: "partial",
+              [keys.category.id]: "partial",
+              [keys.subCategory.id]: "visible",
+              [keys.element.id]: "hidden",
+            },
+          });
         });
 
         it("showing subCategory makes it visible and doesn't affect non related definition containers", async function () {
@@ -1523,22 +1467,20 @@ describe("CategoriesTreeVisibilityHandler", () => {
           const { handler, provider, viewport } = visibilityTestData;
 
           await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
-          await waitFor(async () =>
-            validateHierarchyVisibility({
-              provider,
-              handler,
-              viewport,
-              expectations: {
-                [keys.definitionContainerRoot.id]: "hidden",
-                [keys.categoryOfDefinitionContainer.id]: "hidden",
-                [keys.subCategoryOfDefinitionContainer.id]: "hidden",
-                [keys.category.id]: "partial",
-                [keys.subCategory.id]: "visible",
-                [keys.element.id]: "hidden",
-                [keys.elementOfDefinitionContainer.id]: "hidden",
-              },
-            }),
-          );
+          await validateHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            expectations: {
+              [keys.definitionContainerRoot.id]: "hidden",
+              [keys.categoryOfDefinitionContainer.id]: "hidden",
+              [keys.subCategoryOfDefinitionContainer.id]: "hidden",
+              [keys.category.id]: "partial",
+              [keys.subCategory.id]: "visible",
+              [keys.element.id]: "hidden",
+              [keys.elementOfDefinitionContainer.id]: "hidden",
+            },
+          });
         });
       });
 
@@ -1577,20 +1519,18 @@ describe("CategoriesTreeVisibilityHandler", () => {
             true,
           );
 
-          await waitFor(async () =>
-            validateHierarchyVisibility({
-              provider,
-              handler,
-              viewport,
-              expectations: {
-                [keys.category.id]: "partial",
-                [keys.subCategory.id]: "hidden",
-                [keys.subCategory2.id]: "hidden",
-                [keys.element.id]: "visible",
-                [keys.element2.id]: "hidden",
-              },
-            }),
-          );
+          await validateHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            expectations: {
+              [keys.category.id]: "partial",
+              [keys.subCategory.id]: "hidden",
+              [keys.subCategory2.id]: "hidden",
+              [keys.element.id]: "visible",
+              [keys.element2.id]: "hidden",
+            },
+          });
         });
 
         it("showing element makes it visible and its parent category partially visible, and doesn't affect other categories or subCategories", async function () {
@@ -1623,20 +1563,18 @@ describe("CategoriesTreeVisibilityHandler", () => {
             createElementHierarchyNode({ modelId: keys.physicalModel.id, categoryId: keys.category.id, elementId: keys.element.id }),
             true,
           );
-          await waitFor(async () =>
-            validateHierarchyVisibility({
-              provider,
-              handler,
-              viewport,
-              expectations: {
-                [keys.category2.id]: "hidden",
-                [keys.category.id]: "partial",
-                [keys.subCategory.id]: "hidden",
-                [keys.element.id]: "visible",
-                [keys.element2.id]: "hidden",
-              },
-            }),
-          );
+          await validateHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            expectations: {
+              [keys.category2.id]: "hidden",
+              [keys.category.id]: "partial",
+              [keys.subCategory.id]: "hidden",
+              [keys.element.id]: "visible",
+              [keys.element2.id]: "hidden",
+            },
+          });
         });
 
         it("showing element makes it visible and parents partially visible", async function () {
@@ -1670,19 +1608,17 @@ describe("CategoriesTreeVisibilityHandler", () => {
             createElementHierarchyNode({ modelId: keys.physicalModel.id, categoryId: keys.category.id, elementId: keys.element.id }),
             true,
           );
-          await waitFor(async () =>
-            validateHierarchyVisibility({
-              provider,
-              handler,
-              viewport,
-              expectations: {
-                [keys.definitionContainerRoot.id]: "partial",
-                [keys.category.id]: "partial",
-                [keys.subCategory.id]: "hidden",
-                [keys.element.id]: "visible",
-              },
-            }),
-          );
+          await validateHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            expectations: {
+              [keys.definitionContainerRoot.id]: "partial",
+              [keys.category.id]: "partial",
+              [keys.subCategory.id]: "hidden",
+              [keys.element.id]: "visible",
+            },
+          });
         });
 
         it("showing subCategory makes it visible and doesn't affect non related definition containers", async function () {
@@ -1729,22 +1665,20 @@ describe("CategoriesTreeVisibilityHandler", () => {
           const { handler, provider, viewport } = visibilityTestData;
 
           await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
-          await waitFor(async () =>
-            validateHierarchyVisibility({
-              provider,
-              handler,
-              viewport,
-              expectations: {
-                [keys.definitionContainerRoot.id]: "hidden",
-                [keys.categoryOfDefinitionContainer.id]: "hidden",
-                [keys.subCategoryOfDefinitionContainer.id]: "hidden",
-                [keys.category.id]: "partial",
-                [keys.subCategory.id]: "visible",
-                [keys.element.id]: "hidden",
-                [keys.elementOfDefinitionContainer.id]: "hidden",
-              },
-            }),
-          );
+          await validateHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            expectations: {
+              [keys.definitionContainerRoot.id]: "hidden",
+              [keys.categoryOfDefinitionContainer.id]: "hidden",
+              [keys.subCategoryOfDefinitionContainer.id]: "hidden",
+              [keys.category.id]: "partial",
+              [keys.subCategory.id]: "visible",
+              [keys.element.id]: "hidden",
+              [keys.elementOfDefinitionContainer.id]: "hidden",
+            },
+          });
         });
       });
 
@@ -2011,23 +1945,19 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 expectations: "all-hidden",
               });
               await handler.changeVisibility(nodeToChangeVisibility, true);
-              await waitFor(async () =>
-                validateHierarchyVisibility({
-                  provider,
-                  handler,
-                  viewport,
-                  expectations: expectations(createdIds),
-                }),
-              );
+              await validateHierarchyVisibility({
+                provider,
+                handler,
+                viewport,
+                expectations: expectations(createdIds),
+              });
               await handler.changeVisibility(nodeToChangeVisibility, false);
-              await waitFor(async () =>
-                validateHierarchyVisibility({
-                  provider,
-                  handler,
-                  viewport,
-                  expectations: "all-hidden",
-                }),
-              );
+              await validateHierarchyVisibility({
+                provider,
+                handler,
+                viewport,
+                expectations: "all-hidden",
+              });
             });
           });
         });
@@ -2087,14 +2017,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
         using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys) });
         const { handler, provider, viewport } = visibilityTestData;
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerRoot.id), false);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: "all-hidden",
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: "all-hidden",
+        });
       });
 
       it("hiding definition container makes it and all of its contained elements hidden and doesn't affect non contained definition containers", async function () {
@@ -2135,22 +2063,20 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerRoot.id), false);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: {
-              [keys.definitionContainerRoot2.id]: "visible",
-              [keys.definitionContainerRoot.id]: "hidden",
-              [keys.definitionContainerChild.id]: "hidden",
-              [keys.indirectCategory.id]: "hidden",
-              [keys.category2.id]: "visible",
-              [keys.indirectSubCategory.id]: "hidden",
-              [keys.subCategory2.id]: "visible",
-            },
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: {
+            [keys.definitionContainerRoot2.id]: "visible",
+            [keys.definitionContainerRoot.id]: "hidden",
+            [keys.definitionContainerChild.id]: "hidden",
+            [keys.indirectCategory.id]: "hidden",
+            [keys.category2.id]: "visible",
+            [keys.indirectSubCategory.id]: "hidden",
+            [keys.subCategory2.id]: "visible",
+          },
+        });
       });
 
       it("hiding definition container makes it and all of its contained elements hidden, and parent container partially visible if it has more direct child categories", async function () {
@@ -2174,19 +2100,17 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), false);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: {
-              [keys.definitionContainerRoot.id]: "partial",
-              [keys.definitionContainerChild.id]: "hidden",
-              [keys.indirectCategory.id]: "hidden",
-              [keys.directCategory.id]: "visible",
-            },
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: {
+            [keys.definitionContainerRoot.id]: "partial",
+            [keys.definitionContainerChild.id]: "hidden",
+            [keys.indirectCategory.id]: "hidden",
+            [keys.directCategory.id]: "visible",
+          },
+        });
       });
 
       it("hiding definition container makes it and all of its contained elements hidden, and parent container partially visible if it has more definition containers", async function () {
@@ -2212,20 +2136,18 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), false);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: {
-              [keys.definitionContainerRoot.id]: "partial",
-              [keys.definitionContainerChild.id]: "hidden",
-              [keys.definitionContainerChild2.id]: "visible",
-              [keys.indirectCategory.id]: "hidden",
-              [keys.indirectCategory2.id]: "visible",
-            },
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: {
+            [keys.definitionContainerRoot.id]: "partial",
+            [keys.definitionContainerChild.id]: "hidden",
+            [keys.definitionContainerChild2.id]: "visible",
+            [keys.indirectCategory.id]: "hidden",
+            [keys.indirectCategory2.id]: "visible",
+          },
+        });
       });
 
       it("hiding child definition container makes it, all of its contained elements and its parent definition container hidden", async function () {
@@ -2252,14 +2174,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), false);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: "all-hidden",
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: "all-hidden",
+        });
       });
     });
 
@@ -2283,14 +2203,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), false);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: "all-hidden",
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: "all-hidden",
+        });
       });
 
       it("hiding category makes it, all of its contained subCategories hidden and doesn't affect other categories", async function () {
@@ -2319,19 +2237,17 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), false);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: {
-              [keys.category.id]: "hidden",
-              [keys.category2.id]: "visible",
-              [keys.subCategory2.id]: "visible",
-              [keys.subCategory.id]: "hidden",
-            },
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: {
+            [keys.category.id]: "hidden",
+            [keys.category2.id]: "visible",
+            [keys.subCategory2.id]: "visible",
+            [keys.subCategory.id]: "hidden",
+          },
+        });
       });
 
       it("hiding category makes it, all of its contained subCategories hidden and doesn't affect non related definition container", async function () {
@@ -2364,20 +2280,18 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), false);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: {
-              [keys.definitionContainer.id]: "visible",
-              [keys.category2.id]: "visible",
-              [keys.category.id]: "hidden",
-              [keys.subCategory2.id]: "visible",
-              [keys.subCategory.id]: "hidden",
-            },
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: {
+            [keys.definitionContainer.id]: "visible",
+            [keys.category2.id]: "visible",
+            [keys.category.id]: "hidden",
+            [keys.subCategory2.id]: "visible",
+            [keys.subCategory.id]: "hidden",
+          },
+        });
       });
 
       it("hiding category makes it and all of its subcategories hidden, and parent container partially visible if it has more direct child categories", async function () {
@@ -2410,20 +2324,18 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), false);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: {
-              [keys.definitionContainerRoot.id]: "partial",
-              [keys.category.id]: "hidden",
-              [keys.category2.id]: "visible",
-              [keys.subCategory.id]: "hidden",
-              [keys.subCategory2.id]: "visible",
-            },
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: {
+            [keys.definitionContainerRoot.id]: "partial",
+            [keys.category.id]: "hidden",
+            [keys.category2.id]: "visible",
+            [keys.subCategory.id]: "hidden",
+            [keys.subCategory2.id]: "visible",
+          },
+        });
       });
 
       it("hiding category makes it and all of its subCategories hidden, and parent container partially visible if it has more definition containers", async function () {
@@ -2453,20 +2365,18 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), false);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: {
-              [keys.definitionContainerRoot.id]: "partial",
-              [keys.definitionContainerChild.id]: "visible",
-              [keys.category.id]: "hidden",
-              [keys.indirectCategory.id]: "visible",
-              [keys.subCategory.id]: "hidden",
-            },
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: {
+            [keys.definitionContainerRoot.id]: "partial",
+            [keys.definitionContainerChild.id]: "visible",
+            [keys.category.id]: "hidden",
+            [keys.indirectCategory.id]: "visible",
+            [keys.subCategory.id]: "hidden",
+          },
+        });
       });
     });
 
@@ -2495,18 +2405,16 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), false);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: {
-              [keys.category.id]: "partial",
-              [keys.subCategory.id]: "hidden",
-              [keys.subCategory2.id]: "visible",
-            },
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: {
+            [keys.category.id]: "partial",
+            [keys.subCategory.id]: "hidden",
+            [keys.subCategory2.id]: "visible",
+          },
+        });
       });
 
       it("hiding subCategory makes it hidden and its parent category partially visible, and doesn't affect other categories", async function () {
@@ -2530,18 +2438,16 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), false);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: {
-              [keys.category.id]: "partial",
-              [keys.category2.id]: "visible",
-              [keys.subCategory.id]: "hidden",
-            },
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: {
+            [keys.category.id]: "partial",
+            [keys.category2.id]: "visible",
+            [keys.subCategory.id]: "hidden",
+          },
+        });
       });
 
       it("hiding subCategory makes it hidden and parents partially visible", async function () {
@@ -2566,18 +2472,16 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), false);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: {
-              [keys.definitionContainerRoot.id]: "partial",
-              [keys.category.id]: "partial",
-              [keys.subCategory.id]: "hidden",
-            },
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: {
+            [keys.definitionContainerRoot.id]: "partial",
+            [keys.category.id]: "partial",
+            [keys.subCategory.id]: "hidden",
+          },
+        });
       });
 
       it("hiding subCategory makes it hidden and doesn't affect non related definition containers", async function () {
@@ -2609,20 +2513,18 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), false);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: {
-              [keys.definitionContainerRoot.id]: "visible",
-              [keys.categoryOfDefinitionContainer.id]: "visible",
-              [keys.subCategoryOfDefinitionContainer.id]: "visible",
-              [keys.category.id]: "partial",
-              [keys.subCategory.id]: "hidden",
-            },
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: {
+            [keys.definitionContainerRoot.id]: "visible",
+            [keys.categoryOfDefinitionContainer.id]: "visible",
+            [keys.subCategoryOfDefinitionContainer.id]: "visible",
+            [keys.category.id]: "partial",
+            [keys.subCategory.id]: "hidden",
+          },
+        });
       });
     });
 
@@ -2649,14 +2551,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
-        await waitFor(async () =>
-          validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: "all-visible",
-          }),
-        );
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: "all-visible",
+        });
       });
     });
   });
