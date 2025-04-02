@@ -6,6 +6,7 @@
 import { bufferTime, filter, firstValueFrom, mergeAll, mergeMap, ReplaySubject, Subject } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 
+import type { Id64String } from "@itwin/core-bentley";
 import type { Subscription } from "rxjs";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { CategoryId, ModelId } from "./Types.js";
@@ -13,9 +14,9 @@ import type { CategoryId, ModelId } from "./Types.js";
 type ModelCategoryKey = `${ModelId}-${CategoryId}`;
 
 /** @internal */
-export class ModelCategoryElementsCountCache {
+export class ModelCategoryElementsCountCache implements Disposable {
   private _cache = new Map<ModelCategoryKey, Subject<number>>();
-  private _requestsStream = new Subject<{ modelId: ModelId; categoryId: CategoryId }>();
+  private _requestsStream = new Subject<{ modelId: Id64String; categoryId: Id64String }>();
   private _subscription: Subscription;
 
   public constructor(
@@ -39,7 +40,7 @@ export class ModelCategoryElementsCountCache {
   }
 
   private async queryCategoryElementCounts(
-    input: Array<{ modelId: ModelId; categoryId: CategoryId }>,
+    input: Array<{ modelId: Id64String; categoryId: Id64String }>,
   ): Promise<Array<{ modelId: number; categoryId: number; elementsCount: number }>> {
     const reader = this._queryExecutor.createQueryReader(
       {
@@ -82,7 +83,7 @@ export class ModelCategoryElementsCountCache {
     this._subscription.unsubscribe();
   }
 
-  public async getCategoryElementsCount(modelId: ModelId, categoryId: CategoryId): Promise<number> {
+  public async getCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Promise<number> {
     const cacheKey: ModelCategoryKey = `${modelId}-${categoryId}`;
     let result = this._cache.get(cacheKey);
     if (result !== undefined) {

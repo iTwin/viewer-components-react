@@ -64,7 +64,7 @@ import type { CategoriesTreeHierarchyConfiguration } from "../CategoriesTreeDefi
 import type { CategoriesTreeIdsCache } from "./CategoriesTreeIdsCache.js";
 import type { FilteredTree } from "./FilteredTree.js";
 import type { IVisibilityChangeEventListener } from "../../common/internal/VisibilityChangeEventListener.js";
-import type { CategoryId, DefinitionContainerId, ElementId, ModelId, SubCategoryId } from "../../common/internal/Types.js";
+import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
 
 /** @alpha */
 interface GetCategoryVisibilityStatusProps {
@@ -279,7 +279,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
 
   private getFilteredNodeVisibility(props: GetFilteredNodeVisibilityProps) {
     return from(this.getVisibilityChangeTargets(props)).pipe(
-      mergeMap(({ definitionContainers, subCategories, models, categories, elements }) => {
+      mergeMap(({ definitionContainerIds: definitionContainers, subCategories, modelIds: models, categories, elements }) => {
         const observables = new Array<Observable<VisibilityStatus>>();
         if (definitionContainers?.size) {
           observables.push(
@@ -339,12 +339,12 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     );
   }
 
-  private getModelVisibilityStatus({ modelId }: { modelId: ModelId }): Observable<VisibilityStatus> {
+  private getModelVisibilityStatus({ modelId }: { modelId: Id64String }): Observable<VisibilityStatus> {
     const result = defer(() => {
       const viewport = this._props.viewport;
 
       if (!viewport.view.viewsModel(modelId)) {
-        return from(this._idsCache.getModelCategories(modelId)).pipe(
+        return from(this._idsCache.getModelCategoryIds(modelId)).pipe(
           mergeMap((categoryIds) => from(this._idsCache.getCategoriesModeledElements(modelId, categoryIds))),
           getSubModeledElementsVisibilityStatus({
             ignoreTooltips: true,
@@ -355,7 +355,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
         );
       }
 
-      return from(this._idsCache.getModelCategories(modelId)).pipe(
+      return from(this._idsCache.getModelCategoryIds(modelId)).pipe(
         mergeAll(),
         mergeMap((categoryId) => this.getCategoryDisplayStatus({ modelId, categoryIds: [categoryId], ignoreSubCategories: true, ignoreTooltip: true })),
         mergeVisibilityStatuses(
@@ -371,10 +371,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     return createVisibilityHandlerResult(this, { id: modelId }, result, undefined);
   }
 
-  private getDefinitionContainerDisplayStatus(props: {
-    definitionContainerIds: Array<DefinitionContainerId>;
-    ignoreTooltip?: boolean;
-  }): Observable<VisibilityStatus> {
+  private getDefinitionContainerDisplayStatus(props: { definitionContainerIds: Id64Array; ignoreTooltip?: boolean }): Observable<VisibilityStatus> {
     const result = defer(() => {
       return from(this._idsCache.getAllContainedCategories(props.definitionContainerIds)).pipe(
         mergeAll(),
@@ -391,11 +388,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     return createVisibilityHandlerResult(this, props, result, undefined);
   }
 
-  private getSubCategoryDisplayStatus(props: {
-    categoryId: CategoryId;
-    subCategoryIds: Array<SubCategoryId>;
-    ignoreTooltip?: boolean;
-  }): Observable<VisibilityStatus> {
+  private getSubCategoryDisplayStatus(props: { categoryId: Id64String; subCategoryIds: Id64Array; ignoreTooltip?: boolean }): Observable<VisibilityStatus> {
     const result = defer(() => {
       const { categoryId, subCategoryIds, ignoreTooltip } = props;
       const categoryOverrideResult = this.getCategoryVisibilityFromOverrides([categoryId], ignoreTooltip);
@@ -430,7 +423,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     return createVisibilityHandlerResult(this, props, result, undefined);
   }
 
-  private getCategoryVisibilityFromOverrides(categoryIds: Array<CategoryId>, ignoreTooltip?: boolean): VisibilityStatus | "none" {
+  private getCategoryVisibilityFromOverrides(categoryIds: Id64Array, ignoreTooltip?: boolean): VisibilityStatus | "none" {
     let showOverrides = 0;
     let hideOverrides = 0;
 
@@ -460,8 +453,8 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     categoryIds,
     ignoreTooltip,
   }: {
-    categoryIds: Array<CategoryId>;
-    modelId: ModelId;
+    categoryIds: Id64Array;
+    modelId: Id64String;
     ignoreTooltip?: boolean;
   }): VisibilityStatus {
     const viewport = this._props.viewport;
@@ -879,7 +872,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
 
   private changeFilteredNodeVisibility({ on, ...props }: ChangeFilteredNodeVisibilityProps) {
     return from(this.getVisibilityChangeTargets(props)).pipe(
-      mergeMap(({ definitionContainers, subCategories, models, categories, elements }) => {
+      mergeMap(({ definitionContainerIds: definitionContainers, subCategories, modelIds: models, categories, elements }) => {
         const observables = new Array<Observable<void>>();
         if (definitionContainers?.size) {
           observables.push(this.changeDefinitionContainerState({ definitionContainerIds: [...definitionContainers], on }));
@@ -943,7 +936,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
       if (!on) {
         viewport.changeModelDisplay(ids, false);
         return idsObs.pipe(
-          mergeMap(async (modelId) => ({ modelId, categoryIds: await this._idsCache.getModelCategories(modelId) })),
+          mergeMap(async (modelId) => ({ modelId, categoryIds: await this._idsCache.getModelCategoryIds(modelId) })),
           mergeMap(({ modelId, categoryIds }) => from(this._idsCache.getCategoriesModeledElements(modelId, categoryIds))),
           mergeMap((modeledElementIds) => this.changeModelState({ ids: modeledElementIds, on })),
         );
@@ -953,7 +946,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
         from(viewport.addViewedModels(ids)),
         idsObs.pipe(
           mergeMap((modelId) => {
-            return from(this._idsCache.getModelCategories(modelId)).pipe(
+            return from(this._idsCache.getModelCategoryIds(modelId)).pipe(
               mergeAll(),
               mergeMap((categoryId) => this.changeCategoryState({ categoryIds: [categoryId], modelId, on, ignoreSubCategories: true })),
             );
@@ -964,10 +957,10 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     return createVisibilityHandlerResult(this, props, result, undefined);
   }
 
-  private showModelWithoutAnyCategoriesOrElements(modelId: ModelId): Observable<void> {
+  private showModelWithoutAnyCategoriesOrElements(modelId: Id64String): Observable<void> {
     const viewport = this._props.viewport;
     return forkJoin({
-      categories: this._idsCache.getModelCategories(modelId),
+      categories: this._idsCache.getModelCategoryIds(modelId),
       alwaysDrawnElements: this._alwaysAndNeverDrawnElements.getAlwaysDrawnElements({ modelId }),
     }).pipe(
       mergeMap(async ({ categories, alwaysDrawnElements }) => {
@@ -1001,7 +994,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     }
   }
 
-  private changeSubCategoryState(props: { categoryId: CategoryId; subCategoryIds: Array<SubCategoryId>; on: boolean }): Observable<void> {
+  private changeSubCategoryState(props: { categoryId: Id64String; subCategoryIds: Id64Array; on: boolean }): Observable<void> {
     const result = defer(() => {
       return concat(
         // make sure parent category is enabled
@@ -1012,7 +1005,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     return createVisibilityHandlerResult(this, props, result, undefined);
   }
 
-  private changeDefinitionContainerState(props: { definitionContainerIds: Array<DefinitionContainerId>; on: boolean }): Observable<void> {
+  private changeDefinitionContainerState(props: { definitionContainerIds: Id64Array; on: boolean }): Observable<void> {
     const result = defer(() => {
       return from(this._idsCache.getAllContainedCategories(props.definitionContainerIds)).pipe(
         mergeAll(),
@@ -1118,7 +1111,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     return createVisibilityHandlerResult(this, props, result, undefined);
   }
 
-  private queueElementsVisibilityChange(elementIds: Set<ElementId>, on: boolean, visibleByDefault: boolean) {
+  private queueElementsVisibilityChange(elementIds: Id64Set, on: boolean, visibleByDefault: boolean) {
     const finishedSubject = new Subject<boolean>();
     // observable to track if visibility change is finished/cancelled
     const changeFinished = finishedSubject.pipe(

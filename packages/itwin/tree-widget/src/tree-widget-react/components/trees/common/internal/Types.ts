@@ -15,9 +15,6 @@ export type ModelId = Id64String;
 export type SubModelId = Id64String;
 
 /** @internal */
-export type ParentId = Id64String;
-
-/** @internal */
 export type CategoryId = Id64String;
 
 /** @internal */

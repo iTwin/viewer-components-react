@@ -35,7 +35,6 @@ import type { ClassGroupingHierarchyNode, ElementsGroupInfo, ModelsTreeHierarchy
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/ModelsTreeVisibilityHandler.js";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
-import type { ModelId, SubjectId } from "../common/internal/Types.js";
 
 type ModelsTreeFilteringError = "tooManyFilterMatches" | "tooManyInstancesFocused" | "unknownFilterError" | "unknownInstanceFocusError";
 
@@ -232,8 +231,8 @@ async function getModels(paths: HierarchyFilteringPath[], idsCache: ModelsTreeId
     return undefined;
   }
 
-  const targetModels = new Set<ModelId>();
-  const targetSubjects = new Set<SubjectId>();
+  const targetModelIds = new Set<Id64String>();
+  const targetSubjectIds = new Set<Id64String>();
   for (const path of paths) {
     const currPath = Array.isArray(path) ? path : path.path;
     for (let i = 0; i < currPath.length; i++) {
@@ -244,19 +243,19 @@ async function getModels(paths: HierarchyFilteringPath[], idsCache: ModelsTreeId
 
       // if paths end with subject need to get all models under that subject
       if (i === currPath.length - 1 && currStep.className === SUBJECT_CLASS_NAME) {
-        targetSubjects.add(currStep.id);
+        targetModelIds.add(currStep.id);
         break;
       }
 
       // collect all the models from the filtered path
       if (await classInspector.classDerivesFrom(currStep.className, GEOMETRIC_MODEL_3D_CLASS_NAME)) {
-        targetModels.add(currStep.id);
+        targetSubjectIds.add(currStep.id);
       }
     }
   }
 
-  const matchingModels = await idsCache.getSubjectModelIds([...targetSubjects]);
-  return [...targetModels, ...matchingModels];
+  const matchingModels = await idsCache.getSubjectModelIds([...targetSubjectIds]);
+  return [...targetModelIds, ...matchingModels];
 }
 
 function getEmptyTreeContentComponent(filter?: string, error?: ModelsTreeFilteringError, emptyTreeContent?: React.ReactNode) {
@@ -400,7 +399,7 @@ async function collectFocusedItems(loadFocusedItems: () => AsyncIterableIterator
     parentKey: InstancesNodeKey;
     parentType: "element" | "category";
     groupingNode: ClassGroupingHierarchyNode;
-    modelIds: Array<ModelId>;
+    modelIds: Array<Id64String>;
   }> = [];
   for await (const key of loadFocusedItems()) {
     if ("id" in key) {

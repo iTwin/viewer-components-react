@@ -30,6 +30,7 @@ import {
 import { createIModelAccess } from "../Common.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
 
+import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { CategoriesTreeHierarchyConfiguration } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import type { IModelConnection } from "@itwin/core-frontend";
 
@@ -586,18 +587,34 @@ describe("Categories tree", () => {
   });
 });
 
-function createCategoryTreeProvider(imodel: IModelConnection, viewType: "2d" | "3d", hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>) {
+function createCategoryTreeProvider(
+  imodel: IModelConnection,
+  viewType: "2d" | "3d",
+  hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>,
+): HierarchyProvider & Disposable {
   const imodelAccess = createIModelAccess(imodel);
-  return createIModelHierarchyProvider({
+  const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+  const hierarchyProvider = createIModelHierarchyProvider({
     imodelAccess,
     hierarchyDefinition: new CategoriesTreeDefinition({
       imodelAccess,
       viewType,
-      idsCache: new CategoriesTreeIdsCache(imodelAccess, viewType),
+      idsCache,
       hierarchyConfig: {
         ...defaultHierarchyConfiguration,
         ...hierarchyConfig,
       },
     }),
   });
+  return {
+    hierarchyChanged: hierarchyProvider.hierarchyChanged,
+    getNodes: (props) => hierarchyProvider.getNodes(props),
+    getNodeInstanceKeys: (props) => hierarchyProvider.getNodeInstanceKeys(props),
+    setFormatter: (formatter) => hierarchyProvider.setFormatter(formatter),
+    setHierarchyFilter: (props) => hierarchyProvider.setHierarchyFilter(props),
+    [Symbol.dispose]() {
+      hierarchyProvider[Symbol.dispose]();
+     idsCache[Symbol.dispose]();
+    },
+  };
 }

@@ -81,7 +81,7 @@ interface IdsCacheMockProps {
 
 export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCache {
   return sinon.createStubInstance(ModelsTreeIdsCache, {
-    getChildSubjectIds: sinon.stub<[string[]], Promise<string[]>>().callsFake(async (subjectIds) => {
+    getChildSubjectIds: sinon.stub<[Id64Array], Promise<Id64Array>>().callsFake(async (subjectIds) => {
       const obs = from(subjectIds).pipe(
         concatMap((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
         expand((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
@@ -90,7 +90,7 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
       return firstValueFrom(obs);
     }),
     getChildSubjectModelIds: sinon.stub(),
-    getSubjectModelIds: sinon.stub<[string[]], Promise<string[]>>().callsFake(async (subjectIds) => {
+    getSubjectModelIds: sinon.stub<[Id64Array], Promise<Id64Array>>().callsFake(async (subjectIds) => {
       const obs = from(subjectIds).pipe(
         expand((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
         concatMap((id) => props?.subjectModels?.get(id) ?? EMPTY),
@@ -98,7 +98,7 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
       );
       return firstValueFrom(obs);
     }),
-    getModelCategories: sinon.stub<[Id64String], Promise<Id64Array>>().callsFake(async (modelId) => {
+    getModelCategoryIds: sinon.stub<[Id64String], Promise<Id64Array>>().callsFake(async (modelId) => {
       return props?.modelCategories?.get(modelId) ?? [];
     }),
     getModelElementCount: sinon.stub<[Id64String], Promise<number>>().callsFake(async (modelId) => {

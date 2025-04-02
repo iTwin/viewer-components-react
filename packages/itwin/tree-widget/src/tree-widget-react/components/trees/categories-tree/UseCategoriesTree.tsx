@@ -214,8 +214,8 @@ async function getCategoriesFromPaths(
     return { categories: undefined };
   }
 
-  const rootFilteredElements = new Set<ElementId>();
-  const subModels = new Set<SubModelId>();
+  const rootFilteredElementIds = new Set<ElementId>();
+  const subModelIds = new Set<SubModelId>();
 
   const categories = new Map<CategoryId, Array<SubCategoryId>>();
   for (const path of paths) {
@@ -235,14 +235,14 @@ async function getCategoriesFromPaths(
         continue;
       }
       if (currentNode.className === elementClassName) {
-        rootFilteredElements.add(currentNode.id);
+        rootFilteredElementIds.add(currentNode.id);
         for (let j = i + 1; j < currPath.length; ++j) {
           const childNode = currPath[j];
           if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(childNode)) {
             continue;
           }
           if (childNode.className === modelsClassName) {
-            subModels.add(childNode.id);
+            subModelIds.add(childNode.id);
           }
         }
         break;
@@ -283,8 +283,8 @@ async function getCategoriesFromPaths(
       entry.push(subCategory.id);
     }
   }
-  const rootElementModelMap = await idsCache.getFilteredElementsModels([...rootFilteredElements]);
-  const models = [...subModels, ...new Set(rootElementModelMap.values())];
+  const rootElementModelMap = await idsCache.getFilteredElementsModels([...rootFilteredElementIds]);
+  const models = [...subModelIds, ...new Set(rootElementModelMap.values())];
   return {
     categories: [...categories.entries()].map(([categoryId, subCategoryIds]) => ({
       categoryId,

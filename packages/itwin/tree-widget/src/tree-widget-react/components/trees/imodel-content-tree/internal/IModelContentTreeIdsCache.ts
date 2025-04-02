@@ -13,25 +13,25 @@ import {
 } from "../../common/internal/ClassNameDefinitions.js";
 import { pushToMap } from "../../common/internal/Utils.js";
 
-import type { Id64Set, Id64String } from "@itwin/core-bentley";
+import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import type { CategoryId, ModelId, SubjectId } from "../../common/internal/Types.js";
+import type { ModelId, SubjectId } from "../../common/internal/Types.js";
 
 interface SubjectInfo {
-  parentSubject: Id64String | undefined;
+  parentSubjectId: Id64String | undefined;
   hideInHierarchy: boolean;
-  childSubjects: Id64Set;
-  childModels: Id64Set;
+  childSubjectIds: Id64Set;
+  childModelIds: Id64Set;
 }
 
 interface ModelInfo {
-  categories: Id64Set;
+  categoryIds: Id64Set;
 }
 
 /** @internal */
 export class IModelContentTreeIdsCache {
   private _subjectInfos: Promise<Map<SubjectId, SubjectInfo>> | undefined;
-  private _parentSubjectIds: Promise<Array<SubjectId>> | undefined; // the list should contain a subject id if its node should be shown as having children
+  private _parentSubjectIds: Promise<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
   private _modelInfos: Promise<Map<ModelId, ModelInfo>> | undefined;
 
   constructor(private _queryExecutor: LimitingECSqlQueryExecutor) {}
@@ -81,13 +81,13 @@ export class IModelContentTreeIdsCache {
           const result = new Map<SubjectId, SubjectInfo>();
           for await (const subject of this.querySubjects()) {
             const subjectInfo: SubjectInfo = {
-              parentSubject: subject.parentId,
+              parentSubjectId: subject.parentId,
               hideInHierarchy: subject.hideInHierarchy,
-              childSubjects: new Set(),
-              childModels: new Set(),
+              childSubjectIds: new Set(),
+              childModelIds: new Set(),
             };
             if (subject.targetPartitionId) {
-              subjectInfo.childModels.add(subject.targetPartitionId);
+              subjectInfo.childModelIds.add(subject.targetPartitionId);
             }
             result.set(subject.id, subjectInfo);
           }
@@ -102,11 +102,11 @@ export class IModelContentTreeIdsCache {
         })(),
       ]);
 
-      for (const [subjectId, { parentSubject: parentSubjectId }] of subjectInfos.entries()) {
+      for (const [subjectId, { parentSubjectId }] of subjectInfos.entries()) {
         if (parentSubjectId) {
           const parentSubjectInfo = subjectInfos.get(parentSubjectId);
           assert(!!parentSubjectInfo);
-          parentSubjectInfo.childSubjects.add(subjectId);
+          parentSubjectInfo.childSubjectIds.add(subjectId);
         }
       }
 
@@ -114,7 +114,7 @@ export class IModelContentTreeIdsCache {
         subjectIds.forEach((subjectId) => {
           const subjectInfo = subjectInfos.get(subjectId);
           assert(!!subjectInfo);
-          subjectInfo.childModels.add(partitionId);
+          subjectInfo.childModelIds.add(partitionId);
         });
       }
 
@@ -124,19 +124,19 @@ export class IModelContentTreeIdsCache {
   }
 
   /** Returns ECInstanceIDs of Subjects that either have direct Model or at least one child Subject with a Model. */
-  public async getParentSubjectIds(): Promise<Array<SubjectId>> {
+  public async getParentSubjectIds(): Promise<Id64Array> {
     this._parentSubjectIds ??= (async () => {
       const subjectInfos = await this.getSubjectInfos();
       const parentSubjectIds = new Set<SubjectId>();
       subjectInfos.forEach((subjectInfo, subjectId) => {
-        if (subjectInfo.childModels.size === 0 && subjectInfo.childSubjects.size === 0) {
+        if (subjectInfo.childModelIds.size === 0 && subjectInfo.childSubjectIds.size === 0) {
           return;
         }
         parentSubjectIds.add(subjectId);
-        let currParentId = subjectInfo.parentSubject;
+        let currParentId = subjectInfo.parentSubjectId;
         while (currParentId) {
           parentSubjectIds.add(currParentId);
-          currParentId = subjectInfos.get(currParentId)?.parentSubject;
+          currParentId = subjectInfos.get(currParentId)?.parentSubjectId;
         }
       });
       return [...parentSubjectIds];
@@ -148,7 +148,7 @@ export class IModelContentTreeIdsCache {
    * Returns child subjects of the specified parent subjects as they're displayed in the hierarchy - taking into
    * account `hideInHierarchy` flag.
    */
-  public async getChildSubjectIds(parentSubjectIds: Array<SubjectId>): Promise<Array<SubjectId>> {
+  public async getChildSubjectIds(parentSubjectIds: Id64Array): Promise<Id64Array> {
     const childSubjectIds = new Array<SubjectId>();
     const subjectInfos = await this.getSubjectInfos();
     parentSubjectIds.forEach((subjectId) => {
@@ -164,7 +164,7 @@ export class IModelContentTreeIdsCache {
   }
 
   /** Returns ECInstanceIDs of Models under specific parent Subjects as they are displayed in the hierarchy. */
-  public async getChildSubjectModelIds(parentSubjectIds: Array<SubjectId>): Promise<Array<ModelId>> {
+  public async getChildSubjectModelIds(parentSubjectIds: Id64Array): Promise<Id64Array> {
     const subjectInfos = await this.getSubjectInfos();
 
     const hiddenSubjectIds = new Array<SubjectId>();
@@ -181,12 +181,12 @@ export class IModelContentTreeIdsCache {
     const modelIds = new Array<ModelId>();
     [...parentSubjectIds, ...hiddenSubjectIds].forEach((subjectId) => {
       const subjectInfo = subjectInfos.get(subjectId);
-      subjectInfo && modelIds.push(...subjectInfo.childModels);
+      subjectInfo && modelIds.push(...subjectInfo.childModelIds);
     });
     return modelIds;
   }
 
-  private async *queryModelCategories(): AsyncIterableIterator<{ modelId: ModelId; categoryId: CategoryId }> {
+  private async *queryModelCategories(): AsyncIterableIterator<{ modelId: Id64String; categoryId: Id64String }> {
     const query = `
       SELECT Model.Id modelId, Category.Id categoryId
       FROM ${GEOMETRIC_ELEMENT_3D_CLASS_NAME}
@@ -205,13 +205,13 @@ export class IModelContentTreeIdsCache {
 
   private async getModelInfos() {
     this._modelInfos ??= (async () => {
-      const modelInfos = new Map<ModelId, { categories: Set<CategoryId>; elementCount: number }>();
+      const modelInfos = new Map<ModelId, { categoryIds: Id64Set; elementCount: number }>();
       for await (const { modelId, categoryId } of this.queryModelCategories()) {
         const entry = modelInfos.get(modelId);
         if (entry) {
-          entry.categories.add(categoryId);
+          entry.categoryIds.add(categoryId);
         } else {
-          modelInfos.set(modelId, { categories: new Set([categoryId]), elementCount: 0 });
+          modelInfos.set(modelId, { categoryIds: new Set([categoryId]), elementCount: 0 });
         }
       }
       return modelInfos;
@@ -219,20 +219,20 @@ export class IModelContentTreeIdsCache {
     return this._modelInfos;
   }
 
-  public async getModelCategories(modelIds: Array<ModelId>): Promise<Array<CategoryId>> {
+  public async getModelCategoryIds(modelIds: Id64Array): Promise<Id64Array> {
     const modelInfos = await this.getModelInfos();
-    return modelIds.map((modelId) => modelInfos.get(modelId)?.categories).flatMap((categories) => (categories ? [...categories] : []));
+    return modelIds.map((modelId) => modelInfos.get(modelId)?.categoryIds).flatMap((categories) => (categories ? [...categories] : []));
   }
 }
 
 function forEachChildSubject(
   subjectInfos: Map<SubjectId, SubjectInfo>,
   parentSubject: SubjectId | SubjectInfo,
-  cb: (childSubjectId: SubjectId, childSubjectInfo: SubjectInfo) => "break" | "continue",
+  cb: (childSubjectId: Id64String, childSubjectInfo: SubjectInfo) => "break" | "continue",
 ) {
   const parentSubjectInfo = typeof parentSubject === "string" ? subjectInfos.get(parentSubject) : parentSubject;
   parentSubjectInfo &&
-    parentSubjectInfo.childSubjects.forEach((childSubjectId) => {
+    parentSubjectInfo.childSubjectIds.forEach((childSubjectId) => {
       const childSubjectInfo = subjectInfos.get(childSubjectId)!;
       if (cb(childSubjectId, childSubjectInfo) === "break") {
         return;

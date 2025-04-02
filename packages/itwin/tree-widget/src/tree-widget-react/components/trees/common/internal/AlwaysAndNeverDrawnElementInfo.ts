@@ -29,34 +29,36 @@ import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { getClassesByView, pushToMap, setDifference } from "./Utils.js";
 
 import type { Observable, Subscription } from "rxjs";
-import type { BeEvent } from "@itwin/core-bentley";
+import type { BeEvent, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import type { CategoryId, ElementId, ModelId } from "./Types.js";
 
 interface ElementInfo {
-  elementId: ElementId;
-  modelId: ModelId;
-  categoryId: CategoryId;
+  elementId: Id64String;
+  modelId: Id64String;
+  categoryId: Id64String;
 }
 
 type CacheEntry = Map<ModelId, Map<CategoryId, Set<ElementId>>>;
 
 /** @internal */
 export interface ModelAlwaysOrNeverDrawnElementsQueryProps {
-  modelId: ModelId;
+  modelId: Id64String;
 }
 
 /** @internal */
 export interface CategoryAlwaysOrNeverDrawnElementsQueryProps {
-  modelId?: ModelId;
-  categoryIds: Array<CategoryId>;
+  modelId?: Id64String;
+  categoryIds: Id64Array;
 }
 
 /** @internal */
 export type AlwaysOrNeverDrawnElementsQueryProps = ModelAlwaysOrNeverDrawnElementsQueryProps | CategoryAlwaysOrNeverDrawnElementsQueryProps;
 
+/** @internal */
 export const SET_CHANGE_DEBOUNCE_TIME = 20;
 
+/** @internal */
 export class AlwaysAndNeverDrawnElementInfo implements Disposable {
   private _subscriptions: Subscription[];
   private _alwaysDrawn: Observable<CacheEntry>;
@@ -66,10 +68,11 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
   private _suppressors: Observable<number>;
   private _suppress = new Subject<boolean>();
   private _forceUpdate = new Subject<void>();
-  private _viewType: "2d" | "3d";
 
-  constructor(private readonly _viewport: Viewport) {
-    this._viewType = _viewport.view.is2d() ? "2d" : "3d";
+  constructor(
+    private readonly _viewport: Viewport,
+    private readonly _elementClassName?: string,
+  ) {
     this._alwaysDrawn = this.createCacheEntryObservable({
       event: this._viewport.onAlwaysDrawnChanged,
       getSet: () => this._viewport.alwaysDrawn,
@@ -210,9 +213,9 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
     );
   }
 
-  private queryElementInfo(elementIds: Array<ElementId>, requestId: string): Observable<ElementInfo> {
+  private queryElementInfo(elementIds: Id64Array, requestId: string): Observable<ElementInfo> {
     const executor = createECSqlQueryExecutor(this._viewport.iModel);
-    const { elementClass } = getClassesByView(this._viewType);
+    const { elementClass } = this._elementClassName ? { elementClass: this._elementClassName } : getClassesByView(this._viewport.view.is2d() ? "2d" : "3d");
     const reader = executor.createQueryReader(
       {
         ctes: [
@@ -233,7 +236,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
                 e.modelId,
                 p.Category.Id categoryId,
                 p.Parent.Id parentId
-              FROM${elementClass} p
+              FROM ${elementClass} p
               JOIN ElementInfo e ON p.ECInstanceId = e.parentId
             )
           `,

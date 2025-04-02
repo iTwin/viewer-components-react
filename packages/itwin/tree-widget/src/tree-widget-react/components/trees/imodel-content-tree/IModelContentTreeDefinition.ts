@@ -278,7 +278,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
     instanceFilter,
     viewType,
   }: DefineInstanceNodeChildHierarchyLevelProps & { viewType: "2d" | "3d" }): Promise<HierarchyLevelDefinition> {
-    const childCategoryIds = await this._idsCache.getModelCategories(modelIds);
+    const childCategoryIds = await this._idsCache.getModelCategoryIds(modelIds);
 
     const { categoryClass } = getClassesByView(viewType);
     const categoryFilterClauses = await this._selectQueryFactory.createFilterClauses({

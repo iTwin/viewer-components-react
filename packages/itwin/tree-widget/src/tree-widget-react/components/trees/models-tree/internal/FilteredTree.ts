@@ -7,10 +7,10 @@ import { assert } from "@itwin/core-bentley";
 import { HierarchyFilteringPath, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { CATEGORY_CLASS_NAME, MODEL_CLASS_NAME, SUBJECT_CLASS_NAME } from "../../common/internal/ClassNameDefinitions.js";
 
-import type { Id64String } from "@itwin/core-bentley";
+import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
-import type { CategoryId, ElementId, ModelId, SubjectId } from "../../common/internal/Types.js";
+import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
 
 interface FilteredTreeRootNode {
   children: Map<Id64String, FilteredTreeNode>;
@@ -28,13 +28,13 @@ interface GenericFilteredTreeNode extends BaseFilteredTreeNode {
 
 interface CategoryFilteredTreeNode extends BaseFilteredTreeNode {
   type: "category";
-  modelId: ModelId;
+  modelId: Id64String;
 }
 
 interface ElementFilteredTreeNode extends BaseFilteredTreeNode {
   type: "element";
-  modelId: ModelId;
-  categoryId: CategoryId;
+  modelId: Id64String;
+  categoryId: Id64String;
 }
 
 type FilteredTreeNode = GenericFilteredTreeNode | CategoryFilteredTreeNode | ElementFilteredTreeNode;
@@ -45,7 +45,7 @@ export interface FilteredTree {
 
 type CategoryKey = `${ModelId}-${CategoryId}`;
 
-function createCategoryKey(modelId: ModelId, categoryId: CategoryId): CategoryKey {
+function createCategoryKey(modelId: Id64String, categoryId: Id64String): CategoryKey {
   return `${modelId}-${categoryId}`;
 }
 
@@ -56,8 +56,8 @@ export function parseCategoryKey(key: CategoryKey) {
 }
 
 interface VisibilityChangeTargets {
-  subjects?: Set<SubjectId>;
-  models?: Set<ModelId>;
+  subjectIds?: Id64Set;
+  modelIds?: Id64Set;
   categories?: Set<CategoryKey>;
   elements?: Map<CategoryKey, Set<ElementId>>;
 }
@@ -167,10 +167,10 @@ function collectVisibilityChangeTargets(changeTargets: VisibilityChangeTargets, 
 function addTarget(filterTargets: VisibilityChangeTargets, node: FilteredTreeNode) {
   switch (node.type) {
     case "subject":
-      (filterTargets.subjects ??= new Set()).add(node.id);
+      (filterTargets.subjectIds ??= new Set()).add(node.id);
       return;
     case "model":
-      (filterTargets.models ??= new Set()).add(node.id);
+      (filterTargets.modelIds ??= new Set()).add(node.id);
       return;
     case "category":
       (filterTargets.categories ??= new Set()).add(createCategoryKey(node.modelId, node.id));

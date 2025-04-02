@@ -285,16 +285,16 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
       hierarchyDefinition.push(...(await this.createCategoriesQuery({ categories, instanceFilter })));
     }
     if (definitionContainers.length > 0) {
-      hierarchyDefinition.push(...(await this.createDefinitionContainersQuery({ definitionContainers, instanceFilter })));
+      hierarchyDefinition.push(...(await this.createDefinitionContainersQuery({ definitionContainerIds: definitionContainers, instanceFilter })));
     }
     return hierarchyDefinition;
   }
 
   private async createDefinitionContainersQuery({
-    definitionContainers,
+    definitionContainerIds,
     instanceFilter,
   }: {
-    definitionContainers: Array<DefinitionContainerId>;
+    definitionContainerIds: Id64Array;
     instanceFilter?: GenericInstanceFilter;
   }): Promise<HierarchyLevelDefinition> {
     const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
@@ -328,7 +328,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
               ${instanceFilterClauses.from} this
               ${instanceFilterClauses.joins}
             WHERE
-              this.ECInstanceId IN (${definitionContainers.join(", ")})
+              this.ECInstanceId IN (${definitionContainerIds.join(", ")})
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
         },
@@ -472,7 +472,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
       filter: instanceFilter,
       contentClass: { fullName: this._categoryElementClass, alias: "this" },
     });
-    const modelIds: Array<ModelId> = parentNode.extendedData?.isCategoryOfSubModel
+    const modelIds: Id64Array = parentNode.extendedData?.isCategoryOfSubModel
       ? parseIdsSelectorResult(parentNode.extendedData?.modelIds)
       : [...getDistinctMapValues(await this._idsCache.getCategoriesElementModels(categoryIds))];
 
@@ -800,45 +800,45 @@ function createInstanceKeyPathsFromTargetItems({
     reduce(
       (acc, { id, className }) => {
         if (className === categoryClass) {
-          acc.categories.push(id);
+          acc.categoryIds.push(id);
           return acc;
         }
         if (className === DEFINITION_CONTAINER_CLASS_NAME) {
-          acc.definitionContainers.push(id);
+          acc.definitionContainerIds.push(id);
           return acc;
         }
         if (className === SUB_CATEGORY_CLASS_NAME) {
           if (hierarchyConfig.hideSubCategories) {
             return acc;
           }
-          acc.subCategories.push(id);
+          acc.subCategoryIds.push(id);
           return acc;
         }
 
         if (!hierarchyConfig.showElements) {
           return acc;
         }
-        acc.elements.push(id);
+        acc.elementIds.push(id);
         return acc;
       },
       {
-        definitionContainers: new Array<DefinitionContainerId>(),
-        categories: new Array<CategoryId>(),
-        subCategories: new Array<SubCategoryId>(),
-        elements: new Array<ElementId>(),
+        definitionContainerIds: new Array<DefinitionContainerId>(),
+        categoryIds: new Array<CategoryId>(),
+        subCategoryIds: new Array<SubCategoryId>(),
+        elementIds: new Array<ElementId>(),
       },
     ),
     mergeMap((ids) => {
-      const elementsLength = ids.elements.length;
+      const elementsLength = ids.elementIds.length;
       return merge(
-        from(ids.definitionContainers).pipe(
+        from(ids.definitionContainerIds).pipe(
           mergeMap(async (id) => ({ path: await idsCache.getInstanceKeyPaths({ definitionContainerId: id }), options: { autoExpand: true } })),
         ),
-        from(ids.categories).pipe(mergeMap(async (id) => ({ path: await idsCache.getInstanceKeyPaths({ categoryId: id }), options: { autoExpand: true } }))),
-        from(ids.subCategories).pipe(
+        from(ids.categoryIds).pipe(mergeMap(async (id) => ({ path: await idsCache.getInstanceKeyPaths({ categoryId: id }), options: { autoExpand: true } }))),
+        from(ids.subCategoryIds).pipe(
           mergeMap(async (id) => ({ path: await idsCache.getInstanceKeyPaths({ subCategoryId: id }), options: { autoExpand: true } })),
         ),
-        from(ids.elements).pipe(
+        from(ids.elementIds).pipe(
           bufferCount(Math.ceil(elementsLength / Math.ceil(elementsLength / 5000))),
           releaseMainThreadOnItemsCount(1),
           mergeMap((block) => createGeometricElementInstanceKeyPaths(imodelAccess, idsCache, hierarchyConfig, viewType, block), 10),

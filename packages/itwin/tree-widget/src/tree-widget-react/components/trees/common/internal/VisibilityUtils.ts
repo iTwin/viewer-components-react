@@ -21,7 +21,7 @@ import type { Observable, OperatorFunction } from "rxjs";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { NonPartialVisibilityStatus, Visibility } from "./Tooltip.js";
 import type { VisibilityStatus } from "../UseHierarchyVisibility.js";
-import type { CategoryId, ElementId, ModelId, SubCategoryId, SubModelId } from "./Types.js";
+import type { ElementId, ModelId, SubModelId } from "./Types.js";
 import type { CategoryInfo } from "../CategoriesVisibilityUtils.js";
 
 function mergeVisibilities(obs: Observable<Visibility>): Observable<Visibility | "empty"> {
@@ -96,7 +96,7 @@ export function getSubModeledElementsVisibilityStatus({
 export function filterSubModeledElementIds({
   doesSubModelExist,
 }: {
-  doesSubModelExist: (elementId: ElementId) => Promise<boolean>;
+  doesSubModelExist: (elementId: Id64String) => Promise<boolean>;
 }): OperatorFunction<Array<ElementId>, Array<SubModelId>> {
   return (obs) => {
     return obs.pipe(
@@ -115,7 +115,7 @@ export function changeElementStateNoChildrenOperator(props: {
   isDisplayedByDefault: boolean;
   viewport: Viewport;
 }): OperatorFunction<string, void> {
-  return (elementIds: Observable<ElementId>) => {
+  return (elementIds: Observable<Id64String>) => {
     const { on, isDisplayedByDefault } = props;
     const isAlwaysDrawnExclusive = props.viewport.isAlwaysDrawnExclusive;
     return elementIds.pipe(
@@ -199,7 +199,7 @@ export function getVisibilityFromAlwaysAndNeverDrawnElementsImpl(
 
 /** @internal */
 export function getElementOverriddenVisibility(props: {
-  elementId: ElementId;
+  elementId: Id64String;
   ignoreTooltip?: boolean;
   viewport: Viewport;
   tooltips: {
@@ -295,19 +295,19 @@ export function getElementVisibility(
  * @internal
  */
 export async function toggleAllCategories(viewport: Viewport, display: boolean) {
-  const ids = await getCategories(viewport);
-  if (ids.length === 0) {
+  const categoryIds = await getCategoryIds(viewport);
+  if (categoryIds.length === 0) {
     return;
   }
 
-  await enableCategoryDisplay(viewport, ids, display);
+  await enableCategoryDisplay(viewport, categoryIds, display);
 }
 
 /**
  * Gets ids of all categories from specified imodel and viewport.
  * @internal
  */
-async function getCategories(viewport: Viewport): Promise<Array<CategoryId>> {
+async function getCategoryIds(viewport: Viewport): Promise<Id64Array> {
   const categories = await loadCategoriesFromViewport(viewport);
   return categories.map((category) => category.categoryId);
 }
@@ -316,21 +316,21 @@ async function getCategories(viewport: Viewport): Promise<Array<CategoryId>> {
  * Changes category display in the viewport.
  * @internal
  */
-export async function enableCategoryDisplay(viewport: Viewport, ids: Array<CategoryId>, enabled: boolean, enableAllSubCategories = true) {
-  viewport.changeCategoryDisplay(ids, enabled, enableAllSubCategories);
+export async function enableCategoryDisplay(viewport: Viewport, categoryIds: Id64Array, enabled: boolean, enableAllSubCategories = true) {
+  viewport.changeCategoryDisplay(categoryIds, enabled, enableAllSubCategories);
 
   // remove category overrides per model
   const modelsContainingOverrides = new Array<ModelId>();
   for (const ovr of viewport.perModelCategoryVisibility) {
-    if (ids.findIndex((id) => id === ovr.categoryId) !== -1) {
+    if (categoryIds.findIndex((id) => id === ovr.categoryId) !== -1) {
       modelsContainingOverrides.push(ovr.modelId);
     }
   }
-  viewport.perModelCategoryVisibility.setOverride(modelsContainingOverrides, ids, PerModelCategoryVisibility.Override.None);
+  viewport.perModelCategoryVisibility.setOverride(modelsContainingOverrides, categoryIds, PerModelCategoryVisibility.Override.None);
 
   // changeCategoryDisplay only enables subcategories, it does not disabled them. So we must do that ourselves.
   if (false === enabled) {
-    (await viewport.iModel.categories.getCategoryInfo(ids)).forEach((categoryInfo) => {
+    (await viewport.iModel.categories.getCategoryInfo(categoryIds)).forEach((categoryInfo) => {
       categoryInfo.subCategories.forEach((value) => enableSubCategoryDisplay(viewport, value.id, false));
     });
   }
@@ -340,8 +340,8 @@ export async function enableCategoryDisplay(viewport: Viewport, ids: Array<Categ
  * Changes subcategory display in the viewport
  * @internal
  */
-export function enableSubCategoryDisplay(viewport: Viewport, key: SubCategoryId, enabled: boolean) {
-  viewport.changeSubCategoryDisplay(key, enabled);
+export function enableSubCategoryDisplay(viewport: Viewport, subCategoryId: Id64String, enabled: boolean) {
+  viewport.changeSubCategoryDisplay(subCategoryId, enabled);
 }
 
 /** @internal */

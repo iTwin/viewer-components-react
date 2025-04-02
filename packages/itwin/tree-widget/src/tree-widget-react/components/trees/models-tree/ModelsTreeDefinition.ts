@@ -50,7 +50,7 @@ import type {
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
 import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
-import type { CategoryId, ElementId, ModelId, SubjectId } from "../common/internal/Types.js";
+import type { ElementId } from "../common/internal/Types.js";
 
 /** @beta */
 export type ClassGroupingHierarchyNode = GroupingHierarchyNode & { key: ClassGroupingNodeKey };
@@ -731,35 +731,35 @@ async function createInstanceKeyPathsFromTargetItems({
       reduce(
         (acc, value) => {
           if (value.type === 1) {
-            acc.subjects.push(value.key);
+            acc.subjectIds.push(value.key);
             return acc;
           }
           if (value.type === 2) {
-            acc.models.push(value.key);
+            acc.modelIds.push(value.key);
             return acc;
           }
           if (value.type === 3) {
-            acc.categories.push(value.key);
+            acc.categoryIds.push(value.key);
             return acc;
           }
-          acc.elements.push(value.key);
+          acc.elementIds.push(value.key);
           return acc;
         },
         {
-          models: new Array<ModelId>(),
-          categories: new Array<CategoryId>(),
-          subjects: new Array<SubjectId>(),
-          elements: new Array<ElementId | ElementsGroupInfo>(),
+          modelIds: new Array<Id64String>(),
+          categoryIds: new Array<Id64String>(),
+          subjectIds: new Array<Id64String>(),
+          elementIds: new Array<Id64String | ElementsGroupInfo>(),
         },
       ),
       switchMap(async (ids) => {
-        const elementsLength = ids.elements.length;
+        const elementsLength = ids.elementIds.length;
         return collect(
           merge(
-            from(ids.subjects).pipe(mergeMap((id) => from(idsCache.createSubjectInstanceKeysPath(id)))),
-            from(ids.models).pipe(mergeMap((id) => from(idsCache.createModelInstanceKeyPaths(id)).pipe(mergeAll()))),
-            from(ids.categories).pipe(mergeMap((id) => from(idsCache.createCategoryInstanceKeyPaths(id)).pipe(mergeAll()))),
-            from(ids.elements).pipe(
+            from(ids.subjectIds).pipe(mergeMap((id) => from(idsCache.createSubjectInstanceKeysPath(id)))),
+            from(ids.modelIds).pipe(mergeMap((id) => from(idsCache.createModelInstanceKeyPaths(id)).pipe(mergeAll()))),
+            from(ids.categoryIds).pipe(mergeMap((id) => from(idsCache.createCategoryInstanceKeyPaths(id)).pipe(mergeAll()))),
+            from(ids.elementIds).pipe(
               bufferCount(Math.ceil(elementsLength / Math.ceil(elementsLength / 5000))),
               releaseMainThreadOnItemsCount(1),
               mergeMap((block) => createGeometricElementInstanceKeyPaths(imodelAccess, idsCache, hierarchyConfig, block), 10),
