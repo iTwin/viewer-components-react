@@ -86,9 +86,9 @@ type CategoriesTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContex
 // @beta
 interface CategoryInfo {
     // (undocumented)
-    categoryId: string;
+    categoryId: Id64String;
     // (undocumented)
-    subCategoryIds?: string[];
+    subCategoryIds?: Id64Array;
 }
 
 // @beta (undocumented)
