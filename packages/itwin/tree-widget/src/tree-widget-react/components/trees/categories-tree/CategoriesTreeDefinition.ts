@@ -17,7 +17,7 @@ import {
 import { createIdsSelector, getClassesByView, getDistinctMapValues, parseIdsSelectorResult, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { Id64Array } from "@itwin/core-bentley";
 import type { Observable } from "rxjs";
 import type {
   DefineHierarchyLevelProps,
@@ -854,7 +854,7 @@ function createGeometricElementInstanceKeyPaths(
   idsCache: CategoriesTreeIdsCache,
   hierarchyConfig: CategoriesTreeHierarchyConfiguration,
   viewType: "2d" | "3d",
-  targetItems: Array<Id64String>,
+  targetItems: Id64Array,
 ): Observable<HierarchyFilteringPath> {
   const separator = ";";
   const { categoryClass, elementClass, modelClass } = getClassesByView(viewType);

@@ -27,7 +27,7 @@ import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTre
 
 import type { ReactNode } from "react";
 import type { GroupingHierarchyNode, HierarchyFilteringPath, InstancesNodeKey } from "@itwin/presentation-hierarchies";
-import type { Id64String } from "@itwin/core-bentley";
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
@@ -243,13 +243,13 @@ async function getModels(paths: HierarchyFilteringPath[], idsCache: ModelsTreeId
 
       // if paths end with subject need to get all models under that subject
       if (i === currPath.length - 1 && currStep.className === SUBJECT_CLASS_NAME) {
-        targetModelIds.add(currStep.id);
+        targetSubjectIds.add(currStep.id);
         break;
       }
 
       // collect all the models from the filtered path
       if (await classInspector.classDerivesFrom(currStep.className, GEOMETRIC_MODEL_3D_CLASS_NAME)) {
-        targetSubjectIds.add(currStep.id);
+        targetModelIds.add(currStep.id);
       }
     }
   }
@@ -399,7 +399,7 @@ async function collectFocusedItems(loadFocusedItems: () => AsyncIterableIterator
     parentKey: InstancesNodeKey;
     parentType: "element" | "category";
     groupingNode: ClassGroupingHierarchyNode;
-    modelIds: Array<Id64String>;
+    modelIds: Id64Array;
   }> = [];
   for await (const key of loadFocusedItems()) {
     if ("id" in key) {
