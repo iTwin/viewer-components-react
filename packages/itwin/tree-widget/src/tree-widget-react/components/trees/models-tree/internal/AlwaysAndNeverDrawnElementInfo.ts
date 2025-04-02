@@ -29,22 +29,24 @@ import { ELEMENT_3D_CLASS_NAME } from "../../common/internal/ClassNames.js";
 import { pushToMap } from "../../common/Utils.js";
 
 import type { Observable, Subscription } from "rxjs";
-import type { BeEvent } from "@itwin/core-bentley";
+import type { BeEvent, Id64Array } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
-import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
+import type { CategoryId, ElementId, ModelId, ParentId } from "../../common/internal/Types.js";
 
 interface ElementInfo {
   elementId: ElementId;
   modelId: ModelId;
   categoryId: CategoryId;
+  parentElementId?: ElementId;
 }
 
-type CacheEntry = Map<ModelId, Map<CategoryId, Set<ElementId>>>;
+type CacheEntry = Map<ModelId, Map<ParentId | undefined, Map<CategoryId, Set<ElementId>>>>;
 
 /** @internal */
 export interface AlwaysOrNeverDrawnElementsQueryProps {
   modelId: ModelId;
   categoryId?: CategoryId;
+  parentElementIds?: Id64Array;
 }
 
 /** @internal */
@@ -94,16 +96,34 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
     this._suppress.next(false);
   }
 
-  public getElements({ setType, modelId, categoryId }: { setType: "always" | "never" } & AlwaysOrNeverDrawnElementsQueryProps): Observable<Set<ElementId>> {
+  public getElements({
+    setType,
+    modelId,
+    categoryId,
+    parentElementIds,
+  }: { setType: "always" | "never" } & AlwaysOrNeverDrawnElementsQueryProps): Observable<Set<ElementId>> {
     const cache = setType === "always" ? this._alwaysDrawn : this._neverDrawn;
     const getElements = categoryId
       ? (entry: CacheEntry | undefined): Set<ElementId> => {
-          return entry?.get(modelId)?.get(categoryId) ?? new Set();
+          const parentElementMap = entry?.get(modelId);
+          if (!parentElementMap) {
+            return new Set();
+          }
+
+          for (const parentElementId of parentElementIds ?? [undefined]) {
+            const elements = parentElementMap.get(parentElementId)?.get(categoryId);
+            if (elements) {
+              return elements;
+            }
+          }
+          return new Set();
         }
       : (entry: CacheEntry | undefined) => {
-          const categoriesMap = entry?.get(modelId);
+          const parentElementMap = entry?.get(modelId);
           const elements = new Set<ElementId>();
-          categoriesMap?.forEach((elementIds) => elementIds.forEach((id) => elements.add(id)));
+          parentElementMap?.forEach((categoriesMap) => {
+            categoriesMap.forEach((elementIds) => elementIds.forEach((id) => elements.add(id)));
+          });
           return elements;
         };
 
@@ -161,16 +181,21 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
   private queryAlwaysOrNeverDrawnElementInfo(set: Set<ElementId> | undefined, requestId: string): Observable<CacheEntry> {
     const elementInfo = set?.size ? this.queryElementInfo([...set], requestId) : EMPTY;
     return elementInfo.pipe(
-      reduce((state, { categoryId, modelId, elementId }) => {
-        let categoryMap = state.get(modelId);
+      reduce((state, { categoryId, modelId, elementId, parentElementId }) => {
+        let parentElementMap = state.get(modelId);
+        if (!parentElementMap) {
+          parentElementMap = new Map();
+          state.set(modelId, parentElementMap);
+        }
+        let categoryMap = parentElementMap.get(parentElementId);
         if (!categoryMap) {
           categoryMap = new Map();
-          state.set(modelId, categoryMap);
+          parentElementMap.set(parentElementId, categoryMap);
         }
 
         pushToMap(categoryMap, categoryId, elementId);
         return state;
-      }, new Map<ModelId, Map<CategoryId, Set<ElementId>>>()),
+      }, new Map<ModelId, Map<ParentId | undefined, Map<CategoryId, Set<ElementId>>>>()),
     );
   }
 
@@ -182,10 +207,10 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
           SELECT
             ECInstanceId elementId,
             Model.Id modelId,
-            Category.Id categoryId
+            Category.Id categoryId,
+            Parent.Id parentElementId
           FROM ${ELEMENT_3D_CLASS_NAME}
           WHERE InVirtualSet(?, ECInstanceId)
-          AND Parent.Id IS NULL
         `,
         bindings: [{ type: "idset", value: elementIds }],
       },
@@ -199,6 +224,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
         elementId: row.elementId,
         modelId: row.modelId,
         categoryId: row.categoryId,
+        parentElementId: row.parentElementId ? row.parentElementId : undefined,
       })),
     );
   }

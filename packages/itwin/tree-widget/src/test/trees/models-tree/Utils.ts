@@ -20,7 +20,7 @@ import type {
   HierarchyProvider,
   NonGroupingHierarchyNode,
 } from "@itwin/presentation-hierarchies";
-import type { ModelParentMap } from "../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
+import type { ParentElementMap } from "../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import type { CategoryId, ElementId, ModelId, ParentId, SubjectId } from "../../../tree-widget-react/components/trees/common/internal/Types.js";
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
@@ -72,7 +72,7 @@ interface IdsCacheMockProps {
   subjectModels?: Map<SubjectId, Array<ModelId>>;
   modelCategories?: Map<ModelId, Array<{ categoryId: CategoryId; isAtRoot: boolean }>>;
   categoryElements?: Map<CategoryId, Array<ElementId>>;
-  childrenInfo?: Map<ModelId, ModelParentMap>;
+  childrenInfo?: Map<ModelId, ParentElementMap>;
 }
 
 export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCache {
@@ -105,23 +105,15 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
     getAllModelCategories: sinon.stub<[ModelId], Promise<Array<CategoryId>>>().callsFake(async (modelId) => {
       return props?.modelCategories?.get(modelId)?.map(({ categoryId }) => categoryId) ?? [];
     }),
-    getElementRootCategory: sinon.stub<[{ modelId: ModelId; childElementId: ElementId }], Promise<CategoryId | undefined>>().callsFake(async () => {
-      return undefined;
-    }),
-    getElementsChildrenInfo: sinon
-      .stub<[{ modelId: ModelId; parentElementIds: Set<ElementId> }], Promise<Map<CategoryId, Map<ElementId, boolean>>>>()
-      .callsFake(async () => {
-        return new Map();
-      }),
-    getAllChildrenInfo: sinon.stub<[], Promise<Map<ModelId, ModelParentMap>>>().callsFake(async () => props?.childrenInfo ?? new Map()),
-    getCategoryChildrenInfo: sinon
-      .stub<[{ categoryId: CategoryId; modelId: ModelId; parentElementIds: Array<ParentId> }], Promise<Map<ElementId, boolean>>>()
-      .callsFake(async () => {
-        return new Map();
-      }),
-    getRootCategoryElementsCount: sinon.stub<[ModelId, CategoryId], Promise<number>>().callsFake(async (_, categoryId) => {
-      return props?.categoryElements?.get(categoryId)?.length ?? 0;
-    }),
+    getCategoryChildCategories: sinon
+      .stub<[{ modelId: ModelId; categoryId: CategoryId; parentElementIds?: Array<ElementId> }], Promise<Map<ParentId, Set<CategoryId>>>>()
+      .callsFake(async () => new Map()),
+    getCategoryElementsCount: sinon
+      .stub<[ModelId, CategoryId, Array<ElementId> | undefined], Promise<number>>()
+      .callsFake(async (_, categoryId) => props?.categoryElements?.get(categoryId)?.length ?? 0),
+    getElementsChildCategories: sinon
+      .stub<[{ modelId: ModelId; elementIds: Set<ElementId> }], Promise<Map<ParentId, Set<CategoryId>>>>()
+      .callsFake(async () => new Map()),
     hasSubModel: sinon.stub<[Id64String], Promise<boolean>>().callsFake(async () => false),
     getCategoriesModeledElements: sinon.stub<[Id64String, Id64Array], Promise<Id64Array>>().callsFake(async () => []),
   });

@@ -28,8 +28,8 @@ export function createVisibilityChangeEventListener(
     if (pendingVisibilityChange || suppressChangeEvents > 0) {
       return;
     }
-    pendingVisibilityChange = setTimeout(async () => {
-      await childrenVisibilityCache?.clearChangedValues();
+    pendingVisibilityChange = setTimeout(() => {
+      childrenVisibilityCache?.clearChangedValues();
       onVisibilityChange.raiseEvent();
       pendingVisibilityChange = undefined;
     });

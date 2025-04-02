@@ -25,9 +25,9 @@ describe("ModelsTreeIdsCache", () => {
       return [{ modelId, categoryId, elementsCount: elementIds.length }];
     });
     using cache = createIdsCache(stub);
-    await expect(cache.getRootCategoryElementsCount(modelId, categoryId)).to.eventually.eq(elementIds.length);
+    await expect(cache.getCategoryElementsCount(modelId, categoryId)).to.eventually.eq(elementIds.length);
     expect(stub).to.have.callCount(1);
-    await expect(cache.getRootCategoryElementsCount(modelId, categoryId)).to.eventually.eq(elementIds.length);
+    await expect(cache.getCategoryElementsCount(modelId, categoryId)).to.eventually.eq(elementIds.length);
     expect(stub).to.have.callCount(1);
   });
 });
