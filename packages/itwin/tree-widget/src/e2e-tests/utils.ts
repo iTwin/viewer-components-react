@@ -165,9 +165,8 @@ export async function expandNode(page: Page, node: Locator) {
   await page.keyboard.press("ArrowRight");
 }
 
-export async function openErrorDropdown(page: Page, treeWidget: Locator, errorAmount: number = 1) {
+export async function getErrorDropdown(treeWidget: Locator, errorAmount: number = 1) {
   const dropdown = treeWidget.getByRole("button", { name: `${errorAmount} issues found` });
   await dropdown.waitFor();
-  await takeScreenshot(page, treeWidget, { resetScroll: true });
-  await dropdown.click();
+  return dropdown;
 }

@@ -7,10 +7,10 @@ import type { Locator } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import {
   expandNode,
+  getErrorDropdown,
   initTreeWidgetTest,
   locateInstanceFilter,
   locateNode,
-  openErrorDropdown,
   selectOperatorInDialog,
   selectPropertyInDialog,
   selectTree,
@@ -78,8 +78,9 @@ test.describe("Categories tree", () => {
     await page.getByRole("button", { name: "Apply" }).click();
 
     // wait for message to appear
-    await openErrorDropdown(page, treeWidget);
-
+    const errorDropdown = await getErrorDropdown(treeWidget);
+    await takeScreenshot(page, treeWidget, { resetScroll: true });
+    await errorDropdown.click();
     await takeScreenshot(page, treeWidget, { resetScroll: true });
   });
 
