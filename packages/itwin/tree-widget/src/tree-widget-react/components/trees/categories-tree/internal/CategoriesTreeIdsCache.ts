@@ -3,18 +3,20 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { DEFINITION_CONTAINER_CLASS_NAME, MODEL_CLASS_NAME, SUB_CATEGORY_CLASS_NAME } from "../../common/internal/ClassNameDefinitions.js";
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
-import { getDistinctMapValues } from "../../common/internal/Utils.js";
-import { DEFINITION_CONTAINER_CLASS, SUB_CATEGORY_CLASS } from "./ClassNameDefinitions.js";
+import { getClassesByView, getDistinctMapValues } from "../../common/internal/Utils.js";
 
+import type { CategoryId, DefinitionContainerId, ElementId, ModelId, SubCategoryId } from "../../common/internal/Types.js";
 import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
+
 interface DefinitionContainerInfo {
   modelId: Id64String;
   parentDefinitionContainerExists: boolean;
   childCategories: CategoryInfo[];
-  childDefinitionContainers: Id64Array;
+  childDefinitionContainerIds: Id64Array;
 }
 
 interface CategoriesInfo {
@@ -24,7 +26,7 @@ interface CategoriesInfo {
 
 /** @internal */
 export interface CategoryInfo {
-  id: Id64String;
+  id: CategoryId;
   subCategoryChildCount: number;
 }
 
@@ -32,55 +34,59 @@ interface SubCategoryInfo {
   categoryId: Id64String;
 }
 
+type ModelCategoryKey = `${ModelId}-${CategoryId}`;
+
 /** @internal */
 export class CategoriesTreeIdsCache implements Disposable {
-  private _definitionContainersInfo: Promise<Map<Id64String, DefinitionContainerInfo>> | undefined;
-  private _modelsCategoriesInfo: Promise<Map<Id64String, CategoriesInfo>> | undefined;
-  private _elementModelsCategories: Promise<Map<Id64String, { categories: Id64Set; isSubModel: boolean; isModelPrivate: boolean }>> | undefined;
-  private _subCategoriesInfo: Promise<Map<Id64String, SubCategoryInfo>> | undefined;
+  private _definitionContainersInfo: Promise<Map<DefinitionContainerId, DefinitionContainerInfo>> | undefined;
+  private _modelsCategoriesInfo: Promise<Map<ModelId, CategoriesInfo>> | undefined;
+  private _elementModelsCategories: Promise<Map<ModelId, { categoryIds: Id64Set; isSubModel: boolean; isModelPrivate: boolean }>> | undefined;
+  private _subCategoriesInfo: Promise<Map<SubCategoryId, SubCategoryInfo>> | undefined;
   private readonly _categoryElementCounts: ModelCategoryElementsCountCache;
-  private _modelWithCategoryModeledElements: Promise<Map<string, Id64Set>> | undefined;
+  private _modelWithCategoryModeledElements: Promise<Map<ModelCategoryKey, Set<ElementId>>> | undefined;
   private _categoryClass: string;
   private _categoryElementClass: string;
+  private _categoryModelClass: string;
   private _isDefinitionContainerSupported: Promise<boolean> | undefined;
-  private _filteredElementsModels: Promise<Map<Id64String, Id64String>> | undefined;
+  private _filteredElementsModels: Promise<Map<ElementId, ModelId>> | undefined;
 
   constructor(
     private _queryExecutor: LimitingECSqlQueryExecutor,
     viewType: "3d" | "2d",
   ) {
-    const { categoryClass, categoryElementClass } = getClassesByView(viewType);
+    const { categoryClass, elementClass, modelClass } = getClassesByView(viewType);
     this._categoryClass = categoryClass;
-    this._categoryElementClass = categoryElementClass;
-    this._categoryElementCounts = new ModelCategoryElementsCountCache(_queryExecutor, categoryElementClass);
+    this._categoryElementClass = elementClass;
+    this._categoryModelClass = modelClass;
+    this._categoryElementCounts = new ModelCategoryElementsCountCache(_queryExecutor, elementClass);
   }
 
   public [Symbol.dispose]() {
     this._categoryElementCounts[Symbol.dispose]();
   }
 
-  private async *queryFilteredElementsModels(filteredElements: Id64Array): AsyncIterableIterator<{
+  private async *queryFilteredElementsModels(filteredElementIds: Id64Array): AsyncIterableIterator<{
     modelId: Id64String;
-    id: Id64String;
+    id: ElementId;
   }> {
     const query = `
       SELECT Model.Id modelId, ECInstanceId id
       FROM ${this._categoryElementClass}
-      WHERE ECInstanceId IN (${filteredElements.join(", ")})
+      WHERE ECInstanceId IN (${filteredElementIds.join(", ")})
     `;
     for await (const row of this._queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
       yield { modelId: row.modelId, id: row.id };
     }
   }
 
-  public async getFilteredElementsModels(filteredElements: Id64Array) {
-    if (filteredElements.length === 0) {
-      return new Map<Id64String, Id64String>();
+  public async getFilteredElementsModels(filteredElementIds: Id64Array) {
+    if (filteredElementIds.length === 0) {
+      return new Map<ElementId, ModelId>();
     }
 
     this._filteredElementsModels ??= (async () => {
       const filteredElementsModels = new Map();
-      for await (const { modelId, id } of this.queryFilteredElementsModels(filteredElements)) {
+      for await (const { modelId, id } of this.queryFilteredElementsModels(filteredElementIds)) {
         filteredElementsModels.set(id, modelId);
       }
       return filteredElementsModels;
@@ -92,10 +98,14 @@ export class CategoriesTreeIdsCache implements Disposable {
     this._filteredElementsModels = undefined;
   }
 
-  private async *queryElementModelCategories() {
+  private async *queryElementModelCategories(): AsyncIterableIterator<{
+    modelId: Id64String;
+    categoryId: Id64String;
+    isModelPrivate: boolean;
+  }> {
     const query = `
       SELECT this.Model.Id modelId, this.Category.Id categoryId, m.IsPrivate isModelPrivate
-      FROM BisCore.Model m
+      FROM ${this._categoryModelClass} m
       JOIN ${this._categoryElementClass} this ON m.ECInstanceId = this.Model.Id
       WHERE this.Parent.Id IS NULL
       GROUP BY modelId, categoryId, isModelPrivate
@@ -109,7 +119,7 @@ export class CategoriesTreeIdsCache implements Disposable {
   }
 
   private async *queryCategories(): AsyncIterableIterator<{
-    id: Id64String;
+    id: CategoryId;
     modelId: Id64String;
     parentDefinitionContainerExists: boolean;
     subCategoryChildCount: number;
@@ -123,7 +133,7 @@ export class CategoriesTreeIdsCache implements Disposable {
         ${
           isDefinitionContainerSupported
             ? `
-            IIF(this.Model.Id IN (SELECT dc.ECInstanceId FROM ${DEFINITION_CONTAINER_CLASS} dc),
+            IIF(this.Model.Id IN (SELECT dc.ECInstanceId FROM ${DEFINITION_CONTAINER_CLASS_NAME} dc),
               true,
               false
             )`
@@ -131,8 +141,8 @@ export class CategoriesTreeIdsCache implements Disposable {
         } parentDefinitionContainerExists
       FROM
         ${this._categoryClass} this
-        JOIN ${SUB_CATEGORY_CLASS} sc ON sc.Parent.Id = this.ECInstanceId
-        JOIN BisCore.Model m ON m.ECInstanceId = this.Model.Id
+        JOIN ${SUB_CATEGORY_CLASS_NAME} sc ON sc.Parent.Id = this.ECInstanceId
+        JOIN ${MODEL_CLASS_NAME} m ON m.ECInstanceId = this.Model.Id
       WHERE
         NOT this.IsPrivate
         AND (NOT m.IsPrivate OR m.ECClassId IS (BisCore.DictionaryModel))
@@ -173,7 +183,7 @@ export class CategoriesTreeIdsCache implements Disposable {
     return false;
   }
 
-  private async *queryDefinitionContainers(): AsyncIterableIterator<{ id: Id64String; modelId: Id64String }> {
+  private async *queryDefinitionContainers(): AsyncIterableIterator<{ id: DefinitionContainerId; modelId: Id64String }> {
     // DefinitionModel ECInstanceId will always be the same as modeled DefinitionContainer ECInstanceId, if this wasn't the case, we would need to do something like:
     //  JOIN BisCore.DefinitionModel dm ON dm.ECInstanceId = ${modelIdAccessor}
     //  JOIN BisCore.DefinitionModelBreaksDownDefinitionContainer dr ON dr.SourceECInstanceId = dm.ECInstanceId
@@ -186,7 +196,7 @@ export class CategoriesTreeIdsCache implements Disposable {
             dc.ECInstanceId,
             dc.Model.Id
           FROM
-            ${DEFINITION_CONTAINER_CLASS} dc
+            ${DEFINITION_CONTAINER_CLASS_NAME} dc
           WHERE
             dc.ECInstanceId IN (SELECT c.Model.Id FROM ${this._categoryClass} c WHERE NOT c.IsPrivate AND EXISTS (SELECT 1 FROM ${this._categoryElementClass} e WHERE e.Category.Id = c.ECInstanceId))
             AND NOT dc.IsPrivate
@@ -198,7 +208,7 @@ export class CategoriesTreeIdsCache implements Disposable {
             pdc.Model.Id
           FROM
             ${DEFINITION_CONTAINERS_CTE} cdc
-            JOIN ${DEFINITION_CONTAINER_CLASS} pdc ON pdc.ECInstanceId = cdc.ModelId
+            JOIN ${DEFINITION_CONTAINER_CLASS_NAME} pdc ON pdc.ECInstanceId = cdc.ModelId
           WHERE
             NOT pdc.IsPrivate
         )
@@ -215,16 +225,16 @@ export class CategoriesTreeIdsCache implements Disposable {
     }
   }
 
-  private async *queryVisibleSubCategories(categoriesInfo: Id64Array): AsyncIterableIterator<{ id: Id64String; parentId: Id64String }> {
+  private async *queryVisibleSubCategories(categoryIds: Id64Array): AsyncIterableIterator<{ id: SubCategoryId; parentId: CategoryId }> {
     const definitionsQuery = `
       SELECT
         sc.ECInstanceId id,
         sc.Parent.Id categoryId
       FROM
-        ${SUB_CATEGORY_CLASS} sc
+        ${SUB_CATEGORY_CLASS_NAME} sc
       WHERE
         NOT sc.IsPrivate
-        AND sc.Parent.Id IN (${categoriesInfo.join(",")})
+        AND sc.Parent.Id IN (${categoryIds.join(",")})
     `;
     for await (const row of this._queryExecutor.createQueryReader(
       { ecsql: definitionsQuery },
@@ -236,7 +246,7 @@ export class CategoriesTreeIdsCache implements Disposable {
 
   private async getModelsCategoriesInfo() {
     this._modelsCategoriesInfo ??= (async () => {
-      const allModelsCategories = new Map<Id64String, CategoriesInfo>();
+      const allModelsCategories = new Map<ModelId, CategoriesInfo>();
       for await (const queriedCategory of this.queryCategories()) {
         let modelCategories = allModelsCategories.get(queriedCategory.modelId);
         if (modelCategories === undefined) {
@@ -254,37 +264,42 @@ export class CategoriesTreeIdsCache implements Disposable {
     this._elementModelsCategories ??= (async () => {
       const [modelCategories, modelWithCategoryModeledElements] = await Promise.all([
         (async () => {
-          const elementModelsCategories = new Map<Id64String, { categories: Id64Set; isModelPrivate: boolean }>();
+          const elementModelsCategories = new Map<ModelId, { categoryIds: Id64Set; isModelPrivate: boolean }>();
           for await (const queriedCategory of this.queryElementModelCategories()) {
             let modelEntry = elementModelsCategories.get(queriedCategory.modelId);
             if (modelEntry === undefined) {
-              modelEntry = { categories: new Set(), isModelPrivate: queriedCategory.isModelPrivate };
+              modelEntry = { categoryIds: new Set(), isModelPrivate: queriedCategory.isModelPrivate };
               elementModelsCategories.set(queriedCategory.modelId, modelEntry);
             }
-            modelEntry.categories.add(queriedCategory.categoryId);
+            modelEntry.categoryIds.add(queriedCategory.categoryId);
           }
           return elementModelsCategories;
         })(),
         this.getModelWithCategoryModeledElements(),
       ]);
-      const result = new Map<Id64String, { categories: Id64Set; isSubModel: boolean; isModelPrivate: boolean }>();
+      const result = new Map<ModelId, { categoryIds: Set<CategoryId>; isSubModel: boolean; isModelPrivate: boolean }>();
       const subModels = getDistinctMapValues(modelWithCategoryModeledElements);
       for (const [modelId, modelEntry] of modelCategories) {
         const isSubModel = subModels.has(modelId);
-        result.set(modelId, { categories: modelEntry.categories, isSubModel, isModelPrivate: modelEntry.isModelPrivate });
+        result.set(modelId, { categoryIds: modelEntry.categoryIds, isSubModel, isModelPrivate: modelEntry.isModelPrivate });
       }
       return result;
     })();
     return this._elementModelsCategories;
   }
 
-  private async *queryModeledElements() {
+  private async *queryModeledElements(): AsyncIterableIterator<{
+    modelId: Id64String;
+    modeledElementId: Id64String;
+    categoryId: Id64String;
+    rootCategoryId: Id64String;
+  }> {
     const query = `
       SELECT
         pe.ECInstanceId modeledElementId,
         pe.Category.Id categoryId,
         pe.Model.Id modelId
-      FROM BisCore.Model m
+      FROM ${this._categoryModelClass} m
       JOIN ${this._categoryElementClass} pe ON pe.ECInstanceId = m.ModeledElement.Id
       WHERE
         m.IsPrivate = false
@@ -300,9 +315,9 @@ export class CategoriesTreeIdsCache implements Disposable {
 
   private async getModelWithCategoryModeledElements() {
     this._modelWithCategoryModeledElements ??= (async () => {
-      const modelWithCategoryModeledElements = new Map<Id64String, Id64Set>();
+      const modelWithCategoryModeledElements = new Map<ModelCategoryKey, Set<ElementId>>();
       for await (const { modelId, categoryId, modeledElementId } of this.queryModeledElements()) {
-        const key = `${modelId}-${categoryId}`;
+        const key: ModelCategoryKey = `${modelId}-${categoryId}`;
         const entry = modelWithCategoryModeledElements.get(key);
         if (entry === undefined) {
           modelWithCategoryModeledElements.set(key, new Set([modeledElementId]));
@@ -317,7 +332,7 @@ export class CategoriesTreeIdsCache implements Disposable {
 
   public async getCategoriesModeledElements(modelId: Id64String, categoryIds: Id64Array): Promise<Id64Array> {
     const modelWithCategoryModeledElements = await this.getModelWithCategoryModeledElements();
-    const result = new Array<Id64String>();
+    const result = new Array<ElementId>();
     for (const categoryId of categoryIds) {
       const entry = modelWithCategoryModeledElements.get(`${modelId}-${categoryId}`);
       if (entry !== undefined) {
@@ -329,9 +344,9 @@ export class CategoriesTreeIdsCache implements Disposable {
 
   private async getSubCategoriesInfo() {
     this._subCategoriesInfo ??= (async () => {
-      const allSubCategories = new Map<Id64String, SubCategoryInfo>();
+      const allSubCategories = new Map<SubCategoryId, SubCategoryInfo>();
       const modelsCategoriesInfo = await this.getModelsCategoriesInfo();
-      const categoriesWithMoreThanOneSubCategory = new Array<Id64String>();
+      const categoriesWithMoreThanOneSubCategory = new Array<CategoryId>();
       for (const modelCategoriesInfo of modelsCategoriesInfo.values()) {
         categoriesWithMoreThanOneSubCategory.push(
           ...modelCategoriesInfo.childCategories.filter((categoryInfo) => categoryInfo.subCategoryChildCount > 1).map((categoryInfo) => categoryInfo.id),
@@ -352,7 +367,7 @@ export class CategoriesTreeIdsCache implements Disposable {
 
   private async getDefinitionContainersInfo() {
     this._definitionContainersInfo ??= (async () => {
-      const definitionContainersInfo = new Map<Id64String, DefinitionContainerInfo>();
+      const definitionContainersInfo = new Map<DefinitionContainerId, DefinitionContainerInfo>();
       const [isDefinitionContainerSupported, modelsCategoriesInfo] = await Promise.all([
         this.getIsDefinitionContainerSupported(),
         this.getModelsCategoriesInfo(),
@@ -367,7 +382,7 @@ export class CategoriesTreeIdsCache implements Disposable {
         definitionContainersInfo.set(queriedDefinitionContainer.id, {
           childCategories: modelCategoriesInfo?.childCategories ?? [],
           modelId: queriedDefinitionContainer.modelId,
-          childDefinitionContainers: [],
+          childDefinitionContainerIds: [],
           parentDefinitionContainerExists: false,
         });
       }
@@ -375,7 +390,7 @@ export class CategoriesTreeIdsCache implements Disposable {
       for (const [definitionContainerId, definitionContainerInfo] of definitionContainersInfo) {
         const parentDefinitionContainer = definitionContainersInfo.get(definitionContainerInfo.modelId);
         if (parentDefinitionContainer !== undefined) {
-          parentDefinitionContainer.childDefinitionContainers.push(definitionContainerId);
+          parentDefinitionContainer.childDefinitionContainerIds.push(definitionContainerId);
           definitionContainerInfo.parentDefinitionContainerExists = true;
         }
       }
@@ -387,30 +402,30 @@ export class CategoriesTreeIdsCache implements Disposable {
 
   public async getDirectChildDefinitionContainersAndCategories(
     parentDefinitionContainerIds: Id64Array,
-  ): Promise<{ categories: CategoryInfo[]; definitionContainers: Id64Array }> {
+  ): Promise<{ categories: CategoryInfo[]; definitionContainers: Array<DefinitionContainerId> }> {
     const definitionContainersInfo = await this.getDefinitionContainersInfo();
 
-    const result = { definitionContainers: new Array<Id64String>(), categories: new Array<CategoryInfo>() };
+    const result = { definitionContainers: new Array<DefinitionContainerId>(), categories: new Array<CategoryInfo>() };
 
     parentDefinitionContainerIds.forEach((parentDefinitionContainerId) => {
       const parentDefinitionContainerInfo = definitionContainersInfo.get(parentDefinitionContainerId);
       if (parentDefinitionContainerInfo !== undefined) {
-        result.definitionContainers.push(...parentDefinitionContainerInfo.childDefinitionContainers);
+        result.definitionContainers.push(...parentDefinitionContainerInfo.childDefinitionContainerIds);
         result.categories.push(...parentDefinitionContainerInfo.childCategories);
       }
     });
     return result;
   }
 
-  public async getCategoriesElementModels(categoryIds: Id64Array, includeSubModels?: boolean): Promise<Map<Id64String, Id64Array>> {
+  public async getCategoriesElementModels(categoryIds: Id64Array, includeSubModels?: boolean): Promise<Map<CategoryId, Array<ModelId>>> {
     const elementModelsCategories = await this.getElementModelsCategories();
-    const result = new Map<Id64String, Id64Array>();
+    const result = new Map<CategoryId, Array<ModelId>>();
     for (const categoryId of categoryIds) {
-      for (const [modelId, { categories, isSubModel }] of elementModelsCategories) {
+      for (const [modelId, { categoryIds: categories, isSubModel }] of elementModelsCategories) {
         if ((includeSubModels || !isSubModel) && categories.has(categoryId)) {
           let categoryModels = result.get(categoryId);
           if (!categoryModels) {
-            categoryModels = new Array<Id64String>();
+            categoryModels = new Array<ModelId>();
             result.set(categoryId, categoryModels);
           }
           categoryModels.push(modelId);
@@ -420,9 +435,9 @@ export class CategoriesTreeIdsCache implements Disposable {
     return result;
   }
 
-  public async getModelCategories(modelId: Id64String): Promise<Id64Array> {
+  public async getModelCategoryIds(modelId: Id64String): Promise<Id64Array> {
     const elementModelsCategories = await this.getElementModelsCategories();
-    return [...(elementModelsCategories.get(modelId)?.categories ?? [])];
+    return [...(elementModelsCategories.get(modelId)?.categoryIds ?? [])];
   }
 
   public async hasSubModel(elementId: Id64String): Promise<boolean> {
@@ -435,7 +450,7 @@ export class CategoriesTreeIdsCache implements Disposable {
   }
 
   public async getAllContainedCategories(definitionContainerIds: Id64Array): Promise<Id64Array> {
-    const result = new Array<Id64String>();
+    const result = new Array<CategoryId>();
 
     const definitionContainersInfo = await this.getDefinitionContainersInfo();
     const indirectCategories = await Promise.all(
@@ -445,7 +460,7 @@ export class CategoriesTreeIdsCache implements Disposable {
           return [];
         }
         result.push(...definitionContainerInfo.childCategories.map((category) => category.id));
-        return this.getAllContainedCategories(definitionContainerInfo.childDefinitionContainers);
+        return this.getAllContainedCategories(definitionContainerInfo.childDefinitionContainerIds);
       }),
     );
     for (const categories of indirectCategories) {
@@ -464,7 +479,7 @@ export class CategoriesTreeIdsCache implements Disposable {
       if (subCategoryInfo === undefined) {
         return [];
       }
-      return [...(await this.getInstanceKeyPaths({ categoryId: subCategoryInfo.categoryId })), { id: props.subCategoryId, className: SUB_CATEGORY_CLASS }];
+      return [...(await this.getInstanceKeyPaths({ categoryId: subCategoryInfo.categoryId })), { id: props.subCategoryId, className: SUB_CATEGORY_CLASS_NAME }];
     }
 
     if ("categoryId" in props) {
@@ -488,12 +503,12 @@ export class CategoriesTreeIdsCache implements Disposable {
     }
 
     if (!definitionContainerInfo.parentDefinitionContainerExists) {
-      return [{ id: props.definitionContainerId, className: DEFINITION_CONTAINER_CLASS }];
+      return [{ id: props.definitionContainerId, className: DEFINITION_CONTAINER_CLASS_NAME }];
     }
 
     return [
       ...(await this.getInstanceKeyPaths({ definitionContainerId: definitionContainerInfo.modelId })),
-      { id: props.definitionContainerId, className: DEFINITION_CONTAINER_CLASS },
+      { id: props.definitionContainerId, className: DEFINITION_CONTAINER_CLASS_NAME },
     ];
   }
 
@@ -501,7 +516,7 @@ export class CategoriesTreeIdsCache implements Disposable {
     return this._categoryElementCounts.getCategoryElementsCount(modelId, categoryId);
   }
 
-  public async getAllDefinitionContainersAndCategories(): Promise<{ categories: Id64Array; definitionContainers: Id64Array }> {
+  public async getAllDefinitionContainersAndCategories(): Promise<{ categories: Array<CategoryId>; definitionContainers: Array<DefinitionContainerId> }> {
     const [modelsCategoriesInfo, definitionContainersInfo] = await Promise.all([this.getModelsCategoriesInfo(), this.getDefinitionContainersInfo()]);
     const result = { definitionContainers: [...definitionContainersInfo.keys()], categories: new Array<Id64String>() };
     for (const modelCategoriesInfo of modelsCategoriesInfo.values()) {
@@ -511,7 +526,7 @@ export class CategoriesTreeIdsCache implements Disposable {
     return result;
   }
 
-  public async getRootDefinitionContainersAndCategories(): Promise<{ categories: CategoryInfo[]; definitionContainers: Id64Array }> {
+  public async getRootDefinitionContainersAndCategories(): Promise<{ categories: CategoryInfo[]; definitionContainers: Array<DefinitionContainerId> }> {
     const [modelsCategoriesInfo, definitionContainersInfo] = await Promise.all([this.getModelsCategoriesInfo(), this.getDefinitionContainersInfo()]);
     const result = { definitionContainers: new Array<Id64String>(), categories: new Array<CategoryInfo>() };
     for (const modelCategoriesInfo of modelsCategoriesInfo.values()) {
@@ -528,9 +543,9 @@ export class CategoriesTreeIdsCache implements Disposable {
     return result;
   }
 
-  public async getSubCategories(categoryIds: Id64Array): Promise<Map<Id64String, Id64Array>> {
+  public async getSubCategories(categoryIds: Id64Array): Promise<Map<CategoryId, Array<SubCategoryId>>> {
     const subCategoriesInfo = await this.getSubCategoriesInfo();
-    const result = new Map<Id64String, Id64Array>();
+    const result = new Map<CategoryId, Array<SubCategoryId>>();
     for (const categoryId of categoryIds) {
       for (const [subCategoryId, subCategoryInfo] of subCategoriesInfo) {
         if (subCategoryInfo.categoryId === categoryId) {
@@ -551,11 +566,4 @@ export class CategoriesTreeIdsCache implements Disposable {
     this._isDefinitionContainerSupported ??= this.queryIsDefinitionContainersSupported();
     return this._isDefinitionContainerSupported;
   }
-}
-
-/** @internal */
-export function getClassesByView(viewType: "2d" | "3d") {
-  return viewType === "2d"
-    ? { categoryClass: "BisCore.DrawingCategory", categoryElementClass: "BisCore.GeometricElement2d", categoryModelClass: "BisCore.GeometricModel2d" }
-    : { categoryClass: "BisCore.SpatialCategory", categoryElementClass: "BisCore.GeometricElement3d", categoryModelClass: "BisCore.GeometricModel3d" };
 }

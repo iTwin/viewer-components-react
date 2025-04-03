@@ -9,6 +9,7 @@ import type { Observable, ObservableInput, OperatorFunction } from "rxjs";
 
 /**
  * Applies reduce function and "returns" early if the predicate returns `false` for the accumulator.
+ * @internal
  */
 export function reduceWhile<TValue, TAccumulator>(
   predicate: (x: TAccumulator) => boolean,
@@ -20,7 +21,10 @@ export function reduceWhile<TValue, TAccumulator>(
   };
 }
 
-/** Same as `firstValueFrom` except it won't throw if the observable emits no values. */
+/**
+ * Same as `firstValueFrom` except it won't throw if the observable emits no values.
+ * @internal
+ */
 export async function toVoidPromise(obs: Observable<any>): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     obs.subscribe({
@@ -30,7 +34,10 @@ export async function toVoidPromise(obs: Observable<any>): Promise<void> {
   });
 }
 
-/** Returns observable results in an array */
+/**
+ * Returns observable results in an array
+ * @internal
+ */
 export async function collect<T>(obs: ObservableInput<T>): Promise<T[]> {
   return new Promise((resolve, reject) => {
     const arr = new Array<T>();

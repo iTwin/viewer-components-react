@@ -8,6 +8,14 @@ import { bufferCount, concatAll, concatMap, delay, of } from "rxjs";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
+import {
+  DRAWING_CATEGORY_CLASS_NAME,
+  GEOMETRIC_ELEMENT_2D_CLASS_NAME,
+  GEOMETRIC_ELEMENT_3D_CLASS_NAME,
+  GEOMETRIC_MODEL_2D_CLASS_NAME,
+  GEOMETRIC_MODEL_3D_CLASS_NAME,
+  SPATIAL_CATEGORY_CLASS_NAME,
+} from "./ClassNameDefinitions.js";
 
 import type { Observable } from "rxjs";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
@@ -109,4 +117,11 @@ export function releaseMainThreadOnItemsCount<T>(elementCount: number) {
       concatAll(),
     );
   };
+}
+
+/** @internal */
+export function getClassesByView(viewType: "2d" | "3d") {
+  return viewType === "2d"
+    ? ({ categoryClass: DRAWING_CATEGORY_CLASS_NAME, elementClass: GEOMETRIC_ELEMENT_2D_CLASS_NAME, modelClass: GEOMETRIC_MODEL_2D_CLASS_NAME } as const)
+    : ({ categoryClass: SPATIAL_CATEGORY_CLASS_NAME, elementClass: GEOMETRIC_ELEMENT_3D_CLASS_NAME, modelClass: GEOMETRIC_MODEL_3D_CLASS_NAME } as const);
 }

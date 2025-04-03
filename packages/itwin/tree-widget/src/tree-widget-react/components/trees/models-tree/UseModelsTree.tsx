@@ -16,8 +16,9 @@ import {
   UnknownInstanceFocusError,
 } from "../common/components/EmptyTree.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
+import { GEOMETRIC_MODEL_3D_CLASS_NAME, SUBJECT_CLASS_NAME } from "../common/internal/ClassNameDefinitions.js";
+import { useIModelChangeListener } from "../common/internal/UseIModelChangeListener.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
-import { useIModelChangeListener } from "../common/UseIModelChangeListener.js";
 import { useTelemetryContext } from "../common/UseTelemetryContext.js";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
 import { ModelsTreeNode } from "./internal/ModelsTreeNode.js";
@@ -26,7 +27,7 @@ import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTre
 
 import type { ReactNode } from "react";
 import type { GroupingHierarchyNode, HierarchyFilteringPath, InstancesNodeKey } from "@itwin/presentation-hierarchies";
-import type { Id64String } from "@itwin/core-bentley";
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
@@ -34,6 +35,7 @@ import type { ClassGroupingHierarchyNode, ElementsGroupInfo, ModelsTreeHierarchy
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/ModelsTreeVisibilityHandler.js";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
+
 type ModelsTreeFilteringError = "tooManyFilterMatches" | "tooManyInstancesFocused" | "unknownFilterError" | "unknownInstanceFocusError";
 
 /** @beta */
@@ -229,8 +231,8 @@ async function getModels(paths: HierarchyFilteringPath[], idsCache: ModelsTreeId
     return undefined;
   }
 
-  const targetModels = new Set<Id64String>();
-  const targetSubjects = new Set<Id64String>();
+  const targetModelIds = new Set<Id64String>();
+  const targetSubjectIds = new Set<Id64String>();
   for (const path of paths) {
     const currPath = Array.isArray(path) ? path : path.path;
     for (let i = 0; i < currPath.length; i++) {
@@ -240,20 +242,20 @@ async function getModels(paths: HierarchyFilteringPath[], idsCache: ModelsTreeId
       }
 
       // if paths end with subject need to get all models under that subject
-      if (i === currPath.length - 1 && currStep.className === "BisCore.Subject") {
-        targetSubjects.add(currStep.id);
+      if (i === currPath.length - 1 && currStep.className === SUBJECT_CLASS_NAME) {
+        targetSubjectIds.add(currStep.id);
         break;
       }
 
       // collect all the models from the filtered path
-      if (await classInspector.classDerivesFrom(currStep.className, "BisCore.GeometricModel3d")) {
-        targetModels.add(currStep.id);
+      if (await classInspector.classDerivesFrom(currStep.className, GEOMETRIC_MODEL_3D_CLASS_NAME)) {
+        targetModelIds.add(currStep.id);
       }
     }
   }
 
-  const matchingModels = await idsCache.getSubjectModelIds([...targetSubjects]);
-  return [...targetModels, ...matchingModels];
+  const matchingModels = await idsCache.getSubjectModelIds([...targetSubjectIds]);
+  return [...targetModelIds, ...matchingModels];
 }
 
 function getEmptyTreeContentComponent(filter?: string, error?: ModelsTreeFilteringError, emptyTreeContent?: React.ReactNode) {
@@ -397,7 +399,7 @@ async function collectFocusedItems(loadFocusedItems: () => AsyncIterableIterator
     parentKey: InstancesNodeKey;
     parentType: "element" | "category";
     groupingNode: ClassGroupingHierarchyNode;
-    modelIds: Id64String[];
+    modelIds: Id64Array;
   }> = [];
   for await (const key of loadFocusedItems()) {
     if ("id" in key) {

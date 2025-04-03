@@ -8,14 +8,16 @@ import { useAsyncValue } from "@itwin/components-react";
 import { QueryRowFormat } from "@itwin/core-common";
 import { IconButton } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../../../TreeWidget.js";
-import { hideAllCategories, invertAllCategories, loadCategoriesFromViewport } from "../common/CategoriesVisibilityUtils.js";
+import { hideAllCategories, invertAllCategories } from "../common/CategoriesVisibilityUtils.js";
+import { getClassesByView } from "../common/internal/Utils.js";
+import { loadCategoriesFromViewport } from "../common/internal/VisibilityUtils.js";
 import { hideAllModels, showAll } from "../common/Utils.js";
-import { getClassesByView } from "./internal/CategoriesTreeIdsCache.js";
 
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { TreeToolbarButtonProps } from "../../tree-header/SelectableTree.js";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { Id64Array } from "@itwin/core-bentley";
+import type { ModelId } from "../common/internal/Types.js";
 
 /**
  * Props that get passed to `CategoriesTreeComponent` header button renderer.
@@ -128,13 +130,14 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
 
 const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
 
+/** @internal */
 export function useCategories(viewport: Viewport) {
   const categoriesPromise = useMemo(async () => loadCategoriesFromViewport(viewport), [viewport]);
   return useAsyncValue(categoriesPromise) ?? EMPTY_CATEGORIES_ARRAY;
 }
 
-function useAvailableModels(viewport: Viewport): Id64Array {
-  const [availableModels, setAvailableModels] = useState<Id64Array>([]);
+function useAvailableModels(viewport: Viewport): Array<ModelId> {
+  const [availableModels, setAvailableModels] = useState<Array<ModelId>>([]);
   const imodel = viewport.iModel;
   const viewType = viewport.view.is2d() ? "2d" : "3d";
   useEffect(() => {
@@ -150,14 +153,14 @@ function useAvailableModels(viewport: Viewport): Id64Array {
   return availableModels;
 }
 
-async function queryModelsForHeaderActions(iModel: IModelConnection, viewType: "2d" | "3d"): Promise<Id64Array> {
-  const { categoryModelClass } = getClassesByView(viewType);
-  const models = new Array<Id64String>();
+async function queryModelsForHeaderActions(iModel: IModelConnection, viewType: "2d" | "3d"): Promise<Array<ModelId>> {
+  const { modelClass } = getClassesByView(viewType);
+  const models = new Array<ModelId>();
   const query = `
     SELECT
       m.ECInstanceId id
     FROM
-      ${categoryModelClass} m
+      ${modelClass} m
     WHERE
       m.IsPrivate = false
   `;

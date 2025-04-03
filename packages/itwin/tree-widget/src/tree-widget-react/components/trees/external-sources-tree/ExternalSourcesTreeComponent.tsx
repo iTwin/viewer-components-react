@@ -10,6 +10,7 @@ import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { ExternalSourcesTree } from "./ExternalSourcesTree.js";
 
 import type { ExternalSourcesTreeProps } from "./ExternalSourcesTree.js";
+
 /** @beta */
 interface ExternalSourcesTreeComponentProps
   extends Pick<

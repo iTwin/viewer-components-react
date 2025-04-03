@@ -57,6 +57,7 @@ interface UseHierarchyVisibilityProps {
   visibilityHandlerFactory: () => HierarchyVisibilityHandler;
 }
 
+/** @internal */
 export function useHierarchyVisibility({
   visibilityHandlerFactory,
 }: UseHierarchyVisibilityProps): TreeItemVisibilityButtonProps & { triggerRefresh: () => void } {
@@ -204,6 +205,7 @@ export type HierarchyVisibilityHandlerOverridableMethod<TFunc> = TFunc extends (
   ? (props: HierarchyVisibilityHandlerOverridableMethodProps<TFunc>) => TResult
   : never;
 
+/** @internal */
 export function createVisibilityHandlerResult<TResult, TOverrideProps>(
   handler: HierarchyVisibilityHandler,
   props: TOverrideProps,

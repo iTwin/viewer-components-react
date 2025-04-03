@@ -19,6 +19,7 @@ interface UseVisibilityButtonHandlerResult {
   onVisibilityButtonClick: TreeItemVisibilityButtonProps["onVisibilityButtonClick"];
 }
 
+/** @internal */
 export function useVisibilityButtonHandler({ rootNodes, isNodeSelected, onClick }: UseVisibilityButtonHandlerProps): UseVisibilityButtonHandlerResult {
   const onVisibilityButtonClick = useCallback<TreeItemVisibilityButtonProps["onVisibilityButtonClick"]>(
     (clickedNode, state) => {

@@ -3,11 +3,22 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-/** @internal */
-export const SUB_CATEGORY_CLASS = "BisCore.SubCategory";
+import type { Id64String } from "@itwin/core-bentley";
 
 /** @internal */
-export const DEFINITION_CONTAINER_CLASS = "BisCore.DefinitionContainer";
+export type SubjectId = Id64String;
 
 /** @internal */
-export const DEFINITION_ELEMENT_CLASS = "BisCore.DefinitionElement";
+export type ModelId = Id64String;
+
+/** @internal */
+export type CategoryId = Id64String;
+
+/** @internal */
+export type SubCategoryId = Id64String;
+
+/** @internal */
+export type DefinitionContainerId = Id64String;
+
+/** @internal */
+export type ElementId = Id64String;

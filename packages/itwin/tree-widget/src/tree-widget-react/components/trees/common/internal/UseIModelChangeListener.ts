@@ -13,6 +13,7 @@ interface UseIModelChangeListenerProps {
   action: () => void;
 }
 
+/** @internal */
 export function useIModelChangeListener({ imodel, action }: UseIModelChangeListenerProps) {
   useEffect(() => {
     if (!imodel.isBriefcaseConnection()) {

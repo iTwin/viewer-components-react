@@ -12,8 +12,18 @@ import {
   ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
+import {
+  ELEMENT_CLASS_NAME,
+  GEOMETRIC_ELEMENT_3D_CLASS_NAME,
+  GEOMETRIC_MODEL_3D_CLASS_NAME,
+  INFORMATION_PARTITION_ELEMENT_CLASS_NAME,
+  MODEL_CLASS_NAME,
+  SPATIAL_CATEGORY_CLASS_NAME,
+  SUB_MODELED_ELEMENT_CLASS_NAME,
+  SUBJECT_CLASS_NAME,
+} from "../common/internal/ClassNameDefinitions.js";
+import { collect } from "../common/internal/Rxjs.js";
 import { createIdsSelector, parseIdsSelectorResult, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
-import { collect } from "../common/Rxjs.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 
 import type { Id64String } from "@itwin/core-bentley";
@@ -40,6 +50,7 @@ import type {
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
 import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
+import type { ElementId } from "../common/internal/Types.js";
 
 /** @beta */
 export type ClassGroupingHierarchyNode = GroupingHierarchyNode & { key: ClassGroupingNodeKey };
@@ -64,7 +75,7 @@ export interface ModelsTreeHierarchyConfiguration {
 /** @internal */
 export const defaultHierarchyConfiguration: ModelsTreeHierarchyConfiguration = {
   elementClassGrouping: "enable",
-  elementClassSpecification: "BisCore.GeometricElement3d",
+  elementClassSpecification: GEOMETRIC_ELEMENT_3D_CLASS_NAME,
   showEmptyModels: false,
   hideRootSubject: false,
 };
@@ -106,6 +117,7 @@ interface ModelsTreeInstanceKeyPathsFromInstanceLabelProps {
   limit?: number | "unbounded";
 }
 
+/** @internal */
 export type ModelsTreeInstanceKeyPathsProps = ModelsTreeInstanceKeyPathsFromTargetItemsProps | ModelsTreeInstanceKeyPathsFromInstanceLabelProps;
 type HierarchyProviderProps = Parameters<typeof createIModelHierarchyProvider>[0];
 type HierarchyFilteringPaths = NonNullable<NonNullable<HierarchyProviderProps["filtering"]>["paths"]>;
@@ -118,6 +130,7 @@ export namespace ModelsTreeInstanceKeyPathsProps {
   }
 }
 
+/** @internal */
 export class ModelsTreeDefinition implements HierarchyDefinition {
   private _impl: HierarchyDefinition;
   private _idsCache: ModelsTreeIdsCache;
@@ -135,23 +148,23 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
           this.createSubjectChildrenQuery({ ...requestProps, parentNodeInstanceIds: this._hierarchyConfig.hideRootSubject ? [IModel.rootSubjectId] : [] }),
         childNodes: [
           {
-            parentInstancesNodePredicate: "BisCore.Subject",
+            parentInstancesNodePredicate: SUBJECT_CLASS_NAME,
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createSubjectChildrenQuery(requestProps),
           },
           {
-            parentInstancesNodePredicate: "BisCore.ISubModeledElement",
+            parentInstancesNodePredicate: SUB_MODELED_ELEMENT_CLASS_NAME,
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createISubModeledElementChildrenQuery(requestProps),
           },
           {
-            parentInstancesNodePredicate: "BisCore.GeometricModel3d",
+            parentInstancesNodePredicate: GEOMETRIC_MODEL_3D_CLASS_NAME,
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createGeometricModel3dChildrenQuery(requestProps),
           },
           {
-            parentInstancesNodePredicate: "BisCore.SpatialCategory",
+            parentInstancesNodePredicate: SPATIAL_CATEGORY_CLASS_NAME,
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createSpatialCategoryChildrenQuery(requestProps),
           },
           {
-            parentInstancesNodePredicate: "BisCore.GeometricElement3d",
+            parentInstancesNodePredicate: GEOMETRIC_ELEMENT_3D_CLASS_NAME,
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createGeometricElement3dChildrenQuery(requestProps),
           },
         ],
@@ -204,11 +217,11 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     const [subjectFilterClauses, modelFilterClauses] = await Promise.all([
       this._selectQueryFactory.createFilterClauses({
         filter: instanceFilter,
-        contentClass: { fullName: "BisCore.Subject", alias: "this" },
+        contentClass: { fullName: SUBJECT_CLASS_NAME, alias: "this" },
       }),
       this._selectQueryFactory.createFilterClauses({
         filter: instanceFilter,
-        contentClass: { fullName: "BisCore.GeometricModel3d", alias: "this" },
+        contentClass: { fullName: GEOMETRIC_MODEL_3D_CLASS_NAME, alias: "this" },
       }),
     ]);
     const [childSubjectIds, childModelIds] = parentSubjectIds.length
@@ -217,7 +230,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     const defs = new Array<HierarchyNodesDefinition>();
     childSubjectIds.length &&
       defs.push({
-        fullClassName: "BisCore.Subject",
+        fullClassName: SUBJECT_CLASS_NAME,
         query: {
           ecsql: `
             SELECT
@@ -227,7 +240,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 nodeLabel: {
                   selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
                     classAlias: "this",
-                    className: "BisCore.Subject",
+                    className: SUBJECT_CLASS_NAME,
                   }),
                 },
                 hideIfNoChildren: true,
@@ -254,7 +267,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       });
     childModelIds.length &&
       defs.push({
-        fullClassName: "BisCore.GeometricModel3d",
+        fullClassName: GEOMETRIC_MODEL_3D_CLASS_NAME,
         query: {
           ecsql: `
             SELECT model.ECInstanceId AS ECInstanceId, model.*
@@ -266,7 +279,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   nodeLabel: {
                     selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
                       classAlias: "partition",
-                      className: "BisCore.InformationPartitionElement",
+                      className: INFORMATION_PARTITION_ELEMENT_CLASS_NAME,
                     }),
                   },
                   hideNodeInHierarchy: {
@@ -298,8 +311,8 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   },
                   supportsFiltering: true,
                 })}
-              FROM Bis.GeometricModel3d m
-              JOIN bis.InformationPartitionElement [partition] ON [partition].ECInstanceId = m.ModeledElement.Id
+              FROM ${GEOMETRIC_MODEL_3D_CLASS_NAME} m
+              JOIN ${INFORMATION_PARTITION_ELEMENT_CLASS_NAME} [partition] ON [partition].ECInstanceId = m.ModeledElement.Id
               WHERE
                 m.ECInstanceId IN (${childModelIds.map(() => "?").join(",")})
             ) model
@@ -320,7 +333,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     // hidden - the filter will get applied on the child hierarchy levels
     return [
       {
-        fullClassName: "BisCore.GeometricModel3d",
+        fullClassName: GEOMETRIC_MODEL_3D_CLASS_NAME,
         query: {
           ecsql: `
             SELECT
@@ -330,7 +343,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 nodeLabel: "", // doesn't matter - the node is always hidden
                 hideNodeInHierarchy: true,
               })}
-            FROM BisCore.GeometricModel3d this
+            FROM ${GEOMETRIC_MODEL_3D_CLASS_NAME} this
             WHERE
               this.ModeledElement.Id IN (${elementIds.map(() => "?").join(",")})
               AND NOT this.IsPrivate
@@ -348,11 +361,11 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
     const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
       filter: instanceFilter,
-      contentClass: { fullName: "BisCore.SpatialCategory", alias: "this" },
+      contentClass: { fullName: SPATIAL_CATEGORY_CLASS_NAME, alias: "this" },
     });
     return [
       {
-        fullClassName: "BisCore.SpatialCategory",
+        fullClassName: SPATIAL_CATEGORY_CLASS_NAME,
         query: {
           ecsql: `
             SELECT
@@ -362,7 +375,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 nodeLabel: {
                   selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
                     classAlias: "this",
-                    className: "BisCore.SpatialCategory",
+                    className: SPATIAL_CATEGORY_CLASS_NAME,
                   }),
                 },
                 grouping: { byLabel: { action: "merge", groupId: "category" } },
@@ -411,7 +424,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         mergeMap(async (modelId) => this._idsCache.getCategoriesModeledElements(modelId, categoryIds)),
         reduce((acc, foundModeledElements) => {
           return acc.concat(foundModeledElements);
-        }, new Array<Id64String>()),
+        }, new Array<ElementId>()),
       ),
     );
     return [
@@ -498,7 +511,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                     IFNULL((
                       SELECT 1
                       FROM ${this._hierarchyConfig.elementClassSpecification} ce
-                      JOIN BisCore.Model m ON ce.Model.Id = m.ECInstanceId
+                      JOIN ${MODEL_CLASS_NAME} m ON ce.Model.Id = m.ECInstanceId
                       WHERE ce.Parent.Id = this.ECInstanceId OR (ce.Model.Id = this.ECInstanceId AND m.IsPrivate = false)
                       LIMIT 1
                     ), 0)
@@ -565,7 +578,7 @@ function createGeometricElementInstanceKeyPaths(
   hierarchyConfig: ModelsTreeHierarchyConfiguration,
   targetItems: Array<Id64String | ElementsGroupInfo>,
 ): Observable<HierarchyFilteringPath> {
-  const elementIds = targetItems.filter((info): info is Id64String => typeof info === "string");
+  const elementIds = targetItems.filter((info): info is ElementId => typeof info === "string");
   const groupInfos = targetItems.filter((info): info is ElementsGroupInfo => typeof info !== "string");
   const separator = ";";
 
@@ -605,8 +618,8 @@ function createGeometricElementInstanceKeyPaths(
           )
 
         FROM InstanceElementsWithClassGroupingNodes e
-         LEFT JOIN bis.GeometricModel3d m ON (e.ParentId IS NULL AND m.ECInstanceId = e.ModelId)
-         LEFT JOIN bis.SpatialCategory c ON (e.ParentId IS NULL AND c.ECInstanceId = e.CategoryId)
+         LEFT JOIN ${GEOMETRIC_MODEL_3D_CLASS_NAME} m ON (e.ParentId IS NULL AND m.ECInstanceId = e.ModelId)
+         LEFT JOIN ${SPATIAL_CATEGORY_CLASS_NAME} c ON (e.ParentId IS NULL AND c.ECInstanceId = e.CategoryId)
 
         UNION ALL
 
@@ -621,8 +634,8 @@ function createGeometricElementInstanceKeyPaths(
           )
         FROM ModelsCategoriesElementsHierarchy ce
         JOIN ${hierarchyConfig.elementClassSpecification} pe ON (pe.ECInstanceId = ce.ParentId OR pe.ECInstanceId = ce.ModelId AND ce.ParentId IS NULL)
-        LEFT JOIN bis.GeometricModel3d m ON (pe.Parent.Id IS NULL AND m.ECInstanceId = pe.Model.Id)
-        LEFT JOIN bis.SpatialCategory c ON (pe.Parent.Id IS NULL AND c.ECInstanceId = pe.Category.Id)
+        LEFT JOIN ${GEOMETRIC_MODEL_3D_CLASS_NAME} m ON (pe.Parent.Id IS NULL AND m.ECInstanceId = pe.Model.Id)
+        LEFT JOIN ${SPATIAL_CATEGORY_CLASS_NAME} c ON (pe.Parent.Id IS NULL AND c.ECInstanceId = pe.Category.Id)
       )`,
     ];
     const ecsql = `
@@ -670,10 +683,10 @@ function parseQueryRow(row: ECSqlQueryRow, groupInfos: ElementsGroupInfo[], sepa
         path.push({ className: elementClassName, id: rowElements[i + 1] });
         break;
       case "c":
-        path.push({ className: "BisCore.SpatialCategory", id: rowElements[i + 1] });
+        path.push({ className: SPATIAL_CATEGORY_CLASS_NAME, id: rowElements[i + 1] });
         break;
       case "m":
-        path.push({ className: "BisCore.GeometricModel3d", id: rowElements[i + 1] });
+        path.push({ className: GEOMETRIC_MODEL_3D_CLASS_NAME, id: rowElements[i + 1] });
         break;
     }
   }
@@ -698,20 +711,20 @@ async function createInstanceKeyPathsFromTargetItems({
   return lastValueFrom(
     from(targetItems).pipe(
       releaseMainThreadOnItemsCount(2000),
-      mergeMap(async (key): Promise<{ key: string; type: number } | { key: ElementsGroupInfo; type: 0 }> => {
+      mergeMap(async (key): Promise<{ key: Id64String; type: number } | { key: ElementsGroupInfo; type: 0 }> => {
         if ("parent" in key) {
           return { key, type: 0 };
         }
 
-        if (await imodelAccess.classDerivesFrom(key.className, "BisCore.Subject")) {
+        if (await imodelAccess.classDerivesFrom(key.className, SUBJECT_CLASS_NAME)) {
           return { key: key.id, type: 1 };
         }
 
-        if (await imodelAccess.classDerivesFrom(key.className, "BisCore.Model")) {
+        if (await imodelAccess.classDerivesFrom(key.className, MODEL_CLASS_NAME)) {
           return { key: key.id, type: 2 };
         }
 
-        if (await imodelAccess.classDerivesFrom(key.className, "BisCore.SpatialCategory")) {
+        if (await imodelAccess.classDerivesFrom(key.className, SPATIAL_CATEGORY_CLASS_NAME)) {
           return { key: key.id, type: 3 };
         }
 
@@ -720,35 +733,35 @@ async function createInstanceKeyPathsFromTargetItems({
       reduce(
         (acc, value) => {
           if (value.type === 1) {
-            acc.subjects.push(value.key);
+            acc.subjectIds.push(value.key);
             return acc;
           }
           if (value.type === 2) {
-            acc.models.push(value.key);
+            acc.modelIds.push(value.key);
             return acc;
           }
           if (value.type === 3) {
-            acc.categories.push(value.key);
+            acc.categoryIds.push(value.key);
             return acc;
           }
-          acc.elements.push(value.key);
+          acc.elementIds.push(value.key);
           return acc;
         },
         {
-          models: new Array<Id64String>(),
-          categories: new Array<Id64String>(),
-          subjects: new Array<Id64String>(),
-          elements: new Array<Id64String | ElementsGroupInfo>(),
+          modelIds: new Array<Id64String>(),
+          categoryIds: new Array<Id64String>(),
+          subjectIds: new Array<Id64String>(),
+          elementIds: new Array<Id64String | ElementsGroupInfo>(),
         },
       ),
       switchMap(async (ids) => {
-        const elementsLength = ids.elements.length;
+        const elementsLength = ids.elementIds.length;
         return collect(
           merge(
-            from(ids.subjects).pipe(mergeMap((id) => from(idsCache.createSubjectInstanceKeysPath(id)))),
-            from(ids.models).pipe(mergeMap((id) => from(idsCache.createModelInstanceKeyPaths(id)).pipe(mergeAll()))),
-            from(ids.categories).pipe(mergeMap((id) => from(idsCache.createCategoryInstanceKeyPaths(id)).pipe(mergeAll()))),
-            from(ids.elements).pipe(
+            from(ids.subjectIds).pipe(mergeMap((id) => from(idsCache.createSubjectInstanceKeysPath(id)))),
+            from(ids.modelIds).pipe(mergeMap((id) => from(idsCache.createModelInstanceKeyPaths(id)).pipe(mergeAll()))),
+            from(ids.categoryIds).pipe(mergeMap((id) => from(idsCache.createCategoryInstanceKeyPaths(id)).pipe(mergeAll()))),
+            from(ids.elementIds).pipe(
               bufferCount(Math.ceil(elementsLength / Math.ceil(elementsLength / 5000))),
               releaseMainThreadOnItemsCount(1),
               mergeMap((block) => createGeometricElementInstanceKeyPaths(imodelAccess, idsCache, hierarchyConfig, block), 10),
@@ -765,7 +778,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
 ) {
   const elementLabelSelectClause = await props.labelsFactory.createSelectClause({
     classAlias: "e",
-    className: "BisCore.Element",
+    className: ELEMENT_CLASS_NAME,
     // eslint-disable-next-line @typescript-eslint/unbound-method
     selectorsConcatenator: ECSql.createConcatenatedValueStringSelector,
   });
@@ -778,8 +791,8 @@ async function createInstanceKeyPathsFromInstanceLabel(
             ec_classname(e.ECClassId, 's.c'),
             e.ECInstanceId,
             ${elementLabelSelectClause} Label
-          FROM BisCore.Element e
-          WHERE e.ECClassId IS (BisCore.Subject, BisCore.SpatialCategory, ${props.hierarchyConfig.elementClassSpecification})
+          FROM ${ELEMENT_CLASS_NAME} e
+          WHERE e.ECClassId IS (${SUBJECT_CLASS_NAME}, ${SPATIAL_CATEGORY_CLASS_NAME}, ${props.hierarchyConfig.elementClassSpecification})
 
           UNION ALL
 
@@ -787,8 +800,8 @@ async function createInstanceKeyPathsFromInstanceLabel(
             ec_classname(m.ECClassId, 's.c'),
             m.ECInstanceId,
             ${elementLabelSelectClause} Label
-          FROM BisCore.GeometricModel3d m
-          JOIN BisCore.Element e ON e.ECInstanceId = m.ModeledElement.Id
+          FROM ${GEOMETRIC_MODEL_3D_CLASS_NAME} m
+          JOIN ${ELEMENT_CLASS_NAME} e ON e.ECInstanceId = m.ModeledElement.Id
           WHERE NOT m.IsPrivate
             ${props.hierarchyConfig.showEmptyModels ? "" : `AND EXISTS (SELECT 1 FROM ${props.hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)`}
             AND json_extract(e.JsonProperties, '$.PhysicalPartition.Model.Content') IS NULL

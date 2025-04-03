@@ -9,22 +9,24 @@ import { Icon } from "@itwin/itwinui-react/bricks";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
 import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMatches } from "../common/components/EmptyTree.js";
+import { DEFINITION_CONTAINER_CLASS_NAME, SUB_CATEGORY_CLASS_NAME } from "../common/internal/ClassNameDefinitions.js";
+import { useIModelChangeListener } from "../common/internal/UseIModelChangeListener.js";
+import { getClassesByView } from "../common/internal/Utils.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
-import { useIModelChangeListener } from "../common/UseIModelChangeListener.js";
 import { useTelemetryContext } from "../common/UseTelemetryContext.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
-import { CategoriesTreeIdsCache, getClassesByView } from "./internal/CategoriesTreeIdsCache.js";
+import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
 import { createCategoriesTreeVisibilityHandler } from "./internal/CategoriesTreeVisibilityHandler.js";
-import { DEFINITION_CONTAINER_CLASS, SUB_CATEGORY_CLASS } from "./internal/ClassNameDefinitions.js";
 
 import type { ReactNode } from "react";
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { Id64Array } from "@itwin/core-bentley";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { CategoriesTreeHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
+import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../common/internal/Types.js";
 
 type CategoriesTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError";
 type HierarchyFilteringPaths = Awaited<ReturnType<Required<VisibilityTreeProps>["getFilteredPaths"]>>;
@@ -171,8 +173,8 @@ export function useCategoriesTree({
           hierarchyConfig: hierarchyConfiguration,
         });
         onFilteredPathsChanged(paths);
-        const { categoryElementClass, categoryModelClass } = getClassesByView(viewType);
-        onCategoriesFiltered?.(await getCategoriesFromPaths(paths, getCategoriesTreeIdsCache(), categoryElementClass, categoryModelClass));
+        const { elementClass, modelClass } = getClassesByView(viewType);
+        onCategoriesFiltered?.(await getCategoriesFromPaths(paths, getCategoriesTreeIdsCache(), elementClass, modelClass));
         return paths;
       } catch (e) {
         const newError = e instanceof FilterLimitExceededError ? "tooManyFilterMatches" : "unknownFilterError";
@@ -207,15 +209,15 @@ async function getCategoriesFromPaths(
   idsCache: CategoriesTreeIdsCache,
   elementClassName: string,
   modelsClassName: string,
-): Promise<{ categories: CategoryInfo[] | undefined; models?: Id64Array }> {
+): Promise<{ categories: CategoryInfo[] | undefined; models?: Array<ModelId> }> {
   if (!paths) {
     return { categories: undefined };
   }
 
-  const rootFilteredElements = new Set<Id64String>();
-  const subModels = new Set<Id64String>();
+  const rootFilteredElementIds = new Set<ElementId>();
+  const subModelIds = new Set<ModelId>();
 
-  const categories = new Map<Id64String, Id64String[]>();
+  const categories = new Map<CategoryId, Array<SubCategoryId>>();
   for (const path of paths) {
     const currPath = HierarchyFilteringPath.normalize(path).path;
     if (currPath.length === 0) {
@@ -233,14 +235,14 @@ async function getCategoriesFromPaths(
         continue;
       }
       if (currentNode.className === elementClassName) {
-        rootFilteredElements.add(currentNode.id);
+        rootFilteredElementIds.add(currentNode.id);
         for (let j = i + 1; j < currPath.length; ++j) {
           const childNode = currPath[j];
           if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(childNode)) {
             continue;
           }
           if (childNode.className === modelsClassName) {
-            subModels.add(childNode.id);
+            subModelIds.add(childNode.id);
           }
         }
         break;
@@ -250,7 +252,7 @@ async function getCategoriesFromPaths(
 
     assert(lastNodeInfo !== undefined && HierarchyNodeIdentifier.isInstanceNodeIdentifier(lastNodeInfo.lastNode));
 
-    if (lastNodeInfo.lastNode.className === DEFINITION_CONTAINER_CLASS) {
+    if (lastNodeInfo.lastNode.className === DEFINITION_CONTAINER_CLASS_NAME) {
       const definitionContainerCategories = await idsCache.getAllContainedCategories([lastNodeInfo.lastNode.id]);
       for (const categoryId of definitionContainerCategories) {
         const value = categories.get(categoryId);
@@ -261,7 +263,7 @@ async function getCategoriesFromPaths(
       continue;
     }
 
-    if (lastNodeInfo.lastNode.className === SUB_CATEGORY_CLASS) {
+    if (lastNodeInfo.lastNode.className === SUB_CATEGORY_CLASS_NAME) {
       const secondToLastNode = lastNodeInfo.nodeIndex > 0 ? currPath[lastNodeInfo.nodeIndex - 1] : undefined;
       assert(secondToLastNode !== undefined && HierarchyNodeIdentifier.isInstanceNodeIdentifier(secondToLastNode));
 
@@ -281,8 +283,8 @@ async function getCategoriesFromPaths(
       entry.push(subCategory.id);
     }
   }
-  const rootElementModelMap = await idsCache.getFilteredElementsModels([...rootFilteredElements]);
-  const models = [...subModels, ...new Set(rootElementModelMap.values())];
+  const rootElementModelMap = await idsCache.getFilteredElementsModels([...rootFilteredElementIds]);
+  const models = [...subModelIds, ...new Set(rootElementModelMap.values())];
   return {
     categories: [...categories.entries()].map(([categoryId, subCategoryIds]) => ({
       categoryId,
