@@ -12,9 +12,6 @@ export type SubjectId = Id64String;
 export type ModelId = Id64String;
 
 /** @internal */
-export type SubModelId = Id64String;
-
-/** @internal */
 export type CategoryId = Id64String;
 
 /** @internal */

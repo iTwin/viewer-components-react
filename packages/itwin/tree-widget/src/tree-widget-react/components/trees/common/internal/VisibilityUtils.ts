@@ -6,22 +6,16 @@
 import { filter, from, map, mergeAll, mergeMap, of, reduce, startWith, toArray } from "rxjs";
 import { QueryRowFormat } from "@itwin/core-common";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
-import {
-  DRAWING_CATEGORY_CLASS_NAME,
-  GEOMETRIC_ELEMENT_2D_CLASS_NAME,
-  GEOMETRIC_ELEMENT_3D_CLASS_NAME,
-  SPATIAL_CATEGORY_CLASS_NAME,
-} from "./ClassNameDefinitions.js";
 import { reduceWhile } from "./Rxjs.js";
 import { createVisibilityStatus, getTooltipOptions } from "./Tooltip.js";
-import { releaseMainThreadOnItemsCount } from "./Utils.js";
+import { getClassesByView, releaseMainThreadOnItemsCount } from "./Utils.js";
 
 import type { Viewport } from "@itwin/core-frontend";
 import type { Observable, OperatorFunction } from "rxjs";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { NonPartialVisibilityStatus, Visibility } from "./Tooltip.js";
 import type { VisibilityStatus } from "../UseHierarchyVisibility.js";
-import type { ElementId, ModelId, SubModelId } from "./Types.js";
+import type { ElementId, ModelId } from "./Types.js";
 import type { CategoryInfo } from "../CategoriesVisibilityUtils.js";
 
 function mergeVisibilities(obs: Observable<Visibility>): Observable<Visibility | "empty"> {
@@ -97,7 +91,7 @@ export function filterSubModeledElementIds({
   doesSubModelExist,
 }: {
   doesSubModelExist: (elementId: Id64String) => Promise<boolean>;
-}): OperatorFunction<Array<ElementId>, Array<SubModelId>> {
+}): OperatorFunction<Array<ElementId>, Array<ModelId>> {
   return (obs) => {
     return obs.pipe(
       mergeAll(),
@@ -347,14 +341,23 @@ export function enableSubCategoryDisplay(viewport: Viewport, subCategoryId: Id64
 /** @internal */
 export async function loadCategoriesFromViewport(vp: Viewport) {
   // Query categories and add them to state
-  const selectUsedSpatialCategoryIds = `SELECT DISTINCT Category.Id as id from ${GEOMETRIC_ELEMENT_3D_CLASS_NAME} WHERE Category.Id IN (SELECT ECInstanceId from ${SPATIAL_CATEGORY_CLASS_NAME})`;
-  const selectUsedDrawingCategoryIds = `SELECT DISTINCT Category.Id as id from ${GEOMETRIC_ELEMENT_2D_CLASS_NAME} WHERE Model.Id=? AND Category.Id IN (SELECT ECInstanceId from ${DRAWING_CATEGORY_CLASS_NAME})`;
-  const ecsql = vp.view.is3d() ? selectUsedSpatialCategoryIds : selectUsedDrawingCategoryIds;
-  const ecsql2 = `SELECT ECInstanceId as id FROM ${vp.view.is3d() ? SPATIAL_CATEGORY_CLASS_NAME : DRAWING_CATEGORY_CLASS_NAME} WHERE ECInstanceId IN (${ecsql})`;
+  const { categoryClass, elementClass } = getClassesByView(vp.view.is3d() ? "3d" : "2d");
+  const ecsql = `
+    SELECT ECInstanceId as id
+    FROM ${categoryClass}
+    WHERE
+      ECInstanceId IN (
+        SELECT DISTINCT Category.Id
+        FROM ${elementClass}
+        WHERE
+          Category.Id IN (SELECT ECInstanceId FROM ${categoryClass})
+          ${vp.view.is3d() ? "" : "AND Model.Id=?"}
+      )
+  `;
 
   const categories: CategoryInfo[] = [];
 
-  const rows = await vp.iModel.createQueryReader(ecsql2, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }).toArray();
+  const rows = await vp.iModel.createQueryReader(ecsql, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }).toArray();
   (await vp.iModel.categories.getCategoryInfo(rows.map((row) => row.id))).forEach((val) => {
     categories.push({ categoryId: val.id, subCategoryIds: val.subCategories.size ? [...val.subCategories.keys()] : undefined });
   });

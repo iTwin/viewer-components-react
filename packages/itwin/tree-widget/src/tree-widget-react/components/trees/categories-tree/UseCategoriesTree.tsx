@@ -26,7 +26,7 @@ import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { CategoriesTreeHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
-import type { CategoryId, ElementId, ModelId, SubCategoryId, SubModelId } from "../common/internal/Types.js";
+import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../common/internal/Types.js";
 
 type CategoriesTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError";
 type HierarchyFilteringPaths = Awaited<ReturnType<Required<VisibilityTreeProps>["getFilteredPaths"]>>;
@@ -215,7 +215,7 @@ async function getCategoriesFromPaths(
   }
 
   const rootFilteredElementIds = new Set<ElementId>();
-  const subModelIds = new Set<SubModelId>();
+  const subModelIds = new Set<ModelId>();
 
   const categories = new Map<CategoryId, Array<SubCategoryId>>();
   for (const path of paths) {
