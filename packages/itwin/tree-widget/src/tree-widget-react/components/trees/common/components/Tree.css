@@ -6,4 +6,6 @@
 .tw-tree-renderer-container {
   height: 100%;
   padding-top: var(--iui-size-xs);
+  display: flex;
+  flex-direction: column;
 }

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable @itwin/no-internal */
 
-import { LocalizationContextProvider, TreeRenderer as PresentationTree } from "@itwin/presentation-hierarchies-react";
+import { TreeRenderer as PresentationTree } from "@itwin/presentation-hierarchies-react";
 import { useHierarchiesLocalization } from "../UseHierarchiesLocalization.js";
 
 /** @beta */
@@ -14,8 +14,13 @@ export type BaseTreeRendererProps = React.ComponentPropsWithoutRef<typeof Presen
 export function BaseTreeRenderer({ rootNodes, onNodeClick, expandNode, actions, ...props }: BaseTreeRendererProps) {
   const localizedStrings = useHierarchiesLocalization();
   return (
-    <LocalizationContextProvider localizedStrings={localizedStrings}>
-      <PresentationTree {...props} onNodeClick={onNodeClick} expandNode={expandNode} rootNodes={rootNodes} actions={actions} />
-    </LocalizationContextProvider>
+    <PresentationTree
+      {...props}
+      onNodeClick={onNodeClick}
+      localizedStrings={localizedStrings}
+      expandNode={expandNode}
+      rootNodes={rootNodes}
+      actions={actions}
+    />
   );
 }
