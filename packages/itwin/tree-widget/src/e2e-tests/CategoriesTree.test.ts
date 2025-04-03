@@ -77,10 +77,8 @@ test.describe("Categories tree", () => {
 
     await page.getByRole("button", { name: "Apply" }).click();
 
-    await takeScreenshot(page, treeWidget, { resetScroll: true });
-
     // wait for message to appear
-    await openErrorDropdown(treeWidget);
+    await openErrorDropdown(page, treeWidget);
 
     await takeScreenshot(page, treeWidget, { resetScroll: true });
   });
