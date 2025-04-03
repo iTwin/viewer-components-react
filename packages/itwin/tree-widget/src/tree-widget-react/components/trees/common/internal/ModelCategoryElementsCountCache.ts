@@ -6,13 +6,16 @@
 import { bufferTime, filter, firstValueFrom, mergeAll, mergeMap, ReplaySubject, Subject } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 
-import type { Subscription } from "rxjs";
 import type { Id64String } from "@itwin/core-bentley";
+import type { Subscription } from "rxjs";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import type { CategoryId, ModelId } from "./Types.js";
+
+type ModelCategoryKey = `${ModelId}-${CategoryId}`;
 
 /** @internal */
-export class ModelCategoryElementsCountCache {
-  private _cache = new Map<string, Subject<number>>();
+export class ModelCategoryElementsCountCache implements Disposable {
+  private _cache = new Map<ModelCategoryKey, Subject<number>>();
   private _requestsStream = new Subject<{ modelId: Id64String; categoryId: Id64String }>();
   private _subscription: Subscription;
 
@@ -29,7 +32,7 @@ export class ModelCategoryElementsCountCache {
       )
       .subscribe({
         next: ({ modelId, categoryId, elementsCount }) => {
-          const subject = this._cache.get(`${modelId}${categoryId}`);
+          const subject = this._cache.get(`${modelId}-${categoryId}`);
           assert(!!subject);
           subject.next(elementsCount);
         },
@@ -81,7 +84,7 @@ export class ModelCategoryElementsCountCache {
   }
 
   public async getCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Promise<number> {
-    const cacheKey = `${modelId}${categoryId}`;
+    const cacheKey: ModelCategoryKey = `${modelId}-${categoryId}`;
     let result = this._cache.get(cacheKey);
     if (result !== undefined) {
       return firstValueFrom(result);

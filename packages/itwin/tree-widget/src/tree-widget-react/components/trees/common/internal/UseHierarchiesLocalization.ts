@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useMemo } from "react";
-import { TreeWidget } from "../../../TreeWidget.js";
+import { TreeWidget } from "../../../../TreeWidget.js";
 
 import type { TreeRenderer, useIModelTree } from "@itwin/presentation-hierarchies-react";
 
@@ -13,6 +13,7 @@ type TreeRendererLocalizedStrings = NonNullable<Parameters<typeof TreeRenderer>[
 
 type UseHierarchiesLocalizationResult = UseTreeLocalizedStrings & TreeRendererLocalizedStrings;
 
+/** @internal */
 export function useHierarchiesLocalization(): UseHierarchiesLocalizationResult {
   const stringValues = Object.values(getLocalizedStrings());
   const localizedStrings = useMemo(getLocalizedStrings, stringValues);

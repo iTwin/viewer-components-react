@@ -8,7 +8,7 @@ import { expand, from, mergeMap } from "rxjs";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { waitFor } from "@testing-library/react";
-import { toVoidPromise } from "../../../../tree-widget-react/components/trees/common/Rxjs.js";
+import { toVoidPromise } from "../../../../tree-widget-react/components/trees/common/internal/Rxjs.js";
 import { ModelsTreeNode } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeNode.js";
 
 import type { Visibility } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";

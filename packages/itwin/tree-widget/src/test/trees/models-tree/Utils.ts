@@ -6,6 +6,13 @@
 import { concatMap, count, EMPTY, expand, firstValueFrom, from, toArray } from "rxjs";
 import sinon from "sinon";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
+import {
+  ELEMENT_CLASS_NAME,
+  GEOMETRIC_ELEMENT_3D_CLASS_NAME,
+  MODEL_CLASS_NAME,
+  SPATIAL_CATEGORY_CLASS_NAME,
+  SUBJECT_CLASS_NAME,
+} from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import { ModelsTreeIdsCache } from "../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import { createIModelAccess } from "../Common.js";
@@ -74,7 +81,7 @@ interface IdsCacheMockProps {
 
 export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCache {
   return sinon.createStubInstance(ModelsTreeIdsCache, {
-    getChildSubjectIds: sinon.stub<[string[]], Promise<string[]>>().callsFake(async (subjectIds) => {
+    getChildSubjectIds: sinon.stub<[Id64Array], Promise<Id64Array>>().callsFake(async (subjectIds) => {
       const obs = from(subjectIds).pipe(
         concatMap((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
         expand((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
@@ -83,7 +90,7 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
       return firstValueFrom(obs);
     }),
     getChildSubjectModelIds: sinon.stub(),
-    getSubjectModelIds: sinon.stub<[string[]], Promise<string[]>>().callsFake(async (subjectIds) => {
+    getSubjectModelIds: sinon.stub<[Id64Array], Promise<Id64Array>>().callsFake(async (subjectIds) => {
       const obs = from(subjectIds).pipe(
         expand((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
         concatMap((id) => props?.subjectModels?.get(id) ?? EMPTY),
@@ -91,7 +98,7 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
       );
       return firstValueFrom(obs);
     }),
-    getModelCategories: sinon.stub<[Id64String], Promise<Id64Array>>().callsFake(async (modelId) => {
+    getModelCategoryIds: sinon.stub<[Id64String], Promise<Id64Array>>().callsFake(async (modelId) => {
       return props?.modelCategories?.get(modelId) ?? [];
     }),
     getModelElementCount: sinon.stub<[Id64String], Promise<number>>().callsFake(async (modelId) => {
@@ -113,7 +120,7 @@ export function createSubjectHierarchyNode(...ids: Id64String[]): NonGroupingHie
   return {
     key: {
       type: "instances",
-      instanceKeys: ids.map((id) => ({ className: "Bis:Subject", id })),
+      instanceKeys: ids.map((id) => ({ className: SUBJECT_CLASS_NAME, id })),
     },
     children: false,
     label: "",
@@ -127,7 +134,7 @@ export function createModelHierarchyNode(modelId?: Id64String, hasChildren?: boo
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: "bis:Model", id: modelId ?? "" }],
+      instanceKeys: [{ className: MODEL_CLASS_NAME, id: modelId ?? "" }],
     },
     children: !!hasChildren,
     label: "",
@@ -142,7 +149,7 @@ export function createCategoryHierarchyNode(modelId?: Id64String, categoryId?: I
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: "bis:SpatialCategory", id: categoryId ?? "" }],
+      instanceKeys: [{ className: SPATIAL_CATEGORY_CLASS_NAME, id: categoryId ?? "" }],
     },
     children: !!hasChildren,
     label: "",
@@ -163,7 +170,7 @@ export function createElementHierarchyNode(props: {
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: "bis:GeometricalElement3d", id: props.elementId ?? "" }],
+      instanceKeys: [{ className: GEOMETRIC_ELEMENT_3D_CLASS_NAME, id: props.elementId ?? "" }],
     },
     children: !!props.hasChildren,
     label: "",
@@ -185,7 +192,7 @@ export function createClassGroupingHierarchyNode({
   className?: string;
   parentKeys?: HierarchyNodeKey[];
 }): GroupingHierarchyNode & { key: ClassGroupingNodeKey } {
-  const className = props.className ?? "Bis:Element";
+  const className = props.className ?? ELEMENT_CLASS_NAME;
   return {
     key: {
       type: "class-grouping",

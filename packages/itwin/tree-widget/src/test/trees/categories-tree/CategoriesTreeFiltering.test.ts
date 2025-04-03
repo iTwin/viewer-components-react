@@ -14,6 +14,7 @@ import {
   defaultHierarchyConfiguration,
 } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
+import { DEFINITION_MODEL_CLASS_NAME } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import {
   buildIModel,
   insertDefinitionContainer,
@@ -53,7 +54,7 @@ describe("Categories tree", () => {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer", userLabel: "Test" });
-        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+        const definitionModel = insertSubModel({ builder, classFullName: DEFINITION_MODEL_CLASS_NAME, modeledElementId: definitionContainer.id });
         const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id });
         insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
 
@@ -62,7 +63,7 @@ describe("Categories tree", () => {
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
-      const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      using idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
@@ -78,14 +79,14 @@ describe("Categories tree", () => {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+        const definitionModel = insertSubModel({ builder, classFullName: DEFINITION_MODEL_CLASS_NAME, modeledElementId: definitionContainer.id });
         const definitionContainerChild = insertDefinitionContainer({
           builder,
           codeValue: "DefinitionContainerChild",
           userLabel: "Test",
           modelId: definitionModel.id,
         });
-        const definitionModelChild = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerChild.id });
+        const definitionModelChild = insertSubModel({ builder, classFullName: DEFINITION_MODEL_CLASS_NAME, modeledElementId: definitionContainerChild.id });
         const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
         insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
 
@@ -94,7 +95,7 @@ describe("Categories tree", () => {
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
-      const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      using idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
@@ -110,14 +111,14 @@ describe("Categories tree", () => {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer", userLabel: "Test" });
-        insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+        insertSubModel({ builder, classFullName: DEFINITION_MODEL_CLASS_NAME, modeledElementId: definitionContainer.id });
         const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
         insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
       });
       const { imodel } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
-      const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      using idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
@@ -133,7 +134,7 @@ describe("Categories tree", () => {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+        const definitionModel = insertSubModel({ builder, classFullName: DEFINITION_MODEL_CLASS_NAME, modeledElementId: definitionContainer.id });
         const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", userLabel: "Test", modelId: definitionModel.id });
         insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
 
@@ -142,7 +143,7 @@ describe("Categories tree", () => {
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
-      const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      using idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
@@ -158,7 +159,7 @@ describe("Categories tree", () => {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
-        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+        const definitionModel = insertSubModel({ builder, classFullName: DEFINITION_MODEL_CLASS_NAME, modeledElementId: definitionContainer.id });
         const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id });
         insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
         const subCategory1 = insertSubCategory({ builder, codeValue: "SubCategory1", parentCategoryId: category.id, modelId: definitionModel.id });
@@ -168,7 +169,7 @@ describe("Categories tree", () => {
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
-      const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      using idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
@@ -196,7 +197,7 @@ describe("Categories tree", () => {
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
-      const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      using idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -235,7 +236,7 @@ describe("Categories tree", () => {
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
-      const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      using idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -271,7 +272,7 @@ describe("Categories tree", () => {
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
-      const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      using idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -311,7 +312,7 @@ describe("Categories tree", () => {
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
-      const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      using idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -360,7 +361,7 @@ describe("Categories tree", () => {
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "2d";
-      const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      using idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -399,7 +400,7 @@ describe("Categories tree", () => {
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "2d";
-      const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      using idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({

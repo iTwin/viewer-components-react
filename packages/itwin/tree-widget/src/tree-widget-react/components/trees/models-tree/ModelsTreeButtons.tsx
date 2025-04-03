@@ -7,8 +7,13 @@ import { useEffect, useMemo, useState } from "react";
 import { IconButton } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
-import { hideAllModels, invertAllModels, showAll } from "../common/Utils.js";
-import { areAllModelsVisible, toggleModels } from "./internal/ModelsTreeVisibilityHandler.js";
+import {
+  ELEMENT_CLASS_NAME,
+  GEOMETRIC_ELEMENT_3D_CLASS_NAME,
+  GEOMETRIC_MODEL_3D_CLASS_NAME,
+  INFORMATION_PARTITION_ELEMENT_CLASS_NAME,
+} from "../common/internal/ClassNameDefinitions.js";
+import { areAllModelsVisible, hideAllModels, invertAllModels, showAll, toggleModels } from "../common/Utils.js";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
@@ -87,12 +92,12 @@ function useAvailableModels(imodel: IModelConnection): ModelInfo[] {
 
 async function queryModelsForHeaderActions(iModel: IModelConnection) {
   const queryParams: ModelQueryParams = {
-    from: "BisCore.GeometricModel3d",
+    from: GEOMETRIC_MODEL_3D_CLASS_NAME,
     where: `
         EXISTS (
           SELECT 1
-          FROM BisCore.Element e
-          WHERE e.ECClassId IS (BisCore.GeometricElement3d, BisCore.InformationPartitionElement)
+          FROM ${ELEMENT_CLASS_NAME} e
+          WHERE e.ECClassId IS (${GEOMETRIC_ELEMENT_3D_CLASS_NAME}, ${INFORMATION_PARTITION_ELEMENT_CLASS_NAME})
             AND e.ECInstanceId = GeometricModel3d.ModeledElement.Id
         )
       `,

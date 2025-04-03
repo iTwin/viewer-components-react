@@ -23,6 +23,7 @@ interface ExternalSourcesTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
 }
 
+/** @internal */
 export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
   private _impl: HierarchyDefinition;
   private _selectQueryFactory: NodesQueryClauseFactory;

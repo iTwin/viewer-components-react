@@ -5,19 +5,20 @@
 
 import { assert } from "@itwin/core-bentley";
 import { HierarchyFilteringPath, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
-import { SUB_CATEGORY_CLASS } from "./ClassNameDefinitions.js";
+import { SUB_CATEGORY_CLASS_NAME } from "../../common/internal/ClassNameDefinitions.js";
 
-import type { Id64String } from "@itwin/core-bentley";
+import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
 import type { CategoriesTreeIdsCache } from "./CategoriesTreeIdsCache.js";
+import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../../common/internal/Types.js";
 
 interface FilteredTreeRootNode {
   children: Map<Id64String, FilteredTreeNode>;
 }
 
 interface BaseFilteredTreeNode {
-  id: string;
+  id: Id64String;
   children?: Map<Id64String, FilteredTreeNode>;
   isFilterTarget: boolean;
 }
@@ -57,35 +58,38 @@ export interface FilteredTree {
   getVisibilityChangeTargets(node: HierarchyNode): VisibilityChangeTargets;
 }
 
-type CategoryKey = `${Id64String}-${Id64String}`;
-type SubCategoryKey = `${Id64String}-${Id64String}`;
+type CategoryKey = `${ModelId}-${CategoryId}`;
+type SubCategoryKey = `${CategoryId}-${SubCategoryId}`;
 
-function createCategoryKey(modelId: string | undefined, categoryId: string): CategoryKey {
+function createCategoryKey(modelId: Id64String | undefined, categoryId: Id64String): CategoryKey {
   return `${modelId ?? ""}-${categoryId}`;
 }
 
-function createSubCategoryKey(categoryId: string, subCategoryId: string): SubCategoryKey {
+function createSubCategoryKey(categoryId: Id64String, subCategoryId: Id64String): SubCategoryKey {
   return `${categoryId}-${subCategoryId}`;
 }
 
+/** @internal */
 export function parseCategoryKey(key: CategoryKey): { modelId: Id64String | undefined; categoryId: Id64String } {
   const [modelId, categoryId] = key.split("-");
   return { modelId: modelId !== "" ? modelId : undefined, categoryId };
 }
 
+/** @internal */
 export function parseSubCategoryKey(key: SubCategoryKey) {
   const [categoryId, subCategoryId] = key.split("-");
   return { categoryId, subCategoryId };
 }
 
 interface VisibilityChangeTargets {
-  definitionContainers?: Set<Id64String>;
-  models?: Set<Id64String>;
+  definitionContainerIds?: Id64Set;
+  modelIds?: Id64Set;
   categories?: Set<CategoryKey>;
-  elements?: Map<CategoryKey, Set<Id64String>>;
+  elements?: Map<CategoryKey, Set<ElementId>>;
   subCategories?: Set<SubCategoryKey>;
 }
 
+/** @internal */
 export async function createFilteredTree(props: {
   imodelAccess: ECClassHierarchyInspector;
   filteringPaths: HierarchyFilteringPath[];
@@ -212,10 +216,10 @@ function collectVisibilityChangeTargets(changeTargets: VisibilityChangeTargets, 
 function addTarget(filterTargets: VisibilityChangeTargets, node: FilteredTreeNode) {
   switch (node.type) {
     case "definitionContainer":
-      (filterTargets.definitionContainers ??= new Set()).add(node.id);
+      (filterTargets.definitionContainerIds ??= new Set()).add(node.id);
       return;
     case "model":
-      (filterTargets.models ??= new Set()).add(node.id);
+      (filterTargets.modelIds ??= new Set()).add(node.id);
       return;
     case "subCategory":
       (filterTargets.subCategories ??= new Set()).add(createSubCategoryKey(node.categoryId, node.id));
@@ -242,7 +246,7 @@ function createFilteredTreeNode({
   parent,
 }: {
   type: FilteredTreeNode["type"];
-  id: string;
+  id: Id64String;
   isFilterTarget: boolean;
   parent: FilteredTreeNode | FilteredTreeRootNode;
 }): FilteredTreeNode {
@@ -315,7 +319,7 @@ async function getType(
   categoryElementClass: string,
   categoryModelClassName: string,
 ) {
-  if (await hierarchyChecker.classDerivesFrom(className, SUB_CATEGORY_CLASS)) {
+  if (await hierarchyChecker.classDerivesFrom(className, SUB_CATEGORY_CLASS_NAME)) {
     return "subCategory";
   }
   if (await hierarchyChecker.classDerivesFrom(className, categoryElementClass)) {

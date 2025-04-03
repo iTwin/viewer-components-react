@@ -7,6 +7,7 @@ import { useLayoutEffect, useState } from "react";
 
 import type { PropsWithChildren } from "react";
 
+/** @internal */
 export function Delayed({ show, children }: PropsWithChildren<{ show: boolean }>) {
   const [visible, setVisible] = useState(false);
 

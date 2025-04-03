@@ -48,6 +48,7 @@ export function createFakeSinonViewport(
     isSpatialView: sinon.fake.returns(true),
     viewsCategory: sinon.fake.returns(true),
     viewsModel: sinon.fake.returns(true),
+    is2d: sinon.fake.returns(false) as any,
     ...props?.view,
   };
 
