@@ -166,7 +166,7 @@ export async function expandNode(page: Page, node: Locator) {
 }
 
 export async function getErrorDropdown(treeWidget: Locator, errorAmount: number = 1) {
-  const dropdown = treeWidget.getByRole("button", { name: `${errorAmount} issues found` });
+  const dropdown = treeWidget.getByRole("button", { name: `${errorAmount} issue(s) found` });
   await dropdown.waitFor();
   return dropdown;
 }
