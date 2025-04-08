@@ -92,7 +92,7 @@ test.describe("Categories tree", () => {
     // wait for non searched for nodes to disappear
     await locateNode(treeWidget, "PipeSupport")
       .getByRole("button", { name: "Visible: Category display enabled through category selector", includeHidden: true })
-      .waitFor({ state: "attached" });
+      .waitFor({ state: "hidden" });
     await locateNode(treeWidget, "Equipment").waitFor({ state: "hidden" });
     await takeScreenshot(page, treeWidget);
   });
