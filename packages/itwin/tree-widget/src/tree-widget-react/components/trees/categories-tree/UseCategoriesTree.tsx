@@ -194,11 +194,11 @@ export function useCategoriesTree({
       getHierarchyDefinition,
       getFilteredPaths,
       visibilityHandlerFactory,
-      emptyTreeContent: getEmptyTreeContentComponent(filter, filteringError, emptyTreeContent),
-      highlight: filter ? { text: filter } : undefined,
+      emptyTreeContent: useMemo(() => getEmptyTreeContentComponent(filter, filteringError, emptyTreeContent), [filter, filteringError, emptyTreeContent]),
+      highlight: useMemo(() => (filter ? { text: filter } : undefined), [filter]),
     },
     rendererProps: {
-      getDecorations: (node) => <CategoriesTreeIcon node={node} />,
+      getDecorations: useCallback((node) => <CategoriesTreeIcon node={node} />, []),
       getSublabel,
     },
   };

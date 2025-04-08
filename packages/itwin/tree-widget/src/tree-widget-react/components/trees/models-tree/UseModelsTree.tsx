@@ -215,13 +215,13 @@ export function useModelsTree({
       visibilityHandlerFactory,
       getHierarchyDefinition,
       getFilteredPaths: getPaths,
-      emptyTreeContent: getEmptyTreeContentComponent(filter, filteringError, emptyTreeContent),
-      highlight: filter ? { text: filter } : undefined,
+      emptyTreeContent: useMemo(() => getEmptyTreeContentComponent(filter, filteringError, emptyTreeContent), [filter, filteringError, emptyTreeContent]),
+      highlight: useMemo(() => (filter ? { text: filter } : undefined), [filter]),
       selectionPredicate: nodeSelectionPredicate,
     },
     rendererProps: {
       // onDoubleClick,
-      getDecorations: (node) => <ModelsTreeIcon node={node} />,
+      getDecorations: useCallback((node) => <ModelsTreeIcon node={node} />, []),
     },
   };
 }
