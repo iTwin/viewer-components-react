@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Categories tree now reacts to Category visibility changes from Models tree.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "100586436+JonasDov@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
