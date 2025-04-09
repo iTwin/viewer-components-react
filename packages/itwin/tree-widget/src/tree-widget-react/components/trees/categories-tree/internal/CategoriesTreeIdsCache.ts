@@ -5,7 +5,7 @@
 
 import { DEFINITION_CONTAINER_CLASS_NAME, MODEL_CLASS_NAME, SUB_CATEGORY_CLASS_NAME } from "../../common/internal/ClassNameDefinitions.js";
 import { getClassesByView, getDistinctMapValues } from "../../common/internal/Utils.js";
-import { ModelCategoryElementsCountCache } from "../../common/internal/WithoutParents/ModelCategoryElementsCountCache.js";
+import { ModelCategoryElementsCountCache } from "../../common/internal/withoutParents/ModelCategoryElementsCountCache.js";
 
 import type { CategoryId, DefinitionContainerId, ElementId, ModelId, SubCategoryId } from "../../common/internal/Types.js";
 import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";

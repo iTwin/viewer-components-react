@@ -13,7 +13,7 @@ import {
   SUBJECT_CLASS_NAME,
 } from "../../common/internal/ClassNameDefinitions.js";
 import { pushToMap } from "../../common/internal/Utils.js";
-import { ModelCategoryElementsCountCache } from "../../common/internal/WithParents/ModelCategoryElementsCountCache.js";
+import { ModelCategoryElementsCountCache } from "../../common/internal/withParents/ModelCategoryElementsCountCache.js";
 
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";

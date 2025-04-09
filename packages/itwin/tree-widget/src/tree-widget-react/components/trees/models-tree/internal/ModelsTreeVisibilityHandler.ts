@@ -48,7 +48,7 @@ import {
   getVisibilityFromAlwaysAndNeverDrawnElementsImpl,
   mergeVisibilityStatuses,
 } from "../../common/internal/VisibilityUtils.js";
-import { AlwaysAndNeverDrawnElementInfo } from "../../common/internal/WithParents/AlwaysAndNeverDrawnElementInfo.js";
+import { AlwaysAndNeverDrawnElementInfo } from "../../common/internal/withParents/AlwaysAndNeverDrawnElementInfo.js";
 import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility.js";
 import { createFilteredTree, parseCategoryKey } from "./FilteredTree.js";
 import { ModelsTreeNode } from "./ModelsTreeNode.js";
@@ -63,7 +63,7 @@ import type { Viewport } from "@itwin/core-frontend";
 import type { NonPartialVisibilityStatus } from "../../common/internal/Tooltip.js";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { FilteredTree } from "./FilteredTree.js";
-import type { CategoryAlwaysOrNeverDrawnElementsQueryProps } from "../../common/internal/WithParents/AlwaysAndNeverDrawnElementInfo.js";
+import type { CategoryAlwaysOrNeverDrawnElementsQueryProps } from "../../common/internal/withParents/AlwaysAndNeverDrawnElementInfo.js";
 import type { IVisibilityChangeEventListener } from "../../common/internal/VisibilityChangeEventListener.js";
 import type { ElementId } from "../../common/internal/Types.js";
 
