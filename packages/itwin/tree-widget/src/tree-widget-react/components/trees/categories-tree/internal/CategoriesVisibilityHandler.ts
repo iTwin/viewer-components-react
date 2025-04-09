@@ -31,6 +31,7 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
     this._viewport = props.viewport;
     this._viewport.onDisplayStyleChanged.addListener(this.onDisplayStyleChanged);
     this._viewport.onViewedCategoriesChanged.addListener(this.onViewedCategoriesChanged);
+    this._viewport.onViewedCategoriesPerModelChanged.addListener(this.onViewedCategoriesPerModelChanged);
   }
 
   public dispose() {
@@ -40,6 +41,7 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
   public [Symbol.dispose]() {
     this._viewport.onDisplayStyleChanged.removeListener(this.onDisplayStyleChanged);
     this._viewport.onViewedCategoriesChanged.removeListener(this.onViewedCategoriesChanged);
+    this._viewport.onViewedCategoriesPerModelChanged.removeListener(this.onViewedCategoriesPerModelChanged);
     clearTimeout(this._pendingVisibilityChange);
   }
 
@@ -231,13 +233,15 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
     return this.changeCategoryState(childCategories, on, on);
   }
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   private onDisplayStyleChanged = () => {
     this.onVisibilityChangeInternal();
   };
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   private onViewedCategoriesChanged = () => {
+    this.onVisibilityChangeInternal();
+  };
+
+  private onViewedCategoriesPerModelChanged = () => {
     this.onVisibilityChangeInternal();
   };
 
