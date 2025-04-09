@@ -31,7 +31,6 @@ import {
 import { assert, Id64 } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
-import { AlwaysAndNeverDrawnElementInfo } from "../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
 import { toVoidPromise } from "../../common/internal/Rxjs.js";
 import { createVisibilityStatus, getTooltipOptions } from "../../common/internal/Tooltip.js";
 import { getClassesByView, getDistinctMapValues, releaseMainThreadOnItemsCount, setDifference, setIntersection } from "../../common/internal/Utils.js";
@@ -47,11 +46,12 @@ import {
   getVisibilityFromAlwaysAndNeverDrawnElementsImpl,
   mergeVisibilityStatuses,
 } from "../../common/internal/VisibilityUtils.js";
+import { AlwaysAndNeverDrawnElementInfo } from "../../common/internal/WithoutParents/AlwaysAndNeverDrawnElementInfo.js";
 import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility.js";
 import { CategoriesTreeNode } from "./CategoriesTreeNode.js";
 import { createFilteredTree, parseCategoryKey, parseSubCategoryKey } from "./FilteredTree.js";
 
-import type { CategoryAlwaysOrNeverDrawnElementsQueryProps } from "../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
+import type { CategoryAlwaysOrNeverDrawnElementsQueryProps } from "../../common/internal/WithoutParents/AlwaysAndNeverDrawnElementInfo.js";
 import type { GetVisibilityFromAlwaysAndNeverDrawnElementsProps } from "../../common/internal/VisibilityUtils.js";
 import type { Observable, Subscription } from "rxjs";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";

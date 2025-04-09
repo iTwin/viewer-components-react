@@ -20,13 +20,23 @@ interface VisibilityStatusOptions {
 }
 
 /** @internal */
-export function createVisibilityStatus(status: "visible" | "hidden", options?: VisibilityStatusOptions): NonPartialVisibilityStatus;
-export function createVisibilityStatus(status: "visible" | "hidden" | "partial" | "disabled", options?: VisibilityStatusOptions): VisibilityStatus;
-export function createVisibilityStatus(status: Visibility | "disabled", { useTooltip }: VisibilityStatusOptions = {}): VisibilityStatus {
+export function createVisibilityStatus(
+  status: "visible" | "hidden",
+  options?: VisibilityStatusOptions,
+): NonPartialVisibilityStatus & { tooltipStringId: string | undefined };
+export function createVisibilityStatus(
+  status: "visible" | "hidden" | "partial" | "disabled",
+  options?: VisibilityStatusOptions,
+): VisibilityStatus & { tooltipStringId: string | undefined };
+export function createVisibilityStatus(
+  status: Visibility | "disabled",
+  { useTooltip }: VisibilityStatusOptions = {},
+): VisibilityStatus & { tooltipStringId: string | undefined } {
   return {
     state: status === "disabled" ? "hidden" : status,
     isDisabled: status === "disabled",
     tooltip: useTooltip === false ? undefined : createTooltip(status, useTooltip),
+    tooltipStringId: typeof useTooltip === "string" ? useTooltip : undefined,
   };
 }
 

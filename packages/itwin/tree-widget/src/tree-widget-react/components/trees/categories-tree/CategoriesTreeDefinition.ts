@@ -9,6 +9,7 @@ import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition,
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import {
   DEFINITION_CONTAINER_CLASS_NAME,
+  ELEMENT_CLASS_NAME,
   INFORMATION_PARTITION_ELEMENT_CLASS_NAME,
   MODEL_CLASS_NAME,
   SUB_CATEGORY_CLASS_NAME,
@@ -511,8 +512,10 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                     1,
                     IFNULL((
                       SELECT 1
-                      FROM ${this._categoryElementClass} ce
-                      WHERE ce.Parent.Id = this.ECInstanceId
+                      FROM ${ELEMENT_CLASS_NAME} ce
+                      WHERE
+                        ce.Parent.Id = this.ECInstanceId
+                        AND ce.ECClassId IS (${this._categoryElementClass})
                       LIMIT 1
                     ), 0)
                   )
@@ -570,9 +573,14 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                   selector: `
                     IFNULL((
                       SELECT 1
-                      FROM ${this._categoryElementClass} ce
+                      FROM ${ELEMENT_CLASS_NAME} ce
                       JOIN ${MODEL_CLASS_NAME} m ON ce.Model.Id = m.ECInstanceId
-                      WHERE ce.Parent.Id = this.ECInstanceId OR (ce.Model.Id = this.ECInstanceId AND m.IsPrivate = false)
+                      WHERE
+                        ce.ECClassId IS (${this._categoryElementClass})
+                        AND (
+                          ce.Parent.Id = this.ECInstanceId
+                          OR (ce.Model.Id = this.ECInstanceId AND m.IsPrivate = false)
+                        )
                       LIMIT 1
                     ), 0)
                   `,

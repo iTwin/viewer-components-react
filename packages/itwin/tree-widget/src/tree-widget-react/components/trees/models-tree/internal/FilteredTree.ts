@@ -10,7 +10,7 @@ import { CATEGORY_CLASS_NAME, MODEL_CLASS_NAME, SUBJECT_CLASS_NAME } from "../..
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
-import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
+import type { CategoryId, ElementId, ModelId, ParentId } from "../../common/internal/Types.js";
 
 interface FilteredTreeRootNode {
   children: Map<Id64String, FilteredTreeNode>;
@@ -29,12 +29,14 @@ interface GenericFilteredTreeNode extends BaseFilteredTreeNode {
 interface CategoryFilteredTreeNode extends BaseFilteredTreeNode {
   type: "category";
   modelId: Id64String;
+  parentId: ElementId | undefined;
 }
 
 interface ElementFilteredTreeNode extends BaseFilteredTreeNode {
   type: "element";
   modelId: Id64String;
   categoryId: Id64String;
+  parentId: ElementId | undefined;
 }
 
 type FilteredTreeNode = GenericFilteredTreeNode | CategoryFilteredTreeNode | ElementFilteredTreeNode;
@@ -43,16 +45,15 @@ export interface FilteredTree {
   getVisibilityChangeTargets(node: HierarchyNode): VisibilityChangeTargets;
 }
 
-type CategoryKey = `${ModelId}-${CategoryId}`;
+type CategoryKey = `${ModelId}-${ParentId}-${CategoryId}`;
 
-function createCategoryKey(modelId: Id64String, categoryId: Id64String): CategoryKey {
-  return `${modelId}-${categoryId}`;
+function createCategoryKey(modelId: Id64String, categoryId: Id64String, parentId: ParentId | undefined): CategoryKey {
+  return `${modelId}-${parentId ?? ""}-${categoryId}`;
 }
 
-/** @internal */
 export function parseCategoryKey(key: CategoryKey) {
-  const [modelId, categoryId] = key.split("-");
-  return { modelId, categoryId };
+  const [modelId, parentId, categoryId] = key.split("-");
+  return { modelId, categoryId, parentId: parentId !== "" ? parentId : undefined };
 }
 
 interface VisibilityChangeTargets {
@@ -173,10 +174,10 @@ function addTarget(filterTargets: VisibilityChangeTargets, node: FilteredTreeNod
       (filterTargets.modelIds ??= new Set()).add(node.id);
       return;
     case "category":
-      (filterTargets.categories ??= new Set()).add(createCategoryKey(node.modelId, node.id));
+      (filterTargets.categories ??= new Set()).add(createCategoryKey(node.modelId, node.id, node.parentId));
       return;
     case "element":
-      const categoryKey = createCategoryKey(node.modelId, node.categoryId);
+      const categoryKey = createCategoryKey(node.modelId, node.categoryId, node.parentId);
       const elements = (filterTargets.elements ??= new Map()).get(categoryKey);
       if (elements) {
         elements.add(node.id);
@@ -207,12 +208,13 @@ function createFilteredTreeNode({
   }
 
   if (type === "category") {
-    assert("type" in parent && parent.type === "model");
+    assert("id" in parent);
     return {
       id,
       isFilterTarget,
       type,
-      modelId: parent.id,
+      modelId: "modelId" in parent ? parent.modelId : parent.id,
+      parentId: parent.id,
     };
   }
 
@@ -223,6 +225,7 @@ function createFilteredTreeNode({
       type,
       modelId: parent.modelId,
       categoryId: parent.id,
+      parentId: parent.parentId,
     };
   }
 
@@ -233,6 +236,7 @@ function createFilteredTreeNode({
       type,
       modelId: parent.modelId,
       categoryId: parent.categoryId,
+      parentId: parent.id,
     };
   }
 

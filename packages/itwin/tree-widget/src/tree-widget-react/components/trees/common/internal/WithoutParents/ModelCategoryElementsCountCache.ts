@@ -9,7 +9,7 @@ import { assert } from "@itwin/core-bentley";
 import type { Id64String } from "@itwin/core-bentley";
 import type { Subscription } from "rxjs";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import type { CategoryId, ModelId } from "./Types.js";
+import type { CategoryId, ModelId } from "../Types.js";
 
 type ModelCategoryKey = `${ModelId}-${CategoryId}`;
 
