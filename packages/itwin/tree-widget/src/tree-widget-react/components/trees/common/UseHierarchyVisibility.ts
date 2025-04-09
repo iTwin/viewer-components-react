@@ -63,7 +63,7 @@ export function useHierarchyVisibility({
 }: UseHierarchyVisibilityProps): TreeItemVisibilityButtonProps & { triggerRefresh: () => void } {
   const visibilityStatusMap = useRef(new Map<string, { node: PresentationHierarchyNode; status: VisibilityStatus; needsRefresh: boolean }>());
   const [state, setState] = useState<TreeItemVisibilityButtonProps & { triggerRefresh: () => void }>({
-    getVisibilityButtonState: () => ({ state: "hidden", isDisabled: true }),
+    getVisibilityButtonState: () => ({ state: "visible", isDisabled: true }),
     onVisibilityButtonClick: () => {},
     triggerRefresh: () => {},
   });
@@ -166,7 +166,7 @@ function createStateGetter(
     const entry = map.current.get(node.id);
     if (entry === undefined) {
       calculateVisibility(node);
-      return { state: "hidden", isDisabled: true };
+      return { state: "visible", isDisabled: true };
     }
     if (entry.needsRefresh) {
       calculateVisibility(node);

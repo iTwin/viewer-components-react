@@ -4,7 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 .tw-tree-renderer-container {
-  overflow: auto;
   height: 100%;
   padding-top: var(--iui-size-xs);
+  display: flex;
+  flex-direction: column;
 }

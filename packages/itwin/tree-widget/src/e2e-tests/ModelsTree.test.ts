@@ -7,6 +7,7 @@ import type { Locator } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import {
   expandNode,
+  getErrorDropdown,
   initTreeWidgetTest,
   locateInstanceFilter,
   locateNode,
@@ -114,8 +115,9 @@ test.describe("Models tree", () => {
     await page.getByRole("button", { name: "Apply" }).click();
 
     // wait for message to appear
-    await treeWidget.getByText("No child nodes match current filter").waitFor();
-
+    const errorDropdown = await getErrorDropdown(treeWidget);
+    await takeScreenshot(page, treeWidget, { resetScroll: true });
+    await errorDropdown.click();
     await takeScreenshot(page, treeWidget, { resetScroll: true });
   });
 

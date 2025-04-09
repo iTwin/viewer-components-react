@@ -213,12 +213,15 @@
     "other": "Other",
     "loading": "Loading...",
     "filterHierarchyLevel": "Apply filter",
-    "clearHierarchyLevelFilter": "Clear active filter",
-    "noFilteredChildren": "No child nodes match current filter",
-    "resultLimitExceeded": "There are more items than allowed limit of {{limit}}.",
-    "resultLimitExceededWithFiltering": "Please provide <link>additional filtering</link> - there are more items than allowed limit of {{limit}}.",
-    "increaseHierarchyLimit": "<link>Increase the hierarchy level size limit to {{limit}}.</link>",
-    "increaseHierarchyLimitWithFiltering": "Or, <link>increase the hierarchy level size limit to {{limit}}.</link>",
+    "filterHierarchyLevelActiveDescription": "Filter is applied",
+    "noFilteredChildrenChangeFilter": "Change filter",
+    "failedToCreateHierarchy": "Failed to create hierarchy for {{node}}.",
+    "clearHierarchyLevelFilter": "Clear active filter.",
+    "noFilteredChildren": "No matches for current filter for {{node}}.",
+    "resultLimitExceeded": "The hierarchy for {{node}} contains {{limit}}+ items. Try using filters or increase the limit.",
+    "issuesFound": "issue(s) found",
+    "increaseHierarchyLimit": "Increase limit to {{limit}}",
+    "increaseHierarchyLimitWithFiltering": "Add Filter",
     "retry": "Retry"
   }
 }

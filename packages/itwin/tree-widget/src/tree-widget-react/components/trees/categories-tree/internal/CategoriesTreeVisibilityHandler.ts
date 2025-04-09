@@ -745,14 +745,11 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
             }),
           );
         }),
-        mergeVisibilityStatuses(
-          {
-            visible: undefined,
-            hidden: undefined,
-            partial: undefined,
-          },
-          true,
-        ),
+        mergeVisibilityStatuses({
+          visible: undefined,
+          hidden: undefined,
+          partial: undefined,
+        }),
       );
     });
     return createVisibilityHandlerResult(this, { node }, result, undefined);

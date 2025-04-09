@@ -45,9 +45,9 @@ describe("useHierarchyVisibility", () => {
     visibilityHandler.getVisibilityStatus.resolves({ state: "visible" });
 
     act(() => {
-      // expect initial state to be `off` and disabled
+      // expect initial state to be visible and disabled
       const state = result.current.getVisibilityButtonState(node);
-      expect(state.state).to.be.eq("hidden");
+      expect(state.state).to.be.eq("visible");
       expect(state.isDisabled).to.be.true;
     });
 
@@ -56,6 +56,7 @@ describe("useHierarchyVisibility", () => {
       expect(visibilityHandler.getVisibilityStatus).to.be.called;
       const state = result.current.getVisibilityButtonState(node);
       expect(state.state).to.be.eq("visible");
+      expect(state.isDisabled).to.be.undefined;
     });
 
     expect(result.current.getVisibilityButtonState(node).state).to.be.eq("visible");
@@ -70,9 +71,9 @@ describe("useHierarchyVisibility", () => {
     visibilityHandler.getVisibilityStatus.resolves({ state: "visible" });
 
     act(() => {
-      // expect initial state to be `off` and disabled
+      // expect initial state to be visible and disabled
       const state = result.current.getVisibilityButtonState(node);
-      expect(state.state).to.be.eq("hidden");
+      expect(state.state).to.be.eq("visible");
       expect(state.isDisabled).to.be.true;
     });
 
@@ -81,6 +82,7 @@ describe("useHierarchyVisibility", () => {
       expect(visibilityHandler.getVisibilityStatus).to.be.called;
       const state = result.current.getVisibilityButtonState(node);
       expect(state.state).to.be.eq("visible");
+      expect(state.isDisabled).to.be.undefined;
     });
 
     expect(visibilityHandler.getVisibilityStatus).to.be.calledOnce;
@@ -118,9 +120,9 @@ describe("useHierarchyVisibility", () => {
     visibilityHandler.getVisibilityStatus.resolves({ state: "visible" });
 
     act(() => {
-      // expect initial state to be `off` and disabled
+      // expect initial state to be visible and disabled
       const state = result.current.getVisibilityButtonState(node);
-      expect(state.state).to.be.eq("hidden");
+      expect(state.state).to.be.eq("visible");
       expect(state.isDisabled).to.be.true;
     });
 
@@ -129,6 +131,7 @@ describe("useHierarchyVisibility", () => {
       expect(visibilityHandler.getVisibilityStatus).to.be.called;
       const state = result.current.getVisibilityButtonState(node);
       expect(state.state).to.be.eq("visible");
+      expect(state.isDisabled).to.be.undefined;
     });
 
     expect(visibilityHandler.getVisibilityStatus).to.be.calledOnce;

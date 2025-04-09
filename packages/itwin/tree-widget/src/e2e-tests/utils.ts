@@ -164,3 +164,9 @@ export async function expandNode(page: Page, node: Locator) {
   await node.focus();
   await page.keyboard.press("ArrowRight");
 }
+
+export async function getErrorDropdown(treeWidget: Locator, errorAmount: number = 1) {
+  const dropdown = treeWidget.getByRole("button", { name: `${errorAmount} issue(s) found` });
+  await dropdown.waitFor();
+  return dropdown;
+}
