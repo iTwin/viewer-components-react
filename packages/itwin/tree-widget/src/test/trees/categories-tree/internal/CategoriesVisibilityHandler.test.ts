@@ -28,6 +28,7 @@ import {
 } from "../../../IModelUtils.js";
 import { TestUtils } from "../../../TestUtils.js";
 import { createIModelAccess } from "../../Common.js";
+// eslint-disable-next-line sort-imports
 import { createCategoryHierarchyNode as createModelsTreeCategoryHierarchyNode, createModelHierarchyNode } from "../../models-tree/Utils.js";
 import { createCategoryHierarchyNode, createDefinitionContainerHierarchyNode, createSubCategoryHierarchyNode } from "./Utils.js";
 import { validateHierarchyVisibility } from "./VisibilityValidation.js";
