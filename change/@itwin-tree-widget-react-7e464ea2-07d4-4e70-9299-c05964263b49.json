@@ -1,6 +1,6 @@
 {
   "type": "patch",
-  "comment": "Categories tree now reacts to Category visibility changes from Models tree.",
+  "comment": "Fixed Categories tree not reacting to Category display changes from Models tree, when they're made on per-model category overrides.",
   "packageName": "@itwin/tree-widget-react",
   "email": "100586436+JonasDov@users.noreply.github.com",
   "dependentChangeType": "patch"
