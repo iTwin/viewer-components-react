@@ -7,7 +7,7 @@
 import { useMemo } from "react";
 import { useFilterAction } from "@itwin/presentation-hierarchies-react";
 import { BaseTreeRenderer } from "./BaseTreeRenderer.js";
-import { createVisibilityAction } from "./TreeNodeVisibilityButton.js";
+import { useVisibilityAction } from "./TreeNodeVisibilityButton.js";
 import { useVisibilityButtonHandler } from "./UseVisibilityButtonHandler.js";
 
 import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
@@ -22,21 +22,12 @@ export type VisibilityTreeRendererProps = BaseTreeRendererProps & TreeItemVisibi
  */
 export function VisibilityTreeRenderer({ getVisibilityButtonState, onVisibilityButtonClick: onClick, actions, ...props }: VisibilityTreeRendererProps) {
   const { onVisibilityButtonClick } = useVisibilityButtonHandler({ rootNodes: props.rootNodes, isNodeSelected: props.isNodeSelected, onClick });
-  const visibilityButtonProps: TreeItemVisibilityButtonProps = useMemo(
-    () => ({
-      variant: "eyeball",
-      getVisibilityButtonState,
-      onVisibilityButtonClick,
-    }),
-    [getVisibilityButtonState, onVisibilityButtonClick],
-  );
-
   const filterAction = useFilterAction({ onFilter: props.onFilterClick, getHierarchyLevelDetails: props.getHierarchyLevelDetails });
+  const visibilityAction = useVisibilityAction({ onVisibilityButtonClick, getVisibilityButtonState });
 
-  return (
-    <BaseTreeRenderer
-      {...props}
-      actions={[...(visibilityButtonProps ? [createVisibilityAction(visibilityButtonProps)] : []), filterAction, ...(actions ? actions : [])]}
-    />
-  );
+  const nodeActions = useMemo(() => {
+    return [visibilityAction, filterAction, ...(actions ? actions : [])];
+  }, [filterAction, visibilityAction, actions]);
+
+  return <BaseTreeRenderer {...props} actions={nodeActions} />;
 }

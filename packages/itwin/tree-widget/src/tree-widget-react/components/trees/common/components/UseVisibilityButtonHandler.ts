@@ -5,6 +5,7 @@
 
 import { useCallback } from "react";
 import { isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import { useLatest } from "../internal/Utils.js";
 
 import type { PresentationHierarchyNode, PresentationTreeNode } from "@itwin/presentation-hierarchies-react";
 import type { TreeItemVisibilityButtonProps } from "./TreeNodeVisibilityButton.js";
@@ -21,15 +22,18 @@ interface UseVisibilityButtonHandlerResult {
 
 /** @internal */
 export function useVisibilityButtonHandler({ rootNodes, isNodeSelected, onClick }: UseVisibilityButtonHandlerProps): UseVisibilityButtonHandlerResult {
+  const isNodeSelectedRef = useLatest(isNodeSelected);
+  const rootNodesRef = useLatest(rootNodes);
+
   const onVisibilityButtonClick = useCallback<TreeItemVisibilityButtonProps["onVisibilityButtonClick"]>(
     (clickedNode, state) => {
-      if (!isNodeSelected?.(clickedNode.id)) {
+      if (!isNodeSelectedRef.current?.(clickedNode.id)) {
         onClick(clickedNode, state);
         return;
       }
-      rootNodes && forEachSelectedNode(rootNodes, isNodeSelected, (node) => onClick(node, state));
+      rootNodesRef.current && forEachSelectedNode(rootNodesRef.current, isNodeSelectedRef.current, (node) => onClick(node, state));
     },
-    [rootNodes, isNodeSelected, onClick],
+    [onClick, isNodeSelectedRef, rootNodesRef],
   );
 
   return { onVisibilityButtonClick };

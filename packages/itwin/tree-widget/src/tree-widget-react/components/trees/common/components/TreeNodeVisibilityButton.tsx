@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./TreeNodeVisibilityButton.css";
+import { useCallback } from "react";
 
 import type { PresentationHierarchyNode, TreeItemAction } from "@itwin/presentation-hierarchies-react";
 
@@ -30,30 +31,33 @@ const visibilityPartialSvg = new URL("@itwin/itwinui-icons/visibility-partial.sv
 const visibilityShowSvg = new URL("@itwin/itwinui-icons/visibility-show.svg", import.meta.url).href;
 
 /** @internal */
-export function createVisibilityAction({
+export function useVisibilityAction({
   getVisibilityButtonState,
   onVisibilityButtonClick,
 }: TreeItemVisibilityButtonProps): (node: PresentationHierarchyNode) => TreeItemAction {
-  return (node) => {
-    const state = getVisibilityButtonState(node);
+  return useCallback(
+    (node) => {
+      const state = getVisibilityButtonState(node);
 
-    const getIcon = () => {
-      switch (state.state) {
-        case "visible":
-          return visibilityShowSvg;
-        case "hidden":
-          return visibilityHideSvg;
-        case "partial":
-          return visibilityPartialSvg;
-      }
-    };
-    return {
-      label: state.tooltip ?? "Determining visibility...",
-      action: () => {
-        onVisibilityButtonClick(node, state.state);
-      },
-      show: state.state !== "visible" ? true : undefined,
-      icon: getIcon(),
-    };
-  };
+      const getIcon = () => {
+        switch (state.state) {
+          case "visible":
+            return visibilityShowSvg;
+          case "hidden":
+            return visibilityHideSvg;
+          case "partial":
+            return visibilityPartialSvg;
+        }
+      };
+      return {
+        label: state.tooltip ?? "Determining visibility...",
+        action: () => {
+          onVisibilityButtonClick(node, state.state);
+        },
+        show: state.state !== "visible" ? true : undefined,
+        icon: getIcon(),
+      };
+    },
+    [getVisibilityButtonState, onVisibilityButtonClick],
+  );
 }

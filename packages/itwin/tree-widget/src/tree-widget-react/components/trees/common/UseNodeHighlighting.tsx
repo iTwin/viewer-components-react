@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import { useLatest } from "./internal/Utils.js";
 
@@ -50,43 +50,44 @@ interface UseNodeHighlightingResult {
 
 /** @internal */
 export function useNodeHighlighting({ rootNodes, highlight }: UseNodeHighlightingProps): UseNodeHighlightingResult {
-  const state = useRef<HighlightState>({ nodeInfoMap: new Map(), totalMatches: 0 });
+  const [state, setState] = useState<HighlightState>({ nodeInfoMap: new Map(), totalMatches: 0 });
   const [activeNodeId, setActiveNodeId] = useState<string | undefined>();
   const activeMatchIndexRef = useLatest(highlight?.activeMatchIndex);
   const activeNodeIdRef = useLatest(activeNodeId);
   const onHighlightChangedRef = useLatest(highlight?.onHighlightChanged);
+  const prevStateRef = useLatest(state);
   const searchText = highlight?.text;
 
   useEffect(() => {
     const { state: newState, activeIndex } =
       rootNodes && searchText
-        ? computeHighlightState(rootNodes, searchText, state.current, activeNodeIdRef.current, activeMatchIndexRef.current)
+        ? computeHighlightState(rootNodes, searchText, prevStateRef.current, activeNodeIdRef.current, activeMatchIndexRef.current)
         : { state: { nodeInfoMap: new Map(), totalMatches: 0 }, activeIndex: 0 };
 
-    state.current = newState;
+    setState(newState);
     if (newState.totalMatches === 0) {
       setActiveNodeId(undefined);
     }
     onHighlightChangedRef.current?.(newState.totalMatches === 0 ? 0 : activeIndex, newState.totalMatches);
-  }, [rootNodes, searchText, activeNodeIdRef, activeMatchIndexRef, onHighlightChangedRef]);
+  }, [rootNodes, searchText, activeNodeIdRef, activeMatchIndexRef, onHighlightChangedRef, prevStateRef]);
 
   useEffect(() => {
-    for (const nodeId of state.current.nodeInfoMap.keys()) {
-      if (getNodeChunkInfo(state.current, nodeId, highlight?.activeMatchIndex)?.activeChunkIndex !== undefined) {
+    for (const nodeId of state.nodeInfoMap.keys()) {
+      if (getNodeChunkInfo(state, nodeId, highlight?.activeMatchIndex)?.activeChunkIndex !== undefined) {
         setActiveNodeId(nodeId);
       }
     }
-  }, [highlight?.activeMatchIndex]);
+  }, [state, highlight?.activeMatchIndex]);
 
   const getLabel = useCallback(
     (node: PresentationHierarchyNode) => {
-      const chunkInfo = getNodeChunkInfo(state.current, node.id, highlight?.activeMatchIndex);
+      const chunkInfo = getNodeChunkInfo(state, node.id, highlight?.activeMatchIndex);
       if (searchText && chunkInfo) {
         return <>{markChunks(node.label, chunkInfo.chunks, chunkInfo.activeChunkIndex)}</>;
       }
       return <span>{node.label}</span>;
     },
-    [searchText, highlight?.activeMatchIndex],
+    [state, searchText, highlight?.activeMatchIndex],
   );
 
   return { activeNodeId, getLabel };
