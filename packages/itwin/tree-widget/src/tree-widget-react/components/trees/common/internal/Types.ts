@@ -22,3 +22,6 @@ export type DefinitionContainerId = Id64String;
 
 /** @internal */
 export type ElementId = Id64String;
+
+/** @internal */
+export type ParentId = Id64String;

@@ -613,11 +613,123 @@ describe("Models tree", () => {
         ],
       ),
       TreeFilteringTestCaseDefinition.create(
+        "child element's category",
+        async (builder) => {
+          const rootSubject: InstanceKey = { className: SUBJECT_CLASS_NAME, id: IModel.rootSubjectId };
+          const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
+
+          const parentCategory = insertSpatialCategory({ builder, codeValue: "matching parentCategory" });
+
+          const parentElement = insertPhysicalElement({ builder, userLabel: `parentElement`, modelId: model.id, categoryId: parentCategory.id });
+
+          const childrenCategory = insertSpatialCategory({ builder, codeValue: "matching childrenCategory" });
+
+          const childElementWithSameCategory = insertPhysicalElement({
+            builder,
+            userLabel: `element child1`,
+            modelId: model.id,
+            categoryId: parentCategory.id,
+            parentId: parentElement.id,
+          });
+          const childElementWithDifferentCategory = insertPhysicalElement({
+            builder,
+            userLabel: `element child2`,
+            modelId: model.id,
+            categoryId: childrenCategory.id,
+            parentId: parentElement.id,
+          });
+          const nestedChildElementWithSameCategory = insertPhysicalElement({
+            builder,
+            userLabel: `element nestedChild`,
+            modelId: model.id,
+            categoryId: parentCategory.id,
+            parentId: childElementWithDifferentCategory.id,
+          });
+
+          return {
+            rootSubject,
+            model,
+            parentCategory,
+            parentElement,
+            childrenCategory,
+            childElementWithDifferentCategory,
+            childElementWithSameCategory,
+            nestedChildElementWithSameCategory,
+          };
+        },
+        (x) => [
+          [adjustedModelKey(x.model), x.parentCategory],
+          [adjustedModelKey(x.model), x.parentCategory, adjustedElementKey(x.parentElement), x.childrenCategory],
+          [
+            adjustedModelKey(x.model),
+            x.parentCategory,
+            adjustedElementKey(x.parentElement),
+            x.childrenCategory,
+            adjustedElementKey(x.childElementWithDifferentCategory),
+            x.parentCategory,
+          ],
+        ],
+        (x) => [x.childrenCategory, x.parentCategory],
+        (_x) => "matching",
+        (x) => [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [x.model],
+            autoExpand: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                label: "matching parentCategory",
+                autoExpand: true,
+                children: [
+                  NodeValidators.createForClassGroupingNode({
+                    label: "Physical Object",
+                    autoExpand: true,
+                    children: [
+                      NodeValidators.createForInstanceNode({
+                        instanceKeys: [x.parentElement],
+                        autoExpand: true,
+                        children: [
+                          NodeValidators.createForInstanceNode({
+                            label: "matching childrenCategory",
+                            autoExpand: true,
+                            children: [
+                              NodeValidators.createForClassGroupingNode({
+                                label: "Physical Object",
+                                autoExpand: true,
+                                children: [
+                                  NodeValidators.createForInstanceNode({
+                                    instanceKeys: [x.childElementWithDifferentCategory],
+                                    autoExpand: true,
+                                    children: [
+                                      NodeValidators.createForInstanceNode({
+                                        label: "matching parentCategory",
+                                      }),
+                                    ],
+                                  }),
+                                ],
+                              }),
+                            ],
+                          }),
+                          NodeValidators.createForClassGroupingNode({
+                            label: "Physical Object",
+                            autoExpand: false,
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      ),
+      TreeFilteringTestCaseDefinition.create(
         "child Element nodes",
         async (builder) => {
           const rootSubject: InstanceKey = { className: SUBJECT_CLASS_NAME, id: IModel.rootSubjectId };
           const model = insertPhysicalModelWithPartition({ builder, codeValue: `model-x`, partitionParentId: rootSubject.id });
           const category = insertSpatialCategory({ builder, codeValue: "category-x" });
+          const childCategory = insertSpatialCategory({ builder, codeValue: "childCategory" });
           const rootElement = insertPhysicalElement({ builder, userLabel: `root element 0`, modelId: model.id, categoryId: category.id });
           const childElement1 = insertPhysicalElement({
             builder,
@@ -637,14 +749,14 @@ describe("Models tree", () => {
             builder,
             userLabel: `matching element 3`,
             modelId: model.id,
-            categoryId: category.id,
+            categoryId: childCategory.id,
             parentId: rootElement.id,
           });
-          return { rootSubject, model, category, rootElement, childElement1, childElement2, childElement3 };
+          return { rootSubject, model, category, childCategory, rootElement, childElement1, childElement2, childElement3 };
         },
         (x) => [
           [adjustedModelKey(x.model), x.category, adjustedElementKey(x.rootElement), adjustedElementKey(x.childElement1)],
-          [adjustedModelKey(x.model), x.category, adjustedElementKey(x.rootElement), adjustedElementKey(x.childElement3)],
+          [adjustedModelKey(x.model), x.category, adjustedElementKey(x.rootElement), x.childCategory, adjustedElementKey(x.childElement3)],
         ],
         (x) => [x.childElement1, x.childElement3],
         (_x) => "matching",
@@ -668,6 +780,24 @@ describe("Models tree", () => {
                         label: /^root element/,
                         autoExpand: true,
                         children: [
+                          NodeValidators.createForInstanceNode({
+                            instanceKeys: [x.childCategory],
+                            autoExpand: true,
+                            children: [
+                              NodeValidators.createForClassGroupingNode({
+                                label: "Physical Object",
+                                autoExpand: true,
+                                children: [
+                                  NodeValidators.createForInstanceNode({
+                                    instanceKeys: [x.childElement3],
+                                    label: /^matching element 3/,
+                                    autoExpand: false,
+                                    children: false,
+                                  }),
+                                ],
+                              }),
+                            ],
+                          }),
                           NodeValidators.createForClassGroupingNode({
                             label: "Physical Object",
                             autoExpand: true,
@@ -675,12 +805,6 @@ describe("Models tree", () => {
                               NodeValidators.createForInstanceNode({
                                 instanceKeys: [x.childElement1],
                                 label: /^matching element 1/,
-                                autoExpand: false,
-                                children: false,
-                              }),
-                              NodeValidators.createForInstanceNode({
-                                instanceKeys: [x.childElement3],
-                                label: /^matching element 3/,
                                 autoExpand: false,
                                 children: false,
                               }),
@@ -1507,7 +1631,6 @@ describe("Models tree", () => {
         let hierarchyConfig: ModelsTreeHierarchyConfiguration;
 
         before(async function () {
-          // eslint-disable-next-line deprecation/deprecation
           imodel = (
             await buildIModel(this, async (...args) => {
               const imodelSetupResult = await testCase.setupIModel(...args);

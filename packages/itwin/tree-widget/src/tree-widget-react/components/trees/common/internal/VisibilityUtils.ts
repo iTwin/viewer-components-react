@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { filter, from, map, mergeAll, mergeMap, of, reduce, startWith, toArray } from "rxjs";
+import { concat, EMPTY, filter, from, map, mergeAll, mergeMap, of, reduce, startWith, toArray } from "rxjs";
 import { QueryRowFormat } from "@itwin/core-common";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { reduceWhile } from "./Rxjs.js";
@@ -12,10 +12,10 @@ import { getClassesByView, releaseMainThreadOnItemsCount } from "./Utils.js";
 
 import type { Viewport } from "@itwin/core-frontend";
 import type { Observable, OperatorFunction } from "rxjs";
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { NonPartialVisibilityStatus, Visibility } from "./Tooltip.js";
 import type { VisibilityStatus } from "../UseHierarchyVisibility.js";
-import type { ElementId, ModelId } from "./Types.js";
+import type { CategoryId, ElementId, ModelId, ParentId } from "./Types.js";
 import type { CategoryInfo } from "../CategoriesVisibilityUtils.js";
 
 function mergeVisibilities(obs: Observable<Visibility>): Observable<Visibility | "empty"> {
@@ -53,6 +53,81 @@ export function mergeVisibilityStatuses(
         }
         return createVisibilityStatus(visibility, getTooltipOptions(tooltipMap[visibility], ignoreTooltip));
       }),
+    );
+  };
+}
+
+/** @internal */
+export function getChildrenDisplayStatus({
+  parentNodeVisibilityStatus,
+  tooltips,
+  ignoreTooltips,
+  getCategoryDisplayStatus,
+}: {
+  parentNodeVisibilityStatus: VisibilityStatus;
+  getCategoryDisplayStatus: ({ categoryId, parentElementIds }: { categoryId: Id64String; parentElementIds?: Id64Array }) => Observable<VisibilityStatus>;
+  tooltips: { [key in Visibility]: string | undefined };
+  ignoreTooltips?: boolean;
+}): OperatorFunction<Map<ParentId, Set<CategoryId>>, VisibilityStatus> {
+  return (obs) => {
+    return obs.pipe(
+      mergeMap((childCategoriesMap) => {
+        if (childCategoriesMap.size === 0) {
+          return of(parentNodeVisibilityStatus);
+        }
+
+        return from(childCategoriesMap).pipe(
+          mergeMap(([elementId, categoryIds]) =>
+            from(categoryIds).pipe(
+              mergeMap((categoryId) => getCategoryDisplayStatus({ categoryId, parentElementIds: [elementId] })),
+              mergeVisibilityStatuses(tooltips, ignoreTooltips),
+            ),
+          ),
+          startWith<VisibilityStatus>(parentNodeVisibilityStatus),
+          mergeVisibilityStatuses(tooltips, ignoreTooltips),
+        );
+      }),
+    );
+  };
+}
+
+/** @internal */
+export function changeChildrenDisplayStatus({
+  queueElementsVisibilityChange,
+  getDefaultCategoryVisibilityStatus,
+  createChangeSubModelsObservable,
+  parentsInfo,
+}: {
+  queueElementsVisibilityChange: (elementIds: Id64Set, isDisplayedByDefault: boolean) => Observable<undefined>;
+  getDefaultCategoryVisibilityStatus: (categoryId: Id64String) => NonPartialVisibilityStatus;
+  createChangeSubModelsObservable: (elementIds: Id64Array) => Observable<void>;
+  parentsInfo?: { elementIds: Id64Set; parentsCategoryVisibilityStatus: "visible" | "hidden" };
+}): OperatorFunction<Map<CategoryId, Set<ElementId>>, void> {
+  return (obs) => {
+    return obs.pipe(
+      mergeMap((categoryElementsMap) => from(categoryElementsMap)),
+      reduce(
+        (acc, [categoryId, elementIds]) => {
+          const defaultCategoryVisibility = getDefaultCategoryVisibilityStatus(categoryId);
+          if (defaultCategoryVisibility.state === "visible") {
+            acc.alwaysDrawn.push(...elementIds);
+          } else {
+            acc.neverDrawn.push(...elementIds);
+          }
+          return acc;
+        },
+        {
+          alwaysDrawn: parentsInfo && parentsInfo.parentsCategoryVisibilityStatus === "visible" ? [...parentsInfo.elementIds] : new Array<Id64String>(),
+          neverDrawn: parentsInfo && parentsInfo.parentsCategoryVisibilityStatus === "hidden" ? [...parentsInfo.elementIds] : new Array<Id64String>(),
+        },
+      ),
+      mergeMap((state) =>
+        concat(
+          state.alwaysDrawn.length > 0 ? queueElementsVisibilityChange(new Set(state.alwaysDrawn), true) : EMPTY,
+          state.neverDrawn.length > 0 ? queueElementsVisibilityChange(new Set(state.neverDrawn), false) : EMPTY,
+          createChangeSubModelsObservable([...state.alwaysDrawn, ...state.neverDrawn]),
+        ),
+      ),
     );
   };
 }
@@ -240,7 +315,7 @@ export function getElementVisibility(
   categoryVisibility: NonPartialVisibilityStatus,
   treeType: "modelsTree" | "categoriesTree",
   subModelVisibilityStatus?: VisibilityStatus,
-): VisibilityStatus {
+): VisibilityStatus & { tooltipStringId?: string } {
   if (subModelVisibilityStatus === undefined) {
     if (!viewsModel) {
       return createVisibilityStatus("hidden", getTooltipOptions(`${treeType}.element.hiddenThroughModel`, ignoreTooltip));

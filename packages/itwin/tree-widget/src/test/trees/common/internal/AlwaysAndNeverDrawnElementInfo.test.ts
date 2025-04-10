@@ -9,7 +9,7 @@ import sinon from "sinon";
 import {
   AlwaysAndNeverDrawnElementInfo,
   SET_CHANGE_DEBOUNCE_TIME,
-} from "../../../../tree-widget-react/components/trees/common/internal/AlwaysAndNeverDrawnElementInfo.js";
+} from "../../../../tree-widget-react/components/trees/common/internal/withoutParents/AlwaysAndNeverDrawnElementInfo.js";
 import { createResolvablePromise } from "../../../TestUtils.js";
 import { createFakeSinonViewport } from "../../Common.js";
 

@@ -196,6 +196,8 @@ interface GetCategoryVisibilityStatusProps {
     categoryId: Id64String;
     // (undocumented)
     modelId: Id64String;
+    // (undocumented)
+    parentElementIds?: Id64Array;
 }
 
 // @beta (undocumented)

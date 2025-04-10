@@ -139,7 +139,9 @@ test.describe("Categories tree", () => {
     await locateNode(treeWidget, "Equipment").waitFor();
     await page.getByRole("button", { name: "Hide all" }).click();
 
-    await expect(locateNode(treeWidget, "Equipment").getByRole("button", { name: "Hidden" })).not.toBeVisible();
+    await expect(
+      locateNode(treeWidget, "Equipment").getByRole("button", { name: "Hidden: Category display disabled through category selector" }),
+    ).not.toBeVisible();
     await takeScreenshot(page, treeWidget);
   });
 

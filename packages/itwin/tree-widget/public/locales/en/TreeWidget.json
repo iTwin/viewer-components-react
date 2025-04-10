@@ -56,6 +56,8 @@
         "someElementsAreHidden": "There are both visible and hidden elements in this category",
         "allElementsVisible": "All category elements are in the always drawn list",
         "allElementsAndSubModelsHidden": "All elements are hidden",
+        "someChildrenAreVisible": "Some elements have children that are visible",
+        "someChildrenAreHidden": "Some elements have chilren that are hidden",
         "someElementsOrSubModelsHidden": "Some elements are hidden and some are visible",
         "hiddenThroughModel": "Model is hidden",
         "allModeledElementsHidden": "All elements in the category are hidden",
@@ -68,6 +70,9 @@
         "hiddenThroughModel": "Model is not displayed",
         "hiddenThroughCategory": "Category is not displayed",
         "someElementsAreHidden": "Modeled elements subModel has partial state",
+        "someChildrenAreHidden": "Some child elements are hidden",
+        "someChildrenAreVisible": "Some child elements are visibile",
+        "elementAndAllChildrenAreHidden": "Element and All elements are hidden",
         "partialThroughSubModel": "Modeled element is hidden, but its subModel is visible",
         "partialThroughElement": "Modeled element is visible due to override, but its subModel is hidden",
         "partialThroughCategory": "Modeled element is visible due to category visibility, but its subModel is hidden"
