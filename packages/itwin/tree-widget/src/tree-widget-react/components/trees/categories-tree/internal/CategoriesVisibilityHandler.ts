@@ -183,7 +183,7 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
     let hideOverrides = 0;
     let noOverrides = 0;
     const modelIds = categoryModelsMap.get(categoryId);
-    for (const modelId of modelIds) {
+    for (const modelId of modelIds ?? []) {
       if (this._viewport.view.viewsModel(modelId)) {
         const override = this._viewport.perModelCategoryVisibility.getOverride(modelId, categoryId);
         if (override === PerModelCategoryVisibility.Override.None) {
