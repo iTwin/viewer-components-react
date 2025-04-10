@@ -81,19 +81,10 @@ describe("CategoriesVisibilityHandler", () => {
     });
   }
 
-  async function createVisibilityTestData({
-    imodel,
-    categoryIds,
-    testDataVisibilityInitializer,
-  }: {
-    imodel: IModelConnection;
-    testDataVisibilityInitializer?: TestDataVisibilityInitializer;
-    categoryIds: Id64Array;
-  }) {
+  async function createVisibilityTestData({ imodel, categoryIds }: { imodel: IModelConnection; categoryIds: Id64Array }) {
     const commonProps = await createCommonProps({ imodel, categoryIds });
     const handler = new CategoriesVisibilityHandler({ idsCache: commonProps.idsCache, viewport: commonProps.viewport });
     const provider = createProvider({ ...commonProps });
-    testDataVisibilityInitializer?.initialize(commonProps.viewport);
     return {
       handler,
       provider,
@@ -120,13 +111,13 @@ describe("CategoriesVisibilityHandler", () => {
       });
 
       const { imodel, ...keys } = buildIModelResult;
-      const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createHiddenTestData(keys));
+
       using visibilityTestData = await createVisibilityTestData({
         imodel,
         categoryIds: getCategoryIds(keys),
-        testDataVisibilityInitializer,
       });
       const { handler, provider, viewport } = visibilityTestData;
+      setupInitialDisplayState({ viewport, ...createHiddenTestData(keys), ...createVisibleModels(keys) });
 
       await validateHierarchyVisibility({
         provider,
@@ -160,13 +151,12 @@ describe("CategoriesVisibilityHandler", () => {
         });
 
         const { imodel, ...keys } = buildIModelResult;
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer({ ...createHiddenTestData(keys), ...createVisibleModels(keys) });
         using visibilityTestData = await createVisibilityTestData({
           imodel,
           categoryIds: getCategoryIds(keys),
-          testDataVisibilityInitializer,
         });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createHiddenTestData(keys), ...createVisibleModels(keys) });
 
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerRoot.id), true);
         await validateHierarchyVisibility({
@@ -212,13 +202,12 @@ describe("CategoriesVisibilityHandler", () => {
         });
 
         const { imodel, ...keys } = buildIModelResult;
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer({ ...createHiddenTestData(keys), ...createVisibleModels(keys) });
         using visibilityTestData = await createVisibilityTestData({
           imodel,
           categoryIds: getCategoryIds(keys),
-          testDataVisibilityInitializer,
         });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createHiddenTestData(keys), ...createVisibleModels(keys) });
 
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerRoot.id), true);
         await validateHierarchyVisibility({
@@ -254,13 +243,12 @@ describe("CategoriesVisibilityHandler", () => {
         });
 
         const { imodel, ...keys } = buildIModelResult;
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer({ ...createHiddenTestData(keys), ...createVisibleModels(keys) });
         using visibilityTestData = await createVisibilityTestData({
           imodel,
           categoryIds: getCategoryIds(keys),
-          testDataVisibilityInitializer,
         });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createHiddenTestData(keys), ...createVisibleModels(keys) });
 
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), true);
         await validateHierarchyVisibility({
@@ -295,13 +283,12 @@ describe("CategoriesVisibilityHandler", () => {
         });
 
         const { imodel, ...keys } = buildIModelResult;
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer({ ...createHiddenTestData(keys), ...createVisibleModels(keys) });
         using visibilityTestData = await createVisibilityTestData({
           imodel,
           categoryIds: getCategoryIds(keys),
-          testDataVisibilityInitializer,
         });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createHiddenTestData(keys), ...createVisibleModels(keys) });
 
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), true);
         await validateHierarchyVisibility({
@@ -338,13 +325,13 @@ describe("CategoriesVisibilityHandler", () => {
         });
 
         const { imodel, ...keys } = buildIModelResult;
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer({ ...createHiddenTestData(keys), ...createVisibleModels(keys) });
         using visibilityTestData = await createVisibilityTestData({
           imodel,
           categoryIds: getCategoryIds(keys),
-          testDataVisibilityInitializer,
         });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createHiddenTestData(keys), ...createVisibleModels(keys) });
+
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), true);
         await validateHierarchyVisibility({
           provider,
@@ -371,13 +358,12 @@ describe("CategoriesVisibilityHandler", () => {
         });
 
         const { imodel, ...keys } = buildIModelResult;
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer({ ...createHiddenTestData(keys), ...createVisibleModels(keys) });
         using visibilityTestData = await createVisibilityTestData({
           imodel,
           categoryIds: getCategoryIds(keys),
-          testDataVisibilityInitializer,
         });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createHiddenTestData(keys), ...createVisibleModels(keys) });
 
         await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
         await validateHierarchyVisibility({
@@ -410,13 +396,12 @@ describe("CategoriesVisibilityHandler", () => {
         });
 
         const { imodel, ...keys } = buildIModelResult;
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer({ ...createHiddenTestData(keys), ...createVisibleModels(keys) });
         using visibilityTestData = await createVisibilityTestData({
           imodel,
           categoryIds: getCategoryIds(keys),
-          testDataVisibilityInitializer,
         });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createHiddenTestData(keys), ...createVisibleModels(keys) });
 
         await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
         await validateHierarchyVisibility({
@@ -458,13 +443,13 @@ describe("CategoriesVisibilityHandler", () => {
         });
 
         const { imodel, ...keys } = buildIModelResult;
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer({ ...createHiddenTestData(keys), ...createVisibleModels(keys) });
+
         using visibilityTestData = await createVisibilityTestData({
           imodel,
           categoryIds: getCategoryIds(keys),
-          testDataVisibilityInitializer,
         });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createHiddenTestData(keys), ...createVisibleModels(keys) });
 
         await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
         await validateHierarchyVisibility({
@@ -507,13 +492,13 @@ describe("CategoriesVisibilityHandler", () => {
         });
 
         const { imodel, ...keys } = buildIModelResult;
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer({ ...createHiddenTestData(keys), ...createVisibleModels(keys) });
+
         using visibilityTestData = await createVisibilityTestData({
           imodel,
           categoryIds: getCategoryIds(keys),
-          testDataVisibilityInitializer,
         });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createHiddenTestData(keys), ...createVisibleModels(keys) });
 
         await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
         await validateHierarchyVisibility({
@@ -553,13 +538,13 @@ describe("CategoriesVisibilityHandler", () => {
         });
 
         const { imodel, ...keys } = buildIModelResult;
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer({ ...createHiddenTestData(keys), ...createVisibleModels(keys) });
+
         using visibilityTestData = await createVisibilityTestData({
           imodel,
           categoryIds: getCategoryIds(keys),
-          testDataVisibilityInitializer,
         });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createHiddenTestData(keys), ...createVisibleModels(keys) });
 
         await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
         await validateHierarchyVisibility({
@@ -598,13 +583,13 @@ describe("CategoriesVisibilityHandler", () => {
         });
 
         const { imodel, ...keys } = buildIModelResult;
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer({ ...createHiddenTestData(keys), ...createVisibleModels(keys) });
+
         using visibilityTestData = await createVisibilityTestData({
           imodel,
           categoryIds: getCategoryIds(keys),
-          testDataVisibilityInitializer,
         });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createHiddenTestData(keys), ...createVisibleModels(keys) });
 
         await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
 
@@ -637,13 +622,13 @@ describe("CategoriesVisibilityHandler", () => {
         });
 
         const { imodel, ...keys } = buildIModelResult;
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer({ ...createHiddenTestData(keys), ...createVisibleModels(keys) });
+
         using visibilityTestData = await createVisibilityTestData({
           imodel,
           categoryIds: getCategoryIds(keys),
-          testDataVisibilityInitializer,
         });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createHiddenTestData(keys), ...createVisibleModels(keys) });
 
         await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
         await validateHierarchyVisibility({
@@ -676,13 +661,13 @@ describe("CategoriesVisibilityHandler", () => {
         });
 
         const { imodel, ...keys } = buildIModelResult;
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer({ ...createHiddenTestData(keys), ...createVisibleModels(keys) });
+
         using visibilityTestData = await createVisibilityTestData({
           imodel,
           categoryIds: getCategoryIds(keys),
-          testDataVisibilityInitializer,
         });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createHiddenTestData(keys), ...createVisibleModels(keys) });
 
         await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
         await validateHierarchyVisibility({
@@ -722,13 +707,13 @@ describe("CategoriesVisibilityHandler", () => {
         });
 
         const { imodel, ...keys } = buildIModelResult;
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer({ ...createHiddenTestData(keys), ...createVisibleModels(keys) });
+
         using visibilityTestData = await createVisibilityTestData({
           imodel,
           categoryIds: getCategoryIds(keys),
-          testDataVisibilityInitializer,
         });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createHiddenTestData(keys), ...createVisibleModels(keys) });
 
         await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
         await validateHierarchyVisibility({
@@ -758,9 +743,10 @@ describe("CategoriesVisibilityHandler", () => {
 
         const { imodel, ...keys } = buildIModelResult;
 
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer({ ...createHiddenTestData(keys), ...createVisibleModels(keys) });
-        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys) });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createHiddenTestData(keys), ...createVisibleModels(keys) });
+
         viewport.perModelCategoryVisibility.setOverride(keys.physicalModel.id, keys.category.id, PerModelCategoryVisibility.Override.Show);
 
         await validateHierarchyVisibility({
@@ -784,9 +770,9 @@ describe("CategoriesVisibilityHandler", () => {
 
         const { imodel, ...keys } = buildIModelResult;
 
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer({ ...createHiddenTestData(keys), ...createVisibleModels(keys) });
-        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys) });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createHiddenTestData(keys), ...createVisibleModels(keys) });
 
         viewport.perModelCategoryVisibility.setOverride(keys.physicalModel.id, keys.category.id, PerModelCategoryVisibility.Override.Show);
 
@@ -813,12 +799,9 @@ describe("CategoriesVisibilityHandler", () => {
 
         const { imodel, ...keys } = buildIModelResult;
 
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer({
-          ...createHiddenTestData(keys),
-          categories: [{ id: keys.category.id, visible: true }],
-        });
-        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys) });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createHiddenTestData(keys), categories: [{ id: keys.category.id, visible: true }] });
 
         await viewport.addViewedModels(keys.physicalModel.id);
 
@@ -843,12 +826,10 @@ describe("CategoriesVisibilityHandler", () => {
 
         const { imodel, ...keys } = buildIModelResult;
 
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer({
-          ...createHiddenTestData(keys),
-          categories: [{ id: keys.category.id, visible: true }],
-        });
-        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys) });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createHiddenTestData(keys), categories: [{ id: keys.category.id, visible: true }] });
+
         await viewport.addViewedModels(keys.physicalModel.id);
 
         await validateHierarchyVisibility({
@@ -878,9 +859,9 @@ describe("CategoriesVisibilityHandler", () => {
 
       const { imodel, ...keys } = buildIModelResult;
 
-      const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createVisibleModels(keys));
-      using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+      using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys) });
       const { handler, provider, viewport } = visibilityTestData;
+      setupInitialDisplayState({ viewport, ...createVisibleModels(keys) });
 
       await validateHierarchyVisibility({
         provider,
@@ -913,9 +894,11 @@ describe("CategoriesVisibilityHandler", () => {
         });
 
         const { imodel, ...keys } = buildIModelResult;
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createVisibleModels(keys));
-        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys) });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createVisibleModels(keys) });
+
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerRoot.id), false);
         await validateHierarchyVisibility({
           provider,
@@ -961,9 +944,9 @@ describe("CategoriesVisibilityHandler", () => {
 
         const { imodel, ...keys } = buildIModelResult;
 
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createVisibleModels(keys));
-        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys) });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createVisibleModels(keys) });
 
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerRoot.id), false);
         await validateHierarchyVisibility({
@@ -1000,9 +983,9 @@ describe("CategoriesVisibilityHandler", () => {
 
         const { imodel, ...keys } = buildIModelResult;
 
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createVisibleModels(keys));
-        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys) });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createVisibleModels(keys) });
 
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), false);
         await validateHierarchyVisibility({
@@ -1038,9 +1021,9 @@ describe("CategoriesVisibilityHandler", () => {
 
         const { imodel, ...keys } = buildIModelResult;
 
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createVisibleModels(keys));
-        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys) });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createVisibleModels(keys) });
 
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), false);
         await validateHierarchyVisibility({
@@ -1078,9 +1061,9 @@ describe("CategoriesVisibilityHandler", () => {
 
         const { imodel, ...keys } = buildIModelResult;
 
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createVisibleModels(keys));
-        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys) });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createVisibleModels(keys) });
 
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), false);
         await validateHierarchyVisibility({
@@ -1109,9 +1092,9 @@ describe("CategoriesVisibilityHandler", () => {
 
         const { imodel, ...keys } = buildIModelResult;
 
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createVisibleModels(keys));
-        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys) });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createVisibleModels(keys) });
 
         await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), false);
         await validateHierarchyVisibility({
@@ -1145,9 +1128,9 @@ describe("CategoriesVisibilityHandler", () => {
 
         const { imodel, ...keys } = buildIModelResult;
 
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createVisibleModels(keys));
-        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys) });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createVisibleModels(keys) });
 
         await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), false);
         await validateHierarchyVisibility({
@@ -1190,9 +1173,9 @@ describe("CategoriesVisibilityHandler", () => {
 
         const { imodel, ...keys } = buildIModelResult;
 
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createVisibleModels(keys));
-        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys) });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createVisibleModels(keys) });
 
         await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), false);
         await validateHierarchyVisibility({
@@ -1236,9 +1219,9 @@ describe("CategoriesVisibilityHandler", () => {
 
         const { imodel, ...keys } = buildIModelResult;
 
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createVisibleModels(keys));
-        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys) });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createVisibleModels(keys) });
 
         await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), false);
         await validateHierarchyVisibility({
@@ -1279,9 +1262,9 @@ describe("CategoriesVisibilityHandler", () => {
 
         const { imodel, ...keys } = buildIModelResult;
 
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createVisibleModels(keys));
-        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys) });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createVisibleModels(keys) });
 
         await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), false);
         await validateHierarchyVisibility({
@@ -1321,9 +1304,9 @@ describe("CategoriesVisibilityHandler", () => {
 
         const { imodel, ...keys } = buildIModelResult;
 
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createVisibleModels(keys));
-        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys) });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createVisibleModels(keys) });
 
         await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), false);
         await validateHierarchyVisibility({
@@ -1356,9 +1339,9 @@ describe("CategoriesVisibilityHandler", () => {
 
         const { imodel, ...keys } = buildIModelResult;
 
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createVisibleModels(keys));
-        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys) });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createVisibleModels(keys) });
 
         await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), false);
         await validateHierarchyVisibility({
@@ -1392,9 +1375,9 @@ describe("CategoriesVisibilityHandler", () => {
 
         const { imodel, ...keys } = buildIModelResult;
 
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createVisibleModels(keys));
-        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys) });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createVisibleModels(keys) });
 
         await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), false);
         await validateHierarchyVisibility({
@@ -1435,9 +1418,10 @@ describe("CategoriesVisibilityHandler", () => {
 
         const { imodel, ...keys } = buildIModelResult;
 
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createVisibleModels(keys));
-        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys) });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createVisibleModels(keys) });
+
         await validateHierarchyVisibility({
           provider,
           handler,
@@ -1472,9 +1456,10 @@ describe("CategoriesVisibilityHandler", () => {
 
         const { imodel, ...keys } = buildIModelResult;
 
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createVisibleModels(keys));
-        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys) });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createVisibleModels(keys) });
+
         viewport.perModelCategoryVisibility.setOverride(keys.physicalModel.id, keys.category.id, PerModelCategoryVisibility.Override.Hide);
 
         await validateHierarchyVisibility({
@@ -1498,9 +1483,9 @@ describe("CategoriesVisibilityHandler", () => {
 
         const { imodel, ...keys } = buildIModelResult;
 
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createVisibleModels(keys));
-        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys) });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createVisibleModels(keys) });
 
         viewport.perModelCategoryVisibility.setOverride(keys.physicalModel.id, keys.category.id, PerModelCategoryVisibility.Override.Hide);
 
@@ -1527,9 +1512,9 @@ describe("CategoriesVisibilityHandler", () => {
 
         const { imodel, ...keys } = buildIModelResult;
 
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createVisibleModels(keys));
-        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys) });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createVisibleModels(keys) });
 
         viewport.changeModelDisplay(keys.physicalModel.id, false);
 
@@ -1554,9 +1539,9 @@ describe("CategoriesVisibilityHandler", () => {
 
         const { imodel, ...keys } = buildIModelResult;
 
-        const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createVisibleModels(keys));
-        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys) });
         const { handler, provider, viewport } = visibilityTestData;
+        setupInitialDisplayState({ viewport, ...createVisibleModels(keys) });
 
         viewport.changeModelDisplay(keys.physicalModel.id, false);
 
@@ -1620,47 +1605,40 @@ interface VisibilityInfo {
   visible: boolean;
 }
 
-class TestDataVisibilityInitializer {
-  private _categories: Array<VisibilityInfo>;
-  private _subCategories: Array<VisibilityInfo>;
-  private _models: Array<VisibilityInfo>;
-  private _elements: Array<VisibilityInfo>;
-  constructor(props?: {
-    categories?: Array<VisibilityInfo>;
-    subCategories?: Array<VisibilityInfo>;
-    models?: Array<VisibilityInfo>;
-    elements?: Array<VisibilityInfo>;
-  }) {
-    this._categories = props?.categories ?? [];
-    this._subCategories = props?.subCategories ?? [];
-    this._models = props?.models ?? [];
-    this._elements = props?.elements ?? [];
+function setupInitialDisplayState(props: {
+  viewport: Viewport;
+  categories?: Array<VisibilityInfo>;
+  subCategories?: Array<VisibilityInfo>;
+  models?: Array<VisibilityInfo>;
+  elements?: Array<VisibilityInfo>;
+}) {
+  const { viewport } = props;
+  const categories = props.categories ?? [];
+  const elements = props.elements ?? [];
+  const subCategories = props.subCategories ?? [];
+  const models = props.models ?? [];
+  for (const subCategoryInfo of subCategories) {
+    viewport.changeSubCategoryDisplay(subCategoryInfo.id, subCategoryInfo.visible);
+  }
+  for (const categoryInfo of categories) {
+    viewport.changeCategoryDisplay(categoryInfo.id, categoryInfo.visible, false);
   }
 
-  public initialize(viewport: Viewport): void {
-    for (const subCategoryInfo of this._subCategories) {
-      viewport.changeSubCategoryDisplay(subCategoryInfo.id, subCategoryInfo.visible);
+  for (const elementInfo of elements) {
+    if (elementInfo.visible) {
+      viewport.alwaysDrawn?.add(elementInfo.id);
+      continue;
     }
-    for (const categoryInfo of this._categories) {
-      viewport.changeCategoryDisplay(categoryInfo.id, categoryInfo.visible, false);
-    }
-
-    for (const elementInfo of this._elements) {
-      if (elementInfo.visible) {
-        viewport.alwaysDrawn?.add(elementInfo.id);
-        continue;
-      }
-      viewport.neverDrawn?.add(elementInfo.id);
-    }
-    if (!viewport.alwaysDrawn) {
-      viewport.setAlwaysDrawn(new Set(this._elements.filter(({ visible }) => visible).map(({ id }) => id)));
-    }
-    if (!viewport.neverDrawn) {
-      viewport.setNeverDrawn(new Set(this._elements.filter(({ visible }) => !visible).map(({ id }) => id)));
-    }
-    for (const modelInfo of this._models) {
-      viewport.changeModelDisplay(modelInfo.id, modelInfo.visible);
-    }
+    viewport.neverDrawn?.add(elementInfo.id);
+  }
+  if (!viewport.alwaysDrawn) {
+    viewport.setAlwaysDrawn(new Set(elements.filter(({ visible }) => visible).map(({ id }) => id)));
+  }
+  if (!viewport.neverDrawn) {
+    viewport.setNeverDrawn(new Set(elements.filter(({ visible }) => !visible).map(({ id }) => id)));
+  }
+  for (const modelInfo of models) {
+    viewport.changeModelDisplay(modelInfo.id, modelInfo.visible);
   }
 }
 
