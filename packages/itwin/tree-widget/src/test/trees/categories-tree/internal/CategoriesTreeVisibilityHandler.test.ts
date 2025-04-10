@@ -48,7 +48,7 @@ import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { CategoriesTreeHierarchyConfiguration } from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 
-describe.only("CategoriesTreeVisibilityHandler", () => {
+describe("CategoriesTreeVisibilityHandler", () => {
   before(async () => {
     await initializePresentationTesting({
       backendProps: {
