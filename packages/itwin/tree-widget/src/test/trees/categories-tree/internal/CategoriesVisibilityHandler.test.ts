@@ -5,7 +5,7 @@
 
 
 import { Code, ColorDef, IModel, IModelReadRpcInterface, RenderMode, SnapshotIModelRpcInterface } from "@itwin/core-common";
-import { IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
+import { IModelApp, OffScreenViewport, PerModelCategoryVisibility, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
@@ -14,9 +14,6 @@ import { HierarchyCacheMode, initialize as initializePresentationTesting, termin
 import { CategoriesTreeDefinition } from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 import { CategoriesVisibilityHandler } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesVisibilityHandler.js";
-import { ModelsTreeIdsCache } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
-import { createModelsTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
-import { defaultHierarchyConfiguration as defaultModelsTreeHierarchyConfiguration } from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import {
   buildIModel,
   insertDefinitionContainer,
@@ -28,8 +25,6 @@ import {
 } from "../../../IModelUtils.js";
 import { TestUtils } from "../../../TestUtils.js";
 import { createIModelAccess } from "../../Common.js";
-// eslint-disable-next-line sort-imports
-import { createCategoryHierarchyNode as createModelsTreeCategoryHierarchyNode, createModelHierarchyNode } from "../../models-tree/Utils.js";
 import { createCategoryHierarchyNode, createDefinitionContainerHierarchyNode, createSubCategoryHierarchyNode } from "./Utils.js";
 import { validateHierarchyVisibility } from "./VisibilityValidation.js";
 
@@ -67,12 +62,10 @@ describe("CategoriesVisibilityHandler", () => {
       view: await createViewState(imodel, categoryIds),
       viewRect: new ViewRect(),
     });
-    const modelsTreeIdsCache = new ModelsTreeIdsCache(imodelAccess, defaultModelsTreeHierarchyConfiguration);
     return {
       imodelAccess,
       viewport,
       idsCache,
-      modelsTreeIdsCache,
     };
   }
 
@@ -99,24 +92,16 @@ describe("CategoriesVisibilityHandler", () => {
   }) {
     const commonProps = await createCommonProps({ imodel, categoryIds });
     const handler = new CategoriesVisibilityHandler({ idsCache: commonProps.idsCache, viewport: commonProps.viewport });
-    const modelsTreeHandler = createModelsTreeVisibilityHandler({
-      idsCache: commonProps.modelsTreeIdsCache,
-      viewport: commonProps.viewport,
-      imodelAccess: commonProps.imodelAccess,
-    });
     const provider = createProvider({ ...commonProps });
     testDataVisibilityInitializer?.initialize(commonProps.viewport);
     return {
       handler,
       provider,
       viewport: commonProps.viewport,
-      modelsTreeHandler,
       [Symbol.dispose]() {
-        commonProps.modelsTreeIdsCache[Symbol.dispose]();
         commonProps.viewport.dispose();
         handler[Symbol.dispose]();
         provider[Symbol.dispose]();
-        modelsTreeHandler[Symbol.dispose]();
       },
     };
   }
@@ -150,6 +135,7 @@ describe("CategoriesVisibilityHandler", () => {
         expectations: "all-hidden",
       });
     });
+
     describe("definitionContainers", () => {
       it("showing definition container makes it and all of its contained elements visible", async function () {
         await using buildIModelResult = await buildIModel(this, async (builder) => {
@@ -760,116 +746,118 @@ describe("CategoriesVisibilityHandler", () => {
       });
     });
 
-    describe("reacting to visibility change from models tree", () => {
-      describe("changing category visibility", () => {
-        it("category is visible when models tree shows category", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+    describe("enabling category visibility through overrides", () => {
+      it("category is visible when only one model contains category and override is set to 'Show'", async function () {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
+          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
-            const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-            insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-            return { category, physicalModel };
-          });
-
-          const { imodel, ...keys } = buildIModelResult;
-
-          const testDataVisibilityInitializer = new TestDataVisibilityInitializer({ ...createHiddenTestData(keys), ...createVisibleModels(keys) });
-          using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
-          const { handler, provider, viewport, modelsTreeHandler } = visibilityTestData;
-
-          await modelsTreeHandler.changeVisibility(createModelsTreeCategoryHierarchyNode(keys.physicalModel.id, keys.category.id), true);
-
-          await validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: "all-visible",
-          });
+          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
+          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          return { category, physicalModel };
         });
 
-        it("category is partial when models tree shows category for one model", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
-            const physicalModel2 = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
+        const { imodel, ...keys } = buildIModelResult;
 
-            const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-            insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-            insertPhysicalElement({ builder, modelId: physicalModel2.id, categoryId: category.id });
-            return { category, physicalModel, physicalModel2 };
-          });
+        const testDataVisibilityInitializer = new TestDataVisibilityInitializer({ ...createHiddenTestData(keys), ...createVisibleModels(keys) });
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        const { handler, provider, viewport } = visibilityTestData;
+        viewport.perModelCategoryVisibility.setOverride(keys.physicalModel.id, keys.category.id, PerModelCategoryVisibility.Override.Show);
 
-          const { imodel, ...keys } = buildIModelResult;
-
-          const testDataVisibilityInitializer = new TestDataVisibilityInitializer({ ...createHiddenTestData(keys), ...createVisibleModels(keys) });
-          using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
-          const { handler, provider, viewport, modelsTreeHandler } = visibilityTestData;
-
-          await modelsTreeHandler.changeVisibility(createModelsTreeCategoryHierarchyNode(keys.physicalModel.id, keys.category.id), true);
-
-          await validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: {
-              [keys.category.id]: "partial",
-            },
-          });
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: "all-visible",
         });
       });
 
-      describe("changing model visibility", () => {
-        it("category is hidden when models tree shows model", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+      it("category is partial when multiple models contain category and override for one model is set to 'Show'", async function () {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
+          const physicalModel = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
+          const physicalModel2 = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
 
-            const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-            insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-            return { category, physicalModel };
-          });
-
-          const { imodel, ...keys } = buildIModelResult;
-
-          const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createHiddenTestData(keys));
-          using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
-          const { handler, provider, viewport, modelsTreeHandler } = visibilityTestData;
-
-          await modelsTreeHandler.changeVisibility(createModelHierarchyNode(keys.physicalModel.id), true);
-
-          await validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: "all-visible",
-          });
+          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
+          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          insertPhysicalElement({ builder, modelId: physicalModel2.id, categoryId: category.id });
+          return { category, physicalModel, physicalModel2 };
         });
 
-        it("category is partial when models tree shows one of the models", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
-            const physicalModel2 = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
+        const { imodel, ...keys } = buildIModelResult;
 
-            const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-            insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-            insertPhysicalElement({ builder, modelId: physicalModel2.id, categoryId: category.id });
-            return { category, physicalModel, physicalModel2 };
-          });
+        const testDataVisibilityInitializer = new TestDataVisibilityInitializer({ ...createHiddenTestData(keys), ...createVisibleModels(keys) });
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        const { handler, provider, viewport } = visibilityTestData;
 
-          const { imodel, ...keys } = buildIModelResult;
+        viewport.perModelCategoryVisibility.setOverride(keys.physicalModel.id, keys.category.id, PerModelCategoryVisibility.Override.Show);
 
-          const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createHiddenTestData(keys));
-          using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
-          const { handler, provider, viewport, modelsTreeHandler } = visibilityTestData;
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: {
+            [keys.category.id]: "partial",
+          },
+        });
+      });
+    });
 
-          await modelsTreeHandler.changeVisibility(createModelHierarchyNode(keys.physicalModel.id), true);
+    describe("enabling category visibility through model selector", () => {
+      it("category is visible when only one model contains category and model is enabled through model selector", async function () {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
+          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
-          await validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: {
-              [keys.category.id]: "partial",
-            },
-          });
+          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
+          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          return { category, physicalModel };
+        });
+
+        const { imodel, ...keys } = buildIModelResult;
+
+        const testDataVisibilityInitializer = new TestDataVisibilityInitializer({
+          ...createHiddenTestData(keys),
+          categories: [{ id: keys.category.id, visible: true }],
+        });
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        const { handler, provider, viewport } = visibilityTestData;
+
+        await viewport.addViewedModels(keys.physicalModel.id);
+
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: "all-visible",
+        });
+      });
+
+      it("category is partial when multiple models contain category and one model is enabled through model selector", async function () {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
+          const physicalModel = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
+          const physicalModel2 = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
+
+          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
+          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          insertPhysicalElement({ builder, modelId: physicalModel2.id, categoryId: category.id });
+          return { category, physicalModel, physicalModel2 };
+        });
+
+        const { imodel, ...keys } = buildIModelResult;
+
+        const testDataVisibilityInitializer = new TestDataVisibilityInitializer({
+          ...createHiddenTestData(keys),
+          categories: [{ id: keys.category.id, visible: true }],
+        });
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        const { handler, provider, viewport } = visibilityTestData;
+        await viewport.addViewedModels(keys.physicalModel.id);
+
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: {
+            [keys.category.id]: "partial",
+          },
         });
       });
     });
@@ -1472,115 +1460,113 @@ describe("CategoriesVisibilityHandler", () => {
       });
     });
 
-    describe("reacting to visibility change from models tree", () => {
-      describe("changing category visibility", () => {
-        it("category is hidden when models tree hides category", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+    describe("disabling category visibility through overrides", () => {
+      it("category is hidden when only one model contains category and override is set to 'Hide'", async function () {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
+          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
-            const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-            insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-            return { category, physicalModel };
-          });
-
-          const { imodel, ...keys } = buildIModelResult;
-
-          const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createVisibleModels(keys));
-          using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
-          const { handler, provider, viewport, modelsTreeHandler } = visibilityTestData;
-
-          await modelsTreeHandler.changeVisibility(createModelsTreeCategoryHierarchyNode(keys.physicalModel.id, keys.category.id), false);
-
-          await validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: "all-hidden",
-          });
+          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
+          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          return { category, physicalModel };
         });
 
-        it("category is partial when models tree hides category for one model", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
-            const physicalModel2 = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
+        const { imodel, ...keys } = buildIModelResult;
 
-            const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-            insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-            insertPhysicalElement({ builder, modelId: physicalModel2.id, categoryId: category.id });
-            return { category, physicalModel, physicalModel2 };
-          });
+        const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createVisibleModels(keys));
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        const { handler, provider, viewport } = visibilityTestData;
+        viewport.perModelCategoryVisibility.setOverride(keys.physicalModel.id, keys.category.id, PerModelCategoryVisibility.Override.Hide);
 
-          const { imodel, ...keys } = buildIModelResult;
-
-          const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createVisibleModels(keys));
-          using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
-          const { handler, provider, viewport, modelsTreeHandler } = visibilityTestData;
-
-          await modelsTreeHandler.changeVisibility(createModelsTreeCategoryHierarchyNode(keys.physicalModel.id, keys.category.id), false);
-
-          await validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: {
-              [keys.category.id]: "partial",
-            },
-          });
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: "all-hidden",
         });
       });
-      describe("changing model visibility", () => {
-        it("category is hidden when models tree hides model", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
-            const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-            insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-            return { category, physicalModel };
-          });
+      it("category is partial when multiple models contain category and override for one model is set to 'Hide'", async function () {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
+          const physicalModel = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
+          const physicalModel2 = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
 
-          const { imodel, ...keys } = buildIModelResult;
-
-          const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createVisibleModels(keys));
-          using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
-          const { handler, provider, viewport, modelsTreeHandler } = visibilityTestData;
-
-          await modelsTreeHandler.changeVisibility(createModelHierarchyNode(keys.physicalModel.id), false);
-
-          await validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: "all-hidden",
-          });
+          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
+          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          insertPhysicalElement({ builder, modelId: physicalModel2.id, categoryId: category.id });
+          return { category, physicalModel, physicalModel2 };
         });
 
-        it("category is partial when models tree hides one of the models", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
-            const physicalModel = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
-            const physicalModel2 = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
+        const { imodel, ...keys } = buildIModelResult;
 
-            const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
-            insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-            insertPhysicalElement({ builder, modelId: physicalModel2.id, categoryId: category.id });
-            return { category, physicalModel, physicalModel2 };
-          });
+        const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createVisibleModels(keys));
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        const { handler, provider, viewport } = visibilityTestData;
 
-          const { imodel, ...keys } = buildIModelResult;
+        viewport.perModelCategoryVisibility.setOverride(keys.physicalModel.id, keys.category.id, PerModelCategoryVisibility.Override.Hide);
 
-          const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createVisibleModels(keys));
-          using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
-          const { handler, provider, viewport, modelsTreeHandler } = visibilityTestData;
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: {
+            [keys.category.id]: "partial",
+          },
+        });
+      });
+    });
 
-          await modelsTreeHandler.changeVisibility(createModelHierarchyNode(keys.physicalModel.id), false);
+    describe("disabling category visibility through model selector", () => {
+      it("category is hidden when only one model contains category and model is disabled through model selector", async function () {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
+          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
-          await validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            expectations: {
-              [keys.category.id]: "partial",
-            },
-          });
+          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
+          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          return { category, physicalModel };
+        });
+
+        const { imodel, ...keys } = buildIModelResult;
+
+        const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createVisibleModels(keys));
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        const { handler, provider, viewport } = visibilityTestData;
+
+        viewport.changeModelDisplay(keys.physicalModel.id, false);
+
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: "all-hidden",
+        });
+      });
+
+      it("category is partial when multiple models contain category and one model is disabled through model selector", async function () {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
+          const physicalModel = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
+          const physicalModel2 = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
+
+          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
+          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          insertPhysicalElement({ builder, modelId: physicalModel2.id, categoryId: category.id });
+          return { category, physicalModel, physicalModel2 };
+        });
+
+        const { imodel, ...keys } = buildIModelResult;
+
+        const testDataVisibilityInitializer = new TestDataVisibilityInitializer(createVisibleModels(keys));
+        using visibilityTestData = await createVisibilityTestData({ imodel, categoryIds: getCategoryIds(keys), testDataVisibilityInitializer });
+        const { handler, provider, viewport } = visibilityTestData;
+
+        viewport.changeModelDisplay(keys.physicalModel.id, false);
+
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: {
+            [keys.category.id]: "partial",
+          },
         });
       });
     });

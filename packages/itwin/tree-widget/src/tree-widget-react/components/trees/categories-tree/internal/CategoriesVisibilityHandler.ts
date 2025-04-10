@@ -162,14 +162,14 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
 
   private async getCategoryVisibilityWithoutSubCategories(
     categoryId: Id64String,
-  ): Promise<{ visibility: VisibilityStatus["state"]; reason: "all-overrides" | "some-overrides" | "no-Overrides" }> {
+  ): Promise<{ visibility: VisibilityStatus["state"]; reason: "all-overrides" | "some-overrides" | "no-overrides" }> {
     const categoryModelsMap = await this._idsCache.getCategoriesElementModels([categoryId]);
     let showOverrides = 0;
     let hideOverrides = 0;
     let noOverrides = 0;
     const modelIds = categoryModelsMap.get(categoryId);
     if (!modelIds) {
-      return { visibility: this._viewport.view.viewsCategory(categoryId) ? "visible" : "hidden", reason: "no-Overrides" };
+      return { visibility: this._viewport.view.viewsCategory(categoryId) ? "visible" : "hidden", reason: "no-overrides" };
     }
     for (const modelId of modelIds) {
       if (this._viewport.view.viewsModel(modelId)) {
@@ -193,7 +193,7 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
     }
 
     if (showOverrides === 0 && hideOverrides === 0) {
-      return { visibility: this._viewport.view.viewsCategory(categoryId) ? "visible" : "hidden", reason: "no-Overrides" };
+      return { visibility: this._viewport.view.viewsCategory(categoryId) ? "visible" : "hidden", reason: "no-overrides" };
     }
     if (noOverrides > 0) {
       if (this._viewport.view.viewsCategory(categoryId)) {
@@ -225,24 +225,21 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
     return hiddenSubCategoryCount > 0 ? "hidden" : "visible";
   }
 
+  private async enableCategoriesElementModels(categoryIds: Id64Array) {
+    const categoriesModelsMap = await this._idsCache.getCategoriesElementModels(categoryIds);
+    const modelIds = [...categoriesModelsMap.values()].flat();
+    const hiddenModels = modelIds.filter((modelId) => !this._viewport.view.viewsModel(modelId));
+    if (hiddenModels.length > 0) {
+      this._viewport.changeModelDisplay(hiddenModels, true);
+    }
+  }
+
   private async changeSubCategoryVisibility(node: HierarchyNode, on: boolean) {
     const parentCategoryId = node.extendedData?.categoryId;
 
     // make sure parent category and models are enabled
     if (on && parentCategoryId) {
-      await Promise.all([
-        (async () => {
-          const categoriesModelsMap = await this._idsCache.getCategoriesElementModels([parentCategoryId]);
-          const modelIds = [...categoriesModelsMap.values()].reduce((acc, categoryModels) => {
-            return acc.concat(categoryModels);
-          }, new Array<Id64String>());
-          const hiddenModels = modelIds.filter((modelId) => !this._viewport.view.viewsModel(modelId));
-          if (hiddenModels.length > 0) {
-            this._viewport.changeModelDisplay(hiddenModels, on);
-          }
-        })(),
-        await this.changeCategoryState([parentCategoryId], true, false),
-      ]);
+      await Promise.all([this.enableCategoriesElementModels([parentCategoryId]), this.changeCategoryState([parentCategoryId], true, false)]);
     }
 
     const subCategoryIds = CategoriesVisibilityHandler.getInstanceIdsFromHierarchyNode(node);
@@ -254,12 +251,7 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
     const categoryIds = CategoriesVisibilityHandler.getInstanceIdsFromHierarchyNode(node);
     // make sure models are enabled
     if (on) {
-      const categoriesModelsMap = await this._idsCache.getCategoriesElementModels(categoryIds);
-      const modelIds = [...categoriesModelsMap.values()].flat();
-      const hiddenModels = modelIds.filter((modelId) => !this._viewport.view.viewsModel(modelId));
-      if (hiddenModels.length > 0) {
-        this._viewport.changeModelDisplay(hiddenModels, on);
-      }
+      await this.enableCategoriesElementModels(categoryIds);
     }
     return this.changeCategoryState(categoryIds, on, on);
   }

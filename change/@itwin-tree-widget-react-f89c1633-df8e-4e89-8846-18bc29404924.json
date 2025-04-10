@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Categories tree now shows correct visibilities based on perModelCategoryVisibility.Override",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "100586436+JonasDov@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
