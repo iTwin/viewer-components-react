@@ -9,6 +9,7 @@ import { useFilterAction } from "@itwin/presentation-hierarchies-react";
 import { BaseTreeRenderer } from "./BaseTreeRenderer.js";
 
 import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
+
 /**
  * Default renderer for rendering tree data.
  * @beta
