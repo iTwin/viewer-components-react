@@ -255,9 +255,7 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
     // make sure models are enabled
     if (on) {
       const categoriesModelsMap = await this._idsCache.getCategoriesElementModels(categoryIds);
-      const modelIds = [...categoriesModelsMap.values()].reduce((acc, categoryModels) => {
-        return acc.concat(categoryModels);
-      }, new Array<Id64String>());
+      const modelIds = [...categoriesModelsMap.values()].flat();
       const hiddenModels = modelIds.filter((modelId) => !this._viewport.view.viewsModel(modelId));
       if (hiddenModels.length > 0) {
         this._viewport.changeModelDisplay(hiddenModels, on);
