@@ -89,7 +89,7 @@ export function useHierarchyVisibility({
     const triggerCheckboxUpdate = () => {
       setState((prev) => ({
         ...prev,
-        getCheckboxState: createStateGetter(visibilityStatusMap, calculateNodeStatus),
+        getVisibilityButtonState: createStateGetter(visibilityStatusMap, calculateNodeStatus),
       }));
     };
 
