@@ -14,9 +14,8 @@ export type Visibility = "visible" | "hidden" | "partial";
 export type NonPartialVisibilityStatus = Omit<VisibilityStatus, "state"> & { state: "visible" | "hidden" };
 
 interface VisibilityStatusOptions {
-  // id of localized string to use as an additional tooltip or false to not use tooltip at all
-  // if undefined tooltip will be created based only on the visibility status
-  useTooltip?: string | false;
+  // if undefined or true tooltip will be created based only on the visibility status
+  useTooltip?: boolean;
 }
 
 /** @internal */
@@ -26,26 +25,13 @@ export function createVisibilityStatus(status: Visibility | "disabled", { useToo
   return {
     state: status === "disabled" ? "hidden" : status,
     isDisabled: status === "disabled",
-    tooltip: useTooltip === false ? undefined : createTooltip(status, useTooltip),
+    tooltip: useTooltip === false ? undefined : createTooltip(status),
   };
 }
 
 /** @internal */
-export function createTooltip(status: Visibility | "disabled", tooltipStringId: string | undefined): string {
+export function createTooltip(status: Visibility | "disabled"): string {
   const statusStringId = `visibilityTooltips.status.${status}`;
   const statusString = TreeWidget.translate(statusStringId);
-  if (!tooltipStringId) {
-    return statusString;
-  }
-
-  tooltipStringId = `visibilityTooltips.${tooltipStringId}`;
-  const tooltipString = TreeWidget.translate(tooltipStringId);
-  return `${statusString}: ${tooltipString}`;
-}
-
-/** @internal */
-export function getTooltipOptions(key: string | undefined, ignoreTooltip?: boolean) {
-  return {
-    useTooltip: ignoreTooltip ? (false as const) : key,
-  };
+  return statusString;
 }
