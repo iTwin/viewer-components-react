@@ -373,42 +373,38 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
 
   private async getCategoryVisibilityWithoutSubCategories(
     categoryId: Id64String,
-  ): Promise<{ visibility: Visibility; reason: "all-overrides" | "some-overrides" | "no-Overrides" }> {
+  ): Promise<{ visibility: Visibility; reason: "all-overrides" | "some-overrides" | "no-overrides" }> {
     const categoryModelsMap = await this._idsCache.getCategoriesElementModels([categoryId], true);
     let showOverrides = 0;
-    let hideOverrides = 0;
+    let hiddenModelsCount = 0;
     let noOverrides = 0;
     const modelIds = categoryModelsMap.get(categoryId);
-    if (!modelIds) {
-      return { visibility: this._props.viewport.view.viewsCategory(categoryId) ? "visible" : "hidden", reason: "no-Overrides" };
-    }
-    const viewport = this._props.viewport;
-    for (const modelId of modelIds) {
-      if (viewport.view.viewsModel(modelId)) {
-        const override = viewport.perModelCategoryVisibility.getOverride(modelId, categoryId);
+    for (const modelId of modelIds ?? []) {
+      if (this._props.viewport.view.viewsModel(modelId)) {
+        const override = this._props.viewport.perModelCategoryVisibility.getOverride(modelId, categoryId);
         if (override === PerModelCategoryVisibility.Override.None) {
           ++noOverrides;
           continue;
         }
         if (override === PerModelCategoryVisibility.Override.Hide) {
-          ++hideOverrides;
+          ++hiddenModelsCount;
         } else {
           ++showOverrides;
         }
       } else {
-        ++hideOverrides;
+        ++hiddenModelsCount;
       }
 
-      if (showOverrides > 0 && hideOverrides > 0) {
+      if (showOverrides > 0 && hiddenModelsCount > 0) {
         return { visibility: "partial", reason: "all-overrides" };
       }
     }
 
-    if (showOverrides === 0 && hideOverrides === 0) {
-      return { visibility: viewport.view.viewsCategory(categoryId) ? "visible" : "hidden", reason: "no-Overrides" };
+    if (showOverrides === 0 && hiddenModelsCount === 0) {
+      return { visibility: this._props.viewport.view.viewsCategory(categoryId) ? "visible" : "hidden", reason: "no-overrides" };
     }
     if (noOverrides > 0) {
-      if (viewport.view.viewsCategory(categoryId)) {
+      if (this._props.viewport.view.viewsCategory(categoryId)) {
         return { visibility: showOverrides > 0 ? "visible" : "partial", reason: "some-overrides" };
       }
       return { visibility: showOverrides > 0 ? "partial" : "hidden", reason: "some-overrides" };
