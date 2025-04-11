@@ -7,6 +7,10 @@ module.exports = {
         pkg.dependencies["@itwin/itwinui-react"] = pkg.peerDependencies["@itwin/itwinui-react"];
         delete pkg.peerDependencies["@itwin/itwinui-react"];
       }
+      if (pkg.name === "@itwin/presentation-hierarchies-react") {
+        pkg.dependencies["@itwin/itwinui-react"] = pkg.peerDependencies["@itwin/itwinui-react"];
+        delete pkg.peerDependencies["@itwin/itwinui-react"];
+      }
       return pkg;
     },
   },

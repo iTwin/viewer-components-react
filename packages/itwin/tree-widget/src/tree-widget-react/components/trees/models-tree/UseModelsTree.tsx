@@ -191,6 +191,7 @@ function InstanceFocusError({ error }: { error: ModelsTreeFilteringError }) {
   return <UnknownInstanceFocusError base={"modelsTree"} />;
 }
 
+const rootSubjectSvg = new URL("@itwin/itwinui-icons/imodel.svg", import.meta.url).href;
 const subjectSvg = new URL("@itwin/itwinui-icons/bis-subject.svg", import.meta.url).href;
 const classSvg = new URL("@itwin/itwinui-icons/bis-class.svg", import.meta.url).href;
 const modelSvg = new URL("@itwin/itwinui-icons/model-cube.svg", import.meta.url).href;
@@ -215,6 +216,8 @@ export function ModelsTreeIcon({ node }: { node: PresentationHierarchyNode }) {
         return subjectSvg;
       case "icon-model":
         return modelSvg;
+      case "icon-imodel-hollow-2":
+        return rootSubjectSvg;
       default:
         return undefined;
     }
