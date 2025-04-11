@@ -5,7 +5,7 @@
 
 import { DEFINITION_CONTAINER_CLASS, SUB_CATEGORY_CLASS } from "./ClassNameDefinitions.js";
 
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
 
@@ -35,17 +35,39 @@ export class CategoriesTreeIdsCache {
   private _definitionContainersInfo: Promise<Map<Id64String, DefinitionContainerInfo>> | undefined;
   private _modelsCategoriesInfo: Promise<Map<Id64String, CategoriesInfo>> | undefined;
   private _subCategoriesInfo: Promise<Map<Id64String, SubCategoryInfo>> | undefined;
+  private _elementModelsCategories: Promise<Map<Id64String, Id64Set>> | undefined;
   private _categoryClass: string;
   private _categoryElementClass: string;
+  private _categoryModelClass: string;
   private _isDefinitionContainerSupported: Promise<boolean> | undefined;
 
   constructor(
     private _queryExecutor: LimitingECSqlQueryExecutor,
     viewType: "3d" | "2d",
   ) {
-    const { categoryClass, categoryElementClass } = getClassesByView(viewType);
+    const { categoryClass, categoryElementClass, categoryModelClass } = getClassesByView(viewType);
     this._categoryClass = categoryClass;
     this._categoryElementClass = categoryElementClass;
+    this._categoryModelClass = categoryModelClass;
+  }
+
+  private async *queryElementModelCategories(): AsyncIterableIterator<{
+    modelId: Id64String;
+    categoryId: Id64String;
+  }> {
+    const query = `
+      SELECT this.Model.Id modelId, this.Category.Id categoryId
+      FROM ${this._categoryModelClass} m
+      JOIN ${this._categoryElementClass} this ON m.ECInstanceId = this.Model.Id
+      WHERE m.IsPrivate = false
+      GROUP BY modelId, categoryId
+    `;
+    for await (const row of this._queryExecutor.createQueryReader(
+      { ecsql: query },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: "tree-widget/categories-tree/element-models-and-categories-query" },
+    )) {
+      yield { modelId: row.modelId, categoryId: row.categoryId };
+    }
   }
 
   private async *queryCategories(): AsyncIterableIterator<{
@@ -173,6 +195,22 @@ export class CategoriesTreeIdsCache {
     return this._modelsCategoriesInfo;
   }
 
+  private async getElementModelsCategories() {
+    this._elementModelsCategories ??= (async () => {
+      const elementModelsCategories = new Map<Id64String, Id64Set>();
+      for await (const queriedCategory of this.queryElementModelCategories()) {
+        let modelEntry = elementModelsCategories.get(queriedCategory.modelId);
+        if (modelEntry === undefined) {
+          modelEntry = new Set();
+          elementModelsCategories.set(queriedCategory.modelId, modelEntry);
+        }
+        modelEntry.add(queriedCategory.categoryId);
+      }
+      return elementModelsCategories;
+    })();
+    return this._elementModelsCategories;
+  }
+
   private async getSubCategoriesInfo() {
     this._subCategoriesInfo ??= (async () => {
       const allSubCategories = new Map<Id64String, SubCategoryInfo>();
@@ -245,6 +283,24 @@ export class CategoriesTreeIdsCache {
         result.categories.push(...parentDefinitionContainerInfo.childCategories);
       }
     });
+    return result;
+  }
+
+  public async getCategoriesElementModels(categoryIds: Id64Array): Promise<Map<Id64String, Id64Array>> {
+    const elementModelsCategories = await this.getElementModelsCategories();
+    const result = new Map<Id64String, Id64Array>();
+    for (const categoryId of categoryIds) {
+      for (const [modelId, categories] of elementModelsCategories) {
+        if (categories.has(categoryId)) {
+          let categoryModels = result.get(categoryId);
+          if (!categoryModels) {
+            categoryModels = new Array<Id64String>();
+            result.set(categoryId, categoryModels);
+          }
+          categoryModels.push(modelId);
+        }
+      }
+    }
     return result;
   }
 
@@ -358,6 +414,6 @@ export class CategoriesTreeIdsCache {
 /** @internal */
 export function getClassesByView(viewType: "2d" | "3d") {
   return viewType === "2d"
-    ? { categoryClass: "BisCore.DrawingCategory", categoryElementClass: "BisCore.GeometricElement2d" }
-    : { categoryClass: "BisCore.SpatialCategory", categoryElementClass: "BisCore.GeometricElement3d" };
+    ? { categoryClass: "BisCore.DrawingCategory", categoryElementClass: "BisCore.GeometricElement2d", categoryModelClass: "BisCore.GeometricModel2d" }
+    : { categoryClass: "BisCore.SpatialCategory", categoryElementClass: "BisCore.GeometricElement3d", categoryModelClass: "BisCore.GeometricModel3d" };
 }
