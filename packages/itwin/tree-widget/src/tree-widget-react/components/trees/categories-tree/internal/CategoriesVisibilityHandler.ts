@@ -83,7 +83,7 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
     }
 
     if (CategoriesTreeNode.isCategoryNode(node)) {
-      return this.changeCategoryVisibility(node, on);
+      return this.changeCategoryVisibility(CategoriesVisibilityHandler.getInstanceIdsFromHierarchyNode(node), on);
     }
 
     if (CategoriesTreeNode.isSubCategoryNode(node)) {
@@ -208,8 +208,7 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
       this.changeSubCategoryState(id, on);
     });
   }
-  private async changeCategoryVisibility(node: HierarchyNode, on: boolean) {
-    const categoryIds = CategoriesVisibilityHandler.getInstanceIdsFromHierarchyNode(node);
+  private async changeCategoryVisibility(categoryIds: Id64Array, on: boolean) {
     // make sure models are enabled
     if (on) {
       await this.enableCategoriesElementModelsVisibility(categoryIds);
@@ -220,7 +219,7 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
   private async changeDefinitionContainerVisibility(node: HierarchyNode, on: boolean) {
     const definitionContainerId = CategoriesVisibilityHandler.getInstanceIdsFromHierarchyNode(node);
     const childCategories = await this._idsCache.getAllContainedCategories(definitionContainerId);
-    return this.changeCategoryState(childCategories, on, on);
+    return this.changeCategoryVisibility(childCategories, on);
   }
 
   private onDisplayStyleChanged = () => {
