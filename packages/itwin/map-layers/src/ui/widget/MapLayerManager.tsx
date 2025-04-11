@@ -655,8 +655,6 @@ export function MapLayerManager(props: MapLayerManagerProps) {
     ],
   );
 
-  const [baseMapPanelLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Basemap.BaseMapPanelTitle"));
-
   return (
     <SourceMapContext.Provider
       value={{
@@ -672,7 +670,6 @@ export function MapLayerManager(props: MapLayerManagerProps) {
     >
       {/* Header*/}
       <div className="map-manager-top-header">
-        <span className="map-manager-header-label">{baseMapPanelLabel}</span>
         <div className="map-manager-header-buttons-group">
           <ToggleSwitch className="map-manager-toggle" checked={backgroundMapVisible} onChange={handleMapLayersToggle} />
           <MapLayerSettingsPopupButton disabled={!backgroundMapVisible} />

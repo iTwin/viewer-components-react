@@ -4,9 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import { SvgLayers } from "@itwin/itwinui-icons-react";
-import { Button, Popover } from "@itwin/itwinui-react";
+import { IconButton, Popover } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
 import { SubLayersPanel } from "./SubLayersTree";
+
 import type { SubLayersPanelProps } from "./SubLayersTree";
 // cSpell:ignore droppable Sublayer
 
@@ -41,16 +42,16 @@ export function SubLayersPopupButton(props: SubLayersPopupButtonProps) {
         applyBackground
         positionReference={buttonRef.current ?? undefined}
       >
-        <Button
+        <IconButton
           size="small"
           styleType="borderless"
           ref={buttonRef}
           className="map-manager-item-sub-layer-button"
-          title={popupOpen ? hideSubLayersLabel : showSubLayersLabel}
+          label={popupOpen ? hideSubLayersLabel : showSubLayersLabel}
           onClick={togglePopup}
         >
           <SvgLayers />
-        </Button>
+        </IconButton>
       </Popover>
     </>
   );

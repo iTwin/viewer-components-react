@@ -40,7 +40,7 @@ type ModelCategoryKey = `${ModelId}-${CategoryId}`;
 export class CategoriesTreeIdsCache implements Disposable {
   private _definitionContainersInfo: Promise<Map<DefinitionContainerId, DefinitionContainerInfo>> | undefined;
   private _modelsCategoriesInfo: Promise<Map<ModelId, CategoriesInfo>> | undefined;
-  private _elementModelsCategories: Promise<Map<ModelId, { categoryIds: Id64Set; isSubModel: boolean; isModelPrivate: boolean }>> | undefined;
+  private _elementModelsCategories: Promise<Map<ModelId, { categoryIds: Id64Set; isSubModel: boolean }>> | undefined;
   private _subCategoriesInfo: Promise<Map<SubCategoryId, SubCategoryInfo>> | undefined;
   private readonly _categoryElementCounts: ModelCategoryElementsCountCache;
   private _modelWithCategoryModeledElements: Promise<Map<ModelCategoryKey, Set<ElementId>>> | undefined;
@@ -101,20 +101,19 @@ export class CategoriesTreeIdsCache implements Disposable {
   private async *queryElementModelCategories(): AsyncIterableIterator<{
     modelId: Id64String;
     categoryId: Id64String;
-    isModelPrivate: boolean;
   }> {
     const query = `
-      SELECT this.Model.Id modelId, this.Category.Id categoryId, m.IsPrivate isModelPrivate
+      SELECT this.Model.Id modelId, this.Category.Id categoryId
       FROM ${this._categoryModelClass} m
       JOIN ${this._categoryElementClass} this ON m.ECInstanceId = this.Model.Id
-      WHERE this.Parent.Id IS NULL
-      GROUP BY modelId, categoryId, isModelPrivate
+      WHERE this.Parent.Id IS NULL AND m.IsPrivate = false
+      GROUP BY modelId, categoryId
     `;
     for await (const row of this._queryExecutor.createQueryReader(
       { ecsql: query },
       { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: "tree-widget/categories-tree/element-models-and-categories-query" },
     )) {
-      yield { modelId: row.modelId, categoryId: row.categoryId, isModelPrivate: !!row.isModelPrivate };
+      yield { modelId: row.modelId, categoryId: row.categoryId };
     }
   }
 
@@ -264,11 +263,11 @@ export class CategoriesTreeIdsCache implements Disposable {
     this._elementModelsCategories ??= (async () => {
       const [modelCategories, modelWithCategoryModeledElements] = await Promise.all([
         (async () => {
-          const elementModelsCategories = new Map<ModelId, { categoryIds: Id64Set; isModelPrivate: boolean }>();
+          const elementModelsCategories = new Map<ModelId, { categoryIds: Id64Set }>();
           for await (const queriedCategory of this.queryElementModelCategories()) {
             let modelEntry = elementModelsCategories.get(queriedCategory.modelId);
             if (modelEntry === undefined) {
-              modelEntry = { categoryIds: new Set(), isModelPrivate: queriedCategory.isModelPrivate };
+              modelEntry = { categoryIds: new Set() };
               elementModelsCategories.set(queriedCategory.modelId, modelEntry);
             }
             modelEntry.categoryIds.add(queriedCategory.categoryId);
@@ -277,11 +276,11 @@ export class CategoriesTreeIdsCache implements Disposable {
         })(),
         this.getModelWithCategoryModeledElements(),
       ]);
-      const result = new Map<ModelId, { categoryIds: Set<CategoryId>; isSubModel: boolean; isModelPrivate: boolean }>();
+      const result = new Map<ModelId, { categoryIds: Set<CategoryId>; isSubModel: boolean }>();
       const subModels = getDistinctMapValues(modelWithCategoryModeledElements);
       for (const [modelId, modelEntry] of modelCategories) {
         const isSubModel = subModels.has(modelId);
-        result.set(modelId, { categoryIds: modelEntry.categoryIds, isSubModel, isModelPrivate: modelEntry.isModelPrivate });
+        result.set(modelId, { categoryIds: modelEntry.categoryIds, isSubModel });
       }
       return result;
     })();
@@ -442,11 +441,7 @@ export class CategoriesTreeIdsCache implements Disposable {
 
   public async hasSubModel(elementId: Id64String): Promise<boolean> {
     const elementModelsCategories = await this.getElementModelsCategories();
-    const modeledElementInfo = elementModelsCategories.get(elementId);
-    if (!modeledElementInfo) {
-      return false;
-    }
-    return !modeledElementInfo.isModelPrivate;
+    return elementModelsCategories.has(elementId);
   }
 
   public async getAllContainedCategories(definitionContainerIds: Id64Array): Promise<Id64Array> {

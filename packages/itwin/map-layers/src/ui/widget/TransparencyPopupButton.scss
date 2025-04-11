@@ -2,10 +2,9 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/core-react/lib/cjs/core-react/index";
 
 .map-transparency-popup-panel {
-  z-index: 14000;
+  z-index: var(--uicore-z-index-modal-frontstage);
   display: flex;
   flex-direction: row;
 
@@ -26,10 +25,10 @@
   }
 
   svg.checkered {
-    fill: $buic-foreground-body;
+    fill: var(--iui-color-text);
   }
 
   svg.checkered-disabled {
-    fill: $buic-foreground-muted;
+    fill: var(--iui-color-text-muted);
   }
 }

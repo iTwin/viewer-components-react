@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Removed remaining @import from .scss files.",
+  "packageName": "@itwin/map-layers",
+  "email": "mdastous-bentley@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

@@ -2,10 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/core-react/lib/cjs/core-react/index";
-
-$divider-color: $buic-background-toolbutton-stroke;
-$hovered-icon-color: $buic-foreground-primary;
+$divider-color: var(--iui-color-background-disabled);
+$hovered-icon-color: var(--iui-color-icon-accent);
 
 .map-manager-basemap {
   display: flex;
@@ -48,7 +46,7 @@ $hovered-icon-color: $buic-foreground-primary;
       border: none;
       margin-left: 4px;
       background-color: transparent;
-      color: $buic-foreground-body;
+      color: var(--iui-color-text-muted);
 
       &:hover {
         background-color: transparent;
