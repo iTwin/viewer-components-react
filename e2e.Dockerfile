@@ -7,9 +7,10 @@ FROM mcr.microsoft.com/playwright:v1.49.0-noble
 ARG PACKAGE_NAME=""
 ARG TEST_VIEWER_DIST=""
 
-# Install pnpm
+# Setup corepack
 RUN corepack enable
-RUN corepack prepare pnpm@9.12.3 --activate
+ENV COREPACK_INTEGRITY_KEYS=0
+RUN corepack prepare pnpm@10.6.5 --activate
 
 # Copy the local files to the container
 WORKDIR /workspaces/viewer-components-react/
@@ -18,10 +19,10 @@ COPY ${TEST_VIEWER_DIST} ./apps/test-viewer/dist
 COPY /packages/itwin/${PACKAGE_NAME} ./packages/itwin/${PACKAGE_NAME}
 
 # Switch to the directory where E2E tests will run
-WORKDIR ./packages/itwin/${PACKAGE_NAME}
+WORKDIR /workspaces/viewer-components-react/packages/itwin/${PACKAGE_NAME}
 
 # Install dependencies
-RUN pnpm install -D --filter .
+RUN pnpm install
 RUN npx playwright install chromium
 
 # Set the entry point to run the tests

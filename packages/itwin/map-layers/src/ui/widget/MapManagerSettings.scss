@@ -2,10 +2,9 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/core-react/lib/cjs/core-react/index";
 
-$divider-color: $buic-background-toolbutton-stroke;
-$hovered-icon-color: $buic-foreground-primary-tone;
+$divider-color: var(--iui-color-background-disabled);
+$hovered-icon-color: var(--iui-color-text-accent-hover);
 
 .maplayers-settings-container {
   display: grid;

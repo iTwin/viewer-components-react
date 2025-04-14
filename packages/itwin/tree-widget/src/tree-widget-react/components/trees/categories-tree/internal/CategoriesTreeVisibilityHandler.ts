@@ -59,7 +59,7 @@ import type { Viewport } from "@itwin/core-frontend";
 import type { GroupingHierarchyNode, HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { HierarchyVisibilityHandler, VisibilityStatus } from "../../common/UseHierarchyVisibility.js";
-import type { NonPartialVisibilityStatus, Visibility } from "../../common/internal/Tooltip.js";
+import type { NonPartialVisibilityStatus } from "../../common/internal/Tooltip.js";
 import type { CategoriesTreeHierarchyConfiguration } from "../CategoriesTreeDefinition.js";
 import type { CategoriesTreeIdsCache } from "./CategoriesTreeIdsCache.js";
 import type { FilteredTree } from "./FilteredTree.js";
@@ -371,96 +371,67 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     return createVisibilityHandlerResult(this, props, result, undefined);
   }
 
-  private async getCategoryVisibilityWithoutSubCategories(
-    categoryId: Id64String,
-  ): Promise<{ visibility: Visibility; reason: "all-overrides" | "some-overrides" | "no-overrides" }> {
-    const categoryModelsMap = await this._idsCache.getCategoriesElementModels([categoryId], true);
-    let showOverrides = 0;
-    let hiddenModelsCount = 0;
-    let noOverrides = 0;
-    const modelIds = categoryModelsMap.get(categoryId);
-    for (const modelId of modelIds ?? []) {
-      if (this._props.viewport.view.viewsModel(modelId)) {
-        const override = this._props.viewport.perModelCategoryVisibility.getOverride(modelId, categoryId);
-        if (override === PerModelCategoryVisibility.Override.None) {
-          ++noOverrides;
-          continue;
-        }
-        if (override === PerModelCategoryVisibility.Override.Hide) {
-          ++hiddenModelsCount;
-        } else {
-          ++showOverrides;
-        }
-      } else {
-        ++hiddenModelsCount;
-      }
-
-      if (showOverrides > 0 && hiddenModelsCount > 0) {
-        return { visibility: "partial", reason: "all-overrides" };
-      }
-    }
-
-    if (showOverrides === 0 && hiddenModelsCount === 0) {
-      return { visibility: this._props.viewport.view.viewsCategory(categoryId) ? "visible" : "hidden", reason: "no-overrides" };
-    }
-    if (noOverrides > 0) {
-      if (this._props.viewport.view.viewsCategory(categoryId)) {
-        return { visibility: showOverrides > 0 ? "visible" : "partial", reason: "some-overrides" };
-      }
-      return { visibility: showOverrides > 0 ? "partial" : "hidden", reason: "some-overrides" };
-    }
-
-    return { visibility: showOverrides > 0 ? "visible" : "hidden", reason: "all-overrides" };
-  }
-
-  private getSubCategoriesVisibility(subCategoryIds: Id64Array): Visibility {
-    if (subCategoryIds.length === 0) {
-      return "visible";
-    }
-    let visibleSubCategoryCount = 0;
-    let hiddenSubCategoryCount = 0;
-    for (const subCategoryId of subCategoryIds) {
-      const isVisible = this._props.viewport.isSubCategoryVisible(subCategoryId);
-      if (isVisible) {
-        ++visibleSubCategoryCount;
-      } else {
-        ++hiddenSubCategoryCount;
-      }
-      if (hiddenSubCategoryCount > 0 && visibleSubCategoryCount > 0) {
-        return "partial";
-      }
-    }
-    return hiddenSubCategoryCount > 0 ? "hidden" : "visible";
-  }
-
   private getSubCategoryDisplayStatus(props: { categoryId: Id64String; subCategoryIds: Id64Array }): Observable<VisibilityStatus> {
     const result = defer(async () => {
       const { categoryId, subCategoryIds } = props;
-      const categoryOverrideResult = await this.getCategoryVisibilityWithoutSubCategories(categoryId);
-      if (categoryOverrideResult.reason === "all-overrides" || categoryOverrideResult.visibility === "hidden") {
-        return createVisibilityStatus(categoryOverrideResult.visibility);
+      let visibility: "visible" | "hidden" | "unknown" = "unknown";
+      const categoryModels = [...(await this._idsCache.getCategoriesElementModels([categoryId], true)).values()].flat();
+      let nonDefaultModelDisplayStatesCount = 0;
+      for (const modelId of categoryModels) {
+        if (!this._props.viewport.view.viewsModel(modelId)) {
+          if (visibility === "visible") {
+            return createVisibilityStatus("partial");
+          }
+          visibility = "hidden";
+          ++nonDefaultModelDisplayStatesCount;
+          continue;
+        }
+        const override = this._props.viewport.perModelCategoryVisibility.getOverride(modelId, categoryId);
+        if (override === PerModelCategoryVisibility.Override.Show) {
+          if (visibility === "hidden") {
+            return createVisibilityStatus("partial");
+          }
+          visibility = "visible";
+          ++nonDefaultModelDisplayStatesCount;
+          continue;
+        }
+        if (override === PerModelCategoryVisibility.Override.Hide) {
+          if (visibility === "visible") {
+            return createVisibilityStatus("partial");
+          }
+          visibility = "hidden";
+          ++nonDefaultModelDisplayStatesCount;
+          continue;
+        }
+      }
+      if (categoryModels.length > 0 && nonDefaultModelDisplayStatesCount === categoryModels.length) {
+        assert(visibility === "visible" || visibility === "hidden");
+        return createVisibilityStatus(visibility);
       }
 
-      const subCategoryVisibility = this.getSubCategoriesVisibility(subCategoryIds);
-      if (subCategoryVisibility === "partial") {
-        return createVisibilityStatus("partial");
+      if (!this._props.viewport.view.viewsCategory(categoryId)) {
+        return createVisibilityStatus(visibility === "visible" ? "partial" : "hidden");
       }
-      if (subCategoryVisibility === "hidden") {
-        // This means there were some cateogry overrides set to 'Show'
-        if (!this._props.viewport.view.viewsCategory(categoryId) && categoryOverrideResult.visibility === "partial") {
+
+      if (subCategoryIds.length === 0) {
+        if (visibility === "hidden") {
           return createVisibilityStatus("partial");
         }
-        // This means there were some cateogry overrides set to 'Show'
-        if (categoryOverrideResult.reason === "some-overrides" && categoryOverrideResult.visibility === "visible") {
+        return createVisibilityStatus("visible");
+      }
+
+      for (const subCategoryId of subCategoryIds) {
+        const isSubCategoryVisible = this._props.viewport.isSubCategoryVisible(subCategoryId);
+        if (isSubCategoryVisible && visibility === "hidden") {
           return createVisibilityStatus("partial");
         }
-        return createVisibilityStatus("hidden");
+        if (!isSubCategoryVisible && visibility === "visible") {
+          return createVisibilityStatus("partial");
+        }
+        visibility = isSubCategoryVisible ? "visible" : "hidden";
       }
-      // This means there were some cateogry overrides set to 'hide'
-      if (this._props.viewport.view.viewsCategory(categoryId) && categoryOverrideResult.visibility === "partial") {
-        return createVisibilityStatus("partial");
-      }
-      return createVisibilityStatus("visible");
+      assert(visibility === "visible" || visibility === "hidden");
+      return createVisibilityStatus(visibility);
     });
     return createVisibilityHandlerResult(this, props, result, undefined);
   }
@@ -500,50 +471,18 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     return createVisibilityStatus(visibleThroughCategorySelectorCount > 0 ? "visible" : "hidden");
   }
 
-  private async getDefaultCategoryVisibilityStatus({ categoryIds }: { categoryIds: Array<CategoryId> }): Promise<VisibilityStatus> {
-    const categoriesVisibilty = await Promise.all(
-      categoryIds.map(async (categoryId) => {
-        const { visibility, reason } = await this.getCategoryVisibilityWithoutSubCategories(categoryId);
-        return { categoryId, visibility, reason };
+  private getDefaultCategoryVisibilityStatus({ categoryIds }: { categoryIds: Array<CategoryId> }): Observable<VisibilityStatus> {
+    return from(this._idsCache.getSubCategories(categoryIds)).pipe(
+      mergeMap((categoriesSubCategoriesMap) => {
+        return from(categoryIds).pipe(
+          mergeMap((categoryId) => {
+            const subCategoryIds = categoriesSubCategoriesMap.get(categoryId);
+            return this.getSubCategoryDisplayStatus({ subCategoryIds: subCategoryIds ?? [], categoryId });
+          }),
+          mergeVisibilityStatuses,
+        );
       }),
     );
-
-    let visibleCount = 0;
-    let hiddenCount = 0;
-    for (const { categoryId, visibility, reason } of categoriesVisibilty) {
-      if (visibleCount > 0 && hiddenCount > 0) {
-        return createVisibilityStatus("partial");
-      }
-      if (visibility === "partial") {
-        return createVisibilityStatus("partial");
-      }
-      if (visibility === "hidden") {
-        ++hiddenCount;
-        continue;
-      }
-      if (reason === "all-overrides") {
-        ++visibleCount;
-        continue;
-      }
-      const subCategories = [...(await this._idsCache.getSubCategories([categoryId])).values()].flat();
-      const subCategoriesVisibility = this.getSubCategoriesVisibility(subCategories);
-      if (subCategoriesVisibility === "partial") {
-        return createVisibilityStatus("partial");
-      }
-
-      if (subCategoriesVisibility === "hidden" && reason === "some-overrides") {
-        return createVisibilityStatus("partial");
-      }
-      if (subCategoriesVisibility === "hidden") {
-        ++hiddenCount;
-      } else {
-        ++visibleCount;
-      }
-    }
-    if (visibleCount > 0 && hiddenCount > 0) {
-      return createVisibilityStatus("partial");
-    }
-    return createVisibilityStatus(visibleCount > 0 ? "visible" : "hidden");
   }
 
   private getCategoryDisplayStatus(props: GetCategoryVisibilityStatusProps): Observable<VisibilityStatus> {
@@ -929,7 +868,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
   private changeSubCategoryState(props: { categoryId: Id64String; subCategoryIds: Id64Array; on: boolean }): Observable<void> {
     const result = defer(() => {
       return concat(
-        // make sure parent category is enabled
+        // make sure parent category and models are enabled
         props.on
           ? concat(
               from(enableCategoryDisplay(this._props.viewport, [props.categoryId], props.on, false)),
@@ -942,25 +881,24 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     return createVisibilityHandlerResult(this, props, result, undefined);
   }
 
-  private changeDefinitionContainerState(props: { definitionContainerIds: Id64Array; on: boolean }): Observable<void> {
-    const result = defer(() => {
-      return from(this._idsCache.getAllContainedCategories(props.definitionContainerIds)).pipe(
-        mergeAll(),
-        mergeMap((categoryId) => {
-          return this.changeCategoryState({ categoryIds: [categoryId], on: props.on });
-        }),
-      );
-    });
-    return createVisibilityHandlerResult(this, props, result, undefined);
-  }
-
   private async enableCategoriesElementModelsVisibility(categoryIds: Id64Array) {
-    const categoriesModelsMap = await this._idsCache.getCategoriesElementModels(categoryIds);
+    const categoriesModelsMap = await this._idsCache.getCategoriesElementModels(categoryIds, true);
     const modelIds = [...categoriesModelsMap.values()].flat();
     const hiddenModels = modelIds.filter((modelId) => !this._props.viewport.view.viewsModel(modelId));
     if (hiddenModels.length > 0) {
       this._props.viewport.changeModelDisplay(hiddenModels, true);
     }
+  }
+
+  private changeDefinitionContainerState(props: { definitionContainerIds: Id64Array; on: boolean }): Observable<void> {
+    const result = defer(() => {
+      return from(this._idsCache.getAllContainedCategories(props.definitionContainerIds)).pipe(
+        mergeMap((categoryIds) => {
+          return this.changeCategoryState({ categoryIds, on: props.on });
+        }),
+      );
+    });
+    return createVisibilityHandlerResult(this, props, result, undefined);
   }
 
   private changeCategoryState(props: ChangeCategoryVisibilityStateProps): Observable<void> {
