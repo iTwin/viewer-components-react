@@ -130,7 +130,6 @@ const configuredUiItems = new Map<string, UiItem>([
               {
                 id: IModelContentTreeComponent.id,
                 getLabel: () => IModelContentTreeComponent.getLabel(),
-                isSearchable: true,
                 render: (props) => (
                   <IModelContentTreeComponent
                     getSchemaContext={getSchemaContext}
@@ -146,7 +145,6 @@ const configuredUiItems = new Map<string, UiItem>([
               {
                 id: ExternalSourcesTreeComponent.id,
                 getLabel: () => ExternalSourcesTreeComponent.getLabel(),
-                isSearchable: true,
                 render: (props) => (
                   <ExternalSourcesTreeComponent
                     getSchemaContext={getSchemaContext}
@@ -159,7 +157,6 @@ const configuredUiItems = new Map<string, UiItem>([
               {
                 id: "RepositoriesTree",
                 getLabel: () => "Repositories tree",
-                isSearchable: true,
                 render: () => <RepositoriesTreeComponent baseUrl={`https://${globalThis.IMJS_URL_PREFIX ?? ""}api.bentley.com`} />,
               },
             ];
