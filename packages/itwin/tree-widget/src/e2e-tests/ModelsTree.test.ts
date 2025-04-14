@@ -215,7 +215,7 @@ test.describe("Models tree", () => {
     await page.keyboard.press("Tab");
 
     // ensure visibility action is focused
-    const visibilityAction = node.getByRole("button", { name: "Visible" });
+    const visibilityAction = node.getByRole("button", { name: "Hide" });
     await expect(visibilityAction).toBeFocused();
     await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
 

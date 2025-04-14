@@ -27,10 +27,11 @@
   },
   "visibilityTooltips": {
     "status": {
-      "visible": "Visible",
-      "hidden": "Hidden",
+      "visible": "Hide",
+      "hidden": "Show",
       "disabled": "Disabled",
-      "partial": "Partially visible"
+      "partial": "Show",
+      "determining": "Determining visibility..."
     }
   },
   "categoriesTree": {
