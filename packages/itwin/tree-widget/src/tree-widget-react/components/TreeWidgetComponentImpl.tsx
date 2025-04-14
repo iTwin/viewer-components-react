@@ -41,9 +41,9 @@ export interface TreeDefinition {
    */
   shouldShow?: (imodel: IModelConnection) => Promise<boolean>;
   /**
-   *  Boolean flag to determine if the search box should be rendered.
-   *  - false, the search box will not be rendered.
-   *  - true or undefined, the search box will be rendered.
+   *  Flag to determine if search box should be rendered.
+   *  - false or undefined, the search box will not be rendered.
+   *  - true, the search box will be rendered.
    */
   isSearchable?: boolean;
   /** Icon to render before tree label in tree selector */

@@ -377,6 +377,7 @@ export function Tree({ getSchemaContext, hierarchyLevelSizeLimit, selectionStora
 export interface TreeDefinition {
     getLabel: () => string;
     id: string;
+    isSearchable?: boolean;
     render: (props: TreeRenderProps) => React.ReactNode;
     shouldShow?: (imodel: IModelConnection) => Promise<boolean>;
     startIcon?: React.ReactNode;

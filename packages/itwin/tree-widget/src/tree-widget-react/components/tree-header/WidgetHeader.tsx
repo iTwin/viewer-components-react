@@ -65,7 +65,7 @@ export function WidgetHeader({ defaultSelectedContentId, trees, onFeatureUsed, o
             </Select.HtmlSelect>
           </Select.Root>
         )}
-        {selectedContent.isSearchable !== false && (
+        {selectedContent.isSearchable && (
           <DebouncedSearchBox
             className={"tw-content-header-search"}
             isOpened={isSearchOpen}
