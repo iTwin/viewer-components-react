@@ -2,9 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/core-react/lib/cjs/core-react/index";
 
-$divider-color: $buic-background-toolbutton-stroke;
+$divider-color: --iui-color-background-disabled;
 $hovered-icon-color: --iui-color-background-accent;
 $default-icon-height: 20px;
 $default-font-size: --iui-font-size-1;
@@ -31,14 +30,6 @@ $default-font-size: --iui-font-size-1;
   border-bottom-color: #ccc;
   border-bottom-style: solid;
   border-bottom-width: 1px;
-
-  .map-manager-header-label {
-    font-size: $default-font-size;
-    width: auto;
-    white-space: nowrap;
-    flex: 1 1 auto;
-    padding-left: 10px;
-  }
 
   .map-manager-header-buttons-group {
     margin-left: auto;
@@ -76,6 +67,9 @@ $default-font-size: --iui-font-size-1;
     }
   }
 
+  .map-manager-attach-layer-label {
+    font-style: normal;
+  }
   .core-ls {
     position: absolute;
     top: 50%;
@@ -119,13 +113,13 @@ $default-font-size: --iui-font-size-1;
     justify-content: center;
     align-items: center;
     padding: 10px;
-    border-color: $uicore-gray-a;
-    background-color: $buic-background-1;
+    border-color: var(--buic-inputs-border);
+    background-color:  var(--iui-color-background);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     text-align: center;
-    color: $buic-foreground-muted;
+    color: var(--iui-color-text-muted);
     font-style: italic;
     border-style: dotted;
     border-width: 2px;
@@ -186,7 +180,7 @@ $default-font-size: --iui-font-size-1;
     max-height: 30%;
 
     &.is-dragging-map-over {
-      background-color: $buic-background-5;
+      background-color:var(--iui-color-background-disabled);
     }
   }
 }
@@ -200,7 +194,7 @@ $default-font-size: --iui-font-size-1;
   padding-left: 10px;
   border-width: 0 0 1px 0;
   border-style: solid;
-  border-color: $uicore-gray-a;
+  border-color: var(--buic-inputs-border);
 
   .map-manager-item-label {
     width: 465px;
@@ -226,7 +220,7 @@ $default-font-size: --iui-font-size-1;
   border-bottom-style: solid;
   border-bottom-width: thin;
   margin-bottom: 1em;
-  background-color: $buic-background-1;
+  background-color:  var(--iui-color-background);
 }
 
 .map-manager-layer-action-unlink-button {
@@ -245,9 +239,6 @@ $default-font-size: --iui-font-size-1;
   margin: 0 2px;
 }
 
-.map-manager-visibility-icon {
-  padding-top: 0.5ex;
-}
 .map-manager-source-item {
   display: flex;
   justify-content: flex-start;
@@ -255,7 +246,7 @@ $default-font-size: --iui-font-size-1;
   height: 2.5em;
   width: 100%;
   padding-right: 4px;
-  background-color: $buic-background-1;
+  background-color:  var(--iui-color-background);
 
   .map-manager-item-label {
     flex: 1 1;
@@ -297,22 +288,22 @@ $default-font-size: --iui-font-size-1;
 }
 
 .map-manager-item-sub-layer-container {
-  @include uicore-z-index(dialog-popup);
+  z-index: var(--uicore-z-index-dialog-popup);
 }
 
 .map-manager-sublayer-panel {
   width: 400px; // Ideally I would let the popup's content drives the width, unfortunately without an explicit width, the popup location is not consistent.
-  color: $buic-foreground-body;
+  color: var(--iui-color-text-muted);
   font-size: $default-font-size;
   padding: 4px;
   display: block;
   box-sizing: border-box;
   border-radius: 4px;
-  border: 1px solid $buic-background-panel-stroke;
-  background: $buic-background-panel;
-  color: $buic-text-color;
+  border: 1px solid var(--iui-color-background-disabled);
+  background: var(--iui-color-background-hover);
+  color: var(--iui-color-text);
   cursor: default;
-  @include uicore-z-index(dialog-popup);
+  z-index: var(--uicore-z-index-dialog-popup);
 }
 
 .map-manager-sublayer-label {
@@ -325,14 +316,14 @@ $default-font-size: --iui-font-size-1;
 }
 
 .map-layer-settings-popup-panel {
-  color: $buic-foreground-body;
+  color: var(--iui-color-text-muted);
   font-size: $default-font-size;
   display: grid;
   grid-row-gap: 4px;
   padding: 4px;
 
   &:hover {
-    color: $buic-foreground-activehover;
+    color: var(--iui-color-text);
     cursor: auto;
   }
 
@@ -343,7 +334,7 @@ $default-font-size: --iui-font-size-1;
     position: relative;
 
     &:hover {
-      background-color: $buic-row-hover;
+      background-color: var(--iui-color-background-hover);
     }
   }
 
@@ -357,18 +348,18 @@ $default-font-size: --iui-font-size-1;
     padding-right: 4px;
     border-width: 1px;
     border-style: solid;
-    border-color: $uicore-gray-a;
+    border-color: var(--buic-inputs-border);
     border-radius: 3px;
-    background-color: $buic-background-1;
+    background-color:  var(--iui-color-background);
     overflow: hidden;
-    color: $buic-foreground-muted;
+    color: var(--iui-color-text-muted);
     font-style: italic;
   }
 }
 
 .map-manager-not-geo-located-text {
   width: 90%;
-  color: $buic-foreground-muted;
+  color: var(--iui-color-text-muted);
   font-style: italic;
   text-align: center;
 }
@@ -389,7 +380,7 @@ $default-font-size: --iui-font-size-1;
   }
 
   ul.core-listbox {
-    background-color: $buic-background-1;
+    background-color:  var(--iui-color-background);
   }
 
   .map-manager-sources {

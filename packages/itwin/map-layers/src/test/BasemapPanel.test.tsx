@@ -67,7 +67,7 @@ describe("BasemapPanel", () => {
       </SourceMapContext.Provider>
     );
     await TestUtils.flushAsyncOperations();
-    const iconVisibility = getByTestId(container, "toggle-visibility");
+    const iconVisibility = getByTestId(container, "base-map-visibility-icon-button");
     expect(iconVisibility).toBeDefined();
 
     const selectContent = getByTestId(container, "base-map-select") as HTMLElement;
@@ -98,7 +98,7 @@ describe("BasemapPanel", () => {
     let selectContent = getByTestId(container, "base-map-select");
     expect(selectContent).toBeDefined();
     expect(selectContent!.textContent).toBe("WellKnownBaseMaps.BingProvider.Street");
-    
+
     // Now test with a custom map-layer definition
     baseMap = customBaseMap;
     viewportMock.baseMap = baseMap;

@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 .map-layer-select-features-dialog {
-  z-index: 21000;
+  z-index: var(--uicore-z-index-cursor-overlay);
 }
 
 .map-layer-select-features-dialog.core-dialog .core-dialog-container .core-dialog-area > .core-dialog-content {

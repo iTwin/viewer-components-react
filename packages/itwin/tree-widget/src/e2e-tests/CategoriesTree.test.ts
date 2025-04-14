@@ -139,7 +139,7 @@ test.describe("Categories tree", () => {
     await locateNode(treeWidget, "Equipment").waitFor();
     await page.getByRole("button", { name: "Hide all" }).click();
 
-    await expect(locateNode(treeWidget, "Equipment").getByRole("button", { name: "Hidden" })).not.toBeVisible();
+    await locateNode(treeWidget, "Equipment").getByRole("button", { name: "Hidden" }).waitFor();
     await takeScreenshot(page, treeWidget);
   });
 
@@ -158,7 +158,7 @@ test.describe("Categories tree", () => {
 
     const node = locateNode(treeWidget, "Equipment");
     await node.waitFor({ state: "visible" });
-    await node.getByRole("button", { name: "Visible: All subCategories are visible", includeHidden: true }).waitFor({ state: "attached" });
+    await node.getByRole("button", { name: "Visible: All subCategories are visible", includeHidden: true }).waitFor({ state: "hidden" });
     await takeScreenshot(page, treeWidget);
   });
 });

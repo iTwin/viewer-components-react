@@ -1,7 +1,0 @@
-{
-  "type": "prerelease",
-  "comment": "Resolve GHSA-9crc-q9x8-hgqq",
-  "packageName": "@itwin/map-layers",
-  "email": "aruniverse@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
