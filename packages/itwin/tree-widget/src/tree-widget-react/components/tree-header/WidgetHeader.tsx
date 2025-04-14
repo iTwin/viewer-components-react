@@ -17,6 +17,7 @@ import type { TreeRenderProps } from "../TreeWidgetComponentImpl.js";
 export interface TreeContentDefinition {
   id: string;
   label: string;
+  isSearchable?: boolean;
   render: (props: TreeRenderProps) => React.ReactNode;
 }
 
@@ -64,7 +65,15 @@ export function WidgetHeader({ defaultSelectedContentId, trees, onFeatureUsed, o
             </Select.HtmlSelect>
           </Select.Root>
         )}
-        <DebouncedSearchBox className={"tw-content-header-search"} isOpened={isSearchOpen} setIsOpened={setIsSearchOpen} onSearch={setSearchValue} delay={20} />
+        {selectedContent.isSearchable !== false && (
+          <DebouncedSearchBox
+            className={"tw-content-header-search"}
+            isOpened={isSearchOpen}
+            setIsOpened={setIsSearchOpen}
+            onSearch={setSearchValue}
+            delay={20}
+          />
+        )}
       </div>
       <div className="tw-content-wrapper">{selectedContent?.render({ onPerformanceMeasured, onFeatureUsed, filter: searchValue })}</div>
     </div>
