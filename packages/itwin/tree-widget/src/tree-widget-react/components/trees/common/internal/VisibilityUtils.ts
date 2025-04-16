@@ -7,7 +7,7 @@ import { filter, from, map, mergeAll, mergeMap, of, reduce, startWith, toArray }
 import { QueryRowFormat } from "@itwin/core-common";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { reduceWhile } from "./Rxjs.js";
-import { createVisibilityStatus, getTooltipOptions } from "./Tooltip.js";
+import { createVisibilityStatus } from "./Tooltip.js";
 import { getClassesByView, releaseMainThreadOnItemsCount } from "./Utils.js";
 
 import type { Viewport } from "@itwin/core-frontend";
@@ -39,35 +39,26 @@ function mergeVisibilities(obs: Observable<Visibility>): Observable<Visibility |
 }
 
 /** @internal */
-export function mergeVisibilityStatuses(
-  tooltipMap: { [key in Visibility]: string | undefined },
-  ignoreTooltip?: boolean,
-): OperatorFunction<VisibilityStatus, VisibilityStatus> {
-  return (obs) => {
-    return obs.pipe(
-      map((visibilityStatus) => visibilityStatus.state),
-      mergeVisibilities,
-      map((visibility) => {
-        if (visibility === "empty") {
-          visibility = "visible";
-        }
-        return createVisibilityStatus(visibility, getTooltipOptions(tooltipMap[visibility], ignoreTooltip));
-      }),
-    );
-  };
+export function mergeVisibilityStatuses(obs: Observable<VisibilityStatus>): Observable<VisibilityStatus> {
+  return obs.pipe(
+    map((visibilityStatus) => visibilityStatus.state),
+    mergeVisibilities,
+    map((visibility) => {
+      if (visibility === "empty") {
+        visibility = "visible";
+      }
+      return createVisibilityStatus(visibility);
+    }),
+  );
 }
 
 /** @internal */
 export function getSubModeledElementsVisibilityStatus({
   parentNodeVisibilityStatus,
-  tooltips,
-  ignoreTooltips,
   getModelVisibilityStatus,
 }: {
   parentNodeVisibilityStatus: VisibilityStatus;
   getModelVisibilityStatus: ({ modelId }: { modelId: Id64String }) => Observable<VisibilityStatus>;
-  tooltips: { [key in Visibility]: string | undefined };
-  ignoreTooltips?: boolean;
 }): OperatorFunction<Id64Array, VisibilityStatus> {
   return (obs) => {
     return obs.pipe(
@@ -79,7 +70,7 @@ export function getSubModeledElementsVisibilityStatus({
         return from(modeledElementIds).pipe(
           mergeMap((modeledElementId) => getModelVisibilityStatus({ modelId: modeledElementId })),
           startWith<VisibilityStatus>(parentNodeVisibilityStatus),
-          mergeVisibilityStatuses(tooltips, ignoreTooltips),
+          mergeVisibilityStatuses,
         );
       }),
     );
@@ -163,58 +154,42 @@ export function getVisibilityFromAlwaysAndNeverDrawnElementsImpl(
     alwaysDrawn: Set<ElementId> | undefined;
     neverDrawn: Set<ElementId> | undefined;
     totalCount: number;
-    ignoreTooltip?: boolean;
     viewport: Viewport;
   } & GetVisibilityFromAlwaysAndNeverDrawnElementsProps,
 ): VisibilityStatus {
-  const { alwaysDrawn, neverDrawn, totalCount, ignoreTooltip } = props;
+  const { alwaysDrawn, neverDrawn, totalCount, viewport } = props;
 
   if (neverDrawn?.size === totalCount) {
-    return createVisibilityStatus("hidden", getTooltipOptions(props.tooltips.allElementsInNeverDrawnList, ignoreTooltip));
+    return createVisibilityStatus("hidden");
   }
 
   if (alwaysDrawn?.size === totalCount) {
-    return createVisibilityStatus("visible", getTooltipOptions(props.tooltips.allElementsInAlwaysDrawnList, ignoreTooltip));
+    return createVisibilityStatus("visible");
   }
 
-  const viewport = props.viewport;
-  if (viewport.isAlwaysDrawnExclusive && viewport.alwaysDrawn?.size) {
-    return alwaysDrawn?.size
-      ? createVisibilityStatus("partial", getTooltipOptions(props.tooltips.elementsInBothAlwaysAndNeverDrawn, ignoreTooltip))
-      : createVisibilityStatus("hidden", getTooltipOptions(props.tooltips.noElementsInExclusiveAlwaysDrawnList, ignoreTooltip));
+  if (viewport.isAlwaysDrawnExclusive) {
+    return  createVisibilityStatus(alwaysDrawn?.size ? "partial" : "hidden")
   }
 
   const status = props.defaultStatus();
   if ((status.state === "visible" && neverDrawn?.size) || (status.state === "hidden" && alwaysDrawn?.size)) {
-    return createVisibilityStatus("partial", getTooltipOptions(undefined, ignoreTooltip));
+    return createVisibilityStatus("partial");
   }
   return status;
 }
 
 /** @internal */
-export function getElementOverriddenVisibility(props: {
-  elementId: Id64String;
-  ignoreTooltip?: boolean;
-  viewport: Viewport;
-  tooltips: {
-    hiddenThroughNeverDrawn?: string;
-    hiddenThroughAlwaysDrawnExclusive?: string;
-    visibileThorughAlwaysDrawn?: string;
-  };
-}): NonPartialVisibilityStatus | undefined {
-  const { ignoreTooltip, viewport, elementId, tooltips } = props;
+export function getElementOverriddenVisibility(props: { elementId: Id64String; viewport: Viewport }): NonPartialVisibilityStatus | undefined {
+  const { viewport, elementId } = props;
   if (viewport.neverDrawn?.has(elementId)) {
-    return createVisibilityStatus("hidden", getTooltipOptions(tooltips.hiddenThroughNeverDrawn, ignoreTooltip));
+    return createVisibilityStatus("hidden");
+  }
+  if (viewport.alwaysDrawn?.has(elementId)) {
+    return createVisibilityStatus("visible");
   }
 
-  if (viewport.alwaysDrawn?.size) {
-    if (viewport.alwaysDrawn.has(elementId)) {
-      return createVisibilityStatus("visible", getTooltipOptions(tooltips.visibileThorughAlwaysDrawn, ignoreTooltip));
-    }
-
-    if (viewport.isAlwaysDrawnExclusive) {
-      return createVisibilityStatus("hidden", getTooltipOptions(tooltips.hiddenThroughAlwaysDrawnExclusive, ignoreTooltip));
-    }
+  if (viewport.isAlwaysDrawnExclusive) {
+    return createVisibilityStatus("hidden");
   }
 
   return undefined;
@@ -222,66 +197,35 @@ export function getElementOverriddenVisibility(props: {
 
 /** @internal */
 export interface GetVisibilityFromAlwaysAndNeverDrawnElementsProps {
-  tooltips: {
-    allElementsInNeverDrawnList: string;
-    allElementsInAlwaysDrawnList: string;
-    elementsInBothAlwaysAndNeverDrawn: string;
-    noElementsInExclusiveAlwaysDrawnList: string;
-  };
   /** Status when always/never lists are empty and exclusive mode is off */
   defaultStatus: () => VisibilityStatus;
 }
 
 /** @internal */
 export function getElementVisibility(
-  ignoreTooltip: boolean | undefined,
   viewsModel: boolean,
   overridenVisibility: NonPartialVisibilityStatus | undefined,
   categoryVisibility: NonPartialVisibilityStatus,
-  treeType: "modelsTree" | "categoriesTree",
   subModelVisibilityStatus?: VisibilityStatus,
 ): VisibilityStatus {
-  if (subModelVisibilityStatus === undefined) {
-    if (!viewsModel) {
-      return createVisibilityStatus("hidden", getTooltipOptions(`${treeType}.element.hiddenThroughModel`, ignoreTooltip));
-    }
-
-    if (overridenVisibility) {
-      return overridenVisibility;
-    }
-
-    return createVisibilityStatus(
-      categoryVisibility.state,
-      getTooltipOptions(categoryVisibility.state === "visible" ? undefined : `${treeType}.element.hiddenThroughCategory`, ignoreTooltip),
-    );
-  }
-
-  if (subModelVisibilityStatus.state === "partial") {
-    return createVisibilityStatus("partial", getTooltipOptions(`${treeType}.element.someElementsAreHidden`, ignoreTooltip));
-  }
-
-  if (subModelVisibilityStatus.state === "visible") {
-    if (!viewsModel || overridenVisibility?.state === "hidden" || (categoryVisibility.state === "hidden" && !overridenVisibility)) {
-      return createVisibilityStatus("partial", getTooltipOptions(`${treeType}.element.partialThroughSubModel`, ignoreTooltip));
-    }
-    return createVisibilityStatus("visible", getTooltipOptions(undefined, ignoreTooltip));
+  if (subModelVisibilityStatus?.state === "partial") {
+    return createVisibilityStatus("partial");
   }
 
   if (!viewsModel) {
-    return createVisibilityStatus("hidden", getTooltipOptions(`${treeType}.element.hiddenThroughModel`, ignoreTooltip));
+    return createVisibilityStatus(subModelVisibilityStatus?.state === "visible" ? "partial" : "hidden");
   }
 
-  if (overridenVisibility) {
-    if (overridenVisibility.state === "hidden") {
-      return overridenVisibility;
-    }
-    return createVisibilityStatus("partial", getTooltipOptions(`${treeType}.element.partialThroughElement`, ignoreTooltip));
+  const elementVisibilityWithoutSubModels = overridenVisibility ?? categoryVisibility;
+  if (!subModelVisibilityStatus) {
+    return elementVisibilityWithoutSubModels;
   }
 
-  if (categoryVisibility.state === "visible") {
-    return createVisibilityStatus("partial", getTooltipOptions(`${treeType}.element.partialThroughCategory`, ignoreTooltip));
+  if (elementVisibilityWithoutSubModels.state === subModelVisibilityStatus.state) {
+    return elementVisibilityWithoutSubModels;
   }
-  return createVisibilityStatus("hidden", getTooltipOptions(`${treeType}.element.hiddenThroughCategory`, ignoreTooltip));
+
+  return createVisibilityStatus("partial");
 }
 
 /**

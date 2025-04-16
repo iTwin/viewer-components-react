@@ -6,12 +6,13 @@
 import { expect } from "chai";
 import sinon from "sinon";
 import { BeEvent } from "@itwin/core-bentley";
+import { EmptyLocalization } from "@itwin/core-common";
+import { TreeWidget } from "../../../tree-widget-react.js";
 import { useHierarchyVisibility } from "../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
 import { act, renderHook, waitFor } from "../../TestUtils.js";
 import { createPresentationHierarchyNode } from "../TreeUtils.js";
 
 import type { HierarchyVisibilityHandler } from "../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
-
 type UseHierarchyVisibilityProps = Parameters<typeof useHierarchyVisibility>[0];
 
 describe("useHierarchyVisibility", () => {
@@ -30,11 +31,18 @@ describe("useHierarchyVisibility", () => {
   const initialProps: UseHierarchyVisibilityProps = {
     visibilityHandlerFactory: () => visibilityHandler,
   };
+  before(async () => {
+    await TreeWidget.initialize(new EmptyLocalization());
+  });
 
   beforeEach(() => {
     visibilityHandler.getVisibilityStatus.reset();
     visibilityHandler.changeVisibility.reset();
     visibilityHandler.dispose.reset();
+  });
+
+  after(() => {
+    TreeWidget.terminate();
   });
 
   it("checks visibility status only once", async () => {
