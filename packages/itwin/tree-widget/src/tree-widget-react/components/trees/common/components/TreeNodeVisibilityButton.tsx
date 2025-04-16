@@ -5,6 +5,7 @@
 
 import "./TreeNodeVisibilityButton.css";
 import { useCallback } from "react";
+import { createTooltip } from "../internal/Tooltip.js";
 
 import type { PresentationHierarchyNode, TreeItemAction } from "@itwin/presentation-hierarchies-react";
 
@@ -12,7 +13,7 @@ import type { PresentationHierarchyNode, TreeItemAction } from "@itwin/presentat
  * Data structure that describes tree node checkbox state.
  * @beta
  */
-interface TreeItemVisibilityButtonState {
+export interface TreeItemVisibilityButtonState {
   state: "visible" | "partial" | "hidden";
   isDisabled?: boolean;
   tooltip?: string;
@@ -50,7 +51,7 @@ export function useVisibilityAction({
         }
       };
       return {
-        label: state.tooltip ?? "Determining visibility...",
+        label: state.tooltip ?? createTooltip(state.state),
         action: () => {
           onVisibilityButtonClick(node, state.state);
         },

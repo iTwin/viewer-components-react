@@ -554,7 +554,6 @@ interface UseModelsTreeResult {
 export interface VisibilityStatus {
     isDisabled?: boolean;
     state: "visible" | "partial" | "hidden";
-    tooltip?: string;
 }
 
 // @beta

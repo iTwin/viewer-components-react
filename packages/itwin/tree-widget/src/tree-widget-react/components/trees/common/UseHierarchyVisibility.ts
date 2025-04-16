@@ -19,13 +19,14 @@ import {
   tap,
   throttleTime,
 } from "rxjs";
+import { createTooltip } from "./internal/Tooltip.js";
 import { useTelemetryContext } from "./UseTelemetryContext.js";
 
 import type { Observable } from "rxjs";
 import type { MutableRefObject } from "react";
 import type { BeEvent, IDisposable } from "@itwin/core-bentley";
 import type { HierarchyNode, PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
-import type { TreeItemVisibilityButtonProps } from "./components/TreeNodeVisibilityButton.js";
+import type { TreeItemVisibilityButtonProps, TreeItemVisibilityButtonState } from "./components/TreeNodeVisibilityButton.js";
 
 /**
  * Data structure that describes instance visibility status.
@@ -36,8 +37,6 @@ export interface VisibilityStatus {
   state: "visible" | "partial" | "hidden";
   /** Specifies whether visibility changing is disabled or not. */
   isDisabled?: boolean;
-  /** Tooltip that should be displayed when hovering over the visibility checkbox. */
-  tooltip?: string;
 }
 
 /**
@@ -61,7 +60,7 @@ interface UseHierarchyVisibilityProps {
 export function useHierarchyVisibility({
   visibilityHandlerFactory,
 }: UseHierarchyVisibilityProps): TreeItemVisibilityButtonProps & { triggerRefresh: () => void } {
-  const visibilityStatusMap = useRef(new Map<string, { node: PresentationHierarchyNode; status: VisibilityStatus; needsRefresh: boolean }>());
+  const visibilityStatusMap = useRef(new Map<string, { node: PresentationHierarchyNode; status: TreeItemVisibilityButtonState; needsRefresh: boolean }>());
   const [state, setState] = useState<TreeItemVisibilityButtonProps & { triggerRefresh: () => void }>({
     getVisibilityButtonState: () => ({ state: "visible", isDisabled: true }),
     onVisibilityButtonClick: () => {},
@@ -103,7 +102,10 @@ export function useHierarchyVisibility({
               next: (status) => {
                 visibilityStatusMap.current.set(node.id, {
                   node,
-                  status,
+                  status: {
+                    ...status,
+                    tooltip: createTooltip(status.state),
+                  },
                   needsRefresh: false,
                 });
               },
@@ -130,7 +132,7 @@ export function useHierarchyVisibility({
         return;
       }
       entry.status.state = visibilityState;
-      entry.status.tooltip = undefined;
+      entry.status.tooltip = createTooltip("determining");
       triggerCheckboxUpdate();
     };
 
@@ -159,14 +161,14 @@ export function useHierarchyVisibility({
 }
 
 function createStateGetter(
-  map: MutableRefObject<Map<string, { node: PresentationHierarchyNode; status: VisibilityStatus; needsRefresh: boolean }>>,
+  map: MutableRefObject<Map<string, { node: PresentationHierarchyNode; status: TreeItemVisibilityButtonState; needsRefresh: boolean }>>,
   calculateVisibility: (node: PresentationHierarchyNode) => void,
 ): TreeItemVisibilityButtonProps["getVisibilityButtonState"] {
   return (node) => {
     const entry = map.current.get(node.id);
     if (entry === undefined) {
       calculateVisibility(node);
-      return { state: "visible", isDisabled: true };
+      return { state: "visible", isDisabled: true, tooltip: createTooltip("determining") };
     }
     if (entry.needsRefresh) {
       calculateVisibility(node);
