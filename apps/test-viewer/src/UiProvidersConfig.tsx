@@ -98,6 +98,7 @@ const configuredUiItems = new Map<string, UiItem>([
               {
                 id: ModelsTreeComponent.id,
                 getLabel: () => ModelsTreeComponent.getLabel(),
+                isSearchable: true,
                 render: (props) => (
                   <ModelsTreeWithOptions
                     getSchemaContext={getSchemaContext}
@@ -115,6 +116,7 @@ const configuredUiItems = new Map<string, UiItem>([
               {
                 id: CategoriesTreeComponent.id,
                 getLabel: () => CategoriesTreeComponent.getLabel(),
+                isSearchable: true,
                 render: (props) => (
                   <CategoriesTreeComponent
                     filter={props.filter}

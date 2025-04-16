@@ -40,6 +40,12 @@ export interface TreeDefinition {
    * If callback is `undefined` tree is shown for all iModel connections.
    */
   shouldShow?: (imodel: IModelConnection) => Promise<boolean>;
+  /**
+   *  Flag to determine if search box should be rendered.
+   *  - false or undefined, the search box will not be rendered.
+   *  - true, the search box will be rendered.
+   */
+  isSearchable?: boolean;
   /** Icon to render before tree label in tree selector */
   startIcon?: React.ReactNode;
 }
@@ -105,6 +111,7 @@ async function getActiveTrees(treeDefinitions: TreeDefinition[], imodel: IModelC
     }
     return {
       id: treeDef.id,
+      isSearchable: treeDef.isSearchable,
       label: treeDef.getLabel(),
       render: treeDef.render,
       startIcon: treeDef.startIcon,
@@ -122,6 +129,7 @@ function getWidgetWithHeaderProps(trees?: TreeContentDefinition[]): WidgetHeader
         {
           id: "loading",
           label: "",
+          isSearchable: false,
           render: () => (
             <Delayed>
               {/* <ProgressLinear indeterminate={true} /> */}
@@ -139,6 +147,7 @@ function getWidgetWithHeaderProps(trees?: TreeContentDefinition[]): WidgetHeader
       trees: [
         {
           id: "no-trees",
+          isSearchable: false,
           label: "",
           render: () => (
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }} className="tree-widget-no-trees-container">
