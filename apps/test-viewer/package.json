@@ -44,7 +44,7 @@
     "@itwin/web-viewer-react": "^4.3.3",
     "@itwin/webgl-compatibility": "^4.10.2",
     "@itwin/presentation-hierarchies": "^1.4.1",
-    "@itwin/presentation-hierarchies-react": "^1.6.1",
+    "@itwin/presentation-hierarchies-react": "^1.6.5",
     "@itwin/presentation-shared": "^1.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
