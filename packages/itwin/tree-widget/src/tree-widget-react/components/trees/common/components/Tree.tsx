@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { BeEvent } from "@itwin/core-bentley";
 import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { SchemaMetadataContextProvider } from "@itwin/presentation-components";
@@ -11,10 +11,10 @@ import { useIModelUnifiedSelectionTree, useSelectionHandler } from "@itwin/prese
 import { TreeWidget } from "../../../../TreeWidget.js";
 import { useHierarchiesLocalization } from "../UseHierarchiesLocalization.js";
 import { useHierarchyLevelFiltering } from "../UseHierarchyFiltering.js";
+import { useIModelAccess } from "../UseIModelAccess.js";
 import { useIModelChangeListener } from "../UseIModelChangeListener.js";
 import { useNodeHighlighting } from "../UseNodeHighlighting.js";
 import { useReportingAction, useTelemetryContext } from "../UseTelemetryContext.js";
-import { createIModelAccess } from "../Utils.js";
 import { Delayed } from "./Delayed.js";
 import { ProgressOverlay } from "./ProgressOverlay.js";
 
@@ -71,26 +71,39 @@ export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPa
  * @beta
  */
 export function Tree({ getSchemaContext, hierarchyLevelSizeLimit, selectionStorage, imodelAccess: providedIModelAccess, ...props }: TreeProps) {
-  const defaultHierarchyLevelSizeLimit = hierarchyLevelSizeLimit ?? 1000;
+  const { imodelAccess, currentHierarchyLevelSizeLimit } = useIModelAccess({
+    imodel: props.imodel,
+    imodelAccess: providedIModelAccess,
+    getSchemaContext,
+    hierarchyLevelSizeLimit,
+  });
+  return (
+    <TreeBase
+      {...props}
+      getSchemaContext={getSchemaContext}
+      selectionStorage={selectionStorage}
+      imodelAccess={imodelAccess}
+      currentHierarchyLevelSizeLimit={currentHierarchyLevelSizeLimit}
+    />
+  );
+}
 
-  const imodelAccess = useMemo(() => {
-    return providedIModelAccess ?? createIModelAccess({ getSchemaContext, imodel: props.imodel });
-  }, [providedIModelAccess, getSchemaContext, props.imodel]);
-
+/** @internal */
+export function TreeBase({ getSchemaContext, ...props }: MarkRequired<TreeProps, "imodelAccess"> & { currentHierarchyLevelSizeLimit: number }) {
   return (
     <SchemaMetadataContextProvider imodel={props.imodel} schemaContextProvider={getSchemaContext}>
-      <TreeImpl {...props} selectionStorage={selectionStorage} imodelAccess={imodelAccess} defaultHierarchyLevelSizeLimit={defaultHierarchyLevelSizeLimit} />
+      <TreeBaseImpl {...props} />
     </SchemaMetadataContextProvider>
   );
 }
 
-function TreeImpl({
+function TreeBaseImpl({
   imodel,
   imodelAccess,
   treeName,
   noDataMessage,
   getFilteredPaths,
-  defaultHierarchyLevelSizeLimit,
+  currentHierarchyLevelSizeLimit,
   getHierarchyDefinition,
   selectionPredicate,
   selectionMode,
@@ -99,7 +112,7 @@ function TreeImpl({
   density,
   highlight,
   selectionStorage,
-}: MarkRequired<Omit<TreeProps, "getSchemaContext">, "imodelAccess"> & { defaultHierarchyLevelSizeLimit: number }) {
+}: MarkRequired<Omit<TreeProps, "getSchemaContext">, "imodelAccess"> & { currentHierarchyLevelSizeLimit: number }) {
   const localizedStrings = useHierarchiesLocalization();
   const { onFeatureUsed, onPerformanceMeasured } = useTelemetryContext();
   const [imodelChanged] = useState(new BeEvent<() => void>());
@@ -142,7 +155,7 @@ function TreeImpl({
   const { onNodeClick, onNodeKeyDown } = useSelectionHandler({ rootNodes, selectNodes, selectionMode: selectionMode ?? "single" });
   const { filteringDialog, onFilterClick } = useHierarchyLevelFiltering({
     imodel,
-    defaultHierarchyLevelSizeLimit,
+    defaultHierarchyLevelSizeLimit: currentHierarchyLevelSizeLimit,
   });
   const reportingExpandNode = useReportingAction({ action: expandNode });
   const reportingOnFilterClicked = useReportingAction({ action: onFilterClick });

@@ -25,6 +25,7 @@ test.describe("Categories tree", () => {
   test.beforeEach(async ({ page, baseURL }) => {
     treeWidget = await initTreeWidgetTest({ page, baseURL });
     await selectTree(treeWidget, "Categories");
+    await locateNode(treeWidget, "Equipment").getByRole("checkbox", { name: "Visible" }).waitFor();
   });
 
   withDifferentDensities(() => {
@@ -196,7 +197,7 @@ test.describe("Categories tree", () => {
       await locateNode(treeWidget, "Equipment").waitFor();
       await page.getByRole("button", { name: "Hide all" }).click();
 
-      await expect(locateNode(treeWidget, "Equipment").getByRole("checkbox")).not.toBeChecked();
+      await locateNode(treeWidget, "Equipment").getByRole("checkbox", { name: "Hidden" }).waitFor();
       await takeScreenshot(page, treeWidget);
     });
 
@@ -213,7 +214,7 @@ test.describe("Categories tree", () => {
 
       await treeWidget.getByRole("button", { name: "Close" }).click();
 
-      await locateNode(treeWidget, "Equipment").waitFor({ state: "visible" });
+      await locateNode(treeWidget, "Equipment").getByRole("checkbox", { name: "Visible" }).waitFor();
       await takeScreenshot(page, treeWidget);
     });
   });
