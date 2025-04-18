@@ -1,8 +1,17 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Fri, 21 Mar 2025 11:37:20 GMT and should not be manually modified.
+This log was last generated on Fri, 18 Apr 2025 17:06:22 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 3.6.1
+
+Fri, 18 Apr 2025 17:06:22 GMT
+
+### Patches
+
+- Fixed Categories tree not reacting to Category display changes from Models tree, when they're made on per-model category overrides. ([#1284](https://github.com/iTwin/viewer-components-react/pull/1284))
+- Fixed `ModelsTree` and `CategoriesTree` not applying custom hierarchy level size limit. ([#1292](https://github.com/iTwin/viewer-components-react/pull/1292))
 
 ## 3.6.0
 
