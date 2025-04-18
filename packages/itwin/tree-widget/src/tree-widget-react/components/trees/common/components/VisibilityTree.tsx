@@ -3,13 +3,13 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { useHierarchyVisibility } from "../UseHierarchyVisibility.js";
-import { createIModelAccess } from "../Utils.js";
-import { Tree } from "./Tree.js";
+import { useIModelAccess } from "../UseIModelAccess.js";
+import { TreeBase } from "./Tree.js";
 
-import type { FunctionProps } from "../Utils.js";
 import type { TreeProps } from "./Tree.js";
+import type { FunctionProps } from "../Utils.js";
 import type { ReactNode } from "react";
 import type { VisibilityTreeRendererProps } from "./VisibilityTreeRenderer.js";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
@@ -29,18 +29,24 @@ export type VisibilityTreeProps = Omit<TreeProps, "treeRenderer" | "imodelAccess
  * Tree component that can control visibility of instances represented by tree nodes.
  * @beta
  */
-export function VisibilityTree({ visibilityHandlerFactory, treeRenderer, ...props }: VisibilityTreeProps) {
+export function VisibilityTree({ visibilityHandlerFactory, treeRenderer, hierarchyLevelSizeLimit, ...props }: VisibilityTreeProps) {
   const { imodel, getSchemaContext } = props;
-  const imodelAccess = useMemo(() => createIModelAccess({ imodel, getSchemaContext }), [imodel, getSchemaContext]);
+  const { imodelAccess, currentHierarchyLevelSizeLimit } = useIModelAccess({
+    imodel,
+    getSchemaContext,
+    hierarchyLevelSizeLimit,
+  });
+
   const { getCheckboxState, onCheckboxClicked, triggerRefresh } = useHierarchyVisibility({
     visibilityHandlerFactory: useCallback(() => visibilityHandlerFactory({ imodelAccess }), [visibilityHandlerFactory, imodelAccess]),
   });
 
   return (
-    <Tree
+    <TreeBase
       {...props}
       onReload={triggerRefresh}
       imodelAccess={imodelAccess}
+      currentHierarchyLevelSizeLimit={currentHierarchyLevelSizeLimit}
       treeRenderer={(treeProps) => treeRenderer({ ...treeProps, getCheckboxState, onCheckboxClicked })}
     />
   );

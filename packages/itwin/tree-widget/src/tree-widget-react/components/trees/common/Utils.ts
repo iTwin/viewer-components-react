@@ -4,13 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useRef } from "react";
-import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
-import type { IModelConnection } from "@itwin/core-frontend";
-import type { SchemaContext } from "@itwin/ecschema-metadata";
 
 /** @beta */
 export type FunctionProps<THook extends (props: any) => any> = Parameters<THook>[0];
@@ -46,18 +41,6 @@ export function pushToMap<TKey, TValue>(targetMap: Map<TKey, Set<TValue>>, key: 
     targetMap.set(key, set);
   }
   set.add(value);
-}
-
-/** @internal */
-export function createIModelAccess({ imodel, getSchemaContext }: { imodel: IModelConnection; getSchemaContext: (imodel: IModelConnection) => SchemaContext }) {
-  const schemas = getSchemaContext(imodel);
-  const schemaProvider = createECSchemaProvider(schemas);
-  return {
-    imodelKey: imodel.key,
-    ...schemaProvider,
-    ...createCachingECClassHierarchyInspector({ schemaProvider, cacheSize: 100 }),
-    ...createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(imodel), 1000),
-  };
 }
 
 /** @internal */
