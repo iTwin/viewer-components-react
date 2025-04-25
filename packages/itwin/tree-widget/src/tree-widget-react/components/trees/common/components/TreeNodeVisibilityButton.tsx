@@ -34,7 +34,6 @@ const visibilityPartialSvg = new URL("@itwin/itwinui-icons/visibility-partial.sv
 const visibilityShowSvg = new URL("@itwin/itwinui-icons/visibility-show.svg", import.meta.url).href;
 
 /** @internal */
-
 export const VisibilityAction = memo(function VisibilityAction({
   getVisibilityButtonState,
   onVisibilityButtonClick,

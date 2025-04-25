@@ -16,14 +16,14 @@ import type { TreeProps } from "../common/components/Tree.js";
 
 /** @beta */
 export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
-  Pick<BaseTreeRendererProps, "getActions" | "getDecorations" | "errorRenderer" | "rootErrorRenderer"> & {
+  Pick<BaseTreeRendererProps, "getActions" | "getDecorations"> & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
     };
   };
 
 /** @beta */
-export function ExternalSourcesTree({ getActions, getDecorations, rootErrorRenderer, errorRenderer, selectionMode, ...rest }: ExternalSourcesTreeProps) {
+export function ExternalSourcesTree({ getActions, getDecorations, selectionMode, ...rest }: ExternalSourcesTreeProps) {
   return (
     <Tree
       emptyTreeContent={<EmptyTreeContent icon={documentSvg} />}
@@ -32,13 +32,7 @@ export function ExternalSourcesTree({ getActions, getDecorations, rootErrorRende
       getHierarchyDefinition={getDefinitionsProvider}
       selectionMode={selectionMode ?? "none"}
       treeRenderer={(treeProps) => (
-        <TreeRenderer
-          {...treeProps}
-          rootErrorRenderer={rootErrorRenderer}
-          errorRenderer={errorRenderer}
-          getActions={getActions}
-          getDecorations={getDecorations ?? ((node) => <ExternalSourcesTreeIcon node={node} />)}
-        />
+        <TreeRenderer {...treeProps} getActions={getActions} getDecorations={getDecorations ?? ((node) => <ExternalSourcesTreeIcon node={node} />)} />
       )}
     />
   );

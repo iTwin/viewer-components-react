@@ -22,8 +22,6 @@ interface IModelContentTreeComponentProps
     | "emptyTreeContent"
     | "getActions"
     | "getDecorations"
-    | "errorRenderer"
-    | "rootErrorRenderer"
   > {
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;

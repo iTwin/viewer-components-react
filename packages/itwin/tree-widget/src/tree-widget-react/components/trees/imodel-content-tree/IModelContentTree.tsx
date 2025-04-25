@@ -20,7 +20,7 @@ import type { TreeProps } from "../common/components/Tree.js";
 
 /** @beta */
 export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
-  Pick<BaseTreeRendererProps, "getActions" | "getDecorations" | "errorRenderer" | "rootErrorRenderer"> & {
+  Pick<BaseTreeRendererProps, "getActions" | "getDecorations"> & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
     };
@@ -28,15 +28,7 @@ export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContex
   };
 
 /** @beta */
-export function IModelContentTree({
-  getActions,
-  getDecorations,
-  rootErrorRenderer,
-  errorRenderer,
-  selectionMode,
-  hierarchyConfig: hierarchyConfigProp,
-  ...rest
-}: IModelContentTreeProps) {
+export function IModelContentTree({ getActions, getDecorations, selectionMode, hierarchyConfig: hierarchyConfigProp, ...rest }: IModelContentTreeProps) {
   const getHierarchyDefinition = useCallback<TreeProps["getHierarchyDefinition"]>(
     ({ imodelAccess }) => {
       const hierarchyConfig = {
@@ -57,13 +49,7 @@ export function IModelContentTree({
       getHierarchyDefinition={getHierarchyDefinition}
       selectionMode={selectionMode ?? "extended"}
       treeRenderer={(treeProps) => (
-        <TreeRenderer
-          {...treeProps}
-          rootErrorRenderer={rootErrorRenderer}
-          errorRenderer={errorRenderer}
-          getActions={getActions}
-          getDecorations={getDecorations ?? ((node) => <IModelContentTreeIcon node={node} />)}
-        />
+        <TreeRenderer {...treeProps} getActions={getActions} getDecorations={getDecorations ?? ((node) => <IModelContentTreeIcon node={node} />)} />
       )}
     />
   );

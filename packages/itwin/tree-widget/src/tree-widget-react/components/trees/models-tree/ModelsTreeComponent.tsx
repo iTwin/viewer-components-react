@@ -42,8 +42,6 @@ interface ModelsTreeComponentProps
     | "emptyTreeContent"
     | "getActions"
     | "getDecorations"
-    | "errorRenderer"
-    | "rootErrorRenderer"
   > {
   /**
    * Renderers of header buttons. Defaults to:

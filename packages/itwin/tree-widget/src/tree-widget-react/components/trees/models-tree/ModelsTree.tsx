@@ -12,7 +12,7 @@ import type { UseModelsTreeProps } from "./UseModelsTree.js";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 /** @beta */
 export type ModelsTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
-  Pick<VisibilityTreeRendererProps, "getActions" | "getDecorations" | "errorRenderer" | "rootErrorRenderer"> &
+  Pick<VisibilityTreeRendererProps, "getActions" | "getDecorations"> &
   UseModelsTreeProps & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
@@ -36,8 +36,6 @@ export function ModelsTree({
   onModelsFiltered,
   getActions,
   emptyTreeContent,
-  rootErrorRenderer,
-  errorRenderer,
 }: ModelsTreeProps) {
   const { modelsTreeProps, rendererProps } = useModelsTree({
     activeView,
@@ -59,14 +57,7 @@ export function ModelsTree({
       hierarchyLevelSizeLimit={hierarchyLevelConfig?.sizeLimit}
       selectionMode={selectionMode}
       treeRenderer={(treeProps) => (
-        <VisibilityTreeRenderer
-          {...treeProps}
-          {...rendererProps}
-          rootErrorRenderer={rootErrorRenderer}
-          errorRenderer={errorRenderer}
-          getActions={getActions}
-          getDecorations={getDecorations ?? rendererProps.getDecorations}
-        />
+        <VisibilityTreeRenderer {...treeProps} {...rendererProps} getActions={getActions} getDecorations={getDecorations ?? rendererProps.getDecorations} />
       )}
     />
   );
