@@ -11,16 +11,7 @@ import { useHierarchiesLocalization } from "../internal/UseHierarchiesLocalizati
 export type BaseTreeRendererProps = React.ComponentPropsWithoutRef<typeof PresentationTree>;
 
 /** @internal */
-export function BaseTreeRenderer({ rootNodes, onNodeClick, expandNode, getActions, ...props }: BaseTreeRendererProps) {
+export function BaseTreeRenderer({ rootNodes, expandNode, getActions, ...props }: BaseTreeRendererProps) {
   const localizedStrings = useHierarchiesLocalization();
-  return (
-    <PresentationTree
-      {...props}
-      onNodeClick={onNodeClick}
-      localizedStrings={localizedStrings}
-      expandNode={expandNode}
-      rootNodes={rootNodes}
-      getActions={getActions}
-    />
-  );
+  return <PresentationTree {...props} localizedStrings={localizedStrings} expandNode={expandNode} rootNodes={rootNodes} getActions={getActions} />;
 }
