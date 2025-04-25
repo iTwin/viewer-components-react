@@ -40,8 +40,10 @@ interface ModelsTreeComponentProps
     | "getFilteredPaths"
     | "filter"
     | "emptyTreeContent"
-    | "actions"
+    | "getActions"
     | "getDecorations"
+    | "errorRenderer"
+    | "rootErrorRenderer"
   > {
   /**
    * Renderers of header buttons. Defaults to:

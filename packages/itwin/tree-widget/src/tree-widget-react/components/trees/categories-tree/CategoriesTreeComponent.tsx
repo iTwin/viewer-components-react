@@ -27,9 +27,11 @@ interface CategoriesTreeComponentProps
     | "selectionMode"
     | "filter"
     | "emptyTreeContent"
-    | "actions"
+    | "getActions"
     | "getDecorations"
     | "hierarchyConfig"
+    | "errorRenderer"
+    | "rootErrorRenderer"
   > {
   /**
    * Renderers of header buttons. Defaults to:

@@ -20,15 +20,23 @@ import type { TreeProps } from "../common/components/Tree.js";
 
 /** @beta */
 export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
-  Pick<BaseTreeRendererProps, "actions" | "getDecorations"> & {
+  Pick<BaseTreeRendererProps, "getActions" | "getDecorations" | "errorRenderer" | "rootErrorRenderer"> & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
     };
-  hierarchyConfig?: Partial<IModelContentTreeHierarchyConfiguration>;
-};
+    hierarchyConfig?: Partial<IModelContentTreeHierarchyConfiguration>;
+  };
 
 /** @beta */
-export function IModelContentTree({ actions, getDecorations, selectionMode, hierarchyConfig: hierarchyConfigProp, ...rest }: IModelContentTreeProps) {
+export function IModelContentTree({
+  getActions,
+  getDecorations,
+  rootErrorRenderer,
+  errorRenderer,
+  selectionMode,
+  hierarchyConfig: hierarchyConfigProp,
+  ...rest
+}: IModelContentTreeProps) {
   const getHierarchyDefinition = useCallback<TreeProps["getHierarchyDefinition"]>(
     ({ imodelAccess }) => {
       const hierarchyConfig = {
@@ -49,7 +57,13 @@ export function IModelContentTree({ actions, getDecorations, selectionMode, hier
       getHierarchyDefinition={getHierarchyDefinition}
       selectionMode={selectionMode ?? "extended"}
       treeRenderer={(treeProps) => (
-        <TreeRenderer {...treeProps} actions={actions} getDecorations={getDecorations ?? ((node) => <IModelContentTreeIcon node={node} />)} />
+        <TreeRenderer
+          {...treeProps}
+          rootErrorRenderer={rootErrorRenderer}
+          errorRenderer={errorRenderer}
+          getActions={getActions}
+          getDecorations={getDecorations ?? ((node) => <IModelContentTreeIcon node={node} />)}
+        />
       )}
     />
   );
@@ -65,12 +79,12 @@ const hierarchyTreeSvg = new URL("@itwin/itwinui-icons/selection-children.svg", 
 
 /** @beta */
 export function IModelContentTreeIcon({ node }: { node: PresentationHierarchyNode }) {
-  if (node.extendedData?.imageId === undefined) {
+  if (node.nodeData.extendedData?.imageId === undefined) {
     return undefined;
   }
 
   const getIcon = () => {
-    switch (node.extendedData!.imageId) {
+    switch (node.nodeData.extendedData!.imageId) {
       case "icon-layers":
         return categorySvg;
       case "icon-item":
