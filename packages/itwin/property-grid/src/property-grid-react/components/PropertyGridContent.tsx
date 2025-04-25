@@ -5,7 +5,7 @@
 
 import "./PropertyGridContent.scss";
 import classnames from "classnames";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   CompositeFilterType,
   CompositePropertyDataFilterer,
@@ -19,7 +19,6 @@ import { Text } from "@itwin/itwinui-react";
 import { useActionButtons } from "../hooks/UseActionButtons.js";
 import { useContextMenu } from "../hooks/UseContextMenu.js";
 import { useLoadedInstanceInfo } from "../hooks/UseInstanceInfo.js";
-import { useLatest } from "../hooks/UseLatest.js";
 import { useNullValueSettingContext } from "../hooks/UseNullValuesSetting.js";
 import { useResizeObserver } from "../hooks/UseResizeObserver.js";
 import { useTelemetryContext } from "../hooks/UseTelemetryContext.js";
@@ -110,7 +109,7 @@ export function PropertyGridContent({
   const filterer = useFilterer({ showNullValues, filterText });
   const { ref, height, width } = useResizeObserver();
 
-  const reportThrottledFiltering = useThrottled(() => onFeatureUsed("filter-properties"), 1000);
+  const reportFiltering = useDebounced(() => onFeatureUsed("filter-properties"), 1000);
 
   const settingsProps: SettingsDropdownMenuProps = {
     settingsMenuItems,
@@ -140,7 +139,7 @@ export function PropertyGridContent({
         settingsProps={settingsProps}
         onSearchTextChange={(searchText: string) => {
           if (searchText.length > 0) {
-            reportThrottledFiltering();
+            reportFiltering();
           }
           setFilterText(searchText);
         }}
@@ -212,17 +211,19 @@ function useFilterer({ showNullValues, filterText }: UseFiltererProps) {
   return compositeFilterer;
 }
 
-function useThrottled(func: () => void, timeout: number) {
-  const isThrottledRef = useLatest(false);
+function useDebounced(func: () => void, timeout: number) {
+  const isDebounced = useRef(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   return () => {
-    if (isThrottledRef.current) {
-      return;
+    if (!isDebounced.current) {
+      func();
+      isDebounced.current = true;
     }
-    isThrottledRef.current = true;
-    func();
-    setTimeout(() => {
-      isThrottledRef.current = false;
+
+    clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      isDebounced.current = false;
     }, timeout);
   };
 }
