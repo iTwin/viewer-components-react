@@ -27,7 +27,7 @@ interface CategoriesTreeComponentProps
     | "selectionMode"
     | "filter"
     | "emptyTreeContent"
-    | "actions"
+    | "getActions"
     | "getDecorations"
     | "hierarchyConfig"
   > {

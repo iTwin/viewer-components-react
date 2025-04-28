@@ -4,21 +4,26 @@
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable @itwin/no-internal */
 
-import { useMemo } from "react";
-import { useFilterAction } from "@itwin/presentation-hierarchies-react";
+import { useCallback } from "react";
+import { FilterAction } from "@itwin/presentation-hierarchies-react";
 import { BaseTreeRenderer } from "./BaseTreeRenderer.js";
 
+import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
-
 /**
  * Default renderer for rendering tree data.
  * @beta
  */
-export function TreeRenderer({ actions, ...props }: BaseTreeRendererProps) {
-  const filterAction = useFilterAction({ onFilter: props.onFilterClick, getHierarchyLevelDetails: props.getHierarchyLevelDetails });
-  const nodeActions = useMemo(() => {
-    return [filterAction, ...(actions ? actions : [])];
-  }, [filterAction, actions]);
+export function TreeRenderer({ getActions, getHierarchyLevelDetails, onFilterClick, ...props }: BaseTreeRendererProps) {
+  const nodeActions = useCallback(
+    (node: PresentationHierarchyNode) => {
+      return [
+        <FilterAction key={"Filter"} node={node} onFilter={onFilterClick} getHierarchyLevelDetails={getHierarchyLevelDetails} />,
+        ...(getActions ? getActions(node) : []),
+      ];
+    },
+    [onFilterClick, getHierarchyLevelDetails, getActions],
+  );
 
-  return <BaseTreeRenderer {...props} actions={nodeActions} />;
+  return <BaseTreeRenderer {...props} onFilterClick={onFilterClick} getHierarchyLevelDetails={getHierarchyLevelDetails} getActions={nodeActions} />;
 }

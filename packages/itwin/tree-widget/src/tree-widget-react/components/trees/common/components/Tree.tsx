@@ -50,6 +50,7 @@ export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPa
         Pick<
           BaseTreeRendererProps,
           | "rootNodes"
+          | "reloadTree"
           | "expandNode"
           | "getLabel"
           | "onFilterClick"

@@ -149,12 +149,12 @@ const elementSvg = new URL("@itwin/itwinui-icons/bis-element.svg", import.meta.u
 
 /** @beta */
 export function CategoriesTreeIcon({ node }: { node: PresentationHierarchyNode }) {
-  if (node.extendedData?.imageId === undefined) {
+  if (node.nodeData.extendedData?.imageId === undefined) {
     return undefined;
   }
 
   const getIcon = () => {
-    switch (node.extendedData!.imageId) {
+    switch (node.nodeData.extendedData!.imageId) {
       case "icon-layers":
         return categorySvg;
       case "icon-layers-isolate":
@@ -174,5 +174,5 @@ export function CategoriesTreeIcon({ node }: { node: PresentationHierarchyNode }
 }
 
 function getSublabel(node: PresentationHierarchyNode) {
-  return node.extendedData?.description;
+  return node.nodeData.extendedData?.description;
 }

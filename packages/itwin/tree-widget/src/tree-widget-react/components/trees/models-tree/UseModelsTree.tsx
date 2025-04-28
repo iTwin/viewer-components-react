@@ -199,12 +199,12 @@ const elementSvg = new URL("@itwin/itwinui-icons/bis-element.svg", import.meta.u
 
 /** @beta */
 export function ModelsTreeIcon({ node }: { node: PresentationHierarchyNode }) {
-  if (node.extendedData?.imageId === undefined) {
+  if (node.nodeData.extendedData?.imageId === undefined) {
     return undefined;
   }
 
   const getIcon = () => {
-    switch (node.extendedData!.imageId) {
+    switch (node.nodeData.extendedData!.imageId) {
       case "icon-layers":
         return categorySvg;
       case "icon-item":
