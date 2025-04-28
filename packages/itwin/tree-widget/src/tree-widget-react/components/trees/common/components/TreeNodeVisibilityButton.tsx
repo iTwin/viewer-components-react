@@ -8,7 +8,6 @@ import { memo } from "react";
 import { Tree } from "@itwin/itwinui-react/bricks";
 import { createTooltip } from "../internal/Tooltip.js";
 
-import type { ReactElement } from "react";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
 /**
