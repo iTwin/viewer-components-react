@@ -38,7 +38,7 @@ export const VisibilityAction = memo(function VisibilityAction({
   getVisibilityButtonState,
   onVisibilityButtonClick,
   node,
-}: TreeItemVisibilityButtonProps & { node: PresentationHierarchyNode }): ReactElement {
+}: TreeItemVisibilityButtonProps & { node: PresentationHierarchyNode }) {
   const state = getVisibilityButtonState(node);
 
   const getIcon = () => {
