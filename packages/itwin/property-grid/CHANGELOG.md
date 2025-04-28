@@ -1,8 +1,16 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Fri, 14 Mar 2025 21:21:43 GMT and should not be manually modified.
+This log was last generated on Mon, 28 Apr 2025 11:04:44 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 1.18.1
+
+Mon, 28 Apr 2025 11:04:44 GMT
+
+### Patches
+
+- Reduce `filter-properties` feature reporting duplication. ([#1296](https://github.com/iTwin/viewer-components-react/pull/1296))
 
 ## 1.18.0
 
