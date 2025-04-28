@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Reduce `filter-properties` feature reporting duplication.",
-  "packageName": "@itwin/property-grid-react",
-  "email": "24278440+saskliutas@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

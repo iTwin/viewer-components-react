@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fixed an issue when trying to generate Mapped Properties.",
-  "packageName": "@itwin/grouping-mapping-widget",
-  "email": "Guillar1@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
