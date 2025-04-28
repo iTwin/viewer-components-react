@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Fri, 18 Apr 2025 17:06:22 GMT and should not be manually modified.
+This log was last generated on Mon, 28 Apr 2025 16:18:43 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 3.7.0
+
+Mon, 28 Apr 2025 16:18:43 GMT
+
+### Minor changes
+
+- Added ability to disabled hierarchy level filtering in `ModelsTree`. ([#1297](https://github.com/iTwin/viewer-components-react/pull/1297))
 
 ## 3.6.1
 
