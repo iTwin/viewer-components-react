@@ -284,6 +284,7 @@ interface ModelsTreeHierarchyConfiguration {
     elementClassGrouping: "enable" | "enableWithCounts" | "disable";
     elementClassSpecification: string;
     hideRootSubject: boolean;
+    hierarchyLevelFiltering: "enable" | "disable";
     showEmptyModels: boolean;
 }
 
