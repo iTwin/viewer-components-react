@@ -4,15 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./TreeWidgetComponentImpl.css";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { Spinner } from "@itwin/itwinui-react/bricks";
+import { Skeleton } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../TreeWidget.js";
+import { SelectableTree } from "./tree-header/SelectableTree.js";
 import { WidgetHeader } from "./tree-header/WidgetHeader.js";
+import { SkeletonTree } from "./trees/common/components/SkeletonTree.js";
 
-import type { PropsWithChildren } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { TreeContentDefinition, WidgetHeaderProps } from "./tree-header/WidgetHeader.js";
+import type { TreeContentDefinition, TreeSelectionProps } from "./tree-header/WidgetHeader.js";
 /**
  * Props for rendering trees
  * @public
@@ -72,14 +73,38 @@ export function TreeWidgetComponentImpl(props: TreeWidgetComponentImplProps) {
   return <SelectableTreeContent {...props} imodel={imodel} />;
 }
 
-function SelectableTreeContent(props: TreeWidgetComponentImplProps & { imodel: IModelConnection }) {
-  const { trees: treeDefinitions, imodel } = props;
-  const trees = useActiveTrees(treeDefinitions, imodel);
+function SelectableTreeContent({
+  onPerformanceMeasured,
+  onFeatureUsed,
+  trees: treeDefinitions,
+  imodel,
+}: TreeWidgetComponentImplProps & { imodel: IModelConnection }) {
+  const activeTrees = useActiveTrees(treeDefinitions, imodel);
+  const { trees, defaultSelectedContentId } = useMemo(() => getWidgetWithHeaderProps(activeTrees), [activeTrees]);
+  const [searchValue, setSearchValue] = useState<string | undefined>(undefined);
+  const [selectedContentId, setSelectedContentId] = useState<string | undefined>(defaultSelectedContentId);
+  const selectedContent = useMemo(() => trees.find((c) => c.id === selectedContentId) ?? trees[0], [selectedContentId, trees]);
 
-  // TODO: move tree content rendering here
+  const onSelect = useCallback(
+    (treeId: string) => {
+      onFeatureUsed?.(`choose-${treeId}`);
+      setSelectedContentId(treeId);
+    },
+    [onFeatureUsed],
+  );
+
   return (
     <div className="tree-widget-selectable-tree">
-      <WidgetHeader {...getWidgetWithHeaderProps(trees)} onPerformanceMeasured={props.onPerformanceMeasured} onFeatureUsed={props.onFeatureUsed} />
+      <div className="tw-content">
+        <WidgetHeader
+          trees={trees}
+          defaultSelectedContentId={defaultSelectedContentId}
+          onSearch={setSearchValue}
+          onSelect={onSelect}
+          isLoading={selectedContent.id === "loading"}
+        />
+        <div className="tw-content-wrapper">{selectedContent?.render({ onPerformanceMeasured, onFeatureUsed, filter: searchValue })}</div>
+      </div>
     </div>
   );
 }
@@ -121,7 +146,7 @@ async function getActiveTrees(treeDefinitions: TreeDefinition[], imodel: IModelC
   return (await Promise.all(treeDefinitions.map(handleDefinition))).filter((tree) => tree !== undefined) as TreeContentDefinition[];
 }
 
-function getWidgetWithHeaderProps(trees?: TreeContentDefinition[]): WidgetHeaderProps {
+function getWidgetWithHeaderProps(trees?: TreeContentDefinition[]): TreeSelectionProps {
   if (trees === undefined) {
     return {
       defaultSelectedContentId: "loading",
@@ -130,12 +155,7 @@ function getWidgetWithHeaderProps(trees?: TreeContentDefinition[]): WidgetHeader
           id: "loading",
           label: "",
           isSearchable: false,
-          render: () => (
-            <Delayed>
-              {/* <ProgressLinear indeterminate={true} /> */}
-              <Spinner />
-            </Delayed>
-          ),
+          render: () => <LoadingTree />,
         },
       ],
     };
@@ -165,21 +185,21 @@ function getWidgetWithHeaderProps(trees?: TreeContentDefinition[]): WidgetHeader
   };
 }
 
-function Delayed({ delay = 200, children }: PropsWithChildren<{ delay?: number }>) {
-  const [show, setShow] = useState(false);
-
-  useEffect(() => {
-    const id = setTimeout(() => {
-      setShow(true);
-    }, delay);
-    return () => {
-      clearTimeout(id);
-    };
-  }, [delay]);
-
-  if (!show) {
-    return null;
-  }
-
-  return <>{children}</>;
+function LoadingTree() {
+  return (
+    <SelectableTree
+      buttons={
+        <>
+          <Skeleton variant={"object"} size={"medium"} />
+          <Skeleton variant={"object"} size={"medium"} />
+          <Skeleton variant={"object"} size={"medium"} />
+          <Skeleton variant={"object"} size={"medium"} />
+          <Skeleton variant={"object"} size={"medium"} />
+          <Skeleton variant={"object"} size={"medium"} />
+        </>
+      }
+    >
+      <SkeletonTree />
+    </SelectableTree>
+  );
 }
