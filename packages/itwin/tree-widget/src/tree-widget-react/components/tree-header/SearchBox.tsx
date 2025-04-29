@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import "./SearchBox.css";
 import { useEffect, useRef, useState } from "react";
 import { IconButton, TextBox } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../../TreeWidget.js";
