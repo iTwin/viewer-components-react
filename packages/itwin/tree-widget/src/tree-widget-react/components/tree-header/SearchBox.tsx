@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useRef, useState } from "react";
-import dismissSvg from "@itwin/itwinui-icons/dismiss.svg";
+import closeSvg from "@itwin/itwinui-icons/close.svg";
 import searchSvg from "@itwin/itwinui-icons/search.svg";
 import { IconButton, TextBox } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../../TreeWidget.js";
@@ -54,7 +54,7 @@ export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, cla
         className={"tw-search-box-button"}
         variant={"ghost"}
         label={TreeWidget.translate("header.searchBox.close")}
-        icon={dismissSvg}
+        icon={closeSvg}
         onClick={() => {
           setIsOpened(false);
           setInputValue(undefined);

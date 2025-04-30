@@ -9,6 +9,12 @@ import { toggleAllCategories } from "./internal/VisibilityUtils.js";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 
+/**
+ * This is a logging namespace for public log messages that may be interesting to consumers.
+ * @internal
+ */
+export const LOGGING_NAMESPACE = "TreeWidget";
+
 /** @beta */
 export type FunctionProps<THook extends (props: any) => any> = Parameters<THook>[0];
 

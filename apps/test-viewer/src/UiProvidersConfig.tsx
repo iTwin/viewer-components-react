@@ -40,6 +40,7 @@ import type { ComponentProps } from "react";
 import type { TreeDefinition } from "@itwin/tree-widget-react";
 import type { ClientPrefix } from "@itwin/grouping-mapping-widget";
 import type { UiItemsProvider } from "@itwin/appui-react";
+
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
   uiItemsProviders: UiItemsProvider[];
