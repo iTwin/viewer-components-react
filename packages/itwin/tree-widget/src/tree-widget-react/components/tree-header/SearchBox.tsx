@@ -15,7 +15,7 @@ interface DebouncedSearchBoxProps {
   className?: string;
 }
 
-const dismissSvg = new URL("@itwin/itwinui-icons/dismiss.svg", import.meta.url).href;
+const closeSvg = new URL("@itwin/itwinui-icons/close.svg", import.meta.url).href;
 const searchSvg = new URL("@itwin/itwinui-icons/search.svg", import.meta.url).href;
 
 /** @internal */
@@ -55,7 +55,7 @@ export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, cla
         className={"tw-search-box-button"}
         variant={"ghost"}
         label={TreeWidget.translate("header.searchBox.close")}
-        icon={dismissSvg}
+        icon={closeSvg}
         onClick={() => {
           setIsOpened(false);
           setInputValue(undefined);
