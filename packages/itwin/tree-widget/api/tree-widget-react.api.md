@@ -18,6 +18,7 @@ import type { Id64Array } from '@itwin/core-bentley';
 import type { Id64Set } from '@itwin/core-bentley';
 import type { Id64String } from '@itwin/core-bentley';
 import type { IDisposable } from '@itwin/core-bentley';
+import type { ILogger } from '@itwin/presentation-shared';
 import type { IModelConnection } from '@itwin/core-frontend';
 import type { InstanceKey } from '@itwin/presentation-shared';
 import { JSX as JSX_2 } from 'react/jsx-runtime';
@@ -445,7 +446,8 @@ interface TreeToolbarButtonProps {
 export class TreeWidget {
     static get i18n(): Localization;
     static get i18nNamespace(): string;
-    static initialize(i18n?: Localization): Promise<void>;
+    static initialize(i18n?: Localization, logger?: ILogger): Promise<void>;
+    static get logger(): ILogger;
     static terminate(): void;
     static translate(key: string | string[], options?: TranslationOptions): string;
 }

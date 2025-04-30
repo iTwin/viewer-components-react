@@ -8,24 +8,26 @@ import { useCallback, useMemo, useState } from "react";
 import { BeEvent } from "@itwin/core-bentley";
 import { SchemaMetadataContextProvider } from "@itwin/presentation-components";
 import { useIModelUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
+import { TreeWidget } from "../../../../TreeWidget.js";
 import { useHierarchiesLocalization } from "../internal/UseHierarchiesLocalization.js";
 import { useHierarchyLevelFiltering } from "../internal/UseHierarchyFiltering.js";
 import { useIModelChangeListener } from "../internal/UseIModelChangeListener.js";
 import { createIModelAccess } from "../internal/Utils.js";
 import { useNodeHighlighting } from "../UseNodeHighlighting.js";
 import { useReportingAction, useTelemetryContext } from "../UseTelemetryContext.js";
+import { LOGGING_NAMESPACE } from "../Utils.js";
 import { Delayed } from "./Delayed.js";
 import { EmptyTreeContent } from "./EmptyTree.js";
 import { ProgressOverlay } from "./ProgressOverlay.js";
 import { SkeletonTree } from "./SkeletonTree.js";
 
-import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
-import type { MarkRequired } from "@itwin/core-bentley";
-import type { FunctionProps } from "../Utils.js";
 import type { ReactNode } from "react";
+import type { MarkRequired } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type { PresentationHierarchyNode, SelectionStorage, useIModelTree, useSelectionHandler } from "@itwin/presentation-hierarchies-react";
+import type { FunctionProps } from "../Utils.js";
+import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
 import type { HighlightInfo } from "../UseNodeHighlighting.js";
 
 /** @beta */
@@ -82,8 +84,12 @@ export function Tree({ getSchemaContext, hierarchyLevelSizeLimit, selectionStora
   const defaultHierarchyLevelSizeLimit = hierarchyLevelSizeLimit ?? 1000;
 
   const imodelAccess = useMemo(() => {
+    TreeWidget.logger.logInfo(
+      `${LOGGING_NAMESPACE}.${props.treeName}`,
+      `iModel changed, now using ${providedIModelAccess ? "provided imodel access" : `"${props.imodel.name}"`}`,
+    );
     return providedIModelAccess ?? createIModelAccess({ getSchemaContext, imodel: props.imodel });
-  }, [providedIModelAccess, getSchemaContext, props.imodel]);
+  }, [providedIModelAccess, getSchemaContext, props.imodel, props.treeName]);
 
   return (
     <SchemaMetadataContextProvider imodel={props.imodel} schemaContextProvider={getSchemaContext}>
@@ -139,7 +145,13 @@ function TreeImpl({
       onFeatureUsed({ featureId: `error-${type}`, reportInteraction: false });
     },
   });
-  useIModelChangeListener({ imodel, action: useCallback(() => imodelChanged.raiseEvent(), [imodelChanged]) });
+  useIModelChangeListener({
+    imodel,
+    action: useCallback(() => {
+      TreeWidget.logger.logTrace(`${LOGGING_NAMESPACE}.${treeName}`, `iModel data changed`);
+      imodelChanged.raiseEvent();
+    }, [imodelChanged, treeName]),
+  });
 
   const selectNodes = useSelectionPredicate({
     action: useReportingAction({ action: selectNodesAction }),
