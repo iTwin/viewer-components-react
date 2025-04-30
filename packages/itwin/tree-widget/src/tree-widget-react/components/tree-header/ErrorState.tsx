@@ -3,12 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import errorSvg from "@itwin/itwinui-icons/status-error.svg";
 import { Button, Icon, Text } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../../TreeWidget.js";
 
 import type { FallbackProps } from "react-error-boundary";
-
-const errorSvg = new URL("@itwin/itwinui-icons/status-error.svg", import.meta.url).href;
 
 /** @internal */
 export function ErrorState({ resetErrorBoundary }: FallbackProps) {

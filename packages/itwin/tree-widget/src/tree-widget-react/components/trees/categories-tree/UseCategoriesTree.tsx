@@ -4,6 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import categorySvg from "@itwin/itwinui-icons/bis-category-3d.svg";
+import subcategorySvg from "@itwin/itwinui-icons/bis-category-subcategory.svg";
+import classSvg from "@itwin/itwinui-icons/bis-class.svg";
+import definitionContainerSvg from "@itwin/itwinui-icons/bis-definitions-container.svg";
+import elementSvg from "@itwin/itwinui-icons/bis-element.svg";
 import { Icon } from "@itwin/itwinui-react/bricks";
 import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMatches } from "../common/components/EmptyTree.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
@@ -125,8 +130,6 @@ function useCachedVisibility(activeView: Viewport, hierarchyConfig: CategoriesTr
   };
 }
 
-const categorySvg = new URL("@itwin/itwinui-icons/bis-category-3d.svg", import.meta.url).href;
-
 function getEmptyTreeContentComponent(filter?: string, error?: CategoriesTreeFilteringError, emptyTreeContent?: React.ReactNode) {
   if (error) {
     if (error === "tooManyFilterMatches") {
@@ -142,11 +145,6 @@ function getEmptyTreeContentComponent(filter?: string, error?: CategoriesTreeFil
   }
   return <EmptyTreeContent icon={categorySvg} />;
 }
-
-const subcategorySvg = new URL("@itwin/itwinui-icons/bis-category-subcategory.svg", import.meta.url).href;
-const definitionContainerSvg = new URL("@itwin/itwinui-icons/bis-definitions-container.svg", import.meta.url).href;
-const classSvg = new URL("@itwin/itwinui-icons/bis-class.svg", import.meta.url).href;
-const elementSvg = new URL("@itwin/itwinui-icons/bis-element.svg", import.meta.url).href;
 
 /** @beta */
 export function CategoriesTreeIcon({ node }: { node: PresentationHierarchyNode }) {

@@ -4,6 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useRef, useState } from "react";
+import closeSvg from "@itwin/itwinui-icons/close.svg";
+import searchSvg from "@itwin/itwinui-icons/search.svg";
 import { IconButton, TextBox } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../../TreeWidget.js";
 
@@ -14,9 +16,6 @@ interface DebouncedSearchBoxProps {
   delay: number;
   className?: string;
 }
-
-const closeSvg = new URL("@itwin/itwinui-icons/close.svg", import.meta.url).href;
-const searchSvg = new URL("@itwin/itwinui-icons/search.svg", import.meta.url).href;
 
 /** @internal */
 export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, className }: DebouncedSearchBoxProps) {
