@@ -7,6 +7,7 @@ import "./TreeWidgetUiItemsProvider.css";
 import { useRef } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { StagePanelLocation, StagePanelSection, useTransientState } from "@itwin/appui-react";
+import hierarchyTreeSvg from "@itwin/itwinui-icons/hierarchy-tree.svg";
 import { Icon } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../TreeWidget.js";
 import { ErrorState } from "./tree-header/ErrorState.js";
@@ -34,7 +35,6 @@ interface TreeWidgetProps {
   onFeatureUsed?: (feature: string) => void;
 }
 
-const hierarchyTreeSvg = new URL("@itwin/itwinui-icons/hierarchy-tree.svg", import.meta.url).href;
 
 /**
  * Creates a tree widget definition that should be returned from `UiItemsProvider.getWidgets()`.

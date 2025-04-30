@@ -4,6 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useMemo, useState } from "react";
+import toggle2DSvg from "@itwin/itwinui-icons/2d.svg";
+import toggle3DSvg from "@itwin/itwinui-icons/3d.svg";
+import focusModeSvg from "@itwin/itwinui-icons/cursor-click.svg";
+import visibilityHideSvg from "@itwin/itwinui-icons/visibility-hide.svg";
+import visibilityShowSvg from "@itwin/itwinui-icons/visibility-show.svg";
+import visibilityInvertSvg from "@itwin/itwinui-icons/visibilty-invert.svg";
 import { IconButton } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
@@ -111,8 +117,6 @@ async function queryModelsForHeaderActions(iModel: IModelConnection) {
 /** @public */
 export type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) => React.ReactElement | null;
 
-const visibilityShowSvg = new URL("@itwin/itwinui-icons/visibility-show.svg", import.meta.url).href;
-
 /** @public */
 export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
   return (
@@ -130,8 +134,6 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
     />
   );
 }
-
-const visibilityHideSvg = new URL("@itwin/itwinui-icons/visibility-hide.svg", import.meta.url).href;
 
 /** @public */
 export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
@@ -151,8 +153,6 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
   );
 }
 
-const visibilityInvertSvg = new URL("@itwin/itwinui-icons/visibilty-invert.svg", import.meta.url).href;
-
 /** @public */
 export function InvertButton(props: ModelsTreeHeaderButtonProps) {
   return (
@@ -170,8 +170,6 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
     />
   );
 }
-
-const toggle2DSvg = new URL("@itwin/itwinui-icons/2d.svg", import.meta.url).href;
 
 /** @public */
 export function View2DButton(props: ModelsTreeHeaderButtonProps) {
@@ -201,8 +199,6 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
   );
 }
 
-const toggle3DSvg = new URL("@itwin/itwinui-icons/3d.svg", import.meta.url).href;
-
 /** @public */
 export function View3DButton(props: ModelsTreeHeaderButtonProps) {
   const models3d = useMemo(() => {
@@ -230,8 +226,6 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
     />
   );
 }
-
-const focusModeSvg = new URL("@itwin/itwinui-icons/cursor-click.svg", import.meta.url).href;
 
 /** @public */
 export function ToggleInstancesFocusButton({ onFeatureUsed, disabled }: { onFeatureUsed?: (feature: string) => void; disabled?: boolean }) {
