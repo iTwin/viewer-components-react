@@ -1,18 +1,18 @@
+import "./Reports.scss";
 /*---------------------------------------------------------------------------------------------
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import React, { useEffect, useMemo, useState } from "react";
-import { SearchBox } from "@itwin/core-react";
-import { IModelApp } from "@itwin/core-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { Button, Table, toaster } from "@itwin/itwinui-react";
-import type { Report } from "@itwin/insights-client";
-import { WidgetHeader } from "./utils";
-import ExportModal from "./ExportModal";
-import "./Reports.scss";
+import { IModelApp } from "@itwin/core-frontend";
+import { SearchBox } from "@itwin/core-react";
+import { Button, Table } from "@itwin/itwinui-react";
 import { useReportsClient } from "./context/ReportsClientContext";
+import ExportModal from "./ExportModal";
+import { WidgetHeader } from "./utils";
 
+import type { Report } from "@itwin/insights-client";
 type CreateTypeFromInterface<Interface> = {
   [Property in keyof Interface]: Interface[Property];
 };
@@ -102,13 +102,13 @@ export const Reports = () => {
           })
           .catch((err) => {
             setIsLoading(false);
-            toaster.negative("You are not authorized to get reports for this projects. Please contact project administrator.");
+            // toaster.negative("You are not authorized to get reports for this projects. Please contact project administrator.");
             /* eslint-disable no-console */
             console.error(err);
           });
       })
       .catch((err) => {
-        toaster.negative("You are not authorized to use this system.");
+        // toaster.negative("You are not authorized to use this system.");
         /* eslint-disable no-console */
         console.error(err);
       });

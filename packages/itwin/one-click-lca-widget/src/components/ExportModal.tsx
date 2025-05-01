@@ -5,14 +5,14 @@
 import "./ExportModal.scss";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IModelApp } from "@itwin/core-frontend";
-import { Alert, Button, LabeledInput, Modal, ProgressLinear, ProgressRadial, Text, toaster } from "@itwin/itwinui-react";
-import { SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
-import type { Link, OCLCAJob } from "@itwin/insights-client";
 import { CarbonUploadState } from "@itwin/insights-client";
+import { SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
+import { Alert, Button, LabeledInput, Modal, ProgressLinear, ProgressRadial, Text } from "@itwin/itwinui-react";
 import logo from "../../public/logo/oneClickLCALogo.png";
-import { useOCLCAJobsClient } from "./context/OCLCAJobsClientContext";
 import { OCLCAApiHelper } from "./api/OCLCAApiHelper";
+import { useOCLCAJobsClient } from "./context/OCLCAJobsClientContext";
 
+import type { Link, OCLCAJob } from "@itwin/insights-client";
 interface ExportProps {
   isOpen: boolean;
   close: () => void;
@@ -84,7 +84,7 @@ const ExportModal = (props: ExportProps) => {
             setJobStatus(currentJobStatus.status);
           } else {
             setJobStatus(CarbonUploadState.Failed);
-            toaster.negative("Failed to get job status. 😔");
+            // toaster.negative("Failed to get job status. 😔");
           }
         }
       }, PIN_INTERVAL);
@@ -106,17 +106,17 @@ const ExportModal = (props: ExportProps) => {
             pinStatus(jobCreated);
           } else {
             setJobStatus(CarbonUploadState.Failed);
-            toaster.negative("Failed to create one click lca job. 😔");
+            // toaster.negative("Failed to create one click lca job. 😔");
           }
         } catch (e) {
           setJobStatus(CarbonUploadState.Failed);
-          toaster.negative("You do not have the required permissions. Please contact the project administrator.");
+          // toaster.negative("You do not have the required permissions. Please contact the project administrator.");
           /* eslint-disable no-console */
           console.error(e);
         }
       } else {
         setJobStatus(CarbonUploadState.Failed);
-        toaster.negative("Invalid reportId.");
+        // toaster.negative("Invalid reportId.");
       }
     },
     [props, pinStatus, oneClickLCAClient],
@@ -139,7 +139,7 @@ const ExportModal = (props: ExportProps) => {
           showSigninError(true);
         }
       } catch (err) {
-        toaster.negative("Failed to sign in One Click LCA.");
+        // toaster.negative("Failed to sign in One Click LCA.");
         /* eslint-disable no-console */
         console.error(err);
       }
@@ -216,7 +216,7 @@ const ExportModal = (props: ExportProps) => {
     if (props.isOpen && isSignedIn && cache?.token) {
       runJob(cache.token).catch((err) => {
         setJobStatus(CarbonUploadState.Failed);
-        toaster.negative("Error occurs while running the job. 😔");
+        // toaster.negative("Error occurs while running the job. 😔");
         /* eslint-disable no-console */
         console.error(err);
       });

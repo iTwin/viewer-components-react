@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 import * as moq from "typemoq";
 import { PlanarClipMaskMode, PlanarClipMaskPriority, TerrainHeightOriginMode } from "@itwin/core-common";
+import { DisplayStyle3dState, IModelApp, IModelConnection, ScreenViewport, ViewState3d } from "@itwin/core-frontend";
 import { act, fireEvent, getByTestId, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SourceMapContext } from "../ui/widget/MapLayerManager";
@@ -11,8 +12,6 @@ import { MapManagerSettings } from "../ui/widget/MapManagerSettings";
 import { TestUtils } from "./TestUtils";
 
 import type { BackgroundMapSettings, DisplayStyle3dSettings, TerrainSettings } from "@itwin/core-common";
-import type { DisplayStyle3dState, IModelConnection, ScreenViewport, ViewState3d } from "@itwin/core-frontend";
-
 describe("MapManagerSettings", () => {
   const viewportMock = moq.Mock.ofType<ScreenViewport>();
   const viewMock = moq.Mock.ofType<ViewState3d>();
@@ -23,12 +22,14 @@ describe("MapManagerSettings", () => {
   const terrainSettingsMock = moq.Mock.ofType<TerrainSettings>();
 
   beforeAll(async () => {
-    await MockRender.App.startup();
+    // await MockRender.App.startup();
+    await IModelApp.startup();
     await TestUtils.initialize();
   });
 
   afterAll(async () => {
-    await MockRender.App.shutdown();
+    await IModelApp.shutdown();
+    // await MockRender.App.shutdown();
     TestUtils.terminateUiComponents();
   });
 

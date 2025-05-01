@@ -7,13 +7,9 @@ import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 import { FeatureInfoUiItemsProvider, MapLayersPrefBrowserStorage, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
-import { OneClickLCAProvider } from "@itwin/one-click-lca-react";
-import { ModelsTreeComponent, TreeWidgetComponent } from "@itwin/tree-widget-react";
-import { useViewerOptionsContext } from "./components/ViewerOptions";
 
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { ClientPrefix } from "@itwin/grouping-mapping-widget";
-import type { SelectableTreeDefinition } from "@itwin/tree-widget-react";
+;
 import type { UiItemsProvider } from "@itwin/appui-react";
 import type { ComponentPropsWithRef } from "react";
 
@@ -56,9 +52,19 @@ const prefixUrl = (baseUrl?: string, prefix?: string) => {
   return baseUrl;
 };
 
+export class OneClickLCAProvider implements UiItemsProvider {
+  public readonly id = "OneClickLCAProvider";
+
+  constructor(private readonly _props?: string) {}
+
+  public provideWidgets() {
+    return [];
+  }
+}
+
 interface UiItem {
   initialize: () => Promise<void>;
-  createUiItemsProviders: () => UiItemsProvider[];
+  createUiItemsProviders: () => any;
 }
 
 const schemaContextCache = new Map<string, SchemaContext>();
@@ -75,6 +81,7 @@ function getSchemaContext(imodel: IModelConnection) {
   return schemaContext;
 }
 
+
 const configuredUiItems = new Map<string, UiItem>([
   [
     "map-layers",
@@ -86,44 +93,29 @@ const configuredUiItems = new Map<string, UiItem>([
       createUiItemsProviders: () => [new MapLayersUiItemsProvider(), new FeatureInfoUiItemsProvider({})],
     },
   ],
-  // [
-  //   "geo-tools",
-  //   {
-  //     initialize: async () => {
-  //       await GeoTools.initialize();
-  //     },
-  //     createUiItemsProviders: () => [new GeoToolsAddressSearchProvider()],
-  //   },
-  // ],
-  [
-    "one-click-lca-widget",
-    {
-      initialize: async () => Promise.resolve(),
-      createUiItemsProviders: () => [new OneClickLCAProvider()],
-    },
-  ],
 ]);
 
-function ModelsTreeWithOption(props: ComponentPropsWithRef<typeof ModelsTreeComponent>) {
-  const { disableNodesSelection } = useViewerOptionsContext();
-  return <ModelsTreeComponent {...props} selectionPredicate={disableNodesSelection ? disabledSelectionPredicate : undefined} />;
-}
 
-function TreeWidgetWithOptions(props: { trees: SelectableTreeDefinition[] }) {
-  const { density } = useViewerOptionsContext();
-  return (
-    <TreeWidgetComponent
-      trees={props.trees}
-      density={density}
-      onPerformanceMeasured={(feature: string, elapsedTime: number) => {
-        console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
-      }}
-      onFeatureUsed={(feature: string) => {
-        console.log(`TreeWidget [${feature}] used`);
-      }}
-    />
-  );
-}
+// function ModelsTreeWithOption(props: ComponentPropsWithRef<typeof ModelsTreeComponent>) {
+//   const { disableNodesSelection } = useViewerOptionsContext();
+//   return <ModelsTreeComponent {...props} selectionPredicate={disableNodesSelection ? disabledSelectionPredicate : undefined} />;
+// }
+
+// function TreeWidgetWithOptions(props: { trees: SelectableTreeDefinition[] }) {
+//   const { density } = useViewerOptionsContext();
+//   return (
+//     <TreeWidgetComponent
+//       trees={props.trees}
+//       density={density}
+//       onPerformanceMeasured={(feature: string, elapsedTime: number) => {
+//         console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
+//       }}
+//       onFeatureUsed={(feature: string) => {
+//         console.log(`TreeWidget [${feature}] used`);
+//       }}
+//     />
+//   );
+// }
 
 function disabledSelectionPredicate() {
   return false;
