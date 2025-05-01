@@ -11,7 +11,7 @@ import {
   ColorDef,
   MapImagerySettings,
 } from "@itwin/core-common";
-import { MockRender } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
 import { findByTestId, fireEvent, getByTestId, render } from "@testing-library/react";
 import { BasemapPanel } from "../ui/widget/BasemapPanel";
 import { defaultBaseMapLayers, SourceMapContext } from "../ui/widget/MapLayerManager";
@@ -33,13 +33,15 @@ describe("BasemapPanel", () => {
   });
 
   beforeAll(async () => {
-    await MockRender.App.startup();
+    // await MockRender.App.startup();
+    await IModelApp.startup();
     await TestUtils.initialize();
     window.HTMLElement.prototype.scrollIntoView = () => {};
   });
 
   afterAll(async () => {
-    await MockRender.App.shutdown();
+    // await MockRender.App.shutdown();
+    await IModelApp.shutdown();
     TestUtils.terminateUiComponents();
   });
 

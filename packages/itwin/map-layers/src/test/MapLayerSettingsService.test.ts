@@ -4,8 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 import type { GuidString } from "@itwin/core-bentley";
 import { Guid } from "@itwin/core-bentley";
-import { MapLayerSource, MockRender } from "@itwin/core-frontend";
-
+import { IModelApp, MapLayerSource } from "@itwin/core-frontend";
 import { MapLayerPreferences } from "../MapLayerPreferences";
 import { restore, setup } from "./UserPreferencesMock";
 
@@ -15,14 +14,14 @@ describe("MapLayerPreferences", () => {
   const testName: string = `test${Guid.createValue()}`;
 
   beforeEach(async () => {
-    await MockRender.App.startup();
+    await IModelApp.startup();
     setup();
   });
 
   afterEach(async () => {
     restore();
     vi.restoreAllMocks();
-    await MockRender.App.shutdown();
+    await IModelApp.shutdown();
   });
 
   it("should store and retrieve layer", async () => {

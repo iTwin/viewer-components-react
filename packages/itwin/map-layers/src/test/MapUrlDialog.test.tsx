@@ -3,13 +3,13 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import * as moq from "typemoq";
-import { render, screen, getAllByRole } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { ImageMapLayerSettings } from "@itwin/core-common";
-import { IModelApp, MapLayerSource, MapLayerSourceStatus, MockRender, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
+import { IModelApp, MapLayerSource, MapLayerSourceStatus, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
+import { getAllByRole, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { MapLayersUI } from "../mapLayers";
 import { MapUrlDialog } from "../ui/widget/MapUrlDialog";
 import { AccessClientMock, TokenEndpointMock } from "./AccessClientMock";
-import { MapLayersUI } from "../mapLayers";
 import { TestUtils } from "./TestUtils";
 
 import type { MapSubLayerProps } from "@itwin/core-common";
@@ -46,12 +46,13 @@ describe("MapUrlDialog", () => {
   };
 
   beforeAll(async () => {
-    await MockRender.App.startup();
+    await IModelApp.startup();;
     await TestUtils.initialize();
   });
 
   afterAll(async () => {
-    await MockRender.App.shutdown();
+    await IModelApp.shutdown();
+    // await MockRender.App.shutdown();
     TestUtils.terminateUiComponents();
   });
 
@@ -85,39 +86,39 @@ describe("MapUrlDialog", () => {
   const testAddAuthLayer = async (isOAuth: boolean, format: string) => {
     const sampleLayerSettings = getSampleLayerSettings(format, true);
     let endPoint: MapLayerTokenEndpoint | undefined;
-    
+
     if (isOAuth) {
       endPoint = new TokenEndpointMock();
     }
-  
+
     const validateSourceStub = vi.spyOn(MapLayerSource.prototype, "validateSource").mockImplementation(async () => {
       return Promise.resolve({
         status: MapLayerSourceStatus.RequireAuth,
         authInfo: { tokenEndpoint: endPoint },
       });
     });
-  
+
     const spyOnOkResult = vi.fn();
     const { container, rerender } = render(
       <MapUrlDialog activeViewport={viewportMock.object} onOkResult={spyOnOkResult} />
     );
-  
+
     // Select layer type
     const formatSelect = screen.getAllByRole('combobox')[0];
     await userEvent.click(formatSelect);
-  
+
     // Fill Name and URL fields
     const inputs = container.querySelectorAll('input');
     await userEvent.type(inputs[0], sampleLayerSettings?.name ?? '');
     await userEvent.type(inputs[1], sampleLayerSettings?.url ?? '');
-  
+
     // Click OK to trigger validation
     const okButton = container.querySelector(".map-layer-features-footer-button");
     expect(okButton).not.toBeNull();
     await userEvent.click(okButton!);
-  
+
     rerender(<MapUrlDialog activeViewport={viewportMock.object} onOkResult={spyOnOkResult} />);
-  
+
     if (!isOAuth) {
       // Fill credentials if not OAuth
       const credentialInputs = container.querySelectorAll('input');
@@ -125,22 +126,22 @@ describe("MapUrlDialog", () => {
       await userEvent.type(credentialInputs[2], sampleLayerSettings?.userName ?? '');
       await userEvent.type(credentialInputs[3], sampleLayerSettings?.password ?? '');
     }
-  
+
     validateSourceStub.mockImplementation(async () => {
       return Promise.resolve({
         status: MapLayerSourceStatus.Valid,
         subLayers: sampleLayerSettings?.subLayers,
       });
     });
-  
+
     // Click OK again to add layer
     await userEvent.click(okButton!);
     await TestUtils.flushAsyncOperations();
-  
+
     if (!sampleLayerSettings) {
       throw new Error("Invalid layer settings");
     }
-  
+
     if (!isOAuth) {
       // Verify credentials in source object
       expect(spyOnOkResult).toHaveBeenCalledWith(
@@ -153,13 +154,13 @@ describe("MapUrlDialog", () => {
       );
     }
   };
-  
+
   it("renders", () => {
     const { container, unmount } = renderComponent();
-    
+
     const inputs = container.querySelectorAll('input');
     expect(inputs.length).to.equals(defaultNumberOfInput);
-    
+
     const sourceUrlDiv = container.querySelector('.map-layer-source-url');
     expect(sourceUrlDiv).not.toBeNull();
 
@@ -177,35 +178,35 @@ describe("MapUrlDialog", () => {
     if (!sampleWmsLayerSettings) {
       throw new Error("Invalid layer settings");
     }
-  
+
     const notificationsSpy = vi.spyOn(IModelApp.notifications, 'outputMessage');
     const mockOnOkResult = vi.fn();
-  
-    vi.spyOn(MapLayerSource.prototype, 'validateSource').mockResolvedValue({ 
-      status: MapLayerSourceStatus.Valid, 
-      subLayers: sampleWmsLayerSettings.subLayers 
+
+    vi.spyOn(MapLayerSource.prototype, 'validateSource').mockResolvedValue({
+      status: MapLayerSourceStatus.Valid,
+      subLayers: sampleWmsLayerSettings.subLayers
     });
-  
+
     const { container, unmount } = render(
       <MapUrlDialog
         activeViewport={viewportMock.object}
         onOkResult={mockOnOkResult}
       />
     );
-  
+
     const formatSelect = screen.getAllByRole('combobox')[0];
     await userEvent.click(formatSelect);
-  
+
     const inputs = container.querySelectorAll('input');
     await userEvent.type(inputs[0], sampleWmsLayerSettings?.name ?? '');
     await userEvent.type(inputs[1], sampleWmsLayerSettings?.url ?? '');
-  
+
     const okButton = container.querySelector(".map-layer-features-footer-button");
     expect(okButton).not.toBeNull();
     await userEvent.click(okButton!);
-  
+
     await TestUtils.flushAsyncOperations();
-  
+
     expect(mockOnOkResult).toHaveBeenCalledTimes(1);
     const firstCallArgs = mockOnOkResult.mock.calls[0][0];
     expect(firstCallArgs.source.name).toBe(sampleWmsLayerSettings.name);
@@ -215,7 +216,7 @@ describe("MapUrlDialog", () => {
     IModelApp.notifications.outputMessage(
       new NotifyMessageDetails(OutputMessagePriority.Info, "Messages.MapLayerAttached")
     );
-  
+
     expect(notificationsSpy).toHaveBeenCalledWith(
       new NotifyMessageDetails(OutputMessagePriority.Info, "Messages.MapLayerAttached")
     );
@@ -321,13 +322,13 @@ describe("MapUrlDialog", () => {
 
     //TODO: Move this in AttachLayerPanel
     // const cloned = ImageMapLayerSettings.fromJSON({
-    //   ...sampleLayerSettings.toJSON(), 
+    //   ...sampleLayerSettings.toJSON(),
     //   subLayers: [{ name: "subLayer1", visible: true }]
     // });
 
     // expect(displayStyleMock.object.attachMapLayer)
     //   .toHaveBeenCalledWith({
-    //     settings: cloned, 
+    //     settings: cloned,
     //     mapLayerIndex: {index: -1, isOverlay: false}
     //   });
 

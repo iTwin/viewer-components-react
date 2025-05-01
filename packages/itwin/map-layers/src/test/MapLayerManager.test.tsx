@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { ImageMapLayerSettings } from "@itwin/core-common";
-import { MapLayerIndex, MapLayerSource, MapLayerSources, MockRender } from "@itwin/core-frontend";
+import { IModelApp, MapLayerIndex, MapLayerSource, MapLayerSources } from "@itwin/core-frontend";
 import { fireEvent, getAllByTestId, getByTestId, queryAllByTestId, queryByText, render, RenderResult } from "@testing-library/react";
 import { MapLayerPreferences, MapLayerSourceChangeType } from "../MapLayerPreferences";
 import { MapLayerManager } from "../ui/widget/MapLayerManager";
@@ -24,13 +24,15 @@ describe("MapLayerManager", () => {
   const sourceListSelector = ".map-manager-source-list";
 
   beforeAll(async () => {
-    await MockRender.App.startup();
+    // await MockRender.App.startup();
+    await IModelApp.startup();
     await TestUtils.initialize();
     window.HTMLElement.prototype.scrollIntoView = () => {};
   });
 
   afterAll(async () => {
-    await MockRender.App.shutdown();
+    // await MockRender.App.shutdown();
+    await IModelApp.shutdown();
     TestUtils.terminateUiComponents();
   });
 
