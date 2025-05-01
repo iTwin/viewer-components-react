@@ -1,5 +1,6 @@
 packages:
-  - packages/itwin/*
-  - '!packages/itwin/breakdown-trees'
+  # - packages/itwin/*
+  # - '!packages/itwin/breakdown-trees'
+  - packages/itwin/map-layers
   - apps/test-viewer
-  - apps/learning-snippets
+  # - apps/learning-snippets

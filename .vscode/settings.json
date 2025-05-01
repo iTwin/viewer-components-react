@@ -12,10 +12,10 @@
     ".nycrc": "json",
   },
   "files.exclude": {
-    "**/coverage": true,
-    "**/node_modules": true,
-    "**/lib": true,
-    "**/build": true
+    "**/coverage": false,
+    "**/node_modules": false,
+    "**/lib": false,
+    "**/build": false
   },
   "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,

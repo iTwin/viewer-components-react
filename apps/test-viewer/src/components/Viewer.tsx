@@ -69,6 +69,9 @@ function ViewerWithOptions() {
       theme="light"
       backendConfiguration={{
         defaultBackend: {
+          config: {
+            info: { title: "imodel/rpc", version: "v5" },
+          },
           rpcInterfaces: [ECSchemaRpcInterface],
         },
       }}

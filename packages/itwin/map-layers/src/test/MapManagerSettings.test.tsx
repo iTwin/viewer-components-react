@@ -23,12 +23,12 @@ describe("MapManagerSettings", () => {
   const terrainSettingsMock = moq.Mock.ofType<TerrainSettings>();
 
   beforeAll(async () => {
-    await MockRender.App.startup();
+    // await MockRender.App.startup();
     await TestUtils.initialize();
   });
 
   afterAll(async () => {
-    await MockRender.App.shutdown();
+    // await MockRender.App.shutdown();
     TestUtils.terminateUiComponents();
   });
 

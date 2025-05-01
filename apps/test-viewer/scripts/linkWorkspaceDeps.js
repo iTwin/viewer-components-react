@@ -7,42 +7,42 @@ const path = require("path");
 const watch = process.argv[2] && process.argv[2] === "--watch";
 
 const packages = [
-  {
-    name: "@itwin/tree-widget-react",
-    dir: "tree-widget",
-  },
-  {
-    name: "@itwin/property-grid-react",
-    dir: "property-grid",
-  },
-  {
-    name: "@itwin/measure-tools-react",
-    dir: "measure-tools",
-  },
+  // {
+  //   name: "@itwin/tree-widget-react",
+  //   dir: "tree-widget",
+  // },
+  // {
+  //   name: "@itwin/property-grid-react",
+  //   dir: "property-grid",
+  // },
+  // {
+  //   name: "@itwin/measure-tools-react",
+  //   dir: "measure-tools",
+  // },
   {
     name: "@itwin/map-layers",
     dir: "map-layers",
   },
-  {
-    name: "@itwin/geo-tools-react",
-    dir: "geo-tools",
-  },
-  {
-    name: "@itwin/grouping-mapping-widget",
-    dir: "grouping-mapping-widget",
-  },
-  {
-    name: "@itwin/reports-config-widget-react",
-    dir: "reports-config-widget",
-  },
-  {
-    name: "@itwin/ec3-widget-react",
-    dir: "ec3-widget",
-  },
-  {
-    name: "@itwin/one-click-lca-react",
-    dir: "one-click-lca-widget",
-  },
+  // {
+  //   name: "@itwin/geo-tools-react",
+  //   dir: "geo-tools",
+  // },
+  // {
+  //   name: "@itwin/grouping-mapping-widget",
+  //   dir: "grouping-mapping-widget",
+  // },
+  // {
+  //   name: "@itwin/reports-config-widget-react",
+  //   dir: "reports-config-widget",
+  // },
+  // {
+  //   name: "@itwin/ec3-widget-react",
+  //   dir: "ec3-widget",
+  // },
+  // {
+  //   name: "@itwin/one-click-lca-react",
+  //   dir: "one-click-lca-widget",
+  // },
 ];
 
 linkPackages();
