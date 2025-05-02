@@ -36,7 +36,7 @@
     "@itwin/presentation-hierarchies-react": "^1.6.5",
     "@itwin/presentation-shared": "^1.2.1",
     "@itwin/unified-selection": "^1.4.1",
-    "@itwin/web-viewer-react": "^4.3.5",
+    "@itwin/web-viewer-react": "next",
     "@itwin/webgl-compatibility": "rc",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -46,7 +46,7 @@
     "redux": "^4.2.1"
   },
   "devDependencies": {
-    "@dotenvx/dotenvx": "^1.42.0",
+    "@dotenvx/dotenvx": "^1.42.2",
     "@itwin/eslint-plugin": "^4.1.1",
     "@types/node": "^18.19.87",
     "@types/react": "^18.3.20",

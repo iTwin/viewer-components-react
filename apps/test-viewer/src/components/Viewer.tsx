@@ -69,12 +69,8 @@ function ViewerWithOptions() {
         GoogleMaps: { key: "key", value: ApiKeys.GoogleMapsKey },
       }}
       tileAdmin={{ cesiumIonKey: ApiKeys.CesiumKey }}
-      theme="light"
       backendConfiguration={{
         defaultBackend: {
-          config: {
-            info: { title: "imodel/rpc", version: "v5" },
-          },
           rpcInterfaces: [ECSchemaRpcInterface],
         },
       }}
