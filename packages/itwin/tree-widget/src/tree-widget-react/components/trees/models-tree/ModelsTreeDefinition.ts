@@ -70,6 +70,8 @@ export interface ModelsTreeHierarchyConfiguration {
   showEmptyModels: boolean;
   /** Should the root Subject node be hidden. Defaults to `false`. */
   hideRootSubject: boolean;
+  /** Should hierarchy level be filterable. Defaults to `enable` */
+  hierarchyLevelFiltering: "enable" | "disable";
 }
 
 /** @internal */
@@ -78,6 +80,7 @@ export const defaultHierarchyConfiguration: ModelsTreeHierarchyConfiguration = {
   elementClassSpecification: GEOMETRIC_ELEMENT_3D_CLASS_NAME,
   showEmptyModels: false,
   hideRootSubject: false,
+  hierarchyLevelFiltering: "enable",
 };
 
 interface ModelsTreeDefinitionProps {
@@ -251,7 +254,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   isSubject: true,
                 },
                 autoExpand: { selector: `IIF(this.ECInstanceId = ${IModel.rootSubjectId}, true, false)` },
-                supportsFiltering: true,
+                supportsFiltering: this.supportsFiltering(),
               })}
             FROM ${subjectFilterClauses.from} this
             ${subjectFilterClauses.joins}
@@ -309,7 +312,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                     imageId: "icon-model",
                     isModel: true,
                   },
-                  supportsFiltering: true,
+                  supportsFiltering: this.supportsFiltering(),
                 })}
               FROM ${GEOMETRIC_MODEL_3D_CLASS_NAME} m
               JOIN ${INFORMATION_PARTITION_ELEMENT_CLASS_NAME} [partition] ON [partition].ECInstanceId = m.ModeledElement.Id
@@ -385,7 +388,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   isCategory: true,
                   modelIds: { selector: createIdsSelector(modelIds) },
                 },
-                supportsFiltering: true,
+                supportsFiltering: this.supportsFiltering(),
               })}
             FROM ${instanceFilterClauses.from} this
             ${instanceFilterClauses.joins}
@@ -464,7 +467,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   categoryId: { selector: "IdToHex(this.Category.Id)" },
                   imageId: "icon-item",
                 },
-                supportsFiltering: true,
+                supportsFiltering: this.supportsFiltering(),
               })}
             FROM ${instanceFilterClauses.from} this
             ${instanceFilterClauses.joins}
@@ -522,7 +525,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   categoryId: { selector: "IdToHex(this.Category.Id)" },
                   imageId: "icon-item",
                 },
-                supportsFiltering: true,
+                supportsFiltering: this.supportsFiltering(),
               })}
             FROM ${instanceFilterClauses.from} this
             ${instanceFilterClauses.joins}
@@ -542,6 +545,10 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       return createInstanceKeyPathsFromInstanceLabel({ ...props, labelsFactory });
     }
     return createInstanceKeyPathsFromTargetItems(props);
+  }
+
+  private supportsFiltering() {
+    return this._hierarchyConfig.hierarchyLevelFiltering === "enable";
   }
 
   private async isSupported() {

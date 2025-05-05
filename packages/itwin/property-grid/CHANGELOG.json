@@ -2,6 +2,21 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "date": "Mon, 28 Apr 2025 11:04:44 GMT",
+      "version": "1.18.1",
+      "tag": "@itwin/property-grid-react_v1.18.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "5a064ac6267c488e332f13bb3ff16f66bcafaa3b",
+            "comment": "Reduce `filter-properties` feature reporting duplication."
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 14 Mar 2025 21:21:43 GMT",
       "version": "1.18.0",
       "tag": "@itwin/property-grid-react_v1.18.0",

@@ -307,6 +307,7 @@ interface ModelsTreeHierarchyConfiguration {
     elementClassGrouping: "enable" | "enableWithCounts" | "disable";
     elementClassSpecification: string;
     hideRootSubject: boolean;
+    hierarchyLevelFiltering: "enable" | "disable";
     showEmptyModels: boolean;
 }
 
@@ -559,7 +560,7 @@ export interface VisibilityStatus {
 }
 
 // @beta
-export function VisibilityTree({ visibilityHandlerFactory, treeRenderer, ...props }: VisibilityTreeProps): JSX_2.Element;
+export function VisibilityTree({ visibilityHandlerFactory, treeRenderer, hierarchyLevelSizeLimit, ...props }: VisibilityTreeProps): JSX.Element;
 
 // @beta (undocumented)
 type VisibilityTreeProps = Omit<TreeProps, "treeRenderer" | "imodelAccess"> & {
