@@ -7,18 +7,22 @@
 import "./BasemapPanel.scss";
 import * as React from "react";
 import { BackgroundMapType, BaseMapLayerSettings, ColorByName, ColorDef, ImageMapLayerSettings } from "@itwin/core-common";
+import { IModelApp } from "@itwin/core-frontend";
 import { SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { ColorBuilder, ColorInputPanel, ColorPalette, ColorPicker, ColorSwatch, ColorValue, IconButton, Popover, Select } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
 import { useSourceMapContext } from "./MapLayerManager";
 import { TransparencyPopupButton } from "./TransparencyPopupButton";
 
-import type { BaseLayerSettings, MapImagerySettings, MapLayerProps } from "@itwin/core-common";
 import type { Viewport } from "@itwin/core-frontend";
+import type {
+  BaseLayerSettings,
+  MapImagerySettings} from "@itwin/core-common";
 import type { SelectOption } from "@itwin/itwinui-react";
 const customBaseMapValue = "customBaseMap";
-const getSelectKeyFromProvider = (base: BaseMapLayerSettings) =>
-  `${base.provider ? `${base.provider.name}.${BackgroundMapType[base.provider.type]}` : `${base.name}`}`;
+interface ExtraFormat {
+    selectKeyFromSetting: (base: BaseMapLayerSettings) => string;
+}
 
 interface BasemapPanelProps {
   disabled?: boolean;
@@ -31,6 +35,40 @@ export function BasemapPanel(props: BasemapPanelProps) {
   const [selectedBaseMap, setSelectedBaseMap] = React.useState<BaseLayerSettings | undefined>(() => {
     return activeViewport?.displayStyle.settings.mapImagery.backgroundBase;
   });
+
+  const [extraFormats] = React.useState<{[formatId: string]:ExtraFormat}>(()=>{
+    const extras: {[formatId: string]:ExtraFormat} = {};
+    // TODO: Use format string from format class instead of hardcoded string.
+    if (IModelApp.mapLayerFormatRegistry.isRegistered("GoogleMaps")) {
+      extras.GoogleMaps = {
+        selectKeyFromSetting: (base: BaseMapLayerSettings) => {
+          let key = base.formatId;
+          if (base.properties?.mapType !== undefined) {
+            key = `${key}.${base.properties?.mapType.toString()}`;
+            if (base.properties?.layerTypes) {
+              key = `${key}-${base.properties?.layerTypes.toString()}`;
+            }
+          }
+          return key;
+        }
+      }
+    }
+    return extras;
+  });
+
+  const getSelectKeyFromProvider = React.useCallback(
+    (base: BaseMapLayerSettings) => {
+      if (base.provider) {
+        return `${base.formatId}.${BackgroundMapType[base.provider.type]}`;
+      }
+      if (extraFormats[base.formatId]) {
+        return extraFormats[base.formatId].selectKeyFromSetting(base);
+      }
+      return base.name;
+    },
+    [extraFormats],
+  );
+
   const [baseMapTransparencyValue, setBaseMapTransparencyValue] = React.useState(() => {
     if (activeViewport) {
       const mapImagery = activeViewport.displayStyle.settings.mapImagery;
@@ -45,6 +83,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
       return 0;
     }
   });
+
   const [customBaseMap, setCustomBaseMap] = React.useState<BaseMapLayerSettings | undefined>();
   const [baseMapVisible, setBaseMapVisible] = React.useState(() => {
     if (activeViewport && activeViewport.displayStyle.backgroundMapBase instanceof ImageMapLayerSettings) {
@@ -61,8 +100,8 @@ export function BasemapPanel(props: BasemapPanelProps) {
 
       if (bases) {
         baseOptions.push(
-          ...bases.map((bgProvider) => {
-            const value = getSelectKeyFromProvider(bgProvider);
+          ...bases.map((base) => {
+            const value = getSelectKeyFromProvider(base);
             const label = MapLayersUI.translate(`WellKnownBaseMaps.${value}`);
             return { value, label };
           }),
@@ -70,7 +109,9 @@ export function BasemapPanel(props: BasemapPanelProps) {
       }
 
       // Add new custom base map definition (avoid adding duplicate entry)
-      if (baseMap instanceof BaseMapLayerSettings && !baseMap.provider) {
+      if (baseMap instanceof BaseMapLayerSettings
+        && !baseMap.provider
+        && !extraFormats[baseMap.formatId]) {
         // Add new option only if not created duplicate (Support of base map definition without provider)
         if (undefined === baseOptions.find((opt) => opt.label === baseMap.name)) {
           baseOptions.push({ value: customBaseMapValue, label: baseMap.name });
@@ -81,7 +122,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
       }
       return baseOptions;
     },
-    [bases, customBaseMap, useColorLabel],
+    [bases, customBaseMap, extraFormats, getSelectKeyFromProvider, useColorLabel],
   );
 
   const [baseMapOptions, setBaseMapOptions] = React.useState<SelectOption<string>[]>(() => getBaseMapOptions(selectedBaseMap));
@@ -92,6 +133,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
     },
     [getBaseMapOptions],
   );
+
 
   const handleMapImageryChanged = React.useCallback(
     (args: Readonly<MapImagerySettings>) => {
@@ -155,13 +197,14 @@ export function BasemapPanel(props: BasemapPanelProps) {
   // This effect is only to keep a custom base map option when a 'default' base map is picked.
   React.useEffect(() => {
     if (
-      selectedBaseMap instanceof BaseMapLayerSettings &&
-      !selectedBaseMap.provider &&
-      undefined === baseMapOptions.find((opt) => opt.label === selectedBaseMap.name)
+      selectedBaseMap instanceof BaseMapLayerSettings
+       && !selectedBaseMap.provider
+       && undefined === baseMapOptions.find((opt) => opt.label === selectedBaseMap.name)
+       && undefined === extraFormats[selectedBaseMap.formatId]
     ) {
       setCustomBaseMap(selectedBaseMap);
     }
-  }, [baseMapOptions, selectedBaseMap]);
+  }, [baseMapOptions, extraFormats, selectedBaseMap]);
 
   const [presetColors] = React.useState([
     ColorValue.fromTbgr(ColorByName.grey),
@@ -185,7 +228,8 @@ export function BasemapPanel(props: BasemapPanelProps) {
 
   React.useEffect(() => {
     if (baseIsMap) {
-      if (selectedBaseMap instanceof BaseMapLayerSettings && selectedBaseMap.provider) {
+      if (selectedBaseMap instanceof BaseMapLayerSettings
+        && (selectedBaseMap.provider || extraFormats[selectedBaseMap.formatId])) {
         const mapName = getSelectKeyFromProvider(selectedBaseMap);
         const foundItem = baseMapOptions.find((value) => value.value === mapName);
         if (foundItem) {
@@ -215,7 +259,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
       return;
     }
     setSelectedBaseMapValue({ value: "", label: "" });
-  }, [baseIsColor, baseIsMap, baseMapOptions, selectedBaseMap]);
+  }, [baseIsColor, baseIsMap, baseMapOptions, extraFormats, getSelectKeyFromProvider, selectedBaseMap]);
 
   const handleBackgroundColorDialogOk = React.useCallback(
     (bgColorValue: ColorValue) => {
@@ -240,9 +284,11 @@ export function BasemapPanel(props: BasemapPanelProps) {
         } else if (bases) {
           const baseMap = bases.find((provider) => getSelectKeyFromProvider(provider) === value);
           if (baseMap) {
-            const baseProps: MapLayerProps = baseMap.toJSON();
+            const baseProps = baseMap.toJSON();
             if (activeViewport.displayStyle.backgroundMapBase instanceof BaseMapLayerSettings) {
-              activeViewport.displayStyle.backgroundMapBase = activeViewport.displayStyle.backgroundMapBase.clone({ ...baseProps, visible: baseMapVisible });
+              const provider = extraFormats[baseMap.formatId] ? undefined : baseProps.provider;
+              activeViewport.displayStyle.backgroundMapBase  = activeViewport.displayStyle.backgroundMapBase.clone(
+                { ...baseProps, visible: baseMapVisible, provider});
             } else {
               activeViewport.displayStyle.backgroundMapBase = BaseMapLayerSettings.fromJSON({ ...baseProps, visible: baseMapVisible });
             }
@@ -255,7 +301,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
         }
       }
     },
-    [activeViewport, customBaseMap, bases, baseMapVisible, bgColor],
+    [activeViewport, customBaseMap, bases, getSelectKeyFromProvider, extraFormats, baseMapVisible, bgColor],
   );
 
   const handleVisibilityChange = React.useCallback(() => {
