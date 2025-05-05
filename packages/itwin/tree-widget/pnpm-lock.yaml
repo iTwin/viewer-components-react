@@ -22,8 +22,8 @@ importers:
         specifier: ^1.4.1
         version: 1.4.1
       '@itwin/presentation-hierarchies-react':
-        specifier: 2.0.0-alpha.16
-        version: 2.0.0-alpha.16(@itwin/itwinui-icons@5.0.0-alpha.7)(@itwin/itwinui-react@5.0.0-alpha.14(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 2.0.0-alpha.17
+        version: 2.0.0-alpha.17(@itwin/itwinui-icons@5.0.0-alpha.7)(@itwin/itwinui-react@5.0.0-alpha.14(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@itwin/presentation-shared':
         specifier: ^1.2.0
         version: 1.2.0
@@ -765,8 +765,8 @@ packages:
       '@itwin/ecschema-metadata': ^4.10.2
       '@itwin/presentation-common': ^4.10.2
 
-  '@itwin/presentation-hierarchies-react@2.0.0-alpha.16':
-    resolution: {integrity: sha512-9cB1tKqnCRxtg33fXdHBZ/opd9x0y68TMNTkPiJRYiiQn2A/E+UemNomIrTapYPrJUCN+FSnBjSdVl0bedKBqA==}
+  '@itwin/presentation-hierarchies-react@2.0.0-alpha.17':
+    resolution: {integrity: sha512-32v7h3Agq4zh8pNzr96kytZolYMkU2y44KPw1mgD5Yf8P9LuN+WrISYnJJlRchYKeL0cUsuGf+l5kQwy/bB+kA==}
     peerDependencies:
       '@itwin/itwinui-icons': 5.0.0-alpha.7
       '@itwin/itwinui-react': 5.0.0-alpha.14
@@ -5119,7 +5119,7 @@ snapshots:
       rxjs: 7.8.1
       rxjs-for-await: 1.0.0(rxjs@7.8.1)
 
-  '@itwin/presentation-hierarchies-react@2.0.0-alpha.16(@itwin/itwinui-icons@5.0.0-alpha.7)(@itwin/itwinui-react@5.0.0-alpha.14(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@itwin/presentation-hierarchies-react@2.0.0-alpha.17(@itwin/itwinui-icons@5.0.0-alpha.7)(@itwin/itwinui-react@5.0.0-alpha.14(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@itwin/core-bentley': 4.10.11
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
