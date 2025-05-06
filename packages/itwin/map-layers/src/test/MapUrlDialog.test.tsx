@@ -4,7 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 import * as moq from "typemoq";
 import { ImageMapLayerSettings } from "@itwin/core-common";
-import { IModelApp, MapLayerSource, MapLayerSourceStatus, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
+import {
+  IModelApp,
+  MapLayerSource,
+  MapLayerSourceStatus,
+  NoRenderApp,
+  NotificationManager,
+  NotifyMessageDetails,
+  OutputMessagePriority,
+} from "@itwin/core-frontend";
 import { getAllByRole, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MapLayersUI } from "../mapLayers";
@@ -46,13 +54,11 @@ describe("MapUrlDialog", () => {
   };
 
   beforeAll(async () => {
-    await IModelApp.startup();;
+    await NoRenderApp.startup({notifications: new NotificationManager()})
     await TestUtils.initialize();
   });
 
   afterAll(async () => {
-    await IModelApp.shutdown();
-    // await MockRender.App.shutdown();
     TestUtils.terminateUiComponents();
   });
 

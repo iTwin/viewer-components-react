@@ -11,7 +11,7 @@ import {
   ColorDef,
   MapImagerySettings,
 } from "@itwin/core-common";
-import { IModelApp } from "@itwin/core-frontend";
+import { NoRenderApp, NotificationManager } from "@itwin/core-frontend";
 import { findByTestId, fireEvent, getByTestId, render } from "@testing-library/react";
 import { BasemapPanel } from "../ui/widget/BasemapPanel";
 import { defaultBaseMapLayers, SourceMapContext } from "../ui/widget/MapLayerManager";
@@ -33,15 +33,12 @@ describe("BasemapPanel", () => {
   });
 
   beforeAll(async () => {
-    // await MockRender.App.startup();
-    await IModelApp.startup();
+    await NoRenderApp.startup({notifications: new NotificationManager()})
     await TestUtils.initialize();
     window.HTMLElement.prototype.scrollIntoView = () => {};
   });
 
   afterAll(async () => {
-    // await MockRender.App.shutdown();
-    await IModelApp.shutdown();
     TestUtils.terminateUiComponents();
   });
 
@@ -74,7 +71,7 @@ describe("BasemapPanel", () => {
 
     const selectContent = getByTestId(container, "base-map-select") as HTMLElement;
     expect(selectContent).toBeDefined();
-    expect(selectContent.textContent).toBe("WellKnownBaseMaps.BingProvider.Hybrid");
+    expect(selectContent.textContent).toBe("WellKnownBaseMaps.BingMaps.Hybrid");
   });
 
   it.skip("should refresh select content after API call", async () => {
@@ -99,7 +96,7 @@ describe("BasemapPanel", () => {
 
     let selectContent = getByTestId(container, "base-map-select");
     expect(selectContent).toBeDefined();
-    expect(selectContent!.textContent).toBe("WellKnownBaseMaps.BingProvider.Street");
+    expect(selectContent!.textContent).toBe("WellKnownBaseMaps.BingMaps.Street");
 
     // Now test with a custom map-layer definition
     baseMap = customBaseMap;
