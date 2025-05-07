@@ -1,0 +1,69 @@
+name: PR tree-widget performance benchmark
+
+on:
+  pull_request:
+    branches:
+      - master
+      - stable
+    paths:
+      - apps/performance-tests/tree-widget/**
+      - apps/performance-tests/util/**
+      - packages/itwin/tree-widget/**
+      - pnpm-lock.yaml
+      - .github/workflows/benchmark-pr-tree-widget.yml
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  benchmark:
+    name: 'Tree-Widget: Benchmark performance'
+    if: '!github.event.pull_request.draft'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10.6.5
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build benchmark tests
+        run: pnpm lage build --to vcr-performance-tests
+
+      - name: Restore dataset from cache
+        uses: actions/cache/restore@v4
+        id: cache-restore
+        env:
+          cache-name: cache-dataset
+        with:
+          path: "./apps/performance-tests/datasets/*.bim"
+          key: performance-test-dataset-${{ hashFiles('./apps/performance-tests/src/util/Datasets.ts') }}
+
+      - name: Run benchmark tests
+        run: pnpm benchmark:tree-widget
+
+      - name: Save generated datasets
+        uses: actions/cache/save@v4
+        if: steps.cache-restore.outputs.cache-hit != 'true'
+        with:
+          path: "./apps/performance-tests/datasets/*.bim"
+          key: performance-test-dataset-${{ hashFiles('./apps/performance-tests/src/util/Datasets.ts') }}
+
+      - name: Post benchmark summary
+        uses: JonasDov/github-action-benchmark@04d30c72aa7aad091b58aacbb6c182ebb2ecb6c0
+        with:
+          name: Tree-Widget benchmark
+          tool: 'customSmallerIsBetter'
+          output-file-path: ./apps/performance-tests/tree-widget-benchmark.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          save-data-file: false
+          comment-on-pull-request: true

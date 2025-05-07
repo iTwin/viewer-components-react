@@ -1,0 +1,34 @@
+{
+  "name": "test-utilities",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "npm run -s build:cjs && npm run -s build:esm",
+    "build:cjs": "node ../../../scripts/package-cjs.js ./lib/cjs && tsc 1>&2 -p tsconfig.cjs.json",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "clean": "rimraf lib temp",
+    "lint": "eslint \"./src/**/*.ts\""
+  },
+  "type": "module",
+  "main": "lib/cjs/test-utilities.js",
+  "types": "lib/cjs/test-utilities",
+  "module": "lib/esm/test-utilities.js",
+  "exports": {
+    ".": {
+      "import": "./lib/esm/test-utilities.js",
+      "require": "./lib/cjs/test-utilities.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "devDependencies": {
+    "@itwin/core-bentley": "^4.11.1",
+    "@itwin/core-common": "^4.11.1",
+    "@itwin/core-geometry": "^4.11.1",
+    "@itwin/eslint-plugin": "^5.1.0",
+    "@types/node": "^22.15.4",
+    "eslint": "^9.26.0",
+    "rimraf": "^6.0.1",
+    "rxjs": "^7.8.2",
+    "typescript": "~5.6.0"
+  }
+}
