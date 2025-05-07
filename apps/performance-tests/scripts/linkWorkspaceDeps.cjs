@@ -15,7 +15,6 @@ const packages = [
     name: "test-utilities",
     dir: "test-utilities",
   },
-
 ];
 
 linkPackages();

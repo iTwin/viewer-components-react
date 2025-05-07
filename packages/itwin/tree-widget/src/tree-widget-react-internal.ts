@@ -6,7 +6,10 @@
 // WARNING: This barrel file exports internal APIs only for use by `@itwin/presentation-backend` and `@itwin/presentation-frontend` packages.
 // They should not be used outside of these packages. These APIs may be broken or removed at any time without notice.
 
-export { ModelsTreeDefinition, defaultHierarchyConfiguration as defaultModelsTreeHierarchyConfiguration } from "./tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
+export {
+  ModelsTreeDefinition,
+  defaultHierarchyConfiguration as defaultModelsTreeHierarchyConfiguration,
+} from "./tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 export { ModelsTreeIdsCache } from "./tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 export { createModelsTreeVisibilityHandler } from "./tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
 export { CategoriesTreeDefinition } from "./tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";

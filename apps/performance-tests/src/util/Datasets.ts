@@ -86,6 +86,7 @@ export class Datasets {
    * Create an iModel with `numElements` subcategories all belonging to the same parent spatial category.
    */
   private static async createCategoryIModel(name: string, localPath: string, numElements: number) {
+    // eslint-disable-next-line no-console
     console.log(`${numElements} elements: Creating...`);
     await createIModel(name, localPath, async (builder) => {
       const { id: physicalModelId } = insertPhysicalModelWithPartition({ builder, codeValue: "test physical model" });
@@ -112,6 +113,7 @@ export class Datasets {
       }
     });
 
+    // eslint-disable-next-line no-console
     console.log(`${numElements} elements: Done.`);
   }
 
@@ -121,6 +123,7 @@ export class Datasets {
    * and so on until the depth of `numElements` / 1000 elements is reached. Each 3D element has a related functional element.
    */
   private static async createFunctional3dElementIModel(name: string, localPath: string, numElements: number) {
+    // eslint-disable-next-line no-console
     console.log(`${numElements} elements: Creating...`);
     const schema = await this.getSchemaFromPackage("functional-schema", "Functional.ecschema.xml");
 
@@ -157,6 +160,7 @@ export class Datasets {
       }
     });
 
+    // eslint-disable-next-line no-console
     console.log(`${numElements} elements: Done.`);
   }
 

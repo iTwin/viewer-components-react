@@ -4,29 +4,18 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { asyncScheduler, expand, filter, finalize, from, observeOn, of, tap } from "rxjs";
-import { IModelDb } from "@itwin/core-backend";
 import { BeDuration } from "@itwin/core-bentley";
-import { Schema, SchemaContext, SchemaJsonLocater, SchemaKey, SchemaMatchType, SchemaPropsGetter } from "@itwin/ecschema-metadata";
+import { Schema, SchemaContext, SchemaJsonLocater } from "@itwin/ecschema-metadata";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import {
-  createIModelHierarchyProvider,
-  createLimitingECSqlQueryExecutor,
-  HierarchyDefinition,
-  HierarchyFilteringPath,
-  HierarchyNode,
-  HierarchyProvider,
-} from "@itwin/presentation-hierarchies";
-import {
-  createCachingECClassHierarchyInspector,
-  EC,
-  ECClassHierarchyInspector,
-  ECSchemaProvider,
-  ECSqlQueryDef,
-  ECSqlQueryExecutor,
-  ECSqlQueryReaderOptions,
-} from "@itwin/presentation-shared";
-import { CategoriesTreeIdsCache, ModelsTreeIdsCache } from "@itwin/tree-widget-react/internal";
+import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 import { LOGGER } from "../util/Logging.cjs";
+
+import type { CategoriesTreeIdsCache, ModelsTreeIdsCache } from "@itwin/tree-widget-react/internal";
+import type { IModelDb } from "@itwin/core-backend";
+import type { SchemaKey, SchemaMatchType, SchemaPropsGetter } from "@itwin/ecschema-metadata";
+import type { HierarchyDefinition, HierarchyFilteringPath, HierarchyNode, HierarchyProvider } from "@itwin/presentation-hierarchies";
+import type { EC, ECClassHierarchyInspector, ECSchemaProvider, ECSqlQueryDef, ECSqlQueryExecutor, ECSqlQueryReaderOptions } from "@itwin/presentation-shared";
 
 interface ProviderOptionsBase {
   rowLimit?: number | "unbounded";
@@ -99,7 +88,7 @@ export class StatelessHierarchyProvider implements Disposable {
     });
   }
 
-  [Symbol.dispose]() {
+  public [Symbol.dispose]() {
     this._provider[Symbol.dispose]();
   }
 

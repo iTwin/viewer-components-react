@@ -29,18 +29,13 @@ before(async () => {
     },
     rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
   });
-  //eslint-disable-next-line @itwin/no-internal
   ECSchemaRpcImpl.register();
-  // await IModelHost.startup({
-  //   profileName: "presentation-performance-tests",
-  // });
   await Datasets.initialize("./datasets");
   await UiFramework.initialize();
   await TreeWidget.initialize(new EmptyLocalization());
 });
 
 after(async () => {
-  // await IModelHost.shutdown();
   await terminatePresentationTesting();
   UiFramework.terminate();
   TreeWidget.terminate();

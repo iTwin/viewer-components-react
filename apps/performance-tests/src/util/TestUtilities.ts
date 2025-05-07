@@ -3,8 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { IModelDb, SnapshotDb } from "@itwin/core-backend";
+import { SnapshotDb } from "@itwin/core-backend";
 import { IModelConnection } from "@itwin/core-frontend";
+
+import type { IModelDb } from "@itwin/core-backend";
 
 export interface RunOptions<TContext> {
   /** Name of the test. */
@@ -62,13 +64,11 @@ export function run<T>(props: RunOptions<T>): void {
 export class TestIModelConnection extends IModelConnection {
   // This was added based on this: https://github.com/iTwin/itwinjs-core/pull/7171/files#diff-9d26b04e7ae074b911fb87be3425360d7bd55a7c9f947f5aed1ba36d359f01eb
   constructor(private readonly _db: IModelDb) {
-    // eslint-disable-next-line @itwin/no-internal
     super(_db.getConnectionProps());
     IModelConnection.onOpen.raiseEvent(this);
   }
 
   public override get isClosed(): boolean {
-    // eslint-disable-next-line @itwin/no-internal
     return !this._db.isOpen;
   }
 

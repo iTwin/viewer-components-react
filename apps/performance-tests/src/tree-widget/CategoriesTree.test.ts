@@ -5,14 +5,11 @@
 
 import { expect } from "chai";
 import { SnapshotDb } from "@itwin/core-backend";
-import { Id64Array } from "@itwin/core-bentley";
-import { Viewport } from "@itwin/core-frontend";
-import { createIModelHierarchyProvider, HierarchyProvider } from "@itwin/presentation-hierarchies";
-import { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
+import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { CategoriesTreeDefinition, CategoriesTreeIdsCache, CategoriesVisibilityHandler } from "@itwin/tree-widget-react/internal";
 import { Datasets } from "../util/Datasets.js";
 import { run, TestIModelConnection } from "../util/TestUtilities.js";
-import { IModelAccess, StatelessHierarchyProvider } from "./StatelessHierarchyProvider.js";
+import { StatelessHierarchyProvider } from "./StatelessHierarchyProvider.js";
 import {
   createCategoryHierarchyNode,
   createTestDataForInitialDisplay,
@@ -21,6 +18,12 @@ import {
   setupInitialDisplayState,
   validateHierarchyVisibility,
 } from "./VisibilityUtilities.js";
+
+import type { Id64Array } from "@itwin/core-bentley";
+import type { Viewport } from "@itwin/core-frontend";
+import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
+import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
+import type { IModelAccess } from "./StatelessHierarchyProvider.js";
 
 describe("categories tree", () => {
   run<{ iModel: SnapshotDb; imodelAccess: IModelAccess }>({
@@ -110,7 +113,7 @@ describe("categories tree", () => {
       const handler = new CategoriesVisibilityHandler({ idsCache, viewport });
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new CategoriesTreeDefinition({ idsCache, imodelAccess, viewType: "3d" }),
-        imodelAccess: imodelAccess,
+        imodelAccess,
       });
       return { iModel, imodelAccess, viewport, provider, handler, categories: testData.categories.map((category) => category.id) };
     },
@@ -164,7 +167,7 @@ describe("categories tree", () => {
       const handler = new CategoriesVisibilityHandler({ idsCache, viewport });
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new CategoriesTreeDefinition({ idsCache, imodelAccess, viewType: "3d" }),
-        imodelAccess: imodelAccess,
+        imodelAccess,
       });
       return { iModel, imodelAccess, viewport, provider, handler, categories: testData.categories.map((category) => category.id) };
     },

@@ -5,11 +5,7 @@
 
 import { expect } from "chai";
 import { SnapshotDb } from "@itwin/core-backend";
-import { Id64Array } from "@itwin/core-bentley";
-import { Viewport } from "@itwin/core-frontend";
-import { createIModelHierarchyProvider, HierarchyProvider } from "@itwin/presentation-hierarchies";
-import { ECSqlQueryDef, InstanceKey } from "@itwin/presentation-shared";
-import { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
+import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import {
   createModelsTreeVisibilityHandler,
   defaultModelsTreeHierarchyConfiguration,
@@ -18,7 +14,7 @@ import {
 } from "@itwin/tree-widget-react/internal";
 import { Datasets } from "../util/Datasets.js";
 import { run, TestIModelConnection } from "../util/TestUtilities.js";
-import { IModelAccess, StatelessHierarchyProvider } from "./StatelessHierarchyProvider.js";
+import { StatelessHierarchyProvider } from "./StatelessHierarchyProvider.js";
 import {
   createModelHierarchyNode,
   createTestDataForInitialDisplay,
@@ -27,6 +23,13 @@ import {
   setupInitialDisplayState,
   validateHierarchyVisibility,
 } from "./VisibilityUtilities.js";
+
+import type { Id64Array } from "@itwin/core-bentley";
+import type { Viewport } from "@itwin/core-frontend";
+import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
+import type { ECSqlQueryDef, InstanceKey } from "@itwin/presentation-shared";
+import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
+import type { IModelAccess } from "./StatelessHierarchyProvider.js";
 
 describe("models tree", () => {
   run<{ iModel: SnapshotDb; imodelAccess: IModelAccess; targetItems: Array<InstanceKey> }>({
@@ -130,7 +133,7 @@ describe("models tree", () => {
       const handler = createModelsTreeVisibilityHandler({ idsCache, viewport, imodelAccess });
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
-        imodelAccess: imodelAccess,
+        imodelAccess,
       });
       return { iModel, imodelAccess, viewport, provider, handler, models: testData.models.map((model) => model.id), idsCache };
     },

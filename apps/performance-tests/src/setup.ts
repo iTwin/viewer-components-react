@@ -38,7 +38,6 @@ global.DOMRect = class DOMRect {
 };
 
 // supply mocha hooks
-import path from "path";
 const { cleanup, configure } = await import("@testing-library/react");
 import v8 from "node:v8";
 export const mochaHooks = {

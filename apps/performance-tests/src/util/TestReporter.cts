@@ -107,8 +107,7 @@ export class TestReporter extends Base {
     const results = [...this._testInfo.entries()].map(([testFullName, { test, duration, blockingSummary }]) => {
       const blockingInfo = Object.entries(blockingSummary)
         .filter(([_, val]) => val !== undefined)
-        .map(([key, val]) => `${key}: ${(key === "count" ? val : val?.toFixed(2)) ?? "N/A"}`
-        )
+        .map(([key, val]) => `${key}: ${(key === "count" ? val : val?.toFixed(2)) ?? "N/A"}`)
         .join(", ");
 
       /* eslint-disable @typescript-eslint/naming-convention */
@@ -166,7 +165,5 @@ function log(messageOrCallback: string | (() => string)) {
     LOGGER.logTrace(LOG_CATEGORY, typeof messageOrCallback === "string" ? messageOrCallback : messageOrCallback());
   }
 }
-
-
 
 module.exports = TestReporter;

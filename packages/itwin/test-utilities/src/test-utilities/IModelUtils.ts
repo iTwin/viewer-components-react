@@ -3,23 +3,22 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { Id64String } from "@itwin/core-bentley";
-import {
-  BisCodeSpec,
+import type {
   CategoryProps,
-  Code,
   CodeScopeProps,
   ElementAspectProps,
   ElementProps,
   FunctionalElementProps,
   GeometricModel3dProps,
-  IModel,
   InformationPartitionElementProps,
   ModelProps,
   PhysicalElementProps,
   RelationshipProps,
   SubCategoryProps,
 } from "@itwin/core-common";
+import { BisCodeSpec, Code, IModel } from "@itwin/core-common";
+
+import type { Id64String } from "@itwin/core-bentley";
 
 export interface TestIModelBuilder {
   insertModel(props: ModelProps): Id64String;
@@ -111,6 +110,7 @@ export function insertSubCategory(
   return { className, id };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export function insertPhysicalElement<TAdditionalProps extends {}>(
   props: BaseInstanceInsertProps & {
     modelId: Id64String;

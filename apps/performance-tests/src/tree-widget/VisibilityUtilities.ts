@@ -5,17 +5,18 @@
 
 import { expect } from "chai";
 import { EMPTY, expand, from, mergeMap } from "rxjs";
-import { Id64String } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
-import { IModelApp, IModelConnection, OffScreenViewport, SpatialViewState, Viewport, ViewRect } from "@itwin/core-frontend";
-import { HierarchyNode } from "@itwin/presentation-hierarchies";
-import { ECSqlQueryDef, InstanceKey } from "@itwin/presentation-shared";
+import { IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { toVoidPromise } from "@itwin/tree-widget-react/internal";
 import { waitFor } from "@testing-library/react";
-import { IModelAccess } from "./StatelessHierarchyProvider.js";
 
-import type { HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+import type { HierarchyNode, HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+import type { ECSqlQueryDef, InstanceKey } from "@itwin/presentation-shared";
 import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
+import type { IModelAccess } from "./StatelessHierarchyProvider.js";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { Id64String } from "@itwin/core-bentley";
+
 export interface ValidateNodeProps {
   handler: HierarchyVisibilityHandler;
   viewport: Viewport;
@@ -71,7 +72,7 @@ export async function createViewport({
         displayStyleId: "",
       },
       modelSelectorProps: {
-        models: testData.models.map((model) => model.id),
+        models: testData.models.map((testModel) => testModel.id),
         code: Code.createEmpty(),
         model,
         classFullName: "BisCore:ModelSelector",
