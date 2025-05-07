@@ -1,9 +1,0 @@
-{
-  "recommendations": [
-    "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode",
-    "mike-co.import-sorter",
-    "streetsidesoftware.code-spell-checker",
-    "carlhinkle.aplhabeta"
-  ]
-}
