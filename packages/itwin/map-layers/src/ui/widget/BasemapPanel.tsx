@@ -6,7 +6,7 @@
 
 import "./BasemapPanel.scss";
 import * as React from "react";
-import { BackgroundMapType, BaseMapLayerSettings, ColorByName, ColorDef, ImageMapLayerSettings } from "@itwin/core-common";
+import { BackgroundMapType, BaseLayerSettings, BaseMapLayerSettings, ColorByName, ColorDef, ImageMapLayerSettings } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
 import { SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { ColorBuilder, ColorInputPanel, ColorPalette, ColorPicker, ColorSwatch, ColorValue, IconButton, Popover, Select } from "@itwin/itwinui-react";
@@ -14,10 +14,9 @@ import { MapLayersUI } from "../../mapLayers";
 import { useSourceMapContext } from "./MapLayerManager";
 import { TransparencyPopupButton } from "./TransparencyPopupButton";
 
-import type { Viewport } from "@itwin/core-frontend";
 import type {
-  BaseLayerSettings,
   MapImagerySettings} from "@itwin/core-common";
+import type { Viewport } from "@itwin/core-frontend";
 import type { SelectOption } from "@itwin/itwinui-react";
 const customBaseMapValue = "customBaseMap";
 interface ExtraFormat {
@@ -286,11 +285,10 @@ export function BasemapPanel(props: BasemapPanelProps) {
           if (baseMap) {
             const baseProps = baseMap.toJSON();
             if (activeViewport.displayStyle.backgroundMapBase instanceof BaseMapLayerSettings) {
-              const provider = extraFormats[baseMap.formatId] ? undefined : baseProps.provider;
-              activeViewport.displayStyle.backgroundMapBase  = activeViewport.displayStyle.backgroundMapBase.clone(
-                { ...baseProps, visible: baseMapVisible, provider});
-            } else {
-              activeViewport.displayStyle.backgroundMapBase = BaseMapLayerSettings.fromJSON({ ...baseProps, visible: baseMapVisible });
+              // const provider = extraFormats[baseMap.formatId] ? undefined : baseProps.provider;
+              // activeViewport.displayStyle.backgroundMapBase  = activeViewport.displayStyle.backgroundMapBase.clone(
+                // { ...baseProps, visible: baseMapVisible, provider});
+              activeViewport.displayStyle.backgroundMapBase = BaseLayerSettings.fromJSON({ ...baseProps, visible: baseMapVisible });
             }
           } else {
             const bgColorDef = ColorDef.fromJSON(bgColor);
@@ -301,7 +299,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
         }
       }
     },
-    [activeViewport, customBaseMap, bases, getSelectKeyFromProvider, extraFormats, baseMapVisible, bgColor],
+    [activeViewport, customBaseMap, bases, getSelectKeyFromProvider, baseMapVisible, bgColor],
   );
 
   const handleVisibilityChange = React.useCallback(() => {
