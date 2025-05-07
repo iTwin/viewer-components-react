@@ -65,6 +65,5 @@ jobs:
           tool: 'customSmallerIsBetter'
           output-file-path: ./apps/performance-tests/tree-widget-benchmark.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          # save-data-file: false
+          save-data-file: false
           comment-on-pull-request: true
-          auto-push: true
