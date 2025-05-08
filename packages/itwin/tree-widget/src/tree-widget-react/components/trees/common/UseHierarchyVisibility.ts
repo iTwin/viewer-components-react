@@ -24,7 +24,7 @@ import { useTelemetryContext } from "./UseTelemetryContext.js";
 
 import type { Observable } from "rxjs";
 import type { MutableRefObject } from "react";
-import type { BeEvent, IDisposable } from "@itwin/core-bentley";
+import type { BeEvent } from "@itwin/core-bentley";
 import type { HierarchyNode, PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { TreeItemVisibilityButtonProps, TreeItemVisibilityButtonState } from "./components/TreeNodeVisibilityButton.js";
 
@@ -43,7 +43,7 @@ export interface VisibilityStatus {
  * Handler that can be used to determine and change visibility of instances represented by tree nodes.
  * @beta
  */
-export interface HierarchyVisibilityHandler extends IDisposable {
+export interface HierarchyVisibilityHandler extends Disposable {
   /** Event used to notify tree about visibility changes from outside. */
   readonly onVisibilityChange: BeEvent<() => void>;
   /** Returns current visibility status for tree node. */
@@ -153,7 +153,7 @@ export function useHierarchyVisibility({
     return () => {
       subscription.unsubscribe();
       removeListener();
-      handler.dispose();
+      handler[Symbol.dispose]();
     };
   }, [visibilityHandlerFactory, onFeatureUsed]);
 

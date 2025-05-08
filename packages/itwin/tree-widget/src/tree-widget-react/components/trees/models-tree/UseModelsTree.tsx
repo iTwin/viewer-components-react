@@ -4,12 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import categorySvg from "@itwin/itwinui-icons/bis-category-3d.svg";
-import classSvg from "@itwin/itwinui-icons/bis-class.svg";
-import elementSvg from "@itwin/itwinui-icons/bis-element.svg";
-import subjectSvg from "@itwin/itwinui-icons/bis-subject.svg";
-import modelSvg from "@itwin/itwinui-icons/model-cube.svg";
-import { Icon } from "@itwin/itwinui-react/bricks";
+import { Icon } from "@stratakit/foundations";
+import categorySvg from "@stratakit/icons/bis-category-3d.svg";
+import classSvg from "@stratakit/icons/bis-class.svg";
+import elementSvg from "@stratakit/icons/bis-element.svg";
+import subjectSvg from "@stratakit/icons/bis-subject.svg";
+import modelSvg from "@stratakit/icons/model-cube.svg";
 import {
   EmptyTreeContent,
   FilterUnknownError,

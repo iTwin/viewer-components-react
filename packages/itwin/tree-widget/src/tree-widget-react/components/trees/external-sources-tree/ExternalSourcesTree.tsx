@@ -3,11 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import classSvg from "@itwin/itwinui-icons/bis-class.svg";
-import elementSvg from "@itwin/itwinui-icons/bis-element.svg";
-import documentSvg from "@itwin/itwinui-icons/document.svg";
-import ecSchemaSvg from "@itwin/itwinui-icons/selection-children.svg";
-import { Icon } from "@itwin/itwinui-react/bricks";
+import { Icon } from "@stratakit/foundations";
+import classSvg from "@stratakit/icons/bis-class.svg";
+import elementSvg from "@stratakit/icons/bis-element.svg";
+import documentSvg from "@stratakit/icons/document.svg";
+import ecSchemaSvg from "@stratakit/icons/selection-children.svg";
 import { EmptyTreeContent } from "../common/components/EmptyTree.js";
 import { Tree } from "../common/components/Tree.js";
 import { TreeRenderer } from "../common/components/TreeRenderer.js";

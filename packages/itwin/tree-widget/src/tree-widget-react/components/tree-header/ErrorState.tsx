@@ -3,8 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import errorSvg from "@itwin/itwinui-icons/status-error.svg";
-import { Button, Icon, Text } from "@itwin/itwinui-react/bricks";
+import { Button, Text } from "@stratakit/bricks";
+import { Icon } from "@stratakit/foundations";
+import errorSvg from "@stratakit/icons/status-error.svg";
 import { TreeWidget } from "../../TreeWidget.js";
 
 import type { FallbackProps } from "react-error-boundary";

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./ProgressOverlay.css";
-import { ProgressBar, VisuallyHidden } from "@itwin/itwinui-react/bricks";
+import { ProgressBar, VisuallyHidden } from "@stratakit/bricks";
 import { TreeWidget } from "../../../../TreeWidget.js";
 
 /** @internal */

@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import "./Tree.css";
 import { useCallback, useState } from "react";
 import { BeEvent } from "@itwin/core-bentley";
 import { SchemaMetadataContextProvider } from "@itwin/presentation-components";
@@ -28,6 +29,7 @@ import type { PresentationHierarchyNode, SelectionStorage, useIModelTree, useSel
 import type { FunctionProps } from "../Utils.js";
 import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
 import type { HighlightInfo } from "../UseNodeHighlighting.js";
+
 /** @beta */
 export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPaths" | "getHierarchyDefinition"> &
   Partial<Pick<FunctionProps<typeof useSelectionHandler>, "selectionMode">> & {

@@ -4,7 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./EmptyTree.css";
-import { Anchor, Icon, Text } from "@itwin/itwinui-react/bricks";
+import { Anchor, Text } from "@stratakit/bricks";
+import { Icon } from "@stratakit/foundations";
 import { TreeWidget } from "../../../../TreeWidget.js";
 import { useFocusedInstancesContext } from "../FocusedInstancesContext.js";
 

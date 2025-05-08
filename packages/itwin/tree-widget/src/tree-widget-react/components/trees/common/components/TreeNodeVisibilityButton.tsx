@@ -5,10 +5,10 @@
 
 import "./TreeNodeVisibilityButton.css";
 import { memo } from "react";
-import visibilityHideSvg from "@itwin/itwinui-icons/visibility-hide.svg";
-import visibilityPartialSvg from "@itwin/itwinui-icons/visibility-partial.svg";
-import visibilityShowSvg from "@itwin/itwinui-icons/visibility-show.svg";
-import { Tree } from "@itwin/itwinui-react/bricks";
+import { Tree } from "@stratakit/bricks";
+import visibilityHideSvg from "@stratakit/icons/visibility-hide.svg";
+import visibilityPartialSvg from "@stratakit/icons/visibility-partial.svg";
+import visibilityShowSvg from "@stratakit/icons/visibility-show.svg";
 import { createTooltip } from "../internal/Tooltip.js";
 
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";

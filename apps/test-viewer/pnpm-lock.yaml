@@ -9,8 +9,6 @@ overrides:
   '@itwin/itwinui-react@^2': 2.12.26
   '@itwin/itwinui-react@^3': 3.17.2
 
-pnpmfileChecksum: sha256-r0Is43H9r6hXVU3MIWoQun8WaBZJGVGbXl3xqgo4BgM=
-
 importers:
 
   .:
@@ -96,9 +94,6 @@ importers:
       '@itwin/itwinui-react':
         specifier: 3.17.2
         version: 3.17.2(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@itwin/itwinui-react-v5':
-        specifier: npm:@itwin/itwinui-react@5.0.0-alpha.14
-        version: '@itwin/itwinui-react@5.0.0-alpha.14(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@itwin/map-layers':
         specifier: workspace:*
         version: file:../../packages/itwin/map-layers(37c5476c2a1d3613c96a5acde07c61d8)
@@ -140,7 +135,7 @@ importers:
         version: file:../../packages/itwin/reports-config-widget(b55a580ac3be5b803a83a64894418581)
       '@itwin/tree-widget-react':
         specifier: workspace:*
-        version: file:../../packages/itwin/tree-widget(d8eca397d6b7a1d85d5395cdda48083d)
+        version: file:../../packages/itwin/tree-widget(2ba9ac7c92345ace6341796d06be3611)
       '@itwin/unified-selection':
         specifier: ^1.4.1
         version: 1.4.1
@@ -150,6 +145,15 @@ importers:
       '@itwin/webgl-compatibility':
         specifier: 5.0.0-dev.111
         version: 5.0.0-dev.111
+      '@stratakit/bricks':
+        specifier: ^0.1.0
+        version: 0.1.0(@stratakit/foundations@0.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@stratakit/foundations':
+        specifier: ^0.1.0
+        version: 0.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@stratakit/icons':
+        specifier: ^0.1.0
+        version: 0.1.0
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -905,12 +909,6 @@ packages:
       react: '>=17.0.0'
       react-dom: '>=17.0.0'
 
-  '@itwin/itwinui-react@5.0.0-alpha.14':
-    resolution: {integrity: sha512-7xfpcEKrr7UMuVGrmIckN4Cz82V+zrJaQ+AudJK47gOLMOLyb3nGih+q46lcrQMj5rFsyhlwTqTvmxNWMjJEcg==}
-    peerDependencies:
-      react: '>=18.0.0'
-      react-dom: '>=18.0.0'
-
   '@itwin/map-layers-auth@5.0.0-dev.111':
     resolution: {integrity: sha512-atuKUihkxiqxsVwwRuZ40vtl0uz5KVQIQsxiytaWWMBV9xbzxlhXmYMGRuAYHlURcqDwGzofWEq+mDpw217qfA==}
     peerDependencies:
@@ -1039,6 +1037,15 @@ packages:
       '@itwin/core-quantity': ^4.1.0 || ^5.0.0
       '@itwin/ecschema-metadata': ^4.1.0 || ^5.0.0
 
+  '@itwin/presentation-core-interop@1.4.0-alpha.0':
+    resolution: {integrity: sha512-Pklhrv+jVwWUvtxyX2dUP6ADgqiI9hSJ9849PLF8/DN58jvZgFjIUfjG4SI86s9qAerR+wLb4xAqkLGsFbXz9Q==}
+    peerDependencies:
+      '@itwin/core-bentley': ^4.1.0 || ^5.0.0
+      '@itwin/core-common': ^4.1.0 || ^5.0.0
+      '@itwin/core-geometry': ^4.1.0 || ^5.0.0
+      '@itwin/core-quantity': ^4.1.0 || ^5.0.0
+      '@itwin/ecschema-metadata': ^4.1.0 || ^5.0.0
+
   '@itwin/presentation-frontend@5.0.0-dev.111':
     resolution: {integrity: sha512-Ku/gMc5Q+uMTeWb+1fnnhwGaO6soLaQL3Ro+U4w7xMpKxladWaIEBTBn9clXKhuJvTQ7BCuqkSzccC4wYkwaRg==}
     peerDependencies:
@@ -1059,24 +1066,33 @@ packages:
       '@itwin/itwinui-react':
         optional: true
 
-  '@itwin/presentation-hierarchies-react@2.0.0-alpha.17':
-    resolution: {integrity: sha512-32v7h3Agq4zh8pNzr96kytZolYMkU2y44KPw1mgD5Yf8P9LuN+WrISYnJJlRchYKeL0cUsuGf+l5kQwy/bB+kA==}
+  '@itwin/presentation-hierarchies-react@2.0.0-alpha.19':
+    resolution: {integrity: sha512-6SXhg7cMiYfyJt3HpivZGwa8dvXXWyeDeideo/A+hEjdBJTDDV6hh3JsMtRKL7mPW88htF93KYrmM1fOHkasqw==}
     peerDependencies:
-      '@itwin/itwinui-icons': 5.0.0-alpha.7
-      '@itwin/itwinui-react': 5.0.0-alpha.14
+      '@stratakit/bricks': ^0.1.0
+      '@stratakit/foundations': ^0.1.0
+      '@stratakit/icons': ^0.1.0
       react: ^17.0.0 || ^18.0.0
       react-dom: ^17.0.0 || ^18.0.0
     peerDependenciesMeta:
-      '@itwin/itwinui-icons':
+      '@stratakit/bricks':
         optional: true
-      '@itwin/itwinui-react':
+      '@stratakit/foundations':
+        optional: true
+      '@stratakit/icons':
         optional: true
 
   '@itwin/presentation-hierarchies@1.4.2':
     resolution: {integrity: sha512-8SgB9b91j5ghQ/CO6LpYbG0vs0b0NECop2c4o1WDtGcFNa61SjYniRmkvDZRpda69pQFKeovmzo+WwVChaWVHA==}
 
+  '@itwin/presentation-hierarchies@2.0.0-alpha.0':
+    resolution: {integrity: sha512-3TA0YGnG9XEiiHPxRl9qnKPQBWOHqVlQuzsmTRefd5P8Z/Mshl0irnkaUKq5tbRNmsqI8sh33nfAJXkVxwAfgw==}
+
   '@itwin/presentation-shared@1.2.1':
     resolution: {integrity: sha512-b8In5BV+6q1FjMC+zUmkcSAVgbvp+F0M6WlOOiToSWVx+UpcolctlQZSMCKyBuvYvXVDh7DRfAFOm8k2nfgQfw==}
+
+  '@itwin/presentation-shared@2.0.0-alpha.0':
+    resolution: {integrity: sha512-35uOPMLL+O7uG+XFzyxODy3P6zpegepuxzZpbBfKuM+YKqdhzqTyGRDpgAVPVH44m0Fi5bHkHkE6Gj5Px5H5Tg==}
 
   '@itwin/property-grid-react@file:../../packages/itwin/property-grid':
     resolution: {directory: ../../packages/itwin/property-grid, type: directory}
@@ -1112,18 +1128,23 @@ packages:
   '@itwin/tree-widget-react@file:../../packages/itwin/tree-widget':
     resolution: {directory: ../../packages/itwin/tree-widget, type: directory}
     peerDependencies:
-      '@itwin/appui-abstract': ^4.0.0
-      '@itwin/appui-react': ^4.10.0 || ^5.0.0
-      '@itwin/components-react': ^4.10.0 || ^5.0.0
-      '@itwin/core-frontend': ^4.0.0
-      '@itwin/ecschema-metadata': ^4.0.0
-      '@itwin/itwinui-icons': 5.0.0-alpha.7
+      '@itwin/appui-abstract': 5.0.0-dev.111
+      '@itwin/appui-react': ^5.0.0
+      '@itwin/components-react': ^5.0.0
+      '@itwin/core-frontend': 5.0.0-dev.111
+      '@itwin/ecschema-metadata': 5.0.0-dev.111
       '@itwin/presentation-components': ^5.0.0
+      '@stratakit/bricks': ^0.1.0
+      '@stratakit/foundations': ^0.1.0
+      '@stratakit/icons': ^0.1.0
       react: ^17.0.0 || ^18.0.0
       react-dom: ^17.0.0 || ^18.0.0
 
   '@itwin/unified-selection@1.4.1':
     resolution: {integrity: sha512-PCeoMtG7vtwfKfvEkkAKU5HSw087w4FDSn77DEPNKA9JtdpoMdg0XYZ+J3zg/fBlK/3Spf6vlkr1XDaYQl74jw==}
+
+  '@itwin/unified-selection@1.4.2-alpha.0':
+    resolution: {integrity: sha512-48xj6ZmDfPYPud0SZFrZg2+7pAL8aHSD/Pv49i+Qm4Al252RPI1u7RbKQSRsBXOzMfgXbgQlupFEIMYy9qG9dw==}
 
   '@itwin/viewer-react@5.0.0-dev.3':
     resolution: {integrity: sha512-YLmywxIq+3jleHBFYY7dui34EY7ijl2+w/icI8ulaT/7DROeDTcQRfuXpz13vQmiwsYnIStKAx+gccj1GpZwMA==}
@@ -1426,6 +1447,22 @@ packages:
 
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
+
+  '@stratakit/bricks@0.1.0':
+    resolution: {integrity: sha512-kjy/1jkn9za9kUHNJgIxwslMyl2GU+RDGVVbLA9gyEv5vAzmkDh9QWgWjZgaUlX+Ki1o9V1Bct2Ss/EQtPcHJw==}
+    peerDependencies:
+      '@stratakit/foundations': ^0.1.0
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
+
+  '@stratakit/foundations@0.1.0':
+    resolution: {integrity: sha512-2TxB8JemLoFsP+ptVOLTg9fJhbuw2lsnUtGpesc/MihENwV462LshUdL+zpqeX5yIiMjMfENPv3ojTxBpj7odg==}
+    peerDependencies:
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
+
+  '@stratakit/icons@0.1.0':
+    resolution: {integrity: sha512-PexG/eHpDZNNh0kJTjOTp8rXdZ7UIuCyOyO0YMHEGkp9XudvbdWfyenbvd/nIQ8cTzHxxb5rTzRyb38Z8lk4Og==}
 
   '@svgdotjs/svg.js@3.0.16':
     resolution: {integrity: sha512-yZ4jfP/SeLHEnCi9PIrzienKCrA4vW9+jm5uUV3N5DG2e9zgXLY5FgywK2u8/gMFIeKO0HuqTLFFfWJj+MfMLA==}
@@ -4387,13 +4424,6 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
 
-  '@itwin/itwinui-react@5.0.0-alpha.14(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@ariakit/react': 0.4.17(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      classnames: 2.5.1
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-
   '@itwin/map-layers-auth@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)':
     dependencies:
       '@itwin/core-bentley': 5.0.0-dev.111
@@ -4530,6 +4560,16 @@ snapshots:
       '@itwin/presentation-shared': 1.2.1
       rxjs: 7.8.2
 
+  '@itwin/presentation-core-interop@1.4.0-alpha.0(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-common@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-geometry@5.0.0-dev.111))(@itwin/core-geometry@5.0.0-dev.111)(@itwin/core-quantity@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111))(@itwin/ecschema-metadata@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-quantity@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)))':
+    dependencies:
+      '@itwin/core-bentley': 5.0.0-dev.111
+      '@itwin/core-common': 5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-geometry@5.0.0-dev.111)
+      '@itwin/core-geometry': 5.0.0-dev.111
+      '@itwin/core-quantity': 5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)
+      '@itwin/ecschema-metadata': 5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-quantity@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111))
+      '@itwin/presentation-shared': 2.0.0-alpha.0
+      rxjs: 7.8.2
+
   '@itwin/presentation-frontend@5.0.0-dev.111(1c043e90f0cc5f19c1c64bf557bfa471)':
     dependencies:
       '@itwin/core-bentley': 5.0.0-dev.111
@@ -4559,13 +4599,12 @@ snapshots:
     optionalDependencies:
       '@itwin/itwinui-react': 3.17.2(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
-  '@itwin/presentation-hierarchies-react@2.0.0-alpha.17(@itwin/itwinui-icons@5.0.0-alpha.7)(@itwin/itwinui-react@5.0.0-alpha.14(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@itwin/presentation-hierarchies-react@2.0.0-alpha.19(@stratakit/bricks@0.1.0(@stratakit/foundations@0.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/foundations@0.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/icons@0.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@itwin/core-bentley': 4.11.1
-      '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@itwin/presentation-hierarchies': 1.4.2
-      '@itwin/presentation-shared': 1.2.1
-      '@itwin/unified-selection': 1.4.1
+      '@itwin/presentation-hierarchies': 2.0.0-alpha.0
+      '@itwin/presentation-shared': 2.0.0-alpha.0
+      '@itwin/unified-selection': 1.4.2-alpha.0
       '@tanstack/react-virtual': 3.13.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       classnames: 2.5.1
       immer: 10.1.1
@@ -4574,8 +4613,9 @@ snapshots:
       react-error-boundary: 4.1.2(react@18.3.1)
       rxjs: 7.8.2
     optionalDependencies:
-      '@itwin/itwinui-icons': 5.0.0-alpha.7
-      '@itwin/itwinui-react': 5.0.0-alpha.14(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@stratakit/bricks': 0.1.0(@stratakit/foundations@0.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@stratakit/foundations': 0.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@stratakit/icons': 0.1.0
 
   '@itwin/presentation-hierarchies@1.4.2':
     dependencies:
@@ -4586,7 +4626,20 @@ snapshots:
       natural-compare-lite: 1.4.0
       rxjs: 7.8.2
 
+  '@itwin/presentation-hierarchies@2.0.0-alpha.0':
+    dependencies:
+      '@itwin/core-bentley': 4.11.1
+      '@itwin/core-common': 4.11.1(@itwin/core-bentley@4.11.1)(@itwin/core-geometry@4.11.1)
+      '@itwin/core-geometry': 4.11.1
+      '@itwin/presentation-shared': 2.0.0-alpha.0
+      natural-compare-lite: 1.4.0
+      rxjs: 7.8.2
+
   '@itwin/presentation-shared@1.2.1':
+    dependencies:
+      '@itwin/core-bentley': 4.11.1
+
+  '@itwin/presentation-shared@2.0.0-alpha.0':
     dependencies:
       '@itwin/core-bentley': 4.11.1
 
@@ -4648,21 +4701,22 @@ snapshots:
       - debug
       - encoding
 
-  '@itwin/tree-widget-react@file:../../packages/itwin/tree-widget(d8eca397d6b7a1d85d5395cdda48083d)':
+  '@itwin/tree-widget-react@file:../../packages/itwin/tree-widget(2ba9ac7c92345ace6341796d06be3611)':
     dependencies:
       '@itwin/appui-abstract': 5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)
       '@itwin/appui-react': 5.4.0(7871c7ec280401affcdae2bb957d70cc)
       '@itwin/components-react': 5.4.0(@itwin/appui-abstract@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111))(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-react@5.4.0(@itwin/appui-abstract@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111))(@itwin/core-bentley@5.0.0-dev.111)(@itwin/itwinui-react@3.17.2(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@itwin/itwinui-react@3.17.2(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@itwin/core-frontend': 5.0.0-dev.111(@itwin/appui-abstract@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111))(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-common@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-geometry@5.0.0-dev.111))(@itwin/core-geometry@5.0.0-dev.111)(@itwin/core-orbitgt@5.0.0-dev.111)(@itwin/core-quantity@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111))(@itwin/ecschema-metadata@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-quantity@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)))(@itwin/ecschema-rpcinterface-common@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-common@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-geometry@5.0.0-dev.111))(@itwin/core-geometry@5.0.0-dev.111)(@itwin/ecschema-metadata@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-quantity@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111))))
       '@itwin/ecschema-metadata': 5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-quantity@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111))
-      '@itwin/itwinui-icons': 5.0.0-alpha.7
-      '@itwin/itwinui-react': 5.0.0-alpha.14(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@itwin/presentation-components': 5.12.2(511f82b2ea85a98d2d423ba1451ad505)
-      '@itwin/presentation-core-interop': 1.3.2(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-common@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-geometry@5.0.0-dev.111))(@itwin/core-geometry@5.0.0-dev.111)(@itwin/core-quantity@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111))(@itwin/ecschema-metadata@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-quantity@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)))
-      '@itwin/presentation-hierarchies': 1.4.2
-      '@itwin/presentation-hierarchies-react': 2.0.0-alpha.17(@itwin/itwinui-icons@5.0.0-alpha.7)(@itwin/itwinui-react@5.0.0-alpha.14(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@itwin/presentation-shared': 1.2.1
-      '@itwin/unified-selection': 1.4.1
+      '@itwin/presentation-core-interop': 1.4.0-alpha.0(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-common@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-geometry@5.0.0-dev.111))(@itwin/core-geometry@5.0.0-dev.111)(@itwin/core-quantity@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111))(@itwin/ecschema-metadata@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-quantity@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)))
+      '@itwin/presentation-hierarchies': 2.0.0-alpha.0
+      '@itwin/presentation-hierarchies-react': 2.0.0-alpha.19(@stratakit/bricks@0.1.0(@stratakit/foundations@0.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/foundations@0.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/icons@0.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@itwin/presentation-shared': 2.0.0-alpha.0
+      '@itwin/unified-selection': 1.4.2-alpha.0
+      '@stratakit/bricks': 0.1.0(@stratakit/foundations@0.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@stratakit/foundations': 0.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@stratakit/icons': 0.1.0
       classnames: 2.5.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -4678,6 +4732,13 @@ snapshots:
     dependencies:
       '@itwin/core-bentley': 4.11.1
       '@itwin/presentation-shared': 1.2.1
+      rxjs: 7.8.2
+      rxjs-for-await: 1.0.0(rxjs@7.8.2)
+
+  '@itwin/unified-selection@1.4.2-alpha.0':
+    dependencies:
+      '@itwin/core-bentley': 4.11.1
+      '@itwin/presentation-shared': 2.0.0-alpha.0
       rxjs: 7.8.2
       rxjs-for-await: 1.0.0(rxjs@7.8.2)
 
@@ -4955,6 +5016,23 @@ snapshots:
     optional: true
 
   '@rtsao/scc@1.1.0': {}
+
+  '@stratakit/bricks@0.1.0(@stratakit/foundations@0.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@ariakit/react': 0.4.17(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@stratakit/foundations': 0.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      classnames: 2.5.1
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+
+  '@stratakit/foundations@0.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@ariakit/react': 0.4.17(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      classnames: 2.5.1
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+
+  '@stratakit/icons@0.1.0': {}
 
   '@svgdotjs/svg.js@3.0.16': {}
 

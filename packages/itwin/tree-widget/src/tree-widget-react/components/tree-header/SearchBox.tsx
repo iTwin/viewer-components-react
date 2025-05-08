@@ -4,9 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useRef, useState } from "react";
-import closeSvg from "@itwin/itwinui-icons/close.svg";
-import searchSvg from "@itwin/itwinui-icons/search.svg";
-import { IconButton, TextBox } from "@itwin/itwinui-react/bricks";
+import { IconButton, TextBox } from "@stratakit/bricks";
+import closeSvg from "@stratakit/icons/close.svg";
+import searchSvg from "@stratakit/icons/search.svg";
 import { TreeWidget } from "../../TreeWidget.js";
 
 interface DebouncedSearchBoxProps {

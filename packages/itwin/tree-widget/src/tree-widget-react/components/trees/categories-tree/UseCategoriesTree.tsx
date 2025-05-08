@@ -4,12 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import categorySvg from "@itwin/itwinui-icons/bis-category-3d.svg";
-import subcategorySvg from "@itwin/itwinui-icons/bis-category-subcategory.svg";
-import classSvg from "@itwin/itwinui-icons/bis-class.svg";
-import definitionContainerSvg from "@itwin/itwinui-icons/bis-definitions-container.svg";
-import elementSvg from "@itwin/itwinui-icons/bis-element.svg";
-import { Icon } from "@itwin/itwinui-react/bricks";
+import { Icon } from "@stratakit/foundations";
+import categorySvg from "@stratakit/icons/bis-category-3d.svg";
+import subcategorySvg from "@stratakit/icons/bis-category-subcategory.svg";
+import classSvg from "@stratakit/icons/bis-class.svg";
+import definitionContainerSvg from "@stratakit/icons/bis-definitions-container.svg";
+import elementSvg from "@stratakit/icons/bis-element.svg";
 import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMatches } from "../common/components/EmptyTree.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
 import { createCategoriesTreeVisibilityHandler } from "./internal/CategoriesTreeVisibilityHandler.js";
