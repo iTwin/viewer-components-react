@@ -2,7 +2,6 @@
   "require": ["./lib/setup.js"],
   "timeout": 300000,
   "check-leaks": true,
-  "globals": ["IS_REACT_ACT_ENVIRONMENT"],
   "file": "./lib/main.js",
   "reporter": ["./lib/util/TestReporter.cjs"]
 }
