@@ -19,6 +19,7 @@ interface ImportMetaEnv {
   readonly IMJS_EC3_PORTAL_AUTH_CLIENT_ID?: string;
   readonly IMJS_EC3_PORTAL_AUTH_CLIENT_REDIRECT_URI?: string;
   readonly IMJS_BING_MAPS_KEY?: string;
+  readonly IMJS_GOOGLE_MAPS_KEY?: string;
   readonly IMJS_CESIUM_ION_KEY?: string;
   readonly IMJS_ENABLED_WIDGETS?: string;
 }

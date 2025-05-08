@@ -59,5 +59,13 @@ export default defineConfig(({ mode }) => {
     define: {
       "process.env.IMJS_URL_PREFIX": env.IMJS_URL_PREFIX ? `"${env.IMJS_URL_PREFIX}"` : `""`,
     },
+    css: {
+      preprocessorOptions: {
+        scss: {
+          silenceDeprecations: ["legacy-js-api", "import", "global-builtin"],
+          quietDeps: true,
+        },
+      },
+    },
   };
 });
