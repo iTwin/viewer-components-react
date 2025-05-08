@@ -33,7 +33,7 @@ type ProviderOptionsWithIModelAccess = { imodelAccess: IModelAccess } & Provider
 
 type ProviderOptions = ProviderOptionsWithIModel | ProviderOptionsWithIModelAccess;
 
-const LOG_CATEGORY = "Presentation.PerformanceTests.StatelessHierarchyProvider";
+const LOG_CATEGORY = "TreeWidget.PerformanceTests.StatelessHierarchyProvider";
 
 function log(messageOrCallback: string | (() => string)) {
   if (LOGGER.isEnabled(LOG_CATEGORY, "trace")) {
