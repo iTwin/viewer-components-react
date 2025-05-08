@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Fix issue in MeasurementViewTypeClassifier. fallback classifiers had higher priority than registered classifier.",
-  "packageName": "@itwin/measure-tools-react",
-  "email": "3418768+a-gagnon@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
