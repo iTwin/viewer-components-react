@@ -79,15 +79,25 @@ export class ClassNameMeasurementViewTypeClassifier extends MeasurementViewTypeC
  * can draw different representations of itself in different viewports.
  */
 export class MeasurementViewTarget {
-  private static _classifiers = new Map<string, MeasurementViewTypeClassifier>();
+  private static readonly _classifiers: MeasurementViewTypeClassifier[] = [];
+
+  /** list of standard/default view type classifiers
+   * Apps can override this by registering their own classifier against the same name.
+   * Registered classifiers have a higher priority than the default ones.
+   */
+  private static readonly _defaultClassifiers: MeasurementViewTypeClassifier[] = [
+    new ClassNameMeasurementViewTypeClassifier(WellKnownViewType.Spatial, true, false, SpatialViewState.className),
+    new ClassNameMeasurementViewTypeClassifier(WellKnownViewType.Drawing, false, true, DrawingViewState.className),
+    new ClassNameMeasurementViewTypeClassifier(WellKnownViewType.Sheet, false, true, SheetViewState.className),
+  ];
 
   private _included: Set<string>;
   private _excluded: Set<string>;
   private _viewIds: Set<string>;
 
-  /** Gets all the registered view classifiers. */
-  public static get classifiers(): ReadonlyMap<string, MeasurementViewTypeClassifier> {
-    return MeasurementViewTarget._classifiers;
+  /** Gets all the view classifiers, with registered classifiers before default classifiers. */
+  public static get classifiers(): MeasurementViewTypeClassifier[] {
+    return MeasurementViewTarget._classifiers.concat(MeasurementViewTarget._defaultClassifiers);
   }
 
   /** Gets the "primary" view type which is the first included view type. If there is none, then the default is "any". The majority of cases
@@ -294,7 +304,7 @@ export class MeasurementViewTarget {
     // If incoming type is AnySpatial or AnyDrawing, we need to look at each include's classifier to see if they are compatible
     if (type === WellKnownViewType.AnyDrawing || type === WellKnownViewType.AnySpatial) {
       for (const include of this._included) {
-        const classifier = MeasurementViewTarget.findClassifier(include);
+        const classifier = MeasurementViewTarget.findFirstClassifierForType(include);
         if (!classifier)
           continue;
 
@@ -307,7 +317,7 @@ export class MeasurementViewTarget {
     } else {
       // Otherwise incoming type is not Any*, but it isn't in the include list either. If include list has AnySpatial/AnyDrawing, look up the classifier for the given type
       // so we  can determine if it falls under either of those categories
-      const classifier = MeasurementViewTarget.findClassifier(type);
+      const classifier = MeasurementViewTarget.findFirstClassifierForType(type);
       let isSpatial = false;
       let isDrawing = false;
 
@@ -454,8 +464,9 @@ export class MeasurementViewTarget {
    * @returns a type name for the view, either a WellKnown view type or an app-defined one.
    */
   public static classifyViewport(vp: Viewport): string {
-    for (const kv of MeasurementViewTarget._classifiers) {
-      const classifier = kv[1];
+    const classifiers = MeasurementViewTarget.classifiers;
+
+    for (const classifier of classifiers) {
       if (classifier.classifyViewport(vp))
         return classifier.typeName;
     }
@@ -474,29 +485,41 @@ export class MeasurementViewTarget {
   /**
    * Adds an app-specific view classifier. This overrides any current classifiers that correspond to it's type name.
    * @param classifier Classifier to add.
+   * @returns A function to drop the classifier
+   * @remarks Multiple classifiers can be registered with the same typeName
    */
-  public static registerClassifier(classifier: MeasurementViewTypeClassifier) {
+  public static registerClassifier(classifier: MeasurementViewTypeClassifier): VoidFunction {
     if (classifier.typeName === WellKnownViewType.Any || classifier.typeName === WellKnownViewType.AnySpatial || classifier.typeName === WellKnownViewType.AnyDrawing)
       throw new Error(`${classifier.typeName} is a reserved view type.`);
 
-    MeasurementViewTarget._classifiers.set(classifier.typeName, classifier);
+    MeasurementViewTarget._classifiers.push(classifier);
+
+    return () => {
+      MeasurementViewTarget.dropClassifier(classifier);
+    };
   }
 
   /**
    * Removes an app-specific view classifier.
-   * @param typeName Name of the view classification to drop.
+   * @param classifier Classifier to drop.
    */
-  public static dropClassifier(typeName: string): boolean {
-    return MeasurementViewTarget._classifiers.delete(typeName);
+  public static dropClassifier(classifier: MeasurementViewTypeClassifier): boolean {
+    const index = MeasurementViewTarget._classifiers.indexOf(classifier);
+    if (-1 === index) {
+      return false;
+    }
+    MeasurementViewTarget._classifiers.splice(index, 1);
+    return true;
   }
 
   /**
-   * Finds the associated view type classifier or the type name.
+   * Finds the first associated view type classifier for the type name.
    * @param typeName Type name to find the classifier associated.
    * @returns the associated classifier or undefined if it does not exist.
    */
-  public static findClassifier(typeName: string): MeasurementViewTypeClassifier | undefined {
-    return MeasurementViewTarget._classifiers.get(typeName);
+  public static findFirstClassifierForType(typeName: string, includeDefaults = true): MeasurementViewTypeClassifier | undefined {
+    const classifiers = includeDefaults ? MeasurementViewTarget.classifiers : MeasurementViewTarget._classifiers;
+    return classifiers.find((entry) => entry.typeName === typeName);
   }
 
   public isValidViewId(viewId: string) {
@@ -506,11 +529,6 @@ export class MeasurementViewTarget {
       return true;
   }
 }
-
-// Register standard view type classifiers, these can be overridden by an app later if needed
-MeasurementViewTarget.registerClassifier(new ClassNameMeasurementViewTypeClassifier(WellKnownViewType.Spatial, true, false, SpatialViewState.className));
-MeasurementViewTarget.registerClassifier(new ClassNameMeasurementViewTypeClassifier(WellKnownViewType.Drawing, false, true, DrawingViewState.className));
-MeasurementViewTarget.registerClassifier(new ClassNameMeasurementViewTypeClassifier(WellKnownViewType.Sheet, false, true, SheetViewState.className));
 
 // These are from Civil-ReviewTools, if changed make sure they are changed there.
 MeasurementViewTarget.registerClassifier(new ClassNameMeasurementViewTypeClassifier(WellKnownViewType.XSection, true, false, "XSectionViewDefinition"));
