@@ -5,18 +5,10 @@
 
 import fs from "fs";
 import path from "path";
-import {
-  insertFunctionalElement,
-  insertFunctionalModelWithPartition,
-  insertPhysicalElement,
-  insertPhysicalModelWithPartition,
-  insertSpatialCategory,
-  insertSubCategory,
-} from "test-utilities";
-import * as url from "url";
+import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory, insertSubCategory } from "test-utilities";
 import { createIModel } from "./IModelUtilities.js";
 
-export const IMODEL_NAMES = ["5k subcategories", "5k functional 3D elements", "50k subcategories", "50k functional 3D elements"] as const;
+export const IMODEL_NAMES = ["50k 3D elements", "50k subcategories"] as const;
 export type IModelName = (typeof IMODEL_NAMES)[number];
 export type IModelPathsMap = { [_ in IModelName]?: string };
 
@@ -71,21 +63,17 @@ export class Datasets {
 
   private static getIModelFactory(key: IModelName, elementCount: number) {
     switch (key) {
-      case "5k subcategories":
-        return async (name: string, localPath: string) => this.createCategoryIModel(name, localPath, elementCount);
-      case "5k functional 3D elements":
-        return async (name: string, localPath: string) => this.createFunctional3dElementIModel(name, localPath, elementCount);
       case "50k subcategories":
-        return async (name: string, localPath: string) => this.createCategoryIModel(name, localPath, elementCount);
-      case "50k functional 3D elements":
-        return async (name: string, localPath: string) => this.createFunctional3dElementIModel(name, localPath, elementCount);
+        return async (name: string, localPath: string) => this.createSubCategoryIModel(name, localPath, elementCount);
+      case "50k 3D elements":
+        return async (name: string, localPath: string) => this.create3dElementIModel(name, localPath, elementCount);
     }
   }
 
   /**
    * Create an iModel with `numElements` subcategories all belonging to the same parent spatial category.
    */
-  private static async createCategoryIModel(name: string, localPath: string, numElements: number) {
+  private static async createSubCategoryIModel(name: string, localPath: string, numElements: number) {
     // eslint-disable-next-line no-console
     console.log(`${numElements} elements: Creating...`);
     await createIModel(name, localPath, async (builder) => {
@@ -118,19 +106,16 @@ export class Datasets {
   }
 
   /**
-   * Create an iModel with `numElements` functional 3D elements all belonging to the same spatial category, physical model and functional model.
+   * Create an iModel with `numElements` 3D elements all belonging to the same spatial category, physical model and functional model.
    * The elements are set up in a hierarchical manner, with 1000 top level 3D elements, each having 1 child element, which has 1 child element,
    * and so on until the depth of `numElements` / 1000 elements is reached. Each 3D element has a related functional element.
    */
-  private static async createFunctional3dElementIModel(name: string, localPath: string, numElements: number) {
+  private static async create3dElementIModel(name: string, localPath: string, numElements: number) {
     // eslint-disable-next-line no-console
-    console.log(`${numElements} elements: Creating...`);
-    const schema = await this.getSchemaFromPackage("functional-schema", "Functional.ecschema.xml");
+    console.log(`${numElements} physical elelements: Creating...`);
 
     await createIModel(name, localPath, async (builder) => {
-      await builder.importFullSchema(schema);
       const { id: physicalModelId } = insertPhysicalModelWithPartition({ builder, codeValue: "test physical model" });
-      const { id: functionalModelId } = insertFunctionalModelWithPartition({ builder, codeValue: "test functional model" });
       const { id: categoryId } = insertSpatialCategory({ builder, codeValue: "test category" });
 
       const numberOfGroups = 1000;
@@ -138,7 +123,6 @@ export class Datasets {
 
       for (let i = 0; i < numberOfGroups; ++i) {
         let physicalElementParentId: string | undefined;
-        let functionalElementParentId: string | undefined;
 
         for (let j = 0; j < elementsPerGroup; ++j) {
           physicalElementParentId = insertPhysicalElement({
@@ -148,24 +132,11 @@ export class Datasets {
             categoryId,
             userLabel: "test_element",
           }).id;
-          functionalElementParentId = insertFunctionalElement({
-            builder,
-            parentId: functionalElementParentId,
-            modelId: functionalModelId,
-            representedElementId: physicalElementParentId,
-            relationshipName: "PhysicalElementFulfillsFunction",
-            userLabel: "test_functional_element",
-          }).id;
         }
       }
     });
 
     // eslint-disable-next-line no-console
     console.log(`${numElements} elements: Done.`);
-  }
-
-  private static async getSchemaFromPackage(packageName: string, schemaFileName: string): Promise<string> {
-    const schemaFile = path.join(path.dirname(url.fileURLToPath(import.meta.url)), "..", "..", "node_modules", "@bentley", packageName, schemaFileName);
-    return fs.readFileSync(schemaFile, "utf8");
   }
 }

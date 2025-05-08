@@ -4,12 +4,10 @@ on:
   pull_request:
     branches:
       - master
-      - stable
     paths:
       - apps/performance-tests/tree-widget/**
       - apps/performance-tests/util/**
       - packages/itwin/tree-widget/**
-      - pnpm-lock.yaml
       - .github/workflows/benchmark-pr-tree-widget.yml
     types: [opened, synchronize, reopened, ready_for_review]
 

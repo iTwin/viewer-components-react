@@ -4,3 +4,4 @@
  *--------------------------------------------------------------------------------------------*/
 
 export * from "./test-utilities/IModelUtils.js";
+export * from "./test-utilities/WaitFor.js";

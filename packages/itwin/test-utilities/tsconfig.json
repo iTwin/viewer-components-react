@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "target": "ES2022",
+    "outDir": "lib",
     "lib": ["dom", "ES2022"],
     "strict": true,
     "skipLibCheck": true,
@@ -17,7 +17,6 @@
     "noUnusedParameters": true,
     "forceConsistentCasingInFileNames": true,
     "useDefineForClassFields": true,
-    "outDir": "./lib",
     "sourceMap": true,
     "esModuleInterop": true,
     "declaration": true,

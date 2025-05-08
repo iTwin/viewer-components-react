@@ -1,6 +1,6 @@
 {
   "type": "patch",
-  "comment": "Export internal packages that shouldn't be used by consumers under ./internal",
+  "comment": "",
   "packageName": "@itwin/tree-widget-react",
   "email": "100586436+JonasDov@users.noreply.github.com",
   "dependentChangeType": "patch"

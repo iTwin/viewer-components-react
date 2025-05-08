@@ -1,5 +1,5 @@
 {
-  "require": ["raf/polyfill", "ignore-styles", "./lib/setup.js"],
+  "require": ["./lib/setup.js"],
   "timeout": 300000,
   "check-leaks": true,
   "globals": ["IS_REACT_ACT_ENVIRONMENT"],

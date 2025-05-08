@@ -5,10 +5,10 @@
 
 import { expect } from "chai";
 import { EMPTY, expand, from, mergeMap } from "rxjs";
+import { waitFor } from "test-utilities";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { toVoidPromise } from "@itwin/tree-widget-react/internal";
-import { waitFor } from "@testing-library/react";
 
 import type { HierarchyNode, HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { ECSqlQueryDef, InstanceKey } from "@itwin/presentation-shared";
@@ -207,7 +207,7 @@ export function createModelHierarchyNode(modelId?: Id64String, hasChildren?: boo
   };
 }
 
-export async function getAllItems(imodelAccess: IModelAccess): Promise<Array<InstanceKey>> {
+export async function getAllIModelElements(imodelAccess: IModelAccess): Promise<Array<InstanceKey>> {
   const query: ECSqlQueryDef = {
     ecsql: `
       SELECT
