@@ -176,7 +176,7 @@ type FunctionProps<THook extends (props: any) => any> = Parameters<THook>[0];
 // @beta (undocumented)
 interface GetCategoryVisibilityStatusProps {
     // (undocumented)
-    categoryId: Id64String;
+    categoryId: Id64Arg;
     // (undocumented)
     modelId: Id64String;
 }
@@ -323,7 +323,7 @@ export interface ModelsTreeVisibilityHandlerOverrides {
     }) => Promise<VisibilityStatus>>;
     // (undocumented)
     getModelDisplayStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
-        id: Id64String;
+        id: Id64Arg;
     }) => Promise<VisibilityStatus>>;
     // (undocumented)
     getSubjectNodeVisibility?: HierarchyVisibilityHandlerOverridableMethod<(props: {
