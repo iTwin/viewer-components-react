@@ -21,6 +21,7 @@
     "@itwin/core-bentley": "^4.11.1",
     "@itwin/core-common": "^4.11.1",
     "@itwin/core-geometry": "^4.11.1",
+    "@itwin/eslint-plugin": "^5.2.0",
     "@types/node": "^22.15.4",
     "eslint": "^9.26.0",
     "eslint-config-prettier": "^9.1.0",

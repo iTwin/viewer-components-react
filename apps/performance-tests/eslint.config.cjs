@@ -3,15 +3,20 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+const iTwinPlugin = require("@itwin/eslint-plugin");
 const eslintConfigPrettier = require("eslint-config-prettier");
 const unusedImports = require("eslint-plugin-unused-imports");
 
 module.exports = [
   {
+    files: ["**/*.{ts,cts}"],
+    ...iTwinPlugin.configs.iTwinjsRecommendedConfig,
+  },
+  {
     plugins: {
       "unused-imports": unusedImports,
     },
-    files: ["**/*.{ts,tsx,cts}"],
+    files: ["**/*.{ts,cts}"],
     rules: {
       "no-duplicate-imports": "off",
       "import/no-duplicates": "error",
