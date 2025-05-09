@@ -1,0 +1,15 @@
+{
+  "extends": "./node_modules/@itwin/build-tools/tsconfig-base.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "noImplicitOverride": false,
+    "resolveJsonModule": true,
+    "noUnusedParameters": false,
+    "lib": ["DOM", "ES2022"],
+    "outDir": "lib"
+  },
+  "include": ["src"]
+}

@@ -23,7 +23,8 @@
     "prettier": "prettier --check .",
     "prettier:fix": "prettier --write .",
     "update-extractions": "npm run docs:all && lage update-extractions",
-    "check-extractions": "npm run docs:all && lage check-extractions"
+    "check-extractions": "npm run docs:all && lage check-extractions",
+    "benchmark:tree-widget": "pnpm run -C ./apps/performance-tests benchmark:tree-widget"
   },
   "devDependencies": {
     "beachball": "^2.43.1",

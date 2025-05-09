@@ -3,3 +3,4 @@ packages:
   - '!packages/itwin/breakdown-trees'
   - apps/test-viewer
   - apps/learning-snippets
+  - apps/performance-tests
