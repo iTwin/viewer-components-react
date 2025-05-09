@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-
 import type { Id64String } from "@itwin/core-bentley";
 import type { NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 

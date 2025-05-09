@@ -36,5 +36,5 @@ setup("authenticate", async ({ page }) => {
     },
   ]);
   await page.context().storageState({ path: "e2e-out/.auth.json" });
-  console.log(`Added an IMJS_USER_ACCESS_TOKEN cookie`)
+  console.log(`Added an IMJS_USER_ACCESS_TOKEN cookie`);
 });
