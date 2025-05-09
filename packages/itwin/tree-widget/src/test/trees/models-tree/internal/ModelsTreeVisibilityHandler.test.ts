@@ -98,9 +98,9 @@ describe("ModelsTreeVisibilityHandler", () => {
       const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
         getModelDisplayStatus:
           props?.overrides?.models &&
-          (async ({ id, originalImplementation }) => {
+          (async ({ ids, originalImplementation }) => {
             let visibility: Visibility | "unknown" = "unknown";
-            for (const modelId of Id64.iterable(id)) {
+            for (const modelId of Id64.iterable(ids)) {
               const res = props.overrides!.models!.get(modelId);
               if (!res) {
                 continue;
@@ -114,9 +114,9 @@ describe("ModelsTreeVisibilityHandler", () => {
           }),
         getCategoryDisplayStatus:
           props?.overrides?.categories &&
-          (async ({ categoryId, originalImplementation }) => {
+          (async ({ categoryIds, originalImplementation }) => {
             let visibility: Visibility | "unknown" = "unknown";
-            for (const id of Id64.iterable(categoryId)) {
+            for (const id of Id64.iterable(categoryIds)) {
               const res = props.overrides!.categories!.get(id);
               if (!res) {
                 continue;

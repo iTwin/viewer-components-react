@@ -24,12 +24,13 @@ import {
   takeUntil,
   tap,
 } from "rxjs";
+import { Id64 } from "@itwin/core-bentley";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { pushToMap } from "../../common/Utils.js";
 
+import type { BeEvent, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { Observable, Subscription } from "rxjs";
 import type { Viewport } from "@itwin/core-frontend";
-import type { BeEvent, Id64Array, Id64Set, Id64String, IDisposable } from "@itwin/core-bentley";
 
 interface ElementInfo {
   elementId: Id64String;
@@ -41,12 +42,12 @@ type CacheEntry = Map<Id64String, Map<Id64String, Id64Set>>;
 
 export interface AlwaysOrNeverDrawnElementsQueryProps {
   modelId: Id64String;
-  categoryId?: Id64String;
+  categoryIds?: Id64Arg;
 }
 
 export const SET_CHANGE_DEBOUNCE_TIME = 20;
 
-export class AlwaysAndNeverDrawnElementInfo implements IDisposable {
+export class AlwaysAndNeverDrawnElementInfo implements Disposable {
   private _subscriptions: Subscription[];
   private _alwaysDrawn: Observable<CacheEntry>;
   private _neverDrawn: Observable<CacheEntry>;
@@ -89,11 +90,16 @@ export class AlwaysAndNeverDrawnElementInfo implements IDisposable {
     this._suppress.next(false);
   }
 
-  public getElements({ setType, modelId, categoryId }: { setType: "always" | "never" } & AlwaysOrNeverDrawnElementsQueryProps): Observable<Id64Set> {
+  public getElements({ setType, modelId, categoryIds }: { setType: "always" | "never" } & AlwaysOrNeverDrawnElementsQueryProps): Observable<Id64Set> {
     const cache = setType === "always" ? this._alwaysDrawn : this._neverDrawn;
-    const getElements = categoryId
+    const getElements = categoryIds
       ? (entry: CacheEntry | undefined) => {
-          return entry?.get(modelId)?.get(categoryId) ?? new Set();
+          const result = new Set<Id64String>();
+          for (const categoryId of Id64.iterable(categoryIds)) {
+            const elements = entry?.get(modelId)?.get(categoryId);
+            elements?.forEach((elementId) => result.add(elementId));
+          }
+          return result;
         }
       : (entry: CacheEntry | undefined) => {
           const modelEntry = entry?.get(modelId);
@@ -149,7 +155,7 @@ export class AlwaysAndNeverDrawnElementInfo implements IDisposable {
     return obs;
   }
 
-  public dispose(): void {
+  public [Symbol.dispose]() {
     this._subscriptions.forEach((x) => x.unsubscribe());
     this._subscriptions = [];
     this._disposeSubject.next();

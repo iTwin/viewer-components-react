@@ -7,16 +7,15 @@ import { assert, expect } from "chai";
 import { expand, from, mergeMap } from "rxjs";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
-import { waitFor } from "@testing-library/react";
 import { toVoidPromise } from "../../../../tree-widget-react/components/trees/common/Rxjs.js";
 import { ModelsTreeNode } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeNode.js";
+import { waitFor } from "../../../TestUtils.js";
 
 import type { Visibility } from "../../../../tree-widget-react/components/trees/common/Tooltip.js";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
-
 interface VisibilityExpectations {
   subject(id: string): Visibility;
   element(props: { modelId: Id64String; categoryId: Id64String; elementId: Id64String }): Visibility;
