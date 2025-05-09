@@ -6,13 +6,15 @@
 import { expect } from "chai";
 import { EMPTY, expand, from, mergeMap } from "rxjs";
 import { waitFor } from "test-utilities";
-import { assert, Id64Array, Id64String } from "@itwin/core-bentley";
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import { assert } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
-import { HierarchyNode, HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+import type { HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { toVoidPromise } from "@itwin/tree-widget-react/internal";
 
-import type { ECSqlQueryDef, InstanceKey } from "@itwin/presentation-shared";
+import type { ECSqlQueryDef } from "@itwin/presentation-shared";
 import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
 import type { IModelAccess } from "./StatelessHierarchyProvider.js";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
@@ -183,7 +185,7 @@ export function createCategoryHierarchyNode(categoryId: Id64String, hasChildren 
     parentKeys: [],
     extendedData: {
       isCategory: true,
-      modelId: modelId,
+      modelId,
     },
   };
 }

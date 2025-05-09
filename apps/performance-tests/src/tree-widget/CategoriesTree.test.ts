@@ -70,7 +70,7 @@ describe("categories tree", () => {
       const { iModelConnection, iModel } = TestIModelConnection.openFile(Datasets.getIModelPath("50k subcategories"));
       const imodelAccess = StatelessHierarchyProvider.createIModelAccess(iModel, "unbounded");
       const visibilityTargets = await getVisibilityTargets(imodelAccess);
-      const testData = createTestDataForInitialDisplay({ visibilityTargets: visibilityTargets, visible: false });
+      const testData = createTestDataForInitialDisplay({ visibilityTargets, visible: false });
 
       const viewport = await createViewport({
         iModelConnection,
@@ -124,7 +124,7 @@ describe("categories tree", () => {
       const { iModelConnection, iModel } = TestIModelConnection.openFile(Datasets.getIModelPath("50k categories"));
       const imodelAccess = StatelessHierarchyProvider.createIModelAccess(iModel, "unbounded");
       const visibilityTargets = await getVisibilityTargets(imodelAccess);
-      const testData = createTestDataForInitialDisplay({ visibilityTargets: visibilityTargets, visible: false });
+      const testData = createTestDataForInitialDisplay({ visibilityTargets, visible: false });
 
       const viewport = await createViewport({
         iModelConnection,
