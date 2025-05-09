@@ -1,8 +1,16 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Fri, 14 Mar 2025 21:21:43 GMT and should not be manually modified.
+This log was last generated on Thu, 08 May 2025 14:29:47 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.27.0
+
+Thu, 08 May 2025 14:29:47 GMT
+
+### Minor changes
+
+- Fix issue in MeasurementViewTypeClassifier. fallback classifiers had higher priority than registered classifier. ([#1312](https://github.com/iTwin/viewer-components-react/pull/1312))
 
 ## 0.26.4
 
