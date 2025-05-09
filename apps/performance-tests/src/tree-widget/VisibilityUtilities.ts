@@ -6,25 +6,40 @@
 import { expect } from "chai";
 import { EMPTY, expand, from, mergeMap } from "rxjs";
 import { waitFor } from "test-utilities";
+import { assert, Id64Array, Id64String } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
+import { HierarchyNode, HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import { toVoidPromise } from "@itwin/tree-widget-react/internal";
 
-import type { HierarchyNode, HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { ECSqlQueryDef, InstanceKey } from "@itwin/presentation-shared";
 import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
 import type { IModelAccess } from "./StatelessHierarchyProvider.js";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { Id64String } from "@itwin/core-bentley";
+type Visibility = "visible" | "hidden" | "partial";
+
+export interface VisibilityExpectations {
+  [id: string]: Visibility;
+}
 
 export interface ValidateNodeProps {
   handler: HierarchyVisibilityHandler;
   viewport: Viewport;
   expectations: "all-visible" | "all-hidden";
+  differentNodeExpectations?: VisibilityExpectations;
 }
 
-async function validateNodeVisibility({ node, handler, expectations }: ValidateNodeProps & { node: HierarchyNode }) {
+async function validateNodeVisibility({ node, handler, expectations, differentNodeExpectations }: ValidateNodeProps & { node: HierarchyNode }) {
+  if (HierarchyNode.isClassGroupingNode(node)) {
+    return;
+  }
+  assert(HierarchyNode.isInstancesNode(node));
+  const { id } = node.key.instanceKeys[0];
   const actualVisibility = await handler.getVisibilityStatus(node);
+  if (differentNodeExpectations && id in differentNodeExpectations) {
+    expect(actualVisibility.state).to.eq(differentNodeExpectations[id]);
+    return;
+  }
   expect(actualVisibility.state).to.eq(expectations === "all-hidden" ? "hidden" : "visible");
 }
 
@@ -145,39 +160,19 @@ export function setupInitialDisplayState(props: {
   }
 }
 
-export function createTestDataForInitialDisplay(keys: InstanceKey[], visible = false) {
-  const categories = new Array<VisibilityInfo>();
-  const subCategories = new Array<VisibilityInfo>();
-  const elements = new Array<VisibilityInfo>();
-  const models = new Array<VisibilityInfo>();
-  for (const key of keys) {
-    if (key.className.toLowerCase().includes("subcategory")) {
-      subCategories.push({ id: key.id, visible });
-      continue;
-    }
-    if (key.className.toLowerCase().includes("category")) {
-      categories.push({ id: key.id, visible });
-      subCategories.push({ id: getDefaultSubCategoryId(key.id), visible });
-      continue;
-    }
-    if (key.className.toLowerCase().includes("element")) {
-      elements.push({ id: key.id, visible });
-      continue;
-    }
-    if (key.className.toLowerCase().includes("model")) {
-      models.push({ id: key.id, visible });
-    }
-  }
-  return { categories, subCategories, elements, models };
+export function createTestDataForInitialDisplay(props: {
+  visibilityTargets: { models: Id64Array; categories: Id64Array; subCategories: Id64Array; elements: Id64Array };
+  visible: boolean;
+}) {
+  return {
+    categories: props.visibilityTargets.categories.map((category) => ({ id: category, visible: props.visible })),
+    subCategories: props.visibilityTargets.subCategories.map((subCategory) => ({ id: subCategory, visible: props.visible })),
+    elements: props.visibilityTargets.elements.map((element) => ({ id: element, visible: props.visible })),
+    models: props.visibilityTargets.models.map((model) => ({ id: model, visible: props.visible })),
+  };
 }
 
-function getDefaultSubCategoryId(categoryId: Id64String) {
-  const categoryIdNumber = Number.parseInt(categoryId, 16);
-  const subCategoryId = `0x${(categoryIdNumber + 1).toString(16)}`;
-  return subCategoryId;
-}
-
-export function createCategoryHierarchyNode(categoryId: Id64String, hasChildren = false): NonGroupingHierarchyNode {
+export function createCategoryHierarchyNode(categoryId: Id64String, hasChildren = false, modelId?: Id64String): NonGroupingHierarchyNode {
   return {
     key: {
       type: "instances",
@@ -188,6 +183,7 @@ export function createCategoryHierarchyNode(categoryId: Id64String, hasChildren 
     parentKeys: [],
     extendedData: {
       isCategory: true,
+      modelId: modelId,
     },
   };
 }
@@ -207,7 +203,46 @@ export function createModelHierarchyNode(modelId?: Id64String, hasChildren?: boo
   };
 }
 
-export async function getAllIModelElements(imodelAccess: IModelAccess): Promise<Array<InstanceKey>> {
+export function createElementHierarchyNode(props: {
+  modelId: Id64String | undefined;
+  categoryId: Id64String | undefined;
+  hasChildren?: boolean;
+  elementId?: Id64String;
+}): NonGroupingHierarchyNode {
+  return {
+    key: {
+      type: "instances",
+      instanceKeys: [{ className: "bis:GeometricalElement3d", id: props.elementId ?? "" }],
+    },
+    children: !!props.hasChildren,
+    label: "",
+    parentKeys: [],
+    extendedData: {
+      modelId: props.modelId,
+      categoryId: props.categoryId,
+    },
+  };
+}
+
+/** @internal */
+export function createDefinitionContainerHierarchyNode(definitionContainerId: Id64String): NonGroupingHierarchyNode {
+  return {
+    key: {
+      type: "instances",
+      instanceKeys: [{ className: "bis:DefinitionContainer", id: definitionContainerId }],
+    },
+    children: true,
+    label: "",
+    parentKeys: [],
+    extendedData: {
+      isDefinitionContainer: true,
+    },
+  };
+}
+
+export async function getVisibilityTargets(
+  imodelAccess: IModelAccess,
+): Promise<{ models: Id64Array; categories: Id64Array; subCategories: Id64Array; elements: Id64Array }> {
   const query: ECSqlQueryDef = {
     ecsql: `
       SELECT
@@ -231,9 +266,26 @@ export async function getAllIModelElements(imodelAccess: IModelAccess): Promise<
       FROM bis.SubCategory
     `,
   };
-  const keys = new Array<InstanceKey>();
+  const categories = new Array<Id64String>();
+  const subCategories = new Array<Id64String>();
+  const elements = new Array<Id64String>();
+  const models = new Array<Id64String>();
   for await (const row of imodelAccess.createQueryReader(query, { limit: "unbounded" })) {
-    keys.push({ id: row.ECInstanceId, className: row.ClassName });
+    if (row.ClassName.toLowerCase().includes("subcategory")) {
+      subCategories.push(row.ECInstanceId);
+      continue;
+    }
+    if (row.ClassName.toLowerCase().includes("category")) {
+      categories.push(row.ECInstanceId);
+      continue;
+    }
+    if (row.ClassName.toLowerCase().includes("element")) {
+      elements.push(row.ECInstanceId);
+      continue;
+    }
+    if (row.ClassName.toLowerCase().includes("model")) {
+      models.push(row.ECInstanceId);
+    }
   }
-  return keys;
+  return { categories, subCategories, elements, models };
 }

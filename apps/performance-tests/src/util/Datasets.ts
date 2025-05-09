@@ -5,10 +5,17 @@
 
 import fs from "fs";
 import path from "path";
-import { insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory, insertSubCategory } from "test-utilities";
+import {
+  insertDefinitionContainer,
+  insertPhysicalElement,
+  insertPhysicalModelWithPartition,
+  insertPhysicalSubModel,
+  insertSpatialCategory,
+  insertSubCategory,
+} from "test-utilities";
 import { createIModel } from "./IModelUtilities.js";
 
-export const IMODEL_NAMES = ["50k 3D elements", "50k subcategories"] as const;
+export const IMODEL_NAMES = ["50k 3D elements", "50k subcategories", "50k categories"] as const;
 export type IModelName = (typeof IMODEL_NAMES)[number];
 export type IModelPathsMap = { [_ in IModelName]?: string };
 
@@ -63,11 +70,44 @@ export class Datasets {
 
   private static getIModelFactory(key: IModelName, elementCount: number) {
     switch (key) {
+      case "50k categories":
+        return async (name: string, localPath: string) => this.createCategoryIModel(name, localPath, elementCount);
       case "50k subcategories":
         return async (name: string, localPath: string) => this.createSubCategoryIModel(name, localPath, elementCount);
       case "50k 3D elements":
         return async (name: string, localPath: string) => this.create3dElementIModel(name, localPath, elementCount);
     }
+  }
+
+  /**
+   * Create an iModel with `numElements` categories all belonging to the same definition container.
+   */
+  private static async createCategoryIModel(name: string, localPath: string, numElements: number) {
+    // eslint-disable-next-line no-console
+    console.log(`${numElements} elements: Creating...`);
+    await createIModel(name, localPath, async (builder) => {
+      const { id: physicalModelId } = insertPhysicalModelWithPartition({ builder, codeValue: "test physical model" });
+      const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
+      const definitionModel = insertPhysicalSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+
+      for (let i = 0; i < numElements; ++i) {
+        const { id: categoryId } = insertSpatialCategory({
+          builder,
+          codeValue: `c${i}`,
+          userLabel: `test_category${i}`,
+          modelId: definitionModel.id,
+        });
+        insertPhysicalElement({
+          builder,
+          modelId: physicalModelId,
+          categoryId,
+          userLabel: "test_element",
+        }).id;
+      }
+    });
+
+    // eslint-disable-next-line no-console
+    console.log(`${numElements} elements: Done.`);
   }
 
   /**

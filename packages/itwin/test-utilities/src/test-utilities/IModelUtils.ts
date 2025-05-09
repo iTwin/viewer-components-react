@@ -72,6 +72,25 @@ export function insertPhysicalSubModel(
   return { className, id: modelId };
 }
 
+export function insertDefinitionContainer(
+  props: BaseInstanceInsertProps & { codeValue: string; modelId?: Id64String; isPrivate?: boolean } & Partial<
+      Omit<ElementProps, "id" | "model" | "parent" | "code">
+    >,
+) {
+  const { builder, classFullName, modelId, codeValue, ...elementProps } = props;
+  const defaultClassName = `BisCore${props.fullClassNameSeparator ?? "."}DefinitionContainer`;
+  const className = classFullName ?? defaultClassName;
+  const model = modelId ?? IModel.dictionaryId;
+  const id = builder.insertElement({
+    classFullName: className,
+    model,
+    code: builder.createCode(model, BisCodeSpec.nullCodeSpec, codeValue),
+    ...elementProps,
+  });
+  return { className, id };
+}
+
+
 export function insertSpatialCategory(
   props: BaseInstanceInsertProps & { codeValue: string; modelId?: Id64String } & Partial<Omit<CategoryProps, "id" | "model" | "parent" | "code">>,
 ) {

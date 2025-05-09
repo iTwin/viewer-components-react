@@ -12,9 +12,10 @@ import { run, TestIModelConnection } from "../util/TestUtilities.js";
 import { StatelessHierarchyProvider } from "./StatelessHierarchyProvider.js";
 import {
   createCategoryHierarchyNode,
+  createDefinitionContainerHierarchyNode,
   createTestDataForInitialDisplay,
   createViewport,
-  getAllIModelElements,
+  getVisibilityTargets,
   setupInitialDisplayState,
   validateHierarchyVisibility,
 } from "./VisibilityUtilities.js";
@@ -64,12 +65,12 @@ describe("categories tree", () => {
     provider: HierarchyProvider & Disposable;
     categories: Id64Array;
   }>({
-    testName: "changes visibility for 50k subCategories",
+    testName: "changing category visibility changes visibility for 50k subCategories",
     setup: async () => {
       const { iModelConnection, iModel } = TestIModelConnection.openFile(Datasets.getIModelPath("50k subcategories"));
       const imodelAccess = StatelessHierarchyProvider.createIModelAccess(iModel, "unbounded");
-      const keys = await getAllIModelElements(imodelAccess);
-      const testData = createTestDataForInitialDisplay(keys, false);
+      const visibilityTargets = await getVisibilityTargets(imodelAccess);
+      const testData = createTestDataForInitialDisplay({ visibilityTargets: visibilityTargets, visible: false });
 
       const viewport = await createViewport({
         iModelConnection,
@@ -91,7 +92,7 @@ describe("categories tree", () => {
         viewport,
         expectations: "all-hidden",
       });
-      return { iModel, imodelAccess, viewport, provider, handler, categories: testData.categories.map((category) => category.id) };
+      return { iModel, imodelAccess, viewport, provider, handler, categories: visibilityTargets.categories };
     },
     cleanup: async (props) => {
       props.iModel.close();
@@ -101,6 +102,60 @@ describe("categories tree", () => {
     },
     test: async ({ viewport, handler, provider, categories }) => {
       await Promise.all(categories.map(async (category) => handler.changeVisibility(createCategoryHierarchyNode(category, true), true)));
+      await validateHierarchyVisibility({
+        provider,
+        handler,
+        viewport,
+        expectations: "all-visible",
+      });
+    },
+  });
+
+  run<{
+    iModel: SnapshotDb;
+    imodelAccess: IModelAccess;
+    viewport: Viewport;
+    handler: HierarchyVisibilityHandler & Disposable;
+    provider: HierarchyProvider & Disposable;
+    models: Id64Array;
+  }>({
+    testName: "changing definition container visibility changes visibility for 50k categories",
+    setup: async () => {
+      const { iModelConnection, iModel } = TestIModelConnection.openFile(Datasets.getIModelPath("50k categories"));
+      const imodelAccess = StatelessHierarchyProvider.createIModelAccess(iModel, "unbounded");
+      const visibilityTargets = await getVisibilityTargets(imodelAccess);
+      const testData = createTestDataForInitialDisplay({ visibilityTargets: visibilityTargets, visible: false });
+
+      const viewport = await createViewport({
+        iModelConnection,
+        testData,
+      });
+      setupInitialDisplayState({
+        viewport,
+        ...testData,
+      });
+      const idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d");
+      const handler = new CategoriesVisibilityHandler({ idsCache, viewport });
+      const provider = createIModelHierarchyProvider({
+        hierarchyDefinition: new CategoriesTreeDefinition({ idsCache, imodelAccess, viewType: "3d" }),
+        imodelAccess,
+      });
+      await validateHierarchyVisibility({
+        provider,
+        handler,
+        viewport,
+        expectations: "all-hidden",
+      });
+      return { iModel, imodelAccess, viewport, provider, handler, models: visibilityTargets.models };
+    },
+    cleanup: async (props) => {
+      props.iModel.close();
+      props.viewport.dispose();
+      props.handler[Symbol.dispose]();
+      props.provider[Symbol.dispose]();
+    },
+    test: async ({ viewport, handler, provider, models }) => {
+      await Promise.all(models.map(async (model) => handler.changeVisibility(createDefinitionContainerHierarchyNode(model), true)));
       await validateHierarchyVisibility({
         provider,
         handler,
