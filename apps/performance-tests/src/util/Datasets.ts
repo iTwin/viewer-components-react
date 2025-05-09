@@ -106,7 +106,7 @@ export class Datasets {
   }
 
   /**
-   * Create an iModel with `numElements` 3D elements all belonging to the same spatial category, physical model and functional model.
+   * Create an iModel with `numElements` 3D elements all belonging to the same spatial category and physical model.
    * The elements are set up in a hierarchical manner, with 1000 top level 3D elements, each having 1 child element, which has 1 child element,
    * and so on until the depth of `numElements` / 1000 elements is reached. Each 3D element has a related functional element.
    */
