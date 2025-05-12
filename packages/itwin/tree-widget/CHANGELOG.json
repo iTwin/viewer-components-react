@@ -2,6 +2,42 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Mon, 28 Apr 2025 16:18:43 GMT",
+      "version": "3.7.0",
+      "tag": "@itwin/tree-widget-react_v3.7.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "7f136830308c82e59bbff70c5eef192a14f26854",
+            "comment": "Added ability to disabled hierarchy level filtering in `ModelsTree`."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Fri, 18 Apr 2025 17:06:22 GMT",
+      "version": "3.6.1",
+      "tag": "@itwin/tree-widget-react_v3.6.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "dd34678ae690a6af5befb29f621c07d80d5e7558",
+            "comment": "Fixed Categories tree not reacting to Category display changes from Models tree, when they're made on per-model category overrides."
+          },
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "917945302256397299f94beec815132e0d6bc157",
+            "comment": "Fixed `ModelsTree` and `CategoriesTree` not applying custom hierarchy level size limit."
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 21 Mar 2025 11:37:20 GMT",
       "version": "3.6.0",
       "tag": "@itwin/tree-widget-react_v3.6.0",

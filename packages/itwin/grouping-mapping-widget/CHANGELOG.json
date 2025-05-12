@@ -2,6 +2,21 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "date": "Mon, 28 Apr 2025 11:04:44 GMT",
+      "version": "0.35.2",
+      "tag": "@itwin/grouping-mapping-widget_v0.35.2",
+      "comments": {
+        "patch": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "7e1b0b95fbfc92afe96dce1f36054b7d1a6c6665",
+            "comment": "Fixed an issue when trying to generate Mapped Properties."
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 08 Jan 2025 13:28:10 GMT",
       "version": "0.35.1",
       "tag": "@itwin/grouping-mapping-widget_v0.35.1",

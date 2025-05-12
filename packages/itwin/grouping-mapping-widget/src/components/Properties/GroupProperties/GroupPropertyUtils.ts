@@ -155,8 +155,12 @@ export const convertPresentationFields = (propertyFields: Field[]): PropertyMeta
   propertyFields.forEach((property) => {
     switch (property.type.valueFormat) {
       case PropertyValueFormat.Primitive: {
+        const propertiesField = property as PropertiesField;
+        if (!propertiesField.properties) {
+          return;
+        }
         // Generate base ECProperty
-        const extractedPrimitives = extractPrimitives([], property as PropertiesField);
+        const extractedPrimitives = extractPrimitives([], propertiesField);
         extractedPrimitives.forEach((extractedPrimitive) => {
           extractedPrimitive.sourceSchema = "*";
           extractedPrimitive.sourceClassName = "*";

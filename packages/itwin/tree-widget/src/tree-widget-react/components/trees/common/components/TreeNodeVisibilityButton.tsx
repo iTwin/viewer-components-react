@@ -4,15 +4,20 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./TreeNodeVisibilityButton.css";
-import { useCallback } from "react";
+import { memo } from "react";
+import visibilityHideSvg from "@itwin/itwinui-icons/visibility-hide.svg";
+import visibilityPartialSvg from "@itwin/itwinui-icons/visibility-partial.svg";
+import visibilityShowSvg from "@itwin/itwinui-icons/visibility-show.svg";
+import { Tree } from "@itwin/itwinui-react/bricks";
+import { createTooltip } from "../internal/Tooltip.js";
 
-import type { PresentationHierarchyNode, TreeItemAction } from "@itwin/presentation-hierarchies-react";
+import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
 /**
  * Data structure that describes tree node checkbox state.
  * @beta
  */
-interface TreeItemVisibilityButtonState {
+export interface TreeItemVisibilityButtonState {
   state: "visible" | "partial" | "hidden";
   isDisabled?: boolean;
   tooltip?: string;
@@ -26,38 +31,31 @@ export interface TreeItemVisibilityButtonProps {
   getVisibilityButtonState: (node: PresentationHierarchyNode) => TreeItemVisibilityButtonState;
 }
 
-const visibilityHideSvg = new URL("@itwin/itwinui-icons/visibility-hide.svg", import.meta.url).href;
-const visibilityPartialSvg = new URL("@itwin/itwinui-icons/visibility-partial.svg", import.meta.url).href;
-const visibilityShowSvg = new URL("@itwin/itwinui-icons/visibility-show.svg", import.meta.url).href;
-
 /** @internal */
-export function useVisibilityAction({
+export const VisibilityAction = memo(function VisibilityAction({
   getVisibilityButtonState,
   onVisibilityButtonClick,
-}: TreeItemVisibilityButtonProps): (node: PresentationHierarchyNode) => TreeItemAction {
-  return useCallback(
-    (node) => {
-      const state = getVisibilityButtonState(node);
+  node,
+}: TreeItemVisibilityButtonProps & { node: PresentationHierarchyNode }) {
+  const state = getVisibilityButtonState(node);
 
-      const getIcon = () => {
-        switch (state.state) {
-          case "visible":
-            return visibilityShowSvg;
-          case "hidden":
-            return visibilityHideSvg;
-          case "partial":
-            return visibilityPartialSvg;
-        }
-      };
-      return {
-        label: state.tooltip ?? "Determining visibility...",
-        action: () => {
-          onVisibilityButtonClick(node, state.state);
-        },
-        show: state.state !== "visible" ? true : undefined,
-        icon: getIcon(),
-      };
-    },
-    [getVisibilityButtonState, onVisibilityButtonClick],
+  const getIcon = () => {
+    switch (state.state) {
+      case "visible":
+        return visibilityShowSvg;
+      case "hidden":
+        return visibilityHideSvg;
+      case "partial":
+        return visibilityPartialSvg;
+    }
+  };
+
+  return (
+    <Tree.ItemAction
+      label={state.tooltip ?? createTooltip(state.state)}
+      onClick={() => onVisibilityButtonClick(node, state.state)}
+      visible={state.state !== "visible" ? true : undefined}
+      icon={getIcon()}
+    />
   );
-}
+});

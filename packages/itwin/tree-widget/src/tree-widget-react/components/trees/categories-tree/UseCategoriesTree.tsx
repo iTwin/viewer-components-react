@@ -4,6 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import categorySvg from "@itwin/itwinui-icons/bis-category-3d.svg";
+import subcategorySvg from "@itwin/itwinui-icons/bis-category-subcategory.svg";
+import classSvg from "@itwin/itwinui-icons/bis-class.svg";
+import definitionContainerSvg from "@itwin/itwinui-icons/bis-definitions-container.svg";
+import elementSvg from "@itwin/itwinui-icons/bis-element.svg";
 import { Icon } from "@itwin/itwinui-react/bricks";
 import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMatches } from "../common/components/EmptyTree.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
@@ -22,6 +27,7 @@ import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { CategoriesTreeHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
+
 /** @beta */
 export interface UseCategoriesTreeProps {
   activeView: Viewport;
@@ -124,8 +130,6 @@ function useCachedVisibility(activeView: Viewport, hierarchyConfig: CategoriesTr
   };
 }
 
-const categorySvg = new URL("@itwin/itwinui-icons/bis-category-3d.svg", import.meta.url).href;
-
 function getEmptyTreeContentComponent(filter?: string, error?: CategoriesTreeFilteringError, emptyTreeContent?: React.ReactNode) {
   if (error) {
     if (error === "tooManyFilterMatches") {
@@ -142,19 +146,14 @@ function getEmptyTreeContentComponent(filter?: string, error?: CategoriesTreeFil
   return <EmptyTreeContent icon={categorySvg} />;
 }
 
-const subcategorySvg = new URL("@itwin/itwinui-icons/bis-category-subcategory.svg", import.meta.url).href;
-const definitionContainerSvg = new URL("@itwin/itwinui-icons/bis-definitions-container.svg", import.meta.url).href;
-const classSvg = new URL("@itwin/itwinui-icons/bis-class.svg", import.meta.url).href;
-const elementSvg = new URL("@itwin/itwinui-icons/bis-element.svg", import.meta.url).href;
-
 /** @beta */
 export function CategoriesTreeIcon({ node }: { node: PresentationHierarchyNode }) {
-  if (node.extendedData?.imageId === undefined) {
+  if (node.nodeData.extendedData?.imageId === undefined) {
     return undefined;
   }
 
   const getIcon = () => {
-    switch (node.extendedData!.imageId) {
+    switch (node.nodeData.extendedData!.imageId) {
       case "icon-layers":
         return categorySvg;
       case "icon-layers-isolate":
@@ -174,5 +173,5 @@ export function CategoriesTreeIcon({ node }: { node: PresentationHierarchyNode }
 }
 
 function getSublabel(node: PresentationHierarchyNode) {
-  return node.extendedData?.description;
+  return node.nodeData.extendedData?.description;
 }

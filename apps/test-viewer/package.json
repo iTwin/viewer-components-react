@@ -27,10 +27,10 @@
     "@itwin/imodels-access-frontend": "^5.2.3",
     "@itwin/imodels-client-management": "^5.9.0",
     "@itwin/itwinui-icons-react": "^2.9.0",
-    "@itwin/itwinui-icons": "5.0.0-alpha.4",
+    "@itwin/itwinui-icons": "5.0.0-alpha.7",
     "@itwin/itwinui-illustrations-react": "^2.1.0",
     "@itwin/itwinui-react": "3.17.2",
-    "@itwin/itwinui-react-v5": "npm:@itwin/itwinui-react@5.0.0-alpha.13",
+    "@itwin/itwinui-react-v5": "npm:@itwin/itwinui-react@5.0.0-alpha.14",
     "@itwin/map-layers": "workspace:*",
     "@itwin/map-layers-auth": "^4.10.10",
     "@itwin/map-layers-formats": "^4.10.10",
@@ -46,7 +46,7 @@
     "@itwin/web-viewer-react": "^4.3.3",
     "@itwin/webgl-compatibility": "^4.10.10",
     "@itwin/presentation-hierarchies": "^1.4.1",
-    "@itwin/presentation-hierarchies-react": "^1.6.1",
+    "@itwin/presentation-hierarchies-react": "^1.6.5",
     "@itwin/presentation-shared": "^1.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -75,37 +75,8 @@
     "rimraf": "^3.0.2",
     "sass": "^1.77.5",
     "typescript": "~5.6.0",
-    "vite": "^5.4.12",
+    "vite": "^5.4.18",
     "vite-plugin-static-copy": "^2.0.0"
-  },
-  "dependenciesMeta": {
-    "@itwin/property-grid-react": {
-      "injected": true
-    },
-    "@itwin/tree-widget-react": {
-      "injected": true
-    },
-    "@itwin/measure-tools-react": {
-      "injected": true
-    },
-    "@itwin/map-layers": {
-      "injected": true
-    },
-    "@itwin/geo-tools-react": {
-      "injected": true
-    },
-    "@itwin/grouping-mapping-widget": {
-      "injected": true
-    },
-    "@itwin/reports-config-widget-react": {
-      "injected": true
-    },
-    "@itwin/ec3-widget-react": {
-      "injected": true
-    },
-    "@itwin/one-click-lca-react": {
-      "injected": true
-    }
   },
   "scripts": {
     "start": "dotenvx run -- vite",

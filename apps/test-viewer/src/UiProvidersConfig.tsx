@@ -40,6 +40,7 @@ import type { ComponentProps } from "react";
 import type { TreeDefinition } from "@itwin/tree-widget-react";
 import type { ClientPrefix } from "@itwin/grouping-mapping-widget";
 import type { UiItemsProvider } from "@itwin/appui-react";
+
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
   uiItemsProviders: UiItemsProvider[];
@@ -98,6 +99,7 @@ const configuredUiItems = new Map<string, UiItem>([
               {
                 id: ModelsTreeComponent.id,
                 getLabel: () => ModelsTreeComponent.getLabel(),
+                isSearchable: true,
                 render: (props) => (
                   <ModelsTreeWithOptions
                     getSchemaContext={getSchemaContext}
@@ -115,6 +117,7 @@ const configuredUiItems = new Map<string, UiItem>([
               {
                 id: CategoriesTreeComponent.id,
                 getLabel: () => CategoriesTreeComponent.getLabel(),
+                isSearchable: true,
                 render: (props) => (
                   <CategoriesTreeComponent
                     filter={props.filter}

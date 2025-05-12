@@ -1376,6 +1376,72 @@ describe("Models tree", () => {
           expect: [],
         });
       });
+
+      it("disables hierarchy level filtering support when `hierarchyLevelFiltering` is set to `disable`", async function () {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
+          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+          const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
+          const category = insertSpatialCategory({ builder, codeValue: "category" });
+          const parentElement = insertPhysicalElement({
+            builder,
+            userLabel: `parent element 1`,
+            modelId: model.id,
+            categoryId: category.id,
+          });
+          const childElement = insertPhysicalElement({
+            builder,
+            userLabel: `child element 1`,
+            modelId: model.id,
+            categoryId: category.id,
+            parentId: parentElement.id,
+          });
+          return { rootSubject, model, category, parentElement, childElement };
+        });
+
+        const { imodel, ...keys } = buildIModelResult;
+        using provider = createModelsTreeProvider({
+          imodel,
+          hierarchyConfig: { hierarchyLevelFiltering: "disable" },
+        });
+        await validateHierarchy({
+          provider,
+          expect: [
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.model],
+              supportsFiltering: false,
+              children: [
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.category],
+                  supportsFiltering: false,
+                  children: [
+                    NodeValidators.createForClassGroupingNode({
+                      className: keys.parentElement.className,
+                      children: [
+                        NodeValidators.createForInstanceNode({
+                          instanceKeys: [keys.parentElement],
+                          supportsFiltering: false,
+                          children: [
+                            NodeValidators.createForClassGroupingNode({
+                              className: keys.childElement.className,
+                              children: [
+                                NodeValidators.createForInstanceNode({
+                                  instanceKeys: [keys.childElement],
+                                  supportsFiltering: false,
+                                  children: false,
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        });
+      });
     });
   });
 });

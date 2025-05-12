@@ -3,6 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import classSvg from "@itwin/itwinui-icons/bis-class.svg";
+import elementSvg from "@itwin/itwinui-icons/bis-element.svg";
+import documentSvg from "@itwin/itwinui-icons/document.svg";
+import ecSchemaSvg from "@itwin/itwinui-icons/selection-children.svg";
 import { Icon } from "@itwin/itwinui-react/bricks";
 import { EmptyTreeContent } from "../common/components/EmptyTree.js";
 import { Tree } from "../common/components/Tree.js";
@@ -16,14 +20,14 @@ import type { TreeProps } from "../common/components/Tree.js";
 
 /** @beta */
 export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
-  Pick<BaseTreeRendererProps, "actions" | "getDecorations"> & {
+  Pick<BaseTreeRendererProps, "getActions" | "getDecorations"> & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
     };
   };
 
 /** @beta */
-export function ExternalSourcesTree({ actions, getDecorations, selectionMode, ...rest }: ExternalSourcesTreeProps) {
+export function ExternalSourcesTree({ getActions, getDecorations, selectionMode, ...rest }: ExternalSourcesTreeProps) {
   return (
     <Tree
       emptyTreeContent={<EmptyTreeContent icon={documentSvg} />}
@@ -32,7 +36,7 @@ export function ExternalSourcesTree({ actions, getDecorations, selectionMode, ..
       getHierarchyDefinition={getDefinitionsProvider}
       selectionMode={selectionMode ?? "none"}
       treeRenderer={(treeProps) => (
-        <TreeRenderer {...treeProps} actions={actions} getDecorations={getDecorations ?? ((node) => <ExternalSourcesTreeIcon node={node} />)} />
+        <TreeRenderer {...treeProps} getActions={getActions} getDecorations={getDecorations ?? ((node) => <ExternalSourcesTreeIcon node={node} />)} />
       )}
     />
   );
@@ -42,18 +46,13 @@ const getDefinitionsProvider: TreeProps["getHierarchyDefinition"] = (props) => {
   return new ExternalSourcesTreeDefinition(props);
 };
 
-const classSvg = new URL("@itwin/itwinui-icons/bis-class.svg", import.meta.url).href;
-const elementSvg = new URL("@itwin/itwinui-icons/bis-element.svg", import.meta.url).href;
-const documentSvg = new URL("@itwin/itwinui-icons/document.svg", import.meta.url).href;
-const ecSchemaSvg = new URL("@itwin/itwinui-icons/selection-children.svg", import.meta.url).href;
-
 /** @beta */
 export function ExternalSourcesTreeIcon({ node }: { node: PresentationHierarchyNode }) {
-  if (node.extendedData?.imageId === undefined) {
+  if (node.nodeData.extendedData?.imageId === undefined) {
     return undefined;
   }
   const getIcon = () => {
-    switch (node.extendedData!.imageId) {
+    switch (node.nodeData.extendedData!.imageId) {
       case "icon-item":
         return elementSvg;
       case "icon-ec-class":

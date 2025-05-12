@@ -3,8 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import "./SearchBox.css";
 import { useEffect, useRef, useState } from "react";
+import closeSvg from "@itwin/itwinui-icons/close.svg";
+import searchSvg from "@itwin/itwinui-icons/search.svg";
 import { IconButton, TextBox } from "@itwin/itwinui-react/bricks";
 import { TreeWidget } from "../../TreeWidget.js";
 
@@ -15,9 +16,6 @@ interface DebouncedSearchBoxProps {
   delay: number;
   className?: string;
 }
-
-const dismissSvg = new URL("@itwin/itwinui-icons/dismiss.svg", import.meta.url).href;
-const searchSvg = new URL("@itwin/itwinui-icons/search.svg", import.meta.url).href;
 
 /** @internal */
 export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, className }: DebouncedSearchBoxProps) {
@@ -56,7 +54,7 @@ export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, cla
         className={"tw-search-box-button"}
         variant={"ghost"}
         label={TreeWidget.translate("header.searchBox.close")}
-        icon={dismissSvg}
+        icon={closeSvg}
         onClick={() => {
           setIsOpened(false);
           setInputValue(undefined);

@@ -8,7 +8,7 @@ import "./BasemapPanel.scss";
 import * as React from "react";
 import { BackgroundMapType, BaseMapLayerSettings, ColorByName, ColorDef, ImageMapLayerSettings } from "@itwin/core-common";
 import { SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
-import { Button, ColorBuilder, ColorInputPanel, ColorPalette, ColorPicker, ColorSwatch, ColorValue, IconButton, Popover, Select } from "@itwin/itwinui-react";
+import { ColorBuilder, ColorInputPanel, ColorPalette, ColorPicker, ColorSwatch, ColorValue, IconButton, Popover, Select } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
 import { useSourceMapContext } from "./MapLayerManager";
 import { TransparencyPopupButton } from "./TransparencyPopupButton";
@@ -277,17 +277,17 @@ export function BasemapPanel(props: BasemapPanelProps) {
     <>
       <span className="map-manager-base-label">{baseLayerLabel}</span>
       <div className="map-manager-base-item">
-        <Button
-          className="map-manager-basemap-visibility map-manager-visibility-icon"
-          size="small"
+        <IconButton
+          data-testid="base-map-visibility-icon-button"
+          className="map-manager-basemap-visibility"
           styleType="borderless"
-          data-testid="toggle-visibility"
-          title={toggleVisibility}
-          onClick={handleVisibilityChange}
-          disabled={props.disabled || !activeViewport || !(activeViewport.displayStyle.backgroundMapBase instanceof ImageMapLayerSettings)}
-        >
-          {baseMapVisible ? <SvgVisibilityShow data-testid="layer-visibility-icon-show" /> : <SvgVisibilityHide data-testid="layer-visibility-icon-hide" />}
-        </Button>
+           size="small" label={toggleVisibility}
+           onClick={handleVisibilityChange}
+           disabled={props.disabled || !activeViewport || !(activeViewport.displayStyle.backgroundMapBase instanceof ImageMapLayerSettings)}>
+        {baseMapVisible
+          ? <SvgVisibilityShow data-testid="layer-visibility-icon-show" />
+          : <SvgVisibilityHide data-testid="layer-visibility-icon-hide" />}
+        </IconButton>
         <Select
           data-testid="base-map-select"
           className="map-manager-base-item-select"

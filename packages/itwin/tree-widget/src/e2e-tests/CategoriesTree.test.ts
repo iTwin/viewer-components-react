@@ -31,7 +31,7 @@ test.describe("Categories tree", () => {
     // wait for element to be visible in the tree
     const node = locateNode(treeWidget, "Equipment");
     await node.hover();
-    const visibilityAction = node.getByRole("button", { name: "Visible" });
+    const visibilityAction = node.getByRole("button", { name: "Hide" });
     await expect(visibilityAction).toBeVisible();
     await takeScreenshot(page, treeWidget);
   });
@@ -90,9 +90,8 @@ test.describe("Categories tree", () => {
     await treeWidget.getByPlaceholder("Search...").fill("PipeSupport");
 
     // wait for non searched for nodes to disappear
-    await locateNode(treeWidget, "PipeSupport")
-      .getByRole("button", { name: "Visible: Category display enabled through category selector", includeHidden: true })
-      .waitFor({ state: "hidden" });
+    const node = locateNode(treeWidget, "PipeSupport");
+    await node.getByRole("button", { name: "Hide", includeHidden: true }).waitFor({ state: "attached" });
     await locateNode(treeWidget, "Equipment").waitFor({ state: "hidden" });
     await takeScreenshot(page, treeWidget);
   });
@@ -102,7 +101,7 @@ test.describe("Categories tree", () => {
     const node = locateNode(treeWidget, "Equipment", 1);
     await node.focus();
     const treeContainer = page.locator("#tw-tree-renderer-container");
-    const visibilityAction = node.getByRole("button", { name: "Visible" });
+    const visibilityAction = node.getByRole("button", { name: "Hide" });
     await expect(visibilityAction).toBeVisible();
 
     await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
@@ -139,9 +138,7 @@ test.describe("Categories tree", () => {
     await locateNode(treeWidget, "Equipment").waitFor();
     await page.getByRole("button", { name: "Hide all" }).click();
 
-    await expect(
-      locateNode(treeWidget, "Equipment").getByRole("button", { name: "Hidden: Category display disabled through category selector" }),
-    ).not.toBeVisible();
+    await locateNode(treeWidget, "Equipment").getByRole("button", { name: "Show" }).waitFor();
     await takeScreenshot(page, treeWidget);
   });
 
@@ -160,7 +157,8 @@ test.describe("Categories tree", () => {
 
     const node = locateNode(treeWidget, "Equipment");
     await node.waitFor({ state: "visible" });
-    await node.getByRole("button", { name: "Visible: All subCategories are visible", includeHidden: true }).waitFor({ state: "attached" });
+    await node.getByRole("button", { name: "Determining visibility..." }).waitFor({ state: "detached" });
+    await node.getByRole("button", { name: "Hide", includeHidden: true }).waitFor({ state: "attached" });
     await takeScreenshot(page, treeWidget);
   });
 });
