@@ -331,7 +331,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       }
 
       return from(this._idsCache.getSubjectModelIds(subjectIds)).pipe(
-        concatAll(),
+        mergeAll(),
         distinct(),
         mergeMap((modelId) => this.getModelVisibilityStatus({ modelId })),
         mergeVisibilityStatuses,
@@ -680,7 +680,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         idsObs.pipe(
           mergeMap((modelId) => {
             return from(this._idsCache.getModelCategoryIds(modelId)).pipe(
-              concatAll(),
+              mergeAll(),
               mergeMap((categoryId) => this.changeCategoryState({ categoryId, modelId, on: true })),
             );
           }),
