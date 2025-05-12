@@ -6,7 +6,6 @@
 import { expect } from "chai";
 import { SnapshotDb } from "@itwin/core-backend";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import type { ECSqlQueryDef } from "@itwin/presentation-shared";
 import { CategoriesTreeDefinition, CategoriesTreeIdsCache, CategoriesVisibilityHandler } from "@itwin/tree-widget-react/internal";
 import { Datasets } from "../util/Datasets.js";
 import { run, TestIModelConnection } from "../util/TestUtilities.js";
@@ -148,18 +147,7 @@ describe("categories tree", () => {
         viewport,
         expectations: "all-hidden",
       });
-      const query: ECSqlQueryDef = {
-        ecsql: `
-            SELECT
-              Model.Id AS ECInstanceId
-            FROM bis.SpatialCategory
-            LIMIT 1
-          `,
-      };
-      let definitionContainer = "";
-      for await (const row of imodelAccess.createQueryReader(query, { limit: "unbounded" })) {
-        definitionContainer = row.ECInstanceId;
-      }
+      const definitionContainer = iModel.elements.getElementProps(visibilityTargets.categories[0]).model;
       return { iModel, imodelAccess, viewport, provider, handler, definitionContainer };
     },
     cleanup: async (props) => {
