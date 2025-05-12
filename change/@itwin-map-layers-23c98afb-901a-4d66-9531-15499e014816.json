@@ -1,0 +1,7 @@
+{
+  "type": "prerelease",
+  "comment": "Fix style of color picker button in Map Layers",
+  "packageName": "@itwin/map-layers",
+  "email": "jorigis.snaras@bentley.com",
+  "dependentChangeType": "patch"
+}

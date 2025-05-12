@@ -75,9 +75,11 @@ $hovered-icon-color: var(--iui-color-icon-accent);
     }
 
     .map-manager-base-item-color.components-color-swatch {
-      margin-left: 6px;
-      width: 2em;
-      height: 2em;
+      min-inline-size: var(--iui-size-l);
+      min-block-size: var(--iui-size-l);
+      margin-inline: var(--iui-size-2xs);
+      padding: 0;
+      border: 0;
     }
   }
 }
