@@ -6,43 +6,56 @@
 import { expect } from "chai";
 import { EMPTY, expand, from, mergeMap } from "rxjs";
 import { waitFor } from "test-utilities";
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import { assert } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
-import type { HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { toVoidPromise } from "@itwin/tree-widget-react/internal";
 
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { ECSqlQueryDef } from "@itwin/presentation-shared";
 import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
 import type { IModelAccess } from "./StatelessHierarchyProvider.js";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-type Visibility = "visible" | "hidden" | "partial";
 
-export interface VisibilityExpectations {
-  [id: string]: Visibility;
-}
+type Visibility = "visible" | "hidden" | "partial";
 
 export interface ValidateNodeProps {
   handler: HierarchyVisibilityHandler;
   viewport: Viewport;
-  expectations: "all-visible" | "all-hidden";
-  differentNodeExpectations?: VisibilityExpectations;
+  expectations:
+    | "all-visible"
+    | "all-hidden"
+    | {
+        default: "all-visible" | "all-hidden";
+        instances: { [id: string]: Visibility };
+      };
 }
 
-async function validateNodeVisibility({ node, handler, expectations, differentNodeExpectations }: ValidateNodeProps & { node: HierarchyNode }) {
+async function validateNodeVisibility({ node, handler, expectations }: ValidateNodeProps & { node: HierarchyNode }) {
   if (HierarchyNode.isClassGroupingNode(node)) {
     return;
   }
   assert(HierarchyNode.isInstancesNode(node));
-  const { id } = node.key.instanceKeys[0];
+  const ids = node.key.instanceKeys.map((instanceKey) => instanceKey.id);
   const actualVisibility = await handler.getVisibilityStatus(node);
-  if (differentNodeExpectations && id in differentNodeExpectations) {
-    expect(actualVisibility.state).to.eq(differentNodeExpectations[id]);
+  if (expectations === "all-visible" || expectations === "all-hidden") {
+    expect(actualVisibility.state).to.eq(expectations === "all-hidden" ? "hidden" : "visible");
     return;
   }
-  expect(actualVisibility.state).to.eq(expectations === "all-hidden" ? "hidden" : "visible");
+  if (
+    ids.some((id) => {
+      if (id in expectations.instances) {
+        expect(actualVisibility.state).to.eq(expectations.instances[id]);
+        return true;
+      }
+      return false;
+    })
+  ) {
+    return;
+  }
+  expect(actualVisibility.state).to.eq(expectations.default === "all-hidden" ? "hidden" : "visible");
 }
 
 export async function validateHierarchyVisibility({
@@ -206,10 +219,10 @@ export function createModelHierarchyNode(modelId?: Id64String, hasChildren?: boo
 }
 
 export function createElementHierarchyNode(props: {
-  modelId: Id64String | undefined;
-  categoryId: Id64String | undefined;
+  modelId: Id64String;
+  categoryId: Id64String;
   hasChildren?: boolean;
-  elementId?: Id64String;
+  elementId: Id64String;
 }): NonGroupingHierarchyNode {
   return {
     key: {

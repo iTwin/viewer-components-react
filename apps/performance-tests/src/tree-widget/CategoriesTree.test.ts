@@ -6,6 +6,7 @@
 import { expect } from "chai";
 import { SnapshotDb } from "@itwin/core-backend";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
+import type { ECSqlQueryDef } from "@itwin/presentation-shared";
 import { CategoriesTreeDefinition, CategoriesTreeIdsCache, CategoriesVisibilityHandler } from "@itwin/tree-widget-react/internal";
 import { Datasets } from "../util/Datasets.js";
 import { run, TestIModelConnection } from "../util/TestUtilities.js";
@@ -20,7 +21,7 @@ import {
   validateHierarchyVisibility,
 } from "./VisibilityUtilities.js";
 
-import type { Id64Array } from "@itwin/core-bentley";
+import type { Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
@@ -63,7 +64,7 @@ describe("categories tree", () => {
     viewport: Viewport;
     handler: HierarchyVisibilityHandler & Disposable;
     provider: HierarchyProvider & Disposable;
-    categories: Id64Array;
+    category: Id64String;
   }>({
     testName: "changing category visibility changes visibility for 50k subCategories",
     setup: async () => {
@@ -92,7 +93,8 @@ describe("categories tree", () => {
         viewport,
         expectations: "all-hidden",
       });
-      return { iModel, imodelAccess, viewport, provider, handler, categories: visibilityTargets.categories };
+      expect(visibilityTargets.categories.length).to.be.eq(1);
+      return { iModel, imodelAccess, viewport, provider, handler, category: visibilityTargets.categories[0] };
     },
     cleanup: async (props) => {
       props.iModel.close();
@@ -100,8 +102,8 @@ describe("categories tree", () => {
       props.handler[Symbol.dispose]();
       props.provider[Symbol.dispose]();
     },
-    test: async ({ viewport, handler, provider, categories }) => {
-      await Promise.all(categories.map(async (category) => handler.changeVisibility(createCategoryHierarchyNode(category, true), true)));
+    test: async ({ viewport, handler, provider, category }) => {
+      await handler.changeVisibility(createCategoryHierarchyNode(category, true), true);
       await validateHierarchyVisibility({
         provider,
         handler,
@@ -117,7 +119,7 @@ describe("categories tree", () => {
     viewport: Viewport;
     handler: HierarchyVisibilityHandler & Disposable;
     provider: HierarchyProvider & Disposable;
-    models: Id64Array;
+    definitionContainer: Id64String;
   }>({
     testName: "changing definition container visibility changes visibility for 50k categories",
     setup: async () => {
@@ -146,7 +148,19 @@ describe("categories tree", () => {
         viewport,
         expectations: "all-hidden",
       });
-      return { iModel, imodelAccess, viewport, provider, handler, models: visibilityTargets.models };
+      const query: ECSqlQueryDef = {
+        ecsql: `
+            SELECT
+              Model.Id AS ECInstanceId
+            FROM bis.SpatialCategory
+            LIMIT 1
+          `,
+      };
+      let definitionContainer = "";
+      for await (const row of imodelAccess.createQueryReader(query, { limit: "unbounded" })) {
+        definitionContainer = row.ECInstanceId;
+      }
+      return { iModel, imodelAccess, viewport, provider, handler, definitionContainer };
     },
     cleanup: async (props) => {
       props.iModel.close();
@@ -154,8 +168,8 @@ describe("categories tree", () => {
       props.handler[Symbol.dispose]();
       props.provider[Symbol.dispose]();
     },
-    test: async ({ viewport, handler, provider, models }) => {
-      await Promise.all(models.map(async (model) => handler.changeVisibility(createDefinitionContainerHierarchyNode(model), true)));
+    test: async ({ viewport, handler, provider, definitionContainer }) => {
+      await handler.changeVisibility(createDefinitionContainerHierarchyNode(definitionContainer), true);
       await validateHierarchyVisibility({
         provider,
         handler,

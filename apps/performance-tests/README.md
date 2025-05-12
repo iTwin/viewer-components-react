@@ -8,7 +8,7 @@ The tests are supposed to represent various scenarios that we want to profile.
 
 Additionally, we want to measure how much time the main thread is being blocked.
 Also, these tests have a different purpose - to provide a benchmark that will be used by GitHub actions and can be useful for the developers.
-The simplest way to accommodate that is to use a custom test reporter (defined in `TestReporter.ts`).
+The simplest way to accommodate that is to use a custom test reporter (defined in `TestReporter.cts`).
 The reporter gathers test durations and information about main thread blocking and saves it to a file if an output path is provided.
 
 Example: `mocha -R ./lib/TestReporter.js -O BENCHMARK_OUTPUT_PATH="./results.json"`

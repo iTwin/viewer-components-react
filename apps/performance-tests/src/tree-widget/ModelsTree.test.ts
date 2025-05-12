@@ -5,7 +5,6 @@
 
 import { expect } from "chai";
 import { SnapshotDb } from "@itwin/core-backend";
-import type { Viewport } from "@itwin/core-frontend";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import {
@@ -28,7 +27,8 @@ import {
   validateHierarchyVisibility,
 } from "./VisibilityUtilities.js";
 
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { Viewport } from "@itwin/core-frontend";
+import type { Id64String } from "@itwin/core-bentley";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { ECSqlQueryDef, InstanceKey } from "@itwin/presentation-shared";
 import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
@@ -79,7 +79,7 @@ describe("models tree", () => {
     viewport: Viewport;
     handler: HierarchyVisibilityHandler & Disposable;
     provider: HierarchyProvider & Disposable;
-    models: Id64Array;
+    elementsModel: Id64String;
   }>({
     testName: "changing model visibility changes visibility for 50k elements",
     setup: async () => {
@@ -108,7 +108,8 @@ describe("models tree", () => {
         viewport,
         expectations: "all-hidden",
       });
-      return { iModel, imodelAccess, viewport, provider, handler, models: testData.models.map((model) => model.id), idsCache };
+      const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
+      return { iModel, imodelAccess, viewport, provider, handler, elementsModel, idsCache };
     },
     cleanup: async (props) => {
       props.iModel.close();
@@ -117,8 +118,8 @@ describe("models tree", () => {
       props.provider[Symbol.dispose]();
       props.idsCache[Symbol.dispose]();
     },
-    test: async ({ viewport, handler, provider, models }) => {
-      await Promise.all(models.map(async (model) => handler.changeVisibility(createModelHierarchyNode(model), true)));
+    test: async ({ viewport, handler, provider, elementsModel }) => {
+      await handler.changeVisibility(createModelHierarchyNode(elementsModel), true);
       await validateHierarchyVisibility({
         provider,
         handler,
@@ -135,7 +136,7 @@ describe("models tree", () => {
     viewport: Viewport;
     handler: HierarchyVisibilityHandler & Disposable;
     provider: HierarchyProvider & Disposable;
-    categories: Id64Array;
+    elementsCategory: Id64String;
     elementsModel: Id64String;
   }>({
     testName: "changing category visibility changes visibility for 50k elements",
@@ -165,19 +166,10 @@ describe("models tree", () => {
         viewport,
         expectations: "all-visible",
       });
-      const query: ECSqlQueryDef = {
-        ecsql: `
-            SELECT
-              Model.Id AS ECInstanceId
-            FROM bis.GeometricElement3d
-            LIMIT 1
-          `,
-      };
-      let elementsModel = "";
-      for await (const row of imodelAccess.createQueryReader(query, { limit: "unbounded" })) {
-        elementsModel = row.ECInstanceId;
-      }
-      return { iModel, imodelAccess, viewport, provider, handler, categories: visibilityTargets.categories, elementsModel, idsCache };
+      const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
+      expect(visibilityTargets.categories.length).to.be.eq(1);
+      const elementsCategory = visibilityTargets.categories[0];
+      return { iModel, imodelAccess, viewport, provider, handler, elementsCategory, elementsModel, idsCache };
     },
     cleanup: async (props) => {
       props.iModel.close();
@@ -186,8 +178,8 @@ describe("models tree", () => {
       props.provider[Symbol.dispose]();
       props.idsCache[Symbol.dispose]();
     },
-    test: async ({ viewport, handler, provider, categories, elementsModel }) => {
-      await Promise.all(categories.map(async (category) => handler.changeVisibility(createCategoryHierarchyNode(category, true, elementsModel), false)));
+    test: async ({ viewport, handler, provider, elementsCategory, elementsModel }) => {
+      await handler.changeVisibility(createCategoryHierarchyNode(elementsCategory, true, elementsModel), false);
       await validateHierarchyVisibility({
         provider,
         handler,
@@ -204,7 +196,7 @@ describe("models tree", () => {
     viewport: Viewport;
     handler: HierarchyVisibilityHandler & Disposable;
     provider: HierarchyProvider & Disposable;
-    categories: Id64Array;
+    elementsCategory: Id64String;
     elementsModel: Id64String;
   }>({
     testName: "changing per-model-category override changes visibility for 50k elements",
@@ -228,18 +220,10 @@ describe("models tree", () => {
         hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
         imodelAccess,
       });
-      const query: ECSqlQueryDef = {
-        ecsql: `
-            SELECT
-              Model.Id AS ECInstanceId
-            FROM bis.GeometricElement3d
-            LIMIT 1
-          `,
-      };
-      let elementsModel = "";
-      for await (const row of imodelAccess.createQueryReader(query, { limit: "unbounded" })) {
-        elementsModel = row.ECInstanceId;
-      }
+
+      const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
+      expect(visibilityTargets.categories.length).to.be.eq(1);
+      const elementsCategory = visibilityTargets.categories[0];
 
       await handler.changeVisibility(createModelHierarchyNode(elementsModel), true);
       await validateHierarchyVisibility({
@@ -248,7 +232,7 @@ describe("models tree", () => {
         viewport,
         expectations: "all-visible",
       });
-      return { iModel, imodelAccess, viewport, provider, handler, categories: visibilityTargets.categories, elementsModel, idsCache };
+      return { iModel, imodelAccess, viewport, provider, handler, elementsCategory, elementsModel, idsCache };
     },
     cleanup: async (props) => {
       props.iModel.close();
@@ -257,9 +241,8 @@ describe("models tree", () => {
       props.provider[Symbol.dispose]();
       props.idsCache[Symbol.dispose]();
     },
-    test: async ({ viewport, handler, provider, categories, elementsModel }) => {
-      elementsModel;
-      viewport.perModelCategoryVisibility.setOverride(elementsModel, categories, PerModelCategoryVisibility.Override.Hide);
+    test: async ({ viewport, handler, provider, elementsCategory, elementsModel }) => {
+      viewport.perModelCategoryVisibility.setOverride(elementsModel, elementsCategory, PerModelCategoryVisibility.Override.Hide);
       await validateHierarchyVisibility({
         provider,
         handler,
@@ -299,23 +282,12 @@ describe("models tree", () => {
         hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
         imodelAccess,
       });
-      const query: ECSqlQueryDef = {
-        ecsql: `
-            SELECT
-              ECInstanceId AS ECInstanceId,
-              Category.Id AS CategoryId,
-              Model.Id AS ModelId
-            FROM bis.GeometricElement3d this
-            WHERE Parent.Id IS NULL
-            LIMIT 1
-          `,
-      };
-      const node = { modelId: "", elementId: "", categoryId: "", subjectId: "0x1" };
-      for await (const row of imodelAccess.createQueryReader(query, { limit: "unbounded" })) {
-        node.elementId = row.ECInstanceId;
-        node.modelId = row.ModelId;
-        node.categoryId = row.CategoryId;
-      }
+
+      const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
+      expect(visibilityTargets.categories.length).to.be.eq(1);
+      const elementsCategory = visibilityTargets.categories[0];
+      const node = { modelId: elementsModel, elementId: visibilityTargets.elements[0], categoryId: elementsCategory, subjectId: "0x1" };
+
       await validateHierarchyVisibility({
         provider,
         handler,
@@ -338,12 +310,14 @@ describe("models tree", () => {
         provider,
         handler,
         viewport,
-        expectations: "all-hidden",
-        differentNodeExpectations: {
-          [node.modelId]: "partial",
-          [node.subjectId]: "partial",
-          [node.categoryId]: "partial",
-          [node.elementId]: "visible",
+        expectations: {
+          default: "all-hidden",
+          instances: {
+            [node.modelId]: "partial",
+            [node.subjectId]: "partial",
+            [node.categoryId]: "partial",
+            [node.elementId]: "visible",
+          },
         },
       });
     },
