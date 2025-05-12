@@ -44,18 +44,13 @@ async function validateNodeVisibility({ node, handler, expectations }: ValidateN
     expect(actualVisibility.state).to.eq(expectations === "all-hidden" ? "hidden" : "visible");
     return;
   }
-  if (
-    ids.some((id) => {
-      if (id in expectations.instances) {
-        expect(actualVisibility.state).to.eq(expectations.instances[id]);
-        return true;
-      }
-      return false;
-    })
-  ) {
-    return;
+  const idInExpectations = ids.find((id) => id in expectations.instances)
+  if (idInExpectations) {
+    const expectedVisibility = expectations.instances[idInExpectations];
+    expect(actualVisibility.state).to.eq(expectedVisibility);
+  } else {
+    expect(actualVisibility.state).to.eq(expectations.default === "all-hidden" ? "hidden" : "visible");
   }
-  expect(actualVisibility.state).to.eq(expectations.default === "all-hidden" ? "hidden" : "visible");
 }
 
 export async function validateHierarchyVisibility({
