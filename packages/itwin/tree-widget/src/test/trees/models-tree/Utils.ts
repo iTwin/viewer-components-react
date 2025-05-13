@@ -18,7 +18,7 @@ import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../tr
 import { createIModelAccess } from "../Common.js";
 
 import type { ParentElementMap } from "../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
-import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type {
   ClassGroupingNodeKey,
@@ -113,20 +113,22 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
       return props?.modelCategories?.get(modelId)?.map(({ categoryId }) => categoryId) ?? [];
     }),
     getCategoryChildCategories: sinon
-      .stub<[{ modelId: Id64String; categoryId: Id64String; parentElementIds?: Id64Array }], Promise<Map<ParentId, Set<CategoryId>>>>()
+      .stub<[{ modelId: Id64String; categoryIds: Id64Arg; parentElementIds?: Id64Arg }], Promise<Map<ParentId, Set<CategoryId>>>>()
       .callsFake(async () => new Map()),
-    getCategoryElementsCount: sinon.stub<[ModelId, CategoryId, Array<ElementId> | undefined], Promise<number>>().callsFake(async (_, categoryId) => {
+    getCategoryElementsCount: sinon.stub<[ModelId, CategoryId, Id64Arg | undefined], Promise<number>>().callsFake(async (_, categoryId) => {
       return props?.categoryElements?.get(categoryId)?.length ?? 0;
     }),
     getElementsAllChildren: sinon.stub<[{ modelId: Id64String; elementIds: Id64Array }]>().callsFake(async () => new Map()),
     getCategoryAllIndirectChildren: sinon
-      .stub<[{ modelId: Id64String; categoryId: Id64String; parentElementIds?: Id64Array }], Promise<Map<CategoryId, Set<ElementId>>>>()
+      .stub<[{ modelId: Id64String; categoryId: Id64String; parentElementIds?: Id64Arg }], Promise<Map<CategoryId, Set<ElementId>>>>()
       .callsFake(async () => new Map()),
     getElementsChildCategories: sinon
       .stub<[{ modelId: Id64String; elementIds: Id64Set }], Promise<Map<ParentId, Set<CategoryId>>>>()
       .callsFake(async () => new Map()),
     hasSubModel: sinon.stub<[Id64String], Promise<boolean>>().callsFake(async () => false),
-    getCategoriesModeledElements: sinon.stub<[Id64String, Id64Array], Promise<Id64Array>>().callsFake(async () => []),
+    getCategoriesModeledElements: sinon
+      .stub<[{ modelId: Id64String; categoryIds: Id64Arg; parentIds?: Id64Arg; includeNested: boolean }], Promise<Id64Array>>()
+      .callsFake(async () => []),
   });
 }
 

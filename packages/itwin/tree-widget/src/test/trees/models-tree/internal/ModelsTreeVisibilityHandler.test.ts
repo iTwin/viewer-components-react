@@ -5,7 +5,7 @@
 
 import { assert, expect } from "chai";
 import sinon from "sinon";
-import { CompressedId64Set } from "@itwin/core-bentley";
+import { CompressedId64Set, Id64 } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, IModelReadRpcInterface, RenderMode, SnapshotIModelRpcInterface } from "@itwin/core-common";
 import { IModelApp, NoRenderApp, OffScreenViewport, PerModelCategoryVisibility, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
@@ -99,15 +99,35 @@ describe("ModelsTreeVisibilityHandler", () => {
       const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
         getModelDisplayStatus:
           props?.overrides?.models &&
-          (async ({ id, originalImplementation }) => {
-            const res = props.overrides!.models!.get(id);
-            return res ? createVisibilityStatus(res) : originalImplementation();
+          (async ({ ids, originalImplementation }) => {
+            let visibility: Visibility | "unknown" = "unknown";
+            for (const modelId of Id64.iterable(ids)) {
+              const res = props.overrides!.models!.get(modelId);
+              if (!res) {
+                continue;
+              }
+              if (visibility !== "unknown" && res !== visibility) {
+                return createVisibilityStatus("partial");
+              }
+              visibility = res;
+            }
+            return visibility !== "unknown" ? createVisibilityStatus(visibility) : originalImplementation();
           }),
         getCategoryDisplayStatus:
           props?.overrides?.categories &&
-          (async ({ categoryId, originalImplementation }) => {
-            const res = props.overrides!.categories!.get(categoryId);
-            return res ? createVisibilityStatus(res) : originalImplementation();
+          (async ({ categoryIds, originalImplementation }) => {
+            let visibility: Visibility | "unknown" = "unknown";
+            for (const id of Id64.iterable(categoryIds)) {
+              const res = props.overrides!.categories!.get(id);
+              if (!res) {
+                continue;
+              }
+              if (visibility !== "unknown" && res !== visibility) {
+                return createVisibilityStatus("partial");
+              }
+              visibility = res;
+            }
+            return visibility !== "unknown" ? createVisibilityStatus(visibility) : originalImplementation();
           }),
         getElementDisplayStatus:
           props?.overrides?.elements &&

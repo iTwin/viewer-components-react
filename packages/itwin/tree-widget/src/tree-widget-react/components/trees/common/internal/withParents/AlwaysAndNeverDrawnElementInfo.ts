@@ -25,12 +25,13 @@ import {
   takeUntil,
   tap,
 } from "rxjs";
+import type { BeEvent, Id64Arg, Id64String } from "@itwin/core-bentley";
+import { Id64 } from "@itwin/core-bentley";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { GEOMETRIC_ELEMENT_3D_CLASS_NAME } from "../ClassNameDefinitions.js";
 import { pushToMap, setDifference } from "../Utils.js";
 
 import type { Observable, Subscription } from "rxjs";
-import type { BeEvent, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import type { CategoryId, ElementId, ModelId, ParentId } from "../Types.js";
 
@@ -51,8 +52,8 @@ export interface ModelAlwaysOrNeverDrawnElementsQueryProps {
 /** @internal */
 export interface CategoryAlwaysOrNeverDrawnElementsQueryProps {
   modelId?: Id64String;
-  categoryIds: Id64Array;
-  parentElementIds?: Id64Array;
+  categoryIds: Id64Arg;
+  parentElementIds?: Id64Arg;
 }
 
 /** @internal */
@@ -112,43 +113,40 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
     const cache = props.setType === "always" ? this._alwaysDrawn : this._neverDrawn;
     const getElements =
       "categoryIds" in props
-      ? (entry: CacheEntry | undefined): Set<ElementId> => {
-          const result = new Array<ElementId>();
-          if (!entry) {
-            return new Set();
-          }
-          const { modelId, parentElementIds, categoryIds } = props;
-
-          const parentElementMaps = modelId ? [entry.get(modelId)] : entry.values();
-          for (const parentElementMap of parentElementMaps) {
-            if (!parentElementMap) {
-              continue;
+        ? (entry: CacheEntry | undefined): Set<ElementId> => {
+            if (!entry) {
+              return new Set();
             }
-            for (const parentElementId of parentElementIds ?? [undefined]) {
-              const parentEntry = parentElementMap.get(parentElementId);
-              if (!parentEntry) {
+            const result = new Set<ElementId>();
+            const { modelId, parentElementIds, categoryIds } = props;
+
+            const parentElementMaps = modelId ? [entry.get(modelId)] : entry.values();
+            for (const parentElementMap of parentElementMaps) {
+              if (!parentElementMap) {
                 continue;
               }
-              for (const categoryId of categoryIds) {
-                const categoryElements = parentEntry.get(categoryId);
-                if (!categoryElements) {
+              for (const parentElementId of parentElementIds ? Id64.iterable(parentElementIds) : [undefined]) {
+                const parentEntry = parentElementMap.get(parentElementId);
+                if (!parentEntry) {
                   continue;
                 }
-                result.push(...categoryElements);
+                for (const categoryId of Id64.iterable(categoryIds)) {
+                  const categoryElements = parentEntry.get(categoryId);
+                  categoryElements?.forEach((element) => result.add(element));
+                }
               }
             }
-          }
 
-          return new Set(result);
-        }
-      : (entry: CacheEntry | undefined) => {
-          const parentElementMap = entry?.get(props.modelId);
-          const elements = new Set<ElementId>();
-          parentElementMap?.forEach((categoriesMap) => {
-            categoriesMap.forEach((elementIds) => elementIds.forEach((id) => elements.add(id)));
-          });
-          return elements;
-        };
+            return result;
+          }
+        : (entry: CacheEntry | undefined) => {
+            const parentElementMap = entry?.get(props.modelId);
+            const elements = new Set<ElementId>();
+            parentElementMap?.forEach((categoriesMap) => {
+              categoriesMap.forEach((elementIds) => elementIds.forEach((id) => elements.add(id)));
+            });
+            return elements;
+          };
 
     return cache.pipe(map(getElements));
   }
@@ -251,9 +249,9 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
       })),
     );
   }
-   public getAlwaysDrawnElements(props: AlwaysOrNeverDrawnElementsQueryProps) {
-      return this.getElements({ ...props, setType: "always" });
-    }
+  public getAlwaysDrawnElements(props: AlwaysOrNeverDrawnElementsQueryProps) {
+    return this.getElements({ ...props, setType: "always" });
+  }
 
   public getNeverDrawnElements(props: AlwaysOrNeverDrawnElementsQueryProps) {
     return this.getElements({ ...props, setType: "never" });

@@ -12,7 +12,7 @@ import { getClassesByView, releaseMainThreadOnItemsCount } from "./Utils.js";
 
 import type { Viewport } from "@itwin/core-frontend";
 import type { Observable, OperatorFunction } from "rxjs";
-import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { NonPartialVisibilityStatus, Visibility } from "./Tooltip.js";
 import type { VisibilityStatus } from "../UseHierarchyVisibility.js";
 import type { CategoryId, ElementId, ModelId, ParentId } from "./Types.js";
@@ -58,7 +58,7 @@ export function getChildrenDisplayStatus({
   getCategoryDisplayStatus,
 }: {
   parentNodeVisibilityStatus: VisibilityStatus;
-  getCategoryDisplayStatus: ({ categoryId, parentElementIds }: { categoryId: Id64String; parentElementIds?: Id64Array }) => Observable<VisibilityStatus>;
+  getCategoryDisplayStatus: ({ categoryIds, parentElementIds }: { categoryIds: Id64Set; parentElementIds?: Id64Arg }) => Observable<VisibilityStatus>;
 }): OperatorFunction<Map<ParentId, Set<CategoryId>>, VisibilityStatus> {
   return (obs) => {
     return obs.pipe(
@@ -68,12 +68,7 @@ export function getChildrenDisplayStatus({
         }
 
         return from(childCategoriesMap).pipe(
-          mergeMap(([elementId, categoryIds]) =>
-            from(categoryIds).pipe(
-              mergeMap((categoryId) => getCategoryDisplayStatus({ categoryId, parentElementIds: [elementId] })),
-              mergeVisibilityStatuses,
-            ),
-          ),
+          mergeMap(([elementId, categoryIds]) => getCategoryDisplayStatus({ categoryIds, parentElementIds: elementId })),
           startWith<VisibilityStatus>(parentNodeVisibilityStatus),
           mergeVisibilityStatuses,
         );
@@ -92,7 +87,7 @@ export function changeChildrenDisplayStatus({
   queueElementsVisibilityChange: (elementIds: Id64Set, isDisplayedByDefault: boolean) => Observable<undefined>;
   getDefaultCategoryVisibilityStatus: (categoryId: Id64String) => NonPartialVisibilityStatus;
   createChangeSubModelsObservable: (elementIds: Id64Array) => Observable<void>;
-  parentsInfo?: { elementIds: Id64Set; parentsCategoryVisibilityStatus: "visible" | "hidden" };
+  parentsInfo?: { elementIds: Id64Set; parentsCategoryVisibility: "visible" | "hidden" };
 }): OperatorFunction<Map<CategoryId, Set<ElementId>>, void> {
   return (obs) => {
     return obs.pipe(
@@ -108,8 +103,8 @@ export function changeChildrenDisplayStatus({
           return acc;
         },
         {
-          alwaysDrawn: parentsInfo && parentsInfo.parentsCategoryVisibilityStatus === "visible" ? [...parentsInfo.elementIds] : new Array<Id64String>(),
-          neverDrawn: parentsInfo && parentsInfo.parentsCategoryVisibilityStatus === "hidden" ? [...parentsInfo.elementIds] : new Array<Id64String>(),
+          alwaysDrawn: parentsInfo && parentsInfo.parentsCategoryVisibility === "visible" ? [...parentsInfo.elementIds] : new Array<Id64String>(),
+          neverDrawn: parentsInfo && parentsInfo.parentsCategoryVisibility === "hidden" ? [...parentsInfo.elementIds] : new Array<Id64String>(),
         },
       ),
       mergeMap((state) =>
@@ -129,7 +124,7 @@ export function getSubModeledElementsVisibilityStatus({
   getModelVisibilityStatus,
 }: {
   parentNodeVisibilityStatus: VisibilityStatus;
-  getModelVisibilityStatus: ({ modelId }: { modelId: Id64String }) => Observable<VisibilityStatus>;
+  getModelVisibilityStatus: ({ modelIds }: { modelIds: Id64Array }) => Observable<VisibilityStatus>;
 }): OperatorFunction<Id64Array, VisibilityStatus> {
   return (obs) => {
     return obs.pipe(
@@ -138,11 +133,7 @@ export function getSubModeledElementsVisibilityStatus({
         if (modeledElementIds.length === 0) {
           return of(parentNodeVisibilityStatus);
         }
-        return from(modeledElementIds).pipe(
-          mergeMap((modeledElementId) => getModelVisibilityStatus({ modelId: modeledElementId })),
-          startWith<VisibilityStatus>(parentNodeVisibilityStatus),
-          mergeVisibilityStatuses,
-        );
+        return getModelVisibilityStatus({ modelIds: modeledElementIds }).pipe(startWith<VisibilityStatus>(parentNodeVisibilityStatus), mergeVisibilityStatuses);
       }),
     );
   };
@@ -153,7 +144,7 @@ export function filterSubModeledElementIds({
   doesSubModelExist,
 }: {
   doesSubModelExist: (elementId: Id64String) => Promise<boolean>;
-}): OperatorFunction<Array<ElementId>, Array<ModelId>> {
+}): OperatorFunction<Array<ElementId> | Set<ElementId>, Array<ModelId>> {
   return (obs) => {
     return obs.pipe(
       mergeAll(),
@@ -239,7 +230,7 @@ export function getVisibilityFromAlwaysAndNeverDrawnElementsImpl(
   }
 
   if (viewport.isAlwaysDrawnExclusive) {
-    return  createVisibilityStatus(alwaysDrawn?.size ? "partial" : "hidden")
+    return createVisibilityStatus(alwaysDrawn?.size ? "partial" : "hidden");
   }
 
   const status = props.defaultStatus();
@@ -269,14 +260,14 @@ export function getElementOverriddenVisibility(props: { elementId: Id64String; v
 /** @internal */
 export interface GetVisibilityFromAlwaysAndNeverDrawnElementsProps {
   /** Status when always/never lists are empty and exclusive mode is off */
-  defaultStatus: () => VisibilityStatus;
+  defaultStatus: (categoryId?: Id64String) => VisibilityStatus;
 }
 
 /** @internal */
 export function getElementVisibility(
   viewsModel: boolean,
   overridenVisibility: NonPartialVisibilityStatus | undefined,
-  categoryVisibility: NonPartialVisibilityStatus,
+  categoryVisibility: VisibilityStatus,
   subModelVisibilityStatus?: VisibilityStatus,
 ): VisibilityStatus {
   if (subModelVisibilityStatus?.state === "partial") {

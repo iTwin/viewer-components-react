@@ -47,7 +47,7 @@ export interface FilteredTree {
 
 type CategoryKey = `${ModelId}-${ParentId}-${CategoryId}`;
 
-function createCategoryKey(modelId: Id64String, categoryId: Id64String, parentId: ParentId | undefined): CategoryKey {
+function createCategoryKey(modelId: Id64String, categoryId: Id64String, parentId: ElementId | undefined): CategoryKey {
   return `${modelId}-${parentId ?? ""}-${categoryId}`;
 }
 

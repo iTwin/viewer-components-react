@@ -52,7 +52,15 @@ export class ModelCategoryElementsCountCache implements Disposable {
           SELECT COUNT(*) elementsCount, e.Category.Id categoryId, e.Model.Id modelId, e.Parent.Id parentId
           FROM ${this._elementsClassName} e
           WHERE
-            ${input.map(({ modelId, categoryId, parentElementIds }) => `(e.Parent.Id ${parentElementIds ? `IN (${parentElementIds.join(", ")})` : "IS NULL"} AND e.Model.Id = ${modelId} AND e.Category.Id = ${categoryId})`).join(" OR ")}
+            ${input
+              .map(
+                ({ modelId, categoryId, parentElementIds }) => `(
+                  e.Parent.Id ${parentElementIds ? `IN (${parentElementIds.join(", ")})` : "IS NULL"}
+                  AND e.Model.Id = ${modelId}
+                  AND e.Category.Id = ${categoryId}
+                )`,
+              )
+              .join(" OR ")}
           GROUP BY e.Model.Id, e.Category.Id, e.Parent.Id
         `,
       },
