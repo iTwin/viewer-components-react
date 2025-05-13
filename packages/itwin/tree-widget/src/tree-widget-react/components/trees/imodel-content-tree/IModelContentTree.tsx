@@ -24,7 +24,6 @@ import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-
 import type { BaseTreeRendererProps } from "../common/components/BaseTreeRenderer.js";
 import type { TreeProps } from "../common/components/Tree.js";
 
-
 /** @beta */
 export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
   Pick<BaseTreeRendererProps, "getActions" | "getDecorations"> & {

@@ -194,11 +194,11 @@ type FunctionProps<THook extends (props: any) => any> = Parameters<THook>[0];
 // @beta (undocumented)
 interface GetCategoryVisibilityStatusProps {
     // (undocumented)
-    categoryId: Id64String;
+    categoryIds: Id64Arg;
     // (undocumented)
     modelId: Id64String;
     // (undocumented)
-    parentElementIds?: Id64Array;
+    parentElementIds?: Id64Arg;
 }
 
 // @beta (undocumented)
@@ -353,7 +353,7 @@ export interface ModelsTreeVisibilityHandlerOverrides {
     }) => Promise<VisibilityStatus>>;
     // (undocumented)
     getModelDisplayStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
-        id: Id64String;
+        ids: Id64Arg;
     }) => Promise<VisibilityStatus>>;
     // (undocumented)
     getSubjectNodeVisibility?: HierarchyVisibilityHandlerOverridableMethod<(props: {
@@ -562,7 +562,7 @@ export interface VisibilityStatus {
 }
 
 // @beta
-export function VisibilityTree({ visibilityHandlerFactory, treeRenderer, hierarchyLevelSizeLimit, ...props }: VisibilityTreeProps): JSX.Element;
+export function VisibilityTree({ visibilityHandlerFactory, treeRenderer, hierarchyLevelSizeLimit, ...props }: VisibilityTreeProps): JSX_2.Element;
 
 // @beta (undocumented)
 type VisibilityTreeProps = Omit<TreeProps, "treeRenderer" | "imodelAccess"> & {

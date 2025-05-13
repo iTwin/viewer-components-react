@@ -40,7 +40,7 @@ export class ModelCategoryElementsCountCache implements Disposable {
   }
 
   private async queryCategoryElementCounts(
-    input: Array<{ modelId: Id64String; categoryId: Id64String, parentElementIds?: Id64Array }>,
+    input: Array<{ modelId: Id64String; categoryId: Id64String; parentElementIds?: Id64Array }>,
   ): Promise<Map<ModelParentCategoryKey, number>> {
     const result = new Map<ModelParentCategoryKey, number>();
     if (input.length === 0) {

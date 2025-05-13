@@ -263,7 +263,7 @@ export class CategoriesTreeIdsCache implements Disposable {
     this._elementModelsCategories ??= (async () => {
       const [modelCategories, modelWithCategoryModeledElements] = await Promise.all([
         (async () => {
-          const elementModelsCategories = new Map<ModelId, { categoryIds: Id64Set; }>();
+          const elementModelsCategories = new Map<ModelId, { categoryIds: Id64Set }>();
           for await (const queriedCategory of this.queryElementModelCategories()) {
             let modelEntry = elementModelsCategories.get(queriedCategory.modelId);
             if (modelEntry === undefined) {
@@ -276,7 +276,7 @@ export class CategoriesTreeIdsCache implements Disposable {
         })(),
         this.getModelWithCategoryModeledElements(),
       ]);
-      const result = new Map<ModelId, { categoryIds: Set<CategoryId>; isSubModel: boolean; }>();
+      const result = new Map<ModelId, { categoryIds: Set<CategoryId>; isSubModel: boolean }>();
       const subModels = getDistinctMapValues(modelWithCategoryModeledElements);
       for (const [modelId, modelEntry] of modelCategories) {
         const isSubModel = subModels.has(modelId);

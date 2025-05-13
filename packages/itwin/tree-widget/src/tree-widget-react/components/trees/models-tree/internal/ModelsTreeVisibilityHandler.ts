@@ -348,10 +348,12 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
             );
           }
           return from(this._idsCache.getModelCategoryIds(modelId)).pipe(
-            mergeMap((categoryIds) => categoryIds.length > 0 ? this.getCategoryDisplayStatus({ modelId, categoryIds }) : of(createVisibilityStatus("visible")))
+            mergeMap((categoryIds) =>
+              categoryIds.length > 0 ? this.getCategoryDisplayStatus({ modelId, categoryIds }) : of(createVisibilityStatus("visible")),
+            ),
           );
         }),
-        mergeVisibilityStatuses
+        mergeVisibilityStatuses,
       );
     });
     return createVisibilityHandlerResult(this, { ids: modelIds }, result, this._props.overrides?.getModelDisplayStatus);
@@ -429,24 +431,24 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
                 }),
               );
             }),
-              mergeMap((visibilityStatusOfChildren) => {
-                if (visibilityStatusOfChildren.state === "partial") {
-                  return of(visibilityStatusOfChildren);
-                }
-                return from(
-                  this._idsCache.getCategoriesModeledElements({
-                    modelId: props.modelId,
-                    categoryIds: props.categoryIds,
-                    parentIds: props.parentElementIds,
-                    includeNested: true,
-                  }),
-                ).pipe(
-                  getSubModeledElementsVisibilityStatus({
-                    parentNodeVisibilityStatus: visibilityStatusOfChildren,
-                    getModelVisibilityStatus: (modelProps) => this.getModelVisibilityStatus(modelProps),
-                  }),
-                );
-              })
+            mergeMap((visibilityStatusOfChildren) => {
+              if (visibilityStatusOfChildren.state === "partial") {
+                return of(visibilityStatusOfChildren);
+              }
+              return from(
+                this._idsCache.getCategoriesModeledElements({
+                  modelId: props.modelId,
+                  categoryIds: props.categoryIds,
+                  parentIds: props.parentElementIds,
+                  includeNested: true,
+                }),
+              ).pipe(
+                getSubModeledElementsVisibilityStatus({
+                  parentNodeVisibilityStatus: visibilityStatusOfChildren,
+                  getModelVisibilityStatus: (modelProps) => this.getModelVisibilityStatus(modelProps),
+                }),
+              );
+            }),
           );
         }),
       );

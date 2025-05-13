@@ -35,7 +35,6 @@ interface TreeWidgetProps {
   onFeatureUsed?: (feature: string) => void;
 }
 
-
 /**
  * Creates a tree widget definition that should be returned from `UiItemsProvider.getWidgets()`.
  * @public

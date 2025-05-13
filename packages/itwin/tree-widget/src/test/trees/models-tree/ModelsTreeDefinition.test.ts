@@ -1070,7 +1070,6 @@ describe("Models tree", () => {
           ],
         });
       });
-
     });
 
     describe("Hierarchy customization", () => {
