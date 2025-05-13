@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { DEFINITION_CONTAINER_CLASS_NAME, MODEL_CLASS_NAME, SUB_CATEGORY_CLASS_NAME } from "../../common/internal/ClassNameDefinitions.js";
-import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
 import { getClassesByView, getDistinctMapValues } from "../../common/internal/Utils.js";
+import { ModelCategoryElementsCountCache } from "../../common/internal/withoutParents/ModelCategoryElementsCountCache.js";
 
 import type { CategoryId, DefinitionContainerId, ElementId, ModelId, SubCategoryId } from "../../common/internal/Types.js";
 import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
@@ -263,7 +263,7 @@ export class CategoriesTreeIdsCache implements Disposable {
     this._elementModelsCategories ??= (async () => {
       const [modelCategories, modelWithCategoryModeledElements] = await Promise.all([
         (async () => {
-          const elementModelsCategories = new Map<ModelId, { categoryIds: Id64Set; }>();
+          const elementModelsCategories = new Map<ModelId, { categoryIds: Id64Set }>();
           for await (const queriedCategory of this.queryElementModelCategories()) {
             let modelEntry = elementModelsCategories.get(queriedCategory.modelId);
             if (modelEntry === undefined) {
@@ -276,7 +276,7 @@ export class CategoriesTreeIdsCache implements Disposable {
         })(),
         this.getModelWithCategoryModeledElements(),
       ]);
-      const result = new Map<ModelId, { categoryIds: Set<CategoryId>; isSubModel: boolean; }>();
+      const result = new Map<ModelId, { categoryIds: Set<CategoryId>; isSubModel: boolean }>();
       const subModels = getDistinctMapValues(modelWithCategoryModeledElements);
       for (const [modelId, modelEntry] of modelCategories) {
         const isSubModel = subModels.has(modelId);

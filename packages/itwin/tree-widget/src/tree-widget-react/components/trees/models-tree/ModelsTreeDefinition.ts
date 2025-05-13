@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, defer, firstValueFrom, from, lastValueFrom, map, merge, mergeAll, mergeMap, reduce, switchMap } from "rxjs";
+import { bufferCount, defer, EMPTY, firstValueFrom, from, lastValueFrom, map, merge, mergeAll, mergeMap, of, reduce, switchMap } from "rxjs";
 import { IModel } from "@itwin/core-common";
 import {
   createNodesQueryClauseFactory,
@@ -25,9 +25,10 @@ import {
 import { collect } from "../common/internal/Rxjs.js";
 import { createIdsSelector, parseIdsSelectorResult, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
+import { ModelsTreeNode } from "./internal/ModelsTreeNode.js";
 
 import type { Id64String } from "@itwin/core-bentley";
-import type { Observable } from "rxjs";
+import type { Observable, OperatorFunction } from "rxjs";
 import type {
   ECClassHierarchyInspector,
   ECSchemaProvider,
@@ -301,8 +302,10 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                         selector: `
                           IFNULL((
                             SELECT 1
-                            FROM ${this._hierarchyConfig.elementClassSpecification} e
-                            WHERE e.Model.Id = m.ECInstanceId
+                            FROM ${ELEMENT_CLASS_NAME} e
+                            WHERE
+                              e.Model.Id = m.ECInstanceId
+                              AND e.ECClassId IS (${this._hierarchyConfig.elementClassSpecification})
                             LIMIT 1
                           ), 0)
                         `,
@@ -424,7 +427,9 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     });
     const modeledElements = await firstValueFrom(
       from(modelIds).pipe(
-        mergeMap(async (modelId) => this._idsCache.getCategoriesModeledElements(modelId, categoryIds)),
+        mergeMap(async (modelId) =>
+          this._idsCache.getCategoriesModeledElements({ modelId, categoryIds, parentIds: parentNode.extendedData?.parentElementIds, includeNested: false }),
+        ),
         reduce((acc, foundModeledElements) => {
           return acc.concat(foundModeledElements);
         }, new Array<ElementId>()),
@@ -455,8 +460,10 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                       1,
                       IFNULL((
                         SELECT 1
-                        FROM ${this._hierarchyConfig.elementClassSpecification} ce
-                        WHERE ce.Parent.Id = this.ECInstanceId
+                        FROM ${ELEMENT_CLASS_NAME} ce
+                        WHERE
+                          ce.Parent.Id = this.ECInstanceId
+                          AND ce.ECClassId IS (${this._hierarchyConfig.elementClassSpecification})
                         LIMIT 1
                       ), 0)
                     )
@@ -474,7 +481,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             WHERE
               this.Category.Id IN (${categoryIds.map(() => "?").join(",")})
               AND this.Model.Id IN (${modelIds.map(() => "?").join(",")})
-              AND this.Parent.Id IS NULL
+              AND this.Parent.Id ${parentNode.extendedData?.parentElementIds ? `IN (${parseIdsSelectorResult(parentNode.extendedData.parentElementIds).join(", ")})` : "IS NULL"}
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
           bindings: [...categoryIds.map((id) => ({ type: "id", value: id })), ...modelIds.map((id) => ({ type: "id", value: id }))] as ECSqlBinding[],
@@ -486,12 +493,58 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
   private async createGeometricElement3dChildrenQuery({
     parentNodeInstanceIds: elementIds,
     instanceFilter,
+    parentNode,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
+    const parentsCategory = ModelsTreeNode.getCategoryId(parentNode);
+
+    if (!parentsCategory) {
+      throw new Error(`Invalid geometric element node "${parentNode.label}" - missing category information.`);
+    }
+    const categoryInstanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
+      filter: instanceFilter,
+      contentClass: { fullName: SPATIAL_CATEGORY_CLASS_NAME, alias: "this" },
+    });
+    const elementInstanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
       filter: instanceFilter,
       contentClass: { fullName: this._hierarchyConfig.elementClassSpecification, alias: "this" },
     });
+
     return [
+      {
+        fullClassName: SPATIAL_CATEGORY_CLASS_NAME,
+        query: {
+          ecsql: `
+            SELECT
+              ${await this._selectQueryFactory.createSelectClause({
+                ecClassId: { selector: "this.ECClassId" },
+                ecInstanceId: { selector: "this.ECInstanceId" },
+                nodeLabel: {
+                  selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
+                    classAlias: "this",
+                    className: SPATIAL_CATEGORY_CLASS_NAME,
+                  }),
+                },
+                grouping: { byLabel: { action: "merge", groupId: "category" } },
+                hasChildren: true,
+                extendedData: {
+                  imageId: "icon-layers",
+                  isCategory: true,
+                  modelIds: { selector: "json_array(CAST(IdToHex(el.Model.Id) AS TEXT))" },
+                  parentElementIds: { selector: createIdsSelector(elementIds) },
+                },
+                supportsFiltering: true,
+              })}
+            FROM ${categoryInstanceFilterClauses.from} this
+            JOIN ${this._hierarchyConfig.elementClassSpecification} el ON el.Category.Id = this.ECInstanceId
+            ${categoryInstanceFilterClauses.joins}
+            WHERE
+              el.Parent.Id IN (${elementIds.join(", ")})
+              AND this.ECInstanceId != ${parentsCategory}
+              ${categoryInstanceFilterClauses.where ? `AND ${categoryInstanceFilterClauses.where}` : ""}
+            GROUP BY this.ECInstanceId
+          `,
+        },
+      },
       {
         fullClassName: this._hierarchyConfig.elementClassSpecification,
         query: {
@@ -513,9 +566,14 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   selector: `
                     IFNULL((
                       SELECT 1
-                      FROM ${this._hierarchyConfig.elementClassSpecification} ce
+                      FROM ${ELEMENT_CLASS_NAME} ce
                       JOIN ${MODEL_CLASS_NAME} m ON ce.Model.Id = m.ECInstanceId
-                      WHERE ce.Parent.Id = this.ECInstanceId OR (ce.Model.Id = this.ECInstanceId AND m.IsPrivate = false)
+                      WHERE
+                        ce.ECClassId IS (${this._hierarchyConfig.elementClassSpecification})
+                        AND (
+                          ce.Parent.Id = this.ECInstanceId
+                          OR (ce.Model.Id = this.ECInstanceId AND m.IsPrivate = false)
+                        )
                       LIMIT 1
                     ), 0)
                   `,
@@ -527,11 +585,12 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 },
                 supportsFiltering: this.supportsFiltering(),
               })}
-            FROM ${instanceFilterClauses.from} this
-            ${instanceFilterClauses.joins}
+            FROM ${elementInstanceFilterClauses.from} this
+            ${elementInstanceFilterClauses.joins}
             WHERE
               this.Parent.Id IN (${elementIds.map(() => "?").join(",")})
-              ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+              AND this.Category.Id = ${parentsCategory}
+              ${elementInstanceFilterClauses.where ? `AND ${elementInstanceFilterClauses.where}` : ""}
           `,
           bindings: elementIds.map((id) => ({ type: "id", value: id })),
         },
@@ -613,11 +672,12 @@ function createGeometricElementInstanceKeyPaths(
       `InstanceElementsWithClassGroupingNodes(ECInstanceId, ECClassId, ParentId, ModelId, CategoryId, GroupingNodeIndex) AS (
         ${[...(targetElementsInfoQuery ? [targetElementsInfoQuery] : []), ...targetGroupingNodesElementInfoQueries].join(" UNION ALL ")}
       )`,
-      `ModelsCategoriesElementsHierarchy(ECInstanceId, ParentId, ModelId, GroupingNodeIndex, Path) AS (
+      `ModelsCategoriesElementsHierarchy(ECInstanceId, ParentId, ModelId, CategoryId, GroupingNodeIndex, Path) AS (
         SELECT
           e.ECInstanceId,
           e.ParentId,
           e.ModelId,
+          e.CategoryId,
           e.GroupingNodeIndex,
           IIF(e.ParentId IS NULL,
             'm${separator}' || CAST(IdToHex([m].[ECInstanceId]) AS TEXT) || '${separator}c${separator}' || CAST(IdToHex([c].[ECInstanceId]) AS TEXT) || '${separator}e${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT),
@@ -634,10 +694,11 @@ function createGeometricElementInstanceKeyPaths(
           pe.ECInstanceId,
           pe.Parent.Id,
           pe.Model.Id,
+          pe.Category.Id,
           ce.GroupingNodeIndex,
           IIF(pe.Parent.Id IS NULL,
-            'm${separator}' || CAST(IdToHex([m].[ECInstanceId]) AS TEXT) || '${separator}c${separator}' || CAST(IdToHex([c].[ECInstanceId]) AS TEXT) || '${separator}e${separator}' || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT) || '${separator}' || ce.Path,
-            'e${separator}' || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT) || '${separator}' || ce.Path
+            'm${separator}' || CAST(IdToHex([m].[ECInstanceId]) AS TEXT) || '${separator}c${separator}' || CAST(IdToHex([c].[ECInstanceId]) AS TEXT) || '${separator}e${separator}' || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT) || '${separator}' || IIF(ce.ParentId IS NOT NULL AND ce.CategoryId != pe.Category.Id, 'c${separator}' || CAST(IdToHex(ce.CategoryId) AS TEXT) || '${separator}', '') || ce.Path,
+            'e${separator}' || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT) || '${separator}' || IIF(ce.ParentId IS NOT NULL AND ce.CategoryId != pe.Category.Id, 'c${separator}' || CAST(IdToHex(ce.CategoryId) AS TEXT) || '${separator}', '') || ce.Path
           )
         FROM ModelsCategoriesElementsHierarchy ce
         JOIN ${hierarchyConfig.elementClassSpecification} pe ON (pe.ECInstanceId = ce.ParentId OR pe.ECInstanceId = ce.ModelId AND ce.ParentId IS NULL)
@@ -646,43 +707,144 @@ function createGeometricElementInstanceKeyPaths(
       )`,
     ];
     const ecsql = `
-      SELECT mce.ModelId, mce.Path, mce.GroupingNodeIndex
+      SELECT
+        mce.ModelId modelId,
+        mce.Path path,
+        mce.GroupingNodeIndex groupingNodeIndex
       FROM ModelsCategoriesElementsHierarchy mce
       WHERE mce.ParentId IS NULL
     `;
 
-    return imodelAccess.createQueryReader({ ctes, ecsql }, { rowFormat: "Indexes", limit: "unbounded" });
+    return imodelAccess.createQueryReader({ ctes, ecsql }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" });
   }).pipe(
     releaseMainThreadOnItemsCount(300),
-    map((row) => parseQueryRow(row, groupInfos, separator, hierarchyConfig.elementClassSpecification)),
-    mergeMap(({ modelId, elementHierarchyPath, groupingNode }) =>
-      from(idsCache.createModelInstanceKeyPaths(modelId)).pipe(
-        mergeAll(),
-        map((modelPath) => {
-          // We dont want to modify the original path, we create a copy that we can modify
-          const newModelPath = [...modelPath];
-          newModelPath.pop(); // model is already included in the element hierarchy path
-          const path = [...newModelPath, ...elementHierarchyPath];
-          if (!groupingNode) {
-            return path;
-          }
-          return {
-            path,
-            options: {
-              autoExpand: {
-                key: groupingNode.key,
-                depth: groupingNode.parentKeys.length,
-              },
-            },
-          };
-        }),
-      ),
-    ),
+    createInstanceKeyPathsFromECSqlRow({ groupInfos, separator, elementClassName: hierarchyConfig.elementClassSpecification, idsCache }),
   );
 }
 
-function parseQueryRow(row: ECSqlQueryRow, groupInfos: ElementsGroupInfo[], separator: string, elementClassName: string) {
-  const rowElements: string[] = row[1].split(separator);
+function createCategoryInstanceKeyPaths(
+  imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor,
+  idsCache: ModelsTreeIdsCache,
+  hierarchyConfig: ModelsTreeHierarchyConfiguration,
+  targetItems: Array<Id64String>,
+): Observable<HierarchyFilteringPath> {
+  if (targetItems.length === 0) {
+    return EMPTY;
+  }
+
+  const separator = ";";
+
+  return defer(() => {
+    const ctes = [
+      `CategoriesElements(ECInstanceId, ParentId, CategoryId, ModelId) AS (
+        SELECT
+          e.ECInstanceId,
+          e.Parent.Id,
+          e.Category.Id,
+          e.Model.Id
+        FROM ${hierarchyConfig.elementClassSpecification} e
+        WHERE e.Category.Id IN (${targetItems.join(", ")})
+      )`,
+      `ChildrenCategoriesElementsHierarchy(ECInstanceId, ParentId, ModelId, CategoryId, Path) AS (
+        SELECT
+          e.ECInstanceId,
+          e.Parent.Id,
+          e.Model.Id,
+          e.Category.Id,
+          'e${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT) || '${separator}c${separator}' || CAST(IdToHex([c].[ECInstanceId]) AS TEXT)
+
+        FROM CategoriesElements ce
+          JOIN ${hierarchyConfig.elementClassSpecification} e ON (ce.ParentId = e.ECInstanceId AND ce.CategoryId != e.Category.Id)
+          LEFT JOIN ${SPATIAL_CATEGORY_CLASS_NAME} c ON c.ECInstanceId = ce.CategoryId
+        WHERE ce.ParentId IS NOT NULL
+
+        UNION ALL
+
+        SELECT
+          pe.ECInstanceId,
+          pe.Parent.Id,
+          pe.Model.Id,
+          pe.Category.Id,
+          IIF(pe.Category.Id = cce.CategoryId,
+            'e${separator}' || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT) || '${separator}' || cce.Path,
+            'e${separator}' || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT) || '${separator}c${separator}' || CAST(IdToHex([c].[ECInstanceId]) AS TEXT) || '${separator}' || cce.Path
+          )
+        FROM ChildrenCategoriesElementsHierarchy cce
+          JOIN ${hierarchyConfig.elementClassSpecification} pe ON pe.ECInstanceId = cce.ParentId
+          LEFT JOIN ${SPATIAL_CATEGORY_CLASS_NAME} c ON c.ECInstanceId = cce.CategoryId
+      )`,
+    ];
+    const ecsql = `
+      SELECT
+          cce.ModelId modelId,
+          ('m${separator}' || CAST(IdToHex([m].[ECInstanceId]) AS TEXT) || '${separator}c${separator}' || CAST(IdToHex([c].[ECInstanceId]) AS TEXT) || '${separator}' || cce.Path) path
+        FROM ChildrenCategoriesElementsHierarchy cce
+          JOIN ${GEOMETRIC_MODEL_3D_CLASS_NAME} m ON m.ECInstanceId = cce.ModelId
+          JOIN ${SPATIAL_CATEGORY_CLASS_NAME} c ON c.ECInstanceId = cce.CategoryId
+        WHERE cce.ParentId IS NULL
+
+        UNION ALL
+        SELECT
+          ce.ModelId modelId,
+          ('m${separator}' || CAST(IdToHex([m].[ECInstanceId]) AS TEXT) || '${separator}c${separator}' || CAST(IdToHex([c].[ECInstanceId]) AS TEXT)) path
+        FROM CategoriesElements ce
+          JOIN ${GEOMETRIC_MODEL_3D_CLASS_NAME} m ON m.ECInstanceId = ce.ModelId
+          JOIN ${SPATIAL_CATEGORY_CLASS_NAME} c ON c.ECInstanceId = ce.CategoryId
+        WHERE ce.ParentId IS NULL
+        GROUP BY ce.CategoryId
+    `;
+
+    return imodelAccess.createQueryReader({ ctes, ecsql }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" });
+  }).pipe(
+    releaseMainThreadOnItemsCount(300),
+    createInstanceKeyPathsFromECSqlRow({ idsCache, separator, elementClassName: hierarchyConfig.elementClassSpecification }),
+  );
+}
+
+function createInstanceKeyPathsFromECSqlRow({
+  idsCache,
+  separator,
+  elementClassName,
+  groupInfos,
+}: {
+  idsCache: ModelsTreeIdsCache;
+  separator: string;
+  elementClassName: string;
+  groupInfos?: ElementsGroupInfo[];
+}): OperatorFunction<ECSqlQueryRow, HierarchyFilteringPath> {
+  return (obs) => {
+    return from(obs).pipe(
+      map((row) => parseQueryRow({ row, separator, elementClassName, groupInfos })),
+      mergeMap(({ modelId, instanceKeyPath, groupingNode }) =>
+        from(idsCache.createModelInstanceKeyPaths(modelId)).pipe(
+          mergeAll(),
+          map((modelPath) => {
+            // We dont want to modify the original path, we create a copy that we can modify
+            const newModelPath = [...modelPath];
+            newModelPath.pop(); // model is already included in the element hierarchy path
+            const path = [...newModelPath, ...instanceKeyPath];
+            if (!groupingNode) {
+              return path;
+            }
+            return {
+              path,
+              options: {
+                autoExpand: {
+                  key: groupingNode.key,
+                  depth: groupingNode.parentKeys.length,
+                },
+              },
+            };
+          }),
+        ),
+      ),
+    );
+  };
+}
+
+function parseQueryRow(props: { row: ECSqlQueryRow; groupInfos?: ElementsGroupInfo[]; separator: string; elementClassName: string }) {
+  const { row, groupInfos, separator, elementClassName } = props;
+  const rowElements: string[] = row.path.split(separator);
   const path = new Array<InstanceKey>();
   for (let i = 0; i < rowElements.length; i += 2) {
     switch (rowElements[i]) {
@@ -698,9 +860,9 @@ function parseQueryRow(row: ECSqlQueryRow, groupInfos: ElementsGroupInfo[], sepa
     }
   }
   return {
-    modelId: row[0],
-    elementHierarchyPath: path,
-    groupingNode: row[2] === -1 ? undefined : groupInfos[row[2]].groupingNode,
+    modelId: row.modelId,
+    instanceKeyPath: path,
+    groupingNode: row.groupingNodeIndex === -1 || row.groupingNodeIndex === undefined ? undefined : groupInfos?.[row.groupingNodeIndex].groupingNode,
   };
 }
 
@@ -767,7 +929,7 @@ async function createInstanceKeyPathsFromTargetItems({
           merge(
             from(ids.subjectIds).pipe(mergeMap((id) => from(idsCache.createSubjectInstanceKeysPath(id)))),
             from(ids.modelIds).pipe(mergeMap((id) => from(idsCache.createModelInstanceKeyPaths(id)).pipe(mergeAll()))),
-            from(ids.categoryIds).pipe(mergeMap((id) => from(idsCache.createCategoryInstanceKeyPaths(id)).pipe(mergeAll()))),
+            of(ids.categoryIds).pipe(mergeMap((categoryIds) => createCategoryInstanceKeyPaths(imodelAccess, idsCache, hierarchyConfig, categoryIds))),
             from(ids.elementIds).pipe(
               bufferCount(Math.ceil(elementsLength / Math.ceil(elementsLength / 5000))),
               releaseMainThreadOnItemsCount(1),

@@ -17,33 +17,12 @@ describe("ModelsTreeIdsCache", () => {
     return new ModelsTreeIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded"), defaultHierarchyConfiguration);
   }
 
-  it("caches model element count", async () => {
-    const modelId = "0x1";
-    const categoryId = "0x2";
-    const elementIds = ["0x10", "0x20", "0x30"];
-    const stub = sinon.fake((query: string) => {
-      if (query.includes("GROUP BY modelId, categoryId")) {
-        return elementIds.map((elementId) => ({ elementId, modelId, categoryId }));
-      }
-      if (query.includes("COUNT(*)")) {
-        return [{ modelId, elementCount: elementIds.length }];
-      }
-
-      return [];
-    });
-    using cache = createIdsCache(stub);
-    await expect(cache.getModelElementCount(modelId)).to.eventually.eq(elementIds.length);
-    expect(stub).to.have.callCount(2);
-    await expect(cache.getModelElementCount(modelId)).to.eventually.eq(elementIds.length);
-    expect(stub).to.have.callCount(2);
-  });
-
   it("caches category element count", async () => {
     const modelId = "0x1";
     const categoryId = "0x2";
     const elementIds = ["0x10", "0x20", "0x30"];
     const stub = sinon.fake((query: string) => {
-      if (query.includes(`WHERE Parent.Id IS NULL AND (Model.Id = ${modelId} AND Category.Id = ${categoryId})`)) {
+      if (query.includes(`WHERE (e.Parent.Id IS NULL AND e.Model.Id = ${modelId} AND e.Category.Id = ${categoryId})`)) {
         return [{ modelId, categoryId, elementsCount: elementIds.length }];
       }
       throw new Error(`Unexpected query: ${query}`);

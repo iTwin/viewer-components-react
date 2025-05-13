@@ -26,12 +26,12 @@ import {
   tap,
 } from "rxjs";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { getClassesByView, pushToMap, setDifference } from "./Utils.js";
+import { getClassesByView, pushToMap, setDifference } from "../Utils.js";
 
 import type { Observable, Subscription } from "rxjs";
 import type { BeEvent, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
-import type { CategoryId, ElementId, ModelId } from "./Types.js";
+import type { CategoryId, ElementId, ModelId } from "../Types.js";
 
 interface ElementInfo {
   elementId: Id64String;

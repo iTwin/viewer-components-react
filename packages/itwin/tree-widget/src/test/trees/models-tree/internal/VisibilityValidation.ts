@@ -7,9 +7,10 @@ import { assert, expect } from "chai";
 import { expand, from, mergeMap } from "rxjs";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
-import { waitFor } from "@testing-library/react";
 import { toVoidPromise } from "../../../../tree-widget-react/components/trees/common/internal/Rxjs.js";
 import { ModelsTreeNode } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeNode.js";
+import { getParentElementIds } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
+import { waitFor } from "../../../TestUtils.js";
 
 import type { Visibility } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
@@ -21,7 +22,7 @@ interface VisibilityExpectations {
   subject(id: string): Visibility;
   element(props: { modelId: Id64String; categoryId: Id64String; elementId: Id64String }): Visibility;
   groupingNode(props: { modelId: Id64String; categoryId: Id64String; elementIds: Id64Array }): Visibility;
-  category(props: { modelId: Id64String; categoryId: Id64String }):
+  category(props: { modelId: Id64String; categoryId: Id64String; parentElementId: Id64String | undefined }):
     | Visibility
     | {
         tree: Visibility;
@@ -93,7 +94,12 @@ export async function validateNodeVisibility({ node, handler, visibilityExpectat
 
   if (ModelsTreeNode.isCategoryNode(node)) {
     const modelId = ModelsTreeNode.getModelId(node)!;
-    const expected = visibilityExpectations.category({ modelId, categoryId: id });
+    const parentElementIds = getParentElementIds(node.parentKeys, modelId);
+    const expected = visibilityExpectations.category({
+      modelId,
+      categoryId: id,
+      parentElementId: parentElementIds?.[0],
+    });
     if (typeof expected === "string") {
       expect(actualVisibility.state).to.eq(expected, JSON.stringify({ modelId, categoryId: id }));
       return;
