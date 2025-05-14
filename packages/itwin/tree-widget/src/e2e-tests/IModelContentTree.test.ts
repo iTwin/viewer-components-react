@@ -6,8 +6,15 @@
 import type { Locator } from "@playwright/test";
 import { test } from "@playwright/test";
 import {
-  initTreeWidgetTest, locateInstanceFilter, locateNode, selectOperatorInDialog, selectPropertyInDialog, selectTree, selectValueInDialog,
-  takeScreenshot, withDifferentDensities,
+  initTreeWidgetTest,
+  locateInstanceFilter,
+  locateNode,
+  selectOperatorInDialog,
+  selectPropertyInDialog,
+  selectTree,
+  selectValueInDialog,
+  takeScreenshot,
+  withDifferentDensities,
 } from "./utils.js";
 
 test.describe("iModel content tree", () => {

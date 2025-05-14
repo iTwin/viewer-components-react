@@ -2,6 +2,21 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Thu, 08 May 2025 14:29:47 GMT",
+      "version": "3.7.0",
+      "tag": "@itwin/tree-widget-react_v3.7.0",
+      "comments": {
+        "none": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "b97ad8c54860f38c7c229659d702a43b0e608fba",
+            "comment": ""
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 28 Apr 2025 16:18:43 GMT",
       "version": "3.7.0",
       "tag": "@itwin/tree-widget-react_v3.7.0",

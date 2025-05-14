@@ -2,6 +2,21 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "date": "Thu, 08 May 2025 14:29:47 GMT",
+      "version": "1.18.1",
+      "tag": "@itwin/property-grid-react_v1.18.1",
+      "comments": {
+        "none": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "b97ad8c54860f38c7c229659d702a43b0e608fba",
+            "comment": ""
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 28 Apr 2025 11:04:44 GMT",
       "version": "1.18.1",
       "tag": "@itwin/property-grid-react_v1.18.1",

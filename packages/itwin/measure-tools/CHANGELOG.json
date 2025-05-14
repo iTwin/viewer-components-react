@@ -2,6 +2,21 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Thu, 08 May 2025 14:29:47 GMT",
+      "version": "0.27.0",
+      "tag": "@itwin/measure-tools-react_v0.27.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "3418768+a-gagnon@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "cb0474c1e46881c46b2e2d23bd9ff133012b1bbb",
+            "comment": "Fix issue in MeasurementViewTypeClassifier. fallback classifiers had higher priority than registered classifier."
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 14 Mar 2025 21:21:43 GMT",
       "version": "0.26.4",
       "tag": "@itwin/measure-tools-react_v0.26.4",

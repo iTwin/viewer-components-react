@@ -13,7 +13,13 @@ import { useFiltering } from "../common/UseFiltering.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { ModelsTree } from "./ModelsTree.js";
 import {
-  HideAllButton, InvertButton, ShowAllButton, ToggleInstancesFocusButton, useModelsTreeButtonProps, View2DButton, View3DButton,
+  HideAllButton,
+  InvertButton,
+  ShowAllButton,
+  ToggleInstancesFocusButton,
+  useModelsTreeButtonProps,
+  View2DButton,
+  View3DButton,
 } from "./ModelsTreeButtons.js";
 
 import type { ModelsTreeProps } from "./ModelsTree.js";
