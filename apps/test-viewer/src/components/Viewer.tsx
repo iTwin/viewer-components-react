@@ -64,7 +64,10 @@ function ViewerWithOptions() {
         hideStatusBar: false,
         hideToolSettings: false,
       }}
-      mapLayerOptions={{ BingMaps: { key: "key", value: ApiKeys.BingMapsKey } }}
+      mapLayerOptions={{
+        BingMaps: { key: "key", value: ApiKeys.BingMapsKey },
+        GoogleMaps: { key: "key", value: ApiKeys.GoogleMapsKey },
+      }}
       tileAdmin={{ cesiumIonKey: ApiKeys.CesiumKey }}
       theme="light"
       backendConfiguration={{
