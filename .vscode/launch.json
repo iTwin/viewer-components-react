@@ -145,6 +145,24 @@
       "outFiles": [
         "${workspaceFolder}/apps/learning-snippets/lib/**/*.js"
       ]
-    }
+    },
+    {
+      "name": "Tests: Performance",
+      "cwd": "${workspaceFolder}/apps/performance-tests",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/apps/performance-tests/node_modules/mocha/bin/_mocha",
+      "args": [
+        "--config",
+        "./.mocharc.json",
+        "--no-timeouts",
+        "./lib/**/*.test.js",
+        "--parallel=false"
+      ],
+      "env": {
+        "NODE_ENV": "development",
+        "NODE_OPTIONS": "--enable-source-maps --import ../../node-hooks/ignore-styles/register.cjs"
+      }
+    },
   ]
 }
