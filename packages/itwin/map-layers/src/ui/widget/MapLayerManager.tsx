@@ -12,7 +12,7 @@ import { BentleyError, compareStrings } from "@itwin/core-bentley";
 import { BackgroundMapProvider, BackgroundMapType, BaseMapLayerSettings, ImageMapLayerSettings } from "@itwin/core-common";
 import { ImageryMapTileTree, IModelApp, MapLayerSources, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 import { ToggleSwitch } from "@itwin/itwinui-react";
-import * as MapLayersFormats from "@itwin/map-layers-formats";
+import { GoogleMaps } from "@itwin/map-layers-formats";
 import { CustomParamsMappingStorage } from "../../CustomParamsMappingStorage";
 import { CustomParamUtils } from "../../CustomParamUtils";
 import { MapLayerPreferences, MapLayerSourceChangeType } from "../../MapLayerPreferences";
@@ -119,9 +119,9 @@ export function MapLayerManager(props: MapLayerManagerProps) {
 
     // Add Google Maps layers if the format is registered
     if (IModelApp.mapLayerFormatRegistry.isRegistered("GoogleMaps")) {
-        bases.push(MapLayersFormats.GoogleMaps.createBaseLayerSettings({mapType: "satellite", language: "en", region: "US"}));
-        bases.push(MapLayersFormats.GoogleMaps.createBaseLayerSettings({mapType: "satellite", layerTypes: ["layerRoadmap"], language: "en", region: "US"}));
-        bases.push(MapLayersFormats.GoogleMaps.createBaseLayerSettings({mapType: "roadmap", language: "en", region: "US"}));
+        bases.push(GoogleMaps.createBaseLayerSettings({mapType: "satellite", language: "en", region: "US"}));
+        bases.push(GoogleMaps.createBaseLayerSettings({mapType: "satellite", layerTypes: ["layerRoadmap"], language: "en", region: "US"}));
+        bases.push(GoogleMaps.createBaseLayerSettings({mapType: "roadmap", language: "en", region: "US"}));
     }
     return bases;
   });
