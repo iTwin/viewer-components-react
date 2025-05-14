@@ -8,6 +8,12 @@ Each one has it's own folder and README describing the package.
 
 ## List of actively maintained packages within this repository
 
+### iTwin.js@^5 Compatible
+
+| Name                      | Folder                                                    | Changelog                                                     | Version                                                                                                                              |
+| ------------------------- | --------------------------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| @itwin/map-layers                  | [map-layers](./packages/itwin/map-layers/)                          | [changelog](./packages/itwin/map-layers/CHANGELOG.md)              | [![npm version](https://badge.fury.io/js/%40itwin%2Fmap-layers.svg)](https://badge.fury.io/js/%40itwin%2Fmap-layers)                                   |
+
 ### iTwin.js@^4 Compatible
 
 | Name                               | Folder                                                              | Changelog                                                          | Version                                                                                                                                                |
@@ -15,7 +21,6 @@ Each one has it's own folder and README describing the package.
 | @itwin/breakdown-trees-react       | [breakdown-trees](./packages/itwin/breakdown-trees)                 | [changelog](./packages/itwin/breakdown-trees/CHANGELOG.md)         | [![npm version](https://badge.fury.io/js/%40itwin%2Fbreakdown-trees-react.svg)](https://badge.fury.io/js/%40itwin%2Fbreakdown-trees-react)             |
 | @itwin/geo-tools-react             | [geo-tools](./packages/itwin/geo-tools/)                            | [changelog](./packages/itwin/geo-tools/CHANGELOG.md)               | [![npm version](https://badge.fury.io/js/%40itwin%2Fgeo-tools-react.svg)](https://badge.fury.io/js/%40itwin%2Fgeo-tools-react)                         |
 | @itwin/grouping-mapping-widget     | [grouping-mapping-widget](./packages/itwin/grouping-mapping-widget) | [changelog](./packages/itwin/grouping-mapping-widget/CHANGELOG.md) | [![npm version](https://badge.fury.io/js/%40itwin%2Fgrouping-mapping-widget.svg)](https://badge.fury.io/js/%40itwin%2Fgrouping-mapping-widget)         |
-| @itwin/map-layers                  | [map-layers](./packages/itwin/map-layers/)                          | [changelog](./packages/itwin/map-layers/CHANGELOG.md)              | [![npm version](https://badge.fury.io/js/%40itwin%2Fmap-layers.svg)](https://badge.fury.io/js/%40itwin%2Fmap-layers)                                   |
 | @itwin/measure-tools-react         | [measure-tools](./packages/itwin/measure-tools)                     | [changelog](./packages/itwin/measure-tools/CHANGELOG.md)           | [![npm version](https://badge.fury.io/js/%40itwin%2Fmeasure-tools-react.svg)](https://badge.fury.io/js/%40itwin%2Fmeasure-tools-react)                 |
 | @itwin/tree-widget-react           | [tree-widget](./packages/itwin/tree-widget/)                        | [changelog](./packages/itwin/tree-widget/CHANGELOG.md)             | [![npm version](https://badge.fury.io/js/%40itwin%2Ftree-widget-react.svg)](https://badge.fury.io/js/%40itwin%2Ftree-widget-react)                     |
 | @itwin/property-grid-react         | [property-grid](./packages/itwin/property-grid)                     | [changelog](./packages/itwin/property-grid/CHANGELOG.md)           | [![npm version](https://badge.fury.io/js/%40itwin%2Fproperty-grid-react.svg)](https://badge.fury.io/js/%40itwin%2Fproperty-grid-react)                 |
@@ -32,6 +37,7 @@ Each one has it's own folder and README describing the package.
 ## Archived
 
 The following packages have been deprecated and will no longer be maintained:
+
 | Name | Folder | Changelog | Version | Replacement |
 | ---------------------------------- | -------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
 | @bentley/imodel-select-react | [imodel-select](./packages/archive/imodel-select/) | [changelog](./packages/archive/imodel-select/CHANGELOG.md) | [![npm version](https://badge.fury.io/js/%40bentley%2Fimodel-select-react.svg)](https://badge.fury.io/js/%40bentley%2Fimodel-select-react) | [@itwin/imodel-browser-react](https://www.npmjs.com/package/@itwin/imodel-browser-react) |
