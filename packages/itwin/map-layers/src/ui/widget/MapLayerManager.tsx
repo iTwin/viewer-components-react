@@ -12,6 +12,7 @@ import { BentleyError, compareStrings } from "@itwin/core-bentley";
 import { BackgroundMapProvider, BackgroundMapType, BaseMapLayerSettings, ImageMapLayerSettings } from "@itwin/core-common";
 import { ImageryMapTileTree, IModelApp, MapLayerSources, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 import { ToggleSwitch } from "@itwin/itwinui-react";
+import { GoogleMaps } from "@itwin/map-layers-formats";
 import { CustomParamsMappingStorage } from "../../CustomParamsMappingStorage";
 import { CustomParamUtils } from "../../CustomParamUtils";
 import { MapLayerPreferences, MapLayerSourceChangeType } from "../../MapLayerPreferences";
@@ -107,7 +108,23 @@ interface MapLayerManagerProps {
 export function MapLayerManager(props: MapLayerManagerProps) {
   const [mapSources, setMapSources] = React.useState<MapLayerSource[] | undefined>();
   const [loadingSources, setLoadingSources] = React.useState(false);
-  const [bgProviders] = React.useState<BaseMapLayerSettings[]>(props.mapLayerOptions?.baseMapLayers ?? defaultBaseMapLayers);
+  // const [bgProviders] = React.useState<BaseMapLayerSettings[]>(props.mapLayerOptions?.baseMapLayers ?? defaultBaseMapLayers);
+  const [bgProviders] = React.useState<BaseMapLayerSettings[]>(()=> {
+    // Base layers were provided, used it exclusively.
+    if (props.mapLayerOptions?.baseMapLayers) {
+      return props.mapLayerOptions?.baseMapLayers;
+      }
+
+    const bases = [...defaultBaseMapLayers];
+
+    // Add Google Maps layers if the format is registered
+    if (IModelApp.mapLayerFormatRegistry.isRegistered("GoogleMaps")) {
+        bases.push(GoogleMaps.createBaseLayerSettings({mapType: "satellite", language: "en", region: "US"}));
+        bases.push(GoogleMaps.createBaseLayerSettings({mapType: "satellite", layerTypes: ["layerRoadmap"], language: "en", region: "US"}));
+        bases.push(GoogleMaps.createBaseLayerSettings({mapType: "roadmap", language: "en", region: "US"}));
+    }
+    return bases;
+  });
   const [overlaysLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Widget.OverlayLayers"));
   const [underlaysLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Widget.BackgroundLayers"));
   const { activeViewport, mapLayerOptions } = props;

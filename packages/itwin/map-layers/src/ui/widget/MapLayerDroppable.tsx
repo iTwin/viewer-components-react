@@ -178,7 +178,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
                   }
                 }
               }}
-              title={requireAuthTooltip}
+              label={requireAuthTooltip}
             >
               <SvgStatusWarning />
             </IconButton>
@@ -229,7 +229,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
                 }
               }
             }}
-            title={requireAuthTooltip}
+            label={requireAuthTooltip}
           >
             <SvgStatusWarning />
           </IconButton>

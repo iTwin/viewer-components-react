@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "update presentation deps to versions that properly support core @ 5.0-rc",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "aruniverse@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
