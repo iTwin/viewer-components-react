@@ -6,8 +6,17 @@
 import type { Locator } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import {
-  expandStagePanel, initTreeWidgetTest, locateInstanceFilter, locateNode, scrollTree, selectOperatorInDialog, selectPropertyInDialog, selectTree,
-  selectValueInDialog, takeScreenshot, withDifferentDensities,
+  expandStagePanel,
+  initTreeWidgetTest,
+  locateInstanceFilter,
+  locateNode,
+  scrollTree,
+  selectOperatorInDialog,
+  selectPropertyInDialog,
+  selectTree,
+  selectValueInDialog,
+  takeScreenshot,
+  withDifferentDensities,
 } from "./utils.js";
 
 test.describe("Models tree", () => {
@@ -16,7 +25,7 @@ test.describe("Models tree", () => {
   test.beforeEach(async ({ page, baseURL }) => {
     treeWidget = await initTreeWidgetTest({ page, baseURL });
     await selectTree(treeWidget, "Models");
-    await locateNode(treeWidget, "ProcessPhysicalModel").getByRole("checkbox", { name: "Visible: All categories visible", exact: true }).waitFor();
+    await locateNode(treeWidget, "ProcessPhysicalModel").getByRole("checkbox", { name: "Visible", exact: true }).waitFor();
   });
 
   test("disabled selection", async ({ page }) => {
@@ -46,7 +55,7 @@ test.describe("Models tree", () => {
   withDifferentDensities((density) => {
     test("initial tree", async ({ page }) => {
       // wait for element to be visible in the tree
-      await locateNode(treeWidget, "ProcessPhysicalModel").getByRole("checkbox", { name: "Visible: All categories visible", exact: true }).waitFor();
+      await locateNode(treeWidget, "ProcessPhysicalModel").getByRole("checkbox", { name: "Visible", exact: true }).waitFor();
       await takeScreenshot(page, treeWidget);
     });
 
@@ -230,7 +239,7 @@ test.describe("Models tree", () => {
       await page.keyboard.press("Tab");
 
       // ensure checkbox is focused
-      const checkbox = node.getByRole("checkbox", { name: "Visible: All categories visible" });
+      const checkbox = node.getByRole("checkbox", { name: "Visible" });
       await expect(checkbox).toBeFocused();
 
       await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
