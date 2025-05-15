@@ -4,9 +4,6 @@
 
 ```ts
 
-/// <reference types="node" />
-/// <reference types="react" />
-
 import type { BeEvent } from '@itwin/core-bentley';
 import type { ClassGroupingNodeKey } from '@itwin/presentation-hierarchies';
 import type { ECClassHierarchyInspector } from '@itwin/presentation-shared';
@@ -17,7 +14,6 @@ import type { Id64Arg } from '@itwin/core-bentley';
 import type { Id64Array } from '@itwin/core-bentley';
 import type { Id64Set } from '@itwin/core-bentley';
 import type { Id64String } from '@itwin/core-bentley';
-import type { IDisposable } from '@itwin/core-bentley';
 import type { ILogger } from '@itwin/presentation-shared';
 import type { IModelConnection } from '@itwin/core-frontend';
 import type { InstanceKey } from '@itwin/presentation-shared';
@@ -210,7 +206,7 @@ interface GetGeometricElementVisibilityStatusProps {
 }
 
 // @beta
-export interface HierarchyVisibilityHandler extends IDisposable {
+export interface HierarchyVisibilityHandler extends Disposable {
     changeVisibility(node: HierarchyNode, on: boolean): Promise<void>;
     getVisibilityStatus(node: HierarchyNode): Promise<VisibilityStatus> | VisibilityStatus;
     readonly onVisibilityChange: BeEvent<() => void>;
@@ -450,7 +446,7 @@ export class TreeWidget {
     static initialize(i18n?: Localization, logger?: ILogger): Promise<void>;
     static get logger(): ILogger;
     static terminate(): void;
-    static translate(key: string | string[], options?: TranslationOptions): string;
+    static translate(key: string, options?: TranslationOptions): string;
 }
 
 // @public
@@ -560,7 +556,7 @@ export interface VisibilityStatus {
 }
 
 // @beta
-export function VisibilityTree({ visibilityHandlerFactory, treeRenderer, hierarchyLevelSizeLimit, ...props }: VisibilityTreeProps): JSX.Element;
+export function VisibilityTree({ visibilityHandlerFactory, treeRenderer, hierarchyLevelSizeLimit, ...props }: VisibilityTreeProps): JSX_2.Element;
 
 // @beta (undocumented)
 type VisibilityTreeProps = Omit<TreeProps, "treeRenderer" | "imodelAccess"> & {
