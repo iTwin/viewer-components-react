@@ -1,8 +1,20 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Mon, 28 Apr 2025 16:18:43 GMT and should not be manually modified.
+This log was last generated on Thu, 15 May 2025 05:33:32 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 3.8.0
+
+Thu, 15 May 2025 05:33:32 GMT
+
+### Minor changes
+
+- Fixed merged (categories and models) nodes visibility. Changed `@beta` APIs in a **breaking** way: `ModelsTreeVisibilityHandlerOverrides.getModelDisplayStatus` and `ModelsTreeVisibilityHandlerOverrides.getCategoryDisplayStatus` - `id` and `categoryId` props are now of `Id64Arg` type instead of `Id64String`. Use `Id64` from `@itwin/core-bentley` to access individual IDs. ([#1311](https://github.com/iTwin/viewer-components-react/pull/1311))
+
+### Patches
+
+- update presentation deps to versions that properly support core @ 5.0-rc ([#1304](https://github.com/iTwin/viewer-components-react/pull/1304))
 
 ## 3.7.0
 
