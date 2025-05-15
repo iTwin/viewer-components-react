@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { filter, from, map, mergeAll, mergeMap, of, reduce, startWith, toArray } from "rxjs";
+import { filter, map, mergeAll, mergeMap, of, reduce, startWith, toArray } from "rxjs";
 import { QueryRowFormat } from "@itwin/core-common";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { reduceWhile } from "./Rxjs.js";
@@ -58,7 +58,7 @@ export function getSubModeledElementsVisibilityStatus({
   getModelVisibilityStatus,
 }: {
   parentNodeVisibilityStatus: VisibilityStatus;
-  getModelVisibilityStatus: ({ modelId }: { modelId: Id64String }) => Observable<VisibilityStatus>;
+  getModelVisibilityStatus: ({ modelIds }: { modelIds: Id64Array }) => Observable<VisibilityStatus>;
 }): OperatorFunction<Id64Array, VisibilityStatus> {
   return (obs) => {
     return obs.pipe(
@@ -67,11 +67,7 @@ export function getSubModeledElementsVisibilityStatus({
         if (modeledElementIds.length === 0) {
           return of(parentNodeVisibilityStatus);
         }
-        return from(modeledElementIds).pipe(
-          mergeMap((modeledElementId) => getModelVisibilityStatus({ modelId: modeledElementId })),
-          startWith<VisibilityStatus>(parentNodeVisibilityStatus),
-          mergeVisibilityStatuses,
-        );
+        return getModelVisibilityStatus({ modelIds: modeledElementIds }).pipe(startWith<VisibilityStatus>(parentNodeVisibilityStatus), mergeVisibilityStatuses);
       }),
     );
   };
@@ -168,7 +164,7 @@ export function getVisibilityFromAlwaysAndNeverDrawnElementsImpl(
   }
 
   if (viewport.isAlwaysDrawnExclusive) {
-    return  createVisibilityStatus(alwaysDrawn?.size ? "partial" : "hidden")
+    return createVisibilityStatus(alwaysDrawn?.size ? "partial" : "hidden");
   }
 
   const status = props.defaultStatus();
@@ -198,7 +194,7 @@ export function getElementOverriddenVisibility(props: { elementId: Id64String; v
 /** @internal */
 export interface GetVisibilityFromAlwaysAndNeverDrawnElementsProps {
   /** Status when always/never lists are empty and exclusive mode is off */
-  defaultStatus: () => VisibilityStatus;
+  defaultStatus: (categoryId?: string) => VisibilityStatus;
 }
 
 /** @internal */

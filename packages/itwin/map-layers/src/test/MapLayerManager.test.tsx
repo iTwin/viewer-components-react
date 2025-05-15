@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { ImageMapLayerSettings } from "@itwin/core-common";
-import { MapLayerIndex, MapLayerSource, MapLayerSources, MockRender } from "@itwin/core-frontend";
+import { MapLayerIndex, MapLayerSource, MapLayerSources, NoRenderApp, NotificationManager } from "@itwin/core-frontend";
 import { fireEvent, getAllByTestId, getByTestId, queryAllByTestId, queryByText, render, RenderResult } from "@testing-library/react";
 import { MapLayerPreferences, MapLayerSourceChangeType } from "../MapLayerPreferences";
 import { MapLayerManager } from "../ui/widget/MapLayerManager";
@@ -24,13 +24,12 @@ describe("MapLayerManager", () => {
   const sourceListSelector = ".map-manager-source-list";
 
   beforeAll(async () => {
-    await MockRender.App.startup();
+    await NoRenderApp.startup({notifications: new NotificationManager()})
     await TestUtils.initialize();
     window.HTMLElement.prototype.scrollIntoView = () => {};
   });
 
   afterAll(async () => {
-    await MockRender.App.shutdown();
     TestUtils.terminateUiComponents();
   });
 
@@ -109,9 +108,9 @@ describe("MapLayerManager", () => {
 
     expect(menuItems.length).toBe(4);
     expect(menuItems[0].textContent).toBe("Basemap.ColorFill");
-    expect(menuItems[1].textContent).toBe("WellKnownBaseMaps.BingProvider.Aerial");
-    expect(menuItems[2].textContent).toBe("WellKnownBaseMaps.BingProvider.Hybrid");
-    expect(menuItems[3].textContent).toBe("WellKnownBaseMaps.BingProvider.Street");
+    expect(menuItems[1].textContent).toBe("WellKnownBaseMaps.BingMaps.Aerial");
+    expect(menuItems[2].textContent).toBe("WellKnownBaseMaps.BingMaps.Hybrid");
+    expect(menuItems[3].textContent).toBe("WellKnownBaseMaps.BingMaps.Street");
   });
 
   it("renders source list", async () => {

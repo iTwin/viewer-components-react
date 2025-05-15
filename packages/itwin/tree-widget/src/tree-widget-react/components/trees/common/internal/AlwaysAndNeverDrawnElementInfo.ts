@@ -25,11 +25,12 @@ import {
   takeUntil,
   tap,
 } from "rxjs";
+import { Id64 } from "@itwin/core-bentley";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { getClassesByView, pushToMap, setDifference } from "./Utils.js";
 
+import type { BeEvent, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Observable, Subscription } from "rxjs";
-import type { BeEvent, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import type { CategoryId, ElementId, ModelId } from "./Types.js";
 
@@ -49,7 +50,7 @@ export interface ModelAlwaysOrNeverDrawnElementsQueryProps {
 /** @internal */
 export interface CategoryAlwaysOrNeverDrawnElementsQueryProps {
   modelId?: Id64String;
-  categoryIds: Id64Array;
+  categoryIds: Id64Arg;
 }
 
 /** @internal */
@@ -116,7 +117,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
               if (!categoryMap) {
                 return result;
               }
-              for (const categoryId of props.categoryIds) {
+              for (const categoryId of Id64.iterable(props.categoryIds)) {
                 const elements = categoryMap.get(categoryId);
                 if (elements) {
                   elements.forEach((element) => {
@@ -127,7 +128,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
               return result;
             }
             for (const [, categoryMap] of entry ?? []) {
-              for (const categoryId of props.categoryIds) {
+              for (const categoryId of Id64.iterable(props.categoryIds)) {
                 const elements = categoryMap.get(categoryId);
                 if (elements) {
                   elements.forEach((element) => {

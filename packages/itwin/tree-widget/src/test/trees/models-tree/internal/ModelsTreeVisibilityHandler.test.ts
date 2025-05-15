@@ -5,7 +5,7 @@
 
 import { assert, expect } from "chai";
 import sinon from "sinon";
-import { CompressedId64Set } from "@itwin/core-bentley";
+import { CompressedId64Set, Id64 } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, IModelReadRpcInterface, RenderMode, SnapshotIModelRpcInterface } from "@itwin/core-common";
 import { IModelApp, NoRenderApp, OffScreenViewport, PerModelCategoryVisibility, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
@@ -99,15 +99,35 @@ describe("ModelsTreeVisibilityHandler", () => {
       const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
         getModelDisplayStatus:
           props?.overrides?.models &&
-          (async ({ id, originalImplementation }) => {
-            const res = props.overrides!.models!.get(id);
-            return res ? createVisibilityStatus(res) : originalImplementation();
+          (async ({ ids, originalImplementation }) => {
+            let visibility: Visibility | "unknown" = "unknown";
+            for (const modelId of Id64.iterable(ids)) {
+              const res = props.overrides!.models!.get(modelId);
+              if (!res) {
+                continue;
+              }
+              if (visibility !== "unknown" && res !== visibility) {
+                return createVisibilityStatus("partial");
+              }
+              visibility = res;
+            }
+            return visibility !== "unknown" ? createVisibilityStatus(visibility) : originalImplementation();
           }),
         getCategoryDisplayStatus:
           props?.overrides?.categories &&
-          (async ({ categoryId, originalImplementation }) => {
-            const res = props.overrides!.categories!.get(categoryId);
-            return res ? createVisibilityStatus(res) : originalImplementation();
+          (async ({ categoryIds, originalImplementation }) => {
+            let visibility: Visibility | "unknown" = "unknown";
+            for (const id of Id64.iterable(categoryIds)) {
+              const res = props.overrides!.categories!.get(id);
+              if (!res) {
+                continue;
+              }
+              if (visibility !== "unknown" && res !== visibility) {
+                return createVisibilityStatus("partial");
+              }
+              visibility = res;
+            }
+            return visibility !== "unknown" ? createVisibilityStatus(visibility) : originalImplementation();
           }),
         getElementDisplayStatus:
           props?.overrides?.elements &&
@@ -308,25 +328,6 @@ describe("ModelsTreeVisibilityHandler", () => {
           const result = await handler.getVisibilityStatus(node);
           expect(viewport.view.isSpatialView).to.be.called;
           expect(result).to.include({ state: "hidden", isDisabled: true });
-        });
-
-        it("doesn't query model element count if always/never drawn sets are empty and exclusive mode is off", async () => {
-          const modelId = "0x1";
-          const categories = ["0x10", "0x20"];
-          const node = createModelHierarchyNode(modelId);
-          const idsCache = createFakeIdsCache({
-            modelCategories: new Map([[modelId, categories]]),
-            categoryElements: new Map([
-              ["0x10", ["0x100", "0x200"]],
-              ["0x20", ["0x300", "0x400"]],
-            ]),
-          });
-          using handlerResult = createHandler({ idsCache });
-          const { handler } = handlerResult;
-
-          const result = await handler.getVisibilityStatus(node);
-          expect(result).to.include({ state: "visible" });
-          expect(idsCache.getModelElementCount).not.to.be.called;
         });
 
         describe("visible", () => {
@@ -671,30 +672,6 @@ describe("ModelsTreeVisibilityHandler", () => {
           const status = await handler.getVisibilityStatus(createCategoryHierarchyNode("0x1"));
           expect(overrides.getCategoryDisplayStatus).to.be.called;
           expect(status.state).to.eq("visible");
-        });
-
-        it("doesn't query elements if model is hidden", async () => {
-          const modelId = "0x1";
-          const categoryId = "0x2";
-          const node = createCategoryHierarchyNode(modelId, categoryId);
-          const idsCache = createFakeIdsCache({
-            modelCategories: new Map([[modelId, [categoryId]]]),
-            categoryElements: new Map([[categoryId, ["0x100", "0x200"]]]),
-          });
-          using handlerResult = createHandler({
-            idsCache,
-            viewport: createFakeSinonViewport({
-              alwaysDrawn: new Set(["0x400"]),
-              view: {
-                viewsModel: sinon.fake.returns(false),
-              },
-            }),
-          });
-          const { handler } = handlerResult;
-
-          const result = await handler.getVisibilityStatus(node);
-          expect(result).to.include({ state: "hidden" });
-          expect(idsCache.getModelElementCount).not.to.be.called;
         });
 
         describe("is visible", () => {
@@ -1356,7 +1333,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             using handlerResult = createHandler({ viewport });
             const { handler } = handlerResult;
             await handler.changeVisibility(node, true);
-            expect(viewport.addViewedModels).to.be.calledOnceWith(modelId);
+            expect(viewport.addViewedModels).to.be.calledOnceWith([modelId]);
           });
 
           it("doesn't change always/never drawn sets if they don't have any of the model's children", async () => {
@@ -1448,7 +1425,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             const { handler } = handlerResult;
             await handler.changeVisibility(node, true);
 
-            expect(viewport.perModelCategoryVisibility.clearOverrides).to.be.calledWith(modelId);
+            expect(viewport.perModelCategoryVisibility.clearOverrides).to.be.calledWith([modelId]);
           });
         });
 
@@ -1460,7 +1437,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             using handlerResult = createHandler({ viewport });
             const { handler } = handlerResult;
             await handler.changeVisibility(node, false);
-            expect(viewport.changeModelDisplay).to.be.calledOnceWith(modelId, false);
+            expect(viewport.changeModelDisplay).to.be.calledOnceWith([modelId], false);
           });
         });
       });
@@ -2608,6 +2585,66 @@ describe("ModelsTreeVisibilityHandler", () => {
           groupingNode: ({ elementIds }) => (elementIds.includes(ids.parentElement) ? "hidden" : "visible"),
           element: ({ elementId }) => (elementId === ids.parentElement ? "hidden" : "visible"),
         },
+      });
+    });
+
+    it("changing merged category visibility changes child elements visibility", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
+        const category1 = insertSpatialCategory({ builder, codeValue: "category1", userLabel: "SomeLabel" }).id;
+        const category2 = insertSpatialCategory({ builder, codeValue: "category2", userLabel: "SomeLabel" }).id;
+        const element1 = insertPhysicalElement({ builder, modelId: model, categoryId: category1 }).id;
+        const element2 = insertPhysicalElement({ builder, modelId: model, categoryId: category2 }).id;
+        return { model, element1, element2, category1, category2 };
+      });
+
+      const { imodel, ...ids } = buildIModelResult;
+      using visibilityTestData = createVisibilityTestData({ imodel });
+      const { handler, provider, viewport } = visibilityTestData;
+      await handler.changeVisibility(createCategoryHierarchyNode(ids.model, [ids.category1, ids.category2]), true);
+      viewport.renderFrame();
+
+      await validateHierarchyVisibility({
+        provider,
+        handler,
+        viewport,
+        visibilityExpectations: VisibilityExpectations.all("visible"),
+      });
+    });
+
+    it("changing element visibility changes merged parent category visibility", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
+        const category1 = insertSpatialCategory({ builder, codeValue: "category1", userLabel: "SomeLabel" }).id;
+        const category2 = insertSpatialCategory({ builder, codeValue: "category2", userLabel: "SomeLabel" }).id;
+        const element1 = insertPhysicalElement({ builder, modelId: model, categoryId: category1 }).id;
+        const element2 = insertPhysicalElement({ builder, modelId: model, categoryId: category2 }).id;
+        return { model, element1, element2, category1, category2 };
+      });
+
+      const { imodel, ...ids } = buildIModelResult;
+      using visibilityTestData = createVisibilityTestData({ imodel });
+      const { handler, provider, viewport } = visibilityTestData;
+      await handler.changeVisibility(createElementHierarchyNode({ modelId: ids.model, categoryId: ids.category2, elementId: ids.element2 }), true);
+
+      await validateHierarchyVisibility({
+        provider,
+        handler,
+        viewport,
+        visibilityExpectations: {
+          subject: () => "partial",
+          model: () => "partial",
+          category: () => "partial",
+          groupingNode: () => "partial",
+          element: (props) => (props.elementId === ids.element2 ? "visible" : "hidden"),
+        },
+      });
+      await handler.changeVisibility(createElementHierarchyNode({ modelId: ids.model, categoryId: ids.category1, elementId: ids.element1 }), true);
+      await validateHierarchyVisibility({
+        provider,
+        handler,
+        viewport,
+        visibilityExpectations: VisibilityExpectations.all("visible"),
       });
     });
 

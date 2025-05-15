@@ -63,6 +63,14 @@ export default defineConfig(({ mode }) => {
       assetsInlineLimit: (filePath) => {
         if (filePath.includes("@itwin/itwinui-icons/")) return false;
         return undefined;
+      }
+    },
+    css: {
+      preprocessorOptions: {
+        scss: {
+          silenceDeprecations: ["legacy-js-api", "import", "global-builtin"],
+          quietDeps: true,
+        },
       },
     },
   };

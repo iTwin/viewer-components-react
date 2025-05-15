@@ -3,21 +3,20 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concatMap, count, EMPTY, expand, firstValueFrom, from, toArray } from "rxjs";
+import { concatMap, EMPTY, expand, firstValueFrom, from, toArray } from "rxjs";
 import sinon from "sinon";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import {
   ELEMENT_CLASS_NAME,
   GEOMETRIC_ELEMENT_3D_CLASS_NAME,
   MODEL_CLASS_NAME,
-  SPATIAL_CATEGORY_CLASS_NAME,
   SUBJECT_CLASS_NAME,
 } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import { ModelsTreeIdsCache } from "../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import { createIModelAccess } from "../Common.js";
 
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type {
   ClassGroupingNodeKey,
@@ -101,18 +100,11 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
     getModelCategoryIds: sinon.stub<[Id64String], Promise<Id64Array>>().callsFake(async (modelId) => {
       return props?.modelCategories?.get(modelId) ?? [];
     }),
-    getModelElementCount: sinon.stub<[Id64String], Promise<number>>().callsFake(async (modelId) => {
-      const obs = from(props?.modelCategories?.get(modelId) ?? EMPTY).pipe(
-        concatMap((categoryId) => props?.categoryElements?.get(categoryId) ?? EMPTY),
-        count(),
-      );
-      return firstValueFrom(obs);
-    }),
     getCategoryElementsCount: sinon.stub<[Id64String, Id64String], Promise<number>>().callsFake(async (_, categoryId) => {
       return props?.categoryElements?.get(categoryId)?.length ?? 0;
     }),
     hasSubModel: sinon.stub<[Id64String], Promise<boolean>>().callsFake(async () => false),
-    getCategoriesModeledElements: sinon.stub<[Id64String, Id64Array], Promise<Id64Array>>().callsFake(async () => []),
+    getCategoriesModeledElements: sinon.stub<[Id64String, Id64Arg], Promise<Id64Array>>().callsFake(async () => []),
   });
 }
 
@@ -145,11 +137,14 @@ export function createModelHierarchyNode(modelId?: Id64String, hasChildren?: boo
     },
   };
 }
-export function createCategoryHierarchyNode(modelId?: Id64String, categoryId?: Id64String, hasChildren?: boolean): NonGroupingHierarchyNode {
+export function createCategoryHierarchyNode(modelId?: Id64String, categoryId?: Id64Arg, hasChildren?: boolean): NonGroupingHierarchyNode {
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: SPATIAL_CATEGORY_CLASS_NAME, id: categoryId ?? "" }],
+      instanceKeys:
+        typeof categoryId === "string"
+          ? [{ className: "bis:SpatialCategory", id: categoryId ?? "" }]
+          : [...(categoryId ?? [])].map((id) => ({ className: "bis:SpatialCategory", id })),
     },
     children: !!hasChildren,
     label: "",

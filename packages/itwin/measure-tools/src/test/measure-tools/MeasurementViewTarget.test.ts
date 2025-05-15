@@ -5,6 +5,7 @@
 
 import { assert } from "chai";
 import { WellKnownViewType } from "../../api/MeasurementEnums.js";
+import type { MeasurementViewTypeClassifier } from "../../api/MeasurementViewTarget.js";
 import { MeasurementViewTarget } from "../../api/MeasurementViewTarget.js";
 
 describe("MeasurementViewTarget tests", () => {
@@ -116,5 +117,42 @@ describe("MeasurementViewTarget tests", () => {
 
     assert.isTrue(test.isOfViewType(WellKnownViewType.AnyDrawing));
     assert.isTrue(test.isOfViewType(WellKnownViewType.Sheet));
+  });
+
+  it("Test registered classifiers come first", () => {
+    const myClassifier: MeasurementViewTypeClassifier = {
+      typeName: "my-classifier",
+      isSpatial: true,
+      isDrawing: false,
+      classifyView: () => true,
+      classifyViewport: () => true,
+    };
+
+    assert.isTrue(0 < MeasurementViewTarget.classifiers.length);
+    assert.isUndefined(MeasurementViewTarget.findFirstClassifierForType("my-classifier"));
+
+    let dropFunction = MeasurementViewTarget.registerClassifier(myClassifier);
+    assert.strictEqual(MeasurementViewTarget.findFirstClassifierForType("my-classifier"), myClassifier);
+
+    dropFunction();
+    assert.isUndefined(MeasurementViewTarget.findFirstClassifierForType("my-classifier"));
+
+    // This one should override the default 'spatial' classifier and be returned first!
+    const mySpatialClassifier: MeasurementViewTypeClassifier = {
+      typeName: WellKnownViewType.Spatial,
+      isSpatial: true,
+      isDrawing: false,
+      classifyView: () => true,
+      classifyViewport: () => true,
+    };
+
+    const defaultSpatial = MeasurementViewTarget.findFirstClassifierForType(WellKnownViewType.Spatial);
+    assert.isDefined(MeasurementViewTarget.findFirstClassifierForType(WellKnownViewType.Spatial));
+
+    dropFunction = MeasurementViewTarget.registerClassifier(mySpatialClassifier);
+    assert.strictEqual(MeasurementViewTarget.findFirstClassifierForType(WellKnownViewType.Spatial), mySpatialClassifier);
+    dropFunction();
+
+    assert.strictEqual(MeasurementViewTarget.findFirstClassifierForType(WellKnownViewType.Spatial), defaultSpatial);
   });
 });

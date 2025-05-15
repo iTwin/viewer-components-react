@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { assert } from "@itwin/core-bentley";
+import { assert, Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import {
   GEOMETRIC_MODEL_3D_CLASS_NAME,
@@ -17,7 +17,7 @@ import { pushToMap } from "../../common/internal/Utils.js";
 
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
-import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { CategoryId, ElementId, ModelId, SubjectId } from "../../common/internal/Types.js";
 
@@ -353,11 +353,6 @@ export class ModelsTreeIdsCache {
     return categories ? [...categories] : [];
   }
 
-  public async getModelElementCount(modelId: Id64String): Promise<number> {
-    const modelInfos = await this.getModelInfos();
-    return modelInfos.get(modelId)?.elementCount ?? 0;
-  }
-
   public async hasSubModel(elementId: Id64String): Promise<boolean> {
     const modelInfos = await this.getModelInfos();
     const modeledElementInfo = modelInfos.get(elementId);
@@ -367,10 +362,10 @@ export class ModelsTreeIdsCache {
     return !modeledElementInfo.isModelPrivate;
   }
 
-  public async getCategoriesModeledElements(modelId: Id64String, categoryIds: Id64Array): Promise<Id64Array> {
+  public async getCategoriesModeledElements(modelId: Id64String, categoryIds: Id64Arg): Promise<Id64Array> {
     const modelWithCategoryModeledElements = await this.getModelWithCategoryModeledElements();
-    const result = new Array<ElementId>();
-    for (const categoryId of categoryIds) {
+    const result = new Array<Id64String>();
+    for (const categoryId of Id64.iterable(categoryIds)) {
       const entry = modelWithCategoryModeledElements.get(`${modelId}-${categoryId}`);
       if (entry !== undefined) {
         result.push(...entry);

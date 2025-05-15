@@ -5,8 +5,8 @@
 
 import { expect } from "chai";
 import sinon from "sinon";
-import { waitFor } from "@testing-library/react";
 import { createVisibilityChangeEventListener } from "../../../../tree-widget-react/components/trees/common/internal/VisibilityChangeEventListener.js";
+import { waitFor } from "../../../TestUtils.js";
 import { createFakeSinonViewport } from "../../Common.js";
 
 describe("VisibilityChangeEventListener", () => {

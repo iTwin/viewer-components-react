@@ -23,6 +23,10 @@
     ".": {
       "import": "./lib/esm/tree-widget-react.js"
     },
+    "./internal": {
+      "import": "./lib/esm/tree-widget-react-internal.js",
+      "require": "./lib/cjs/tree-widget-react-internal.js"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {
@@ -62,7 +66,7 @@
     "react-dom": "^17.0.0 || ^18.0.0"
   },
   "dependencies": {
-    "@itwin/presentation-core-interop": "^1.3.0",
+    "@itwin/presentation-core-interop": "^1.3.2",
     "@itwin/presentation-hierarchies": "^1.4.1",
     "@itwin/presentation-hierarchies-react": "2.0.0-alpha.17",
     "@itwin/presentation-shared": "^1.2.0",
@@ -97,9 +101,9 @@
     "@itwin/oidc-signin-tool": "^4.4.0",
     "@itwin/presentation-backend": "^4.11.1",
     "@itwin/presentation-common": "^4.11.1",
-    "@itwin/presentation-components": "^5.9.0",
+    "@itwin/presentation-components": "^5.12.2",
     "@itwin/presentation-frontend": "^4.11.1",
-    "@itwin/presentation-testing": "^5.3.0",
+    "@itwin/presentation-testing": "^5.4.3",
     "@itwin/webgl-compatibility": "^4.11.1",
     "@playwright/test": "^1.48.2",
     "@testing-library/dom": "^10.4.0",
