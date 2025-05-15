@@ -101,9 +101,9 @@ export class GoogleAddressProvider implements AddressProvider {
   private _apiKey: string;
   public readonly hasAddressIds = true;
 
-  constructor(radius?: number) {
-    if (radius !== undefined) {
-      this._radius = radius;
+  constructor(locationBiasRadius?: number) {
+    if (locationBiasRadius !== undefined) {
+      this._radius = locationBiasRadius;
     }
 
     this._apiKey = "";

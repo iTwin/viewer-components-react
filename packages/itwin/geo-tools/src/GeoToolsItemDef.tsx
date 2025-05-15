@@ -3,28 +3,29 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-/** @packageDocumentation
- * @module Tools
- */
-import * as React from "react";
+import React from "react";
+import { ToolbarItemUtilities } from "@itwin/appui-react";
+import { SvgGeosearch } from "@itwin/itwinui-icons-react";
+import { GeoAddressSearch } from "./components/GeoAddressSearch";
+import { GeoTools } from "./GeoTools";
 
 import type { ToolbarCustomItem} from "@itwin/appui-react";
-import { ToolbarItemUtilities } from "@itwin/appui-react";
-import { GeoAddressSearch } from "./components/GeoAddressSearch";
-import { SvgGeosearch } from "@itwin/itwinui-icons-react";
-import { GeoTools } from "./GeoTools";
+import type { AddressProvider } from "./AddressProvider";
+export interface GeoToolsOptions {
+  addressProvider?: AddressProvider
+}
 
 /** Utility Class that provides definitions of tools. These definitions can be used to populate the UI.
  * @public
  */
 // istanbul ignore next
 export class GeoToolsItemDef {
-  public static get geoAddressSearchButtonItemDef(): ToolbarCustomItem {
+  public static getItemDef(opts?: GeoToolsOptions): ToolbarCustomItem {
     return ToolbarItemUtilities.createCustomItem({
       id: "geo-tools:geoAddressSearch",
       icon: <SvgGeosearch />,
       label: GeoTools.translate("geoAddressSearch.label"),
-      panelContent: <GeoAddressSearch />,
+      panelContent: <GeoAddressSearch provider={opts?.addressProvider}/>,
     });
   }
 }

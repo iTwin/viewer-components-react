@@ -3,12 +3,21 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { ToolbarItemUtilities, ToolbarOrientation, ToolbarUsage } from "@itwin/appui-react";
+import { GeoToolsItemDef } from "./GeoToolsItemDef";
+
+import type { GeoToolsOptions } from "./GeoToolsItemDef";
 import type { ToolbarItem, UiItemsProvider } from "@itwin/appui-react";
 
-import { GeoToolsItemDef } from "./GeoToolsItemDef";
+import type { AddressProvider } from "./AddressProvider";
 
 export class GeoToolsAddressSearchProvider implements UiItemsProvider {
   public readonly id = "GeoToolsAddressSearchProvider";
+  private _opts?: GeoToolsOptions;
+
+
+  public constructor(opts?: GeoToolsOptions) {
+    this._opts = opts;
+  }
 
   public getToolbarItems(): ToolbarItem[] {
     const horizontalLayoutOverride = {
@@ -17,13 +26,15 @@ export class GeoToolsAddressSearchProvider implements UiItemsProvider {
         usage: ToolbarUsage.ViewNavigation,
       },
     };
+
+    const itemDef = GeoToolsItemDef.getItemDef(this._opts);
     return [
       ToolbarItemUtilities.createCustomItem({
-        id: GeoToolsItemDef.geoAddressSearchButtonItemDef.id,
+        id: itemDef.id,
         itemPriority: 70,
-        icon: GeoToolsItemDef.geoAddressSearchButtonItemDef.iconNode,
-        label: GeoToolsItemDef.geoAddressSearchButtonItemDef.label,
-        panelContent: GeoToolsItemDef.geoAddressSearchButtonItemDef.panelContent,
+        icon: itemDef.iconNode,
+        label: itemDef.label,
+        panelContent: itemDef.panelContent,
         layouts: horizontalLayoutOverride,
       }),
     ];

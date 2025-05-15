@@ -7,7 +7,7 @@ import { StagePanelLocation, StagePanelSection } from "@itwin/appui-react";
 import { EC3Provider, EC3Widget } from "@itwin/ec3-widget-react";
 import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
-import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
+import { GeoTools, GeoToolsAddressSearchProvider, GoogleAddressProvider } from "@itwin/geo-tools-react";
 import { GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
 import { SvgHierarchyTree, SvgTechnicalPreviewMiniBw } from "@itwin/itwinui-icons-react";
 import { FeatureInfoUiItemsProvider, MapLayersPrefBrowserStorage, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
@@ -257,7 +257,7 @@ const configuredUiItems = new Map<string, UiItem>([
       initialize: async () => {
         await GeoTools.initialize();
       },
-      createUiItemsProviders: () => [new GeoToolsAddressSearchProvider()],
+      createUiItemsProviders: () => [new GeoToolsAddressSearchProvider(new GoogleAddressProvider)],
     },
   ],
   [
