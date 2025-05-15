@@ -5,18 +5,17 @@
 
 import { expect } from "chai";
 import { mount } from "enzyme";
-import { fireEvent, render } from "@testing-library/react";
 import * as React from "react";
 import * as sinon from "sinon";
-import { BingAddressProvider } from "../AddressProvider";
-import { GeoAddressSearch, IModelGeoView } from "../geo-tools";
-import TestUtils from "./TestUtils";
 import { stubObject } from "ts-sinon";
-import { Point2d, Range2d } from "@itwin/core-geometry";
 import { SpecialKey } from "@itwin/appui-abstract";
-import { MockRender } from "@itwin/core-frontend";
 import { EmptyLocalization } from "@itwin/core-common";
+import { MapCartoRectangle, MockRender } from "@itwin/core-frontend";
+import { fireEvent, render } from "@testing-library/react";
+import { BingAddressProvider, GeoAddressSearch, IModelGeoView } from "../geo-tools";
+import TestUtils from "./TestUtils";
 
+import type { Range2d } from "@itwin/core-geometry";
 describe("GeoAddressSearch", () => {
 
   const options = [
@@ -38,21 +37,21 @@ describe("GeoAddressSearch", () => {
     locateAddressStub = sinon.stub(IModelGeoView, "locateAddress").callsFake(async (_address: string) => {
       return Promise.resolve(true);
     });
-    providerStub.getAddresses.returns(Promise.resolve([options[0]]));
+    providerStub.getSuggestions.returns(Promise.resolve([options[0]]));
 
     // providerStub.getAddresses.callsFake(async (_query: string, _viewLatLongBBox: Range2d)=>{
     //   console.log(`getAddresses called`);
     //   return Promise.resolve([options[0], options[1]]);
     // })
     getFrustumLonLatBBoxStub = sinon.stub(IModelGeoView, "getFrustumLonLatBBox").callsFake(() => {
-      return Range2d.createArray([Point2d.create(0, 0), Point2d.create(1, 1)]);
+      return MapCartoRectangle.createZero();
     });
   });
 
   afterEach(() => {
     locateAddressStub.restore();
     getFrustumLonLatBBoxStub.restore();
-    providerStub.getAddresses.reset();
+    providerStub.getSuggestions.reset();
 
   });
   after(async () => {
@@ -77,13 +76,13 @@ describe("GeoAddressSearch", () => {
     const input = geoAddrSearch.find("input[type='text']");
     expect(input.length).to.eq(1);
 
-    expect(providerStub.getAddresses.called).to.be.false;
+    expect(providerStub.getSuggestions.called).to.be.false;
 
     // getAddresses should not be called using an empty value
     input.simulate("change", { target: { value: "" } });
     await TestUtils.flushAsyncOperations();
     wrapper.update();
-    expect(providerStub.getAddresses.called).to.be.false;
+    expect(providerStub.getSuggestions.called).to.be.false;
 
     // First test with a getFrustumLonLatBBox stub that returns undefined
     getFrustumLonLatBBoxStub.restore();
@@ -95,12 +94,12 @@ describe("GeoAddressSearch", () => {
     wrapper.update();
 
     getFrustumLonLatBBoxStub.calledOnce.should.true;
-    providerStub.getAddresses.calledOnce.should.false;
+    providerStub.getSuggestions.calledOnce.should.false;
 
     // Now test with a stud that returns a proper Range.
     getFrustumLonLatBBoxStub.restore();
     getFrustumLonLatBBoxStub = sinon.stub(IModelGeoView, "getFrustumLonLatBBox").callsFake(() => {
-      return Range2d.createArray([Point2d.create(0, 0), Point2d.create(1, 1)]);
+      return MapCartoRectangle.createZero();
     });
 
     input.simulate("change", { target: { value: "sample Addr" } });
@@ -108,7 +107,7 @@ describe("GeoAddressSearch", () => {
     wrapper.update();
 
     getFrustumLonLatBBoxStub.calledOnce.should.true;
-    providerStub.getAddresses.calledOnce.should.true;
+    providerStub.getSuggestions.calledOnce.should.true;
 
     wrapper.unmount();
   });
