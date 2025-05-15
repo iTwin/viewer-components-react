@@ -8,8 +8,6 @@ import { GeoToolsItemDef } from "./GeoToolsItemDef";
 import type { GeoToolsOptions } from "./GeoToolsItemDef";
 import type { ToolbarItem, UiItemsProvider } from "@itwin/appui-react";
 
-import type { AddressProvider } from "./AddressProvider";
-
 export class GeoToolsAddressSearchProvider implements UiItemsProvider {
   public readonly id = "GeoToolsAddressSearchProvider";
   private _opts?: GeoToolsOptions;

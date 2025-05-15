@@ -5,9 +5,10 @@
 
 import "./GeoAddressSearch.scss";
 import * as React from "react";
-import { ComboBox } from "@itwin/itwinui-react";
+import { SvgCloseSmall, SvgSearch } from "@itwin/itwinui-icons-react";
+import { ComboBox, IconButton } from "@itwin/itwinui-react";
+import { BingAddressProvider } from "../BingAddressProvider";
 import { GeoTools } from "../GeoTools";
-import { GoogleAddressProvider } from "../GoogleAddressProvider";
 import { IModelGeoView } from "../IModelGeoView";
 
 import type { SelectOption } from "@itwin/itwinui-react";
@@ -25,8 +26,8 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
   const [addressCache, setAddressCache] = React.useState<AddressData[]>([]);
 
   // `React.useMemo' is used avoid creating new object on each render cycle
-  const addressProvider = React.useMemo(() => props.provider ?? new GoogleAddressProvider(), [props.provider]);
-  // const addressProvider = React.useMemo(() => props.provider ?? new BingAddressProvider(), [props.provider]);
+  // Default is Bing provider, but we might want to default to Google in the future
+  const addressProvider = React.useMemo(() => props.provider ?? new BingAddressProvider(), [props.provider]);
 
   const onAddressSelected = async (selected: string) => {
     setInputValue(selected);
@@ -58,25 +59,19 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
     return [];
   };
 
-  // React.useEffect(() => {
-  //   void (async () => {
-  //     const items = await getAddressesFunc(inputValue);
-  //     setOptions(items.map((value) => ({ label: value.formattedAddress ?? "", value: value.formattedAddress ?? "" })));
-  //     console.log("setOptions: ", items);
-  //   })();
-  // }, [inputValue]);
 
   const clearValue = () => {
     setInputValue("");
-    console.log("clearValue");
+    setOptions([]);
   };
 
   return (
-    // <div className="geotools-geoaddresssearch__container">
-    //   <div className="geotools-geoaddresssearch__combobox">
+    <div className="geotools-geoaddresssearch__container">
+      <div className="geotools-geoaddresssearch__combobox">
         <ComboBox
           options={options}
-          filterFunction={(options)=>options}
+          filterFunction={(options)=>options} // disable filtering as it can interfere with the address provider
+          emptyStateMessage={GeoTools.translate("geoAddressSearch.noResults")}
           onHide={()=>clearValue()}
           inputProps={{
             placeholder: GeoTools.translate("geoAddressSearch.inputPlaceHolder"),
@@ -85,12 +80,9 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
               const items = await getAddressesFunc(inputValue);
               setAddressCache(items);
               const options = items.map((value) => ({ label: value.formattedAddress ?? "", value: value.formattedAddress ?? "" }))
-              console.log("setOptions: ", options);
               setOptions(options);
 
               setInputValue(event.target.value);
-              console.log("onChange: ", event.target.value);
-
             },
           }}
           onChange={(value: any) => {
@@ -99,14 +91,13 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
           value={inputValue}
           enableVirtualization
         />
-    //   </div>
-    //   <IconButton
-    //     className="geotools-geoaddresssearch__button"
-    //     onClick={clearValue}
-    //     label={!inputValue ? "" : GeoTools.translate("geoAddressSearch.clearTooltip")}
-    //   >
-    //     {!inputValue ? <SvgSearch style={{ opacity: 0.5 }} /> : <SvgCloseSmall />}
-    //   </IconButton>
-    // </div>
+      </div>
+      <IconButton
+        className="geotools-geoaddresssearch__button"
+        onClick={clearValue}
+        label={!inputValue ? "" : GeoTools.translate("geoAddressSearch.clearTooltip")} >
+          {!inputValue ? <SvgSearch style={{ opacity: 0.5 }} /> : <SvgCloseSmall />}
+      </IconButton>
+  </div>
   );
 }
