@@ -101,7 +101,7 @@
     "@itwin/presentation-common": "5.0.0-dev.111",
     "@itwin/presentation-components": "5.12.2-alpha.1",
     "@itwin/presentation-frontend": "5.0.0-dev.111",
-    "@itwin/presentation-testing": "^5.4.3",
+    "@itwin/presentation-testing": "5.4.3-alpha.1",
     "@itwin/webgl-compatibility": "5.0.0-dev.111",
     "@stratakit/icons": "^0.1.0",
     "@stratakit/bricks": "^0.1.0",
