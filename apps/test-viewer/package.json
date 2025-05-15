@@ -36,7 +36,7 @@
     "@itwin/measure-tools-react": "workspace:*",
     "@itwin/one-click-lca-react": "workspace:*",
     "@itwin/presentation-common": "5.0.0-dev.111",
-    "@itwin/presentation-components": "^5.12.2",
+    "@itwin/presentation-components": "5.12.2-alpha.1",
     "@itwin/presentation-frontend": "5.0.0-dev.111",
     "@itwin/property-grid-react": "workspace:*",
     "@itwin/reports-config-widget-react": "workspace:*",

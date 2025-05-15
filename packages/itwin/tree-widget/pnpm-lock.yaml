@@ -107,8 +107,8 @@ importers:
         specifier: 5.0.0-dev.111
         version: 5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-common@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-geometry@5.0.0-dev.111))(@itwin/core-quantity@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111))(@itwin/ecschema-metadata@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-quantity@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)))
       '@itwin/presentation-components':
-        specifier: ^5.12.2
-        version: 5.12.2(5131002aa29de13c2d995641e5ff2a6a)
+        specifier: 5.12.2-alpha.1
+        version: 5.12.2-alpha.1(5131002aa29de13c2d995641e5ff2a6a)
       '@itwin/presentation-frontend':
         specifier: 5.0.0-dev.111
         version: 5.0.0-dev.111(4644b01c34d2c5c3c8363e58455118c4)
@@ -742,6 +742,27 @@ packages:
 
   '@itwin/presentation-components@5.12.2':
     resolution: {integrity: sha512-WQnRvIaVWT0SlU6QgptZAZwQcvmmDIGcX6H0iMzbrSqmJH2uQacIb+Jw0r6O5K5H9QSldl0TgvsxDVoAHvlXGA==}
+    peerDependencies:
+      '@itwin/appui-abstract': ^4.4.0 || ^5.0.0
+      '@itwin/components-react': ^4.9.0 || ^5.0.0
+      '@itwin/core-bentley': ^4.4.0 || ^5.0.0
+      '@itwin/core-common': ^4.4.0 || ^5.0.0
+      '@itwin/core-frontend': ^4.4.0 || ^5.0.0
+      '@itwin/core-quantity': ^4.4.0 || ^5.0.0
+      '@itwin/core-react': ^4.9.0 || ^5.0.0
+      '@itwin/ecschema-metadata': ^4.4.0 || ^5.0.0
+      '@itwin/imodel-components-react': ^4.9.0 || ^5.0.0
+      '@itwin/presentation-common': ^4.4.0 || ^5.0.0
+      '@itwin/presentation-frontend': ^4.4.0 || ^5.0.0
+      '@itwin/unified-selection-react': ^1.0.0
+      react: ^17.0.0 || ^18.0.0
+      react-dom: ^17.0.0 || ^18.0.0
+    peerDependenciesMeta:
+      '@itwin/unified-selection-react':
+        optional: true
+
+  '@itwin/presentation-components@5.12.2-alpha.1':
+    resolution: {integrity: sha512-n0mBd4NXnl5vPZhFXZU6wXOS8nd1agb2KiJS0a0zEi9JHWepdQy9a0S7chBrxeViTK8ULwSqcuEOQ1wblBl0Zg==}
     peerDependencies:
       '@itwin/appui-abstract': ^4.4.0 || ^5.0.0
       '@itwin/components-react': ^4.9.0 || ^5.0.0
@@ -4810,7 +4831,7 @@ snapshots:
       rimraf: 6.0.1
       tree-kill: 1.2.2
       typedoc: 0.26.11(typescript@5.6.3)
-      typedoc-plugin-merge-modules: 6.1.0(typedoc@0.26.11(typescript@5.6.3))
+      typedoc-plugin-merge-modules: 6.1.0(typedoc@0.26.11(typescript@5.8.3))
       typescript: 5.6.3
       wtfnode: 0.9.4
       yargs: 17.7.2
@@ -5126,6 +5147,36 @@ snapshots:
       '@itwin/presentation-frontend': 5.0.0-dev.111(4644b01c34d2c5c3c8363e58455118c4)
       '@itwin/presentation-shared': 1.2.1
       '@itwin/unified-selection': 1.4.1
+      classnames: 2.5.1
+      fast-deep-equal: 3.1.3
+      fast-sort: 3.4.1
+      micro-memoize: 4.1.3
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+      react-error-boundary: 4.1.2(react@18.3.1)
+      rxjs: 7.8.1
+    transitivePeerDependencies:
+      - '@itwin/core-geometry'
+
+  '@itwin/presentation-components@5.12.2-alpha.1(5131002aa29de13c2d995641e5ff2a6a)':
+    dependencies:
+      '@itwin/appui-abstract': 5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)
+      '@itwin/components-react': 5.4.0(@itwin/appui-abstract@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111))(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-react@5.4.0(@itwin/appui-abstract@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111))(@itwin/core-bentley@5.0.0-dev.111)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@itwin/core-bentley': 5.0.0-dev.111
+      '@itwin/core-common': 5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-geometry@5.0.0-dev.111)
+      '@itwin/core-frontend': 5.0.0-dev.111(@itwin/appui-abstract@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111))(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-common@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-geometry@5.0.0-dev.111))(@itwin/core-geometry@5.0.0-dev.111)(@itwin/core-orbitgt@5.0.0-dev.111)(@itwin/core-quantity@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111))(@itwin/ecschema-metadata@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-quantity@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)))(@itwin/ecschema-rpcinterface-common@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-common@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-geometry@5.0.0-dev.111))(@itwin/core-geometry@5.0.0-dev.111)(@itwin/ecschema-metadata@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-quantity@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111))))(inversify@6.0.3)(reflect-metadata@0.1.14)
+      '@itwin/core-quantity': 5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)
+      '@itwin/core-react': 5.4.0(@itwin/appui-abstract@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111))(@itwin/core-bentley@5.0.0-dev.111)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@itwin/ecschema-metadata': 5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-quantity@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111))
+      '@itwin/imodel-components-react': 5.4.0(0a8edbb24207863a264a7382af936a40)
+      '@itwin/itwinui-icons-react': 2.10.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@itwin/itwinui-react': 3.18.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@itwin/presentation-common': 5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-common@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-geometry@5.0.0-dev.111))(@itwin/core-quantity@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111))(@itwin/ecschema-metadata@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-quantity@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)))
+      '@itwin/presentation-core-interop': 1.4.0-alpha.1(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-common@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-geometry@5.0.0-dev.111))(@itwin/core-geometry@5.0.0-dev.111)(@itwin/core-quantity@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111))(@itwin/ecschema-metadata@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)(@itwin/core-quantity@5.0.0-dev.111(@itwin/core-bentley@5.0.0-dev.111)))
+      '@itwin/presentation-frontend': 5.0.0-dev.111(4644b01c34d2c5c3c8363e58455118c4)
+      '@itwin/presentation-shared': 2.0.0-alpha.0
+      '@itwin/unified-selection': 1.4.2-alpha.0
       classnames: 2.5.1
       fast-deep-equal: 3.1.3
       fast-sort: 3.4.1
@@ -9250,7 +9301,7 @@ snapshots:
       possible-typed-array-names: 1.1.0
       reflect.getprototypeof: 1.0.10
 
-  typedoc-plugin-merge-modules@6.1.0(typedoc@0.26.11(typescript@5.6.3)):
+  typedoc-plugin-merge-modules@6.1.0(typedoc@0.26.11(typescript@5.8.3)):
     dependencies:
       typedoc: 0.26.11(typescript@5.6.3)
 
