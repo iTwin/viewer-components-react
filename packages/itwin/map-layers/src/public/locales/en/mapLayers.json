@@ -169,10 +169,15 @@
     "SetTransparency": "Set transparency"
   },
   "WellKnownBaseMaps": {
-    "BingProvider": {
+    "BingMaps": {
       "Aerial": "Bing Maps: Aerial Imagery",
       "Hybrid": "Bing Maps: Aerial Imagery with labels",
       "Street": "Bing Maps: Streets"
+    },
+    "GoogleMaps": {
+      "satellite": "Google Maps: Aerial Imagery",
+      "satellite-layerRoadmap": "Google Maps: Aerial Imagery with labels",
+      "roadmap": "Google Maps: Streets"
     }
   }
 }

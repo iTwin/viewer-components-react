@@ -1,0 +1,7 @@
+{
+  "type": "major",
+  "comment": "Upgrade to iTwin.js 5.0; adds support for Google 2D Tiles",
+  "packageName": "@itwin/map-layers",
+  "email": "aruniverse@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

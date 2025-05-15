@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Fixed merged (categories and models) nodes visibility. Changed `@beta` APIs in a **breaking** way: `ModelsTreeVisibilityHandlerOverrides.getModelDisplayStatus` and `ModelsTreeVisibilityHandlerOverrides.getCategoryDisplayStatus` - `id` and `categoryId` props are now of `Id64Arg` type instead of `Id64String`. Use `Id64` from `@itwin/core-bentley` to access individual IDs.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "100586436+JonasDov@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

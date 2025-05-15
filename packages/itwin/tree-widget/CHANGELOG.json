@@ -2,6 +2,37 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Thu, 15 May 2025 05:33:32 GMT",
+      "version": "3.8.0",
+      "tag": "@itwin/tree-widget-react_v3.8.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "5c1844caf2fc91a9d41f95f6f667522f3e35272a",
+            "comment": "Fixed merged (categories and models) nodes visibility. Changed `@beta` APIs in a **breaking** way: `ModelsTreeVisibilityHandlerOverrides.getModelDisplayStatus` and `ModelsTreeVisibilityHandlerOverrides.getCategoryDisplayStatus` - `id` and `categoryId` props are now of `Id64Arg` type instead of `Id64String`. Use `Id64` from `@itwin/core-bentley` to access individual IDs."
+          }
+        ],
+        "patch": [
+          {
+            "author": "aruniverse@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "d2ea00ead2c5c4a297907b64456a0b5c9628a251",
+            "comment": "update presentation deps to versions that properly support core @ 5.0-rc"
+          }
+        ],
+        "none": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "ccdccffd2d9c2e1cafead78c1b57744eb6abeca5",
+            "comment": ""
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 08 May 2025 14:29:47 GMT",
       "version": "3.7.0",
       "tag": "@itwin/tree-widget-react_v3.7.0",
