@@ -786,7 +786,6 @@ async function createInstanceKeyPathsFromInstanceLabel(
   const elementLabelSelectClause = await props.labelsFactory.createSelectClause({
     classAlias: "e",
     className: ELEMENT_CLASS_NAME,
-    // eslint-disable-next-line @typescript-eslint/unbound-method
     selectorsConcatenator: ECSql.createConcatenatedValueStringSelector,
   });
   const targetsReader = props.imodelAccess.createQueryReader(

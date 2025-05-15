@@ -58,7 +58,6 @@ export function mockPresentationManager() {
   const onIModelHierarchyChanged = new BeEvent<(args: IModelHierarchyChangeEventArgs) => void>();
   const presentationManagerMock = moq.Mock.ofType<PresentationManager>();
   presentationManagerMock.setup((x) => x.vars(moq.It.isAny())).returns(() => rulesetVariablesManagerMock.object);
-  // eslint-disable-next-line @itwin/no-internal
   presentationManagerMock.setup((x) => x.onIModelHierarchyChanged).returns(() => onIModelHierarchyChanged);
   presentationManagerMock.setup((x) => x.rulesets()).returns(() => rulesetsManagerMock.object);
 

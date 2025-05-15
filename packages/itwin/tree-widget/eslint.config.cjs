@@ -23,6 +23,12 @@ module.exports = [
     },
   },
   {
+    files: ["src/test/**/*.{ts,tsx}"],
+    rules: {
+      "@typescript-eslint/unbound-method": "off",
+    },
+  },
+  {
     plugins: {
       "unused-imports": unusedImports,
     },
@@ -32,9 +38,16 @@ module.exports = [
       "import/no-duplicates": "error",
       "object-curly-spacing": ["error", "always"],
       "@typescript-eslint/consistent-type-imports": "error",
+      "@typescript-eslint/no-non-null-assertion": "off",
       "@typescript-eslint/no-unused-vars": "off",
       "unused-imports/no-unused-imports": "error",
       "unused-imports/no-unused-vars": ["error", { vars: "all", varsIgnorePattern: "^_", args: "after-used", argsIgnorePattern: "^_" }],
+       "@typescript-eslint/no-empty-object-type": [
+        "error",
+        {
+          allowObjectTypes: "always",
+        },
+      ],
       curly: ["error", "all"],
     },
   },

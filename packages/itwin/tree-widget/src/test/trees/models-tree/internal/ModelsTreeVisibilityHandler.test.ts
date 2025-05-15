@@ -85,7 +85,7 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
 
     afterEach(() => {
-      createdHandlers.forEach((x) => x.dispose());
+      createdHandlers.forEach((x) => x[Symbol.dispose]());
       createdHandlers = [];
     });
 

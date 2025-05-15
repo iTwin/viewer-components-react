@@ -78,7 +78,7 @@ export class TreeWidget {
 
   /** Calls i18n.translateWithNamespace with the "TreeWidget" namespace. Do NOT include the namespace in the key.
    */
-  public static translate(key: string | string[], options?: TranslationOptions): string {
+  public static translate(key: string, options?: TranslationOptions): string {
     const stringKey = `${TreeWidget.i18nNamespace}:${key}`;
     return TreeWidget.i18n.getLocalizedString(stringKey, options);
   }
