@@ -5,7 +5,7 @@
 
 import { expect } from "chai";
 import { ElementOwnsMultiAspects, ExternalSourceAspect, PhysicalModel, SpatialCategory, Subject } from "@itwin/core-backend";
-import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
+import { IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { DefaultContentDisplayTypes, KeySet, PresentationRpcInterface, PropertyValueFormat } from "@itwin/presentation-common";
@@ -42,7 +42,7 @@ describe("Models tree", () => {
             },
           },
         },
-        rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
+        rpcs: [IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
       });
       // eslint-disable-next-line @itwin/no-internal
       ECSchemaRpcImpl.register();
@@ -53,7 +53,6 @@ describe("Models tree", () => {
     });
 
     it("can filter root level", async function () {
-      // eslint-disable-next-line deprecation/deprecation
       await using imodelResult = await buildIModel(this, async (builder) => {
         const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
         const childSubject = insertSubject({ builder, codeValue: "child subject 1", description: "", parentId: rootSubject.id });
@@ -157,7 +156,6 @@ describe("Models tree", () => {
               builder,
               codeValue: `model 3`,
               parentId: rootSubject.id,
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               jsonProperties: { PhysicalPartition: { Model: { Content: true } } },
             }).id,
           }).id,

@@ -58,7 +58,6 @@ export function mockPresentationManager() {
   const onIModelHierarchyChanged = new BeEvent<(args: IModelHierarchyChangeEventArgs) => void>();
   const presentationManagerMock = moq.Mock.ofType<PresentationManager>();
   presentationManagerMock.setup((x) => x.vars(moq.It.isAny())).returns(() => rulesetVariablesManagerMock.object);
-  // eslint-disable-next-line @itwin/no-internal
   presentationManagerMock.setup((x) => x.onIModelHierarchyChanged).returns(() => onIModelHierarchyChanged);
   presentationManagerMock.setup((x) => x.rulesets()).returns(() => rulesetsManagerMock.object);
 
@@ -117,15 +116,15 @@ export function mockViewport(props?: ViewportMockProps) {
     props.imodel = moq.Mock.ofType<IModelConnection>().object;
   }
   const vpMock = moq.Mock.ofType<Viewport>();
-  vpMock.setup((x) => x.iModel).returns(() => props!.imodel!);
-  vpMock.setup((x) => x.view).returns(() => props!.viewState!);
-  vpMock.setup((x) => x.perModelCategoryVisibility).returns(() => props!.perModelCategoryVisibility!);
-  vpMock.setup((x) => x.onViewedCategoriesPerModelChanged).returns(() => props!.onViewedCategoriesPerModelChanged!);
-  vpMock.setup((x) => x.onDisplayStyleChanged).returns(() => props!.onDisplayStyleChanged!);
-  vpMock.setup((x) => x.onViewedCategoriesChanged).returns(() => props!.onViewedCategoriesChanged!);
-  vpMock.setup((x) => x.onViewedModelsChanged).returns(() => props!.onViewedModelsChanged!);
-  vpMock.setup((x) => x.onAlwaysDrawnChanged).returns(() => props!.onAlwaysDrawnChanged!);
-  vpMock.setup((x) => x.onNeverDrawnChanged).returns(() => props!.onNeverDrawnChanged!);
+  vpMock.setup((x) => x.iModel).returns(() => props.imodel!);
+  vpMock.setup((x) => x.view).returns(() => props.viewState!);
+  vpMock.setup((x) => x.perModelCategoryVisibility).returns(() => props.perModelCategoryVisibility!);
+  vpMock.setup((x) => x.onViewedCategoriesPerModelChanged).returns(() => props.onViewedCategoriesPerModelChanged!);
+  vpMock.setup((x) => x.onDisplayStyleChanged).returns(() => props.onDisplayStyleChanged!);
+  vpMock.setup((x) => x.onViewedCategoriesChanged).returns(() => props.onViewedCategoriesChanged!);
+  vpMock.setup((x) => x.onViewedModelsChanged).returns(() => props.onViewedModelsChanged!);
+  vpMock.setup((x) => x.onAlwaysDrawnChanged).returns(() => props.onAlwaysDrawnChanged!);
+  vpMock.setup((x) => x.onNeverDrawnChanged).returns(() => props.onNeverDrawnChanged!);
   return vpMock;
 }
 

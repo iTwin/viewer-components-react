@@ -7,10 +7,11 @@ import { useState } from "react";
 import { StagePanelLocation, StagePanelSection, useActiveViewport, WidgetState } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
 import { ExpandableBlock } from "@itwin/itwinui-react";
-import { Chip, Icon } from "@itwin/itwinui-react-v5/bricks";
 import { MapLayersPrefBrowserStorage, MapLayersUI, MapLayersWidget } from "@itwin/map-layers";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
 import { CategoriesTreeIcon, Tree, TreeRenderer, TreeWidget, useCategoriesTree } from "@itwin/tree-widget-react";
+import { Chip } from "@stratakit/bricks";
+import { Icon } from "@stratakit/foundations";
 import { getSchemaContext } from "../SchemaContext";
 import { unifiedSelectionStorage } from "../SelectionStorage";
 

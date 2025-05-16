@@ -4,13 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useMemo, useState } from "react";
-import toggle2DSvg from "@itwin/itwinui-icons/2d.svg";
-import toggle3DSvg from "@itwin/itwinui-icons/3d.svg";
-import focusModeSvg from "@itwin/itwinui-icons/cursor-click.svg";
-import visibilityHideSvg from "@itwin/itwinui-icons/visibility-hide.svg";
-import visibilityShowSvg from "@itwin/itwinui-icons/visibility-show.svg";
-import visibilityInvertSvg from "@itwin/itwinui-icons/visibilty-invert.svg";
-import { IconButton } from "@itwin/itwinui-react/bricks";
+import { IconButton } from "@stratakit/bricks";
+import toggle2DSvg from "@stratakit/icons/2d.svg";
+import toggle3DSvg from "@stratakit/icons/3d.svg";
+import focusModeSvg from "@stratakit/icons/cursor-click.svg";
+import visibilityHideSvg from "@stratakit/icons/visibility-hide.svg";
+import visibilityInvertSvg from "@stratakit/icons/visibility-invert.svg";
+import visibilityShowSvg from "@stratakit/icons/visibility-show.svg";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
 import {

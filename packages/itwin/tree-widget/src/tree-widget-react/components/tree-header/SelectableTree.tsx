@@ -5,7 +5,7 @@
 
 import "./SelectableTree.css";
 import { ErrorBoundary } from "react-error-boundary";
-import { Divider } from "@itwin/itwinui-react/bricks";
+import { Divider } from "@stratakit/bricks";
 import { ErrorState } from "./ErrorState.js";
 
 import type { Viewport } from "@itwin/core-frontend";

@@ -19,16 +19,8 @@ jobs:
   - job: Build
     workspace:
       clean: all
-    strategy:
-      matrix:
-        "Windows":
-          OS: windows-latest
-        "Linux":
-          OS: ubuntu-latest
-        "Mac":
-          OS: macOS-latest
     pool:
-      vmImage: $(OS)
+      vmImage: ubuntu-latest
     steps:
       - template: templates/build-steps.yaml
 

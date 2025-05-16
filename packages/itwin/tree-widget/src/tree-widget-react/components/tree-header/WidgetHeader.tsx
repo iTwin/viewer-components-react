@@ -5,7 +5,7 @@
 
 import "./WidgetHeader.css";
 import { useState } from "react";
-import { Select, Skeleton } from "@itwin/itwinui-react/bricks";
+import { Select, Skeleton } from "@stratakit/bricks";
 import { DebouncedSearchBox } from "./SearchBox.js";
 
 import type { TreeRenderProps } from "../TreeWidgetComponentImpl.js";

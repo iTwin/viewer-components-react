@@ -47,7 +47,7 @@ export async function buildIModel<TResult extends {} | undefined>(
   setup?: (builder: TestIModelBuilder, testSchema: TestSchemaDefinition, mochaContext: Mocha.Context) => Promise<TResult>,
 ) {
   let res!: TResult;
-  // eslint-disable-next-line deprecation/deprecation
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   const imodel = await buildTestIModel(mochaContext, async (builder) => {
     const testSchema = (await importSchema({
       mochaContext,

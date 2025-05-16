@@ -24,7 +24,7 @@ describe("useHierarchyVisibility", () => {
       ReturnType<HierarchyVisibilityHandler["getVisibilityStatus"]>
     >(),
     changeVisibility: sinon.stub<Parameters<HierarchyVisibilityHandler["changeVisibility"]>, ReturnType<HierarchyVisibilityHandler["changeVisibility"]>>(),
-    dispose: sinon.stub<Parameters<HierarchyVisibilityHandler["dispose"]>, ReturnType<HierarchyVisibilityHandler["dispose"]>>(),
+    [Symbol.dispose]: sinon.stub<[], void>(),
     onVisibilityChange,
   } satisfies HierarchyVisibilityHandler;
 
@@ -38,7 +38,7 @@ describe("useHierarchyVisibility", () => {
   beforeEach(() => {
     visibilityHandler.getVisibilityStatus.reset();
     visibilityHandler.changeVisibility.reset();
-    visibilityHandler.dispose.reset();
+    visibilityHandler[Symbol.dispose].reset();
   });
 
   after(() => {

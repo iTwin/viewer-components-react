@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
-import { Code, ColorDef, IModel, IModelReadRpcInterface, RenderMode, SnapshotIModelRpcInterface } from "@itwin/core-common";
+import { Code, ColorDef, IModel, IModelReadRpcInterface, RenderMode } from "@itwin/core-common";
 import { IModelApp, OffScreenViewport, PerModelCategoryVisibility, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
@@ -58,7 +58,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           },
         },
       },
-      rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
+      rpcs: [IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
     });
     await TestUtils.initialize();
     // eslint-disable-next-line @itwin/no-internal
@@ -133,7 +133,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       ...commonProps,
       [Symbol.dispose]() {
         commonProps.idsCache[Symbol.dispose]();
-        commonProps.viewport.dispose();
+        commonProps.viewport[Symbol.dispose]();
         handler[Symbol.dispose]();
         provider[Symbol.dispose]();
       },

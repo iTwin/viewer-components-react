@@ -5,7 +5,7 @@
 
 import { expect } from "chai";
 import { Id64 } from "@itwin/core-bentley";
-import { IModel, IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
+import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
@@ -95,7 +95,7 @@ describe("Models tree", () => {
             },
           },
         },
-        rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
+        rpcs: [IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
       });
       // eslint-disable-next-line @itwin/no-internal
       ECSchemaRpcImpl.register();
@@ -395,7 +395,6 @@ describe("Models tree", () => {
             builder,
             codeValue: `matching model 1`,
             parentId: childSubject.id,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             jsonProperties: { PhysicalPartition: { Model: { Content: true } } },
           });
           const model1 = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
@@ -868,14 +867,12 @@ describe("Models tree", () => {
             builder,
             codeValue: `hidden-subject`,
             parentId: rootSubject.id,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             jsonProperties: { Subject: { Job: { Bridge: "Test" } } },
           });
           const partition = insertPhysicalPartition({
             builder,
             codeValue: `hidden-model`,
             parentId: hiddenChildSubject.id,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             jsonProperties: { PhysicalPartition: { Model: { Content: true } } },
           });
           const model = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
@@ -1507,7 +1504,6 @@ describe("Models tree", () => {
         let hierarchyConfig: ModelsTreeHierarchyConfiguration;
 
         before(async function () {
-          // eslint-disable-next-line deprecation/deprecation
           imodel = (
             await buildIModel(this, async (...args) => {
               const imodelSetupResult = await testCase.setupIModel(...args);

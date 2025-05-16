@@ -6,10 +6,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAsyncValue } from "@itwin/components-react";
 import { QueryRowFormat } from "@itwin/core-common";
-import visibilityHideSvg from "@itwin/itwinui-icons/visibility-hide.svg";
-import visibilityShowSvg from "@itwin/itwinui-icons/visibility-show.svg";
-import visibilityInvertSvg from "@itwin/itwinui-icons/visibilty-invert.svg";
-import { IconButton } from "@itwin/itwinui-react/bricks";
+import { IconButton } from "@stratakit/bricks";
+import visibilityHideSvg from "@stratakit/icons/visibility-hide.svg";
+import visibilityInvertSvg from "@stratakit/icons/visibility-invert.svg";
+import visibilityShowSvg from "@stratakit/icons/visibility-show.svg";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { hideAllCategories, invertAllCategories } from "../common/CategoriesVisibilityUtils.js";
 import { getClassesByView } from "../common/internal/Utils.js";
