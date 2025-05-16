@@ -5,10 +5,10 @@
 
 import "./TreeNodeVisibilityButton.css";
 import { memo } from "react";
-import { Tree } from "@stratakit/bricks";
 import visibilityHideSvg from "@stratakit/icons/visibility-hide.svg";
 import visibilityPartialSvg from "@stratakit/icons/visibility-partial.svg";
 import visibilityShowSvg from "@stratakit/icons/visibility-show.svg";
+import { Tree } from "@stratakit/structures";
 import { createTooltip } from "../internal/Tooltip.js";
 
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
