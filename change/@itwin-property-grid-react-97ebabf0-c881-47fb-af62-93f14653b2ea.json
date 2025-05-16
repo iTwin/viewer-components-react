@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Add support for iTwin.js v5.0",
+  "packageName": "@itwin/property-grid-react",
+  "email": "aruniverse@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
