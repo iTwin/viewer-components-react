@@ -10,16 +10,17 @@ import { ExpandableBlock } from "@itwin/itwinui-react";
 import { MapLayersPrefBrowserStorage, MapLayersUI, MapLayersWidget } from "@itwin/map-layers";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
 import { CategoriesTreeIcon, Tree, TreeRenderer, TreeWidget, useCategoriesTree } from "@itwin/tree-widget-react";
-import { Chip } from "@stratakit/bricks";
 import { Icon } from "@stratakit/foundations";
+import { Chip } from "@stratakit/structures";
 import { getSchemaContext } from "../SchemaContext";
 import { unifiedSelectionStorage } from "../SelectionStorage";
 
 import type { UiItemsProvider } from "@itwin/appui-react";
 import type { ComponentProps, PropsWithChildren, ReactNode } from "react";
 import type { Viewport } from "@itwin/core-frontend";
-const mapIcon = new URL("@itwin/itwinui-icons/map.svg", import.meta.url).href;
-const element3dIcon = new URL("@itwin/itwinui-icons/3d.svg", import.meta.url).href;
+
+const mapIcon = new URL("@itwin/@stratakit/icons/map.svg", import.meta.url).href;
+const element3dIcon = new URL("@itwin/@stratakit/icons/3d.svg", import.meta.url).href;
 
 export async function initializeLayers() {
   await MapLayersFormats.initialize();
