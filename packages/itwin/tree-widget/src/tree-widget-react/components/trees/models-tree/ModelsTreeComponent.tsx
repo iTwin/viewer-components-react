@@ -30,7 +30,6 @@ import type { ModelsTreeHeaderButtonProps, ModelsTreeHeaderButtonType } from "./
 interface ModelsTreeComponentProps
   extends Pick<
     ModelsTreeProps,
-    | "getSchemaContext"
     | "selectionStorage"
     | "hierarchyLevelConfig"
     | "selectionMode"

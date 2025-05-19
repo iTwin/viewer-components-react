@@ -12,50 +12,39 @@ import { LOGGING_NAMESPACE } from "../Utils.js";
 
 import type { FunctionProps} from "../Utils.js";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type { useIModelTree } from "@itwin/presentation-hierarchies-react";
 
 type IModelAccess = FunctionProps<typeof useIModelTree>["imodelAccess"];
 
 export interface UseIModelAccessProps {
-    imodel: IModelConnection;
-    getSchemaContext: (imodel: IModelConnection) => SchemaContext;
-    treeName: string;
-    imodelAccess?: IModelAccess;
-    hierarchyLevelSizeLimit?: number;
+  imodel: IModelConnection;
+  treeName: string;
+  imodelAccess?: IModelAccess;
+  hierarchyLevelSizeLimit?: number;
 }
 
 /** @internal */
-export function useIModelAccess({imodel, getSchemaContext, treeName, imodelAccess: providedIModelAccess, hierarchyLevelSizeLimit}: UseIModelAccessProps): {
+export function useIModelAccess({ imodel, treeName, imodelAccess: providedIModelAccess, hierarchyLevelSizeLimit }: UseIModelAccessProps): {
   imodelAccess: IModelAccess;
   currentHierarchyLevelSizeLimit: number;
 } {
-    const defaultHierarchyLevelSizeLimit = hierarchyLevelSizeLimit ?? 1000;
-    const imodelAccess = useMemo(() => {
-      TreeWidget.logger.logInfo(
-        `${LOGGING_NAMESPACE}.${treeName}`,
-        `iModel changed, now using ${providedIModelAccess ? "provided imodel access" : `"${imodel.name}"`}`,
-      );
-      return providedIModelAccess ?? createIModelAccess({ getSchemaContext, imodel, hierarchyLevelSizeLimit: defaultHierarchyLevelSizeLimit });
-    }, [providedIModelAccess, getSchemaContext, imodel, treeName, defaultHierarchyLevelSizeLimit]);
+  const defaultHierarchyLevelSizeLimit = hierarchyLevelSizeLimit ?? 1000;
+  const imodelAccess = useMemo(() => {
+    TreeWidget.logger.logInfo(
+      `${LOGGING_NAMESPACE}.${treeName}`,
+      `iModel changed, now using ${providedIModelAccess ? "provided imodel access" : `"${imodel.name}"`}`,
+    );
+    return providedIModelAccess ?? createIModelAccess({ imodel, hierarchyLevelSizeLimit: defaultHierarchyLevelSizeLimit });
+  }, [providedIModelAccess, imodel, treeName, defaultHierarchyLevelSizeLimit]);
 
-    return {
-      imodelAccess,
-      currentHierarchyLevelSizeLimit: defaultHierarchyLevelSizeLimit,
-    }
+  return {
+    imodelAccess,
+    currentHierarchyLevelSizeLimit: defaultHierarchyLevelSizeLimit,
+  };
 }
 
-function createIModelAccess({
-  imodel,
-  getSchemaContext,
-  hierarchyLevelSizeLimit,
-}: {
-  imodel: IModelConnection;
-  getSchemaContext: (imodel: IModelConnection) => SchemaContext;
-  hierarchyLevelSizeLimit: number;
-}) {
-  const schemas = getSchemaContext(imodel);
-  const schemaProvider = createECSchemaProvider(schemas);
+function createIModelAccess({ imodel, hierarchyLevelSizeLimit }: { imodel: IModelConnection; hierarchyLevelSizeLimit: number }) {
+  const schemaProvider = createECSchemaProvider(imodel.schemaContext);
   return {
     imodelKey: imodel.key,
     ...schemaProvider,

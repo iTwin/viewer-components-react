@@ -23,15 +23,7 @@ import { SkeletonTree } from "./SkeletonTree.js";
 
 import type { ReactNode } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { SchemaContext } from "@itwin/ecschema-metadata";
-import type {
-  PresentationHierarchyNode,
-  SelectionStorage,
-  TreeRendererProps,
-  useIModelTree,
-  useSelectionHandler,
-  useTree,
-} from "@itwin/presentation-hierarchies-react";
+import type { PresentationHierarchyNode, SelectionStorage, useIModelTree, useSelectionHandler } from "@itwin/presentation-hierarchies-react";
 import type { FunctionProps } from "../Utils.js";
 import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
 import type { HighlightInfo } from "../UseNodeHighlighting.js";
@@ -40,8 +32,6 @@ export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPa
   Partial<Pick<FunctionProps<typeof useSelectionHandler>, "selectionMode">> & {
     /** iModel connection that should be used to pull data from. */
     imodel: IModelConnection;
-    /** Callback for getting `SchemaContext` for specific iModel. */
-    getSchemaContext: (imodel: IModelConnection) => SchemaContext;
     /** Unique tree component name that will be used as unified selection change event source when selecting node. */
     treeName: string;
     /** Unified selection storage that should be used by tree to handle tree selection changes. */
@@ -72,7 +62,6 @@ export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPa
  * @beta
  */
 export function Tree({
-  getSchemaContext,
   hierarchyLevelSizeLimit,
   getHierarchyDefinition,
   getFilteredPaths,
@@ -89,7 +78,6 @@ export function Tree({
   const { imodelAccess, currentHierarchyLevelSizeLimit } = useIModelAccess({
     imodel: props.imodel,
     imodelAccess: providedIModelAccess,
-    getSchemaContext,
     treeName,
     hierarchyLevelSizeLimit,
   });
@@ -129,7 +117,6 @@ export function Tree({
   });
 
   if (treeProps.rootErrorRendererProps !== undefined) {
-    // eslint-disable-next-line @itwin/no-internal
     return <StrataKitRootErrorRenderer {...treeProps.rootErrorRendererProps} />;
   }
 

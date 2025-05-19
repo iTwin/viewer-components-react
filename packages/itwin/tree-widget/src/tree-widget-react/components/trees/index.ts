@@ -5,8 +5,12 @@
 
 export { ModelsTreeComponent } from "./models-tree/ModelsTreeComponent.js";
 export { CategoriesTreeComponent } from "./categories-tree/CategoriesTreeComponent.js";
+
+export { ClassificationsTreeComponent } from "./classifications-tree/ClassificationsTreeComponent.js";
+
 export { IModelContentTreeComponent } from "./imodel-content-tree/IModelContentTreeComponent.js";
 export { IModelContentTreeIcon } from "./imodel-content-tree/IModelContentTree.js";
+
 export { ExternalSourcesTreeComponent } from "./external-sources-tree/ExternalSourcesTreeComponent.js";
 export { ExternalSourcesTreeIcon } from "./external-sources-tree/ExternalSourcesTree.js";
 
