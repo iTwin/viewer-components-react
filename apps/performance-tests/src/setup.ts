@@ -11,3 +11,7 @@ import * as jsdom from "jsdom";
 globalJsdom(undefined, {
   virtualConsole: new jsdom.VirtualConsole().sendTo(console, { omitJSDOMErrors: true }),
 });
+
+global.CSS = {
+  supports: (_k: string, _v: string) => false,
+} as any;
