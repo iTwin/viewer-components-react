@@ -9,6 +9,8 @@ import type {
   ElementAspectProps,
   ElementProps,
   FunctionalElementProps,
+  GeometricElement2dProps,
+  GeometricModel2dProps,
   GeometricModel3dProps,
   InformationPartitionElementProps,
   ModelProps,
@@ -72,6 +74,47 @@ export function insertPhysicalSubModel(
   return { className, id: modelId };
 }
 
+export function insertDrawingModelWithPartition(props: BaseInstanceInsertProps & { codeValue: string; partitionParentId?: Id64String }) {
+  const { codeValue, partitionParentId, ...baseProps } = props;
+  const partitionKey = insertDrawingPartition({ ...baseProps, codeValue, parentId: partitionParentId ?? IModel.rootSubjectId });
+  return insertDrawingSubModel({ ...baseProps, modeledElementId: partitionKey.id });
+}
+
+export function insertDrawingPartition(
+  props: BaseInstanceInsertProps & { codeValue: string; parentId: Id64String } & Partial<
+      Omit<InformationPartitionElementProps, "id" | "parent" | "code" | "userLabel">
+    >,
+) {
+  const { builder, classFullName, codeValue, parentId, ...partitionProps } = props;
+  const defaultModelClassName = `BisCore${props.fullClassNameSeparator ?? "."}Drawing`;
+  const className = classFullName ?? defaultModelClassName;
+  const partitionId = builder.insertElement({
+    classFullName: className,
+    model: IModel.repositoryModelId,
+    code: builder.createCode(parentId, BisCodeSpec.informationPartitionElement, codeValue),
+    parent: {
+      id: parentId,
+      relClassName: `BisCore${props.fullClassNameSeparator ?? "."}SubjectOwnsPartitionElements`,
+    },
+    ...partitionProps,
+  });
+  return { className, id: partitionId };
+}
+
+export function insertDrawingSubModel(
+  props: BaseInstanceInsertProps & { modeledElementId: Id64String } & Partial<Omit<GeometricModel2dProps, "id" | "modeledElement" | "parentModel">>,
+) {
+  const { builder, classFullName, modeledElementId, ...modelProps } = props;
+  const defaultModelClassName = `BisCore${props.fullClassNameSeparator ?? "."}DrawingModel`;
+  const className = classFullName ?? defaultModelClassName;
+  const modelId = builder.insertModel({
+    classFullName: className,
+    modeledElement: { id: modeledElementId },
+    ...modelProps,
+  });
+  return { className, id: modelId };
+}
+
 export function insertDefinitionContainer(
   props: BaseInstanceInsertProps & { codeValue: string; modelId?: Id64String; isPrivate?: boolean } & Partial<
       Omit<ElementProps, "id" | "model" | "parent" | "code">
@@ -90,7 +133,6 @@ export function insertDefinitionContainer(
   return { className, id };
 }
 
-
 export function insertSpatialCategory(
   props: BaseInstanceInsertProps & { codeValue: string; modelId?: Id64String } & Partial<Omit<CategoryProps, "id" | "model" | "parent" | "code">>,
 ) {
@@ -102,6 +144,22 @@ export function insertSpatialCategory(
     classFullName: className,
     model,
     code: builder.createCode(model, BisCodeSpec.spatialCategory, codeValue),
+    ...categoryProps,
+  });
+  return { className, id };
+}
+
+export function insertDrawingCategory(
+  props: BaseInstanceInsertProps & { codeValue: string; modelId?: Id64String } & Partial<Omit<CategoryProps, "id" | "model" | "parent" | "code">>,
+) {
+  const { builder, classFullName, modelId, codeValue, ...categoryProps } = props;
+  const defaultClassName = `BisCore${props.fullClassNameSeparator ?? "."}DrawingCategory`;
+  const className = classFullName ?? defaultClassName;
+  const model = modelId ?? IModel.dictionaryId;
+  const id = builder.insertElement({
+    classFullName: className,
+    model,
+    code: builder.createCode(model, BisCodeSpec.drawingCategory, codeValue),
     ...categoryProps,
   });
   return { className, id };
@@ -166,6 +224,45 @@ export function insertPhysicalElement<TAdditionalProps extends {}>(
       : undefined),
     ...elementProps,
   } as PhysicalElementProps);
+  return { className, id };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export function insertDrawingElement<TAdditionalProps extends {}>(
+  props: BaseInstanceInsertProps & {
+    modelId: Id64String;
+    categoryId: Id64String;
+    codeValue?: string;
+    parentId?: Id64String;
+    typeDefinitionId?: Id64String;
+  } & Partial<Omit<GeometricElement2dProps, "id" | "model" | "category" | "parent" | "code">> &
+    TAdditionalProps,
+) {
+  const { builder, classFullName, modelId, categoryId, parentId, typeDefinitionId, codeValue, ...elementProps } = props;
+  const defaultClassName = `BisCore${props.fullClassNameSeparator ?? "."}DrawingGraphic`;
+  const className = classFullName ?? defaultClassName;
+  const id = builder.insertElement({
+    classFullName: className,
+    model: modelId,
+    category: categoryId,
+    code: codeValue ? builder.createCode(parentId ?? modelId, BisCodeSpec.nullCodeSpec, codeValue) : Code.createEmpty(),
+    ...(parentId
+      ? {
+          parent: {
+            id: parentId,
+          },
+        }
+      : undefined),
+    ...(typeDefinitionId
+      ? {
+          typeDefinition: {
+            id: typeDefinitionId,
+            relClassName: `BisCore${props.fullClassNameSeparator ?? "."}GraphicalElement2dIsOfType`,
+          },
+        }
+      : undefined),
+    ...elementProps,
+  } satisfies GeometricElement2dProps);
   return { className, id };
 }
 
