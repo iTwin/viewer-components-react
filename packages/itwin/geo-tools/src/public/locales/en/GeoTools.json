@@ -2,6 +2,7 @@
   "geoAddressSearch": {
     "label": "Search Address",
     "inputPlaceHolder": "Search Address..",
-    "clearTooltip": "Clear"
+    "clearTooltip": "Clear",
+    "noResults": "No results found"
   }
 }
