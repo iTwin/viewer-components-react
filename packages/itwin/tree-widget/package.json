@@ -1,6 +1,6 @@
 {
   "name": "@itwin/tree-widget-react",
-  "version": "3.8.0",
+  "version": "3.9.0",
   "description": "Tree Widget React",
   "keywords": [
     "Bentley",
@@ -60,11 +60,11 @@
     "check-extractions": "node ../../../scripts/updateExtractions.js --targets=./README.md --check"
   },
   "peerDependencies": {
-    "@itwin/appui-abstract": "^4.0.0",
+    "@itwin/appui-abstract": "^4.0.0 || ^5.0.0",
     "@itwin/appui-react": "^4.10.0 || ^5.0.0",
     "@itwin/components-react": "^4.10.0 || ^5.0.0",
-    "@itwin/core-frontend": "^4.0.0",
-    "@itwin/ecschema-metadata": "^4.0.0",
+    "@itwin/core-frontend": "^4.0.0 || ^5.0.0",
+    "@itwin/ecschema-metadata": "^4.0.0 || ^5.0.0",
     "@itwin/itwinui-react": "^3.11.0",
     "@itwin/presentation-components": "^5.0.0",
     "react": "^17.0.0 || ^18.0.0",

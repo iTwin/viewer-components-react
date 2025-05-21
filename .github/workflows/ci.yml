@@ -1,0 +1,115 @@
+name: CI
+
+on:
+  pull_request:
+    branches: ["master"]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  install:
+    name: Install node modules
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+
+      - run: pnpm install
+
+  check:
+    runs-on: ubuntu-latest
+    needs: install
+    name: Check change files
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - run: pnpm install
+
+      - run: pnpm check && pnpm check:dev
+
+  audit:
+    runs-on: ubuntu-latest
+    needs: install
+    name: PNPM audit
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - run: pnpm install
+
+      - run: pnpm audit --registry=https://registry.npmjs.org --audit-level=high --production
+
+  build:
+    runs-on: ubuntu-latest
+    needs: install
+    name: Build Test & Lint
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - run: pnpm install
+
+      - run: pnpm exec lage lint extract-api cover --grouped
+        name: Build Lint Test and check API changes
+        env:
+          TF_BUILD: 1
+
+  validate-docs:
+    runs-on: ubuntu-latest
+    needs: install
+    name: Validate docs snippets
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - run: pnpm install
+
+      - run: pnpm exec lage docs --grouped
+        name: Build docs
+
+      - run: pnpm exec lage check-extractions --grouped
+        name: Validate snippets in markdowns
