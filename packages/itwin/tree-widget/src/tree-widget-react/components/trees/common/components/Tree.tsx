@@ -138,7 +138,6 @@ export function Tree({
       isReloading={isReloading}
       treeRendererProps={treeProps.treeRendererProps}
       getNode={getNode}
-      imodelChanged={imodelChanged}
       getSchemaContext={getSchemaContext}
       currentHierarchyLevelSizeLimit={currentHierarchyLevelSizeLimit}
     />
@@ -148,7 +147,6 @@ export function Tree({
 type TreeBaseProps = {
   currentHierarchyLevelSizeLimit: number;
   getNode: (nodeId: string) => PresentationHierarchyNode | undefined;
-  imodelChanged: BeEvent<() => void>;
   treeRendererProps?: TreeRendererProps;
 } & Omit<TreeProps, "selectionStorage" | "treeName" | "getHierarchyDefinition"> &
   Pick<ReturnType<typeof useTree>, "getNode" | "isReloading">;
@@ -172,17 +170,16 @@ function TreeBaseImpl({
   currentHierarchyLevelSizeLimit,
   selectionPredicate,
   selectionMode,
-  imodelChanged,
   treeRenderer,
   highlight,
   treeRendererProps,
   isReloading,
-  getNode
+  getNode,
 }: Omit<TreeBaseProps, "getSchemaContext" | "treeRendererProps"> & Required<Pick<TreeBaseProps, "treeRendererProps">>) {
   const selectNodes = useSelectionPredicate({
     action: useReportingAction({ action: treeRendererProps.selectNodes }),
     predicate: selectionPredicate,
-    getNode: rest.getNode,
+    getNode,
   });
   const { filteringDialog, onFilterClick } = useHierarchyLevelFiltering({
     imodel,
