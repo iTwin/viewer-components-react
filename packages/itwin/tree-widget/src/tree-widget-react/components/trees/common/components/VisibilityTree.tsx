@@ -6,8 +6,9 @@
 import { useCallback } from "react";
 import { useIModelAccess } from "../internal/UseIModelAccess.js";
 import { useHierarchyVisibility } from "../UseHierarchyVisibility.js";
-import { Tree, TreeProps } from "./Tree.js";
+import { Tree } from "./Tree.js";
 
+import type { TreeProps } from "./Tree.js";
 import type { FunctionProps } from "../Utils.js";
 import type { ReactNode } from "react";
 import type { VisibilityTreeRendererProps } from "./VisibilityTreeRenderer.js";

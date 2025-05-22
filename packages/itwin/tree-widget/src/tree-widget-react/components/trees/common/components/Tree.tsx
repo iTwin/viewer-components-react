@@ -21,8 +21,7 @@ import { EmptyTreeContent } from "./EmptyTree.js";
 import { ProgressOverlay } from "./ProgressOverlay.js";
 import { SkeletonTree } from "./SkeletonTree.js";
 
-import type { PropsWithoutRef, ReactNode } from "react";
-import type { MarkRequired } from "@itwin/core-bentley";
+import type { ReactNode } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type {
@@ -155,7 +154,7 @@ type TreeBaseProps = {
   Pick<ReturnType<typeof useTree>, "getNode" | "isReloading">;
 
 /** @internal */
-export function TreeBase({ getSchemaContext, getFilteredPaths, onReload, treeRendererProps, ...props }: TreeBaseProps) {
+function TreeBase({ getSchemaContext, getFilteredPaths, onReload, treeRendererProps, ...props }: TreeBaseProps) {
   if (treeRendererProps === undefined) {
     return <SkeletonTree />;
   }
