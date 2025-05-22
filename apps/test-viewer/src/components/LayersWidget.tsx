@@ -145,10 +145,9 @@ function Elements({ view, ...rest }: ElementsProps) {
         <TreeRenderer
           {...treeProps}
           {...rendererProps}
-          getSublabel={undefined}
           getDecorations={(node) => (
             <>
-              <Chip label={node.label.substring(0, 1)} variant="outline"/>
+              <Chip label={node.label.substring(0, 1)} variant="outline" />
               <CategoriesTreeIcon node={node} />
             </>
           )}

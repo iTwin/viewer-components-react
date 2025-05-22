@@ -4,10 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useState } from "react";
-import { isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import { useLatest } from "./internal/Utils.js";
 
-import type { PresentationHierarchyNode, PresentationTreeNode } from "@itwin/presentation-hierarchies-react";
+import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
 /** @beta */
 export interface HighlightInfo {
@@ -15,7 +14,7 @@ export interface HighlightInfo {
 }
 
 interface UseNodeHighlightingProps {
-  rootNodes: PresentationTreeNode[] | undefined;
+  rootNodes: PresentationHierarchyNode[] | undefined;
   // TODO: move activeMatchIndex and onHighlightChanged to HighlightInfo when it's implemented.
   highlight?: HighlightInfo & {
     activeMatchIndex?: number;
@@ -105,16 +104,18 @@ function getNodeChunkInfo(state: HighlightState, nodeId: string, activeIndex?: n
   return isActive ? { activeChunkIndex: activeIndex - info.startIndex, chunks: info.matches } : { chunks: info.matches };
 }
 
-function computeHighlightState(rootNodes: PresentationTreeNode[], searchText: string, state: HighlightState, activeNodeId?: string, activeMatchIndex?: number) {
+function computeHighlightState(
+  rootNodes: PresentationHierarchyNode[],
+  searchText: string,
+  state: HighlightState,
+  activeNodeId?: string,
+  activeMatchIndex?: number,
+) {
   const newState: HighlightState = { nodeInfoMap: new Map(), totalMatches: 0 };
   let newActiveIndex = activeMatchIndex ?? 0;
 
-  const computeHighlightStateRecursively = (nodes: Array<PresentationTreeNode>) => {
+  const computeHighlightStateRecursively = (nodes: Array<PresentationHierarchyNode>) => {
     nodes.forEach((node) => {
-      if (!isPresentationHierarchyNode(node)) {
-        return;
-      }
-
       const matches = findChunks(node.label, searchText);
       newState.nodeInfoMap.set(node.id, { startIndex: newState.totalMatches, matches });
       newState.totalMatches += matches.length;

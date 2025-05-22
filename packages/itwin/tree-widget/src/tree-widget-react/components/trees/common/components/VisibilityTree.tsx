@@ -6,7 +6,7 @@
 import { useCallback } from "react";
 import { useIModelAccess } from "../internal/UseIModelAccess.js";
 import { useHierarchyVisibility } from "../UseHierarchyVisibility.js";
-import { TreeBase } from "./Tree.js";
+import { Tree } from "./Tree.js";
 
 import type { TreeProps } from "./Tree.js";
 import type { FunctionProps } from "../Utils.js";
@@ -43,11 +43,11 @@ export function VisibilityTree({ visibilityHandlerFactory, treeRenderer, hierarc
   });
 
   return (
-    <TreeBase
+    <Tree
       {...props}
       onReload={triggerRefresh}
       imodelAccess={imodelAccess}
-      currentHierarchyLevelSizeLimit={currentHierarchyLevelSizeLimit}
+      hierarchyLevelSizeLimit={currentHierarchyLevelSizeLimit}
       treeRenderer={(treeProps) => treeRenderer({ ...treeProps, getVisibilityButtonState, onVisibilityButtonClick })}
     />
   );
