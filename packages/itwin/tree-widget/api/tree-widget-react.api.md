@@ -24,15 +24,16 @@ import type { PropsWithChildren } from 'react';
 import type { ReactNode } from 'react';
 import type { SchemaContext } from '@itwin/ecschema-metadata';
 import type { SelectionStorage } from '@itwin/presentation-hierarchies-react';
+import { StrataKitTreeRenderer } from '@itwin/presentation-hierarchies-react';
 import type { TranslationOptions } from '@itwin/core-common';
-import { TreeRenderer as TreeRenderer_2 } from '@itwin/presentation-hierarchies-react';
+import type { TreeRendererProps } from '@itwin/presentation-hierarchies-react';
 import type { useIModelTree } from '@itwin/presentation-hierarchies-react';
 import type { useSelectionHandler } from '@itwin/presentation-hierarchies-react';
 import type { Viewport } from '@itwin/core-frontend';
 import type { Widget } from '@itwin/appui-react';
 
 // @beta (undocumented)
-export type BaseTreeRendererProps = React.ComponentPropsWithoutRef<typeof TreeRenderer_2>;
+export type BaseTreeRendererProps = React.ComponentPropsWithoutRef<typeof StrataKitTreeRenderer>;
 
 // @public
 export const CategoriesTreeComponent: {
@@ -369,7 +370,7 @@ interface TelemetryContextProviderProps {
 }
 
 // @beta
-export function Tree({ getSchemaContext, hierarchyLevelSizeLimit, selectionStorage, imodelAccess: providedIModelAccess, ...props }: TreeProps): JSX_2.Element;
+export function Tree({ getSchemaContext, hierarchyLevelSizeLimit, getHierarchyDefinition, getFilteredPaths, selectionStorage, imodelAccess: providedIModelAccess, treeName, onReload, ...props }: TreeProps): JSX_2.Element;
 
 // @public
 export interface TreeDefinition {
@@ -410,7 +411,7 @@ type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPaths" | 
     treeName: string;
     selectionStorage: SelectionStorage;
     selectionPredicate?: (node: PresentationHierarchyNode) => boolean;
-    treeRenderer: (treeProps: Required<Pick<BaseTreeRendererProps, "rootNodes" | "reloadTree" | "expandNode" | "getLabel" | "onFilterClick" | "selectNodes" | "selectionMode" | "isNodeSelected" | "getHierarchyLevelDetails" | "getLabel">>) => ReactNode;
+    treeRenderer: (treeProps: Required<Pick<BaseTreeRendererProps, "getLabel" | "onFilterClick" | "selectionMode" | "getLabel"> & TreeRendererProps>) => ReactNode;
     imodelAccess?: FunctionProps<typeof useIModelTree>["imodelAccess"];
     hierarchyLevelSizeLimit?: number;
     emptyTreeContent?: ReactNode;
