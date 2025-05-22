@@ -177,7 +177,7 @@ function TreeBaseImpl({
   highlight,
   treeRendererProps,
   isReloading,
-  ...rest
+  getNode
 }: Omit<TreeBaseProps, "getSchemaContext" | "treeRendererProps"> & Required<Pick<TreeBaseProps, "treeRendererProps">>) {
   const selectNodes = useSelectionPredicate({
     action: useReportingAction({ action: treeRendererProps.selectNodes }),
@@ -198,7 +198,7 @@ function TreeBaseImpl({
 
   const treeRenderProps: FunctionProps<TreeProps["treeRenderer"]> = {
     ...treeRendererProps,
-    selectNodes: selectNodes,
+    selectNodes,
     selectionMode: selectionMode ?? "single",
     expandNode: reportingExpandNode,
     onFilterClick: reportingOnFilterClicked,
