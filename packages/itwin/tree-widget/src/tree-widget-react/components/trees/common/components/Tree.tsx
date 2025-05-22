@@ -7,7 +7,7 @@ import "./Tree.css";
 import { useCallback, useState } from "react";
 import { BeEvent } from "@itwin/core-bentley";
 import { SchemaMetadataContextProvider } from "@itwin/presentation-components";
-import { useIModelUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
+import { StrataKitRootErrorRenderer, useIModelUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
 import { TreeWidget } from "../../../../TreeWidget.js";
 import { useHierarchiesLocalization } from "../internal/UseHierarchiesLocalization.js";
 import { useHierarchyLevelFiltering } from "../internal/UseHierarchyFiltering.js";
@@ -21,15 +21,21 @@ import { EmptyTreeContent } from "./EmptyTree.js";
 import { ProgressOverlay } from "./ProgressOverlay.js";
 import { SkeletonTree } from "./SkeletonTree.js";
 
-import type { ReactNode } from "react";
+import type { PropsWithoutRef, ReactNode } from "react";
 import type { MarkRequired } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
-import type { PresentationHierarchyNode, SelectionStorage, useIModelTree, useSelectionHandler } from "@itwin/presentation-hierarchies-react";
+import type {
+  PresentationHierarchyNode,
+  SelectionStorage,
+  TreeRendererProps,
+  useIModelTree,
+  useSelectionHandler,
+  useTree,
+} from "@itwin/presentation-hierarchies-react";
 import type { FunctionProps } from "../Utils.js";
 import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
 import type { HighlightInfo } from "../UseNodeHighlighting.js";
-
 /** @beta */
 export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPaths" | "getHierarchyDefinition"> &
   Partial<Pick<FunctionProps<typeof useSelectionHandler>, "selectionMode">> & {
@@ -48,21 +54,7 @@ export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPa
     selectionPredicate?: (node: PresentationHierarchyNode) => boolean;
     /** Tree renderer that should be used to render tree data. */
     treeRenderer: (
-      treeProps: Required<
-        Pick<
-          BaseTreeRendererProps,
-          | "rootNodes"
-          | "reloadTree"
-          | "expandNode"
-          | "getLabel"
-          | "onFilterClick"
-          | "selectNodes"
-          | "selectionMode"
-          | "isNodeSelected"
-          | "getHierarchyLevelDetails"
-          | "getLabel"
-        >
-      >,
+      treeProps: Required<Pick<BaseTreeRendererProps, "getLabel" | "onFilterClick" | "selectionMode" | "getLabel"> & TreeRendererProps>,
     ) => ReactNode;
     /** Custom iModel access that is stored outside tree component. If not provided it new iModel access will be created using `imodel` prop. */
     imodelAccess?: FunctionProps<typeof useIModelTree>["imodelAccess"];
@@ -80,59 +72,33 @@ export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPa
  * Default tree component that manages tree state and renders using supplied `treeRenderer`.
  * @beta
  */
-export function Tree({ getSchemaContext, hierarchyLevelSizeLimit, selectionStorage, imodelAccess: providedIModelAccess, ...props }: TreeProps) {
+export function Tree({
+  getSchemaContext,
+  hierarchyLevelSizeLimit,
+  getHierarchyDefinition,
+  getFilteredPaths,
+  selectionStorage,
+  imodelAccess: providedIModelAccess,
+  treeName,
+  onReload,
+  ...props
+}: TreeProps) {
+  const { onFeatureUsed, onPerformanceMeasured } = useTelemetryContext();
+  const [imodelChanged] = useState(new BeEvent<() => void>());
+  const localizedStrings = useHierarchiesLocalization();
+
   const { imodelAccess, currentHierarchyLevelSizeLimit } = useIModelAccess({
     imodel: props.imodel,
     imodelAccess: providedIModelAccess,
     getSchemaContext,
-    treeName: props.treeName,
+    treeName: treeName,
     hierarchyLevelSizeLimit,
   });
-  return (
-    <TreeBase
-      {...props}
-      getSchemaContext={getSchemaContext}
-      selectionStorage={selectionStorage}
-      imodelAccess={imodelAccess}
-      currentHierarchyLevelSizeLimit={currentHierarchyLevelSizeLimit}
-    />
-  );
-}
 
-/** @internal */
-export function TreeBase({ getSchemaContext, ...props }: MarkRequired<TreeProps, "imodelAccess"> & { currentHierarchyLevelSizeLimit: number }) {
-  return (
-    <SchemaMetadataContextProvider imodel={props.imodel} schemaContextProvider={getSchemaContext}>
-      <TreeBaseImpl {...props} />
-    </SchemaMetadataContextProvider>
-  );
-}
-
-function TreeBaseImpl({
-  imodel,
-  imodelAccess,
-  treeName,
-  emptyTreeContent,
-  getFilteredPaths,
-  currentHierarchyLevelSizeLimit,
-  getHierarchyDefinition,
-  selectionPredicate,
-  selectionMode,
-  onReload,
-  treeRenderer,
-  selectionStorage,
-  highlight,
-}: MarkRequired<Omit<TreeProps, "getSchemaContext">, "imodelAccess"> & { currentHierarchyLevelSizeLimit: number }) {
-  const localizedStrings = useHierarchiesLocalization();
-  const { onFeatureUsed, onPerformanceMeasured } = useTelemetryContext();
-  const [imodelChanged] = useState(new BeEvent<() => void>());
   const {
-    rootNodes,
     getNode,
-    isLoading,
-    selectNodes: selectNodesAction,
     setFormatter: _setFormatter,
-    expandNode,
+    isReloading,
     ...treeProps
   } = useIModelUnifiedSelectionTree({
     imodelAccess,
@@ -156,39 +122,85 @@ function TreeBaseImpl({
     },
   });
   useIModelChangeListener({
-    imodel,
+    imodel: props.imodel,
     action: useCallback(() => {
       TreeWidget.logger.logTrace(`${LOGGING_NAMESPACE}.${treeName}`, `iModel data changed`);
       imodelChanged.raiseEvent();
     }, [imodelChanged, treeName]),
   });
 
+  if (treeProps.rootErrorRendererProps !== undefined) {
+    return <StrataKitRootErrorRenderer {...treeProps.rootErrorRendererProps} />;
+  }
+
+  return (
+    <TreeBase
+      {...props}
+      isReloading={isReloading}
+      treeRendererProps={treeProps.treeRendererProps}
+      getNode={getNode}
+      imodelChanged={imodelChanged}
+      getSchemaContext={getSchemaContext}
+      currentHierarchyLevelSizeLimit={currentHierarchyLevelSizeLimit}
+    />
+  );
+}
+
+type TreeBaseProps = {
+  currentHierarchyLevelSizeLimit: number;
+  getNode: (nodeId: string) => PresentationHierarchyNode | undefined;
+  imodelChanged: BeEvent<() => void>;
+  treeRendererProps?: TreeRendererProps;
+} & Omit<TreeProps, "selectionStorage" | "treeName" | "getHierarchyDefinition"> &
+  Pick<ReturnType<typeof useTree>, "getNode" | "isReloading">;
+
+/** @internal */
+export function TreeBase({ getSchemaContext, getFilteredPaths, onReload, treeRendererProps, ...props }: TreeBaseProps) {
+  if (treeRendererProps === undefined) {
+    return <SkeletonTree />;
+  }
+
+  return (
+    <SchemaMetadataContextProvider imodel={props.imodel} schemaContextProvider={getSchemaContext}>
+      <TreeBaseImpl {...props} treeRendererProps={treeRendererProps} />
+    </SchemaMetadataContextProvider>
+  );
+}
+
+function TreeBaseImpl({
+  imodel,
+  emptyTreeContent,
+  currentHierarchyLevelSizeLimit,
+  selectionPredicate,
+  selectionMode,
+  imodelChanged,
+  treeRenderer,
+  highlight,
+  treeRendererProps,
+  isReloading,
+  ...rest
+}: Omit<TreeBaseProps, "getSchemaContext" | "treeRendererProps"> & Required<Pick<TreeBaseProps, "treeRendererProps">>) {
   const selectNodes = useSelectionPredicate({
-    action: useReportingAction({ action: selectNodesAction }),
+    action: useReportingAction({ action: treeRendererProps.selectNodes }),
     predicate: selectionPredicate,
-    getNode,
+    getNode: rest.getNode,
   });
   const { filteringDialog, onFilterClick } = useHierarchyLevelFiltering({
     imodel,
     defaultHierarchyLevelSizeLimit: currentHierarchyLevelSizeLimit,
   });
-  const reportingExpandNode = useReportingAction({ action: expandNode });
+  const reportingExpandNode = useReportingAction({ action: treeRendererProps.expandNode });
   const reportingOnFilterClicked = useReportingAction({ action: onFilterClick });
-  const { getLabel } = useNodeHighlighting({ rootNodes, highlight });
+  const { getLabel } = useNodeHighlighting({ rootNodes: treeRendererProps.rootNodes, highlight });
 
-  if (rootNodes === undefined) {
-    return <SkeletonTree />;
-  }
-
-  if (rootNodes.length === 0 && !isLoading) {
+  if (treeRendererProps.rootNodes.length === 0 && !isReloading) {
     return <>{emptyTreeContent ? emptyTreeContent : <EmptyTreeContent />}</>;
   }
 
-  const treeRendererProps: FunctionProps<TreeProps["treeRenderer"]> = {
-    ...treeProps,
-    rootNodes,
+  const treeRenderProps: FunctionProps<TreeProps["treeRenderer"]> = {
+    ...treeRendererProps,
+    selectNodes: selectNodes,
     selectionMode: selectionMode ?? "single",
-    selectNodes,
     expandNode: reportingExpandNode,
     onFilterClick: reportingOnFilterClicked,
     getLabel,
@@ -197,10 +209,10 @@ function TreeBaseImpl({
   return (
     <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>
       <div className={"tw-tree-renderer-container"} id="tw-tree-renderer-container">
-        {treeRenderer(treeRendererProps)}
+        {treeRenderer(treeRenderProps)}
         {filteringDialog}
       </div>
-      <Delayed show={isLoading}>
+      <Delayed show={isReloading}>
         <ProgressOverlay />
       </Delayed>
     </div>
@@ -215,7 +227,7 @@ function useSelectionPredicate({
   action: (...args: any[]) => void;
   predicate?: (node: PresentationHierarchyNode) => boolean;
   getNode: (nodeId: string) => PresentationHierarchyNode | undefined;
-}): ReturnType<typeof useIModelUnifiedSelectionTree>["selectNodes"] {
+}): TreeRendererProps["selectNodes"] {
   return useCallback(
     (nodeIds, changeType) =>
       action(

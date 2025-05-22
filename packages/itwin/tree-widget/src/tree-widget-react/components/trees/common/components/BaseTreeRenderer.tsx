@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable @itwin/no-internal */
 
-import { TreeRenderer as PresentationTree } from "@itwin/presentation-hierarchies-react";
+import { StrataKitTreeRenderer as PresentationTree } from "@itwin/presentation-hierarchies-react";
 import { useHierarchiesLocalization } from "../internal/UseHierarchiesLocalization.js";
 
 /** @beta */
