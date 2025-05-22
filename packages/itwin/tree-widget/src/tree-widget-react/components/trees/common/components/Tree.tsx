@@ -199,7 +199,7 @@ function TreeBaseImpl({
 
   const treeRenderProps: FunctionProps<TreeProps["treeRenderer"]> = {
     ...treeRendererProps,
-    selectNodes: selectNodes,
+    selectNodes,
     selectionMode: selectionMode ?? "single",
     expandNode: reportingExpandNode,
     onFilterClick: reportingOnFilterClicked,
