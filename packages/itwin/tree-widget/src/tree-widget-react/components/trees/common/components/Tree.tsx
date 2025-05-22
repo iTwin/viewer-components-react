@@ -90,7 +90,7 @@ export function Tree({
     imodel: props.imodel,
     imodelAccess: providedIModelAccess,
     getSchemaContext,
-    treeName: treeName,
+    treeName,
     hierarchyLevelSizeLimit,
   });
 
@@ -129,6 +129,7 @@ export function Tree({
   });
 
   if (treeProps.rootErrorRendererProps !== undefined) {
+    // eslint-disable-next-line @itwin/no-internal
     return <StrataKitRootErrorRenderer {...treeProps.rootErrorRendererProps} />;
   }
 
@@ -152,7 +153,7 @@ type TreeBaseProps = {
   Pick<ReturnType<typeof useTree>, "getNode" | "isReloading">;
 
 /** @internal */
-function TreeBase({ getSchemaContext, getFilteredPaths, onReload, treeRendererProps, ...props }: TreeBaseProps) {
+function TreeBase({ getSchemaContext, treeRendererProps, ...props }: TreeBaseProps) {
   if (treeRendererProps === undefined) {
     return <SkeletonTree />;
   }
