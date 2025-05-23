@@ -54,7 +54,7 @@ export const VisibilityAction = memo(function VisibilityAction({
     <Tree.ItemAction
       label={state.tooltip ?? createTooltip(state.state)}
       onClick={() => onVisibilityButtonClick(node, state.state)}
-      visible={state.state !== "visible" ? true : undefined}
+      visible={state.isDisabled ? false : state.state !== "visible" ? true : undefined}
       icon={getIcon()}
     />
   );

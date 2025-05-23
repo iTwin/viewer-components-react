@@ -55,6 +55,9 @@
       "tooManyFilterMatchesRetry": "Please refine your search and try again."
     }
   },
+  "classificationsTree": {
+    "label": "Classifications"
+  },
   "modelsTree": {
     "label": "Models",
     "buttons": {

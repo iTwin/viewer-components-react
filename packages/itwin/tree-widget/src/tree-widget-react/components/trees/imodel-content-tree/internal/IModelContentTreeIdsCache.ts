@@ -5,11 +5,11 @@
 
 import { assert } from "@itwin/core-bentley";
 import {
-  GEOMETRIC_ELEMENT_2D_CLASS_NAME,
-  GEOMETRIC_ELEMENT_3D_CLASS_NAME,
-  INFORMATION_PARTITION_ELEMENT_CLASS_NAME,
-  MODEL_CLASS_NAME,
-  SUBJECT_CLASS_NAME,
+  CLASS_NAME_GeometricElement2d,
+  CLASS_NAME_GeometricElement3d,
+  CLASS_NAME_InformationPartitionElement,
+  CLASS_NAME_Model,
+  CLASS_NAME_Subject,
 } from "../../common/internal/ClassNameDefinitions.js";
 import { pushToMap } from "../../common/internal/Utils.js";
 
@@ -43,7 +43,7 @@ export class IModelContentTreeIdsCache {
         s.Parent.Id parentId,
         (
           SELECT m.ECInstanceId
-          FROM ${MODEL_CLASS_NAME} m
+          FROM ${CLASS_NAME_Model} m
           WHERE
             m.ECInstanceId = HexToId(json_extract(s.JsonProperties, '$.Subject.Model.TargetPartition'))
             AND NOT m.IsPrivate
@@ -55,7 +55,7 @@ export class IModelContentTreeIdsCache {
           ) THEN 1
           ELSE 0
         END hideInHierarchy
-      FROM ${SUBJECT_CLASS_NAME} s
+      FROM ${CLASS_NAME_Subject} s
     `;
     for await (const row of this._queryExecutor.createQueryReader({ ecsql: subjectsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
       yield { id: row.id, parentId: row.parentId, targetPartitionId: row.targetPartitionId, hideInHierarchy: !!row.hideInHierarchy };
@@ -65,8 +65,8 @@ export class IModelContentTreeIdsCache {
   private async *queryModels(): AsyncIterableIterator<{ id: ModelId; parentId: SubjectId }> {
     const modelsQuery = `
       SELECT p.ECInstanceId id, p.Parent.Id parentId
-      FROM ${INFORMATION_PARTITION_ELEMENT_CLASS_NAME} p
-      INNER JOIN ${MODEL_CLASS_NAME} m ON m.ModeledElement.Id = p.ECInstanceId
+      FROM ${CLASS_NAME_InformationPartitionElement} p
+      INNER JOIN ${CLASS_NAME_Model} m ON m.ModeledElement.Id = p.ECInstanceId
       WHERE NOT m.IsPrivate
     `;
     for await (const row of this._queryExecutor.createQueryReader({ ecsql: modelsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
@@ -189,12 +189,12 @@ export class IModelContentTreeIdsCache {
   private async *queryModelCategories(): AsyncIterableIterator<{ modelId: Id64String; categoryId: Id64String }> {
     const query = `
       SELECT Model.Id modelId, Category.Id categoryId
-      FROM ${GEOMETRIC_ELEMENT_3D_CLASS_NAME}
+      FROM ${CLASS_NAME_GeometricElement3d}
       WHERE Parent.Id IS NULL
       GROUP BY Model.Id, Category.Id
       UNION ALL
       SELECT Model.Id modelId, Category.Id categoryId
-      FROM ${GEOMETRIC_ELEMENT_2D_CLASS_NAME}
+      FROM ${CLASS_NAME_GeometricElement2d}
       WHERE Parent.Id IS NULL
       GROUP BY Model.Id, Category.Id
     `;

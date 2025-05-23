@@ -21,7 +21,7 @@ export class ModelCategoryElementsCountCache implements Disposable {
 
   public constructor(
     private _queryExecutor: LimitingECSqlQueryExecutor,
-    private _elementsClassName: string,
+    private _elementsClassNames: string[],
   ) {
     this._subscription = this._requestsStream
       .pipe(
@@ -44,28 +44,36 @@ export class ModelCategoryElementsCountCache implements Disposable {
   ): Promise<Array<{ modelId: number; categoryId: number; elementsCount: number }>> {
     const reader = this._queryExecutor.createQueryReader(
       {
-        ctes: [
-          `
-            CategoryElements(id, modelId, categoryId) AS (
-              SELECT ECInstanceId, Model.Id, Category.Id
-              FROM ${this._elementsClassName}
-              WHERE
-                Parent.Id IS NULL
-                AND (
-                  ${input.map(({ modelId, categoryId }) => `Model.Id = ${modelId} AND Category.Id = ${categoryId}`).join(" OR ")}
-                )
+        ctes: this._elementsClassNames.map(
+          (elementsClassName, index) => `
+          CategoryElements${index}(id, modelId, categoryId) AS (
+            SELECT ECInstanceId, Model.Id, Category.Id
+            FROM ${elementsClassName}
+            WHERE
+              Parent.Id IS NULL
+              AND (
+                ${input.map(({ modelId, categoryId }) => `Model.Id = ${modelId} AND Category.Id = ${categoryId}`).join(" OR ")}
+              )
 
-              UNION ALL
+            UNION ALL
 
-              SELECT c.ECInstanceId, p.modelId, p.categoryId
-              FROM ${this._elementsClassName} c
-              JOIN CategoryElements p ON c.Parent.Id = p.id
-            )
-          `,
-        ],
+            SELECT c.ECInstanceId, p.modelId, p.categoryId
+            FROM ${elementsClassName} c
+            JOIN CategoryElements${index} p ON c.Parent.Id = p.id
+          )
+        `,
+        ),
         ecsql: `
           SELECT modelId, categoryId, COUNT(id) elementsCount
-          FROM CategoryElements
+          FROM (
+            ${this._elementsClassNames
+              .map(
+                (_, index) => `
+                SELECT * FROM CategoryElements${index}
+              `,
+              )
+              .join(" UNION ALL ")}
+          )
           GROUP BY modelId, categoryId
         `,
       },

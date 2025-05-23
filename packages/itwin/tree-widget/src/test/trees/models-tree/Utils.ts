@@ -7,10 +7,10 @@ import { concatMap, EMPTY, expand, firstValueFrom, from, toArray } from "rxjs";
 import sinon from "sinon";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import {
-  ELEMENT_CLASS_NAME,
-  GEOMETRIC_ELEMENT_3D_CLASS_NAME,
-  MODEL_CLASS_NAME,
-  SUBJECT_CLASS_NAME,
+  CLASS_NAME_Element,
+  CLASS_NAME_GeometricElement3d,
+  CLASS_NAME_Model,
+  CLASS_NAME_Subject,
 } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import { ModelsTreeIdsCache } from "../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
@@ -112,7 +112,7 @@ export function createSubjectHierarchyNode(...ids: Id64String[]): NonGroupingHie
   return {
     key: {
       type: "instances",
-      instanceKeys: ids.map((id) => ({ className: SUBJECT_CLASS_NAME, id })),
+      instanceKeys: ids.map((id) => ({ className: CLASS_NAME_Subject, id })),
     },
     children: false,
     label: "",
@@ -126,7 +126,7 @@ export function createModelHierarchyNode(modelId?: Id64String, hasChildren?: boo
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: MODEL_CLASS_NAME, id: modelId ?? "" }],
+      instanceKeys: [{ className: CLASS_NAME_Model, id: modelId ?? "" }],
     },
     children: !!hasChildren,
     label: "",
@@ -165,7 +165,7 @@ export function createElementHierarchyNode(props: {
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: GEOMETRIC_ELEMENT_3D_CLASS_NAME, id: props.elementId ?? "" }],
+      instanceKeys: [{ className: CLASS_NAME_GeometricElement3d, id: props.elementId ?? "" }],
     },
     children: !!props.hasChildren,
     label: "",
@@ -187,7 +187,7 @@ export function createClassGroupingHierarchyNode({
   className?: string;
   parentKeys?: HierarchyNodeKey[];
 }): GroupingHierarchyNode & { key: ClassGroupingNodeKey } {
-  const className = props.className ?? ELEMENT_CLASS_NAME;
+  const className = props.className ?? CLASS_NAME_Element;
   return {
     key: {
       type: "class-grouping",

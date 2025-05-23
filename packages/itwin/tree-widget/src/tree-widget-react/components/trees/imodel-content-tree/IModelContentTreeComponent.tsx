@@ -14,14 +14,7 @@ import type { IModelContentTreeProps } from "./IModelContentTree.js";
 interface IModelContentTreeComponentProps
   extends Pick<
     IModelContentTreeProps,
-    | "getSchemaContext"
-    | "selectionStorage"
-    | "hierarchyConfig"
-    | "hierarchyLevelConfig"
-    | "selectionMode"
-    | "emptyTreeContent"
-    | "getActions"
-    | "getDecorations"
+    "selectionStorage" | "hierarchyConfig" | "hierarchyLevelConfig" | "selectionMode" | "emptyTreeContent" | "getActions" | "getDecorations"
   > {
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;

@@ -4,9 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import {
-  DEFINITION_CONTAINER_CLASS_NAME,
-  ELEMENT_CLASS_NAME,
-  SUB_CATEGORY_CLASS_NAME,
+  CLASS_NAME_DefinitionContainer,
+  CLASS_NAME_Element,
+  CLASS_NAME_SubCategory,
 } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import { getClassesByView, getDistinctMapValues } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
 
@@ -58,7 +58,7 @@ export function createSubCategoryHierarchyNode(subCategoryId: Id64String, catego
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: SUB_CATEGORY_CLASS_NAME, id: subCategoryId }],
+      instanceKeys: [{ className: CLASS_NAME_SubCategory, id: subCategoryId }],
     },
     children: false,
     label: "",
@@ -81,7 +81,7 @@ export function createClassGroupingHierarchyNode({
   className?: string;
   parentKeys?: HierarchyNodeKey[];
 }): GroupingHierarchyNode & { key: ClassGroupingNodeKey } {
-  const className = props.className ?? ELEMENT_CLASS_NAME;
+  const className = props.className ?? CLASS_NAME_Element;
   return {
     key: {
       type: "class-grouping",
@@ -103,7 +103,7 @@ export function createDefinitionContainerHierarchyNode(definitionContainerId: Id
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: DEFINITION_CONTAINER_CLASS_NAME, id: definitionContainerId }],
+      instanceKeys: [{ className: CLASS_NAME_DefinitionContainer, id: definitionContainerId }],
     },
     children: true,
     label: "",

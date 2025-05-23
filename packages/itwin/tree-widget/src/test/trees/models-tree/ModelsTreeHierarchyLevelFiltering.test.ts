@@ -11,7 +11,7 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { DefaultContentDisplayTypes, KeySet, PresentationRpcInterface, PropertyValueFormat } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-import { SUBJECT_CLASS_NAME } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
+import { CLASS_NAME_Subject } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import {
   buildIModel,
   insertExternalSourceAspect,
@@ -100,7 +100,7 @@ describe("Models tree", () => {
         nodes: await collect(
           provider.getNodes({
             parentNode: undefined,
-            instanceFilter: createInstanceFilter(SUBJECT_CLASS_NAME, {
+            instanceFilter: createInstanceFilter(CLASS_NAME_Subject, {
               sourceAlias: "this",
               propertyName: "Description",
               propertyTypeName: "string",
@@ -115,7 +115,7 @@ describe("Models tree", () => {
         nodes: await collect(
           provider.getNodes({
             parentNode: undefined,
-            instanceFilter: createInstanceFilter(SUBJECT_CLASS_NAME, {
+            instanceFilter: createInstanceFilter(CLASS_NAME_Subject, {
               sourceAlias: "this",
               propertyName: "Description",
               propertyTypeName: "string",

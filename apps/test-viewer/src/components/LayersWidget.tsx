@@ -12,7 +12,6 @@ import { MapLayersFormats } from "@itwin/map-layers-formats";
 import { CategoriesTreeIcon, Tree, TreeRenderer, TreeWidget, useCategoriesTree } from "@itwin/tree-widget-react";
 import { Icon } from "@stratakit/foundations";
 import { Chip } from "@stratakit/structures";
-import { getSchemaContext } from "../SchemaContext";
 import { unifiedSelectionStorage } from "../SelectionStorage";
 
 import type { UiItemsProvider } from "@itwin/appui-react";
@@ -36,7 +35,7 @@ export function createLayersUiProvider(): UiItemsProvider {
         {
           icon: <Icon href={element3dIcon} />,
           label: "Elements",
-          content: <ElementComponent getSchemaContext={getSchemaContext} selectionStorage={unifiedSelectionStorage} />,
+          content: <ElementComponent selectionStorage={unifiedSelectionStorage} />,
         },
         {
           icon: <Icon href={mapIcon} />,
@@ -123,7 +122,7 @@ function LayerBlock({
   );
 }
 
-function ElementComponent(props: Pick<ElementsProps, "getSchemaContext" | "selectionStorage">) {
+function ElementComponent(props: Pick<ElementsProps, "selectionStorage">) {
   const view = useActiveViewport();
   if (!view) {
     return null;
@@ -132,7 +131,7 @@ function ElementComponent(props: Pick<ElementsProps, "getSchemaContext" | "selec
   return <Elements {...props} view={view} />;
 }
 
-type ElementsProps = Pick<ComponentProps<typeof Tree>, "getSchemaContext" | "selectionStorage"> & { view: Viewport };
+type ElementsProps = Pick<ComponentProps<typeof Tree>, "selectionStorage"> & { view: Viewport };
 
 function Elements({ view, ...rest }: ElementsProps) {
   const { categoriesTreeProps, rendererProps } = useCategoriesTree({ activeView: view });

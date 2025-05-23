@@ -20,6 +20,8 @@ export async function createIModel(name: string, localPath: string, cb: (builder
     await cb(builder);
   } finally {
     iModel.saveChanges("Initial commit");
+    iModel.withSqliteStatement("ANALYZE", () => {});
+    iModel.saveChanges("Analyze");
     iModel.close();
   }
 }
