@@ -274,25 +274,6 @@ export class Datasets {
           });
         }
       }
-
-      const { id: physicalModelId } = insertPhysicalModelWithPartition({ builder, codeValue: "test physical model" });
-      const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-      const definitionModel = insertPhysicalSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
-
-      for (let i = 0; i < numElements; ++i) {
-        const { id: categoryId } = insertSpatialCategory({
-          builder,
-          codeValue: `c${i}`,
-          userLabel: `test_category${i}`,
-          modelId: definitionModel.id,
-        });
-        insertPhysicalElement({
-          builder,
-          modelId: physicalModelId,
-          categoryId,
-          userLabel: "test_element",
-        }).id;
-      }
     });
 
     console.log(`${numElements} classifications: Done.`);

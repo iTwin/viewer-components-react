@@ -52,7 +52,7 @@ describe("categories tree", () => {
         }),
       };
       expect(filtering.paths.length).to.eq(50000);
-      const provider = new StatelessHierarchyProvider({
+      using provider = new StatelessHierarchyProvider({
         imodelAccess,
         getHierarchyFactory: () => new CategoriesTreeDefinition({ imodelAccess, idsCache, viewType: "3d", hierarchyConfig }),
         filtering,
@@ -106,7 +106,7 @@ describe("categories tree", () => {
     },
     cleanup: async (props) => {
       props.iModel.close();
-      props.viewport.dispose();
+      props.viewport[Symbol.dispose]();
       props.handler[Symbol.dispose]();
       props.provider[Symbol.dispose]();
     },
@@ -165,7 +165,7 @@ describe("categories tree", () => {
     },
     cleanup: async (props) => {
       props.iModel.close();
-      props.viewport.dispose();
+      props.viewport[Symbol.dispose]();
       props.handler[Symbol.dispose]();
       props.provider[Symbol.dispose]();
     },

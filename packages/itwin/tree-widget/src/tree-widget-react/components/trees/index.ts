@@ -4,21 +4,22 @@
  *--------------------------------------------------------------------------------------------*/
 
 export { ModelsTreeComponent } from "./models-tree/ModelsTreeComponent.js";
+export { useModelsTree, ModelsTreeIcon } from "./models-tree/UseModelsTree.js";
+export { useModelsTreeButtonProps } from "./models-tree/ModelsTreeButtons.js";
+
 export { CategoriesTreeComponent } from "./categories-tree/CategoriesTreeComponent.js";
+export { useCategoriesTree, CategoriesTreeIcon } from "./categories-tree/UseCategoriesTree.js";
+export { useCategoriesTreeButtonProps } from "./categories-tree/CategoriesTreeButtons.js";
 
 export { ClassificationsTreeComponent } from "./classifications-tree/ClassificationsTreeComponent.js";
+export { ClassificationsTreeIcon } from "./classifications-tree/ClassificationsTreeIcon.js";
+export { useClassificationsTree } from "./classifications-tree/UseClassificationsTree.js";
 
 export { IModelContentTreeComponent } from "./imodel-content-tree/IModelContentTreeComponent.js";
 export { IModelContentTreeIcon } from "./imodel-content-tree/IModelContentTree.js";
 
 export { ExternalSourcesTreeComponent } from "./external-sources-tree/ExternalSourcesTreeComponent.js";
 export { ExternalSourcesTreeIcon } from "./external-sources-tree/ExternalSourcesTree.js";
-
-export { useModelsTree, ModelsTreeIcon } from "./models-tree/UseModelsTree.js";
-export { useCategoriesTree, CategoriesTreeIcon } from "./categories-tree/UseCategoriesTree.js";
-
-export { useModelsTreeButtonProps } from "./models-tree/ModelsTreeButtons.js";
-export { useCategoriesTreeButtonProps } from "./categories-tree/CategoriesTreeButtons.js";
 
 export { BaseTreeRendererProps } from "./common/components/BaseTreeRenderer.js";
 export { FocusedInstancesContextProvider, useFocusedInstancesContext } from "./common/FocusedInstancesContext.js";

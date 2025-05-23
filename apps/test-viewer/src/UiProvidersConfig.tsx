@@ -24,6 +24,7 @@ import {
 import { REPORTS_CONFIG_BASE_URL, ReportsConfigProvider, ReportsConfigWidget } from "@itwin/reports-config-widget-react";
 import {
   CategoriesTreeComponent,
+  ClassificationsTreeComponent,
   ExternalSourcesTreeComponent,
   IModelContentTreeComponent,
   ModelsTreeComponent,
@@ -154,6 +155,12 @@ const configuredUiItems = new Map<string, UiItem>([
                 id: "RepositoriesTree",
                 getLabel: () => "Repositories tree",
                 render: () => <RepositoriesTreeComponent baseUrl={`https://${globalThis.IMJS_URL_PREFIX ?? ""}api.bentley.com`} />,
+              },
+              {
+                id: ClassificationsTreeComponent.id,
+                getLabel: () => "Classifications tree",
+                render: () => <ClassificationsTreeComponent selectionStorage={unifiedSelectionStorage} rootClassificationSystemCode="50k classifications" />,
+                shouldShow: async (imodel) => ClassificationsTreeComponent.isSupportedByIModel(imodel),
               },
             ];
             return [

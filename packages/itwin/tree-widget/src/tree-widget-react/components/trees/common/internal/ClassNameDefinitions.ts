@@ -5,6 +5,8 @@
 
 /** @internal */
 export const CATEGORY_CLASS_NAME = "BisCore.Category";
+/** @internal */
+export const CLASS_NAME_Category = CATEGORY_CLASS_NAME; // FIXME: cleanup
 
 /** @internal */
 export const DEFINITION_CONTAINER_CLASS_NAME = "BisCore.DefinitionContainer";
@@ -20,6 +22,9 @@ export const DRAWING_CATEGORY_CLASS_NAME = "BisCore.DrawingCategory";
 
 /** @internal */
 export const ELEMENT_CLASS_NAME = "BisCore.Element";
+
+/** @internal */
+export const GEOMETRIC_ELEMENT_CLASS_NAME = "BisCore.GeometricElement";
 
 /** @internal */
 export const GEOMETRIC_ELEMENT_2D_CLASS_NAME = "BisCore.GeometricElement2d";
@@ -50,3 +55,12 @@ export const SUB_CATEGORY_CLASS_NAME = "BisCore.SubCategory";
 
 /** @internal */
 export const SUB_MODELED_ELEMENT_CLASS_NAME = "BisCore.ISubModeledElement";
+
+/** @internal */
+export const CLASS_NAME_ClassificationSystem = "ClassificationSystems.ClassificationSystem";
+/** @internal */
+export const CLASS_NAME_ClassificationTable = "ClassificationSystems.ClassificationTable";
+/** @internal */
+export const CLASS_NAME_Classification = "ClassificationSystems.Classification";
+/** @internal */
+export const CLASS_NAME_ElementHasClassifications = "ClassificationSystems.ElementHasClassifications";
