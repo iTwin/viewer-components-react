@@ -7,7 +7,7 @@ import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import { useEffect, useMemo, useState } from "react";
 import { HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { useFocusedInstancesContext } from "../../common/FocusedInstancesContext.js";
-import { GEOMETRIC_MODEL_3D_CLASS_NAME, SUBJECT_CLASS_NAME } from "../../common/internal/ClassNameDefinitions.js";
+import { CLASS_NAME_GeometricModel3d, CLASS_NAME_Subject } from "../../common/internal/ClassNameDefinitions.js";
 import { FilterLimitExceededError } from "../../common/TreeErrors.js";
 import { useTelemetryContext } from "../../common/UseTelemetryContext.js";
 import { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
@@ -167,13 +167,13 @@ async function getModels(paths: HierarchyFilteringPath[], idsCache: ModelsTreeId
       }
 
       // if paths end with subject need to get all models under that subject
-      if (i === currPath.length - 1 && currStep.className === SUBJECT_CLASS_NAME) {
+      if (i === currPath.length - 1 && currStep.className === CLASS_NAME_Subject) {
         targetSubjectIds.add(currStep.id);
         break;
       }
 
       // collect all the models from the filtered path
-      if (await classInspector.classDerivesFrom(currStep.className, GEOMETRIC_MODEL_3D_CLASS_NAME)) {
+      if (await classInspector.classDerivesFrom(currStep.className, CLASS_NAME_GeometricModel3d)) {
         targetModelIds.add(currStep.id);
       }
     }

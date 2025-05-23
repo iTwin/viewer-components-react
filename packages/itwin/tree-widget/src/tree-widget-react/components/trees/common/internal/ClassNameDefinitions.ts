@@ -4,57 +4,44 @@
  *--------------------------------------------------------------------------------------------*/
 
 /** @internal */
-export const CATEGORY_CLASS_NAME = "BisCore.Category";
-/** @internal */
-export const CLASS_NAME_Category = CATEGORY_CLASS_NAME; // FIXME: cleanup
+export const CLASS_NAME_Subject = "BisCore.Subject";
 
 /** @internal */
-export const DEFINITION_CONTAINER_CLASS_NAME = "BisCore.DefinitionContainer";
+export const CLASS_NAME_Category = "BisCore.Category";
+/** @internal */
+export const CLASS_NAME_SpatialCategory = "BisCore.SpatialCategory";
+/** @internal */
+export const CLASS_NAME_DrawingCategory = "BisCore.DrawingCategory";
+/** @internal */
+export const CLASS_NAME_SubCategory = "BisCore.SubCategory";
 
 /** @internal */
-export const DEFINITION_ELEMENT_CLASS_NAME = "BisCore.DefinitionElement";
+export const CLASS_NAME_DefinitionContainer = "BisCore.DefinitionContainer";
+/** @internal */
+export const CLASS_NAME_DefinitionElement = "BisCore.DefinitionElement";
+/** @internal */
+export const CLASS_NAME_DefinitionModel = "BisCore.DefinitionModel";
 
 /** @internal */
-export const DEFINITION_MODEL_CLASS_NAME = "BisCore.DefinitionModel";
+export const CLASS_NAME_Element = "BisCore.Element";
+/** @internal */
+export const CLASS_NAME_InformationPartitionElement = "BisCore.InformationPartitionElement";
+/** @internal */
+export const CLASS_NAME_GeometricElement = "BisCore.GeometricElement";
+/** @internal */
+export const CLASS_NAME_GeometricElement2d = "BisCore.GeometricElement2d";
+/** @internal */
+export const CLASS_NAME_GeometricElement3d = "BisCore.GeometricElement3d";
 
 /** @internal */
-export const DRAWING_CATEGORY_CLASS_NAME = "BisCore.DrawingCategory";
+export const CLASS_NAME_ISubModeledElement = "BisCore.ISubModeledElement";
 
 /** @internal */
-export const ELEMENT_CLASS_NAME = "BisCore.Element";
-
+export const CLASS_NAME_Model = "BisCore.Model";
 /** @internal */
-export const GEOMETRIC_ELEMENT_CLASS_NAME = "BisCore.GeometricElement";
-
+export const CLASS_NAME_GeometricModel2d = "BisCore.GeometricModel2d";
 /** @internal */
-export const GEOMETRIC_ELEMENT_2D_CLASS_NAME = "BisCore.GeometricElement2d";
-
-/** @internal */
-export const GEOMETRIC_ELEMENT_3D_CLASS_NAME = "BisCore.GeometricElement3d";
-
-/** @internal */
-export const GEOMETRIC_MODEL_2D_CLASS_NAME = "BisCore.GeometricModel2d";
-
-/** @internal */
-export const GEOMETRIC_MODEL_3D_CLASS_NAME = "BisCore.GeometricModel3d";
-
-/** @internal */
-export const INFORMATION_PARTITION_ELEMENT_CLASS_NAME = "BisCore.InformationPartitionElement";
-
-/** @internal */
-export const MODEL_CLASS_NAME = "BisCore.Model";
-
-/** @internal */
-export const SPATIAL_CATEGORY_CLASS_NAME = "BisCore.SpatialCategory";
-
-/** @internal */
-export const SUBJECT_CLASS_NAME = "BisCore.Subject";
-
-/** @internal */
-export const SUB_CATEGORY_CLASS_NAME = "BisCore.SubCategory";
-
-/** @internal */
-export const SUB_MODELED_ELEMENT_CLASS_NAME = "BisCore.ISubModeledElement";
+export const CLASS_NAME_GeometricModel3d = "BisCore.GeometricModel3d";
 
 /** @internal */
 export const CLASS_NAME_ClassificationSystem = "ClassificationSystems.ClassificationSystem";

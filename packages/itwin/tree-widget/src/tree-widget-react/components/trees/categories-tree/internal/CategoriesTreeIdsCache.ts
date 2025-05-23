@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { DEFINITION_CONTAINER_CLASS_NAME, MODEL_CLASS_NAME, SUB_CATEGORY_CLASS_NAME } from "../../common/internal/ClassNameDefinitions.js";
+import { CLASS_NAME_DefinitionContainer, CLASS_NAME_Model, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
 import { getClassesByView, getDistinctMapValues } from "../../common/internal/Utils.js";
 
@@ -132,7 +132,7 @@ export class CategoriesTreeIdsCache implements Disposable {
         ${
           isDefinitionContainerSupported
             ? `
-            IIF(this.Model.Id IN (SELECT dc.ECInstanceId FROM ${DEFINITION_CONTAINER_CLASS_NAME} dc),
+            IIF(this.Model.Id IN (SELECT dc.ECInstanceId FROM ${CLASS_NAME_DefinitionContainer} dc),
               true,
               false
             )`
@@ -140,8 +140,8 @@ export class CategoriesTreeIdsCache implements Disposable {
         } parentDefinitionContainerExists
       FROM
         ${this._categoryClass} this
-        JOIN ${SUB_CATEGORY_CLASS_NAME} sc ON sc.Parent.Id = this.ECInstanceId
-        JOIN ${MODEL_CLASS_NAME} m ON m.ECInstanceId = this.Model.Id
+        JOIN ${CLASS_NAME_SubCategory} sc ON sc.Parent.Id = this.ECInstanceId
+        JOIN ${CLASS_NAME_Model} m ON m.ECInstanceId = this.Model.Id
       WHERE
         NOT this.IsPrivate
         AND (NOT m.IsPrivate OR m.ECClassId IS (BisCore.DictionaryModel))
@@ -195,7 +195,7 @@ export class CategoriesTreeIdsCache implements Disposable {
             dc.ECInstanceId,
             dc.Model.Id
           FROM
-            ${DEFINITION_CONTAINER_CLASS_NAME} dc
+            ${CLASS_NAME_DefinitionContainer} dc
           WHERE
             dc.ECInstanceId IN (SELECT c.Model.Id FROM ${this._categoryClass} c WHERE NOT c.IsPrivate AND EXISTS (SELECT 1 FROM ${this._categoryElementClass} e WHERE e.Category.Id = c.ECInstanceId))
             AND NOT dc.IsPrivate
@@ -207,7 +207,7 @@ export class CategoriesTreeIdsCache implements Disposable {
             pdc.Model.Id
           FROM
             ${DEFINITION_CONTAINERS_CTE} cdc
-            JOIN ${DEFINITION_CONTAINER_CLASS_NAME} pdc ON pdc.ECInstanceId = cdc.ModelId
+            JOIN ${CLASS_NAME_DefinitionContainer} pdc ON pdc.ECInstanceId = cdc.ModelId
           WHERE
             NOT pdc.IsPrivate
         )
@@ -230,7 +230,7 @@ export class CategoriesTreeIdsCache implements Disposable {
         sc.ECInstanceId id,
         sc.Parent.Id categoryId
       FROM
-        ${SUB_CATEGORY_CLASS_NAME} sc
+        ${CLASS_NAME_SubCategory} sc
       WHERE
         NOT sc.IsPrivate
         AND sc.Parent.Id IN (${categoryIds.join(",")})
@@ -263,7 +263,7 @@ export class CategoriesTreeIdsCache implements Disposable {
     this._elementModelsCategories ??= (async () => {
       const [modelCategories, modelWithCategoryModeledElements] = await Promise.all([
         (async () => {
-          const elementModelsCategories = new Map<ModelId, { categoryIds: Id64Set; }>();
+          const elementModelsCategories = new Map<ModelId, { categoryIds: Id64Set }>();
           for await (const queriedCategory of this.queryElementModelCategories()) {
             let modelEntry = elementModelsCategories.get(queriedCategory.modelId);
             if (modelEntry === undefined) {
@@ -276,7 +276,7 @@ export class CategoriesTreeIdsCache implements Disposable {
         })(),
         this.getModelWithCategoryModeledElements(),
       ]);
-      const result = new Map<ModelId, { categoryIds: Set<CategoryId>; isSubModel: boolean; }>();
+      const result = new Map<ModelId, { categoryIds: Set<CategoryId>; isSubModel: boolean }>();
       const subModels = getDistinctMapValues(modelWithCategoryModeledElements);
       for (const [modelId, modelEntry] of modelCategories) {
         const isSubModel = subModels.has(modelId);
@@ -474,7 +474,7 @@ export class CategoriesTreeIdsCache implements Disposable {
       if (subCategoryInfo === undefined) {
         return [];
       }
-      return [...(await this.getInstanceKeyPaths({ categoryId: subCategoryInfo.categoryId })), { id: props.subCategoryId, className: SUB_CATEGORY_CLASS_NAME }];
+      return [...(await this.getInstanceKeyPaths({ categoryId: subCategoryInfo.categoryId })), { id: props.subCategoryId, className: CLASS_NAME_SubCategory }];
     }
 
     if ("categoryId" in props) {
@@ -498,12 +498,12 @@ export class CategoriesTreeIdsCache implements Disposable {
     }
 
     if (!definitionContainerInfo.parentDefinitionContainerExists) {
-      return [{ id: props.definitionContainerId, className: DEFINITION_CONTAINER_CLASS_NAME }];
+      return [{ id: props.definitionContainerId, className: CLASS_NAME_DefinitionContainer }];
     }
 
     return [
       ...(await this.getInstanceKeyPaths({ definitionContainerId: definitionContainerInfo.modelId })),
-      { id: props.definitionContainerId, className: DEFINITION_CONTAINER_CLASS_NAME },
+      { id: props.definitionContainerId, className: CLASS_NAME_DefinitionContainer },
     ];
   }
 

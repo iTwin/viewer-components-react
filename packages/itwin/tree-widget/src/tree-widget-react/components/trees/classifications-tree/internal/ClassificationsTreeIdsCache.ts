@@ -9,11 +9,11 @@ import {
   CLASS_NAME_Classification,
   CLASS_NAME_ClassificationSystem,
   CLASS_NAME_ClassificationTable,
+  CLASS_NAME_DrawingCategory,
   CLASS_NAME_ElementHasClassifications,
-  DRAWING_CATEGORY_CLASS_NAME,
-  GEOMETRIC_ELEMENT_2D_CLASS_NAME,
-  GEOMETRIC_ELEMENT_3D_CLASS_NAME,
-  SPATIAL_CATEGORY_CLASS_NAME,
+  CLASS_NAME_GeometricElement2d,
+  CLASS_NAME_GeometricElement3d,
+  CLASS_NAME_SpatialCategory,
 } from "../../common/internal/ClassNameDefinitions.js";
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
 import { getDistinctMapValues } from "../../common/internal/Utils.js";
@@ -261,14 +261,14 @@ export class ClassificationsTreeIdsCache implements Disposable {
       FROM ${CLASSIFICATIONS_CTE} cl
       LEFT JOIN ${CLASS_NAME_Category} cat ON cat.ECInstanceId IN (
         SELECT c.ECInstanceId
-        FROM ${DRAWING_CATEGORY_CLASS_NAME} c
-        JOIN ${GEOMETRIC_ELEMENT_2D_CLASS_NAME} e2d ON e2d.Category.Id = c.ECInstanceId AND e2d.Parent.Id IS NULL
+        FROM ${CLASS_NAME_DrawingCategory} c
+        JOIN ${CLASS_NAME_GeometricElement2d} e2d ON e2d.Category.Id = c.ECInstanceId AND e2d.Parent.Id IS NULL
         JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = e2d.ECInstanceId
         WHERE ehc.TargetECInstanceId = cl.ClassificationId AND NOT c.IsPrivate
         UNION ALL
         SELECT c.ECInstanceId
-        FROM ${SPATIAL_CATEGORY_CLASS_NAME} c
-        JOIN ${GEOMETRIC_ELEMENT_3D_CLASS_NAME} e3d ON e3d.Category.Id = c.ECInstanceId AND e3d.Parent.Id IS NULL
+        FROM ${CLASS_NAME_SpatialCategory} c
+        JOIN ${CLASS_NAME_GeometricElement3d} e3d ON e3d.Category.Id = c.ECInstanceId AND e3d.Parent.Id IS NULL
         JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = e3d.ECInstanceId
         WHERE ehc.TargetECInstanceId = cl.ClassificationId AND NOT c.IsPrivate
       )

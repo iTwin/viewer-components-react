@@ -14,10 +14,10 @@ import visibilityShowSvg from "@stratakit/icons/visibility-show.svg";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
 import {
-  ELEMENT_CLASS_NAME,
-  GEOMETRIC_ELEMENT_3D_CLASS_NAME,
-  GEOMETRIC_MODEL_3D_CLASS_NAME,
-  INFORMATION_PARTITION_ELEMENT_CLASS_NAME,
+  CLASS_NAME_Element,
+  CLASS_NAME_GeometricElement3d,
+  CLASS_NAME_GeometricModel3d,
+  CLASS_NAME_InformationPartitionElement,
 } from "../common/internal/ClassNameDefinitions.js";
 import { areAllModelsVisible, hideAllModels, invertAllModels, showAll, toggleModels } from "../common/Utils.js";
 
@@ -98,12 +98,12 @@ function useAvailableModels(imodel: IModelConnection): ModelInfo[] {
 
 async function queryModelsForHeaderActions(iModel: IModelConnection) {
   const queryParams: ModelQueryParams = {
-    from: GEOMETRIC_MODEL_3D_CLASS_NAME,
+    from: CLASS_NAME_GeometricModel3d,
     where: `
         EXISTS (
           SELECT 1
-          FROM ${ELEMENT_CLASS_NAME} e
-          WHERE e.ECClassId IS (${GEOMETRIC_ELEMENT_3D_CLASS_NAME}, ${INFORMATION_PARTITION_ELEMENT_CLASS_NAME})
+          FROM ${CLASS_NAME_Element} e
+          WHERE e.ECClassId IS (${CLASS_NAME_GeometricElement3d}, ${CLASS_NAME_InformationPartitionElement})
             AND e.ECInstanceId = GeometricModel3d.ModeledElement.Id
         )
       `,

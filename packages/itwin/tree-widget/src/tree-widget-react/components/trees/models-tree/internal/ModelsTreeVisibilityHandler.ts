@@ -31,7 +31,7 @@ import { assert, Id64 } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { AlwaysAndNeverDrawnElementInfo } from "../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
-import { GEOMETRIC_ELEMENT_3D_CLASS_NAME } from "../../common/internal/ClassNameDefinitions.js";
+import { CLASS_NAME_GeometricElement3d } from "../../common/internal/ClassNameDefinitions.js";
 import { toVoidPromise } from "../../common/internal/Rxjs.js";
 import { createVisibilityStatus } from "../../common/internal/Tooltip.js";
 import { releaseMainThreadOnItemsCount, setDifference, setIntersection } from "../../common/internal/Utils.js";
@@ -161,7 +161,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         elements: true,
       },
     });
-    this._alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfo(_props.viewport, GEOMETRIC_ELEMENT_3D_CLASS_NAME);
+    this._alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfo(_props.viewport, CLASS_NAME_GeometricElement3d);
     this._idsCache = this._props.idsCache;
     this._filteredTree = _props.filteredPaths ? createFilteredTree(this._props.imodelAccess, _props.filteredPaths) : undefined;
     this._subscriptions.push(this._elementChangeQueue.pipe(concatAll()).subscribe());

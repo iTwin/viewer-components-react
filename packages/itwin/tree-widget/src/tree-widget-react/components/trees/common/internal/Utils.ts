@@ -9,12 +9,12 @@ import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/present
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 import {
-  DRAWING_CATEGORY_CLASS_NAME,
-  GEOMETRIC_ELEMENT_2D_CLASS_NAME,
-  GEOMETRIC_ELEMENT_3D_CLASS_NAME,
-  GEOMETRIC_MODEL_2D_CLASS_NAME,
-  GEOMETRIC_MODEL_3D_CLASS_NAME,
-  SPATIAL_CATEGORY_CLASS_NAME,
+  CLASS_NAME_DrawingCategory,
+  CLASS_NAME_GeometricElement2d,
+  CLASS_NAME_GeometricElement3d,
+  CLASS_NAME_GeometricModel2d,
+  CLASS_NAME_GeometricModel3d,
+  CLASS_NAME_SpatialCategory,
 } from "./ClassNameDefinitions.js";
 
 import type { Observable } from "rxjs";
@@ -122,6 +122,6 @@ export function releaseMainThreadOnItemsCount<T>(elementCount: number) {
 /** @internal */
 export function getClassesByView(viewType: "2d" | "3d") {
   return viewType === "2d"
-    ? ({ categoryClass: DRAWING_CATEGORY_CLASS_NAME, elementClass: GEOMETRIC_ELEMENT_2D_CLASS_NAME, modelClass: GEOMETRIC_MODEL_2D_CLASS_NAME } as const)
-    : ({ categoryClass: SPATIAL_CATEGORY_CLASS_NAME, elementClass: GEOMETRIC_ELEMENT_3D_CLASS_NAME, modelClass: GEOMETRIC_MODEL_3D_CLASS_NAME } as const);
+    ? ({ categoryClass: CLASS_NAME_DrawingCategory, elementClass: CLASS_NAME_GeometricElement2d, modelClass: CLASS_NAME_GeometricModel2d } as const)
+    : ({ categoryClass: CLASS_NAME_SpatialCategory, elementClass: CLASS_NAME_GeometricElement3d, modelClass: CLASS_NAME_GeometricModel3d } as const);
 }

@@ -10,12 +10,12 @@ import {
   CLASS_NAME_Classification,
   CLASS_NAME_ClassificationSystem,
   CLASS_NAME_ClassificationTable,
+  CLASS_NAME_Element,
   CLASS_NAME_ElementHasClassifications,
-  ELEMENT_CLASS_NAME,
-  GEOMETRIC_ELEMENT_2D_CLASS_NAME,
-  GEOMETRIC_ELEMENT_3D_CLASS_NAME,
-  GEOMETRIC_ELEMENT_CLASS_NAME,
-  SPATIAL_CATEGORY_CLASS_NAME,
+  CLASS_NAME_GeometricElement,
+  CLASS_NAME_GeometricElement2d,
+  CLASS_NAME_GeometricElement3d,
+  CLASS_NAME_SpatialCategory,
 } from "../common/internal/ClassNameDefinitions.js";
 import { createIdsSelector, parseIdsSelectorResult } from "../common/internal/Utils.js";
 
@@ -32,12 +32,6 @@ import type {
 } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, ECSchemaProvider, IInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
 import type { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
-
-const CLASS_NAME_SpatialCategory = SPATIAL_CATEGORY_CLASS_NAME;
-const CLASS_NAME_Element = ELEMENT_CLASS_NAME;
-const CLASS_NAME_GeometricElement = GEOMETRIC_ELEMENT_CLASS_NAME;
-const CLASS_NAME_GeometricElement3d = GEOMETRIC_ELEMENT_3D_CLASS_NAME;
-const CLASS_NAME_GeometricElement2d = GEOMETRIC_ELEMENT_2D_CLASS_NAME;
 
 interface ClassificationsTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;

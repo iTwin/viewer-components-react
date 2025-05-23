@@ -8,11 +8,11 @@ import { assert } from "@itwin/core-bentley";
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition, ProcessedHierarchyNode } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import {
-  DEFINITION_CONTAINER_CLASS_NAME,
-  INFORMATION_PARTITION_ELEMENT_CLASS_NAME,
-  MODEL_CLASS_NAME,
-  SUB_CATEGORY_CLASS_NAME,
-  SUB_MODELED_ELEMENT_CLASS_NAME,
+  CLASS_NAME_DefinitionContainer,
+  CLASS_NAME_InformationPartitionElement,
+  CLASS_NAME_ISubModeledElement,
+  CLASS_NAME_Model,
+  CLASS_NAME_SubCategory,
 } from "../common/internal/ClassNameDefinitions.js";
 import { createIdsSelector, getClassesByView, getDistinctMapValues, parseIdsSelectorResult, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
@@ -150,7 +150,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                     definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createElementChildrenQuery(requestProps),
                   },
                   {
-                    parentInstancesNodePredicate: SUB_MODELED_ELEMENT_CLASS_NAME,
+                    parentInstancesNodePredicate: CLASS_NAME_ISubModeledElement,
                     definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createISubModeledElementChildrenQuery(requestProps),
                   },
                   {
@@ -170,7 +170,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
             ...(isDefinitionContainerSupported
               ? [
                   {
-                    parentInstancesNodePredicate: DEFINITION_CONTAINER_CLASS_NAME,
+                    parentInstancesNodePredicate: CLASS_NAME_DefinitionContainer,
                     definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) =>
                       this.createDefinitionContainersAndCategoriesQuery(requestProps),
                   },
@@ -300,12 +300,12 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   }): Promise<HierarchyLevelDefinition> {
     const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
       filter: instanceFilter,
-      contentClass: { fullName: DEFINITION_CONTAINER_CLASS_NAME, alias: "this" },
+      contentClass: { fullName: CLASS_NAME_DefinitionContainer, alias: "this" },
     });
 
     return [
       {
-        fullClassName: DEFINITION_CONTAINER_CLASS_NAME,
+        fullClassName: CLASS_NAME_DefinitionContainer,
         query: {
           ecsql: `
             SELECT
@@ -315,7 +315,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 nodeLabel: {
                   selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
                     classAlias: "this",
-                    className: DEFINITION_CONTAINER_CLASS_NAME,
+                    className: CLASS_NAME_DefinitionContainer,
                   }),
                 },
                 extendedData: {
@@ -428,12 +428,12 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
     const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
       filter: instanceFilter,
-      contentClass: { fullName: SUB_CATEGORY_CLASS_NAME, alias: "this" },
+      contentClass: { fullName: CLASS_NAME_SubCategory, alias: "this" },
     });
 
     return [
       {
-        fullClassName: SUB_CATEGORY_CLASS_NAME,
+        fullClassName: CLASS_NAME_SubCategory,
         query: {
           ecsql: `
             SELECT
@@ -443,7 +443,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 nodeLabel: {
                   selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
                     classAlias: "this",
-                    className: SUB_CATEGORY_CLASS_NAME,
+                    className: CLASS_NAME_SubCategory,
                   }),
                 },
                 extendedData: {
@@ -530,7 +530,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
               supportsFiltering: true,
             })}
           FROM ${instanceFilterClauses.from} this
-          ${parentNode.extendedData?.isCategoryOfSubModel ? "" : `JOIN ${INFORMATION_PARTITION_ELEMENT_CLASS_NAME} ipe ON ipe.ECInstanceId = this.Model.Id`}
+          ${parentNode.extendedData?.isCategoryOfSubModel ? "" : `JOIN ${CLASS_NAME_InformationPartitionElement} ipe ON ipe.ECInstanceId = this.Model.Id`}
           ${instanceFilterClauses.joins}
           WHERE
             this.Category.Id IN (${categoryIds.join(",")})
@@ -571,7 +571,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                     IFNULL((
                       SELECT 1
                       FROM ${this._categoryElementClass} ce
-                      JOIN ${MODEL_CLASS_NAME} m ON ce.Model.Id = m.ECInstanceId
+                      JOIN ${CLASS_NAME_Model} m ON ce.Model.Id = m.ECInstanceId
                       WHERE ce.Parent.Id = this.ECInstanceId OR (ce.Model.Id = this.ECInstanceId AND m.IsPrivate = false)
                       LIMIT 1
                     ), 0)
@@ -620,8 +620,8 @@ async function createInstanceKeyPathsFromInstanceLabel(
   const SUBCATEGORIES_WITH_LABELS_CTE = "SubCategoriesWithLabels";
   const DEFINITION_CONTAINERS_WITH_LABELS_CTE = "DefinitionContainersWithLabels";
   const [categoryLabelSelectClause, subCategoryLabelSelectClause, elementLabelSelectClause, definitionContainerLabelSelectClause] = await Promise.all(
-    [categoryClass, SUB_CATEGORY_CLASS_NAME, elementClass, ...(definitionContainers.length > 0 ? [DEFINITION_CONTAINER_CLASS_NAME] : [])].map(
-      async (className) => props.labelsFactory.createSelectClause({ classAlias: "this", className }),
+    [categoryClass, CLASS_NAME_SubCategory, elementClass, ...(definitionContainers.length > 0 ? [CLASS_NAME_DefinitionContainer] : [])].map(async (className) =>
+      props.labelsFactory.createSelectClause({ classAlias: "this", className }),
     ),
   );
   return lastValueFrom(
@@ -635,7 +635,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
               ${categoryLabelSelectClause}
             FROM
               ${categoryClass} this
-              JOIN ${SUB_CATEGORY_CLASS_NAME} sc ON sc.Parent.Id = this.ECInstanceId
+              JOIN ${CLASS_NAME_SubCategory} sc ON sc.Parent.Id = this.ECInstanceId
             WHERE
               this.ECInstanceId IN (${categories.join(", ")})
               GROUP BY this.ECInstanceId
@@ -650,7 +650,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
                     ${elementLabelSelectClause}
                   FROM
                     ${elementClass} this
-                    JOIN ${MODEL_CLASS_NAME} m ON this.Model.Id = m.ECInstanceId
+                    JOIN ${CLASS_NAME_Model} m ON this.Model.Id = m.ECInstanceId
                   WHERE
                     NOT m.IsPrivate
                     AND this.Category.Id IN (${categories.join(", ")})
@@ -667,7 +667,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
                   this.Parent.Id,
                   ${subCategoryLabelSelectClause}
                 FROM
-                  ${SUB_CATEGORY_CLASS_NAME} this
+                  ${CLASS_NAME_SubCategory} this
                 WHERE
                   NOT this.IsPrivate
                   AND this.Parent.Id IN (${categories.join(", ")})
@@ -681,7 +681,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
                   this.ECInstanceId,
                   ${definitionContainerLabelSelectClause}
                 FROM
-                  ${DEFINITION_CONTAINER_CLASS_NAME} this
+                  ${CLASS_NAME_DefinitionContainer} this
                 WHERE
                   this.ECInstanceId IN (${definitionContainers.join(", ")})
               )`,
@@ -762,13 +762,13 @@ async function createInstanceKeyPathsFromInstanceLabel(
             className = categoryClass;
             break;
           case "sc":
-            className = SUB_CATEGORY_CLASS_NAME;
+            className = CLASS_NAME_SubCategory;
             break;
           case "e":
             className = elementClass;
             break;
           default:
-            className = DEFINITION_CONTAINER_CLASS_NAME;
+            className = CLASS_NAME_DefinitionContainer;
             break;
         }
         return {
@@ -804,11 +804,11 @@ function createInstanceKeyPathsFromTargetItems({
           acc.categoryIds.push(id);
           return acc;
         }
-        if (className === DEFINITION_CONTAINER_CLASS_NAME) {
+        if (className === CLASS_NAME_DefinitionContainer) {
           acc.definitionContainerIds.push(id);
           return acc;
         }
-        if (className === SUB_CATEGORY_CLASS_NAME) {
+        if (className === CLASS_NAME_SubCategory) {
           if (hierarchyConfig.hideSubCategories) {
             return acc;
           }
