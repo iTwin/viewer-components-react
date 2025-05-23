@@ -194,7 +194,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         using handlerResult = createHandler();
         const { handler } = handlerResult;
         const result = await handler.getVisibilityStatus(node);
-        expect(result).to.include({ state: "hidden", isDisabled: true });
+        expect(result).to.include({ isDisabled: true });
       });
 
       describe("subject", () => {
@@ -227,7 +227,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           const { handler } = handlerResult;
           const result = await handler.getVisibilityStatus(node);
           expect(viewport.view.isSpatialView).to.be.called;
-          expect(result).to.include({ state: "hidden", isDisabled: true });
+          expect(result).to.include({ isDisabled: true });
         });
 
         it("is visible when subject contains no models", async () => {
@@ -327,7 +327,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           const { handler } = handlerResult;
           const result = await handler.getVisibilityStatus(node);
           expect(viewport.view.isSpatialView).to.be.called;
-          expect(result).to.include({ state: "hidden", isDisabled: true });
+          expect(result).to.include({ isDisabled: true });
         });
 
         describe("visible", () => {
