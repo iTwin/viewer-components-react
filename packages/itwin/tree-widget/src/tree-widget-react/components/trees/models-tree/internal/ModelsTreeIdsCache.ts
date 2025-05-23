@@ -53,7 +53,7 @@ export class ModelsTreeIdsCache {
     private _queryExecutor: LimitingECSqlQueryExecutor,
     private _hierarchyConfig: ModelsTreeHierarchyConfiguration,
   ) {
-    this._categoryElementCounts = new ModelCategoryElementsCountCache(_queryExecutor, this._hierarchyConfig.elementClassSpecification);
+    this._categoryElementCounts = new ModelCategoryElementsCountCache(_queryExecutor, [this._hierarchyConfig.elementClassSpecification]);
     this._modelKeyPaths = new Map();
     this._subjectKeyPaths = new Map();
     this._categoryKeyPaths = new Map();

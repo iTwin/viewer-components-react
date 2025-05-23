@@ -58,7 +58,7 @@ export class CategoriesTreeIdsCache implements Disposable {
     this._categoryClass = categoryClass;
     this._categoryElementClass = elementClass;
     this._categoryModelClass = modelClass;
-    this._categoryElementCounts = new ModelCategoryElementsCountCache(_queryExecutor, elementClass);
+    this._categoryElementCounts = new ModelCategoryElementsCountCache(_queryExecutor, [elementClass]);
   }
 
   public [Symbol.dispose]() {
