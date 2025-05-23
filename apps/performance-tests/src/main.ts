@@ -27,6 +27,7 @@ before(async () => {
         },
       },
     },
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
   });
   ECSchemaRpcImpl.register();
