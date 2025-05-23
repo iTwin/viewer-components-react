@@ -397,7 +397,7 @@ interface TelemetryContextProviderProps {
 }
 
 // @beta
-export function Tree({ hierarchyLevelSizeLimit, selectionStorage, imodelAccess: providedIModelAccess, ...props }: TreeProps): JSX_2.Element;
+export function Tree({ hierarchyLevelSizeLimit, getHierarchyDefinition, getFilteredPaths, selectionStorage, imodelAccess: providedIModelAccess, treeName, onReload, ...props }: TreeProps): JSX_2.Element;
 
 // @public
 export interface TreeDefinition {

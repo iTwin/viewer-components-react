@@ -23,10 +23,18 @@ import { SkeletonTree } from "./SkeletonTree.js";
 
 import type { ReactNode } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { PresentationHierarchyNode, SelectionStorage, useIModelTree, useSelectionHandler } from "@itwin/presentation-hierarchies-react";
+import type {
+  PresentationHierarchyNode,
+  SelectionStorage,
+  TreeRendererProps,
+  useIModelTree,
+  useSelectionHandler,
+  useTree,
+} from "@itwin/presentation-hierarchies-react";
 import type { FunctionProps } from "../Utils.js";
 import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
 import type { HighlightInfo } from "../UseNodeHighlighting.js";
+
 /** @beta */
 export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPaths" | "getHierarchyDefinition"> &
   Partial<Pick<FunctionProps<typeof useSelectionHandler>, "selectionMode">> & {
@@ -126,7 +134,6 @@ export function Tree({
       isReloading={isReloading}
       treeRendererProps={treeProps.treeRendererProps}
       getNode={getNode}
-      getSchemaContext={getSchemaContext}
       currentHierarchyLevelSizeLimit={currentHierarchyLevelSizeLimit}
     />
   );
@@ -140,7 +147,9 @@ type TreeBaseProps = {
   Pick<ReturnType<typeof useTree>, "getNode" | "isReloading">;
 
 /** @internal */
-function TreeBase({ getSchemaContext, treeRendererProps, ...props }: TreeBaseProps) {
+function TreeBase({ treeRendererProps, ...props }: TreeBaseProps) {
+  const getSchemaContext = useCallback(() => props.imodel.schemaContext, [props.imodel]);
+
   if (treeRendererProps === undefined) {
     return <SkeletonTree />;
   }
