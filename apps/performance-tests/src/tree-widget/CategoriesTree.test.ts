@@ -57,7 +57,7 @@ describe("categories tree", () => {
         getHierarchyFactory: () => new CategoriesTreeDefinition({ imodelAccess, idsCache, viewType: "3d", hierarchyConfig }),
         filtering,
       });
-      const result = await provider.loadHierarchy({ depth: 1 });
+      const result = await provider.loadHierarchy({ shouldExpand: (node) => node.children && !!node.autoExpand });
       expect(result).to.eq(1);
     },
   });

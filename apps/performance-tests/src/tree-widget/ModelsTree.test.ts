@@ -67,7 +67,7 @@ describe("models tree", () => {
         getHierarchyFactory: () => new ModelsTreeDefinition({ imodelAccess, idsCache, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
         filtering,
       });
-      const result = await provider.loadHierarchy({ depth: 2 });
+      const result = await provider.loadHierarchy({ shouldExpand: (node) => node.children && !!node.autoExpand });
       expect(result).to.eq(2);
     },
   });
