@@ -30,7 +30,7 @@ import type { Id64String } from "@itwin/core-bentley";
 import type { DefinitionElementProps } from "@itwin/core-common";
 
 const rootClassificationSystemCode = "TestClassificationSystem";
-const classificationSymbolizedByCategoryRelationshipName = "TestClassificationSchema.ClassificationSymbolizedByCategory";
+const categorySymbolizesClassificationRelationshipName = "TestClassificationSchema.CategorySymbolizesClassification";
 
 describe("Classifications tree", () => {
   describe("Hierarchy definition", () => {
@@ -119,7 +119,7 @@ describe("Classifications tree", () => {
       });
 
       const { imodel, ...keys } = buildIModelResult;
-      using provider = createClassificationsTreeProvider(imodel, { rootClassificationSystemCode, classificationSymbolizedByCategoryRelationshipName });
+      using provider = createClassificationsTreeProvider(imodel, { rootClassificationSystemCode, categorySymbolizesClassificationRelationshipName });
 
       await validateHierarchy({
         provider,
@@ -206,7 +206,7 @@ function insertClassificationTable(
   props: {
     builder: TestIModelBuilder;
     modelId?: Id64String;
-    parentId?: Id64String
+    parentId?: Id64String;
     codeValue?: string;
   } & Partial<Omit<DefinitionElementProps, "id" | "parent" | "code" | "model">>,
 ) {
@@ -214,15 +214,21 @@ function insertClassificationTable(
   const className = `ClassificationSystems.ClassificationTable`;
   const id = builder.insertElement({
     classFullName: className,
-    model: modelId  ?? IModel.dictionaryId,
+    model: modelId ?? IModel.dictionaryId,
     code: codeValue ? builder.createCode(parentId ?? modelId ?? IModel.dictionaryId, BisCodeSpec.nullCodeSpec, codeValue) : Code.createEmpty(),
-    parent: parentId ?{
-      id: parentId,
-      relClassName: "ClassificationSystems.ClassificationSystemOwnsClassificationTable",
-    } : undefined,
+    parent: parentId
+      ? {
+          id: parentId,
+          relClassName: "ClassificationSystems.ClassificationSystemOwnsClassificationTable",
+        }
+      : undefined,
     ...elementProps,
   });
-  insertDefinitionSubModel({ builder, modeledElementId: id, modelModelsElementRelationshipName: "ClassificationSystems.DefinitionModelBreaksDownClassificationTable" });
+  insertDefinitionSubModel({
+    builder,
+    modeledElementId: id,
+    modelModelsElementRelationshipName: "ClassificationSystems.DefinitionModelBreaksDownClassificationTable",
+  });
   return { className, id };
 }
 
@@ -230,7 +236,7 @@ function insertClassification(
   props: {
     builder: TestIModelBuilder;
     modelId: Id64String;
-    parentId?: Id64String
+    parentId?: Id64String;
     codeValue?: string;
   } & Partial<Omit<DefinitionElementProps, "id" | "parent" | "code" | "model">>,
 ) {
@@ -240,22 +246,18 @@ function insertClassification(
     classFullName: className,
     model: modelId,
     code: codeValue ? builder.createCode(parentId ?? modelId, BisCodeSpec.nullCodeSpec, codeValue) : Code.createEmpty(),
-    parent: parentId ? {
-      id: parentId,
-      relClassName: "ClassificationSystems.ClassificationOwnsSubClassifications",
-    } : undefined,
+    parent: parentId
+      ? {
+          id: parentId,
+          relClassName: "ClassificationSystems.ClassificationOwnsSubClassifications",
+        }
+      : undefined,
     ...elementProps,
   });
   return { className, id };
 }
 
-function insertElementHasClassificationsRelationship(
-  props: {
-    builder: TestIModelBuilder;
-    elementId: Id64String;
-    classificationId: Id64String;
-  },
-) {
+function insertElementHasClassificationsRelationship(props: { builder: TestIModelBuilder; elementId: Id64String; classificationId: Id64String }) {
   const { builder, elementId, classificationId } = props;
   return builder.insertRelationship({
     classFullName: "ClassificationSystems.ElementHasClassifications",
@@ -264,16 +266,10 @@ function insertElementHasClassificationsRelationship(
   });
 }
 
-function insertClassificationSymbolizedByCategoryRelationship(
-  props: {
-    builder: TestIModelBuilder;
-    categoryId: Id64String;
-    classificationId: Id64String;
-  },
-) {
+function insertClassificationSymbolizedByCategoryRelationship(props: { builder: TestIModelBuilder; categoryId: Id64String; classificationId: Id64String }) {
   const { builder, categoryId, classificationId } = props;
   return builder.insertRelationship({
-    classFullName: classificationSymbolizedByCategoryRelationshipName,
+    classFullName: categorySymbolizesClassificationRelationshipName,
     sourceId: categoryId,
     targetId: classificationId,
   });
@@ -292,7 +288,7 @@ async function importClassificationSchema(builder: TestIModelBuilder) {
     schemaContentXml: `
       <ECSchemaReference name="BisCore" version="01.00.16" alias="bis" />
       <ECSchemaReference name="ClassificationSystems" version="01.00.04" alias="clsf" />
-      <ECRelationshipClass typeName="ClassificationSymbolizedByCategory" modifier="None" strength="referencing">
+      <ECRelationshipClass typeName="CategorySymbolizesClassification" modifier="None" strength="referencing">
           <BaseClass>bis:ElementRefersToElements</BaseClass>
           <Source multiplicity="(0..*)" roleLabel="symbolizes" polymorphic="true">
               <Class class="bis:Category"/>
