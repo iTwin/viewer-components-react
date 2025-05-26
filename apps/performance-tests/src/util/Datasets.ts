@@ -187,7 +187,13 @@ export class Datasets {
   }
 
   /**
-   * Create an iModel with `numElements` categories all belonging to the same definition container.
+   * Create an iModel with:
+   * - 1 `ClassificationSystem`, whose code = `name`,
+   * - 10 `ClassificationTable` elements as children for the `ClassificationSystem` all with a single sub-model,
+   * - `numElements / 10` `Classification` elements inside `ClassificationTable`'s sub-model with:
+   *  - 1 child `Classification`,
+   *  - 1 spatial category and 3d element,
+   *  - 1 drawing category and 2d element.
    */
   private static async createClassificationsIModel(name: string, localPath: string, numElements: number) {
     console.log(`${numElements} classifications: Creating...`);

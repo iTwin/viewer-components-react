@@ -12,7 +12,7 @@ import { StatelessHierarchyProvider } from "./StatelessHierarchyProvider.js";
 
 import type { IModelAccess } from "./StatelessHierarchyProvider.js";
 
-describe.only("classifications tree", () => {
+describe("classifications tree", () => {
   const rootClassificationSystemCode = "50k classifications";
 
   run<{ imodel: SnapshotDb; imodelAccess: IModelAccess; idsCache: ClassificationsTreeIdsCache }>({
@@ -20,7 +20,7 @@ describe.only("classifications tree", () => {
     setup: async () => {
       const imodel = SnapshotDb.openFile(Datasets.getIModelPath("50k classifications"));
       const imodelAccess = StatelessHierarchyProvider.createIModelAccess(imodel, "unbounded");
-      const idsCache = new ClassificationsTreeIdsCache(imodelAccess, rootClassificationSystemCode)
+      const idsCache = new ClassificationsTreeIdsCache(imodelAccess, rootClassificationSystemCode);
       return { imodel, imodelAccess, idsCache };
     },
     cleanup: (props) => {
@@ -30,11 +30,12 @@ describe.only("classifications tree", () => {
     test: async ({ imodelAccess, idsCache }) => {
       using provider = new StatelessHierarchyProvider({
         imodelAccess,
-        getHierarchyFactory: () => new ClassificationsTreeDefinition({
-          imodelAccess,
-          idsCache,
-          rootClassificationSystemCode,
-        }),
+        getHierarchyFactory: () =>
+          new ClassificationsTreeDefinition({
+            imodelAccess,
+            idsCache,
+            rootClassificationSystemCode,
+          }),
       });
       const result = await provider.loadHierarchy({ depth: 1 });
       expect(result).to.eq(10);

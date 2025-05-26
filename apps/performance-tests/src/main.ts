@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { UiFramework } from "@itwin/appui-react";
-import { EmptyLocalization, IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
+import { EmptyLocalization, IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
@@ -27,8 +27,7 @@ before(async () => {
         },
       },
     },
-    // eslint-disable-next-line @typescript-eslint/no-deprecated
-    rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
+    rpcs: [IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
   });
   ECSchemaRpcImpl.register();
   await Datasets.initialize("./datasets");
