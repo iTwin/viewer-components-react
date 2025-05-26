@@ -128,11 +128,17 @@ export const ClassificationsTreeComponent: {
 };
 
 // @alpha (undocumented)
-interface ClassificationsTreeComponentProps extends Pick<ClassificationsTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "emptyTreeContent" | "getActions" | "getDecorations" | "rootClassificationSystemCode"> {
+interface ClassificationsTreeComponentProps extends Pick<ClassificationsTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "emptyTreeContent" | "getActions" | "getDecorations" | "hierarchyConfig"> {
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
     onPerformanceMeasured?: (featureId: string, duration: number) => void;
+}
+
+// @alpha (undocumented)
+interface ClassificationsTreeHierarchyConfiguration {
+    classificationSymbolizedByCategoryRelationshipName?: string;
+    rootClassificationSystemCode: string;
 }
 
 // @beta (undocumented)
@@ -526,7 +532,7 @@ interface UseCategoriesTreeResult {
 }
 
 // @alpha
-export function useClassificationsTree({ activeView, rootClassificationSystemCode, emptyTreeContent, }: UseClassificationsTreeProps): UseClassificationsTreeResult;
+export function useClassificationsTree({ activeView, emptyTreeContent, ...rest }: UseClassificationsTreeProps): UseClassificationsTreeResult;
 
 // @alpha (undocumented)
 interface UseClassificationsTreeProps {
@@ -535,7 +541,7 @@ interface UseClassificationsTreeProps {
     // (undocumented)
     emptyTreeContent?: ReactNode;
     // (undocumented)
-    rootClassificationSystemCode: string;
+    hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
 }
 
 // @alpha (undocumented)

@@ -36,7 +36,25 @@ import type { ClassificationsTreeIdsCache } from "./internal/ClassificationsTree
 interface ClassificationsTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   idsCache: ClassificationsTreeIdsCache;
+  hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
+}
+
+/** @alpha */
+export interface ClassificationsTreeHierarchyConfiguration {
+  /**
+   * The classifications' hierarchy starts at the root `ClassificationSystem` element. This attribute identifiers that
+   * root `ClassificationSystem`.
+   */
   rootClassificationSystemCode: string;
+
+  /**
+   * In case consumer knows the name of relationship between a `Classification` and a `Category`, it can be provided
+   * here. With this relationship, Categories for a given Classification can be loaded directly, without going through
+   * geometric elements. That has a couple of effects:
+   * - Performance is better, as it allows us to avoid scanning all elements under specific Classification.
+   * - Categories related to a Classification are displayed, even if they don't have any elements assigned to them.
+   */
+  classificationSymbolizedByCategoryRelationshipName?: string;
 }
 
 /** @internal */
@@ -122,7 +140,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
             JOIN ${CLASS_NAME_ClassificationSystem} system ON system.ECInstanceId = this.Parent.Id
             ${instanceFilterClauses.joins}
             WHERE
-              system.CodeValue = '${this._props.rootClassificationSystemCode}'
+              system.CodeValue = '${this._props.hierarchyConfig.rootClassificationSystemCode}'
               AND NOT this.IsPrivate
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,

@@ -9,41 +9,42 @@ import { useIModelChangeListener } from "../../common/internal/UseIModelChangeLi
 import { ClassificationsTreeIdsCache } from "./ClassificationsTreeIdsCache.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
+import type { ClassificationsTreeHierarchyConfiguration } from "../ClassificationsTreeDefinition.js";
 
 /** @internal */
-export function useIdsCache(imodel: IModelConnection, rootClassificationSystemCode: string) {
+export function useIdsCache(imodel: IModelConnection, hierarchyConfig: ClassificationsTreeHierarchyConfiguration) {
   const cacheRef = useRef<ClassificationsTreeIdsCache | undefined>(undefined);
   const clearCacheRef = useRef(() => () => {
     cacheRef.current?.[Symbol.dispose]?.();
     cacheRef.current = undefined;
   });
-  const createCacheGetterRef = useRef((currIModel: IModelConnection, currRootClassificationSystemCode: string) => () => {
+  const createCacheGetterRef = useRef((currIModel: IModelConnection, currHierarchyConfig: ClassificationsTreeHierarchyConfiguration) => () => {
     if (cacheRef.current === undefined) {
-      cacheRef.current = new ClassificationsTreeIdsCache(createECSqlQueryExecutor(currIModel), currRootClassificationSystemCode);
+      cacheRef.current = new ClassificationsTreeIdsCache(createECSqlQueryExecutor(currIModel), currHierarchyConfig);
     }
     return cacheRef.current;
   });
-  const [getCache, setCacheGetter] = useState<() => ClassificationsTreeIdsCache>(() => createCacheGetterRef.current(imodel, rootClassificationSystemCode));
+  const [getCache, setCacheGetter] = useState<() => ClassificationsTreeIdsCache>(() => createCacheGetterRef.current(imodel, hierarchyConfig));
 
   useEffect(() => {
     // clear cache in case it was created before `useEffect` was run first time
     clearCacheRef.current();
 
     // make sure all cache users rerender
-    setCacheGetter(() => createCacheGetterRef.current(imodel, rootClassificationSystemCode));
+    setCacheGetter(() => createCacheGetterRef.current(imodel, hierarchyConfig));
     return () => {
       // eslint-disable-next-line react-hooks/exhaustive-deps
       clearCacheRef.current();
     };
-  }, [imodel, rootClassificationSystemCode]);
+  }, [imodel, hierarchyConfig]);
 
   useIModelChangeListener({
     imodel,
     action: useCallback(() => {
       clearCacheRef.current();
       // make sure all cache users rerender
-      setCacheGetter(() => createCacheGetterRef.current(imodel, rootClassificationSystemCode));
-    }, [imodel, rootClassificationSystemCode]),
+      setCacheGetter(() => createCacheGetterRef.current(imodel, hierarchyConfig));
+    }, [imodel, hierarchyConfig]),
   });
 
   return {

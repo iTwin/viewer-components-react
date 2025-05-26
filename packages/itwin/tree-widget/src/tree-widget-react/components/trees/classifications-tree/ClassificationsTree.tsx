@@ -25,7 +25,7 @@ export function ClassificationsTree({
   imodel,
   selectionStorage,
   activeView,
-  rootClassificationSystemCode,
+  hierarchyConfig,
   hierarchyLevelConfig,
   selectionMode,
   emptyTreeContent,
@@ -34,7 +34,7 @@ export function ClassificationsTree({
 }: ClassificationsTreeProps) {
   const { categoriesTreeProps, rendererProps } = useClassificationsTree({
     activeView,
-    rootClassificationSystemCode,
+    hierarchyConfig,
     emptyTreeContent,
   });
 

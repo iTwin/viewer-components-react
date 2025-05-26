@@ -40,6 +40,9 @@ importers:
         specifier: ^7.8.1
         version: 7.8.1
     devDependencies:
+      '@bentley/classification-systems-schema':
+        specifier: 1.0.4-dev.4
+        version: 1.0.4-dev.4
       '@itwin/appui-abstract':
         specifier: 5.0.0-dev.115
         version: 5.0.0-dev.115(@itwin/core-bentley@5.0.0-dev.115)
@@ -355,6 +358,9 @@ packages:
   '@bcoe/v8-coverage@1.0.2':
     resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
     engines: {node: '>=18'}
+
+  '@bentley/classification-systems-schema@1.0.4-dev.4':
+    resolution: {integrity: sha512-QLvLP6/kkPK/iXHRvGB7iEN4f6I14u+ZMuLmI/lWRCHIpCS35o3zATqRNR+w/U4s0C2BnpTP7bP11VQtPXYd/w==}
 
   '@bentley/imodeljs-native@5.0.104':
     resolution: {integrity: sha512-eFZUa9i/4DDdGx+2A9xa0CtRZAhbmCA56Ozu0s4thmDmHetAl0OvXR7QQBIXMu2KhaFjRfmz080di4fXqCyEDg==}
@@ -4621,6 +4627,8 @@ snapshots:
   '@babel/runtime@7.27.1': {}
 
   '@bcoe/v8-coverage@1.0.2': {}
+
+  '@bentley/classification-systems-schema@1.0.4-dev.4': {}
 
   '@bentley/imodeljs-native@5.0.104': {}
 

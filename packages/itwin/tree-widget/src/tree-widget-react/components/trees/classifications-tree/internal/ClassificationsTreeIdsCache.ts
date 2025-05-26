@@ -21,6 +21,7 @@ import { getDistinctMapValues } from "../../common/internal/Utils.js";
 import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import type { ClassificationsTreeHierarchyConfiguration } from "../ClassificationsTreeDefinition.js";
 
 type ClassificationId = Id64String;
 type ClassificationTableId = Id64String;
@@ -46,7 +47,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
 
   constructor(
     private _queryExecutor: LimitingECSqlQueryExecutor,
-    private _rootClassificationSystemCode: string,
+    private _hierarchyConfig: ClassificationsTreeHierarchyConfiguration,
   ) {
     this._categoryElementCounts = new ModelCategoryElementsCountCache(_queryExecutor, ["BisCore.GeometricElement2d", "BisCore.GeometricElement3d"]);
   }
@@ -226,7 +227,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
           JOIN ${CLASS_NAME_ClassificationTable} ct ON ct.ECInstanceId = cl.Model.Id
           JOIN ${CLASS_NAME_ClassificationSystem} cs ON cs.ECInstanceId = ct.Parent.Id
           WHERE
-            cs.CodeValue = '${this._rootClassificationSystemCode}'
+            cs.CodeValue = '${this._hierarchyConfig.rootClassificationSystemCode}'
             AND NOT ct.IsPrivate
             AND NOT cl.IsPrivate
             AND cl.Parent.Id IS NULL

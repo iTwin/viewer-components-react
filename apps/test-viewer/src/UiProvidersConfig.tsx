@@ -159,7 +159,12 @@ const configuredUiItems = new Map<string, UiItem>([
               {
                 id: ClassificationsTreeComponent.id,
                 getLabel: () => "Classifications tree",
-                render: () => <ClassificationsTreeComponent selectionStorage={unifiedSelectionStorage} rootClassificationSystemCode="50k classifications" />,
+                render: () => (
+                  <ClassificationsTreeComponent
+                    selectionStorage={unifiedSelectionStorage}
+                    hierarchyConfig={{ rootClassificationSystemCode: "50k classifications" }}
+                  />
+                ),
                 shouldShow: async (imodel) => ClassificationsTreeComponent.isSupportedByIModel(imodel),
               },
             ];

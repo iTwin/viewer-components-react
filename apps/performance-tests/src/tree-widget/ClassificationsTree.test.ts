@@ -20,7 +20,7 @@ describe("classifications tree", () => {
     setup: async () => {
       const imodel = SnapshotDb.openFile(Datasets.getIModelPath("50k classifications"));
       const imodelAccess = StatelessHierarchyProvider.createIModelAccess(imodel, "unbounded");
-      const idsCache = new ClassificationsTreeIdsCache(imodelAccess, rootClassificationSystemCode);
+      const idsCache = new ClassificationsTreeIdsCache(imodelAccess, { rootClassificationSystemCode });
       return { imodel, imodelAccess, idsCache };
     },
     cleanup: (props) => {
@@ -34,7 +34,9 @@ describe("classifications tree", () => {
           new ClassificationsTreeDefinition({
             imodelAccess,
             idsCache,
-            rootClassificationSystemCode,
+            hierarchyConfig: {
+              rootClassificationSystemCode,
+            },
           }),
       });
       const result = await provider.loadHierarchy({ depth: 1 });
