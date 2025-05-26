@@ -119,30 +119,25 @@ export class ClassificationsTreeIdsCache implements Disposable {
     rootCategoryId: Id64String;
   }> {
     const query = `
-      SELECT *
-      FROM (
-        SELECT
-          pe.ECInstanceId modeledElementId,
-          pe.Category.Id categoryId,
-          pe.Model.Id modelId
-        FROM BisCore.GeometricModel m
-        JOIN BisCore.GeometricElement3d pe ON pe.ECInstanceId = m.ModeledElement.Id
-        WHERE
-          m.IsPrivate = false
-          AND m.ECInstanceId IN (SELECT Model.Id FROM BisCore.Element)
-
-        UNION ALL
-
-        SELECT
-          pe.ECInstanceId modeledElementId,
-          pe.Category.Id categoryId,
-          pe.Model.Id modelId
-        FROM BisCore.GeometricModel m
-        JOIN BisCore.GeometricElement2d pe ON pe.ECInstanceId = m.ModeledElement.Id
-        WHERE
-          m.IsPrivate = false
-          AND m.ECInstanceId IN (SELECT Model.Id FROM BisCore.Element)
-      )
+      SELECT
+        pe.ECInstanceId modeledElementId,
+        pe.Category.Id categoryId,
+        pe.Model.Id modelId
+      FROM BisCore.GeometricModel m
+      JOIN BisCore.GeometricElement3d pe ON pe.ECInstanceId = m.ModeledElement.Id
+      WHERE
+        m.IsPrivate = false
+        AND m.ECInstanceId IN (SELECT Model.Id FROM BisCore.Element)
+      UNION ALL
+      SELECT
+        pe.ECInstanceId modeledElementId,
+        pe.Category.Id categoryId,
+        pe.Model.Id modelId
+      FROM BisCore.GeometricModel m
+      JOIN BisCore.GeometricElement2d pe ON pe.ECInstanceId = m.ModeledElement.Id
+      WHERE
+        m.IsPrivate = false
+        AND m.ECInstanceId IN (SELECT Model.Id FROM BisCore.Element)
     `;
     for await (const row of this._queryExecutor.createQueryReader(
       { ecsql: query },
