@@ -61,21 +61,19 @@ export class ClassificationsTreeIdsCache implements Disposable {
   }> {
     const query = `
       SELECT * FROM (
-        SELECT * FROM (
-          SELECT this.Model.Id modelId, this.Category.Id categoryId
-          FROM BisCore.GeometricModel m
-          JOIN BisCore.GeometricElement3d this ON m.ECInstanceId = this.Model.Id
-          WHERE this.Parent.Id IS NULL AND m.IsPrivate = false
-          GROUP BY modelId, categoryId
-        )
-        UNION ALL
-        SELECT * FROM (
-          SELECT this.Model.Id modelId, this.Category.Id categoryId
-          FROM BisCore.GeometricModel m
-          JOIN BisCore.GeometricElement2d this ON m.ECInstanceId = this.Model.Id
-          WHERE this.Parent.Id IS NULL AND m.IsPrivate = false
-          GROUP BY modelId, categoryId
-        )
+        SELECT this.Model.Id modelId, this.Category.Id categoryId
+        FROM BisCore.GeometricModel m
+        JOIN BisCore.GeometricElement3d this ON m.ECInstanceId = this.Model.Id
+        WHERE this.Parent.Id IS NULL AND m.IsPrivate = false
+        GROUP BY modelId, categoryId
+      )
+      UNION ALL
+      SELECT * FROM (
+        SELECT this.Model.Id modelId, this.Category.Id categoryId
+        FROM BisCore.GeometricModel m
+        JOIN BisCore.GeometricElement2d this ON m.ECInstanceId = this.Model.Id
+        WHERE this.Parent.Id IS NULL AND m.IsPrivate = false
+        GROUP BY modelId, categoryId
       )
     `;
     for await (const row of this._queryExecutor.createQueryReader(
