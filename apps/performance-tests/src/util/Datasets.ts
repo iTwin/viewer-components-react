@@ -2,20 +2,25 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
+/* eslint-disable no-console */
 
 import fs from "fs";
 import path from "path";
 import {
   insertDefinitionContainer,
+  insertDrawingCategory,
+  insertDrawingElement,
+  insertDrawingModelWithPartition,
   insertPhysicalElement,
   insertPhysicalModelWithPartition,
   insertPhysicalSubModel,
   insertSpatialCategory,
   insertSubCategory,
 } from "test-utilities";
+import { BisCodeSpec, IModel } from "@itwin/core-common";
 import { createIModel } from "./IModelUtilities.js";
 
-export const IMODEL_NAMES = ["50k 3D elements", "50k subcategories", "50k categories"] as const;
+export const IMODEL_NAMES = ["50k 3D elements", "50k subcategories", "50k categories", "50k classifications"] as const;
 export type IModelName = (typeof IMODEL_NAMES)[number];
 export type IModelPathsMap = { [_ in IModelName]?: string };
 
@@ -62,7 +67,12 @@ export class Datasets {
     const localPath = path.join(folderPath, `${name}.bim`);
 
     if (force || !fs.existsSync(localPath)) {
-      await iModelFactory(name, localPath);
+      try {
+        await iModelFactory(name, localPath);
+      } catch (e) {
+        fs.unlinkSync(localPath);
+        throw e;
+      }
     }
 
     return path.resolve(localPath);
@@ -76,6 +86,8 @@ export class Datasets {
         return async (name: string, localPath: string) => this.createSubCategoryIModel(name, localPath, elementCount);
       case "50k 3D elements":
         return async (name: string, localPath: string) => this.create3dElementIModel(name, localPath, elementCount);
+      case "50k classifications":
+        return async (name: string, localPath: string) => this.createClassificationsIModel(name, localPath, elementCount);
     }
   }
 
@@ -83,8 +95,7 @@ export class Datasets {
    * Create an iModel with `numElements` categories all belonging to the same definition container.
    */
   private static async createCategoryIModel(name: string, localPath: string, numElements: number) {
-    // eslint-disable-next-line no-console
-    console.log(`${numElements} elements: Creating...`);
+    console.log(`${numElements} categories: Creating...`);
     await createIModel(name, localPath, async (builder) => {
       const { id: physicalModelId } = insertPhysicalModelWithPartition({ builder, codeValue: "test physical model" });
       const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
@@ -106,16 +117,14 @@ export class Datasets {
       }
     });
 
-    // eslint-disable-next-line no-console
-    console.log(`${numElements} elements: Done.`);
+    console.log(`${numElements} categories: Done.`);
   }
 
   /**
    * Create an iModel with `numElements` subcategories all belonging to the same parent spatial category.
    */
   private static async createSubCategoryIModel(name: string, localPath: string, numElements: number) {
-    // eslint-disable-next-line no-console
-    console.log(`${numElements} elements: Creating...`);
+    console.log(`${numElements} sub-categories: Creating...`);
     await createIModel(name, localPath, async (builder) => {
       const { id: physicalModelId } = insertPhysicalModelWithPartition({ builder, codeValue: "test physical model" });
       const { id: categoryId } = insertSpatialCategory({
@@ -141,8 +150,7 @@ export class Datasets {
       }
     });
 
-    // eslint-disable-next-line no-console
-    console.log(`${numElements} elements: Done.`);
+    console.log(`${numElements} sub-categories: Done.`);
   }
 
   /**
@@ -151,8 +159,7 @@ export class Datasets {
    * and so on until the depth of `numElements` / 1000 elements is reached.
    */
   private static async create3dElementIModel(name: string, localPath: string, numElements: number) {
-    // eslint-disable-next-line no-console
-    console.log(`${numElements} physical elelements: Creating...`);
+    console.log(`${numElements} physical elements: Creating...`);
 
     await createIModel(name, localPath, async (builder) => {
       const { id: physicalModelId } = insertPhysicalModelWithPartition({ builder, codeValue: "test physical model" });
@@ -176,7 +183,105 @@ export class Datasets {
       }
     });
 
-    // eslint-disable-next-line no-console
-    console.log(`${numElements} elements: Done.`);
+    console.log(`${numElements} physical elements: Done.`);
+  }
+
+  /**
+   * Create an iModel with:
+   * - 1 `ClassificationSystem`, whose code = `name`,
+   * - 10 `ClassificationTable` elements as children for the `ClassificationSystem` all with a single sub-model,
+   * - `numElements / 10` `Classification` elements inside `ClassificationTable`'s sub-model with:
+   *  - 1 child `Classification`,
+   *  - 1 spatial category and 3d element,
+   *  - 1 drawing category and 2d element.
+   */
+  private static async createClassificationsIModel(name: string, localPath: string, numElements: number) {
+    console.log(`${numElements} classifications: Creating...`);
+    await createIModel(name, localPath, async (builder) => {
+      const schemaPath = import.meta.resolve("@bentley/classification-systems-schema/ClassificationSystems.ecschema.xml");
+      const schemaXml = fs.readFileSync(fs.realpathSync(new URL(schemaPath)), { encoding: "utf-8" });
+      await builder.importFullSchema(schemaXml);
+
+      const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "physical model" });
+      const drawingModel = insertDrawingModelWithPartition({ builder, codeValue: "drawing model" });
+
+      const systemId = builder.insertElement({
+        classFullName: "ClassificationSystems.ClassificationSystem",
+        model: IModel.dictionaryId,
+        code: builder.createCode(IModel.dictionaryId, BisCodeSpec.nullCodeSpec, name),
+      });
+
+      for (let i = 0; i < 10; ++i) {
+        const tableId = builder.insertElement({
+          classFullName: "ClassificationSystems.ClassificationTable",
+          model: IModel.dictionaryId,
+          parent: {
+            relClassName: "ClassificationSystems.ClassificationSystemOwnsClassificationTable",
+            id: systemId,
+          },
+          code: builder.createCode(IModel.dictionaryId, BisCodeSpec.nullCodeSpec, `Table ${i + 1}`),
+        });
+        const tableModelId = builder.insertModel({
+          classFullName: "BisCore.DefinitionModel",
+          modeledElement: {
+            relClassName: "ClassificationSystems.DefinitionModelBreaksDownClassificationTable",
+            id: tableId,
+          },
+        });
+        for (let j = 0; j < numElements / 10; ++j) {
+          const classificationId = builder.insertElement({
+            classFullName: "ClassificationSystems.Classification",
+            model: tableModelId,
+            code: builder.createCode(tableModelId, BisCodeSpec.nullCodeSpec, `Classification ${j + 1}`),
+          });
+
+          builder.insertElement({
+            classFullName: "ClassificationSystems.Classification",
+            model: tableModelId,
+            code: builder.createCode(tableModelId, BisCodeSpec.nullCodeSpec, `Child classification ${j + 1}`),
+            parent: {
+              relClassName: "ClassificationSystems.ClassificationOwnsSubClassifications",
+              id: classificationId,
+            },
+          });
+
+          const spatialCategory = insertSpatialCategory({
+            builder,
+            codeValue: `Spatial category ${j + 1}`,
+            modelId: tableModelId,
+          });
+          const physicalElement = insertPhysicalElement({
+            builder,
+            modelId: physicalModel.id,
+            categoryId: spatialCategory.id,
+            userLabel: `physical element ${i + 1} ${j + 1}`,
+          });
+          builder.insertRelationship({
+            classFullName: "ClassificationSystems.ElementHasClassifications",
+            sourceId: physicalElement.id,
+            targetId: classificationId,
+          });
+
+          const drawingCategory = insertDrawingCategory({
+            builder,
+            codeValue: `Drawing category ${j + 1}`,
+            modelId: tableModelId,
+          });
+          const drawingElement = insertDrawingElement({
+            builder,
+            modelId: drawingModel.id,
+            categoryId: drawingCategory.id,
+            userLabel: `drawing element ${i + 1} ${j + 1}`,
+          });
+          builder.insertRelationship({
+            classFullName: "ClassificationSystems.ElementHasClassifications",
+            sourceId: drawingElement.id,
+            targetId: classificationId,
+          });
+        }
+      }
+    });
+
+    console.log(`${numElements} classifications: Done.`);
   }
 }

@@ -43,12 +43,7 @@ export function mergeVisibilityStatuses(obs: Observable<VisibilityStatus>): Obse
   return obs.pipe(
     map((visibilityStatus) => visibilityStatus.state),
     mergeVisibilities,
-    map((visibility) => {
-      if (visibility === "empty") {
-        visibility = "visible";
-      }
-      return createVisibilityStatus(visibility);
-    }),
+    map((visibility) => createVisibilityStatus(visibility === "empty" ? "disabled" : visibility)),
   );
 }
 

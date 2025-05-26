@@ -6,11 +6,11 @@
 import { assert, Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import {
-  GEOMETRIC_MODEL_3D_CLASS_NAME,
-  INFORMATION_PARTITION_ELEMENT_CLASS_NAME,
-  MODEL_CLASS_NAME,
-  SPATIAL_CATEGORY_CLASS_NAME,
-  SUBJECT_CLASS_NAME,
+  CLASS_NAME_GeometricModel3d,
+  CLASS_NAME_InformationPartitionElement,
+  CLASS_NAME_Model,
+  CLASS_NAME_SpatialCategory,
+  CLASS_NAME_Subject,
 } from "../../common/internal/ClassNameDefinitions.js";
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
 import { pushToMap } from "../../common/internal/Utils.js";
@@ -53,7 +53,7 @@ export class ModelsTreeIdsCache {
     private _queryExecutor: LimitingECSqlQueryExecutor,
     private _hierarchyConfig: ModelsTreeHierarchyConfiguration,
   ) {
-    this._categoryElementCounts = new ModelCategoryElementsCountCache(_queryExecutor, this._hierarchyConfig.elementClassSpecification);
+    this._categoryElementCounts = new ModelCategoryElementsCountCache(_queryExecutor, [this._hierarchyConfig.elementClassSpecification]);
     this._modelKeyPaths = new Map();
     this._subjectKeyPaths = new Map();
     this._categoryKeyPaths = new Map();
@@ -70,7 +70,7 @@ export class ModelsTreeIdsCache {
         s.Parent.Id parentId,
         (
           SELECT m.ECInstanceId
-          FROM ${GEOMETRIC_MODEL_3D_CLASS_NAME} m
+          FROM ${CLASS_NAME_GeometricModel3d} m
           WHERE m.ECInstanceId = HexToId(json_extract(s.JsonProperties, '$.Subject.Model.TargetPartition'))
             AND NOT m.IsPrivate
             AND EXISTS (SELECT 1 FROM ${this._hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)
@@ -92,8 +92,8 @@ export class ModelsTreeIdsCache {
   private async *queryModels(): AsyncIterableIterator<{ id: ModelId; parentId: SubjectId }> {
     const modelsQuery = `
       SELECT p.ECInstanceId id, p.Parent.Id parentId
-      FROM ${INFORMATION_PARTITION_ELEMENT_CLASS_NAME} p
-      INNER JOIN ${GEOMETRIC_MODEL_3D_CLASS_NAME} m ON m.ModeledElement.Id = p.ECInstanceId
+      FROM ${CLASS_NAME_InformationPartitionElement} p
+      INNER JOIN ${CLASS_NAME_GeometricModel3d} m ON m.ModeledElement.Id = p.ECInstanceId
       WHERE
         NOT m.IsPrivate
         ${this._hierarchyConfig.showEmptyModels ? "" : `AND EXISTS (SELECT 1 FROM ${this._hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)`}
@@ -247,7 +247,7 @@ export class ModelsTreeIdsCache {
           }
           const parentInfo = subjectInfos.get(currParentId);
           if (!parentInfo?.hideInHierarchy) {
-            result.push({ className: SUBJECT_CLASS_NAME, id: currParentId });
+            result.push({ className: CLASS_NAME_Subject, id: currParentId });
           }
           currParentId = parentInfo?.parentSubjectId;
         }
@@ -272,7 +272,7 @@ export class ModelsTreeIdsCache {
   private async *queryModelCategories(): AsyncIterableIterator<{ modelId: Id64String; categoryId: Id64String; isModelPrivate: boolean }> {
     const query = `
       SELECT this.Model.Id modelId, this.Category.Id categoryId, m.IsPrivate isModelPrivate
-      FROM ${MODEL_CLASS_NAME} m
+      FROM ${CLASS_NAME_Model} m
       JOIN ${this._hierarchyConfig.elementClassSpecification} this ON m.ECInstanceId = this.Model.Id
       WHERE this.Parent.Id IS NULL
       GROUP BY modelId, categoryId, isModelPrivate
@@ -288,7 +288,7 @@ export class ModelsTreeIdsCache {
         pe.ECInstanceId modeledElementId,
         pe.Category.Id categoryId,
         pe.Model.Id modelId
-      FROM ${MODEL_CLASS_NAME} m
+      FROM ${CLASS_NAME_Model} m
       JOIN ${this._hierarchyConfig.elementClassSpecification} pe ON pe.ECInstanceId = m.ModeledElement.Id
       WHERE
         m.IsPrivate = false
@@ -414,7 +414,7 @@ export class ModelsTreeIdsCache {
         for (const categoryModelId of [...result]) {
           const modelPaths = await this.createModelInstanceKeyPaths(categoryModelId);
           for (const modelPath of modelPaths) {
-            categoryPaths.push([...modelPath, { className: SPATIAL_CATEGORY_CLASS_NAME, id: categoryId }]);
+            categoryPaths.push([...modelPath, { className: CLASS_NAME_SpatialCategory, id: categoryId }]);
           }
         }
         return categoryPaths;

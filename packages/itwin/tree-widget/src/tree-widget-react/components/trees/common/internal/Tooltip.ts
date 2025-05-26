@@ -18,7 +18,7 @@ export function createVisibilityStatus(status: "visible" | "hidden"): NonPartial
 export function createVisibilityStatus(status: "visible" | "hidden" | "partial" | "disabled"): VisibilityStatus;
 export function createVisibilityStatus(status: Visibility | "disabled"): VisibilityStatus {
   return {
-    state: status === "disabled" ? "hidden" : status,
+    state: status === "disabled" ? "visible" : status,
     isDisabled: status === "disabled",
   };
 }

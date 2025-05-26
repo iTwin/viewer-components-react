@@ -30,10 +30,9 @@ export type VisibilityTreeProps = Omit<TreeProps, "treeRenderer" | "imodelAccess
  * @beta
  */
 export function VisibilityTree({ visibilityHandlerFactory, treeRenderer, hierarchyLevelSizeLimit, ...props }: VisibilityTreeProps) {
-  const { imodel, getSchemaContext, treeName } = props;
+  const { imodel, treeName } = props;
   const { imodelAccess, currentHierarchyLevelSizeLimit } = useIModelAccess({
     imodel,
-    getSchemaContext,
     treeName,
     hierarchyLevelSizeLimit,
   });

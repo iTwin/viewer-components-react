@@ -5,7 +5,7 @@
 
 import { assert } from "@itwin/core-bentley";
 import { HierarchyFilteringPath, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
-import { CATEGORY_CLASS_NAME, MODEL_CLASS_NAME, SUBJECT_CLASS_NAME } from "../../common/internal/ClassNameDefinitions.js";
+import { CLASS_NAME_Category, CLASS_NAME_Model, CLASS_NAME_Subject } from "../../common/internal/ClassNameDefinitions.js";
 
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
@@ -240,13 +240,13 @@ function createFilteredTreeNode({
 }
 
 async function getType(hierarchyChecker: ECClassHierarchyInspector, className: string) {
-  if (await hierarchyChecker.classDerivesFrom(className, SUBJECT_CLASS_NAME)) {
+  if (await hierarchyChecker.classDerivesFrom(className, CLASS_NAME_Subject)) {
     return "subject";
   }
-  if (await hierarchyChecker.classDerivesFrom(className, MODEL_CLASS_NAME)) {
+  if (await hierarchyChecker.classDerivesFrom(className, CLASS_NAME_Model)) {
     return "model";
   }
-  if (await hierarchyChecker.classDerivesFrom(className, CATEGORY_CLASS_NAME)) {
+  if (await hierarchyChecker.classDerivesFrom(className, CLASS_NAME_Category)) {
     return "category";
   }
   return "element";

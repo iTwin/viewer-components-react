@@ -69,8 +69,6 @@ UiItemsManager.register({
             getLabel: () => ModelsTreeComponent.getLabel(),
             render: (props) => (
               <ModelsTreeComponent
-                // see "Creating schema context" section for example implementation
-                getSchemaContext={getSchemaContext}
                 // see "Creating unified selection storage" section for example implementation
                 selectionStorage={unifiedSelectionStorage}
               />
@@ -106,8 +104,6 @@ import { ModelsTreeComponent } from "@itwin/tree-widget-react";
 function MyWidget() {
   return (
     <ModelsTreeComponent
-      // see "Creating schema context" section for example implementation
-      getSchemaContext={getSchemaContext}
       // see "Creating unified selection storage" section for example implementation
       selectionStorage={unifiedSelectionStorage}
       headerButtons={[
@@ -148,7 +144,6 @@ import { useCallback } from "react";
 import { TreeWithHeader, useModelsTree, useModelsTreeButtonProps, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
 import type { SelectionStorage } from "@itwin/unified-selection";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type { ComponentPropsWithoutRef } from "react";
 
 type VisibilityTreeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>;
@@ -169,11 +164,10 @@ function CustomModelsTreeRenderer(props: CustomModelsTreeRendererProps) {
 interface CustomModelsTreeProps {
   imodel: IModelConnection;
   viewport: Viewport;
-  getSchemaContext: (imodel: IModelConnection) => SchemaContext;
   selectionStorage: SelectionStorage;
 }
 
-function CustomModelsTreeComponent({ imodel, viewport, getSchemaContext, selectionStorage }: CustomModelsTreeProps) {
+function CustomModelsTreeComponent({ imodel, viewport, selectionStorage }: CustomModelsTreeProps) {
   const { buttonProps } = useModelsTreeButtonProps({ imodel, viewport });
   const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport });
 
@@ -186,7 +180,6 @@ function CustomModelsTreeComponent({ imodel, viewport, getSchemaContext, selecti
     >
       <VisibilityTree
         {...modelsTreeProps}
-        getSchemaContext={getSchemaContext}
         selectionStorage={selectionStorage}
         imodel={imodel}
         treeRenderer={(props) => <CustomModelsTreeRenderer {...props} {...rendererProps} />}
@@ -226,7 +219,6 @@ function CustomModelsTreeComponent({ viewport, selectionStorage, imodel, targetI
   return (
     <VisibilityTree
       {...modelsTreeProps}
-      getSchemaContext={getSchemaContext}
       selectionStorage={selectionStorage}
       imodel={imodel}
       treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
@@ -249,8 +241,6 @@ import { CategoriesTreeComponent } from "@itwin/tree-widget-react";
 function MyWidget() {
   return (
     <CategoriesTreeComponent
-      // see "Creating schema context" section for example implementation
-      getSchemaContext={getSchemaContext}
       // see "Creating unified selection storage" section for example implementation
       selectionStorage={unifiedSelectionStorage}
       headerButtons={[(props) => <CategoriesTreeComponent.ShowAllButton {...props} />, (props) => <CategoriesTreeComponent.HideAllButton {...props} />]}
@@ -278,7 +268,6 @@ Example:
 import { TreeWithHeader, useCategoriesTree, useCategoriesTreeButtonProps, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { SelectionStorage } from "@itwin/unified-selection";
-import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type { ComponentPropsWithoutRef } from "react";
 
 type VisibilityTreeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>;
@@ -302,11 +291,10 @@ function CustomCategoriesTreeRenderer(props: CustomCategoriesTreeRendererProps) 
 interface CustomCategoriesTreeProps {
   imodel: IModelConnection;
   viewport: Viewport;
-  getSchemaContext: (imodel: IModelConnection) => SchemaContext;
   selectionStorage: SelectionStorage;
 }
 
-function CustomCategoriesTreeComponent({ imodel, viewport, getSchemaContext, selectionStorage }: CustomCategoriesTreeProps) {
+function CustomCategoriesTreeComponent({ imodel, viewport, selectionStorage }: CustomCategoriesTreeProps) {
   const { buttonProps } = useCategoriesTreeButtonProps({ viewport });
   const { categoriesTreeProps, rendererProps } = useCategoriesTree({ activeView: viewport, filter: "" });
   return (
@@ -318,7 +306,6 @@ function CustomCategoriesTreeComponent({ imodel, viewport, getSchemaContext, sel
     >
       <VisibilityTree
         {...categoriesTreeProps}
-        getSchemaContext={getSchemaContext}
         selectionStorage={selectionStorage}
         imodel={imodel}
         treeRenderer={(props) => <CustomCategoriesTreeRenderer {...props} {...rendererProps} />}
@@ -349,8 +336,6 @@ import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
 function MyWidget() {
   return (
     <IModelContentTreeComponent
-      // see "Creating schema context" section for example implementation
-      getSchemaContext={getSchemaContext}
       // see "Creating unified selection storage" section for example implementation
       selectionStorage={unifiedSelectionStorage}
     />
@@ -421,7 +406,6 @@ function MyTree({ imodel }: MyTreeProps) {
       treeName="MyTree"
       imodel={imodel}
       selectionStorage={unifiedSelectionStorage}
-      getSchemaContext={getSchemaContext}
       getHierarchyDefinition={getHierarchyDefinition}
       treeRenderer={(props) => <TreeRenderer {...props} />}
     />
@@ -506,7 +490,6 @@ function MyVisibilityTree({ imodel }: MyVisibilityTreeProps) {
       treeName="MyVisibilityTree"
       imodel={imodel}
       selectionStorage={unifiedSelectionStorage}
-      getSchemaContext={getSchemaContext}
       getHierarchyDefinition={getHierarchyDefinition}
       visibilityHandlerFactory={visibilityHandlerFactory}
       treeRenderer={(props) => <VisibilityTreeRenderer {...props} />}
@@ -559,34 +542,6 @@ import { Presentation } from "@itwin/presentation-frontend";
 
 await Presentation.initialize({ selection: { selectionStorage: getUnifiedSelectionStorage() } });
 ```
-
-### Creating schema context
-
-All tree components delivered with the package require a [`SchemaContext`](https://www.itwinjs.org/reference/ecschema-metadata/context/schemacontext/) to be able to access iModels metadata.
-
-Typically, we want one schema context per iModel per application - this allows schema information to be shared across components, saving memory and time required to access the metadata. Below is an example implementation of `getSchemaContext` function, required by tree components:
-
-```tsx
-import { SchemaContext } from "@itwin/ecschema-metadata";
-import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
-import type { IModelConnection } from "@itwin/core-frontend";
-
-const schemaContextCache = new Map<string, SchemaContext>();
-function getSchemaContext(imodel: IModelConnection) {
-  const key = imodel.getRpcProps().key;
-  let schemaContext = schemaContextCache.get(key);
-  if (!schemaContext) {
-    const schemaLocater = new ECSchemaRpcLocater(imodel.getRpcProps());
-    schemaContext = new SchemaContext();
-    schemaContext.addLocater(schemaLocater);
-    schemaContextCache.set(key, schemaContext);
-    imodel.onClose.addOnce(() => schemaContextCache.delete(key));
-  }
-  return schemaContext;
-}
-```
-
-Note: Using `ECSchemaRpcLocater` requires the application to support [ECSchemaRpcInterface](https://github.com/iTwin/itwinjs-core/blob/111ab9053f4718896de17bdaeb8de037bad281bd/core/ecschema-rpc/common/src/ECSchemaRpcInterface.ts#L14). This means [registering the interface](https://www.itwinjs.org/learning/rpcinterface/#configure-interfaces) and, on the backend, [registering the implementation](https://www.itwinjs.org/learning/rpcinterface/#server-side-configuration) by calling [ECSchemaRpcImpl.register()](https://github.com/iTwin/itwinjs-core/blob/111ab9053f4718896de17bdaeb8de037bad281bd/core/ecschema-rpc/impl/src/ECSchemaRpcImpl.ts#L29).
 
 ## Telemetry
 
@@ -645,7 +600,6 @@ function MyWidget() {
       onFeatureUsed={(feature) => {
         console.log(`TreeWidget [${feature}] used`);
       }}
-      getSchemaContext={getSchemaContext}
       selectionStorage={unifiedSelectionStorage}
     />
   );
@@ -679,7 +633,6 @@ function MyTree() {
     // VisibilityTree will use provided telemetry context to report used features and their performance
     <VisibilityTree
       {...categoriesTreeProps}
-      getSchemaContext={getSchemaContext}
       selectionStorage={unifiedSelectionStorage}
       imodel={imodel}
       treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}

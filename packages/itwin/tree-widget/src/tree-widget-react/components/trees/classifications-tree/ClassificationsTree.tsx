@@ -3,43 +3,39 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import { VisibilityTree } from "../common/components/VisibilityTree.js";
 import { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRenderer.js";
-import { useCategoriesTree } from "./UseCategoriesTree.js";
+import { useClassificationsTree } from "./UseClassificationsTree.js";
 
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
-import type { UseCategoriesTreeProps } from "./UseCategoriesTree.js";
-import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
+import type { UseClassificationsTreeProps } from "./UseClassificationsTree.js";
 
-/** @beta */
-export type CategoriesTreeProps = Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
+/** @alpha */
+export type ClassificationsTreeProps = Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
   Pick<VisibilityTreeRendererProps, "getActions" | "getDecorations"> &
-  UseCategoriesTreeProps & {
+  UseClassificationsTreeProps & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
     };
   };
 
-/** @beta */
-export function CategoriesTree({
+/** @alpha */
+export function ClassificationsTree({
   imodel,
   selectionStorage,
   activeView,
-  filter,
+  rootClassificationSystemCode,
   hierarchyLevelConfig,
   selectionMode,
-  onCategoriesFiltered,
   emptyTreeContent,
   getDecorations,
   getActions,
-  hierarchyConfig,
-}: CategoriesTreeProps) {
-  const { categoriesTreeProps, rendererProps } = useCategoriesTree({
-    filter,
+}: ClassificationsTreeProps) {
+  const { categoriesTreeProps, rendererProps } = useClassificationsTree({
     activeView,
-    onCategoriesFiltered,
+    rootClassificationSystemCode,
     emptyTreeContent,
-    hierarchyConfig,
   });
 
   return (

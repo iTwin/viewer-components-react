@@ -24,6 +24,7 @@ import {
 import { REPORTS_CONFIG_BASE_URL, ReportsConfigProvider, ReportsConfigWidget } from "@itwin/reports-config-widget-react";
 import {
   CategoriesTreeComponent,
+  ClassificationsTreeComponent,
   ExternalSourcesTreeComponent,
   IModelContentTreeComponent,
   ModelsTreeComponent,
@@ -33,7 +34,6 @@ import {
 import { createLayersUiProvider, initializeLayers } from "./components/LayersWidget";
 import { RepositoriesTreeComponent } from "./components/repositories-tree/RepositoriesTree";
 import { useViewerOptionsContext } from "./components/ViewerOptions";
-import { getSchemaContext } from "./SchemaContext";
 import { unifiedSelectionStorage } from "./SelectionStorage";
 
 import type { ComponentProps } from "react";
@@ -102,7 +102,6 @@ const configuredUiItems = new Map<string, UiItem>([
                 isSearchable: true,
                 render: (props) => (
                   <ModelsTreeWithOptions
-                    getSchemaContext={getSchemaContext}
                     hierarchyConfig={{
                       hideRootSubject: true,
                     }}
@@ -121,7 +120,6 @@ const configuredUiItems = new Map<string, UiItem>([
                 render: (props) => (
                   <CategoriesTreeComponent
                     filter={props.filter}
-                    getSchemaContext={getSchemaContext}
                     selectionStorage={unifiedSelectionStorage}
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}
@@ -133,7 +131,6 @@ const configuredUiItems = new Map<string, UiItem>([
                 getLabel: () => IModelContentTreeComponent.getLabel(),
                 render: (props) => (
                   <IModelContentTreeComponent
-                    getSchemaContext={getSchemaContext}
                     hierarchyConfig={{
                       hideRootSubject: true,
                     }}
@@ -148,7 +145,6 @@ const configuredUiItems = new Map<string, UiItem>([
                 getLabel: () => ExternalSourcesTreeComponent.getLabel(),
                 render: (props) => (
                   <ExternalSourcesTreeComponent
-                    getSchemaContext={getSchemaContext}
                     selectionStorage={unifiedSelectionStorage}
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}
@@ -159,6 +155,12 @@ const configuredUiItems = new Map<string, UiItem>([
                 id: "RepositoriesTree",
                 getLabel: () => "Repositories tree",
                 render: () => <RepositoriesTreeComponent baseUrl={`https://${globalThis.IMJS_URL_PREFIX ?? ""}api.bentley.com`} />,
+              },
+              {
+                id: ClassificationsTreeComponent.id,
+                getLabel: () => "Classifications tree",
+                render: () => <ClassificationsTreeComponent selectionStorage={unifiedSelectionStorage} rootClassificationSystemCode="50k classifications" />,
+                shouldShow: async (imodel) => ClassificationsTreeComponent.isSupportedByIModel(imodel),
               },
             ];
             return [
