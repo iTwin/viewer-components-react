@@ -41,7 +41,7 @@ interface ClassificationsTreeDefinitionProps {
 
 /** @internal */
 export class ClassificationsTreeDefinition implements HierarchyDefinition {
-  private _impl: Promise<HierarchyDefinition> | undefined;
+  private _impl: HierarchyDefinition;
   private _selectQueryFactory: NodesQueryClauseFactory;
   private _nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
 
@@ -51,40 +51,34 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
       imodelAccess: this._props.imodelAccess,
       instanceLabelSelectClauseFactory: this._nodeLabelSelectClauseFactory,
     });
+    this._impl = createPredicateBasedHierarchyDefinition({
+      classHierarchyInspector: this._props.imodelAccess,
+      hierarchy: {
+        rootNodes: async (requestProps: DefineRootHierarchyLevelProps) => this.#createClassificationTablesQuery(requestProps),
+        childNodes: [
+          {
+            parentInstancesNodePredicate: CLASS_NAME_ClassificationTable,
+            definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.#createClassificationTableChildrenQuery(requestProps),
+          },
+          {
+            parentInstancesNodePredicate: CLASS_NAME_Classification,
+            definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.#createClassificationChildrenQuery(requestProps),
+          },
+          {
+            parentInstancesNodePredicate: CLASS_NAME_Category,
+            definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.#createCategoryChildrenQuery(requestProps),
+          },
+          {
+            parentInstancesNodePredicate: CLASS_NAME_GeometricElement,
+            definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.#createGeometricElementChildrenQuery(requestProps),
+          },
+        ],
+      },
+    });
   }
 
   public async defineHierarchyLevel(props: DefineHierarchyLevelProps) {
-    return (await this.#getHierarchyDefinition()).defineHierarchyLevel(props);
-  }
-
-  async #getHierarchyDefinition(): Promise<HierarchyDefinition> {
-    this._impl ??= (async () => {
-      return createPredicateBasedHierarchyDefinition({
-        classHierarchyInspector: this._props.imodelAccess,
-        hierarchy: {
-          rootNodes: async (requestProps: DefineRootHierarchyLevelProps) => this.#createClassificationTablesQuery(requestProps),
-          childNodes: [
-            {
-              parentInstancesNodePredicate: CLASS_NAME_ClassificationTable,
-              definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.#createClassificationTableChildrenQuery(requestProps),
-            },
-            {
-              parentInstancesNodePredicate: CLASS_NAME_Classification,
-              definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.#createClassificationChildrenQuery(requestProps),
-            },
-            {
-              parentInstancesNodePredicate: CLASS_NAME_Category,
-              definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.#createCategoryChildrenQuery(requestProps),
-            },
-            {
-              parentInstancesNodePredicate: CLASS_NAME_GeometricElement,
-              definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.#createGeometricElementChildrenQuery(requestProps),
-            },
-          ],
-        },
-      });
-    })();
-    return this._impl;
+    return this._impl.defineHierarchyLevel(props);
   }
 
   async #createClassificationTablesQuery(props: { instanceFilter?: GenericInstanceFilter }): Promise<HierarchyLevelDefinition> {
@@ -190,7 +184,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
     const childrenInfo = await this._props.idsCache.getDirectCategoriesAndClassifications(classificationIds);
     return [
       // load child classifications
-      await(async () => {
+      await (async () => {
         const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
           filter: instanceFilter,
           contentClass: { fullName: CLASS_NAME_Classification, alias: "this" },
@@ -228,7 +222,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
         };
       })(),
       // load referenced categories
-      await(async () => {
+      await (async () => {
         const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
           filter: instanceFilter,
           contentClass: { fullName: CLASS_NAME_Category, alias: "this" },
