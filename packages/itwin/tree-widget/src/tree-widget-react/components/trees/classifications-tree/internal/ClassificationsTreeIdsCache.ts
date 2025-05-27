@@ -5,15 +5,12 @@
 
 import { assert } from "@itwin/core-bentley";
 import {
-  CLASS_NAME_Category,
   CLASS_NAME_Classification,
   CLASS_NAME_ClassificationSystem,
   CLASS_NAME_ClassificationTable,
-  CLASS_NAME_DrawingCategory,
   CLASS_NAME_ElementHasClassifications,
   CLASS_NAME_GeometricElement2d,
   CLASS_NAME_GeometricElement3d,
-  CLASS_NAME_SpatialCategory,
 } from "../../common/internal/ClassNameDefinitions.js";
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
 import { getDistinctMapValues } from "../../common/internal/Utils.js";
@@ -21,6 +18,7 @@ import { getDistinctMapValues } from "../../common/internal/Utils.js";
 import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import type { ClassificationsTreeHierarchyConfiguration } from "../ClassificationsTreeDefinition.js";
 
 type ClassificationId = Id64String;
 type ClassificationTableId = Id64String;
@@ -46,7 +44,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
 
   constructor(
     private _queryExecutor: LimitingECSqlQueryExecutor,
-    private _rootClassificationSystemCode: string,
+    private _hierarchyConfig: ClassificationsTreeHierarchyConfiguration,
   ) {
     this._categoryElementCounts = new ModelCategoryElementsCountCache(_queryExecutor, ["BisCore.GeometricElement2d", "BisCore.GeometricElement3d"]);
   }
@@ -226,7 +224,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
           JOIN ${CLASS_NAME_ClassificationTable} ct ON ct.ECInstanceId = cl.Model.Id
           JOIN ${CLASS_NAME_ClassificationSystem} cs ON cs.ECInstanceId = ct.Parent.Id
           WHERE
-            cs.CodeValue = '${this._rootClassificationSystemCode}'
+            cs.CodeValue = '${this._hierarchyConfig.rootClassificationSystemCode}'
             AND NOT ct.IsPrivate
             AND NOT cl.IsPrivate
             AND cl.Parent.Id IS NULL
@@ -245,28 +243,33 @@ export class ClassificationsTreeIdsCache implements Disposable {
         )
       `,
     ];
-    const ecsql = `
-      SELECT
-        cl.ClassificationId id,
-        cl.ClassificationTableId tableId,
-        cl.ParentClassificationId parentId,
-        group_concat(IdToHex(cat.ECInstanceId)) relatedCategories
-      FROM ${CLASSIFICATIONS_CTE} cl
-      LEFT JOIN ${CLASS_NAME_Category} cat ON cat.ECInstanceId IN (
-        SELECT c.ECInstanceId
-        FROM ${CLASS_NAME_DrawingCategory} c
-        JOIN ${CLASS_NAME_GeometricElement2d} e2d ON e2d.Category.Id = c.ECInstanceId AND e2d.Parent.Id IS NULL
-        JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = e2d.ECInstanceId
-        WHERE ehc.TargetECInstanceId = cl.ClassificationId AND NOT c.IsPrivate
-        UNION ALL
-        SELECT c.ECInstanceId
-        FROM ${CLASS_NAME_SpatialCategory} c
-        JOIN ${CLASS_NAME_GeometricElement3d} e3d ON e3d.Category.Id = c.ECInstanceId AND e3d.Parent.Id IS NULL
-        JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = e3d.ECInstanceId
-        WHERE ehc.TargetECInstanceId = cl.ClassificationId AND NOT c.IsPrivate
-      )
-      GROUP BY cl.ClassificationId
-    `;
+    const ecsql = this._hierarchyConfig.categorySymbolizesClassificationRelationshipName
+      ? `
+          SELECT
+            cl.ClassificationId id,
+            cl.ClassificationTableId tableId,
+            cl.ParentClassificationId parentId,
+            group_concat(IdToHex(csc.SourceECInstanceId)) relatedCategories
+          FROM ${CLASSIFICATIONS_CTE} cl
+          LEFT JOIN ${this._hierarchyConfig.categorySymbolizesClassificationRelationshipName} csc ON csc.TargetECInstanceId = cl.ClassificationId
+          GROUP BY cl.ClassificationId
+        `
+      : `
+          SELECT
+            cl.ClassificationId id,
+            cl.ClassificationTableId tableId,
+            cl.ParentClassificationId parentId,
+            group_concat(IdToHex(cat.ECInstanceId)) relatedCategories
+          FROM ${CLASSIFICATIONS_CTE} cl
+          LEFT JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.TargetECInstanceId = cl.ClassificationId
+          LEFT JOIN (
+            SELECT ECInstanceId, Category.Id CategoryId FROM ${CLASS_NAME_GeometricElement2d} WHERE Parent.Id IS NULL
+            UNION ALL
+            SELECT ECInstanceId, Category.Id CategoryId FROM ${CLASS_NAME_GeometricElement3d} WHERE Parent.Id IS NULL
+          ) e ON e.ECInstanceId = ehc.SourceECInstanceId
+          LEFT JOIN BisCore.Category cat ON cat.ECInstanceId = e.CategoryId AND NOT cat.IsPrivate
+          GROUP BY cl.ClassificationId
+        `;
     for await (const row of this._queryExecutor.createQueryReader(
       { ctes, ecsql },
       { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: "tree-widget/classifications-tree/classifications-query" },

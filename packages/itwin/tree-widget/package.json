@@ -78,6 +78,7 @@
     "rxjs": "^7.8.1"
   },
   "devDependencies": {
+    "@bentley/classification-systems-schema": "1.0.4-dev.4",
     "@itwin/appui-abstract": "5.0.0-dev.115",
     "@itwin/appui-react": "^5.7.0",
     "@itwin/build-tools": "5.0.0-dev.115",

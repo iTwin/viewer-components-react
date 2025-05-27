@@ -85,18 +85,22 @@ interface ImportSchemaResult {
   items: { [className: string]: { name: string; fullName: string; label: string } };
 }
 export async function importSchema({
-  mochaContext,
   builder,
   schemaContentXml,
   ...props
 }: {
-  mochaContext: Mocha.Context;
   builder: TestIModelBuilder;
   schemaContentXml: string;
   schemaAlias: string;
-  schemaName?: string;
-}): Promise<ImportSchemaResult> {
-  const schemaName = props.schemaName ?? `SCHEMA_${mochaContext.test!.fullTitle()}`.replace(/[^\w\d_]/gi, "_").replace(/_+/g, "_");
+} & (
+  | {
+      mochaContext: Mocha.Context;
+    }
+  | {
+      schemaName: string;
+    }
+)): Promise<ImportSchemaResult> {
+  const schemaName = "schemaName" in props ? props.schemaName : `SCHEMA_${props.mochaContext.test!.fullTitle()}`.replace(/[^\w\d_]/gi, "_").replace(/_+/g, "_");
   const schemaAlias = props.schemaAlias;
   const schemaXml = getFullSchemaXml({ schemaName, schemaAlias, schemaContentXml });
   await builder.importSchema(schemaXml);
@@ -191,12 +195,19 @@ export function insertPartition(
 }
 
 export function insertSubModel(
-  props: BaseInstanceInsertProps & { classFullName: string; modeledElementId: Id64String } & Partial<Omit<ModelProps, "id" | "modeledElement" | "parentModel">>,
+  props: BaseInstanceInsertProps & {
+    classFullName: string;
+    modeledElementId: Id64String;
+    modelModelsElementRelationshipName?: string;
+  } & Partial<Omit<ModelProps, "id" | "modeledElement" | "parentModel">>,
 ) {
-  const { builder, classFullName, modeledElementId, ...modelProps } = props;
+  const { builder, classFullName, modeledElementId, modelModelsElementRelationshipName, ...modelProps } = props;
   const modelId = builder.insertModel({
     classFullName,
-    modeledElement: { id: modeledElementId },
+    modeledElement: {
+      id: modeledElementId,
+      relClassName: modelModelsElementRelationshipName,
+    },
     ...modelProps,
   });
   return { className: classFullName, id: modelId };
@@ -626,7 +637,9 @@ export function insertDefinitionPartition(
 }
 
 export function insertDefinitionSubModel(
-  props: BaseInstanceInsertProps & { modeledElementId: Id64String } & Partial<Omit<GeometricModel3dProps, "id" | "modeledElement" | "parentModel">>,
+  props: BaseInstanceInsertProps & { modeledElementId: Id64String; modelModelsElementRelationshipName?: string } & Partial<
+      Omit<GeometricModel3dProps, "id" | "modeledElement" | "parentModel">
+    >,
 ) {
   return insertSubModel({
     classFullName: `BisCore${props.fullClassNameSeparator ?? "."}DefinitionModel`,
@@ -673,7 +686,6 @@ export class BackendTestIModelBuilder implements TestIModelBuilder {
   }
 
   public async importSchema(schemaXml: string): Promise<void> {
-    // eslint-disable-next-line @itwin/no-internal
     await this._iModel.importSchemaStrings([schemaXml]);
   }
 }

@@ -36,7 +36,27 @@ import type { ClassificationsTreeIdsCache } from "./internal/ClassificationsTree
 interface ClassificationsTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   idsCache: ClassificationsTreeIdsCache;
+  hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
+}
+
+/** @alpha */
+export interface ClassificationsTreeHierarchyConfiguration {
+  /**
+   * The classifications' hierarchy starts at the root `ClassificationSystem` element. This attribute identifiers that
+   * root `ClassificationSystem`.
+   */
   rootClassificationSystemCode: string;
+
+  /**
+   * In case consumer knows the name of relationship between a `Classification` and a `Category`, it can be provided
+   * here. With this relationship, Categories for a given Classification can be loaded directly, without going through
+   * geometric elements. That has a couple of effects:
+   * - Performance is better, as it allows us to avoid scanning all elements under specific Classification.
+   * - Categories related to a Classification are displayed, even if they don't have any elements assigned to them.
+   *
+   * It's expected that source of the relationship is `BisCore.Category` and target - `ClassificationSystems.Classification`.
+   */
+  categorySymbolizesClassificationRelationshipName?: string;
 }
 
 /** @internal */
@@ -122,7 +142,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
             JOIN ${CLASS_NAME_ClassificationSystem} system ON system.ECInstanceId = this.Parent.Id
             ${instanceFilterClauses.joins}
             WHERE
-              system.CodeValue = '${this._props.rootClassificationSystemCode}'
+              system.CodeValue = '${this._props.hierarchyConfig.rootClassificationSystemCode}'
               AND NOT this.IsPrivate
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
@@ -249,7 +269,25 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
                             className: CLASS_NAME_Category,
                           }),
                         },
-                        hasChildren: true, // we won't get the category if it doesn't have elements, and if it has elements, it will have children
+                        hasChildren: this._props.hierarchyConfig.categorySymbolizesClassificationRelationshipName
+                          ? {
+                              selector: `COALESCE(
+                                (
+                                  SELECT 1
+                                  FROM ${CLASS_NAME_GeometricElement3d} e3d
+                                  WHERE e3d.Category.Id = this.ECInstanceId
+                                  LIMIT 1
+                                ),
+                                (
+                                  SELECT 1
+                                  FROM ${CLASS_NAME_GeometricElement2d} e2d
+                                  WHERE e2d.Category.Id = this.ECInstanceId
+                                  LIMIT 1
+                                ),
+                                0
+                              )`,
+                            }
+                          : true, // we won't get the category if it doesn't have elements, and if it has elements, it will have children
                         extendedData: {
                           type: { selector: `IIF(ec_classname(this.ECClassId, 'c') = 'SpatialCategory', 'SpatialCategory', 'DrawingCategory')` },
                           classificationIds: { selector: createIdsSelector(classificationIds) },
@@ -363,7 +401,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
   }
 }
 
-function createClassificationHasChildrenSelector(classificationAlias: string) {
+function createClassificationHasChildrenSelector(classificationAlias: string, classificationSymbolizedByCategoryRelationshipName?: string) {
   return `
     COALESCE((
         SELECT 1
@@ -375,7 +413,16 @@ function createClassificationHasChildrenSelector(classificationAlias: string) {
         FROM ${CLASS_NAME_ElementHasClassifications} ehc
         WHERE ehc.TargetECInstanceId = ${classificationAlias}.ECInstanceId
         LIMIT 1
-      ),
+      ), ${
+        classificationSymbolizedByCategoryRelationshipName
+          ? `(
+              SELECT 1
+              FROM ${classificationSymbolizedByCategoryRelationshipName} csc
+              WHERE csc.SourceECInstanceId = ${classificationAlias}.ECInstanceId
+              LIMIT 1
+            )`
+          : ``
+      }
       0
     )
   `;

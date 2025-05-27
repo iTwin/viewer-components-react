@@ -2,7 +2,6 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-/* eslint-disable @itwin/no-internal */
 
 import { StrataKitTreeRenderer as PresentationTree } from "@itwin/presentation-hierarchies-react";
 import { useHierarchiesLocalization } from "../internal/UseHierarchiesLocalization.js";

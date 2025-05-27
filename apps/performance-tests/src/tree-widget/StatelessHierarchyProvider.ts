@@ -62,9 +62,7 @@ export class StatelessHierarchyProvider implements Disposable {
     this._provider = this.createProvider();
   }
 
-  public async loadHierarchy(props?: { depth?: number }): Promise<number> {
-    const depth = props?.depth;
-
+  public async loadHierarchy(props?: { shouldExpand?: (node: HierarchyNode, index: number) => boolean }): Promise<number> {
     let nodeCount = 0;
     return new Promise<number>((resolve, reject) => {
       const nodesObservable = of<HierarchyNode | undefined>(undefined).pipe(
@@ -76,7 +74,7 @@ export class StatelessHierarchyProvider implements Disposable {
               log(`Got children for ${parentNodeLabel}`);
             }),
             tap(() => ++nodeCount),
-            filter((node) => node.children && (!depth || getNodeDepth(node) < depth)),
+            filter((node, index) => (props?.shouldExpand ? props.shouldExpand(node, index) : true)),
             observeOn(asyncScheduler),
           );
         }, 1),
@@ -121,10 +119,6 @@ export class StatelessHierarchyProvider implements Disposable {
     };
     return imodelAccess;
   }
-}
-
-function getNodeDepth(node: HierarchyNode): number {
-  return node.parentKeys.length + 1;
 }
 
 class AsyncSchemaJsonLocater extends SchemaJsonLocater {

@@ -189,8 +189,8 @@ export class Datasets {
   /**
    * Create an iModel with:
    * - 1 `ClassificationSystem`, whose code = `name`,
-   * - 10 `ClassificationTable` elements as children for the `ClassificationSystem` all with a single sub-model,
-   * - `numElements / 10` `Classification` elements inside `ClassificationTable`'s sub-model with:
+   * - 50 `ClassificationTable` elements as children for the `ClassificationSystem` all with a single sub-model,
+   * - `numElements / 50` `Classification` elements inside `ClassificationTable`'s sub-model with:
    *  - 1 child `Classification`,
    *  - 1 spatial category and 3d element,
    *  - 1 drawing category and 2d element.
@@ -202,6 +202,24 @@ export class Datasets {
       const schemaXml = fs.readFileSync(fs.realpathSync(new URL(schemaPath)), { encoding: "utf-8" });
       await builder.importFullSchema(schemaXml);
 
+      // also import our custom schema for classification - category relationship
+      await builder.importSchema(
+        "TestClassificationSchema",
+        `
+          <ECSchemaReference name="BisCore" version="01.00.16" alias="bis" />
+          <ECSchemaReference name="ClassificationSystems" version="01.00.04" alias="clsf" />
+          <ECRelationshipClass typeName="CategorySymbolizesClassification" modifier="None" strength="referencing">
+              <BaseClass>bis:ElementRefersToElements</BaseClass>
+              <Source multiplicity="(0..*)" roleLabel="symbolizes" polymorphic="true">
+                  <Class class="bis:Category" />
+              </Source>
+              <Target multiplicity="(0..*)" roleLabel="is symbolized by" polymorphic="true">
+                  <Class class="clsf:Classification "/>
+              </Target>
+          </ECRelationshipClass>
+        `,
+      );
+
       const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "physical model" });
       const drawingModel = insertDrawingModelWithPartition({ builder, codeValue: "drawing model" });
 
@@ -211,7 +229,8 @@ export class Datasets {
         code: builder.createCode(IModel.dictionaryId, BisCodeSpec.nullCodeSpec, name),
       });
 
-      for (let i = 0; i < 10; ++i) {
+      const classificationTablesCount = 50;
+      for (let i = 0; i < classificationTablesCount; ++i) {
         const tableId = builder.insertElement({
           classFullName: "ClassificationSystems.ClassificationTable",
           model: IModel.dictionaryId,
@@ -228,7 +247,7 @@ export class Datasets {
             id: tableId,
           },
         });
-        for (let j = 0; j < numElements / 10; ++j) {
+        for (let j = 0; j < numElements / classificationTablesCount; ++j) {
           const classificationId = builder.insertElement({
             classFullName: "ClassificationSystems.Classification",
             model: tableModelId,
@@ -261,6 +280,11 @@ export class Datasets {
             sourceId: physicalElement.id,
             targetId: classificationId,
           });
+          builder.insertRelationship({
+            classFullName: "TestClassificationSchema.CategorySymbolizesClassification",
+            sourceId: spatialCategory.id,
+            targetId: classificationId,
+          });
 
           const drawingCategory = insertDrawingCategory({
             builder,
@@ -276,6 +300,11 @@ export class Datasets {
           builder.insertRelationship({
             classFullName: "ClassificationSystems.ElementHasClassifications",
             sourceId: drawingElement.id,
+            targetId: classificationId,
+          });
+          builder.insertRelationship({
+            classFullName: "TestClassificationSchema.CategorySymbolizesClassification",
+            sourceId: drawingCategory.id,
             targetId: classificationId,
           });
         }
