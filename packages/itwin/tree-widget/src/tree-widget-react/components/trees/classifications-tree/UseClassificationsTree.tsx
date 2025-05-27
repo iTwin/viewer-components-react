@@ -38,7 +38,7 @@ interface UseClassificationsTreeResult {
  */
 export function useClassificationsTree({ activeView, emptyTreeContent, ...rest }: UseClassificationsTreeProps): UseClassificationsTreeResult {
   const hierarchyConfig = useMemo(
-    () => rest.hierarchyConfig,
+    () => ({ ...rest.hierarchyConfig }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [...Object.values(rest.hierarchyConfig)],
   );
