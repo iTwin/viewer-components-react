@@ -34,12 +34,22 @@ export class GoogleAddressProvider implements AddressProvider {
     return true;
   }
 
-  public async getLocation(data: GoogleAddressData): Promise<Cartographic> {
+  protected async getAuthRequestHeader(): Promise<Record<string, string>> {
+    return { "X-Goog-Api-Key": this._apiKey};
+  }
 
-    const response = await fetch(`https://places.googleapis.com/v1/places/${data.placeId}`, {
+  protected async getPlacesBaseUrl(): Promise<string> {
+    return "https://places.googleapis.com/v1/places/";
+  }
+
+  public async getLocation(data: GoogleAddressData): Promise<Cartographic> {
+    let baseUrl = await this.getPlacesBaseUrl();
+    const url = `${baseUrl}${!baseUrl.endsWith("/")?"/":""}${data.placeId}`;
+    const authHeader = await this.getAuthRequestHeader();
+    const response = await fetch(url, {
       method: "GET",
       headers: {
-        "X-Goog-Api-Key": this._apiKey,
+        ...authHeader,
         "X-Goog-FieldMask": "location",
       } });
     const json: any = await response.json();
@@ -52,8 +62,13 @@ export class GoogleAddressProvider implements AddressProvider {
     return Cartographic.fromDegrees({longitude: long, latitude: lat});
   }
 
-  protected getSuggestionsRequest(query: string, viewRect: MapCartoRectangle): AddressRequest {
-    const url = new URL("https://places.googleapis.com/v1/places:autocomplete");
+  protected async getPlacesAutoCompleteUrl(): Promise<string> {
+    return "https://places.googleapis.com/v1/places:autocomplete";
+  }
+
+  protected async getSuggestionsRequest(query: string, viewRect: MapCartoRectangle): Promise<AddressRequest> {
+    const urlStr = await this.getPlacesAutoCompleteUrl()
+    const url = new URL(urlStr);
 
     const body = {
       input: query,
@@ -67,11 +82,12 @@ export class GoogleAddressProvider implements AddressProvider {
         },
       }
     }
+    const authHeader = await this.getAuthRequestHeader();
     return {
       url: url,
       method: "POST",
       headers: {
-        "X-Goog-Api-Key": this._apiKey,
+        ...authHeader,
         "X-Goog-FieldMask": "suggestions.placePrediction.text.text,suggestions.placePrediction.placeId",
       },
       body: JSON.stringify(body),
@@ -79,7 +95,7 @@ export class GoogleAddressProvider implements AddressProvider {
   }
 
   public async getSuggestions(query: string, userView: MapCartoRectangle): Promise<AddressData[]> {
-    const request = this.getSuggestionsRequest(query, userView);
+    const request = await this.getSuggestionsRequest(query, userView);
 
     if (query.length < 3) {
       return [];
