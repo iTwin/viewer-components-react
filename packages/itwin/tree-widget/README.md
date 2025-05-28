@@ -218,7 +218,7 @@ function CustomModelsTreeComponent({ imodel, viewport, getSchemaContext, selecti
 
 #### Displaying a subset of the tree
 
-Models tree allows displaying a subset of all nodes by providing a `getFilteredPaths` function. This function receives an internal helper function called `createInstanceKeyPaths`, which can generate paths from either
+Models tree allows displaying a subset of all nodes by providing a `getFilteredPaths` function. This function receives an internal helper function called `createInstanceKeyPaths`, which can generate paths from either:
 - a list of instance keys (`targetItems`)
 - a label string
 
@@ -309,7 +309,7 @@ Use `getFilteredPaths` when you need more control over which nodes are shown. He
 
   <!-- END EXTRACTION -->
 
-- **Apply fully custom logic**: Generate pahts based on completely custom implementation, like showing each category that has an override applied in viewport.
+- **Apply fully custom logic**: Generate paths based on completely custom implementation. For exampel: showing each category that has an override applied in viewport.
     <!-- [[include: [TreeWidget.GetFilteredPathsComponentExample3], tsx]] -->
     <!-- BEGIN EXTRACTION -->
   ```tsx
