@@ -218,47 +218,129 @@ function CustomModelsTreeComponent({ imodel, viewport, getSchemaContext, selecti
 
 #### Displaying a subset of the tree
 
-Models tree allows displaying a subset of all nodes by providing a `getFilteredPaths` function, which receives a `createInstanceKeyPaths` function for creating hierarchy node paths from instance keys or an instance label and returns a list of hierarchy node paths targeting some nodes. When these paths are provided, the displayed hierarchy consists only of the targeted nodes, their ancestors, and their children. Example implementation of `getFilteredPaths`:
+Models tree allows displaying a subset of all nodes by providing a `getFilteredPaths` function, which receives a `createInstanceKeyPaths` function for creating hierarchy node paths from instance keys or an instance label and returns a list of hierarchy node paths targeting some nodes. When these paths are provided, the displayed hierarchy consists only of the targeted nodes, their ancestors, and their children.
+`getFilteredPaths` function doesn't need to be provided to be able to use search in `ModelsTreeComponent`. `createInstanceKeyPaths` is the internal function which is used when `getFilteredPaths` is undefined.
+`getFilteredPaths` function is useful when you want to apply additional or custom filtering. Example use cases:
 
-<!-- [[include: [TreeWidget.GetFilteredPathsComponentExample], tsx]] -->
-<!-- BEGIN EXTRACTION -->
+- You have instance keys of items you want to keep, these instance keys can be provided as `targetItems` to `createInstanceKeyPaths`. `createInstanceKeyPaths` will create filter paths based on the `targetItems`.
+  <!-- [[include: [TreeWidget.GetFilteredPathsComponentExample], tsx]] -->
+  <!-- BEGIN EXTRACTION -->
 
-```tsx
-type UseModelsTreeProps = Parameters<typeof useModelsTree>[0];
-type GetFilteredPathsType = Exclude<UseModelsTreeProps["getFilteredPaths"], undefined>;
-interface CustomModelsTreeProps {
-  viewport: Viewport;
-  selectionStorage: SelectionStorage;
-  imodel: IModelConnection;
-  targetItems: InstanceKey[];
-}
+  ```tsx
+  type UseModelsTreeProps = Parameters<typeof useModelsTree>[0];
+  type GetFilteredPathsType = Exclude<UseModelsTreeProps["getFilteredPaths"], undefined>;
+  interface CustomModelsTreeProps {
+    viewport: Viewport;
+    selectionStorage: SelectionStorage;
+    imodel: IModelConnection;
+    targetItems: InstanceKey[];
+  }
 
-function CustomModelsTreeComponent({ viewport, selectionStorage, imodel, targetItems }: CustomModelsTreeProps) {
-  const getFilteredPaths = useCallback<GetFilteredPathsType>(
-    async ({ createInstanceKeyPaths }) => {
-      return createInstanceKeyPaths({
-        // list of instance keys representing nodes that should be displayed in the hierarchy
-        targetItems,
-      });
-    },
-    [targetItems],
-  );
+  function CustomModelsTreeComponent({ viewport, selectionStorage, imodel, targetItems }: CustomModelsTreeProps) {
+    const getFilteredPaths = useCallback<GetFilteredPathsType>(
+      async ({ createInstanceKeyPaths }) => {
+        return createInstanceKeyPaths({
+          // list of instance keys representing nodes that should be displayed in the hierarchy
+          targetItems,
+        });
+      },
+      [targetItems],
+    );
 
-  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths });
+    const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths });
 
-  return (
-    <VisibilityTree
-      {...modelsTreeProps}
-      getSchemaContext={getSchemaContext}
-      selectionStorage={selectionStorage}
-      imodel={imodel}
-      treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
-    />
-  );
-}
-```
+    return (
+      <VisibilityTree
+        {...modelsTreeProps}
+        getSchemaContext={getSchemaContext}
+        selectionStorage={selectionStorage}
+        imodel={imodel}
+        treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
+      />
+    );
+  }
+  ```
 
-<!-- END EXTRACTION -->
+  <!-- END EXTRACTION -->
+
+- You want to modify paths which would be created by default. For example: `createInstanceKeyPaths` creates paths based on filter string, but you want to additionally filter out paths that are too long.
+  <!-- [[include: [TreeWidget.GetFilteredPathsComponentExample2], tsx]] -->
+  <!-- BEGIN EXTRACTION -->
+
+  ```tsx
+  interface CustomModelsTreeProps2 {
+    viewport: Viewport;
+    selectionStorage: SelectionStorage;
+    imodel: IModelConnection;
+  }
+
+  function CustomModelsTreeComponent2({ viewport, selectionStorage, imodel }: CustomModelsTreeProps2) {
+    const getFilteredPaths = useCallback<GetFilteredPathsType>(async ({ createInstanceKeyPaths, filter }) => {
+      const defaultPaths = await createInstanceKeyPaths({ label: filter ?? "test" });
+      const result = new Array<HierarchyFilteringPath>();
+      for (const path of defaultPaths) {
+        const normalizedPath = HierarchyFilteringPath.normalize(path);
+        if (normalizedPath.path.length < 5) {
+          normalizedPath.options = { autoExpand: true };
+          result.push(normalizedPath);
+        }
+      }
+      return result;
+    }, []);
+
+    const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths });
+
+    return (
+      <VisibilityTree
+        {...modelsTreeProps}
+        getSchemaContext={getSchemaContext}
+        selectionStorage={selectionStorage}
+        imodel={imodel}
+        treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
+      />
+    );
+  }
+  ```
+
+  <!-- END EXTRACTION -->
+
+- You want to create filter paths based on custom logic. For example: you want to create a path for each category override in viewport.
+    <!-- [[include: [TreeWidget.GetFilteredPathsComponentExample3], tsx]] -->
+    <!-- BEGIN EXTRACTION -->
+  ```tsx
+  interface CustomModelsTreeProps3 {
+    viewport: Viewport;
+    selectionStorage: SelectionStorage;
+    imodel: IModelConnection;
+  }
+
+  function CustomModelsTreeComponent3({ viewport, selectionStorage, imodel }: CustomModelsTreeProps3) {
+    const getFilteredPaths = useCallback<GetFilteredPathsType>(async () => {
+      const filteredPaths = new Array<HierarchyFilteringPath>();
+      for (const override of viewport.perModelCategoryVisibility) {
+        filteredPaths.push([
+          { id: "0x1", className: "BisCore.Subject" },
+          { id: override.modelId, className: "BisCore.Model" },
+          { id: override.categoryId, className: "BisCore.Category" },
+        ]);
+      }
+      return filteredPaths;
+    }, [viewport]);
+
+    const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths });
+
+    return (
+      <VisibilityTree
+        {...modelsTreeProps}
+        getSchemaContext={getSchemaContext}
+        selectionStorage={selectionStorage}
+        imodel={imodel}
+        treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
+      />
+    );
+  }
+  ```
+    <!-- END EXTRACTION -->
 
 ### Categories tree
 
