@@ -34,27 +34,33 @@ type ModelsTreeFilteringError = "tooManyFilterMatches" | "tooManyInstancesFocuse
 
 /** @beta */
 export interface UseModelsTreeProps {
-  /** String used to filter models tree nodes. Nodes which don't contain specified string in their label will be filtered out.*/
+  /**
+   * Optional search string used to filter tree nodes.
+   * Nodes that do not contain this string in their label will be filtered out.
+   *
+   * This filtering works without the need of `getFilteredPaths`. If `getFilteredPaths` function is provided, it will take precedence and this
+   * string will be ignored during filtering process.
+   */
   filter?: string;
   activeView: Viewport;
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
   visibilityHandlerOverrides?: ModelsTreeVisibilityHandlerOverrides;
   /**
-   * Function that can be used to create custom filter paths. This function doesn't need to be provided for filtering by filter string to work.
-   * `createInstanceKeyPaths` is the internal function which is used when `getFilteredPaths` is not provided.
+   * Optional function for providing custom filter paths.
+   * When defined, this function overrides the default filtering logic that uses the `filter` string.
    *
-   * This function is useful when you want to apply additional or custom filtering. Example use cases:
-   * - You have instance keys of items you want to keep, these instance keys can be provided as `targetItems` to `createInstanceKeyPaths`.
-   * `createInstanceKeyPaths` will create filter paths based on the `targetItems`.
-   * - You want to modify paths which would be created by default. For example: `createInstanceKeyPaths` creates paths based on filter string and
-   * you want to additionally filter out paths that contain sub-models.
-   * - You want to create filter paths based on custom logic. For example: you want to create path for each geometric element that has a parent
-   * geometric element.
-   * @param props provided when `getFilteredPaths` is called.
-   * - `createInstanceKeyPaths` is the internal function that creates filtering paths based on provided target items or node label.
-   * - `filter` is the filter which would be used to create filter paths if `getFilteredPaths` wouldn't be provided. It is usually the search string.
-   * @note Paths created by `createInstanceKeyPaths` won't have `autoExpand` flag set. If you want nodes to be expanded, iterate through each path and
-   * set `autoExpand` flag to `true`.
+   * Use this function when you want full control over which nodes should be displaed, based on more complex logic or known instance keys.
+   *
+   * @param props Parameters provided when `getFilteredPaths` is called:
+   * - `createInstanceKeyPaths`: Helper function to create filter paths.
+   * - `filter`: The filter string which would otherwise be used for default filtering.
+   *
+   * ### Example use cases:
+   * - You have a list of `InstanceKey` items, which you want to keep. Pass them as `targetItems` to `createInstanceKeyPaths`.
+   * - You want to create filter paths based on a label, but also apply some extra conditions (for example exclude paths with sub-models).
+   * - You want to construct custom filtered paths. For example: create a filter path for each geometric element which has a parent element.
+   * @note Paths returned  by `createInstanceKeyPaths` will not have `autoExpand` flag set. If you want nodes to be expanded, iterate over the paths and
+   * set `autoExpand: true` manually.
    */
   getFilteredPaths?: (props: {
     /** Internal function that creates filtering paths based on provided target items or node label.*/
@@ -182,6 +188,7 @@ export function useModelsTree({
                 hierarchyConfig: hierarchyConfiguration,
                 limit: "unbounded",
               }),
+            filter,
           });
           void handlePaths(paths, imodelAccess);
           return paths;

@@ -218,11 +218,16 @@ function CustomModelsTreeComponent({ imodel, viewport, getSchemaContext, selecti
 
 #### Displaying a subset of the tree
 
-Models tree allows displaying a subset of all nodes by providing a `getFilteredPaths` function, which receives a `createInstanceKeyPaths` function for creating hierarchy node paths from instance keys or an instance label and returns a list of hierarchy node paths targeting some nodes. When these paths are provided, the displayed hierarchy consists only of the targeted nodes, their ancestors, and their children.
-`getFilteredPaths` function doesn't need to be provided to be able to use search in `ModelsTreeComponent`. `createInstanceKeyPaths` is the internal function which is used when `getFilteredPaths` is undefined.
-`getFilteredPaths` function is useful when you want to apply additional or custom filtering. Example use cases:
+Models tree allows displaying a subset of all nodes by providing a `getFilteredPaths` function. This function receives an internal helper function called `createInstanceKeyPaths`, which can generate paths from either
+- a list of instance keys (`targetItems`)
+- a label string
 
-- You have instance keys of items you want to keep, these instance keys can be provided as `targetItems` to `createInstanceKeyPaths`. `createInstanceKeyPaths` will create filter paths based on the `targetItems`.
+When these paths are provided, the displayed hierarchy consists only of the targeted nodes, their ancestors, and their children.
+
+If `getFilteredPaths` is **not** provided, the default filtering logic uses the `filter` string and `createInstanceKeyPaths` internally.
+Use `getFilteredPaths` when you need more control over which nodes are shown. Here are some example use cases:
+
+- **Filter by known instance keys**: You already have a list of `InstanceKey` items that should remain in the tree. Pass them as `targetItems` to `createInstanceKeyPaths`.
   <!-- [[include: [TreeWidget.GetFilteredPathsComponentExample], tsx]] -->
   <!-- BEGIN EXTRACTION -->
 
@@ -263,7 +268,7 @@ Models tree allows displaying a subset of all nodes by providing a `getFilteredP
 
   <!-- END EXTRACTION -->
 
-- You want to modify paths which would be created by default. For example: `createInstanceKeyPaths` creates paths based on filter string, but you want to additionally filter out paths that are too long.
+- **Post-process the paths created `createInstanceKeyPaths`**: Use `filter` string to generate the paths, then apply additional filtering - e.g., remove paths that are too long.
   <!-- [[include: [TreeWidget.GetFilteredPathsComponentExample2], tsx]] -->
   <!-- BEGIN EXTRACTION -->
 
@@ -304,7 +309,7 @@ Models tree allows displaying a subset of all nodes by providing a `getFilteredP
 
   <!-- END EXTRACTION -->
 
-- You want to create filter paths based on custom logic. For example: you want to create a path for each category override in viewport.
+- **Apply fully custom logic**: Generate pahts based on completely custom implementation, like showing each category that has an override applied in viewport.
     <!-- [[include: [TreeWidget.GetFilteredPathsComponentExample3], tsx]] -->
     <!-- BEGIN EXTRACTION -->
   ```tsx
