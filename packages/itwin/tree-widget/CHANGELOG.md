@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Thu, 15 May 2025 05:33:32 GMT and should not be manually modified.
+This log was last generated on Mon, 19 May 2025 16:58:21 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 3.9.0
+
+Mon, 19 May 2025 16:58:21 GMT
+
+### Minor changes
+
+- Add support for iTwin.js v5.0 ([#1326](https://github.com/iTwin/viewer-components-react/pull/1326))
 
 ## 3.8.0
 

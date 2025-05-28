@@ -2,6 +2,21 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Mon, 19 May 2025 16:58:21 GMT",
+      "version": "3.9.0",
+      "tag": "@itwin/tree-widget-react_v3.9.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "aruniverse@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "8365a53de8e40dcbf9dc35882f8480219099afe5",
+            "comment": "Add support for iTwin.js v5.0"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 15 May 2025 05:33:32 GMT",
       "version": "3.8.0",
       "tag": "@itwin/tree-widget-react_v3.8.0",
