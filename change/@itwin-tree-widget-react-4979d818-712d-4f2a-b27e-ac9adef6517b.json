@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Add optional `filter` prop has been added to `getFilteredPaths`. This prop is provided when `getFilteredPaths` is called and it is the same as the filter that is provided to `useModelsTree`. Added docs explaining getFilteredPaths usage.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "100586436+JonasDov@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
