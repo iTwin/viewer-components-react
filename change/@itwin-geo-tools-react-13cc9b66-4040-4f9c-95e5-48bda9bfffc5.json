@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Add support for Google Places API in `<GeoAddressSearch>` ",
-  "packageName": "@itwin/geo-tools-react",
-  "email": "mdastous-bentley@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
