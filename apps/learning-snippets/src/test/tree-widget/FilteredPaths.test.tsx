@@ -6,14 +6,21 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 
 import { expect } from "chai";
-import sinon from "sinon";
 import { useCallback } from "react";
+import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
+import { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import { useModelsTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
 import { createStorage } from "@itwin/unified-selection";
 import { cleanup, render, waitFor } from "@testing-library/react";
-import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils.js";
+import {
+  buildIModel,
+  insertPhysicalElement,
+  insertPhysicalModelWithPartition,
+  insertPhysicalSubModel,
+  insertSpatialCategory,
+} from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
 import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils.js";
 
@@ -56,6 +63,75 @@ function CustomModelsTreeComponent({ viewport, selectionStorage, imodel, targetI
 }
 // __PUBLISH_EXTRACT_END__
 
+// __PUBLISH_EXTRACT_START__ TreeWidget.GetFilteredPathsComponentExample2
+interface CustomModelsTreeProps2 {
+  viewport: Viewport;
+  selectionStorage: SelectionStorage;
+  imodel: IModelConnection;
+}
+
+function CustomModelsTreeComponent2({ viewport, selectionStorage, imodel }: CustomModelsTreeProps2) {
+  const getFilteredPaths = useCallback<GetFilteredPathsType>(async ({ createInstanceKeyPaths, filter }) => {
+    const defaultPaths = await createInstanceKeyPaths({ label: filter ?? "test" });
+    const result = new Array<HierarchyFilteringPath>();
+    for (const path of defaultPaths) {
+      const normalizedPath = HierarchyFilteringPath.normalize(path);
+      if (normalizedPath.path.length < 5) {
+        normalizedPath.options = { autoExpand: true };
+        result.push(normalizedPath);
+      }
+    }
+    return result;
+  }, []);
+
+  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths });
+
+  return (
+    <VisibilityTree
+      {...modelsTreeProps}
+      getSchemaContext={getSchemaContext}
+      selectionStorage={selectionStorage}
+      imodel={imodel}
+      treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
+    />
+  );
+}
+// __PUBLISH_EXTRACT_END__
+
+// __PUBLISH_EXTRACT_START__ TreeWidget.GetFilteredPathsComponentExample3
+interface CustomModelsTreeProps3 {
+  viewport: Viewport;
+  selectionStorage: SelectionStorage;
+  imodel: IModelConnection;
+}
+
+function CustomModelsTreeComponent3({ viewport, selectionStorage, imodel }: CustomModelsTreeProps3) {
+  const getFilteredPaths = useCallback<GetFilteredPathsType>(async () => {
+    const filteredPaths = new Array<HierarchyFilteringPath>();
+    for (const override of viewport.perModelCategoryVisibility) {
+      filteredPaths.push([
+        { id: "0x1", className: "BisCore.Subject" },
+        { id: override.modelId, className: "BisCore.Model" },
+        { id: override.categoryId, className: "BisCore.Category" },
+      ]);
+    }
+    return filteredPaths;
+  }, [viewport]);
+
+  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths });
+
+  return (
+    <VisibilityTree
+      {...modelsTreeProps}
+      getSchemaContext={getSchemaContext}
+      selectionStorage={selectionStorage}
+      imodel={imodel}
+      treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
+    />
+  );
+}
+// __PUBLISH_EXTRACT_END__
+
 describe("Tree widget", () => {
   describe("Learning snippets", () => {
     describe("Components", () => {
@@ -74,7 +150,7 @@ describe("Tree widget", () => {
           sinon.restore();
         });
 
-        it("renders custom models tree component with filtered paths", async function () {
+        it("renders custom models tree component with filtered paths using targetItems", async function () {
           const imodel = await buildIModel(this, async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
             const physicalModel2 = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel 2" });
@@ -103,6 +179,75 @@ describe("Tree widget", () => {
           await waitFor(() => {
             getByText("TestPhysicalModel");
             expect(queryByText("TestPhysicalModel 2")).to.be.null;
+          });
+        });
+
+        it("renders custom models tree component with filtered paths when they are modified", async function () {
+          const imodel = await buildIModel(this, async (builder, testSchema) => {
+            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "PhysicalModel" });
+            const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
+            insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id, userLabel: "test element 1" });
+            insertPhysicalModelWithPartition({ builder, codeValue: "PhysicalModel2" });
+            const category2 = insertSpatialCategory({ builder, codeValue: "SpatialCategory 2" });
+            const element2 = insertPhysicalElement({
+              builder,
+              classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+              userLabel: `element 2`,
+              modelId: physicalModel.id,
+              categoryId: category2.id,
+            });
+            const subModel = insertPhysicalSubModel({ builder, modeledElementId: element2.id });
+            insertPhysicalElement({ builder, userLabel: `test modeling element`, modelId: subModel.id, categoryId: category.id });
+          });
+          const testViewport = getTestViewer(imodel.imodel, true);
+          const unifiedSelectionStorage = createStorage();
+          sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
+          sinon.stub(UiFramework, "getIModelConnection").returns(imodel.imodel);
+          mockGetBoundingClientRect();
+
+          using _ = { [Symbol.dispose]: cleanup };
+          const { getByText, queryByText } = render(
+            <CustomModelsTreeComponent2 selectionStorage={unifiedSelectionStorage} imodel={imodel.imodel} viewport={testViewport} />,
+          );
+
+          await waitFor(() => {
+            getByText("PhysicalModel");
+            expect(queryByText("PhysicalModel2")).to.be.null;
+          });
+        });
+
+        it("renders custom models tree component with filtered paths when filtered paths are created customly", async function () {
+          const imodel = await buildIModel(this, async (builder) => {
+            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "PhysicalModel" });
+            const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
+            const physicalModel2 = insertPhysicalModelWithPartition({ builder, codeValue: "PhysicalModel2" });
+            const category2 = insertSpatialCategory({ builder, codeValue: "SpatialCategory2" });
+            insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id, userLabel: "test element 1" });
+            insertPhysicalElement({ builder, modelId: physicalModel2.id, categoryId: category2.id, userLabel: "test element 2" });
+            return { physicalModel, category };
+          });
+          const testViewport = getTestViewer(imodel.imodel, true);
+          const modifiedViewport = {
+            ...testViewport,
+            perModelCategoryVisibility: {
+              *[Symbol.iterator]() {
+                yield { modelId: imodel.physicalModel.id, categoryId: imodel.category.id };
+              },
+            },
+          } as unknown as Viewport;
+          const unifiedSelectionStorage = createStorage();
+          sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
+          sinon.stub(UiFramework, "getIModelConnection").returns(imodel.imodel);
+          mockGetBoundingClientRect();
+
+          using _ = { [Symbol.dispose]: cleanup };
+          const { getByText, queryByText } = render(
+            <CustomModelsTreeComponent3 selectionStorage={unifiedSelectionStorage} imodel={imodel.imodel} viewport={modifiedViewport} />,
+          );
+
+          await waitFor(() => {
+            getByText("PhysicalModel");
+            expect(queryByText("PhysicalModel2")).to.be.null;
           });
         });
       });

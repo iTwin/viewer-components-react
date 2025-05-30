@@ -34,12 +34,39 @@ type ModelsTreeFilteringError = "tooManyFilterMatches" | "tooManyInstancesFocuse
 
 /** @beta */
 export interface UseModelsTreeProps {
+  /**
+   * Optional search string used to filter tree nodes.
+   * Nodes that do not contain this string in their label will be filtered out.
+   *
+   * This filtering works without the need of `getFilteredPaths`. If `getFilteredPaths` function is provided, it will take precedence and this
+   * string will be ignored during filtering process.
+   */
   filter?: string;
   activeView: Viewport;
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
   visibilityHandlerOverrides?: ModelsTreeVisibilityHandlerOverrides;
+  /**
+   * Optional function for providing custom filter paths.
+   * When defined, this function overrides the default filtering logic that uses the `filter` string.
+   *
+   * Use this function when you want full control over which nodes should be displaed, based on more complex logic or known instance keys.
+   *
+   * @param props Parameters provided when `getFilteredPaths` is called:
+   * - `createInstanceKeyPaths`: Helper function to create filter paths.
+   * - `filter`: The filter string which would otherwise be used for default filtering.
+   *
+   * ### Example use cases:
+   * - You have a list of `InstanceKey` items, which you want to keep. Pass them as `targetItems` to `createInstanceKeyPaths`.
+   * - You want to create filter paths based on a label, but also apply some extra conditions (for example exclude paths with sub-models).
+   * - You want to construct custom filtered paths. For example: create a filter path for each geometric element which has a parent element.
+   * @note Paths returned  by `createInstanceKeyPaths` will not have `autoExpand` flag set. If you want nodes to be expanded, iterate over the paths and
+   * set `autoExpand: true` manually.
+   */
   getFilteredPaths?: (props: {
+    /** Internal function that creates filtering paths based on provided target items or node label.*/
     createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<HierarchyFilteringPath[]>;
+    /** Filter which would be used to create filter paths if `getFilteredPaths` wouldn't be provided. It is usually the search string.*/
+    filter?: string;
   }) => Promise<HierarchyFilteringPath[]>;
   onModelsFiltered?: (modelIds: Id64String[] | undefined) => void;
   /**
@@ -161,6 +188,7 @@ export function useModelsTree({
                 hierarchyConfig: hierarchyConfiguration,
                 limit: "unbounded",
               }),
+            filter,
           });
           void handlePaths(paths, imodelAccess);
           return paths;
