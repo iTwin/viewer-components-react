@@ -1,8 +1,16 @@
 # Change Log - @itwin/geo-tools-react
 
-This log was last generated on Thu, 06 Mar 2025 23:36:28 GMT and should not be manually modified.
+This log was last generated on Fri, 30 May 2025 19:49:32 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 5.3.0
+
+Fri, 30 May 2025 19:49:32 GMT
+
+### Minor changes
+
+- Add support for Google Places API in `<GeoAddressSearch>`  ([#1321](https://github.com/iTwin/viewer-components-react/pull/1321))
 
 ## 5.2.0
 
