@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1747674531135,
+  "lastUpdate": 1748866400513,
   "repoUrl": "https://github.com/iTwin/viewer-components-react",
   "entries": {
     "Tree-Widget benchmark": [
@@ -657,6 +657,118 @@ window.BENCHMARK_DATA = {
             "value": 401,
             "unit": "ms",
             "extra": "count: 27\nmax: 513\np95: 401\nmedian: 52"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "100586436+JonasDov@users.noreply.github.com",
+            "name": "JonasDov",
+            "username": "JonasDov"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ca930b1fc0f70467cf3fbe714517e0ee4adccd9d",
+          "message": "Update `getFilteredPaths` documentation (#1335)\n\n* Add comments\n\n* Run extract and changeset\n\n* Update doc clarity\n\n* Update readme\n\n* Update extractions\n\n* Update packages/itwin/tree-widget/src/tree-widget-react/components/trees/models-tree/UseModelsTree.tsx\n\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>\n\n* Update packages/itwin/tree-widget/src/tree-widget-react/components/trees/models-tree/UseModelsTree.tsx\n\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>\n\n* Update packages/itwin/tree-widget/src/tree-widget-react/components/trees/models-tree/UseModelsTree.tsx\n\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>\n\n* Update packages/itwin/tree-widget/src/tree-widget-react/components/trees/models-tree/UseModelsTree.tsx\n\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>\n\n* Update packages/itwin/tree-widget/src/tree-widget-react/components/trees/models-tree/UseModelsTree.tsx\n\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>\n\n* Update packages/itwin/tree-widget/src/tree-widget-react/components/trees/models-tree/UseModelsTree.tsx\n\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>\n\n* Update packages/itwin/tree-widget/README.md\n\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>\n\n* Update packages/itwin/tree-widget/README.md\n\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>\n\n* Update change/@itwin-tree-widget-react-4979d818-712d-4f2a-b27e-ac9adef6517b.json\n\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>\n\n* Update snippets\n\n* Update apps/learning-snippets/src/test/tree-widget/FilteredPaths.test.tsx\n\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>\n\n* Update apps/learning-snippets/src/test/tree-widget/FilteredPaths.test.tsx\n\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>\n\n* Update apps/learning-snippets/src/test/tree-widget/FilteredPaths.test.tsx\n\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>\n\n* run update extractions\n\n---------\n\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>",
+          "timestamp": "2025-06-02T15:03:10+03:00",
+          "tree_id": "4c5960bb7662170fa5545c24487cb8300360abd1",
+          "url": "https://github.com/iTwin/viewer-components-react/commit/ca930b1fc0f70467cf3fbe714517e0ee4adccd9d"
+        },
+        "date": 1748866398148,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "categories tree creates initial filtered view for 50k items",
+            "value": 2342.38,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree creates initial filtered view for 50k items (P95 of main thread blocks)",
+            "value": 1682,
+            "unit": "ms",
+            "extra": "count: 6\nmax: 1682\np95: 1682\nmedian: 31.5"
+          },
+          {
+            "name": "categories tree changing category visibility changes visibility for 50k subCategories",
+            "value": 13509.62,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree changing category visibility changes visibility for 50k subCategories (P95 of main thread blocks)",
+            "value": 782,
+            "unit": "ms",
+            "extra": "count: 33\nmax: 2625\np95: 782\nmedian: 62"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k categories",
+            "value": 7980.43,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k categories (P95 of main thread blocks)",
+            "value": 4719,
+            "unit": "ms",
+            "extra": "count: 8\nmax: 4719\np95: 4719\nmedian: 57.5"
+          },
+          {
+            "name": "models tree creates initial filtered view for 50k target items",
+            "value": 2268.14,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree creates initial filtered view for 50k target items (P95 of main thread blocks)",
+            "value": 222,
+            "unit": "ms",
+            "extra": "count: 13\nmax: 222\np95: 222\nmedian: 36"
+          },
+          {
+            "name": "models tree changing model visibility changes visibility for 50k elements",
+            "value": 53035.23,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing model visibility changes visibility for 50k elements (P95 of main thread blocks)",
+            "value": 128,
+            "unit": "ms",
+            "extra": "count: 22\nmax: 295\np95: 128\nmedian: 42"
+          },
+          {
+            "name": "models tree changing category visibility changes visibility for 50k elements",
+            "value": 53410.07,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing category visibility changes visibility for 50k elements (P95 of main thread blocks)",
+            "value": 286,
+            "unit": "ms",
+            "extra": "count: 20\nmax: 286\np95: 286\nmedian: 69.5"
+          },
+          {
+            "name": "models tree changing per-model-category override changes visibility for 50k elements",
+            "value": 53260.16,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing per-model-category override changes visibility for 50k elements (P95 of main thread blocks)",
+            "value": 109,
+            "unit": "ms",
+            "extra": "count: 24\nmax: 365\np95: 109\nmedian: 42.5"
+          },
+          {
+            "name": "models tree changing element visibility changes only parent nodes visibility with 50k elements",
+            "value": 54236.91,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing element visibility changes only parent nodes visibility with 50k elements (P95 of main thread blocks)",
+            "value": 356,
+            "unit": "ms",
+            "extra": "count: 24\nmax: 515\np95: 356\nmedian: 60.5"
           }
         ]
       }
