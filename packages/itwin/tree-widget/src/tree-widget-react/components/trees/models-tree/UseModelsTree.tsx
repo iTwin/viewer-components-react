@@ -63,7 +63,7 @@ export interface UseModelsTreeProps {
    * set `autoExpand: true` manually.
    */
   getFilteredPaths?: (props: {
-    /** Internal function that creates filtering paths based on provided target items or node label.*/
+    /** A function that creates filtering paths based on provided target instance keys or node label. */
     createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<HierarchyFilteringPath[]>;
     /** Filter which would be used to create filter paths if `getFilteredPaths` wouldn't be provided. It is usually the search string.*/
     filter?: string;
