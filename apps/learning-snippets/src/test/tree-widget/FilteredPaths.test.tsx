@@ -69,7 +69,6 @@ function CustomModelsTreeComponentWithTargetItems({
 // __PUBLISH_EXTRACT_END__
 
 // __PUBLISH_EXTRACT_START__ TreeWidget.GetFilteredPathsComponentWithPostProcessingExample
-
 function CustomModelsTreeComponentWithPostProcessing({
   viewport,
   selectionStorage,
