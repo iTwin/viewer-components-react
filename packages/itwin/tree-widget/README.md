@@ -225,7 +225,6 @@ Models tree allows displaying a subset of all nodes by providing a `getFilteredP
 
 When these paths are provided, the displayed hierarchy consists only of the targeted nodes, their ancestors, and their children.
 
-If `getFilteredPaths` is **not** provided, the default filtering logic uses the `filter` string and `createInstanceKeyPaths` internally.
 Use `getFilteredPaths` when you need more control over which nodes are shown. Here are some example use cases:
 
 - **Filter by known instance keys**: You already have a list of `InstanceKey` items that should remain in the tree. Pass them as `targetItems` to `createInstanceKeyPaths`.
