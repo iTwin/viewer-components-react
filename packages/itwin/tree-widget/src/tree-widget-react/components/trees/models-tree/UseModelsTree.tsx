@@ -65,7 +65,7 @@ export interface UseModelsTreeProps {
   getFilteredPaths?: (props: {
     /** A function that creates filtering paths based on provided target instance keys or node label. */
     createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<HierarchyFilteringPath[]>;
-    /** Filter which would be used to create filter paths if `getFilteredPaths` wouldn't be provided. It is usually the search string.*/
+    /** Filter which would be used to create filter paths if `getFilteredPaths` wouldn't be provided. */
     filter?: string;
   }) => Promise<HierarchyFilteringPath[]>;
   onModelsFiltered?: (modelIds: Id64String[] | undefined) => void;
