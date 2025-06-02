@@ -6,6 +6,7 @@
 import React from "react";
 import { ToolbarItemUtilities } from "@itwin/appui-react";
 import { SvgGeosearch } from "@itwin/itwinui-icons-react";
+import { BingAddressProvider } from "./BingAddressProvider";
 import { GeoAddressSearch } from "./components/GeoAddressSearch";
 import { GeoTools } from "./GeoTools";
 
@@ -25,7 +26,7 @@ export class GeoToolsItemDef {
       id: "geo-tools:geoAddressSearch",
       icon: <SvgGeosearch />,
       label: GeoTools.translate("geoAddressSearch.label"),
-      panelContent: <GeoAddressSearch provider={opts?.addressProvider}/>,
+      panelContent: <GeoAddressSearch provider={opts?.addressProvider?? new BingAddressProvider()}/>,
     });
   }
 }

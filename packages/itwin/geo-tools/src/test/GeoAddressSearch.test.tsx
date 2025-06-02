@@ -5,7 +5,7 @@
 
 import { expect } from "chai";
 import { mount } from "enzyme";
-import * as React from "react";
+import React from "react";
 import * as sinon from "sinon";
 import { stubObject } from "ts-sinon";
 import { SpecialKey } from "@itwin/appui-abstract";
@@ -60,7 +60,7 @@ describe("GeoAddressSearch", () => {
   });
 
   it("renders", () => {
-    const wrapper = mount(<GeoAddressSearch />);
+    const wrapper = mount(<GeoAddressSearch provider={new BingAddressProvider()}/>);
 
     expect(wrapper.find("input[type='text']").length).to.eq(1);
     wrapper.unmount();
