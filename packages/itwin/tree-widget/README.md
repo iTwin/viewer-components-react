@@ -218,7 +218,7 @@ function CustomModelsTreeComponent({ imodel, viewport, getSchemaContext, selecti
 
 #### Displaying a subset of the tree
 
-Models tree allows displaying a subset of all nodes by providing a `getFilteredPaths` function. This function receives an internal helper function called `createInstanceKeyPaths`, which can generate paths from either:
+Models tree allows displaying a subset of all nodes by providing a `getFilteredPaths` function. This function receives a helper function called `createInstanceKeyPaths`, which can generate paths from either:
 
 - a list of instance keys (`targetItems`)
 - a label string
