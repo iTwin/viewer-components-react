@@ -38,8 +38,8 @@ export interface UseModelsTreeProps {
    * Optional search string used to filter tree nodes.
    * Nodes that do not contain this string in their label will be filtered out.
    *
-   * This filtering works without the need of `getFilteredPaths`. If `getFilteredPaths` function is provided, it will take precedence and this
-   * string will be ignored during filtering process.
+   * If `getFilteredPaths` function is provided, it will take precedence and automatic filtering by this string will not be applied.
+   * Instead, the string will be supplied to the given `getFilteredPaths` function for consumers to apply the filtering.
    */
   filter?: string;
   activeView: Viewport;
