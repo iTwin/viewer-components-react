@@ -526,15 +526,14 @@ export function useModelsTreeButtonProps({ imodel, viewport }: {
 interface UseModelsTreeProps {
     // (undocumented)
     activeView: Viewport;
-    // (undocumented)
     filter?: string;
-    // (undocumented)
     getFilteredPaths?: (props: {
         createInstanceKeyPaths: (props: {
             targetItems: Array<InstanceKey | ElementsGroupInfo>;
         } | {
             label: string;
         }) => Promise<HierarchyFilteringPath[]>;
+        filter?: string;
     }) => Promise<HierarchyFilteringPath[]>;
     // (undocumented)
     hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
