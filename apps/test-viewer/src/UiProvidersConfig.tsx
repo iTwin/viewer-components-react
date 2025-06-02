@@ -257,6 +257,8 @@ const configuredUiItems = new Map<string, UiItem>([
       initialize: async () => {
         await GeoTools.initialize();
       },
+      // TODO: Use next line to use Google API
+      // createUiItemsProviders: () => [new GeoToolsAddressSearchProvider(new GoogleAddressProvider)],
       createUiItemsProviders: () => [new GeoToolsAddressSearchProvider()],
     },
   ],
