@@ -13,12 +13,22 @@ import { PropertyGridContent } from "./PropertyGridContent.js";
 import type { DataProviderProps } from "../hooks/UseDataProvider.js";
 import type { FilteringPropertyGridProps } from "./FilteringPropertyGrid.js";
 import type { PropertyGridContentProps } from "./PropertyGridContent.js";
+import type { SelectionStorage } from "@itwin/unified-selection";
 
 /**
  * Props for `PropertyGrid` component.
  * @public
  */
-export type PropertyGridProps = Omit<PropertyGridContentProps, "dataProvider" | "dataRenderer"> & DataProviderProps;
+export type PropertyGridProps = Omit<PropertyGridContentProps, "dataProvider" | "dataRenderer"> &
+  DataProviderProps & {
+    /**
+     * Unified selection storage to use for listening and getting active selection.
+     *
+     * When not specified, the deprecated `SelectionManager` from `@itwin/presentation-frontend` package
+     * is used.
+     */
+    selectionStorage?: SelectionStorage;
+  };
 
 /**
  * Component that renders property grid for instances in `UnifiedSelection`.
@@ -33,8 +43,8 @@ export function PropertyGrid({ createDataProvider, ...props }: PropertyGridProps
   return <UnifiedSelectionPropertyGrid {...props} dataProvider={dataProvider} />;
 }
 
-function UnifiedSelectionPropertyGrid(props: PropertyGridContentProps) {
-  const { isOverLimit } = usePropertyDataProviderWithUnifiedSelection({ dataProvider: props.dataProvider });
+function UnifiedSelectionPropertyGrid({ selectionStorage, ...props }: PropertyGridContentProps & { selectionStorage?: SelectionStorage }) {
+  const { isOverLimit } = usePropertyDataProviderWithUnifiedSelection({ dataProvider: props.dataProvider, selectionStorage });
 
   const dataRenderer = (dataRendererProps: FilteringPropertyGridProps) => {
     if (isOverLimit) {

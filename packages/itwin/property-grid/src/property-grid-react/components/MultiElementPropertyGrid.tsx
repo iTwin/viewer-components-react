@@ -17,7 +17,6 @@ import { ElementList as ElementListComponent } from "./ElementList.js";
 import { PropertyGrid as PropertyGridComponent } from "./PropertyGrid.js";
 import { SingleElementPropertyGrid as SingleElementPropertyGridComponent } from "./SingleElementPropertyGrid.js";
 
-import type { SelectionStorage } from "../hooks/UseUnifiedSelectionHandler.js";
 import type { ElementListProps } from "./ElementList.js";
 import type { ReactNode } from "react";
 import type { PropertyGridProps } from "./PropertyGrid.js";
@@ -36,14 +35,6 @@ enum MultiElementPropertyContent {
  * @public
  */
 export interface MultiElementPropertyGridProps extends Omit<PropertyGridProps, "headerControls" | "onBackButton"> {
-  /**
-   * Unified selection storage to use for listening and getting active selection.
-   *
-   * When not specified, the deprecated `SelectionManager` from `@itwin/presentation-frontend` package
-   * is used.
-   */
-  selectionStorage?: SelectionStorage;
-
   /** Renders controls for ancestors navigation. If set to `undefined`, ancestors navigation is disabled. */
   ancestorsNavigationControls?: (props: AncestorsNavigationControlsProps) => ReactNode;
 
@@ -61,12 +52,12 @@ export interface MultiElementPropertyGridProps extends Omit<PropertyGridProps, "
  * - If a single instance is selected, navigation through its ancestors can be enabled.
  * @public
  */
-export function MultiElementPropertyGrid({ ancestorsNavigationControls, ...props }: MultiElementPropertyGridProps) {
+export function MultiElementPropertyGrid({ ancestorsNavigationControls, getParentInstanceKey, ...props }: MultiElementPropertyGridProps) {
   const { selectionChange } = useSelectionHandler({ selectionStorage: props.selectionStorage });
   const { selectedKeys, focusedInstanceKey, focusInstance, ancestorsNavigationProps } = useInstanceSelection({
     imodel: props.imodel,
     selectionStorage: props.selectionStorage,
-    getParentInstanceKey: props.getParentInstanceKey,
+    getParentInstanceKey,
   });
   const [content, setContent] = useState<MultiElementPropertyContent>(MultiElementPropertyContent.PropertyGrid);
   const { onFeatureUsed } = useTelemetryContext();
