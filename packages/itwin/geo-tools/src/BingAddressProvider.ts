@@ -2,7 +2,7 @@
 import { IModelApp } from "@itwin/core-frontend";
 
 import type { MapCartoRectangle } from "@itwin/core-frontend";
-import type { GeoCoder, AddressProvider, AddressRequest, AddressData } from "./AddressProvider";
+import type { GeoCoder, AddressProvider, AddressRequest, AddressData, AddressProviderViewContext } from "./AddressProvider";
 
 export class BingAddressProvider implements AddressProvider {
   private _radius = 5000;
@@ -14,6 +14,10 @@ export class BingAddressProvider implements AddressProvider {
   public supportsAddressLocation(): this is GeoCoder  {
       return false;
     }
+
+  public isDisabled(_context: AddressProviderViewContext) {
+    return false;
+  };
 
   constructor(radius?: number, maxResults?: number, entityTypes?: string[]) {
     if (maxResults !== undefined) {

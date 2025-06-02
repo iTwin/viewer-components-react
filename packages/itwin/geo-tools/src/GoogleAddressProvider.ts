@@ -3,11 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Cartographic } from "@itwin/core-common";
+import { BaseMapLayerSettings, Cartographic } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
 
-import type { MapCartoRectangle } from "@itwin/core-frontend";
-import type { AddressProvider, AddressRequest, AddressData, GeoCoder } from "./AddressProvider";
+import type { MapCartoRectangle, Viewport } from "@itwin/core-frontend";
+import type { AddressProvider, AddressRequest, AddressData, GeoCoder, AddressProviderViewContext } from "./AddressProvider";
 
 /**
  * Information requiered to retreive location from Google Places API.
@@ -25,6 +25,7 @@ export class GoogleAddressProvider implements AddressProvider {
   private _apiKey: string;
   public readonly hasAddressIds = true;
 
+
   constructor(locationBiasRadius?: number) {
     if (locationBiasRadius !== undefined) {
       this._radius = locationBiasRadius;
@@ -39,6 +40,18 @@ export class GoogleAddressProvider implements AddressProvider {
   public supportsAddressLocation(): this is GeoCoder  {
     return true;
   }
+
+  private isGoogleBaseMap (vp?: Viewport): boolean  {
+        return (
+            vp?.viewFlags.backgroundMap === true
+            && vp?.displayStyle.backgroundMapBase instanceof BaseMapLayerSettings
+            && vp.displayStyle.backgroundMapBase.formatId === "GoogleMaps"
+        );
+  };
+
+  public isDisabled(context: AddressProviderViewContext) {
+    return !this.isGoogleBaseMap(context.viewport);
+    };
 
   protected async getAuthRequestHeader(): Promise<Record<string, string>> {
     return { "X-Goog-Api-Key": this._apiKey};

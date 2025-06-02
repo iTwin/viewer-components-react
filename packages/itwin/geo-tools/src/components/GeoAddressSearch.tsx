@@ -6,12 +6,9 @@
 import "./GeoAddressSearch.scss";
 import * as React from "react";
 import { useActiveViewport } from "@itwin/appui-react";
-import { BaseMapLayerSettings } from "@itwin/core-common";
 import { SvgCloseSmall, SvgSearch } from "@itwin/itwinui-icons-react";
 import { ComboBox, IconButton } from "@itwin/itwinui-react";
-import { BingAddressProvider } from "../BingAddressProvider";
 import { GeoTools } from "../GeoTools";
-import { GoogleAddressProvider } from "../GoogleAddressProvider";
 import { IModelGeoView } from "../IModelGeoView";
 
 import type { Viewport } from "@itwin/core-frontend";
@@ -22,52 +19,37 @@ import type { AddressData, AddressProvider } from "../AddressProvider";
  */
 export interface GeoAddressSearchProps {
   /** Address provider object */
-  provider?: AddressProvider;
+  provider: AddressProvider;
+
   /** Indicates whether to set focus to the input element (default to true)*/
   setFocus?: boolean;
 }
-
-const isGoogleBaseMap = (vp?: Viewport): boolean => {
-      return (
-          vp?.viewFlags.backgroundMap === true
-          && vp?.displayStyle.backgroundMapBase instanceof BaseMapLayerSettings
-          && vp.displayStyle.backgroundMapBase.formatId === "GoogleMaps"
-      );
-};
-const isValidBaseMap = (provider: AddressProvider, vp?: Viewport) => {
-  const isGoogleAddressProvider = provider instanceof GoogleAddressProvider;
-  return !isGoogleAddressProvider || (isGoogleAddressProvider && isGoogleBaseMap(vp));
-}
-
 /**
- * <GeoAddressSearch> react component
  */
 export function GeoAddressSearch(props: GeoAddressSearchProps) {
+  const {provider} = props;
+
   const [inputValue, setInputValue] = React.useState("");
   const [options, setOptions] = React.useState<SelectOption<string>[]>([]);
   const [addressCache, setAddressCache] = React.useState<AddressData[]>([]);
   const activeViewport = useActiveViewport(); // Hook to ensure the component re-renders when the active viewport changes
-  const [disabled, setDisabled] = React.useState<boolean>(() => isGoogleBaseMap(activeViewport));
-
-  // `React.useMemo' is used avoid creating new object on each render cycle
-  // Default is Bing provider, but we might want to default to Google in the future
-  const addressProvider = React.useMemo(() => props.provider ?? new BingAddressProvider(), [props.provider]);
+  const [disabled, setDisabled] = React.useState<boolean>(() => provider.isDisabled({ viewport: activeViewport }) );
 
   React.useEffect(() => {
-    setDisabled(!isValidBaseMap(addressProvider, activeViewport));
+
     return activeViewport?.onDisplayStyleChanged.addListener(
-      (vp)=>{setDisabled(!isValidBaseMap(addressProvider, vp));}
+      (vp)=>{setDisabled(provider?.isDisabled({ viewport: vp }) );}
     );
   }, [activeViewport]);
 
   const onAddressSelected = async (selected: string) => {
     setInputValue(selected);
     let locatedByPosition = false
-    if (addressProvider.supportsAddressLocation()) {
+    if (provider.supportsAddressLocation()) {
       const address = addressCache.find((addr) => addr.formattedAddress === selected);
         if (address !== undefined) {
           try {
-            const location = await addressProvider.getLocation(address);
+            const location = await provider.getLocation(address);
             if (location) {
               locatedByPosition = await IModelGeoView.locatePosition(location);
             }
@@ -83,7 +65,7 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
   const getAddressesFunc = async (value: string): Promise<AddressData[]> => {
     const viewBBox = IModelGeoView.getFrustumLonLatBBox();
     if (viewBBox && value) {
-      const addr = await addressProvider.getSuggestions(value, viewBBox);
+      const addr = await provider.getSuggestions(value, viewBBox);
       setAddressCache(addr);
       return addr;
     }
