@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fix property grid not loading data when using `SelectionStorage` directly.",
-  "packageName": "@itwin/property-grid-react",
-  "email": "24278440+saskliutas@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
