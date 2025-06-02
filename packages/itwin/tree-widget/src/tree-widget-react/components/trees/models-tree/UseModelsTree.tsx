@@ -35,7 +35,7 @@ type ModelsTreeFilteringError = "tooManyFilterMatches" | "tooManyInstancesFocuse
 /** @beta */
 export interface UseModelsTreeProps {
   /**
-   * Optional search string used to filter tree nodes.
+   * Optional search string used to filter tree nodes by label, as well as highlight matching substrings in the tree.
    * Nodes that do not contain this string in their label will be filtered out.
    *
    * If `getFilteredPaths` function is provided, it will take precedence and automatic filtering by this string will not be applied.
