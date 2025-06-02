@@ -115,30 +115,25 @@ function CustomModelsTreeComponentWithFilterAndTargetItems({
   selectionStorage: SelectionStorage;
   imodel: IModelConnection;
 }) {
-  const customFilter = 'test';
   const getFilteredPaths = useCallback<GetFilteredPathsType>(
     async ({ createInstanceKeyPaths, filter }) => {
-      const userLabelFilter = filter ?? customFilter;
       const targetItems = new Array<InstanceKey>();
       for await (const row of imodel.createQueryReader(`
           SELECT ec_classname(e.ECClassId, 's.c') className, e.ECInstanceId id
           FROM BisCore.Element e
-          WHERE UserLabel LIKE '%${userLabelFilter}%'
+          WHERE UserLabel LIKE '%${filter ?? ""}%'
         `,
         undefined,
         { rowFormat: QueryRowFormat.UseJsPropertyNames },
       )) {
         targetItems.push({ id: row.id, className: row.className });
       }
-
-      return createInstanceKeyPaths({
-        targetItems,
-      });
+      return createInstanceKeyPaths({ targetItems });
     },
     [imodel],
   );
 
-  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths, filter: customFilter });
+  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths, filter: "test" });
 
   return (
     <VisibilityTree
