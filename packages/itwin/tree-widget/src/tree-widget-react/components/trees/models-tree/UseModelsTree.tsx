@@ -46,10 +46,9 @@ export interface UseModelsTreeProps {
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
   visibilityHandlerOverrides?: ModelsTreeVisibilityHandlerOverrides;
   /**
-   * Optional function for providing custom filter paths.
-   * When defined, this function overrides the default filtering logic that uses the `filter` string.
+   * Optional function for applying custom filtering on the hierarchy. Use it when you want full control over which nodes should be displayed, based on more complex logic or known instance keys.
    *
-   * Use this function when you want full control over which nodes should be displaed, based on more complex logic or known instance keys.
+   * When defined, this function takes precedence over filtering by `filter` string. If both are supplied, the `filter` is provided as an argument to `getFilteredPaths`.
    *
    * @param props Parameters provided when `getFilteredPaths` is called:
    * - `createInstanceKeyPaths`: Helper function to create filter paths.
