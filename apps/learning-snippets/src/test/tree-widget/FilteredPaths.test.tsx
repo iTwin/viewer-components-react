@@ -9,6 +9,7 @@ import { expect } from "chai";
 import { useCallback } from "react";
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
+import { QueryRowFormat } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
 import { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import { useModelsTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
@@ -28,17 +29,21 @@ import type { SelectionStorage } from "@itwin/unified-selection";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
 
-// __PUBLISH_EXTRACT_START__ TreeWidget.GetFilteredPathsComponentExample
+// __PUBLISH_EXTRACT_START__ TreeWidget.GetFilteredPathsComponentWithTargetItemsExample
 type UseModelsTreeProps = Parameters<typeof useModelsTree>[0];
 type GetFilteredPathsType = Exclude<UseModelsTreeProps["getFilteredPaths"], undefined>;
-interface CustomModelsTreeProps {
+
+function CustomModelsTreeComponentWithTargetItems({
+  viewport,
+  selectionStorage,
+  imodel,
+  targetItems,
+}: {
   viewport: Viewport;
   selectionStorage: SelectionStorage;
   imodel: IModelConnection;
   targetItems: InstanceKey[];
-}
-
-function CustomModelsTreeComponent({ viewport, selectionStorage, imodel, targetItems }: CustomModelsTreeProps) {
+}) {
   const getFilteredPaths = useCallback<GetFilteredPathsType>(
     async ({ createInstanceKeyPaths }) => {
       return createInstanceKeyPaths({
@@ -63,14 +68,17 @@ function CustomModelsTreeComponent({ viewport, selectionStorage, imodel, targetI
 }
 // __PUBLISH_EXTRACT_END__
 
-// __PUBLISH_EXTRACT_START__ TreeWidget.GetFilteredPathsComponentExample2
-interface CustomModelsTreeProps2 {
+// __PUBLISH_EXTRACT_START__ TreeWidget.GetFilteredPathsComponentWithPostProcessingExample
+
+function CustomModelsTreeComponentWithPostProcessing({
+  viewport,
+  selectionStorage,
+  imodel,
+}: {
   viewport: Viewport;
   selectionStorage: SelectionStorage;
   imodel: IModelConnection;
-}
-
-function CustomModelsTreeComponent2({ viewport, selectionStorage, imodel }: CustomModelsTreeProps2) {
+}) {
   const getFilteredPaths = useCallback<GetFilteredPathsType>(async ({ createInstanceKeyPaths, filter }) => {
     const defaultPaths = await createInstanceKeyPaths({ label: filter ?? "test" });
     const result = new Array<HierarchyFilteringPath>();
@@ -98,27 +106,41 @@ function CustomModelsTreeComponent2({ viewport, selectionStorage, imodel }: Cust
 }
 // __PUBLISH_EXTRACT_END__
 
-// __PUBLISH_EXTRACT_START__ TreeWidget.GetFilteredPathsComponentExample3
-interface CustomModelsTreeProps3 {
+// __PUBLISH_EXTRACT_START__ TreeWidget.GetFilteredPathsComponentWithFilterAndTargetItemsExample
+
+function CustomModelsTreeComponentWithFilterAndTargetItems({
+  viewport,
+  selectionStorage,
+  imodel,
+}: {
   viewport: Viewport;
   selectionStorage: SelectionStorage;
   imodel: IModelConnection;
-}
+}) {
+  const customFilter = 'test';
+  const getFilteredPaths = useCallback<GetFilteredPathsType>(
+    async ({ createInstanceKeyPaths, filter }) => {
+      const userLabelFilter = filter ?? customFilter;
+      const targetItems = new Array<InstanceKey>();
+      for await (const row of imodel.createQueryReader(`
+          SELECT ec_classname(e.ECClassId, 's.c') className, e.ECInstanceId id
+          FROM BisCore.Element e
+          WHERE UserLabel LIKE '%${userLabelFilter}%'
+        `,
+        undefined,
+        { rowFormat: QueryRowFormat.UseJsPropertyNames },
+      )) {
+        targetItems.push({ id: row.id, className: row.className });
+      }
 
-function CustomModelsTreeComponent3({ viewport, selectionStorage, imodel }: CustomModelsTreeProps3) {
-  const getFilteredPaths = useCallback<GetFilteredPathsType>(async () => {
-    const filteredPaths = new Array<HierarchyFilteringPath>();
-    for (const override of viewport.perModelCategoryVisibility) {
-      filteredPaths.push([
-        { id: "0x1", className: "BisCore.Subject" },
-        { id: override.modelId, className: "BisCore.Model" },
-        { id: override.categoryId, className: "BisCore.Category" },
-      ]);
-    }
-    return filteredPaths;
-  }, [viewport]);
+      return createInstanceKeyPaths({
+        targetItems,
+      });
+    },
+    [imodel],
+  );
 
-  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths });
+  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths, filter: customFilter });
 
   return (
     <VisibilityTree
@@ -168,7 +190,7 @@ describe("Tree widget", () => {
 
           using _ = { [Symbol.dispose]: cleanup };
           const { getByText, queryByText } = render(
-            <CustomModelsTreeComponent
+            <CustomModelsTreeComponentWithTargetItems
               selectionStorage={unifiedSelectionStorage}
               imodel={imodel.imodel}
               viewport={testViewport}
@@ -207,7 +229,7 @@ describe("Tree widget", () => {
 
           using _ = { [Symbol.dispose]: cleanup };
           const { getByText, queryByText } = render(
-            <CustomModelsTreeComponent2 selectionStorage={unifiedSelectionStorage} imodel={imodel.imodel} viewport={testViewport} />,
+            <CustomModelsTreeComponentWithPostProcessing selectionStorage={unifiedSelectionStorage} imodel={imodel.imodel} viewport={testViewport} />,
           );
 
           await waitFor(() => {
@@ -216,25 +238,17 @@ describe("Tree widget", () => {
           });
         });
 
-        it("renders custom models tree component with filtered paths when filtered paths are created customly", async function () {
+        it("renders custom models tree component with filtered paths when filtered paths are created using filter", async function () {
           const imodel = await buildIModel(this, async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "PhysicalModel" });
             const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
             const physicalModel2 = insertPhysicalModelWithPartition({ builder, codeValue: "PhysicalModel2" });
             const category2 = insertSpatialCategory({ builder, codeValue: "SpatialCategory2" });
             insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id, userLabel: "test element 1" });
-            insertPhysicalElement({ builder, modelId: physicalModel2.id, categoryId: category2.id, userLabel: "test element 2" });
+            insertPhysicalElement({ builder, modelId: physicalModel2.id, categoryId: category2.id, userLabel: "element 2" });
             return { physicalModel, category };
           });
           const testViewport = getTestViewer(imodel.imodel, true);
-          const modifiedViewport = {
-            ...testViewport,
-            perModelCategoryVisibility: {
-              *[Symbol.iterator]() {
-                yield { modelId: imodel.physicalModel.id, categoryId: imodel.category.id };
-              },
-            },
-          } as unknown as Viewport;
           const unifiedSelectionStorage = createStorage();
           sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
           sinon.stub(UiFramework, "getIModelConnection").returns(imodel.imodel);
@@ -242,7 +256,7 @@ describe("Tree widget", () => {
 
           using _ = { [Symbol.dispose]: cleanup };
           const { getByText, queryByText } = render(
-            <CustomModelsTreeComponent3 selectionStorage={unifiedSelectionStorage} imodel={imodel.imodel} viewport={modifiedViewport} />,
+            <CustomModelsTreeComponentWithFilterAndTargetItems selectionStorage={unifiedSelectionStorage} imodel={imodel.imodel} viewport={testViewport} />,
           );
 
           await waitFor(() => {

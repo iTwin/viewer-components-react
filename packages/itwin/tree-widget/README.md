@@ -223,25 +223,29 @@ Models tree allows displaying a subset of all nodes by providing a `getFilteredP
 - a list of instance keys (`targetItems`)
 - a label string
 
-When these paths are provided, the displayed hierarchy consists only of the targeted nodes, their ancestors, and their children.
+Based on the returned paths, the displayed hierarchy consists only of the targeted nodes, their ancestors, and their children.
 
 Use `getFilteredPaths` when you need more control over which nodes are shown. Here are some example use cases:
 
 - **Filter by known instance keys**: You already have a list of `InstanceKey` items that should remain in the tree. Pass them as `targetItems` to `createInstanceKeyPaths`.
-  <!-- [[include: [TreeWidget.GetFilteredPathsComponentExample], tsx]] -->
+  <!-- [[include: [TreeWidget.GetFilteredPathsComponentWithTargetItemsExample], tsx]] -->
   <!-- BEGIN EXTRACTION -->
 
   ```tsx
   type UseModelsTreeProps = Parameters<typeof useModelsTree>[0];
   type GetFilteredPathsType = Exclude<UseModelsTreeProps["getFilteredPaths"], undefined>;
-  interface CustomModelsTreeProps {
+
+  function CustomModelsTreeComponentWithTargetItems({
+    viewport,
+    selectionStorage,
+    imodel,
+    targetItems,
+  }: {
     viewport: Viewport;
     selectionStorage: SelectionStorage;
     imodel: IModelConnection;
     targetItems: InstanceKey[];
-  }
-
-  function CustomModelsTreeComponent({ viewport, selectionStorage, imodel, targetItems }: CustomModelsTreeProps) {
+  }) {
     const getFilteredPaths = useCallback<GetFilteredPathsType>(
       async ({ createInstanceKeyPaths }) => {
         return createInstanceKeyPaths({
@@ -269,17 +273,19 @@ Use `getFilteredPaths` when you need more control over which nodes are shown. He
   <!-- END EXTRACTION -->
 
 - **Post-process the paths created `createInstanceKeyPaths`**: Use `filter` string to generate the paths, then apply additional filtering - e.g., remove paths that are too long.
-  <!-- [[include: [TreeWidget.GetFilteredPathsComponentExample2], tsx]] -->
+  <!-- [[include: [TreeWidget.GetFilteredPathsComponentWithPostProcessingExample], tsx]] -->
   <!-- BEGIN EXTRACTION -->
 
   ```tsx
-  interface CustomModelsTreeProps2 {
+  function CustomModelsTreeComponentWithPostProcessing({
+    viewport,
+    selectionStorage,
+    imodel,
+  }: {
     viewport: Viewport;
     selectionStorage: SelectionStorage;
     imodel: IModelConnection;
-  }
-
-  function CustomModelsTreeComponent2({ viewport, selectionStorage, imodel }: CustomModelsTreeProps2) {
+  }) {
     const getFilteredPaths = useCallback<GetFilteredPathsType>(async ({ createInstanceKeyPaths, filter }) => {
       const defaultPaths = await createInstanceKeyPaths({ label: filter ?? "test" });
       const result = new Array<HierarchyFilteringPath>();
@@ -309,30 +315,44 @@ Use `getFilteredPaths` when you need more control over which nodes are shown. He
 
   <!-- END EXTRACTION -->
 
-- **Apply fully custom logic**: Generate paths based on completely custom implementation. For exampel: showing each category that has an override applied in viewport.
-    <!-- [[include: [TreeWidget.GetFilteredPathsComponentExample3], tsx]] -->
+- **Apply custom logic to generate instance keys**: Generate instance keys using custom implementation. For example: query elements that have specified filter in their user label and provide them as targetItems.
+    <!-- [[include: [TreeWidget.GetFilteredPathsComponentWithFilterAndTargetItemsExample], tsx]] -->
     <!-- BEGIN EXTRACTION -->
   ```tsx
-  interface CustomModelsTreeProps3 {
+  function CustomModelsTreeComponentWithFilterAndTargetItems({
+    viewport,
+    selectionStorage,
+    imodel,
+  }: {
     viewport: Viewport;
     selectionStorage: SelectionStorage;
     imodel: IModelConnection;
-  }
+  }) {
+    const customFilter = "test";
+    const getFilteredPaths = useCallback<GetFilteredPathsType>(
+      async ({ createInstanceKeyPaths, filter }) => {
+        const userLabelFilter = filter ?? customFilter;
+        const targetItems = new Array<InstanceKey>();
+        for await (const row of imodel.createQueryReader(
+          `
+            SELECT ec_classname(e.ECClassId, 's.c') className, e.ECInstanceId id
+            FROM BisCore.Element e
+            WHERE UserLabel LIKE '%${userLabelFilter}%'
+          `,
+          undefined,
+          { rowFormat: QueryRowFormat.UseJsPropertyNames },
+        )) {
+          targetItems.push({ id: row.id, className: row.className });
+        }
 
-  function CustomModelsTreeComponent3({ viewport, selectionStorage, imodel }: CustomModelsTreeProps3) {
-    const getFilteredPaths = useCallback<GetFilteredPathsType>(async () => {
-      const filteredPaths = new Array<HierarchyFilteringPath>();
-      for (const override of viewport.perModelCategoryVisibility) {
-        filteredPaths.push([
-          { id: "0x1", className: "BisCore.Subject" },
-          { id: override.modelId, className: "BisCore.Model" },
-          { id: override.categoryId, className: "BisCore.Category" },
-        ]);
-      }
-      return filteredPaths;
-    }, [viewport]);
+        return createInstanceKeyPaths({
+          targetItems,
+        });
+      },
+      [imodel],
+    );
 
-    const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths });
+    const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths, filter: customFilter });
 
     return (
       <VisibilityTree
