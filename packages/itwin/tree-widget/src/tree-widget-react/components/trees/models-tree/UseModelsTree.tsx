@@ -54,10 +54,11 @@ export interface UseModelsTreeProps {
    * - `createInstanceKeyPaths`: Helper function to create filter paths.
    * - `filter`: The filter string which would otherwise be used for default filtering.
    *
-   * ### Example use cases:
-   * - You have a list of `InstanceKey` items, which you want to keep. Pass them as `targetItems` to `createInstanceKeyPaths`.
-   * - You want to create filter paths based on a label, but also apply some extra conditions (for example exclude paths with sub-models).
+   * **Example use cases:**
+   * - You have a list of `InstanceKey` items, which you want to use for filtering the hierarchy.
+   * - You want to create filter paths based on node label, but also apply some extra conditions (for example exclude paths with sub-models).
    * - You want to construct custom filtered paths. For example: create a filter path for each geometric element which has a parent element.
+   *
    * @note Paths returned  by `createInstanceKeyPaths` will not have `autoExpand` flag set. If you want nodes to be expanded, iterate over the paths and
    * set `autoExpand: true` manually.
    */
