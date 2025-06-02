@@ -9,11 +9,17 @@ import { IModelApp } from "@itwin/core-frontend";
 import type { MapCartoRectangle } from "@itwin/core-frontend";
 import type { AddressProvider, AddressRequest, AddressData, GeoCoder } from "./AddressProvider";
 
-
+/**
+ * Information requiered to retreive location from Google Places API.
+ **/
 export interface GoogleAddressData  extends AddressData {
   placeId: string;
 }
 
+/**
+ * Address provider for Google Places API.
+ * It supports address suggestions and location retrieval based on place IDs.
+ */
 export class GoogleAddressProvider implements AddressProvider {
   private _radius = 5000;
   private _apiKey: string;
