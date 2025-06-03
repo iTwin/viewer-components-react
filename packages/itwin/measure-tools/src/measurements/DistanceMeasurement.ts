@@ -54,6 +54,8 @@ export interface DistanceMeasurementProps extends MeasurementProps {
   showAxes?: boolean;
   lengthKoQ?: string;
   lengthPersistenceUnitName?: string;
+  bearingKoQ?: string;
+  bearingPersistenceUnitName?: string;
 }
 
 /** Serializer for a [[DistanceMeasurement]]. */
@@ -456,21 +458,18 @@ export class DistanceMeasurement extends Measurement {
     const formatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
 
     const distance = this._startPoint.distance(this._endPoint);
-    const magnitude = distance * this.worldScale;
-    let fDistance: string;
+    let lengthSpec: FormatterSpec | undefined;
     if (formatProps) {
       // eslint-disable-next-line @itwin/no-internal
-      const lengthSpec = await IModelApp.quantityFormatter.createFormatterSpec({
+      lengthSpec = await IModelApp.quantityFormatter.createFormatterSpec({
         formatProps,
         persistenceUnitName: this._persistenceUnitName
       });
-      fDistance = IModelApp.quantityFormatter.formatQuantity(
-        magnitude,
-        lengthSpec
-      );
-    } else {
-      fDistance = magnitude.toString();
     }
+    const fDistance = IModelApp.quantityFormatter.formatQuantity(
+      distance,
+      lengthSpec
+    );
 
     const midPoint = Point3d.createAdd2Scaled(
       this._startPoint,
