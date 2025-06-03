@@ -52,7 +52,7 @@ export interface DistanceMeasurementProps extends MeasurementProps {
   startPoint: XYZProps;
   endPoint: XYZProps;
   showAxes?: boolean;
-  lengthKoQ?: string;
+  lengthKoQ?: string; // TODO: Should I move these 4 props into its own object?
   lengthPersistenceUnitName?: string;
   bearingKoQ?: string;
   bearingPersistenceUnitName?: string;
@@ -102,6 +102,8 @@ export class DistanceMeasurement extends Measurement {
   private _showAxes: boolean;
   private _lengthKoQ: string;
   private _persistenceUnitName: string;
+  private _bearingKoQ: string;
+  private _bearingPersistenceUnitName: string;
 
   private _isDynamic: boolean; // No serialize
   private _textMarker?: TextMarker; // No serialize
@@ -170,7 +172,9 @@ export class DistanceMeasurement extends Measurement {
     this._runRiseAxes = [];
     this._lengthKoQ = "AecUnits.LENGTH";
     this._persistenceUnitName = "Units.M";
-
+    // TODO: These two should be made optional, and logic only happens if the application passed them into the props.
+    this._bearingKoQ = "RoadRailUnits.Bearing";
+    this._bearingPersistenceUnitName = "Units.RAD";
     if (props) this.readFromJSON(props);
 
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
@@ -508,8 +512,11 @@ export class DistanceMeasurement extends Measurement {
     const run = this.drawingMetadata?.worldScale !== undefined ? this.worldScale * Math.abs(this._endPoint.x - this._startPoint.x): this._startPoint.distanceXY(this._endPoint);
     const rise = this.drawingMetadata?.worldScale !== undefined ? this.worldScale * (this._endPoint.y - this._startPoint.y): this._endPoint.z - this._startPoint.z;
     const slope = 0.0 < run ? (100 * rise) / run : 0.0;
+
     const dx = Math.abs(this._endPoint.x - this._startPoint.x);
     const dy = Math.abs(this._endPoint.y - this._startPoint.y);
+    let bearing = Math.atan2(dx, dy); // radians, 0 = North, π/2 = East
+    if (bearing < 0) bearing += 2 * Math.PI; // Normalize to [0, 2π)
 
     const adjustedStart = this.adjustPointForGlobalOrigin(this._startPoint);
     const adjustedEnd = this.adjustPointForGlobalOrigin(this._endPoint);
@@ -582,7 +589,21 @@ export class DistanceMeasurement extends Measurement {
         value: fSlope,
       },
     );
-
+    if (this._bearingKoQ && this._bearingPersistenceUnitName) {
+      // eslint-disable-next-line @itwin/no-internal
+      const bearingSpecs = await IModelApp.quantityFormatter.createFormatterSpec({
+        persistenceUnitName: this._bearingPersistenceUnitName,
+        formatProps: FormatterUtils.getDefaultBearingFormatProps() // TODO: Replace with retrieving formatProps from formatsProvider and KoQ after demo.
+      });
+      const fBearing: string = IModelApp.quantityFormatter.formatQuantity(bearing, bearingSpecs);
+      data.properties.push({
+        label: MeasureTools.localization.getLocalizedString(
+          "MeasureTools:tools.MeasureDistance.bearing"
+        ),
+        name: "DistanceMeasurement_Bearing",
+        value: fBearing,
+    });
+    }
     if (this.drawingMetadata?.worldScale === undefined) {
       data.properties.push(
         {
@@ -688,6 +709,12 @@ export class DistanceMeasurement extends Measurement {
     if (jsonDist.lengthPersistenceUnitName !== undefined)
       this._persistenceUnitName = jsonDist.lengthPersistenceUnitName;
 
+    if (jsonDist.bearingKoQ !== undefined)
+      this._bearingKoQ = jsonDist.bearingKoQ;
+
+    if (jsonDist.bearingPersistenceUnitName !== undefined)
+      this._bearingPersistenceUnitName = jsonDist.bearingPersistenceUnitName;
+
     this.buildRunRiseAxes();
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
@@ -705,6 +732,8 @@ export class DistanceMeasurement extends Measurement {
     jsonDist.showAxes = this._showAxes;
     jsonDist.lengthKoQ = this._lengthKoQ;
     jsonDist.lengthPersistenceUnitName = this._persistenceUnitName;
+    jsonDist.bearingKoQ = this._bearingKoQ;
+    jsonDist.bearingPersistenceUnitName = this._bearingPersistenceUnitName;
   }
 
   public static create(start: Point3d, end: Point3d, viewType?: string, lengthKoQ?: string, lengthPersistenceUnitName?: string) {

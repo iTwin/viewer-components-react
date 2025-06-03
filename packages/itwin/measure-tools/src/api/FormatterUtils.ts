@@ -6,6 +6,7 @@
 import type { Point3d, XAndY } from "@itwin/core-geometry";
 import type { Cartographic } from "@itwin/core-common";
 import { IModelApp, QuantityType } from "@itwin/core-frontend";
+import type { FormatProps } from "@itwin/core-quantity";
 import { FormatTraits, type FormatterSpec } from "@itwin/core-quantity";
 import { MeasureTools } from "../MeasureTools.js";
 
@@ -199,5 +200,25 @@ export class FormatterUtils {
         QuantityType.LengthEngineering
       );
     return IModelApp.quantityFormatter.formatQuantity(length, spec);
+  }
+
+  public static getDefaultBearingFormatProps(): FormatProps {
+    return {
+      minWidth: 2,
+      precision: 0,
+      type: "Bearing",
+      revolutionUnit: "Units.REVOLUTION",
+      formatTraits: ["showUnitLabel"],
+      uomSeparator: "",
+      composite: {
+        includeZero: true,
+        spacer: "",
+        units: [
+          { name: "Units.ARC_DEG", label: "°" },
+          { name: "Units.ARC_MINUTE", label: "'" },
+          { name: "Units.ARC_SECOND", label: "\"" },
+        ],
+      },
+    };
   }
 }
