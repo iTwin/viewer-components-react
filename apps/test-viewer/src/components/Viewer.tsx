@@ -15,7 +15,7 @@ import { getUiProvidersConfig } from "../UiProvidersConfig";
 import { ApiKeys } from "./ApiKeys";
 import { useAuthorizationContext } from "./Authorization";
 import { statusBarActionsProvider, ViewerOptionsProvider } from "./ViewerOptions";
-import { SchemaFormatsProvider, SchemaKey, SchemaMatchType } from "@itwin/ecschema-metadata";
+import { SchemaFormatsProvider, SchemaKey, SchemaMatchType, SchemaUnitProvider } from "@itwin/ecschema-metadata";
 
 const uiConfig = getUiProvidersConfig();
 
@@ -97,10 +97,18 @@ function onIModelConnected(imodel: IModelConnection) {
       const removeListener = IModelApp.quantityFormatter.onActiveFormattingUnitSystemChanged.addListener((args) => {
         schemaFormatsProvider.unitSystem = args.system;
       });
-      IModelApp.formatsProvider = schemaFormatsProvider;
-      console.log("Registered SchemaFormatsProvider");
 
-      IModelConnection.onClose.addOnce(removeListener)
+      const schemaUnitsProvider = new SchemaUnitProvider(imodel.schemaContext);
+      IModelApp.quantityFormatter.unitsProvider = schemaUnitsProvider;
+      IModelApp.formatsProvider = schemaFormatsProvider;
+      console.log("Registered SchemaFormatsProvider, SchemaUnitProvider");
+
+      IModelConnection.onClose.addOnce(() => {
+        removeListener();
+        IModelApp.resetFormatsProvider();
+        void IModelApp.quantityFormatter.resetToUseInternalUnitsProvider();
+        console.log("Unregistered SchemaFormatsProvider, SchemaUnitProvider");
+      });
     }
   }).catch((_) => {
     console.error("No common AecUnits schema found in iModel, not registering a SchemaFormatsProvider");
