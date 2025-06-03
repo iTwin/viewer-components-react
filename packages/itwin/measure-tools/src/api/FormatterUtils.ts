@@ -6,7 +6,7 @@
 import type { Point3d, XAndY } from "@itwin/core-geometry";
 import type { Cartographic } from "@itwin/core-common";
 import { IModelApp, QuantityType } from "@itwin/core-frontend";
-import type { FormatterSpec } from "@itwin/core-quantity";
+import { FormatTraits, type FormatterSpec } from "@itwin/core-quantity";
 import { MeasureTools } from "../MeasureTools.js";
 
 export class FormatterUtils {
@@ -55,14 +55,26 @@ export class FormatterUtils {
     return FormatterUtils.formatCoordinatesWithSpec(point, coordSpec);
   }
 
-  public static formatCoordinatesImmediate(point: Point3d): string {
-    const coordSpec =
-      IModelApp.quantityFormatter.findFormatterSpecByQuantityType(
-        QuantityType.Coordinate
-      );
-    if (undefined === coordSpec) return "";
+  public static formatCoordinatesImmediate(point: Point3d, coordSpec?: FormatterSpec): string {
+    let result: string;
+    if (!coordSpec) {
+      coordSpec =
+        IModelApp.quantityFormatter.findFormatterSpecByQuantityType(
+          QuantityType.Coordinate
+        );
+      if (undefined === coordSpec) return "";
+      result = FormatterUtils.formatCoordinatesWithSpec(point, coordSpec);
+    } else {
+      // eslint-disable-next-line @itwin/no-internal
+      const oldFormatTraits = coordSpec.format.formatTraits;
+      // eslint-disable-next-line @itwin/no-internal
+      coordSpec.format.formatTraits &= ~FormatTraits.ShowUnitLabel;
+      result = FormatterUtils.formatCoordinatesWithSpec(point, coordSpec);
+      // eslint-disable-next-line @itwin/no-internal
+      coordSpec.format.formatTraits = oldFormatTraits; // Restore original format traits
+    }
 
-    return FormatterUtils.formatCoordinatesWithSpec(point, coordSpec);
+    return result;
   }
 
   public static async formatCoordinatesXY(point: XAndY): Promise<string> {

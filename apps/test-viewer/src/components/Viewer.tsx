@@ -15,6 +15,7 @@ import { getUiProvidersConfig } from "../UiProvidersConfig";
 import { ApiKeys } from "./ApiKeys";
 import { useAuthorizationContext } from "./Authorization";
 import { statusBarActionsProvider, ViewerOptionsProvider } from "./ViewerOptions";
+import { SchemaFormatsProvider, SchemaKey, SchemaMatchType } from "@itwin/ecschema-metadata";
 
 const uiConfig = getUiProvidersConfig();
 
@@ -89,6 +90,15 @@ function onIModelConnected(imodel: IModelConnection) {
   setTimeout(() => {
     IModelConnection.onOpen.raiseEvent(imodel);
   }, 1000);
+
+  imodel.schemaContext.getSchema(new SchemaKey("AecUnits", SchemaMatchType.Latest)).then((schema) => {
+    if (schema) {
+      IModelApp.formatsProvider = new SchemaFormatsProvider(imodel.schemaContext, IModelApp.quantityFormatter.activeUnitSystem);
+      console.log("Registered SchemaFormatsProvider");
+    }
+  }).catch((_) => {
+    console.error("No common AecUnits schema found in iModel, not registering a SchemaFormatsProvider");
+  });
 }
 
 function useIModelInfo() {

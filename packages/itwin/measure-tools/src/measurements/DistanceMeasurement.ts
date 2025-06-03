@@ -43,6 +43,7 @@ import type { MeasurementProps } from "../api/MeasurementProps.js";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet.js";
 import { TextMarker } from "../api/TextMarker.js";
 import { MeasureTools } from "../MeasureTools.js";
+import type { FormatterSpec } from "@itwin/core-quantity";
 
 /**
  * Props for serializing a [[DistanceMeasurement]].
@@ -51,6 +52,8 @@ export interface DistanceMeasurementProps extends MeasurementProps {
   startPoint: XYZProps;
   endPoint: XYZProps;
   showAxes?: boolean;
+  lengthKoQ?: string;
+  lengthPersistenceUnitName?: string;
 }
 
 /** Serializer for a [[DistanceMeasurement]]. */
@@ -95,6 +98,8 @@ export class DistanceMeasurement extends Measurement {
   private _startPoint: Point3d;
   private _endPoint: Point3d;
   private _showAxes: boolean;
+  private _lengthKoQ: string;
+  private _persistenceUnitName: string;
 
   private _isDynamic: boolean; // No serialize
   private _textMarker?: TextMarker; // No serialize
@@ -129,6 +134,22 @@ export class DistanceMeasurement extends Measurement {
     this._showAxes = v;
   }
 
+  public get lengthKoQ(): string {
+    return this._lengthKoQ;
+  }
+  public set lengthKoQ(value: string) {
+    this._lengthKoQ = value;
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+  }
+
+  public get persistenceUnitName(): string {
+    return this._persistenceUnitName;
+  }
+  public set persistenceUnitName(value: string) {
+    this._persistenceUnitName = value;
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+  }
+
   // eslint-disable-next-line @typescript-eslint/naming-convention
   private get isAxis(): boolean {
     return (
@@ -145,6 +166,8 @@ export class DistanceMeasurement extends Measurement {
     this._isDynamic = false;
     this._showAxes = MeasurementPreferences.current.displayMeasurementAxes;
     this._runRiseAxes = [];
+    this._lengthKoQ = "AecUnits.LENGTH";
+    this._persistenceUnitName = "Units.M";
 
     if (props) this.readFromJSON(props);
 
@@ -429,15 +452,25 @@ export class DistanceMeasurement extends Measurement {
   }
 
   private async createTextMarker(): Promise<void> {
-    const lengthSpec =
-      await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
-        QuantityType.LengthEngineering
-      );
+    // eslint-disable-next-line @itwin/no-internal
+    const formatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
+
     const distance = this._startPoint.distance(this._endPoint);
-    const fDistance = IModelApp.quantityFormatter.formatQuantity(
-      distance * this.worldScale,
-      lengthSpec
-    );
+    const magnitude = distance * this.worldScale;
+    let fDistance: string;
+    if (formatProps) {
+      // eslint-disable-next-line @itwin/no-internal
+      const lengthSpec = await IModelApp.quantityFormatter.createFormatterSpec({
+        formatProps,
+        persistenceUnitName: this._persistenceUnitName
+      });
+      fDistance = IModelApp.quantityFormatter.formatQuantity(
+        magnitude,
+        lengthSpec
+      );
+    } else {
+      fDistance = magnitude.toString();
+    }
 
     const midPoint = Point3d.createAdd2Scaled(
       this._startPoint,
@@ -469,10 +502,8 @@ export class DistanceMeasurement extends Measurement {
   }
 
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
-    const lengthSpec =
-      await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
-        QuantityType.LengthEngineering
-      );
+    // eslint-disable-next-line @itwin/no-internal
+    const formatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
 
     const distance = this.worldScale * this._startPoint.distance(this._endPoint);
     const run = this.drawingMetadata?.worldScale !== undefined ? this.worldScale * Math.abs(this._endPoint.x - this._startPoint.x): this._startPoint.distanceXY(this._endPoint);
@@ -484,15 +515,21 @@ export class DistanceMeasurement extends Measurement {
     const adjustedStart = this.adjustPointForGlobalOrigin(this._startPoint);
     const adjustedEnd = this.adjustPointForGlobalOrigin(this._endPoint);
 
-    const fDistance = IModelApp.quantityFormatter.formatQuantity(
-      distance,
-      lengthSpec
-    );
+    let lengthSpec: FormatterSpec | undefined;
+    if (formatProps) {
+      // eslint-disable-next-line @itwin/no-internal
+      lengthSpec = await IModelApp.quantityFormatter.createFormatterSpec({
+        formatProps,
+        persistenceUnitName: this._persistenceUnitName
+      });
+    }
+
+    const fDistance = IModelApp.quantityFormatter.formatQuantity(distance, lengthSpec);
     const fStartCoords = FormatterUtils.formatCoordinatesImmediate(
-      adjustedStart
+      adjustedStart, lengthSpec
     );
     const fEndCoords = FormatterUtils.formatCoordinatesImmediate(
-      adjustedEnd
+      adjustedEnd, lengthSpec
     );
     const fSlope = FormatterUtils.formatSlope(slope, true);
     const fRun = IModelApp.quantityFormatter.formatQuantity(run, lengthSpec);
@@ -621,6 +658,7 @@ export class DistanceMeasurement extends Measurement {
       this._showAxes = other._showAxes;
       this._startPoint.setFrom(other._startPoint);
       this._endPoint.setFrom(other._endPoint);
+      this._lengthKoQ = other._lengthKoQ;
       this.buildRunRiseAxes();
       this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
     }
@@ -645,6 +683,12 @@ export class DistanceMeasurement extends Measurement {
         ? jsonDist.showAxes
         : MeasurementPreferences.current.displayMeasurementAxes;
 
+    if (jsonDist.lengthKoQ !== undefined)
+      this._lengthKoQ = jsonDist.lengthKoQ
+
+    if (jsonDist.lengthPersistenceUnitName !== undefined)
+      this._persistenceUnitName = jsonDist.lengthPersistenceUnitName;
+
     this.buildRunRiseAxes();
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
@@ -660,13 +704,17 @@ export class DistanceMeasurement extends Measurement {
     jsonDist.startPoint = this._startPoint.toJSON();
     jsonDist.endPoint = this._endPoint.toJSON();
     jsonDist.showAxes = this._showAxes;
+    jsonDist.lengthKoQ = this._lengthKoQ;
+    jsonDist.lengthPersistenceUnitName = this._persistenceUnitName;
   }
 
-  public static create(start: Point3d, end: Point3d, viewType?: string) {
+  public static create(start: Point3d, end: Point3d, viewType?: string, lengthKoQ?: string, lengthPersistenceUnitName?: string) {
     // Don't ned to serialize the points, will just work as is
     const measurement = new DistanceMeasurement({
       startPoint: start,
       endPoint: end,
+      lengthKoQ,
+      lengthPersistenceUnitName
     });
     if (viewType) measurement.viewTarget.include(viewType);
 
