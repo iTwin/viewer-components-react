@@ -93,8 +93,14 @@ function onIModelConnected(imodel: IModelConnection) {
 
   imodel.schemaContext.getSchema(new SchemaKey("AecUnits", SchemaMatchType.Latest)).then((schema) => {
     if (schema) {
-      IModelApp.formatsProvider = new SchemaFormatsProvider(imodel.schemaContext, IModelApp.quantityFormatter.activeUnitSystem);
+      const schemaFormatsProvider = new SchemaFormatsProvider(imodel.schemaContext, IModelApp.quantityFormatter.activeUnitSystem);
+      const removeListener = IModelApp.quantityFormatter.onActiveFormattingUnitSystemChanged.addListener((args) => {
+        schemaFormatsProvider.unitSystem = args.system;
+      });
+      IModelApp.formatsProvider = schemaFormatsProvider;
       console.log("Registered SchemaFormatsProvider");
+
+      IModelConnection.onClose.addOnce(removeListener)
     }
   }).catch((_) => {
     console.error("No common AecUnits schema found in iModel, not registering a SchemaFormatsProvider");
