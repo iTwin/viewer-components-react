@@ -2,6 +2,21 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "date": "Mon, 02 Jun 2025 13:19:21 GMT",
+      "version": "1.19.1",
+      "tag": "@itwin/property-grid-react_v1.19.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "35bac86bce9580cdbb546e0d938f82a8b3dfb876",
+            "comment": "Fix property grid not loading data when using `SelectionStorage` directly."
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 19 May 2025 16:58:21 GMT",
       "version": "1.19.0",
       "tag": "@itwin/property-grid-react_v1.19.0",

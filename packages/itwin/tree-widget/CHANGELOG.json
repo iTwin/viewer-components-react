@@ -2,6 +2,21 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Mon, 02 Jun 2025 13:19:21 GMT",
+      "version": "3.10.0",
+      "tag": "@itwin/tree-widget-react_v3.10.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "ca930b1fc0f70467cf3fbe714517e0ee4adccd9d",
+            "comment": "`useModelsTree`: The `getFilteredPaths` callback prop now has a `filter` prop, which matches the value of `filter` prop passed to `useModelsTree` hook. This make it more convenient for consumers to filter by instance keys and label at the same time."
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 19 May 2025 16:58:21 GMT",
       "version": "3.9.0",
       "tag": "@itwin/tree-widget-react_v3.9.0",
