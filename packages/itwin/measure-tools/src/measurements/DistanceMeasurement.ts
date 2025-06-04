@@ -515,12 +515,9 @@ export class DistanceMeasurement extends Measurement {
 
     const dx = Math.abs(this._endPoint.x - this._startPoint.x);
     const dy = Math.abs(this._endPoint.y - this._startPoint.y);
-    let bearing = Math.atan2(dx, dy); // radians, 0 = North, π/2 = East
-    if (bearing < 0) bearing += 2 * Math.PI; // Normalize to [0, 2π)
-
+    const bearing = FormatterUtils.calculateBearing(this._endPoint.x - this._startPoint.x, this._endPoint.y - this._startPoint.y);
     const adjustedStart = this.adjustPointForGlobalOrigin(this._startPoint);
     const adjustedEnd = this.adjustPointForGlobalOrigin(this._endPoint);
-
     let lengthSpec: FormatterSpec | undefined;
     if (formatProps) {
       // eslint-disable-next-line @itwin/no-internal

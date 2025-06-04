@@ -61,7 +61,7 @@ function ViewerWithOptions() {
       onIModelAppInit={onIModelAppInit}
       uiProviders={[...uiConfig.uiItemsProviders, statusBarActionsProvider]}
       defaultUiConfig={{
-        hideNavigationAid: true,
+        hideNavigationAid: false,
         hideStatusBar: false,
         hideToolSettings: false,
       }}

@@ -202,6 +202,15 @@ export class FormatterUtils {
     return IModelApp.quantityFormatter.formatQuantity(length, spec);
   }
 
+  /**
+   * @returns The bearing in radians, where 0 is North and π/2 is East.
+   */
+  public static calculateBearing(dx: number, dy: number): number {
+    let bearing = Math.atan2(dx, dy); // radians, 0 = North, π/2 = East
+    if (bearing < 0) bearing += 2 * Math.PI; // Normalize to [0, 2π)
+    return bearing;
+  }
+
   public static getDefaultBearingFormatProps(): FormatProps {
     return {
       minWidth: 2,
