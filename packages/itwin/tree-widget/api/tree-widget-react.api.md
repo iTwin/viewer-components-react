@@ -128,7 +128,7 @@ export const ClassificationsTreeComponent: {
 };
 
 // @alpha (undocumented)
-interface ClassificationsTreeComponentProps extends Pick<ClassificationsTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "emptyTreeContent" | "getActions" | "getDecorations" | "hierarchyConfig"> {
+interface ClassificationsTreeComponentProps extends Pick<ClassificationsTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "emptyTreeContent" | "getActions" | "getDecorations" | "hierarchyConfig" | "onLabelChanged"> {
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
@@ -151,6 +151,7 @@ type ClassificationsTreeProps = Pick<VisibilityTreeProps, "imodel" | "selectionS
     hierarchyLevelConfig?: {
         sizeLimit?: number;
     };
+    onLabelChanged?: (node: PresentationHierarchyNode, newLabel: string) => void;
 };
 
 // @public
