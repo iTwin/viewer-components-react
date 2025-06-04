@@ -14,6 +14,7 @@ import { useClassificationsTree } from "./UseClassificationsTree.js";
 import type { PresentationHierarchyNode, StrataKitTreeRenderer } from "@itwin/presentation-hierarchies-react";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { UseClassificationsTreeProps } from "./UseClassificationsTree.js";
+
 /** @alpha */
 export type ClassificationsTreeProps = Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
   Pick<VisibilityTreeRendererProps, "getActions" | "getDecorations"> &
