@@ -56,7 +56,6 @@ export function ClassificationsTree({
       return {
         onLabelChanged: onLabelChanged
           ? (newLabel) => {
-              node.label = newLabel;
               onLabelChanged(node, newLabel);
             }
           : undefined,
