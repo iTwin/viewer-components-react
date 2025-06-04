@@ -151,6 +151,10 @@ export class AngleMeasurement extends Measurement {
     jsonDist.anglePersistenceUnitName = this._anglePersistenceUnitName;
   }
 
+  public override onDisplayUnitsChanged(): void {
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+  }
+
   /**
    * Tests equality with another measurement.
    * @param other Measurement to test equality for.

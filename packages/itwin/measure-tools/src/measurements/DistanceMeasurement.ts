@@ -751,13 +751,15 @@ export class DistanceMeasurement extends Measurement {
     jsonDist.bearingPersistenceUnitName = this._bearingPersistenceUnitName;
   }
 
-  public static create(start: Point3d, end: Point3d, viewType?: string, lengthKoQ?: string, lengthPersistenceUnitName?: string) {
+  public static create(start: Point3d, end: Point3d, viewType?: string, lengthKoQ?: string, lengthPersistenceUnitName?: string, bearingKoQ?: string, bearingPersistenceUnitName?: string) {
     // Don't ned to serialize the points, will just work as is
     const measurement = new DistanceMeasurement({
       startPoint: start,
       endPoint: end,
       lengthKoQ,
-      lengthPersistenceUnitName
+      lengthPersistenceUnitName,
+      bearingKoQ,
+      bearingPersistenceUnitName
     });
     if (viewType) measurement.viewTarget.include(viewType);
 
