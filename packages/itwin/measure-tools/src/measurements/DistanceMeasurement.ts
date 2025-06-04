@@ -101,7 +101,7 @@ export class DistanceMeasurement extends Measurement {
   private _endPoint: Point3d;
   private _showAxes: boolean;
   private _lengthKoQ: string;
-  private _persistenceUnitName: string;
+  private _lengthPersistenceUnitName: string;
   private _bearingKoQ: string;
   private _bearingPersistenceUnitName: string;
 
@@ -146,11 +146,29 @@ export class DistanceMeasurement extends Measurement {
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
-  public get persistenceUnitName(): string {
-    return this._persistenceUnitName;
+  public get lengthPersistenceUnitName(): string {
+    return this._lengthPersistenceUnitName;
   }
-  public set persistenceUnitName(value: string) {
-    this._persistenceUnitName = value;
+  public set lengthPersistenceUnitName(value: string) {
+    this._lengthPersistenceUnitName = value;
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+  }
+
+  public get bearingKoQ(): string {
+    return this._bearingKoQ;
+  }
+
+  public set bearingKoQ(value: string) {
+    this._bearingKoQ = value;
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+  }
+
+  public get bearingPersistenceUnitName(): string {
+    return this._bearingPersistenceUnitName;
+  }
+
+  public set bearingPersistenceUnitName(value: string) {
+    this._bearingPersistenceUnitName = value;
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
@@ -171,7 +189,7 @@ export class DistanceMeasurement extends Measurement {
     this._showAxes = MeasurementPreferences.current.displayMeasurementAxes;
     this._runRiseAxes = [];
     this._lengthKoQ = "AecUnits.LENGTH";
-    this._persistenceUnitName = "Units.M";
+    this._lengthPersistenceUnitName = "Units.M";
     // TODO: These two should be made optional, and logic only happens if the application passed them into the props.
     this._bearingKoQ = "RoadRailUnits.Bearing";
     this._bearingPersistenceUnitName = "Units.RAD";
@@ -467,7 +485,7 @@ export class DistanceMeasurement extends Measurement {
       // eslint-disable-next-line @itwin/no-internal
       lengthSpec = await IModelApp.quantityFormatter.createFormatterSpec({
         formatProps,
-        persistenceUnitName: this._persistenceUnitName
+        persistenceUnitName: this._lengthPersistenceUnitName
       });
     }
     const fDistance = IModelApp.quantityFormatter.formatQuantity(
@@ -523,7 +541,7 @@ export class DistanceMeasurement extends Measurement {
       // eslint-disable-next-line @itwin/no-internal
       lengthSpec = await IModelApp.quantityFormatter.createFormatterSpec({
         formatProps,
-        persistenceUnitName: this._persistenceUnitName
+        persistenceUnitName: this._lengthPersistenceUnitName
       });
     }
 
@@ -704,7 +722,7 @@ export class DistanceMeasurement extends Measurement {
       this._lengthKoQ = jsonDist.lengthKoQ
 
     if (jsonDist.lengthPersistenceUnitName !== undefined)
-      this._persistenceUnitName = jsonDist.lengthPersistenceUnitName;
+      this._lengthPersistenceUnitName = jsonDist.lengthPersistenceUnitName;
 
     if (jsonDist.bearingKoQ !== undefined)
       this._bearingKoQ = jsonDist.bearingKoQ;
@@ -728,7 +746,7 @@ export class DistanceMeasurement extends Measurement {
     jsonDist.endPoint = this._endPoint.toJSON();
     jsonDist.showAxes = this._showAxes;
     jsonDist.lengthKoQ = this._lengthKoQ;
-    jsonDist.lengthPersistenceUnitName = this._persistenceUnitName;
+    jsonDist.lengthPersistenceUnitName = this._lengthPersistenceUnitName;
     jsonDist.bearingKoQ = this._bearingKoQ;
     jsonDist.bearingPersistenceUnitName = this._bearingPersistenceUnitName;
   }
