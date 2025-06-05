@@ -163,6 +163,13 @@ const configuredUiItems = new Map<string, UiItem>([
                   <ClassificationsTreeComponent
                     selectionStorage={unifiedSelectionStorage}
                     hierarchyConfig={{ rootClassificationSystemCode: "50k classifications" }}
+                    getEditingProps={(node) => {
+                      return {
+                        onLabelChanged: (newLabel: string) => {
+                          console.log("node label changed", node, newLabel);
+                        },
+                      };
+                    }}
                   />
                 ),
                 shouldShow: async (imodel) => ClassificationsTreeComponent.isSupportedByIModel(imodel),
