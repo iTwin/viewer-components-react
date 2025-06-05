@@ -4,25 +4,23 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
-import type { ComponentProps } from "react";
 import { useCallback } from "react";
 import { RenameAction } from "@itwin/presentation-hierarchies-react";
 import { VisibilityTree } from "../common/components/VisibilityTree.js";
 import { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRenderer.js";
 import { useClassificationsTree } from "./UseClassificationsTree.js";
 
-import type { PresentationHierarchyNode, StrataKitTreeRenderer } from "@itwin/presentation-hierarchies-react";
+import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { UseClassificationsTreeProps } from "./UseClassificationsTree.js";
 
 /** @alpha */
 export type ClassificationsTreeProps = Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
-  Pick<VisibilityTreeRendererProps, "getActions" | "getDecorations"> &
+  Pick<VisibilityTreeRendererProps, "getActions" | "getDecorations" | "getEditingProps"> &
   UseClassificationsTreeProps & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
     };
-    onLabelChanged?: (node: PresentationHierarchyNode, newLabel: string) => void;
   };
 
 /** @alpha */
@@ -36,7 +34,7 @@ export function ClassificationsTree({
   emptyTreeContent,
   getDecorations,
   getActions,
-  onLabelChanged,
+  getEditingProps,
 }: ClassificationsTreeProps) {
   const { categoriesTreeProps, rendererProps } = useClassificationsTree({
     activeView,
@@ -49,19 +47,6 @@ export function ClassificationsTree({
       return [<RenameAction key="RenameAction" />, ...(getActions ? getActions(node) : [])];
     },
     [getActions],
-  );
-
-  const getEditingProps = useCallback<Required<ComponentProps<typeof StrataKitTreeRenderer>>["getEditingProps"]>(
-    (node) => {
-      return {
-        onLabelChanged: onLabelChanged
-          ? (newLabel) => {
-              onLabelChanged(node, newLabel);
-            }
-          : undefined,
-      };
-    },
-    [onLabelChanged],
   );
 
   return (

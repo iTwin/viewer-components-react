@@ -18,7 +18,7 @@ import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 interface ClassificationsTreeComponentProps
   extends Pick<
     ClassificationsTreeProps,
-    "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "emptyTreeContent" | "getActions" | "getDecorations" | "hierarchyConfig" | "onLabelChanged"
+    "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "emptyTreeContent" | "getActions" | "getDecorations" | "hierarchyConfig" | "getEditingProps"
   > {
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;

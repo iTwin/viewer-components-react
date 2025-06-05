@@ -163,8 +163,12 @@ const configuredUiItems = new Map<string, UiItem>([
                   <ClassificationsTreeComponent
                     selectionStorage={unifiedSelectionStorage}
                     hierarchyConfig={{ rootClassificationSystemCode: "50k classifications" }}
-                    onLabelChanged={(node, newLabel) => {
-                      console.log("node label changed", node, newLabel);
+                    getEditingProps={(node) => {
+                      return {
+                        onLabelChanged: (newLabel: string) => {
+                          console.log("node label changed", node, newLabel);
+                        },
+                      };
                     }}
                   />
                 ),
