@@ -59,6 +59,7 @@
     "redux": "^4.2.1"
   },
   "devDependencies": {
+    "@bentley/units-schema": "^1.0.8",
     "@itwin/appui-abstract": "^5.0.0-dev.116",
     "@itwin/appui-react": "^4.17.6",
     "@itwin/build-tools": "^5.0.0-dev.116",
@@ -73,6 +74,7 @@
     "@itwin/core-quantity": "^5.0.0-dev.116",
     "@itwin/core-react": "^4.17.6",
     "@itwin/ecschema-metadata": "^5.0.0-dev.116",
+    "@itwin/ecschema-locaters": "^5.0.0-dev.116",
     "@itwin/eslint-plugin": "^4.1.1",
     "@itwin/imodel-components-react": "^4.17.6",
     "@itwin/itwinui-react": "^3.17.3",

@@ -16,7 +16,7 @@ import {
 } from "@itwin/core-geometry";
 import type { GeometryStreamProps } from "@itwin/core-common";
 import type { BeButtonEvent, DecorateContext } from "@itwin/core-frontend";
-import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
+import { GraphicType, IModelApp } from "@itwin/core-frontend";
 import { FormatterUtils } from "../api/FormatterUtils.js";
 import {
   StyleSet,
@@ -747,15 +747,12 @@ export class DistanceMeasurement extends Measurement {
     };
   }
 
-  public static create(start: Point3d, end: Point3d, viewType?: string, lengthFmtProps?: MeasurementFormattingProps, bearingFmtProps?: MeasurementFormattingProps): DistanceMeasurement {
+  public static create(start: Point3d, end: Point3d, viewType?: string, formatting?: { length?: MeasurementFormattingProps, bearing?: MeasurementFormattingProps }): DistanceMeasurement {
     // Don't ned to serialize the points, will just work as is
     const measurement = new DistanceMeasurement({
       startPoint: start,
       endPoint: end,
-      formatting: {
-        length: lengthFmtProps,
-        bearing: bearingFmtProps,
-      }
+      formatting
     });
     if (viewType) measurement.viewTarget.include(viewType);
 

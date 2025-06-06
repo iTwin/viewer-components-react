@@ -16,6 +16,9 @@ importers:
         specifier: ^2.10.0
         version: 2.10.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
+      '@bentley/units-schema':
+        specifier: ^1.0.8
+        version: 1.0.8
       '@itwin/appui-abstract':
         specifier: ^5.0.0-dev.116
         version: 5.0.0-dev.116(@itwin/core-bentley@5.0.0-dev.116)
@@ -55,6 +58,9 @@ importers:
       '@itwin/core-react':
         specifier: ^4.17.6
         version: 4.17.6(@itwin/appui-abstract@5.0.0-dev.116(@itwin/core-bentley@5.0.0-dev.116))(@itwin/core-bentley@5.0.0-dev.116)(@types/react@17.0.83)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@itwin/ecschema-locaters':
+        specifier: ^5.0.0-dev.116
+        version: 5.0.0-dev.116(@itwin/ecschema-metadata@5.0.0-dev.116(@itwin/core-bentley@5.0.0-dev.116)(@itwin/core-quantity@5.0.0-dev.116(@itwin/core-bentley@5.0.0-dev.116)))
       '@itwin/ecschema-metadata':
         specifier: ^5.0.0-dev.116
         version: 5.0.0-dev.116(@itwin/core-bentley@5.0.0-dev.116)(@itwin/core-quantity@5.0.0-dev.116(@itwin/core-bentley@5.0.0-dev.116))
@@ -261,6 +267,9 @@ packages:
 
   '@bentley/icons-generic@1.0.34':
     resolution: {integrity: sha512-IIs1wDcY2oZ8tJ3EZRw0U51M+0ZL3MvwoDYYmhUXaa9/UZqpFoOyLBGaxjirQteWXqTIMm3mFvmC+Nbn1ok4Iw==}
+
+  '@bentley/units-schema@1.0.8':
+    resolution: {integrity: sha512-mib0MBPNxT6xS1Spihn/VZeYGRvhbfjZ/O2/FaRDHc9J3dymtCqL/1Q/iTY5fscqUWvr9TdJjx+ICPmb5Wr4HQ==}
 
   '@csstools/color-helpers@5.0.2':
     resolution: {integrity: sha512-JqWH1vsgdGcw2RR6VliXXdA0/59LttzlU8UlRT/iUUsEeWfYq8I+K0yhihEUTTHLRm1EXvpsCx3083EU15ecsA==}
@@ -609,6 +618,11 @@ packages:
 
   '@itwin/core-telemetry@4.10.10':
     resolution: {integrity: sha512-eTlnmyyF4o+syNSym77PIYbzHpZS5uyUzookhrnKXT5CdJ6V8nFzDs6SFw4WVDe9yJ9ujicKSGZ0O6i8to2ReA==}
+
+  '@itwin/ecschema-locaters@5.0.0-dev.116':
+    resolution: {integrity: sha512-/XL02ppGpZsKVhcNpKBXGPF5dDk9baWINQtqEjv2XdlfKoEukcwR8mz4Cn+i3igjJPc21zgGgNgQ42pWasRvfQ==}
+    peerDependencies:
+      '@itwin/ecschema-metadata': 5.0.0-dev.116
 
   '@itwin/ecschema-metadata@5.0.0-dev.116':
     resolution: {integrity: sha512-hGoGBJSIfktuNfu6D7yiNrE2Mwxp4v/zMEE4B08wJxHery9ulLg0qbVVJY8VU0xJlug0emXUFWvz+rA4YScdUg==}
@@ -1272,6 +1286,10 @@ packages:
 
   '@vitest/utils@2.1.9':
     resolution: {integrity: sha512-v0psaMSkNJ3A2NMrUEHFRzJtDPFn+/VWZ5WxImB21T9fjucJRmS7xCS3ppEnARb9y11OAzaD+P2Ps+b+BGX5iQ==}
+
+  '@xmldom/xmldom@0.8.10':
+    resolution: {integrity: sha512-2WALfTl4xo2SkGCYRt6rDTFfk9R1czmBvUQy12gK2KuRKIpWEhcbbzy8EZXtz/jkRqHX8bFEc6FC1HjX4TUWYw==}
+    engines: {node: '>=10.0.0'}
 
   '@yarnpkg/lockfile@1.1.0':
     resolution: {integrity: sha512-GpSwvyXOcOOlV70vbnzjj4fW5xW/FdUF6nQEt1ENy7m4ZCczi1+/buVUPAqmGfqznsORNFzUMjctTIp8a9tuCQ==}
@@ -4049,6 +4067,8 @@ snapshots:
 
   '@bentley/icons-generic@1.0.34': {}
 
+  '@bentley/units-schema@1.0.8': {}
+
   '@csstools/color-helpers@5.0.2': {}
 
   '@csstools/css-calc@2.1.2(@csstools/css-parser-algorithms@3.0.4(@csstools/css-tokenizer@3.0.3))(@csstools/css-tokenizer@3.0.3)':
@@ -4274,7 +4294,7 @@ snapshots:
       rimraf: 6.0.1
       tree-kill: 1.2.2
       typedoc: 0.26.11(typescript@5.6.3)
-      typedoc-plugin-merge-modules: 6.1.0(typedoc@0.26.11(typescript@5.7.3))
+      typedoc-plugin-merge-modules: 6.1.0(typedoc@0.26.11(typescript@5.6.3))
       typescript: 5.6.3
       wtfnode: 0.9.4
       yargs: 17.7.2
@@ -4402,6 +4422,13 @@ snapshots:
       '@itwin/core-common': 4.10.10(@itwin/core-bentley@4.10.10)(@itwin/core-geometry@5.0.0-dev.116)
     transitivePeerDependencies:
       - '@itwin/core-geometry'
+
+  '@itwin/ecschema-locaters@5.0.0-dev.116(@itwin/ecschema-metadata@5.0.0-dev.116(@itwin/core-bentley@5.0.0-dev.116)(@itwin/core-quantity@5.0.0-dev.116(@itwin/core-bentley@5.0.0-dev.116)))':
+    dependencies:
+      '@itwin/ecschema-metadata': 5.0.0-dev.116(@itwin/core-bentley@5.0.0-dev.116)(@itwin/core-quantity@5.0.0-dev.116(@itwin/core-bentley@5.0.0-dev.116))
+      '@xmldom/xmldom': 0.8.10
+      fs-extra: 8.1.0
+      glob: 10.4.5
 
   '@itwin/ecschema-metadata@5.0.0-dev.116(@itwin/core-bentley@5.0.0-dev.116)(@itwin/core-quantity@5.0.0-dev.116(@itwin/core-bentley@5.0.0-dev.116))':
     dependencies:
@@ -5250,6 +5277,8 @@ snapshots:
       '@vitest/pretty-format': 2.1.9
       loupe: 3.1.3
       tinyrainbow: 1.2.0
+
+  '@xmldom/xmldom@0.8.10': {}
 
   '@yarnpkg/lockfile@1.1.0': {}
 
@@ -8014,7 +8043,7 @@ snapshots:
       possible-typed-array-names: 1.1.0
       reflect.getprototypeof: 1.0.10
 
-  typedoc-plugin-merge-modules@6.1.0(typedoc@0.26.11(typescript@5.7.3)):
+  typedoc-plugin-merge-modules@6.1.0(typedoc@0.26.11(typescript@5.6.3)):
     dependencies:
       typedoc: 0.26.11(typescript@5.6.3)
 

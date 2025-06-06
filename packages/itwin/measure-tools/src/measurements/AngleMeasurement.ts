@@ -18,7 +18,7 @@ import {
 } from "@itwin/core-geometry";
 import type { GeometryStreamProps } from "@itwin/core-common";
 import type { BeButtonEvent, DecorateContext } from "@itwin/core-frontend";
-import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
+import { GraphicType, IModelApp } from "@itwin/core-frontend";
 import {
   StyleSet,
   WellKnownGraphicStyleType,
@@ -494,15 +494,13 @@ export class AngleMeasurement extends Measurement {
     center?: Point3d,
     endPoint?: Point3d,
     viewType?: string,
-    angleFmtProps?: MeasurementFormattingProps
+    formatting?: { angle?: MeasurementFormattingProps }
   ) {
     const measurement = new AngleMeasurement({
       startPoint,
       center,
       endPoint,
-      formatting: {
-        angle: angleFmtProps
-      }
+      formatting
     });
 
     if (viewType) measurement.viewTarget.include(viewType);
