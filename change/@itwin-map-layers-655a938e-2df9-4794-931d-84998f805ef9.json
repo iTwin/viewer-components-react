@@ -1,6 +1,6 @@
 {
   "type": "prerelease",
-  "comment": "Disable `GoogleAddressProvider` when Google Maps base map is not active",
+  "comment": "[Bug fix] Unable to change base map after selecting 'Solid Fill Color",
   "packageName": "@itwin/map-layers",
   "email": "mdastous-bentley@users.noreply.github.com",
   "dependentChangeType": "patch"
