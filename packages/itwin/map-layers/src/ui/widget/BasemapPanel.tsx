@@ -286,6 +286,8 @@ export function BasemapPanel(props: BasemapPanelProps) {
             const baseProps = baseMap.toJSON();
             if (activeViewport.displayStyle.backgroundMapBase instanceof BaseMapLayerSettings) {
               activeViewport.displayStyle.backgroundMapBase = BaseLayerSettings.fromJSON({ ...baseProps, visible: baseMapVisible });
+            } else {
+              activeViewport.displayStyle.backgroundMapBase = BaseLayerSettings.fromJSON(baseProps)
             }
           } else {
             const bgColorDef = ColorDef.fromJSON(bgColor);
