@@ -14,8 +14,6 @@ export default [
         {
           tag: [
             "internal",
-            "alpha",
-            "beta",
           ],
         },
       ],
