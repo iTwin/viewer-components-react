@@ -66,12 +66,9 @@ export class FormatterUtils {
       if (undefined === coordSpec) return "";
       result = FormatterUtils.formatCoordinatesWithSpec(point, coordSpec);
     } else {
-      // eslint-disable-next-line @itwin/no-internal
       const oldFormatTraits = coordSpec.format.formatTraits;
-      // eslint-disable-next-line @itwin/no-internal
       coordSpec.format.formatTraits &= ~FormatTraits.ShowUnitLabel;
       result = FormatterUtils.formatCoordinatesWithSpec(point, coordSpec);
-      // eslint-disable-next-line @itwin/no-internal
       coordSpec.format.formatTraits = oldFormatTraits; // Restore original format traits
     }
 
@@ -140,12 +137,14 @@ export class FormatterUtils {
   }
 
   public static async formatCartographicToLatLong(
-    c: Cartographic
+    c: Cartographic, angleSpec?: FormatterSpec
   ): Promise<string> {
-    const latLongSpec =
-      await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
-        QuantityType.LatLong
-      );
+    if (!angleSpec) {
+      angleSpec =
+        await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
+          QuantityType.LatLong
+        );
+    }
     const latSuffixKey =
       0 < c.latitude
         ? "MeasureTools:Generic.latitudeNorthSuffix"
@@ -157,13 +156,13 @@ export class FormatterUtils {
 
     let str = IModelApp.quantityFormatter.formatQuantity(
       Math.abs(c.latitude),
-      latLongSpec
+      angleSpec
     );
     str += MeasureTools.localization.getLocalizedString(latSuffixKey);
     str += ", ";
     str += IModelApp.quantityFormatter.formatQuantity(
       Math.abs(c.longitude),
-      latLongSpec
+      angleSpec
     );
     str += MeasureTools.localization.getLocalizedString(longSuffixKey);
     return str;
@@ -186,20 +185,24 @@ export class FormatterUtils {
     return `${fSlope} (${fSlopeRatio})`;
   }
 
-  public static async formatStation(station: number): Promise<string> {
-    const spec =
-      await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
-        QuantityType.Stationing
-      );
-    return IModelApp.quantityFormatter.formatQuantity(station, spec);
+  public static async formatStation(station: number, stationSpec?: FormatterSpec): Promise<string> {
+    if (!stationSpec) {
+      stationSpec =
+        await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
+          QuantityType.Stationing
+        );
+    }
+    return IModelApp.quantityFormatter.formatQuantity(station, stationSpec);
   }
 
-  public static async formatLength(length: number): Promise<string> {
-    const spec =
-      await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
-        QuantityType.LengthEngineering
-      );
-    return IModelApp.quantityFormatter.formatQuantity(length, spec);
+  public static async formatLength(length: number, lengthSpec?: FormatterSpec): Promise<string> {
+    if (!lengthSpec) {
+      lengthSpec =
+        await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
+          QuantityType.LengthEngineering
+        );
+    }
+    return IModelApp.quantityFormatter.formatQuantity(length, lengthSpec);
   }
 
   /**

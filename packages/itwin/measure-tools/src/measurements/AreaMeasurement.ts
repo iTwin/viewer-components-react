@@ -31,7 +31,7 @@ import {
   MeasurementSerializer,
 } from "../api/Measurement.js";
 import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper.js";
-import type { MeasurementProps } from "../api/MeasurementProps.js";
+import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet.js";
 import { Polygon } from "../api/Polygon.js";
 import { DistanceMeasurement } from "./DistanceMeasurement.js";
@@ -43,10 +43,12 @@ import type { FormatterSpec } from "@itwin/core-quantity";
  */
 export interface AreaMeasurementProps extends MeasurementProps {
   polygonPoints: XYZProps[];
-  lengthKoQ?: string;
-  lengthPersistenceUnitName?: string;
-  areaKoQ?: string;
-  areaPersistenceUnitName?: string;
+  formatting? : {
+    /** Defaults to "AecUnits.LENGTH" and "Units.M" */
+    length?: MeasurementFormattingProps;
+    /** Defaults to "AecUnits.AREA" and "Units.SQ_M" */
+    area? : MeasurementFormattingProps;
+  }
 }
 
 /** Serializer for a [[AreaMeasurement]]. */
@@ -126,7 +128,7 @@ export class AreaMeasurement extends Measurement {
     return true;
   }
 
-    public get lengthKoQ(): string {
+  public get lengthKoQ(): string {
     return this._lengthKoQ;
   }
   public set lengthKoQ(value: string) {
@@ -449,19 +451,15 @@ export class AreaMeasurement extends Measurement {
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
     let lengthSpec: FormatterSpec | undefined;
     let areaSpec: FormatterSpec | undefined;
-    // eslint-disable-next-line @itwin/no-internal
     const lengthFormatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
-    // eslint-disable-next-line @itwin/no-internal
     const areaFormatProps = await IModelApp.formatsProvider.getFormat(this._areaKoQ);
     if (lengthFormatProps) {
-      // eslint-disable-next-line @itwin/no-internal
       lengthSpec = await IModelApp.quantityFormatter.createFormatterSpec({
         formatProps: lengthFormatProps,
         persistenceUnitName: this._lengthPersistenceUnitName
       });
     }
     if (areaFormatProps) {
-      // eslint-disable-next-line @itwin/no-internal
       areaSpec = await IModelApp.quantityFormatter.createFormatterSpec({
         formatProps: areaFormatProps,
         persistenceUnitName: this._areaPersistenceUnitName
@@ -635,6 +633,11 @@ export class AreaMeasurement extends Measurement {
       if (this.isDynamic && this._dynamicEdge)
         this.updateDynamicPolygon(this._dynamicEdge.endPointRef);
     }
+
+    if (jsonArea.formatting?.area?.koqName) this._areaKoQ = jsonArea.formatting.area.koqName;
+    if (jsonArea.formatting?.area?.persistenceUnitName) this._areaPersistenceUnitName = jsonArea.formatting.area.persistenceUnitName;
+    if (jsonArea.formatting?.length?.koqName) this._lengthKoQ = jsonArea.formatting.length.koqName;
+    if (jsonArea.formatting?.length?.persistenceUnitName) this._lengthPersistenceUnitName = jsonArea.formatting.length.persistenceUnitName;
   }
 
   /**
@@ -649,15 +652,21 @@ export class AreaMeasurement extends Measurement {
 
     const jsonArea = json as AreaMeasurementProps;
     jsonArea.polygonPoints = pts;
-    jsonArea.lengthKoQ = this._lengthKoQ;
-    jsonArea.lengthPersistenceUnitName = this._lengthPersistenceUnitName;
-    jsonArea.areaKoQ = this._areaKoQ;
-    jsonArea.areaPersistenceUnitName = this._areaPersistenceUnitName;
+    jsonArea.formatting = {
+      length: {
+        koqName: this._lengthKoQ,
+        persistenceUnitName: this._lengthPersistenceUnitName,
+      },
+      area: {
+        koqName: this._areaKoQ,
+        persistenceUnitName: this._areaPersistenceUnitName,
+      },
+    };
   }
 
-  public static create(pts: Point3d[], viewType?: string, lengthKoQ?: string, lengthPersistenceUnitName?: string, areaKoQ?: string, areaPersistenceUnitName?: string): AreaMeasurement {
+  public static create(pts: Point3d[], viewType?: string, lengthFmtProps?: MeasurementFormattingProps, areaFmtProps?: MeasurementFormattingProps): AreaMeasurement {
     // Don't ned to serialize the points, will just work as is
-    const measurement = new AreaMeasurement({ polygonPoints: pts, lengthKoQ, lengthPersistenceUnitName, areaKoQ, areaPersistenceUnitName });
+    const measurement = new AreaMeasurement({ polygonPoints: pts, formatting: { length: lengthFmtProps, area: areaFmtProps } });
     if (viewType) measurement.viewTarget.include(viewType);
 
     return measurement;
