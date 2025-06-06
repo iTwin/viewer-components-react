@@ -16,7 +16,7 @@ import {
 } from "@itwin/core-geometry";
 import type { GeometryStreamProps } from "@itwin/core-common";
 import type { BeButtonEvent, DecorateContext } from "@itwin/core-frontend";
-import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
+import { GraphicType, IModelApp } from "@itwin/core-frontend";
 import { FormatterUtils } from "../api/FormatterUtils.js";
 import {
   StyleSet,
@@ -39,10 +39,11 @@ import {
   MeasurementPreferencesProperty,
 } from "../api/MeasurementPreferences.js";
 import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper.js";
-import type { MeasurementProps } from "../api/MeasurementProps.js";
+import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet.js";
 import { TextMarker } from "../api/TextMarker.js";
 import { MeasureTools } from "../MeasureTools.js";
+import type { FormatterSpec } from "@itwin/core-quantity";
 
 /**
  * Props for serializing a [[DistanceMeasurement]].
@@ -51,6 +52,12 @@ export interface DistanceMeasurementProps extends MeasurementProps {
   startPoint: XYZProps;
   endPoint: XYZProps;
   showAxes?: boolean;
+  formatting? : {
+    /** Defaults to "AecUnits.LENGTH" and "Units.M" */
+    length?: MeasurementFormattingProps;
+    /** Defaults to "RoadRailUnits.Bearing" and "Units.RAD" */
+    bearing? : MeasurementFormattingProps;
+  }
 }
 
 /** Serializer for a [[DistanceMeasurement]]. */
@@ -95,6 +102,10 @@ export class DistanceMeasurement extends Measurement {
   private _startPoint: Point3d;
   private _endPoint: Point3d;
   private _showAxes: boolean;
+  private _lengthKoQ: string;
+  private _lengthPersistenceUnitName: string;
+  private _bearingKoQ: string;
+  private _bearingPersistenceUnitName: string;
 
   private _isDynamic: boolean; // No serialize
   private _textMarker?: TextMarker; // No serialize
@@ -129,6 +140,40 @@ export class DistanceMeasurement extends Measurement {
     this._showAxes = v;
   }
 
+  public get lengthKoQ(): string {
+    return this._lengthKoQ;
+  }
+  public set lengthKoQ(value: string) {
+    this._lengthKoQ = value;
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+  }
+
+  public get lengthPersistenceUnitName(): string {
+    return this._lengthPersistenceUnitName;
+  }
+  public set lengthPersistenceUnitName(value: string) {
+    this._lengthPersistenceUnitName = value;
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+  }
+
+  public get bearingKoQ(): string {
+    return this._bearingKoQ;
+  }
+
+  public set bearingKoQ(value: string) {
+    this._bearingKoQ = value;
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+  }
+
+  public get bearingPersistenceUnitName(): string {
+    return this._bearingPersistenceUnitName;
+  }
+
+  public set bearingPersistenceUnitName(value: string) {
+    this._bearingPersistenceUnitName = value;
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+  }
+
   // eslint-disable-next-line @typescript-eslint/naming-convention
   private get isAxis(): boolean {
     return (
@@ -145,7 +190,11 @@ export class DistanceMeasurement extends Measurement {
     this._isDynamic = false;
     this._showAxes = MeasurementPreferences.current.displayMeasurementAxes;
     this._runRiseAxes = [];
-
+    this._lengthKoQ = "AecUnits.LENGTH";
+    this._lengthPersistenceUnitName = "Units.M";
+    // TODO: These two should be made optional, and logic only happens if the application passed them into the props.
+    this._bearingKoQ = "RoadRailUnits.Bearing";
+    this._bearingPersistenceUnitName = "Units.RAD"; // TODO: Once units schema 1.0.9 is released, change to Units.HORIZONTAL_DIR_RAD
     if (props) this.readFromJSON(props);
 
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
@@ -429,13 +478,18 @@ export class DistanceMeasurement extends Measurement {
   }
 
   private async createTextMarker(): Promise<void> {
-    const lengthSpec =
-      await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
-        QuantityType.LengthEngineering
-      );
+    const formatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
+
     const distance = this._startPoint.distance(this._endPoint);
+    let lengthSpec: FormatterSpec | undefined;
+    if (formatProps) {
+      lengthSpec = await IModelApp.quantityFormatter.createFormatterSpec({
+        formatProps,
+        persistenceUnitName: this._lengthPersistenceUnitName
+      });
+    }
     const fDistance = IModelApp.quantityFormatter.formatQuantity(
-      distance * this.worldScale,
+      distance,
       lengthSpec
     );
 
@@ -469,30 +523,32 @@ export class DistanceMeasurement extends Measurement {
   }
 
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
-    const lengthSpec =
-      await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
-        QuantityType.LengthEngineering
-      );
+    const formatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
 
     const distance = this.worldScale * this._startPoint.distance(this._endPoint);
     const run = this.drawingMetadata?.worldScale !== undefined ? this.worldScale * Math.abs(this._endPoint.x - this._startPoint.x): this._startPoint.distanceXY(this._endPoint);
     const rise = this.drawingMetadata?.worldScale !== undefined ? this.worldScale * (this._endPoint.y - this._startPoint.y): this._endPoint.z - this._startPoint.z;
     const slope = 0.0 < run ? (100 * rise) / run : 0.0;
+
     const dx = Math.abs(this._endPoint.x - this._startPoint.x);
     const dy = Math.abs(this._endPoint.y - this._startPoint.y);
-
+    const bearing = FormatterUtils.calculateBearing(this._endPoint.x - this._startPoint.x, this._endPoint.y - this._startPoint.y);
     const adjustedStart = this.adjustPointForGlobalOrigin(this._startPoint);
     const adjustedEnd = this.adjustPointForGlobalOrigin(this._endPoint);
+    let lengthSpec: FormatterSpec | undefined;
+    if (formatProps) {
+      lengthSpec = await IModelApp.quantityFormatter.createFormatterSpec({
+        formatProps,
+        persistenceUnitName: this._lengthPersistenceUnitName
+      });
+    }
 
-    const fDistance = IModelApp.quantityFormatter.formatQuantity(
-      distance,
-      lengthSpec
-    );
+    const fDistance = IModelApp.quantityFormatter.formatQuantity(distance, lengthSpec);
     const fStartCoords = FormatterUtils.formatCoordinatesImmediate(
-      adjustedStart
+      adjustedStart, lengthSpec
     );
     const fEndCoords = FormatterUtils.formatCoordinatesImmediate(
-      adjustedEnd
+      adjustedEnd, lengthSpec
     );
     const fSlope = FormatterUtils.formatSlope(slope, true);
     const fRun = IModelApp.quantityFormatter.formatQuantity(run, lengthSpec);
@@ -546,7 +602,20 @@ export class DistanceMeasurement extends Measurement {
         value: fSlope,
       },
     );
-
+    if (this._bearingKoQ && this._bearingPersistenceUnitName) {
+      const bearingSpecs = await IModelApp.quantityFormatter.createFormatterSpec({
+        persistenceUnitName: this._bearingPersistenceUnitName,
+        formatProps: FormatterUtils.getDefaultBearingFormatProps() // TODO: Replace with retrieving formatProps from formatsProvider and KoQ after demo.
+      });
+      const fBearing: string = IModelApp.quantityFormatter.formatQuantity(bearing, bearingSpecs);
+      data.properties.push({
+        label: MeasureTools.localization.getLocalizedString(
+          "MeasureTools:tools.MeasureDistance.bearing"
+        ),
+        name: "DistanceMeasurement_Bearing",
+        value: fBearing,
+    });
+    }
     if (this.drawingMetadata?.worldScale === undefined) {
       data.properties.push(
         {
@@ -621,6 +690,7 @@ export class DistanceMeasurement extends Measurement {
       this._showAxes = other._showAxes;
       this._startPoint.setFrom(other._startPoint);
       this._endPoint.setFrom(other._endPoint);
+      this._lengthKoQ = other._lengthKoQ;
       this.buildRunRiseAxes();
       this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
     }
@@ -645,6 +715,11 @@ export class DistanceMeasurement extends Measurement {
         ? jsonDist.showAxes
         : MeasurementPreferences.current.displayMeasurementAxes;
 
+    if (jsonDist.formatting?.length?.koqName) this._lengthKoQ = jsonDist.formatting.length.koqName;
+    if (jsonDist.formatting?.length?.persistenceUnitName) this._lengthPersistenceUnitName = jsonDist.formatting.length.persistenceUnitName;
+    if (jsonDist.formatting?.bearing?.koqName) this._bearingKoQ = jsonDist.formatting.bearing.koqName;
+    if (jsonDist.formatting?.bearing?.persistenceUnitName) this._bearingPersistenceUnitName = jsonDist.formatting.bearing.persistenceUnitName;
+
     this.buildRunRiseAxes();
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
@@ -660,13 +735,24 @@ export class DistanceMeasurement extends Measurement {
     jsonDist.startPoint = this._startPoint.toJSON();
     jsonDist.endPoint = this._endPoint.toJSON();
     jsonDist.showAxes = this._showAxes;
+    jsonDist.formatting = {
+      length: {
+        koqName: this._lengthKoQ,
+        persistenceUnitName: this._lengthPersistenceUnitName,
+      },
+      bearing: {
+        koqName: this._bearingKoQ,
+        persistenceUnitName: this._bearingPersistenceUnitName,
+      },
+    };
   }
 
-  public static create(start: Point3d, end: Point3d, viewType?: string) {
+  public static create(start: Point3d, end: Point3d, viewType?: string, formatting?: { length?: MeasurementFormattingProps, bearing?: MeasurementFormattingProps }): DistanceMeasurement {
     // Don't ned to serialize the points, will just work as is
     const measurement = new DistanceMeasurement({
       startPoint: start,
       endPoint: end,
+      formatting
     });
     if (viewType) measurement.viewTarget.include(viewType);
 

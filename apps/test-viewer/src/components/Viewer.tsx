@@ -15,6 +15,7 @@ import { getUiProvidersConfig } from "../UiProvidersConfig";
 import { ApiKeys } from "./ApiKeys";
 import { useAuthorizationContext } from "./Authorization";
 import { statusBarActionsProvider, ViewerOptionsProvider } from "./ViewerOptions";
+import { SchemaFormatsProvider, SchemaKey, SchemaMatchType, SchemaUnitProvider } from "@itwin/ecschema-metadata";
 
 const uiConfig = getUiProvidersConfig();
 
@@ -60,7 +61,7 @@ function ViewerWithOptions() {
       onIModelAppInit={onIModelAppInit}
       uiProviders={[...uiConfig.uiItemsProviders, statusBarActionsProvider]}
       defaultUiConfig={{
-        hideNavigationAid: true,
+        hideNavigationAid: false,
         hideStatusBar: false,
         hideToolSettings: false,
       }}
@@ -89,6 +90,29 @@ function onIModelConnected(imodel: IModelConnection) {
   setTimeout(() => {
     IModelConnection.onOpen.raiseEvent(imodel);
   }, 1000);
+
+  imodel.schemaContext.getSchema(new SchemaKey("AecUnits", SchemaMatchType.Latest)).then((schema) => {
+    if (schema) {
+      const schemaFormatsProvider = new SchemaFormatsProvider(imodel.schemaContext, IModelApp.quantityFormatter.activeUnitSystem);
+      const removeListener = IModelApp.quantityFormatter.onActiveFormattingUnitSystemChanged.addListener((args) => {
+        schemaFormatsProvider.unitSystem = args.system;
+      });
+
+      const schemaUnitsProvider = new SchemaUnitProvider(imodel.schemaContext);
+      IModelApp.quantityFormatter.unitsProvider = schemaUnitsProvider;
+      IModelApp.formatsProvider = schemaFormatsProvider;
+      console.log("Registered SchemaFormatsProvider, SchemaUnitProvider");
+
+      IModelConnection.onClose.addOnce(() => {
+        removeListener();
+        IModelApp.resetFormatsProvider();
+        void IModelApp.quantityFormatter.resetToUseInternalUnitsProvider();
+        console.log("Unregistered SchemaFormatsProvider, SchemaUnitProvider");
+      });
+    }
+  }).catch((_) => {
+    console.error("No common AecUnits schema found in iModel, not registering a SchemaFormatsProvider");
+  });
 }
 
 function useIModelInfo() {

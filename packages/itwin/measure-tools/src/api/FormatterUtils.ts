@@ -6,7 +6,8 @@
 import type { Point3d, XAndY } from "@itwin/core-geometry";
 import type { Cartographic } from "@itwin/core-common";
 import { IModelApp, QuantityType } from "@itwin/core-frontend";
-import type { FormatterSpec } from "@itwin/core-quantity";
+import type { FormatProps } from "@itwin/core-quantity";
+import { FormatTraits, type FormatterSpec } from "@itwin/core-quantity";
 import { MeasureTools } from "../MeasureTools.js";
 
 export class FormatterUtils {
@@ -55,14 +56,23 @@ export class FormatterUtils {
     return FormatterUtils.formatCoordinatesWithSpec(point, coordSpec);
   }
 
-  public static formatCoordinatesImmediate(point: Point3d): string {
-    const coordSpec =
-      IModelApp.quantityFormatter.findFormatterSpecByQuantityType(
-        QuantityType.Coordinate
-      );
-    if (undefined === coordSpec) return "";
+  public static formatCoordinatesImmediate(point: Point3d, coordSpec?: FormatterSpec): string {
+    let result: string;
+    if (!coordSpec) {
+      coordSpec =
+        IModelApp.quantityFormatter.findFormatterSpecByQuantityType(
+          QuantityType.Coordinate
+        );
+      if (undefined === coordSpec) return "";
+      result = FormatterUtils.formatCoordinatesWithSpec(point, coordSpec);
+    } else {
+      const oldFormatTraits = coordSpec.format.formatTraits;
+      coordSpec.format.formatTraits &= ~FormatTraits.ShowUnitLabel;
+      result = FormatterUtils.formatCoordinatesWithSpec(point, coordSpec);
+      coordSpec.format.formatTraits = oldFormatTraits; // Restore original format traits
+    }
 
-    return FormatterUtils.formatCoordinatesWithSpec(point, coordSpec);
+    return result;
   }
 
   public static async formatCoordinatesXY(point: XAndY): Promise<string> {
@@ -127,12 +137,14 @@ export class FormatterUtils {
   }
 
   public static async formatCartographicToLatLong(
-    c: Cartographic
+    c: Cartographic, angleSpec?: FormatterSpec
   ): Promise<string> {
-    const latLongSpec =
-      await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
-        QuantityType.LatLong
-      );
+    if (!angleSpec) {
+      angleSpec =
+        await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
+          QuantityType.LatLong
+        );
+    }
     const latSuffixKey =
       0 < c.latitude
         ? "MeasureTools:Generic.latitudeNorthSuffix"
@@ -144,13 +156,13 @@ export class FormatterUtils {
 
     let str = IModelApp.quantityFormatter.formatQuantity(
       Math.abs(c.latitude),
-      latLongSpec
+      angleSpec
     );
     str += MeasureTools.localization.getLocalizedString(latSuffixKey);
     str += ", ";
     str += IModelApp.quantityFormatter.formatQuantity(
       Math.abs(c.longitude),
-      latLongSpec
+      angleSpec
     );
     str += MeasureTools.localization.getLocalizedString(longSuffixKey);
     return str;
@@ -173,19 +185,52 @@ export class FormatterUtils {
     return `${fSlope} (${fSlopeRatio})`;
   }
 
-  public static async formatStation(station: number): Promise<string> {
-    const spec =
-      await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
-        QuantityType.Stationing
-      );
-    return IModelApp.quantityFormatter.formatQuantity(station, spec);
+  public static async formatStation(station: number, stationSpec?: FormatterSpec): Promise<string> {
+    if (!stationSpec) {
+      stationSpec =
+        await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
+          QuantityType.Stationing
+        );
+    }
+    return IModelApp.quantityFormatter.formatQuantity(station, stationSpec);
   }
 
-  public static async formatLength(length: number): Promise<string> {
-    const spec =
-      await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
-        QuantityType.LengthEngineering
-      );
-    return IModelApp.quantityFormatter.formatQuantity(length, spec);
+  public static async formatLength(length: number, lengthSpec?: FormatterSpec): Promise<string> {
+    if (!lengthSpec) {
+      lengthSpec =
+        await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
+          QuantityType.LengthEngineering
+        );
+    }
+    return IModelApp.quantityFormatter.formatQuantity(length, lengthSpec);
+  }
+
+  /**
+   * @returns The bearing in radians, where 0 is North and π/2 is East.
+   */
+  public static calculateBearing(dx: number, dy: number): number {
+    let bearing = Math.atan2(dx, dy); // radians, 0 = North, π/2 = East
+    if (bearing < 0) bearing += 2 * Math.PI; // Normalize to [0, 2π)
+    return bearing;
+  }
+
+  public static getDefaultBearingFormatProps(): FormatProps {
+    return {
+      minWidth: 2,
+      precision: 0,
+      type: "Bearing",
+      revolutionUnit: "Units.REVOLUTION",
+      formatTraits: ["showUnitLabel"],
+      uomSeparator: "",
+      composite: {
+        includeZero: true,
+        spacer: "",
+        units: [
+          { name: "Units.ARC_DEG", label: "°" },
+          { name: "Units.ARC_MINUTE", label: "'" },
+          { name: "Units.ARC_SECOND", label: "\"" },
+        ],
+      },
+    };
   }
 }

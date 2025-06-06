@@ -18,7 +18,7 @@ import {
 } from "@itwin/core-geometry";
 import type { GeometryStreamProps } from "@itwin/core-common";
 import type { BeButtonEvent, DecorateContext } from "@itwin/core-frontend";
-import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
+import { GraphicType, IModelApp } from "@itwin/core-frontend";
 import {
   StyleSet,
   WellKnownGraphicStyleType,
@@ -34,15 +34,20 @@ import {
   MeasurementSerializer,
 } from "../api/Measurement.js";
 import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper.js";
-import type { MeasurementProps } from "../api/MeasurementProps.js";
+import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet.js";
 import { TextMarker } from "../api/TextMarker.js";
 import { MeasureTools } from "../MeasureTools.js";
+import type { FormatterSpec } from "@itwin/core-quantity";
 
 export interface AngleMeasurementProps extends MeasurementProps {
   startPoint?: XYZProps;
   center?: XYZProps;
   endPoint?: XYZProps;
+  formatting?: {
+    /** Defaults to "AecUnits.ANGLE" and "Units.RAD" */
+    angle?: MeasurementFormattingProps;
+  }
 }
 
 export class AngleMeasurementSerializer extends MeasurementSerializer {
@@ -72,6 +77,8 @@ export class AngleMeasurement extends Measurement {
   private _startPoint: Point3d | undefined;
   private _center: Point3d | undefined;
   private _endPoint: Point3d | undefined;
+  private _angleKoQ: string;
+  private _anglePersistenceUnitName: string;
 
   private _textMarker?: TextMarker;
   private _isDynamic: boolean;
@@ -87,6 +94,8 @@ export class AngleMeasurement extends Measurement {
     super();
 
     this._isDynamic = false;
+    this._angleKoQ = "AecUnits.ANGLE";
+    this._anglePersistenceUnitName = "Units.RAD";
     if (props) this.readFromJSON(props);
 
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
@@ -118,11 +127,28 @@ export class AngleMeasurement extends Measurement {
     return angle;
   }
 
+  public get angleKoQ(): string {
+    return this._angleKoQ;
+  }
+  public set angleKoQ(koqName: string) {
+    this._angleKoQ = koqName;
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+  }
+  public get anglePersistenceUnitName(): string {
+    return this._anglePersistenceUnitName;
+  }
+  public set anglePersistenceUnitName(unitName: string) {
+    this._anglePersistenceUnitName = unitName;
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+  }
+
   public override readFromJSON(props: AngleMeasurementProps) {
     super.readFromJSON(props);
     if (props.startPoint) this._startPoint = Point3d.fromJSON(props.startPoint);
     if (props.center) this._center = Point3d.fromJSON(props.center);
     if (props.endPoint) this._endPoint = Point3d.fromJSON(props.endPoint);
+    if (props.formatting?.angle?.koqName) this._angleKoQ = props.formatting.angle.koqName;
+    if (props.formatting?.angle?.persistenceUnitName) this._anglePersistenceUnitName = props.formatting.angle.persistenceUnitName;
 
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
@@ -138,6 +164,16 @@ export class AngleMeasurement extends Measurement {
     if (this._startPoint) jsonDist.startPoint = this._startPoint.toJSON();
     if (this._endPoint) jsonDist.endPoint = this._endPoint.toJSON();
     if (this._center) jsonDist.center = this._center.toJSON();
+    jsonDist.formatting = {
+      angle: {
+        koqName: this._angleKoQ,
+        persistenceUnitName: this._anglePersistenceUnitName,
+      }
+    };
+  }
+
+  public override onDisplayUnitsChanged(): void {
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
   /**
@@ -354,11 +390,14 @@ export class AngleMeasurement extends Measurement {
   }
 
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
-    const angleSpec =
-      await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
-        QuantityType.Angle
-      );
-
+    const formatProps = await IModelApp.formatsProvider.getFormat(this._angleKoQ);
+    let angleSpec: FormatterSpec | undefined;
+    if (formatProps) {
+      angleSpec = await IModelApp.quantityFormatter.createFormatterSpec({
+        formatProps,
+        persistenceUnitName: this._anglePersistenceUnitName
+      });
+    }
     const angle = this.angle ?? 0;
     const fAngle = IModelApp.quantityFormatter.formatQuantity(angle, angleSpec);
 
@@ -387,10 +426,14 @@ export class AngleMeasurement extends Measurement {
 
   private async createTextMarker(): Promise<void> {
     if (this._center !== undefined && this.angle !== undefined) {
-      const angleSpec =
-        await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
-          QuantityType.Angle
-        );
+      const formatProps = await IModelApp.formatsProvider.getFormat(this._angleKoQ);
+      let angleSpec: FormatterSpec | undefined;
+      if (formatProps) {
+        angleSpec = await IModelApp.quantityFormatter.createFormatterSpec({
+          formatProps,
+          persistenceUnitName: this._anglePersistenceUnitName
+        });
+      }
       const angle = this.angle;
       const fAngle = IModelApp.quantityFormatter.formatQuantity(
         angle,
@@ -450,12 +493,14 @@ export class AngleMeasurement extends Measurement {
     startPoint: Point3d,
     center?: Point3d,
     endPoint?: Point3d,
-    viewType?: string
+    viewType?: string,
+    formatting?: { angle?: MeasurementFormattingProps }
   ) {
     const measurement = new AngleMeasurement({
       startPoint,
       center,
       endPoint,
+      formatting
     });
 
     if (viewType) measurement.viewTarget.include(viewType);
