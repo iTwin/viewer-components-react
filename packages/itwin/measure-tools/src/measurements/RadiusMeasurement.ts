@@ -44,10 +44,13 @@ export interface RadiusMeasurementProps extends MeasurementProps {
   startPoint?: XYZProps;
   midPoint?: XYZProps;
   endPoint?: XYZProps;
-  formatting?: {
-    /** Defaults to "AecUnits.LENGTH" and "Units.M" */
-    length?: MeasurementFormattingProps;
-  }
+  formatting?: RadiusMeasurementFormattingProps;
+}
+
+/** Formatting properties for Radius measurement. */
+export interface RadiusMeasurementFormattingProps {
+  /** Defaults to "AecUnits.LENGTH" and "Units.M" */
+  length?: MeasurementFormattingProps;
 }
 
 export class RadiusMeasurementSerializer extends MeasurementSerializer {
@@ -612,7 +615,7 @@ export class RadiusMeasurement extends Measurement {
     midPoint?: Point3d,
     endPoint?: Point3d,
     viewType?: string,
-    formatting?: { length?: MeasurementFormattingProps }
+    formatting?: RadiusMeasurementFormattingProps
   ) {
     const measurement = new RadiusMeasurement({
       startPoint,

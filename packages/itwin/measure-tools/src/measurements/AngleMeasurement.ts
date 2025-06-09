@@ -43,10 +43,13 @@ export interface AngleMeasurementProps extends MeasurementProps {
   startPoint?: XYZProps;
   center?: XYZProps;
   endPoint?: XYZProps;
-  formatting?: {
-    /** Defaults to "AecUnits.ANGLE" and "Units.RAD" */
-    angle?: MeasurementFormattingProps;
-  }
+  formatting?: AngleMeasurementFormattingProps;
+}
+
+/** Formatting properties for angle measurement. */
+export interface AngleMeasurementFormattingProps {
+  /** Defaults to "AecUnits.ANGLE" and "Units.RAD" */
+  angle?: MeasurementFormattingProps;
 }
 
 export class AngleMeasurementSerializer extends MeasurementSerializer {
@@ -493,7 +496,7 @@ export class AngleMeasurement extends Measurement {
     center?: Point3d,
     endPoint?: Point3d,
     viewType?: string,
-    formatting?: { angle?: MeasurementFormattingProps }
+    formatting?: AngleMeasurementFormattingProps
   ) {
     const measurement = new AngleMeasurement({
       startPoint,

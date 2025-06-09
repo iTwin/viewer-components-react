@@ -51,12 +51,15 @@ export interface DistanceMeasurementProps extends MeasurementProps {
   startPoint: XYZProps;
   endPoint: XYZProps;
   showAxes?: boolean;
-  formatting? : {
-    /** Defaults to "AecUnits.LENGTH" and "Units.M" */
-    length?: MeasurementFormattingProps;
-    /** Defaults to "RoadRailUnits.Bearing" and "Units.RAD" */
-    bearing? : MeasurementFormattingProps;
-  }
+  formatting?: DistanceMeasurementFormattingProps;
+}
+
+/** Formatting properties for distance measurement. */
+export interface DistanceMeasurementFormattingProps {
+  /** Defaults to "AecUnits.LENGTH" and "Units.M" */
+  length?: MeasurementFormattingProps;
+  /** Defaults to "RoadRailUnits.Bearing" and "Units.RAD" */
+  bearing? : MeasurementFormattingProps;
 }
 
 /** Serializer for a [[DistanceMeasurement]]. */
@@ -103,8 +106,8 @@ export class DistanceMeasurement extends Measurement {
   private _showAxes: boolean;
   private _lengthKoQ: string;
   private _lengthPersistenceUnitName: string;
-  private _bearingKoQ: string;
-  private _bearingPersistenceUnitName: string;
+  private _bearingKoQ?: string;
+  private _bearingPersistenceUnitName?: string;
 
   private _isDynamic: boolean; // No serialize
   private _textMarker?: TextMarker; // No serialize
@@ -155,7 +158,7 @@ export class DistanceMeasurement extends Measurement {
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
-  public get bearingKoQ(): string {
+  public get bearingKoQ(): string | undefined {
     return this._bearingKoQ;
   }
 
@@ -164,7 +167,7 @@ export class DistanceMeasurement extends Measurement {
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
-  public get bearingPersistenceUnitName(): string {
+  public get bearingPersistenceUnitName(): string | undefined {
     return this._bearingPersistenceUnitName;
   }
 
@@ -191,9 +194,6 @@ export class DistanceMeasurement extends Measurement {
     this._runRiseAxes = [];
     this._lengthKoQ = "AecUnits.LENGTH";
     this._lengthPersistenceUnitName = "Units.M";
-    // TODO: These two should be made optional, and logic only happens if the application passed them into the props.
-    this._bearingKoQ = "RoadRailUnits.Bearing";
-    this._bearingPersistenceUnitName = "Units.RAD"; // TODO: Once units schema 1.0.9 is released, change to Units.HORIZONTAL_DIR_RAD
     if (props) this.readFromJSON(props);
 
     this.populateFormattingSpecsRegistry().then(() => this.createTextMarker().catch())
@@ -239,10 +239,12 @@ export class DistanceMeasurement extends Measurement {
         await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._lengthKoQ, this._lengthPersistenceUnitName, lengthFormatProps);
       }
     }
-    const bearingEntry = IModelApp.quantityFormatter.getSpecsByName(this._bearingKoQ);
-    if (!bearingEntry || bearingEntry.formatterSpec.persistenceUnit?.name !== this._bearingPersistenceUnitName) {
-      const bearingFormatProps = FormatterUtils.getDefaultBearingFormatProps();
-      await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._bearingKoQ, this._bearingPersistenceUnitName, bearingFormatProps);
+    if (this._bearingKoQ && this._bearingPersistenceUnitName) {
+      const bearingEntry = IModelApp.quantityFormatter.getSpecsByName(this._bearingKoQ);
+      if (!bearingEntry || bearingEntry.formatterSpec.persistenceUnit?.name !== this._bearingPersistenceUnitName) {
+        const bearingFormatProps = FormatterUtils.getDefaultBearingFormatProps();
+        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._bearingKoQ, this._bearingPersistenceUnitName, bearingFormatProps);
+      }
     }
   }
 
@@ -746,7 +748,7 @@ export class DistanceMeasurement extends Measurement {
     };
   }
 
-  public static create(start: Point3d, end: Point3d, viewType?: string, formatting?: { length?: MeasurementFormattingProps, bearing?: MeasurementFormattingProps }): DistanceMeasurement {
+  public static create(start: Point3d, end: Point3d, viewType?: string, formatting?: DistanceMeasurementFormattingProps): DistanceMeasurement {
     // Don't ned to serialize the points, will just work as is
     const measurement = new DistanceMeasurement({
       startPoint: start,

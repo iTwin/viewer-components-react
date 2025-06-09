@@ -50,16 +50,18 @@ export interface LocationMeasurementProps extends MeasurementProps {
   slope?: number;
   station?: number;
   offset?: number;
-  formatting?: {
-    /** Defaults to "AecUnits.LENGTH" and "Units.M" */
-    length?: MeasurementFormattingProps;
-    /** Defaults to "RoadRailUnits.STATION" and "Units.M" */
-    station?: MeasurementFormattingProps;
-    /** Defaults to "AecUnits.ANGLE" and "Units.RAD" */
-    angle?: MeasurementFormattingProps;
-  }
+  formatting?: LocationMeasurementFormattingProps;
 }
 
+/** Formatting properties for location measurement. */
+export interface LocationMeasurementFormattingProps {
+  /** Defaults to "AecUnits.LENGTH" and "Units.M" */
+  length?: MeasurementFormattingProps;
+  /** Defaults to "RoadRailUnits.STATION" and "Units.M" */
+  station?: MeasurementFormattingProps;
+  /** Defaults to "AecUnits.ANGLE" and "Units.RAD" */
+  angle?: MeasurementFormattingProps;
+}
 /** Serializer for a [[LocationMeasurement]]. */
 export class LocationMeasurementSerializer extends MeasurementSerializer {
   public static readonly locationMeasurementName = "locationMeasurement";
@@ -622,11 +624,7 @@ export class LocationMeasurement extends Measurement {
     }
   }
 
-  public static create(location: Point3d, viewType?: string, formatting?: {
-    length?: MeasurementFormattingProps;
-    station?: MeasurementFormattingProps;
-    angle?: MeasurementFormattingProps;
-  }) {
+  public static create(location: Point3d, viewType?: string, formatting?: LocationMeasurementFormattingProps) {
     // Don't need to serialize the points, will just work as is
 
     const measurement = new LocationMeasurement({ location, formatting });

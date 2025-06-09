@@ -26,7 +26,7 @@ import type { Feature } from "../api/FeatureTracking.js";
 import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking.js";
 import { MeasurementToolBase } from "../api/MeasurementTool.js";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget.js";
-import type { LocationMeasurement } from "../measurements/LocationMeasurement.js";
+import type { LocationMeasurement, LocationMeasurementFormattingProps } from "../measurements/LocationMeasurement.js";
 import type { AddLocationProps } from "../toolmodels/MeasureLocationToolModel.js";
 import { MeasureLocationToolModel } from "../toolmodels/MeasureLocationToolModel.js";
 import { MeasureTools } from "../MeasureTools.js";
@@ -44,7 +44,6 @@ MeasureLocationToolModel
   public static override toolId = "MeasureTools.MeasureLocation";
   public static override iconSpec = "icon-measure-location";
   private static readonly useDynamicMeasurementPropertyName = "useDynamicMeasurement";
-
   protected override get allowedDrawingTypes(): SheetMeasurementsHelper.DrawingType[] {
     return [SheetMeasurementsHelper.DrawingType.CrossSection, SheetMeasurementsHelper.DrawingType.Plan];
   }
@@ -72,13 +71,14 @@ MeasureLocationToolModel
     return MeasureToolsFeatures.Tools_MeasureLocation;
   }
 
-  constructor(enableSheetMeasurements = false, allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true)) {
+  constructor(enableSheetMeasurements = false, allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true), formatting?: LocationMeasurementFormattingProps) {
     super(allowedViewportCallback);
     this._enableSheetMeasurements = enableSheetMeasurements;
+    this.toolModel.formatting = formatting;
   }
 
   public async onRestartTool(): Promise<void> {
-    const tool = new MeasureLocationTool(this._enableSheetMeasurements, this._allowedViewportCallback);
+    const tool = new MeasureLocationTool(this._enableSheetMeasurements, this._allowedViewportCallback, this.toolModel.formatting);
     if (await tool.run()) return;
 
     return this.exitTool();

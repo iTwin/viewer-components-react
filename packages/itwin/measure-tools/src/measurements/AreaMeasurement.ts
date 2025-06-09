@@ -42,12 +42,15 @@ import { MeasureTools } from "../MeasureTools.js";
  */
 export interface AreaMeasurementProps extends MeasurementProps {
   polygonPoints: XYZProps[];
-  formatting? : {
-    /** Defaults to "AecUnits.LENGTH" and "Units.M" */
-    length?: MeasurementFormattingProps;
-    /** Defaults to "AecUnits.AREA" and "Units.SQ_M" */
-    area? : MeasurementFormattingProps;
-  }
+  formatting?: AreaMeasurementFormattingProps;
+}
+
+/** Formatting properties for area measurement. */
+export interface AreaMeasurementFormattingProps {
+  /** Defaults to "AecUnits.LENGTH" and "Units.M" */
+  length?: MeasurementFormattingProps;
+  /** Defaults to "AecUnits.AREA" and "Units.SQ_M" */
+  area? : MeasurementFormattingProps;
 }
 
 /** Serializer for a [[AreaMeasurement]]. */
@@ -668,7 +671,7 @@ export class AreaMeasurement extends Measurement {
     };
   }
 
-  public static create(pts: Point3d[], viewType?: string, formatting?: { length?: MeasurementFormattingProps, area?: MeasurementFormattingProps }): AreaMeasurement {
+  public static create(pts: Point3d[], viewType?: string, formatting?: AreaMeasurementFormattingProps): AreaMeasurement {
     // Don't ned to serialize the points, will just work as is
     const measurement = new AreaMeasurement({ polygonPoints: pts, formatting });
     if (viewType) measurement.viewTarget.include(viewType);
