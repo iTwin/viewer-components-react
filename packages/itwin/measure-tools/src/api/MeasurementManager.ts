@@ -455,7 +455,6 @@ export class MeasurementManager implements Decorator {
       const unsubscribers = [IModelApp.quantityFormatter.onActiveFormattingUnitSystemChanged.addListener(this.onActiveUnitSystemChanged, this),
         IModelApp.quantityFormatter.onQuantityFormatsChanged.addListener(this.onActiveUnitSystemChanged, this),
         IModelApp.quantityFormatter.onUnitsProviderChanged.addListener(this.onActiveUnitSystemChanged, this),
-        IModelApp.formatsProvider.onFormatsChanged.addListener(this.onActiveUnitSystemChanged, this) // TODO: Maybe add a different event handler for this, to handle individual format changes.
       ];
       this._dropQuantityFormatterListeners = () => unsubscribers.forEach((unsubscriber) => {
         unsubscriber();

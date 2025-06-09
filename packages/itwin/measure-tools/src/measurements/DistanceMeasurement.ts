@@ -43,7 +43,6 @@ import type { MeasurementFormattingProps, MeasurementProps } from "../api/Measur
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet.js";
 import { TextMarker } from "../api/TextMarker.js";
 import { MeasureTools } from "../MeasureTools.js";
-import type { FormatterSpec } from "@itwin/core-quantity";
 
 /**
  * Props for serializing a [[DistanceMeasurement]].
@@ -197,7 +196,8 @@ export class DistanceMeasurement extends Measurement {
     this._bearingPersistenceUnitName = "Units.RAD"; // TODO: Once units schema 1.0.9 is released, change to Units.HORIZONTAL_DIR_RAD
     if (props) this.readFromJSON(props);
 
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.populateFormattingSpecsRegistry().then(() => this.createTextMarker().catch())
+    .catch();
   }
 
   public setStartPoint(point: XYAndZ) {
@@ -229,6 +229,21 @@ export class DistanceMeasurement extends Measurement {
     this._textStyleOverride = ovrTextStyle;
     this._startPoint.setFrom(start);
     this._endPoint.setFrom(end);
+  }
+
+  public override async populateFormattingSpecsRegistry(): Promise<void> {
+    const lengthEntry = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ);
+    if (!lengthEntry || lengthEntry.formatterSpec.persistenceUnit?.name !== this._lengthPersistenceUnitName) {
+      const lengthFormatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
+      if (lengthFormatProps) {
+        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._lengthKoQ, this._lengthPersistenceUnitName, lengthFormatProps);
+      }
+    }
+    const bearingEntry = IModelApp.quantityFormatter.getSpecsByName(this._bearingKoQ);
+    if (!bearingEntry || bearingEntry.formatterSpec.persistenceUnit?.name !== this._bearingPersistenceUnitName) {
+      const bearingFormatProps = FormatterUtils.getDefaultBearingFormatProps();
+      await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._bearingKoQ, this._bearingPersistenceUnitName, bearingFormatProps);
+    }
   }
 
   public override testDecorationHit(
@@ -464,6 +479,7 @@ export class DistanceMeasurement extends Measurement {
     this._runRiseAxes.forEach((axis: DistanceMeasurement) =>
       axis.onDisplayUnitsChanged()
     );
+
   }
 
   private updateMarkerStyle() {
@@ -478,16 +494,9 @@ export class DistanceMeasurement extends Measurement {
   }
 
   private async createTextMarker(): Promise<void> {
-    const formatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
+    const lengthSpec = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ)?.formatterSpec;
 
     const distance = this._startPoint.distance(this._endPoint);
-    let lengthSpec: FormatterSpec | undefined;
-    if (formatProps) {
-      lengthSpec = await IModelApp.quantityFormatter.createFormatterSpec({
-        formatProps,
-        persistenceUnitName: this._lengthPersistenceUnitName
-      });
-    }
     const fDistance = IModelApp.quantityFormatter.formatQuantity(
       distance,
       lengthSpec
@@ -523,7 +532,6 @@ export class DistanceMeasurement extends Measurement {
   }
 
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
-    const formatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
 
     const distance = this.worldScale * this._startPoint.distance(this._endPoint);
     const run = this.drawingMetadata?.worldScale !== undefined ? this.worldScale * Math.abs(this._endPoint.x - this._startPoint.x): this._startPoint.distanceXY(this._endPoint);
@@ -535,13 +543,7 @@ export class DistanceMeasurement extends Measurement {
     const bearing = FormatterUtils.calculateBearing(this._endPoint.x - this._startPoint.x, this._endPoint.y - this._startPoint.y);
     const adjustedStart = this.adjustPointForGlobalOrigin(this._startPoint);
     const adjustedEnd = this.adjustPointForGlobalOrigin(this._endPoint);
-    let lengthSpec: FormatterSpec | undefined;
-    if (formatProps) {
-      lengthSpec = await IModelApp.quantityFormatter.createFormatterSpec({
-        formatProps,
-        persistenceUnitName: this._lengthPersistenceUnitName
-      });
-    }
+    const lengthSpec = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ)?.formatterSpec;
 
     const fDistance = IModelApp.quantityFormatter.formatQuantity(distance, lengthSpec);
     const fStartCoords = FormatterUtils.formatCoordinatesImmediate(
@@ -603,10 +605,7 @@ export class DistanceMeasurement extends Measurement {
       },
     );
     if (this._bearingKoQ && this._bearingPersistenceUnitName) {
-      const bearingSpecs = await IModelApp.quantityFormatter.createFormatterSpec({
-        persistenceUnitName: this._bearingPersistenceUnitName,
-        formatProps: FormatterUtils.getDefaultBearingFormatProps() // TODO: Replace with retrieving formatProps from formatsProvider and KoQ after demo.
-      });
+      const bearingSpecs = IModelApp.quantityFormatter.getSpecsByName(this._bearingKoQ)?.formatterSpec;
       const fBearing: string = IModelApp.quantityFormatter.formatQuantity(bearing, bearingSpecs);
       data.properties.push({
         label: MeasureTools.localization.getLocalizedString(
@@ -614,7 +613,7 @@ export class DistanceMeasurement extends Measurement {
         ),
         name: "DistanceMeasurement_Bearing",
         value: fBearing,
-    });
+      });
     }
     if (this.drawingMetadata?.worldScale === undefined) {
       data.properties.push(

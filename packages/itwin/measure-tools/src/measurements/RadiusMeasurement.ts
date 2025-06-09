@@ -39,7 +39,6 @@ import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet.js";
 import { TextMarker } from "../api/TextMarker.js";
 import { ViewHelper } from "../api/ViewHelper.js";
 import { MeasureTools } from "../MeasureTools.js";
-import type { FormatterSpec } from "@itwin/core-quantity";
 
 export interface RadiusMeasurementProps extends MeasurementProps {
   startPoint?: XYZProps;
@@ -116,7 +115,8 @@ export class RadiusMeasurement extends Measurement {
     this._lengthPersistenceUnitName = "Units.M";
     if (props) this.readFromJSON(props);
 
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.populateFormattingSpecsRegistry().then(() => this.createTextMarker().catch())
+    .catch();
   }
 
   public get startPointRef(): Point3d | undefined {
@@ -299,6 +299,16 @@ export class RadiusMeasurement extends Measurement {
     return undefined;
   }
 
+  public override async populateFormattingSpecsRegistry(): Promise<void> {
+    const lengthEntry = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ);
+    if (!lengthEntry || lengthEntry.formatterSpec.persistenceUnit?.name !== this._lengthPersistenceUnitName) {
+      const lengthFormatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
+      if (lengthFormatProps) {
+        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._lengthKoQ, this._lengthPersistenceUnitName, lengthFormatProps);
+      }
+    }
+  }
+
   private _getSnapId(): string | undefined {
     if (!this.transientId)
       this.transientId = MeasurementSelectionSet.nextTransientId;
@@ -435,14 +445,7 @@ export class RadiusMeasurement extends Measurement {
   }
 
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
-    let lengthSpec: FormatterSpec | undefined;
-    const formatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
-    if (formatProps) {
-      lengthSpec = await IModelApp.quantityFormatter.createFormatterSpec({
-        formatProps,
-        persistenceUnitName: this._lengthPersistenceUnitName
-      });
-    }
+    const lengthSpec = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ)?.formatterSpec;
 
     const radius = this._arc?.circularRadius() ?? 0.0;
     const diameter = radius * 2;
@@ -543,14 +546,7 @@ export class RadiusMeasurement extends Measurement {
 
   private async createTextMarker(): Promise<void> {
     if (this._arc !== undefined) {
-      let lengthSpec: FormatterSpec | undefined;
-      const formatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
-      if (formatProps) {
-        lengthSpec = await IModelApp.quantityFormatter.createFormatterSpec({
-          formatProps,
-          persistenceUnitName: this._lengthPersistenceUnitName
-        });
-      }
+      const lengthSpec = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ)?.formatterSpec;
       const radius = this._arc.circularRadius()!;
       const fRadius = IModelApp.quantityFormatter.formatQuantity(
         radius,

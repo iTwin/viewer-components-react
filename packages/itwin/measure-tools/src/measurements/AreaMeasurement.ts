@@ -36,7 +36,6 @@ import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet.js";
 import { Polygon } from "../api/Polygon.js";
 import { DistanceMeasurement } from "./DistanceMeasurement.js";
 import { MeasureTools } from "../MeasureTools.js";
-import type { FormatterSpec } from "@itwin/core-quantity";
 
 /**
  * Props for serializing a [[AreaMeasurement]].
@@ -178,6 +177,8 @@ export class AreaMeasurement extends Measurement {
     this._isDynamic = false;
 
     if (props) this.readFromJSON(props);
+
+    this.populateFormattingSpecsRegistry().catch();
   }
 
   private handleTextMarkerButtonEvent(ev: BeButtonEvent): boolean {
@@ -188,6 +189,23 @@ export class AreaMeasurement extends Measurement {
     );
 
     return true;
+  }
+
+  public override async populateFormattingSpecsRegistry(): Promise<void> {
+    const lengthEntry = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ);
+    if (!lengthEntry || lengthEntry.formatterSpec.persistenceUnit?.name !== this._lengthPersistenceUnitName) {
+      const lengthFormatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
+      if (lengthFormatProps) {
+        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._lengthKoQ, this._lengthPersistenceUnitName, lengthFormatProps);
+      }
+    }
+    const areaEntry = IModelApp.quantityFormatter.getSpecsByName(this._areaKoQ);
+    if (!areaEntry || areaEntry.formatterSpec.persistenceUnit?.name !== this._areaPersistenceUnitName) {
+      const areaFormatProps = await IModelApp.formatsProvider.getFormat(this._areaKoQ);
+      if (areaFormatProps) {
+        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._areaKoQ, this._areaPersistenceUnitName, areaFormatProps);
+      }
+    }
   }
 
   public addPointToDynamicPolygon(point: Point3d): boolean {
@@ -449,22 +467,8 @@ export class AreaMeasurement extends Measurement {
   }
 
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
-    let lengthSpec: FormatterSpec | undefined;
-    let areaSpec: FormatterSpec | undefined;
-    const lengthFormatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
-    const areaFormatProps = await IModelApp.formatsProvider.getFormat(this._areaKoQ);
-    if (lengthFormatProps) {
-      lengthSpec = await IModelApp.quantityFormatter.createFormatterSpec({
-        formatProps: lengthFormatProps,
-        persistenceUnitName: this._lengthPersistenceUnitName
-      });
-    }
-    if (areaFormatProps) {
-      areaSpec = await IModelApp.quantityFormatter.createFormatterSpec({
-        formatProps: areaFormatProps,
-        persistenceUnitName: this._areaPersistenceUnitName
-      });
-    }
+    const lengthSpec = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ)?.formatterSpec;
+    const areaSpec = IModelApp.quantityFormatter.getSpecsByName(this._areaKoQ)?.formatterSpec;
 
     const fPerimeter = IModelApp.quantityFormatter.formatQuantity(
       this.worldScale * this._polygon.perimeter,
@@ -666,7 +670,7 @@ export class AreaMeasurement extends Measurement {
 
   public static create(pts: Point3d[], viewType?: string, formatting?: { length?: MeasurementFormattingProps, area?: MeasurementFormattingProps }): AreaMeasurement {
     // Don't ned to serialize the points, will just work as is
-    const measurement = new AreaMeasurement({ polygonPoints: pts, formatting});
+    const measurement = new AreaMeasurement({ polygonPoints: pts, formatting });
     if (viewType) measurement.viewTarget.include(viewType);
 
     return measurement;

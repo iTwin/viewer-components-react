@@ -38,7 +38,6 @@ import type { MeasurementFormattingProps, MeasurementProps } from "../api/Measur
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet.js";
 import { TextMarker } from "../api/TextMarker.js";
 import { MeasureTools } from "../MeasureTools.js";
-import type { FormatterSpec } from "@itwin/core-quantity";
 
 export interface AngleMeasurementProps extends MeasurementProps {
   startPoint?: XYZProps;
@@ -98,7 +97,8 @@ export class AngleMeasurement extends Measurement {
     this._anglePersistenceUnitName = "Units.RAD";
     if (props) this.readFromJSON(props);
 
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.populateFormattingSpecsRegistry().then(() => this.createTextMarker().catch())
+    .catch();
   }
 
   public get startPointRef(): Point3d | undefined {
@@ -176,6 +176,19 @@ export class AngleMeasurement extends Measurement {
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
+  public override async populateFormattingSpecsRegistry(): Promise<void> {
+    const angleEntry = IModelApp.quantityFormatter.getSpecsByName(this._angleKoQ);
+    if (!angleEntry || angleEntry.formatterSpec.persistenceUnit?.name !== this._anglePersistenceUnitName) {
+      const angleFormatProps = await IModelApp.formatsProvider.getFormat(this._angleKoQ);
+      if (angleFormatProps) {
+        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(
+          this._angleKoQ,
+          this._anglePersistenceUnitName,
+          angleFormatProps
+        );
+      }
+    }
+  }
   /**
    * Tests equality with another measurement.
    * @param other Measurement to test equality for.
@@ -390,14 +403,7 @@ export class AngleMeasurement extends Measurement {
   }
 
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
-    const formatProps = await IModelApp.formatsProvider.getFormat(this._angleKoQ);
-    let angleSpec: FormatterSpec | undefined;
-    if (formatProps) {
-      angleSpec = await IModelApp.quantityFormatter.createFormatterSpec({
-        formatProps,
-        persistenceUnitName: this._anglePersistenceUnitName
-      });
-    }
+    const angleSpec = IModelApp.quantityFormatter.getSpecsByName(this._angleKoQ)?.formatterSpec;
     const angle = this.angle ?? 0;
     const fAngle = IModelApp.quantityFormatter.formatQuantity(angle, angleSpec);
 
@@ -426,14 +432,7 @@ export class AngleMeasurement extends Measurement {
 
   private async createTextMarker(): Promise<void> {
     if (this._center !== undefined && this.angle !== undefined) {
-      const formatProps = await IModelApp.formatsProvider.getFormat(this._angleKoQ);
-      let angleSpec: FormatterSpec | undefined;
-      if (formatProps) {
-        angleSpec = await IModelApp.quantityFormatter.createFormatterSpec({
-          formatProps,
-          persistenceUnitName: this._anglePersistenceUnitName
-        });
-      }
+      const angleSpec = IModelApp.quantityFormatter.getSpecsByName(this._angleKoQ)?.formatterSpec;
       const angle = this.angle;
       const fAngle = IModelApp.quantityFormatter.formatQuantity(
         angle,

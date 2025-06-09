@@ -823,6 +823,8 @@ export abstract class Measurement {
   /** Notify subclasses when the display units have changed. */
   public onDisplayUnitsChanged(): void { }
 
+  public async populateFormattingSpecsRegistry(): Promise<void> { }
+
   /** Notify subclasses when the transient ID has changed.
    * @param _prevId The previous ID, if any.
    */
@@ -995,4 +997,6 @@ export abstract class Measurement {
 
     target.invalidateViewportDecorations();
   }
+
+
 }
