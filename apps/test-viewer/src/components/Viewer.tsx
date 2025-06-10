@@ -111,8 +111,8 @@ function onIModelConnected(imodel: IModelConnection) {
           console.log("Unregistered SchemaFormatsProvider, SchemaUnitProvider");
         });
       }
-    } catch {
-      console.error("No common AecUnits schema found in iModel, not registering a SchemaFormatsProvider");
+    } catch (err) {
+      console.error("Error while setting up formats provider:", err);
     }
   }
 
