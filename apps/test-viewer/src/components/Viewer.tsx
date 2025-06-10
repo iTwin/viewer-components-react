@@ -93,24 +93,25 @@ function onIModelConnected(imodel: IModelConnection) {
   const setupFormatsProvider = async () => {
     try {
       const schema = await imodel.schemaContext.getSchema(new SchemaKey("AecUnits", SchemaMatchType.Latest));
-      if (schema) {
-        const schemaFormatsProvider = new SchemaFormatsProvider(imodel.schemaContext, IModelApp.quantityFormatter.activeUnitSystem);
-        const removeListener = IModelApp.quantityFormatter.onActiveFormattingUnitSystemChanged.addListener((args) => {
-          schemaFormatsProvider.unitSystem = args.system;
-        });
+      if (!schema) throw new Error("AecUnits schema not found in iModel");
 
-        const schemaUnitsProvider = new SchemaUnitProvider(imodel.schemaContext);
-        IModelApp.quantityFormatter.unitsProvider = schemaUnitsProvider;
-        IModelApp.formatsProvider = schemaFormatsProvider;
-        console.log("Registered SchemaFormatsProvider, SchemaUnitProvider");
+      const schemaFormatsProvider = new SchemaFormatsProvider(imodel.schemaContext, IModelApp.quantityFormatter.activeUnitSystem);
+      const removeListener = IModelApp.quantityFormatter.onActiveFormattingUnitSystemChanged.addListener((args) => {
+        schemaFormatsProvider.unitSystem = args.system;
+      });
 
-        IModelConnection.onClose.addOnce(() => {
-          removeListener();
-          IModelApp.resetFormatsProvider();
-          void IModelApp.quantityFormatter.resetToUseInternalUnitsProvider();
-          console.log("Unregistered SchemaFormatsProvider, SchemaUnitProvider");
-        });
-      }
+      const schemaUnitsProvider = new SchemaUnitProvider(imodel.schemaContext);
+      IModelApp.quantityFormatter.unitsProvider = schemaUnitsProvider;
+      IModelApp.formatsProvider = schemaFormatsProvider;
+      console.log("Registered SchemaFormatsProvider, SchemaUnitProvider");
+
+      IModelConnection.onClose.addOnce(() => {
+        removeListener();
+        IModelApp.resetFormatsProvider();
+        void IModelApp.quantityFormatter.resetToUseInternalUnitsProvider();
+        console.log("Unregistered SchemaFormatsProvider, SchemaUnitProvider");
+      });
+
     } catch (err) {
       console.error("Error while setting up formats provider:", err);
     }
