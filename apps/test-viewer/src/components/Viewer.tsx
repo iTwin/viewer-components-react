@@ -90,29 +90,34 @@ function onIModelConnected(imodel: IModelConnection) {
   setTimeout(() => {
     IModelConnection.onOpen.raiseEvent(imodel);
   }, 1000);
+  const setupFormatsProvider = async () => {
+    try {
+      const schema = await imodel.schemaContext.getSchema(new SchemaKey("AecUnits", SchemaMatchType.Latest));
+      if (schema) {
+        const schemaFormatsProvider = new SchemaFormatsProvider(imodel.schemaContext, IModelApp.quantityFormatter.activeUnitSystem);
+        const removeListener = IModelApp.quantityFormatter.onActiveFormattingUnitSystemChanged.addListener((args) => {
+          schemaFormatsProvider.unitSystem = args.system;
+        });
 
-  imodel.schemaContext.getSchema(new SchemaKey("AecUnits", SchemaMatchType.Latest)).then((schema) => {
-    if (schema) {
-      const schemaFormatsProvider = new SchemaFormatsProvider(imodel.schemaContext, IModelApp.quantityFormatter.activeUnitSystem);
-      const removeListener = IModelApp.quantityFormatter.onActiveFormattingUnitSystemChanged.addListener((args) => {
-        schemaFormatsProvider.unitSystem = args.system;
-      });
+        const schemaUnitsProvider = new SchemaUnitProvider(imodel.schemaContext);
+        IModelApp.quantityFormatter.unitsProvider = schemaUnitsProvider;
+        IModelApp.formatsProvider = schemaFormatsProvider;
+        console.log("Registered SchemaFormatsProvider, SchemaUnitProvider");
 
-      const schemaUnitsProvider = new SchemaUnitProvider(imodel.schemaContext);
-      IModelApp.quantityFormatter.unitsProvider = schemaUnitsProvider;
-      IModelApp.formatsProvider = schemaFormatsProvider;
-      console.log("Registered SchemaFormatsProvider, SchemaUnitProvider");
-
-      IModelConnection.onClose.addOnce(() => {
-        removeListener();
-        IModelApp.resetFormatsProvider();
-        void IModelApp.quantityFormatter.resetToUseInternalUnitsProvider();
-        console.log("Unregistered SchemaFormatsProvider, SchemaUnitProvider");
-      });
+        IModelConnection.onClose.addOnce(() => {
+          removeListener();
+          IModelApp.resetFormatsProvider();
+          void IModelApp.quantityFormatter.resetToUseInternalUnitsProvider();
+          console.log("Unregistered SchemaFormatsProvider, SchemaUnitProvider");
+        });
+      }
+    } catch {
+      console.error("No common AecUnits schema found in iModel, not registering a SchemaFormatsProvider");
     }
-  }).catch((_) => {
-    console.error("No common AecUnits schema found in iModel, not registering a SchemaFormatsProvider");
-  });
+  }
+
+  // Only load a schema formats provider if the iModel has the AecUnits schema
+  void setupFormatsProvider();
 }
 
 function useIModelInfo() {
