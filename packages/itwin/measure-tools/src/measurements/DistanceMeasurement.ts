@@ -607,8 +607,8 @@ export class DistanceMeasurement extends Measurement {
       },
     );
     if (this._bearingKoQ && this._bearingPersistenceUnitName) {
-      const bearingSpecs = IModelApp.quantityFormatter.getSpecsByName(this._bearingKoQ)?.formatterSpec;
-      const fBearing: string = IModelApp.quantityFormatter.formatQuantity(bearing, bearingSpecs);
+      const bearingSpec = IModelApp.quantityFormatter.getSpecsByName(this._bearingKoQ)?.formatterSpec;
+      const fBearing: string = IModelApp.quantityFormatter.formatQuantity(bearing, bearingSpec);
       data.properties.push({
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureDistance.bearing"

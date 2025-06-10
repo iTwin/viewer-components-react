@@ -26,21 +26,6 @@ import type { RadiusMeasurementFormattingProps } from "../measurements/RadiusMea
 
 export class MeasureToolDefinitions {
 
-  /**
-   * @deprecated in 0.14.2 use getMeasureDistanceToolCommand instead
-   */
-  public static get measureDistanceToolCommand() {
-    return new ToolItemDef({
-      toolId: MeasureDistanceTool.toolId,
-      iconSpec: MeasureDistanceTool.iconSpec,
-      label: () => MeasureDistanceTool.flyover,
-      tooltip: () => MeasureDistanceTool.description,
-      execute: () => {
-        void IModelApp.tools.run(MeasureDistanceTool.toolId);
-      },
-    });
-  }
-
   public static getMeasureDistanceToolCommand(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true), enableSheetMeasurements: boolean, formatting?: DistanceMeasurementFormattingProps) {
     return new ToolItemDef({
       toolId: MeasureDistanceTool.toolId,
@@ -54,21 +39,6 @@ export class MeasureToolDefinitions {
     });
   }
 
-  /**
-   * @deprecated in 0.14.2 use getMeasureAreaToolCommand instead
-   */
-  public static get measureAreaToolCommand() {
-    return new ToolItemDef({
-      toolId: MeasureAreaTool.toolId,
-      iconSpec: MeasureAreaTool.iconSpec,
-      label: () => MeasureAreaTool.flyover,
-      tooltip: () => MeasureAreaTool.description,
-      execute: () => {
-        void IModelApp.tools.run(MeasureAreaTool.toolId);
-      },
-    });
-  }
-
   public static getMeasureAreaToolCommand(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true), enableSheetMeasurements: boolean, formatting?: AreaMeasurementFormattingProps) {
     return new ToolItemDef({
       toolId: MeasureAreaTool.toolId,
@@ -78,21 +48,6 @@ export class MeasureToolDefinitions {
       execute: () => {
         const tool = new MeasureAreaTool(enableSheetMeasurements, allowedViewportCallback, formatting);
         void tool.run();
-      },
-    });
-  }
-
-  /**
-   * @deprecated in 0.15.0 use getMeasureLocationToolCommand instead
-   */
-  public static get measureLocationToolCommand() {
-    return new ToolItemDef({
-      toolId: MeasureLocationTool.toolId,
-      iconSpec: MeasureLocationTool.iconSpec,
-      label: () => MeasureLocationTool.flyover,
-      tooltip: () => MeasureLocationTool.description,
-      execute: () => {
-        void IModelApp.tools.run(MeasureLocationTool.toolId);
       },
     });
   }
@@ -150,21 +105,6 @@ export class MeasureToolDefinitions {
     });
   }
 
-  /**
-   * @deprecated in 0.23.1 use getMeasureRadiusToolCommand instead
-   */
-  public static get measureRadiusToolCommand() {
-    return new ToolItemDef({
-      toolId: MeasureRadiusTool.toolId,
-      iconSpec: MeasureRadiusTool.iconSpec,
-      label: () => MeasureRadiusTool.flyover,
-      tooltip: () => MeasureRadiusTool.description,
-      execute: () => {
-        void IModelApp.tools.run(MeasureRadiusTool.toolId);
-      },
-    });
-  }
-
   public static getMeasureRadiusToolCommand(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true), formatting?: RadiusMeasurementFormattingProps) {
     return new ToolItemDef({
       toolId: MeasureRadiusTool.toolId,
@@ -178,21 +118,6 @@ export class MeasureToolDefinitions {
     });
   }
 
-  /**
-   * @deprecated in 0.23.1 use getMeasureRadiusToolCommand instead
-   */
-  public static get measureAngleToolCommand() {
-    return new ToolItemDef({
-      toolId: MeasureAngleTool.toolId,
-      iconSpec: MeasureAngleTool.iconSpec,
-      label: () => MeasureAngleTool.flyover,
-      tooltip: () => MeasureAngleTool.description,
-      execute: () => {
-        void IModelApp.tools.run(MeasureAngleTool.toolId);
-      },
-    });
-  }
-
   public static getMeasureAngleToolCommand(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true), formatting?: AngleMeasurementFormattingProps) {
     return new ToolItemDef({
       toolId: MeasureAngleTool.toolId,
@@ -202,25 +127,6 @@ export class MeasureToolDefinitions {
       execute: () => {
         const tool = new MeasureAngleTool(allowedViewportCallback, formatting);
         void tool.run();
-      },
-    });
-  }
-
-  /**
-   * @deprecated in 0.23.1 use getMeasureRadiusToolCommand instead
-   */
-  public static get measurePerpendicularToolCommand() {
-    return new ToolItemDef({
-      toolId: MeasurePerpendicularTool.toolId,
-      iconSpec: MeasurePerpendicularTool.iconSpec,
-      label: () => MeasurePerpendicularTool.flyover,
-      tooltip: () => MeasurePerpendicularTool.description,
-      isHidden: new ConditionalBooleanValue(
-        () => !!IModelApp.viewManager.selectedView?.view?.is2d(),
-        [SyncUiEventId.ViewStateChanged]
-      ),
-      execute: () => {
-        void IModelApp.tools.run(MeasurePerpendicularTool.toolId);
       },
     });
   }

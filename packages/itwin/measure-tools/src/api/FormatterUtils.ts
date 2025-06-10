@@ -67,7 +67,7 @@ export class FormatterUtils {
       result = FormatterUtils.formatCoordinatesWithSpec(point, coordSpec);
     } else {
       const oldFormatTraits = coordSpec.format.formatTraits;
-      coordSpec.format.formatTraits &= ~FormatTraits.ShowUnitLabel;
+      coordSpec.format.formatTraits &= ~FormatTraits.ShowUnitLabel; // Bit-wise remove ShowUnitLabel trait if exists
       result = FormatterUtils.formatCoordinatesWithSpec(point, coordSpec);
       coordSpec.format.formatTraits = oldFormatTraits; // Restore original format traits
     }
