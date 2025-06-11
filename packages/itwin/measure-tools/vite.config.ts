@@ -22,6 +22,7 @@ export default defineConfig({
     exclude: ["src/test/measure-tools/_Setup.test.ts"],
     server: {
       deps: {
+        // See reason: https://github.com/iTwin/appui/issues/1208
         inline: [
           '@itwin/appui-react',
           '@itwin/imodel-components-react',

@@ -20,7 +20,7 @@ beforeAll(async () => {
   await MeasureTools.startup({ localization });
 
   const schemaContext = new SchemaContext();
-  const unitSchemaFilePath = path.join(__dirname, "..", "..", "..", "node_modules", "@bentley", "units-schema");
+  const unitSchemaFilePath = path.dirname(require.resolve("@bentley/units-schema/package.json"));
   const locUnits = new SchemaXmlFileLocater();
   locUnits.addSchemaSearchPath(unitSchemaFilePath)
   schemaContext.addLocater(locUnits);
