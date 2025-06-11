@@ -1,6 +1,6 @@
 {
   "type": "patch",
-  "comment": "[geo-tools] Disable GoogleAddressProvider when Google Maps base map is not active",
+  "comment": "Disable GoogleAddressProvider when Google Maps base map is not active",
   "packageName": "@itwin/geo-tools-react",
   "email": "mdastous-bentley@users.noreply.github.com",
   "dependentChangeType": "patch"
