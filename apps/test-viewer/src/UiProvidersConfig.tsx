@@ -243,7 +243,7 @@ const configuredUiItems = new Map<string, UiItem>([
           distance: {
             bearing: {
               koqName: "RoadRailUnits.Bearing",
-              persistenceUnitName: "Units.RAD" // TODO: Once units schema 1.0.9 is released, change to Units.HORIZONTAL_DIR_RAD
+              persistenceUnitName: "Units.RAD"
             }
           }
         }
