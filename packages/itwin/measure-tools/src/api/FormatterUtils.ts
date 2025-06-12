@@ -10,89 +10,57 @@ import type { FormatProps } from "@itwin/core-quantity";
 import { FormatTraits, type FormatterSpec } from "@itwin/core-quantity";
 import { MeasureTools } from "../MeasureTools.js";
 
-export class FormatterUtils {
-  private static removeUnitSuffixes(s: string) {
-    s = s.replace(/ m/g, "");
-    s = s.replace(/ ft/g, "");
-    return s;
+export namespace FormatterUtils {
+
+  /** Formats a sequence of values with spec without the unit label */
+  function formatValuesWithNoUnitLabel(values: number[], spec: FormatterSpec): string {
+    const oldFormatTraits = spec.format.formatTraits;
+
+    spec.format.formatTraits &= ~FormatTraits.ShowUnitLabel; // Bit-wise remove ShowUnitLabel trait if exists
+    const strs = values.map((value) => IModelApp.quantityFormatter.formatQuantity(value, spec));
+    spec.format.formatTraits = oldFormatTraits; // Restore original format traits
+
+    return strs.join(", ");
   }
 
-  private static formatCoordinatesWithSpec(
-    point: Point3d,
-    spec: FormatterSpec
-  ): string {
-    const xStr = FormatterUtils.removeUnitSuffixes(
-      IModelApp.quantityFormatter.formatQuantity(point.x, spec)
-    );
-    const yStr = FormatterUtils.removeUnitSuffixes(
-      IModelApp.quantityFormatter.formatQuantity(point.y, spec)
-    );
-    const zStr = FormatterUtils.removeUnitSuffixes(
-      IModelApp.quantityFormatter.formatQuantity(point.z, spec)
-    );
-    return `${xStr}, ${yStr}, ${zStr}`;
-  }
-
-  private static formatCoordinatesXYWithSpec(
-    point: XAndY,
-    spec: FormatterSpec
-  ): string {
-    const xStr = FormatterUtils.removeUnitSuffixes(
-      IModelApp.quantityFormatter.formatQuantity(point.x, spec)
-    );
-    const yStr = FormatterUtils.removeUnitSuffixes(
-      IModelApp.quantityFormatter.formatQuantity(point.y, spec)
-    );
-    return `${xStr}, ${yStr}`;
-  }
-
-  public static async formatCoordinates(point: Point3d): Promise<string> {
+  export async function formatCoordinates(point: Point3d): Promise<string> {
     const coordSpec =
       await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
         QuantityType.Coordinate
       );
-    if (undefined === coordSpec) return "";
-
-    return FormatterUtils.formatCoordinatesWithSpec(point, coordSpec);
+    return formatCoordinatesImmediate(point, coordSpec);
   }
 
-  public static formatCoordinatesImmediate(point: Point3d, coordSpec?: FormatterSpec): string {
-    let result: string;
+  export function formatCoordinatesImmediate(point: Point3d, coordSpec?: FormatterSpec): string {
     if (!coordSpec) {
       coordSpec =
         IModelApp.quantityFormatter.findFormatterSpecByQuantityType(
           QuantityType.Coordinate
         );
-      if (undefined === coordSpec) return "";
-      result = FormatterUtils.formatCoordinatesWithSpec(point, coordSpec);
-    } else {
-      const oldFormatTraits = coordSpec.format.formatTraits;
-      coordSpec.format.formatTraits &= ~FormatTraits.ShowUnitLabel; // Bit-wise remove ShowUnitLabel trait if exists
-      result = FormatterUtils.formatCoordinatesWithSpec(point, coordSpec);
-      coordSpec.format.formatTraits = oldFormatTraits; // Restore original format traits
     }
+    if (undefined === coordSpec) return "";
 
-    return result;
+    return formatValuesWithNoUnitLabel([point.x, point.y, point.z], coordSpec);
   }
 
-  public static async formatCoordinatesXY(point: XAndY): Promise<string> {
+  export async function formatCoordinatesXY(point: XAndY): Promise<string> {
     const coordSpec =
       await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
         QuantityType.Coordinate
       );
-    if (undefined === coordSpec) return "";
-
-    return FormatterUtils.formatCoordinatesXYWithSpec(point, coordSpec);
+    return formatCoordinatesXYImmediate(point, coordSpec);
   }
 
-  public static formatCoordinatesXYImmediate(point: XAndY): string {
-    const coordSpec =
-      IModelApp.quantityFormatter.findFormatterSpecByQuantityType(
-        QuantityType.Coordinate
-      );
+  export function formatCoordinatesXYImmediate(point: XAndY, coordSpec?: FormatterSpec): string {
+    if (!coordSpec) {
+      coordSpec =
+        IModelApp.quantityFormatter.findFormatterSpecByQuantityType(
+          QuantityType.Coordinate
+        );
+    }
     if (undefined === coordSpec) return "";
 
-    return FormatterUtils.formatCoordinatesXYWithSpec(point, coordSpec);
+    return formatValuesWithNoUnitLabel([point.x, point.y], coordSpec);
   }
 
   /** Formats the input angle into DD°MM'SS.SS" format.
@@ -100,7 +68,7 @@ export class FormatterUtils {
    * The minute symbol is an apostrophe ' while it should be a prime (\u2032)
    * The second symbol is a quotation mark " while it should be a double prime (\u2033)
    */
-  public static formatAngleToDMS(angleInDegrees: number): string {
+  export function formatAngleToDMS(angleInDegrees: number): string {
     const isNegative = angleInDegrees < 0;
     angleInDegrees = Math.abs(angleInDegrees);
 
@@ -118,7 +86,7 @@ export class FormatterUtils {
     return str;
   }
 
-  public static formatCartographicToLatLongDMS(c: Cartographic): string {
+  export function formatCartographicToLatLongDMS(c: Cartographic): string {
     const latSuffixKey =
       0 < c.latitude
         ? "MeasureTools:Generic.latitudeNorthSuffix"
@@ -136,7 +104,7 @@ export class FormatterUtils {
     return str;
   }
 
-  public static async formatCartographicToLatLong(
+  export async function formatCartographicToLatLong(
     c: Cartographic, angleSpec?: FormatterSpec
   ): Promise<string> {
     if (!angleSpec) {
@@ -168,7 +136,7 @@ export class FormatterUtils {
     return str;
   }
 
-  public static formatSlope(
+  export function formatSlope(
     slopeInPercent: number,
     withSlopeRatio: boolean
   ): string {
@@ -185,7 +153,7 @@ export class FormatterUtils {
     return `${fSlope} (${fSlopeRatio})`;
   }
 
-  public static async formatStation(station: number, stationSpec?: FormatterSpec): Promise<string> {
+  export async function formatStation(station: number, stationSpec?: FormatterSpec): Promise<string> {
     if (!stationSpec) {
       stationSpec =
         await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
@@ -195,7 +163,7 @@ export class FormatterUtils {
     return IModelApp.quantityFormatter.formatQuantity(station, stationSpec);
   }
 
-  public static async formatLength(length: number, lengthSpec?: FormatterSpec): Promise<string> {
+  export async function formatLength(length: number, lengthSpec?: FormatterSpec): Promise<string> {
     if (!lengthSpec) {
       lengthSpec =
         await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
@@ -208,13 +176,13 @@ export class FormatterUtils {
   /**
    * @returns The bearing in radians, where 0 is North and π/2 is East.
    */
-  public static calculateBearing(dx: number, dy: number): number {
+  export function calculateBearing(dx: number, dy: number): number {
     let bearing = Math.atan2(dx, dy); // radians, 0 = North, π/2 = East
     if (bearing < 0) bearing += 2 * Math.PI; // Normalize to [0, 2π)
     return bearing;
   }
 
-  public static getDefaultBearingFormatProps(): FormatProps {
+  export function getDefaultBearingFormatProps(): FormatProps {
     return {
       minWidth: 2,
       precision: 0,
