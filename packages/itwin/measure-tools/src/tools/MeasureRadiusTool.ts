@@ -19,7 +19,7 @@ import type { Feature } from "../api/FeatureTracking.js";
 import { MeasureToolsFeatures } from "../api/FeatureTracking.js";
 import { MeasurementToolBase } from "../api/MeasurementTool.js";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget.js";
-import type { RadiusMeasurement } from "../measurements/RadiusMeasurement.js";
+import type { RadiusMeasurement, RadiusMeasurementFormattingProps } from "../measurements/RadiusMeasurement.js";
 import { MeasureTools } from "../MeasureTools.js";
 import { MeasureRadiusToolModel } from "../toolmodels/MeasureRadiusToolModel.js";
 
@@ -56,12 +56,13 @@ MeasureRadiusToolModel
     return MeasureToolsFeatures.Tools_MeasureRadius;
   }
 
-  constructor(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true)) {
+  constructor(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true), formatting?: RadiusMeasurementFormattingProps) {
     super(allowedViewportCallback);
+    this.toolModel.formatting = formatting;
   }
 
   public async onRestartTool(): Promise<void> {
-    const tool = new MeasureRadiusTool(this._allowedViewportCallback);
+    const tool = new MeasureRadiusTool(this._allowedViewportCallback, this.toolModel.formatting);
     if (await tool.run()) return;
 
     return this.exitTool();

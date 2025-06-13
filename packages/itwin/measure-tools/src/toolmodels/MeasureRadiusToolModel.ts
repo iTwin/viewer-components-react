@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import type { Point3d } from "@itwin/core-geometry";
 import { MeasurementToolModel } from "../api/MeasurementToolModel.js";
+import type { RadiusMeasurementFormattingProps } from "../measurements/RadiusMeasurement.js";
 import { RadiusMeasurement } from "../measurements/RadiusMeasurement.js";
 
 enum State {
@@ -19,12 +20,16 @@ export class MeasureRadiusToolModel extends MeasurementToolModel<RadiusMeasureme
 
   private _currentMeasurement?: RadiusMeasurement;
   private _currentViewportType?: string;
+  private _formatting?: RadiusMeasurementFormattingProps;
   private _currentState: State;
 
   constructor() {
     super();
     this._currentState = State.SetMeasurementViewport;
   }
+
+  public get formatting(): RadiusMeasurementFormattingProps | undefined { return this._formatting; }
+  public set formatting(formatting: RadiusMeasurementFormattingProps | undefined) { this._formatting = formatting; }
 
   public get currentState(): State {
     return this._currentState;
@@ -56,6 +61,7 @@ export class MeasureRadiusToolModel extends MeasurementToolModel<RadiusMeasureme
       undefined,
       undefined,
       viewType,
+      this._formatting
     );
     this._currentMeasurement.isDynamic = isDynamic;
     this.notifyNewMeasurement();

@@ -27,10 +27,10 @@
     "benchmark:tree-widget": "pnpm run -C ./apps/performance-tests benchmark:tree-widget"
   },
   "devDependencies": {
-    "beachball": "^2.43.1",
-    "cpx2": "^7.0.1",
-    "lage": "^2.13.0",
-    "prettier": "^3.2.5",
+    "beachball": "^2.54.0",
+    "cpx2": "^7.0.2",
+    "lage": "^2.14.6",
+    "prettier": "^3.5.3",
     "yargs": "^17.7.2"
   },
   "pnpm": {

@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import type { Point3d } from "@itwin/core-geometry";
 import { MeasurementToolModel } from "../api/MeasurementToolModel.js";
+import type { AngleMeasurementFormattingProps } from "../measurements/AngleMeasurement.js";
 import { AngleMeasurement } from "../measurements/AngleMeasurement.js";
 
 enum State {
@@ -20,12 +21,15 @@ export class MeasureAngleToolModel extends MeasurementToolModel<AngleMeasurement
   private _currentMeasurement?: AngleMeasurement;
   private _currentViewportType?: string;
   private _currentState: State;
+  private _formatting?: AngleMeasurementFormattingProps
 
   constructor() {
     super();
     this._currentState = State.SetMeasurementViewport;
   }
 
+  public get formatting(): AngleMeasurementFormattingProps | undefined { return this._formatting; }
+  public set formatting(formatting: AngleMeasurementFormattingProps | undefined) { this._formatting = formatting; }
   public get currentState(): State {
     return this._currentState;
   }
@@ -56,6 +60,7 @@ export class MeasureAngleToolModel extends MeasurementToolModel<AngleMeasurement
       undefined,
       undefined,
       viewType,
+      this._formatting
     );
     this._currentMeasurement.isDynamic = isDynamic;
     this.notifyNewMeasurement();
