@@ -43,6 +43,7 @@ import type { MeasurementFormattingProps, MeasurementProps } from "../api/Measur
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet.js";
 import { TextMarker } from "../api/TextMarker.js";
 import { MeasureTools } from "../MeasureTools.js";
+import type { FormatterSpec } from "@itwin/core-quantity";
 
 /**
  * Props for serializing a [[DistanceMeasurement]].
@@ -237,13 +238,6 @@ export class DistanceMeasurement extends Measurement {
       const lengthFormatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
       if (lengthFormatProps) {
         await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._lengthKoQ, this._lengthPersistenceUnitName, lengthFormatProps);
-      }
-    }
-    if (this._bearingKoQ && this._bearingPersistenceUnitName) {
-      const bearingEntry = IModelApp.quantityFormatter.getSpecsByName(this._bearingKoQ);
-      if (!bearingEntry || bearingEntry.formatterSpec.persistenceUnit?.name !== this._bearingPersistenceUnitName) {
-        const bearingFormatProps = FormatterUtils.getDefaultBearingFormatProps();
-        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._bearingKoQ, this._bearingPersistenceUnitName, bearingFormatProps);
       }
     }
   }
@@ -607,7 +601,14 @@ export class DistanceMeasurement extends Measurement {
       },
     );
     if (this._bearingKoQ && this._bearingPersistenceUnitName) {
-      const bearingSpec = IModelApp.quantityFormatter.getSpecsByName(this._bearingKoQ)?.formatterSpec;
+      let bearingSpec: FormatterSpec | undefined;
+      const bearingFormatProps = FormatterUtils.getDefaultBearingFormatProps();
+      if (bearingFormatProps) {
+        bearingSpec = await IModelApp.quantityFormatter.createFormatterSpec({
+          persistenceUnitName: this._bearingPersistenceUnitName,
+          formatProps: bearingFormatProps
+        });
+      }
       const fBearing: string = IModelApp.quantityFormatter.formatQuantity(bearing, bearingSpec);
       data.properties.push({
         label: MeasureTools.localization.getLocalizedString(
