@@ -1,0 +1,7 @@
+{
+  "type": "major",
+  "comment": "Updated to official itwin 5.0 release",
+  "packageName": "@itwin/geo-tools-react",
+  "email": "mdastous-bentley@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
