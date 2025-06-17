@@ -7,7 +7,7 @@ const base = require("./beachball.config.js");
 /** @type {import("beachball").BeachballConfig } */
 module.exports = {
   ...base,
-  scope: ["packages/itwin/map-layers"],
+  scope: [],   // List package paths to include in the dev release ie: "packages/itwin/map-layers"
   tag: "dev",
   prereleasePrefix: "dev",
   generateChangelog: false,
