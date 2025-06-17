@@ -128,7 +128,7 @@ export function SubLayersTree(props: SubLayersTreeProps) {
     const handler = new SubLayerCheckboxHandler(subLayers, props.singleVisibleSubLayer ?? false, nodeLoader, props.onSubLayerStateChange);
     setEventHandler(handler);
     return () => {
-      handler.dispose();
+      handler[Symbol.dispose]();
     };
   }, [nodeLoader, subLayers, props.onSubLayerStateChange, props.singleVisibleSubLayer]);
 
@@ -236,7 +236,7 @@ class SubLayerCheckboxHandler extends TreeEventHandler {
 
   public override dispose() {
     this._removeModelChangedListener();
-    super.dispose();
+    super[Symbol.dispose]();
   }
 
   // Cascade state
