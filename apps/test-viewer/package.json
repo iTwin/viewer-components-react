@@ -82,7 +82,7 @@
     "build": "npm run link:deps && tsc --noEmit",
     "clean": "rimraf dist",
     "dist": "vite build",
-    "lint": "eslint ./s^5.0.0/**/*.{ts,tsx}",
+    "lint": "eslint ./src/**/*.{ts,tsx}",
     "link:deps": "node ./scripts/linkWorkspaceDeps.js",
     "link:deps:watch": "node ./scripts/linkWorkspaceDeps.js --watch"
   },
