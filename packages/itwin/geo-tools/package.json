@@ -55,7 +55,6 @@
     "@itwin/core-orbitgt": "^5.0.0",
     "@itwin/core-quantity": "^5.0.0",
     "@itwin/core-react": "^5.0.0",
-    "@itwin/core-telemetry": "^5.0.0",
     "@itwin/imodel-components-react": "^5.0.0",
     "@itwin/itwinui-icons-react": "^2.1.0",
     "@itwin/itwinui-react": "^3.16.5",

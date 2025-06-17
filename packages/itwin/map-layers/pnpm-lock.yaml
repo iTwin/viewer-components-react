@@ -52,9 +52,6 @@ importers:
       '@itwin/core-react':
         specifier: ^5.4.0
         version: 5.4.0(@itwin/appui-abstract@5.0.0(@itwin/core-bentley@5.0.0))(@itwin/core-bentley@5.0.0)(@itwin/itwinui-react@3.18.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@itwin/core-telemetry':
-        specifier: latest
-        version: 4.11.1(@itwin/core-geometry@5.0.0)
       '@itwin/ecschema-metadata':
         specifier: ^5.0.0
         version: 5.0.0(@itwin/core-bentley@5.0.0)(@itwin/core-quantity@5.0.0(@itwin/core-bentley@5.0.0))
@@ -491,17 +488,8 @@ packages:
       react: ^18.0.0
       react-dom: ^18.0.0
 
-  '@itwin/core-bentley@4.11.1':
-    resolution: {integrity: sha512-ylzadB/lDnQ9nfdmM2M5PA0oP0DpseSDy47jd3sD/UWZdeKDgtvDm1u5p8ASSJeE8eO7fryqB8Gab3VPuj7tgw==}
-
   '@itwin/core-bentley@5.0.0':
     resolution: {integrity: sha512-9XJyk8q1NdsRBwuYPGo4U9ARKXVbyXSRHcU20PgHU8wU89omrDkXdQhTRJnWmGZk2a3R+OJY9DQnfM4/Wajnzw==}
-
-  '@itwin/core-common@4.11.1':
-    resolution: {integrity: sha512-L6isG4FYdJcw0u+aTv+H1XMUBd108BkN6rKBcFLu651tCgbz5UwLEy5JEbLr8FO0woyc6RBsoQeXHWEObU+/Ng==}
-    peerDependencies:
-      '@itwin/core-bentley': ^4.11.1
-      '@itwin/core-geometry': ^4.11.1
 
   '@itwin/core-common@5.0.0':
     resolution: {integrity: sha512-psOW6dxLzuy1XkPVRNQOFG8XRtT9yEBl0edtLwjfW0wcuWLfNveGRPDPi4t4QsfQbUiUifeLVAQ+U+xmwSuJJQ==}
@@ -545,9 +533,6 @@ packages:
       '@itwin/itwinui-react': 3.16.0
       react: ^18.0.0
       react-dom: ^18.0.0
-
-  '@itwin/core-telemetry@4.11.1':
-    resolution: {integrity: sha512-e++sNNCKXn118/lQdjkjc//uHpqGI6NDSC+ZyVLSD4MRpXBflLfHu/eAXTog63X1RN5sbXU81vo59BnmWoGRiA==}
 
   '@itwin/ecschema-metadata@5.0.0':
     resolution: {integrity: sha512-WNL/4Xa3KlMdHpknbsaiTZblDmHmBV9zLpNd8ShO3BmjD+vteFraylrMxQAHWKiHsrTDj5l4i00MsBFnwPzMDA==}
@@ -3768,16 +3753,7 @@ snapshots:
       rxjs: 7.8.2
       ts-key-enum: 2.0.13
 
-  '@itwin/core-bentley@4.11.1': {}
-
   '@itwin/core-bentley@5.0.0': {}
-
-  '@itwin/core-common@4.11.1(@itwin/core-bentley@4.11.1)(@itwin/core-geometry@5.0.0)':
-    dependencies:
-      '@itwin/core-bentley': 4.11.1
-      '@itwin/core-geometry': 5.0.0
-      flatbuffers: 1.12.0
-      js-base64: 3.7.7
 
   '@itwin/core-common@5.0.0(@itwin/core-bentley@5.0.0)(@itwin/core-geometry@5.0.0)':
     dependencies:
@@ -3843,13 +3819,6 @@ snapshots:
       react-autosuggest: 10.1.0(react@18.3.1)
       react-dom: 18.3.1(react@18.3.1)
       ts-key-enum: 2.0.13
-
-  '@itwin/core-telemetry@4.11.1(@itwin/core-geometry@5.0.0)':
-    dependencies:
-      '@itwin/core-bentley': 4.11.1
-      '@itwin/core-common': 4.11.1(@itwin/core-bentley@4.11.1)(@itwin/core-geometry@5.0.0)
-    transitivePeerDependencies:
-      - '@itwin/core-geometry'
 
   '@itwin/ecschema-metadata@5.0.0(@itwin/core-bentley@5.0.0)(@itwin/core-quantity@5.0.0(@itwin/core-bentley@5.0.0))':
     dependencies:

@@ -53,7 +53,6 @@
     "@itwin/core-orbitgt": "^5.0.0",
     "@itwin/core-quantity": "^5.0.0",
     "@itwin/core-react": "^5.4.0",
-    "@itwin/core-telemetry": "latest",
     "@itwin/ecschema-metadata": "^5.0.0",
     "@itwin/ecschema-rpcinterface-common": "^5.0.0",
     "@itwin/eslint-plugin": "^5.1.0",

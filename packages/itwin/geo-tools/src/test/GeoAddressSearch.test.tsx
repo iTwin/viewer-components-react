@@ -10,7 +10,7 @@ import * as sinon from "sinon";
 import { stubObject } from "ts-sinon";
 import { SpecialKey } from "@itwin/appui-abstract";
 import { EmptyLocalization } from "@itwin/core-common";
-import { MapCartoRectangle, MockRender } from "@itwin/core-frontend";
+import { MapCartoRectangle, NoRenderApp } from "@itwin/core-frontend";
 import { fireEvent, render } from "@testing-library/react";
 import { BingAddressProvider, GeoAddressSearch, IModelGeoView } from "../geo-tools";
 import TestUtils from "./TestUtils";
@@ -29,7 +29,7 @@ describe("GeoAddressSearch", () => {
   let locateAddressStub: sinon.SinonStub<[string], Promise<boolean> >;
 
   before(async () => {
-    await MockRender.App.startup({localization: new EmptyLocalization()});
+    await NoRenderApp.startup({localization: new EmptyLocalization()});
     await TestUtils.initializeGeoTools();
   });
 
@@ -56,7 +56,6 @@ describe("GeoAddressSearch", () => {
   });
   after(async () => {
     TestUtils.terminateUiComponents();
-    await MockRender.App.shutdown();
   });
 
   it("renders", () => {
