@@ -167,7 +167,7 @@ export class AreaMeasurement extends Measurement {
   constructor(props?: AreaMeasurementProps) {
     super(props);
 
-    this._polygon = new Polygon([], false);
+    this._polygon = new Polygon([], false, undefined, undefined, props?.formatting?.area);
     this._polygon.textMarker.setMouseButtonHandler(
       this.handleTextMarkerButtonEvent.bind(this)
     );
@@ -245,7 +245,7 @@ export class AreaMeasurement extends Measurement {
     if (length === 0) return;
 
     const start = this.polygonPoints[length - 1];
-    this._dynamicEdge = DistanceMeasurement.create(start, point);
+    this._dynamicEdge = DistanceMeasurement.create(start, point, undefined, { length: { koqName: this._lengthKoQ, persistenceUnitName: this._lengthPersistenceUnitName }});
     if (this.drawingMetadata?.origin)
       this._dynamicEdge.drawingMetadata = { origin: this.drawingMetadata.origin, worldScale: this.worldScale };
     this._dynamicEdge.sheetViewId = this.sheetViewId;
@@ -631,6 +631,16 @@ export class AreaMeasurement extends Measurement {
     super.readFromJSON(json);
 
     const jsonArea = json as AreaMeasurementProps;
+    if (jsonArea.formatting?.area?.koqName) {
+      this._areaKoQ = jsonArea.formatting.area.koqName;
+      this._polygon.areaKoQ = this._areaKoQ;
+    }
+    if (jsonArea.formatting?.area?.persistenceUnitName) {
+      this._areaPersistenceUnitName = jsonArea.formatting.area.persistenceUnitName;
+      this._polygon.areaPersistenceUnitName = this._areaPersistenceUnitName;
+    }
+    if (jsonArea.formatting?.length?.koqName) this._lengthKoQ = jsonArea.formatting.length.koqName;
+    if (jsonArea.formatting?.length?.persistenceUnitName) this._lengthPersistenceUnitName = jsonArea.formatting.length.persistenceUnitName;
     if (jsonArea.polygonPoints !== undefined) {
       const pts = new Array<Point3d>();
       for (const pt of jsonArea.polygonPoints) pts.push(Point3d.fromJSON(pt));
@@ -641,10 +651,7 @@ export class AreaMeasurement extends Measurement {
         this.updateDynamicPolygon(this._dynamicEdge.endPointRef);
     }
 
-    if (jsonArea.formatting?.area?.koqName) this._areaKoQ = jsonArea.formatting.area.koqName;
-    if (jsonArea.formatting?.area?.persistenceUnitName) this._areaPersistenceUnitName = jsonArea.formatting.area.persistenceUnitName;
-    if (jsonArea.formatting?.length?.koqName) this._lengthKoQ = jsonArea.formatting.length.koqName;
-    if (jsonArea.formatting?.length?.persistenceUnitName) this._lengthPersistenceUnitName = jsonArea.formatting.length.persistenceUnitName;
+
   }
 
   /**
