@@ -232,9 +232,9 @@ export class DistanceMeasurement extends Measurement {
     this._endPoint.setFrom(end);
   }
 
-  public override async populateFormattingSpecsRegistry(): Promise<void> {
+  public override async populateFormattingSpecsRegistry(_force?: boolean): Promise<void> {
     const lengthEntry = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ);
-    if (!lengthEntry || lengthEntry.formatterSpec.persistenceUnit?.name !== this._lengthPersistenceUnitName) {
+    if (_force || !lengthEntry || lengthEntry.formatterSpec.persistenceUnit?.name !== this._lengthPersistenceUnitName) {
       const lengthFormatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
       if (lengthFormatProps) {
         await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._lengthKoQ, this._lengthPersistenceUnitName, lengthFormatProps);

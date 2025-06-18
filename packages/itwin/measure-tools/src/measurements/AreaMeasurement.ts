@@ -194,16 +194,16 @@ export class AreaMeasurement extends Measurement {
     return true;
   }
 
-  public override async populateFormattingSpecsRegistry(): Promise<void> {
+  public override async populateFormattingSpecsRegistry(_force?: boolean): Promise<void> {
     const lengthEntry = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ);
-    if (!lengthEntry || lengthEntry.formatterSpec.persistenceUnit?.name !== this._lengthPersistenceUnitName) {
+    if (_force || !lengthEntry || lengthEntry.formatterSpec.persistenceUnit?.name !== this._lengthPersistenceUnitName) {
       const lengthFormatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
       if (lengthFormatProps) {
         await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._lengthKoQ, this._lengthPersistenceUnitName, lengthFormatProps);
       }
     }
     const areaEntry = IModelApp.quantityFormatter.getSpecsByName(this._areaKoQ);
-    if (!areaEntry || areaEntry.formatterSpec.persistenceUnit?.name !== this._areaPersistenceUnitName) {
+    if (_force || !areaEntry || areaEntry.formatterSpec.persistenceUnit?.name !== this._areaPersistenceUnitName) {
       const areaFormatProps = await IModelApp.formatsProvider.getFormat(this._areaKoQ);
       if (areaFormatProps) {
         await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._areaKoQ, this._areaPersistenceUnitName, areaFormatProps);

@@ -271,23 +271,23 @@ export class LocationMeasurement extends Measurement {
     if (this._textMarker) this._textMarker.transientHiliteId = this.transientId;
   }
 
-  public override async populateFormattingSpecsRegistry(): Promise<void> {
+  public override async populateFormattingSpecsRegistry(_force?: boolean): Promise<void> {
     const lengthEntry = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ);
-    if (!lengthEntry || lengthEntry.formatterSpec.persistenceUnit?.name !== this._lengthPersistenceUnitName) {
+    if (_force || !lengthEntry || lengthEntry.formatterSpec.persistenceUnit?.name !== this._lengthPersistenceUnitName) {
       const lengthFormatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
       if (lengthFormatProps) {
         await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._lengthKoQ, this._lengthPersistenceUnitName, lengthFormatProps);
       }
     }
     const stationEntry = IModelApp.quantityFormatter.getSpecsByName(this._stationKoQ);
-    if (!stationEntry || stationEntry.formatterSpec.persistenceUnit?.name !== this._stationPersistenceUnitName) {
+    if (_force || !stationEntry || stationEntry.formatterSpec.persistenceUnit?.name !== this._stationPersistenceUnitName) {
       const stationFormatProps = await IModelApp.formatsProvider.getFormat(this._stationKoQ);
       if (stationFormatProps) {
         await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._stationKoQ, this._stationPersistenceUnitName, stationFormatProps);
       }
     }
     const angleEntry = IModelApp.quantityFormatter.getSpecsByName(this._angleKoQ);
-    if (!angleEntry || angleEntry.formatterSpec.persistenceUnit?.name !== this._anglePersistenceUnitName) {
+    if (_force || !angleEntry || angleEntry.formatterSpec.persistenceUnit?.name !== this._anglePersistenceUnitName) {
       const angleFormatProps = await IModelApp.formatsProvider.getFormat(this._angleKoQ);
       if (angleFormatProps) {
         await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._angleKoQ, this._anglePersistenceUnitName, angleFormatProps);

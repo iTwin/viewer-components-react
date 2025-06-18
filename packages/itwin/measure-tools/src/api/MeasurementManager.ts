@@ -455,6 +455,9 @@ export class MeasurementManager implements Decorator {
       const unsubscribers = [IModelApp.quantityFormatter.onActiveFormattingUnitSystemChanged.addListener(this.onActiveUnitSystemChanged, this),
         IModelApp.quantityFormatter.onQuantityFormatsChanged.addListener(this.onActiveUnitSystemChanged, this),
         IModelApp.quantityFormatter.onUnitsProviderChanged.addListener(this.onActiveUnitSystemChanged, this),
+        IModelApp.formatsProvider.onFormatsChanged.addListener(async () => {
+          await this.onFormatsChanged();
+        }, this)
       ];
       this._dropQuantityFormatterListeners = () => unsubscribers.forEach((unsubscriber) => {
         unsubscriber();
@@ -486,6 +489,14 @@ export class MeasurementManager implements Decorator {
   public onActiveUnitSystemChanged() {
     for (const measurement of this._measurements) {
       measurement.onDisplayUnitsChanged();
+    }
+  }
+
+  public async onFormatsChanged() {
+    for (const measurement of this._measurements) {
+      await measurement.populateFormattingSpecsRegistry(true);
+      measurement.onDisplayUnitsChanged();
+      this.invalidateDecorations();
     }
   }
 }

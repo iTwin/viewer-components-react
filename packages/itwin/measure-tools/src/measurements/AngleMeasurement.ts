@@ -179,9 +179,9 @@ export class AngleMeasurement extends Measurement {
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
-  public override async populateFormattingSpecsRegistry(): Promise<void> {
+  public override async populateFormattingSpecsRegistry(_force?: boolean): Promise<void> {
     const angleEntry = IModelApp.quantityFormatter.getSpecsByName(this._angleKoQ);
-    if (!angleEntry || angleEntry.formatterSpec.persistenceUnit?.name !== this._anglePersistenceUnitName) {
+    if (_force || !angleEntry || angleEntry.formatterSpec.persistenceUnit?.name !== this._anglePersistenceUnitName) {
       const angleFormatProps = await IModelApp.formatsProvider.getFormat(this._angleKoQ);
       if (angleFormatProps) {
         await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(

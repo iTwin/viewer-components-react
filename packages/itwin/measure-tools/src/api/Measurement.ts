@@ -823,8 +823,10 @@ export abstract class Measurement {
   /** Notify subclasses when the display units have changed. */
   public onDisplayUnitsChanged(): void { }
 
-  /** Populate the formatting specs registry with the specs subclasses need for measurement formatting.*/
-  public async populateFormattingSpecsRegistry(): Promise<void> { }
+  /** Populate the formatting specs registry with the specs subclasses need for measurement formatting.
+    * @param _force If true, repopulate the registry even if it has already been populated.
+  */
+  public async populateFormattingSpecsRegistry(_force?: boolean): Promise<void> { }
 
   /** Notify subclasses when the transient ID has changed.
    * @param _prevId The previous ID, if any.
