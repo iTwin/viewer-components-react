@@ -23,13 +23,13 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(@itwin/core-bentley@5.0.0)
       '@itwin/appui-react':
-        specifier: ^5.10.0
+        specifier: ^5.5.0
         version: 5.10.0(ccae6fa39d1ffda5ac04a901b0f70e2f)
       '@itwin/build-tools':
         specifier: ^5.0.0
         version: 5.0.0(@types/node@18.19.87)
       '@itwin/components-react':
-        specifier: ^5.10.0
+        specifier: ^5.5.0
         version: 5.10.0(@itwin/appui-abstract@5.0.0(@itwin/core-bentley@5.0.0))(@itwin/core-bentley@5.0.0)(@itwin/core-react@5.10.0(@itwin/appui-abstract@5.0.0(@itwin/core-bentley@5.0.0))(@itwin/core-bentley@5.0.0)(@itwin/itwinui-react@3.18.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@itwin/itwinui-react@3.18.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@itwin/core-bentley':
         specifier: ^5.0.0
@@ -50,7 +50,7 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(@itwin/core-bentley@5.0.0)
       '@itwin/core-react':
-        specifier: ^5.10.0
+        specifier: ^5.5.0
         version: 5.10.0(@itwin/appui-abstract@5.0.0(@itwin/core-bentley@5.0.0))(@itwin/core-bentley@5.0.0)(@itwin/itwinui-react@3.18.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@itwin/ecschema-metadata':
         specifier: ^5.0.0
@@ -59,10 +59,10 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(@itwin/core-bentley@5.0.0)(@itwin/core-common@5.0.0(@itwin/core-bentley@5.0.0)(@itwin/core-geometry@5.0.0))(@itwin/core-geometry@5.0.0)(@itwin/ecschema-metadata@5.0.0(@itwin/core-bentley@5.0.0)(@itwin/core-quantity@5.0.0(@itwin/core-bentley@5.0.0)))
       '@itwin/eslint-plugin':
-        specifier: ^5.1.0
-        version: 5.1.0(eslint@9.25.1)(typescript@5.6.3)
+        specifier: ^5.2.1
+        version: 5.2.1(eslint@9.25.1)(typescript@5.6.3)
       '@itwin/imodel-components-react':
-        specifier: ^5.10.0
+        specifier: ^5.5.0
         version: 5.10.0(34adc1517a0e1da3407c04263d00469f)
       '@itwin/itwinui-react':
         specifier: ^3.18.1
@@ -548,8 +548,8 @@ packages:
       '@itwin/core-geometry': 5.0.0
       '@itwin/ecschema-metadata': 5.0.0
 
-  '@itwin/eslint-plugin@5.1.0':
-    resolution: {integrity: sha512-hGpVdlHlStuZmMGBKQ2KwsjLkTMl+sBCTrRy9fMSpwIa4kX/TxeQuifZyTM8bzhXEd9I4G8weOpYR0HU9MX+ug==}
+  '@itwin/eslint-plugin@5.2.1':
+    resolution: {integrity: sha512-iFmxAXzBYUm/yHiyp37V8Qn2oZ9iqwB1HxWX1AAhewk77JUIhO1KLY2hrBNisHx49giy7hZmIOBEaXc357z+Uw==}
     engines: {node: ^18.18.0 || ^20.0.0 || ^22.0.0}
     hasBin: true
     peerDependencies:
@@ -3832,7 +3832,7 @@ snapshots:
       '@itwin/core-geometry': 5.0.0
       '@itwin/ecschema-metadata': 5.0.0(@itwin/core-bentley@5.0.0)(@itwin/core-quantity@5.0.0(@itwin/core-bentley@5.0.0))
 
-  '@itwin/eslint-plugin@5.1.0(eslint@9.25.1)(typescript@5.6.3)':
+  '@itwin/eslint-plugin@5.2.1(eslint@9.25.1)(typescript@5.6.3)':
     dependencies:
       '@typescript-eslint/eslint-plugin': 8.31.1(@typescript-eslint/parser@8.31.1(eslint@9.25.1)(typescript@5.6.3))(eslint@9.25.1)(typescript@5.6.3)
       '@typescript-eslint/parser': 8.31.1(eslint@9.25.1)(typescript@5.6.3)
