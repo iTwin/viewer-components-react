@@ -10,7 +10,7 @@ import { BeEvent } from "@itwin/core-bentley";
 import { KeySet } from "@itwin/presentation-common";
 import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
 import { Selectables } from "@itwin/unified-selection";
-import { render as rtlRender, renderHook as rtlRenderHook } from "@testing-library/react";
+import { renderHook as renderHookRTL, render as renderRTL } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 
 import type { PropsWithChildren, ReactElement } from "react";
@@ -122,7 +122,7 @@ function createWrapper(wrapper?: React.JSXElementConstructor<{ children: React.R
 function customRender(ui: ReactElement, options?: RenderOptions & { disableStrictMode?: boolean }): RenderResult & { user: UserEvent } {
   const wrapper = createWrapper(options?.wrapper, options?.disableStrictMode);
   return {
-    ...rtlRender(ui, { ...options, wrapper }),
+    ...renderRTL(ui, { ...options, wrapper }),
     user: userEvent.setup(),
   };
 }
@@ -132,7 +132,7 @@ function customRenderHook<Result, Props>(
   options?: RenderHookOptions<Props> & { disableStrictMode?: boolean },
 ): RenderHookResult<Result, Props> {
   const wrapper = createWrapper(options?.wrapper, options?.disableStrictMode);
-  return rtlRenderHook(render, { ...options, wrapper });
+  return renderHookRTL(render, { ...options, wrapper });
 }
 
 export * from "@testing-library/react";
