@@ -328,23 +328,23 @@ describe("Default context menu items", () => {
 });
 
 function createField() {
-  return new Field(
-    {
+  return new Field({
+    category: {
       name: "category",
       description: "",
       expand: false,
       label: "Category",
       priority: 0,
     },
-    "test-field",
-    "Test Field",
-    {
+    name: "test-field",
+    label: "Test Field",
+    type: {
       typeName: "string",
       valueFormat: PresentationPropertyValueFormat.Primitive,
     },
-    false,
-    0,
-  );
+    isReadonly: false,
+    priority: 0,
+  });
 }
 
 function createRecord() {

@@ -10,7 +10,7 @@ import { BeEvent } from "@itwin/core-bentley";
 import { KeySet } from "@itwin/presentation-common";
 import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
 import { Selectables } from "@itwin/unified-selection";
-import { renderHook as renderHookRTL, render as renderRTL } from "@testing-library/react";
+import { render as rtlRender, renderHook as rtlRenderHook } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 
 import type { PropsWithChildren, ReactElement } from "react";
@@ -32,9 +32,13 @@ export function createPropertyRecord(value: PropertyValue, description: Partial<
 
 export function stubSelectionManager(presentationSingleton?: typeof Presentation) {
   const selectionManagerStub = {
+    // eslint-disable-next-line deprecation/deprecation
     selectionChange: new SelectionChangeEvent(),
+    // eslint-disable-next-line deprecation/deprecation
     getSelectionLevels: createFunctionStub<SelectionManager["getSelectionLevels"]>().returns([0]),
+    // eslint-disable-next-line deprecation/deprecation
     getSelection: createFunctionStub<SelectionManager["getSelection"]>().returns(new KeySet()),
+    // eslint-disable-next-line deprecation/deprecation
     replaceSelection: createFunctionStub<SelectionManager["replaceSelection"]>(),
   };
   sinon.stub(presentationSingleton ?? Presentation, "selection").get(() => selectionManagerStub);
@@ -118,7 +122,7 @@ function createWrapper(wrapper?: React.JSXElementConstructor<{ children: React.R
 function customRender(ui: ReactElement, options?: RenderOptions & { disableStrictMode?: boolean }): RenderResult & { user: UserEvent } {
   const wrapper = createWrapper(options?.wrapper, options?.disableStrictMode);
   return {
-    ...renderRTL(ui, { ...options, wrapper }),
+    ...rtlRender(ui, { ...options, wrapper }),
     user: userEvent.setup(),
   };
 }
@@ -128,7 +132,7 @@ function customRenderHook<Result, Props>(
   options?: RenderHookOptions<Props> & { disableStrictMode?: boolean },
 ): RenderHookResult<Result, Props> {
   const wrapper = createWrapper(options?.wrapper, options?.disableStrictMode);
-  return renderHookRTL(render, { ...options, wrapper });
+  return rtlRenderHook(render, { ...options, wrapper });
 }
 
 export * from "@testing-library/react";

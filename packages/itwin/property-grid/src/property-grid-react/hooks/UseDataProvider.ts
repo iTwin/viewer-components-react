@@ -145,8 +145,9 @@ class PerformanceTrackingProvider implements IPresentationPropertyDataProvider {
  * The first option is to dispose using the deprecated `dispose` method if it exists on the object.
  * If not, we use the new `Symbol.dispose` method. If that doesn't exist either, the object is
  * considered as non-disposable and nothing is done with it.
+ * @internal
  */
-function safeDispose(disposable: {} | { [Symbol.dispose]: () => void } | { dispose: () => void }) {
+export function safeDispose(disposable: {} | { [Symbol.dispose]: () => void } | { dispose: () => void }) {
   if ("dispose" in disposable) {
     disposable.dispose();
     /* c8 ignore next 3 */

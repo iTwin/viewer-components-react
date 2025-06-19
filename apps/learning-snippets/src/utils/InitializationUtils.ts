@@ -3,10 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import * as fs from "fs";
 import * as path from "path";
 import * as url from "url";
-import * as fs from "fs";
-import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
+import { IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
@@ -28,7 +28,7 @@ export async function initializeLearningSnippetsTests() {
     backendHostProps: {
       cacheDir: path.join(outDir, "cache"),
     },
-    rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
+    rpcs: [IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
   });
   // eslint-disable-next-line @itwin/no-internal
   ECSchemaRpcImpl.register();

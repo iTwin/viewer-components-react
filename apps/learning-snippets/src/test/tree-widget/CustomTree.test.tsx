@@ -21,6 +21,7 @@ import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from 
 import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils.js";
 
 describe("Tree widget", () => {
+  mockGetBoundingClientRect();
   describe("Learning snippets", () => {
     describe("Components", () => {
       before(async function () {
@@ -50,7 +51,6 @@ describe("Tree widget", () => {
         const unifiedSelectionStorage = createStorage();
         sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
         sinon.stub(UiFramework, "getIModelConnection").returns(imodelConnection);
-        mockGetBoundingClientRect();
 
         // __PUBLISH_EXTRACT_START__ TreeWidget.CustomTreeExample
         type TreeProps = ComponentPropsWithoutRef<typeof Tree>;

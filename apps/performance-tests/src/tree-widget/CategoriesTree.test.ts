@@ -97,7 +97,7 @@ describe("categories tree", () => {
     },
     cleanup: async (props) => {
       props.iModel.close();
-      props.viewport.dispose();
+      props.viewport[Symbol.dispose]();
       props.handler[Symbol.dispose]();
       props.provider[Symbol.dispose]();
     },
@@ -152,7 +152,7 @@ describe("categories tree", () => {
     },
     cleanup: async (props) => {
       props.iModel.close();
-      props.viewport.dispose();
+      props.viewport[Symbol.dispose]();
       props.handler[Symbol.dispose]();
       props.provider[Symbol.dispose]();
     },

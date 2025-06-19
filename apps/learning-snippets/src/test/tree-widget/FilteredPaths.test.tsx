@@ -148,6 +148,7 @@ function CustomModelsTreeComponentWithFilterAndTargetItems({
 // __PUBLISH_EXTRACT_END__
 
 describe("Tree widget", () => {
+  mockGetBoundingClientRect();
   describe("Learning snippets", () => {
     describe("Components", () => {
       describe("Filtered paths", () => {
@@ -179,7 +180,6 @@ describe("Tree widget", () => {
           const unifiedSelectionStorage = createStorage();
           sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
           sinon.stub(UiFramework, "getIModelConnection").returns(imodel.imodel);
-          mockGetBoundingClientRect();
 
           using _ = { [Symbol.dispose]: cleanup };
           const { getByText, queryByText } = render(
@@ -218,7 +218,6 @@ describe("Tree widget", () => {
           const unifiedSelectionStorage = createStorage();
           sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
           sinon.stub(UiFramework, "getIModelConnection").returns(imodel.imodel);
-          mockGetBoundingClientRect();
 
           using _ = { [Symbol.dispose]: cleanup };
           const { getByText, queryByText } = render(
@@ -245,7 +244,6 @@ describe("Tree widget", () => {
           const unifiedSelectionStorage = createStorage();
           sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
           sinon.stub(UiFramework, "getIModelConnection").returns(imodel.imodel);
-          mockGetBoundingClientRect();
 
           using _ = { [Symbol.dispose]: cleanup };
           const { getByText, queryByText } = render(

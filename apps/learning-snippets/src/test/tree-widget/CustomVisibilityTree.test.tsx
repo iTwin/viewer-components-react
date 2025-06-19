@@ -26,6 +26,7 @@ import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { VisibilityStatus } from "@itwin/tree-widget-react";
 
 describe("Tree widget", () => {
+  mockGetBoundingClientRect();
   describe("Learning snippets", () => {
     describe("Components", () => {
       before(async function () {
@@ -55,7 +56,6 @@ describe("Tree widget", () => {
         const unifiedSelectionStorage = createStorage();
         sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
         sinon.stub(UiFramework, "getIModelConnection").returns(imodelConnection);
-        mockGetBoundingClientRect();
 
         // __PUBLISH_EXTRACT_START__ TreeWidget.CustomVisibilityTreeExample
         type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
