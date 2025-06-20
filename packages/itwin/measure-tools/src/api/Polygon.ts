@@ -6,10 +6,11 @@
 import type { Ray3d } from "@itwin/core-geometry";
 import { Point3d, PolygonOps } from "@itwin/core-geometry";
 import type { DecorateContext, GraphicBuilder} from "@itwin/core-frontend";
-import { IModelApp, QuantityType } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
 import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "./GraphicStyle.js";
 import type { TextEntry} from "./TextMarker.js";
 import { TextMarker } from "./TextMarker.js";
+import type { MeasurementFormattingProps } from "./MeasurementProps.js";
 
 export class Polygon {
   public isSelected: boolean;
@@ -25,6 +26,8 @@ export class Polygon {
   private _overrideText?: string[] | TextEntry[];
   private _textMarker: TextMarker;
   private _styleSet: StyleSet;
+  private _areaKoQ: string;
+  private _areaPersistenceUnitName: string;
 
   public get points(): Point3d[] {
     return this._points;
@@ -76,7 +79,27 @@ export class Polygon {
     return this._worldScale ?? 1.0;
   }
 
-  constructor(points: Point3d[], copyPoints: boolean = true, styleSet?: StyleSet, worldScale?: number) {
+  public get areaKoQ(): string {
+    return this._areaKoQ;
+  }
+
+  public set areaKoQ(value: string) {
+    this._areaKoQ = value;
+    this.recomputeFromPoints();
+  }
+
+  public get areaPersistenceUnitName(): string {
+    return this._areaPersistenceUnitName;
+  }
+
+  public set areaPersistenceUnitName(value: string) {
+    this._areaPersistenceUnitName = value;
+    this.recomputeFromPoints();
+  }
+
+  constructor(points: Point3d[], copyPoints: boolean = true, styleSet?: StyleSet, worldScale?: number, formatting?: MeasurementFormattingProps) {
+    this._areaKoQ = formatting?.koqName ?? "AecUnits.AREA";
+    this._areaPersistenceUnitName = formatting?.persistenceUnitName ?? "Units.SQ_M";
     this._styleSet = (styleSet !== undefined) ? styleSet : StyleSet.default;
     this.drawMarker = true;
     this.drawFillArea = true;
@@ -117,12 +140,12 @@ export class Polygon {
       this.recomputeFromPoints();
   }
 
-  private setTextToMarker() {
+  private async setTextToMarker() {
     if (this._overrideText) {
       this._textMarker.textLines = this._overrideText;
     } else {
       const lines: string[] = [];
-      const areaFormatter = IModelApp.quantityFormatter.findFormatterSpecByQuantityType(QuantityType.Area);
+      const areaFormatter = IModelApp.quantityFormatter.getSpecsByName(this._areaKoQ)?.formatterSpec;
       if (undefined !== areaFormatter)
         lines.push(IModelApp.quantityFormatter.formatQuantity(this.worldScale * this.worldScale * this.area, areaFormatter));
 

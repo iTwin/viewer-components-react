@@ -22,6 +22,7 @@ import { MeasurementViewTarget } from "../api/MeasurementViewTarget.js";
 import type { AngleMeasurement } from "../measurements/AngleMeasurement.js";
 import { MeasureTools } from "../MeasureTools.js";
 import { MeasureAngleToolModel } from "../toolmodels/MeasureAngleToolModel.js";
+import type { AngleMeasurementFormattingProps } from "../measurements/AngleMeasurement.js";
 
 /** Tool for measuring angles using start, center and end point */
 export class MeasureAngleTool extends MeasurementToolBase<
@@ -56,12 +57,13 @@ MeasureAngleToolModel
     return MeasureToolsFeatures.Tools_MeasureAngle;
   }
 
-  constructor(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true)) {
+  constructor(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true), formatting?: AngleMeasurementFormattingProps) {
     super(allowedViewportCallback);
+    this.toolModel.formatting = formatting;
   }
 
   public async onRestartTool(): Promise<void> {
-    const tool = new MeasureAngleTool(this._allowedViewportCallback);
+    const tool = new MeasureAngleTool(this._allowedViewportCallback, this.toolModel.formatting);
     if (await tool.run()) return;
 
     return this.exitTool();

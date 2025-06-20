@@ -19,7 +19,7 @@ import type {
   GraphicBuilder,
   RenderGraphicOwner,
 } from "@itwin/core-frontend";
-import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
+import { GraphicType, IModelApp } from "@itwin/core-frontend";
 import { StyleSet, WellKnownGraphicStyleType } from "../api/GraphicStyle.js";
 import type {
   MeasurementEqualityOptions,
@@ -31,7 +31,7 @@ import {
   MeasurementSerializer,
 } from "../api/Measurement.js";
 import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper.js";
-import type { MeasurementProps } from "../api/MeasurementProps.js";
+import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet.js";
 import { Polygon } from "../api/Polygon.js";
 import { DistanceMeasurement } from "./DistanceMeasurement.js";
@@ -42,6 +42,15 @@ import { MeasureTools } from "../MeasureTools.js";
  */
 export interface AreaMeasurementProps extends MeasurementProps {
   polygonPoints: XYZProps[];
+  formatting?: AreaMeasurementFormattingProps;
+}
+
+/** Formatting properties for area measurement. */
+export interface AreaMeasurementFormattingProps {
+  /** Defaults to "AecUnits.LENGTH" and "Units.M" */
+  length?: MeasurementFormattingProps;
+  /** Defaults to "AecUnits.AREA" and "Units.SQ_M" */
+  area? : MeasurementFormattingProps;
 }
 
 /** Serializer for a [[AreaMeasurement]]. */
@@ -84,6 +93,10 @@ export class AreaMeasurement extends Measurement {
   );
 
   private _polygon: Polygon;
+  private _lengthKoQ: string;
+  private _lengthPersistenceUnitName: string;
+  private _areaKoQ: string;
+  private _areaPersistenceUnitName: string;
 
   private _isDynamic: boolean; // No serialize, for dynamics
   private _dynamicEdge?: DistanceMeasurement; // No serialize, for dynamics
@@ -117,18 +130,58 @@ export class AreaMeasurement extends Measurement {
     return true;
   }
 
+  public get lengthKoQ(): string {
+    return this._lengthKoQ;
+  }
+  public set lengthKoQ(value: string) {
+    this._lengthKoQ = value;
+    this._polygon.recomputeFromPoints();
+  }
+
+  public get lengthPersistenceUnitName(): string {
+    return this._lengthPersistenceUnitName;
+  }
+  public set lengthPersistenceUnitName(value: string) {
+    this._lengthPersistenceUnitName = value;
+    this._polygon.recomputeFromPoints();
+  }
+
+  public get areaKoQ(): string {
+    return this._areaKoQ;
+  }
+
+  public set areaKoQ(value: string) {
+    this._areaKoQ = value;
+    this._polygon.recomputeFromPoints();
+  }
+
+  public get areaPersistenceUnitName(): string {
+    return this._areaPersistenceUnitName;
+  }
+
+  public set areaPersistenceUnitName(value: string) {
+    this._areaPersistenceUnitName = value;
+    this._polygon.recomputeFromPoints();
+  }
+
   constructor(props?: AreaMeasurementProps) {
     super(props);
 
-    this._polygon = new Polygon([], false);
+    this._polygon = new Polygon([], false, undefined, undefined, props?.formatting?.area);
     this._polygon.textMarker.setMouseButtonHandler(
       this.handleTextMarkerButtonEvent.bind(this)
     );
+    this._lengthKoQ = "AecUnits.LENGTH";
+    this._lengthPersistenceUnitName = "Units.M";
+    this._areaKoQ = "AecUnits.AREA";
+    this._areaPersistenceUnitName = "Units.SQ_M";
     this._polygon.textMarker.transientHiliteId = this.transientId;
     this._polygon.makeSelectable(true);
     this._isDynamic = false;
 
     if (props) this.readFromJSON(props);
+
+    this.populateFormattingSpecsRegistry().catch();
   }
 
   private handleTextMarkerButtonEvent(ev: BeButtonEvent): boolean {
@@ -139,6 +192,23 @@ export class AreaMeasurement extends Measurement {
     );
 
     return true;
+  }
+
+  public override async populateFormattingSpecsRegistry(_force?: boolean): Promise<void> {
+    const lengthEntry = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ);
+    if (_force || !lengthEntry || lengthEntry.formatterSpec.persistenceUnit?.name !== this._lengthPersistenceUnitName) {
+      const lengthFormatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
+      if (lengthFormatProps) {
+        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._lengthKoQ, this._lengthPersistenceUnitName, lengthFormatProps);
+      }
+    }
+    const areaEntry = IModelApp.quantityFormatter.getSpecsByName(this._areaKoQ);
+    if (_force || !areaEntry || areaEntry.formatterSpec.persistenceUnit?.name !== this._areaPersistenceUnitName) {
+      const areaFormatProps = await IModelApp.formatsProvider.getFormat(this._areaKoQ);
+      if (areaFormatProps) {
+        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._areaKoQ, this._areaPersistenceUnitName, areaFormatProps);
+      }
+    }
   }
 
   public addPointToDynamicPolygon(point: Point3d): boolean {
@@ -175,7 +245,7 @@ export class AreaMeasurement extends Measurement {
     if (length === 0) return;
 
     const start = this.polygonPoints[length - 1];
-    this._dynamicEdge = DistanceMeasurement.create(start, point);
+    this._dynamicEdge = DistanceMeasurement.create(start, point, undefined, { length: { koqName: this._lengthKoQ, persistenceUnitName: this._lengthPersistenceUnitName }});
     if (this.drawingMetadata?.origin)
       this._dynamicEdge.drawingMetadata = { origin: this.drawingMetadata.origin, worldScale: this.worldScale };
     this._dynamicEdge.sheetViewId = this.sheetViewId;
@@ -400,14 +470,8 @@ export class AreaMeasurement extends Measurement {
   }
 
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
-    const lengthSpec =
-      await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
-        QuantityType.LengthEngineering
-      );
-    const areaSpec =
-      await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
-        QuantityType.Area
-      );
+    const lengthSpec = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ)?.formatterSpec;
+    const areaSpec = IModelApp.quantityFormatter.getSpecsByName(this._areaKoQ)?.formatterSpec;
 
     const fPerimeter = IModelApp.quantityFormatter.formatQuantity(
       this.worldScale * this._polygon.perimeter,
@@ -567,6 +631,16 @@ export class AreaMeasurement extends Measurement {
     super.readFromJSON(json);
 
     const jsonArea = json as AreaMeasurementProps;
+    if (jsonArea.formatting?.area?.koqName) {
+      this._areaKoQ = jsonArea.formatting.area.koqName;
+      this._polygon.areaKoQ = this._areaKoQ;
+    }
+    if (jsonArea.formatting?.area?.persistenceUnitName) {
+      this._areaPersistenceUnitName = jsonArea.formatting.area.persistenceUnitName;
+      this._polygon.areaPersistenceUnitName = this._areaPersistenceUnitName;
+    }
+    if (jsonArea.formatting?.length?.koqName) this._lengthKoQ = jsonArea.formatting.length.koqName;
+    if (jsonArea.formatting?.length?.persistenceUnitName) this._lengthPersistenceUnitName = jsonArea.formatting.length.persistenceUnitName;
     if (jsonArea.polygonPoints !== undefined) {
       const pts = new Array<Point3d>();
       for (const pt of jsonArea.polygonPoints) pts.push(Point3d.fromJSON(pt));
@@ -576,6 +650,8 @@ export class AreaMeasurement extends Measurement {
       if (this.isDynamic && this._dynamicEdge)
         this.updateDynamicPolygon(this._dynamicEdge.endPointRef);
     }
+
+
   }
 
   /**
@@ -590,11 +666,21 @@ export class AreaMeasurement extends Measurement {
 
     const jsonArea = json as AreaMeasurementProps;
     jsonArea.polygonPoints = pts;
+    jsonArea.formatting = {
+      length: {
+        koqName: this._lengthKoQ,
+        persistenceUnitName: this._lengthPersistenceUnitName,
+      },
+      area: {
+        koqName: this._areaKoQ,
+        persistenceUnitName: this._areaPersistenceUnitName,
+      },
+    };
   }
 
-  public static create(pts: Point3d[], viewType?: string): AreaMeasurement {
+  public static create(pts: Point3d[], viewType?: string, formatting?: AreaMeasurementFormattingProps): AreaMeasurement {
     // Don't ned to serialize the points, will just work as is
-    const measurement = new AreaMeasurement({ polygonPoints: pts });
+    const measurement = new AreaMeasurement({ polygonPoints: pts, formatting });
     if (viewType) measurement.viewTarget.include(viewType);
 
     return measurement;

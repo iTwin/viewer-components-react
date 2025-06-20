@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import type { Point3d } from "@itwin/core-geometry";
+import type { AreaMeasurementFormattingProps } from "../measurements/AreaMeasurement.js";
 import { AreaMeasurement } from "../measurements/AreaMeasurement.js";
 import { MeasurementToolModel } from "../api/MeasurementToolModel.js";
 import type { DrawingMetadata } from "../api/Measurement.js";
@@ -19,11 +20,15 @@ export class MeasureAreaToolModel extends MeasurementToolModel<AreaMeasurement> 
   private _currentState: State;
   private _currentViewportType?: string;
   private _currentMeasurement?: AreaMeasurement;
+  private _formatting?: AreaMeasurementFormattingProps;
 
   constructor() {
     super();
     this._currentState = State.SetMeasurementViewport;
   }
+
+  public get formatting(): AreaMeasurementFormattingProps | undefined { return this._formatting; }
+  public set formatting(formatting: AreaMeasurementFormattingProps | undefined) { this._formatting = formatting; }
 
   public get drawingMetadata(): DrawingMetadata | undefined {
     return this._currentMeasurement?.drawingMetadata;
@@ -74,7 +79,7 @@ export class MeasureAreaToolModel extends MeasurementToolModel<AreaMeasurement> 
       if (isDynamic)
         return false;
 
-      this._currentMeasurement = AreaMeasurement.create([point], viewType);
+      this._currentMeasurement = AreaMeasurement.create([point], viewType, this._formatting);
       this._currentMeasurement.isDynamic = true;
       this.notifyNewMeasurement();
       return true;

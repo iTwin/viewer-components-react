@@ -5,7 +5,7 @@
 
 import type { Point3d } from "@itwin/core-geometry";
 import { MeasurementToolModel } from "../api/MeasurementToolModel.js";
-import type { LocationMeasurementProps } from "../measurements/LocationMeasurement.js";
+import type { LocationMeasurementFormattingProps, LocationMeasurementProps } from "../measurements/LocationMeasurement.js";
 import { LocationMeasurement } from "../measurements/LocationMeasurement.js";
 import type { MeasurementProps } from "../api/MeasurementProps.js";
 import type { DrawingMetadataProps } from "../api/Measurement.js";
@@ -24,9 +24,11 @@ export interface AddLocationProps extends Omit<LocationMeasurementPropsOnly, "lo
 
 export class MeasureLocationToolModel extends MeasurementToolModel<LocationMeasurement> {
   private _currentMeasurement?: LocationMeasurement;
+  private _formatting?: LocationMeasurementFormattingProps;
 
   public override get dynamicMeasurement(): LocationMeasurement | undefined { return this._currentMeasurement; }
-
+  public get formatting(): LocationMeasurementFormattingProps | undefined { return this._formatting; }
+  public set formatting(formatting: LocationMeasurementFormattingProps | undefined) { this._formatting = formatting; }
   constructor() {
     super();
   }
@@ -44,7 +46,7 @@ export class MeasureLocationToolModel extends MeasurementToolModel<LocationMeasu
     const { viewType, ...rest } = props;
 
     if (!this._currentMeasurement) {
-      this._currentMeasurement = new LocationMeasurement(rest);
+      this._currentMeasurement = new LocationMeasurement({...rest, formatting: this._formatting});
       this.sheetViewId = props.viewId;
       this._currentMeasurement.viewTarget.include(viewType);
       this._currentMeasurement.isDynamic = isDynamic;
