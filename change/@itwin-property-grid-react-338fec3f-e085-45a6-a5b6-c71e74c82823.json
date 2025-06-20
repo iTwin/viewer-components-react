@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Update itwinjs-core dependencies to v5.0.0",
-  "packageName": "@itwin/property-grid-react",
-  "email": "100586436+JonasDov@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

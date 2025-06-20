@@ -2,6 +2,21 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "date": "Fri, 20 Jun 2025 17:05:06 GMT",
+      "version": "1.19.2",
+      "tag": "@itwin/property-grid-react_v1.19.2",
+      "comments": {
+        "patch": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "6bb80f1c9307809d157332ba5a1438e062e0eb58",
+            "comment": "Update itwinjs-core dependencies to v5.0.0"
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 02 Jun 2025 13:19:21 GMT",
       "version": "1.19.1",
       "tag": "@itwin/property-grid-react_v1.19.1",
