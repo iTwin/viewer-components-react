@@ -61,7 +61,7 @@ function ViewerWithOptions() {
       authClient={authClient}
       enablePerformanceMonitors={false}
       onIModelAppInit={onIModelAppInit}
-      // Only set providers after IModelAppInit, otherwise map-layers stuff will fail to initialize
+      // Only set providers once IModelAppInit has fired, otherwise map-layers objects will fail to initialize
       uiProviders={uiConfig ? [...uiConfig.uiItemsProviders, statusBarActionsProvider] : []}
       defaultUiConfig={{
         hideNavigationAid: true,
