@@ -219,7 +219,7 @@ importers:
         version: 3.2.0(@typescript-eslint/eslint-plugin@7.16.1(@typescript-eslint/parser@7.16.1(eslint@8.57.0)(typescript@5.6.3))(eslint@8.57.0)(typescript@5.6.3))(eslint@8.57.0)
       fast-xml-parser:
         specifier: ^4.3.6
-        version: 4.3.6
+        version: 4.4.1
       global-jsdom:
         specifier: ^9.2.0
         version: 9.2.0(jsdom@23.1.0)
@@ -2157,8 +2157,8 @@ packages:
   fast-uri@3.0.6:
     resolution: {integrity: sha512-Atfo14OibSv5wAp4VWNsFYE1AchQRTv9cBGWET4pZWHzYshFSS9NQI6I57rdKn9croWVMbYFbLhJ+yJvmZIIHw==}
 
-  fast-xml-parser@4.3.6:
-    resolution: {integrity: sha512-M2SovcRxD4+vC493Uc2GZVcZaj66CCJhWurC4viynVSTvrpErCShNcDz1lAho6n9REQKvL/ll4A4/fw6Y9z8nw==}
+  fast-xml-parser@4.4.1:
+    resolution: {integrity: sha512-xkjOecfnKGkSsOwtZ5Pz7Us/T6mrbPQrq0nh+aCO5V9nk5NLWmasAHumTKjiPJPWANe+kAZ84Jc8ooJkzZ88Sw==}
     hasBin: true
 
   fast-xml-parser@5.2.5:
@@ -6804,7 +6804,7 @@ snapshots:
 
   fast-uri@3.0.6: {}
 
-  fast-xml-parser@4.3.6:
+  fast-xml-parser@4.4.1:
     dependencies:
       strnum: 1.1.2
 
