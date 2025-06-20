@@ -148,6 +148,7 @@ describe("createPropertyGrid", () => {
         triggerSelectionChange(props?: Pick<Partial<EventArgs<typeof selectionStorage.selectionChangeEvent>>, "source">) {
           selectionManager.selectionChange.raiseEvent(
             { source: "TestSource", imodel, ...props } as EventArgs<typeof selectionManager.selectionChange>,
+            // eslint-disable-next-line deprecation/deprecation
             selectionManager as ISelectionProvider,
           );
         },

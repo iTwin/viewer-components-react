@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { Code, ColorDef, IModel, IModelReadRpcInterface, RenderMode, SnapshotIModelRpcInterface } from "@itwin/core-common";
+import { Code, ColorDef, IModel, IModelReadRpcInterface, RenderMode } from "@itwin/core-common";
 import { IModelApp, OffScreenViewport, PerModelCategoryVisibility, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
@@ -42,7 +42,7 @@ describe("CategoriesVisibilityHandler", () => {
           },
         },
       },
-      rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
+      rpcs: [IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
     });
     await TestUtils.initialize();
     // eslint-disable-next-line @itwin/no-internal
@@ -89,7 +89,7 @@ describe("CategoriesVisibilityHandler", () => {
       provider,
       viewport: commonProps.viewport,
       [Symbol.dispose]() {
-        commonProps.viewport.dispose();
+        commonProps.viewport[Symbol.dispose]();
         handler[Symbol.dispose]();
         provider[Symbol.dispose]();
       },

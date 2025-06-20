@@ -291,7 +291,7 @@ async function getModels(paths: HierarchyFilteringPath[], idsCache: ModelsTreeId
 
 function getNoDataMessage(filter?: string, error?: ModelsTreeFilteringError) {
   if (isInstanceFocusError(error)) {
-    return <InstanceFocusError error={error!} />;
+    return <InstanceFocusError error={error} />;
   }
   if (isFilterError(error)) {
     return <Text>{TreeWidget.translate(`modelsTree.filtering.${error}`)}</Text>;

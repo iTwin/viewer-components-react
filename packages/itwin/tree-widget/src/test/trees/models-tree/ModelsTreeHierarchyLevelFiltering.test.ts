@@ -5,7 +5,7 @@
 
 import { expect } from "chai";
 import { ElementOwnsMultiAspects, ExternalSourceAspect, PhysicalModel, SpatialCategory, Subject } from "@itwin/core-backend";
-import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
+import { IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { DefaultContentDisplayTypes, KeySet, PresentationRpcInterface, PropertyValueFormat } from "@itwin/presentation-common";
@@ -41,7 +41,7 @@ describe("Models tree", () => {
             },
           },
         },
-        rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
+        rpcs: [IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
       });
       // eslint-disable-next-line @itwin/no-internal
       ECSchemaRpcImpl.register();

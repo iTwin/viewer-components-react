@@ -4,8 +4,6 @@
 
 ```ts
 
-/// <reference types="react" />
-
 import type { ActionButtonRendererProps } from '@itwin/components-react';
 import { FavoritePropertiesScope } from '@itwin/presentation-frontend';
 import type { Field } from '@itwin/presentation-common';
