@@ -1,8 +1,30 @@
 # Change Log - @itwin/map-layers
 
-This log was last generated on Wed, 23 Oct 2024 13:32:29 GMT and should not be manually modified.
+This log was last generated on Fri, 20 Jun 2025 17:05:06 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 6.0.0
+
+Fri, 20 Jun 2025 17:05:06 GMT
+
+### Major changes
+
+- Upgrade to iTwin.js 5.0; adds support for Google 2D Tiles ([#1304](https://github.com/iTwin/viewer-components-react/pull/1304))
+- migrate map-layers to iTwinUI 3 ([#1136](https://github.com/iTwin/viewer-components-react/pull/1136))
+
+### Patches
+
+- Removed remaining @import from .scss files. ([#1277](https://github.com/iTwin/viewer-components-react/pull/1277))
+- Updated to itwin.js 5 official release. ([#1348](https://github.com/iTwin/viewer-components-react/pull/1348))
+
+### Changes
+
+- Removed includes in SCSS files and fixed a bunch of UI issues ([#1263](https://github.com/iTwin/viewer-components-react/pull/1263))
+- Fix style of color picker button in Map Layers ([#1314](https://github.com/iTwin/viewer-components-react/pull/1314))
+- Dropped widget header label. ([#1261](https://github.com/iTwin/viewer-components-react/pull/1261))
+- [Bug fix] Unable to change base map after selecting 'Solid Fill Color. ([#1337](https://github.com/iTwin/viewer-components-react/pull/1337))
+- Resolve GHSA-9crc-q9x8-hgqq ([#1244](https://github.com/iTwin/viewer-components-react/pull/1244))
 
 ## 5.6.2
 

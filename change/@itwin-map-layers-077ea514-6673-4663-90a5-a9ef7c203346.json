@@ -1,7 +1,0 @@
-{
-  "type": "prerelease",
-  "comment": "Removed includes in SCSS files and fixed a bunch of UI issues",
-  "packageName": "@itwin/map-layers",
-  "email": "mdastous-bentley@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
