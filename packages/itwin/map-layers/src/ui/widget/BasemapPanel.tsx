@@ -107,12 +107,15 @@ export function BasemapPanel(props: BasemapPanelProps) {
         );
       }
 
+      const baseMapSelectKey = baseMap ? getSelectKeyFromProvider(baseMap as BaseMapLayerSettings) : "";
+
       // Add new custom base map definition (avoid adding duplicate entry)
       if (baseMap instanceof BaseMapLayerSettings
-        && !baseMap.provider
+        && baseOptions.find((opt) => opt.value === baseMapSelectKey) === undefined
         && !extraFormats[baseMap.formatId]) {
-        // Add new option only if not created duplicate (Support of base map definition without provider)
+        // Add new option for the custom base map
         if (undefined === baseOptions.find((opt) => opt.label === baseMap.name)) {
+          setCustomBaseMap(baseMap);
           baseOptions.push({ value: customBaseMapValue, label: baseMap.name });
         }
       } else if (customBaseMap) {
@@ -197,7 +200,6 @@ export function BasemapPanel(props: BasemapPanelProps) {
   React.useEffect(() => {
     if (
       selectedBaseMap instanceof BaseMapLayerSettings
-       && !selectedBaseMap.provider
        && undefined === baseMapOptions.find((opt) => opt.label === selectedBaseMap.name)
        && undefined === extraFormats[selectedBaseMap.formatId]
     ) {
@@ -235,7 +237,9 @@ export function BasemapPanel(props: BasemapPanelProps) {
           setSelectedBaseMapValue(foundItem);
           return;
         }
-      } else if (selectedBaseMap instanceof BaseMapLayerSettings) {
+      }
+
+      if (selectedBaseMap instanceof BaseMapLayerSettings) {
         // We got a custom base map
 
         // First check if the name matches a label of existing base map.
