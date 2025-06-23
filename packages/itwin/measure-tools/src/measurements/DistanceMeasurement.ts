@@ -433,9 +433,9 @@ export class DistanceMeasurement extends Measurement {
       await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
         QuantityType.LengthEngineering
       );
-    const distance = this._startPoint.distance(this._endPoint);
+    const { distance } = this.getDistances();
     const fDistance = IModelApp.quantityFormatter.formatQuantity(
-      distance * this.worldScale,
+      distance,
       lengthSpec
     );
 
@@ -468,15 +468,45 @@ export class DistanceMeasurement extends Measurement {
     return true;
   }
 
+  private getDistances(): { distance: number, run: number, rise: number } {
+    if (this.drawingMetadata?.sheetToWorldTransform) {
+      // calculate distances in sheet coordinates
+      const adjustedStartPoint = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this.startPointRef.clone()));
+      const adjustedEndPointFinal = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this.endPointRef.clone()));
+      const directDistanceFinal = adjustedStartPoint.distance(adjustedEndPointFinal);
+
+      // Project End Point Vertically (for Horizontal Distance Calculation)
+      const projectedEndPointX = Point3d.create(this.endPointRef.x, this.startPointRef.y, this.startPointRef.z);
+      const adjustedEndPointX = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(projectedEndPointX));
+      const horizontalDistance = adjustedStartPoint.distance(adjustedEndPointX);
+
+
+      // Project End Point Horizontally (for Vertical Distance Calculation)
+      const projectedEndPointY = Point3d.create(this.startPointRef.x, this.endPointRef.y, this.startPointRef.z);
+      const adjustedEndPointY = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(projectedEndPointY));
+      const verticalDistance = adjustedEndPointY.minus(adjustedStartPoint).z;
+      return {
+        distance: directDistanceFinal,
+        run: horizontalDistance,
+        rise: verticalDistance,
+      };
+    }
+
+    // calculate distances in world coordinates
+    return {
+      distance: this._startPoint.distance(this._endPoint),
+      run: this._startPoint.distanceXY(this._endPoint),
+      rise: this._endPoint.z - this._startPoint.z,
+    };
+  }
+
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
     const lengthSpec =
       await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
         QuantityType.LengthEngineering
       );
 
-    const distance = this.worldScale * this._startPoint.distance(this._endPoint);
-    const run = this.drawingMetadata?.worldScale !== undefined ? this.worldScale * Math.abs(this._endPoint.x - this._startPoint.x): this._startPoint.distanceXY(this._endPoint);
-    const rise = this.drawingMetadata?.worldScale !== undefined ? this.worldScale * (this._endPoint.y - this._startPoint.y): this._endPoint.z - this._startPoint.z;
+    const { distance, run, rise } = this.getDistances();
     const slope = 0.0 < run ? (100 * rise) / run : 0.0;
     const dx = Math.abs(this._endPoint.x - this._startPoint.x);
     const dy = Math.abs(this._endPoint.y - this._startPoint.y);
@@ -547,7 +577,7 @@ export class DistanceMeasurement extends Measurement {
       },
     );
 
-    if (this.drawingMetadata?.worldScale === undefined) {
+    if (this.drawingMetadata?.sheetToWorldTransform === undefined) {
       data.properties.push(
         {
           label: MeasureTools.localization.getLocalizedString(
