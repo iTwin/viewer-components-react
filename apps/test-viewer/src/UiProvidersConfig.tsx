@@ -50,7 +50,7 @@ import type { ComponentPropsWithRef } from "react";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
-  get uiItemsProviders(): UiItemsProvider[];
+  uiItemsProviders: UiItemsProvider[];
 }
 
 export function getUiProvidersConfig(): UiProvidersConfig {
