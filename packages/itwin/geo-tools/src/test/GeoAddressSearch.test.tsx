@@ -5,12 +5,12 @@
 
 import { expect } from "chai";
 import { mount } from "enzyme";
-import * as React from "react";
+import React from "react";
 import * as sinon from "sinon";
 import { stubObject } from "ts-sinon";
 import { SpecialKey } from "@itwin/appui-abstract";
 import { EmptyLocalization } from "@itwin/core-common";
-import { MapCartoRectangle, MockRender } from "@itwin/core-frontend";
+import { MapCartoRectangle, NoRenderApp } from "@itwin/core-frontend";
 import { fireEvent, render } from "@testing-library/react";
 import { BingAddressProvider, GeoAddressSearch, IModelGeoView } from "../geo-tools";
 import TestUtils from "./TestUtils";
@@ -29,7 +29,7 @@ describe("GeoAddressSearch", () => {
   let locateAddressStub: sinon.SinonStub<[string], Promise<boolean> >;
 
   before(async () => {
-    await MockRender.App.startup({localization: new EmptyLocalization()});
+    await NoRenderApp.startup({localization: new EmptyLocalization()});
     await TestUtils.initializeGeoTools();
   });
 
@@ -56,11 +56,10 @@ describe("GeoAddressSearch", () => {
   });
   after(async () => {
     TestUtils.terminateUiComponents();
-    await MockRender.App.shutdown();
   });
 
   it("renders", () => {
-    const wrapper = mount(<GeoAddressSearch />);
+    const wrapper = mount(<GeoAddressSearch provider={new BingAddressProvider()}/>);
 
     expect(wrapper.find("input[type='text']").length).to.eq(1);
     wrapper.unmount();

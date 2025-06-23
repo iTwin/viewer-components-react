@@ -28,6 +28,7 @@ import { getSchemaContext as getTestSchemaContext, getTestViewer, mockGetBoundin
 import type { InstanceKey } from "@itwin/presentation-common";
 
 describe("Tree widget", () => {
+  mockGetBoundingClientRect();
   describe("Learning snippets", () => {
     describe("Components", () => {
       describe("Models tree", () => {
@@ -58,7 +59,6 @@ describe("Tree widget", () => {
           const unifiedSelectionStorage = createStorage();
           sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
           sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
-          mockGetBoundingClientRect();
           const getSchemaContext = getTestSchemaContext;
 
           // __PUBLISH_EXTRACT_START__ TreeWidget.ModelsTreeExample
@@ -93,7 +93,12 @@ describe("Tree widget", () => {
                 parentId: rootSubject.id,
               });
               const model = insertPhysicalModelWithPartition({ builder, codeValue: "model", partitionParentId: childSubject.id });
-              insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" }).id });
+              insertPhysicalElement({
+                builder,
+                userLabel: `element`,
+                modelId: model.id,
+                categoryId: insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" }).id,
+              });
               return { model, childSubject };
             })
           ).imodel;
@@ -101,7 +106,6 @@ describe("Tree widget", () => {
           const unifiedSelectionStorage = createStorage();
           sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
           sinon.stub(UiFramework, "getIModelConnection").returns(testImodel);
-          mockGetBoundingClientRect();
 
           // __PUBLISH_EXTRACT_START__ TreeWidget.CustomModelsTreeExample
           type VisibilityTreeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>;

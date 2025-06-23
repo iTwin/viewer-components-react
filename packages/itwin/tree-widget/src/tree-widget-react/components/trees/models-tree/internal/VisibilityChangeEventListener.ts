@@ -5,11 +5,10 @@
 
 import { BeEvent } from "@itwin/core-bentley";
 
-import type { IDisposable } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 
 /** @internal */
-export interface IVisibilityChangeEventListener extends IDisposable {
+export interface IVisibilityChangeEventListener extends Disposable {
   onVisibilityChange: BeEvent<() => void>;
   suppressChangeEvents(): void;
   resumeChangeEvents(): void;
@@ -40,7 +39,7 @@ export function createVisibilityChangeEventListener(viewport: Viewport): IVisibi
 
   return {
     onVisibilityChange,
-    dispose: () => {
+    [Symbol.dispose]() {
       if (pendingVisibilityChange) {
         clearTimeout(pendingVisibilityChange);
         pendingVisibilityChange = undefined;

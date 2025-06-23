@@ -5,38 +5,51 @@
 
 import "./GeoAddressSearch.scss";
 import * as React from "react";
+import { useActiveViewport } from "@itwin/appui-react";
 import { SvgCloseSmall, SvgSearch } from "@itwin/itwinui-icons-react";
 import { ComboBox, IconButton } from "@itwin/itwinui-react";
-import { BingAddressProvider } from "../BingAddressProvider";
 import { GeoTools } from "../GeoTools";
 import { IModelGeoView } from "../IModelGeoView";
 
+import type { Viewport } from "@itwin/core-frontend";
 import type { SelectOption } from "@itwin/itwinui-react";
 import type { AddressData, AddressProvider } from "../AddressProvider";
+/**
+ * Properties for the <GeoAddressSearch> component.
+ */
 export interface GeoAddressSearchProps {
   /** Address provider object */
-  provider?: AddressProvider;
+  provider: AddressProvider;
+
   /** Indicates whether to set focus to the input element (default to true)*/
   setFocus?: boolean;
 }
-
+/**
+ */
 export function GeoAddressSearch(props: GeoAddressSearchProps) {
+  const {provider} = props;
+
   const [inputValue, setInputValue] = React.useState("");
   const [options, setOptions] = React.useState<SelectOption<string>[]>([]);
   const [addressCache, setAddressCache] = React.useState<AddressData[]>([]);
+  const activeViewport = useActiveViewport(); // Hook to ensure the component re-renders when the active viewport changes
+  const [disabled, setDisabled] = React.useState<boolean>(() => provider.isDisabled({ viewport: activeViewport }) );
 
-  // `React.useMemo' is used avoid creating new object on each render cycle
-  // Default is Bing provider, but we might want to default to Google in the future
-  const addressProvider = React.useMemo(() => props.provider ?? new BingAddressProvider(), [props.provider]);
+  React.useEffect(() => {
+
+    return activeViewport?.onDisplayStyleChanged.addListener(
+      (vp)=>{setDisabled(provider?.isDisabled({ viewport: vp }) );}
+    );
+  }, [activeViewport]);
 
   const onAddressSelected = async (selected: string) => {
     setInputValue(selected);
     let locatedByPosition = false
-    if (addressProvider.supportsAddressLocation()) {
+    if (provider.supportsAddressLocation()) {
       const address = addressCache.find((addr) => addr.formattedAddress === selected);
         if (address !== undefined) {
           try {
-            const location = await addressProvider.getLocation(address);
+            const location = await provider.getLocation(address);
             if (location) {
               locatedByPosition = await IModelGeoView.locatePosition(location);
             }
@@ -52,7 +65,7 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
   const getAddressesFunc = async (value: string): Promise<AddressData[]> => {
     const viewBBox = IModelGeoView.getFrustumLonLatBBox();
     if (viewBBox && value) {
-      const addr = await addressProvider.getSuggestions(value, viewBBox);
+      const addr = await provider.getSuggestions(value, viewBBox);
       setAddressCache(addr);
       return addr;
     }
@@ -69,12 +82,14 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
     <div className="geotools-geoaddresssearch__container">
       <div className="geotools-geoaddresssearch__combobox">
         <ComboBox
+
           options={options}
           filterFunction={(options)=>options} // disable filtering as it can interfere with the address provider
           emptyStateMessage={GeoTools.translate("geoAddressSearch.noResults")}
           onHide={()=>clearValue()}
           inputProps={{
-            placeholder: GeoTools.translate("geoAddressSearch.inputPlaceHolder"),
+            disabled,
+            placeholder: disabled ? GeoTools.translate("geoAddressSearch.invalidBaseMap") : GeoTools.translate("geoAddressSearch.inputPlaceHolder"),
             onChange: async (event: React.ChangeEvent<HTMLInputElement>) => {
 
               const items = await getAddressesFunc(inputValue);
@@ -87,12 +102,15 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
           }}
           onChange={(value: any) => {
             onAddressSelected(value);
+
           }}
           value={inputValue}
           enableVirtualization
         />
       </div>
+
       <IconButton
+        disabled={disabled}
         className="geotools-geoaddresssearch__button"
         onClick={clearValue}
         label={!inputValue ? "" : GeoTools.translate("geoAddressSearch.clearTooltip")} >

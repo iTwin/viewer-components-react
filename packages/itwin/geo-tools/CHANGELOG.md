@@ -1,8 +1,20 @@
 # Change Log - @itwin/geo-tools-react
 
-This log was last generated on Fri, 30 May 2025 19:49:32 GMT and should not be manually modified.
+This log was last generated on Fri, 20 Jun 2025 17:05:06 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 6.0.0
+
+Fri, 20 Jun 2025 17:05:06 GMT
+
+### Major changes
+
+- Updated to official itwin 5.0 release ([#1348](https://github.com/iTwin/viewer-components-react/pull/1348))
+
+### Patches
+
+- Disable GoogleAddressProvider when Google Maps base map is not active. ([#1341](https://github.com/iTwin/viewer-components-react/pull/1341))
 
 ## 5.3.0
 

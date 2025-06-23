@@ -200,7 +200,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
   }
 
   public [Symbol.dispose]() {
-    this._eventListener.dispose();
+    this._eventListener[Symbol.dispose]();
     this._alwaysAndNeverDrawnElements[Symbol.dispose]();
     this._subscriptions.forEach((x) => x.unsubscribe());
   }

@@ -26,6 +26,7 @@ import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from 
 import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils.js";
 
 describe("Tree widget", () => {
+  mockGetBoundingClientRect();
   describe("Learning snippets", () => {
     describe("Components", () => {
       describe("Categories tree", () => {
@@ -54,7 +55,6 @@ describe("Tree widget", () => {
           const unifiedSelectionStorage = createStorage();
           sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
           sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
-          mockGetBoundingClientRect();
 
           // __PUBLISH_EXTRACT_START__ TreeWidget.CategoriesTreeExample
           function MyWidget() {
@@ -89,7 +89,6 @@ describe("Tree widget", () => {
           const unifiedSelectionStorage = createStorage();
           sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
           sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
-          mockGetBoundingClientRect();
 
           // __PUBLISH_EXTRACT_START__ TreeWidget.CustomCategoriesTreeExample
           type VisibilityTreeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>;
