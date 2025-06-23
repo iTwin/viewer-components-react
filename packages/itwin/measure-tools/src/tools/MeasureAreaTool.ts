@@ -23,7 +23,7 @@ import type { Feature } from "../api/FeatureTracking.js";
 import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking.js";
 import { MeasurementToolBase } from "../api/MeasurementTool.js";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget.js";
-import type { AreaMeasurement } from "../measurements/AreaMeasurement.js";
+import type { AreaMeasurement, AreaMeasurementFormattingProps } from "../measurements/AreaMeasurement.js";
 import { MeasureAreaToolModel } from "../toolmodels/MeasureAreaToolModel.js";
 import { MeasureTools } from "../MeasureTools.js";
 import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper.js";
@@ -61,13 +61,14 @@ MeasureAreaToolModel
     return MeasureToolsFeatures.Tools_MeasureArea;
   }
 
-  constructor(enableSheetMeasurements = false, allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true)) {
+  constructor(enableSheetMeasurements = false, allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true), formatting?: AreaMeasurementFormattingProps) {
     super(allowedViewportCallback);
     this._enableSheetMeasurements = enableSheetMeasurements;
+    this.toolModel.formatting = formatting;
   }
 
   public async onRestartTool(): Promise<void> {
-    const tool = new MeasureAreaTool(this._enableSheetMeasurements,this._allowedViewportCallback);
+    const tool = new MeasureAreaTool(this._enableSheetMeasurements,this._allowedViewportCallback, this.toolModel.formatting);
     if (await tool.run()) return;
 
     return this.exitTool();

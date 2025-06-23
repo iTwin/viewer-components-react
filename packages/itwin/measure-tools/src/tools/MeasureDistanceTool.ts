@@ -22,7 +22,7 @@ import type { Feature } from "../api/FeatureTracking.js";
 import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking.js";
 import { MeasurementToolBase } from "../api/MeasurementTool.js";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget.js";
-import type { DistanceMeasurement } from "../measurements/DistanceMeasurement.js";
+import type { DistanceMeasurement, DistanceMeasurementFormattingProps } from "../measurements/DistanceMeasurement.js";
 import { MeasureTools } from "../MeasureTools.js";
 import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel.js";
 import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper.js";
@@ -64,9 +64,10 @@ MeasureDistanceToolModel
     return MeasureToolsFeatures.Tools_MeasureDistance;
   }
 
-  constructor(enableSheetMeasurements = false, allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true)) {
+  constructor(enableSheetMeasurements = false, allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true), formatting?: DistanceMeasurementFormattingProps) {
     super(allowedViewportCallback);
     this._enableSheetMeasurements = enableSheetMeasurements;
+    this.toolModel.formatting = formatting;
   }
 
   public override async onPostInstall(): Promise<void> {
@@ -74,7 +75,7 @@ MeasureDistanceToolModel
   }
 
   public async onRestartTool(): Promise<void> {
-    const tool = new MeasureDistanceTool(this._enableSheetMeasurements, this._allowedViewportCallback);
+    const tool = new MeasureDistanceTool(this._enableSheetMeasurements, this._allowedViewportCallback, this.toolModel.formatting);
     if (await tool.run()) return;
 
     return this.exitTool();
