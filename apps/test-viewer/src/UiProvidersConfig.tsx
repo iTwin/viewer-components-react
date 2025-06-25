@@ -245,7 +245,16 @@ const configuredUiItems = new Map<string, UiItem>([
         await MeasureTools.startup();
         MeasurementActionToolbar.setDefaultActionProvider();
       },
-      createUiItemsProviders: () => [new MeasureToolsUiItemsProvider()],
+      createUiItemsProviders: () => [new MeasureToolsUiItemsProvider({
+        measurementFormattingProps: {
+          distance: {
+            bearing: {
+              koqName: "RoadRailUnits.Bearing",
+              persistenceUnitName: "Units.RAD"
+            }
+          }
+        }
+      })],
     },
   ],
   [

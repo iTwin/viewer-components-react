@@ -6,6 +6,7 @@
 import type { Point3d } from "@itwin/core-geometry";
 import { MeasurementPreferences } from "../api/MeasurementPreferences.js";
 import { MeasurementToolModel } from "../api/MeasurementToolModel.js";
+import type { DistanceMeasurementFormattingProps } from "../measurements/DistanceMeasurement.js";
 import { DistanceMeasurement } from "../measurements/DistanceMeasurement.js";
 import type { DrawingMetadata } from "../api/Measurement.js";
 
@@ -21,11 +22,15 @@ export class MeasureDistanceToolModel extends MeasurementToolModel<DistanceMeasu
   private _currentState: State;
   private _currentViewportType?: string;
   private _currentMeasurement?: DistanceMeasurement;
+  private  _formatting?: DistanceMeasurementFormattingProps;
 
   constructor() {
     super();
     this._currentState = State.SetMeasurementViewport;
   }
+
+  public get formatting(): DistanceMeasurementFormattingProps | undefined { return this._formatting; }
+  public set formatting(formatting: DistanceMeasurementFormattingProps | undefined) { this._formatting = formatting; }
 
   public get currentState(): State { return this._currentState; }
 
@@ -65,7 +70,7 @@ export class MeasureDistanceToolModel extends MeasurementToolModel<DistanceMeasu
     if (viewType !== this._currentViewportType!)
       return false;
 
-    this._currentMeasurement = DistanceMeasurement.create(point, point, this._currentViewportType);
+    this._currentMeasurement = DistanceMeasurement.create(point, point, this._currentViewportType, this._formatting);
     this._currentMeasurement.isDynamic = true;
     this._currentMeasurement.showAxes = false; // Turn off axes for new dynamic measurements
     this.notifyNewMeasurement();

@@ -29,7 +29,7 @@ package-lock.json
 *.bak
 *.orig
 .node-xmlhttprequest-sync*
-
+.DS_Store
 # e2e tests output
 /**/e2e-out
 

@@ -28,7 +28,7 @@ import type { Feature } from "../api/FeatureTracking.js";
 import { MeasureToolsFeatures } from "../api/FeatureTracking.js";
 import { MeasurementToolBase } from "../api/MeasurementTool.js";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget.js";
-import type { DistanceMeasurement } from "../measurements/DistanceMeasurement.js";
+import type { DistanceMeasurement, DistanceMeasurementFormattingProps } from "../measurements/DistanceMeasurement.js";
 import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel.js";
 import { MeasureTools } from "../MeasureTools.js";
 
@@ -40,7 +40,6 @@ MeasureDistanceToolModel
   public static override iconSpec = "icon-measure-perpendicular";
 
   protected _firstSurface?: Plane3dByOriginAndUnitNormal;
-
   public static override get flyover() {
     return MeasureTools.localization.getLocalizedString(
       "MeasureTools:tools.MeasurePerpendicular.flyover"
@@ -57,8 +56,9 @@ MeasureDistanceToolModel
     );
   }
 
-  constructor(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true)) {
+  constructor(allowedViewportCallback: (vp: ScreenViewport) => boolean = (() => true), formatting?: DistanceMeasurementFormattingProps) {
     super(allowedViewportCallback);
+    this.toolModel.formatting = formatting;
   }
 
   protected override get feature(): Feature | undefined {
@@ -66,7 +66,7 @@ MeasureDistanceToolModel
   }
 
   public async onRestartTool(): Promise<void> {
-    const tool = new MeasurePerpendicularTool(this._allowedViewportCallback);
+    const tool = new MeasurePerpendicularTool(this._allowedViewportCallback, this.toolModel.formatting);
     if (await tool.run()) return;
 
     return this.exitTool();

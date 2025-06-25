@@ -5,6 +5,12 @@
 
 import type { DrawingMetadataProps } from "./Measurement.js";
 
+/** Properties for a measurement to generate a FormattingSpec. */
+export interface MeasurementFormattingProps {
+  koqName?: string;
+  persistenceUnitName?: string;
+}
+
 /** Properties for a Measurement that can be serialized. */
 export interface MeasurementProps {
   /** Whether or not the measurement is in a locked state. Locked measurements cannot be cleared or edited. */
