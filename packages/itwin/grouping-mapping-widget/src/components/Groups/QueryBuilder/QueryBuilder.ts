@@ -98,12 +98,6 @@ export class QueryBuilder {
   };
 
   public async addProperty(prop: PropertyRecord): Promise<boolean> {
-    console.log("=== ADD PROPERTY ===");
-    console.log("Property Name:", prop.property.name);
-    console.log("Property DisplayLabel:", prop.property.displayLabel);
-    console.log("Property TypeName:", prop.property.typename);
-    console.log("Property Value:", prop.value);
-    
     // TODO: only handle primitive properties now
     if (prop.value?.valueFormat !== PropertyValueFormat.Primitive) {
       toaster.warning("Only primitive types are supported for now.");
@@ -120,10 +114,6 @@ export class QueryBuilder {
       return false;
     }
 
-    console.log("PropertyField:", propertyField);
-    console.log("PropertyField.properties:", propertyField.properties);
-    console.log("NavigationPropertyInfo:", propertyField.properties[0]?.property.navigationPropertyInfo);
-
     this._propertyMap.set(JSON.stringify(propertyField.getFieldDescriptor()), { propertyRecord: prop, propertiesField: propertyField });
     return true;
   }
@@ -135,9 +125,6 @@ export class QueryBuilder {
   }
 
   private async buildProperty(prop: PropertyRecord, propertiesField: PropertiesField) {
-    console.log("\n=== BUILD PROPERTY ===");
-    console.log("Building property:", prop.property.name);
-    
     if (prop.value?.valueFormat !== PropertyValueFormat.Primitive || prop.value.value === undefined) {
       toaster.negative("Error. An unexpected error has occured while building a query.");
       return;
@@ -157,10 +144,6 @@ export class QueryBuilder {
     const isNavigation: boolean = prop.property.typename.toLowerCase() === "navigation";
     const isCategory: boolean = isNavigation && this.isCategory(propertiesField);
     const modeledElement = await this.getPotentialModeledElement(propertiesField, prop);
-    
-    console.log("isNavigation:", isNavigation);
-    console.log("isCategory:", isCategory);
-    console.log("modeledElement from getPotentialModeledElement:", modeledElement);
 
     const isAspect: boolean =
       pathToPrimaryClass?.find(
@@ -178,17 +161,9 @@ export class QueryBuilder {
           : (prop.value.value as InstanceKey).id
         : prop.value.value;
 
-      console.log("Processing property:");
-      console.log("  className:", className);
-      console.log("  propertyName:", propertyName);
-      console.log("  propertyValue:", propertyValue);
-      console.log("  modeledElement:", modeledElement);
-
       if (!isAspect && pathToPrimaryClass && pathToPrimaryClass.length > 0) {
-        console.log("  -> Adding as related query");
         this.addRelatedToQuery(i, propertiesField, propertyName, propertyValue);
       } else {
-        console.log("  -> Adding as property query");
         // Model properties with display values always need quotes
         const needsQuote = modeledElement ? true : this.needsQuote(propertiesField);
         this.addPropertyToQuery(i, className, propertyName, propertyValue, needsQuote, isCategory, modeledElement, isAspect);
@@ -322,13 +297,10 @@ export class QueryBuilder {
   }
 
   public async buildQueryString() {
-    console.log("\n=== BUILD QUERY STRING ===");
     await this.regenerateQuery();
     if (this.query === undefined || this.query.unions.find((u) => u.classes.length === 0 && u.properties.length === 0)) {
       return "";
     }
-    
-    console.log("Query structure:", JSON.stringify(this.query, null, 2));
 
     const unionSegments: string[] = [];
     for (const union of this.query.unions) {
@@ -344,11 +316,7 @@ export class QueryBuilder {
 
       const whereSegments: string[] = [];
       for (const property of union.properties) {
-        console.log("\nProcessing property in query building:");
-        console.log("  property:", property);
-        
         if (property.isCategory) {
-          console.log("  -> Processing as Category");
           if (property.className !== baseClassName)
             querySegments.set("BisCore.GeometricElement3d", [`BisCore.GeometricElement3d.ECInstanceId = ${baseIdName}`]);
 
@@ -356,9 +324,6 @@ export class QueryBuilder {
           whereSegments.push(this.categoryWhereQuery(property.classProperties[0].value.toString()));
           continue;
         } else if (property.modeledElementClass) {
-          console.log("  -> Processing as Modeled Element");
-          console.log("  modeledElementClass:", property.modeledElementClass);
-          console.log("  baseClassName:", baseClassName);
           querySegments.set(property.modeledElementClass, [`${property.modeledElementClass}.ECInstanceId = ${baseClassName}.Model.id`]);
           whereSegments.push(
             `(${property.modeledElementClass}.UserLabel = '${property.classProperties[0].value.toString()}' OR ${property.modeledElementClass}.CodeValue = '${property.classProperties[0].value.toString()}')`,
@@ -386,8 +351,6 @@ export class QueryBuilder {
       unionSegments.push([selectClause, ...joinClauses, whereClause].join(" "));
     }
     const result = unionSegments.join(" UNION ");
-    console.log("\n=== FINAL QUERY ===");
-    console.log(result);
     return result;
   }
 
