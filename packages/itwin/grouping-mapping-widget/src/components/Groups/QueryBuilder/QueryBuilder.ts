@@ -165,7 +165,7 @@ export class QueryBuilder {
         this.addRelatedToQuery(i, propertiesField, propertyName, propertyValue);
       } else {
         // Model properties with display values always need quotes
-        const needsQuote = modeledElement ? true : this.needsQuote(propertiesField);
+        const needsQuote = !!modeledElement || this.needsQuote(propertiesField);
         this.addPropertyToQuery(i, className, propertyName, propertyValue, needsQuote, isCategory, modeledElement, isAspect);
       }
     }
@@ -276,8 +276,7 @@ export class QueryBuilder {
     // Model properties should be kept separate to ensure proper JOIN generation
     const foundPropertyClass = this.query.unions[unionIndex].properties.find((p) => {
       // Don't merge Model properties with regular properties
-      if (modeledElementClass && !p.modeledElementClass) return false;
-      if (!modeledElementClass && p.modeledElementClass) return false;
+      if (!!modeledElementClass !== !!p.modeledElementClass) return false;
       return p.className === className;
     });
 
