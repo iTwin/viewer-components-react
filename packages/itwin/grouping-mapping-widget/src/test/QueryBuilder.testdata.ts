@@ -1264,7 +1264,7 @@ export const testCases: QueryBuilderTestData = {
     {
       name: "when property is a model, return a model query string",
       expectedResult:
-        "SELECT BisCore.B.ECInstanceId, BisCore.B.ECClassId FROM BisCore.B JOIN mockModeledElement ON mockModeledElement.ECInstanceId = BisCore.Element.Model.id WHERE mockModeledElement.UserLabel = 'displayValueString' OR mockModeledElement.CodeValue = 'displayValueString'",
+        "SELECT BisCore.B.ECInstanceId, BisCore.B.ECClassId FROM BisCore.B JOIN mockModeledElement ON mockModeledElement.ECInstanceId = BisCore.B.Model.id WHERE (mockModeledElement.UserLabel = 'displayValueString' OR mockModeledElement.CodeValue = 'displayValueString')",
       operations: [
         {
           expectedResult: true,
