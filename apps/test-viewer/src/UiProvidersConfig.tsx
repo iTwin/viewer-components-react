@@ -10,7 +10,13 @@ import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
 import { GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
 import { SvgHierarchyTree, SvgTechnicalPreviewMiniBw } from "@itwin/itwinui-icons-react";
-import { FeatureInfoUiItemsProvider, MapLayersPrefBrowserStorage, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
+import {
+  createDefaultGoogleMapsBaseMaps,
+  FeatureInfoUiItemsProvider,
+  MapLayersPrefBrowserStorage,
+  MapLayersUI,
+  MapLayersUiItemsProvider,
+} from "@itwin/map-layers";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
 import { MeasurementActionToolbar, MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
 import { OneClickLCAProvider } from "@itwin/one-click-lca-react";
@@ -50,13 +56,14 @@ export interface UiProvidersConfig {
 export function getUiProvidersConfig(): UiProvidersConfig {
   const enabledWidgets = new URLSearchParams(document.location.href).get("widgets") ?? import.meta.env.IMJS_ENABLED_WIDGETS ?? undefined;
   const matchingItems = enabledWidgets ? collectSupportedItems(enabledWidgets.split(/[\s;]/)) : [...configuredUiItems.values()];
-  const uiItemsProviders = matchingItems.map((item) => item.createUiItemsProviders());
   return {
     initialize: async () => {
       const promises = matchingItems.map(async (item) => item.initialize());
       await Promise.all(promises);
     },
-    uiItemsProviders: uiItemsProviders.flat(),
+    get uiItemsProviders() {
+      return matchingItems.flatMap((item) => item.createUiItemsProviders());
+    },
   };
 }
 
@@ -257,7 +264,12 @@ const configuredUiItems = new Map<string, UiItem>([
         await MapLayersFormats.initialize();
         await MapLayersUI.initialize({ iTwinConfig: new MapLayersPrefBrowserStorage() });
       },
-      createUiItemsProviders: () => [new MapLayersUiItemsProvider(), new FeatureInfoUiItemsProvider({})],
+      createUiItemsProviders: () => {
+        return [
+          new MapLayersUiItemsProvider({baseMapLayers: createDefaultGoogleMapsBaseMaps()}),
+          new FeatureInfoUiItemsProvider({})];
+      }
+
     },
   ],
   [
