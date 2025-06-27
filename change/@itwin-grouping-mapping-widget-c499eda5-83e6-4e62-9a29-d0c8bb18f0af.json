@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fix Model property query generation.",
-  "packageName": "@itwin/grouping-mapping-widget",
-  "email": "Guillar1@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

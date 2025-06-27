@@ -1,8 +1,16 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Mon, 28 Apr 2025 11:04:44 GMT and should not be manually modified.
+<!-- This log was last generated on Fri, 27 Jun 2025 03:45:17 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.35.3
+
+Fri, 27 Jun 2025 03:45:17 GMT
+
+### Patches
+
+- Fix Model property query generation. ([#1357](https://github.com/iTwin/viewer-components-react/pull/1357))
 
 ## 0.35.2
 
