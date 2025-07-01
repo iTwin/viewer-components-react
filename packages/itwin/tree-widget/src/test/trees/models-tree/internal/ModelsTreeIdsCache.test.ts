@@ -31,7 +31,7 @@ describe("ModelsTreeIdsCache", () => {
       const categoryId = "0x2";
       const elementIds = ["0x10", "0x20", "0x30"];
       const stub = sinon.fake((query: string) => {
-        if (query.includes(`WHERE Parent.Id IS NULL AND (Model.Id = ${modelId} AND Category.Id IN(${categoryId}))`)) {
+        if (query.includes(`WHERE Parent.Id IS NULL AND (Model.Id = ${modelId} AND Category.Id IN (${categoryId}))`)) {
           return [{ modelId, categoryId, elementsCount: elementIds.length }];
         }
         throw new Error(`Unexpected query: ${query}`);
