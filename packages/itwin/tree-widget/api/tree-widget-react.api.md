@@ -137,7 +137,6 @@ interface ClassificationsTreeComponentProps extends Pick<ClassificationsTreeProp
 
 // @alpha (undocumented)
 interface ClassificationsTreeHierarchyConfiguration {
-    categorySymbolizesClassificationRelationshipName?: string;
     rootClassificationSystemCode: string;
 }
 

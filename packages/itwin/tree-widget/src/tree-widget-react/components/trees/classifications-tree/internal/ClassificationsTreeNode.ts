@@ -22,11 +22,6 @@ export namespace ClassificationsTreeNode {
   export const isClassificationNode = (node: Pick<ClassificationsTreeNode, "extendedData">) =>
     getNodeType(node) === "Classification";
 
-  export const isCategoryNode = (node: Pick<ClassificationsTreeNode, "extendedData">) => {
-    const type = getNodeType(node);
-    return type === "SpatialCategory" || type === "DrawingCategory";
-  }
-
   export const isGeometricElementNode = (node: Pick<ClassificationsTreeNode, "extendedData">) => {
     const type = getNodeType(node);
     return type === "GeometricElement3d" || type === "GeometricElement2d";

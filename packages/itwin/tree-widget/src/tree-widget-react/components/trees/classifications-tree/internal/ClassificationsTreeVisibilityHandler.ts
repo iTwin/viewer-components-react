@@ -4,30 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import {
-  concat,
-  concatAll,
-  defaultIfEmpty,
-  defer,
-  distinct,
-  EMPTY,
-  filter,
-  firstValueFrom,
-  forkJoin,
-  from,
-  fromEventPattern,
-  map,
-  merge,
-  mergeAll,
-  mergeMap,
-  of,
-  reduce,
-  shareReplay,
-  startWith,
-  Subject,
-  take,
-  takeUntil,
-  tap,
-  toArray,
+  concat, concatAll, defaultIfEmpty, defer, distinct, EMPTY, filter, firstValueFrom, forkJoin, from, fromEventPattern, map, merge, mergeAll, mergeMap,
+  of, reduce, shareReplay, startWith, Subject, take, takeUntil, tap, toArray,
 } from "rxjs";
 import { assert, Id64 } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
@@ -38,13 +16,8 @@ import { createVisibilityStatus } from "../../common/internal/Tooltip.js";
 import { setDifference, setIntersection } from "../../common/internal/Utils.js";
 import { createVisibilityChangeEventListener } from "../../common/internal/VisibilityChangeEventListener.js";
 import {
-  changeElementStateNoChildrenOperator,
-  enableCategoryDisplay,
-  getElementOverriddenVisibility,
-  getElementVisibility,
-  getSubModeledElementsVisibilityStatus,
-  getVisibilityFromAlwaysAndNeverDrawnElementsImpl,
-  mergeVisibilityStatuses,
+  changeElementStateNoChildrenOperator, enableCategoryDisplay, getElementOverriddenVisibility, getElementVisibility,
+  getSubModeledElementsVisibilityStatus, getVisibilityFromAlwaysAndNeverDrawnElementsImpl, mergeVisibilityStatuses,
 } from "../../common/internal/VisibilityUtils.js";
 import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility.js";
 import { ClassificationsTreeNode } from "./ClassificationsTreeNode.js";
@@ -170,12 +143,6 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
       });
     }
 
-    if (ClassificationsTreeNode.isCategoryNode(node)) {
-      return this.getCategoryDisplayStatus({
-        categoryIds: node.key.instanceKeys.map(({ id }) => id),
-      });
-    }
-
     return this.getGeometricElementDisplayStatus({
       elementId: (() => {
         assert(node.key.instanceKeys.length === 1);
@@ -183,14 +150,19 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
       })(),
       modelId: ClassificationsTreeNode.getModelId(node),
       categoryId: ClassificationsTreeNode.getCategoryId(node),
+      elementType: node.extendedData?.type,
     });
   }
 
   private getClassificationTableDisplayStatus(props: { classificationTableIds: Id64Array }): Observable<VisibilityStatus> {
     const result = defer(() => {
       return from(this._idsCache.getAllContainedCategories(props.classificationTableIds)).pipe(
-        mergeAll(),
-        mergeMap((categoryId) => this.getCategoryDisplayStatus({ categoryIds: [categoryId] })),
+        mergeMap(({ drawing, spatial }) =>
+          merge(
+            of(drawing).pipe(mergeMap((categoryIds) => this.getCategoryDisplayStatus({ categoryIds, type: "DrawingCategory" }))),
+            of(spatial).pipe(mergeMap((categoryIds) => this.getCategoryDisplayStatus({ categoryIds, type: "SpatialCategory" }))),
+          ),
+        ),
         mergeVisibilityStatuses,
       );
     });
@@ -200,8 +172,12 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
   private getClassificationDisplayStatus(props: { classificationIds: Id64Array }): Observable<VisibilityStatus> {
     const result = defer(() => {
       return from(this._idsCache.getAllContainedCategories(props.classificationIds)).pipe(
-        mergeAll(),
-        mergeMap((categoryId) => this.getCategoryDisplayStatus({ categoryIds: [categoryId] })),
+        mergeMap(({ drawing, spatial }) =>
+          merge(
+            of(drawing).pipe(mergeMap((categoryIds) => this.getCategoryDisplayStatus({ categoryIds, type: "DrawingCategory" }))),
+            of(spatial).pipe(mergeMap((categoryIds) => this.getCategoryDisplayStatus({ categoryIds, type: "SpatialCategory" }))),
+          ),
+        ),
         mergeVisibilityStatuses,
       );
     });
@@ -216,6 +192,8 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
         mergeMap((modelId) => {
           if (!viewport.view.viewsModel(modelId)) {
             return from(this._idsCache.getModelCategoryIds(modelId)).pipe(
+              mergeMap(({ drawing, spatial }) => merge(drawing, spatial)),
+              toArray(),
               mergeMap((categoryIds) => from(this._idsCache.getCategoriesModeledElements(modelId, categoryIds))),
               getSubModeledElementsVisibilityStatus({
                 parentNodeVisibilityStatus: createVisibilityStatus("hidden"),
@@ -224,7 +202,12 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
             );
           }
           return from(this._idsCache.getModelCategoryIds(modelId)).pipe(
-            mergeMap((categoryIds) => this.getCategoryDisplayStatus({ modelId, categoryIds })),
+            mergeMap(({ drawing, spatial }) =>
+              merge(
+                of(drawing).pipe(mergeMap((categoryIds) => this.getCategoryDisplayStatus({ modelId, categoryIds, type: "DrawingCategory" }))),
+                of(spatial).pipe(mergeMap((categoryIds) => this.getCategoryDisplayStatus({ modelId, categoryIds, type: "SpatialCategory" }))),
+              ),
+            ),
             mergeVisibilityStatuses,
           );
         }),
@@ -322,8 +305,22 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
     return result;
   }
 
-  private getCategoryDisplayStatus(props: { modelId?: Id64String; categoryIds: Id64Array }): Observable<VisibilityStatus> {
+  private getCategoryDisplayStatus(props: {
+    modelId?: Id64String;
+    categoryIds: Id64Array;
+    type: "DrawingCategory" | "SpatialCategory";
+  }): Observable<VisibilityStatus> {
     const result = defer(() => {
+      if (props.categoryIds.length === 0) {
+        return EMPTY;
+      }
+
+      const isSupportedInView =
+        (this._props.viewport.view.is3d() && props.type === "SpatialCategory") || (this._props.viewport.view.is2d() && props.type === "DrawingCategory");
+      if (!isSupportedInView) {
+        return of(createVisibilityStatus("disabled"));
+      }
+
       const modelsObservable = props.modelId
         ? of(new Map(props.categoryIds.map((id) => [id, [props.modelId!]])))
         : from(this._idsCache.getCategoriesElementModels(props.categoryIds));
@@ -479,10 +476,21 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
     );
   }
 
-  private getGeometricElementDisplayStatus(props: { elementId: Id64String; categoryId: Id64String; modelId: Id64String }): Observable<VisibilityStatus> {
+  private getGeometricElementDisplayStatus(props: {
+    elementId: Id64String;
+    categoryId: Id64String;
+    modelId: Id64String;
+    elementType: string;
+  }): Observable<VisibilityStatus> {
     const result: Observable<VisibilityStatus> = defer(() => {
       const viewport = this._props.viewport;
-      const { elementId, modelId, categoryId } = props;
+      const { elementId, modelId, categoryId, elementType } = props;
+
+      const isSupportedInView =
+        (viewport.view.is3d() && elementType === "GeometricElement3d") || (viewport.view.is2d() && elementType === "GeometricElement2d");
+      if (!isSupportedInView) {
+        return of(createVisibilityStatus("disabled"));
+      }
 
       const viewsModel = viewport.view.viewsModel(modelId);
       const elementStatus = getElementOverriddenVisibility({
@@ -524,13 +532,6 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
       });
     }
 
-    if (ClassificationsTreeNode.isCategoryNode(node)) {
-      return this.changeCategoryDisplayState({
-        categoryIds: node.key.instanceKeys.map(({ id }) => id),
-        on,
-      });
-    }
-
     return this.changeGeometricElementsDisplayState({
       elementIds: new Set([...node.key.instanceKeys.map(({ id }) => id)]),
       modelId: ClassificationsTreeNode.getModelId(node),
@@ -542,6 +543,8 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
   private changeClassificationTableDisplayState(props: { classificationTableIds: Id64Array; on: boolean }): Observable<void> {
     const result = defer(() => {
       return from(this._idsCache.getAllContainedCategories(props.classificationTableIds)).pipe(
+        mergeMap(({ drawing, spatial }) => merge(drawing, spatial)),
+        toArray(),
         mergeMap((categoryIds) => {
           return this.changeCategoryDisplayState({ categoryIds, on: props.on });
         }),
@@ -553,6 +556,8 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
   private changeClassificationDisplayState(props: { classificationIds: Id64Array; on: boolean }): Observable<void> {
     const result = defer(() => {
       return from(this._idsCache.getAllContainedCategories(props.classificationIds)).pipe(
+        mergeMap(({ drawing, spatial }) => merge(drawing, spatial)),
+        toArray(),
         mergeMap((categoryIds) => {
           return this.changeCategoryDisplayState({ categoryIds, on: props.on });
         }),
@@ -577,7 +582,7 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
         viewport.changeModelDisplay(modelIds, false);
         return idsObs.pipe(
           mergeMap(async (modelId) => ({ modelId, categoryIds: await this._idsCache.getModelCategoryIds(modelId) })),
-          mergeMap(({ modelId, categoryIds }) => from(this._idsCache.getCategoriesModeledElements(modelId, categoryIds))),
+          mergeMap(({ modelId, categoryIds }) => from(this._idsCache.getCategoriesModeledElements(modelId, [...categoryIds.drawing, ...categoryIds.spatial]))),
           mergeMap((modeledElementIds) => this.changeModelDisplayState({ modelIds: modeledElementIds, on })),
         );
       }
@@ -587,7 +592,7 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
         idsObs.pipe(
           mergeMap((modelId) => {
             return from(this._idsCache.getModelCategoryIds(modelId)).pipe(
-              mergeAll(),
+              mergeMap(({ drawing, spatial }) => merge(drawing, spatial)),
               mergeMap((categoryId) => this.changeCategoryDisplayState({ categoryIds: [categoryId], modelId, on })),
             );
           }),
@@ -608,7 +613,10 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
         if (alwaysDrawn && alwaysDrawnElements) {
           viewport.setAlwaysDrawn(setDifference(alwaysDrawn, alwaysDrawnElements));
         }
-        categories.forEach((categoryId) => {
+        categories.drawing.forEach((categoryId) => {
+          this.changeCategoryStateInViewportAccordingToModelVisibility(modelId, categoryId, false);
+        });
+        categories.spatial.forEach((categoryId) => {
           this.changeCategoryStateInViewportAccordingToModelVisibility(modelId, categoryId, false);
         });
         await viewport.addViewedModels(modelId);
