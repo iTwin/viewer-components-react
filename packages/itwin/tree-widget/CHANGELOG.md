@@ -1,8 +1,24 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Mon, 19 May 2025 16:58:21 GMT and should not be manually modified.
+This log was last generated on Fri, 20 Jun 2025 17:05:06 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 3.10.1
+
+Fri, 20 Jun 2025 17:05:06 GMT
+
+### Patches
+
+- Update itwinjs-core dependencies to v5.0.0 ([#1349](https://github.com/iTwin/viewer-components-react/pull/1349))
+
+## 3.10.0
+
+Mon, 02 Jun 2025 13:19:21 GMT
+
+### Minor changes
+
+- `useModelsTree`: The `getFilteredPaths` callback prop now has a `filter` prop, which matches the value of `filter` prop passed to `useModelsTree` hook. This make it more convenient for consumers to filter by instance keys and label at the same time. ([#1335](https://github.com/iTwin/viewer-components-react/pull/1335))
 
 ## 3.9.0
 

@@ -2,6 +2,99 @@
   "name": "@itwin/map-layers",
   "entries": [
     {
+      "date": "Fri, 20 Jun 2025 17:05:06 GMT",
+      "version": "6.0.0",
+      "tag": "@itwin/map-layers_v6.0.0",
+      "comments": {
+        "prerelease": [
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "88648aba1605adecb0dd171693aa69343f44acc8",
+            "comment": "Removed includes in SCSS files and fixed a bunch of UI issues"
+          },
+          {
+            "author": "1468929+jsnaras@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "e552f2c8a5ee74863c70fd846ca81ca7ce7ec45b",
+            "comment": "Fix style of color picker button in Map Layers"
+          },
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "2c558cf0e0581ff3cb263da071e1fb157a3be415",
+            "comment": "Dropped widget header label."
+          },
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "9601ae95ca39b228d4fbc81c1568683dfce0bff1",
+            "comment": "[Bug fix] Unable to change base map after selecting 'Solid Fill Color."
+          },
+          {
+            "author": "aruniverse@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "2f239d122fa4e226db14b0af2a93eb2027dc79e3",
+            "comment": "Resolve GHSA-9crc-q9x8-hgqq"
+          }
+        ],
+        "major": [
+          {
+            "author": "aruniverse@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "d2ea00ead2c5c4a297907b64456a0b5c9628a251",
+            "comment": "Upgrade to iTwin.js 5.0; adds support for Google 2D Tiles"
+          },
+          {
+            "author": "hoangnam.le@bentley.com",
+            "package": "@itwin/map-layers",
+            "commit": "90292731fb228b344c9f213bcf7ff76e2ac72295",
+            "comment": "migrate map-layers to iTwinUI 3"
+          }
+        ],
+        "none": [
+          {
+            "author": "bipin.pachhai@bentley.com",
+            "package": "@itwin/map-layers",
+            "commit": "6cd8eb0bc30fd9e1744495236e4131c6b9e69c72",
+            "comment": ""
+          },
+          {
+            "author": "50554904+hl662@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "6efc511ae3d8b99c0980255556bd6f930b1113a0",
+            "comment": "Replace usage of Popup with iTwinUI Popover"
+          },
+          {
+            "author": "bipin.pachhai@bentley.com",
+            "package": "@itwin/map-layers",
+            "commit": "4cb0bd3624106abd3efe319d45a3cb13e4414c5c",
+            "comment": "Add support for AppUI 5.x"
+          },
+          {
+            "author": "bipin.pachhai@bentley.com",
+            "package": "@itwin/map-layers",
+            "commit": "cfbf4d063d21b63a915907e2a5359452a51562b4",
+            "comment": ""
+          }
+        ],
+        "patch": [
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "307a41011ae0000f528aa03a874af2c089df36c7",
+            "comment": "Removed remaining @import from .scss files."
+          },
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "f2ad60c811889b41423e5012f554fd81e586f82b",
+            "comment": "Updated to itwin.js 5 official release."
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 23 Oct 2024 13:32:29 GMT",
       "version": "5.6.2",
       "tag": "@itwin/map-layers_v5.6.2",

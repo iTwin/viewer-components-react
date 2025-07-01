@@ -22,7 +22,7 @@ describe("MapManagerSettings", () => {
   const terrainSettingsMock = moq.Mock.ofType<TerrainSettings>();
 
   beforeAll(async () => {
-    NoRenderApp.startup({ notifications: new NotificationManager() });
+    await NoRenderApp.startup({ notifications: new NotificationManager() });
     await TestUtils.initialize();
   });
 

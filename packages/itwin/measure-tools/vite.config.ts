@@ -7,12 +7,30 @@ export default defineConfig({
   // look for all static in the dist folder
   publicDir: "./public",
   assetsInclude: "./public/*",
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: 'modern-compiler'
+      }
+    }
+  },
   test: {
     globals: true,
     environment: "jsdom",
     setupFiles: ["src/test/measure-tools/_Setup.test.ts"],
     include: ["src/test/measure-tools/**/*.test.*"],
     exclude: ["src/test/measure-tools/_Setup.test.ts"],
+    server: {
+      deps: {
+        // See reason: https://github.com/iTwin/appui/issues/1208
+        inline: [
+          '@itwin/appui-react',
+          '@itwin/imodel-components-react',
+          '@itwin/components-react',
+          '@itwin/core-react',
+        ],
+      }
+    },
     coverage: {
       exclude: ["lib/*", "src/test/*"],
       include: ["src/*"],

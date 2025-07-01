@@ -33,7 +33,10 @@ export function useFilteredPaths({
   hierarchyConfiguration: ModelsTreeHierarchyConfiguration;
   filter?: string;
   getFilteredPaths?: (props: {
+    /** A function that creates filtering paths based on provided target instance keys or node label. */
     createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<HierarchyFilteringPath[]>;
+    /** Filter which would be used to create filter paths if `getFilteredPaths` wouldn't be provided. */
+    filter?: string;
   }) => Promise<HierarchyFilteringPath[]>;
   getModelsTreeIdsCache: () => ModelsTreeIdsCache;
   onModelsFiltered?: (modelIds: Id64String[] | undefined) => void;
@@ -59,14 +62,14 @@ export function useFilteredPaths({
 
   const getPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
     const handlePaths = async (filteredPaths: HierarchyFilteringPath[], classInspector: ECClassHierarchyInspector) => {
-      onFilteredPathsChanged(filteredPaths);
-      if (!onModelsFiltered) {
-        return;
-      }
+          onFilteredPathsChanged(filteredPaths);
+          if (!onModelsFiltered) {
+            return;
+          }
 
-      const modelIds = await getModels(filteredPaths, getModelsTreeIdsCache(), classInspector);
-      onModelsFiltered(modelIds);
-    };
+          const modelIds = await getModels(filteredPaths, getModelsTreeIdsCache(), classInspector);
+          onModelsFiltered(modelIds);
+        };
 
     if (loadFocusedItems) {
       return async ({ imodelAccess }) => {
@@ -104,6 +107,7 @@ export function useFilteredPaths({
                 hierarchyConfig: hierarchyConfiguration,
                 limit: "unbounded",
               }),
+            filter,
           });
           void handlePaths(paths, imodelAccess);
           return paths;

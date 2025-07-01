@@ -1,8 +1,16 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Thu, 08 May 2025 14:29:47 GMT and should not be manually modified.
+<!-- This log was last generated on Tue, 24 Jun 2025 15:02:05 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.28.0
+
+Tue, 24 Jun 2025 15:02:05 GMT
+
+### Minor changes
+
+- Update quantity formatting logic, add bearing to DistanceMeasurement widget data ([#1336](https://github.com/iTwin/viewer-components-react/pull/1336))
 
 ## 0.27.0
 

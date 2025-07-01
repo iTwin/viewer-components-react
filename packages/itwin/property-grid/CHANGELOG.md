@@ -1,8 +1,24 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Mon, 19 May 2025 16:58:21 GMT and should not be manually modified.
+This log was last generated on Fri, 20 Jun 2025 17:05:06 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 1.19.2
+
+Fri, 20 Jun 2025 17:05:06 GMT
+
+### Patches
+
+- Update itwinjs-core dependencies to v5.0.0 ([#1349](https://github.com/iTwin/viewer-components-react/pull/1349))
+
+## 1.19.1
+
+Mon, 02 Jun 2025 13:19:21 GMT
+
+### Patches
+
+- Fix property grid not loading data when using `SelectionStorage` directly. ([#1338](https://github.com/iTwin/viewer-components-react/pull/1338))
 
 ## 1.19.0
 

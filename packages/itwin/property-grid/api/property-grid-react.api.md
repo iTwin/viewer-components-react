@@ -4,8 +4,6 @@
 
 ```ts
 
-/// <reference types="react" />
-
 import type { ActionButtonRendererProps } from '@itwin/components-react';
 import { FavoritePropertiesScope } from '@itwin/presentation-frontend';
 import type { Field } from '@itwin/presentation-common';
@@ -22,7 +20,7 @@ import type { PropsWithChildren } from 'react';
 import type { ReactNode } from 'react';
 import { Ref } from 'react';
 import { Selectables } from '@itwin/unified-selection';
-import type { SelectionStorage as SelectionStorage_2 } from '@itwin/unified-selection';
+import type { SelectionStorage } from '@itwin/unified-selection';
 import { StagePanelLocation } from '@itwin/appui-react';
 import { StagePanelSection } from '@itwin/appui-react';
 import type { TranslationOptions } from '@itwin/core-common';
@@ -96,13 +94,12 @@ export class IModelAppUserPreferencesStorage implements PreferencesStorage {
 }
 
 // @public
-export function MultiElementPropertyGrid({ ancestorsNavigationControls, ...props }: MultiElementPropertyGridProps): JSX.Element;
+export function MultiElementPropertyGrid({ ancestorsNavigationControls, getParentInstanceKey, ...props }: MultiElementPropertyGridProps): JSX.Element;
 
 // @public
 export interface MultiElementPropertyGridProps extends Omit<PropertyGridProps, "headerControls" | "onBackButton"> {
     ancestorsNavigationControls?: (props: AncestorsNavigationControlsProps) => ReactNode;
     getParentInstanceKey?: (key: InstanceKey) => Promise<InstanceKey | undefined>;
-    selectionStorage?: SelectionStorage;
 }
 
 // @public
@@ -186,7 +183,9 @@ export interface PropertyGridPropertyUpdatedArgs extends PropertyUpdatedArgs {
 }
 
 // @public
-export type PropertyGridProps = Omit<PropertyGridContentProps, "dataProvider" | "dataRenderer"> & DataProviderProps;
+export type PropertyGridProps = Omit<PropertyGridContentProps, "dataProvider" | "dataRenderer"> & DataProviderProps & {
+    selectionStorage?: SelectionStorage;
+};
 
 // @public
 export function PropertyGridSettingsMenuItem({ id, onClick, title, children }: PropsWithChildren<PropertyGridSettingsMenuItemProps>): JSX.Element;
@@ -226,7 +225,7 @@ type PropertyGridWidgetOwnProps = {
     selectionStorage?: never;
 } | {
     shouldShow?: (selection: Selectables) => Promise<boolean>;
-    selectionStorage: SelectionStorage;
+    selectionStorage: SelectionStorage_2;
 });
 
 // @public
@@ -236,7 +235,7 @@ export type PropertyGridWidgetProps = PropertyGridComponentProps & PropertyGridW
 export function RemoveFavoritePropertyContextMenuItem({ field, imodel, scope, onSelect }: FavoritePropertiesContextMenuItemProps): JSX.Element | null;
 
 // @public (undocumented)
-type SelectionStorage = Pick<SelectionStorage_2, "getSelection" | "replaceSelection" | "selectionChangeEvent">;
+type SelectionStorage_2 = Pick<SelectionStorage, "getSelection" | "replaceSelection" | "selectionChangeEvent">;
 
 // @public
 export interface SettingsMenuItemProps {

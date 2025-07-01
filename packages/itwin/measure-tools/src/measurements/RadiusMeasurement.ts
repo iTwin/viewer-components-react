@@ -18,7 +18,7 @@ import type {
   DecorateContext,
   Viewport,
 } from "@itwin/core-frontend";
-import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
+import { GraphicType, IModelApp } from "@itwin/core-frontend";
 import {
   StyleSet,
   WellKnownGraphicStyleType,
@@ -34,7 +34,7 @@ import {
   MeasurementSerializer,
 } from "../api/Measurement.js";
 import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper.js";
-import type { MeasurementProps } from "../api/MeasurementProps.js";
+import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet.js";
 import { TextMarker } from "../api/TextMarker.js";
 import { ViewHelper } from "../api/ViewHelper.js";
@@ -44,6 +44,13 @@ export interface RadiusMeasurementProps extends MeasurementProps {
   startPoint?: XYZProps;
   midPoint?: XYZProps;
   endPoint?: XYZProps;
+  formatting?: RadiusMeasurementFormattingProps;
+}
+
+/** Formatting properties for Radius measurement. */
+export interface RadiusMeasurementFormattingProps {
+  /** Defaults to "AecUnits.LENGTH" and "Units.M" */
+  length?: MeasurementFormattingProps;
 }
 
 export class RadiusMeasurementSerializer extends MeasurementSerializer {
@@ -74,6 +81,8 @@ export class RadiusMeasurement extends Measurement {
   private _startPoint: Point3d | undefined;
   private _midPoint: Point3d | undefined;
   private _endPoint: Point3d | undefined;
+  private _lengthKoQ: string;
+  private _lengthPersistenceUnitName: string;
 
   private _textMarker?: TextMarker;
   private _isDynamic: boolean;
@@ -85,13 +94,32 @@ export class RadiusMeasurement extends Measurement {
     this._isDynamic = v;
   }
 
+  public get lengthKoQ(): string {
+    return this._lengthKoQ;
+  }
+  public set lengthKoQ(value: string) {
+    this._lengthKoQ = value;
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+  }
+
+  public get lengthPersistenceUnitName(): string {
+    return this._lengthPersistenceUnitName;
+  }
+  public set lengthPersistenceUnitName(value: string) {
+    this._lengthPersistenceUnitName = value;
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+  }
+
   constructor(props?: RadiusMeasurementProps) {
     super();
 
     this._isDynamic = false;
+    this._lengthKoQ = "AecUnits.LENGTH";
+    this._lengthPersistenceUnitName = "Units.M";
     if (props) this.readFromJSON(props);
 
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    this.populateFormattingSpecsRegistry().then(() => this.createTextMarker().catch())
+    .catch();
   }
 
   public get startPointRef(): Point3d | undefined {
@@ -142,7 +170,8 @@ export class RadiusMeasurement extends Measurement {
     if (props.startPoint) this._startPoint = Point3d.fromJSON(props.startPoint);
     if (props.midPoint) this._midPoint = Point3d.fromJSON(props.midPoint);
     if (props.endPoint) this._endPoint = Point3d.fromJSON(props.endPoint);
-
+    if (props.formatting?.length?.koqName) this._lengthKoQ = props.formatting.length.koqName;
+    if (props.formatting?.length?.persistenceUnitName) this._lengthPersistenceUnitName = props.formatting.length.persistenceUnitName;
     this._updateArc();
   }
 
@@ -157,6 +186,12 @@ export class RadiusMeasurement extends Measurement {
     if (this._startPoint) jsonDist.startPoint = this._startPoint.toJSON();
     if (this._endPoint) jsonDist.endPoint = this._endPoint.toJSON();
     if (this._midPoint) jsonDist.midPoint = this._midPoint.toJSON();
+    jsonDist.formatting = {
+      length: {
+        koqName: this._lengthKoQ,
+        persistenceUnitName: this._lengthPersistenceUnitName,
+      },
+    };
   }
 
   /**
@@ -265,6 +300,16 @@ export class RadiusMeasurement extends Measurement {
     }
 
     return undefined;
+  }
+
+  public override async populateFormattingSpecsRegistry(_force?: boolean): Promise<void> {
+    const lengthEntry = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ);
+    if (_force || !lengthEntry || lengthEntry.formatterSpec.persistenceUnit?.name !== this._lengthPersistenceUnitName) {
+      const lengthFormatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
+      if (lengthFormatProps) {
+        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._lengthKoQ, this._lengthPersistenceUnitName, lengthFormatProps);
+      }
+    }
   }
 
   private _getSnapId(): string | undefined {
@@ -403,10 +448,7 @@ export class RadiusMeasurement extends Measurement {
   }
 
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
-    const lengthSpec =
-      await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
-        QuantityType.LengthEngineering
-      );
+    const lengthSpec = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ)?.formatterSpec;
 
     const radius = this._arc?.circularRadius() ?? 0.0;
     const diameter = radius * 2;
@@ -507,10 +549,7 @@ export class RadiusMeasurement extends Measurement {
 
   private async createTextMarker(): Promise<void> {
     if (this._arc !== undefined) {
-      const lengthSpec =
-        await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
-          QuantityType.LengthEngineering
-        );
+      const lengthSpec = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ)?.formatterSpec;
       const radius = this._arc.circularRadius()!;
       const fRadius = IModelApp.quantityFormatter.formatQuantity(
         radius,
@@ -575,12 +614,14 @@ export class RadiusMeasurement extends Measurement {
     startPoint: Point3d,
     midPoint?: Point3d,
     endPoint?: Point3d,
-    viewType?: string
+    viewType?: string,
+    formatting?: RadiusMeasurementFormattingProps
   ) {
     const measurement = new RadiusMeasurement({
       startPoint,
       midPoint,
       endPoint,
+      formatting
     });
 
     if (viewType) measurement.viewTarget.include(viewType);

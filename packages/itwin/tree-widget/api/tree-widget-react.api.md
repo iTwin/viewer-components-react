@@ -572,15 +572,14 @@ interface UseModelsTreeProps {
     activeView: Viewport;
     // (undocumented)
     emptyTreeContent?: ReactNode;
-    // (undocumented)
     filter?: string;
-    // (undocumented)
     getFilteredPaths?: (props: {
         createInstanceKeyPaths: (props: {
             targetItems: Array<InstanceKey | ElementsGroupInfo>;
         } | {
             label: string;
         }) => Promise<HierarchyFilteringPath[]>;
+        filter?: string;
     }) => Promise<HierarchyFilteringPath[]>;
     // (undocumented)
     hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;

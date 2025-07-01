@@ -2,6 +2,44 @@
   "name": "@itwin/geo-tools-react",
   "entries": [
     {
+      "date": "Fri, 20 Jun 2025 17:05:06 GMT",
+      "version": "6.0.0",
+      "tag": "@itwin/geo-tools-react_v6.0.0",
+      "comments": {
+        "major": [
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/geo-tools-react",
+            "commit": "f2ad60c811889b41423e5012f554fd81e586f82b",
+            "comment": "Updated to official itwin 5.0 release"
+          }
+        ],
+        "patch": [
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/geo-tools-react",
+            "commit": "07636f2e91115c32977c6497c857f4728d2f4a8d",
+            "comment": "Disable GoogleAddressProvider when Google Maps base map is not active."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Fri, 30 May 2025 19:49:32 GMT",
+      "version": "5.3.0",
+      "tag": "@itwin/geo-tools-react_v5.3.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/geo-tools-react",
+            "commit": "f4e30e33c36e7176a2acdcfb3369d52c9539601c",
+            "comment": "Add support for Google Places API in `<GeoAddressSearch>` "
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 06 Mar 2025 23:36:28 GMT",
       "version": "5.2.0",
       "tag": "@itwin/geo-tools-react_v5.2.0",

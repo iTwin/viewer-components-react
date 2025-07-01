@@ -2,6 +2,8 @@
   "geoAddressSearch": {
     "label": "Search Address",
     "inputPlaceHolder": "Search Address..",
-    "clearTooltip": "Clear"
+    "invalidBaseMap": "Invalid Base Map",
+    "clearTooltip": "Clear",
+    "noResults": "No results found"
   }
 }
