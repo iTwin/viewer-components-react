@@ -12,7 +12,10 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import type { RpcInterfaceDefinition } from "@itwin/core-common";
 
 export async function initializeITwinJs() {
-  await IModelHost.startup();
+  await IModelHost.startup({
+    cacheDir: `./lib/test/output/${process.pid}/`,
+    profileName: "tree-widget-tests",
+  });
   // eslint-disable-next-line @itwin/no-internal
   ECSchemaRpcImpl.register();
 
