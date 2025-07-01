@@ -6,8 +6,8 @@
 import { Icon } from "@stratakit/foundations";
 import icon2d from "@stratakit/icons/2d.svg";
 import icon3d from "@stratakit/icons/3d.svg";
-import iconBisCategory3d from "@stratakit/icons/bis-category-3d.svg";
 import iconBisDefinitionsContainer from "@stratakit/icons/bis-definitions-container.svg";
+import iconBisElement from "@stratakit/icons/bis-element.svg";
 
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
@@ -24,16 +24,12 @@ export function ClassificationsTreeIcon({ node }: { node: PresentationHierarchyN
         return iconBisDefinitionsContainer;
       case "Classification":
         return iconBisDefinitionsContainer;
-      case "SpatialCategory":
-        return iconBisCategory3d;
-      case "DrawingCategory":
-        return iconBisCategory3d;
       case "GeometricElement3d":
         return icon3d;
       case "GeometricElement2d":
         return icon2d;
       default:
-        return undefined;
+        return iconBisElement;
     }
   };
 
