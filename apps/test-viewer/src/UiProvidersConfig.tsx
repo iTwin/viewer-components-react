@@ -50,7 +50,7 @@ import type { ComponentPropsWithRef } from "react";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
-  uiItemsProviders: UiItemsProvider[];
+  getUiItemsProviders: () => UiItemsProvider[];
 }
 
 export function getUiProvidersConfig(): UiProvidersConfig {
@@ -61,7 +61,7 @@ export function getUiProvidersConfig(): UiProvidersConfig {
       const promises = matchingItems.map(async (item) => item.initialize());
       await Promise.all(promises);
     },
-    get uiItemsProviders() {
+    getUiItemsProviders() {
       return matchingItems.flatMap((item) => item.createUiItemsProviders());
     },
   };

@@ -6,6 +6,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { IModelApp, IModelConnection } from "@itwin/core-frontend";
+import { SchemaFormatsProvider, SchemaKey, SchemaMatchType, SchemaUnitProvider } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { FrontendDevTools } from "@itwin/frontend-devtools";
 import { ArcGisAccessClient } from "@itwin/map-layers-auth";
@@ -15,7 +16,6 @@ import { getUiProvidersConfig } from "../UiProvidersConfig";
 import { ApiKeys } from "./ApiKeys";
 import { useAuthorizationContext } from "./Authorization";
 import { statusBarActionsProvider, ViewerOptionsProvider } from "./ViewerOptions";
-import { SchemaFormatsProvider, SchemaKey, SchemaMatchType, SchemaUnitProvider } from "@itwin/ecschema-metadata";
 
 import type { UiProvidersConfig } from "../UiProvidersConfig";
 
@@ -30,9 +30,9 @@ export function Viewer() {
 function ViewerWithOptions() {
   const { client: authClient } = useAuthorizationContext();
   const { iTwinId, iModelId } = useIModelInfo();
-  const  [uiConfig, setUiConfig] = useState<UiProvidersConfig|undefined>();
+  const [uiConfig, setUiConfig] = useState<UiProvidersConfig | undefined>();
 
- const onIModelAppInit = useCallback(async () => {
+  const onIModelAppInit = useCallback(async () => {
     const providersConfig = getUiProvidersConfig();
     await providersConfig.initialize();
     await FrontendDevTools.initialize();
@@ -63,7 +63,7 @@ function ViewerWithOptions() {
       enablePerformanceMonitors={false}
       onIModelAppInit={onIModelAppInit}
       // Only set providers once IModelAppInit has fired, otherwise map-layers objects will fail to initialize
-      uiProviders={uiConfig ? [...uiConfig.uiItemsProviders, statusBarActionsProvider] : []}
+      uiProviders={uiConfig ? [...uiConfig.getUiItemsProviders(), statusBarActionsProvider] : []}
       defaultUiConfig={{
         hideNavigationAid: false,
         hideStatusBar: false,
