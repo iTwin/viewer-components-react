@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { Subscription } from "rxjs";
-import { bufferCount, bufferTime, filter, firstValueFrom, from, mergeAll, mergeMap, ReplaySubject, Subject } from "rxjs";
+import { bufferCount, bufferTime, filter, firstValueFrom, from, map, mergeAll, mergeMap, reduce, ReplaySubject, Subject } from "rxjs";
 import { assert, Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import { collect } from "../../common/Rxjs.js";
@@ -389,61 +389,64 @@ export class ModelsTreeIdsCache {
   private async queryCategoryElementCounts(
     input: Array<{ modelId: Id64String; categoryId: Id64String }>,
   ): Promise<Array<{ modelId: number; categoryId: number; elementsCount: number }>> {
-    const modelCategoryMap = new Map<Id64String, Id64Set>();
-    for (const { modelId, categoryId } of input) {
-      const entry = modelCategoryMap.get(modelId);
-      if (!entry) {
-        modelCategoryMap.set(modelId, new Set([categoryId]));
-      } else {
-        entry.add(categoryId);
-      }
-    }
-    const modelCategoryWhereClauses = new Array<string>();
-    for (const [modelId, categoryIds] of modelCategoryMap) {
-      modelCategoryWhereClauses.push(`Model.Id = ${modelId} AND Category.Id IN (${[...categoryIds].join(", ")})`);
-    }
-
     return collect(
-      from(modelCategoryWhereClauses).pipe(
-        bufferCount(Math.ceil(modelCategoryWhereClauses.length / Math.ceil(modelCategoryWhereClauses.length / 2900))),
-        mergeMap(async (whereClauses) => {
-          const reader = this._queryExecutor.createQueryReader(
-            {
-              ctes: [
-                `
-                  CategoryElements(id, modelId, categoryId) AS (
-                    SELECT ECInstanceId, Model.Id, Category.Id
-                    FROM ${this._hierarchyConfig.elementClassSpecification}
-                    WHERE
-                      Parent.Id IS NULL
-                      AND (
-                        ${whereClauses.join(" OR ")}
-                      )
-
-                    UNION ALL
-
-                    SELECT c.ECInstanceId, p.modelId, p.categoryId
-                    FROM ${this._hierarchyConfig.elementClassSpecification} c
-                    JOIN CategoryElements p ON c.Parent.Id = p.id
-                  )
-                `,
-              ],
-              ecsql: `
-                SELECT modelId, categoryId, COUNT(id) elementsCount
-                FROM CategoryElements
-                GROUP BY modelId, categoryId
-              `,
-            },
-            { rowFormat: "ECSqlPropertyNames", limit: "unbounded" },
-          );
-
-          const result = new Array<{ modelId: number; categoryId: number; elementsCount: number }>();
-          for await (const row of reader) {
-            result.push({ modelId: row.modelId, categoryId: row.categoryId, elementsCount: row.elementsCount });
+      from(input).pipe(
+        reduce((acc, { modelId, categoryId }) => {
+          const entry = acc.get(modelId);
+          if (!entry) {
+            acc.set(modelId, new Set([categoryId]));
+          } else {
+            entry.add(categoryId);
           }
-          return result;
-        }),
-        mergeAll(),
+          return acc;
+        }, new Map<Id64String, Id64Set>()),
+        mergeMap((modelCategoryMap) =>
+          from(modelCategoryMap.entries()).pipe(
+            map(([modelId, categoryIds]) => `Model.Id = ${modelId} AND Category.Id IN (${[...categoryIds].join(", ")})`),
+            // Maximum Depth Of An Expression Tree is set to 3000:
+            // https://github.com/iTwin/imodel-native/blob/f0f36d97fe10fd441b8bf760c331d299615a42b9/iModelCore/BeSQLite/SQLite/bentley-sqlite.c#L22
+            // 2900 makes sure that this limit is not reached
+            bufferCount(Math.ceil(modelCategoryMap.size / Math.ceil(modelCategoryMap.size / 2900))),
+            mergeMap(async (whereClauses) => {
+              const reader = this._queryExecutor.createQueryReader(
+                {
+                  ctes: [
+                    `
+                    CategoryElements(id, modelId, categoryId) AS (
+                      SELECT ECInstanceId, Model.Id, Category.Id
+                      FROM ${this._hierarchyConfig.elementClassSpecification}
+                      WHERE
+                        Parent.Id IS NULL
+                        AND (
+                          ${whereClauses.join(" OR ")}
+                        )
+
+                      UNION ALL
+
+                      SELECT c.ECInstanceId, p.modelId, p.categoryId
+                      FROM ${this._hierarchyConfig.elementClassSpecification} c
+                      JOIN CategoryElements p ON c.Parent.Id = p.id
+                    )
+                  `,
+                  ],
+                  ecsql: `
+                  SELECT modelId, categoryId, COUNT(id) elementsCount
+                  FROM CategoryElements
+                  GROUP BY modelId, categoryId
+                `,
+                },
+                { rowFormat: "ECSqlPropertyNames", limit: "unbounded" },
+              );
+
+              const result = new Array<{ modelId: number; categoryId: number; elementsCount: number }>();
+              for await (const row of reader) {
+                result.push({ modelId: row.modelId, categoryId: row.categoryId, elementsCount: row.elementsCount });
+              }
+              return result;
+            }),
+            mergeAll(),
+          ),
+        ),
       ),
     );
   }
