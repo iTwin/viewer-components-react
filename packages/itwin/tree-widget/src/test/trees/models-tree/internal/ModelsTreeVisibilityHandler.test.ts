@@ -2196,6 +2196,35 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
     });
 
+    it("validates visibility for large iModel", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const modelsToTurnOn = new Array<string>();
+        let elementId = "";
+        for (let i = 0; i < 3; ++i) {
+          const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: `model${i}` }).id;
+          modelsToTurnOn.push(model);
+          for (let j = 0; j < 1000; ++j) {
+            const categoryId = insertSpatialCategory({ builder, codeValue: `category${i}-${j}` }).id;
+            elementId = insertPhysicalElement({ builder, modelId: model, categoryId }).id;
+          }
+        }
+        return { modelsToTurnOn, elementId };
+      });
+
+      const { imodel, ...ids } = buildIModelResult;
+      using visibilityTestData = createVisibilityTestData({ imodel });
+      const { handler, provider, viewport } = visibilityTestData;
+      await Promise.all(ids.modelsToTurnOn.map(async (modelId) => handler.changeVisibility(createModelHierarchyNode(modelId), true)));
+      viewport.setAlwaysDrawn(new Set([ids.elementId]));
+      viewport.renderFrame();
+      await validateHierarchyVisibility({
+        provider,
+        handler,
+        viewport,
+        visibilityExpectations: VisibilityExpectations.all("visible"),
+      });
+    });
+
     it("showing model makes it, all its categories and elements visible and doesn't affect other models", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const categoryId = insertSpatialCategory({ builder, codeValue: "category" }).id;
