@@ -2,6 +2,21 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "date": "Fri, 27 Jun 2025 03:45:17 GMT",
+      "version": "0.35.3",
+      "tag": "@itwin/grouping-mapping-widget_v0.35.3",
+      "comments": {
+        "patch": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "73a4ca6f89a8ea401dc2aff68d60ac8b09f18242",
+            "comment": "Fix Model property query generation."
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 28 Apr 2025 11:04:44 GMT",
       "version": "0.35.2",
       "tag": "@itwin/grouping-mapping-widget_v0.35.2",
