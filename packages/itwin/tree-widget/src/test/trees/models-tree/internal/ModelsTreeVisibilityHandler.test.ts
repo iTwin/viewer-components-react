@@ -2222,6 +2222,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         handler,
         viewport,
         visibilityExpectations: VisibilityExpectations.all("visible"),
+        waitForOptions: { timeout: 100 },
       });
     });
 

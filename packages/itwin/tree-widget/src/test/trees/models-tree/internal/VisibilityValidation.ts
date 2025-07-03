@@ -11,11 +11,13 @@ import { toVoidPromise } from "../../../../tree-widget-react/components/trees/co
 import { ModelsTreeNode } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeNode.js";
 import { waitFor } from "../../../TestUtils.js";
 
+import type { waitForOptions } from "../../../TestUtils.js";
 import type { Visibility } from "../../../../tree-widget-react/components/trees/common/Tooltip.js";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
+
 interface VisibilityExpectations {
   subject(id: string): Visibility;
   element(props: { modelId: Id64String; categoryId: Id64String; elementId: Id64String }): Visibility;
@@ -115,15 +117,17 @@ export async function validateNodeVisibility({ node, handler, visibilityExpectat
 
 export async function validateHierarchyVisibility({
   provider,
+  waitForOptions,
   ...props
 }: Omit<ValidateNodeProps, "visibilityExpectations"> & {
   visibilityExpectations: VisibilityExpectations;
   provider: HierarchyProvider;
+  waitForOptions?: waitForOptions;
 }) {
   await toVoidPromise(
     from(provider.getNodes({ parentNode: undefined })).pipe(
       expand((node) => provider.getNodes({ parentNode: node })),
-      mergeMap(async (node) => waitFor(async () => validateNodeVisibility({ ...props, node }))),
+      mergeMap(async (node) => waitFor(async () => validateNodeVisibility({ ...props, node }), waitForOptions)),
     ),
   );
 }
