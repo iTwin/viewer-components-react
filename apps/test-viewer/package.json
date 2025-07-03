@@ -83,8 +83,8 @@
     "clean": "rimraf dist",
     "dist": "vite build",
     "lint": "eslint ./src/**/*.{ts,tsx}",
-    "link:deps": "node ./scripts/linkWorkspaceDeps.js",
-    "link:deps:watch": "node ./scripts/linkWorkspaceDeps.js --watch"
+    "link:deps": "node ./scripts/linkWorkspaceDeps.cjs",
+    "link:deps:watch": "node ./scripts/linkWorkspaceDeps.cjs --watch"
   },
   "eslintConfig": {
     "extends": [
