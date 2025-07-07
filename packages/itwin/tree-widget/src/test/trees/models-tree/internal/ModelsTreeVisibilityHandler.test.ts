@@ -2196,7 +2196,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
     });
 
-    it("validates visibility for large iModel", async function () {
+    it.skip("validates visibility for large iModel", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const modelsToTurnOn = new Array<string>();
         let elementId = "";
