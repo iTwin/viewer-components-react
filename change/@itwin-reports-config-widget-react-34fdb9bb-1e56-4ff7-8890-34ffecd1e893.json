@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Removed unused `react-redux` peer dependency.",
-  "packageName": "@itwin/reports-config-widget-react",
-  "email": "24278440+saskliutas@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

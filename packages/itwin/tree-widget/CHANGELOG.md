@@ -1,8 +1,17 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Fri, 20 Jun 2025 17:05:06 GMT and should not be manually modified.
+<!-- This log was last generated on Mon, 07 Jul 2025 19:55:02 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.10.2
+
+Mon, 07 Jul 2025 19:55:02 GMT
+
+### Patches
+
+- Bumped `@itwin/presentation-hierarchies-react` version. ([#1368](https://github.com/iTwin/viewer-components-react/pull/1368))
+- Fix category count query throwing error on large iModels ([#1364](https://github.com/iTwin/viewer-components-react/pull/1364))
 
 ## 3.10.1
 

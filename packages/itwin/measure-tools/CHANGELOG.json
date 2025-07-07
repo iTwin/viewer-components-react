@@ -2,6 +2,21 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Mon, 07 Jul 2025 19:55:02 GMT",
+      "version": "0.28.1",
+      "tag": "@itwin/measure-tools-react_v0.28.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "358152a41bbb49c65445c5a4c9dfbd639edad74e",
+            "comment": "Removed unused `redux` peer dependency."
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 24 Jun 2025 15:02:05 GMT",
       "version": "0.28.0",
       "tag": "@itwin/measure-tools-react_v0.28.0",
