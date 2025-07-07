@@ -22,6 +22,7 @@ import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 type Visibility = "visible" | "hidden" | "partial";
 
 export interface ValidateNodeProps {
+  ignoreChildren?: (node: HierarchyNode) => boolean;
   handler: HierarchyVisibilityHandler;
   viewport: Viewport;
   expectations:
@@ -44,7 +45,7 @@ async function validateNodeVisibility({ node, handler, expectations }: ValidateN
     expect(actualVisibility.state).to.eq(expectations === "all-hidden" ? "hidden" : "visible");
     return;
   }
-  const idInExpectations = ids.find((id) => id in expectations.instances)
+  const idInExpectations = ids.find((id) => id in expectations.instances);
   if (idInExpectations) {
     const expectedVisibility = expectations.instances[idInExpectations];
     expect(actualVisibility.state).to.eq(expectedVisibility);
@@ -55,14 +56,15 @@ async function validateNodeVisibility({ node, handler, expectations }: ValidateN
 
 export async function validateHierarchyVisibility({
   provider,
+  ignoreChildren,
   ...props
 }: ValidateNodeProps & {
   provider: HierarchyProvider;
 }) {
   await toVoidPromise(
     from(provider.getNodes({ parentNode: undefined })).pipe(
-      expand((node) => (node.children ? provider.getNodes({ parentNode: node }) : EMPTY)),
-      mergeMap(async (node) => waitFor(async () => validateNodeVisibility({ ...props, node }))),
+      expand((node) => (node.children && (!ignoreChildren || !ignoreChildren(node)) ? provider.getNodes({ parentNode: node }) : EMPTY), 1000),
+      mergeMap(async (node) => waitFor(async () => validateNodeVisibility({ ...props, node })), 1000),
     ),
   );
 }
