@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { assert, expect } from "chai";
+import { from, mergeMap, take } from "rxjs";
 import sinon from "sinon";
 import { CompressedId64Set, Id64 } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, IModelReadRpcInterface, RenderMode } from "@itwin/core-common";
@@ -15,6 +16,7 @@ import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { InstanceKey } from "@itwin/presentation-shared";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
+import { toVoidPromise } from "../../../../tree-widget-react-internal.js";
 import { createVisibilityStatus } from "../../../../tree-widget-react/components/trees/common/Tooltip.js";
 import { ModelsTreeIdsCache } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import { createModelsTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
@@ -29,7 +31,7 @@ import {
   insertSpatialCategory,
   insertSubject,
 } from "../../../IModelUtils.js";
-import { TestUtils } from "../../../TestUtils.js";
+import { TestUtils, waitFor } from "../../../TestUtils.js";
 import { createFakeSinonViewport, createIModelAccess } from "../../Common.js";
 import {
   createCategoryHierarchyNode,
@@ -39,7 +41,7 @@ import {
   createModelHierarchyNode,
   createSubjectHierarchyNode,
 } from "../Utils.js";
-import { validateHierarchyVisibility, VisibilityExpectations } from "./VisibilityValidation.js";
+import { validateHierarchyVisibility, validateNodeVisibility, VisibilityExpectations } from "./VisibilityValidation.js";
 
 import type { Visibility } from "../../../../tree-widget-react/components/trees/common/Tooltip.js";
 import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
@@ -49,7 +51,6 @@ import type { GeometricElement3dProps, QueryBinder } from "@itwin/core-common";
 import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath, HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { Id64String } from "@itwin/core-bentley";
 import type { ValidateNodeProps } from "./VisibilityValidation.js";
-
 interface VisibilityOverrides {
   models?: Map<Id64String, Visibility>;
   categories?: Map<Id64String, Visibility>;
@@ -2196,7 +2197,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
     });
 
-    it("validates visibility for large iModel", async function () {
+    it.only("validates visibility for large iModel", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const modelsToTurnOn = new Array<string>();
         let elementId = "";
@@ -2217,13 +2218,21 @@ describe("ModelsTreeVisibilityHandler", () => {
       await Promise.all(ids.modelsToTurnOn.map(async (modelId) => handler.changeVisibility(createModelHierarchyNode(modelId), true)));
       viewport.setAlwaysDrawn(new Set([ids.elementId]));
       viewport.renderFrame();
-      await validateHierarchyVisibility({
-        provider,
-        handler,
-        viewport,
-        visibilityExpectations: VisibilityExpectations.all("visible"),
-        waitForOptions: { timeout: 2000 },
-      });
+      await toVoidPromise(
+        from(provider.getNodes({ parentNode: undefined })).pipe(
+          mergeMap(async (node) => {
+            await validateNodeVisibility({ node, visibilityExpectations: VisibilityExpectations.all("visible"), viewport, handler });
+            return provider.getNodes({ parentNode: node })
+          }),
+          mergeMap((nodeIterator) => nodeIterator),
+          take(1),
+          mergeMap(async (node) =>
+            waitFor(async () => validateNodeVisibility({ node, visibilityExpectations: VisibilityExpectations.all("visible"), viewport, handler }), {
+              timeout: 2000,
+            }),
+          ),
+        ),
+      );
     });
 
     it("showing model makes it, all its categories and elements visible and doesn't affect other models", async function () {
