@@ -1,8 +1,16 @@
 # Change Log - @itwin/map-layers
 
-This log was last generated on Fri, 20 Jun 2025 17:05:06 GMT and should not be manually modified.
+<!-- This log was last generated on Mon, 07 Jul 2025 19:55:02 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 6.0.1
+
+Mon, 07 Jul 2025 19:55:02 GMT
+
+### Patches
+
+- Provide a method to generate default Google maps base layers (aerial, hybrid, streets).  Also configured test viewer to show Google Maps as the default imagery provider. ([#1352](https://github.com/iTwin/viewer-components-react/pull/1352))
 
 ## 6.0.0
 

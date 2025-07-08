@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Provide a method to generate default Google maps base layers (aerial, hybrid, streets).  Also configured test viewer to show Google Maps as the default imagery provider.",
-  "packageName": "@itwin/map-layers",
-  "email": "mdastous-bentley@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
