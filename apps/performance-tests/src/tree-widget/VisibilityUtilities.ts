@@ -56,7 +56,7 @@ async function validateNodeVisibility({ node, handler, expectations }: ValidateN
 
 export async function validateHierarchyVisibility({
   provider,
-  ignoreChildren,
+  ignoreChildren = () => false,
   ...props
 }: ValidateNodeProps & {
   provider: HierarchyProvider;
