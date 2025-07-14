@@ -8,13 +8,14 @@ import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import iconBisCategory3d from "@stratakit/icons/bis-category-3d.svg";
 import { EmptyTreeContent } from "../common/components/EmptyTree.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
-import { useIdsCache, UseIdsCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
+import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { ClassificationsTreeComponent } from "./ClassificationsTreeComponent.js";
 import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.js";
 import { ClassificationsTreeIcon } from "./ClassificationsTreeIcon.js";
 import { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
 import { createClassificationsTreeVisibilityHandler } from "./internal/ClassificationsTreeVisibilityHandler.js";
 
+import type { UseIdsCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import type { UseCachedVisibilityProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "./ClassificationsTreeDefinition.js";
 import type { ReactNode } from "react";

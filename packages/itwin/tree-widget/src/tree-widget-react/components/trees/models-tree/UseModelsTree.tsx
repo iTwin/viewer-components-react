@@ -20,13 +20,14 @@ import {
   UnknownInstanceFocusError,
 } from "../common/components/EmptyTree.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
-import { useIdsCache, UseIdsCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
+import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
 import { ModelsTreeNode } from "./internal/ModelsTreeNode.js";
 import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibilityHandler.js";
 import { useFilteredPaths } from "./internal/UseFilteredPaths.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition.js";
 
+import type { UseIdsCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import type { UseCachedVisibilityProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { ReactNode } from "react";
 import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
@@ -119,7 +120,7 @@ export function useModelsTree({
   const { getCache: getModelsTreeIdsCache } = useIdsCache<ModelsTreeIdsCache, { hierarchyConfig: ModelsTreeHierarchyConfiguration }>({
     imodel: activeView.iModel,
     createCache,
-    cacheSpecificProps: useMemo(() => ({ hierarchyConfig: hierarchyConfiguration }), [hierarchyConfig]),
+    cacheSpecificProps: useMemo(() => ({ hierarchyConfig: hierarchyConfiguration }), [hierarchyConfiguration]),
   });
 
   const { visibilityHandlerFactory, onFilteredPathsChanged } = useCachedVisibility<ModelsTreeIdsCache, { overrides?: ModelsTreeVisibilityHandlerOverrides }>({
