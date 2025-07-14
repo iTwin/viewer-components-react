@@ -19,7 +19,7 @@ import {
   TooManyInstancesFocused,
   UnknownInstanceFocusError,
 } from "../common/components/EmptyTree.js";
-import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
+import { useCachedVisibility, UseCachedVisibilityProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
 import { ModelsTreeNode } from "./internal/ModelsTreeNode.js";
@@ -170,12 +170,9 @@ export function useModelsTree({
   };
 }
 
-function createVisibilityHandlerFactory(props: {
-  activeView: Viewport;
-  idsCacheGetter: () => ModelsTreeIdsCache;
-  filteredPaths?: HierarchyFilteringPath[];
-  factoryProps: { overrides?: ModelsTreeVisibilityHandlerOverrides };
-}): VisibilityTreeProps["visibilityHandlerFactory"] {
+function createVisibilityHandlerFactory(
+  props: Parameters<UseCachedVisibilityProps<ModelsTreeIdsCache, { overrides?: ModelsTreeVisibilityHandlerOverrides }>["createFactory"]>[0],
+): VisibilityTreeProps["visibilityHandlerFactory"] {
   const { activeView, idsCacheGetter, filteredPaths, factoryProps } = props;
   return ({ imodelAccess }) =>
     createModelsTreeVisibilityHandler({

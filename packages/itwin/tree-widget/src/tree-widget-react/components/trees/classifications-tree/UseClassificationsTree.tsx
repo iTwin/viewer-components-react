@@ -7,7 +7,7 @@ import { useCallback, useMemo } from "react";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import iconBisCategory3d from "@stratakit/icons/bis-category-3d.svg";
 import { EmptyTreeContent } from "../common/components/EmptyTree.js";
-import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
+import { useCachedVisibility, UseCachedVisibilityProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { ClassificationsTreeComponent } from "./ClassificationsTreeComponent.js";
 import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.js";
@@ -80,10 +80,9 @@ export function useClassificationsTree({ activeView, emptyTreeContent, ...rest }
   };
 }
 
-function createVisibilityHandlerFactory(props: {
-  activeView: Viewport;
-  idsCacheGetter: () => ClassificationsTreeIdsCache;
-}): VisibilityTreeProps["visibilityHandlerFactory"] {
+function createVisibilityHandlerFactory(
+  props: Parameters<UseCachedVisibilityProps<ClassificationsTreeIdsCache, undefined>["createFactory"]>[0],
+): VisibilityTreeProps["visibilityHandlerFactory"] {
   const { activeView, idsCacheGetter } = props;
   return ({ imodelAccess }) => createClassificationsTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter(), imodelAccess });
 }

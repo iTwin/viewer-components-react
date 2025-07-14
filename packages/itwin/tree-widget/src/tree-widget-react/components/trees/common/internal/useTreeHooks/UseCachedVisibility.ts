@@ -10,7 +10,7 @@ import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { VisibilityTreeProps } from "../../components/VisibilityTree.js";
 
 /** @internal */
-export function useCachedVisibility<TCache, TFactorySpecificProps extends object | undefined>(props: {
+export type UseCachedVisibilityProps<TCache, TFactorySpecificProps> = {
   activeView: Viewport;
   getCache: () => TCache;
   factoryProps: TFactorySpecificProps;
@@ -20,7 +20,10 @@ export function useCachedVisibility<TCache, TFactorySpecificProps extends object
     filteredPaths: HierarchyFilteringPath[] | undefined;
     factoryProps: TFactorySpecificProps;
   }) => VisibilityTreeProps["visibilityHandlerFactory"];
-}) {
+};
+
+/** @internal */
+export function useCachedVisibility<TCache, TFactorySpecificProps extends object | undefined>(props: UseCachedVisibilityProps<TCache, TFactorySpecificProps>) {
   const [filteredPaths, setFilteredPaths] = useState<HierarchyFilteringPath[] | undefined>(undefined);
   const { activeView, getCache, factoryProps, createFactory } = props;
 

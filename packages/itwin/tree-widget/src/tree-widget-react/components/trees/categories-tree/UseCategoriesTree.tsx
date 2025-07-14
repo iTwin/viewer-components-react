@@ -12,7 +12,7 @@ import classSvg from "@stratakit/icons/bis-class.svg";
 import definitionContainerSvg from "@stratakit/icons/bis-definitions-container.svg";
 import elementSvg from "@stratakit/icons/bis-element.svg";
 import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMatches } from "../common/components/EmptyTree.js";
-import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
+import { useCachedVisibility, UseCachedVisibilityProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
@@ -109,12 +109,9 @@ export function useCategoriesTree({
   };
 }
 
-function createVisibilityHandlerFactory(props: {
-  activeView: Viewport;
-  idsCacheGetter: () => CategoriesTreeIdsCache;
-  filteredPaths?: HierarchyFilteringPath[];
-  factoryProps: { hierarchyConfig: CategoriesTreeHierarchyConfiguration };
-}): VisibilityTreeProps["visibilityHandlerFactory"] {
+function createVisibilityHandlerFactory(
+  props: Parameters<UseCachedVisibilityProps<CategoriesTreeIdsCache, { hierarchyConfig: CategoriesTreeHierarchyConfiguration }>["createFactory"]>[0],
+): VisibilityTreeProps["visibilityHandlerFactory"] {
   const { activeView, factoryProps, idsCacheGetter, filteredPaths } = props;
   return ({ imodelAccess }) =>
     createCategoriesTreeVisibilityHandler({

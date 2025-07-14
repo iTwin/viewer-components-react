@@ -9,11 +9,16 @@ import { useIModelChangeListener } from "../UseIModelChangeListener.js";
 import type { IModelConnection } from "@itwin/core-frontend";
 
 /** @internal */
-export function useIdsCache<TCache extends Disposable, TCacheSpecificProps extends object>(props: {
+export type UseIdsCacheProps<TCache, TCacheSpecificProps> = {
   imodel: IModelConnection;
   createCache: (imodel: IModelConnection, cacheProps: TCacheSpecificProps) => TCache;
   cacheSpecificProps: TCacheSpecificProps;
-}): { getCache: () => TCache } {
+};
+
+/** @internal */
+export function useIdsCache<TCache extends Disposable, TCacheSpecificProps extends object>(
+  props: UseIdsCacheProps<TCache, TCacheSpecificProps>,
+): { getCache: () => TCache } {
   const cacheRef = useRef<TCache | undefined>(undefined);
   const clearCacheRef = useRef(() => {
     cacheRef.current?.[Symbol.dispose]?.();
