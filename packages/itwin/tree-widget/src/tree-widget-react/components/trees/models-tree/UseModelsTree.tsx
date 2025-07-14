@@ -20,7 +20,7 @@ import {
   UnknownInstanceFocusError,
 } from "../common/components/EmptyTree.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
-import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
+import { useIdsCache, UseIdsCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
 import { ModelsTreeNode } from "./internal/ModelsTreeNode.js";
 import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibilityHandler.js";
@@ -118,14 +118,14 @@ export function useModelsTree({
   );
   const { getCache: getModelsTreeIdsCache } = useIdsCache<ModelsTreeIdsCache, { hierarchyConfig: ModelsTreeHierarchyConfiguration }>({
     imodel: activeView.iModel,
-    createCache: (currIModel, createCacheProps) => new ModelsTreeIdsCache(createECSqlQueryExecutor(currIModel), createCacheProps.hierarchyConfig),
-    cacheSpecificProps: { hierarchyConfig: hierarchyConfiguration },
+    createCache,
+    cacheSpecificProps: useMemo(() => ({ hierarchyConfig: hierarchyConfiguration }), [hierarchyConfig]),
   });
 
   const { visibilityHandlerFactory, onFilteredPathsChanged } = useCachedVisibility<ModelsTreeIdsCache, { overrides?: ModelsTreeVisibilityHandlerOverrides }>({
     activeView,
     createFactory: createVisibilityHandlerFactory,
-    factoryProps: { overrides: visibilityHandlerOverrides },
+    factoryProps: useMemo(() => ({ overrides: visibilityHandlerOverrides }), [visibilityHandlerOverrides]),
     getCache: getModelsTreeIdsCache,
   });
 
@@ -243,4 +243,8 @@ export function ModelsTreeIcon({ node }: { node: PresentationHierarchyNode }) {
   };
 
   return <Icon href={getIcon()} />;
+}
+
+function createCache(...props: Parameters<UseIdsCacheProps<ModelsTreeIdsCache, { hierarchyConfig: ModelsTreeHierarchyConfiguration }>["createCache"]>) {
+  return new ModelsTreeIdsCache(createECSqlQueryExecutor(props[0]), props[1].hierarchyConfig);
 }

@@ -13,7 +13,7 @@ import definitionContainerSvg from "@stratakit/icons/bis-definitions-container.s
 import elementSvg from "@stratakit/icons/bis-element.svg";
 import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMatches } from "../common/components/EmptyTree.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
-import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
+import { useIdsCache, UseIdsCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
 import { createCategoriesTreeVisibilityHandler } from "./internal/CategoriesTreeVisibilityHandler.js";
@@ -71,8 +71,8 @@ export function useCategoriesTree({
 
   const { getCache: getCategoriesTreeIdsCache } = useIdsCache<CategoriesTreeIdsCache, { viewType: "2d" | "3d" }>({
     imodel: activeView.iModel,
-    createCache: (currIModel, createCacheProps) => new CategoriesTreeIdsCache(createECSqlQueryExecutor(currIModel), createCacheProps.viewType),
-    cacheSpecificProps: { viewType },
+    createCache,
+    cacheSpecificProps: useMemo(() => ({ viewType }), [viewType]),
   });
 
   const { visibilityHandlerFactory, onFilteredPathsChanged } = useCategoriesCachedVisibility(activeView, getCategoriesTreeIdsCache, hierarchyConfiguration);
@@ -176,7 +176,7 @@ function useCategoriesCachedVisibility(activeView: Viewport, getCache: () => Cat
   >({
     activeView,
     getCache,
-    factoryProps: { hierarchyConfig },
+    factoryProps: useMemo(() => ({ hierarchyConfig }), [hierarchyConfig]),
     createFactory: createVisibilityHandlerFactory,
   });
 
@@ -188,4 +188,8 @@ function useCategoriesCachedVisibility(activeView: Viewport, getCache: () => Cat
     visibilityHandlerFactory,
     onFilteredPathsChanged,
   };
+}
+
+function createCache(...props: Parameters<UseIdsCacheProps<CategoriesTreeIdsCache, { viewType: "2d" | "3d" }>["createCache"]>) {
+  return new CategoriesTreeIdsCache(createECSqlQueryExecutor(props[0]), props[1].viewType);
 }

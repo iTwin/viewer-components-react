@@ -8,7 +8,7 @@ import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import iconBisCategory3d from "@stratakit/icons/bis-category-3d.svg";
 import { EmptyTreeContent } from "../common/components/EmptyTree.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
-import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
+import { useIdsCache, UseIdsCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { ClassificationsTreeComponent } from "./ClassificationsTreeComponent.js";
 import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.js";
 import { ClassificationsTreeIcon } from "./ClassificationsTreeIcon.js";
@@ -49,8 +49,8 @@ export function useClassificationsTree({ activeView, emptyTreeContent, ...rest }
   const { getCache: getClassificationsTreeIdsCache } = useIdsCache<ClassificationsTreeIdsCache, { hierarchyConfig: ClassificationsTreeHierarchyConfiguration }>(
     {
       imodel: activeView.iModel,
-      createCache: (currIModel, cacheProps) => new ClassificationsTreeIdsCache(createECSqlQueryExecutor(currIModel), cacheProps.hierarchyConfig),
-      cacheSpecificProps: { hierarchyConfig },
+      createCache,
+      cacheSpecificProps: useMemo(() => ({ hierarchyConfig }), [hierarchyConfig]),
     },
   );
 
@@ -86,4 +86,10 @@ function createVisibilityHandlerFactory(
 ): VisibilityTreeProps["visibilityHandlerFactory"] {
   const { activeView, idsCacheGetter } = props;
   return ({ imodelAccess }) => createClassificationsTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter(), imodelAccess });
+}
+
+function createCache(
+  ...props: Parameters<UseIdsCacheProps<ClassificationsTreeIdsCache, { hierarchyConfig: ClassificationsTreeHierarchyConfiguration }>["createCache"]>
+) {
+  return new ClassificationsTreeIdsCache(createECSqlQueryExecutor(props[0]), props[1].hierarchyConfig);
 }
