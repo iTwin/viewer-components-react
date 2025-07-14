@@ -9,17 +9,21 @@ import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { VisibilityTreeProps } from "../../components/VisibilityTree.js";
 
+
+/** @internal */
+export interface CreateFactoryProps<TCache, TFactorySpecificProps> {
+  activeView: Viewport;
+  idsCacheGetter: () => TCache;
+  filteredPaths: HierarchyFilteringPath[] | undefined;
+  factoryProps: TFactorySpecificProps;
+}
+
 /** @internal */
 export interface UseCachedVisibilityProps<TCache, TFactorySpecificProps> {
   activeView: Viewport;
   getCache: () => TCache;
   factoryProps: TFactorySpecificProps;
-  createFactory: (props: {
-    activeView: Viewport;
-    idsCacheGetter: () => TCache;
-    filteredPaths: HierarchyFilteringPath[] | undefined;
-    factoryProps: TFactorySpecificProps;
-  }) => VisibilityTreeProps["visibilityHandlerFactory"];
+  createFactory: (props: CreateFactoryProps<TCache, TFactorySpecificProps>) => VisibilityTreeProps["visibilityHandlerFactory"];
 }
 
 /** @internal */

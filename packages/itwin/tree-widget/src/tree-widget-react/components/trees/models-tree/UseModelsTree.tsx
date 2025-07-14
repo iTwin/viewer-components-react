@@ -28,7 +28,7 @@ import { useFilteredPaths } from "./internal/UseFilteredPaths.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition.js";
 
 import type { UseIdsCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
-import type { UseCachedVisibilityProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
+import type { CreateFactoryProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { ReactNode } from "react";
 import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { Id64String } from "@itwin/core-bentley";
@@ -173,7 +173,7 @@ export function useModelsTree({
 }
 
 function createVisibilityHandlerFactory(
-  props: Parameters<UseCachedVisibilityProps<ModelsTreeIdsCache, { overrides?: ModelsTreeVisibilityHandlerOverrides }>["createFactory"]>[0],
+  props: CreateFactoryProps<ModelsTreeIdsCache, { overrides?: ModelsTreeVisibilityHandlerOverrides }>,
 ): VisibilityTreeProps["visibilityHandlerFactory"] {
   const { activeView, idsCacheGetter, filteredPaths, factoryProps } = props;
   return ({ imodelAccess }) =>

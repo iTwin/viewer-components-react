@@ -20,7 +20,7 @@ import { createCategoriesTreeVisibilityHandler } from "./internal/CategoriesTree
 import { useFilteredPaths } from "./internal/UseFilteredPaths.js";
 
 import type { UseIdsCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
-import type { UseCachedVisibilityProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
+import type { CreateFactoryProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { CategoriesTreeFilteringError } from "./internal/UseFilteredPaths.js";
 import type { ReactNode } from "react";
 import type { Id64Array } from "@itwin/core-bentley";
@@ -76,7 +76,11 @@ export function useCategoriesTree({
     cacheSpecificProps: useMemo(() => ({ viewType }), [viewType]),
   });
 
-  const { visibilityHandlerFactory, onFilteredPathsChanged } = useCategoriesCachedVisibility(activeView, getCategoriesTreeIdsCache, hierarchyConfiguration);
+  const { visibilityHandlerFactory, onFilteredPathsChanged } = useCategoriesCachedVisibility({
+    activeView,
+    getCache: getCategoriesTreeIdsCache,
+    hierarchyConfig: hierarchyConfiguration,
+  });
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
     (props) => {
@@ -111,7 +115,7 @@ export function useCategoriesTree({
 }
 
 function createVisibilityHandlerFactory(
-  props: Parameters<UseCachedVisibilityProps<CategoriesTreeIdsCache, { hierarchyConfig: CategoriesTreeHierarchyConfiguration }>["createFactory"]>[0],
+  props: CreateFactoryProps<CategoriesTreeIdsCache, { hierarchyConfig: CategoriesTreeHierarchyConfiguration }>,
 ): VisibilityTreeProps["visibilityHandlerFactory"] {
   const { activeView, factoryProps, idsCacheGetter, filteredPaths } = props;
   return ({ imodelAccess }) =>
@@ -170,7 +174,12 @@ function getSublabel(node: PresentationHierarchyNode) {
   return node.nodeData.extendedData?.description;
 }
 
-function useCategoriesCachedVisibility(activeView: Viewport, getCache: () => CategoriesTreeIdsCache, hierarchyConfig: CategoriesTreeHierarchyConfiguration) {
+function useCategoriesCachedVisibility(props: {
+  activeView: Viewport;
+  getCache: () => CategoriesTreeIdsCache;
+  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
+}) {
+  const { activeView, getCache, hierarchyConfig } = props;
   const { visibilityHandlerFactory, filteredPaths, onFilteredPathsChanged } = useCachedVisibility<
     CategoriesTreeIdsCache,
     { hierarchyConfig: CategoriesTreeHierarchyConfiguration }

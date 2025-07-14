@@ -16,7 +16,7 @@ import { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCa
 import { createClassificationsTreeVisibilityHandler } from "./internal/ClassificationsTreeVisibilityHandler.js";
 
 import type { UseIdsCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
-import type { UseCachedVisibilityProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
+import type { CreateFactoryProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "./ClassificationsTreeDefinition.js";
 import type { ReactNode } from "react";
 import type { Viewport } from "@itwin/core-frontend";
@@ -82,9 +82,7 @@ export function useClassificationsTree({ activeView, emptyTreeContent, ...rest }
   };
 }
 
-function createVisibilityHandlerFactory(
-  props: Parameters<UseCachedVisibilityProps<ClassificationsTreeIdsCache, undefined>["createFactory"]>[0],
-): VisibilityTreeProps["visibilityHandlerFactory"] {
+function createVisibilityHandlerFactory(props: CreateFactoryProps<ClassificationsTreeIdsCache, undefined>): VisibilityTreeProps["visibilityHandlerFactory"] {
   const { activeView, idsCacheGetter } = props;
   return ({ imodelAccess }) => createClassificationsTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter(), imodelAccess });
 }
