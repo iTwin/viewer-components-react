@@ -45,11 +45,13 @@ export function useClassificationsTree({ activeView, emptyTreeContent, ...rest }
     [...Object.values(rest.hierarchyConfig)],
   );
 
-  const { getCache: getClassificationsTreeIdsCache } = useIdsCache<ClassificationsTreeIdsCache, { hierarchyConfig: ClassificationsTreeHierarchyConfiguration }>({
-    imodel: activeView.iModel,
-    createCache: (currIModel, cacheProps) => new ClassificationsTreeIdsCache(createECSqlQueryExecutor(currIModel), cacheProps.hierarchyConfig),
-    cacheSpecificProps: { hierarchyConfig },
-  });
+  const { getCache: getClassificationsTreeIdsCache } = useIdsCache<ClassificationsTreeIdsCache, { hierarchyConfig: ClassificationsTreeHierarchyConfiguration }>(
+    {
+      imodel: activeView.iModel,
+      createCache: (currIModel, cacheProps) => new ClassificationsTreeIdsCache(createECSqlQueryExecutor(currIModel), cacheProps.hierarchyConfig),
+      cacheSpecificProps: { hierarchyConfig },
+    },
+  );
 
   const { visibilityHandlerFactory } = useCachedVisibility<ClassificationsTreeIdsCache, undefined>({
     activeView,
@@ -78,12 +80,10 @@ export function useClassificationsTree({ activeView, emptyTreeContent, ...rest }
   };
 }
 
-function createVisibilityHandlerFactory(
-  props: {
-    activeView: Viewport,
-    idsCacheGetter: () => ClassificationsTreeIdsCache,
-  }
-): VisibilityTreeProps["visibilityHandlerFactory"] {
-  const { activeView, idsCacheGetter} = props;
+function createVisibilityHandlerFactory(props: {
+  activeView: Viewport;
+  idsCacheGetter: () => ClassificationsTreeIdsCache;
+}): VisibilityTreeProps["visibilityHandlerFactory"] {
+  const { activeView, idsCacheGetter } = props;
   return ({ imodelAccess }) => createClassificationsTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter(), imodelAccess });
 }

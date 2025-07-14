@@ -9,11 +9,11 @@ import { useIModelChangeListener } from "../UseIModelChangeListener.js";
 import type { IModelConnection } from "@itwin/core-frontend";
 
 /** @internal */
-export function useIdsCache<TCache, TCacheSpecificProps extends object>(props: {
-    imodel: IModelConnection,
-    createCache: (imodel: IModelConnection, cacheProps: TCacheSpecificProps) => TCache,
-    cacheSpecificProps: TCacheSpecificProps,
-  }): { getCache: () => TCache } {
+export function useIdsCache<TCache extends Disposable, TCacheSpecificProps extends object>(props: {
+  imodel: IModelConnection;
+  createCache: (imodel: IModelConnection, cacheProps: TCacheSpecificProps) => TCache;
+  cacheSpecificProps: TCacheSpecificProps;
+}): { getCache: () => TCache } {
   const cacheRef = useRef<TCache | undefined>(undefined);
   const clearCacheRef = useRef(() => {
     cacheRef.current?.[Symbol.dispose]?.();
@@ -21,10 +21,10 @@ export function useIdsCache<TCache, TCacheSpecificProps extends object>(props: {
   });
   const { imodel, createCache, cacheSpecificProps } = props;
 
-  const createCacheGetterRef = useRef((currImodel: IModelConnection, cacheSpecificProps: TCacheSpecificProps) => {
+  const createCacheGetterRef = useRef((currImodel: IModelConnection, specificProps: TCacheSpecificProps) => {
     return () => {
       if (cacheRef.current === undefined) {
-        cacheRef.current = createCache(currImodel, cacheSpecificProps);
+        cacheRef.current = createCache(currImodel, specificProps);
       }
       return cacheRef.current;
     };
@@ -39,17 +39,18 @@ export function useIdsCache<TCache, TCacheSpecificProps extends object>(props: {
     // make sure all cache users rerender
     setCacheGetter(() => createCacheGetterRef.current(imodel, cacheSpecificProps));
     return () => {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       clearCacheRef.current();
     };
   }, [imodel, cacheSpecificProps]);
 
   useIModelChangeListener({
-    imodel: imodel,
+    imodel,
     action: useCallback(() => {
       clearCacheRef.current();
       // make sure all cache users rerender
       setCacheGetter(() => createCacheGetterRef.current(imodel, cacheSpecificProps));
-    }, [imodel,  cacheSpecificProps]),
+    }, [imodel, cacheSpecificProps]),
   });
 
   return {

@@ -4,17 +4,23 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useState } from "react";
-import { Viewport } from "@itwin/core-frontend";
-import { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
-import { VisibilityTreeProps } from "../../components/VisibilityTree.js";
+
+import type { Viewport } from "@itwin/core-frontend";
+import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
+import type { VisibilityTreeProps } from "../../components/VisibilityTree.js";
 
 /** @internal */
 export function useCachedVisibility<TCache, TFactorySpecificProps extends object | undefined>(props: {
-    activeView: Viewport,
-    getCache: () => TCache,
-    factoryProps: TFactorySpecificProps,
-    createFactory: (props: { activeView: Viewport, idsCacheGetter: () => TCache, filteredPaths: HierarchyFilteringPath[] | undefined, factoryProps: TFactorySpecificProps }) => VisibilityTreeProps["visibilityHandlerFactory"]
-  }) {
+  activeView: Viewport;
+  getCache: () => TCache;
+  factoryProps: TFactorySpecificProps;
+  createFactory: (props: {
+    activeView: Viewport;
+    idsCacheGetter: () => TCache;
+    filteredPaths: HierarchyFilteringPath[] | undefined;
+    factoryProps: TFactorySpecificProps;
+  }) => VisibilityTreeProps["visibilityHandlerFactory"];
+}) {
   const [filteredPaths, setFilteredPaths] = useState<HierarchyFilteringPath[] | undefined>(undefined);
   const { activeView, getCache, factoryProps, createFactory } = props;
 
@@ -29,6 +35,6 @@ export function useCachedVisibility<TCache, TFactorySpecificProps extends object
   return {
     visibilityHandlerFactory,
     onFilteredPathsChanged: useCallback((paths: HierarchyFilteringPath[] | undefined) => setFilteredPaths(paths), []),
-    filteredPaths
+    filteredPaths,
   };
 }

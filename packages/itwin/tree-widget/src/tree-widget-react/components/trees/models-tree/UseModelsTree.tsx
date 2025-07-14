@@ -125,7 +125,7 @@ export function useModelsTree({
     activeView,
     createFactory: createVisibilityHandlerFactory,
     factoryProps: { overrides: visibilityHandlerOverrides },
-    getCache: getModelsTreeIdsCache
+    getCache: getModelsTreeIdsCache,
   });
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
@@ -176,8 +176,15 @@ function createVisibilityHandlerFactory(props: {
   filteredPaths?: HierarchyFilteringPath[];
   factoryProps: { overrides?: ModelsTreeVisibilityHandlerOverrides };
 }): VisibilityTreeProps["visibilityHandlerFactory"] {
-  const { activeView, idsCacheGetter, filteredPaths, factoryProps} = props;
-  return ({ imodelAccess }) => createModelsTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter(), imodelAccess, overrides: factoryProps.overrides, filteredPaths: filteredPaths });
+  const { activeView, idsCacheGetter, filteredPaths, factoryProps } = props;
+  return ({ imodelAccess }) =>
+    createModelsTreeVisibilityHandler({
+      viewport: activeView,
+      idsCache: idsCacheGetter(),
+      imodelAccess,
+      overrides: factoryProps.overrides,
+      filteredPaths,
+    });
 }
 
 function getEmptyTreeContentComponent(filter?: string, error?: ModelsTreeFilteringError, emptyTreeContent?: React.ReactNode) {
