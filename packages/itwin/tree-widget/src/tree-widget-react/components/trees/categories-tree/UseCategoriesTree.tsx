@@ -12,15 +12,15 @@ import classSvg from "@stratakit/icons/bis-class.svg";
 import definitionContainerSvg from "@stratakit/icons/bis-definitions-container.svg";
 import elementSvg from "@stratakit/icons/bis-element.svg";
 import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMatches } from "../common/components/EmptyTree.js";
-import { useCachedVisibility, UseCachedVisibilityProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
+import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
 import { createCategoriesTreeVisibilityHandler } from "./internal/CategoriesTreeVisibilityHandler.js";
 import { useFilteredPaths } from "./internal/UseFilteredPaths.js";
 
+import type { UseCachedVisibilityProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { CategoriesTreeFilteringError } from "./internal/UseFilteredPaths.js";
-import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { ReactNode } from "react";
 import type { Id64Array } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";

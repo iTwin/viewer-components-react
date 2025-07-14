@@ -9,11 +9,11 @@ import { useIModelChangeListener } from "../UseIModelChangeListener.js";
 import type { IModelConnection } from "@itwin/core-frontend";
 
 /** @internal */
-export type UseIdsCacheProps<TCache, TCacheSpecificProps> = {
+export interface UseIdsCacheProps<TCache, TCacheSpecificProps> {
   imodel: IModelConnection;
   createCache: (imodel: IModelConnection, cacheProps: TCacheSpecificProps) => TCache;
   cacheSpecificProps: TCacheSpecificProps;
-};
+}
 
 /** @internal */
 export function useIdsCache<TCache extends Disposable, TCacheSpecificProps extends object>(

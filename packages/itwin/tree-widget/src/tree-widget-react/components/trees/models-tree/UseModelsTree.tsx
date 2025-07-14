@@ -19,7 +19,7 @@ import {
   TooManyInstancesFocused,
   UnknownInstanceFocusError,
 } from "../common/components/EmptyTree.js";
-import { useCachedVisibility, UseCachedVisibilityProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
+import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
 import { ModelsTreeNode } from "./internal/ModelsTreeNode.js";
@@ -27,6 +27,7 @@ import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibili
 import { useFilteredPaths } from "./internal/UseFilteredPaths.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition.js";
 
+import type { UseCachedVisibilityProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { ReactNode } from "react";
 import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { Id64String } from "@itwin/core-bentley";

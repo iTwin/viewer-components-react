@@ -281,6 +281,7 @@ Use `getFilteredPaths` when you need more control over which nodes are shown. He
   ```
 
 - **Apply custom logic to generate instance keys**: Generate instance keys using custom implementation. For example: query elements that have specified filter in their user label and provide them as targetItems.
+
   ```tsx
   function CustomModelsTreeComponentWithFilterAndTargetItems({
     viewport,
