@@ -4,8 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useRef } from "react";
+import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
 
 /** @beta */
 export type FunctionProps<THook extends (props: any) => any> = Parameters<THook>[0];
@@ -50,4 +52,60 @@ export function useLatest<T>(value: T) {
     ref.current = value;
   }, [value]);
   return ref;
+}
+
+/** @internal */
+export function joinHierarchyFilteringPaths(subsetPaths: HierarchyNodeIdentifiersPath[], regularPaths: HierarchyFilteringPath[]): HierarchyFilteringPath[] {
+  const normalizedRegularPaths = regularPaths.map((regularPath) => HierarchyFilteringPath.normalize(regularPath));
+
+  const result = new Array<HierarchyFilteringPath>();
+  const includedRegularPathIndexes = new Array<number>();
+
+  subsetPaths.forEach((subsetPath) => {
+    let depth = 0;
+    let addSubsetPathToResult = false;
+
+    for (let i = 0; i < normalizedRegularPaths.length; ++i) {
+      const normalizedRegularPath = normalizedRegularPaths[i];
+      if (normalizedRegularPath.path.length === 0) {
+        continue;
+      }
+
+      for (let j = 0; j < subsetPath.length; ++j) {
+        const identifier = subsetPath[j];
+        if (!HierarchyNodeIdentifier.equal(normalizedRegularPath.path[j], identifier)) {
+          break;
+        }
+
+        if (normalizedRegularPath.path.length === j + 1) {
+          addSubsetPathToResult = true;
+          depth = Math.max(
+            depth,
+            !normalizedRegularPath.options?.autoExpand
+              ? 0
+              : normalizedRegularPath.options.autoExpand === true
+                ? normalizedRegularPath.path.length - 1
+                : normalizedRegularPath.options.autoExpand.depth,
+          );
+          break;
+        }
+
+        if (subsetPath.length === j + 1) {
+          addSubsetPathToResult = true;
+          if (!includedRegularPathIndexes.includes(i)) {
+            result.push(normalizedRegularPath);
+            includedRegularPathIndexes.push(i);
+          }
+        }
+      }
+    }
+
+    if (addSubsetPathToResult) {
+      result.push({
+        path: subsetPath,
+        options: depth === 0 ? undefined : ({ autoExpand: depth >= subsetPath.length - 1 ? true : { depth } }),
+      });
+    }
+  });
+  return result;
 }
