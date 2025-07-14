@@ -27,7 +27,7 @@ import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibili
 import { useFilteredPaths } from "./internal/UseFilteredPaths.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition.js";
 
-import type { UseIdsCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
+import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import type { CreateFactoryProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { ReactNode } from "react";
 import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
@@ -246,6 +246,6 @@ export function ModelsTreeIcon({ node }: { node: PresentationHierarchyNode }) {
   return <Icon href={getIcon()} />;
 }
 
-function createCache(...props: Parameters<UseIdsCacheProps<ModelsTreeIdsCache, { hierarchyConfig: ModelsTreeHierarchyConfiguration }>["createCache"]>) {
-  return new ModelsTreeIdsCache(createECSqlQueryExecutor(props[0]), props[1].hierarchyConfig);
+function createCache(props: CreateCacheProps<{ hierarchyConfig: ModelsTreeHierarchyConfiguration }>) {
+  return new ModelsTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.hierarchyConfig);
 }

@@ -19,7 +19,7 @@ import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
 import { createCategoriesTreeVisibilityHandler } from "./internal/CategoriesTreeVisibilityHandler.js";
 import { useFilteredPaths } from "./internal/UseFilteredPaths.js";
 
-import type { UseIdsCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
+import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import type { CreateFactoryProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { CategoriesTreeFilteringError } from "./internal/UseFilteredPaths.js";
 import type { ReactNode } from "react";
@@ -200,6 +200,6 @@ function useCategoriesCachedVisibility(props: {
   };
 }
 
-function createCache(...props: Parameters<UseIdsCacheProps<CategoriesTreeIdsCache, { viewType: "2d" | "3d" }>["createCache"]>) {
-  return new CategoriesTreeIdsCache(createECSqlQueryExecutor(props[0]), props[1].viewType);
+function createCache(props: CreateCacheProps<{ viewType: "2d" | "3d" }>) {
+  return new CategoriesTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.viewType);
 }

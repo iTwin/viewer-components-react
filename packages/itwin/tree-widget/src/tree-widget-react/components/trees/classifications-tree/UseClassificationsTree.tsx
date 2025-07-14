@@ -15,7 +15,7 @@ import { ClassificationsTreeIcon } from "./ClassificationsTreeIcon.js";
 import { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
 import { createClassificationsTreeVisibilityHandler } from "./internal/ClassificationsTreeVisibilityHandler.js";
 
-import type { UseIdsCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
+import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import type { CreateFactoryProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "./ClassificationsTreeDefinition.js";
 import type { ReactNode } from "react";
@@ -87,8 +87,6 @@ function createVisibilityHandlerFactory(props: CreateFactoryProps<Classification
   return ({ imodelAccess }) => createClassificationsTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter(), imodelAccess });
 }
 
-function createCache(
-  ...props: Parameters<UseIdsCacheProps<ClassificationsTreeIdsCache, { hierarchyConfig: ClassificationsTreeHierarchyConfiguration }>["createCache"]>
-) {
-  return new ClassificationsTreeIdsCache(createECSqlQueryExecutor(props[0]), props[1].hierarchyConfig);
+function createCache(props:  CreateCacheProps<{ hierarchyConfig: ClassificationsTreeHierarchyConfiguration }>) {
+  return new ClassificationsTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.hierarchyConfig);
 }

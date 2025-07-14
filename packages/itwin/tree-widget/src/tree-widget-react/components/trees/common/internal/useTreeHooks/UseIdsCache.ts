@@ -9,9 +9,15 @@ import { useIModelChangeListener } from "../UseIModelChangeListener.js";
 import type { IModelConnection } from "@itwin/core-frontend";
 
 /** @internal */
+export interface CreateCacheProps<TCacheSpecificProps> {
+  imodel: IModelConnection;
+  specificProps: TCacheSpecificProps
+}
+
+/** @internal */
 export interface UseIdsCacheProps<TCache, TCacheSpecificProps> {
   imodel: IModelConnection;
-  createCache: (imodel: IModelConnection, cacheProps: TCacheSpecificProps) => TCache;
+  createCache: (props: CreateCacheProps<TCacheSpecificProps>) => TCache;
   cacheSpecificProps: TCacheSpecificProps;
 }
 
@@ -29,7 +35,7 @@ export function useIdsCache<TCache extends Disposable, TCacheSpecificProps exten
   const createCacheGetterRef = useRef((currImodel: IModelConnection, specificProps: TCacheSpecificProps) => {
     return () => {
       if (cacheRef.current === undefined) {
-        cacheRef.current = createCache(currImodel, specificProps);
+        cacheRef.current = createCache({ imodel: currImodel, specificProps });
       }
       return cacheRef.current;
     };
