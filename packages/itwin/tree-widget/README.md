@@ -201,8 +201,6 @@ Based on the returned paths, the displayed hierarchy consists only of the target
 Use `getFilteredPaths` when you need more control over which nodes are shown. Here are some example use cases:
 
 - **Filter by known instance keys**: You already have a list of `InstanceKey` items that should remain in the tree. Pass them as `targetItems` to `createInstanceKeyPaths`.
-  <!-- [[include: [TreeWidget.GetFilteredPathsComponentWithTargetItemsExample], tsx]] -->
-  <!-- BEGIN EXTRACTION -->
 
   ```tsx
   type UseModelsTreeProps = Parameters<typeof useModelsTree>[0];
@@ -243,11 +241,7 @@ Use `getFilteredPaths` when you need more control over which nodes are shown. He
   }
   ```
 
-  <!-- END EXTRACTION -->
-
 - **Post-process the paths created `createInstanceKeyPaths`**: Use `filter` string to generate the paths, then apply additional filtering - e.g., remove paths that are too long.
-  <!-- [[include: [TreeWidget.GetFilteredPathsComponentWithPostProcessingExample], tsx]] -->
-  <!-- BEGIN EXTRACTION -->
 
   ```tsx
   function CustomModelsTreeComponentWithPostProcessing({
@@ -286,11 +280,7 @@ Use `getFilteredPaths` when you need more control over which nodes are shown. He
   }
   ```
 
-  <!-- END EXTRACTION -->
-
 - **Apply custom logic to generate instance keys**: Generate instance keys using custom implementation. For example: query elements that have specified filter in their user label and provide them as targetItems.
-    <!-- [[include: [TreeWidget.GetFilteredPathsComponentWithFilterAndTargetItemsExample], tsx]] -->
-    <!-- BEGIN EXTRACTION -->
   ```tsx
   function CustomModelsTreeComponentWithFilterAndTargetItems({
     viewport,
@@ -333,7 +323,6 @@ Use `getFilteredPaths` when you need more control over which nodes are shown. He
     );
   }
   ```
-    <!-- END EXTRACTION -->
 
 ### Categories tree
 
