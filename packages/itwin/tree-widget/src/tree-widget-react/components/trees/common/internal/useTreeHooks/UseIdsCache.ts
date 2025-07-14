@@ -11,7 +11,7 @@ import type { IModelConnection } from "@itwin/core-frontend";
 /** @internal */
 export interface CreateCacheProps<TCacheSpecificProps> {
   imodel: IModelConnection;
-  specificProps: TCacheSpecificProps
+  specificProps: TCacheSpecificProps;
 }
 
 /** @internal */

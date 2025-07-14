@@ -9,7 +9,6 @@ import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { VisibilityTreeProps } from "../../components/VisibilityTree.js";
 
-
 /** @internal */
 export interface CreateFactoryProps<TCache, TFactorySpecificProps> {
   activeView: Viewport;
