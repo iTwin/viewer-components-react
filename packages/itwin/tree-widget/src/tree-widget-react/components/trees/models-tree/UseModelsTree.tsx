@@ -3,7 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
+import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { Icon } from "@stratakit/foundations";
 import categorySvg from "@stratakit/icons/bis-category-3d.svg";
 import classSvg from "@stratakit/icons/bis-class.svg";
@@ -18,13 +19,16 @@ import {
   TooManyInstancesFocused,
   UnknownInstanceFocusError,
 } from "../common/components/EmptyTree.js";
+import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
+import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
+import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
 import { ModelsTreeNode } from "./internal/ModelsTreeNode.js";
 import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibilityHandler.js";
 import { useFilteredPaths } from "./internal/UseFilteredPaths.js";
-import { useIdsCache } from "./internal/UseIdsCache.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition.js";
 
-import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
+import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
+import type { CreateFactoryProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { ReactNode } from "react";
 import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { Id64String } from "@itwin/core-bentley";
@@ -113,12 +117,18 @@ export function useModelsTree({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     Object.values(hierarchyConfig ?? {}),
   );
+  const { getCache: getModelsTreeIdsCache } = useIdsCache<ModelsTreeIdsCache, { hierarchyConfig: ModelsTreeHierarchyConfiguration }>({
+    imodel: activeView.iModel,
+    createCache,
+    cacheSpecificProps: useMemo(() => ({ hierarchyConfig: hierarchyConfiguration }), [hierarchyConfiguration]),
+  });
 
-  const { getModelsTreeIdsCache, visibilityHandlerFactory, onFilteredPathsChanged } = useCachedVisibility(
+  const { visibilityHandlerFactory, onFilteredPathsChanged } = useCachedVisibility<ModelsTreeIdsCache, { overrides?: ModelsTreeVisibilityHandlerOverrides }>({
     activeView,
-    hierarchyConfiguration,
-    visibilityHandlerOverrides,
-  );
+    createFactory: createVisibilityHandlerFactory,
+    factoryProps: useMemo(() => ({ overrides: visibilityHandlerOverrides }), [visibilityHandlerOverrides]),
+    getCache: getModelsTreeIdsCache,
+  });
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
     ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache: getModelsTreeIdsCache(), hierarchyConfig: hierarchyConfiguration }),
@@ -163,30 +173,17 @@ export function useModelsTree({
 }
 
 function createVisibilityHandlerFactory(
-  activeView: Viewport,
-  idsCacheGetter: () => ModelsTreeIdsCache,
-  overrides?: ModelsTreeVisibilityHandlerOverrides,
-  filteredPaths?: HierarchyFilteringPath[],
+  props: CreateFactoryProps<ModelsTreeIdsCache, { overrides?: ModelsTreeVisibilityHandlerOverrides }>,
 ): VisibilityTreeProps["visibilityHandlerFactory"] {
-  return ({ imodelAccess }) => createModelsTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter(), imodelAccess, overrides, filteredPaths });
-}
-
-function useCachedVisibility(activeView: Viewport, hierarchyConfig: ModelsTreeHierarchyConfiguration, overrides?: ModelsTreeVisibilityHandlerOverrides) {
-  const { getCache: getModelsTreeIdsCache } = useIdsCache(activeView.iModel, hierarchyConfig);
-  const [filteredPaths, setFilteredPaths] = useState<HierarchyFilteringPath[]>();
-  const [visibilityHandlerFactory, setVisibilityHandlerFactory] = useState<VisibilityTreeProps["visibilityHandlerFactory"]>(() =>
-    createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache, overrides, filteredPaths),
-  );
-
-  useEffect(() => {
-    setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache, overrides, filteredPaths));
-  }, [activeView, getModelsTreeIdsCache, overrides, filteredPaths]);
-
-  return {
-    getModelsTreeIdsCache,
-    visibilityHandlerFactory,
-    onFilteredPathsChanged: useCallback((paths: HierarchyFilteringPath[] | undefined) => setFilteredPaths(paths), []),
-  };
+  const { activeView, idsCacheGetter, filteredPaths, factoryProps } = props;
+  return ({ imodelAccess }) =>
+    createModelsTreeVisibilityHandler({
+      viewport: activeView,
+      idsCache: idsCacheGetter(),
+      imodelAccess,
+      overrides: factoryProps.overrides,
+      filteredPaths,
+    });
 }
 
 function getEmptyTreeContentComponent(filter?: string, error?: ModelsTreeFilteringError, emptyTreeContent?: React.ReactNode) {
@@ -247,4 +244,8 @@ export function ModelsTreeIcon({ node }: { node: PresentationHierarchyNode }) {
   };
 
   return <Icon href={getIcon()} />;
+}
+
+function createCache(props: CreateCacheProps<{ hierarchyConfig: ModelsTreeHierarchyConfiguration }>) {
+  return new ModelsTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.hierarchyConfig);
 }

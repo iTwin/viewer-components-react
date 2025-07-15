@@ -3,7 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
+import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { Icon } from "@stratakit/foundations";
 import categorySvg from "@stratakit/icons/bis-category-3d.svg";
 import subcategorySvg from "@stratakit/icons/bis-category-subcategory.svg";
@@ -11,14 +12,16 @@ import classSvg from "@stratakit/icons/bis-class.svg";
 import definitionContainerSvg from "@stratakit/icons/bis-definitions-container.svg";
 import elementSvg from "@stratakit/icons/bis-element.svg";
 import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMatches } from "../common/components/EmptyTree.js";
+import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
+import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
+import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
 import { createCategoriesTreeVisibilityHandler } from "./internal/CategoriesTreeVisibilityHandler.js";
 import { useFilteredPaths } from "./internal/UseFilteredPaths.js";
-import { useIdsCache } from "./internal/UseIdsCache.js";
 
+import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
+import type { CreateFactoryProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { CategoriesTreeFilteringError } from "./internal/UseFilteredPaths.js";
-import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
-import type { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
 import type { ReactNode } from "react";
 import type { Id64Array } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
@@ -67,7 +70,17 @@ export function useCategoriesTree({
   );
   const viewType = activeView.view.is2d() ? "2d" : "3d";
 
-  const { getCategoriesTreeIdsCache, visibilityHandlerFactory, onFilteredPathsChanged } = useCachedVisibility(activeView, hierarchyConfiguration, viewType);
+  const { getCache: getCategoriesTreeIdsCache } = useIdsCache<CategoriesTreeIdsCache, { viewType: "2d" | "3d" }>({
+    imodel: activeView.iModel,
+    createCache,
+    cacheSpecificProps: useMemo(() => ({ viewType }), [viewType]),
+  });
+
+  const { visibilityHandlerFactory, onFilteredPathsChanged } = useCategoriesCachedVisibility({
+    activeView,
+    getCache: getCategoriesTreeIdsCache,
+    hierarchyConfig: hierarchyConfiguration,
+  });
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
     (props) => {
@@ -102,32 +115,17 @@ export function useCategoriesTree({
 }
 
 function createVisibilityHandlerFactory(
-  activeView: Viewport,
-  idsCacheGetter: () => CategoriesTreeIdsCache,
-  hierarchyConfig: CategoriesTreeHierarchyConfiguration,
-  filteredPaths?: HierarchyFilteringPath[],
+  props: CreateFactoryProps<CategoriesTreeIdsCache, { hierarchyConfig: CategoriesTreeHierarchyConfiguration }>,
 ): VisibilityTreeProps["visibilityHandlerFactory"] {
+  const { activeView, factoryProps, idsCacheGetter, filteredPaths } = props;
   return ({ imodelAccess }) =>
-    createCategoriesTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter(), imodelAccess, filteredPaths, hierarchyConfig });
-}
-
-function useCachedVisibility(activeView: Viewport, hierarchyConfig: CategoriesTreeHierarchyConfiguration, viewType: "2d" | "3d") {
-  const [filteredPaths, setFilteredPaths] = useState<HierarchyFilteringPath[]>();
-  const { getCache: getCategoriesTreeIdsCache } = useIdsCache(activeView.iModel, viewType, filteredPaths);
-
-  const [visibilityHandlerFactory, setVisibilityHandlerFactory] = useState<VisibilityTreeProps["visibilityHandlerFactory"]>(() =>
-    createVisibilityHandlerFactory(activeView, getCategoriesTreeIdsCache, hierarchyConfig, filteredPaths),
-  );
-
-  useEffect(() => {
-    setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getCategoriesTreeIdsCache, hierarchyConfig, filteredPaths));
-  }, [activeView, getCategoriesTreeIdsCache, hierarchyConfig, filteredPaths]);
-
-  return {
-    getCategoriesTreeIdsCache,
-    visibilityHandlerFactory,
-    onFilteredPathsChanged: useCallback((paths: HierarchyFilteringPath[] | undefined) => setFilteredPaths(paths), []),
-  };
+    createCategoriesTreeVisibilityHandler({
+      viewport: activeView,
+      idsCache: idsCacheGetter(),
+      imodelAccess,
+      filteredPaths,
+      hierarchyConfig: factoryProps.hierarchyConfig,
+    });
 }
 
 function getEmptyTreeContentComponent(filter?: string, error?: CategoriesTreeFilteringError, emptyTreeContent?: React.ReactNode) {
@@ -174,4 +172,34 @@ export function CategoriesTreeIcon({ node }: { node: PresentationHierarchyNode }
 
 function getSublabel(node: PresentationHierarchyNode) {
   return node.nodeData.extendedData?.description;
+}
+
+function useCategoriesCachedVisibility(props: {
+  activeView: Viewport;
+  getCache: () => CategoriesTreeIdsCache;
+  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
+}) {
+  const { activeView, getCache, hierarchyConfig } = props;
+  const { visibilityHandlerFactory, filteredPaths, onFilteredPathsChanged } = useCachedVisibility<
+    CategoriesTreeIdsCache,
+    { hierarchyConfig: CategoriesTreeHierarchyConfiguration }
+  >({
+    activeView,
+    getCache,
+    factoryProps: useMemo(() => ({ hierarchyConfig }), [hierarchyConfig]),
+    createFactory: createVisibilityHandlerFactory,
+  });
+
+  useEffect(() => {
+    getCache().clearFilteredElementsModels();
+  }, [filteredPaths, getCache]);
+
+  return {
+    visibilityHandlerFactory,
+    onFilteredPathsChanged,
+  };
+}
+
+function createCache(props: CreateCacheProps<{ viewType: "2d" | "3d" }>) {
+  return new CategoriesTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.viewType);
 }
