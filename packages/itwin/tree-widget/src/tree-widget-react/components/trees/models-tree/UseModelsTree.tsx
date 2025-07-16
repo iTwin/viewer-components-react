@@ -150,7 +150,7 @@ export function useModelsTree({
     if (!subsetTreeConfig) {
       return undefined;
     }
-    return async ({ imodelAccess }) => {
+    return async ({ imodelAccess, abortSignal }) => {
       try {
         const paths = await ModelsTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
@@ -158,6 +158,7 @@ export function useModelsTree({
           idsCache: getModelsTreeIdsCache(),
           hierarchyConfig: hierarchyConfiguration,
           limit: "unbounded",
+          abortSignal
         });
         return paths.map((path) => HierarchyFilteringPath.normalize(path).path);
       } catch (e) {
@@ -186,16 +187,17 @@ export function useModelsTree({
     };
 
     if (loadFocusedItems) {
-      return async ({ imodelAccess }) => {
+      return async ({ imodelAccess, abortSignal }) => {
         try {
           const focusedItems = await collectFocusedItems(loadFocusedItems);
           const [subSetPaths, focusedPaths] = await Promise.all([
-            getSubsetPaths ? getSubsetPaths({ imodelAccess }) : undefined,
+            getSubsetPaths ? getSubsetPaths({ imodelAccess, abortSignal }) : undefined,
             ModelsTreeDefinition.createInstanceKeyPaths({
               imodelAccess,
               idsCache: getModelsTreeIdsCache(),
               targetItems: focusedItems,
               hierarchyConfig: hierarchyConfiguration,
+              abortSignal
             }).then((createdPaths) => createdPaths.map((path) => ("path" in path ? path : { path, options: { autoExpand: true } }))),
           ]);
           const joinedPaths = !subSetPaths ? focusedPaths : joinHierarchyFilteringPaths(subSetPaths, focusedPaths);
@@ -214,10 +216,10 @@ export function useModelsTree({
     }
 
     if (getFilteredPaths) {
-      return async ({ imodelAccess }) => {
+      return async ({ imodelAccess, abortSignal }) => {
         try {
           const [subSetPaths, customFilteredPaths] = await Promise.all([
-            getSubsetPaths ? getSubsetPaths({ imodelAccess }) : undefined,
+            getSubsetPaths ? getSubsetPaths({ imodelAccess, abortSignal }) : undefined,
             getFilteredPaths({
               createInstanceKeyPaths: async (props) =>
                 ModelsTreeDefinition.createInstanceKeyPaths({
@@ -226,6 +228,7 @@ export function useModelsTree({
                   idsCache: getModelsTreeIdsCache(),
                   hierarchyConfig: hierarchyConfiguration,
                   limit: "unbounded",
+                  abortSignal
                 }),
               filter,
             }),
@@ -246,16 +249,17 @@ export function useModelsTree({
     }
 
     if (filter) {
-      return async ({ imodelAccess }) => {
+      return async ({ imodelAccess, abortSignal }) => {
         onFeatureUsed({ featureId: "filtering", reportInteraction: true });
         try {
           const [subSetPaths, filterPaths] = await Promise.all([
-            getSubsetPaths ? getSubsetPaths({ imodelAccess }) : undefined,
+            getSubsetPaths ? getSubsetPaths({ imodelAccess, abortSignal }) : undefined,
             ModelsTreeDefinition.createInstanceKeyPaths({
               imodelAccess,
               label: filter,
               idsCache: getModelsTreeIdsCache(),
               hierarchyConfig: hierarchyConfiguration,
+              abortSignal
             }).then((createdPaths) => createdPaths.map((path) => ("path" in path ? path : { path, options: { autoExpand: true } }))),
           ]);
 

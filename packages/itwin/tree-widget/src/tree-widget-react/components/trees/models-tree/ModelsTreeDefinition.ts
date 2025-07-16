@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, defer, firstValueFrom, from, lastValueFrom, map, merge, mergeAll, mergeMap, reduce, switchMap } from "rxjs";
+import { bufferCount, defer, firstValueFrom, from, fromEvent, lastValueFrom, map, merge, mergeAll, mergeMap, reduce, switchMap, takeUntil } from "rxjs";
 import { IModel } from "@itwin/core-common";
 import {
   createNodesQueryClauseFactory,
@@ -94,21 +94,22 @@ export interface ElementsGroupInfo {
   groupingNode: ClassGroupingHierarchyNode;
 }
 
-interface ModelsTreeInstanceKeyPathsFromTargetItemsProps {
+interface ModelsTreeInstanceKeyPathsBaseProps {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
-  targetItems: Array<InstanceKey | ElementsGroupInfo>;
   hierarchyConfig: ModelsTreeHierarchyConfiguration;
   limit?: number | "unbounded";
+  abortSignal: AbortSignal;
 }
 
-interface ModelsTreeInstanceKeyPathsFromInstanceLabelProps {
-  imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
-  idsCache: ModelsTreeIdsCache;
+type ModelsTreeInstanceKeyPathsFromTargetItemsProps = {
+  targetItems: Array<InstanceKey | ElementsGroupInfo>;
+} & ModelsTreeInstanceKeyPathsBaseProps;
+
+type ModelsTreeInstanceKeyPathsFromInstanceLabelProps = {
   label: string;
-  hierarchyConfig: ModelsTreeHierarchyConfiguration;
-  limit?: number | "unbounded";
-}
+} & ModelsTreeInstanceKeyPathsBaseProps;
+
 
 export type ModelsTreeInstanceKeyPathsProps = ModelsTreeInstanceKeyPathsFromTargetItemsProps | ModelsTreeInstanceKeyPathsFromInstanceLabelProps;
 type HierarchyProviderProps = Parameters<typeof createIModelHierarchyProvider>[0];
@@ -698,6 +699,7 @@ async function createInstanceKeyPathsFromTargetItems({
   hierarchyConfig,
   idsCache,
   limit,
+  abortSignal
 }: ModelsTreeInstanceKeyPathsFromTargetItemsProps): Promise<HierarchyFilteringPath[]> {
   if (limit !== "unbounded" && targetItems.length > (limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT)) {
     throw new FilterLimitExceededError(limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT);
@@ -705,6 +707,7 @@ async function createInstanceKeyPathsFromTargetItems({
 
   return lastValueFrom(
     from(targetItems).pipe(
+      takeUntil(fromEvent(abortSignal, "abort")),
       releaseMainThreadOnItemsCount(2000),
       mergeMap(async (key): Promise<{ key: string; type: number } | { key: ElementsGroupInfo; type: 0 }> => {
         if ("parent" in key) {

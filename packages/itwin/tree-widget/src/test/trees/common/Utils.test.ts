@@ -4,9 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
+import { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import { joinHierarchyFilteringPaths } from "../../../tree-widget-react/components/trees/common/Utils.js";
 
-import type { HierarchyFilteringPath, HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
+import type { HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
 
 describe("Utils", () => {
   describe("joinHierarchyFilteringPaths", () => {
@@ -60,19 +61,19 @@ describe("Utils", () => {
           },
           {
             path: [model, category, element, element2],
-            options: { autoExpand: { dept: 2 }}
+            options: { autoExpand: { depth: 2 } }
           },
           {
           path: [model, category, element, element3],
-          options: { autoExpand: { dept: 2 }}
+          options: { autoExpand: { depth: 2 } }
           },
           {
             path: [model, category, element2, element3],
-            options: { autoExpand: { dept: 2 }}
+            options: { autoExpand: { depth: 2 } }
           },
           {
             path: [model, category2, element4],
-            options: { autoExpand: true}
+            options: { autoExpand: { depth: 1 } }
           }
         ]
         expect(joinedPaths).to.deep.eq(expectedPaths)
@@ -89,7 +90,18 @@ describe("Utils", () => {
           { path: [model, category, element, element2, element3], options: { autoExpand: true } },
           { path: [model, category, element, element3, element], options: { autoExpand: { depth: 2 } } },
         ]
-        const joinedPaths = joinHierarchyFilteringPaths(subsetPaths, filterPaths);
+        const sortFn = (lhs: HierarchyFilteringPath, rhs: HierarchyFilteringPath) => {
+          const lhsStr = JSON.stringify(lhs);
+          const rhsStr = JSON.stringify(rhs);
+          if (rhsStr === lhsStr) {
+            return 0;
+          }
+          if (lhsStr < rhsStr) {
+            return -1;
+          }
+          return 1;
+        }
+        const joinedPaths = joinHierarchyFilteringPaths(subsetPaths, filterPaths).sort(sortFn);
         const expectedPaths = [
           {
             path: subsetPaths[0],
@@ -103,11 +115,11 @@ describe("Utils", () => {
             path: subsetPaths[2],
             options: undefined
           },
-          filterPaths[0],
+          { path: HierarchyFilteringPath.normalize(filterPaths[0]).path },
           filterPaths[1],
           filterPaths[2]
-        ];
-        expect(joinedPaths.sort()).to.deep.eq(expectedPaths.sort());
+        ].sort(sortFn);
+        expect(joinedPaths).to.deep.eq(expectedPaths);
       });
     });
 });

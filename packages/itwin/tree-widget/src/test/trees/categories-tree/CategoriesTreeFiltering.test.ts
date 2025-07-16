@@ -60,12 +60,14 @@ describe("Categories tree", () => {
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      const abortSignal = new AbortController().signal;
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
           label: "Test",
           viewType,
           idsCache,
+          abortSignal
         }),
       ).to.deep.eq([{ path: [keys.definitionContainer], options: { autoExpand: true } }]);
     });
@@ -91,12 +93,14 @@ describe("Categories tree", () => {
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      const abortSignal = new AbortController().signal;
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
           label: "Test",
           viewType,
           idsCache,
+          abortSignal
         }),
       ).to.deep.eq([{ path: [keys.definitionContainer, keys.definitionContainerChild], options: { autoExpand: true } }]);
     });
@@ -113,12 +117,14 @@ describe("Categories tree", () => {
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      const abortSignal = new AbortController().signal;
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
           label: "Test",
           viewType,
           idsCache,
+          abortSignal
         }),
       ).to.deep.eq([]);
     });
@@ -137,12 +143,14 @@ describe("Categories tree", () => {
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      const abortSignal = new AbortController().signal;
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
           label: "Test",
           viewType,
           idsCache,
+          abortSignal
         }),
       ).to.deep.eq([{ path: [keys.definitionContainer, keys.category], options: { autoExpand: true } }]);
     });
@@ -162,12 +170,14 @@ describe("Categories tree", () => {
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      const abortSignal = new AbortController().signal;
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
           label: "SubCategory1",
           viewType,
           idsCache,
+          abortSignal
         }),
       ).to.deep.eq([{ path: [keys.definitionContainer, keys.category, keys.subCategory1], options: { autoExpand: true } }]);
     });
@@ -189,6 +199,7 @@ describe("Categories tree", () => {
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      const abortSignal = new AbortController().signal;
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -196,6 +207,7 @@ describe("Categories tree", () => {
           label: "_",
           viewType: "3d",
           idsCache,
+          abortSignal
         }),
       ).to.deep.eq([{ path: [keys.category1], options: { autoExpand: true } }]);
 
@@ -205,6 +217,7 @@ describe("Categories tree", () => {
           label: "%",
           viewType: "3d",
           idsCache,
+          abortSignal
         }),
       ).to.deep.eq([{ path: [keys.category2], options: { autoExpand: true } }]);
     });
@@ -226,6 +239,7 @@ describe("Categories tree", () => {
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      const abortSignal = new AbortController().signal;
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -233,6 +247,7 @@ describe("Categories tree", () => {
           label: "_",
           viewType: "3d",
           idsCache,
+          abortSignal
         }),
       ).to.deep.eq([{ path: [keys.category, keys.subCategory1], options: { autoExpand: true } }]);
 
@@ -242,6 +257,7 @@ describe("Categories tree", () => {
           label: "%",
           viewType: "3d",
           idsCache,
+          abortSignal
         }),
       ).to.deep.eq([{ path: [keys.category, keys.subCategory2], options: { autoExpand: true } }]);
     });
@@ -260,6 +276,7 @@ describe("Categories tree", () => {
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      const abortSignal = new AbortController().signal;
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -267,6 +284,7 @@ describe("Categories tree", () => {
           label: "Test",
           viewType: "3d",
           idsCache,
+          abortSignal
         }),
       ).to.deep.eq([{ path: [keys.category], options: { autoExpand: true } }]);
 
@@ -276,6 +294,7 @@ describe("Categories tree", () => {
           label: "SpatialCategory",
           viewType: "3d",
           idsCache,
+          abortSignal
         }),
       ).to.deep.eq([]);
     });
@@ -298,6 +317,7 @@ describe("Categories tree", () => {
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      const abortSignal = new AbortController().signal;
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -305,6 +325,7 @@ describe("Categories tree", () => {
           label: "Test",
           viewType: "3d",
           idsCache,
+          abortSignal
         }),
       ).to.deep.eq([{ path: [keys.category], options: { autoExpand: true } }]);
 
@@ -314,6 +335,7 @@ describe("Categories tree", () => {
           label: "SubCategory1",
           viewType: "3d",
           idsCache,
+          abortSignal
         }),
       ).to.deep.eq([{ path: [keys.category, keys.subCategory1], options: { autoExpand: true } }]);
 
@@ -323,6 +345,7 @@ describe("Categories tree", () => {
           label: "SubCategory2",
           viewType: "3d",
           idsCache,
+          abortSignal
         }),
       ).to.deep.eq([{ path: [keys.category, keys.subCategory2], options: { autoExpand: true } }]);
     });
@@ -344,6 +367,7 @@ describe("Categories tree", () => {
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "2d";
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      const abortSignal = new AbortController().signal;
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -351,6 +375,7 @@ describe("Categories tree", () => {
           label: "_",
           viewType: "2d",
           idsCache,
+          abortSignal
         }),
       ).to.deep.eq([{ path: [keys.category1], options: { autoExpand: true } }]);
 
@@ -360,6 +385,7 @@ describe("Categories tree", () => {
           label: "%",
           viewType: "2d",
           idsCache,
+          abortSignal
         }),
       ).to.deep.eq([{ path: [keys.category2], options: { autoExpand: true } }]);
     });
@@ -381,6 +407,7 @@ describe("Categories tree", () => {
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "2d";
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+      const abortSignal = new AbortController().signal;
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -388,6 +415,7 @@ describe("Categories tree", () => {
           label: "_",
           viewType: "2d",
           idsCache,
+          abortSignal
         }),
       ).to.deep.eq([{ path: [keys.category, keys.subCategory1], options: { autoExpand: true } }]);
 
@@ -397,6 +425,7 @@ describe("Categories tree", () => {
           label: "%",
           viewType: "2d",
           idsCache,
+          abortSignal
         }),
       ).to.deep.eq([{ path: [keys.category, keys.subCategory2], options: { autoExpand: true } }]);
     });

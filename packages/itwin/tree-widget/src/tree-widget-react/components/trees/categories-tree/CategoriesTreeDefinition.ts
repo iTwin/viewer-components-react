@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, from, lastValueFrom, map, mergeMap, toArray } from "rxjs";
+import { defer, EMPTY, from, fromEvent, lastValueFrom, map, mergeMap, takeUntil, toArray } from "rxjs";
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
@@ -40,6 +40,7 @@ interface CategoriesTreeInstanceKeyPathsFromInstanceLabelProps {
   viewType: "2d" | "3d";
   limit?: number | "unbounded";
   idsCache: CategoriesTreeIdsCache;
+  abortSignal: AbortSignal;
 }
 
 export class CategoriesTreeDefinition implements HierarchyDefinition {
@@ -381,6 +382,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
           id: row.ECInstanceId,
         }),
       ),
+      takeUntil(fromEvent(props.abortSignal, "abort")),
       toArray(),
       mergeMap((targetItems): Observable<HierarchyFilteringPath> => createInstanceKeyPathsFromTargetItems({ ...props, targetItems })),
       toArray(),
