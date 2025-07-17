@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, from, lastValueFrom, map, mergeMap, toArray } from "rxjs";
+import { defer, EMPTY, from, fromEvent, identity, lastValueFrom, map, mergeMap, takeUntil, toArray } from "rxjs";
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
@@ -40,6 +40,7 @@ interface CategoriesTreeInstanceKeyPathsFromInstanceLabelProps {
   viewType: "2d" | "3d";
   limit?: number | "unbounded";
   idsCache: CategoriesTreeIdsCache;
+  abortSignal?: AbortSignal;
 }
 
 export class CategoriesTreeDefinition implements HierarchyDefinition {
@@ -267,24 +268,25 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
 async function createInstanceKeyPathsFromInstanceLabel(
   props: CategoriesTreeInstanceKeyPathsFromInstanceLabelProps & { labelsFactory: IInstanceLabelSelectClauseFactory; cache: CategoriesTreeIdsCache },
 ): Promise<HierarchyFilteringPath[]> {
-  const { definitionContainers, categories } = await props.cache.getAllDefinitionContainersAndCategories();
-  if (categories.length === 0) {
-    return [];
-  }
+  const { cache, abortSignal, label, viewType, labelsFactory, limit, imodelAccess } = props;
+  const { categoryClass } = getClassesByView(viewType);
 
-  const { categoryClass } = getClassesByView(props.viewType);
-  const adjustedLabel = props.label.replace(/[%_\\]/g, "\\$&");
+  const adjustedLabel = label.replace(/[%_\\]/g, "\\$&");
 
   const CATEGORIES_WITH_LABELS_CTE = "CategoriesWithLabels";
   const SUBCATEGORIES_WITH_LABELS_CTE = "SubCategoriesWithLabels";
   const DEFINITION_CONTAINERS_WITH_LABELS_CTE = "DefinitionContainersWithLabels";
-  const [categoryLabelSelectClause, subCategoryLabelSelectClause, definitionContainerLabelSelectClause] = await Promise.all(
-    [categoryClass, SUB_CATEGORY_CLASS, ...(definitionContainers.length > 0 ? [DEFINITION_CONTAINER_CLASS] : [])].map(async (className) =>
-      props.labelsFactory.createSelectClause({ classAlias: "this", className }),
-    ),
-  );
   return lastValueFrom(
-    defer(() => {
+    defer(async () => {
+      const { definitionContainers, categories } = await cache.getAllDefinitionContainersAndCategories();
+      if (categories.length === 0) {
+        return undefined;
+      }
+      const [categoryLabelSelectClause, subCategoryLabelSelectClause, definitionContainerLabelSelectClause] = await Promise.all(
+        [categoryClass, SUB_CATEGORY_CLASS, ...(definitionContainers.length > 0 ? [DEFINITION_CONTAINER_CLASS] : [])].map(async (className) =>
+          labelsFactory.createSelectClause({ classAlias: "this", className }),
+        ),
+      );
       const ctes = [
         `${CATEGORIES_WITH_LABELS_CTE}(ClassName, ECInstanceId, ChildCount, DisplayLabel) AS (
             SELECT
@@ -363,18 +365,22 @@ async function createInstanceKeyPathsFromInstanceLabel(
                 : ""
             }
         )
-        ${props.limit === undefined ? `LIMIT ${MAX_FILTERING_INSTANCE_KEY_COUNT + 1}` : props.limit !== "unbounded" ? `LIMIT ${props.limit}` : ""}
+        ${limit === undefined ? `LIMIT ${MAX_FILTERING_INSTANCE_KEY_COUNT + 1}` : limit !== "unbounded" ? `LIMIT ${limit}` : ""}
       `;
       const bindings = [
         { type: "string" as const, value: adjustedLabel },
         { type: "string" as const, value: adjustedLabel },
         ...(definitionContainers.length > 0 ? [{ type: "string" as const, value: adjustedLabel }] : []),
       ];
-      return props.imodelAccess.createQueryReader(
-        { ctes, ecsql, bindings },
-        { restartToken: "tree-widget/categories-tree/filter-by-label-query", limit: props.limit },
-      );
+      return { ctes, ecsql, bindings };
     }).pipe(
+      mergeMap((queryProps) => {
+        if (!queryProps) {
+          return EMPTY;
+        }
+        return imodelAccess.createQueryReader(queryProps, { restartToken: "tree-widget/categories-tree/filter-by-label-query", limit });
+      }),
+      abortSignal ? takeUntil(fromEvent(abortSignal, "abort")) : identity,
       map(
         (row): InstanceKey => ({
           className: row.ClassName === "c" ? categoryClass : row.ClassName === "sc" ? SUB_CATEGORY_CLASS : DEFINITION_CONTAINER_CLASS,
