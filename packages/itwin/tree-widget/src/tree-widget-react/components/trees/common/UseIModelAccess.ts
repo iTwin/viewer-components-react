@@ -16,26 +16,26 @@ import type { FunctionProps } from "./Utils.js";
 type IModelAccess = FunctionProps<typeof useIModelTree>["imodelAccess"];
 
 export interface UseIModelAccessProps {
-    imodel: IModelConnection;
-    getSchemaContext: (imodel: IModelConnection) => SchemaContext;
-    imodelAccess?: IModelAccess;
-    hierarchyLevelSizeLimit?: number;
+  imodel: IModelConnection;
+  getSchemaContext: (imodel: IModelConnection) => SchemaContext;
+  imodelAccess?: IModelAccess;
+  hierarchyLevelSizeLimit?: number;
 }
 
 /** @internal */
-export function useIModelAccess({imodel, getSchemaContext, imodelAccess: providedIModelAccess, hierarchyLevelSizeLimit}: UseIModelAccessProps): {
+export function useIModelAccess({ imodel, getSchemaContext, imodelAccess: providedIModelAccess, hierarchyLevelSizeLimit }: UseIModelAccessProps): {
   imodelAccess: IModelAccess;
   currentHierarchyLevelSizeLimit: number;
 } {
-    const defaultHierarchyLevelSizeLimit = hierarchyLevelSizeLimit ?? 1000;
-    const imodelAccess = useMemo(() => {
-      return providedIModelAccess ?? createIModelAccess({ getSchemaContext, imodel, hierarchyLevelSizeLimit: defaultHierarchyLevelSizeLimit });
-    }, [providedIModelAccess, getSchemaContext, imodel, defaultHierarchyLevelSizeLimit]);
+  const defaultHierarchyLevelSizeLimit = hierarchyLevelSizeLimit ?? 1000;
+  const imodelAccess = useMemo(() => {
+    return providedIModelAccess ?? createIModelAccess({ getSchemaContext, imodel, hierarchyLevelSizeLimit: defaultHierarchyLevelSizeLimit });
+  }, [providedIModelAccess, getSchemaContext, imodel, defaultHierarchyLevelSizeLimit]);
 
-    return {
-      imodelAccess,
-      currentHierarchyLevelSizeLimit: defaultHierarchyLevelSizeLimit,
-    }
+  return {
+    imodelAccess,
+    currentHierarchyLevelSizeLimit: defaultHierarchyLevelSizeLimit,
+  };
 }
 
 function createIModelAccess({

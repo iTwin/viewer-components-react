@@ -72,6 +72,44 @@ describe("Categories tree", () => {
       ).to.deep.eq([{ path: [keys.definitionContainer], options: { autoExpand: true } }]);
     });
 
+    it("filtering by label aborts when abort signal fires", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer", userLabel: "Test" });
+        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModel.id });
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+        return { definitionContainer };
+      });
+      const { imodel, ...ids } = buildIModelResult;
+      const imodelAccess = createIModelAccess(imodel);
+      const viewType = "3d";
+      const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+
+      const abortController1 = new AbortController();
+      const pathsPromiseAborted = CategoriesTreeDefinition.createInstanceKeyPaths({
+        imodelAccess,
+        label: "Test",
+        viewType,
+        idsCache,
+        abortSignal: abortController1.signal,
+      });
+      abortController1.abort();
+      expect(await pathsPromiseAborted).to.deep.eq([]);
+
+      const abortController2 = new AbortController();
+      const pathsPromise = CategoriesTreeDefinition.createInstanceKeyPaths({
+        imodelAccess,
+        label: "Test",
+        viewType,
+        idsCache,
+        abortSignal: abortController2.signal,
+      });
+      expect(await pathsPromise).to.deep.eq([
+        { path: [{ className: "BisCore.DefinitionContainer", id: ids.definitionContainer.id }], options: { autoExpand: true } },
+      ]);
+    });
+
     it("finds definition container by label when it is contained by another definition container", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });

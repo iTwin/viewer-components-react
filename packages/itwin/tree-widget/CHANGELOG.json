@@ -2,6 +2,42 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Mon, 14 Jul 2025 12:38:56 GMT",
+      "version": "3.10.3",
+      "tag": "@itwin/tree-widget-react_v3.10.3",
+      "comments": {
+        "patch": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "ffeaba0dd2c6e5c62e89f25da999ec229a5f3c58",
+            "comment": "Added missing peer dependencies."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Mon, 07 Jul 2025 19:55:02 GMT",
+      "version": "3.10.2",
+      "tag": "@itwin/tree-widget-react_v3.10.2",
+      "comments": {
+        "patch": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "358152a41bbb49c65445c5a4c9dfbd639edad74e",
+            "comment": "Bumped `@itwin/presentation-hierarchies-react` version."
+          },
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "96beca02d7274f6ae5e846feee0d8b31e78f8036",
+            "comment": "Fix category count query throwing error on large iModels"
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 20 Jun 2025 17:05:06 GMT",
       "version": "3.10.1",
       "tag": "@itwin/tree-widget-react_v3.10.1",

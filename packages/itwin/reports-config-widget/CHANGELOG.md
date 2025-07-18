@@ -1,8 +1,16 @@
 # Change Log - @itwin/reports-config-widget-react
 
-This log was last generated on Wed, 18 Dec 2024 12:42:56 GMT and should not be manually modified.
+<!-- This log was last generated on Mon, 07 Jul 2025 19:55:02 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.8.1
+
+Mon, 07 Jul 2025 19:55:02 GMT
+
+### Patches
+
+- Removed unused `react-redux` peer dependency. ([#1368](https://github.com/iTwin/viewer-components-react/pull/1368))
 
 ## 0.8.0
 
