@@ -336,6 +336,7 @@ describe("Categories tree", () => {
       const imodelAccess = createIModelAccess(imodel);
       const viewType = "3d";
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
