@@ -90,7 +90,6 @@ export function insertDefinitionContainer(
   return { className, id };
 }
 
-
 export function insertSpatialCategory(
   props: BaseInstanceInsertProps & { codeValue: string; modelId?: Id64String } & Partial<Omit<CategoryProps, "id" | "model" | "parent" | "code">>,
 ) {

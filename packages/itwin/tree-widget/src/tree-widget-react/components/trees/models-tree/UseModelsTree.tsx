@@ -153,7 +153,7 @@ export function useModelsTree({
     };
 
     if (loadFocusedItems) {
-      return async ({ imodelAccess }) => {
+      return async ({ imodelAccess, abortSignal }) => {
         try {
           const focusedItems = await collectFocusedItems(loadFocusedItems);
           const paths = await ModelsTreeDefinition.createInstanceKeyPaths({
@@ -161,6 +161,7 @@ export function useModelsTree({
             idsCache: getModelsTreeIdsCache(),
             targetItems: focusedItems,
             hierarchyConfig: hierarchyConfiguration,
+            abortSignal,
           });
           void handlePaths(paths, imodelAccess);
           return paths.map((path) => ("path" in path ? path : { path, options: { autoExpand: true } }));
@@ -177,7 +178,7 @@ export function useModelsTree({
     }
 
     if (getFilteredPaths) {
-      return async ({ imodelAccess }) => {
+      return async ({ imodelAccess, abortSignal }) => {
         try {
           const paths = await getFilteredPaths({
             createInstanceKeyPaths: async (props) =>
@@ -187,6 +188,7 @@ export function useModelsTree({
                 idsCache: getModelsTreeIdsCache(),
                 hierarchyConfig: hierarchyConfiguration,
                 limit: "unbounded",
+                abortSignal,
               }),
             filter,
           });
@@ -205,7 +207,7 @@ export function useModelsTree({
     }
 
     if (filter) {
-      return async ({ imodelAccess }) => {
+      return async ({ imodelAccess, abortSignal }) => {
         onFeatureUsed({ featureId: "filtering", reportInteraction: true });
         try {
           const paths = await ModelsTreeDefinition.createInstanceKeyPaths({
@@ -213,6 +215,7 @@ export function useModelsTree({
             label: filter,
             idsCache: getModelsTreeIdsCache(),
             hierarchyConfig: hierarchyConfiguration,
+            abortSignal,
           });
           void handlePaths(paths, imodelAccess);
           return paths.map((path) => ("path" in path ? path : { path, options: { autoExpand: true } }));

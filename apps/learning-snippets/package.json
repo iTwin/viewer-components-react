@@ -40,7 +40,7 @@
     "@itwin/presentation-components": "^5.12.4",
     "@itwin/presentation-frontend": "^5.0.0",
     "@itwin/presentation-testing": "^5.4.5",
-    "@itwin/presentation-hierarchies": "^1.5.1",
+    "@itwin/presentation-hierarchies": "^1.6.1",
     "@itwin/presentation-shared": "^1.2.2",
     "@itwin/unified-selection": "^1.4.2",
     "@testing-library/dom": "^10.4.0",

@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Updated @itwin/presentation-hierarchies to v1.6.1 and @itwin/presentation-hierarchies-react to 1.7.1",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "100586436+JonasDov@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
