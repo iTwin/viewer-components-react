@@ -786,7 +786,7 @@ function createInstanceKeyPathsFromTargetItemsObs({
           ),
         ),
       );
-    })
+    }),
   );
 }
 
@@ -795,13 +795,13 @@ function createInstanceKeyPathsFromInstanceLabelObs(
 ) {
   const { labelsFactory, hierarchyConfig, label, imodelAccess, limit } = props;
   return defer(async () => {
-      const elementLabelSelectClause = await labelsFactory.createSelectClause({
-        classAlias: "e",
-        className: "BisCore.Element",
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        selectorsConcatenator: ECSql.createConcatenatedValueStringSelector,
-      });
-      const ecsql = `
+    const elementLabelSelectClause = await labelsFactory.createSelectClause({
+      classAlias: "e",
+      className: "BisCore.Element",
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      selectorsConcatenator: ECSql.createConcatenatedValueStringSelector,
+    });
+    const ecsql = `
         SELECT *
         FROM (
           SELECT
@@ -827,18 +827,18 @@ function createInstanceKeyPathsFromInstanceLabelObs(
         WHERE Label LIKE '%' || ? || '%' ESCAPE '\\'
         LIMIT ${MAX_FILTERING_INSTANCE_KEY_COUNT + 1}
       `;
-      const bindings: ECSqlBinding[] = [{ type: "string", value: label.replace(/[%_\\]/g, "\\$&") }];
-      return { ecsql, bindings };
-    }).pipe(
-      mergeMap((queryProps) => {
-        return imodelAccess.createQueryReader(queryProps, {
-          rowFormat: "Indexes",
-          restartToken: "tree-widget/models-tree/filter-by-label-query",
-          limit,
-        });
-      }),
-      map((row) => ({ className: row[0], id: row[1] })),
-      toArray(),
-      mergeMap((targetKeys) => createInstanceKeyPathsFromTargetItemsObs({ ...props, targetItems: targetKeys })),
+    const bindings: ECSqlBinding[] = [{ type: "string", value: label.replace(/[%_\\]/g, "\\$&") }];
+    return { ecsql, bindings };
+  }).pipe(
+    mergeMap((queryProps) => {
+      return imodelAccess.createQueryReader(queryProps, {
+        rowFormat: "Indexes",
+        restartToken: "tree-widget/models-tree/filter-by-label-query",
+        limit,
+      });
+    }),
+    map((row) => ({ className: row[0], id: row[1] })),
+    toArray(),
+    mergeMap((targetKeys) => createInstanceKeyPathsFromTargetItemsObs({ ...props, targetItems: targetKeys })),
   );
 }

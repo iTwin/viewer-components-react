@@ -79,7 +79,7 @@ namespace TreeFilteringTestCaseDefinition {
   };
 }
 
-describe.only("Models tree", () => {
+describe("Models tree", () => {
   describe("Hierarchy filtering", () => {
     before(async function () {
       await initializePresentationTesting({
@@ -1576,14 +1576,12 @@ describe.only("Models tree", () => {
         });
 
         it("finds instance key paths by target instance key", async function () {
-          const abortSignal = new AbortController().signal;
           const actualInstanceKeyPaths = (
             await ModelsTreeDefinition.createInstanceKeyPaths({
               imodelAccess: createIModelAccess(imodel),
               idsCache: modelsTreeIdsCache,
               targetItems,
               hierarchyConfig,
-              abortSignal
             })
           ).sort(instanceKeyPathSorter);
           expect(actualInstanceKeyPaths).to.deep.eq(instanceKeyPaths);
@@ -1593,7 +1591,6 @@ describe.only("Models tree", () => {
           if (targetInstanceLabel === undefined) {
             this.skip();
           }
-          const abortSignal = new AbortController().signal;
 
           const actualInstanceKeyPaths = (
             await ModelsTreeDefinition.createInstanceKeyPaths({
@@ -1601,7 +1598,6 @@ describe.only("Models tree", () => {
               idsCache: modelsTreeIdsCache,
               label: targetInstanceLabel,
               hierarchyConfig,
-              abortSignal
             })
           ).sort(instanceKeyPathSorter);
           expect(actualInstanceKeyPaths).to.deep.eq(instanceKeyPaths);
@@ -1627,14 +1623,12 @@ describe.only("Models tree", () => {
 
       const imodelAccess = createIModelAccess(imodel);
       using idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig);
-      const abortSignal = new AbortController().signal;
       const actualInstanceKeyPaths = (
         await ModelsTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
           idsCache,
           label: formattedECInstanceId,
           hierarchyConfig,
-          abortSignal
         })
       ).sort(instanceKeyPathSorter);
       expect(actualInstanceKeyPaths).to.deep.eq(expectedPaths);
@@ -1744,7 +1738,6 @@ describe.only("Models tree", () => {
 
       const imodelAccess = createIModelAccess(imodel);
       using idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig);
-      const abortSignal = new AbortController().signal;
 
       expect(
         (
@@ -1753,7 +1746,6 @@ describe.only("Models tree", () => {
             idsCache,
             label: "_",
             hierarchyConfig,
-            abortSignal
           })
         ).sort(instanceKeyPathSorter),
       ).to.deep.eq([[adjustedModelKey(keys.model), keys.category, adjustedElementKey(keys.element1)]]);
@@ -1765,7 +1757,6 @@ describe.only("Models tree", () => {
             idsCache,
             label: "%",
             hierarchyConfig,
-            abortSignal
           })
         ).sort(instanceKeyPathSorter),
       ).to.deep.eq([[adjustedModelKey(keys.model), keys.category, adjustedElementKey(keys.element2)]]);
@@ -1777,7 +1768,6 @@ describe.only("Models tree", () => {
             idsCache,
             label: "\\",
             hierarchyConfig,
-            abortSignal
           })
         ).sort(instanceKeyPathSorter),
       ).to.deep.eq([[adjustedModelKey(keys.model), keys.category, adjustedElementKey(keys.element3)]]);

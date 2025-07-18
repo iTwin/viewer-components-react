@@ -37,7 +37,6 @@ describe("categories tree", () => {
     cleanup: (props) => props.iModel.close(),
     test: async ({ imodelAccess }) => {
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d");
-      const abortSignal = new AbortController().signal;
       const filtering = {
         paths: await CategoriesTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
@@ -45,7 +44,6 @@ describe("categories tree", () => {
           label: "sc",
           viewType: "3d",
           idsCache,
-          abortSignal
         }),
       };
       expect(filtering.paths.length).to.eq(50000);
