@@ -86,10 +86,10 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
     if (!filter) {
       return undefined;
     }
-    return async ({ imodelAccess }) => {
+    return async ({ imodelAccess, abortSignal }) => {
       onFeatureUsed({ featureId: "filtering", reportInteraction: true });
       try {
-        const paths = await CategoriesTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, viewType, idsCache });
+        const paths = await CategoriesTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, viewType, idsCache, abortSignal });
         onCategoriesFiltered?.(await getCategoriesFromPaths(paths, idsCache));
         return paths;
       } catch (e) {

@@ -40,6 +40,7 @@ interface ModelsTreeComponentProps
     | "hierarchyConfig"
     | "visibilityHandlerOverrides"
     | "getFilteredPaths"
+    | "subsetTreeConfig"
   > {
   /**
    * Renderers of header buttons. Defaults to:

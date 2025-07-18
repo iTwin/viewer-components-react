@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Added option to add additional filtering to models tree based on instance keys. `UseModelsTreeProps` now has `subsetTreeConfig` which enables this.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "100586436+JonasDov@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
