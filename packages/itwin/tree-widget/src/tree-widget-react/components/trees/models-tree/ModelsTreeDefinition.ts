@@ -5,6 +5,7 @@
 
 import {
   bufferCount,
+  defaultIfEmpty,
   defer,
   firstValueFrom,
   from,
@@ -544,11 +545,18 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
   }
 
   public static async createInstanceKeyPaths(props: ModelsTreeInstanceKeyPathsProps) {
-    if (ModelsTreeInstanceKeyPathsProps.isLabelProps(props)) {
-      const labelsFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
-      return createInstanceKeyPathsFromInstanceLabel({ ...props, labelsFactory });
-    }
-    return createInstanceKeyPathsFromTargetItems(props);
+    return lastValueFrom(
+      defer(() => {
+        if (ModelsTreeInstanceKeyPathsProps.isLabelProps(props)) {
+          const labelsFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
+          return createInstanceKeyPathsFromInstanceLabelObs({ ...props, labelsFactory });
+        }
+        return createInstanceKeyPathsFromTargetItemsObs(props);
+      }).pipe(
+        props.abortSignal ? takeUntil(fromEvent(props.abortSignal, "abort")) : identity,
+        defaultIfEmpty([])
+      ),
+    )
   }
 
   private supportsFiltering() {
@@ -708,20 +716,18 @@ function parseQueryRow(row: ECSqlQueryRow, groupInfos: ElementsGroupInfo[], sepa
   };
 }
 
-async function createInstanceKeyPathsFromTargetItems({
+function createInstanceKeyPathsFromTargetItemsObs({
   targetItems,
   imodelAccess,
   hierarchyConfig,
   idsCache,
   limit,
-  abortSignal,
-}: ModelsTreeInstanceKeyPathsFromTargetItemsProps): Promise<HierarchyFilteringPath[]> {
+}: Omit<ModelsTreeInstanceKeyPathsFromTargetItemsProps, "abortSignal">): Observable<HierarchyFilteringPath[]> {
   if (limit !== "unbounded" && targetItems.length > (limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT)) {
     throw new FilterLimitExceededError(limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT);
   }
 
-  return lastValueFrom(
-    from(targetItems).pipe(
+  return from(targetItems).pipe(
       releaseMainThreadOnItemsCount(2000),
       mergeMap(async (key): Promise<{ key: string; type: number } | { key: ElementsGroupInfo; type: 0 }> => {
         if ("parent" in key) {
@@ -742,7 +748,6 @@ async function createInstanceKeyPathsFromTargetItems({
 
         return { key: key.id, type: 0 };
       }, 2),
-      abortSignal ? takeUntil(fromEvent(abortSignal, "abort")) : identity,
       reduce(
         (acc, value) => {
           if (value.type === 1) {
@@ -781,17 +786,15 @@ async function createInstanceKeyPathsFromTargetItems({
             ),
           ),
         );
-      }),
-    ),
+      })
   );
 }
 
-async function createInstanceKeyPathsFromInstanceLabel(
-  props: ModelsTreeInstanceKeyPathsFromInstanceLabelProps & { labelsFactory: IInstanceLabelSelectClauseFactory },
+function createInstanceKeyPathsFromInstanceLabelObs(
+  props: Omit<ModelsTreeInstanceKeyPathsFromInstanceLabelProps, "abortSignal"> & { labelsFactory: IInstanceLabelSelectClauseFactory },
 ) {
-  const { labelsFactory, hierarchyConfig, label, imodelAccess, abortSignal, limit } = props;
-  return lastValueFrom(
-    defer(async () => {
+  const { labelsFactory, hierarchyConfig, label, imodelAccess, limit } = props;
+  return defer(async () => {
       const elementLabelSelectClause = await labelsFactory.createSelectClause({
         classAlias: "e",
         className: "BisCore.Element",
@@ -834,10 +837,8 @@ async function createInstanceKeyPathsFromInstanceLabel(
           limit,
         });
       }),
-      abortSignal ? takeUntil(fromEvent(abortSignal, "abort")) : identity,
       map((row) => ({ className: row[0], id: row[1] })),
       toArray(),
-      mergeMap(async (targetKeys) => createInstanceKeyPathsFromTargetItems({ ...props, targetItems: targetKeys })),
-    ),
+      mergeMap((targetKeys) => createInstanceKeyPathsFromTargetItemsObs({ ...props, targetItems: targetKeys })),
   );
 }

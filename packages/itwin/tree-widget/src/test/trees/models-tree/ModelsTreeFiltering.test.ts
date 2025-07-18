@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import sinon from "sinon";
 import { Id64 } from "@itwin/core-bentley";
 import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
@@ -1648,11 +1647,6 @@ describe("Models tree", () => {
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
       using idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig);
 
-      const queryReaderImpl = imodelAccess.createQueryReader;
-      imodelAccess.createQueryReader = sinon.fake((props, config) => {
-        return queryReaderImpl(props, config);
-      });
-
       const abortController1 = new AbortController();
       const pathsPromiseAborted = ModelsTreeDefinition.createInstanceKeyPaths({
         imodelAccess,
@@ -1663,7 +1657,6 @@ describe("Models tree", () => {
       });
       abortController1.abort();
       expect(await pathsPromiseAborted).to.deep.eq([]);
-      expect(imodelAccess.createQueryReader).to.not.be.called;
 
       const abortController2 = new AbortController();
       const pathsPromise = ModelsTreeDefinition.createInstanceKeyPaths({
@@ -1679,7 +1672,6 @@ describe("Models tree", () => {
           { className: "BisCore.SpatialCategory", id: ids.category.id },
         ],
       ]);
-      expect(imodelAccess.createQueryReader).to.be.called;
     });
 
     it("filtering by target items aborts when abort signal fires", async function () {

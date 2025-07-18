@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, from, fromEvent, identity, lastValueFrom, map, mergeMap, takeUntil, toArray } from "rxjs";
+import { defaultIfEmpty, defer, EMPTY, from, fromEvent, identity, lastValueFrom, map, mergeMap, takeUntil, toArray } from "rxjs";
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
@@ -380,7 +380,6 @@ async function createInstanceKeyPathsFromInstanceLabel(
         }
         return imodelAccess.createQueryReader(queryProps, { restartToken: "tree-widget/categories-tree/filter-by-label-query", limit });
       }),
-      abortSignal ? takeUntil(fromEvent(abortSignal, "abort")) : identity,
       map(
         (row): InstanceKey => ({
           className: row.ClassName === "c" ? categoryClass : row.ClassName === "sc" ? SUB_CATEGORY_CLASS : DEFINITION_CONTAINER_CLASS,
@@ -390,6 +389,8 @@ async function createInstanceKeyPathsFromInstanceLabel(
       toArray(),
       mergeMap((targetItems): Observable<HierarchyFilteringPath> => createInstanceKeyPathsFromTargetItems({ ...props, targetItems })),
       toArray(),
+      abortSignal ? takeUntil(fromEvent(abortSignal, "abort")) : identity,
+      defaultIfEmpty([])
     ),
   );
 }
