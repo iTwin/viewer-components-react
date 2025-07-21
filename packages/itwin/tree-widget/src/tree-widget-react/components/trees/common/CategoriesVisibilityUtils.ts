@@ -6,6 +6,7 @@
 import { QueryRowFormat } from "@itwin/core-common";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 
 /**
@@ -19,6 +20,7 @@ export interface CategoryInfo {
 
 /**
  * Toggles visibility of categories to show or hide.
+ * @internal
  */
 export async function toggleAllCategories(viewport: Viewport, display: boolean) {
   const ids = await getCategories(viewport);
@@ -39,22 +41,23 @@ async function getCategories(viewport: Viewport) {
 
 /**
  * Changes category display in the viewport.
+ * @internal
  */
-export async function enableCategoryDisplay(viewport: Viewport, ids: string[], enabled: boolean, enableAllSubCategories = true) {
-  viewport.changeCategoryDisplay(ids, enabled, enableAllSubCategories);
+export async function enableCategoryDisplay(viewport: Viewport, categoryIds: Id64Array, enabled: boolean, enableAllSubCategories = true) {
+  viewport.changeCategoryDisplay(categoryIds, enabled, enableAllSubCategories);
 
   // remove category overrides per model
   const modelsContainingOverrides: string[] = [];
   for (const ovr of viewport.perModelCategoryVisibility) {
-    if (ids.findIndex((id) => id === ovr.categoryId) !== -1) {
+    if (categoryIds.findIndex((id) => id === ovr.categoryId) !== -1) {
       modelsContainingOverrides.push(ovr.modelId);
     }
   }
-  viewport.perModelCategoryVisibility.setOverride(modelsContainingOverrides, ids, PerModelCategoryVisibility.Override.None);
+  viewport.perModelCategoryVisibility.setOverride(modelsContainingOverrides, categoryIds, PerModelCategoryVisibility.Override.None);
 
   // changeCategoryDisplay only enables subcategories, it does not disabled them. So we must do that ourselves.
   if (false === enabled) {
-    (await viewport.iModel.categories.getCategoryInfo(ids)).forEach((categoryInfo) => {
+    (await viewport.iModel.categories.getCategoryInfo(categoryIds)).forEach((categoryInfo) => {
       categoryInfo.subCategories.forEach((value) => enableSubCategoryDisplay(viewport, value.id, false));
     });
   }
@@ -62,11 +65,13 @@ export async function enableCategoryDisplay(viewport: Viewport, ids: string[], e
 
 /**
  * Changes subcategory display in the viewport
+ * @internal
  */
 export function enableSubCategoryDisplay(viewport: Viewport, key: string, enabled: boolean) {
   viewport.changeSubCategoryDisplay(key, enabled);
 }
 
+/** @internal */
 export async function loadCategoriesFromViewport(vp: Viewport) {
   // Query categories and add them to state
   const selectUsedSpatialCategoryIds =
@@ -106,14 +111,15 @@ export async function hideAllCategories(categories: string[], viewport: Viewport
  * @public
  */
 export async function invertAllCategories(categories: CategoryInfo[], viewport: Viewport) {
-  const enabled: string[] = [];
-  const disabled: string[] = [];
-  const enabledSubCategories: string[] = [];
-  const disabledSubCategories: string[] = [];
+  const enabledCategories = new Set<Id64String>();
+  const disabledCategories = new Set<Id64String>();
+  const enabledSubCategories = new Array<Id64String>();
+  const disabledSubCategories = new Array<Id64String>();
+  const modelCategoryOverrides = new Map<Id64String, { categoriesToEnable?: Id64Array; categoriesToDisable?: Id64Array }>();
 
   for (const category of categories) {
     if (!viewport.view.viewsCategory(category.categoryId)) {
-      disabled.push(category.categoryId);
+      disabledCategories.add(category.categoryId);
       continue;
     }
     // First, we need to check if at least one subcategory is disabled. If it is true, then only subcategories should change display, not categories.
@@ -122,17 +128,57 @@ export async function invertAllCategories(categories: CategoryInfo[], viewport: 
         viewport.isSubCategoryVisible(subCategory) ? enabledSubCategories.push(subCategory) : disabledSubCategories.push(subCategory);
       }
     } else {
-      enabled.push(category.categoryId);
+      enabledCategories.add(category.categoryId);
     }
+  }
+
+  // collect per model overrides that need to be inverted
+  for (const { modelId, categoryId, visible } of viewport.perModelCategoryVisibility) {
+    if (visible) {
+      if (enabledCategories.has(categoryId)) {
+        continue;
+      }
+      let visibleEntry = modelCategoryOverrides.get(modelId);
+      if (!visibleEntry) {
+        visibleEntry = { categoriesToDisable: [] };
+        modelCategoryOverrides.set(modelId, visibleEntry);
+      } else if (!visibleEntry.categoriesToDisable) {
+        visibleEntry.categoriesToDisable = [];
+      }
+      visibleEntry.categoriesToDisable?.push(categoryId);
+      continue;
+    }
+
+    if (disabledCategories.has(categoryId)) {
+      continue;
+    }
+    let hiddenEntry = modelCategoryOverrides.get(modelId);
+    if (!hiddenEntry) {
+      hiddenEntry = { categoriesToEnable: [] };
+      modelCategoryOverrides.set(modelId, hiddenEntry);
+    } else if (!hiddenEntry.categoriesToEnable) {
+      hiddenEntry.categoriesToEnable = [];
+    }
+    hiddenEntry.categoriesToEnable?.push(categoryId);
   }
 
   // Disable enabled
   enabledSubCategories.forEach((subCategory) => enableSubCategoryDisplay(viewport, subCategory, false));
 
-  await enableCategoryDisplay(viewport, enabled, false, true);
+  await enableCategoryDisplay(viewport, [...enabledCategories], false, true);
 
   // Enable disabled
   disabledSubCategories.forEach((subCategory) => enableSubCategoryDisplay(viewport, subCategory, true));
 
-  await enableCategoryDisplay(viewport, disabled, true, true);
+  await enableCategoryDisplay(viewport, [...disabledCategories], true, true);
+
+  // invert overrides
+  for (const [modelId, entry] of modelCategoryOverrides) {
+    if (entry.categoriesToEnable) {
+      viewport.perModelCategoryVisibility.setOverride(modelId, entry.categoriesToEnable, PerModelCategoryVisibility.Override.Show);
+    }
+    if (entry.categoriesToDisable) {
+      viewport.perModelCategoryVisibility.setOverride(modelId, entry.categoriesToDisable, PerModelCategoryVisibility.Override.Hide);
+    }
+  }
 }
