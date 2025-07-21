@@ -18,7 +18,7 @@ import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 interface ClassificationsTreeComponentProps
   extends Pick<
     ClassificationsTreeProps,
-    "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "emptyTreeContent" | "getActions" | "getDecorations" | "hierarchyConfig"
+    "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "filter" | "emptyTreeContent" | "getActions" | "getDecorations" | "hierarchyConfig"
   > {
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
@@ -65,12 +65,13 @@ function ClassificationsTreeComponentImpl({
   viewport,
   onPerformanceMeasured,
   onFeatureUsed,
+  filter,
   ...treeProps
 }: ClassificationsTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
   return (
     <TelemetryContextProvider componentIdentifier={ClassificationsTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
       <SelectableTree>
-        <ClassificationsTree {...treeProps} imodel={iModel} activeView={viewport} />
+        <ClassificationsTree {...treeProps} imodel={iModel} activeView={viewport} filter={filter} />
       </SelectableTree>
     </TelemetryContextProvider>
   );

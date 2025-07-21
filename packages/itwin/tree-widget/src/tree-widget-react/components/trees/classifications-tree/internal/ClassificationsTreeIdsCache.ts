@@ -18,13 +18,9 @@ import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCate
 import { getDistinctMapValues } from "../../common/internal/Utils.js";
 
 import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
-import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
+import type { CategoryId, ClassificationId, ClassificationTableId, ElementId, ModelId } from "../../common/internal/Types.js";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { ClassificationsTreeHierarchyConfiguration } from "../ClassificationsTreeDefinition.js";
-/** @internal */
-export type ClassificationId = Id64String;
-/** @internal */
-export type ClassificationTableId = Id64String;
 
 interface ClassificationInfo {
   childClassificationIds: ClassificationId[];
@@ -40,6 +36,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
   private _elementModelsCategories: Promise<Map<ModelId, { category2dIds: Id64Set; category3dIds: Id64Set; isSubModel: boolean }>> | undefined;
   private _modelWithCategoryModeledElements: Promise<Map<ModelCategoryKey, Set<ElementId>>> | undefined;
   private _classificationInfos: Promise<Map<ClassificationId | ClassificationTableId, ClassificationInfo>> | undefined;
+  private _filteredElementsData: Promise<Map<ElementId, { modelId: Id64String; categoryId: Id64String }>> | undefined;
 
   constructor(
     private _queryExecutor: LimitingECSqlQueryExecutor,
@@ -181,18 +178,18 @@ export class ClassificationsTreeIdsCache implements Disposable {
     return result;
   }
 
-  public async getCategoriesElementModels(categoryIds: Id64Array, includeSubModels?: boolean): Promise<Map<CategoryId, Array<ModelId>>> {
+  public async getCategoriesElementModels(categoryIds: Id64Array, includeSubModels?: boolean): Promise<Map<CategoryId, Set<ModelId>>> {
     const elementModelsCategories = await this.getElementModelsCategories();
-    const result = new Map<CategoryId, Array<ModelId>>();
+    const result = new Map<CategoryId, Set<ModelId>>();
     for (const categoryId of categoryIds) {
       for (const [modelId, { category2dIds, category3dIds, isSubModel }] of elementModelsCategories) {
         if ((includeSubModels || !isSubModel) && (category2dIds.has(categoryId) || category3dIds.has(categoryId))) {
           let categoryModels = result.get(categoryId);
           if (!categoryModels) {
-            categoryModels = new Array<ModelId>();
+            categoryModels = new Set<ModelId>();
             result.set(categoryId, categoryModels);
           }
-          categoryModels.push(modelId);
+          categoryModels.add(modelId);
         }
       }
     }
@@ -347,5 +344,63 @@ export class ClassificationsTreeIdsCache implements Disposable {
       }),
     );
     return result;
+  }
+
+  public async getAllClassifications(): Promise<ClassificationId[]> {
+    const classificationsInfo = await this.getClassificationsInfo();
+    return [...classificationsInfo.keys()];
+  }
+
+  private async *queryFilteredElementsData({ element2dIds, element3dIds }: { element2dIds: Id64Array; element3dIds: Id64Array }): AsyncIterableIterator<{
+    modelId: Id64String;
+    id: ElementId;
+    categoryId: CategoryId;
+  }> {
+    const queries = new Array<string>();
+    if (element2dIds.length > 0) {
+      queries.push(`
+        SELECT Model.Id modelId, Category.Id categoryId, ECInstanceId id
+        FROM ${CLASS_NAME_GeometricElement2d}
+        WHERE ECInstanceId IN (${element2dIds.join(", ")})
+      `);
+    }
+    if (element3dIds.length > 0) {
+      queries.push(`
+        SELECT Model.Id modelId, Category.Id categoryId, ECInstanceId id
+        FROM ${CLASS_NAME_GeometricElement3d}
+        WHERE ECInstanceId IN (${element3dIds.join(", ")})
+      `);
+    }
+    for await (const row of this._queryExecutor.createQueryReader(
+      { ecsql: queries.join(" UNION ALL ") },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded" },
+    )) {
+      yield { modelId: row.modelId, id: row.id, categoryId: row.categoryId };
+    }
+  }
+
+  public async getFilteredElementsData({
+    element2dIds,
+    element3dIds,
+  }: {
+    element2dIds: Id64Array;
+    element3dIds: Id64Array;
+  }): Promise<Map<ElementId, { categoryId: Id64String; modelId: Id64String }>> {
+    if (element2dIds.length === 0 && element3dIds.length === 0) {
+      return new Map();
+    }
+
+    this._filteredElementsData ??= (async () => {
+      const filteredElementsData = new Map();
+      for await (const { modelId, id, categoryId } of this.queryFilteredElementsData({ element2dIds, element3dIds })) {
+        filteredElementsData.set(id, { modelId, categoryId });
+      }
+      return filteredElementsData;
+    })();
+    return this._filteredElementsData;
+  }
+
+  public clearFilteredElementsData() {
+    this._filteredElementsData = undefined;
   }
 }

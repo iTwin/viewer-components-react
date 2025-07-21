@@ -9,23 +9,30 @@ import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { DrawingViewState, IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { ClassificationsTreeDefinition } from "../../../tree-widget-react/components/trees/classifications-tree/ClassificationsTreeDefinition.js";
+import { ClassificationsTreeIdsCache } from "../../../tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeIdsCache.js";
+import { createClassificationsTreeVisibilityHandler } from "../../../tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeVisibilityHandler.js";
 import {
-  ClassificationsTreeIdsCache,
-} from "../../../tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeIdsCache.js";
-import {
-  createClassificationsTreeVisibilityHandler,
-} from "../../../tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeVisibilityHandler.js";
-import {
-  buildIModel, insertDrawingCategory, insertDrawingGraphic, insertDrawingModelWithPartition, insertPhysicalElement, insertPhysicalModelWithPartition,
+  buildIModel,
+  insertDrawingCategory,
+  insertDrawingGraphic,
+  insertDrawingModelWithPartition,
+  insertPhysicalElement,
+  insertPhysicalModelWithPartition,
   insertSpatialCategory,
 } from "../../IModelUtils.js";
 import { initializeITwinJs, terminateITwinJs } from "../../Initialize.js";
 import { createIModelAccess } from "../Common.js";
 import {
-  createClassificationHierarchyNode, createClassificationTableHierarchyNode, createPhysicalElementHierarchyNode,
+  createClassificationHierarchyNode,
+  createClassificationTableHierarchyNode,
+  createDrawingElementHierarchyNode,
+  createPhysicalElementHierarchyNode,
 } from "./HierarchyNodeUtils.js";
 import {
-  importClassificationSchema, insertClassification, insertClassificationSystem, insertClassificationTable,
+  importClassificationSchema,
+  insertClassification,
+  insertClassificationSystem,
+  insertClassificationTable,
   insertElementHasClassificationsRelationship,
 } from "./Utils.js";
 import { validateHierarchyVisibility } from "./VisibilityValidation.js";
@@ -800,6 +807,387 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       });
     });
   });
+
+  describe("filtered nodes", () => {
+    async function createFilteredVisibilityTestData({
+      imodel,
+      filterPaths,
+      categoryIds,
+      modelIds,
+      view,
+    }: Parameters<typeof createVisibilityTestData>[0] & {
+      filterPaths: HierarchyNodeIdentifiersPath[];
+      categoryIds: Id64Array;
+      modelIds: Id64Array;
+      view: "3d" | "2d";
+    }) {
+      const imodelAccess = createIModelAccess(imodel);
+      const idsCache = new ClassificationsTreeIdsCache(imodelAccess, { rootClassificationSystemCode });
+      const viewport = OffScreenViewport.create({
+        view: view === "3d" ? await createSpatialViewState(imodel, categoryIds, modelIds) : await createDrawingViewState(imodel, categoryIds, modelIds),
+        viewRect: new ViewRect(),
+      });
+      const handler = createClassificationsTreeVisibilityHandler({ idsCache, viewport, imodelAccess, filteredPaths: filterPaths });
+      const defaultProvider = createProvider({ idsCache, imodelAccess });
+      const filteredProvider = createProvider({ idsCache, imodelAccess, filterPaths });
+      return {
+        handler,
+        defaultProvider,
+        filteredProvider,
+        imodel,
+        imodelAccess,
+        viewport,
+        [Symbol.dispose]() {
+          idsCache[Symbol.dispose]();
+          viewport[Symbol.dispose]();
+          handler[Symbol.dispose]();
+          defaultProvider[Symbol.dispose]();
+          filteredProvider[Symbol.dispose]();
+        },
+      };
+    }
+
+    it("showing filtered geometric element changes visibility for nodes in filter paths", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        await importClassificationSchema(builder);
+
+        const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
+        const table = insertClassificationTable({ builder, parentId: system.id, codeValue: "ClassificationTable" });
+        const classification = insertClassification({ builder, modelId: table.id, codeValue: "Classification" });
+
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "physical model" });
+        const spatialCategory = insertSpatialCategory({ builder, codeValue: "spatial category" });
+        const element1 = insertPhysicalElement({
+          builder,
+          modelId: physicalModel.id,
+          categoryId: spatialCategory.id,
+          codeValue: "3d element1",
+        });
+        const element2 = insertPhysicalElement({
+          builder,
+          modelId: physicalModel.id,
+          categoryId: spatialCategory.id,
+          codeValue: "3d element2",
+        });
+        insertElementHasClassificationsRelationship({ builder, elementId: element1.id, classificationId: classification.id });
+        insertElementHasClassificationsRelationship({ builder, elementId: element2.id, classificationId: classification.id });
+
+        return {
+          table,
+          classification,
+          physicalModel,
+          spatialCategory,
+          element1,
+          element2,
+          filterPaths: [[table, classification, element1]],
+        };
+      });
+
+      const { imodel, filterPaths, ...keys } = buildIModelResult;
+      using visibilityTestData = await createFilteredVisibilityTestData({
+        imodel,
+        filterPaths,
+        view: "3d",
+        categoryIds: [keys.spatialCategory.id],
+        modelIds: [keys.physicalModel.id],
+      });
+      const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
+      await setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
+
+      await handler.changeVisibility(
+        createPhysicalElementHierarchyNode({
+          id: keys.element1.id,
+          categoryId: keys.spatialCategory.id,
+          modelId: keys.physicalModel.id,
+          filtering: {
+            isFilterTarget: true,
+            filteredChildrenIdentifierPaths: [],
+          },
+        }),
+        true,
+      );
+
+      await validateHierarchyVisibility({
+        provider: filteredProvider,
+        handler,
+        viewport,
+        expectations: "all-visible",
+      });
+
+      await validateHierarchyVisibility({
+        provider: defaultProvider,
+        handler,
+        viewport,
+        expectations: {
+          [keys.table.id]: "partial",
+          [keys.classification.id]: "partial",
+          [keys.element1.id]: "visible",
+          [keys.element2.id]: "hidden",
+        },
+      });
+    });
+
+    it("showing filtered drawing element changes visibility for nodes in filter paths", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        await importClassificationSchema(builder);
+
+        const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
+        const table = insertClassificationTable({ builder, parentId: system.id, codeValue: "ClassificationTable" });
+        const classification = insertClassification({ builder, modelId: table.id, codeValue: "Classification" });
+        const drawingModel = insertDrawingModelWithPartition({ builder, codeValue: "drawing model" });
+        const drawingCategory = insertDrawingCategory({ builder, codeValue: "drawing category" });
+        const element1 = insertDrawingGraphic({
+          builder,
+          modelId: drawingModel.id,
+          categoryId: drawingCategory.id,
+          codeValue: "2d element1",
+        });
+        const element2 = insertDrawingGraphic({
+          builder,
+          modelId: drawingModel.id,
+          categoryId: drawingCategory.id,
+          codeValue: "2d element2",
+        });
+        insertElementHasClassificationsRelationship({ builder, elementId: element1.id, classificationId: classification.id });
+        insertElementHasClassificationsRelationship({ builder, elementId: element2.id, classificationId: classification.id });
+
+        return {
+          table,
+          classification,
+          drawingModel,
+          drawingCategory,
+          element1,
+          element2,
+          filterPaths: [[table, classification, element1]],
+        };
+      });
+
+      const { imodel, filterPaths, ...keys } = buildIModelResult;
+      using visibilityTestData = await createFilteredVisibilityTestData({
+        imodel,
+        filterPaths,
+        view: "2d",
+        categoryIds: [keys.drawingCategory.id],
+        modelIds: [keys.drawingModel.id],
+      });
+      const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
+      await setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
+
+      await handler.changeVisibility(
+        createDrawingElementHierarchyNode({
+          id: keys.element1.id,
+          categoryId: keys.drawingCategory.id,
+          modelId: keys.drawingModel.id,
+          filtering: {
+            isFilterTarget: true,
+            filteredChildrenIdentifierPaths: [],
+          },
+        }),
+        true,
+      );
+
+      await validateHierarchyVisibility({
+        provider: filteredProvider,
+        handler,
+        viewport,
+        expectations: "all-visible",
+      });
+
+      await validateHierarchyVisibility({
+        provider: defaultProvider,
+        handler,
+        viewport,
+        expectations: {
+          [keys.table.id]: "partial",
+          [keys.classification.id]: "partial",
+          [keys.element1.id]: "visible",
+          [keys.element2.id]: "hidden",
+        },
+      });
+    });
+
+    it("showing filtered classification changes visibility for nodes in filter paths", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        await importClassificationSchema(builder);
+
+        const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
+        const table = insertClassificationTable({ builder, parentId: system.id, codeValue: "ClassificationTable" });
+        const classification1 = insertClassification({ builder, modelId: table.id, codeValue: "Classification1" });
+        const classification2 = insertClassification({ builder, modelId: table.id, codeValue: "Classification2" });
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "physical model" });
+        const spatialCategory1 = insertSpatialCategory({ builder, codeValue: "spatial category1" });
+        const spatialCategory2 = insertSpatialCategory({ builder, codeValue: "spatial category2" });
+        const element1 = insertPhysicalElement({
+          builder,
+          modelId: physicalModel.id,
+          categoryId: spatialCategory1.id,
+          codeValue: "3d element1",
+        });
+        const element2 = insertPhysicalElement({
+          builder,
+          modelId: physicalModel.id,
+          categoryId: spatialCategory1.id,
+          codeValue: "3d element2",
+        });
+        const element3 = insertPhysicalElement({
+          builder,
+          modelId: physicalModel.id,
+          categoryId: spatialCategory2.id,
+          codeValue: "3d element3",
+        });
+        insertElementHasClassificationsRelationship({ builder, elementId: element1.id, classificationId: classification1.id });
+        insertElementHasClassificationsRelationship({ builder, elementId: element2.id, classificationId: classification1.id });
+        insertElementHasClassificationsRelationship({ builder, elementId: element3.id, classificationId: classification2.id });
+
+        return {
+          table,
+          classification1,
+          classification2,
+          physicalModel,
+          spatialCategory1,
+          spatialCategory2,
+          element1,
+          element2,
+          element3,
+          filterPaths: [[table, classification1, element1]],
+        };
+      });
+
+      const { imodel, filterPaths, ...keys } = buildIModelResult;
+      using visibilityTestData = await createFilteredVisibilityTestData({
+        imodel,
+        filterPaths,
+        view: "3d",
+        categoryIds: [keys.spatialCategory1.id, keys.spatialCategory2.id],
+        modelIds: [keys.physicalModel.id],
+      });
+      const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
+      await setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
+      await handler.changeVisibility(
+        createClassificationHierarchyNode({
+          id: keys.classification1.id,
+          filtering: {
+            isFilterTarget: false,
+            filteredChildrenIdentifierPaths: [[keys.element1]],
+          },
+          parentKeys: [keys.table],
+        }),
+        true,
+      );
+
+      await validateHierarchyVisibility({
+        provider: filteredProvider,
+        handler,
+        viewport,
+        expectations: "all-visible",
+      });
+
+      await validateHierarchyVisibility({
+        provider: defaultProvider,
+        handler,
+        viewport,
+        expectations: {
+          [keys.table.id]: "partial",
+          [keys.classification1.id]: "partial",
+          [keys.element1.id]: "visible",
+          [keys.element2.id]: "hidden",
+          [keys.classification2.id]: "hidden",
+          [keys.element3.id]: "hidden",
+        },
+      });
+    });
+
+    it("showing filtered classification table changes visibility for nodes in filter paths", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        await importClassificationSchema(builder);
+
+        const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
+        const table = insertClassificationTable({ builder, parentId: system.id, codeValue: "ClassificationTable" });
+        const classification1 = insertClassification({ builder, modelId: table.id, codeValue: "Classification1" });
+        const classification2 = insertClassification({ builder, modelId: table.id, codeValue: "Classification2" });
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "physical model" });
+        const spatialCategory1 = insertSpatialCategory({ builder, codeValue: "spatial category1" });
+        const spatialCategory2 = insertSpatialCategory({ builder, codeValue: "spatial category2" });
+        const element1 = insertPhysicalElement({
+          builder,
+          modelId: physicalModel.id,
+          categoryId: spatialCategory1.id,
+          codeValue: "3d element1",
+        });
+        const element2 = insertPhysicalElement({
+          builder,
+          modelId: physicalModel.id,
+          categoryId: spatialCategory1.id,
+          codeValue: "3d element2",
+        });
+        const element3 = insertPhysicalElement({
+          builder,
+          modelId: physicalModel.id,
+          categoryId: spatialCategory2.id,
+          codeValue: "3d element3",
+        });
+        insertElementHasClassificationsRelationship({ builder, elementId: element1.id, classificationId: classification1.id });
+        insertElementHasClassificationsRelationship({ builder, elementId: element2.id, classificationId: classification1.id });
+        insertElementHasClassificationsRelationship({ builder, elementId: element3.id, classificationId: classification2.id });
+
+        return {
+          table,
+          classification1,
+          classification2,
+          physicalModel,
+          spatialCategory1,
+          spatialCategory2,
+          element1,
+          element2,
+          element3,
+          filterPaths: [[table, classification1, element1]],
+        };
+      });
+
+      const { imodel, filterPaths, ...keys } = buildIModelResult;
+      using visibilityTestData = await createFilteredVisibilityTestData({
+        imodel,
+        filterPaths,
+        view: "3d",
+        categoryIds: [keys.spatialCategory1.id, keys.spatialCategory2.id],
+        modelIds: [keys.physicalModel.id],
+      });
+      const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
+      await setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
+      await handler.changeVisibility(
+        createClassificationTableHierarchyNode({
+          hasChildren: true,
+          id: keys.table.id,
+          filtering: {
+            isFilterTarget: false,
+            filteredChildrenIdentifierPaths: [[keys.classification1, keys.element1]],
+          },
+        }),
+        true,
+      );
+
+      await validateHierarchyVisibility({
+        provider: filteredProvider,
+        handler,
+        viewport,
+        expectations: "all-visible",
+      });
+
+      await validateHierarchyVisibility({
+        provider: defaultProvider,
+        handler,
+        viewport,
+        expectations: {
+          [keys.table.id]: "partial",
+          [keys.classification1.id]: "partial",
+          [keys.element1.id]: "visible",
+          [keys.element2.id]: "hidden",
+          [keys.classification2.id]: "hidden",
+          [keys.element3.id]: "hidden",
+        },
+      });
+    });
+  });
 });
 
 async function createSpatialViewState(iModel: IModelConnection, categoryIds: Id64Array, modelIds: Id64Array) {
@@ -866,7 +1254,7 @@ async function createDrawingViewState(iModel: IModelConnection, categoryIds: Id6
     },
     iModel,
   );
-  modelIds.length && await viewState.changeViewedModel(modelIds[0]);
+  modelIds.length && (await viewState.changeViewedModel(modelIds[0]));
 
   viewState.displayStyle.backgroundColor = ColorDef.white;
   const flags = viewState.viewFlags.copy({
@@ -922,7 +1310,7 @@ async function setupInitialDisplayState(props: {
   }
   if (viewport.view.is2d()) {
     assert(models.length <= 1, "2d views support only one model at a time");
-    models.length && models[0].visible && await viewport.changeViewedModel2d(models[0].id);
+    models.length && models[0].visible && (await viewport.changeViewedModel2d(models[0].id));
   }
 }
 

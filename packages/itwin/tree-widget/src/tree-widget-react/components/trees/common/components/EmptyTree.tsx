@@ -80,8 +80,6 @@ export function UnknownInstanceFocusError({ base }: FilterEmptyTreeProps) {
   );
 }
 
-
-
 interface EmptyTreeContentProps {
   icon?: string;
 }
