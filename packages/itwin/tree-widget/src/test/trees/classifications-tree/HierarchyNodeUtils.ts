@@ -3,16 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  CLASS_NAME_Classification, CLASS_NAME_ClassificationTable,
-} from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
+import { CLASS_NAME_Classification, CLASS_NAME_ClassificationTable } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 
-export function createClassificationTableHierarchyNode(
-  {id, hasChildren}: {id: Id64String; hasChildren?: boolean},
-): NonGroupingHierarchyNode {
+export function createClassificationTableHierarchyNode({ id, hasChildren }: { id: Id64String; hasChildren?: boolean }): NonGroupingHierarchyNode {
   return {
     key: {
       type: "instances",
@@ -27,9 +23,7 @@ export function createClassificationTableHierarchyNode(
   };
 }
 
-export function createClassificationHierarchyNode(
-  {id, hasChildren}: {id: Id64String; hasChildren?: boolean}
-): NonGroupingHierarchyNode {
+export function createClassificationHierarchyNode({ id, hasChildren }: { id: Id64String; hasChildren?: boolean }): NonGroupingHierarchyNode {
   return {
     key: {
       type: "instances",
@@ -44,7 +38,15 @@ export function createClassificationHierarchyNode(
   };
 }
 
-export function createPhysicalElementHierarchyNode({id, modelId, categoryId}: {id: Id64String; modelId: Id64String; categoryId: Id64String}): NonGroupingHierarchyNode {
+export function createPhysicalElementHierarchyNode({
+  id,
+  modelId,
+  categoryId,
+}: {
+  id: Id64String;
+  modelId: Id64String;
+  categoryId: Id64String;
+}): NonGroupingHierarchyNode {
   return {
     key: {
       type: "instances",
@@ -61,7 +63,15 @@ export function createPhysicalElementHierarchyNode({id, modelId, categoryId}: {i
   };
 }
 
-export function createDrawingElementHierarchyNode({id, modelId, categoryId}: {id: Id64String; modelId: Id64String; categoryId: Id64String}): NonGroupingHierarchyNode {
+export function createDrawingElementHierarchyNode({
+  id,
+  modelId,
+  categoryId,
+}: {
+  id: Id64String;
+  modelId: Id64String;
+  categoryId: Id64String;
+}): NonGroupingHierarchyNode {
   return {
     key: {
       type: "instances",

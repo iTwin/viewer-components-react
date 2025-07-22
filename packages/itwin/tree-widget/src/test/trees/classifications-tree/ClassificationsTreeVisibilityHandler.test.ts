@@ -9,23 +9,25 @@ import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { DrawingViewState, IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { ClassificationsTreeDefinition } from "../../../tree-widget-react/components/trees/classifications-tree/ClassificationsTreeDefinition.js";
+import { ClassificationsTreeIdsCache } from "../../../tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeIdsCache.js";
+import { createClassificationsTreeVisibilityHandler } from "../../../tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeVisibilityHandler.js";
 import {
-  ClassificationsTreeIdsCache,
-} from "../../../tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeIdsCache.js";
-import {
-  createClassificationsTreeVisibilityHandler,
-} from "../../../tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeVisibilityHandler.js";
-import {
-  buildIModel, insertDrawingCategory, insertDrawingGraphic, insertDrawingModelWithPartition, insertPhysicalElement, insertPhysicalModelWithPartition,
+  buildIModel,
+  insertDrawingCategory,
+  insertDrawingGraphic,
+  insertDrawingModelWithPartition,
+  insertPhysicalElement,
+  insertPhysicalModelWithPartition,
   insertSpatialCategory,
 } from "../../IModelUtils.js";
 import { initializeITwinJs, terminateITwinJs } from "../../Initialize.js";
 import { createIModelAccess } from "../Common.js";
+import { createClassificationHierarchyNode, createClassificationTableHierarchyNode, createPhysicalElementHierarchyNode } from "./HierarchyNodeUtils.js";
 import {
-  createClassificationHierarchyNode, createClassificationTableHierarchyNode, createPhysicalElementHierarchyNode,
-} from "./HierarchyNodeUtils.js";
-import {
-  importClassificationSchema, insertClassification, insertClassificationSystem, insertClassificationTable,
+  importClassificationSchema,
+  insertClassification,
+  insertClassificationSystem,
+  insertClassificationTable,
   insertElementHasClassificationsRelationship,
 } from "./Utils.js";
 import { validateHierarchyVisibility } from "./VisibilityValidation.js";
@@ -866,7 +868,7 @@ async function createDrawingViewState(iModel: IModelConnection, categoryIds: Id6
     },
     iModel,
   );
-  modelIds.length && await viewState.changeViewedModel(modelIds[0]);
+  modelIds.length && (await viewState.changeViewedModel(modelIds[0]));
 
   viewState.displayStyle.backgroundColor = ColorDef.white;
   const flags = viewState.viewFlags.copy({
@@ -922,7 +924,7 @@ async function setupInitialDisplayState(props: {
   }
   if (viewport.view.is2d()) {
     assert(models.length <= 1, "2d views support only one model at a time");
-    models.length && models[0].visible && await viewport.changeViewedModel2d(models[0].id);
+    models.length && models[0].visible && (await viewport.changeViewedModel2d(models[0].id));
   }
 }
 
