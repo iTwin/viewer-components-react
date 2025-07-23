@@ -115,11 +115,10 @@ function onIModelConnected(imodel: IModelConnection) {
         void IModelApp.quantityFormatter.resetToUseInternalUnitsProvider();
         console.log("Unregistered SchemaFormatsProvider, SchemaUnitProvider");
       });
-
     } catch (err) {
       console.error("Error while setting up formats provider:", err);
     }
-  }
+  };
 
   // Only load a schema formats provider if the iModel has the AecUnits schema
   void setupFormatsProvider();

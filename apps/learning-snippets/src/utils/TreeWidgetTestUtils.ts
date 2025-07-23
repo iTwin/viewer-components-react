@@ -83,8 +83,8 @@ export function mockGetBoundingClientRect() {
     );
   });
 
- afterEach(() => {
-   stubs.forEach((stub) => stub.restore());
-   stubs = [];
- });
+  afterEach(() => {
+    stubs.forEach((stub) => stub.restore());
+    stubs = [];
+  });
 }
