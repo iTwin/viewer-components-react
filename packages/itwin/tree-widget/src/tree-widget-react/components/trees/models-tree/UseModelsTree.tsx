@@ -75,7 +75,7 @@ export interface UseModelsTreeProps {
    *
    * When defined, only nodes that are in provided paths or children of filter targets will be part of the hierarchy.
    */
-  getSubsetTreePaths?: (props: {
+  getSubTreePaths?: (props: {
     /** A function that creates filtering paths based on provided target instance keys. */
     createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> }) => Promise<HierarchyFilteringPath[]>;
   }) => Promise<HierarchyFilteringPath[]>;
@@ -108,7 +108,7 @@ export function useModelsTree({
   getFilteredPaths,
   onModelsFiltered,
   selectionPredicate: nodeTypeSelectionPredicate,
-  getSubsetTreePaths,
+  getSubTreePaths,
 }: UseModelsTreeProps): UseModelsTreeResult {
   const [filteringError, setFilteringError] = useState<ModelsTreeFilteringError | undefined>(undefined);
   const hierarchyConfiguration = useMemo<ModelsTreeHierarchyConfiguration>(
@@ -145,16 +145,16 @@ export function useModelsTree({
     [onFeatureUsed],
   );
 
-  const getSubsetPaths = useMemo<
+  const getSubTreePathsInternal = useMemo<
     ((...props: Parameters<Required<VisibilityTreeProps>["getFilteredPaths"]>) => Promise<HierarchyNodeIdentifiersPath[]>) | undefined
   >(() => {
-    if (!getSubsetTreePaths) {
+    if (!getSubTreePaths) {
       return undefined;
     }
 
     return async ({ imodelAccess, abortSignal }) => {
       try {
-        const paths = await getSubsetTreePaths({
+        const paths = await getSubTreePaths({
           createInstanceKeyPaths: async ({ targetItems }) =>
             ModelsTreeDefinition.createInstanceKeyPaths({
               imodelAccess,
@@ -170,14 +170,14 @@ export function useModelsTree({
         return [];
       }
     };
-  }, [getModelsTreeIdsCache, hierarchyConfiguration, getSubsetTreePaths]);
+  }, [getModelsTreeIdsCache, hierarchyConfiguration, getSubTreePaths]);
 
   const getPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
     setFilteringError(undefined);
     onModelsFiltered?.(undefined);
 
     // reset filtered paths if there is no filters applied. This allows to keep current filtered paths until new paths are loaded.
-    if (!loadFocusedItems && !getFilteredPaths && !filter && !getSubsetPaths) {
+    if (!loadFocusedItems && !getFilteredPaths && !filter && !getSubTreePathsInternal) {
       onFilteredPathsChanged(undefined);
     }
 
@@ -196,7 +196,7 @@ export function useModelsTree({
         try {
           const focusedItems = await collectFocusedItems(loadFocusedItems);
           const [subSetPaths, focusedPaths] = await Promise.all([
-            getSubsetPaths ? getSubsetPaths({ imodelAccess, abortSignal }) : undefined,
+            getSubTreePathsInternal ? getSubTreePathsInternal({ imodelAccess, abortSignal }) : undefined,
             ModelsTreeDefinition.createInstanceKeyPaths({
               imodelAccess,
               idsCache: getModelsTreeIdsCache(),
@@ -224,7 +224,7 @@ export function useModelsTree({
       return async ({ imodelAccess, abortSignal }) => {
         try {
           const [subSetPaths, customFilteredPaths] = await Promise.all([
-            getSubsetPaths ? getSubsetPaths({ imodelAccess, abortSignal }) : undefined,
+            getSubTreePathsInternal ? getSubTreePathsInternal({ imodelAccess, abortSignal }) : undefined,
             getFilteredPaths({
               createInstanceKeyPaths: async (props) =>
                 ModelsTreeDefinition.createInstanceKeyPaths({
@@ -258,7 +258,7 @@ export function useModelsTree({
         onFeatureUsed({ featureId: "filtering", reportInteraction: true });
         try {
           const [subSetPaths, filterPaths] = await Promise.all([
-            getSubsetPaths ? getSubsetPaths({ imodelAccess, abortSignal }) : undefined,
+            getSubTreePathsInternal ? getSubTreePathsInternal({ imodelAccess, abortSignal }) : undefined,
             ModelsTreeDefinition.createInstanceKeyPaths({
               imodelAccess,
               label: filter,
@@ -282,7 +282,7 @@ export function useModelsTree({
         }
       };
     }
-    return getSubsetPaths;
+    return getSubTreePathsInternal;
   }, [
     filter,
     loadFocusedItems,
@@ -292,7 +292,7 @@ export function useModelsTree({
     hierarchyConfiguration,
     onModelsFiltered,
     onFilteredPathsChanged,
-    getSubsetPaths,
+    getSubTreePathsInternal,
   ]);
 
   const nodeSelectionPredicate = useCallback<NonNullable<VisibilityTreeProps["selectionPredicate"]>>(
