@@ -103,7 +103,7 @@ export function joinHierarchyFilteringPaths(subsetPaths: HierarchyNodeIdentifier
     if (addSubsetPathToResult) {
       result.push({
         path: subsetPath,
-        options: depth === 0 ? undefined : ({ autoExpand: depth >= subsetPath.length - 1 ? true : { depth } }),
+        options: depth === 0 ? undefined : { autoExpand: depth >= subsetPath.length - 1 ? true : { depth } },
       });
     }
   });

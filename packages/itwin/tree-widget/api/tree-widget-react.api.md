@@ -260,7 +260,7 @@ export const ModelsTreeComponent: {
 };
 
 // @public (undocumented)
-interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode" | "selectionPredicate" | "hierarchyConfig" | "visibilityHandlerOverrides" | "getFilteredPaths" | "subsetTreeConfig"> {
+interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode" | "selectionPredicate" | "hierarchyConfig" | "visibilityHandlerOverrides" | "getFilteredPaths" | "getSubsetTreePaths"> {
     headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
@@ -508,7 +508,7 @@ interface UseCategoriesTreeResult {
 export function useFocusedInstancesContext(): FocusedInstancesContext;
 
 // @beta
-export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getFilteredPaths, onModelsFiltered, selectionPredicate: nodeTypeSelectionPredicate, subsetTreeConfig, }: UseModelsTreeProps): UseModelsTreeResult;
+export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getFilteredPaths, onModelsFiltered, selectionPredicate: nodeTypeSelectionPredicate, getSubsetTreePaths, }: UseModelsTreeProps): UseModelsTreeResult;
 
 // @public
 export function useModelsTreeButtonProps({ imodel, viewport }: {
@@ -532,6 +532,11 @@ interface UseModelsTreeProps {
         }) => Promise<HierarchyFilteringPath[]>;
         filter?: string;
     }) => Promise<HierarchyFilteringPath[]>;
+    getSubsetTreePaths?: (props: {
+        createInstanceKeyPaths: (props: {
+            targetItems: Array<InstanceKey | ElementsGroupInfo>;
+        }) => Promise<HierarchyFilteringPath[]>;
+    }) => Promise<HierarchyFilteringPath[]>;
     // (undocumented)
     hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
     // (undocumented)
@@ -540,9 +545,6 @@ interface UseModelsTreeProps {
         node: PresentationHierarchyNode;
         type: "subject" | "model" | "category" | "element" | "elements-class-group";
     }) => boolean;
-    subsetTreeConfig?: {
-        targetItems: Array<InstanceKey>;
-    };
     // (undocumented)
     visibilityHandlerOverrides?: ModelsTreeVisibilityHandlerOverrides;
 }

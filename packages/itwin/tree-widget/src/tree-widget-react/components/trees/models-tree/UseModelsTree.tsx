@@ -70,14 +70,15 @@ export interface UseModelsTreeProps {
     filter?: string;
   }) => Promise<HierarchyFilteringPath[]>;
   /**
-   * Optional props for applying custom filtering on the hierarchy.
+   * Optional function for applying custom filtering on the hierarchy.
    * Use it when you want to display only part of the hierarchy, but don't want to change how filtering works.
    *
-   * When defined, only nodes that are children/parents to provided targetItems will be part of the hierarchy.
+   * When defined, only nodes that are in provided paths or children of filter targets will be part of the hierarchy.
    */
-  subsetTreeConfig?: {
-    targetItems: Array<InstanceKey>;
-  };
+  getSubsetTreePaths?: (props: {
+    /** A function that creates filtering paths based on provided target instance keys. */
+    createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> }) => Promise<HierarchyFilteringPath[]>;
+  }) => Promise<HierarchyFilteringPath[]>;
   onModelsFiltered?: (modelIds: Id64String[] | undefined) => void;
   /**
    * An optional predicate to allow or prohibit selection of a node.
@@ -107,7 +108,7 @@ export function useModelsTree({
   getFilteredPaths,
   onModelsFiltered,
   selectionPredicate: nodeTypeSelectionPredicate,
-  subsetTreeConfig,
+  getSubsetTreePaths,
 }: UseModelsTreeProps): UseModelsTreeResult {
   const [filteringError, setFilteringError] = useState<ModelsTreeFilteringError | undefined>(undefined);
   const hierarchyConfiguration = useMemo<ModelsTreeHierarchyConfiguration>(
@@ -147,25 +148,29 @@ export function useModelsTree({
   const getSubsetPaths = useMemo<
     ((...props: Parameters<Required<VisibilityTreeProps>["getFilteredPaths"]>) => Promise<HierarchyNodeIdentifiersPath[]>) | undefined
   >(() => {
-    if (!subsetTreeConfig) {
+    if (!getSubsetTreePaths) {
       return undefined;
     }
+
     return async ({ imodelAccess, abortSignal }) => {
       try {
-        const paths = await ModelsTreeDefinition.createInstanceKeyPaths({
-          imodelAccess,
-          targetItems: subsetTreeConfig.targetItems,
-          idsCache: getModelsTreeIdsCache(),
-          hierarchyConfig: hierarchyConfiguration,
-          limit: "unbounded",
-          abortSignal
+        const paths = await getSubsetTreePaths({
+          createInstanceKeyPaths: async ({ targetItems }) =>
+            ModelsTreeDefinition.createInstanceKeyPaths({
+              imodelAccess,
+              targetItems,
+              idsCache: getModelsTreeIdsCache(),
+              hierarchyConfig: hierarchyConfiguration,
+              limit: "unbounded",
+              abortSignal,
+            }),
         });
         return paths.map((path) => HierarchyFilteringPath.normalize(path).path);
       } catch (e) {
         return [];
       }
     };
-  }, [getModelsTreeIdsCache, hierarchyConfiguration, subsetTreeConfig]);
+  }, [getModelsTreeIdsCache, hierarchyConfiguration, getSubsetTreePaths]);
 
   const getPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
     setFilteringError(undefined);
@@ -197,7 +202,7 @@ export function useModelsTree({
               idsCache: getModelsTreeIdsCache(),
               targetItems: focusedItems,
               hierarchyConfig: hierarchyConfiguration,
-              abortSignal
+              abortSignal,
             }).then((createdPaths) => createdPaths.map((path) => ("path" in path ? path : { path, options: { autoExpand: true } }))),
           ]);
           const joinedPaths = !subSetPaths ? focusedPaths : joinHierarchyFilteringPaths(subSetPaths, focusedPaths);
@@ -228,7 +233,7 @@ export function useModelsTree({
                   idsCache: getModelsTreeIdsCache(),
                   hierarchyConfig: hierarchyConfiguration,
                   limit: "unbounded",
-                  abortSignal
+                  abortSignal,
                 }),
               filter,
             }),
@@ -259,7 +264,7 @@ export function useModelsTree({
               label: filter,
               idsCache: getModelsTreeIdsCache(),
               hierarchyConfig: hierarchyConfiguration,
-              abortSignal
+              abortSignal,
             }).then((createdPaths) => createdPaths.map((path) => ("path" in path ? path : { path, options: { autoExpand: true } }))),
           ]);
 
