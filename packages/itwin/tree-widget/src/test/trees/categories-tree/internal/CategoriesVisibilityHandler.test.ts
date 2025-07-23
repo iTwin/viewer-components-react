@@ -3,8 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { Code, ColorDef, IModel, IModelReadRpcInterface, RenderMode } from "@itwin/core-common";
-import { IModelApp, OffScreenViewport, PerModelCategoryVisibility, SpatialViewState, ViewRect } from "@itwin/core-frontend";
+import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
+import { OffScreenViewport, PerModelCategoryVisibility, ViewRect } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
@@ -24,6 +24,7 @@ import {
 } from "../../../IModelUtils.js";
 import { TestUtils } from "../../../TestUtils.js";
 import { createIModelAccess } from "../../Common.js";
+import { createViewState } from "../../TreeUtils.js";
 import { createCategoryHierarchyNode, createDefinitionContainerHierarchyNode, createSubCategoryHierarchyNode } from "./Utils.js";
 import { validateHierarchyVisibility } from "./VisibilityValidation.js";
 
@@ -1556,48 +1557,6 @@ describe("CategoriesVisibilityHandler", () => {
     });
   });
 });
-
-async function createViewState(iModel: IModelConnection, categoryIds: Id64Array, modelIds: Id64Array) {
-  const model = IModel.dictionaryId;
-  const viewState = SpatialViewState.createFromProps(
-    {
-      categorySelectorProps: { categories: categoryIds, model, code: Code.createEmpty(), classFullName: "BisCore:CategorySelector" },
-      displayStyleProps: { model, code: Code.createEmpty(), classFullName: "BisCore:DisplayStyle3d" },
-      viewDefinitionProps: {
-        model,
-        code: Code.createEmpty(),
-        categorySelectorId: "",
-        classFullName: "BisCore:SpatialViewDefinition",
-        displayStyleId: "",
-      },
-      modelSelectorProps: {
-        models: modelIds,
-        code: Code.createEmpty(),
-        model,
-        classFullName: "BisCore:ModelSelector",
-      },
-    },
-    iModel,
-  );
-
-  viewState.setAllow3dManipulations(true);
-
-  viewState.displayStyle.backgroundColor = ColorDef.white;
-  const flags = viewState.viewFlags.copy({
-    grid: false,
-    renderMode: RenderMode.SmoothShade,
-    backgroundMap: false,
-  });
-  viewState.displayStyle.viewFlags = flags;
-
-  IModelApp.viewManager.onViewOpen.addOnce((vp) => {
-    if (vp.view.hasSameCoordinates(viewState)) {
-      vp.applyViewState(viewState);
-    }
-  });
-  await viewState.load();
-  return viewState;
-}
 
 interface VisibilityInfo {
   id: Id64String;
