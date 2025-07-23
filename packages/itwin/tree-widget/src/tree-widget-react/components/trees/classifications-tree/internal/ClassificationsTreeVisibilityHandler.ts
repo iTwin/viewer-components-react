@@ -4,8 +4,30 @@
  *--------------------------------------------------------------------------------------------*/
 
 import {
-  concat, concatAll, defaultIfEmpty, defer, distinct, EMPTY, filter, firstValueFrom, forkJoin, from, fromEventPattern, map, merge, mergeAll, mergeMap,
-  of, reduce, shareReplay, startWith, Subject, take, takeUntil, tap, toArray,
+  concat,
+  concatAll,
+  defaultIfEmpty,
+  defer,
+  distinct,
+  EMPTY,
+  filter,
+  firstValueFrom,
+  forkJoin,
+  from,
+  fromEventPattern,
+  map,
+  merge,
+  mergeAll,
+  mergeMap,
+  of,
+  reduce,
+  shareReplay,
+  startWith,
+  Subject,
+  take,
+  takeUntil,
+  tap,
+  toArray,
 } from "rxjs";
 import { assert, Id64 } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
@@ -16,8 +38,13 @@ import { createVisibilityStatus } from "../../common/internal/Tooltip.js";
 import { setDifference, setIntersection } from "../../common/internal/Utils.js";
 import { createVisibilityChangeEventListener } from "../../common/internal/VisibilityChangeEventListener.js";
 import {
-  changeElementStateNoChildrenOperator, enableCategoryDisplay, getElementOverriddenVisibility, getElementVisibility,
-  getSubModeledElementsVisibilityStatus, getVisibilityFromAlwaysAndNeverDrawnElementsImpl, mergeVisibilityStatuses,
+  changeElementStateNoChildrenOperator,
+  enableCategoryDisplay,
+  getElementOverriddenVisibility,
+  getElementVisibility,
+  getSubModeledElementsVisibilityStatus,
+  getVisibilityFromAlwaysAndNeverDrawnElementsImpl,
+  mergeVisibilityStatuses,
 } from "../../common/internal/VisibilityUtils.js";
 import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility.js";
 import { ClassificationsTreeNode } from "./ClassificationsTreeNode.js";

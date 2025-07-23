@@ -1,13 +1,12 @@
 //@ts-check
 
-
 const itwinUiV3dependencies = [
   "@itwin/presentation-components",
   "@itwin/components-react",
   "@itwin/core-react",
   "@itwin/imodel-components-react",
-  "@itwin/appui-react"
-]
+  "@itwin/appui-react",
+];
 
 module.exports = {
   hooks: {

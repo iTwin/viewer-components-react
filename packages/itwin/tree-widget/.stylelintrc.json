@@ -1,9 +1,7 @@
 {
   "overrides": [
     {
-      "files": [
-        "./src/**/*.css"
-      ],
+      "files": ["./src/**/*.css"],
       "extends": "stylelint-config-standard",
       "rules": {
         "comment-whitespace-inside": null

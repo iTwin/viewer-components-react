@@ -87,6 +87,6 @@ function createVisibilityHandlerFactory(props: CreateFactoryProps<Classification
   return ({ imodelAccess }) => createClassificationsTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter(), imodelAccess });
 }
 
-function createCache(props:  CreateCacheProps<{ hierarchyConfig: ClassificationsTreeHierarchyConfiguration }>) {
+function createCache(props: CreateCacheProps<{ hierarchyConfig: ClassificationsTreeHierarchyConfiguration }>) {
   return new ClassificationsTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.hierarchyConfig);
 }

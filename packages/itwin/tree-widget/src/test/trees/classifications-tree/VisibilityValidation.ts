@@ -28,7 +28,10 @@ export async function validateNodeVisibility({ node, handler, expectations }: Va
   const actualVisibility = await handler.getVisibilityStatus(node);
 
   if (expectations === "all-hidden" || expectations === "all-visible") {
-    expect(actualVisibility.state).to.eq(expectations === "all-hidden" ? "hidden" : "visible", `Expected [${node.label}] visibility to be ${expectations}, but got ${actualVisibility.state}`);
+    expect(actualVisibility.state).to.eq(
+      expectations === "all-hidden" ? "hidden" : "visible",
+      `Expected [${node.label}] visibility to be ${expectations}, but got ${actualVisibility.state}`,
+    );
     return;
   }
 

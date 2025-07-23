@@ -10,7 +10,7 @@ import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shar
 import { TreeWidget } from "../../../../TreeWidget.js";
 import { LOGGING_NAMESPACE } from "../Utils.js";
 
-import type { FunctionProps} from "../Utils.js";
+import type { FunctionProps } from "../Utils.js";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { useIModelTree } from "@itwin/presentation-hierarchies-react";
 

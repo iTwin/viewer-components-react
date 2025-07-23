@@ -62,14 +62,14 @@ export function useFilteredPaths({
 
   const getPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
     const handlePaths = async (filteredPaths: HierarchyFilteringPath[], classInspector: ECClassHierarchyInspector) => {
-          onFilteredPathsChanged(filteredPaths);
-          if (!onModelsFiltered) {
-            return;
-          }
+      onFilteredPathsChanged(filteredPaths);
+      if (!onModelsFiltered) {
+        return;
+      }
 
-          const modelIds = await getModels(filteredPaths, getModelsTreeIdsCache(), classInspector);
-          onModelsFiltered(modelIds);
-        };
+      const modelIds = await getModels(filteredPaths, getModelsTreeIdsCache(), classInspector);
+      onModelsFiltered(modelIds);
+    };
 
     if (loadFocusedItems) {
       return async ({ imodelAccess }) => {
