@@ -390,7 +390,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
       mergeMap((targetItems): Observable<HierarchyFilteringPath> => createInstanceKeyPathsFromTargetItems({ ...props, targetItems })),
       toArray(),
       abortSignal ? takeUntil(fromEvent(abortSignal, "abort")) : identity,
-      defaultIfEmpty([])
+      defaultIfEmpty([]),
     ),
   );
 }

@@ -6,6 +6,7 @@
 import { QueryRowFormat } from "@itwin/core-common";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 
 /**
@@ -19,6 +20,7 @@ export interface CategoryInfo {
 
 /**
  * Toggles visibility of categories to show or hide.
+ * @internal
  */
 export async function toggleAllCategories(viewport: Viewport, display: boolean) {
   const ids = await getCategories(viewport);
@@ -39,22 +41,23 @@ async function getCategories(viewport: Viewport) {
 
 /**
  * Changes category display in the viewport.
+ * @internal
  */
-export async function enableCategoryDisplay(viewport: Viewport, ids: string[], enabled: boolean, enableAllSubCategories = true) {
-  viewport.changeCategoryDisplay(ids, enabled, enableAllSubCategories);
+export async function enableCategoryDisplay(viewport: Viewport, categoryIds: Id64Array, enabled: boolean, enableAllSubCategories = true) {
+  viewport.changeCategoryDisplay(categoryIds, enabled, enableAllSubCategories);
 
   // remove category overrides per model
   const modelsContainingOverrides: string[] = [];
   for (const ovr of viewport.perModelCategoryVisibility) {
-    if (ids.findIndex((id) => id === ovr.categoryId) !== -1) {
+    if (categoryIds.findIndex((id) => id === ovr.categoryId) !== -1) {
       modelsContainingOverrides.push(ovr.modelId);
     }
   }
-  viewport.perModelCategoryVisibility.setOverride(modelsContainingOverrides, ids, PerModelCategoryVisibility.Override.None);
+  viewport.perModelCategoryVisibility.setOverride(modelsContainingOverrides, categoryIds, PerModelCategoryVisibility.Override.None);
 
   // changeCategoryDisplay only enables subcategories, it does not disabled them. So we must do that ourselves.
   if (false === enabled) {
-    (await viewport.iModel.categories.getCategoryInfo(ids)).forEach((categoryInfo) => {
+    (await viewport.iModel.categories.getCategoryInfo(categoryIds)).forEach((categoryInfo) => {
       categoryInfo.subCategories.forEach((value) => enableSubCategoryDisplay(viewport, value.id, false));
     });
   }
@@ -62,11 +65,13 @@ export async function enableCategoryDisplay(viewport: Viewport, ids: string[], e
 
 /**
  * Changes subcategory display in the viewport
+ * @internal
  */
 export function enableSubCategoryDisplay(viewport: Viewport, key: string, enabled: boolean) {
   viewport.changeSubCategoryDisplay(key, enabled);
 }
 
+/** @internal */
 export async function loadCategoriesFromViewport(vp: Viewport) {
   // Query categories and add them to state
   const selectUsedSpatialCategoryIds =
@@ -103,36 +108,38 @@ export async function hideAllCategories(categories: string[], viewport: Viewport
 
 /**
  * Invert display of all given categories.
+ * Categories are inverted like this:
+ * - If category is visible, it will be hidden.
+ * - If category is hidden, it will be visible.
+ * - If category is partially visible, it will be fully visible.
  * @public
  */
 export async function invertAllCategories(categories: CategoryInfo[], viewport: Viewport) {
-  const enabled: string[] = [];
-  const disabled: string[] = [];
-  const enabledSubCategories: string[] = [];
-  const disabledSubCategories: string[] = [];
+  const categoriesToEnable = new Set<Id64String>();
+  const categoriesToDisable = new Set<Id64String>();
 
   for (const category of categories) {
     if (!viewport.view.viewsCategory(category.categoryId)) {
-      disabled.push(category.categoryId);
+      categoriesToEnable.add(category.categoryId);
       continue;
     }
-    // First, we need to check if at least one subcategory is disabled. If it is true, then only subcategories should change display, not categories.
+    // Check if category is in partial state
     if (category.subCategoryIds?.some((subCategory) => !viewport.isSubCategoryVisible(subCategory))) {
-      for (const subCategory of category.subCategoryIds) {
-        viewport.isSubCategoryVisible(subCategory) ? enabledSubCategories.push(subCategory) : disabledSubCategories.push(subCategory);
-      }
+      categoriesToEnable.add(category.categoryId);
     } else {
-      enabled.push(category.categoryId);
+      categoriesToDisable.add(category.categoryId);
     }
   }
 
-  // Disable enabled
-  enabledSubCategories.forEach((subCategory) => enableSubCategoryDisplay(viewport, subCategory, false));
+  // collect per model overrides that need to be inverted
+  for (const { categoryId, visible } of viewport.perModelCategoryVisibility) {
+    if (!visible && categoriesToDisable.has(categoryId)) {
+      categoriesToEnable.add(categoryId);
+      categoriesToDisable.delete(categoryId);
+    }
+  }
 
-  await enableCategoryDisplay(viewport, enabled, false, true);
+  await enableCategoryDisplay(viewport, [...categoriesToDisable], false, true);
 
-  // Enable disabled
-  disabledSubCategories.forEach((subCategory) => enableSubCategoryDisplay(viewport, subCategory, true));
-
-  await enableCategoryDisplay(viewport, disabled, true, true);
+  await enableCategoryDisplay(viewport, [...categoriesToEnable], true, true);
 }
