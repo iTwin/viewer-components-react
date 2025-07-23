@@ -33,7 +33,7 @@ export function ModelsTree({
   visibilityHandlerOverrides,
   getFilteredPaths,
   onModelsFiltered,
-  getSubsetTreePaths,
+  getSubTreePaths,
 }: ModelsTreeProps) {
   const { modelsTreeProps, rendererProps } = useModelsTree({
     activeView,
@@ -43,7 +43,7 @@ export function ModelsTree({
     getFilteredPaths,
     onModelsFiltered,
     selectionPredicate,
-    getSubsetTreePaths,
+    getSubTreePaths,
   });
 
   return (
