@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Id64String } from "@itwin/core-bentley";
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import { assert } from "@itwin/core-bentley";
 import { parseIdsSelectorResult } from "../../common/internal/Utils.js";
 
@@ -25,7 +25,7 @@ export namespace ClassificationsTreeNode {
     return type === "GeometricElement3d" || type === "GeometricElement2d";
   };
 
-  export const getClassificationIds = (node: Pick<ClassificationsTreeNode, "extendedData">): Id64String[] => {
+  export const getClassificationIds = (node: Pick<ClassificationsTreeNode, "extendedData">): Id64Array => {
     assert(!!node.extendedData && "classificationIds" in node.extendedData);
     return parseIdsSelectorResult(node.extendedData.classificationIds);
   };
