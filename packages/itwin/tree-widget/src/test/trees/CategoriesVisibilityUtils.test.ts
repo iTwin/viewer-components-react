@@ -173,17 +173,14 @@ describe("CategoryVisibilityUtils", () => {
         const physicalModel2 = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel2" }).id;
         const category1 = insertSpatialCategory({ builder, codeValue: "SpatialCategory1" }).id;
         const category2 = insertSpatialCategory({ builder, codeValue: "SpatialCategory2" }).id;
-        const category3 = insertSpatialCategory({ builder, codeValue: "SpatialCategory3" }).id;
         const subCategory1 = insertSubCategory({ builder, codeValue: "SubCategory1", parentCategoryId: category1 }).id;
         const subCategory2 = insertSubCategory({ builder, codeValue: "SubCategory2", parentCategoryId: category2 }).id;
-        const subCategory3 = insertSubCategory({ builder, codeValue: "SubCategory3", parentCategoryId: category3 }).id;
         insertPhysicalElement({ builder, codeValue: "element1", categoryId: category1, modelId: physicalModel1 }).id;
-        insertPhysicalElement({ builder, codeValue: "element2", categoryId: category2, modelId: physicalModel1 }).id;
-        insertPhysicalElement({ builder, codeValue: "element3", categoryId: category3, modelId: physicalModel2 }).id;
+        insertPhysicalElement({ builder, codeValue: "element2", categoryId: category2, modelId: physicalModel2 }).id;
         return {
           models: [physicalModel1, physicalModel2],
-          categories: [category1, category2, category3],
-          subCategories: [subCategory1, subCategory2, subCategory3],
+          categories: [category1, category2],
+          subCategories: [subCategory1, subCategory2],
         };
       });
     }
@@ -217,7 +214,7 @@ describe("CategoryVisibilityUtils", () => {
       await terminatePresentationTesting();
     });
 
-    it("inverts categories", async () => {
+    it("inverts visible and hidden categories", async () => {
       viewport.changeCategoryDisplay([categoryIds[0]], false, true);
       viewport.changeCategoryDisplay([categoryIds[1], categoryIds[2]], true, true);
       for (let i = 0; i < categoryIds.length; ++i) {
@@ -232,39 +229,16 @@ describe("CategoryVisibilityUtils", () => {
       }
     });
 
-    it("inverts subCategories", async () => {
-      viewport.changeCategoryDisplay(categoryIds, true, true);
+    it("enables categories when they are in partial state due to subcategories", async () => {
+      viewport.changeCategoryDisplay(categoryIds[0], true, true);
+      viewport.changeCategoryDisplay(categoryIds[1], false, true);
       viewport.changeSubCategoryDisplay(subCategoryIds[0], false);
       viewport.changeSubCategoryDisplay(subCategoryIds[1], true);
-      viewport.changeSubCategoryDisplay(subCategoryIds[2], true);
-      for (const id of categoryIds) {
-        expect(viewport.view.viewsCategory(id)).to.be.true;
-      }
-      for (let i = 0; i < subCategoryIds.length; ++i) {
-        expect(viewport.isSubCategoryVisible(subCategoryIds[i])).to.eq(i > 0);
-      }
-      await invertAllCategories(
-        categoryIds.map((id, index) => ({ categoryId: id, subCategoryIds: [subCategoryIds[index]] })),
-        viewport,
-      );
       for (let i = 0; i < categoryIds.length; ++i) {
         expect(viewport.view.viewsCategory(categoryIds[i])).to.eq(i === 0);
       }
       for (let i = 0; i < subCategoryIds.length; ++i) {
-        expect(viewport.isSubCategoryVisible(subCategoryIds[i])).to.eq(i === 0);
-      }
-    });
-
-    it("doesn't invert subCategories if category is hidden", async () => {
-      viewport.changeCategoryDisplay(categoryIds, false, true);
-      viewport.changeSubCategoryDisplay(subCategoryIds[0], false);
-      viewport.changeSubCategoryDisplay(subCategoryIds[1], true);
-      viewport.changeSubCategoryDisplay(subCategoryIds[2], true);
-      for (const id of categoryIds) {
-        expect(viewport.view.viewsCategory(id)).to.be.false;
-      }
-      for (let i = 0; i < subCategoryIds.length; ++i) {
-        expect(viewport.isSubCategoryVisible(subCategoryIds[i])).to.eq(i > 0);
+        expect(viewport.isSubCategoryVisible(subCategoryIds[i])).to.eq(i !== 0);
       }
       await invertAllCategories(
         categoryIds.map((id, index) => ({ categoryId: id, subCategoryIds: [subCategoryIds[index]] })),
@@ -278,31 +252,14 @@ describe("CategoryVisibilityUtils", () => {
       }
     });
 
-    it("inverts per-model category 'hide' overrides", async () => {
-      viewport.changeCategoryDisplay(categoryIds, true, true);
-      for (const id of categoryIds) {
-        expect(viewport.view.viewsCategory(id)).to.be.true;
+    it("enables categories when they are in partial state due to per model overrides", async () => {
+      viewport.changeCategoryDisplay(categoryIds[0], true, true);
+      viewport.changeCategoryDisplay(categoryIds[1], false, true);
+      for (let i = 0; i < categoryIds.length; ++i) {
+        expect(viewport.view.viewsCategory(categoryIds[i])).to.eq(i === 0);
       }
-      viewport.perModelCategoryVisibility.setOverride(modelIds[0], categoryIds, PerModelCategoryVisibility.Override.Hide);
-      viewport.perModelCategoryVisibility.setOverride(modelIds[1], categoryIds, PerModelCategoryVisibility.Override.Show);
-      await invertAllCategories(
-        categoryIds.map((id) => ({ categoryId: id })),
-        viewport,
-      );
-      for (const id of categoryIds) {
-        expect(viewport.view.viewsCategory(id)).to.be.false;
-        expect(viewport.perModelCategoryVisibility.getOverride(modelIds[0], id)).to.eq(PerModelCategoryVisibility.Override.Show);
-        expect(viewport.perModelCategoryVisibility.getOverride(modelIds[1], id)).to.eq(PerModelCategoryVisibility.Override.None);
-      }
-    });
-
-    it("inverts per-model category 'show' overrides", async () => {
-      viewport.changeCategoryDisplay(categoryIds, false, true);
-      for (const id of categoryIds) {
-        expect(viewport.view.viewsCategory(id)).to.be.false;
-      }
-      viewport.perModelCategoryVisibility.setOverride(modelIds[0], categoryIds, PerModelCategoryVisibility.Override.Hide);
-      viewport.perModelCategoryVisibility.setOverride(modelIds[1], categoryIds, PerModelCategoryVisibility.Override.Show);
+      viewport.perModelCategoryVisibility.setOverride(modelIds[0], categoryIds[0], PerModelCategoryVisibility.Override.Hide);
+      viewport.perModelCategoryVisibility.setOverride(modelIds[1], categoryIds[1], PerModelCategoryVisibility.Override.Show);
       await invertAllCategories(
         categoryIds.map((id) => ({ categoryId: id })),
         viewport,
@@ -310,7 +267,27 @@ describe("CategoryVisibilityUtils", () => {
       for (const id of categoryIds) {
         expect(viewport.view.viewsCategory(id)).to.be.true;
         expect(viewport.perModelCategoryVisibility.getOverride(modelIds[0], id)).to.eq(PerModelCategoryVisibility.Override.None);
-        expect(viewport.perModelCategoryVisibility.getOverride(modelIds[1], id)).to.eq(PerModelCategoryVisibility.Override.Hide);
+        expect(viewport.perModelCategoryVisibility.getOverride(modelIds[1], id)).to.eq(PerModelCategoryVisibility.Override.None);
+      }
+    });
+
+    it("inverts visible and hidden categories when they have overrides", async () => {
+      viewport.changeCategoryDisplay(categoryIds[0], true, true);
+      viewport.changeCategoryDisplay(categoryIds[1], false, true);
+
+      for (let i = 0; i < categoryIds.length; ++i) {
+        expect(viewport.view.viewsCategory(categoryIds[i])).to.eq(i === 0);
+      }
+      viewport.perModelCategoryVisibility.setOverride(modelIds[0], categoryIds[0], PerModelCategoryVisibility.Override.Show);
+      viewport.perModelCategoryVisibility.setOverride(modelIds[1], categoryIds[1], PerModelCategoryVisibility.Override.Hide);
+      await invertAllCategories(
+        categoryIds.map((id) => ({ categoryId: id })),
+        viewport,
+      );
+      for (let i = 0; i < categoryIds.length; ++i) {
+        expect(viewport.view.viewsCategory(categoryIds[i])).to.eq(i !== 0);
+        expect(viewport.perModelCategoryVisibility.getOverride(modelIds[0], categoryIds[i])).to.eq(PerModelCategoryVisibility.Override.None);
+        expect(viewport.perModelCategoryVisibility.getOverride(modelIds[1], categoryIds[i])).to.eq(PerModelCategoryVisibility.Override.None);
       }
     });
   });

@@ -108,77 +108,40 @@ export async function hideAllCategories(categories: string[], viewport: Viewport
 
 /**
  * Invert display of all given categories.
+ * Categories are inverted like this:
+ * - If category is visible, it will be hidden.
+ * - If category is hidden, it will be visible.
+ * - If category is partially visible, it will be fully visible.
  * @public
  */
 export async function invertAllCategories(categories: CategoryInfo[], viewport: Viewport) {
-  const enabledCategories = new Set<Id64String>();
-  const disabledCategories = new Set<Id64String>();
-  const enabledSubCategories = new Array<Id64String>();
-  const disabledSubCategories = new Array<Id64String>();
-  const modelCategoryOverrides = new Map<Id64String, { categoriesToEnable?: Id64Array; categoriesToDisable?: Id64Array }>();
+  const categoriesToEnable = new Set<Id64String>();
+  const categoriesToDisable = new Set<Id64String>();
 
   for (const category of categories) {
     if (!viewport.view.viewsCategory(category.categoryId)) {
-      disabledCategories.add(category.categoryId);
+      categoriesToEnable.add(category.categoryId);
       continue;
     }
-    // First, we need to check if at least one subcategory is disabled. If it is true, then only subcategories should change display, not categories.
+    // Check if category is in partial state
     if (category.subCategoryIds?.some((subCategory) => !viewport.isSubCategoryVisible(subCategory))) {
-      for (const subCategory of category.subCategoryIds) {
-        viewport.isSubCategoryVisible(subCategory) ? enabledSubCategories.push(subCategory) : disabledSubCategories.push(subCategory);
-      }
+      categoriesToEnable.add(category.categoryId);
     } else {
-      enabledCategories.add(category.categoryId);
+      categoriesToDisable.add(category.categoryId);
     }
   }
 
   // collect per model overrides that need to be inverted
-  for (const { modelId, categoryId, visible } of viewport.perModelCategoryVisibility) {
-    if (visible) {
-      if (enabledCategories.has(categoryId)) {
-        continue;
+  for (const { categoryId, visible } of viewport.perModelCategoryVisibility) {
+    if (!visible) {
+      if (categoriesToDisable.has(categoryId)) {
+        categoriesToEnable.add(categoryId);
+        categoriesToDisable.delete(categoryId);
       }
-      let visibleEntry = modelCategoryOverrides.get(modelId);
-      if (!visibleEntry) {
-        visibleEntry = { categoriesToDisable: [] };
-        modelCategoryOverrides.set(modelId, visibleEntry);
-      } else if (!visibleEntry.categoriesToDisable) {
-        visibleEntry.categoriesToDisable = [];
-      }
-      visibleEntry.categoriesToDisable?.push(categoryId);
-      continue;
     }
-
-    if (disabledCategories.has(categoryId)) {
-      continue;
-    }
-    let hiddenEntry = modelCategoryOverrides.get(modelId);
-    if (!hiddenEntry) {
-      hiddenEntry = { categoriesToEnable: [] };
-      modelCategoryOverrides.set(modelId, hiddenEntry);
-    } else if (!hiddenEntry.categoriesToEnable) {
-      hiddenEntry.categoriesToEnable = [];
-    }
-    hiddenEntry.categoriesToEnable?.push(categoryId);
   }
 
-  // Disable enabled
-  enabledSubCategories.forEach((subCategory) => enableSubCategoryDisplay(viewport, subCategory, false));
+  await enableCategoryDisplay(viewport, [...categoriesToDisable], false, true);
 
-  await enableCategoryDisplay(viewport, [...enabledCategories], false, true);
-
-  // Enable disabled
-  disabledSubCategories.forEach((subCategory) => enableSubCategoryDisplay(viewport, subCategory, true));
-
-  await enableCategoryDisplay(viewport, [...disabledCategories], true, true);
-
-  // invert overrides
-  for (const [modelId, entry] of modelCategoryOverrides) {
-    if (entry.categoriesToEnable) {
-      viewport.perModelCategoryVisibility.setOverride(modelId, entry.categoriesToEnable, PerModelCategoryVisibility.Override.Show);
-    }
-    if (entry.categoriesToDisable) {
-      viewport.perModelCategoryVisibility.setOverride(modelId, entry.categoriesToDisable, PerModelCategoryVisibility.Override.Hide);
-    }
-  }
+  await enableCategoryDisplay(viewport, [...categoriesToEnable], true, true);
 }
