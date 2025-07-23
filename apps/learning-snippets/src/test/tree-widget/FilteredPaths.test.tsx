@@ -118,7 +118,8 @@ function CustomModelsTreeComponentWithFilterAndTargetItems({
   const getFilteredPaths = useCallback<GetFilteredPathsType>(
     async ({ createInstanceKeyPaths, filter }) => {
       const targetItems = new Array<InstanceKey>();
-      for await (const row of imodel.createQueryReader(`
+      for await (const row of imodel.createQueryReader(
+        `
           SELECT ec_classname(e.ECClassId, 's.c') className, e.ECInstanceId id
           FROM BisCore.Element e
           WHERE UserLabel LIKE '%${filter ?? ""}%'
