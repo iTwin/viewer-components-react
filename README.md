@@ -10,9 +10,9 @@ Each one has it's own folder and README describing the package.
 
 ### iTwin.js@^5 Compatible
 
-| Name                      | Folder                                                    | Changelog                                                     | Version                                                                                                                              |
-| ------------------------- | --------------------------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| @itwin/map-layers                  | [map-layers](./packages/itwin/map-layers/)                          | [changelog](./packages/itwin/map-layers/CHANGELOG.md)              | [![npm version](https://badge.fury.io/js/%40itwin%2Fmap-layers.svg)](https://badge.fury.io/js/%40itwin%2Fmap-layers)                                   |
+| Name              | Folder                                     | Changelog                                             | Version                                                                                                              |
+| ----------------- | ------------------------------------------ | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| @itwin/map-layers | [map-layers](./packages/itwin/map-layers/) | [changelog](./packages/itwin/map-layers/CHANGELOG.md) | [![npm version](https://badge.fury.io/js/%40itwin%2Fmap-layers.svg)](https://badge.fury.io/js/%40itwin%2Fmap-layers) |
 
 ### iTwin.js@^4 Compatible
 
@@ -38,11 +38,11 @@ Each one has it's own folder and README describing the package.
 
 The following packages have been deprecated and will no longer be maintained:
 
-| Name | Folder | Changelog | Version | Replacement |
-| ---------------------------------- | -------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
-| @bentley/imodel-select-react | [imodel-select](./packages/archive/imodel-select/) | [changelog](./packages/archive/imodel-select/CHANGELOG.md) | [![npm version](https://badge.fury.io/js/%40bentley%2Fimodel-select-react.svg)](https://badge.fury.io/js/%40bentley%2Fimodel-select-react) | [@itwin/imodel-browser-react](https://www.npmjs.com/package/@itwin/imodel-browser-react) |
-| @bentley/markup-frontstage-react | [markup-frontstage](./packages/archive/markup-frontstage/) | [changelog](./packages/archive/markup-frontstage/CHANGELOG.md) | [![npm version](https://badge.fury.io/js/%40bentley%2Fmarkup-frontstage-react.svg)](https://badge.fury.io/js/%40bentley%2Fmarkup-frontstage-react) | N/A |
-| @itwin/infrastructure-iot-react | [infrastructure-iot](./packages/archive/infrastructure-iot) | [changelog](./packages/archive/infrastructure-iot/CHANGELOG.md) | [![npm version](https://badge.fury.io/js/%40itwin%2Finfrastructure-iot-react.svg)](https://badge.fury.io/js/%40itwin%2Finfrastructure-iot-react) | N/A |
+| Name                             | Folder                                                      | Changelog                                                       | Version                                                                                                                                            | Replacement                                                                              |
+| -------------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| @bentley/imodel-select-react     | [imodel-select](./packages/archive/imodel-select/)          | [changelog](./packages/archive/imodel-select/CHANGELOG.md)      | [![npm version](https://badge.fury.io/js/%40bentley%2Fimodel-select-react.svg)](https://badge.fury.io/js/%40bentley%2Fimodel-select-react)         | [@itwin/imodel-browser-react](https://www.npmjs.com/package/@itwin/imodel-browser-react) |
+| @bentley/markup-frontstage-react | [markup-frontstage](./packages/archive/markup-frontstage/)  | [changelog](./packages/archive/markup-frontstage/CHANGELOG.md)  | [![npm version](https://badge.fury.io/js/%40bentley%2Fmarkup-frontstage-react.svg)](https://badge.fury.io/js/%40bentley%2Fmarkup-frontstage-react) | N/A                                                                                      |
+| @itwin/infrastructure-iot-react  | [infrastructure-iot](./packages/archive/infrastructure-iot) | [changelog](./packages/archive/infrastructure-iot/CHANGELOG.md) | [![npm version](https://badge.fury.io/js/%40itwin%2Finfrastructure-iot-react.svg)](https://badge.fury.io/js/%40itwin%2Finfrastructure-iot-react)   | N/A                                                                                      |
 
 ## Adding a new "project"
 

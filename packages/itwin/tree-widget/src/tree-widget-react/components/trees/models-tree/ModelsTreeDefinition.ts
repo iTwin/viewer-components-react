@@ -552,11 +552,8 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
           return createInstanceKeyPathsFromInstanceLabelObs({ ...props, labelsFactory });
         }
         return createInstanceKeyPathsFromTargetItemsObs(props);
-      }).pipe(
-        props.abortSignal ? takeUntil(fromEvent(props.abortSignal, "abort")) : identity,
-        defaultIfEmpty([])
-      ),
-    )
+      }).pipe(props.abortSignal ? takeUntil(fromEvent(props.abortSignal, "abort")) : identity, defaultIfEmpty([])),
+    );
   }
 
   private supportsFiltering() {
