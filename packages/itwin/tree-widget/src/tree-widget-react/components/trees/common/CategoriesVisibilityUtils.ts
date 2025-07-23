@@ -133,11 +133,9 @@ export async function invertAllCategories(categories: CategoryInfo[], viewport: 
 
   // collect per model overrides that need to be inverted
   for (const { categoryId, visible } of viewport.perModelCategoryVisibility) {
-    if (!visible) {
-      if (categoriesToDisable.has(categoryId)) {
-        categoriesToEnable.add(categoryId);
-        categoriesToDisable.delete(categoryId);
-      }
+    if (!visible && categoriesToDisable.has(categoryId)) {
+      categoriesToEnable.add(categoryId);
+      categoriesToDisable.delete(categoryId);
     }
   }
 
