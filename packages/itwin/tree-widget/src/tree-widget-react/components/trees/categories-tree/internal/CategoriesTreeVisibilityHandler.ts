@@ -35,7 +35,7 @@ import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies
 import { AlwaysAndNeverDrawnElementInfo } from "../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
 import { toVoidPromise } from "../../common/internal/Rxjs.js";
 import { createVisibilityStatus } from "../../common/internal/Tooltip.js";
-import { getClassesByView, releaseMainThreadOnItemsCount, setDifference, setIntersection } from "../../common/internal/Utils.js";
+import { getClassesByView, getDistinctMapValues, releaseMainThreadOnItemsCount, setDifference, setIntersection } from "../../common/internal/Utils.js";
 import { createVisibilityChangeEventListener } from "../../common/internal/VisibilityChangeEventListener.js";
 import {
   changeElementStateNoChildrenOperator,
@@ -380,7 +380,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     const result = defer(async () => {
       const { categoryId, subCategoryIds } = props;
       let visibility: "visible" | "hidden" | "unknown" = "unknown";
-      const categoryModels = [...(await this._idsCache.getCategoriesElementModels([categoryId], true)).values()].flat();
+      const categoryModels = getDistinctMapValues(await this._idsCache.getCategoriesElementModels([categoryId], true));
       let nonDefaultModelDisplayStatesCount = 0;
       for (const modelId of categoryModels) {
         if (!this._props.viewport.view.viewsModel(modelId)) {
@@ -409,7 +409,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
           continue;
         }
       }
-      if (categoryModels.length > 0 && nonDefaultModelDisplayStatesCount === categoryModels.length) {
+      if (categoryModels.size > 0 && nonDefaultModelDisplayStatesCount === categoryModels.size) {
         assert(visibility === "visible" || visibility === "hidden");
         return createVisibilityStatus(visibility);
       }
@@ -497,7 +497,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
       }
 
       const modelsObservable = props.modelId
-        ? of(new Map(props.categoryIds.map((id) => [id, [props.modelId as string]])))
+        ? of(new Map(props.categoryIds.map((id) => [id, new Set([props.modelId!])])))
         : from(this._idsCache.getCategoriesElementModels(props.categoryIds));
       return merge(
         // get visibility status from always and never drawn elements
@@ -888,8 +888,13 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
 
   private async enableCategoriesElementModelsVisibility(categoryIds: Id64Array) {
     const categoriesModelsMap = await this._idsCache.getCategoriesElementModels(categoryIds, true);
-    const modelIds = [...categoriesModelsMap.values()].flat();
-    const hiddenModels = modelIds.filter((modelId) => !this._props.viewport.view.viewsModel(modelId));
+    const modelIds = getDistinctMapValues(categoriesModelsMap);
+    const hiddenModels = new Array<ModelId>();
+    modelIds.forEach((modelId) => {
+      if (!this._props.viewport.view.viewsModel(modelId)) {
+        hiddenModels.push(modelId);
+      }
+    });
     if (hiddenModels.length > 0) {
       this._props.viewport.changeModelDisplay(hiddenModels, true);
     }
@@ -916,7 +921,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
       }
 
       const modelIdsObservable = modelId
-        ? of(new Map(categoryIds.map((id) => [id, [modelId]])))
+        ? of(new Map(categoryIds.map((id) => [id, new Set([modelId])])))
         : from(this._idsCache.getCategoriesElementModels(categoryIds, true));
       return concat(
         modelId ? EMPTY : from(enableCategoryDisplay(viewport, categoryIds, on, ignoreSubCategories ? false : on)),
@@ -1064,7 +1069,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     }
     const { modelId, categoryIds } = props.queryProps;
     const totalCount = (
-      modelId ? of(new Map(categoryIds.map((categoryId) => [categoryId, [modelId]]))) : from(this._idsCache.getCategoriesElementModels(categoryIds))
+      modelId ? of(new Map(categoryIds.map((categoryId) => [categoryId, new Set([modelId])]))) : from(this._idsCache.getCategoriesElementModels(categoryIds))
     ).pipe(
       mergeMap((categoriesMap) => from(categoriesMap)),
       mergeMap(([categoryId, modelIds]) => {

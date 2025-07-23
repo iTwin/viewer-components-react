@@ -31,16 +31,18 @@ export function ClassificationsTree({
   emptyTreeContent,
   getDecorations,
   getActions,
+  filter,
 }: ClassificationsTreeProps) {
-  const { categoriesTreeProps, rendererProps } = useClassificationsTree({
+  const { classificationsTreeProps, rendererProps } = useClassificationsTree({
     activeView,
     hierarchyConfig,
     emptyTreeContent,
+    filter,
   });
 
   return (
     <VisibilityTree
-      {...categoriesTreeProps}
+      {...classificationsTreeProps}
       imodel={imodel}
       selectionStorage={selectionStorage}
       hierarchyLevelSizeLimit={hierarchyLevelConfig?.sizeLimit}

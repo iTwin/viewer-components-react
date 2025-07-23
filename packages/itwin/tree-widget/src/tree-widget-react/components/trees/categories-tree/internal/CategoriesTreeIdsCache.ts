@@ -416,18 +416,18 @@ export class CategoriesTreeIdsCache implements Disposable {
     return result;
   }
 
-  public async getCategoriesElementModels(categoryIds: Id64Array, includeSubModels?: boolean): Promise<Map<CategoryId, Array<ModelId>>> {
+  public async getCategoriesElementModels(categoryIds: Id64Array, includeSubModels?: boolean): Promise<Map<CategoryId, Set<ModelId>>> {
     const elementModelsCategories = await this.getElementModelsCategories();
-    const result = new Map<CategoryId, Array<ModelId>>();
+    const result = new Map<CategoryId, Set<ModelId>>();
     for (const categoryId of categoryIds) {
       for (const [modelId, { categoryIds: categories, isSubModel }] of elementModelsCategories) {
         if ((includeSubModels || !isSubModel) && categories.has(categoryId)) {
           let categoryModels = result.get(categoryId);
           if (!categoryModels) {
-            categoryModels = new Array<ModelId>();
+            categoryModels = new Set<ModelId>();
             result.set(categoryId, categoryModels);
           }
-          categoryModels.push(modelId);
+          categoryModels.add(modelId);
         }
       }
     }

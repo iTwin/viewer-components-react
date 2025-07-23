@@ -7,7 +7,9 @@ import asTable from "as-table";
 import fs from "fs";
 import Mocha from "mocha";
 import { LOGGER } from "./Logging.cjs";
-import { MainThreadBlocksDetector, Summary } from "./MainThreadBlocksDetector.cjs";
+import { MainThreadBlocksDetector } from "./MainThreadBlocksDetector.cjs";
+
+import type { Summary } from "./MainThreadBlocksDetector.cjs";
 
 interface TestInfo {
   test: Mocha.Runnable;
