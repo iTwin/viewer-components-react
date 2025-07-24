@@ -128,7 +128,7 @@
       }
     },
     "subTree": {
-      "unknownSubTreeError": "An unknown error occurred while creating a subTree."
+      "unknownSubTreeError": "An unknown error occurred while creating a sub-tree."
     },
     "filtering": {
       "noMatches": "There are no nodes matching filter \"{{filter}}\"",
