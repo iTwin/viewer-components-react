@@ -2,6 +2,21 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Tue, 24 Jun 2025 15:02:05 GMT",
+      "version": "0.28.0",
+      "tag": "@itwin/measure-tools-react_v0.28.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "50554904+hl662@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "ffe4533b3df27f6bea34a1080ac5c7817506c6bb",
+            "comment": "Update quantity formatting logic, add bearing to DistanceMeasurement widget data"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 08 May 2025 14:29:47 GMT",
       "version": "0.27.0",
       "tag": "@itwin/measure-tools-react_v0.27.0",

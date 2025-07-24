@@ -36,7 +36,7 @@ export function createPropertyGrid(propertyGridProps: PropertyGridWidgetProps): 
     widgetId,
     selectionStorage,
     shouldShow,
-    propertyGridComponent: <PropertyGridComponent {...propertyGridComponentProps} />,
+    propertyGridComponent: <PropertyGridComponent {...propertyGridComponentProps} selectionStorage={selectionStorage} />,
   } as PropertyWidgetInternalProps;
   return {
     id: widgetId,

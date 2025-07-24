@@ -233,7 +233,16 @@ const configuredUiItems = new Map<string, UiItem>([
         await MeasureTools.startup();
         MeasurementActionToolbar.setDefaultActionProvider();
       },
-      createUiItemsProviders: () => [new MeasureToolsUiItemsProvider()],
+      createUiItemsProviders: () => [new MeasureToolsUiItemsProvider({
+        measurementFormattingProps: {
+          distance: {
+            bearing: {
+              koqName: "RoadRailUnits.Bearing",
+              persistenceUnitName: "Units.RAD"
+            }
+          }
+        }
+      })],
     },
   ],
   [
@@ -252,6 +261,8 @@ const configuredUiItems = new Map<string, UiItem>([
       initialize: async () => {
         await GeoTools.initialize();
       },
+      // TODO: Use next line to use Google API
+      // createUiItemsProviders: () => [new GeoToolsAddressSearchProvider(new GoogleAddressProvider)],
       createUiItemsProviders: () => [new GeoToolsAddressSearchProvider()],
     },
   ],

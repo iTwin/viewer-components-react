@@ -37,6 +37,7 @@
       "slope": "Slope:",
       "run": "Run:",
       "rise": "Rise:",
+      "bearing": "Bearing:",
       "useMultiPoint": "Multi-point",
       "mainInstruction": "Enter point to measure from",
       "mainInstruction2": "Enter point to measure to"

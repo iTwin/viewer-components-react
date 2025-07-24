@@ -17,7 +17,7 @@ describe("classifications tree", () => {
   const rootClassificationSystemCode = "50k classifications";
 
   runClassificationsPerformanceTest({
-    testName: "loads initial view for iModel with 50k classifications without classification-category relationship",
+    testName: "loads initial view for iModel with 50k classifications",
     hierarchyConfig: { rootClassificationSystemCode },
     loadHierarchyProps: { shouldExpand: (node) => node.children && !!node.autoExpand },
     validateResult: (result) => {
@@ -26,32 +26,8 @@ describe("classifications tree", () => {
   });
 
   runClassificationsPerformanceTest({
-    testName: "loads initial view for iModel with 50k classifications with classification-category relationship",
-    hierarchyConfig: {
-      rootClassificationSystemCode,
-      categorySymbolizesClassificationRelationshipName: "TestClassificationSchema.CategorySymbolizesClassification",
-    },
-    loadHierarchyProps: { shouldExpand: (node) => node.children && !!node.autoExpand },
-    validateResult: (result) => {
-      expect(result).to.eq(50);
-    },
-  });
-
-  runClassificationsPerformanceTest({
-    testName: "loads first branch for iModel with 50k classifications without classification-category relationship",
+    testName: "loads first branch for iModel with 50k classifications",
     hierarchyConfig: { rootClassificationSystemCode },
-    loadHierarchyProps: { shouldExpand: (node, index) => node.children && index === 0 },
-    validateResult: (result) => {
-      expect(result).to.eq(50 /* tables */ + 1000 /* classifications */ + 3 /* classification + spatial category + drawing category */);
-    },
-  });
-
-  runClassificationsPerformanceTest({
-    testName: "loads first branch for iModel with 50k classifications with classification-category relationship",
-    hierarchyConfig: {
-      rootClassificationSystemCode,
-      categorySymbolizesClassificationRelationshipName: "TestClassificationSchema.CategorySymbolizesClassification",
-    },
     loadHierarchyProps: { shouldExpand: (node, index) => node.children && index === 0 },
     validateResult: (result) => {
       expect(result).to.eq(50 /* tables */ + 1000 /* classifications */ + 3 /* classification + spatial category + drawing category */);

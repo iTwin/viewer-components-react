@@ -28,11 +28,13 @@ export function useSelectionHandler({ selectionStorage }: { selectionStorage?: S
         selectionChange.raiseEvent({ ...args, getSelection: () => selectionStorage.getSelection(args) });
       });
     }
+    // eslint-disable-next-line deprecation/deprecation
     return Presentation.selection.selectionChange.addListener((args) => {
       selectionChange.raiseEvent({
         level: args.level,
         imodelKey: createIModelKey(args.imodel),
         source: args.source,
+        // eslint-disable-next-line deprecation/deprecation
         getSelection: () => createSelectablesFromKeySet(Presentation.selection.getSelection(args.imodel, args.level)),
       });
     });
@@ -42,7 +44,8 @@ export function useSelectionHandler({ selectionStorage }: { selectionStorage?: S
     (args: { imodel: IModelConnection; level: number }): Selectables => {
       return selectionStorage
         ? selectionStorage.getSelection({ imodelKey: createIModelKey(args.imodel), level: args.level })
-        : createSelectablesFromKeySet(Presentation.selection.getSelection(args.imodel, args.level));
+        : // eslint-disable-next-line deprecation/deprecation
+          createSelectablesFromKeySet(Presentation.selection.getSelection(args.imodel, args.level));
     },
     [selectionStorage],
   );
@@ -60,6 +63,7 @@ export function useSelectionHandler({ selectionStorage }: { selectionStorage?: S
       }
       void (async () => {
         const keys = await createKeysFromSelectablesArray(args.selectables);
+        // eslint-disable-next-line deprecation/deprecation
         Presentation.selection.replaceSelection(args.source, args.imodel, keys, args.level);
       })();
     },

@@ -15,9 +15,9 @@ import {
 } from "@itwin/components-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { Flex, Text } from "@itwin/itwinui-react";
+import { safeDispose } from "../hooks/UseDataProvider.js";
 import { PropertyGridManager } from "../PropertyGridManager.js";
 
-import type { IDisposable } from "@itwin/core-bentley";
 import type {
   FilteredPropertyData,
   IPropertyDataFilterer,
@@ -26,6 +26,7 @@ import type {
   PropertyData,
   PropertyDataFilterResult,
 } from "@itwin/components-react";
+
 /**
  * Properties for rendering a `FilteringPropertyGrid`.
  * @public
@@ -48,7 +49,7 @@ export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildC
     const provider = new AutoExpandingPropertyFilterDataProvider(filteringProvider, autoExpandChildCategories);
     setFilteringDataProvider(provider);
     return () => {
-      provider.dispose();
+      provider[Symbol.dispose]();
     };
   }, [filterer, dataProvider, autoExpandChildCategories]);
 
@@ -136,7 +137,7 @@ export class NonEmptyValuesPropertyDataFilterer extends PropertyRecordDataFilter
   }
 }
 
-class AutoExpandingPropertyFilterDataProvider implements IPropertyDataProvider, IDisposable {
+class AutoExpandingPropertyFilterDataProvider implements IPropertyDataProvider {
   public onDataChanged = new PropertyDataChangeEvent();
   private _removeListener: () => void;
   private _autoExpandChildCategories = true;
@@ -152,9 +153,9 @@ class AutoExpandingPropertyFilterDataProvider implements IPropertyDataProvider, 
     }
   }
 
-  public dispose() {
+  public [Symbol.dispose](): void {
     this._removeListener();
-    this._wrapped.dispose();
+    safeDispose(this._wrapped);
   }
 
   public async getData(): Promise<PropertyData> {

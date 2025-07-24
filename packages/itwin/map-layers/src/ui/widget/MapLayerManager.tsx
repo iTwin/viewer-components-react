@@ -10,7 +10,7 @@ import * as React from "react";
 import { DragDropContext } from "react-beautiful-dnd";
 import { BentleyError, compareStrings } from "@itwin/core-bentley";
 import { BackgroundMapProvider, BackgroundMapType, BaseMapLayerSettings, ImageMapLayerSettings } from "@itwin/core-common";
-import { ImageryMapTileTree, IModelApp, MapLayerSources, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
+import { IModelApp, MapLayerSources, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 import { ToggleSwitch } from "@itwin/itwinui-react";
 import { GoogleMaps } from "@itwin/map-layers-formats";
 import { CustomParamsMappingStorage } from "../../CustomParamsMappingStorage";
@@ -26,7 +26,7 @@ import { MapManagerLayersHeader } from "./MapManagerMapLayersHeader";
 
 import type { DropResult } from "react-beautiful-dnd";
 import type { MapImagerySettings, MapSubLayerProps, MapSubLayerSettings } from "@itwin/core-common";
-import type { MapLayerImageryProvider, MapLayerScaleRangeVisibility, MapLayerSource, ScreenViewport, TileTreeOwner, Viewport } from "@itwin/core-frontend";
+import type { MapLayerImageryProvider, MapLayerScaleRangeVisibility, MapLayerSource, ScreenViewport, Viewport } from "@itwin/core-frontend";
 import type { MapLayerOptions, StyleMapLayerSettings } from "../Interfaces";
 /** @internal */
 export interface SourceMapContextProps {
@@ -166,20 +166,6 @@ export function MapLayerManager(props: MapLayerManagerProps) {
       isMounted.current = false;
     };
   });
-
-  // Setup onTileTreeLoad events listening.
-  // This is needed because we need to know when the imagery provider
-  // is created, and be able to monitor to status change.
-  React.useEffect(() => {
-    const handleTileTreeLoad = (args: TileTreeOwner) => {
-      // Ignore non-map tile trees
-      if (args.tileTree instanceof ImageryMapTileTree) {
-        loadMapLayerSettingsFromViewport(activeViewport);
-      }
-    };
-
-    return IModelApp.tileAdmin.onTileTreeLoad.addListener(handleTileTreeLoad);
-  }, [activeViewport, loadMapLayerSettingsFromViewport]);
 
   React.useEffect(() => {
     const handleScaleRangeVisibilityChanged = (layerIndexes: MapLayerScaleRangeVisibility[]) => {

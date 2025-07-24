@@ -104,11 +104,13 @@ describe("<MultiElementPropertyGrid />", () => {
             imodel,
             level: 0,
             source: "TestSource",
+            // eslint-disable-next-line deprecation/deprecation
             changeType: SelectionChangeType.Clear,
             keys: new KeySet(),
             timestamp: new Date(),
             ...props,
           },
+          // eslint-disable-next-line deprecation/deprecation
           selectionManager as ISelectionProvider,
         );
       },

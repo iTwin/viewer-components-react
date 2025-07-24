@@ -18,6 +18,11 @@ import type { RecursiveRequired } from "../utils/types.js";
 import { MeasurementPropertyWidget, MeasurementPropertyWidgetId } from "./MeasurementPropertyWidget.js";
 import { IModelApp } from "@itwin/core-frontend";
 import type { ScreenViewport } from "@itwin/core-frontend";
+import type { DistanceMeasurementFormattingProps } from "../measurements/DistanceMeasurement.js";
+import type { AreaMeasurementFormattingProps } from "../measurements/AreaMeasurement.js";
+import type { LocationMeasurementFormattingProps } from "../measurements/LocationMeasurement.js";
+import type { AngleMeasurementFormattingProps } from "../measurements/AngleMeasurement.js";
+import type { RadiusMeasurementFormattingProps } from "../measurements/RadiusMeasurement.js";
 
 export interface MeasureToolsUiProviderOptions {
   itemPriority?: number;
@@ -29,6 +34,13 @@ export interface MeasureToolsUiProviderOptions {
   // If we check for sheet to 3d transformation when measuring in sheets
   enableSheetMeasurement?: boolean;
   stageUsageList?: string[];
+  measurementFormattingProps?: {
+    distance?: DistanceMeasurementFormattingProps;
+    angle?: AngleMeasurementFormattingProps;
+    area?: AreaMeasurementFormattingProps;
+    location?: LocationMeasurementFormattingProps;
+    radius?: RadiusMeasurementFormattingProps;
+  }
   // Called in the isValidLocation to filter viewports the tool can be used into
   allowedViewportCallback?: (vp: ScreenViewport) => boolean;
   additionalToolbarItems?: ToolItemDef[];
@@ -38,7 +50,10 @@ export interface MeasureToolsUiProviderOptions {
 
 export class MeasureToolsUiItemsProvider implements UiItemsProvider {
   public readonly id = "MeasureToolsUiItemsProvider";
-  private _props: Omit<RecursiveRequired<MeasureToolsUiProviderOptions>, 'additionalToolbarItems'> & { additionalToolbarItems?: ToolItemDef[] };
+  private _props: Omit<RecursiveRequired<MeasureToolsUiProviderOptions>, 'measurementFormattingProps' | 'additionalToolbarItems'> & {
+    additionalToolbarItems?: ToolItemDef[],
+    measurementFormattingProps?: MeasureToolsUiProviderOptions['measurementFormattingProps']
+  };
 
   constructor(props?: MeasureToolsUiProviderOptions) {
     this._props = {
@@ -49,6 +64,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
         section: props?.widgetPlacement?.section ?? StagePanelSection.Start,
       },
       enableSheetMeasurement: props?.enableSheetMeasurement ?? false,
+      measurementFormattingProps: props?.measurementFormattingProps,
       stageUsageList: props?.stageUsageList ?? [StageUsage.General],
       allowedViewportCallback: props?.allowedViewportCallback ?? ((_vp: ScreenViewport) => {return true}),
       additionalToolbarItems: props?.additionalToolbarItems,
@@ -68,22 +84,22 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       const callback = this._props.allowedViewportCallback as (vp: ScreenViewport) => boolean;
       const isHiddenCallbackFunc = this._props.isHiddenCallback as (activeViewport?: ScreenViewport) => boolean;
       if (!featureFlags?.hideDistanceTool) {
-        tools.push(MeasureToolDefinitions.getMeasureDistanceToolCommand(callback, this._props.enableSheetMeasurement));
+        tools.push(MeasureToolDefinitions.getMeasureDistanceToolCommand(callback, this._props.enableSheetMeasurement, this._props.measurementFormattingProps?.distance));
       }
       if (!featureFlags?.hideAreaTool) {
-        tools.push(MeasureToolDefinitions.getMeasureAreaToolCommand(callback, this._props.enableSheetMeasurement));
+        tools.push(MeasureToolDefinitions.getMeasureAreaToolCommand(callback, this._props.enableSheetMeasurement, this._props.measurementFormattingProps?.area));
       }
       if (!featureFlags?.hideLocationTool) {
-        tools.push(MeasureToolDefinitions.getMeasureLocationToolCommand(callback, this._props.enableSheetMeasurement));
+        tools.push(MeasureToolDefinitions.getMeasureLocationToolCommand(callback, this._props.enableSheetMeasurement, this._props.measurementFormattingProps?.location));
       }
       if (!featureFlags?.hideRadiusTool) {
-        tools.push(MeasureToolDefinitions.getMeasureRadiusToolCommand(callback));
+        tools.push(MeasureToolDefinitions.getMeasureRadiusToolCommand(callback, this._props.measurementFormattingProps?.radius));
       }
       if (!featureFlags?.hideAngleTool) {
-        tools.push(MeasureToolDefinitions.getMeasureAngleToolCommand(callback));
+        tools.push(MeasureToolDefinitions.getMeasureAngleToolCommand(callback, this._props.measurementFormattingProps?.angle));
       }
       if (!featureFlags?.hidePerpendicularTool) {
-        tools.push(MeasureToolDefinitions.getMeasurePerpendicularToolCommand(callback));
+        tools.push(MeasureToolDefinitions.getMeasurePerpendicularToolCommand(callback, this._props.measurementFormattingProps?.distance));
       }
       if (this._props.additionalToolbarItems) {
         tools.push(...this._props.additionalToolbarItems);

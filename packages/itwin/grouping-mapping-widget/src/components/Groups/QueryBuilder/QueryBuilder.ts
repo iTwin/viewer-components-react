@@ -164,7 +164,9 @@ export class QueryBuilder {
       if (!isAspect && pathToPrimaryClass && pathToPrimaryClass.length > 0) {
         this.addRelatedToQuery(i, propertiesField, propertyName, propertyValue);
       } else {
-        this.addPropertyToQuery(i, className, propertyName, propertyValue, this.needsQuote(propertiesField), isCategory, modeledElement, isAspect);
+        // Model properties with display values always need quotes
+        const needsQuote = !!modeledElement || this.needsQuote(propertiesField);
+        this.addPropertyToQuery(i, className, propertyName, propertyValue, needsQuote, isCategory, modeledElement, isAspect);
       }
     }
     return true;
@@ -271,7 +273,12 @@ export class QueryBuilder {
       return;
     }
 
-    const foundPropertyClass = this.query.unions[unionIndex].properties.find((p) => p.className === className);
+    // Model properties should be kept separate to ensure proper JOIN generation
+    const foundPropertyClass = this.query.unions[unionIndex].properties.find((p) => {
+      // Don't merge Model properties with regular properties
+      if (!!modeledElementClass !== !!p.modeledElementClass) return false;
+      return p.className === className;
+    });
 
     if (foundPropertyClass) {
       const foundJoin = foundPropertyClass?.classProperties.find((join) => join.name === propertyName);
@@ -316,9 +323,9 @@ export class QueryBuilder {
           whereSegments.push(this.categoryWhereQuery(property.classProperties[0].value.toString()));
           continue;
         } else if (property.modeledElementClass) {
-          querySegments.set(property.modeledElementClass, [`${property.modeledElementClass}.ECInstanceId = BisCore.Element.Model.id`]);
+          querySegments.set(property.modeledElementClass, [`${property.modeledElementClass}.ECInstanceId = ${baseClassName}.Model.id`]);
           whereSegments.push(
-            `${property.modeledElementClass}.UserLabel = '${property.classProperties[0].value.toString()}' OR ${property.modeledElementClass}.CodeValue = '${property.classProperties[0].value.toString()}'`,
+            `(${property.modeledElementClass}.UserLabel = '${property.classProperties[0].value.toString()}' OR ${property.modeledElementClass}.CodeValue = '${property.classProperties[0].value.toString()}')`,
           );
           continue;
         }
@@ -342,8 +349,8 @@ export class QueryBuilder {
 
       unionSegments.push([selectClause, ...joinClauses, whereClause].join(" "));
     }
-
-    return unionSegments.join(" UNION ");
+    const result = unionSegments.join(" UNION ");
+    return result;
   }
 
   private selectClause(baseProperty: QueryProperty | undefined, baseClass: QueryClass | undefined) {

@@ -17,7 +17,7 @@ import type {
 } from "@itwin/core-common";
 import { Cartographic } from "@itwin/core-common";
 import type { BeButtonEvent, DecorateContext } from "@itwin/core-frontend";
-import { GraphicType } from "@itwin/core-frontend";
+import { GraphicType, IModelApp } from "@itwin/core-frontend";
 import { FormatterUtils } from "../api/FormatterUtils.js";
 import {
   StyleSet,
@@ -36,7 +36,7 @@ import {
 import { WellKnownViewType } from "../api/MeasurementEnums.js";
 import { MeasurementPreferences } from "../api/MeasurementPreferences.js";
 import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper.js";
-import type { MeasurementProps } from "../api/MeasurementProps.js";
+import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet.js";
 import { TextMarker } from "../api/TextMarker.js";
 import { MeasureTools } from "../MeasureTools.js";
@@ -46,13 +46,22 @@ import { MeasureTools } from "../MeasureTools.js";
  */
 export interface LocationMeasurementProps extends MeasurementProps {
   location: XYZProps;
-
   geoLocation?: CartographicProps;
   slope?: number;
   station?: number;
   offset?: number;
+  formatting?: LocationMeasurementFormattingProps;
 }
 
+/** Formatting properties for location measurement. */
+export interface LocationMeasurementFormattingProps {
+  /** Defaults to "AecUnits.LENGTH" and "Units.M" */
+  length?: MeasurementFormattingProps;
+  /** Defaults to "RoadRailUnits.STATION" and "Units.M" */
+  station?: MeasurementFormattingProps;
+  /** Defaults to "AecUnits.ANGLE" and "Units.RAD" */
+  angle?: MeasurementFormattingProps;
+}
 /** Serializer for a [[LocationMeasurement]]. */
 export class LocationMeasurementSerializer extends MeasurementSerializer {
   public static readonly locationMeasurementName = "locationMeasurement";
@@ -96,6 +105,12 @@ export class LocationMeasurement extends Measurement {
 
   private _textMarker?: TextMarker; // No serialize
   private _isDynamic: boolean; // No serialize
+  private _lengthKoQ: string;
+  private _lengthPersistenceUnitName: string;
+  private _stationKoQ: string;
+  private _stationPersistenceUnitName: string;
+  private _angleKoQ: string;
+  private _anglePersistenceUnitName: string;
 
   public get location(): Point3d {
     return this._location;
@@ -143,18 +158,66 @@ export class LocationMeasurement extends Measurement {
     if (this._textMarker) this._textMarker.pickable = !v;
   }
 
+  public get lengthKoQ(): string {
+    return this._lengthKoQ;
+  }
+  public set lengthKoQ(value: string) {
+    this._lengthKoQ = value;
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+  }
+  public get lengthPersistenceUnitName(): string {
+    return this._lengthPersistenceUnitName;
+  }
+  public set lengthPersistenceUnitName(value: string) {
+    this._lengthPersistenceUnitName = value;
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+  }
+
+  public get stationKoQ(): string {
+    return this._stationKoQ;
+  }
+  public set stationKoQ(value: string) {
+    this._stationKoQ = value;
+  }
+  public get stationPersistenceUnitName(): string {
+    return this._stationPersistenceUnitName;
+  }
+  public set stationPersistenceUnitName(value: string) {
+    this._stationPersistenceUnitName = value;
+  }
+
+  public get angleKoQ(): string {
+    return this._angleKoQ;
+  }
+  public set angleKoQ(value: string) {
+    this._angleKoQ = value;
+  }
+  public get anglePersistenceUnitName(): string {
+    return this._anglePersistenceUnitName;
+  }
+  public set anglePersistenceUnitName(value: string) {
+    this._anglePersistenceUnitName = value;
+  }
+
   constructor(props?: LocationMeasurementProps) {
     super(props);
 
     this._location = Point3d.createZero();
     this._isDynamic = false;
+    this._lengthKoQ = "AecUnits.LENGTH";
+    this._lengthPersistenceUnitName = "Units.M";
+    this._stationKoQ = "RoadRailUnits.STATION";
+    this._stationPersistenceUnitName = "Units.M";
+    this._angleKoQ = "AecUnits.ANGLE";
+    this._anglePersistenceUnitName = "Units.RAD";
     this.getSnapId(); // Preload transient ID"s since we normally don not have these as dynamic
 
     if (props) {
       this.readFromJSON(props);
-    } else {
-      this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
     }
+
+    this.populateFormattingSpecsRegistry().then(() => this.createTextMarker().catch())
+    .catch();
   }
 
   /** Changes the location. Only possible if the measurement is dynamic. */
@@ -208,6 +271,30 @@ export class LocationMeasurement extends Measurement {
     if (this._textMarker) this._textMarker.transientHiliteId = this.transientId;
   }
 
+  public override async populateFormattingSpecsRegistry(_force?: boolean): Promise<void> {
+    const lengthEntry = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ);
+    if (_force || !lengthEntry || lengthEntry.formatterSpec.persistenceUnit?.name !== this._lengthPersistenceUnitName) {
+      const lengthFormatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
+      if (lengthFormatProps) {
+        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._lengthKoQ, this._lengthPersistenceUnitName, lengthFormatProps);
+      }
+    }
+    const stationEntry = IModelApp.quantityFormatter.getSpecsByName(this._stationKoQ);
+    if (_force || !stationEntry || stationEntry.formatterSpec.persistenceUnit?.name !== this._stationPersistenceUnitName) {
+      const stationFormatProps = await IModelApp.formatsProvider.getFormat(this._stationKoQ);
+      if (stationFormatProps) {
+        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._stationKoQ, this._stationPersistenceUnitName, stationFormatProps);
+      }
+    }
+    const angleEntry = IModelApp.quantityFormatter.getSpecsByName(this._angleKoQ);
+    if (_force || !angleEntry || angleEntry.formatterSpec.persistenceUnit?.name !== this._anglePersistenceUnitName) {
+      const angleFormatProps = await IModelApp.formatsProvider.getFormat(this._angleKoQ);
+      if (angleFormatProps) {
+        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._angleKoQ, this._anglePersistenceUnitName, angleFormatProps);
+      }
+    }
+  }
+
   public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
@@ -233,24 +320,26 @@ export class LocationMeasurement extends Measurement {
 
   private async createTextMarker(): Promise<void> {
     const adjustedLocation = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._location));
+    const lengthSpec = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ)?.formatterSpec;
+
     const entries = [
       {
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureLocation.coordinate_x"
         ),
-        value: await FormatterUtils.formatLength(adjustedLocation.x),
+        value: await FormatterUtils.formatLength(adjustedLocation.x, lengthSpec),
       },
       {
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureLocation.coordinate_y"
         ),
-        value: await FormatterUtils.formatLength(adjustedLocation.y),
+        value: await FormatterUtils.formatLength(adjustedLocation.y, lengthSpec),
       },
       {
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureLocation.coordinate_z"
         ),
-        value: await FormatterUtils.formatLength(adjustedLocation.z),
+        value: await FormatterUtils.formatLength(adjustedLocation.z, lengthSpec),
       },
     ];
 
@@ -287,8 +376,12 @@ export class LocationMeasurement extends Measurement {
   protected override async getDataForMeasurementWidgetInternal(): Promise<
   MeasurementWidgetData | undefined
   > {
+    const lengthSpec = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ)?.formatterSpec;
+    const angleSpec = IModelApp.quantityFormatter.getSpecsByName(this._angleKoQ)?.formatterSpec;
+    const stationSpec = IModelApp.quantityFormatter.getSpecsByName(this._stationKoQ)?.formatterSpec;
+
     const adjustedLocation = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._location));
-    const fCoordinates = await FormatterUtils.formatCoordinates(adjustedLocation);
+    const fCoordinates = FormatterUtils.formatCoordinatesImmediate(adjustedLocation, lengthSpec);
 
     let title = MeasureTools.localization.getLocalizedString(
       "MeasureTools:Measurements.locationMeasurement"
@@ -313,7 +406,7 @@ export class LocationMeasurement extends Measurement {
         ),
         name: "LocationMeasurement_LatLong",
         value: await FormatterUtils.formatCartographicToLatLong(
-          this._geoLocation
+          this._geoLocation, angleSpec
         ),
       });
 
@@ -323,7 +416,7 @@ export class LocationMeasurement extends Measurement {
           "MeasureTools:tools.MeasureLocation.altitude"
         ),
         name: "LocationMeasurement_Altitude",
-        value: await FormatterUtils.formatLength(adjustedLocation.z),
+        value: await FormatterUtils.formatLength(adjustedLocation.z, lengthSpec),
       });
     }
     if (this.drawingMetadata?.sheetToWorldTransform === undefined) {
@@ -350,7 +443,7 @@ export class LocationMeasurement extends Measurement {
           "MeasureTools:tools.MeasureLocation.station"
         ),
         name: "LocationMeasurement_Station",
-        value: await FormatterUtils.formatStation(this._station),
+        value: await FormatterUtils.formatStation(this._station, stationSpec),
       });
     }
 
@@ -360,7 +453,7 @@ export class LocationMeasurement extends Measurement {
           "MeasureTools:tools.MeasureLocation.offset"
         ),
         name: "LocationMeasurement_Offset",
-        value: await FormatterUtils.formatLength(this._offset),
+        value: await FormatterUtils.formatLength(this._offset, lengthSpec),
       });
     }
 
@@ -473,6 +566,18 @@ export class LocationMeasurement extends Measurement {
       this._geoLocation = Cartographic.fromRadians(jsonLoc.geoLocation);
     else this._geoLocation = undefined;
 
+    if (jsonLoc.formatting?.length?.koqName) this._lengthKoQ = jsonLoc.formatting.length.koqName;
+    if (jsonLoc.formatting?.length?.persistenceUnitName)
+      this._lengthPersistenceUnitName = jsonLoc.formatting.length.persistenceUnitName;
+
+    if (jsonLoc.formatting?.station?.koqName) this._stationKoQ = jsonLoc.formatting.station.koqName;
+    if (jsonLoc.formatting?.station?.persistenceUnitName)
+      this._stationPersistenceUnitName = jsonLoc.formatting.station.persistenceUnitName;
+
+    if (jsonLoc.formatting?.angle?.koqName) this._angleKoQ = jsonLoc.formatting.angle.koqName;
+    if (jsonLoc.formatting?.angle?.persistenceUnitName)
+      this._anglePersistenceUnitName = jsonLoc.formatting.angle.persistenceUnitName;
+
     this._slope = jsonLoc.slope;
     this._station = jsonLoc.station;
     this._offset = jsonLoc.offset;
@@ -503,11 +608,26 @@ export class LocationMeasurement extends Measurement {
     jsonLoc.slope = this._slope;
     jsonLoc.station = this._station;
     jsonLoc.offset = this._offset;
+    jsonLoc.formatting = {
+      length: {
+        koqName: this._lengthKoQ,
+        persistenceUnitName: this._lengthPersistenceUnitName,
+      },
+      station: {
+        koqName: this._stationKoQ,
+        persistenceUnitName: this._stationPersistenceUnitName,
+      },
+      angle: {
+        koqName: this._angleKoQ,
+        persistenceUnitName: this._anglePersistenceUnitName,
+      },
+    }
   }
 
-  public static create(location: Point3d, viewType?: string) {
-    // Don"t ned to serialize the points, will just work as is
-    const measurement = new LocationMeasurement({ location });
+  public static create(location: Point3d, viewType?: string, formatting?: LocationMeasurementFormattingProps) {
+    // Don't need to serialize the points, will just work as is
+
+    const measurement = new LocationMeasurement({ location, formatting });
     if (viewType) measurement.viewTarget.include(viewType);
 
     return measurement;
