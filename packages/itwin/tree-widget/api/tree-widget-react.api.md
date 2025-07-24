@@ -9,7 +9,7 @@ import type { ClassGroupingNodeKey } from '@itwin/presentation-hierarchies';
 import type { ComponentPropsWithoutRef } from 'react';
 import type { ECClassHierarchyInspector } from '@itwin/presentation-shared';
 import type { GroupingHierarchyNode } from '@itwin/presentation-hierarchies';
-import type { HierarchyFilteringPath } from '@itwin/presentation-hierarchies';
+import { HierarchyFilteringPath } from '@itwin/presentation-hierarchies';
 import type { HierarchyNode } from '@itwin/presentation-hierarchies-react';
 import type { Id64Arg } from '@itwin/core-bentley';
 import type { Id64Array } from '@itwin/core-bentley';
@@ -260,7 +260,7 @@ export const ModelsTreeComponent: {
 };
 
 // @public (undocumented)
-interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode" | "selectionPredicate" | "hierarchyConfig" | "visibilityHandlerOverrides" | "getFilteredPaths"> {
+interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode" | "selectionPredicate" | "hierarchyConfig" | "visibilityHandlerOverrides" | "getFilteredPaths" | "getSubTreePaths"> {
     headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
@@ -508,7 +508,7 @@ interface UseCategoriesTreeResult {
 export function useFocusedInstancesContext(): FocusedInstancesContext;
 
 // @beta
-export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getFilteredPaths, onModelsFiltered, selectionPredicate: nodeTypeSelectionPredicate, }: UseModelsTreeProps): UseModelsTreeResult;
+export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getFilteredPaths, onModelsFiltered, selectionPredicate: nodeTypeSelectionPredicate, getSubTreePaths, }: UseModelsTreeProps): UseModelsTreeResult;
 
 // @public
 export function useModelsTreeButtonProps({ imodel, viewport }: {
@@ -531,6 +531,11 @@ interface UseModelsTreeProps {
             label: string;
         }) => Promise<HierarchyFilteringPath[]>;
         filter?: string;
+    }) => Promise<HierarchyFilteringPath[]>;
+    getSubTreePaths?: (props: {
+        createInstanceKeyPaths: (props: {
+            targetItems: Array<InstanceKey | ElementsGroupInfo>;
+        }) => Promise<HierarchyFilteringPath[]>;
     }) => Promise<HierarchyFilteringPath[]>;
     // (undocumented)
     hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
