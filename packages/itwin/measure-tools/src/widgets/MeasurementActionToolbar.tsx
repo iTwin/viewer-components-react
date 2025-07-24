@@ -336,7 +336,7 @@ export class MeasurementActionToolbar {
     const realOffset = offset !== undefined ? offset : Point2d.createZero();
     const parentDocument = IModelApp.viewManager.selectedView?.vpDiv.ownerDocument;
     if (!parentDocument) {
-      return false;
+      return true;
     }
 
     const toolItems: ToolbarActionItem[] = itemList.map((itemDef: MeasurementActionItemDef, index) => {
