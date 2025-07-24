@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fix measure context toolbar to not move with cursor",
-  "packageName": "@itwin/measure-tools-react",
-  "email": "wil.maier@bentley.com",
-  "dependentChangeType": "patch"
-}
