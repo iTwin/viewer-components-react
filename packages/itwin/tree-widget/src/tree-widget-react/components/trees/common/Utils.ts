@@ -7,7 +7,7 @@ import { useEffect, useRef } from "react";
 import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
-import type { HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
+import type { HierarchyFilteringPathOptions, HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
 
 /** @beta */
 export type FunctionProps<THook extends (props: any) => any> = Parameters<THook>[0];
@@ -62,7 +62,7 @@ export function joinHierarchyFilteringPaths(subTreePaths: HierarchyNodeIdentifie
   const filteringPathsToIncludeIndexes = new Set<number>();
 
   subTreePaths.forEach((subTreePath) => {
-    let depth = 0;
+    let options: HierarchyFilteringPathOptions | undefined;
     let addSubTreePathToResult = false;
 
     for (let i = 0; i < normalizedFilteringPaths.length; ++i) {
@@ -80,14 +80,12 @@ export function joinHierarchyFilteringPaths(subTreePaths: HierarchyNodeIdentifie
         // filtering paths that are shorter or equal than subTree paths length don't need to be added to the result
         if (normalizedFilteringPath.path.length === j + 1) {
           addSubTreePathToResult = true;
-          depth = Math.max(
-            depth,
-            !normalizedFilteringPath.options?.autoExpand
-              ? 0
-              : normalizedFilteringPath.options.autoExpand === true
-                ? normalizedFilteringPath.path.length - 1
-                : normalizedFilteringPath.options.autoExpand.depth,
-          );
+          // If filtering path has autoExpand set to true, it means that we should expand only to the targeted filtered node
+          // This is done by setting depthInPath
+          options =
+            normalizedFilteringPath.options?.autoExpand !== true
+              ? HierarchyFilteringPath.mergeOptions(options, normalizedFilteringPath.options)
+              : { autoExpand: { depthInPath: normalizedFilteringPath.path.length - 1 } };
           break;
         }
 
@@ -102,7 +100,7 @@ export function joinHierarchyFilteringPaths(subTreePaths: HierarchyNodeIdentifie
     if (addSubTreePathToResult) {
       result.push({
         path: subTreePath,
-        options: depth === 0 ? undefined : { autoExpand: depth >= subTreePath.length - 1 ? true : { depth } },
+        options,
       });
     }
   });

@@ -71,17 +71,16 @@ export interface UseModelsTreeProps {
     filter?: string;
   }) => Promise<HierarchyFilteringPath[]>;
   /**
-   * Optional function for restricting the visible hierarchy to a specific subTree of nodes, without changing how filtering works.
+   * Optional function for restricting the visible hierarchy to a specific sub-tree of nodes, without changing how filtering works.
    *
-   * Use when you want to display only part of the hierarchy, but still allow normal filtering within that subTree.
-   * Unlike `getFilteredPaths`, which controls which nodes match the filter, `getSubTreePaths` limits the scope of the hierarchy itself.
+   * Use when you want to display only part of the hierarchy, but still allow normal filtering within that sub-tree.
    *
    * When defined, only nodes that are in the provided paths or children of target nodes will be part of the hierarchy.
-   * Filtering (by label or custom logic) will still apply within this subset.
+   * Filtering (by label or custom logic) will still apply within this sub-tree.
    *
    * Key difference:
    * - `getFilteredPaths` determines which nodes should be shown, giving you full control over filtering logic.
-   * - `getSubTreePaths` restricts the hierarchy to a subTree, but does not override the filtering logic — filtering is still applied within the restricted subTree.
+   * - `getSubTreePaths` restricts the hierarchy to a sub-tree, but does not override the filtering logic — filtering is still applied within the restricted sub-tree.
    */
   getSubTreePaths?: (props: {
     /** A function that creates filtering paths based on provided target instance keys. */
