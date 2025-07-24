@@ -32,6 +32,7 @@ import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 
 type ModelsTreeFilteringError = "tooManyFilterMatches" | "tooManyInstancesFocused" | "unknownFilterError" | "unknownInstanceFocusError";
+type ModelsTreeSubTreeError = "unknownSubTreeError";
 
 /** @beta */
 export interface UseModelsTreeProps {
@@ -70,10 +71,17 @@ export interface UseModelsTreeProps {
     filter?: string;
   }) => Promise<HierarchyFilteringPath[]>;
   /**
-   * Optional function for applying custom filtering on the hierarchy.
-   * Use it when you want to display only part of the hierarchy, but don't want to change how filtering works.
+   * Optional function for restricting the visible hierarchy to a specific subTree of nodes, without changing how filtering works.
    *
-   * When defined, only nodes that are in provided paths or children of filter targets will be part of the hierarchy.
+   * Use when you want to display only part of the hierarchy, but still allow normal filtering within that subTree.
+   * Unlike `getFilteredPaths`, which controls which nodes match the filter, `getSubTreePaths` limits the scope of the hierarchy itself.
+   *
+   * When defined, only nodes that are in the provided paths or children of target nodes will be part of the hierarchy.
+   * Filtering (by label or custom logic) will still apply within this subset.
+   *
+   * Key difference:
+   * - `getFilteredPaths` determines which nodes should be shown, giving you full control over filtering logic.
+   * - `getSubTreePaths` restricts the hierarchy to a subTree, but does not override the filtering logic — filtering is still applied within the restricted subTree.
    */
   getSubTreePaths?: (props: {
     /** A function that creates filtering paths based on provided target instance keys. */
@@ -111,6 +119,7 @@ export function useModelsTree({
   getSubTreePaths,
 }: UseModelsTreeProps): UseModelsTreeResult {
   const [filteringError, setFilteringError] = useState<ModelsTreeFilteringError | undefined>(undefined);
+  const [subTreeError, setSubTreeError] = useState<ModelsTreeSubTreeError | undefined>(undefined);
   const hierarchyConfiguration = useMemo<ModelsTreeHierarchyConfiguration>(
     () => ({
       ...defaultHierarchyConfiguration,
@@ -146,13 +155,13 @@ export function useModelsTree({
   );
 
   const getSubTreePathsInternal = useMemo<
-    ((...props: Parameters<Required<VisibilityTreeProps>["getFilteredPaths"]>) => Promise<HierarchyNodeIdentifiersPath[]>) | undefined
+    (...props: Parameters<Required<VisibilityTreeProps>["getFilteredPaths"]>) => Promise<HierarchyNodeIdentifiersPath[] | undefined>
   >(() => {
-    if (!getSubTreePaths) {
-      return undefined;
-    }
-
     return async ({ imodelAccess, abortSignal }) => {
+      if (!getSubTreePaths) {
+        return undefined;
+      }
+
       try {
         const paths = await getSubTreePaths({
           createInstanceKeyPaths: async ({ targetItems }) =>
@@ -167,6 +176,8 @@ export function useModelsTree({
         });
         return paths.map((path) => HierarchyFilteringPath.normalize(path).path);
       } catch (e) {
+        const newError = "unknownSubTreeError";
+        setSubTreeError(newError);
         return [];
       }
     };
@@ -195,19 +206,18 @@ export function useModelsTree({
       return async ({ imodelAccess, abortSignal }) => {
         try {
           const focusedItems = await collectFocusedItems(loadFocusedItems);
-          const [subSetPaths, focusedPaths] = await Promise.all([
-            getSubTreePathsInternal ? getSubTreePathsInternal({ imodelAccess, abortSignal }) : undefined,
-            ModelsTreeDefinition.createInstanceKeyPaths({
-              imodelAccess,
-              idsCache: getModelsTreeIdsCache(),
-              targetItems: focusedItems,
-              hierarchyConfig: hierarchyConfiguration,
-              abortSignal,
-            }).then((createdPaths) => createdPaths.map((path) => ("path" in path ? path : { path, options: { autoExpand: true } }))),
-          ]);
-          const joinedPaths = !subSetPaths ? focusedPaths : joinHierarchyFilteringPaths(subSetPaths, focusedPaths);
-          void handlePaths(joinedPaths, imodelAccess);
-          return joinedPaths;
+          return await createFilteringPathsResult({
+            getFilteringPaths: async () =>
+              ModelsTreeDefinition.createInstanceKeyPaths({
+                imodelAccess,
+                idsCache: getModelsTreeIdsCache(),
+                targetItems: focusedItems,
+                hierarchyConfig: hierarchyConfiguration,
+                abortSignal,
+              }).then((createdPaths) => createdPaths.map((path) => ("path" in path ? path : { path, options: { autoExpand: true } }))),
+            getSubTreePaths: async () => getSubTreePathsInternal({ imodelAccess, abortSignal }),
+            handlePaths: async (paths) => handlePaths(paths, imodelAccess),
+          });
         } catch (e) {
           const newError = e instanceof FilterLimitExceededError ? "tooManyInstancesFocused" : "unknownInstanceFocusError";
           if (newError !== "tooManyInstancesFocused") {
@@ -223,24 +233,23 @@ export function useModelsTree({
     if (getFilteredPaths) {
       return async ({ imodelAccess, abortSignal }) => {
         try {
-          const [subSetPaths, customFilteredPaths] = await Promise.all([
-            getSubTreePathsInternal ? getSubTreePathsInternal({ imodelAccess, abortSignal }) : undefined,
-            getFilteredPaths({
-              createInstanceKeyPaths: async (props) =>
-                ModelsTreeDefinition.createInstanceKeyPaths({
-                  ...props,
-                  imodelAccess,
-                  idsCache: getModelsTreeIdsCache(),
-                  hierarchyConfig: hierarchyConfiguration,
-                  limit: "unbounded",
-                  abortSignal,
-                }),
-              filter,
-            }),
-          ]);
-          const joinedPaths = !subSetPaths ? customFilteredPaths : joinHierarchyFilteringPaths(subSetPaths, customFilteredPaths);
-          void handlePaths(joinedPaths, imodelAccess);
-          return joinedPaths;
+          return await createFilteringPathsResult({
+            getFilteringPaths: async () =>
+              getFilteredPaths({
+                createInstanceKeyPaths: async (props) =>
+                  ModelsTreeDefinition.createInstanceKeyPaths({
+                    ...props,
+                    imodelAccess,
+                    idsCache: getModelsTreeIdsCache(),
+                    hierarchyConfig: hierarchyConfiguration,
+                    limit: "unbounded",
+                    abortSignal,
+                  }),
+                filter,
+              }),
+            getSubTreePaths: async () => getSubTreePathsInternal({ imodelAccess, abortSignal }),
+            handlePaths: async (paths) => handlePaths(paths, imodelAccess),
+          });
         } catch (e) {
           const newError = e instanceof FilterLimitExceededError ? "tooManyFilterMatches" : "unknownFilterError";
           if (newError !== "tooManyFilterMatches") {
@@ -257,20 +266,18 @@ export function useModelsTree({
       return async ({ imodelAccess, abortSignal }) => {
         onFeatureUsed({ featureId: "filtering", reportInteraction: true });
         try {
-          const [subSetPaths, filterPaths] = await Promise.all([
-            getSubTreePathsInternal ? getSubTreePathsInternal({ imodelAccess, abortSignal }) : undefined,
-            ModelsTreeDefinition.createInstanceKeyPaths({
-              imodelAccess,
-              label: filter,
-              idsCache: getModelsTreeIdsCache(),
-              hierarchyConfig: hierarchyConfiguration,
-              abortSignal,
-            }).then((createdPaths) => createdPaths.map((path) => ("path" in path ? path : { path, options: { autoExpand: true } }))),
-          ]);
-
-          const joinedPaths = !subSetPaths ? filterPaths : joinHierarchyFilteringPaths(subSetPaths, filterPaths);
-          void handlePaths(joinedPaths, imodelAccess);
-          return joinedPaths;
+          return await createFilteringPathsResult({
+            getFilteringPaths: async () =>
+              ModelsTreeDefinition.createInstanceKeyPaths({
+                imodelAccess,
+                label: filter,
+                idsCache: getModelsTreeIdsCache(),
+                hierarchyConfig: hierarchyConfiguration,
+                abortSignal,
+              }).then((createdPaths) => createdPaths.map((path) => ("path" in path ? path : { path, options: { autoExpand: true } }))),
+            getSubTreePaths: async () => getSubTreePathsInternal({ imodelAccess, abortSignal }),
+            handlePaths: async (paths) => handlePaths(paths, imodelAccess),
+          });
         } catch (e) {
           const newError = e instanceof FilterLimitExceededError ? "tooManyFilterMatches" : "unknownFilterError";
           if (newError !== "tooManyFilterMatches") {
@@ -311,7 +318,7 @@ export function useModelsTree({
       visibilityHandlerFactory,
       getHierarchyDefinition,
       getFilteredPaths: getPaths,
-      noDataMessage: getNoDataMessage(filter, filteringError),
+      noDataMessage: getNoDataMessage(filter, subTreeError, filteringError),
       highlight: filter ? { text: filter } : undefined,
       selectionPredicate: nodeSelectionPredicate,
     },
@@ -354,17 +361,24 @@ async function getModels(paths: HierarchyFilteringPath[], idsCache: ModelsTreeId
   return [...targetModels, ...matchingModels];
 }
 
-function getNoDataMessage(filter?: string, error?: ModelsTreeFilteringError) {
-  if (isInstanceFocusError(error)) {
-    return <InstanceFocusError error={error} />;
+function getNoDataMessage(filter?: string, subTreeError?: ModelsTreeSubTreeError, filteringError?: ModelsTreeFilteringError) {
+  if (isSubTreeError(subTreeError)) {
+    return <Text>{TreeWidget.translate(`modelsTree.subTree.${subTreeError}`)}</Text>;
   }
-  if (isFilterError(error)) {
-    return <Text>{TreeWidget.translate(`modelsTree.filtering.${error}`)}</Text>;
+  if (isInstanceFocusError(filteringError)) {
+    return <InstanceFocusError error={filteringError} />;
+  }
+  if (isFilterError(filteringError)) {
+    return <Text>{TreeWidget.translate(`modelsTree.filtering.${filteringError}`)}</Text>;
   }
   if (filter) {
     return <Text>{TreeWidget.translate("modelsTree.filtering.noMatches", { filter })}</Text>;
   }
   return undefined;
+}
+
+function isSubTreeError(error: ModelsTreeSubTreeError | undefined) {
+  return error === "unknownSubTreeError";
 }
 
 function isFilterError(error: ModelsTreeFilteringError | undefined) {
@@ -527,4 +541,20 @@ function createLocalizedMessage(message: string, onClick?: () => void) {
       {textAfter ? textAfter : null}
     </>
   );
+}
+
+async function createFilteringPathsResult({
+  getSubTreePaths,
+  getFilteringPaths,
+  handlePaths,
+}: {
+  getSubTreePaths: () => Promise<HierarchyNodeIdentifiersPath[] | undefined>;
+  getFilteringPaths: () => Promise<HierarchyFilteringPath[]>;
+  handlePaths: (filteredPaths: HierarchyFilteringPath[]) => Promise<void>;
+}): Promise<HierarchyFilteringPath[]> {
+  const [subTreePaths, filterPaths] = await Promise.all([getSubTreePaths(), getFilteringPaths()]);
+
+  const joinedPaths = !subTreePaths ? filterPaths : joinHierarchyFilteringPaths(subTreePaths, filterPaths);
+  void handlePaths(joinedPaths);
+  return joinedPaths;
 }

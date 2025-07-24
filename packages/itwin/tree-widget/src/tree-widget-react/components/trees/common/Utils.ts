@@ -55,57 +55,59 @@ export function useLatest<T>(value: T) {
 }
 
 /** @internal */
-export function joinHierarchyFilteringPaths(subsetPaths: HierarchyNodeIdentifiersPath[], regularPaths: HierarchyFilteringPath[]): HierarchyFilteringPath[] {
-  const normalizedRegularPaths = regularPaths.map((regularPath) => HierarchyFilteringPath.normalize(regularPath));
+export function joinHierarchyFilteringPaths(subTreePaths: HierarchyNodeIdentifiersPath[], filteringPaths: HierarchyFilteringPath[]): HierarchyFilteringPath[] {
+  const normalizedFilteringPaths = filteringPaths.map((filteringPath) => HierarchyFilteringPath.normalize(filteringPath));
 
   const result = new Array<HierarchyFilteringPath>();
-  const includedRegularPathIndexes = new Array<number>();
+  const filteringPathsToIncludeIndexes = new Set<number>();
 
-  subsetPaths.forEach((subsetPath) => {
+  subTreePaths.forEach((subTreePath) => {
     let depth = 0;
-    let addSubsetPathToResult = false;
+    let addSubTreePathToResult = false;
 
-    for (let i = 0; i < normalizedRegularPaths.length; ++i) {
-      const normalizedRegularPath = normalizedRegularPaths[i];
-      if (normalizedRegularPath.path.length === 0) {
+    for (let i = 0; i < normalizedFilteringPaths.length; ++i) {
+      const normalizedFilteringPath = normalizedFilteringPaths[i];
+      if (normalizedFilteringPath.path.length === 0) {
         continue;
       }
 
-      for (let j = 0; j < subsetPath.length; ++j) {
-        const identifier = subsetPath[j];
-        if (!HierarchyNodeIdentifier.equal(normalizedRegularPath.path[j], identifier)) {
+      for (let j = 0; j < subTreePath.length; ++j) {
+        const identifier = subTreePath[j];
+        if (normalizedFilteringPath.path.length <= j || !HierarchyNodeIdentifier.equal(normalizedFilteringPath.path[j], identifier)) {
           break;
         }
 
-        if (normalizedRegularPath.path.length === j + 1) {
-          addSubsetPathToResult = true;
+        // filtering paths that are shorter or equal than subTree paths length don't need to be added to the result
+        if (normalizedFilteringPath.path.length === j + 1) {
+          addSubTreePathToResult = true;
           depth = Math.max(
             depth,
-            !normalizedRegularPath.options?.autoExpand
+            !normalizedFilteringPath.options?.autoExpand
               ? 0
-              : normalizedRegularPath.options.autoExpand === true
-                ? normalizedRegularPath.path.length - 1
-                : normalizedRegularPath.options.autoExpand.depth,
+              : normalizedFilteringPath.options.autoExpand === true
+                ? normalizedFilteringPath.path.length - 1
+                : normalizedFilteringPath.options.autoExpand.depth,
           );
           break;
         }
 
-        if (subsetPath.length === j + 1) {
-          addSubsetPathToResult = true;
-          if (!includedRegularPathIndexes.includes(i)) {
-            result.push(normalizedRegularPath);
-            includedRegularPathIndexes.push(i);
-          }
+        // filtering paths that are longer than subTree paths need to be added to the result
+        if (subTreePath.length === j + 1) {
+          addSubTreePathToResult = true;
+          filteringPathsToIncludeIndexes.add(i);
         }
       }
     }
 
-    if (addSubsetPathToResult) {
+    if (addSubTreePathToResult) {
       result.push({
-        path: subsetPath,
-        options: depth === 0 ? undefined : { autoExpand: depth >= subsetPath.length - 1 ? true : { depth } },
+        path: subTreePath,
+        options: depth === 0 ? undefined : { autoExpand: depth >= subTreePath.length - 1 ? true : { depth } },
       });
     }
   });
+  for (const index of filteringPathsToIncludeIndexes) {
+    result.push(normalizedFilteringPaths[index]);
+  }
   return result;
 }

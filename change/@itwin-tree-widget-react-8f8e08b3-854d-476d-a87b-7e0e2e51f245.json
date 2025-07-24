@@ -1,6 +1,6 @@
 {
   "type": "minor",
-  "comment": "Added option to add additional filtering to models tree based on instance keys. `UseModelsTreeProps` now has `getSubTreePaths` which enables this.",
+  "comment": "Added `getSubTreePaths` option to `UseModelsTreeProps` for restricting the visible hierarchy to a subTree of nodes based on instance keys. Unlike `getFilteredPaths`, which controls filtering logic, `getSubTreePaths` limits the scope of the hierarchy itself, allowing filtering within the specified subTree.",
   "packageName": "@itwin/tree-widget-react",
   "email": "100586436+JonasDov@users.noreply.github.com",
   "dependentChangeType": "patch"
