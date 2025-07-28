@@ -37,41 +37,53 @@ describe("Utils", () => {
     });
 
     it("returns subTree paths when filter paths are shorter than subTree paths", () => {
-      const subTreePaths: HierarchyNodeIdentifiersPath[] = [
-        [subject, model],
-        [model, category1, element1, element2],
-        [model, category1, element1, element3],
-        [model, category1, element2, element3],
-        [model, category2, element4],
-      ];
-      const filterPaths: HierarchyFilteringPath[] = [
-        [subject],
-        { path: [model, category1, element1], options: { autoExpand: true } },
-        { path: [model, category1], options: { autoExpand: { depth: 1 } } },
-        { path: [model, category1, element2], options: { autoExpand: { depth: 2 } } },
-        { path: [model, category2], options: { autoExpand: true } },
-      ];
+      const filterPath1 = { path: [subject] };
+      const filterPath2 = { path: [element1, element2, element3], options: { autoExpand: true } };
+      const filterPath3 = { path: [element1, element2, category1], options: { autoExpand: { depth: 1 } } };
+      const filterPath4 = { path: [element1, element2, category2], options: { autoExpand: { depth: 2, includeGroupingNodes: true } } };
+      const filterPath5 = { path: [element2, element3], options: { autoExpand: { depth: 2, key: { className: element2.className, type: "class-grouping" } } } };
+      const filterPath6 = { path: [element3, element4], options: { autoExpand: { depthInHierarchy: 1 } } };
+      const filterPath7 = { path: [element4, category1], options: { autoExpand: { depthInPath: 1 } } };
+      const filterPaths: HierarchyFilteringPath[] = [filterPath1, filterPath2, filterPath3, filterPath4, filterPath5, filterPath6, filterPath7];
+
+      const subTreePath1 = [...filterPath1.path, model];
+      const subTreePath2 = [...filterPath2.path, element4];
+      const subTreePath3 = [...filterPath3.path, element4];
+      const subTreePath4 = [...filterPath4.path, element4];
+      const subTreePath5 = [...filterPath5.path, category1, element4];
+      const subTreePath6 = [...filterPath6.path, category1, category2];
+      const subTreePath7 = [...filterPath7.path, category2];
+      const subTreePaths: HierarchyNodeIdentifiersPath[] = [subTreePath1, subTreePath2, subTreePath3, subTreePath4, subTreePath5, subTreePath6, subTreePath7];
+
       const joinedPaths = joinHierarchyFilteringPaths(subTreePaths, filterPaths);
       const expectedPaths = [
         {
-          path: [subject, model],
+          path: subTreePath1,
           options: undefined,
         },
         {
-          path: [model, category1, element1, element2],
-          options: { autoExpand: { depth: 2 } },
+          path: subTreePath2,
+          options: { autoExpand: { depthInPath: 2 } },
         },
         {
-          path: [model, category1, element1, element3],
-          options: { autoExpand: { depth: 2 } },
+          path: subTreePath3,
+          options: filterPath3.options,
         },
         {
-          path: [model, category1, element2, element3],
-          options: { autoExpand: { depth: 2 } },
+          path: subTreePath4,
+          options: filterPath4.options,
         },
         {
-          path: [model, category2, element4],
-          options: { autoExpand: { depth: 1 } },
+          path: subTreePath5,
+          options: filterPath5.options,
+        },
+        {
+          path: subTreePath6,
+          options: filterPath6.options,
+        },
+        {
+          path: subTreePath7,
+          options: filterPath7.options,
         },
       ];
       expect(joinedPaths).to.deep.eq(expectedPaths);

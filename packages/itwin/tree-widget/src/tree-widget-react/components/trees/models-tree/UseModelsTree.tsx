@@ -154,13 +154,12 @@ export function useModelsTree({
   );
 
   const getSubTreePathsInternal = useMemo<
-    (...props: Parameters<Required<VisibilityTreeProps>["getFilteredPaths"]>) => Promise<HierarchyNodeIdentifiersPath[] | undefined>
+    ((...props: Parameters<Required<VisibilityTreeProps>["getFilteredPaths"]>) => Promise<HierarchyNodeIdentifiersPath[]>) | undefined
   >(() => {
+    if (!getSubTreePaths) {
+      return undefined;
+    }
     return async ({ imodelAccess, abortSignal }) => {
-      if (!getSubTreePaths) {
-        return undefined;
-      }
-
       try {
         const paths = await getSubTreePaths({
           createInstanceKeyPaths: async ({ targetItems }) =>
@@ -214,7 +213,7 @@ export function useModelsTree({
                 hierarchyConfig: hierarchyConfiguration,
                 abortSignal,
               }).then((createdPaths) => createdPaths.map((path) => ("path" in path ? path : { path, options: { autoExpand: true } }))),
-            getSubTreePaths: async () => getSubTreePathsInternal({ imodelAccess, abortSignal }),
+            getSubTreePaths: async () => (getSubTreePathsInternal ? getSubTreePathsInternal({ imodelAccess, abortSignal }) : undefined),
             handlePaths: async (paths) => handlePaths(paths, imodelAccess),
           });
         } catch (e) {
@@ -246,7 +245,7 @@ export function useModelsTree({
                   }),
                 filter,
               }),
-            getSubTreePaths: async () => getSubTreePathsInternal({ imodelAccess, abortSignal }),
+            getSubTreePaths: async () => (getSubTreePathsInternal ? getSubTreePathsInternal({ imodelAccess, abortSignal }) : undefined),
             handlePaths: async (paths) => handlePaths(paths, imodelAccess),
           });
         } catch (e) {
@@ -274,7 +273,7 @@ export function useModelsTree({
                 hierarchyConfig: hierarchyConfiguration,
                 abortSignal,
               }).then((createdPaths) => createdPaths.map((path) => ("path" in path ? path : { path, options: { autoExpand: true } }))),
-            getSubTreePaths: async () => getSubTreePathsInternal({ imodelAccess, abortSignal }),
+            getSubTreePaths: async () => (getSubTreePathsInternal ? getSubTreePathsInternal({ imodelAccess, abortSignal }) : undefined),
             handlePaths: async (paths) => handlePaths(paths, imodelAccess),
           });
         } catch (e) {
