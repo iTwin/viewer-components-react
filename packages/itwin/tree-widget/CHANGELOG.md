@@ -1,8 +1,20 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Mon, 14 Jul 2025 12:38:56 GMT and should not be manually modified. -->
+<!-- This log was last generated on Thu, 24 Jul 2025 16:07:32 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.11.0
+
+Thu, 24 Jul 2025 16:07:32 GMT
+
+### Minor changes
+
+- Updated @itwin/presentation-hierarchies to v1.6.1 and @itwin/presentation-hierarchies-react to 1.7.1 ([#1379](https://github.com/iTwin/viewer-components-react/pull/1379))
+
+### Patches
+
+- Fix categories tree incorectly inverting categories visibility. ([#1381](https://github.com/iTwin/viewer-components-react/pull/1381))
 
 ## 3.10.3
 

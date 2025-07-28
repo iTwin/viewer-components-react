@@ -2,6 +2,37 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Thu, 24 Jul 2025 16:07:32 GMT",
+      "version": "3.11.0",
+      "tag": "@itwin/tree-widget-react_v3.11.0",
+      "comments": {
+        "none": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "8394f55100949c152f6061b3844a27e62986f7d5",
+            "comment": ""
+          }
+        ],
+        "minor": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "716fac477486d6a6ee5461677d6436d1230665b4",
+            "comment": "Updated @itwin/presentation-hierarchies to v1.6.1 and @itwin/presentation-hierarchies-react to 1.7.1"
+          }
+        ],
+        "patch": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "b00fd369efde15ccabbecae582777139e4fac126",
+            "comment": "Fix categories tree incorectly inverting categories visibility."
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 14 Jul 2025 12:38:56 GMT",
       "version": "3.10.3",
       "tag": "@itwin/tree-widget-react_v3.10.3",

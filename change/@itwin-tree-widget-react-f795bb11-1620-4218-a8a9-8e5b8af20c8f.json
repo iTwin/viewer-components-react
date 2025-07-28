@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fix categories tree incorectly inverting categories visibility.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "100586436+JonasDov@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

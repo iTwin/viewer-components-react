@@ -1,8 +1,16 @@
 # Change Log - @itwin/measure-tools-react
 
-<!-- This log was last generated on Mon, 07 Jul 2025 19:55:02 GMT and should not be manually modified. -->
+<!-- This log was last generated on Thu, 24 Jul 2025 16:07:32 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.28.2
+
+Thu, 24 Jul 2025 16:07:32 GMT
+
+### Patches
+
+- Fix measure context toolbar to not move with cursor ([#1385](https://github.com/iTwin/viewer-components-react/pull/1385))
 
 ## 0.28.1
 
