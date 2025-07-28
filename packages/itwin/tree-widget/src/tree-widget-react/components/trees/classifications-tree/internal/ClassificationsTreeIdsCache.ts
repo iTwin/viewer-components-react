@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { from, map, mergeMap, Observable } from "rxjs";
+import { from, map, mergeMap } from "rxjs";
 import {
   CLASS_NAME_Classification,
   CLASS_NAME_ClassificationSystem,
@@ -17,6 +17,7 @@ import {
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
 import { getDistinctMapValues } from "../../common/internal/Utils.js";
 
+import type { Observable } from "rxjs";
 import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";

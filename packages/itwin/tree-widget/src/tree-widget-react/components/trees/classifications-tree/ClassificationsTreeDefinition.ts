@@ -16,7 +16,6 @@ import {
   CLASS_NAME_GeometricElement2d,
   CLASS_NAME_GeometricElement3d,
 } from "../common/internal/ClassNameDefinitions.js";
-import { ElementId } from "../common/internal/Types.js";
 import { releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 
@@ -35,6 +34,7 @@ import type {
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlQueryRow, IInstanceLabelSelectClauseFactory, InstanceKey } from "@itwin/presentation-shared";
+import type { ElementId } from "../common/internal/Types.js";
 import type { ClassificationId, ClassificationsTreeIdsCache, ClassificationTableId } from "./internal/ClassificationsTreeIdsCache.js";
 
 const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
