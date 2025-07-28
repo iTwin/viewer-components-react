@@ -159,8 +159,10 @@ const configuredUiItems = new Map<string, UiItem>([
               {
                 id: ClassificationsTreeComponent.id,
                 getLabel: () => "Classifications tree",
-                render: () => (
+                isSearchable: true,
+                render: (props) => (
                   <ClassificationsTreeComponent
+                    filter={props.filter}
                     selectionStorage={unifiedSelectionStorage}
                     hierarchyConfig={{ rootClassificationSystemCode: "50k classifications" }}
                   />

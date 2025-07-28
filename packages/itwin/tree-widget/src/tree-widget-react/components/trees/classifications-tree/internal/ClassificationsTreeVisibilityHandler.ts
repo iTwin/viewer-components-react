@@ -48,7 +48,7 @@ import {
 } from "../../common/internal/VisibilityUtils.js";
 import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility.js";
 import { ClassificationsTreeNode } from "./ClassificationsTreeNode.js";
-import { createFilteredTree, parseElementKey } from "./FilteredTree.js";
+import { createFilteredTree } from "./FilteredTree.js";
 
 import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { GetVisibilityFromAlwaysAndNeverDrawnElementsProps } from "../../common/internal/VisibilityUtils.js";
@@ -217,14 +217,11 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
         if (classificationIds?.size) {
           observables.push(this.getClassificationDisplayStatus({ classificationIds: [...classificationIds] }));
         }
-        if (elements2d?.size) {
+        if (elements2d?.length) {
           observables.push(
             from(elements2d).pipe(
               releaseMainThreadOnItemsCount(50),
-              mergeMap(([elementKey, elementIds]) => {
-                const { modelId, categoryId } = parseElementKey(elementKey);
-                assert(modelId !== undefined);
-                assert(categoryId !== undefined);
+              mergeMap(({ modelId, categoryId, elementIds }) => {
                 return from(elementIds).pipe(
                   releaseMainThreadOnItemsCount(1000),
                   mergeMap((elementId) => this.getGeometricElementDisplayStatus({ modelId, categoryId, elementId, elementType: "2d" })),
@@ -234,14 +231,11 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
           );
         }
 
-        if (elements3d?.size) {
+        if (elements3d?.length) {
           observables.push(
             from(elements3d).pipe(
               releaseMainThreadOnItemsCount(50),
-              mergeMap(([elementKey, elementIds]) => {
-                const { modelId, categoryId } = parseElementKey(elementKey);
-                assert(modelId !== undefined);
-                assert(categoryId !== undefined);
+              mergeMap(({ modelId, categoryId, elementIds }) => {
                 return from(elementIds).pipe(
                   releaseMainThreadOnItemsCount(1000),
                   mergeMap((elementId) => this.getGeometricElementDisplayStatus({ modelId, categoryId, elementId, elementType: "3d" })),
@@ -664,26 +658,20 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
           observables.push(this.changeClassificationDisplayState({ classificationIds: [...classificationIds], on }));
         }
 
-        if (elements2d?.size) {
+        if (elements2d?.length) {
           observables.push(
             from(elements2d).pipe(
-              mergeMap(([elementKey, elementIds]) => {
-                const { modelId, categoryId } = parseElementKey(elementKey);
-                assert(modelId !== undefined);
-                assert(categoryId !== undefined);
+              mergeMap(({ modelId, categoryId, elementIds }) => {
                 return this.changeGeometricElementsDisplayState({ modelId, categoryId, elementIds, on });
               }),
             ),
           );
         }
 
-        if (elements3d?.size) {
+        if (elements3d?.length) {
           observables.push(
             from(elements3d).pipe(
-              mergeMap(([elementKey, elementIds]) => {
-                const { modelId, categoryId } = parseElementKey(elementKey);
-                assert(modelId !== undefined);
-                assert(categoryId !== undefined);
+              mergeMap(({ modelId, categoryId, elementIds }) => {
                 return this.changeGeometricElementsDisplayState({ modelId, categoryId, elementIds, on });
               }),
             ),

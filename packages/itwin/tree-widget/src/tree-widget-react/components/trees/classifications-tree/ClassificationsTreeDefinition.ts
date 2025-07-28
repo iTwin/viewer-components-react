@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, defer, EMPTY, from, lastValueFrom, map, merge, mergeMap, of, reduce, toArray } from "rxjs";
+import { bufferCount, defer, EMPTY, from, identity, lastValueFrom, map, merge, mergeMap, of, reduce, toArray } from "rxjs";
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql, parseFullClassName } from "@itwin/presentation-shared";
 import {
@@ -16,12 +16,12 @@ import {
   CLASS_NAME_GeometricElement2d,
   CLASS_NAME_GeometricElement3d,
 } from "../common/internal/ClassNameDefinitions.js";
+import { ElementId } from "../common/internal/Types.js";
 import { releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 
-import type { Observable } from "rxjs";
-import type { Id64Array } from "@itwin/core-bentley";
-import type { ClassificationId, ClassificationTableId, ElementId } from "../common/internal/Types.js";
+import type { Observable, OperatorFunction } from "rxjs";
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type {
   DefineHierarchyLevelProps,
   DefineInstanceNodeChildHierarchyLevelProps,
@@ -30,11 +30,12 @@ import type {
   HierarchyDefinition,
   HierarchyFilteringPath,
   HierarchyLevelDefinition,
+  HierarchyNodeIdentifiersPath,
   LimitingECSqlQueryExecutor,
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlQueryRow, IInstanceLabelSelectClauseFactory, InstanceKey } from "@itwin/presentation-shared";
-import type { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
+import type { ClassificationId, ClassificationsTreeIdsCache, ClassificationTableId } from "./internal/ClassificationsTreeIdsCache.js";
 
 const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
 
@@ -505,12 +506,9 @@ async function createInstanceKeyPathsFromInstanceLabel(
       ];
       return { ctes, ecsql, bindings };
     }).pipe(
-      mergeMap((queryProps) => {
-        if (!queryProps) {
-          return EMPTY;
-        }
-        return props.imodelAccess.createQueryReader(queryProps, { restartToken: "tree-widget/classifications-tree/filter-by-label-query", limit: props.limit });
-      }),
+      mergeMap((queryProps) =>
+        props.imodelAccess.createQueryReader(queryProps, { restartToken: "tree-widget/classifications-tree/filter-by-label-query", limit: props.limit }),
+      ),
       map((row): InstanceKey => {
         let className: string;
         switch (row.ClassName) {
@@ -532,79 +530,87 @@ async function createInstanceKeyPathsFromInstanceLabel(
           id: row.ECInstanceId,
         };
       }),
-      toArray(),
-      mergeMap((targetItems) => createInstanceKeyPathsFromTargetItems({ ...props, targetItems })),
+      createInstanceKeyPathsFromTargetItems(props),
       toArray(),
     ),
   );
 }
 
 function createInstanceKeyPathsFromTargetItems({
-  targetItems,
+  idsCache,
   imodelAccess,
   limit,
-}: Pick<ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps, "limit" | "imodelAccess"> & {
-  targetItems: InstanceKey[];
-}): Observable<HierarchyFilteringPath> {
-  if (limit !== "unbounded" && targetItems.length > (limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT)) {
-    throw new FilterLimitExceededError(limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT);
-  }
+}: Pick<ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps, "limit" | "imodelAccess" | "idsCache">): OperatorFunction<
+  InstanceKey,
+  HierarchyFilteringPath
+> {
+  return (targetItems: Observable<InstanceKey>) => {
+    return targetItems.pipe(
+      limit !== "unbounded"
+        ? map((targetItem, index) => {
+            if (index >= (limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT)) {
+              throw new FilterLimitExceededError(limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT);
+            }
+            return targetItem;
+          })
+        : identity,
+      releaseMainThreadOnItemsCount(2000),
+      reduce(
+        (acc, { id, className }) => {
+          if (className === CLASS_NAME_ClassificationTable) {
+            acc.classificationTableIds.push(id);
+            return acc;
+          }
+          if (className === CLASS_NAME_Classification) {
+            acc.classificationIds.push(id);
+            return acc;
+          }
+          if (className === CLASS_NAME_GeometricElement2d) {
+            acc.element2dIds.push(id);
+            return acc;
+          }
 
-  return from(targetItems).pipe(
-    releaseMainThreadOnItemsCount(2000),
-    reduce(
-      (acc, { id, className }) => {
-        if (className === CLASS_NAME_ClassificationTable) {
-          acc.classificationTableIds.push(id);
+          acc.element3dIds.push(id);
           return acc;
-        }
-        if (className === CLASS_NAME_Classification) {
-          acc.classificationIds.push(id);
-          return acc;
-        }
-        if (className === CLASS_NAME_GeometricElement2d) {
-          acc.element2dIds.push(id);
-          return acc;
-        }
-
-        acc.element3dIds.push(id);
-        return acc;
-      },
-      {
-        classificationTableIds: new Array<ClassificationTableId>(),
-        classificationIds: new Array<ClassificationId>(),
-        element2dIds: new Array<ElementId>(),
-        element3dIds: new Array<ElementId>(),
-      },
-    ),
-    mergeMap((ids) => {
-      const elements2dLength = ids.element2dIds.length;
-      const elements3dLength = ids.element3dIds.length;
-      return merge(
-        from(ids.classificationTableIds).pipe(
-          map((id): HierarchyFilteringPath => ({ path: [{ id, className: CLASS_NAME_ClassificationTable }], options: { autoExpand: true } })),
-        ),
-        of(ids.classificationIds).pipe(mergeMap((classificationIds) => createClassificationsInstanceKeyPaths(imodelAccess, classificationIds))),
-        from(ids.element2dIds).pipe(
-          bufferCount(Math.ceil(elements2dLength / Math.ceil(elements2dLength / 5000))),
-          releaseMainThreadOnItemsCount(1),
-          mergeMap((block) => createGeometricElementInstanceKeyPaths(imodelAccess, block, "2d"), 10),
-        ),
-        from(ids.element3dIds).pipe(
-          bufferCount(Math.ceil(elements3dLength / Math.ceil(elements3dLength / 5000))),
-          releaseMainThreadOnItemsCount(1),
-          mergeMap((block) => createGeometricElementInstanceKeyPaths(imodelAccess, block, "3d"), 10),
-        ),
-      );
-    }),
-  );
+        },
+        {
+          classificationTableIds: new Array<ClassificationTableId>(),
+          classificationIds: new Array<ClassificationId>(),
+          element2dIds: new Array<ElementId>(),
+          element3dIds: new Array<ElementId>(),
+        },
+      ),
+      mergeMap((ids) => {
+        const elements2dLength = ids.element2dIds.length;
+        const elements3dLength = ids.element3dIds.length;
+        return merge(
+          from(ids.classificationTableIds).pipe(
+            map((id): HierarchyFilteringPath => ({ path: [{ id, className: CLASS_NAME_ClassificationTable }], options: { autoExpand: true } })),
+          ),
+          idsCache.getClassificationsPathObs(ids.classificationIds).pipe(map((path) => ({ path, options: { autoExpand: true } }))),
+          from(ids.element2dIds).pipe(
+            bufferCount(Math.ceil(elements2dLength / Math.ceil(elements2dLength / 5000))),
+            releaseMainThreadOnItemsCount(1),
+            mergeMap((block) => createGeometricElementInstanceKeyPaths({ idsCache, imodelAccess, targetItems: block, type: "2d" }), 10),
+          ),
+          from(ids.element3dIds).pipe(
+            bufferCount(Math.ceil(elements3dLength / Math.ceil(elements3dLength / 5000))),
+            releaseMainThreadOnItemsCount(1),
+            mergeMap((block) => createGeometricElementInstanceKeyPaths({ idsCache, imodelAccess, targetItems: block, type: "3d" }), 10),
+          ),
+        );
+      }),
+    );
+  };
 }
 
-function createGeometricElementInstanceKeyPaths(
-  imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor,
-  targetItems: Id64Array,
-  type: "2d" | "3d",
-): Observable<HierarchyFilteringPath> {
+function createGeometricElementInstanceKeyPaths(props: {
+  idsCache: ClassificationsTreeIdsCache;
+  imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
+  targetItems: Id64Array;
+  type: "2d" | "3d";
+}): Observable<HierarchyFilteringPath> {
+  const { targetItems, imodelAccess, type, idsCache } = props;
   if (targetItems.length === 0) {
     return EMPTY;
   }
@@ -630,37 +636,19 @@ function createGeometricElementInstanceKeyPaths(
         FROM ElementsHierarchy ce
         JOIN ${type === "2d" ? CLASS_NAME_GeometricElement2d : CLASS_NAME_GeometricElement3d} pe ON pe.ECInstanceId = ce.ParentId
       )`,
-      `ClassificationsHierarchy(ECInstanceId, ParentId, Path) AS (
-        SELECT
-          c.ECInstanceId,
-          c.Parent.Id,
-          IIF(c.Parent.Id IS NULL,
-            'ct${separator}' || CAST(IdToHex(c.Model.Id) AS TEXT) || '${separator}c${separator}' || CAST(IdToHex([c].[ECInstanceId]) AS TEXT) || '${separator}' || e.Path,
-            'c${separator}' || CAST(IdToHex([c].[ECInstanceId]) AS TEXT) || '${separator}' || e.Path
-          )
-        FROM
-          ${CLASS_NAME_Classification} c
-          JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.TargetECInstanceId = c.ECInstanceId
-          JOIN ElementsHierarchy e ON ehc.SourceECInstanceId = e.ECInstanceId
-        WHERE e.ParentId IS NULL
-
-        UNION ALL
-
-        SELECT
-          pc.ECInstanceId,
-          pc.Parent.Id,
-          IIF(pc.Parent.Id IS NULL,
-            'ct${separator}' || CAST(IdToHex(pc.Model.Id) AS TEXT) || '${separator}c${separator}' || CAST(IdToHex([pc].[ECInstanceId]) AS TEXT) || '${separator}' || cc.Path,
-            'c${separator}' || CAST(IdToHex([pc].[ECInstanceId]) AS TEXT) || '${separator}' || cc.Path
-          )
-        FROM ClassificationsHierarchy cc
-        JOIN ${CLASS_NAME_Classification} pc ON pc.ECInstanceId = cc.ParentId
-      )`,
     ];
     const ecsql = `
-      SELECT ch.Path
-      FROM ClassificationsHierarchy ch
-      WHERE ch.ParentId IS NULL
+      SELECT
+        IIF(c.Parent.Id IS NULL,
+          'ct${separator}' || CAST(IdToHex(c.Model.Id) AS TEXT) || '${separator}c${separator}' || CAST(IdToHex([c].[ECInstanceId]) AS TEXT) || '${separator}' || e.Path,
+          'c${separator}' || CAST(IdToHex([c].[ECInstanceId]) AS TEXT) || '${separator}' || e.Path
+        ),
+        c.Parent.Id
+      FROM
+        ${CLASS_NAME_Classification} c
+        JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.TargetECInstanceId = c.ECInstanceId
+        JOIN ElementsHierarchy e ON ehc.SourceECInstanceId = e.ECInstanceId
+      WHERE e.ParentId IS NULL
     `;
 
     return imodelAccess.createQueryReader(
@@ -670,67 +658,20 @@ function createGeometricElementInstanceKeyPaths(
   }).pipe(
     releaseMainThreadOnItemsCount(300),
     map((row) => parseQueryRow(row, separator)),
-    mergeMap(async (elementHierarchyPath) => ({ path: elementHierarchyPath, options: { autoExpand: true } })),
-  );
-}
-
-function createClassificationsInstanceKeyPaths(
-  imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor,
-  targetItems: Id64Array,
-): Observable<HierarchyFilteringPath> {
-  if (targetItems.length === 0) {
-    return EMPTY;
-  }
-  const separator = ";";
-
-  return defer(() => {
-    const ctes = [
-      `ClassificationsHierarchy(ECInstanceId, ParentId, Path) AS (
-        SELECT
-          c.ECInstanceId,
-          c.Parent.Id,
-          IIF(c.Parent.Id IS NULL,
-            'ct${separator}' || CAST(IdToHex(c.Model.Id) AS TEXT) || '${separator}c${separator}' || CAST(IdToHex([c].[ECInstanceId]) AS TEXT),
-            'c${separator}' || CAST(IdToHex([c].[ECInstanceId]) AS TEXT)
-          )
-        FROM ${CLASS_NAME_Classification} c
-        WHERE c.ECInstanceId IN (${targetItems.join(",")})
-
-        UNION ALL
-
-        SELECT
-          pc.ECInstanceId,
-          pc.Parent.Id,
-          IIF(pc.Parent.Id IS NULL,
-            'ct${separator}' || CAST(IdToHex(pc.Model.Id) AS TEXT) || '${separator}c${separator}' || CAST(IdToHex([pc].[ECInstanceId]) AS TEXT) || '${separator}' || cc.Path,
-            'c${separator}' || CAST(IdToHex([pc].[ECInstanceId]) AS TEXT) || '${separator}' || cc.Path
-          )
-        FROM ClassificationsHierarchy cc
-        JOIN ${CLASS_NAME_Classification} pc ON pc.ECInstanceId = cc.ParentId
-      )`,
-    ];
-    const ecsql = `
-      SELECT ch.Path
-      FROM ClassificationsHierarchy ch
-      WHERE ch.ParentId IS NULL
-    `;
-
-    return imodelAccess.createQueryReader(
-      { ctes, ecsql },
-      { rowFormat: "Indexes", limit: "unbounded", restartToken: "tree-widget/classifications-tree/classifications-filter-paths-query" },
-    );
-  }).pipe(
-    releaseMainThreadOnItemsCount(300),
-    map((row) => parseQueryRow(row, separator)),
-    mergeMap(async (classificationHierarchyPath) => {
-      return { path: classificationHierarchyPath, options: { autoExpand: true } };
+    mergeMap(({ path, parentClassificationId }) => {
+      if (parentClassificationId) {
+        return idsCache
+          .getClassificationsPathObs([parentClassificationId])
+          .pipe(map((parentClassificationPath) => ({ path: parentClassificationPath.concat(path), options: { autoExpand: true } })));
+      }
+      return of({ path, options: { autoExpand: true } });
     }),
   );
 }
 
-function parseQueryRow(row: ECSqlQueryRow, separator: string) {
+function parseQueryRow(row: ECSqlQueryRow, separator: string): { path: HierarchyNodeIdentifiersPath; parentClassificationId: Id64String | undefined } {
   const rowElements: string[] = row[0].split(separator);
-  const path = new Array<InstanceKey>();
+  const path: HierarchyNodeIdentifiersPath = [];
   for (let i = 0; i < rowElements.length; i += 2) {
     switch (rowElements[i]) {
       case "e2d":
@@ -748,5 +689,5 @@ function parseQueryRow(row: ECSqlQueryRow, separator: string) {
     }
   }
 
-  return path;
+  return { path, parentClassificationId: row[1] };
 }
