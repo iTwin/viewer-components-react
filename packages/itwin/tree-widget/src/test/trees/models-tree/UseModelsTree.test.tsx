@@ -115,8 +115,7 @@ describe("useModelsTree", () => {
         const { result: renderHookResult } = renderHook(useModelsTree, { initialProps });
         const { getFilteredPaths } = renderHookResult.current.modelsTreeProps;
         await waitFor(async () => {
-          const result = getFilteredPaths ? await getFilteredPaths({ imodelAccess, abortSignal }) : getFilteredPaths;
-          expect(result).to.be.undefined;
+          expect(getFilteredPaths).to.be.undefined;
         });
       });
 
@@ -124,7 +123,8 @@ describe("useModelsTree", () => {
         const { result: renderHookResult } = renderHook(useModelsTree, { initialProps: { ...initialProps, getSubTreePaths } });
         const { getFilteredPaths } = renderHookResult.current.modelsTreeProps;
         await waitFor(async () => {
-          const result = getFilteredPaths ? await getFilteredPaths({ imodelAccess, abortSignal }) : getFilteredPaths;
+          expect(getFilteredPaths).to.not.be.undefined;
+          const result = await getFilteredPaths!({ imodelAccess, abortSignal });
           const expectedResult: HierarchyFilteringPath[] = [
             [
               { id: IModel.rootSubjectId, className: subjectClass },
@@ -146,7 +146,8 @@ describe("useModelsTree", () => {
         const { result: renderHookResult } = renderHook(useModelsTree, { initialProps: { ...initialProps, getSubTreePaths, filter: "element2" } });
         const { getFilteredPaths } = renderHookResult.current.modelsTreeProps;
         await waitFor(async () => {
-          const result = getFilteredPaths ? await getFilteredPaths({ imodelAccess, abortSignal }) : getFilteredPaths;
+          expect(getFilteredPaths).to.not.be.undefined;
+          const result = await getFilteredPaths!({ imodelAccess, abortSignal });
           const expectedResult: HierarchyFilteringPath[] = [
             {
               path: [
@@ -181,7 +182,8 @@ describe("useModelsTree", () => {
         });
         const { getFilteredPaths } = renderHookResult.current.modelsTreeProps;
         await waitFor(async () => {
-          const result = getFilteredPaths ? await getFilteredPaths({ imodelAccess, abortSignal }) : getFilteredPaths;
+          expect(getFilteredPaths).to.not.be.undefined;
+          const result = await getFilteredPaths!({ imodelAccess, abortSignal });
           const expectedResult: HierarchyFilteringPath[] = [
             {
               path: [
@@ -202,8 +204,8 @@ describe("useModelsTree", () => {
         const { result: hooksResult } = renderHook(
           (props) => {
             return {
-              contextResult: useFocusedInstancesContext(),
-              renderHookResult: useModelsTree({ ...props }),
+              focusedInstancesContext: useFocusedInstancesContext(),
+              modelsTree: useModelsTree({ ...props }),
             };
           },
           {
@@ -218,12 +220,12 @@ describe("useModelsTree", () => {
 
         // Enable focus mode
         act(() => {
-          hooksResult.current.contextResult.toggle();
+          hooksResult.current.focusedInstancesContext.toggle();
         });
 
         // Wait for enabled to be true
         await waitFor(() => {
-          expect(hooksResult.current.contextResult.enabled).to.be.true;
+          expect(hooksResult.current.focusedInstancesContext.enabled).to.be.true;
         });
 
         // Add to selection
@@ -231,10 +233,11 @@ describe("useModelsTree", () => {
           selectionStorage.addToSelection({ imodelKey: imodel.key, level: 0, source: "test", selectables: [{ className: modelClass, id: modelIds[1] }] });
         });
 
-        const { getFilteredPaths } = hooksResult.current.renderHookResult.modelsTreeProps;
+        const { getFilteredPaths } = hooksResult.current.modelsTree.modelsTreeProps;
 
         await waitFor(async () => {
-          const result = getFilteredPaths ? await getFilteredPaths({ imodelAccess, abortSignal }) : getFilteredPaths;
+          expect(getFilteredPaths).to.not.be.undefined;
+          const result = await getFilteredPaths!({ imodelAccess, abortSignal });
           const expectedResult: HierarchyFilteringPath[] = [
             {
               path: [
