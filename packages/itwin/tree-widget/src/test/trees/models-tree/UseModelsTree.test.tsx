@@ -114,9 +114,7 @@ describe("useModelsTree", () => {
       it("getFilteredPaths returns correct result when getSubTreePaths is not defined", async () => {
         const { result: renderHookResult } = renderHook(useModelsTree, { initialProps });
         const { getFilteredPaths } = renderHookResult.current.modelsTreeProps;
-        await waitFor(async () => {
-          expect(getFilteredPaths).to.be.undefined;
-        });
+        expect(getFilteredPaths).to.be.undefined;
       });
 
       it("getFilteredPaths returns correct result when getSubTreePaths is defined", async () => {
