@@ -310,8 +310,9 @@ export class ClassificationsTreeIdsCache implements Disposable {
         if (!classificationEntry) {
           classificationEntry = { childClassificationIds: [], relatedCategories2d, relatedCategories3d, parentClassificationOrTableId: tableOrParentId };
           classificationInfos.set(id, classificationEntry);
+        } else {
+          classificationEntry.parentClassificationOrTableId = tableOrParentId;
         }
-        classificationEntry.parentClassificationOrTableId = tableOrParentId;
       }
       return classificationInfos;
     })();

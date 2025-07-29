@@ -128,7 +128,6 @@ export async function createFilteredTree(props: {
       (parentNode.children ??= new Map()).set(identifier.id, newNode);
       parentNode = newNode;
       if (newNode.type === "element2d") {
-        assert(newNode.type === "element2d");
         filtered2dElements.push(newNode);
       } else if (newNode.type === "element3d") {
         filtered3dElements.push(newNode);

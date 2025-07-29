@@ -74,12 +74,10 @@ export interface ClassificationsTreeVisibilityHandlerProps {
   filteredPaths?: HierarchyFilteringPath[];
 }
 
-/** @alpha */
 interface GetFilteredNodeVisibilityProps {
   node: HierarchyNode;
 }
 
-/** @alpha */
 interface ChangeFilteredNodeVisibilityProps extends GetFilteredNodeVisibilityProps {
   on: boolean;
 }

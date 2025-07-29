@@ -544,12 +544,13 @@ function createInstanceKeyPathsFromTargetItems({
   InstanceKey,
   HierarchyFilteringPath
 > {
+  const actualLimit = limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT;
   return (targetItems: Observable<InstanceKey>) => {
     return targetItems.pipe(
-      limit !== "unbounded"
+      actualLimit !== "unbounded"
         ? map((targetItem, index) => {
-            if (index >= (limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT)) {
-              throw new FilterLimitExceededError(limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT);
+            if (index >= actualLimit) {
+              throw new FilterLimitExceededError(actualLimit);
             }
             return targetItem;
           })
@@ -624,7 +625,7 @@ function createGeometricElementInstanceKeyPaths(props: {
           e.ECInstanceId,
           e.Parent.Id,
           'e${type}${separator}' || CAST(IdToHex([e].[ECInstanceId]) AS TEXT)
-        FROM  ${type === "2d" ? CLASS_NAME_GeometricElement2d : CLASS_NAME_GeometricElement3d} e
+        FROM  ${CLASS_NAME_Element} e
         WHERE e.ECInstanceId IN (${targetItems.join(",")})
 
         UNION ALL
@@ -634,16 +635,13 @@ function createGeometricElementInstanceKeyPaths(props: {
           pe.Parent.Id,
           'e${type}${separator}' || CAST(IdToHex([pe].[ECInstanceId]) AS TEXT) || '${separator}' || ce.Path
         FROM ElementsHierarchy ce
-        JOIN ${type === "2d" ? CLASS_NAME_GeometricElement2d : CLASS_NAME_GeometricElement3d} pe ON pe.ECInstanceId = ce.ParentId
+        JOIN ${CLASS_NAME_Element} pe ON pe.ECInstanceId = ce.ParentId
       )`,
     ];
     const ecsql = `
       SELECT
-        IIF(c.Parent.Id IS NULL,
-          'ct${separator}' || CAST(IdToHex(c.Model.Id) AS TEXT) || '${separator}c${separator}' || CAST(IdToHex([c].[ECInstanceId]) AS TEXT) || '${separator}' || e.Path,
-          'c${separator}' || CAST(IdToHex([c].[ECInstanceId]) AS TEXT) || '${separator}' || e.Path
-        ),
-        c.Parent.Id
+        e.Path path,
+        c.ECInstanceId classificationId
       FROM
         ${CLASS_NAME_Classification} c
         JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.TargetECInstanceId = c.ECInstanceId
@@ -653,7 +651,7 @@ function createGeometricElementInstanceKeyPaths(props: {
 
     return imodelAccess.createQueryReader(
       { ctes, ecsql },
-      { rowFormat: "Indexes", limit: "unbounded", restartToken: `tree-widget/classifications-tree/elements${type}-filter-paths-query` },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `tree-widget/classifications-tree/elements${type}-filter-paths-query` },
     );
   }).pipe(
     releaseMainThreadOnItemsCount(300),
@@ -670,7 +668,7 @@ function createGeometricElementInstanceKeyPaths(props: {
 }
 
 function parseQueryRow(row: ECSqlQueryRow, separator: string): { path: HierarchyNodeIdentifiersPath; parentClassificationId: Id64String | undefined } {
-  const rowElements: string[] = row[0].split(separator);
+  const rowElements: string[] = row.path.split(separator);
   const path: HierarchyNodeIdentifiersPath = [];
   for (let i = 0; i < rowElements.length; i += 2) {
     switch (rowElements[i]) {
@@ -680,14 +678,8 @@ function parseQueryRow(row: ECSqlQueryRow, separator: string): { path: Hierarchy
       case "e3d":
         path.push({ className: CLASS_NAME_GeometricElement3d, id: rowElements[i + 1] });
         break;
-      case "c":
-        path.push({ className: CLASS_NAME_Classification, id: rowElements[i + 1] });
-        break;
-      case "ct":
-        path.push({ className: CLASS_NAME_ClassificationTable, id: rowElements[i + 1] });
-        break;
     }
   }
 
-  return { path, parentClassificationId: row[1] };
+  return { path, parentClassificationId: row.classificationId };
 }
