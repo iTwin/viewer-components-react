@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753373869495,
+  "lastUpdate": 1753878391540,
   "repoUrl": "https://github.com/iTwin/viewer-components-react",
   "entries": {
     "Tree-Widget benchmark": [
@@ -2526,6 +2526,129 @@ window.BENCHMARK_DATA = {
             "value": 543,
             "unit": "ms",
             "extra": "count: 18\nmax: 543\np95: 543\nmedian: 38"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "100586436+JonasDov@users.noreply.github.com",
+            "name": "JonasDov",
+            "username": "JonasDov"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "4bec3e01cbe01fe9843f6bd54b43f9cba333536f",
+          "message": "[Tree-widget]: Add option to get a smaller part of models tree (#1375)\n\n* Add subsetTree\n\n* Run extract api and changeset\n\n* Bump perentation-hierarchies version\n\n* Fix merge problems\n\n* Add back new line\n\n* Change subsetTreeConfig to getSubsetTreePaths\n\n* Rename getSubsetTreePaths to getSubTreePaths\n\n* Update name\n\n* Adress comments\n\n* Bump hierarchies versions and update comments\n\n* Update packages/itwin/tree-widget/public/locales/en/TreeWidget.json\n\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>\n\n* Add tests\n\n* Adress comments\n\n* Remove wait For\n\n---------\n\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>",
+          "timestamp": "2025-07-30T08:16:59-04:00",
+          "tree_id": "efbb09a9d9bca7ac43e1ce957a2fb52ced2baf80",
+          "url": "https://github.com/iTwin/viewer-components-react/commit/4bec3e01cbe01fe9843f6bd54b43f9cba333536f"
+        },
+        "date": 1753878389337,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "categories tree creates initial filtered view for 50k items",
+            "value": 2618.24,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree creates initial filtered view for 50k items (P95 of main thread blocks)",
+            "value": 1781,
+            "unit": "ms",
+            "extra": "count: 9\nmax: 1781\np95: 1781\nmedian: 32"
+          },
+          {
+            "name": "categories tree changing category visibility changes visibility for 50k subCategories",
+            "value": 9049.54,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree changing category visibility changes visibility for 50k subCategories (P95 of main thread blocks)",
+            "value": 2575,
+            "unit": "ms",
+            "extra": "count: 20\nmax: 2575\np95: 2575\nmedian: 32.5"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k categories",
+            "value": 6810.02,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k categories (P95 of main thread blocks)",
+            "value": 3519,
+            "unit": "ms",
+            "extra": "count: 8\nmax: 3519\np95: 3519\nmedian: 47.5"
+          },
+          {
+            "name": "models tree creates initial filtered view for 50k target items",
+            "value": 2309.29,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree creates initial filtered view for 50k target items (P95 of main thread blocks)",
+            "value": 340,
+            "unit": "ms",
+            "extra": "count: 12\nmax: 340\np95: 340\nmedian: 34.5"
+          },
+          {
+            "name": "models tree validates categories visibility for imodel with 50k categories",
+            "value": 16142.39,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree validates categories visibility for imodel with 50k categories (P95 of main thread blocks)",
+            "value": 4546,
+            "unit": "ms",
+            "extra": "count: 11\nmax: 4546\np95: 4546\nmedian: 74"
+          },
+          {
+            "name": "models tree changing model visibility changes visibility for 50k elements",
+            "value": 48217.1,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing model visibility changes visibility for 50k elements (P95 of main thread blocks)",
+            "value": 271,
+            "unit": "ms",
+            "extra": "count: 12\nmax: 271\np95: 271\nmedian: 41.5"
+          },
+          {
+            "name": "models tree changing category visibility changes visibility for 50k elements",
+            "value": 47863.5,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing category visibility changes visibility for 50k elements (P95 of main thread blocks)",
+            "value": 255,
+            "unit": "ms",
+            "extra": "count: 16\nmax: 255\np95: 255\nmedian: 35"
+          },
+          {
+            "name": "models tree changing per-model-category override changes visibility for 50k elements",
+            "value": 48469.77,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing per-model-category override changes visibility for 50k elements (P95 of main thread blocks)",
+            "value": 259,
+            "unit": "ms",
+            "extra": "count: 15\nmax: 259\np95: 259\nmedian: 36"
+          },
+          {
+            "name": "models tree changing element visibility changes only parent nodes visibility with 50k elements",
+            "value": 49334.29,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing element visibility changes only parent nodes visibility with 50k elements (P95 of main thread blocks)",
+            "value": 471,
+            "unit": "ms",
+            "extra": "count: 15\nmax: 471\np95: 471\nmedian: 43"
           }
         ]
       }
