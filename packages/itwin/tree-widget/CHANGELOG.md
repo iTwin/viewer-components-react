@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Thu, 24 Jul 2025 16:07:32 GMT and should not be manually modified. -->
+<!-- This log was last generated on Wed, 30 Jul 2025 13:10:01 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.12.0
+
+Wed, 30 Jul 2025 13:10:01 GMT
+
+### Minor changes
+
+- Added `getSubTreePaths` option to `UseModelsTreeProps` for restricting the visible hierarchy to a sub-tree of nodes based on instance keys. Unlike `getFilteredPaths`, which controls filtering logic, `getSubTreePaths` limits the scope of the hierarchy, allowing filtering within the specified sub-tree. ([#1375](https://github.com/iTwin/viewer-components-react/pull/1375))
 
 ## 3.11.0
 

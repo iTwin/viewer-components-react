@@ -2,6 +2,21 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Wed, 30 Jul 2025 13:10:01 GMT",
+      "version": "3.12.0",
+      "tag": "@itwin/tree-widget-react_v3.12.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "4bec3e01cbe01fe9843f6bd54b43f9cba333536f",
+            "comment": "Added `getSubTreePaths` option to `UseModelsTreeProps` for restricting the visible hierarchy to a sub-tree of nodes based on instance keys. Unlike `getFilteredPaths`, which controls filtering logic, `getSubTreePaths` limits the scope of the hierarchy, allowing filtering within the specified sub-tree."
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 24 Jul 2025 16:07:32 GMT",
       "version": "3.11.0",
       "tag": "@itwin/tree-widget-react_v3.11.0",
