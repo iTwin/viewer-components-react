@@ -23,7 +23,7 @@ import type { InstanceKey } from "@itwin/presentation-common";
 
 // __PUBLISH_EXTRACT_START__ TreeWidget.GetSubTreePathsComponentWithTargetItemsExample
 type UseModelsTreeProps = Parameters<typeof useModelsTree>[0];
-type GetSubTreePathsType = Exclude<UseModelsTreeProps["getSubTreePaths"], undefined>;
+type GetSubTreePathsType = NonNullable<UseModelsTreeProps["getSubTreePaths"]>;
 
 function CustomModelsTreeComponentWithTargetItems({
   viewport,
