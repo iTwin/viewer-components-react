@@ -218,14 +218,19 @@ function CustomModelsTreeComponent({ imodel, viewport, getSchemaContext, selecti
 
 #### Displaying a subset of the tree
 
-Models tree allows displaying a subset of all nodes by providing a `getFilteredPaths` function. This function receives a helper function called `createInstanceKeyPaths`, which can generate paths from either:
+Models tree allows displaying a subset of all nodes by providing a `getFilteredPaths` or `getSubTreePaths` functions. These functions receive a helper function called `createInstanceKeyPaths`.
+For `getFilteredPaths` this helper function can generate paths from either:
 
 - a list of instance keys (`targetItems`)
 - a label string
 
+For `getSubTreePaths` this helper function can generate paths from:
+
+- a list of instance keys (`targetItems`)
+
 Based on the returned paths, the displayed hierarchy consists only of the targeted nodes, their ancestors, and their children.
 
-Use `getFilteredPaths` when you need more control over which nodes are shown. Here are some example use cases:
+Use `getFilteredPaths` when you need more control over filtering behaviour. Here are some example use cases:
 
 - **Filter by known instance keys**: You already have a list of `InstanceKey` items that should remain in the tree. Pass them as `targetItems` to `createInstanceKeyPaths`.
   <!-- [[include: [TreeWidget.GetFilteredPathsComponentWithTargetItemsExample], tsx]] -->
@@ -361,6 +366,55 @@ Use `getFilteredPaths` when you need more control over which nodes are shown. He
   }
   ```
     <!-- END EXTRACTION -->
+
+Use `getSubTreePaths` when you need to restrict the visible hierarchy to a specific sub-tree of nodes, without changing how filtering works. Here is an example use case:
+
+**Restrict the hierarchy to a sub-tree and keep the default filtering logic**: You already have a list of `InstanceKey` items that should remain in the tree. Pass them as `targetItems` to `createInstanceKeyPaths`. This will restrict the hierarchy to a sub-tree, but filtering will work as before.
+
+  <!-- [[include: [TreeWidget.GetSubTreePathsComponentWithTargetItemsExample], tsx]] -->
+  <!-- BEGIN EXTRACTION -->
+
+```tsx
+type UseModelsTreeProps = Props<typeof useModelsTree>;
+type GetSubTreePathsType = NonNullable<UseModelsTreeProps["getSubTreePaths"]>;
+
+function CustomModelsTreeComponentWithTargetItems({
+  viewport,
+  selectionStorage,
+  imodel,
+  targetItems,
+}: {
+  viewport: Viewport;
+  selectionStorage: SelectionStorage;
+  imodel: IModelConnection;
+  targetItems: InstanceKey[];
+}) {
+  const getSubTreePaths = useCallback<GetSubTreePathsType>(
+    async ({ createInstanceKeyPaths }) => {
+      return createInstanceKeyPaths({
+        // List of instance keys representing nodes that should be part of the hierarchy.
+        // Only these nodes, their ancestors and children will be part of that hierarchy.
+        targetItems,
+      });
+    },
+    [targetItems],
+  );
+
+  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getSubTreePaths });
+
+  return (
+    <VisibilityTree
+      {...modelsTreeProps}
+      getSchemaContext={getSchemaContext}
+      selectionStorage={selectionStorage}
+      imodel={imodel}
+      treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
+    />
+  );
+}
+```
+
+  <!-- END EXTRACTION -->
 
 ### Categories tree
 
