@@ -20,6 +20,7 @@ import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TreeWidgetT
 import type { SelectionStorage } from "@itwin/unified-selection";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
+import type { Props } from "@itwin/presentation-shared";
 
 // __PUBLISH_EXTRACT_START__ TreeWidget.GetSubTreePathsComponentWithTargetItemsExample
 type UseModelsTreeProps = Props<typeof useModelsTree>;

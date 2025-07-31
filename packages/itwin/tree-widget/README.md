@@ -375,8 +375,8 @@ Use `getSubTreePaths` when you need to restrict the visible hierarchy to a speci
   <!-- BEGIN EXTRACTION -->
 
 ```tsx
-type UseModelsTreeProps = Parameters<typeof useModelsTree>[0];
-type GetSubTreePathsType = Exclude<UseModelsTreeProps["getSubTreePaths"], undefined>;
+type UseModelsTreeProps = Props<typeof useModelsTree>;
+type GetSubTreePathsType = NonNullable<UseModelsTreeProps["getSubTreePaths"]>;
 
 function CustomModelsTreeComponentWithTargetItems({
   viewport,
