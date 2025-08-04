@@ -128,7 +128,7 @@ export const ClassificationsTreeComponent: {
 };
 
 // @alpha (undocumented)
-interface ClassificationsTreeComponentProps extends Pick<ClassificationsTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "emptyTreeContent" | "getActions" | "getDecorations" | "hierarchyConfig" | "getEditingProps"> {
+interface ClassificationsTreeComponentProps extends Pick<ClassificationsTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "filter" | "emptyTreeContent" | "getActions" | "getDecorations" | "hierarchyConfig" | "getEditingProps"> {
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
@@ -531,7 +531,7 @@ interface UseCategoriesTreeResult {
 }
 
 // @alpha
-export function useClassificationsTree({ activeView, emptyTreeContent, ...rest }: UseClassificationsTreeProps): UseClassificationsTreeResult;
+export function useClassificationsTree({ activeView, emptyTreeContent, filter, ...rest }: UseClassificationsTreeProps): UseClassificationsTreeResult;
 
 // @alpha (undocumented)
 interface UseClassificationsTreeProps {
@@ -540,13 +540,15 @@ interface UseClassificationsTreeProps {
     // (undocumented)
     emptyTreeContent?: ReactNode;
     // (undocumented)
+    filter?: string;
+    // (undocumented)
     hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
 }
 
 // @alpha (undocumented)
 interface UseClassificationsTreeResult {
     // (undocumented)
-    categoriesTreeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "visibilityHandlerFactory" | "emptyTreeContent">;
+    classificationsTreeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "visibilityHandlerFactory" | "getFilteredPaths" | "emptyTreeContent" | "highlight">;
     // (undocumented)
     rendererProps: Required<Pick<VisibilityTreeRendererProps, "getDecorations">>;
 }

@@ -35,11 +35,13 @@ export function ClassificationsTree({
   getDecorations,
   getActions,
   getEditingProps,
+  filter,
 }: ClassificationsTreeProps) {
-  const { categoriesTreeProps, rendererProps } = useClassificationsTree({
+  const { classificationsTreeProps, rendererProps } = useClassificationsTree({
     activeView,
     hierarchyConfig,
     emptyTreeContent,
+    filter,
   });
 
   const nodeActions = useCallback(
@@ -51,7 +53,7 @@ export function ClassificationsTree({
 
   return (
     <VisibilityTree
-      {...categoriesTreeProps}
+      {...classificationsTreeProps}
       imodel={imodel}
       selectionStorage={selectionStorage}
       hierarchyLevelSizeLimit={hierarchyLevelConfig?.sizeLimit}

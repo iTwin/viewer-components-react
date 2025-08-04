@@ -35,7 +35,7 @@ import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies
 import { AlwaysAndNeverDrawnElementInfo } from "../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
 import { toVoidPromise } from "../../common/internal/Rxjs.js";
 import { createVisibilityStatus } from "../../common/internal/Tooltip.js";
-import { setDifference, setIntersection } from "../../common/internal/Utils.js";
+import { getDistinctMapValues, releaseMainThreadOnItemsCount, setDifference, setIntersection } from "../../common/internal/Utils.js";
 import { createVisibilityChangeEventListener } from "../../common/internal/VisibilityChangeEventListener.js";
 import {
   changeElementStateNoChildrenOperator,
@@ -48,7 +48,9 @@ import {
 } from "../../common/internal/VisibilityUtils.js";
 import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility.js";
 import { ClassificationsTreeNode } from "./ClassificationsTreeNode.js";
+import { createFilteredTree } from "./FilteredTree.js";
 
+import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { GetVisibilityFromAlwaysAndNeverDrawnElementsProps } from "../../common/internal/VisibilityUtils.js";
 import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyVisibilityHandler, VisibilityStatus } from "../../common/UseHierarchyVisibility.js";
@@ -59,6 +61,7 @@ import type { ClassificationsTreeIdsCache } from "./ClassificationsTreeIdsCache.
 import type { IVisibilityChangeEventListener } from "../../common/internal/VisibilityChangeEventListener.js";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { CategoryId, ElementId } from "../../common/internal/Types.js";
+import type { FilteredTree } from "./FilteredTree.js";
 
 /**
  * Props for `createClassificationsTreeVisibilityHandler`.
@@ -68,6 +71,15 @@ export interface ClassificationsTreeVisibilityHandlerProps {
   viewport: Viewport;
   idsCache: ClassificationsTreeIdsCache;
   imodelAccess: ECClassHierarchyInspector;
+  filteredPaths?: HierarchyFilteringPath[];
+}
+
+interface GetFilteredNodeVisibilityProps {
+  node: HierarchyNode;
+}
+
+interface ChangeFilteredNodeVisibilityProps extends GetFilteredNodeVisibilityProps {
+  on: boolean;
 }
 
 /**
@@ -82,6 +94,7 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
   private readonly _eventListener: IVisibilityChangeEventListener;
   private readonly _alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo;
   private readonly _idsCache: ClassificationsTreeIdsCache;
+  private _filteredTree: Promise<FilteredTree> | undefined;
   private _elementChangeQueue = new Subject<Observable<void>>();
   private _subscriptions: Subscription[] = [];
   private _changeRequest = new Subject<{ key: HierarchyNodeKey; depth: number }>();
@@ -97,6 +110,13 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
     });
     this._alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfo(_props.viewport);
     this._idsCache = this._props.idsCache;
+    if (_props.filteredPaths) {
+      this._filteredTree = createFilteredTree({
+        idsCache: this._idsCache,
+        filteringPaths: _props.filteredPaths,
+        imodelAccess: this._props.imodelAccess,
+      });
+    }
     this._subscriptions.push(this._elementChangeQueue.pipe(concatAll()).subscribe());
   }
 
@@ -154,6 +174,9 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
   }
 
   private getVisibilityStatusObs(node: HierarchyNode): Observable<VisibilityStatus> {
+    if (node.filtering?.filteredChildrenIdentifierPaths?.length && !node.filtering.isFilterTarget) {
+      return this.getFilteredNodeVisibility({ node });
+    }
     if (!HierarchyNode.isInstancesNode(node)) {
       return EMPTY;
     }
@@ -179,6 +202,56 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
       categoryId: ClassificationsTreeNode.getCategoryId(node),
       elementType: node.extendedData?.type,
     });
+  }
+
+  private getFilteredNodeVisibility(props: GetFilteredNodeVisibilityProps) {
+    return from(this.getVisibilityChangeTargets(props)).pipe(
+      mergeMap(({ classificationIds, classificationTableIds, elements2d, elements3d }) => {
+        const observables = new Array<Observable<VisibilityStatus>>();
+        if (classificationTableIds?.size) {
+          observables.push(this.getClassificationTableDisplayStatus({ classificationTableIds: [...classificationTableIds] }));
+        }
+
+        if (classificationIds?.size) {
+          observables.push(this.getClassificationDisplayStatus({ classificationIds: [...classificationIds] }));
+        }
+        if (elements2d?.length) {
+          observables.push(
+            from(elements2d).pipe(
+              releaseMainThreadOnItemsCount(50),
+              mergeMap(({ modelId, categoryId, elementIds }) => {
+                return from(elementIds).pipe(
+                  releaseMainThreadOnItemsCount(1000),
+                  mergeMap((elementId) => this.getGeometricElementDisplayStatus({ modelId, categoryId, elementId, elementType: "2d" })),
+                );
+              }),
+            ),
+          );
+        }
+
+        if (elements3d?.length) {
+          observables.push(
+            from(elements3d).pipe(
+              releaseMainThreadOnItemsCount(50),
+              mergeMap(({ modelId, categoryId, elementIds }) => {
+                return from(elementIds).pipe(
+                  releaseMainThreadOnItemsCount(1000),
+                  mergeMap((elementId) => this.getGeometricElementDisplayStatus({ modelId, categoryId, elementId, elementType: "3d" })),
+                );
+              }),
+            ),
+          );
+        }
+
+        return merge(...observables);
+      }),
+      mergeVisibilityStatuses,
+    );
+  }
+
+  private async getVisibilityChangeTargets({ node }: GetFilteredNodeVisibilityProps) {
+    const filteredTree = await this._filteredTree;
+    return filteredTree ? filteredTree.getVisibilityChangeTargets(node) : {};
   }
 
   private getClassificationTableDisplayStatus(props: { classificationTableIds: Id64Array }): Observable<VisibilityStatus> {
@@ -283,7 +356,7 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
     const result = from(categoryIds).pipe(
       mergeMap(async (categoryId) => {
         let visibility: "visible" | "hidden" | "unknown" = "unknown";
-        const categoryModels = [...(await this._idsCache.getCategoriesElementModels([categoryId], true)).values()].flat();
+        const categoryModels = getDistinctMapValues(await this._idsCache.getCategoriesElementModels([categoryId], true));
         let nonDefaultModelDisplayStatesCount = 0;
         for (const modelId of categoryModels) {
           if (!this._props.viewport.view.viewsModel(modelId)) {
@@ -313,7 +386,7 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
           }
         }
 
-        if (categoryModels.length > 0 && nonDefaultModelDisplayStatesCount === categoryModels.length) {
+        if (categoryModels.size > 0 && nonDefaultModelDisplayStatesCount === categoryModels.size) {
           assert(visibility === "visible" || visibility === "hidden");
           return createVisibilityStatus(visibility);
         }
@@ -349,7 +422,7 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
       }
 
       const modelsObservable = props.modelId
-        ? of(new Map(props.categoryIds.map((id) => [id, [props.modelId!]])))
+        ? of(new Map(props.categoryIds.map((id) => [id, new Set([props.modelId!])])))
         : from(this._idsCache.getCategoriesElementModels(props.categoryIds));
       return merge(
         // get visibility status from always and never drawn elements
@@ -478,7 +551,7 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
     }
     const { modelId, categoryIds } = props.queryProps;
     const totalCount = (
-      modelId ? of(new Map(categoryIds.map((categoryId) => [categoryId, [modelId]]))) : from(this._idsCache.getCategoriesElementModels(categoryIds))
+      modelId ? of(new Map(categoryIds.map((categoryId) => [categoryId, new Set([modelId])]))) : from(this._idsCache.getCategoriesElementModels(categoryIds))
     ).pipe(
       mergeMap((categoriesMap) => from(categoriesMap)),
       mergeMap(([categoryId, modelIds]) => {
@@ -541,6 +614,10 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
   }
 
   private changeVisibilityObs(node: HierarchyNode, on: boolean): Observable<void> {
+    if (node.filtering?.filteredChildrenIdentifierPaths?.length && !node.filtering.isFilterTarget) {
+      return this.changeFilteredNodeVisibility({ node, on });
+    }
+
     if (!HierarchyNode.isInstancesNode(node)) {
       return EMPTY;
     }
@@ -565,6 +642,43 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
       categoryId: ClassificationsTreeNode.getCategoryId(node),
       on,
     });
+  }
+
+  private changeFilteredNodeVisibility({ on, ...props }: ChangeFilteredNodeVisibilityProps) {
+    return from(this.getVisibilityChangeTargets(props)).pipe(
+      mergeMap(({ classificationTableIds, classificationIds, elements2d, elements3d }) => {
+        const observables = new Array<Observable<void>>();
+        if (classificationTableIds?.size) {
+          observables.push(this.changeClassificationTableDisplayState({ classificationTableIds: [...classificationTableIds], on }));
+        }
+
+        if (classificationIds?.size) {
+          observables.push(this.changeClassificationDisplayState({ classificationIds: [...classificationIds], on }));
+        }
+
+        if (elements2d?.length) {
+          observables.push(
+            from(elements2d).pipe(
+              mergeMap(({ modelId, categoryId, elementIds }) => {
+                return this.changeGeometricElementsDisplayState({ modelId, categoryId, elementIds, on });
+              }),
+            ),
+          );
+        }
+
+        if (elements3d?.length) {
+          observables.push(
+            from(elements3d).pipe(
+              mergeMap(({ modelId, categoryId, elementIds }) => {
+                return this.changeGeometricElementsDisplayState({ modelId, categoryId, elementIds, on });
+              }),
+            ),
+          );
+        }
+
+        return merge(...observables);
+      }),
+    );
   }
 
   private changeClassificationTableDisplayState(props: { classificationTableIds: Id64Array; on: boolean }): Observable<void> {
@@ -674,7 +788,7 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
       const { modelId, categoryIds, on } = props;
       const viewport = this._props.viewport;
       const modelIdsObservable = modelId
-        ? of(new Map(categoryIds.map((id) => [id, [modelId]])))
+        ? of(new Map(categoryIds.map((id) => [id, new Set([modelId])])))
         : from(this._idsCache.getCategoriesElementModels(categoryIds, true));
       return concat(
         modelId ? EMPTY : from(enableCategoryDisplay(viewport, categoryIds, on)),

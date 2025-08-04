@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { assert } from "@itwin/core-bentley";
+import { from, map, mergeMap } from "rxjs";
 import {
   CLASS_NAME_Classification,
   CLASS_NAME_ClassificationSystem,
@@ -17,16 +17,19 @@ import {
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
 import { getDistinctMapValues } from "../../common/internal/Utils.js";
 
+import type { Observable } from "rxjs";
 import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
-import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { ClassificationsTreeHierarchyConfiguration } from "../ClassificationsTreeDefinition.js";
+
 /** @internal */
 export type ClassificationId = Id64String;
 /** @internal */
 export type ClassificationTableId = Id64String;
 
 interface ClassificationInfo {
+  parentClassificationOrTableId: ClassificationId | ClassificationTableId | undefined;
   childClassificationIds: ClassificationId[];
   relatedCategories2d: CategoryId[];
   relatedCategories3d: CategoryId[];
@@ -40,6 +43,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
   private _elementModelsCategories: Promise<Map<ModelId, { category2dIds: Id64Set; category3dIds: Id64Set; isSubModel: boolean }>> | undefined;
   private _modelWithCategoryModeledElements: Promise<Map<ModelCategoryKey, Set<ElementId>>> | undefined;
   private _classificationInfos: Promise<Map<ClassificationId | ClassificationTableId, ClassificationInfo>> | undefined;
+  private _filteredElementsData: Promise<Map<ElementId, { modelId: Id64String; categoryId: Id64String }>> | undefined;
 
   constructor(
     private _queryExecutor: LimitingECSqlQueryExecutor,
@@ -181,18 +185,18 @@ export class ClassificationsTreeIdsCache implements Disposable {
     return result;
   }
 
-  public async getCategoriesElementModels(categoryIds: Id64Array, includeSubModels?: boolean): Promise<Map<CategoryId, Array<ModelId>>> {
+  public async getCategoriesElementModels(categoryIds: Id64Array, includeSubModels?: boolean): Promise<Map<CategoryId, Set<ModelId>>> {
     const elementModelsCategories = await this.getElementModelsCategories();
-    const result = new Map<CategoryId, Array<ModelId>>();
+    const result = new Map<CategoryId, Set<ModelId>>();
     for (const categoryId of categoryIds) {
       for (const [modelId, { category2dIds, category3dIds, isSubModel }] of elementModelsCategories) {
         if ((includeSubModels || !isSubModel) && (category2dIds.has(categoryId) || category3dIds.has(categoryId))) {
           let categoryModels = result.get(categoryId);
           if (!categoryModels) {
-            categoryModels = new Array<ModelId>();
+            categoryModels = new Set<ModelId>();
             result.set(categoryId, categoryModels);
           }
-          categoryModels.push(modelId);
+          categoryModels.add(modelId);
         }
       }
     }
@@ -216,13 +220,13 @@ export class ClassificationsTreeIdsCache implements Disposable {
     return this._categoryElementCounts.getCategoryElementsCount(modelId, categoryId);
   }
 
-  private async *queryClassifications(): AsyncIterableIterator<{
-    id: Id64String;
-    tableId?: ClassificationTableId;
-    parentId?: ClassificationId;
-    relatedCategories2d: CategoryId[];
-    relatedCategories3d: CategoryId[];
-  }> {
+  private async *queryClassifications(): AsyncIterableIterator<
+    {
+      id: Id64String;
+      relatedCategories2d: CategoryId[];
+      relatedCategories3d: CategoryId[];
+    } & ({ tableId: ClassificationTableId; parentId: undefined } | { tableId: undefined; parentId: ClassificationId })
+  > {
     const CLASSIFICATIONS_CTE = "Classifications";
     const ctes = [
       `
@@ -296,15 +300,19 @@ export class ClassificationsTreeIdsCache implements Disposable {
       const classificationInfos = new Map<ClassificationId | ClassificationTableId, ClassificationInfo>();
       for await (const { id, tableId, parentId, relatedCategories2d, relatedCategories3d } of this.queryClassifications()) {
         const tableOrParentId = tableId ?? parentId;
-        assert(!!tableOrParentId);
         let parentInfo = classificationInfos.get(tableOrParentId);
         if (!parentInfo) {
-          parentInfo = { childClassificationIds: [], relatedCategories2d: [], relatedCategories3d: [] };
+          parentInfo = { childClassificationIds: [], relatedCategories2d: [], relatedCategories3d: [], parentClassificationOrTableId: undefined };
           classificationInfos.set(tableOrParentId, parentInfo);
         }
         parentInfo.childClassificationIds.push(id);
-
-        classificationInfos.set(id, { childClassificationIds: [], relatedCategories2d, relatedCategories3d });
+        let classificationEntry = classificationInfos.get(id);
+        if (!classificationEntry) {
+          classificationEntry = { childClassificationIds: [], relatedCategories2d, relatedCategories3d, parentClassificationOrTableId: tableOrParentId };
+          classificationInfos.set(id, classificationEntry);
+        } else {
+          classificationEntry.parentClassificationOrTableId = tableOrParentId;
+        }
       }
       return classificationInfos;
     })();
@@ -337,15 +345,94 @@ export class ClassificationsTreeIdsCache implements Disposable {
       return result;
     }
     const classificationsInfo = await this.getClassificationsInfo();
-    await Promise.all(
-      classificationOrTableIds.map(async (classificationOrTableId) => {
-        const classificationInfo = classificationsInfo.get(classificationOrTableId);
-        if (classificationInfo === undefined) {
-          return;
-        }
-        result.push(...classificationInfo.childClassificationIds);
+    classificationOrTableIds.forEach((classificationOrTableId) => {
+      const classificationInfo = classificationsInfo.get(classificationOrTableId);
+      if (classificationInfo === undefined) {
+        return;
+      }
+      result.push(...classificationInfo.childClassificationIds);
+    });
+    return result;
+  }
+
+  public getClassificationsPathObs(classificationIds: Id64Array): Observable<HierarchyNodeIdentifiersPath> {
+    return from(this.getClassificationsInfo()).pipe(
+      mergeMap((classificationsInfo) => {
+        return from(classificationIds).pipe(
+          map((classificationId) => {
+            const path: HierarchyNodeIdentifiersPath = [{ id: classificationId, className: CLASS_NAME_Classification }];
+            let parentId = classificationsInfo.get(classificationId)?.parentClassificationOrTableId;
+            while (parentId !== undefined) {
+              const parentIdOfParent = classificationsInfo.get(parentId)?.parentClassificationOrTableId;
+              if (parentIdOfParent) {
+                path.push({ className: CLASS_NAME_Classification, id: parentId });
+              } else {
+                path.push({ className: CLASS_NAME_ClassificationTable, id: parentId });
+              }
+              parentId = parentIdOfParent;
+            }
+            return path.reverse();
+          }),
+        );
       }),
     );
-    return result;
+  }
+
+  public async getAllClassifications(): Promise<ClassificationId[]> {
+    const classificationsInfo = await this.getClassificationsInfo();
+    return [...classificationsInfo.keys()];
+  }
+
+  private async *queryFilteredElementsData({ element2dIds, element3dIds }: { element2dIds: Id64Array; element3dIds: Id64Array }): AsyncIterableIterator<{
+    modelId: Id64String;
+    id: ElementId;
+    categoryId: Id64String;
+  }> {
+    const queries = new Array<string>();
+    if (element2dIds.length > 0) {
+      queries.push(`
+        SELECT Model.Id modelId, Category.Id categoryId, ECInstanceId id
+        FROM ${CLASS_NAME_GeometricElement2d}
+        WHERE ECInstanceId IN (${element2dIds.join(", ")})
+      `);
+    }
+    if (element3dIds.length > 0) {
+      queries.push(`
+        SELECT Model.Id modelId, Category.Id categoryId, ECInstanceId id
+        FROM ${CLASS_NAME_GeometricElement3d}
+        WHERE ECInstanceId IN (${element3dIds.join(", ")})
+      `);
+    }
+    for await (const row of this._queryExecutor.createQueryReader(
+      { ecsql: queries.join(" UNION ALL ") },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded" },
+    )) {
+      yield { modelId: row.modelId, id: row.id, categoryId: row.categoryId };
+    }
+  }
+
+  public async getFilteredElementsData({
+    element2dIds,
+    element3dIds,
+  }: {
+    element2dIds: Id64Array;
+    element3dIds: Id64Array;
+  }): Promise<Map<ElementId, { categoryId: Id64String; modelId: Id64String }>> {
+    if (element2dIds.length === 0 && element3dIds.length === 0) {
+      return new Map();
+    }
+
+    this._filteredElementsData ??= (async () => {
+      const filteredElementsData = new Map();
+      for await (const { modelId, id, categoryId } of this.queryFilteredElementsData({ element2dIds, element3dIds })) {
+        filteredElementsData.set(id, { modelId, categoryId });
+      }
+      return filteredElementsData;
+    })();
+    return this._filteredElementsData;
+  }
+
+  public clearFilteredElementsData() {
+    this._filteredElementsData = undefined;
   }
 }
