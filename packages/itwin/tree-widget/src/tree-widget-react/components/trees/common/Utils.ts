@@ -85,7 +85,7 @@ export function joinHierarchyFilteringPaths(subTreePaths: HierarchyNodeIdentifie
           options =
             normalizedFilteringPath.options?.autoExpand !== true
               ? HierarchyFilteringPath.mergeOptions(options, normalizedFilteringPath.options)
-              : { autoExpand: { depthInPath: normalizedFilteringPath.path.length - 1 } };
+              : { autoExpand: { depthInPath: normalizedFilteringPath.path.length } };
           break;
         }
 

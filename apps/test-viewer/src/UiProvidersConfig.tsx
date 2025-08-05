@@ -134,6 +134,15 @@ const configuredUiItems = new Map<string, UiItem>([
                       selectionMode={"extended"}
                       onPerformanceMeasured={props.onPerformanceMeasured}
                       onFeatureUsed={props.onFeatureUsed}
+                      getSubTreePaths={async (propss) => {
+                        const ids = ["0x40000000dbb", "0x40000000a4f", "0x40000000a51", "0x40000000a9d", "0x40000000aa1"];
+                        return propss.createInstanceKeyPaths({
+                          targetItems: ids.map((id) => ({
+                            className: "BisCore.GeometricElement3d",
+                            id,
+                          })),
+                        });
+                      }}
                     />
                   );
                 },
