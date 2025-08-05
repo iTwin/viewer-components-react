@@ -9,6 +9,7 @@ import { OffScreenViewport, ViewRect } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
+import { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { createStorage } from "@itwin/unified-selection";
 import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../../../tree-widget-react/components/trees/common/FocusedInstancesContext.js";
@@ -20,7 +21,6 @@ import { createIModelAccess } from "../Common.js";
 import { createViewState } from "../TreeUtils.js";
 
 import type { SelectionStorage } from "@itwin/unified-selection";
-import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { UseModelsTreeProps } from "../../../tree-widget-react/components/trees/models-tree/UseModelsTree.js";
 import type { Id64Array } from "@itwin/core-bentley";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
@@ -122,7 +122,12 @@ describe("useModelsTree", () => {
         const { getFilteredPaths } = renderHookResult.current.modelsTreeProps;
         await waitFor(async () => {
           expect(getFilteredPaths).to.not.be.undefined;
-          const result = await getFilteredPaths!({ imodelAccess, abortSignal });
+          const result = (await getFilteredPaths!({ imodelAccess, abortSignal }))?.sort((lhs, rhs) => {
+            if (HierarchyFilteringPath.normalize(lhs).path.length > HierarchyFilteringPath.normalize(rhs).path.length) {
+              return -1;
+            }
+            return 1;
+          });
           const expectedResult: HierarchyFilteringPath[] = [
             [
               { id: IModel.rootSubjectId, className: subjectClass },
