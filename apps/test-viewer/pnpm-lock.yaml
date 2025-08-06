@@ -129,7 +129,7 @@ importers:
         version: file:../../packages/itwin/reports-config-widget(701228d7c9e472dc3b796bc2b0da9abb)
       '@itwin/tree-widget-react':
         specifier: workspace:*
-        version: file:../../packages/itwin/tree-widget(7becfec79f915a93b2c2b34759ae4d3b)
+        version: file:../../packages/itwin/tree-widget(06adb0c49043e004f6d0fd057b78bb25)
       '@itwin/unified-selection':
         specifier: ^1.4.1
         version: 1.4.1
@@ -140,17 +140,17 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0
       '@stratakit/bricks':
-        specifier: ^0.2.0
-        version: 0.2.0(@stratakit/foundations@0.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.3.3
+        version: 0.3.3(@stratakit/foundations@0.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@stratakit/foundations':
-        specifier: ^0.1.3
-        version: 0.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.2
+        version: 0.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@stratakit/icons':
         specifier: ^0.1.0
         version: 0.1.0
       '@stratakit/structures':
-        specifier: ^0.1.1
-        version: 0.1.1(@stratakit/foundations@0.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.3.1
+        version: 0.3.1(@stratakit/foundations@0.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react@18.3.23)(immer@10.1.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.5.0(react@18.3.1))
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -968,13 +968,13 @@ packages:
       '@itwin/itwinui-react':
         optional: true
 
-  '@itwin/presentation-hierarchies-react@2.0.0-alpha.22':
-    resolution: {integrity: sha512-wNRWHnJa/Fnidmoa1b91xII5QCrIuJjfmP+SwE5cBui7vU5mG2Q30Usp6UafXCVa0HufSUkFz9hcyzt7PQXLqQ==}
+  '@itwin/presentation-hierarchies-react@2.0.0-alpha.26':
+    resolution: {integrity: sha512-XfAcyQuNvC9U3oMZqAg7TXAnhNZkS5kCCmARoo7ba6NsJT5nPAxbZsAjnYSySeZLA4G1LUEWbnNDzo0/w4jy2A==}
     peerDependencies:
-      '@stratakit/bricks': ^0.2.0
-      '@stratakit/foundations': ^0.1.3
+      '@stratakit/bricks': ^0.3.3
+      '@stratakit/foundations': ^0.2.2
       '@stratakit/icons': ^0.1.0
-      '@stratakit/structures': ^0.1.1
+      '@stratakit/structures': ^0.3.1
       react: ^17.0.0 || ^18.0.0
       react-dom: ^17.0.0 || ^18.0.0
     peerDependenciesMeta:
@@ -990,8 +990,8 @@ packages:
   '@itwin/presentation-hierarchies@1.5.1':
     resolution: {integrity: sha512-nEP+DyDlA300d0R8/DOVPIklrsOwjUQaNMMbtjSXYVet3htHC/8henYK0pUNFpQ5CoqXfdEIXixJlJGZl5MSBA==}
 
-  '@itwin/presentation-hierarchies@2.0.0-alpha.1':
-    resolution: {integrity: sha512-wK4LSaWTqOeZ/0GUE0WonP4UzTsWPnXhxU5aFH4Tn9BmftUpo57JiE4WwAsihKHJLITjxvJLuGe8wEvwQWLPmA==}
+  '@itwin/presentation-hierarchies@2.0.0-alpha.2':
+    resolution: {integrity: sha512-FoBoCkxJv46O72RXY5cksxJc6fPwAYRbtS6i1kBffJV4ozVAjqNIHqBymurIWSn1wqMpg0vU0Z64+lINwDUUnA==}
 
   '@itwin/presentation-shared@1.2.2':
     resolution: {integrity: sha512-jQWW7mjfb5Qcxtfa3EBLrKhVyaulptwN0yLp0gViCXBcrxbZyukCcvLaDBBevAfSF7Mtspc22Vj0dKCq10UfrQ==}
@@ -1051,6 +1051,9 @@ packages:
 
   '@itwin/unified-selection@1.4.2':
     resolution: {integrity: sha512-RdX/SfX7pH5DyArNeNor3iuKr5NsPYWo7P0YXr6eOQOGda3CoEO3KTv3/QLZRXKtDlUt+Xs9dfzBfrWCsRtIxA==}
+
+  '@itwin/unified-selection@1.5.0':
+    resolution: {integrity: sha512-QIrwaW0S+fUURRBW0mk4rOxAKJ8KZ/ttbVYqvrRb0m0cjfyX9oyiPuVf3bGg5rvpqsINTXBdfe/X6ckHFRHdCQ==}
 
   '@itwin/viewer-react@5.0.0-dev.9':
     resolution: {integrity: sha512-297sKHop2x2hwz6P60sovLbfNbAifrKVnONClLeL6D1T07hLaxjHtEuqyIF3GUVH9ncagMi6gFOMW1ybcqhO1A==}
@@ -1353,26 +1356,31 @@ packages:
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
 
-  '@stratakit/bricks@0.2.0':
-    resolution: {integrity: sha512-aJhs1dfrl4EpUKQUrxlliLnZakoFna3ttC8cYdYlBvPwROuLvfxhU1dlUQAxr6LSh+30sq8asdQ2CXCJCV8Tqg==}
+  '@stratakit/bricks@0.3.3':
+    resolution: {integrity: sha512-Ojw0aDyZgvHlCDlzV6Z9qZJK4yRUMwG6ZNQ4FlqfZhh3S4Q3Y6kOypZGWNi7KyLqV8KL8A+ATePea3tvtRAc9Q==}
     peerDependencies:
-      '@stratakit/foundations': ^0.1.3
+      '@stratakit/foundations': ^0.2.2
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
 
-  '@stratakit/foundations@0.1.3':
-    resolution: {integrity: sha512-2E5Yhk7jmghk4qG5k1ZKbbtMfQzgruI6kWOi3vwZ+5isuRi7vbHxE4L3SC6R5Sn+yOpX9YnfetAtSuDrnEbqbA==}
+  '@stratakit/foundations@0.2.2':
+    resolution: {integrity: sha512-e1ICNxf64o5gE+1FtMOjS54lKjeYjiSM3ETVT5k7sIsQOeRhfB01609NejyGR2h8AczFPGbNEFprtMXKvpbqCw==}
     peerDependencies:
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-dom:
+        optional: true
 
   '@stratakit/icons@0.1.0':
     resolution: {integrity: sha512-PexG/eHpDZNNh0kJTjOTp8rXdZ7UIuCyOyO0YMHEGkp9XudvbdWfyenbvd/nIQ8cTzHxxb5rTzRyb38Z8lk4Og==}
 
-  '@stratakit/structures@0.1.1':
-    resolution: {integrity: sha512-QamcFdLQLkq3mbz3nhiskH651LhPa/SkeHRebfVCJkurjSYgjd/7+ju8gc2PF6VOqP8MhSfnBmig5X20HSGRNA==}
+  '@stratakit/structures@0.3.1':
+    resolution: {integrity: sha512-bdEcc7U+yBgw9ieGfALsxXuyzqZBmShAY0QdX7cjCS4q7U2vEBshDvJnUpVEaW/nLs6e94bnVb6ycfWHBiSPAQ==}
     peerDependencies:
-      '@stratakit/foundations': ^0.1.3
+      '@stratakit/foundations': ^0.2.2
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
 
@@ -3463,6 +3471,24 @@ packages:
       react:
         optional: true
 
+  zustand@5.0.7:
+    resolution: {integrity: sha512-Ot6uqHDW/O2VdYsKLLU8GQu8sCOM1LcoE8RwvLv9uuRT9s6SOHCKs0ZEOhxg+I1Ld+A1Q5lwx+UlKXXUoCZITg==}
+    engines: {node: '>=12.20.0'}
+    peerDependencies:
+      '@types/react': '>=18.0.0'
+      immer: '>=9.0.6'
+      react: '>=18.0.0'
+      use-sync-external-store: '>=1.2.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      immer:
+        optional: true
+      react:
+        optional: true
+      use-sync-external-store:
+        optional: true
+
 snapshots:
 
   '@ampproject/remapping@2.3.0':
@@ -4320,12 +4346,12 @@ snapshots:
     optionalDependencies:
       '@itwin/itwinui-react': 3.17.2(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
-  '@itwin/presentation-hierarchies-react@2.0.0-alpha.22(@stratakit/bricks@0.2.0(@stratakit/foundations@0.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/foundations@0.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/icons@0.1.0)(@stratakit/structures@0.1.1(@stratakit/foundations@0.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@itwin/presentation-hierarchies-react@2.0.0-alpha.26(@stratakit/bricks@0.3.3(@stratakit/foundations@0.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/foundations@0.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/icons@0.1.0)(@stratakit/structures@0.3.1(@stratakit/foundations@0.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react@18.3.23)(immer@10.1.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.5.0(react@18.3.1)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@itwin/core-bentley': 4.11.6
-      '@itwin/presentation-hierarchies': 2.0.0-alpha.1
+      '@itwin/core-bentley': 5.0.0
+      '@itwin/presentation-hierarchies': 2.0.0-alpha.2
       '@itwin/presentation-shared': 2.0.0-alpha.1
-      '@itwin/unified-selection': 1.4.2
+      '@itwin/unified-selection': 1.5.0
       '@tanstack/react-virtual': 3.13.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       classnames: 2.5.1
       immer: 10.1.1
@@ -4334,10 +4360,10 @@ snapshots:
       react-error-boundary: 4.1.2(react@18.3.1)
       rxjs: 7.8.2
     optionalDependencies:
-      '@stratakit/bricks': 0.2.0(@stratakit/foundations@0.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@stratakit/foundations': 0.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@stratakit/bricks': 0.3.3(@stratakit/foundations@0.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@stratakit/foundations': 0.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@stratakit/icons': 0.1.0
-      '@stratakit/structures': 0.1.1(@stratakit/foundations@0.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@stratakit/structures': 0.3.1(@stratakit/foundations@0.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react@18.3.23)(immer@10.1.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.5.0(react@18.3.1))
 
   '@itwin/presentation-hierarchies@1.5.1':
     dependencies:
@@ -4348,7 +4374,7 @@ snapshots:
       natural-compare-lite: 1.4.0
       rxjs: 7.8.2
 
-  '@itwin/presentation-hierarchies@2.0.0-alpha.1':
+  '@itwin/presentation-hierarchies@2.0.0-alpha.2':
     dependencies:
       '@itwin/core-bentley': 5.0.0
       '@itwin/core-common': 5.0.0(@itwin/core-bentley@5.0.0)(@itwin/core-geometry@5.0.0)
@@ -4422,7 +4448,7 @@ snapshots:
       - debug
       - encoding
 
-  '@itwin/tree-widget-react@file:../../packages/itwin/tree-widget(7becfec79f915a93b2c2b34759ae4d3b)':
+  '@itwin/tree-widget-react@file:../../packages/itwin/tree-widget(06adb0c49043e004f6d0fd057b78bb25)':
     dependencies:
       '@itwin/appui-abstract': 5.0.0(@itwin/core-bentley@5.0.0)
       '@itwin/appui-react': 5.8.0(e448386433b71de3d4aadd38f08c4222)
@@ -4431,14 +4457,14 @@ snapshots:
       '@itwin/ecschema-metadata': 5.0.0(@itwin/core-bentley@5.0.0)(@itwin/core-quantity@5.0.0(@itwin/core-bentley@5.0.0))
       '@itwin/presentation-components': 5.12.2(2c32907a3611fb8c322d9c37007d7d00)
       '@itwin/presentation-core-interop': 1.4.0-alpha.2(@itwin/core-bentley@5.0.0)(@itwin/core-common@5.0.0(@itwin/core-bentley@5.0.0)(@itwin/core-geometry@5.0.0))(@itwin/core-geometry@5.0.0)(@itwin/core-quantity@5.0.0(@itwin/core-bentley@5.0.0))(@itwin/ecschema-metadata@5.0.0(@itwin/core-bentley@5.0.0)(@itwin/core-quantity@5.0.0(@itwin/core-bentley@5.0.0)))
-      '@itwin/presentation-hierarchies': 2.0.0-alpha.1
-      '@itwin/presentation-hierarchies-react': 2.0.0-alpha.22(@stratakit/bricks@0.2.0(@stratakit/foundations@0.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/foundations@0.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/icons@0.1.0)(@stratakit/structures@0.1.1(@stratakit/foundations@0.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@itwin/presentation-hierarchies': 2.0.0-alpha.2
+      '@itwin/presentation-hierarchies-react': 2.0.0-alpha.26(@stratakit/bricks@0.3.3(@stratakit/foundations@0.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/foundations@0.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/icons@0.1.0)(@stratakit/structures@0.3.1(@stratakit/foundations@0.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react@18.3.23)(immer@10.1.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.5.0(react@18.3.1)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@itwin/presentation-shared': 2.0.0-alpha.1
       '@itwin/unified-selection': 1.4.2
-      '@stratakit/bricks': 0.2.0(@stratakit/foundations@0.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@stratakit/foundations': 0.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@stratakit/bricks': 0.3.3(@stratakit/foundations@0.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@stratakit/foundations': 0.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@stratakit/icons': 0.1.0
-      '@stratakit/structures': 0.1.1(@stratakit/foundations@0.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@stratakit/structures': 0.3.1(@stratakit/foundations@0.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react@18.3.23)(immer@10.1.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.5.0(react@18.3.1))
       classnames: 2.5.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -4458,6 +4484,13 @@ snapshots:
       rxjs-for-await: 1.0.0(rxjs@7.8.2)
 
   '@itwin/unified-selection@1.4.2':
+    dependencies:
+      '@itwin/core-bentley': 5.0.0
+      '@itwin/presentation-shared': 1.2.2
+      rxjs: 7.8.2
+      rxjs-for-await: 1.0.0(rxjs@7.8.2)
+
+  '@itwin/unified-selection@1.5.0':
     dependencies:
       '@itwin/core-bentley': 5.0.0
       '@itwin/presentation-shared': 1.2.2
@@ -4739,31 +4772,37 @@ snapshots:
 
   '@rtsao/scc@1.1.0': {}
 
-  '@stratakit/bricks@0.2.0(@stratakit/foundations@0.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@stratakit/bricks@0.3.3(@stratakit/foundations@0.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@ariakit/react': 0.4.17(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@stratakit/foundations': 0.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@stratakit/foundations': 0.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       classnames: 2.5.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@stratakit/foundations@0.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@stratakit/foundations@0.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@ariakit/react': 0.4.17(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       classnames: 2.5.1
+    optionalDependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
   '@stratakit/icons@0.1.0': {}
 
-  '@stratakit/structures@0.1.1(@stratakit/foundations@0.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@stratakit/structures@0.3.1(@stratakit/foundations@0.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react@18.3.23)(immer@10.1.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.5.0(react@18.3.1))':
     dependencies:
       '@ariakit/react': 0.4.17(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@stratakit/bricks': 0.2.0(@stratakit/foundations@0.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@stratakit/foundations': 0.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@stratakit/bricks': 0.3.3(@stratakit/foundations@0.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@stratakit/foundations': 0.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       classnames: 2.5.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
+      zustand: 5.0.7(@types/react@18.3.23)(immer@10.1.1)(react@18.3.1)(use-sync-external-store@1.5.0(react@18.3.1))
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
+      - use-sync-external-store
 
   '@svgdotjs/svg.js@3.0.16': {}
 
@@ -7229,3 +7268,10 @@ snapshots:
       '@types/react': 18.3.23
       immer: 10.1.1
       react: 18.3.1
+
+  zustand@5.0.7(@types/react@18.3.23)(immer@10.1.1)(react@18.3.1)(use-sync-external-store@1.5.0(react@18.3.1)):
+    optionalDependencies:
+      '@types/react': 18.3.23
+      immer: 10.1.1
+      react: 18.3.1
+      use-sync-external-store: 1.5.0(react@18.3.1)

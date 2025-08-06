@@ -23,28 +23,38 @@ export type VisibilityTreeRendererProps = BaseTreeRendererProps & TreeItemVisibi
 export function VisibilityTreeRenderer({
   getVisibilityButtonState,
   onVisibilityButtonClick: onClick,
-  getActions,
+  getInlineActions,
+  getMenuActions,
   onFilterClick,
   getHierarchyLevelDetails,
   ...props
 }: VisibilityTreeRendererProps) {
   const { onVisibilityButtonClick } = useVisibilityButtonHandler({ rootNodes: props.rootNodes, isNodeSelected: props.isNodeSelected, onClick });
 
-  const nodeActions = useCallback(
+  const nodeInlineActions = useCallback(
     (node: PresentationHierarchyNode) => {
-      return [
-        <VisibilityAction
-          key={"Visibility"}
-          node={node}
-          onVisibilityButtonClick={onVisibilityButtonClick}
-          getVisibilityButtonState={getVisibilityButtonState}
-        />,
-        <FilterAction key={"Filter"} node={node} onFilter={onFilterClick} getHierarchyLevelDetails={getHierarchyLevelDetails} />,
-        ...(getActions ? getActions(node) : []),
-      ];
+      return getInlineActions
+        ? getInlineActions(node)
+        : [
+            <VisibilityAction
+              key={"Visibility"}
+              node={node}
+              onVisibilityButtonClick={onVisibilityButtonClick}
+              getVisibilityButtonState={getVisibilityButtonState}
+            />,
+            <FilterAction key={"Filter"} node={node} onFilter={onFilterClick} getHierarchyLevelDetails={getHierarchyLevelDetails} reserveSpace />,
+          ];
     },
-    [onVisibilityButtonClick, getVisibilityButtonState, onFilterClick, getHierarchyLevelDetails, getActions],
+    [getInlineActions, onVisibilityButtonClick, getVisibilityButtonState, onFilterClick, getHierarchyLevelDetails],
   );
 
-  return <BaseTreeRenderer {...props} onFilterClick={onFilterClick} getHierarchyLevelDetails={getHierarchyLevelDetails} getActions={nodeActions} />;
+  return (
+    <BaseTreeRenderer
+      {...props}
+      onFilterClick={onFilterClick}
+      getHierarchyLevelDetails={getHierarchyLevelDetails}
+      getInlineActions={nodeInlineActions}
+      getMenuActions={getMenuActions}
+    />
+  );
 }
