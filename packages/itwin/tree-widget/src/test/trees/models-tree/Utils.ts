@@ -27,21 +27,25 @@ interface CreateModelsTreeProviderProps {
   imodel: IModelConnection;
   filteredNodePaths?: HierarchyFilteringPath[];
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
+  idsCache?: ModelsTreeIdsCache;
+  imodelAccess?: ReturnType<typeof createIModelAccess>;
 }
 
 export function createModelsTreeProvider({
   imodel,
   filteredNodePaths,
   hierarchyConfig,
+  imodelAccess,
+  idsCache,
 }: CreateModelsTreeProviderProps): HierarchyProvider & { dispose: () => void; [Symbol.dispose]: () => void } {
   const config = { ...defaultHierarchyConfiguration, hideRootSubject: true, ...hierarchyConfig };
-  const imodelAccess = createIModelAccess(imodel);
-  const idsCache = new ModelsTreeIdsCache(imodelAccess, config);
+  const createdImodelAccess = imodelAccess ?? createIModelAccess(imodel);
+  const createdIdsCache = idsCache ?? new ModelsTreeIdsCache(createdImodelAccess, config);
   const provider = createIModelHierarchyProvider({
-    imodelAccess,
+    imodelAccess: createdImodelAccess,
     hierarchyDefinition: new ModelsTreeDefinition({
-      imodelAccess,
-      idsCache,
+      imodelAccess: createdImodelAccess,
+      idsCache: createdIdsCache,
       hierarchyConfig: config,
     }),
     ...(filteredNodePaths
@@ -50,7 +54,9 @@ export function createModelsTreeProvider({
   });
   const dispose = () => {
     provider[Symbol.dispose]();
-    idsCache[Symbol.dispose]();
+    if (!idsCache) {
+      createdIdsCache[Symbol.dispose]();
+    }
   };
   return {
     hierarchyChanged: provider.hierarchyChanged,

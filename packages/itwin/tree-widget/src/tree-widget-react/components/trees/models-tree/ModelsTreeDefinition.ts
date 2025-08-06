@@ -544,7 +544,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     ];
   }
 
-  public static async createInstanceKeyPaths(props: ModelsTreeInstanceKeyPathsProps) {
+  public static async createInstanceKeyPaths(props: ModelsTreeInstanceKeyPathsProps): Promise<HierarchyFilteringPath[]> {
     return lastValueFrom(
       defer(() => {
         if (ModelsTreeInstanceKeyPathsProps.isLabelProps(props)) {
