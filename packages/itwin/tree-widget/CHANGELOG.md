@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Wed, 06 Aug 2025 10:14:27 GMT and should not be manually modified. -->
+<!-- This log was last generated on Wed, 06 Aug 2025 13:46:52 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.13.0
+
+Wed, 06 Aug 2025 13:46:52 GMT
+
+### Minor changes
+
+- Added `getActions` callback to `TreeRenderer` components. It allows to supply custom actions for tree nodes. ([#1395](https://github.com/iTwin/viewer-components-react/pull/1395))
 
 ## 3.12.1
 
