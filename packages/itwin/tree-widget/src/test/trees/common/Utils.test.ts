@@ -63,7 +63,7 @@ describe("Utils", () => {
         },
         {
           path: subTreePath2,
-          options: { autoExpand: { depthInPath: 2 } },
+          options: { autoExpand: { depthInPath: 3 } },
         },
         {
           path: subTreePath3,

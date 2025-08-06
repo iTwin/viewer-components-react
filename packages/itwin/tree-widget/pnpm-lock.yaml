@@ -19,11 +19,11 @@ importers:
         specifier: ^1.3.2
         version: 1.3.2(@itwin/core-bentley@5.0.0)(@itwin/core-common@5.0.0(@itwin/core-bentley@5.0.0)(@itwin/core-geometry@5.0.0))(@itwin/core-geometry@5.0.0)(@itwin/core-quantity@5.0.0(@itwin/core-bentley@5.0.0))(@itwin/ecschema-metadata@5.0.0(@itwin/core-bentley@5.0.0)(@itwin/core-quantity@5.0.0(@itwin/core-bentley@5.0.0)))
       '@itwin/presentation-hierarchies':
-        specifier: ^1.7.0
-        version: 1.7.0
+        specifier: ^1.7.1
+        version: 1.7.1
       '@itwin/presentation-hierarchies-react':
-        specifier: ^1.7.2
-        version: 1.7.2(@itwin/itwinui-react@3.16.5(@types/react@18.0.34)(react-dom@18.0.0(react@18.0.0))(react@18.0.0))(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
+        specifier: ^1.8.1
+        version: 1.8.1(@itwin/itwinui-react@3.16.5(@types/react@18.0.34)(react-dom@18.0.0(react@18.0.0))(react@18.0.0))(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
       '@itwin/presentation-shared':
         specifier: ^1.2.2
         version: 1.2.2
@@ -497,11 +497,11 @@ packages:
     resolution: {integrity: sha512-uBkIAXZ945qthY+bC73rlJNyP9nR9KBm2hPxjZEzIJ86szQ7C6cFKbXMrP0fXfTWO126dSumgpJmMfK/+b1P8Q==}
     hasBin: true
 
-  '@itwin/certa@5.0.0-dev.119':
-    resolution: {integrity: sha512-kyaLHPy+p58pqoPvD719yR4HH5QmRxBxNMqJMiKvZarMmyDteNdBU+dC04R8ooFZ8/svMcH4Cx4JreMF4Y+lzQ==}
+  '@itwin/certa@5.1.0-dev.71':
+    resolution: {integrity: sha512-dsrZNj5fq8rIJxy9SPBCPnmR+xhmNIm+zyhiKHs6shhq0PHqdiL7VmLBJAl3P4rdQp6BqA9/R8rnSwm50+CFLA==}
     hasBin: true
     peerDependencies:
-      electron: ^35.0.0 || ^36.0.0
+      electron: ^35.0.0 || ^36.0.0 || ^37.0.0
     peerDependenciesMeta:
       electron:
         optional: true
@@ -722,7 +722,7 @@ packages:
       '@itwin/core-react': ^4.9.0 || ^5.0.0
       '@itwin/ecschema-metadata': ^4.4.0 || ^5.0.0
       '@itwin/imodel-components-react': ^4.9.0 || ^5.0.0
-      '@itwin/itwinui-react': ^3.0.0
+      '@itwin/itwinui-react': 3.18.3
       '@itwin/presentation-common': ^4.4.0 || ^5.0.0
       '@itwin/presentation-frontend': ^4.4.0 || ^5.0.0
       '@itwin/unified-selection-react': ^1.0.0
@@ -760,8 +760,8 @@ packages:
       '@itwin/ecschema-metadata': 5.0.0
       '@itwin/presentation-common': 5.0.0
 
-  '@itwin/presentation-hierarchies-react@1.7.2':
-    resolution: {integrity: sha512-DvjcfWok6SJzCzvsXsaOxZ5DnytI/RuL2lBi7/YkFTCJwBxvtx2IJO/YLRCUS2fKvfkbUURHyVLbtRqwSAd4Xg==}
+  '@itwin/presentation-hierarchies-react@1.8.1':
+    resolution: {integrity: sha512-ZVOw7RraGYu+Be0CbnSzSMylnE3yOr0/Xxm/xCxFJQC3ZmksbTN8B1pWrQq7oYWT6UINc1+fRPivK/vznVTX8g==}
     peerDependencies:
       '@itwin/itwinui-react': ^3.0.0
       react: ^17.0.0 || ^18.0.0
@@ -770,8 +770,8 @@ packages:
       '@itwin/itwinui-react':
         optional: true
 
-  '@itwin/presentation-hierarchies@1.7.0':
-    resolution: {integrity: sha512-+6m0lBPK437XDKHWtID/4pqQ880jJPEAMlVTMzCkR4NooA+3UUWDjlJg7UNP2WWBKSLp9nt9VLmnW1XxThSmLg==}
+  '@itwin/presentation-hierarchies@1.7.1':
+    resolution: {integrity: sha512-E9agiauFTGCT50nXI7P/c4F4P9Kdm975TJBveWN94pDo1KrvSX0rwupx5CTJ3ZnRPGGpvihGcxQsFqUDDV+Z0g==}
 
   '@itwin/presentation-shared@1.2.2':
     resolution: {integrity: sha512-jQWW7mjfb5Qcxtfa3EBLrKhVyaulptwN0yLp0gViCXBcrxbZyukCcvLaDBBevAfSF7Mtspc22Vj0dKCq10UfrQ==}
@@ -796,6 +796,9 @@ packages:
 
   '@itwin/unified-selection@1.4.2':
     resolution: {integrity: sha512-RdX/SfX7pH5DyArNeNor3iuKr5NsPYWo7P0YXr6eOQOGda3CoEO3KTv3/QLZRXKtDlUt+Xs9dfzBfrWCsRtIxA==}
+
+  '@itwin/unified-selection@1.5.0':
+    resolution: {integrity: sha512-QIrwaW0S+fUURRBW0mk4rOxAKJ8KZ/ttbVYqvrRb0m0cjfyX9oyiPuVf3bGg5rvpqsINTXBdfe/X6ckHFRHdCQ==}
 
   '@itwin/webgl-compatibility@5.0.0':
     resolution: {integrity: sha512-ZEew+kioa7BFM3JasRrxORdGTctJ3ZHaUJkQR99dD3xEBV7wHPfYoUqhQbBe8f3mZAyZgIIt7z5Eb3GdXRrzVQ==}
@@ -4667,7 +4670,7 @@ snapshots:
       - '@types/node'
       - supports-color
 
-  '@itwin/certa@5.0.0-dev.119':
+  '@itwin/certa@5.1.0-dev.71':
     dependencies:
       canonical-path: 1.0.0
       detect-port: 1.3.0
@@ -4917,7 +4920,7 @@ snapshots:
 
   '@itwin/oidc-signin-tool@5.0.0(@itwin/core-bentley@5.0.0)':
     dependencies:
-      '@itwin/certa': 5.0.0-dev.119
+      '@itwin/certa': 5.1.0-dev.71
       '@itwin/core-bentley': 5.0.0
       '@itwin/service-authorization': 2.0.0(@itwin/core-bentley@5.0.0)
       '@playwright/test': 1.48.2
@@ -5012,14 +5015,14 @@ snapshots:
       rxjs: 7.8.1
       rxjs-for-await: 1.0.0(rxjs@7.8.1)
 
-  '@itwin/presentation-hierarchies-react@1.7.2(@itwin/itwinui-react@3.16.5(@types/react@18.0.34)(react-dom@18.0.0(react@18.0.0))(react@18.0.0))(react-dom@18.0.0(react@18.0.0))(react@18.0.0)':
+  '@itwin/presentation-hierarchies-react@1.8.1(@itwin/itwinui-react@3.16.5(@types/react@18.0.34)(react-dom@18.0.0(react@18.0.0))(react@18.0.0))(react-dom@18.0.0(react@18.0.0))(react@18.0.0)':
     dependencies:
       '@itwin/core-bentley': 5.0.0
       '@itwin/itwinui-icons-react': 2.10.0(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
-      '@itwin/presentation-hierarchies': 1.7.0
+      '@itwin/presentation-hierarchies': 1.7.1
       '@itwin/presentation-shared': 1.2.2
-      '@itwin/unified-selection': 1.4.2
+      '@itwin/unified-selection': 1.5.0
       classnames: 2.5.1
       immer: 10.1.1
       react: 18.0.0
@@ -5029,7 +5032,7 @@ snapshots:
     optionalDependencies:
       '@itwin/itwinui-react': 3.16.5(@types/react@18.0.34)(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
 
-  '@itwin/presentation-hierarchies@1.7.0':
+  '@itwin/presentation-hierarchies@1.7.1':
     dependencies:
       '@itwin/core-bentley': 5.0.0
       '@itwin/core-common': 5.0.0(@itwin/core-bentley@5.0.0)(@itwin/core-geometry@5.0.0)
@@ -5077,6 +5080,13 @@ snapshots:
       - supports-color
 
   '@itwin/unified-selection@1.4.2':
+    dependencies:
+      '@itwin/core-bentley': 5.0.0
+      '@itwin/presentation-shared': 1.2.2
+      rxjs: 7.8.1
+      rxjs-for-await: 1.0.0(rxjs@7.8.1)
+
+  '@itwin/unified-selection@1.5.0':
     dependencies:
       '@itwin/core-bentley': 5.0.0
       '@itwin/presentation-shared': 1.2.2
