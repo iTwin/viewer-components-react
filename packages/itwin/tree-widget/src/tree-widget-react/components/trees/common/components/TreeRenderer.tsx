@@ -23,6 +23,7 @@ export type TreeRendererProps = Pick<
   | "getIcon"
   | "getLabel"
   | "getSublabel"
+  | "getActions"
   | "getHierarchyLevelDetails"
   | "checkboxProps"
   | "reloadTree"
@@ -52,6 +53,7 @@ export function TreeRenderer({
   getIcon,
   getLabel,
   getSublabel,
+  getActions,
   getHierarchyLevelDetails,
   checkboxProps,
   filterButtonsVisibility,
@@ -79,6 +81,7 @@ export function TreeRenderer({
           getIcon={getIcon}
           getLabel={getLabel}
           getSublabel={getSublabel}
+          getActions={getActions}
           onFilterClick={onFilterClick}
           getHierarchyLevelDetails={getHierarchyLevelDetails}
           checkboxProps={checkboxProps}
@@ -97,6 +100,7 @@ export function TreeRenderer({
       getIcon,
       getLabel,
       getSublabel,
+      getActions,
       onFilterClick,
       checkboxProps,
       filterButtonsVisibility,

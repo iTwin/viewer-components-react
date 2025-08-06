@@ -433,10 +433,10 @@ type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPaths" | 
 };
 
 // @beta
-export function TreeRenderer({ rootNodes, expandNode, onNodeClick, onNodeKeyDown, onNodeDoubleClick, isNodeSelected, onFilterClick, getIcon, getLabel, getSublabel, getHierarchyLevelDetails, checkboxProps, filterButtonsVisibility, reloadTree, size, enableVirtualization, ...props }: TreeRendererProps): JSX.Element;
+export function TreeRenderer({ rootNodes, expandNode, onNodeClick, onNodeKeyDown, onNodeDoubleClick, isNodeSelected, onFilterClick, getIcon, getLabel, getSublabel, getActions, getHierarchyLevelDetails, checkboxProps, filterButtonsVisibility, reloadTree, size, enableVirtualization, ...props }: TreeRendererProps): JSX.Element;
 
 // @beta (undocumented)
-type TreeRendererProps = Pick<TreeNodeRendererProps, "expandNode" | "onNodeClick" | "onNodeKeyDown" | "onFilterClick" | "getIcon" | "getLabel" | "getSublabel" | "getHierarchyLevelDetails" | "checkboxProps" | "reloadTree" | "filterButtonsVisibility"> & Omit<ComponentPropsWithoutRef<typeof Tree_2<RenderedTreeNode>>, "data" | "nodeRenderer" | "getNode"> & {
+type TreeRendererProps = Pick<TreeNodeRendererProps, "expandNode" | "onNodeClick" | "onNodeKeyDown" | "onFilterClick" | "getIcon" | "getLabel" | "getSublabel" | "getActions" | "getHierarchyLevelDetails" | "checkboxProps" | "reloadTree" | "filterButtonsVisibility"> & Omit<ComponentPropsWithoutRef<typeof Tree_2<RenderedTreeNode>>, "data" | "nodeRenderer" | "getNode"> & {
     rootNodes: PresentationTreeNode[];
     isNodeSelected: (nodeId: string) => boolean;
     onNodeDoubleClick?: (node: PresentationHierarchyNode, isSelected: boolean) => void;

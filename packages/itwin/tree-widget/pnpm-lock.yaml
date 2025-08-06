@@ -22,8 +22,8 @@ importers:
         specifier: ^1.7.1
         version: 1.7.1
       '@itwin/presentation-hierarchies-react':
-        specifier: ^1.8.1
-        version: 1.8.1(@itwin/itwinui-react@3.16.5(@types/react@18.0.34)(react-dom@18.0.0(react@18.0.0))(react@18.0.0))(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
+        specifier: ^1.9.0
+        version: 1.9.0(@itwin/itwinui-react@3.16.5(@types/react@18.0.34)(react-dom@18.0.0(react@18.0.0))(react@18.0.0))(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
       '@itwin/presentation-shared':
         specifier: ^1.2.2
         version: 1.2.2
@@ -722,7 +722,7 @@ packages:
       '@itwin/core-react': ^4.9.0 || ^5.0.0
       '@itwin/ecschema-metadata': ^4.4.0 || ^5.0.0
       '@itwin/imodel-components-react': ^4.9.0 || ^5.0.0
-      '@itwin/itwinui-react': 3.18.3
+      '@itwin/itwinui-react': ^3.0.0
       '@itwin/presentation-common': ^4.4.0 || ^5.0.0
       '@itwin/presentation-frontend': ^4.4.0 || ^5.0.0
       '@itwin/unified-selection-react': ^1.0.0
@@ -760,8 +760,8 @@ packages:
       '@itwin/ecschema-metadata': 5.0.0
       '@itwin/presentation-common': 5.0.0
 
-  '@itwin/presentation-hierarchies-react@1.8.1':
-    resolution: {integrity: sha512-ZVOw7RraGYu+Be0CbnSzSMylnE3yOr0/Xxm/xCxFJQC3ZmksbTN8B1pWrQq7oYWT6UINc1+fRPivK/vznVTX8g==}
+  '@itwin/presentation-hierarchies-react@1.9.0':
+    resolution: {integrity: sha512-jcnUYnXy/o0a8azQXXAbAZm8W+jhi8HcVNUAiMmpSWZI7hnSE75knxmu4W7mv336BiQnkiwacHoweGsbHifdkA==}
     peerDependencies:
       '@itwin/itwinui-react': ^3.0.0
       react: ^17.0.0 || ^18.0.0
@@ -5015,7 +5015,7 @@ snapshots:
       rxjs: 7.8.1
       rxjs-for-await: 1.0.0(rxjs@7.8.1)
 
-  '@itwin/presentation-hierarchies-react@1.8.1(@itwin/itwinui-react@3.16.5(@types/react@18.0.34)(react-dom@18.0.0(react@18.0.0))(react@18.0.0))(react-dom@18.0.0(react@18.0.0))(react@18.0.0)':
+  '@itwin/presentation-hierarchies-react@1.9.0(@itwin/itwinui-react@3.16.5(@types/react@18.0.34)(react-dom@18.0.0(react@18.0.0))(react@18.0.0))(react-dom@18.0.0(react@18.0.0))(react@18.0.0)':
     dependencies:
       '@itwin/core-bentley': 5.0.0
       '@itwin/itwinui-icons-react': 2.10.0(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
