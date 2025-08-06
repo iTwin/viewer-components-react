@@ -27,7 +27,7 @@
     "@itwin/imodels-client-management": "latest",
     "@itwin/itwinui-icons-react": "^2.10.0",
     "@itwin/itwinui-illustrations-react": "^2.1.0",
-    "@itwin/itwinui-react": "3.17.2",
+    "@itwin/itwinui-react": "3.19.0",
     "@itwin/map-layers": "workspace:*",
     "@itwin/map-layers-auth": "^5.0.0",
     "@itwin/map-layers-formats": "^5.0.0",
@@ -111,7 +111,7 @@
   "pnpm": {
     "overrides": {
       "@itwin/itwinui-react@^2": "2.12.26",
-      "@itwin/itwinui-react@^3": "3.17.2"
+      "@itwin/itwinui-react@^3": "3.19.0"
     }
   }
 }

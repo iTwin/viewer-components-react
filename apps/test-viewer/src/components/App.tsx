@@ -20,7 +20,7 @@ import type { FallbackProps } from "react-error-boundary";
 export function App() {
   return (
     <BrowserRouter>
-      <ThemeProvider theme={"light"} future={{ themeBridge: true }} as={Root} colorScheme={"light"} synchronizeColorScheme density="dense">
+      <ThemeProvider theme={"light"} future={true} as={Root} colorScheme={"light"} synchronizeColorScheme density="dense">
         <ErrorBoundary FallbackComponent={ErrorState}>
           <AuthorizationProvider>
             <AppRoutes />
