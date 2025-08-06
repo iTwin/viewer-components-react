@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Wed, 30 Jul 2025 13:10:01 GMT and should not be manually modified. -->
+<!-- This log was last generated on Wed, 06 Aug 2025 10:14:27 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.12.1
+
+Wed, 06 Aug 2025 10:14:27 GMT
+
+### Patches
+
+- Models tree: Fixed not all required nodes being auto-expanded when using `getSubTreePaths` together with filtering. ([#1391](https://github.com/iTwin/viewer-components-react/pull/1391))
 
 ## 3.12.0
 

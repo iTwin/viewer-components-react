@@ -2,6 +2,29 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Wed, 06 Aug 2025 10:14:27 GMT",
+      "version": "3.12.1",
+      "tag": "@itwin/tree-widget-react_v3.12.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "297d985c3f7f8177abcc1d0a35209f6a286e2bf6",
+            "comment": "Models tree: Fixed not all required nodes being auto-expanded when using `getSubTreePaths` together with filtering."
+          }
+        ],
+        "none": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "04dbd95e32655bd3fbbce950f79c8595d60480bc",
+            "comment": "Add learning snippet for `getSubTreePaths`"
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 30 Jul 2025 13:10:01 GMT",
       "version": "3.12.0",
       "tag": "@itwin/tree-widget-react_v3.12.0",

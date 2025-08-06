@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Models tree: Fixed not all required nodes being auto-expanded when using `getSubTreePaths` together with filtering.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "100586436+JonasDov@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
