@@ -200,3 +200,16 @@ export function createClassGroupingHierarchyNode({
     extendedData: props,
   };
 }
+
+export function getGroupingNodeParentKeys (keys: any[]): HierarchyNodeKey[] {
+  return keys.map((key) => {
+    if ("type" in key) {
+      return key;
+    }
+
+    return {
+      type: "instances",
+      instanceKeys: [key],
+    };
+  });
+};

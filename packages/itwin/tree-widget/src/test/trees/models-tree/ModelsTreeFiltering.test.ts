@@ -29,7 +29,7 @@ import {
 } from "../../IModelUtils.js";
 import { createIModelAccess } from "../Common.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
-import { createClassGroupingHierarchyNode, createModelsTreeProvider } from "./Utils.js";
+import { createClassGroupingHierarchyNode, createModelsTreeProvider, getGroupingNodeParentKeys } from "./Utils.js";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -936,7 +936,7 @@ describe("Models tree", () => {
           (x) =>
             x.groupingNode.groupedInstanceKeys.map((elementKey) => ({
               path: [...x.pathUntilTargetElement, adjustedElementKey(elementKey)],
-              options: { autoExpand: { key: x.groupingNode.key, depth: x.pathUntilTargetElement.length } },
+              options: { autoExpand: { depth: x.pathUntilTargetElement.length, includeGroupingNodes: true } },
             })),
           (x) => [
             {
@@ -1020,7 +1020,7 @@ describe("Models tree", () => {
           (x) =>
             x.groupingNode.groupedInstanceKeys.map((elementKey) => ({
               path: [...x.pathUntilTargetElement, adjustedElementKey(elementKey)],
-              options: { autoExpand: { key: x.groupingNode.key, depth: x.pathUntilTargetElement.length } },
+              options: { autoExpand: { depth: x.pathUntilTargetElement.length, includeGroupingNodes: true } },
             })),
           (x) => [
             {
@@ -1143,11 +1143,11 @@ describe("Models tree", () => {
           (x) => [
             ...x.physicalElementGroupingNode.groupedInstanceKeys.map((elementKey) => ({
               path: [...x.pathUntilTargetElement, adjustedElementKey(elementKey)],
-              options: { autoExpand: { key: x.physicalElementGroupingNode.key, depth: x.pathUntilTargetElement.length } },
+              options: { autoExpand: { depth: x.pathUntilTargetElement.length, includeGroupingNodes: true } },
             })),
             ...x.testElementGroupingNode.groupedInstanceKeys.map((elementKey) => ({
               path: [...x.pathUntilTargetElement, adjustedElementKey(elementKey)],
-              options: { autoExpand: { key: x.testElementGroupingNode.key, depth: x.pathUntilTargetElement.length } },
+              options: { autoExpand: { depth: x.pathUntilTargetElement.length, includeGroupingNodes: true } },
             })),
           ],
           (x) => [
@@ -1233,21 +1233,27 @@ describe("Models tree", () => {
               modelId: model.id,
               categoryId: category.id,
               elements: [parentElement.id],
-              parentKeys: pathUntilParentElement.map((key) => ({ type: "instances", instanceKeys: [key] })),
+              parentKeys: getGroupingNodeParentKeys(pathUntilParentElement),
             });
             const middleElementGroupingNode = createClassGroupingHierarchyNode({
               className: middleElement.className,
               modelId: model.id,
               categoryId: category.id,
               elements: [middleElement.id],
-              parentKeys: [...pathUntilParentElement, parentElement].map((key) => ({ type: "instances", instanceKeys: [key] })),
+              parentKeys: getGroupingNodeParentKeys([...pathUntilParentElement, parentElementGroupingNode.key, parentElement]),
             });
             const childElementGroupingNode = createClassGroupingHierarchyNode({
               className: childElement.className,
               modelId: model.id,
               categoryId: category.id,
               elements: [childElement.id],
-              parentKeys: [...pathUntilParentElement, middleElement].map((key) => ({ type: "instances", instanceKeys: [key] })),
+              parentKeys: getGroupingNodeParentKeys([
+                ...pathUntilParentElement,
+                parentElementGroupingNode.key,
+                parentElement,
+                middleElementGroupingNode.key,
+                middleElement,
+              ]),
             });
             return {
               rootSubject,
@@ -1265,15 +1271,15 @@ describe("Models tree", () => {
           (x) => [
             {
               path: [...x.pathUntilParentElement, adjustedElementKey(x.parentElement)],
-              options: { autoExpand: { key: x.parentElementGroupingNode.key, depth: x.parentElementGroupingNode.parentKeys.length } },
+              options: { autoExpand: { depth: x.parentElementGroupingNode.parentKeys.length, includeGroupingNodes: true } },
             },
             {
               path: [...x.pathUntilParentElement, adjustedElementKey(x.parentElement), adjustedElementKey(x.middleElement)],
-              options: { autoExpand: { key: x.middleElementGroupingNode.key, depth: x.middleElementGroupingNode.parentKeys.length } },
+              options: { autoExpand: { depth: x.middleElementGroupingNode.parentKeys.length, includeGroupingNodes: true } },
             },
             {
               path: [...x.pathUntilParentElement, adjustedElementKey(x.parentElement), adjustedElementKey(x.middleElement), adjustedElementKey(x.childElement)],
-              options: { autoExpand: { key: x.childElementGroupingNode.key, depth: x.childElementGroupingNode.parentKeys.length } },
+              options: { autoExpand: { depth: x.childElementGroupingNode.parentKeys.length, includeGroupingNodes: true } },
             },
           ],
           (x) => [
@@ -1360,7 +1366,7 @@ describe("Models tree", () => {
             [...x.pathUntilTargetElement, adjustedElementKey(x.element)],
             {
               path: [...x.pathUntilTargetElement, adjustedElementKey(x.element)],
-              options: { autoExpand: { key: x.groupingNode.key, depth: x.groupingNode.parentKeys.length } },
+              options: { autoExpand: { depth: x.groupingNode.parentKeys.length, includeGroupingNodes: true } },
             },
           ],
           (x) => [
@@ -1434,11 +1440,11 @@ describe("Models tree", () => {
           (x) => [
             {
               path: [adjustedModelKey(x.model), x.category1, adjustedElementKey(x.element1)],
-              options: { autoExpand: { key: x.groupingNode1.key, depth: x.groupingNode1.parentKeys.length } },
+              options: { autoExpand: { depth: x.groupingNode1.parentKeys.length, includeGroupingNodes: true } },
             },
             {
               path: [adjustedModelKey(x.model), x.category2, adjustedElementKey(x.element2)],
-              options: { autoExpand: { key: x.groupingNode2.key, depth: x.groupingNode2.parentKeys.length } },
+              options: { autoExpand: { depth: x.groupingNode2.parentKeys.length, includeGroupingNodes: true } },
             },
           ],
           (x) => [
