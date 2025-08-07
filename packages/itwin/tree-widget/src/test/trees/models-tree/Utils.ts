@@ -201,7 +201,15 @@ export function createClassGroupingHierarchyNode({
   };
 }
 
-export function getGroupingNodeParentKeys (keys: any[]): HierarchyNodeKey[] {
+export function getGroupingNodeParentKeys(
+  keys: (
+    | ClassGroupingNodeKey
+    | {
+        className: string;
+        id: string;
+      }
+  )[],
+): HierarchyNodeKey[] {
   return keys.map((key) => {
     if ("type" in key) {
       return key;

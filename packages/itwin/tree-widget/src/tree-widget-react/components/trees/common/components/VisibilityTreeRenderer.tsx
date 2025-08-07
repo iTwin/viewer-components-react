@@ -41,6 +41,7 @@ export function VisibilityTreeRenderer({
               node={node}
               onVisibilityButtonClick={onVisibilityButtonClick}
               getVisibilityButtonState={getVisibilityButtonState}
+              reserveSpace
             />,
             <FilterAction key={"Filter"} node={node} onFilter={onFilterClick} getHierarchyLevelDetails={getHierarchyLevelDetails} reserveSpace />,
           ];

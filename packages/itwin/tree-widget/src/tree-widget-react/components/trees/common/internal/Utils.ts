@@ -74,18 +74,6 @@ export function pushToMap<TKey, TValue>(targetMap: Map<TKey, Set<TValue>>, key: 
 }
 
 /** @internal */
-// export function createIModelAccess({ imodel, getSchemaContext }: { imodel: IModelConnection; getSchemaContext: (imodel: IModelConnection) => SchemaContext }) {
-//   const schemas = getSchemaContext(imodel);
-//   const schemaProvider = createECSchemaProvider(schemas);
-//   return {
-//     imodelKey: imodel.key,
-//     ...schemaProvider,
-//     ...createCachingECClassHierarchyInspector({ schemaProvider, cacheSize: 100 }),
-//     ...createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(imodel), 1000),
-//   };
-// }
-
-/** @internal */
 export function useLatest<T>(value: T) {
   const ref = useRef(value);
   useEffect(() => {
