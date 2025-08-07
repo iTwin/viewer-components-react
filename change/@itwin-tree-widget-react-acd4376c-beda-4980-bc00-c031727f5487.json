@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Models tree: Stop unnecessarily executing an expensive model elements' count query, whose results we weren't even using.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "35135765+grigasp@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
