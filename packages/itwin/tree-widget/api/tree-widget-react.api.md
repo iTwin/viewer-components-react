@@ -7,6 +7,7 @@
 import type { BeEvent } from '@itwin/core-bentley';
 import type { ClassGroupingNodeKey } from '@itwin/presentation-hierarchies';
 import type { ECClassHierarchyInspector } from '@itwin/presentation-shared';
+import { FilterAction } from '@itwin/presentation-hierarchies-react';
 import type { GroupingHierarchyNode } from '@itwin/presentation-hierarchies';
 import type { HierarchyFilteringPath } from '@itwin/presentation-hierarchies';
 import type { HierarchyNode } from '@itwin/presentation-hierarchies-react';
@@ -22,6 +23,7 @@ import type { Localization } from '@itwin/core-common';
 import type { PresentationHierarchyNode } from '@itwin/presentation-hierarchies-react';
 import type { PropsWithChildren } from 'react';
 import type { ReactNode } from 'react';
+import { RenameAction } from '@itwin/presentation-hierarchies-react';
 import type { SelectionStorage } from '@itwin/presentation-hierarchies-react';
 import { StrataKitTreeRenderer } from '@itwin/presentation-hierarchies-react';
 import type { TranslationOptions } from '@itwin/core-common';
@@ -45,7 +47,7 @@ export const CategoriesTreeComponent: {
 };
 
 // @public (undocumented)
-interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "filter" | "emptyTreeContent" | "getActions" | "getDecorations" | "hierarchyConfig"> {
+interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "filter" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getDecorations" | "hierarchyConfig"> {
     headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode>;
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
@@ -74,7 +76,7 @@ export function CategoriesTreeIcon({ node }: {
 }): JSX_2.Element | undefined;
 
 // @beta (undocumented)
-type CategoriesTreeProps = Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> & Pick<VisibilityTreeRendererProps, "getActions" | "getDecorations"> & UseCategoriesTreeProps & {
+type CategoriesTreeProps = Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> & Pick<VisibilityTreeRendererProps, "getInlineActions" | "getMenuActions" | "getDecorations"> & UseCategoriesTreeProps & {
     hierarchyLevelConfig?: {
         sizeLimit?: number;
     };
@@ -128,7 +130,7 @@ export const ClassificationsTreeComponent: {
 };
 
 // @alpha (undocumented)
-interface ClassificationsTreeComponentProps extends Pick<ClassificationsTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "filter" | "emptyTreeContent" | "getActions" | "getDecorations" | "hierarchyConfig"> {
+interface ClassificationsTreeComponentProps extends Pick<ClassificationsTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "filter" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getDecorations" | "hierarchyConfig"> {
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
@@ -146,7 +148,7 @@ export function ClassificationsTreeIcon({ node }: {
 }): JSX_2.Element | undefined;
 
 // @alpha (undocumented)
-type ClassificationsTreeProps = Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> & Pick<VisibilityTreeRendererProps, "getActions" | "getDecorations"> & UseClassificationsTreeProps & {
+type ClassificationsTreeProps = Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> & Pick<VisibilityTreeRendererProps, "getInlineActions" | "getMenuActions" | "getDecorations"> & UseClassificationsTreeProps & {
     hierarchyLevelConfig?: {
         sizeLimit?: number;
     };
@@ -178,7 +180,7 @@ export const ExternalSourcesTreeComponent: {
 };
 
 // @beta (undocumented)
-interface ExternalSourcesTreeComponentProps extends Pick<ExternalSourcesTreeProps, "selectionStorage" | "selectionMode" | "hierarchyLevelConfig" | "selectionMode" | "emptyTreeContent" | "getActions" | "getDecorations"> {
+interface ExternalSourcesTreeComponentProps extends Pick<ExternalSourcesTreeProps, "selectionStorage" | "selectionMode" | "hierarchyLevelConfig" | "selectionMode" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getDecorations"> {
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
@@ -191,11 +193,13 @@ export function ExternalSourcesTreeIcon({ node }: {
 }): JSX_2.Element | undefined;
 
 // @beta (undocumented)
-type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> & Pick<BaseTreeRendererProps, "getActions" | "getDecorations"> & {
+type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> & Pick<BaseTreeRendererProps, "getInlineActions" | "getMenuActions" | "getDecorations"> & {
     hierarchyLevelConfig?: {
         sizeLimit?: number;
     };
 };
+
+export { FilterAction }
 
 // @beta
 export class FilterLimitExceededError extends Error {
@@ -268,7 +272,7 @@ export const IModelContentTreeComponent: {
 };
 
 // @beta (undocumented)
-interface IModelContentTreeComponentProps extends Pick<IModelContentTreeProps, "selectionStorage" | "hierarchyConfig" | "hierarchyLevelConfig" | "selectionMode" | "emptyTreeContent" | "getActions" | "getDecorations"> {
+interface IModelContentTreeComponentProps extends Pick<IModelContentTreeProps, "selectionStorage" | "hierarchyConfig" | "hierarchyLevelConfig" | "selectionMode" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getDecorations"> {
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
@@ -286,7 +290,7 @@ export function IModelContentTreeIcon({ node }: {
 }): JSX_2.Element | undefined;
 
 // @beta (undocumented)
-type IModelContentTreeProps = Pick<TreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> & Pick<BaseTreeRendererProps, "getActions" | "getDecorations"> & {
+type IModelContentTreeProps = Pick<TreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> & Pick<BaseTreeRendererProps, "getInlineActions" | "getMenuActions" | "getDecorations"> & {
     hierarchyLevelConfig?: {
         sizeLimit?: number;
     };
@@ -315,7 +319,7 @@ export const ModelsTreeComponent: {
 };
 
 // @public (undocumented)
-interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "selectionPredicate" | "hierarchyConfig" | "visibilityHandlerOverrides" | "getFilteredPaths" | "filter" | "emptyTreeContent" | "getActions" | "getDecorations"> {
+interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "selectionPredicate" | "hierarchyConfig" | "visibilityHandlerOverrides" | "getFilteredPaths" | "filter" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getDecorations"> {
     headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
@@ -346,7 +350,7 @@ export function ModelsTreeIcon({ node }: {
 }): JSX_2.Element | undefined;
 
 // @beta (undocumented)
-type ModelsTreeProps = Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> & Pick<VisibilityTreeRendererProps, "getActions" | "getDecorations"> & UseModelsTreeProps & {
+type ModelsTreeProps = Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> & Pick<VisibilityTreeRendererProps, "getInlineActions" | "getMenuActions" | "getDecorations"> & UseModelsTreeProps & {
     hierarchyLevelConfig?: {
         sizeLimit?: number;
     };
@@ -388,6 +392,8 @@ export interface ModelsTreeVisibilityHandlerOverrides {
     }) => Promise<VisibilityStatus>>;
 }
 
+export { RenameAction }
+
 // @beta (undocumented)
 export function SelectableTree({ buttons, children }: PropsWithChildren<TreehHeaderProps>): JSX_2.Element;
 
@@ -424,6 +430,7 @@ interface TreehHeaderProps {
 interface TreeItemVisibilityButtonProps {
     getVisibilityButtonState: (node: PresentationHierarchyNode) => TreeItemVisibilityButtonState;
     onVisibilityButtonClick: (node: PresentationHierarchyNode, state: TreeItemVisibilityButtonState["state"]) => void;
+    reserveSpace?: true;
 }
 
 // @beta
@@ -451,7 +458,7 @@ type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPaths" | 
 };
 
 // @beta
-export function TreeRenderer({ getActions, getHierarchyLevelDetails, onFilterClick, ...props }: BaseTreeRendererProps): JSX_2.Element;
+export function TreeRenderer({ getInlineActions, getHierarchyLevelDetails, onFilterClick, ...props }: BaseTreeRendererProps): JSX_2.Element;
 
 // @public
 interface TreeRenderProps {
@@ -621,7 +628,7 @@ type VisibilityTreeProps = Omit<TreeProps, "treeRenderer" | "imodelAccess"> & {
 };
 
 // @beta
-export function VisibilityTreeRenderer({ getVisibilityButtonState, onVisibilityButtonClick: onClick, getActions, onFilterClick, getHierarchyLevelDetails, ...props }: VisibilityTreeRendererProps): JSX_2.Element;
+export function VisibilityTreeRenderer({ getVisibilityButtonState, onVisibilityButtonClick: onClick, getInlineActions, getMenuActions, onFilterClick, getHierarchyLevelDetails, ...props }: VisibilityTreeRendererProps): JSX_2.Element;
 
 // @beta (undocumented)
 type VisibilityTreeRendererProps = BaseTreeRendererProps & TreeItemVisibilityButtonProps;
