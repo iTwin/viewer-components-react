@@ -25,7 +25,6 @@ interface SubjectInfo {
 interface ModelInfo {
   isModelPrivate: boolean;
   categories: Id64Set;
-  elementCount: number;
 }
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
@@ -250,17 +249,6 @@ export class ModelsTreeIdsCache {
     return entry;
   }
 
-  private async *queryModelElementCounts() {
-    const query = /* sql */ `
-      SELECT Model.Id modelId, COUNT(*) elementCount
-      FROM ${this._hierarchyConfig.elementClassSpecification}
-      GROUP BY Model.Id
-    `;
-    for await (const row of this._queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
-      yield { modelId: row.modelId, elementCount: row.elementCount };
-    }
-  }
-
   private async *queryModelCategories() {
     const query = /* sql */ `
       SELECT this.Model.Id modelId, this.Category.Id categoryId, m.IsPrivate isModelPrivate
@@ -310,30 +298,16 @@ export class ModelsTreeIdsCache {
 
   private async getModelInfos() {
     this._modelInfos ??= (async () => {
-      const modelInfos = new Map<Id64String, { categories: Id64Set; elementCount: number; isModelPrivate: boolean }>();
-      await Promise.all([
-        (async () => {
-          for await (const { modelId, categoryId, isModelPrivate } of this.queryModelCategories()) {
-            const entry = modelInfos.get(modelId);
-            if (entry) {
-              entry.categories.add(categoryId);
-              entry.isModelPrivate = isModelPrivate;
-            } else {
-              modelInfos.set(modelId, { categories: new Set([categoryId]), elementCount: 0, isModelPrivate });
-            }
-          }
-        })(),
-        (async () => {
-          for await (const { modelId, elementCount } of this.queryModelElementCounts()) {
-            const entry = modelInfos.get(modelId);
-            if (entry) {
-              entry.elementCount = elementCount;
-            } else {
-              modelInfos.set(modelId, { categories: new Set(), elementCount, isModelPrivate: false });
-            }
-          }
-        })(),
-      ]);
+      const modelInfos = new Map<Id64String, { categories: Id64Set; isModelPrivate: boolean }>();
+      for await (const { modelId, categoryId, isModelPrivate } of this.queryModelCategories()) {
+        const entry = modelInfos.get(modelId);
+        if (entry) {
+          entry.categories.add(categoryId);
+          entry.isModelPrivate = isModelPrivate;
+        } else {
+          modelInfos.set(modelId, { categories: new Set([categoryId]), isModelPrivate });
+        }
+      }
       return modelInfos;
     })();
     return this._modelInfos;
