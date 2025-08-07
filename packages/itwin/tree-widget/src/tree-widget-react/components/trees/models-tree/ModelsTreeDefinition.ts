@@ -3,7 +3,24 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, defer, firstValueFrom, from, lastValueFrom, map, merge, mergeAll, mergeMap, reduce, switchMap } from "rxjs";
+import {
+  bufferCount,
+  defaultIfEmpty,
+  defer,
+  firstValueFrom,
+  from,
+  fromEvent,
+  identity,
+  lastValueFrom,
+  map,
+  merge,
+  mergeAll,
+  mergeMap,
+  reduce,
+  switchMap,
+  takeUntil,
+  toArray,
+} from "rxjs";
 import { IModel } from "@itwin/core-common";
 import {
   createNodesQueryClauseFactory,
@@ -104,21 +121,21 @@ export interface ElementsGroupInfo {
   groupingNode: ClassGroupingHierarchyNode;
 }
 
-interface ModelsTreeInstanceKeyPathsFromTargetItemsProps {
+interface ModelsTreeInstanceKeyPathsBaseProps {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
-  targetItems: Array<InstanceKey | ElementsGroupInfo>;
   hierarchyConfig: ModelsTreeHierarchyConfiguration;
   limit?: number | "unbounded";
+  abortSignal?: AbortSignal;
 }
 
-interface ModelsTreeInstanceKeyPathsFromInstanceLabelProps {
-  imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
-  idsCache: ModelsTreeIdsCache;
+type ModelsTreeInstanceKeyPathsFromTargetItemsProps = {
+  targetItems: Array<InstanceKey | ElementsGroupInfo>;
+} & ModelsTreeInstanceKeyPathsBaseProps;
+
+type ModelsTreeInstanceKeyPathsFromInstanceLabelProps = {
   label: string;
-  hierarchyConfig: ModelsTreeHierarchyConfiguration;
-  limit?: number | "unbounded";
-}
+} & ModelsTreeInstanceKeyPathsBaseProps;
 
 /** @internal */
 export type ModelsTreeInstanceKeyPathsProps = ModelsTreeInstanceKeyPathsFromTargetItemsProps | ModelsTreeInstanceKeyPathsFromInstanceLabelProps;
@@ -539,12 +556,16 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     ];
   }
 
-  public static async createInstanceKeyPaths(props: ModelsTreeInstanceKeyPathsProps) {
-    if (ModelsTreeInstanceKeyPathsProps.isLabelProps(props)) {
-      const labelsFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
-      return createInstanceKeyPathsFromInstanceLabel({ ...props, labelsFactory });
-    }
-    return createInstanceKeyPathsFromTargetItems(props);
+  public static async createInstanceKeyPaths(props: ModelsTreeInstanceKeyPathsProps): Promise<HierarchyFilteringPath[]> {
+    return lastValueFrom(
+      defer(() => {
+        if (ModelsTreeInstanceKeyPathsProps.isLabelProps(props)) {
+          const labelsFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
+          return createInstanceKeyPathsFromInstanceLabelObs({ ...props, labelsFactory });
+        }
+        return createInstanceKeyPathsFromTargetItemsObs(props);
+      }).pipe(props.abortSignal ? takeUntil(fromEvent(props.abortSignal, "abort")) : identity, defaultIfEmpty([])),
+    );
   }
 
   private supportsFiltering() {
@@ -670,8 +691,7 @@ function createGeometricElementInstanceKeyPaths(
             path,
             options: {
               autoExpand: {
-                key: groupingNode.key,
-                depth: groupingNode.parentKeys.length,
+                depthInHierarchy: groupingNode.parentKeys.length,
               },
             },
           };
@@ -704,93 +724,91 @@ function parseQueryRow(row: ECSqlQueryRow, groupInfos: ElementsGroupInfo[], sepa
   };
 }
 
-async function createInstanceKeyPathsFromTargetItems({
+function createInstanceKeyPathsFromTargetItemsObs({
   targetItems,
   imodelAccess,
   hierarchyConfig,
   idsCache,
   limit,
-}: ModelsTreeInstanceKeyPathsFromTargetItemsProps): Promise<HierarchyFilteringPath[]> {
+}: Omit<ModelsTreeInstanceKeyPathsFromTargetItemsProps, "abortSignal">): Observable<HierarchyFilteringPath[]> {
   if (limit !== "unbounded" && targetItems.length > (limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT)) {
     throw new FilterLimitExceededError(limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT);
   }
 
-  return lastValueFrom(
-    from(targetItems).pipe(
-      releaseMainThreadOnItemsCount(2000),
-      mergeMap(async (key): Promise<{ key: Id64String; type: number } | { key: ElementsGroupInfo; type: 0 }> => {
-        if ("parent" in key) {
-          return { key, type: 0 };
-        }
+  return from(targetItems).pipe(
+    releaseMainThreadOnItemsCount(2000),
+    mergeMap(async (key): Promise<{ key: Id64String; type: number } | { key: ElementsGroupInfo; type: 0 }> => {
+      if ("parent" in key) {
+        return { key, type: 0 };
+      }
 
-        if (await imodelAccess.classDerivesFrom(key.className, CLASS_NAME_Subject)) {
-          return { key: key.id, type: 1 };
-        }
+      if (await imodelAccess.classDerivesFrom(key.className, CLASS_NAME_Subject)) {
+        return { key: key.id, type: 1 };
+      }
 
-        if (await imodelAccess.classDerivesFrom(key.className, CLASS_NAME_Model)) {
-          return { key: key.id, type: 2 };
-        }
+      if (await imodelAccess.classDerivesFrom(key.className, CLASS_NAME_Model)) {
+        return { key: key.id, type: 2 };
+      }
 
-        if (await imodelAccess.classDerivesFrom(key.className, CLASS_NAME_SpatialCategory)) {
-          return { key: key.id, type: 3 };
-        }
+      if (await imodelAccess.classDerivesFrom(key.className, CLASS_NAME_SpatialCategory)) {
+        return { key: key.id, type: 3 };
+      }
 
-        return { key: key.id, type: 0 };
-      }, 2),
-      reduce(
-        (acc, value) => {
-          if (value.type === 1) {
-            acc.subjectIds.push(value.key);
-            return acc;
-          }
-          if (value.type === 2) {
-            acc.modelIds.push(value.key);
-            return acc;
-          }
-          if (value.type === 3) {
-            acc.categoryIds.push(value.key);
-            return acc;
-          }
-          acc.elementIds.push(value.key);
+      return { key: key.id, type: 0 };
+    }, 2),
+    reduce(
+      (acc, value) => {
+        if (value.type === 1) {
+          acc.subjectIds.push(value.key);
           return acc;
-        },
-        {
-          modelIds: new Array<Id64String>(),
-          categoryIds: new Array<Id64String>(),
-          subjectIds: new Array<Id64String>(),
-          elementIds: new Array<Id64String | ElementsGroupInfo>(),
-        },
-      ),
-      switchMap(async (ids) => {
-        const elementsLength = ids.elementIds.length;
-        return collect(
-          merge(
-            from(ids.subjectIds).pipe(mergeMap((id) => from(idsCache.createSubjectInstanceKeysPath(id)))),
-            from(ids.modelIds).pipe(mergeMap((id) => from(idsCache.createModelInstanceKeyPaths(id)).pipe(mergeAll()))),
-            from(ids.categoryIds).pipe(mergeMap((id) => from(idsCache.createCategoryInstanceKeyPaths(id)).pipe(mergeAll()))),
-            from(ids.elementIds).pipe(
-              bufferCount(Math.ceil(elementsLength / Math.ceil(elementsLength / 5000))),
-              releaseMainThreadOnItemsCount(1),
-              mergeMap((block) => createGeometricElementInstanceKeyPaths(imodelAccess, idsCache, hierarchyConfig, block), 10),
-            ),
-          ),
-        );
-      }),
+        }
+        if (value.type === 2) {
+          acc.modelIds.push(value.key);
+          return acc;
+        }
+        if (value.type === 3) {
+          acc.categoryIds.push(value.key);
+          return acc;
+        }
+        acc.elementIds.push(value.key);
+        return acc;
+      },
+      {
+        modelIds: new Array<Id64String>(),
+        categoryIds: new Array<Id64String>(),
+        subjectIds: new Array<Id64String>(),
+        elementIds: new Array<Id64String | ElementsGroupInfo>(),
+      },
     ),
+    switchMap(async (ids) => {
+      const elementsLength = ids.elementIds.length;
+      return collect(
+        merge(
+          from(ids.subjectIds).pipe(mergeMap((id) => from(idsCache.createSubjectInstanceKeysPath(id)))),
+          from(ids.modelIds).pipe(mergeMap((id) => from(idsCache.createModelInstanceKeyPaths(id)).pipe(mergeAll()))),
+          from(ids.categoryIds).pipe(mergeMap((id) => from(idsCache.createCategoryInstanceKeyPaths(id)).pipe(mergeAll()))),
+          from(ids.elementIds).pipe(
+            bufferCount(Math.ceil(elementsLength / Math.ceil(elementsLength / 5000))),
+            releaseMainThreadOnItemsCount(1),
+            mergeMap((block) => createGeometricElementInstanceKeyPaths(imodelAccess, idsCache, hierarchyConfig, block), 10),
+          ),
+        ),
+      );
+    }),
   );
 }
 
-async function createInstanceKeyPathsFromInstanceLabel(
-  props: ModelsTreeInstanceKeyPathsFromInstanceLabelProps & { labelsFactory: IInstanceLabelSelectClauseFactory },
+function createInstanceKeyPathsFromInstanceLabelObs(
+  props: Omit<ModelsTreeInstanceKeyPathsFromInstanceLabelProps, "abortSignal"> & { labelsFactory: IInstanceLabelSelectClauseFactory },
 ) {
-  const elementLabelSelectClause = await props.labelsFactory.createSelectClause({
-    classAlias: "e",
-    className: CLASS_NAME_Element,
-    selectorsConcatenator: ECSql.createConcatenatedValueStringSelector,
-  });
-  const targetsReader = props.imodelAccess.createQueryReader(
-    {
-      ecsql: `
+  const { labelsFactory, hierarchyConfig, label, imodelAccess, limit } = props;
+  return defer(async () => {
+    const elementLabelSelectClause = await labelsFactory.createSelectClause({
+      classAlias: "e",
+      className: CLASS_NAME_Element,
+      selectorsConcatenator: ECSql.createConcatenatedValueStringSelector,
+    });
+    const ecsql = `
         SELECT *
         FROM (
           SELECT
@@ -798,7 +816,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
             e.ECInstanceId,
             ${elementLabelSelectClause} Label
           FROM ${CLASS_NAME_Element} e
-          WHERE e.ECClassId IS (${CLASS_NAME_Subject}, ${CLASS_NAME_SpatialCategory}, ${props.hierarchyConfig.elementClassSpecification})
+          WHERE e.ECClassId IS (${CLASS_NAME_Subject}, ${CLASS_NAME_SpatialCategory}, ${hierarchyConfig.elementClassSpecification})
 
           UNION ALL
 
@@ -809,22 +827,25 @@ async function createInstanceKeyPathsFromInstanceLabel(
           FROM ${CLASS_NAME_GeometricModel3d} m
           JOIN ${CLASS_NAME_Element} e ON e.ECInstanceId = m.ModeledElement.Id
           WHERE NOT m.IsPrivate
-            ${props.hierarchyConfig.showEmptyModels ? "" : `AND EXISTS (SELECT 1 FROM ${props.hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)`}
+            ${hierarchyConfig.showEmptyModels ? "" : `AND EXISTS (SELECT 1 FROM ${hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)`}
             AND json_extract(e.JsonProperties, '$.PhysicalPartition.Model.Content') IS NULL
             AND json_extract(e.JsonProperties, '$.GraphicalPartition3d.Model.Content') IS NULL
         )
         WHERE Label LIKE '%' || ? || '%' ESCAPE '\\'
         LIMIT ${MAX_FILTERING_INSTANCE_KEY_COUNT + 1}
-      `,
-      bindings: [{ type: "string", value: props.label.replace(/[%_\\]/g, "\\$&") }],
-    },
-    { rowFormat: "Indexes", restartToken: "tree-widget/models-tree/filter-by-label-query", limit: props.limit },
+      `;
+    const bindings: ECSqlBinding[] = [{ type: "string", value: label.replace(/[%_\\]/g, "\\$&") }];
+    return { ecsql, bindings };
+  }).pipe(
+    mergeMap((queryProps) => {
+      return imodelAccess.createQueryReader(queryProps, {
+        rowFormat: "Indexes",
+        restartToken: "tree-widget/models-tree/filter-by-label-query",
+        limit,
+      });
+    }),
+    map((row) => ({ className: row[0], id: row[1] })),
+    toArray(),
+    mergeMap((targetKeys) => createInstanceKeyPathsFromTargetItemsObs({ ...props, targetItems: targetKeys })),
   );
-
-  const targetKeys = new Array<InstanceKey>();
-  for await (const row of targetsReader) {
-    targetKeys.push({ className: row[0], id: row[1] });
-  }
-
-  return createInstanceKeyPathsFromTargetItems({ ...props, targetItems: targetKeys });
 }

@@ -15,6 +15,7 @@ import {
   EmptyTreeContent,
   FilterUnknownError,
   NoFilterMatches,
+  SubTreeError,
   TooManyFilterMatches,
   TooManyInstancesFocused,
   UnknownInstanceFocusError,
@@ -39,7 +40,7 @@ import type { ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./Mode
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/ModelsTreeVisibilityHandler.js";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
-import type { ModelsTreeFilteringError } from "./internal/UseFilteredPaths.js";
+import type { ModelsTreeFilteringError, ModelsTreeSubTreeError } from "./internal/UseFilteredPaths.js";
 
 /** @beta */
 export interface UseModelsTreeProps {
@@ -77,6 +78,22 @@ export interface UseModelsTreeProps {
     /** Filter which would be used to create filter paths if `getFilteredPaths` wouldn't be provided. */
     filter?: string;
   }) => Promise<HierarchyFilteringPath[]>;
+  /**
+   * Optional function for restricting the visible hierarchy to a specific sub-tree of nodes, without changing how filtering works.
+   *
+   * Use when you want to display only part of the hierarchy, but still allow normal filtering within that sub-tree.
+   *
+   * When defined, only nodes that are in the provided paths or children of target nodes will be part of the hierarchy.
+   * Filtering (by label or custom logic) will still apply within this sub-tree.
+   *
+   * Key difference:
+   * - `getFilteredPaths` determines which nodes should be shown, giving you full control over filtering logic.
+   * - `getSubTreePaths` restricts the hierarchy to a sub-tree, but does not override the filtering logic — filtering is still applied within the restricted sub-tree.
+   */
+  getSubTreePaths?: (props: {
+    /** A function that creates filtering paths based on provided target instance keys. */
+    createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> }) => Promise<HierarchyFilteringPath[]>;
+  }) => Promise<HierarchyFilteringPath[]>;
   onModelsFiltered?: (modelIds: Id64String[] | undefined) => void;
   /**
    * An optional predicate to allow or prohibit selection of a node.
@@ -108,6 +125,7 @@ export function useModelsTree({
   onModelsFiltered,
   selectionPredicate: nodeTypeSelectionPredicate,
   emptyTreeContent,
+  getSubTreePaths,
 }: UseModelsTreeProps): UseModelsTreeResult {
   const hierarchyConfiguration = useMemo<ModelsTreeHierarchyConfiguration>(
     () => ({
@@ -135,13 +153,14 @@ export function useModelsTree({
     [getModelsTreeIdsCache, hierarchyConfiguration],
   );
 
-  const { getPaths, filteringError } = useFilteredPaths({
+  const { getPaths, filteringError, subTreeError } = useFilteredPaths({
     hierarchyConfiguration,
     filter,
     getFilteredPaths,
     getModelsTreeIdsCache,
     onFilteredPathsChanged,
     onModelsFiltered,
+    getSubTreePaths,
   });
 
   const nodeSelectionPredicate = useCallback<NonNullable<VisibilityTreeProps["selectionPredicate"]>>(
@@ -161,7 +180,10 @@ export function useModelsTree({
       visibilityHandlerFactory,
       getHierarchyDefinition,
       getFilteredPaths: getPaths,
-      emptyTreeContent: useMemo(() => getEmptyTreeContentComponent(filter, filteringError, emptyTreeContent), [filter, filteringError, emptyTreeContent]),
+      emptyTreeContent: useMemo(
+        () => getEmptyTreeContentComponent(filter, subTreeError, filteringError, emptyTreeContent),
+        [filter, subTreeError, filteringError, emptyTreeContent],
+      ),
       highlight: useMemo(() => (filter ? { text: filter } : undefined), [filter]),
       selectionPredicate: nodeSelectionPredicate,
     },
@@ -186,7 +208,15 @@ function createVisibilityHandlerFactory(
     });
 }
 
-function getEmptyTreeContentComponent(filter?: string, error?: ModelsTreeFilteringError, emptyTreeContent?: React.ReactNode) {
+function getEmptyTreeContentComponent(
+  filter?: string,
+  subTreeError?: ModelsTreeSubTreeError,
+  error?: ModelsTreeFilteringError,
+  emptyTreeContent?: React.ReactNode,
+) {
+  if (isSubTreeError(subTreeError)) {
+    return <SubTreeError base={"modelsTree"} error={subTreeError} />;
+  }
   if (isInstanceFocusError(error)) {
     return <InstanceFocusError error={error} />;
   }
@@ -203,6 +233,10 @@ function getEmptyTreeContentComponent(filter?: string, error?: ModelsTreeFilteri
     return emptyTreeContent;
   }
   return <EmptyTreeContent icon={modelSvg} />;
+}
+
+function isSubTreeError(error: ModelsTreeSubTreeError | undefined) {
+  return error === "unknownSubTreeError";
 }
 
 function isFilterError(error: ModelsTreeFilteringError | undefined) {

@@ -41,6 +41,7 @@ interface ModelsTreeComponentProps
     | "emptyTreeContent"
     | "getActions"
     | "getDecorations"
+    | "getSubTreePaths"
   > {
   /**
    * Renderers of header buttons. Defaults to:
