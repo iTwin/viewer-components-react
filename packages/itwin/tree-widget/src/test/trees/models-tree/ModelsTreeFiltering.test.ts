@@ -84,7 +84,7 @@ namespace TreeFilteringTestCaseDefinition {
   };
 }
 
-describe.only("Models tree", () => {
+describe("Models tree", () => {
   describe("Hierarchy filtering", () => {
     before(async function () {
       await initializePresentationTesting({
@@ -1021,7 +1021,7 @@ describe.only("Models tree", () => {
               modelId: model.id,
               categoryId: category.id,
               elements: [testElement1.id, testElement2.id],
-              parentKeys: getGroupingNodeParentKeys([...pathUntilRootElement, rootGroupingNode.key, adjustedElementKey(rootElement)])
+              parentKeys: getGroupingNodeParentKeys([...pathUntilRootElement, rootGroupingNode.key, adjustedElementKey(rootElement)]),
             });
             return { rootSubject, model, category, rootElement, testElement1, testElement2, pathUntilTargetElement, groupingNode };
           },
