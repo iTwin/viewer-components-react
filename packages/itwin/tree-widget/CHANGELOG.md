@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Wed, 06 Aug 2025 13:46:52 GMT and should not be manually modified. -->
+<!-- This log was last generated on Thu, 07 Aug 2025 12:12:57 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.13.1
+
+Thu, 07 Aug 2025 12:12:57 GMT
+
+### Patches
+
+- Split large queries into smaller chunks to make them execute quicker. ([#1396](https://github.com/iTwin/viewer-components-react/pull/1396))
 
 ## 3.13.0
 

@@ -2,6 +2,21 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Thu, 07 Aug 2025 12:12:57 GMT",
+      "version": "3.13.1",
+      "tag": "@itwin/tree-widget-react_v3.13.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "d9158a7f82f1c69be0e7913bc1d3bb2f435a5f10",
+            "comment": "Split large queries into smaller chunks to make them execute quicker."
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 06 Aug 2025 13:46:52 GMT",
       "version": "3.13.0",
       "tag": "@itwin/tree-widget-react_v3.13.0",
