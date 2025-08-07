@@ -55,6 +55,8 @@ export interface LocationMeasurementProps extends MeasurementProps {
 
 /** Formatting properties for location measurement. */
 export interface LocationMeasurementFormattingProps {
+  /** Defaults to "AecUnits.LENGTH_COORDINATE" and "Units.M" */
+  coordinate?: MeasurementFormattingProps;
   /** Defaults to "AecUnits.LENGTH" and "Units.M" */
   length?: MeasurementFormattingProps;
   /** Defaults to "RoadRailUnits.STATION" and "Units.M" */
@@ -105,6 +107,8 @@ export class LocationMeasurement extends Measurement {
 
   private _textMarker?: TextMarker; // No serialize
   private _isDynamic: boolean; // No serialize
+  private _coordinateKoQ: string;
+  private _coordinatePersistenceUnitName: string;
   private _lengthKoQ: string;
   private _lengthPersistenceUnitName: string;
   private _stationKoQ: string;
@@ -158,6 +162,21 @@ export class LocationMeasurement extends Measurement {
     if (this._textMarker) this._textMarker.pickable = !v;
   }
 
+  public get coordinateKoQ(): string {
+    return this._coordinateKoQ;
+  }
+  public set coordinateKoQ(value: string) {
+    this._coordinateKoQ = value;
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+  }
+  public get coordinatePersistenceUnitName(): string {
+    return this._coordinatePersistenceUnitName;
+  }
+  public set coordinatePersistenceUnitName(value: string) {
+    this._coordinatePersistenceUnitName = value;
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+  }
+
   public get lengthKoQ(): string {
     return this._lengthKoQ;
   }
@@ -204,6 +223,8 @@ export class LocationMeasurement extends Measurement {
 
     this._location = Point3d.createZero();
     this._isDynamic = false;
+    this._coordinateKoQ = "AecUnits.LENGTH_COORDINATE";
+    this._coordinatePersistenceUnitName = "Units.M";
     this._lengthKoQ = "AecUnits.LENGTH";
     this._lengthPersistenceUnitName = "Units.M";
     this._stationKoQ = "RoadRailUnits.STATION";
@@ -272,6 +293,13 @@ export class LocationMeasurement extends Measurement {
   }
 
   public override async populateFormattingSpecsRegistry(_force?: boolean): Promise<void> {
+    const coordinateEntry = IModelApp.quantityFormatter.getSpecsByName(this._coordinateKoQ);
+    if (_force || !coordinateEntry || coordinateEntry.formatterSpec.persistenceUnit?.name !== this._coordinatePersistenceUnitName) {
+      const coordinateFormatProps = await IModelApp.formatsProvider.getFormat(this._coordinateKoQ);
+      if (coordinateFormatProps) {
+        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._coordinateKoQ, this._coordinatePersistenceUnitName, coordinateFormatProps);
+      }
+    }
     const lengthEntry = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ);
     if (_force || !lengthEntry || lengthEntry.formatterSpec.persistenceUnit?.name !== this._lengthPersistenceUnitName) {
       const lengthFormatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
@@ -320,26 +348,26 @@ export class LocationMeasurement extends Measurement {
 
   private async createTextMarker(): Promise<void> {
     const adjustedLocation = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._location));
-    const lengthSpec = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ)?.formatterSpec;
+    const coordinateSpec = IModelApp.quantityFormatter.getSpecsByName(this._coordinateKoQ)?.formatterSpec;
 
     const entries = [
       {
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureLocation.coordinate_x"
         ),
-        value: await FormatterUtils.formatLength(adjustedLocation.x, lengthSpec),
+        value: await FormatterUtils.formatLength(adjustedLocation.x, coordinateSpec),
       },
       {
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureLocation.coordinate_y"
         ),
-        value: await FormatterUtils.formatLength(adjustedLocation.y, lengthSpec),
+        value: await FormatterUtils.formatLength(adjustedLocation.y, coordinateSpec),
       },
       {
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureLocation.coordinate_z"
         ),
-        value: await FormatterUtils.formatLength(adjustedLocation.z, lengthSpec),
+        value: await FormatterUtils.formatLength(adjustedLocation.z, coordinateSpec),
       },
     ];
 
@@ -376,12 +404,13 @@ export class LocationMeasurement extends Measurement {
   protected override async getDataForMeasurementWidgetInternal(): Promise<
   MeasurementWidgetData | undefined
   > {
+    const coordinateSpec = IModelApp.quantityFormatter.getSpecsByName(this._coordinateKoQ)?.formatterSpec;
     const lengthSpec = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ)?.formatterSpec;
     const angleSpec = IModelApp.quantityFormatter.getSpecsByName(this._angleKoQ)?.formatterSpec;
     const stationSpec = IModelApp.quantityFormatter.getSpecsByName(this._stationKoQ)?.formatterSpec;
 
     const adjustedLocation = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._location));
-    const fCoordinates = FormatterUtils.formatCoordinatesImmediate(adjustedLocation, lengthSpec);
+    const fCoordinates = FormatterUtils.formatCoordinatesImmediate(adjustedLocation, coordinateSpec);
 
     let title = MeasureTools.localization.getLocalizedString(
       "MeasureTools:Measurements.locationMeasurement"
@@ -416,7 +445,7 @@ export class LocationMeasurement extends Measurement {
           "MeasureTools:tools.MeasureLocation.altitude"
         ),
         name: "LocationMeasurement_Altitude",
-        value: await FormatterUtils.formatLength(adjustedLocation.z, lengthSpec),
+        value: await FormatterUtils.formatLength(adjustedLocation.z, coordinateSpec),
       });
     }
     if (this.drawingMetadata?.sheetToWorldTransform === undefined) {
@@ -566,6 +595,10 @@ export class LocationMeasurement extends Measurement {
       this._geoLocation = Cartographic.fromRadians(jsonLoc.geoLocation);
     else this._geoLocation = undefined;
 
+    if (jsonLoc.formatting?.coordinate?.koqName) this._coordinateKoQ = jsonLoc.formatting.coordinate.koqName;
+    if (jsonLoc.formatting?.coordinate?.persistenceUnitName)
+      this._coordinatePersistenceUnitName = jsonLoc.formatting.coordinate.persistenceUnitName;
+
     if (jsonLoc.formatting?.length?.koqName) this._lengthKoQ = jsonLoc.formatting.length.koqName;
     if (jsonLoc.formatting?.length?.persistenceUnitName)
       this._lengthPersistenceUnitName = jsonLoc.formatting.length.persistenceUnitName;
@@ -609,6 +642,10 @@ export class LocationMeasurement extends Measurement {
     jsonLoc.station = this._station;
     jsonLoc.offset = this._offset;
     jsonLoc.formatting = {
+      coordinate: {
+        koqName: this._coordinateKoQ,
+        persistenceUnitName: this._coordinatePersistenceUnitName,
+      },
       length: {
         koqName: this._lengthKoQ,
         persistenceUnitName: this._lengthPersistenceUnitName,
