@@ -402,10 +402,9 @@ export class ModelsTreeIdsCache {
         }, new Map<Id64String, Id64Set>()),
         mergeMap((modelCategoryMap) => modelCategoryMap.entries()),
         map(([modelId, categoryIds]) => `Model.Id = ${modelId} AND Category.Id IN (${[...categoryIds].join(", ")})`),
-        // Maximum Depth Of An Expression Tree is set to 3000:
-        // https://github.com/iTwin/imodel-native/blob/f0f36d97fe10fd441b8bf760c331d299615a42b9/iModelCore/BeSQLite/SQLite/bentley-sqlite.c#L22
-        // 2900 makes sure that this limit is not reached
-        bufferCount(2900),
+        // we may have thousands of where clauses here, and sending a single query with all of them could take a
+        // long time - instead, split it into smaller chunks
+        bufferCount(100),
         mergeMap(async (whereClauses) => {
           const reader = this._queryExecutor.createQueryReader(
             {
