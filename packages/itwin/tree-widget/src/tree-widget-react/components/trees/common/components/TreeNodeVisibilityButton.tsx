@@ -36,7 +36,11 @@ export interface TreeItemVisibilityButtonProps {
   reserveSpace?: true;
 }
 
-/** @beta */
+/**
+ * React component that renders a visibility action for a tree item.
+ * Should be used with `VisibilityTreeRenderer`.
+ * @beta
+ */
 export const VisibilityAction = memo(function VisibilityAction({ node, reserveSpace }: TreeItemVisibilityButtonProps & { node: PresentationHierarchyNode }) {
   const context = useVisibilityContext();
   const state = context?.getVisibilityButtonState(node);

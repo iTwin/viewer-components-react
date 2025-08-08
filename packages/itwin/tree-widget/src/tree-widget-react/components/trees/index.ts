@@ -26,6 +26,7 @@ export { FocusedInstancesContextProvider, useFocusedInstancesContext } from "./c
 
 export { Tree } from "./common/components/Tree.js";
 export { VisibilityTree } from "./common/components/VisibilityTree.js";
+export { VisibilityAction } from "./common/components/TreeNodeVisibilityButton.js";
 export { TreeRenderer } from "./common/components/TreeRenderer.js";
 export { VisibilityTreeRenderer } from "./common/components/VisibilityTreeRenderer.js";
 export { HierarchyVisibilityHandler, VisibilityStatus } from "./common/UseHierarchyVisibility.js";
