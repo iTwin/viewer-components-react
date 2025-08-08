@@ -226,4 +226,4 @@ export function getGroupingNodeParentKeys(
       instanceKeys: [key],
     };
   });
-};
+}

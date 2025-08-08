@@ -1222,7 +1222,6 @@ describe("Models tree", () => {
               parentKeys: getGroupingNodeParentKeys([adjustedModelKey(model), category]),
             });
 
-
             const physicalElementGroupingNode = createClassGroupingHierarchyNode({
               className: physicalElement1.className,
               modelId: model.id,
