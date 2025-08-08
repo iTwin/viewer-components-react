@@ -42,6 +42,7 @@ interface ModelsTreeComponentProps
     | "getInlineActions"
     | "getMenuActions"
     | "getDecorations"
+    | "getSubTreePaths"
   > {
   /**
    * Renderers of header buttons. Defaults to:

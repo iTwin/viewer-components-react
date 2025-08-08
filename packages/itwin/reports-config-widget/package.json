@@ -1,6 +1,6 @@
 {
   "name": "@itwin/reports-config-widget-react",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "An iTwin.js 3D Viewer Widget that interfaces with the iTwin Reporting Platform.",
   "keywords": [
     "Bentley",
@@ -131,7 +131,6 @@
     "@itwin/core-bentley": "^4.0.0",
     "@itwin/core-frontend": "^4.0.0",
     "react": "^17.0.2 || ^18.0.0",
-    "react-dom": "^17.0.2 || ^18.0.0",
-    "react-redux": "^7.2.0"
+    "react-dom": "^17.0.2 || ^18.0.0"
   }
 }

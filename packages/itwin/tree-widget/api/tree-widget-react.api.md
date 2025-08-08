@@ -319,7 +319,11 @@ export const ModelsTreeComponent: {
 };
 
 // @public (undocumented)
+<<<<<<< HEAD
 interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "selectionPredicate" | "hierarchyConfig" | "visibilityHandlerOverrides" | "getFilteredPaths" | "filter" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getDecorations"> {
+=======
+interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "selectionPredicate" | "hierarchyConfig" | "visibilityHandlerOverrides" | "getFilteredPaths" | "filter" | "emptyTreeContent" | "getActions" | "getDecorations" | "getSubTreePaths"> {
+>>>>>>> tree-widget/next
     headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
@@ -564,7 +568,7 @@ interface UseClassificationsTreeResult {
 export function useFocusedInstancesContext(): FocusedInstancesContext;
 
 // @beta
-export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getFilteredPaths, onModelsFiltered, selectionPredicate: nodeTypeSelectionPredicate, emptyTreeContent, }: UseModelsTreeProps): UseModelsTreeResult;
+export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getFilteredPaths, onModelsFiltered, selectionPredicate: nodeTypeSelectionPredicate, emptyTreeContent, getSubTreePaths, }: UseModelsTreeProps): UseModelsTreeResult;
 
 // @public
 export function useModelsTreeButtonProps({ imodel, viewport }: {
@@ -589,6 +593,11 @@ interface UseModelsTreeProps {
             label: string;
         }) => Promise<HierarchyFilteringPath[]>;
         filter?: string;
+    }) => Promise<HierarchyFilteringPath[]>;
+    getSubTreePaths?: (props: {
+        createInstanceKeyPaths: (props: {
+            targetItems: Array<InstanceKey | ElementsGroupInfo>;
+        }) => Promise<HierarchyFilteringPath[]>;
     }) => Promise<HierarchyFilteringPath[]>;
     // (undocumented)
     hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;

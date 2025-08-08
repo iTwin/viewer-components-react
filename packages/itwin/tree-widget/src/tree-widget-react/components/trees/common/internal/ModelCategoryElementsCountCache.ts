@@ -3,10 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferTime, filter, firstValueFrom, mergeAll, mergeMap, ReplaySubject, Subject } from "rxjs";
+import { bufferCount, bufferTime, filter, firstValueFrom, from, map, mergeAll, mergeMap, reduce, ReplaySubject, Subject } from "rxjs";
 import { assert } from "@itwin/core-bentley";
+import { collect } from "./Rxjs.js";
 
-import type { Id64String } from "@itwin/core-bentley";
+import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { Subscription } from "rxjs";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { CategoryId, ModelId } from "./Types.js";
@@ -42,49 +43,70 @@ export class ModelCategoryElementsCountCache implements Disposable {
   private async queryCategoryElementCounts(
     input: Array<{ modelId: Id64String; categoryId: Id64String }>,
   ): Promise<Array<{ modelId: number; categoryId: number; elementsCount: number }>> {
-    const reader = this._queryExecutor.createQueryReader(
-      {
-        ctes: this._elementsClassNames.map(
-          (elementsClassName, index) => `
-          CategoryElements${index}(id, modelId, categoryId) AS (
-            SELECT ECInstanceId, Model.Id, Category.Id
-            FROM ${elementsClassName}
-            WHERE
-              Parent.Id IS NULL
-              AND (
-                ${input.map(({ modelId, categoryId }) => `Model.Id = ${modelId} AND Category.Id = ${categoryId}`).join(" OR ")}
-              )
+    return collect(
+      from(input).pipe(
+        reduce((acc, { modelId, categoryId }) => {
+          const entry = acc.get(modelId);
+          if (!entry) {
+            acc.set(modelId, new Set([categoryId]));
+          } else {
+            entry.add(categoryId);
+          }
+          return acc;
+        }, new Map<Id64String, Id64Set>()),
+        mergeMap((modelCategoryMap) => modelCategoryMap.entries()),
+        map(([modelId, categoryIds]) => `Model.Id = ${modelId} AND Category.Id IN (${[...categoryIds].join(", ")})`),
+        // we may have thousands of where clauses here, and sending a single query with all of them could take a
+        // long time - instead, split it into smaller chunks
+        bufferCount(100),
+        mergeMap(async (whereClauses) => {
+          const reader = this._queryExecutor.createQueryReader(
+            {
+              ctes: this._elementsClassNames.map(
+                (elementsClassName, index) => `
+                  CategoryElements${index}(id, modelId, categoryId) AS (
+                    SELECT ECInstanceId, Model.Id, Category.Id
+                    FROM ${elementsClassName}
+                    WHERE
+                      Parent.Id IS NULL
+                      AND (
+                        ${whereClauses.join(" OR ")}
+                      )
 
-            UNION ALL
+                    UNION ALL
 
-            SELECT c.ECInstanceId, p.modelId, p.categoryId
-            FROM ${elementsClassName} c
-            JOIN CategoryElements${index} p ON c.Parent.Id = p.id
-          )
-        `,
-        ),
-        ecsql: `
-          SELECT modelId, categoryId, COUNT(id) elementsCount
-          FROM (
-            ${this._elementsClassNames
-              .map(
-                (_, index) => `
-                SELECT * FROM CategoryElements${index}
+                    SELECT c.ECInstanceId, p.modelId, p.categoryId
+                    FROM ${elementsClassName} c
+                    JOIN CategoryElements${index} p ON c.Parent.Id = p.id
+                  )
+                `,
+              ),
+              ecsql: `
+                SELECT modelId, categoryId, COUNT(id) elementsCount
+                FROM (
+                  ${this._elementsClassNames
+                    .map(
+                      (_, index) => `
+                      SELECT * FROM CategoryElements${index}
+                    `,
+                    )
+                    .join(" UNION ALL ")}
+                )
+                GROUP BY modelId, categoryId
               `,
-              )
-              .join(" UNION ALL ")}
-          )
-          GROUP BY modelId, categoryId
-        `,
-      },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded" },
-    );
+            },
+            { rowFormat: "ECSqlPropertyNames", limit: "unbounded" },
+          );
 
-    const result = new Array<{ modelId: number; categoryId: number; elementsCount: number }>();
-    for await (const row of reader) {
-      result.push({ modelId: row.modelId, categoryId: row.categoryId, elementsCount: row.elementsCount });
-    }
-    return result;
+          const result = new Array<{ modelId: number; categoryId: number; elementsCount: number }>();
+          for await (const row of reader) {
+            result.push({ modelId: row.modelId, categoryId: row.categoryId, elementsCount: row.elementsCount });
+          }
+          return result;
+        }),
+        mergeAll(),
+      ),
+    );
   }
 
   public [Symbol.dispose]() {

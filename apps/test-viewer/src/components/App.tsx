@@ -50,7 +50,7 @@ function Main() {
 
 function Loader() {
   return (
-    // eslint-disable-next-line deprecation/deprecation
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     <FillCentered>
       <div className="signin-content">
         <ProgressLinear indeterminate={true} labels={["Signing in..."]} />

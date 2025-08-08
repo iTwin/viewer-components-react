@@ -24,15 +24,14 @@ test.describe("Categories tree", () => {
   test.beforeEach(async ({ page, baseURL }) => {
     treeWidget = await initTreeWidgetTest({ page, baseURL });
     await selectTree(treeWidget, "Categories");
-    await locateNode(treeWidget, "Equipment").getByRole("button", { name: "Determining visibility..." }).waitFor({ state: "detached" });
+    const node = locateNode(treeWidget, "Equipment");
+    await node.hover();
+    await node.getByRole("button", { name: "Hide" }).waitFor();
   });
 
   test("initial tree", async ({ page }) => {
     // wait for element to be visible in the tree
-    const node = locateNode(treeWidget, "Equipment");
-    await node.hover();
-    const visibilityAction = node.getByRole("button", { name: "Hide" });
-    await expect(visibilityAction).toBeVisible();
+    await locateNode(treeWidget, "Equipment").waitFor();
     await takeScreenshot(page, treeWidget);
   });
 

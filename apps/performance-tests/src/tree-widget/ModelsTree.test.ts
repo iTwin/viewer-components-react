@@ -81,6 +81,67 @@ describe("models tree", () => {
     provider: HierarchyProvider & Disposable;
     elementsModel: Id64String;
   }>({
+    testName: "validates categories visibility for imodel with 50k categories",
+    setup: async () => {
+      const { iModelConnection, iModel } = TestIModelConnection.openFile(Datasets.getIModelPath("50k categories"));
+      const imodelAccess = StatelessHierarchyProvider.createIModelAccess(iModel, "unbounded");
+      const visibilityTargets = await getVisibilityTargets(imodelAccess);
+      const testData = createTestDataForInitialDisplay({ visibilityTargets, visible: false });
+
+      const viewport = await createViewport({
+        iModelConnection,
+        testData,
+      });
+      setupInitialDisplayState({
+        viewport,
+        ...testData,
+      });
+      const idsCache = new ModelsTreeIdsCache(imodelAccess, defaultModelsTreeHierarchyConfiguration);
+      const handler = createModelsTreeVisibilityHandler({ idsCache, viewport, imodelAccess });
+      const provider = createIModelHierarchyProvider({
+        hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
+        imodelAccess,
+      });
+      await validateHierarchyVisibility({
+        ignoreChildren: (node) => !!node.extendedData?.isCategory,
+        provider,
+        handler,
+        viewport,
+        expectations: "all-hidden",
+      });
+      const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
+      return { iModel, imodelAccess, viewport, provider, handler, elementsModel, idsCache };
+    },
+    cleanup: async (props) => {
+      props.iModel.close();
+      props.viewport[Symbol.dispose]();
+      props.handler[Symbol.dispose]();
+      props.provider[Symbol.dispose]();
+      props.idsCache[Symbol.dispose]();
+    },
+    test: async ({ viewport, handler, provider, elementsModel }) => {
+      // Add one element to always draw set to trigger additional queries
+      viewport.setAlwaysDrawn(new Set([elementsModel]));
+      await handler.changeVisibility(createModelHierarchyNode(elementsModel), true);
+      await validateHierarchyVisibility({
+        ignoreChildren: (node) => !!node.extendedData?.isCategory,
+        provider,
+        handler,
+        viewport,
+        expectations: "all-visible",
+      });
+    },
+  });
+
+  run<{
+    iModel: SnapshotDb;
+    idsCache: ModelsTreeIdsCache;
+    imodelAccess: IModelAccess;
+    viewport: Viewport;
+    handler: HierarchyVisibilityHandler & Disposable;
+    provider: HierarchyProvider & Disposable;
+    elementsModel: Id64String;
+  }>({
     testName: "changing model visibility changes visibility for 50k elements",
     setup: async () => {
       const { iModelConnection, iModel } = TestIModelConnection.openFile(Datasets.getIModelPath("50k 3D elements"));

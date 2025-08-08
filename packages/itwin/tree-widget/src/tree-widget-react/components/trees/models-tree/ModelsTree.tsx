@@ -10,6 +10,7 @@ import { useModelsTree } from "./UseModelsTree.js";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { UseModelsTreeProps } from "./UseModelsTree.js";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
+
 /** @beta */
 export type ModelsTreeProps = Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
   Pick<VisibilityTreeRendererProps, "getInlineActions" | "getMenuActions" | "getDecorations"> &
@@ -36,6 +37,7 @@ export function ModelsTree({
   getInlineActions,
   getMenuActions,
   emptyTreeContent,
+  getSubTreePaths,
 }: ModelsTreeProps) {
   const { modelsTreeProps, rendererProps } = useModelsTree({
     activeView,
@@ -46,6 +48,7 @@ export function ModelsTree({
     onModelsFiltered,
     selectionPredicate,
     emptyTreeContent,
+    getSubTreePaths,
   });
 
   return (
