@@ -19,6 +19,7 @@ import {
 import type { GeometryStreamProps } from "@itwin/core-common";
 import type { BeButtonEvent, DecorateContext } from "@itwin/core-frontend";
 import { GraphicType, IModelApp } from "@itwin/core-frontend";
+import { FormatterUtils } from "../api/FormatterUtils.js";
 import {
   StyleSet,
   WellKnownGraphicStyleType,
@@ -408,7 +409,7 @@ export class AngleMeasurement extends Measurement {
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
     const angleSpec = IModelApp.quantityFormatter.getSpecsByName(this._angleKoQ)?.formatterSpec;
     const angle = this.angle ?? 0;
-    const fAngle = IModelApp.quantityFormatter.formatQuantity(angle, angleSpec);
+    const fAngle = await FormatterUtils.formatAngle(angle, angleSpec);
 
     let title = MeasureTools.localization.getLocalizedString(
       "MeasureTools:tools.MeasureAngle.measurement"
@@ -437,7 +438,7 @@ export class AngleMeasurement extends Measurement {
     if (this._center !== undefined && this.angle !== undefined) {
       const angleSpec = IModelApp.quantityFormatter.getSpecsByName(this._angleKoQ)?.formatterSpec;
       const angle = this.angle;
-      const fAngle = IModelApp.quantityFormatter.formatQuantity(
+      const fAngle = await FormatterUtils.formatAngle(
         angle,
         angleSpec
       );

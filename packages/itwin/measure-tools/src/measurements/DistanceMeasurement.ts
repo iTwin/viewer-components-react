@@ -59,8 +59,10 @@ export interface DistanceMeasurementProps extends MeasurementProps {
 export interface DistanceMeasurementFormattingProps {
   /** Defaults to "AecUnits.LENGTH" and "Units.M" */
   length?: MeasurementFormattingProps;
-  /** Defaults to "RoadRailUnits.Bearing" and "Units.RAD" */
+  /** Defaults to "RoadRailUnits.BEARING" and "Units.RAD" */
   bearing? : MeasurementFormattingProps;
+  /** Defaults to "AecUnits.LENGTH_COORDINATE" and "Units.M" */
+  coordinate?: MeasurementFormattingProps;
 }
 
 /** Serializer for a [[DistanceMeasurement]]. */
@@ -109,6 +111,8 @@ export class DistanceMeasurement extends Measurement {
   private _lengthPersistenceUnitName: string;
   private _bearingKoQ?: string;
   private _bearingPersistenceUnitName?: string;
+  private _coordinateKoQ: string;
+  private _coordinatePersistenceUnitName: string;
 
   private _isDynamic: boolean; // No serialize
   private _textMarker?: TextMarker; // No serialize
@@ -177,6 +181,22 @@ export class DistanceMeasurement extends Measurement {
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
+  public get coordinateKoQ(): string {
+    return this._coordinateKoQ;
+  }
+
+  public set coordinateKoQ(value: string) {
+    this._coordinateKoQ = value;
+  }
+
+  public get coordinatePersistenceUnitName(): string {
+    return this._coordinatePersistenceUnitName;
+  }
+
+  public set coordinatePersistenceUnitName(value: string) {
+    this._coordinatePersistenceUnitName = value;
+  }
+
   // eslint-disable-next-line @typescript-eslint/naming-convention
   private get isAxis(): boolean {
     return (
@@ -195,6 +215,8 @@ export class DistanceMeasurement extends Measurement {
     this._runRiseAxes = [];
     this._lengthKoQ = "AecUnits.LENGTH";
     this._lengthPersistenceUnitName = "Units.M";
+    this._coordinateKoQ = "AecUnits.LENGTH_COORDINATE";
+    this._coordinatePersistenceUnitName = "Units.M";
     if (props) this.readFromJSON(props);
 
     this.populateFormattingSpecsRegistry().then(() => this.createTextMarker().catch())
@@ -238,6 +260,14 @@ export class DistanceMeasurement extends Measurement {
       const lengthFormatProps = await IModelApp.formatsProvider.getFormat(this._lengthKoQ);
       if (lengthFormatProps) {
         await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._lengthKoQ, this._lengthPersistenceUnitName, lengthFormatProps);
+      }
+    }
+
+    const coordinateEntry = IModelApp.quantityFormatter.getSpecsByName(this._coordinateKoQ);
+    if (_force || !coordinateEntry || coordinateEntry.formatterSpec.persistenceUnit?.name !== this._coordinatePersistenceUnitName) {
+      const coordinateFormatProps = await IModelApp.formatsProvider.getFormat(this._coordinateKoQ);
+      if (coordinateFormatProps) {
+        await IModelApp.quantityFormatter.addFormattingSpecsToRegistry(this._coordinateKoQ, this._coordinatePersistenceUnitName, coordinateFormatProps);
       }
     }
   }
@@ -493,7 +523,7 @@ export class DistanceMeasurement extends Measurement {
     const lengthSpec = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ)?.formatterSpec;
 
     const distance = this._startPoint.distance(this._endPoint);
-    const fDistance = IModelApp.quantityFormatter.formatQuantity(
+    const fDistance = await FormatterUtils.formatLength(
       distance,
       lengthSpec
     );
@@ -540,19 +570,16 @@ export class DistanceMeasurement extends Measurement {
     const adjustedStart = this.adjustPointForGlobalOrigin(this._startPoint);
     const adjustedEnd = this.adjustPointForGlobalOrigin(this._endPoint);
     const lengthSpec = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ)?.formatterSpec;
+    const coordinateSpec = IModelApp.quantityFormatter.getSpecsByName(this._coordinateKoQ)?.formatterSpec;
 
-    const fDistance = IModelApp.quantityFormatter.formatQuantity(distance, lengthSpec);
-    const fStartCoords = FormatterUtils.formatCoordinatesImmediate(
-      adjustedStart, lengthSpec
-    );
-    const fEndCoords = FormatterUtils.formatCoordinatesImmediate(
-      adjustedEnd, lengthSpec
-    );
+    const fDistance = await FormatterUtils.formatLength(distance, lengthSpec);
+    const fStartCoords = FormatterUtils.formatCoordinatesImmediate(adjustedStart, coordinateSpec);
+    const fEndCoords = FormatterUtils.formatCoordinatesImmediate(adjustedEnd, coordinateSpec);
     const fSlope = FormatterUtils.formatSlope(slope, true);
-    const fRun = IModelApp.quantityFormatter.formatQuantity(run, lengthSpec);
-    const fDeltaX = IModelApp.quantityFormatter.formatQuantity(dx, lengthSpec);
-    const fDeltaY = IModelApp.quantityFormatter.formatQuantity(dy, lengthSpec);
-    const fRise = IModelApp.quantityFormatter.formatQuantity(rise, lengthSpec);
+    const fRun = await FormatterUtils.formatLength(run, lengthSpec);
+    const fDeltaX = await FormatterUtils.formatLength(dx, lengthSpec);
+    const fDeltaY = await FormatterUtils.formatLength(dy, lengthSpec);
+    const fRise = await FormatterUtils.formatLength(rise, lengthSpec);
 
     let title = MeasureTools.localization.getLocalizedString(
       "MeasureTools:Measurements.distanceMeasurement"
@@ -721,6 +748,8 @@ export class DistanceMeasurement extends Measurement {
     if (jsonDist.formatting?.length?.persistenceUnitName) this._lengthPersistenceUnitName = jsonDist.formatting.length.persistenceUnitName;
     if (jsonDist.formatting?.bearing?.koqName) this._bearingKoQ = jsonDist.formatting.bearing.koqName;
     if (jsonDist.formatting?.bearing?.persistenceUnitName) this._bearingPersistenceUnitName = jsonDist.formatting.bearing.persistenceUnitName;
+    if (jsonDist.formatting?.coordinate?.koqName) this._coordinateKoQ = jsonDist.formatting.coordinate.koqName;
+    if (jsonDist.formatting?.coordinate?.persistenceUnitName) this._coordinatePersistenceUnitName = jsonDist.formatting.coordinate.persistenceUnitName;
 
     this.buildRunRiseAxes();
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
@@ -745,6 +774,10 @@ export class DistanceMeasurement extends Measurement {
       bearing: {
         koqName: this._bearingKoQ,
         persistenceUnitName: this._bearingPersistenceUnitName,
+      },
+      coordinate: {
+        koqName: this._coordinateKoQ,
+        persistenceUnitName: this._coordinatePersistenceUnitName,
       },
     };
   }
