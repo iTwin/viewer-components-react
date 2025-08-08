@@ -1,8 +1,5 @@
 {
-  "require": [
-    "ignore-styles",
-    "./lib/setup.js"
-  ],
+  "require": ["ignore-styles", "./lib/setup.js"],
   "timeout": 300000,
   "check-leaks": true,
   "file": "./lib/main.js",

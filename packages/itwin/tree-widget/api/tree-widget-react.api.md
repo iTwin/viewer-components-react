@@ -20,6 +20,7 @@ import type { IModelConnection } from '@itwin/core-frontend';
 import type { InstanceKey } from '@itwin/presentation-shared';
 import { JSX as JSX_2 } from 'react/jsx-runtime';
 import type { Localization } from '@itwin/core-common';
+import { NamedExoticComponent } from 'react';
 import type { PresentationHierarchyNode } from '@itwin/presentation-hierarchies-react';
 import type { PropsWithChildren } from 'react';
 import type { ReactNode } from 'react';
@@ -319,11 +320,7 @@ export const ModelsTreeComponent: {
 };
 
 // @public (undocumented)
-<<<<<<< HEAD
-interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "selectionPredicate" | "hierarchyConfig" | "visibilityHandlerOverrides" | "getFilteredPaths" | "filter" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getDecorations"> {
-=======
-interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "selectionPredicate" | "hierarchyConfig" | "visibilityHandlerOverrides" | "getFilteredPaths" | "filter" | "emptyTreeContent" | "getActions" | "getDecorations" | "getSubTreePaths"> {
->>>>>>> tree-widget/next
+interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "selectionPredicate" | "hierarchyConfig" | "visibilityHandlerOverrides" | "getFilteredPaths" | "filter" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getDecorations" | "getSubTreePaths"> {
     headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
@@ -432,8 +429,6 @@ interface TreehHeaderProps {
 
 // @beta (undocumented)
 interface TreeItemVisibilityButtonProps {
-    getVisibilityButtonState: (node: PresentationHierarchyNode) => TreeItemVisibilityButtonState;
-    onVisibilityButtonClick: (node: PresentationHierarchyNode, state: TreeItemVisibilityButtonState["state"]) => void;
     reserveSpace?: true;
 }
 
@@ -620,6 +615,17 @@ interface UseModelsTreeResult {
 }
 
 // @beta
+export const VisibilityAction: NamedExoticComponent<TreeItemVisibilityButtonProps & {
+node: PresentationHierarchyNode;
+}>;
+
+// @beta (undocumented)
+interface VisibilityContext {
+    getVisibilityButtonState: (node: PresentationHierarchyNode) => TreeItemVisibilityButtonState;
+    onVisibilityButtonClick: (node: PresentationHierarchyNode, state: TreeItemVisibilityButtonState["state"]) => void;
+}
+
+// @beta
 export interface VisibilityStatus {
     isDisabled?: boolean;
     state: "visible" | "partial" | "hidden";
@@ -633,14 +639,14 @@ type VisibilityTreeProps = Omit<TreeProps, "treeRenderer" | "imodelAccess"> & {
     visibilityHandlerFactory: (props: {
         imodelAccess: ECClassHierarchyInspector;
     }) => HierarchyVisibilityHandler;
-    treeRenderer: (treeProps: FunctionProps<TreeProps["treeRenderer"]> & Pick<VisibilityTreeRendererProps, "getVisibilityButtonState" | "onVisibilityButtonClick">) => ReactNode;
+    treeRenderer: (treeProps: FunctionProps<TreeProps["treeRenderer"]> & Pick<VisibilityContext, "getVisibilityButtonState" | "onVisibilityButtonClick">) => ReactNode;
 };
 
 // @beta
-export function VisibilityTreeRenderer({ getVisibilityButtonState, onVisibilityButtonClick: onClick, getInlineActions, getMenuActions, onFilterClick, getHierarchyLevelDetails, ...props }: VisibilityTreeRendererProps): JSX_2.Element;
+export function VisibilityTreeRenderer({ getVisibilityButtonState, onVisibilityButtonClick: onClick, getInlineActions, onFilterClick, getHierarchyLevelDetails, ...props }: VisibilityTreeRendererProps): JSX_2.Element;
 
 // @beta (undocumented)
-type VisibilityTreeRendererProps = BaseTreeRendererProps & TreeItemVisibilityButtonProps;
+type VisibilityTreeRendererProps = BaseTreeRendererProps & VisibilityContext;
 
 // (No @packageDocumentation comment for this package)
 

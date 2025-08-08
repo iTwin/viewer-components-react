@@ -72,7 +72,7 @@ export const VisibilityAction = memo(function VisibilityAction({ node, reserveSp
   );
 });
 
-/** @internal */
+/** @beta */
 export interface VisibilityContext {
   /** Callback that should be invoked when checkbox is clicked. */
   onVisibilityButtonClick: (node: PresentationHierarchyNode, state: TreeItemVisibilityButtonState["state"]) => void;
