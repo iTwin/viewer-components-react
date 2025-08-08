@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./TreeNodeVisibilityButton.css";
-import { memo } from "react";
+import { createContext, memo, useContext } from "react";
 import visibilityHideSvg from "@stratakit/icons/visibility-hide.svg";
 import visibilityPartialSvg from "@stratakit/icons/visibility-partial.svg";
 import visibilityShowSvg from "@stratakit/icons/visibility-show.svg";
@@ -12,6 +12,7 @@ import { Tree } from "@stratakit/structures";
 import { TreeWidget } from "../../../../TreeWidget.js";
 import { createTooltip } from "../internal/Tooltip.js";
 
+import type { PropsWithChildren } from "react";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 /**
  * Data structure that describes tree node checkbox state.
@@ -25,10 +26,6 @@ export interface TreeItemVisibilityButtonState {
 
 /** @beta */
 export interface TreeItemVisibilityButtonProps {
-  /** Callback that should be invoked when checkbox is clicked. */
-  onVisibilityButtonClick: (node: PresentationHierarchyNode, state: TreeItemVisibilityButtonState["state"]) => void;
-  /** Callback that should be used to determine current checkbox state. */
-  getVisibilityButtonState: (node: PresentationHierarchyNode) => TreeItemVisibilityButtonState;
   /**
    * Indicates that space for this action button should be reserved, even when the action is not available.
    * For nodes that don't support visibility, `<VisibilityAction reserveSpace />` renders:
@@ -40,13 +37,16 @@ export interface TreeItemVisibilityButtonProps {
 }
 
 /** @beta */
-export const VisibilityAction = memo(function VisibilityAction({
-  getVisibilityButtonState,
-  onVisibilityButtonClick,
-  node,
-  reserveSpace,
-}: TreeItemVisibilityButtonProps & { node: PresentationHierarchyNode }) {
-  const state = getVisibilityButtonState(node);
+export const VisibilityAction = memo(function VisibilityAction({ node, reserveSpace }: TreeItemVisibilityButtonProps & { node: PresentationHierarchyNode }) {
+  const context = useVisibilityContext();
+  const state = context?.getVisibilityButtonState(node);
+
+  if (!context || !state || state.isDisabled) {
+    return reserveSpace ? (
+      <Tree.ItemAction label={TreeWidget.translate(`visibilityTooltips.status.disabled`)} visible={false} icon={visibilityShowSvg} />
+    ) : undefined;
+  }
+
   const getIcon = () => {
     switch (state.state) {
       case "visible":
@@ -58,16 +58,32 @@ export const VisibilityAction = memo(function VisibilityAction({
     }
   };
 
-  if (state.isDisabled) {
-    return reserveSpace ? <Tree.ItemAction label={TreeWidget.translate(`visibilityTooltips.status.disabled`)} visible={false} icon={getIcon()} /> : undefined;
-  }
-
   return (
     <Tree.ItemAction
       label={state.tooltip ?? createTooltip(state.state)}
-      onClick={() => onVisibilityButtonClick(node, state.state)}
+      onClick={() => context.onVisibilityButtonClick(node, state.state)}
       visible={state.state !== "visible" ? true : undefined}
       icon={getIcon()}
     />
   );
 });
+
+/** @internal */
+export interface VisibilityContext {
+  /** Callback that should be invoked when checkbox is clicked. */
+  onVisibilityButtonClick: (node: PresentationHierarchyNode, state: TreeItemVisibilityButtonState["state"]) => void;
+  /** Callback that should be used to determine current checkbox state. */
+  getVisibilityButtonState: (node: PresentationHierarchyNode) => TreeItemVisibilityButtonState;
+}
+
+const visibilityContext = createContext<VisibilityContext | undefined>(undefined);
+
+/** @internal */
+export const useVisibilityContext = () => {
+  return useContext(visibilityContext);
+};
+
+/** @alpha */
+export function VisibilityContextProvider({ onVisibilityButtonClick, getVisibilityButtonState, children }: PropsWithChildren<VisibilityContext>) {
+  return <visibilityContext.Provider value={{ onVisibilityButtonClick, getVisibilityButtonState }}>{children}</visibilityContext.Provider>;
+}
