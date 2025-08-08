@@ -14,7 +14,14 @@ import type { IModelContentTreeProps } from "./IModelContentTree.js";
 interface IModelContentTreeComponentProps
   extends Pick<
     IModelContentTreeProps,
-    "selectionStorage" | "hierarchyConfig" | "hierarchyLevelConfig" | "selectionMode" | "emptyTreeContent" | "getActions" | "getDecorations"
+    | "selectionStorage"
+    | "hierarchyConfig"
+    | "hierarchyLevelConfig"
+    | "selectionMode"
+    | "emptyTreeContent"
+    | "getInlineActions"
+    | "getMenuActions"
+    | "getDecorations"
   > {
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
@@ -34,7 +41,7 @@ export const IModelContentTreeComponent = ({ onFeatureUsed, onPerformanceMeasure
   return (
     <TelemetryContextProvider componentIdentifier={IModelContentTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
       <SelectableTree>
-        <IModelContentTree getActions={undefined} {...props} imodel={imodel} />
+        <IModelContentTree {...props} imodel={imodel} />
       </SelectableTree>
     </TelemetryContextProvider>
   );

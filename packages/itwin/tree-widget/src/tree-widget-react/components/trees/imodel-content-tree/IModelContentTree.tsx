@@ -26,7 +26,7 @@ import type { TreeProps } from "../common/components/Tree.js";
 
 /** @beta */
 export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
-  Pick<BaseTreeRendererProps, "getActions" | "getDecorations"> & {
+  Pick<BaseTreeRendererProps, "getInlineActions" | "getMenuActions" | "getDecorations"> & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
     };
@@ -34,7 +34,14 @@ export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "selectionStorag
   };
 
 /** @beta */
-export function IModelContentTree({ getActions, getDecorations, selectionMode, hierarchyConfig: hierarchyConfigProp, ...rest }: IModelContentTreeProps) {
+export function IModelContentTree({
+  getInlineActions,
+  getMenuActions,
+  getDecorations,
+  selectionMode,
+  hierarchyConfig: hierarchyConfigProp,
+  ...rest
+}: IModelContentTreeProps) {
   const getHierarchyDefinition = useCallback<TreeProps["getHierarchyDefinition"]>(
     ({ imodelAccess }) => {
       const hierarchyConfig = {
@@ -55,7 +62,12 @@ export function IModelContentTree({ getActions, getDecorations, selectionMode, h
       getHierarchyDefinition={getHierarchyDefinition}
       selectionMode={selectionMode ?? "extended"}
       treeRenderer={(treeProps) => (
-        <TreeRenderer {...treeProps} getActions={getActions} getDecorations={getDecorations ?? ((node) => <IModelContentTreeIcon node={node} />)} />
+        <TreeRenderer
+          {...treeProps}
+          getInlineActions={getInlineActions}
+          getMenuActions={getMenuActions}
+          getDecorations={getDecorations ?? ((node) => <IModelContentTreeIcon node={node} />)}
+        />
       )}
     />
   );

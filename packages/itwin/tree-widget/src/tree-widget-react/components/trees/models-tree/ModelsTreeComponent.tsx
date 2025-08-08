@@ -39,7 +39,8 @@ interface ModelsTreeComponentProps
     | "getFilteredPaths"
     | "filter"
     | "emptyTreeContent"
-    | "getActions"
+    | "getInlineActions"
+    | "getMenuActions"
     | "getDecorations"
     | "getSubTreePaths"
   > {

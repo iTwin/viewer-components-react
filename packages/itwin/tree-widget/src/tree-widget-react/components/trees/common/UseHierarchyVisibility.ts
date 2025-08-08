@@ -26,7 +26,7 @@ import type { Observable } from "rxjs";
 import type { MutableRefObject } from "react";
 import type { BeEvent } from "@itwin/core-bentley";
 import type { HierarchyNode, PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
-import type { TreeItemVisibilityButtonProps, TreeItemVisibilityButtonState } from "./components/TreeNodeVisibilityButton.js";
+import type { TreeItemVisibilityButtonState, VisibilityContext } from "./components/TreeNodeVisibilityButton.js";
 
 /**
  * Data structure that describes instance visibility status.
@@ -57,11 +57,9 @@ interface UseHierarchyVisibilityProps {
 }
 
 /** @internal */
-export function useHierarchyVisibility({
-  visibilityHandlerFactory,
-}: UseHierarchyVisibilityProps): TreeItemVisibilityButtonProps & { triggerRefresh: () => void } {
+export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarchyVisibilityProps): VisibilityContext & { triggerRefresh: () => void } {
   const visibilityStatusMap = useRef(new Map<string, { node: PresentationHierarchyNode; status: TreeItemVisibilityButtonState; needsRefresh: boolean }>());
-  const [state, setState] = useState<TreeItemVisibilityButtonProps & { triggerRefresh: () => void }>({
+  const [state, setState] = useState<VisibilityContext & { triggerRefresh: () => void }>({
     getVisibilityButtonState: () => ({ state: "visible", isDisabled: true }),
     onVisibilityButtonClick: () => {},
     triggerRefresh: () => {},
@@ -122,7 +120,7 @@ export function useHierarchyVisibility({
         },
       });
 
-    const changeVisibility: TreeItemVisibilityButtonProps["onVisibilityButtonClick"] = (node, visibilityState) => {
+    const changeVisibility: VisibilityContext["onVisibilityButtonClick"] = (node, visibilityState) => {
       onFeatureUsed({ featureId: "visibility-change", reportInteraction: true });
       // visible should become hidden, partial and hidden should become visible TODO: redo for clarity
       const on = visibilityState === "visible" ? false : true;
@@ -163,7 +161,7 @@ export function useHierarchyVisibility({
 function createStateGetter(
   map: MutableRefObject<Map<string, { node: PresentationHierarchyNode; status: TreeItemVisibilityButtonState; needsRefresh: boolean }>>,
   calculateVisibility: (node: PresentationHierarchyNode) => void,
-): TreeItemVisibilityButtonProps["getVisibilityButtonState"] {
+): VisibilityContext["getVisibilityButtonState"] {
   return (node) => {
     const entry = map.current.get(node.id);
     if (entry === undefined) {

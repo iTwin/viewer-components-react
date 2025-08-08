@@ -13,16 +13,15 @@ import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
  * Default renderer for rendering tree data.
  * @beta
  */
-export function TreeRenderer({ getActions, getHierarchyLevelDetails, onFilterClick, ...props }: BaseTreeRendererProps) {
-  const nodeActions = useCallback(
+export function TreeRenderer({ getInlineActions, getHierarchyLevelDetails, onFilterClick, ...props }: BaseTreeRendererProps) {
+  const nodeInlineActions = useCallback(
     (node: PresentationHierarchyNode) => {
-      return [
-        <FilterAction key={"Filter"} node={node} onFilter={onFilterClick} getHierarchyLevelDetails={getHierarchyLevelDetails} />,
-        ...(getActions ? getActions(node) : []),
-      ];
+      return getInlineActions
+        ? getInlineActions(node)
+        : [<FilterAction key={"Filter"} node={node} onFilter={onFilterClick} getHierarchyLevelDetails={getHierarchyLevelDetails} reserveSpace />];
     },
-    [onFilterClick, getHierarchyLevelDetails, getActions],
+    [getInlineActions, onFilterClick, getHierarchyLevelDetails],
   );
 
-  return <BaseTreeRenderer {...props} onFilterClick={onFilterClick} getHierarchyLevelDetails={getHierarchyLevelDetails} getActions={nodeActions} />;
+  return <BaseTreeRenderer {...props} onFilterClick={onFilterClick} getHierarchyLevelDetails={getHierarchyLevelDetails} getInlineActions={nodeInlineActions} />;
 }

@@ -29,6 +29,7 @@ alpha;function;useClassificationsTree
 public;function;useFocusedInstancesContext
 beta;function;useModelsTree
 public;function;useModelsTreeButtonProps
+beta;const;VisibilityAction
 beta;interface;VisibilityStatus
 beta;function;VisibilityTree
 beta;function;VisibilityTreeRenderer

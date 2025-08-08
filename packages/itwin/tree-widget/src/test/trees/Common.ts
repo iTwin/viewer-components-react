@@ -12,6 +12,8 @@ import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/present
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 
+import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import type { ECClassHierarchyInspector, ECSchemaProvider } from "@itwin/presentation-shared";
 import type { QueryBinder, QueryOptions } from "@itwin/core-common";
 import type { IModelConnection, Viewport, ViewState } from "@itwin/core-frontend";
 
@@ -100,7 +102,13 @@ export function createFakeSinonViewport(
   return result as Viewport;
 }
 
-export function createIModelAccess(imodel: IModelConnection) {
+type IModelAccess = ECSchemaProvider &
+  LimitingECSqlQueryExecutor &
+  ECClassHierarchyInspector & {
+    imodelKey: string;
+  };
+
+export function createIModelAccess(imodel: IModelConnection): IModelAccess {
   const schemas = new SchemaContext();
   schemas.addLocater(new ECSchemaRpcLocater(imodel.getRpcProps()));
   const schemaProvider = createECSchemaProvider(schemas);

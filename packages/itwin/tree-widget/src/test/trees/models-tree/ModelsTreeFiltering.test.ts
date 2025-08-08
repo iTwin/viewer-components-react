@@ -30,7 +30,7 @@ import {
 } from "../../IModelUtils.js";
 import { createIModelAccess } from "../Common.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
-import { createClassGroupingHierarchyNode, createModelsTreeProvider } from "./Utils.js";
+import { createClassGroupingHierarchyNode, createModelsTreeProvider, getNodeParentKeys } from "./Utils.js";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -1115,12 +1115,7 @@ describe("Models tree", () => {
               modelId: model.id,
               categoryId: category.id,
               elements: [testElement1.id, testElement2.id],
-              parentKeys: [adjustedModelKey(model), category, groupingNode, adjustedElementKey(rootElement)].map((key) => {
-                if ("key" in key) {
-                  return key.key;
-                }
-                return { type: "instances", instanceKeys: [key] };
-              }),
+              parentKeys: getNodeParentKeys([adjustedModelKey(model), category, groupingNode.key, adjustedElementKey(rootElement)]),
             });
             return { rootSubject, model, category, rootElement, testElement1, testElement2, pathUntilTargetElement, targetGroupingNode };
           },
@@ -1224,31 +1219,22 @@ describe("Models tree", () => {
               modelId: model.id,
               categoryId: category.id,
               elements: [rootElement.id],
-              parentKeys: [adjustedModelKey(model), category].map((key) => ({ type: "instances", instanceKeys: [key] })),
+              parentKeys: getNodeParentKeys([adjustedModelKey(model), category]),
             });
+
             const physicalElementGroupingNode = createClassGroupingHierarchyNode({
               className: physicalElement1.className,
               modelId: model.id,
               categoryId: category.id,
               elements: [physicalElement1.id, physicalElement2.id],
-              parentKeys: [adjustedModelKey(model), category, groupingNode, adjustedElementKey(rootElement)].map((key) => {
-                if ("key" in key) {
-                  return key.key;
-                }
-                return { type: "instances", instanceKeys: [key] };
-              }),
+              parentKeys: getNodeParentKeys([adjustedModelKey(model), category, groupingNode.key, adjustedElementKey(rootElement)]),
             });
             const testElementGroupingNode = createClassGroupingHierarchyNode({
               className: testElement1.className,
               modelId: model.id,
               categoryId: category.id,
               elements: [testElement1.id, testElement2.id],
-              parentKeys: [adjustedModelKey(model), category, groupingNode, adjustedElementKey(rootElement)].map((key) => {
-                if ("key" in key) {
-                  return key.key;
-                }
-                return { type: "instances", instanceKeys: [key] };
-              }),
+              parentKeys: getNodeParentKeys([adjustedModelKey(model), category, groupingNode.key, adjustedElementKey(rootElement)]),
             });
             return {
               rootSubject,
@@ -1357,31 +1343,27 @@ describe("Models tree", () => {
               modelId: model.id,
               categoryId: category.id,
               elements: [parentElement.id],
-              parentKeys: pathUntilParentElement.map((key) => ({ type: "instances", instanceKeys: [key] })),
+              parentKeys: getNodeParentKeys(pathUntilParentElement),
             });
             const middleElementGroupingNode = createClassGroupingHierarchyNode({
               className: middleElement.className,
               modelId: model.id,
               categoryId: category.id,
               elements: [middleElement.id],
-              parentKeys: [...pathUntilParentElement, parentElementGroupingNode, parentElement].map((key) => {
-                if ("key" in key) {
-                  return key.key;
-                }
-                return { type: "instances", instanceKeys: [key] };
-              }),
+              parentKeys: getNodeParentKeys([...pathUntilParentElement, parentElementGroupingNode.key, parentElement]),
             });
             const childElementGroupingNode = createClassGroupingHierarchyNode({
               className: childElement.className,
               modelId: model.id,
               categoryId: category.id,
               elements: [childElement.id],
-              parentKeys: [...pathUntilParentElement, parentElementGroupingNode, parentElement, middleElementGroupingNode, middleElement].map((key) => {
-                if ("key" in key) {
-                  return key.key;
-                }
-                return { type: "instances", instanceKeys: [key] };
-              }),
+              parentKeys: getNodeParentKeys([
+                ...pathUntilParentElement,
+                parentElementGroupingNode.key,
+                parentElement,
+                middleElementGroupingNode.key,
+                middleElement,
+              ]),
             });
             return {
               rootSubject,
