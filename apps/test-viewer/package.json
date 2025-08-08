@@ -37,7 +37,6 @@
     "@itwin/presentation-common": "^5.1.0",
     "@itwin/presentation-components": "^5.12.4",
     "@itwin/presentation-frontend": "^5.1.0",
-    "@itwin/presentation-testing": "^5.4.5",
     "@itwin/presentation-hierarchies": "^1.7.1",
     "@itwin/presentation-hierarchies-react": "^1.8.1",
     "@itwin/presentation-shared": "^1.2.2",

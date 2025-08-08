@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Thu, 07 Aug 2025 12:12:57 GMT and should not be manually modified. -->
+<!-- This log was last generated on Thu, 07 Aug 2025 18:43:06 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.13.2
+
+Thu, 07 Aug 2025 18:43:06 GMT
+
+### Patches
+
+- Models tree: Stop unnecessarily executing an expensive model elements' count query, whose results we weren't even using.
 
 ## 3.13.1
 
