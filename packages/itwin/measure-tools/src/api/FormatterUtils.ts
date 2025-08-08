@@ -173,6 +173,26 @@ export namespace FormatterUtils {
     return IModelApp.quantityFormatter.formatQuantity(length, lengthSpec);
   }
 
+  export async function formatAngle(angle: number, angleSpec?: FormatterSpec): Promise<string> {
+    if (!angleSpec) {
+      angleSpec =
+        await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
+          QuantityType.Angle
+        );
+    }
+    return IModelApp.quantityFormatter.formatQuantity(angle, angleSpec);
+  }
+
+  export async function formatArea(area: number, areaSpec?: FormatterSpec): Promise<string> {
+    if (!areaSpec) {
+      areaSpec =
+        await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
+          QuantityType.Area
+        );
+    }
+    return IModelApp.quantityFormatter.formatQuantity(area, areaSpec);
+  }
+
   /**
    * @returns The bearing in radians, where 0 is North and π/2 is East.
    */

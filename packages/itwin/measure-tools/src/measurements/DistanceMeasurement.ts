@@ -523,7 +523,7 @@ export class DistanceMeasurement extends Measurement {
     const lengthSpec = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ)?.formatterSpec;
 
     const distance = this._startPoint.distance(this._endPoint);
-    const fDistance = IModelApp.quantityFormatter.formatQuantity(
+    const fDistance = await FormatterUtils.formatLength(
       distance,
       lengthSpec
     );
@@ -572,14 +572,14 @@ export class DistanceMeasurement extends Measurement {
     const lengthSpec = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ)?.formatterSpec;
     const coordinateSpec = IModelApp.quantityFormatter.getSpecsByName(this._coordinateKoQ)?.formatterSpec;
 
-    const fDistance = IModelApp.quantityFormatter.formatQuantity(distance, lengthSpec);
+    const fDistance = await FormatterUtils.formatLength(distance, lengthSpec);
     const fStartCoords = FormatterUtils.formatCoordinatesImmediate(adjustedStart, coordinateSpec);
     const fEndCoords = FormatterUtils.formatCoordinatesImmediate(adjustedEnd, coordinateSpec);
     const fSlope = FormatterUtils.formatSlope(slope, true);
-    const fRun = IModelApp.quantityFormatter.formatQuantity(run, lengthSpec);
-    const fDeltaX = IModelApp.quantityFormatter.formatQuantity(dx, lengthSpec);
-    const fDeltaY = IModelApp.quantityFormatter.formatQuantity(dy, lengthSpec);
-    const fRise = IModelApp.quantityFormatter.formatQuantity(rise, lengthSpec);
+    const fRun = await FormatterUtils.formatLength(run, lengthSpec);
+    const fDeltaX = await FormatterUtils.formatLength(dx, lengthSpec);
+    const fDeltaY = await FormatterUtils.formatLength(dy, lengthSpec);
+    const fRise = await FormatterUtils.formatLength(rise, lengthSpec);
 
     let title = MeasureTools.localization.getLocalizedString(
       "MeasureTools:Measurements.distanceMeasurement"

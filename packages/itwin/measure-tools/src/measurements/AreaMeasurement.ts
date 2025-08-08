@@ -20,6 +20,7 @@ import type {
   RenderGraphicOwner,
 } from "@itwin/core-frontend";
 import { GraphicType, IModelApp } from "@itwin/core-frontend";
+import { FormatterUtils } from "../api/FormatterUtils.js";
 import { StyleSet, WellKnownGraphicStyleType } from "../api/GraphicStyle.js";
 import type {
   MeasurementEqualityOptions,
@@ -473,15 +474,15 @@ export class AreaMeasurement extends Measurement {
     const lengthSpec = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ)?.formatterSpec;
     const areaSpec = IModelApp.quantityFormatter.getSpecsByName(this._areaKoQ)?.formatterSpec;
 
-    const fPerimeter = IModelApp.quantityFormatter.formatQuantity(
+    const fPerimeter = await FormatterUtils.formatLength(
       this.worldScale * this._polygon.perimeter,
       lengthSpec
     );
-    const fArea = IModelApp.quantityFormatter.formatQuantity(
+    const fArea = await FormatterUtils.formatArea(
       this.worldScale * this.worldScale * this._polygon.area,
       areaSpec
     );
-    const fAreaXY = IModelApp.quantityFormatter.formatQuantity(
+    const fAreaXY = await FormatterUtils.formatArea(
       this._polygon.areaXY,
       areaSpec
     );
