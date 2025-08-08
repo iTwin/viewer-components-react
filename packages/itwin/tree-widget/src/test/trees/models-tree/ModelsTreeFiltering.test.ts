@@ -32,7 +32,6 @@ import { createIModelAccess } from "../Common.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
 import { createClassGroupingHierarchyNode, createModelsTreeProvider, getGroupingNodeParentKeys } from "./Utils.js";
 
-import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";

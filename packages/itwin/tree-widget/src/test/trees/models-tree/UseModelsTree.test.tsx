@@ -120,9 +120,10 @@ describe("useModelsTree", () => {
       it("getFilteredPaths returns correct result when getSubTreePaths is defined", async () => {
         const { result: renderHookResult } = renderHook(useModelsTree, { initialProps: { ...initialProps, getSubTreePaths } });
         const { getFilteredPaths } = renderHookResult.current.modelsTreeProps;
+        const abortSignal = new AbortController().signal;
         await waitFor(async () => {
           expect(getFilteredPaths).to.not.be.undefined;
-          const result = (await getFilteredPaths!({ imodelAccess /* abortSignal */ }))?.sort((lhs, rhs) => {
+          const result = (await getFilteredPaths!({ imodelAccess, abortSignal }))?.sort((lhs, rhs) => {
             if (HierarchyFilteringPath.normalize(lhs).path.length > HierarchyFilteringPath.normalize(rhs).path.length) {
               return -1;
             }
@@ -148,9 +149,10 @@ describe("useModelsTree", () => {
       it("getFilteredPaths returns correct result when getSubTreePaths and filter is defined", async () => {
         const { result: renderHookResult } = renderHook(useModelsTree, { initialProps: { ...initialProps, getSubTreePaths, filter: "element2" } });
         const { getFilteredPaths } = renderHookResult.current.modelsTreeProps;
+        const abortSignal = new AbortController().signal;
         await waitFor(async () => {
           expect(getFilteredPaths).to.not.be.undefined;
-          const result = await getFilteredPaths!({ imodelAccess /* abortSignal */ });
+          const result = await getFilteredPaths!({ imodelAccess, abortSignal });
           const expectedResult: HierarchyFilteringPath[] = [
             {
               path: [
@@ -184,9 +186,11 @@ describe("useModelsTree", () => {
           initialProps: { ...initialProps, getSubTreePaths, getFilteredPaths: getFilteredPathsForProps },
         });
         const { getFilteredPaths } = renderHookResult.current.modelsTreeProps;
+        const abortSignal = new AbortController().signal;
+
         await waitFor(async () => {
           expect(getFilteredPaths).to.not.be.undefined;
-          const result = await getFilteredPaths!({ imodelAccess /* abortSignal */ });
+          const result = await getFilteredPaths!({ imodelAccess, abortSignal });
           const expectedResult: HierarchyFilteringPath[] = [
             {
               path: [
@@ -237,10 +241,11 @@ describe("useModelsTree", () => {
         });
 
         const { getFilteredPaths } = hooksResult.current.modelsTree.modelsTreeProps;
+        const abortSignal = new AbortController().signal;
 
         await waitFor(async () => {
           expect(getFilteredPaths).to.not.be.undefined;
-          const result = await getFilteredPaths!({ imodelAccess /* abortSignal */ });
+          const result = await getFilteredPaths!({ imodelAccess, abortSignal });
           const expectedResult: HierarchyFilteringPath[] = [
             {
               path: [
