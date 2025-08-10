@@ -3,7 +3,24 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, defer, firstValueFrom, from, lastValueFrom, map, merge, mergeMap, of, reduce, toArray } from "rxjs";
+import {
+  bufferCount,
+  defaultIfEmpty,
+  defer,
+  EMPTY,
+  firstValueFrom,
+  from,
+  fromEvent,
+  identity,
+  lastValueFrom,
+  map,
+  merge,
+  mergeMap,
+  of,
+  reduce,
+  takeUntil,
+  toArray,
+} from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition, ProcessedHierarchyNode } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
@@ -58,6 +75,7 @@ interface CategoriesTreeInstanceKeyPathsFromInstanceLabelProps {
   limit?: number | "unbounded";
   idsCache: CategoriesTreeIdsCache;
   hierarchyConfig: CategoriesTreeHierarchyConfiguration;
+  abortSignal?: AbortSignal;
 }
 
 /**
@@ -608,24 +626,27 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
 async function createInstanceKeyPathsFromInstanceLabel(
   props: CategoriesTreeInstanceKeyPathsFromInstanceLabelProps & { labelsFactory: IInstanceLabelSelectClauseFactory },
 ): Promise<HierarchyFilteringPath[]> {
-  const { definitionContainers, categories } = await props.idsCache.getAllDefinitionContainersAndCategories();
-  if (categories.length === 0) {
-    return [];
-  }
-  const { categoryClass, elementClass } = getClassesByView(props.viewType);
-  const adjustedLabel = props.label.replace(/[%_\\]/g, "\\$&");
+  const { idsCache, abortSignal, label, viewType, labelsFactory, limit, hierarchyConfig, imodelAccess } = props;
+  const { categoryClass, elementClass } = getClassesByView(viewType);
+
+  const adjustedLabel = label.replace(/[%_\\]/g, "\\$&");
 
   const CATEGORIES_WITH_LABELS_CTE = "CategoriesWithLabels";
   const ELEMENTS_WITH_LABELS_CTE = "ElementsWithLabels";
   const SUBCATEGORIES_WITH_LABELS_CTE = "SubCategoriesWithLabels";
   const DEFINITION_CONTAINERS_WITH_LABELS_CTE = "DefinitionContainersWithLabels";
-  const [categoryLabelSelectClause, subCategoryLabelSelectClause, elementLabelSelectClause, definitionContainerLabelSelectClause] = await Promise.all(
-    [categoryClass, CLASS_NAME_SubCategory, elementClass, ...(definitionContainers.length > 0 ? [CLASS_NAME_DefinitionContainer] : [])].map(async (className) =>
-      props.labelsFactory.createSelectClause({ classAlias: "this", className }),
-    ),
-  );
+
   return lastValueFrom(
-    defer(() => {
+    defer(async () => {
+      const { definitionContainers, categories } = await idsCache.getAllDefinitionContainersAndCategories();
+      if (categories.length === 0) {
+        return undefined;
+      }
+      const [categoryLabelSelectClause, subCategoryLabelSelectClause, elementLabelSelectClause, definitionContainerLabelSelectClause] = await Promise.all(
+        [categoryClass, CLASS_NAME_SubCategory, elementClass, ...(definitionContainers.length > 0 ? [CLASS_NAME_DefinitionContainer] : [])].map(
+          async (className) => labelsFactory.createSelectClause({ classAlias: "this", className }),
+        ),
+      );
       const ctes = [
         `${CATEGORIES_WITH_LABELS_CTE}(ClassName, ECInstanceId, ChildCount, DisplayLabel) AS (
             SELECT
@@ -640,7 +661,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
               this.ECInstanceId IN (${categories.join(", ")})
               GROUP BY this.ECInstanceId
           )`,
-        ...(props.hierarchyConfig.showElements
+        ...(hierarchyConfig.showElements
           ? [
               `${ELEMENTS_WITH_LABELS_CTE}(ClassName, ECInstanceId, ParentId, DisplayLabel) AS (
                   SELECT
@@ -657,7 +678,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
                 )`,
             ]
           : []),
-        ...(props.hierarchyConfig.hideSubCategories
+        ...(hierarchyConfig.hideSubCategories
           ? []
           : [
               `${SUBCATEGORIES_WITH_LABELS_CTE}(ClassName, ECInstanceId, ParentId, DisplayLabel) AS (
@@ -698,7 +719,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
           WHERE
             c.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
           ${
-            props.hierarchyConfig.showElements
+            hierarchyConfig.showElements
               ? `
                 UNION ALL
                 SELECT
@@ -712,7 +733,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
               : ""
           }
           ${
-            props.hierarchyConfig.hideSubCategories
+            hierarchyConfig.hideSubCategories
               ? ""
               : `
                 UNION ALL
@@ -742,19 +763,22 @@ async function createInstanceKeyPathsFromInstanceLabel(
               : ""
           }
         )
-        ${props.limit === undefined ? `LIMIT ${MAX_FILTERING_INSTANCE_KEY_COUNT + 1}` : props.limit !== "unbounded" ? `LIMIT ${props.limit}` : ""}
+        ${limit === undefined ? `LIMIT ${MAX_FILTERING_INSTANCE_KEY_COUNT + 1}` : limit !== "unbounded" ? `LIMIT ${limit}` : ""}
       `;
       const bindings = [
         { type: "string" as const, value: adjustedLabel },
-        ...(props.hierarchyConfig.showElements ? [{ type: "string" as const, value: adjustedLabel }] : []),
-        ...(props.hierarchyConfig.hideSubCategories ? [] : [{ type: "string" as const, value: adjustedLabel }]),
+        ...(hierarchyConfig.showElements ? [{ type: "string" as const, value: adjustedLabel }] : []),
+        ...(hierarchyConfig.hideSubCategories ? [] : [{ type: "string" as const, value: adjustedLabel }]),
         ...(definitionContainers.length > 0 ? [{ type: "string" as const, value: adjustedLabel }] : []),
       ];
-      return props.imodelAccess.createQueryReader(
-        { ctes, ecsql, bindings },
-        { restartToken: "tree-widget/categories-tree/filter-by-label-query", limit: props.limit },
-      );
+      return { ctes, ecsql, bindings };
     }).pipe(
+      mergeMap((queryProps) => {
+        if (!queryProps) {
+          return EMPTY;
+        }
+        return imodelAccess.createQueryReader(queryProps, { restartToken: "tree-widget/categories-tree/filter-by-label-query", limit });
+      }),
       map((row): InstanceKey => {
         let className: string;
         switch (row.ClassName) {
@@ -779,6 +803,8 @@ async function createInstanceKeyPathsFromInstanceLabel(
       toArray(),
       mergeMap((targetItems) => createInstanceKeyPathsFromTargetItems({ ...props, targetItems })),
       toArray(),
+      abortSignal ? takeUntil(fromEvent(abortSignal, "abort")) : identity,
+      defaultIfEmpty([]),
     ),
   );
 }

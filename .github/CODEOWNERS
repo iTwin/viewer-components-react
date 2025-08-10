@@ -12,6 +12,7 @@
 
 /apps/test-viewer  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
 /apps/learning-snippets  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
+/apps/performance-tests  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
 
 /packages/itwin/property-grid  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
 /change/@itwin-property-grid-react*  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation

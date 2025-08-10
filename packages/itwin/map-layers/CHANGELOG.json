@@ -2,6 +2,21 @@
   "name": "@itwin/map-layers",
   "entries": [
     {
+      "date": "Mon, 07 Jul 2025 19:55:02 GMT",
+      "version": "6.0.1",
+      "tag": "@itwin/map-layers_v6.0.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "63019a0785bd80f943f38a8c758b651103561efb",
+            "comment": "Provide a method to generate default Google maps base layers (aerial, hybrid, streets).  Also configured test viewer to show Google Maps as the default imagery provider."
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 20 Jun 2025 17:05:06 GMT",
       "version": "6.0.0",
       "tag": "@itwin/map-layers_v6.0.0",

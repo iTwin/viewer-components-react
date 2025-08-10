@@ -1,8 +1,69 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Fri, 20 Jun 2025 17:05:06 GMT and should not be manually modified.
+<!-- This log was last generated on Thu, 07 Aug 2025 12:12:57 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.13.1
+
+Thu, 07 Aug 2025 12:12:57 GMT
+
+### Patches
+
+- Split large queries into smaller chunks to make them execute quicker. ([#1396](https://github.com/iTwin/viewer-components-react/pull/1396))
+
+## 3.13.0
+
+Wed, 06 Aug 2025 13:46:52 GMT
+
+### Minor changes
+
+- Added `getActions` callback to `TreeRenderer` components. It allows to supply custom actions for tree nodes. ([#1395](https://github.com/iTwin/viewer-components-react/pull/1395))
+
+## 3.12.1
+
+Wed, 06 Aug 2025 10:14:27 GMT
+
+### Patches
+
+- Models tree: Fixed not all required nodes being auto-expanded when using `getSubTreePaths` together with filtering. ([#1391](https://github.com/iTwin/viewer-components-react/pull/1391))
+
+## 3.12.0
+
+Wed, 30 Jul 2025 13:10:01 GMT
+
+### Minor changes
+
+- Added `getSubTreePaths` option to `UseModelsTreeProps` for restricting the visible hierarchy to a sub-tree of nodes based on instance keys. Unlike `getFilteredPaths`, which controls filtering logic, `getSubTreePaths` limits the scope of the hierarchy, allowing filtering within the specified sub-tree. ([#1375](https://github.com/iTwin/viewer-components-react/pull/1375))
+
+## 3.11.0
+
+Thu, 24 Jul 2025 16:07:32 GMT
+
+### Minor changes
+
+- Updated @itwin/presentation-hierarchies to v1.6.1 and @itwin/presentation-hierarchies-react to 1.7.1 ([#1379](https://github.com/iTwin/viewer-components-react/pull/1379))
+
+### Patches
+
+- Fix categories tree incorectly inverting categories visibility. ([#1381](https://github.com/iTwin/viewer-components-react/pull/1381))
+
+## 3.10.3
+
+Mon, 14 Jul 2025 12:38:56 GMT
+
+### Patches
+
+- Added missing peer dependencies. ([#1376](https://github.com/iTwin/viewer-components-react/pull/1376))
+
+## 3.10.2
+
+Mon, 07 Jul 2025 19:55:02 GMT
+
+### Patches
+
+- Bumped `@itwin/presentation-hierarchies-react` version. ([#1368](https://github.com/iTwin/viewer-components-react/pull/1368))
+- Fix category count query throwing error on large iModels ([#1364](https://github.com/iTwin/viewer-components-react/pull/1364))
 
 ## 3.10.1
 

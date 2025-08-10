@@ -80,6 +80,20 @@ export function UnknownInstanceFocusError({ base }: FilterEmptyTreeProps) {
   );
 }
 
+interface SubTreeErrorProps {
+  base: string;
+  error: string;
+}
+
+/** @internal */
+export function SubTreeError({ base, error }: SubTreeErrorProps) {
+  return (
+    <div className={"tw-filter-empty-tree-container"}>
+      <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.subTree.${error}`)}</Text>
+    </div>
+  );
+}
+
 interface EmptyTreeContentProps {
   icon?: string;
 }

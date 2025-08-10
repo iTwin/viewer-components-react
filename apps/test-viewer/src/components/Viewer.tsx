@@ -3,9 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { IModelApp, IModelConnection } from "@itwin/core-frontend";
+import { SchemaFormatsProvider, SchemaKey, SchemaMatchType, SchemaUnitProvider } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { FrontendDevTools } from "@itwin/frontend-devtools";
 import { ArcGisAccessClient } from "@itwin/map-layers-auth";
@@ -15,26 +16,8 @@ import { getUiProvidersConfig } from "../UiProvidersConfig";
 import { ApiKeys } from "./ApiKeys";
 import { useAuthorizationContext } from "./Authorization";
 import { statusBarActionsProvider, ViewerOptionsProvider } from "./ViewerOptions";
-import { SchemaFormatsProvider, SchemaKey, SchemaMatchType, SchemaUnitProvider } from "@itwin/ecschema-metadata";
 
-const uiConfig = getUiProvidersConfig();
-
-async function onIModelAppInit() {
-  await uiConfig.initialize();
-  await FrontendDevTools.initialize();
-  // ArcGIS Oauth setup
-  const accessClient = new ArcGisAccessClient();
-  accessClient.initialize({
-    redirectUri: "http://localhost:3000/esri-oauth2-callback",
-    clientIds: {
-      arcgisOnlineClientId: import.meta.env.IMJS_AUTH_ARCGIS_CLIENT_ID,
-      enterpriseClientIds: [{ serviceBaseUrl: "", clientId: "Bentley_TestApp" }],
-    },
-  });
-
-  IModelApp.mapLayerFormatRegistry.setAccessClient("ArcGIS", accessClient);
-  IModelApp.mapLayerFormatRegistry.setAccessClient("ArcGISFeature", accessClient);
-}
+import type { UiProvidersConfig } from "../UiProvidersConfig";
 
 export function Viewer() {
   return (
@@ -44,11 +27,29 @@ export function Viewer() {
   );
 }
 
-const uiProviders = [...uiConfig.uiItemsProviders, statusBarActionsProvider];
-
 function ViewerWithOptions() {
   const { client: authClient } = useAuthorizationContext();
   const { iTwinId, iModelId } = useIModelInfo();
+  const [uiConfig, setUiConfig] = useState<UiProvidersConfig | undefined>();
+
+  const onIModelAppInit = useCallback(async () => {
+    const providersConfig = getUiProvidersConfig();
+    await providersConfig.initialize();
+    await FrontendDevTools.initialize();
+    // ArcGIS Oauth setup
+    const accessClient = new ArcGisAccessClient();
+    accessClient.initialize({
+      redirectUri: "http://localhost:3000/esri-oauth2-callback",
+      clientIds: {
+        arcgisOnlineClientId: import.meta.env.IMJS_AUTH_ARCGIS_CLIENT_ID,
+        enterpriseClientIds: [{ serviceBaseUrl: "", clientId: "Bentley_TestApp" }],
+      },
+    });
+
+    IModelApp.mapLayerFormatRegistry.setAccessClient("ArcGIS", accessClient);
+    IModelApp.mapLayerFormatRegistry.setAccessClient("ArcGISFeature", accessClient);
+    setUiConfig(providersConfig);
+  }, []);
 
   if (!iTwinId || !iModelId) {
     return null;
@@ -61,7 +62,8 @@ function ViewerWithOptions() {
       authClient={authClient}
       enablePerformanceMonitors={false}
       onIModelAppInit={onIModelAppInit}
-      uiProviders={uiProviders}
+      // Only set providers once IModelAppInit has fired, otherwise map-layers objects will fail to initialize
+      uiProviders={uiConfig ? [...uiConfig.getUiItemsProviders(), statusBarActionsProvider] : []}
       defaultUiConfig={{
         hideNavigationAid: false,
         hideStatusBar: false,
@@ -113,11 +115,10 @@ function onIModelConnected(imodel: IModelConnection) {
         void IModelApp.quantityFormatter.resetToUseInternalUnitsProvider();
         console.log("Unregistered SchemaFormatsProvider, SchemaUnitProvider");
       });
-
     } catch (err) {
       console.error("Error while setting up formats provider:", err);
     }
-  }
+  };
 
   // Only load a schema formats provider if the iModel has the AecUnits schema
   void setupFormatsProvider();

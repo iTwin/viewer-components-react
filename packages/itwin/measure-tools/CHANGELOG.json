@@ -2,6 +2,36 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Thu, 24 Jul 2025 16:07:32 GMT",
+      "version": "0.28.2",
+      "tag": "@itwin/measure-tools-react_v0.28.2",
+      "comments": {
+        "patch": [
+          {
+            "author": "wil.maier@bentley.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "68b15b98808fcfd488e8176c77d5a2f01493fb9b",
+            "comment": "Fix measure context toolbar to not move with cursor"
+          }
+        ]
+      }
+    },
+    {
+      "date": "Mon, 07 Jul 2025 19:55:02 GMT",
+      "version": "0.28.1",
+      "tag": "@itwin/measure-tools-react_v0.28.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "358152a41bbb49c65445c5a4c9dfbd639edad74e",
+            "comment": "Removed unused `redux` peer dependency."
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 24 Jun 2025 15:02:05 GMT",
       "version": "0.28.0",
       "tag": "@itwin/measure-tools-react_v0.28.0",

@@ -3,11 +3,13 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Viewport } from "@itwin/core-frontend";
+import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
 import { showAllCategories } from "./CategoriesVisibilityUtils.js";
 import { toggleAllCategories } from "./internal/VisibilityUtils.js";
 
+import type { Viewport } from "@itwin/core-frontend";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { HierarchyFilteringPathOptions, HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
 
 /**
  * This is a logging namespace for public log messages that may be interesting to consumers.
@@ -88,4 +90,60 @@ export async function toggleModels(models: string[], enable: boolean, viewport: 
  */
 export function areAllModelsVisible(models: string[], viewport: Viewport) {
   return models.length !== 0 ? models.every((id) => viewport.viewsModel(id)) : false;
+}
+
+/** @internal */
+export function joinHierarchyFilteringPaths(subTreePaths: HierarchyNodeIdentifiersPath[], filteringPaths: HierarchyFilteringPath[]): HierarchyFilteringPath[] {
+  const normalizedFilteringPaths = filteringPaths.map((filteringPath) => HierarchyFilteringPath.normalize(filteringPath));
+
+  const result = new Array<HierarchyFilteringPath>();
+  const filteringPathsToIncludeIndexes = new Set<number>();
+
+  subTreePaths.forEach((subTreePath) => {
+    let options: HierarchyFilteringPathOptions | undefined;
+    let addSubTreePathToResult = false;
+
+    for (let i = 0; i < normalizedFilteringPaths.length; ++i) {
+      const normalizedFilteringPath = normalizedFilteringPaths[i];
+      if (normalizedFilteringPath.path.length === 0) {
+        continue;
+      }
+
+      for (let j = 0; j < subTreePath.length; ++j) {
+        const identifier = subTreePath[j];
+        if (normalizedFilteringPath.path.length <= j || !HierarchyNodeIdentifier.equal(normalizedFilteringPath.path[j], identifier)) {
+          break;
+        }
+
+        // filtering paths that are shorter or equal than subTree paths length don't need to be added to the result
+        if (normalizedFilteringPath.path.length === j + 1) {
+          addSubTreePathToResult = true;
+          // If filtering path has autoExpand set to true, it means that we should expand only to the targeted filtered node
+          // This is done by setting depthInPath
+          options =
+            normalizedFilteringPath.options?.autoExpand !== true
+              ? HierarchyFilteringPath.mergeOptions(options, normalizedFilteringPath.options)
+              : { autoExpand: { depthInPath: normalizedFilteringPath.path.length } };
+          break;
+        }
+
+        // filtering paths that are longer than subTree paths need to be added to the result
+        if (subTreePath.length === j + 1) {
+          addSubTreePathToResult = true;
+          filteringPathsToIncludeIndexes.add(i);
+        }
+      }
+    }
+
+    if (addSubTreePathToResult) {
+      result.push({
+        path: subTreePath,
+        options,
+      });
+    }
+  });
+  for (const index of filteringPathsToIncludeIndexes) {
+    result.push(normalizedFilteringPaths[index]);
+  }
+  return result;
 }

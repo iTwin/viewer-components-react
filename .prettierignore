@@ -3,20 +3,38 @@ change
 lib
 dist
 
-# Ignore auto-generated files
-CHANGELOG.md
-CHANGELOG.json
-
 # Ignore vscode settings
 .vscode
-
-# Ignore pnpm files
-pnpm-lock.yaml
-pnpm-workspace.yaml
 
 # Ignore configs and pipelines
 .pipelines
 .github
 
+# Ignore archived packages
+packages/archive
+
+# Ignore everything under packages/itwin/
+packages/itwin/**
+
+# Except for the following directories
+!packages/itwin/tree-widget/
+!packages/itwin/tree-widget/**
+!packages/itwin/test-utilities/
+!packages/itwin/test-utilities/**
+!packages/itwin/property-grid/
+!packages/itwin/property-grid/**
+
+# Ignore README files due to extractions
+packages/itwin/tree-widget/README.md
+packages/itwin/property-grid/README.md
+
 # Ignore extracted api definitions
-./packages/itwin/**/api
+packages/itwin/**/api
+
+# Ignore auto-generated files
+CHANGELOG.md
+CHANGELOG.json
+
+# Ignore pnpm files
+pnpm-lock.yaml
+pnpm-workspace.yaml

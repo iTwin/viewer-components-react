@@ -9,13 +9,14 @@ import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
+import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import {
   CLASS_NAME_GeometricElement3d,
   CLASS_NAME_GeometricModel3d,
   CLASS_NAME_Subject,
 } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
+import { joinHierarchyFilteringPaths } from "../../../tree-widget-react/components/trees/common/Utils.js";
 import { ModelsTreeIdsCache } from "../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import {
@@ -34,11 +35,9 @@ import { createClassGroupingHierarchyNode, createModelsTreeProvider } from "./Ut
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
-import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { TestIModelBuilder } from "@itwin/presentation-testing";
 import type { ExpectedHierarchyDef } from "../HierarchyValidation.js";
 import type { ElementsGroupInfo } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
-
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
 interface TreeFilteringTestCaseDefinition<TIModelSetupResult extends {}> {
@@ -103,6 +102,102 @@ describe("Models tree", () => {
 
     after(async function () {
       await terminatePresentationTesting();
+    });
+
+    it("sets auto-expand on correct nodes with merged sub-tree and filter paths", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+        const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
+        const category = insertSpatialCategory({ builder, codeValue: "category" });
+        const parentElement = insertPhysicalElement({
+          builder,
+          userLabel: `parent el`,
+          modelId: model.id,
+          categoryId: category.id,
+        });
+        const childElement = insertPhysicalElement({
+          builder,
+          userLabel: `child el`,
+          modelId: model.id,
+          categoryId: category.id,
+          parentId: parentElement.id,
+        });
+        insertPhysicalElement({
+          builder,
+          userLabel: `unrelated el`,
+          modelId: model.id,
+          categoryId: category.id,
+        });
+        return { rootSubject, model, category, parentElement, childElement };
+      });
+      const { imodel, ...keys } = buildIModelResult;
+      const imodelAccess = createIModelAccess(imodel);
+      const config = { ...defaultHierarchyConfiguration, hideRootSubject: true, elementClassSpecification: keys.parentElement.className };
+      using idsCache = new ModelsTreeIdsCache(imodelAccess, config);
+      const [subTreePaths, filterPaths] = await Promise.all([
+        ModelsTreeDefinition.createInstanceKeyPaths({
+          imodelAccess,
+          idsCache,
+          hierarchyConfig: config,
+          targetItems: [{ id: keys.childElement.id, className: keys.childElement.className }],
+        }),
+        ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, idsCache, hierarchyConfig: config, label: "parent" }),
+      ]);
+      const joinedPaths = joinHierarchyFilteringPaths(
+        subTreePaths.map((path) => HierarchyFilteringPath.normalize(path).path),
+        filterPaths.map((path) => {
+          const normalizedPath = HierarchyFilteringPath.normalize(path);
+          normalizedPath.options = { autoExpand: true };
+          return normalizedPath;
+        }),
+      );
+
+      using provider = createModelsTreeProvider({
+        imodel,
+        hierarchyConfig: config,
+        filteredNodePaths: joinedPaths,
+        imodelAccess,
+        idsCache,
+      });
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.model],
+            supportsFiltering: true,
+            autoExpand: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.category],
+                supportsFiltering: true,
+                autoExpand: true,
+                children: [
+                  NodeValidators.createForClassGroupingNode({
+                    autoExpand: true,
+                    children: [
+                      NodeValidators.createForInstanceNode({
+                        instanceKeys: [keys.parentElement],
+                        supportsFiltering: true,
+                        children: [
+                          NodeValidators.createForClassGroupingNode({
+                            children: [
+                              NodeValidators.createForInstanceNode({
+                                instanceKeys: [keys.childElement],
+                                supportsFiltering: true,
+                                children: false,
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      });
     });
 
     runTestCases(
@@ -936,7 +1031,7 @@ describe("Models tree", () => {
           (x) =>
             x.groupingNode.groupedInstanceKeys.map((elementKey) => ({
               path: [...x.pathUntilTargetElement, adjustedElementKey(elementKey)],
-              options: { autoExpand: { key: x.groupingNode.key, depth: x.pathUntilTargetElement.length } },
+              options: { autoExpand: { depthInHierarchy: x.groupingNode.parentKeys.length } },
             })),
           (x) => [
             {
@@ -1009,23 +1104,35 @@ describe("Models tree", () => {
             });
             const pathUntilTargetElement = [adjustedModelKey(model), category, adjustedElementKey(rootElement)];
             const groupingNode = createClassGroupingHierarchyNode({
+              className: rootElement.className,
+              modelId: model.id,
+              categoryId: category.id,
+              elements: [rootElement.id],
+              parentKeys: [adjustedModelKey(model), category].map((key) => ({ type: "instances", instanceKeys: [key] })),
+            });
+            const targetGroupingNode = createClassGroupingHierarchyNode({
               className: testElement1.className,
               modelId: model.id,
               categoryId: category.id,
               elements: [testElement1.id, testElement2.id],
-              parentKeys: pathUntilTargetElement.map((key) => ({ type: "instances", instanceKeys: [key] })),
+              parentKeys: [adjustedModelKey(model), category, groupingNode, adjustedElementKey(rootElement)].map((key) => {
+                if ("key" in key) {
+                  return key.key;
+                }
+                return { type: "instances", instanceKeys: [key] };
+              }),
             });
-            return { rootSubject, model, category, rootElement, testElement1, testElement2, pathUntilTargetElement, groupingNode };
+            return { rootSubject, model, category, rootElement, testElement1, testElement2, pathUntilTargetElement, targetGroupingNode };
           },
           (x) =>
-            x.groupingNode.groupedInstanceKeys.map((elementKey) => ({
+            x.targetGroupingNode.groupedInstanceKeys.map((elementKey) => ({
               path: [...x.pathUntilTargetElement, adjustedElementKey(elementKey)],
-              options: { autoExpand: { key: x.groupingNode.key, depth: x.pathUntilTargetElement.length } },
+              options: { autoExpand: { depthInHierarchy: x.targetGroupingNode.parentKeys.length } },
             })),
           (x) => [
             {
               parent: { type: "element", ids: [x.rootElement.id] },
-              groupingNode: x.groupingNode,
+              groupingNode: x.targetGroupingNode,
             },
           ],
           undefined,
@@ -1112,19 +1219,36 @@ describe("Models tree", () => {
             });
 
             const pathUntilTargetElement = [adjustedModelKey(model), category, adjustedElementKey(rootElement)];
+            const groupingNode = createClassGroupingHierarchyNode({
+              className: rootElement.className,
+              modelId: model.id,
+              categoryId: category.id,
+              elements: [rootElement.id],
+              parentKeys: [adjustedModelKey(model), category].map((key) => ({ type: "instances", instanceKeys: [key] })),
+            });
             const physicalElementGroupingNode = createClassGroupingHierarchyNode({
               className: physicalElement1.className,
               modelId: model.id,
               categoryId: category.id,
               elements: [physicalElement1.id, physicalElement2.id],
-              parentKeys: pathUntilTargetElement.map((key) => ({ type: "instances", instanceKeys: [key] })),
+              parentKeys: [adjustedModelKey(model), category, groupingNode, adjustedElementKey(rootElement)].map((key) => {
+                if ("key" in key) {
+                  return key.key;
+                }
+                return { type: "instances", instanceKeys: [key] };
+              }),
             });
             const testElementGroupingNode = createClassGroupingHierarchyNode({
               className: testElement1.className,
               modelId: model.id,
               categoryId: category.id,
               elements: [testElement1.id, testElement2.id],
-              parentKeys: pathUntilTargetElement.map((key) => ({ type: "instances", instanceKeys: [key] })),
+              parentKeys: [adjustedModelKey(model), category, groupingNode, adjustedElementKey(rootElement)].map((key) => {
+                if ("key" in key) {
+                  return key.key;
+                }
+                return { type: "instances", instanceKeys: [key] };
+              }),
             });
             return {
               rootSubject,
@@ -1143,11 +1267,11 @@ describe("Models tree", () => {
           (x) => [
             ...x.physicalElementGroupingNode.groupedInstanceKeys.map((elementKey) => ({
               path: [...x.pathUntilTargetElement, adjustedElementKey(elementKey)],
-              options: { autoExpand: { key: x.physicalElementGroupingNode.key, depth: x.pathUntilTargetElement.length } },
+              options: { autoExpand: { depthInHierarchy: x.physicalElementGroupingNode.parentKeys.length } },
             })),
             ...x.testElementGroupingNode.groupedInstanceKeys.map((elementKey) => ({
               path: [...x.pathUntilTargetElement, adjustedElementKey(elementKey)],
-              options: { autoExpand: { key: x.testElementGroupingNode.key, depth: x.pathUntilTargetElement.length } },
+              options: { autoExpand: { depthInHierarchy: x.testElementGroupingNode.parentKeys.length } },
             })),
           ],
           (x) => [
@@ -1240,14 +1364,24 @@ describe("Models tree", () => {
               modelId: model.id,
               categoryId: category.id,
               elements: [middleElement.id],
-              parentKeys: [...pathUntilParentElement, parentElement].map((key) => ({ type: "instances", instanceKeys: [key] })),
+              parentKeys: [...pathUntilParentElement, parentElementGroupingNode, parentElement].map((key) => {
+                if ("key" in key) {
+                  return key.key;
+                }
+                return { type: "instances", instanceKeys: [key] };
+              }),
             });
             const childElementGroupingNode = createClassGroupingHierarchyNode({
               className: childElement.className,
               modelId: model.id,
               categoryId: category.id,
               elements: [childElement.id],
-              parentKeys: [...pathUntilParentElement, middleElement].map((key) => ({ type: "instances", instanceKeys: [key] })),
+              parentKeys: [...pathUntilParentElement, parentElementGroupingNode, parentElement, middleElementGroupingNode, middleElement].map((key) => {
+                if ("key" in key) {
+                  return key.key;
+                }
+                return { type: "instances", instanceKeys: [key] };
+              }),
             });
             return {
               rootSubject,
@@ -1265,15 +1399,15 @@ describe("Models tree", () => {
           (x) => [
             {
               path: [...x.pathUntilParentElement, adjustedElementKey(x.parentElement)],
-              options: { autoExpand: { key: x.parentElementGroupingNode.key, depth: x.parentElementGroupingNode.parentKeys.length } },
+              options: { autoExpand: { depthInHierarchy: x.parentElementGroupingNode.parentKeys.length } },
             },
             {
               path: [...x.pathUntilParentElement, adjustedElementKey(x.parentElement), adjustedElementKey(x.middleElement)],
-              options: { autoExpand: { key: x.middleElementGroupingNode.key, depth: x.middleElementGroupingNode.parentKeys.length } },
+              options: { autoExpand: { depthInHierarchy: x.middleElementGroupingNode.parentKeys.length } },
             },
             {
               path: [...x.pathUntilParentElement, adjustedElementKey(x.parentElement), adjustedElementKey(x.middleElement), adjustedElementKey(x.childElement)],
-              options: { autoExpand: { key: x.childElementGroupingNode.key, depth: x.childElementGroupingNode.parentKeys.length } },
+              options: { autoExpand: { depthInHierarchy: x.childElementGroupingNode.parentKeys.length } },
             },
           ],
           (x) => [
@@ -1360,7 +1494,7 @@ describe("Models tree", () => {
             [...x.pathUntilTargetElement, adjustedElementKey(x.element)],
             {
               path: [...x.pathUntilTargetElement, adjustedElementKey(x.element)],
-              options: { autoExpand: { key: x.groupingNode.key, depth: x.groupingNode.parentKeys.length } },
+              options: { autoExpand: { depthInHierarchy: x.groupingNode.parentKeys.length } },
             },
           ],
           (x) => [
@@ -1434,11 +1568,11 @@ describe("Models tree", () => {
           (x) => [
             {
               path: [adjustedModelKey(x.model), x.category1, adjustedElementKey(x.element1)],
-              options: { autoExpand: { key: x.groupingNode1.key, depth: x.groupingNode1.parentKeys.length } },
+              options: { autoExpand: { depthInHierarchy: x.groupingNode1.parentKeys.length } },
             },
             {
               path: [adjustedModelKey(x.model), x.category2, adjustedElementKey(x.element2)],
-              options: { autoExpand: { key: x.groupingNode2.key, depth: x.groupingNode2.parentKeys.length } },
+              options: { autoExpand: { depthInHierarchy: x.groupingNode2.parentKeys.length } },
             },
           ],
           (x) => [
@@ -1594,6 +1728,86 @@ describe("Models tree", () => {
         })
       ).sort(instanceKeyPathSorter);
       expect(actualInstanceKeyPaths).to.deep.eq(expectedPaths);
+    });
+
+    it("filtering by label aborts when abort signal fires", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+        const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
+        const category = insertSpatialCategory({ builder, codeValue: "category", userLabel: "Test" });
+        insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
+        return { model, category };
+      });
+      const { imodel, ...ids } = buildIModelResult;
+      const imodelAccess = createIModelAccess(imodel);
+      const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
+      using idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig);
+
+      const abortController1 = new AbortController();
+      const pathsPromiseAborted = ModelsTreeDefinition.createInstanceKeyPaths({
+        imodelAccess,
+        idsCache,
+        label: "Test",
+        hierarchyConfig,
+        abortSignal: abortController1.signal,
+      });
+      abortController1.abort();
+      expect(await pathsPromiseAborted).to.deep.eq([]);
+
+      const abortController2 = new AbortController();
+      const pathsPromise = ModelsTreeDefinition.createInstanceKeyPaths({
+        imodelAccess,
+        idsCache,
+        label: "Test",
+        hierarchyConfig,
+        abortSignal: abortController2.signal,
+      });
+      expect(await pathsPromise).to.deep.eq([
+        [
+          { className: "BisCore.GeometricModel3d", id: ids.model.id },
+          { className: "BisCore.SpatialCategory", id: ids.category.id },
+        ],
+      ]);
+    });
+
+    it("filtering by target items aborts when abort signal fires", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+        const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
+        const category = insertSpatialCategory({ builder, codeValue: "category", userLabel: "Test" });
+        insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
+        return { model, category };
+      });
+      const { imodel, ...ids } = buildIModelResult;
+      const imodelAccess = createIModelAccess(imodel);
+      const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
+      using idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig);
+
+      const abortController1 = new AbortController();
+      const pathsPromiseAborted = ModelsTreeDefinition.createInstanceKeyPaths({
+        imodelAccess,
+        idsCache,
+        targetItems: [{ className: "BisCore.SpatialCategory", id: ids.category.id }],
+        hierarchyConfig,
+        abortSignal: abortController1.signal,
+      });
+      abortController1.abort();
+      expect(await pathsPromiseAborted).to.deep.eq([]);
+
+      const abortController2 = new AbortController();
+      const pathsPromise = ModelsTreeDefinition.createInstanceKeyPaths({
+        imodelAccess,
+        idsCache,
+        targetItems: [{ className: "BisCore.SpatialCategory", id: ids.category.id }],
+        hierarchyConfig,
+        abortSignal: abortController2.signal,
+      });
+      expect(await pathsPromise).to.deep.eq([
+        [
+          { className: "BisCore.GeometricModel3d", id: ids.model.id },
+          { className: "BisCore.SpatialCategory", id: ids.category.id },
+        ],
+      ]);
     });
 
     it("finds elements by label containing special SQLite characters", async function () {

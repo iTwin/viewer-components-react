@@ -43,11 +43,16 @@ module.exports = [
       curly: ["error", "all"],
     },
   },
-  eslintConfigPrettier,
   {
     files: ["**/*.{ts,tsx}"],
     rules: {
       "no-console": "off",
+    },
+  },
+  {
+    files: ["**/*.{ts,tsx}"],
+    rules: {
+      ...eslintConfigPrettier.rules,
     },
   },
 ];

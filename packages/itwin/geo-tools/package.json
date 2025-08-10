@@ -1,6 +1,6 @@
 {
   "name": "@itwin/geo-tools-react",
-  "version": "6.0.0",
+  "version": "6.0.1",
   "description": "React Geospatial Tools",
   "keywords": [
     "Bentley",
@@ -115,8 +115,7 @@
     "@itwin/core-react": "^5.5.0",
     "@itwin/itwinui-react": "^3.16.5",
     "react": "^17.0.0 || ^18.0.0",
-    "react-dom": "^17.0.0 || ^18.0.0",
-    "redux": "^4.1.0"
+    "react-dom": "^17.0.0 || ^18.0.0"
   },
   "nyc": {
     "extends": "./node_modules/@itwin/build-tools/.nycrc",

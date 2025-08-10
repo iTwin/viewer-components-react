@@ -12,6 +12,7 @@ import { ModelsTreeNode } from "../../../../tree-widget-react/components/trees/m
 import { waitFor } from "../../../TestUtils.js";
 
 import type { Visibility } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
+import type { waitForOptions } from "../../../TestUtils.js";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
@@ -116,15 +117,17 @@ export async function validateNodeVisibility({ node, handler, visibilityExpectat
 
 export async function validateHierarchyVisibility({
   provider,
+  waitForOptions,
   ...props
 }: Omit<ValidateNodeProps, "visibilityExpectations"> & {
   visibilityExpectations: VisibilityExpectations;
   provider: HierarchyProvider;
+  waitForOptions?: waitForOptions;
 }) {
   await toVoidPromise(
     from(provider.getNodes({ parentNode: undefined })).pipe(
       expand((node) => provider.getNodes({ parentNode: node })),
-      mergeMap(async (node) => waitFor(async () => validateNodeVisibility({ ...props, node }))),
+      mergeMap(async (node) => waitFor(async () => validateNodeVisibility({ ...props, node }), waitForOptions)),
     ),
   );
 }
