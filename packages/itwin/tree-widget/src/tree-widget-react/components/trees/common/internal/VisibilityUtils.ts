@@ -4,15 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { filter, map, mergeAll, mergeMap, of, reduce, startWith, toArray } from "rxjs";
+import { Id64 } from "@itwin/core-bentley";
 import { QueryRowFormat } from "@itwin/core-common";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { reduceWhile } from "./Rxjs.js";
 import { createVisibilityStatus } from "./Tooltip.js";
-import { getClassesByView, releaseMainThreadOnItemsCount } from "./Utils.js";
+import { getArrayFromId64Arg, getClassesByView, releaseMainThreadOnItemsCount } from "./Utils.js";
 
 import type { Viewport } from "@itwin/core-frontend";
 import type { Observable, OperatorFunction } from "rxjs";
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { NonPartialVisibilityStatus, Visibility } from "./Tooltip.js";
 import type { VisibilityStatus } from "../UseHierarchyVisibility.js";
 import type { ElementId, ModelId } from "./Types.js";
@@ -73,7 +74,7 @@ export function filterSubModeledElementIds({
   doesSubModelExist,
 }: {
   doesSubModelExist: (elementId: Id64String) => Promise<boolean>;
-}): OperatorFunction<Array<ElementId>, Array<ModelId>> {
+}): OperatorFunction<Iterable<ElementId>, Array<ModelId>> {
   return (obs) => {
     return obs.pipe(
       mergeAll(),
@@ -245,13 +246,13 @@ async function getCategoryIds(viewport: Viewport): Promise<Id64Array> {
  * Changes category display in the viewport.
  * @internal
  */
-export async function enableCategoryDisplay(viewport: Viewport, categoryIds: Id64Array, enabled: boolean, enableAllSubCategories = true) {
+export async function enableCategoryDisplay(viewport: Viewport, categoryIds: Id64Arg, enabled: boolean, enableAllSubCategories = true) {
   viewport.changeCategoryDisplay(categoryIds, enabled, enableAllSubCategories);
 
   // remove category overrides per model
   const modelsContainingOverrides = new Array<ModelId>();
   for (const ovr of viewport.perModelCategoryVisibility) {
-    if (categoryIds.findIndex((id) => id === ovr.categoryId) !== -1) {
+    if (Id64.has(categoryIds, ovr.categoryId)) {
       modelsContainingOverrides.push(ovr.modelId);
     }
   }
@@ -259,7 +260,7 @@ export async function enableCategoryDisplay(viewport: Viewport, categoryIds: Id6
 
   // changeCategoryDisplay only enables subcategories, it does not disabled them. So we must do that ourselves.
   if (false === enabled) {
-    (await viewport.iModel.categories.getCategoryInfo(categoryIds)).forEach((categoryInfo) => {
+    (await viewport.iModel.categories.getCategoryInfo(getArrayFromId64Arg(categoryIds))).forEach((categoryInfo) => {
       categoryInfo.subCategories.forEach((value) => enableSubCategoryDisplay(viewport, value.id, false));
     });
   }

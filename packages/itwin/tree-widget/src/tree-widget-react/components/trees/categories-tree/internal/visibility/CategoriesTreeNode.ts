@@ -3,8 +3,17 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { HierarchyNode } from "@itwin/presentation-hierarchies";
+
 import type { Id64String } from "@itwin/core-bentley";
-import type { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+import type {
+  ClassGroupingNodeKey,
+  GroupingHierarchyNode,
+  HierarchyNodeKey,
+  InstancesNodeKey,
+  NonGroupingHierarchyNode,
+} from "@itwin/presentation-hierarchies";
+import type { ElementId, ModelId } from "../../../common/internal/Types.js";
 
 interface CategoriesTreeNode {
   key: HierarchyNodeKey;
@@ -13,6 +22,24 @@ interface CategoriesTreeNode {
 
 /** @internal */
 export namespace CategoriesTreeNode {
+  /**
+   * Determines if node represents an element class grouping node.
+   */
+  export const isElementClassGroupingNode = (
+    node: CategoriesTreeNode,
+  ): node is GroupingHierarchyNode & {
+    key: ClassGroupingNodeKey;
+    extendedData: { categoryId: Id64String; modelElementsMap: Map<ModelId, Set<ElementId>> };
+  } => {
+    return (
+      HierarchyNode.isClassGroupingNode(node) &&
+      !!node.extendedData &&
+      "categoryId" in node.extendedData &&
+      !!node.extendedData.categoryId &&
+      "modelElementsMap" in node.extendedData &&
+      !!node.extendedData.modelElementsMap
+    );
+  };
   /**
    * Determines if node represents a definition container.
    */
@@ -34,14 +61,37 @@ export namespace CategoriesTreeNode {
   /**
    * Determines if node represents an element.
    */
-  export const isElementNode = (node: Pick<CategoriesTreeNode, "extendedData">) =>
-    node.extendedData && "isElement" in node.extendedData && !!node.extendedData.isElement;
+  export const isElementNode = (
+    node: Pick<CategoriesTreeNode, "extendedData">,
+  ): node is NonGroupingHierarchyNode & { key: InstancesNodeKey; extendedData: { modelId: Id64String; categoryId: Id64String } } => {
+    return (
+      !!node.extendedData &&
+      "isElement" in node.extendedData &&
+      !!node.extendedData.isElement &&
+      "modelId" in node.extendedData &&
+      !!node.extendedData.modelId &&
+      "categoryId" in node.extendedData &&
+      !!node.extendedData.categoryId
+    );
+  };
 
   /**
    * Determines if node represents a sub-category.
    */
-  export const isSubCategoryNode = (node: Pick<CategoriesTreeNode, "extendedData">) =>
-    node.extendedData && "isSubCategory" in node.extendedData && !!node.extendedData.isSubCategory;
+  export const isSubCategoryNode = (
+    node: Pick<CategoriesTreeNode, "extendedData">,
+  ): node is NonGroupingHierarchyNode & {
+    key: InstancesNodeKey;
+    extendedData: { categoryId: Id64String };
+  } => {
+    return (
+      !!node.extendedData &&
+      "isSubCategory" in node.extendedData &&
+      !!node.extendedData.isSubCategory &&
+      "categoryId" in node.extendedData &&
+      !!node.extendedData.categoryId
+    );
+  };
 
   /**
    * Retrieves model ID from node's extended data.

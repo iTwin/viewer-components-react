@@ -3,12 +3,13 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { Id64 } from "@itwin/core-bentley";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_Model, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
 import { getClassesByView, getDistinctMapValues } from "../../common/internal/Utils.js";
 
+import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { CategoryId, DefinitionContainerId, ElementId, ModelId, SubCategoryId } from "../../common/internal/Types.js";
-import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
 
@@ -329,10 +330,10 @@ export class CategoriesTreeIdsCache implements Disposable {
     return this._modelWithCategoryModeledElements;
   }
 
-  public async getCategoriesModeledElements(modelId: Id64String, categoryIds: Id64Array): Promise<Id64Array> {
+  public async getCategoriesModeledElements(modelId: Id64String, categoryIds: Id64Arg): Promise<Id64Array> {
     const modelWithCategoryModeledElements = await this.getModelWithCategoryModeledElements();
     const result = new Array<ElementId>();
-    for (const categoryId of categoryIds) {
+    for (const categoryId of Id64.iterable(categoryIds)) {
       const entry = modelWithCategoryModeledElements.get(`${modelId}-${categoryId}`);
       if (entry !== undefined) {
         result.push(...entry);
@@ -416,10 +417,10 @@ export class CategoriesTreeIdsCache implements Disposable {
     return result;
   }
 
-  public async getCategoriesElementModels(categoryIds: Id64Array, includeSubModels?: boolean): Promise<Map<CategoryId, Set<ModelId>>> {
+  public async getCategoriesElementModels(categoryIds: Id64Arg, includeSubModels?: boolean): Promise<Map<CategoryId, Set<ModelId>>> {
     const elementModelsCategories = await this.getElementModelsCategories();
     const result = new Map<CategoryId, Set<ModelId>>();
-    for (const categoryId of categoryIds) {
+    for (const categoryId of Id64.iterable(categoryIds)) {
       for (const [modelId, { categoryIds: categories, isSubModel }] of elementModelsCategories) {
         if ((includeSubModels || !isSubModel) && categories.has(categoryId)) {
           let categoryModels = result.get(categoryId);
@@ -538,10 +539,10 @@ export class CategoriesTreeIdsCache implements Disposable {
     return result;
   }
 
-  public async getSubCategories(categoryIds: Id64Array): Promise<Map<CategoryId, Array<SubCategoryId>>> {
+  public async getSubCategories(categoryIds: Id64Arg): Promise<Map<CategoryId, Array<SubCategoryId>>> {
     const subCategoriesInfo = await this.getSubCategoriesInfo();
     const result = new Map<CategoryId, Array<SubCategoryId>>();
-    for (const categoryId of categoryIds) {
+    for (const categoryId of Id64.iterable(categoryIds)) {
       for (const [subCategoryId, subCategoryInfo] of subCategoriesInfo) {
         if (subCategoryInfo.categoryId === categoryId) {
           let categoryEntry = result.get(categoryId);

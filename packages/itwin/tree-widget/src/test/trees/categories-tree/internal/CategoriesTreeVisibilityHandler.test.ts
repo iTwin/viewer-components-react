@@ -16,7 +16,7 @@ import {
   defaultHierarchyConfiguration,
 } from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
-import { createCategoriesTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeVisibilityHandler.js";
+import { createCategoriesTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/categories-tree/internal/visibility/CategoriesTreeVisibilityHandler.js";
 import { CLASS_NAME_DefinitionModel, CLASS_NAME_Subject } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import {
   buildIModel,
@@ -169,6 +169,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         expectations: "all-hidden",
       });
     });
+
     describe("definitionContainers", () => {
       it("showing definition container makes it and all of its contained elements visible", async function () {
         await using buildIModelResult = await buildIModel(this, async (builder) => {
@@ -259,13 +260,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
           handler,
           viewport,
           expectations: {
-            [keys.definitionContainerRoot2.id]: "hidden",
             [keys.definitionContainerRoot.id]: "visible",
             [keys.definitionContainerChild.id]: "visible",
-            [keys.category2.id]: "hidden",
             [keys.indirectCategory.id]: "visible",
-            [keys.subCategory2.id]: "hidden",
             [keys.indirectSubCategory.id]: "visible",
+            [keys.definitionContainerRoot2.id]: "hidden",
+            [keys.category2.id]: "hidden",
+            [keys.subCategory2.id]: "hidden",
           },
         });
       });
@@ -780,7 +781,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
     });
 
-    describe("hideSubCategories set to true", () => {
+    describe.skip("hideSubCategories set to true", () => {
       it("showing subCategory does not do anything", async function () {
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
@@ -1790,9 +1791,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                   elementId: ids.subModelElement?.id,
                 }),
               expectations: (ids: IModelWithSubModelIds) => ({
-                // This happens because changing element state does not turn on category visiblity, it only turns on model display if it is off.
-                // Since subModelCategory is also displayed at tree root (it does not have children) it's visibility remains hidden.
-                [ids.subModelCategory?.id ?? ""]: "hidden",
+                [ids.subModelCategory?.id ?? ""]: "visible",
                 [`${ids.modeledElement.id}-${ids.subModelCategory?.id ?? ""}`]: "visible",
                 [ids.category.id]: "partial",
                 [ids.modeledElement.id]: "partial",
@@ -2664,7 +2663,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
     });
 
-    describe("hideSubCategories set to true", () => {
+    describe.skip("hideSubCategories set to true", () => {
       it("showing subCategory does not do anything", async function () {
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });

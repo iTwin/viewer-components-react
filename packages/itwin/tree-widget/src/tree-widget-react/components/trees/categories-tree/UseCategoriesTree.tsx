@@ -16,8 +16,8 @@ import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVi
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
-import { createCategoriesTreeVisibilityHandler } from "./internal/CategoriesTreeVisibilityHandler.js";
 import { useFilteredPaths } from "./internal/UseFilteredPaths.js";
+import { createCategoriesTreeVisibilityHandler } from "./internal/visibility/CategoriesTreeVisibilityHandler.js";
 
 import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import type { CreateFactoryProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";

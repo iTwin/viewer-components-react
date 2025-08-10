@@ -13,8 +13,8 @@ import { ClassificationsTreeComponent } from "./ClassificationsTreeComponent.js"
 import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.js";
 import { ClassificationsTreeIcon } from "./ClassificationsTreeIcon.js";
 import { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
-import { createClassificationsTreeVisibilityHandler } from "./internal/ClassificationsTreeVisibilityHandler.js";
 import { useFilteredPaths } from "./internal/UseFilteredPaths.js";
+import { createClassificationsTreeVisibilityHandler } from "./internal/visibility/ClassificationsTreeVisibilityHandler.js";
 
 import type { ClassificationsTreeFilteringError } from "./internal/UseFilteredPaths.js";
 import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";

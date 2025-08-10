@@ -192,21 +192,20 @@ export class ModelsTreeIdsCache {
   }
 
   /** Returns ECInstanceIDs of all Models under specific parent Subjects, including their child Subjects, etc. */
-  public async getSubjectModelIds(subjectIds: Id64Array): Promise<Id64Array> {
+  public async getSubjectModelIds(subjectIds: Id64Arg): Promise<Id64Array> {
     const subjectInfos = await this.getSubjectInfos();
-    const subjectStack = [...subjectIds];
     const result = new Array<ModelId>();
-    while (true) {
-      const subjectId = subjectStack.pop();
-      if (subjectId === undefined) {
-        break;
-      }
+    const childSubjects = new Array<SubjectId>();
+    for (const subjectId of Id64.iterable(subjectIds)) {
       const subjectInfo = subjectInfos.get(subjectId);
       if (!subjectInfo) {
         continue;
       }
       result.push(...subjectInfo.childModelIds);
-      subjectStack.push(...subjectInfo.childSubjectIds);
+      childSubjects.push(...subjectInfo.childSubjectIds);
+    }
+    if (childSubjects.length > 0) {
+      result.push(...(await this.getSubjectModelIds(childSubjects)));
     }
     return result;
   }
@@ -351,6 +350,22 @@ export class ModelsTreeIdsCache {
     const modelInfos = await this.getModelInfos();
     const categories = modelInfos.get(modelId)?.categoryIds;
     return categories ? [...categories] : [];
+  }
+
+  public async getCategoriesElementModels(categoryIds: Id64Arg): Promise<Map<CategoryId, Array<ModelId>>> {
+    const modelInfos = await this.getModelInfos();
+    const result = new Map<CategoryId, Array<ModelId>>();
+    for (const categoryId of Id64.iterable(categoryIds)) {
+      const entry = new Array<ModelId>();
+      for (const [modelId, { categoryIds: modelCategoryIds }] of modelInfos.entries()) {
+        if (modelCategoryIds.has(categoryId)) {
+          entry.push(modelId);
+        }
+      }
+      result.set(categoryId, entry);
+    }
+
+    return result;
   }
 
   public async hasSubModel(elementId: Id64String): Promise<boolean> {

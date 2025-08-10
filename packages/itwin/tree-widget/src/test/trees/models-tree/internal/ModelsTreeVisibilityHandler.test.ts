@@ -5,20 +5,18 @@
 
 import { assert, expect } from "chai";
 import sinon from "sinon";
-import { CompressedId64Set, Id64 } from "@itwin/core-bentley";
+import { CompressedId64Set } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, IModelReadRpcInterface, RenderMode } from "@itwin/core-common";
 import { IModelApp, NoRenderApp, OffScreenViewport, PerModelCategoryVisibility, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor, HierarchyNode } from "@itwin/presentation-hierarchies";
+import { createIModelHierarchyProvider, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { InstanceKey } from "@itwin/presentation-shared";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { CLASS_NAME_Subject } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
-import { createVisibilityStatus } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
 import { ModelsTreeIdsCache } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
-import { createModelsTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
+import { createModelsTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import {
   buildIModel,
@@ -42,31 +40,15 @@ import {
 } from "../Utils.js";
 import { validateHierarchyVisibility, VisibilityExpectations } from "./VisibilityValidation.js";
 
-import type { Visibility } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
 import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
-import type { ModelsTreeVisibilityHandlerProps } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
+import type { ModelsTreeVisibilityHandlerProps } from "../../../../tree-widget-react/components/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { GeometricElement3dProps, QueryBinder } from "@itwin/core-common";
 import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath, HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { Id64String } from "@itwin/core-bentley";
 import type { ValidateNodeProps } from "./VisibilityValidation.js";
 
-interface VisibilityOverrides {
-  models?: Map<Id64String, Visibility>;
-  categories?: Map<Id64String, Visibility>;
-  elements?: Map<Id64String, Visibility>;
-}
-
-type ModelsTreeHierarchyConfiguration = Partial<ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"]>;
-
 describe("ModelsTreeVisibilityHandler", () => {
-  function createIdsCache(iModel: IModelConnection, hierarchyConfig?: ModelsTreeHierarchyConfiguration) {
-    return new ModelsTreeIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded"), {
-      ...defaultHierarchyConfiguration,
-      ...hierarchyConfig,
-    });
-  }
-
   before(async () => {
     await NoRenderApp.startup();
     await TestUtils.initialize();
@@ -95,89 +77,19 @@ describe("ModelsTreeVisibilityHandler", () => {
       };
     }
 
-    function createHandler(props?: { overrides?: VisibilityOverrides; idsCache?: ModelsTreeIdsCache; viewport?: Viewport }) {
-      const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
-        getModelDisplayStatus:
-          props?.overrides?.models &&
-          (async ({ ids, originalImplementation }) => {
-            let visibility: Visibility | "unknown" = "unknown";
-            for (const modelId of Id64.iterable(ids)) {
-              const res = props.overrides!.models!.get(modelId);
-              if (!res) {
-                continue;
-              }
-              if (visibility !== "unknown" && res !== visibility) {
-                return createVisibilityStatus("partial");
-              }
-              visibility = res;
-            }
-            return visibility !== "unknown" ? createVisibilityStatus(visibility) : originalImplementation();
-          }),
-        getCategoryDisplayStatus:
-          props?.overrides?.categories &&
-          (async ({ categoryIds, originalImplementation }) => {
-            let visibility: Visibility | "unknown" = "unknown";
-            for (const id of Id64.iterable(categoryIds)) {
-              const res = props.overrides!.categories!.get(id);
-              if (!res) {
-                continue;
-              }
-              if (visibility !== "unknown" && res !== visibility) {
-                return createVisibilityStatus("partial");
-              }
-              visibility = res;
-            }
-            return visibility !== "unknown" ? createVisibilityStatus(visibility) : originalImplementation();
-          }),
-        getElementDisplayStatus:
-          props?.overrides?.elements &&
-          (async ({ elementId, originalImplementation }) => {
-            const res = props.overrides!.elements!.get(elementId);
-            return res ? createVisibilityStatus(res) : originalImplementation();
-          }),
-        changeCategoryState: sinon.fake(async ({ originalImplementation }) => originalImplementation()),
-        changeModelState: sinon.fake(async ({ originalImplementation }) => originalImplementation()),
-        changeElementsState: sinon.fake(async ({ originalImplementation }) => originalImplementation()),
-      };
+    function createHandler(props?: { idsCache?: ModelsTreeIdsCache; viewport?: Viewport }) {
       const handler = createModelsTreeVisibilityHandler({
         viewport: props?.viewport ?? createFakeSinonViewport(),
-        overrides,
         idsCache: props?.idsCache ?? createFakeIdsCache(),
         imodelAccess: createFakeIModelAccess(),
       });
       return {
         handler,
-        overrides,
         [Symbol.dispose]() {
           handler[Symbol.dispose]();
         },
       };
     }
-
-    describe("overridden methods", () => {
-      it("can call original implementation", async () => {
-        let useOriginalImplFlag = false;
-        const viewport = createFakeSinonViewport();
-        using idsCache = createIdsCache(viewport.iModel);
-        using handler = createModelsTreeVisibilityHandler({
-          viewport,
-          idsCache,
-          overrides: {
-            getElementDisplayStatus: async ({ originalImplementation }) => {
-              return useOriginalImplFlag ? originalImplementation() : createVisibilityStatus("hidden");
-            },
-          },
-          imodelAccess: createFakeIModelAccess(),
-        });
-
-        const node = createElementHierarchyNode({ modelId: "0x1", categoryId: "0x2", elementId: "0x3" });
-        await expect(handler.getVisibilityStatus(node)).to.eventually.include({ state: "hidden" });
-
-        useOriginalImplFlag = true;
-        await expect(handler.getVisibilityStatus(node)).to.eventually.include({ state: "visible" });
-      });
-    });
-
     describe("getVisibilityStatus", () => {
       it("returns disabled when node is not an instance node", async () => {
         const node: HierarchyNode = {
@@ -198,24 +110,6 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
 
       describe("subject", () => {
-        it("can be overridden", async () => {
-          const overrides = {
-            getSubjectNodeVisibility: sinon.fake.resolves(createVisibilityStatus("visible")),
-          };
-          const viewport = createFakeSinonViewport();
-          using idsCache = createIdsCache(viewport.iModel);
-          using handler = createModelsTreeVisibilityHandler({
-            viewport,
-            idsCache,
-            overrides,
-            imodelAccess: createFakeIModelAccess(),
-          });
-
-          const status = await handler.getVisibilityStatus(createSubjectHierarchyNode());
-          expect(status.state).to.eq("visible");
-          expect(overrides.getSubjectNodeVisibility).to.be.called;
-        });
-
         it("returns disabled when active view is not spatial", async () => {
           const node = createSubjectHierarchyNode();
           const viewport = createFakeSinonViewport({
@@ -254,12 +148,6 @@ describe("ModelsTreeVisibilityHandler", () => {
           });
           using handlerResult = createHandler({
             idsCache,
-            overrides: {
-              models: new Map([
-                ["0x3", "visible"],
-                ["0x4", "visible"],
-              ]),
-            },
           });
           const { handler } = handlerResult;
           const result = await handler.getVisibilityStatus(node);
@@ -278,12 +166,6 @@ describe("ModelsTreeVisibilityHandler", () => {
           });
           using handlerResult = createHandler({
             idsCache,
-            overrides: {
-              models: new Map([
-                ["0x3", "hidden"],
-                ["0x4", "hidden"],
-              ]),
-            },
           });
           const { handler } = handlerResult;
           const result = await handler.getVisibilityStatus(node);
@@ -302,12 +184,6 @@ describe("ModelsTreeVisibilityHandler", () => {
           });
           using handlerResult = createHandler({
             idsCache,
-            overrides: {
-              models: new Map([
-                ["0x3", "visible"],
-                ["0x4", "hidden"],
-              ]),
-            },
           });
           const { handler } = handlerResult;
           const result = await handler.getVisibilityStatus(node);
@@ -656,24 +532,6 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
 
       describe("category", () => {
-        it("can be overridden", async () => {
-          const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
-            getCategoryDisplayStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
-          };
-          const viewport = createFakeSinonViewport();
-          using idsCache = createIdsCache(viewport.iModel);
-          using handler = createModelsTreeVisibilityHandler({
-            viewport,
-            idsCache,
-            overrides,
-            imodelAccess: createFakeIModelAccess(),
-          });
-
-          const status = await handler.getVisibilityStatus(createCategoryHierarchyNode("0x1"));
-          expect(overrides.getCategoryDisplayStatus).to.be.called;
-          expect(status.state).to.eq("visible");
-        });
-
         describe("is visible", () => {
           it("when `viewport.view.viewsCategory` returns TRUE and there are NO elements in the NEVER drawn list", async () => {
             const categoryId = "0x2";
@@ -944,24 +802,6 @@ describe("ModelsTreeVisibilityHandler", () => {
         const categoryId = "0x2";
         const elementId = "0x3";
 
-        it("can be overridden", async () => {
-          const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
-            getElementDisplayStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
-          };
-          const viewport = createFakeSinonViewport();
-          using idsCache = createIdsCache(viewport.iModel);
-          using handler = createModelsTreeVisibilityHandler({
-            viewport,
-            idsCache,
-            overrides,
-            imodelAccess: createFakeIModelAccess(),
-          });
-
-          const status = await handler.getVisibilityStatus(createElementHierarchyNode({ modelId: "0x1", categoryId: "0x2", elementId: "0x3" }));
-          expect(overrides.getElementDisplayStatus).to.be.called;
-          expect(status.state).to.eq("visible");
-        });
-
         it("is disabled when has no category or model", async () => {
           using handlerResult = createHandler();
           const { handler } = handlerResult;
@@ -1088,30 +928,6 @@ describe("ModelsTreeVisibilityHandler", () => {
         const modelId = "0x1";
         const categoryId = "0x2";
 
-        it("can be overridden", async () => {
-          const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
-            getElementGroupingNodeDisplayStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
-          };
-          const viewport = createFakeSinonViewport();
-          using idsCache = createIdsCache(viewport.iModel);
-          using handler = createModelsTreeVisibilityHandler({
-            viewport,
-            idsCache,
-            overrides,
-            imodelAccess: createFakeIModelAccess(),
-          });
-
-          const status = await handler.getVisibilityStatus(
-            createClassGroupingHierarchyNode({
-              modelId,
-              categoryId,
-              elements: [],
-            }),
-          );
-          expect(status.state).to.eq("visible");
-          expect(overrides.getElementGroupingNodeDisplayStatus).to.be.called;
-        });
-
         it("is visible if all node elements are visible", async () => {
           const elementIds = ["0x10", "0x20"];
           const node = createClassGroupingHierarchyNode({
@@ -1124,9 +940,6 @@ describe("ModelsTreeVisibilityHandler", () => {
               modelCategories: new Map([[modelId, [categoryId]]]),
               categoryElements: new Map([[categoryId, elementIds]]),
             }),
-            overrides: {
-              elements: new Map(elementIds.map((x) => [x, "visible"])),
-            },
           });
           const { handler } = handlerResult;
           const result = await handler.getVisibilityStatus(node);
@@ -1264,23 +1077,6 @@ describe("ModelsTreeVisibilityHandler", () => {
 
     describe("changeVisibilityStatus", () => {
       describe("subject", () => {
-        it("can be overridden", async () => {
-          const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
-            changeSubjectNodeState: sinon.fake.resolves(undefined),
-          };
-          const viewport = createFakeSinonViewport();
-          using idsCache = createIdsCache(viewport.iModel);
-          using handler = createModelsTreeVisibilityHandler({
-            viewport,
-            idsCache,
-            overrides,
-            imodelAccess: createFakeIModelAccess(),
-          });
-
-          await handler.changeVisibility(createSubjectHierarchyNode(), true);
-          expect(overrides.changeSubjectNodeState).to.be.called;
-        });
-
         describe("on", () => {
           it("marks all models as visible", async () => {
             const subjectIds = ["0x1", "0x2"];
@@ -1296,10 +1092,9 @@ describe("ModelsTreeVisibilityHandler", () => {
               }),
               viewport,
             });
-            const { handler, overrides } = handlerResult;
+            const { handler } = handlerResult;
 
             await handler.changeVisibility(node, true);
-            expect(overrides.changeModelState).to.be.calledOnceWith(sinon.match({ ids: sinon.match.array.deepEquals(modelIds.flat()), on: true }));
           });
         });
 
@@ -1316,10 +1111,9 @@ describe("ModelsTreeVisibilityHandler", () => {
                 subjectModels: new Map(subjectIds.map((id, idx) => [id, modelIds[idx]])),
               }),
             });
-            const { handler, overrides } = handlerResult;
+            const { handler } = handlerResult;
 
             await handler.changeVisibility(node, false);
-            expect(overrides.changeModelState).to.be.calledOnceWith(sinon.match({ ids: sinon.match.array.deepEquals(modelIds.flat()), on: false }));
           });
         });
       });
@@ -1443,23 +1237,6 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
 
       describe("category", () => {
-        it("can be overridden", async () => {
-          const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
-            changeCategoryState: sinon.fake.resolves(undefined),
-          };
-          const viewport = createFakeSinonViewport();
-          using idsCache = createIdsCache(viewport.iModel);
-          using handler = createModelsTreeVisibilityHandler({
-            viewport,
-            idsCache,
-            overrides,
-            imodelAccess: createFakeIModelAccess(),
-          });
-
-          await handler.changeVisibility(createCategoryHierarchyNode("0x1"), true);
-          expect(overrides.changeCategoryState).to.be.called;
-        });
-
         describe("on", () => {
           it("removes HIDE override if model is shown", async () => {
             const modelId = "0x1";
@@ -1519,26 +1296,6 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
 
       describe("element", () => {
-        it("can be overridden", async () => {
-          const modelId = "0x1";
-          const categoryId = "0x2";
-          const elementId = "0x10";
-          const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
-            changeElementsState: sinon.fake.resolves(undefined),
-          };
-          const viewport = createFakeSinonViewport();
-          using idsCache = createIdsCache(viewport.iModel);
-          using handler = createModelsTreeVisibilityHandler({
-            viewport,
-            idsCache,
-            overrides,
-            imodelAccess: createFakeIModelAccess(),
-          });
-
-          await handler.changeVisibility(createElementHierarchyNode({ modelId, categoryId, elementId }), true);
-          expect(overrides.changeElementsState).to.be.called;
-        });
-
         describe("on", () => {
           it("removes it from the never drawn list", async () => {
             const modelId = "0x1";
@@ -1598,9 +1355,6 @@ describe("ModelsTreeVisibilityHandler", () => {
             });
             using handlerResult = createHandler({
               viewport,
-              overrides: {
-                models: new Map([[modelId, "hidden"]]),
-              },
             });
             const { handler } = handlerResult;
             await handler.changeVisibility(node, true);
@@ -1683,34 +1437,6 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
 
       describe("grouping node", () => {
-        it("can be overridden", async () => {
-          const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
-            changeElementGroupingNodeState: sinon.fake.resolves(undefined),
-          };
-          const viewport = createFakeSinonViewport();
-          using idsCache = createIdsCache(viewport.iModel);
-          using handler = createModelsTreeVisibilityHandler({
-            viewport,
-            idsCache,
-            overrides,
-            imodelAccess: createFakeIModelAccess(),
-          });
-
-          const node = createClassGroupingHierarchyNode({
-            modelId: "0x1",
-            categoryId: "0x2",
-            elements: [],
-          });
-
-          for (const on of [true, false]) {
-            await handler.changeVisibility(node, on);
-            expect(overrides.changeElementGroupingNodeState).to.be.calledWithMatch({
-              node,
-              on,
-            });
-          }
-        });
-
         function testChildElementsChange(on: boolean) {
           it(`${on ? "shows" : "hides"} all its elements`, async () => {
             const modelId = "0x1";

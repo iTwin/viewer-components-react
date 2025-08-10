@@ -183,7 +183,7 @@ async function getModels(paths: HierarchyFilteringPath[], idsCache: ModelsTreeId
     }
   }
 
-  const matchingModels = await idsCache.getSubjectModelIds([...targetSubjectIds]);
+  const matchingModels = await idsCache.getSubjectModelIds(targetSubjectIds);
   return [...targetModelIds, ...matchingModels];
 }
 

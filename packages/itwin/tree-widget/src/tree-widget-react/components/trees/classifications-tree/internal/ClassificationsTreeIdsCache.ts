@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { from, map, mergeMap } from "rxjs";
+import { Id64 } from "@itwin/core-bentley";
 import {
   CLASS_NAME_Classification,
   CLASS_NAME_ClassificationSystem,
@@ -17,8 +18,8 @@ import {
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
 import { getDistinctMapValues } from "../../common/internal/Utils.js";
 
+import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { Observable } from "rxjs";
-import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { ClassificationsTreeHierarchyConfiguration } from "../ClassificationsTreeDefinition.js";
@@ -173,10 +174,10 @@ export class ClassificationsTreeIdsCache implements Disposable {
     return this._modelWithCategoryModeledElements;
   }
 
-  public async getCategoriesModeledElements(modelId: Id64String, categoryIds: Id64Array): Promise<Id64Array> {
+  public async getCategoriesModeledElements(modelId: Id64String, categoryIds: Id64Arg): Promise<Id64Array> {
     const modelWithCategoryModeledElements = await this.getModelWithCategoryModeledElements();
     const result = new Array<ElementId>();
-    for (const categoryId of categoryIds) {
+    for (const categoryId of Id64.iterable(categoryIds)) {
       const entry = modelWithCategoryModeledElements.get(`${modelId}-${categoryId}`);
       if (entry !== undefined) {
         result.push(...entry);
@@ -185,10 +186,10 @@ export class ClassificationsTreeIdsCache implements Disposable {
     return result;
   }
 
-  public async getCategoriesElementModels(categoryIds: Id64Array, includeSubModels?: boolean): Promise<Map<CategoryId, Set<ModelId>>> {
+  public async getCategoriesElementModels(categoryIds: Id64Arg, includeSubModels?: boolean): Promise<Map<CategoryId, Set<ModelId>>> {
     const elementModelsCategories = await this.getElementModelsCategories();
     const result = new Map<CategoryId, Set<ModelId>>();
-    for (const categoryId of categoryIds) {
+    for (const categoryId of Id64.iterable(categoryIds)) {
       for (const [modelId, { category2dIds, category3dIds, isSubModel }] of elementModelsCategories) {
         if ((includeSubModels || !isSubModel) && (category2dIds.has(categoryId) || category3dIds.has(categoryId))) {
           let categoryModels = result.get(categoryId);
