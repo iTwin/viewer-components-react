@@ -5,6 +5,7 @@
 
 import { useEffect, useRef } from "react";
 import { bufferCount, concatAll, concatMap, delay, of } from "rxjs";
+import { Id64 } from "@itwin/core-bentley";
 import {
   CLASS_NAME_DrawingCategory,
   CLASS_NAME_GeometricElement2d,
@@ -15,7 +16,7 @@ import {
 } from "./ClassNameDefinitions.js";
 
 import type { Observable } from "rxjs";
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 
 /** @internal */
 export function setDifference<T>(lhs: Set<T>, rhs: Set<T>): Set<T> {
@@ -107,4 +108,17 @@ export function getClassesByView(viewType: "2d" | "3d") {
   return viewType === "2d"
     ? ({ categoryClass: CLASS_NAME_DrawingCategory, elementClass: CLASS_NAME_GeometricElement2d, modelClass: CLASS_NAME_GeometricModel2d } as const)
     : ({ categoryClass: CLASS_NAME_SpatialCategory, elementClass: CLASS_NAME_GeometricElement3d, modelClass: CLASS_NAME_GeometricModel3d } as const);
+}
+
+/** @internal */
+export function joinId64Arg(arg: Id64Arg, separator: string): string {
+  let joined = "";
+  for (const argItem of Id64.iterable(arg)) {
+    if (joined !== "") {
+      joined += separator;
+    }
+
+    joined += argItem;
+  }
+  return joined;
 }
