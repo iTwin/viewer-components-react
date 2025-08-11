@@ -64,7 +64,7 @@ import type { CategoriesTreeHierarchyConfiguration } from "../CategoriesTreeDefi
 import type { CategoriesTreeIdsCache } from "./CategoriesTreeIdsCache.js";
 import type { FilteredTree } from "./FilteredTree.js";
 import type { IVisibilityChangeEventListener } from "../../common/internal/VisibilityChangeEventListener.js";
-import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
+import type { ElementId, ModelId } from "../../common/internal/Types.js";
 
 /** @alpha */
 interface GetCategoryVisibilityStatusProps {
@@ -380,7 +380,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     const result = defer(async () => {
       const { categoryId, subCategoryIds } = props;
       let visibility: "visible" | "hidden" | "unknown" = "unknown";
-      const categoryModels = getDistinctMapValues(await this._idsCache.getCategoriesElementModels([categoryId], true));
+      const categoryModels = getDistinctMapValues(await this._idsCache.getCategoriesElementModels(categoryId, true));
       let nonDefaultModelDisplayStatesCount = 0;
       for (const modelId of categoryModels) {
         if (!this._props.viewport.view.viewsModel(modelId)) {
@@ -476,7 +476,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     return createVisibilityStatus(visibleThroughCategorySelectorCount > 0 ? "visible" : "hidden");
   }
 
-  private getDefaultCategoryVisibilityStatus({ categoryIds }: { categoryIds: Array<CategoryId> }): Observable<VisibilityStatus> {
+  private getDefaultCategoryVisibilityStatus({ categoryIds }: { categoryIds: Id64Array }): Observable<VisibilityStatus> {
     return from(this._idsCache.getSubCategories(categoryIds)).pipe(
       mergeMap((categoriesSubCategoriesMap) => {
         return from(categoryIds).pipe(
@@ -519,7 +519,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
                             defaultStatus: () => this.getDefaultModelsCategoryVisibilityStatus({ modelId: model, categoryIds: [category] }),
                           }).pipe(
                             mergeMap((visibilityStatusAlwaysAndNeverDraw) => {
-                              return from(this._idsCache.getCategoriesModeledElements(model, [category])).pipe(
+                              return from(this._idsCache.getCategoriesModeledElements(model, category)).pipe(
                                 getSubModeledElementsVisibilityStatus({
                                   parentNodeVisibilityStatus: visibilityStatusAlwaysAndNeverDraw,
                                   getModelVisibilityStatus: (modelProps) => this.getModelVisibilityStatus(modelProps),
@@ -528,7 +528,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
                             }),
                           );
                         }
-                        return from(this._idsCache.getCategoriesModeledElements(model, [category])).pipe(
+                        return from(this._idsCache.getCategoriesModeledElements(model, category)).pipe(
                           getSubModeledElementsVisibilityStatus({
                             parentNodeVisibilityStatus: createVisibilityStatus("hidden"),
                             getModelVisibilityStatus: (modelProps) => this.getModelVisibilityStatus(modelProps),
@@ -949,7 +949,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
           mergeMap(([categoryId, modelIds]) => {
             return from(modelIds).pipe(
               mergeMap((modelOfCategory) =>
-                from(this._idsCache.getCategoriesModeledElements(modelOfCategory, [categoryId])).pipe(
+                from(this._idsCache.getCategoriesModeledElements(modelOfCategory, categoryId)).pipe(
                   mergeMap((modeledElementIds) => this.changeModelState({ ids: modeledElementIds, on })),
                 ),
               ),

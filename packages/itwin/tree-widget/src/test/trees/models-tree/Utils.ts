@@ -5,6 +5,7 @@
 
 import { concatMap, EMPTY, expand, firstValueFrom, from, toArray } from "rxjs";
 import sinon from "sinon";
+import { Id64 } from "@itwin/core-bentley";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import {
   CLASS_NAME_Element,
@@ -87,8 +88,8 @@ interface IdsCacheMockProps {
 
 export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCache {
   return sinon.createStubInstance(ModelsTreeIdsCache, {
-    getChildSubjectIds: sinon.stub<[Id64Array], Promise<Id64Array>>().callsFake(async (subjectIds) => {
-      const obs = from(subjectIds).pipe(
+    getChildSubjectIds: sinon.stub<[Id64Arg], Promise<Id64Array>>().callsFake(async (subjectIds) => {
+      const obs = from(Id64.iterable(subjectIds)).pipe(
         concatMap((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
         expand((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
         toArray(),
@@ -96,8 +97,8 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
       return firstValueFrom(obs);
     }),
     getChildSubjectModelIds: sinon.stub(),
-    getSubjectModelIds: sinon.stub<[Id64Array], Promise<Id64Array>>().callsFake(async (subjectIds) => {
-      const obs = from(subjectIds).pipe(
+    getSubjectModelIds: sinon.stub<[Id64Arg], Promise<Id64Array>>().callsFake(async (subjectIds) => {
+      const obs = from(Id64.iterable(subjectIds)).pipe(
         expand((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
         concatMap((id) => props?.subjectModels?.get(id) ?? EMPTY),
         toArray(),
