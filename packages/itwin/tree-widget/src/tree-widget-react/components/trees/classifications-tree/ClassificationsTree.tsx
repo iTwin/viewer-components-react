@@ -42,13 +42,6 @@ export function ClassificationsTree({
     filter,
   });
 
-  // const nodeActions = useCallback(
-  //   (node: PresentationHierarchyNode) => {
-  //     return [<RenameAction key="RenameAction" />, ...(getActions ? getActions(node) : [])];
-  //   },
-  //   [getActions],
-  // );
-
   return (
     <VisibilityTree
       {...classificationsTreeProps}
