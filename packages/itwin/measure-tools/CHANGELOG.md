@@ -1,8 +1,16 @@
 # Change Log - @itwin/measure-tools-react
 
-<!-- This log was last generated on Thu, 24 Jul 2025 16:07:32 GMT and should not be manually modified. -->
+<!-- This log was last generated on Mon, 11 Aug 2025 13:31:19 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.29.0
+
+Mon, 11 Aug 2025 13:31:19 GMT
+
+### Minor changes
+
+- Use separate KindOfQuantity for Coordinate Lengths, fallback to QuantityType as last resort ([#1397](https://github.com/iTwin/viewer-components-react/pull/1397))
 
 ## 0.28.2
 

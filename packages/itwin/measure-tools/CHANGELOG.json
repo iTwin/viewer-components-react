@@ -2,6 +2,21 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Mon, 11 Aug 2025 13:31:19 GMT",
+      "version": "0.29.0",
+      "tag": "@itwin/measure-tools-react_v0.29.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "50554904+hl662@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "bcdd6aaf1ac66084281cedcc29fa375bbdebf32a",
+            "comment": "Use separate KindOfQuantity for Coordinate Lengths, fallback to QuantityType as last resort"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 24 Jul 2025 16:07:32 GMT",
       "version": "0.28.2",
       "tag": "@itwin/measure-tools-react_v0.28.2",
