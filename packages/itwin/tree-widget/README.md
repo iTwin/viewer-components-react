@@ -368,7 +368,6 @@ function CustomModelsTreeComponentWithTargetItems({
   return (
     <VisibilityTree
       {...modelsTreeProps}
-      getSchemaContext={getSchemaContext}
       selectionStorage={selectionStorage}
       imodel={imodel}
       treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
