@@ -16,10 +16,10 @@ import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCate
 import { pushToMap } from "../../common/internal/Utils.js";
 
 import type { InstanceKey } from "@itwin/presentation-shared";
-import type { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { CategoryId, ElementId, ModelId, SubjectId } from "../../common/internal/Types.js";
+import type { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
 
 interface SubjectInfo {
   parentSubjectId: Id64String | undefined;
