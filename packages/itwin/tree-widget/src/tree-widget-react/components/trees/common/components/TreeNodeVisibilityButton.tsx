@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./TreeNodeVisibilityButton.css";
-import { createContext, memo, useContext } from "react";
+import { createContext, memo, useContext, useMemo } from "react";
 import visibilityHideSvg from "@stratakit/icons/visibility-hide.svg";
 import visibilityPartialSvg from "@stratakit/icons/visibility-partial.svg";
 import visibilityShowSvg from "@stratakit/icons/visibility-show.svg";
@@ -89,5 +89,17 @@ export const useVisibilityContext = () => {
 
 /** @alpha */
 export function VisibilityContextProvider({ onVisibilityButtonClick, getVisibilityButtonState, children }: PropsWithChildren<VisibilityContext>) {
-  return <visibilityContext.Provider value={{ onVisibilityButtonClick, getVisibilityButtonState }}>{children}</visibilityContext.Provider>;
+  return (
+    <visibilityContext.Provider
+      value={useMemo(
+        () => ({
+          onVisibilityButtonClick,
+          getVisibilityButtonState,
+        }),
+        [getVisibilityButtonState, onVisibilityButtonClick],
+      )}
+    >
+      {children}
+    </visibilityContext.Provider>
+  );
 }
