@@ -26,6 +26,7 @@ export { FocusedInstancesContextProvider, useFocusedInstancesContext } from "./c
 
 export { Tree } from "./common/components/Tree.js";
 export { VisibilityTree } from "./common/components/VisibilityTree.js";
+export { VisibilityAction } from "./common/components/TreeNodeVisibilityButton.js";
 export { TreeRenderer } from "./common/components/TreeRenderer.js";
 export { VisibilityTreeRenderer } from "./common/components/VisibilityTreeRenderer.js";
 export { HierarchyVisibilityHandler, VisibilityStatus } from "./common/UseHierarchyVisibility.js";
@@ -33,3 +34,6 @@ export { TelemetryContextProvider } from "./common/UseTelemetryContext.js";
 export { FilterLimitExceededError } from "./common/TreeErrors.js";
 
 export { ModelsTreeVisibilityHandlerOverrides } from "./models-tree/internal/ModelsTreeVisibilityHandler.js";
+
+// reexport actions from presentation-hierarchies-react to keep naming consistent
+export { RenameAction, FilterAction } from "@itwin/presentation-hierarchies-react";

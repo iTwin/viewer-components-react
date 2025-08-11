@@ -8,7 +8,13 @@ import { EC3Provider, EC3Widget } from "@itwin/ec3-widget-react";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
 import { GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
 import { SvgHierarchyTree } from "@itwin/itwinui-icons-react";
-import { FeatureInfoUiItemsProvider, MapLayersPrefBrowserStorage, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
+import {
+  createDefaultGoogleMapsBaseMaps,
+  FeatureInfoUiItemsProvider,
+  MapLayersPrefBrowserStorage,
+  MapLayersUI,
+  MapLayersUiItemsProvider,
+} from "@itwin/map-layers";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
 import { MeasurementActionToolbar, MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
 import { OneClickLCAProvider } from "@itwin/one-click-lca-react";
@@ -43,7 +49,7 @@ import type { UiItemsProvider } from "@itwin/appui-react";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
-  uiItemsProviders: UiItemsProvider[];
+  getUiItemsProviders: () => UiItemsProvider[];
 }
 
 export function getUiProvidersConfig(): UiProvidersConfig {
@@ -54,7 +60,9 @@ export function getUiProvidersConfig(): UiProvidersConfig {
       const promises = matchingItems.map(async (item) => item.initialize());
       await Promise.all(promises);
     },
-    uiItemsProviders: matchingItems.flatMap((item) => item.createUiItemsProviders()),
+    getUiItemsProviders() {
+      return matchingItems.flatMap((item) => item.createUiItemsProviders());
+    },
   };
 }
 
@@ -235,16 +243,18 @@ const configuredUiItems = new Map<string, UiItem>([
         await MeasureTools.startup();
         MeasurementActionToolbar.setDefaultActionProvider();
       },
-      createUiItemsProviders: () => [new MeasureToolsUiItemsProvider({
-        measurementFormattingProps: {
-          distance: {
-            bearing: {
-              koqName: "RoadRailUnits.Bearing",
-              persistenceUnitName: "Units.RAD"
-            }
-          }
-        }
-      })],
+      createUiItemsProviders: () => [
+        new MeasureToolsUiItemsProvider({
+          measurementFormattingProps: {
+            distance: {
+              bearing: {
+                koqName: "RoadRailUnits.Bearing",
+                persistenceUnitName: "Units.RAD",
+              },
+            },
+          },
+        }),
+      ],
     },
   ],
   [
@@ -254,7 +264,9 @@ const configuredUiItems = new Map<string, UiItem>([
         await MapLayersFormats.initialize();
         await MapLayersUI.initialize({ iTwinConfig: new MapLayersPrefBrowserStorage() });
       },
-      createUiItemsProviders: () => [new MapLayersUiItemsProvider(), new FeatureInfoUiItemsProvider({})],
+      createUiItemsProviders: () => {
+        return [new MapLayersUiItemsProvider({ baseMapLayers: createDefaultGoogleMapsBaseMaps() }), new FeatureInfoUiItemsProvider({})];
+      },
     },
   ],
   [

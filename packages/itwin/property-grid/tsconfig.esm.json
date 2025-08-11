@@ -5,7 +5,5 @@
     "moduleResolution": "NodeNext",
     "outDir": "lib/esm"
   },
-  "exclude": [
-    "src/e2e-tests/**/*"
-  ]
+  "exclude": ["src/e2e-tests/**/*"]
 }

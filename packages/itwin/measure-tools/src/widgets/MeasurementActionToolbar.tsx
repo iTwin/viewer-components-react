@@ -6,9 +6,18 @@
 import * as React from "react";
 import type { XAndY } from "@itwin/core-geometry";
 import { Point2d } from "@itwin/core-geometry";
-import { RelativePosition } from "@itwin/appui-abstract";
 import type { ItemProps, ToolbarActionItem } from "@itwin/appui-react";
-import { ActionButtonItemDef, CursorInformation, CursorPopupManager, ToolbarItemUtilities } from "@itwin/appui-react";
+import {
+  ActionButtonItemDef,
+  CursorInformation,
+  PopupManager,
+  PositionPopup,
+  Toolbar,
+  ToolbarItemUtilities
+} from "@itwin/appui-react";
+import { IModelApp } from "@itwin/core-frontend";
+import { Direction } from "@itwin/components-react";
+
 import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking.js";
 import type { Measurement, MeasurementPickContext } from "../api/Measurement.js";
 import { MeasurementManager } from "../api/MeasurementManager.js";
@@ -102,7 +111,6 @@ export class MeasurementActionDefinitions {
       label: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.unlock"),
       tooltip: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.unlock"),
       execute: (args: Measurement[]) => {
-
         args.forEach((m) => {
           if (m.isLocked) {
             m.isLocked = false;
@@ -124,7 +132,6 @@ export class MeasurementActionDefinitions {
       label: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.lock"),
       tooltip: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.lock"),
       execute: (args: Measurement[]) => {
-
         args.forEach((m) => {
           if (!m.isLocked) {
             m.isLocked = true;
@@ -145,7 +152,6 @@ export class MeasurementActionDefinitions {
       label: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.hideMeasurements"),
       tooltip: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.hideMeaurements"),
       execute: (args: Measurement[]) => {
-
         args.forEach((m) => {
           if (m.isVisible) {
             m.isVisible = false;
@@ -165,7 +171,6 @@ export class MeasurementActionDefinitions {
       label: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.displayMeasurements"),
       tooltip: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.displayMeasurements"),
       execute: (args: Measurement[]) => {
-
         args.forEach((m) => {
           if (!m.isVisible) {
             m.isVisible = true;
@@ -185,7 +190,6 @@ export class MeasurementActionDefinitions {
       label: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.displayLabels"),
       tooltip: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.displayLabels"),
       execute: (args: Measurement[]) => {
-
         args.forEach((m) => {
           if (!m.displayLabels) {
             m.displayLabels = true;
@@ -205,7 +209,6 @@ export class MeasurementActionDefinitions {
       label: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.hideLabels"),
       tooltip: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.hideLabels"),
       execute: (args: Measurement[]) => {
-
         args.forEach((m) => {
           if (m.displayLabels) {
             m.displayLabels = false;
@@ -225,7 +228,6 @@ export class MeasurementActionDefinitions {
       label: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.displayMeasurementAxes"),
       tooltip: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.displayMeasurementAxes"),
       execute: (args: Measurement[]) => {
-
         args.forEach((m) => {
           if (m instanceof DistanceMeasurement && !m.showAxes) {
             m.showAxes = true;
@@ -245,7 +247,6 @@ export class MeasurementActionDefinitions {
       label: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.hideMeasurementAxes"),
       tooltip: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.hideMeasurementAxes"),
       execute: (args: Measurement[]) => {
-
         args.forEach((m) => {
           if (m instanceof DistanceMeasurement && m.showAxes) {
             m.showAxes = false;
@@ -312,33 +313,53 @@ export class MeasurementActionToolbar {
    * @param measurements array of Measurement the actions are for. First one is always the one that initiated the event.
    * @param screenPoint Where on the screen the toolbar is to be positioned (e.g. cursor point)
    * @param offset Optional offset from the position. Default is (0,0)
-   * @param relativePosition Optional direction the toolbar will open from. Default is Top (so will be above and centered from point + offset).
    * @returns true if the toolbar was opened, false if otherwise (e.g. no action items to view).
    */
-  public static openToolbar(measurements: Measurement[], screenPoint: XAndY, offset?: XAndY, relativePosition?: RelativePosition): boolean {
+  public static openToolbar(measurements: Measurement[], screenPoint: XAndY, offset?: XAndY): boolean {
     // Ensure a previous toolbar was closed out
     this.closeToolbar(false);
 
     const measurementsForActions = measurements.filter((m) => m.allowActions);
-    if (measurementsForActions.length === 0)
-      return false;
+    if (measurementsForActions.length === 0) return false;
 
-    if (this._filterHandler && !this._filterHandler(measurementsForActions))
-      return false;
+    if (this._filterHandler && !this._filterHandler(measurementsForActions)) return false;
 
     // Query all action items...if have none, do not show the toolbar
     const itemList = this.buildActionList(measurementsForActions);
-    if (itemList.length === 0)
-      return false;
+    if (itemList.length === 0) return false;
 
     // Build toolbar ID, making it unique so we can fade out a previous toolbar and not have that interfere with a new toolbar
     this._lastPopupId = `measurement-action-toolbar-${this._counter.toString()}`;
     this._counter++;
 
     // Show toolbar
-    const realOffset = (offset !== undefined) ? offset : Point2d.createZero();
-    const realRelPosition = (relativePosition !== undefined) ? relativePosition : RelativePosition.Top;
-    CursorPopupManager.open(this._lastPopupId, this.buildToolbar(measurementsForActions, itemList), screenPoint, realOffset, realRelPosition);
+    const realOffset = offset !== undefined ? offset : Point2d.createZero();
+    const parentDocument = IModelApp.viewManager.selectedView?.vpDiv.ownerDocument;
+    if (!parentDocument) {
+      return true;
+    }
+
+    const toolItems: ToolbarActionItem[] = itemList.map((itemDef: MeasurementActionItemDef, index) => {
+      itemDef.measurements = measurements;
+      return ToolbarItemUtilities.createActionItem(itemDef.id, index * 10, itemDef.iconSpec, itemDef.label, itemDef.execute);
+    });
+    // Center the toolbar horizontally and position it to specified offset above the cursor point
+    const toolbarWidth = toolItems.length * 36; // Approximate width based on typical button size
+    const point = {
+      x: screenPoint.x - realOffset.x - toolbarWidth / 2,
+      y: screenPoint.y - realOffset.y,
+    };
+    const component = (
+      <PositionPopup point={point}>
+        <Toolbar expandsTo={Direction.Top} items={toolItems} />
+      </PositionPopup>
+    );
+    PopupManager.addOrUpdatePopup({
+      id: this._lastPopupId,
+      pt: point,
+      component,
+      parentDocument,
+    });
 
     FeatureTracking.notifyFeature(MeasureToolsFeatures.MeasurementActionsToolbar_Open);
 
@@ -351,17 +372,15 @@ export class MeasurementActionToolbar {
   public static closeToolbar(fadeOut: boolean = false): void {
     // Forcibly close a fading toolbar if we get another close call otherwise they may interfere with each other
     if (this._fadeoutPopId !== undefined) {
-      CursorPopupManager.close(this._fadeoutPopId, false, false);
+      PopupManager.removePopup(this._fadeoutPopId);
       this._fadeoutPopId = undefined;
     }
 
-    if (this._lastPopupId === undefined)
-      return;
+    if (this._lastPopupId === undefined) return;
 
-    if (fadeOut)
-      this._fadeoutPopId = this._lastPopupId;
+    if (fadeOut) this._fadeoutPopId = this._lastPopupId;
 
-    CursorPopupManager.close(this._lastPopupId, false, fadeOut);
+    PopupManager.removePopup(this._lastPopupId);
     this._lastPopupId = undefined;
   }
 
@@ -373,7 +392,7 @@ export class MeasurementActionToolbar {
     // Filter out duplicates
     this.dropActionProvider(provider);
 
-    const realPriority = (providerPriority !== undefined) ? providerPriority : 0;
+    const realPriority = providerPriority !== undefined ? providerPriority : 0;
     this._actionProviders.push({ priority: realPriority, provider });
 
     this._actionProviders.sort((a, b) => b.priority - a.priority);
@@ -384,8 +403,7 @@ export class MeasurementActionToolbar {
    */
   public static dropActionProvider(provider: MeasurementActionProvider): void {
     for (let i = 0; i < this._actionProviders.length; i++) {
-      if (this._actionProviders[i].provider === provider)
-        this._actionProviders.splice(i, 1);
+      if (this._actionProviders[i].provider === provider) this._actionProviders.splice(i, 1);
     }
   }
 
@@ -397,31 +415,31 @@ export class MeasurementActionToolbar {
   /** Sets a default provider (which can be later cleared). This sets lock/unlock, delete, and open properties action buttons. */
   public static setDefaultActionProvider() {
     MeasurementActionToolbar.addActionProvider((measurements: Measurement[], actionItemList: MeasurementActionItemDef[]) => {
-
       let allMeasurementsShowingLabels = true;
       let allMeasurementsLocked = true;
       let hasDistanceMeasurements = false;
       let allDistanceMeasurementsShowingAxes = true;
 
       for (const measurement of measurements) {
-        if (!measurement.isLocked)
-          allMeasurementsLocked = false;
+        if (!measurement.isLocked) allMeasurementsLocked = false;
 
-        if (!measurement.displayLabels)
-          allMeasurementsShowingLabels = false;
+        if (!measurement.displayLabels) allMeasurementsShowingLabels = false;
 
         if (measurement instanceof DistanceMeasurement) {
           hasDistanceMeasurements = true;
-          if (!measurement.showAxes)
-            allDistanceMeasurementsShowingAxes = false;
+          if (!measurement.showAxes) allDistanceMeasurementsShowingAxes = false;
         }
       }
 
-      actionItemList.push((allMeasurementsLocked) ? MeasurementActionDefinitions.unlockAction : MeasurementActionDefinitions.lockAction);
-      actionItemList.push((allMeasurementsShowingLabels) ? MeasurementActionDefinitions.hideMeasurementLabels : MeasurementActionDefinitions.displayMeasurementLabels);
+      actionItemList.push(allMeasurementsLocked ? MeasurementActionDefinitions.unlockAction : MeasurementActionDefinitions.lockAction);
+      actionItemList.push(
+        allMeasurementsShowingLabels ? MeasurementActionDefinitions.hideMeasurementLabels : MeasurementActionDefinitions.displayMeasurementLabels,
+      );
 
       if (hasDistanceMeasurements)
-        actionItemList.push((allDistanceMeasurementsShowingAxes) ? MeasurementActionDefinitions.hideMeasurementAxes : MeasurementActionDefinitions.displayMeasurementAxes);
+        actionItemList.push(
+          allDistanceMeasurementsShowingAxes ? MeasurementActionDefinitions.hideMeasurementAxes : MeasurementActionDefinitions.displayMeasurementAxes,
+        );
 
       actionItemList.push(MeasurementActionDefinitions.deleteAction);
       actionItemList.push(MeasurementActionDefinitions.openPropertiesAction);
@@ -431,8 +449,7 @@ export class MeasurementActionToolbar {
   private static buildActionList(measurements: Measurement[]): MeasurementActionItemDef[] {
     const itemList = new Array<MeasurementActionItemDef>();
 
-    for (const entry of this._actionProviders)
-      entry.provider(measurements, itemList);
+    for (const entry of this._actionProviders) entry.provider(measurements, itemList);
 
     return itemList;
   }
@@ -442,7 +459,7 @@ export class MeasurementActionToolbar {
       itemDef.measurements = measurements;
       return ToolbarItemUtilities.createActionItem(itemDef.id, index * 10, itemDef.iconSpec, itemDef.label, itemDef.execute);
     });
-    return <PopupToolbar items={toolItems} onClose={() => MeasurementActionToolbar.closeToolbar(true)}/>;
+    return <PopupToolbar items={toolItems} onClose={() => MeasurementActionToolbar.closeToolbar(true)} />;
   }
 }
 
@@ -462,7 +479,7 @@ ShimFunctions.defaultButtonEventAction = (measurement: Measurement, pickContext:
   measurements.unshift(measurement);
 
   // Open toolbar for measurement
-  MeasurementActionToolbar.openToolbar(measurements, CursorInformation.cursorPosition, Point2d.create(0, 10));
+  MeasurementActionToolbar.openToolbar(measurements, CursorInformation.cursorPosition, Point2d.create(0, 60));
 
   // Notify global event that this measurement is responding to the button
   MeasurementManager.instance.notifyMeasurementButtonEvent(measurement, pickContext);

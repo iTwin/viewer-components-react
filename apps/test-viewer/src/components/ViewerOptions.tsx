@@ -100,7 +100,7 @@ function ToggleTreeNodesSelectionButton() {
 }
 
 function SelectionScopeSelectorButton() {
-  // eslint-disable-next-line deprecation/deprecation
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   const [activeScope, setActiveScope] = useState(getScopeId(Presentation.selection.scopes.activeScope));
   return (
     <Select
@@ -113,13 +113,13 @@ function SelectionScopeSelectorButton() {
         const scopeId = value as keyof typeof scopes;
         setActiveScope(scopeId);
         // TODO: Viewer should allow specifying the active selection scope without using `Presentation.selection`
-        // eslint-disable-next-line deprecation/deprecation
+        // eslint-disable-next-line @typescript-eslint/no-deprecated
         Presentation.selection.scopes.activeScope = scopes[scopeId].props;
       }}
     />
   );
 }
-// eslint-disable-next-line deprecation/deprecation
+// eslint-disable-next-line @typescript-eslint/no-deprecated
 function getScopeId(scopeArg: SelectionScopesManager["activeScope"]): keyof typeof scopes {
   if (!scopeArg) {
     return "element";
