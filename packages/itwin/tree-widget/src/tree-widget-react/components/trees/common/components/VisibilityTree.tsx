@@ -14,6 +14,7 @@ import type { ReactNode } from "react";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { HierarchyVisibilityHandler } from "../UseHierarchyVisibility.js";
 import type { VisibilityContext } from "./TreeNodeVisibilityButton.js";
+
 /** @beta */
 export type VisibilityTreeProps = Omit<TreeProps, "treeRenderer" | "imodelAccess"> & {
   /** Callback for creating visibility handler used to control visibility of instances represented by tree nodes. */
