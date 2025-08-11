@@ -64,7 +64,7 @@ import type { CategoriesTreeHierarchyConfiguration } from "../CategoriesTreeDefi
 import type { CategoriesTreeIdsCache } from "./CategoriesTreeIdsCache.js";
 import type { FilteredTree } from "./FilteredTree.js";
 import type { IVisibilityChangeEventListener } from "../../common/internal/VisibilityChangeEventListener.js";
-import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
+import type { ElementId, ModelId } from "../../common/internal/Types.js";
 
 /** @alpha */
 interface GetCategoryVisibilityStatusProps {

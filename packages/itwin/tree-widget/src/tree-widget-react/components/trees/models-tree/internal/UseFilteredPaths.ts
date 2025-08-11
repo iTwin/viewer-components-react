@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import { useEffect, useMemo, useState } from "react";
 import { HierarchyFilteringPath, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { useFocusedInstancesContext } from "../../common/FocusedInstancesContext.js";
@@ -13,6 +12,7 @@ import { useTelemetryContext } from "../../common/UseTelemetryContext.js";
 import { joinHierarchyFilteringPaths } from "../../common/Utils.js";
 import { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
 
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { VisibilityTreeProps } from "../../common/components/VisibilityTree.js";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
