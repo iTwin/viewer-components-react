@@ -1,0 +1,135 @@
+{
+  "QuantityFormat": {
+    "labels": {
+      "advancedOptions": "Advanced Options",
+      "samplePreview": "Sample Preview",
+      "formatTypeSublabel": "Format Type",
+      "units": "Units",
+      "precision": "Precision",
+      "value": "Value",
+      "formatted": "Formatted",
+      "type": "Type",
+      "appendUnitLabel": "Append Unit Label",
+      "labelSeparator": "Label Separator",
+      "addSubUnit": "Add Sub Unit",
+      "removeUnit": "Remove Unit",
+      "compositeSpacer": "Composite Spacer",
+      "compositeSpacerDescription": "Separator between composite units",
+      "signOptionLabel": "Sign Option",
+      "signOptionTooltip": "Select how positive and negative signs are displayed",
+      "stationOffsetLabel": "Station Offset",
+      "stationSeparatorLabel": "Station Separator",
+      "useThousandSeparatorLabel": "Use Thousand Separator",
+      "thousandSeparatorLabel": "Thousand Separator",
+      "thousandSelectorTooltip": "Select thousands separator character",
+      "decimalSeparatorLabel": "Decimal Separator",
+      "showTrailZerosLabel": "Show Trailing Zeros",
+      "keepDecimalPointLabel": "Keep Decimal Point",
+      "keepSingleZeroLabel": "Keep Single Zero",
+      "zeroEmptyLabel": "Zero Empty",
+      "fractionDashLabel": "Use Fraction Dash",
+      "scientificTypeLabel": "Scientific Type",
+      "scientificTypeTooltip": "Select scientific notation format",
+      "ratioTypeLabel": "Ratio Type",
+      "azimuthBaseUnit": "Azimuth Base Unit",
+      "azimuthCounterClockwise": "Counter Clockwise",
+      "azimuthBase": "Azimuth Base",
+      "moreLabel": "More",
+      "lessLabel": "Less"
+    },
+    "none": "None",
+    "space": "Space",
+    "dash": "Dash",
+    "decimal": "Decimal",
+    "fractional": "Fractional",
+    "scientific": "Scientific",
+    "station": "Station",
+    "azimuth": "Azimuth",
+    "bearing": "Bearing",
+    "ratio": "Ratio",
+    "decimal_precision": {
+      "zero": "0",
+      "one": "1",
+      "two": "2",
+      "three": "3",
+      "four": "4",
+      "five": "5",
+      "six": "6",
+      "seven": "7",
+      "eight": "8",
+      "nine": "9",
+      "ten": "10",
+      "eleven": "11",
+      "twelve": "12"
+    },
+    "fraction_precision": {
+      "whole": "Whole",
+      "half": "1/2",
+      "quarter": "1/4",
+      "eighth": "1/8",
+      "sixteenth": "1/16",
+      "thirty_second": "1/32",
+      "sixty_fourth": "1/64",
+      "one_twenty_eighth": "1/128",
+      "two_fifty_sixth": "1/256"
+    },
+    "sign_option": {
+      "noSign": "No Sign",
+      "onlyNegative": "Only Negative",
+      "signAlways": "Always Sign",
+      "negativeParentheses": "Negative in Parentheses"
+    },
+    "station_size": {
+      "one": "1",
+      "two": "2",
+      "three": "3",
+      "four": "4",
+      "five": "5"
+    },
+    "station_separator": {
+      "plus": "+",
+      "minus": "-",
+      "space": " "
+    },
+    "thousand_separator": {
+      "comma": ",",
+      "point": ".",
+      "space": " ",
+      "none": "None"
+    },
+    "decimal_separator": {
+      "point": ".",
+      "comma": ","
+    },
+    "scientific-type": {
+      "normalized": "Normalized",
+      "zero-normalized": "Zero Normalized"
+    },
+    "ratio-type": {
+      "n-to-one": {
+        "label": "N:1",
+        "description": "N to one ratio format"
+      },
+      "one-to-n": {
+        "label": "1:N",
+        "description": "One to N ratio format"
+      },
+      "use-greatest-common-divisor": {
+        "label": "Use GCD",
+        "description": "Use greatest common divisor"
+      },
+      "value-based": {
+        "label": "Value Based",
+        "description": "Value based ratio format"
+      },
+      "default": {
+        "description": "Default ratio type description"
+      }
+    },
+    "azimuthType": {
+      "baseUnitTooltip": "Base unit for azimuth measurement",
+      "ccwFlagTooltip": "Counter-clockwise direction flag",
+      "baseTooltip": "Base angle for azimuth measurement"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "extends": "./node_modules/@itwin/build-tools/tsconfig-base.json",
+  "compilerOptions": {
+    "jsx": "react",
+    "module": "NodeNext",
+    "moduleResolution": "nodenext",
+    "target": "ES2024",
+    "outDir": "./lib"
+  },
+  "include": [
+    "./src/**/*.ts*"
+  ],
+  "exclude": [
+    "vite.config.ts"
+  ]
+}

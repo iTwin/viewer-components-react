@@ -1,0 +1,83 @@
+{
+  "name": "@itwin/quantity-formatting-react",
+  "version": "0.0.0",
+  "license": "MIT",
+  "description": "React components and utilities for quantity formatting",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iTwin/viewer-components-react/tree/master/packages/itwin/quantity-formatting"
+  },
+  "type": "module",
+  "types": "./lib/quantity-formatting-react.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/quantity-formatting-react.d.ts",
+      "default": "./lib/quantity-formatting-react.js"
+    }
+  },
+  "scripts": {
+    "build": "npm run copy:public && tsc 1>&2 && npm run copy:css",
+    "copy:public": "cpx \"./public/**/*\" ./lib/public",
+    "copy:css": "cpx \"./src/**/*.*css\" ./lib",
+    "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
+    "clean": "rimraf lib",
+    "rebuild": "npm run clean && npm run build",
+    "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
+    "lint:fix": "npm run lint -- --fix",
+    "lint:table": "eslint ./**/*.{ts,tsx} 1>&2 -f ./node_modules/@itwin/eslint-plugin/dist/formatters/no-internal-summary-with-table.js",
+    "test": "vitest run",
+    "cover": "vitest run --coverage"
+  },
+  "keywords": [
+    "Bentley",
+    "BIM",
+    "iModel",
+    "iTwin",
+    "Quantity",
+    "Formatting",
+    "Units",
+    "iTwin.js"
+  ],
+  "author": {
+    "name": "Bentley Systems, Inc.",
+    "url": "http://www.bentley.com"
+  },
+  "peerDependencies": {
+    "@itwin/core-bentley": "^5.1.1",
+    "@itwin/core-common": "^5.1.1",
+    "@itwin/core-frontend": "^5.1.1",
+    "@itwin/core-quantity": "^5.1.1",
+    "@itwin/ecschema-metadata": "^5.1.1",
+    "@itwin/itwinui-react": "^3.16.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "@itwin/build-tools": "^5.1.1",
+    "@itwin/core-bentley": "^5.1.1",
+    "@itwin/core-common": "^5.1.1",
+    "@itwin/core-frontend": "^5.1.1",
+    "@itwin/core-quantity": "^5.1.1",
+    "@itwin/ecschema-metadata": "^5.1.1",
+    "@itwin/eslint-plugin": "^4.1.1",
+    "@itwin/itwinui-react": "^3.17.3",
+    "@types/react": "^19.1.9",
+    "@types/react-dom": "^19.1.7",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "@vitest/coverage-v8": "^3.2.4",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-react": "^7.37.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "~5.7.3",
+    "vite": "^7.1.1",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "@itwin/itwinui-icons-react": "^2.10.0"
+  }
+}
