@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 // WARNING: The order of imports in this file is important!
 
-// setup chai
+/// setup chai
 import chai from "chai";
 import sinonChai from "sinon-chai";
 chai.use(sinonChai);
@@ -12,6 +12,7 @@ chai.use(sinonChai);
 // get rid of various xhr errors in the console
 import globalJsdom from "global-jsdom";
 import * as jsdom from "jsdom";
+
 globalJsdom(undefined, {
   virtualConsole: new jsdom.VirtualConsole().sendTo(console, { omitJSDOMErrors: true }),
 });

@@ -77,7 +77,7 @@ export function useFilteredPaths({
     if (!getSubTreePaths) {
       return undefined;
     }
-    return async ({ imodelAccess /* abortSignal */ }) => {
+    return async ({ imodelAccess, abortSignal }) => {
       try {
         const paths = await getSubTreePaths({
           createInstanceKeyPaths: async ({ targetItems }) =>
@@ -87,7 +87,7 @@ export function useFilteredPaths({
               idsCache: getModelsTreeIdsCache(),
               hierarchyConfig: hierarchyConfiguration,
               limit: "unbounded",
-              // abortSignal,
+              abortSignal,
             }),
         });
         return paths.map((path) => HierarchyFilteringPath.normalize(path).path);
@@ -111,7 +111,7 @@ export function useFilteredPaths({
     };
 
     if (loadFocusedItems) {
-      return async ({ imodelAccess /* abortSignal */ }) => {
+      return async ({ imodelAccess, abortSignal }) => {
         try {
           const focusedItems = await collectFocusedItems(loadFocusedItems);
           return await createFilteringPathsResult({
@@ -121,9 +121,9 @@ export function useFilteredPaths({
                 idsCache: getModelsTreeIdsCache(),
                 targetItems: focusedItems,
                 hierarchyConfig: hierarchyConfiguration,
-                // abortSignal,
+                abortSignal,
               }).then((createdPaths) => createdPaths.map((path) => ("path" in path ? path : { path, options: { autoExpand: true } }))),
-            getSubTreePaths: async () => (getSubTreePathsInternal ? getSubTreePathsInternal({ imodelAccess /* abortSignal */ }) : undefined),
+            getSubTreePaths: async () => (getSubTreePathsInternal ? getSubTreePathsInternal({ imodelAccess, abortSignal }) : undefined),
             handlePaths: async (paths) => handlePaths(paths, imodelAccess),
           });
         } catch (e) {
@@ -139,7 +139,7 @@ export function useFilteredPaths({
     }
 
     if (getFilteredPaths) {
-      return async ({ imodelAccess /* abortSignal */ }) => {
+      return async ({ imodelAccess, abortSignal }) => {
         try {
           return await createFilteringPathsResult({
             getFilteringPaths: async () =>
@@ -151,11 +151,11 @@ export function useFilteredPaths({
                     idsCache: getModelsTreeIdsCache(),
                     hierarchyConfig: hierarchyConfiguration,
                     limit: "unbounded",
-                    // abortSignal,
+                    abortSignal,
                   }),
                 filter,
               }),
-            getSubTreePaths: async () => (getSubTreePathsInternal ? getSubTreePathsInternal({ imodelAccess /* abortSignal */ }) : undefined),
+            getSubTreePaths: async () => (getSubTreePathsInternal ? getSubTreePathsInternal({ imodelAccess, abortSignal }) : undefined),
             handlePaths: async (paths) => handlePaths(paths, imodelAccess),
           });
         } catch (e) {
@@ -171,7 +171,7 @@ export function useFilteredPaths({
     }
 
     if (filter) {
-      return async ({ imodelAccess /* abortSignal */ }) => {
+      return async ({ imodelAccess, abortSignal }) => {
         onFeatureUsed({ featureId: "filtering", reportInteraction: true });
         try {
           return await createFilteringPathsResult({
@@ -181,9 +181,9 @@ export function useFilteredPaths({
                 label: filter,
                 idsCache: getModelsTreeIdsCache(),
                 hierarchyConfig: hierarchyConfiguration,
-                // abortSignal,
+                abortSignal,
               }).then((createdPaths) => createdPaths.map((path) => ("path" in path ? path : { path, options: { autoExpand: true } }))),
-            getSubTreePaths: async () => (getSubTreePathsInternal ? getSubTreePathsInternal({ imodelAccess /* abortSignal */ }) : undefined),
+            getSubTreePaths: async () => (getSubTreePathsInternal ? getSubTreePathsInternal({ imodelAccess, abortSignal }) : undefined),
             handlePaths: async (paths) => handlePaths(paths, imodelAccess),
           });
         } catch (e) {

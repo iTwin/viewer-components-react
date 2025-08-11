@@ -58,11 +58,12 @@ export function useFilteredPaths({
       return undefined;
     }
 
-    return async ({ imodelAccess }) => {
+    return async ({ imodelAccess, abortSignal }) => {
       onFeatureUsed({ featureId: "filtering", reportInteraction: true });
       try {
         const paths = await CategoriesTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
+          abortSignal,
           label: filter,
           viewType,
           idsCache: getCategoriesTreeIdsCache(),
