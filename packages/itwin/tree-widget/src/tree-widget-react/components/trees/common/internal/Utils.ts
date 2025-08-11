@@ -18,7 +18,7 @@ import {
 } from "./ClassNameDefinitions.js";
 
 import type { Observable } from "rxjs";
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
 
@@ -124,4 +124,9 @@ export function getClassesByView(viewType: "2d" | "3d") {
   return viewType === "2d"
     ? ({ categoryClass: CLASS_NAME_DrawingCategory, elementClass: CLASS_NAME_GeometricElement2d, modelClass: CLASS_NAME_GeometricModel2d } as const)
     : ({ categoryClass: CLASS_NAME_SpatialCategory, elementClass: CLASS_NAME_GeometricElement3d, modelClass: CLASS_NAME_GeometricModel3d } as const);
+}
+
+/** @internal */
+export function getArrayFromId64Arg(arg: Id64Arg): Id64Array {
+  return typeof arg === "string" ? [arg] : Array.isArray(arg) ? arg : [...arg];
 }
