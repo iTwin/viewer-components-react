@@ -356,7 +356,7 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
     const result = from(categoryIds).pipe(
       mergeMap(async (categoryId) => {
         let visibility: "visible" | "hidden" | "unknown" = "unknown";
-        const categoryModels = getDistinctMapValues(await this._idsCache.getCategoriesElementModels([categoryId], true));
+        const categoryModels = getDistinctMapValues(await this._idsCache.getCategoriesElementModels(categoryId, true));
         let nonDefaultModelDisplayStatesCount = 0;
         for (const modelId of categoryModels) {
           if (!this._props.viewport.view.viewsModel(modelId)) {
@@ -443,7 +443,7 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
                         defaultStatus: () => this.getDefaultModelsCategoryVisibilityStatus({ modelId: model, categoryIds: [category] }),
                       }).pipe(
                         mergeMap((visibilityStatusAlwaysAndNeverDraw) => {
-                          return from(this._idsCache.getCategoriesModeledElements(model, [category])).pipe(
+                          return from(this._idsCache.getCategoriesModeledElements(model, category)).pipe(
                             getSubModeledElementsVisibilityStatus({
                               parentNodeVisibilityStatus: visibilityStatusAlwaysAndNeverDraw,
                               getModelVisibilityStatus: (modelProps) => this.getModelVisibilityStatus(modelProps),
@@ -452,7 +452,7 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
                         }),
                       );
                     }
-                    return from(this._idsCache.getCategoriesModeledElements(model, [category])).pipe(
+                    return from(this._idsCache.getCategoriesModeledElements(model, category)).pipe(
                       getSubModeledElementsVisibilityStatus({
                         parentNodeVisibilityStatus: createVisibilityStatus("hidden"),
                         getModelVisibilityStatus: (modelProps) => this.getModelVisibilityStatus(modelProps),
@@ -816,7 +816,7 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
           mergeMap(([categoryId, modelIds]) => {
             return from(modelIds).pipe(
               mergeMap((modelOfCategory) =>
-                from(this._idsCache.getCategoriesModeledElements(modelOfCategory, [categoryId])).pipe(
+                from(this._idsCache.getCategoriesModeledElements(modelOfCategory, categoryId)).pipe(
                   mergeMap((modeledElementIds) => this.changeModelDisplayState({ modelIds: modeledElementIds, on })),
                 ),
               ),

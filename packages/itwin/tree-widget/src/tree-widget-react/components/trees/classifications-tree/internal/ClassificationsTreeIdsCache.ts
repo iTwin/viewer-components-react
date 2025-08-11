@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { from, map, mergeMap } from "rxjs";
+import { Id64 } from "@itwin/core-bentley";
 import {
   CLASS_NAME_Classification,
   CLASS_NAME_ClassificationSystem,
@@ -15,10 +16,10 @@ import {
   CLASS_NAME_SpatialCategory,
 } from "../../common/internal/ClassNameDefinitions.js";
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
-import { getDistinctMapValues } from "../../common/internal/Utils.js";
+import { getDistinctMapValues, joinId64Arg } from "../../common/internal/Utils.js";
 
 import type { Observable } from "rxjs";
-import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { ClassificationsTreeHierarchyConfiguration } from "../ClassificationsTreeDefinition.js";
@@ -173,10 +174,10 @@ export class ClassificationsTreeIdsCache implements Disposable {
     return this._modelWithCategoryModeledElements;
   }
 
-  public async getCategoriesModeledElements(modelId: Id64String, categoryIds: Id64Array): Promise<Id64Array> {
+  public async getCategoriesModeledElements(modelId: Id64String, categoryIds: Id64Arg): Promise<Id64Array> {
     const modelWithCategoryModeledElements = await this.getModelWithCategoryModeledElements();
     const result = new Array<ElementId>();
-    for (const categoryId of categoryIds) {
+    for (const categoryId of Id64.iterable(categoryIds)) {
       const entry = modelWithCategoryModeledElements.get(`${modelId}-${categoryId}`);
       if (entry !== undefined) {
         result.push(...entry);
@@ -185,10 +186,10 @@ export class ClassificationsTreeIdsCache implements Disposable {
     return result;
   }
 
-  public async getCategoriesElementModels(categoryIds: Id64Array, includeSubModels?: boolean): Promise<Map<CategoryId, Set<ModelId>>> {
+  public async getCategoriesElementModels(categoryIds: Id64Arg, includeSubModels?: boolean): Promise<Map<CategoryId, Set<ModelId>>> {
     const elementModelsCategories = await this.getElementModelsCategories();
     const result = new Map<CategoryId, Set<ModelId>>();
-    for (const categoryId of categoryIds) {
+    for (const categoryId of Id64.iterable(categoryIds)) {
       for (const [modelId, { category2dIds, category3dIds, isSubModel }] of elementModelsCategories) {
         if ((includeSubModels || !isSubModel) && (category2dIds.has(categoryId) || category3dIds.has(categoryId))) {
           let categoryModels = result.get(categoryId);
@@ -319,46 +320,50 @@ export class ClassificationsTreeIdsCache implements Disposable {
     return this._classificationInfos;
   }
 
-  public async getAllContainedCategories(classificationOrTableIds: Id64Array): Promise<{ drawing: Id64Array; spatial: Id64Array }> {
+  public async getAllContainedCategories(classificationOrTableIds: Id64Arg): Promise<{ drawing: Id64Array; spatial: Id64Array }> {
     const result = { drawing: new Array<CategoryId>(), spatial: new Array<CategoryId>() };
-    if (classificationOrTableIds.length === 0) {
+    if (Id64.sizeOf(classificationOrTableIds) === 0) {
       return result;
     }
     const classificationsInfo = await this.getClassificationsInfo();
-    await Promise.all(
-      classificationOrTableIds.map(async (classificationOrTableId) => {
-        const classificationInfo = classificationsInfo.get(classificationOrTableId);
-        if (classificationInfo === undefined) {
-          return;
-        }
-        const childClassificationsResult = await this.getAllContainedCategories(classificationInfo.childClassificationIds);
-        result.drawing.push(...classificationInfo.relatedCategories2d, ...childClassificationsResult.drawing);
-        result.spatial.push(...classificationInfo.relatedCategories3d, ...childClassificationsResult.spatial);
-      }),
-    );
-    return result;
-  }
-
-  public async getDirectChildClassifications(classificationOrTableIds: Id64Array): Promise<ClassificationId[]> {
-    const result = new Array<ClassificationId>();
-    if (classificationOrTableIds.length === 0) {
-      return result;
-    }
-    const classificationsInfo = await this.getClassificationsInfo();
-    classificationOrTableIds.forEach((classificationOrTableId) => {
+    const promises = new Array<Promise<{ drawing: Id64Array; spatial: Id64Array }>>();
+    for (const classificationOrTableId of Id64.iterable(classificationOrTableIds)) {
       const classificationInfo = classificationsInfo.get(classificationOrTableId);
       if (classificationInfo === undefined) {
-        return;
+        continue;
       }
-      result.push(...classificationInfo.childClassificationIds);
-    });
+      result.drawing.push(...classificationInfo.relatedCategories2d);
+      result.spatial.push(...classificationInfo.relatedCategories3d);
+      promises.push(this.getAllContainedCategories(classificationInfo.childClassificationIds));
+    }
+    const promisesResult = await Promise.all(promises);
+    for (const { drawing, spatial } of promisesResult) {
+      result.drawing.push(...drawing);
+      result.spatial.push(...spatial);
+    }
     return result;
   }
 
-  public getClassificationsPathObs(classificationIds: Id64Array): Observable<HierarchyNodeIdentifiersPath> {
+  public async getDirectChildClassifications(classificationOrTableIds: Id64Arg): Promise<ClassificationId[]> {
+    const result = new Array<ClassificationId>();
+    if (Id64.sizeOf(classificationOrTableIds) === 0) {
+      return result;
+    }
+    const classificationsInfo = await this.getClassificationsInfo();
+    for (const classificationOrTableId of Id64.iterable(classificationOrTableIds)) {
+      const classificationInfo = classificationsInfo.get(classificationOrTableId);
+      if (classificationInfo === undefined) {
+        continue;
+      }
+      result.push(...classificationInfo.childClassificationIds);
+    }
+    return result;
+  }
+
+  public getClassificationsPathObs(classificationIds: Id64Arg): Observable<HierarchyNodeIdentifiersPath> {
     return from(this.getClassificationsInfo()).pipe(
       mergeMap((classificationsInfo) => {
-        return from(classificationIds).pipe(
+        return from(Id64.iterable(classificationIds)).pipe(
           map((classificationId) => {
             const path: HierarchyNodeIdentifiersPath = [{ id: classificationId, className: CLASS_NAME_Classification }];
             let parentId = classificationsInfo.get(classificationId)?.parentClassificationOrTableId;
@@ -383,24 +388,24 @@ export class ClassificationsTreeIdsCache implements Disposable {
     return [...classificationsInfo.keys()];
   }
 
-  private async *queryFilteredElementsData({ element2dIds, element3dIds }: { element2dIds: Id64Array; element3dIds: Id64Array }): AsyncIterableIterator<{
+  private async *queryFilteredElementsData({ element2dIds, element3dIds }: { element2dIds: Id64Arg; element3dIds: Id64Arg }): AsyncIterableIterator<{
     modelId: Id64String;
     id: ElementId;
     categoryId: Id64String;
   }> {
     const queries = new Array<string>();
-    if (element2dIds.length > 0) {
+    if (Id64.sizeOf(element2dIds) > 0) {
       queries.push(`
         SELECT Model.Id modelId, Category.Id categoryId, ECInstanceId id
         FROM ${CLASS_NAME_GeometricElement2d}
-        WHERE ECInstanceId IN (${element2dIds.join(", ")})
+        WHERE ECInstanceId IN (${joinId64Arg(element2dIds, ",")})
       `);
     }
-    if (element3dIds.length > 0) {
+    if (Id64.sizeOf(element3dIds) > 0) {
       queries.push(`
         SELECT Model.Id modelId, Category.Id categoryId, ECInstanceId id
         FROM ${CLASS_NAME_GeometricElement3d}
-        WHERE ECInstanceId IN (${element3dIds.join(", ")})
+        WHERE ECInstanceId IN (${joinId64Arg(element3dIds, ",")})
       `);
     }
     for await (const row of this._queryExecutor.createQueryReader(
@@ -415,16 +420,19 @@ export class ClassificationsTreeIdsCache implements Disposable {
     element2dIds,
     element3dIds,
   }: {
-    element2dIds: Id64Array;
-    element3dIds: Id64Array;
+    element2dIds: Id64Arg;
+    element3dIds: Id64Arg;
   }): Promise<Map<ElementId, { categoryId: Id64String; modelId: Id64String }>> {
-    if (element2dIds.length === 0 && element3dIds.length === 0) {
+    if (Id64.sizeOf(element2dIds) === 0 && Id64.sizeOf(element3dIds) === 0) {
       return new Map();
     }
 
     this._filteredElementsData ??= (async () => {
       const filteredElementsData = new Map();
-      for await (const { modelId, id, categoryId } of this.queryFilteredElementsData({ element2dIds, element3dIds })) {
+      for await (const { modelId, id, categoryId } of this.queryFilteredElementsData({
+        element2dIds,
+        element3dIds,
+      })) {
         filteredElementsData.set(id, { modelId, categoryId });
       }
       return filteredElementsData;
