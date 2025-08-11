@@ -55,6 +55,41 @@ import type { IVisibilityChangeEventListener } from "../../common/internal/Visib
 import type { GetVisibilityFromAlwaysAndNeverDrawnElementsProps } from "../../common/internal/VisibilityUtils.js";
 import type { CategoriesTreeIdsCache } from "./CategoriesTreeIdsCache.js";
 import type { FilteredTree } from "./FilteredTree.js";
+import type { IVisibilityChangeEventListener } from "../../common/internal/VisibilityChangeEventListener.js";
+import type { ElementId, ModelId } from "../../common/internal/Types.js";
+
+/** @alpha */
+interface GetCategoryVisibilityStatusProps {
+  categoryIds: Id64Array;
+  modelId?: Id64String;
+  ignoreSubCategories?: boolean;
+}
+
+/** @alpha */
+interface ChangeCategoryVisibilityStateProps extends GetCategoryVisibilityStatusProps {
+  on: boolean;
+}
+
+/** @alpha */
+interface GetGeometricElementVisibilityStatusProps {
+  elementId: Id64String;
+  modelId: Id64String;
+  categoryId: Id64String;
+}
+
+/** @alpha */
+interface ChangeGeometricElementsDisplayStateProps {
+  elementIds: Id64Set;
+  modelId: Id64String;
+  categoryId: Id64String;
+  on: boolean;
+}
+
+/** @alpha */
+interface ChangeModelVisibilityStateProps {
+  ids: Id64Arg;
+  on: boolean;
+}
 
 /** @alpha */
 interface GetFilteredNodeVisibilityProps {
