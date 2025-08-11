@@ -334,9 +334,6 @@ Use `getSubTreePaths` when you need to restrict the visible hierarchy to a speci
 
 **Restrict the hierarchy to a sub-tree and keep the default filtering logic**: You already have a list of `InstanceKey` items that should remain in the tree. Pass them as `targetItems` to `createInstanceKeyPaths`. This will restrict the hierarchy to a sub-tree, but filtering will work as before.
 
-  <!-- [[include: [TreeWidget.GetSubTreePathsComponentWithTargetItemsExample], tsx]] -->
-  <!-- BEGIN EXTRACTION -->
-
 ```tsx
 type UseModelsTreeProps = Props<typeof useModelsTree>;
 type GetSubTreePathsType = NonNullable<UseModelsTreeProps["getSubTreePaths"]>;
@@ -375,8 +372,6 @@ function CustomModelsTreeComponentWithTargetItems({
   );
 }
 ```
-
-  <!-- END EXTRACTION -->
 
 ### Categories tree
 
