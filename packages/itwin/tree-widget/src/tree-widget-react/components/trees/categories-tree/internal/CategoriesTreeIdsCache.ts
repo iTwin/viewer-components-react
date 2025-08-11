@@ -6,7 +6,7 @@
 import { Id64 } from "@itwin/core-bentley";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_Model, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
-import { getArrayFromId64Arg, getClassesByView, getDistinctMapValues } from "../../common/internal/Utils.js";
+import { getClassesByView, getDistinctMapValues, joinId64Arg } from "../../common/internal/Utils.js";
 
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { CategoryId, DefinitionContainerId, ElementId, ModelId, SubCategoryId } from "../../common/internal/Types.js";
@@ -66,14 +66,14 @@ export class CategoriesTreeIdsCache implements Disposable {
     this._categoryElementCounts[Symbol.dispose]();
   }
 
-  private async *queryFilteredElementsModels(filteredElementIds: Id64Array): AsyncIterableIterator<{
+  private async *queryFilteredElementsModels(filteredElementIds: Id64Arg): AsyncIterableIterator<{
     modelId: Id64String;
     id: ElementId;
   }> {
     const query = `
       SELECT Model.Id modelId, ECInstanceId id
       FROM ${this._categoryElementClass}
-      WHERE ECInstanceId IN (${filteredElementIds.join(", ")})
+      WHERE ECInstanceId IN (${joinId64Arg(filteredElementIds, ",")})
     `;
     for await (const row of this._queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
       yield { modelId: row.modelId, id: row.id };
@@ -87,7 +87,7 @@ export class CategoriesTreeIdsCache implements Disposable {
 
     this._filteredElementsModels ??= (async () => {
       const filteredElementsModels = new Map();
-      for await (const { modelId, id } of this.queryFilteredElementsModels(getArrayFromId64Arg(filteredElementIds))) {
+      for await (const { modelId, id } of this.queryFilteredElementsModels(filteredElementIds)) {
         filteredElementsModels.set(id, modelId);
       }
       return filteredElementsModels;

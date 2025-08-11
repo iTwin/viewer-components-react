@@ -16,7 +16,7 @@ import {
   CLASS_NAME_SpatialCategory,
 } from "../../common/internal/ClassNameDefinitions.js";
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
-import { getArrayFromId64Arg, getDistinctMapValues } from "../../common/internal/Utils.js";
+import { getDistinctMapValues, joinId64Arg } from "../../common/internal/Utils.js";
 
 import type { Observable } from "rxjs";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
@@ -388,24 +388,24 @@ export class ClassificationsTreeIdsCache implements Disposable {
     return [...classificationsInfo.keys()];
   }
 
-  private async *queryFilteredElementsData({ element2dIds, element3dIds }: { element2dIds: Id64Array; element3dIds: Id64Array }): AsyncIterableIterator<{
+  private async *queryFilteredElementsData({ element2dIds, element3dIds }: { element2dIds: Id64Arg; element3dIds: Id64Arg }): AsyncIterableIterator<{
     modelId: Id64String;
     id: ElementId;
     categoryId: Id64String;
   }> {
     const queries = new Array<string>();
-    if (element2dIds.length > 0) {
+    if (Id64.sizeOf(element2dIds) > 0) {
       queries.push(`
         SELECT Model.Id modelId, Category.Id categoryId, ECInstanceId id
         FROM ${CLASS_NAME_GeometricElement2d}
-        WHERE ECInstanceId IN (${element2dIds.join(", ")})
+        WHERE ECInstanceId IN (${joinId64Arg(element2dIds, ",")})
       `);
     }
-    if (element3dIds.length > 0) {
+    if (Id64.sizeOf(element3dIds) > 0) {
       queries.push(`
         SELECT Model.Id modelId, Category.Id categoryId, ECInstanceId id
         FROM ${CLASS_NAME_GeometricElement3d}
-        WHERE ECInstanceId IN (${element3dIds.join(", ")})
+        WHERE ECInstanceId IN (${joinId64Arg(element3dIds, ",")})
       `);
     }
     for await (const row of this._queryExecutor.createQueryReader(
@@ -430,8 +430,8 @@ export class ClassificationsTreeIdsCache implements Disposable {
     this._filteredElementsData ??= (async () => {
       const filteredElementsData = new Map();
       for await (const { modelId, id, categoryId } of this.queryFilteredElementsData({
-        element2dIds: getArrayFromId64Arg(element2dIds),
-        element3dIds: getArrayFromId64Arg(element3dIds),
+        element2dIds,
+        element3dIds,
       })) {
         filteredElementsData.set(id, { modelId, categoryId });
       }

@@ -5,6 +5,7 @@
 
 import { useEffect, useRef } from "react";
 import { bufferCount, concatAll, concatMap, delay, of } from "rxjs";
+import { Id64 } from "@itwin/core-bentley";
 import {
   CLASS_NAME_DrawingCategory,
   CLASS_NAME_GeometricElement2d,
@@ -110,6 +111,14 @@ export function getClassesByView(viewType: "2d" | "3d") {
 }
 
 /** @internal */
-export function getArrayFromId64Arg(arg: Id64Arg): Id64Array {
-  return typeof arg === "string" ? [arg] : Array.isArray(arg) ? arg : [...arg];
+export function joinId64Arg(arg: Id64Arg, separator: string): string {
+  let joined = "";
+  for (const argItem of Id64.iterable(arg)) {
+    if (joined !== "") {
+      joined += separator;
+    }
+
+    joined += argItem;
+  }
+  return joined;
 }
