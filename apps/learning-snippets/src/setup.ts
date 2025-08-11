@@ -42,6 +42,10 @@ global.DOMRect = class DOMRect {
   }
 };
 
+global.CSS = {
+  supports: (_k: string, _v: string) => false,
+} as any;
+
 // supply mocha hooks
 const { cleanup, configure } = await import("@testing-library/react");
 export const mochaHooks = {
