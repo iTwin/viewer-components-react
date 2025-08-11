@@ -174,7 +174,7 @@ const configuredUiItems = new Map<string, UiItem>([
                     filter={props.filter}
                     selectionStorage={unifiedSelectionStorage}
                     hierarchyConfig={{ rootClassificationSystemCode: "50k classifications" }}
-                    getMenuActions={(node) => [<RenameAction />]}
+                    getMenuActions={() => [<RenameAction />]}
                     getEditingProps={(node) => {
                       return {
                         onLabelChanged: (newLabel: string) => {
