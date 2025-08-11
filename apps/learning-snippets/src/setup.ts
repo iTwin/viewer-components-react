@@ -6,12 +6,13 @@
 
 // setup chai
 import chai from "chai";
-import sinonChai from "sinon-chai";
-chai.use(sinonChai);
-
 // get rid of various xhr errors in the console
 import globalJsdom from "global-jsdom";
 import * as jsdom from "jsdom";
+import sinonChai from "sinon-chai";
+
+chai.use(sinonChai);
+
 globalJsdom(undefined, {
   virtualConsole: new jsdom.VirtualConsole().sendTo(console, { omitJSDOMErrors: true }),
 });
@@ -41,6 +42,10 @@ global.DOMRect = class DOMRect {
     return JSON.stringify(this);
   }
 };
+
+global.CSS = {
+  supports: (_k: string, _v: string) => false,
+} as any;
 
 // supply mocha hooks
 const { cleanup, configure } = await import("@testing-library/react");
