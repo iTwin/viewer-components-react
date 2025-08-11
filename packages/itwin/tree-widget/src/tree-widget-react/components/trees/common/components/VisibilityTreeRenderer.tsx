@@ -32,11 +32,12 @@ export function VisibilityTreeRenderer({
 
   const nodeActions = useCallback(
     (node: PresentationHierarchyNode) => {
-      return [
-        <VisibilityAction key={"Visibility"} node={node} reserveSpace />,
-        <FilterAction key={"Filter"} node={node} onFilter={onFilterClick} getHierarchyLevelDetails={getHierarchyLevelDetails} />,
-        ...(getInlineActions ? getInlineActions(node) : []),
-      ];
+      return getInlineActions
+        ? getInlineActions(node)
+        : [
+            <VisibilityAction key={"Visibility"} node={node} reserveSpace />,
+            <FilterAction key={"Filter"} node={node} onFilter={onFilterClick} getHierarchyLevelDetails={getHierarchyLevelDetails} reserveSpace />,
+          ];
     },
     [onFilterClick, getHierarchyLevelDetails, getInlineActions],
   );
