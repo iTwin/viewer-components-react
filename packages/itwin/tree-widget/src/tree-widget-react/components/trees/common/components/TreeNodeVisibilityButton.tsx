@@ -87,7 +87,7 @@ export const useVisibilityContext = () => {
   return useContext(visibilityContext);
 };
 
-/** @alpha */
+/** @internal */
 export function VisibilityContextProvider({ onVisibilityButtonClick, getVisibilityButtonState, children }: PropsWithChildren<VisibilityContext>) {
   return (
     <visibilityContext.Provider
