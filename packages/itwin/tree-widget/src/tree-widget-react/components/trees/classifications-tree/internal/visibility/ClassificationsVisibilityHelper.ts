@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { from, merge, mergeMap, of, toArray } from "rxjs";
-import { getArrayFromId64Arg } from "../../../common/internal/Utils.js";
 import { BaseVisibilityStatusHelper } from "../../../common/internal/visibility/BaseVisibilityStatusHelper.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 
@@ -30,7 +29,7 @@ export class ClassificationsVisibilityStatusHelper extends BaseVisibilityStatusH
   }
 
   public getClassificationTablesVisibilityStatus(props: { classificationTableIds: Id64Arg }): Observable<VisibilityStatus> {
-    return from(this.#props.idsCache.getAllContainedCategories(getArrayFromId64Arg(props.classificationTableIds))).pipe(
+    return from(this.#props.idsCache.getAllContainedCategories(props.classificationTableIds)).pipe(
       mergeMap(({ drawing, spatial }) =>
         merge(
           of(drawing).pipe(mergeMap((categoryIds) => this.getCategoriesVisibilityStatus({ modelId: undefined, categoryIds, type: "DrawingCategory" }))),
@@ -42,7 +41,7 @@ export class ClassificationsVisibilityStatusHelper extends BaseVisibilityStatusH
   }
 
   public getClassificationsVisibilityStatus(props: { classificationIds: Id64Arg }): Observable<VisibilityStatus> {
-    return from(this.#props.idsCache.getAllContainedCategories(getArrayFromId64Arg(props.classificationIds))).pipe(
+    return from(this.#props.idsCache.getAllContainedCategories(props.classificationIds)).pipe(
       mergeMap(({ drawing, spatial }) =>
         merge(
           of(drawing).pipe(mergeMap((categoryIds) => this.getCategoriesVisibilityStatus({ modelId: undefined, categoryIds, type: "DrawingCategory" }))),
@@ -54,7 +53,7 @@ export class ClassificationsVisibilityStatusHelper extends BaseVisibilityStatusH
   }
 
   public changeClassificationTablesVisibilityStatus(props: { classificationTableIds: Id64Arg; on: boolean }): Observable<void> {
-    return from(this.#props.idsCache.getAllContainedCategories(getArrayFromId64Arg(props.classificationTableIds))).pipe(
+    return from(this.#props.idsCache.getAllContainedCategories(props.classificationTableIds)).pipe(
       mergeMap(({ drawing, spatial }) => merge(drawing, spatial)),
       toArray(),
       mergeMap((categoryIds) => this.changeCategoriesVisibilityStatus({ modelId: undefined, categoryIds, on: props.on })),
@@ -62,7 +61,7 @@ export class ClassificationsVisibilityStatusHelper extends BaseVisibilityStatusH
   }
 
   public changeClassificationsVisibilityStatus(props: { classificationIds: Id64Arg; on: boolean }): Observable<void> {
-    return from(this.#props.idsCache.getAllContainedCategories(getArrayFromId64Arg(props.classificationIds))).pipe(
+    return from(this.#props.idsCache.getAllContainedCategories(props.classificationIds)).pipe(
       mergeMap(({ drawing, spatial }) => merge(drawing, spatial)),
       toArray(),
       mergeMap((categoryIds) => this.changeCategoriesVisibilityStatus({ modelId: undefined, categoryIds, on: props.on })),

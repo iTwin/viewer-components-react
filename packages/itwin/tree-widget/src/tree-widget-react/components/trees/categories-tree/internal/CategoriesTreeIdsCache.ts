@@ -6,7 +6,7 @@
 import { Id64 } from "@itwin/core-bentley";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_Model, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
-import { getClassesByView, getDistinctMapValues } from "../../common/internal/Utils.js";
+import { getArrayFromId64Arg, getClassesByView, getDistinctMapValues } from "../../common/internal/Utils.js";
 
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { CategoryId, DefinitionContainerId, ElementId, ModelId, SubCategoryId } from "../../common/internal/Types.js";
@@ -80,14 +80,14 @@ export class CategoriesTreeIdsCache implements Disposable {
     }
   }
 
-  public async getFilteredElementsModels(filteredElementIds: Id64Array) {
-    if (filteredElementIds.length === 0) {
+  public async getFilteredElementsModels(filteredElementIds: Id64Arg) {
+    if (Id64.sizeOf(filteredElementIds) === 0) {
       return new Map<ElementId, ModelId>();
     }
 
     this._filteredElementsModels ??= (async () => {
       const filteredElementsModels = new Map();
-      for await (const { modelId, id } of this.queryFilteredElementsModels(filteredElementIds)) {
+      for await (const { modelId, id } of this.queryFilteredElementsModels(getArrayFromId64Arg(filteredElementIds))) {
         filteredElementsModels.set(id, modelId);
       }
       return filteredElementsModels;
@@ -401,19 +401,19 @@ export class CategoriesTreeIdsCache implements Disposable {
   }
 
   public async getDirectChildDefinitionContainersAndCategories(
-    parentDefinitionContainerIds: Id64Array,
+    parentDefinitionContainerIds: Id64Arg,
   ): Promise<{ categories: CategoryInfo[]; definitionContainers: Array<DefinitionContainerId> }> {
     const definitionContainersInfo = await this.getDefinitionContainersInfo();
 
     const result = { definitionContainers: new Array<DefinitionContainerId>(), categories: new Array<CategoryInfo>() };
-
-    parentDefinitionContainerIds.forEach((parentDefinitionContainerId) => {
+    for (const parentDefinitionContainerId of Id64.iterable(parentDefinitionContainerIds)) {
       const parentDefinitionContainerInfo = definitionContainersInfo.get(parentDefinitionContainerId);
-      if (parentDefinitionContainerInfo !== undefined) {
-        result.definitionContainers.push(...parentDefinitionContainerInfo.childDefinitionContainerIds);
-        result.categories.push(...parentDefinitionContainerInfo.childCategories);
+      if (!parentDefinitionContainerInfo) {
+        continue;
       }
-    });
+      result.definitionContainers.push(...parentDefinitionContainerInfo.childDefinitionContainerIds);
+      result.categories.push(...parentDefinitionContainerInfo.childCategories);
+    }
     return result;
   }
 
@@ -445,20 +445,21 @@ export class CategoriesTreeIdsCache implements Disposable {
     return elementModelsCategories.has(elementId);
   }
 
-  public async getAllContainedCategories(definitionContainerIds: Id64Array): Promise<Id64Array> {
+  public async getAllContainedCategories(definitionContainerIds: Id64Arg): Promise<Id64Array> {
     const result = new Array<CategoryId>();
 
     const definitionContainersInfo = await this.getDefinitionContainersInfo();
-    const indirectCategories = await Promise.all(
-      definitionContainerIds.map(async (definitionContainerId) => {
-        const definitionContainerInfo = definitionContainersInfo.get(definitionContainerId);
-        if (definitionContainerInfo === undefined) {
-          return [];
-        }
-        result.push(...definitionContainerInfo.childCategories.map((category) => category.id));
-        return this.getAllContainedCategories(definitionContainerInfo.childDefinitionContainerIds);
-      }),
-    );
+    const indirectCategoryPromises = new Array<Promise<Id64Array>>();
+    for (const definitionContainerId of Id64.iterable(definitionContainerIds)) {
+      const definitionContainerInfo = definitionContainersInfo.get(definitionContainerId);
+      if (definitionContainerInfo === undefined) {
+        continue;
+      }
+      result.push(...definitionContainerInfo.childCategories.map((category) => category.id));
+      indirectCategoryPromises.push(this.getAllContainedCategories(definitionContainerInfo.childDefinitionContainerIds));
+    }
+
+    const indirectCategories = await Promise.all(indirectCategoryPromises);
     for (const categories of indirectCategories) {
       result.push(...categories);
     }

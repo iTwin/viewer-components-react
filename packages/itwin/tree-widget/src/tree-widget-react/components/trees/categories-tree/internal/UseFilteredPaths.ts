@@ -139,7 +139,7 @@ async function getCategoriesFromPaths(
     assert(lastNodeInfo !== undefined && HierarchyNodeIdentifier.isInstanceNodeIdentifier(lastNodeInfo.lastNode));
 
     if (lastNodeInfo.lastNode.className === CLASS_NAME_DefinitionContainer) {
-      const definitionContainerCategories = await idsCache.getAllContainedCategories([lastNodeInfo.lastNode.id]);
+      const definitionContainerCategories = await idsCache.getAllContainedCategories(lastNodeInfo.lastNode.id);
       for (const categoryId of definitionContainerCategories) {
         const value = categories.get(categoryId);
         if (value === undefined) {

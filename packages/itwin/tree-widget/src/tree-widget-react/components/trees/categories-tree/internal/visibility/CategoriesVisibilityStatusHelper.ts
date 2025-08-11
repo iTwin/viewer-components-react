@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { concat, EMPTY, from, map, mergeMap, reduce } from "rxjs";
-import { getArrayFromId64Arg } from "../../../common/internal/Utils.js";
 import { BaseVisibilityStatusHelper } from "../../../common/internal/visibility/BaseVisibilityStatusHelper.js";
 import { enableCategoryDisplay, enableSubCategoryDisplay } from "../../../common/internal/VisibilityUtils.js";
 
@@ -30,8 +29,7 @@ export class CategoriesVisibilityStatusHelper extends BaseVisibilityStatusHelper
   }
 
   public getDefinitionContainersVisibilityStatus(props: { definitionContainerIds: Id64Arg }): Observable<VisibilityStatus> {
-    const definitionContainerIdsArray = getArrayFromId64Arg(props.definitionContainerIds);
-    return from(this.#props.idsCache.getAllContainedCategories(definitionContainerIdsArray)).pipe(
+    return from(this.#props.idsCache.getAllContainedCategories(props.definitionContainerIds)).pipe(
       mergeMap((categoryIds) =>
         this.getCategoriesVisibilityStatus({ categoryIds, modelId: undefined, type: this.#props.viewport.view.is2d() ? "DrawingCategory" : "SpatialCategory" }),
       ),
@@ -39,8 +37,7 @@ export class CategoriesVisibilityStatusHelper extends BaseVisibilityStatusHelper
   }
 
   public changeDefinitionContainersVisibilityStatus(props: { definitionContainerIds: Id64Arg; on: boolean }): Observable<void> {
-    const definitionContainerIdsArray = getArrayFromId64Arg(props.definitionContainerIds);
-    return from(this.#props.idsCache.getAllContainedCategories(definitionContainerIdsArray)).pipe(
+    return from(this.#props.idsCache.getAllContainedCategories(props.definitionContainerIds)).pipe(
       mergeMap((categoryIds) => this.changeCategoriesVisibilityStatus({ categoryIds, modelId: undefined, on: props.on })),
     );
   }
@@ -59,8 +56,7 @@ export class CategoriesVisibilityStatusHelper extends BaseVisibilityStatusHelper
   }
 
   private enableCategoriesElementModelsVisibility(categoryIds: Id64Arg): Observable<void> {
-    const categoryIdsArray = getArrayFromId64Arg(categoryIds);
-    return from(this.#props.idsCache.getCategoriesElementModels(categoryIdsArray, true)).pipe(
+    return from(this.#props.idsCache.getCategoriesElementModels(categoryIds, true)).pipe(
       mergeMap((categoriesModelsMap) => categoriesModelsMap.values()),
       reduce((acc, modelIds) => {
         modelIds.forEach((modelId) => {

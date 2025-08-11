@@ -659,7 +659,7 @@ function createGeometricElementInstanceKeyPaths(props: {
     mergeMap(({ path, parentClassificationId }) => {
       if (parentClassificationId) {
         return idsCache
-          .getClassificationsPathObs([parentClassificationId])
+          .getClassificationsPathObs(parentClassificationId)
           .pipe(map((parentClassificationPath) => ({ path: parentClassificationPath.concat(path), options: { autoExpand: true } })));
       }
       return of({ path, options: { autoExpand: true } });

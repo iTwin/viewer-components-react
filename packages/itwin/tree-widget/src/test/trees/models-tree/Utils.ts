@@ -87,8 +87,8 @@ interface IdsCacheMockProps {
 
 export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCache {
   return sinon.createStubInstance(ModelsTreeIdsCache, {
-    getChildSubjectIds: sinon.stub<[Id64Array], Promise<Id64Array>>().callsFake(async (subjectIds) => {
-      const obs = from(subjectIds).pipe(
+    getChildSubjectIds: sinon.stub<[Id64Arg], Promise<Id64Array>>().callsFake(async (subjectIds) => {
+      const obs = from(Id64.iterable(subjectIds)).pipe(
         concatMap((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
         expand((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
         toArray(),
