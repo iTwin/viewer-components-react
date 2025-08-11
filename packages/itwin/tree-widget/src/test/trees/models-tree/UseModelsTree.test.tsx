@@ -39,7 +39,6 @@ describe("useModelsTree", () => {
       let modelIds: Id64Array;
       let viewport: Viewport;
       let initialProps: UseModelsTreeProps;
-      // let abortSignal: AbortSignal;
       let getSubTreePaths: UseModelsTreeProps["getSubTreePaths"];
       let selectionStorage: SelectionStorage;
 
@@ -88,7 +87,6 @@ describe("useModelsTree", () => {
         });
         initialProps = { activeView: viewport };
         imodelAccess = createIModelAccess(imodel);
-        // abortSignal = new AbortController().signal;
         getSubTreePaths = async ({ createInstanceKeyPaths }) => {
           return createInstanceKeyPaths({
             targetItems: [
