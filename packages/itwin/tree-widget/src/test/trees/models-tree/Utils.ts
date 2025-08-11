@@ -21,6 +21,7 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import type {
   ClassGroupingNodeKey,
   GroupingHierarchyNode,
+  GroupingNodeKey,
   HierarchyFilteringPath,
   HierarchyNodeKey,
   HierarchyProvider,
@@ -205,4 +206,25 @@ export function createClassGroupingHierarchyNode({
     parentKeys: parentKeys ?? [],
     extendedData: props,
   };
+}
+
+export function getNodeParentKeys(
+  keys: (
+    | GroupingNodeKey
+    | {
+        className: string;
+        id: string;
+      }
+  )[],
+): HierarchyNodeKey[] {
+  return keys.map((key) => {
+    if ("type" in key) {
+      return key;
+    }
+
+    return {
+      type: "instances",
+      instanceKeys: [key],
+    };
+  });
 }
