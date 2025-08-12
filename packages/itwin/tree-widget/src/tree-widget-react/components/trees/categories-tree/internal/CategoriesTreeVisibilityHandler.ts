@@ -319,6 +319,9 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
               merge(
                 drawingCategories ? of(drawingCategories).pipe(mergeMap((categoryIds) => this.getCategoriesVisibilityStatus({ modelId, categoryIds }))) : EMPTY,
                 spatialCategories ? of(spatialCategories).pipe(mergeMap((categoryIds) => this.getCategoriesVisibilityStatus({ modelId, categoryIds }))) : EMPTY,
+                (!drawingCategories || Id64.sizeOf(drawingCategories) === 0) && (!spatialCategories || Id64.sizeOf(spatialCategories) === 0)
+                  ? of(createVisibilityStatus("visible"))
+                  : EMPTY,
               ),
             ),
           );
@@ -858,11 +861,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
       const viewport = this._props.viewport;
       const modelIdsObservable = (
         modelIdFromProps
-          ? of(
-              new Map<ModelId, Set<CategoryId>>([
-                [modelIdFromProps, typeof categoryIds === "string" ? new Set([categoryIds]) : Array.isArray(categoryIds) ? new Set(categoryIds) : categoryIds],
-              ]),
-            )
+          ? of(new Map<ModelId, Set<CategoryId>>([[modelIdFromProps, getSetFromId64Arg(categoryIds)]]))
           : this.getModels({ categoryIds }).pipe(
               reduce((acc, { id, models }) => {
                 if (!models) {
