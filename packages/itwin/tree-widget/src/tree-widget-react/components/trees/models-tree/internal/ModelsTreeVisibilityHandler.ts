@@ -46,7 +46,7 @@ import {
   mergeVisibilityStatuses,
 } from "../../common/internal/VisibilityUtils.js";
 import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility.js";
-import { createFilteredTree, parseCategoryKey } from "./FilteredTree.js";
+import { createFilteredTree } from "./FilteredTree.js";
 import { ModelsTreeNode } from "./ModelsTreeNode.js";
 
 import type { NonPartialVisibilityStatus } from "../../common/internal/Tooltip.js";
@@ -58,7 +58,6 @@ import type { ModelsTreeIdsCache } from "./ModelsTreeIdsCache.js";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
-import type { FilteredTree } from "./FilteredTree.js";
 import type { IVisibilityChangeEventListener } from "../../common/internal/VisibilityChangeEventListener.js";
 import type { ElementId } from "../../common/internal/Types.js";
 
@@ -147,7 +146,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
   private readonly _eventListener: IVisibilityChangeEventListener;
   private readonly _alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo;
   private readonly _idsCache: ModelsTreeIdsCache;
-  private _filteredTree: Promise<FilteredTree> | undefined;
+  private _filteredTree: ReturnType<typeof createFilteredTree> | undefined;
   private _elementChangeQueue = new Subject<Observable<void>>();
   private _subscriptions: Subscription[] = [];
   private _changeRequest = new Subject<{ key: HierarchyNodeKey; depth: number }>();
@@ -163,7 +162,9 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     });
     this._alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfo(_props.viewport, CLASS_NAME_GeometricElement3d);
     this._idsCache = this._props.idsCache;
-    this._filteredTree = _props.filteredPaths ? createFilteredTree(this._props.imodelAccess, _props.filteredPaths) : undefined;
+    this._filteredTree = _props.filteredPaths
+      ? createFilteredTree({ imodelAccess: this._props.imodelAccess, filteringPaths: _props.filteredPaths })
+      : undefined;
     this._subscriptions.push(this._elementChangeQueue.pipe(concatAll()).subscribe());
   }
 
@@ -271,39 +272,39 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
   }
 
   private getFilteredNodeVisibility(props: GetFilteredNodeVisibilityProps) {
-    return from(this.getVisibilityChangeTargets(props)).pipe(
-      mergeMap(({ subjectIds: subjects, modelIds: models, categories, elements }) => {
+    return from(this.getFilteredTreeTargets(props)).pipe(
+      mergeMap(({ targets }) => {
+        if (!targets) {
+          return EMPTY;
+        }
+        const { subjectIds, modelIds, categories, elements } = targets;
         const observables = new Array<Observable<VisibilityStatus>>();
-        if (subjects?.size) {
-          observables.push(this.getSubjectNodeVisibilityStatus({ subjectIds: [...subjects] }));
+        if (subjectIds?.size) {
+          observables.push(this.getSubjectsVisibilityStatus({ subjectIds }));
         }
 
-        if (models?.size) {
-          observables.push(this.getModelVisibilityStatus({ modelIds: models }));
+        if (modelIds?.size) {
+          observables.push(this.getModelsVisibilityStatus({ modelIds }));
         }
 
-        if (categories?.size) {
+        if (categories?.length) {
           observables.push(
             from(categories).pipe(
-              mergeMap((key) => {
-                const { modelId, categoryId } = parseCategoryKey(key);
-                return this.getCategoryDisplayStatus({ modelId, categoryIds: categoryId });
-              }),
+              mergeMap(({ modelId, categoryIds }) =>
+                this.getCategoriesVisibilityStatus({
+                  categoryIds,
+                  modelId,
+                }),
+              ),
             ),
           );
         }
 
-        if (elements?.size) {
+        if (elements?.length) {
           observables.push(
             from(elements).pipe(
               releaseMainThreadOnItemsCount(50),
-              mergeMap(([categoryKey, elementIds]) => {
-                const { modelId, categoryId } = parseCategoryKey(categoryKey);
-                return from(elementIds).pipe(
-                  releaseMainThreadOnItemsCount(1000),
-                  mergeMap((elementId) => this.getElementDisplayStatus({ modelId, categoryId, elementId })),
-                );
-              }),
+              mergeMap(({ modelId, elementIds, categoryId }) => this.getElementsVisibilityStatus({ modelId, categoryId, elementIds })),
             ),
           );
         }
@@ -541,41 +542,46 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     });
   }
 
-  private async getVisibilityChangeTargets({ node }: GetFilteredNodeVisibilityProps) {
+  private async getFilteredTreeTargets({ node }: GetFilteredNodeVisibilityProps) {
     const filteredTree = await this._filteredTree;
-    return filteredTree ? filteredTree.getVisibilityChangeTargets(node) : {};
+    return filteredTree ? filteredTree.getFilterTargets(node) : {};
   }
 
   private changeFilteredNodeVisibility({ on, ...props }: ChangeFilteredNodeVisibilityProps) {
-    return from(this.getVisibilityChangeTargets(props)).pipe(
-      mergeMap(({ subjectIds: subjects, modelIds: models, categories, elements }) => {
+    return from(this.getFilteredTreeTargets(props)).pipe(
+      mergeMap(({ targets }) => {
+        if (!targets) {
+          return EMPTY;
+        }
+        const { subjectIds, modelIds, categories, elements } = targets;
         const observables = new Array<Observable<void>>();
-        if (subjects?.size) {
-          observables.push(this.changeSubjectNodeState([...subjects], on));
+        if (subjectIds?.size) {
+          observables.push(this.changeSubjectsVisibilityStatus({ subjectIds, on }));
         }
 
-        if (models?.size) {
-          observables.push(this.changeModelState({ ids: models, on }));
+        if (modelIds?.size) {
+          observables.push(this.changeModelsVisibilityStatus({ modelIds, on }));
         }
 
-        if (categories?.size) {
+        if (categories?.length) {
           observables.push(
             from(categories).pipe(
-              mergeMap((key) => {
-                const { modelId, categoryId } = parseCategoryKey(key);
-                return this.changeCategoryState({ modelId, categoryIds: categoryId, on });
-              }),
+              mergeMap(({ modelId, categoryIds }) =>
+                this.changeCategoriesVisibilityStatus({
+                  categoryIds,
+                  modelId,
+                  on,
+                }),
+              ),
             ),
           );
         }
 
-        if (elements?.size) {
+        if (elements?.length) {
           observables.push(
             from(elements).pipe(
-              mergeMap(([categoryKey, elementIds]) => {
-                const { modelId, categoryId } = parseCategoryKey(categoryKey);
-                return this.changeElementsState({ modelId, categoryId, elementIds, on });
-              }),
+              releaseMainThreadOnItemsCount(50),
+              mergeMap(({ modelId, elementIds, categoryId }) => this.changeElementsVisibilityStatus({ modelId, categoryId, elementIds, on })),
             ),
           );
         }

@@ -50,7 +50,7 @@ import {
 } from "../../common/internal/VisibilityUtils.js";
 import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility.js";
 import { CategoriesTreeNode } from "./CategoriesTreeNode.js";
-import { createFilteredTree, parseCategoryKey, parseSubCategoryKey } from "./FilteredTree.js";
+import { createFilteredTree } from "./FilteredTree.js";
 
 import type { GetVisibilityFromAlwaysAndNeverDrawnElementsProps } from "../../common/internal/VisibilityUtils.js";
 import type { Observable, Subscription } from "rxjs";
@@ -62,10 +62,8 @@ import type { HierarchyVisibilityHandler, VisibilityStatus } from "../../common/
 import type { NonPartialVisibilityStatus } from "../../common/internal/Tooltip.js";
 import type { CategoriesTreeHierarchyConfiguration } from "../CategoriesTreeDefinition.js";
 import type { CategoriesTreeIdsCache } from "./CategoriesTreeIdsCache.js";
-import type { FilteredTree } from "./FilteredTree.js";
 import type { IVisibilityChangeEventListener } from "../../common/internal/VisibilityChangeEventListener.js";
 import type { ElementId, ModelId } from "../../common/internal/Types.js";
-
 /** @alpha */
 interface GetCategoryVisibilityStatusProps {
   categoryIds: Id64Array;
@@ -133,7 +131,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
   private readonly _eventListener: IVisibilityChangeEventListener;
   private readonly _alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo;
   private readonly _idsCache: CategoriesTreeIdsCache;
-  private _filteredTree: Promise<FilteredTree> | undefined;
+  private _filteredTree: ReturnType<typeof createFilteredTree> | undefined;
   private _elementChangeQueue = new Subject<Observable<void>>();
   private _subscriptions: Subscription[] = [];
   private _changeRequest = new Subject<{ key: HierarchyNodeKey; depth: number }>();
@@ -278,55 +276,45 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
   }
 
   private getFilteredNodeVisibility(props: GetFilteredNodeVisibilityProps) {
-    return from(this.getVisibilityChangeTargets(props)).pipe(
-      mergeMap(({ definitionContainerIds: definitionContainers, subCategories, modelIds: models, categories, elements }) => {
+    return from(this.getFilteredTreeTargets(props)).pipe(
+      mergeMap(({ targets }) => {
+        if (!targets) {
+          return EMPTY;
+        }
+        const { definitionContainerIds, subCategories, modelIds, categories, elements } = targets;
         const observables = new Array<Observable<VisibilityStatus>>();
-        if (definitionContainers?.size) {
-          observables.push(
-            from(definitionContainers).pipe(
-              mergeMap((definitionContainerId) => this.getDefinitionContainerDisplayStatus({ definitionContainerIds: [definitionContainerId] })),
-            ),
-          );
+        if (definitionContainerIds?.size) {
+          observables.push(this.getDefinitionContainersVisibilityStatus({ definitionContainerIds }));
         }
 
-        if (models?.size) {
-          observables.push(this.getModelVisibilityStatus({ modelIds: models }));
+        if (modelIds?.size) {
+          observables.push(this.getModelsVisibilityStatus({ modelIds }));
         }
 
-        if (categories?.size) {
+        if (categories?.length) {
           observables.push(
             from(categories).pipe(
-              mergeMap((key) => {
-                const { modelId, categoryId } = parseCategoryKey(key);
-                return this.getCategoryDisplayStatus({ ignoreSubCategories: !!modelId, modelId, categoryIds: [categoryId] });
-              }),
+              mergeMap(({ modelId, categoryIds }) =>
+                this.getCategoriesVisibilityStatus({
+                  categoryIds,
+                  modelId,
+                }),
+              ),
             ),
           );
         }
 
-        if (subCategories?.size) {
+        if (subCategories?.length) {
           observables.push(
-            from(subCategories).pipe(
-              mergeMap((key) => {
-                const { subCategoryId, categoryId } = parseSubCategoryKey(key);
-                return this.getSubCategoryDisplayStatus({ subCategoryIds: [subCategoryId], categoryId });
-              }),
-            ),
+            from(subCategories).pipe(mergeMap(({ categoryId, subCategoryIds }) => this.getSubCategoriesVisibilityStatus({ subCategoryIds, categoryId }))),
           );
         }
 
-        if (elements?.size) {
+        if (elements?.length) {
           observables.push(
             from(elements).pipe(
               releaseMainThreadOnItemsCount(50),
-              mergeMap(([categoryKey, elementIds]) => {
-                const { modelId, categoryId } = parseCategoryKey(categoryKey);
-                assert(modelId !== undefined);
-                return from(elementIds).pipe(
-                  releaseMainThreadOnItemsCount(1000),
-                  mergeMap((elementId) => this.getElementDisplayStatus({ modelId, categoryId, elementId })),
-                );
-              }),
+              mergeMap(({ modelId, elementIds, categoryId }) => this.getElementsVisibilityStatus({ modelId, categoryId, elementIds })),
             ),
           );
         }
@@ -741,53 +729,44 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     });
   }
 
-  private async getVisibilityChangeTargets({ node }: GetFilteredNodeVisibilityProps) {
+  private async getFilteredTreeTargets({ node }: GetFilteredNodeVisibilityProps) {
     const filteredTree = await this._filteredTree;
-    return filteredTree ? filteredTree.getVisibilityChangeTargets(node) : {};
+    return filteredTree ? filteredTree.getFilterTargets(node) : {};
   }
 
   private changeFilteredNodeVisibility({ on, ...props }: ChangeFilteredNodeVisibilityProps) {
-    return from(this.getVisibilityChangeTargets(props)).pipe(
-      mergeMap(({ definitionContainerIds: definitionContainers, subCategories, modelIds: models, categories, elements }) => {
+    return from(this.getFilteredTreeTargets(props)).pipe(
+      mergeMap(({ targets }) => {
+        if (!targets) {
+          return EMPTY;
+        }
+        const { definitionContainerIds, subCategories, modelIds, categories, elements } = targets;
         const observables = new Array<Observable<void>>();
-        if (definitionContainers?.size) {
-          observables.push(this.changeDefinitionContainerState({ definitionContainerIds: [...definitionContainers], on }));
+        if (definitionContainerIds?.size) {
+          observables.push(this.changeDefinitionContainersVisibilityStatus({ definitionContainerIds, on }));
         }
 
-        if (models?.size) {
-          observables.push(this.changeModelState({ ids: models, on }));
+        if (modelIds?.size) {
+          observables.push(this.changeModelsVisibilityStatus({ modelIds, on }));
         }
 
-        if (categories?.size) {
-          observables.push(
-            from(categories).pipe(
-              mergeMap((key) => {
-                const { modelId, categoryId } = parseCategoryKey(key);
-                return this.changeCategoryState({ modelId, categoryIds: [categoryId], ignoreSubCategories: false, on });
-              }),
-            ),
-          );
+        if (categories?.length) {
+          observables.push(from(categories).pipe(mergeMap(({ modelId, categoryIds }) => this.changeCategoriesVisibilityStatus({ categoryIds, modelId, on }))));
         }
 
-        if (subCategories?.size) {
+        if (subCategories?.length) {
           observables.push(
             from(subCategories).pipe(
-              mergeMap((key) => {
-                const { subCategoryId, categoryId } = parseSubCategoryKey(key);
-                return this.changeSubCategoryState({ categoryId, subCategoryIds: [subCategoryId], on });
-              }),
+              mergeMap(({ categoryId, subCategoryIds }) => this.changeSubCategoriesVisibilityStatus({ subCategoryIds, categoryId, on })),
             ),
           );
         }
 
-        if (elements?.size) {
+        if (elements?.length) {
           observables.push(
             from(elements).pipe(
-              mergeMap(([categoryKey, elementIds]) => {
-                const { modelId, categoryId } = parseCategoryKey(categoryKey);
-                assert(modelId !== undefined);
-                return this.changeElementsState({ modelId, categoryId, elementIds, on });
-              }),
+              releaseMainThreadOnItemsCount(50),
+              mergeMap(({ modelId, elementIds, categoryId }) => this.changeElementsVisibilityStatus({ modelId, categoryId, elementIds, on })),
             ),
           );
         }
