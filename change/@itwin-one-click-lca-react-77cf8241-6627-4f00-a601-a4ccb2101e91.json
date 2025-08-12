@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Upgraded @itwin/insights-client version to 0.16.0",
+  "packageName": "@itwin/one-click-lca-react",
+  "email": "tejas.sutar@bentley.com",
+  "dependentChangeType": "patch"
+}
