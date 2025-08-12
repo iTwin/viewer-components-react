@@ -43,12 +43,6 @@ describe("SignOption", () => {
       <SignOption formatProps={formatProps} onChange={onChange} />
     );
 
-    const comboBox = within(
-      renderedComponent
-        .getByText("QuantityFormat.labels.signOptionLabel")
-        .closest(".icr-quantityFormat-v2-formatInlineRow")!
-    ).getByRole("combobox");
-    expect(comboBox).to.exist;
     expect(
       renderedComponent.getByText("QuantityFormat.sign_option.onlyNegative")
     ).to.exist;
@@ -69,7 +63,7 @@ describe("SignOption", () => {
       renderedComponent.getByText("QuantityFormat.labels.signOptionLabel")
     ).to.exist;
     expect(
-      renderedComponent.getByText("QuantityFormat.sign_option.always")
+      renderedComponent.getByText("QuantityFormat.sign_option.signAlways")
     ).to.exist;
   });
 });

@@ -6,70 +6,99 @@ import { describe, beforeEach, it, vi, expect } from "vitest";
 import * as React from "react";
 import { render, waitFor } from "@testing-library/react";
 import type { FormatProps, UnitProps, UnitsProvider } from "@itwin/core-quantity";
-import { FractionalPrimaryChildren, FractionalSecondaryChildren } from "../../../components/quantityformat/panels/Fractional.js";
+import { RatioPrimaryChildren, RatioSecondaryChildren } from "../../../components/quantityformat/panels/Ratio.js";
 import { IModelApp } from "@itwin/core-frontend";
 
-describe("Fractional Panel", () => {
+describe("Ratio Panel", () => {
   let unitsProvider: UnitsProvider;
   let persistenceUnit: UnitProps;
+
   beforeEach(async () => {
     unitsProvider = IModelApp.quantityFormatter.unitsProvider;
     persistenceUnit = await unitsProvider.findUnitByName("Units.M");
   });
-  describe("FractionalPrimaryChildren", () => {
+
+  describe("RatioPrimaryChildren", () => {
     it("should render primary children with format type", async () => {
       const formatProps: FormatProps = {
-        type: "fractional",
-        precision: 4,
+        type: "ratio",
+        precision: 2,
       };
       const onFormatChange = vi.fn();
+
       const renderedComponent = render(
-        <FractionalPrimaryChildren
+        <RatioPrimaryChildren
           formatProps={formatProps}
           onFormatChange={onFormatChange}
           unitsProvider={unitsProvider}
           persistenceUnit={persistenceUnit}
         />
       );
-      expect(renderedComponent.getByLabelText("QuantityFormat.labels.type")).to.exist;
-      expect(renderedComponent.getByLabelText("QuantityFormat.labels.precision")).to.exist;
+
+      expect(renderedComponent.getByLabelText("QuantityFormat.labels.type")).toBeTruthy();
+      expect(renderedComponent.getByLabelText("QuantityFormat.labels.precision")).toBeTruthy();
     });
+
+    it("should render ratio type selector", async () => {
+      const formatProps: FormatProps = {
+        type: "ratio",
+        precision: 2,
+      };
+      const onFormatChange = vi.fn();
+
+      const renderedComponent = render(
+        <RatioPrimaryChildren
+          formatProps={formatProps}
+          onFormatChange={onFormatChange}
+          unitsProvider={unitsProvider}
+          persistenceUnit={persistenceUnit}
+        />
+      );
+
+      expect(renderedComponent.getByLabelText("QuantityFormat.labels.ratioTypeLabel")).toBeTruthy();
+    });
+
     it("should render unit label controls when showUnitLabel is enabled", async () => {
       const formatProps: FormatProps = {
-        type: "fractional",
+        type: "ratio",
         formatTraits: ["showUnitLabel"],
       };
       const onFormatChange = vi.fn();
+
       const renderedComponent = render(
-        <FractionalPrimaryChildren
+        <RatioPrimaryChildren
           formatProps={formatProps}
           onFormatChange={onFormatChange}
           unitsProvider={unitsProvider}
           persistenceUnit={persistenceUnit}
         />
       );
+
       await waitFor(() => {
-        expect(renderedComponent.getByLabelText("QuantityFormat.labels.labelSeparator")).to.exist;
+        expect(renderedComponent.getByLabelText("QuantityFormat.labels.labelSeparator")).toBeTruthy();
       });
     });
   });
-  describe("FractionalSecondaryChildren", () => {
-    it("should render secondary children with format type", async () => {
+
+  describe("RatioSecondaryChildren", () => {
+    it("should render secondary children with ratio-specific options", async () => {
       const formatProps: FormatProps = {
-        type: "fractional",
-        precision: 4,
+        type: "ratio",
+        precision: 2,
       };
       const onFormatChange = vi.fn();
+
       const renderedComponent = render(
-        <FractionalSecondaryChildren
+        <RatioSecondaryChildren
           formatProps={formatProps}
           onFormatChange={onFormatChange}
           unitsProvider={unitsProvider}
           persistenceUnit={persistenceUnit}
         />
       );
-      expect(renderedComponent.getByLabelText("QuantityFormat.labels.signOptionLabel")).to.exist;
-      expect(renderedComponent.getByLabelText("QuantityFormat.labels.fractionDashLabel")).to.exist;
+
+      expect(renderedComponent.getByLabelText("QuantityFormat.labels.signOptionLabel")).toBeTruthy();
+      expect(renderedComponent.getByLabelText("QuantityFormat.labels.decimalSeparatorLabel")).toBeTruthy();
     });
   });
 });

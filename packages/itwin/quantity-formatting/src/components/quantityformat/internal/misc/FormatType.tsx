@@ -32,7 +32,6 @@ interface FormatTypeSelectorProps {
 function FormatTypeSelector(props: FormatTypeSelectorProps) {
   const { type, onChange } = props;
   const { translate } = useTranslation();
-  const formatTypeSelectorId = React.useId();
   const formatOptions = React.useMemo<SelectOption<FormatType>[]>(
     () => [
       {
@@ -77,7 +76,7 @@ function FormatTypeSelector(props: FormatTypeSelectorProps) {
   return (
     <LabeledSelect
       displayStyle="inline"
-      label={translate("QuantityFormat.labels.azimuthBaseUnit")}
+      label={translate("QuantityFormat.labels.type")}
       options={formatOptions}
       onChange={handleOnChange}
       size="small"
