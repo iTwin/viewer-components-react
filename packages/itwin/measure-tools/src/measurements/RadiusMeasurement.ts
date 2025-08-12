@@ -19,6 +19,7 @@ import type {
   Viewport,
 } from "@itwin/core-frontend";
 import { GraphicType, IModelApp } from "@itwin/core-frontend";
+import { FormatterUtils } from "../api/FormatterUtils.js";
 import {
   StyleSet,
   WellKnownGraphicStyleType,
@@ -455,19 +456,19 @@ export class RadiusMeasurement extends Measurement {
     const length = this._arc?.curveLength() ?? 0.0;
     const circumference = 2 * Math.PI * radius;
 
-    const fRadius = IModelApp.quantityFormatter.formatQuantity(
+    const fRadius = await FormatterUtils.formatLength(
       radius,
       lengthSpec
     );
-    const fDiameter = IModelApp.quantityFormatter.formatQuantity(
+    const fDiameter = await FormatterUtils.formatLength(
       diameter,
       lengthSpec
     );
-    const fCircumference = IModelApp.quantityFormatter.formatQuantity(
+    const fCircumference = await FormatterUtils.formatLength(
       circumference,
       lengthSpec
     );
-    const fArcLength = IModelApp.quantityFormatter.formatQuantity(
+    const fArcLength = await FormatterUtils.formatLength(
       length,
       lengthSpec
     );
@@ -551,7 +552,7 @@ export class RadiusMeasurement extends Measurement {
     if (this._arc !== undefined) {
       const lengthSpec = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ)?.formatterSpec;
       const radius = this._arc.circularRadius()!;
-      const fRadius = IModelApp.quantityFormatter.formatQuantity(
+      const fRadius = await FormatterUtils.formatLength(
         radius,
         lengthSpec
       );

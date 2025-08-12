@@ -25,7 +25,6 @@ interface SubjectInfo {
 interface ModelInfo {
   isModelPrivate: boolean;
   categories: Id64Set;
-  elementCount: number;
 }
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
@@ -250,17 +249,6 @@ export class ModelsTreeIdsCache {
     return entry;
   }
 
-  private async *queryModelElementCounts() {
-    const query = /* sql */ `
-      SELECT Model.Id modelId, COUNT(*) elementCount
-      FROM ${this._hierarchyConfig.elementClassSpecification}
-      GROUP BY Model.Id
-    `;
-    for await (const row of this._queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
-      yield { modelId: row.modelId, elementCount: row.elementCount };
-    }
-  }
-
   private async *queryModelCategories() {
     const query = /* sql */ `
       SELECT this.Model.Id modelId, this.Category.Id categoryId, m.IsPrivate isModelPrivate
@@ -310,30 +298,16 @@ export class ModelsTreeIdsCache {
 
   private async getModelInfos() {
     this._modelInfos ??= (async () => {
-      const modelInfos = new Map<Id64String, { categories: Id64Set; elementCount: number; isModelPrivate: boolean }>();
-      await Promise.all([
-        (async () => {
-          for await (const { modelId, categoryId, isModelPrivate } of this.queryModelCategories()) {
-            const entry = modelInfos.get(modelId);
-            if (entry) {
-              entry.categories.add(categoryId);
-              entry.isModelPrivate = isModelPrivate;
-            } else {
-              modelInfos.set(modelId, { categories: new Set([categoryId]), elementCount: 0, isModelPrivate });
-            }
-          }
-        })(),
-        (async () => {
-          for await (const { modelId, elementCount } of this.queryModelElementCounts()) {
-            const entry = modelInfos.get(modelId);
-            if (entry) {
-              entry.elementCount = elementCount;
-            } else {
-              modelInfos.set(modelId, { categories: new Set(), elementCount, isModelPrivate: false });
-            }
-          }
-        })(),
-      ]);
+      const modelInfos = new Map<Id64String, { categories: Id64Set; isModelPrivate: boolean }>();
+      for await (const { modelId, categoryId, isModelPrivate } of this.queryModelCategories()) {
+        const entry = modelInfos.get(modelId);
+        if (entry) {
+          entry.categories.add(categoryId);
+          entry.isModelPrivate = isModelPrivate;
+        } else {
+          modelInfos.set(modelId, { categories: new Set([categoryId]), isModelPrivate });
+        }
+      }
       return modelInfos;
     })();
     return this._modelInfos;
@@ -402,10 +376,9 @@ export class ModelsTreeIdsCache {
         }, new Map<Id64String, Id64Set>()),
         mergeMap((modelCategoryMap) => modelCategoryMap.entries()),
         map(([modelId, categoryIds]) => `Model.Id = ${modelId} AND Category.Id IN (${[...categoryIds].join(", ")})`),
-        // Maximum Depth Of An Expression Tree is set to 3000:
-        // https://github.com/iTwin/imodel-native/blob/f0f36d97fe10fd441b8bf760c331d299615a42b9/iModelCore/BeSQLite/SQLite/bentley-sqlite.c#L22
-        // 2900 makes sure that this limit is not reached
-        bufferCount(2900),
+        // we may have thousands of where clauses here, and sending a single query with all of them could take a
+        // long time - instead, split it into smaller chunks
+        bufferCount(100),
         mergeMap(async (whereClauses) => {
           const reader = this._queryExecutor.createQueryReader(
             {

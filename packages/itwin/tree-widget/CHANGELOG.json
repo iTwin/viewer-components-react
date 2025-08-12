@@ -2,6 +2,51 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Thu, 07 Aug 2025 18:43:06 GMT",
+      "version": "3.13.2",
+      "tag": "@itwin/tree-widget-react_v3.13.2",
+      "comments": {
+        "patch": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "067937bf5048479d756e6eb2c6ec335e6bef4468",
+            "comment": "Models tree: Stop unnecessarily executing an expensive model elements' count query, whose results we weren't even using."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Thu, 07 Aug 2025 12:12:57 GMT",
+      "version": "3.13.1",
+      "tag": "@itwin/tree-widget-react_v3.13.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "d9158a7f82f1c69be0e7913bc1d3bb2f435a5f10",
+            "comment": "Split large queries into smaller chunks to make them execute quicker."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Wed, 06 Aug 2025 13:46:52 GMT",
+      "version": "3.13.0",
+      "tag": "@itwin/tree-widget-react_v3.13.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "481f02ca133c5cc43b058a881fc8ce7fa9daf0c4",
+            "comment": "Added `getActions` callback to `TreeRenderer` components. It allows to supply custom actions for tree nodes."
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 06 Aug 2025 10:14:27 GMT",
       "version": "3.12.1",
       "tag": "@itwin/tree-widget-react_v3.12.1",

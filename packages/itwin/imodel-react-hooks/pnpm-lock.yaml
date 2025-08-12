@@ -5,10 +5,6 @@ settings:
   excludeLinksFromLockfile: false
   injectWorkspacePackages: true
 
-overrides:
-  '@itwin/itwinui-react@^2': 2.12.26
-  '@itwin/itwinui-react@^3': 3.18.3
-
 importers:
 
   .:
@@ -3300,7 +3296,7 @@ snapshots:
       rimraf: 3.0.2
       tree-kill: 1.2.2
       typedoc: 0.22.18(typescript@4.4.4)
-      typedoc-plugin-merge-modules: 3.1.0(typedoc@0.22.18(typescript@4.6.2))
+      typedoc-plugin-merge-modules: 3.1.0(typedoc@0.22.18(typescript@4.4.4))
       typescript: 4.4.4
       wtfnode: 0.9.1
       yargs: 16.2.0
@@ -3377,7 +3373,7 @@ snapshots:
       eslint-import-resolver-node: 0.3.4
       eslint-import-resolver-typescript: 2.4.0(eslint-plugin-import@2.23.4(@typescript-eslint/parser@4.31.2(eslint@7.11.0)(typescript@4.6.2))(eslint@7.11.0))(eslint@7.11.0)
       eslint-plugin-deprecation: 1.2.1(eslint@7.11.0)(typescript@4.6.2)
-      eslint-plugin-import: 2.23.4(@typescript-eslint/parser@4.31.2(eslint@7.11.0)(typescript@4.6.2))(eslint-import-resolver-typescript@2.4.0)(eslint@7.11.0)
+      eslint-plugin-import: 2.23.4(@typescript-eslint/parser@4.31.2(eslint@7.11.0)(typescript@4.6.2))(eslint-import-resolver-typescript@2.4.0(eslint-plugin-import@2.23.4(@typescript-eslint/parser@4.31.2(eslint@7.11.0)(typescript@4.6.2))(eslint@7.11.0))(eslint@7.11.0))(eslint@7.11.0)
       eslint-plugin-jam3: 0.2.3
       eslint-plugin-jsdoc: 35.1.3(eslint@7.11.0)
       eslint-plugin-jsx-a11y: 6.4.1(eslint@7.11.0)
@@ -4505,7 +4501,7 @@ snapshots:
     dependencies:
       debug: 4.3.4
       eslint: 7.11.0
-      eslint-plugin-import: 2.23.4(@typescript-eslint/parser@4.31.2(eslint@7.11.0)(typescript@4.6.2))(eslint-import-resolver-typescript@2.4.0)(eslint@7.11.0)
+      eslint-plugin-import: 2.23.4(@typescript-eslint/parser@4.31.2(eslint@7.11.0)(typescript@4.6.2))(eslint-import-resolver-typescript@2.4.0(eslint-plugin-import@2.23.4(@typescript-eslint/parser@4.31.2(eslint@7.11.0)(typescript@4.6.2))(eslint@7.11.0))(eslint@7.11.0))(eslint@7.11.0)
       glob: 7.2.3
       is-glob: 4.0.3
       resolve: 1.22.8
@@ -4534,7 +4530,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.23.4(@typescript-eslint/parser@4.31.2(eslint@7.11.0)(typescript@4.6.2))(eslint-import-resolver-typescript@2.4.0)(eslint@7.11.0):
+  eslint-plugin-import@2.23.4(@typescript-eslint/parser@4.31.2(eslint@7.11.0)(typescript@4.6.2))(eslint-import-resolver-typescript@2.4.0(eslint-plugin-import@2.23.4(@typescript-eslint/parser@4.31.2(eslint@7.11.0)(typescript@4.6.2))(eslint@7.11.0))(eslint@7.11.0))(eslint@7.11.0):
     dependencies:
       array-includes: 3.1.7
       array.prototype.flat: 1.3.2
@@ -6461,7 +6457,7 @@ snapshots:
     dependencies:
       is-typedarray: 1.0.0
 
-  typedoc-plugin-merge-modules@3.1.0(typedoc@0.22.18(typescript@4.6.2)):
+  typedoc-plugin-merge-modules@3.1.0(typedoc@0.22.18(typescript@4.4.4)):
     dependencies:
       typedoc: 0.22.18(typescript@4.4.4)
 

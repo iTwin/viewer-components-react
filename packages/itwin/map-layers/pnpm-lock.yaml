@@ -5,10 +5,6 @@ settings:
   excludeLinksFromLockfile: false
   injectWorkspacePackages: true
 
-overrides:
-  '@itwin/itwinui-react@^2': 2.12.26
-  '@itwin/itwinui-react@^3': 3.18.3
-
 importers:
 
   .:
@@ -69,7 +65,7 @@ importers:
         specifier: ^5.5.0
         version: 5.10.0(b4852a6d7938249e57c0628eb80cb612)
       '@itwin/itwinui-react':
-        specifier: 3.18.3
+        specifier: ^3.18.1
         version: 3.18.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@itwin/map-layers-formats':
         specifier: ^5.0.0
@@ -461,7 +457,7 @@ packages:
       '@itwin/core-quantity': ^4.0.0 || ^5.0.0
       '@itwin/core-react': 5.10.0
       '@itwin/imodel-components-react': 5.10.0
-      '@itwin/itwinui-react': 3.18.3
+      '@itwin/itwinui-react': ^3.15.0
       react: ^18.0.0
       react-dom: ^18.0.0
       react-redux: ^7.2.2 || ^8.0.0 || ^9.0.0
@@ -488,7 +484,7 @@ packages:
       '@itwin/appui-abstract': ^4.0.0 || ^5.0.0
       '@itwin/core-bentley': ^4.0.0 || ^5.0.0
       '@itwin/core-react': 5.10.0
-      '@itwin/itwinui-react': 3.18.3
+      '@itwin/itwinui-react': ^3.15.0
       react: ^18.0.0
       react-dom: ^18.0.0
 
@@ -534,7 +530,7 @@ packages:
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0 || ^5.0.0
       '@itwin/core-bentley': ^4.0.0 || ^5.0.0
-      '@itwin/itwinui-react': 3.18.3
+      '@itwin/itwinui-react': ^3.15.0
       react: ^18.0.0
       react-dom: ^18.0.0
 
@@ -571,7 +567,7 @@ packages:
       '@itwin/core-geometry': ^4.0.0 || ^5.0.0
       '@itwin/core-quantity': ^4.0.0 || ^5.0.0
       '@itwin/core-react': 5.10.0
-      '@itwin/itwinui-react': 3.18.3
+      '@itwin/itwinui-react': ^3.15.0
       react: ^18.0.0
       react-dom: ^18.0.0
 

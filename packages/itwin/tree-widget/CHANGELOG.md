@@ -1,8 +1,32 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Wed, 06 Aug 2025 10:14:27 GMT and should not be manually modified. -->
+<!-- This log was last generated on Thu, 07 Aug 2025 18:43:06 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.13.2
+
+Thu, 07 Aug 2025 18:43:06 GMT
+
+### Patches
+
+- Models tree: Stop unnecessarily executing an expensive model elements' count query, whose results we weren't even using.
+
+## 3.13.1
+
+Thu, 07 Aug 2025 12:12:57 GMT
+
+### Patches
+
+- Split large queries into smaller chunks to make them execute quicker. ([#1396](https://github.com/iTwin/viewer-components-react/pull/1396))
+
+## 3.13.0
+
+Wed, 06 Aug 2025 13:46:52 GMT
+
+### Minor changes
+
+- Added `getActions` callback to `TreeRenderer` components. It allows to supply custom actions for tree nodes. ([#1395](https://github.com/iTwin/viewer-components-react/pull/1395))
 
 ## 3.12.1
 
