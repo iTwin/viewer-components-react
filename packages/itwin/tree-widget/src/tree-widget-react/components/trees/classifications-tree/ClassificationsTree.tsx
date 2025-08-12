@@ -13,7 +13,7 @@ import type { UseClassificationsTreeProps } from "./UseClassificationsTree.js";
 
 /** @alpha */
 export type ClassificationsTreeProps = Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
-  Pick<VisibilityTreeRendererProps, "getInlineActions" | "getMenuActions" | "getDecorations"> &
+  Pick<VisibilityTreeRendererProps, "getInlineActions" | "getMenuActions" | "getDecorations" | "getEditingProps"> &
   UseClassificationsTreeProps & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
@@ -32,6 +32,7 @@ export function ClassificationsTree({
   getDecorations,
   getInlineActions,
   getMenuActions,
+  getEditingProps,
   filter,
 }: ClassificationsTreeProps) {
   const { classificationsTreeProps, rendererProps } = useClassificationsTree({
@@ -52,6 +53,7 @@ export function ClassificationsTree({
         <VisibilityTreeRenderer
           {...treeProps}
           {...rendererProps}
+          getEditingProps={getEditingProps}
           getInlineActions={getInlineActions}
           getMenuActions={getMenuActions}
           getDecorations={getDecorations ?? rendererProps.getDecorations}

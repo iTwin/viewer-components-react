@@ -34,6 +34,7 @@ import {
   ExternalSourcesTreeComponent,
   IModelContentTreeComponent,
   ModelsTreeComponent,
+  RenameAction,
   TreeWidget,
   TreeWidgetComponent,
 } from "@itwin/tree-widget-react";
@@ -173,6 +174,12 @@ const configuredUiItems = new Map<string, UiItem>([
                     filter={props.filter}
                     selectionStorage={unifiedSelectionStorage}
                     hierarchyConfig={{ rootClassificationSystemCode: "50k classifications" }}
+                    getMenuActions={() => [<RenameAction key={"renameAction"} />]}
+                    getEditingProps={(node) => ({
+                      onLabelChanged: (newLabel: string) => {
+                        console.log("node label changed", node, newLabel);
+                      },
+                    })}
                   />
                 ),
                 shouldShow: async (imodel) => ClassificationsTreeComponent.isSupportedByIModel(imodel),
