@@ -27,6 +27,7 @@ interface ClassificationsTreeComponentProps
     | "getMenuActions"
     | "getDecorations"
     | "hierarchyConfig"
+    | "getEditingProps"
   > {
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
