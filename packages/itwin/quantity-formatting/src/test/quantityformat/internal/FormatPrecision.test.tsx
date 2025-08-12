@@ -37,8 +37,10 @@ describe("FormatPrecision", () => {
     const onChange = vi.fn();
     render(<FormatPrecision formatProps={defaultDecimalFormatProps} onChange={onChange} />);
 
-    const input = screen.getByRole("spinbutton");
-    fireEvent.change(input, { target: { value: "4" } });
+    const input = screen.getByRole("combobox") as HTMLInputElement;
+    fireEvent.click(input);
+    const button = screen.getByText('QuantityFormat.decimal_precision.four');
+    fireEvent.click(button);
 
     expect(onChange).toHaveBeenCalledWith({
       ...defaultDecimalFormatProps,
@@ -50,8 +52,10 @@ describe("FormatPrecision", () => {
     const onChange = vi.fn();
     render(<FormatPrecision formatProps={defaultFractionalFormatProps} onChange={onChange} />);
 
-    const selector = screen.getByRole("combobox");
-    fireEvent.change(selector, { target: { value: "8" } });
+    const input = screen.getByRole("combobox") as HTMLInputElement;
+    fireEvent.click(input);
+    const button = screen.getByText('QuantityFormat.fraction_precision.eighth');
+    fireEvent.click(button);
 
     expect(onChange).toHaveBeenCalledWith({
       ...defaultFractionalFormatProps,
@@ -63,30 +67,22 @@ describe("FormatPrecision", () => {
     const onChange = vi.fn();
     render(<FormatPrecision formatProps={defaultDecimalFormatProps} onChange={onChange} />);
 
-    const input = screen.getByRole("spinbutton");
-
+    const input = screen.getByRole("combobox") as HTMLInputElement;
+    fireEvent.click(input);
     // Test multiple precision changes
-    fireEvent.change(input, { target: { value: "0" } });
+    const button = screen.getByText('QuantityFormat.decimal_precision.zero');
+    fireEvent.click(button);
     expect(onChange).toHaveBeenCalledWith({
       ...defaultDecimalFormatProps,
       precision: 0,
     });
-
-    fireEvent.change(input, { target: { value: "6" } });
+    fireEvent.click(input);
+    const button2 = screen.getByText('QuantityFormat.decimal_precision.six');
+    fireEvent.click(button2);
     expect(onChange).toHaveBeenCalledWith({
       ...defaultDecimalFormatProps,
       precision: 6,
     });
-  });
-
-  it("should not call onChange when onChange prop is not provided", () => {
-    render(<FormatPrecision formatProps={defaultDecimalFormatProps} />);
-
-    const input = screen.getByRole("spinbutton");
-    fireEvent.change(input, { target: { value: "4" } });
-
-    // Should not throw error and should render without issues
-    expect(screen.getByText("QuantityFormat.labels.precision")).toBeTruthy();
   });
 
   it("should handle undefined precision in formatProps", () => {
@@ -96,8 +92,10 @@ describe("FormatPrecision", () => {
     const onChange = vi.fn();
     render(<FormatPrecision formatProps={formatPropsWithoutPrecision} onChange={onChange} />);
 
-    const input = screen.getByLabelText("QuantityFormat.labels.precision") as HTMLInputElement;
-    fireEvent.change(input, { target: { value: "3" } });
+    const input = screen.getByRole("combobox") as HTMLInputElement;
+    fireEvent.click(input);
+    const button = screen.getByText('QuantityFormat.decimal_precision.three');
+    fireEvent.click(button);
 
     expect(onChange).toHaveBeenCalledWith({
       ...formatPropsWithoutPrecision,

@@ -32,7 +32,7 @@ describe("Fractional Panel", () => {
         />
       );
       expect(renderedComponent.getByLabelText("QuantityFormat.labels.type")).to.exist;
-      expect(renderedComponent.getByLabelText("QuantityFormat.labels.precision")).to.exist;
+      expect(renderedComponent.getByText("QuantityFormat.labels.precision")).to.exist;
     });
     it("should render unit label controls when showUnitLabel is enabled", async () => {
       const formatProps: FormatProps = {

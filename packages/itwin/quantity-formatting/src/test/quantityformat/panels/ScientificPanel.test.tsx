@@ -55,7 +55,7 @@ describe("Scientific Panel", () => {
         />
       );
 
-      expect(renderedComponent.getByLabelText("QuantityFormat.labels.scientificTypeLabel")).toBeTruthy();
+      expect(renderedComponent.getByText("QuantityFormat.labels.scientificTypeLabel")).toBeTruthy();
     });
 
     it("should render unit label controls when showUnitLabel is enabled", async () => {
@@ -98,7 +98,7 @@ describe("Scientific Panel", () => {
       );
 
       expect(renderedComponent.getByLabelText("QuantityFormat.labels.signOptionLabel")).toBeTruthy();
-      expect(renderedComponent.getByLabelText("QuantityFormat.labels.decimalSeparatorLabel")).toBeTruthy();
+      expect(renderedComponent.getByText("QuantityFormat.labels.decimalSeparatorLabel")).toBeTruthy();
     });
   });
 });
