@@ -65,7 +65,7 @@ const QuantityFormatWidget: React.FC = () => {
         title="Quantity Format Settings"
         style={{ width: "600px", maxWidth: "90vw" }}
       >
-        <div style={{ padding: "16px", height: "400px", overflow: "auto" }}>
+        <div style={{ padding: "16px", height: "1200px", overflow: "auto" }}>
           <QuantityFormatPanel
             formatDefinition={formatDefinition}
             unitsProvider={memoizedUnitsProvider}

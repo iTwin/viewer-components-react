@@ -16,6 +16,7 @@
       "precision": "Precision",
       "type": "Format Type",
       "formatTypeSublabel": "Select the format for which you would like to display measurements",
+      "formatSetSectionLabel": "Available Formats",
       "appendUnitLabel": "Show Unit Label",
       "labelSeparator": "Label Separator",
       "signOptionLabel": "Sign Option",
