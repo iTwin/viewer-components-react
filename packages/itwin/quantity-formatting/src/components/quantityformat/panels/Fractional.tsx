@@ -7,25 +7,25 @@
 import * as React from "react";
 import type { PanelProps } from "./Decimal.js";
 import { Format, FormatTraits } from "@itwin/core-quantity";
-import { FormatUnitsV2 } from "../internal/FormatUnitsV2.js";
+import { FormatUnits } from "../internal/FormatUnits.js";
 import { FormatTypeOption } from "../internal/misc/FormatType.js";
 import {
-  AppendUnitLabelV2,
-  UomSeparatorSelectorV2,
-} from "../internal/FormatUnitLabelV2.js";
-import { FormatPrecisionV2 } from "../internal/FormatPrecisionV2.js";
+  AppendUnitLabel,
+  UomSeparatorSelector,
+} from "../internal/FormatUnitLabel.js";
+import { FormatPrecision } from "../internal/FormatPrecision.js";
 import { Divider, Label, Text } from "@itwin/itwinui-react";
 import { useTranslation } from "../../../useTranslation.js";
-import { ShowTrailingZerosV2 } from "../internal/ShowTrailingZerosV2.js";
-import { SignOptionV2 } from "../internal/SignOptionV2.js";
-import { KeepSingleZeroV2 } from "../internal/KeepSingleZeroV2.js";
-import { ZeroEmptyV2 } from "../internal/ZeroEmptyV2.js";
-import { FractionDashV2 } from "../internal/FractionDashV2.js";
+import { ShowTrailingZeros } from "../internal/ShowTrailingZeros.js";
+import { SignOption } from "../internal/SignOption.js";
+import { KeepSingleZero } from "../internal/KeepSingleZero.js";
+import { ZeroEmpty } from "../internal/ZeroEmpty.js";
+import { FractionDash } from "../internal/FractionDash.js";
 import {
   ThousandsSeparatorSelector,
   UseThousandsSeparator,
-} from "../internal/ThousandsSeparatorV2.js";
-import "../FormatPanelV2.scss";
+} from "../internal/ThousandsSeparator.js";
+import "../FormatPanel.scss";
 
 /** Primary children component for fractional format
  * @internal
@@ -37,8 +37,8 @@ export function FractionalPrimaryChildren(
   const { translate } = useTranslation();
 
   return (
-    <div className="icr-quantityFormat-v2-formatPanel-primaryChildren">
-      <div className="icr-quantityFormat-v2-formatTypeRow">
+    <div className="quantityFormat--formatPanel-primaryChildren">
+      <div className="quantityFormat--formatTypeRow">
         <FormatTypeOption formatProps={formatProps} onChange={onFormatChange} />
       </div>
       <Text variant="small" isMuted={true}>
@@ -46,14 +46,14 @@ export function FractionalPrimaryChildren(
       </Text>
       <Divider />
       <Label>{translate("QuantityFormat.labels.units")}</Label>
-      <FormatUnitsV2
+      <FormatUnits
         unitsProvider={unitsProvider}
         persistenceUnit={persistenceUnit}
         initialFormat={formatProps}
         onUnitsChange={onFormatChange}
       />
       <Divider />
-      <AppendUnitLabelV2
+      <AppendUnitLabel
         formatProps={formatProps}
         onFormatChange={onFormatChange}
       />
@@ -61,12 +61,12 @@ export function FractionalPrimaryChildren(
         formatProps,
         FormatTraits.ShowUnitLabel
       ) && (
-        <UomSeparatorSelectorV2
+        <UomSeparatorSelector
           formatProps={formatProps}
           onFormatChange={onFormatChange}
         />
       )}
-      <FormatPrecisionV2 formatProps={formatProps} onChange={onFormatChange} />
+      <FormatPrecision formatProps={formatProps} onChange={onFormatChange} />
     </div>
   );
 }
@@ -89,9 +89,9 @@ export function FractionalSecondaryChildren(
   const { formatProps, onFormatChange } = props;
 
   return (
-    <div className="icr-quantityFormat-v2-formatPanel-secondaryChildren">
-      <SignOptionV2 formatProps={formatProps} onChange={onFormatChange} />
-      <FractionDashV2 formatProps={formatProps} onChange={onFormatChange} />
+    <div className="quantityFormat--formatPanel-secondaryChildren">
+      <SignOption formatProps={formatProps} onChange={onFormatChange} />
+      <FractionDash formatProps={formatProps} onChange={onFormatChange} />
       <UseThousandsSeparator
         formatProps={formatProps}
         onChange={onFormatChange}
@@ -100,12 +100,12 @@ export function FractionalSecondaryChildren(
         formatProps={formatProps}
         onChange={onFormatChange}
       />
-      <ShowTrailingZerosV2
+      <ShowTrailingZeros
         formatProps={formatProps}
         onChange={onFormatChange}
       />
-      <KeepSingleZeroV2 formatProps={formatProps} onChange={onFormatChange} />
-      <ZeroEmptyV2 formatProps={formatProps} onChange={onFormatChange} />
+      <KeepSingleZero formatProps={formatProps} onChange={onFormatChange} />
+      <ZeroEmpty formatProps={formatProps} onChange={onFormatChange} />
     </div>
   );
 }

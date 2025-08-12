@@ -6,44 +6,44 @@
 
 import * as React from "react";
 import type { FormatProps } from "@itwin/core-quantity";
-import { StationSizeSelector } from "./misc/StationSizeSelector.js";
+import { StationSeparatorSelector } from "./misc/StationSeparatorSelector.js";
 import { useTranslation } from "../../../useTranslation.js";
 import { Label } from "@itwin/itwinui-react";
 
-/** Properties of [[StationOffsetV2]] component.
+/** Properties of [[StationSeparator]] component.
  * @internal
  */
-export interface StationOffsetV2Props {
+export interface StationSeparatorProps {
   formatProps: FormatProps;
   onChange?: (format: FormatProps) => void;
   disabled?: boolean;
 }
 
-/** Component to show/edit Station Format Offset Size.
+/** Component to show/edit Station Format Separator.
  * @internal
  */
-export function StationOffsetV2(props: StationOffsetV2Props) {
+export function StationSeparator(props: StationSeparatorProps) {
   const { formatProps, onChange, disabled = false } = props;
   const { translate } = useTranslation();
-  const stationOffsetSelectorId = React.useId();
+  const stationSeparatorSelectorId = React.useId();
 
-  const handleStationOffsetChange = React.useCallback(
-    (value: number) => {
-      const newFormatProps = { ...formatProps, stationOffsetSize: value };
+  const handleStationSeparatorChange = React.useCallback(
+    (value: string) => {
+      const newFormatProps = { ...formatProps, stationSeparator: value };
       onChange && onChange(newFormatProps);
     },
     [formatProps, onChange]
   );
 
   return (
-    <div className="icr-quantityFormat-v2-formatInlineRow">
-      <Label displayStyle="inline" id={stationOffsetSelectorId}>
-        {translate("QuantityFormat.labels.stationOffsetLabel")}
+    <div className="quantityFormat--formatInlineRow">
+      <Label displayStyle="inline" id={stationSeparatorSelectorId}>
+        {translate("QuantityFormat.labels.stationSeparatorLabel")}
       </Label>
-      <StationSizeSelector
-        aria-labelledby={stationOffsetSelectorId}
-        value={formatProps.stationOffsetSize ?? 2}
-        onChange={handleStationOffsetChange}
+      <StationSeparatorSelector
+        aria-labelledby={stationSeparatorSelectorId}
+        separator={formatProps.stationSeparator ?? "+"}
+        onChange={handleStationSeparatorChange}
       />
     </div>
   );

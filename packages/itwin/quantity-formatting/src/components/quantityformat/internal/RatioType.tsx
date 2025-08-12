@@ -6,17 +6,17 @@
 
 import * as React from "react";
 import type { FormatProps } from "@itwin/core-quantity";
-import { parseRatioType, RatioType } from "@itwin/core-quantity";
+import { parseRatioType, RatioType as CoreRatioType } from "@itwin/core-quantity";
 import { IconButton, LabeledSelect } from "@itwin/itwinui-react";
 import type { SelectOption } from "@itwin/itwinui-react";
 import { SvgHelpCircularHollow } from "@itwin/itwinui-icons-react";
 import { useTranslation } from "../../../useTranslation.js";
-import "../FormatPanelV2.scss";
+import "../FormatPanel.scss";
 
-/** Properties of [[RatioTypeV2]] component.
+/** Properties of [[RatioType]] component.
  * @internal
  */
-export interface RatioTypeV2Props {
+export interface RatioTypeProps {
   formatProps: FormatProps;
   onChange?: (format: FormatProps) => void;
 }
@@ -24,7 +24,7 @@ export interface RatioTypeV2Props {
 /** Component to show/edit ratio type.
  * @internal
  */
-export function RatioTypeV2(props: RatioTypeV2Props) {
+export function RatioType(props: RatioTypeProps) {
   const { formatProps, onChange } = props;
   const { translate } = useTranslation();
 
@@ -36,7 +36,7 @@ export function RatioTypeV2(props: RatioTypeV2Props) {
   );
 
   const handleRatioTypeChange = React.useCallback(
-    (type: RatioType) => {
+    (type: CoreRatioType) => {
       const newFormatProps = {
         ...formatProps,
         ratioType: type,
@@ -49,23 +49,23 @@ export function RatioTypeV2(props: RatioTypeV2Props) {
   const currentType = React.useMemo(() => {
     return formatProps.ratioType && formatProps.ratioType.length > 0
       ? parseRatioType(formatProps.ratioType, "custom")
-      : RatioType.NToOne;
+      : CoreRatioType.NToOne;
   }, [formatProps.ratioType]);
 
-  const formatOptions: SelectOption<RatioType>[] = React.useMemo(
+  const formatOptions: SelectOption<CoreRatioType>[] = React.useMemo(
     () => [
       {
-        value: RatioType.NToOne,
+        value: CoreRatioType.NToOne,
         label: translate("QuantityFormat.ratio-type.n-to-one.label"),
         sublabel: translate("QuantityFormat.ratio-type.n-to-one.description"),
       },
       {
-        value: RatioType.OneToN,
+        value: CoreRatioType.OneToN,
         label: translate("QuantityFormat.ratio-type.one-to-n.label"),
         sublabel: translate("QuantityFormat.ratio-type.one-to-n.description"),
       },
       {
-        value: RatioType.UseGreatestCommonDivisor,
+        value: CoreRatioType.UseGreatestCommonDivisor,
         label: translate(
           "QuantityFormat.ratio-type.use-greatest-common-divisor.label"
         ),
@@ -74,7 +74,7 @@ export function RatioTypeV2(props: RatioTypeV2Props) {
         ),
       },
       {
-        value: RatioType.ValueBased,
+        value: CoreRatioType.ValueBased,
         label: translate("QuantityFormat.ratio-type.value-based.label"),
         sublabel: translate(
           "QuantityFormat.ratio-type.value-based.description"
@@ -85,13 +85,13 @@ export function RatioTypeV2(props: RatioTypeV2Props) {
   );
 
   return (
-    <div className="icr-quantityFormat-v2-formatInlineRow">
+    <div className="quantityFormat--formatInlineRow">
       <LabeledSelect
         label={
           <>
             {translate("QuantityFormat.labels.ratioTypeLabel")}
             <IconButton
-              className="icr-quantityFormat-v2-formatHelpTooltip"
+              className="quantityFormat--formatHelpTooltip"
               styleType="borderless"
               size="small"
               label={translate("QuantityFormat.ratio-type.default.description")}

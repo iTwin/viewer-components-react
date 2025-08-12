@@ -11,10 +11,10 @@ import { Label } from "@itwin/itwinui-react";
 import { DecimalSeparatorSelector } from "./misc/DecimalSeparator.js";
 import { useTranslation } from "../../../useTranslation.js";
 
-/** Properties of [[DecimalSeparatorV2]] component.
+/** Properties of [[DecimalSeparator]] component.
  * @internal
  */
-export interface DecimalSeparatorV2Props {
+export interface DecimalSeparatorProps {
   formatProps: FormatProps;
   onChange?: (format: FormatProps) => void;
 }
@@ -22,7 +22,7 @@ export interface DecimalSeparatorV2Props {
 /** Component to show/edit decimal separator.
  * @internal
  */
-export function DecimalSeparatorV2(props: DecimalSeparatorV2Props) {
+export function DecimalSeparator(props: DecimalSeparatorProps) {
   const { formatProps, onChange } = props;
   const { translate } = useTranslation();
 
@@ -65,7 +65,7 @@ export function DecimalSeparatorV2(props: DecimalSeparatorV2Props) {
   );
 
   return (
-    <div className="icr-quantityFormat-v2-formatInlineRow">
+    <div className="quantityFormat--formatInlineRow">
       <Label displayStyle="inline" id={decimalSeparatorSelectorId}>
         {translate("QuantityFormat.labels.decimalSeparatorLabel")}
       </Label>

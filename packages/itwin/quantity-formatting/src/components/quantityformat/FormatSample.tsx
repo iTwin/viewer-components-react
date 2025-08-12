@@ -12,10 +12,10 @@ import {
 } from "@itwin/core-quantity";
 import type { UnitsProvider } from "@itwin/core-quantity";
 import { Divider, Input, Label } from "@itwin/itwinui-react";
-import "./FormatPanelV2.scss";
+import "./FormatPanel.scss";
 import { useTranslation } from "../../useTranslation.js";
 
-interface FormatSampleV2Props {
+interface FormatSampleProps {
   formatProps: FormatProps;
   unitsProvider: UnitsProvider;
   persistenceUnit?: UnitProps;
@@ -27,7 +27,7 @@ interface FormatSampleV2Props {
  * Creates its own FormatterSpec internally based on formatProps and persistenceUnit.
  * @internal
  */
-export function FormatSampleV2(props: FormatSampleV2Props) {
+export function FormatSample(props: FormatSampleProps) {
   const { formatProps, unitsProvider, persistenceUnit, initialMagnitude } =
     props;
   const initialValue = initialMagnitude ?? 0;
@@ -108,31 +108,31 @@ export function FormatSampleV2(props: FormatSampleV2Props) {
     : "";
 
   return (
-    <div className="icr-quantityFormat-v2-formatSample-container">
-      <div className="icr-quantityFormat-v2-formatSample-box">
+    <div className="quantityFormat--formatSample-container">
+      <div className="quantityFormat--formatSample-box">
         <Label
-          className="icr-quantityFormat-v2-samplePreviewTitle"
+          className="quantityFormat--samplePreviewTitle"
           htmlFor={inputId}
         >
           {translate("QuantityFormat.labels.samplePreview")}
         </Label>
-        <div className="icr-quantityFormat-v2-formatSample-previewRow">
-          <div className="icr-quantityFormat-v2-formatSample-inputGroup">
+        <div className="quantityFormat--formatSample-previewRow">
+          <div className="quantityFormat--formatSample-inputGroup">
             <Input
               id={inputId}
-              className="icr-quantityFormat-v2-formatSample-input"
+              className="quantityFormat--formatSample-input"
               value={sampleValue}
               onChange={handleOnValueChange}
               onKeyDown={handleKeyDown}
               onBlur={handleOnValueBlur}
               size="small"
             />
-            <Label className="icr-quantityFormat-v2-persistenceUnitLabel">
+            <Label className="quantityFormat--persistenceUnitLabel">
               {activePersistenceUnitLabel}
             </Label>
           </div>
           <Divider orientation="vertical" />
-          <Label className="icr-quantityFormat-v2-formattedValueLabel">
+          <Label className="quantityFormat--formattedValueLabel">
             {formattedValue}
           </Label>
         </div>

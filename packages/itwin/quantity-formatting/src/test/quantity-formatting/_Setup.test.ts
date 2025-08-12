@@ -1,11 +1,22 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+import { afterAll, beforeAll } from "vitest";
 
-import { beforeEach, describe, it, expect } from "vitest";
+import { NoRenderApp } from "@itwin/core-frontend";
+import { EmptyLocalization } from "@itwin/core-common";
 
-// Setup for vitest tests
-beforeEach(() => {
-  // Any setup logic needed for tests
+import { QuantityFormatting } from "../../QuantityFormatting.js";
+
+// Before all tests, initialize any global services
+beforeAll(async () => {
+  const localization = new EmptyLocalization();
+  await NoRenderApp.startup({ localization });
+  await QuantityFormatting.startup({ localization });
+
+});
+
+afterAll(async () => {
+  QuantityFormatting.terminate();
 });

@@ -12,10 +12,10 @@ import { useTranslation } from "../../../useTranslation.js";
 import { Label } from "@itwin/itwinui-react";
 import { DecimalPrecisionSelector } from "./misc/DecimalPrecision.js";
 
-/** Properties of [[FormatPrecisionV2]] component.
+/** Properties of [[FormatPrecision]] component.
  * @internal
  */
-export interface FormatPrecisionV2Props {
+export interface FormatPrecisionProps {
   formatProps: FormatProps;
   onChange?: (format: FormatProps) => void;
 }
@@ -23,7 +23,7 @@ export interface FormatPrecisionV2Props {
 /** Component to show/edit Quantity Format Precision.
  * @internal
  */
-export function FormatPrecisionV2(props: FormatPrecisionV2Props) {
+export function FormatPrecision(props: FormatPrecisionProps) {
   const { formatProps, onChange } = props;
   const { translate } = useTranslation();
   const precisionSelectorId = React.useId();
@@ -38,7 +38,7 @@ export function FormatPrecisionV2(props: FormatPrecisionV2Props) {
   const formatType = parseFormatType(formatProps.type, "format");
 
   return (
-    <div className="icr-quantityFormat-v2-formatInlineRow">
+    <div className="quantityFormat--formatInlineRow">
       <Label displayStyle="inline" id={precisionSelectorId}>
         {translate("QuantityFormat.labels.precision")}
       </Label>

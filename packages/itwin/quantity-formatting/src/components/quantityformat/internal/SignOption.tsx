@@ -11,12 +11,12 @@ import { SignOptionSelector } from "./misc/SignOption.js";
 import { useTranslation } from "../../../useTranslation.js";
 import { IconButton, Label } from "@itwin/itwinui-react";
 import { SvgHelpCircularHollow } from "@itwin/itwinui-icons-react";
-import "../FormatPanelV2.scss";
+import "../FormatPanel.scss";
 
-/** Properties of [[SignOptionV2]] component.
+/** Properties of [[SignOption]] component.
  * @internal
  */
-export interface SignOptionV2Props {
+export interface SignOptionProps {
   formatProps: FormatProps;
   onChange?: (format: FormatProps) => void;
   disabled?: boolean;
@@ -25,7 +25,7 @@ export interface SignOptionV2Props {
 /** Component to show/edit Show Sign Option.
  * @internal
  */
-export function SignOptionV2(props: SignOptionV2Props) {
+export function SignOption(props: SignOptionProps) {
   const { formatProps, onChange, disabled = false } = props;
   const { translate } = useTranslation();
   const showSignOptionId = React.useId();
@@ -48,11 +48,11 @@ export function SignOptionV2(props: SignOptionV2Props) {
   );
 
   return (
-    <div className="icr-quantityFormat-v2-formatInlineRow">
+    <div className="quantityFormat--formatInlineRow">
       <Label displayStyle="inline" id={showSignOptionId}>
         {translate("QuantityFormat.labels.signOptionLabel")}
         <IconButton
-          className="icr-quantityFormat-v2-formatHelpTooltip"
+          className="quantityFormat--formatHelpTooltip"
           styleType="borderless"
           size="small"
           label={translate("QuantityFormat.labels.signOptionTooltip")}

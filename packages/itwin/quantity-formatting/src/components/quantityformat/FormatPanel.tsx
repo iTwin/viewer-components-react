@@ -37,7 +37,7 @@ import {
   getBearingPrimaryChildren,
   getBearingSecondaryChildren,
 } from "./panels/Bearing.js";
-import "./FormatPanelV2.scss";
+import "./FormatPanel.scss";
 import {
   getRatioPrimaryChildren,
   getRatioSecondaryChildren,
@@ -56,17 +56,17 @@ function useTranslation() {
   };
 }
 
-interface FormatPanelV2Props {
+interface FormatPanelProps {
   formatProps: FormatProps;
   unitsProvider: UnitsProvider;
   onFormatChange: (formatProps: FormatProps) => void;
   persistenceUnit?: UnitProps;
 }
 
-/** Format Panel V2 that uses primary and secondary children based on format type
+/** Format Panel  that uses primary and secondary children based on format type
  * @beta
  */
-export function FormatPanelV2(props: FormatPanelV2Props) {
+export function FormatPanel(props: FormatPanelProps) {
   const { formatProps, unitsProvider, onFormatChange, persistenceUnit } = props;
   const [isExpanded, setIsExpanded] = React.useState(false);
   const { translate } = useTranslation();
@@ -128,11 +128,11 @@ export function FormatPanelV2(props: FormatPanelV2Props) {
     <Flex
       flexDirection="column"
       alignItems="flex-start"
-      className="icr-quantityFormat-v2-formatPanel"
+      className="quantityFormat--formatPanel"
     >
       <Surface
         elevation={0}
-        className="icr-quantityFormat-v2-formatPanel-primaryChildren"
+        className="quantityFormat--formatPanel-primaryChildren"
       >
         {primaryChildren}
       </Surface>
@@ -145,7 +145,7 @@ export function FormatPanelV2(props: FormatPanelV2Props) {
         isExpanded={isExpanded}
         onToggle={() => setIsExpanded(!isExpanded)}
       >
-        <div className="icr-quantityFormat-v2-formatPanel-secondaryChildren">
+        <div className="quantityFormat--formatPanel-secondaryChildren">
           {secondaryChildren}
         </div>
       </ExpandableBlock>

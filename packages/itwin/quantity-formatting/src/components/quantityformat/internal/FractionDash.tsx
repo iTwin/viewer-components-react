@@ -10,10 +10,10 @@ import { Format, FormatTraits, getTraitString } from "@itwin/core-quantity";
 import { Checkbox, Label } from "@itwin/itwinui-react";
 import { useTranslation } from "../../../useTranslation.js";
 
-/** Properties of [[FractionDashV2]] component.
+/** Properties of [[FractionDash]] component.
  * @internal
  */
-export interface FractionDashV2Props {
+export interface FractionDashProps {
   formatProps: FormatProps;
   onChange?: (format: FormatProps) => void;
 }
@@ -21,7 +21,7 @@ export interface FractionDashV2Props {
 /** Component to show/edit Fraction Dash format trait.
  * @internal
  */
-export function FractionDashV2(props: FractionDashV2Props) {
+export function FractionDash(props: FractionDashProps) {
   const { formatProps, onChange } = props;
   const { translate } = useTranslation();
 
@@ -76,7 +76,7 @@ export function FractionDashV2(props: FractionDashV2Props) {
   );
 
   return (
-    <div className="icr-quantityFormat-v2-formatInlineRow">
+    <div className="quantityFormat--formatInlineRow">
       <Label displayStyle="inline" htmlFor={fractionDashId}>
         {translate("QuantityFormat.labels.fractionDashLabel")}
       </Label>

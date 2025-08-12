@@ -15,7 +15,7 @@ import type { SelectOption } from "@itwin/itwinui-react";
 import { SvgHelpCircularHollow } from "@itwin/itwinui-icons-react";
 import { useTranslation } from "../../../useTranslation.js";
 import { getUnitName } from "./misc/UnitDescr.js";
-import "../FormatPanelV2.scss";
+import "../FormatPanel.scss";
 
 async function getUnitConversionData(
   possibleUnits: UnitProps[],
@@ -55,16 +55,16 @@ async function getPossibleUnits(
     .map((value) => value.unitProps);
 }
 
-/** Properties of [[FormatUnitsV2]] component.
+/** Properties of [[FormatUnits]] component.
  * @internal
  */
-export interface FormatUnitsV2Props {
+export interface FormatUnitsProps {
   initialFormat: FormatProps;
   persistenceUnit?: UnitProps;
   unitsProvider: UnitsProvider;
   onUnitsChange?: (format: FormatProps) => void;
 }
-function UnitDescrV2(props: {
+function UnitDescr(props: {
   name: string;
   parentUnitName?: string;
   label: string;
@@ -168,7 +168,6 @@ function UnitDescrV2(props: {
         }
       } catch (error) {
         // Fallback to current unit if there's an error
-        // eslint-disable-next-line no-console
         console.warn("Failed to load unit options:", error);
         if (isMounted.current) {
           setUnitOptions([
@@ -197,7 +196,7 @@ function UnitDescrV2(props: {
   );
 
   return (
-    <div className="icr-quantityFormat-v2-formatInlineRow">
+    <div className="quantityFormat--formatInlineRow">
       <Select
         id={unitSelectorId}
         options={unitOptions}
@@ -206,7 +205,7 @@ function UnitDescrV2(props: {
         onChange={handleOnUnitChange}
         disabled={readonly}
         size="small"
-        className="icr-quantityFormat-v2-unitSelect"
+        className="quantityFormat--unitSelect"
       />
       <Input
         id={labelInputId}
@@ -215,7 +214,7 @@ function UnitDescrV2(props: {
         onChange={handleOnLabelChange}
         size="small"
         disabled={readonly}
-        className="icr-quantityFormat-v2-unitInput"
+        className="quantityFormat--unitInput"
       />
     </div>
   );
@@ -224,7 +223,7 @@ function UnitDescrV2(props: {
 /** Component to show/edit Units used for Quantity Formatting.
  * @internal
  */
-export function FormatUnitsV2(props: FormatUnitsV2Props) {
+export function FormatUnits(props: FormatUnitsProps) {
   const { initialFormat, persistenceUnit, unitsProvider, onUnitsChange } =
     props;
   const { translate } = useTranslation();
@@ -331,7 +330,7 @@ export function FormatUnitsV2(props: FormatUnitsV2Props) {
     <>
       {formatProps.composite?.units
         ? formatProps.composite.units.map((value, index) => (
-            <UnitDescrV2
+            <UnitDescr
               key={value.name}
               name={value.name}
               label={value.label ?? ""}
@@ -348,7 +347,7 @@ export function FormatUnitsV2(props: FormatUnitsV2Props) {
             />
           ))
         : persistenceUnit && (
-            <UnitDescrV2
+            <UnitDescr
               key={persistenceUnit.name}
               name={persistenceUnit.name}
               label={persistenceUnit.label}
@@ -361,7 +360,7 @@ export function FormatUnitsV2(props: FormatUnitsV2Props) {
 
       {formatProps.composite?.units &&
         formatProps.composite.units.length > 1 && (
-          <div className="icr-quantityFormat-v2-formatInlineRow">
+          <div className="quantityFormat--formatInlineRow">
             <Label displayStyle="inline" htmlFor={compositeSpacerSelectorId}>
               {translate("QuantityFormat.labels.compositeSpacer")}
               <IconButton

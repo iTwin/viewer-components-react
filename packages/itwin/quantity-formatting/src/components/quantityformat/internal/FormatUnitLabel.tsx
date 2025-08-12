@@ -11,10 +11,10 @@ import type { SelectOption } from "@itwin/itwinui-react";
 import { Checkbox, Label, LabeledSelect } from "@itwin/itwinui-react";
 import { useTranslation } from "../../../useTranslation.js";
 
-/** Properties of [[UomSeparatorSelectorV2]] component.
+/** Properties of [[UomSeparatorSelector]] component.
  * @internal
  */
-interface UomSeparatorSelectorV2Props {
+interface UomSeparatorSelectorProps {
   formatProps: FormatProps;
   onFormatChange: (formatProps: FormatProps) => void;
 }
@@ -22,7 +22,7 @@ interface UomSeparatorSelectorV2Props {
 /** Component to set the unit of measure separator.
  * @internal
  */
-export function UomSeparatorSelectorV2(props: UomSeparatorSelectorV2Props) {
+export function UomSeparatorSelector(props: UomSeparatorSelectorProps) {
   const { formatProps, onFormatChange, ...rest } = props;
   const { translate } = useTranslation();
 
@@ -57,7 +57,7 @@ export function UomSeparatorSelectorV2(props: UomSeparatorSelectorV2Props) {
   }, [formatProps.uomSeparator, translate]);
 
   return (
-    <div className="icr-quantityFormat-v2-formatInlineRow">
+    <div className="quantityFormat--formatInlineRow">
       <LabeledSelect
         label={translate("QuantityFormat.labels.labelSeparator")}
         options={separatorOptions}
@@ -71,10 +71,10 @@ export function UomSeparatorSelectorV2(props: UomSeparatorSelectorV2Props) {
   );
 }
 
-/** Properties of [[AppendUnitLabelV2]] component.
+/** Properties of [[AppendUnitLabel]] component.
  * @internal
  */
-interface AppendUnitLabelV2Props {
+interface AppendUnitLabelProps {
   formatProps: FormatProps;
   onFormatChange: (formatProps: FormatProps) => void;
 }
@@ -82,7 +82,7 @@ interface AppendUnitLabelV2Props {
 /** Component to set the append unit label flag.
  * @internal
  */
-export function AppendUnitLabelV2(props: AppendUnitLabelV2Props) {
+export function AppendUnitLabel(props: AppendUnitLabelProps) {
   const { formatProps, onFormatChange } = props;
   const { translate } = useTranslation();
   const appendUnitLabelId = React.useId();
@@ -131,7 +131,7 @@ export function AppendUnitLabelV2(props: AppendUnitLabelV2Props) {
   );
 
   return (
-    <div className="icr-quantityFormat-v2-formatInlineRow icr-quantityFormat-v2-appendUnitLabel">
+    <div className="quantityFormat--formatInlineRow quantityFormat--appendUnitLabel">
       <Label htmlFor={appendUnitLabelId}>
         {translate("QuantityFormat.labels.appendUnitLabel")}
       </Label>

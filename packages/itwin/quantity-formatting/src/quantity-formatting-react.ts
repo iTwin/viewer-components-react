@@ -12,6 +12,6 @@
 export { QuantityFormatting } from "./QuantityFormatting.js";
 
 // Export React components here
-export { QuantityFormatPanelV2 } from "./components/quantityformat/QuantityFormatPanelV2.js";
-export { FormatSampleV2 } from "./components/quantityformat/FormatSampleV2.js";
-export { FormatPanelV2 } from "./components/quantityformat/FormatPanelV2.js";
+export { QuantityFormatPanelV2 } from "./components/quantityformat/QuantityFormatPanel.js";
+export { FormatSampleV2 } from "./components/quantityformat/FormatSample.js";
+export { FormatPanelV2 } from "./components/quantityformat/FormatPanel.js";

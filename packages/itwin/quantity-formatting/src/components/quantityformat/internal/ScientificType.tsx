@@ -6,17 +6,17 @@
 
 import * as React from "react";
 import type { FormatProps } from "@itwin/core-quantity";
-import { parseScientificType, ScientificType } from "@itwin/core-quantity";
+import { parseScientificType, ScientificType as CoreScientificType } from "@itwin/core-quantity";
 import { IconButton, LabeledSelect } from "@itwin/itwinui-react";
 import type { SelectOption } from "@itwin/itwinui-react";
 import { SvgHelpCircularHollow } from "@itwin/itwinui-icons-react";
 import { useTranslation } from "../../../useTranslation.js";
-import "../FormatPanelV2.scss";
+import "../FormatPanel.scss";
 
-/** Properties of [[ScientificTypeV2]] component.
+/** Properties of [[ScientificType]] component.
  * @internal
  */
-export interface ScientificTypeV2Props {
+export interface ScientificTypeProps {
   formatProps: FormatProps;
   onChange?: (format: FormatProps) => void;
   disabled?: boolean;
@@ -25,7 +25,7 @@ export interface ScientificTypeV2Props {
 /** Component to show/edit scientific type.
  * @internal
  */
-export function ScientificTypeV2(props: ScientificTypeV2Props) {
+export function ScientificType(props: ScientificTypeProps) {
   const { formatProps, onChange, disabled = false } = props;
   const { translate } = useTranslation();
 
@@ -37,7 +37,7 @@ export function ScientificTypeV2(props: ScientificTypeV2Props) {
   );
 
   const handleScientificTypeChange = React.useCallback(
-    (type: ScientificType) => {
+    (type: CoreScientificType) => {
       const newFormatProps = {
         ...formatProps,
         scientificType: type,
@@ -50,17 +50,17 @@ export function ScientificTypeV2(props: ScientificTypeV2Props) {
   const currentType = React.useMemo(() => {
     return formatProps.scientificType && formatProps.scientificType.length > 0
       ? parseScientificType(formatProps.scientificType, "custom")
-      : ScientificType.Normalized;
+      : CoreScientificType.Normalized;
   }, [formatProps.scientificType]);
 
-  const formatOptions: SelectOption<ScientificType>[] = React.useMemo(
+  const formatOptions: SelectOption<CoreScientificType>[] = React.useMemo(
     () => [
       {
-        value: ScientificType.Normalized,
+        value: CoreScientificType.Normalized,
         label: translate("QuantityFormat.scientific-type.normalized"),
       },
       {
-        value: ScientificType.ZeroNormalized,
+        value: CoreScientificType.ZeroNormalized,
         label: translate("QuantityFormat.scientific-type.zero-normalized"),
       },
     ],
@@ -68,13 +68,13 @@ export function ScientificTypeV2(props: ScientificTypeV2Props) {
   );
 
   return (
-    <div className="icr-quantityFormat-v2-formatInlineRow">
+    <div className="quantityFormat--formatInlineRow">
       <LabeledSelect
         label={
           <>
             {translate("QuantityFormat.labels.scientificTypeLabel")}
             <IconButton
-              className="icr-quantityFormat-v2-formatHelpTooltip"
+              className="quantityFormat--formatHelpTooltip"
               styleType="borderless"
               size="small"
               label={translate("QuantityFormat.labels.scientificTypeTooltip")}

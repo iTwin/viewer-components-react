@@ -53,7 +53,6 @@ function AzimuthBaseUnitSelector(props: {
         }
       } catch (error) {
         // Fallback to current unit if there's an error
-        // eslint-disable-next-line no-console
         console.warn("Failed to load unit family:", error);
         setUnitOptions([{ value: currentUnit, label: currentUnit }]);
       }
@@ -70,7 +69,7 @@ function AzimuthBaseUnitSelector(props: {
   );
 
   return (
-    <div className="icr-quantityFormat-v2-formatInlineRow">
+    <div className="quantityFormat--formatInlineRow">
       <LabeledSelect
         label={
           <>
@@ -95,10 +94,10 @@ function AzimuthBaseUnitSelector(props: {
 }
 
 /**
- * Component used to customize Azimuth options of a Format (V2).
+ * Component used to customize Azimuth options of a Format ().
  * @alpha
  */
-export function AzimuthOptionsV2(props: {
+export function AzimuthOptions(props: {
   formatProps: FormatProps;
   onChange?: (format: FormatProps) => void;
   disabled: boolean;
@@ -158,7 +157,7 @@ export function AzimuthOptionsV2(props: {
 
   return (
     <>
-      <div className="icr-quantityFormat-v2-formatInlineRow">
+      <div className="quantityFormat--formatInlineRow">
         <Label htmlFor={ccwCheckboxId} displayStyle="inline">
           {translate("QuantityFormat.labels.azimuthCounterClockwise")}
         </Label>
@@ -183,7 +182,7 @@ export function AzimuthOptionsV2(props: {
         onChange={handleAzimuthBaseUnitChange}
         disabled={disabled}
       />
-      <div className="icr-quantityFormat-v2-formatInlineRow">
+      <div className="quantityFormat--formatInlineRow">
         <Label htmlFor={baseInputId} displayStyle="inline">
           {translate("QuantityFormat.labels.azimuthBase")}
         </Label>

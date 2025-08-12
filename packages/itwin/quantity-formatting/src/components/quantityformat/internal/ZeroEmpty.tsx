@@ -9,12 +9,12 @@ import type { FormatProps } from "@itwin/core-quantity";
 import { Format, FormatTraits, getTraitString } from "@itwin/core-quantity";
 import { Checkbox, Label } from "@itwin/itwinui-react";
 import { useTranslation } from "../../../useTranslation.js";
-import "../FormatPanelV2.scss";
+import "../FormatPanel.scss";
 
-/** Properties of [[ZeroEmptyV2]] component.
+/** Properties of [[ZeroEmpty]] component.
  * @internal
  */
-export interface ZeroEmptyV2Props {
+export interface ZeroEmptyProps {
   formatProps: FormatProps;
   onChange?: (format: FormatProps) => void;
   disabled?: boolean;
@@ -23,7 +23,7 @@ export interface ZeroEmptyV2Props {
 /** Component to show/edit Zero Empty setting.
  * @internal
  */
-export function ZeroEmptyV2(props: ZeroEmptyV2Props) {
+export function ZeroEmpty(props: ZeroEmptyProps) {
   const { formatProps, onChange, disabled } = props;
   const { translate } = useTranslation();
   const zeroEmptyId = React.useId();
@@ -64,7 +64,7 @@ export function ZeroEmptyV2(props: ZeroEmptyV2Props) {
   );
 
   return (
-    <div className="icr-quantityFormat-v2-formatInlineRow">
+    <div className="quantityFormat--formatInlineRow">
       <Label displayStyle="inline" htmlFor={zeroEmptyId}>
         {translate("QuantityFormat.labels.zeroEmptyLabel")}
       </Label>

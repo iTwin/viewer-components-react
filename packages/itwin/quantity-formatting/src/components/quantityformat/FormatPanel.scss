@@ -3,15 +3,15 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-.icr-quantityFormat-v2-formatPanel {
+.quantityFormat--formatPanel {
   display: flex;
   flex-direction: column;
   gap: var(--iui-size-l);
   padding: var(--iui-size-l);
 }
 
-.icr-quantityFormat-v2-formatPanel
-  .icr-quantityFormat-v2-formatPanel-primaryChildren {
+.quantityFormat--formatPanel
+  .quantityFormat--formatPanel-primaryChildren {
   /* Always visible primary controls */
   border-radius: var(--iui-border-radius-1);
   padding: var(--iui-size-m);
@@ -20,8 +20,8 @@
   width: 100%;
 }
 
-.icr-quantityFormat-v2-formatPanel
-  .icr-quantityFormat-v2-formatPanel-secondaryChildren {
+.quantityFormat--formatPanel
+  .quantityFormat--formatPanel-secondaryChildren {
   /* Expandable secondary controls */
   padding: var(--iui-size-s);
   background: var(--iui-color-background-backdrop);
@@ -30,8 +30,8 @@
   flex-direction: column;
 }
 
-/* FormatSampleV2 styles */
-.icr-quantityFormat-v2-formatSample-container {
+/* FormatSample styles */
+.quantityFormat--formatSample-container {
   padding: var(--iui-size-s);
   margin-top: var(--iui-size-l);
   display: flex;
@@ -39,60 +39,60 @@
   align-items: center;
 }
 
-.icr-quantityFormat-v2-formatSample-box {
+.quantityFormat--formatSample-box {
   border: 1px solid var(--iui-color-border-subtle);
   border-radius: var(--iui-border-radius-1);
   padding: var(--iui-size-m);
   margin: var(--iui-size-s);
 }
 
-.icr-quantityFormat-v2-formatSample-previewRow {
+.quantityFormat--formatSample-previewRow {
   display: flex;
   align-items: center;
   gap: var(--iui-size-s);
 }
 
-.icr-quantityFormat-v2-formatSample-input {
+.quantityFormat--formatSample-input {
   min-width: 120px;
 }
 
 /* Format type row styling */
-.icr-quantityFormat-v2-formatTypeRow {
+.quantityFormat--formatTypeRow {
   display: flex;
   align-items: center;
   gap: var(--iui-size-xs);
 }
 
 /* Inline styling for unit label components */
-.icr-quantityFormat-v2-formatInlineRow {
+.quantityFormat--formatInlineRow {
   display: flex;
   align-items: center;
   min-height: var(--iui-size-xl);
 }
 
-.icr-quantityFormat-v2-appendUnitLabel {
+.quantityFormat--appendUnitLabel {
   gap: var(--iui-size-m);
 }
 
-.icr-quantityFormat-v2-formatHelpTooltip {
+.quantityFormat--formatHelpTooltip {
   position: relative;
   top: 1px;
   margin-left: var(--iui-size-xs);
 }
 
-/* UnitDescrV2 component styling */
-.icr-quantityFormat-v2-formatInlineRow .icr-quantityFormat-v2-unitSelect {
+/* UnitDescr component styling */
+.quantityFormat--formatInlineRow .quantityFormat--unitSelect {
   min-width: 20%;
   width: fit-content;
 }
 
-.icr-quantityFormat-v2-formatInlineRow .icr-quantityFormat-v2-unitInput {
+.quantityFormat--formatInlineRow .quantityFormat--unitInput {
   min-width: 25%;
   width: fit-content;
 }
 
-/* FormatSampleV2 persistence unit label styling */
-.icr-quantityFormat-v2-persistenceUnitLabel {
+/* FormatSample persistence unit label styling */
+.quantityFormat--persistenceUnitLabel {
   width: 100%;
   flex: 1;
   margin: 0;
@@ -105,26 +105,26 @@
 }
 
 /* Input group styling for input and label together */
-.icr-quantityFormat-v2-formatSample-inputGroup {
+.quantityFormat--formatSample-inputGroup {
   display: flex;
   align-items: stretch;
   min-width: 200px;
 }
 
-.icr-quantityFormat-v2-formatSample-inputGroup
-  .icr-quantityFormat-v2-formatSample-input {
+.quantityFormat--formatSample-inputGroup
+  .quantityFormat--formatSample-input {
   border-radius: var(--iui-border-radius-1) 0 0 var(--iui-border-radius-1);
   border-right: none;
 }
 
 /* Formatted value label styling */
-.icr-quantityFormat-v2-formattedValueLabel {
+.quantityFormat--formattedValueLabel {
   padding: var(--iui-size-xs);
   background-color: var(--iui-color-background-base);
 }
 
 /* Sample preview title label styling */
-.icr-quantityFormat-v2-samplePreviewTitle {
+.quantityFormat--samplePreviewTitle {
   margin-bottom: var(--iui-size-s);
   font-weight: 600;
 }
