@@ -27,19 +27,19 @@ export function StationSizeSelector(props: StationSizeSelectorProps) {
   const separatorOptions: SelectOption<number>[] = [
     {
       value: 1,
-      label: translate("QuantityFormat.station_size.one"),
+      label: translate("QuantityFormat:station_size.one"),
     },
     {
       value: 2,
-      label: translate("QuantityFormat.station_size.two"),
+      label: translate("QuantityFormat:station_size.two"),
     },
     {
       value: 3,
-      label: translate("QuantityFormat.station_size.three"),
+      label: translate("QuantityFormat:station_size.three"),
     },
     {
       value: 4,
-      label: translate("QuantityFormat.station_size.four"),
+      label: translate("QuantityFormat:station_size.four"),
     },
   ];
 

@@ -65,7 +65,7 @@ export function ShowTrailingZeros(props: ShowTrailingZerosProps) {
   return (
     <div className="quantityFormat--formatInlineRow">
       <Label displayStyle="inline" htmlFor={showTrailZerosId}>
-        {translate("QuantityFormat.labels.showTrailZerosLabel")}
+        {translate("QuantityFormat:labels.showTrailZerosLabel")}
       </Label>
       <Checkbox
         id={showTrailZerosId}

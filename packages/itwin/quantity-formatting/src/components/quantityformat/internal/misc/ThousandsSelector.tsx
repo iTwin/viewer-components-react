@@ -29,11 +29,11 @@ export function ThousandsSelector(props: ThousandsSelectorProps) {
     const uomDefaultEntries: SelectOption<string>[] = [
       {
         value: ",",
-        label: translate("QuantityFormat.thousand_separator.comma"),
+        label: translate("QuantityFormat:thousand_separator.comma"),
       },
       {
         value: ".",
-        label: translate("QuantityFormat.thousand_separator.point"),
+        label: translate("QuantityFormat:thousand_separator.point"),
       },
     ];
     const completeListOfEntries: SelectOption<string>[] = [];

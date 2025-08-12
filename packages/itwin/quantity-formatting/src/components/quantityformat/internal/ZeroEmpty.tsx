@@ -66,7 +66,7 @@ export function ZeroEmpty(props: ZeroEmptyProps) {
   return (
     <div className="quantityFormat--formatInlineRow">
       <Label displayStyle="inline" htmlFor={zeroEmptyId}>
-        {translate("QuantityFormat.labels.zeroEmptyLabel")}
+        {translate("QuantityFormat:labels.zeroEmptyLabel")}
       </Label>
       <Checkbox
         id={zeroEmptyId}

@@ -18,7 +18,7 @@ describe("ShowTrailingZeros", () => {
     const onChange = vi.fn();
     render(<ShowTrailingZeros formatProps={defaultFormatProps} onChange={onChange} />);
 
-    expect(screen.getByText("QuantityFormat.labels.showTrailZerosLabel")).toBeTruthy();
+    expect(screen.getByText("QuantityFormat:labels.showTrailZerosLabel")).toBeTruthy();
     const checkbox = screen.getByRole("checkbox") as HTMLInputElement;
     expect(checkbox.checked).toBeFalsy();
   });
@@ -100,6 +100,6 @@ describe("ShowTrailingZeros", () => {
     fireEvent.click(checkbox);
 
     // Should not throw error and should render without issues
-    expect(screen.getByText("QuantityFormat.labels.showTrailZerosLabel")).toBeTruthy();
+    expect(screen.getByText("QuantityFormat:labels.showTrailZerosLabel")).toBeTruthy();
   });
 });

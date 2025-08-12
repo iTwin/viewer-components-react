@@ -18,7 +18,7 @@ describe("UseThousandsSeparator", () => {
     const onChange = vi.fn();
     const renderedComponent = render(<UseThousandsSeparator formatProps={defaultFormatProps} onChange={onChange} />);
 
-    expect(renderedComponent.getByLabelText("QuantityFormat.labels.useThousandSeparatorLabel")).toBeTruthy();
+    expect(renderedComponent.getByLabelText("QuantityFormat:labels.useThousandSeparatorLabel")).toBeTruthy();
     const checkbox = renderedComponent.getByRole("checkbox") as HTMLInputElement;
     expect(checkbox.checked).toBeFalsy();
   });
@@ -91,7 +91,7 @@ describe("ThousandsSeparatorSelector", () => {
 
       expect(
         renderedComponent.getByLabelText(
-          "QuantityFormat.labels.useThousandSeparatorLabel"
+          "QuantityFormat:labels.useThousandSeparatorLabel"
         )
       ).to.exist;
   });
@@ -130,7 +130,7 @@ describe("ThousandsSeparatorSelector", () => {
 
       // Test selecting period (.) which should change decimal separator to comma
       const periodOption = renderedComponent.getByRole("option", {
-        name: "QuantityFormat.thousand_separator.point",
+        name: "QuantityFormat:thousand_separator.point",
       });
       fireEvent.click(periodOption);
 

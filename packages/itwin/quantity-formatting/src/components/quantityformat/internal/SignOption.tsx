@@ -50,12 +50,12 @@ export function SignOption(props: SignOptionProps) {
   return (
     <div className="quantityFormat--formatInlineRow">
       <Label displayStyle="inline" id={showSignOptionId}>
-        {translate("QuantityFormat.labels.signOptionLabel")}
+        {translate("QuantityFormat:labels.signOptionLabel")}
         <IconButton
           className="quantityFormat--formatHelpTooltip"
           styleType="borderless"
           size="small"
-          label={translate("QuantityFormat.labels.signOptionTooltip")}
+          label={translate("QuantityFormat:labels.signOptionTooltip")}
         >
           <SvgHelpCircularHollow />
         </IconButton>

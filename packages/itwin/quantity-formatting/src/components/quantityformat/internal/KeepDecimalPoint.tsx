@@ -66,7 +66,7 @@ export function KeepDecimalPoint(props: KeepDecimalPointProps) {
   return (
     <div className="quantityFormat--formatInlineRow">
       <Label displayStyle="inline" htmlFor={keepDecimalPointId}>
-        {translate("QuantityFormat.labels.keepDecimalPointLabel")}
+        {translate("QuantityFormat:labels.keepDecimalPointLabel")}
       </Label>
       <Checkbox
         id={keepDecimalPointId}

@@ -57,11 +57,11 @@ export function ScientificType(props: ScientificTypeProps) {
     () => [
       {
         value: CoreScientificType.Normalized,
-        label: translate("QuantityFormat.scientific-type.normalized"),
+        label: translate("QuantityFormat:scientific-type.normalized"),
       },
       {
         value: CoreScientificType.ZeroNormalized,
-        label: translate("QuantityFormat.scientific-type.zero-normalized"),
+        label: translate("QuantityFormat:scientific-type.zero-normalized"),
       },
     ],
     [translate]
@@ -72,12 +72,12 @@ export function ScientificType(props: ScientificTypeProps) {
       <LabeledSelect
         label={
           <>
-            {translate("QuantityFormat.labels.scientificTypeLabel")}
+            {translate("QuantityFormat:labels.scientificTypeLabel")}
             <IconButton
               className="quantityFormat--formatHelpTooltip"
               styleType="borderless"
               size="small"
-              label={translate("QuantityFormat.labels.scientificTypeTooltip")}
+              label={translate("QuantityFormat:labels.scientificTypeTooltip")}
             >
               <SvgHelpCircularHollow />
             </IconButton>

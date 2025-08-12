@@ -31,10 +31,10 @@ export function BearingPrimaryChildren(props: PanelProps): React.ReactElement {
         <FormatTypeOption formatProps={formatProps} onChange={onFormatChange} />
       </div>
       <Text variant="small" isMuted={true}>
-        {translate("QuantityFormat.labels.formatTypeSublabel")}
+        {translate("QuantityFormat:labels.formatTypeSublabel")}
       </Text>
       <Divider />
-      <Label>{translate("QuantityFormat.labels.units")}</Label>
+      <Label>{translate("QuantityFormat:labels.units")}</Label>
       <FormatUnits
         unitsProvider={unitsProvider}
         persistenceUnit={persistenceUnit}

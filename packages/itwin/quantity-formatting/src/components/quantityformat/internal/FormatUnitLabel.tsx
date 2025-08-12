@@ -36,9 +36,9 @@ export function UomSeparatorSelector(props: UomSeparatorSelectorProps) {
 
   const separatorOptions: SelectOption<string>[] = React.useMemo(() => {
     const uomDefaultEntries: SelectOption<string>[] = [
-      { value: "", label: translate("QuantityFormat.none") },
-      { value: " ", label: translate("QuantityFormat.space") },
-      { value: "-", label: translate("QuantityFormat.dash") },
+      { value: "", label: translate("QuantityFormat:none") },
+      { value: " ", label: translate("QuantityFormat:space") },
+      { value: "-", label: translate("QuantityFormat:dash") },
     ];
 
     const completeListOfEntries: SelectOption<string>[] = [];
@@ -59,7 +59,7 @@ export function UomSeparatorSelector(props: UomSeparatorSelectorProps) {
   return (
     <div className="quantityFormat--formatInlineRow">
       <LabeledSelect
-        label={translate("QuantityFormat.labels.labelSeparator")}
+        label={translate("QuantityFormat:labels.labelSeparator")}
         options={separatorOptions}
         value={formatProps.uomSeparator ?? ""}
         onChange={handleOnChange}
@@ -133,7 +133,7 @@ export function AppendUnitLabel(props: AppendUnitLabelProps) {
   return (
     <div className="quantityFormat--formatInlineRow quantityFormat--appendUnitLabel">
       <Label htmlFor={appendUnitLabelId}>
-        {translate("QuantityFormat.labels.appendUnitLabel")}
+        {translate("QuantityFormat:labels.appendUnitLabel")}
       </Label>
       <Checkbox
         id={appendUnitLabelId}

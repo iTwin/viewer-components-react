@@ -25,19 +25,19 @@ export function SignOptionSelector(props: SignOptionSelectorProps) {
   const options: SelectOption<ShowSignOption>[] = [
     {
       value: ShowSignOption.NoSign,
-      label: translate("QuantityFormat.sign_option.noSign"),
+      label: translate("QuantityFormat:sign_option.noSign"),
     },
     {
       value: ShowSignOption.OnlyNegative,
-      label: translate("QuantityFormat.sign_option.onlyNegative"),
+      label: translate("QuantityFormat:sign_option.onlyNegative"),
     },
     {
       value: ShowSignOption.SignAlways,
-      label: translate("QuantityFormat.sign_option.signAlways"),
+      label: translate("QuantityFormat:sign_option.signAlways"),
     },
     {
       value: ShowSignOption.NegativeParentheses,
-      label: translate("QuantityFormat.sign_option.negativeParentheses"),
+      label: translate("QuantityFormat:sign_option.negativeParentheses"),
     },
   ];
 

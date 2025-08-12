@@ -67,7 +67,7 @@ export function DecimalSeparator(props: DecimalSeparatorProps) {
   return (
     <div className="quantityFormat--formatInlineRow">
       <Label displayStyle="inline" id={decimalSeparatorSelectorId}>
-        {translate("QuantityFormat.labels.decimalSeparatorLabel")}
+        {translate("QuantityFormat:labels.decimalSeparatorLabel")}
       </Label>
       <DecimalSeparatorSelector
         separator={formatProps.decimalSeparator ?? "."}

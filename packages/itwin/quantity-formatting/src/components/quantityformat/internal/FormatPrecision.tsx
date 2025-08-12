@@ -40,7 +40,7 @@ export function FormatPrecision(props: FormatPrecisionProps) {
   return (
     <div className="quantityFormat--formatInlineRow">
       <Label displayStyle="inline" id={precisionSelectorId}>
-        {translate("QuantityFormat.labels.precision")}
+        {translate("QuantityFormat:labels.precision")}
       </Label>
       {formatType === FormatType.Fractional ? (
         <FractionPrecisionSelector

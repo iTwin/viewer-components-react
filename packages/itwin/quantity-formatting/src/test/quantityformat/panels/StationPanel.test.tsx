@@ -35,8 +35,8 @@ describe("Station Panel", () => {
         />
       );
 
-      expect(renderedComponent.getByLabelText("QuantityFormat.labels.type")).toBeTruthy();
-      expect(renderedComponent.getByLabelText("QuantityFormat.labels.precision")).toBeTruthy();
+      expect(renderedComponent.getByLabelText("QuantityFormat:labels.type")).toBeTruthy();
+      expect(renderedComponent.getByLabelText("QuantityFormat:labels.precision")).toBeTruthy();
     });
 
     it("should render station separator selector", async () => {
@@ -55,7 +55,7 @@ describe("Station Panel", () => {
         />
       );
 
-      expect(renderedComponent.getByText("QuantityFormat.labels.stationSeparatorLabel")).toBeTruthy();
+      expect(renderedComponent.getByText("QuantityFormat:labels.stationSeparatorLabel")).toBeTruthy();
     });
 
     it("should render station offset controls", async () => {
@@ -74,7 +74,7 @@ describe("Station Panel", () => {
         />
       );
 
-      expect(renderedComponent.getByText("QuantityFormat.labels.stationOffsetLabel")).toBeTruthy();
+      expect(renderedComponent.getByText("QuantityFormat:labels.stationOffsetLabel")).toBeTruthy();
     });
 
     it("should render unit label controls when showUnitLabel is enabled", async () => {
@@ -94,7 +94,7 @@ describe("Station Panel", () => {
       );
 
       await waitFor(() => {
-        expect(renderedComponent.getByLabelText("QuantityFormat.labels.labelSeparator")).toBeTruthy();
+        expect(renderedComponent.getByLabelText("QuantityFormat:labels.labelSeparator")).toBeTruthy();
       });
     });
   });
@@ -116,8 +116,8 @@ describe("Station Panel", () => {
         />
       );
 
-      expect(renderedComponent.getByLabelText("QuantityFormat.labels.signOptionLabel")).toBeTruthy();
-      expect(renderedComponent.getByLabelText("QuantityFormat.labels.showTrailZerosLabel")).toBeTruthy();
+      expect(renderedComponent.getByLabelText("QuantityFormat:labels.signOptionLabel")).toBeTruthy();
+      expect(renderedComponent.getByLabelText("QuantityFormat:labels.showTrailZerosLabel")).toBeTruthy();
     });
   });
 });

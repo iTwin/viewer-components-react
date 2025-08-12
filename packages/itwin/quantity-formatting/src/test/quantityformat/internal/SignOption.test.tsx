@@ -44,7 +44,7 @@ describe("SignOption", () => {
     );
 
     expect(
-      renderedComponent.getByText("QuantityFormat.sign_option.onlyNegative")
+      renderedComponent.getByText("QuantityFormat:sign_option.onlyNegative")
     ).to.exist;
   });
 
@@ -60,10 +60,10 @@ describe("SignOption", () => {
     );
 
     expect(
-      renderedComponent.getByText("QuantityFormat.labels.signOptionLabel")
+      renderedComponent.getByText("QuantityFormat:labels.signOptionLabel")
     ).to.exist;
     expect(
-      renderedComponent.getByText("QuantityFormat.sign_option.signAlways")
+      renderedComponent.getByText("QuantityFormat:sign_option.signAlways")
     ).to.exist;
   });
 });

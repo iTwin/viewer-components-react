@@ -78,7 +78,7 @@ export function FractionDash(props: FractionDashProps) {
   return (
     <div className="quantityFormat--formatInlineRow">
       <Label displayStyle="inline" htmlFor={fractionDashId}>
-        {translate("QuantityFormat.labels.fractionDashLabel")}
+        {translate("QuantityFormat:labels.fractionDashLabel")}
       </Label>
       <Checkbox
         id={fractionDashId}

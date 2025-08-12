@@ -114,7 +114,7 @@ export function FormatSample(props: FormatSampleProps) {
           className="quantityFormat--samplePreviewTitle"
           htmlFor={inputId}
         >
-          {translate("QuantityFormat.labels.samplePreview")}
+          {translate("QuantityFormat:labels.samplePreview")}
         </Label>
         <div className="quantityFormat--formatSample-previewRow">
           <div className="quantityFormat--formatSample-inputGroup">

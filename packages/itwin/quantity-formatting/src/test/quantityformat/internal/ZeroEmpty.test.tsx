@@ -18,7 +18,7 @@ describe("ZeroEmpty", () => {
     const onChange = vi.fn();
     render(<ZeroEmpty formatProps={defaultFormatProps} onChange={onChange} />);
 
-    expect(screen.getByText("QuantityFormat.labels.zeroEmptyLabel")).toBeTruthy();
+    expect(screen.getByText("QuantityFormat:labels.zeroEmptyLabel")).toBeTruthy();
     const checkbox = screen.getByRole("checkbox") as HTMLInputElement;
     expect(checkbox.checked).toBe(false);
   });
@@ -100,6 +100,6 @@ describe("ZeroEmpty", () => {
     fireEvent.click(checkbox);
 
     // Should not throw error and should render without issues
-    expect(screen.getByText("QuantityFormat.labels.zeroEmptyLabel")).toBeTruthy();
+    expect(screen.getByText("QuantityFormat:labels.zeroEmptyLabel")).toBeTruthy();
   });
 });

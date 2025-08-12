@@ -29,39 +29,39 @@ export function FractionPrecisionSelector(
   const options: SelectOption<number>[] = [
     {
       value: 1,
-      label: translate("QuantityFormat.fraction_precision.whole"),
+      label: translate("QuantityFormat:fraction_precision.whole"),
     },
     {
       value: 2,
-      label: translate("QuantityFormat.fraction_precision.half"),
+      label: translate("QuantityFormat:fraction_precision.half"),
     },
     {
       value: 4,
-      label: translate("QuantityFormat.fraction_precision.quarter"),
+      label: translate("QuantityFormat:fraction_precision.quarter"),
     },
     {
       value: 8,
-      label: translate("QuantityFormat.fraction_precision.eighth"),
+      label: translate("QuantityFormat:fraction_precision.eighth"),
     },
     {
       value: 16,
-      label: translate("QuantityFormat.fraction_precision.sixteenth"),
+      label: translate("QuantityFormat:fraction_precision.sixteenth"),
     },
     {
       value: 32,
-      label: translate("QuantityFormat.fraction_precision.over32"),
+      label: translate("QuantityFormat:fraction_precision.over32"),
     },
     {
       value: 64,
-      label: translate("QuantityFormat.fraction_precision.over64"),
+      label: translate("QuantityFormat:fraction_precision.over64"),
     },
     {
       value: 128,
-      label: translate("QuantityFormat.fraction_precision.over128"),
+      label: translate("QuantityFormat:fraction_precision.over128"),
     },
     {
       value: 256,
-      label: translate("QuantityFormat.fraction_precision.over256"),
+      label: translate("QuantityFormat:fraction_precision.over256"),
     },
   ];
 

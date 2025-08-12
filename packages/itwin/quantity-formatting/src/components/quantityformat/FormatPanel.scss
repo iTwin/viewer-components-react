@@ -24,7 +24,6 @@
   .quantityFormat--formatPanel-secondaryChildren {
   /* Expandable secondary controls */
   padding: var(--iui-size-s);
-  background: var(--iui-color-background-backdrop);
   border-radius: var(--iui-border-radius-1);
   display: flex;
   flex-direction: column;
@@ -61,6 +60,11 @@
   display: flex;
   align-items: center;
   gap: var(--iui-size-xs);
+  margin: var(--iui-size-xs) 0;
+}
+
+.quantityFormat-formatPanel-divider {
+  margin: var(--iui-size-xs)
 }
 
 /* Inline styling for unit label components */
@@ -68,6 +72,7 @@
   display: flex;
   align-items: center;
   min-height: var(--iui-size-xl);
+  margin-bottom: var(--iui-size-xs);
 }
 
 .quantityFormat--appendUnitLabel {

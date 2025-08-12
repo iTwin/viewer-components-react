@@ -150,14 +150,14 @@ function UnitDescr(props: {
             // construct an entry that will provide the name and label of the unit to add
             options.push({
               value: `ADDSUBUNIT:${potentialSubUnit.name}:${potentialSubUnit.label}`,
-              label: translate("QuantityFormat.labels.addSubUnit"),
+              label: translate("QuantityFormat:labels.addSubUnit"),
             });
           }
 
           if (index !== 0) {
             options.push({
               value: "REMOVEUNIT",
-              label: translate("QuantityFormat.labels.removeUnit"),
+              label: translate("QuantityFormat:labels.removeUnit"),
             });
           }
 
@@ -362,13 +362,13 @@ export function FormatUnits(props: FormatUnitsProps) {
         formatProps.composite.units.length > 1 && (
           <div className="quantityFormat--formatInlineRow">
             <Label displayStyle="inline" htmlFor={compositeSpacerSelectorId}>
-              {translate("QuantityFormat.labels.compositeSpacer")}
+              {translate("QuantityFormat:labels.compositeSpacer")}
               <IconButton
                 className="format-help-tooltip"
                 size="small"
                 styleType="borderless"
                 label={translate(
-                  "QuantityFormat.labels.compositeSpacerDescription"
+                  "QuantityFormat:labels.compositeSpacerDescription"
                 )}
               >
                 <SvgHelpCircularHollow />

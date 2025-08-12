@@ -141,14 +141,14 @@ export function UnitDescr(props: UnitDescrProps) {
           // construct an entry that will provide the name and label of the unit to add
           options.push({
             value: `ADDSUBUNIT:${potentialSubUnit.name}:${potentialSubUnit.label}`,
-            label: translate("QuantityFormat.labels.addSubUnit"),
+            label: translate("QuantityFormat:labels.addSubUnit"),
           });
         }
 
         if (index !== 0)
           options.push({
             value: "REMOVEUNIT",
-            label: translate("QuantityFormat.labels.removeUnit"),
+            label: translate("QuantityFormat:labels.removeUnit"),
           });
 
         if (isMounted.current) {

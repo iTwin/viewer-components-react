@@ -73,11 +73,11 @@ function AzimuthBaseUnitSelector(props: {
       <LabeledSelect
         label={
           <>
-            {translate("QuantityFormat.labels.azimuthBaseUnit")}
+            {translate("QuantityFormat:labels.azimuthBaseUnit")}
             <IconButton
               size="small"
               styleType="borderless"
-              label={translate("QuantityFormat.azimuthType.baseUnitTooltip")}
+              label={translate("QuantityFormat:azimuthType.baseUnitTooltip")}
             >
               <SvgHelpCircularHollow />
             </IconButton>
@@ -159,12 +159,12 @@ export function AzimuthOptions(props: {
     <>
       <div className="quantityFormat--formatInlineRow">
         <Label htmlFor={ccwCheckboxId} displayStyle="inline">
-          {translate("QuantityFormat.labels.azimuthCounterClockwise")}
+          {translate("QuantityFormat:labels.azimuthCounterClockwise")}
         </Label>
         <IconButton
           size="small"
           styleType="borderless"
-          label={translate("QuantityFormat.azimuthType.ccwFlagTooltip")}
+          label={translate("QuantityFormat:azimuthType.ccwFlagTooltip")}
         >
           <SvgHelpCircularHollow />
         </IconButton>
@@ -184,12 +184,12 @@ export function AzimuthOptions(props: {
       />
       <div className="quantityFormat--formatInlineRow">
         <Label htmlFor={baseInputId} displayStyle="inline">
-          {translate("QuantityFormat.labels.azimuthBase")}
+          {translate("QuantityFormat:labels.azimuthBase")}
         </Label>
         <IconButton
           size="small"
           styleType="borderless"
-          label={translate("QuantityFormat.azimuthType.baseTooltip")}
+          label={translate("QuantityFormat:azimuthType.baseTooltip")}
         >
           <SvgHelpCircularHollow />
         </IconButton>

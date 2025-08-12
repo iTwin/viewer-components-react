@@ -26,11 +26,11 @@ export function DecimalSeparatorSelector(props: DecimalSeparatorSelectorProps) {
   const options: SelectOption<string>[] = [
     {
       value: ".",
-      label: translate("QuantityFormat.decimal_separator.point"),
+      label: translate("QuantityFormat:decimal_separator.point"),
     },
     {
       value: ",",
-      label: translate("QuantityFormat.decimal_separator.comma"),
+      label: translate("QuantityFormat:decimal_separator.comma"),
     },
   ];
 

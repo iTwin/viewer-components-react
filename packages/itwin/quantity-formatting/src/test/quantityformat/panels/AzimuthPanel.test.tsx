@@ -35,8 +35,8 @@ describe("Azimuth Panel", () => {
         />
       );
 
-      expect(renderedComponent.getByLabelText("QuantityFormat.labels.type")).toBeTruthy();
-      expect(renderedComponent.getByLabelText("QuantityFormat.labels.precision")).toBeTruthy();
+      expect(renderedComponent.getByLabelText("QuantityFormat:labels.type")).toBeTruthy();
+      expect(renderedComponent.getByLabelText("QuantityFormat:labels.precision")).toBeTruthy();
     });
 
     it("should render unit label controls when showUnitLabel is enabled", async () => {
@@ -56,7 +56,7 @@ describe("Azimuth Panel", () => {
       );
 
       await waitFor(() => {
-        expect(renderedComponent.getByLabelText("QuantityFormat.labels.labelSeparator")).toBeTruthy();
+        expect(renderedComponent.getByLabelText("QuantityFormat:labels.labelSeparator")).toBeTruthy();
       });
     });
   });
@@ -78,8 +78,8 @@ describe("Azimuth Panel", () => {
         />
       );
 
-      expect(renderedComponent.getByLabelText("QuantityFormat.labels.signOptionLabel")).toBeTruthy();
-      expect(renderedComponent.getByText("QuantityFormat.labels.decimalSeparatorLabel")).toBeTruthy();
+      expect(renderedComponent.getByLabelText("QuantityFormat:labels.signOptionLabel")).toBeTruthy();
+      expect(renderedComponent.getByText("QuantityFormat:labels.decimalSeparatorLabel")).toBeTruthy();
     });
   });
 });

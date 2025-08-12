@@ -34,10 +34,10 @@ describe("Decimal Panel", () => {
           persistenceUnit={persistenceUnit}
         />
       );
-      expect(renderedComponent.getByLabelText("QuantityFormat.labels.type")).to
+      expect(renderedComponent.getByLabelText("QuantityFormat:labels.type")).to
         .exist;
       expect(
-        renderedComponent.getByLabelText("QuantityFormat.labels.precision")
+        renderedComponent.getByLabelText("QuantityFormat:labels.precision")
       ).to.exist;
     });
 
@@ -58,7 +58,7 @@ describe("Decimal Panel", () => {
       );
 
       await waitFor(() => {
-        expect(renderedComponent.getByLabelText("QuantityFormat.labels.labelSeparator")).toBeTruthy();
+        expect(renderedComponent.getByLabelText("QuantityFormat:labels.labelSeparator")).toBeTruthy();
       });
     });
   });
@@ -80,8 +80,8 @@ describe("Decimal Panel", () => {
         />
       );
 
-      expect(renderedComponent.getByText("QuantityFormat.labels.signOptionLabel")).toBeTruthy();
-      expect(renderedComponent.getByText("QuantityFormat.labels.decimalSeparatorLabel")).toBeTruthy();
+      expect(renderedComponent.getByText("QuantityFormat:labels.signOptionLabel")).toBeTruthy();
+      expect(renderedComponent.getByText("QuantityFormat:labels.decimalSeparatorLabel")).toBeTruthy();
     });
   });
 });

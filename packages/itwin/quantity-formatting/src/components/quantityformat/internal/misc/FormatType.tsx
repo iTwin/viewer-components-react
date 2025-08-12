@@ -36,31 +36,31 @@ function FormatTypeSelector(props: FormatTypeSelectorProps) {
     () => [
       {
         value: FormatType.Decimal,
-        label: translate("QuantityFormat.decimal"),
+        label: translate("QuantityFormat:decimal"),
       },
       {
         value: FormatType.Scientific,
-        label: translate("QuantityFormat.scientific"),
+        label: translate("QuantityFormat:scientific"),
       },
       {
         value: FormatType.Station,
-        label: translate("QuantityFormat.station"),
+        label: translate("QuantityFormat:station"),
       },
       {
         value: FormatType.Fractional,
-        label: translate("QuantityFormat.fractional"),
+        label: translate("QuantityFormat:fractional"),
       },
       {
         value: FormatType.Bearing,
-        label: translate("QuantityFormat.bearing"),
+        label: translate("QuantityFormat:bearing"),
       },
       {
         value: FormatType.Azimuth,
-        label: translate("QuantityFormat.azimuth"),
+        label: translate("QuantityFormat:azimuth"),
       },
       {
         value: FormatType.Ratio,
-        label: translate("QuantityFormat.ratio"),
+        label: translate("QuantityFormat:ratio"),
       },
     ],
     [translate]
@@ -76,7 +76,7 @@ function FormatTypeSelector(props: FormatTypeSelectorProps) {
   return (
     <LabeledSelect
       displayStyle="inline"
-      label={translate("QuantityFormat.labels.type")}
+      label={translate("QuantityFormat:labels.type")}
       options={formatOptions}
       onChange={handleOnChange}
       size="small"

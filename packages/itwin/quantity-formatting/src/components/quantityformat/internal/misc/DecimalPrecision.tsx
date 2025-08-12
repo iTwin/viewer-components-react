@@ -30,55 +30,55 @@ export function DecimalPrecisionSelector(props: DecimalPrecisionSelectorProps) {
   const options: SelectOption<number>[] = [
     {
       value: 0,
-      label: translate("QuantityFormat.decimal_precision.zero"),
+      label: translate("QuantityFormat:decimal_precision.zero"),
     },
     {
       value: 1,
-      label: translate("QuantityFormat.decimal_precision.one"),
+      label: translate("QuantityFormat:decimal_precision.one"),
     },
     {
       value: 2,
-      label: translate("QuantityFormat.decimal_precision.two"),
+      label: translate("QuantityFormat:decimal_precision.two"),
     },
     {
       value: 3,
-      label: translate("QuantityFormat.decimal_precision.three"),
+      label: translate("QuantityFormat:decimal_precision.three"),
     },
     {
       value: 4,
-      label: translate("QuantityFormat.decimal_precision.four"),
+      label: translate("QuantityFormat:decimal_precision.four"),
     },
     {
       value: 5,
-      label: translate("QuantityFormat.decimal_precision.five"),
+      label: translate("QuantityFormat:decimal_precision.five"),
     },
     {
       value: 6,
-      label: translate("QuantityFormat.decimal_precision.six"),
+      label: translate("QuantityFormat:decimal_precision.six"),
     },
     {
       value: 7,
-      label: translate("QuantityFormat.decimal_precision.seven"),
+      label: translate("QuantityFormat:decimal_precision.seven"),
     },
     {
       value: 8,
-      label: translate("QuantityFormat.decimal_precision.eight"),
+      label: translate("QuantityFormat:decimal_precision.eight"),
     },
     {
       value: 9,
-      label: translate("QuantityFormat.decimal_precision.nine"),
+      label: translate("QuantityFormat:decimal_precision.nine"),
     },
     {
       value: 10,
-      label: translate("QuantityFormat.decimal_precision.ten"),
+      label: translate("QuantityFormat:decimal_precision.ten"),
     },
     {
       value: 11,
-      label: translate("QuantityFormat.decimal_precision.eleven"),
+      label: translate("QuantityFormat:decimal_precision.eleven"),
     },
     {
       value: 12,
-      label: translate("QuantityFormat.decimal_precision.twelve"),
+      label: translate("QuantityFormat:decimal_precision.twelve"),
     },
   ];
 

@@ -38,7 +38,7 @@ export function StationSeparator(props: StationSeparatorProps) {
   return (
     <div className="quantityFormat--formatInlineRow">
       <Label displayStyle="inline" id={stationSeparatorSelectorId}>
-        {translate("QuantityFormat.labels.stationSeparatorLabel")}
+        {translate("QuantityFormat:labels.stationSeparatorLabel")}
       </Label>
       <StationSeparatorSelector
         aria-labelledby={stationSeparatorSelectorId}

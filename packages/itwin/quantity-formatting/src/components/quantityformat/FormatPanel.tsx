@@ -49,7 +49,7 @@ function useTranslation() {
     translate: (key: string) => {
       // Default translations for common keys
       const translations: Record<string, string> = {
-        "QuantityFormat.labels.advancedOptions": "Advanced Options",
+        "QuantityFormat:labels.advancedOptions": "Advanced Options",
       };
       return translations[key] || key;
     },
@@ -139,7 +139,7 @@ export function FormatPanel(props: FormatPanelProps) {
       <ExpandableBlock
         title={
           <Text variant="leading">
-            {translate("QuantityFormat.labels.advancedOptions")}
+            {translate("QuantityFormat:labels.advancedOptions")}
           </Text>
         }
         isExpanded={isExpanded}

@@ -36,19 +36,19 @@ export function StationSeparatorSelector(props: StationSeparatorSelectorProps) {
     const uomDefaultEntries: SelectOption<string>[] = [
       {
         value: "+",
-        label: translate("QuantityFormat.station_separator.plus"),
+        label: translate("QuantityFormat:station_separator.plus"),
       },
       {
         value: "-",
-        label: translate("QuantityFormat.station_separator.minus"),
+        label: translate("QuantityFormat:station_separator.minus"),
       },
       {
         value: " ",
-        label: translate("QuantityFormat.station_separator.blank"),
+        label: translate("QuantityFormat:station_separator.blank"),
       },
       {
         value: "^",
-        label: translate("QuantityFormat.station_separator.caret"),
+        label: translate("QuantityFormat:station_separator.caret"),
       },
     ];
     const completeListOfEntries: SelectOption<string>[] = [];

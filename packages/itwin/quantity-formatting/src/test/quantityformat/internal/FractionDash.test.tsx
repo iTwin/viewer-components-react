@@ -18,7 +18,7 @@ describe("FractionDash", () => {
     const onChange = vi.fn();
     render(<FractionDash formatProps={defaultFormatProps} onChange={onChange} />);
 
-    expect(screen.getByText("QuantityFormat.labels.fractionDashLabel")).toBeTruthy();
+    expect(screen.getByText("QuantityFormat:labels.fractionDashLabel")).toBeTruthy();
     const checkbox = screen.getByRole("checkbox") as HTMLInputElement;
     expect(checkbox.checked).toBe(false);
   });
@@ -101,6 +101,6 @@ describe("FractionDash", () => {
     fireEvent.click(checkbox);
 
     // Should not throw error and should render without issues
-    expect(screen.getByText("QuantityFormat.labels.fractionDashLabel")).toBeTruthy();
+    expect(screen.getByText("QuantityFormat:labels.fractionDashLabel")).toBeTruthy();
   });
 });

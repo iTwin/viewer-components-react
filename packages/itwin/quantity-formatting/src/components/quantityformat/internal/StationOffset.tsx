@@ -38,7 +38,7 @@ export function StationOffset(props: StationOffsetProps) {
   return (
     <div className="quantityFormat--formatInlineRow">
       <Label displayStyle="inline" id={stationOffsetSelectorId}>
-        {translate("QuantityFormat.labels.stationOffsetLabel")}
+        {translate("QuantityFormat:labels.stationOffsetLabel")}
       </Label>
       <StationSizeSelector
         aria-labelledby={stationOffsetSelectorId}

@@ -56,28 +56,28 @@ export function RatioType(props: RatioTypeProps) {
     () => [
       {
         value: CoreRatioType.NToOne,
-        label: translate("QuantityFormat.ratio-type.n-to-one.label"),
-        sublabel: translate("QuantityFormat.ratio-type.n-to-one.description"),
+        label: translate("QuantityFormat:ratio-type.n-to-one.label"),
+        sublabel: translate("QuantityFormat:ratio-type.n-to-one.description"),
       },
       {
         value: CoreRatioType.OneToN,
-        label: translate("QuantityFormat.ratio-type.one-to-n.label"),
-        sublabel: translate("QuantityFormat.ratio-type.one-to-n.description"),
+        label: translate("QuantityFormat:ratio-type.one-to-n.label"),
+        sublabel: translate("QuantityFormat:ratio-type.one-to-n.description"),
       },
       {
         value: CoreRatioType.UseGreatestCommonDivisor,
         label: translate(
-          "QuantityFormat.ratio-type.use-greatest-common-divisor.label"
+          "QuantityFormat:ratio-type.use-greatest-common-divisor.label"
         ),
         sublabel: translate(
-          "QuantityFormat.ratio-type.use-greatest-common-divisor.description"
+          "QuantityFormat:ratio-type.use-greatest-common-divisor.description"
         ),
       },
       {
         value: CoreRatioType.ValueBased,
-        label: translate("QuantityFormat.ratio-type.value-based.label"),
+        label: translate("QuantityFormat:ratio-type.value-based.label"),
         sublabel: translate(
-          "QuantityFormat.ratio-type.value-based.description"
+          "QuantityFormat:ratio-type.value-based.description"
         ),
       },
     ],
@@ -89,12 +89,12 @@ export function RatioType(props: RatioTypeProps) {
       <LabeledSelect
         label={
           <>
-            {translate("QuantityFormat.labels.ratioTypeLabel")}
+            {translate("QuantityFormat:labels.ratioTypeLabel")}
             <IconButton
               className="quantityFormat--formatHelpTooltip"
               styleType="borderless"
               size="small"
-              label={translate("QuantityFormat.ratio-type.default.description")}
+              label={translate("QuantityFormat:ratio-type.default.description")}
             >
               <SvgHelpCircularHollow />
             </IconButton>

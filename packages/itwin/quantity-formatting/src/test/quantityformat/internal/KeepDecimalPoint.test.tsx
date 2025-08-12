@@ -18,7 +18,7 @@ describe("KeepDecimalPoint", () => {
     const onChange = vi.fn();
     render(<KeepDecimalPoint formatProps={defaultFormatProps} onChange={onChange} />);
 
-    expect(screen.getByText("QuantityFormat.labels.keepDecimalPointLabel")).toBeTruthy();
+    expect(screen.getByText("QuantityFormat:labels.keepDecimalPointLabel")).toBeTruthy();
     const checkbox = screen.getByRole("checkbox") as HTMLInputElement;
     expect(checkbox.checked).toBe(false);
   });
@@ -100,6 +100,6 @@ describe("KeepDecimalPoint", () => {
     fireEvent.click(checkbox);
 
     // Should not throw error and should render without issues
-    expect(screen.getByText("QuantityFormat.labels.keepDecimalPointLabel")).toBeTruthy();
+    expect(screen.getByText("QuantityFormat:labels.keepDecimalPointLabel")).toBeTruthy();
   });
 });
