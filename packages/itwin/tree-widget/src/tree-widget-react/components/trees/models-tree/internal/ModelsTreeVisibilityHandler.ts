@@ -348,26 +348,6 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     return createVisibilityHandlerResult(this, { modelIds }, result, this._props.overrides?.getModelsVisibilityStatus);
   }
 
-  private getVisibleModelDefaultCategoriesVisibilityStatus({ modelId, categoryIds }: { categoryIds: Id64Arg; modelId: Id64String }): VisibilityStatus {
-    const viewport = this._props.viewport;
-
-    let visibleCount = 0;
-    for (const categoryId of Id64.iterable(categoryIds)) {
-      const override = this._props.viewport.perModelCategoryVisibility.getOverride(modelId, categoryId);
-      if (
-        override === PerModelCategoryVisibility.Override.Show ||
-        (override === PerModelCategoryVisibility.Override.None && viewport.view.viewsCategory(categoryId))
-      ) {
-        ++visibleCount;
-        continue;
-      }
-      if (visibleCount > 0) {
-        return createVisibilityStatus("partial");
-      }
-    }
-    return visibleCount > 0 ? createVisibilityStatus("visible") : createVisibilityStatus("hidden");
-  }
-
   private getVisibleModelCategoriesVisibilityStatus({ modelId, categoryIds }: { modelId: Id64String; categoryIds: Id64Arg }) {
     return merge(
       this.getVisibilityFromAlwaysAndNeverDrawnElements({
@@ -460,13 +440,29 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     return createVisibilityHandlerResult(this, props, result, undefined);
   }
 
+  private getVisibleModelDefaultCategoriesVisibilityStatus({ modelId, categoryIds }: { categoryIds: Id64Arg; modelId: Id64String }): VisibilityStatus {
+    const viewport = this._props.viewport;
+
+    let visibleCount = 0;
+    for (const categoryId of Id64.iterable(categoryIds)) {
+      const override = this._props.viewport.perModelCategoryVisibility.getOverride(modelId, categoryId);
+      if (
+        override === PerModelCategoryVisibility.Override.Show ||
+        (override === PerModelCategoryVisibility.Override.None && viewport.view.viewsCategory(categoryId))
+      ) {
+        ++visibleCount;
+        continue;
+      }
+      if (visibleCount > 0) {
+        return createVisibilityStatus("partial");
+      }
+    }
+    return visibleCount > 0 ? createVisibilityStatus("visible") : createVisibilityStatus("hidden");
+  }
+
   private getCategoriesVisibilityStatus(props: { categoryIds: Id64Arg; modelId: Id64String | undefined }): Observable<VisibilityStatus> {
     const result = defer(() => {
-      const { categoryIds, modelId: modelIdFromProps } = props;
-      if (Id64.sizeOf(categoryIds) === 0) {
-        return EMPTY;
-      }
-
+      const { modelId: modelIdFromProps, categoryIds } = props;
       return (
         modelIdFromProps
           ? from(Id64.iterable(categoryIds)).pipe(map((categoryId) => ({ id: categoryId, models: modelIdFromProps })))
@@ -533,6 +529,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     });
     return createVisibilityHandlerResult(this, props, result, this._props.overrides?.getCategoriesVisibilityStatus);
   }
+
   private getGroupedElementsVisibilityStatus(props: { modelId: Id64String; categoryId: Id64String; elementIds: Id64Arg }): Observable<VisibilityStatus> {
     const { modelId, categoryId, elementIds } = props;
     return this.getElementsVisibilityStatus({ elementIds, modelId, categoryId });
@@ -711,13 +708,13 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
   }
 
   private changeModelsVisibilityStatus(props: { modelIds: Id64Arg; on: boolean }): Observable<void> {
+    const { modelIds, on } = props;
+
+    if (Id64.sizeOf(modelIds) === 0) {
+      return EMPTY;
+    }
+
     const result = defer(() => {
-      const { modelIds, on } = props;
-
-      if (Id64.sizeOf(modelIds) === 0) {
-        return EMPTY;
-      }
-
       const viewport = this._props.viewport;
 
       viewport.perModelCategoryVisibility.clearOverrides(modelIds);

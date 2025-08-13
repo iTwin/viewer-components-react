@@ -315,26 +315,6 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
     return createVisibilityHandlerResult(this, { modelIds }, result, undefined);
   }
 
-  private getVisibleModelDefaultCategoriesVisibilityStatus({ modelId, categoryIds }: { categoryIds: Id64Arg; modelId: Id64String }): VisibilityStatus {
-    const viewport = this._props.viewport;
-
-    let visibleCount = 0;
-    for (const categoryId of Id64.iterable(categoryIds)) {
-      const override = this._props.viewport.perModelCategoryVisibility.getOverride(modelId, categoryId);
-      if (
-        override === PerModelCategoryVisibility.Override.Show ||
-        (override === PerModelCategoryVisibility.Override.None && viewport.view.viewsCategory(categoryId))
-      ) {
-        ++visibleCount;
-        continue;
-      }
-      if (visibleCount > 0) {
-        return createVisibilityStatus("partial");
-      }
-    }
-    return visibleCount > 0 ? createVisibilityStatus("visible") : createVisibilityStatus("hidden");
-  }
-
   private getVisibleModelCategoriesVisibilityStatus({ modelId, categoryIds }: { modelId: Id64String; categoryIds: Id64Arg }) {
     return merge(
       this.getVisibilityFromAlwaysAndNeverDrawnElements({
@@ -427,6 +407,26 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
     return createVisibilityHandlerResult(this, props, result, undefined);
   }
 
+  private getVisibleModelDefaultCategoriesVisibilityStatus({ modelId, categoryIds }: { categoryIds: Id64Arg; modelId: Id64String }): VisibilityStatus {
+    const viewport = this._props.viewport;
+
+    let visibleCount = 0;
+    for (const categoryId of Id64.iterable(categoryIds)) {
+      const override = this._props.viewport.perModelCategoryVisibility.getOverride(modelId, categoryId);
+      if (
+        override === PerModelCategoryVisibility.Override.Show ||
+        (override === PerModelCategoryVisibility.Override.None && viewport.view.viewsCategory(categoryId))
+      ) {
+        ++visibleCount;
+        continue;
+      }
+      if (visibleCount > 0) {
+        return createVisibilityStatus("partial");
+      }
+    }
+    return visibleCount > 0 ? createVisibilityStatus("visible") : createVisibilityStatus("hidden");
+  }
+
   private getCategoriesVisibilityStatus(props: {
     categoryIds: Id64Arg;
     modelId: Id64String | undefined;
@@ -509,51 +509,6 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
       );
     });
     return createVisibilityHandlerResult(this, props, result, undefined);
-  }
-
-  private getVisibilityFromAlwaysAndNeverDrawnElements(
-    props: GetVisibilityFromAlwaysAndNeverDrawnElementsProps & ({ elements: Id64Arg } | { queryProps: { modelId: Id64String; categoryIds: Id64Arg } }),
-  ): Observable<VisibilityStatus> {
-    const viewport = this._props.viewport;
-    if (viewport.isAlwaysDrawnExclusive) {
-      if (!viewport?.alwaysDrawn?.size) {
-        return of(createVisibilityStatus("hidden"));
-      }
-    } else if (!viewport?.neverDrawn?.size && !viewport?.alwaysDrawn?.size) {
-      return of(props.defaultStatus());
-    }
-
-    if ("elements" in props) {
-      return of(
-        getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
-          ...props,
-          alwaysDrawn: viewport.alwaysDrawn?.size ? setIntersection(Id64.iterable(props.elements), viewport.alwaysDrawn) : undefined,
-          neverDrawn: viewport.neverDrawn?.size ? setIntersection(Id64.iterable(props.elements), viewport.neverDrawn) : undefined,
-          totalCount: Id64.sizeOf(props.elements),
-          viewport,
-        }),
-      );
-    }
-    const { modelId, categoryIds } = props.queryProps;
-    const totalCount = from(Id64.iterable(categoryIds)).pipe(
-      mergeMap((categoryId) => this.getElementsCount({ modelId, categoryId })),
-      reduce((acc, specificModelCategoryCount) => {
-        return acc + specificModelCategoryCount;
-      }, 0),
-    );
-    return forkJoin({
-      totalCount,
-      alwaysDrawn: this._alwaysAndNeverDrawnElements.getAlwaysDrawnElements(props.queryProps),
-      neverDrawn: this._alwaysAndNeverDrawnElements.getNeverDrawnElements(props.queryProps),
-    }).pipe(
-      map((state) => {
-        return getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
-          ...props,
-          ...state,
-          viewport,
-        });
-      }),
-    );
   }
 
   private getElementsVisibilityStatus(props: {
@@ -719,13 +674,13 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
   }
 
   private changeModelsVisibilityStatus(props: { modelIds: Id64Arg; on: boolean }): Observable<void> {
+    const { modelIds, on } = props;
+
+    if (Id64.sizeOf(modelIds) === 0) {
+      return EMPTY;
+    }
+
     const result = defer(() => {
-      const { modelIds, on } = props;
-
-      if (Id64.sizeOf(modelIds) === 0) {
-        return EMPTY;
-      }
-
       const viewport = this._props.viewport;
 
       viewport.perModelCategoryVisibility.clearOverrides(modelIds);
@@ -947,6 +902,51 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
         },
       }),
       map(() => undefined),
+    );
+  }
+
+  private getVisibilityFromAlwaysAndNeverDrawnElements(
+    props: GetVisibilityFromAlwaysAndNeverDrawnElementsProps & ({ elements: Id64Arg } | { queryProps: { modelId: Id64String; categoryIds: Id64Arg } }),
+  ): Observable<VisibilityStatus> {
+    const viewport = this._props.viewport;
+    if (viewport.isAlwaysDrawnExclusive) {
+      if (!viewport?.alwaysDrawn?.size) {
+        return of(createVisibilityStatus("hidden"));
+      }
+    } else if (!viewport?.neverDrawn?.size && !viewport?.alwaysDrawn?.size) {
+      return of(props.defaultStatus());
+    }
+
+    if ("elements" in props) {
+      return of(
+        getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
+          ...props,
+          alwaysDrawn: viewport.alwaysDrawn?.size ? setIntersection(Id64.iterable(props.elements), viewport.alwaysDrawn) : undefined,
+          neverDrawn: viewport.neverDrawn?.size ? setIntersection(Id64.iterable(props.elements), viewport.neverDrawn) : undefined,
+          totalCount: Id64.sizeOf(props.elements),
+          viewport,
+        }),
+      );
+    }
+    const { modelId, categoryIds } = props.queryProps;
+    const totalCount = from(Id64.iterable(categoryIds)).pipe(
+      mergeMap((categoryId) => this.getElementsCount({ modelId, categoryId })),
+      reduce((acc, specificModelCategoryCount) => {
+        return acc + specificModelCategoryCount;
+      }, 0),
+    );
+    return forkJoin({
+      totalCount,
+      alwaysDrawn: this._alwaysAndNeverDrawnElements.getAlwaysDrawnElements(props.queryProps),
+      neverDrawn: this._alwaysAndNeverDrawnElements.getNeverDrawnElements(props.queryProps),
+    }).pipe(
+      map((state) => {
+        return getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
+          ...props,
+          ...state,
+          viewport,
+        });
+      }),
     );
   }
 
