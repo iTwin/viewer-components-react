@@ -39,7 +39,6 @@ export function setIntersection<T>(lhs: Iterable<T>, rhs: Set<T>): Set<T> {
   }
   return result;
 }
-
 /** @internal */
 export function getDistinctMapValues(map: Map<any, Array<string> | Set<string>>): Set<string> {
   const result = new Set<string>();
