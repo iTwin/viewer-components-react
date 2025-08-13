@@ -16,6 +16,8 @@ import { getUiProvidersConfig } from "../UiProvidersConfig";
 import { ApiKeys } from "./ApiKeys";
 import { useAuthorizationContext } from "./Authorization";
 import { statusBarActionsProvider, ViewerOptionsProvider } from "./ViewerOptions";
+import { FormatManager } from "./FormatManager";
+
 
 import type { UiProvidersConfig } from "../UiProvidersConfig";
 
@@ -36,6 +38,10 @@ function ViewerWithOptions() {
     const providersConfig = getUiProvidersConfig();
     await providersConfig.initialize();
     await FrontendDevTools.initialize();
+
+    // Initialize FormatManager with sample format sets
+    await FormatManager.initialize([]);
+
     // ArcGIS Oauth setup
     const accessClient = new ArcGisAccessClient();
     accessClient.initialize({
@@ -99,16 +105,17 @@ function onIModelConnected(imodel: IModelConnection) {
       const schema = await imodel.schemaContext.getSchema(new SchemaKey("AecUnits", SchemaMatchType.Latest));
       if (!schema) throw new Error("AecUnits schema not found in iModel");
 
+      const schemaUnitsProvider = new SchemaUnitProvider(imodel.schemaContext);
+      IModelApp.quantityFormatter.unitsProvider = schemaUnitsProvider;
+
       const schemaFormatsProvider = new SchemaFormatsProvider(imodel.schemaContext, IModelApp.quantityFormatter.activeUnitSystem);
+      FormatManager.instance.fallbackFormatsProvider = schemaFormatsProvider;
       const removeListener = IModelApp.quantityFormatter.onActiveFormattingUnitSystemChanged.addListener((args) => {
         schemaFormatsProvider.unitSystem = args.system;
       });
-
-      const schemaUnitsProvider = new SchemaUnitProvider(imodel.schemaContext);
-      IModelApp.quantityFormatter.unitsProvider = schemaUnitsProvider;
-      IModelApp.formatsProvider = schemaFormatsProvider;
+      await FormatManager.instance.onIModelOpen(imodel);
       console.log("Registered SchemaFormatsProvider, SchemaUnitProvider");
-
+      console.log(FormatManager.instance.activeFormatSet)
       IModelConnection.onClose.addOnce(() => {
         removeListener();
         IModelApp.resetFormatsProvider();

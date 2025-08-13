@@ -5,10 +5,11 @@
 
 import React, { useCallback, useState } from "react";
 import { StagePanelLocation, StagePanelSection } from "@itwin/appui-react";
-import { QuantityFormatPanel } from "@itwin/quantity-formatting-react";
+import { FormatSelector, QuantityFormatPanel } from "@itwin/quantity-formatting-react";
 import { IModelApp } from "@itwin/core-frontend";
-import type { FormatProps } from "@itwin/core-quantity";
+import type { FormatDefinition, FormatProps } from "@itwin/core-quantity";
 import { Button, Modal, ModalButtonBar } from "@itwin/itwinui-react";
+import { FormatManager } from "./FormatManager";
 
 import type { UiItemsProvider, Widget } from "@itwin/appui-react";
 
@@ -24,9 +25,17 @@ const QuantityFormatWidget: React.FC = () => {
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [unitsProvider, setUnitsProvider] = useState(() => IModelApp.quantityFormatter.unitsProvider);
+  const [activeFormatSet] = useState(() => FormatManager.instance.activeFormatSet);
+  const [activeFormatDefinitionKey, setActiveFormatDefinitionKey] = useState<string | undefined>();
 
   const handleFormatChange = useCallback((newFormat: FormatProps) => {
     setFormatDefinition(newFormat);
+  }, []);
+
+  const handleFormatSelectorChange = useCallback((formatDef: FormatDefinition, key: string) => {
+    setFormatDefinition(formatDef);
+    setActiveFormatDefinitionKey(key);
   }, []);
 
   const handleOpenModal = useCallback(() => {
@@ -44,7 +53,15 @@ const QuantityFormatWidget: React.FC = () => {
   }, [formatDefinition]);
 
   // Memoize the unitsProvider to prevent unnecessary re-renders
-  const memoizedUnitsProvider = React.useMemo(() => IModelApp.quantityFormatter.unitsProvider, []);
+  React.useEffect(() => {
+    const _removeListener = IModelApp.quantityFormatter.onUnitsProviderChanged.addListener(() => {
+      // Handle units provider changes if needed
+      setUnitsProvider(IModelApp.quantityFormatter.unitsProvider);
+    });
+    return () => {
+      _removeListener();
+    };
+  }, []);
 
   return (
     <>
@@ -57,6 +74,16 @@ const QuantityFormatWidget: React.FC = () => {
         >
           Configure Quantity Format
         </Button>
+
+        {activeFormatSet && (
+          <div style={{ padding: "16px 0" }}>
+            <FormatSelector
+              activeFormatSet={activeFormatSet}
+              activeFormatDefinitionKey={activeFormatDefinitionKey}
+              onListItemChange={handleFormatSelectorChange}
+            />
+          </div>
+        )}
       </div>
 
       <Modal
@@ -68,7 +95,7 @@ const QuantityFormatWidget: React.FC = () => {
         <div style={{ padding: "16px", height: "1200px", overflow: "auto" }}>
           <QuantityFormatPanel
             formatDefinition={formatDefinition}
-            unitsProvider={memoizedUnitsProvider}
+            unitsProvider={unitsProvider}
             onFormatChange={handleFormatChange}
           />
         </div>
