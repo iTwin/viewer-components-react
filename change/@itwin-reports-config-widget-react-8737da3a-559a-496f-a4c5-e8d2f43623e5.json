@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Upgraded @itwin/insights-client version to 0.16.0",
-  "packageName": "@itwin/reports-config-widget-react",
-  "email": "tejas.sutar@bentley.com",
-  "dependentChangeType": "patch"
-}
