@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { HierarchyNode } from "@itwin/presentation-hierarchies";
+import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 
 /** @internal */
 export interface FilteredVisibilityTargets<TFilterTargets> {
