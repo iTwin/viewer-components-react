@@ -45,7 +45,7 @@ describe("SignOption", () => {
 
     expect(
       renderedComponent.getByText("sign_option.onlyNegative")
-    ).to.exist;
+    ).toBeTruthy();
   });
 
   it("should render with specified showSignOption", async () => {
@@ -61,9 +61,9 @@ describe("SignOption", () => {
 
     expect(
       renderedComponent.getByText("labels.signOptionLabel")
-    ).to.exist;
+    ).toBeTruthy();
     expect(
       renderedComponent.getByText("sign_option.signAlways")
-    ).to.exist;
+    ).toBeTruthy();
   });
 });

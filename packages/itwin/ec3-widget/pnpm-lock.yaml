@@ -5,10 +5,6 @@ settings:
   excludeLinksFromLockfile: false
   injectWorkspacePackages: true
 
-overrides:
-  '@itwin/itwinui-react@^2': 2.12.26
-  '@itwin/itwinui-react@^3': 3.18.3
-
 importers:
 
   .:
@@ -20,7 +16,7 @@ importers:
         specifier: ^2.4.0
         version: 2.4.0(react-dom@17.0.0(react@17.0.0))(react@17.0.0)
       '@itwin/itwinui-react':
-        specifier: 2.12.26
+        specifier: ^2.12.0
         version: 2.12.26(react-dom@17.0.0(react@17.0.0))(react@17.0.0)
       classnames:
         specifier: ^2.3.1
@@ -3894,7 +3890,7 @@ snapshots:
       rimraf: 3.0.2
       tree-kill: 1.2.2
       typedoc: 0.23.28(typescript@5.0.4)
-      typedoc-plugin-merge-modules: 4.1.0(typedoc@0.23.28(typescript@4.6.2))
+      typedoc-plugin-merge-modules: 4.1.0(typedoc@0.23.28(typescript@5.0.4))
       typescript: 5.0.4
       wtfnode: 0.9.1
       yargs: 17.7.2
@@ -7381,7 +7377,7 @@ snapshots:
     dependencies:
       is-typedarray: 1.0.0
 
-  typedoc-plugin-merge-modules@4.1.0(typedoc@0.23.28(typescript@4.6.2)):
+  typedoc-plugin-merge-modules@4.1.0(typedoc@0.23.28(typescript@5.0.4)):
     dependencies:
       typedoc: 0.23.28(typescript@5.0.4)
 

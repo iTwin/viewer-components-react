@@ -43,11 +43,8 @@
     "url": "http://www.bentley.com"
   },
   "peerDependencies": {
-    "@itwin/core-bentley": "^5.1.1",
-    "@itwin/core-common": "^5.1.1",
     "@itwin/core-frontend": "^5.1.1",
     "@itwin/core-quantity": "^5.1.1",
-    "@itwin/ecschema-metadata": "^5.1.1",
     "@itwin/itwinui-react": "^3.16.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"

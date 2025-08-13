@@ -93,7 +93,7 @@ describe("ThousandsSeparatorSelector", () => {
         renderedComponent.getByLabelText(
           "labels.useThousandSeparatorLabel"
         )
-      ).to.exist;
+      ).toBeTruthy();
   });
 
   it("should not render when use1000Separator trait is not set", () => {
@@ -124,7 +124,6 @@ describe("ThousandsSeparatorSelector", () => {
         />
       );
 
-      screen.debug()
       const selector = renderedComponent.getByRole("combobox");
       fireEvent.click(selector);
 

@@ -38,7 +38,7 @@ describe("Decimal Panel", () => {
         .exist;
       expect(
         renderedComponent.getByLabelText("labels.precision")
-      ).to.exist;
+      ).toBeTruthy();
     });
 
     it("should render unit label controls when showUnitLabel is enabled", async () => {

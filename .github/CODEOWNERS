@@ -47,5 +47,5 @@
 /packages/itwin/map-layers  @itwin/viewer-components-reviewers @mdastous-bentley @eringram
 /change/@itwin-map-layers*  @itwin/viewer-components-reviewers @mdastous-bentley @eringram
 
-/packages/itwin/quantity-formatting  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation @hl662
-/change/@itwin-quantity-formatting-react*  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
+/packages/itwin/quantity-formatting @itwin/itwinjs-core-presentation @hl662
+/change/@itwin-quantity-formatting-react* @itwin/itwinjs-core-presentation @hl662

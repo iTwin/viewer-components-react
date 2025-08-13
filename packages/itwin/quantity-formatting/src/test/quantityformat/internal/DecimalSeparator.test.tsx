@@ -45,10 +45,10 @@ describe("DecimalSeparator", () => {
 
     expect(
       renderedComponent.getByText("labels.decimalSeparatorLabel")
-    ).to.exist;
+    ).toBeTruthy();
     expect(
       renderedComponent.getByText("decimal_separator.point")
-    ).to.exist;
+    ).toBeTruthy();
   });
 
   it("should render with specified decimal separator", async () => {
@@ -65,9 +65,9 @@ describe("DecimalSeparator", () => {
 
     expect(
       renderedComponent.getByText("labels.decimalSeparatorLabel")
-    ).to.exist;
+    ).toBeTruthy();
     expect(
       renderedComponent.getByText("decimal_separator.comma")
-    ).to.exist;
+    ).toBeTruthy();
   });
 });

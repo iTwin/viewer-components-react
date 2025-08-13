@@ -62,7 +62,7 @@ export class QuantityFormatting {
    */
   public static terminate(): void {
     if (QuantityFormatting._isInitialized) {
-      IModelApp.localization.unregisterNamespace(QuantityFormatting._i18nNamespace);
+      QuantityFormatting._localization.unregisterNamespace(QuantityFormatting._i18nNamespace)
       QuantityFormatting._isInitialized = false;
     }
   }
