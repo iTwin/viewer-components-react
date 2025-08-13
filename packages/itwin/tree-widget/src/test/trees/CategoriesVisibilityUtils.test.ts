@@ -70,7 +70,7 @@ describe("CategoryVisibilityUtils", () => {
     imodelMock.setup((x) => x.createQueryReader(moq.It.isAny(), moq.It.isAny(), moq.It.isAny())).returns(() => queryReaderMock.object);
     imodelMock.setup((x) => x.categories).returns(() => categoriesMock.object);
     queryReaderMock.setup(async (x) => x.toArray()).returns(async () => [{ id: categoryId }]);
-    categoriesMock.setup(async (x) => x.getCategoryInfo([categoryId])).returns(async () => categoriesInfo);
+    categoriesMock.setup(async (x) => x.getCategoryInfo(moq.It.isAny())).returns(async () => categoriesInfo);
     perModelCategoryVisibilityMock.setup((x) => x[Symbol.iterator]()).returns(() => [][Symbol.iterator]());
     viewportMock.setup((x) => x.view).returns(() => viewStateMock.object);
     viewportMock.setup((x) => x.iModel).returns(() => imodelMock.object);
@@ -102,18 +102,18 @@ describe("CategoryVisibilityUtils", () => {
 
   describe("enableCategoryDisplay", () => {
     it("enables category", async () => {
-      await enableCategoryDisplay(viewportMock.object, ["CategoryId"], true, false);
-      viewportMock.verify((x) => x.changeCategoryDisplay(["CategoryId"], true, false), moq.Times.once());
+      await enableCategoryDisplay(viewportMock.object, "CategoryId", true, false);
+      viewportMock.verify((x) => x.changeCategoryDisplay("CategoryId", true, false), moq.Times.once());
     });
 
     it("disables category", async () => {
-      await enableCategoryDisplay(viewportMock.object, ["CategoryId"], false, false);
-      viewportMock.verify((x) => x.changeCategoryDisplay(["CategoryId"], false, false), moq.Times.once());
+      await enableCategoryDisplay(viewportMock.object, "CategoryId", false, false);
+      viewportMock.verify((x) => x.changeCategoryDisplay("CategoryId", false, false), moq.Times.once());
     });
 
     it("disables category and subcategories", async () => {
-      await enableCategoryDisplay(viewportMock.object, ["CategoryId"], false, true);
-      viewportMock.verify((x) => x.changeCategoryDisplay(["CategoryId"], false, true), moq.Times.once());
+      await enableCategoryDisplay(viewportMock.object, "CategoryId", false, true);
+      viewportMock.verify((x) => x.changeCategoryDisplay("CategoryId", false, true), moq.Times.once());
       viewportMock.verify((x) => x.changeSubCategoryDisplay(moq.It.isAny(), moq.It.isAny()), moq.Times.once());
     });
 
@@ -121,9 +121,9 @@ describe("CategoryVisibilityUtils", () => {
       const ovrs = [{ modelId: "ModelId", categoryId: "CategoryId", visible: false }];
       perModelCategoryVisibilityMock.reset();
       perModelCategoryVisibilityMock.setup((x) => x[Symbol.iterator]()).returns(() => ovrs[Symbol.iterator]());
-      await enableCategoryDisplay(viewportMock.object, ["CategoryId"], true, false);
-      viewportMock.verify((x) => x.changeCategoryDisplay(["CategoryId"], true, false), moq.Times.once());
-      perModelCategoryVisibilityMock.verify((x) => x.setOverride(["ModelId"], ["CategoryId"], PerModelCategoryVisibility.Override.None), moq.Times.once());
+      await enableCategoryDisplay(viewportMock.object, "CategoryId", true, false);
+      viewportMock.verify((x) => x.changeCategoryDisplay("CategoryId", true, false), moq.Times.once());
+      perModelCategoryVisibilityMock.verify((x) => x.setOverride(["ModelId"], "CategoryId", PerModelCategoryVisibility.Override.None), moq.Times.once());
     });
   });
 
