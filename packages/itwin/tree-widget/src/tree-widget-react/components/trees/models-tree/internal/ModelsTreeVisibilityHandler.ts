@@ -337,11 +337,9 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
               merge(
                 drawingCategories ? of(drawingCategories).pipe(mergeMap((categoryIds) => this.getCategoriesVisibilityStatus({ modelId, categoryIds }))) : EMPTY,
                 spatialCategories ? of(spatialCategories).pipe(mergeMap((categoryIds) => this.getCategoriesVisibilityStatus({ modelId, categoryIds }))) : EMPTY,
-                (!drawingCategories || Id64.sizeOf(drawingCategories) === 0) && (!spatialCategories || Id64.sizeOf(spatialCategories) === 0)
-                  ? of(createVisibilityStatus("visible"))
-                  : EMPTY,
               ),
             ),
+            defaultIfEmpty(createVisibilityStatus("visible")),
           );
         }),
         mergeVisibilityStatuses,
@@ -525,14 +523,10 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
                   return this.getSubCategoriesVisibilityStatus({ categoryId, modelId: modelIdFromProps, subCategoryIds: subCategories });
                 }
 
-                if (visibleModels.length === 0 && hiddenModels.length === 0) {
-                  return of(createVisibilityStatus(this._props.viewport.view.viewsCategory(categoryId) ? "visible" : "hidden"));
-                }
-
                 return EMPTY;
               }),
             ),
-          );
+          ).pipe(defaultIfEmpty(createVisibilityStatus(this._props.viewport.view.viewsCategory(categoryId) ? "visible" : "hidden")));
         }),
         mergeVisibilityStatuses,
       );
