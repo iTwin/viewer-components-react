@@ -13,7 +13,6 @@ import type { HierarchyFilteringPath } from '@itwin/presentation-hierarchies';
 import type { HierarchyNode } from '@itwin/presentation-hierarchies-react';
 import type { Id64Arg } from '@itwin/core-bentley';
 import type { Id64Array } from '@itwin/core-bentley';
-import type { Id64Set } from '@itwin/core-bentley';
 import type { Id64String } from '@itwin/core-bentley';
 import type { ILogger } from '@itwin/presentation-shared';
 import type { IModelConnection } from '@itwin/core-frontend';
@@ -89,32 +88,6 @@ interface CategoryInfo {
     categoryId: Id64String;
     // (undocumented)
     subCategoryIds?: Id64Array;
-}
-
-// @beta (undocumented)
-interface ChangeCategoryVisibilityStateProps extends GetCategoryVisibilityStatusProps {
-    // (undocumented)
-    on: boolean;
-}
-
-// @beta (undocumented)
-interface ChangeGeometricElementsDisplayStateProps {
-    // (undocumented)
-    categoryId: Id64String;
-    // (undocumented)
-    elementIds: Id64Set;
-    // (undocumented)
-    modelId: Id64String;
-    // (undocumented)
-    on: boolean;
-}
-
-// @beta (undocumented)
-interface ChangeModelVisibilityStateProps {
-    // (undocumented)
-    ids: Id64Arg;
-    // (undocumented)
-    on: boolean;
 }
 
 // @beta (undocumented)
@@ -224,24 +197,6 @@ export function FocusedInstancesContextProvider({ selectionStorage, imodelKey, c
 
 // @beta (undocumented)
 type FunctionProps<THook extends (props: any) => any> = Parameters<THook>[0];
-
-// @beta (undocumented)
-interface GetCategoryVisibilityStatusProps {
-    // (undocumented)
-    categoryIds: Id64Arg;
-    // (undocumented)
-    modelId: Id64String;
-}
-
-// @beta (undocumented)
-interface GetGeometricElementVisibilityStatusProps {
-    // (undocumented)
-    categoryId: Id64String;
-    // (undocumented)
-    elementId: Id64String;
-    // (undocumented)
-    modelId: Id64String;
-}
 
 // @beta
 export interface HierarchyVisibilityHandler extends Disposable {
@@ -360,36 +315,55 @@ type ModelsTreeProps = Pick<VisibilityTreeProps, "imodel" | "selectionStorage" |
 // @beta
 export interface ModelsTreeVisibilityHandlerOverrides {
     // (undocumented)
-    changeCategoryState?: HierarchyVisibilityHandlerOverridableMethod<(props: ChangeCategoryVisibilityStateProps) => Promise<void>>;
+    changeCategoriesVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
+        categoryIds: Id64Arg;
+        modelId?: Id64String;
+        on: boolean;
+    }) => Promise<void>>;
     // (undocumented)
-    changeElementGroupingNodeState?: HierarchyVisibilityHandlerOverridableMethod<(props: {
+    changeElementGroupingNodeVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
         node: GroupingHierarchyNode;
         on: boolean;
     }) => Promise<void>>;
     // (undocumented)
-    changeElementsState?: HierarchyVisibilityHandlerOverridableMethod<(props: ChangeGeometricElementsDisplayStateProps) => Promise<void>>;
-    // (undocumented)
-    changeModelState?: HierarchyVisibilityHandlerOverridableMethod<(props: ChangeModelVisibilityStateProps) => Promise<void>>;
-    // (undocumented)
-    changeSubjectNodeState?: HierarchyVisibilityHandlerOverridableMethod<(props: {
-        ids: Id64Array;
+    changeElementsVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
+        categoryId: Id64String;
+        modelId: Id64String;
+        elementIds: Id64Arg;
         on: boolean;
     }) => Promise<void>>;
     // (undocumented)
-    getCategoryDisplayStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: GetCategoryVisibilityStatusProps) => Promise<VisibilityStatus>>;
+    changeModelsVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
+        modelIds: Id64Arg;
+        on: boolean;
+    }) => Promise<void>>;
     // (undocumented)
-    getElementDisplayStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: GetGeometricElementVisibilityStatusProps) => Promise<VisibilityStatus>>;
+    changeSubjectsVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
+        subjectIds: Id64Arg;
+        on: boolean;
+    }) => Promise<void>>;
     // (undocumented)
-    getElementGroupingNodeDisplayStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
+    getCategoriesVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
+        categoryIds: Id64Arg;
+        modelId?: Id64String;
+    }) => Promise<VisibilityStatus>>;
+    // (undocumented)
+    getElementGroupingNodeVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
         node: GroupingHierarchyNode;
     }) => Promise<VisibilityStatus>>;
     // (undocumented)
-    getModelDisplayStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
-        ids: Id64Arg;
+    getElementsVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
+        categoryId: Id64String;
+        modelId: Id64String;
+        elementIds: Id64Arg;
     }) => Promise<VisibilityStatus>>;
     // (undocumented)
-    getSubjectNodeVisibility?: HierarchyVisibilityHandlerOverridableMethod<(props: {
-        ids: Id64Array;
+    getModelsVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
+        modelIds: Id64Arg;
+    }) => Promise<VisibilityStatus>>;
+    // (undocumented)
+    getSubjectsVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
+        subjectIds: Id64Arg;
     }) => Promise<VisibilityStatus>>;
 }
 

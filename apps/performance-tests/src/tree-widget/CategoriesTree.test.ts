@@ -90,7 +90,7 @@ describe("categories tree", () => {
         showElements: false,
       };
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d");
-      const handler = createCategoriesTreeVisibilityHandler({ imodelAccess, idsCache, viewport, hierarchyConfig });
+      const handler = createCategoriesTreeVisibilityHandler({ imodelAccess, idsCache, viewport });
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new CategoriesTreeDefinition({ idsCache, imodelAccess, viewType: "3d", hierarchyConfig }),
         imodelAccess,
@@ -149,7 +149,7 @@ describe("categories tree", () => {
         showElements: false,
       };
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d");
-      const handler = createCategoriesTreeVisibilityHandler({ imodelAccess, idsCache, viewport, hierarchyConfig });
+      const handler = createCategoriesTreeVisibilityHandler({ imodelAccess, idsCache, viewport });
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new CategoriesTreeDefinition({ idsCache, imodelAccess, viewType: "3d", hierarchyConfig }),
         imodelAccess,

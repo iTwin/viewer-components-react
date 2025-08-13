@@ -43,11 +43,12 @@ import {
 } from "./Utils.js";
 import { validateHierarchyVisibility } from "./VisibilityValidation.js";
 
-import type { VisibilityExpectations } from "./VisibilityValidation.js";
-import type { InstanceKey } from "@itwin/presentation-common";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { CategoriesTreeHierarchyConfiguration } from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
+import type { InstanceKey } from "@itwin/presentation-common";
 import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+import type { CategoriesTreeHierarchyConfiguration } from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
+import type { VisibilityExpectations } from "./VisibilityValidation.js";
+
 describe("CategoriesTreeVisibilityHandler", () => {
   before(async () => {
     await initializePresentationTesting({
@@ -169,6 +170,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         expectations: "all-hidden",
       });
     });
+
     describe("definitionContainers", () => {
       it("showing definition container makes it and all of its contained elements visible", async function () {
         await using buildIModelResult = await buildIModel(this, async (builder) => {
@@ -259,13 +261,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
           handler,
           viewport,
           expectations: {
-            [keys.definitionContainerRoot2.id]: "hidden",
             [keys.definitionContainerRoot.id]: "visible",
             [keys.definitionContainerChild.id]: "visible",
-            [keys.category2.id]: "hidden",
             [keys.indirectCategory.id]: "visible",
-            [keys.subCategory2.id]: "hidden",
             [keys.indirectSubCategory.id]: "visible",
+            [keys.definitionContainerRoot2.id]: "hidden",
+            [keys.category2.id]: "hidden",
+            [keys.subCategory2.id]: "hidden",
           },
         });
       });
@@ -776,44 +778,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
             [keys.category.id]: "partial",
             [keys.subCategory.id]: "visible",
           },
-        });
-      });
-    });
-
-    describe("hideSubCategories set to true", () => {
-      it("showing subCategory does not do anything", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-          const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
-
-          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelRoot.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-          const subCategory = insertSubCategory({
-            builder,
-            parentCategoryId: category.id,
-            codeValue: "subCategory",
-            modelId: definitionModelRoot.id,
-          });
-          return { category, subCategory, definitionContainerRoot, physicalModel };
-        });
-
-        const { imodel, ...keys } = buildIModelResult;
-
-        using visibilityTestData = await createVisibilityTestData({
-          imodel,
-          ...getModelAndCategoryIds(keys),
-          hierarchyConfig: { hideSubCategories: true },
-        });
-        const { handler, provider, viewport } = visibilityTestData;
-        setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
-
-        await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
-        await validateHierarchyVisibility({
-          provider,
-          handler,
-          viewport,
-          expectations: "all-hidden",
         });
       });
     });
@@ -1790,9 +1754,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                   elementId: ids.subModelElement?.id,
                 }),
               expectations: (ids: IModelWithSubModelIds) => ({
-                // This happens because changing element state does not turn on category visiblity, it only turns on model display if it is off.
-                // Since subModelCategory is also displayed at tree root (it does not have children) it's visibility remains hidden.
-                [ids.subModelCategory?.id ?? ""]: "hidden",
+                [ids.subModelCategory?.id ?? ""]: "visible",
                 [`${ids.modeledElement.id}-${ids.subModelCategory?.id ?? ""}`]: "visible",
                 [ids.category.id]: "partial",
                 [ids.modeledElement.id]: "partial",
@@ -2664,38 +2626,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
     });
 
-    describe("hideSubCategories set to true", () => {
-      it("showing subCategory does not do anything", async function () {
-        await using buildIModelResult = await buildIModel(this, async (builder) => {
-          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-          const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-          const definitionModelRoot = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerRoot.id });
-
-          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelRoot.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-          const subCategory = insertSubCategory({
-            builder,
-            parentCategoryId: category.id,
-            codeValue: "subCategory",
-            modelId: definitionModelRoot.id,
-          });
-          return { category, subCategory, definitionContainerRoot, physicalModel };
-        });
-
-        const { imodel, ...keys } = buildIModelResult;
-        using visibilityTestData = await createVisibilityTestData({ imodel, ...getModelAndCategoryIds(keys), hierarchyConfig: { hideSubCategories: true } });
-        const { handler, provider, viewport } = visibilityTestData;
-        setupInitialDisplayState({ viewport });
-
-        await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
-        await validateHierarchyVisibility({
-          provider,
-          handler,
-          viewport,
-          expectations: "all-visible",
-        });
-      });
-    });
     describe("disabling category visibility through overrides", () => {
       it("category is hidden when only one model contains category and override is set to 'Hide'", async function () {
         await using buildIModelResult = await buildIModel(this, async (builder) => {

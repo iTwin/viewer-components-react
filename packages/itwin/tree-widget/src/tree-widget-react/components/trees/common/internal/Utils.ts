@@ -19,19 +19,26 @@ import type { Observable } from "rxjs";
 import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 
 /** @internal */
-export function setDifference<T>(lhs: Set<T>, rhs: Set<T>): Set<T> {
+export function setDifference<T>(lhs: Iterable<T>, rhs: Set<T>): Set<T> {
   const result = new Set<T>();
-  lhs.forEach((x) => !rhs.has(x) && result.add(x));
+  for (const x of lhs) {
+    if (!rhs.has(x)) {
+      result.add(x);
+    }
+  }
   return result;
 }
 
 /** @internal */
-export function setIntersection<T>(lhs: Set<T>, rhs: Set<T>): Set<T> {
+export function setIntersection<T>(lhs: Iterable<T>, rhs: Set<T>): Set<T> {
   const result = new Set<T>();
-  lhs.forEach((x) => rhs.has(x) && result.add(x));
+  for (const x of lhs) {
+    if (rhs.has(x)) {
+      result.add(x);
+    }
+  }
   return result;
 }
-
 /** @internal */
 export function getDistinctMapValues(map: Map<any, Array<string> | Set<string>>): Set<string> {
   const result = new Set<string>();
@@ -121,4 +128,9 @@ export function joinId64Arg(arg: Id64Arg, separator: string): string {
     joined += argItem;
   }
   return joined;
+}
+
+/** @internal */
+export function getSetFromId64Arg(arg: Id64Arg): Set<Id64String> {
+  return typeof arg === "string" ? new Set([arg]) : Array.isArray(arg) ? new Set(arg) : arg;
 }
