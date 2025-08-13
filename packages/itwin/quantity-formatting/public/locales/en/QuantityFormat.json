@@ -45,7 +45,9 @@
       "advancedOptions": "Advanced Options",
       "addSubUnit": "Add Sub Unit",
       "removeUnit": "Remove Unit",
-      "azimuthBaseUnit": "Azimuth Base Unit"
+      "azimuthBaseUnit": "Azimuth Base Unit",
+      "save": "Save",
+      "clear": "Clear"
   },
   "decimal_precision": {
     "zero": "0",
