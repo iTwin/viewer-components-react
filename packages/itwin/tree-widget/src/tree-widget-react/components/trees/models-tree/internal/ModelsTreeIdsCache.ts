@@ -374,6 +374,22 @@ export class ModelsTreeIdsCache {
     return result;
   }
 
+  public async getCategoriesElementModels(categoryIds: Id64Arg): Promise<Map<CategoryId, Array<ModelId>>> {
+    const modelInfos = await this.getModelInfos();
+    const result = new Map<CategoryId, Array<ModelId>>();
+    for (const categoryId of Id64.iterable(categoryIds)) {
+      const entry = new Array<ModelId>();
+      for (const [modelId, { categoryIds: modelCategoryIds }] of modelInfos.entries()) {
+        if (modelCategoryIds.has(categoryId)) {
+          entry.push(modelId);
+        }
+      }
+      result.set(categoryId, entry);
+    }
+
+    return result;
+  }
+
   public async createModelInstanceKeyPaths(modelId: Id64String): Promise<HierarchyNodeIdentifiersPath[]> {
     let entry = this._modelKeyPaths.get(modelId);
     if (!entry) {
