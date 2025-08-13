@@ -5,7 +5,7 @@
 
 
 import * as React from "react";
-import type { FormatProps, UnitProps } from "@itwin/core-quantity";
+import type { FormatDefinition, UnitProps } from "@itwin/core-quantity";
 import type { UnitsProvider } from "@itwin/core-quantity";
 import { Format, FormatTraits } from "@itwin/core-quantity";
 import { FormatUnits } from "../internal/FormatUnits.js";
@@ -33,9 +33,9 @@ import "../FormatPanel.scss";
  * @internal
  */
 export interface PanelProps {
-  formatProps: FormatProps;
+  formatProps: FormatDefinition;
   unitsProvider: UnitsProvider;
-  onFormatChange: (formatProps: FormatProps) => void;
+  onFormatChange: (formatProps: FormatDefinition) => void;
   persistenceUnit?: UnitProps;
 }
 

@@ -18,7 +18,7 @@ describe("KeepSingleZero", () => {
     const onChange = vi.fn();
     render(<KeepSingleZero formatProps={defaultFormatProps} onChange={onChange} />);
 
-    expect(screen.getByText("QuantityFormat:labels.keepSingleZeroLabel")).toBeTruthy();
+    expect(screen.getByText("labels.keepSingleZeroLabel")).toBeTruthy();
     const checkbox = screen.getByRole("checkbox") as HTMLInputElement;
     expect(checkbox.checked).not.toBeTruthy();
   });
@@ -100,6 +100,6 @@ describe("KeepSingleZero", () => {
     fireEvent.click(checkbox);
 
     // Should not throw error and should render without issues
-    expect(screen.getByText("QuantityFormat:labels.keepSingleZeroLabel")).toBeTruthy();
+    expect(screen.getByText("labels.keepSingleZeroLabel")).toBeTruthy();
   });
 });

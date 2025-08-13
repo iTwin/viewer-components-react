@@ -5,7 +5,7 @@
 
 
 import * as React from "react";
-import type { FormatProps } from "@itwin/core-quantity";
+import type { FormatDefinition } from "@itwin/core-quantity";
 import { Format, FormatTraits, getTraitString } from "@itwin/core-quantity";
 import type { SelectOption } from "@itwin/itwinui-react";
 import { Checkbox, Label, LabeledSelect } from "@itwin/itwinui-react";
@@ -15,8 +15,8 @@ import { useTranslation } from "../../../useTranslation.js";
  * @internal
  */
 interface UomSeparatorSelectorProps {
-  formatProps: FormatProps;
-  onFormatChange: (formatProps: FormatProps) => void;
+  formatProps: FormatDefinition;
+  onFormatChange: (formatProps: FormatDefinition) => void;
 }
 
 /** Component to set the unit of measure separator.
@@ -75,8 +75,8 @@ export function UomSeparatorSelector(props: UomSeparatorSelectorProps) {
  * @internal
  */
 interface AppendUnitLabelProps {
-  formatProps: FormatProps;
-  onFormatChange: (formatProps: FormatProps) => void;
+  formatProps: FormatDefinition;
+  onFormatChange: (formatProps: FormatDefinition) => void;
 }
 
 /** Component to set the append unit label flag.

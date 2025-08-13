@@ -23,14 +23,14 @@ describe("FormatPrecision", () => {
     const onChange = vi.fn();
     render(<FormatPrecision formatProps={defaultDecimalFormatProps} onChange={onChange} />);
 
-    expect(screen.getByText("QuantityFormat:labels.precision")).toBeTruthy();
+    expect(screen.getByText("labels.precision")).toBeTruthy();
   });
 
   it("should render with fractional precision selector for fractional format", () => {
     const onChange = vi.fn();
     render(<FormatPrecision formatProps={defaultFractionalFormatProps} onChange={onChange} />);
 
-    expect(screen.getByText("QuantityFormat:labels.precision")).toBeTruthy();
+    expect(screen.getByText("labels.precision")).toBeTruthy();
   });
 
   it("should call onChange when decimal precision is changed", () => {
@@ -39,7 +39,7 @@ describe("FormatPrecision", () => {
 
     const input = screen.getByRole("combobox") as HTMLInputElement;
     fireEvent.click(input);
-    const button = screen.getByText('QuantityFormat:decimal_precision.four');
+    const button = screen.getByText('decimal_precision.four');
     fireEvent.click(button);
 
     expect(onChange).toHaveBeenCalledWith({
@@ -54,7 +54,7 @@ describe("FormatPrecision", () => {
 
     const input = screen.getByRole("combobox") as HTMLInputElement;
     fireEvent.click(input);
-    const button = screen.getByText('QuantityFormat:fraction_precision.eighth');
+    const button = screen.getByText('fraction_precision.eighth');
     fireEvent.click(button);
 
     expect(onChange).toHaveBeenCalledWith({
@@ -70,14 +70,14 @@ describe("FormatPrecision", () => {
     const input = screen.getByRole("combobox") as HTMLInputElement;
     fireEvent.click(input);
     // Test multiple precision changes
-    const button = screen.getByText('QuantityFormat:decimal_precision.zero');
+    const button = screen.getByText('decimal_precision.zero');
     fireEvent.click(button);
     expect(onChange).toHaveBeenCalledWith({
       ...defaultDecimalFormatProps,
       precision: 0,
     });
     fireEvent.click(input);
-    const button2 = screen.getByText('QuantityFormat:decimal_precision.six');
+    const button2 = screen.getByText('decimal_precision.six');
     fireEvent.click(button2);
     expect(onChange).toHaveBeenCalledWith({
       ...defaultDecimalFormatProps,
@@ -94,7 +94,7 @@ describe("FormatPrecision", () => {
 
     const input = screen.getByRole("combobox") as HTMLInputElement;
     fireEvent.click(input);
-    const button = screen.getByText('QuantityFormat:decimal_precision.three');
+    const button = screen.getByText('decimal_precision.three');
     fireEvent.click(button);
 
     expect(onChange).toHaveBeenCalledWith({

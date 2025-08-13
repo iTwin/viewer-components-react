@@ -35,8 +35,8 @@ describe("Scientific Panel", () => {
         />
       );
 
-      expect(renderedComponent.getByLabelText("QuantityFormat:labels.type")).toBeTruthy();
-      expect(renderedComponent.getByLabelText("QuantityFormat:labels.precision")).toBeTruthy();
+      expect(renderedComponent.getByLabelText("labels.type")).toBeTruthy();
+      expect(renderedComponent.getByLabelText("labels.precision")).toBeTruthy();
     });
 
     it("should render scientific type selector", async () => {
@@ -55,7 +55,7 @@ describe("Scientific Panel", () => {
         />
       );
 
-      expect(renderedComponent.getByText("QuantityFormat:labels.scientificTypeLabel")).toBeTruthy();
+      expect(renderedComponent.getByText("labels.scientificTypeLabel")).toBeTruthy();
     });
 
     it("should render unit label controls when showUnitLabel is enabled", async () => {
@@ -75,7 +75,7 @@ describe("Scientific Panel", () => {
       );
 
       await waitFor(() => {
-        expect(renderedComponent.getByLabelText("QuantityFormat:labels.labelSeparator")).toBeTruthy();
+        expect(renderedComponent.getByLabelText("labels.labelSeparator")).toBeTruthy();
       });
     });
   });
@@ -97,8 +97,8 @@ describe("Scientific Panel", () => {
         />
       );
 
-      expect(renderedComponent.getByLabelText("QuantityFormat:labels.signOptionLabel")).toBeTruthy();
-      expect(renderedComponent.getByText("QuantityFormat:labels.decimalSeparatorLabel")).toBeTruthy();
+      expect(renderedComponent.getByLabelText("labels.signOptionLabel")).toBeTruthy();
+      expect(renderedComponent.getByText("labels.decimalSeparatorLabel")).toBeTruthy();
     });
   });
 });

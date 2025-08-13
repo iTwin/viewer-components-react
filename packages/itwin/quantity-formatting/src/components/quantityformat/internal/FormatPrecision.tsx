@@ -5,7 +5,7 @@
 
 
 import * as React from "react";
-import type { FormatProps } from "@itwin/core-quantity";
+import type { FormatDefinition } from "@itwin/core-quantity";
 import { FormatType, parseFormatType } from "@itwin/core-quantity";
 import { FractionPrecisionSelector } from "./misc/FractionPrecision.js";
 import { useTranslation } from "../../../useTranslation.js";
@@ -16,8 +16,8 @@ import { DecimalPrecisionSelector } from "./misc/DecimalPrecision.js";
  * @internal
  */
 export interface FormatPrecisionProps {
-  formatProps: FormatProps;
-  onChange?: (format: FormatProps) => void;
+  formatProps: FormatDefinition;
+  onChange?: (format: FormatDefinition) => void;
 }
 
 /** Component to show/edit Quantity Format Precision.

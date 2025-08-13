@@ -35,8 +35,8 @@ describe("Bearing Panel", () => {
         />
       );
 
-      expect(renderedComponent.getByLabelText("QuantityFormat:labels.type")).toBeTruthy();
-      expect(renderedComponent.getByLabelText("QuantityFormat:labels.precision")).toBeTruthy();
+      expect(renderedComponent.getByLabelText("labels.type")).toBeTruthy();
+      expect(renderedComponent.getByLabelText("labels.precision")).toBeTruthy();
     });
 
     it("should render unit controls", async () => {
@@ -55,7 +55,7 @@ describe("Bearing Panel", () => {
         />
       );
 
-      expect(renderedComponent.getByText("QuantityFormat:labels.units")).toBeTruthy();
+      expect(renderedComponent.getByText("labels.units")).toBeTruthy();
     });
   });
 
@@ -76,8 +76,8 @@ describe("Bearing Panel", () => {
         />
       );
 
-      expect(renderedComponent.getByText("QuantityFormat:labels.decimalSeparatorLabel")).toBeTruthy();
-      expect(renderedComponent.getByText("QuantityFormat:labels.keepDecimalPointLabel")).toBeTruthy();
+      expect(renderedComponent.getByText("labels.decimalSeparatorLabel")).toBeTruthy();
+      expect(renderedComponent.getByText("labels.keepDecimalPointLabel")).toBeTruthy();
     });
   });
 });

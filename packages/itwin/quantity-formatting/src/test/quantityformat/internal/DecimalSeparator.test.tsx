@@ -44,10 +44,10 @@ describe("DecimalSeparator", () => {
     );
 
     expect(
-      renderedComponent.getByText("QuantityFormat:labels.decimalSeparatorLabel")
+      renderedComponent.getByText("labels.decimalSeparatorLabel")
     ).to.exist;
     expect(
-      renderedComponent.getByText("QuantityFormat:decimal_separator.point")
+      renderedComponent.getByText("decimal_separator.point")
     ).to.exist;
   });
 
@@ -64,10 +64,10 @@ describe("DecimalSeparator", () => {
     );
 
     expect(
-      renderedComponent.getByText("QuantityFormat:labels.decimalSeparatorLabel")
+      renderedComponent.getByText("labels.decimalSeparatorLabel")
     ).to.exist;
     expect(
-      renderedComponent.getByText("QuantityFormat:decimal_separator.comma")
+      renderedComponent.getByText("decimal_separator.comma")
     ).to.exist;
   });
 });

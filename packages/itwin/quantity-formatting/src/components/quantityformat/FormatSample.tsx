@@ -6,7 +6,7 @@
 import * as React from "react";
 import {
   Format,
-  type FormatProps,
+  type FormatDefinition,
   FormatterSpec,
   type UnitProps,
 } from "@itwin/core-quantity";
@@ -16,14 +16,13 @@ import "./FormatPanel.scss";
 import { useTranslation } from "../../useTranslation.js";
 
 interface FormatSampleProps {
-  formatProps: FormatProps;
+  formatProps: FormatDefinition;
   unitsProvider: UnitsProvider;
   persistenceUnit?: UnitProps;
   initialMagnitude?: number;
-  hideLabels?: boolean;
 }
 
-/** Component to show the persistence value and formatted value for FormatProps.
+/** Component to show the persistence value and formatted value for FormatDefinition.
  * Creates its own FormatterSpec internally based on formatProps and persistenceUnit.
  * @internal
  */

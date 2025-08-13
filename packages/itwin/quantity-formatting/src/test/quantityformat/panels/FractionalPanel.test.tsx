@@ -31,8 +31,8 @@ describe("Fractional Panel", () => {
           persistenceUnit={persistenceUnit}
         />
       );
-      expect(renderedComponent.getByLabelText("QuantityFormat:labels.type")).to.exist;
-      expect(renderedComponent.getByText("QuantityFormat:labels.precision")).to.exist;
+      expect(renderedComponent.getByLabelText("labels.type")).to.exist;
+      expect(renderedComponent.getByText("labels.precision")).to.exist;
     });
     it("should render unit label controls when showUnitLabel is enabled", async () => {
       const formatProps: FormatProps = {
@@ -49,7 +49,7 @@ describe("Fractional Panel", () => {
         />
       );
       await waitFor(() => {
-        expect(renderedComponent.getByLabelText("QuantityFormat:labels.labelSeparator")).to.exist;
+        expect(renderedComponent.getByLabelText("labels.labelSeparator")).to.exist;
       });
     });
   });
@@ -68,8 +68,8 @@ describe("Fractional Panel", () => {
           persistenceUnit={persistenceUnit}
         />
       );
-      expect(renderedComponent.getByLabelText("QuantityFormat:labels.signOptionLabel")).to.exist;
-      expect(renderedComponent.getByLabelText("QuantityFormat:labels.fractionDashLabel")).to.exist;
+      expect(renderedComponent.getByLabelText("labels.signOptionLabel")).to.exist;
+      expect(renderedComponent.getByLabelText("labels.fractionDashLabel")).to.exist;
     });
   });
 });

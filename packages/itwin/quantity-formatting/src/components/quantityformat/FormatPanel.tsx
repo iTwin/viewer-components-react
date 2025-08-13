@@ -5,7 +5,7 @@
 
 import * as React from "react";
 import {
-  type FormatProps,
+  type FormatDefinition,
   FormatType,
   parseFormatType,
   type UnitProps,
@@ -57,9 +57,9 @@ function useTranslation() {
 }
 
 interface FormatPanelProps {
-  formatProps: FormatProps;
+  formatProps: FormatDefinition;
   unitsProvider: UnitsProvider;
-  onFormatChange: (formatProps: FormatProps) => void;
+  onFormatChange: (formatProps: FormatDefinition) => void;
   persistenceUnit?: UnitProps;
 }
 

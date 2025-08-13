@@ -6,7 +6,7 @@
 
 import * as React from "react";
 import type {
-  FormatProps,
+  FormatDefinition,
   UnitProps,
   UnitsProvider,
 } from "@itwin/core-quantity";
@@ -59,10 +59,10 @@ async function getPossibleUnits(
  * @internal
  */
 export interface FormatUnitsProps {
-  initialFormat: FormatProps;
+  initialFormat: FormatDefinition;
   persistenceUnit?: UnitProps;
   unitsProvider: UnitsProvider;
-  onUnitsChange?: (format: FormatProps) => void;
+  onUnitsChange?: (format: FormatDefinition) => void;
 }
 function UnitDescr(props: {
   name: string;
@@ -227,7 +227,7 @@ export function FormatUnits(props: FormatUnitsProps) {
   const { initialFormat, persistenceUnit, unitsProvider, onUnitsChange } =
     props;
   const { translate } = useTranslation();
-  const initialFormatRef = React.useRef<FormatProps>(initialFormat);
+  const initialFormatRef = React.useRef<FormatDefinition>(initialFormat);
   const [formatProps, setFormatProps] = React.useState(initialFormat);
   const compositeSpacerSelectorId = React.useId();
 
@@ -239,7 +239,7 @@ export function FormatUnits(props: FormatUnitsProps) {
   }, [initialFormat]);
 
   const handleSetFormatProps = React.useCallback(
-    (newProps: FormatProps) => {
+    (newProps: FormatDefinition) => {
       setFormatProps(newProps);
       onUnitsChange && onUnitsChange(newProps);
     },

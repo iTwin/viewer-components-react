@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as React from "react";
-import type { FormatProps, UnitProps } from "@itwin/core-quantity";
+import type { UnitProps, FormatDefinition } from "@itwin/core-quantity";
 import type { UnitsProvider } from "@itwin/core-quantity";
 import { FormatPanel } from "./FormatPanel.js";
 import { Divider } from "@itwin/itwinui-react";
@@ -14,9 +14,9 @@ import { FormatSample } from "./FormatSample.js";
  * @beta
  */
 export interface QuantityFormatPanelProps {
-  formatDefinition: FormatProps;
+  formatDefinition: FormatDefinition;
   unitsProvider: UnitsProvider;
-  onFormatChange: (formatProps: FormatProps) => void;
+  onFormatChange: (formatProps: FormatDefinition) => void;
   initialMagnitude?: number;
   showSample?: boolean;
 }
@@ -59,7 +59,7 @@ export function QuantityFormatPanel(props: QuantityFormatPanelProps) {
   }, [formatDefinition.composite, unitsProvider]);
 
   const handleOnFormatChanged = React.useCallback(
-    async (newProps: FormatProps) => {
+    async (newProps: FormatDefinition) => {
       onFormatChange && onFormatChange(newProps);
     },
     [onFormatChange]

@@ -5,7 +5,7 @@
 
 
 import * as React from "react";
-import type { FormatProps } from "@itwin/core-quantity";
+import type { FormatDefinition } from "@itwin/core-quantity";
 import { Format, FormatTraits } from "@itwin/core-quantity";
 import { Label } from "@itwin/itwinui-react";
 import { DecimalSeparatorSelector } from "./misc/DecimalSeparator.js";
@@ -15,8 +15,8 @@ import { useTranslation } from "../../../useTranslation.js";
  * @internal
  */
 export interface DecimalSeparatorProps {
-  formatProps: FormatProps;
-  onChange?: (format: FormatProps) => void;
+  formatProps: FormatDefinition;
+  onChange?: (format: FormatDefinition) => void;
 }
 
 /** Component to show/edit decimal separator.
@@ -29,7 +29,7 @@ export function DecimalSeparator(props: DecimalSeparatorProps) {
   const decimalSeparatorSelectorId = React.useId();
 
   const handleSetFormatProps = React.useCallback(
-    (newProps: FormatProps) => {
+    (newProps: FormatDefinition) => {
       onChange && onChange(newProps);
     },
     [onChange]
