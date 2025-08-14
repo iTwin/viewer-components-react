@@ -107,7 +107,7 @@ export interface UseModelsTreeProps {
 interface UseModelsTreeResult {
   modelsTreeProps: Pick<
     VisibilityTreeProps,
-    "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlight" | "emptyTreeContent" | "selectionPredicate"
+    "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent" | "selectionPredicate"
   >;
   rendererProps: Required<Pick<VisibilityTreeRendererProps, "getDecorations">>;
 }
@@ -184,7 +184,7 @@ export function useModelsTree({
         () => getEmptyTreeContentComponent(filter, subTreeError, filteringError, emptyTreeContent),
         [filter, subTreeError, filteringError, emptyTreeContent],
       ),
-      highlight: useMemo(() => (filter ? { text: filter } : undefined), [filter]),
+      highlightText: filter,
       selectionPredicate: nodeSelectionPredicate,
     },
     rendererProps: {

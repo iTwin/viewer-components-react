@@ -37,7 +37,7 @@ export interface UseClassificationsTreeProps {
 interface UseClassificationsTreeResult {
   classificationsTreeProps: Pick<
     VisibilityTreeProps,
-    "treeName" | "getHierarchyDefinition" | "visibilityHandlerFactory" | "getFilteredPaths" | "emptyTreeContent" | "highlight"
+    "treeName" | "getHierarchyDefinition" | "visibilityHandlerFactory" | "getFilteredPaths" | "emptyTreeContent" | "highlightText"
   >;
   rendererProps: Required<Pick<VisibilityTreeRendererProps, "getDecorations">>;
 }
@@ -86,7 +86,7 @@ export function useClassificationsTree({ activeView, emptyTreeContent, filter, .
       visibilityHandlerFactory,
       getFilteredPaths: getPaths,
       emptyTreeContent: useMemo(() => getEmptyTreeContentComponent(filter, filteringError, emptyTreeContent), [filter, filteringError, emptyTreeContent]),
-      highlight: useMemo(() => (filter ? { text: filter } : undefined), [filter]),
+      highlightText: filter,
     },
     rendererProps: {
       getDecorations: useCallback((node) => <ClassificationsTreeIcon node={node} />, []),
