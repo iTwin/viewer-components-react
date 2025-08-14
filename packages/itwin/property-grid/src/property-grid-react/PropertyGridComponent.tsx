@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useActiveIModelConnection } from "@itwin/appui-react";
+import { SchemaMetadataContextProvider } from "@itwin/presentation-components";
 import { MultiElementPropertyGrid } from "./components/MultiElementPropertyGrid.js";
 import { TelemetryContextProvider } from "./hooks/UseTelemetryContext.js";
 import { PreferencesContextProvider } from "./PropertyGridPreferencesContext.js";
@@ -11,6 +12,7 @@ import { PreferencesContextProvider } from "./PropertyGridPreferencesContext.js"
 import type { TelemetryContextProviderProps } from "./hooks/UseTelemetryContext.js";
 import type { MultiElementPropertyGridProps } from "./components/MultiElementPropertyGrid.js";
 import type { PreferencesStorage } from "./api/PreferencesStorage.js";
+import type { IModelConnection } from "@itwin/core-frontend";
 
 /**
  * Props for `PropertyGridComponent`.
@@ -35,10 +37,16 @@ export function PropertyGridComponent({ preferencesStorage, onPerformanceMeasure
   }
 
   return (
-    <TelemetryContextProvider onPerformanceMeasured={onPerformanceMeasured} onFeatureUsed={onFeatureUsed}>
-      <PreferencesContextProvider storage={preferencesStorage}>
-        <MultiElementPropertyGrid {...props} imodel={imodel} />
-      </PreferencesContextProvider>
-    </TelemetryContextProvider>
+    <SchemaMetadataContextProvider imodel={imodel} schemaContextProvider={getSchemaContext}>
+      <TelemetryContextProvider onPerformanceMeasured={onPerformanceMeasured} onFeatureUsed={onFeatureUsed}>
+        <PreferencesContextProvider storage={preferencesStorage}>
+          <MultiElementPropertyGrid {...props} imodel={imodel} />
+        </PreferencesContextProvider>
+      </TelemetryContextProvider>
+    </SchemaMetadataContextProvider>
   );
+}
+
+function getSchemaContext(imodel: IModelConnection) {
+  return imodel.schemaContext;
 }

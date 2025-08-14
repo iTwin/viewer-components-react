@@ -92,8 +92,8 @@ importers:
         specifier: ^5.1.1
         version: 5.1.1(@itwin/core-bentley@5.1.1)(@itwin/core-common@5.1.1(@itwin/core-bentley@5.1.1)(@itwin/core-geometry@5.1.1))(@itwin/core-quantity@5.1.1(@itwin/core-bentley@5.1.1))(@itwin/ecschema-metadata@5.1.1(@itwin/core-bentley@5.1.1)(@itwin/core-quantity@5.1.1(@itwin/core-bentley@5.1.1)))
       '@itwin/presentation-components':
-        specifier: ^5.12.5
-        version: 5.12.5(285727e1af522cc8f1e3495a764f3397)
+        specifier: ^5.12.6
+        version: 5.12.6(285727e1af522cc8f1e3495a764f3397)
       '@itwin/presentation-frontend':
         specifier: ^5.1.1
         version: 5.1.1(81f7d0a872ff0766cff35d7142df1440)
@@ -571,8 +571,8 @@ packages:
       '@itwin/core-quantity': 5.1.1
       '@itwin/ecschema-metadata': 5.1.1
 
-  '@itwin/presentation-components@5.12.5':
-    resolution: {integrity: sha512-cOWGXqNUVb0SyqnoEkz6Cf1kG6fj+ALTxZ4MasX2ayEBDTTkXe+q/33L4yMU9+ujuN+K9B0ohfad7QnMGoaq3g==}
+  '@itwin/presentation-components@5.12.6':
+    resolution: {integrity: sha512-DytdHcAFKBiVOeq7M3hXd7zOJD4xVYhVwo8WRPBMsCMJxGV3ZkVKLwVXwQKbS+Su17TkGQFRkdwso/7OPpiVpw==}
     peerDependencies:
       '@itwin/appui-abstract': ^4.4.0 || ^5.0.0
       '@itwin/components-react': ^4.9.0 || ^5.0.0
@@ -602,6 +602,15 @@ packages:
       '@itwin/core-quantity': ^4.1.0 || ^5.0.0
       '@itwin/ecschema-metadata': ^4.1.0 || ^5.0.0
 
+  '@itwin/presentation-core-interop@1.3.4':
+    resolution: {integrity: sha512-NntADk7pOb+3pvsur1IonW6GZSUbHFhlmLSUTANXbyxJ/u2rydhPwQfhMq+CvR1hsbQDAJu9NSK/nijhirYo1g==}
+    peerDependencies:
+      '@itwin/core-bentley': ^4.1.0 || ^5.0.0
+      '@itwin/core-common': ^4.1.0 || ^5.0.0
+      '@itwin/core-geometry': ^4.1.0 || ^5.0.0
+      '@itwin/core-quantity': ^4.1.0 || ^5.0.0
+      '@itwin/ecschema-metadata': ^4.1.0 || ^5.0.0
+
   '@itwin/presentation-frontend@5.1.1':
     resolution: {integrity: sha512-MZpivTajkh4Xt8TCcl8M1Um9joQJUU8iHdZ8rTBEwRnSFC/gWgOb6T8MUcuWv0rkCgAchEyzTVvACjIVkNfhQA==}
     peerDependencies:
@@ -615,6 +624,9 @@ packages:
   '@itwin/presentation-shared@1.2.2':
     resolution: {integrity: sha512-jQWW7mjfb5Qcxtfa3EBLrKhVyaulptwN0yLp0gViCXBcrxbZyukCcvLaDBBevAfSF7Mtspc22Vj0dKCq10UfrQ==}
 
+  '@itwin/presentation-shared@1.2.3':
+    resolution: {integrity: sha512-YHwmyMfWH5re0m0DVDEnO7BeSE2pfOQI/bbk6j2KS+Y0am1IJ+LEgE/0bQu+MVsAFQqrThrGvLMDu6AbCl7+8w==}
+
   '@itwin/service-authorization@2.0.0':
     resolution: {integrity: sha512-hn+QJpXVW56s4Y27iC2nUsfTvD58TTmzHqZHbOPXkdzMT2wcnhVbA96AqFLMp5mXDf64wym4rtxGNmEgmw7ZKg==}
     peerDependencies:
@@ -622,6 +634,9 @@ packages:
 
   '@itwin/unified-selection@1.5.0':
     resolution: {integrity: sha512-QIrwaW0S+fUURRBW0mk4rOxAKJ8KZ/ttbVYqvrRb0m0cjfyX9oyiPuVf3bGg5rvpqsINTXBdfe/X6ckHFRHdCQ==}
+
+  '@itwin/unified-selection@1.5.1':
+    resolution: {integrity: sha512-Lql3RvC/NtRrNhRgJ4xs2U5b2iu4C5c5AJV/PYqSbcRNBfyyi8M5dLz9TXfxL3bz8A3nIlHiDSCnHiEIo2WQww==}
 
   '@itwin/webgl-compatibility@5.1.1':
     resolution: {integrity: sha512-MjmhPThpqe1cwLnCFuzU3oObADvucxhQSVG9fd1IYC4G49IIrxGRD2WVN6/6ORpPUe/HptbErSQDyKJ8PPgXmQ==}
@@ -4392,7 +4407,7 @@ snapshots:
       '@itwin/ecschema-metadata': 5.1.1(@itwin/core-bentley@5.1.1)(@itwin/core-quantity@5.1.1(@itwin/core-bentley@5.1.1))
       '@itwin/presentation-shared': 1.2.2
 
-  '@itwin/presentation-components@5.12.5(285727e1af522cc8f1e3495a764f3397)':
+  '@itwin/presentation-components@5.12.6(285727e1af522cc8f1e3495a764f3397)':
     dependencies:
       '@itwin/appui-abstract': 5.1.1(@itwin/core-bentley@5.1.1)
       '@itwin/components-react': 5.13.0(@itwin/appui-abstract@5.1.1(@itwin/core-bentley@5.1.1))(@itwin/core-bentley@5.1.1)(@itwin/core-react@5.13.0(@itwin/appui-abstract@5.1.1(@itwin/core-bentley@5.1.1))(@itwin/core-bentley@5.1.1)(@itwin/itwinui-react@3.19.3(react-dom@18.0.0(react@18.0.0))(react@18.0.0))(react-dom@18.0.0(react@18.0.0))(react@18.0.0))(@itwin/itwinui-react@3.19.3(react-dom@18.0.0(react@18.0.0))(react@18.0.0))(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
@@ -4407,10 +4422,10 @@ snapshots:
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
       '@itwin/itwinui-react': 3.19.3(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
       '@itwin/presentation-common': 5.1.1(@itwin/core-bentley@5.1.1)(@itwin/core-common@5.1.1(@itwin/core-bentley@5.1.1)(@itwin/core-geometry@5.1.1))(@itwin/core-quantity@5.1.1(@itwin/core-bentley@5.1.1))(@itwin/ecschema-metadata@5.1.1(@itwin/core-bentley@5.1.1)(@itwin/core-quantity@5.1.1(@itwin/core-bentley@5.1.1)))
-      '@itwin/presentation-core-interop': 1.3.3(@itwin/core-bentley@5.1.1)(@itwin/core-common@5.1.1(@itwin/core-bentley@5.1.1)(@itwin/core-geometry@5.1.1))(@itwin/core-geometry@5.1.1)(@itwin/core-quantity@5.1.1(@itwin/core-bentley@5.1.1))(@itwin/ecschema-metadata@5.1.1(@itwin/core-bentley@5.1.1)(@itwin/core-quantity@5.1.1(@itwin/core-bentley@5.1.1)))
+      '@itwin/presentation-core-interop': 1.3.4(@itwin/core-bentley@5.1.1)(@itwin/core-common@5.1.1(@itwin/core-bentley@5.1.1)(@itwin/core-geometry@5.1.1))(@itwin/core-geometry@5.1.1)(@itwin/core-quantity@5.1.1(@itwin/core-bentley@5.1.1))(@itwin/ecschema-metadata@5.1.1(@itwin/core-bentley@5.1.1)(@itwin/core-quantity@5.1.1(@itwin/core-bentley@5.1.1)))
       '@itwin/presentation-frontend': 5.1.1(81f7d0a872ff0766cff35d7142df1440)
-      '@itwin/presentation-shared': 1.2.2
-      '@itwin/unified-selection': 1.5.0
+      '@itwin/presentation-shared': 1.2.3
+      '@itwin/unified-selection': 1.5.1
       classnames: 2.5.1
       fast-deep-equal: 3.1.3
       fast-sort: 3.4.1
@@ -4432,6 +4447,16 @@ snapshots:
       '@itwin/presentation-shared': 1.2.2
       rxjs: 7.8.2
 
+  '@itwin/presentation-core-interop@1.3.4(@itwin/core-bentley@5.1.1)(@itwin/core-common@5.1.1(@itwin/core-bentley@5.1.1)(@itwin/core-geometry@5.1.1))(@itwin/core-geometry@5.1.1)(@itwin/core-quantity@5.1.1(@itwin/core-bentley@5.1.1))(@itwin/ecschema-metadata@5.1.1(@itwin/core-bentley@5.1.1)(@itwin/core-quantity@5.1.1(@itwin/core-bentley@5.1.1)))':
+    dependencies:
+      '@itwin/core-bentley': 5.1.1
+      '@itwin/core-common': 5.1.1(@itwin/core-bentley@5.1.1)(@itwin/core-geometry@5.1.1)
+      '@itwin/core-geometry': 5.1.1
+      '@itwin/core-quantity': 5.1.1(@itwin/core-bentley@5.1.1)
+      '@itwin/ecschema-metadata': 5.1.1(@itwin/core-bentley@5.1.1)(@itwin/core-quantity@5.1.1(@itwin/core-bentley@5.1.1))
+      '@itwin/presentation-shared': 1.2.3
+      rxjs: 7.8.2
+
   '@itwin/presentation-frontend@5.1.1(81f7d0a872ff0766cff35d7142df1440)':
     dependencies:
       '@itwin/core-bentley': 5.1.1
@@ -4448,6 +4473,10 @@ snapshots:
     dependencies:
       '@itwin/core-bentley': 5.1.1
 
+  '@itwin/presentation-shared@1.2.3':
+    dependencies:
+      '@itwin/core-bentley': 5.1.1
+
   '@itwin/service-authorization@2.0.0(@itwin/core-bentley@5.1.1)':
     dependencies:
       '@itwin/core-bentley': 5.1.1
@@ -4461,6 +4490,13 @@ snapshots:
     dependencies:
       '@itwin/core-bentley': 5.1.1
       '@itwin/presentation-shared': 1.2.2
+      rxjs: 7.8.2
+      rxjs-for-await: 1.0.0(rxjs@7.8.2)
+
+  '@itwin/unified-selection@1.5.1':
+    dependencies:
+      '@itwin/core-bentley': 5.1.1
+      '@itwin/presentation-shared': 1.2.3
       rxjs: 7.8.2
       rxjs-for-await: 1.0.0(rxjs@7.8.2)
 

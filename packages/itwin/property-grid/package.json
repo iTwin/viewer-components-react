@@ -99,7 +99,7 @@
     "@itwin/imodel-components-react": "^5.13.0",
     "@itwin/oidc-signin-tool": "^5.0.1",
     "@itwin/presentation-common": "^5.1.1",
-    "@itwin/presentation-components": "^5.12.5",
+    "@itwin/presentation-components": "^5.12.6",
     "@itwin/presentation-frontend": "^5.1.1",
     "@itwin/webgl-compatibility": "^5.1.1",
     "@playwright/test": "^1.48.2",

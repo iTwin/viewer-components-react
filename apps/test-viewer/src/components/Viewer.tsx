@@ -6,7 +6,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { IModelApp, IModelConnection } from "@itwin/core-frontend";
-import { SchemaFormatsProvider, SchemaKey, SchemaMatchType, SchemaUnitProvider } from "@itwin/ecschema-metadata";
+import { SchemaFormatsProvider, SchemaUnitProvider } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { FrontendDevTools } from "@itwin/frontend-devtools";
 import { ArcGisAccessClient } from "@itwin/map-layers-auth";
@@ -90,14 +90,12 @@ function ViewerWithOptions() {
 }
 
 function onIModelConnected(imodel: IModelConnection) {
-  // need this temporarily for e2e tests, until a fix for https://github.com/iTwin/itwinjs-core/issues/7496 is consumed
-  setTimeout(() => {
-    IModelConnection.onOpen.raiseEvent(imodel);
-  }, 1000);
   const setupFormatsProvider = async () => {
     try {
-      const schema = await imodel.schemaContext.getSchema(new SchemaKey("AecUnits", SchemaMatchType.Latest));
-      if (!schema) throw new Error("AecUnits schema not found in iModel");
+      // const schema = await imodel.schemaContext.getSchema(new SchemaKey("AecUnits", SchemaMatchType.Latest));
+      // if (!schema) {
+      //   throw new Error("AecUnits schema not found in iModel");
+      // }
 
       const schemaFormatsProvider = new SchemaFormatsProvider(imodel.schemaContext, IModelApp.quantityFormatter.activeUnitSystem);
       const removeListener = IModelApp.quantityFormatter.onActiveFormattingUnitSystemChanged.addListener((args) => {
