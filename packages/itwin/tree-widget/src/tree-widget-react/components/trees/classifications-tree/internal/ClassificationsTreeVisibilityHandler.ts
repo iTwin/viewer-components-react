@@ -196,7 +196,7 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
 
   private getFilteredNodeVisibility(props: GetFilteredNodeVisibilityProps) {
     return from(this.getFilteredTreeTargets(props)).pipe(
-      mergeMap(({ targets }) => {
+      mergeMap((targets) => {
         if (!targets) {
           return EMPTY;
         }
@@ -247,7 +247,7 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
 
   private async getFilteredTreeTargets({ node }: GetFilteredNodeVisibilityProps) {
     const filteredTree = await this._filteredTree;
-    return filteredTree ? filteredTree.getFilterTargets(node) : {};
+    return filteredTree ? filteredTree.getFilterTargets(node) : undefined;
   }
 
   private getClassificationTablesVisibilityStatus(props: { classificationTableIds: Id64Arg }): Observable<VisibilityStatus> {
@@ -621,7 +621,7 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
 
   private changeFilteredNodeVisibility({ on, ...props }: ChangeFilteredNodeVisibilityProps) {
     return from(this.getFilteredTreeTargets(props)).pipe(
-      mergeMap(({ targets }) => {
+      mergeMap((targets) => {
         if (!targets) {
           return EMPTY;
         }

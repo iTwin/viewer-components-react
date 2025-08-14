@@ -11,7 +11,7 @@ import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
-import type { FilteredTree, FilteredVisibilityTargets } from "../../common/internal/visibility/BaseFilteredTree.js";
+import type { FilteredTree } from "../../common/internal/visibility/BaseFilteredTree.js";
 
 interface FilteredTreeRootNode {
   children: Map<Id64String, FilteredTreeNode>;
@@ -115,13 +115,14 @@ export async function createFilteredTree({
   };
 }
 
-function getFilterTargets(root: FilteredTreeRootNode, node: HierarchyNode): FilteredVisibilityTargets<ModelsTreeFilterTargets> {
+function getFilterTargets(root: FilteredTreeRootNode, node: HierarchyNode): ModelsTreeFilterTargets | undefined {
+  const filterTargetsHandler = new FilterTargetsHandler();
   let lookupParents: Array<{ children?: Map<Id64String, FilteredTreeNode> }> = [root];
   const filterTargets: FilterTargetsInternal = {};
 
   const nodeKey = node.key;
   if (!HierarchyNodeKey.isInstances(nodeKey)) {
-    return {};
+    return undefined;
   }
 
   // find the filtered parent nodes of the `node`
@@ -134,7 +135,7 @@ function getFilterTargets(root: FilteredTreeRootNode, node: HierarchyNode): Filt
     // and use them when checking for matching node in one level deeper.
     const parentNodes = findMatchingFilteredNodes(lookupParents, parentKey.instanceKeys);
     if (parentNodes.length === 0) {
-      return {};
+      return undefined;
     }
     lookupParents = parentNodes;
   }
@@ -142,17 +143,21 @@ function getFilterTargets(root: FilteredTreeRootNode, node: HierarchyNode): Filt
   // find filtered nodes that match the `node`
   const filteredNodes = findMatchingFilteredNodes(lookupParents, nodeKey.instanceKeys);
   if (filteredNodes.length === 0) {
-    return {};
+    return undefined;
   }
 
-  filteredNodes.forEach((filteredNode) => collectFilterTargets(filterTargets, filteredNode));
+  filteredNodes.forEach((filteredNode) => filterTargetsHandler.collectFilterTargets(filterTargets, filteredNode));
 
-  if (!filterTargets.categories && !filterTargets.subjectIds && !filterTargets.elements && !filterTargets.modelIds) {
-    return {};
-  }
+  return filterTargetsHandler.convertInternalFilterTargets(filterTargets);
+}
 
-  return {
-    targets: {
+class FilterTargetsHandler {
+  public convertInternalFilterTargets(filterTargets: FilterTargetsInternal): ModelsTreeFilterTargets | undefined {
+    if (!filterTargets.categories && !filterTargets.subjectIds && !filterTargets.elements && !filterTargets.modelIds) {
+      return undefined;
+    }
+
+    return {
       categories: filterTargets.categories
         ? [...filterTargets.categories.entries()].map(([modelId, categoryIds]) => {
             return { modelId, categoryIds };
@@ -166,62 +171,62 @@ function getFilterTargets(root: FilteredTreeRootNode, node: HierarchyNode): Filt
         : undefined,
       modelIds: filterTargets.modelIds,
       subjectIds: filterTargets.subjectIds,
-    },
-  };
+    };
+  }
+
+  public collectFilterTargets(changeTargets: FilterTargetsInternal, filteredNode: FilteredTreeNode) {
+    if (filteredNode.isFilterTarget) {
+      this.addTarget(changeTargets, filteredNode);
+      return;
+    }
+
+    if (filteredNode.type === "element") {
+      // need to add parent ids as filter target will be an element
+      this.addTarget(changeTargets, filteredNode);
+    }
+
+    if (!filteredNode.children) {
+      return;
+    }
+
+    for (const child of filteredNode.children.values()) {
+      this.collectFilterTargets(changeTargets, child);
+    }
+  }
+
+  private addTarget(filterTargets: FilterTargetsInternal, node: FilteredTreeNode) {
+    switch (node.type) {
+      case "subject":
+        (filterTargets.subjectIds ??= new Set()).add(node.id);
+        return;
+      case "model":
+        (filterTargets.modelIds ??= new Set()).add(node.id);
+        return;
+      case "category":
+        const categories = (filterTargets.categories ??= new Map()).get(node.modelId);
+        if (categories) {
+          categories.add(node.id);
+          return;
+        }
+        filterTargets.categories.set(node.modelId, new Set([node.id]));
+        return;
+      case "element":
+        const modelCategoryKey = createModelCategoryKey(node.modelId, node.categoryId);
+        const elements = (filterTargets.elements ??= new Map()).get(modelCategoryKey);
+        if (elements) {
+          elements.add(node.id);
+          return;
+        }
+        filterTargets.elements.set(modelCategoryKey, new Set([node.id]));
+        return;
+    }
+  }
 }
 
 function findMatchingFilteredNodes(lookupParents: Array<{ children?: Map<Id64String, FilteredTreeNode> }>, keys: InstanceKey[]) {
   return lookupParents
     .flatMap((lookup) => keys.map((key) => lookup.children?.get(key.id)))
     .filter((lookupNode): lookupNode is FilteredTreeNode => lookupNode !== undefined);
-}
-
-function collectFilterTargets(changeTargets: FilterTargetsInternal, node: FilteredTreeNode) {
-  if (node.isFilterTarget) {
-    addTarget(changeTargets, node);
-    return;
-  }
-
-  if (node.type === "element") {
-    // need to add parent ids as filter target will be an element
-    addTarget(changeTargets, node);
-  }
-
-  if (!node.children) {
-    return;
-  }
-
-  for (const child of node.children.values()) {
-    collectFilterTargets(changeTargets, child);
-  }
-}
-
-function addTarget(filterTargets: FilterTargetsInternal, node: FilteredTreeNode) {
-  switch (node.type) {
-    case "subject":
-      (filterTargets.subjectIds ??= new Set()).add(node.id);
-      return;
-    case "model":
-      (filterTargets.modelIds ??= new Set()).add(node.id);
-      return;
-    case "category":
-      const categories = (filterTargets.categories ??= new Map()).get(node.modelId);
-      if (categories) {
-        categories.add(node.id);
-        return;
-      }
-      filterTargets.categories.set(node.modelId, new Set([node.id]));
-      return;
-    case "element":
-      const modelCategoryKey = createModelCategoryKey(node.modelId, node.categoryId);
-      const elements = (filterTargets.elements ??= new Map()).get(modelCategoryKey);
-      if (elements) {
-        elements.add(node.id);
-        return;
-      }
-      filterTargets.elements.set(modelCategoryKey, new Set([node.id]));
-      return;
-  }
 }
 
 function createFilteredTreeNode({
