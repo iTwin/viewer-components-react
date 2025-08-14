@@ -14,14 +14,8 @@ import type { FormatSet } from "@itwin/ecschema-metadata";
 
 /** Button component that shows a button to open the Quantity Format Panel in a modal */
 export const QuantityFormatButton: React.FC = () => {
-  // Initial format definition with basic decimal format
-  const [formatDefinition, setFormatDefinition] = useState<FormatDefinition>({
-    precision: 4,
-    type: "Decimal",
-    composite: {
-      units: [{ name: "Units.M", label: "m" }],
-    },
-  });
+  // Initial format definition is undefined until a format is selected
+  const [formatDefinition, setFormatDefinition] = useState<FormatDefinition | undefined>(undefined);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [unitsProvider, setUnitsProvider] = useState(() => IModelApp.quantityFormatter.unitsProvider);
@@ -84,7 +78,7 @@ export const QuantityFormatButton: React.FC = () => {
             />
           </div>
 
-          <QuantityFormatPanel formatDefinition={formatDefinition} unitsProvider={unitsProvider} onFormatChange={handleFormatChange} />
+          {formatDefinition && <QuantityFormatPanel formatDefinition={formatDefinition} unitsProvider={unitsProvider} onFormatChange={handleFormatChange} />}
         </div>
 
         <ModalButtonBar>

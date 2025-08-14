@@ -17,7 +17,7 @@ importers:
         version: 2.4.0(react-dom@17.0.0(react@17.0.0))(react@17.0.0)
       '@itwin/itwinui-react':
         specifier: ^2.12.0
-        version: 2.12.26(react-dom@17.0.0(react@17.0.0))(react@17.0.0)
+        version: 2.12.0(react-dom@17.0.0(react@17.0.0))(react@17.0.0)
       classnames:
         specifier: ^2.3.1
         version: 2.3.1
@@ -567,9 +567,8 @@ packages:
       react: '>=16.8.6'
       react-dom: '>=16.8.6'
 
-  '@itwin/itwinui-react@2.12.26':
-    resolution: {integrity: sha512-SzedS6sz1iupq0JZm0SAfynFPR8xB9/GbTtQz/8XyuTEvrBoXyHMZJGAySR99TdLwpm3r+cxAEpFK5UOpQ+0Vw==}
-    deprecated: iTwinUI v2 has reached end-of-life. Please upgrade to the latest version.
+  '@itwin/itwinui-react@2.12.0':
+    resolution: {integrity: sha512-owXvQ4qX6fkPFRS46BSMmhM1eHjJ/jfhdAkQTKYK7He+14gcyaBHrSBIiRNKILFHSyBQXE2FjD6wwoAjS/lnDA==}
     peerDependencies:
       react: '>=16.8.6 < 19.0.0'
       react-dom: '>=16.8.6 < 19.0.0'
@@ -2913,7 +2912,6 @@ packages:
 
   rimraf@3.0.2:
     resolution: {integrity: sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==}
-    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
 
   run-parallel@1.2.0:
@@ -3866,7 +3864,7 @@ snapshots:
       '@itwin/imodel-components-react': 4.0.0(d81aa86de7bea849bbca505ae237ba1e)
       '@itwin/itwinui-icons': 1.16.0
       '@itwin/itwinui-icons-react': 2.4.0(react-dom@17.0.0(react@17.0.0))(react@17.0.0)
-      '@itwin/itwinui-react': 2.12.26(react-dom@17.0.0(react@17.0.0))(react@17.0.0)
+      '@itwin/itwinui-react': 2.12.0(react-dom@17.0.0(react@17.0.0))(react@17.0.0)
       '@itwin/itwinui-variables': 2.1.2
       classnames: 2.3.1
       immer: 9.0.6
@@ -3910,7 +3908,7 @@ snapshots:
       '@itwin/core-bentley': 4.0.0
       '@itwin/core-react': 4.0.0(@itwin/appui-abstract@4.0.0(@itwin/core-bentley@4.0.0))(@itwin/core-bentley@4.0.0)(react-dom@17.0.0(react@17.0.0))(react@17.0.0)
       '@itwin/itwinui-icons-react': 2.4.0(react-dom@17.0.0(react@17.0.0))(react@17.0.0)
-      '@itwin/itwinui-react': 2.12.26(react-dom@17.0.0(react@17.0.0))(react@17.0.0)
+      '@itwin/itwinui-react': 2.12.0(react-dom@17.0.0(react@17.0.0))(react@17.0.0)
       '@itwin/itwinui-variables': 2.1.2
       '@types/shortid': 0.0.32
       classnames: 2.3.1
@@ -3993,7 +3991,7 @@ snapshots:
       '@itwin/appui-abstract': 4.0.0(@itwin/core-bentley@4.0.0)
       '@itwin/core-bentley': 4.0.0
       '@itwin/itwinui-icons-react': 2.4.0(react-dom@17.0.0(react@17.0.0))(react@17.0.0)
-      '@itwin/itwinui-react': 2.12.26(react-dom@17.0.0(react@17.0.0))(react@17.0.0)
+      '@itwin/itwinui-react': 2.12.0(react-dom@17.0.0(react@17.0.0))(react@17.0.0)
       '@itwin/itwinui-variables': 2.1.2
       classnames: 2.3.1
       dompurify: 2.4.7
@@ -4050,7 +4048,7 @@ snapshots:
       '@itwin/core-quantity': 4.0.0(@itwin/core-bentley@4.0.0)
       '@itwin/core-react': 4.0.0(@itwin/appui-abstract@4.0.0(@itwin/core-bentley@4.0.0))(@itwin/core-bentley@4.0.0)(react-dom@17.0.0(react@17.0.0))(react@17.0.0)
       '@itwin/itwinui-icons-react': 2.4.0(react-dom@17.0.0(react@17.0.0))(react@17.0.0)
-      '@itwin/itwinui-react': 2.12.26(react-dom@17.0.0(react@17.0.0))(react@17.0.0)
+      '@itwin/itwinui-react': 2.12.0(react-dom@17.0.0(react@17.0.0))(react@17.0.0)
       '@itwin/itwinui-variables': 2.1.2
       classnames: 2.3.1
       react: 17.0.0
@@ -4075,7 +4073,7 @@ snapshots:
       react: 17.0.0
       react-dom: 17.0.0(react@17.0.0)
 
-  '@itwin/itwinui-react@2.12.26(react-dom@17.0.0(react@17.0.0))(react@17.0.0)':
+  '@itwin/itwinui-react@2.12.0(react-dom@17.0.0(react@17.0.0))(react@17.0.0)':
     dependencies:
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@17.0.0(react@17.0.0))(react@17.0.0)
       '@tippyjs/react': 4.2.6(react-dom@17.0.0(react@17.0.0))(react@17.0.0)
