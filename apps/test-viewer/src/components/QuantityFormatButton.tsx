@@ -40,7 +40,6 @@ export const QuantityFormatButton: React.FC = () => {
     setIsModalOpen(false);
   }, []);
 
-  // Memoize the unitsProvider to prevent unnecessary re-renders
   React.useEffect(() => {
     const _removeListener = IModelApp.quantityFormatter.onUnitsProviderChanged.addListener(() => {
       // Handle units provider changes if needed
