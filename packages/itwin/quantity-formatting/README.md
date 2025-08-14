@@ -33,19 +33,19 @@ The typical workflow involves selecting a format and customizing it to meet your
 
 Starting with the `QuantityFormatPanel`, you can select a format from the available options. Initially, the Save and Clear buttons are disabled when no changes have been made.
 
-![QuantityFormatPanel with a format selected](./media/selected-format.png)
+<img src="./media/selected-format.png" alt="QuantityFormatPanel with a format selected" width="436" height="600">
 
 The `FormatSelector` dropdown shows all available formats to choose from:
 
-![Dropdown menu of FormatSelector open](./media/list-of-formats.png)
+<img src="./media/list-of-formats.png" alt="Dropdown menu of FormatSelector open" width="436" height="600">
 
 You can then customize the format by changing properties like the unit. For example, changing from square feet to square meters:
 
-![Dropdown of units](./media/dropdown-select-unit.png)
+<img src="./media/dropdown-select-unit.png" alt="Dropdown of units" width="436" height="600">
 
 After making changes, notice how the Save and Clear buttons become enabled (highlighted), indicating that modifications can now be applied or discarded. The preview panel also now shows the value converted to square meters:
 
-![After changing unit](./media/after-select-unit.png)
+<img src="./media/after-select-unit.png" alt="After changing unit" width="436" height="600">
 
 Click **Save** to apply your changes or **Clear** to reset back to the original format settings.
 
