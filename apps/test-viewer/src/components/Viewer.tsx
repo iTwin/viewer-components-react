@@ -6,7 +6,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { IModelApp, IModelConnection } from "@itwin/core-frontend";
-import { SchemaFormatsProvider, SchemaKey, SchemaMatchType, SchemaUnitProvider } from "@itwin/ecschema-metadata";
+import { SchemaFormatsProvider, SchemaUnitProvider } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { FrontendDevTools } from "@itwin/frontend-devtools";
 import { ArcGisAccessClient } from "@itwin/map-layers-auth";
@@ -41,7 +41,7 @@ function ViewerWithOptions() {
 
     // Initialize FormatManager with sample format sets
     await FormatManager.initialize([]);
-
+    console.log(FormatManager.instance)
     // ArcGIS Oauth setup
     const accessClient = new ArcGisAccessClient();
     accessClient.initialize({
@@ -102,24 +102,19 @@ function onIModelConnected(imodel: IModelConnection) {
   }, 1000);
   const setupFormatsProvider = async () => {
     try {
-      const schema = await imodel.schemaContext.getSchema(new SchemaKey("AecUnits", SchemaMatchType.Latest));
-      if (!schema) throw new Error("AecUnits schema not found in iModel");
-
       const schemaUnitsProvider = new SchemaUnitProvider(imodel.schemaContext);
       IModelApp.quantityFormatter.unitsProvider = schemaUnitsProvider;
-
-      const schemaFormatsProvider = new SchemaFormatsProvider(imodel.schemaContext, IModelApp.quantityFormatter.activeUnitSystem);
-      FormatManager.instance.fallbackFormatsProvider = schemaFormatsProvider;
-      const removeListener = IModelApp.quantityFormatter.onActiveFormattingUnitSystemChanged.addListener((args) => {
-        schemaFormatsProvider.unitSystem = args.system;
-      });
-      await FormatManager.instance.onIModelOpen(imodel);
+      if (FormatManager.instance) {
+        await FormatManager.instance?.onIModelOpen(imodel);
+      } else {
+        const schemaFormatsProvider = new SchemaFormatsProvider(imodel.schemaContext, IModelApp.quantityFormatter.activeUnitSystem);
+        IModelApp.formatsProvider = schemaFormatsProvider;
+      }
       console.log("Registered SchemaFormatsProvider, SchemaUnitProvider");
-      console.log(FormatManager.instance.activeFormatSet)
       IModelConnection.onClose.addOnce(() => {
-        removeListener();
         IModelApp.resetFormatsProvider();
         void IModelApp.quantityFormatter.resetToUseInternalUnitsProvider();
+        if (FormatManager.instance) void FormatManager.instance.onIModelClose();
         console.log("Unregistered SchemaFormatsProvider, SchemaUnitProvider");
       });
     } catch (err) {
@@ -127,7 +122,6 @@ function onIModelConnected(imodel: IModelConnection) {
     }
   };
 
-  // Only load a schema formats provider if the iModel has the AecUnits schema
   void setupFormatsProvider();
 }
 

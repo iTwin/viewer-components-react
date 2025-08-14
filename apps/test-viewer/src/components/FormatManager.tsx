@@ -4,7 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { BeEvent } from "@itwin/core-bentley";
-import { IModelApp, IModelConnection } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
 import type { FormatDefinition, FormatsChangedArgs, FormatsProvider, MutableFormatsProvider } from "@itwin/core-quantity";
 import type { FormatSet } from "@itwin/ecschema-metadata";
 import { SchemaFormatsProvider, SchemaItemType, SchemaKey, SchemaMatchType } from "@itwin/ecschema-metadata";
@@ -14,10 +15,14 @@ export class FormatManager {
   private _formatSets: FormatSet[] = [];
   private _fallbackFormatProvider?: FormatsProvider;
   private _activeFormatSet?: FormatSet;
+  private _activeFormatSetFormatsProvider?: FormatSetFormatsProvider;
   private _iModelOpened: boolean = false;
   private _removeListeners: (() => void)[] = [];
 
-  public static get instance(): FormatManager {
+  /** Event raised when the active format set changes */
+  public readonly onActiveFormatSetChanged = new BeEvent<(formatSet: FormatSet | undefined) => void>();
+
+  public static get instance(): FormatManager | undefined {
     return this._instance;
   }
 
@@ -33,22 +38,15 @@ export class FormatManager {
     return this._activeFormatSet;
   }
 
+  public get activeFormatSetFormatsProvider(): FormatSetFormatsProvider | undefined {
+    return this._activeFormatSetFormatsProvider;
+  }
+
   /** Initialize with a set of format sets to use */
   public static async initialize(formatSets: FormatSet[], fallbackProvider?: FormatsProvider): Promise<void> {
-    if (this._instance)
-      throw new Error("FormatManager is already initialized.");
+    if (this._instance) throw new Error("FormatManager is already initialized.");
 
     this._instance = new FormatManager(formatSets, fallbackProvider);
-
-    this._instance._removeListeners.push(IModelConnection.onOpen.addListener(async (iModel: IModelConnection) => {
-      // Initialize the formats provider for the opened iModel
-      this._instance._iModelOpened = true;
-      await this._instance.onIModelOpen(iModel);
-    }));
-
-    this._instance._removeListeners.push(IModelConnection.onClose.addListener(async () => {
-      this._instance._iModelOpened = false;
-    }));
   }
 
   public constructor(formatSets: FormatSet[], fallbackProvider?: FormatsProvider) {
@@ -66,10 +64,13 @@ export class FormatManager {
   public setActiveFormatSet(formatSet: FormatSet): void {
     const formatSetFormatsProvider = new FormatSetFormatsProvider(formatSet, this._fallbackFormatProvider);
     this._activeFormatSet = formatSet;
+    this._activeFormatSetFormatsProvider = formatSetFormatsProvider;
 
     if (this._iModelOpened) {
       IModelApp.formatsProvider = formatSetFormatsProvider;
     }
+
+    this.onActiveFormatSetChanged.raiseEvent(formatSet);
   }
 
   // Typically, enables a SchemaFormatsProvider to be the fallback during runtime.
@@ -78,6 +79,7 @@ export class FormatManager {
     if (this._activeFormatSet) {
       // If we have an active format set, we need to update the formats provider to include the new fallback.
       const newFormatSetFormatsProvider = new FormatSetFormatsProvider(this._activeFormatSet, this._fallbackFormatProvider);
+      this._activeFormatSetFormatsProvider = newFormatSetFormatsProvider;
       IModelApp.formatsProvider = newFormatSetFormatsProvider;
     }
   }
@@ -86,37 +88,46 @@ export class FormatManager {
     return this._fallbackFormatProvider;
   }
 
+  public async onIModelClose() {
+    // Clean up listeners
+    this._removeListeners.forEach((removeListener) => removeListener());
+    this._fallbackFormatProvider = undefined;
+    if (this._activeFormatSetFormatsProvider) {
+      this._activeFormatSetFormatsProvider.clearFallbackProvider(); // Works here because the fallback provider is the SchemaFormatsProvider used onIModelOpen.
+    }
+    this._iModelOpened = false;
+  }
+
+  /**
+   * If FormatSetFormatsProvider was successfully set, renders the usage of IModelApp.quantityFormatter.activeUnitSystem pointless when formatting.
+   */
   public async onIModelOpen(iModel: IModelConnection): Promise<void> {
     // Set up schema-based units and formats providers
-
     const schemaFormatsProvider = new SchemaFormatsProvider(iModel.schemaContext, IModelApp.quantityFormatter.activeUnitSystem);
     this.fallbackFormatsProvider = schemaFormatsProvider;
-
+    this._removeListeners.push(
+      IModelApp.quantityFormatter.onActiveFormattingUnitSystemChanged.addListener((args) => {
+        schemaFormatsProvider.unitSystem = args.system;
+      }),
+    );
     // Query schemas for KindOfQuantity items
     try {
       const schemaFormatSet: FormatSet = {
         name: "SchemaFormats",
         label: "Example Format Set",
-        formats: {}
+        formats: {},
       };
-      const reader = iModel.createQueryReader("SELECT\n  ks.Name || '.' || k.Name AS kindOfQuantityFullName,\n  COUNT(*) AS propertyCount,\n  json_group_array(p.Name) AS propertyNames\nFROM\n  ECDbMeta.ECPropertyDef p\n  JOIN ECDbMeta.KindOfQuantityDef k ON k.ECInstanceId = p.KindOfQuantity.Id\n  JOIN ECDbMeta.ECSchemaDef ks ON ks.ECInstanceId = k.Schema.Id\nGROUP BY\n  ks.Name,\n  k.Name\nORDER BY\n  propertyCount DESC;");
-      while (await reader.step()) {
-        console.log(reader.current[0]);
-        const formatName = reader.current[0].kindOfQuantityFullName;
-        const format = await schemaFormatsProvider.getFormat(formatName);
-        if (format) {
-          schemaFormatSet.formats[formatName] = format;
-        }
-      }
+
+
       // Try to get known schemas that typically contain KindOfQuantity items, and get all the formats from kind of quantities
       const schemaNames = ["AecUnits"];
 
       for (const schemaName of schemaNames) {
         try {
           const schema = await iModel.schemaContext.getSchema(new SchemaKey(schemaName, SchemaMatchType.Latest));
-            if (schema) {
+          if (schema) {
             for (const schemaItem of schema.getItems()) {
-              console.log(schemaItem)
+              console.log(schemaItem);
               if (schemaItem.schemaItemType === SchemaItemType.KindOfQuantity) {
                 const format = await schemaFormatsProvider.getFormat(schemaItem.fullName);
                 if (format) {
@@ -130,14 +141,29 @@ export class FormatManager {
         }
       }
 
+      // Get all used KindOfQuantities from the iModel, and populate the formatSet.
+      const reader = iModel.createQueryReader(
+        "SELECT\n  ks.Name || '.' || k.Name AS kindOfQuantityFullName,\n  COUNT(*) AS propertyCount,\n  json_group_array(p.Name) AS propertyNames\nFROM\n  ECDbMeta.ECPropertyDef p\n  JOIN ECDbMeta.KindOfQuantityDef k ON k.ECInstanceId = p.KindOfQuantity.Id\n  JOIN ECDbMeta.ECSchemaDef ks ON ks.ECInstanceId = k.Schema.Id\nGROUP BY\n  ks.Name,\n  k.Name\nORDER BY\n  propertyCount DESC;",
+      );
+      const allRows = await reader.toArray();
+      for (const row of allRows) {
+        const formatName = row[0];
+        const format = await schemaFormatsProvider.getFormat(formatName);
+        if (format) {
+          schemaFormatSet.formats[formatName] = format;
+        }
+      }
+
+
       // Set this as the active format set if we found any formats
       if (Object.keys(schemaFormatSet.formats).length > 0) {
+        this._iModelOpened = true;
         this.setActiveFormatSet(schemaFormatSet);
+
         console.log(`Created schema-based format set with ${Object.keys(schemaFormatSet.formats).length} formats`);
       } else {
         console.log("No KindOfQuantity items found in known schemas");
       }
-
     } catch (error) {
       console.error("Failed to query schema items:", error);
     }
@@ -158,6 +184,10 @@ export class FormatSetFormatsProvider implements MutableFormatsProvider {
   public async addFormat(name: string, format: FormatDefinition): Promise<void> {
     this._formatSet.formats[name] = format;
     this.onFormatsChanged.raiseEvent({ formatsChanged: [name] });
+  }
+
+  public clearFallbackProvider(): void {
+    this._fallbackProvider = undefined;
   }
 
   public async getFormat(name: string): Promise<FormatDefinition | undefined> {
