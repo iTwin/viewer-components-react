@@ -4,41 +4,31 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { assert } from "@itwin/core-bentley";
-import { HierarchyFilteringPath, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { CLASS_NAME_Classification, CLASS_NAME_ClassificationTable, CLASS_NAME_GeometricElement2d } from "../../common/internal/ClassNameDefinitions.js";
+import { createFilteredTree } from "../../common/internal/visibility/BaseFilteredTree.js";
 
+import type { BaseFilteredTreeNode, FilteredNodesHandler, FilteredTree, FilteredTreeNodeChildren } from "../../common/internal/visibility/BaseFilteredTree.js";
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
-import type { HierarchyNode } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
+import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
+import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
-import type { FilteredTree } from "../../common/internal/visibility/BaseFilteredTree.js";
 import type { ClassificationsTreeIdsCache } from "./ClassificationsTreeIdsCache.js";
 
-interface FilteredTreeRootNode {
-  children: Map<Id64String, FilteredTreeNode>;
-}
-
-interface BaseFilteredTreeNode {
-  id: Id64String;
-  children?: Map<Id64String, FilteredTreeNode>;
-  isFilterTarget: boolean;
-}
-
-interface ClassificationTableFilteredTreeNode extends BaseFilteredTreeNode {
+interface ClassificationTableFilteredTreeNode extends BaseFilteredTreeNode<ClassificationTableFilteredTreeNode> {
   type: "classificationTable";
 }
 
-interface ClassificationFilteredTreeNode extends BaseFilteredTreeNode {
+interface ClassificationFilteredTreeNode extends BaseFilteredTreeNode<ClassificationFilteredTreeNode> {
   type: "classification";
 }
 
-interface Element2dFilteredTreeNode extends BaseFilteredTreeNode {
+interface Element2dFilteredTreeNode extends BaseFilteredTreeNode<Element2dFilteredTreeNode> {
   type: "element2d";
   categoryId: Id64String;
   modelId: Id64String;
 }
 
-interface Element3dFilteredTreeNode extends BaseFilteredTreeNode {
+interface Element3dFilteredTreeNode extends BaseFilteredTreeNode<Element3dFilteredTreeNode> {
   type: "element3d";
   categoryId: Id64String;
   modelId: Id64String;
@@ -46,14 +36,18 @@ interface Element3dFilteredTreeNode extends BaseFilteredTreeNode {
 
 type FilteredTreeNode = ClassificationTableFilteredTreeNode | ClassificationFilteredTreeNode | Element2dFilteredTreeNode | Element3dFilteredTreeNode;
 
-type TemporaryElement2dFilteredNode = Omit<Element2dFilteredTreeNode, "modelId" | "categoryId"> & {
+type TemporaryElement2dFilteredNode = Omit<Element2dFilteredTreeNode, "modelId" | "categoryId" | "children"> & {
   modelId: string | undefined;
   categoryId: string | undefined;
+  children?: FilteredTreeNodeChildren<TemporaryElement2dFilteredNode>;
 };
-type TemporaryElement3dFilteredNode = Omit<Element3dFilteredTreeNode, "modelId" | "categoryId"> & {
+
+type TemporaryElement3dFilteredNode = Omit<Element3dFilteredTreeNode, "modelId" | "categoryId" | "children"> & {
   modelId: string | undefined;
   categoryId: string | undefined;
+  children?: FilteredTreeNodeChildren<TemporaryElement3dFilteredNode>;
 };
+
 type TemporaryFilteredTreeNode =
   | ClassificationTableFilteredTreeNode
   | ClassificationFilteredTreeNode
@@ -69,107 +63,18 @@ export interface ClassificationsTreeFilterTargets {
 }
 
 /** @internal */
-export async function createFilteredTree(props: {
+export async function createFilteredClassificationsTree(props: {
   imodelAccess: ECClassHierarchyInspector;
   filteringPaths: HierarchyFilteringPath[];
   idsCache: ClassificationsTreeIdsCache;
 }): Promise<FilteredTree<ClassificationsTreeFilterTargets>> {
   const { imodelAccess, filteringPaths, idsCache } = props;
-  const root: FilteredTreeRootNode = {
-    children: new Map(),
-  };
-
-  const filtered2dElements = new Array<TemporaryElement2dFilteredNode>();
-  const filtered3dElements = new Array<TemporaryElement3dFilteredNode>();
-  for (const filteringPath of filteringPaths) {
-    const normalizedPath = HierarchyFilteringPath.normalize(filteringPath).path;
-
-    let parentNode: TemporaryFilteredTreeNode | FilteredTreeRootNode = root;
-    for (let i = 0; i < normalizedPath.length; ++i) {
-      if ("type" in parentNode && parentNode.isFilterTarget) {
-        break;
-      }
-
-      const identifier = normalizedPath[i];
-
-      if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(identifier)) {
-        break;
-      }
-
-      const currentNode: FilteredTreeNode | undefined = parentNode.children?.get(identifier.id);
-      if (currentNode !== undefined) {
-        parentNode = currentNode;
-        continue;
-      }
-
-      const type = await getType(imodelAccess, identifier.className);
-
-      const newNode = createFilteredTreeNode({
-        type,
-        id: identifier.id,
-        isFilterTarget: i === normalizedPath.length - 1,
-      });
-      (parentNode.children ??= new Map()).set(identifier.id, newNode);
-      parentNode = newNode;
-      if (newNode.type === "element2d") {
-        filtered2dElements.push(newNode);
-      } else if (newNode.type === "element3d") {
-        filtered3dElements.push(newNode);
-      }
-    }
-  }
-  const filteredElementsModels = await idsCache.getFilteredElementsData({
-    element2dIds: filtered2dElements.map(({ id }) => id),
-    element3dIds: filtered3dElements.map(({ id }) => id),
+  return createFilteredTree({
+    getType: async (className) => getType(imodelAccess, className),
+    createFilteredTreeNode,
+    filteredNodesHanlder: new ClassificationsTreeFilteredNodesHandler({ idsCache }),
+    filteringPaths,
   });
-  // We populate filtered elements array with references, this causes root to change accordingly
-  [filtered2dElements, filtered3dElements].forEach((elementsArr) =>
-    elementsArr.forEach((element) => {
-      const entry = filteredElementsModels.get(element.id);
-      assert(entry !== undefined);
-      element.modelId = entry.modelId;
-      element.categoryId = entry.categoryId;
-    }),
-  );
-
-  return {
-    getFilterTargets: (node: HierarchyNode) => getFilterTargets(root, node),
-  };
-}
-
-function getFilterTargets(root: FilteredTreeRootNode, node: HierarchyNode): ClassificationsTreeFilterTargets | undefined {
-  const filterTargetsHandler = new FilterTargetsHandler();
-  let lookupParents: Array<{ children?: Map<Id64String, FilteredTreeNode> }> = [root];
-
-  const nodeKey = node.key;
-  if (!HierarchyNodeKey.isInstances(nodeKey)) {
-    return undefined;
-  }
-
-  // find the filtered parent nodes of the `node`
-  for (const parentKey of node.parentKeys) {
-    if (!HierarchyNodeKey.isInstances(parentKey)) {
-      continue;
-    }
-
-    // tree node might be merged from multiple instances. As filtered tree stores only one instance per node, we need to find all matching nodes
-    // and use them when checking for matching node in one level deeper.
-    const parentNodes = findMatchingFilteredNodes(lookupParents, parentKey.instanceKeys);
-    if (parentNodes.length === 0) {
-      return undefined;
-    }
-    lookupParents = parentNodes;
-  }
-
-  // find filtered nodes that match the `node`
-  const filteredNodes = findMatchingFilteredNodes(lookupParents, nodeKey.instanceKeys);
-  if (filteredNodes.length === 0) {
-    return undefined;
-  }
-
-  const filterTargets: FilterTargetsInternal = {};
-  filteredNodes.forEach((filteredNode) => filterTargetsHandler.collectFilterTargets(filterTargets, filteredNode));
-  return filterTargetsHandler.convertInternalFilterTargets(filterTargets);
 }
 
 interface FilterTargetsInternal {
@@ -179,8 +84,48 @@ interface FilterTargetsInternal {
   classificationIds?: Id64Set;
 }
 
-class FilterTargetsHandler {
-  public convertInternalFilterTargets(filterTargets: FilterTargetsInternal): ClassificationsTreeFilterTargets | undefined {
+class ClassificationsTreeFilteredNodesHandler implements FilteredNodesHandler<ClassificationsTreeFilterTargets, TemporaryFilteredTreeNode> {
+  private _filteredTemporary2dElements = new Map<Id64String, Omit<TemporaryElement2dFilteredNode, "children">>();
+  private _filteredTemporary3dElements = new Map<Id64String, Omit<TemporaryElement3dFilteredNode, "children">>();
+  private _filtered2dElements = new Map<Id64String, Omit<Element2dFilteredTreeNode, "children">>();
+  private _filtered3dElements = new Map<Id64String, Omit<Element3dFilteredTreeNode, "children">>();
+
+  constructor(private _props: { idsCache: ClassificationsTreeIdsCache }) {}
+
+  public saveFilteredNode(node: TemporaryFilteredTreeNode): void {
+    if (node.type === "element2d") {
+      this._filteredTemporary2dElements.set(node.id, node);
+    } else if (node.type === "element3d") {
+      this._filteredTemporary3dElements.set(node.id, node);
+    }
+  }
+
+  public async prepareSavedNodes(): Promise<void> {
+    const filteredElementsModels = await this._props.idsCache.getFilteredElementsData({
+      element2dIds: [...this._filteredTemporary2dElements.keys()],
+      element3dIds: [...this._filteredTemporary3dElements.keys()],
+    });
+    this._filteredTemporary2dElements.forEach((element, id) => {
+      const entry = filteredElementsModels.get(element.id);
+      assert(entry !== undefined);
+      this._filtered2dElements.set(id, { ...element, modelId: entry.modelId, categoryId: entry.categoryId });
+    });
+    this._filteredTemporary3dElements.forEach((element, id) => {
+      const entry = filteredElementsModels.get(element.id);
+      assert(entry !== undefined);
+      this._filtered3dElements.set(id, { ...element, modelId: entry.modelId, categoryId: entry.categoryId });
+    });
+  }
+
+  public convertNodesToFilterTargets(filteredNodes: TemporaryFilteredTreeNode[]): ClassificationsTreeFilterTargets | undefined {
+    const filterTargets: FilterTargetsInternal = {};
+
+    filteredNodes.forEach((filteredNode) => this.collectFilterTargets(filterTargets, filteredNode));
+
+    return this.convertInternalFilterTargets(filterTargets);
+  }
+
+  private convertInternalFilterTargets(filterTargets: FilterTargetsInternal): ClassificationsTreeFilterTargets | undefined {
     if (!filterTargets.classificationIds && !filterTargets.classificationIds && !filterTargets.elements2d && !filterTargets.elements3d) {
       return undefined;
     }
@@ -203,7 +148,10 @@ class FilterTargetsHandler {
     };
   }
 
-  public collectFilterTargets(changeTargets: FilterTargetsInternal, filteredNode: FilteredTreeNode) {
+  private collectFilterTargets(changeTargets: FilterTargetsInternal, node: TemporaryFilteredTreeNode) {
+    const filteredNode =
+      node.type === "element2d" ? this._filtered2dElements.get(node.id) : node.type === "element3d" ? this._filtered3dElements.get(node.id) : node;
+    assert(filteredNode !== undefined);
     if (filteredNode.isFilterTarget) {
       this.addTarget(changeTargets, filteredNode);
       return;
@@ -214,16 +162,16 @@ class FilterTargetsHandler {
       this.addTarget(changeTargets, filteredNode);
     }
 
-    if (!filteredNode.children) {
+    if (!node.children) {
       return;
     }
 
-    for (const child of filteredNode.children.values()) {
+    for (const child of node.children.values()) {
       this.collectFilterTargets(changeTargets, child);
     }
   }
 
-  public addTarget(filterTargets: FilterTargetsInternal, node: FilteredTreeNode) {
+  private addTarget(filterTargets: FilterTargetsInternal, node: FilteredTreeNode) {
     switch (node.type) {
       case "classificationTable":
         (filterTargets.classificationTableIds ??= new Set()).add(node.id);
@@ -262,12 +210,6 @@ function createModelCategoryKey(modelId: Id64String, categoryId: Id64String): Mo
 function parseModelCategoryKey(key: ModelCategoryKey): { modelId: Id64String; categoryId: Id64String } {
   const [modelId, categoryId] = key.split("-");
   return { modelId, categoryId };
-}
-
-function findMatchingFilteredNodes(lookupParents: Array<{ children?: Map<Id64String, FilteredTreeNode> }>, keys: InstanceKey[]) {
-  return lookupParents
-    .flatMap((lookup) => keys.map((key) => lookup.children?.get(key.id)))
-    .filter((lookupNode): lookupNode is FilteredTreeNode => lookupNode !== undefined);
 }
 
 function createFilteredTreeNode({

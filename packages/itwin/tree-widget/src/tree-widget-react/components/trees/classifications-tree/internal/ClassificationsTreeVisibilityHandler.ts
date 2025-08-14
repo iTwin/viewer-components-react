@@ -43,7 +43,7 @@ import {
 } from "../../common/internal/VisibilityUtils.js";
 import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility.js";
 import { ClassificationsTreeNode } from "./ClassificationsTreeNode.js";
-import { createFilteredTree } from "./FilteredTree.js";
+import { createFilteredClassificationsTree } from "./FilteredTree.js";
 
 import type { Observable, Subscription } from "rxjs";
 import type { Id64Arg, Id64String } from "@itwin/core-bentley";
@@ -87,7 +87,7 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
   private readonly _eventListener: IVisibilityChangeEventListener;
   private readonly _alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo;
   private readonly _idsCache: ClassificationsTreeIdsCache;
-  private _filteredTree: ReturnType<typeof createFilteredTree> | undefined;
+  private _filteredTree: ReturnType<typeof createFilteredClassificationsTree> | undefined;
   private _elementChangeQueue = new Subject<Observable<void>>();
   private _subscriptions: Subscription[] = [];
   private _changeRequest = new Subject<{ key: HierarchyNodeKey; depth: number }>();
@@ -104,7 +104,7 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
     this._alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfo(_props.viewport);
     this._idsCache = this._props.idsCache;
     if (_props.filteredPaths) {
-      this._filteredTree = createFilteredTree({
+      this._filteredTree = createFilteredClassificationsTree({
         idsCache: this._idsCache,
         filteringPaths: _props.filteredPaths,
         imodelAccess: this._props.imodelAccess,

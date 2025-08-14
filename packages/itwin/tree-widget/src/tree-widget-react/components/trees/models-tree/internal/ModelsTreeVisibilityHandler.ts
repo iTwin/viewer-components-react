@@ -42,7 +42,7 @@ import {
   mergeVisibilityStatuses,
 } from "../../common/internal/VisibilityUtils.js";
 import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility.js";
-import { createFilteredTree } from "./FilteredTree.js";
+import { createFilteredModelsTree } from "./FilteredTree.js";
 import { ModelsTreeNode } from "./ModelsTreeNode.js";
 
 import type { Observable, Subscription } from "rxjs";
@@ -119,7 +119,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
   private readonly _eventListener: IVisibilityChangeEventListener;
   private readonly _alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo;
   private readonly _idsCache: ModelsTreeIdsCache;
-  private _filteredTree: ReturnType<typeof createFilteredTree> | undefined;
+  private _filteredTree: ReturnType<typeof createFilteredModelsTree> | undefined;
   private _elementChangeQueue = new Subject<Observable<void>>();
   private _subscriptions: Subscription[] = [];
   private _changeRequest = new Subject<{ key: HierarchyNodeKey; depth: number }>();
@@ -136,7 +136,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     this._alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfo(_props.viewport, CLASS_NAME_GeometricElement3d);
     this._idsCache = this._props.idsCache;
     this._filteredTree = _props.filteredPaths
-      ? createFilteredTree({ imodelAccess: this._props.imodelAccess, filteringPaths: _props.filteredPaths })
+      ? createFilteredModelsTree({ imodelAccess: this._props.imodelAccess, filteringPaths: _props.filteredPaths })
       : undefined;
     this._subscriptions.push(this._elementChangeQueue.pipe(concatAll()).subscribe());
   }

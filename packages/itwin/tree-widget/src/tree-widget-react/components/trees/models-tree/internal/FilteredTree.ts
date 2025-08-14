@@ -4,59 +4,31 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { assert } from "@itwin/core-bentley";
-import { HierarchyFilteringPath, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { CLASS_NAME_Category, CLASS_NAME_Model, CLASS_NAME_Subject } from "../../common/internal/ClassNameDefinitions.js";
+import { createFilteredTree } from "../../common/internal/visibility/BaseFilteredTree.js";
 
+import type { BaseFilteredTreeNode, FilteredNodesHandler, FilteredTree, FilteredTreeRootNode } from "../../common/internal/visibility/BaseFilteredTree.js";
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
-import type { HierarchyNode } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
+import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
+import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
-import type { FilteredTree } from "../../common/internal/visibility/BaseFilteredTree.js";
 
-interface FilteredTreeRootNode {
-  children: Map<Id64String, FilteredTreeNode>;
-}
-
-interface BaseFilteredTreeNode {
-  id: Id64String;
-  children?: Map<Id64String, FilteredTreeNode>;
-  isFilterTarget: boolean;
-}
-
-interface GenericFilteredTreeNode extends BaseFilteredTreeNode {
+interface GenericFilteredTreeNode extends BaseFilteredTreeNode<GenericFilteredTreeNode> {
   type: "subject" | "model";
 }
 
-interface CategoryFilteredTreeNode extends BaseFilteredTreeNode {
+interface CategoryFilteredTreeNode extends BaseFilteredTreeNode<CategoryFilteredTreeNode> {
   type: "category";
   modelId: Id64String;
 }
 
-interface ElementFilteredTreeNode extends BaseFilteredTreeNode {
+interface ElementFilteredTreeNode extends BaseFilteredTreeNode<ElementFilteredTreeNode> {
   type: "element";
   modelId: Id64String;
   categoryId: Id64String;
 }
 
 type FilteredTreeNode = GenericFilteredTreeNode | CategoryFilteredTreeNode | ElementFilteredTreeNode;
-
-type ModelCategoryKey = `${ModelId}-${CategoryId}`;
-
-function createModelCategoryKey(modelId: Id64String, categoryId: Id64String): ModelCategoryKey {
-  return `${modelId}-${categoryId}`;
-}
-
-function parseModelCategoryKey(key: ModelCategoryKey) {
-  const [modelId, categoryId] = key.split("-");
-  return { modelId, categoryId };
-}
-
-interface FilterTargetsInternal {
-  subjectIds?: Id64Set;
-  modelIds?: Id64Set;
-  categories?: Map<ModelId, Set<CategoryId>>;
-  elements?: Map<ModelCategoryKey, Set<ElementId>>;
-}
 
 /** @internal */
 export interface ModelsTreeFilterTargets {
@@ -67,92 +39,39 @@ export interface ModelsTreeFilterTargets {
 }
 
 /** @internal */
-export async function createFilteredTree({
-  imodelAccess,
-  filteringPaths,
-}: {
+export async function createFilteredModelsTree(props: {
   imodelAccess: ECClassHierarchyInspector;
   filteringPaths: HierarchyFilteringPath[];
 }): Promise<FilteredTree<ModelsTreeFilterTargets>> {
-  const root: FilteredTreeRootNode = {
-    children: new Map(),
-  };
-
-  for (const filteringPath of filteringPaths) {
-    const normalizedPath = HierarchyFilteringPath.normalize(filteringPath).path;
-
-    let parentNode: FilteredTreeRootNode | FilteredTreeNode = root;
-    for (let i = 0; i < normalizedPath.length; i++) {
-      if ("type" in parentNode && parentNode.isFilterTarget) {
-        break;
-      }
-
-      const identifier = normalizedPath[i];
-      if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(identifier)) {
-        break;
-      }
-
-      const currentNode: FilteredTreeNode | undefined = parentNode.children?.get(identifier.id);
-      if (currentNode !== undefined) {
-        parentNode = currentNode;
-        continue;
-      }
-
-      const type = await getType(imodelAccess, identifier.className);
-      const newNode: FilteredTreeNode = createFilteredTreeNode({
-        type,
-        id: identifier.id,
-        isFilterTarget: i === normalizedPath.length - 1,
-        parent: parentNode,
-      });
-      (parentNode.children ??= new Map()).set(identifier.id, newNode);
-      parentNode = newNode;
-    }
-  }
-
-  return {
-    getFilterTargets: (node: HierarchyNode) => getFilterTargets(root, node),
-  };
+  const { imodelAccess, filteringPaths } = props;
+  return createFilteredTree({
+    getType: async (className) => getType(imodelAccess, className),
+    createFilteredTreeNode,
+    filteredNodesHanlder: new ModelsTreeFilteredNodesHandler(),
+    filteringPaths,
+  });
 }
 
-function getFilterTargets(root: FilteredTreeRootNode, node: HierarchyNode): ModelsTreeFilterTargets | undefined {
-  const filterTargetsHandler = new FilterTargetsHandler();
-  let lookupParents: Array<{ children?: Map<Id64String, FilteredTreeNode> }> = [root];
-  const filterTargets: FilterTargetsInternal = {};
-
-  const nodeKey = node.key;
-  if (!HierarchyNodeKey.isInstances(nodeKey)) {
-    return undefined;
-  }
-
-  // find the filtered parent nodes of the `node`
-  for (const parentKey of node.parentKeys) {
-    if (!HierarchyNodeKey.isInstances(parentKey)) {
-      continue;
-    }
-
-    // tree node might be merged from multiple instances. As filtered tree stores only one instance per node, we need to find all matching nodes
-    // and use them when checking for matching node in one level deeper.
-    const parentNodes = findMatchingFilteredNodes(lookupParents, parentKey.instanceKeys);
-    if (parentNodes.length === 0) {
-      return undefined;
-    }
-    lookupParents = parentNodes;
-  }
-
-  // find filtered nodes that match the `node`
-  const filteredNodes = findMatchingFilteredNodes(lookupParents, nodeKey.instanceKeys);
-  if (filteredNodes.length === 0) {
-    return undefined;
-  }
-
-  filteredNodes.forEach((filteredNode) => filterTargetsHandler.collectFilterTargets(filterTargets, filteredNode));
-
-  return filterTargetsHandler.convertInternalFilterTargets(filterTargets);
+interface FilterTargetsInternal {
+  subjectIds?: Id64Set;
+  modelIds?: Id64Set;
+  categories?: Map<ModelId, Set<CategoryId>>;
+  elements?: Map<ModelCategoryKey, Set<ElementId>>;
 }
 
-class FilterTargetsHandler {
-  public convertInternalFilterTargets(filterTargets: FilterTargetsInternal): ModelsTreeFilterTargets | undefined {
+class ModelsTreeFilteredNodesHandler implements FilteredNodesHandler<ModelsTreeFilterTargets, FilteredTreeNode> {
+  public convertNodesToFilterTargets(filteredNodes: FilteredTreeNode[]): ModelsTreeFilterTargets | undefined {
+    const filterTargets: FilterTargetsInternal = {};
+
+    filteredNodes.forEach((filteredNode) => this.collectFilterTargets(filterTargets, filteredNode));
+
+    return this.convertInternalFilterTargets(filterTargets);
+  }
+
+  public async prepareSavedNodes() {}
+  public saveFilteredNode() {}
+
+  private convertInternalFilterTargets(filterTargets: FilterTargetsInternal): ModelsTreeFilterTargets | undefined {
     if (!filterTargets.categories && !filterTargets.subjectIds && !filterTargets.elements && !filterTargets.modelIds) {
       return undefined;
     }
@@ -174,7 +93,7 @@ class FilterTargetsHandler {
     };
   }
 
-  public collectFilterTargets(changeTargets: FilterTargetsInternal, filteredNode: FilteredTreeNode) {
+  private collectFilterTargets(changeTargets: FilterTargetsInternal, filteredNode: FilteredTreeNode) {
     if (filteredNode.isFilterTarget) {
       this.addTarget(changeTargets, filteredNode);
       return;
@@ -223,10 +142,15 @@ class FilterTargetsHandler {
   }
 }
 
-function findMatchingFilteredNodes(lookupParents: Array<{ children?: Map<Id64String, FilteredTreeNode> }>, keys: InstanceKey[]) {
-  return lookupParents
-    .flatMap((lookup) => keys.map((key) => lookup.children?.get(key.id)))
-    .filter((lookupNode): lookupNode is FilteredTreeNode => lookupNode !== undefined);
+type ModelCategoryKey = `${ModelId}-${CategoryId}`;
+
+function createModelCategoryKey(modelId: Id64String, categoryId: Id64String): ModelCategoryKey {
+  return `${modelId}-${categoryId}`;
+}
+
+function parseModelCategoryKey(key: ModelCategoryKey) {
+  const [modelId, categoryId] = key.split("-");
+  return { modelId, categoryId };
 }
 
 function createFilteredTreeNode({
@@ -238,7 +162,7 @@ function createFilteredTreeNode({
   type: FilteredTreeNode["type"];
   id: string;
   isFilterTarget: boolean;
-  parent: FilteredTreeNode | FilteredTreeRootNode;
+  parent: FilteredTreeNode | FilteredTreeRootNode<FilteredTreeNode>;
 }): FilteredTreeNode {
   if (type === "subject" || type === "model") {
     return {

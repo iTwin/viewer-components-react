@@ -43,7 +43,7 @@ import {
 } from "../../common/internal/VisibilityUtils.js";
 import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility.js";
 import { CategoriesTreeNode } from "./CategoriesTreeNode.js";
-import { createFilteredTree } from "./FilteredTree.js";
+import { createFilteredCategoriesTree } from "./FilteredTree.js";
 
 import type { Observable, Subscription } from "rxjs";
 import type { Id64Arg, Id64String } from "@itwin/core-bentley";
@@ -89,7 +89,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
   private readonly _eventListener: IVisibilityChangeEventListener;
   private readonly _alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo;
   private readonly _idsCache: CategoriesTreeIdsCache;
-  private _filteredTree: ReturnType<typeof createFilteredTree> | undefined;
+  private _filteredTree: ReturnType<typeof createFilteredCategoriesTree> | undefined;
   private _elementChangeQueue = new Subject<Observable<void>>();
   private _subscriptions: Subscription[] = [];
   private _changeRequest = new Subject<{ key: HierarchyNodeKey; depth: number }>();
@@ -108,7 +108,7 @@ class CategoriesTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler 
     this._idsCache = this._props.idsCache;
     const { categoryClass, elementClass, modelClass } = getClassesByView(_props.viewport.view.is2d() ? "2d" : "3d");
     if (_props.filteredPaths) {
-      this._filteredTree = createFilteredTree({
+      this._filteredTree = createFilteredCategoriesTree({
         idsCache: this._idsCache,
         filteringPaths: _props.filteredPaths,
         categoryClassName: categoryClass,
