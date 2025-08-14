@@ -214,12 +214,6 @@ type HierarchyVisibilityHandlerOverridableMethodProps<TFunc> = TFunc extends (pr
     readonly handler: HierarchyVisibilityHandler;
 } : never;
 
-// @beta (undocumented)
-interface HighlightInfo {
-    // (undocumented)
-    text: string;
-}
-
 // @beta
 export const IModelContentTreeComponent: {
     ({ onFeatureUsed, onPerformanceMeasured, ...props }: IModelContentTreeComponentProps): JSX_2.Element | null;
@@ -427,7 +421,7 @@ type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPaths" | 
     hierarchyLevelSizeLimit?: number;
     emptyTreeContent?: ReactNode;
     onReload?: () => void;
-    highlight?: HighlightInfo;
+    highlightText?: string;
 };
 
 // @beta
@@ -505,7 +499,7 @@ interface UseCategoriesTreeProps {
 // @beta (undocumented)
 interface UseCategoriesTreeResult {
     // (undocumented)
-    categoriesTreeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlight" | "emptyTreeContent">;
+    categoriesTreeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent">;
     // (undocumented)
     rendererProps: Required<Pick<VisibilityTreeRendererProps, "getDecorations" | "getSublabel">>;
 }
@@ -528,7 +522,7 @@ interface UseClassificationsTreeProps {
 // @alpha (undocumented)
 interface UseClassificationsTreeResult {
     // (undocumented)
-    classificationsTreeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "visibilityHandlerFactory" | "getFilteredPaths" | "emptyTreeContent" | "highlight">;
+    classificationsTreeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "visibilityHandlerFactory" | "getFilteredPaths" | "emptyTreeContent" | "highlightText">;
     // (undocumented)
     rendererProps: Required<Pick<VisibilityTreeRendererProps, "getDecorations">>;
 }
@@ -583,7 +577,7 @@ interface UseModelsTreeProps {
 // @beta (undocumented)
 interface UseModelsTreeResult {
     // (undocumented)
-    modelsTreeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlight" | "emptyTreeContent" | "selectionPredicate">;
+    modelsTreeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent" | "selectionPredicate">;
     // (undocumented)
     rendererProps: Required<Pick<VisibilityTreeRendererProps, "getDecorations">>;
 }
