@@ -44,9 +44,9 @@ const packages = [
     dir: "one-click-lca-widget",
   },
   {
-    name:"@itwin/quantity-formatting-react",
-    dir: "quantity-formatting"
-  }
+    name: "@itwin/quantity-formatting-react",
+    dir: "quantity-formatting",
+  },
 ];
 
 linkPackages();
