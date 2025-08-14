@@ -76,6 +76,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
             enableVirtualization
             dropdownMenuProps={{
               style: {
+                // Expand dropdown menu length from 8 items to 30 items, or 70% of screen height
                 maxBlockSize: "min(calc((var(--iui-component-height) - 1px) * 30), 70vh)",
               },
             }}

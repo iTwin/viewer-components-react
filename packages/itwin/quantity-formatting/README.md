@@ -20,6 +20,34 @@ This package provides React components for working with quantities and their for
 npm install @itwin/quantity-formatting-react
 ```
 
+## Common Worfklow
+
+The typical workflow involves selecting a format and customizing it to meet your needs:
+
+1. **Select a Format**: Use the `FormatSelector` to choose from available predefined formats
+2. **Customize Settings**: Modify format properties like precision, units, and display options
+3. **Preview Changes**: See real-time formatting preview as you make adjustments
+4. **Save or Reset**: Apply your changes or revert to the original format
+
+### Example Workflow
+
+Starting with the `QuantityFormatPanel`, you can select a format from the available options. Initially, the Save and Clear buttons are disabled when no changes have been made.
+
+![QuantityFormatPanel with a format selected](./media/selected-format.png)
+
+The `FormatSelector` dropdown shows all available formats to choose from:
+
+![Dropdown menu of FormatSelector open](./media/list-of-formats.png)
+
+You can then customize the format by changing properties like the unit. For example, changing from square feet to square meters:
+
+![Dropdown of units](./media/dropdown-select-unit.png)
+
+After making changes, notice how the Save and Clear buttons become enabled (highlighted), indicating that modifications can now be applied or discarded. The preview panel also now shows the value converted to square meters:
+
+![After changing unit](./media/after-select-unit.png)
+
+Click **Save** to apply your changes or **Clear** to reset back to the original format settings.
 ## Components
 
 This package provides four main React components for quantity formatting:

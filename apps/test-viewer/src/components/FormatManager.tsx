@@ -149,9 +149,22 @@ export class FormatManager {
       }
 
       // Get all used KindOfQuantities from the iModel, and populate the formatSet.
-      const reader = iModel.createQueryReader(
-        "SELECT\n  ks.Name || '.' || k.Name AS kindOfQuantityFullName,\n  COUNT(*) AS propertyCount,\n  json_group_array(p.Name) AS propertyNames\nFROM\n  ECDbMeta.ECPropertyDef p\n  JOIN ECDbMeta.KindOfQuantityDef k ON k.ECInstanceId = p.KindOfQuantity.Id\n  JOIN ECDbMeta.ECSchemaDef ks ON ks.ECInstanceId = k.Schema.Id\nGROUP BY\n  ks.Name,\n  k.Name\nORDER BY\n  propertyCount DESC;",
-      );
+      const ecsqlQuery = `
+        SELECT
+          ks.Name || '.' || k.Name AS kindOfQuantityFullName,
+          COUNT(*) AS propertyCount,
+          json_group_array(p.Name) AS propertyNames
+        FROM
+          ECDbMeta.ECPropertyDef p
+          JOIN ECDbMeta.KindOfQuantityDef k ON k.ECInstanceId = p.KindOfQuantity.Id
+          JOIN ECDbMeta.ECSchemaDef ks ON ks.ECInstanceId = k.Schema.Id
+        GROUP BY
+          ks.Name,
+          k.Name
+        ORDER BY
+          propertyCount DESC;
+      `;
+      const reader = iModel.createQueryReader(ecsqlQuery);
       const allRows = await reader.toArray();
       for (const row of allRows) {
         const formatName = row[0];

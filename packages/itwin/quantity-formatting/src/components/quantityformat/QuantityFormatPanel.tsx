@@ -102,7 +102,7 @@ export function QuantityFormatPanel(props: QuantityFormatPanelProps) {
             formatProps={clonedFormatDefinition}
             unitsProvider={unitsProvider}
             persistenceUnit={persistenceUnit}
-            initialMagnitude={props.initialMagnitude}
+            initialMagnitude={props.initialMagnitude ?? 1234.5678}
           />
           <Divider />
         </>
