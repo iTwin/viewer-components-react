@@ -43,7 +43,7 @@ import {
 } from "../../common/internal/VisibilityUtils.js";
 import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility.js";
 import { ClassificationsTreeNode } from "./ClassificationsTreeNode.js";
-import { createFilteredTree } from "./FilteredTree.js";
+import { createFilteredClassificationsTree } from "./FilteredTree.js";
 
 import type { Observable, Subscription } from "rxjs";
 import type { Id64Arg, Id64String } from "@itwin/core-bentley";
@@ -55,7 +55,6 @@ import type { GetVisibilityFromAlwaysAndNeverDrawnElementsProps } from "../../co
 import type { CategoryId, ModelId } from "../../common/internal/Types.js";
 import type { HierarchyVisibilityHandler, VisibilityStatus } from "../../common/UseHierarchyVisibility.js";
 import type { ClassificationsTreeIdsCache } from "./ClassificationsTreeIdsCache.js";
-import type { FilteredTree } from "./FilteredTree.js";
 
 /**
  * Props for `createClassificationsTreeVisibilityHandler`.
@@ -88,7 +87,7 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
   private readonly _eventListener: IVisibilityChangeEventListener;
   private readonly _alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo;
   private readonly _idsCache: ClassificationsTreeIdsCache;
-  private _filteredTree: Promise<FilteredTree> | undefined;
+  private _filteredTree: ReturnType<typeof createFilteredClassificationsTree> | undefined;
   private _elementChangeQueue = new Subject<Observable<void>>();
   private _subscriptions: Subscription[] = [];
   private _changeRequest = new Subject<{ key: HierarchyNodeKey; depth: number }>();
@@ -105,7 +104,7 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
     this._alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfo(_props.viewport);
     this._idsCache = this._props.idsCache;
     if (_props.filteredPaths) {
-      this._filteredTree = createFilteredTree({
+      this._filteredTree = createFilteredClassificationsTree({
         idsCache: this._idsCache,
         filteringPaths: _props.filteredPaths,
         imodelAccess: this._props.imodelAccess,
@@ -196,8 +195,13 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
   }
 
   private getFilteredNodeVisibility(props: GetFilteredNodeVisibilityProps) {
-    return from(this.getVisibilityChangeTargets(props)).pipe(
-      mergeMap(({ classificationIds, classificationTableIds, elements2d, elements3d }) => {
+    return from(this.getFilteredTreeTargets(props)).pipe(
+      mergeMap((targets) => {
+        if (!targets) {
+          return EMPTY;
+        }
+
+        const { classificationIds, classificationTableIds, elements2d, elements3d } = targets;
         const observables = new Array<Observable<VisibilityStatus>>();
         if (classificationTableIds?.size) {
           observables.push(this.getClassificationTablesVisibilityStatus({ classificationTableIds }));
@@ -206,6 +210,7 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
         if (classificationIds?.size) {
           observables.push(this.getClassificationsVisibilityStatus({ classificationIds }));
         }
+
         if (elements2d?.length) {
           observables.push(
             from(elements2d).pipe(
@@ -240,9 +245,9 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
     );
   }
 
-  private async getVisibilityChangeTargets({ node }: GetFilteredNodeVisibilityProps) {
+  private async getFilteredTreeTargets({ node }: GetFilteredNodeVisibilityProps) {
     const filteredTree = await this._filteredTree;
-    return filteredTree ? filteredTree.getVisibilityChangeTargets(node) : {};
+    return filteredTree ? filteredTree.getFilterTargets(node) : undefined;
   }
 
   private getClassificationTablesVisibilityStatus(props: { classificationTableIds: Id64Arg }): Observable<VisibilityStatus> {
@@ -615,8 +620,12 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
   }
 
   private changeFilteredNodeVisibility({ on, ...props }: ChangeFilteredNodeVisibilityProps) {
-    return from(this.getVisibilityChangeTargets(props)).pipe(
-      mergeMap(({ classificationTableIds, classificationIds, elements2d, elements3d }) => {
+    return from(this.getFilteredTreeTargets(props)).pipe(
+      mergeMap((targets) => {
+        if (!targets) {
+          return EMPTY;
+        }
+        const { classificationIds, classificationTableIds, elements2d, elements3d } = targets;
         const observables = new Array<Observable<void>>();
         if (classificationTableIds?.size) {
           observables.push(this.changeClassificationTablesVisibilityStatus({ classificationTableIds, on }));
@@ -629,9 +638,7 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
         if (elements2d?.length) {
           observables.push(
             from(elements2d).pipe(
-              mergeMap(({ modelId, categoryId, elementIds }) => {
-                return this.changeElementsVisibilityStatus({ modelId, categoryId, elementIds, on });
-              }),
+              mergeMap(({ modelId, categoryId, elementIds }) => this.changeElementsVisibilityStatus({ modelId, categoryId, elementIds, on })),
             ),
           );
         }
@@ -639,9 +646,7 @@ class ClassificationsTreeVisibilityHandlerImpl implements HierarchyVisibilityHan
         if (elements3d?.length) {
           observables.push(
             from(elements3d).pipe(
-              mergeMap(({ modelId, categoryId, elementIds }) => {
-                return this.changeElementsVisibilityStatus({ modelId, categoryId, elementIds, on });
-              }),
+              mergeMap(({ modelId, categoryId, elementIds }) => this.changeElementsVisibilityStatus({ modelId, categoryId, elementIds, on })),
             ),
           );
         }
