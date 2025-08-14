@@ -117,7 +117,9 @@ export class FormatManager {
         label: "Example Format Set",
         formats: {},
       };
-
+      // Used until https://github.com/iTwin/bis-schemas/issues/566 is resolved
+      // If there are duplicate labels, use the unique fullName of the KoQ instead of it's label.
+      const usedLabels: Set<string> = new Set();
 
       // Try to get known schemas that typically contain KindOfQuantity items, and get all the formats from kind of quantities
       const schemaNames = ["AecUnits"];
@@ -127,10 +129,15 @@ export class FormatManager {
           const schema = await iModel.schemaContext.getSchema(new SchemaKey(schemaName, SchemaMatchType.Latest));
           if (schema) {
             for (const schemaItem of schema.getItems()) {
-              console.log(schemaItem);
               if (schemaItem.schemaItemType === SchemaItemType.KindOfQuantity) {
                 const format = await schemaFormatsProvider.getFormat(schemaItem.fullName);
                 if (format) {
+                  if (format.label) {
+                    if (usedLabels.has(format.label)) {
+                      (format as any).label = format.name ?? format.label;
+                    }
+                    usedLabels.add(format.label);
+                  }
                   schemaFormatSet.formats[schemaItem.fullName] = format;
                 }
               }
@@ -150,10 +157,15 @@ export class FormatManager {
         const formatName = row[0];
         const format = await schemaFormatsProvider.getFormat(formatName);
         if (format) {
+          if (format.label) {
+            if (usedLabels.has(format.label)) {
+              (format as any).label = format.name ?? format.label;
+            }
+            usedLabels.add(format.label);
+          }
           schemaFormatSet.formats[formatName] = format;
         }
       }
-
 
       // Set this as the active format set if we found any formats
       if (Object.keys(schemaFormatSet.formats).length > 0) {
@@ -192,10 +204,8 @@ export class FormatSetFormatsProvider implements MutableFormatsProvider {
 
   public async getFormat(name: string): Promise<FormatDefinition | undefined> {
     const format = this._formatSet.formats[name];
-    if (format)
-      return format;
-    if (this._fallbackProvider)
-      return this._fallbackProvider.getFormat(name);
+    if (format) return format;
+    if (this._fallbackProvider) return this._fallbackProvider.getFormat(name);
     return undefined;
   }
 

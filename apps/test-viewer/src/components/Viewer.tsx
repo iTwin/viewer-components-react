@@ -18,8 +18,8 @@ import { useAuthorizationContext } from "./Authorization";
 import { statusBarActionsProvider, ViewerOptionsProvider } from "./ViewerOptions";
 import { FormatManager } from "./FormatManager";
 
-
 import type { UiProvidersConfig } from "../UiProvidersConfig";
+import { QuantityFormatting } from "@itwin/quantity-formatting-react";
 
 export function Viewer() {
   return (
@@ -38,10 +38,9 @@ function ViewerWithOptions() {
     const providersConfig = getUiProvidersConfig();
     await providersConfig.initialize();
     await FrontendDevTools.initialize();
-
+    await QuantityFormatting.startup();
     // Initialize FormatManager with sample format sets
     await FormatManager.initialize([]);
-    console.log(FormatManager.instance)
     // ArcGIS Oauth setup
     const accessClient = new ArcGisAccessClient();
     accessClient.initialize({

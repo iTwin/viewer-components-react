@@ -10,6 +10,7 @@ import { FormatPanel } from "./FormatPanel.js";
 import { Button, ButtonGroup, Divider, Flex } from "@itwin/itwinui-react";
 import { FormatSample } from "./FormatSample.js";
 import { useTranslation } from "../../useTranslation.js";
+import "./FormatPanel.scss";
 
 /** Properties of [[QuantityFormatPanel]] component.
  * @beta
@@ -112,7 +113,7 @@ export function QuantityFormatPanel(props: QuantityFormatPanelProps) {
         onFormatChange={handleOnFormatChanged}
         persistenceUnit={persistenceUnit}
       />
-      <Divider />
+      <Divider className="quantityFormat-formatPanel-divider" />
       <Flex justifyContent="flex-end" gap="xs">
         <ButtonGroup>
           <Button styleType="default" onClick={handleClear} disabled={!_saveEnabled}>

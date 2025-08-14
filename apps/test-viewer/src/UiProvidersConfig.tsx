@@ -39,7 +39,6 @@ import {
   TreeWidgetComponent,
 } from "@itwin/tree-widget-react";
 import { RepositoriesTreeComponent } from "./components/repositories-tree/RepositoriesTree";
-import { QuantityFormatUiItemsProvider } from "./components/QuantityFormatUiItemsProvider";
 import { useViewerOptionsContext } from "./components/ViewerOptions";
 import { unifiedSelectionStorage } from "./SelectionStorage";
 
@@ -48,7 +47,6 @@ import type { ClientPrefix } from "@itwin/grouping-mapping-widget";
 import type { SelectableTreeDefinition } from "@itwin/tree-widget-react";
 import type { UiItemsProvider } from "@itwin/appui-react";
 import type { ComponentPropsWithRef } from "react";
-import { QuantityFormatting } from "@itwin/quantity-formatting-react";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
@@ -324,13 +322,6 @@ const configuredUiItems = new Map<string, UiItem>([
     {
       initialize: async () => Promise.resolve(),
       createUiItemsProviders: () => [new OneClickLCAProvider()],
-    },
-  ],
-  [
-    "quantity-formatting",
-    {
-      initialize: async () => QuantityFormatting.startup(),
-      createUiItemsProviders: () => [new QuantityFormatUiItemsProvider()],
     },
   ],
 ]);
