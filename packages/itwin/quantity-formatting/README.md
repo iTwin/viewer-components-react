@@ -48,6 +48,7 @@ After making changes, notice how the Save and Clear buttons become enabled (high
 ![After changing unit](./media/after-select-unit.png)
 
 Click **Save** to apply your changes or **Clear** to reset back to the original format settings.
+
 ## Components
 
 This package provides four main React components for quantity formatting:
