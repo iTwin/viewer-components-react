@@ -6,14 +6,11 @@
 import { IModelApp } from "@itwin/core-frontend";
 import type { Localization } from "@itwin/core-common";
 
-export interface StartupOptions {
-  localization?: Localization;
-}
-
 /**
  * Static class for managing quantity formatting localization and initialization.
  * This class handles the setup and management of internationalization resources
  * for quantity formatting components.
+ * @beta
  */
 export class QuantityFormatting {
   private static _isInitialized = false;
@@ -45,7 +42,7 @@ export class QuantityFormatting {
    * Initializes the QuantityFormatting class with localization support.
    * @param options Optional startup options including custom localization instance
    */
-  public static async startup(options?: StartupOptions): Promise<void> {
+  public static async startup(options?: { localization?: Localization }): Promise<void> {
     if (QuantityFormatting.isInitialized) return;
 
     QuantityFormatting._localization =

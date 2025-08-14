@@ -15,6 +15,9 @@ import { Divider, Input, Label } from "@itwin/itwinui-react";
 import "./FormatPanel.scss";
 import { useTranslation } from "../../useTranslation.js";
 
+/**
+ * @internal
+*/
 interface FormatSampleProps {
   formatProps: FormatDefinition;
   unitsProvider: UnitsProvider;
@@ -24,7 +27,7 @@ interface FormatSampleProps {
 
 /** Component to show the persistence value and formatted value for FormatDefinition.
  * Creates its own FormatterSpec internally based on formatProps and persistenceUnit.
- * @internal
+ * @beta
  */
 export function FormatSample(props: FormatSampleProps) {
   const { formatProps, unitsProvider, persistenceUnit, initialMagnitude } =

@@ -12,12 +12,19 @@ import { useTranslation } from "../../useTranslation.js";
 
 import type { FormatSet } from "@itwin/ecschema-metadata";
 
+/**
+ * @internal
+ */
 interface FormatSelectorProps {
   activeFormatSet?: FormatSet;
   activeFormatDefinitionKey?: string;
   onListItemChange: (formatDefinition: FormatDefinition, key: string) => void;
 }
 
+/**
+ * A React component that renders a format selector dropdown for choosing quantity formats.
+ * @beta
+ */
 export const FormatSelector: React.FC<FormatSelectorProps> = ({
   activeFormatSet,
   activeFormatDefinitionKey,

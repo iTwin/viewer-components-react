@@ -56,6 +56,9 @@ function useTranslation() {
   };
 }
 
+/**
+ * @internal
+ */
 interface FormatPanelProps {
   formatProps: FormatDefinition;
   unitsProvider: UnitsProvider;

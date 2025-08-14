@@ -22,11 +22,14 @@
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
     "clean": "rimraf lib",
     "rebuild": "npm run clean && npm run build",
+    "extract-api": "betools extract-api --entry=lib/quantity-formatting-react --apiReportFolder=./api --apiReportTempFolder=./api/temp --apiSummaryFolder=./api --includeUnexportedApis",
     "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
     "lint:fix": "npm run lint -- --fix",
     "lint:table": "eslint ./**/*.{ts,tsx} 1>&2 -f ./node_modules/@itwin/eslint-plugin/dist/formatters/no-internal-summary-with-table.js",
     "test": "vitest",
-    "cover": "vitest run --coverage --silent"
+    "cover": "vitest run --coverage --silent",
+    "update-extractions": "node ../../../scripts/updateExtractions.js --targets=./README.md",
+    "check-extractions": "node ../../../scripts/updateExtractions.js --targets=./README.md --check"
   },
   "keywords": [
     "Bentley",

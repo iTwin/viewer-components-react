@@ -22,6 +22,13 @@ npm install @itwin/quantity-formatting-react
 
 ## Components
 
+This package provides four main React components for quantity formatting:
+
+- **QuantityFormatPanel**: Complete formatting configuration with live preview
+- **FormatPanel**: Flexible format property editor
+- **FormatSample**: Real-time formatting preview component
+- **FormatSelector**: Dropdown for selecting from predefined format sets
+
 ### QuantityFormatPanel
 
 The main component for configuring quantity formatting. It provides a complete user interface for setting up format properties and includes a live formatting preview.
@@ -30,11 +37,11 @@ The main component for configuring quantity formatting. It provides a complete u
 
 ```typescript
 interface QuantityFormatPanelProps {
-  formatDefinition: FormatDefinition;           // Current format configuration
-  unitsProvider: UnitsProvider;            // Provider for unit definitions
+  formatDefinition: FormatDefinition; // Current format configuration
+  unitsProvider: UnitsProvider; // Provider for unit definitions
   onFormatChange: (formatProps: FormatDefinition) => void; // Callback when format changes
-  initialMagnitude?: number;               // Initial value for sample preview (default: 0)
-  showSample?: boolean;                    // Whether to show the format sample (default: true)
+  initialMagnitude?: number; // Initial value for sample preview (default: 0)
+  showSample?: boolean; // Whether to show the format sample (default: true)
 }
 ```
 
@@ -72,15 +79,9 @@ function QuantityFormatDialog() {
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)}>
-        Configure Format
-      </Button>
+      <Button onClick={() => setIsOpen(true)}>Configure Format</Button>
 
-      <Modal
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        title="Quantity Format Settings"
-      >
+      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Quantity Format Settings">
         <QuantityFormatPanel
           formatDefinition={formatDefinition}
           unitsProvider={IModelApp.quantityFormatter.unitsProvider}
@@ -110,10 +111,10 @@ A flexible component for editing format properties with customizable primary and
 
 ```typescript
 interface FormatPanelProps {
-  formatDefinition: FormatDefinition;      // Current format configuration
-  unitsProvider: UnitsProvider;            // Provider for unit definitions
+  formatDefinition: FormatDefinition; // Current format configuration
+  unitsProvider: UnitsProvider; // Provider for unit definitions
   onFormatChange: (formatProps: FormatDefinition) => void; // Callback when format changes
-  persistenceUnit?: UnitProps;             // Unit for persistence/storage
+  persistenceUnit?: UnitProps; // Unit for persistence/storage
 }
 ```
 
@@ -168,10 +169,10 @@ A component that provides real-time preview of how values will be formatted usin
 
 ```typescript
 interface FormatSampleProps {
-  formatProps: FormatDefinition;           // Format configuration to preview
-  unitsProvider: UnitsProvider;            // Provider for unit definitions
-  persistenceUnit?: UnitProps;             // Unit for the input value
-  initialMagnitude?: number;               // Initial value to display (default: 0)
+  formatProps: FormatDefinition; // Format configuration to preview
+  unitsProvider: UnitsProvider; // Provider for unit definitions
+  persistenceUnit?: UnitProps; // Unit for the input value
+  initialMagnitude?: number; // Initial value to display (default: 0)
 }
 ```
 
@@ -199,11 +200,7 @@ function FormatPreview() {
   return (
     <div style={{ padding: "16px" }}>
       <h3>Format Preview</h3>
-      <FormatSample
-        formatProps={format}
-        unitsProvider={IModelApp.quantityFormatter.unitsProvider}
-        initialMagnitude={123.456789}
-      />
+      <FormatSample formatProps={format} unitsProvider={IModelApp.quantityFormatter.unitsProvider} initialMagnitude={123.456789} />
     </div>
   );
 }
@@ -219,8 +216,8 @@ A dropdown component for selecting from predefined format definitions within a f
 
 ```typescript
 interface FormatSelectorProps {
-  activeFormatSet?: FormatSet;             // Set of available formats
-  activeFormatDefinitionKey?: string;      // Currently selected format key
+  activeFormatSet?: FormatSet; // Set of available formats
+  activeFormatDefinitionKey?: string; // Currently selected format key
   onListItemChange: (formatDefinition: FormatDefinition, key: string) => void; // Selection callback
 }
 ```
@@ -238,10 +235,7 @@ import type { FormatDefinition, FormatSet } from "@itwin/ecschema-metadata";
 function FormatSelectionPanel({ formatSet }: { formatSet?: FormatSet }) {
   const [selectedKey, setSelectedKey] = useState<string>();
 
-  const handleFormatSelection = useCallback((
-    formatDef: FormatDefinition,
-    key: string
-  ) => {
+  const handleFormatSelection = useCallback((formatDef: FormatDefinition, key: string) => {
     setSelectedKey(key);
     console.log("Selected format:", formatDef.label, "with key:", key);
   }, []);
@@ -249,12 +243,73 @@ function FormatSelectionPanel({ formatSet }: { formatSet?: FormatSet }) {
   return (
     <div style={{ padding: "16px" }}>
       <h3>Select a Format</h3>
-      <FormatSelector
-        activeFormatSet={formatSet}
-        activeFormatDefinitionKey={selectedKey}
-        onListItemChange={handleFormatSelection}
-      />
+      <FormatSelector activeFormatSet={formatSet} activeFormatDefinitionKey={selectedKey} onListItemChange={handleFormatSelection} />
     </div>
+  );
+}
+```
+
+</details>
+
+## Complete Example
+
+Here's a comprehensive example showing how to use FormatSelector together with QuantityFormatPanel:
+
+<details>
+<summary>Complete integration example</summary>
+
+```tsx
+import React, { useState, useCallback } from "react";
+import { FormatSelector, QuantityFormatPanel } from "@itwin/quantity-formatting-react";
+import { IModelApp } from "@itwin/core-frontend";
+import { Modal, Button, ModalButtonBar } from "@itwin/itwinui-react";
+import type { FormatDefinition, FormatSet } from "@itwin/ecschema-metadata";
+
+function QuantityFormatDialog({ formatSet }: { formatSet?: FormatSet }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [formatDefinition, setFormatDefinition] = useState<FormatDefinition | undefined>();
+  const [selectedFormatKey, setSelectedFormatKey] = useState<string>();
+
+  const handleFormatSelection = useCallback((formatDef: FormatDefinition, key: string) => {
+    setFormatDefinition(formatDef);
+    setSelectedFormatKey(key);
+  }, []);
+
+  const handleFormatChange = useCallback((newFormat: FormatDefinition) => {
+    setFormatDefinition(newFormat);
+  }, []);
+
+  return (
+    <>
+      <Button onClick={() => setIsOpen(true)}>Configure Format</Button>
+
+      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Quantity Format Settings">
+        <div style={{ padding: "16px" }}>
+          <div style={{ marginBottom: "16px" }}>
+            <h4>Select a Format</h4>
+            <FormatSelector activeFormatSet={formatSet} activeFormatDefinitionKey={selectedFormatKey} onListItemChange={handleFormatSelection} />
+          </div>
+
+          {formatDefinition && (
+            <div>
+              <h4>Customize Format</h4>
+              <QuantityFormatPanel
+                formatDefinition={formatDefinition}
+                unitsProvider={IModelApp.quantityFormatter.unitsProvider}
+                onFormatChange={handleFormatChange}
+              />
+            </div>
+          )}
+        </div>
+
+        <ModalButtonBar>
+          <Button onClick={() => setIsOpen(false)}>Cancel</Button>
+          <Button styleType="high-visibility" onClick={() => setIsOpen(false)} disabled={!formatDefinition}>
+            Apply Format
+          </Button>
+        </ModalButtonBar>
+      </Modal>
+    </>
   );
 }
 ```
