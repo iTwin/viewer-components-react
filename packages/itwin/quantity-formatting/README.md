@@ -12,7 +12,7 @@ This package provides React components for working with quantities and their for
 - **Real-time Preview**: Live formatting preview as you adjust settings
 - **Unit Management**: Support for composite units and unit conversion
 - **Flexible UI Components**: Modular components that can be embedded in dialogs, panels, or custom UIs
-- **Format Selection**: Choose from predefined formats or create custom ones
+- **Format Selection**: Choose from predefined formats to customize
 
 ## Installation
 

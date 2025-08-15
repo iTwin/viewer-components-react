@@ -38,6 +38,7 @@ export function FormatSample(props: FormatSampleProps) {
   const [formatSpec, setFormatSpec] = React.useState<FormatterSpec | undefined>(
     undefined
   );
+  const [formattedValue, setFormattedValue] = React.useState("");
   const { translate } = useTranslation();
   const inputId = React.useId();
   // Create FormatterSpec when formatProps or persistenceUnit changes
@@ -75,6 +76,15 @@ export function FormatSample(props: FormatSampleProps) {
     setSampleValue(value.toString());
   }, [initialMagnitude]);
 
+  // Update formatted value when magnitude or formatSpec changes
+  React.useEffect(() => {
+    if (formatSpec) {
+      setFormattedValue(formatSpec.applyFormatting(magnitude));
+    } else {
+      setFormattedValue("");
+    }
+  }, [magnitude, formatSpec]);
+
   const handleOnValueBlur = React.useCallback(() => {
     let newValue = Number.parseFloat(sampleValue);
     if (Number.isNaN(newValue)) newValue = 0;
@@ -84,6 +94,9 @@ export function FormatSample(props: FormatSampleProps) {
 
   const handleOnValueChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
+      let newValue = Number.parseFloat(sampleValue);
+      if (Number.isNaN(newValue)) newValue = 0;
+      setMagnitude(newValue);
       setSampleValue(event.target.value);
     },
     []
@@ -91,6 +104,20 @@ export function FormatSample(props: FormatSampleProps) {
 
   const handleKeyDown = React.useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
+      // Allow control keys (Backspace, Delete, Tab, Escape, Enter, Arrow keys)
+      const allowedControlKeys = [
+        'Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
+        'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+        'Home', 'End'
+      ];
+
+      // Allow control keys, numbers (0-9), and decimal point
+      if (!allowedControlKeys.includes(e.key) && !/^[0-9.]$/.test(e.key)) {
+        e.preventDefault();
+        return;
+      }
+
+      // Handle Enter key - update magnitude and sampleValue
       if (e.key === "Enter") {
         let newValue = Number.parseFloat(sampleValue);
         if (Number.isNaN(newValue)) newValue = 0;
@@ -105,9 +132,6 @@ export function FormatSample(props: FormatSampleProps) {
   const activePersistenceUnitLabel = formatSpec
     ? formatSpec.persistenceUnit.label
     : persistenceUnit?.label ?? "";
-  const formattedValue = formatSpec
-    ? formatSpec.applyFormatting(magnitude)
-    : "";
 
   return (
     <div className="quantityFormat--formatSample-container">

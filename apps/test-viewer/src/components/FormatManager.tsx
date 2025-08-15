@@ -134,7 +134,7 @@ export class FormatManager {
                 if (format) {
                   if (format.label) {
                     if (usedLabels.has(format.label)) {
-                      (format as any).label = format.name ?? format.label;
+                      (format as any).label = `${format.label} (${schemaItem.key.schemaName})`;
                     }
                     usedLabels.add(format.label);
                   }
@@ -172,7 +172,8 @@ export class FormatManager {
         if (format) {
           if (format.label) {
             if (usedLabels.has(format.label)) {
-              (format as any).label = format.name ?? format.label;
+              const schemaName = formatName.split(".")[0];
+              (format as any).label = `${format.label} (${schemaName})`;
             }
             usedLabels.add(format.label);
           }

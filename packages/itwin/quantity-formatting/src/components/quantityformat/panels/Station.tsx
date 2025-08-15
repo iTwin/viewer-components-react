@@ -16,6 +16,8 @@ import {
 import { FormatPrecision } from "../internal/FormatPrecision.js";
 import { StationSeparator } from "../internal/StationSeparator.js";
 import { StationOffset } from "../internal/StationOffset.js";
+import { StationBaseFactor } from "../internal/StationBaseFactor.js";
+import { StationBaseFactorPreset } from "../internal/StationBaseFactorPreset.js";
 import { ShowTrailingZeros } from "../internal/ShowTrailingZeros.js";
 import { SignOption } from "../internal/SignOption.js";
 import { KeepDecimalPoint } from "../internal/KeepDecimalPoint.js";
@@ -67,6 +69,7 @@ export function StationPrimaryChildren(props: PanelProps): React.ReactElement {
         />
       )}
       <FormatPrecision formatProps={formatProps} onChange={onFormatChange} />
+      <StationBaseFactorPreset formatProps={formatProps} onChange={onFormatChange} />
       {/* Add station offset, precision, etc. controls here */}
     </div>
   );
@@ -91,6 +94,7 @@ export function StationSecondaryChildren(
     <div className="quantityFormat--formatPanel-secondaryChildren">
       <SignOption formatProps={formatProps} onChange={onFormatChange} />
       <StationOffset formatProps={formatProps} onChange={onFormatChange} />
+      <StationBaseFactor formatProps={formatProps} onChange={onFormatChange} />
       <StationSeparator formatProps={formatProps} onChange={onFormatChange} />
       <UseThousandsSeparator
         formatProps={formatProps}

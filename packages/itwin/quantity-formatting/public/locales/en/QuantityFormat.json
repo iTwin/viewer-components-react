@@ -22,6 +22,8 @@
       "signOptionLabel": "Sign Option",
       "signOptionTooltip": "Controls when + or - signs appear",
       "stationOffsetLabel": "Station Format",
+      "stationBaseFactorLabel": "Station Base Factor",
+      "stationPresetLabel": "How Many Units Per Station",
       "stationSeparatorLabel": "Station Separator",
       "decimalSeparatorLabel": "Decimal Separator",
       "showTrailZerosLabel": "Show Trailing Zeros",
