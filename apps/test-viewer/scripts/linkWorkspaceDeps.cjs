@@ -43,6 +43,10 @@ const packages = [
     name: "@itwin/one-click-lca-react",
     dir: "one-click-lca-widget",
   },
+  {
+    name: "@itwin/quantity-formatting-react",
+    dir: "quantity-formatting",
+  },
 ];
 
 linkPackages();

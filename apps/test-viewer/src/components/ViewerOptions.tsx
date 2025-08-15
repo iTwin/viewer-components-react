@@ -9,6 +9,7 @@ import { TransientIdSequence } from "@itwin/core-bentley";
 import { SvgSelection, SvgVisibilityShow, SvgZoomInCircular } from "@itwin/itwinui-icons-react";
 import { IconButton, Select } from "@itwin/itwinui-react";
 import { Presentation } from "@itwin/presentation-frontend";
+import { QuantityFormatButton } from "./QuantityFormatButton";
 
 import type { SelectionScopesManager } from "@itwin/presentation-frontend";
 import type { PropsWithChildren } from "react";
@@ -70,6 +71,12 @@ export const statusBarActionsProvider: UiItemsProvider = {
       id: `addTransientElementToSelectionButton`,
       content: <AddTransientElementToSelectionButton />,
       itemPriority: 4,
+      section: StatusBarSection.Left,
+    },
+    {
+      id: `quantityFormatButton`,
+      content: <QuantityFormatButton />,
+      itemPriority: 5,
       section: StatusBarSection.Left,
     },
     {
