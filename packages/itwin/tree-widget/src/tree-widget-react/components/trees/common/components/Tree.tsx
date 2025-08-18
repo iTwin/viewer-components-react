@@ -182,7 +182,7 @@ function TreeBaseImpl({
   });
   const reportingExpandNode = useReportingAction({ action: treeRendererProps.expandNode });
   const reportingOnFilterClicked = useReportingAction({ action: onFilterClick });
-  // Don't highligh nodes if tree isReloading
+  // Don't highlight nodes if tree is reloading
   const { getLabel } = useNodeHighlighting({ highlightText: isReloading ? undefined : highlightText });
 
   if (treeRendererProps.rootNodes.length === 0 && !isReloading) {
