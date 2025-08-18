@@ -264,7 +264,7 @@ class ClassificationsTreeFilteredNodesHandler extends FilteredNodesHandler<
     };
   }
 
-  public async getType(className: string): Promise<FilteredTreeNode["type"]> {
+  public async getType(className: string): Promise<TemporaryFilteredTreeNode["type"]> {
     if (await this._props.imodelAccess.classDerivesFrom(className, CLASS_NAME_ClassificationTable)) {
       return "classificationTable";
     }
