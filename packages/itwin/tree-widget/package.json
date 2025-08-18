@@ -1,6 +1,6 @@
 {
   "name": "@itwin/tree-widget-react",
-  "version": "4.0.0-alpha.14",
+  "version": "4.0.0-alpha.15",
   "description": "Tree Widget React",
   "keywords": [
     "Bentley",
@@ -56,13 +56,16 @@
   "peerDependencies": {
     "@itwin/appui-abstract": "^5.0.0",
     "@itwin/appui-react": "^5.5.0",
+    "@itwin/core-bentley": "^5.0.0",
     "@itwin/components-react": "^5.5.0",
+    "@itwin/core-common": "^5.0.0",
     "@itwin/core-frontend": "^5.0.0",
     "@itwin/ecschema-metadata": "^5.0.0",
     "@stratakit/icons": "^0.1.0",
     "@stratakit/bricks": "^0.3.3",
     "@stratakit/foundations": "^0.2.2",
     "@stratakit/structures": "^0.3.1",
+    "@itwin/presentation-common": "^5.0.0",
     "@itwin/presentation-components": "^5.12.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
