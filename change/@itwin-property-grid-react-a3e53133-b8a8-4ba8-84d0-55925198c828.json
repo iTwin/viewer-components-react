@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Bump package dependencies.",
+  "packageName": "@itwin/property-grid-react",
+  "email": "35135765+grigasp@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

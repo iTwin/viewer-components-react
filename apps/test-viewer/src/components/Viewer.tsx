@@ -95,23 +95,24 @@ function ViewerWithOptions() {
 }
 
 function onIModelConnected(imodel: IModelConnection) {
-  // need this temporarily for e2e tests, until a fix for https://github.com/iTwin/itwinjs-core/issues/7496 is consumed
-  setTimeout(() => {
-    IModelConnection.onOpen.raiseEvent(imodel);
-  }, 1000);
   const setupFormatsProvider = async () => {
     try {
+      let removeListener: () => void | undefined;
       const schemaUnitsProvider = new SchemaUnitProvider(imodel.schemaContext);
       IModelApp.quantityFormatter.unitsProvider = schemaUnitsProvider;
+      // FormatManager will handle assigning a FormatsProvider to IModelApp.formatsProvider, if not used then init a SchemaFormatsProvider here
       if (FormatManager.instance) {
         await FormatManager.instance?.onIModelOpen(imodel);
       } else {
         const schemaFormatsProvider = new SchemaFormatsProvider(imodel.schemaContext, IModelApp.quantityFormatter.activeUnitSystem);
+        removeListener = IModelApp.quantityFormatter.onActiveFormattingUnitSystemChanged.addListener((args) => {
+          schemaFormatsProvider.unitSystem = args.system;
+        });
         IModelApp.formatsProvider = schemaFormatsProvider;
       }
-      console.log("Registered SchemaFormatsProvider, SchemaUnitProvider");
       IModelConnection.onClose.addOnce(() => {
         IModelApp.resetFormatsProvider();
+        removeListener?.();
         void IModelApp.quantityFormatter.resetToUseInternalUnitsProvider();
         if (FormatManager.instance) void FormatManager.instance.onIModelClose();
         console.log("Unregistered SchemaFormatsProvider, SchemaUnitProvider");
