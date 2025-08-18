@@ -7,13 +7,12 @@ import "./Tree.css";
 import { useCallback, useState } from "react";
 import { BeEvent } from "@itwin/core-bentley";
 import { SchemaMetadataContextProvider } from "@itwin/presentation-components";
-import { StrataKitRootErrorRenderer, useIModelUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
+import { StrataKitRootErrorRenderer, useIModelUnifiedSelectionTree, useNodeHighlighting } from "@itwin/presentation-hierarchies-react";
 import { TreeWidget } from "../../../../TreeWidget.js";
 import { useHierarchiesLocalization } from "../internal/UseHierarchiesLocalization.js";
 import { useHierarchyLevelFiltering } from "../internal/UseHierarchyFiltering.js";
 import { useIModelAccess } from "../internal/UseIModelAccess.js";
 import { useIModelChangeListener } from "../internal/UseIModelChangeListener.js";
-import { useNodeHighlighting } from "../UseNodeHighlighting.js";
 import { useReportingAction, useTelemetryContext } from "../UseTelemetryContext.js";
 import { LOGGING_NAMESPACE } from "../Utils.js";
 import { Delayed } from "./Delayed.js";
@@ -33,7 +32,6 @@ import type {
 } from "@itwin/presentation-hierarchies-react";
 import type { FunctionProps } from "../Utils.js";
 import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
-import type { HighlightInfo } from "../UseNodeHighlighting.js";
 
 /** @beta */
 export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPaths" | "getHierarchyDefinition"> &
@@ -61,8 +59,8 @@ export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPa
     emptyTreeContent?: ReactNode;
     /** Callback that this invoked when tree reloads. */
     onReload?: () => void;
-    /** Options for highlighting node labels. */
-    highlight?: HighlightInfo;
+    /** Text that should be highlighted in node labels. */
+    highlightText?: string;
   };
 
 /**
@@ -168,7 +166,7 @@ function TreeBaseImpl({
   selectionPredicate,
   selectionMode,
   treeRenderer,
-  highlight,
+  highlightText,
   treeRendererProps,
   isReloading,
   getNode,
@@ -184,7 +182,8 @@ function TreeBaseImpl({
   });
   const reportingExpandNode = useReportingAction({ action: treeRendererProps.expandNode });
   const reportingOnFilterClicked = useReportingAction({ action: onFilterClick });
-  const { getLabel } = useNodeHighlighting({ rootNodes: treeRendererProps.rootNodes, highlight });
+  // Don't highlight nodes if tree is reloading
+  const { getLabel } = useNodeHighlighting({ highlightText: isReloading ? undefined : highlightText });
 
   if (treeRendererProps.rootNodes.length === 0 && !isReloading) {
     return <>{emptyTreeContent ? emptyTreeContent : <EmptyTreeContent />}</>;
