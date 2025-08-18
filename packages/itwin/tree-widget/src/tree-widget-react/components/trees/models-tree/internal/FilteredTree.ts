@@ -215,7 +215,7 @@ class ModelsTreeFilteredNodesHandler extends FilteredNodesHandler<ProcessedFilte
     throw new Error("Invalid parent node type");
   }
 
-    public async getType(className: string): Promise<FilteredTreeNode["type"]> {
+  public async getType(className: string): Promise<FilteredTreeNode["type"]> {
     if (await this._props.imodelAccess.classDerivesFrom(className, CLASS_NAME_Subject)) {
       return "subject";
     }
