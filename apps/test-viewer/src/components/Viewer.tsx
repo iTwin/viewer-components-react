@@ -92,11 +92,6 @@ function ViewerWithOptions() {
 function onIModelConnected(imodel: IModelConnection) {
   const setupFormatsProvider = async () => {
     try {
-      // const schema = await imodel.schemaContext.getSchema(new SchemaKey("AecUnits", SchemaMatchType.Latest));
-      // if (!schema) {
-      //   throw new Error("AecUnits schema not found in iModel");
-      // }
-
       const schemaFormatsProvider = new SchemaFormatsProvider(imodel.schemaContext, IModelApp.quantityFormatter.activeUnitSystem);
       const removeListener = IModelApp.quantityFormatter.onActiveFormattingUnitSystemChanged.addListener((args) => {
         schemaFormatsProvider.unitSystem = args.system;
