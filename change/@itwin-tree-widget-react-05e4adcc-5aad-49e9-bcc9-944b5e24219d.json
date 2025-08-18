@@ -1,6 +1,6 @@
 {
   "type": "prerelease",
-  "comment": "TreeProps highlight property has been replaced with highlightText. UseClassificationsTreeResult, UseModelsTreeResult and UseCategoriesTreeResult now have highlightText istead of highlight.",
+  "comment": "Renamed `highlight` property to `highlightText` in the following interfaces: `TreeProps`, `UseClassificationsTreeResult`, `UseModelsTreeResult` and `UseCategoriesTreeResult`.",
   "packageName": "@itwin/tree-widget-react",
   "email": "100586436+JonasDov@users.noreply.github.com",
   "dependentChangeType": "patch"
