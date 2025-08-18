@@ -5,10 +5,6 @@ settings:
   excludeLinksFromLockfile: false
   injectWorkspacePackages: true
 
-overrides:
-  '@itwin/itwinui-react@^2': 2.12.26
-  '@itwin/itwinui-react@^3': 3.19.0
-
 pnpmfileChecksum: sha256-E2jNlu7vvNbcOUYIOxolUAA8EHZ437t7v9NMvw89a6o=
 
 importers:
