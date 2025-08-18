@@ -47,7 +47,7 @@ export async function createFilteredModelsTree(props: {
   return createFilteredTree({
     getType: async (className) => getType(imodelAccess, className),
     createFilteredTreeNode,
-    filteredNodesHanlder: new ModelsTreeFilteredNodesHandler(),
+    filteredNodesHandler: new ModelsTreeFilteredNodesHandler(),
     filteringPaths,
   });
 }

@@ -46,7 +46,7 @@ export interface CreateFilteredTreeProps<TFilterTargets, TFilteredTreeNode exten
     isFilterTarget: boolean;
     parent: TFilteredTreeNode | FilteredTreeRootNode<TFilteredTreeNode>;
   }) => TFilteredTreeNode;
-  filteredNodesHanlder: FilteredNodesHandler<TFilterTargets, TFilteredTreeNode>;
+  filteredNodesHandler: FilteredNodesHandler<TFilterTargets, TFilteredTreeNode>;
   filteringPaths: HierarchyFilteringPath[];
 }
 
@@ -54,7 +54,7 @@ export interface CreateFilteredTreeProps<TFilterTargets, TFilteredTreeNode exten
 export async function createFilteredTree<TFilterTargets, TFilteredTreeNode extends BaseFilteredTreeNode<TFilteredTreeNode>>(
   props: CreateFilteredTreeProps<TFilterTargets, TFilteredTreeNode>,
 ): Promise<FilteredTree<TFilterTargets>> {
-  const { filteringPaths, createFilteredTreeNode, filteredNodesHanlder, getType } = props;
+  const { filteringPaths, createFilteredTreeNode, filteredNodesHandler, getType } = props;
   const root: FilteredTreeRootNode<TFilteredTreeNode> = {
     children: new Map(),
   };
@@ -90,19 +90,19 @@ export async function createFilteredTree<TFilterTargets, TFilteredTreeNode exten
       });
       (parentNode.children ??= new Map()).set(identifier.id, newNode);
       parentNode = newNode;
-      filteredNodesHanlder.saveFilteredNode(newNode);
+      filteredNodesHandler.saveFilteredNode(newNode);
     }
   }
-  await filteredNodesHanlder.prepareSavedNodes();
+  await filteredNodesHandler.prepareSavedNodes();
   return {
-    getFilterTargets: (node: HierarchyNode) => getNodeFilterTargets(root, node, filteredNodesHanlder),
+    getFilterTargets: (node: HierarchyNode) => getNodeFilterTargets(root, node, filteredNodesHandler),
   };
 }
 
 function getNodeFilterTargets<TFilterTargets, TFilteredTreeNode extends BaseFilteredTreeNode<TFilteredTreeNode>>(
   root: FilteredTreeRootNode<TFilteredTreeNode>,
   node: HierarchyNode,
-  filteredNodesHanlder: FilteredNodesHandler<TFilterTargets, TFilteredTreeNode>,
+  filteredNodesHandler: FilteredNodesHandler<TFilterTargets, TFilteredTreeNode>,
 ): TFilterTargets | undefined {
   let lookupParents: Array<{ children?: Map<Id64String, TFilteredTreeNode> }> = [root];
 
@@ -132,7 +132,7 @@ function getNodeFilterTargets<TFilterTargets, TFilteredTreeNode extends BaseFilt
     return undefined;
   }
 
-  return filteredNodesHanlder.convertNodesToFilterTargets(filteredNodes);
+  return filteredNodesHandler.convertNodesToFilterTargets(filteredNodes);
 }
 
 function findMatchingFilteredNodes<TFilteredTreeNode>(lookupParents: Array<{ children?: Map<Id64String, TFilteredTreeNode> }>, keys: InstanceKey[]) {

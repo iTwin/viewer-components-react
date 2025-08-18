@@ -85,7 +85,7 @@ export async function createFilteredCategoriesTree(props: {
   return createFilteredTree({
     getType: async (className) => getType(imodelAccess, className, categoryClassName, categoryElementClassName, categoryModelClassName),
     createFilteredTreeNode,
-    filteredNodesHanlder: new CategoriesTreeFilteredNodesHandler({ idsCache }),
+    filteredNodesHandler: new CategoriesTreeFilteredNodesHandler({ idsCache }),
     filteringPaths,
   });
 }

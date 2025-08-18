@@ -72,7 +72,7 @@ export async function createFilteredClassificationsTree(props: {
   return createFilteredTree({
     getType: async (className) => getType(imodelAccess, className),
     createFilteredTreeNode,
-    filteredNodesHanlder: new ClassificationsTreeFilteredNodesHandler({ idsCache }),
+    filteredNodesHandler: new ClassificationsTreeFilteredNodesHandler({ idsCache }),
     filteringPaths,
   });
 }
