@@ -5,13 +5,13 @@
 
 import { assert } from "@itwin/core-bentley";
 import { CLASS_NAME_Category, CLASS_NAME_Model, CLASS_NAME_Subject } from "../../common/internal/ClassNameDefinitions.js";
-import { createFilteredTree } from "../../common/internal/visibility/BaseFilteredTree.js";
+import { createFilteredTree, FilteredNodesHandler } from "../../common/internal/visibility/BaseFilteredTree.js";
 
-import type { BaseFilteredTreeNode, FilteredNodesHandler, FilteredTree, FilteredTreeRootNode } from "../../common/internal/visibility/BaseFilteredTree.js";
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
+import type { BaseFilteredTreeNode, FilteredTree, FilteredTreeRootNode } from "../../common/internal/visibility/BaseFilteredTree.js";
 
 interface GenericFilteredTreeNode extends BaseFilteredTreeNode<GenericFilteredTreeNode> {
   type: "subject" | "model";
@@ -45,9 +45,7 @@ export async function createFilteredModelsTree(props: {
 }): Promise<FilteredTree<ModelsTreeFilterTargets>> {
   const { imodelAccess, filteringPaths } = props;
   return createFilteredTree({
-    getType: async (className) => getType(imodelAccess, className),
-    createFilteredTreeNode,
-    filteredNodesHandler: new ModelsTreeFilteredNodesHandler(),
+    filteredNodesHandler: new ModelsTreeFilteredNodesHandler({ imodelAccess }),
     filteringPaths,
   });
 }
@@ -59,7 +57,21 @@ interface FilterTargetsInternal {
   elements?: Map<ModelCategoryKey, Set<ElementId>>;
 }
 
-class ModelsTreeFilteredNodesHandler implements FilteredNodesHandler<ModelsTreeFilterTargets, FilteredTreeNode> {
+interface ModelsTreeFilteredNodesHandlerProps {
+  imodelAccess: ECClassHierarchyInspector;
+}
+
+type ModelCategoryKey = `${ModelId}-${CategoryId}`;
+
+interface ProcessedFilteredNodes {
+  root: FilteredTreeRootNode<FilteredTreeNode>;
+}
+
+class ModelsTreeFilteredNodesHandler extends FilteredNodesHandler<ProcessedFilteredNodes, ModelsTreeFilterTargets, FilteredTreeNode> {
+  constructor(private readonly _props: ModelsTreeFilteredNodesHandlerProps) {
+    super();
+  }
+
   public convertNodesToFilterTargets(filteredNodes: FilteredTreeNode[]): ModelsTreeFilterTargets | undefined {
     const filterTargets: FilterTargetsInternal = {};
 
@@ -68,8 +80,9 @@ class ModelsTreeFilteredNodesHandler implements FilteredNodesHandler<ModelsTreeF
     return this.convertInternalFilterTargets(filterTargets);
   }
 
-  public async prepareSavedNodes() {}
-  public saveFilteredNode() {}
+  public async processFilteredNodes(_: FilteredTreeNode[], root: FilteredTreeRootNode<FilteredTreeNode>): Promise<ProcessedFilteredNodes> {
+    return { root };
+  }
 
   private convertInternalFilterTargets(filterTargets: FilterTargetsInternal): ModelsTreeFilterTargets | undefined {
     if (!filterTargets.categories && !filterTargets.subjectIds && !filterTargets.elements && !filterTargets.modelIds) {
@@ -84,7 +97,7 @@ class ModelsTreeFilteredNodesHandler implements FilteredNodesHandler<ModelsTreeF
         : undefined,
       elements: filterTargets.elements
         ? [...filterTargets.elements.entries()].map(([modelCategoryKey, elementIds]) => {
-            const { modelId, categoryId } = parseModelCategoryKey(modelCategoryKey);
+            const { modelId, categoryId } = this.parseModelCategoryKey(modelCategoryKey);
             return { modelId, categoryId, elementIds };
           })
         : undefined,
@@ -130,7 +143,7 @@ class ModelsTreeFilteredNodesHandler implements FilteredNodesHandler<ModelsTreeF
         filterTargets.categories.set(node.modelId, new Set([node.id]));
         return;
       case "element":
-        const modelCategoryKey = createModelCategoryKey(node.modelId, node.categoryId);
+        const modelCategoryKey = this.createModelCategoryKey(node.modelId, node.categoryId);
         const elements = (filterTargets.elements ??= new Map()).get(modelCategoryKey);
         if (elements) {
           elements.add(node.id);
@@ -140,80 +153,78 @@ class ModelsTreeFilteredNodesHandler implements FilteredNodesHandler<ModelsTreeF
         return;
     }
   }
-}
 
-type ModelCategoryKey = `${ModelId}-${CategoryId}`;
-
-function createModelCategoryKey(modelId: Id64String, categoryId: Id64String): ModelCategoryKey {
-  return `${modelId}-${categoryId}`;
-}
-
-function parseModelCategoryKey(key: ModelCategoryKey) {
-  const [modelId, categoryId] = key.split("-");
-  return { modelId, categoryId };
-}
-
-function createFilteredTreeNode({
-  type,
-  id,
-  isFilterTarget,
-  parent,
-}: {
-  type: FilteredTreeNode["type"];
-  id: string;
-  isFilterTarget: boolean;
-  parent: FilteredTreeNode | FilteredTreeRootNode<FilteredTreeNode>;
-}): FilteredTreeNode {
-  if (type === "subject" || type === "model") {
-    return {
-      id,
-      isFilterTarget,
-      type,
-    };
+  private createModelCategoryKey(modelId: Id64String, categoryId: Id64String): ModelCategoryKey {
+    return `${modelId}-${categoryId}`;
   }
 
-  if (type === "category") {
-    assert("type" in parent && parent.type === "model");
-    return {
-      id,
-      isFilterTarget,
-      type,
-      modelId: parent.id,
-    };
+  private parseModelCategoryKey(key: ModelCategoryKey): { modelId: Id64String; categoryId: Id64String } {
+    const [modelId, categoryId] = key.split("-");
+    return { modelId, categoryId };
   }
 
-  if ("type" in parent && parent.type === "category") {
-    return {
-      id,
-      isFilterTarget,
-      type,
-      modelId: parent.modelId,
-      categoryId: parent.id,
-    };
+  public createFilteredTreeNode({
+    type,
+    id,
+    isFilterTarget,
+    parent,
+  }: {
+    type: FilteredTreeNode["type"];
+    id: string;
+    isFilterTarget: boolean;
+    parent: FilteredTreeNode | FilteredTreeRootNode<FilteredTreeNode>;
+  }): FilteredTreeNode {
+    if (type === "subject" || type === "model") {
+      return {
+        id,
+        isFilterTarget,
+        type,
+      };
+    }
+
+    if (type === "category") {
+      assert("type" in parent && parent.type === "model");
+      return {
+        id,
+        isFilterTarget,
+        type,
+        modelId: parent.id,
+      };
+    }
+
+    if ("type" in parent && parent.type === "category") {
+      return {
+        id,
+        isFilterTarget,
+        type,
+        modelId: parent.modelId,
+        categoryId: parent.id,
+      };
+    }
+
+    if ("type" in parent && parent.type === "element") {
+      return {
+        id,
+        isFilterTarget,
+        type,
+        modelId: parent.modelId,
+        categoryId: parent.categoryId,
+      };
+    }
+
+    throw new Error("Invalid parent node type");
   }
 
-  if ("type" in parent && parent.type === "element") {
-    return {
-      id,
-      isFilterTarget,
-      type,
-      modelId: parent.modelId,
-      categoryId: parent.categoryId,
-    };
+    public async getType(className: string): Promise<FilteredTreeNode["type"]> {
+    if (await this._props.imodelAccess.classDerivesFrom(className, CLASS_NAME_Subject)) {
+      return "subject";
+    }
+    if (await this._props.imodelAccess.classDerivesFrom(className, CLASS_NAME_Model)) {
+      return "model";
+    }
+    if (await this._props.imodelAccess.classDerivesFrom(className, CLASS_NAME_Category)) {
+      return "category";
+    }
+    return "element";
   }
-
-  throw new Error("Invalid parent node type");
-}
-
-async function getType(hierarchyChecker: ECClassHierarchyInspector, className: string) {
-  if (await hierarchyChecker.classDerivesFrom(className, CLASS_NAME_Subject)) {
-    return "subject";
-  }
-  if (await hierarchyChecker.classDerivesFrom(className, CLASS_NAME_Model)) {
-    return "model";
-  }
-  if (await hierarchyChecker.classDerivesFrom(className, CLASS_NAME_Category)) {
-    return "category";
-  }
-  return "element";
 }

@@ -26,10 +26,57 @@ export interface BaseFilteredTreeNode<TFilteredTreeNode extends BaseFilteredTree
 }
 
 /** @internal */
-export abstract class FilteredNodesHandler<TFilterTargets, TFilteredTreeNode> {
-  public abstract convertNodesToFilterTargets(filteredNodes: TFilteredTreeNode[]): TFilterTargets | undefined;
-  public abstract saveFilteredNode(node: TFilteredTreeNode): void;
-  public abstract prepareSavedNodes(): Promise<void>;
+export abstract class FilteredNodesHandler<
+  TProcessedFilteredNodes extends { root: FilteredTreeRootNode<TFilteredTreeNode> },
+  TFilterTargets,
+  TFilteredTreeNode extends BaseFilteredTreeNode<TFilteredTreeNode>,
+> {
+  public abstract getType(className: string): Promise<TFilteredTreeNode["type"]>;
+  public abstract convertNodesToFilterTargets(filteredNodes: TFilteredTreeNode[], processedFilteredNodes: TProcessedFilteredNodes): TFilterTargets | undefined;
+  public abstract processFilteredNodes(nodes: TFilteredTreeNode[], root: FilteredTreeRootNode<TFilteredTreeNode>): Promise<TProcessedFilteredNodes>;
+  public abstract createFilteredTreeNode(props: {
+    type: TFilteredTreeNode["type"];
+    id: Id64String;
+    isFilterTarget: boolean;
+    parent: TFilteredTreeNode | FilteredTreeRootNode<TFilteredTreeNode>;
+  }): TFilteredTreeNode;
+  public getNodeFilterTargets(node: HierarchyNode, processedFilteredNodes: TProcessedFilteredNodes): TFilterTargets | undefined {
+    let lookupParents: Array<{ children?: Map<Id64String, TFilteredTreeNode> }> = [processedFilteredNodes.root];
+
+    const nodeKey = node.key;
+    if (!HierarchyNodeKey.isInstances(nodeKey)) {
+      return undefined;
+    }
+
+    // find the filtered parent nodes of the `node`
+    for (const parentKey of node.parentKeys) {
+      if (!HierarchyNodeKey.isInstances(parentKey)) {
+        continue;
+      }
+
+      // tree node might be merged from multiple instances. As filtered tree stores only one instance per node, we need to find all matching nodes
+      // and use them when checking for matching node in one level deeper.
+      const parentNodes = this.findMatchingFilteredNodes(lookupParents, parentKey.instanceKeys);
+      if (parentNodes.length === 0) {
+        return undefined;
+      }
+      lookupParents = parentNodes;
+    }
+
+    // find filtered nodes that match the `node`
+    const filteredNodes = this.findMatchingFilteredNodes(lookupParents, nodeKey.instanceKeys);
+    if (filteredNodes.length === 0) {
+      return undefined;
+    }
+
+    return this.convertNodesToFilterTargets(filteredNodes, processedFilteredNodes);
+  }
+
+  private findMatchingFilteredNodes(lookupParents: Array<{ children?: Map<Id64String, TFilteredTreeNode> }>, keys: InstanceKey[]) {
+    return lookupParents
+      .flatMap((lookup) => keys.map((key) => lookup.children?.get(key.id)))
+      .filter((lookupNode): lookupNode is TFilteredTreeNode => lookupNode !== undefined);
+  }
 }
 
 /** @internal */
@@ -38,26 +85,26 @@ export interface FilteredTree<TFilterTargets> {
 }
 
 /** @internal */
-export interface CreateFilteredTreeProps<TFilterTargets, TFilteredTreeNode extends BaseFilteredTreeNode<TFilteredTreeNode>> {
-  getType: (className: string) => Promise<string>;
-  createFilteredTreeNode: (props: {
-    type: TFilteredTreeNode["type"];
-    id: Id64String;
-    isFilterTarget: boolean;
-    parent: TFilteredTreeNode | FilteredTreeRootNode<TFilteredTreeNode>;
-  }) => TFilteredTreeNode;
-  filteredNodesHandler: FilteredNodesHandler<TFilterTargets, TFilteredTreeNode>;
+export interface CreateFilteredTreeProps<
+  TProcessedFilteredNodes extends { root: FilteredTreeRootNode<TFilteredTreeNode> },
+  TFilterTargets,
+  TFilteredTreeNode extends BaseFilteredTreeNode<TFilteredTreeNode>,
+> {
+  filteredNodesHandler: FilteredNodesHandler<TProcessedFilteredNodes, TFilterTargets, TFilteredTreeNode>;
   filteringPaths: HierarchyFilteringPath[];
 }
 
 /** @internal */
-export async function createFilteredTree<TFilterTargets, TFilteredTreeNode extends BaseFilteredTreeNode<TFilteredTreeNode>>(
-  props: CreateFilteredTreeProps<TFilterTargets, TFilteredTreeNode>,
-): Promise<FilteredTree<TFilterTargets>> {
-  const { filteringPaths, createFilteredTreeNode, filteredNodesHandler, getType } = props;
+export async function createFilteredTree<
+  TProcessedFilteredNodes extends { root: FilteredTreeRootNode<TFilteredTreeNode> },
+  TFilterTargets,
+  TFilteredTreeNode extends BaseFilteredTreeNode<TFilteredTreeNode>,
+>(props: CreateFilteredTreeProps<TProcessedFilteredNodes, TFilterTargets, TFilteredTreeNode>): Promise<FilteredTree<TFilterTargets>> {
+  const { filteringPaths, filteredNodesHandler } = props;
   const root: FilteredTreeRootNode<TFilteredTreeNode> = {
     children: new Map(),
   };
+  const filteredNodesArr = new Array<TFilteredTreeNode>();
 
   for (const filteringPath of filteringPaths) {
     const normalizedPath = HierarchyFilteringPath.normalize(filteringPath).path;
@@ -80,9 +127,9 @@ export async function createFilteredTree<TFilterTargets, TFilteredTreeNode exten
         continue;
       }
 
-      const type = await getType(identifier.className);
+      const type = await filteredNodesHandler.getType(identifier.className);
 
-      const newNode = createFilteredTreeNode({
+      const newNode = filteredNodesHandler.createFilteredTreeNode({
         type,
         id: identifier.id,
         isFilterTarget: i === normalizedPath.length - 1,
@@ -90,53 +137,11 @@ export async function createFilteredTree<TFilterTargets, TFilteredTreeNode exten
       });
       (parentNode.children ??= new Map()).set(identifier.id, newNode);
       parentNode = newNode;
-      filteredNodesHandler.saveFilteredNode(newNode);
+      filteredNodesArr.push(newNode);
     }
   }
-  await filteredNodesHandler.prepareSavedNodes();
+  const processedFilteredNodes = await filteredNodesHandler.processFilteredNodes(filteredNodesArr, root);
   return {
-    getFilterTargets: (node: HierarchyNode) => getNodeFilterTargets(root, node, filteredNodesHandler),
+    getFilterTargets: (node: HierarchyNode) => filteredNodesHandler.getNodeFilterTargets(node, processedFilteredNodes),
   };
-}
-
-function getNodeFilterTargets<TFilterTargets, TFilteredTreeNode extends BaseFilteredTreeNode<TFilteredTreeNode>>(
-  root: FilteredTreeRootNode<TFilteredTreeNode>,
-  node: HierarchyNode,
-  filteredNodesHandler: FilteredNodesHandler<TFilterTargets, TFilteredTreeNode>,
-): TFilterTargets | undefined {
-  let lookupParents: Array<{ children?: Map<Id64String, TFilteredTreeNode> }> = [root];
-
-  const nodeKey = node.key;
-  if (!HierarchyNodeKey.isInstances(nodeKey)) {
-    return undefined;
-  }
-
-  // find the filtered parent nodes of the `node`
-  for (const parentKey of node.parentKeys) {
-    if (!HierarchyNodeKey.isInstances(parentKey)) {
-      continue;
-    }
-
-    // tree node might be merged from multiple instances. As filtered tree stores only one instance per node, we need to find all matching nodes
-    // and use them when checking for matching node in one level deeper.
-    const parentNodes = findMatchingFilteredNodes(lookupParents, parentKey.instanceKeys);
-    if (parentNodes.length === 0) {
-      return undefined;
-    }
-    lookupParents = parentNodes;
-  }
-
-  // find filtered nodes that match the `node`
-  const filteredNodes = findMatchingFilteredNodes(lookupParents, nodeKey.instanceKeys);
-  if (filteredNodes.length === 0) {
-    return undefined;
-  }
-
-  return filteredNodesHandler.convertNodesToFilterTargets(filteredNodes);
-}
-
-function findMatchingFilteredNodes<TFilteredTreeNode>(lookupParents: Array<{ children?: Map<Id64String, TFilteredTreeNode> }>, keys: InstanceKey[]) {
-  return lookupParents
-    .flatMap((lookup) => keys.map((key) => lookup.children?.get(key.id)))
-    .filter((lookupNode): lookupNode is TFilteredTreeNode => lookupNode !== undefined);
 }

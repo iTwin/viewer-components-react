@@ -5,13 +5,13 @@
 
 import { assert } from "@itwin/core-bentley";
 import { CLASS_NAME_Classification, CLASS_NAME_ClassificationTable, CLASS_NAME_GeometricElement2d } from "../../common/internal/ClassNameDefinitions.js";
-import { createFilteredTree } from "../../common/internal/visibility/BaseFilteredTree.js";
+import { createFilteredTree, FilteredNodesHandler } from "../../common/internal/visibility/BaseFilteredTree.js";
 
-import type { BaseFilteredTreeNode, FilteredNodesHandler, FilteredTree, FilteredTreeNodeChildren } from "../../common/internal/visibility/BaseFilteredTree.js";
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
+import type { BaseFilteredTreeNode, FilteredTree, FilteredTreeNodeChildren, FilteredTreeRootNode } from "../../common/internal/visibility/BaseFilteredTree.js";
 import type { ClassificationsTreeIdsCache } from "./ClassificationsTreeIdsCache.js";
 
 interface ClassificationTableFilteredTreeNode extends BaseFilteredTreeNode<ClassificationTableFilteredTreeNode> {
@@ -70,9 +70,7 @@ export async function createFilteredClassificationsTree(props: {
 }): Promise<FilteredTree<ClassificationsTreeFilterTargets>> {
   const { imodelAccess, filteringPaths, idsCache } = props;
   return createFilteredTree({
-    getType: async (className) => getType(imodelAccess, className),
-    createFilteredTreeNode,
-    filteredNodesHandler: new ClassificationsTreeFilteredNodesHandler({ idsCache }),
+    filteredNodesHandler: new ClassificationsTreeFilteredNodesHandler({ idsCache, imodelAccess }),
     filteringPaths,
   });
 }
@@ -84,43 +82,71 @@ interface FilterTargetsInternal {
   classificationIds?: Id64Set;
 }
 
-class ClassificationsTreeFilteredNodesHandler implements FilteredNodesHandler<ClassificationsTreeFilterTargets, TemporaryFilteredTreeNode> {
-  private _filteredTemporary2dElements = new Map<Id64String, Omit<TemporaryElement2dFilteredNode, "children">>();
-  private _filteredTemporary3dElements = new Map<Id64String, Omit<TemporaryElement3dFilteredNode, "children">>();
-  private _filtered2dElements = new Map<Id64String, Omit<Element2dFilteredTreeNode, "children">>();
-  private _filtered3dElements = new Map<Id64String, Omit<Element3dFilteredTreeNode, "children">>();
+interface ClassificationsTreeFilteredNodesHandlerProps {
+  idsCache: ClassificationsTreeIdsCache;
+  imodelAccess: ECClassHierarchyInspector;
+}
 
-  constructor(private _props: { idsCache: ClassificationsTreeIdsCache }) {}
+type ModelCategoryKey = `${ModelId}-${CategoryId}`;
 
-  public saveFilteredNode(node: TemporaryFilteredTreeNode): void {
-    if (node.type === "element2d") {
-      this._filteredTemporary2dElements.set(node.id, node);
-    } else if (node.type === "element3d") {
-      this._filteredTemporary3dElements.set(node.id, node);
+interface ProcessedFilteredNodes {
+  filtered2dElements: Map<Id64String, Omit<Element2dFilteredTreeNode, "children">>;
+  filtered3dElements: Map<Id64String, Omit<Element3dFilteredTreeNode, "children">>;
+  root: FilteredTreeRootNode<TemporaryFilteredTreeNode>;
+}
+
+class ClassificationsTreeFilteredNodesHandler extends FilteredNodesHandler<
+  ProcessedFilteredNodes,
+  ClassificationsTreeFilterTargets,
+  TemporaryFilteredTreeNode
+> {
+  constructor(private readonly _props: ClassificationsTreeFilteredNodesHandlerProps) {
+    super();
+  }
+
+  public async processFilteredNodes(
+    nodes: TemporaryFilteredTreeNode[],
+    root: FilteredTreeRootNode<TemporaryFilteredTreeNode>,
+  ): Promise<ProcessedFilteredNodes> {
+    const filteredTemporary2dElements = new Map<Id64String, Omit<TemporaryElement2dFilteredNode, "children">>();
+    const filteredTemporary3dElements = new Map<Id64String, Omit<TemporaryElement3dFilteredNode, "children">>();
+    const result: ProcessedFilteredNodes = {
+      root,
+      filtered2dElements: new Map(),
+      filtered3dElements: new Map(),
+    };
+    for (const node of nodes) {
+      if (node.type === "element2d") {
+        filteredTemporary2dElements.set(node.id, node);
+      } else if (node.type === "element3d") {
+        filteredTemporary3dElements.set(node.id, node);
+      }
     }
-  }
 
-  public async prepareSavedNodes(): Promise<void> {
     const filteredElementsModels = await this._props.idsCache.getFilteredElementsData({
-      element2dIds: [...this._filteredTemporary2dElements.keys()],
-      element3dIds: [...this._filteredTemporary3dElements.keys()],
+      element2dIds: [...filteredTemporary2dElements.keys()],
+      element3dIds: [...filteredTemporary3dElements.keys()],
     });
-    this._filteredTemporary2dElements.forEach((element, id) => {
+    filteredTemporary2dElements.forEach((element, id) => {
       const entry = filteredElementsModels.get(element.id);
       assert(entry !== undefined);
-      this._filtered2dElements.set(id, { ...element, modelId: entry.modelId, categoryId: entry.categoryId });
+      result.filtered2dElements.set(id, { ...element, modelId: entry.modelId, categoryId: entry.categoryId });
     });
-    this._filteredTemporary3dElements.forEach((element, id) => {
+    filteredTemporary3dElements.forEach((element, id) => {
       const entry = filteredElementsModels.get(element.id);
       assert(entry !== undefined);
-      this._filtered3dElements.set(id, { ...element, modelId: entry.modelId, categoryId: entry.categoryId });
+      result.filtered3dElements.set(id, { ...element, modelId: entry.modelId, categoryId: entry.categoryId });
     });
+    return result;
   }
 
-  public convertNodesToFilterTargets(filteredNodes: TemporaryFilteredTreeNode[]): ClassificationsTreeFilterTargets | undefined {
+  public convertNodesToFilterTargets(
+    filteredNodes: TemporaryFilteredTreeNode[],
+    processedFilteredNodes: ProcessedFilteredNodes,
+  ): ClassificationsTreeFilterTargets | undefined {
     const filterTargets: FilterTargetsInternal = {};
 
-    filteredNodes.forEach((filteredNode) => this.collectFilterTargets(filterTargets, filteredNode));
+    filteredNodes.forEach((filteredNode) => this.collectFilterTargets(filterTargets, filteredNode, processedFilteredNodes));
 
     return this.convertInternalFilterTargets(filterTargets);
   }
@@ -135,22 +161,26 @@ class ClassificationsTreeFilteredNodesHandler implements FilteredNodesHandler<Cl
       classificationTableIds: filterTargets.classificationIds,
       elements2d: filterTargets.elements2d
         ? [...filterTargets.elements2d?.entries()].map(([modelCategoryKey, elementIds]) => {
-            const { modelId, categoryId } = parseModelCategoryKey(modelCategoryKey);
+            const { modelId, categoryId } = this.parseModelCategoryKey(modelCategoryKey);
             return { modelId, categoryId, elementIds };
           })
         : undefined,
       elements3d: filterTargets.elements3d
         ? [...filterTargets.elements3d?.entries()].map(([modelCategoryKey, elementIds]) => {
-            const { modelId, categoryId } = parseModelCategoryKey(modelCategoryKey);
+            const { modelId, categoryId } = this.parseModelCategoryKey(modelCategoryKey);
             return { modelId, categoryId, elementIds };
           })
         : undefined,
     };
   }
 
-  private collectFilterTargets(changeTargets: FilterTargetsInternal, node: TemporaryFilteredTreeNode) {
+  private collectFilterTargets(changeTargets: FilterTargetsInternal, node: TemporaryFilteredTreeNode, processedFilteredNodes: ProcessedFilteredNodes) {
     const filteredNode =
-      node.type === "element2d" ? this._filtered2dElements.get(node.id) : node.type === "element3d" ? this._filtered3dElements.get(node.id) : node;
+      node.type === "element2d"
+        ? processedFilteredNodes.filtered2dElements.get(node.id)
+        : node.type === "element3d"
+          ? processedFilteredNodes.filtered3dElements.get(node.id)
+          : node;
     assert(filteredNode !== undefined);
     if (filteredNode.isFilterTarget) {
       this.addTarget(changeTargets, filteredNode);
@@ -167,7 +197,7 @@ class ClassificationsTreeFilteredNodesHandler implements FilteredNodesHandler<Cl
     }
 
     for (const child of node.children.values()) {
-      this.collectFilterTargets(changeTargets, child);
+      this.collectFilterTargets(changeTargets, child, processedFilteredNodes);
     }
   }
 
@@ -180,7 +210,7 @@ class ClassificationsTreeFilteredNodesHandler implements FilteredNodesHandler<Cl
         (filterTargets.classificationIds ??= new Set()).add(node.id);
         return;
       case "element2d":
-        const element2dKey = createModelCategoryKey(node.modelId, node.categoryId);
+        const element2dKey = this.createModelCategoryKey(node.modelId, node.categoryId);
         const elements2d = (filterTargets.elements2d ??= new Map()).get(element2dKey);
         if (elements2d) {
           elements2d.add(node.id);
@@ -189,7 +219,7 @@ class ClassificationsTreeFilteredNodesHandler implements FilteredNodesHandler<Cl
         filterTargets.elements2d.set(element2dKey, new Set([node.id]));
         return;
       case "element3d":
-        const element3dKey = createModelCategoryKey(node.modelId, node.categoryId);
+        const element3dKey = this.createModelCategoryKey(node.modelId, node.categoryId);
         const elements3d = (filterTargets.elements3d ??= new Map()).get(element3dKey);
         if (elements3d) {
           elements3d.add(node.id);
@@ -199,53 +229,51 @@ class ClassificationsTreeFilteredNodesHandler implements FilteredNodesHandler<Cl
         return;
     }
   }
-}
 
-type ModelCategoryKey = `${ModelId}-${CategoryId}`;
+  private createModelCategoryKey(modelId: Id64String, categoryId: Id64String): ModelCategoryKey {
+    return `${modelId}-${categoryId}`;
+  }
 
-function createModelCategoryKey(modelId: Id64String, categoryId: Id64String): ModelCategoryKey {
-  return `${modelId}-${categoryId}`;
-}
+  private parseModelCategoryKey(key: ModelCategoryKey): { modelId: Id64String; categoryId: Id64String } {
+    const [modelId, categoryId] = key.split("-");
+    return { modelId, categoryId };
+  }
 
-function parseModelCategoryKey(key: ModelCategoryKey): { modelId: Id64String; categoryId: Id64String } {
-  const [modelId, categoryId] = key.split("-");
-  return { modelId, categoryId };
-}
-
-function createFilteredTreeNode({
-  type,
-  id,
-  isFilterTarget,
-}: {
-  type: FilteredTreeNode["type"];
-  id: Id64String;
-  isFilterTarget: boolean;
-}): TemporaryFilteredTreeNode {
-  if (type === "element2d" || type === "element3d") {
+  public createFilteredTreeNode({
+    type,
+    id,
+    isFilterTarget,
+  }: {
+    type: FilteredTreeNode["type"];
+    id: Id64String;
+    isFilterTarget: boolean;
+  }): TemporaryFilteredTreeNode {
+    if (type === "element2d" || type === "element3d") {
+      return {
+        id,
+        isFilterTarget,
+        type,
+        modelId: undefined,
+        categoryId: undefined,
+      };
+    }
     return {
       id,
       isFilterTarget,
       type,
-      modelId: undefined,
-      categoryId: undefined,
     };
   }
-  return {
-    id,
-    isFilterTarget,
-    type,
-  };
-}
 
-async function getType(hierarchyChecker: ECClassHierarchyInspector, className: string) {
-  if (await hierarchyChecker.classDerivesFrom(className, CLASS_NAME_ClassificationTable)) {
-    return "classificationTable";
+  public async getType(className: string): Promise<FilteredTreeNode["type"]> {
+    if (await this._props.imodelAccess.classDerivesFrom(className, CLASS_NAME_ClassificationTable)) {
+      return "classificationTable";
+    }
+    if (await this._props.imodelAccess.classDerivesFrom(className, CLASS_NAME_Classification)) {
+      return "classification";
+    }
+    if (await this._props.imodelAccess.classDerivesFrom(className, CLASS_NAME_GeometricElement2d)) {
+      return "element2d";
+    }
+    return "element3d";
   }
-  if (await hierarchyChecker.classDerivesFrom(className, CLASS_NAME_Classification)) {
-    return "classification";
-  }
-  if (await hierarchyChecker.classDerivesFrom(className, CLASS_NAME_GeometricElement2d)) {
-    return "element2d";
-  }
-  return "element3d";
 }
