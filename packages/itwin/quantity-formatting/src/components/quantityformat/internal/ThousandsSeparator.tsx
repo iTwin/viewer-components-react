@@ -88,7 +88,7 @@ export function UseThousandsSeparator(props: UseThousandsSeparatorProps) {
  */
 export interface ThousandsSeparatorSelectorProps {
   formatProps: FormatProps;
-  onChange?: (format: FormatProps) => void;
+  onChange: (format: FormatProps) => void;
 }
 
 /** Component to select the thousands separator character.
@@ -101,13 +101,6 @@ export function ThousandsSeparatorSelector(
   const { translate } = useTranslation();
 
   const thousandsSelectorId = React.useId();
-
-  const handleSetFormatProps = React.useCallback(
-    (newProps: FormatProps) => {
-      onChange && onChange(newProps);
-    },
-    [onChange]
-  );
 
   const isFormatTraitSet = React.useCallback(
     (trait: FormatTraits) => {
@@ -125,13 +118,13 @@ export function ThousandsSeparatorSelector(
         // thousandSeparator === ","
         else decimalSeparator = ".";
       }
-      handleSetFormatProps({
+      onChange({
         ...formatProps,
         thousandSeparator,
         decimalSeparator,
       });
     },
-    [formatProps, isFormatTraitSet, handleSetFormatProps]
+    [formatProps, isFormatTraitSet]
   );
 
   // Only show if the Use1000Separator trait is set

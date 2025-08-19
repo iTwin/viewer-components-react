@@ -65,13 +65,6 @@ export function FractionPrecisionSelector(
     },
   ];
 
-  const handleOnChange = React.useCallback(
-    (newValue: number) => {
-      onChange && onChange(newValue);
-    },
-    [onChange]
-  );
-
   return (
     <Select
       options={options}
