@@ -4,15 +4,20 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { assert } from "@itwin/core-bentley";
-import { CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
-import { createFilteredTree, FilteredNodesHandler } from "../../common/internal/visibility/BaseFilteredTree.js";
+import { CLASS_NAME_SubCategory } from "../../../common/internal/ClassNameDefinitions.js";
+import { createFilteredTree, FilteredNodesHandler } from "../../../common/internal/visibility/BaseFilteredTree.js";
 
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
-import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../../common/internal/Types.js";
-import type { BaseFilteredTreeNode, FilteredTree, FilteredTreeNodeChildren, FilteredTreeRootNode } from "../../common/internal/visibility/BaseFilteredTree.js";
-import type { CategoriesTreeIdsCache } from "./CategoriesTreeIdsCache.js";
+import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../../../common/internal/Types.js";
+import type {
+  BaseFilteredTreeNode,
+  FilteredTree,
+  FilteredTreeNodeChildren,
+  FilteredTreeRootNode,
+} from "../../../common/internal/visibility/BaseFilteredTree.js";
+import type { CategoriesTreeIdsCache } from "../CategoriesTreeIdsCache.js";
 
 /** @internal */
 export interface CategoriesTreeFilterTargets {
