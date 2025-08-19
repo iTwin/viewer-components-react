@@ -11,7 +11,7 @@ import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
-import type { BaseFilteredTreeNode, FilteredTree, FilteredTreeNodeChildren, FilteredTreeRootNode } from "../../common/internal/visibility/BaseFilteredTree.js";
+import type { BaseFilteredTreeNode, FilteredTree, FilteredTreeNodeChildren } from "../../common/internal/visibility/BaseFilteredTree.js";
 import type { ClassificationsTreeIdsCache } from "./ClassificationsTreeIdsCache.js";
 
 interface ClassificationTableFilteredTreeNode extends BaseFilteredTreeNode<ClassificationTableFilteredTreeNode> {
@@ -92,7 +92,6 @@ type ModelCategoryKey = `${ModelId}-${CategoryId}`;
 interface ProcessedFilteredNodes {
   filtered2dElements: Map<Id64String, Omit<Element2dFilteredTreeNode, "children">>;
   filtered3dElements: Map<Id64String, Omit<Element3dFilteredTreeNode, "children">>;
-  root: FilteredTreeRootNode<TemporaryFilteredTreeNode>;
 }
 
 class ClassificationsTreeFilteredNodesHandler extends FilteredNodesHandler<
@@ -104,18 +103,14 @@ class ClassificationsTreeFilteredNodesHandler extends FilteredNodesHandler<
     super();
   }
 
-  public async processFilteredNodes(
-    nodes: TemporaryFilteredTreeNode[],
-    root: FilteredTreeRootNode<TemporaryFilteredTreeNode>,
-  ): Promise<ProcessedFilteredNodes> {
+  public async getProcessedFilteredNodes(): Promise<ProcessedFilteredNodes> {
     const filteredTemporary2dElements = new Map<Id64String, Omit<TemporaryElement2dFilteredNode, "children">>();
     const filteredTemporary3dElements = new Map<Id64String, Omit<TemporaryElement3dFilteredNode, "children">>();
     const result: ProcessedFilteredNodes = {
-      root,
       filtered2dElements: new Map(),
       filtered3dElements: new Map(),
     };
-    for (const node of nodes) {
+    for (const node of this.filteredNodesArr) {
       if (node.type === "element2d") {
         filteredTemporary2dElements.set(node.id, node);
       } else if (node.type === "element3d") {

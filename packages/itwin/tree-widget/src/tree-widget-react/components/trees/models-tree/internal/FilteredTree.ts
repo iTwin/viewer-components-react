@@ -63,11 +63,8 @@ interface ModelsTreeFilteredNodesHandlerProps {
 
 type ModelCategoryKey = `${ModelId}-${CategoryId}`;
 
-interface ProcessedFilteredNodes {
-  root: FilteredTreeRootNode<FilteredTreeNode>;
-}
 
-class ModelsTreeFilteredNodesHandler extends FilteredNodesHandler<ProcessedFilteredNodes, ModelsTreeFilterTargets, FilteredTreeNode> {
+class ModelsTreeFilteredNodesHandler extends FilteredNodesHandler<void, ModelsTreeFilterTargets, FilteredTreeNode> {
   constructor(private readonly _props: ModelsTreeFilteredNodesHandlerProps) {
     super();
   }
@@ -80,9 +77,7 @@ class ModelsTreeFilteredNodesHandler extends FilteredNodesHandler<ProcessedFilte
     return this.convertInternalFilterTargets(filterTargets);
   }
 
-  public async processFilteredNodes(_: FilteredTreeNode[], root: FilteredTreeRootNode<FilteredTreeNode>): Promise<ProcessedFilteredNodes> {
-    return { root };
-  }
+  public async getProcessedFilteredNodes(): Promise<void> {}
 
   private convertInternalFilterTargets(filterTargets: FilterTargetsInternal): ModelsTreeFilterTargets | undefined {
     if (!filterTargets.categories && !filterTargets.subjectIds && !filterTargets.elements && !filterTargets.modelIds) {

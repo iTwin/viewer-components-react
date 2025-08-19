@@ -108,7 +108,6 @@ type ModelCategoryKey = `${ModelId}-${CategoryId}`;
 
 interface ProcessedFilteredNodes {
   filteredElements: Map<Id64String, Omit<ElementFilteredTreeNode, "children">>;
-  root: FilteredTreeRootNode<TemporaryFilteredTreeNode>;
 }
 
 class CategoriesTreeFilteredNodesHandler extends FilteredNodesHandler<ProcessedFilteredNodes, CategoriesTreeFilterTargets, TemporaryFilteredTreeNode> {
@@ -116,16 +115,12 @@ class CategoriesTreeFilteredNodesHandler extends FilteredNodesHandler<ProcessedF
     super();
   }
 
-  public async processFilteredNodes(
-    nodes: TemporaryFilteredTreeNode[],
-    root: FilteredTreeRootNode<TemporaryFilteredTreeNode>,
-  ): Promise<ProcessedFilteredNodes> {
+  public async getProcessedFilteredNodes(): Promise<ProcessedFilteredNodes> {
     const filteredTemporaryElements = new Map<Id64String, Omit<TemporaryElementFilteredNode, "children">>();
     const result: ProcessedFilteredNodes = {
-      root,
       filteredElements: new Map(),
     };
-    nodes.forEach((node) => {
+    this.filteredNodesArr.forEach((node) => {
       if (node.type === "element") {
         filteredTemporaryElements.set(node.id, node);
       }

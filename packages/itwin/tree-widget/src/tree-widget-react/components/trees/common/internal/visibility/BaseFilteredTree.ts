@@ -26,22 +26,50 @@ export interface BaseFilteredTreeNode<TFilteredTreeNode extends BaseFilteredTree
 }
 
 /** @internal */
-export abstract class FilteredNodesHandler<
-  TProcessedFilteredNodes extends { root: FilteredTreeRootNode<TFilteredTreeNode> },
-  TFilterTargets,
-  TFilteredTreeNode extends BaseFilteredTreeNode<TFilteredTreeNode>,
-> {
+export abstract class FilteredNodesHandler<TProcessedFilteredNodes, TFilterTargets, TFilteredTreeNode extends BaseFilteredTreeNode<TFilteredTreeNode>> {
+  public root: FilteredTreeRootNode<TFilteredTreeNode> = {
+    children: new Map(),
+  };
+  public filteredNodesArr = new Array<TFilteredTreeNode>();
+
   public abstract getType(className: string): Promise<TFilteredTreeNode["type"]>;
   public abstract convertNodesToFilterTargets(filteredNodes: TFilteredTreeNode[], processedFilteredNodes: TProcessedFilteredNodes): TFilterTargets | undefined;
-  public abstract processFilteredNodes(nodes: TFilteredTreeNode[], root: FilteredTreeRootNode<TFilteredTreeNode>): Promise<TProcessedFilteredNodes>;
+  public abstract getProcessedFilteredNodes(): Promise<TProcessedFilteredNodes>;
   public abstract createFilteredTreeNode(props: {
     type: TFilteredTreeNode["type"];
     id: Id64String;
     isFilterTarget: boolean;
     parent: TFilteredTreeNode | FilteredTreeRootNode<TFilteredTreeNode>;
   }): TFilteredTreeNode;
-  public getNodeFilterTargets(node: HierarchyNode, processedFilteredNodes: TProcessedFilteredNodes): TFilterTargets | undefined {
-    let lookupParents: Array<{ children?: Map<Id64String, TFilteredTreeNode> }> = [processedFilteredNodes.root];
+
+  public async processFilteredNodes(): Promise<{ getNodeFilterTargets: (node: HierarchyNode) => TFilterTargets | undefined }> {
+    const processedFilteredNodes = await this.getProcessedFilteredNodes();
+    return {
+      getNodeFilterTargets: (node: HierarchyNode) => this.getNodeFilterTargets(node, processedFilteredNodes),
+    };
+  }
+
+  public async accept(props: {
+    instanceKey: InstanceKey;
+    parentNode: TFilteredTreeNode | FilteredTreeRootNode<TFilteredTreeNode>;
+    isFilterTarget: boolean;
+  }): Promise<TFilteredTreeNode> {
+    const { instanceKey, parentNode, isFilterTarget } = props;
+    const type = await this.getType(instanceKey.className);
+
+    const newNode = this.createFilteredTreeNode({
+      type,
+      id: instanceKey.id,
+      isFilterTarget,
+      parent: parentNode,
+    });
+    (parentNode.children ??= new Map()).set(instanceKey.id, newNode);
+    this.filteredNodesArr.push(newNode);
+    return newNode;
+  }
+
+  private getNodeFilterTargets(node: HierarchyNode, processedFilteredNodes: TProcessedFilteredNodes): TFilterTargets | undefined {
+    let lookupParents: Array<{ children?: Map<Id64String, TFilteredTreeNode> }> = [this.root];
 
     const nodeKey = node.key;
     if (!HierarchyNodeKey.isInstances(nodeKey)) {
@@ -85,31 +113,21 @@ export interface FilteredTree<TFilterTargets> {
 }
 
 /** @internal */
-export interface CreateFilteredTreeProps<
-  TProcessedFilteredNodes extends { root: FilteredTreeRootNode<TFilteredTreeNode> },
-  TFilterTargets,
-  TFilteredTreeNode extends BaseFilteredTreeNode<TFilteredTreeNode>,
-> {
+export interface CreateFilteredTreeProps<TProcessedFilteredNodes, TFilterTargets, TFilteredTreeNode extends BaseFilteredTreeNode<TFilteredTreeNode>> {
   filteredNodesHandler: FilteredNodesHandler<TProcessedFilteredNodes, TFilterTargets, TFilteredTreeNode>;
   filteringPaths: HierarchyFilteringPath[];
 }
 
 /** @internal */
-export async function createFilteredTree<
-  TProcessedFilteredNodes extends { root: FilteredTreeRootNode<TFilteredTreeNode> },
-  TFilterTargets,
-  TFilteredTreeNode extends BaseFilteredTreeNode<TFilteredTreeNode>,
->(props: CreateFilteredTreeProps<TProcessedFilteredNodes, TFilterTargets, TFilteredTreeNode>): Promise<FilteredTree<TFilterTargets>> {
+export async function createFilteredTree<TProcessedFilteredNodes, TFilterTargets, TFilteredTreeNode extends BaseFilteredTreeNode<TFilteredTreeNode>>(
+  props: CreateFilteredTreeProps<TProcessedFilteredNodes, TFilterTargets, TFilteredTreeNode>,
+): Promise<FilteredTree<TFilterTargets>> {
   const { filteringPaths, filteredNodesHandler } = props;
-  const root: FilteredTreeRootNode<TFilteredTreeNode> = {
-    children: new Map(),
-  };
-  const filteredNodesArr = new Array<TFilteredTreeNode>();
 
   for (const filteringPath of filteringPaths) {
     const normalizedPath = HierarchyFilteringPath.normalize(filteringPath).path;
 
-    let parentNode: FilteredTreeRootNode<TFilteredTreeNode> | TFilteredTreeNode = root;
+    let parentNode: FilteredTreeRootNode<TFilteredTreeNode> | TFilteredTreeNode = filteredNodesHandler.root;
     for (let i = 0; i < normalizedPath.length; ++i) {
       if ("type" in parentNode && "isFilterTarget" in parentNode && parentNode.isFilterTarget) {
         break;
@@ -126,22 +144,15 @@ export async function createFilteredTree<
         parentNode = currentNode;
         continue;
       }
-
-      const type = await filteredNodesHandler.getType(identifier.className);
-
-      const newNode = filteredNodesHandler.createFilteredTreeNode({
-        type,
-        id: identifier.id,
+      parentNode = await filteredNodesHandler.accept({
+        instanceKey: identifier,
+        parentNode,
         isFilterTarget: i === normalizedPath.length - 1,
-        parent: parentNode,
       });
-      (parentNode.children ??= new Map()).set(identifier.id, newNode);
-      parentNode = newNode;
-      filteredNodesArr.push(newNode);
     }
   }
-  const processedFilteredNodes = await filteredNodesHandler.processFilteredNodes(filteredNodesArr, root);
+  const processedFilteredNodes = await filteredNodesHandler.processFilteredNodes();
   return {
-    getFilterTargets: (node: HierarchyNode) => filteredNodesHandler.getNodeFilterTargets(node, processedFilteredNodes),
+    getFilterTargets: (node: HierarchyNode) => processedFilteredNodes.getNodeFilterTargets(node),
   };
 }
