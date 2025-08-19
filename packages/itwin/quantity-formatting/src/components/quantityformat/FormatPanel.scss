@@ -32,8 +32,6 @@
 /* FormatSample styles */
 .quantityFormat--formatSample-container {
   margin-top: var(--iui-size-l);
-  display: flex;
-  flex-direction: row;
   align-items: center;
 }
 
@@ -134,5 +132,5 @@
 }
 
 .quantityFormat--format-selector-menu {
-  --iui-menu-max-height: calc((var(--iui-component-height) - 1px) * 20.5);
+  --iui-menu-max-height: calc((var(--iui-component-height) - 1px) * 15.5);
 }
