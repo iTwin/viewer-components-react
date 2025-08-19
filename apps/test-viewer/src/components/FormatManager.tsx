@@ -220,7 +220,7 @@ export class FormatSetFormatsProvider implements MutableFormatsProvider {
     // Normalizes any schemaItem names coming from node addon 'schemaName:schemaItemName' -> 'schemaName.schemaItemName'
     const [schemaName, itemName] = SchemaItem.parseFullName(input);
 
-    const name = (schemaName === "") ? itemName : `${schemaName}.${itemName}`;
+    const name = schemaName === "" ? itemName : `${schemaName}.${itemName}`;
     const format = this._formatSet.formats[name];
     if (format) return format;
     if (this._fallbackProvider) return this._fallbackProvider.getFormat(name);

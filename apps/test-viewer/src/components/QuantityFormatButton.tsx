@@ -68,7 +68,7 @@ export const QuantityFormatButton: React.FC = () => {
       </Button>
 
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} title="Quantity Format Settings" style={{ width: "600px", maxWidth: "90vw" }}>
-        <div style={{ padding: "16px",overflow: "auto" }}>
+        <div style={{ padding: "16px", overflow: "auto" }}>
           <div>
             <FormatSelector
               activeFormatSet={activeFormatSet}
