@@ -51,6 +51,7 @@ export function createFakeSinonViewport(
     viewsCategory: sinon.fake.returns(true),
     viewsModel: sinon.fake.returns(true),
     is2d: sinon.fake.returns(false) as any,
+    is3d: sinon.fake.returns(true) as any,
     ...props?.view,
   };
 
@@ -64,6 +65,7 @@ export function createFakeSinonViewport(
     isAlwaysDrawnExclusive: false,
     onViewedCategoriesPerModelChanged: new BeEvent(),
     onViewedCategoriesChanged: new BeEvent(),
+    onDisplayStyleChanged: new BeEvent(),
     onViewedModelsChanged: new BeEvent(),
     onAlwaysDrawnChanged,
     onNeverDrawnChanged,

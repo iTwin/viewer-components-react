@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { filter, map, mergeAll, mergeMap, of, reduce, startWith, toArray } from "rxjs";
+import { map, reduce } from "rxjs";
 import { Id64 } from "@itwin/core-bentley";
 import { QueryRowFormat } from "@itwin/core-common";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
@@ -16,7 +16,7 @@ import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import type { CategoryInfo } from "../CategoriesVisibilityUtils.js";
 import type { VisibilityStatus } from "../UseHierarchyVisibility.js";
-import type { NonPartialVisibilityStatus, Visibility } from "./Tooltip.js";
+import type { Visibility } from "./Tooltip.js";
 import type { ElementId, ModelId } from "./Types.js";
 
 function mergeVisibilities(obs: Observable<Visibility>): Observable<Visibility | "empty"> {
@@ -46,44 +46,6 @@ export function mergeVisibilityStatuses(obs: Observable<VisibilityStatus>): Obse
     mergeVisibilities,
     map((visibility) => createVisibilityStatus(visibility === "empty" ? "disabled" : visibility)),
   );
-}
-
-/** @internal */
-export function getSubModeledElementsVisibilityStatus({
-  parentNodeVisibilityStatus,
-  getModelVisibilityStatus,
-}: {
-  parentNodeVisibilityStatus: VisibilityStatus;
-  getModelVisibilityStatus: ({ modelIds }: { modelIds: Id64Array }) => Observable<VisibilityStatus>;
-}): OperatorFunction<Id64Array, VisibilityStatus> {
-  return (obs) => {
-    return obs.pipe(
-      // combine visibility status of sub-models with visibility status of parent node
-      mergeMap((modeledElementIds) => {
-        if (modeledElementIds.length === 0) {
-          return of(parentNodeVisibilityStatus);
-        }
-        return getModelVisibilityStatus({ modelIds: modeledElementIds }).pipe(startWith<VisibilityStatus>(parentNodeVisibilityStatus), mergeVisibilityStatuses);
-      }),
-    );
-  };
-}
-
-/** @internal */
-export function filterSubModeledElementIds({
-  doesSubModelExist,
-}: {
-  doesSubModelExist: (elementId: Id64String) => Promise<boolean>;
-}): OperatorFunction<Array<ElementId>, Array<ModelId>> {
-  return (obs) => {
-    return obs.pipe(
-      mergeAll(),
-      mergeMap(async (elementId) => ({ elementId, hasSubModel: await doesSubModelExist(elementId) })),
-      filter(({ hasSubModel }) => hasSubModel),
-      map(({ elementId }) => elementId),
-      toArray(),
-    );
-  };
 }
 
 /** @internal */
@@ -171,53 +133,9 @@ export function getVisibilityFromAlwaysAndNeverDrawnElementsImpl(
 }
 
 /** @internal */
-export function getElementOverriddenVisibility(props: { elementId: Id64String; viewport: Viewport }): NonPartialVisibilityStatus | undefined {
-  const { viewport, elementId } = props;
-  if (viewport.neverDrawn?.has(elementId)) {
-    return createVisibilityStatus("hidden");
-  }
-  if (viewport.alwaysDrawn?.has(elementId)) {
-    return createVisibilityStatus("visible");
-  }
-
-  if (viewport.isAlwaysDrawnExclusive) {
-    return createVisibilityStatus("hidden");
-  }
-
-  return undefined;
-}
-
-/** @internal */
 export interface GetVisibilityFromAlwaysAndNeverDrawnElementsProps {
   /** Status when always/never lists are empty and exclusive mode is off */
   defaultStatus: (categoryId?: string) => VisibilityStatus;
-}
-
-/** @internal */
-export function getElementVisibility(
-  viewsModel: boolean,
-  overridenVisibility: NonPartialVisibilityStatus | undefined,
-  categoryVisibility: NonPartialVisibilityStatus,
-  subModelVisibilityStatus?: VisibilityStatus,
-): VisibilityStatus {
-  if (subModelVisibilityStatus?.state === "partial") {
-    return createVisibilityStatus("partial");
-  }
-
-  if (!viewsModel) {
-    return createVisibilityStatus(subModelVisibilityStatus?.state === "visible" ? "partial" : "hidden");
-  }
-
-  const elementVisibilityWithoutSubModels = overridenVisibility ?? categoryVisibility;
-  if (!subModelVisibilityStatus) {
-    return elementVisibilityWithoutSubModels;
-  }
-
-  if (elementVisibilityWithoutSubModels.state === subModelVisibilityStatus.state) {
-    return elementVisibilityWithoutSubModels;
-  }
-
-  return createVisibilityStatus("partial");
 }
 
 /**

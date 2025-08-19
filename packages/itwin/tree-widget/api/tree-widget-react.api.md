@@ -36,6 +36,43 @@ import type { Widget } from '@itwin/appui-react';
 // @beta (undocumented)
 export type BaseTreeRendererProps = React.ComponentPropsWithoutRef<typeof StrataKitTreeRenderer>;
 
+// @internal
+interface BaseTreeVisibilityHandlerOverrides {
+    // (undocumented)
+    changeCategoriesVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
+        categoryIds: Id64Arg;
+        modelId?: Id64String;
+        on: boolean;
+    }) => Promise<void>>;
+    // (undocumented)
+    changeElementsVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
+        elementIds: Id64Arg;
+        modelId: Id64String;
+        categoryId: Id64String;
+        on: boolean;
+    }) => Promise<void>>;
+    // (undocumented)
+    changeModelsVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
+        modelIds: Id64Arg;
+        on: boolean;
+    }) => Promise<void>>;
+    // (undocumented)
+    getCategoriesVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
+        categoryIds: Id64Arg;
+        modelId?: Id64String;
+    }) => Promise<VisibilityStatus>>;
+    // (undocumented)
+    getElementsVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
+        elementIds: Id64Arg;
+        modelId: Id64String;
+        categoryId: Id64String;
+    }) => Promise<VisibilityStatus>>;
+    // (undocumented)
+    getModelsVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
+        modelIds: Id64Arg;
+    }) => Promise<VisibilityStatus>>;
+}
+
 // @public
 export const CategoriesTreeComponent: {
     (props: CategoriesTreeComponentProps): JSX_2.Element | null;
@@ -307,28 +344,10 @@ type ModelsTreeProps = Pick<VisibilityTreeProps, "imodel" | "selectionStorage" |
 };
 
 // @beta
-export interface ModelsTreeVisibilityHandlerOverrides {
-    // (undocumented)
-    changeCategoriesVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
-        categoryIds: Id64Arg;
-        modelId?: Id64String;
-        on: boolean;
-    }) => Promise<void>>;
+export interface ModelsTreeVisibilityHandlerOverrides extends BaseTreeVisibilityHandlerOverrides {
     // (undocumented)
     changeElementGroupingNodeVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
         node: GroupingHierarchyNode;
-        on: boolean;
-    }) => Promise<void>>;
-    // (undocumented)
-    changeElementsVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
-        categoryId: Id64String;
-        modelId: Id64String;
-        elementIds: Id64Arg;
-        on: boolean;
-    }) => Promise<void>>;
-    // (undocumented)
-    changeModelsVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
-        modelIds: Id64Arg;
         on: boolean;
     }) => Promise<void>>;
     // (undocumented)
@@ -337,23 +356,8 @@ export interface ModelsTreeVisibilityHandlerOverrides {
         on: boolean;
     }) => Promise<void>>;
     // (undocumented)
-    getCategoriesVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
-        categoryIds: Id64Arg;
-        modelId?: Id64String;
-    }) => Promise<VisibilityStatus>>;
-    // (undocumented)
     getElementGroupingNodeVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
         node: GroupingHierarchyNode;
-    }) => Promise<VisibilityStatus>>;
-    // (undocumented)
-    getElementsVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
-        categoryId: Id64String;
-        modelId: Id64String;
-        elementIds: Id64Arg;
-    }) => Promise<VisibilityStatus>>;
-    // (undocumented)
-    getModelsVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
-        modelIds: Id64Arg;
     }) => Promise<VisibilityStatus>>;
     // (undocumented)
     getSubjectsVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {

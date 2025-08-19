@@ -16,7 +16,7 @@ import {
   defaultHierarchyConfiguration,
 } from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
-import { createCategoriesTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeVisibilityHandler.js";
+import { createCategoriesTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/categories-tree/internal/visibility/CategoriesTreeVisibilityHandler.js";
 import { CLASS_NAME_DefinitionModel, CLASS_NAME_Subject } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import {
   buildIModel,

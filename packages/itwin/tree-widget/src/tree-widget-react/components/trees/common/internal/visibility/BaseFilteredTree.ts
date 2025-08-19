@@ -12,12 +12,22 @@ import type { InstanceKey } from "@itwin/presentation-shared";
 /** @internal */
 export type FilteredTreeNodeChildren<TFilteredTreeNode> = Map<Id64String, TFilteredTreeNode>;
 
-/** @internal */
+/**
+ * A generic interface for a filtered tree root node.
+ *
+ * It differs from `BaseFilteredTreeNode` in that it only contains children details and nothing else.
+ * @internal
+ */
 export interface FilteredTreeRootNode<TFilteredTreeNode extends BaseFilteredTreeNode<TFilteredTreeNode>> {
   children: FilteredTreeNodeChildren<TFilteredTreeNode>;
 }
 
-/** @internal */
+/**
+ * A generic interface for a filtered tree node.
+ *
+ * It represents every node in a filtered tree structure.
+ * @internal
+ * */
 export interface BaseFilteredTreeNode<TFilteredTreeNode extends BaseFilteredTreeNode<TFilteredTreeNode>> {
   type: string;
   id: Id64String;
@@ -25,16 +35,34 @@ export interface BaseFilteredTreeNode<TFilteredTreeNode extends BaseFilteredTree
   isFilterTarget: boolean;
 }
 
-/** @internal */
+/**
+ * Class that provides methods to handle filtered nodes in a tree structure.
+ *
+ * It provides two methods that can be shared across different filtered trees:
+ * - `processFilteredNodes` - processes filtered nodes and returns a function to get filter targets for a node.
+ * - `accept` - accepts a new node and adds it to the tree structure.
+ * @internal
+ */
 export abstract class FilteredNodesHandler<TProcessedFilteredNodes, TFilterTargets, TFilteredTreeNode extends BaseFilteredTreeNode<TFilteredTreeNode>> {
   public root: FilteredTreeRootNode<TFilteredTreeNode> = {
     children: new Map(),
   };
   public filteredNodesArr = new Array<TFilteredTreeNode>();
 
+  /** Returns filtered tree node type based on its' className */
   public abstract getType(className: string): Promise<TFilteredTreeNode["type"]>;
+  /** Converts nodes to filter targets */
   public abstract convertNodesToFilterTargets(filteredNodes: TFilteredTreeNode[], processedFilteredNodes: TProcessedFilteredNodes): TFilterTargets | undefined;
+  /**
+   * Processes filtered nodes.
+   *
+   * Nodes are created using filtering paths, and some information is not present in the filtering paths.
+   * Because of this, some nodes may need to be processed to get additional information.
+   *
+   * E.g. Retrieving categoryId of elements can't be done using filtering paths.
+   */
   public abstract getProcessedFilteredNodes(): Promise<TProcessedFilteredNodes>;
+  /** Creates filtered nodes  */
   public abstract createFilteredTreeNode(props: {
     type: TFilteredTreeNode["type"];
     id: Id64String;
@@ -49,6 +77,7 @@ export abstract class FilteredNodesHandler<TProcessedFilteredNodes, TFilterTarge
     };
   }
 
+  /** Takes a new node and adds it to the tree structure. */
   public async accept(props: {
     instanceKey: InstanceKey;
     parentNode: TFilteredTreeNode | FilteredTreeRootNode<TFilteredTreeNode>;
@@ -68,6 +97,7 @@ export abstract class FilteredNodesHandler<TProcessedFilteredNodes, TFilterTarge
     return newNode;
   }
 
+  /** Takes a specific node and gets all filter targets related to it. */
   private getNodeFilterTargets(node: HierarchyNode, processedFilteredNodes: TProcessedFilteredNodes): TFilterTargets | undefined {
     let lookupParents: Array<{ children?: Map<Id64String, TFilteredTreeNode> }> = [this.root];
 
@@ -100,6 +130,7 @@ export abstract class FilteredNodesHandler<TProcessedFilteredNodes, TFilterTarge
     return this.convertNodesToFilterTargets(filteredNodes, processedFilteredNodes);
   }
 
+  /** Finds filtered nodes that match the given keys. */
   private findMatchingFilteredNodes(lookupParents: Array<{ children?: Map<Id64String, TFilteredTreeNode> }>, keys: InstanceKey[]) {
     return lookupParents
       .flatMap((lookup) => keys.map((key) => lookup.children?.get(key.id)))
@@ -118,7 +149,10 @@ export interface CreateFilteredTreeProps<TProcessedFilteredNodes, TFilterTargets
   filteringPaths: HierarchyFilteringPath[];
 }
 
-/** @internal */
+/**
+ * Function iterates over filtering paths and creates uses `filteredNodesHandler` to create a filtered tree.
+ * @internal
+ */
 export async function createFilteredTree<TProcessedFilteredNodes, TFilterTargets, TFilteredTreeNode extends BaseFilteredTreeNode<TFilteredTreeNode>>(
   props: CreateFilteredTreeProps<TProcessedFilteredNodes, TFilterTargets, TFilteredTreeNode>,
 ): Promise<FilteredTree<TFilterTargets>> {

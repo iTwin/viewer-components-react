@@ -3,10 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import { assert } from "@itwin/core-bentley";
 import { parseIdsSelectorResult } from "../../common/internal/Utils.js";
 
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 
 interface ClassificationsTreeNode {

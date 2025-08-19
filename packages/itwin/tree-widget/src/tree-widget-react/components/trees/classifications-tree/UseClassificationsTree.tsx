@@ -13,17 +13,17 @@ import { ClassificationsTreeComponent } from "./ClassificationsTreeComponent.js"
 import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.js";
 import { ClassificationsTreeIcon } from "./ClassificationsTreeIcon.js";
 import { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
-import { createClassificationsTreeVisibilityHandler } from "./internal/ClassificationsTreeVisibilityHandler.js";
 import { useFilteredPaths } from "./internal/UseFilteredPaths.js";
+import { createClassificationsTreeVisibilityHandler } from "./internal/visibility/ClassificationsTreeVisibilityHandler.js";
 
-import type { ClassificationsTreeFilteringError } from "./internal/UseFilteredPaths.js";
-import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
-import type { CreateFactoryProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
-import type { ClassificationsTreeHierarchyConfiguration } from "./ClassificationsTreeDefinition.js";
 import type { ReactNode } from "react";
 import type { Viewport } from "@itwin/core-frontend";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
+import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
+import type { CreateFactoryProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
+import type { ClassificationsTreeFilteringError } from "./internal/UseFilteredPaths.js";
+import type { ClassificationsTreeHierarchyConfiguration } from "./ClassificationsTreeDefinition.js";
 
 /** @alpha */
 export interface UseClassificationsTreeProps {

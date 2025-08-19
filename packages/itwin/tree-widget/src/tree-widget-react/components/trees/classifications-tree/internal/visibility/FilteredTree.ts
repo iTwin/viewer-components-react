@@ -4,15 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { assert } from "@itwin/core-bentley";
-import { CLASS_NAME_Classification, CLASS_NAME_ClassificationTable, CLASS_NAME_GeometricElement2d } from "../../common/internal/ClassNameDefinitions.js";
-import { createFilteredTree, FilteredNodesHandler } from "../../common/internal/visibility/BaseFilteredTree.js";
+import { CLASS_NAME_Classification, CLASS_NAME_ClassificationTable, CLASS_NAME_GeometricElement2d } from "../../../common/internal/ClassNameDefinitions.js";
+import { createFilteredTree, FilteredNodesHandler } from "../../../common/internal/visibility/BaseFilteredTree.js";
 
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
-import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
-import type { BaseFilteredTreeNode, FilteredTree, FilteredTreeNodeChildren } from "../../common/internal/visibility/BaseFilteredTree.js";
-import type { ClassificationsTreeIdsCache } from "./ClassificationsTreeIdsCache.js";
+import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
+import type { BaseFilteredTreeNode, FilteredTree, FilteredTreeNodeChildren } from "../../../common/internal/visibility/BaseFilteredTree.js";
+import type { ClassificationsTreeIdsCache } from "../ClassificationsTreeIdsCache.js";
 
 interface ClassificationTableFilteredTreeNode extends BaseFilteredTreeNode<ClassificationTableFilteredTreeNode> {
   type: "classificationTable";
