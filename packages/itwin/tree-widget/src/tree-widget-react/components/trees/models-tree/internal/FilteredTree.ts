@@ -63,7 +63,6 @@ interface ModelsTreeFilteredNodesHandlerProps {
 
 type ModelCategoryKey = `${ModelId}-${CategoryId}`;
 
-
 class ModelsTreeFilteredNodesHandler extends FilteredNodesHandler<void, ModelsTreeFilterTargets, FilteredTreeNode> {
   constructor(private readonly _props: ModelsTreeFilteredNodesHandlerProps) {
     super();
