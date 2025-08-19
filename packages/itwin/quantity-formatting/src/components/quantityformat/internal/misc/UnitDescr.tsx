@@ -89,8 +89,6 @@ export function UnitDescr(props: UnitDescrProps) {
   const [currentUnit, setCurrentUnit] = React.useState({ name, label });
   const { translate } = useTranslation();
 
-  const isMounted = React.useRef(false);
-
   React.useEffect(() => {
     let disposed = false;
     const fetchAllowableUnitSelections = async () => {
