@@ -43,18 +43,11 @@ export function StationSizeSelector(props: StationSizeSelectorProps) {
     },
   ];
 
-  const handleOnChange = React.useCallback(
-    (newValue: number) => {
-      onChange && onChange(newValue);
-    },
-    [onChange]
-  );
-
   return (
     <Select
       options={separatorOptions}
       value={value}
-      onChange={handleOnChange}
+      onChange={(newValue) => onChange(newValue)}
       size="small"
       id={id}
     />

@@ -41,18 +41,11 @@ export function SignOptionSelector(props: SignOptionSelectorProps) {
     },
   ];
 
-  const handleOnChange = React.useCallback(
-    (newValue: ShowSignOption) => {
-      onChange && onChange(newValue);
-    },
-    [onChange]
-  );
-
   return (
     <Select
       options={options}
       value={signOption}
-      onChange={handleOnChange}
+      onChange={(newValue) => onChange(newValue)}
       size="small"
       id={id}
     />

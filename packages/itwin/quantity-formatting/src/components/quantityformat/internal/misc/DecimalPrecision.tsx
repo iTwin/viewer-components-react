@@ -82,18 +82,11 @@ export function DecimalPrecisionSelector(props: DecimalPrecisionSelectorProps) {
     },
   ];
 
-  const handleOnChange = React.useCallback(
-    (newValue: number) => {
-      onChange && onChange(newValue);
-    },
-    [onChange]
-  );
-
   return (
     <Select
       options={options}
       value={precision}
-      onChange={handleOnChange}
+      onChange={(newValue) => onChange(newValue)}
       size="small"
       id={id}
       {...rest}

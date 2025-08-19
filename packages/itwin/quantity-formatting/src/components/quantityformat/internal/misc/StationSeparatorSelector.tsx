@@ -25,13 +25,6 @@ export function StationSeparatorSelector(props: StationSeparatorSelectorProps) {
   const { separator, onChange, id } = props;
   const { translate } = useTranslation();
 
-  const handleOnChange = React.useCallback(
-    (newValue: string) => {
-      onChange && onChange(newValue);
-    },
-    [onChange]
-  );
-
   const separatorOptions = React.useMemo(() => {
     const uomDefaultEntries: SelectOption<string>[] = [
       {
@@ -67,7 +60,7 @@ export function StationSeparatorSelector(props: StationSeparatorSelectorProps) {
       id={id}
       options={separatorOptions}
       value={separator}
-      onChange={handleOnChange}
+      onChange={(value) => onChange(value)}
       size="small"
     />
   );

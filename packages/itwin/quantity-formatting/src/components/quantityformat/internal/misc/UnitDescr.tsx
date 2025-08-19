@@ -92,14 +92,8 @@ export function UnitDescr(props: UnitDescrProps) {
   const isMounted = React.useRef(false);
 
   React.useEffect(() => {
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-    };
-  });
-
-  React.useEffect(() => {
-    async function fetchAllowableUnitSelections() {
+    let disposed = false;
+    const fetchAllowableUnitSelections = async () => {
       const currentUnitProps = await unitsProvider.findUnitByName(name);
       const parentUnit = await unitsProvider.findUnitByName(
         parentUnitName ? parentUnitName : name
@@ -151,13 +145,16 @@ export function UnitDescr(props: UnitDescrProps) {
             label: translate("QuantityFormat:labels.removeUnit"),
           });
 
-        if (isMounted.current) {
-          setUnitOptions(options);
-          setCurrentUnit(currentUnitProps);
-        }
+        if (disposed) return;
+        setUnitOptions(options);
+        setCurrentUnit(currentUnitProps);
       }
     }
     void fetchAllowableUnitSelections();
+
+    return () => {
+      disposed = true;
+    };
   }, [index, label, name, parentUnitName, translate, unitsProvider]);
 
   const handleOnUnitChange = React.useCallback(

@@ -76,7 +76,7 @@ export function FractionPrecisionSelector(
     <Select
       options={options}
       value={precision}
-      onChange={handleOnChange}
+      onChange={(newValue) => onChange(newValue)}
       size="small"
       id={id}
     />

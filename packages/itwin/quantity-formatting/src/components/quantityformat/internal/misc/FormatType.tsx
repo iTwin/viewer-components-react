@@ -66,19 +66,14 @@ function FormatTypeSelector(props: FormatTypeSelectorProps) {
     [translate]
   );
 
-  const handleOnChange = React.useCallback(
-    (newValue: FormatType) => {
-      onChange && onChange(newValue);
-    },
-    [onChange]
-  );
+
 
   return (
     <LabeledSelect
       displayStyle="inline"
       label={translate("QuantityFormat:labels.type")}
       options={formatOptions}
-      onChange={handleOnChange}
+      onChange={(newValue: FormatType) => onChange(newValue)}
       size="small"
       value={type}
     />
@@ -103,7 +98,7 @@ const handleUnitsWhenFormatTypeChange = (
 
 interface FormatTypeOptionProps {
   formatProps: FormatProps;
-  onChange?: (format: FormatProps) => void;
+  onChange: (format: FormatProps) => void;
 }
 
 /** Component to set the Quantity Format type.
@@ -172,7 +167,7 @@ export function FormatTypeOption(props: FormatTypeOptionProps) {
         azimuthBase,
         ratioType,
       };
-      onChange && onChange(newFormatProps);
+      onChange(newFormatProps);
     },
     [formatProps, onChange]
   );

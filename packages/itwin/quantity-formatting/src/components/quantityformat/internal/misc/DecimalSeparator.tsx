@@ -34,18 +34,11 @@ export function DecimalSeparatorSelector(props: DecimalSeparatorSelectorProps) {
     },
   ];
 
-  const handleOnChange = React.useCallback(
-    (newValue: string) => {
-      onChange && onChange(newValue);
-    },
-    [onChange]
-  );
-
   return (
     <Select
       options={options}
       value={separator}
-      onChange={handleOnChange}
+      onChange={(newValue) => onChange(newValue)}
       size="small"
     />
   );

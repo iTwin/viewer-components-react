@@ -55,6 +55,7 @@ export function QuantityFormatPanel(props: QuantityFormatPanelProps) {
 
   // Generate persistenceUnit from first composite unit
   React.useEffect(() => {
+    let disposed = false;
     const loadPersistenceUnit = async () => {
       if (
         clonedFormatDefinition.composite &&
@@ -64,16 +65,22 @@ export function QuantityFormatPanel(props: QuantityFormatPanelProps) {
         const firstUnitName = clonedFormatDefinition.composite.units[0].name;
         try {
           const unit = await unitsProvider.findUnitByName(firstUnitName);
+          if (disposed) return;
           setPersistenceUnit(unit);
         } catch {
+          if (disposed) return;
           setPersistenceUnit(undefined);
         }
       } else {
+        if (disposed) return;
         setPersistenceUnit(undefined);
       }
     };
 
     void loadPersistenceUnit();
+    return () => {
+      disposed = true;
+    };
   }, [clonedFormatDefinition.composite, unitsProvider]);
 
   const handleOnFormatChanged = React.useCallback(

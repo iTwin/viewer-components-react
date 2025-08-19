@@ -32,7 +32,8 @@ function AzimuthBaseUnitSelector(props: {
   ]);
 
   React.useEffect(() => {
-    async function loadUnitOptions() {
+    let disposed = false;
+    const loadUnitOptions = async () => {
       try {
         // Find the current unit to get its phenomenon (family)
         const baseUnit = await unitsProvider.findUnitByName(currentUnit);
@@ -48,6 +49,7 @@ function AzimuthBaseUnitSelector(props: {
             }))
             .sort((a, b) => a.label.localeCompare(b.label));
 
+          if (disposed) return;
           setUnitOptions(options);
         }
       } catch (error) {
@@ -58,6 +60,9 @@ function AzimuthBaseUnitSelector(props: {
     }
 
     void loadUnitOptions();
+    return () => {
+      disposed = true;
+    };
   }, [currentUnit, unitsProvider]);
 
   return (

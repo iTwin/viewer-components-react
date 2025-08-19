@@ -43,6 +43,7 @@ export function FormatSample(props: FormatSampleProps) {
   const inputId = React.useId();
   // Create FormatterSpec when formatProps or persistenceUnit changes
   React.useEffect(() => {
+    let disposed = false;
     const createFormatterSpec = async () => {
       if (!persistenceUnit) {
         setFormatSpec(undefined);
@@ -61,13 +62,18 @@ export function FormatSample(props: FormatSampleProps) {
           unitsProvider,
           persistenceUnit
         );
+        if (disposed) return;
         setFormatSpec(spec);
       } catch {
+        if (disposed) return;
         setFormatSpec(undefined);
       }
     };
 
     void createFormatterSpec();
+    return () => {
+      disposed = true;
+    };
   }, [formatProps, unitsProvider, persistenceUnit]);
 
   React.useEffect(() => {
