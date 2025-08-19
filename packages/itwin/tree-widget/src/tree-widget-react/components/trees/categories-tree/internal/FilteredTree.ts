@@ -4,47 +4,47 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { assert } from "@itwin/core-bentley";
-import { HierarchyFilteringPath, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
+import { createFilteredTree, FilteredNodesHandler } from "../../common/internal/visibility/BaseFilteredTree.js";
 
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
-import type { HierarchyNode } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
-import type { CategoriesTreeIdsCache } from "./CategoriesTreeIdsCache.js";
+import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
+import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../../common/internal/Types.js";
+import type { BaseFilteredTreeNode, FilteredTree, FilteredTreeNodeChildren, FilteredTreeRootNode } from "../../common/internal/visibility/BaseFilteredTree.js";
+import type { CategoriesTreeIdsCache } from "./CategoriesTreeIdsCache.js";
 
-interface FilteredTreeRootNode {
-  children: Map<Id64String, FilteredTreeNode>;
+/** @internal */
+export interface CategoriesTreeFilterTargets {
+  categories?: Array<{ modelId: Id64String | undefined; categoryIds: Id64Set }>;
+  elements?: Array<{ modelId: Id64String; categoryId: Id64String; elementIds: Id64Set }>;
+  definitionContainerIds?: Id64Set;
+  modelIds?: Id64Set;
+  subCategories?: Array<{ categoryId: Id64String; subCategoryIds: Id64Set }>;
 }
 
-interface BaseFilteredTreeNode {
-  id: Id64String;
-  children?: Map<Id64String, FilteredTreeNode>;
-  isFilterTarget: boolean;
-}
-
-interface CategoryFilteredTreeNode extends BaseFilteredTreeNode {
+interface CategoryFilteredTreeNode extends BaseFilteredTreeNode<CategoryFilteredTreeNode> {
   type: "category";
   modelId?: Id64String;
 }
 
-interface ModelFilteredTreeNode extends BaseFilteredTreeNode {
+interface ModelFilteredTreeNode extends BaseFilteredTreeNode<ModelFilteredTreeNode> {
   type: "model";
   categoryId?: Id64String;
 }
-interface SubCategoryFilteredTreeNode extends BaseFilteredTreeNode {
+interface SubCategoryFilteredTreeNode extends BaseFilteredTreeNode<SubCategoryFilteredTreeNode> {
   type: "subCategory";
   categoryId: Id64String;
 }
 
-interface DefinitionContainerFilteredTreeNode extends BaseFilteredTreeNode {
+interface DefinitionContainerFilteredTreeNode extends BaseFilteredTreeNode<DefinitionContainerFilteredTreeNode> {
   type: "definitionContainer";
 }
 
-interface ElementFilteredTreeNode extends BaseFilteredTreeNode {
+interface ElementFilteredTreeNode extends BaseFilteredTreeNode<ElementFilteredTreeNode> {
   type: "element";
   categoryId: Id64String;
-  modelId?: Id64String;
+  modelId: Id64String;
 }
 
 type FilteredTreeNode =
@@ -54,245 +54,217 @@ type FilteredTreeNode =
   | ElementFilteredTreeNode
   | ModelFilteredTreeNode;
 
-export interface FilteredTree {
-  getVisibilityChangeTargets(node: HierarchyNode): VisibilityChangeTargets;
-}
+type TemporaryElementFilteredNode = Omit<ElementFilteredTreeNode, "modelId" | "children"> & {
+  modelId: string | undefined;
+  children?: FilteredTreeNodeChildren<TemporaryElementFilteredNode>;
+};
 
-type CategoryKey = `${ModelId}-${CategoryId}`;
-type SubCategoryKey = `${CategoryId}-${SubCategoryId}`;
-
-function createCategoryKey(modelId: Id64String | undefined, categoryId: Id64String): CategoryKey {
-  return `${modelId ?? ""}-${categoryId}`;
-}
-
-function createSubCategoryKey(categoryId: Id64String, subCategoryId: Id64String): SubCategoryKey {
-  return `${categoryId}-${subCategoryId}`;
-}
+type TemporaryFilteredTreeNode =
+  | DefinitionContainerFilteredTreeNode
+  | SubCategoryFilteredTreeNode
+  | CategoryFilteredTreeNode
+  | TemporaryElementFilteredNode
+  | ModelFilteredTreeNode;
 
 /** @internal */
-export function parseCategoryKey(key: CategoryKey): { modelId: Id64String | undefined; categoryId: Id64String } {
-  const [modelId, categoryId] = key.split("-");
-  return { modelId: modelId !== "" ? modelId : undefined, categoryId };
-}
-
-/** @internal */
-export function parseSubCategoryKey(key: SubCategoryKey) {
-  const [categoryId, subCategoryId] = key.split("-");
-  return { categoryId, subCategoryId };
-}
-
-interface VisibilityChangeTargets {
-  definitionContainerIds?: Id64Set;
-  modelIds?: Id64Set;
-  categories?: Set<CategoryKey>;
-  elements?: Map<CategoryKey, Set<ElementId>>;
-  subCategories?: Set<SubCategoryKey>;
-}
-
-/** @internal */
-export async function createFilteredTree(props: {
+export async function createFilteredCategoriesTree(props: {
   imodelAccess: ECClassHierarchyInspector;
   filteringPaths: HierarchyFilteringPath[];
   categoryClassName: string;
   categoryElementClassName: string;
   categoryModelClassName: string;
   idsCache: CategoriesTreeIdsCache;
-}): Promise<FilteredTree> {
+}): Promise<FilteredTree<CategoriesTreeFilterTargets>> {
   const { imodelAccess, filteringPaths, categoryClassName, categoryElementClassName, categoryModelClassName, idsCache } = props;
-  const root: FilteredTreeRootNode = {
-    children: new Map(),
-  };
-
-  const filteredElements = new Array<ElementFilteredTreeNode>();
-  for (const filteringPath of filteringPaths) {
-    const normalizedPath = HierarchyFilteringPath.normalize(filteringPath).path;
-
-    let parentNode: FilteredTreeRootNode | FilteredTreeNode = root;
-    for (let i = 0; i < normalizedPath.length; i++) {
-      if ("type" in parentNode && parentNode.isFilterTarget) {
-        break;
-      }
-
-      const identifier = normalizedPath[i];
-
-      if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(identifier)) {
-        break;
-      }
-
-      const currentNode: FilteredTreeNode | undefined = parentNode.children?.get(identifier.id);
-      if (currentNode !== undefined) {
-        parentNode = currentNode;
-        continue;
-      }
-
-      const type = await getType(imodelAccess, identifier.className, categoryClassName, categoryElementClassName, categoryModelClassName);
-
-      const newNode: FilteredTreeNode = createFilteredTreeNode({
-        type,
-        id: identifier.id,
-        isFilterTarget: i === normalizedPath.length - 1,
-        parent: parentNode,
-      });
-      (parentNode.children ??= new Map()).set(identifier.id, newNode);
-      parentNode = newNode;
-      if (newNode.type === "element") {
-        filteredElements.push(newNode);
-      }
-    }
-  }
-  const filteredElementsModels = await idsCache.getFilteredElementsModels(filteredElements.map(({ id }) => id));
-  // We populate filtered elements array with references, this causes root to change accordingly
-  filteredElements.forEach((element) => {
-    element.modelId = filteredElementsModels.get(element.id);
+  return createFilteredTree({
+    filteredNodesHandler: new CategoriesTreeFilteredNodesHandler({
+      idsCache,
+      imodelAccess,
+      categoryClassName,
+      categoryElementClassName,
+      categoryModelClassName,
+    }),
+    filteringPaths,
   });
-
-  return {
-    getVisibilityChangeTargets: (node: HierarchyNode) => getVisibilityChangeTargets(root, node),
-  };
 }
 
-function getVisibilityChangeTargets(root: FilteredTreeRootNode, node: HierarchyNode) {
-  let lookupParents: Array<{ children?: Map<Id64String, FilteredTreeNode> }> = [root];
-  const changeTargets: VisibilityChangeTargets = {};
-
-  const nodeKey = node.key;
-  if (!HierarchyNodeKey.isInstances(nodeKey)) {
-    return changeTargets;
-  }
-
-  // find the filtered parent nodes of the `node`
-  for (const parentKey of node.parentKeys) {
-    if (!HierarchyNodeKey.isInstances(parentKey)) {
-      continue;
-    }
-
-    // tree node might be merged from multiple instances. As filtered tree stores only one instance per node, we need to find all matching nodes
-    // and use them when checking for matching node in one level deeper.
-    const parentNodes = findMatchingFilteredNodes(lookupParents, parentKey.instanceKeys);
-    if (parentNodes.length === 0) {
-      return changeTargets;
-    }
-    lookupParents = parentNodes;
-  }
-
-  // find filtered nodes that match the `node`
-  const filteredNodes = findMatchingFilteredNodes(lookupParents, nodeKey.instanceKeys);
-  if (filteredNodes.length === 0) {
-    return changeTargets;
-  }
-
-  for (const filteredNode of filteredNodes) {
-    collectVisibilityChangeTargets(changeTargets, filteredNode);
-  }
-  return changeTargets;
+interface FilterTargetsInternal {
+  elements?: Map<ModelCategoryKey, Set<ElementId>>;
+  categories?: Map<ModelId | undefined, Set<CategoryId>>;
+  definitionContainerIds?: Id64Set;
+  modelIds?: Id64Set;
+  subCategories?: Map<CategoryId, Set<SubCategoryId>>;
 }
 
-function findMatchingFilteredNodes(lookupParents: Array<{ children?: Map<Id64String, FilteredTreeNode> }>, keys: InstanceKey[]) {
-  return lookupParents
-    .flatMap((lookup) => keys.map((key) => lookup.children?.get(key.id)))
-    .filter((lookupNode): lookupNode is FilteredTreeNode => lookupNode !== undefined);
+interface CategoriesTreeFilteredNodesHandlerProps {
+  idsCache: CategoriesTreeIdsCache;
+  imodelAccess: ECClassHierarchyInspector;
+  categoryClassName: string;
+  categoryElementClassName: string;
+  categoryModelClassName: string;
 }
 
-function collectVisibilityChangeTargets(changeTargets: VisibilityChangeTargets, filteredNode: FilteredTreeNode) {
-  if (filteredNode.isFilterTarget) {
-    addTarget(changeTargets, filteredNode);
-    return;
-  }
+type ModelCategoryKey = `${ModelId}-${CategoryId}`;
 
-  if (filteredNode.type === "element") {
-    // need to add parent ids as filter target will be an element
-    addTarget(changeTargets, filteredNode);
-  }
-
-  if (!filteredNode.children) {
-    return;
-  }
-
-  for (const child of filteredNode.children.values()) {
-    collectVisibilityChangeTargets(changeTargets, child);
-  }
+interface ProcessedFilteredNodes {
+  filteredElements: Map<Id64String, Omit<ElementFilteredTreeNode, "children">>;
 }
 
-function addTarget(filterTargets: VisibilityChangeTargets, node: FilteredTreeNode) {
-  switch (node.type) {
-    case "definitionContainer":
-      (filterTargets.definitionContainerIds ??= new Set()).add(node.id);
-      return;
-    case "model":
-      (filterTargets.modelIds ??= new Set()).add(node.id);
-      return;
-    case "subCategory":
-      (filterTargets.subCategories ??= new Set()).add(createSubCategoryKey(node.categoryId, node.id));
-      return;
-    case "category":
-      (filterTargets.categories ??= new Set()).add(createCategoryKey(node.modelId, node.id));
-      return;
-    case "element":
-      const categoryKey = createCategoryKey(node.modelId, node.categoryId);
-      const elements = (filterTargets.elements ??= new Map()).get(categoryKey);
-      if (elements) {
-        elements.add(node.id);
-        return;
+class CategoriesTreeFilteredNodesHandler extends FilteredNodesHandler<ProcessedFilteredNodes, CategoriesTreeFilterTargets, TemporaryFilteredTreeNode> {
+  constructor(private readonly _props: CategoriesTreeFilteredNodesHandlerProps) {
+    super();
+  }
+
+  public async getProcessedFilteredNodes(): Promise<ProcessedFilteredNodes> {
+    const filteredTemporaryElements = new Map<Id64String, Omit<TemporaryElementFilteredNode, "children">>();
+    const result: ProcessedFilteredNodes = {
+      filteredElements: new Map(),
+    };
+    this.filteredNodesArr.forEach((node) => {
+      if (node.type === "element") {
+        filteredTemporaryElements.set(node.id, node);
       }
-      filterTargets.elements.set(categoryKey, new Set([node.id]));
-      return;
-  }
-}
+    });
 
-function createFilteredTreeNode({
-  type,
-  id,
-  isFilterTarget,
-  parent,
-}: {
-  type: FilteredTreeNode["type"];
-  id: Id64String;
-  isFilterTarget: boolean;
-  parent: FilteredTreeNode | FilteredTreeRootNode;
-}): FilteredTreeNode {
-  if (type === "definitionContainer") {
+    const filteredElementsModels = await this._props.idsCache.getFilteredElementsModels([...filteredTemporaryElements.keys()]);
+    filteredTemporaryElements.forEach((element, id) => {
+      const modelId = filteredElementsModels.get(element.id);
+      assert(modelId !== undefined);
+      result.filteredElements.set(id, { ...element, modelId });
+    });
+    return result;
+  }
+
+  public convertNodesToFilterTargets(
+    filteredNodes: TemporaryFilteredTreeNode[],
+    processedFilteredNodes: ProcessedFilteredNodes,
+  ): CategoriesTreeFilterTargets | undefined {
+    const filterTargets: FilterTargetsInternal = {};
+
+    filteredNodes.forEach((filteredNode) => this.collectFilterTargets(filterTargets, filteredNode, processedFilteredNodes));
+
+    return this.convertInternalFilterTargets(filterTargets);
+  }
+
+  private convertInternalFilterTargets(filterTargets: FilterTargetsInternal): CategoriesTreeFilterTargets | undefined {
+    if (
+      !filterTargets.categories &&
+      !filterTargets.definitionContainerIds &&
+      !filterTargets.elements &&
+      !filterTargets.modelIds &&
+      !filterTargets.subCategories
+    ) {
+      return undefined;
+    }
     return {
-      id,
-      isFilterTarget,
-      type,
+      categories: filterTargets.categories
+        ? [...filterTargets.categories.entries()].map(([modelId, categoryIds]) => {
+            return { modelId, categoryIds };
+          })
+        : undefined,
+      elements: filterTargets.elements
+        ? [...filterTargets.elements.entries()].map(([modelCategoryKey, elementIds]) => {
+            const { modelId, categoryId } = this.parseModelCategoryKey(modelCategoryKey);
+            return { modelId, categoryId, elementIds };
+          })
+        : undefined,
+      definitionContainerIds: filterTargets.definitionContainerIds,
+      modelIds: filterTargets.modelIds,
+      subCategories: filterTargets.subCategories
+        ? [...filterTargets.subCategories.entries()].map(([categoryId, subCategoryIds]) => {
+            return { categoryId, subCategoryIds };
+          })
+        : undefined,
     };
   }
-  if (type === "subCategory") {
-    assert("id" in parent);
-    return {
-      id,
-      isFilterTarget,
-      type,
-      categoryId: parent.id,
-    };
+
+  private collectFilterTargets(changeTargets: FilterTargetsInternal, node: TemporaryFilteredTreeNode, processedFilteredNodes: ProcessedFilteredNodes) {
+    const filteredNode = node.type !== "element" ? node : processedFilteredNodes.filteredElements.get(node.id);
+    assert(filteredNode !== undefined);
+    if (filteredNode.isFilterTarget) {
+      this.addTarget(changeTargets, filteredNode);
+      return;
+    }
+
+    if (filteredNode.type === "element") {
+      // need to add parent ids as filter target will be an element
+      this.addTarget(changeTargets, filteredNode);
+    }
+
+    if (!node.children) {
+      return;
+    }
+
+    for (const child of node.children.values()) {
+      this.collectFilterTargets(changeTargets, child, processedFilteredNodes);
+    }
   }
-  if (type === "category") {
-    if ("type" in parent && parent.type === "model") {
+
+  private addTarget(filterTargets: FilterTargetsInternal, node: FilteredTreeNode) {
+    switch (node.type) {
+      case "definitionContainer":
+        (filterTargets.definitionContainerIds ??= new Set()).add(node.id);
+        return;
+      case "model":
+        (filterTargets.modelIds ??= new Set()).add(node.id);
+        return;
+      case "subCategory":
+        const subCategories = (filterTargets.subCategories ??= new Map()).get(node.categoryId);
+        if (subCategories) {
+          subCategories.add(node.id);
+          return;
+        }
+        filterTargets.subCategories.set(node.categoryId, new Set([node.id]));
+        return;
+      case "category":
+        const categories = (filterTargets.categories ??= new Map()).get(node.modelId);
+        if (!categories) {
+          categories.add(node.id);
+          return;
+        }
+        filterTargets.categories.set(node.modelId, new Set([node.id]));
+        return;
+      case "element":
+        const modelCategoryKey = this.createModelCategoryKey(node.modelId, node.categoryId);
+        const elements = (filterTargets.elements ??= new Map()).get(modelCategoryKey);
+        if (elements) {
+          elements.add(node.id);
+          return;
+        }
+        filterTargets.elements.set(modelCategoryKey, new Set([node.id]));
+        return;
+    }
+  }
+
+  private createModelCategoryKey(modelId: Id64String, categoryId: Id64String): ModelCategoryKey {
+    return `${modelId}-${categoryId}`;
+  }
+
+  private parseModelCategoryKey(key: ModelCategoryKey): { modelId: Id64String; categoryId: Id64String } {
+    const [modelId, categoryId] = key.split("-");
+    return { modelId, categoryId };
+  }
+
+  public createFilteredTreeNode({
+    type,
+    id,
+    isFilterTarget,
+    parent,
+  }: {
+    type: FilteredTreeNode["type"];
+    id: Id64String;
+    isFilterTarget: boolean;
+    parent: TemporaryFilteredTreeNode | FilteredTreeRootNode<TemporaryFilteredTreeNode>;
+  }): TemporaryFilteredTreeNode {
+    if (type === "definitionContainer") {
       return {
         id,
         isFilterTarget,
         type,
-        modelId: parent.id,
       };
     }
-    return {
-      id,
-      isFilterTarget,
-      type,
-    };
-  }
-  if (type === "model") {
-    assert("id" in parent);
-    return {
-      id,
-      isFilterTarget,
-      type,
-      categoryId: parent.type === "category" ? parent.id : undefined,
-    };
-  }
-
-  if ("type" in parent) {
-    if (parent.type === "category") {
+    if (type === "subCategory") {
+      assert("id" in parent);
       return {
         id,
         isFilterTarget,
@@ -300,36 +272,67 @@ function createFilteredTreeNode({
         categoryId: parent.id,
       };
     }
-    assert(parent.type === "element");
-    return {
-      id,
-      isFilterTarget,
-      type,
-      categoryId: parent.categoryId,
-    };
+    if (type === "category") {
+      if ("type" in parent && parent.type === "model") {
+        return {
+          id,
+          isFilterTarget,
+          type,
+          modelId: parent.id,
+        };
+      }
+      return {
+        id,
+        isFilterTarget,
+        type,
+      };
+    }
+    if (type === "model") {
+      assert("id" in parent);
+      return {
+        id,
+        isFilterTarget,
+        type,
+        categoryId: parent.type === "category" ? parent.id : undefined,
+      };
+    }
+
+    if ("type" in parent) {
+      if (parent.type === "category") {
+        return {
+          id,
+          isFilterTarget,
+          type,
+          categoryId: parent.id,
+          modelId: undefined,
+        };
+      }
+      assert(parent.type === "element");
+      return {
+        id,
+        isFilterTarget,
+        type,
+        categoryId: parent.categoryId,
+        modelId: undefined,
+      };
+    }
+
+    throw new Error("Invalid parent node type");
   }
 
-  throw new Error("Invalid parent node type");
-}
-
-async function getType(
-  hierarchyChecker: ECClassHierarchyInspector,
-  className: string,
-  categoryClassName: string,
-  categoryElementClass: string,
-  categoryModelClassName: string,
-) {
-  if (await hierarchyChecker.classDerivesFrom(className, CLASS_NAME_SubCategory)) {
-    return "subCategory";
+  public async getType(className: string): Promise<TemporaryFilteredTreeNode["type"]> {
+    if (await this._props.imodelAccess.classDerivesFrom(className, CLASS_NAME_SubCategory)) {
+      return "subCategory";
+    }
+    if (await this._props.imodelAccess.classDerivesFrom(className, this._props.categoryElementClassName)) {
+      return "element";
+    }
+    if (await this._props.imodelAccess.classDerivesFrom(className, this._props.categoryClassName)) {
+      return "category";
+    }
+    if (await this._props.imodelAccess.classDerivesFrom(className, this._props.categoryModelClassName)) {
+      return "model";
+    }
+    return "definitionContainer";
   }
-  if (await hierarchyChecker.classDerivesFrom(className, categoryElementClass)) {
-    return "element";
-  }
-  if (await hierarchyChecker.classDerivesFrom(className, categoryClassName)) {
-    return "category";
-  }
-  if (await hierarchyChecker.classDerivesFrom(className, categoryModelClassName)) {
-    return "model";
-  }
-  return "definitionContainer";
 }
