@@ -73,13 +73,6 @@ export function RatioPrimaryChildren(props: PanelProps): React.ReactElement {
   );
 }
 
-/** Returns the primary children for ratio format (always visible)
- * @internal
- */
-export function getRatioPrimaryChildren(props: PanelProps): React.ReactNode {
-  return <RatioPrimaryChildren {...props} />;
-}
-
 /** Secondary children component for ratio format
  * @internal
  */
@@ -107,11 +100,4 @@ export function RatioSecondaryChildren(props: PanelProps): React.ReactElement {
       <ZeroEmpty formatProps={formatProps} onChange={onFormatChange} />
     </div>
   );
-}
-
-/** Returns the secondary children for ratio format (expandable/collapsible)
- * @internal
- */
-export function getRatioSecondaryChildren(props: PanelProps): React.ReactNode {
-  return <RatioSecondaryChildren {...props} />;
 }

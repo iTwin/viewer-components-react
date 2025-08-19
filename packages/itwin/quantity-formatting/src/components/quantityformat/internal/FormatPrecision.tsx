@@ -17,7 +17,7 @@ import { DecimalPrecisionSelector } from "./misc/DecimalPrecision.js";
  */
 export interface FormatPrecisionProps {
   formatProps: FormatDefinition;
-  onChange?: (format: FormatDefinition) => void;
+  onChange: (format: FormatDefinition) => void;
 }
 
 /** Component to show/edit Quantity Format Precision.
@@ -27,14 +27,6 @@ export function FormatPrecision(props: FormatPrecisionProps) {
   const { formatProps, onChange } = props;
   const { translate } = useTranslation();
   const precisionSelectorId = React.useId();
-  const handlePrecisionChange = React.useCallback(
-    (precision: number) => {
-      const newFormatProps = { ...formatProps, precision };
-      onChange && onChange(newFormatProps);
-    },
-    [formatProps, onChange]
-  );
-
   const formatType = parseFormatType(formatProps.type, "format");
 
   return (
@@ -45,13 +37,13 @@ export function FormatPrecision(props: FormatPrecisionProps) {
       {formatType === FormatType.Fractional ? (
         <FractionPrecisionSelector
           precision={formatProps.precision ?? 0}
-          onChange={handlePrecisionChange}
+          onChange={(value) => onChange({ ...formatProps, precision: value })}
           aria-labelledby={precisionSelectorId}
         />
       ) : (
         <DecimalPrecisionSelector
           precision={formatProps.precision ?? 0}
-          onChange={handlePrecisionChange}
+          onChange={(value) => onChange({ ...formatProps, precision: value })}
           aria-labelledby={precisionSelectorId}
         />
       )}

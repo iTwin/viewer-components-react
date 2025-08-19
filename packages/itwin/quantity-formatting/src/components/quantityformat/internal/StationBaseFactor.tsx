@@ -13,7 +13,7 @@ import { useTranslation } from "../../../useTranslation.js";
  */
 export interface StationBaseFactorProps {
   formatProps: FormatDefinition;
-  onChange?: (format: FormatDefinition) => void;
+  onChange: (format: FormatDefinition) => void;
 }
 
 /** Component to show/edit Station Format Base Factor.
@@ -26,10 +26,7 @@ export function StationBaseFactor(props: StationBaseFactorProps) {
   const { translate } = useTranslation();
   const stationBaseFactorInputId = React.useId();
 
-  const currentValue = React.useMemo(() => {
-    // Default to 1 if no base factor is set
-    return (formatProps as any).stationBaseFactor ?? 1;
-  }, [formatProps]);
+  const currentValue = (formatProps as any).stationBaseFactor ?? 1;
 
   const [inputValue, setInputValue] = React.useState(currentValue.toString());
 
@@ -57,7 +54,7 @@ export function StationBaseFactor(props: StationBaseFactorProps) {
 
     if (newValue !== currentValue) {
       const newFormatProps = { ...formatProps, stationBaseFactor: newValue };
-      onChange && onChange(newFormatProps);
+      onChange(newFormatProps);
     }
   }, [inputValue, currentValue, formatProps, onChange]);
 

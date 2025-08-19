@@ -15,7 +15,7 @@ import { useTranslation } from "../../../useTranslation.js";
  */
 export interface FractionDashProps {
   formatProps: FormatProps;
-  onChange?: (format: FormatProps) => void;
+  onChange: (format: FormatProps) => void;
 }
 
 /** Component to show/edit Fraction Dash format trait.
@@ -26,13 +26,6 @@ export function FractionDash(props: FractionDashProps) {
   const { translate } = useTranslation();
 
   const fractionDashId = React.useId();
-
-  const handleSetFormatProps = React.useCallback(
-    (newProps: FormatProps) => {
-      onChange && onChange(newProps);
-    },
-    [onChange]
-  );
 
   const setFormatTrait = React.useCallback(
     (trait: FormatTraits, setActive: boolean) => {
@@ -55,10 +48,9 @@ export function FractionDash(props: FractionDashProps) {
           formatTraits = traits.filter((traitEntry) => traitEntry !== traitStr);
         }
       }
-      const newFormatProps = { ...formatProps, formatTraits };
-      handleSetFormatProps(newFormatProps);
+      onChange({ ...formatProps, formatTraits });
     },
-    [formatProps, handleSetFormatProps]
+    [formatProps, onChange]
   );
 
   const handleUseFractionDashChange = React.useCallback(
@@ -83,7 +75,7 @@ export function FractionDash(props: FractionDashProps) {
       <Checkbox
         id={fractionDashId}
         checked={isFormatTraitSet(FormatTraits.FractionDash)}
-        onChange={handleUseFractionDashChange}
+        onChange={(e) => setFormatTrait(FormatTraits.FractionDash, e.target.checked)}
       />
     </div>
   );

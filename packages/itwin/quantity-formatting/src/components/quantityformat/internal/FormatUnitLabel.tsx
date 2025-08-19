@@ -23,16 +23,8 @@ interface UomSeparatorSelectorProps {
  * @internal
  */
 export function UomSeparatorSelector(props: UomSeparatorSelectorProps) {
-  const { formatProps, onFormatChange, ...rest } = props;
+  const { formatProps, onFormatChange } = props;
   const { translate } = useTranslation();
-
-  const handleOnChange = React.useCallback(
-    (value: string) => {
-      const newFormatProps = { ...formatProps, uomSeparator: value };
-      onFormatChange && onFormatChange(newFormatProps);
-    },
-    [formatProps, onFormatChange]
-  );
 
   const separatorOptions: SelectOption<string>[] = React.useMemo(() => {
     const uomDefaultEntries: SelectOption<string>[] = [
@@ -62,10 +54,9 @@ export function UomSeparatorSelector(props: UomSeparatorSelectorProps) {
         label={translate("QuantityFormat:labels.labelSeparator")}
         options={separatorOptions}
         value={formatProps.uomSeparator ?? ""}
-        onChange={handleOnChange}
+        onChange={(value: string) => onFormatChange({ ...formatProps, uomSeparator: value })}
         size="small"
         displayStyle="inline"
-        {...rest}
       />
     </div>
   );
@@ -96,7 +87,7 @@ export function AppendUnitLabel(props: AppendUnitLabelProps) {
             ? [...formatProps.formatTraits, getTraitString(trait)]
             : [getTraitString(trait)],
         };
-        onFormatChange && onFormatChange(newFormatProps);
+        onFormatChange(newFormatProps);
       } else {
         const formatTraits = formatProps.formatTraits;
         if (Array.isArray(formatTraits)) {
@@ -106,10 +97,9 @@ export function AppendUnitLabel(props: AppendUnitLabelProps) {
               (entry: string) => entry !== getTraitString(trait)
             ),
           };
-          onFormatChange && onFormatChange(newFormatProps);
+          onFormatChange(newFormatProps);
         } else {
-          const newFormatProps = { ...formatProps, formatTraits: [] };
-          onFormatChange && onFormatChange(newFormatProps);
+          onFormatChange({ ...formatProps, formatTraits: [] });
         }
       }
     },
@@ -123,13 +113,6 @@ export function AppendUnitLabel(props: AppendUnitLabelProps) {
     [formatProps]
   );
 
-  const handleShowUnitLabelChange = React.useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFormatTrait(FormatTraits.ShowUnitLabel, e.target.checked);
-    },
-    [setFormatTrait]
-  );
-
   return (
     <div className="quantityFormat--formatInlineRow quantityFormat--appendUnitLabel">
       <Label htmlFor={appendUnitLabelId}>
@@ -138,7 +121,7 @@ export function AppendUnitLabel(props: AppendUnitLabelProps) {
       <Checkbox
         id={appendUnitLabelId}
         checked={isFormatTraitSet(FormatTraits.ShowUnitLabel)}
-        onChange={handleShowUnitLabelChange}
+        onChange={(e) => setFormatTrait(FormatTraits.ShowUnitLabel, e.target.checked)}
       />
     </div>
   );

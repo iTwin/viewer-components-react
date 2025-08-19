@@ -16,15 +16,14 @@ import "../FormatPanel.scss";
  */
 export interface ZeroEmptyProps {
   formatProps: FormatProps;
-  onChange?: (format: FormatProps) => void;
-  disabled?: boolean;
+  onChange: (format: FormatProps) => void;
 }
 
 /** Component to show/edit Zero Empty setting.
  * @internal
  */
 export function ZeroEmpty(props: ZeroEmptyProps) {
-  const { formatProps, onChange, disabled } = props;
+  const { formatProps, onChange } = props;
   const { translate } = useTranslation();
   const zeroEmptyId = React.useId();
 
@@ -50,17 +49,9 @@ export function ZeroEmpty(props: ZeroEmptyProps) {
           : formatProps.formatTraits.split(/,|;|\|/);
         formatTraits = traits.filter((traitEntry) => traitEntry !== traitStr);
       }
-      const newFormatProps = { ...formatProps, formatTraits };
-      onChange && onChange(newFormatProps);
+      onChange({ ...formatProps, formatTraits });
     },
     [formatProps, onChange]
-  );
-
-  const handleZeroEmptyChange = React.useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFormatTrait(FormatTraits.ZeroEmpty, e.target.checked);
-    },
-    [setFormatTrait]
   );
 
   return (
@@ -74,8 +65,7 @@ export function ZeroEmpty(props: ZeroEmptyProps) {
           formatProps,
           FormatTraits.ZeroEmpty
         )}
-        onChange={handleZeroEmptyChange}
-        disabled={disabled}
+        onChange={(e) => setFormatTrait(FormatTraits.ZeroEmpty, e.target.checked)}
       />
     </div>
   );

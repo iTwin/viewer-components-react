@@ -75,13 +75,6 @@ export function StationPrimaryChildren(props: PanelProps): React.ReactElement {
   );
 }
 
-/** Returns the primary children for station format (always visible)
- * @internal
- */
-export function getStationPrimaryChildren(props: PanelProps): React.ReactNode {
-  return <StationPrimaryChildren {...props} />;
-}
-
 /** Secondary children component for station format
  * @internal
  */
@@ -113,13 +106,4 @@ export function StationSecondaryChildren(
       <ZeroEmpty formatProps={formatProps} onChange={onFormatChange} />
     </div>
   );
-}
-
-/** Returns the secondary children for station format (expandable/collapsible)
- * @internal
- */
-export function getStationSecondaryChildren(
-  props: PanelProps
-): React.ReactNode {
-  return <StationSecondaryChildren {...props} />;
 }

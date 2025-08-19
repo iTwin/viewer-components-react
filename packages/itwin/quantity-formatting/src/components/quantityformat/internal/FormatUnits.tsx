@@ -62,7 +62,7 @@ export interface FormatUnitsProps {
   initialFormat: FormatDefinition;
   persistenceUnit?: UnitProps;
   unitsProvider: UnitsProvider;
-  onUnitsChange?: (format: FormatDefinition) => void;
+  onUnitsChange: (format: FormatDefinition) => void;
 }
 function UnitDescr(props: {
   name: string;
@@ -180,17 +180,10 @@ function UnitDescr(props: {
     void fetchAllowableUnitSelections();
   }, [index, label, name, parentUnitName, translate, unitsProvider]);
 
-  const handleOnUnitChange = React.useCallback(
-    (newValue: string) => {
-      onUnitChange && onUnitChange(newValue, index);
-    },
-    [index, onUnitChange]
-  );
-
   const handleOnLabelChange = React.useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       e.preventDefault();
-      onLabelChange && onLabelChange(e.target.value, index);
+      onLabelChange(e.target.value, index);
     },
     [index, onLabelChange]
   );
@@ -202,7 +195,7 @@ function UnitDescr(props: {
         options={unitOptions}
         data-testid={`unit-${currentUnit.name}`}
         value={`${currentUnit.name}:${currentUnit.label}`}
-        onChange={handleOnUnitChange}
+        onChange={(newValue) => onUnitChange(newValue, index)}
         disabled={readonly}
         size="small"
         className="quantityFormat--unitSelect"
@@ -241,7 +234,7 @@ export function FormatUnits(props: FormatUnitsProps) {
   const handleSetFormatProps = React.useCallback(
     (newProps: FormatDefinition) => {
       setFormatProps(newProps);
-      onUnitsChange && onUnitsChange(newProps);
+      onUnitsChange(newProps);
     },
     [onUnitsChange]
   );
@@ -319,8 +312,7 @@ export function FormatUnits(props: FormatUnitsProps) {
       if (formatProps.composite) {
         const spacerValue = e.target.value.length ? e.target.value[0] : ""; // spacer can only be empty or a single character
         const composite = { ...formatProps.composite, spacer: spacerValue };
-        const newFormatProps = { ...formatProps, composite };
-        handleSetFormatProps(newFormatProps);
+        handleSetFormatProps({ ...formatProps, composite });
       }
     },
     [formatProps, handleSetFormatProps]

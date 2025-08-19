@@ -18,34 +18,15 @@ import "../FormatPanel.scss";
  */
 export interface ScientificTypeProps {
   formatProps: FormatProps;
-  onChange?: (format: FormatProps) => void;
-  disabled?: boolean;
+  onChange: (format: FormatProps) => void;
 }
 
 /** Component to show/edit scientific type.
  * @internal
  */
 export function ScientificType(props: ScientificTypeProps) {
-  const { formatProps, onChange, disabled = false } = props;
+  const { formatProps, onChange } = props;
   const { translate } = useTranslation();
-
-  const handleSetFormatProps = React.useCallback(
-    (newProps: FormatProps) => {
-      onChange && onChange(newProps);
-    },
-    [onChange]
-  );
-
-  const handleScientificTypeChange = React.useCallback(
-    (type: CoreScientificType) => {
-      const newFormatProps = {
-        ...formatProps,
-        scientificType: type,
-      };
-      handleSetFormatProps(newFormatProps);
-    },
-    [formatProps, handleSetFormatProps]
-  );
 
   const currentType = React.useMemo(() => {
     return formatProps.scientificType && formatProps.scientificType.length > 0
@@ -85,9 +66,8 @@ export function ScientificType(props: ScientificTypeProps) {
         }
         options={formatOptions}
         value={currentType}
-        onChange={handleScientificTypeChange}
+        onChange={(type: CoreScientificType) => onChange({ ...formatProps, scientificType: type })}
         size="small"
-        disabled={disabled}
       />
     </div>
   );

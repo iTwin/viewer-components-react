@@ -7,7 +7,7 @@ import { afterAll, beforeAll, beforeEach, vi } from "vitest";
 import { NoRenderApp } from "@itwin/core-frontend";
 import { EmptyLocalization } from "@itwin/core-common";
 
-import { QuantityFormatting } from "../../QuantityFormatting.js";
+import { QuantityFormatting } from "../QuantityFormatting.js";
 
 // Before all tests, initialize any global services
 beforeAll(async () => {

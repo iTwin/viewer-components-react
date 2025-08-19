@@ -18,7 +18,7 @@ import "../FormatPanel.scss";
  */
 export interface RatioTypeProps {
   formatProps: FormatProps;
-  onChange?: (format: FormatProps) => void;
+  onChange: (format: FormatProps) => void;
 }
 
 /** Component to show/edit ratio type.
@@ -27,24 +27,6 @@ export interface RatioTypeProps {
 export function RatioType(props: RatioTypeProps) {
   const { formatProps, onChange } = props;
   const { translate } = useTranslation();
-
-  const handleSetFormatProps = React.useCallback(
-    (newProps: FormatProps) => {
-      onChange && onChange(newProps);
-    },
-    [onChange]
-  );
-
-  const handleRatioTypeChange = React.useCallback(
-    (type: CoreRatioType) => {
-      const newFormatProps = {
-        ...formatProps,
-        ratioType: type,
-      };
-      handleSetFormatProps(newFormatProps);
-    },
-    [formatProps, handleSetFormatProps]
-  );
 
   const currentType = React.useMemo(() => {
     return formatProps.ratioType && formatProps.ratioType.length > 0
@@ -102,7 +84,7 @@ export function RatioType(props: RatioTypeProps) {
         }
         options={formatOptions}
         value={currentType}
-        onChange={handleRatioTypeChange}
+        onChange={(type: CoreRatioType) => onChange({ ...formatProps, ratioType: type })}
         size="small"
         displayStyle="inline"
         menuStyle={{ maxInlineSize: "60vw" }}

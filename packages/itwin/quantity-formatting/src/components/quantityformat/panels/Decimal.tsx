@@ -82,12 +82,6 @@ export function DecimalPrimaryChildren(props: PanelProps): React.ReactElement {
   );
 }
 
-/** Returns the primary children for decimal format
- * @internal
- */
-export function getDecimalPrimaryChildren(props: PanelProps): React.ReactNode {
-  return <DecimalPrimaryChildren {...props} />;
-}
 
 /** Secondary children component for decimal format
  * @internal
@@ -118,13 +112,4 @@ export function DecimalSecondaryChildren(
       <ZeroEmpty formatProps={formatProps} onChange={onFormatChange} />
     </div>
   );
-}
-
-/** Returns the secondary children for decimal format
- * @internal
- */
-export function getDecimalSecondaryChildren(
-  props: PanelProps
-): React.ReactNode {
-  return <DecimalSecondaryChildren {...props} />;
 }

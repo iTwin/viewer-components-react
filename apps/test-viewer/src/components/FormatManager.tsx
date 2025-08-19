@@ -8,7 +8,7 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
 import type { FormatDefinition, FormatsChangedArgs, FormatsProvider, MutableFormatsProvider } from "@itwin/core-quantity";
 import type { FormatSet } from "@itwin/ecschema-metadata";
-import { SchemaFormatsProvider, SchemaItemType, SchemaKey, SchemaMatchType } from "@itwin/ecschema-metadata";
+import { SchemaFormatsProvider, SchemaItem, SchemaItemType, SchemaKey, SchemaMatchType } from "@itwin/ecschema-metadata";
 
 export class FormatManager {
   protected static _instance: FormatManager;
@@ -216,7 +216,11 @@ export class FormatSetFormatsProvider implements MutableFormatsProvider {
     this._fallbackProvider = undefined;
   }
 
-  public async getFormat(name: string): Promise<FormatDefinition | undefined> {
+  public async getFormat(input: string): Promise<FormatDefinition | undefined> {
+    // Normalizes any schemaItem names coming from node addon 'schemaName:schemaItemName' -> 'schemaName.schemaItemName'
+    const [schemaName, itemName] = SchemaItem.parseFullName(input);
+
+    const name = (schemaName === "") ? itemName : `${schemaName}.${itemName}`;
     const format = this._formatSet.formats[name];
     if (format) return format;
     if (this._fallbackProvider) return this._fallbackProvider.getFormat(name);

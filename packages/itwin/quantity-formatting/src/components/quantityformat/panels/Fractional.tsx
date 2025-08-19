@@ -71,14 +71,6 @@ export function FractionalPrimaryChildren(
   );
 }
 
-/** Returns the primary children for fractional format
- * @internal
- */
-export function getFractionalPrimaryChildren(
-  props: PanelProps
-): React.ReactNode {
-  return <FractionalPrimaryChildren {...props} />;
-}
 
 /** Secondary children component for fractional format
  * @internal
@@ -108,13 +100,4 @@ export function FractionalSecondaryChildren(
       <ZeroEmpty formatProps={formatProps} onChange={onFormatChange} />
     </div>
   );
-}
-
-/** Returns the secondary children for fractional format
- * @internal
- */
-export function getFractionalSecondaryChildren(
-  props: PanelProps
-): React.ReactNode {
-  return <FractionalSecondaryChildren {...props} />;
 }

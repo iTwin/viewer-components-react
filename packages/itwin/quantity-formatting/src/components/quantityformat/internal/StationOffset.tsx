@@ -15,25 +15,16 @@ import { Label } from "@itwin/itwinui-react";
  */
 export interface StationOffsetProps {
   formatProps: FormatProps;
-  onChange?: (format: FormatProps) => void;
-  disabled?: boolean;
+  onChange: (format: FormatProps) => void;
 }
 
 /** Component to show/edit Station Format Offset Size.
  * @internal
  */
 export function StationOffset(props: StationOffsetProps) {
-  const { formatProps, onChange, disabled = false } = props;
+  const { formatProps, onChange } = props;
   const { translate } = useTranslation();
   const stationOffsetSelectorId = React.useId();
-
-  const handleStationOffsetChange = React.useCallback(
-    (value: number) => {
-      const newFormatProps = { ...formatProps, stationOffsetSize: value };
-      onChange && onChange(newFormatProps);
-    },
-    [formatProps, onChange]
-  );
 
   return (
     <div className="quantityFormat--formatInlineRow">
@@ -43,7 +34,7 @@ export function StationOffset(props: StationOffsetProps) {
       <StationSizeSelector
         aria-labelledby={stationOffsetSelectorId}
         value={formatProps.stationOffsetSize ?? 2}
-        onChange={handleStationOffsetChange}
+        onChange={(value) => onChange({ ...formatProps, stationOffsetSize: value })}
       />
     </div>
   );

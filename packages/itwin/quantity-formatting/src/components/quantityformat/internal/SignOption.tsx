@@ -18,15 +18,14 @@ import "../FormatPanel.scss";
  */
 export interface SignOptionProps {
   formatProps: FormatProps;
-  onChange?: (format: FormatProps) => void;
-  disabled?: boolean;
+  onChange: (format: FormatProps) => void;
 }
 
 /** Component to show/edit Show Sign Option.
  * @internal
  */
 export function SignOption(props: SignOptionProps) {
-  const { formatProps, onChange, disabled = false } = props;
+  const { formatProps, onChange } = props;
   const { translate } = useTranslation();
   const showSignOptionId = React.useId();
 
@@ -37,14 +36,6 @@ export function SignOption(props: SignOptionProps) {
         "format"
       ),
     [formatProps.showSignOption]
-  );
-
-  const handleShowSignOptionChange = React.useCallback(
-    (value: ShowSignOption) => {
-      const newFormatProps = { ...formatProps, showSignOption: value };
-      onChange && onChange(newFormatProps);
-    },
-    [formatProps, onChange]
   );
 
   return (
@@ -63,7 +54,7 @@ export function SignOption(props: SignOptionProps) {
       <SignOptionSelector
         aria-labelledby={showSignOptionId}
         signOption={showSignOption}
-        onChange={handleShowSignOptionChange}
+        onChange={(value: ShowSignOption) => onChange({ ...formatProps, showSignOption: value })}
       />
     </div>
   );

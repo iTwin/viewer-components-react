@@ -13,48 +13,36 @@ import {
 import type { UnitsProvider } from "@itwin/core-quantity";
 import { ExpandableBlock, Flex, Surface, Text } from "@itwin/itwinui-react";
 import {
-  getDecimalPrimaryChildren,
-  getDecimalSecondaryChildren,
+  DecimalPrimaryChildren,
+  DecimalSecondaryChildren,
   type PanelProps,
 } from "./panels/Decimal.js";
 import {
-  getFractionalPrimaryChildren,
-  getFractionalSecondaryChildren,
+  FractionalPrimaryChildren,
+  FractionalSecondaryChildren,
 } from "./panels/Fractional.js";
 import {
-  getScientificPrimaryChildren,
-  getScientificSecondaryChildren,
+  ScientificPrimaryChildren,
+  ScientificSecondaryChildren,
 } from "./panels/Scientific.js";
 import {
-  getStationPrimaryChildren,
-  getStationSecondaryChildren,
+  StationPrimaryChildren,
+  StationSecondaryChildren,
 } from "./panels/Station.js";
 import {
-  getAzimuthPrimaryChildren,
-  getAzimuthSecondaryChildren,
+  AzimuthPrimaryChildren,
+  AzimuthSecondaryChildren,
 } from "./panels/Azimuth.js";
 import {
-  getBearingPrimaryChildren,
-  getBearingSecondaryChildren,
+  BearingPrimaryChildren,
+  BearingSecondaryChildren,
 } from "./panels/Bearing.js";
 import "./FormatPanel.scss";
 import {
-  getRatioPrimaryChildren,
-  getRatioSecondaryChildren,
+  RatioPrimaryChildren,
+  RatioSecondaryChildren,
 } from "./panels/Ratio.js";
-
-// Temporary translation function - this should be replaced with proper i18n
-function useTranslation() {
-  return {
-    translate: (key: string) => {
-      // Default translations for common keys
-      const translations: Record<string, string> = {
-        "QuantityFormat:labels.advancedOptions": "Advanced Options",
-      };
-      return translations[key] || key;
-    },
-  };
-}
+import { useTranslation } from "../../useTranslation.js";
 
 /**
  * @internal
@@ -86,43 +74,43 @@ export function FormatPanel(props: FormatPanelProps) {
     switch (formatType) {
       case FormatType.Decimal:
         return [
-          getDecimalPrimaryChildren(panelProps),
-          getDecimalSecondaryChildren(panelProps),
+          <DecimalPrimaryChildren {...panelProps} />,
+          <DecimalSecondaryChildren {...panelProps} />,
         ];
       case FormatType.Fractional:
         return [
-          getFractionalPrimaryChildren(panelProps),
-          getFractionalSecondaryChildren(panelProps),
+          <FractionalPrimaryChildren {...panelProps} />,
+          <FractionalSecondaryChildren {...panelProps} />,
         ];
       case FormatType.Scientific:
         return [
-          getScientificPrimaryChildren(panelProps),
-          getScientificSecondaryChildren(panelProps),
+          <ScientificPrimaryChildren {...panelProps} />,
+          <ScientificSecondaryChildren {...panelProps} />,
         ];
       case FormatType.Station:
         return [
-          getStationPrimaryChildren(panelProps),
-          getStationSecondaryChildren(panelProps),
+          <StationPrimaryChildren {...panelProps} />,
+          <StationSecondaryChildren {...panelProps} />,
         ];
       case FormatType.Azimuth:
         return [
-          getAzimuthPrimaryChildren(panelProps),
-          getAzimuthSecondaryChildren(panelProps),
+          <AzimuthPrimaryChildren {...panelProps} />,
+          <AzimuthSecondaryChildren {...panelProps} />,
         ];
       case FormatType.Bearing:
         return [
-          getBearingPrimaryChildren(panelProps),
-          getBearingSecondaryChildren(panelProps),
+          <BearingPrimaryChildren {...panelProps} />,
+          <BearingSecondaryChildren {...panelProps} />,
         ];
       case FormatType.Ratio:
         return [
-          getRatioPrimaryChildren(panelProps),
-          getRatioSecondaryChildren(panelProps),
+          <RatioPrimaryChildren {...panelProps} />,
+          <RatioSecondaryChildren {...panelProps} />,
         ];
       default:
         return [
-          getDecimalPrimaryChildren(panelProps),
-          getDecimalSecondaryChildren(panelProps),
+          <DecimalPrimaryChildren {...panelProps} />,
+          <DecimalSecondaryChildren {...panelProps} />,
         ];
     }
   }, [formatProps, unitsProvider, onFormatChange, persistenceUnit]);

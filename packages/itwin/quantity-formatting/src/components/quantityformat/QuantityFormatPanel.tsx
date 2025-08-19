@@ -41,7 +41,7 @@ export function QuantityFormatPanel(props: QuantityFormatPanelProps) {
   ({ ...formatDefinition })
   );
 
-  const [_saveEnabled, _setSaveEnabled] = React.useState(false);
+  const [saveEnabled, setSaveEnabled] = React.useState(false);
 
   const [persistenceUnit, setPersistenceUnit] = React.useState<
     UnitProps | undefined
@@ -50,7 +50,7 @@ export function QuantityFormatPanel(props: QuantityFormatPanelProps) {
   // Update the cloned format definition when the prop changes
   React.useEffect(() => {
     setClonedFormatDefinition({ ...formatDefinition });
-    _setSaveEnabled(false);
+    setSaveEnabled(false);
   }, [formatDefinition]);
 
   // Generate persistenceUnit from first composite unit
@@ -79,19 +79,19 @@ export function QuantityFormatPanel(props: QuantityFormatPanelProps) {
   const handleOnFormatChanged = React.useCallback(
     async (newProps: FormatDefinition) => {
       setClonedFormatDefinition(newProps);
-      _setSaveEnabled(true);
+      setSaveEnabled(true);
     },
     []
   );
 
   const handleSave = React.useCallback(() => {
     onFormatChange && onFormatChange(clonedFormatDefinition);
-    _setSaveEnabled(false);
+    setSaveEnabled(false);
   }, [onFormatChange, clonedFormatDefinition]);
 
   const handleClear = React.useCallback(() => {
     setClonedFormatDefinition({...formatDefinition});
-    _setSaveEnabled(false);
+    setSaveEnabled(false);
   }, [formatDefinition]);
 
   return (
@@ -116,10 +116,10 @@ export function QuantityFormatPanel(props: QuantityFormatPanelProps) {
       <Divider className="quantityFormat-formatPanel-divider" />
       <Flex justifyContent="flex-end" gap="xs">
         <ButtonGroup>
-          <Button styleType="default" onClick={handleClear} disabled={!_saveEnabled}>
+          <Button styleType="default" onClick={handleClear} disabled={!saveEnabled}>
             {translate("QuantityFormat:labels.clear")}
           </Button>
-          <Button styleType="high-visibility" onClick={handleSave} disabled={!_saveEnabled}>
+          <Button styleType="high-visibility" onClick={handleSave} disabled={!saveEnabled}>
             {translate("QuantityFormat:labels.save")}
           </Button>
         </ButtonGroup>

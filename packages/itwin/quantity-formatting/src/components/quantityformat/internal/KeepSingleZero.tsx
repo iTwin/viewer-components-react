@@ -16,15 +16,14 @@ import "../FormatPanel.scss";
  */
 export interface KeepSingleZeroProps {
   formatProps: FormatProps;
-  onChange?: (format: FormatProps) => void;
-  disabled?: boolean;
+  onChange: (format: FormatProps) => void;
 }
 
 /** Component to show/edit Keep Single Zero setting.
  * @internal
  */
 export function KeepSingleZero(props: KeepSingleZeroProps) {
-  const { formatProps, onChange, disabled } = props;
+  const { formatProps, onChange } = props;
   const { translate } = useTranslation();
   const keepSingleZeroId = React.useId();
 
@@ -50,17 +49,9 @@ export function KeepSingleZero(props: KeepSingleZeroProps) {
           : formatProps.formatTraits.split(/,|;|\|/);
         formatTraits = traits.filter((traitEntry) => traitEntry !== traitStr);
       }
-      const newFormatProps = { ...formatProps, formatTraits };
-      onChange && onChange(newFormatProps);
+      onChange({ ...formatProps, formatTraits });
     },
     [formatProps, onChange]
-  );
-
-  const handleKeepSingleZeroChange = React.useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFormatTrait(FormatTraits.KeepSingleZero, e.target.checked);
-    },
-    [setFormatTrait]
   );
 
   return (
@@ -74,8 +65,7 @@ export function KeepSingleZero(props: KeepSingleZeroProps) {
           formatProps,
           FormatTraits.KeepSingleZero
         )}
-        onChange={handleKeepSingleZeroChange}
-        disabled={disabled}
+        onChange={(e) => setFormatTrait(FormatTraits.KeepSingleZero, e.target.checked)}
       />
     </div>
   );

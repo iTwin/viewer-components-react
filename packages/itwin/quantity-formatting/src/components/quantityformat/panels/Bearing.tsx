@@ -72,19 +72,3 @@ export function BearingSecondaryChildren(
     </div>
   );
 }
-
-/** Returns the primary children for bearing format
- * @internal
- */
-export function getBearingPrimaryChildren(props: PanelProps): React.ReactNode {
-  return <BearingPrimaryChildren {...props} />;
-}
-
-/** Returns the secondary children for bearing format
- * @internal
- */
-export function getBearingSecondaryChildren(
-  props: PanelProps
-): React.ReactNode {
-  return <BearingSecondaryChildren {...props} />;
-}

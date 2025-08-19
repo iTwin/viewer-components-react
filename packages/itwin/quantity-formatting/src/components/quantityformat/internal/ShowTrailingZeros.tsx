@@ -15,15 +15,14 @@ import { Checkbox, Label } from "@itwin/itwinui-react";
  */
 export interface ShowTrailingZerosProps {
   formatProps: FormatProps;
-  onChange?: (format: FormatProps) => void;
-  disabled?: boolean;
+  onChange: (format: FormatProps) => void;
 }
 
 /** Component to show/edit Show Trailing Zeros format trait.
  * @internal
  */
 export function ShowTrailingZeros(props: ShowTrailingZerosProps) {
-  const { formatProps, onChange, disabled = false } = props;
+  const { formatProps, onChange } = props;
   const { translate } = useTranslation();
   const showTrailZerosId = React.useId();
 
@@ -49,17 +48,9 @@ export function ShowTrailingZeros(props: ShowTrailingZerosProps) {
           : formatProps.formatTraits.split(/,|;|\|/);
         formatTraits = traits.filter((traitEntry) => traitEntry !== traitStr);
       }
-      const newFormatProps = { ...formatProps, formatTraits };
-      onChange && onChange(newFormatProps);
+      onChange({...formatProps, formatTraits});
     },
     [formatProps, onChange]
-  );
-
-  const handleShowTrailingZeroesChange = React.useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFormatTrait(FormatTraits.TrailZeroes, e.target.checked);
-    },
-    [setFormatTrait]
   );
 
   return (
@@ -73,8 +64,7 @@ export function ShowTrailingZeros(props: ShowTrailingZerosProps) {
           formatProps,
           FormatTraits.TrailZeroes
         )}
-        onChange={handleShowTrailingZeroesChange}
-        disabled={disabled}
+        onChange={(e) => setFormatTrait(FormatTraits.TrailZeroes, e.target.checked)}
       />
     </div>
   );

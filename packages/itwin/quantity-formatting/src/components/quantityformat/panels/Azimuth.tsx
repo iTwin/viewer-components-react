@@ -70,7 +70,6 @@ export function AzimuthPrimaryChildren(props: PanelProps): React.ReactElement {
       <AzimuthOptions
         formatProps={formatProps}
         onChange={onFormatChange}
-        disabled={false}
         unitsProvider={unitsProvider}
       />
       {/* Add precision, etc. controls here */}
@@ -78,12 +77,6 @@ export function AzimuthPrimaryChildren(props: PanelProps): React.ReactElement {
   );
 }
 
-/** Returns the primary children for azimuth format (always visible)
- * @internal
- */
-export function getAzimuthPrimaryChildren(props: PanelProps): React.ReactNode {
-  return <AzimuthPrimaryChildren {...props} />;
-}
 
 /** Secondary children component for azimuth format
  * @internal
@@ -114,13 +107,4 @@ export function AzimuthSecondaryChildren(
       <ZeroEmpty formatProps={formatProps} onChange={onFormatChange} />
     </div>
   );
-}
-
-/** Returns the secondary children for azimuth format (expandable/collapsible)
- * @internal
- */
-export function getAzimuthSecondaryChildren(
-  props: PanelProps
-): React.ReactNode {
-  return <AzimuthSecondaryChildren {...props} />;
 }

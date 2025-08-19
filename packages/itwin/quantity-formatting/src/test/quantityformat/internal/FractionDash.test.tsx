@@ -94,13 +94,4 @@ describe("FractionDash", () => {
     });
   });
 
-  it("should not call onChange when onChange prop is not provided", () => {
-    render(<FractionDash formatProps={defaultFormatProps} />);
-
-    const checkbox = screen.getByRole("checkbox");
-    fireEvent.click(checkbox);
-
-    // Should not throw error and should render without issues
-    expect(screen.getByText("labels.fractionDashLabel")).toBeTruthy();
-  });
 });

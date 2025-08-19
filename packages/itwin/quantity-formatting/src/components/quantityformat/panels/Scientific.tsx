@@ -74,14 +74,6 @@ export function ScientificPrimaryChildren(
   );
 }
 
-/** Returns the primary children for scientific format
- * @internal
- */
-export function getScientificPrimaryChildren(
-  props: PanelProps
-): React.ReactNode {
-  return <ScientificPrimaryChildren {...props} />;
-}
 
 /** Secondary children component for scientific format
  * @internal
@@ -112,13 +104,4 @@ export function ScientificSecondaryChildren(
       <ZeroEmpty formatProps={formatProps} onChange={onFormatChange} />
     </div>
   );
-}
-
-/** Returns the secondary children for scientific format
- * @internal
- */
-export function getScientificSecondaryChildren(
-  props: PanelProps
-): React.ReactNode {
-  return <ScientificSecondaryChildren {...props} />;
 }

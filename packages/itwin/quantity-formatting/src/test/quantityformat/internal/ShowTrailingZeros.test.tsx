@@ -65,21 +65,6 @@ describe("ShowTrailingZeros", () => {
     });
   });
 
-  it("should be disabled when disabled prop is true", () => {
-    const onChange = vi.fn();
-    render(<ShowTrailingZeros formatProps={defaultFormatProps} onChange={onChange} disabled={true} />);
-
-    const checkbox = screen.getByRole("checkbox") as HTMLInputElement;
-    expect(checkbox.disabled).toBeTruthy();
-  });
-
-  it("should not be disabled when disabled prop is false", () => {
-    const onChange = vi.fn();
-    render(<ShowTrailingZeros formatProps={defaultFormatProps} onChange={onChange} disabled={false} />);
-
-    const checkbox = screen.getByRole("checkbox") as HTMLInputElement;
-    expect(checkbox.disabled).toBeFalsy();
-  });
 
   it("should handle string formatTraits", () => {
     const formatPropsWithStringTraits: FormatProps = {
@@ -91,15 +76,5 @@ describe("ShowTrailingZeros", () => {
 
     const checkbox = screen.getByRole("checkbox") as HTMLInputElement;
     expect(checkbox.checked).toBeTruthy();
-  });
-
-  it("should not call onChange when onChange prop is not provided", () => {
-    render(<ShowTrailingZeros formatProps={defaultFormatProps} />);
-
-    const checkbox = screen.getByRole("checkbox");
-    fireEvent.click(checkbox);
-
-    // Should not throw error and should render without issues
-    expect(screen.getByText("labels.showTrailZerosLabel")).toBeTruthy();
   });
 });

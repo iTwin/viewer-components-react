@@ -65,22 +65,6 @@ describe("KeepDecimalPoint", () => {
     });
   });
 
-  it("should be disabled when disabled prop is true", () => {
-    const onChange = vi.fn();
-    render(<KeepDecimalPoint formatProps={defaultFormatProps} onChange={onChange} disabled={true} />);
-
-    const checkbox = screen.getByRole("checkbox") as HTMLInputElement;
-    expect(checkbox.disabled).toBe(true);
-  });
-
-  it("should not be disabled when disabled prop is false", () => {
-    const onChange = vi.fn();
-    render(<KeepDecimalPoint formatProps={defaultFormatProps} onChange={onChange} disabled={false} />);
-
-    const checkbox = screen.getByRole("checkbox") as HTMLInputElement;
-    expect(checkbox.disabled).toBe(false);
-  });
-
   it("should handle string formatTraits", () => {
     const formatPropsWithStringTraits: FormatProps = {
       ...defaultFormatProps,
@@ -93,13 +77,4 @@ describe("KeepDecimalPoint", () => {
     expect(checkbox.checked).toBe(true);
   });
 
-  it("should not call onChange when onChange prop is not provided", () => {
-    render(<KeepDecimalPoint formatProps={defaultFormatProps} />);
-
-    const checkbox = screen.getByRole("checkbox");
-    fireEvent.click(checkbox);
-
-    // Should not throw error and should render without issues
-    expect(screen.getByText("labels.keepDecimalPointLabel")).toBeTruthy();
-  });
 });

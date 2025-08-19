@@ -16,7 +16,7 @@ import { useTranslation } from "../../../useTranslation.js";
  */
 export interface DecimalSeparatorProps {
   formatProps: FormatDefinition;
-  onChange?: (format: FormatDefinition) => void;
+  onChange: (format: FormatDefinition) => void;
 }
 
 /** Component to show/edit decimal separator.
@@ -27,13 +27,6 @@ export function DecimalSeparator(props: DecimalSeparatorProps) {
   const { translate } = useTranslation();
 
   const decimalSeparatorSelectorId = React.useId();
-
-  const handleSetFormatProps = React.useCallback(
-    (newProps: FormatDefinition) => {
-      onChange && onChange(newProps);
-    },
-    [onChange]
-  );
 
   const handleDecimalSeparatorChange = React.useCallback(
     (decimalSeparator: string) => {
@@ -59,9 +52,9 @@ export function DecimalSeparator(props: DecimalSeparatorProps) {
         thousandSeparator,
         decimalSeparator,
       };
-      handleSetFormatProps(newFormatProps);
+      onChange(newFormatProps);
     },
-    [formatProps, handleSetFormatProps]
+    [formatProps, onChange]
   );
 
   return (

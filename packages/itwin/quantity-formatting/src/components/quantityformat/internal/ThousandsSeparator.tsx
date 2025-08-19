@@ -17,7 +17,7 @@ import { ThousandsSelector } from "./misc/ThousandsSelector.js";
  */
 export interface UseThousandsSeparatorProps {
   formatProps: FormatProps;
-  onChange?: (format: FormatProps) => void;
+  onChange: (format: FormatProps) => void;
 }
 
 /** Component to enable/disable the use of thousand separator.
@@ -28,13 +28,6 @@ export function UseThousandsSeparator(props: UseThousandsSeparatorProps) {
   const { translate } = useTranslation();
 
   const useThousandsId = React.useId();
-
-  const handleSetFormatProps = React.useCallback(
-    (newProps: FormatProps) => {
-      onChange && onChange(newProps);
-    },
-    [onChange]
-  );
 
   const setFormatTrait = React.useCallback(
     (trait: FormatTraits, setActive: boolean) => {
@@ -57,10 +50,9 @@ export function UseThousandsSeparator(props: UseThousandsSeparatorProps) {
           formatTraits = traits.filter((traitEntry) => traitEntry !== traitStr);
         }
       }
-      const newFormatProps = { ...formatProps, formatTraits };
-      handleSetFormatProps(newFormatProps);
+      onChange({ ...formatProps, formatTraits });
     },
-    [formatProps, handleSetFormatProps]
+    [formatProps, onChange]
   );
 
   const handleUseThousandsSeparatorChange = React.useCallback(
@@ -133,12 +125,11 @@ export function ThousandsSeparatorSelector(
         // thousandSeparator === ","
         else decimalSeparator = ".";
       }
-      const newFormatProps = {
+      handleSetFormatProps({
         ...formatProps,
         thousandSeparator,
         decimalSeparator,
-      };
-      handleSetFormatProps(newFormatProps);
+      });
     },
     [formatProps, isFormatTraitSet, handleSetFormatProps]
   );

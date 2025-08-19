@@ -24,9 +24,8 @@ function AzimuthBaseUnitSelector(props: {
   currentUnit: string;
   unitsProvider: UnitsProvider;
   onChange: (unitName: string) => void;
-  disabled: boolean;
 }) {
-  const { currentUnit, unitsProvider, onChange, disabled } = props;
+  const { currentUnit, unitsProvider, onChange } = props;
   const { translate } = useTranslation();
   const [unitOptions, setUnitOptions] = React.useState<SelectOption<string>[]>([
     { value: currentUnit, label: currentUnit },
@@ -61,13 +60,6 @@ function AzimuthBaseUnitSelector(props: {
     void loadUnitOptions();
   }, [currentUnit, unitsProvider]);
 
-  const handleUnitChange = React.useCallback(
-    (value: string) => {
-      onChange(value);
-    },
-    [onChange]
-  );
-
   return (
     <div className="quantityFormat--formatInlineRow">
       <LabeledSelect
@@ -85,7 +77,7 @@ function AzimuthBaseUnitSelector(props: {
         }
         value={currentUnit}
         options={unitOptions}
-        onChange={handleUnitChange}
+        onChange={(value: string) => onChange(value)}
         size="small"
         displayStyle="inline"
       />
@@ -99,41 +91,23 @@ function AzimuthBaseUnitSelector(props: {
  */
 export function AzimuthOptions(props: {
   formatProps: FormatProps;
-  onChange?: (format: FormatProps) => void;
-  disabled: boolean;
+  onChange: (format: FormatProps) => void;
   unitsProvider: UnitsProvider;
 }) {
-  const { formatProps, onChange, disabled, unitsProvider } = props;
+  const { formatProps, onChange, unitsProvider } = props;
   const { translate } = useTranslation();
 
   const baseInputId = React.useId();
   const ccwCheckboxId = React.useId();
 
-  const handleAzimuthBaseUnitChange = React.useCallback(
-    (unitName: string) => {
-      const newFormatProps = { ...formatProps, azimuthBaseUnit: unitName };
-      onChange && onChange(newFormatProps);
-    },
-    [formatProps, onChange]
-  );
   const handleAzimuthBaseChange = React.useCallback(
     (value: number) => {
       const newFormatProps = { ...formatProps, azimuthBase: value };
-      onChange && onChange(newFormatProps);
+      onChange(newFormatProps);
     },
     [formatProps, onChange]
   );
 
-  const handleAzimuthCCWChange = React.useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const newFormatProps = {
-        ...formatProps,
-        azimuthCounterClockwise: event.target.checked,
-      };
-      onChange && onChange(newFormatProps);
-    },
-    [formatProps, onChange]
-  );
 
   /** Disable commas and letters */
   const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -171,16 +145,14 @@ export function AzimuthOptions(props: {
         <Checkbox
           id={ccwCheckboxId}
           checked={formatProps.azimuthCounterClockwise ?? false}
-          onChange={handleAzimuthCCWChange}
-          disabled={disabled}
+          onChange={(event) => onChange({ ...formatProps, azimuthCounterClockwise: event.target.checked })}
         />
       </div>
 
       <AzimuthBaseUnitSelector
         currentUnit={formatProps.azimuthBaseUnit ?? "Units.ARC_DEG"}
         unitsProvider={unitsProvider}
-        onChange={handleAzimuthBaseUnitChange}
-        disabled={disabled}
+        onChange={(value) => onChange({ ...formatProps, azimuthBaseUnit: value })}
       />
       <div className="quantityFormat--formatInlineRow">
         <Label htmlFor={baseInputId} displayStyle="inline">
@@ -200,7 +172,6 @@ export function AzimuthOptions(props: {
           onKeyDown={onKeyDown}
           onChange={handleInputChange}
           size="small"
-          disabled={disabled}
         />
       </div>
     </>

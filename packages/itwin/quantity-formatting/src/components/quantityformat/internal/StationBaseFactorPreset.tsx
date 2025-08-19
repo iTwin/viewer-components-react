@@ -13,7 +13,7 @@ import { useTranslation } from "../../../useTranslation.js";
  */
 export interface StationBaseFactorPresetProps {
   formatProps: FormatDefinition;
-  onChange?: (format: FormatDefinition) => void;
+  onChange: (format: FormatDefinition) => void;
 }
 
 /** Component to provide preset station base factor and offset size combinations.
@@ -24,13 +24,10 @@ export function StationBaseFactorPreset(props: StationBaseFactorPresetProps) {
   const { formatProps, onChange } = props;
   const { translate } = useTranslation();
 
-  const currentBaseFactor = React.useMemo(() => {
-    return (formatProps as any).stationBaseFactor ?? 1;
-  }, [formatProps]);
+  const currentBaseFactor = formatProps.stationBaseFactor ?? 1;
 
-  const currentOffsetSize = React.useMemo(() => {
-    return formatProps.stationOffsetSize ?? 2;
-  }, [formatProps]);
+  const currentOffsetSize = formatProps.stationOffsetSize ?? 2;
+
 
   // Determine which preset is currently active
   const activePreset = React.useMemo(() => {
@@ -68,7 +65,7 @@ export function StationBaseFactorPreset(props: StationBaseFactorPresetProps) {
         stationBaseFactor: newBaseFactor,
       };
 
-      onChange && onChange(newFormatProps);
+      onChange(newFormatProps);
     },
     [formatProps, onChange]
   );

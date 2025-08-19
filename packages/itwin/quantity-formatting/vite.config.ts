@@ -17,9 +17,9 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "jsdom",
-    setupFiles: ["src/test/quantity-formatting/_Setup.test.ts"],
+    setupFiles: ["src/test/_Setup.test.ts"],
     include: ["src/test/**/*.test.*"],
-    exclude: ["src/test/quantity-formatting/_Setup.test.ts"],
+    exclude: ["src/test/_Setup.test.ts"],
     coverage: {
       exclude: ["lib/*", "src/test/*"],
       include: ["src/*"],
