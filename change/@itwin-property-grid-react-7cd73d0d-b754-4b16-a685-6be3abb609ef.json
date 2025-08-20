@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fix quantity formatting not working in editable property grid.",
-  "packageName": "@itwin/property-grid-react",
-  "email": "35135765+grigasp@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

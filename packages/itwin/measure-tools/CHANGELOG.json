@@ -2,6 +2,21 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Wed, 20 Aug 2025 13:45:50 GMT",
+      "version": "0.29.0",
+      "tag": "@itwin/measure-tools-react_v0.29.0",
+      "comments": {
+        "none": [
+          {
+            "author": "50554904+hl662@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "fc516e871e4e41687c119b9e34a1a51e401f8ce0",
+            "comment": "Update License.md"
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 11 Aug 2025 13:31:19 GMT",
       "version": "0.29.0",
       "tag": "@itwin/measure-tools-react_v0.29.0",

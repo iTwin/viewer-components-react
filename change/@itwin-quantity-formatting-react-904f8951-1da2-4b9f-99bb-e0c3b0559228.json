@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Add @itwin/quantity-formatting-react package",
-  "packageName": "@itwin/quantity-formatting-react",
-  "email": "50554904+hl662@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
