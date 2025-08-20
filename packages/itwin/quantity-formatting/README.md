@@ -2,6 +2,37 @@
 
 React components for quantity formatting in iTwin.js applications.
 
+- [@itwin/quantity-formatting-react](#itwinquantity-formatting-react)
+  - [Description](#description)
+  - [Installation](#installation)
+  - [Common Worfklow](#common-worfklow)
+    - [Example Workflow](#example-workflow)
+  - [Components](#components)
+    - [QuantityFormatPanel](#quantityformatpanel)
+      - [QuantityFormatPanel Properties](#quantityformatpanel-properties)
+      - [QuantityFormatPanel Usage](#quantityformatpanel-usage)
+    - [FormatPanel](#formatpanel)
+      - [FormatPanel Properties](#formatpanel-properties)
+      - [FormatPanel Usage](#formatpanel-usage)
+    - [FormatSample](#formatsample)
+      - [FormatSample Properties](#formatsample-properties)
+      - [FormatSample Usage](#formatsample-usage)
+    - [FormatSelector](#formatselector)
+      - [FormatSelector Properties](#formatselector-properties)
+      - [FormatSelector Usage](#formatselector-usage)
+  - [Complete Example](#complete-example)
+  - [API](#api)
+    - [FormatManager](#formatmanager)
+      - [Key Features](#key-features)
+      - [Quick Start](#quick-start)
+      - [Initialization Options](#initialization-options)
+      - [Format Set Management](#format-set-management)
+      - [iModel Lifecycle Integration](#imodel-lifecycle-integration)
+      - [Event Handling](#event-handling)
+  - [Initialization](#initialization)
+    - [Integration with iModel Workflow](#integration-with-imodel-workflow)
+  - [License](#license)
+
 ## Description
 
 This package provides React components for working with quantities and their formatting in iTwin.js applications. It includes components for configuring, displaying, and converting quantities with proper unit handling and formatting options.
@@ -345,17 +376,176 @@ function QuantityFormatDialog({ formatSet }: { formatSet?: FormatSet }) {
 
 </details>
 
-## Initialization
+## API
 
-Before using the components, initialize the localization support:
+### FormatManager
+
+The `FormatManager` provides a centralized singleton for managing format sets and format providers in iTwin applications. It automatically integrates with iModel schemas and supports custom format sets with event-driven updates.
+
+#### Key Features
+
+- **Singleton Pattern**: Single instance for application-wide format management
+- **Format Set Management**: Add, remove, and organize collections of formats
+- **Schema Integration**: Automatically discover and load formats from iModel schemas
+- **Event-Driven**: Real-time notifications when format sets or active formats change
+- **Fallback Support**: Configurable fallback format providers
+
+#### Quick Start
 
 ```typescript
-import { QuantityFormatting } from "@itwin/quantity-formatting-react";
+import { FormatManager } from "@itwin/quantity-formatting-react";
+
+// Initialize the FormatManager during application startup
+await FormatManager.initialize({
+  formatSets: [myCustomFormatSet],
+  setupSchemaFormatSetOnIModelOpen: true, // Auto-setup from schemas
+});
+
+
+// Listen for format changes
+FormatManager.instance?.onActiveFormatSetChanged.addListener((args) => {
+  console.log(`Format set changed to: ${args.currentFormatSet.name}`);
+});
+
+// Set an active format set
+FormatManager.instance?.setActiveFormatSet(myFormatSet);
+```
+
+#### Initialization Options
+
+The `FormatManager.initialize()` method accepts these configuration options:
+
+```typescript
+interface FormatManagerInitializeOptions {
+  /** Initial format sets to register */
+  formatSets?: FormatSet[];
+
+  /** Fallback format provider for unknown formats */
+  fallbackProvider?: FormatsProvider;
+
+  /** Whether to automatically setup schema formats when iModel opens (default: true) */
+  setupSchemaFormatSetOnIModelOpen?: boolean;
+
+  /** Schema names to scan for formats (default: ["AecUnits"]) */
+  schemaNames?: string[];
+}
+```
+
+#### Format Set Management
+
+```typescript
+const manager = FormatManager.instance!;
+
+// Add a new format set
+manager.addFormatSet({
+  name: "MyFormats",
+  label: "My Custom Formats",
+  formats: {
+    "custom.length": {
+      type: "Decimal",
+      precision: 3,
+      label: "Custom Length Format"
+    }
+  }
+});
+
+// Get all format sets
+const formatSets = manager.formatSets;
+
+// Get specific format set
+const myFormatSet = manager.getFormatSet("MyFormats");
+
+// Remove a format set
+manager.removeFormatSet("MyFormats");
+
+// Set active format set (applies to IModelApp.formatsProvider)
+manager.setActiveFormatSet(myFormatSet);
+```
+
+#### iModel Lifecycle Integration
+
+The FormatManager automatically integrates with iModel lifecycle events:
+
+```typescript
+// Called when iModel opens - automatically sets up schema formats
+await manager.onIModelOpen(iModelConnection, {
+  schemaNames: ["AecUnits"], // Get all KindOfQuantities from these schemas
+  excludeUsedKindOfQuantities: false, // Include formats from used KindOfQuantities from all schemas across the iModel, not just those passed to schemaNames
+  formatSetLabel: "Schema Formats", // Label for the auto-generated format set
+});
+
+// Called when iModel closes - cleans up schema providers and event listeners
+await manager.onIModelClose();
+```
+
+#### Event Handling
+
+The FormatManager provides several events for monitoring changes:
+
+```typescript
+const manager = FormatManager.instance!;
+
+// Listen for format set collection changes
+manager.onFormatSetsChanged.addListener((formatSets) => {
+  console.log(`Now have ${formatSets.length} format sets`);
+});
+
+// Listen for active format set changes
+manager.onActiveFormatSetChanged.addListener((args) => {
+  console.log(`Active format set changed from ${args.previousFormatSet?.name} to ${args.currentFormatSet.name}`);
+});
+
+// FormatSetFormatsProvider also fires events when individual formats change
+const provider = manager.activeFormatSetFormatsProvider;
+provider?.onFormatsChanged.addListener((args) => {
+  console.log(`Formats changed: ${args.formatsChanged.join(", ")}`);
+});
+```
+
+## Initialization
+
+Before using the components, initialize both the localization support and optionally the FormatManager:
+
+```typescript
+import { QuantityFormatting, FormatManager } from "@itwin/quantity-formatting-react";
 import { IModelApp } from "@itwin/core-frontend";
 
-// Initialize during application startup
+// Initialize localization during application startup
 await QuantityFormatting.startup({
   localization: IModelApp.localization, // Optional: use custom localization
+});
+
+// Optionally initialize FormatManager for centralized format management
+await FormatManager.initialize({
+  formatSets: [], // Start with empty format sets, or provide custom ones
+  setupSchemaFormatSetOnIModelOpen: true, // Auto-setup from iModel schemas
+});
+```
+
+### Integration with iModel Workflow
+
+For applications that work with iModels, integrate the FormatManager with your iModel lifecycle:
+
+```typescript
+import { IModelConnection } from "@itwin/core-frontend";
+
+// When opening an iModel
+IModelConnection.open(...).then(async (iModelConnection) => {
+  // Setup schema-based formats automatically
+  await FormatManager.instance?.onIModelOpen(iModelConnection);
+
+  // Your application logic here
+});
+
+// When closing an iModel
+iModelConnection.close().then(async () => {
+  // Cleanup schema providers
+  await FormatManager.instance?.onIModelClose();
+});
+
+// Application shutdown
+process.on('exit', () => {
+  FormatManager.terminate(); // Cleanup singleton and listeners
 });
 ```
 
