@@ -157,7 +157,7 @@ export function UnitDescr(props: UnitDescrProps) {
 
   const handleOnUnitChange = React.useCallback(
     (newValue: string) => {
-      onUnitChange && onUnitChange(newValue, index);
+      onUnitChange(newValue, index);
     },
     [index, onUnitChange]
   );
