@@ -165,7 +165,7 @@ export function UnitDescr(props: UnitDescrProps) {
   const handleOnLabelChange = React.useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       e.preventDefault();
-      onLabelChange && onLabelChange(e.target.value, index);
+      onLabelChange(e.target.value, index);
     },
     [index, onLabelChange]
   );
