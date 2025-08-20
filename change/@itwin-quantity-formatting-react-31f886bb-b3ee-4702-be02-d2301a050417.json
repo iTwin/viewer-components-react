@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Add formatManager API",
+  "packageName": "@itwin/quantity-formatting-react",
+  "email": "50554904+hl662@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

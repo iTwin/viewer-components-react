@@ -401,7 +401,6 @@ await FormatManager.initialize({
   setupSchemaFormatSetOnIModelOpen: true, // Auto-setup from schemas
 });
 
-
 // Listen for format changes
 FormatManager.instance?.onActiveFormatSetChanged.addListener((args) => {
   console.log(`Format set changed to: ${args.currentFormatSet.name}`);
@@ -444,9 +443,9 @@ manager.addFormatSet({
     "custom.length": {
       type: "Decimal",
       precision: 3,
-      label: "Custom Length Format"
-    }
-  }
+      label: "Custom Length Format",
+    },
+  },
 });
 
 // Get all format sets
