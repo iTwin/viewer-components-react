@@ -4,11 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import React, { useCallback, useState } from "react";
-import { FormatSelector, QuantityFormatPanel } from "@itwin/quantity-formatting-react";
+import { FormatManager, FormatSelector, QuantityFormatPanel } from "@itwin/quantity-formatting-react";
 import { IModelApp } from "@itwin/core-frontend";
 import type { FormatDefinition } from "@itwin/core-quantity";
 import { Button, Modal, ModalButtonBar } from "@itwin/itwinui-react";
-import { FormatManager } from "./FormatManager";
 
 import type { FormatSet } from "@itwin/ecschema-metadata";
 
@@ -52,8 +51,8 @@ export const QuantityFormatButton: React.FC = () => {
 
   // Listen for active format set changes
   React.useEffect(() => {
-    const removeFormatSetListener = FormatManager.instance?.onActiveFormatSetChanged.addListener((formatSet) => {
-      setActiveFormatSet(formatSet);
+    const removeFormatSetListener = FormatManager.instance?.onActiveFormatSetChanged.addListener((args: { currentFormatSet: FormatSet }) => {
+      setActiveFormatSet(args.currentFormatSet);
       setActiveFormatDefinitionKey(undefined); // Reset selection when format set changes
     });
     return () => {

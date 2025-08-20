@@ -19,7 +19,7 @@ import type { IModelConnection } from "@itwin/core-frontend";
  *   console.log(`${info.kindOfQuantityFullName}`);
  * });
  * ```
- * @alpha
+ * @beta
  */
 export async function getUsedKindOfQuantitiesFromIModel(iModel: IModelConnection): Promise<{ kindOfQuantityFullName: string }[]> {
   const ecsqlQuery = `

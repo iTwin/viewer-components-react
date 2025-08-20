@@ -9,10 +9,11 @@ import { IModelApp } from "@itwin/core-frontend";
 import type { FormatDefinition, FormatsChangedArgs, FormatsProvider, MutableFormatsProvider } from "@itwin/core-quantity";
 import type { FormatSet } from "@itwin/ecschema-metadata";
 import { SchemaFormatsProvider, SchemaItem, SchemaItemType, SchemaKey, SchemaMatchType } from "@itwin/ecschema-metadata";
+import { getUsedKindOfQuantitiesFromIModel } from "./Utils.js";
 
 /**
  * Event arguments for format set change events.
- * @alpha
+ * @beta
  */
 export interface FormatSetChangedEventArgs {
   /** The previously active format set, if any */
@@ -23,7 +24,7 @@ export interface FormatSetChangedEventArgs {
 
 /**
  * Options for initializing the FormatManager.
- * @alpha
+ * @beta
  */
 export interface FormatManagerInitializeOptions {
   /** Initial format sets to load */
@@ -38,7 +39,7 @@ export interface FormatManagerInitializeOptions {
 
 /**
  * Options for populating a format set of KindOfQuantities in an iModel when it is open
- * @alpha
+ * @beta
  */
 export interface OnIModelOpenOptions {
   /** Schema names to scan for formats. Defaults to ["AecUnits"] */
@@ -71,7 +72,7 @@ export interface OnIModelOpenOptions {
  * FormatManager.instance.setActiveFormatSet(myFormatSet);
  * ```
  *
- * @alpha
+ * @beta
  */
 export class FormatManager {
   private static _instance?: FormatManager;
@@ -103,7 +104,6 @@ export class FormatManager {
 
   /**
    * Gets all available format sets.
-   * @alpha
    */
   public get formatSets(): FormatSet[] {
     return [...this._formatSets];
@@ -112,7 +112,6 @@ export class FormatManager {
   /**
    * Sets the available format sets.
    * @param formatSets - The format sets to make available.
-   * @alpha
    */
   public set formatSets(formatSets: FormatSet[]) {
     this._formatSets = [...formatSets];
@@ -121,7 +120,6 @@ export class FormatManager {
 
   /**
    * Gets the currently active format set.
-   * @alpha
    */
   public get activeFormatSet(): FormatSet | undefined {
     return this._activeFormatSet;
@@ -129,7 +127,6 @@ export class FormatManager {
 
   /**
    * Gets the active format set's formats provider.
-   * @alpha
    */
   public get activeFormatSetFormatsProvider(): FormatSetFormatsProvider | undefined {
     return this._activeFormatSetFormatsProvider;
@@ -137,7 +134,6 @@ export class FormatManager {
 
   /**
    * Gets the current fallback formats provider.
-   * @alpha
    */
   public get fallbackFormatsProvider(): FormatsProvider | undefined {
     return this._fallbackFormatProvider;
@@ -147,7 +143,6 @@ export class FormatManager {
    * Sets the fallback formats provider.
    * Typically used to enable a SchemaFormatsProvider as the fallback during runtime.
    * @param provider - The formats provider to use as fallback.
-   * @alpha
    */
   public set fallbackFormatsProvider(provider: FormatsProvider | undefined) {
     this._fallbackFormatProvider = provider;
@@ -165,7 +160,6 @@ export class FormatManager {
    * Initialize the FormatManager with the given options.
    * @param options - Configuration options for the FormatManager.
    * @throws Error if the FormatManager is already initialized.
-   * @alpha
    */
   public static async initialize(options: FormatManagerInitializeOptions): Promise<void> {
     if (this._instance) {
@@ -177,7 +171,6 @@ export class FormatManager {
 
   /**
    * Terminates the FormatManager and cleans up all listeners.
-   * @alpha
    */
   public static terminate(): void {
     if (this._instance) {
@@ -209,7 +202,6 @@ export class FormatManager {
   /**
    * Sets the active format set and updates the formats provider.
    * @param formatSet - The format set to activate.
-   * @alpha
    */
   public setActiveFormatSet(formatSet: FormatSet): void {
     const previousFormatSet = this._activeFormatSet;
@@ -231,7 +223,6 @@ export class FormatManager {
   /**
    * Adds a new format set to the available format sets.
    * @param formatSet - The format set to add.
-   * @alpha
    */
   public addFormatSet(formatSet: FormatSet): void {
     // Check if format set with same name already exists
@@ -301,7 +292,6 @@ export class FormatManager {
    * Called when an iModel is opened. Sets up schema-based formats if enabled.
    * @param iModel - The opened iModel connection.
    * @param options - Optional configuration for schema format setup.
-   * @alpha
    */
   public async onIModelOpen(iModel: IModelConnection, options?: OnIModelOpenOptions): Promise<void> {
     // Set up schema-based units and formats providers
@@ -332,7 +322,6 @@ export class FormatManager {
    * @param iModel - The iModel connection.
    * @param schemaFormatsProvider - The schema formats provider.
    * @param options - Query options.
-   * @internal
    */
   private async _setupSchemaFormats(
     iModel: IModelConnection,
@@ -391,7 +380,6 @@ export class FormatManager {
 
   /**
    * Processes format labels to ensure uniqueness.
-   * @internal
    */
   private _processFormatLabel(format: FormatDefinition, schemaItem: any, usedLabels: Set<string>): void {
     if (format.label) {
@@ -404,7 +392,6 @@ export class FormatManager {
 
   /**
    * Adds formats that are actually used in the iModel.
-   * @internal
    */
   private async _addUsedFormatsFromIModel(
     iModel: IModelConnection,
@@ -412,28 +399,11 @@ export class FormatManager {
     schemaFormatSet: FormatSet,
     usedLabels: Set<string>
   ): Promise<void> {
-    const ecsqlQuery = `
-      SELECT
-        ks.Name || '.' || k.Name AS kindOfQuantityFullName,
-        COUNT(*) AS propertyCount,
-        json_group_array(p.Name) AS propertyNames
-      FROM
-        ECDbMeta.ECPropertyDef p
-        JOIN ECDbMeta.KindOfQuantityDef k ON k.ECInstanceId = p.KindOfQuantity.Id
-        JOIN ECDbMeta.ECSchemaDef ks ON ks.ECInstanceId = k.Schema.Id
-      GROUP BY
-        ks.Name,
-        k.Name
-      ORDER BY
-        propertyCount DESC;
-    `;
-
     try {
-      const reader = iModel.createQueryReader(ecsqlQuery);
-      const allRows = await reader.toArray();
+      const koqs = await getUsedKindOfQuantitiesFromIModel(iModel);
 
-      for (const row of allRows) {
-        const formatName = row[0];
+      for (const row of koqs) {
+        const formatName = row.kindOfQuantityFullName;
         const format = await schemaFormatsProvider.getFormat(formatName);
         if (format && !schemaFormatSet.formats[formatName]) {
           if (format.label && usedLabels.has(format.label)) {
@@ -454,12 +424,13 @@ export class FormatManager {
 
 /**
  * A formats provider that uses a FormatSet and optionally falls back to another provider.
- * @alpha
+ *
+ * @important This will be replaced by FormatSetFormatsProvider from @itwin/ecschema-metadata in 5.2.
+ * @beta
  */
 export class FormatSetFormatsProvider implements MutableFormatsProvider {
   /**
    * Event raised when formats in the set are changed.
-   * @alpha
    */
   public readonly onFormatsChanged = new BeEvent<(args: FormatsChangedArgs) => void>();
 
@@ -470,7 +441,6 @@ export class FormatSetFormatsProvider implements MutableFormatsProvider {
    * Creates a new FormatSetFormatsProvider.
    * @param formatSet - The format set to provide formats from.
    * @param fallbackProvider - Optional fallback provider for formats not in the set.
-   * @alpha
    */
   public constructor(formatSet: FormatSet, fallbackProvider?: FormatsProvider) {
     this._formatSet = formatSet;
@@ -481,7 +451,6 @@ export class FormatSetFormatsProvider implements MutableFormatsProvider {
    * Adds a format to the format set.
    * @param name - The name of the format.
    * @param format - The format definition.
-   * @alpha
    */
   public async addFormat(name: string, format: FormatDefinition): Promise<void> {
     this._formatSet.formats[name] = format;
@@ -490,7 +459,6 @@ export class FormatSetFormatsProvider implements MutableFormatsProvider {
 
   /**
    * Removes the fallback provider.
-   * @alpha
    */
   public clearFallbackProvider(): void {
     this._fallbackProvider = undefined;
@@ -500,7 +468,6 @@ export class FormatSetFormatsProvider implements MutableFormatsProvider {
    * Gets a format by name from the format set or fallback provider.
    * @param input - The format name or schema item name.
    * @returns The format definition if found, undefined otherwise.
-   * @alpha
    */
   public async getFormat(input: string): Promise<FormatDefinition | undefined> {
     // Normalizes any schemaItem names coming from node addon 'schemaName:schemaItemName' -> 'schemaName.schemaItemName'
@@ -516,7 +483,6 @@ export class FormatSetFormatsProvider implements MutableFormatsProvider {
   /**
    * Removes a format from the format set.
    * @param name - The name of the format to remove.
-   * @alpha
    */
   public async removeFormat(name: string): Promise<void> {
     delete this._formatSet.formats[name];
@@ -525,7 +491,6 @@ export class FormatSetFormatsProvider implements MutableFormatsProvider {
 
   /**
    * Gets the underlying format set.
-   * @alpha
    */
   public get formatSet(): FormatSet {
     return this._formatSet;
@@ -533,7 +498,6 @@ export class FormatSetFormatsProvider implements MutableFormatsProvider {
 
   /**
    * Gets the fallback provider.
-   * @alpha
    */
   public get fallbackProvider(): FormatsProvider | undefined {
     return this._fallbackProvider;
