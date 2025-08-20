@@ -41,6 +41,7 @@
     "@itwin/presentation-hierarchies-react": "^1.9.1",
     "@itwin/presentation-shared": "^1.2.2",
     "@itwin/property-grid-react": "workspace:*",
+    "@itwin/quantity-formatting-react": "workspace:*",
     "@itwin/reports-config-widget-react": "workspace:*",
     "@itwin/tree-widget-react": "workspace:*",
     "@itwin/unified-selection": "^1.5.0",

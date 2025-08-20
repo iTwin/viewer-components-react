@@ -1,0 +1,7 @@
+sep=;
+Release Tag;API Item Type;API Item Name
+beta;function;FormatPanel
+beta;function;FormatSample
+beta;const;FormatSelector
+beta;function;QuantityFormatPanel
+beta;class;QuantityFormatting
