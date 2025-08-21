@@ -103,16 +103,12 @@ export class FormatManager {
   }
 
   /**
-   * Gets all available format sets.
+   * All available format sets.
    */
   public get formatSets(): FormatSet[] {
     return [...this._formatSets];
   }
 
-  /**
-   * Sets the available format sets.
-   * @param formatSets - The format sets to make available.
-   */
   public set formatSets(formatSets: FormatSet[]) {
     this._formatSets = [...formatSets];
     this.onFormatSetsChanged.raiseEvent(this._formatSets);
@@ -133,17 +129,13 @@ export class FormatManager {
   }
 
   /**
-   * Gets the current fallback formats provider.
+   * The fallback formats provider.
+   * Typically used to enable a SchemaFormatsProvider as the fallback during runtime.
    */
   public get fallbackFormatsProvider(): FormatsProvider | undefined {
     return this._fallbackFormatProvider;
   }
 
-  /**
-   * Sets the fallback formats provider.
-   * Typically used to enable a SchemaFormatsProvider as the fallback during runtime.
-   * @param provider - The formats provider to use as fallback.
-   */
   public set fallbackFormatsProvider(provider: FormatsProvider | undefined) {
     this._fallbackFormatProvider = provider;
     if (this._activeFormatSet) {
