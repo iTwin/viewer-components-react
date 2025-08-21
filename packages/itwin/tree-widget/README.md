@@ -320,40 +320,67 @@ Use `getFilteredPaths` when you need more control over filtering behaviour. Here
 
   <!-- END EXTRACTION -->
 
-- **Apply custom logic to generate instance keys**: Generate instance keys using custom implementation. For example: query elements that have specified filter in their user label and provide them as targetItems.
-    <!-- [[include: [TreeWidget.GetFilteredPathsComponentWithFilterAndTargetItemsExample], tsx]] -->
-    <!-- BEGIN EXTRACTION -->
+- **Apply custom logic to generate instance keys**: Generate instance keys using custom implementation. For example: only apply the given filter string to `bis.Subject` and `bis.Model` instances, but not others (`bis.Category`, `bis.GeometricElement`).
+  <!-- [[include: [TreeWidget.GetFilteredPathsComponentWithFilterAndTargetItemsExample], tsx]] -->
+  <!-- BEGIN EXTRACTION -->
+
   ```tsx
   function CustomModelsTreeComponentWithFilterAndTargetItems({
     viewport,
     selectionStorage,
     imodel,
+    filter,
   }: {
     viewport: Viewport;
     selectionStorage: SelectionStorage;
     imodel: IModelConnection;
+    filter: string | undefined;
   }) {
     const getFilteredPaths = useCallback<GetFilteredPathsType>(
-      async ({ createInstanceKeyPaths, filter }) => {
+      async ({ createInstanceKeyPaths, filter: activeFilter }) => {
+        if (!activeFilter) {
+          // if filter is not defined, return `undefined` to avoid applying empty filter
+          return undefined;
+        }
         const targetItems = new Array<InstanceKey>();
         for await (const row of imodel.createQueryReader(
           `
-            SELECT ec_classname(e.ECClassId, 's.c') className, e.ECInstanceId id
-            FROM BisCore.Element e
-            WHERE UserLabel LIKE '%${filter ?? ""}%'
+            SELECT ClassName, Id
+            FROM (
+              SELECT
+                ec_classname(e.ECClassId, 's.c') ClassName,
+                e.ECInstanceId Id,
+                COALESCE(e.UserLabel, e.CodeValue) Label
+              FROM BisCore.Subject e
+  
+              UNION ALL
+  
+              SELECT
+                ec_classname(m.ECClassId, 's.c') ClassName,
+                m.ECInstanceId Id,
+                COALESCE(e.UserLabel, e.CodeValue) Label
+              FROM BisCore.GeometricModel3d m
+              JOIN BisCore.Element e ON e.ECInstanceId = m.ModeledElement.Id
+              WHERE NOT m.IsPrivate
+                AND EXISTS (SELECT 1 FROM BisCore.Element WHERE Model.Id = m.ECInstanceId)
+                AND json_extract(e.JsonProperties, '$.PhysicalPartition.Model.Content') IS NULL
+                AND json_extract(e.JsonProperties, '$.GraphicalPartition3d.Model.Content') IS NULL
+            )
+            WHERE Label LIKE '%${activeFilter.replaceAll(/[%_\\]/g, "\\$&")}%' ESCAPE '\\'
           `,
           undefined,
           { rowFormat: QueryRowFormat.UseJsPropertyNames },
         )) {
-          targetItems.push({ id: row.id, className: row.className });
+          targetItems.push({ id: row.Id, className: row.ClassName });
         }
-        return createInstanceKeyPaths({ targetItems });
+        // `createInstanceKeyPaths` doesn't automatically set the `autoExpand` flag - set it here
+        const paths = await createInstanceKeyPaths({ targetItems });
+        return paths.map((path) => ({ ...path, options: { autoExpand: true } }));
       },
       [imodel],
     );
 
-    const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths, filter: "test" });
-
+    const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths, filter });
     return (
       <VisibilityTree
         {...modelsTreeProps}
@@ -365,14 +392,15 @@ Use `getFilteredPaths` when you need more control over filtering behaviour. Here
     );
   }
   ```
-    <!-- END EXTRACTION -->
+
+  <!-- END EXTRACTION -->
 
 Use `getSubTreePaths` when you need to restrict the visible hierarchy to a specific sub-tree of nodes, without changing how filtering works. Here is an example use case:
 
 **Restrict the hierarchy to a sub-tree and keep the default filtering logic**: You already have a list of `InstanceKey` items that should remain in the tree. Pass them as `targetItems` to `createInstanceKeyPaths`. This will restrict the hierarchy to a sub-tree, but filtering will work as before.
 
-  <!-- [[include: [TreeWidget.GetSubTreePathsComponentWithTargetItemsExample], tsx]] -->
-  <!-- BEGIN EXTRACTION -->
+<!-- [[include: [TreeWidget.GetSubTreePathsComponentWithTargetItemsExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
 
 ```tsx
 type UseModelsTreeProps = Props<typeof useModelsTree>;
@@ -414,7 +442,7 @@ function CustomModelsTreeComponentWithTargetItems({
 }
 ```
 
-  <!-- END EXTRACTION -->
+<!-- END EXTRACTION -->
 
 ### Categories tree
 
