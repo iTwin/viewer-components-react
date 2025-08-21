@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Allow FeatureInfoWidget to be used from en Editing FrontStage",
-  "packageName": "@itwin/map-layers",
-  "email": "84491342+ashar-bentley@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
