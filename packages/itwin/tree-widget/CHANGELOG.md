@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Thu, 07 Aug 2025 18:43:06 GMT and should not be manually modified. -->
+<!-- This log was last generated on Thu, 21 Aug 2025 11:00:38 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.14.0
+
+Thu, 21 Aug 2025 11:00:38 GMT
+
+### Minor changes
+
+- Allow Model tree's `getFilteredPaths` prop function to return `undefined` paths. In that case, it's considered that filtering should not be applied, and the full unfiltered tree should be loaded. ([#1417](https://github.com/iTwin/viewer-components-react/pull/1417))
 
 ## 3.13.2
 

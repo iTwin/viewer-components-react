@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Allow Model tree's `getFilteredPaths` prop function to return `undefined` paths. In that case, it's considered that filtering should not be applied, and the full unfiltered tree should be loaded.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "35135765+grigasp@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
