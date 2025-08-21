@@ -84,7 +84,7 @@ export class FeatureInfoUiItemsProvider implements UiItemsProvider {
     const widgets = [];
 
     const tmpSection = section ?? StagePanelSection.End;
-    if (tmpSection === StagePanelSection.End && stageUsage === StageUsage.General && location === StagePanelLocation.Right) {
+    if (tmpSection === StagePanelSection.End && (stageUsage === StageUsage.General || stageUsage === StageUsage.Edit) && location === StagePanelLocation.Right) {
       widgets.push({
         id: FeatureInfoUiItemsProvider.widgetId,
         label: MapLayersUI.localization.getLocalizedString("mapLayers:FeatureInfoWidget.Label"),
