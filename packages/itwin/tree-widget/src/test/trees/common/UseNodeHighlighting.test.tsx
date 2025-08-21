@@ -54,6 +54,34 @@ describe("useNodeHighlighting", () => {
     expect(container.querySelector("mark")?.textContent).to.be.eq("node");
   });
 
+  it("highlights text when match found on a node nested under grouping node", () => {
+    const groupingNode = createPresentationHierarchyNode({ id: "grouping-node", label: "grouping node" });
+    const rootNodes = [
+      {
+        ...groupingNode,
+        nodeData: {
+          ...groupingNode.nodeData,
+          key: { type: "label-grouping", label: "grouped node" },
+          groupedInstanceKeys: [],
+        },
+        children: [createdFilterTargetHierarchyNode({ id: "grouped-node", label: "grouped node" })],
+      },
+    ] satisfies PresentationHierarchyNode[];
+    const onHighlightChangedStub = sinon.stub();
+
+    const { result } = renderHook(useNodeHighlighting, {
+      initialProps: { rootNodes, highlight: { text: "grouped node", activeMatchIndex: undefined, onHighlightChanged: onHighlightChangedStub } },
+    });
+
+    expect(onHighlightChangedStub).to.be.calledWith(0, 1);
+
+    const groupingNodeRender = render(result.current.getLabel(rootNodes[0]));
+    expect(groupingNodeRender.container.querySelector("mark")?.textContent).to.be.undefined;
+
+    const groupedNodeRender = render(result.current.getLabel(rootNodes[0].children[0]));
+    expect(groupedNodeRender.container.querySelector("mark")?.textContent).to.eq("grouped node");
+  });
+
   it("highlights text in the middle", () => {
     const rootNodes = [createdFilterTargetHierarchyNode({ id: "node", label: "1 test 2" })];
     const onHighlightChangedStub = sinon.stub();

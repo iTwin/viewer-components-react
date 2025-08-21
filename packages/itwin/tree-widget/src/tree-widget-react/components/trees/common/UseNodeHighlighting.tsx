@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import { HierarchyNode, isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import { useLatest } from "./Utils.js";
 
 import type { PresentationHierarchyNode, PresentationTreeNode } from "@itwin/presentation-hierarchies-react";
@@ -119,7 +119,10 @@ function computeHighlightState(rootNodes: PresentationTreeNode[], searchText: st
         newState.totalMatches += matches.length;
       }
 
-      if (typeof node.children !== "boolean" && node.nodeData.filtering?.filteredChildrenIdentifierPaths?.length) {
+      if (
+        typeof node.children !== "boolean" &&
+        (HierarchyNode.isGroupingNode(node.nodeData) || node.nodeData.filtering?.filteredChildrenIdentifierPaths?.length)
+      ) {
         computeHighlightStateRecursively(node.children);
       }
     });
