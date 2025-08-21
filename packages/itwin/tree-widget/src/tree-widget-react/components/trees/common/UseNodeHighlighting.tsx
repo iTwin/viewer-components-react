@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import { HierarchyNode, isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import { useLatest } from "./Utils.js";
 
 import type { PresentationHierarchyNode, PresentationTreeNode } from "@itwin/presentation-hierarchies-react";
@@ -113,11 +113,16 @@ function computeHighlightState(rootNodes: PresentationTreeNode[], searchText: st
         return;
       }
 
-      const matches = findChunks(node.label, searchText);
-      newState.nodeInfoMap.set(node.id, { startIndex: newState.totalMatches, matches });
-      newState.totalMatches += matches.length;
+      if (node.nodeData.filtering?.isFilterTarget) {
+        const matches = findChunks(node.label, searchText);
+        newState.nodeInfoMap.set(node.id, { startIndex: newState.totalMatches, matches });
+        newState.totalMatches += matches.length;
+      }
 
-      if (typeof node.children !== "boolean") {
+      if (
+        typeof node.children !== "boolean" &&
+        (HierarchyNode.isGroupingNode(node.nodeData) || node.nodeData.filtering?.filteredChildrenIdentifierPaths?.length)
+      ) {
         computeHighlightStateRecursively(node.children);
       }
     });

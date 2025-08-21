@@ -328,6 +328,9 @@ export interface ModelsTreeVisibilityHandlerOverrides {
     }) => Promise<VisibilityStatus>>;
 }
 
+// @public (undocumented)
+type NormalizedHierarchyFilteringPath = ReturnType<(typeof HierarchyFilteringPath)["normalize"]>;
+
 // @public
 export function SelectableTree(props: SelectableTreeProps): JSX.Element | null;
 
@@ -529,13 +532,13 @@ interface UseModelsTreeProps {
             targetItems: Array<InstanceKey | ElementsGroupInfo>;
         } | {
             label: string;
-        }) => Promise<HierarchyFilteringPath[]>;
+        }) => Promise<NormalizedHierarchyFilteringPath[]>;
         filter?: string;
-    }) => Promise<HierarchyFilteringPath[]>;
+    }) => Promise<HierarchyFilteringPath[] | undefined>;
     getSubTreePaths?: (props: {
         createInstanceKeyPaths: (props: {
             targetItems: Array<InstanceKey | ElementsGroupInfo>;
-        }) => Promise<HierarchyFilteringPath[]>;
+        }) => Promise<NormalizedHierarchyFilteringPath[]>;
     }) => Promise<HierarchyFilteringPath[]>;
     // (undocumented)
     hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;

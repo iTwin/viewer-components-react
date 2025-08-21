@@ -170,7 +170,7 @@ function ModelsTreeComponentImpl({
         filteringProps={{
           onFilterStart: applyFilter,
           onFilterClear: clearFilter,
-          isDisabled: instanceFocusEnabled || !!treeProps.getFilteredPaths,
+          isDisabled: instanceFocusEnabled,
         }}
         buttons={buttons}
         density={density}
