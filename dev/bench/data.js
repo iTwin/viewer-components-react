@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1754592769339,
+  "lastUpdate": 1755772291400,
   "repoUrl": "https://github.com/iTwin/viewer-components-react",
   "entries": {
     "Tree-Widget benchmark": [
@@ -3879,6 +3879,129 @@ window.BENCHMARK_DATA = {
             "value": 498,
             "unit": "ms",
             "extra": "count: 12\nmax: 498\np95: 498\nmedian: 63.5"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "35135765+grigasp@users.noreply.github.com",
+            "name": "Grigas",
+            "username": "grigasp"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f2871a30c65e1c6fa31eedbae362620df73db5e7",
+          "message": "Tree widget: Allow returning `undefined` paths from `getFilteredPaths` prop function (#1417)\n\n* Models tree: Don't filter the tree when `getFilteredPaths` returns `undefined`\n\n* Don't disable filtering button if `getFilteredPaths` is defined\n\n* Only apply matches highlighting on filter targets\n\n* prettier\n\n* fix tests\n\n* grouping nodes don't get `filteredChildrenIdentifierPaths` attribute - we still need to recurse into their children",
+          "timestamp": "2025-08-21T13:21:12+03:00",
+          "tree_id": "11dc8da965597ec990a8bed469488b7498d3d5fd",
+          "url": "https://github.com/iTwin/viewer-components-react/commit/f2871a30c65e1c6fa31eedbae362620df73db5e7"
+        },
+        "date": 1755772288505,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "categories tree creates initial filtered view for 50k items",
+            "value": 2494.5,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree creates initial filtered view for 50k items (P95 of main thread blocks)",
+            "value": 1689,
+            "unit": "ms",
+            "extra": "count: 6\nmax: 1689\np95: 1689\nmedian: 33"
+          },
+          {
+            "name": "categories tree changing category visibility changes visibility for 50k subCategories",
+            "value": 9940.55,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree changing category visibility changes visibility for 50k subCategories (P95 of main thread blocks)",
+            "value": 3391,
+            "unit": "ms",
+            "extra": "count: 17\nmax: 3391\np95: 3391\nmedian: 32"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k categories",
+            "value": 6431.18,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k categories (P95 of main thread blocks)",
+            "value": 3165,
+            "unit": "ms",
+            "extra": "count: 8\nmax: 3165\np95: 3165\nmedian: 55.5"
+          },
+          {
+            "name": "models tree creates initial filtered view for 50k target items",
+            "value": 2269.22,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree creates initial filtered view for 50k target items (P95 of main thread blocks)",
+            "value": 145,
+            "unit": "ms",
+            "extra": "count: 11\nmax: 145\np95: 145\nmedian: 38"
+          },
+          {
+            "name": "models tree validates categories visibility for imodel with 50k categories",
+            "value": 16265.16,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree validates categories visibility for imodel with 50k categories (P95 of main thread blocks)",
+            "value": 4408,
+            "unit": "ms",
+            "extra": "count: 11\nmax: 4408\np95: 4408\nmedian: 659"
+          },
+          {
+            "name": "models tree changing model visibility changes visibility for 50k elements",
+            "value": 50096.99,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing model visibility changes visibility for 50k elements (P95 of main thread blocks)",
+            "value": 293,
+            "unit": "ms",
+            "extra": "count: 14\nmax: 293\np95: 293\nmedian: 33"
+          },
+          {
+            "name": "models tree changing category visibility changes visibility for 50k elements",
+            "value": 50217.59,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing category visibility changes visibility for 50k elements (P95 of main thread blocks)",
+            "value": 280,
+            "unit": "ms",
+            "extra": "count: 16\nmax: 280\np95: 280\nmedian: 37"
+          },
+          {
+            "name": "models tree changing per-model-category override changes visibility for 50k elements",
+            "value": 49953.15,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing per-model-category override changes visibility for 50k elements (P95 of main thread blocks)",
+            "value": 283,
+            "unit": "ms",
+            "extra": "count: 12\nmax: 283\np95: 283\nmedian: 53.5"
+          },
+          {
+            "name": "models tree changing element visibility changes only parent nodes visibility with 50k elements",
+            "value": 51232.78,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing element visibility changes only parent nodes visibility with 50k elements (P95 of main thread blocks)",
+            "value": 495,
+            "unit": "ms",
+            "extra": "count: 14\nmax: 495\np95: 495\nmedian: 39"
           }
         ]
       }
