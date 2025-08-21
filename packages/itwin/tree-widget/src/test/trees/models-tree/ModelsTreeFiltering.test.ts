@@ -1679,7 +1679,7 @@ describe("Models tree", () => {
               hierarchyConfig,
             })
           ).sort(instanceKeyPathSorter);
-          expect(actualInstanceKeyPaths).to.deep.eq(instanceKeyPaths);
+          expect(actualInstanceKeyPaths).to.deep.eq(instanceKeyPaths.map(HierarchyFilteringPath.normalize));
         });
 
         it("finds instance key paths by target instance label", async function () {
@@ -1695,7 +1695,7 @@ describe("Models tree", () => {
               hierarchyConfig,
             })
           ).sort(instanceKeyPathSorter);
-          expect(actualInstanceKeyPaths).to.deep.eq(instanceKeyPaths);
+          expect(actualInstanceKeyPaths).to.deep.eq(instanceKeyPaths.map(HierarchyFilteringPath.normalize));
         });
       });
     });
@@ -1726,7 +1726,7 @@ describe("Models tree", () => {
           hierarchyConfig,
         })
       ).sort(instanceKeyPathSorter);
-      expect(actualInstanceKeyPaths).to.deep.eq(expectedPaths);
+      expect(actualInstanceKeyPaths).to.deep.eq(expectedPaths.map(HierarchyFilteringPath.normalize));
     });
 
     it("filtering by label aborts when abort signal fires", async function () {
@@ -1762,10 +1762,12 @@ describe("Models tree", () => {
         abortSignal: abortController2.signal,
       });
       expect(await pathsPromise).to.deep.eq([
-        [
-          { className: "BisCore.GeometricModel3d", id: ids.model.id },
-          { className: "BisCore.SpatialCategory", id: ids.category.id },
-        ],
+        {
+          path: [
+            { className: "BisCore.GeometricModel3d", id: ids.model.id },
+            { className: "BisCore.SpatialCategory", id: ids.category.id },
+          ],
+        },
       ]);
     });
 
@@ -1802,10 +1804,12 @@ describe("Models tree", () => {
         abortSignal: abortController2.signal,
       });
       expect(await pathsPromise).to.deep.eq([
-        [
-          { className: "BisCore.GeometricModel3d", id: ids.model.id },
-          { className: "BisCore.SpatialCategory", id: ids.category.id },
-        ],
+        {
+          path: [
+            { className: "BisCore.GeometricModel3d", id: ids.model.id },
+            { className: "BisCore.SpatialCategory", id: ids.category.id },
+          ],
+        },
       ]);
     });
 
@@ -1843,7 +1847,7 @@ describe("Models tree", () => {
             hierarchyConfig,
           })
         ).sort(instanceKeyPathSorter),
-      ).to.deep.eq([[adjustedModelKey(keys.model), keys.category, adjustedElementKey(keys.element1)]]);
+      ).to.deep.eq([{ path: [adjustedModelKey(keys.model), keys.category, adjustedElementKey(keys.element1)] }]);
 
       expect(
         (
@@ -1854,7 +1858,7 @@ describe("Models tree", () => {
             hierarchyConfig,
           })
         ).sort(instanceKeyPathSorter),
-      ).to.deep.eq([[adjustedModelKey(keys.model), keys.category, adjustedElementKey(keys.element2)]]);
+      ).to.deep.eq([{ path: [adjustedModelKey(keys.model), keys.category, adjustedElementKey(keys.element2)] }]);
 
       expect(
         (
@@ -1865,7 +1869,7 @@ describe("Models tree", () => {
             hierarchyConfig,
           })
         ).sort(instanceKeyPathSorter),
-      ).to.deep.eq([[adjustedModelKey(keys.model), keys.category, adjustedElementKey(keys.element3)]]);
+      ).to.deep.eq([{ path: [adjustedModelKey(keys.model), keys.category, adjustedElementKey(keys.element3)] }]);
     });
   }
 });

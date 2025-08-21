@@ -9,8 +9,24 @@ import { useNodeHighlighting } from "../../../tree-widget-react/components/trees
 import { render, renderHook } from "../../TestUtils.js";
 import { createPresentationHierarchyNode } from "../TreeUtils.js";
 
+import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+
 describe("useNodeHighlighting", () => {
   it("does not highlight text when no matches found", () => {
+    const rootNodes = [createdFilterTargetHierarchyNode({ id: "node", label: "node" })];
+    const onHighlightChangedStub = sinon.stub();
+
+    const { result } = renderHook(useNodeHighlighting, {
+      initialProps: { rootNodes, highlight: { text: "test", activeMatchIndex: undefined, onHighlightChanged: onHighlightChangedStub } },
+    });
+
+    expect(onHighlightChangedStub).to.be.calledWith(0, 0);
+    const { container } = render(result.current.getLabel(rootNodes[0]));
+
+    expect(container.querySelector("mark")).to.be.null;
+  });
+
+  it("does not highlight text when node is not filter target", () => {
     const rootNodes = [createPresentationHierarchyNode({ id: "node", label: "node" })];
     const onHighlightChangedStub = sinon.stub();
 
@@ -25,7 +41,7 @@ describe("useNodeHighlighting", () => {
   });
 
   it("highlights text when match found", () => {
-    const rootNodes = [createPresentationHierarchyNode({ id: "node", label: "node" })];
+    const rootNodes = [createdFilterTargetHierarchyNode({ id: "node", label: "node" })];
     const onHighlightChangedStub = sinon.stub();
 
     const { result } = renderHook(useNodeHighlighting, {
@@ -39,7 +55,7 @@ describe("useNodeHighlighting", () => {
   });
 
   it("highlights text in the middle", () => {
-    const rootNodes = [createPresentationHierarchyNode({ id: "node", label: "1 test 2" })];
+    const rootNodes = [createdFilterTargetHierarchyNode({ id: "node", label: "1 test 2" })];
     const onHighlightChangedStub = sinon.stub();
 
     const { result } = renderHook(useNodeHighlighting, {
@@ -60,7 +76,7 @@ describe("useNodeHighlighting", () => {
   });
 
   it("highlights edges of text", () => {
-    const rootNodes = [createPresentationHierarchyNode({ id: "node", label: "test node test" })];
+    const rootNodes = [createdFilterTargetHierarchyNode({ id: "node", label: "test node test" })];
     const onHighlightChangedStub = sinon.stub();
 
     const { result } = renderHook(useNodeHighlighting, {
@@ -81,7 +97,7 @@ describe("useNodeHighlighting", () => {
   });
 
   it("merges adjacent non-active chunks", () => {
-    const rootNodes = [createPresentationHierarchyNode({ id: "node", label: "OOOO" })];
+    const rootNodes = [createdFilterTargetHierarchyNode({ id: "node", label: "OOOO" })];
     const onHighlightChangedStub = sinon.stub();
 
     const { result } = renderHook(useNodeHighlighting, {
@@ -98,7 +114,7 @@ describe("useNodeHighlighting", () => {
   });
 
   it("does not merge active chunk", () => {
-    const rootNodes = [createPresentationHierarchyNode({ id: "node", label: "OOOOO" })];
+    const rootNodes = [createdFilterTargetHierarchyNode({ id: "node", label: "OOOOO" })];
     const onHighlightChangedStub = sinon.stub();
 
     const { result } = renderHook(useNodeHighlighting, {
@@ -118,7 +134,7 @@ describe("useNodeHighlighting", () => {
   });
 
   it("adds and updates active match class", () => {
-    const rootNodes = [createPresentationHierarchyNode({ id: "node", label: "test test test" })];
+    const rootNodes = [createdFilterTargetHierarchyNode({ id: "node", label: "test test test" })];
     const onHighlightChangedStub = sinon.stub();
 
     const { result, rerender: rerenderHook } = renderHook(useNodeHighlighting, {
@@ -157,7 +173,7 @@ describe("useNodeHighlighting", () => {
   });
 
   it("updates index when active node predecessor nodes change", () => {
-    const rootNodes = [createPresentationHierarchyNode({ id: "node", label: "OOOO" })];
+    const rootNodes = [createdFilterTargetHierarchyNode({ id: "node", label: "OOOO" })];
     const onHighlightChangedStub = sinon.stub();
 
     const { result, rerender } = renderHook(useNodeHighlighting, {
@@ -176,8 +192,8 @@ describe("useNodeHighlighting", () => {
     expect(marks[2].textContent).to.be.eq("O");
 
     const newRootNodes = [
-      createPresentationHierarchyNode({ id: "predecessor-node", label: "O" }),
-      createPresentationHierarchyNode({ id: "node", label: "OOOO" }),
+      createdFilterTargetHierarchyNode({ id: "predecessor-node", label: "O" }),
+      createdFilterTargetHierarchyNode({ id: "node", label: "OOOO" }),
     ];
 
     onHighlightChangedStub.resetHistory();
@@ -187,7 +203,7 @@ describe("useNodeHighlighting", () => {
   });
 
   it("does not update index when active node successor nodes change", () => {
-    const rootNodes = [createPresentationHierarchyNode({ id: "node", label: "OOOO" })];
+    const rootNodes = [createdFilterTargetHierarchyNode({ id: "node", label: "OOOO" })];
     const onHighlightChangedStub = sinon.stub();
 
     const { result, rerender } = renderHook(useNodeHighlighting, {
@@ -206,8 +222,8 @@ describe("useNodeHighlighting", () => {
     expect(marks[2].textContent).to.be.eq("O");
 
     const newRootNodes = [
-      createPresentationHierarchyNode({ id: "node", label: "OOOO" }),
-      createPresentationHierarchyNode({ id: "successor-node", label: "O" }),
+      createdFilterTargetHierarchyNode({ id: "node", label: "OOOO" }),
+      createdFilterTargetHierarchyNode({ id: "successor-node", label: "O" }),
     ];
 
     onHighlightChangedStub.resetHistory();
@@ -217,7 +233,7 @@ describe("useNodeHighlighting", () => {
   });
 
   it("returns currently active node", () => {
-    const rootNodes = [createPresentationHierarchyNode({ id: "node-1", label: "node" }), createPresentationHierarchyNode({ id: "node-2", label: "node" })];
+    const rootNodes = [createdFilterTargetHierarchyNode({ id: "node-1", label: "node" }), createdFilterTargetHierarchyNode({ id: "node-2", label: "node" })];
     const onHighlightChangedStub = sinon.stub();
 
     const { result, rerender } = renderHook(useNodeHighlighting, {
@@ -235,7 +251,7 @@ describe("useNodeHighlighting", () => {
   });
 
   it("clears active node when `searchText` is empty", () => {
-    const rootNodes = [createPresentationHierarchyNode({ id: "node", label: "node" })];
+    const rootNodes = [createdFilterTargetHierarchyNode({ id: "node", label: "node" })];
     const onHighlightChangedStub = sinon.stub();
 
     const { result, rerender } = renderHook(useNodeHighlighting, {
@@ -253,7 +269,7 @@ describe("useNodeHighlighting", () => {
   });
 
   it("clears active node when `rootNodes` is empty", () => {
-    const rootNodes = [createPresentationHierarchyNode({ id: "node", label: "node" })];
+    const rootNodes = [createdFilterTargetHierarchyNode({ id: "node", label: "node" })];
     const onHighlightChangedStub = sinon.stub();
 
     const { result, rerender } = renderHook(useNodeHighlighting, {
@@ -270,3 +286,16 @@ describe("useNodeHighlighting", () => {
     expect(result.current.activeNodeId).to.be.undefined;
   });
 });
+
+function createdFilterTargetHierarchyNode(partial?: Partial<PresentationHierarchyNode>): PresentationHierarchyNode {
+  const node = createPresentationHierarchyNode(partial);
+  return {
+    ...node,
+    nodeData: {
+      ...node.nodeData,
+      filtering: {
+        isFilterTarget: true,
+      },
+    },
+  };
+}
