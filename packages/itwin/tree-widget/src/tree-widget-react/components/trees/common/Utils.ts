@@ -58,7 +58,10 @@ export function useLatest<T>(value: T) {
 export type NormalizedHierarchyFilteringPath = ReturnType<(typeof HierarchyFilteringPath)["normalize"]>;
 
 /** @internal */
-export function joinHierarchyFilteringPaths(subTreePaths: HierarchyNodeIdentifiersPath[], filteringPaths: NormalizedHierarchyFilteringPath[]): NormalizedHierarchyFilteringPath[] {
+export function joinHierarchyFilteringPaths(
+  subTreePaths: HierarchyNodeIdentifiersPath[],
+  filteringPaths: NormalizedHierarchyFilteringPath[],
+): NormalizedHierarchyFilteringPath[] {
   const result = new Array<NormalizedHierarchyFilteringPath>();
   const filteringPathsToIncludeIndexes = new Set<number>();
 

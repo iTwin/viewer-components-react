@@ -35,7 +35,7 @@ import { FilterLimitExceededError } from "../common/TreeErrors.js";
 import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils.js";
 import { releaseMainThreadOnItemsCount } from "./Utils.js";
 
-import type { NormalizedHierarchyFilteringPath} from "../common/Utils.js";
+import type { NormalizedHierarchyFilteringPath } from "../common/Utils.js";
 import type { Id64String } from "@itwin/core-bentley";
 import type { Observable } from "rxjs";
 import type {
