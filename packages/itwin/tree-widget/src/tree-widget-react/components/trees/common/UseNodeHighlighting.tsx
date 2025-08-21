@@ -113,11 +113,13 @@ function computeHighlightState(rootNodes: PresentationTreeNode[], searchText: st
         return;
       }
 
-      const matches = findChunks(node.label, searchText);
-      newState.nodeInfoMap.set(node.id, { startIndex: newState.totalMatches, matches });
-      newState.totalMatches += matches.length;
+      if (node.nodeData.filtering?.isFilterTarget) {
+        const matches = findChunks(node.label, searchText);
+        newState.nodeInfoMap.set(node.id, { startIndex: newState.totalMatches, matches });
+        newState.totalMatches += matches.length;
+      }
 
-      if (typeof node.children !== "boolean") {
+      if (typeof node.children !== "boolean" && node.nodeData.filtering?.filteredChildrenIdentifierPaths?.length) {
         computeHighlightStateRecursively(node.children);
       }
     });
