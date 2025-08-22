@@ -2,6 +2,21 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Fri, 22 Aug 2025 18:31:46 GMT",
+      "version": "0.29.1",
+      "tag": "@itwin/measure-tools-react_v0.29.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "50554904+hl662@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "70fd59aa16a79d16dc86eb26ef487f384f3f97a1",
+            "comment": "Fix aggregatableValues missing formatting in Measurement widgets"
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 20 Aug 2025 13:45:50 GMT",
       "version": "0.29.0",
       "tag": "@itwin/measure-tools-react_v0.29.0",

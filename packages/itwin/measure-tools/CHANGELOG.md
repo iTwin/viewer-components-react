@@ -1,8 +1,16 @@
 # Change Log - @itwin/measure-tools-react
 
-<!-- This log was last generated on Mon, 11 Aug 2025 13:31:19 GMT and should not be manually modified. -->
+<!-- This log was last generated on Fri, 22 Aug 2025 18:31:46 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.29.1
+
+Fri, 22 Aug 2025 18:31:46 GMT
+
+### Patches
+
+- Fix aggregatableValues missing formatting in Measurement widgets ([#1420](https://github.com/iTwin/viewer-components-react/pull/1420))
 
 ## 0.29.0
 
