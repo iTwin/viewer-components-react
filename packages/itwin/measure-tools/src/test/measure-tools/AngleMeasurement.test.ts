@@ -3,8 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Point3d } from "@itwin/core-geometry";
 import { assert } from "chai";
+import { Point3d } from "@itwin/core-geometry";
 import { Measurement, MeasurementPickContext } from "../../api/Measurement.js";
 import { WellKnownViewType } from "../../api/MeasurementEnums.js";
 import { AngleMeasurement, AngleMeasurementSerializer } from "../../measurements/AngleMeasurement.js";
@@ -117,9 +117,10 @@ describe("AngleMeasurement tests", () => {
 
     assert.lengthOf(model.measurements, 0);
     assert.instanceOf(model.dynamicMeasurement, AngleMeasurement);
-    assert.isTrue(Point3d.create(1, 2, 3).isAlmostEqual(model.dynamicMeasurement!.startPointRef!));
-    assert.isUndefined(model.dynamicMeasurement!.centerRef);
-    assert.isUndefined(model.dynamicMeasurement!.endPointRef);
+    const dynamicMeasurement = model.dynamicMeasurement as AngleMeasurement;
+    assert.isTrue(Point3d.create(1, 2, 3).isAlmostEqual(dynamicMeasurement.startPointRef!));
+    assert.isUndefined(dynamicMeasurement.centerRef);
+    assert.isUndefined(dynamicMeasurement.endPointRef);
 
     // Test SetCenter state
     assert.strictEqual(MeasureAngleToolModel.State.SetCenter, model.currentState);

@@ -5,44 +5,25 @@
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { XYAndZ, XYZProps } from "@itwin/core-geometry";
-import { Geometry, Range1d } from "@itwin/core-geometry";
-import {
-  IModelJson,
-  LineSegment3d,
-  Point3d,
-  PointString3d,
-  Ray3d,
-  Vector3d,
-} from "@itwin/core-geometry";
+import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
+import { Geometry, IModelJson, LineSegment3d, Point3d, PointString3d, Range1d, Ray3d, Vector3d } from "@itwin/core-geometry";
+import { FormatterUtils } from "../api/FormatterUtils.js";
+import { StyleSet, TextOffsetType, WellKnownGraphicStyleType, WellKnownTextStyleType } from "../api/GraphicStyle.js";
+import { Measurement, MeasurementPickContext, MeasurementSerializer } from "../api/Measurement.js";
+import { MeasurementManager } from "../api/MeasurementManager.js";
+import { MeasurementPreferences, MeasurementPreferencesProperty } from "../api/MeasurementPreferences.js";
+import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper.js";
+import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet.js";
+import { TextMarker } from "../api/TextMarker.js";
+import { MeasureTools } from "../MeasureTools.js";
+
 import type { GeometryStreamProps } from "@itwin/core-common";
 import type { BeButtonEvent, DecorateContext } from "@itwin/core-frontend";
-import { GraphicType, IModelApp } from "@itwin/core-frontend";
-import { FormatterUtils } from "../api/FormatterUtils.js";
-import {
-  StyleSet,
-  TextOffsetType,
-  WellKnownGraphicStyleType,
-  WellKnownTextStyleType,
-} from "../api/GraphicStyle.js";
 import type {
   MeasurementEqualityOptions,
   MeasurementWidgetData,
 } from "../api/Measurement.js";
-import {
-  Measurement,
-  MeasurementPickContext,
-  MeasurementSerializer,
-} from "../api/Measurement.js";
-import { MeasurementManager } from "../api/MeasurementManager.js";
-import {
-  MeasurementPreferences,
-  MeasurementPreferencesProperty,
-} from "../api/MeasurementPreferences.js";
-import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper.js";
 import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
-import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet.js";
-import { TextMarker } from "../api/TextMarker.js";
-import { MeasureTools } from "../MeasureTools.js";
 import type { FormatterSpec } from "@itwin/core-quantity";
 
 /**
@@ -569,17 +550,17 @@ export class DistanceMeasurement extends Measurement {
     const bearing = FormatterUtils.calculateBearing(this._endPoint.x - this._startPoint.x, this._endPoint.y - this._startPoint.y);
     const adjustedStart = this.adjustPointForGlobalOrigin(this._startPoint);
     const adjustedEnd = this.adjustPointForGlobalOrigin(this._endPoint);
-    const lengthSpec = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ)?.formatterSpec;
-    const coordinateSpec = IModelApp.quantityFormatter.getSpecsByName(this._coordinateKoQ)?.formatterSpec;
+    const lengthSpec = FormatterUtils.getFormatterSpecWithFallback(this._lengthKoQ, QuantityType.LengthEngineering);
+    const coordinateSpec = FormatterUtils.getFormatterSpecWithFallback(this._coordinateKoQ, QuantityType.Coordinate);
 
-    const fDistance = await FormatterUtils.formatLength(distance, lengthSpec);
+    const fDistance = lengthSpec ? IModelApp.quantityFormatter.formatQuantity(distance, lengthSpec) : await FormatterUtils.formatLength(distance);
     const fStartCoords = FormatterUtils.formatCoordinatesImmediate(adjustedStart, coordinateSpec);
     const fEndCoords = FormatterUtils.formatCoordinatesImmediate(adjustedEnd, coordinateSpec);
     const fSlope = FormatterUtils.formatSlope(slope, true);
-    const fRun = await FormatterUtils.formatLength(run, lengthSpec);
-    const fDeltaX = await FormatterUtils.formatLength(dx, lengthSpec);
-    const fDeltaY = await FormatterUtils.formatLength(dy, lengthSpec);
-    const fRise = await FormatterUtils.formatLength(rise, lengthSpec);
+    const fRun = lengthSpec ? IModelApp.quantityFormatter.formatQuantity(run, lengthSpec) : await FormatterUtils.formatLength(run);
+    const fDeltaX = lengthSpec ? IModelApp.quantityFormatter.formatQuantity(dx, lengthSpec) : await FormatterUtils.formatLength(dx);
+    const fDeltaY = lengthSpec ? IModelApp.quantityFormatter.formatQuantity(dy, lengthSpec) : await FormatterUtils.formatLength(dy);
+    const fRise = lengthSpec ? IModelApp.quantityFormatter.formatQuantity(rise, lengthSpec) : await FormatterUtils.formatLength(rise);
 
     let title = MeasureTools.localization.getLocalizedString(
       "MeasureTools:Measurements.distanceMeasurement"

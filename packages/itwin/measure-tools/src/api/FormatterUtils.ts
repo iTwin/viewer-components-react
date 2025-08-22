@@ -6,11 +6,28 @@
 import type { Point3d, XAndY } from "@itwin/core-geometry";
 import type { Cartographic } from "@itwin/core-common";
 import { IModelApp, QuantityType } from "@itwin/core-frontend";
-import type { FormatProps } from "@itwin/core-quantity";
-import { FormatTraits, type FormatterSpec } from "@itwin/core-quantity";
+import { FormatTraits } from "@itwin/core-quantity";
 import { MeasureTools } from "../MeasureTools.js";
 
+import type { FormatProps , FormatterSpec} from "@itwin/core-quantity";
 export namespace FormatterUtils {
+
+  /**
+   * Gets a FormatterSpec by KoQ string with fallback to QuantityType.
+   * @param koqString The Kind of Quantity string to look up.
+   * @param fallbackQuantityType The QuantityType to use if KoQ lookup fails.
+   * @returns A FormatterSpec or undefined if both lookups fail.
+   */
+  export function getFormatterSpecWithFallback(koqString: string, fallbackQuantityType: QuantityType): FormatterSpec | undefined {
+    // First try to get the spec by KoQ string
+    const koqEntry = IModelApp.quantityFormatter.getSpecsByName(koqString);
+    if (koqEntry) {
+      return koqEntry.formatterSpec;
+    }
+
+    // Fallback to QuantityType
+    return IModelApp.quantityFormatter.findFormatterSpecByQuantityType(fallbackQuantityType);
+  }
 
   /** Formats a sequence of values with spec without the unit label */
   function formatValuesWithNoUnitLabel(values: number[], spec: FormatterSpec): string {

@@ -5,42 +5,29 @@
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { XYZProps } from "@itwin/core-geometry";
-import {
-  Geometry,
-  IModelJson,
-  Point3d,
-  PointString3d,
-} from "@itwin/core-geometry";
-import type {
-  CartographicProps,
-  GeometryStreamProps,
-} from "@itwin/core-common";
 import { Cartographic } from "@itwin/core-common";
-import type { BeButtonEvent, DecorateContext } from "@itwin/core-frontend";
-import { GraphicType, IModelApp } from "@itwin/core-frontend";
+import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
+import { Geometry, IModelJson, Point3d, PointString3d } from "@itwin/core-geometry";
 import { FormatterUtils } from "../api/FormatterUtils.js";
-import {
-  StyleSet,
-  WellKnownGraphicStyleType,
-  WellKnownTextStyleType,
-} from "../api/GraphicStyle.js";
-import type {
-  MeasurementEqualityOptions,
-  MeasurementWidgetData,
-} from "../api/Measurement.js";
-import {
-  Measurement,
-  MeasurementPickContext,
-  MeasurementSerializer,
-} from "../api/Measurement.js";
+import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "../api/GraphicStyle.js";
+import { Measurement, MeasurementPickContext, MeasurementSerializer } from "../api/Measurement.js";
 import { WellKnownViewType } from "../api/MeasurementEnums.js";
 import { MeasurementPreferences } from "../api/MeasurementPreferences.js";
 import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper.js";
-import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet.js";
 import { TextMarker } from "../api/TextMarker.js";
 import { MeasureTools } from "../MeasureTools.js";
 
+import type {
+  CartographicProps,
+  GeometryStreamProps,
+} from "@itwin/core-common";
+import type { BeButtonEvent, DecorateContext } from "@itwin/core-frontend";
+import type {
+  MeasurementEqualityOptions,
+  MeasurementWidgetData,
+} from "../api/Measurement.js";
+import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
 /**
  * Props for serializing a [[LocationMeasurement]].
  */
@@ -348,7 +335,7 @@ export class LocationMeasurement extends Measurement {
 
   private async createTextMarker(): Promise<void> {
     const adjustedLocation = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._location));
-    const coordinateSpec = IModelApp.quantityFormatter.getSpecsByName(this._coordinateKoQ)?.formatterSpec;
+    const coordinateSpec = FormatterUtils.getFormatterSpecWithFallback(this._coordinateKoQ, QuantityType.Coordinate);
 
     const entries = [
       {
@@ -404,10 +391,10 @@ export class LocationMeasurement extends Measurement {
   protected override async getDataForMeasurementWidgetInternal(): Promise<
   MeasurementWidgetData | undefined
   > {
-    const coordinateSpec = IModelApp.quantityFormatter.getSpecsByName(this._coordinateKoQ)?.formatterSpec;
-    const lengthSpec = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ)?.formatterSpec;
-    const angleSpec = IModelApp.quantityFormatter.getSpecsByName(this._angleKoQ)?.formatterSpec;
-    const stationSpec = IModelApp.quantityFormatter.getSpecsByName(this._stationKoQ)?.formatterSpec;
+    const coordinateSpec = FormatterUtils.getFormatterSpecWithFallback(this._coordinateKoQ, QuantityType.Coordinate);
+    const lengthSpec = FormatterUtils.getFormatterSpecWithFallback(this._lengthKoQ, QuantityType.LengthEngineering);
+    const angleSpec = FormatterUtils.getFormatterSpecWithFallback(this._angleKoQ, QuantityType.Angle);
+    const stationSpec = FormatterUtils.getFormatterSpecWithFallback(this._stationKoQ, QuantityType.Stationing);
 
     const adjustedLocation = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._location));
     const fCoordinates = FormatterUtils.formatCoordinatesImmediate(adjustedLocation, coordinateSpec);
