@@ -5,13 +5,17 @@
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { XYZProps } from "@itwin/core-geometry";
-import {
-  Geometry,
-  IModelJson,
-  Point3d,
-  PointString3d,
-  PolygonOps,
-} from "@itwin/core-geometry";
+import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
+import { Geometry, IModelJson, Point3d, PointString3d, PolygonOps } from "@itwin/core-geometry";
+import { FormatterUtils } from "../api/FormatterUtils.js";
+import { StyleSet, WellKnownGraphicStyleType } from "../api/GraphicStyle.js";
+import { Measurement, MeasurementPickContext, MeasurementSerializer } from "../api/Measurement.js";
+import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper.js";
+import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet.js";
+import { Polygon } from "../api/Polygon.js";
+import { MeasureTools } from "../MeasureTools.js";
+import { DistanceMeasurement } from "./DistanceMeasurement.js";
+
 import type { GeometryStreamProps } from "@itwin/core-common";
 import type {
   BeButtonEvent,
@@ -19,25 +23,11 @@ import type {
   GraphicBuilder,
   RenderGraphicOwner,
 } from "@itwin/core-frontend";
-import { GraphicType, IModelApp } from "@itwin/core-frontend";
-import { FormatterUtils } from "../api/FormatterUtils.js";
-import { StyleSet, WellKnownGraphicStyleType } from "../api/GraphicStyle.js";
 import type {
   MeasurementEqualityOptions,
   MeasurementWidgetData,
 } from "../api/Measurement.js";
-import {
-  Measurement,
-  MeasurementPickContext,
-  MeasurementSerializer,
-} from "../api/Measurement.js";
-import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper.js";
 import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
-import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet.js";
-import { Polygon } from "../api/Polygon.js";
-import { DistanceMeasurement } from "./DistanceMeasurement.js";
-import { MeasureTools } from "../MeasureTools.js";
-
 /**
  * Props for serializing a [[AreaMeasurement]].
  */
@@ -471,8 +461,8 @@ export class AreaMeasurement extends Measurement {
   }
 
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
-    const lengthSpec = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ)?.formatterSpec;
-    const areaSpec = IModelApp.quantityFormatter.getSpecsByName(this._areaKoQ)?.formatterSpec;
+    const lengthSpec = FormatterUtils.getFormatterSpecWithFallback(this._lengthKoQ, QuantityType.LengthEngineering);
+    const areaSpec = FormatterUtils.getFormatterSpecWithFallback(this._areaKoQ, QuantityType.Area);
 
     const fPerimeter = await FormatterUtils.formatLength(
       this.worldScale * this._polygon.perimeter,
