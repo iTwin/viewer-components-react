@@ -3,8 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Point3d } from "@itwin/core-geometry";
 import { assert } from "chai";
+import { Point3d } from "@itwin/core-geometry";
 import { Measurement, MeasurementPickContext } from "../../api/Measurement.js";
 import { WellKnownViewType } from "../../api/MeasurementEnums.js";
 import { DistanceMeasurement, DistanceMeasurementSerializer } from "../../measurements/DistanceMeasurement.js";
@@ -101,8 +101,9 @@ describe("DistanceMeasurement tests", () => {
 
     assert.lengthOf(model.measurements, 0);
     assert.instanceOf(model.dynamicMeasurement, DistanceMeasurement);
-    assert.isTrue(Point3d.create(1, 2, 3).isAlmostEqual(model.dynamicMeasurement!.startPointRef));
-    assert.isTrue(Point3d.create(1, 2, 3).isAlmostEqual(model.dynamicMeasurement!.endPointRef));
+    const dynamicMeasurement = model.dynamicMeasurement as DistanceMeasurement;
+    assert.isTrue(Point3d.create(1, 2, 3).isAlmostEqual(dynamicMeasurement.startPointRef));
+    assert.isTrue(Point3d.create(1, 2, 3).isAlmostEqual(dynamicMeasurement.endPointRef));
 
     // Test state with dynamics
     assert.strictEqual(MeasureDistanceToolModel.State.SetEndPoint, model.currentState);
