@@ -9,7 +9,7 @@ import { IModelApp, QuantityType } from "@itwin/core-frontend";
 import { FormatTraits } from "@itwin/core-quantity";
 import { MeasureTools } from "../MeasureTools.js";
 
-import type { FormatProps , FormatterSpec} from "@itwin/core-quantity";
+import type { FormatDefinition, FormatProps , FormatterSpec} from "@itwin/core-quantity";
 export namespace FormatterUtils {
 
   /**
@@ -226,17 +226,13 @@ export namespace FormatterUtils {
    * @returns A FormatterSpec for bearing formatting.
    */
   export async function getBearingFormatterSpec(bearingKoQ: string, persistenceUnitName: string): Promise<FormatterSpec | undefined> {
-    let formatProps: FormatProps | undefined;
-
+    let formatProps: FormatDefinition;
     try {
-      // First try to get format props from the formats provider using the bearingKoQ
-      formatProps = await IModelApp.formatsProvider.getFormat(bearingKoQ);
+      // Get format props from the formats provider using the bearingKoQ. If undefined, use default bearing format
+      const result = await IModelApp.formatsProvider.getFormat(bearingKoQ);
+      formatProps = result ?? getDefaultBearingFormatProps();
     } catch {
-      // If that fails, formatProps will remain undefined and we'll use the fallback
-    }
-
-    // If we couldn't get format props from the provider, use the default bearing format
-    if (!formatProps) {
+    // If an error occurs, use the default bearing format
       formatProps = getDefaultBearingFormatProps();
     }
 
