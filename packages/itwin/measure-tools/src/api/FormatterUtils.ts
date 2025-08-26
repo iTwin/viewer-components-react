@@ -9,7 +9,7 @@ import { IModelApp, QuantityType } from "@itwin/core-frontend";
 import { FormatTraits } from "@itwin/core-quantity";
 import { MeasureTools } from "../MeasureTools.js";
 
-import type { FormatProps , FormatterSpec} from "@itwin/core-quantity";
+import type { FormatDefinition, FormatProps , FormatterSpec} from "@itwin/core-quantity";
 export namespace FormatterUtils {
 
   /**
@@ -217,6 +217,30 @@ export namespace FormatterUtils {
     let bearing = Math.atan2(dx, dy); // radians, 0 = North, π/2 = East
     if (bearing < 0) bearing += 2 * Math.PI; // Normalize to [0, 2π)
     return bearing;
+  }
+
+  /**
+   * Creates a FormatterSpec for bearing using the provided KoQ string with fallback to default bearing format.
+   * @param bearingKoQ The Kind of Quantity string for bearing.
+   * @param persistenceUnitName The persistence unit name for the bearing.
+   * @returns A FormatterSpec for bearing formatting.
+   */
+  export async function getBearingFormatterSpec(bearingKoQ: string, persistenceUnitName: string): Promise<FormatterSpec | undefined> {
+    let formatProps: FormatDefinition;
+    try {
+      // Get format props from the formats provider using the bearingKoQ. If undefined, use default bearing format
+      const result = await IModelApp.formatsProvider.getFormat(bearingKoQ);
+      formatProps = result ?? getDefaultBearingFormatProps();
+    } catch {
+    // If an error occurs, use the default bearing format
+      formatProps = getDefaultBearingFormatProps();
+    }
+
+    // Create and return the formatter spec
+    return IModelApp.quantityFormatter.createFormatterSpec({
+      persistenceUnitName,
+      formatProps
+    });
   }
 
   export function getDefaultBearingFormatProps(): FormatProps {
