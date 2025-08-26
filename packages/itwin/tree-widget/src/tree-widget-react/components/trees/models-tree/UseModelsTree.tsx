@@ -25,22 +25,25 @@ import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
 import { ModelsTreeNode } from "./internal/ModelsTreeNode.js";
 import { useFilteredPaths } from "./internal/UseFilteredPaths.js";
-import { createModelsTreeVisibilityHandler } from "./internal/visibility/ModelsTreeVisibilityHandler.js";
+import { createFilteredModelsTree } from "./internal/visibility/FilteredTree.js";
+import { ModelsTreeVisibilityHandler } from "./internal/visibility/ModelsTreeVisibilityHandler.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition.js";
 
-import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
-import type { CreateFactoryProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { ReactNode } from "react";
-import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { Id64String } from "@itwin/core-bentley";
-import type { InstanceKey } from "@itwin/presentation-shared";
 import type { Viewport } from "@itwin/core-frontend";
+import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
-import type { ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition.js";
-import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/visibility/ModelsTreeVisibilityHandler.js";
+import type { InstanceKey } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
+import type { CreateFilteredTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
+import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
+import type { FilteredTree } from "../common/internal/visibility/BaseFilteredTree.js";
 import type { ModelsTreeFilteringError, ModelsTreeSubTreeError } from "./internal/UseFilteredPaths.js";
+import type { ModelsTreeFilterTargets } from "./internal/visibility/FilteredTree.js";
+import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/visibility/ModelsTreeVisibilityHandler.js";
+import type { ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition.js";
 
 /** @beta */
 export interface UseModelsTreeProps {
@@ -141,10 +144,17 @@ export function useModelsTree({
     cacheSpecificProps: useMemo(() => ({ hierarchyConfig: hierarchyConfiguration }), [hierarchyConfiguration]),
   });
 
-  const { visibilityHandlerFactory, onFilteredPathsChanged } = useCachedVisibility<ModelsTreeIdsCache, { overrides?: ModelsTreeVisibilityHandlerOverrides }>({
+  const { visibilityHandlerFactory, onFilteredPathsChanged } = useCachedVisibility<
+    ModelsTreeIdsCache,
+    ModelsTreeFilterTargets,
+    undefined,
+    { overrides?: ModelsTreeVisibilityHandlerOverrides }
+  >({
     activeView,
-    createFactory: createVisibilityHandlerFactory,
-    factoryProps: useMemo(() => ({ overrides: visibilityHandlerOverrides }), [visibilityHandlerOverrides]),
+    createFilteredTree,
+    filteredTreeProps: undefined,
+    treeSpecificVisibilityHandlerProps: useMemo(() => ({ overrides: visibilityHandlerOverrides }), [visibilityHandlerOverrides]),
+    createTreeSpecificVisibilityHandler,
     getCache: getModelsTreeIdsCache,
   });
 
@@ -194,18 +204,25 @@ export function useModelsTree({
   };
 }
 
-function createVisibilityHandlerFactory(
-  props: CreateFactoryProps<ModelsTreeIdsCache, { overrides?: ModelsTreeVisibilityHandlerOverrides }>,
-): VisibilityTreeProps["visibilityHandlerFactory"] {
-  const { activeView, idsCacheGetter, filteredPaths, factoryProps } = props;
-  return ({ imodelAccess }) =>
-    createModelsTreeVisibilityHandler({
-      viewport: activeView,
-      idsCache: idsCacheGetter(),
-      imodelAccess,
-      overrides: factoryProps.overrides,
-      filteredPaths,
-    });
+async function createFilteredTree(props: CreateFilteredTreeProps<ModelsTreeIdsCache, undefined>): Promise<FilteredTree<ModelsTreeFilterTargets>> {
+  const { filteringPaths, imodelAccess } = props;
+  return createFilteredModelsTree({
+    imodelAccess,
+    filteringPaths,
+  });
+}
+
+function createTreeSpecificVisibilityHandler(
+  props: CreateTreeSpecificVisibilityHandlerProps<ModelsTreeIdsCache, { overrides?: ModelsTreeVisibilityHandlerOverrides }>,
+) {
+  const { info, getCache, overrideHandler, treeSpecificVisibilityHandlerProps, viewport } = props;
+  return new ModelsTreeVisibilityHandler({
+    alwaysAndNeverDrawnElementInfo: info,
+    overrideHandler,
+    idsCache: getCache(),
+    viewport,
+    overrides: treeSpecificVisibilityHandlerProps.overrides,
+  });
 }
 
 function getEmptyTreeContentComponent(

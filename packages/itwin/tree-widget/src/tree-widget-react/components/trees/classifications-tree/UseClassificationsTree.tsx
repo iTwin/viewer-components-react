@@ -14,16 +14,19 @@ import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.j
 import { ClassificationsTreeIcon } from "./ClassificationsTreeIcon.js";
 import { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
 import { useFilteredPaths } from "./internal/UseFilteredPaths.js";
-import { createClassificationsTreeVisibilityHandler } from "./internal/visibility/ClassificationsTreeVisibilityHandler.js";
+import { ClassificationsTreeVisibilityHandler } from "./internal/visibility/ClassificationsTreeVisibilityHandler.js";
+import { createFilteredClassificationsTree } from "./internal/visibility/FilteredTree.js";
 
 import type { ReactNode } from "react";
 import type { Viewport } from "@itwin/core-frontend";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
+import type { FilteredTree } from "../common/internal/visibility/BaseFilteredTree.js";
+import type { CreateFilteredTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
-import type { CreateFactoryProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
-import type { ClassificationsTreeFilteringError } from "./internal/UseFilteredPaths.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "./ClassificationsTreeDefinition.js";
+import type { ClassificationsTreeFilteringError } from "./internal/UseFilteredPaths.js";
+import type { ClassificationsTreeFilterTargets } from "./internal/visibility/FilteredTree.js";
 
 /** @alpha */
 export interface UseClassificationsTreeProps {
@@ -94,11 +97,6 @@ export function useClassificationsTree({ activeView, emptyTreeContent, filter, .
   };
 }
 
-function createVisibilityHandlerFactory(props: CreateFactoryProps<ClassificationsTreeIdsCache, undefined>): VisibilityTreeProps["visibilityHandlerFactory"] {
-  const { activeView, idsCacheGetter } = props;
-  return ({ imodelAccess }) => createClassificationsTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter(), imodelAccess });
-}
-
 function createCache(props: CreateCacheProps<{ hierarchyConfig: ClassificationsTreeHierarchyConfiguration }>) {
   return new ClassificationsTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.hierarchyConfig);
 }
@@ -121,11 +119,18 @@ function getEmptyTreeContentComponent(filter?: string, error?: ClassificationsTr
 
 function useClassificationsCachedVisibility(props: { activeView: Viewport; getCache: () => ClassificationsTreeIdsCache }) {
   const { activeView, getCache } = props;
-  const { visibilityHandlerFactory, filteredPaths, onFilteredPathsChanged } = useCachedVisibility<ClassificationsTreeIdsCache, undefined>({
+  const { visibilityHandlerFactory, filteredPaths, onFilteredPathsChanged } = useCachedVisibility<
+    ClassificationsTreeIdsCache,
+    ClassificationsTreeFilterTargets,
+    undefined,
+    undefined
+  >({
     activeView,
     getCache,
-    factoryProps: undefined,
-    createFactory: createVisibilityHandlerFactory,
+    createFilteredTree,
+    createTreeSpecificVisibilityHandler,
+    filteredTreeProps: undefined,
+    treeSpecificVisibilityHandlerProps: undefined,
   });
 
   useEffect(() => {
@@ -136,4 +141,24 @@ function useClassificationsCachedVisibility(props: { activeView: Viewport; getCa
     visibilityHandlerFactory,
     onFilteredPathsChanged,
   };
+}
+
+async function createFilteredTree(
+  props: CreateFilteredTreeProps<ClassificationsTreeIdsCache, undefined>,
+): Promise<FilteredTree<ClassificationsTreeFilterTargets>> {
+  const { filteringPaths, getCache, imodelAccess } = props;
+  return createFilteredClassificationsTree({
+    idsCache: getCache(),
+    filteringPaths,
+    imodelAccess,
+  });
+}
+
+function createTreeSpecificVisibilityHandler(props: CreateTreeSpecificVisibilityHandlerProps<ClassificationsTreeIdsCache, undefined>) {
+  const { info, getCache, viewport } = props;
+  return new ClassificationsTreeVisibilityHandler({
+    alwaysAndNeverDrawnElementInfo: info,
+    idsCache: getCache(),
+    viewport,
+  });
 }

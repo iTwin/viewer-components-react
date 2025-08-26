@@ -10,7 +10,9 @@ import { DrawingViewState, IModelApp, OffScreenViewport, SpatialViewState, ViewR
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { ClassificationsTreeDefinition } from "../../../tree-widget-react/components/trees/classifications-tree/ClassificationsTreeDefinition.js";
 import { ClassificationsTreeIdsCache } from "../../../tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeIdsCache.js";
-import { createClassificationsTreeVisibilityHandler } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/ClassificationsTreeVisibilityHandler.js";
+import { ClassificationsTreeVisibilityHandler } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/ClassificationsTreeVisibilityHandler.js";
+import { createFilteredClassificationsTree } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/FilteredTree.js";
+import { HierarchyVisibilityHandlerImpl } from "../../../tree-widget-react/components/trees/common/internal/useTreeHooks/UseCachedVisibility.js";
 import {
   buildIModel,
   insertDrawingCategory,
@@ -37,9 +39,11 @@ import {
 } from "./Utils.js";
 import { validateHierarchyVisibility } from "./VisibilityValidation.js";
 
-import type { HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
-import type { InstanceKey } from "@itwin/presentation-shared";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { HierarchyFilteringPath, HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
+import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
+import type { ClassificationsTreeFilterTargets } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/FilteredTree.js";
+import type { FilteredTree } from "../../../tree-widget-react/components/trees/common/internal/visibility/BaseFilteredTree.js";
 
 describe("ClassificationsTreeVisibilityHandler", () => {
   before(async () => {
@@ -81,7 +85,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       view: view === "3d" ? await createSpatialViewState(imodel, categoryIds, modelIds) : await createDrawingViewState(imodel, categoryIds, modelIds),
       viewRect: new ViewRect(),
     });
-    const handler = createClassificationsTreeVisibilityHandler({ idsCache, viewport, imodelAccess });
+    const handler = createClassificationsTreeVisibilityHandler({ imodelAccess, idsCache, viewport });
     const provider = createProvider({ idsCache, imodelAccess });
     return {
       handler,
@@ -1336,4 +1340,32 @@ function createHiddenTestData(keys: { [key: string]: InstanceKey }) {
     }
   }
   return { categories, elements, models };
+}
+
+function createClassificationsTreeVisibilityHandler(props: {
+  viewport: Viewport;
+  idsCache: ClassificationsTreeIdsCache;
+  imodelAccess: ECClassHierarchyInspector;
+  filteredPaths?: HierarchyFilteringPath[];
+}) {
+  return new HierarchyVisibilityHandlerImpl<ClassificationsTreeFilterTargets>({
+    getFilteredTree: (): undefined | Promise<FilteredTree<ClassificationsTreeFilterTargets>> => {
+      if (!props.filteredPaths) {
+        return undefined;
+      }
+      return createFilteredClassificationsTree({
+        idsCache: props.idsCache,
+        filteringPaths: props.filteredPaths,
+        imodelAccess: props.imodelAccess,
+      });
+    },
+    getTreeSpecificVisibilityHandler: (info) => {
+      return new ClassificationsTreeVisibilityHandler({
+        alwaysAndNeverDrawnElementInfo: info,
+        idsCache: props.idsCache,
+        viewport: props.viewport,
+      });
+    },
+    viewport: props.viewport,
+  });
 }

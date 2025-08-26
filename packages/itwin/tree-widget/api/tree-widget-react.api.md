@@ -36,7 +36,7 @@ import type { Widget } from '@itwin/appui-react';
 // @beta (undocumented)
 export type BaseTreeRendererProps = React.ComponentPropsWithoutRef<typeof StrataKitTreeRenderer>;
 
-// @internal
+// @public
 interface BaseTreeVisibilityHandlerOverrides {
     // (undocumented)
     changeCategoriesVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {

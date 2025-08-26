@@ -14,22 +14,26 @@ import elementSvg from "@stratakit/icons/bis-element.svg";
 import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMatches } from "../common/components/EmptyTree.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
+import { getClassesByView } from "../common/internal/Utils.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
 import { useFilteredPaths } from "./internal/UseFilteredPaths.js";
-import { createCategoriesTreeVisibilityHandler } from "./internal/visibility/CategoriesTreeVisibilityHandler.js";
+import { CategoriesTreeVisibilityHandler } from "./internal/visibility/CategoriesTreeVisibilityHandler.js";
+import { createFilteredCategoriesTree } from "./internal/visibility/FilteredTree.js";
 
 import type { ReactNode } from "react";
 import type { Id64Array } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
-import type { CreateFactoryProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
+import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
-import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
-import type { CategoriesTreeFilteringError } from "./internal/UseFilteredPaths.js";
+import type { CreateFilteredTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
+import type { FilteredTree } from "../common/internal/visibility/BaseFilteredTree.js";
 import type { CategoriesTreeHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
+import type { CategoriesTreeFilterTargets } from "./internal/visibility/FilteredTree.js";
+import type { CategoriesTreeFilteringError } from "./internal/UseFilteredPaths.js";
 
 /** @beta */
 export interface UseCategoriesTreeProps {
@@ -113,17 +117,6 @@ export function useCategoriesTree({
   };
 }
 
-function createVisibilityHandlerFactory(props: CreateFactoryProps<CategoriesTreeIdsCache, undefined>): VisibilityTreeProps["visibilityHandlerFactory"] {
-  const { activeView, idsCacheGetter, filteredPaths } = props;
-  return ({ imodelAccess }) =>
-    createCategoriesTreeVisibilityHandler({
-      viewport: activeView,
-      idsCache: idsCacheGetter(),
-      imodelAccess,
-      filteredPaths,
-    });
-}
-
 function getEmptyTreeContentComponent(filter?: string, error?: CategoriesTreeFilteringError, emptyTreeContent?: React.ReactNode) {
   if (error) {
     if (error === "tooManyFilterMatches") {
@@ -172,11 +165,19 @@ function getSublabel(node: PresentationHierarchyNode) {
 
 function useCategoriesCachedVisibility(props: { activeView: Viewport; getCache: () => CategoriesTreeIdsCache }) {
   const { activeView, getCache } = props;
-  const { visibilityHandlerFactory, filteredPaths, onFilteredPathsChanged } = useCachedVisibility<CategoriesTreeIdsCache, undefined>({
+  const filteredTreeProps = getClassesByView(activeView.view.is2d() ? "2d" : "3d");
+  const { visibilityHandlerFactory, filteredPaths, onFilteredPathsChanged } = useCachedVisibility<
+    CategoriesTreeIdsCache,
+    CategoriesTreeFilterTargets,
+    ReturnType<typeof getClassesByView>,
+    undefined
+  >({
     activeView,
     getCache,
-    factoryProps: undefined,
-    createFactory: createVisibilityHandlerFactory,
+    filteredTreeProps,
+    createFilteredTree,
+    treeSpecificVisibilityHandlerProps: undefined,
+    createTreeSpecificVisibilityHandler,
   });
 
   useEffect(() => {
@@ -187,6 +188,29 @@ function useCategoriesCachedVisibility(props: { activeView: Viewport; getCache: 
     visibilityHandlerFactory,
     onFilteredPathsChanged,
   };
+}
+
+function createTreeSpecificVisibilityHandler(props: CreateTreeSpecificVisibilityHandlerProps<CategoriesTreeIdsCache, undefined>) {
+  const { info, getCache, viewport } = props;
+  return new CategoriesTreeVisibilityHandler({
+    alwaysAndNeverDrawnElementInfo: info,
+    idsCache: getCache(),
+    viewport,
+  });
+}
+
+async function createFilteredTree(
+  props: CreateFilteredTreeProps<CategoriesTreeIdsCache, ReturnType<typeof getClassesByView>>,
+): Promise<FilteredTree<CategoriesTreeFilterTargets>> {
+  const { filteringPaths, imodelAccess, getCache, filteredTreeProps } = props;
+  return createFilteredCategoriesTree({
+    imodelAccess,
+    filteringPaths,
+    idsCache: getCache(),
+    categoryClassName: filteredTreeProps.categoryClass,
+    categoryElementClassName: filteredTreeProps.elementClass,
+    categoryModelClassName: filteredTreeProps.modelClass,
+  });
 }
 
 function createCache(props: CreateCacheProps<{ viewType: "2d" | "3d" }>) {

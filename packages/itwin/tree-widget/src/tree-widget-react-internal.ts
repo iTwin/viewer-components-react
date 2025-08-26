@@ -13,11 +13,11 @@ export {
   defaultHierarchyConfiguration as defaultModelsTreeHierarchyConfiguration,
 } from "./tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 export { ModelsTreeIdsCache } from "./tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
-export { createModelsTreeVisibilityHandler } from "./tree-widget-react/components/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
+export { createModelsTreeVisibilityHandler } from "./test/trees/models-tree/internal/ModelsTreeVisibilityHandler.test.js";
 
 export { CategoriesTreeDefinition } from "./tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 export { CategoriesTreeIdsCache } from "./tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
-export { createCategoriesTreeVisibilityHandler } from "./tree-widget-react/components/trees/categories-tree/internal/visibility/CategoriesTreeVisibilityHandler.js";
+export { createCategoriesTreeVisibilityHandler } from "./test/trees/categories-tree/internal/CategoriesTreeVisibilityHandler.test.js";
 export { CategoriesTreeNode } from "./tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeNode.js";
 
 export { ClassificationsTreeDefinition } from "./tree-widget-react/components/trees/classifications-tree/ClassificationsTreeDefinition.js";

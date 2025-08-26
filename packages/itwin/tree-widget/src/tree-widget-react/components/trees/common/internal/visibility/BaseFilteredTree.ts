@@ -44,10 +44,10 @@ export interface BaseFilteredTreeNode<TFilteredTreeNode extends BaseFilteredTree
  * @internal
  */
 export abstract class FilteredNodesHandler<TProcessedFilteredNodes, TFilterTargets, TFilteredTreeNode extends BaseFilteredTreeNode<TFilteredTreeNode>> {
-  public root: FilteredTreeRootNode<TFilteredTreeNode> = {
+  public readonly root: FilteredTreeRootNode<TFilteredTreeNode> = {
     children: new Map(),
   };
-  public filteredNodesArr = new Array<TFilteredTreeNode>();
+  public readonly filteredNodesArr = new Array<TFilteredTreeNode>();
 
   /** Returns filtered tree node type based on its' className */
   public abstract getType(className: string): Promise<TFilteredTreeNode["type"]>;

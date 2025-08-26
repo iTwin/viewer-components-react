@@ -4,31 +4,65 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { concat, EMPTY, from, map, mergeMap, reduce } from "rxjs";
-import { BaseVisibilityStatusModifier } from "../../../common/internal/visibility/BaseVisibilityStatusModifier.js";
-import { enableCategoryDisplay, enableSubCategoryDisplay } from "../../../common/internal/VisibilityUtils.js";
+import { BaseVisibilityHelper } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
+import { enableCategoryDisplay, enableSubCategoryDisplay, mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 
 import type { Observable } from "rxjs";
 import type { Id64Arg, Id64String } from "@itwin/core-bentley";
 import type { ElementId, ModelId } from "../../../common/internal/Types.js";
-import type { BaseVisibilityStatusModifierProps } from "../../../common/internal/visibility/BaseVisibilityStatusModifier.js";
+import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
+import type { BaseVisibilityHelperProps } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import type { CategoriesTreeIdsCache } from "../CategoriesTreeIdsCache.js";
 
 /** @internal */
-export type CategoriesTreeVisibilityStatusModifierProps = BaseVisibilityStatusModifierProps & {
+export type CategoriesTreeVisibilityHelperProps = BaseVisibilityHelperProps & {
   idsCache: CategoriesTreeIdsCache;
 };
 
 /**
- * Visibility status modifier for categories tree.
+ * Visibility status helper for categories tree.
  *
- * It extends base visibility status modifier and provides methods to change visibility status of definition containers, sub-categories and grouped elements.
+ * It extends base visibility status helper and provides methods to get and change visibility status of definition containers and grouped elements.
  * @internal
  */
-export class CategoriesTreeVisibilityStatusModifier extends BaseVisibilityStatusModifier {
-  #props: CategoriesTreeVisibilityStatusModifierProps;
-  constructor(_props: CategoriesTreeVisibilityStatusModifierProps) {
+export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
+  #props: CategoriesTreeVisibilityHelperProps;
+  constructor(_props: CategoriesTreeVisibilityHelperProps) {
     super(_props);
     this.#props = _props;
+  }
+
+  /**
+   * Gets visibility status of definition containers.
+   *
+   * Determines visibility status by checking visibility status of related categories.
+   */
+  public getDefinitionContainersVisibilityStatus(props: { definitionContainerIds: Id64Arg }): Observable<VisibilityStatus> {
+    return from(this.#props.idsCache.getAllContainedCategories(props.definitionContainerIds)).pipe(
+      mergeMap((categoryIds) =>
+        this.getCategoriesVisibilityStatus({
+          categoryIds,
+          modelId: undefined,
+          type: this.#props.viewport.view.is2d() ? "DrawingCategory" : "SpatialCategory",
+        }),
+      ),
+    );
+  }
+
+  /** Gets grouped elements visibility status. */
+  public getGroupedElementsVisibilityStatus(props: { modelElementsMap: Map<ModelId, Set<ElementId>>; categoryId: Id64String }): Observable<VisibilityStatus> {
+    const { modelElementsMap, categoryId } = props;
+    return from(modelElementsMap).pipe(
+      mergeMap(([modelId, elementIds]) =>
+        this.getElementsVisibilityStatus({
+          elementIds,
+          modelId,
+          categoryId,
+          type: this.#props.viewport.view.is2d() ? "GeometricElement2d" : "GeometricElement3d",
+        }),
+      ),
+      mergeVisibilityStatuses,
+    );
   }
 
   /**
