@@ -507,7 +507,7 @@ export class DistanceMeasurement extends Measurement {
 
     const distance = this._startPoint.distance(this._endPoint);
     const fDistance = await FormatterUtils.formatLength(
-      distance,
+      distance * this.worldScale,
       lengthSpec
     );
 
