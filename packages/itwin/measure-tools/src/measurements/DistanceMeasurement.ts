@@ -198,6 +198,8 @@ export class DistanceMeasurement extends Measurement {
     this._lengthPersistenceUnitName = "Units.M";
     this._coordinateKoQ = "AecUnits.LENGTH_COORDINATE";
     this._coordinatePersistenceUnitName = "Units.M";
+    this._bearingKoQ = "RoadRailUnits.BEARING";
+    this._bearingPersistenceUnitName = "Units.RAD";
     if (props) this.readFromJSON(props);
 
     this.populateFormattingSpecsRegistry().then(() => this.createTextMarker().catch())
@@ -609,14 +611,7 @@ export class DistanceMeasurement extends Measurement {
       },
     );
     if (this._bearingKoQ && this._bearingPersistenceUnitName) {
-      let bearingSpec: FormatterSpec | undefined;
-      const bearingFormatProps = FormatterUtils.getDefaultBearingFormatProps();
-      if (bearingFormatProps) {
-        bearingSpec = await IModelApp.quantityFormatter.createFormatterSpec({
-          persistenceUnitName: this._bearingPersistenceUnitName,
-          formatProps: bearingFormatProps
-        });
-      }
+      const bearingSpec = await FormatterUtils.getBearingFormatterSpec(this._bearingKoQ, this._bearingPersistenceUnitName);
       const fBearing: string = IModelApp.quantityFormatter.formatQuantity(bearing, bearingSpec);
       data.properties.push({
         label: MeasureTools.localization.getLocalizedString(

@@ -219,6 +219,34 @@ export namespace FormatterUtils {
     return bearing;
   }
 
+  /**
+   * Creates a FormatterSpec for bearing using the provided KoQ string with fallback to default bearing format.
+   * @param bearingKoQ The Kind of Quantity string for bearing.
+   * @param persistenceUnitName The persistence unit name for the bearing.
+   * @returns A FormatterSpec for bearing formatting.
+   */
+  export async function getBearingFormatterSpec(bearingKoQ: string, persistenceUnitName: string): Promise<FormatterSpec | undefined> {
+    let formatProps: FormatProps | undefined;
+
+    try {
+      // First try to get format props from the formats provider using the bearingKoQ
+      formatProps = await IModelApp.formatsProvider.getFormat(bearingKoQ);
+    } catch {
+      // If that fails, formatProps will remain undefined and we'll use the fallback
+    }
+
+    // If we couldn't get format props from the provider, use the default bearing format
+    if (!formatProps) {
+      formatProps = getDefaultBearingFormatProps();
+    }
+
+    // Create and return the formatter spec
+    return IModelApp.quantityFormatter.createFormatterSpec({
+      persistenceUnitName,
+      formatProps
+    });
+  }
+
   export function getDefaultBearingFormatProps(): FormatProps {
     return {
       minWidth: 2,
