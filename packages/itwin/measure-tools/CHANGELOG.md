@@ -1,8 +1,16 @@
 # Change Log - @itwin/measure-tools-react
 
-<!-- This log was last generated on Fri, 22 Aug 2025 18:31:46 GMT and should not be manually modified. -->
+<!-- This log was last generated on Tue, 26 Aug 2025 19:59:16 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.29.2
+
+Tue, 26 Aug 2025 19:59:16 GMT
+
+### Patches
+
+- MeasurementWidget reacts to formatsProvider changes ([#1424](https://github.com/iTwin/viewer-components-react/pull/1424))
 
 ## 0.29.1
 

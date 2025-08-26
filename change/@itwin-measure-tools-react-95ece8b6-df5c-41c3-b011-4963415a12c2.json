@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "MeasurementWidget reacts to formatsProvider changes",
-  "packageName": "@itwin/measure-tools-react",
-  "email": "50554904+hl662@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
