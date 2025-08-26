@@ -82,6 +82,7 @@ export function useCategoriesTree({
 
   const { visibilityHandlerFactory, onFilteredPathsChanged } = useCategoriesCachedVisibility({
     activeView,
+    viewType,
     getCache: getCategoriesTreeIdsCache,
   });
 
@@ -163,9 +164,8 @@ function getSublabel(node: PresentationHierarchyNode) {
   return node.nodeData.extendedData?.description;
 }
 
-function useCategoriesCachedVisibility(props: { activeView: Viewport; getCache: () => CategoriesTreeIdsCache }) {
-  const { activeView, getCache } = props;
-  const filteredTreeProps = getClassesByView(activeView.view.is2d() ? "2d" : "3d");
+function useCategoriesCachedVisibility(props: { activeView: Viewport; getCache: () => CategoriesTreeIdsCache; viewType: "2d" | "3d" }) {
+  const { activeView, getCache, viewType } = props;
   const { visibilityHandlerFactory, filteredPaths, onFilteredPathsChanged } = useCachedVisibility<
     CategoriesTreeIdsCache,
     CategoriesTreeFilterTargets,
@@ -174,7 +174,7 @@ function useCategoriesCachedVisibility(props: { activeView: Viewport; getCache: 
   >({
     activeView,
     getCache,
-    filteredTreeProps,
+    filteredTreeProps: useMemo(() => getClassesByView(viewType), [viewType]),
     createFilteredTree,
     treeSpecificVisibilityHandlerProps: undefined,
     createTreeSpecificVisibilityHandler,
