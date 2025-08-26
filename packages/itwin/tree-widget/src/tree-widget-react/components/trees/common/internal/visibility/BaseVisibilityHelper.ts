@@ -47,7 +47,7 @@ import type { GetVisibilityFromAlwaysAndNeverDrawnElementsProps } from "../Visib
 /**
  * Functionality of tree visibility handler methods that can be overridden.
  * Each callback is provided original implementation and reference to a `HierarchyVisibilityHandler`.
- * @public
+ * @beta
  */
 export interface BaseTreeVisibilityHandlerOverrides {
   getModelsVisibilityStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: { modelIds: Id64Arg }) => Promise<VisibilityStatus>>;
