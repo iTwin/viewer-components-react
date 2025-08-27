@@ -99,8 +99,10 @@ class ClassificationsTreeFilteredNodesHandler extends FilteredNodesHandler<
   ClassificationsTreeFilterTargets,
   TemporaryFilteredTreeNode
 > {
-  constructor(private readonly _props: ClassificationsTreeFilteredNodesHandlerProps) {
+  readonly #props: ClassificationsTreeFilteredNodesHandlerProps;
+  constructor(props: ClassificationsTreeFilteredNodesHandlerProps) {
     super();
+    this.#props = props;
   }
 
   public async getProcessedFilteredNodes(): Promise<ProcessedFilteredNodes> {
@@ -118,7 +120,7 @@ class ClassificationsTreeFilteredNodesHandler extends FilteredNodesHandler<
       }
     }
 
-    const filteredElementsModels = await this._props.idsCache.getFilteredElementsData({
+    const filteredElementsModels = await this.#props.idsCache.getFilteredElementsData({
       element2dIds: [...filteredTemporary2dElements.keys()],
       element3dIds: [...filteredTemporary3dElements.keys()],
     });
@@ -260,13 +262,13 @@ class ClassificationsTreeFilteredNodesHandler extends FilteredNodesHandler<
   }
 
   public async getType(className: string): Promise<TemporaryFilteredTreeNode["type"]> {
-    if (await this._props.imodelAccess.classDerivesFrom(className, CLASS_NAME_ClassificationTable)) {
+    if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAME_ClassificationTable)) {
       return "classificationTable";
     }
-    if (await this._props.imodelAccess.classDerivesFrom(className, CLASS_NAME_Classification)) {
+    if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAME_Classification)) {
       return "classification";
     }
-    if (await this._props.imodelAccess.classDerivesFrom(className, CLASS_NAME_GeometricElement2d)) {
+    if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAME_GeometricElement2d)) {
       return "element2d";
     }
     return "element3d";

@@ -40,11 +40,13 @@ export interface CategoriesTreeVisibilityHandlerProps {
  * @internal
  */
 export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecificVisibilityHandler<CategoriesTreeFilterTargets> {
-  private _visibilityHelper: CategoriesTreeVisibilityHelper;
-  private _elementType: "GeometricElement3d" | "GeometricElement2d";
-  private _categoryType: "DrawingCategory" | "SpatialCategory";
-  private _modelType: "GeometricModel3d" | "GeometricModel2d";
-  constructor(private readonly _props: CategoriesTreeVisibilityHandlerProps) {
+  readonly #props: CategoriesTreeVisibilityHandlerProps;
+  #visibilityHelper: CategoriesTreeVisibilityHelper;
+  #elementType: "GeometricElement3d" | "GeometricElement2d";
+  #categoryType: "DrawingCategory" | "SpatialCategory";
+  #modelType: "GeometricModel3d" | "GeometricModel2d";
+  constructor(constructorProps: CategoriesTreeVisibilityHandlerProps) {
+    this.#props = constructorProps;
     // Remove after https://github.com/iTwin/viewer-components-react/issues/1421.
     // We won't need to create a custom base ids cache.
     const baseIdsCache: BaseIdsCache = {
@@ -53,22 +55,22 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
       getModels: (props) => this.getModels(props),
       getSubCategories: (props) => this.getSubCategories(props),
       getSubModels: (props) => this.getSubModels(props),
-      hasSubModel: async (props) => this._props.idsCache.hasSubModel(props),
+      hasSubModel: async (props) => this.#props.idsCache.hasSubModel(props),
     };
-    this._visibilityHelper = new CategoriesTreeVisibilityHelper({
-      viewport: this._props.viewport,
-      idsCache: this._props.idsCache,
-      alwaysAndNeverDrawnElementInfo: this._props.alwaysAndNeverDrawnElementInfo,
+    this.#visibilityHelper = new CategoriesTreeVisibilityHelper({
+      viewport: this.#props.viewport,
+      idsCache: this.#props.idsCache,
+      alwaysAndNeverDrawnElementInfo: this.#props.alwaysAndNeverDrawnElementInfo,
       baseIdsCache,
     });
 
-    this._elementType = _props.viewport.view.is2d() ? "GeometricElement2d" : "GeometricElement3d";
-    this._categoryType = _props.viewport.view.is2d() ? "DrawingCategory" : "SpatialCategory";
-    this._modelType = _props.viewport.view.is2d() ? "GeometricModel2d" : "GeometricModel3d";
+    this.#elementType = this.#props.viewport.view.is2d() ? "GeometricElement2d" : "GeometricElement3d";
+    this.#categoryType = this.#props.viewport.view.is2d() ? "DrawingCategory" : "SpatialCategory";
+    this.#modelType = this.#props.viewport.view.is2d() ? "GeometricModel2d" : "GeometricModel3d";
   }
 
   public [Symbol.dispose]() {
-    this._visibilityHelper[Symbol.dispose]();
+    this.#visibilityHelper[Symbol.dispose]();
   }
 
   public changeFilterTargetsVisibilityStatus(targets: CategoriesTreeFilterTargets, on: boolean): Observable<void> {
@@ -76,23 +78,23 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
       const { definitionContainerIds, subCategories, modelIds, categories, elements } = targets;
       const observables = new Array<Observable<void>>();
       if (definitionContainerIds?.size) {
-        observables.push(this._visibilityHelper.changeDefinitionContainersVisibilityStatus({ definitionContainerIds, on }));
+        observables.push(this.#visibilityHelper.changeDefinitionContainersVisibilityStatus({ definitionContainerIds, on }));
       }
 
       if (modelIds?.size) {
-        observables.push(this._visibilityHelper.changeModelsVisibilityStatus({ modelIds, on }));
+        observables.push(this.#visibilityHelper.changeModelsVisibilityStatus({ modelIds, on }));
       }
 
       if (categories?.length) {
         observables.push(
-          from(categories).pipe(mergeMap(({ modelId, categoryIds }) => this._visibilityHelper.changeCategoriesVisibilityStatus({ categoryIds, modelId, on }))),
+          from(categories).pipe(mergeMap(({ modelId, categoryIds }) => this.#visibilityHelper.changeCategoriesVisibilityStatus({ categoryIds, modelId, on }))),
         );
       }
 
       if (subCategories?.length) {
         observables.push(
           from(subCategories).pipe(
-            mergeMap(({ categoryId, subCategoryIds }) => this._visibilityHelper.changeSubCategoriesVisibilityStatus({ subCategoryIds, categoryId, on })),
+            mergeMap(({ categoryId, subCategoryIds }) => this.#visibilityHelper.changeSubCategoriesVisibilityStatus({ subCategoryIds, categoryId, on })),
           ),
         );
       }
@@ -101,7 +103,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
         observables.push(
           from(elements).pipe(
             releaseMainThreadOnItemsCount(50),
-            mergeMap(({ modelId, elementIds, categoryId }) => this._visibilityHelper.changeElementsVisibilityStatus({ modelId, categoryId, elementIds, on })),
+            mergeMap(({ modelId, elementIds, categoryId }) => this.#visibilityHelper.changeElementsVisibilityStatus({ modelId, categoryId, elementIds, on })),
           ),
         );
       }
@@ -113,7 +115,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
   public getVisibilityStatus(node: HierarchyNode): Observable<VisibilityStatus> {
     if (HierarchyNode.isClassGroupingNode(node)) {
       const nodeInfo = this.getGroupingNodeInfo(node);
-      return this._visibilityHelper.getGroupedElementsVisibilityStatus({ categoryId: nodeInfo.categoryId, modelElementsMap: nodeInfo.modelElementsMap });
+      return this.#visibilityHelper.getGroupedElementsVisibilityStatus({ categoryId: nodeInfo.categoryId, modelElementsMap: nodeInfo.modelElementsMap });
     }
 
     if (!HierarchyNode.isInstancesNode(node)) {
@@ -121,23 +123,23 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
     }
 
     if (CategoriesTreeNode.isDefinitionContainerNode(node)) {
-      return this._visibilityHelper.getDefinitionContainersVisibilityStatus({
+      return this.#visibilityHelper.getDefinitionContainersVisibilityStatus({
         definitionContainerIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
       });
     }
 
     if (CategoriesTreeNode.isModelNode(node)) {
-      return this._visibilityHelper.getModelsVisibilityStatus({
+      return this.#visibilityHelper.getModelsVisibilityStatus({
         modelIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
-        type: this._modelType,
+        type: this.#modelType,
       });
     }
 
     if (CategoriesTreeNode.isCategoryNode(node)) {
-      return this._visibilityHelper.getCategoriesVisibilityStatus({
+      return this.#visibilityHelper.getCategoriesVisibilityStatus({
         categoryIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
         modelId: CategoriesTreeNode.getModelId(node),
-        type: this._categoryType,
+        type: this.#categoryType,
       });
     }
 
@@ -147,7 +149,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
     }
 
     if (CategoriesTreeNode.isSubCategoryNode(node)) {
-      return this._visibilityHelper.getSubCategoriesVisibilityStatus({
+      return this.#visibilityHelper.getSubCategoriesVisibilityStatus({
         categoryId,
         subCategoryIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
       });
@@ -157,11 +159,11 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
     if (!modelId) {
       return of(createVisibilityStatus("disabled"));
     }
-    return this._visibilityHelper.getElementsVisibilityStatus({
+    return this.#visibilityHelper.getElementsVisibilityStatus({
       elementIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
       modelId,
       categoryId,
-      type: this._elementType,
+      type: this.#elementType,
     });
   }
 
@@ -169,7 +171,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
   public changeVisibilityStatus(node: HierarchyNode, on: boolean): Observable<void> {
     if (HierarchyNode.isClassGroupingNode(node)) {
       const nodeInfo = this.getGroupingNodeInfo(node);
-      return this._visibilityHelper.changeGroupedElementsVisibilityStatus({
+      return this.#visibilityHelper.changeGroupedElementsVisibilityStatus({
         categoryId: nodeInfo.categoryId,
         modelElementsMap: nodeInfo.modelElementsMap,
         on,
@@ -181,21 +183,21 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
     }
 
     if (CategoriesTreeNode.isDefinitionContainerNode(node)) {
-      return this._visibilityHelper.changeDefinitionContainersVisibilityStatus({
+      return this.#visibilityHelper.changeDefinitionContainersVisibilityStatus({
         definitionContainerIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
         on,
       });
     }
 
     if (CategoriesTreeNode.isModelNode(node)) {
-      return this._visibilityHelper.changeModelsVisibilityStatus({
+      return this.#visibilityHelper.changeModelsVisibilityStatus({
         modelIds: node.key.instanceKeys.map(({ id }) => id),
         on,
       });
     }
 
     if (CategoriesTreeNode.isCategoryNode(node)) {
-      return this._visibilityHelper.changeCategoriesVisibilityStatus({
+      return this.#visibilityHelper.changeCategoriesVisibilityStatus({
         categoryIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
         modelId: CategoriesTreeNode.getModelId(node),
         on,
@@ -208,7 +210,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
     }
 
     if (CategoriesTreeNode.isSubCategoryNode(node)) {
-      return this._visibilityHelper.changeSubCategoriesVisibilityStatus({
+      return this.#visibilityHelper.changeSubCategoriesVisibilityStatus({
         categoryId,
         subCategoryIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
         on,
@@ -220,7 +222,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
       return EMPTY;
     }
 
-    return this._visibilityHelper.changeElementsVisibilityStatus({
+    return this.#visibilityHelper.changeElementsVisibilityStatus({
       elementIds: node.key.instanceKeys.map(({ id }) => id),
       modelId,
       categoryId,
@@ -233,21 +235,21 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
       const { definitionContainerIds, subCategories, modelIds, categories, elements } = targets;
       const observables = new Array<Observable<VisibilityStatus>>();
       if (definitionContainerIds?.size) {
-        observables.push(this._visibilityHelper.getDefinitionContainersVisibilityStatus({ definitionContainerIds }));
+        observables.push(this.#visibilityHelper.getDefinitionContainersVisibilityStatus({ definitionContainerIds }));
       }
 
       if (modelIds?.size) {
-        observables.push(this._visibilityHelper.getModelsVisibilityStatus({ modelIds, type: this._modelType }));
+        observables.push(this.#visibilityHelper.getModelsVisibilityStatus({ modelIds, type: this.#modelType }));
       }
 
       if (categories?.length) {
         observables.push(
           from(categories).pipe(
             mergeMap(({ modelId, categoryIds }) =>
-              this._visibilityHelper.getCategoriesVisibilityStatus({
+              this.#visibilityHelper.getCategoriesVisibilityStatus({
                 categoryIds,
                 modelId,
-                type: this._categoryType,
+                type: this.#categoryType,
               }),
             ),
           ),
@@ -257,7 +259,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
       if (subCategories?.length) {
         observables.push(
           from(subCategories).pipe(
-            mergeMap(({ categoryId, subCategoryIds }) => this._visibilityHelper.getSubCategoriesVisibilityStatus({ subCategoryIds, categoryId })),
+            mergeMap(({ categoryId, subCategoryIds }) => this.#visibilityHelper.getSubCategoriesVisibilityStatus({ subCategoryIds, categoryId })),
           ),
         );
       }
@@ -267,7 +269,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
           from(elements).pipe(
             releaseMainThreadOnItemsCount(50),
             mergeMap(({ modelId, elementIds, categoryId }) =>
-              this._visibilityHelper.getElementsVisibilityStatus({ modelId, categoryId, elementIds, type: this._elementType }),
+              this.#visibilityHelper.getElementsVisibilityStatus({ modelId, categoryId, elementIds, type: this.#elementType }),
             ),
           ),
         );
@@ -280,10 +282,10 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
   private getCategories(props: Parameters<BaseIdsCache["getCategories"]>[0]): ReturnType<BaseIdsCache["getCategories"]> {
     return from(Id64.iterable(props.modelIds)).pipe(
       mergeMap((modelId) =>
-        from(this._props.idsCache.getModelCategoryIds(modelId)).pipe(
+        from(this.#props.idsCache.getModelCategoryIds(modelId)).pipe(
           map((categories) => ({
             id: modelId,
-            ...(this._props.viewport.view.is2d() ? { drawingCategories: categories } : { spatialCategories: categories }),
+            ...(this.#props.viewport.view.is2d() ? { drawingCategories: categories } : { spatialCategories: categories }),
           })),
         ),
       ),
@@ -291,13 +293,13 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
   }
 
   private getElementsCount(props: Parameters<BaseIdsCache["getElementsCount"]>[0]): ReturnType<BaseIdsCache["getElementsCount"]> {
-    return from(this._props.idsCache.getCategoryElementsCount(props.modelId, props.categoryId));
+    return from(this.#props.idsCache.getCategoryElementsCount(props.modelId, props.categoryId));
   }
 
   private getModels(props: Parameters<BaseIdsCache["getModels"]>[0]): ReturnType<BaseIdsCache["getModels"]> {
     return from(Id64.iterable(props.categoryIds)).pipe(
       mergeMap((categoryId) =>
-        from(this._props.idsCache.getCategoriesElementModels(categoryId, true)).pipe(
+        from(this.#props.idsCache.getCategoriesElementModels(categoryId, true)).pipe(
           mergeMap((categoryModelsMap) => (categoryModelsMap.size > 0 ? categoryModelsMap.values() : of(undefined))),
           map((categoryModels) => ({ id: categoryId, models: categoryModels })),
         ),
@@ -308,7 +310,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
   private getSubCategories(props: Parameters<BaseIdsCache["getSubCategories"]>[0]): ReturnType<BaseIdsCache["getSubCategories"]> {
     return from(Id64.iterable(props.categoryIds)).pipe(
       mergeMap((categoryId) =>
-        from(this._props.idsCache.getSubCategories(categoryId)).pipe(
+        from(this.#props.idsCache.getSubCategories(categoryId)).pipe(
           mergeMap((categorySubCategoriesMap) => (categorySubCategoriesMap.size > 0 ? categorySubCategoriesMap.values() : of(undefined))),
           map((subCategories) => ({ id: categoryId, subCategories })),
         ),
@@ -320,8 +322,8 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
     if ("modelIds" in props) {
       return from(Id64.iterable(props.modelIds)).pipe(
         mergeMap((modelId) =>
-          from(this._props.idsCache.getModelCategoryIds(modelId)).pipe(
-            mergeMap((categoryIds) => from(this._props.idsCache.getCategoriesModeledElements(modelId, categoryIds))),
+          from(this.#props.idsCache.getModelCategoryIds(modelId)).pipe(
+            mergeMap((categoryIds) => from(this.#props.idsCache.getCategoriesModeledElements(modelId, categoryIds))),
             map((subModels) => ({ id: modelId, subModels })),
           ),
         ),
@@ -331,21 +333,21 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
     if (props.modelId) {
       return from(Id64.iterable(props.categoryIds)).pipe(
         mergeMap((categoryId) =>
-          from(this._props.idsCache.getCategoriesModeledElements(props.modelId!, categoryId)).pipe(map((subModels) => ({ id: categoryId, subModels }))),
+          from(this.#props.idsCache.getCategoriesModeledElements(props.modelId!, categoryId)).pipe(map((subModels) => ({ id: categoryId, subModels }))),
         ),
       );
     }
 
     return from(Id64.iterable(props.categoryIds)).pipe(
       mergeMap((categoryId) =>
-        from(this._props.idsCache.getCategoriesElementModels(categoryId)).pipe(
+        from(this.#props.idsCache.getCategoriesElementModels(categoryId)).pipe(
           mergeMap((categoryModelsMap) => {
             const models = categoryModelsMap.get(categoryId);
             if (!models) {
               return of({ id: categoryId, subModels: undefined });
             }
             return from(models).pipe(
-              mergeMap((modelId) => from(this._props.idsCache.getCategoriesModeledElements(modelId, categoryId))),
+              mergeMap((modelId) => from(this.#props.idsCache.getCategoriesModeledElements(modelId, categoryId))),
               map((subModels) => ({ id: categoryId, subModels })),
             );
           }),

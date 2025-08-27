@@ -123,15 +123,17 @@ export interface HierarchyVisibilityHandlerImplProps<TFilterTargets> {
  * @internal
  */
 export class HierarchyVisibilityHandlerImpl<TFilterTargets> implements HierarchyVisibilityHandler, Disposable {
-  private readonly _eventListener: IVisibilityChangeEventListener;
-  private readonly _alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo;
-  private _treeSpecificVisibilityHandler: TreeSpecificVisibilityHandler<TFilterTargets> & Disposable;
-  private _changeRequest = new Subject<{ key: HierarchyNodeKey; depth: number }>();
-  private _filteredTree: Promise<FilteredTree<TFilterTargets>> | undefined;
+  readonly #props: HierarchyVisibilityHandlerImplProps<TFilterTargets>;
+  readonly #eventListener: IVisibilityChangeEventListener;
+  readonly #alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo;
+  #treeSpecificVisibilityHandler: TreeSpecificVisibilityHandler<TFilterTargets> & Disposable;
+  #changeRequest = new Subject<{ key: HierarchyNodeKey; depth: number }>();
+  #filteredTree: Promise<FilteredTree<TFilterTargets>> | undefined;
 
-  constructor(private readonly _props: HierarchyVisibilityHandlerImplProps<TFilterTargets>) {
-    this._eventListener = createVisibilityChangeEventListener({
-      viewport: _props.viewport,
+  constructor(props: HierarchyVisibilityHandlerImplProps<TFilterTargets>) {
+    this.#props = props;
+    this.#eventListener = createVisibilityChangeEventListener({
+      viewport: this.#props.viewport,
       listeners: {
         models: true,
         categories: true,
@@ -139,31 +141,31 @@ export class HierarchyVisibilityHandlerImpl<TFilterTargets> implements Hierarchy
         displayStyle: true,
       },
     });
-    this._alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfo(_props.viewport);
-    this._treeSpecificVisibilityHandler = this._props.getTreeSpecificVisibilityHandler(
-      this._alwaysAndNeverDrawnElements,
+    this.#alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfo(this.#props.viewport);
+    this.#treeSpecificVisibilityHandler = this.#props.getTreeSpecificVisibilityHandler(
+      this.#alwaysAndNeverDrawnElements,
       new HierarchyVisibilityOverrideHandler(this),
     );
-    this._filteredTree = this._props.getFilteredTree();
+    this.#filteredTree = this.#props.getFilteredTree();
   }
 
   public get onVisibilityChange() {
-    return this._eventListener.onVisibilityChange;
+    return this.#eventListener.onVisibilityChange;
   }
 
   public async getVisibilityStatus(node: HierarchyNode): Promise<VisibilityStatus> {
     return firstValueFrom(
       this.getVisibilityStatusInternal(node).pipe(
         // unsubscribe from the observable if the change request for this node is received
-        takeUntil(this._changeRequest.pipe(filter(({ key, depth }) => depth === node.parentKeys.length && HierarchyNodeKey.equals(node.key, key)))),
+        takeUntil(this.#changeRequest.pipe(filter(({ key, depth }) => depth === node.parentKeys.length && HierarchyNodeKey.equals(node.key, key)))),
         // unsubscribe if visibility changes
         takeUntil(
           fromEventPattern(
             (handler) => {
-              this._eventListener.onVisibilityChange.addListener(handler);
+              this.#eventListener.onVisibilityChange.addListener(handler);
             },
             (handler) => {
-              this._eventListener.onVisibilityChange.removeListener(handler);
+              this.#eventListener.onVisibilityChange.removeListener(handler);
             },
           ),
         ),
@@ -174,19 +176,19 @@ export class HierarchyVisibilityHandlerImpl<TFilterTargets> implements Hierarchy
 
   public async changeVisibility(node: HierarchyNode, shouldDisplay: boolean): Promise<void> {
     // notify about new change request
-    this._changeRequest.next({ key: node.key, depth: node.parentKeys.length });
+    this.#changeRequest.next({ key: node.key, depth: node.parentKeys.length });
 
     const changeObservable = this.changeVisibilityStatusInternal(node, shouldDisplay).pipe(
       // unsubscribe from the observable if the change request for this node is received
-      takeUntil(this._changeRequest.pipe(filter(({ key, depth }) => depth === node.parentKeys.length && HierarchyNodeKey.equals(node.key, key)))),
+      takeUntil(this.#changeRequest.pipe(filter(({ key, depth }) => depth === node.parentKeys.length && HierarchyNodeKey.equals(node.key, key)))),
       tap({
         subscribe: () => {
-          this._eventListener.suppressChangeEvents();
-          this._alwaysAndNeverDrawnElements.suppressChangeEvents();
+          this.#eventListener.suppressChangeEvents();
+          this.#alwaysAndNeverDrawnElements.suppressChangeEvents();
         },
         finalize: () => {
-          this._eventListener.resumeChangeEvents();
-          this._alwaysAndNeverDrawnElements.resumeChangeEvents();
+          this.#eventListener.resumeChangeEvents();
+          this.#alwaysAndNeverDrawnElements.resumeChangeEvents();
         },
       }),
     );
@@ -195,23 +197,23 @@ export class HierarchyVisibilityHandlerImpl<TFilterTargets> implements Hierarchy
   }
 
   public [Symbol.dispose]() {
-    this._eventListener[Symbol.dispose]();
-    this._alwaysAndNeverDrawnElements[Symbol.dispose]();
-    this._treeSpecificVisibilityHandler[Symbol.dispose]();
+    this.#eventListener[Symbol.dispose]();
+    this.#alwaysAndNeverDrawnElements[Symbol.dispose]();
+    this.#treeSpecificVisibilityHandler[Symbol.dispose]();
   }
 
   private getVisibilityStatusInternal(node: HierarchyNode) {
     if (node.filtering?.filteredChildrenIdentifierPaths?.length && !node.filtering.isFilterTarget) {
       return this.getFilteredNodeVisibility({ node });
     }
-    return this._treeSpecificVisibilityHandler.getVisibilityStatus(node);
+    return this.#treeSpecificVisibilityHandler.getVisibilityStatus(node);
   }
 
   private changeVisibilityStatusInternal(node: HierarchyNode, on: boolean): Observable<void> {
     if (node.filtering?.filteredChildrenIdentifierPaths?.length && !node.filtering.isFilterTarget) {
       return this.changeFilteredNodeVisibility({ node, on });
     }
-    return this._treeSpecificVisibilityHandler.changeVisibilityStatus(node, on);
+    return this.#treeSpecificVisibilityHandler.changeVisibilityStatus(node, on);
   }
 
   private getFilteredNodeVisibility(props: { node: HierarchyNode }) {
@@ -220,16 +222,16 @@ export class HierarchyVisibilityHandlerImpl<TFilterTargets> implements Hierarchy
         if (!targets) {
           return EMPTY;
         }
-        return this._treeSpecificVisibilityHandler.getFilterTargetsVisibilityStatus(targets);
+        return this.#treeSpecificVisibilityHandler.getFilterTargetsVisibilityStatus(targets);
       }),
     );
   }
 
   private getFilteredTreeTargets({ node }: { node: HierarchyNode }): Observable<TFilterTargets | undefined> {
-    if (!this._filteredTree) {
+    if (!this.#filteredTree) {
       return of(undefined);
     }
-    return from(this._filteredTree).pipe(map((filteredTree) => filteredTree.getFilterTargets(node)));
+    return from(this.#filteredTree).pipe(map((filteredTree) => filteredTree.getFilterTargets(node)));
   }
 
   private changeFilteredNodeVisibility({ on, node }: { on: boolean; node: HierarchyNode }) {
@@ -238,7 +240,7 @@ export class HierarchyVisibilityHandlerImpl<TFilterTargets> implements Hierarchy
         if (!targets) {
           return EMPTY;
         }
-        return this._treeSpecificVisibilityHandler.changeFilterTargetsVisibilityStatus(targets, on);
+        return this.#treeSpecificVisibilityHandler.changeFilterTargetsVisibilityStatus(targets, on);
       }),
     );
   }

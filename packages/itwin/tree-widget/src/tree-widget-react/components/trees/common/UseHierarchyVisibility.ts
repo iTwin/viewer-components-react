@@ -207,7 +207,10 @@ export type HierarchyVisibilityHandlerOverridableMethod<TFunc> = TFunc extends (
 
 /** @internal */
 export class HierarchyVisibilityOverrideHandler {
-  constructor(private _baseHandler: HierarchyVisibilityHandler) {}
+  #baseHandler: HierarchyVisibilityHandler;
+  constructor(baseHandler: HierarchyVisibilityHandler) {
+    this.#baseHandler = baseHandler;
+  }
   public createVisibilityHandlerResult<TResult, TOverrideProps>(props: {
     nonOverridenResult: Observable<TResult>;
     override: HierarchyVisibilityHandlerOverridableMethod<(props: TOverrideProps) => Promise<TResult>> | undefined;
@@ -219,7 +222,7 @@ export class HierarchyVisibilityOverrideHandler {
           override({
             ...overrideProps,
             originalImplementation: async () => lastValueFrom(nonOverridenResult, { defaultValue: undefined as TResult }),
-            handler: this._baseHandler,
+            handler: this.#baseHandler,
           }),
         )
       : nonOverridenResult;

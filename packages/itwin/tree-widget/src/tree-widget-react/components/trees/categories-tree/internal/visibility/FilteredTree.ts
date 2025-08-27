@@ -116,8 +116,10 @@ interface ProcessedFilteredNodes {
 }
 
 class CategoriesTreeFilteredNodesHandler extends FilteredNodesHandler<ProcessedFilteredNodes, CategoriesTreeFilterTargets, TemporaryFilteredTreeNode> {
-  constructor(private readonly _props: CategoriesTreeFilteredNodesHandlerProps) {
+  readonly #props: CategoriesTreeFilteredNodesHandlerProps;
+  constructor(props: CategoriesTreeFilteredNodesHandlerProps) {
     super();
+    this.#props = props;
   }
 
   public async getProcessedFilteredNodes(): Promise<ProcessedFilteredNodes> {
@@ -131,7 +133,7 @@ class CategoriesTreeFilteredNodesHandler extends FilteredNodesHandler<ProcessedF
       }
     });
 
-    const filteredElementsModels = await this._props.idsCache.getFilteredElementsModels([...filteredTemporaryElements.keys()]);
+    const filteredElementsModels = await this.#props.idsCache.getFilteredElementsModels([...filteredTemporaryElements.keys()]);
     filteredTemporaryElements.forEach((element, id) => {
       const modelId = filteredElementsModels.get(element.id);
       assert(modelId !== undefined);
@@ -326,16 +328,16 @@ class CategoriesTreeFilteredNodesHandler extends FilteredNodesHandler<ProcessedF
   }
 
   public async getType(className: string): Promise<TemporaryFilteredTreeNode["type"]> {
-    if (await this._props.imodelAccess.classDerivesFrom(className, CLASS_NAME_SubCategory)) {
+    if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAME_SubCategory)) {
       return "subCategory";
     }
-    if (await this._props.imodelAccess.classDerivesFrom(className, this._props.categoryElementClassName)) {
+    if (await this.#props.imodelAccess.classDerivesFrom(className, this.#props.categoryElementClassName)) {
       return "element";
     }
-    if (await this._props.imodelAccess.classDerivesFrom(className, this._props.categoryClassName)) {
+    if (await this.#props.imodelAccess.classDerivesFrom(className, this.#props.categoryClassName)) {
       return "category";
     }
-    if (await this._props.imodelAccess.classDerivesFrom(className, this._props.categoryModelClassName)) {
+    if (await this.#props.imodelAccess.classDerivesFrom(className, this.#props.categoryModelClassName)) {
       return "model";
     }
     return "definitionContainer";
