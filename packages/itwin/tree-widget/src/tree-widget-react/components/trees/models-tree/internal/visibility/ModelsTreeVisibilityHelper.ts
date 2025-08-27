@@ -29,9 +29,9 @@ export type ModelsTreeVisibilityHelperProps = BaseVisibilityHelperProps & {
  */
 export class ModelsTreeVisibilityHelper extends BaseVisibilityHelper {
   #props: ModelsTreeVisibilityHelperProps;
-  constructor(_props: ModelsTreeVisibilityHelperProps) {
-    super(_props);
-    this.#props = _props;
+  constructor(props: ModelsTreeVisibilityHelperProps) {
+    super(props);
+    this.#props = props;
   }
 
   /**
