@@ -633,7 +633,7 @@ export class BaseVisibilityHelper implements Disposable {
     );
   }
 
-  /** Adds per-model category overrides based on default category visibility. */
+  /** Adds per-model category overrides based on category visibility in category selector. */
   private changeCategoryStateInViewportAccordingToModelVisibility(modelId: string, categoryId: string, on: boolean, changeSubCategories: boolean) {
     const viewport = this._props.viewport;
     const isDisplayedInSelector = viewport.view.viewsCategory(categoryId);
