@@ -4,15 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { assert } from "@itwin/core-bentley";
-import { CLASS_NAME_Classification, CLASS_NAME_ClassificationTable, CLASS_NAME_GeometricElement2d } from "../../common/internal/ClassNameDefinitions.js";
-import { createFilteredTree, FilteredNodesHandler } from "../../common/internal/visibility/BaseFilteredTree.js";
+import { CLASS_NAME_Classification, CLASS_NAME_ClassificationTable, CLASS_NAME_GeometricElement2d } from "../../../common/internal/ClassNameDefinitions.js";
+import { createFilteredTree, FilteredNodesHandler } from "../../../common/internal/visibility/BaseFilteredTree.js";
 
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
-import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
-import type { BaseFilteredTreeNode, FilteredTree, FilteredTreeNodeChildren } from "../../common/internal/visibility/BaseFilteredTree.js";
-import type { ClassificationsTreeIdsCache } from "./ClassificationsTreeIdsCache.js";
+import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
+import type { BaseFilteredTreeNode, FilteredTree, FilteredTreeNodeChildren } from "../../../common/internal/visibility/BaseFilteredTree.js";
+import type { ClassificationsTreeIdsCache } from "../ClassificationsTreeIdsCache.js";
 
 interface ClassificationTableFilteredTreeNode extends BaseFilteredTreeNode<ClassificationTableFilteredTreeNode> {
   type: "classificationTable";
@@ -99,8 +99,10 @@ class ClassificationsTreeFilteredNodesHandler extends FilteredNodesHandler<
   ClassificationsTreeFilterTargets,
   TemporaryFilteredTreeNode
 > {
-  constructor(private readonly _props: ClassificationsTreeFilteredNodesHandlerProps) {
+  readonly #props: ClassificationsTreeFilteredNodesHandlerProps;
+  constructor(props: ClassificationsTreeFilteredNodesHandlerProps) {
     super();
+    this.#props = props;
   }
 
   public async getProcessedFilteredNodes(): Promise<ProcessedFilteredNodes> {
@@ -118,7 +120,7 @@ class ClassificationsTreeFilteredNodesHandler extends FilteredNodesHandler<
       }
     }
 
-    const filteredElementsModels = await this._props.idsCache.getFilteredElementsData({
+    const filteredElementsModels = await this.#props.idsCache.getFilteredElementsData({
       element2dIds: [...filteredTemporary2dElements.keys()],
       element3dIds: [...filteredTemporary3dElements.keys()],
     });
@@ -260,13 +262,13 @@ class ClassificationsTreeFilteredNodesHandler extends FilteredNodesHandler<
   }
 
   public async getType(className: string): Promise<TemporaryFilteredTreeNode["type"]> {
-    if (await this._props.imodelAccess.classDerivesFrom(className, CLASS_NAME_ClassificationTable)) {
+    if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAME_ClassificationTable)) {
       return "classificationTable";
     }
-    if (await this._props.imodelAccess.classDerivesFrom(className, CLASS_NAME_Classification)) {
+    if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAME_Classification)) {
       return "classification";
     }
-    if (await this._props.imodelAccess.classDerivesFrom(className, CLASS_NAME_GeometricElement2d)) {
+    if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAME_GeometricElement2d)) {
       return "element2d";
     }
     return "element3d";

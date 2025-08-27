@@ -18,7 +18,7 @@ import { HierarchyCacheMode, initialize as initializePresentationTesting, termin
 import { CLASS_NAME_Subject } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import { createVisibilityStatus } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
 import { ModelsTreeIdsCache } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
-import { createModelsTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
+import { createModelsTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import {
   buildIModel,
@@ -46,9 +46,10 @@ import type { Id64String } from "@itwin/core-bentley";
 import type { GeometricElement3dProps, QueryBinder } from "@itwin/core-common";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath, HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { Visibility } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
 import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
-import type { ModelsTreeVisibilityHandlerProps } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
+import type { ModelsTreeVisibilityHandlerProps } from "../../../../tree-widget-react/components/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
 import type { ValidateNodeProps } from "./VisibilityValidation.js";
 
 interface VisibilityOverrides {
@@ -89,7 +90,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       createdHandlers = [];
     });
 
-    function createFakeIModelAccess(): ModelsTreeVisibilityHandlerProps["imodelAccess"] {
+    function createFakeIModelAccess(): ECClassHierarchyInspector {
       return {
         classDerivesFrom: sinon.fake.returns(false),
       };

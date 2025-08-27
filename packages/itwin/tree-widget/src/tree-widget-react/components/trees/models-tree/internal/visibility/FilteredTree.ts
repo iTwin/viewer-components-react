@@ -4,14 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { assert } from "@itwin/core-bentley";
-import { CLASS_NAME_Category, CLASS_NAME_Model, CLASS_NAME_Subject } from "../../common/internal/ClassNameDefinitions.js";
-import { createFilteredTree, FilteredNodesHandler } from "../../common/internal/visibility/BaseFilteredTree.js";
+import { CLASS_NAME_Category, CLASS_NAME_Model, CLASS_NAME_Subject } from "../../../common/internal/ClassNameDefinitions.js";
+import { createFilteredTree, FilteredNodesHandler } from "../../../common/internal/visibility/BaseFilteredTree.js";
 
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
-import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
-import type { BaseFilteredTreeNode, FilteredTree, FilteredTreeRootNode } from "../../common/internal/visibility/BaseFilteredTree.js";
+import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
+import type { BaseFilteredTreeNode, FilteredTree, FilteredTreeRootNode } from "../../../common/internal/visibility/BaseFilteredTree.js";
 
 interface GenericFilteredTreeNode extends BaseFilteredTreeNode<GenericFilteredTreeNode> {
   type: "subject" | "model";
@@ -64,8 +64,10 @@ interface ModelsTreeFilteredNodesHandlerProps {
 type ModelCategoryKey = `${ModelId}-${CategoryId}`;
 
 class ModelsTreeFilteredNodesHandler extends FilteredNodesHandler<void, ModelsTreeFilterTargets, FilteredTreeNode> {
-  constructor(private readonly _props: ModelsTreeFilteredNodesHandlerProps) {
+  readonly #props: ModelsTreeFilteredNodesHandlerProps;
+  constructor(props: ModelsTreeFilteredNodesHandlerProps) {
     super();
+    this.#props = props;
   }
 
   public convertNodesToFilterTargets(filteredNodes: FilteredTreeNode[]): ModelsTreeFilterTargets | undefined {
@@ -210,13 +212,13 @@ class ModelsTreeFilteredNodesHandler extends FilteredNodesHandler<void, ModelsTr
   }
 
   public async getType(className: string): Promise<FilteredTreeNode["type"]> {
-    if (await this._props.imodelAccess.classDerivesFrom(className, CLASS_NAME_Subject)) {
+    if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAME_Subject)) {
       return "subject";
     }
-    if (await this._props.imodelAccess.classDerivesFrom(className, CLASS_NAME_Model)) {
+    if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAME_Model)) {
       return "model";
     }
-    if (await this._props.imodelAccess.classDerivesFrom(className, CLASS_NAME_Category)) {
+    if (await this.#props.imodelAccess.classDerivesFrom(className, CLASS_NAME_Category)) {
       return "category";
     }
     return "element";
