@@ -23,43 +23,32 @@ import type { TreeSpecificVisibilityHandler } from "../visibility/BaseVisibility
 import type { IVisibilityChangeEventListener } from "../VisibilityChangeEventListener.js";
 
 /** @internal */
-export interface CreateFilteredTreeProps<TCache, TFilteredTreeSpecificProps> {
+export interface CreateFilteredTreeProps<TCache> {
   getCache: () => TCache;
   imodelAccess: ECClassHierarchyInspector;
   filteringPaths: HierarchyFilteringPath[];
-  filteredTreeProps: TFilteredTreeSpecificProps;
 }
 
 /** @internal */
-export interface CreateTreeSpecificVisibilityHandlerProps<TCache, TTreeSpecificVisibilityHandlerProps> {
+export interface CreateTreeSpecificVisibilityHandlerProps<TCache> {
   info: AlwaysAndNeverDrawnElementInfo;
   getCache: () => TCache;
   viewport: Viewport;
   overrideHandler: HierarchyVisibilityOverrideHandler;
-  treeSpecificVisibilityHandlerProps: TTreeSpecificVisibilityHandlerProps;
 }
 
 /** @internal */
-export interface UseCachedVisibilityProps<TCache, TFilterTargets, TFilteredTreeSpecificProps, TTreeSpecificVisibilityHandlerProps> {
+export interface UseCachedVisibilityProps<TCache, TFilterTargets> {
   activeView: Viewport;
   getCache: () => TCache;
-  filteredTreeProps: TFilteredTreeSpecificProps;
-  treeSpecificVisibilityHandlerProps: TTreeSpecificVisibilityHandlerProps;
-  createFilteredTree: (props: CreateFilteredTreeProps<TCache, TFilteredTreeSpecificProps>) => Promise<FilteredTree<TFilterTargets>>;
-  createTreeSpecificVisibilityHandler: (
-    props: CreateTreeSpecificVisibilityHandlerProps<TCache, TTreeSpecificVisibilityHandlerProps>,
-  ) => TreeSpecificVisibilityHandler<TFilterTargets> & Disposable;
+  createFilteredTree: (props: CreateFilteredTreeProps<TCache>) => Promise<FilteredTree<TFilterTargets>>;
+  createTreeSpecificVisibilityHandler: (props: CreateTreeSpecificVisibilityHandlerProps<TCache>) => TreeSpecificVisibilityHandler<TFilterTargets> & Disposable;
 }
 
 /** @internal */
-export function useCachedVisibility<
-  TCache,
-  TFilterTargets,
-  TFilteredTreeSpecificProps extends object | undefined,
-  TTreeSpecificVisibilityHandlerProps extends object | undefined,
->(props: UseCachedVisibilityProps<TCache, TFilterTargets, TFilteredTreeSpecificProps, TTreeSpecificVisibilityHandlerProps>) {
+export function useCachedVisibility<TCache, TFilterTargets>(props: UseCachedVisibilityProps<TCache, TFilterTargets>) {
   const [filteredPaths, setFilteredPaths] = useState<HierarchyFilteringPath[] | undefined>(undefined);
-  const { activeView, getCache, createFilteredTree, createTreeSpecificVisibilityHandler, filteredTreeProps, treeSpecificVisibilityHandlerProps } = props;
+  const { activeView, getCache, createFilteredTree, createTreeSpecificVisibilityHandler } = props;
 
   const [visibilityHandlerFactory, setVisibilityHandlerFactory] = useState<VisibilityTreeProps["visibilityHandlerFactory"]>(() =>
     createVisibilityHandlerFactory({
@@ -67,8 +56,6 @@ export function useCachedVisibility<
       getCache,
       createFilteredTree,
       createTreeSpecificVisibilityHandler,
-      filteredTreeProps,
-      treeSpecificVisibilityHandlerProps,
       filteringPaths: filteredPaths,
     }),
   );
@@ -80,12 +67,10 @@ export function useCachedVisibility<
         getCache,
         createFilteredTree,
         createTreeSpecificVisibilityHandler,
-        filteredTreeProps,
-        treeSpecificVisibilityHandlerProps,
         filteringPaths: filteredPaths,
       }),
     );
-  }, [activeView, getCache, filteredPaths, createFilteredTree, createTreeSpecificVisibilityHandler, filteredTreeProps, treeSpecificVisibilityHandlerProps]);
+  }, [activeView, getCache, filteredPaths, createFilteredTree, createTreeSpecificVisibilityHandler]);
 
   return {
     visibilityHandlerFactory,
@@ -94,26 +79,18 @@ export function useCachedVisibility<
   };
 }
 
-function createVisibilityHandlerFactory<TCache, TFilterTargets, TFilteredTreeSpecificProps, TTreeSpecificVisibilityHandlerProps>(
-  props: UseCachedVisibilityProps<TCache, TFilterTargets, TFilteredTreeSpecificProps, TTreeSpecificVisibilityHandlerProps> & {
+function createVisibilityHandlerFactory<TCache, TFilterTargets>(
+  props: UseCachedVisibilityProps<TCache, TFilterTargets> & {
     filteringPaths: HierarchyFilteringPath[] | undefined;
   },
 ): VisibilityTreeProps["visibilityHandlerFactory"] {
-  const {
-    activeView,
-    createFilteredTree,
-    createTreeSpecificVisibilityHandler,
-    filteredTreeProps,
-    getCache,
-    treeSpecificVisibilityHandlerProps,
-    filteringPaths,
-  } = props;
+  const { activeView, createFilteredTree, createTreeSpecificVisibilityHandler, getCache, filteringPaths } = props;
   return ({ imodelAccess }) =>
     new HierarchyVisibilityHandlerImpl<TFilterTargets>({
       viewport: activeView,
       getFilteredTree: (): Promise<FilteredTree<TFilterTargets>> | undefined => {
         if (filteringPaths) {
-          return createFilteredTree({ imodelAccess, filteringPaths, filteredTreeProps, getCache });
+          return createFilteredTree({ imodelAccess, filteringPaths, getCache });
         }
         return undefined;
       },
@@ -123,7 +100,6 @@ function createVisibilityHandlerFactory<TCache, TFilterTargets, TFilteredTreeSpe
           getCache,
           viewport: activeView,
           overrideHandler,
-          treeSpecificVisibilityHandlerProps,
         }),
     });
 }

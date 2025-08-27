@@ -17,10 +17,8 @@ import { InstanceKey } from "@itwin/presentation-shared";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { CLASS_NAME_Subject } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import { createVisibilityStatus } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
-import { HierarchyVisibilityHandlerImpl } from "../../../../tree-widget-react/components/trees/common/internal/useTreeHooks/UseCachedVisibility.js";
 import { ModelsTreeIdsCache } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
-import { createFilteredModelsTree } from "../../../../tree-widget-react/components/trees/models-tree/internal/visibility/FilteredTree.js";
-import { ModelsTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
+import { createModelsTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import {
   buildIModel,
@@ -47,21 +45,12 @@ import { validateHierarchyVisibility, VisibilityExpectations } from "./Visibilit
 import type { Id64String } from "@itwin/core-bentley";
 import type { GeometricElement3dProps, QueryBinder } from "@itwin/core-common";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type {
-  GroupingHierarchyNode,
-  HierarchyFilteringPath,
-  HierarchyNodeIdentifiersPath,
-  HierarchyProvider,
-  NonGroupingHierarchyNode,
-} from "@itwin/presentation-hierarchies";
+import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath, HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { Visibility } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
 import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
-import type { ValidateNodeProps } from "./VisibilityValidation.js";
-import type { ModelsTreeVisibilityHandlerOverrides } from "../../../../tree-widget-react.js";
-import type { FilteredTree } from "../../../../tree-widget-react/components/trees/common/internal/visibility/BaseFilteredTree.js";
-import type { ModelsTreeFilterTargets } from "../../../../tree-widget-react/components/trees/models-tree/internal/visibility/FilteredTree.js";
 import type { ModelsTreeVisibilityHandlerProps } from "../../../../tree-widget-react/components/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
+import type { ValidateNodeProps } from "./VisibilityValidation.js";
 
 interface VisibilityOverrides {
   models?: Map<Id64String, Visibility>;
@@ -3547,35 +3536,4 @@ function createBlankViewState(iModel: IModelConnection) {
   });
 
   return viewState;
-}
-
-/** @internal */
-export function createModelsTreeVisibilityHandler(props: {
-  viewport: Viewport;
-  idsCache: ModelsTreeIdsCache;
-  imodelAccess: ECClassHierarchyInspector;
-  overrides?: ModelsTreeVisibilityHandlerOverrides;
-  filteredPaths?: HierarchyFilteringPath[];
-}) {
-  return new HierarchyVisibilityHandlerImpl<ModelsTreeFilterTargets>({
-    getFilteredTree: (): undefined | Promise<FilteredTree<ModelsTreeFilterTargets>> => {
-      if (!props.filteredPaths) {
-        return undefined;
-      }
-      return createFilteredModelsTree({
-        filteringPaths: props.filteredPaths,
-        imodelAccess: props.imodelAccess,
-      });
-    },
-    getTreeSpecificVisibilityHandler: (info, overrideHandler) => {
-      return new ModelsTreeVisibilityHandler({
-        alwaysAndNeverDrawnElementInfo: info,
-        idsCache: props.idsCache,
-        viewport: props.viewport,
-        overrideHandler,
-        overrides: props.overrides,
-      });
-    },
-    viewport: props.viewport,
-  });
 }

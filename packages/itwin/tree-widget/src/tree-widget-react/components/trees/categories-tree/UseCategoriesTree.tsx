@@ -166,17 +166,14 @@ function getSublabel(node: PresentationHierarchyNode) {
 
 function useCategoriesCachedVisibility(props: { activeView: Viewport; getCache: () => CategoriesTreeIdsCache; viewType: "2d" | "3d" }) {
   const { activeView, getCache, viewType } = props;
-  const { visibilityHandlerFactory, filteredPaths, onFilteredPathsChanged } = useCachedVisibility<
-    CategoriesTreeIdsCache,
-    CategoriesTreeFilterTargets,
-    ReturnType<typeof getClassesByView>,
-    undefined
-  >({
+  const { visibilityHandlerFactory, filteredPaths, onFilteredPathsChanged } = useCachedVisibility<CategoriesTreeIdsCache, CategoriesTreeFilterTargets>({
     activeView,
     getCache,
-    filteredTreeProps: useMemo(() => getClassesByView(viewType), [viewType]),
-    createFilteredTree,
-    treeSpecificVisibilityHandlerProps: undefined,
+    createFilteredTree: useCallback(
+      async (filteredTreeProps: CreateFilteredTreeProps<CategoriesTreeIdsCache>) =>
+        createFilteredTree({ ...filteredTreeProps, viewClasses: getClassesByView(viewType) }),
+      [viewType],
+    ),
     createTreeSpecificVisibilityHandler,
   });
 
@@ -190,7 +187,7 @@ function useCategoriesCachedVisibility(props: { activeView: Viewport; getCache: 
   };
 }
 
-function createTreeSpecificVisibilityHandler(props: CreateTreeSpecificVisibilityHandlerProps<CategoriesTreeIdsCache, undefined>) {
+function createTreeSpecificVisibilityHandler(props: CreateTreeSpecificVisibilityHandlerProps<CategoriesTreeIdsCache>) {
   const { info, getCache, viewport } = props;
   return new CategoriesTreeVisibilityHandler({
     alwaysAndNeverDrawnElementInfo: info,
@@ -200,16 +197,16 @@ function createTreeSpecificVisibilityHandler(props: CreateTreeSpecificVisibility
 }
 
 async function createFilteredTree(
-  props: CreateFilteredTreeProps<CategoriesTreeIdsCache, ReturnType<typeof getClassesByView>>,
+  props: CreateFilteredTreeProps<CategoriesTreeIdsCache> & { viewClasses: ReturnType<typeof getClassesByView> },
 ): Promise<FilteredTree<CategoriesTreeFilterTargets>> {
-  const { filteringPaths, imodelAccess, getCache, filteredTreeProps } = props;
+  const { filteringPaths, imodelAccess, getCache, viewClasses } = props;
   return createFilteredCategoriesTree({
     imodelAccess,
     filteringPaths,
     idsCache: getCache(),
-    categoryClassName: filteredTreeProps.categoryClass,
-    categoryElementClassName: filteredTreeProps.elementClass,
-    categoryModelClassName: filteredTreeProps.modelClass,
+    categoryClassName: viewClasses.categoryClass,
+    categoryElementClassName: viewClasses.elementClass,
+    categoryModelClassName: viewClasses.modelClass,
   });
 }
 

@@ -87,7 +87,7 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
       props.on
         ? concat(
             from(enableCategoryDisplay(this.#props.viewport, props.categoryId, props.on, false)),
-            this.enableCategoriesElementModelsVisibility(props.categoryId),
+            this.enableCategoriesElementModelsVisibilityStatus(props.categoryId),
           )
         : EMPTY,
       from(props.subCategoryIds).pipe(map((subCategoryId) => enableSubCategoryDisplay(this.#props.viewport, subCategoryId, props.on))),
@@ -108,7 +108,7 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
   }
 
   /** Turns on visiblity status of models (that are not yet turned on) that are related to categories. */
-  private enableCategoriesElementModelsVisibility(categoryIds: Id64Arg): Observable<void> {
+  private enableCategoriesElementModelsVisibilityStatus(categoryIds: Id64Arg): Observable<void> {
     return from(this.#props.idsCache.getCategoriesElementModels(categoryIds, true)).pipe(
       mergeMap((categoriesModelsMap) => categoriesModelsMap.values()),
       reduce((acc, modelIds) => {

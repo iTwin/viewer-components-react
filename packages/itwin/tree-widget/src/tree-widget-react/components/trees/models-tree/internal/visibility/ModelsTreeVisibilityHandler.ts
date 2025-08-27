@@ -7,16 +7,20 @@ import { defer, EMPTY, from, map, merge, mergeMap, of } from "rxjs";
 import { assert, Id64 } from "@itwin/core-bentley";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
+import { HierarchyVisibilityHandlerImpl } from "../../../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { releaseMainThreadOnItemsCount } from "../../../common/internal/Utils.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 import { ModelsTreeNode } from "../ModelsTreeNode.js";
+import { createFilteredModelsTree } from "./FilteredTree.js";
 import { ModelsTreeVisibilityHelper } from "./ModelsTreeVisibilityHelper.js";
 
 import type { Observable } from "rxjs";
 import type { Id64Arg } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
-import type { GroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+import type { GroupingHierarchyNode, HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
+import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { AlwaysAndNeverDrawnElementInfo } from "../../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
+import type { FilteredTree } from "../../../common/internal/visibility/BaseFilteredTree.js";
 import type {
   BaseIdsCache,
   BaseTreeVisibilityHandlerOverrides,
@@ -64,6 +68,8 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
   private _visibilityHelper: ModelsTreeVisibilityHelper;
 
   constructor(private readonly _props: ModelsTreeVisibilityHandlerProps) {
+    // Remove after https://github.com/iTwin/viewer-components-react/issues/1421.
+    // We won't need to create a custom base ids cache.
     const baseIdsCache: BaseIdsCache = {
       getCategories: (props) => this.getCategories(props),
       getElementsCount: (props) => this.getElementsCount(props),
@@ -348,4 +354,38 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
     const elementIds = node.groupedInstanceKeys.map((key) => key.id);
     return { modelId, categoryId, elementIds };
   }
+}
+
+/**
+ * Creates models tree visibility handler. Is used by integration and performance tests.
+ * @internal
+ */
+export function createModelsTreeVisibilityHandler(props: {
+  viewport: Viewport;
+  idsCache: ModelsTreeIdsCache;
+  imodelAccess: ECClassHierarchyInspector;
+  overrides?: ModelsTreeVisibilityHandlerOverrides;
+  filteredPaths?: HierarchyFilteringPath[];
+}) {
+  return new HierarchyVisibilityHandlerImpl<ModelsTreeFilterTargets>({
+    getFilteredTree: (): undefined | Promise<FilteredTree<ModelsTreeFilterTargets>> => {
+      if (!props.filteredPaths) {
+        return undefined;
+      }
+      return createFilteredModelsTree({
+        filteringPaths: props.filteredPaths,
+        imodelAccess: props.imodelAccess,
+      });
+    },
+    getTreeSpecificVisibilityHandler: (info, overrideHandler) => {
+      return new ModelsTreeVisibilityHandler({
+        alwaysAndNeverDrawnElementInfo: info,
+        idsCache: props.idsCache,
+        viewport: props.viewport,
+        overrideHandler,
+        overrides: props.overrides,
+      });
+    },
+    viewport: props.viewport,
+  });
 }

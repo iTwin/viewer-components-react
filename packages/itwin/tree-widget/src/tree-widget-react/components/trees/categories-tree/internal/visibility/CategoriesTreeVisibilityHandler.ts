@@ -7,17 +7,21 @@ import { defer, EMPTY, from, map, merge, mergeMap, of } from "rxjs";
 import { assert, Id64 } from "@itwin/core-bentley";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
-import { releaseMainThreadOnItemsCount } from "../../../common/internal/Utils.js";
+import { HierarchyVisibilityHandlerImpl } from "../../../common/internal/useTreeHooks/UseCachedVisibility.js";
+import { getClassesByView, releaseMainThreadOnItemsCount } from "../../../common/internal/Utils.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 import { CategoriesTreeNode } from "../CategoriesTreeNode.js";
 import { CategoriesTreeVisibilityHelper } from "./CategoriesTreeVisibilityHelper.js";
+import { createFilteredCategoriesTree } from "./FilteredTree.js";
 
 import type { Observable } from "rxjs";
 import type { Viewport } from "@itwin/core-frontend";
-import type { GroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+import type { GroupingHierarchyNode, HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
+import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { AlwaysAndNeverDrawnElementInfo } from "../../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
 import type { ElementId, ModelId } from "../../../common/internal/Types.js";
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
+import type { FilteredTree } from "../../../common/internal/visibility/BaseFilteredTree.js";
 import type { BaseIdsCache, TreeSpecificVisibilityHandler } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import type { CategoriesTreeIdsCache } from "../CategoriesTreeIdsCache.js";
 import type { CategoriesTreeFilterTargets } from "./FilteredTree.js";
@@ -41,6 +45,8 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
   private _categoryType: "DrawingCategory" | "SpatialCategory";
   private _modelType: "GeometricModel3d" | "GeometricModel2d";
   constructor(private readonly _props: CategoriesTreeVisibilityHandlerProps) {
+    // Remove after https://github.com/iTwin/viewer-components-react/issues/1421.
+    // We won't need to create a custom base ids cache.
     const baseIdsCache: BaseIdsCache = {
       getCategories: (props) => this.getCategories(props),
       getElementsCount: (props) => this.getElementsCount(props),
@@ -355,4 +361,40 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
 
     return { modelElementsMap, categoryId };
   }
+}
+
+/**
+ * Creates categories tree visibility handler. Is used by integration and performance tests.
+ * @internal
+ */
+export function createCategoriesTreeVisibilityHandler(props: {
+  viewport: Viewport;
+  idsCache: CategoriesTreeIdsCache;
+  imodelAccess: ECClassHierarchyInspector;
+  filteredPaths?: HierarchyFilteringPath[];
+}) {
+  return new HierarchyVisibilityHandlerImpl<CategoriesTreeFilterTargets>({
+    getFilteredTree: (): undefined | Promise<FilteredTree<CategoriesTreeFilterTargets>> => {
+      if (!props.filteredPaths) {
+        return undefined;
+      }
+      const { categoryClass, elementClass, modelClass } = getClassesByView(props.viewport.view.is2d() ? "2d" : "3d");
+      return createFilteredCategoriesTree({
+        idsCache: props.idsCache,
+        filteringPaths: props.filteredPaths,
+        imodelAccess: props.imodelAccess,
+        categoryClassName: categoryClass,
+        categoryElementClassName: elementClass,
+        categoryModelClassName: modelClass,
+      });
+    },
+    getTreeSpecificVisibilityHandler: (info) => {
+      return new CategoriesTreeVisibilityHandler({
+        alwaysAndNeverDrawnElementInfo: info,
+        idsCache: props.idsCache,
+        viewport: props.viewport,
+      });
+    },
+    viewport: props.viewport,
+  });
 }

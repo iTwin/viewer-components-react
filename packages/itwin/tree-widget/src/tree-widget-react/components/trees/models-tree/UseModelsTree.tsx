@@ -144,17 +144,13 @@ export function useModelsTree({
     cacheSpecificProps: useMemo(() => ({ hierarchyConfig: hierarchyConfiguration }), [hierarchyConfiguration]),
   });
 
-  const { visibilityHandlerFactory, onFilteredPathsChanged } = useCachedVisibility<
-    ModelsTreeIdsCache,
-    ModelsTreeFilterTargets,
-    undefined,
-    { overrides?: ModelsTreeVisibilityHandlerOverrides }
-  >({
+  const { visibilityHandlerFactory, onFilteredPathsChanged } = useCachedVisibility<ModelsTreeIdsCache, ModelsTreeFilterTargets>({
     activeView,
     createFilteredTree,
-    filteredTreeProps: undefined,
-    treeSpecificVisibilityHandlerProps: useMemo(() => ({ overrides: visibilityHandlerOverrides }), [visibilityHandlerOverrides]),
-    createTreeSpecificVisibilityHandler,
+    createTreeSpecificVisibilityHandler: useCallback(
+      (treeProps) => createTreeSpecificVisibilityHandler({ ...treeProps, overrides: visibilityHandlerOverrides }),
+      [visibilityHandlerOverrides],
+    ),
     getCache: getModelsTreeIdsCache,
   });
 
@@ -204,7 +200,7 @@ export function useModelsTree({
   };
 }
 
-async function createFilteredTree(props: CreateFilteredTreeProps<ModelsTreeIdsCache, undefined>): Promise<FilteredTree<ModelsTreeFilterTargets>> {
+async function createFilteredTree(props: CreateFilteredTreeProps<ModelsTreeIdsCache>): Promise<FilteredTree<ModelsTreeFilterTargets>> {
   const { filteringPaths, imodelAccess } = props;
   return createFilteredModelsTree({
     imodelAccess,
@@ -213,15 +209,15 @@ async function createFilteredTree(props: CreateFilteredTreeProps<ModelsTreeIdsCa
 }
 
 function createTreeSpecificVisibilityHandler(
-  props: CreateTreeSpecificVisibilityHandlerProps<ModelsTreeIdsCache, { overrides?: ModelsTreeVisibilityHandlerOverrides }>,
+  props: CreateTreeSpecificVisibilityHandlerProps<ModelsTreeIdsCache> & { overrides?: ModelsTreeVisibilityHandlerOverrides },
 ) {
-  const { info, getCache, overrideHandler, treeSpecificVisibilityHandlerProps, viewport } = props;
+  const { info, getCache, overrideHandler, overrides, viewport } = props;
   return new ModelsTreeVisibilityHandler({
     alwaysAndNeverDrawnElementInfo: info,
     overrideHandler,
     idsCache: getCache(),
     viewport,
-    overrides: treeSpecificVisibilityHandlerProps.overrides,
+    overrides,
   });
 }
 

@@ -16,11 +16,8 @@ import {
   defaultHierarchyConfiguration,
 } from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
-import { CategoriesTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/categories-tree/internal/visibility/CategoriesTreeVisibilityHandler.js";
-import { createFilteredCategoriesTree } from "../../../../tree-widget-react/components/trees/categories-tree/internal/visibility/FilteredTree.js";
+import { createCategoriesTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/categories-tree/internal/visibility/CategoriesTreeVisibilityHandler.js";
 import { CLASS_NAME_DefinitionModel, CLASS_NAME_Subject } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
-import { HierarchyVisibilityHandlerImpl } from "../../../../tree-widget-react/components/trees/common/internal/useTreeHooks/UseCachedVisibility.js";
-import { getClassesByView } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
 import {
   buildIModel,
   insertDefinitionContainer,
@@ -48,11 +45,8 @@ import { validateHierarchyVisibility } from "./VisibilityValidation.js";
 
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
-import type { GroupingHierarchyNode, HierarchyFilteringPath, HierarchyNodeIdentifiersPath, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
+import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { CategoriesTreeHierarchyConfiguration } from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
-import type { CategoriesTreeFilterTargets } from "../../../../tree-widget-react/components/trees/categories-tree/internal/visibility/FilteredTree.js";
-import type { FilteredTree } from "../../../../tree-widget-react/components/trees/common/internal/visibility/BaseFilteredTree.js";
 import type { VisibilityExpectations } from "./VisibilityValidation.js";
 
 describe("CategoriesTreeVisibilityHandler", () => {
@@ -2841,37 +2835,4 @@ function getModelAndCategoryIds(keys: { [key: string]: InstanceKey }) {
     }
   }
   return { categoryIds, modelIds };
-}
-
-/** @internal */
-export function createCategoriesTreeVisibilityHandler(props: {
-  viewport: Viewport;
-  idsCache: CategoriesTreeIdsCache;
-  imodelAccess: ECClassHierarchyInspector;
-  filteredPaths?: HierarchyFilteringPath[];
-}) {
-  return new HierarchyVisibilityHandlerImpl<CategoriesTreeFilterTargets>({
-    getFilteredTree: (): undefined | Promise<FilteredTree<CategoriesTreeFilterTargets>> => {
-      if (!props.filteredPaths) {
-        return undefined;
-      }
-      const { categoryClass, elementClass, modelClass } = getClassesByView(props.viewport.view.is2d() ? "2d" : "3d");
-      return createFilteredCategoriesTree({
-        idsCache: props.idsCache,
-        filteringPaths: props.filteredPaths,
-        imodelAccess: props.imodelAccess,
-        categoryClassName: categoryClass,
-        categoryElementClassName: elementClass,
-        categoryModelClassName: modelClass,
-      });
-    },
-    getTreeSpecificVisibilityHandler: (info) => {
-      return new CategoriesTreeVisibilityHandler({
-        alwaysAndNeverDrawnElementInfo: info,
-        idsCache: props.idsCache,
-        viewport: props.viewport,
-      });
-    },
-    viewport: props.viewport,
-  });
 }

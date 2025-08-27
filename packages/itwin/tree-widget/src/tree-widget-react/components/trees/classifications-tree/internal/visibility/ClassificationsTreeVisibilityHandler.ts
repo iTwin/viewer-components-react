@@ -37,6 +37,8 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
   private _visibilityHelper: ClassificationsTreeVisibilityHelper;
 
   constructor(private readonly _props: ClassificationsTreeVisibilityHandlerProps) {
+    // Remove after https://github.com/iTwin/viewer-components-react/issues/1421.
+    // We won't need to create a custom base ids cache.
     const baseIdsCache: BaseIdsCache = {
       getCategories: (props) => this.getCategories(props),
       getElementsCount: (props) => this.getElementsCount(props),

@@ -121,16 +121,12 @@ function useClassificationsCachedVisibility(props: { activeView: Viewport; getCa
   const { activeView, getCache } = props;
   const { visibilityHandlerFactory, filteredPaths, onFilteredPathsChanged } = useCachedVisibility<
     ClassificationsTreeIdsCache,
-    ClassificationsTreeFilterTargets,
-    undefined,
-    undefined
+    ClassificationsTreeFilterTargets
   >({
     activeView,
     getCache,
     createFilteredTree,
     createTreeSpecificVisibilityHandler,
-    filteredTreeProps: undefined,
-    treeSpecificVisibilityHandlerProps: undefined,
   });
 
   useEffect(() => {
@@ -143,9 +139,7 @@ function useClassificationsCachedVisibility(props: { activeView: Viewport; getCa
   };
 }
 
-async function createFilteredTree(
-  props: CreateFilteredTreeProps<ClassificationsTreeIdsCache, undefined>,
-): Promise<FilteredTree<ClassificationsTreeFilterTargets>> {
+async function createFilteredTree(props: CreateFilteredTreeProps<ClassificationsTreeIdsCache>): Promise<FilteredTree<ClassificationsTreeFilterTargets>> {
   const { filteringPaths, getCache, imodelAccess } = props;
   return createFilteredClassificationsTree({
     idsCache: getCache(),
@@ -154,7 +148,7 @@ async function createFilteredTree(
   });
 }
 
-function createTreeSpecificVisibilityHandler(props: CreateTreeSpecificVisibilityHandlerProps<ClassificationsTreeIdsCache, undefined>) {
+function createTreeSpecificVisibilityHandler(props: CreateTreeSpecificVisibilityHandlerProps<ClassificationsTreeIdsCache>) {
   const { info, getCache, viewport } = props;
   return new ClassificationsTreeVisibilityHandler({
     alwaysAndNeverDrawnElementInfo: info,

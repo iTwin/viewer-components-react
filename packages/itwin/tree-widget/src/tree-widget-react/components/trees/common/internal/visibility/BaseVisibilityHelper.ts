@@ -197,7 +197,7 @@ export class BaseVisibilityHelper implements Disposable {
     return merge(
       this.getVisibilityFromAlwaysAndNeverDrawnElements({
         queryProps: { modelId, categoryIds },
-        defaultStatus: () => this.getVisibleModelDefaultCategoriesVisibilityStatus({ modelId, categoryIds }),
+        defaultStatus: () => this.getVisibleModelCategoriesDirectVisibilityStatus({ modelId, categoryIds }),
       }),
       this._props.baseIdsCache.getSubModels({ modelId, categoryIds }).pipe(
         mergeMap(({ subModels }) => {
@@ -402,7 +402,7 @@ export class BaseVisibilityHelper implements Disposable {
    * - Per model category visibility overrides;
    * - Category selector visibility in the viewport.
    */
-  public getVisibleModelDefaultCategoriesVisibilityStatus({ modelId, categoryIds }: { categoryIds: Id64Arg; modelId: Id64String }): VisibilityStatus {
+  public getVisibleModelCategoriesDirectVisibilityStatus({ modelId, categoryIds }: { categoryIds: Id64Arg; modelId: Id64String }): VisibilityStatus {
     const viewport = this._props.viewport;
 
     let visibleCount = 0;
@@ -473,7 +473,7 @@ export class BaseVisibilityHelper implements Disposable {
       // TODO: check child elements that are subModels
       return this.getVisibilityFromAlwaysAndNeverDrawnElements({
         elements: elementIds,
-        defaultStatus: () => this.getVisibleModelDefaultCategoriesVisibilityStatus({ categoryIds: categoryId, modelId }),
+        defaultStatus: () => this.getVisibleModelCategoriesDirectVisibilityStatus({ categoryIds: categoryId, modelId }),
       }).pipe(
         mergeMap((visibilityStatusAlwaysAndNeverDraw) => {
           return from(Id64.iterable(elementIds)).pipe(
@@ -754,7 +754,7 @@ export class BaseVisibilityHelper implements Disposable {
 
             return this.showModelWithoutAnyCategoriesOrElements(modelId).pipe(
               mergeMap(() => {
-                const defaultVisibility = this.getVisibleModelDefaultCategoriesVisibilityStatus({
+                const defaultVisibility = this.getVisibleModelCategoriesDirectVisibilityStatus({
                   categoryIds: categoryId,
                   modelId,
                 });
@@ -764,7 +764,7 @@ export class BaseVisibilityHelper implements Disposable {
             );
           }
 
-          const categoryVisibility = this.getVisibleModelDefaultCategoriesVisibilityStatus({ categoryIds: categoryId, modelId });
+          const categoryVisibility = this.getVisibleModelCategoriesDirectVisibilityStatus({ categoryIds: categoryId, modelId });
           const isDisplayedByDefault = categoryVisibility.state === "visible";
           return this.queueElementsVisibilityChange(elementIds, on, isDisplayedByDefault);
         }),
