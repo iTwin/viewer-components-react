@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "fixed worldScale conversion being removed",
-  "packageName": "@itwin/measure-tools-react",
-  "email": "maxime.brassard@bentley.com",
-  "dependentChangeType": "patch"
-}

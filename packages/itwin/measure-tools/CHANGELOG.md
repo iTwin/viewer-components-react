@@ -1,8 +1,16 @@
 # Change Log - @itwin/measure-tools-react
 
-<!-- This log was last generated on Tue, 26 Aug 2025 19:59:16 GMT and should not be manually modified. -->
+<!-- This log was last generated on Wed, 27 Aug 2025 13:53:50 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.29.3
+
+Wed, 27 Aug 2025 13:53:50 GMT
+
+### Patches
+
+- fixed worldScale conversion being removed ([#1426](https://github.com/iTwin/viewer-components-react/pull/1426))
 
 ## 0.29.2
 
