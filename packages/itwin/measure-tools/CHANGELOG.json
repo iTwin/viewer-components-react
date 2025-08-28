@@ -2,6 +2,21 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Wed, 27 Aug 2025 13:53:50 GMT",
+      "version": "0.29.3",
+      "tag": "@itwin/measure-tools-react_v0.29.3",
+      "comments": {
+        "patch": [
+          {
+            "author": "maxime.brassard@bentley.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "c206b21785c2126adc3b6dc5ec6693071a0b9c62",
+            "comment": "fixed worldScale conversion being removed"
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 26 Aug 2025 19:59:16 GMT",
       "version": "0.29.2",
       "tag": "@itwin/measure-tools-react_v0.29.2",
