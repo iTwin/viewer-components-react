@@ -178,6 +178,11 @@
       "satellite": "Google Maps: Aerial Imagery",
       "satellite-layerRoadmap": "Google Maps: Aerial Imagery with labels",
       "roadmap": "Google Maps: Streets"
+    },
+    "MapBoxImagery": {
+      "Aerial": "MapBox Maps: Aerial Imagery",
+      "Street": "MapBox Maps: Street Imagery",
+      "Hybrid": "MapBox Maps: Aerial Imagery with Labels"
     }
   }
 }
