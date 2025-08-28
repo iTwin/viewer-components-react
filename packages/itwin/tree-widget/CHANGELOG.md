@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Thu, 21 Aug 2025 11:00:38 GMT and should not be manually modified. -->
+<!-- This log was last generated on Thu, 28 Aug 2025 19:47:46 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.14.1
+
+Thu, 28 Aug 2025 19:47:46 GMT
+
+### Patches
+
+- Adjust models and categories trees in tree widget. They no longer re-query information after users clear active hierarchy filter. ([#1431](https://github.com/iTwin/viewer-components-react/pull/1431))
 
 ## 3.14.0
 

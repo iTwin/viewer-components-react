@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Adjust models and categories trees in tree widget. They no longer re-query information after users clear active hierarchy filter.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "100586436+JonasDov@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
