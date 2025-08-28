@@ -5,12 +5,11 @@
 
 import { expect } from "chai";
 import sinon from "sinon";
-import { Id64Array } from "@itwin/core-bentley";
 import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
 import { OffScreenViewport, ViewRect } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
-import { InstanceKey, PresentationRpcInterface } from "@itwin/presentation-common";
+import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { createStorage } from "@itwin/unified-selection";
@@ -23,9 +22,12 @@ import { createFakeSinonViewport, createIModelAccess } from "../Common.js";
 import { createViewState } from "../TreeUtils.js";
 import { createModelHierarchyNode } from "./Utils.js";
 
+import type { Id64Array } from "@itwin/core-bentley";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { InstanceKey } from "@itwin/presentation-common";
 import type { SelectionStorage } from "@itwin/unified-selection";
 import type { UseModelsTreeProps } from "../../../tree-widget-react/components/trees/models-tree/UseModelsTree.js";
+
 describe("useModelsTree", () => {
   before(async () => {
     await initializePresentationTesting({
@@ -58,10 +60,7 @@ describe("useModelsTree", () => {
     const queryHandler = sinon.fake(() => []);
     const viewport = createFakeSinonViewport({ queryHandler });
     const imodelAccess = createIModelAccess(imodel);
-    const {
-      result: renderHookResult,
-      rerender,
-    } = renderHook(useModelsTree, {
+    const { result: renderHookResult, rerender } = renderHook(useModelsTree, {
       initialProps: {
         activeView: viewport,
         getFilteredPaths: async () => [[{ id: keys.modelId, className: "BisCore.Model" }]],
