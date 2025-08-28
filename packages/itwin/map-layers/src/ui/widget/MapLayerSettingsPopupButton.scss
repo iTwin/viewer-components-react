@@ -5,6 +5,7 @@
 $hovered-icon-color: var(--iui-color-icon-accent);
 
 .maplayers-settings-popup {
+  max-block-size: 600px !important;
   overflow: auto;
 }
 
