@@ -11,8 +11,8 @@ import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyFilteringPath, HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
+import { CreateCacheProps, useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
-import { useIModelChangeListener } from "../common/UseIModelChangeListener.js";
 import { useTelemetryContext } from "../common/UseTelemetryContext.js";
 import { joinHierarchyFilteringPaths } from "../common/Utils.js";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
@@ -130,11 +130,17 @@ export function useModelsTree({
   );
   const { onFeatureUsed } = useTelemetryContext();
 
-  const { getModelsTreeIdsCache, visibilityHandlerFactory, onFilteredPathsChanged } = useCachedVisibility(
+  const { getCache: getModelsTreeIdsCache } = useIdsCache<ModelsTreeIdsCache, { hierarchyConfig: ModelsTreeHierarchyConfiguration }>({
+    imodel: activeView.iModel,
+    createCache,
+    cacheSpecificProps: useMemo(() => ({ hierarchyConfig: hierarchyConfiguration }), [hierarchyConfiguration]),
+  });
+
+  const { visibilityHandlerFactory, onFilteredPathsChanged } = useCachedVisibility({
     activeView,
-    hierarchyConfiguration,
-    visibilityHandlerOverrides,
-  );
+    overrides: visibilityHandlerOverrides,
+    getModelsTreeIdsCache,
+  });
   const { loadFocusedItems } = useFocusedInstancesContext();
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
@@ -432,42 +438,25 @@ function createVisibilityHandlerFactory(
   return ({ imodelAccess }) => createModelsTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter(), imodelAccess, overrides, filteredPaths });
 }
 
-function useCachedVisibility(activeView: Viewport, hierarchyConfig: ModelsTreeHierarchyConfiguration, overrides?: ModelsTreeVisibilityHandlerOverrides) {
-  const cacheRef = useRef<ModelsTreeIdsCache>();
+function useCachedVisibility(props: {
+  activeView: Viewport;
+  getModelsTreeIdsCache: () => ModelsTreeIdsCache;
+  overrides?: ModelsTreeVisibilityHandlerOverrides;
+}) {
+  const { activeView, getModelsTreeIdsCache, overrides } = props;
   const currentIModelRef = useRef(activeView.iModel);
-
-  const resetModelsTreeIdsCache = () => {
-    cacheRef.current?.[Symbol.dispose]();
-    cacheRef.current = undefined;
-  };
-  const getModelsTreeIdsCache = useCallback(() => {
-    if (!cacheRef.current) {
-      cacheRef.current = new ModelsTreeIdsCache(createECSqlQueryExecutor(currentIModelRef.current), hierarchyConfig);
-    }
-    return cacheRef.current;
-  }, [hierarchyConfig]);
 
   const [filteredPaths, setFilteredPaths] = useState<HierarchyFilteringPath[]>();
   const [visibilityHandlerFactory, setVisibilityHandlerFactory] = useState<VisibilityTreeProps["visibilityHandlerFactory"]>(() =>
     createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache, overrides, filteredPaths),
   );
 
-  useIModelChangeListener({
-    imodel: activeView.iModel,
-    action: useCallback(() => {
-      resetModelsTreeIdsCache();
-      setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache, overrides, filteredPaths));
-    }, [activeView, getModelsTreeIdsCache, overrides, filteredPaths]),
-  });
-
   useEffect(() => {
     currentIModelRef.current = activeView.iModel;
     setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache, overrides, filteredPaths));
-    return () => resetModelsTreeIdsCache();
   }, [activeView, getModelsTreeIdsCache, overrides, filteredPaths]);
 
   return {
-    getModelsTreeIdsCache,
     visibilityHandlerFactory,
     onFilteredPathsChanged: useCallback((paths: HierarchyFilteringPath[] | undefined) => setFilteredPaths(paths), []),
   };
@@ -573,4 +562,8 @@ async function createFilteringPathsResult({
     void handlePaths(joinedPaths);
   }
   return joinedPaths;
+}
+
+function createCache(props: CreateCacheProps<{ hierarchyConfig: ModelsTreeHierarchyConfiguration }>) {
+  return new ModelsTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.hierarchyConfig);
 }

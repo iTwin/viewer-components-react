@@ -10,6 +10,7 @@ import { Text } from "@itwin/itwinui-react";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
 import { TreeWidget } from "../../../TreeWidget.js";
+import { CreateCacheProps, useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 import { useTelemetryContext } from "../common/UseTelemetryContext.js";
 import { CategoriesTreeDefinition } from "./CategoriesTreeDefinition.js";
@@ -25,7 +26,6 @@ import type { Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
-
 type CategoriesTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError";
 type HierarchyFilteringPaths = Awaited<ReturnType<Required<VisibilityTreeProps>["getFilteredPaths"]>>;
 
@@ -55,14 +55,16 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
   const viewType = activeView.view.is2d() ? "2d" : "3d";
   const iModel = activeView.iModel;
 
-  const idsCache = useMemo(() => {
-    return new CategoriesTreeIdsCache(createECSqlQueryExecutor(iModel), viewType);
-  }, [viewType, iModel]);
+  const { getCache: getCategoriesTreeIdsCache } = useIdsCache<CategoriesTreeIdsCache, { viewType: "2d" | "3d" }>({
+    imodel: activeView.iModel,
+    createCache,
+    cacheSpecificProps: useMemo(() => ({ viewType }), [viewType]),
+  });
 
   const visibilityHandlerFactory = useCallback(() => {
     const visibilityHandler = new CategoriesVisibilityHandler({
       viewport: activeView,
-      idsCache,
+      idsCache: getCategoriesTreeIdsCache(),
     });
     return {
       getVisibilityStatus: async (node: HierarchyNode) => visibilityHandler.getVisibilityStatus(node),
@@ -70,14 +72,14 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
       onVisibilityChange: visibilityHandler.onVisibilityChange,
       dispose: () => visibilityHandler.dispose(),
     };
-  }, [activeView, idsCache]);
+  }, [activeView, getCategoriesTreeIdsCache]);
   const { onFeatureUsed } = useTelemetryContext();
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
     (props) => {
-      return new CategoriesTreeDefinition({ ...props, viewType, idsCache });
+      return new CategoriesTreeDefinition({ ...props, viewType, idsCache: getCategoriesTreeIdsCache() });
     },
-    [viewType, idsCache],
+    [viewType, getCategoriesTreeIdsCache],
   );
 
   const getFilteredPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
@@ -89,8 +91,14 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
     return async ({ imodelAccess, abortSignal }) => {
       onFeatureUsed({ featureId: "filtering", reportInteraction: true });
       try {
-        const paths = await CategoriesTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, viewType, idsCache, abortSignal });
-        onCategoriesFiltered?.(await getCategoriesFromPaths(paths, idsCache));
+        const paths = await CategoriesTreeDefinition.createInstanceKeyPaths({
+          imodelAccess,
+          label: filter,
+          viewType,
+          idsCache: getCategoriesTreeIdsCache(),
+          abortSignal,
+        });
+        onCategoriesFiltered?.(await getCategoriesFromPaths(paths, getCategoriesTreeIdsCache()));
         return paths;
       } catch (e) {
         const newError = e instanceof FilterLimitExceededError ? "tooManyFilterMatches" : "unknownFilterError";
@@ -102,7 +110,7 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
         return [];
       }
     };
-  }, [filter, viewType, onFeatureUsed, onCategoriesFiltered, idsCache]);
+  }, [filter, viewType, onFeatureUsed, onCategoriesFiltered, getCategoriesTreeIdsCache]);
 
   return {
     categoriesTreeProps: {
@@ -239,4 +247,8 @@ function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
 
 function getSublabel(node: PresentationHierarchyNode) {
   return node.extendedData?.description;
+}
+
+function createCache(props: CreateCacheProps<{ viewType: "2d" | "3d" }>) {
+  return new CategoriesTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.viewType);
 }

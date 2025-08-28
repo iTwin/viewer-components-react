@@ -17,6 +17,7 @@ import type { QueryBinder, QueryOptions } from "@itwin/core-common";
 
 export function createIModelMock(queryHandler?: (query: string, params?: QueryBinder, config?: QueryOptions) => any[] | Promise<any[]>) {
   return {
+    isBriefcaseConnection: sinon.fake.returns(false),
     createQueryReader: sinon.fake(async function* (query: string, params?: QueryBinder, config?: QueryOptions): AsyncIterableIterator<any> {
       const result = (await queryHandler?.(query, params, config)) ?? [];
       for (const item of result) {

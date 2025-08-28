@@ -31,7 +31,7 @@ interface SubCategoryInfo {
 }
 
 /** @internal */
-export class CategoriesTreeIdsCache {
+export class CategoriesTreeIdsCache implements Disposable {
   private _definitionContainersInfo: Promise<Map<Id64String, DefinitionContainerInfo>> | undefined;
   private _modelsCategoriesInfo: Promise<Map<Id64String, CategoriesInfo>> | undefined;
   private _subCategoriesInfo: Promise<Map<Id64String, SubCategoryInfo>> | undefined;
@@ -50,6 +50,8 @@ export class CategoriesTreeIdsCache {
     this._categoryElementClass = categoryElementClass;
     this._categoryModelClass = categoryModelClass;
   }
+
+  public [Symbol.dispose]() {}
 
   private async *queryElementModelCategories(): AsyncIterableIterator<{
     modelId: Id64String;
