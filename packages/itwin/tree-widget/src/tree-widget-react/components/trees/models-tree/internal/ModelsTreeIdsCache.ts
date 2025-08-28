@@ -30,7 +30,7 @@ interface ModelInfo {
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
 /** @internal */
-export class ModelsTreeIdsCache {
+export class ModelsTreeIdsCache implements Disposable {
   private readonly _categoryElementCounts: ModelCategoryElementsCountCache;
   private _subjectInfos: Promise<Map<Id64String, SubjectInfo>> | undefined;
   private _parentSubjectIds: Promise<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
