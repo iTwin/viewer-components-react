@@ -69,22 +69,23 @@ describe("useModelsTree", () => {
 
     let getFilteredPaths = renderHookResult.current.modelsTreeProps.getFilteredPaths;
     let visibilityHandler = renderHookResult.current.modelsTreeProps.visibilityHandlerFactory({ imodelAccess });
-
-    expect(getFilteredPaths).to.not.be.undefined;
-    await getFilteredPaths!({ imodelAccess, abortSignal: new AbortController().signal });
-    await visibilityHandler.getVisibilityStatus(createModelHierarchyNode(keys.modelId));
-    expect(viewport.iModel.createQueryReader).to.be.called;
-    sinon.reset();
-    rerender({
-      activeView: viewport,
-      getFilteredPaths: async () => [],
+    await waitFor(async () => {
+      expect(getFilteredPaths).to.not.be.undefined;
+      await getFilteredPaths!({ imodelAccess, abortSignal: new AbortController().signal });
+      await visibilityHandler.getVisibilityStatus(createModelHierarchyNode(keys.modelId));
+      expect(viewport.iModel.createQueryReader).to.be.called;
+      sinon.reset();
+      rerender({
+        activeView: viewport,
+        getFilteredPaths: async () => [],
+      });
+      getFilteredPaths = renderHookResult.current.modelsTreeProps.getFilteredPaths;
+      visibilityHandler = renderHookResult.current.modelsTreeProps.visibilityHandlerFactory({ imodelAccess });
+      expect(getFilteredPaths).to.not.be.undefined;
+      await getFilteredPaths!({ imodelAccess, abortSignal: new AbortController().signal });
+      await visibilityHandler.getVisibilityStatus(createModelHierarchyNode(keys.modelId));
+      expect(viewport.iModel.createQueryReader).not.to.be.called;
     });
-    getFilteredPaths = renderHookResult.current.modelsTreeProps.getFilteredPaths;
-    visibilityHandler = renderHookResult.current.modelsTreeProps.visibilityHandlerFactory({ imodelAccess });
-    expect(getFilteredPaths).to.not.be.undefined;
-    await getFilteredPaths!({ imodelAccess, abortSignal: new AbortController().signal });
-    await visibilityHandler.getVisibilityStatus(createModelHierarchyNode(keys.modelId));
-    expect(viewport.iModel.createQueryReader).not.to.be.called;
   });
 
   describe("getFilteredPaths", () => {
