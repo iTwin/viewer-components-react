@@ -28,8 +28,8 @@ importers:
         specifier: ^4.2.1
         version: 4.2.1
       '@itwin/insights-client':
-        specifier: ^0.15.1
-        version: 0.15.1
+        specifier: ^0.16.0
+        version: 0.16.0
       '@itwin/itwins-client':
         specifier: ^1.1.0
         version: 1.1.0
@@ -684,8 +684,8 @@ packages:
   '@itwin/imodels-client-management@4.2.1':
     resolution: {integrity: sha512-1rDDb2hl5eLmL/32fgvur45UAkOH9Yy3zrWyqEZzcFKaz+VlIyiG5dZH5QSYyBkSvBB1yRf+V1JehptEJyEWTA==}
 
-  '@itwin/insights-client@0.15.1':
-    resolution: {integrity: sha512-UQl/JDwwFVL9jZyygyRyuuhtLZyJilGy+OsoIUdKrmkX5FF7ND2h+ShIxSOabzIqFhzwxEzkge4MJBKPYjL4xQ==}
+  '@itwin/insights-client@0.16.0':
+    resolution: {integrity: sha512-fAdCtuF1HKjcsja6362b2U42C0+parR+YPyAR42/ToHsCezBouHrhqOXeVQUeqlxni1v5a275P9KRJPzm5nMBg==}
 
   '@itwin/itwins-client@1.1.0':
     resolution: {integrity: sha512-xZKB+wN3mZ5XOK+B7ZrIOivVRZk6728eQzZRiy5i+mWDAVCHaxq1NJKtsyDpVgPfPbrD24cYWzs63hM3huY/2w==}
@@ -4430,7 +4430,7 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  '@itwin/insights-client@0.15.1':
+  '@itwin/insights-client@0.16.0':
     dependencies:
       cross-fetch: 4.0.0
       fast-xml-parser: 4.3.2

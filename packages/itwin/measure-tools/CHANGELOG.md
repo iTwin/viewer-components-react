@@ -1,8 +1,40 @@
 # Change Log - @itwin/measure-tools-react
 
-<!-- This log was last generated on Thu, 24 Jul 2025 16:07:32 GMT and should not be manually modified. -->
+<!-- This log was last generated on Wed, 27 Aug 2025 13:53:50 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.29.3
+
+Wed, 27 Aug 2025 13:53:50 GMT
+
+### Patches
+
+- fixed worldScale conversion being removed ([#1426](https://github.com/iTwin/viewer-components-react/pull/1426))
+
+## 0.29.2
+
+Tue, 26 Aug 2025 19:59:16 GMT
+
+### Patches
+
+- MeasurementWidget reacts to formatsProvider changes ([#1424](https://github.com/iTwin/viewer-components-react/pull/1424))
+
+## 0.29.1
+
+Fri, 22 Aug 2025 18:31:46 GMT
+
+### Patches
+
+- Fix aggregatableValues missing formatting in Measurement widgets ([#1420](https://github.com/iTwin/viewer-components-react/pull/1420))
+
+## 0.29.0
+
+Mon, 11 Aug 2025 13:31:19 GMT
+
+### Minor changes
+
+- Use separate KindOfQuantity for Coordinate Lengths, fallback to QuantityType as last resort ([#1397](https://github.com/iTwin/viewer-components-react/pull/1397))
 
 ## 0.28.2
 

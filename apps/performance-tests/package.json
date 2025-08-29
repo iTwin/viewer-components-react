@@ -15,10 +15,10 @@
     "link:deps": "node ./scripts/linkWorkspaceDeps.cjs"
   },
   "devDependencies": {
-    "@itwin/appui-react": "^5.10.0",
-    "@itwin/components-react": "^5.10.0",
-    "@itwin/core-react": "^5.10.0",
-    "@itwin/imodel-components-react": "^5.10.0",
+    "@itwin/appui-react": "^5.13.1",
+    "@itwin/components-react": "^5.13.1",
+    "@itwin/core-react": "^5.13.1",
+    "@itwin/imodel-components-react": "^5.13.1",
     "@bentley/classification-systems-schema": "1.0.4-dev.4",
     "@itwin/appui-abstract": "^5.0.0",
     "@itwin/build-tools": "^5.0.0",

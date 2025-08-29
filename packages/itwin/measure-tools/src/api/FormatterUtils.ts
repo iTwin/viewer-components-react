@@ -6,11 +6,28 @@
 import type { Point3d, XAndY } from "@itwin/core-geometry";
 import type { Cartographic } from "@itwin/core-common";
 import { IModelApp, QuantityType } from "@itwin/core-frontend";
-import type { FormatProps } from "@itwin/core-quantity";
-import { FormatTraits, type FormatterSpec } from "@itwin/core-quantity";
+import { FormatTraits } from "@itwin/core-quantity";
 import { MeasureTools } from "../MeasureTools.js";
 
+import type { FormatDefinition, FormatProps , FormatterSpec} from "@itwin/core-quantity";
 export namespace FormatterUtils {
+
+  /**
+   * Gets a FormatterSpec by KoQ string with fallback to QuantityType.
+   * @param koqString The Kind of Quantity string to look up.
+   * @param fallbackQuantityType The QuantityType to use if KoQ lookup fails.
+   * @returns A FormatterSpec or undefined if both lookups fail.
+   */
+  export function getFormatterSpecWithFallback(koqString: string, fallbackQuantityType: QuantityType): FormatterSpec | undefined {
+    // First try to get the spec by KoQ string
+    const koqEntry = IModelApp.quantityFormatter.getSpecsByName(koqString);
+    if (koqEntry) {
+      return koqEntry.formatterSpec;
+    }
+
+    // Fallback to QuantityType
+    return IModelApp.quantityFormatter.findFormatterSpecByQuantityType(fallbackQuantityType);
+  }
 
   /** Formats a sequence of values with spec without the unit label */
   function formatValuesWithNoUnitLabel(values: number[], spec: FormatterSpec): string {
@@ -173,6 +190,26 @@ export namespace FormatterUtils {
     return IModelApp.quantityFormatter.formatQuantity(length, lengthSpec);
   }
 
+  export async function formatAngle(angle: number, angleSpec?: FormatterSpec): Promise<string> {
+    if (!angleSpec) {
+      angleSpec =
+        await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
+          QuantityType.Angle
+        );
+    }
+    return IModelApp.quantityFormatter.formatQuantity(angle, angleSpec);
+  }
+
+  export async function formatArea(area: number, areaSpec?: FormatterSpec): Promise<string> {
+    if (!areaSpec) {
+      areaSpec =
+        await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
+          QuantityType.Area
+        );
+    }
+    return IModelApp.quantityFormatter.formatQuantity(area, areaSpec);
+  }
+
   /**
    * @returns The bearing in radians, where 0 is North and π/2 is East.
    */
@@ -180,6 +217,30 @@ export namespace FormatterUtils {
     let bearing = Math.atan2(dx, dy); // radians, 0 = North, π/2 = East
     if (bearing < 0) bearing += 2 * Math.PI; // Normalize to [0, 2π)
     return bearing;
+  }
+
+  /**
+   * Creates a FormatterSpec for bearing using the provided KoQ string with fallback to default bearing format.
+   * @param bearingKoQ The Kind of Quantity string for bearing.
+   * @param persistenceUnitName The persistence unit name for the bearing.
+   * @returns A FormatterSpec for bearing formatting.
+   */
+  export async function getBearingFormatterSpec(bearingKoQ: string, persistenceUnitName: string): Promise<FormatterSpec | undefined> {
+    let formatProps: FormatDefinition;
+    try {
+      // Get format props from the formats provider using the bearingKoQ. If undefined, use default bearing format
+      const result = await IModelApp.formatsProvider.getFormat(bearingKoQ);
+      formatProps = result ?? getDefaultBearingFormatProps();
+    } catch {
+    // If an error occurs, use the default bearing format
+      formatProps = getDefaultBearingFormatProps();
+    }
+
+    // Create and return the formatter spec
+    return IModelApp.quantityFormatter.createFormatterSpec({
+      persistenceUnitName,
+      formatProps
+    });
   }
 
   export function getDefaultBearingFormatProps(): FormatProps {

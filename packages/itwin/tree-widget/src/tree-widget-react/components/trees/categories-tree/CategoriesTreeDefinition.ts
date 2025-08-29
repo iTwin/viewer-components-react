@@ -16,7 +16,6 @@ import {
   map,
   merge,
   mergeMap,
-  of,
   reduce,
   takeUntil,
   toArray,
@@ -42,7 +41,6 @@ import type {
   DefineRootHierarchyLevelProps,
   GenericInstanceFilter,
   HierarchyDefinition,
-  HierarchyFilteringPath,
   HierarchyLevelDefinition,
   HierarchyNodesDefinition,
   LimitingECSqlQueryExecutor,
@@ -58,6 +56,7 @@ import type {
 } from "@itwin/presentation-shared";
 import type { CategoriesTreeIdsCache, CategoryInfo } from "./internal/CategoriesTreeIdsCache.js";
 import type { CategoryId, DefinitionContainerId, ElementId, ModelId, SubCategoryId } from "../common/internal/Types.js";
+import type { NormalizedHierarchyFilteringPath } from "../common/Utils.js";
 
 const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
 
@@ -617,7 +616,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     ];
   }
 
-  public static async createInstanceKeyPaths(props: CategoriesTreeInstanceKeyPathsFromInstanceLabelProps): Promise<HierarchyFilteringPath[]> {
+  public static async createInstanceKeyPaths(props: CategoriesTreeInstanceKeyPathsFromInstanceLabelProps): Promise<NormalizedHierarchyFilteringPath[]> {
     const labelsFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
     return createInstanceKeyPathsFromInstanceLabel({ ...props, labelsFactory });
   }
@@ -625,7 +624,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
 
 async function createInstanceKeyPathsFromInstanceLabel(
   props: CategoriesTreeInstanceKeyPathsFromInstanceLabelProps & { labelsFactory: IInstanceLabelSelectClauseFactory },
-): Promise<HierarchyFilteringPath[]> {
+): Promise<NormalizedHierarchyFilteringPath[]> {
   const { idsCache, abortSignal, label, viewType, labelsFactory, limit, hierarchyConfig, imodelAccess } = props;
   const { categoryClass, elementClass } = getClassesByView(viewType);
 
@@ -816,7 +815,7 @@ function createInstanceKeyPathsFromTargetItems({
   hierarchyConfig,
   idsCache,
   limit,
-}: CategoriesTreeInstanceKeyPathsFromInstanceLabelProps & { targetItems: InstanceKey[] }): Observable<HierarchyFilteringPath> {
+}: CategoriesTreeInstanceKeyPathsFromInstanceLabelProps & { targetItems: InstanceKey[] }): Observable<NormalizedHierarchyFilteringPath> {
   if (limit !== "unbounded" && targetItems.length > (limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT)) {
     throw new FilterLimitExceededError(limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT);
   }
@@ -881,11 +880,11 @@ function createGeometricElementInstanceKeyPaths(
   hierarchyConfig: CategoriesTreeHierarchyConfiguration,
   viewType: "2d" | "3d",
   targetItems: Id64Array,
-): Observable<HierarchyFilteringPath> {
+): Observable<NormalizedHierarchyFilteringPath> {
   const separator = ";";
   const { categoryClass, elementClass, modelClass } = getClassesByView(viewType);
   if (targetItems.length === 0 || !hierarchyConfig.showElements) {
-    return of([]);
+    return EMPTY;
   }
 
   return defer(() => {

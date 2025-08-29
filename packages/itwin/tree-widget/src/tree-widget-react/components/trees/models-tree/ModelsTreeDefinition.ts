@@ -25,6 +25,7 @@ import { IModel } from "@itwin/core-common";
 import {
   createNodesQueryClauseFactory,
   createPredicateBasedHierarchyDefinition,
+  HierarchyFilteringPath,
   NodeSelectClauseColumnNames,
   ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
@@ -43,6 +44,7 @@ import { collect } from "../common/internal/Rxjs.js";
 import { createIdsSelector, parseIdsSelectorResult, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 
+import type { NormalizedHierarchyFilteringPath } from "../common/Utils.js";
 import type { Id64String } from "@itwin/core-bentley";
 import type { Observable } from "rxjs";
 import type {
@@ -56,7 +58,6 @@ import type {
 } from "@itwin/presentation-shared";
 import type {
   ClassGroupingNodeKey,
-  createIModelHierarchyProvider,
   DefineHierarchyLevelProps,
   DefineInstanceNodeChildHierarchyLevelProps,
   GroupingHierarchyNode,
@@ -139,9 +140,6 @@ type ModelsTreeInstanceKeyPathsFromInstanceLabelProps = {
 
 /** @internal */
 export type ModelsTreeInstanceKeyPathsProps = ModelsTreeInstanceKeyPathsFromTargetItemsProps | ModelsTreeInstanceKeyPathsFromInstanceLabelProps;
-type HierarchyProviderProps = Parameters<typeof createIModelHierarchyProvider>[0];
-type HierarchyFilteringPaths = NonNullable<NonNullable<HierarchyProviderProps["filtering"]>["paths"]>;
-type HierarchyFilteringPath = HierarchyFilteringPaths[number];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export namespace ModelsTreeInstanceKeyPathsProps {
@@ -556,7 +554,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     ];
   }
 
-  public static async createInstanceKeyPaths(props: ModelsTreeInstanceKeyPathsProps): Promise<HierarchyFilteringPath[]> {
+  public static async createInstanceKeyPaths(props: ModelsTreeInstanceKeyPathsProps): Promise<NormalizedHierarchyFilteringPath[]> {
     return lastValueFrom(
       defer(() => {
         if (ModelsTreeInstanceKeyPathsProps.isLabelProps(props)) {
@@ -605,8 +603,8 @@ function createGeometricElementInstanceKeyPaths(
   idsCache: ModelsTreeIdsCache,
   hierarchyConfig: ModelsTreeHierarchyConfiguration,
   targetItems: Array<Id64String | ElementsGroupInfo>,
-): Observable<HierarchyFilteringPath> {
-  const elementIds = targetItems.filter((info): info is ElementId => typeof info === "string");
+): Observable<NormalizedHierarchyFilteringPath> {
+  const elementIds = targetItems.filter((info): info is Id64String => typeof info === "string");
   const groupInfos = targetItems.filter((info): info is ElementsGroupInfo => typeof info !== "string");
   const separator = ";";
 
@@ -680,12 +678,12 @@ function createGeometricElementInstanceKeyPaths(
       from(idsCache.createModelInstanceKeyPaths(modelId)).pipe(
         mergeAll(),
         map((modelPath) => {
-          // We dont want to modify the original path, we create a copy that we can modify
+          // We don't want to modify the original path, we create a copy that we can modify
           const newModelPath = [...modelPath];
           newModelPath.pop(); // model is already included in the element hierarchy path
           const path = [...newModelPath, ...elementHierarchyPath];
           if (!groupingNode) {
-            return path;
+            return { path };
           }
           return {
             path,
@@ -730,7 +728,7 @@ function createInstanceKeyPathsFromTargetItemsObs({
   hierarchyConfig,
   idsCache,
   limit,
-}: Omit<ModelsTreeInstanceKeyPathsFromTargetItemsProps, "abortSignal">): Observable<HierarchyFilteringPath[]> {
+}: Omit<ModelsTreeInstanceKeyPathsFromTargetItemsProps, "abortSignal">): Observable<NormalizedHierarchyFilteringPath[]> {
   if (limit !== "unbounded" && targetItems.length > (limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT)) {
     throw new FilterLimitExceededError(limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT);
   }
@@ -784,9 +782,11 @@ function createInstanceKeyPathsFromTargetItemsObs({
       const elementsLength = ids.elementIds.length;
       return collect(
         merge(
-          from(ids.subjectIds).pipe(mergeMap((id) => from(idsCache.createSubjectInstanceKeysPath(id)))),
-          from(ids.modelIds).pipe(mergeMap((id) => from(idsCache.createModelInstanceKeyPaths(id)).pipe(mergeAll()))),
-          from(ids.categoryIds).pipe(mergeMap((id) => from(idsCache.createCategoryInstanceKeyPaths(id)).pipe(mergeAll()))),
+          from(ids.subjectIds).pipe(mergeMap((id) => from(idsCache.createSubjectInstanceKeysPath(id)).pipe(map(HierarchyFilteringPath.normalize)))),
+          from(ids.modelIds).pipe(mergeMap((id) => from(idsCache.createModelInstanceKeyPaths(id)).pipe(mergeAll(), map(HierarchyFilteringPath.normalize)))),
+          from(ids.categoryIds).pipe(
+            mergeMap((id) => from(idsCache.createCategoryInstanceKeyPaths(id)).pipe(mergeAll(), map(HierarchyFilteringPath.normalize))),
+          ),
           from(ids.elementIds).pipe(
             bufferCount(Math.ceil(elementsLength / Math.ceil(elementsLength / 5000))),
             releaseMainThreadOnItemsCount(1),

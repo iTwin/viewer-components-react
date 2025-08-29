@@ -12,11 +12,11 @@ import { FilterLimitExceededError } from "../../common/TreeErrors.js";
 import { useTelemetryContext } from "../../common/UseTelemetryContext.js";
 import { CategoriesTreeDefinition } from "../CategoriesTreeDefinition.js";
 
+import type { CategoryInfo } from "../../common/CategoriesVisibilityUtils.js";
 import type { VisibilityTreeProps } from "../../common/components/VisibilityTree.js";
+import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../../common/internal/Types.js";
 import type { CategoriesTreeHierarchyConfiguration } from "../CategoriesTreeDefinition.js";
 import type { CategoriesTreeIdsCache } from "./CategoriesTreeIdsCache.js";
-import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../../common/internal/Types.js";
-import type { CategoryInfo } from "../../common/CategoriesVisibilityUtils.js";
 
 /** @internal */
 export type CategoriesTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError";

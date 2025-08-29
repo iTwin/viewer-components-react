@@ -1,8 +1,16 @@
 # Change Log - @itwin/map-layers
 
-<!-- This log was last generated on Mon, 07 Jul 2025 19:55:02 GMT and should not be manually modified. -->
+<!-- This log was last generated on Thu, 21 Aug 2025 19:04:55 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 6.0.2
+
+Thu, 21 Aug 2025 19:04:55 GMT
+
+### Patches
+
+- Allow FeatureInfoWidget to be used from en Editing FrontStage ([#1419](https://github.com/iTwin/viewer-components-react/pull/1419))
 
 ## 6.0.1
 

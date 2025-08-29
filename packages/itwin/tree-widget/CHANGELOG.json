@@ -2,6 +2,51 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Thu, 28 Aug 2025 19:47:46 GMT",
+      "version": "3.14.1",
+      "tag": "@itwin/tree-widget-react_v3.14.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "269adae6c9d1949d651eb1341b29bf594f6bfc66",
+            "comment": "Adjust models and categories trees in tree widget. They no longer re-query information after users clear active hierarchy filter."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Thu, 21 Aug 2025 11:00:38 GMT",
+      "version": "3.14.0",
+      "tag": "@itwin/tree-widget-react_v3.14.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "f2871a30c65e1c6fa31eedbae362620df73db5e7",
+            "comment": "Allow Model tree's `getFilteredPaths` prop function to return `undefined` paths. In that case, it's considered that filtering should not be applied, and the full unfiltered tree should be loaded."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Thu, 07 Aug 2025 18:43:06 GMT",
+      "version": "3.13.2",
+      "tag": "@itwin/tree-widget-react_v3.13.2",
+      "comments": {
+        "patch": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "067937bf5048479d756e6eb2c6ec335e6bef4468",
+            "comment": "Models tree: Stop unnecessarily executing an expensive model elements' count query, whose results we weren't even using."
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 07 Aug 2025 12:12:57 GMT",
       "version": "3.13.1",
       "tag": "@itwin/tree-widget-react_v3.13.1",

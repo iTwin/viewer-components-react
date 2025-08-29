@@ -92,38 +92,42 @@ export function areAllModelsVisible(models: string[], viewport: Viewport) {
   return models.length !== 0 ? models.every((id) => viewport.viewsModel(id)) : false;
 }
 
-/** @internal */
-export function joinHierarchyFilteringPaths(subTreePaths: HierarchyNodeIdentifiersPath[], filteringPaths: HierarchyFilteringPath[]): HierarchyFilteringPath[] {
-  const normalizedFilteringPaths = filteringPaths.map((filteringPath) => HierarchyFilteringPath.normalize(filteringPath));
+/** @public */
+export type NormalizedHierarchyFilteringPath = ReturnType<(typeof HierarchyFilteringPath)["normalize"]>;
 
-  const result = new Array<HierarchyFilteringPath>();
+/** @internal */
+export function joinHierarchyFilteringPaths(
+  subTreePaths: HierarchyNodeIdentifiersPath[],
+  filteringPaths: NormalizedHierarchyFilteringPath[],
+): NormalizedHierarchyFilteringPath[] {
+  const result = new Array<NormalizedHierarchyFilteringPath>();
   const filteringPathsToIncludeIndexes = new Set<number>();
 
   subTreePaths.forEach((subTreePath) => {
     let options: HierarchyFilteringPathOptions | undefined;
     let addSubTreePathToResult = false;
 
-    for (let i = 0; i < normalizedFilteringPaths.length; ++i) {
-      const normalizedFilteringPath = normalizedFilteringPaths[i];
-      if (normalizedFilteringPath.path.length === 0) {
+    for (let i = 0; i < filteringPaths.length; ++i) {
+      const filteringPath = filteringPaths[i];
+      if (filteringPath.path.length === 0) {
         continue;
       }
 
       for (let j = 0; j < subTreePath.length; ++j) {
         const identifier = subTreePath[j];
-        if (normalizedFilteringPath.path.length <= j || !HierarchyNodeIdentifier.equal(normalizedFilteringPath.path[j], identifier)) {
+        if (filteringPath.path.length <= j || !HierarchyNodeIdentifier.equal(filteringPath.path[j], identifier)) {
           break;
         }
 
         // filtering paths that are shorter or equal than subTree paths length don't need to be added to the result
-        if (normalizedFilteringPath.path.length === j + 1) {
+        if (filteringPath.path.length === j + 1) {
           addSubTreePathToResult = true;
           // If filtering path has autoExpand set to true, it means that we should expand only to the targeted filtered node
           // This is done by setting depthInPath
           options =
-            normalizedFilteringPath.options?.autoExpand !== true
-              ? HierarchyFilteringPath.mergeOptions(options, normalizedFilteringPath.options)
-              : { autoExpand: { depthInPath: normalizedFilteringPath.path.length } };
+            filteringPath.options?.autoExpand !== true
+              ? HierarchyFilteringPath.mergeOptions(options, filteringPath.options)
+              : { autoExpand: { depthInPath: filteringPath.path.length } };
           break;
         }
 
@@ -143,7 +147,7 @@ export function joinHierarchyFilteringPaths(subTreePaths: HierarchyNodeIdentifie
     }
   });
   for (const index of filteringPathsToIncludeIndexes) {
-    result.push(normalizedFilteringPaths[index]);
+    result.push(filteringPaths[index]);
   }
   return result;
 }

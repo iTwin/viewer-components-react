@@ -40,6 +40,7 @@ import type { VisibilityTreeRendererProps } from "../common/components/Visibilit
 import type { CreateFilteredTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import type { FilteredTree } from "../common/internal/visibility/BaseFilteredTree.js";
+import type { NormalizedHierarchyFilteringPath } from "../common/Utils.js";
 import type { ModelsTreeFilteringError, ModelsTreeSubTreeError } from "./internal/UseFilteredPaths.js";
 import type { ModelsTreeFilterTargets } from "./internal/visibility/FilteredTree.js";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/visibility/ModelsTreeVisibilityHandler.js";
@@ -77,10 +78,10 @@ export interface UseModelsTreeProps {
    */
   getFilteredPaths?: (props: {
     /** A function that creates filtering paths based on provided target instance keys or node label. */
-    createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<HierarchyFilteringPath[]>;
+    createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<NormalizedHierarchyFilteringPath[]>;
     /** Filter which would be used to create filter paths if `getFilteredPaths` wouldn't be provided. */
     filter?: string;
-  }) => Promise<HierarchyFilteringPath[]>;
+  }) => Promise<HierarchyFilteringPath[] | undefined>;
   /**
    * Optional function for restricting the visible hierarchy to a specific sub-tree of nodes, without changing how filtering works.
    *
@@ -95,7 +96,7 @@ export interface UseModelsTreeProps {
    */
   getSubTreePaths?: (props: {
     /** A function that creates filtering paths based on provided target instance keys. */
-    createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> }) => Promise<HierarchyFilteringPath[]>;
+    createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> }) => Promise<NormalizedHierarchyFilteringPath[]>;
   }) => Promise<HierarchyFilteringPath[]>;
   onModelsFiltered?: (modelIds: Id64String[] | undefined) => void;
   /**

@@ -7,6 +7,7 @@ import { expect } from "chai";
 import { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import { joinHierarchyFilteringPaths } from "../../../tree-widget-react/components/trees/common/Utils.js";
 
+import type { NormalizedHierarchyFilteringPath } from "../../../tree-widget-react/components/trees/common/Utils.js";
 import type { HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
 
 describe("Utils", () => {
@@ -22,15 +23,15 @@ describe("Utils", () => {
 
     it("returns empty when filter and subTree paths dont overlap", () => {
       const subTreePaths: HierarchyNodeIdentifiersPath[] = [[subject, model]];
-      const filterPaths: HierarchyFilteringPath[] = [
-        [subject, { ...model, imodelKey: "random" }],
-        [subject, { ...model, className: "random" }],
-        [subject, { ...model, id: "random" }],
-        [subject, category1],
-        [category1, model],
-        [model],
-        [category1],
-        [],
+      const filterPaths: NormalizedHierarchyFilteringPath[] = [
+        { path: [subject, { ...model, imodelKey: "random" }] },
+        { path: [subject, { ...model, className: "random" }] },
+        { path: [subject, { ...model, id: "random" }] },
+        { path: [subject, category1] },
+        { path: [category1, model] },
+        { path: [model] },
+        { path: [category1] },
+        { path: [] },
       ];
       const joinedPaths = joinHierarchyFilteringPaths(subTreePaths, filterPaths);
       expect(joinedPaths).to.deep.eq([]);
@@ -44,7 +45,7 @@ describe("Utils", () => {
       const filterPath5 = { path: [element2, element3], options: { autoExpand: { depth: 2, key: { className: element2.className, type: "class-grouping" } } } };
       const filterPath6 = { path: [element3, element4], options: { autoExpand: { depthInHierarchy: 1 } } };
       const filterPath7 = { path: [element4, category1], options: { autoExpand: { depthInPath: 1 } } };
-      const filterPaths: HierarchyFilteringPath[] = [filterPath1, filterPath2, filterPath3, filterPath4, filterPath5, filterPath6, filterPath7];
+      const filterPaths: NormalizedHierarchyFilteringPath[] = [filterPath1, filterPath2, filterPath3, filterPath4, filterPath5, filterPath6, filterPath7];
 
       const subTreePath1 = [...filterPath1.path, model];
       const subTreePath2 = [...filterPath2.path, element4];
@@ -95,8 +96,8 @@ describe("Utils", () => {
         [model, category1, element1, element2],
         [model, category1, element1, element3],
       ];
-      const filterPaths: HierarchyFilteringPath[] = [
-        [subject, model, category1],
+      const filterPaths: NormalizedHierarchyFilteringPath[] = [
+        { path: [subject, model, category1] },
         { path: [model, category1, element1, element2, element3], options: { autoExpand: true } },
         { path: [model, category1, element1, element3, element1], options: { autoExpand: { depthInPath: 2 } } },
       ];

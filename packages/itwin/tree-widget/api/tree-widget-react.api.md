@@ -9,7 +9,7 @@ import type { ClassGroupingNodeKey } from '@itwin/presentation-hierarchies';
 import type { ECClassHierarchyInspector } from '@itwin/presentation-shared';
 import { FilterAction } from '@itwin/presentation-hierarchies-react';
 import type { GroupingHierarchyNode } from '@itwin/presentation-hierarchies';
-import type { HierarchyFilteringPath } from '@itwin/presentation-hierarchies';
+import { HierarchyFilteringPath } from '@itwin/presentation-hierarchies';
 import type { HierarchyNode } from '@itwin/presentation-hierarchies-react';
 import type { Id64Arg } from '@itwin/core-bentley';
 import type { Id64Array } from '@itwin/core-bentley';
@@ -365,6 +365,9 @@ export interface ModelsTreeVisibilityHandlerOverrides extends BaseTreeVisibility
     }) => Promise<VisibilityStatus>>;
 }
 
+// @public (undocumented)
+type NormalizedHierarchyFilteringPath = ReturnType<(typeof HierarchyFilteringPath)["normalize"]>;
+
 export { RenameAction }
 
 // @beta (undocumented)
@@ -558,13 +561,13 @@ interface UseModelsTreeProps {
             targetItems: Array<InstanceKey | ElementsGroupInfo>;
         } | {
             label: string;
-        }) => Promise<HierarchyFilteringPath[]>;
+        }) => Promise<NormalizedHierarchyFilteringPath[]>;
         filter?: string;
-    }) => Promise<HierarchyFilteringPath[]>;
+    }) => Promise<HierarchyFilteringPath[] | undefined>;
     getSubTreePaths?: (props: {
         createInstanceKeyPaths: (props: {
             targetItems: Array<InstanceKey | ElementsGroupInfo>;
-        }) => Promise<HierarchyFilteringPath[]>;
+        }) => Promise<NormalizedHierarchyFilteringPath[]>;
     }) => Promise<HierarchyFilteringPath[]>;
     // (undocumented)
     hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;

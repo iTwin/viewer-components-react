@@ -8,10 +8,10 @@ import { FilterLimitExceededError } from "../../common/TreeErrors.js";
 import { useTelemetryContext } from "../../common/UseTelemetryContext.js";
 import { ClassificationsTreeDefinition } from "../ClassificationsTreeDefinition.js";
 
+import type { VisibilityTreeProps } from "../../common/components/VisibilityTree.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "../ClassificationsTreeDefinition.js";
 import type { ClassificationsTreeIdsCache } from "./ClassificationsTreeIdsCache.js";
 
-import type { VisibilityTreeProps } from "../../common/components/VisibilityTree.js";
 /** @internal */
 export type ClassificationsTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError";
 

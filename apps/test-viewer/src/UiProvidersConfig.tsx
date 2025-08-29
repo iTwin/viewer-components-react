@@ -214,6 +214,7 @@ const configuredUiItems = new Map<string, UiItem>([
           getWidgets: () => {
             return [
               createPropertyGrid({
+                editorSystem: "legacy",
                 autoExpandChildCategories: true,
                 ancestorsNavigationControls: (props) => <AncestorsNavigationControls {...props} />,
                 contextMenuItems: [
@@ -229,6 +230,11 @@ const configuredUiItems = new Map<string, UiItem>([
                   console.log(`PropertyGrid [${feature}] used`);
                 },
                 selectionStorage: unifiedSelectionStorage,
+                isPropertyEditingEnabled: true,
+                onPropertyUpdated: async ({ newValue }) => {
+                  console.log(`Updated new value`, newValue);
+                  return true;
+                },
               }),
             ];
           },

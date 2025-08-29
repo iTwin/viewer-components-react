@@ -1,4 +1,14 @@
 {
+  "cSpell.words": [
+    "stratakit",
+    "imodel",
+    "appui",
+    "ecsql",
+    "idset",
+    "IFNULL",
+    "ctes",
+    "concatenator"
+  ],
   "editor.insertSpaces": true,
   "editor.tabSize": 2,
   "editor.trimAutoWhitespace": true,

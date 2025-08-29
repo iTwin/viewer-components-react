@@ -73,7 +73,7 @@
   "dependencies": {
     "@itwin/presentation-core-interop": "^1.4.0-alpha.3",
     "@itwin/presentation-hierarchies": "^2.0.0-alpha.4",
-    "@itwin/presentation-hierarchies-react": "2.0.0-alpha.32",
+    "@itwin/presentation-hierarchies-react": "2.0.0-alpha.33",
     "@itwin/presentation-shared": "^2.0.0-alpha.2",
     "@itwin/unified-selection": "^1.5.1-alpha.1",
     "classnames": "^2.5.1",
@@ -104,7 +104,7 @@
     "@itwin/oidc-signin-tool": "^5.0.0",
     "@itwin/presentation-backend": "^5.0.0",
     "@itwin/presentation-common": "^5.0.0",
-    "@itwin/presentation-components": "5.12.6-alpha.0",
+    "@itwin/presentation-components": "5.12.6-alpha.2",
     "@itwin/presentation-frontend": "^5.0.0",
     "@itwin/presentation-testing": "^5.4.5",
     "@itwin/webgl-compatibility": "^5.0.0",
