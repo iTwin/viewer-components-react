@@ -4,12 +4,48 @@
 
 ```ts
 
+import { BeEvent } from '@itwin/core-bentley';
 import { FormatDefinition } from '@itwin/core-quantity';
+import type { FormatsChangedArgs } from '@itwin/core-quantity';
 import type { FormatSet } from '@itwin/ecschema-metadata';
+import type { FormatsProvider } from '@itwin/core-quantity';
+import type { IModelConnection } from '@itwin/core-frontend';
 import type { Localization } from '@itwin/core-common';
+import type { MutableFormatsProvider } from '@itwin/core-quantity';
 import * as React_2 from 'react';
 import { UnitProps } from '@itwin/core-quantity';
 import type { UnitsProvider } from '@itwin/core-quantity';
+
+// @beta
+export class FormatManager {
+    [Symbol.dispose](): void;
+    constructor(options: FormatManagerInitializeOptions);
+    get activeFormatSet(): FormatSet | undefined;
+    get activeFormatSetFormatsProvider(): FormatSetFormatsProvider | undefined;
+    addFormatSet(formatSet: FormatSet): void;
+    get fallbackFormatsProvider(): FormatsProvider | undefined;
+    set fallbackFormatsProvider(provider: FormatsProvider | undefined);
+    get formatSets(): FormatSet[];
+    set formatSets(formatSets: FormatSet[]);
+    getFormatSet(name: string): FormatSet | undefined;
+    static initialize(options: FormatManagerInitializeOptions): Promise<void>;
+    static get instance(): FormatManager | undefined;
+    readonly onActiveFormatSetChanged: BeEvent<(args: FormatSetChangedEventArgs) => void>;
+    readonly onFormatSetsChanged: BeEvent<(formatSets: FormatSet[]) => void>;
+    onIModelClose(): Promise<void>;
+    onIModelOpen(iModel: IModelConnection, options?: OnIModelOpenOptions): Promise<void>;
+    removeFormatSet(name: string): boolean;
+    setActiveFormatSet(formatSet: FormatSet): void;
+    static terminate(): void;
+}
+
+// @beta
+export interface FormatManagerInitializeOptions {
+    fallbackProvider?: FormatsProvider;
+    formatSets: FormatSet[];
+    schemaNames?: string[];
+    setupSchemaFormatSetOnIModelOpen?: boolean;
+}
 
 // @beta
 export function FormatPanel(props: FormatPanelProps): React_2.JSX.Element;
@@ -52,6 +88,36 @@ interface FormatSelectorProps {
     activeFormatSet?: FormatSet;
     // (undocumented)
     onListItemChange: (formatDefinition: FormatDefinition, key: string) => void;
+}
+
+// @beta
+export interface FormatSetChangedEventArgs {
+    currentFormatSet: FormatSet;
+    previousFormatSet?: FormatSet;
+}
+
+// @beta
+export class FormatSetFormatsProvider implements MutableFormatsProvider {
+    constructor(formatSet: FormatSet, fallbackProvider?: FormatsProvider);
+    addFormat(name: string, format: FormatDefinition): Promise<void>;
+    clearFallbackProvider(): void;
+    get fallbackProvider(): FormatsProvider | undefined;
+    get formatSet(): FormatSet;
+    getFormat(input: string): Promise<FormatDefinition | undefined>;
+    readonly onFormatsChanged: BeEvent<(args: FormatsChangedArgs) => void>;
+    removeFormat(name: string): Promise<void>;
+}
+
+// @beta
+export function getUsedKindOfQuantitiesFromIModel(iModel: IModelConnection): Promise<{
+    kindOfQuantityFullName: string;
+}[]>;
+
+// @beta
+export interface OnIModelOpenOptions {
+    excludeUsedKindOfQuantities?: boolean;
+    formatSetLabel?: string;
+    schemaNames?: string[];
 }
 
 // @beta
