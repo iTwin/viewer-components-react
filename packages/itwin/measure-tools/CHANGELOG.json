@@ -2,6 +2,81 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Wed, 27 Aug 2025 13:53:50 GMT",
+      "version": "0.29.3",
+      "tag": "@itwin/measure-tools-react_v0.29.3",
+      "comments": {
+        "patch": [
+          {
+            "author": "maxime.brassard@bentley.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "c206b21785c2126adc3b6dc5ec6693071a0b9c62",
+            "comment": "fixed worldScale conversion being removed"
+          }
+        ]
+      }
+    },
+    {
+      "date": "Tue, 26 Aug 2025 19:59:16 GMT",
+      "version": "0.29.2",
+      "tag": "@itwin/measure-tools-react_v0.29.2",
+      "comments": {
+        "patch": [
+          {
+            "author": "50554904+hl662@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "c8f7f7a15dc21cb6ae19a39d7c750a03ffeb7396",
+            "comment": "MeasurementWidget reacts to formatsProvider changes"
+          }
+        ]
+      }
+    },
+    {
+      "date": "Fri, 22 Aug 2025 18:31:46 GMT",
+      "version": "0.29.1",
+      "tag": "@itwin/measure-tools-react_v0.29.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "50554904+hl662@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "70fd59aa16a79d16dc86eb26ef487f384f3f97a1",
+            "comment": "Fix aggregatableValues missing formatting in Measurement widgets"
+          }
+        ]
+      }
+    },
+    {
+      "date": "Wed, 20 Aug 2025 13:45:50 GMT",
+      "version": "0.29.0",
+      "tag": "@itwin/measure-tools-react_v0.29.0",
+      "comments": {
+        "none": [
+          {
+            "author": "50554904+hl662@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "fc516e871e4e41687c119b9e34a1a51e401f8ce0",
+            "comment": "Update License.md"
+          }
+        ]
+      }
+    },
+    {
+      "date": "Mon, 11 Aug 2025 13:31:19 GMT",
+      "version": "0.29.0",
+      "tag": "@itwin/measure-tools-react_v0.29.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "50554904+hl662@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "bcdd6aaf1ac66084281cedcc29fa375bbdebf32a",
+            "comment": "Use separate KindOfQuantity for Coordinate Lengths, fallback to QuantityType as last resort"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 24 Jul 2025 16:07:32 GMT",
       "version": "0.28.2",
       "tag": "@itwin/measure-tools-react_v0.28.2",

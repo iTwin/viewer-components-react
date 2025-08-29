@@ -1,8 +1,25 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Fri, 20 Jun 2025 17:05:06 GMT and should not be manually modified.
+<!-- This log was last generated on Wed, 27 Aug 2025 11:06:53 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 1.19.4
+
+Wed, 27 Aug 2025 11:06:53 GMT
+
+### Patches
+
+- Open property grid if selection contains something before property grid is added to frontstage ([#1427](https://github.com/iTwin/viewer-components-react/pull/1427))
+
+## 1.19.3
+
+Wed, 20 Aug 2025 13:45:50 GMT
+
+### Patches
+
+- Fix quantity formatting not working in editable property grid. ([#1407](https://github.com/iTwin/viewer-components-react/pull/1407))
+- Bump package dependencies. ([#1407](https://github.com/iTwin/viewer-components-react/pull/1407))
 
 ## 1.19.2
 

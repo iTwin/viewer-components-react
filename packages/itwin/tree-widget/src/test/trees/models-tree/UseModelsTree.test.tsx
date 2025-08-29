@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
+import sinon from "sinon";
 import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
 import { OffScreenViewport, ViewRect } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
@@ -17,15 +18,76 @@ import { useModelsTree } from "../../../tree-widget-react/components/trees/model
 import { TreeWidget } from "../../../tree-widget-react/TreeWidget.js";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../IModelUtils.js";
 import { act, renderHook, waitFor } from "../../TestUtils.js";
-import { createIModelAccess } from "../Common.js";
+import { createFakeSinonViewport, createIModelAccess } from "../Common.js";
 import { createViewState } from "../TreeUtils.js";
+import { createModelHierarchyNode } from "./Utils.js";
 
-import type { SelectionStorage } from "@itwin/unified-selection";
-import type { UseModelsTreeProps } from "../../../tree-widget-react/components/trees/models-tree/UseModelsTree.js";
 import type { Id64Array } from "@itwin/core-bentley";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { InstanceKey } from "@itwin/presentation-common";
+import type { SelectionStorage } from "@itwin/unified-selection";
+import type { UseModelsTreeProps } from "../../../tree-widget-react/components/trees/models-tree/UseModelsTree.js";
 
 describe("useModelsTree", () => {
+  before(async () => {
+    await initializePresentationTesting({
+      backendProps: {
+        caching: {
+          hierarchies: {
+            mode: HierarchyCacheMode.Memory,
+          },
+        },
+      },
+      rpcs: [IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
+    });
+    await TreeWidget.initialize();
+  });
+
+  after(async function () {
+    await terminatePresentationTesting();
+    TreeWidget.terminate();
+  });
+
+  it("preserves cache when filter changes", async function () {
+    await using buildIModelResult = await buildIModel(this, async (builder) => {
+      const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+      const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
+      const category = insertSpatialCategory({ builder, codeValue: "category" });
+      insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category.id });
+      return { modelId: model.id, categoryId: category.id, rootSubjectId: rootSubject.id };
+    });
+    const { imodel, ...keys } = buildIModelResult;
+    const queryHandler = sinon.fake(() => []);
+    const viewport = createFakeSinonViewport({ queryHandler });
+    const imodelAccess = createIModelAccess(imodel);
+    const { result: renderHookResult, rerender } = renderHook(useModelsTree, {
+      initialProps: {
+        activeView: viewport,
+        getFilteredPaths: async () => [[{ id: keys.modelId, className: "BisCore.Model" }]],
+      },
+    });
+
+    let getFilteredPaths = renderHookResult.current.modelsTreeProps.getFilteredPaths;
+    let visibilityHandler = renderHookResult.current.modelsTreeProps.visibilityHandlerFactory({ imodelAccess });
+    await waitFor(async () => {
+      expect(getFilteredPaths).to.not.be.undefined;
+      await getFilteredPaths!({ imodelAccess, abortSignal: new AbortController().signal });
+      await visibilityHandler.getVisibilityStatus(createModelHierarchyNode(keys.modelId));
+      expect(viewport.iModel.createQueryReader).to.be.called;
+      sinon.reset();
+      rerender({
+        activeView: viewport,
+        getFilteredPaths: async () => [],
+      });
+      getFilteredPaths = renderHookResult.current.modelsTreeProps.getFilteredPaths;
+      visibilityHandler = renderHookResult.current.modelsTreeProps.visibilityHandlerFactory({ imodelAccess });
+      expect(getFilteredPaths).to.not.be.undefined;
+      await getFilteredPaths!({ imodelAccess, abortSignal: new AbortController().signal });
+      await visibilityHandler.getVisibilityStatus(createModelHierarchyNode(keys.modelId));
+      expect(viewport.iModel.createQueryReader).not.to.be.called;
+    });
+  });
+
   describe("getFilteredPaths", () => {
     describe("with getSubTreePaths", () => {
       const categoryClass = "BisCore.SpatialCategory";

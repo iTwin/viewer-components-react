@@ -6,12 +6,13 @@
 import "./PropertyGridUiItemsProvider.scss";
 import { useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { StagePanelLocation, StagePanelSection, StageUsage, useSpecificWidgetDef, WidgetState } from "@itwin/appui-react";
+import { StagePanelLocation, StagePanelSection, StageUsage, useActiveIModelConnection, useSpecificWidgetDef, WidgetState } from "@itwin/appui-react";
 import { Id64 } from "@itwin/core-bentley";
 import { SvgInfoCircular } from "@itwin/itwinui-icons-react";
 import { SvgError } from "@itwin/itwinui-illustrations-react";
 import { Button, NonIdealState } from "@itwin/itwinui-react";
 import { KeySet } from "@itwin/presentation-common";
+import { createIModelKey } from "@itwin/presentation-core-interop";
 import { Selectable, Selectables } from "@itwin/unified-selection";
 import { usePropertyGridTransientState } from "./hooks/UsePropertyGridTransientState.js";
 import { createKeysFromSelectable, useSelectionHandler } from "./hooks/UseUnifiedSelectionHandler.js";
@@ -166,11 +167,12 @@ export function PropertyGridWidget({
   const ref = usePropertyGridTransientState<HTMLDivElement>();
   const appuiWidgetDef = useSpecificWidgetDef(widgetId);
   const widgetDef = widgetDefOverride ?? appuiWidgetDef;
-  const { selectionChange } = useSelectionHandler({ selectionStorage });
+  const { selectionChange, getSelection } = useSelectionHandler({ selectionStorage });
+  const imodel = useActiveIModelConnection();
 
   useEffect(() => {
     /* c8 ignore next 3 */
-    if (!widgetDef) {
+    if (!widgetDef || !imodel) {
       return;
     }
 
@@ -184,8 +186,8 @@ export function PropertyGridWidget({
       : // finally, if `shouldShow` is not provided, we default to showing the widget if there are any non-transient instances selected
         defaultWidgetShowPredicate;
 
-    const unregisterListener = selectionChange.addListener(async (args) => {
-      const predicateResult = await predicate(args.getSelection());
+    const toggleWidget = async (selectables: Selectables) => {
+      const predicateResult = await predicate(selectables);
 
       /* c8 ignore next 3 */
       if (isDisposed) {
@@ -197,13 +199,22 @@ export function PropertyGridWidget({
       } else if (widgetDef.state === WidgetState.Hidden) {
         widgetDef.setWidgetState(WidgetState.Open);
       }
+    };
+
+    const unregisterListener = selectionChange.addListener(async (args) => {
+      if (args.imodelKey !== createIModelKey(imodel)) {
+        return;
+      }
+      await toggleWidget(args.getSelection());
     });
+
+    void toggleWidget(getSelection({ imodel, level: 0 }));
 
     return () => {
       unregisterListener();
       isDisposed = true;
     };
-  }, [shouldShow, widgetDef, selectionChange, selectionStorage]);
+  }, [shouldShow, widgetDef, selectionChange, selectionStorage, getSelection, imodel]);
 
   return (
     <div ref={ref} className="property-grid-widget">

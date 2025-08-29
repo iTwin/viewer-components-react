@@ -27,7 +27,6 @@ import type {
   DefineRootHierarchyLevelProps,
   GenericInstanceFilter,
   HierarchyDefinition,
-  HierarchyFilteringPath,
   HierarchyLevelDefinition,
   HierarchyNodeIdentifiersPath,
   LimitingECSqlQueryExecutor,
@@ -35,6 +34,7 @@ import type {
 } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlQueryRow, IInstanceLabelSelectClauseFactory, InstanceKey } from "@itwin/presentation-shared";
 import type { ElementId } from "../common/internal/Types.js";
+import type { NormalizedHierarchyFilteringPath } from "../common/Utils.js";
 import type { ClassificationId, ClassificationsTreeIdsCache, ClassificationTableId } from "./internal/ClassificationsTreeIdsCache.js";
 
 const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
@@ -331,7 +331,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
     });
   }
 
-  public static async createInstanceKeyPaths(props: ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps): Promise<HierarchyFilteringPath[]> {
+  public static async createInstanceKeyPaths(props: ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps): Promise<NormalizedHierarchyFilteringPath[]> {
     const labelsFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
     return createInstanceKeyPathsFromInstanceLabel({ ...props, labelsFactory });
   }
@@ -357,7 +357,7 @@ function createClassificationHasChildrenSelector(classificationAlias: string) {
 
 async function createInstanceKeyPathsFromInstanceLabel(
   props: ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps & { labelsFactory: IInstanceLabelSelectClauseFactory },
-): Promise<HierarchyFilteringPath[]> {
+): Promise<NormalizedHierarchyFilteringPath[]> {
   const adjustedLabel = props.label.replace(/[%_\\]/g, "\\$&");
 
   const CLASSIFICATION_TABLES_WITH_LABELS_CTE = "ClassificationTablesWithLabels";
@@ -542,7 +542,7 @@ function createInstanceKeyPathsFromTargetItems({
   limit,
 }: Pick<ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps, "limit" | "imodelAccess" | "idsCache">): OperatorFunction<
   InstanceKey,
-  HierarchyFilteringPath
+  NormalizedHierarchyFilteringPath
 > {
   const actualLimit = limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT;
   return (targetItems: Observable<InstanceKey>) => {
@@ -585,9 +585,7 @@ function createInstanceKeyPathsFromTargetItems({
         const elements2dLength = ids.element2dIds.length;
         const elements3dLength = ids.element3dIds.length;
         return merge(
-          from(ids.classificationTableIds).pipe(
-            map((id): HierarchyFilteringPath => ({ path: [{ id, className: CLASS_NAME_ClassificationTable }], options: { autoExpand: true } })),
-          ),
+          from(ids.classificationTableIds).pipe(map((id) => ({ path: [{ id, className: CLASS_NAME_ClassificationTable }], options: { autoExpand: true } }))),
           idsCache.getClassificationsPathObs(ids.classificationIds).pipe(map((path) => ({ path, options: { autoExpand: true } }))),
           from(ids.element2dIds).pipe(
             bufferCount(Math.ceil(elements2dLength / Math.ceil(elements2dLength / 5000))),
@@ -610,7 +608,7 @@ function createGeometricElementInstanceKeyPaths(props: {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   targetItems: Id64Array;
   type: "2d" | "3d";
-}): Observable<HierarchyFilteringPath> {
+}): Observable<NormalizedHierarchyFilteringPath> {
   const { targetItems, imodelAccess, type, idsCache } = props;
   if (targetItems.length === 0) {
     return EMPTY;

@@ -1,0 +1,20 @@
+{
+  "name": "@itwin/quantity-formatting-react",
+  "entries": [
+    {
+      "date": "Wed, 20 Aug 2025 13:45:50 GMT",
+      "version": "0.1.0",
+      "tag": "@itwin/quantity-formatting-react_v0.1.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "50554904+hl662@users.noreply.github.com",
+            "package": "@itwin/quantity-formatting-react",
+            "commit": "fc516e871e4e41687c119b9e34a1a51e401f8ce0",
+            "comment": "Add @itwin/quantity-formatting-react package"
+          }
+        ]
+      }
+    }
+  ]
+}

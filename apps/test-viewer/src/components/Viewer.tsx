@@ -6,7 +6,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { IModelApp, IModelConnection } from "@itwin/core-frontend";
-import { SchemaFormatsProvider, SchemaKey, SchemaMatchType, SchemaUnitProvider } from "@itwin/ecschema-metadata";
+import { SchemaFormatsProvider, SchemaUnitProvider } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { FrontendDevTools } from "@itwin/frontend-devtools";
 import { ArcGisAccessClient } from "@itwin/map-layers-auth";
@@ -16,8 +16,10 @@ import { getUiProvidersConfig } from "../UiProvidersConfig";
 import { ApiKeys } from "./ApiKeys";
 import { useAuthorizationContext } from "./Authorization";
 import { statusBarActionsProvider, ViewerOptionsProvider } from "./ViewerOptions";
+import { FormatManager } from "./FormatManager";
 
 import type { UiProvidersConfig } from "../UiProvidersConfig";
+import { QuantityFormatting } from "@itwin/quantity-formatting-react";
 
 export function Viewer() {
   return (
@@ -36,6 +38,9 @@ function ViewerWithOptions() {
     const providersConfig = getUiProvidersConfig();
     await providersConfig.initialize();
     await FrontendDevTools.initialize();
+    await QuantityFormatting.startup();
+    // Initialize FormatManager with sample format sets
+    await FormatManager.initialize([]);
     // ArcGIS Oauth setup
     const accessClient = new ArcGisAccessClient();
     accessClient.initialize({
@@ -90,29 +95,26 @@ function ViewerWithOptions() {
 }
 
 function onIModelConnected(imodel: IModelConnection) {
-  // need this temporarily for e2e tests, until a fix for https://github.com/iTwin/itwinjs-core/issues/7496 is consumed
-  setTimeout(() => {
-    IModelConnection.onOpen.raiseEvent(imodel);
-  }, 1000);
   const setupFormatsProvider = async () => {
     try {
-      const schema = await imodel.schemaContext.getSchema(new SchemaKey("AecUnits", SchemaMatchType.Latest));
-      if (!schema) throw new Error("AecUnits schema not found in iModel");
-
-      const schemaFormatsProvider = new SchemaFormatsProvider(imodel.schemaContext, IModelApp.quantityFormatter.activeUnitSystem);
-      const removeListener = IModelApp.quantityFormatter.onActiveFormattingUnitSystemChanged.addListener((args) => {
-        schemaFormatsProvider.unitSystem = args.system;
-      });
-
+      let removeListener: () => void | undefined;
       const schemaUnitsProvider = new SchemaUnitProvider(imodel.schemaContext);
       IModelApp.quantityFormatter.unitsProvider = schemaUnitsProvider;
-      IModelApp.formatsProvider = schemaFormatsProvider;
-      console.log("Registered SchemaFormatsProvider, SchemaUnitProvider");
-
+      // FormatManager will handle assigning a FormatsProvider to IModelApp.formatsProvider, if not used then init a SchemaFormatsProvider here
+      if (FormatManager.instance) {
+        await FormatManager.instance?.onIModelOpen(imodel);
+      } else {
+        const schemaFormatsProvider = new SchemaFormatsProvider(imodel.schemaContext, IModelApp.quantityFormatter.activeUnitSystem);
+        removeListener = IModelApp.quantityFormatter.onActiveFormattingUnitSystemChanged.addListener((args) => {
+          schemaFormatsProvider.unitSystem = args.system;
+        });
+        IModelApp.formatsProvider = schemaFormatsProvider;
+      }
       IModelConnection.onClose.addOnce(() => {
-        removeListener();
         IModelApp.resetFormatsProvider();
+        removeListener?.();
         void IModelApp.quantityFormatter.resetToUseInternalUnitsProvider();
+        if (FormatManager.instance) void FormatManager.instance.onIModelClose();
         console.log("Unregistered SchemaFormatsProvider, SchemaUnitProvider");
       });
     } catch (err) {
@@ -120,7 +122,6 @@ function onIModelConnected(imodel: IModelConnection) {
     }
   };
 
-  // Only load a schema formats provider if the iModel has the AecUnits schema
   void setupFormatsProvider();
 }
 

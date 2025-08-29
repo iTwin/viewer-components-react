@@ -5,40 +5,23 @@
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { XYZProps } from "@itwin/core-geometry";
-import {
-  Angle,
-  AngleSweep,
-  Arc3d,
-  AxisOrder,
-  IModelJson,
-  Matrix3d,
-  Point3d,
-  PointString3d,
-  Vector3d,
-} from "@itwin/core-geometry";
-import type { GeometryStreamProps } from "@itwin/core-common";
-import type { BeButtonEvent, DecorateContext } from "@itwin/core-frontend";
-import { GraphicType, IModelApp } from "@itwin/core-frontend";
-import {
-  StyleSet,
-  WellKnownGraphicStyleType,
-  WellKnownTextStyleType,
-} from "../api/GraphicStyle.js";
-import type {
-  MeasurementEqualityOptions,
-  MeasurementWidgetData,
-} from "../api/Measurement.js";
-import {
-  Measurement,
-  MeasurementPickContext,
-  MeasurementSerializer,
-} from "../api/Measurement.js";
+import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
+import { Angle, AngleSweep, Arc3d, AxisOrder, IModelJson, Matrix3d, Point3d, PointString3d, Vector3d } from "@itwin/core-geometry";
+import { FormatterUtils } from "../api/FormatterUtils.js";
+import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "../api/GraphicStyle.js";
+import { Measurement, MeasurementPickContext, MeasurementSerializer } from "../api/Measurement.js";
 import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper.js";
-import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet.js";
 import { TextMarker } from "../api/TextMarker.js";
 import { MeasureTools } from "../MeasureTools.js";
 
+import type { GeometryStreamProps } from "@itwin/core-common";
+import type { BeButtonEvent, DecorateContext } from "@itwin/core-frontend";
+import type {
+  MeasurementEqualityOptions,
+  MeasurementWidgetData,
+} from "../api/Measurement.js";
+import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
 export interface AngleMeasurementProps extends MeasurementProps {
   startPoint?: XYZProps;
   center?: XYZProps;
@@ -406,9 +389,9 @@ export class AngleMeasurement extends Measurement {
   }
 
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
-    const angleSpec = IModelApp.quantityFormatter.getSpecsByName(this._angleKoQ)?.formatterSpec;
+    const angleSpec = FormatterUtils.getFormatterSpecWithFallback(this._angleKoQ, QuantityType.Angle);
     const angle = this.angle ?? 0;
-    const fAngle = IModelApp.quantityFormatter.formatQuantity(angle, angleSpec);
+    const fAngle = await FormatterUtils.formatAngle(angle, angleSpec);
 
     let title = MeasureTools.localization.getLocalizedString(
       "MeasureTools:tools.MeasureAngle.measurement"
@@ -435,9 +418,9 @@ export class AngleMeasurement extends Measurement {
 
   private async createTextMarker(): Promise<void> {
     if (this._center !== undefined && this.angle !== undefined) {
-      const angleSpec = IModelApp.quantityFormatter.getSpecsByName(this._angleKoQ)?.formatterSpec;
+      const angleSpec = FormatterUtils.getFormatterSpecWithFallback(this._angleKoQ, QuantityType.Angle);
       const angle = this.angle;
-      const fAngle = IModelApp.quantityFormatter.formatQuantity(
+      const fAngle = await FormatterUtils.formatAngle(
         angle,
         angleSpec
       );

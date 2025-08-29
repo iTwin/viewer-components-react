@@ -2,6 +2,42 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "date": "Wed, 27 Aug 2025 11:06:53 GMT",
+      "version": "1.19.4",
+      "tag": "@itwin/property-grid-react_v1.19.4",
+      "comments": {
+        "patch": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "5d966483c31ce6a81c2bbd4ef62e740972716850",
+            "comment": "Open property grid if selection contains something before property grid is added to frontstage"
+          }
+        ]
+      }
+    },
+    {
+      "date": "Wed, 20 Aug 2025 13:45:50 GMT",
+      "version": "1.19.3",
+      "tag": "@itwin/property-grid-react_v1.19.3",
+      "comments": {
+        "patch": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "654b1f8103b1fe283b9ecc70aeeee48064151a22",
+            "comment": "Fix quantity formatting not working in editable property grid."
+          },
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "654b1f8103b1fe283b9ecc70aeeee48064151a22",
+            "comment": "Bump package dependencies."
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 24 Jul 2025 16:07:32 GMT",
       "version": "1.19.2",
       "tag": "@itwin/property-grid-react_v1.19.2",

@@ -2,6 +2,21 @@
   "name": "@itwin/map-layers",
   "entries": [
     {
+      "date": "Thu, 21 Aug 2025 19:04:55 GMT",
+      "version": "6.0.2",
+      "tag": "@itwin/map-layers_v6.0.2",
+      "comments": {
+        "patch": [
+          {
+            "author": "84491342+ashar-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "34e252a414aa4f76b1dc47ffba6723b22feb8b5c",
+            "comment": "Allow FeatureInfoWidget to be used from en Editing FrontStage"
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 07 Jul 2025 19:55:02 GMT",
       "version": "6.0.1",
       "tag": "@itwin/map-layers_v6.0.1",

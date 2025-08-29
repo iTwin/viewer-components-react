@@ -1,8 +1,32 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Thu, 07 Aug 2025 12:12:57 GMT and should not be manually modified. -->
+<!-- This log was last generated on Thu, 28 Aug 2025 19:47:46 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.14.1
+
+Thu, 28 Aug 2025 19:47:46 GMT
+
+### Patches
+
+- Adjust models and categories trees in tree widget. They no longer re-query information after users clear active hierarchy filter. ([#1431](https://github.com/iTwin/viewer-components-react/pull/1431))
+
+## 3.14.0
+
+Thu, 21 Aug 2025 11:00:38 GMT
+
+### Minor changes
+
+- Allow Model tree's `getFilteredPaths` prop function to return `undefined` paths. In that case, it's considered that filtering should not be applied, and the full unfiltered tree should be loaded. ([#1417](https://github.com/iTwin/viewer-components-react/pull/1417))
+
+## 3.13.2
+
+Thu, 07 Aug 2025 18:43:06 GMT
+
+### Patches
+
+- Models tree: Stop unnecessarily executing an expensive model elements' count query, whose results we weren't even using.
 
 ## 3.13.1
 

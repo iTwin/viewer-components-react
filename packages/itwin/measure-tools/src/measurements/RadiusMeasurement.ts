@@ -5,41 +5,28 @@
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { XYZProps } from "@itwin/core-geometry";
-import {
-  Arc3d,
-  IModelJson,
-  Point3d,
-  Ray3d,
-  Vector3d,
-} from "@itwin/core-geometry";
+import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
+import { Arc3d, IModelJson, Point3d, Ray3d, Vector3d } from "@itwin/core-geometry";
+import { FormatterUtils } from "../api/FormatterUtils.js";
+import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "../api/GraphicStyle.js";
+import { Measurement, MeasurementPickContext, MeasurementSerializer } from "../api/Measurement.js";
+import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper.js";
+import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet.js";
+import { TextMarker } from "../api/TextMarker.js";
+import { ViewHelper } from "../api/ViewHelper.js";
+import { MeasureTools } from "../MeasureTools.js";
+
 import type { GeometryStreamProps } from "@itwin/core-common";
 import type {
   BeButtonEvent,
   DecorateContext,
   Viewport,
 } from "@itwin/core-frontend";
-import { GraphicType, IModelApp } from "@itwin/core-frontend";
-import {
-  StyleSet,
-  WellKnownGraphicStyleType,
-  WellKnownTextStyleType,
-} from "../api/GraphicStyle.js";
 import type {
   MeasurementEqualityOptions,
   MeasurementWidgetData,
 } from "../api/Measurement.js";
-import {
-  Measurement,
-  MeasurementPickContext,
-  MeasurementSerializer,
-} from "../api/Measurement.js";
-import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper.js";
 import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
-import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet.js";
-import { TextMarker } from "../api/TextMarker.js";
-import { ViewHelper } from "../api/ViewHelper.js";
-import { MeasureTools } from "../MeasureTools.js";
-
 export interface RadiusMeasurementProps extends MeasurementProps {
   startPoint?: XYZProps;
   midPoint?: XYZProps;
@@ -448,26 +435,26 @@ export class RadiusMeasurement extends Measurement {
   }
 
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
-    const lengthSpec = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ)?.formatterSpec;
+    const lengthSpec = FormatterUtils.getFormatterSpecWithFallback(this._lengthKoQ, QuantityType.LengthEngineering);
 
     const radius = this._arc?.circularRadius() ?? 0.0;
     const diameter = radius * 2;
     const length = this._arc?.curveLength() ?? 0.0;
     const circumference = 2 * Math.PI * radius;
 
-    const fRadius = IModelApp.quantityFormatter.formatQuantity(
+    const fRadius = await FormatterUtils.formatLength(
       radius,
       lengthSpec
     );
-    const fDiameter = IModelApp.quantityFormatter.formatQuantity(
+    const fDiameter = await FormatterUtils.formatLength(
       diameter,
       lengthSpec
     );
-    const fCircumference = IModelApp.quantityFormatter.formatQuantity(
+    const fCircumference = await FormatterUtils.formatLength(
       circumference,
       lengthSpec
     );
-    const fArcLength = IModelApp.quantityFormatter.formatQuantity(
+    const fArcLength = await FormatterUtils.formatLength(
       length,
       lengthSpec
     );
@@ -549,9 +536,9 @@ export class RadiusMeasurement extends Measurement {
 
   private async createTextMarker(): Promise<void> {
     if (this._arc !== undefined) {
-      const lengthSpec = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ)?.formatterSpec;
+      const lengthSpec = FormatterUtils.getFormatterSpecWithFallback(this._lengthKoQ, QuantityType.LengthEngineering);
       const radius = this._arc.circularRadius()!;
-      const fRadius = IModelApp.quantityFormatter.formatQuantity(
+      const fRadius = await FormatterUtils.formatLength(
         radius,
         lengthSpec
       );
