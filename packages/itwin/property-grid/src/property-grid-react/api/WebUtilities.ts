@@ -3,6 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+// cspell:words ClipboardiOS
+
 /* c8 ignore start */
 
 /**

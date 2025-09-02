@@ -34,6 +34,8 @@ import type {
   SubjectProps,
 } from "@itwin/core-common";
 
+// cspell:words ecdbmap jpath
+
 export async function buildIModel(
   mochaContext: Mocha.Context,
   setup?: (builder: TestIModelBuilder, testSchema: TestSchemaDefinition, mochaContext: Mocha.Context) => Promise<void>,

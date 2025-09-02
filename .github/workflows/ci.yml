@@ -87,6 +87,9 @@ jobs:
       - name: Run prettier
         run: pnpm prettier
 
+      - name: Run cspell
+        run: pnpm cspell
+
       - run: pnpm exec lage lint extract-api cover --grouped
         name: Build Lint Test and check API changes
         env:

@@ -18,6 +18,7 @@
     "check:dev": "beachball check --config beachball.config.dev.js",
     "change": "beachball change --no-commit",
     "change:dev": "beachball change --config beachball.config.dev.js --no-commit",
+    "cspell": "cspell .",
     "publish": "beachball publish --new",
     "bump": "beachball bump",
     "prettier": "prettier --check .",
@@ -29,8 +30,9 @@
   "devDependencies": {
     "beachball": "^2.54.0",
     "cpx2": "^7.0.2",
+    "cspell": "^9.2.0",
     "lage": "^2.14.6",
-    "prettier": "^3.5.3",
+    "prettier": "^3.6.2",
     "yargs": "^17.7.2"
   },
   "pnpm": {

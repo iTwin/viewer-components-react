@@ -84,6 +84,8 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
       filter: props.instanceFilter,
       contentClass: { fullName: "BisCore.ExternalSource", alias: "this" },
     });
+
+    // cspell:disable
     return [
       {
         fullClassName: "BisCore.ExternalSource",
@@ -111,6 +113,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
         },
       },
     ];
+    // cspell:enable
   }
 
   private async createExternalSourcesGroupChildrenQuery({
@@ -121,6 +124,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
       filter: instanceFilter,
       contentClass: { fullName: "BisCore.ExternalSource", alias: "this" },
     });
+    // cspell:disable
     return [
       {
         fullClassName: "BisCore.ExternalSource",
@@ -150,6 +154,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
         },
       },
     ];
+    // cspell:enable
   }
 
   private async createExternalSourceChildrenQuery({
