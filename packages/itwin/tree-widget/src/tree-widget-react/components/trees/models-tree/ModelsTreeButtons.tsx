@@ -114,6 +114,7 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
       styleType="borderless"
       label={TreeWidget.translate("modelsTree.buttons.showAll.tooltip")}
       onClick={() => {
+        // cspell:disable-next-line
         props.onFeatureUsed?.("models-tree-showall");
         void showAllModels(
           props.models.map((model) => model.id),
@@ -134,6 +135,7 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
       styleType="borderless"
       label={TreeWidget.translate("modelsTree.buttons.hideAll.tooltip")}
       onClick={() => {
+        // cspell:disable-next-line
         props.onFeatureUsed?.("models-tree-hideall");
         void hideAllModels(
           props.models.map((model) => model.id),
@@ -240,6 +242,7 @@ export function ToggleInstancesFocusButton({ density, onFeatureUsed }: { density
       size={density === "enlarged" ? "large" : "small"}
       label={label}
       onClick={() => {
+        // cspell:disable-next-line
         onFeatureUsed?.("models-tree-instancesfocus");
         toggle();
       }}

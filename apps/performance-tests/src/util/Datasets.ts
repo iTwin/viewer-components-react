@@ -152,7 +152,7 @@ export class Datasets {
    */
   private static async create3dElementIModel(name: string, localPath: string, numElements: number) {
     // eslint-disable-next-line no-console
-    console.log(`${numElements} physical elelements: Creating...`);
+    console.log(`${numElements} physical elements: Creating...`);
 
     await createIModel(name, localPath, async (builder) => {
       const { id: physicalModelId } = insertPhysicalModelWithPartition({ builder, codeValue: "test physical model" });

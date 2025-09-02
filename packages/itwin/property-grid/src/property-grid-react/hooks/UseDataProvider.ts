@@ -14,6 +14,8 @@ import type { KeySet, PageOptions, SelectionInfo } from "@itwin/presentation-com
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
 
+// cspell:words keyselection
+
 /**
  * Props for data provider used by `PropertyGrid`
  * @public
@@ -115,8 +117,8 @@ class PerformanceTrackingProvider implements IPresentationPropertyDataProvider {
   }
 
   /* c8 ignore next 3 */
-  public async getFieldByPropertyDescription(descr: PropertyDescription) {
-    return this._wrappedProvider.getFieldByPropertyDescription(descr);
+  public async getFieldByPropertyDescription(description: PropertyDescription) {
+    return this._wrappedProvider.getFieldByPropertyDescription(description);
   }
 
   private _lastKeysGuid: string = "";
