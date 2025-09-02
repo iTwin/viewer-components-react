@@ -1,8 +1,17 @@
 # Change Log - @itwin/map-layers
 
-<!-- This log was last generated on Thu, 21 Aug 2025 19:04:55 GMT and should not be manually modified. -->
+<!-- This log was last generated on Tue, 02 Sep 2025 13:55:23 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 6.0.3
+
+Tue, 02 Sep 2025 13:55:23 GMT
+
+### Patches
+
+- Restore maplayers header label and add optional flag to hide it ([#1434](https://github.com/iTwin/viewer-components-react/pull/1434))
+- Increase height of maplayers settings popup to eliminate scroll bar. ([#1432](https://github.com/iTwin/viewer-components-react/pull/1432))
 
 ## 6.0.2
 

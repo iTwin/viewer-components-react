@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Increase height of maplayers settings popup to eliminate scroll bar.",
-  "packageName": "@itwin/map-layers",
-  "email": "wil.maier@bentley.com",
-  "dependentChangeType": "patch"
-}
