@@ -20,3 +20,27 @@
 .signin-content {
   width: 400px;
 }
+
+/* Quantity Format Modal Styles */
+.quantity-format-modal {
+  width: 90rem;
+  height: 45rem;
+}
+
+.quantity-format-selector-item {
+  flex: 0 0 30%;
+}
+
+.quantity-format-panel-item {
+  flex: 1;
+  height: 36rem;
+  overflow-y: auto;
+}
+
+.quantity-format-empty-state {
+  height: 100%;
+}
+
+.quantity-format-button-container {
+  margin-top: 1rem;
+}

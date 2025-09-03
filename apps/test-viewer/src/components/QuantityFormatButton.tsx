@@ -67,17 +67,9 @@ export const QuantityFormatButton: React.FC = () => {
         Customize Formatting
       </Button>
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        title="Quantity Format Settings"
-        style={{
-          width: "90rem",
-          height: "45rem",
-        }}
-      >
+      <Modal isOpen={isModalOpen} onClose={handleCloseModal} title="Quantity Format Settings" className="quantity-format-modal">
         <Flex flexDirection="row" gap="l">
-          <Flex.Item style={{ flex: "0 0 30%" }}>
+          <Flex.Item className="quantity-format-selector-item">
             <FormatSelector
               activeFormatSet={activeFormatSet}
               activeFormatDefinitionKey={activeFormatDefinitionKey}
@@ -85,11 +77,11 @@ export const QuantityFormatButton: React.FC = () => {
             />
           </Flex.Item>
 
-          <Flex.Item style={{ flex: "1", height: "36rem", overflowY: "auto" }}>
+          <Flex.Item className="quantity-format-panel-item">
             {formatDefinition ? (
               <QuantityFormatPanel formatDefinition={formatDefinition} unitsProvider={unitsProvider} onFormatChange={handleFormatChange} />
             ) : (
-              <Flex flexDirection="column" justifyContent="center" alignItems="center" style={{ height: "100%" }}>
+              <Flex flexDirection="column" justifyContent="center" alignItems="center" className="quantity-format-empty-state">
                 <Text variant="leading" isMuted>
                   Select a format in the list to edit
                 </Text>
@@ -97,7 +89,7 @@ export const QuantityFormatButton: React.FC = () => {
             )}
           </Flex.Item>
         </Flex>
-        <Flex justifyContent="flex-end" flexDirection="row" style={{ marginTop: "1rem" }}>
+        <Flex justifyContent="flex-end" flexDirection="row" className="quantity-format-button-container">
           <ModalButtonBar>
             <Button styleType="default" onClick={handleCloseModal}>
               Close

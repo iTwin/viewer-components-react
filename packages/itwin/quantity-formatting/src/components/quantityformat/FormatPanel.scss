@@ -134,7 +134,7 @@
   width: 100%;
   overflow-y: auto;
   border: 1px solid var(--iui-color-border);
-  border-radius: 0 0 var(--iui-border-radius-1) var(--iui-border-radius-1);
+  border-radius: var(--iui-border-radius-1);
 }
 
 .quantityFormat--formatSelector-listItem {
