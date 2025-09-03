@@ -1126,13 +1126,15 @@ function mergeVisibilityStatuses(
   };
 }
 
-function setDifference<T>(lhs: Set<T>, rhs: Set<T>): Set<T> {
+/** @internal */
+export function setDifference<T>(lhs: Set<T>, rhs: Set<T>): Set<T> {
   const result = new Set<T>();
   lhs.forEach((x) => !rhs.has(x) && result.add(x));
   return result;
 }
 
-function setIntersection<T>(lhs: Set<T>, rhs: Set<T>): Set<T> {
+/** @internal */
+export function setIntersection<T>(lhs: Set<T>, rhs: Set<T>): Set<T> {
   const result = new Set<T>();
   lhs.forEach((x) => rhs.has(x) && result.add(x));
   return result;
