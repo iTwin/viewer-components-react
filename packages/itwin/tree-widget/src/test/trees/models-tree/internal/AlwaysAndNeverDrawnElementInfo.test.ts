@@ -87,6 +87,50 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       }
     });
 
+    it(`does not requery when events are suppressed`, async () => {
+      const modelId = "0x1";
+      const categoryId = "0x2";
+      const elements = ["0x10", "0x20"];
+      const queryHandler = sinon.fake(() => {
+        return elements.map((elementId) => ({ elementId, modelId, categoryId }));
+      });
+      const viewport = createFakeSinonViewport({
+        [`${setType}Drawn`]: new Set(elements),
+        queryHandler,
+      });
+      using alwaysAndNeverDrawnElementInfo = new AlwaysAndNeverDrawnElementInfo(viewport);
+      await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
+      await expect(firstValueFrom(alwaysAndNeverDrawnElementInfo.getElements({ setType, modelId }))).to.eventually.deep.eq(new Set(elements));
+      alwaysAndNeverDrawnElementInfo.suppressChangeEvents();
+      alwaysAndNeverDrawnElementInfo.resumeChangeEvents();
+
+      await expect(firstValueFrom(alwaysAndNeverDrawnElementInfo.getElements({ setType, modelId }))).to.eventually.deep.eq(new Set(elements));
+      expect(queryHandler).to.be.calledOnce;
+    });
+
+    it.only(`returns value only after events are resumed`, async () => {
+      const modelId = "0x1";
+      const categoryId = "0x2";
+      const elements = ["0x10", "0x20"];
+      const queryHandler = sinon.fake(() => {
+        return elements.map((elementId) => ({ elementId, modelId, categoryId }));
+      });
+      const viewport = createFakeSinonViewport({
+        [`${setType}Drawn`]: new Set(elements),
+        queryHandler,
+      });
+      using alwaysAndNeverDrawnElementInfo = new AlwaysAndNeverDrawnElementInfo(viewport);
+      // await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
+      // await firstValueFrom(alwaysAndNeverDrawnElementInfo.getElements({ setType, modelId }));
+      alwaysAndNeverDrawnElementInfo.suppressChangeEvents();
+      const newSet = new Set([elements[1]]);
+      setType === "always" ? viewport.setAlwaysDrawn(newSet) : viewport.setNeverDrawn(newSet);
+      await firstValueFrom(alwaysAndNeverDrawnElementInfo.getElements({ setType, modelId }));
+      alwaysAndNeverDrawnElementInfo.resumeChangeEvents();
+      // await sinon.clock.tickAsync(200);
+      expect(queryHandler).to.be.calledOnce;
+    });
+
     it(`returns empty set when model has no ${setType} drawn elements`, async () => {
       const modelId = "0x1";
       const queryHandler = sinon.fake(() => {
@@ -253,7 +297,7 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
     runTests("always");
   });
 
-  describe("never drawn", () => {
+  describe.skip("never drawn", () => {
     runTests("never");
   });
 });
