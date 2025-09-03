@@ -1,8 +1,16 @@
 # Change Log - @itwin/map-layers
 
-<!-- This log was last generated on Tue, 02 Sep 2025 13:55:23 GMT and should not be manually modified. -->
+<!-- This log was last generated on Wed, 03 Sep 2025 19:13:15 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 6.0.4
+
+Wed, 03 Sep 2025 19:13:15 GMT
+
+### Patches
+
+- Fix map layer popover list overflow issue ([#1436](https://github.com/iTwin/viewer-components-react/pull/1436))
 
 ## 6.0.3
 
