@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Fix map layer popover list overflow issue",
+  "packageName": "@itwin/map-layers",
+  "email": "wil.maier@bentley.com",
+  "dependentChangeType": "patch"
+}
