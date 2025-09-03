@@ -24,7 +24,6 @@ import type {
   MeasurementWidgetData,
 } from "../api/Measurement.js";
 import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
-import type { FormatterSpec } from "@itwin/core-quantity";
 
 /**
  * Props for serializing a [[DistanceMeasurement]].
@@ -198,8 +197,7 @@ export class DistanceMeasurement extends Measurement {
     this._lengthPersistenceUnitName = "Units.M";
     this._coordinateKoQ = "AecUnits.LENGTH_COORDINATE";
     this._coordinatePersistenceUnitName = "Units.M";
-    this._bearingKoQ = "RoadRailUnits.BEARING";
-    this._bearingPersistenceUnitName = "Units.RAD";
+
     if (props) this.readFromJSON(props);
 
     this.populateFormattingSpecsRegistry().then(() => this.createTextMarker().catch())
