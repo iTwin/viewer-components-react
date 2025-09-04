@@ -256,7 +256,7 @@ const configuredUiItems = new Map<string, UiItem>([
           measurementFormattingProps: {
             distance: {
               bearing: {
-                koqName: "RoadRailUnits.Bearing",
+                koqName: "RoadRailUnits.BEARING",
                 persistenceUnitName: "Units.RAD",
               },
             },
