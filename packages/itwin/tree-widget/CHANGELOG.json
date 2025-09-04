@@ -2,6 +2,36 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Tue, 02 Sep 2025 13:55:23 GMT",
+      "version": "3.14.1",
+      "tag": "@itwin/tree-widget-react_v3.14.1",
+      "comments": {
+        "none": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "ab5578d906f30883327aca85593bdc80db814fab",
+            "comment": "Fix misspelled words."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Thu, 28 Aug 2025 19:47:46 GMT",
+      "version": "3.14.1",
+      "tag": "@itwin/tree-widget-react_v3.14.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "269adae6c9d1949d651eb1341b29bf594f6bfc66",
+            "comment": "Adjust models and categories trees in tree widget. They no longer re-query information after users clear active hierarchy filter."
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 21 Aug 2025 11:00:38 GMT",
       "version": "3.14.0",
       "tag": "@itwin/tree-widget-react_v3.14.0",

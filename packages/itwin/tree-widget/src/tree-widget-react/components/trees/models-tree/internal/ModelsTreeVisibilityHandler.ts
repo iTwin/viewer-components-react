@@ -523,7 +523,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
   private getElementVisibility(
     ignoreTooltip: boolean | undefined,
     viewsModel: boolean,
-    overridenVisibility: NonPartialVisibilityStatus | undefined,
+    overriddenVisibility: NonPartialVisibilityStatus | undefined,
     categoryVisibility: NonPartialVisibilityStatus,
     subModelVisibilityStatus?: VisibilityStatus,
   ): VisibilityStatus {
@@ -532,8 +532,8 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         return createVisibilityStatus("hidden", getTooltipOptions("modelsTree.element.hiddenThroughModel", ignoreTooltip));
       }
 
-      if (overridenVisibility) {
-        return overridenVisibility;
+      if (overriddenVisibility) {
+        return overriddenVisibility;
       }
 
       return createVisibilityStatus(
@@ -547,7 +547,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     }
 
     if (subModelVisibilityStatus.state === "visible") {
-      if (!viewsModel || overridenVisibility?.state === "hidden" || (categoryVisibility.state === "hidden" && !overridenVisibility)) {
+      if (!viewsModel || overriddenVisibility?.state === "hidden" || (categoryVisibility.state === "hidden" && !overriddenVisibility)) {
         return createVisibilityStatus("partial", getTooltipOptions("modelsTree.element.partialThroughSubModel", ignoreTooltip));
       }
       return createVisibilityStatus("visible", getTooltipOptions(undefined, ignoreTooltip));
@@ -557,9 +557,9 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       return createVisibilityStatus("hidden", getTooltipOptions("modelsTree.element.hiddenThroughModel", ignoreTooltip));
     }
 
-    if (overridenVisibility) {
-      if (overridenVisibility.state === "hidden") {
-        return overridenVisibility;
+    if (overriddenVisibility) {
+      if (overriddenVisibility.state === "hidden") {
+        return overriddenVisibility;
       }
       return createVisibilityStatus("partial", getTooltipOptions("modelsTree.element.partialThroughElement", ignoreTooltip));
     }
