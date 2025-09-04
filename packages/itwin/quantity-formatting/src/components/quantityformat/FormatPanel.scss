@@ -130,7 +130,8 @@
 
 .quantityFormat--formatSelector-list {
   height: 100%;
-  max-height: 30rem;
+  max-height: inherit;
+  min-height: inherit;
   width: 100%;
   overflow-y: auto;
   border: 1px solid var(--iui-color-border);
