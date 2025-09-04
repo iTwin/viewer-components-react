@@ -30,8 +30,6 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
 }) => {
   const { translate } = useTranslation();
   const [searchTerm, setSearchTerm] = React.useState("");
-  const formatListId = React.useId();
-  const searchBoxId = React.useId();
 
   // Prepare format entries
   const formatEntries = React.useMemo(() => {
@@ -81,13 +79,11 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
       {activeFormatSet && (
         <>
           <Input
-            id={searchBoxId}
             value={searchTerm}
             onChange={handleSearchChange}
-            placeholder="Search formats..."
+            placeholder={translate("QuantityFormat:labels.searchFormats")}
           />
           <List
-            id={formatListId}
             className="quantityFormat--formatSelector-list"
           >
             {filteredFormats.map(({ key, label, description }) => (

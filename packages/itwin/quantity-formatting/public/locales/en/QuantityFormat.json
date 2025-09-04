@@ -48,7 +48,8 @@
       "removeUnit": "Remove Unit",
       "azimuthBaseUnit": "Azimuth Base Unit",
       "save": "Save",
-      "clear": "Clear"
+      "clear": "Clear",
+      "searchFormats": "Search formats..."
   },
   "decimal_precision": {
     "zero": "0",
