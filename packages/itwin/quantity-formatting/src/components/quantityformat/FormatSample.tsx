@@ -107,7 +107,7 @@ export function FormatSample(props: FormatSampleProps) {
   const handleKeyDown = React.useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       // Allow control keys (Backspace, Delete, Tab, Escape, Enter, Arrow keys)
-      const allowedControlKeys = [-
+      const allowedControlKeys = [
         'Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
         'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
         'Home', 'End'
