@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Fix always/never Drawn query being executed after every node visibility change.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "100586436+JonasDov@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
