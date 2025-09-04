@@ -94,9 +94,8 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
               <ListItem
                 key={key}
                 onClick={() => handleFormatSelect(key)}
-                className={`quantityFormat--formatSelector-listItem ${
-                  activeFormatDefinitionKey === key ? "active" : ""
-                }`}
+                active={activeFormatDefinitionKey === key}
+                className={`quantityFormat--formatSelector-listItem`}
               >
                 <Flex flexDirection="column" alignItems="flex-start">
                   <Text variant="body">{label}</Text>
