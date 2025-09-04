@@ -2,6 +2,21 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Thu, 04 Sep 2025 15:12:16 GMT",
+      "version": "0.29.4",
+      "tag": "@itwin/measure-tools-react_v0.29.4",
+      "comments": {
+        "patch": [
+          {
+            "author": "50554904+hl662@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "946b68bbbd6d1900afdb1c8f30126b443e450ebc",
+            "comment": "Make bearing calculation opt in again for Distance measurements"
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 27 Aug 2025 13:53:50 GMT",
       "version": "0.29.3",
       "tag": "@itwin/measure-tools-react_v0.29.3",
