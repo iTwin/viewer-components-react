@@ -31,21 +31,23 @@ The typical workflow involves selecting a format and customizing it to meet your
 
 ### Example Workflow
 
-Starting with the `QuantityFormatPanel`, you can select a format from the available options. Initially, the Save and Clear buttons are disabled when no changes have been made.
+> FormatSelector and QuantityFormatPanel are separate components, that can be used together. The following example's code can be found in this repository's [QuantityFormatButton.tsx](https://github.com/iTwin/viewer-components-react/blob/master/apps/test-viewer/src/components/QuantityFormatButton.tsx)
 
-<img src="./media/selected-format.png" alt="QuantityFormatPanel with a format selected" width="436" height="600">
+Starting with the `FormatSelector`, this component shows all available formats to choose from. It also includes a search bar, allowing you to filter formats based on their labels:
 
-The `FormatSelector` dropdown shows all available formats to choose from:
+<img src="./media/list-of-formats.png" alt="List of formats of a FormatSelector" width="700" height="440">
 
-<img src="./media/list-of-formats.png" alt="Dropdown menu of FormatSelector open" width="436" height="600">
+After selecting a format from the `FormatSelector`, the `QuantityFormatPanel` appears. Initially, the Save and Clear buttons are disabled when no changes have been made.
 
-You can then customize the format by changing properties like the unit. For example, changing from square feet to square meters:
+<img src="./media/selected-format.png" alt="QuantityFormatPanel with a format selected" width="700" height="440">
 
-<img src="./media/dropdown-select-unit.png" alt="Dropdown of units" width="436" height="600">
+You can then customize the format by changing properties like the unit. For example, changing from feet to meters:
 
-After making changes, notice how the Save and Clear buttons become enabled (highlighted), indicating that modifications can now be applied or discarded. The preview panel also now shows the value converted to square meters:
+<img src="./media/dropdown-select-unit.png" alt="Dropdown of units" width="700" height="440">
 
-<img src="./media/after-select-unit.png" alt="After changing unit" width="436" height="600">
+After making changes, notice how the Save and Clear buttons become enabled (highlighted), indicating that modifications can now be applied or discarded. The preview panel also now shows the value converted to meters:
+
+<img src="./media/after-select-unit.png" alt="After changing unit" width="700" height="440">
 
 Click **Save** to apply your changes or **Clear** to reset back to the original format settings.
 
@@ -239,7 +241,7 @@ function FormatPreview() {
 
 ### FormatSelector
 
-A dropdown component for selecting from predefined format definitions within a format set.
+A component for selecting from predefined format definitions within a format set.
 
 #### FormatSelector Properties
 
@@ -282,68 +284,7 @@ function FormatSelectionPanel({ formatSet }: { formatSet?: FormatSet }) {
 
 ## Complete Example
 
-Here's a comprehensive example showing how to use FormatSelector together with QuantityFormatPanel:
-
-<details>
-<summary>Complete integration example</summary>
-
-```tsx
-import React, { useState, useCallback } from "react";
-import { FormatSelector, QuantityFormatPanel } from "@itwin/quantity-formatting-react";
-import { IModelApp } from "@itwin/core-frontend";
-import { Modal, Button, ModalButtonBar } from "@itwin/itwinui-react";
-import type { FormatDefinition, FormatSet } from "@itwin/ecschema-metadata";
-
-function QuantityFormatDialog({ formatSet }: { formatSet?: FormatSet }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [formatDefinition, setFormatDefinition] = useState<FormatDefinition | undefined>();
-  const [selectedFormatKey, setSelectedFormatKey] = useState<string>();
-
-  const handleFormatSelection = useCallback((formatDef: FormatDefinition, key: string) => {
-    setFormatDefinition(formatDef);
-    setSelectedFormatKey(key);
-  }, []);
-
-  const handleFormatChange = useCallback((newFormat: FormatDefinition) => {
-    setFormatDefinition(newFormat);
-  }, []);
-
-  return (
-    <>
-      <Button onClick={() => setIsOpen(true)}>Configure Format</Button>
-
-      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Quantity Format Settings">
-        <div style={{ padding: "16px" }}>
-          <div style={{ marginBottom: "16px" }}>
-            <h4>Select a Format</h4>
-            <FormatSelector activeFormatSet={formatSet} activeFormatDefinitionKey={selectedFormatKey} onListItemChange={handleFormatSelection} />
-          </div>
-
-          {formatDefinition && (
-            <div>
-              <h4>Customize Format</h4>
-              <QuantityFormatPanel
-                formatDefinition={formatDefinition}
-                unitsProvider={IModelApp.quantityFormatter.unitsProvider}
-                onFormatChange={handleFormatChange}
-              />
-            </div>
-          )}
-        </div>
-
-        <ModalButtonBar>
-          <Button onClick={() => setIsOpen(false)}>Cancel</Button>
-          <Button styleType="high-visibility" onClick={() => setIsOpen(false)} disabled={!formatDefinition}>
-            Apply Format
-          </Button>
-        </ModalButtonBar>
-      </Modal>
-    </>
-  );
-}
-```
-
-</details>
+A comprehensive example showing how to use FormatSelector together with QuantityFormatPanel can be found in this repository's test-viewer, found in [QuantityFormatButton.tsx](https://github.com/iTwin/viewer-components-react/blob/master/apps/test-viewer/src/components/QuantityFormatButton.tsx). The [common workflow](#common-worfklow) in the section above shows the component in pictures.
 
 ## Initialization
 
