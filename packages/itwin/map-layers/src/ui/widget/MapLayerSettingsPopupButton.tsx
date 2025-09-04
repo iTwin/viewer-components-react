@@ -51,6 +51,7 @@ export function MapLayerSettingsPopupButton(props: MapLayerSettingsPopupButtonPr
     <>
       <Popover
         className="maplayers-settings-popup"
+        middleware={{ size: { maxHeight: "600px" }}}
         content={
           <div ref={panelRef} className="maplayers-settings-popup-panel">
             <MapManagerSettings onHandleOutsideClick={setHandleOutsideClick}/>

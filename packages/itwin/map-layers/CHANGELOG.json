@@ -2,6 +2,42 @@
   "name": "@itwin/map-layers",
   "entries": [
     {
+      "date": "Wed, 03 Sep 2025 19:13:15 GMT",
+      "version": "6.0.4",
+      "tag": "@itwin/map-layers_v6.0.4",
+      "comments": {
+        "patch": [
+          {
+            "author": "wil.maier@bentley.com",
+            "package": "@itwin/map-layers",
+            "commit": "259019020982ea799fa19a348ead413a08558a5f",
+            "comment": "Fix map layer popover list overflow issue"
+          }
+        ]
+      }
+    },
+    {
+      "date": "Tue, 02 Sep 2025 13:55:23 GMT",
+      "version": "6.0.3",
+      "tag": "@itwin/map-layers_v6.0.3",
+      "comments": {
+        "patch": [
+          {
+            "author": "wil.maier@bentley.com",
+            "package": "@itwin/map-layers",
+            "commit": "656456be6a78f816116f354f5deb1b767cb20711",
+            "comment": "Restore maplayers header label and add optional flag to hide it"
+          },
+          {
+            "author": "wil.maier@bentley.com",
+            "package": "@itwin/map-layers",
+            "commit": "acb1451b2c4bde6715e6a540d995c4c8674aedd0",
+            "comment": "Increase height of maplayers settings popup to eliminate scroll bar."
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 21 Aug 2025 19:04:55 GMT",
       "version": "6.0.2",
       "tag": "@itwin/map-layers_v6.0.2",

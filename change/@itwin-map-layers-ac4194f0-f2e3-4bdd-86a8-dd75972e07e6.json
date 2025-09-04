@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Restore maplayers header label and add optional flag to hide it",
-  "packageName": "@itwin/map-layers",
-  "email": "wil.maier@bentley.com",
-  "dependentChangeType": "patch"
-}
