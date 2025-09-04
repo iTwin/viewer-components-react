@@ -31,7 +31,7 @@ The typical workflow involves selecting a format and customizing it to meet your
 
 ### Example Workflow
 
-> FormatSelector and QuantityFormatPanel are separate components, that can be used together. The following example's code can be found in this repository's [QuantityFormatButton.tsx](../../../apps/test-viewer/src/components/QuantityFormatButton.tsx)
+> FormatSelector and QuantityFormatPanel are separate components, that can be used together. The following example's code can be found in this repository's [QuantityFormatButton.tsx](https://github.com/iTwin/viewer-components-react/blob/master/apps/test-viewer/src/components/QuantityFormatButton.tsx)
 
 Starting with the `FormatSelector`, this component shows all available formats to choose from. It also includes a search bar, allowing you to filter formats based on their labels:
 
@@ -284,7 +284,7 @@ function FormatSelectionPanel({ formatSet }: { formatSet?: FormatSet }) {
 
 ## Complete Example
 
-A comprehensive example showing how to use FormatSelector together with QuantityFormatPanel can be found in this repository's test-viewer, found in [QuantityFormatButton.tsx](../../../apps/test-viewer/src/components/QuantityFormatButton.tsx). The [common workflow](#common-worfklow) in the section above shows the component in pictures.
+A comprehensive example showing how to use FormatSelector together with QuantityFormatPanel can be found in this repository's test-viewer, found in [QuantityFormatButton.tsx](https://github.com/iTwin/viewer-components-react/blob/master/apps/test-viewer/src/components/QuantityFormatButton.tsx). The [common workflow](#common-worfklow) in the section above shows the component in pictures.
 
 ## Initialization
 
