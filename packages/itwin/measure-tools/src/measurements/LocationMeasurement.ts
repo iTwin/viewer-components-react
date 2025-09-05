@@ -224,8 +224,7 @@ export class LocationMeasurement extends Measurement {
       this.readFromJSON(props);
     }
 
-    this.populateFormattingSpecsRegistry().then(() => this.createTextMarker().catch())
-    .catch();
+    this.createTextMarker().catch();
   }
 
   /** Changes the location. Only possible if the measurement is dynamic. */
