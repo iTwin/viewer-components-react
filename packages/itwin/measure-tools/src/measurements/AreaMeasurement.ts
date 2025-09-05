@@ -172,7 +172,6 @@ export class AreaMeasurement extends Measurement {
 
     if (props) this.readFromJSON(props);
 
-    this.populateFormattingSpecsRegistry().catch();
   }
 
   private handleTextMarkerButtonEvent(ev: BeButtonEvent): boolean {

@@ -200,8 +200,7 @@ export class DistanceMeasurement extends Measurement {
 
     if (props) this.readFromJSON(props);
 
-    this.populateFormattingSpecsRegistry().then(() => this.createTextMarker().catch())
-    .catch();
+    this.createTextMarker().catch();
   }
 
   public setStartPoint(point: XYAndZ) {
@@ -501,7 +500,7 @@ export class DistanceMeasurement extends Measurement {
   }
 
   private async createTextMarker(): Promise<void> {
-    const lengthSpec = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ)?.formatterSpec;
+    const lengthSpec = FormatterUtils.getFormatterSpecWithFallback(this._lengthKoQ, QuantityType.LengthEngineering);
 
     const distance = this._startPoint.distance(this._endPoint);
     const fDistance = await FormatterUtils.formatLength(

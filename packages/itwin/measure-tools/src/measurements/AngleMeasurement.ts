@@ -83,8 +83,7 @@ export class AngleMeasurement extends Measurement {
     this._anglePersistenceUnitName = "Units.RAD";
     if (props) this.readFromJSON(props);
 
-    this.populateFormattingSpecsRegistry().then(() => this.createTextMarker().catch())
-    .catch();
+    this.createTextMarker().catch();
   }
 
   public get startPointRef(): Point3d | undefined {

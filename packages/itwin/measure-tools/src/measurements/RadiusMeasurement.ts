@@ -105,8 +105,7 @@ export class RadiusMeasurement extends Measurement {
     this._lengthPersistenceUnitName = "Units.M";
     if (props) this.readFromJSON(props);
 
-    this.populateFormattingSpecsRegistry().then(() => this.createTextMarker().catch())
-    .catch();
+    this.createTextMarker().catch();
   }
 
   public get startPointRef(): Point3d | undefined {
