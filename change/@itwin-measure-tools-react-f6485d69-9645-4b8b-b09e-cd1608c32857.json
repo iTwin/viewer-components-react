@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Fix performance, area polygon's text marker when no KoQ schema found",
+  "packageName": "@itwin/measure-tools-react",
+  "email": "50554904+hl662@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
