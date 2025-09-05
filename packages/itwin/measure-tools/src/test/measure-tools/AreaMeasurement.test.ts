@@ -3,8 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Point3d } from "@itwin/core-geometry";
 import { assert } from "chai";
+import { vi } from "vitest";
+import { IModelApp, QuantityType } from "@itwin/core-frontend";
+import { Point3d } from "@itwin/core-geometry";
 import { Measurement, MeasurementPickContext } from "../../api/Measurement.js";
 import { WellKnownViewType } from "../../api/MeasurementEnums.js";
 import { AreaMeasurement, AreaMeasurementSerializer } from "../../measurements/AreaMeasurement.js";
@@ -61,6 +63,112 @@ describe("AreaMeasurement tests", () => {
     assert.isDefined(measure3.getDecorationGeometry(pickContext));
     assert.isDefined(await measure3.getDataForMeasurementWidget());
     assert.isString(await measure3.getDecorationToolTip(pickContext));
+  });
+
+  it("Test fallback from getFormatterSpec on construction", async () => {
+    // Mock getSpecsByName to return undefined (simulating KoQ lookup failure)
+    const originalGetSpecsByName = IModelApp.quantityFormatter.getSpecsByName;
+    const originalFindFormatterSpecByQuantityType = IModelApp.quantityFormatter.findFormatterSpecByQuantityType;
+
+    // Create a mock that returns undefined for KoQ lookup
+    const getSpecsByNameSpy = vi.fn().mockReturnValue(undefined);
+    const findFormatterSpecSpy = vi.fn().mockReturnValue({
+      format: { formatTraits: 0 },
+      persistenceUnit: { name: "Units.M" },
+      applyFormatting: vi.fn().mockReturnValue("mockedFormattedValue")
+    });
+
+    // Replace the methods with our spies
+    IModelApp.quantityFormatter.getSpecsByName = getSpecsByNameSpy;
+    IModelApp.quantityFormatter.findFormatterSpecByQuantityType = findFormatterSpecSpy;
+
+    try {
+      // Create an AreaMeasurement with valid polygon to trigger createTextMarker
+      const measurement = AreaMeasurement.create(
+        [Point3d.create(0, 0, 0), Point3d.create(-1, 1, 0), Point3d.create(0, 2, 0)],
+        WellKnownViewType.XSection
+      );
+
+      // Wait for the async createTextMarker to complete
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      // Verify that the KoQ lookup was attempted (area KoQ is used first in widget data)
+      assert.isTrue(getSpecsByNameSpy.mock.calls.length > 0, "getSpecsByName should have been called during construction");
+      assert.strictEqual(getSpecsByNameSpy.mock.calls[0][0], "AecUnits.AREA", "Should lookup the default area KoQ string");
+
+      // Verify that the fallback method was called
+      assert.isTrue(findFormatterSpecSpy.mock.calls.length > 0, "findFormatterSpecByQuantityType should have been called as fallback");
+      assert.strictEqual(findFormatterSpecSpy.mock.calls[0][0], QuantityType.Area, "Should fallback to QuantityType.Area");
+
+      // Verify the measurement was created successfully
+      assert.isDefined(measurement);
+      assert.isDefined(measurement.polygonPoints);
+      assert.strictEqual(measurement.areaKoQ, "AecUnits.AREA");
+    } finally {
+      // Restore original methods
+      IModelApp.quantityFormatter.getSpecsByName = originalGetSpecsByName;
+      IModelApp.quantityFormatter.findFormatterSpecByQuantityType = originalFindFormatterSpecByQuantityType;
+    }
+  });
+
+  it("Test fallback from getFormatterSpec in setTextToMarker", async () => {
+    // Mock getSpecsByName to return undefined (simulating KoQ lookup failure)
+    const originalGetSpecsByName = IModelApp.quantityFormatter.getSpecsByName;
+    const originalFindFormatterSpecByQuantityType = IModelApp.quantityFormatter.findFormatterSpecByQuantityType;
+    const originalFormatQuantity = IModelApp.quantityFormatter.formatQuantity;
+
+    // Create a mock that returns undefined for KoQ lookup
+    const getSpecsByNameSpy = vi.fn().mockReturnValue(undefined);
+    const findFormatterSpecSpy = vi.fn().mockReturnValue({
+      format: { formatTraits: 0 },
+      persistenceUnit: { name: "Units.SQ_M" },
+    });
+    const formatQuantitySpy = vi.fn().mockReturnValue("1.5 m²");
+
+    // Replace the methods with our spies
+    IModelApp.quantityFormatter.getSpecsByName = getSpecsByNameSpy;
+    IModelApp.quantityFormatter.findFormatterSpecByQuantityType = findFormatterSpecSpy;
+    IModelApp.quantityFormatter.formatQuantity = formatQuantitySpy;
+
+    try {
+      // Create an AreaMeasurement with valid polygon
+      const measurement = AreaMeasurement.create(
+        [Point3d.create(0, 0, 0), Point3d.create(1, 0, 0), Point3d.create(1, 1, 0), Point3d.create(0, 1, 0)],
+        WellKnownViewType.XSection
+      );
+
+      // Clear previous calls from construction
+      getSpecsByNameSpy.mockClear();
+      findFormatterSpecSpy.mockClear();
+      formatQuantitySpy.mockClear();
+
+      // Trigger setTextToMarker by calling recomputeFromPoints
+      measurement.polygon.recomputeFromPoints();
+
+      // Wait for any async operations
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      // Verify that the KoQ lookup was attempted in setTextToMarker
+      assert.isTrue(getSpecsByNameSpy.mock.calls.length > 0, "getSpecsByName should have been called in setTextToMarker");
+      assert.strictEqual(getSpecsByNameSpy.mock.calls[0][0], "AecUnits.AREA", "Should lookup the area KoQ string in setTextToMarker");
+
+      // Verify that the fallback method was called
+      assert.isTrue(findFormatterSpecSpy.mock.calls.length > 0, "findFormatterSpecByQuantityType should have been called as fallback in setTextToMarker");
+      assert.strictEqual(findFormatterSpecSpy.mock.calls[0][0], QuantityType.Area, "Should fallback to QuantityType.Area in setTextToMarker");
+
+      // Verify that formatQuantity was called with the fallback spec
+      assert.isTrue(formatQuantitySpy.mock.calls.length > 0, "formatQuantity should have been called with fallback spec");
+
+      // Verify the measurement was updated successfully
+      assert.isDefined(measurement);
+      assert.isDefined(measurement.polygon);
+      assert.isDefined(measurement.polygon.textMarker);
+    } finally {
+      // Restore original methods
+      IModelApp.quantityFormatter.getSpecsByName = originalGetSpecsByName;
+      IModelApp.quantityFormatter.findFormatterSpecByQuantityType = originalFindFormatterSpecByQuantityType;
+      IModelApp.quantityFormatter.formatQuantity = originalFormatQuantity;
+    }
   });
 
   it("Test dynamic", () => {
