@@ -87,7 +87,7 @@ export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetPr
 
   if (hasData && dataProvider.current) {
     return (
-      <div ref={elementRef}>
+      <div ref={elementRef} style={{ width: "100%", height: "100%" }}>
         <VirtualizedPropertyGridWithDataProvider
           width={width}
           height={height}

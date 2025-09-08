@@ -2,6 +2,21 @@
   "name": "@itwin/map-layers",
   "entries": [
     {
+      "date": "Mon, 08 Sep 2025 15:05:41 GMT",
+      "version": "6.0.5",
+      "tag": "@itwin/map-layers_v6.0.5",
+      "comments": {
+        "patch": [
+          {
+            "author": "wil.maier@bentley.com",
+            "package": "@itwin/map-layers",
+            "commit": "356845b658501ba217a3ee28fc277660eb91621f",
+            "comment": "Fix hidden map layers feature info widget to use getWidgets instead of deprecated provideWidgets."
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 03 Sep 2025 19:13:15 GMT",
       "version": "6.0.4",
       "tag": "@itwin/map-layers_v6.0.4",
