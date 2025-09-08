@@ -2,6 +2,21 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Mon, 08 Sep 2025 17:12:28 GMT",
+      "version": "0.29.5",
+      "tag": "@itwin/measure-tools-react_v0.29.5",
+      "comments": {
+        "patch": [
+          {
+            "author": "50554904+hl662@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "672a315d468a205fc69125e158d5f69bcc2ffb00",
+            "comment": "Fix performance, area polygon's text marker when no KoQ schema found"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 04 Sep 2025 15:12:16 GMT",
       "version": "0.29.4",
       "tag": "@itwin/measure-tools-react_v0.29.4",
