@@ -4,7 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ConditionalBooleanValue } from "@itwin/appui-abstract";
-import { StagePanelLocation, StagePanelSection, StageUsage, ToolbarItemUtilities, ToolbarOrientation, ToolbarUsage, WidgetState } from "@itwin/appui-react";
+import {
+  StagePanelLocation,
+  StagePanelSection,
+  ToolbarItemUtilities,
+  ToolbarOrientation,
+  ToolbarUsage,
+  WidgetState
+} from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
 import { SvgMapInfo } from "@itwin/itwinui-icons-react";
 import { MapFeatureInfoTool } from "@itwin/map-layers-formats";
@@ -12,7 +19,7 @@ import { MapLayersUI } from "../mapLayers";
 import { MapLayersSyncUiEventId } from "../MapLayersActionIds";
 import { MapFeatureInfoWidget } from "./widget/FeatureInfoWidget";
 
-import type { ToolbarActionItem, ToolbarItem, UiItemsProvider } from "@itwin/appui-react";
+import type { ToolbarActionItem, ToolbarItem, UiItemsProvider, Widget } from "@itwin/appui-react";
 import type { ScreenViewport } from "@itwin/core-frontend";
 import type { MapLayerProps } from "@itwin/core-common";
 import type { MapFeatureInfoOptions } from "./Interfaces";
@@ -80,20 +87,21 @@ export class FeatureInfoUiItemsProvider implements UiItemsProvider {
     return [];
   }
 
-  public provideWidgets(_stageId: string, stageUsage: string, location: StagePanelLocation, section?: StagePanelSection) {
-    const widgets = [];
-
-    const tmpSection = section ?? StagePanelSection.End;
-    if (tmpSection === StagePanelSection.End && (stageUsage === StageUsage.General || stageUsage === StageUsage.Edit) && location === StagePanelLocation.Right) {
-      widgets.push({
-        id: FeatureInfoUiItemsProvider.widgetId,
-        label: MapLayersUI.localization.getLocalizedString("mapLayers:FeatureInfoWidget.Label"),
-        icon: <SvgMapInfo />,
-        content: <MapFeatureInfoWidget featureInfoOpts={this._featureInfoOpts} />,
-        defaultState: WidgetState.Hidden,
-      });
-    }
-
+  public getWidgets(): Widget[] {
+    const widgets: Widget[] = [];
+    widgets.push({
+      id: FeatureInfoUiItemsProvider.widgetId,
+      label: MapLayersUI.localization.getLocalizedString("mapLayers:FeatureInfoWidget.Label"),
+      icon: <SvgMapInfo />,
+      content: <MapFeatureInfoWidget featureInfoOpts={this._featureInfoOpts} />,
+      defaultState: WidgetState.Hidden,
+      layouts: {
+        standard: {
+          location: StagePanelLocation.Right,
+          section: StagePanelSection.End,
+        },
+      },
+    });
     return widgets;
   }
 }

@@ -86,19 +86,19 @@ export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetPr
   );
 
   if (hasData && dataProvider.current) {
-    return (
-      <div ref={elementRef}>
-        <VirtualizedPropertyGridWithDataProvider
-          width={width}
-          height={height}
-          dataProvider={dataProvider.current}
-          orientation={Orientation.Vertical}
-          isPropertySelectionEnabled={featureInfoOpts?.propertyGridOptions?.isPropertySelectionEnabled}
-          isPropertyHoverEnabled // This need to be turned on to have the action button appears only when property hovered
-          actionButtonRenderers={[copyButton]}
-        />
-      </div>
-    );
+      return (
+        <div ref={elementRef} style={{ width: "100%", height: "100%" }}>
+          <VirtualizedPropertyGridWithDataProvider
+            width={width}
+            height={height}
+            dataProvider={dataProvider.current}
+            orientation={Orientation.Vertical}
+            isPropertySelectionEnabled={featureInfoOpts?.propertyGridOptions?.isPropertySelectionEnabled}
+            isPropertyHoverEnabled // This need to be turned on to have the action button appears only when property hovered
+            actionButtonRenderers={[copyButton]}
+          />
+        </div>
+      );
   } else {
     return (
       <Flex justifyContent="center" style={{ width: "100%", height: "100%" }}>
