@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Fix hidden map layers feature info widget to use getWidgets instead of deprecated provideWidgets.",
+  "packageName": "@itwin/map-layers",
+  "email": "wil.maier@bentley.com",
+  "dependentChangeType": "patch"
+}
