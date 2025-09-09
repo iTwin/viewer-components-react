@@ -4,14 +4,15 @@
 *--------------------------------------------------------------------------------------------*/
 
 import type { Ray3d } from "@itwin/core-geometry";
+import { IModelApp, QuantityType } from "@itwin/core-frontend";
 import { Point3d, PolygonOps } from "@itwin/core-geometry";
-import type { DecorateContext, GraphicBuilder} from "@itwin/core-frontend";
-import { IModelApp } from "@itwin/core-frontend";
+import { FormatterUtils } from "./FormatterUtils.js";
 import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "./GraphicStyle.js";
-import type { TextEntry} from "./TextMarker.js";
 import { TextMarker } from "./TextMarker.js";
-import type { MeasurementFormattingProps } from "./MeasurementProps.js";
 
+import type { DecorateContext, GraphicBuilder} from "@itwin/core-frontend";
+import type { TextEntry} from "./TextMarker.js";
+import type { MeasurementFormattingProps } from "./MeasurementProps.js";
 export class Polygon {
   public isSelected: boolean;
   public drawMarker: boolean;
@@ -145,7 +146,7 @@ export class Polygon {
       this._textMarker.textLines = this._overrideText;
     } else {
       const lines: string[] = [];
-      const areaFormatter = IModelApp.quantityFormatter.getSpecsByName(this._areaKoQ)?.formatterSpec;
+      const areaFormatter = FormatterUtils.getFormatterSpecWithFallback(this._areaKoQ, QuantityType.Area);
       if (undefined !== areaFormatter)
         lines.push(IModelApp.quantityFormatter.formatQuantity(this.worldScale * this.worldScale * this.area, areaFormatter));
 
