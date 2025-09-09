@@ -5,9 +5,10 @@
 
 import React, { useCallback, useState } from "react";
 import { IModelApp } from "@itwin/core-frontend";
-import { Button, Flex, Modal, ModalButtonBar, Text } from "@itwin/itwinui-react";
-import { FormatSelector, QuantityFormatPanel } from "@itwin/quantity-formatting-react";
+import { Button, Modal, Tabs } from "@itwin/itwinui-react";
 import { FormatManager } from "./FormatManager";
+import { FormatSetsTabPanel } from "./FormatSetsTabPanel";
+import { FormatTabPanel } from "./FormatTabPanel";
 
 import type { FormatDefinition } from "@itwin/core-quantity";
 import type { FormatSet } from "@itwin/ecschema-metadata";
@@ -68,34 +69,33 @@ export const QuantityFormatButton: React.FC = () => {
       </Button>
 
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} title="Quantity Format Settings" className="quantity-format-modal">
-        <Flex flexDirection="row" gap="l">
-          <Flex.Item className="quantity-format-selector-item">
-            <FormatSelector
+        <Tabs.Wrapper type="borderless">
+          <Tabs.TabList>
+            <Tabs.Tab value='formats' label='Formats' key='formats' />
+            <Tabs.Tab value='format-sets' label='Format Sets' key='format-sets' />
+          </Tabs.TabList>
+          <Tabs.Panel value='formats' key='formats'>
+            <FormatTabPanel
               activeFormatSet={activeFormatSet}
               activeFormatDefinitionKey={activeFormatDefinitionKey}
+              formatDefinition={formatDefinition}
+              unitsProvider={unitsProvider}
               onListItemChange={handleFormatSelectorChange}
+              onFormatChange={handleFormatChange}
             />
-          </Flex.Item>
+          </Tabs.Panel>
+          <Tabs.Panel value='format-sets' key='format-sets'>
+            <FormatSetsTabPanel />
+          </Tabs.Panel>
+        </Tabs.Wrapper>
 
-          <Flex.Item className="quantity-format-panel-item">
-            {formatDefinition ? (
-              <QuantityFormatPanel formatDefinition={formatDefinition} unitsProvider={unitsProvider} onFormatChange={handleFormatChange} />
-            ) : (
-              <Flex flexDirection="column" justifyContent="center" alignItems="center" className="quantity-format-empty-state">
-                <Text variant="leading" isMuted>
-                  Select a format in the list to edit
-                </Text>
-              </Flex>
-            )}
-          </Flex.Item>
-        </Flex>
-        <Flex justifyContent="flex-end" flexDirection="row" className="quantity-format-button-container">
+        {/* <Flex justifyContent="flex-end" flexDirection="row" className="quantity-format-button-container">
           <ModalButtonBar>
             <Button styleType="default" onClick={handleCloseModal}>
               Close
             </Button>
           </ModalButtonBar>
-        </Flex>
+        </Flex> */}
       </Modal>
     </>
   );

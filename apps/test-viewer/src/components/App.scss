@@ -27,6 +27,11 @@
   height: 45rem;
 }
 
+.format-tab-panel {
+  max-height: 36rem;
+  overflow: hidden;
+}
+
 .quantity-format-selector-item {
   flex: 0 0 30%;
 }
