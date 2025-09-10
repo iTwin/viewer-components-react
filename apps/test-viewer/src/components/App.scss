@@ -33,7 +33,7 @@
 
 .quantity-format-selector-item {
   flex: 0 0 30%;
-  height: 36rem;
+  height: 35rem;
 }
 
 .quantity-format-panel-item {
@@ -48,4 +48,44 @@
 
 .quantity-format-button-container {
   margin-top: 1rem;
+}
+
+/* Format Set Selector Styles */
+.format-set-selector-container {
+  height: 10rem;
+}
+
+.format-set-selector-list {
+  height: 100%;
+  max-height: inherit;
+  min-height: inherit;
+  width: 100%;
+  overflow-y: auto;
+  border: 1px solid var(--iui-color-border);
+  border-radius: var(--iui-border-radius-1);
+  margin-top: var(--iui-size-xs);
+}
+
+.format-set-selector-listItem {
+  cursor: pointer;
+  padding: var(--iui-size-xs);
+  transition: background-color 0.2s ease;
+}
+
+.format-set-selector-listItem:hover {
+  background-color: var(--iui-color-background-hover);
+}
+
+.format-set-selector-listItem.active {
+  background-color: var(--iui-color-background-accent-muted);
+  border-left: 3px solid var(--iui-color-border-accent);
+}
+
+.format-set-selector-listItem:last-child {
+  border-bottom: none;
+}
+
+/* Format Set Panel Styles */
+.format-set-panel-input {
+  width: 30rem;
 }
