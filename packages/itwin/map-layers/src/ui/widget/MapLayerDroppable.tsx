@@ -21,11 +21,13 @@ import { MapLayerSettingsMenu } from "./MapLayerSettingsMenu";
 import { MapUrlDialog } from "./MapUrlDialog";
 import { SubLayersPopupButton } from "./SubLayersPopupButton";
 
-import type { DraggableChildrenFn, DroppableProvided, DroppableStateSnapshot } from "react-beautiful-dnd";
+import type { DraggableChildrenFn, DroppableProps , DroppableProvided , DroppableStateSnapshot } from "react-beautiful-dnd";
 import type { SubLayerId } from "@itwin/core-common";
 import type { MapLayerIndex, ScreenViewport } from "@itwin/core-frontend";
 import type { MapLayerOptions, StyleMapLayerSettings } from "../Interfaces";
 import type { SourceState } from "./MapUrlDialog";
+
+
 /** @internal */
 interface MapLayerDroppableProps {
   isOverlay: boolean;
@@ -39,6 +41,22 @@ interface MapLayerDroppableProps {
   onItemEdited: () => void;
   disabled?: boolean;
 }
+
+// eslint-disable-next-line @typescript-eslint/unbound-method
+const StrictModeDroppable = ({ children, ...props }: DroppableProps) =>{
+  const [enabled, setEnabled] = React.useState(false);
+  React.useEffect(() => {
+    const animation = requestAnimationFrame(() => setEnabled(true));
+    return () => {
+      cancelAnimationFrame(animation);
+      setEnabled(false);
+    };
+  }, []);
+  if (!enabled) {
+    return null;
+  }
+  return <Droppable {...props}>{children}</Droppable>;
+};
 
 const changeVisibilityByElementId = (element: Element | null, visible: boolean) => {
   if (element) {
@@ -292,8 +310,8 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
   }
 
   return (
-    <Droppable droppableId={droppableId} renderClone={renderItem} getContainerForClone={props.getContainerForClone as any}>
+    <StrictModeDroppable droppableId={droppableId} renderClone={renderItem} getContainerForClone={props.getContainerForClone as any}>
       {renderDraggable}
-    </Droppable>
+    </StrictModeDroppable>
   );
 }
