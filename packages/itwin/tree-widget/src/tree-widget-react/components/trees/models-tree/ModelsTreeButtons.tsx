@@ -193,7 +193,8 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
         void toggleModels(models2d, is2dToggleActive, props.viewport);
       }}
       aria-disabled={models2d.length === 0}
-      isActive={is2dToggleActive}
+      active={is2dToggleActive}
+      isActive={is2dToggleActive} /* eslint-disable-line @typescript-eslint/no-deprecated */
       icon={toggle2DSvg}
     />
   );
@@ -221,7 +222,8 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
         void toggleModels(models3d, is3dToggleActive, props.viewport);
       }}
       aria-disabled={models3d.length === 0}
-      isActive={is3dToggleActive}
+      active={is3dToggleActive}
+      isActive={is3dToggleActive} /* eslint-disable-line @typescript-eslint/no-deprecated */
       icon={toggle3DSvg}
     />
   );
@@ -244,7 +246,8 @@ export function ToggleInstancesFocusButton({ onFeatureUsed, disabled }: { onFeat
         toggle();
       }}
       aria-disabled={disabled}
-      isActive={enabled}
+      active={enabled}
+      isActive={enabled} /* eslint-disable-line @typescript-eslint/no-deprecated */
       icon={focusModeSvg}
     />
   );
