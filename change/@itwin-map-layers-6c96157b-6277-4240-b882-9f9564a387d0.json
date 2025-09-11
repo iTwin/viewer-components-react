@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fix Drag and Drop of layers in React Strict Mode",
-  "packageName": "@itwin/map-layers",
-  "email": "andremig-bentley@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
