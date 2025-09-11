@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { ImageMapLayerSettings } from "@itwin/core-common";
 import { MapLayerIndex, MapLayerSource, MapLayerSources, NoRenderApp, NotificationManager } from "@itwin/core-frontend";
-import { fireEvent, getAllByTestId, getByTestId, queryAllByTestId, queryByText, render, RenderResult } from "@testing-library/react";
+import { act, fireEvent, getAllByTestId, getByTestId, queryAllByTestId, queryByText, render, RenderResult } from "@testing-library/react";
 import { MapLayerPreferences, MapLayerSourceChangeType } from "../MapLayerPreferences";
 import { MapLayerManager } from "../ui/widget/MapLayerManager";
 import { TestUtils } from "./TestUtils";
@@ -223,6 +223,7 @@ describe("MapLayerManager", () => {
   });
 
   it("should maintain checkboxes in synch", async () => {
+    vi.useFakeTimers();
     viewportMock.reset();
     const layer1 = ImageMapLayerSettings.fromJSON({
       formatId: "WMS",
@@ -245,8 +246,11 @@ describe("MapLayerManager", () => {
       </div>,
     );
     const { container } = renderResult;
-    await TestUtils.flushAsyncOperations();
 
+    await act(() => {
+      vi.runAllTimers();
+      TestUtils.flushAsyncOperations();
+    });
     const layerSections = getAllByTestId(container, "map-manager-layer-section");
 
     const doLayerSectionTests = (section: HTMLElement) => {
@@ -281,6 +285,14 @@ describe("MapLayerManager", () => {
   });
 
   it("should detach layers", async () => {
+    vi.useRealTimers(); // Use real timers for this test
+
+    const originalRAF = window.requestAnimationFrame;
+    window.requestAnimationFrame = (callback: FrameRequestCallback) => {
+      callback(0);
+      return 0;
+    };
+
     viewportMock.reset();
     const backgroundLayerSettings = ImageMapLayerSettings.fromJSON({
       formatId: "WMS",
@@ -305,7 +317,12 @@ describe("MapLayerManager", () => {
       </div>,
     );
     const { container } = renderResult;
-    await TestUtils.flushAsyncOperations();
+
+    window.requestAnimationFrame = originalRAF;
+
+    await act(async () => {
+      await TestUtils.flushAsyncOperations();
+    });
 
     const checkLayerSection = async (section: HTMLElement, sectionName: string) => {
       let listItem = queryByText(container, sectionName);
@@ -314,11 +331,17 @@ describe("MapLayerManager", () => {
       expect(detachAllButton).toBeDefined();
 
       const checkbox = getByTestId(section, "select-item-checkbox");
-      checkbox.click();
+
+      await act(async () => {
+        checkbox.click();
+        await TestUtils.flushAsyncOperations();
+      });
 
       // Click on the detachAll button of the background section, it should clear layer items *only* in the background section
-      detachAllButton.click();
-      await TestUtils.flushAsyncOperations();
+      await act(async () => {
+        detachAllButton.click();
+        await TestUtils.flushAsyncOperations();
+      });
 
       listItem = queryByText(container, sectionName);
       expect(listItem).toBeNull();
@@ -329,6 +352,14 @@ describe("MapLayerManager", () => {
   });
 
   it("should change layers visibility", async () => {
+    vi.useRealTimers(); // Use real timers for this test
+
+    const originalRAF = window.requestAnimationFrame;
+    window.requestAnimationFrame = (callback: FrameRequestCallback) => {
+      callback(0);
+      return 0;
+    };
+
     const checkLayerItemsVisibility = (element: HTMLElement, nbVisibleLayers: number, nbNonVisibleLayers: number) => {
       const iconVisibilityIcons = queryAllByTestId(element, "layer-visibility-icon-show");
       expect(iconVisibilityIcons.length).toBe(nbVisibleLayers);
@@ -358,7 +389,12 @@ describe("MapLayerManager", () => {
       </div>,
     );
     const { container } = renderResult;
-    await TestUtils.flushAsyncOperations();
+
+    window.requestAnimationFrame = originalRAF;
+
+    await act(async () => {
+      await TestUtils.flushAsyncOperations();
+    });
 
     const checkLayerSection = async (section: HTMLElement) => {
       checkLayerItemsVisibility(section, 1, 0);
