@@ -315,9 +315,9 @@ Use `getFilteredPaths` when you need more control over filtering behaviour. Here
                 e.ECInstanceId Id,
                 COALESCE(e.UserLabel, e.CodeValue) Label
               FROM BisCore.Subject e
-
+  
               UNION ALL
-
+  
               SELECT
                 ec_classname(m.ECClassId, 's.c') ClassName,
                 m.ECInstanceId Id,
