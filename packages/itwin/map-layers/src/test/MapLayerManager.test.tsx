@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { ImageMapLayerSettings } from "@itwin/core-common";
 import { MapLayerIndex, MapLayerSource, MapLayerSources, NoRenderApp, NotificationManager } from "@itwin/core-frontend";
-import { fireEvent, getAllByTestId, getByTestId, queryAllByTestId, queryByText, render, RenderResult } from "@testing-library/react";
+import { act, fireEvent, getAllByTestId, getByTestId, queryAllByTestId, queryByText, render, RenderResult } from "@testing-library/react";
 import { MapLayerPreferences, MapLayerSourceChangeType } from "../MapLayerPreferences";
 import { MapLayerManager } from "../ui/widget/MapLayerManager";
 import { TestUtils } from "./TestUtils";
@@ -223,6 +223,7 @@ describe("MapLayerManager", () => {
   });
 
   it("should maintain checkboxes in synch", async () => {
+    vi.useFakeTimers();
     viewportMock.reset();
     const layer1 = ImageMapLayerSettings.fromJSON({
       formatId: "WMS",
@@ -245,8 +246,11 @@ describe("MapLayerManager", () => {
       </div>,
     );
     const { container } = renderResult;
-    await TestUtils.flushAsyncOperations();
 
+    await act(() => {
+      vi.runAllTimers();
+      TestUtils.flushAsyncOperations();
+    });
     const layerSections = getAllByTestId(container, "map-manager-layer-section");
 
     const doLayerSectionTests = (section: HTMLElement) => {
@@ -281,6 +285,7 @@ describe("MapLayerManager", () => {
   });
 
   it("should detach layers", async () => {
+    vi.useFakeTimers();
     viewportMock.reset();
     const backgroundLayerSettings = ImageMapLayerSettings.fromJSON({
       formatId: "WMS",
@@ -305,7 +310,11 @@ describe("MapLayerManager", () => {
       </div>,
     );
     const { container } = renderResult;
-    await TestUtils.flushAsyncOperations();
+
+    await act(() => {
+      vi.runAllTimers();
+      TestUtils.flushAsyncOperations();
+    });
 
     const checkLayerSection = async (section: HTMLElement, sectionName: string) => {
       let listItem = queryByText(container, sectionName);
@@ -336,6 +345,7 @@ describe("MapLayerManager", () => {
       expect(iconInvisibilityIcons.length).toBe(nbNonVisibleLayers);
     };
 
+    vi.useFakeTimers();
     viewportMock.reset();
     const backgroundLayerSettings = ImageMapLayerSettings.fromJSON({
       formatId: "WMS",
@@ -358,7 +368,10 @@ describe("MapLayerManager", () => {
       </div>,
     );
     const { container } = renderResult;
-    await TestUtils.flushAsyncOperations();
+    await act(() => {
+      vi.runAllTimers();
+      TestUtils.flushAsyncOperations();
+    });
 
     const checkLayerSection = async (section: HTMLElement) => {
       checkLayerItemsVisibility(section, 1, 0);
