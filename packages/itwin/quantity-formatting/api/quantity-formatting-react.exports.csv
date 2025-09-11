@@ -1,7 +1,13 @@
 sep=;
 Release Tag;API Item Type;API Item Name
+beta;class;FormatManager
+beta;interface;FormatManagerInitializeOptions
 beta;function;FormatPanel
 beta;function;FormatSample
 beta;const;FormatSelector
+beta;interface;FormatSetChangedEventArgs
+beta;class;FormatSetFormatsProvider
+beta;function;getUsedKindOfQuantitiesFromIModel
+beta;interface;OnIModelOpenOptions
 beta;function;QuantityFormatPanel
 beta;class;QuantityFormatting

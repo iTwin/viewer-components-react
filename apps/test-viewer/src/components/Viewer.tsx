@@ -16,10 +16,9 @@ import { getUiProvidersConfig } from "../UiProvidersConfig";
 import { ApiKeys } from "./ApiKeys";
 import { useAuthorizationContext } from "./Authorization";
 import { statusBarActionsProvider, ViewerOptionsProvider } from "./ViewerOptions";
-import { FormatManager } from "./FormatManager";
+import { FormatManager, QuantityFormatting } from "@itwin/quantity-formatting-react";
 
 import type { UiProvidersConfig } from "../UiProvidersConfig";
-import { QuantityFormatting } from "@itwin/quantity-formatting-react";
 
 export function Viewer() {
   return (
@@ -40,7 +39,10 @@ function ViewerWithOptions() {
     await FrontendDevTools.initialize();
     await QuantityFormatting.startup();
     // Initialize FormatManager with sample format sets
-    await FormatManager.initialize([]);
+    await FormatManager.initialize({
+      formatSets: [],
+      setupSchemaFormatSetOnIModelOpen: true,
+    });
     // ArcGIS Oauth setup
     const accessClient = new ArcGisAccessClient();
     accessClient.initialize({
