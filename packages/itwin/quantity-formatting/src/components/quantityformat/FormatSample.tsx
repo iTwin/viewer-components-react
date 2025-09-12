@@ -3,18 +3,14 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import * as React from "react";
-import {
-  Format,
-  type FormatDefinition,
-  FormatterSpec,
-  type UnitProps,
-} from "@itwin/core-quantity";
-import type { UnitsProvider } from "@itwin/core-quantity";
-import { Divider, Input, Label } from "@itwin/itwinui-react";
 import "./FormatPanel.scss";
+import * as React from "react";
+import { Format, FormatterSpec } from "@itwin/core-quantity";
+import { Divider, Input, Label } from "@itwin/itwinui-react";
 import { useTranslation } from "../../useTranslation.js";
 
+import type { FormatDefinition, UnitProps } from "@itwin/core-quantity";
+import type { UnitsProvider } from "@itwin/core-quantity";
 /**
  * @internal
 */
@@ -159,14 +155,13 @@ export function FormatSample(props: FormatSampleProps) {
               onBlur={handleOnValueBlur}
               size="small"
             />
-            <Label className="quantityFormat--persistenceUnitLabel">
-              {activePersistenceUnitLabel}
-            </Label>
           </div>
           <Divider orientation="vertical" />
-          <Label className="quantityFormat--formattedValueLabel">
-            {formattedValue}
-          </Label>
+          <div className="quantityFormat--formatSample-resultSection">
+            <Label className="quantityFormat--formattedValueLabel">
+              {formattedValue}
+            </Label>
+          </div>
         </div>
       </div>
     </div>
