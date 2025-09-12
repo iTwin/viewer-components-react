@@ -2,6 +2,21 @@
   "name": "@itwin/map-layers",
   "entries": [
     {
+      "date": "Thu, 11 Sep 2025 20:53:05 GMT",
+      "version": "6.0.6",
+      "tag": "@itwin/map-layers_v6.0.6",
+      "comments": {
+        "patch": [
+          {
+            "author": "andremig-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "f615e584e3f38f8f896f6b269b3681e8a34360cb",
+            "comment": "Fix Drag and Drop of layers in React Strict Mode"
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 08 Sep 2025 15:05:41 GMT",
       "version": "6.0.5",
       "tag": "@itwin/map-layers_v6.0.5",
