@@ -10,43 +10,43 @@
     "azimuth": "Azimuth",
     "ratio": "Ratio",
     "labels": {
-      "compositeSpacer": "Composite Spacer",
+      "compositeSpacer": "Composite spacer",
       "compositeSpacerDescription": "Character that appears between units when displaying measurements with multiple units",
       "formatted": "Formatted",
       "precision": "Precision",
-      "type": "Format Type",
+      "type": "Format type",
       "formatTypeSublabel": "Select the format for which you would like to display measurements",
-      "appendUnitLabel": "Show Unit Label",
-      "labelSeparator": "Label Separator",
-      "signOptionLabel": "Sign Option",
+      "appendUnitLabel": "Show unit label",
+      "labelSeparator": "Label separator",
+      "signOptionLabel": "Sign option",
       "signOptionTooltip": "Controls when + or - signs appear",
-      "stationOffsetLabel": "Station Format",
-      "stationBaseFactorLabel": "Station Base Factor",
-      "stationPresetLabel": "How Many Units Per Station",
-      "stationSeparatorLabel": "Station Separator",
-      "decimalSeparatorLabel": "Decimal Separator",
-      "showTrailZerosLabel": "Show Trailing Zeros",
-      "keepSingleZeroLabel": "Add Single Zero After Decimal Point",
-      "zeroEmptyLabel": "Hide If Zero",
+      "stationOffsetLabel": "Station format",
+      "stationBaseFactorLabel": "Station base factor",
+      "stationPresetLabel": "How many units per station",
+      "stationSeparatorLabel": "Station separator",
+      "decimalSeparatorLabel": "Decimal separator",
+      "showTrailZerosLabel": "Show trailing zeros",
+      "keepSingleZeroLabel": "Add single zero after decimal point",
+      "zeroEmptyLabel": "Hide if zero",
       "moreLabel": "More",
       "lessLabel": "Less",
-      "keepDecimalPointLabel": "Keep Decimal Point",
-      "fractionDashLabel": "Fraction Dash",
-      "scientificTypeLabel": "Scientific Type",
+      "keepDecimalPointLabel": "Keep decimal point",
+      "fractionDashLabel": "Fraction dash",
+      "scientificTypeLabel": "Scientific type",
       "scientificTypeTooltip": "Select which scientific notation to use",
-      "useThousandSeparatorLabel": "Use Thousand Separator",
-      "thousandSeparatorLabel": "Thousand Separator",
+      "useThousandSeparatorLabel": "Use thousand separator",
+      "thousandSeparatorLabel": "Thousand separator",
       "thousandSelectorTooltip": "When this and the decimal separator are set to the same character, one will be flipped to avoid conflicts",
       "value": "Value",
-      "ratioTypeLabel": "Ratio Type",
-      "azimuthBase": "Azimuth Base",
-      "azimuthCounterClockwise": "Enable Azimuth Counter-Clockwise",
-      "samplePreview": "Try It Out",
+      "ratioTypeLabel": "Ratio type",
+      "azimuthBase": "Azimuth base",
+      "azimuthCounterClockwise": "Enable azimuth counter-clockwise",
+      "samplePreview": "Try it out",
       "units": "Units",
-      "advancedOptions": "Advanced Options",
-      "addSubUnit": "Add Sub Unit",
-      "removeUnit": "Remove Unit",
-      "azimuthBaseUnit": "Azimuth Base Unit",
+      "advancedOptions": "Advanced options",
+      "addSubUnit": "Add sub unit",
+      "removeUnit": "Remove unit",
+      "azimuthBaseUnit": "Azimuth base unit",
       "save": "Save",
       "clear": "Clear",
       "searchFormats": "Search formats..."
@@ -78,10 +78,10 @@
     "over256": "1/256"
   },
   "sign_option": {
-    "noSign": "No Sign",
-    "onlyNegative": "Only Negative",
-    "signAlways": "Always Sign",
-    "negativeParentheses": "Negative in Parentheses"
+    "noSign": "No sign",
+    "onlyNegative": "Only negative",
+    "signAlways": "Always sign",
+    "negativeParentheses": "Negative in parentheses"
   },
   "station_size": {
     "one": "0+0",
@@ -105,7 +105,7 @@
   },
   "scientific-type": {
     "normalized": "Normalized",
-    "zero-normalized": "Zero Normalized"
+    "zero-normalized": "Zero normalized"
   },
   "ratio-type": {
     "n-to-one": {
@@ -121,7 +121,7 @@
       "description": "Simplifies ratio using GCD (e.g. 0.3 → 3:10)"
     },
     "value-based": {
-      "label": "Value Based",
+      "label": "Value based",
       "description": "Scales the smaller value to 1 (e.g. 0.5 → 2:1, 2 → 1:2)"
     },
     "default": {
@@ -137,12 +137,12 @@
     "label": "Bearing",
     "description": "Bearing",
     "bearingGap": {
-      "label": "Add Direction Gap"
+      "label": "Add direction gap"
     }
   },
   "bearingAngleDirection": {
-    "label": "Angle Direction",
+    "label": "Angle direction",
     "clockwise": "Clockwise",
-    "counter-clockwise": "Counter-Clockwise"
+    "counter-clockwise": "Counter-clockwise"
   }
 }
