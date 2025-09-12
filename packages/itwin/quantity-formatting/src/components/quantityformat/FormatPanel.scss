@@ -129,13 +129,13 @@
 }
 
 .quantityFormat--formatSelector-list {
-  height: 100%;
-  max-height: inherit;
-  min-height: inherit;
+  height: inherit;
   width: 100%;
   overflow-y: auto;
-  border: 1px solid var(--iui-color-border);
-  border-radius: var(--iui-border-radius-1);
+  border-left: 1px solid var(--iui-color-border);
+  border-right: 1px solid var(--iui-color-border);
+  border-bottom: 1px solid var(--iui-color-border);
+  border-radius: 0 0 var(--iui-border-radius-1) var(--iui-border-radius-1);
 }
 
 .quantityFormat--formatSelector-listItem {
@@ -158,5 +158,5 @@
 }
 
 .quantityFormat--formatSelector-container {
-  min-height: 35rem;
+  height: inherit;
 }

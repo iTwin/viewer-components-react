@@ -1,4 +1,3 @@
-import * as React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
@@ -78,14 +77,14 @@ describe("FormatSelector", () => {
     it("should render without crashing when activeFormatSet is provided", () => {
       render(<FormatSelector {...defaultProps} />);
 
-      expect(screen.getByPlaceholderText("Search formats...")).toBeDefined();
+      expect(screen.getByPlaceholderText("QuantityFormat:labels.searchFormats")).toBeDefined();
       expect(screen.getByRole("list")).toBeDefined();
     });
 
     it("should not render content when activeFormatSet is undefined", () => {
       render(<FormatSelector {...defaultProps} activeFormatSet={undefined} />);
 
-      expect(screen.queryByPlaceholderText("Search formats...")).toBeNull();
+      expect(screen.queryByPlaceholderText("QuantityFormat:labels.searchFormats")).toBeNull();
       expect(screen.queryByRole("list")).toBeNull();
     });
 
@@ -109,7 +108,7 @@ describe("FormatSelector", () => {
       render(<FormatSelector {...defaultProps} activeFormatDefinitionKey="length-format" />);
 
       const activeItem = screen.getByText("Length Format").closest(".quantityFormat--formatSelector-listItem");
-      expect(activeItem?.classList.contains("active")).toBe(true);
+      expect(activeItem?.getAttribute("data-iui-active")).toBe("true");
     });
   });
 
@@ -118,7 +117,7 @@ describe("FormatSelector", () => {
       const user = userEvent.setup();
       render(<FormatSelector {...defaultProps} />);
 
-      const searchInput = screen.getByPlaceholderText("Search formats...");
+      const searchInput = screen.getByPlaceholderText("QuantityFormat:labels.searchFormats");
       await user.type(searchInput, "Length");
 
       await waitFor(() => {
@@ -132,7 +131,7 @@ describe("FormatSelector", () => {
       const user = userEvent.setup();
       render(<FormatSelector {...defaultProps} />);
 
-      const searchInput = screen.getByPlaceholderText("Search formats...");
+      const searchInput = screen.getByPlaceholderText("QuantityFormat:labels.searchFormats");
       await user.type(searchInput, "area");
 
       await waitFor(() => {
@@ -146,7 +145,7 @@ describe("FormatSelector", () => {
       const user = userEvent.setup();
       render(<FormatSelector {...defaultProps} />);
 
-      const searchInput = screen.getByPlaceholderText("Search formats...");
+      const searchInput = screen.getByPlaceholderText("QuantityFormat:labels.searchFormats");
       await user.type(searchInput, "imperial");
 
       await waitFor(() => {
@@ -160,7 +159,7 @@ describe("FormatSelector", () => {
       const user = userEvent.setup();
       render(<FormatSelector {...defaultProps} />);
 
-      const searchInput = screen.getByPlaceholderText("Search formats...");
+      const searchInput = screen.getByPlaceholderText("QuantityFormat:labels.searchFormats");
       await user.type(searchInput, "nonexistent");
 
       await waitFor(() => {
@@ -175,7 +174,7 @@ describe("FormatSelector", () => {
       const user = userEvent.setup();
       render(<FormatSelector {...defaultProps} />);
 
-      const searchInput = screen.getByPlaceholderText("Search formats...");
+      const searchInput = screen.getByPlaceholderText("QuantityFormat:labels.searchFormats");
 
       // First type a search term
       await user.type(searchInput, "Length");
@@ -196,7 +195,7 @@ describe("FormatSelector", () => {
       const user = userEvent.setup();
       render(<FormatSelector {...defaultProps} />);
 
-      const searchInput = screen.getByPlaceholderText("Search formats...");
+      const searchInput = screen.getByPlaceholderText("QuantityFormat:labels.searchFormats");
       await user.type(searchInput, "AREA");
 
       await waitFor(() => {
@@ -232,7 +231,7 @@ describe("FormatSelector", () => {
       const user = userEvent.setup();
       render(<FormatSelector {...defaultProps} />);
 
-      const searchInput = screen.getByPlaceholderText("Search formats...");
+      const searchInput = screen.getByPlaceholderText("QuantityFormat:labels.searchFormats");
       await user.type(searchInput, "nonexistent");
 
       await waitFor(() => {
@@ -258,7 +257,7 @@ describe("FormatSelector", () => {
 
       render(<FormatSelector {...defaultProps} activeFormatSet={emptyFormatSet} />);
 
-      expect(screen.getByPlaceholderText("Search formats...")).toBeDefined();
+      expect(screen.getByPlaceholderText("QuantityFormat:labels.searchFormats")).toBeDefined();
       expect(screen.getByRole("list")).toBeDefined();
       expect(screen.queryByRole("listitem")).toBeNull();
     });
@@ -307,7 +306,7 @@ describe("FormatSelector", () => {
       const user = userEvent.setup();
       render(<FormatSelector {...defaultProps} />);
 
-      const searchInput = screen.getByPlaceholderText("Search formats...");
+      const searchInput = screen.getByPlaceholderText("QuantityFormat:labels.searchFormats");
       await user.type(searchInput, "   ");
 
       // Should show all formats when search is only whitespace
@@ -323,11 +322,11 @@ describe("FormatSelector", () => {
     it("should have proper ARIA labels and roles", () => {
       render(<FormatSelector {...defaultProps} />);
 
-      const searchInput = screen.getByPlaceholderText("Search formats...");
+      const searchInput = screen.getByPlaceholderText("QuantityFormat:labels.searchFormats");
       const list = screen.getByRole("list");
 
-      expect(searchInput.getAttribute("id")).toBeTruthy();
-      expect(list.getAttribute("id")).toBeTruthy();
+      expect(searchInput.getAttribute("class")).toBeTruthy();
+      expect(list.getAttribute("class")).toBeTruthy();
       expect(list.classList.contains("quantityFormat--formatSelector-list")).toBe(true);
     });
 
