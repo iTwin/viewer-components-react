@@ -75,7 +75,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
   );
 
   return (
-    <Flex flexDirection="column" alignItems="flex-start" className="quantityFormat--formatSelector-container">
+    <Flex flexDirection="column" alignItems="flex-start" gap="none" className="quantityFormat--formatSelector-container">
       {activeFormatSet && (
         <>
           <Input

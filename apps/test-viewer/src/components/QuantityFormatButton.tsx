@@ -5,7 +5,7 @@
 
 import React, { useCallback, useState } from "react";
 import { IModelApp } from "@itwin/core-frontend";
-import { Button, Flex, Modal, ModalButtonBar, Text } from "@itwin/itwinui-react";
+import { Button, Flex, Modal, Text } from "@itwin/itwinui-react";
 import { FormatSelector, QuantityFormatPanel } from "@itwin/quantity-formatting-react";
 import { FormatManager } from "./FormatManager";
 
@@ -68,7 +68,7 @@ export const QuantityFormatButton: React.FC = () => {
       </Button>
 
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} title="Quantity Format Settings" className="quantity-format-modal">
-        <Flex flexDirection="row" gap="l">
+        <Flex flexDirection="row" gap="l" className="format-selector-container">
           <Flex.Item className="quantity-format-selector-item">
             <FormatSelector
               activeFormatSet={activeFormatSet}
@@ -88,13 +88,6 @@ export const QuantityFormatButton: React.FC = () => {
               </Flex>
             )}
           </Flex.Item>
-        </Flex>
-        <Flex justifyContent="flex-end" flexDirection="row" className="quantity-format-button-container">
-          <ModalButtonBar>
-            <Button styleType="default" onClick={handleCloseModal}>
-              Close
-            </Button>
-          </ModalButtonBar>
         </Flex>
       </Modal>
     </>
