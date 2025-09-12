@@ -127,33 +127,6 @@ describe("FormatSelector", () => {
       });
     });
 
-    it("should filter formats based on search term (description match)", async () => {
-      const user = userEvent.setup();
-      render(<FormatSelector {...defaultProps} />);
-
-      const searchInput = screen.getByPlaceholderText("QuantityFormat:labels.searchFormats");
-      await user.type(searchInput, "area");
-
-      await waitFor(() => {
-        expect(screen.getByText("Area Format")).toBeDefined();
-        expect(screen.queryByText("Length Format")).toBeNull();
-        expect(screen.queryByText("Imperial Length")).toBeNull();
-      });
-    });
-
-    it("should filter formats based on search term (key match)", async () => {
-      const user = userEvent.setup();
-      render(<FormatSelector {...defaultProps} />);
-
-      const searchInput = screen.getByPlaceholderText("QuantityFormat:labels.searchFormats");
-      await user.type(searchInput, "imperial");
-
-      await waitFor(() => {
-        expect(screen.getByText("Imperial Length")).toBeDefined();
-        expect(screen.queryByText("Length Format")).toBeNull();
-        expect(screen.queryByText("Area Format")).toBeNull();
-      });
-    });
 
     it("should show 'no formats found' message when search yields no results", async () => {
       const user = userEvent.setup();
@@ -191,7 +164,7 @@ describe("FormatSelector", () => {
       });
     });
 
-    it("should perform case-insensitive search", async () => {
+    it("should perform case-insensitive search on labels", async () => {
       const user = userEvent.setup();
       render(<FormatSelector {...defaultProps} />);
 
@@ -199,8 +172,10 @@ describe("FormatSelector", () => {
       await user.type(searchInput, "AREA");
 
       await waitFor(() => {
+        // Searching for "AREA" should match "Area Format" label (case-insensitive)
         expect(screen.getByText("Area Format")).toBeDefined();
         expect(screen.queryByText("Length Format")).toBeNull();
+        expect(screen.queryByText("Imperial Length")).toBeNull();
       });
     });
   });
