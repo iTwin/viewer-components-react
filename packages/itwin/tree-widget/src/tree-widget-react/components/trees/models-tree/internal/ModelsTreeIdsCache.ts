@@ -3,13 +3,13 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Subscription } from "rxjs";
 import { bufferCount, bufferTime, filter, firstValueFrom, from, map, mergeAll, mergeMap, reduce, ReplaySubject, Subject } from "rxjs";
 import { assert, Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import { collect } from "../../common/Rxjs.js";
 import { pushToMap } from "../../common/Utils.js";
 
+import type { Subscription } from "rxjs";
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
@@ -24,8 +24,7 @@ interface SubjectInfo {
 
 interface ModelInfo {
   isModelPrivate: boolean;
-  // Keys are category Ids and boolean tells if category is of root element
-  categories: Map<Id64String, boolean>;
+  categories: Map<Id64String, { isRootElementCategory: boolean }>;
 }
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
@@ -254,20 +253,20 @@ export class ModelsTreeIdsCache implements Disposable {
     modelId: Id64String;
     categoryId: Id64String;
     isModelPrivate: boolean;
-    isCategoryOfRootElement: boolean;
+    isRootElementCategory: boolean;
   }> {
     const query = `
-      SELECT 
+      SELECT
         this.Model.Id modelId,
         this.Category.Id categoryId,
         m.IsPrivate isModelPrivate,
-        MAX(IIF(this.Parent.Id IS NULL, 1, 0)) isCategoryOfRootElement
+        MAX(IIF(this.Parent.Id IS NULL, 1, 0)) isRootElementCategory
       FROM BisCore.Model m
       JOIN ${this._hierarchyConfig.elementClassSpecification} this ON m.ECInstanceId = this.Model.Id
       GROUP BY modelId, categoryId, isModelPrivate
     `;
     for await (const row of this._queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
-      yield { modelId: row.modelId, categoryId: row.categoryId, isModelPrivate: !!row.isModelPrivate, isCategoryOfRootElement: !!row.isCategoryOfRootElement };
+      yield { modelId: row.modelId, categoryId: row.categoryId, isModelPrivate: !!row.isModelPrivate, isRootElementCategory: !!row.isCategoryOfRootElement };
     }
   }
 
@@ -307,17 +306,14 @@ export class ModelsTreeIdsCache implements Disposable {
 
   private async getModelInfos() {
     this._modelInfos ??= (async () => {
-      const modelInfos = new Map<Id64String, { categories: Map<Id64String, boolean>; isModelPrivate: boolean }>();
-      for await (const { modelId, categoryId, isModelPrivate, isCategoryOfRootElement } of this.queryModelCategories()) {
+      const modelInfos = new Map<Id64String, { categories: Map<Id64String, { isRootElementCategory: boolean }>; isModelPrivate: boolean }>();
+      for await (const { modelId, categoryId, isModelPrivate, isRootElementCategory } of this.queryModelCategories()) {
         const entry = modelInfos.get(modelId);
         if (entry) {
-          const categoryEntry = entry.categories.get(categoryId);
-          if (!categoryEntry) {
-            entry.categories.set(categoryId, isCategoryOfRootElement);
-          }
+          entry.categories.set(categoryId, { isRootElementCategory });
           entry.isModelPrivate = isModelPrivate;
         } else {
-          modelInfos.set(modelId, { categories: new Map([[categoryId, isCategoryOfRootElement]]), isModelPrivate });
+          modelInfos.set(modelId, { categories: new Map([[categoryId, { isRootElementCategory }]]), isModelPrivate });
         }
       }
       return modelInfos;
@@ -445,7 +441,7 @@ export class ModelsTreeIdsCache implements Disposable {
         const modelInfos = await this.getModelInfos();
         modelInfos?.forEach((modelInfo, modelId) => {
           const categoryEntry = modelInfo.categories.get(categoryId);
-          if (categoryEntry) {
+          if (categoryEntry?.isRootElementCategory) {
             result.add(modelId);
           }
         });
