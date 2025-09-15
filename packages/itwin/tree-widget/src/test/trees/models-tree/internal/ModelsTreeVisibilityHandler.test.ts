@@ -2652,7 +2652,7 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
 
     describe("child element category is different than parent's", () => {
-      it("model visibility only takes into account parent element categories", async function () {
+      it("model visibility takes into account all element categories", async function () {
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           const parentCategory = insertSpatialCategory({ builder, codeValue: "parentCategory" });
           const childCategory = insertSpatialCategory({ builder, codeValue: "childCategory" });
@@ -2674,10 +2674,83 @@ describe("ModelsTreeVisibilityHandler", () => {
           handler,
           viewport,
           visibilityExpectations: {
-            ...VisibilityExpectations.all("visible"),
-            // FIXME: This is strange from the UX perspective
+            // Only categories of elements without parents are shown in the tree
+            category: () => "visible",
+            subject: () => "partial",
+            model: () => "partial",
             groupingNode: ({ elementIds }) => (elementIds.includes(parentElementId) ? "visible" : "hidden"),
             element: ({ elementId }) => (elementId === parentElementId ? "visible" : "hidden"),
+          },
+        });
+      });
+
+      it("changing category visibility of hidden model does not turn on unrelated elements", async function () {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
+          const parentCategory = insertSpatialCategory({ builder, codeValue: "parentCategory" });
+          const parentCategory2 = insertSpatialCategory({ builder, codeValue: "parentCategory2" });
+          const childCategory = insertSpatialCategory({ builder, codeValue: "childCategory" });
+          const model = insertPhysicalModelWithPartition({ builder, codeValue: "model" });
+
+          const parentElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: parentCategory.id });
+          const parentElement2 = insertPhysicalElement({ builder, modelId: model.id, categoryId: parentCategory2.id });
+          insertPhysicalElement({ builder, modelId: model.id, categoryId: childCategory.id, parentId: parentElement2.id });
+          return { modelId: model.id, parentCategoryId: parentCategory.id, parentElementId: parentElement.id, childCategoryId: childCategory.id };
+        });
+        const { imodel, modelId, parentCategoryId, parentElementId, childCategoryId } = buildIModelResult;
+        using visibilityTestData = createVisibilityTestData({ imodel });
+        const { handler, viewport, ...props } = visibilityTestData;
+        const modelNode = createModelHierarchyNode(modelId, true);
+        // Make child category enabled through category selector
+        viewport.changeCategoryDisplay(childCategoryId, true);
+        await handler.changeVisibility(modelNode, false);
+
+        const parentCategoryNode = createCategoryHierarchyNode(modelId, parentCategoryId);
+        // Changing category for hidden model should put all other categories into Hide overrides
+        await handler.changeVisibility(parentCategoryNode, true);
+        viewport.renderFrame();
+        await validateHierarchyVisibility({
+          ...props,
+          handler,
+          viewport,
+          visibilityExpectations: {
+            subject: () => "partial",
+            category: ({ categoryId }) => (categoryId === parentCategoryId ? "visible" : "hidden"),
+            model: () => "partial",
+            groupingNode: ({ elementIds }) => (elementIds.includes(parentElementId) ? "visible" : "hidden"),
+            element: ({ elementId }) => (elementId === parentElementId ? "visible" : "hidden"),
+          },
+        });
+      });
+
+      it("changing category visibility turns on child elements that have the same category", async function () {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
+          const sharedCategory = insertSpatialCategory({ builder, codeValue: "parentCategory" });
+          const parentCategory2 = insertSpatialCategory({ builder, codeValue: "parentCategory2" });
+          const model = insertPhysicalModelWithPartition({ builder, codeValue: "model" });
+
+          insertPhysicalElement({ builder, modelId: model.id, categoryId: sharedCategory.id });
+          const parentElement2 = insertPhysicalElement({ builder, modelId: model.id, categoryId: parentCategory2.id });
+          insertPhysicalElement({ builder, modelId: model.id, categoryId: sharedCategory.id, parentId: parentElement2.id });
+          return { modelId: model.id, parentCategoryId: sharedCategory.id, parentElementId: parentElement2.id };
+        });
+        const { imodel, modelId, parentCategoryId, parentElementId } = buildIModelResult;
+        using visibilityTestData = createVisibilityTestData({ imodel });
+        const { handler, viewport, ...props } = visibilityTestData;
+
+        const parentCategoryNode = createCategoryHierarchyNode(modelId, parentCategoryId);
+        // Changing category for hidden model should put all other categories into Hide overrides
+        await handler.changeVisibility(parentCategoryNode, true);
+        viewport.renderFrame();
+        await validateHierarchyVisibility({
+          ...props,
+          handler,
+          viewport,
+          visibilityExpectations: {
+            subject: () => "partial",
+            category: ({ categoryId }) => (categoryId === parentCategoryId ? "visible" : "hidden"),
+            model: () => "partial",
+            groupingNode: ({ elementIds }) => (!elementIds.includes(parentElementId) ? "visible" : "hidden"),
+            element: ({ elementId }) => (elementId !== parentElementId ? "visible" : "hidden"),
           },
         });
       });
