@@ -24,7 +24,8 @@ interface SubjectInfo {
 
 interface ModelInfo {
   isModelPrivate: boolean;
-  categories: Id64Set;
+  // Keys are category Ids and boolean tells if category is of root element
+  categories: Map<Id64String, boolean>;
 }
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
@@ -249,16 +250,19 @@ export class ModelsTreeIdsCache implements Disposable {
     return entry;
   }
 
-  private async *queryModelCategories() {
-    const query = /* sql */ `
-      SELECT this.Model.Id modelId, this.Category.Id categoryId, m.IsPrivate isModelPrivate
+  private async *queryModelCategories(): AsyncIterableIterator<{ modelId: Id64String; categoryId: Id64String; isModelPrivate: boolean; isCategoryOfRootElement: boolean }> {
+    const query = `
+      SELECT 
+        this.Model.Id modelId,
+        this.Category.Id categoryId,
+        m.IsPrivate isModelPrivate,
+        MAX(IIF(this.Parent.Id IS NULL, 1, 0)) isCategoryOfRootElement
       FROM BisCore.Model m
       JOIN ${this._hierarchyConfig.elementClassSpecification} this ON m.ECInstanceId = this.Model.Id
-      WHERE this.Parent.Id IS NULL
       GROUP BY modelId, categoryId, isModelPrivate
     `;
     for await (const row of this._queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
-      yield { modelId: row.modelId, categoryId: row.categoryId, isModelPrivate: !!row.isModelPrivate };
+      yield { modelId: row.modelId, categoryId: row.categoryId, isModelPrivate: !!row.isModelPrivate, isCategoryOfRootElement: !!row.isCategoryOfRootElement };
     }
   }
 
@@ -298,14 +302,17 @@ export class ModelsTreeIdsCache implements Disposable {
 
   private async getModelInfos() {
     this._modelInfos ??= (async () => {
-      const modelInfos = new Map<Id64String, { categories: Id64Set; isModelPrivate: boolean }>();
-      for await (const { modelId, categoryId, isModelPrivate } of this.queryModelCategories()) {
+      const modelInfos = new Map<Id64String, { categories: Map<Id64String, boolean>; isModelPrivate: boolean }>();
+      for await (const { modelId, categoryId, isModelPrivate, isCategoryOfRootElement } of this.queryModelCategories()) {
         const entry = modelInfos.get(modelId);
         if (entry) {
-          entry.categories.add(categoryId);
+          const categoryEntry = entry.categories.get(categoryId);
+          if (!categoryEntry) {
+            entry.categories.set(categoryId, isCategoryOfRootElement);
+          }
           entry.isModelPrivate = isModelPrivate;
         } else {
-          modelInfos.set(modelId, { categories: new Set([categoryId]), isModelPrivate });
+          modelInfos.set(modelId, { categories: new Map([[categoryId, isCategoryOfRootElement]]), isModelPrivate });
         }
       }
       return modelInfos;
@@ -315,7 +322,7 @@ export class ModelsTreeIdsCache implements Disposable {
 
   public async getModelCategories(modelId: Id64String): Promise<Id64Array> {
     const modelInfos = await this.getModelInfos();
-    const categories = modelInfos.get(modelId)?.categories;
+    const categories = modelInfos.get(modelId)?.categories.keys();
     return categories ? [...categories] : [];
   }
 
@@ -432,7 +439,8 @@ export class ModelsTreeIdsCache implements Disposable {
         const result = new Set<Id64String>();
         const modelInfos = await this.getModelInfos();
         modelInfos?.forEach((modelInfo, modelId) => {
-          if (modelInfo.categories.has(categoryId)) {
+          const categoryEntry = modelInfo.categories.get(categoryId);
+          if (categoryEntry) {
             result.add(modelId);
           }
         });
