@@ -2614,7 +2614,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
     });
 
-    it.only("changing element visibility changes merged parent category visibility", async function () {
+    it("changing element visibility changes merged parent category visibility", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
         const category1 = insertSpatialCategory({ builder, codeValue: "category1", userLabel: "SomeLabel" }).id;
