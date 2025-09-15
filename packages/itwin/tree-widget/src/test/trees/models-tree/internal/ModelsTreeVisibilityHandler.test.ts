@@ -1403,14 +1403,11 @@ describe("ModelsTreeVisibilityHandler", () => {
                 [otherCategoryId, [otherAlwaysDrawnElement, otherNeverDrawnElement]],
               ]),
             });
-            sinon.useFakeTimers({ shouldClearNativeTimers: true });
             using handlerResult = createHandler({ viewport, idsCache });
             const { handler } = handlerResult;
-            await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
             await handler.changeVisibility(node, true);
             expect(viewport.alwaysDrawn).to.deep.eq(new Set([otherAlwaysDrawnElement]));
             expect(viewport.neverDrawn).to.deep.eq(new Set([otherNeverDrawnElement]));
-            sinon.clock.restore();
           });
 
           it(`removes per model category overrides`, async () => {
@@ -2628,6 +2625,8 @@ describe("ModelsTreeVisibilityHandler", () => {
       using visibilityTestData = createVisibilityTestData({ imodel });
       const { handler, provider, viewport } = visibilityTestData;
       await handler.changeVisibility(createElementHierarchyNode({ modelId: ids.model, categoryId: ids.category2, elementId: ids.element2 }), true);
+      // Need to render frame for always/never drawn change event to fire
+      viewport.renderFrame();
 
       await validateHierarchyVisibility({
         provider,

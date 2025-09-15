@@ -8,15 +8,19 @@ import {
   debounceTime,
   defer,
   EMPTY,
+  filter,
   first,
   fromEventPattern,
   map,
   of,
   reduce,
+  scan,
   share,
+  shareReplay,
   startWith,
   Subject,
   switchMap,
+  take,
   takeUntil,
   tap,
 } from "rxjs";
@@ -48,23 +52,32 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
   #disposeSubject = new Subject<void>();
   readonly #viewport: Viewport;
 
+  #suppressors: Observable<number>;
+  #suppress = new Subject<boolean>();
   #suppressionCount = 0;
 
   constructor(viewport: Viewport) {
     this.#viewport = viewport;
     this.#alwaysDrawn = { cacheEntryObs: this.createCacheEntryObservable("always") };
     this.#neverDrawn = { cacheEntryObs: this.createCacheEntryObservable("never") };
+    this.#suppressors = this.#suppress.pipe(
+      scan((acc, suppress) => acc + (suppress ? 1 : -1), 0),
+      startWith(0),
+      shareReplay(1),
+    );
     this.#subscriptions = [this.#alwaysDrawn.cacheEntryObs.subscribe(), this.#neverDrawn.cacheEntryObs.subscribe()];
   }
 
   public suppressChangeEvents() {
     ++this.#suppressionCount;
+    this.#suppress.next(true);
   }
 
   public resumeChangeEvents() {
     if (this.#suppressionCount > 0) {
       --this.#suppressionCount;
     }
+    this.#suppress.next(false);
   }
 
   public getElements({ setType, modelId, categoryIds }: { setType: SetType } & AlwaysOrNeverDrawnElementsQueryProps): Observable<Id64Set> {
@@ -87,7 +100,9 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
           return elements;
         };
 
-    return this.#suppressionCount === 0 ? cache.cacheEntryObs.pipe(map(getElements)) : of(cache.latestCacheEntryValue).pipe(map(getElements));
+    return this.#suppressionCount === 0 || !cache.latestCacheEntryValue
+      ? cache.cacheEntryObs.pipe(map(getElements))
+      : of(cache.latestCacheEntryValue).pipe(map(getElements));
   }
 
   private createCacheEntryObservable(setType: SetType): Observable<CacheEntry> {
@@ -106,6 +121,13 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
       // This will make newly subscribed observers wait for the debounce period to pass
       // instead of consuming the cached value which at this point becomes invalid.
       tap(() => resultSubject.next(undefined)),
+      // Check if cache updates are not suppressed.
+      switchMap(() =>
+        this.#suppressors.pipe(
+          filter((suppressors) => suppressors === 0),
+          take(1),
+        ),
+      ),
       debounceTime(SET_CHANGE_DEBOUNCE_TIME),
       // Cancel pending request if dispose() is called.
       takeUntil(this.#disposeSubject),

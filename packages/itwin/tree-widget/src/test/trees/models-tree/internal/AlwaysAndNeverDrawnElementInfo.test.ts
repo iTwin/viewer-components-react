@@ -193,9 +193,14 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
       info.suppressChangeEvents();
       vp.setAlwaysDrawn(new Set(["0x4"]));
+      await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       await firstValueFrom(info.getElements({ setType, modelId }));
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
       expect(result1).to.deep.eq(set);
+      info.resumeChangeEvents();
+
+      await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
+      expect(vp.iModel.createQueryReader).to.be.calledTwice;
     });
 
     it(`requeries when supression is removed and ${setType}Drawn changes`, async () => {
