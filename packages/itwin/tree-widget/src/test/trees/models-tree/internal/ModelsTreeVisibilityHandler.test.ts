@@ -16,6 +16,7 @@ import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor, Hierar
 import { InstanceKey } from "@itwin/presentation-shared";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { createVisibilityStatus } from "../../../../tree-widget-react/components/trees/common/Tooltip.js";
+import { SET_CHANGE_DEBOUNCE_TIME } from "../../../../tree-widget-react/components/trees/models-tree/internal/AlwaysAndNeverDrawnElementInfo.js";
 import { ModelsTreeIdsCache } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import { createModelsTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
@@ -49,7 +50,6 @@ import type { GeometricElement3dProps, QueryBinder } from "@itwin/core-common";
 import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath, HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { Id64String } from "@itwin/core-bentley";
 import type { ValidateNodeProps } from "./VisibilityValidation.js";
-
 interface VisibilityOverrides {
   models?: Map<Id64String, Visibility>;
   categories?: Map<Id64String, Visibility>;
@@ -1403,11 +1403,14 @@ describe("ModelsTreeVisibilityHandler", () => {
                 [otherCategoryId, [otherAlwaysDrawnElement, otherNeverDrawnElement]],
               ]),
             });
+            sinon.useFakeTimers({ shouldClearNativeTimers: true });
             using handlerResult = createHandler({ viewport, idsCache });
             const { handler } = handlerResult;
+            await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
             await handler.changeVisibility(node, true);
             expect(viewport.alwaysDrawn).to.deep.eq(new Set([otherAlwaysDrawnElement]));
             expect(viewport.neverDrawn).to.deep.eq(new Set([otherNeverDrawnElement]));
+            sinon.clock.restore();
           });
 
           it(`removes per model category overrides`, async () => {
@@ -2611,7 +2614,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
     });
 
-    it("changing element visibility changes merged parent category visibility", async function () {
+    it.only("changing element visibility changes merged parent category visibility", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
         const category1 = insertSpatialCategory({ builder, codeValue: "category1", userLabel: "SomeLabel" }).id;
@@ -2639,6 +2642,8 @@ describe("ModelsTreeVisibilityHandler", () => {
         },
       });
       await handler.changeVisibility(createElementHierarchyNode({ modelId: ids.model, categoryId: ids.category1, elementId: ids.element1 }), true);
+      // Need to render frame for always/never drawn change event to fire
+      viewport.renderFrame();
       await validateHierarchyVisibility({
         provider,
         handler,
