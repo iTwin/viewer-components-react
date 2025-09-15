@@ -2718,7 +2718,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         });
       });
 
-      it("changing category visibility of hidden model turns on child elements that have the same category", async function () {
+      it("changing category visibility turns on child elements that have the same category", async function () {
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           const sharedCategory = insertSpatialCategory({ builder, codeValue: "parentCategory" });
           const parentCategory2 = insertSpatialCategory({ builder, codeValue: "parentCategory2" });
