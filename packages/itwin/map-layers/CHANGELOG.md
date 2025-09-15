@@ -1,8 +1,24 @@
 # Change Log - @itwin/map-layers
 
-<!-- This log was last generated on Wed, 03 Sep 2025 19:13:15 GMT and should not be manually modified. -->
+<!-- This log was last generated on Thu, 11 Sep 2025 20:53:05 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 6.0.6
+
+Thu, 11 Sep 2025 20:53:05 GMT
+
+### Patches
+
+- Fix Drag and Drop of layers in React Strict Mode ([#1447](https://github.com/iTwin/viewer-components-react/pull/1447))
+
+## 6.0.5
+
+Mon, 08 Sep 2025 15:05:41 GMT
+
+### Patches
+
+- Fix hidden map layers feature info widget to use getWidgets instead of deprecated provideWidgets. ([#1443](https://github.com/iTwin/viewer-components-react/pull/1443))
 
 ## 6.0.4
 

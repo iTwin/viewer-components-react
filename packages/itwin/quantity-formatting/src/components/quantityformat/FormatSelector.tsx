@@ -4,12 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as React from "react";
-
-import type { FormatDefinition } from "@itwin/core-quantity";
-import { ComboBox, Flex, Label, Text } from "@itwin/itwinui-react";
-
+import { Flex, Input, List, ListItem, Text } from "@itwin/itwinui-react";
 import { useTranslation } from "../../useTranslation.js";
 
+import type { FormatDefinition } from "@itwin/core-quantity";
 import type { FormatSet } from "@itwin/ecschema-metadata";
 
 /**
@@ -22,7 +20,7 @@ interface FormatSelectorProps {
 }
 
 /**
- * A React component that renders a format selector dropdown for choosing quantity formats.
+ * A React component that renders a format selector with searchable list for choosing quantity formats.
  * @beta
  */
 export const FormatSelector: React.FC<FormatSelectorProps> = ({
@@ -31,53 +29,88 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
   onListItemChange,
 }) => {
   const { translate } = useTranslation();
-  const formatListId = React.useId();
+  const [searchTerm, setSearchTerm] = React.useState("");
 
-  // Prepare options for ComboBox
-  const formatOptions = React.useMemo(() => {
+  // Prepare format entries
+  const formatEntries = React.useMemo(() => {
     if (!activeFormatSet?.formats) {
       return [];
     }
 
     return Object.entries(activeFormatSet.formats).map(([key, formatDef]) => ({
-      value: key,
+      key,
+      formatDef,
       label: formatDef.label || key,
-      sublabel: formatDef.description,
+      description: formatDef.description || "",
     }));
   }, [activeFormatSet?.formats]);
 
-  const handleFormatChange = React.useCallback(
-    (value: string) => {
-      if (activeFormatSet?.formats && value) {
-        const formatDef = activeFormatSet.formats[value];
-        if (formatDef) {
-          onListItemChange(formatDef, value);
-        }
+  // Filter formats based on search term
+  const filteredFormats = React.useMemo(() => {
+    if (!searchTerm.trim()) {
+      return formatEntries;
+    }
+
+    const lowerSearchTerm = searchTerm.toLowerCase();
+    return formatEntries.filter(({ label }) =>
+      label.toLowerCase().includes(lowerSearchTerm)
+    );
+  }, [formatEntries, searchTerm]);
+
+  const handleFormatSelect = React.useCallback(
+    (key: string) => {
+      if (activeFormatSet?.formats) {
+        const formatDef = activeFormatSet.formats[key];
+        onListItemChange(formatDef, key);
       }
     },
-    [activeFormatSet?.formats, onListItemChange],
+    [onListItemChange, activeFormatSet]
+  );
+
+  const handleSearchChange = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchTerm(event.target.value);
+    },
+    []
   );
 
   return (
-    <Flex flexDirection="column" alignItems="flex-start">
+    <Flex flexDirection="column" alignItems="flex-start" gap="none" className="quantityFormat--formatSelector-container">
       {activeFormatSet && (
         <>
-          <Label htmlFor={formatListId} className="quantity-format-label">
-            <Text variant="leading">
-              {translate("QuantityFormat:labels.formatSetSectionLabel")}
-            </Text>
-          </Label>
-          <ComboBox
-            id={formatListId}
-            className="format-selector-list"
-            options={formatOptions}
-            value={activeFormatDefinitionKey || ""}
-            onChange={handleFormatChange}
-            enableVirtualization
-            dropdownMenuProps={{
-              className: "quantityFormat--format-selector-menu",
-            }}
+          <Input
+            value={searchTerm}
+            onChange={handleSearchChange}
+            placeholder={translate("QuantityFormat:labels.searchFormats")}
           />
+          <List
+            className="quantityFormat--formatSelector-list"
+          >
+            {filteredFormats.map(({ key, label, description }) => (
+              <ListItem
+                key={key}
+                onClick={() => handleFormatSelect(key)}
+                active={activeFormatDefinitionKey === key}
+                className={`quantityFormat--formatSelector-listItem`}
+              >
+                <Flex flexDirection="column" alignItems="flex-start">
+                  <Text variant="body">{label}</Text>
+                  {description && (
+                    <Text variant="small" isMuted>
+                      {description}
+                    </Text>
+                  )}
+                </Flex>
+              </ListItem>
+            ))}
+            {filteredFormats.length === 0 && searchTerm.trim() && (
+              <ListItem disabled>
+                <Text variant="body" isMuted>
+                  No formats found matching "{searchTerm}"
+                </Text>
+              </ListItem>
+            )}
+          </List>
         </>
       )}
     </Flex>
