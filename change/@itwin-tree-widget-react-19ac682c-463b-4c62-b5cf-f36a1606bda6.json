@@ -1,6 +1,6 @@
 {
   "type": "patch",
-  "comment": "Fixed visibility problem in models tree related to parent/child elements. Turning on category visibility  hidden model would sometimes turn on other elements' children that are not related to that category.",
+  "comment": "Models tree: Fixed turning on category visibility under a hidden model causing categories of child elements to also become visible.",
   "packageName": "@itwin/tree-widget-react",
   "email": "100586436+JonasDov@users.noreply.github.com",
   "dependentChangeType": "patch"
