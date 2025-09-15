@@ -2672,7 +2672,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           visibilityExpectations: {
             // Only categories of elements without parents are shown in the tree
             category: () => "visible",
-            subject: () => "partial",         
+            subject: () => "partial",
             model: () => "partial",
             groupingNode: ({ elementIds }) => (elementIds.includes(parentElementId) ? "visible" : "hidden"),
             element: ({ elementId }) => (elementId === parentElementId ? "visible" : "hidden"),

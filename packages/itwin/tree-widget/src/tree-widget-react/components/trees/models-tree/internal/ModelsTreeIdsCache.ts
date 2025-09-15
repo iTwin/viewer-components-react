@@ -250,7 +250,12 @@ export class ModelsTreeIdsCache implements Disposable {
     return entry;
   }
 
-  private async *queryModelCategories(): AsyncIterableIterator<{ modelId: Id64String; categoryId: Id64String; isModelPrivate: boolean; isCategoryOfRootElement: boolean }> {
+  private async *queryModelCategories(): AsyncIterableIterator<{
+    modelId: Id64String;
+    categoryId: Id64String;
+    isModelPrivate: boolean;
+    isCategoryOfRootElement: boolean;
+  }> {
     const query = `
       SELECT 
         this.Model.Id modelId,
