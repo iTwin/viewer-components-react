@@ -6,13 +6,14 @@
 import {
   BehaviorSubject,
   debounceTime,
+  defer,
   EMPTY,
   filter,
   first,
-  from,
   fromEventPattern,
   map,
-  merge,
+  mergeMap,
+  of,
   reduce,
   scan,
   share,
@@ -28,70 +29,55 @@ import { Id64 } from "@itwin/core-bentley";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { pushToMap } from "../../common/Utils.js";
 
-import type { BeEvent, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { Observable, Subscription } from "rxjs";
 import type { Viewport } from "@itwin/core-frontend";
 
-interface ElementInfo {
-  elementId: Id64String;
-  modelId: Id64String;
-  categoryId: Id64String;
-}
+/** @internal */
+export const SET_CHANGE_DEBOUNCE_TIME = 20;
 
-type CacheEntry = Map<Id64String, Map<Id64String, Id64Set>>;
+type SetType = "always" | "never";
 
+/** @internal */
 export interface AlwaysOrNeverDrawnElementsQueryProps {
   modelId: Id64String;
   categoryIds?: Id64Arg;
 }
 
-export const SET_CHANGE_DEBOUNCE_TIME = 20;
+type CacheEntry = Map<Id64String, Map<Id64String, Id64Set>>;
 
 export class AlwaysAndNeverDrawnElementInfo implements Disposable {
-  private _subscriptions: Subscription[];
-  private _alwaysDrawn: Observable<CacheEntry>;
-  private _neverDrawn: Observable<CacheEntry>;
-  private _disposeSubject = new Subject<void>();
+  #subscriptions: Subscription[];
+  #alwaysDrawn: { cacheEntryObs: Observable<CacheEntry>; latestCacheEntryValue?: CacheEntry };
+  #neverDrawn: { cacheEntryObs: Observable<CacheEntry>; latestCacheEntryValue?: CacheEntry };
+  #disposeSubject = new Subject<void>();
+  readonly #viewport: Viewport;
 
-  private _suppressors: Observable<number>;
-  private _suppress = new Subject<boolean>();
-  private _forceUpdate = new Subject<void>();
+  #suppressors: Observable<number>;
+  #suppress = new Subject<boolean>();
 
-  constructor(private readonly _viewport: Viewport) {
-    this._alwaysDrawn = this.createCacheEntryObservable({
-      event: this._viewport.onAlwaysDrawnChanged,
-      getSet: () => this._viewport.alwaysDrawn,
-      id: "alwaysDrawn",
-    });
-    this._neverDrawn = this.createCacheEntryObservable({
-      event: this._viewport.onNeverDrawnChanged,
-      getSet: () => this._viewport.neverDrawn,
-      id: "neverDrawn",
-    });
-    this._suppressors = this._suppress.pipe(
+  constructor(viewport: Viewport) {
+    this.#viewport = viewport;
+    this.#alwaysDrawn = { cacheEntryObs: this.createCacheEntryObservable("always") };
+    this.#neverDrawn = { cacheEntryObs: this.createCacheEntryObservable("never") };
+    this.#suppressors = this.#suppress.pipe(
       scan((acc, suppress) => acc + (suppress ? 1 : -1), 0),
       startWith(0),
       shareReplay(1),
     );
-    this._subscriptions = [
-      this._alwaysDrawn.subscribe(),
-      this._neverDrawn.subscribe(),
-      this._suppressors.pipe(filter((suppressors) => suppressors === 0)).subscribe({
-        next: () => this._forceUpdate.next(),
-      }),
-    ];
+    this.#subscriptions = [this.#alwaysDrawn.cacheEntryObs.subscribe(), this.#neverDrawn.cacheEntryObs.subscribe()];
   }
 
   public suppressChangeEvents() {
-    this._suppress.next(true);
+    this.#suppress.next(true);
   }
 
   public resumeChangeEvents() {
-    this._suppress.next(false);
+    this.#suppress.next(false);
   }
 
-  public getElements({ setType, modelId, categoryIds }: { setType: "always" | "never" } & AlwaysOrNeverDrawnElementsQueryProps): Observable<Id64Set> {
-    const cache = setType === "always" ? this._alwaysDrawn : this._neverDrawn;
+  public getElements({ setType, modelId, categoryIds }: { setType: SetType } & AlwaysOrNeverDrawnElementsQueryProps): Observable<Id64Set> {
+    const cache = setType === "always" ? this.#alwaysDrawn : this.#neverDrawn;
     const getElements = categoryIds
       ? (entry: CacheEntry | undefined) => {
           const result = new Set<Id64String>();
@@ -110,40 +96,48 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
           return elements;
         };
 
-    return cache.pipe(map(getElements));
+    return !cache.latestCacheEntryValue
+      ? cache.cacheEntryObs.pipe(map(getElements))
+      : this.#suppressors.pipe(
+          take(1),
+          mergeMap((suppressionCount) =>
+            suppressionCount > 0 ? of(cache.latestCacheEntryValue).pipe(map(getElements)) : cache.cacheEntryObs.pipe(map(getElements)),
+          ),
+        );
   }
 
-  private createCacheEntryObservable(props: { event: BeEvent<() => void>; getSet(): Id64Set | undefined; id: string }) {
-    const event = props.event;
+  private createCacheEntryObservable(setType: SetType): Observable<CacheEntry> {
+    const event = setType === "always" ? this.#viewport.onAlwaysDrawnChanged : this.#viewport.onNeverDrawnChanged;
+    const getIds = setType === "always" ? () => this.#viewport.alwaysDrawn : () => this.#viewport.neverDrawn;
+
     const resultSubject = new BehaviorSubject<CacheEntry | undefined>(undefined);
 
-    const obs = merge(
-      fromEventPattern(
-        (handler) => event.addListener(handler),
-        (handler) => event.removeListener(handler),
-      ),
-      this._forceUpdate,
+    const obs = fromEventPattern(
+      (handler) => event.addListener(handler),
+      (handler) => event.removeListener(handler),
     ).pipe(
       // Fire the observable once at the beginning
       startWith(undefined),
-      // Stop listening to events when dispose() is called
-      takeUntil(this._disposeSubject),
       // Reset result subject as soon as a new event is emitted.
       // This will make newly subscribed observers wait for the debounce period to pass
       // instead of consuming the cached value which at this point becomes invalid.
       tap(() => resultSubject.next(undefined)),
       // Check if cache updates are not suppressed.
       switchMap(() =>
-        this._suppressors.pipe(
+        this.#suppressors.pipe(
           filter((suppressors) => suppressors === 0),
           take(1),
         ),
       ),
       debounceTime(SET_CHANGE_DEBOUNCE_TIME),
       // Cancel pending request if dispose() is called.
-      takeUntil(this._disposeSubject),
+      takeUntil(this.#disposeSubject),
       // If multiple requests are sent at once, preserve only the result of the newest.
-      switchMap(() => this.queryAlwaysOrNeverDrawnElementInfo(props.getSet(), props.id)),
+      switchMap(() => this.queryAlwaysOrNeverDrawnElementInfo(getIds(), `${setType}Drawn`)),
+      tap((cacheEntry) => {
+        const value = setType === "always" ? this.#alwaysDrawn : this.#neverDrawn;
+        value.latestCacheEntryValue = cacheEntry;
+      }),
       // Share the result by using a subject which always emits the saved result.
       share({
         connector: () => resultSubject,
@@ -156,9 +150,9 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
   }
 
   public [Symbol.dispose]() {
-    this._subscriptions.forEach((x) => x.unsubscribe());
-    this._subscriptions = [];
-    this._disposeSubject.next();
+    this.#subscriptions.forEach((x) => x.unsubscribe());
+    this.#subscriptions = [];
+    this.#disposeSubject.next();
   }
 
   private queryAlwaysOrNeverDrawnElementInfo(set: Id64Set | undefined, requestId: string): Observable<CacheEntry> {
@@ -176,45 +170,52 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
     );
   }
 
-  private queryElementInfo(elementIds: Id64Array, requestId: string): Observable<ElementInfo> {
-    const executor = createECSqlQueryExecutor(this._viewport.iModel);
-    const reader = executor.createQueryReader(
-      {
-        ctes: [
-          `
-        ElementInfo(elementId, modelId, categoryId, parentId) AS (
-          SELECT
-            ECInstanceId elementId,
-            Model.Id modelId,
-            Category.Id categoryId,
-            Parent.Id parentId
-          FROM bis.GeometricElement3d
-          WHERE InVirtualSet(?, ECInstanceId)
+  private queryElementInfo(
+    elementIds: Id64Array,
+    requestId: string,
+  ): Observable<{
+    elementId: Id64String;
+    modelId: Id64String;
+    categoryId: Id64String;
+  }> {
+    return defer(() => {
+      const executor = createECSqlQueryExecutor(this.#viewport.iModel);
+      return executor.createQueryReader(
+        {
+          ctes: [
+            `
+            ElementInfo(elementId, modelId, categoryId, parentId) AS (
+              SELECT
+                ECInstanceId elementId,
+                Model.Id modelId,
+                Category.Id categoryId,
+                Parent.Id parentId
+              FROM bis.GeometricElement3d
+              WHERE InVirtualSet(?, ECInstanceId)
 
-          UNION ALL
+              UNION ALL
 
-          SELECT
-            e.elementId,
-            e.modelId,
-            p.Category.Id categoryId,
-            p.Parent.Id parentId
-          FROM bis.GeometricElement3d p
-          JOIN ElementInfo e ON p.ECInstanceId = e.parentId
-        )
-        `,
-        ],
-        ecsql: `
-        SELECT elementId, modelId, categoryId
-        FROM ElementInfo
-        WHERE parentId IS NULL
-      `,
-        bindings: [{ type: "idset", value: elementIds }],
-      },
-      {
-        restartToken: `ModelsTreeVisibilityHandler/${requestId}`,
-      },
-    );
-
-    return from(reader).pipe(map((row) => ({ elementId: row.elementId, modelId: row.modelId, categoryId: row.categoryId })));
+              SELECT
+                e.elementId,
+                e.modelId,
+                p.Category.Id categoryId,
+                p.Parent.Id parentId
+              FROM bis.GeometricElement3d p
+              JOIN ElementInfo e ON p.ECInstanceId = e.parentId
+            )
+            `,
+          ],
+          ecsql: `
+            SELECT elementId, modelId, categoryId
+            FROM ElementInfo
+            WHERE parentId IS NULL
+          `,
+          bindings: [{ type: "idset", value: elementIds }],
+        },
+        {
+          restartToken: `ModelsTreeVisibilityHandler/${requestId}`,
+        },
+      );
+    }).pipe(map((row) => ({ elementId: row.elementId, modelId: row.modelId, categoryId: row.categoryId })));
   }
 }

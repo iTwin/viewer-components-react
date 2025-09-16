@@ -49,7 +49,6 @@ import type { GeometricElement3dProps, QueryBinder } from "@itwin/core-common";
 import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath, HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { Id64String } from "@itwin/core-bentley";
 import type { ValidateNodeProps } from "./VisibilityValidation.js";
-
 interface VisibilityOverrides {
   models?: Map<Id64String, Visibility>;
   categories?: Map<Id64String, Visibility>;
@@ -2625,6 +2624,8 @@ describe("ModelsTreeVisibilityHandler", () => {
       using visibilityTestData = createVisibilityTestData({ imodel });
       const { handler, provider, viewport } = visibilityTestData;
       await handler.changeVisibility(createElementHierarchyNode({ modelId: ids.model, categoryId: ids.category2, elementId: ids.element2 }), true);
+      // Need to render frame for always/never drawn change event to fire
+      viewport.renderFrame();
 
       await validateHierarchyVisibility({
         provider,
@@ -2639,6 +2640,8 @@ describe("ModelsTreeVisibilityHandler", () => {
         },
       });
       await handler.changeVisibility(createElementHierarchyNode({ modelId: ids.model, categoryId: ids.category1, elementId: ids.element1 }), true);
+      // Need to render frame for always/never drawn change event to fire
+      viewport.renderFrame();
       await validateHierarchyVisibility({
         provider,
         handler,
