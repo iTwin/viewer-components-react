@@ -16,7 +16,6 @@ import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor, Hierar
 import { InstanceKey } from "@itwin/presentation-shared";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { createVisibilityStatus } from "../../../../tree-widget-react/components/trees/common/Tooltip.js";
-import { SET_CHANGE_DEBOUNCE_TIME } from "../../../../tree-widget-react/components/trees/models-tree/internal/AlwaysAndNeverDrawnElementInfo.js";
 import { ModelsTreeIdsCache } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import { createModelsTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
