@@ -170,6 +170,7 @@ export function setupInitialDisplayState(props: {
   for (const modelInfo of models) {
     viewport.changeModelDisplay(modelInfo.id, modelInfo.visible);
   }
+  viewport.renderFrame();
 }
 
 export function createTestDataForInitialDisplay(props: {

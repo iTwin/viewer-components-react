@@ -216,7 +216,7 @@ export class Datasets {
                   <Class class="bis:Category" />
               </Source>
               <Target multiplicity="(0..*)" roleLabel="is symbolized by" polymorphic="true">
-                  <Class class="clsf:Classification "/>
+                  <Class class="clsf:Classification"/>
               </Target>
           </ECRelationshipClass>
         `,
