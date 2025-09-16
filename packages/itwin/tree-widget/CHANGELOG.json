@@ -2,6 +2,27 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Tue, 16 Sep 2025 11:13:44 GMT",
+      "version": "3.14.2",
+      "tag": "@itwin/tree-widget-react_v3.14.2",
+      "comments": {
+        "patch": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "f6de2da24ad79161b33a3fbbe632a942a68fcf43",
+            "comment": "Models tree: Fixed turning on category visibility under a hidden model causing categories of child elements to also become visible."
+          },
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "44c679e3eaea98d771a40868ebb42875a4dd4cbf",
+            "comment": "Fix a query being unnecessarily executed after every node visibility change."
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 02 Sep 2025 13:55:23 GMT",
       "version": "3.14.1",
       "tag": "@itwin/tree-widget-react_v3.14.1",

@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Models tree: Fixed turning on category visibility under a hidden model causing categories of child elements to also become visible.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "100586436+JonasDov@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

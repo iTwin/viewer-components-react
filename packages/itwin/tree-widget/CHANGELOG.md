@@ -1,8 +1,17 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Thu, 28 Aug 2025 19:47:46 GMT and should not be manually modified. -->
+<!-- This log was last generated on Tue, 16 Sep 2025 11:13:44 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.14.2
+
+Tue, 16 Sep 2025 11:13:44 GMT
+
+### Patches
+
+- Models tree: Fixed turning on category visibility under a hidden model causing categories of child elements to also become visible. ([#1452](https://github.com/iTwin/viewer-components-react/pull/1452))
+- Fix a query being unnecessarily executed after every node visibility change. ([#1439](https://github.com/iTwin/viewer-components-react/pull/1439))
 
 ## 3.14.1
 
