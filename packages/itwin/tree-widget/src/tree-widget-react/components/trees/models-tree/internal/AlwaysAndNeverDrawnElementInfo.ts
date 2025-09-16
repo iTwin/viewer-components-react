@@ -12,6 +12,7 @@ import {
   first,
   fromEventPattern,
   map,
+  mergeMap,
   of,
   reduce,
   scan,
@@ -54,7 +55,6 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
 
   #suppressors: Observable<number>;
   #suppress = new Subject<boolean>();
-  #suppressionCount = 0;
 
   constructor(viewport: Viewport) {
     this.#viewport = viewport;
@@ -69,14 +69,10 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
   }
 
   public suppressChangeEvents() {
-    ++this.#suppressionCount;
     this.#suppress.next(true);
   }
 
   public resumeChangeEvents() {
-    if (this.#suppressionCount > 0) {
-      --this.#suppressionCount;
-    }
     this.#suppress.next(false);
   }
 
@@ -100,9 +96,14 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
           return elements;
         };
 
-    return this.#suppressionCount === 0 || !cache.latestCacheEntryValue
+    return !cache.latestCacheEntryValue
       ? cache.cacheEntryObs.pipe(map(getElements))
-      : of(cache.latestCacheEntryValue).pipe(map(getElements));
+      : this.#suppressors.pipe(
+          take(1),
+          mergeMap((suppressionCount) =>
+            suppressionCount > 0 ? of(cache.latestCacheEntryValue).pipe(map(getElements)) : cache.cacheEntryObs.pipe(map(getElements)),
+          ),
+        );
   }
 
   private createCacheEntryObservable(setType: SetType): Observable<CacheEntry> {
