@@ -2,6 +2,7 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
+
 import { XMLParser } from "fast-xml-parser";
 import fs from "fs";
 import { SnapshotDb } from "@itwin/core-backend";
@@ -32,6 +33,8 @@ import type {
   SubCategoryProps,
   SubjectProps,
 } from "@itwin/core-common";
+
+// cspell:words ecdbmap jpath
 
 export async function buildIModel(
   mochaContext: Mocha.Context,

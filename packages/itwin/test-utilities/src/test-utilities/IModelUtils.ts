@@ -22,6 +22,8 @@ import { BisCodeSpec, Code, IModel } from "@itwin/core-common";
 
 import type { Id64String } from "@itwin/core-bentley";
 
+// cspell:words ecdbmap
+
 export interface TestIModelBuilder {
   insertModel(props: ModelProps): Id64String;
   insertElement(props: ElementProps): Id64String;

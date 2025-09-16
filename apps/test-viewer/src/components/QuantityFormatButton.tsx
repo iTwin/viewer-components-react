@@ -4,12 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import React, { useCallback, useState } from "react";
-import { FormatSelector, QuantityFormatPanel } from "@itwin/quantity-formatting-react";
 import { IModelApp } from "@itwin/core-frontend";
-import type { FormatDefinition } from "@itwin/core-quantity";
-import { Button, Modal, ModalButtonBar } from "@itwin/itwinui-react";
+import { Button, Flex, Modal, Text } from "@itwin/itwinui-react";
+import { FormatSelector, QuantityFormatPanel } from "@itwin/quantity-formatting-react";
 import { FormatManager } from "./FormatManager";
 
+import type { FormatDefinition } from "@itwin/core-quantity";
 import type { FormatSet } from "@itwin/ecschema-metadata";
 
 /** Button component that shows a button to open the Quantity Format Panel in a modal */
@@ -67,24 +67,28 @@ export const QuantityFormatButton: React.FC = () => {
         Customize Formatting
       </Button>
 
-      <Modal isOpen={isModalOpen} onClose={handleCloseModal} title="Quantity Format Settings" style={{ width: "600px", maxWidth: "90vw" }}>
-        <div style={{ padding: "16px", overflow: "auto" }}>
-          <div>
+      <Modal isOpen={isModalOpen} onClose={handleCloseModal} title="Quantity Format Settings" className="quantity-format-modal">
+        <Flex flexDirection="row" gap="l" className="format-selector-container">
+          <Flex.Item className="quantity-format-selector-item">
             <FormatSelector
               activeFormatSet={activeFormatSet}
               activeFormatDefinitionKey={activeFormatDefinitionKey}
               onListItemChange={handleFormatSelectorChange}
             />
-          </div>
+          </Flex.Item>
 
-          {formatDefinition && <QuantityFormatPanel formatDefinition={formatDefinition} unitsProvider={unitsProvider} onFormatChange={handleFormatChange} />}
-        </div>
-
-        <ModalButtonBar>
-          <Button styleType="default" onClick={handleCloseModal}>
-            Close
-          </Button>
-        </ModalButtonBar>
+          <Flex.Item className="quantity-format-panel-item">
+            {formatDefinition ? (
+              <QuantityFormatPanel formatDefinition={formatDefinition} unitsProvider={unitsProvider} onFormatChange={handleFormatChange} />
+            ) : (
+              <Flex flexDirection="column" justifyContent="center" alignItems="center" className="quantity-format-empty-state">
+                <Text variant="leading" isMuted>
+                  Select a format in the list to edit
+                </Text>
+              </Flex>
+            )}
+          </Flex.Item>
+        </Flex>
       </Modal>
     </>
   );

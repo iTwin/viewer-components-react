@@ -83,6 +83,7 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
       variant={"ghost"}
       label={TreeWidget.translate("categoriesTree.buttons.showAll.tooltip")}
       onClick={() => {
+        // cspell:disable-next-line
         props.onFeatureUsed?.(`categories-tree-showall`);
         void showAll({ models: props.models, viewport: props.viewport, categories: props.categories.map((category) => category.categoryId) });
       }}
@@ -98,6 +99,7 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
       variant={"ghost"}
       label={TreeWidget.translate("categoriesTree.buttons.hideAll.tooltip")}
       onClick={() => {
+        // cspell:disable-next-line
         props.onFeatureUsed?.(`categories-tree-hideall`);
         void hideAllCategories(
           props.categories.map((category) => category.categoryId),

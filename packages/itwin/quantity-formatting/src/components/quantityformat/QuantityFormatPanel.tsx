@@ -3,15 +3,15 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import "./FormatPanel.scss";
 import * as React from "react";
+import { Button, ButtonGroup, Flex } from "@itwin/itwinui-react";
+import { useTranslation } from "../../useTranslation.js";
+import { FormatPanel } from "./FormatPanel.js";
+import { FormatSample } from "./FormatSample.js";
+
 import type { UnitProps, FormatDefinition } from "@itwin/core-quantity";
 import type { UnitsProvider } from "@itwin/core-quantity";
-import { FormatPanel } from "./FormatPanel.js";
-import { Button, ButtonGroup, Divider, Flex } from "@itwin/itwinui-react";
-import { FormatSample } from "./FormatSample.js";
-import { useTranslation } from "../../useTranslation.js";
-import "./FormatPanel.scss";
-
 /** Properties of [[QuantityFormatPanel]] component.
  * @beta
  */
@@ -104,15 +104,12 @@ export function QuantityFormatPanel(props: QuantityFormatPanelProps) {
   return (
     <div className="components-quantityFormat-quantityPanel">
       {showSample && (
-        <>
-          <FormatSample
-            formatProps={clonedFormatDefinition}
-            unitsProvider={unitsProvider}
-            persistenceUnit={persistenceUnit}
-            initialMagnitude={props.initialMagnitude ?? 1234.5678}
-          />
-          <Divider />
-        </>
+        <FormatSample
+          formatProps={clonedFormatDefinition}
+          unitsProvider={unitsProvider}
+          persistenceUnit={persistenceUnit}
+          initialMagnitude={props.initialMagnitude ?? 1234.5678}
+        />
       )}
       <FormatPanel
         formatProps={clonedFormatDefinition}
@@ -120,7 +117,6 @@ export function QuantityFormatPanel(props: QuantityFormatPanelProps) {
         onFormatChange={handleOnFormatChanged}
         persistenceUnit={persistenceUnit}
       />
-      <Divider className="quantityFormat-formatPanel-divider" />
       <Flex justifyContent="flex-end" gap="xs">
         <ButtonGroup>
           <Button styleType="default" onClick={handleClear} disabled={!saveEnabled}>

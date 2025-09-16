@@ -3,9 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Point3d } from "@itwin/core-geometry";
-import { Cartographic } from "@itwin/core-common";
 import { assert } from "chai";
+import { vi } from "vitest";
+import { Cartographic } from "@itwin/core-common";
+import { IModelApp, QuantityType } from "@itwin/core-frontend";
+import { Point3d } from "@itwin/core-geometry";
 import { Measurement, MeasurementPickContext } from "../../api/Measurement.js";
 import { WellKnownViewType } from "../../api/MeasurementEnums.js";
 import { LocationMeasurement, LocationMeasurementSerializer } from "../../measurements/LocationMeasurement.js";
@@ -68,6 +70,52 @@ describe("LocationMeasurement tests", () => {
     assert.isDefined(measure3.getDecorationGeometry(pickContext));
     assert.isDefined(await measure3.getDataForMeasurementWidget());
     assert.isString(await measure3.getDecorationToolTip(pickContext));
+  });
+
+  it("Test fallback from getFormatterSpec on construction", async () => {
+    // Mock getSpecsByName to return undefined (simulating KoQ lookup failure)
+    const originalGetSpecsByName = IModelApp.quantityFormatter.getSpecsByName;
+    const originalFindFormatterSpecByQuantityType = IModelApp.quantityFormatter.findFormatterSpecByQuantityType;
+
+    // Create a mock that returns undefined for KoQ lookup
+    const getSpecsByNameSpy = vi.fn().mockReturnValue(undefined);
+    const findFormatterSpecSpy = vi.fn().mockReturnValue({
+      format: { formatTraits: 0 },
+      persistenceUnit: { name: "Units.M" },
+      applyFormatting: vi.fn().mockReturnValue("mockedFormattedValue")
+    });
+
+    // Replace the methods with our spies
+    IModelApp.quantityFormatter.getSpecsByName = getSpecsByNameSpy;
+    IModelApp.quantityFormatter.findFormatterSpecByQuantityType = findFormatterSpecSpy;
+
+    try {
+      // Create a LocationMeasurement to trigger createTextMarker
+      const measurement = LocationMeasurement.create(
+        Point3d.create(100, 10, 20),
+        WellKnownViewType.XSection
+      );
+
+      // Wait for the async createTextMarker to complete
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      // Verify that the KoQ lookup was attempted (coordinate is used first in createTextMarker)
+      assert.isTrue(getSpecsByNameSpy.mock.calls.length > 0, "getSpecsByName should have been called during construction");
+      assert.strictEqual(getSpecsByNameSpy.mock.calls[0][0], "AecUnits.LENGTH_COORDINATE", "Should lookup the default coordinate KoQ string");
+
+      // Verify that the fallback method was called
+      assert.isTrue(findFormatterSpecSpy.mock.calls.length > 0, "findFormatterSpecByQuantityType should have been called as fallback");
+      assert.strictEqual(findFormatterSpecSpy.mock.calls[0][0], QuantityType.Coordinate, "Should fallback to QuantityType.Coordinate");
+
+      // Verify the measurement was created successfully
+      assert.isDefined(measurement);
+      assert.isDefined(measurement.location);
+      assert.strictEqual(measurement.coordinateKoQ, "AecUnits.LENGTH_COORDINATE");
+    } finally {
+      // Restore original methods
+      IModelApp.quantityFormatter.getSpecsByName = originalGetSpecsByName;
+      IModelApp.quantityFormatter.findFormatterSpecByQuantityType = originalFindFormatterSpecByQuantityType;
+    }
   });
 
   it("Test MeasureLocationToolModel reset/clear measurements", () => {

@@ -1,8 +1,16 @@
 # Change Log - @itwin/quantity-formatting-react
 
-<!-- This log was last generated on Wed, 20 Aug 2025 13:45:50 GMT and should not be manually modified. -->
+<!-- This log was last generated on Tue, 16 Sep 2025 11:13:44 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.1.1
+
+Tue, 16 Sep 2025 11:13:44 GMT
+
+### Patches
+
+- Update FormatSelector to be a list with a searchbox, instead of dropdown ([#1437](https://github.com/iTwin/viewer-components-react/pull/1437))
 
 ## 0.1.0
 

@@ -30,7 +30,7 @@ interface SubjectInfo {
 
 interface ModelInfo {
   isModelPrivate: boolean;
-  categoryIds: Id64Set;
+  categories: Map<CategoryId, { isRootElementCategory: boolean }>;
 }
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
@@ -257,16 +257,24 @@ export class ModelsTreeIdsCache implements Disposable {
     return entry;
   }
 
-  private async *queryModelCategories(): AsyncIterableIterator<{ modelId: Id64String; categoryId: Id64String; isModelPrivate: boolean }> {
+  private async *queryModelCategories(): AsyncIterableIterator<{
+    modelId: Id64String;
+    categoryId: Id64String;
+    isModelPrivate: boolean;
+    isRootElementCategory: boolean;
+  }> {
     const query = `
-      SELECT this.Model.Id modelId, this.Category.Id categoryId, m.IsPrivate isModelPrivate
+      SELECT
+        this.Model.Id modelId,
+        this.Category.Id categoryId,
+        m.IsPrivate isModelPrivate,
+        MAX(IIF(this.Parent.Id IS NULL, 1, 0)) isRootElementCategory
       FROM ${CLASS_NAME_Model} m
       JOIN ${this._hierarchyConfig.elementClassSpecification} this ON m.ECInstanceId = this.Model.Id
-      WHERE this.Parent.Id IS NULL
       GROUP BY modelId, categoryId, isModelPrivate
     `;
     for await (const row of this._queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
-      yield { modelId: row.modelId, categoryId: row.categoryId, isModelPrivate: !!row.isModelPrivate };
+      yield { modelId: row.modelId, categoryId: row.categoryId, isModelPrivate: !!row.isModelPrivate, isRootElementCategory: !!row.isRootElementCategory };
     }
   }
 
@@ -306,14 +314,14 @@ export class ModelsTreeIdsCache implements Disposable {
 
   private async getModelInfos() {
     this._modelInfos ??= (async () => {
-      const modelInfos = new Map<Id64String, { categoryIds: Id64Set; isModelPrivate: boolean }>();
-      for await (const { modelId, categoryId, isModelPrivate } of this.queryModelCategories()) {
+      const modelInfos = new Map<ModelId, { categories: Map<CategoryId, { isRootElementCategory: boolean }>; isModelPrivate: boolean }>();
+      for await (const { modelId, categoryId, isModelPrivate, isRootElementCategory } of this.queryModelCategories()) {
         const entry = modelInfos.get(modelId);
         if (entry) {
-          entry.categoryIds.add(categoryId);
+          entry.categories.set(categoryId, { isRootElementCategory });
           entry.isModelPrivate = isModelPrivate;
         } else {
-          modelInfos.set(modelId, { categoryIds: new Set([categoryId]), isModelPrivate });
+          modelInfos.set(modelId, { categories: new Map([[categoryId, { isRootElementCategory }]]), isModelPrivate });
         }
       }
       return modelInfos;
@@ -323,7 +331,7 @@ export class ModelsTreeIdsCache implements Disposable {
 
   public async getModelCategoryIds(modelId: Id64String): Promise<Id64Array> {
     const modelInfos = await this.getModelInfos();
-    const categories = modelInfos.get(modelId)?.categoryIds;
+    const categories = modelInfos.get(modelId)?.categories.keys();
     return categories ? [...categories] : [];
   }
 
@@ -353,8 +361,8 @@ export class ModelsTreeIdsCache implements Disposable {
     const result = new Map<CategoryId, Array<ModelId>>();
     for (const categoryId of Id64.iterable(categoryIds)) {
       const entry = new Array<ModelId>();
-      for (const [modelId, { categoryIds: modelCategoryIds }] of modelInfos.entries()) {
-        if (modelCategoryIds.has(categoryId)) {
+      for (const [modelId, { categories }] of modelInfos.entries()) {
+        if (categories.has(categoryId)) {
           entry.push(modelId);
         }
       }
@@ -395,7 +403,8 @@ export class ModelsTreeIdsCache implements Disposable {
         const result = new Set<ModelId>();
         const modelInfos = await this.getModelInfos();
         modelInfos?.forEach((modelInfo, modelId) => {
-          if (modelInfo.categoryIds.has(categoryId)) {
+          const categoryEntry = modelInfo.categories.get(categoryId);
+          if (categoryEntry?.isRootElementCategory) {
             result.add(modelId);
           }
         });

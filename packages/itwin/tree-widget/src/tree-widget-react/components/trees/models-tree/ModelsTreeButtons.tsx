@@ -124,6 +124,7 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
       variant={"ghost"}
       label={TreeWidget.translate("modelsTree.buttons.showAll.tooltip")}
       onClick={() => {
+        // cspell:disable-next-line
         props.onFeatureUsed?.("models-tree-showall");
         void showAll({
           models: props.models.map((model) => model.id),
@@ -142,6 +143,7 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
       variant={"ghost"}
       label={TreeWidget.translate("modelsTree.buttons.hideAll.tooltip")}
       onClick={() => {
+        // cspell:disable-next-line
         props.onFeatureUsed?.("models-tree-hideall");
         void hideAllModels(
           props.models.map((model) => model.id),
@@ -242,6 +244,7 @@ export function ToggleInstancesFocusButton({ onFeatureUsed, disabled }: { onFeat
       variant={"ghost"}
       label={label}
       onClick={() => {
+        // cspell:disable-next-line
         onFeatureUsed?.("models-tree-instancesfocus");
         toggle();
       }}

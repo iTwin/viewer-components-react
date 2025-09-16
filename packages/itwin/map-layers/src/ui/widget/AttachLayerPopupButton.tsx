@@ -628,6 +628,7 @@ export function AttachLayerPopupButton(props: AttachLayerPopupButtonProps) {
         onVisibleChange={setPopupOpen}
         closeOnOutsideClick={handleOutsideClick}
         placement={"bottom-end"}
+        style={{ overflow: "auto" }}
       >
         {renderButton()}
       </Popover>
