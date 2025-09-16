@@ -35,14 +35,6 @@ import type { Observable, Subscription } from "rxjs";
 import type { Viewport } from "@itwin/core-frontend";
 import type { CategoryId, ElementId, ModelId } from "./Types.js";
 
-interface ElementInfo {
-  elementId: Id64String;
-  modelId: Id64String;
-  categoryId: Id64String;
-}
-
-type CacheEntry = Map<ModelId, Map<CategoryId, Set<ElementId>>>;
-
 /** @internal */
 export interface ModelAlwaysOrNeverDrawnElementsQueryProps {
   modelId: Id64String;
@@ -60,6 +52,14 @@ export type AlwaysOrNeverDrawnElementsQueryProps = ModelAlwaysOrNeverDrawnElemen
 /** @internal */
 export const SET_CHANGE_DEBOUNCE_TIME = 20;
 
+interface ElementInfo {
+  elementId: Id64String;
+  modelId: Id64String;
+  categoryId: Id64String;
+}
+
+type CacheEntry = Map<ModelId, Map<CategoryId, Set<ElementId>>>;
+
 type SetType = "always" | "never";
 
 /** @internal */
@@ -69,15 +69,12 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
   #neverDrawn: { cacheEntryObs: Observable<CacheEntry>; latestCacheEntryValue?: CacheEntry };
   #disposeSubject = new Subject<void>();
   readonly #viewport: Viewport;
-  #elementClassName?: string;
+  readonly #elementClassName?: string;
 
   #suppressors: Observable<number>;
   #suppress = new Subject<boolean>();
 
-  constructor(
-    readonly viewport: Viewport,
-    readonly elementClassName?: string,
-  ) {
+  constructor(viewport: Viewport, elementClassName?: string) {
     this.#elementClassName = elementClassName;
     this.#viewport = viewport;
     this.#alwaysDrawn = { cacheEntryObs: this.createCacheEntryObservable("always") };

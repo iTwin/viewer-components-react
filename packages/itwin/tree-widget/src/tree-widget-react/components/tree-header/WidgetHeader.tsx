@@ -10,6 +10,8 @@ import { DebouncedSearchBox } from "./SearchBox.js";
 
 import type { TreeRenderProps } from "../TreeWidgetComponentImpl.js";
 
+// cspell:words xlarge
+
 /**
  * A definition for trees displayed in `WidgetWithHeader`
  * @internal

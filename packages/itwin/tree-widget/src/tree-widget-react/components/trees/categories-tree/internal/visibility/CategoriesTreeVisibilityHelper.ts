@@ -107,7 +107,7 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
     );
   }
 
-  /** Turns on visiblity status of models (that are not yet turned on) that are related to categories. */
+  /** Turns on visibility status of models (that are not yet turned on) that are related to categories. */
   private enableCategoriesElementModelsVisibilityStatus(categoryIds: Id64Arg): Observable<void> {
     return from(this.#props.idsCache.getCategoriesElementModels(categoryIds, true)).pipe(
       mergeMap((categoriesModelsMap) => categoriesModelsMap.values()),

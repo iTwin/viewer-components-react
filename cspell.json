@@ -23,10 +23,12 @@
     "rpcinterface",
     "selectables",
     "SHOWNULL",
+    "stratakit",
     "sublabel",
     "txns",
     "typemoq",
-    "unregisters"
+    "unregisters",
+    "viewports"
   ],
   "ignorePaths": [
     "archive",

@@ -54,13 +54,13 @@ export class ModelsTreeVisibilityHelper extends BaseVisibilityHelper {
     return this.#props.overrideHandler
       ? this.#props.overrideHandler.createVisibilityHandlerResult({
           overrideProps: props,
-          nonOverridenResult: result,
+          nonOverriddenResult: result,
           override: this.#props.overrides?.getSubjectsVisibilityStatus,
         })
       : result;
   }
 
-  /** Gets visiblity status of grouped elements */
+  /** Gets visibility status of grouped elements */
   public getGroupedElementsVisibilityStatus(props: { modelId: Id64String; categoryId: Id64String; elementIds: Id64Arg }): Observable<VisibilityStatus> {
     const { modelId, categoryId, elementIds } = props;
     return this.getElementsVisibilityStatus({ elementIds, modelId, categoryId, type: "GeometricElement3d" });
@@ -79,7 +79,7 @@ export class ModelsTreeVisibilityHelper extends BaseVisibilityHelper {
     return this.#props.overrideHandler
       ? this.#props.overrideHandler.createVisibilityHandlerResult({
           overrideProps: props,
-          nonOverridenResult: result,
+          nonOverriddenResult: result,
           override: this.#props.overrides?.changeSubjectsVisibilityStatus,
         })
       : result;
