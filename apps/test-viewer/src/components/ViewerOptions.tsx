@@ -14,6 +14,7 @@ import { QuantityFormatButton } from "./QuantityFormatButton";
 import type { SelectionScopesManager } from "@itwin/presentation-frontend";
 import type { PropsWithChildren } from "react";
 import type { UiItemsProvider } from "@itwin/appui-react";
+import type { IModelConnection } from "@itwin/core-frontend";
 
 export interface ViewerOptionsContext {
   density: "default" | "enlarged";
@@ -85,8 +86,30 @@ export const statusBarActionsProvider: UiItemsProvider = {
       itemPriority: 1,
       section: StatusBarSection.Right,
     },
+    {
+      id: `getSelectionScopes`,
+      content: <GetSelectionScopesButton />,
+      itemPriority: 2,
+      section: StatusBarSection.Right,
+    },
   ],
 };
+
+function GetSelectionScopesButton() {
+  const imodel = useActiveIModelConnection();
+  if (!imodel) {
+    return null;
+  }
+  return (
+    <IconButton label="Get selection scopes" styleType="borderless" onClick={async () => getSelectionScopes(imodel)}>
+      <SvgVisibilityShow />
+    </IconButton>
+  );
+}
+async function getSelectionScopes(imodel: IModelConnection) {
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
+  console.log(await Presentation.selection.scopes.getSelectionScopes(imodel));
+}
 
 function ToggleExpandedLayoutButton() {
   const { setDensity } = useViewerActionsContext();
