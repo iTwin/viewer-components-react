@@ -133,7 +133,7 @@ describe("categories tree", () => {
     provider: HierarchyProvider & Disposable;
     definitionContainer: Id64String;
   }>({
-    // TODO: Fix me, getting heap out of memory
+    // TODO: https://github.com/iTwin/viewer-components-react/issues/1454
     skip: true,
     testName: "changing definition container visibility changes visibility for 50k categories",
     setup: async () => {
