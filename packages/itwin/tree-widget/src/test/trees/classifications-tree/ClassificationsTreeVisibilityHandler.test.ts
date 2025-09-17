@@ -376,6 +376,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         await setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
 
         await handler.changeVisibility(createClassificationHierarchyNode({ id: keys.childClassification1.id }), true);
+        viewport.renderFrame();
         await validateHierarchyVisibility({
           provider,
           handler,
@@ -467,6 +468,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           createPhysicalElementHierarchyNode({ id: keys.targetPhysicalElement.id, categoryId: keys.spatialCategory.id, modelId: keys.physicalModel.id }),
           true,
         );
+        viewport.renderFrame();
         await validateHierarchyVisibility({
           provider,
           handler,
@@ -910,6 +912,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         }),
         true,
       );
+      viewport.renderFrame();
 
       await validateHierarchyVisibility({
         provider: filteredProvider,
@@ -1078,6 +1081,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         }),
         true,
       );
+      viewport.renderFrame();
 
       await validateHierarchyVisibility({
         provider: filteredProvider,
@@ -1169,6 +1173,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         }),
         true,
       );
+      viewport.renderFrame();
 
       await validateHierarchyVisibility({
         provider: filteredProvider,
@@ -1316,6 +1321,7 @@ async function setupInitialDisplayState(props: {
     assert(models.length <= 1, "2d views support only one model at a time");
     models.length && models[0].visible && (await viewport.changeViewedModel2d(models[0].id));
   }
+  viewport.renderFrame();
 }
 
 function createHiddenTestData(keys: { [key: string]: InstanceKey }) {

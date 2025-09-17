@@ -47,6 +47,9 @@ export interface MapLayerOptions {
 
   /** Optionally show the user preferences storage options(i.e. iTwin vs iModel).  Defaults to false */
   showUserPreferencesStorageOptions?: boolean;
+
+  /** Optionally hide the header label */
+  hideHeaderLabel?: boolean;
 }
 
 export interface MapFeatureInfoPropertyGridOptions {

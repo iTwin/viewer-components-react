@@ -8,6 +8,8 @@ import { expect, test } from "@playwright/test";
 
 import type { Locator, Page } from "@playwright/test";
 
+// cspell:words networkidle
+
 export const locateNode = (tree: Page | Locator, name: string, level?: number) => tree.getByRole("treeitem", { name, level });
 export const locateWidget = (page: Page | Locator, widgetName: string) => page.locator(`.${widgetName}-widget`);
 export const locateInstanceFilter = (page: Page | Locator) => page.locator(`.presentation-instance-filter`);

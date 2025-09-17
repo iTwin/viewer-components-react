@@ -6,14 +6,15 @@
 import {
   BehaviorSubject,
   debounceTime,
+  defer,
   EMPTY,
   filter,
   first,
   forkJoin,
-  from,
   fromEventPattern,
   map,
-  merge,
+  mergeMap,
+  of,
   reduce,
   scan,
   share,
@@ -29,18 +30,10 @@ import { Id64 } from "@itwin/core-bentley";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { getClassesByView, pushToMap, setDifference } from "./Utils.js";
 
-import type { BeEvent, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
+import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Observable, Subscription } from "rxjs";
 import type { Viewport } from "@itwin/core-frontend";
 import type { CategoryId, ElementId, ModelId } from "./Types.js";
-
-interface ElementInfo {
-  elementId: Id64String;
-  modelId: Id64String;
-  categoryId: Id64String;
-}
-
-type CacheEntry = Map<ModelId, Map<CategoryId, Set<ElementId>>>;
 
 /** @internal */
 export interface ModelAlwaysOrNeverDrawnElementsQueryProps {
@@ -59,55 +52,51 @@ export type AlwaysOrNeverDrawnElementsQueryProps = ModelAlwaysOrNeverDrawnElemen
 /** @internal */
 export const SET_CHANGE_DEBOUNCE_TIME = 20;
 
+interface ElementInfo {
+  elementId: Id64String;
+  modelId: Id64String;
+  categoryId: Id64String;
+}
+
+type CacheEntry = Map<ModelId, Map<CategoryId, Set<ElementId>>>;
+
+type SetType = "always" | "never";
+
 /** @internal */
 export class AlwaysAndNeverDrawnElementInfo implements Disposable {
-  private _subscriptions: Subscription[];
-  private _alwaysDrawn: Observable<CacheEntry>;
-  private _neverDrawn: Observable<CacheEntry>;
-  private _disposeSubject = new Subject<void>();
+  #subscriptions: Subscription[];
+  #alwaysDrawn: { cacheEntryObs: Observable<CacheEntry>; latestCacheEntryValue?: CacheEntry };
+  #neverDrawn: { cacheEntryObs: Observable<CacheEntry>; latestCacheEntryValue?: CacheEntry };
+  #disposeSubject = new Subject<void>();
+  readonly #viewport: Viewport;
+  readonly #elementClassName?: string;
 
-  private _suppressors: Observable<number>;
-  private _suppress = new Subject<boolean>();
-  private _forceUpdate = new Subject<void>();
+  #suppressors: Observable<number>;
+  #suppress = new Subject<boolean>();
 
-  constructor(
-    private readonly _viewport: Viewport,
-    private readonly _elementClassName?: string,
-  ) {
-    this._alwaysDrawn = this.createCacheEntryObservable({
-      event: this._viewport.onAlwaysDrawnChanged,
-      getSet: () => this._viewport.alwaysDrawn,
-      id: "alwaysDrawn",
-    });
-    this._neverDrawn = this.createCacheEntryObservable({
-      event: this._viewport.onNeverDrawnChanged,
-      getSet: () => this._viewport.neverDrawn,
-      id: "neverDrawn",
-    });
-    this._suppressors = this._suppress.pipe(
+  constructor(viewport: Viewport, elementClassName?: string) {
+    this.#elementClassName = elementClassName;
+    this.#viewport = viewport;
+    this.#alwaysDrawn = { cacheEntryObs: this.createCacheEntryObservable("always") };
+    this.#neverDrawn = { cacheEntryObs: this.createCacheEntryObservable("never") };
+    this.#suppressors = this.#suppress.pipe(
       scan((acc, suppress) => acc + (suppress ? 1 : -1), 0),
       startWith(0),
       shareReplay(1),
     );
-    this._subscriptions = [
-      this._alwaysDrawn.subscribe(),
-      this._neverDrawn.subscribe(),
-      this._suppressors.pipe(filter((suppressors) => suppressors === 0)).subscribe({
-        next: () => this._forceUpdate.next(),
-      }),
-    ];
+    this.#subscriptions = [this.#alwaysDrawn.cacheEntryObs.subscribe(), this.#neverDrawn.cacheEntryObs.subscribe()];
   }
 
   public suppressChangeEvents() {
-    this._suppress.next(true);
+    this.#suppress.next(true);
   }
 
   public resumeChangeEvents() {
-    this._suppress.next(false);
+    this.#suppress.next(false);
   }
 
-  public getElements(props: { setType: "always" | "never" } & AlwaysOrNeverDrawnElementsQueryProps): Observable<Set<ElementId>> {
-    const cache = props.setType === "always" ? this._alwaysDrawn : this._neverDrawn;
+  public getElements(props: { setType: SetType } & AlwaysOrNeverDrawnElementsQueryProps): Observable<Set<ElementId>> {
+    const cache = props.setType === "always" ? this.#alwaysDrawn : this.#neverDrawn;
     const getElements =
       "categoryIds" in props
         ? (entry: CacheEntry | undefined) => {
@@ -148,40 +137,48 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
             return elements;
           };
 
-    return cache.pipe(map(getElements));
+    return !cache.latestCacheEntryValue
+      ? cache.cacheEntryObs.pipe(map(getElements))
+      : this.#suppressors.pipe(
+          take(1),
+          mergeMap((suppressionCount) =>
+            suppressionCount > 0 ? of(cache.latestCacheEntryValue).pipe(map(getElements)) : cache.cacheEntryObs.pipe(map(getElements)),
+          ),
+        );
   }
 
-  private createCacheEntryObservable(props: { event: BeEvent<() => void>; getSet(): Set<ElementId> | undefined; id: string }) {
-    const event = props.event;
+  private createCacheEntryObservable(setType: SetType): Observable<CacheEntry> {
+    const event = setType === "always" ? this.#viewport.onAlwaysDrawnChanged : this.#viewport.onNeverDrawnChanged;
+    const getIds = setType === "always" ? () => this.#viewport.alwaysDrawn : () => this.#viewport.neverDrawn;
+
     const resultSubject = new BehaviorSubject<CacheEntry | undefined>(undefined);
 
-    const obs = merge(
-      fromEventPattern(
-        (handler) => event.addListener(handler),
-        (handler) => event.removeListener(handler),
-      ),
-      this._forceUpdate,
+    const obs = fromEventPattern(
+      (handler) => event.addListener(handler),
+      (handler) => event.removeListener(handler),
     ).pipe(
       // Fire the observable once at the beginning
       startWith(undefined),
-      // Stop listening to events when dispose() is called
-      takeUntil(this._disposeSubject),
       // Reset result subject as soon as a new event is emitted.
       // This will make newly subscribed observers wait for the debounce period to pass
       // instead of consuming the cached value which at this point becomes invalid.
       tap(() => resultSubject.next(undefined)),
       // Check if cache updates are not suppressed.
       switchMap(() =>
-        this._suppressors.pipe(
+        this.#suppressors.pipe(
           filter((suppressors) => suppressors === 0),
           take(1),
         ),
       ),
       debounceTime(SET_CHANGE_DEBOUNCE_TIME),
       // Cancel pending request if dispose() is called.
-      takeUntil(this._disposeSubject),
+      takeUntil(this.#disposeSubject),
       // If multiple requests are sent at once, preserve only the result of the newest.
-      switchMap(() => this.queryAlwaysOrNeverDrawnElementInfo(props.getSet(), props.id)),
+      switchMap(() => this.queryAlwaysOrNeverDrawnElementInfo(getIds(), `${setType}Drawn`)),
+      tap((cacheEntry) => {
+        const value = setType === "always" ? this.#alwaysDrawn : this.#neverDrawn;
+        value.latestCacheEntryValue = cacheEntry;
+      }),
       // Share the result by using a subject which always emits the saved result.
       share({
         connector: () => resultSubject,
@@ -194,9 +191,9 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
   }
 
   public [Symbol.dispose](): void {
-    this._subscriptions.forEach((x) => x.unsubscribe());
-    this._subscriptions = [];
-    this._disposeSubject.next();
+    this.#subscriptions.forEach((x) => x.unsubscribe());
+    this.#subscriptions = [];
+    this.#disposeSubject.next();
   }
 
   private queryAlwaysOrNeverDrawnElementInfo(set: Set<ElementId> | undefined, requestId: string): Observable<CacheEntry> {
@@ -215,12 +212,13 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
   }
 
   private queryElementInfo(elementIds: Id64Array, requestId: string): Observable<ElementInfo> {
-    const executor = createECSqlQueryExecutor(this._viewport.iModel);
-    const { elementClass } = this._elementClassName ? { elementClass: this._elementClassName } : getClassesByView(this._viewport.view.is2d() ? "2d" : "3d");
-    const reader = executor.createQueryReader(
-      {
-        ctes: [
-          `
+    return defer(() => {
+      const executor = createECSqlQueryExecutor(this.#viewport.iModel);
+      const { elementClass } = this.#elementClassName ? { elementClass: this.#elementClassName } : getClassesByView(this.#viewport.view.is2d() ? "2d" : "3d");
+      return executor.createQueryReader(
+        {
+          ctes: [
+            `
             ElementInfo(elementId, modelId, categoryId, parentId) AS (
               SELECT
                 ECInstanceId elementId,
@@ -241,20 +239,19 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
               JOIN ElementInfo e ON p.ECInstanceId = e.parentId
             )
           `,
-        ],
-        ecsql: `
+          ],
+          ecsql: `
           SELECT elementId, modelId, categoryId
           FROM ElementInfo
           WHERE parentId IS NULL
         `,
-        bindings: [{ type: "idset", value: elementIds }],
-      },
-      {
-        restartToken: `ModelsTreeVisibilityHandler/${requestId}`,
-      },
-    );
-
-    return from(reader).pipe(map((row) => ({ elementId: row.elementId, modelId: row.modelId, categoryId: row.categoryId })));
+          bindings: [{ type: "idset", value: elementIds }],
+        },
+        {
+          restartToken: `ModelsTreeVisibilityHandler/${requestId}`,
+        },
+      );
+    }).pipe(map((row) => ({ elementId: row.elementId, modelId: row.modelId, categoryId: row.categoryId })));
   }
 
   public getAlwaysDrawnElements(props: AlwaysOrNeverDrawnElementsQueryProps) {
@@ -271,7 +268,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
       neverDrawn: this.getNeverDrawnElements(props),
     }).pipe(
       map(({ alwaysDrawn, neverDrawn }) => {
-        const viewport = this._viewport;
+        const viewport = this.#viewport;
         if (viewport.alwaysDrawn?.size && alwaysDrawn.size) {
           viewport.setAlwaysDrawn(setDifference(viewport.alwaysDrawn, alwaysDrawn));
         }

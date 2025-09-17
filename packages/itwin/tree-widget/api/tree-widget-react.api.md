@@ -371,7 +371,7 @@ type NormalizedHierarchyFilteringPath = ReturnType<(typeof HierarchyFilteringPat
 export { RenameAction }
 
 // @beta (undocumented)
-export function SelectableTree({ buttons, children }: PropsWithChildren<TreehHeaderProps>): JSX_2.Element;
+export function SelectableTree({ buttons, children }: PropsWithChildren<TreeHeaderProps>): JSX_2.Element;
 
 // @beta (undocumented)
 export function TelemetryContextProvider({ children, onPerformanceMeasured, onFeatureUsed, componentIdentifier, }: PropsWithChildren<TelemetryContextProviderProps>): JSX_2.Element;
@@ -397,7 +397,7 @@ export interface TreeDefinition {
 }
 
 // @beta (undocumented)
-interface TreehHeaderProps {
+interface TreeHeaderProps {
     // (undocumented)
     buttons?: ReactNode;
 }

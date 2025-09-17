@@ -93,19 +93,6 @@
   width: fit-content;
 }
 
-/* FormatSample persistence unit label styling */
-.quantityFormat--persistenceUnitLabel {
-  width: 100%;
-  flex: 1;
-  margin: 0;
-  padding: var(--iui-size-s) var(--iui-size-m);
-  border: 1px solid var(--iui-color-border);
-  border-radius: 0 var(--iui-border-radius-1) var(--iui-border-radius-1) 0;
-  display: flex;
-  align-items: center;
-  white-space: nowrap;
-}
-
 /* Input group styling for input and label together */
 .quantityFormat--formatSample-inputGroup {
   display: flex;
@@ -115,13 +102,12 @@
 
 .quantityFormat--formatSample-inputGroup
   .quantityFormat--formatSample-input {
-  border-radius: var(--iui-border-radius-1) 0 0 var(--iui-border-radius-1);
-  border-right: none;
+  border-radius: var(--iui-border-radius-1);
 }
 
 /* Formatted value label styling */
 .quantityFormat--formattedValueLabel {
-  padding: var(--iui-size-xs);
+  margin-left: var(--iui-size-xs);
   background-color: var(--iui-color-background-base);
 }
 
@@ -132,5 +118,45 @@
 }
 
 .quantityFormat--format-selector-menu {
-  --iui-menu-max-height: calc((var(--iui-component-height) - 1px) * 15.5);
+  --iui-menu-max-height: min(calc((var(--iui-component-height) - 1px) * 15.5), 70vh);
+}
+
+/* Result section styling for vertical layout */
+.quantityFormat--formatSample-resultSection {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+.quantityFormat--formatSelector-list {
+  height: inherit;
+  width: 100%;
+  overflow-y: auto;
+  border-left: 1px solid var(--iui-color-border);
+  border-right: 1px solid var(--iui-color-border);
+  border-bottom: 1px solid var(--iui-color-border);
+  border-radius: 0 0 var(--iui-border-radius-1) var(--iui-border-radius-1);
+}
+
+.quantityFormat--formatSelector-listItem {
+  cursor: pointer;
+  padding: var(--iui-size-xs);
+  transition: background-color 0.2s ease;
+}
+
+.quantityFormat--formatSelector-listItem:hover {
+  background-color: var(--iui-color-background-hover);
+}
+
+.quantityFormat--formatSelector-listItem.active {
+  background-color: var(--iui-color-background-accent-muted);
+  border-left: 3px solid var(--iui-color-border-accent);
+}
+
+.quantityFormat--formatSelector-listItem:last-child {
+  border-bottom: none;
+}
+
+.quantityFormat--formatSelector-container {
+  height: inherit;
 }

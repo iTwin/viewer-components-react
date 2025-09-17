@@ -203,6 +203,8 @@ export class Datasets {
       await builder.importFullSchema(schemaXml);
 
       // also import our custom schema for classification - category relationship
+
+      // cspell:disable
       await builder.importSchema(
         "TestClassificationSchema",
         `
@@ -214,10 +216,11 @@ export class Datasets {
                   <Class class="bis:Category" />
               </Source>
               <Target multiplicity="(0..*)" roleLabel="is symbolized by" polymorphic="true">
-                  <Class class="clsf:Classification "/>
+                  <Class class="clsf:Classification"/>
               </Target>
           </ECRelationshipClass>
         `,
+        // cspell:enable
       );
 
       const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "physical model" });

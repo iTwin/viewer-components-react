@@ -143,7 +143,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
       });
       return this.#props.overrideHandler.createVisibilityHandlerResult({
         overrideProps: { node },
-        nonOverridenResult: result,
+        nonOverriddenResult: result,
         override: this.#props.overrides?.getElementGroupingNodeVisibilityStatus,
       });
     }
@@ -199,7 +199,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
       });
       return this.#props.overrideHandler.createVisibilityHandlerResult({
         overrideProps: { node, on },
-        nonOverridenResult: result,
+        nonOverriddenResult: result,
         override: this.#props.overrides?.changeElementGroupingNodeVisibilityStatus,
       });
     }
@@ -299,7 +299,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
   }
 
   private getModels(props: Parameters<BaseIdsCache["getModels"]>[0]): ReturnType<BaseIdsCache["getModels"]> {
-    // Models cache for categories that dont have models still adds them to the final map
+    // Models cache for categories that don't have models still adds them to the final map
     return from(this.#props.idsCache.getCategoriesElementModels(props.categoryIds)).pipe(
       mergeMap((categoryModelsMap) => categoryModelsMap.entries()),
       map(([categoryId, categoryModels]) => ({ id: categoryId, models: categoryModels })),

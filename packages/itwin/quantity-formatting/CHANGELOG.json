@@ -2,6 +2,21 @@
   "name": "@itwin/quantity-formatting-react",
   "entries": [
     {
+      "date": "Tue, 16 Sep 2025 11:13:44 GMT",
+      "version": "0.1.1",
+      "tag": "@itwin/quantity-formatting-react_v0.1.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "50554904+hl662@users.noreply.github.com",
+            "package": "@itwin/quantity-formatting-react",
+            "commit": "f7a3753cca59d4e7fc99f44a3f26db4f677cc4ce",
+            "comment": "Update FormatSelector to be a list with a searchbox, instead of dropdown"
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 20 Aug 2025 13:45:50 GMT",
       "version": "0.1.0",
       "tag": "@itwin/quantity-formatting-react_v0.1.0",

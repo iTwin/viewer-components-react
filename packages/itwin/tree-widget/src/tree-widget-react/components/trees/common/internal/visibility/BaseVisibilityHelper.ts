@@ -173,7 +173,7 @@ export class BaseVisibilityHelper implements Disposable {
     return this.#props.overrideHandler
       ? this.#props.overrideHandler.createVisibilityHandlerResult({
           overrideProps: { modelIds: props.modelIds },
-          nonOverridenResult: result,
+          nonOverriddenResult: result,
           override: this.#props.overrides?.getModelsVisibilityStatus,
         })
       : result;
@@ -185,7 +185,7 @@ export class BaseVisibilityHelper implements Disposable {
    * Determines visibility status by checking:
    * - Elements in the viewports' always/never drawn lists;
    * - Default categories visibility status in the viewport;
-   * - Submodels that are related to the modelId and categoryIds
+   * - SubModels that are related to the modelId and categoryIds
    */
   private getVisibleModelCategoriesVisibilityStatus({
     modelId,
@@ -213,22 +213,22 @@ export class BaseVisibilityHelper implements Disposable {
   }
 
   /** Gets visibility status of sub-categories, assuming category is visible. */
-  private getVisibileCategorySubCategoriesVisibilityStatus(props: { subCategoryIds: Id64Arg }): VisibilityStatus {
+  private getVisibleCategorySubCategoriesVisibilityStatus(props: { subCategoryIds: Id64Arg }): VisibilityStatus {
     const { subCategoryIds } = props;
-    let subCategoryVisiblity: "visible" | "hidden" | "unknown" = "unknown";
+    let subCategoryVisibility: "visible" | "hidden" | "unknown" = "unknown";
     for (const subCategoryId of Id64.iterable(subCategoryIds)) {
       const isSubCategoryVisible = this.#props.viewport.isSubCategoryVisible(subCategoryId);
-      if (isSubCategoryVisible && subCategoryVisiblity === "hidden") {
+      if (isSubCategoryVisible && subCategoryVisibility === "hidden") {
         return createVisibilityStatus("partial");
       }
-      if (!isSubCategoryVisible && subCategoryVisiblity === "visible") {
+      if (!isSubCategoryVisible && subCategoryVisibility === "visible") {
         return createVisibilityStatus("partial");
       }
-      subCategoryVisiblity = isSubCategoryVisible ? "visible" : "hidden";
+      subCategoryVisibility = isSubCategoryVisible ? "visible" : "hidden";
     }
     // If visibility is unknown, no subCategories were provided,
     // Since category is visible we return visible
-    return createVisibilityStatus(subCategoryVisiblity === "unknown" ? "visible" : subCategoryVisiblity);
+    return createVisibilityStatus(subCategoryVisibility === "unknown" ? "visible" : subCategoryVisibility);
   }
 
   /**
@@ -289,7 +289,7 @@ export class BaseVisibilityHelper implements Disposable {
           return createVisibilityStatus("visible");
         }
 
-        const subCategoriesVisibility = this.getVisibileCategorySubCategoriesVisibilityStatus({ subCategoryIds: props.subCategoryIds });
+        const subCategoriesVisibility = this.getVisibleCategorySubCategoriesVisibilityStatus({ subCategoryIds: props.subCategoryIds });
         return subCategoriesVisibility.state === visibility || visibility === "unknown" ? subCategoriesVisibility : createVisibilityStatus("partial");
       }),
       mergeVisibilityStatuses,
@@ -391,7 +391,7 @@ export class BaseVisibilityHelper implements Disposable {
     return this.#props.overrideHandler
       ? this.#props.overrideHandler.createVisibilityHandlerResult({
           overrideProps: props,
-          nonOverridenResult: result,
+          nonOverriddenResult: result,
           override: this.#props.overrides?.getCategoriesVisibilityStatus,
         })
       : result;
@@ -506,13 +506,13 @@ export class BaseVisibilityHelper implements Disposable {
     return this.#props.overrideHandler
       ? this.#props.overrideHandler.createVisibilityHandlerResult({
           overrideProps: props,
-          nonOverridenResult: result,
+          nonOverriddenResult: result,
           override: this.#props.overrides?.getElementsVisibilityStatus,
         })
       : result;
   }
 
-  /** Gets visiblity status of elements based on viewport's always/never drawn elements and related categories and models. */
+  /** Gets visibility status of elements based on viewport's always/never drawn elements and related categories and models. */
   private getVisibilityFromAlwaysAndNeverDrawnElements(
     props: GetVisibilityFromAlwaysAndNeverDrawnElementsProps & ({ elements: Id64Arg } | { queryProps: { modelId: Id64String; categoryIds: Id64Arg } }),
   ): Observable<VisibilityStatus> {
@@ -596,7 +596,7 @@ export class BaseVisibilityHelper implements Disposable {
     return this.#props.overrideHandler
       ? this.#props.overrideHandler.createVisibilityHandlerResult({
           overrideProps: props,
-          nonOverridenResult: result,
+          nonOverriddenResult: result,
           override: this.#props.overrides?.changeModelsVisibilityStatus,
         })
       : result;
@@ -728,7 +728,7 @@ export class BaseVisibilityHelper implements Disposable {
     return this.#props.overrideHandler
       ? this.#props.overrideHandler.createVisibilityHandlerResult({
           overrideProps: props,
-          nonOverridenResult: result,
+          nonOverriddenResult: result,
           override: this.#props.overrides?.changeCategoriesVisibilityStatus,
         })
       : result;
@@ -737,7 +737,7 @@ export class BaseVisibilityHelper implements Disposable {
   /**
    * Changes visibility status of elements by adding them to the viewport's always/never drawn elements.
    *
-   * Also, changes vibility status of specified elements that are models.
+   * Also, changes visibility status of specified elements that are models.
    */
   public changeElementsVisibilityStatus(props: { elementIds: Id64Arg; modelId: Id64String; categoryId: Id64String; on: boolean }): Observable<void> {
     const result = defer(() => {
@@ -788,7 +788,7 @@ export class BaseVisibilityHelper implements Disposable {
     return this.#props.overrideHandler
       ? this.#props.overrideHandler.createVisibilityHandlerResult({
           overrideProps: props,
-          nonOverridenResult: result,
+          nonOverriddenResult: result,
           override: this.#props.overrides?.changeElementsVisibilityStatus,
         })
       : result;

@@ -212,19 +212,19 @@ export class HierarchyVisibilityOverrideHandler {
     this.#baseHandler = baseHandler;
   }
   public createVisibilityHandlerResult<TResult, TOverrideProps>(props: {
-    nonOverridenResult: Observable<TResult>;
+    nonOverriddenResult: Observable<TResult>;
     override: HierarchyVisibilityHandlerOverridableMethod<(props: TOverrideProps) => Promise<TResult>> | undefined;
     overrideProps: TOverrideProps;
   }): Observable<TResult> {
-    const { nonOverridenResult, override, overrideProps } = props;
+    const { nonOverriddenResult, override, overrideProps } = props;
     return override
       ? from(
           override({
             ...overrideProps,
-            originalImplementation: async () => lastValueFrom(nonOverridenResult, { defaultValue: undefined as TResult }),
+            originalImplementation: async () => lastValueFrom(nonOverriddenResult, { defaultValue: undefined as TResult }),
             handler: this.#baseHandler,
           }),
         )
-      : nonOverridenResult;
+      : nonOverriddenResult;
   }
 }

@@ -24,7 +24,6 @@ import type {
   MeasurementWidgetData,
 } from "../api/Measurement.js";
 import type { MeasurementFormattingProps, MeasurementProps } from "../api/MeasurementProps.js";
-import type { FormatterSpec } from "@itwin/core-quantity";
 
 /**
  * Props for serializing a [[DistanceMeasurement]].
@@ -198,12 +197,10 @@ export class DistanceMeasurement extends Measurement {
     this._lengthPersistenceUnitName = "Units.M";
     this._coordinateKoQ = "AecUnits.LENGTH_COORDINATE";
     this._coordinatePersistenceUnitName = "Units.M";
-    this._bearingKoQ = "RoadRailUnits.BEARING";
-    this._bearingPersistenceUnitName = "Units.RAD";
+
     if (props) this.readFromJSON(props);
 
-    this.populateFormattingSpecsRegistry().then(() => this.createTextMarker().catch())
-    .catch();
+    this.createTextMarker().catch();
   }
 
   public setStartPoint(point: XYAndZ) {
@@ -503,7 +500,7 @@ export class DistanceMeasurement extends Measurement {
   }
 
   private async createTextMarker(): Promise<void> {
-    const lengthSpec = IModelApp.quantityFormatter.getSpecsByName(this._lengthKoQ)?.formatterSpec;
+    const lengthSpec = FormatterUtils.getFormatterSpecWithFallback(this._lengthKoQ, QuantityType.LengthEngineering);
 
     const distance = this._startPoint.distance(this._endPoint);
     const fDistance = await FormatterUtils.formatLength(

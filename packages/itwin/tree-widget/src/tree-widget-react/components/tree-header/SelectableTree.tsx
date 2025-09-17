@@ -18,12 +18,12 @@ export interface TreeToolbarButtonProps {
 }
 
 /** @beta */
-interface TreehHeaderProps {
+interface TreeHeaderProps {
   buttons?: ReactNode;
 }
 
 /** @beta */
-export function SelectableTree({ buttons, children }: PropsWithChildren<TreehHeaderProps>) {
+export function SelectableTree({ buttons, children }: PropsWithChildren<TreeHeaderProps>) {
   return (
     <div className={"tw-tree-with-toolbar"}>
       {buttons ? <div className={"tw-tree-toolbar"}>{buttons}</div> : <></>}

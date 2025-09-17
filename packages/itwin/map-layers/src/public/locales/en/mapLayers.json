@@ -5,6 +5,7 @@
   },
   "Basemap": {
     "BaseLayer": "Base",
+    "BaseMapPanelTitle": "Map Layers",
     "ColorFill": "Solid Fill Color",
     "SelectBaseMap": "Select base layer"
   },
