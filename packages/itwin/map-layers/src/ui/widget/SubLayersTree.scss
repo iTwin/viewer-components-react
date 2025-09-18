@@ -46,6 +46,10 @@
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
+
+    .iui-button:nth-child(2) {
+      margin-left: 5px;
+    }
   }
 
   .tree-toolbar-searchbox {

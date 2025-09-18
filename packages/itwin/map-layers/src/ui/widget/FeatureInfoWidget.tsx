@@ -1,3 +1,4 @@
+import "./FeatureInfoWidget.scss";
 /*---------------------------------------------------------------------------------------------
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
@@ -9,8 +10,8 @@ import { SvgCopy } from "@itwin/itwinui-icons-react";
 import { Flex, IconButton } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
 import { FeatureInfoUiItemsProvider } from "../FeatureInfoUiItemsProvider";
-import { FeatureInfoDataProvider } from "./FeatureInfoDataProvider";
 import { useResizeObserver } from "../hooks/useResizeObserver";
+import { FeatureInfoDataProvider } from "./FeatureInfoDataProvider";
 
 import type { PrimitiveValue } from "@itwin/appui-abstract";
 import type { ActionButtonRendererProps } from "@itwin/components-react";
@@ -87,7 +88,7 @@ export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetPr
 
   if (hasData && dataProvider.current) {
     return (
-      <div ref={elementRef} style={{ width: "100%", height: "100%" }}>
+      <div ref={elementRef} className="feature-info-widget-container">
         <VirtualizedPropertyGridWithDataProvider
           width={width}
           height={height}
@@ -101,7 +102,7 @@ export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetPr
     );
   } else {
     return (
-      <Flex justifyContent="center" style={{ width: "100%", height: "100%" }}>
+      <Flex justifyContent="center" className="feature-info-widget-no-records">
         <span>
           <i>{noRecordsMessage}</i>
         </span>

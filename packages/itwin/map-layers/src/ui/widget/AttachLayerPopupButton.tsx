@@ -442,13 +442,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick, se
   return (
     <div className="map-manager-header">
       {(loading || loadingSources) && (
-        <div style={{
-          position: "absolute",
-          inset: 0,
-          display: "grid",
-          placeItems: "center",
-          zIndex: 100,
-        }}>
+        <div className="map-manager-loading-overlay">
           <ProgressRadial as="div"/>
         </div>
       )}
@@ -628,7 +622,7 @@ export function AttachLayerPopupButton(props: AttachLayerPopupButtonProps) {
         onVisibleChange={setPopupOpen}
         closeOnOutsideClick={handleOutsideClick}
         placement={"bottom-end"}
-        style={{ overflow: "auto" }}
+        className="map-manager-popover-overflow"
       >
         {renderButton()}
       </Popover>

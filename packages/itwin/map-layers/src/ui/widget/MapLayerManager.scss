@@ -424,3 +424,25 @@ $default-font-size: --iui-font-size-1;
     }
   }
 }
+
+// Loading overlay styles
+.map-manager-loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 100;
+}
+
+.map-manager-popover-overflow {
+  overflow: auto;
+}
+
+// Hidden element utilities
+.map-manager-hidden {
+  visibility: hidden;
+}
+
+.map-manager-display-none {
+  display: none;
+}

@@ -1,11 +1,11 @@
 
+import "./SubLayersTree.scss";
+import * as React from "react";
 /*---------------------------------------------------------------------------------------------
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { PropertyValueFormat } from "@itwin/appui-abstract";
-import "./SubLayersTree.scss";
-import * as React from "react";
 import {
   CheckBoxState,
   ControlledTree,
@@ -21,8 +21,8 @@ import {
 import { SvgCheckboxDeselect, SvgCheckboxSelect, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { Checkbox, IconButton, Input } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
-import { SubLayersDataProvider } from "./SubLayersDataProvider";
 import { useResizeObserver } from "../hooks/useResizeObserver";
+import { SubLayersDataProvider } from "./SubLayersDataProvider";
 
 import type {
   AbstractTreeNodeLoaderWithProvider,
@@ -184,7 +184,6 @@ export function SubLayersTree(props: SubLayersTreeProps) {
                   {props.checkboxStyle === "eye" ? <SvgVisibilityShow /> : <SvgCheckboxSelect />}
                 </IconButton>,
                 <IconButton
-                  style={{ marginLeft: "5px" }}
                   key="hide-all-btn"
                   size="small"
                   label={props.checkboxStyle === "eye" ? MapLayersUI.translate("SubLayers.AllOff") : MapLayersUI.translate("SelectFeaturesDialog.AllOff")}
