@@ -4,31 +4,25 @@
  *--------------------------------------------------------------------------------------------*/
 
 
+import "../FormatPanel.scss";
 import * as React from "react";
-import type { FormatDefinition, UnitProps } from "@itwin/core-quantity";
-import type { UnitsProvider } from "@itwin/core-quantity";
 import { Format, FormatTraits } from "@itwin/core-quantity";
-import { FormatUnits } from "../internal/FormatUnits.js";
-import { FormatTypeOption } from "../internal/misc/FormatType.js";
-import {
-  AppendUnitLabel,
-  UomSeparatorSelector,
-} from "../internal/FormatUnitLabel.js";
-import { FormatPrecision } from "../internal/FormatPrecision.js";
-import { DecimalSeparator } from "../internal/DecimalSeparator.js";
 import { Divider, Label, Text } from "@itwin/itwinui-react";
 import { useTranslation } from "../../../useTranslation.js";
-import { ShowTrailingZeros } from "../internal/ShowTrailingZeros.js";
-import { SignOption } from "../internal/SignOption.js";
+import { DecimalSeparator } from "../internal/DecimalSeparator.js";
+import { FormatPrecision } from "../internal/FormatPrecision.js";
+import { AppendUnitLabel, UomSeparatorSelector } from "../internal/FormatUnitLabel.js";
+import { FormatUnits } from "../internal/FormatUnits.js";
 import { KeepDecimalPoint } from "../internal/KeepDecimalPoint.js";
 import { KeepSingleZero } from "../internal/KeepSingleZero.js";
+import { FormatTypeOption } from "../internal/misc/FormatType.js";
+import { ShowTrailingZeros } from "../internal/ShowTrailingZeros.js";
+import { SignOption } from "../internal/SignOption.js";
+import { ThousandsSeparatorSelector, UseThousandsSeparator } from "../internal/ThousandsSeparator.js";
 import { ZeroEmpty } from "../internal/ZeroEmpty.js";
-import {
-  ThousandsSeparatorSelector,
-  UseThousandsSeparator,
-} from "../internal/ThousandsSeparator.js";
-import "../FormatPanel.scss";
 
+import type { FormatDefinition, UnitProps } from "@itwin/core-quantity";
+import type { UnitsProvider } from "@itwin/core-quantity";
 /** Common props for all format panel components
  * @internal
  */
@@ -62,7 +56,7 @@ export function DecimalPrimaryChildren(props: PanelProps): React.ReactElement {
         initialFormat={formatProps}
         onUnitsChange={onFormatChange}
       />
-      <Divider />
+      <Divider className="quantityFormat-formatPanel-divider"/>
       <AppendUnitLabel
         formatProps={formatProps}
         onFormatChange={onFormatChange}

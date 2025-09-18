@@ -14,7 +14,7 @@
   .quantityFormat--formatPanel-primaryChildren {
   /* Always visible primary controls */
   border-radius: var(--iui-border-radius-1);
-  padding: var(--iui-size-m);
+  padding: var(--iui-size-s);
   background: var(--iui-color-background);
   flex: 1;
   width: 100%;
@@ -23,7 +23,7 @@
 .quantityFormat--formatPanel
   .quantityFormat--formatPanel-secondaryChildren {
   /* Expandable secondary controls */
-  padding: var(--iui-size-s);
+  padding: var(--iui-size-xs);
   border-radius: var(--iui-border-radius-1);
   display: flex;
   flex-direction: column;
@@ -31,16 +31,13 @@
 
 /* FormatSample styles */
 .quantityFormat--formatSample-container {
-  margin-top: var(--iui-size-l);
   align-items: center;
-}
-
-.quantityFormat--formatSample-box {
   border: 1px solid var(--iui-color-border-subtle);
   border-radius: var(--iui-border-radius-1);
-  padding: var(--iui-size-m);
+  padding: var(--iui-size-l);
   margin: var(--iui-size-s) 0;
 }
+
 
 .quantityFormat--formatSample-previewRow {
   display: flex;
@@ -61,7 +58,7 @@
 }
 
 .quantityFormat-formatPanel-divider {
-  margin: var(--iui-size-xs)
+  margin: var(--iui-size-s)
 }
 
 /* Inline styling for unit label components */
@@ -114,7 +111,6 @@
 /* Sample preview title label styling */
 .quantityFormat--samplePreviewTitle {
   margin-bottom: var(--iui-size-s);
-  font-weight: 600;
 }
 
 .quantityFormat--format-selector-menu {
