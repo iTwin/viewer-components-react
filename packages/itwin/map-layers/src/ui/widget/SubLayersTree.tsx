@@ -185,6 +185,7 @@ export function SubLayersTree(props: SubLayersTreeProps) {
                 <IconButton
                   key="hide-all-btn"
                   size="small"
+                  className="tree-toolbar-button-spaced"
                   label={props.checkboxStyle === "eye" ? MapLayersUI.translate("SubLayers.AllOff") : MapLayersUI.translate("SelectFeaturesDialog.AllOff")}
                   onClick={async () => changeAll(false)}
                 >
