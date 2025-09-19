@@ -6,7 +6,7 @@
 
 // the following quiet warning caused by react-beautiful-dnd package
 
-import "./MapLayerManager.scss";
+import "./MapLayerDroppable.scss";
 import * as React from "react";
 import { Draggable, Droppable } from "react-beautiful-dnd";
 import { UiFramework } from "@itwin/appui-react";

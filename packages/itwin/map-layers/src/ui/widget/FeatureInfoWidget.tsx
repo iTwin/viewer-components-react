@@ -1,8 +1,8 @@
-import "./FeatureInfoWidget.scss";
 /*---------------------------------------------------------------------------------------------
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
+import "./FeatureInfoWidget.scss";
 import * as React from "react";
 import { useActiveFrontstageDef, WidgetState } from "@itwin/appui-react";
 import { Orientation, VirtualizedPropertyGridWithDataProvider } from "@itwin/components-react";
