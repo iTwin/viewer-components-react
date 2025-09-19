@@ -3,47 +3,21 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import * as React from "react";
-import {
-  type FormatDefinition,
-  FormatType,
-  parseFormatType,
-  type UnitProps,
-} from "@itwin/core-quantity";
-import type { UnitsProvider } from "@itwin/core-quantity";
-import { ExpandableBlock, Flex, Surface, Text } from "@itwin/itwinui-react";
-import {
-  DecimalPrimaryChildren,
-  DecimalSecondaryChildren,
-  type PanelProps,
-} from "./panels/Decimal.js";
-import {
-  FractionalPrimaryChildren,
-  FractionalSecondaryChildren,
-} from "./panels/Fractional.js";
-import {
-  ScientificPrimaryChildren,
-  ScientificSecondaryChildren,
-} from "./panels/Scientific.js";
-import {
-  StationPrimaryChildren,
-  StationSecondaryChildren,
-} from "./panels/Station.js";
-import {
-  AzimuthPrimaryChildren,
-  AzimuthSecondaryChildren,
-} from "./panels/Azimuth.js";
-import {
-  BearingPrimaryChildren,
-  BearingSecondaryChildren,
-} from "./panels/Bearing.js";
 import "./FormatPanel.scss";
-import {
-  RatioPrimaryChildren,
-  RatioSecondaryChildren,
-} from "./panels/Ratio.js";
+import * as React from "react";
+import { FormatType, parseFormatType } from "@itwin/core-quantity";
+import { Divider, ExpandableBlock, Flex, Surface, Text } from "@itwin/itwinui-react";
 import { useTranslation } from "../../useTranslation.js";
+import { AzimuthPrimaryChildren, AzimuthSecondaryChildren } from "./panels/Azimuth.js";
+import { BearingPrimaryChildren, BearingSecondaryChildren } from "./panels/Bearing.js";
+import { DecimalPrimaryChildren, DecimalSecondaryChildren } from "./panels/Decimal.js";
+import { FractionalPrimaryChildren, FractionalSecondaryChildren } from "./panels/Fractional.js";
+import { RatioPrimaryChildren, RatioSecondaryChildren } from "./panels/Ratio.js";
+import { ScientificPrimaryChildren, ScientificSecondaryChildren } from "./panels/Scientific.js";
+import { StationPrimaryChildren, StationSecondaryChildren } from "./panels/Station.js";
 
+import type { PanelProps} from "./panels/Decimal.js";
+import type { UnitsProvider , FormatDefinition, UnitProps } from "@itwin/core-quantity";
 /**
  * @internal
  */
@@ -124,15 +98,19 @@ export function FormatPanel(props: FormatPanelProps) {
       <Surface
         elevation={0}
         className="quantityFormat--formatPanel-primaryChildren"
+        border={false}
       >
         {primaryChildren}
       </Surface>
+      <Divider className="quantityFormat-formatPanel-divider" />
       <ExpandableBlock
         title={
           <Text variant="leading">
             {translate("QuantityFormat:labels.advancedOptions")}
           </Text>
         }
+        size="small"
+        styleType="borderless"
         isExpanded={isExpanded}
         onToggle={() => setIsExpanded(!isExpanded)}
       >

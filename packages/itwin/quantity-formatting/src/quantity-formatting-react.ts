@@ -16,3 +16,5 @@ export { QuantityFormatPanel } from "./components/quantityformat/QuantityFormatP
 export { FormatSample } from "./components/quantityformat/FormatSample.js";
 export { FormatPanel } from "./components/quantityformat/FormatPanel.js";
 export { FormatSelector } from "./components/quantityformat/FormatSelector.js";
+export { FormatSetPanel } from "./components/quantityformat/FormatSetPanel.js";
+export { FormatSetSelector } from "./components/quantityformat/FormatSetSelector.js";
