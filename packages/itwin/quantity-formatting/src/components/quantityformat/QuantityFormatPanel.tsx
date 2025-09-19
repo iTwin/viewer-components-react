@@ -5,7 +5,7 @@
 
 import "./FormatPanel.scss";
 import * as React from "react";
-import { Button, Divider, Flex } from "@itwin/itwinui-react";
+import { Button, Flex } from "@itwin/itwinui-react";
 import { useTranslation } from "../../useTranslation.js";
 import { FormatPanel } from "./FormatPanel.js";
 import { FormatSample } from "./FormatSample.js";
@@ -110,7 +110,6 @@ export function QuantityFormatPanel(props: QuantityFormatPanelProps) {
           initialMagnitude={props.initialMagnitude ?? 1234.5678}
         />
       )}
-      <Divider className="quantityFormat-formatPanel-divider" />
       <FormatPanel
         formatProps={clonedFormatDefinition}
         unitsProvider={unitsProvider}
