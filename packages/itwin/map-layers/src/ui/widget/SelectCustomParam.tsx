@@ -5,6 +5,7 @@
 // cSpell:ignore Modeless WMTS
 
 import "./MapUrlDialog.scss";
+import "./SelectCustomParam.scss";
 import * as React from "react";
 import { Select } from "@itwin/itwinui-react";
 import { CustomParamsStorage } from "../../CustomParamsStorage";
@@ -72,7 +73,6 @@ export function SelectCustomParam(props: SelectCustomParamProps) {
         options={customParams}
         value={paramValues}
         disabled={props.disabled || customParams.length === 0}
-        menuStyle={{ zIndex: 100000 }} // Ensure the dropdown selection is on top of the Modal that utilizes this component
         onChange={handleOnChange}
         size="small"
         onKeyDown={handleKeyDown}

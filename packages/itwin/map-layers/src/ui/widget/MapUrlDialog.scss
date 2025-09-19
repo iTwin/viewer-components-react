@@ -8,6 +8,8 @@ $default-font-size: var(--iui-font-size-1);
 
 .map-layer-url-dialog {
   z-index: var(--uicore-z-index-cursor-overlay);
+  min-height: 120px;
+  max-width: 600px;
 }
 
 .map-layer-url-dialog-content {

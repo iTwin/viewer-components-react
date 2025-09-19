@@ -2,6 +2,7 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
+import "./AttachLayerPopupButton.scss";
 import * as React from "react";
 import { UiFramework } from "@itwin/appui-react";
 import { IModelApp, MapLayerSource, MapLayerSourceStatus, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
@@ -442,13 +443,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick, se
   return (
     <div className="map-manager-header">
       {(loading || loadingSources) && (
-        <div style={{
-          position: "absolute",
-          inset: 0,
-          display: "grid",
-          placeItems: "center",
-          zIndex: 100,
-        }}>
+        <div className="map-manager-loading-overlay">
           <ProgressRadial as="div"/>
         </div>
       )}
@@ -628,7 +623,7 @@ export function AttachLayerPopupButton(props: AttachLayerPopupButtonProps) {
         onVisibleChange={setPopupOpen}
         closeOnOutsideClick={handleOutsideClick}
         placement={"bottom-end"}
-        style={{ overflow: "auto" }}
+        className="map-manager-popover-overflow"
       >
         {renderButton()}
       </Popover>

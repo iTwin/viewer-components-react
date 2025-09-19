@@ -362,7 +362,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
             }
           >
             <IconButton label='Show color picker' styleType='borderless' className='map-manager-base-item-color components-color-swatch'>
-              <ColorSwatch style={{ pointerEvents: 'none' }} color={ColorValue.fromTbgr(bgColor)} />
+              <ColorSwatch color={ColorValue.fromTbgr(bgColor)} />
             </IconButton>
           </Popover>
         )}

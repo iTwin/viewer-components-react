@@ -67,7 +67,7 @@ export function CustomParamEditDialog(props: CustomParamEditDialogProps) {
       title={MapLayersUI.translate(props.item ? "CustomParamEditDialog.DialogTitleEdit" : "CustomParamEditDialog.DialogTitleAdd")}
       isOpen={true}
       onClose={handleCancel}
-      style={{ minHeight: 120, minWidth: 120 }}
+      className="custom-param-edit-dialog-modal"
       portal
     >
       <ModalContent>

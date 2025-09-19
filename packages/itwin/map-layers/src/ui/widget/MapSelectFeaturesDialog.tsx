@@ -19,7 +19,6 @@ export interface MapSelectFeaturesProps {
   handleOk: (subLayers: MapSubLayerProps[]) => void;
   handleCancel: () => void;
 }
-const minHeight = 250;
 const maxSubLayers = 30;
 
 export function MapSelectFeaturesDialog(props: MapSelectFeaturesProps) {
@@ -88,7 +87,6 @@ export function MapSelectFeaturesDialog(props: MapSelectFeaturesProps) {
         title={MapLayersUI.translate("CustomAttach.SelectLayersToCreate")}
         isOpen={true}
         onClose={handleCancel}
-        style={{ minHeight, maxWidth: 600 }}
         portal
       >
         {/* 'onSubLayerStateChange' is used to trigger hook state change only, no need to update subLayer objects */}

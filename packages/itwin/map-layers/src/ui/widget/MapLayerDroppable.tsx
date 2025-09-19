@@ -6,7 +6,7 @@
 
 // the following quiet warning caused by react-beautiful-dnd package
 
-import "./MapLayerManager.scss";
+import "./MapLayerDroppable.scss";
 import * as React from "react";
 import { Draggable, Droppable } from "react-beautiful-dnd";
 import { UiFramework } from "@itwin/appui-react";
@@ -204,7 +204,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
         </span>
 
         {/* SubLayersPopupButton */}
-        <div id="MapLayerSettingsSubLayersMenu" style={{ visibility: "hidden" }} className="map-manager-item-sub-layer-container">
+        <div id="MapLayerSettingsSubLayersMenu" className="map-manager-item-sub-layer-container map-manager-hidden">
           {activeLayer.subLayers && activeLayer.subLayers.length > 1 && (
             <SubLayersPopupButton
               checkboxStyle="eye"
@@ -252,7 +252,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
             <SvgStatusWarning />
           </IconButton>
         )}
-        <div id="MapLayerSettingsMenuWrapper" style={{ visibility: "hidden" }}>
+        <div id="MapLayerSettingsMenuWrapper" className="map-manager-hidden">
           <MapLayerSettingsMenu
             activeViewport={props.activeViewport}
             mapLayerSettings={activeLayer}
@@ -304,7 +304,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
         {/* We don't want a placeholder when displaying the 'Drop here' message
               Unfortunately, if don't add it, 'react-beautiful-dnd' show an error message in the console.
               So I simply make it hidden. See https://github.com/atlassian/react-beautiful-dnd/issues/518 */}
-        <div style={containsLayer ? undefined : { display: "none" }}>{dropProvided.placeholder}</div>
+        <div className={containsLayer ? undefined : "map-manager-display-none"}>{dropProvided.placeholder}</div>
       </div>
     );
   }

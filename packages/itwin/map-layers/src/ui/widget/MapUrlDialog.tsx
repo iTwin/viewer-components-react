@@ -15,10 +15,10 @@ import { CustomParamsStorage } from "../../CustomParamsStorage";
 import { CustomParamUtils } from "../../CustomParamUtils";
 import { MapLayerPreferences } from "../../MapLayerPreferences";
 import { MapLayersUI } from "../../mapLayers";
+import { useCrossOriginPopup } from "../hooks/useCrossOriginPopup";
 import { SelectCustomParam } from "./SelectCustomParam";
 import { SelectMapFormat } from "./SelectMapFormat";
 import { UserPreferencesStorageOptions } from "./UserPreferencesStorageOptions";
-import { useCrossOriginPopup } from "../hooks/useCrossOriginPopup";
 
 import type { ImageMapLayerSettings } from "@itwin/core-common";
 import type { MapLayerAccessClient, MapLayerSourceValidation, ScreenViewport } from "@itwin/core-frontend";
@@ -626,7 +626,6 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
         title={dialogTitle}
         isOpen={true}
         onClose={handleCancel}
-        style={{ minHeight: 120, maxWidth: 600 }}
         portal
       >
         <ModalContent>
