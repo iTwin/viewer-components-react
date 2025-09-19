@@ -6,8 +6,6 @@
 .quantityFormat--formatPanel {
   display: flex;
   flex-direction: column;
-  gap: var(--iui-size-l);
-  padding: var(--iui-size-s) 0;
 }
 
 .quantityFormat--formatPanel
@@ -58,7 +56,13 @@
 }
 
 .quantityFormat-formatPanel-divider {
-  margin: var(--iui-size-s)
+  margin-top: var(--iui-size-s);
+  margin-bottom: var(--iui-size-s);
+}
+
+.quantityFormat-formatPanel-unit-divider {
+  margin-top: var(--iui-size-xs);
+  margin-bottom: var(--iui-size-xs);
 }
 
 /* Inline styling for unit label components */
@@ -155,4 +159,47 @@
 
 .quantityFormat--formatSelector-container {
   height: inherit;
+}
+
+/* Format Set Selector Styles */
+.quantityFormat--formatSetSelector-container {
+  height: inherit;
+}
+
+.quantityFormat--formatSetSelector-list {
+  height: inherit;
+  width: 100%;
+  overflow-y: auto;
+  border-left: 1px solid var(--iui-color-border);
+  border-right: 1px solid var(--iui-color-border);
+  border-bottom: 1px solid var(--iui-color-border);
+  border-radius: 0 0 var(--iui-border-radius-1) var(--iui-border-radius-1);
+}
+
+.quantityFormat--formatSetSelector-listItem {
+  cursor: pointer;
+  padding: var(--iui-size-xs);
+  transition: background-color 0.2s ease;
+}
+
+.quantityFormat--formatSetSelector-listItem:hover {
+  background-color: var(--iui-color-background-hover);
+}
+
+.quantityFormat--formatSetSelector-listItem.active {
+  background-color: var(--iui-color-background-accent-muted);
+  border-left: 3px solid var(--iui-color-border-accent);
+}
+
+.quantityFormat--formatSetSelector-listItem:last-child {
+  border-bottom: none;
+}
+
+/* Format Set Panel Styles */
+.quantityFormat--formatSetPanel-input {
+  width: 30rem;
+}
+
+.quantityFormat--formatSetPanel-input:disabled {
+  background-color: var(--iui-color-background-zebra);
 }

@@ -5,9 +5,8 @@
 
 import React from "react";
 import { Button, Flex, Text } from "@itwin/itwinui-react";
+import { FormatSetPanel, FormatSetSelector } from "@itwin/quantity-formatting-react";
 import { FormatManager } from "./FormatManager";
-import { FormatSetPanel } from "./FormatSetPanel";
-import { FormatSetSelector } from "./FormatSetSelector";
 
 import type { FormatSet } from "@itwin/ecschema-metadata";
 
@@ -100,26 +99,19 @@ export const FormatSetsTabPanel: React.FC = () => {
   return (
     <Flex flexDirection="row" gap="l" className="format-tab-panel">
       <Flex.Item className="quantity-format-selector-item">
-        <Flex flexDirection="column" alignItems="stretch" gap="m">
-          <FormatSetSelector formatSets={formatSets} selectedFormatSetKey={selectedFormatSetKey} onFormatSetChange={handleFormatSetChange} />
-
-          {selectedFormatSet && (
-            <Flex flexDirection="column" alignItems="center" gap="xs">
-              <Text variant="body">Selected: {selectedFormatSet.label}</Text>
-              {activeFormatSetKey && (
-                <Text variant="small" isMuted>
-                  Active: {formatSets.find((fs) => fs.name === activeFormatSetKey)?.label || activeFormatSetKey}
-                </Text>
-              )}
-            </Flex>
+        <Flex flexDirection="column" alignItems="flex-start" gap="m">
+          {activeFormatSetKey && (
+            <Text variant='leading'>
+              Active: {formatSets.find((fs) => fs.name === activeFormatSetKey)?.label || activeFormatSetKey}
+            </Text>
           )}
-
+          <FormatSetSelector formatSets={formatSets} selectedFormatSetKey={selectedFormatSetKey} onFormatSetChange={handleFormatSetChange} />
           <Flex flexDirection="row" gap="s" justifyContent="flex-end">
             <Button size="small" styleType="default" onClick={handleCancelSelection} disabled={!hasChanges}>
               Cancel
             </Button>
             <Button size="small" styleType="high-visibility" onClick={handleApplyFormatSet} disabled={!hasChanges || !selectedFormatSet}>
-              Apply Format Set
+              Set as Active
             </Button>
           </Flex>
         </Flex>

@@ -4,7 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import React from "react";
-import { Flex, LabeledInput, LabeledSelect, Text, Textarea } from "@itwin/itwinui-react";
+import { ComboBox, Flex, Input, Label, Text, Textarea } from "@itwin/itwinui-react";
+import { useTranslation } from "../../useTranslation.js";
 
 import type { FormatSet } from "@itwin/ecschema-metadata";
 
@@ -20,15 +21,16 @@ interface FormatSetPanelProps {
 /**
  * A React component that displays and allows editing of format set properties.
  */
-export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({
-  formatSet,
-  editable = false,
-  onFormatSetChange,
-}) => {
-  const [name, setName] = React.useState(formatSet?.name || "");
+export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, editable = false, onFormatSetChange }) => {
   const [label, setLabel] = React.useState(formatSet?.label || "");
   const [description, setDescription] = React.useState("");
   const [unitSystem, setUnitSystem] = React.useState<string>("metric");
+  const { translate } = useTranslation();
+
+  // Generate unique IDs for form elements
+  const labelInputId = React.useId();
+  const descriptionInputId = React.useId();
+  const unitSystemSelectId = React.useId();
 
   // Unit system options
   const unitSystemOptions = [
@@ -56,27 +58,10 @@ export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({
 
   // Update local state when formatSet prop changes
   React.useEffect(() => {
-    setName(formatSet?.name || "");
     setLabel(formatSet?.label || "");
     setDescription(formatSet?.name ? getExampleDescription(formatSet.name) : "");
     setUnitSystem("metric"); // Default to metric, could be extended to read from formatSet
   }, [formatSet, getExampleDescription]);
-
-  const handleNameChange = React.useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const newName = event.target.value;
-      setName(newName);
-
-      if (editable && formatSet && onFormatSetChange) {
-        const updatedFormatSet: FormatSet = {
-          ...formatSet,
-          name: newName,
-        };
-        onFormatSetChange(updatedFormatSet);
-      }
-    },
-    [editable, formatSet, onFormatSetChange]
-  );
 
   const handleLabelChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,85 +76,77 @@ export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({
         onFormatSetChange(updatedFormatSet);
       }
     },
-    [editable, formatSet, onFormatSetChange]
+    [editable, formatSet, onFormatSetChange],
   );
 
-  const handleDescriptionChange = React.useCallback(
-    (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const newDescription = event.target.value;
-      setDescription(newDescription);
-      // Note: FormatSet doesn't have description property yet, so we don't update the formatSet
-    },
-    []
-  );
+  const handleDescriptionChange = React.useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newDescription = event.target.value;
+    setDescription(newDescription);
+    // Note: FormatSet doesn't have description property yet, so we don't update the formatSet
+  }, []);
 
-  const handleUnitSystemChange = React.useCallback(
-    (value: string) => {
-      setUnitSystem(value);
-      // Note: FormatSet doesn't have unitSystem property yet, so we don't update the formatSet
-    },
-    []
-  );
+  const handleUnitSystemChange = React.useCallback((value: string) => {
+    setUnitSystem(value);
+    // Note: FormatSet doesn't have unitSystem property yet, so we don't update the formatSet
+  }, []);
 
   if (!formatSet) {
     return (
       <Flex flexDirection="column" justifyContent="center" alignItems="center" style={{ height: "100%" }}>
         <Text variant="leading" isMuted>
-          Select a format set to view details
+          {translate("QuantityFormat:labels.selectFormatSetToView")}
         </Text>
       </Flex>
     );
   }
 
   return (
-    <Flex flexDirection="column" gap="m" style={{ padding: "var(--iui-size-m)" }}>
-      <Text variant="leading">Format Set Details</Text>
+    <Flex flexDirection="column" alignItems="flex-start" gap="m" style={{ padding: "var(--iui-size-s)" }}>
+      <Text variant="subheading">{translate("QuantityFormat:labels.formatSetDetails")}</Text>
 
-      <LabeledInput
-        label="Name"
-        value={name}
-        onChange={handleNameChange}
-        disabled={!editable}
-        placeholder="Format set name"
-        className="format-set-panel-input"
-      />
-
-      <LabeledInput
-        label="Label"
-        value={label}
-        onChange={handleLabelChange}
-        disabled={!editable}
-        placeholder="Format set display label"
-        className="format-set-panel-input"
-      />
-
-      <Flex flexDirection="column" gap="xs">
-        <Text variant="body">Description</Text>
-        <Textarea
-          value={description}
-          onChange={handleDescriptionChange}
+      <Flex alignItems="center" gap="m">
+        <Label htmlFor={labelInputId}>{translate("QuantityFormat:labels.label")}</Label>
+        <Input
+          id={labelInputId}
+          value={label}
+          onChange={handleLabelChange}
           disabled={!editable}
-          placeholder="Format set description"
-          className="format-set-panel-input"
-          rows={4}
+          placeholder={translate("QuantityFormat:labels.formatSetDisplayLabel")}
+          className="quantityFormat--formatSetPanel-input"
+          style={{ flex: 1 }}
         />
       </Flex>
 
-      <LabeledSelect
-        label="Unit System"
-        value={unitSystem}
-        onChange={handleUnitSystemChange}
-        options={unitSystemOptions}
-        disabled={!editable}
-        className="format-set-panel-input"
-        placeholder="Select unit system"
-      />
+      <Flex alignItems="center" gap="m">
+        <Label htmlFor={unitSystemSelectId}>{translate("QuantityFormat:labels.unitSystem")}</Label>
+        <ComboBox
+          id={unitSystemSelectId}
+          value={unitSystem}
+          onChange={handleUnitSystemChange}
+          options={unitSystemOptions}
+          inputProps={{
+            disabled: !editable,
+            placeholder: translate("QuantityFormat:labels.selectUnitSystem"),
+            style: {
+              backgroundColor: !editable ? "var(--iui-color-background-zebra)" : undefined,
+            },
+          }}
+          className="quantityFormat--formatSetPanel-input"
+          style={{ flex: 1 }}
+        />
+      </Flex>
 
-      <Flex flexDirection="column" gap="xs">
-        <Text variant="subheading">Formats</Text>
-        <Text variant="body" isMuted>
-          {Object.keys(formatSet.formats).length} format(s) defined
-        </Text>
+      <Flex flexDirection="column" alignItems="flex-start" gap="xs">
+        <Label htmlFor={descriptionInputId}>{translate("QuantityFormat:labels.description")}</Label>
+        <Textarea
+          id={descriptionInputId}
+          value={description}
+          onChange={handleDescriptionChange}
+          disabled={!editable}
+          placeholder={translate("QuantityFormat:labels.formatSetDescription")}
+          className="quantityFormat--formatSetPanel-input"
+          rows={4}
+        />
       </Flex>
     </Flex>
   );

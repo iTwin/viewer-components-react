@@ -5,6 +5,7 @@
 
 import React from "react";
 import { Flex, Input, List, ListItem, Text } from "@itwin/itwinui-react";
+import { useTranslation } from "../../useTranslation.js";
 
 import type { FormatSet } from "@itwin/ecschema-metadata";
 
@@ -26,6 +27,7 @@ export const FormatSetSelector: React.FC<FormatSetSelectorProps> = ({
   onFormatSetChange,
 }) => {
   const [searchTerm, setSearchTerm] = React.useState("");
+  const { translate } = useTranslation();
 
   // Prepare format set entries
   const formatSetEntries = React.useMemo(() => {
@@ -67,19 +69,19 @@ export const FormatSetSelector: React.FC<FormatSetSelectorProps> = ({
   );
 
   return (
-    <Flex flexDirection="column" alignItems="flex-start" className="format-set-selector-container">
+    <Flex flexDirection="column" gap="none" alignItems="flex-start" className="quantityFormat--formatSetSelector-container">
       <Input
         value={searchTerm}
         onChange={handleSearchChange}
-        placeholder="Search format sets..."
+        placeholder={translate("QuantityFormat:labels.searchFormatSets")}
       />
-      <List className="format-set-selector-list">
+      <List className="quantityFormat--formatSetSelector-list">
         {filteredFormatSets.map(({ key, label }) => (
           <ListItem
             key={key}
             onClick={() => handleFormatSetSelect(key)}
             active={selectedFormatSetKey === key}
-            className="format-set-selector-listItem"
+            className="quantityFormat--formatSetSelector-listItem"
           >
             <Text variant="body">{label}</Text>
           </ListItem>
@@ -87,14 +89,14 @@ export const FormatSetSelector: React.FC<FormatSetSelectorProps> = ({
         {filteredFormatSets.length === 0 && searchTerm.trim() && (
           <ListItem disabled>
             <Text variant="body" isMuted>
-              No format sets found matching &quot;{searchTerm}&quot;
+              {translate("QuantityFormat:labels.noFormatSetsFound")} &quot;{searchTerm}&quot;
             </Text>
           </ListItem>
         )}
         {formatSets.length === 0 && (
           <ListItem disabled>
             <Text variant="body" isMuted>
-              No format sets available
+              {translate("QuantityFormat:labels.noFormatSetsAvailable")}
             </Text>
           </ListItem>
         )}

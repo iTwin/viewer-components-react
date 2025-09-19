@@ -48,7 +48,7 @@ export function DecimalPrimaryChildren(props: PanelProps): React.ReactElement {
       <Text variant="small" isMuted={true}>
         {translate("QuantityFormat:labels.formatTypeSublabel")}
       </Text>
-      <Divider className="quantityFormat-formatPanel-divider" />
+      <Divider className="quantityFormat-formatPanel-unit-divider" />
       <Label>{translate("QuantityFormat:labels.units")}</Label>
       <FormatUnits
         unitsProvider={unitsProvider}
@@ -56,7 +56,7 @@ export function DecimalPrimaryChildren(props: PanelProps): React.ReactElement {
         initialFormat={formatProps}
         onUnitsChange={onFormatChange}
       />
-      <Divider className="quantityFormat-formatPanel-divider"/>
+      <Divider className="quantityFormat-formatPanel-unit-divider"/>
       <AppendUnitLabel
         formatProps={formatProps}
         onFormatChange={onFormatChange}
