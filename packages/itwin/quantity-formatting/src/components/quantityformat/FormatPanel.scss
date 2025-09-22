@@ -196,8 +196,31 @@
 }
 
 /* Format Set Panel Styles */
-.quantityFormat--formatSetPanel-input {
-  width: 30rem;
+.quantityFormat--formatSetPanel-container {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--iui-size-m);
+  padding: var(--iui-size-s);
+}
+
+.quantityFormat--formatSetPanel-emptyState {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.quantityFormat--formatSetPanel-inputRow {
+  align-items: center;
+  gap: var(--iui-size-m);
+  width: 100%;
+}
+
+.quantityFormat--formatSetPanel-inputColumn {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--iui-size-xs);
+  width: 100%
 }
 
 .quantityFormat--formatSetPanel-input:disabled {

@@ -92,7 +92,7 @@ export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, edita
 
   if (!formatSet) {
     return (
-      <Flex flexDirection="column" justifyContent="center" alignItems="center" style={{ height: "100%" }}>
+      <Flex className="quantityFormat--formatSetPanel-emptyState">
         <Text variant="leading" isMuted>
           {translate("QuantityFormat:labels.selectFormatSetToView")}
         </Text>
@@ -101,10 +101,10 @@ export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, edita
   }
 
   return (
-    <Flex flexDirection="column" alignItems="flex-start" gap="m" style={{ padding: "var(--iui-size-s)" }}>
+    <Flex className="quantityFormat--formatSetPanel-container">
       <Text variant="subheading">{translate("QuantityFormat:labels.formatSetDetails")}</Text>
 
-      <Flex alignItems="center" gap="m">
+      <Flex className="quantityFormat--formatSetPanel-inputRow">
         <Label htmlFor={labelInputId}>{translate("QuantityFormat:labels.label")}</Label>
         <Input
           id={labelInputId}
@@ -113,11 +113,10 @@ export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, edita
           disabled={!editable}
           placeholder={translate("QuantityFormat:labels.formatSetDisplayLabel")}
           className="quantityFormat--formatSetPanel-input"
-          style={{ flex: 1 }}
         />
       </Flex>
 
-      <Flex alignItems="center" gap="m">
+      <Flex className="quantityFormat--formatSetPanel-inputRow">
         <Label htmlFor={unitSystemSelectId}>{translate("QuantityFormat:labels.unitSystem")}</Label>
         <ComboBox
           id={unitSystemSelectId}
@@ -131,12 +130,11 @@ export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, edita
               backgroundColor: !editable ? "var(--iui-color-background-zebra)" : undefined,
             },
           }}
-          className="quantityFormat--formatSetPanel-input"
-          style={{ flex: 1 }}
+          className="quantityFormat--formatSetPanel-inputRow"
         />
       </Flex>
 
-      <Flex flexDirection="column" alignItems="flex-start" gap="xs">
+      <Flex className="quantityFormat--formatSetPanel-inputColumn">
         <Label htmlFor={descriptionInputId}>{translate("QuantityFormat:labels.description")}</Label>
         <Textarea
           id={descriptionInputId}
