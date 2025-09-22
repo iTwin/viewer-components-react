@@ -119,13 +119,13 @@ export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, edita
       <Flex className="quantityFormat--formatSetPanel-inputRow">
         <Label htmlFor={unitSystemSelectId}>{translate("QuantityFormat:labels.unitSystem")}</Label>
         <ComboBox
-          id={unitSystemSelectId}
           value={unitSystem}
           onChange={handleUnitSystemChange}
           options={unitSystemOptions}
           inputProps={{
             disabled: !editable,
             placeholder: translate("QuantityFormat:labels.selectUnitSystem"),
+            id: unitSystemSelectId,
             style: {
               backgroundColor: !editable ? "var(--iui-color-background-zebra)" : undefined,
             },
