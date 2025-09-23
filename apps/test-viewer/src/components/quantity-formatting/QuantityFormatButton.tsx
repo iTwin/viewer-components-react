@@ -6,9 +6,9 @@
 import React, { useCallback, useState } from "react";
 import { IModelApp } from "@itwin/core-frontend";
 import { Button, Modal, Tabs } from "@itwin/itwinui-react";
-import { FormatManager } from "./quantity-formatting/FormatManager";
-import { FormatSetsTabPanel } from "./quantity-formatting/FormatSetsTabPanel";
-import { FormatTabPanel } from "./quantity-formatting/FormatTabPanel";
+import { FormatManager } from "./FormatManager";
+import { FormatSetsTabPanel } from "./FormatSetsTabPanel";
+import { FormatTabPanel } from "./FormatTabPanel";
 
 import type { FormatDefinition } from "@itwin/core-quantity";
 import type { FormatSet } from "@itwin/ecschema-metadata";
