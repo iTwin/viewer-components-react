@@ -1,8 +1,16 @@
 # Change Log - @itwin/map-layers
 
-<!-- This log was last generated on Thu, 11 Sep 2025 20:53:05 GMT and should not be manually modified. -->
+<!-- This log was last generated on Tue, 23 Sep 2025 14:41:43 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 6.0.7
+
+Tue, 23 Sep 2025 14:41:43 GMT
+
+### Patches
+
+- Replace Inline Styles with css Classes ([#1455](https://github.com/iTwin/viewer-components-react/pull/1455))
 
 ## 6.0.6
 
