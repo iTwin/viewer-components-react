@@ -10,17 +10,16 @@ import { SchemaFormatsProvider, SchemaUnitProvider } from "@itwin/ecschema-metad
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { FrontendDevTools } from "@itwin/frontend-devtools";
 import { ArcGisAccessClient } from "@itwin/map-layers-auth";
+import { QuantityFormatting } from "@itwin/quantity-formatting-react";
 import { Viewer as WebViewer } from "@itwin/web-viewer-react";
 import { unifiedSelectionStorage } from "../SelectionStorage";
 import { getUiProvidersConfig } from "../UiProvidersConfig";
 import { ApiKeys } from "./ApiKeys";
 import { useAuthorizationContext } from "./Authorization";
+import { FormatManager } from "./quantity-formatting/FormatManager";
 import { statusBarActionsProvider, ViewerOptionsProvider } from "./ViewerOptions";
-import { FormatManager } from "./FormatManager";
 
 import type { UiProvidersConfig } from "../UiProvidersConfig";
-import { QuantityFormatting } from "@itwin/quantity-formatting-react";
-
 export function Viewer() {
   return (
     <ViewerOptionsProvider>
