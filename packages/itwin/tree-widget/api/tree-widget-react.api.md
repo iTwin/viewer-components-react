@@ -405,14 +405,14 @@ interface TreeHeaderButtonProps {
 }
 
 // @beta
-interface TreeNodeCheckboxState {
-    // (undocumented)
-    isDisabled?: boolean;
-    // (undocumented)
+type TreeNodeCheckboxState = ({
     state: "on" | "off" | "partial";
-    // (undocumented)
+    isDisabled?: boolean;
+} | {
+    isLoading: true;
+}) & {
     tooltip?: string;
-}
+};
 
 // @beta (undocumented)
 type TreeNodeRendererProps = ComponentPropsWithoutRef<typeof TreeNodeRenderer> & {

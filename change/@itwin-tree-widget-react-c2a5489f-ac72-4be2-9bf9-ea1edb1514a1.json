@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Introduce an extra state to `TreeNodeCheckboxState` interface - `{ isLoading: true }`. When such state is returned, the \"eye\" checkboxes are not rendered by `<VisibilityTreeRenderer />` and `<TreeNodeRenderer />`. Previously, we were returning \"disabled\" state, resulting in disabled checkboxes being briefly shown until the states were loaded.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "35135765+grigasp@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
