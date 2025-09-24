@@ -2683,6 +2683,39 @@ describe("ModelsTreeVisibilityHandler", () => {
         });
       });
 
+      it("model visibility takes into account all element categories when some elements are in always drawn list", async function () {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
+          const parentCategory = insertSpatialCategory({ builder, codeValue: "parentCategory" });
+          const childCategory = insertSpatialCategory({ builder, codeValue: "childCategory" });
+          const model = insertPhysicalModelWithPartition({ builder, codeValue: "model" });
+
+          const parentElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: parentCategory.id });
+          insertPhysicalElement({ builder, modelId: model.id, categoryId: parentCategory.id });
+          const childElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: childCategory.id, parentId: parentElement.id });
+          return { modelId: model.id, parentCategoryId: parentCategory.id, parentElementId: parentElement.id, childElementId: childElement.id };
+        });
+        const { imodel, modelId, parentCategoryId, parentElementId, childElementId } = buildIModelResult;
+        using visibilityTestData = createVisibilityTestData({ imodel });
+        const { handler, viewport, ...props } = visibilityTestData;
+        const parentCategoryNode = createCategoryHierarchyNode(modelId, parentCategoryId);
+        await handler.changeVisibility(parentCategoryNode, true);
+        viewport.setAlwaysDrawn(new Set([...(viewport.alwaysDrawn ?? []), parentElementId]));
+        viewport.renderFrame();
+        await validateHierarchyVisibility({
+          ...props,
+          handler,
+          viewport,
+          visibilityExpectations: {
+            // Only categories of elements without parents are shown in the tree
+            category: () => "visible",
+            subject: () => "partial",
+            model: () => "partial",
+            groupingNode: ({ elementIds }) => (!elementIds.includes(childElementId) ? "visible" : "hidden"),
+            element: ({ elementId }) => (elementId !== childElementId ? "visible" : "hidden"),
+          },
+        });
+      });
+
       it("changing category visibility of hidden model does not turn on unrelated elements", async function () {
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           const parentCategory = insertSpatialCategory({ builder, codeValue: "parentCategory" });

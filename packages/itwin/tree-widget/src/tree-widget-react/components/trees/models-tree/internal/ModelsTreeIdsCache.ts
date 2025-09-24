@@ -370,7 +370,7 @@ export class ModelsTreeIdsCache implements Disposable {
 
   private async queryCategoryElementCounts(
     input: Array<{ modelId: Id64String; categoryId: Id64String }>,
-  ): Promise<Array<{ modelId: number; categoryId: number; elementsCount: number }>> {
+  ): Promise<Array<{ modelId: Id64String; categoryId: Id64String; elementsCount: number }>> {
     return collect(
       from(input).pipe(
         reduce((acc, { modelId, categoryId }) => {
@@ -392,36 +392,43 @@ export class ModelsTreeIdsCache implements Disposable {
             {
               ctes: [
                 `
-                    CategoryElements(id, modelId, categoryId) AS (
-                      SELECT ECInstanceId, Model.Id, Category.Id
-                      FROM ${this._hierarchyConfig.elementClassSpecification}
-                      WHERE
-                        Parent.Id IS NULL
-                        AND (
-                          ${whereClauses.join(" OR ")}
-                        )
+                  CategoryElements(id, modelId, categoryId) AS (
+                    SELECT ECInstanceId, Model.Id, Category.Id
+                    FROM ${this._hierarchyConfig.elementClassSpecification}
+                    WHERE
+                      Parent.Id IS NULL
+                      AND (
+                        ${whereClauses.join(" OR ")}
+                      )
 
-                      UNION ALL
+                    UNION ALL
 
-                      SELECT c.ECInstanceId, p.modelId, p.categoryId
-                      FROM ${this._hierarchyConfig.elementClassSpecification} c
-                      JOIN CategoryElements p ON c.Parent.Id = p.id
-                    )
-                  `,
+                    SELECT c.ECInstanceId, p.modelId, p.categoryId
+                    FROM ${this._hierarchyConfig.elementClassSpecification} c
+                    JOIN CategoryElements p ON c.Parent.Id = p.id
+                  )
+                `,
               ],
               ecsql: `
-                  SELECT modelId, categoryId, COUNT(id) elementsCount
-                  FROM CategoryElements
-                  GROUP BY modelId, categoryId
-                `,
+                SELECT modelId, categoryId, COUNT(id) elementsCount
+                FROM CategoryElements
+                GROUP BY modelId, categoryId
+              `,
             },
             { rowFormat: "ECSqlPropertyNames", limit: "unbounded" },
           );
 
-          const result = new Array<{ modelId: number; categoryId: number; elementsCount: number }>();
+          const result = new Array<{ modelId: Id64String; categoryId: Id64String; elementsCount: number }>();
           for await (const row of reader) {
             result.push({ modelId: row.modelId, categoryId: row.categoryId, elementsCount: row.elementsCount });
           }
+
+          input.forEach(({ modelId, categoryId }) => {
+            if (!result.some((queriedResult) => queriedResult.categoryId === categoryId && queriedResult.modelId === modelId)) {
+              result.push({ categoryId, modelId, elementsCount: 0 });
+            }
+          });
+
           return result;
         }),
         mergeAll(),
@@ -485,7 +492,7 @@ class ModelCategoryElementsCountCache {
   public constructor(
     private _loader: (
       input: Array<{ modelId: Id64String; categoryId: Id64String }>,
-    ) => Promise<Array<{ modelId: number; categoryId: number; elementsCount: number }>>,
+    ) => Promise<Array<{ modelId: Id64String; categoryId: Id64String; elementsCount: number }>>,
   ) {
     this._subscription = this._requestsStream
       .pipe(

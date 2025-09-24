@@ -931,7 +931,9 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     } & GetVisibilityFromAlwaysAndNeverDrawnElementsProps & { ignoreTooltip?: boolean },
   ): VisibilityStatus {
     const { alwaysDrawn, neverDrawn, totalCount, ignoreTooltip } = props;
-
+    if (totalCount === 0) {
+      return props.defaultStatus();
+    }
     if (neverDrawn?.size === totalCount) {
       return createVisibilityStatus("hidden", getTooltipOptions(props.tooltips.allElementsInNeverDrawnList, ignoreTooltip));
     }
@@ -989,6 +991,14 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
           alwaysDrawn: this.getAlwaysDrawnElements({ categoryIds: categoryId, modelId }),
           neverDrawn: this.getNeverDrawnElements({ categoryIds: categoryId, modelId }),
         }).pipe(
+          // There is a known bug:
+          // Categories that don't have root elements will make visibility result incorrect
+          // E.g.:
+          // - CategoryA
+          //  - ElementA (CategoryA is visible)
+          //    - ChildElementB (CategoryB is hidden) ChildElementB is in always drawn list
+          // Result will be "partial" because CategoryB will return hidden visibility, even though all elements are visible
+          // TODO fix with: https://github.com/iTwin/viewer-components-react/issues/1100
           map((state) => {
             return this.getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
               ...props,
