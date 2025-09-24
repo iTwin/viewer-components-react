@@ -55,6 +55,7 @@ export const QuantityFormatButton: React.FC = () => {
     const removeFormatSetListener = FormatManager.instance?.onActiveFormatSetChanged.addListener((formatSet) => {
       setActiveFormatSet(formatSet);
       setActiveFormatDefinitionKey(undefined); // Reset selection when format set changes
+      setFormatDefinition(undefined); // Reset format definition when format set changes
     });
     return () => {
       if (removeFormatSetListener) removeFormatSetListener();
