@@ -38,7 +38,7 @@ import { releaseMainThreadOnItemsCount } from "../Utils.js";
 import { AlwaysAndNeverDrawnElementInfo } from "./AlwaysAndNeverDrawnElementInfo.js";
 import { createFilteredTree, parseCategoryKey } from "./FilteredTree.js";
 import { ModelsTreeNode } from "./ModelsTreeNode.js";
-import { VisibilityChangeEventListener } from "./VisibilityChangeEventListener.js";
+import { createVisibilityChangeEventListener } from "./VisibilityChangeEventListener.js";
 
 import type { Observable, OperatorFunction, Subscription } from "rxjs";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
@@ -142,7 +142,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
   private _changeRequest = new Subject<{ key: HierarchyNodeKey; depth: number }>();
 
   constructor(private readonly _props: ModelsTreeVisibilityHandlerProps) {
-    this._eventListener = new VisibilityChangeEventListener(_props.viewport);
+    this._eventListener = createVisibilityChangeEventListener(_props.viewport);
     this._alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfo(_props.viewport);
     this._idsCache = this._props.idsCache;
     this._filteredTree = _props.filteredPaths ? createFilteredTree(this._props.imodelAccess, _props.filteredPaths) : undefined;

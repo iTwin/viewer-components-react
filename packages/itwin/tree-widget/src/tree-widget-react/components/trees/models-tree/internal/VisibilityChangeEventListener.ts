@@ -15,75 +15,64 @@ export interface IVisibilityChangeEventListener extends Disposable {
 }
 
 /** @internal */
-export class VisibilityChangeEventListener implements IVisibilityChangeEventListener {
-  #onVisibilityChange: BeEvent<() => void>;
-  #pendingVisibilityChange: undefined | ReturnType<typeof setTimeout>;
-  #suppressChangeEvents = 0;
-  #hasFiredDuringSuppress = true;
-  #listeners: Array<() => void>;
-
-  constructor(viewport: Viewport) {
-    this.#onVisibilityChange = new BeEvent<() => void>();
-    this.#listeners = [
-      viewport.onViewedCategoriesPerModelChanged.addListener(() => {
-        this.#hasFiredDuringSuppress = true;
-        this.handleVisibilityChange();
-      }),
-      viewport.onViewedCategoriesChanged.addListener(() => {
-        this.#hasFiredDuringSuppress = true;
-        this.handleVisibilityChange();
-      }),
-      viewport.onViewedModelsChanged.addListener(() => {
-        this.#hasFiredDuringSuppress = true;
-        this.handleVisibilityChange();
-      }),
-      viewport.onAlwaysDrawnChanged.addListener(() => {
-        this.#hasFiredDuringSuppress = true;
-        this.handleVisibilityChange();
-      }),
-      viewport.onNeverDrawnChanged.addListener(() => {
-        this.#hasFiredDuringSuppress = true;
-        this.handleVisibilityChange();
-      }),
-    ];
-  }
-
-  public [Symbol.dispose]() {
-    if (this.#pendingVisibilityChange) {
-      clearTimeout(this.#pendingVisibilityChange);
-      this.#pendingVisibilityChange = undefined;
-    }
-    this.#listeners.forEach((listener) => listener());
-    this.#listeners.length = 0;
-  }
-
-  public get isVisibilityChangePending(): boolean {
-    return this.#pendingVisibilityChange !== undefined;
-  }
-
-  private handleVisibilityChange() {
-    if (this.#pendingVisibilityChange || this.#suppressChangeEvents > 0) {
+export function createVisibilityChangeEventListener(viewport: Viewport): IVisibilityChangeEventListener & { isVisibilityChangePending: boolean } {
+  const onVisibilityChange = new BeEvent<() => void>();
+  let pendingVisibilityChange: undefined | ReturnType<typeof setTimeout>;
+  let suppressChangeEvents: number = 0;
+  let hasFiredDuringSuppress = true;
+  const handleVisibilityChange = () => {
+    if (pendingVisibilityChange || suppressChangeEvents > 0) {
       return;
     }
-    this.#pendingVisibilityChange = setTimeout(() => {
-      this.#onVisibilityChange.raiseEvent();
-      this.#pendingVisibilityChange = undefined;
-    }, 10);
-  }
+    pendingVisibilityChange = setTimeout(() => {
+      onVisibilityChange.raiseEvent();
+      pendingVisibilityChange = undefined;
+    });
+  };
 
-  public get onVisibilityChange() {
-    return this.#onVisibilityChange;
-  }
+  const listeners = [
+    viewport.onViewedCategoriesPerModelChanged.addListener(() => {
+      hasFiredDuringSuppress = true;
+      handleVisibilityChange();
+    }),
+    viewport.onViewedCategoriesChanged.addListener(() => {
+      hasFiredDuringSuppress = true;
+      handleVisibilityChange();
+    }),
+    viewport.onViewedModelsChanged.addListener(() => {
+      hasFiredDuringSuppress = true;
+      handleVisibilityChange();
+    }),
+    viewport.onAlwaysDrawnChanged.addListener(() => {
+      hasFiredDuringSuppress = true;
+      handleVisibilityChange();
+    }),
+    viewport.onNeverDrawnChanged.addListener(() => {
+      hasFiredDuringSuppress = true;
+      handleVisibilityChange();
+    }),
+  ];
 
-  public suppressChangeEvents() {
-    this.#hasFiredDuringSuppress = false;
-    ++this.#suppressChangeEvents;
-  }
-
-  public resumeChangeEvents() {
-    --this.#suppressChangeEvents;
-    if (this.#suppressChangeEvents === 0 && this.#hasFiredDuringSuppress) {
-      this.handleVisibilityChange();
-    }
-  }
+  return {
+    onVisibilityChange,
+    [Symbol.dispose]() {
+      if (pendingVisibilityChange) {
+        clearTimeout(pendingVisibilityChange);
+        pendingVisibilityChange = undefined;
+      }
+      listeners.forEach((x) => x());
+      listeners.length = 0;
+    },
+    suppressChangeEvents: () => {
+      hasFiredDuringSuppress = false;
+      ++suppressChangeEvents;
+    },
+    isVisibilityChangePending: pendingVisibilityChange !== undefined,
+    resumeChangeEvents: () => {
+      --suppressChangeEvents;
+      if (suppressChangeEvents === 0 && hasFiredDuringSuppress) {
+        handleVisibilityChange();
+      }
+    },
+  };
 }
