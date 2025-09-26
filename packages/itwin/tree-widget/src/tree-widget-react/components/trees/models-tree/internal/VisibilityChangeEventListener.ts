@@ -15,10 +15,11 @@ export interface IVisibilityChangeEventListener extends Disposable {
 }
 
 /** @internal */
-export function createVisibilityChangeEventListener(viewport: Viewport): IVisibilityChangeEventListener {
+export function createVisibilityChangeEventListener(viewport: Viewport): IVisibilityChangeEventListener & { isVisibilityChangePending: () => boolean } {
   const onVisibilityChange = new BeEvent<() => void>();
   let pendingVisibilityChange: undefined | ReturnType<typeof setTimeout>;
   let suppressChangeEvents: number = 0;
+  let hasFiredDuringSuppress = true;
   const handleVisibilityChange = () => {
     if (pendingVisibilityChange || suppressChangeEvents > 0) {
       return;
@@ -30,11 +31,26 @@ export function createVisibilityChangeEventListener(viewport: Viewport): IVisibi
   };
 
   const listeners = [
-    viewport.onViewedCategoriesPerModelChanged.addListener(handleVisibilityChange),
-    viewport.onViewedCategoriesChanged.addListener(handleVisibilityChange),
-    viewport.onViewedModelsChanged.addListener(handleVisibilityChange),
-    viewport.onAlwaysDrawnChanged.addListener(handleVisibilityChange),
-    viewport.onNeverDrawnChanged.addListener(handleVisibilityChange),
+    viewport.onViewedCategoriesPerModelChanged.addListener(() => {
+      hasFiredDuringSuppress = true;
+      handleVisibilityChange();
+    }),
+    viewport.onViewedCategoriesChanged.addListener(() => {
+      hasFiredDuringSuppress = true;
+      handleVisibilityChange();
+    }),
+    viewport.onViewedModelsChanged.addListener(() => {
+      hasFiredDuringSuppress = true;
+      handleVisibilityChange();
+    }),
+    viewport.onAlwaysDrawnChanged.addListener(() => {
+      hasFiredDuringSuppress = true;
+      handleVisibilityChange();
+    }),
+    viewport.onNeverDrawnChanged.addListener(() => {
+      hasFiredDuringSuppress = true;
+      handleVisibilityChange();
+    }),
   ];
 
   return {
@@ -48,11 +64,13 @@ export function createVisibilityChangeEventListener(viewport: Viewport): IVisibi
       listeners.length = 0;
     },
     suppressChangeEvents: () => {
-      suppressChangeEvents++;
+      hasFiredDuringSuppress = false;
+      ++suppressChangeEvents;
     },
+    isVisibilityChangePending: () => pendingVisibilityChange !== undefined,
     resumeChangeEvents: () => {
-      suppressChangeEvents--;
-      if (suppressChangeEvents === 0) {
+      --suppressChangeEvents;
+      if (suppressChangeEvents === 0 && hasFiredDuringSuppress) {
         handleVisibilityChange();
       }
     },
