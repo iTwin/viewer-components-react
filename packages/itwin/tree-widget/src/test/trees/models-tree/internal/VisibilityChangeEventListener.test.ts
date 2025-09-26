@@ -75,7 +75,7 @@ describe("VisibilityChangeEventListener", () => {
     handler.onVisibilityChange.addListener(spy);
     handler.suppressChangeEvents();
     handler.resumeChangeEvents();
-    expect(handler.isVisibilityChangePending).to.be.false;
+    expect(handler.isVisibilityChangePending()).to.be.false;
     expect(spy).to.not.be.called;
   });
 
@@ -91,10 +91,10 @@ describe("VisibilityChangeEventListener", () => {
     onViewedModelsChanged.raiseEvent(vpMock);
     onAlwaysDrawnChanged.raiseEvent(vpMock);
     onNeverDrawnChanged.raiseEvent(vpMock);
-    expect(handler.isVisibilityChangePending).to.be.false;
+    expect(handler.isVisibilityChangePending()).to.be.false;
     expect(spy).to.not.be.called;
     handler.resumeChangeEvents();
-    expect(handler.isVisibilityChangePending).to.be.true;
+    expect(handler.isVisibilityChangePending()).to.be.true;
     await waitFor(() => expect(spy).to.be.calledOnce);
   });
 
@@ -111,7 +111,7 @@ describe("VisibilityChangeEventListener", () => {
     onViewedModelsChanged.raiseEvent(vpMock);
     onAlwaysDrawnChanged.raiseEvent(vpMock);
     onNeverDrawnChanged.raiseEvent(vpMock);
-    expect(handler.isVisibilityChangePending).to.be.true;
+    expect(handler.isVisibilityChangePending()).to.be.true;
     await waitFor(() => expect(spy).to.be.calledOnce);
   });
 });

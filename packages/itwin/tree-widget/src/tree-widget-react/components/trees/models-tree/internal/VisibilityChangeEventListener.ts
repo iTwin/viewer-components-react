@@ -15,7 +15,7 @@ export interface IVisibilityChangeEventListener extends Disposable {
 }
 
 /** @internal */
-export function createVisibilityChangeEventListener(viewport: Viewport): IVisibilityChangeEventListener & { isVisibilityChangePending: boolean } {
+export function createVisibilityChangeEventListener(viewport: Viewport): IVisibilityChangeEventListener & { isVisibilityChangePending: () => boolean } {
   const onVisibilityChange = new BeEvent<() => void>();
   let pendingVisibilityChange: undefined | ReturnType<typeof setTimeout>;
   let suppressChangeEvents: number = 0;
@@ -67,7 +67,7 @@ export function createVisibilityChangeEventListener(viewport: Viewport): IVisibi
       hasFiredDuringSuppress = false;
       ++suppressChangeEvents;
     },
-    isVisibilityChangePending: pendingVisibilityChange !== undefined,
+    isVisibilityChangePending: () => pendingVisibilityChange !== undefined,
     resumeChangeEvents: () => {
       --suppressChangeEvents;
       if (suppressChangeEvents === 0 && hasFiredDuringSuppress) {
