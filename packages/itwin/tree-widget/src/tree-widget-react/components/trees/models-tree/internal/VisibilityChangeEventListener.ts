@@ -61,7 +61,7 @@ export class VisibilityChangeEventListener implements IVisibilityChangeEventList
   }
 
   private handleVisibilityChange() {
-    if (this.#pendingVisibilityChange || this.#suppressChangeEvents > 0 || !this.#hasFiredDuringSuppress) {
+    if (this.#pendingVisibilityChange || this.#suppressChangeEvents > 0) {
       return;
     }
     this.#pendingVisibilityChange = setTimeout(() => {
@@ -81,7 +81,7 @@ export class VisibilityChangeEventListener implements IVisibilityChangeEventList
 
   public resumeChangeEvents() {
     --this.#suppressChangeEvents;
-    if (this.#suppressChangeEvents === 0) {
+    if (this.#suppressChangeEvents === 0 && !this.#hasFiredDuringSuppress) {
       this.handleVisibilityChange();
     }
   }
