@@ -75,7 +75,7 @@ export class VisibilityChangeEventListener implements IVisibilityChangeEventList
   }
 
   public suppressChangeEvents() {
-    // this.#hasFiredDuringSuppress = false;
+    this.#hasFiredDuringSuppress = false;
     ++this.#suppressChangeEvents;
   }
 
