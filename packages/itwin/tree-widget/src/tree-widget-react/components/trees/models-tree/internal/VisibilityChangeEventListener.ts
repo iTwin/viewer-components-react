@@ -82,7 +82,7 @@ export class VisibilityChangeEventListener implements IVisibilityChangeEventList
 
   public resumeChangeEvents() {
     --this.#suppressChangeEvents;
-    if (this.#suppressChangeEvents === 0 && !this.#hasFiredDuringSuppress) {
+    if (this.#suppressChangeEvents === 0 && this.#hasFiredDuringSuppress) {
       this.handleVisibilityChange();
     }
   }
