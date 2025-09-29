@@ -12,15 +12,17 @@ export interface IVisibilityChangeEventListener extends Disposable {
   onVisibilityChange: BeEvent<() => void>;
   suppressChangeEvents(): void;
   resumeChangeEvents(): void;
+  isVisibilityChangePending: () => boolean;
 }
 
 /** @internal */
-export function createVisibilityChangeEventListener(viewport: Viewport): IVisibilityChangeEventListener & { isVisibilityChangePending: () => boolean } {
+export function createVisibilityChangeEventListener(viewport: Viewport): IVisibilityChangeEventListener {
   const onVisibilityChange = new BeEvent<() => void>();
   let pendingVisibilityChange: undefined | ReturnType<typeof setTimeout>;
   let suppressChangeEvents: number = 0;
   let hasFiredDuringSuppress = true;
   const handleVisibilityChange = () => {
+    hasFiredDuringSuppress = true;
     if (pendingVisibilityChange || suppressChangeEvents > 0) {
       return;
     }
@@ -31,26 +33,11 @@ export function createVisibilityChangeEventListener(viewport: Viewport): IVisibi
   };
 
   const listeners = [
-    viewport.onViewedCategoriesPerModelChanged.addListener(() => {
-      hasFiredDuringSuppress = true;
-      handleVisibilityChange();
-    }),
-    viewport.onViewedCategoriesChanged.addListener(() => {
-      hasFiredDuringSuppress = true;
-      handleVisibilityChange();
-    }),
-    viewport.onViewedModelsChanged.addListener(() => {
-      hasFiredDuringSuppress = true;
-      handleVisibilityChange();
-    }),
-    viewport.onAlwaysDrawnChanged.addListener(() => {
-      hasFiredDuringSuppress = true;
-      handleVisibilityChange();
-    }),
-    viewport.onNeverDrawnChanged.addListener(() => {
-      hasFiredDuringSuppress = true;
-      handleVisibilityChange();
-    }),
+    viewport.onViewedCategoriesPerModelChanged.addListener(handleVisibilityChange),
+    viewport.onViewedCategoriesChanged.addListener(handleVisibilityChange),
+    viewport.onViewedModelsChanged.addListener(handleVisibilityChange),
+    viewport.onAlwaysDrawnChanged.addListener(handleVisibilityChange),
+    viewport.onNeverDrawnChanged.addListener(handleVisibilityChange),
   ];
 
   return {
