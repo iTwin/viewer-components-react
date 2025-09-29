@@ -59,6 +59,20 @@ export namespace ModelsTreeNode {
     return modelIds && (Array.isArray(modelIds) ? modelIds[0] : modelIds);
   };
 
+  // export const getElementChildren = (extendedData?: { [id: string]: any }): undefined | Array<Id64Array> => {
+  //   if (
+  //     !extendedData ||
+  //     !("children" in extendedData) ||
+  //     !extendedData.children ||
+  //     !Array.isArray(extendedData.children) ||
+  //     extendedData.children.length === 0 ||
+  //     !Array.isArray(extendedData.children[0])
+  //   ) {
+  //     return undefined;
+  //   }
+  //   return extendedData.children;
+  // };
+
   /**
    * Retrieves category ID from node's extended data.
    */

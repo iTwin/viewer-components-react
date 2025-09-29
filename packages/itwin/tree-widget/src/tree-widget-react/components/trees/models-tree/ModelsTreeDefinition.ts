@@ -26,6 +26,7 @@ import {
   createNodesQueryClauseFactory,
   createPredicateBasedHierarchyDefinition,
   HierarchyFilteringPath,
+  HierarchyNodeKey,
   NodeSelectClauseColumnNames,
   ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
@@ -35,18 +36,8 @@ import { FilterLimitExceededError } from "../common/TreeErrors.js";
 import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils.js";
 import { releaseMainThreadOnItemsCount } from "./Utils.js";
 
-import type { NormalizedHierarchyFilteringPath } from "../common/Utils.js";
-import type { Id64String } from "@itwin/core-bentley";
 import type { Observable } from "rxjs";
-import type {
-  ECClassHierarchyInspector,
-  ECSchemaProvider,
-  ECSqlBinding,
-  ECSqlQueryDef,
-  ECSqlQueryRow,
-  IInstanceLabelSelectClauseFactory,
-  InstanceKey,
-} from "@itwin/presentation-shared";
+import type { Id64String } from "@itwin/core-bentley";
 import type {
   ClassGroupingNodeKey,
   DefineHierarchyLevelProps,
@@ -58,6 +49,16 @@ import type {
   LimitingECSqlQueryExecutor,
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
+import type {
+  ECClassHierarchyInspector,
+  ECSchemaProvider,
+  ECSqlBinding,
+  ECSqlQueryDef,
+  ECSqlQueryRow,
+  IInstanceLabelSelectClauseFactory,
+  InstanceKey,
+} from "@itwin/presentation-shared";
+import type { NormalizedHierarchyFilteringPath } from "../common/Utils.js";
 import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
 
 /** @beta */
@@ -188,6 +189,20 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
 
   public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
     if (ProcessedHierarchyNode.isGroupingNode(node)) {
+      let childrenCount = 0;
+      let isFiltered = false;
+      const filterTargets = new Map<Id64String, { childrenCount: number }>();
+      node.children.forEach((child) => {
+        if (child.extendedData?.childrenCount) {
+          childrenCount += child.extendedData.childrenCount;
+        }
+        if (child.filtering) {
+          isFiltered = true;
+          if ((!child.filtering.filteredChildrenIdentifierPaths?.length || child.filtering.isFilterTarget) && HierarchyNodeKey.isInstances(child.key)) {
+            child.key.instanceKeys.forEach((key) => filterTargets.set(key.id, { childrenCount: child.extendedData?.childrenCount ?? 0 }));
+          }
+        }
+      });
       return {
         ...node,
         label: this._hierarchyConfig.elementClassGrouping === "enableWithCounts" ? `${node.label} (${node.children.length})` : node.label,
@@ -195,6 +210,9 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
           ...node.extendedData,
           // add `modelId` and `categoryId` from the first grouped element
           ...node.children[0].extendedData,
+          childrenCount,
+          isFiltered,
+          filterTargets,
           // `imageId` is assigned to instance nodes at query time, but grouping ones need to
           // be handled during post-processing
           imageId: "icon-ec-class",
@@ -412,6 +430,37 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     ];
   }
 
+  private getElementChildrenCountCtes(props: { whereClause: string }): Array<string> {
+    return [
+      `
+        ElementWithParent(id, parentId) AS (
+          SELECT
+            c.ECInstanceId,
+            c.Parent.Id
+          FROM ${this._hierarchyConfig.elementClassSpecification} p
+          JOIN ${this._hierarchyConfig.elementClassSpecification} c on c.Parent.Id = p.ECInstanceId
+          WHERE
+           ${props.whereClause}
+
+          UNION ALL
+
+          SELECT
+            c.ECInstanceId,
+            p.parentId
+          FROM ${this._hierarchyConfig.elementClassSpecification} c
+          JOIN ElementWithParent p ON p.id = c.Parent.Id
+        )
+      `,
+      `
+        ParentChildrenCount(parentId, childrenCount) AS (
+          SELECT parentId, COUNT(id)
+          FROM ElementWithParent
+          GROUP BY parentId
+        )
+      `,
+    ];
+  }
+
   private async createSpatialCategoryChildrenQuery({
     parentNodeInstanceIds: categoryIds,
     parentNode,
@@ -433,10 +482,22 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         }, new Array<Id64String>()),
       ),
     );
+    const childrenCountWhereClause = `
+      p.Category.Id IN (${categoryIds.map(() => "?").join(",")})
+      AND p.Model.Id IN (${modelIds.map(() => "?").join(",")})
+      AND p.Parent.Id IS NULL
+    `;
+    const ctes = this.getElementChildrenCountCtes({ whereClause: childrenCountWhereClause });
+    const bindings = new Array<ECSqlBinding>();
+    for (let i = 0; i < 2; ++i) {
+      categoryIds.forEach((id) => bindings.push({ type: "id", value: id }));
+      modelIds.map((id) => bindings.push({ type: "id", value: id }));
+    }
     return [
       {
         fullClassName: this._hierarchyConfig.elementClassSpecification,
         query: {
+          ctes,
           ecsql: `
             SELECT
               ${await this._selectQueryFactory.createSelectClause({
@@ -469,10 +530,12 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   modelId: { selector: "IdToHex(this.Model.Id)" },
                   categoryId: { selector: "IdToHex(this.Category.Id)" },
                   imageId: "icon-item",
+                  childrenCount: { selector: "c.ChildrenCount" },
                 },
                 supportsFiltering: this.supportsFiltering(),
               })}
             FROM ${instanceFilterClauses.from} this
+            LEFT JOIN ParentChildrenCount c ON c.parentId = this.ECInstanceId
             ${instanceFilterClauses.joins}
             WHERE
               this.Category.Id IN (${categoryIds.map(() => "?").join(",")})
@@ -480,7 +543,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
               AND this.Parent.Id IS NULL
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
-          bindings: [...categoryIds.map((id) => ({ type: "id", value: id })), ...modelIds.map((id) => ({ type: "id", value: id }))] as ECSqlBinding[],
+          bindings,
         },
       },
     ];
@@ -494,10 +557,20 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       filter: instanceFilter,
       contentClass: { fullName: this._hierarchyConfig.elementClassSpecification, alias: "this" },
     });
+
+    const childrenCountWhereClause = `
+      p.Parent.Id IN (${elementIds.map(() => "?").join(",")})
+    `;
+    const ctes = this.getElementChildrenCountCtes({ whereClause: childrenCountWhereClause });
+    const bindings = new Array<ECSqlBinding>();
+    for (let i = 0; i < 2; ++i) {
+      elementIds.map((id) => bindings.push({ type: "id", value: id }));
+    }
     return [
       {
         fullClassName: this._hierarchyConfig.elementClassSpecification,
         query: {
+          ctes,
           ecsql: `
             SELECT
               ${await this._selectQueryFactory.createSelectClause({
@@ -527,16 +600,18 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   modelId: { selector: "IdToHex(this.Model.Id)" },
                   categoryId: { selector: "IdToHex(this.Category.Id)" },
                   imageId: "icon-item",
+                  childrenCount: { selector: "c.ChildrenCount" },
                 },
                 supportsFiltering: this.supportsFiltering(),
               })}
             FROM ${instanceFilterClauses.from} this
+            LEFT JOIN ParentChildrenCount c ON c.parentId = this.ECInstanceId
             ${instanceFilterClauses.joins}
             WHERE
               this.Parent.Id IN (${elementIds.map(() => "?").join(",")})
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
-          bindings: elementIds.map((id) => ({ type: "id", value: id })),
+          bindings,
         },
       },
     ];

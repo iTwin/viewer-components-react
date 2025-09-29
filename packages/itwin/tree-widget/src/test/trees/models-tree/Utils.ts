@@ -5,6 +5,7 @@
 
 import { concatMap, EMPTY, expand, firstValueFrom, from, toArray } from "rxjs";
 import sinon from "sinon";
+import { Id64 } from "@itwin/core-bentley";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { ModelsTreeIdsCache } from "../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
@@ -20,6 +21,7 @@ import type {
   HierarchyProvider,
   NonGroupingHierarchyNode,
 } from "@itwin/presentation-hierarchies";
+import type { ChildrenTree } from "../../../tree-widget-react/components/trees/models-tree/Utils.js";
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
@@ -76,6 +78,7 @@ interface IdsCacheMockProps {
   subjectModels?: Map<Id64String, Id64String[]>;
   modelCategories?: Map<Id64String, Id64Array>;
   categoryElements?: Map<Id64String, Id64Array>;
+  childElements?: Map<Id64String, Id64Array>;
 }
 
 export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCache {
@@ -99,6 +102,33 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
     }),
     getModelCategories: sinon.stub<[Id64String], Promise<Id64Array>>().callsFake(async (modelId) => {
       return props?.modelCategories?.get(modelId) ?? [];
+    }),
+    getChildrenTree: sinon.stub<[{ elementIds: Id64Arg }], Promise<ChildrenTree<undefined>>>().callsFake(async () => {
+      return new Map();
+    }),
+    getAllChildrenCount: sinon.stub<[{ elementIds: Id64Arg }], Promise<Map<Id64String, number>>>().callsFake(async ({ elementIds }) => {
+      const result = new Map<Id64String, number>();
+      if (!props?.childElements) {
+        for (const elementId of Id64.iterable(elementIds)) {
+          result.set(elementId, 0);
+        }
+        return result;
+      }
+      const getChildrenCount = (id: Id64String): number => {
+        let childrenCount = 0;
+        const entry = props.childElements!.get(id);
+        if (entry) {
+          childrenCount += entry.length;
+          for (const childId of entry) {
+            childrenCount += getChildrenCount(childId);
+          }
+        }
+        return childrenCount;
+      };
+      for (const elementId of Id64.iterable(elementIds)) {
+        result.set(elementId, getChildrenCount(elementId));
+      }
+      return result;
     }),
     getCategoryElementsCount: sinon.stub<[Id64String, Id64String], Promise<number>>().callsFake(async (_, categoryId) => {
       return props?.categoryElements?.get(categoryId)?.length ?? 0;

@@ -26,3 +26,46 @@ export function releaseMainThreadOnItemsCount<T>(elementCount: number) {
     );
   };
 }
+
+/** @internal */
+export type ChildrenTree<T> = Map<string, { children?: ChildrenTree<T>; additionalProps?: T }>;
+
+/** @internal */
+export function getIdsFromChildrenTree<T>({ tree, additionalCheck }: { tree: ChildrenTree<T>, additionalCheck?: (treeEntry: T | undefined) => boolean }): Set<string> {
+  const result = new Set<string>();
+  tree.forEach((entry, id) => {
+    if (!additionalCheck || additionalCheck(entry.additionalProps)) {
+      result.add(id);
+    }
+    if (entry.children) {
+      const childrenIds = getIdsFromChildrenTree({ tree: entry.children, additionalCheck });
+      childrenIds.forEach((childId) => result.add(childId));
+    }
+  })
+  return result;
+}
+
+export function getChildIdsFromChildrenTree<T>({ tree, additionalCheck }: { tree: ChildrenTree<T>, additionalCheck?: (treeEntry: T | undefined) => boolean }): Set<string> {
+  const result = new Set<string>();
+  tree.forEach((entry) => {
+    if (entry.children) {
+      const childrenIds = getIdsFromChildrenTree({ tree: entry.children, additionalCheck });
+      childrenIds.forEach((childId) => result.add(childId));
+    }
+  })
+  return result;
+}
+
+export function getIdsWithPropsFromChildrenTree<T>({ tree, additionalCheck }: { tree: ChildrenTree<T>, additionalCheck?: (treeEntry: T | undefined) => boolean }): Map<string, T | undefined> {
+  const result = new Map<string, T | undefined>();
+  tree.forEach((entry, id) => {
+    if (!additionalCheck || additionalCheck(entry.additionalProps)) {
+      result.set(id, entry.additionalProps);
+    }
+    if (entry.children) {
+      const childrenIds = getIdsWithPropsFromChildrenTree({ tree: entry.children, additionalCheck });
+      childrenIds.forEach((additionalProps, childId) => result.set(childId, additionalProps));
+    }
+  })
+  return result;
+}

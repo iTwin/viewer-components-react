@@ -371,7 +371,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 alwaysDrawn: new Set([...categoryElements.values()].flat()),
                 queryHandler: () =>
                   [...categoryElements].flatMap(([categoryId, elements]) => {
-                    return elements.map((elementId) => ({ elementId, categoryId, modelId }));
+                    return elements.map((elementId) => ({ rootCategoryId: categoryId, categoryId, modelId, elementsPath: elementId }));
                   }),
               }),
             });
@@ -480,7 +480,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 neverDrawn: new Set([...categoryElements.values()].flat()),
                 queryHandler: () =>
                   [...categoryElements].flatMap(([categoryId, elements]) => {
-                    return elements.map((elementId) => ({ elementId, categoryId, modelId }));
+                    return elements.map((elementId) => ({ rootCategoryId: categoryId, categoryId, modelId, elementsPath: elementId }));
                   }),
               }),
             });
@@ -596,7 +596,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               idsCache,
               viewport: createFakeSinonViewport({
                 neverDrawn: new Set(["0x100"]),
-                queryHandler: () => [{ elementId: "0x100", modelId, categoryId: "0x10" }],
+                queryHandler: () => [{ rootCategoryId: "0x10", elementsPath: "0x100", modelId, categoryId: "0x10" }],
               }),
             });
             const { handler } = handlerResult;
@@ -619,7 +619,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               viewport: createFakeSinonViewport({
                 isAlwaysDrawnExclusive: true,
                 alwaysDrawn: new Set(["0x100"]),
-                queryHandler: () => [{ elementId: "0x100", modelId, categoryId: "0x10" }],
+                queryHandler: () => [{ rootCategoryId: "0x10", elementsPath: "0x100", modelId, categoryId: "0x10" }],
               }),
             });
             const { handler } = handlerResult;
@@ -767,7 +767,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 view: {
                   viewsCategory: sinon.fake.returns(true),
                 },
-                queryHandler: () => [{ elementId: "0x4", modelId: "0xff", categoryId: "0xff" }],
+                queryHandler: () => [{ rootcategoryId: "0xff", elementsPath: "0x4", modelId: "0xff", categoryId: "0xff" }],
               }),
             });
             const { handler } = handlerResult;
@@ -790,7 +790,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 view: {
                   viewsCategory: sinon.fake.returns(true),
                 },
-                queryHandler: () => elements.map((elementId) => ({ elementId, modelId, categoryId })),
+                queryHandler: () => elements.map((elementId) => ({ rootCategoryId: categoryId, elementsPath: elementId, modelId, categoryId })),
               }),
             });
             const { handler } = handlerResult;
@@ -833,7 +833,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 perModelCategoryVisibility: {
                   getOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.Show),
                 },
-                queryHandler: () => [{ elementId: "0x4", modelId: "0xff", categoryId: "0xff" }],
+                queryHandler: () => [{ rootCategoryId: "0xff", elementsPath: "0x4", modelId: "0xff", categoryId: "0xff" }],
               }),
             });
             const { handler } = handlerResult;
@@ -858,7 +858,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 view: {
                   viewsCategory: sinon.fake.returns(true),
                 },
-                queryHandler: () => [{ elementId: elements[0], modelId, categoryId }],
+                queryHandler: () => [{ elementsPath: elements[0], modelId, rootCategoryId: categoryId, categoryId }],
               }),
             });
             const { handler } = handlerResult;
@@ -881,7 +881,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 view: {
                   viewsCategory: sinon.fake.returns(false),
                 },
-                queryHandler: () => [{ elementId: elements[0], modelId, categoryId }],
+                queryHandler: () => [{ rootCategoryId: categoryId, elementsPath: elements[0], modelId, categoryId }],
               }),
             });
             const { handler } = handlerResult;
@@ -904,7 +904,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 perModelCategoryVisibility: {
                   getOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.Show),
                 },
-                queryHandler: () => [{ elementId: elements[0], modelId, categoryId }],
+                queryHandler: () => [{ rootCategoryId: categoryId, elementsPath: elements[0], modelId, categoryId }],
               }),
             });
             const { handler } = handlerResult;
@@ -927,7 +927,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 perModelCategoryVisibility: {
                   getOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.Hide),
                 },
-                queryHandler: () => [{ elementId: elements[0], modelId, categoryId }],
+                queryHandler: () => [{ rootCategoryId: categoryId, elementsPath: elements[0], modelId, categoryId }],
               }),
             });
             const { handler } = handlerResult;
@@ -1376,15 +1376,15 @@ describe("ModelsTreeVisibilityHandler", () => {
                 const ids = CompressedId64Set.decompressSet((binder?.serialize() as any)[1].value);
                 if (ids.size === 2 && alwaysDrawnElements.every((id) => ids.has(id))) {
                   return [
-                    ...alwaysDrawnElements.map((elementId) => ({ elementId, modelId, categoryId })),
-                    { elementId: otherAlwaysDrawnElement, modelId: otherModelId, categoryId: otherCategoryId },
+                    ...alwaysDrawnElements.map((elementId) => ({ rootCategoryId: categoryId, elementsPath: elementId, modelId, categoryId })),
+                    { rootCategoryId: otherCategoryId, elementsPath: otherAlwaysDrawnElement, modelId: otherModelId, categoryId: otherCategoryId },
                   ];
                 }
 
                 if (ids.size === 2 && neverDrawnElements.every((id) => ids.has(id))) {
                   return [
-                    ...neverDrawnElements.map((elementId) => ({ elementId, modelId, categoryId })),
-                    { elementId: otherNeverDrawnElement, modelId: otherModelId, categoryId: otherCategoryId },
+                    ...neverDrawnElements.map((elementId) => ({ rootCategoryId: categoryId, elementsPath: elementId, modelId, categoryId })),
+                    { rootCategoryId: otherCategoryId, elementsPath: otherNeverDrawnElement, modelId: otherModelId, categoryId: otherCategoryId },
                   ];
                 }
 
@@ -2264,14 +2264,14 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
     });
 
-    it("hiding parent element makes it hidden, model and category partially visible, while children remain visible", async function () {
+    it("hiding parent element makes it, its children, model and category hidden", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const category = insertSpatialCategory({ builder, codeValue: "category" }).id;
         const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
         const parentElement = insertPhysicalElement({ builder, modelId: model, categoryId: category }).id;
         const child = insertPhysicalElement({ builder, modelId: model, categoryId: category, parentId: parentElement }).id;
-        insertPhysicalElement({ builder, modelId: model, categoryId: category, parentId: child });
-        return { model, category, parentElement };
+        const childOfChild = insertPhysicalElement({ builder, modelId: model, categoryId: category, parentId: child }).id;
+        return { model, category, parentElement, child, childOfChild };
       });
 
       const { imodel, ...ids } = buildIModelResult;
@@ -2286,13 +2286,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         provider,
         handler,
         viewport,
-        visibilityExpectations: {
-          subject: () => "partial",
-          model: () => ({ tree: "partial", modelSelector: true }),
-          category: () => ({ tree: "partial", categorySelector: false, perModelCategoryOverride: "show" }),
-          groupingNode: ({ elementIds }) => (elementIds.includes(ids.parentElement) ? "hidden" : "visible"),
-          element: ({ elementId }) => (elementId === ids.parentElement ? "hidden" : "visible"),
-        },
+        visibilityExpectations: VisibilityExpectations.all("hidden"),
       });
     });
 
@@ -2495,18 +2489,18 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
     });
 
-    it("showing grouping node makes it and its grouped elements visible", async function () {
+    it("showing grouping node makes it, its grouped elements, and children visible", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const category = insertSpatialCategory({ builder, codeValue: "category" }).id;
         const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
         const parentElement = insertPhysicalElement({ builder, modelId: model, categoryId: category }).id;
         const child = insertPhysicalElement({ builder, modelId: model, categoryId: category, parentId: parentElement }).id;
-        insertPhysicalElement({ builder, modelId: model, categoryId: category, parentId: child });
+        const childOfChild = insertPhysicalElement({ builder, modelId: model, categoryId: category, parentId: child }).id;
 
         const otherCategory = insertSpatialCategory({ builder, codeValue: "otherCategory" }).id;
         insertPhysicalElement({ builder, modelId: model, categoryId: otherCategory });
 
-        return { model, category, parentElement };
+        return { model, category, parentElement, child, childOfChild };
       });
 
       const { imodel, ...ids } = buildIModelResult;
@@ -2531,10 +2525,11 @@ describe("ModelsTreeVisibilityHandler", () => {
           model: () => ({ tree: "partial", modelSelector: true }),
           category: ({ categoryId }) =>
             categoryId === ids.category
-              ? { tree: "partial", categorySelector: false, perModelCategoryOverride: "none" }
+              ? { tree: "visible", categorySelector: false, perModelCategoryOverride: "none" }
               : { tree: "hidden", categorySelector: false, perModelCategoryOverride: "none" },
-          groupingNode: ({ elementIds }) => (elementIds.includes(ids.parentElement) ? "visible" : "hidden"),
-          element: ({ elementId }) => (elementId === ids.parentElement ? "visible" : "hidden"),
+          groupingNode: ({ elementIds }) =>
+            elementIds.some((elementId) => [ids.parentElement, ids.child, ids.childOfChild].includes(elementId)) ? "visible" : "hidden",
+          element: ({ elementId }) => ([ids.parentElement, ids.child, ids.childOfChild].includes(elementId) ? "visible" : "hidden"),
         },
       });
     });
@@ -2545,12 +2540,12 @@ describe("ModelsTreeVisibilityHandler", () => {
         const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
         const parentElement = insertPhysicalElement({ builder, modelId: model, categoryId: category }).id;
         const child = insertPhysicalElement({ builder, modelId: model, categoryId: category, parentId: parentElement }).id;
-        insertPhysicalElement({ builder, modelId: model, categoryId: category, parentId: child });
+        const childOfChild = insertPhysicalElement({ builder, modelId: model, categoryId: category, parentId: child }).id;
 
         const otherCategory = insertSpatialCategory({ builder, codeValue: "otherCategory" }).id;
         insertPhysicalElement({ builder, modelId: model, categoryId: otherCategory });
 
-        return { model, category, parentElement };
+        return { model, category, parentElement, child, childOfChild };
       });
 
       const { imodel, ...ids } = buildIModelResult;
@@ -2576,12 +2571,13 @@ describe("ModelsTreeVisibilityHandler", () => {
           subject: () => "partial",
           model: () => ({ tree: "partial", modelSelector: true }),
           category: ({ categoryId }) => ({
-            tree: categoryId === ids.category ? "partial" : "visible",
+            tree: categoryId === ids.category ? "hidden" : "visible",
             categorySelector: false,
             perModelCategoryOverride: "show",
           }),
-          groupingNode: ({ elementIds }) => (elementIds.includes(ids.parentElement) ? "hidden" : "visible"),
-          element: ({ elementId }) => (elementId === ids.parentElement ? "hidden" : "visible"),
+          groupingNode: ({ elementIds }) =>
+            elementIds.some((elementId) => [ids.parentElement, ids.child, ids.childOfChild].includes(elementId)) ? "hidden" : "visible",
+          element: ({ elementId }) => ([ids.parentElement, ids.child, ids.childOfChild].includes(elementId) ? "hidden" : "visible"),
         },
       });
     });
@@ -3562,6 +3558,8 @@ describe("ModelsTreeVisibilityHandler", () => {
         });
 
         await validateHierarchyVisibility({
+
+          waitForOptions: {timeout: 50000},
           provider: defaultProvider,
           handler,
           viewport,

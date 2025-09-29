@@ -27,11 +27,11 @@ import {
 } from "rxjs";
 import { Id64 } from "@itwin/core-bentley";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { pushToMap } from "../../common/Utils.js";
 
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { Observable, Subscription } from "rxjs";
 import type { Viewport } from "@itwin/core-frontend";
+import type { ChildrenTree } from "../Utils.js";
 
 /** @internal */
 export const SET_CHANGE_DEBOUNCE_TIME = 20;
@@ -39,17 +39,17 @@ export const SET_CHANGE_DEBOUNCE_TIME = 20;
 type SetType = "always" | "never";
 
 /** @internal */
-export interface AlwaysOrNeverDrawnElementsQueryProps {
-  modelId: Id64String;
-  categoryIds?: Id64Arg;
+export interface GetElementsProps {
+  parentInstanceNodeIds: Array<Id64Arg>;
+  setType: SetType;
 }
 
-type CacheEntry = Map<Id64String, Map<Id64String, Id64Set>>;
+type CachedNodesMap = ChildrenTree<{ categoryId?: Id64String; isInList: boolean }>;
 
 export class AlwaysAndNeverDrawnElementInfo implements Disposable {
   #subscriptions: Subscription[];
-  #alwaysDrawn: { cacheEntryObs: Observable<CacheEntry>; latestCacheEntryValue?: CacheEntry };
-  #neverDrawn: { cacheEntryObs: Observable<CacheEntry>; latestCacheEntryValue?: CacheEntry };
+  #alwaysDrawn: { cacheEntryObs: Observable<CachedNodesMap>; latestCacheEntryValue?: CachedNodesMap };
+  #neverDrawn: { cacheEntryObs: Observable<CachedNodesMap>; latestCacheEntryValue?: CachedNodesMap };
   #disposeSubject = new Subject<void>();
   readonly #viewport: Viewport;
 
@@ -76,25 +76,14 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
     this.#suppress.next(false);
   }
 
-  public getElements({ setType, modelId, categoryIds }: { setType: SetType } & AlwaysOrNeverDrawnElementsQueryProps): Observable<Id64Set> {
+  public getElementChildrenTree({ setType, parentInstanceNodeIds }: GetElementsProps): Observable<CachedNodesMap> {
     const cache = setType === "always" ? this.#alwaysDrawn : this.#neverDrawn;
-    const getElements = categoryIds
-      ? (entry: CacheEntry | undefined) => {
-          const result = new Set<Id64String>();
-          for (const categoryId of Id64.iterable(categoryIds)) {
-            const elements = entry?.get(modelId)?.get(categoryId);
-            elements?.forEach((elementId) => result.add(elementId));
-          }
-          return result;
-        }
-      : (entry: CacheEntry | undefined) => {
-          const modelEntry = entry?.get(modelId);
-          const elements = new Set<Id64String>();
-          for (const set of modelEntry?.values() ?? []) {
-            set.forEach((id) => elements.add(id));
-          }
-          return elements;
-        };
+    const getElements = (rootTreeNode: CachedNodesMap | undefined): CachedNodesMap => {
+      if (!rootTreeNode) {
+        return new Map();
+      }
+      return this.getChildrenTree({ cachedMap: rootTreeNode, parentInstanceNodeIds });
+    };
 
     return !cache.latestCacheEntryValue
       ? cache.cacheEntryObs.pipe(map(getElements))
@@ -106,11 +95,34 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
         );
   }
 
-  private createCacheEntryObservable(setType: SetType): Observable<CacheEntry> {
+  private getChildrenTree({
+    cachedMap,
+    parentInstanceNodeIds,
+  }: {
+    cachedMap: CachedNodesMap;
+    parentInstanceNodeIds: Array<Id64Arg>;
+  }): CachedNodesMap {
+    if (parentInstanceNodeIds.length === 0) {
+      return cachedMap;
+    }
+    const result: CachedNodesMap = new Map();
+    for (const parentNodeId of Id64.iterable(parentInstanceNodeIds[0])) {
+      const entry = cachedMap.get(parentNodeId);
+      if (entry?.children) {
+        const childrenTree = this.getChildrenTree({ cachedMap: entry.children, parentInstanceNodeIds: parentInstanceNodeIds.slice(1) });
+        if (childrenTree.size > 0) {
+          result.set(parentNodeId, { children: childrenTree });
+        }
+      }
+    }
+    return result;
+  }
+
+  private createCacheEntryObservable(setType: SetType): Observable<CachedNodesMap> {
     const event = setType === "always" ? this.#viewport.onAlwaysDrawnChanged : this.#viewport.onNeverDrawnChanged;
     const getIds = setType === "always" ? () => this.#viewport.alwaysDrawn : () => this.#viewport.neverDrawn;
 
-    const resultSubject = new BehaviorSubject<CacheEntry | undefined>(undefined);
+    const resultSubject = new BehaviorSubject<CachedNodesMap | undefined>(undefined);
 
     const obs = fromEventPattern(
       (handler) => event.addListener(handler),
@@ -144,7 +156,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
         resetOnRefCountZero: false,
       }),
       // Wait until the result is available.
-      first((x): x is CacheEntry => !!x),
+      first((x): x is CachedNodesMap => !!x),
     );
     return obs;
   }
@@ -155,18 +167,54 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
     this.#disposeSubject.next();
   }
 
-  private queryAlwaysOrNeverDrawnElementInfo(set: Id64Set | undefined, requestId: string): Observable<CacheEntry> {
+  private queryAlwaysOrNeverDrawnElementInfo(set: Id64Set | undefined, requestId: string): Observable<CachedNodesMap> {
     const elementInfo = set?.size ? this.queryElementInfo([...set], requestId) : EMPTY;
     return elementInfo.pipe(
-      reduce((state, val) => {
-        let entry = state.get(val.modelId);
-        if (!entry) {
-          entry = new Map();
-          state.set(val.modelId, entry);
+      reduce((acc, { categoryId, rootCategoryId, modelId, elementsPath }) => {
+        let modelEntry = acc.get(modelId);
+        if (!modelEntry) {
+          modelEntry = { additionalProps: { isInList: false }, children: new Map() };
+          acc.set(modelId, modelEntry);
         }
-        pushToMap(entry, val.categoryId, val.elementId);
-        return state;
-      }, new Map<Id64String, Map<Id64String, Id64Set>>()),
+
+        let categoryEntry = modelEntry.children!.get(rootCategoryId);
+        if (!categoryEntry) {
+          categoryEntry = { additionalProps: { isInList: false }, children: new Map() };
+          modelEntry.children!.set(rootCategoryId, categoryEntry);
+        }
+
+        let lastEntry = categoryEntry;
+        const pathLength = elementsPath.length;
+        for (let i = 0; i < pathLength; ++i) {
+          const elementId = elementsPath[i];
+          let elementEntry = lastEntry.children?.get(elementId);
+          if (!elementEntry) {
+            if (i + 1 === pathLength) {
+              elementEntry = { additionalProps: { isInList: true, categoryId }};
+            } else {
+              elementEntry = { additionalProps: { isInList: false }, children: new Map()};
+            }
+            if (!lastEntry.children) {
+              lastEntry.children = new Map();
+            }
+            lastEntry.children.set(elementId, elementEntry);
+          }
+          if (i + 1 === pathLength) {
+            if (!elementEntry.additionalProps) {
+              elementEntry.additionalProps = {
+                isInList: true,
+                categoryId
+              }
+            }
+            else {
+              elementEntry.additionalProps.isInList = true;
+              elementEntry.additionalProps.categoryId = categoryId;
+            }
+          }
+          lastEntry = elementEntry;
+        }
+        return acc;
+      }, new Map<Id64String, { children?: CachedNodesMap; additionalProps: { categoryId?: Id64String; isInList: boolean }}>()),
     );
   }
 
@@ -174,9 +222,10 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
     elementIds: Id64Array,
     requestId: string,
   ): Observable<{
-    elementId: Id64String;
+    rootCategoryId: Id64String;
     modelId: Id64String;
     categoryId: Id64String;
+    elementsPath: Id64Array;
   }> {
     return defer(() => {
       const executor = createECSqlQueryExecutor(this.#viewport.iModel);
@@ -184,38 +233,45 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
         {
           ctes: [
             `
-            ElementInfo(elementId, modelId, categoryId, parentId) AS (
+            ElementInfo(modelId, rootCategoryId, categoryId, parentId, elementsPath) AS (
               SELECT
-                ECInstanceId elementId,
                 Model.Id modelId,
+                Category.Id rootCategoryId,
                 Category.Id categoryId,
-                Parent.Id parentId
+                Parent.Id parentId,
+                CAST(IdToHex(ECInstanceId) AS TEXT) elementsPath
               FROM bis.GeometricElement3d
               WHERE InVirtualSet(?, ECInstanceId)
 
               UNION ALL
 
               SELECT
-                e.elementId,
-                e.modelId,
-                p.Category.Id categoryId,
-                p.Parent.Id parentId
+                e.modelId modelId,
+                p.Category.Id rootCategoryId,
+                e.categoryId categoryId,
+                p.Parent.Id parentId,
+                CAST(IdToHex(p.ECInstanceId) AS TEXT) || ';' || e.elementsPath
               FROM bis.GeometricElement3d p
               JOIN ElementInfo e ON p.ECInstanceId = e.parentId
             )
             `,
           ],
           ecsql: `
-            SELECT elementId, modelId, categoryId
+            SELECT elementsPath elementsPath, modelId modelId, categoryId categoryId, rootCategoryId rootCategoryId
             FROM ElementInfo
             WHERE parentId IS NULL
           `,
           bindings: [{ type: "idset", value: elementIds }],
         },
         {
+          rowFormat: "ECSqlPropertyNames",
           restartToken: `ModelsTreeVisibilityHandler/${requestId}`,
         },
       );
-    }).pipe(map((row) => ({ elementId: row.elementId, modelId: row.modelId, categoryId: row.categoryId })));
+    }).pipe(
+      map((row) => {
+        return { elementsPath: row.elementsPath.split(";"), modelId: row.modelId, categoryId: row.categoryId, rootCategoryId: row.rootCategoryId };
+      }),
+    );
   }
 }
