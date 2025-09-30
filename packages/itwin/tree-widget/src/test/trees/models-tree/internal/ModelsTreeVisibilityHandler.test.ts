@@ -2892,7 +2892,11 @@ describe("ModelsTreeVisibilityHandler", () => {
         const { imodel, modelId, parentCategoryId, parentElementId, childElementId } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodel });
         const { handler, viewport, ...props } = visibilityTestData;
-        const parentCategoryNode = createCategoryHierarchyNode(modelId, parentCategoryId);
+        const parentCategoryNode = createCategoryHierarchyNode({
+          modelId,
+          categoryId: parentCategoryId,
+          parentKeys: [{ type: "instances", instanceKeys: [{ id: modelId, className: "BisCore.Model" }] }],
+        });
         await handler.changeVisibility(parentCategoryNode, true);
         viewport.setAlwaysDrawn(new Set([...(viewport.alwaysDrawn ?? []), parentElementId]));
         viewport.renderFrame();
