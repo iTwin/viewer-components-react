@@ -80,6 +80,10 @@ $hovered-icon-color: var(--iui-color-icon-accent);
       margin-inline: var(--iui-size-2xs);
       padding: 0;
       border: 0;
+
+      .iui-color-swatch {
+        pointer-events: none;
+      }
     }
   }
 }

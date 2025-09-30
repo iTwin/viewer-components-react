@@ -553,11 +553,13 @@ export class ModelsTreeIdsCache implements Disposable {
           for await (const row of reader) {
             result.push({ modelId: row.modelId, categoryId: row.categoryId, elementsCount: row.elementsCount });
           }
+
           input.forEach(({ modelId, categoryId }) => {
             if (!result.some((queriedResult) => queriedResult.categoryId === categoryId && queriedResult.modelId === modelId)) {
               result.push({ categoryId, modelId, elementsCount: 0 });
             }
           });
+
           return result;
         }),
         mergeAll(),
