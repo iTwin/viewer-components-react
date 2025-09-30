@@ -31,7 +31,7 @@ export interface ValidateNodeProps {
     | {
         default: "all-visible" | "all-hidden";
         instances: { [id: string]: Visibility };
-        parentIds?: { [id: string]: Visibility }
+        parentIds?: { [id: string]: Visibility };
       };
 }
 
@@ -41,7 +41,10 @@ async function validateNodeVisibility({ node, handler, expectations }: ValidateN
   }
   assert(HierarchyNode.isInstancesNode(node));
   const ids = node.key.instanceKeys.map((instanceKey) => instanceKey.id);
-  const parentIds = node.parentKeys.filter((key) => HierarchyNodeKey.isInstances(key)).map((key) => key.instanceKeys.map(({id}) => id)).flat()
+  const parentIds = node.parentKeys
+    .filter((key) => HierarchyNodeKey.isInstances(key))
+    .map((key) => key.instanceKeys.map(({ id }) => id))
+    .flat();
   const actualVisibility = await handler.getVisibilityStatus(node);
   if (expectations === "all-visible" || expectations === "all-hidden") {
     expect(actualVisibility.state).to.eq(expectations === "all-hidden" ? "hidden" : "visible");

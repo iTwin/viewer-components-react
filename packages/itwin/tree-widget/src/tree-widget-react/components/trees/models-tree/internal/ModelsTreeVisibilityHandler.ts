@@ -1378,7 +1378,7 @@ function getTooltipOptions(key: string | undefined, ignoreTooltip?: boolean) {
   };
 }
 
-function getParentInstanceNodeIds(props: { parentKeys: HierarchyNodeKey[]; modelId: Id64String;}): Array<Id64Arg> {
+function getParentInstanceNodeIds(props: { parentKeys: HierarchyNodeKey[]; modelId: Id64String }): Array<Id64Arg> {
   const parentInstanceNodeIds = new Array<Id64Arg>();
   let modelFound = false;
   props.parentKeys.forEach((parentKey) => {
@@ -1386,11 +1386,11 @@ function getParentInstanceNodeIds(props: { parentKeys: HierarchyNodeKey[]; model
       return;
     }
     if (modelFound) {
-      parentInstanceNodeIds.push(parentKey.instanceKeys.map(({id}) => id));
+      parentInstanceNodeIds.push(parentKey.instanceKeys.map(({ id }) => id));
       return;
     }
     if (parentKey.instanceKeys.some((instanceKey) => instanceKey.id === props.modelId)) {
-      parentInstanceNodeIds.push(parentKey.instanceKeys.map(({id}) => id))
+      parentInstanceNodeIds.push(parentKey.instanceKeys.map(({ id }) => id));
       modelFound = true;
     }
   });
