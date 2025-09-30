@@ -198,6 +198,7 @@ describe("<ModelsTreeComponent />", () => {
         );
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
+        // cspell:disable-next-line
         expect(onFeatureUsedSpy).to.be.calledWith("models-tree-showall");
       });
     });
@@ -217,6 +218,7 @@ describe("<ModelsTreeComponent />", () => {
         );
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
+        // cspell:disable-next-line
         expect(onFeatureUsedSpy).to.be.calledWith("models-tree-hideall");
       });
     });
