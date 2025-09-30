@@ -430,9 +430,10 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     ];
   }
 
-  private getElementChildrenCountCtes(props: { whereClauseFn: (parentAlias: string) => string }): { ctes: Array<string>, cteName: string } {
-    return { ctes: [
-      `
+  private getElementChildrenCountCtes(props: { whereClauseFn: (parentAlias: string) => string }): { ctes: Array<string>; cteName: string } {
+    return {
+      ctes: [
+        `
         ElementWithParent(id, parentId) AS (
           SELECT
             c.ECInstanceId,
@@ -450,15 +451,17 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
           FROM ${this._hierarchyConfig.elementClassSpecification} c
           JOIN ElementWithParent p ON p.id = c.Parent.Id
         )
-      `,
-      `
+        `,
+        `
         ParentChildrenCount(parentId, childrenCount) AS (
           SELECT parentId, COUNT(id)
           FROM ElementWithParent
           GROUP BY parentId
         )
-      `,
-    ], cteName: `ParentChildrenCount` };
+        `,
+      ],
+      cteName: `ParentChildrenCount`,
+    };
   }
 
   private async createSpatialCategoryChildrenQuery({

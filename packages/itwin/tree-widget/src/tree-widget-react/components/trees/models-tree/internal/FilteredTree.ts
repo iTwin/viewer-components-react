@@ -44,7 +44,7 @@ interface GetElementsFromUnfilteredChildrenTreeProps {
 
 /** @internal */
 export interface FilteredTree {
-  getVisibilityChangeTargets(props: { parentKeys: HierarchyNodeKey[], ids: Id64Arg }): VisibilityChangeTargets;
+  getVisibilityChangeTargets(props: { parentKeys: HierarchyNodeKey[]; ids: Id64Arg }): VisibilityChangeTargets;
   getElementsFromUnfilteredChildrenTree(props: GetElementsFromUnfilteredChildrenTreeProps): Id64Set | undefined;
 }
 
@@ -140,7 +140,13 @@ function getElementsFromUnfilteredChildrenTree(props: GetElementsFromUnfilteredC
   return result.size > 0 ? result : undefined;
 }
 
-function getChildrenTreeIdsMatchingFilteredNodes({ tree, filteredNodes }: { tree: ChildrenTree<any>, filteredNodes: Array<FilteredTreeNode | FilteredTreeRootNode>}): Id64Set {
+function getChildrenTreeIdsMatchingFilteredNodes({
+  tree,
+  filteredNodes,
+}: {
+  tree: ChildrenTree<any>;
+  filteredNodes: Array<FilteredTreeNode | FilteredTreeRootNode>;
+}): Id64Set {
   if (tree.size === 0) {
     return new Set();
   }
@@ -189,7 +195,10 @@ function getVisibilityChangeTargets(root: FilteredTreeRootNode, parentKeys: Hier
 
     // tree node might be merged from multiple instances. As filtered tree stores only one instance per node, we need to find all matching nodes
     // and use them when checking for matching node in one level deeper.
-    const parentNodes = findMatchingFilteredNodes(lookupParents, parentKey.instanceKeys.map((key) => key.id));
+    const parentNodes = findMatchingFilteredNodes(
+      lookupParents,
+      parentKey.instanceKeys.map((key) => key.id),
+    );
     if (parentNodes.length === 0) {
       return changeTargets;
     }
@@ -252,7 +261,7 @@ function addTarget(filterTargets: VisibilityChangeTargets, node: FilteredTreeNod
       return;
     case "element":
       const categoryKey = createCategoryKey(node.modelId, node.categoryId);
-      const elements = (filterTargets.elements ??= new Map<CategoryKey, Map<Id64String, { isFilterTarget: boolean }>>).get(categoryKey);
+      const elements = (filterTargets.elements ??= new Map<CategoryKey, Map<Id64String, { isFilterTarget: boolean }>>()).get(categoryKey);
       if (elements) {
         elements.set(node.id, { isFilterTarget: node.isFilterTarget });
         return;

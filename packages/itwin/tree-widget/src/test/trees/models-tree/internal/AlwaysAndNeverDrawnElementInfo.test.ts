@@ -79,8 +79,7 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       const result = await firstValueFrom(info.getElementChildrenTree({ setType, parentInstanceNodeIds: [modelId] }));
       const expectedResult: ChildrenTree<{ categoryId?: string; isInList: boolean }> = new Map();
       expectedResult.set(categoryId, { children: new Map(), additionalProps: { isInList: false } });
-      expectedResult.get(categoryId)
-        ?.children?.set(elementId, { additionalProps: { categoryId, isInList: true } });
+      expectedResult.get(categoryId)?.children?.set(elementId, { additionalProps: { categoryId, isInList: true } });
       expect(result).to.deep.eq(expectedResult);
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
     });
@@ -102,8 +101,7 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       const result = await firstValueFrom(info.getElementChildrenTree({ setType, parentInstanceNodeIds: [modelId] }));
       const expectedResult: ChildrenTree<{ categoryId?: string; isInList: boolean }> = new Map();
       expectedResult.set(categoryId, { children: new Map(), additionalProps: { isInList: false } });
-      expectedResult.get(categoryId)
-        ?.children?.set(elementId, { additionalProps: { categoryId, isInList: true } });
+      expectedResult.get(categoryId)?.children?.set(elementId, { additionalProps: { categoryId, isInList: true } });
       expect(result).to.deep.eq(expectedResult);
 
       // second request is not delayed because value is cached
@@ -129,8 +127,7 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       const result = await firstValueFrom(info.getElementChildrenTree({ setType, parentInstanceNodeIds: [modelId] }));
       const expectedResult: ChildrenTree<{ categoryId?: string; isInList: boolean }> = new Map();
       expectedResult.set(categoryId, { children: new Map(), additionalProps: { isInList: false } });
-      expectedResult.get(categoryId)
-        ?.children?.set(elementId, { additionalProps: { categoryId, isInList: true } });
+      expectedResult.get(categoryId)?.children?.set(elementId, { additionalProps: { categoryId, isInList: true } });
       expect(result).to.deep.eq(expectedResult);
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
 
@@ -180,8 +177,7 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       const result1 = await firstValueFrom(info.getElementChildrenTree({ setType, parentInstanceNodeIds: [modelId] }));
       const expectedResult: ChildrenTree<{ categoryId?: string; isInList: boolean }> = new Map();
       expectedResult.set(categoryId, { children: new Map(), additionalProps: { isInList: false } });
-      expectedResult.get(categoryId)
-        ?.children?.set(elementId, { additionalProps: { categoryId, isInList: true } });
+      expectedResult.get(categoryId)?.children?.set(elementId, { additionalProps: { categoryId, isInList: true } });
       expect(result1).to.deep.eq(expectedResult);
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
       info.suppressChangeEvents();
@@ -209,8 +205,7 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       const result1 = await firstValueFrom(info.getElementChildrenTree({ setType, parentInstanceNodeIds: [modelId] }));
       const expectedResult: ChildrenTree<{ categoryId?: string; isInList: boolean }> = new Map();
       expectedResult.set(categoryId, { children: new Map(), additionalProps: { isInList: false } });
-      expectedResult.get(categoryId)
-        ?.children?.set(elementId, { additionalProps: { categoryId, isInList: true } });
+      expectedResult.get(categoryId)?.children?.set(elementId, { additionalProps: { categoryId, isInList: true } });
       expect(result1).to.deep.eq(expectedResult);
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
       info.suppressChangeEvents();

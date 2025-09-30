@@ -5,14 +5,15 @@
 
 import { concatMap, EMPTY, expand, firstValueFrom, from, toArray } from "rxjs";
 import sinon from "sinon";
+import { Id64 } from "@itwin/core-bentley";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { ModelsTreeIdsCache } from "../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import { createIModelAccess } from "../Common.js";
 
-import { Id64, type Id64Arg, type Id64Array, type Id64String } from "@itwin/core-bentley";
+import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
-import {
+import type {
   ClassGroupingNodeKey,
   GroupingHierarchyNode,
   HierarchyFilteringPath,
@@ -21,8 +22,8 @@ import {
   HierarchyProvider,
   NonGroupingHierarchyNode,
 } from "@itwin/presentation-hierarchies";
+import type { InstanceKey } from "@itwin/presentation-shared";
 import type { ChildrenTree } from "../../../tree-widget-react/components/trees/models-tree/Utils.js";
-import { InstanceKey } from "@itwin/presentation-shared";
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
@@ -223,7 +224,7 @@ export function createClassGroupingHierarchyNode({
   elements: Id64Array;
   className?: string;
   parentKeys?: HierarchyNodeKey[];
-  modelId: Id64String,
+  modelId: Id64String;
   categoryId: Id64String;
   extendedData?: {
     [key: string]: any;
@@ -239,6 +240,6 @@ export function createClassGroupingHierarchyNode({
     groupedInstanceKeys: elements ? elements.map((id) => ({ className, id })) : [],
     label: "",
     parentKeys: parentKeys ?? [],
-    extendedData: { ...extendedData, categoryId, modelId},
+    extendedData: { ...extendedData, categoryId, modelId },
   };
 }

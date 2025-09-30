@@ -168,45 +168,48 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
   private queryAlwaysOrNeverDrawnElementInfo(set: Id64Set | undefined, requestId: string): Observable<CachedNodesMap> {
     const elementInfo = set?.size ? this.queryElementInfo([...set], requestId) : EMPTY;
     return elementInfo.pipe(
-      reduce((acc, { categoryId, rootCategoryId, modelId, elementsPath }) => {
-        let modelEntry = acc.get(modelId);
-        if (!modelEntry) {
-          modelEntry = { additionalProps: { isInList: false }, children: new Map() };
-          acc.set(modelId, modelEntry);
-        }
+      reduce(
+        (acc, { categoryId, rootCategoryId, modelId, elementsPath }) => {
+          let modelEntry = acc.get(modelId);
+          if (!modelEntry) {
+            modelEntry = { additionalProps: { isInList: false }, children: new Map() };
+            acc.set(modelId, modelEntry);
+          }
 
-        let categoryEntry = modelEntry.children!.get(rootCategoryId);
-        if (!categoryEntry) {
-          categoryEntry = { additionalProps: { isInList: false }, children: new Map() };
-          modelEntry.children!.set(rootCategoryId, categoryEntry);
-        }
+          let categoryEntry = modelEntry.children!.get(rootCategoryId);
+          if (!categoryEntry) {
+            categoryEntry = { additionalProps: { isInList: false }, children: new Map() };
+            modelEntry.children!.set(rootCategoryId, categoryEntry);
+          }
 
-        let lastEntry = categoryEntry;
-        const pathLength = elementsPath.length;
-        for (let i = 0; i < pathLength; ++i) {
-          const elementId = elementsPath[i];
-          let elementEntry = lastEntry.children?.get(elementId);
-          if (!elementEntry) {
+          let lastEntry = categoryEntry;
+          const pathLength = elementsPath.length;
+          for (let i = 0; i < pathLength; ++i) {
+            const elementId = elementsPath[i];
+            let elementEntry = lastEntry.children?.get(elementId);
+            if (!elementEntry) {
+              if (i + 1 === pathLength) {
+                elementEntry = { additionalProps: { isInList: true, categoryId } };
+              } else {
+                elementEntry = { additionalProps: { isInList: false }, children: new Map() };
+              }
+              if (!lastEntry.children) {
+                lastEntry.children = new Map();
+              }
+              lastEntry.children.set(elementId, elementEntry);
+            }
             if (i + 1 === pathLength) {
-              elementEntry = { additionalProps: { isInList: true, categoryId }};
-            } else {
-              elementEntry = { additionalProps: { isInList: false }, children: new Map()};
+              elementEntry.additionalProps = {
+                isInList: true,
+                categoryId,
+              };
             }
-            if (!lastEntry.children) {
-              lastEntry.children = new Map();
-            }
-            lastEntry.children.set(elementId, elementEntry);
+            lastEntry = elementEntry;
           }
-          if (i + 1 === pathLength) {
-            elementEntry.additionalProps = {
-              isInList: true,
-              categoryId
-            }
-          }
-          lastEntry = elementEntry;
-        }
-        return acc;
-      }, ((): CachedNodesMap => new Map())()),
+          return acc;
+        },
+        ((): CachedNodesMap => new Map())(),
+      ),
     );
   }
 
