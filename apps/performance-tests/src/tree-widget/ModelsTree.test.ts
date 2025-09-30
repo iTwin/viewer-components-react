@@ -122,6 +122,7 @@ describe("models tree", () => {
     test: async ({ viewport, handler, provider, elementsModel }) => {
       // Add one element to always draw set to trigger additional queries
       viewport.setAlwaysDrawn(new Set([elementsModel]));
+      viewport.renderFrame();
       await handler.changeVisibility(createModelHierarchyNode(elementsModel), true);
       viewport.renderFrame();
       await validateHierarchyVisibility({
