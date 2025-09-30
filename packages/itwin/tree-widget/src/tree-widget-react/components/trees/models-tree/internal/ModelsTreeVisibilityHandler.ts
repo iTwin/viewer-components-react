@@ -41,15 +41,15 @@ import { ModelsTreeNode } from "./ModelsTreeNode.js";
 import { createVisibilityChangeEventListener } from "./VisibilityChangeEventListener.js";
 
 import type { Observable, OperatorFunction, Subscription } from "rxjs";
-import type { GroupingHierarchyNode, HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
-import type { HierarchyVisibilityHandler, HierarchyVisibilityHandlerOverridableMethod, VisibilityStatus } from "../../common/UseHierarchyVisibility.js";
-import type { ModelsTreeIdsCache } from "./ModelsTreeIdsCache.js";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
-import type { IVisibilityChangeEventListener } from "./VisibilityChangeEventListener.js";
 import type { Viewport } from "@itwin/core-frontend";
-import type { NonPartialVisibilityStatus, Visibility } from "../../common/Tooltip.js";
+import type { GroupingHierarchyNode, HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
+import type { NonPartialVisibilityStatus, Visibility } from "../../common/Tooltip.js";
+import type { HierarchyVisibilityHandler, HierarchyVisibilityHandlerOverridableMethod, VisibilityStatus } from "../../common/UseHierarchyVisibility.js";
 import type { FilteredTree } from "./FilteredTree.js";
+import type { ModelsTreeIdsCache } from "./ModelsTreeIdsCache.js";
+import type { IVisibilityChangeEventListener } from "./VisibilityChangeEventListener.js";
 
 /** @beta */
 interface GetCategoryVisibilityStatusProps {
