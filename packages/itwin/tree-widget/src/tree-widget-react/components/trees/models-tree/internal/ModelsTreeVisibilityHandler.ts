@@ -68,14 +68,11 @@ interface GetGeometricElementVisibilityStatusProps {
   elementId: Id64String;
   modelId: Id64String;
   categoryId: Id64String;
-  parentKeys: HierarchyNodeKey[];
-  totalChildrenCount: number;
 }
 
 /** @beta */
 interface ChangeGeometricElementsDisplayStateProps {
   elementIds: Id64Set;
-  children: Id64Arg | undefined;
   modelId: Id64String;
   categoryId: Id64String;
   on: boolean;
@@ -597,7 +594,13 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     });
   }
 
-  private getElementDisplayStatus({ ...props }: GetGeometricElementVisibilityStatusProps & { ignoreTooltip?: boolean }): Observable<VisibilityStatus> {
+  private getElementDisplayStatus({
+    ...props
+  }: GetGeometricElementVisibilityStatusProps & {
+    ignoreTooltip?: boolean;
+    parentKeys: HierarchyNodeKey[];
+    totalChildrenCount: number;
+  }): Observable<VisibilityStatus> {
     const result = this.getElementsDisplayStatus({
       elementIds: [props.elementId],
       modelId: props.modelId,
@@ -868,7 +871,11 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     return createVisibilityHandlerResult(this, props, result, this._props.overrides?.changeCategoryState);
   }
 
-  private doChangeElementsState(props: ChangeGeometricElementsDisplayStateProps): Observable<void | undefined> {
+  private doChangeElementsState(
+    props: ChangeGeometricElementsDisplayStateProps & {
+      children: Id64Arg | undefined;
+    },
+  ): Observable<void | undefined> {
     return defer(() => {
       const { modelId, categoryId, elementIds, on, children } = props;
       const viewport = this._props.viewport;
@@ -942,7 +949,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
    * Updates visibility of an element and all its child elements by adding them to the always/never drawn list.
    * @note If element is to be enabled and model is hidden, it will be enabled.
    */
-  private changeElementsState(props: ChangeGeometricElementsDisplayStateProps): Observable<void> {
+  private changeElementsState(props: ChangeGeometricElementsDisplayStateProps & { children: Id64Arg | undefined }): Observable<void> {
     const result = this.doChangeElementsState(props);
     return createVisibilityHandlerResult(this, props, result, this._props.overrides?.changeElementsState);
   }
