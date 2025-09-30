@@ -14,6 +14,7 @@ import type { InstanceKey } from "@itwin/presentation-shared";
 import type { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import type { ChildrenTree } from "../Utils.js";
 
 interface SubjectInfo {
   parentSubject: Id64String | undefined;
@@ -28,6 +29,8 @@ interface ModelInfo {
 }
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
+type ChildrenMap = Map<Id64String, { children: Id64Array | undefined }>;
+type ChildrenLoadingMap = Map<Id64String, Promise<void>>;
 
 /** @internal */
 export class ModelsTreeIdsCache implements Disposable {
@@ -39,6 +42,8 @@ export class ModelsTreeIdsCache implements Disposable {
   private _modelKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath[]>>;
   private _subjectKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath>>;
   private _categoryKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath[]>>;
+  #childrenMap: ChildrenMap;
+  #childrenLoadingMap: ChildrenLoadingMap;
 
   constructor(
     private _queryExecutor: LimitingECSqlQueryExecutor,
@@ -48,6 +53,8 @@ export class ModelsTreeIdsCache implements Disposable {
     this._modelKeyPaths = new Map();
     this._subjectKeyPaths = new Map();
     this._categoryKeyPaths = new Map();
+    this.#childrenMap = new Map();
+    this.#childrenLoadingMap = new Map();
   }
 
   public [Symbol.dispose]() {
@@ -92,6 +99,130 @@ export class ModelsTreeIdsCache implements Disposable {
     for await (const row of this._queryExecutor.createQueryReader({ ecsql: modelsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
       yield { id: row.id, parentId: row.parentId };
     }
+  }
+
+  private async *queryChildren({ elementIds }: { elementIds: Id64Array }): AsyncIterableIterator<{ id: Id64String; parentId: Id64String }> {
+    const ctes = [
+      `
+        ElementChildren(id, parentId) AS (
+          SELECT ECInstanceId id, Parent.Id parentId
+          FROM ${this._hierarchyConfig.elementClassSpecification}
+          WHERE Parent.Id IN (${elementIds.join(", ")})
+
+          UNION ALL
+
+          SELECT c.ECInstanceId id, c.Parent.Id
+          FROM ${this._hierarchyConfig.elementClassSpecification} c
+          JOIN ElementChildren p ON c.Parent.Id = p.id
+        )
+      `,
+    ];
+    const ecsql = `
+      SELECT id, parentId
+      FROM ElementChildren
+    `;
+    for await (const row of this._queryExecutor.createQueryReader({ ecsql, ctes }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+      yield { id: row.id, parentId: row.parentId };
+    }
+  }
+
+  private getChildrenTreeFromMap({ elementIds }: { elementIds: Id64Arg }): ChildrenTree<undefined> {
+    if (Id64.sizeOf(elementIds) === 0 || this.#childrenMap.size === 0) {
+      return new Map();
+    }
+    const result: ChildrenTree<undefined> = new Map();
+    for (const elementId of Id64.iterable(elementIds)) {
+      const entry = this.#childrenMap.get(elementId);
+      if (!entry?.children) {
+        continue;
+      }
+      const elementChildrenTree: ChildrenTree<undefined> = new Map();
+      result.set(elementId, { children: elementChildrenTree });
+      entry.children.forEach((childId) => {
+        const childrenTreeOfChild = this.getChildrenTreeFromMap({ elementIds: childId });
+        if (childrenTreeOfChild.size > 0) {
+          elementChildrenTree.set(childId, { children: childrenTreeOfChild });
+          return;
+        }
+        elementChildrenTree.set(childId, { children: undefined });
+      });
+    }
+    return result;
+  }
+
+  private getChildrenCountMap({ elementIds }: { elementIds: Id64Arg }): Map<Id64String, number> {
+    if (Id64.sizeOf(elementIds) === 0) {
+      return new Map();
+    }
+    const result = new Map<Id64String, number>();
+    for (const elementId of Id64.iterable(elementIds)) {
+      const entry = this.#childrenMap.get(elementId);
+      if (entry?.children) {
+        let allElementChildrenCount = entry.children.length;
+        this.getChildrenCountMap({ elementIds: entry.children }).forEach((childrenCount) => (allElementChildrenCount += childrenCount));
+        result.set(elementId, allElementChildrenCount);
+      }
+    }
+    return result;
+  }
+
+  private createChildrenLoadingMapEntries({ elementsToQuery }: { elementsToQuery: Id64Array }): { promise: Promise<void> } {
+    const elementsToQueryPromise = (async ({ childrenMap, childrenLoadingMap }: { childrenMap: ChildrenMap; childrenLoadingMap: ChildrenLoadingMap }) => {
+      const result = new Map<Id64String, { children: Id64Array | undefined }>();
+      for await (const { id, parentId } of this.queryChildren({ elementIds: elementsToQuery })) {
+        let entry = result.get(parentId);
+        if (!entry) {
+          entry = { children: [] };
+          result.set(parentId, entry);
+        }
+        if (!entry.children) {
+          entry.children = [];
+        }
+
+        entry.children.push(id);
+        if (!result.has(id)) {
+          result.set(id, { children: undefined });
+        }
+      }
+
+      result.forEach((entry, id) => childrenMap.set(id, entry));
+      elementsToQuery.forEach((elementId) => childrenLoadingMap.delete(elementId));
+      return;
+    })({ childrenLoadingMap: this.#childrenLoadingMap, childrenMap: this.#childrenMap });
+
+    elementsToQuery.forEach((elementId) => this.#childrenLoadingMap.set(elementId, elementsToQueryPromise));
+    return { promise: elementsToQueryPromise };
+  }
+
+  private async createChildrenMapEntries({ elementIds }: { elementIds: Id64Arg }): Promise<void[]> {
+    const promises = new Array<Promise<void>>();
+    const elementsToQuery = new Array<Id64String>();
+    for (const elementId of Id64.iterable(elementIds)) {
+      if (this.#childrenMap.has(elementId)) {
+        continue;
+      }
+      const loadingPromise = this.#childrenLoadingMap.get(elementId);
+      if (loadingPromise) {
+        promises.push(loadingPromise);
+        continue;
+      }
+      elementsToQuery.push(elementId);
+    }
+
+    if (elementsToQuery.length > 0) {
+      promises.push(this.createChildrenLoadingMapEntries({ elementsToQuery }).promise);
+    }
+    return Promise.all(promises);
+  }
+
+  public async getChildrenTree({ elementIds }: { elementIds: Id64Arg }): Promise<ChildrenTree<undefined>> {
+    await this.createChildrenMapEntries({ elementIds });
+    return this.getChildrenTreeFromMap({ elementIds });
+  }
+
+  public async getAllChildrenCount({ elementIds }: { elementIds: Id64Arg }): Promise<Map<Id64String, number>> {
+    await this.createChildrenMapEntries({ elementIds });
+    return this.getChildrenCountMap({ elementIds });
   }
 
   private async getSubjectInfos() {
@@ -370,7 +501,7 @@ export class ModelsTreeIdsCache implements Disposable {
 
   private async queryCategoryElementCounts(
     input: Array<{ modelId: Id64String; categoryId: Id64String }>,
-  ): Promise<Array<{ modelId: number; categoryId: number; elementsCount: number }>> {
+  ): Promise<Array<{ modelId: Id64String; categoryId: Id64String; elementsCount: number }>> {
     return collect(
       from(input).pipe(
         reduce((acc, { modelId, categoryId }) => {
@@ -392,36 +523,41 @@ export class ModelsTreeIdsCache implements Disposable {
             {
               ctes: [
                 `
-                    CategoryElements(id, modelId, categoryId) AS (
-                      SELECT ECInstanceId, Model.Id, Category.Id
-                      FROM ${this._hierarchyConfig.elementClassSpecification}
-                      WHERE
-                        Parent.Id IS NULL
-                        AND (
-                          ${whereClauses.join(" OR ")}
-                        )
+                  CategoryElements(id, modelId, categoryId) AS (
+                    SELECT ECInstanceId, Model.Id, Category.Id
+                    FROM ${this._hierarchyConfig.elementClassSpecification}
+                    WHERE
+                      Parent.Id IS NULL
+                      AND (
+                        ${whereClauses.join(" OR ")}
+                      )
 
-                      UNION ALL
+                    UNION ALL
 
-                      SELECT c.ECInstanceId, p.modelId, p.categoryId
-                      FROM ${this._hierarchyConfig.elementClassSpecification} c
-                      JOIN CategoryElements p ON c.Parent.Id = p.id
-                    )
-                  `,
+                    SELECT c.ECInstanceId, p.modelId, p.categoryId
+                    FROM ${this._hierarchyConfig.elementClassSpecification} c
+                    JOIN CategoryElements p ON c.Parent.Id = p.id
+                  )
+                `,
               ],
               ecsql: `
-                  SELECT modelId, categoryId, COUNT(id) elementsCount
-                  FROM CategoryElements
-                  GROUP BY modelId, categoryId
-                `,
+                SELECT modelId, categoryId, COUNT(id) elementsCount
+                FROM CategoryElements
+                GROUP BY modelId, categoryId
+              `,
             },
             { rowFormat: "ECSqlPropertyNames", limit: "unbounded" },
           );
 
-          const result = new Array<{ modelId: number; categoryId: number; elementsCount: number }>();
+          const result = new Array<{ modelId: Id64String; categoryId: Id64String; elementsCount: number }>();
           for await (const row of reader) {
             result.push({ modelId: row.modelId, categoryId: row.categoryId, elementsCount: row.elementsCount });
           }
+          input.forEach(({ modelId, categoryId }) => {
+            if (!result.some((queriedResult) => queriedResult.categoryId === categoryId && queriedResult.modelId === modelId)) {
+              result.push({ categoryId, modelId, elementsCount: 0 });
+            }
+          });
           return result;
         }),
         mergeAll(),
@@ -485,7 +621,7 @@ class ModelCategoryElementsCountCache {
   public constructor(
     private _loader: (
       input: Array<{ modelId: Id64String; categoryId: Id64String }>,
-    ) => Promise<Array<{ modelId: number; categoryId: number; elementsCount: number }>>,
+    ) => Promise<Array<{ modelId: Id64String; categoryId: Id64String; elementsCount: number }>>,
   ) {
     this._subscription = this._requestsStream
       .pipe(

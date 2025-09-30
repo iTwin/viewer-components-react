@@ -10,16 +10,19 @@ import { ModelsTreeIdsCache } from "../../../tree-widget-react/components/trees/
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import { createIModelAccess } from "../Common.js";
 
-import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
+import { Id64, type Id64Arg, type Id64Array, type Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type {
+import {
   ClassGroupingNodeKey,
   GroupingHierarchyNode,
   HierarchyFilteringPath,
+  HierarchyNode,
   HierarchyNodeKey,
   HierarchyProvider,
   NonGroupingHierarchyNode,
 } from "@itwin/presentation-hierarchies";
+import type { ChildrenTree } from "../../../tree-widget-react/components/trees/models-tree/Utils.js";
+import { InstanceKey } from "@itwin/presentation-shared";
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
@@ -100,6 +103,12 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
     getModelCategories: sinon.stub<[Id64String], Promise<Id64Array>>().callsFake(async (modelId) => {
       return props?.modelCategories?.get(modelId) ?? [];
     }),
+    getChildrenTree: sinon.stub<[{ elementIds: Id64Arg }], Promise<ChildrenTree<undefined>>>().callsFake(async () => {
+      return new Map();
+    }),
+    getAllChildrenCount: sinon.stub<[{ elementIds: Id64Arg }], Promise<Map<Id64String, number>>>().callsFake(async () => {
+      return new Map();
+    }),
     getCategoryElementsCount: sinon.stub<[Id64String, Id64String], Promise<number>>().callsFake(async (_, categoryId) => {
       return props?.categoryElements?.get(categoryId)?.length ?? 0;
     }),
@@ -108,21 +117,33 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
   });
 }
 
-export function createSubjectHierarchyNode(...ids: Id64String[]): NonGroupingHierarchyNode {
+export function createSubjectHierarchyNode({ ids, parentKeys }: { ids?: Id64Arg; parentKeys?: HierarchyNodeKey[] }): NonGroupingHierarchyNode {
+  const instanceKeys = new Array<InstanceKey>();
+  for (const id of ids ? Id64.iterable(ids) : []) {
+    instanceKeys.push({ className: "Bis:Subject", id });
+  }
   return {
     key: {
       type: "instances",
-      instanceKeys: ids.map((id) => ({ className: "Bis:Subject", id })),
+      instanceKeys,
     },
     children: false,
     label: "",
-    parentKeys: [],
+    parentKeys: parentKeys ?? [],
     extendedData: {
       isSubject: true,
     },
   };
 }
-export function createModelHierarchyNode(modelId?: Id64String, hasChildren?: boolean): NonGroupingHierarchyNode {
+export function createModelHierarchyNode({
+  modelId,
+  hasChildren,
+  parentKeys,
+}: {
+  modelId?: Id64String;
+  hasChildren?: boolean;
+  parentKeys?: HierarchyNodeKey[];
+}): NonGroupingHierarchyNode {
   return {
     key: {
       type: "instances",
@@ -130,14 +151,24 @@ export function createModelHierarchyNode(modelId?: Id64String, hasChildren?: boo
     },
     children: !!hasChildren,
     label: "",
-    parentKeys: [],
+    parentKeys: parentKeys ?? [],
     extendedData: {
       isModel: true,
       modelId: modelId ?? "0x1",
     },
   };
 }
-export function createCategoryHierarchyNode(modelId?: Id64String, categoryId?: Id64Arg, hasChildren?: boolean): NonGroupingHierarchyNode {
+export function createCategoryHierarchyNode({
+  modelId,
+  categoryId,
+  hasChildren,
+  parentKeys,
+}: {
+  modelId?: Id64String;
+  categoryId?: Id64Arg;
+  hasChildren?: boolean;
+  parentKeys?: HierarchyNodeKey[];
+}): NonGroupingHierarchyNode {
   return {
     key: {
       type: "instances",
@@ -148,7 +179,7 @@ export function createCategoryHierarchyNode(modelId?: Id64String, categoryId?: I
     },
     children: !!hasChildren,
     label: "",
-    parentKeys: [],
+    parentKeys: parentKeys ?? [],
     extendedData: {
       isCategory: true,
       modelId: modelId ?? "0x1",
@@ -161,6 +192,9 @@ export function createElementHierarchyNode(props: {
   categoryId: Id64String | undefined;
   hasChildren?: boolean;
   elementId?: Id64String;
+  parentKeys?: HierarchyNodeKey[];
+  filtering?: HierarchyNode["filtering"];
+  childrenCount?: number;
 }): NonGroupingHierarchyNode {
   return {
     key: {
@@ -169,23 +203,31 @@ export function createElementHierarchyNode(props: {
     },
     children: !!props.hasChildren,
     label: "",
-    parentKeys: [],
+    filtering: props.filtering,
+    parentKeys: props.parentKeys ?? [],
     extendedData: {
       modelId: props.modelId,
       categoryId: props.categoryId,
+      childrenCount: props.childrenCount !== undefined ? props.childrenCount : undefined,
     },
   };
 }
 export function createClassGroupingHierarchyNode({
   elements,
   parentKeys,
+  extendedData,
+  modelId,
+  categoryId,
   ...props
 }: {
-  modelId: Id64String | undefined;
-  categoryId: Id64String | undefined;
   elements: Id64Array;
   className?: string;
   parentKeys?: HierarchyNodeKey[];
+  modelId: Id64String,
+  categoryId: Id64String;
+  extendedData?: {
+    [key: string]: any;
+  };
 }): GroupingHierarchyNode & { key: ClassGroupingNodeKey } {
   const className = props.className ?? "Bis:Element";
   return {
@@ -197,6 +239,6 @@ export function createClassGroupingHierarchyNode({
     groupedInstanceKeys: elements ? elements.map((id) => ({ className, id })) : [],
     label: "",
     parentKeys: parentKeys ?? [],
-    extendedData: props,
+    extendedData: { ...extendedData, categoryId, modelId},
   };
 }
