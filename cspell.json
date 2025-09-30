@@ -13,6 +13,7 @@
     "idset",
     "IFNULL",
     "imodel",
+    "imodels",
     "IMJS",
     "itwin",
     "itwins",
@@ -33,7 +34,6 @@
   "ignorePaths": [
     "archive",
     "lib",
-    "scripts",
     "package.json",
     "pnpm-lock.yaml",
     "pnpm-workspace.yaml",
