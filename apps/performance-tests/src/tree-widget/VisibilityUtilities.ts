@@ -9,11 +9,11 @@ import { waitFor } from "test-utilities";
 import { assert } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
-import { HierarchyNode } from "@itwin/presentation-hierarchies";
+import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { toVoidPromise } from "@itwin/tree-widget-react/internal";
 
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { ECSqlQueryDef } from "@itwin/presentation-shared";
 import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
 import type { IModelAccess } from "./StatelessHierarchyProvider.js";
@@ -31,6 +31,7 @@ export interface ValidateNodeProps {
     | {
         default: "all-visible" | "all-hidden";
         instances: { [id: string]: Visibility };
+        parentIds?: { [id: string]: Visibility }
       };
 }
 
@@ -40,6 +41,7 @@ async function validateNodeVisibility({ node, handler, expectations }: ValidateN
   }
   assert(HierarchyNode.isInstancesNode(node));
   const ids = node.key.instanceKeys.map((instanceKey) => instanceKey.id);
+  const parentIds = node.parentKeys.filter((key) => HierarchyNodeKey.isInstances(key)).map((key) => key.instanceKeys.map(({id}) => id)).flat()
   const actualVisibility = await handler.getVisibilityStatus(node);
   if (expectations === "all-visible" || expectations === "all-hidden") {
     expect(actualVisibility.state).to.eq(expectations === "all-hidden" ? "hidden" : "visible");
@@ -49,9 +51,15 @@ async function validateNodeVisibility({ node, handler, expectations }: ValidateN
   if (idInExpectations) {
     const expectedVisibility = expectations.instances[idInExpectations];
     expect(actualVisibility.state).to.eq(expectedVisibility);
-  } else {
-    expect(actualVisibility.state).to.eq(expectations.default === "all-hidden" ? "hidden" : "visible");
+    return;
   }
+  const parentIdInExpectations = expectations.parentIds ? parentIds.find((id) => id in expectations.parentIds!) : undefined;
+  if (parentIdInExpectations) {
+    const expectedVisibility = expectations.parentIds![parentIdInExpectations];
+    expect(actualVisibility.state).to.eq(expectedVisibility);
+    return;
+  }
+  expect(actualVisibility.state).to.eq(expectations.default === "all-hidden" ? "hidden" : "visible");
 }
 
 export async function validateHierarchyVisibility({
