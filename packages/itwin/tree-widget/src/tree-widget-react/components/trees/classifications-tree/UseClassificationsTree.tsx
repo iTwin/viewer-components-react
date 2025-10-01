@@ -9,6 +9,7 @@ import iconBisCategory3d from "@stratakit/icons/bis-category-3d.svg";
 import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMatches } from "../common/components/EmptyTree.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
+import { createTreeWidgetViewport, isTreeWidgetViewport, TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import { ClassificationsTreeComponent } from "./ClassificationsTreeComponent.js";
 import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.js";
 import { ClassificationsTreeIcon } from "./ClassificationsTreeIcon.js";
@@ -30,7 +31,7 @@ import type { ClassificationsTreeFilterTargets } from "./internal/visibility/Fil
 
 /** @alpha */
 export interface UseClassificationsTreeProps {
-  activeView: Viewport;
+  activeView: Viewport | TreeWidgetViewport;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
   emptyTreeContent?: ReactNode;
   filter?: string;
@@ -55,16 +56,19 @@ export function useClassificationsTree({ activeView, emptyTreeContent, filter, .
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [...Object.values(rest.hierarchyConfig)],
   );
+  const treeWidgetViewport = useMemo(() => {
+    return isTreeWidgetViewport(activeView) ? activeView : createTreeWidgetViewport(activeView);
+  }, [activeView]);
   const { getCache: getClassificationsTreeIdsCache } = useIdsCache<ClassificationsTreeIdsCache, { hierarchyConfig: ClassificationsTreeHierarchyConfiguration }>(
     {
-      imodel: activeView.iModel,
+      imodel: treeWidgetViewport.iModel,
       createCache,
       cacheSpecificProps: useMemo(() => ({ hierarchyConfig }), [hierarchyConfig]),
     },
   );
 
   const { visibilityHandlerFactory, onFilteredPathsChanged } = useClassificationsCachedVisibility({
-    activeView,
+    activeView: treeWidgetViewport,
     getCache: getClassificationsTreeIdsCache,
   });
 
@@ -117,7 +121,7 @@ function getEmptyTreeContentComponent(filter?: string, error?: ClassificationsTr
   return <EmptyTreeContent icon={iconBisCategory3d} />;
 }
 
-function useClassificationsCachedVisibility(props: { activeView: Viewport; getCache: () => ClassificationsTreeIdsCache }) {
+function useClassificationsCachedVisibility(props: { activeView: TreeWidgetViewport; getCache: () => ClassificationsTreeIdsCache }) {
   const { activeView, getCache } = props;
   const { visibilityHandlerFactory, filteredPaths, onFilteredPathsChanged } = useCachedVisibility<
     ClassificationsTreeIdsCache,

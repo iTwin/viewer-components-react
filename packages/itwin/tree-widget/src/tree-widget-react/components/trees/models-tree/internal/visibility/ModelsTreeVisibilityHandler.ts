@@ -10,13 +10,13 @@ import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
 import { HierarchyVisibilityHandlerImpl } from "../../../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { releaseMainThreadOnItemsCount } from "../../../common/internal/Utils.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
+import { TreeWidgetViewport } from "../../../common/TreeWidgetViewport.js";
 import { ModelsTreeNode } from "../ModelsTreeNode.js";
 import { createFilteredModelsTree } from "./FilteredTree.js";
 import { ModelsTreeVisibilityHelper } from "./ModelsTreeVisibilityHelper.js";
 
 import type { Observable } from "rxjs";
 import type { Id64Arg } from "@itwin/core-bentley";
-import type { Viewport } from "@itwin/core-frontend";
 import type { GroupingHierarchyNode, HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { AlwaysAndNeverDrawnElementInfo } from "../../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
@@ -52,7 +52,7 @@ export interface ModelsTreeVisibilityHandlerOverrides extends BaseTreeVisibility
 /** @internal */
 export interface ModelsTreeVisibilityHandlerProps {
   idsCache: ModelsTreeIdsCache;
-  viewport: Viewport;
+  viewport: TreeWidgetViewport;
   alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfo;
   overrideHandler: HierarchyVisibilityOverrideHandler;
   overrides?: ModelsTreeVisibilityHandlerOverrides;
@@ -363,7 +363,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
  * @internal
  */
 export function createModelsTreeVisibilityHandler(props: {
-  viewport: Viewport;
+  viewport: TreeWidgetViewport;
   idsCache: ModelsTreeIdsCache;
   imodelAccess: ECClassHierarchyInspector;
   overrides?: ModelsTreeVisibilityHandlerOverrides;

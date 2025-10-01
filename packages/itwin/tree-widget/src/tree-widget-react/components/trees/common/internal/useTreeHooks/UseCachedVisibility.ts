@@ -6,6 +6,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { defaultIfEmpty, EMPTY, filter, firstValueFrom, from, fromEventPattern, map, mergeMap, of, Subject, takeUntil, tap } from "rxjs";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+import { TreeWidgetViewport } from "../../TreeWidgetViewport.js";
 import { HierarchyVisibilityOverrideHandler } from "../../UseHierarchyVisibility.js";
 import { AlwaysAndNeverDrawnElementInfo } from "../AlwaysAndNeverDrawnElementInfo.js";
 import { toVoidPromise } from "../Rxjs.js";
@@ -13,7 +14,6 @@ import { createVisibilityStatus } from "../Tooltip.js";
 import { createVisibilityChangeEventListener } from "../VisibilityChangeEventListener.js";
 
 import type { Observable } from "rxjs";
-import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyFilteringPath, HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../../components/VisibilityTree.js";
@@ -33,13 +33,13 @@ export interface CreateFilteredTreeProps<TCache> {
 export interface CreateTreeSpecificVisibilityHandlerProps<TCache> {
   info: AlwaysAndNeverDrawnElementInfo;
   getCache: () => TCache;
-  viewport: Viewport;
+  viewport: TreeWidgetViewport;
   overrideHandler: HierarchyVisibilityOverrideHandler;
 }
 
 /** @internal */
 export interface UseCachedVisibilityProps<TCache, TFilterTargets> {
-  activeView: Viewport;
+  activeView: TreeWidgetViewport;
   getCache: () => TCache;
   createFilteredTree: (props: CreateFilteredTreeProps<TCache>) => Promise<FilteredTree<TFilterTargets>>;
   createTreeSpecificVisibilityHandler: (props: CreateTreeSpecificVisibilityHandlerProps<TCache>) => TreeSpecificVisibilityHandler<TFilterTargets> & Disposable;
@@ -106,7 +106,7 @@ function createVisibilityHandlerFactory<TCache, TFilterTargets>(
 
 /** @internal */
 export interface HierarchyVisibilityHandlerImplProps<TFilterTargets> {
-  viewport: Viewport;
+  viewport: TreeWidgetViewport;
   getTreeSpecificVisibilityHandler: (
     info: AlwaysAndNeverDrawnElementInfo,
     overrideHandler: HierarchyVisibilityOverrideHandler,

@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
-import { assert } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { DrawingViewState, IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
@@ -13,6 +12,7 @@ import { ClassificationsTreeIdsCache } from "../../../tree-widget-react/componen
 import { ClassificationsTreeVisibilityHandler } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/ClassificationsTreeVisibilityHandler.js";
 import { createFilteredClassificationsTree } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/FilteredTree.js";
 import { HierarchyVisibilityHandlerImpl } from "../../../tree-widget-react/components/trees/common/internal/useTreeHooks/UseCachedVisibility.js";
+import { TreeWidgetViewport } from "../../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
 import {
   buildIModel,
   insertDrawingCategory,
@@ -24,6 +24,7 @@ import {
 } from "../../IModelUtils.js";
 import { initializeITwinJs, terminateITwinJs } from "../../Initialize.js";
 import { createIModelAccess } from "../Common.js";
+import { createTreeWidgetTestingViewport, TreeWidgetTestingViewport } from "../TreeUtils.js";
 import {
   createClassificationHierarchyNode,
   createClassificationTableHierarchyNode,
@@ -39,7 +40,7 @@ import {
 } from "./Utils.js";
 import { validateHierarchyVisibility } from "./VisibilityValidation.js";
 
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyFilteringPath, HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
 import type { ClassificationsTreeFilterTargets } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/FilteredTree.js";
@@ -81,10 +82,12 @@ describe("ClassificationsTreeVisibilityHandler", () => {
   }) {
     const imodelAccess = createIModelAccess(imodel);
     const idsCache = new ClassificationsTreeIdsCache(imodelAccess, { rootClassificationSystemCode });
-    const viewport = OffScreenViewport.create({
-      view: view === "3d" ? await createSpatialViewState(imodel, categoryIds, modelIds) : await createDrawingViewState(imodel, categoryIds, modelIds),
-      viewRect: new ViewRect(),
-    });
+    const viewport = createTreeWidgetTestingViewport(
+      OffScreenViewport.create({
+        view: view === "3d" ? await createSpatialViewState(imodel, categoryIds, modelIds) : await createDrawingViewState(imodel, categoryIds, modelIds),
+        viewRect: new ViewRect(),
+      }),
+    );
     const handler = createClassificationsTreeVisibilityHandler({ imodelAccess, idsCache, viewport });
     const provider = createProvider({ idsCache, imodelAccess });
     return {
@@ -829,10 +832,12 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     }) {
       const imodelAccess = createIModelAccess(imodel);
       const idsCache = new ClassificationsTreeIdsCache(imodelAccess, { rootClassificationSystemCode });
-      const viewport = OffScreenViewport.create({
-        view: view === "3d" ? await createSpatialViewState(imodel, categoryIds, modelIds) : await createDrawingViewState(imodel, categoryIds, modelIds),
-        viewRect: new ViewRect(),
-      });
+      const viewport = createTreeWidgetTestingViewport(
+        OffScreenViewport.create({
+          view: view === "3d" ? await createSpatialViewState(imodel, categoryIds, modelIds) : await createDrawingViewState(imodel, categoryIds, modelIds),
+          viewRect: new ViewRect(),
+        }),
+      );
       const handler = createClassificationsTreeVisibilityHandler({ idsCache, viewport, imodelAccess, filteredPaths: filterPaths });
       const defaultProvider = createProvider({ idsCache, imodelAccess });
       const filteredProvider = createProvider({ idsCache, imodelAccess, filterPaths });
@@ -1287,7 +1292,7 @@ interface VisibilityInfo {
   visible: boolean;
 }
 async function setupInitialDisplayState(props: {
-  viewport: Viewport;
+  viewport: TreeWidgetTestingViewport;
   categories?: Array<VisibilityInfo>;
   models?: Array<VisibilityInfo>;
   elements?: Array<VisibilityInfo>;
@@ -1297,29 +1302,20 @@ async function setupInitialDisplayState(props: {
   const elements = props.elements ?? [];
   const models = props.models ?? [];
   for (const categoryInfo of categories) {
-    viewport.changeCategoryDisplay(categoryInfo.id, categoryInfo.visible, false);
+    viewport.changeCategoryDisplay({ categoryIds: categoryInfo.id, display: categoryInfo.visible, enableAllSubCategories: false });
   }
-  for (const elementInfo of elements) {
-    if (elementInfo.visible) {
-      viewport.alwaysDrawn?.add(elementInfo.id);
-      continue;
-    }
-    viewport.neverDrawn?.add(elementInfo.id);
+  const alwaysDrawn = elements.filter(({ visible }) => visible).map(({ id }) => id);
+  if (alwaysDrawn.length > 0) {
+    viewport.setAlwaysDrawn({ elementIds: new Set([...alwaysDrawn, ...(viewport.alwaysDrawn ?? [])]) });
   }
-  if (!viewport.alwaysDrawn) {
-    viewport.setAlwaysDrawn(new Set(elements.filter(({ visible }) => visible).map(({ id }) => id)));
+  const neverDrawn = elements.filter(({ visible }) => !visible).map(({ id }) => id);
+  if (neverDrawn.length > 0) {
+    viewport.setNeverDrawn(new Set([...neverDrawn, ...(viewport.neverDrawn ?? [])]));
   }
-  if (!viewport.neverDrawn) {
-    viewport.setNeverDrawn(new Set(elements.filter(({ visible }) => !visible).map(({ id }) => id)));
-  }
-  if (viewport.view.is3d()) {
+  if (viewport.viewType === "3d" || viewport.viewType === "spatial" || viewport.viewType === "2d") {
     for (const modelInfo of models) {
-      viewport.changeModelDisplay(modelInfo.id, modelInfo.visible);
+      viewport.changeModelDisplay({ modelIds: modelInfo.id, display: modelInfo.visible });
     }
-  }
-  if (viewport.view.is2d()) {
-    assert(models.length <= 1, "2d views support only one model at a time");
-    models.length && models[0].visible && (await viewport.changeViewedModel2d(models[0].id));
   }
   viewport.renderFrame();
 }
@@ -1349,7 +1345,7 @@ function createHiddenTestData(keys: { [key: string]: InstanceKey }) {
 }
 
 function createClassificationsTreeVisibilityHandler(props: {
-  viewport: Viewport;
+  viewport: TreeWidgetViewport;
   idsCache: ClassificationsTreeIdsCache;
   imodelAccess: ECClassHierarchyInspector;
   filteredPaths?: HierarchyFilteringPath[];

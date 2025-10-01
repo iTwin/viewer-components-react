@@ -5,7 +5,6 @@
 
 import { expect } from "chai";
 import sinon from "sinon";
-import * as moq from "typemoq";
 import { IModelReadRpcInterface, SubCategoryAppearance } from "@itwin/core-common";
 import { IModelApp, NoRenderApp, OffScreenViewport, PerModelCategoryVisibility, ViewRect } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
@@ -19,12 +18,13 @@ import {
   loadCategoriesFromViewport,
   toggleAllCategories,
 } from "../../tree-widget-react/components/trees/common/internal/VisibilityUtils.js";
+import { TreeWidgetViewport } from "../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory, insertSubCategory } from "../IModelUtils.js";
 import { TestUtils } from "../TestUtils.js";
-import { createViewState } from "./TreeUtils.js";
+import { createFakeSinonViewport, createIModelMock } from "./Common.js";
+import { createTreeWidgetTestingViewport, createViewState, TreeWidgetTestingViewport } from "./TreeUtils.js";
 
-import type { ECSqlReader } from "@itwin/core-common";
-import type { IModelConnection, SpatialViewState, Viewport } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 
 describe("CategoryVisibilityUtils", () => {
@@ -37,13 +37,6 @@ describe("CategoryVisibilityUtils", () => {
     TestUtils.terminate();
     await IModelApp.shutdown();
   });
-
-  const imodelMock = moq.Mock.ofType<IModelConnection>();
-  const viewportMock = moq.Mock.ofType<Viewport>();
-  const viewStateMock = moq.Mock.ofType<SpatialViewState>();
-  const queryReaderMock = moq.Mock.ofType<ECSqlReader>();
-  const categoriesMock = moq.Mock.ofType<IModelConnection.Categories>();
-  const perModelCategoryVisibilityMock = moq.Mock.ofType<PerModelCategoryVisibility.Overrides>();
 
   const categoryId = "CategoryId";
   const subCategoryId = "SubCategoryId";
@@ -65,77 +58,72 @@ describe("CategoryVisibilityUtils", () => {
       },
     ],
   ]);
+  let viewport: TreeWidgetViewport;
 
   beforeEach(() => {
-    imodelMock.setup((x) => x.createQueryReader(moq.It.isAny(), moq.It.isAny(), moq.It.isAny())).returns(() => queryReaderMock.object);
-    imodelMock.setup((x) => x.categories).returns(() => categoriesMock.object);
-    queryReaderMock.setup(async (x) => x.toArray()).returns(async () => [{ id: categoryId }]);
-    categoriesMock.setup(async (x) => x.getCategoryInfo(moq.It.isAny())).returns(async () => categoriesInfo);
-    perModelCategoryVisibilityMock.setup((x) => x[Symbol.iterator]()).returns(() => [][Symbol.iterator]());
-    viewportMock.setup((x) => x.view).returns(() => viewStateMock.object);
-    viewportMock.setup((x) => x.iModel).returns(() => imodelMock.object);
-    viewportMock.setup((x) => x.perModelCategoryVisibility).returns(() => perModelCategoryVisibilityMock.object);
-    viewStateMock.setup((x) => x.is3d()).returns(() => true);
+    viewport = createFakeSinonViewport({
+      queryHandler: () => [{ id: categoryId }],
+      getCategoryInfo: async () => categoriesInfo,
+      viewType: "spatial",
+    });
   });
 
   afterEach(() => {
-    perModelCategoryVisibilityMock.reset();
-    imodelMock.reset();
-    queryReaderMock.reset();
-    categoriesMock.reset();
-    viewportMock.reset();
-    viewStateMock.reset();
     sinon.restore();
   });
 
   describe("toggleAllCategories", () => {
     it("enables all categories", async () => {
-      await toggleAllCategories(viewportMock.object, true);
-      viewportMock.verify((x) => x.changeCategoryDisplay(["CategoryId"], true, moq.It.isAny()), moq.Times.once());
+      await toggleAllCategories(viewport, true);
+      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: [categoryId], display: true, enableAllSubCategories: true });
     });
 
     it("disables all categories", async () => {
-      await toggleAllCategories(viewportMock.object, false);
-      viewportMock.verify((x) => x.changeCategoryDisplay(["CategoryId"], false, moq.It.isAny()), moq.Times.once());
+      await toggleAllCategories(viewport, false);
+      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: [categoryId], display: false, enableAllSubCategories: true });
     });
   });
 
   describe("enableCategoryDisplay", () => {
     it("enables category", async () => {
-      await enableCategoryDisplay(viewportMock.object, "CategoryId", true, false);
-      viewportMock.verify((x) => x.changeCategoryDisplay("CategoryId", true, false), moq.Times.once());
+      await enableCategoryDisplay(viewport, categoryId, true, false);
+      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: categoryId, display: true, enableAllSubCategories: false });
     });
 
     it("disables category", async () => {
-      await enableCategoryDisplay(viewportMock.object, "CategoryId", false, false);
-      viewportMock.verify((x) => x.changeCategoryDisplay("CategoryId", false, false), moq.Times.once());
+      await enableCategoryDisplay(viewport, categoryId, false, false);
+      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: categoryId, display: false, enableAllSubCategories: false });
     });
 
     it("disables category and subcategories", async () => {
-      await enableCategoryDisplay(viewportMock.object, "CategoryId", false, true);
-      viewportMock.verify((x) => x.changeCategoryDisplay("CategoryId", false, true), moq.Times.once());
-      viewportMock.verify((x) => x.changeSubCategoryDisplay(moq.It.isAny(), moq.It.isAny()), moq.Times.once());
+      await enableCategoryDisplay(viewport, categoryId, false, true);
+      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: categoryId, display: false, enableAllSubCategories: true });
+      expect(viewport.changeSubCategoryDisplay).to.be.calledOnceWith({ subCategoryId: subCategoryId, display: false });
     });
 
     it("removes overrides per model when enabling category", async () => {
-      const ovrs = [{ modelId: "ModelId", categoryId: "CategoryId", visible: false }];
-      perModelCategoryVisibilityMock.reset();
-      perModelCategoryVisibilityMock.setup((x) => x[Symbol.iterator]()).returns(() => ovrs[Symbol.iterator]());
-      await enableCategoryDisplay(viewportMock.object, "CategoryId", true, false);
-      viewportMock.verify((x) => x.changeCategoryDisplay("CategoryId", true, false), moq.Times.once());
-      perModelCategoryVisibilityMock.verify((x) => x.setOverride(["ModelId"], "CategoryId", PerModelCategoryVisibility.Override.None), moq.Times.once());
+      const overrides = [{ modelId: "ModelId", categoryId, visible: false }];
+      viewport.perModelCategoryOverrides = overrides;
+      await enableCategoryDisplay(viewport, categoryId, true, false);
+
+      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: categoryId, display: true, enableAllSubCategories: false });
+      expect(viewport.setPerModelCategoryOverride).to.be.calledOnceWith({
+        modelIds: ["ModelId"],
+        categoryIds: categoryId,
+        override: PerModelCategoryVisibility.Override.None,
+      });
     });
   });
 
   describe("enableSubCategoryDisplay", () => {
     it("enables subCategory", () => {
-      enableSubCategoryDisplay(viewportMock.object, "SubCategoryId", true);
-      viewportMock.verify((x) => x.changeSubCategoryDisplay("SubCategoryId", true), moq.Times.once());
+      enableSubCategoryDisplay(viewport, subCategoryId, true);
+      expect(viewport.changeSubCategoryDisplay).to.be.calledOnceWith({ subCategoryId: subCategoryId, display: true });
     });
 
     it("disables subCategory", () => {
-      enableSubCategoryDisplay(viewportMock.object, "SubCategoryId", false);
-      viewportMock.verify((x) => x.changeSubCategoryDisplay("SubCategoryId", false), moq.Times.once());
+      enableSubCategoryDisplay(viewport, subCategoryId, false);
+      expect(viewport.changeSubCategoryDisplay).to.be.calledOnceWith({ subCategoryId: subCategoryId, display: false });
     });
   });
 
@@ -150,11 +138,11 @@ describe("CategoryVisibilityUtils", () => {
           },
         ],
       ]);
-      queryReaderMock.reset();
-      categoriesMock.reset();
-      queryReaderMock.setup(async (x) => x.toArray()).returns(async () => [{ id: "CategoryWithoutSubcategories" }]);
-      categoriesMock.setup(async (x) => x.getCategoryInfo(["CategoryWithoutSubcategories"])).returns(async () => categoryInfoWithoutSubcategories);
-      const result = await loadCategoriesFromViewport(viewportMock.object);
+      viewport.iModel = createIModelMock({
+        queryHandler: () => [{ id: "CategoryWithoutSubcategories" }],
+        getCategoryInfo: async () => categoryInfoWithoutSubcategories,
+      });
+      const result = await loadCategoriesFromViewport(viewport);
       expect(result[0].subCategoryIds).to.be.undefined;
     });
   });
@@ -164,7 +152,7 @@ describe("CategoryVisibilityUtils", () => {
     let categoryIds: Array<Id64String>;
     let modelIds: Array<Id64String>;
     let subCategoryIds: Array<Id64String>;
-    let viewport: Viewport;
+    let viewport: TreeWidgetTestingViewport;
     async function createIModel(
       context: Mocha.Context,
     ): Promise<{ imodel: IModelConnection } & { models: Id64Array; categories: Id64Array; subCategories: Id64Array }> {
@@ -202,10 +190,12 @@ describe("CategoryVisibilityUtils", () => {
       categoryIds = buildIModelResult.categories;
       modelIds = buildIModelResult.models;
       subCategoryIds = buildIModelResult.subCategories;
-      viewport = OffScreenViewport.create({
-        view: await createViewState(imodel, categoryIds, modelIds),
-        viewRect: new ViewRect(),
-      });
+      viewport = createTreeWidgetTestingViewport(
+        OffScreenViewport.create({
+          view: await createViewState(imodel, categoryIds, modelIds),
+          viewRect: new ViewRect(),
+        }),
+      );
     });
 
     after(async function () {
@@ -215,79 +205,79 @@ describe("CategoryVisibilityUtils", () => {
     });
 
     it("inverts visible and hidden categories", async () => {
-      viewport.changeCategoryDisplay([categoryIds[0]], false, true);
-      viewport.changeCategoryDisplay([categoryIds[1], categoryIds[2]], true, true);
+      viewport.changeCategoryDisplay({ categoryIds: [categoryIds[0]], display: false, enableAllSubCategories: true });
+      viewport.changeCategoryDisplay({ categoryIds: [categoryIds[1], categoryIds[2]], display: true, enableAllSubCategories: true });
       for (let i = 0; i < categoryIds.length; ++i) {
-        expect(viewport.view.viewsCategory(categoryIds[i])).to.eq(i > 0);
+        expect(viewport.viewsCategory(categoryIds[i])).to.eq(i > 0);
       }
       await invertAllCategories(
         categoryIds.map((id) => ({ categoryId: id })),
         viewport,
       );
       for (let i = 0; i < categoryIds.length; ++i) {
-        expect(viewport.view.viewsCategory(categoryIds[i])).to.eq(i === 0);
+        expect(viewport.viewsCategory(categoryIds[i])).to.eq(i === 0);
       }
     });
 
     it("enables categories when they are in partial state due to subcategories", async () => {
-      viewport.changeCategoryDisplay(categoryIds[0], true, true);
-      viewport.changeCategoryDisplay(categoryIds[1], false, true);
-      viewport.changeSubCategoryDisplay(subCategoryIds[0], false);
-      viewport.changeSubCategoryDisplay(subCategoryIds[1], true);
+      viewport.changeCategoryDisplay({ categoryIds: categoryIds[0], display: true, enableAllSubCategories: true });
+      viewport.changeCategoryDisplay({ categoryIds: categoryIds[1], display: false, enableAllSubCategories: true });
+      viewport.changeSubCategoryDisplay({ subCategoryId: subCategoryIds[0], display: false });
+      viewport.changeSubCategoryDisplay({ subCategoryId: subCategoryIds[1], display: true });
       for (let i = 0; i < categoryIds.length; ++i) {
-        expect(viewport.view.viewsCategory(categoryIds[i])).to.eq(i === 0);
+        expect(viewport.viewsCategory(categoryIds[i])).to.eq(i === 0);
       }
       for (let i = 0; i < subCategoryIds.length; ++i) {
-        expect(viewport.isSubCategoryVisible(subCategoryIds[i])).to.eq(i !== 0);
+        expect(viewport.viewsSubCategory(subCategoryIds[i])).to.eq(i !== 0);
       }
       await invertAllCategories(
         categoryIds.map((id, index) => ({ categoryId: id, subCategoryIds: [subCategoryIds[index]] })),
         viewport,
       );
       for (const id of categoryIds) {
-        expect(viewport.view.viewsCategory(id)).to.be.true;
+        expect(viewport.viewsCategory(id)).to.be.true;
       }
       for (const id of subCategoryIds) {
-        expect(viewport.isSubCategoryVisible(id)).to.be.true;
+        expect(viewport.viewsSubCategory(id)).to.be.true;
       }
     });
 
     it("enables categories when they are in partial state due to per model overrides", async () => {
-      viewport.changeCategoryDisplay(categoryIds[0], true, true);
-      viewport.changeCategoryDisplay(categoryIds[1], false, true);
+      viewport.changeCategoryDisplay({ categoryIds: categoryIds[0], display: true, enableAllSubCategories: true });
+      viewport.changeCategoryDisplay({ categoryIds: categoryIds[1], display: false, enableAllSubCategories: true });
       for (let i = 0; i < categoryIds.length; ++i) {
-        expect(viewport.view.viewsCategory(categoryIds[i])).to.eq(i === 0);
+        expect(viewport.viewsCategory(categoryIds[i])).to.eq(i === 0);
       }
-      viewport.perModelCategoryVisibility.setOverride(modelIds[0], categoryIds[0], PerModelCategoryVisibility.Override.Hide);
-      viewport.perModelCategoryVisibility.setOverride(modelIds[1], categoryIds[1], PerModelCategoryVisibility.Override.Show);
+      viewport.setPerModelCategoryOverride({ modelIds: modelIds[0], categoryIds: categoryIds[0], override: PerModelCategoryVisibility.Override.Hide });
+      viewport.setPerModelCategoryOverride({ modelIds: modelIds[1], categoryIds: categoryIds[1], override: PerModelCategoryVisibility.Override.Show });
       await invertAllCategories(
         categoryIds.map((id) => ({ categoryId: id })),
         viewport,
       );
       for (const id of categoryIds) {
-        expect(viewport.view.viewsCategory(id)).to.be.true;
-        expect(viewport.perModelCategoryVisibility.getOverride(modelIds[0], id)).to.eq(PerModelCategoryVisibility.Override.None);
-        expect(viewport.perModelCategoryVisibility.getOverride(modelIds[1], id)).to.eq(PerModelCategoryVisibility.Override.None);
+        expect(viewport.viewsCategory(id)).to.be.true;
+        expect(viewport.getPerModelCategoryOverride({ modelId: modelIds[0], categoryId: id })).to.eq(PerModelCategoryVisibility.Override.None);
+        expect(viewport.getPerModelCategoryOverride({ modelId: modelIds[1], categoryId: id })).to.eq(PerModelCategoryVisibility.Override.None);
       }
     });
 
     it("inverts visible and hidden categories when they have overrides", async () => {
-      viewport.changeCategoryDisplay(categoryIds[0], true, true);
-      viewport.changeCategoryDisplay(categoryIds[1], false, true);
+      viewport.changeCategoryDisplay({ categoryIds: categoryIds[0], display: true, enableAllSubCategories: true });
+      viewport.changeCategoryDisplay({ categoryIds: categoryIds[1], display: false, enableAllSubCategories: true });
 
       for (let i = 0; i < categoryIds.length; ++i) {
-        expect(viewport.view.viewsCategory(categoryIds[i])).to.eq(i === 0);
+        expect(viewport.viewsCategory(categoryIds[i])).to.eq(i === 0);
       }
-      viewport.perModelCategoryVisibility.setOverride(modelIds[0], categoryIds[0], PerModelCategoryVisibility.Override.Show);
-      viewport.perModelCategoryVisibility.setOverride(modelIds[1], categoryIds[1], PerModelCategoryVisibility.Override.Hide);
+      viewport.setPerModelCategoryOverride({ modelIds: modelIds[0], categoryIds: categoryIds[0], override: PerModelCategoryVisibility.Override.Show });
+      viewport.setPerModelCategoryOverride({ modelIds: modelIds[1], categoryIds: categoryIds[1], override: PerModelCategoryVisibility.Override.Hide });
       await invertAllCategories(
         categoryIds.map((id) => ({ categoryId: id })),
         viewport,
       );
       for (let i = 0; i < categoryIds.length; ++i) {
-        expect(viewport.view.viewsCategory(categoryIds[i])).to.eq(i !== 0);
-        expect(viewport.perModelCategoryVisibility.getOverride(modelIds[0], categoryIds[i])).to.eq(PerModelCategoryVisibility.Override.None);
-        expect(viewport.perModelCategoryVisibility.getOverride(modelIds[1], categoryIds[i])).to.eq(PerModelCategoryVisibility.Override.None);
+        expect(viewport.viewsCategory(categoryIds[i])).to.eq(i !== 0);
+        expect(viewport.getPerModelCategoryOverride({ modelId: modelIds[0], categoryId: categoryIds[i] })).to.eq(PerModelCategoryVisibility.Override.None);
+        expect(viewport.getPerModelCategoryOverride({ modelId: modelIds[1], categoryId: categoryIds[i] })).to.eq(PerModelCategoryVisibility.Override.None);
       }
     });
   });

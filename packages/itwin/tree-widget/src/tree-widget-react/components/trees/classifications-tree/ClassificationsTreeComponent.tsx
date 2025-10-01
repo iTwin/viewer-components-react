@@ -8,11 +8,12 @@ import { SchemaKey, SchemaMatchType } from "@itwin/ecschema-metadata";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { useActiveViewport } from "../common/internal/UseActiveViewport.js";
+import { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { ClassificationsTree } from "./ClassificationsTree.js";
 
 import type { ClassificationsTreeProps } from "./ClassificationsTree.js";
-import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
 
 /** @alpha */
 interface ClassificationsTreeComponentProps
@@ -29,6 +30,7 @@ interface ClassificationsTreeComponentProps
     | "hierarchyConfig"
     | "getEditingProps"
   > {
+  treeWidgetViewport?: TreeWidgetViewport;
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }
@@ -39,7 +41,7 @@ interface ClassificationsTreeComponentProps
  */
 export const ClassificationsTreeComponent = (props: ClassificationsTreeComponentProps) => {
   const iModel = useActiveIModelConnection();
-  const viewport = useActiveViewport();
+  const viewport = useActiveViewport({ treeWidgetViewport: props.treeWidgetViewport });
 
   if (!iModel || !viewport) {
     return null;
@@ -76,7 +78,7 @@ function ClassificationsTreeComponentImpl({
   onFeatureUsed,
   filter,
   ...treeProps
-}: ClassificationsTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
+}: ClassificationsTreeComponentProps & { iModel: IModelConnection; viewport: TreeWidgetViewport }) {
   return (
     <TelemetryContextProvider componentIdentifier={ClassificationsTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
       <SelectableTree>

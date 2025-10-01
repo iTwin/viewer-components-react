@@ -6,6 +6,7 @@
 import { expect } from "chai";
 import { firstValueFrom } from "rxjs";
 import sinon from "sinon";
+import { Id64String } from "@itwin/core-bentley";
 import {
   AlwaysAndNeverDrawnElementInfo,
   SET_CHANGE_DEBOUNCE_TIME,
@@ -120,7 +121,13 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       expect(result).to.deep.eq(set);
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
 
-      const setterFunction = setType === "always" ? vp.setAlwaysDrawn : vp.setNeverDrawn;
+      const setterFunction = (ids: Set<Id64String>) => {
+        if (setType === "always") {
+          vp.setAlwaysDrawn({ elementIds: ids });
+          return;
+        }
+        vp.setNeverDrawn(ids);
+      };
       setterFunction(new Set(["0x4"]));
 
       const resultPromise2 = firstValueFrom(info.getElements({ setType, modelId }));
@@ -141,7 +148,13 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       await firstValueFrom(info.getElements({ setType, modelId: "0x2" }));
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
       const resultPromise2 = firstValueFrom(info.getElements({ setType, modelId: "0x2" }));
-      const setterFunction = setType === "always" ? vp.setAlwaysDrawn : vp.setNeverDrawn;
+      const setterFunction = (ids: Set<Id64String>) => {
+        if (setType === "always") {
+          vp.setAlwaysDrawn({ elementIds: ids });
+          return;
+        }
+        vp.setNeverDrawn(ids);
+      };
       setterFunction(new Set(["0x2"]));
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       await resultPromise2;
@@ -192,7 +205,14 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       expect(result1).to.deep.eq(set);
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
       info.suppressChangeEvents();
-      vp.setAlwaysDrawn(new Set(["0x4"]));
+      const setterFunction = (ids: Set<Id64String>) => {
+        if (setType === "always") {
+          vp.setAlwaysDrawn({ elementIds: ids });
+          return;
+        }
+        vp.setNeverDrawn(ids);
+      };
+      setterFunction(new Set(["0x4"]));
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       await firstValueFrom(info.getElements({ setType, modelId }));
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
@@ -214,7 +234,13 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       await firstValueFrom(info.getElements({ setType, modelId: "0x2" }));
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
       info.suppressChangeEvents();
-      const setterFunction = setType === "always" ? vp.setAlwaysDrawn : vp.setNeverDrawn;
+      const setterFunction = (ids: Set<Id64String>) => {
+        if (setType === "always") {
+          vp.setAlwaysDrawn({ elementIds: ids });
+          return;
+        }
+        vp.setNeverDrawn(ids);
+      };
       setterFunction(new Set(["0x2"]));
       info.resumeChangeEvents();
       const resultPromise2 = firstValueFrom(info.getElements({ setType, modelId: "0x2" }));

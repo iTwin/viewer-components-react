@@ -8,11 +8,11 @@ import { Id64 } from "@itwin/core-bentley";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { releaseMainThreadOnItemsCount } from "../../../common/internal/Utils.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
+import { TreeWidgetViewport } from "../../../common/TreeWidgetViewport.js";
 import { ClassificationsTreeNode } from "../ClassificationsTreeNode.js";
 import { ClassificationsTreeVisibilityHelper } from "./ClassificationsTreeVisibilityHelper.js";
 
 import type { Observable } from "rxjs";
-import type { Viewport } from "@itwin/core-frontend";
 import type { AlwaysAndNeverDrawnElementInfo } from "../../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
 import type { ModelId } from "../../../common/internal/Types.js";
 import type { BaseIdsCache, TreeSpecificVisibilityHandler } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
@@ -23,7 +23,7 @@ import type { ClassificationsTreeFilterTargets } from "./FilteredTree.js";
 /** @internal */
 export interface ClassificationsTreeVisibilityHandlerProps {
   idsCache: ClassificationsTreeIdsCache;
-  viewport: Viewport;
+  viewport: TreeWidgetViewport;
   alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfo;
 }
 

@@ -9,6 +9,7 @@ import { TreeWidget } from "../../../TreeWidget.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
 import { useActiveViewport } from "../common/internal/UseActiveViewport.js";
+import { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { ModelsTree } from "./ModelsTree.js";
 import {
@@ -23,7 +24,7 @@ import {
 
 import type { ModelsTreeProps } from "./ModelsTree.js";
 import type { ReactNode } from "react";
-import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { ModelsTreeHeaderButtonProps, ModelsTreeHeaderButtonType } from "./ModelsTreeButtons.js";
 
 /** @public */
@@ -57,6 +58,7 @@ interface ModelsTreeComponentProps
    * ]
    * ```
    */
+  treeWidgetViewport?: TreeWidgetViewport;
   headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
@@ -70,7 +72,7 @@ interface ModelsTreeComponentProps
  */
 export const ModelsTreeComponent = (props: ModelsTreeComponentProps) => {
   const iModel = useActiveIModelConnection();
-  const viewport = useActiveViewport();
+  const viewport = useActiveViewport({ treeWidgetViewport: props.treeWidgetViewport });
 
   if (!iModel || !viewport) {
     return null;
@@ -144,7 +146,7 @@ function ModelsTreeComponentImpl({
   onPerformanceMeasured,
   filter,
   ...treeProps
-}: ModelsTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
+}: ModelsTreeComponentProps & { iModel: IModelConnection; viewport: TreeWidgetViewport }) {
   const { buttonProps, onModelsFiltered } = useModelsTreeButtonProps({ imodel: iModel, viewport });
   const { enabled: instanceFocusEnabled, toggle: toggleInstanceFocus } = useFocusedInstancesContext();
 
