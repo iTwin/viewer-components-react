@@ -1,0 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+
+.map-layer-source-select .iui-select-menu {
+  z-index: 100000; /* Ensure the dropdown selection is on top of the Modal that utilizes this component */
+}

@@ -46,20 +46,19 @@ describe("useHierarchyVisibility", () => {
     visibilityHandler.getVisibilityStatus.resolves({ state: "visible" });
 
     act(() => {
-      // expect initial state to be `off` and disabled
+      // expect initial state to be "loading"
       const state = result.current.getCheckboxState(node);
-      expect(state.state).to.be.eq("off");
-      expect(state.isDisabled).to.be.true;
+      expect(state).to.deep.eq({ isLoading: true });
     });
 
     await waitFor(() => {
       // wait for visibility status to be calculated
       expect(visibilityHandler.getVisibilityStatus).to.be.called;
       const state = result.current.getCheckboxState(node);
-      expect(state.state).to.be.eq("on");
+      expect(state).to.deep.eq({ state: "on" });
     });
 
-    expect(result.current.getCheckboxState(node).state).to.be.eq("on");
+    expect(result.current.getCheckboxState(node)).to.deep.eq({ state: "on" });
     expect(visibilityHandler.getVisibilityStatus).to.be.calledOnce;
   });
 
@@ -71,17 +70,16 @@ describe("useHierarchyVisibility", () => {
     visibilityHandler.getVisibilityStatus.resolves({ state: "visible" });
 
     act(() => {
-      // expect initial state to be `off` and disabled
+      // expect initial state to be "loading"
       const state = result.current.getCheckboxState(node);
-      expect(state.state).to.be.eq("off");
-      expect(state.isDisabled).to.be.true;
+      expect(state).to.deep.eq({ isLoading: true });
     });
 
     await waitFor(() => {
       // wait for visibility status to calculated
       expect(visibilityHandler.getVisibilityStatus).to.be.called;
       const state = result.current.getCheckboxState(node);
-      expect(state.state).to.be.eq("on");
+      expect(state).to.deep.eq({ state: "on" });
     });
 
     expect(visibilityHandler.getVisibilityStatus).to.be.calledOnce;
@@ -97,17 +95,17 @@ describe("useHierarchyVisibility", () => {
       // expect visibility state to be same
       expect(visibilityHandler.getVisibilityStatus).to.be.called;
       const state = result.current.getCheckboxState(node);
-      expect(state.state).to.be.eq("on");
+      expect(state).to.deep.eq({ state: "on" });
     });
 
     await waitFor(() => {
       // wait for visibility status to calculated
       expect(visibilityHandler.getVisibilityStatus).to.be.calledTwice;
       const state = result.current.getCheckboxState(node);
-      expect(state.state).to.be.eq("partial");
+      expect(state).to.deep.eq({ state: "partial" });
     });
 
-    expect(result.current.getCheckboxState(node).state).to.be.eq("partial");
+    expect(result.current.getCheckboxState(node)).to.deep.eq({ state: "partial" });
     expect(visibilityHandler.getVisibilityStatus).to.be.calledTwice;
   });
 
@@ -119,17 +117,16 @@ describe("useHierarchyVisibility", () => {
     visibilityHandler.getVisibilityStatus.resolves({ state: "visible" });
 
     act(() => {
-      // expect initial state to be `off` and disabled
+      // expect initial state to be "loading"
       const state = result.current.getCheckboxState(node);
-      expect(state.state).to.be.eq("off");
-      expect(state.isDisabled).to.be.true;
+      expect(state).to.deep.eq({ isLoading: true });
     });
 
     await waitFor(() => {
       // wait for visibility status to calculated
       expect(visibilityHandler.getVisibilityStatus).to.be.called;
       const state = result.current.getCheckboxState(node);
-      expect(state.state).to.be.eq("on");
+      expect(state).to.deep.eq({ state: "on" });
     });
 
     expect(visibilityHandler.getVisibilityStatus).to.be.calledOnce;
@@ -152,14 +149,14 @@ describe("useHierarchyVisibility", () => {
       // expect visibility state to be optimistically updated to 'off'
       expect(visibilityHandler.getVisibilityStatus).to.be.calledOnce;
       const state = result.current.getCheckboxState(node);
-      expect(state.state).to.be.eq("off");
+      expect(state).to.deep.eq({ state: "off" });
     });
 
     await waitFor(() => {
       // wait for visibility status to recalculated
       expect(visibilityHandler.getVisibilityStatus).to.be.calledTwice;
       const state = result.current.getCheckboxState(node);
-      expect(state.state).to.be.eq("off");
+      expect(state).to.deep.eq({ state: "off" });
     });
 
     expect(visibilityHandler.getVisibilityStatus).to.be.calledTwice;

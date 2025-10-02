@@ -61,7 +61,7 @@ interface UseHierarchyVisibilityProps {
 export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarchyVisibilityProps): TreeCheckboxProps & { triggerRefresh: () => void } {
   const visibilityStatusMap = useRef(new Map<string, { node: PresentationHierarchyNode; status: VisibilityStatus; needsRefresh: boolean }>());
   const [state, setState] = useState<TreeCheckboxProps & { triggerRefresh: () => void }>({
-    getCheckboxState: () => ({ state: "off", isDisabled: true }),
+    getCheckboxState: () => ({ isLoading: true }),
     onCheckboxClicked: () => {},
     triggerRefresh: () => {},
   });
@@ -126,7 +126,7 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
         return;
       }
       entry.status.state = checked ? "visible" : "hidden";
-      entry.status.tooltip = undefined;
+      delete entry.status.tooltip;
       triggerCheckboxUpdate();
     };
 
@@ -162,17 +162,17 @@ function createStateGetter(
     const entry = map.current.get(node.id);
     if (entry === undefined) {
       calculateVisibility(node);
-      return { state: "off", isDisabled: true };
+      return { isLoading: true };
     }
+
     if (entry.needsRefresh) {
       calculateVisibility(node);
     }
 
     const status = entry.status;
     return {
+      ...status,
       state: status.state === "visible" ? "on" : status.state === "hidden" ? "off" : "partial",
-      tooltip: status.tooltip,
-      isDisabled: status.isDisabled,
     };
   };
 }

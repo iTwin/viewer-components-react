@@ -13,11 +13,17 @@ import type { ComponentPropsWithoutRef } from "react";
  * Data structure that describes tree node checkbox state.
  * @beta
  */
-interface TreeNodeCheckboxState {
-  state: "on" | "off" | "partial";
-  isDisabled?: boolean;
+type TreeNodeCheckboxState = (
+  | {
+      state: "on" | "off" | "partial";
+      isDisabled?: boolean;
+    }
+  | {
+      isLoading: true;
+    }
+) & {
   tooltip?: string;
-}
+};
 
 /** @beta */
 export interface TreeCheckboxProps {
@@ -38,21 +44,29 @@ export function TreeNodeCheckbox({ node, onCheckboxClicked, getCheckboxState, ..
   }
 
   const checkboxState = getCheckboxState(node);
+  const checkboxProps: ComponentPropsWithoutRef<typeof Checkbox> = {
+    ...props,
+    "aria-label": checkboxState.tooltip,
+    onClick: (e) => {
+      e.stopPropagation();
+    },
+    onChange: (e) => {
+      onCheckboxClicked(node, e.currentTarget.checked);
+    },
+  };
+  if ("isLoading" in checkboxState) {
+    checkboxProps.style = {
+      ...checkboxProps.style,
+      visibility: "hidden",
+    };
+  } else {
+    checkboxProps.checked = checkboxState.state === "on";
+    checkboxProps.indeterminate = checkboxState.state === "partial";
+    checkboxProps.disabled = checkboxState.isDisabled;
+  }
   return (
     <TooltipWrapper content={checkboxState.tooltip}>
-      <Checkbox
-        {...props}
-        checked={checkboxState.state === "on"}
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-        onChange={(e) => {
-          onCheckboxClicked(node, e.currentTarget.checked);
-        }}
-        indeterminate={checkboxState.state === "partial"}
-        disabled={checkboxState.isDisabled}
-        aria-label={checkboxState.tooltip}
-      />
+      <Checkbox {...checkboxProps} />
     </TooltipWrapper>
   );
 }
