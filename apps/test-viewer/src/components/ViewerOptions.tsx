@@ -9,7 +9,7 @@ import { TransientIdSequence } from "@itwin/core-bentley";
 import { SvgSelection, SvgVisibilityShow, SvgZoomInCircular } from "@itwin/itwinui-icons-react";
 import { IconButton, Select } from "@itwin/itwinui-react";
 import { Presentation } from "@itwin/presentation-frontend";
-import { QuantityFormatButton } from "./QuantityFormatButton";
+import { QuantityFormatButton } from "./quantity-formatting/QuantityFormatButton";
 
 import type { SelectionScopesManager } from "@itwin/presentation-frontend";
 import type { PropsWithChildren } from "react";

@@ -4,31 +4,25 @@
  *---------------------------------------------------------------------------------------------*/
 
 
+import "../FormatPanel.scss";
 import * as React from "react";
-import type { PanelProps } from "./Decimal.js";
 import { Format, FormatTraits } from "@itwin/core-quantity";
-import { FormatUnits } from "../internal/FormatUnits.js";
-import { FormatTypeOption } from "../internal/misc/FormatType.js";
-import {
-  AppendUnitLabel,
-  UomSeparatorSelector,
-} from "../internal/FormatUnitLabel.js";
-import { FormatPrecision } from "../internal/FormatPrecision.js";
 import { Divider, Label, Text } from "@itwin/itwinui-react";
 import { useTranslation } from "../../../useTranslation.js";
-import { ShowTrailingZeros } from "../internal/ShowTrailingZeros.js";
-import { SignOption } from "../internal/SignOption.js";
+import { DecimalSeparator } from "../internal/DecimalSeparator.js";
+import { FormatPrecision } from "../internal/FormatPrecision.js";
+import { AppendUnitLabel, UomSeparatorSelector } from "../internal/FormatUnitLabel.js";
+import { FormatUnits } from "../internal/FormatUnits.js";
 import { KeepDecimalPoint } from "../internal/KeepDecimalPoint.js";
 import { KeepSingleZero } from "../internal/KeepSingleZero.js";
-import { ZeroEmpty } from "../internal/ZeroEmpty.js";
-import {
-  ThousandsSeparatorSelector,
-  UseThousandsSeparator,
-} from "../internal/ThousandsSeparator.js";
+import { FormatTypeOption } from "../internal/misc/FormatType.js";
 import { ScientificType } from "../internal/ScientificType.js";
-import "../FormatPanel.scss";
-import { DecimalSeparator } from "../internal/DecimalSeparator.js";
+import { ShowTrailingZeros } from "../internal/ShowTrailingZeros.js";
+import { SignOption } from "../internal/SignOption.js";
+import { ThousandsSeparatorSelector, UseThousandsSeparator } from "../internal/ThousandsSeparator.js";
+import { ZeroEmpty } from "../internal/ZeroEmpty.js";
 
+import type { PanelProps } from "./Decimal.js";
 /** Primary children component for scientific format
  * @internal
  */
@@ -46,7 +40,7 @@ export function ScientificPrimaryChildren(
       <Text variant="small" isMuted={true}>
         {translate("QuantityFormat:labels.formatTypeSublabel")}
       </Text>
-      <Divider />
+      <Divider className="quantityFormat-formatPanel-unit-divider" />
       <Label>{translate("QuantityFormat:labels.units")}</Label>
       <FormatUnits
         unitsProvider={unitsProvider}
@@ -54,7 +48,7 @@ export function ScientificPrimaryChildren(
         initialFormat={formatProps}
         onUnitsChange={onFormatChange}
       />
-      <Divider />
+      <Divider className="quantityFormat-formatPanel-unit-divider" />
       <AppendUnitLabel
         formatProps={formatProps}
         onFormatChange={onFormatChange}
