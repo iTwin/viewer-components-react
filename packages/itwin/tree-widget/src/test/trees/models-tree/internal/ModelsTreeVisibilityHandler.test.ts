@@ -1338,6 +1338,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             const modelId = "0x1";
             const node = createModelHierarchyNode(modelId);
             const viewport = createFakeSinonViewport({
+              // cspell:disable-next-line
               alwaysDrawn: new Set(["abcd", "efgh"]),
               neverDrawn: new Set(["1234", "3456"]),
             });

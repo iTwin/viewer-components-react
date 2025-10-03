@@ -152,13 +152,13 @@ describe("<MultiElementPropertyGrid />", () => {
       });
 
       it("renders element list", async () => {
-        const instancekeys = [
+        const instanceKeys = [
           { id: "0x1", className: "TestSchema.TestClass" },
           { id: "0x2", className: "TestSchema.TestClass" },
         ];
-        const expectedLabels = instancekeys.map(buildLabel);
+        const expectedLabels = instanceKeys.map(buildLabel);
 
-        setupMultiInstanceData(instancekeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
+        setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
         getLabelsStub.callsFake(async (keys) => keys.map(buildLabel));
 
         const { getByText, getByRole, user } = render(<MultiElementPropertyGrid {...getProps()} />);
@@ -174,13 +174,13 @@ describe("<MultiElementPropertyGrid />", () => {
       });
 
       it("renders specific element props", async () => {
-        const instancekeys = [
+        const instanceKeys = [
           { id: "0x1", className: "TestSchema.TestClass" },
           { id: "0x2", className: "TestSchema.TestClass" },
         ];
-        const expectedLabels = instancekeys.map(buildLabel);
+        const expectedLabels = instanceKeys.map(buildLabel);
 
-        setupMultiInstanceData(instancekeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
+        setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
         getLabelsStub.callsFake(async (keys) => keys.map(buildLabel));
 
         const { getByText, getByRole, user } = render(<MultiElementPropertyGrid {...getProps()} />);
@@ -199,13 +199,13 @@ describe("<MultiElementPropertyGrid />", () => {
       });
 
       it("navigates from single element to multi element grid using 'Back' button", async () => {
-        const instancekeys = [
+        const instanceKeys = [
           { id: "0x1", className: "TestSchema.TestClass" },
           { id: "0x2", className: "TestSchema.TestClass" },
         ];
-        const expectedLabels = instancekeys.map(buildLabel);
+        const expectedLabels = instanceKeys.map(buildLabel);
 
-        setupMultiInstanceData(instancekeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
+        setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
         getLabelsStub.callsFake(async (keys) => keys.map(buildLabel));
 
         const { getByText, getByRole, container, user } = render(<MultiElementPropertyGrid {...getProps()} />);
@@ -240,13 +240,13 @@ describe("<MultiElementPropertyGrid />", () => {
       });
 
       it("goes back to multi element property grid after selection changes", async () => {
-        const instancekeys = [
+        const instanceKeys = [
           { id: "0x1", className: "TestSchema.TestClass" },
           { id: "0x2", className: "TestSchema.TestClass" },
         ];
-        const expectedLabels = instancekeys.map(buildLabel);
+        const expectedLabels = instanceKeys.map(buildLabel);
 
-        setupMultiInstanceData(instancekeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
+        setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
         getLabelsStub.callsFake(async (keys) => keys.map(buildLabel));
 
         const { getByText, getByRole, user, unmount } = render(<MultiElementPropertyGrid {...getProps()} />);
@@ -269,8 +269,8 @@ describe("<MultiElementPropertyGrid />", () => {
       it("renders buttons for ancestor navigation", async () => {
         const { AncestorsNavigationControls } = await import("../../property-grid-react/components/MultiElementPropertyGrid.js");
 
-        const instancekey = { id: "0x1", className: "TestSchema.TestClass" };
-        setupMultiInstanceData([{ key: instancekey, value: "Test-Value-1" }]);
+        const instanceKey = { id: "0x1", className: "TestSchema.TestClass" };
+        setupMultiInstanceData([{ key: instanceKey, value: "Test-Value-1" }]);
 
         getParentInstanceKeyStub.reset();
         getParentInstanceKeyStub.resolves({ id: "0x2", className: "TestSchema.ParentClass" });
@@ -361,13 +361,13 @@ describe("<MultiElementPropertyGrid />", () => {
 
         it("reports when element list is shown", async () => {
           const onFeatureUsedSpy = sinon.spy();
-          const instancekeys = [
+          const instanceKeys = [
             { id: "0x1", className: "TestSchema.TestClass" },
             { id: "0x2", className: "TestSchema.TestClass" },
           ];
-          const expectedLabels = instancekeys.map(buildLabel);
+          const expectedLabels = instanceKeys.map(buildLabel);
 
-          setupMultiInstanceData(instancekeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
+          setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
           getLabelsStub.callsFake(async (keys) => keys.map(buildLabel));
 
           const { getByText, getByRole, user } = render(
@@ -389,13 +389,13 @@ describe("<MultiElementPropertyGrid />", () => {
 
         it("reports when element selected from element list", async () => {
           const onFeatureUsedSpy = sinon.spy();
-          const instancekeys = [
+          const instanceKeys = [
             { id: "0x1", className: "TestSchema.TestClass" },
             { id: "0x2", className: "TestSchema.TestClass" },
           ];
-          const expectedLabels = instancekeys.map(buildLabel);
+          const expectedLabels = instanceKeys.map(buildLabel);
 
-          setupMultiInstanceData(instancekeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
+          setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
           getLabelsStub.callsFake(async (keys) => keys.map(buildLabel));
 
           const { getByText, getByRole, user } = render(
@@ -420,13 +420,13 @@ describe("<MultiElementPropertyGrid />", () => {
 
         it("reports when navigates from single element to multi element grid using 'Back' button", async () => {
           const onFeatureUsedSpy = sinon.spy();
-          const instancekeys = [
+          const instanceKeys = [
             { id: "0x1", className: "TestSchema.TestClass" },
             { id: "0x2", className: "TestSchema.TestClass" },
           ];
-          const expectedLabels = instancekeys.map(buildLabel);
+          const expectedLabels = instanceKeys.map(buildLabel);
 
-          setupMultiInstanceData(instancekeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
+          setupMultiInstanceData(instanceKeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
           getLabelsStub.callsFake(async (keys) => keys.map(buildLabel));
 
           const { container, getByText, getByRole, user } = render(

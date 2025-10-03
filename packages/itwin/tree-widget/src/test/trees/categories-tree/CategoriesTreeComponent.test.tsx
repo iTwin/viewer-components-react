@@ -167,6 +167,7 @@ describe("<CategoriesTreeComponent />", () => {
         );
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
+        // cspell:disable-next-line
         expect(onFeatureUsedSpy).to.be.calledWith("categories-tree-showall");
       });
     });
@@ -186,6 +187,7 @@ describe("<CategoriesTreeComponent />", () => {
         );
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
+        // cspell:disable-next-line
         expect(onFeatureUsedSpy).to.be.calledWith("categories-tree-hideall");
       });
     });

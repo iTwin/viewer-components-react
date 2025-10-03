@@ -25,6 +25,9 @@ import {
 } from "../../IModelUtils.js";
 import { createIModelAccess } from "../Common.js";
 
+// cspell:words egory
+// cspell complains about Cat_egory and Cat%egory
+
 describe("Categories tree", () => {
   describe("Hierarchy filtering", () => {
     before(async function () {
