@@ -15,16 +15,23 @@ const testFormatSets: FormatSet[] = [
   {
     name: "TestFormatSet1",
     label: "Arizona Highway Project (Civil)",
+    unitSystem: "imperial",
+    description:
+      "This format set contains all the formatting standards used by civil engineers on the Arizona Highway Project. Includes units for measurements, coordinates, and construction materials.",
     formats: {},
   },
   {
     name: "TestFormatSet2",
     label: "Arizona Highway Project (Project Manager)",
+    unitSystem: "imperial",
+    description: "This format set contains all the formatting standards used by project managers on the Arizona Highway Project.",
     formats: {},
   },
   {
     name: "TestFormatSet3",
     label: "My personal format set",
+    unitSystem: "metric",
+    description: "Custom formatting preferences for individual use. Combines metric and imperial units based on personal workflow requirements.",
     formats: {},
   },
 ];
@@ -35,6 +42,8 @@ export const FormatSetsTabPanel: React.FC = () => {
   const [activeFormatSetKey, setActiveFormatSetKey] = React.useState<string | undefined>();
   const [selectedFormatSetKey, setSelectedFormatSetKey] = React.useState<string | undefined>();
   const [selectedFormatSet, setSelectedFormatSet] = React.useState<FormatSet | undefined>();
+  const [clonedSelectedFormatSet, setClonedSelectedFormatSet] = React.useState<FormatSet | undefined>();
+  const [saveEnabled, setSaveEnabled] = React.useState(false);
 
   // Load format sets from FormatManager
   React.useEffect(() => {
@@ -51,6 +60,7 @@ export const FormatSetsTabPanel: React.FC = () => {
         setActiveFormatSetKey(activeKey);
         setSelectedFormatSetKey(activeKey); // Initially select the active one
         setSelectedFormatSet(formatManager.activeFormatSet);
+        setClonedSelectedFormatSet({ ...formatManager.activeFormatSet });
       }
 
       // Listen for active format set changes
@@ -74,6 +84,8 @@ export const FormatSetsTabPanel: React.FC = () => {
   const handleFormatSetChange = React.useCallback((formatSet: FormatSet, key: string) => {
     setSelectedFormatSetKey(key);
     setSelectedFormatSet(formatSet);
+    setClonedSelectedFormatSet({ ...formatSet });
+    setSaveEnabled(false);
   }, []);
 
   const handleApplyFormatSet = React.useCallback(() => {
@@ -85,13 +97,48 @@ export const FormatSetsTabPanel: React.FC = () => {
     }
   }, [selectedFormatSet]);
 
+  const handleFormatSetChanged = React.useCallback((updatedFormatSet: FormatSet) => {
+    setClonedSelectedFormatSet(updatedFormatSet);
+    setSaveEnabled(true);
+  }, []);
+
+  const handleSaveFormatSet = React.useCallback(() => {
+    if (clonedSelectedFormatSet && selectedFormatSetKey) {
+      // Update the format set in the formatSets array
+      const updatedFormatSets = formatSets.map((formatSet) => (formatSet.name === selectedFormatSetKey ? clonedSelectedFormatSet : formatSet));
+      setFormatSets(updatedFormatSets);
+      setSelectedFormatSet(clonedSelectedFormatSet);
+      setSaveEnabled(false);
+      // Update FormatManager with the new format sets
+      const formatManager = FormatManager.instance;
+      if (formatManager) {
+        // Update the format sets in FormatManager
+        formatManager.formatSets = updatedFormatSets;
+
+        // If the cloned format set is the active one, replace the active format set
+        if (formatManager.activeFormatSet && clonedSelectedFormatSet.name === formatManager.activeFormatSet.name) {
+          formatManager.setActiveFormatSet(clonedSelectedFormatSet);
+        }
+      }
+    }
+  }, [clonedSelectedFormatSet, selectedFormatSetKey, formatSets]);
+
+  const handleClearFormatSet = React.useCallback(() => {
+    if (selectedFormatSet) {
+      setClonedSelectedFormatSet({ ...selectedFormatSet });
+      setSaveEnabled(false);
+    }
+  }, [selectedFormatSet]);
+
   const handleCancelSelection = React.useCallback(() => {
     // Reset selection to the currently active format set
     setSelectedFormatSetKey(activeFormatSetKey);
     const formatManager = FormatManager.instance;
     if (formatManager && formatManager.activeFormatSet) {
       setSelectedFormatSet(formatManager.activeFormatSet);
+      setClonedSelectedFormatSet({ ...formatManager.activeFormatSet });
     }
+    setSaveEnabled(false);
   }, [activeFormatSetKey]);
 
   const hasChanges = selectedFormatSetKey !== activeFormatSetKey;
@@ -101,14 +148,14 @@ export const FormatSetsTabPanel: React.FC = () => {
       <Flex.Item className="quantity-format-selector-item">
         <Flex flexDirection="column" alignItems="flex-start" gap="m">
           {activeFormatSetKey && (
-            <Text variant='leading' style={{ marginTop: "0.25rem"}}>
+            <Text variant="leading" style={{ marginTop: "0.25rem" }}>
               Active: {formatSets.find((fs) => fs.name === activeFormatSetKey)?.label || activeFormatSetKey}
             </Text>
           )}
-          <div style={{height: "30rem", width: "23.5rem"}}>
+          <div style={{ height: "30rem" }}>
             <FormatSetSelector formatSets={formatSets} selectedFormatSetKey={selectedFormatSetKey} onFormatSetChange={handleFormatSetChange} />
           </div>
-          <Flex flexDirection="row" gap="s" justifyContent="flex-end">
+          <Flex flexDirection="row" gap="xs" justifyContent="flex-end">
             <Button size="small" styleType="default" onClick={handleCancelSelection} disabled={!hasChanges}>
               Cancel
             </Button>
@@ -120,7 +167,19 @@ export const FormatSetsTabPanel: React.FC = () => {
       </Flex.Item>
 
       <Flex.Item className="quantity-format-panel-item">
-        <FormatSetPanel formatSet={selectedFormatSet} />
+        <Flex flexDirection="column" gap="xs">
+          <FormatSetPanel formatSet={clonedSelectedFormatSet} editable={true} onFormatSetChange={handleFormatSetChanged} />
+          <Flex.Item alignSelf="flex-end">
+            <Flex gap="xs">
+              <Button size="small" styleType="default" onClick={handleClearFormatSet} disabled={!saveEnabled}>
+                Clear
+              </Button>
+              <Button size="small" styleType="high-visibility" onClick={handleSaveFormatSet} disabled={!saveEnabled}>
+                Save
+              </Button>
+            </Flex>
+          </Flex.Item>
+        </Flex>
       </Flex.Item>
     </Flex>
   );

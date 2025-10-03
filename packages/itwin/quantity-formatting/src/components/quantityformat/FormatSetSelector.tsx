@@ -29,36 +29,24 @@ export const FormatSetSelector: React.FC<FormatSetSelectorProps> = ({
   const [searchTerm, setSearchTerm] = React.useState("");
   const { translate } = useTranslation();
 
-  // Prepare format set entries
-  const formatSetEntries = React.useMemo(() => {
-    return formatSets.map((formatSet, index) => ({
-      key: formatSet.name || `formatSet-${index}`,
-      formatSet,
-      label: formatSet.label,
-      description: "", // FormatSet doesn't have description property
-    }));
-  }, [formatSets]);
-
   // Filter format sets based on search term
   const filteredFormatSets = React.useMemo(() => {
     if (!searchTerm.trim()) {
-      return formatSetEntries;
+      return formatSets;
     }
 
     const lowerSearchTerm = searchTerm.toLowerCase();
-    return formatSetEntries.filter(({ label }) =>
-      label.toLowerCase().includes(lowerSearchTerm)
+    return formatSets.filter((formatSet) =>
+      formatSet.label.toLowerCase().includes(lowerSearchTerm)
     );
-  }, [formatSetEntries, searchTerm]);
+  }, [formatSets, searchTerm]);
 
   const handleFormatSetSelect = React.useCallback(
-    (key: string) => {
-      const selectedEntry = formatSetEntries.find(entry => entry.key === key);
-      if (selectedEntry) {
-        onFormatSetChange(selectedEntry.formatSet, key);
-      }
+    (formatSet: FormatSet) => {
+      const key = formatSet.name || `formatSet-${formatSets.indexOf(formatSet)}`;
+      onFormatSetChange(formatSet, key);
     },
-    [onFormatSetChange, formatSetEntries]
+    [onFormatSetChange, formatSets]
   );
 
   const handleSearchChange = React.useCallback(
@@ -76,16 +64,19 @@ export const FormatSetSelector: React.FC<FormatSetSelectorProps> = ({
         placeholder={translate("QuantityFormat:labels.searchFormatSets")}
       />
       <List className="quantityFormat--formatSetSelector-list">
-        {filteredFormatSets.map(({ key, label }) => (
-          <ListItem
-            key={key}
-            onClick={() => handleFormatSetSelect(key)}
-            active={selectedFormatSetKey === key}
-            className="quantityFormat--formatSetSelector-listItem"
-          >
-            <Text variant="body">{label}</Text>
-          </ListItem>
-        ))}
+        {filteredFormatSets.map((formatSet, index) => {
+          const key = formatSet.name || `formatSet-${index}`;
+          return (
+            <ListItem
+              key={key}
+              onClick={() => handleFormatSetSelect(formatSet)}
+              active={selectedFormatSetKey === key}
+              className="quantityFormat--formatSetSelector-listItem"
+            >
+              <Text variant="body">{formatSet.label}</Text>
+            </ListItem>
+          );
+        })}
         {filteredFormatSets.length === 0 && searchTerm.trim() && (
           <ListItem disabled>
             <Text variant="body" isMuted>
