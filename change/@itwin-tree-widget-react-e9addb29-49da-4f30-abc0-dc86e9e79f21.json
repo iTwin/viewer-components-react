@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Models tree: Fixed adding elements to always/never drawn lists would cause model to not load its' visibility.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "100586436+JonasDov@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

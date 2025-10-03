@@ -2,6 +2,35 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Fri, 03 Oct 2025 11:22:06 GMT",
+      "version": "3.15.0",
+      "tag": "@itwin/tree-widget-react_v3.15.0",
+      "comments": {
+        "patch": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "2ebfb498e79d48a468585ffd2438a5117096d0c9",
+            "comment": "Models tree: reduce tree visibility icon flickering when changing visibility."
+          },
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "90a099db2f8e5db9771f93c6babb100d7b11e3a7",
+            "comment": "Models tree: Fixed adding elements to always/never drawn lists would cause model to not load its' visibility."
+          }
+        ],
+        "minor": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "98475bec25818d5e9f2d912032d6f74c9fd4c1e2",
+            "comment": "Introduce an extra state to `TreeNodeCheckboxState` interface - `{ isLoading: true }`. When such state is returned, the \"eye\" checkboxes are not rendered by `<VisibilityTreeRenderer />` and `<TreeNodeRenderer />`. Previously, we were returning \"disabled\" state, resulting in disabled checkboxes being briefly shown until the states were loaded."
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 16 Sep 2025 11:13:44 GMT",
       "version": "3.14.2",
       "tag": "@itwin/tree-widget-react_v3.14.2",
