@@ -10,3 +10,18 @@
 .map-manager-display-none {
   display: none;
 }
+
+// Hover-based visibility for settings menus
+.map-manager-source-item {
+  #MapLayerSettingsMenuWrapper,
+  #MapLayerSettingsSubLayersMenu {
+    visibility: hidden;
+  }
+
+  &:hover {
+    #MapLayerSettingsMenuWrapper,
+    #MapLayerSettingsSubLayersMenu {
+      visibility: visible;
+    }
+  }
+}

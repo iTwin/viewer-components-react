@@ -58,11 +58,6 @@ const StrictModeDroppable = ({ children, ...props }: DroppableProps) =>{
   return <Droppable {...props}>{children}</Droppable>;
 };
 
-const changeVisibilityByElementId = (element: Element | null, visible: boolean) => {
-  if (element) {
-    element.setAttribute("style", `visibility: ${visible ? "visible" : "hidden"}`);
-  }
-};
 
 /** @internal */
 export function MapLayerDroppable(props: MapLayerDroppableProps) {
@@ -116,11 +111,6 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
     [props],
   );
 
-  const changeSettingsMenuVisibility = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, visible: boolean) => {
-    changeVisibilityByElementId(event.currentTarget.querySelector("#MapLayerSettingsMenuWrapper"), visible);
-    changeVisibilityByElementId(event.currentTarget.querySelector("#MapLayerSettingsSubLayersMenu"), visible);
-  };
-
   const renderItem: DraggableChildrenFn = (dragProvided, _, rubric) => {
     assert(props.layersList !== undefined);
     const activeLayer = props.layersList[rubric.source.index];
@@ -133,8 +123,6 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
         key={activeLayer.name}
         {...dragProvided.draggableProps}
         ref={dragProvided.innerRef}
-        onMouseEnter={(event) => changeSettingsMenuVisibility(event, true)}
-        onMouseLeave={(event) => changeSettingsMenuVisibility(event, false)}
       >
         {/* Checkbox */}
         <Checkbox
@@ -204,7 +192,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
         </span>
 
         {/* SubLayersPopupButton */}
-        <div id="MapLayerSettingsSubLayersMenu" className="map-manager-item-sub-layer-container map-manager-hidden">
+        <div id="MapLayerSettingsSubLayersMenu" className="map-manager-item-sub-layer-container">
           {activeLayer.subLayers && activeLayer.subLayers.length > 1 && (
             <SubLayersPopupButton
               checkboxStyle="eye"
@@ -252,7 +240,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
             <SvgStatusWarning />
           </IconButton>
         )}
-        <div id="MapLayerSettingsMenuWrapper" className="map-manager-hidden">
+        <div id="MapLayerSettingsMenuWrapper">
           <MapLayerSettingsMenu
             activeViewport={props.activeViewport}
             mapLayerSettings={activeLayer}
