@@ -40,7 +40,6 @@ import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath, NonGroupingHi
 import type { Id64String } from "@itwin/core-bentley";
 
 describe("ModelsTreeVisibilityHandler", () => {
-
   before(async () => {
     await NoRenderApp.startup();
     await TestUtils.initialize();
@@ -1554,7 +1553,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           const otherCategory = insertSpatialCategory({ builder, codeValue: "category2" }).id;
           insertPhysicalElement({ builder, modelId: otherModel, categoryId: otherCategory });
 
-          return { model1, category1, element1, element2, otherModel, otherCategory  };
+          return { model1, category1, element1, element2, otherModel, otherCategory };
         });
 
         const { imodel, ...ids } = buildIModelResult;
@@ -1572,8 +1571,8 @@ describe("ModelsTreeVisibilityHandler", () => {
           viewport,
           visibilityExpectations: {
             subject: () => "partial",
-            model: (id) => id === ids.model1 ? "visible" : "hidden",
-            category: ({ categoryId }) => categoryId === ids.category1 ? "visible" : "hidden",
+            model: (id) => (id === ids.model1 ? "visible" : "hidden"),
+            category: ({ categoryId }) => (categoryId === ids.category1 ? "visible" : "hidden"),
             groupingNode: ({ elementIds }) => (elementIds.includes(ids.element1) ? "visible" : "hidden"),
             element: ({ elementId }) => (elementId === ids.element1 || elementId === ids.element2 ? "visible" : "hidden"),
           },
@@ -1590,7 +1589,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           const otherCategory = insertSpatialCategory({ builder, codeValue: "category2" }).id;
           insertPhysicalElement({ builder, modelId: model, categoryId: otherCategory });
 
-          return { model, category1, element1, element2, otherCategory  };
+          return { model, category1, element1, element2, otherCategory };
         });
 
         const { imodel, ...ids } = buildIModelResult;
@@ -1609,7 +1608,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           visibilityExpectations: {
             subject: () => "partial",
             model: () => "partial",
-            category: ({ categoryId }) => categoryId === ids.category1 ? "visible" : "hidden",
+            category: ({ categoryId }) => (categoryId === ids.category1 ? "visible" : "hidden"),
             groupingNode: ({ elementIds }) => (elementIds.includes(ids.element1) ? "visible" : "hidden"),
             element: ({ elementId }) => (elementId === ids.element1 || elementId === ids.element2 ? "visible" : "hidden"),
           },
@@ -1624,14 +1623,14 @@ describe("ModelsTreeVisibilityHandler", () => {
           const element2 = insertPhysicalElement({ builder, modelId: model, categoryId: category }).id;
 
           insertPhysicalElement({
-              builder,
-              userLabel: `element`,
-              modelId: model,
-              categoryId: category,
-              classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
-            });
+            builder,
+            userLabel: `element`,
+            modelId: model,
+            categoryId: category,
+            classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+          });
 
-          return { model, category, element1, element2  };
+          return { model, category, element1, element2 };
         });
 
         const { imodel, ...ids } = buildIModelResult;
@@ -1640,7 +1639,10 @@ describe("ModelsTreeVisibilityHandler", () => {
         viewport.changeModelDisplay(ids.model, true);
         viewport.setAlwaysDrawn(new Set([ids.element2]), true);
         viewport.renderFrame();
-        await handler.changeVisibility(createClassGroupingHierarchyNode({ elements: [ids.element1, ids.element2], categoryId: ids.category, modelId: ids.model}), true);
+        await handler.changeVisibility(
+          createClassGroupingHierarchyNode({ elements: [ids.element1, ids.element2], categoryId: ids.category, modelId: ids.model }),
+          true,
+        );
         viewport.renderFrame();
 
         await validateHierarchyVisibility({
@@ -1665,7 +1667,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           const element2 = insertPhysicalElement({ builder, modelId: model, categoryId: category }).id;
           insertPhysicalElement({ builder, modelId: model, categoryId: category }).id;
 
-          return { model, category, element1, element2  };
+          return { model, category, element1, element2 };
         });
 
         const { imodel, ...ids } = buildIModelResult;
@@ -1674,7 +1676,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         viewport.changeModelDisplay(ids.model, true);
         viewport.setAlwaysDrawn(new Set([ids.element2]), true);
         viewport.renderFrame();
-        await handler.changeVisibility(createElementHierarchyNode({ elementId: ids.element1, categoryId: ids.category, modelId: ids.model}), true);
+        await handler.changeVisibility(createElementHierarchyNode({ elementId: ids.element1, categoryId: ids.category, modelId: ids.model }), true);
         viewport.renderFrame();
 
         await validateHierarchyVisibility({
@@ -1690,7 +1692,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           },
         });
       });
-    })
+    });
   });
 });
 
