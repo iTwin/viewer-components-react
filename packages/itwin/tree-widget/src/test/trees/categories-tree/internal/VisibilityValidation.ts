@@ -10,11 +10,11 @@ import { waitFor } from "@testing-library/react";
 import { CategoriesTreeNode } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeNode.js";
 import { toVoidPromise } from "../../../../tree-widget-react/components/trees/common/internal/Rxjs.js";
 
-import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
-import type { Visibility } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
-import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
 import type { Id64Array } from "@itwin/core-bentley";
+import type { Visibility } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
+import type { TreeWidgetViewport } from "../../../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
+import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
 
 export interface VisibilityExpectations {
   [id: string]: Visibility;
@@ -22,7 +22,7 @@ export interface VisibilityExpectations {
 
 export interface ValidateNodeProps {
   handler: HierarchyVisibilityHandler;
-  viewport: Viewport;
+  viewport: TreeWidgetViewport;
   expectations: "all-visible" | "all-hidden" | VisibilityExpectations;
 }
 

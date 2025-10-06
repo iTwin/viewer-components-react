@@ -15,7 +15,6 @@ import { CategoriesTreeVisibilityHelper } from "./CategoriesTreeVisibilityHelper
 import { createFilteredCategoriesTree } from "./FilteredTree.js";
 
 import type { Observable } from "rxjs";
-import type { Viewport } from "@itwin/core-frontend";
 import type { GroupingHierarchyNode, HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { AlwaysAndNeverDrawnElementInfo } from "../../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
@@ -23,13 +22,14 @@ import type { ElementId, ModelId } from "../../../common/internal/Types.js";
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
 import type { FilteredTree } from "../../../common/internal/visibility/BaseFilteredTree.js";
 import type { BaseIdsCache, TreeSpecificVisibilityHandler } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
+import type { TreeWidgetViewport } from "../../../common/TreeWidgetViewport.js";
 import type { CategoriesTreeIdsCache } from "../CategoriesTreeIdsCache.js";
 import type { CategoriesTreeFilterTargets } from "./FilteredTree.js";
 
 /** @internal */
 export interface CategoriesTreeVisibilityHandlerProps {
   idsCache: CategoriesTreeIdsCache;
-  viewport: Viewport;
+  viewport: TreeWidgetViewport;
   alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfo;
 }
 
@@ -64,9 +64,9 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
       baseIdsCache,
     });
 
-    this.#elementType = this.#props.viewport.view.is2d() ? "GeometricElement2d" : "GeometricElement3d";
-    this.#categoryType = this.#props.viewport.view.is2d() ? "DrawingCategory" : "SpatialCategory";
-    this.#modelType = this.#props.viewport.view.is2d() ? "GeometricModel2d" : "GeometricModel3d";
+    this.#elementType = this.#props.viewport.viewType === "2d" ? "GeometricElement2d" : "GeometricElement3d";
+    this.#categoryType = this.#props.viewport.viewType === "2d" ? "DrawingCategory" : "SpatialCategory";
+    this.#modelType = this.#props.viewport.viewType === "2d" ? "GeometricModel2d" : "GeometricModel3d";
   }
 
   public [Symbol.dispose]() {
@@ -285,7 +285,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
         from(this.#props.idsCache.getModelCategoryIds(modelId)).pipe(
           map((categories) => ({
             id: modelId,
-            ...(this.#props.viewport.view.is2d() ? { drawingCategories: categories } : { spatialCategories: categories }),
+            ...(this.#props.viewport.viewType === "2d" ? { drawingCategories: categories } : { spatialCategories: categories }),
           })),
         ),
       ),
@@ -370,7 +370,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
  * @internal
  */
 export function createCategoriesTreeVisibilityHandler(props: {
-  viewport: Viewport;
+  viewport: TreeWidgetViewport;
   idsCache: CategoriesTreeIdsCache;
   imodelAccess: ECClassHierarchyInspector;
   filteredPaths?: HierarchyFilteringPath[];
@@ -380,7 +380,7 @@ export function createCategoriesTreeVisibilityHandler(props: {
       if (!props.filteredPaths) {
         return undefined;
       }
-      const { categoryClass, elementClass, modelClass } = getClassesByView(props.viewport.view.is2d() ? "2d" : "3d");
+      const { categoryClass, elementClass, modelClass } = getClassesByView(props.viewport.viewType === "2d" ? "2d" : "3d");
       return createFilteredCategoriesTree({
         idsCache: props.idsCache,
         filteringPaths: props.filteredPaths,

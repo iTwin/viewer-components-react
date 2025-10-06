@@ -8,12 +8,13 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Divider } from "@stratakit/bricks";
 import { ErrorState } from "./ErrorState.js";
 
-import type { Viewport } from "@itwin/core-frontend";
 import type { PropsWithChildren, ReactNode } from "react";
+import type { Viewport } from "@itwin/core-frontend";
+import type { TreeWidgetViewport } from "../trees/common/TreeWidgetViewport.js";
 
 /** @public */
 export interface TreeToolbarButtonProps {
-  viewport: Viewport;
+  viewport: Viewport | TreeWidgetViewport;
   onFeatureUsed?: (feature: string) => void;
 }
 

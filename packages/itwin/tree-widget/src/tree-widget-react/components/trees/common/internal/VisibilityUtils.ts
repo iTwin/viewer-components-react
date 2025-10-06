@@ -13,8 +13,8 @@ import { getClassesByView, releaseMainThreadOnItemsCount } from "./Utils.js";
 
 import type { Observable, OperatorFunction } from "rxjs";
 import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
-import type { Viewport } from "@itwin/core-frontend";
 import type { CategoryInfo } from "../CategoriesVisibilityUtils.js";
+import type { TreeWidgetViewport } from "../TreeWidgetViewport.js";
 import type { VisibilityStatus } from "../UseHierarchyVisibility.js";
 import type { Visibility } from "./Tooltip.js";
 import type { ElementId, ModelId } from "./Types.js";
@@ -52,7 +52,7 @@ export function mergeVisibilityStatuses(obs: Observable<VisibilityStatus>): Obse
 export function changeElementStateNoChildrenOperator(props: {
   on: boolean;
   isDisplayedByDefault: boolean;
-  viewport: Viewport;
+  viewport: TreeWidgetViewport;
 }): OperatorFunction<string, void> {
   return (elementIds: Observable<Id64String>) => {
     const { on, isDisplayedByDefault } = props;
@@ -96,7 +96,9 @@ export function changeElementStateNoChildrenOperator(props: {
       ),
       map((state) => {
         state.changedNeverDrawn && state.neverDrawn && props.viewport.setNeverDrawn(state.neverDrawn);
-        state.changedAlwaysDrawn && state.alwaysDrawn && props.viewport.setAlwaysDrawn(state.alwaysDrawn, props.viewport.isAlwaysDrawnExclusive);
+        state.changedAlwaysDrawn &&
+          state.alwaysDrawn &&
+          props.viewport.setAlwaysDrawn({ elementIds: state.alwaysDrawn, exclusive: props.viewport.isAlwaysDrawnExclusive });
       }),
     );
   };
@@ -108,7 +110,7 @@ export function getVisibilityFromAlwaysAndNeverDrawnElementsImpl(
     alwaysDrawn: Set<ElementId> | undefined;
     neverDrawn: Set<ElementId> | undefined;
     totalCount: number;
-    viewport: Viewport;
+    viewport: TreeWidgetViewport;
   } & GetVisibilityFromAlwaysAndNeverDrawnElementsProps,
 ): VisibilityStatus {
   const { alwaysDrawn, neverDrawn, totalCount, viewport } = props;
@@ -142,7 +144,7 @@ export interface GetVisibilityFromAlwaysAndNeverDrawnElementsProps {
  * Toggles visibility of categories to show or hide.
  * @internal
  */
-export async function toggleAllCategories(viewport: Viewport, display: boolean) {
+export async function toggleAllCategories(viewport: TreeWidgetViewport, display: boolean) {
   const categoryIds = await getCategoryIds(viewport);
   if (categoryIds.length === 0) {
     return;
@@ -155,7 +157,7 @@ export async function toggleAllCategories(viewport: Viewport, display: boolean) 
  * Gets ids of all categories from specified imodel and viewport.
  * @internal
  */
-async function getCategoryIds(viewport: Viewport): Promise<Id64Array> {
+async function getCategoryIds(viewport: TreeWidgetViewport): Promise<Id64Array> {
   const categories = await loadCategoriesFromViewport(viewport);
   return categories.map((category) => category.categoryId);
 }
@@ -164,17 +166,17 @@ async function getCategoryIds(viewport: Viewport): Promise<Id64Array> {
  * Changes category display in the viewport.
  * @internal
  */
-export async function enableCategoryDisplay(viewport: Viewport, categoryIds: Id64Arg, enabled: boolean, enableAllSubCategories = true) {
-  viewport.changeCategoryDisplay(categoryIds, enabled, enableAllSubCategories);
+export async function enableCategoryDisplay(viewport: TreeWidgetViewport, categoryIds: Id64Arg, enabled: boolean, enableAllSubCategories = true) {
+  viewport.changeCategoryDisplay({ categoryIds, display: enabled, enableAllSubCategories });
 
   // remove category overrides per model
   const modelsContainingOverrides = new Array<ModelId>();
-  for (const ovr of viewport.perModelCategoryVisibility) {
-    if (Id64.has(categoryIds, ovr.categoryId)) {
-      modelsContainingOverrides.push(ovr.modelId);
+  for (const override of viewport.perModelCategoryOverrides) {
+    if (Id64.has(categoryIds, override.categoryId)) {
+      modelsContainingOverrides.push(override.modelId);
     }
   }
-  viewport.perModelCategoryVisibility.setOverride(modelsContainingOverrides, categoryIds, PerModelCategoryVisibility.Override.None);
+  viewport.setPerModelCategoryOverride({ modelIds: modelsContainingOverrides, categoryIds, override: PerModelCategoryVisibility.Override.None });
 
   // changeCategoryDisplay only enables subcategories, it does not disabled them. So we must do that ourselves.
   if (false === enabled) {
@@ -188,14 +190,17 @@ export async function enableCategoryDisplay(viewport: Viewport, categoryIds: Id6
  * Changes subcategory display in the viewport
  * @internal
  */
-export function enableSubCategoryDisplay(viewport: Viewport, subCategoryId: Id64String, enabled: boolean) {
-  viewport.changeSubCategoryDisplay(subCategoryId, enabled);
+export function enableSubCategoryDisplay(viewport: TreeWidgetViewport, subCategoryId: Id64String, enabled: boolean) {
+  viewport.changeSubCategoryDisplay({ subCategoryId, display: enabled });
 }
 
 /** @internal */
-export async function loadCategoriesFromViewport(vp: Viewport) {
+export async function loadCategoriesFromViewport(vp: TreeWidgetViewport) {
   // Query categories and add them to state
-  const { categoryClass, elementClass } = getClassesByView(vp.view.is3d() ? "3d" : "2d");
+  if (vp.viewType === "other") {
+    return [];
+  }
+  const { categoryClass, elementClass } = getClassesByView(vp.viewType);
   const ecsql = `
     SELECT ECInstanceId as id
     FROM ${categoryClass}
@@ -205,13 +210,18 @@ export async function loadCategoriesFromViewport(vp: Viewport) {
         FROM ${elementClass}
         WHERE
           Category.Id IN (SELECT ECInstanceId FROM ${categoryClass})
-          ${vp.view.is3d() ? "" : "AND Model.Id=?"}
+          ${vp.viewType !== "2d" ? "" : "AND Model.Id=?"}
       )
   `;
 
   const categories: CategoryInfo[] = [];
-
-  const rows = await vp.iModel.createQueryReader(ecsql, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }).toArray();
+  const rows = await (async () => {
+    const result = new Array<any>();
+    for await (const row of vp.iModel.createQueryReader(ecsql, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames })) {
+      result.push(row);
+    }
+    return result;
+  })();
   (await vp.iModel.categories.getCategoryInfo(rows.map((row) => row.id))).forEach((val) => {
     categories.push({ categoryId: val.id, subCategoryIds: val.subCategories.size ? [...val.subCategories.keys()] : undefined });
   });

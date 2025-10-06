@@ -43,7 +43,7 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
         this.getCategoriesVisibilityStatus({
           categoryIds,
           modelId: undefined,
-          type: this.#props.viewport.view.is2d() ? "DrawingCategory" : "SpatialCategory",
+          type: this.#props.viewport.viewType === "2d" ? "DrawingCategory" : "SpatialCategory",
         }),
       ),
     );
@@ -58,7 +58,7 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
           elementIds,
           modelId,
           categoryId,
-          type: this.#props.viewport.view.is2d() ? "GeometricElement2d" : "GeometricElement3d",
+          type: this.#props.viewport.viewType === "2d" ? "GeometricElement2d" : "GeometricElement3d",
         }),
       ),
       mergeVisibilityStatuses,
@@ -113,7 +113,7 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
       mergeMap((categoriesModelsMap) => categoriesModelsMap.values()),
       reduce((acc, modelIds) => {
         modelIds.forEach((modelId) => {
-          if (!this.#props.viewport.view.viewsModel(modelId)) {
+          if (!this.#props.viewport.viewsModel(modelId)) {
             acc.add(modelId);
           }
         });
@@ -121,7 +121,7 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
       }, new Set<Id64String>()),
       map((hiddenModels) => {
         if (hiddenModels.size > 0) {
-          this.#props.viewport.changeModelDisplay(hiddenModels, true);
+          this.#props.viewport.changeModelDisplay({ modelIds: hiddenModels, display: true });
         }
       }),
     );

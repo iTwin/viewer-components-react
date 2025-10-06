@@ -12,9 +12,10 @@ import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { CategoriesTree } from "./CategoriesTree.js";
 import { HideAllButton, InvertAllButton, ShowAllButton, useCategoriesTreeButtonProps } from "./CategoriesTreeButtons.js";
 
-import type { CategoriesTreeProps } from "./CategoriesTree.js";
 import type { ReactNode } from "react";
-import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
+import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
+import type { CategoriesTreeProps } from "./CategoriesTree.js";
 import type { CategoriesTreeHeaderButtonProps, CategoriesTreeHeaderButtonType } from "./CategoriesTreeButtons.js";
 
 /** @public */
@@ -42,6 +43,7 @@ interface CategoriesTreeComponentProps
    * ```
    */
   headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode>;
+  treeWidgetViewport?: TreeWidgetViewport;
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }
@@ -52,7 +54,7 @@ interface CategoriesTreeComponentProps
  */
 export const CategoriesTreeComponent = (props: CategoriesTreeComponentProps) => {
   const iModel = useActiveIModelConnection();
-  const viewport = useActiveViewport();
+  const viewport = useActiveViewport({ treeWidgetViewport: props.treeWidgetViewport });
 
   if (!iModel || !viewport) {
     return null;
@@ -99,7 +101,7 @@ function CategoriesTreeComponentImpl({
   onFeatureUsed,
   filter,
   ...treeProps
-}: CategoriesTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
+}: CategoriesTreeComponentProps & { iModel: IModelConnection; viewport: TreeWidgetViewport }) {
   const { buttonProps, onCategoriesFiltered } = useCategoriesTreeButtonProps({ viewport });
 
   const buttons: ReactNode = headerButtons

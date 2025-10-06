@@ -5,11 +5,13 @@
 
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { IModelApp, SpatialViewState } from "@itwin/core-frontend";
+import { createTreeWidgetViewport } from "../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
 
 import type { Id64Array } from "@itwin/core-bentley";
-import type { IModelConnection } from "@itwin/core-frontend";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import type { TreeWidgetViewport } from "../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
 
 export function createPresentationHierarchyNode(partial?: Partial<PresentationHierarchyNode>): PresentationHierarchyNode {
   return {
@@ -75,4 +77,65 @@ export async function createViewState(iModel: IModelConnection, categoryIds: Id6
   });
   await viewState.load();
   return viewState;
+}
+/** @internal */
+export type TreeWidgetTestingViewport = TreeWidgetViewport & { renderFrame: () => void } & Disposable;
+
+/** @internal */
+export function createTreeWidgetTestingViewport(viewport: Viewport): TreeWidgetTestingViewport {
+  const treeWidgetViewport = createTreeWidgetViewport(viewport);
+  return {
+    addViewedModels: async (props) => treeWidgetViewport.addViewedModels(props),
+    iModel: treeWidgetViewport.iModel,
+    get alwaysDrawn() {
+      return treeWidgetViewport.alwaysDrawn;
+    },
+    get neverDrawn() {
+      return treeWidgetViewport.neverDrawn;
+    },
+    get viewType() {
+      return treeWidgetViewport.viewType;
+    },
+    get isAlwaysDrawnExclusive() {
+      return treeWidgetViewport.isAlwaysDrawnExclusive;
+    },
+    changeCategoryDisplay: (props) => treeWidgetViewport.changeCategoryDisplay(props),
+    changeModelDisplay: (props) => treeWidgetViewport.changeModelDisplay(props),
+    changeSubCategoryDisplay: (props) => treeWidgetViewport.changeSubCategoryDisplay(props),
+    clearNeverDrawn: () => treeWidgetViewport.clearNeverDrawn(),
+    clearAlwaysDrawn: () => treeWidgetViewport.clearAlwaysDrawn(),
+    setNeverDrawn: (props) => treeWidgetViewport.setNeverDrawn(props),
+    setAlwaysDrawn: (props) => treeWidgetViewport.setAlwaysDrawn(props),
+    setPerModelCategoryOverride: (props) => treeWidgetViewport.setPerModelCategoryOverride(props),
+    getPerModelCategoryOverride: (props) => treeWidgetViewport.getPerModelCategoryOverride(props),
+    clearPerModelCategoryOverrides: (props) => treeWidgetViewport.clearPerModelCategoryOverrides(props),
+    get onAlwaysDrawnChanged() {
+      return treeWidgetViewport.onAlwaysDrawnChanged;
+    },
+    get onDisplayedCategoriesChanged() {
+      return treeWidgetViewport.onDisplayedCategoriesChanged;
+    },
+    get onDisplayedModelsChanged() {
+      return treeWidgetViewport.onDisplayedModelsChanged;
+    },
+    get onNeverDrawnChanged() {
+      return treeWidgetViewport.onNeverDrawnChanged;
+    },
+    get onDisplayStyleChanged() {
+      return treeWidgetViewport.onDisplayStyleChanged;
+    },
+    get onPerModelCategoriesOverridesChanged() {
+      return treeWidgetViewport.onPerModelCategoriesOverridesChanged;
+    },
+    get perModelCategoryOverrides() {
+      return treeWidgetViewport.perModelCategoryOverrides;
+    },
+    viewsCategory: (props) => treeWidgetViewport.viewsCategory(props),
+    viewsModel: (props) => treeWidgetViewport.viewsModel(props),
+    viewsSubCategory: (props) => treeWidgetViewport.viewsSubCategory(props),
+    renderFrame: () => viewport.renderFrame(),
+    [Symbol.dispose]() {
+      viewport[Symbol.dispose]();
+    },
+  };
 }

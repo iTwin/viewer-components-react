@@ -5,7 +5,7 @@
 
 import { BeEvent } from "@itwin/core-bentley";
 
-import type { Viewport } from "@itwin/core-frontend";
+import type { TreeWidgetViewport } from "../TreeWidgetViewport.js";
 
 /** @internal */
 export interface IVisibilityChangeEventListener extends Disposable {
@@ -16,7 +16,7 @@ export interface IVisibilityChangeEventListener extends Disposable {
 
 /** @internal */
 export function createVisibilityChangeEventListener(props: {
-  viewport: Viewport;
+  viewport: TreeWidgetViewport;
   listeners: {
     elements?: boolean;
     categories?: boolean;
@@ -44,14 +44,14 @@ export function createVisibilityChangeEventListener(props: {
     listeners.push(props.viewport.onNeverDrawnChanged.addListener(handleVisibilityChange));
   }
   if (props.listeners.categories) {
-    listeners.push(props.viewport.onViewedCategoriesPerModelChanged.addListener(handleVisibilityChange));
-    listeners.push(props.viewport.onViewedCategoriesChanged.addListener(handleVisibilityChange));
+    listeners.push(props.viewport.onPerModelCategoriesOverridesChanged.addListener(handleVisibilityChange));
+    listeners.push(props.viewport.onDisplayedCategoriesChanged.addListener(handleVisibilityChange));
   }
   if (props.listeners.displayStyle) {
     listeners.push(props.viewport.onDisplayStyleChanged.addListener(handleVisibilityChange));
   }
   if (props.listeners.models) {
-    listeners.push(props.viewport.onViewedModelsChanged.addListener(handleVisibilityChange));
+    listeners.push(props.viewport.onDisplayedModelsChanged.addListener(handleVisibilityChange));
   }
 
   return {

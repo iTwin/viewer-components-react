@@ -22,7 +22,7 @@ describe("VisibilityChangeEventListener", () => {
     });
     const spy = sinon.spy();
     handler.onVisibilityChange.addListener(spy);
-    vpMock.onAlwaysDrawnChanged.raiseEvent(vpMock);
+    vpMock.onAlwaysDrawnChanged.raiseEvent();
     await waitFor(() => expect(spy).to.be.calledOnce);
   });
 
@@ -38,7 +38,7 @@ describe("VisibilityChangeEventListener", () => {
     });
     const spy = sinon.spy();
     handler.onVisibilityChange.addListener(spy);
-    vpMock.onNeverDrawnChanged.raiseEvent(vpMock);
+    vpMock.onNeverDrawnChanged.raiseEvent();
     await waitFor(() => expect(spy).to.be.calledOnce);
   });
 
@@ -54,7 +54,7 @@ describe("VisibilityChangeEventListener", () => {
     });
     const spy = sinon.spy();
     handler.onVisibilityChange.addListener(spy);
-    vpMock.onViewedCategoriesChanged.raiseEvent(vpMock);
+    vpMock.onDisplayedCategoriesChanged.raiseEvent();
     await waitFor(() => expect(spy).to.be.calledOnce);
   });
 
@@ -70,7 +70,7 @@ describe("VisibilityChangeEventListener", () => {
     });
     const spy = sinon.spy();
     handler.onVisibilityChange.addListener(spy);
-    vpMock.onViewedModelsChanged.raiseEvent(vpMock);
+    vpMock.onDisplayedModelsChanged.raiseEvent();
     await waitFor(() => expect(spy).to.be.calledOnce);
   });
 
@@ -86,13 +86,13 @@ describe("VisibilityChangeEventListener", () => {
     });
     const spy = sinon.spy();
     handler.onVisibilityChange.addListener(spy);
-    vpMock.onViewedCategoriesPerModelChanged.raiseEvent(vpMock);
+    vpMock.onPerModelCategoriesOverridesChanged.raiseEvent();
     await waitFor(() => expect(spy).to.be.calledOnce);
   });
 
   it("raises event once when multiple affecting events are fired", async () => {
     const vpMock = createFakeSinonViewport();
-    const { onViewedCategoriesPerModelChanged, onViewedCategoriesChanged, onViewedModelsChanged, onAlwaysDrawnChanged, onNeverDrawnChanged } = vpMock;
+    const { onPerModelCategoriesOverridesChanged, onDisplayedCategoriesChanged, onDisplayedModelsChanged, onAlwaysDrawnChanged, onNeverDrawnChanged } = vpMock;
     using handler = createVisibilityChangeEventListener({
       viewport: vpMock,
       listeners: {
@@ -103,11 +103,11 @@ describe("VisibilityChangeEventListener", () => {
     });
     const spy = sinon.spy();
     handler.onVisibilityChange.addListener(spy);
-    onViewedCategoriesPerModelChanged.raiseEvent(vpMock);
-    onViewedCategoriesChanged.raiseEvent(vpMock);
-    onViewedModelsChanged.raiseEvent(vpMock);
-    onAlwaysDrawnChanged.raiseEvent(vpMock);
-    onNeverDrawnChanged.raiseEvent(vpMock);
+    onPerModelCategoriesOverridesChanged.raiseEvent();
+    onDisplayedCategoriesChanged.raiseEvent();
+    onDisplayedModelsChanged.raiseEvent();
+    onAlwaysDrawnChanged.raiseEvent();
+    onNeverDrawnChanged.raiseEvent();
     await waitFor(() => expect(spy).to.be.calledOnce);
   });
 });

@@ -31,7 +31,7 @@ import {
 } from "../../../IModelUtils.js";
 import { TestUtils } from "../../../TestUtils.js";
 import { createIModelAccess } from "../../Common.js";
-import { createViewState } from "../../TreeUtils.js";
+import { createTreeWidgetTestingViewport, createViewState } from "../../TreeUtils.js";
 import {
   createCategoryHierarchyNode,
   createClassGroupingHierarchyNode,
@@ -43,10 +43,11 @@ import {
 } from "./Utils.js";
 import { validateHierarchyVisibility } from "./VisibilityValidation.js";
 
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { CategoriesTreeHierarchyConfiguration } from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
+import type { TreeWidgetTestingViewport } from "../../TreeUtils.js";
 import type { VisibilityExpectations } from "./VisibilityValidation.js";
 
 describe("CategoriesTreeVisibilityHandler", () => {
@@ -84,10 +85,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
   }) {
     const imodelAccess = createIModelAccess(imodel);
     const idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d");
-    const viewport = OffScreenViewport.create({
-      view: await createViewState(imodel, categoryIds, modelIds),
-      viewRect: new ViewRect(),
-    });
+    const viewport = createTreeWidgetTestingViewport(
+      OffScreenViewport.create({
+        view: await createViewState(imodel, categoryIds, modelIds),
+        viewRect: new ViewRect(),
+      }),
+    );
+
     return {
       imodelAccess,
       viewport,
@@ -1968,7 +1972,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
         setupInitialDisplayState({ viewport, ...createHiddenTestData(keys), models: [] });
 
-        viewport.perModelCategoryVisibility.setOverride(keys.physicalModel.id, keys.category.id, PerModelCategoryVisibility.Override.Show);
+        viewport.setPerModelCategoryOverride({
+          modelIds: keys.physicalModel.id,
+          categoryIds: keys.category.id,
+          override: PerModelCategoryVisibility.Override.Show,
+        });
 
         await validateHierarchyVisibility({
           provider,
@@ -1995,7 +2003,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
         setupInitialDisplayState({ viewport, ...createHiddenTestData(keys), models: [] });
 
-        viewport.perModelCategoryVisibility.setOverride(keys.physicalModel.id, keys.category.id, PerModelCategoryVisibility.Override.Show);
+        viewport.setPerModelCategoryOverride({
+          modelIds: keys.physicalModel.id,
+          categoryIds: keys.category.id,
+          override: PerModelCategoryVisibility.Override.Show,
+        });
 
         await validateHierarchyVisibility({
           provider,
@@ -2662,7 +2674,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
         setupInitialDisplayState({ viewport });
 
-        viewport.perModelCategoryVisibility.setOverride(keys.physicalModel.id, keys.category.id, PerModelCategoryVisibility.Override.Hide);
+        viewport.setPerModelCategoryOverride({
+          modelIds: keys.physicalModel.id,
+          categoryIds: keys.category.id,
+          override: PerModelCategoryVisibility.Override.Hide,
+        });
 
         await validateHierarchyVisibility({
           provider,
@@ -2689,7 +2705,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
         setupInitialDisplayState({ viewport });
 
-        viewport.perModelCategoryVisibility.setOverride(keys.physicalModel.id, keys.category.id, PerModelCategoryVisibility.Override.Hide);
+        viewport.setPerModelCategoryOverride({
+          modelIds: keys.physicalModel.id,
+          categoryIds: keys.category.id,
+          override: PerModelCategoryVisibility.Override.Hide,
+        });
 
         await validateHierarchyVisibility({
           provider,
@@ -2718,7 +2738,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
         setupInitialDisplayState({ viewport });
 
-        viewport.changeModelDisplay(keys.physicalModel.id, false);
+        viewport.changeModelDisplay({ modelIds: keys.physicalModel.id, display: false });
 
         await validateHierarchyVisibility({
           provider,
@@ -2745,7 +2765,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
         setupInitialDisplayState({ viewport });
 
-        viewport.changeModelDisplay(keys.physicalModel.id, false);
+        viewport.changeModelDisplay({ modelIds: keys.physicalModel.id, display: false });
 
         await validateHierarchyVisibility({
           provider,
@@ -2766,7 +2786,7 @@ interface VisibilityInfo {
 }
 
 function setupInitialDisplayState(props: {
-  viewport: Viewport;
+  viewport: TreeWidgetTestingViewport;
   categories?: Array<VisibilityInfo>;
   subCategories?: Array<VisibilityInfo>;
   models?: Array<VisibilityInfo>;
@@ -2778,27 +2798,22 @@ function setupInitialDisplayState(props: {
   const subCategories = props.subCategories ?? [];
   const models = props.models ?? [];
   for (const subCategoryInfo of subCategories) {
-    viewport.changeSubCategoryDisplay(subCategoryInfo.id, subCategoryInfo.visible);
+    viewport.changeSubCategoryDisplay({ subCategoryId: subCategoryInfo.id, display: subCategoryInfo.visible });
   }
   for (const categoryInfo of categories) {
-    viewport.changeCategoryDisplay(categoryInfo.id, categoryInfo.visible, false);
+    viewport.changeCategoryDisplay({ categoryIds: categoryInfo.id, display: categoryInfo.visible, enableAllSubCategories: false });
+  }
+  const alwaysDrawn = elements.filter(({ visible }) => visible).map(({ id }) => id);
+  if (alwaysDrawn.length > 0) {
+    viewport.setAlwaysDrawn({ elementIds: new Set([...alwaysDrawn, ...(viewport.alwaysDrawn ?? [])]) });
+  }
+  const neverDrawn = elements.filter(({ visible }) => !visible).map(({ id }) => id);
+  if (neverDrawn.length > 0) {
+    viewport.setNeverDrawn(new Set([...neverDrawn, ...(viewport.neverDrawn ?? [])]));
   }
 
-  for (const elementInfo of elements) {
-    if (elementInfo.visible) {
-      viewport.alwaysDrawn?.add(elementInfo.id);
-      continue;
-    }
-    viewport.neverDrawn?.add(elementInfo.id);
-  }
-  if (!viewport.alwaysDrawn) {
-    viewport.setAlwaysDrawn(new Set(elements.filter(({ visible }) => visible).map(({ id }) => id)));
-  }
-  if (!viewport.neverDrawn) {
-    viewport.setNeverDrawn(new Set(elements.filter(({ visible }) => !visible).map(({ id }) => id)));
-  }
   for (const modelInfo of models) {
-    viewport.changeModelDisplay(modelInfo.id, modelInfo.visible);
+    viewport.changeModelDisplay({ modelIds: modelInfo.id, display: modelInfo.visible });
   }
   viewport.renderFrame();
 }

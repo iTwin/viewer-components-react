@@ -19,7 +19,7 @@ import type { Observable } from "rxjs";
 import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 
 /** @internal */
-export function setDifference<T>(lhs: Iterable<T>, rhs: Set<T>): Set<T> {
+export function setDifference<T>(lhs: Readonly<Iterable<T>>, rhs: ReadonlySet<T>): Set<T> {
   const result = new Set<T>();
   for (const x of lhs) {
     if (!rhs.has(x)) {
@@ -30,7 +30,7 @@ export function setDifference<T>(lhs: Iterable<T>, rhs: Set<T>): Set<T> {
 }
 
 /** @internal */
-export function setIntersection<T>(lhs: Iterable<T>, rhs: Set<T>): Set<T> {
+export function setIntersection<T>(lhs: Readonly<Iterable<T>>, rhs: ReadonlySet<T>): Set<T> {
   const result = new Set<T>();
   for (const x of lhs) {
     if (rhs.has(x)) {
@@ -111,7 +111,7 @@ export function releaseMainThreadOnItemsCount<T>(elementCount: number) {
 }
 
 /** @internal */
-export function getClassesByView(viewType: "2d" | "3d") {
+export function getClassesByView(viewType: "2d" | "3d" | "spatial") {
   return viewType === "2d"
     ? ({ categoryClass: CLASS_NAME_DrawingCategory, elementClass: CLASS_NAME_GeometricElement2d, modelClass: CLASS_NAME_GeometricModel2d } as const)
     : ({ categoryClass: CLASS_NAME_SpatialCategory, elementClass: CLASS_NAME_GeometricElement3d, modelClass: CLASS_NAME_GeometricModel3d } as const);

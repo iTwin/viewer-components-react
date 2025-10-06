@@ -20,6 +20,7 @@ import type { InstanceKey } from '@itwin/presentation-shared';
 import { JSX as JSX_2 } from 'react/jsx-runtime';
 import type { Localization } from '@itwin/core-common';
 import { NamedExoticComponent } from 'react';
+import type { PerModelCategoryVisibility } from '@itwin/core-frontend';
 import type { PresentationHierarchyNode } from '@itwin/presentation-hierarchies-react';
 import type { PropsWithChildren } from 'react';
 import type { ReactNode } from 'react';
@@ -90,6 +91,8 @@ interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "select
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
     onPerformanceMeasured?: (featureId: string, duration: number) => void;
+    // (undocumented)
+    treeWidgetViewport?: TreeWidgetViewport;
 }
 
 // @public
@@ -146,6 +149,8 @@ interface ClassificationsTreeComponentProps extends Pick<ClassificationsTreeProp
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
     onPerformanceMeasured?: (featureId: string, duration: number) => void;
+    // (undocumented)
+    treeWidgetViewport?: TreeWidgetViewport;
 }
 
 // @alpha (undocumented)
@@ -312,6 +317,8 @@ interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "selectionStora
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
     onPerformanceMeasured?: (featureId: string, duration: number) => void;
+    // (undocumented)
+    treeWidgetViewport?: TreeWidgetViewport;
 }
 
 // @public
@@ -449,7 +456,7 @@ interface TreeToolbarButtonProps {
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
-    viewport: Viewport;
+    viewport: Viewport | TreeWidgetViewport;
 }
 
 // @public
@@ -472,12 +479,66 @@ interface TreeWidgetProps {
     trees: TreeDefinition[];
 }
 
+// @alpha
+export interface TreeWidgetViewport {
+    addViewedModels(modelIds: Id64Arg): Promise<void>;
+    alwaysDrawn: ReadonlySet<Id64String> | undefined;
+    changeCategoryDisplay: (props: {
+        categoryIds: Id64Arg;
+        display: boolean;
+        enableAllSubCategories?: boolean;
+    }) => void;
+    changeModelDisplay: (props: {
+        modelIds: Id64Arg;
+        display: boolean;
+    }) => boolean;
+    changeSubCategoryDisplay: (props: {
+        subCategoryId: Id64String;
+        display: boolean;
+    }) => void;
+    clearAlwaysDrawn: () => void;
+    clearNeverDrawn: () => void;
+    clearPerModelCategoryOverrides: (modelIds?: Id64Arg) => void;
+    getPerModelCategoryOverride: (props: {
+        modelId: Id64String;
+        categoryId: Id64String;
+    }) => PerModelCategoryVisibility.Override;
+    iModel: IModelConnection;
+    readonly isAlwaysDrawnExclusive: boolean;
+    neverDrawn: ReadonlySet<Id64String> | undefined;
+    onAlwaysDrawnChanged: BeEvent<() => void>;
+    onDisplayedCategoriesChanged: BeEvent<() => void>;
+    onDisplayedModelsChanged: BeEvent<() => void>;
+    onDisplayStyleChanged: BeEvent<() => void>;
+    onNeverDrawnChanged: BeEvent<() => void>;
+    onPerModelCategoriesOverridesChanged: BeEvent<() => void>;
+    perModelCategoryOverrides: Readonly<Iterable<{
+        modelId: Id64String;
+        categoryId: Id64String;
+        visible: boolean;
+    }>>;
+    setAlwaysDrawn: (props: {
+        elementIds: Set<Id64String>;
+        exclusive?: boolean;
+    }) => void;
+    setNeverDrawn: (elementIds: Set<Id64String>) => void;
+    setPerModelCategoryOverride: (props: {
+        modelIds: Id64Arg;
+        categoryIds: Id64Arg;
+        override: PerModelCategoryVisibility.Override;
+    }) => void;
+    viewsCategory: (categoryId: Id64String) => boolean;
+    viewsModel: (modelId: Id64String) => boolean;
+    viewsSubCategory: (subCategoryId: Id64String) => boolean;
+    viewType: "2d" | "3d" | "spatial" | "other";
+}
+
 // @beta
 export function useCategoriesTree({ filter, activeView, onCategoriesFiltered, emptyTreeContent, hierarchyConfig, }: UseCategoriesTreeProps): UseCategoriesTreeResult;
 
 // @public
 export function useCategoriesTreeButtonProps({ viewport }: {
-    viewport: Viewport;
+    viewport: Viewport | TreeWidgetViewport;
 }): {
     buttonProps: Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport" | "models">;
     onCategoriesFiltered: (props: {
@@ -489,7 +550,7 @@ export function useCategoriesTreeButtonProps({ viewport }: {
 // @beta (undocumented)
 interface UseCategoriesTreeProps {
     // (undocumented)
-    activeView: Viewport;
+    activeView: Viewport | TreeWidgetViewport;
     // (undocumented)
     emptyTreeContent?: ReactNode;
     // (undocumented)
@@ -517,7 +578,7 @@ export function useClassificationsTree({ activeView, emptyTreeContent, filter, .
 // @alpha (undocumented)
 interface UseClassificationsTreeProps {
     // (undocumented)
-    activeView: Viewport;
+    activeView: Viewport | TreeWidgetViewport;
     // (undocumented)
     emptyTreeContent?: ReactNode;
     // (undocumented)
@@ -543,7 +604,7 @@ export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityH
 // @public
 export function useModelsTreeButtonProps({ imodel, viewport }: {
     imodel: IModelConnection;
-    viewport: Viewport;
+    viewport: Viewport | TreeWidgetViewport;
 }): {
     buttonProps: Pick<ModelsTreeHeaderButtonProps, "models" | "viewport">;
     onModelsFiltered: (models: Id64String[] | undefined) => void;
@@ -552,7 +613,7 @@ export function useModelsTreeButtonProps({ imodel, viewport }: {
 // @beta (undocumented)
 interface UseModelsTreeProps {
     // (undocumented)
-    activeView: Viewport;
+    activeView: Viewport | TreeWidgetViewport;
     // (undocumented)
     emptyTreeContent?: ReactNode;
     filter?: string;

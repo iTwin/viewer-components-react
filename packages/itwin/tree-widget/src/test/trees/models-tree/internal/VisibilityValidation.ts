@@ -11,12 +11,12 @@ import { toVoidPromise } from "../../../../tree-widget-react/components/trees/co
 import { ModelsTreeNode } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeNode.js";
 import { waitFor } from "../../../TestUtils.js";
 
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
+import type { TreeWidgetViewport } from "../../../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
+import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
 import type { Visibility } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
 import type { waitForOptions } from "../../../TestUtils.js";
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
-import type { Viewport } from "@itwin/core-frontend";
-import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
-import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
 
 interface VisibilityExpectations {
   subject(id: string): Visibility;
@@ -51,7 +51,7 @@ export namespace VisibilityExpectations {
 
 export interface ValidateNodeProps {
   handler: HierarchyVisibilityHandler;
-  viewport: Viewport;
+  viewport: TreeWidgetViewport;
   visibilityExpectations: VisibilityExpectations;
 }
 
@@ -102,9 +102,9 @@ export async function validateNodeVisibility({ node, handler, visibilityExpectat
 
     const { tree: handlerVisibility, categorySelector, perModelCategoryOverride } = expected;
     expect(actualVisibility.state).to.eq(handlerVisibility, JSON.stringify({ modelId, categoryId: id }));
-    expect(viewport.view.viewsCategory(id)).to.eq(categorySelector, `Category selector for: ${JSON.stringify({ modelId, categoryId: id })}`);
+    expect(viewport.viewsCategory(id)).to.eq(categorySelector, `Category selector for: ${JSON.stringify({ modelId, categoryId: id })}`);
 
-    const ovr = viewport.perModelCategoryVisibility.getOverride(modelId, id);
+    const ovr = viewport.getPerModelCategoryOverride({ modelId, categoryId: id });
     expect(overrideToString(ovr)).to.eq(perModelCategoryOverride, JSON.stringify({ modelId, categoryId: id }));
     return;
   }

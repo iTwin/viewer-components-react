@@ -22,6 +22,7 @@ import {
 } from "../common/components/EmptyTree.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
+import { createTreeWidgetViewport, isTreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
 import { ModelsTreeNode } from "./internal/ModelsTreeNode.js";
 import { useFilteredPaths } from "./internal/UseFilteredPaths.js";
@@ -40,6 +41,7 @@ import type { VisibilityTreeRendererProps } from "../common/components/Visibilit
 import type { CreateFilteredTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import type { FilteredTree } from "../common/internal/visibility/BaseFilteredTree.js";
+import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { NormalizedHierarchyFilteringPath } from "../common/Utils.js";
 import type { ModelsTreeFilteringError, ModelsTreeSubTreeError } from "./internal/UseFilteredPaths.js";
 import type { ModelsTreeFilterTargets } from "./internal/visibility/FilteredTree.js";
@@ -56,7 +58,7 @@ export interface UseModelsTreeProps {
    * Instead, the string will be supplied to the given `getFilteredPaths` function for consumers to apply the filtering.
    */
   filter?: string;
-  activeView: Viewport;
+  activeView: Viewport | TreeWidgetViewport;
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
   visibilityHandlerOverrides?: ModelsTreeVisibilityHandlerOverrides;
   /**
@@ -131,6 +133,9 @@ export function useModelsTree({
   emptyTreeContent,
   getSubTreePaths,
 }: UseModelsTreeProps): UseModelsTreeResult {
+  const treeWidgetViewport = useMemo(() => {
+    return isTreeWidgetViewport(activeView) ? activeView : createTreeWidgetViewport(activeView);
+  }, [activeView]);
   const hierarchyConfiguration = useMemo<ModelsTreeHierarchyConfiguration>(
     () => ({
       ...defaultHierarchyConfiguration,
@@ -146,7 +151,7 @@ export function useModelsTree({
   });
 
   const { visibilityHandlerFactory, onFilteredPathsChanged } = useCachedVisibility<ModelsTreeIdsCache, ModelsTreeFilterTargets>({
-    activeView,
+    activeView: treeWidgetViewport,
     createFilteredTree,
     createTreeSpecificVisibilityHandler: useCallback(
       (treeProps) => createTreeSpecificVisibilityHandler({ ...treeProps, overrides: visibilityHandlerOverrides }),

@@ -15,6 +15,7 @@ import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMat
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { getClassesByView } from "../common/internal/Utils.js";
+import { createTreeWidgetViewport, isTreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
 import { useFilteredPaths } from "./internal/UseFilteredPaths.js";
@@ -31,13 +32,14 @@ import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { CreateFilteredTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { FilteredTree } from "../common/internal/visibility/BaseFilteredTree.js";
+import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { CategoriesTreeHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
 import type { CategoriesTreeFilterTargets } from "./internal/visibility/FilteredTree.js";
 import type { CategoriesTreeFilteringError } from "./internal/UseFilteredPaths.js";
 
 /** @beta */
 export interface UseCategoriesTreeProps {
-  activeView: Viewport;
+  activeView: Viewport | TreeWidgetViewport;
   onCategoriesFiltered?: (props: { categories: CategoryInfo[] | undefined; models?: Id64Array }) => void;
   filter?: string;
   emptyTreeContent?: ReactNode;
@@ -72,16 +74,19 @@ export function useCategoriesTree({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     Object.values(hierarchyConfig ?? {}),
   );
-  const viewType = activeView.view.is2d() ? "2d" : "3d";
+  const treeWidgetViewport = useMemo(() => {
+    return isTreeWidgetViewport(activeView) ? activeView : createTreeWidgetViewport(activeView);
+  }, [activeView]);
+  const viewType = treeWidgetViewport.viewType === "2d" ? "2d" : "3d";
 
   const { getCache: getCategoriesTreeIdsCache } = useIdsCache<CategoriesTreeIdsCache, { viewType: "2d" | "3d" }>({
-    imodel: activeView.iModel,
+    imodel: treeWidgetViewport.iModel,
     createCache,
     cacheSpecificProps: useMemo(() => ({ viewType }), [viewType]),
   });
 
   const { visibilityHandlerFactory, onFilteredPathsChanged } = useCategoriesCachedVisibility({
-    activeView,
+    activeView: treeWidgetViewport,
     viewType,
     getCache: getCategoriesTreeIdsCache,
   });
@@ -164,7 +169,7 @@ function getSublabel(node: PresentationHierarchyNode) {
   return node.nodeData.extendedData?.description;
 }
 
-function useCategoriesCachedVisibility(props: { activeView: Viewport; getCache: () => CategoriesTreeIdsCache; viewType: "2d" | "3d" }) {
+function useCategoriesCachedVisibility(props: { activeView: TreeWidgetViewport; getCache: () => CategoriesTreeIdsCache; viewType: "2d" | "3d" }) {
   const { activeView, getCache, viewType } = props;
   const { visibilityHandlerFactory, filteredPaths, onFilteredPathsChanged } = useCachedVisibility<CategoriesTreeIdsCache, CategoriesTreeFilterTargets>({
     activeView,
