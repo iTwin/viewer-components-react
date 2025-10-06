@@ -1,8 +1,21 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Tue, 16 Sep 2025 11:13:44 GMT and should not be manually modified. -->
+<!-- This log was last generated on Fri, 03 Oct 2025 11:22:06 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.15.0
+
+Fri, 03 Oct 2025 11:22:06 GMT
+
+### Minor changes
+
+- Introduce an extra state to `TreeNodeCheckboxState` interface - `{ isLoading: true }`. When such state is returned, the "eye" checkboxes are not rendered by `<VisibilityTreeRenderer />` and `<TreeNodeRenderer />`. Previously, we were returning "disabled" state, resulting in disabled checkboxes being briefly shown until the states were loaded. ([#1458](https://github.com/iTwin/viewer-components-react/pull/1458))
+
+### Patches
+
+- Models tree: reduce tree visibility icon flickering when changing visibility. ([#1462](https://github.com/iTwin/viewer-components-react/pull/1462))
+- Models tree: Fixed adding elements to always/never drawn lists would cause model to not load its' visibility. ([#1461](https://github.com/iTwin/viewer-components-react/pull/1461))
 
 ## 3.14.2
 
