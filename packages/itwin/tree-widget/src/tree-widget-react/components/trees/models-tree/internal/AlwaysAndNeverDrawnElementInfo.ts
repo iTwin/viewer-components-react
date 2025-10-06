@@ -31,10 +31,11 @@ import { Id64 } from "@itwin/core-bentley";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { releaseMainThreadOnItemsCount } from "../Utils.js";
 
-import type { ChildrenTree} from "../Utils.js";
+import type { ChildrenTree } from "../Utils.js";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { Observable, Subscription } from "rxjs";
 import type { Viewport } from "@itwin/core-frontend";
+
 /** @internal */
 export const SET_CHANGE_DEBOUNCE_TIME = 20;
 
