@@ -71,10 +71,10 @@ export const QuantityFormatButton: React.FC = () => {
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} title="Quantity Format Settings" className="quantity-format-modal">
         <Tabs.Wrapper type="borderless">
           <Tabs.TabList>
-            <Tabs.Tab value='formats' label='Formats' key='formats' />
-            <Tabs.Tab value='format-sets' label='Format Sets' key='format-sets' />
+            <Tabs.Tab value="formats" label="Formats" key="formats" />
+            <Tabs.Tab value="format-sets" label="Format Sets" key="format-sets" />
           </Tabs.TabList>
-          <Tabs.Panel value='formats' key='formats'>
+          <Tabs.Panel value="formats" key="formats">
             <FormatTabPanel
               activeFormatSet={activeFormatSet}
               activeFormatDefinitionKey={activeFormatDefinitionKey}
@@ -84,7 +84,7 @@ export const QuantityFormatButton: React.FC = () => {
               onFormatChange={handleFormatChange}
             />
           </Tabs.Panel>
-          <Tabs.Panel value='format-sets' key='format-sets'>
+          <Tabs.Panel value="format-sets" key="format-sets">
             <FormatSetsTabPanel />
           </Tabs.Panel>
         </Tabs.Wrapper>

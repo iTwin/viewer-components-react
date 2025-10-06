@@ -7,7 +7,7 @@ import { QuantityFormatPanel } from "@itwin/quantity-formatting-react";
 import { FormatManager } from "./FormatManager";
 
 import type { FormatDefinition } from "@itwin/core-quantity";
-import type { DefaultContextMenuItemProps} from "@itwin/property-grid-react";
+import type { DefaultContextMenuItemProps } from "@itwin/property-grid-react";
 export function CustomizeFormatPropertyContextMenuItem({ record }: DefaultContextMenuItemProps): React.JSX.Element | null {
   const defaultAction = async (): Promise<void> => {
     if (!record.property.kindOfQuantityName) {
@@ -41,23 +41,14 @@ export function CustomizeFormatPropertyActionItem({ kindOfQuantityName }: { kind
     }
   };
 
-  return (
-    <button
-      style={{ width: "16px", height: "16px", backgroundColor: "red" }}
-      title={"Customize Property's Formatting"}
-      onClick={handleClick}
-    >
-    </button>
-  );
+  return <button style={{ width: "16px", height: "16px", backgroundColor: "red" }} title={"Customize Property's Formatting"} onClick={handleClick}></button>;
 }
 
 interface QuantityFormatPanelDialogWithoutFormatSelectorProps {
   readonly formatDefinition: FormatDefinition;
 }
 
-const QuantityFormatPanelDialogWithoutFormatSelector: React.FC<QuantityFormatPanelDialogWithoutFormatSelectorProps> = ({
-  formatDefinition,
-}) => {
+const QuantityFormatPanelDialogWithoutFormatSelector: React.FC<QuantityFormatPanelDialogWithoutFormatSelectorProps> = ({ formatDefinition }) => {
   const [isModalOpen, setIsModalOpen] = useState(true);
   const [unitsProvider, setUnitsProvider] = useState(IModelApp.quantityFormatter.unitsProvider);
 

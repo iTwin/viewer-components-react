@@ -31,11 +31,7 @@ export const FormatTabPanel: React.FC<FormatTabPanelProps> = ({
   return (
     <Flex flexDirection="row" gap="l" className="format-tab-panel">
       <Flex.Item className="quantity-format-selector-item">
-        <FormatSelector
-          activeFormatSet={activeFormatSet}
-          activeFormatDefinitionKey={activeFormatDefinitionKey}
-          onListItemChange={onListItemChange}
-        />
+        <FormatSelector activeFormatSet={activeFormatSet} activeFormatDefinitionKey={activeFormatDefinitionKey} onListItemChange={onListItemChange} />
       </Flex.Item>
 
       <Flex.Item className="quantity-format-panel-item">
