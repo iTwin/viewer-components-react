@@ -183,6 +183,7 @@ describe("models tree", () => {
     },
     test: async ({ viewport, handler, provider, elementsModel }) => {
       await handler.changeVisibility(createModelHierarchyNode(elementsModel), true);
+      viewport.renderFrame();
       await validateHierarchyVisibility({
         provider,
         handler,
@@ -243,6 +244,7 @@ describe("models tree", () => {
     },
     test: async ({ viewport, handler, provider, elementsCategory, elementsModel }) => {
       await handler.changeVisibility(createCategoryHierarchyNode(elementsCategory, true, elementsModel), false);
+      viewport.renderFrame();
       await validateHierarchyVisibility({
         provider,
         handler,
@@ -380,6 +382,9 @@ describe("models tree", () => {
             [node.modelId]: "partial",
             [node.subjectId]: "partial",
             [node.categoryId]: "partial",
+            [node.elementId]: "visible",
+          },
+          parentIds: {
             [node.elementId]: "visible",
           },
         },
