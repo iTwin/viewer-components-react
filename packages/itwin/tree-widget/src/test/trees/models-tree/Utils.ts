@@ -104,7 +104,7 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
     getModelCategories: sinon.stub<[Id64String], Promise<Id64Array>>().callsFake(async (modelId) => {
       return props?.modelCategories?.get(modelId) ?? [];
     }),
-    getChildrenTree: sinon.stub<[{ elementIds: Id64Arg }], Promise<ChildrenTree<undefined>>>().callsFake(async () => {
+    getChildrenTree: sinon.stub<[{ elementIds: Id64Arg }], Promise<ChildrenTree<{}>>>().callsFake(async () => {
       return new Map();
     }),
     getAllChildrenCount: sinon.stub<[{ elementIds: Id64Arg }], Promise<Map<Id64String, number>>>().callsFake(async () => {
@@ -118,9 +118,9 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
   });
 }
 
-export function createSubjectHierarchyNode({ ids, parentKeys }: { ids?: Id64Arg; parentKeys?: HierarchyNodeKey[] }): NonGroupingHierarchyNode {
+export function createSubjectHierarchyNode(props?: { ids?: Id64Arg; parentKeys?: HierarchyNodeKey[] }): NonGroupingHierarchyNode {
   const instanceKeys = new Array<InstanceKey>();
-  for (const id of ids ? Id64.iterable(ids) : []) {
+  for (const id of props?.ids ? Id64.iterable(props.ids) : []) {
     instanceKeys.push({ className: "Bis:Subject", id });
   }
   return {
@@ -130,32 +130,24 @@ export function createSubjectHierarchyNode({ ids, parentKeys }: { ids?: Id64Arg;
     },
     children: false,
     label: "",
-    parentKeys: parentKeys ?? [],
+    parentKeys: props?.parentKeys ?? [],
     extendedData: {
       isSubject: true,
     },
   };
 }
-export function createModelHierarchyNode({
-  modelId,
-  hasChildren,
-  parentKeys,
-}: {
-  modelId?: Id64String;
-  hasChildren?: boolean;
-  parentKeys?: HierarchyNodeKey[];
-}): NonGroupingHierarchyNode {
+export function createModelHierarchyNode(props?: { modelId?: Id64String; hasChildren?: boolean; parentKeys?: HierarchyNodeKey[] }): NonGroupingHierarchyNode {
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: "bis:Model", id: modelId ?? "" }],
+      instanceKeys: [{ className: "bis:Model", id: props?.modelId ?? "" }],
     },
-    children: !!hasChildren,
+    children: !!props?.hasChildren,
     label: "",
-    parentKeys: parentKeys ?? [],
+    parentKeys: props?.parentKeys ?? [],
     extendedData: {
       isModel: true,
-      modelId: modelId ?? "0x1",
+      modelId: props?.modelId ?? "0x1",
     },
   };
 }
@@ -216,7 +208,6 @@ export function createElementHierarchyNode(props: {
 export function createClassGroupingHierarchyNode({
   elements,
   parentKeys,
-  extendedData,
   modelId,
   categoryId,
   ...props
@@ -226,9 +217,6 @@ export function createClassGroupingHierarchyNode({
   parentKeys?: HierarchyNodeKey[];
   modelId: Id64String;
   categoryId: Id64String;
-  extendedData?: {
-    [key: string]: any;
-  };
 }): GroupingHierarchyNode & { key: ClassGroupingNodeKey } {
   const className = props.className ?? "Bis:Element";
   return {
@@ -240,6 +228,6 @@ export function createClassGroupingHierarchyNode({
     groupedInstanceKeys: elements ? elements.map((id) => ({ className, id })) : [],
     label: "",
     parentKeys: parentKeys ?? [],
-    extendedData: { ...extendedData, categoryId, modelId },
+    extendedData: { categoryId, modelId },
   };
 }

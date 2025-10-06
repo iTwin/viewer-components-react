@@ -28,43 +28,28 @@ export function releaseMainThreadOnItemsCount<T>(elementCount: number) {
 }
 
 /** @internal */
-export type ChildrenTree<T> = Map<string, { children?: ChildrenTree<T>; additionalProps?: T }>;
+export type ChildrenTree<T extends object> = Map<string, T & { children?: ChildrenTree<T> }>;
 
 /** @internal */
-export function getIdsFromChildrenTree<T>({
+export function getIdsFromChildrenTree<T extends object>({
   tree,
-  additionalCheck,
+  predicate,
 }: {
   tree: ChildrenTree<T>;
-  additionalCheck?: (treeEntry: T | undefined) => boolean;
+  predicate?: (props: { depth: number; treeEntry: T }) => boolean;
 }): Set<string> {
-  const result = new Set<string>();
-  tree.forEach((entry, id) => {
-    if (!additionalCheck || additionalCheck(entry.additionalProps)) {
-      result.add(id);
-    }
-    if (entry.children) {
-      const childrenIds = getIdsFromChildrenTree({ tree: entry.children, additionalCheck });
-      childrenIds.forEach((childId) => result.add(childId));
-    }
-  });
-  return result;
-}
-
-/** @internal */
-export function getChildIdsFromChildrenTree<T>({
-  tree,
-  additionalCheck,
-}: {
-  tree: ChildrenTree<T>;
-  additionalCheck?: (treeEntry: T | undefined) => boolean;
-}): Set<string> {
-  const result = new Set<string>();
-  tree.forEach((entry) => {
-    if (entry.children) {
-      const childrenIds = getIdsFromChildrenTree({ tree: entry.children, additionalCheck });
-      childrenIds.forEach((childId) => result.add(childId));
-    }
-  });
-  return result;
+  function getIdsInternal({ childrenTree, depth }: { childrenTree: ChildrenTree<T>; depth: number }): Set<string> {
+    const result = new Set<string>();
+    childrenTree.forEach((entry, id) => {
+      if (!predicate || predicate({ depth, treeEntry: entry })) {
+        result.add(id);
+      }
+      if (entry.children) {
+        const childrenIds = getIdsInternal({ childrenTree: entry.children, depth: depth + 1 });
+        childrenIds.forEach((childId) => result.add(childId));
+      }
+    });
+    return result;
+  }
+  return getIdsInternal({ childrenTree: tree, depth: 0 });
 }

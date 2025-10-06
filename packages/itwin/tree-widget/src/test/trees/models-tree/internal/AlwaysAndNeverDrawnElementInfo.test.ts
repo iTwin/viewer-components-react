@@ -78,8 +78,8 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(info.getElementChildrenTree({ setType, parentInstanceNodeIds: [modelId] }));
       const expectedResult: ChildrenTree<{ categoryId?: string; isInList: boolean }> = new Map();
-      expectedResult.set(categoryId, { children: new Map(), additionalProps: { isInList: false } });
-      expectedResult.get(categoryId)?.children?.set(elementId, { additionalProps: { categoryId, isInList: true } });
+      expectedResult.set(categoryId, { children: new Map(), isInList: false });
+      expectedResult.get(categoryId)?.children?.set(elementId, { categoryId, isInList: true });
       expect(result).to.deep.eq(expectedResult);
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
     });
@@ -100,8 +100,8 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(info.getElementChildrenTree({ setType, parentInstanceNodeIds: [modelId] }));
       const expectedResult: ChildrenTree<{ categoryId?: string; isInList: boolean }> = new Map();
-      expectedResult.set(categoryId, { children: new Map(), additionalProps: { isInList: false } });
-      expectedResult.get(categoryId)?.children?.set(elementId, { additionalProps: { categoryId, isInList: true } });
+      expectedResult.set(categoryId, { children: new Map(), isInList: false });
+      expectedResult.get(categoryId)?.children?.set(elementId, { categoryId, isInList: true });
       expect(result).to.deep.eq(expectedResult);
 
       // second request is not delayed because value is cached
@@ -126,8 +126,8 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(info.getElementChildrenTree({ setType, parentInstanceNodeIds: [modelId] }));
       const expectedResult: ChildrenTree<{ categoryId?: string; isInList: boolean }> = new Map();
-      expectedResult.set(categoryId, { children: new Map(), additionalProps: { isInList: false } });
-      expectedResult.get(categoryId)?.children?.set(elementId, { additionalProps: { categoryId, isInList: true } });
+      expectedResult.set(categoryId, { children: new Map(), isInList: false });
+      expectedResult.get(categoryId)?.children?.set(elementId, { categoryId, isInList: true });
       expect(result).to.deep.eq(expectedResult);
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
 
@@ -176,8 +176,8 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result1 = await firstValueFrom(info.getElementChildrenTree({ setType, parentInstanceNodeIds: [modelId] }));
       const expectedResult: ChildrenTree<{ categoryId?: string; isInList: boolean }> = new Map();
-      expectedResult.set(categoryId, { children: new Map(), additionalProps: { isInList: false } });
-      expectedResult.get(categoryId)?.children?.set(elementId, { additionalProps: { categoryId, isInList: true } });
+      expectedResult.set(categoryId, { children: new Map(), isInList: false });
+      expectedResult.get(categoryId)?.children?.set(elementId, { categoryId, isInList: true });
       expect(result1).to.deep.eq(expectedResult);
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
       info.suppressChangeEvents();
@@ -204,8 +204,8 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result1 = await firstValueFrom(info.getElementChildrenTree({ setType, parentInstanceNodeIds: [modelId] }));
       const expectedResult: ChildrenTree<{ categoryId?: string; isInList: boolean }> = new Map();
-      expectedResult.set(categoryId, { children: new Map(), additionalProps: { isInList: false } });
-      expectedResult.get(categoryId)?.children?.set(elementId, { additionalProps: { categoryId, isInList: true } });
+      expectedResult.set(categoryId, { children: new Map(), isInList: false });
+      expectedResult.get(categoryId)?.children?.set(elementId, { categoryId, isInList: true });
       expect(result1).to.deep.eq(expectedResult);
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
       info.suppressChangeEvents();
@@ -275,7 +275,7 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(info.getElementChildrenTree({ setType, parentInstanceNodeIds: [modelId, categoryId] }));
       const expectedResult: ChildrenTree<{ categoryId?: string; isInList: boolean }> = new Map();
-      expectedResult.set(elementId, { additionalProps: { categoryId, isInList: true } });
+      expectedResult.set(elementId, { categoryId, isInList: true });
       expect(result).to.deep.eq(expectedResult);
     });
 

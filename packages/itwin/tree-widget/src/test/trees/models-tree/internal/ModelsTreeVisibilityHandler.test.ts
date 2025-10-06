@@ -209,13 +209,13 @@ describe("ModelsTreeVisibilityHandler", () => {
             imodelAccess: createFakeIModelAccess(),
           });
 
-          const status = await handler.getVisibilityStatus(createSubjectHierarchyNode({}));
+          const status = await handler.getVisibilityStatus(createSubjectHierarchyNode());
           expect(status.state).to.eq("visible");
           expect(overrides.getSubjectNodeVisibility).to.be.called;
         });
 
         it("returns disabled when active view is not spatial", async () => {
-          const node = createSubjectHierarchyNode({});
+          const node = createSubjectHierarchyNode();
           const viewport = createFakeSinonViewport({
             view: {
               isSpatialView: sinon.fake.returns(false),
@@ -315,7 +315,7 @@ describe("ModelsTreeVisibilityHandler", () => {
 
       describe("model", () => {
         it("is disabled when active view is not spatial", async () => {
-          const node = createModelHierarchyNode({});
+          const node = createModelHierarchyNode();
           const viewport = createFakeSinonViewport({
             view: {
               isSpatialView: sinon.fake.returns(false),
@@ -767,7 +767,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 view: {
                   viewsCategory: sinon.fake.returns(true),
                 },
-                queryHandler: () => [{ rootcategoryId: "0xff", elementsPath: "0x4", modelId: "0xff", categoryId: "0xff" }],
+                queryHandler: () => [{ rootCategoryId: "0xff", elementsPath: "0x4", modelId: "0xff", categoryId: "0xff" }],
               }),
             });
             const { handler } = handlerResult;
@@ -1275,7 +1275,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             imodelAccess: createFakeIModelAccess(),
           });
 
-          await handler.changeVisibility(createSubjectHierarchyNode({}), true);
+          await handler.changeVisibility(createSubjectHierarchyNode(), true);
           expect(overrides.changeSubjectNodeState).to.be.called;
         });
 
@@ -1868,7 +1868,6 @@ describe("ModelsTreeVisibilityHandler", () => {
               createModelHierarchyNode({
                 modelId: ids.modelId,
                 hasChildren: true,
-                parentKeys: [{ type: "instances", instanceKeys: [{ id: ids.subjectId, className: "BisCore.Subject" }] }],
               }),
             expectations: () => VisibilityExpectations.all("visible"),
           },
@@ -1879,10 +1878,6 @@ describe("ModelsTreeVisibilityHandler", () => {
                 modelId: ids.modelId,
                 categoryId: ids.categoryId,
                 hasChildren: true,
-                parentKeys: [
-                  { type: "instances", instanceKeys: [{ id: ids.subjectId, className: "BisCore.Subject" }] },
-                  { type: "instances", instanceKeys: [{ id: ids.modelId, className: "BisCore.Model" }] },
-                ],
               }),
             expectations: () => VisibilityExpectations.all("visible"),
           },
@@ -1893,11 +1888,6 @@ describe("ModelsTreeVisibilityHandler", () => {
                 modelId: ids.modelId,
                 categoryId: ids.categoryId,
                 elements: [ids.modeledElementId],
-                parentKeys: [
-                  { type: "instances", instanceKeys: [{ id: ids.subjectId, className: "BisCore.Subject" }] },
-                  { type: "instances", instanceKeys: [{ id: ids.modelId, className: "BisCore.Model" }] },
-                  { type: "instances", instanceKeys: [{ id: ids.categoryId, className: "BisCore.SpatialCategory" }] },
-                ],
               }),
             expectations: () => VisibilityExpectations.all("visible"),
           },
@@ -1909,12 +1899,6 @@ describe("ModelsTreeVisibilityHandler", () => {
                 categoryId: ids.categoryId,
                 elementId: ids.modeledElementId,
                 hasChildren: true,
-                parentKeys: [
-                  { type: "instances", instanceKeys: [{ id: ids.subjectId, className: "BisCore.Subject" }] },
-                  { type: "instances", instanceKeys: [{ id: ids.modelId, className: "BisCore.Model" }] },
-                  { type: "instances", instanceKeys: [{ id: ids.categoryId, className: "BisCore.SpatialCategory" }] },
-                  { type: "class-grouping", className: "" },
-                ],
               }),
             expectations: () => VisibilityExpectations.all("visible"),
           },
@@ -1924,13 +1908,6 @@ describe("ModelsTreeVisibilityHandler", () => {
               createModelHierarchyNode({
                 modelId: ids.modeledElementId,
                 hasChildren: true,
-                parentKeys: [
-                  { type: "instances", instanceKeys: [{ id: ids.subjectId, className: "BisCore.Subject" }] },
-                  { type: "instances", instanceKeys: [{ id: ids.modelId, className: "BisCore.Model" }] },
-                  { type: "instances", instanceKeys: [{ id: ids.categoryId, className: "BisCore.SpatialCategory" }] },
-                  { type: "class-grouping", className: "" },
-                  { type: "instances", instanceKeys: [{ id: ids.modeledElementId, className: "" }] },
-                ],
               }),
             expectations: (ids: IModelWithSubModelIds): ReturnType<typeof VisibilityExpectations.all> => ({
               subject: () => "partial",
@@ -1962,13 +1939,6 @@ describe("ModelsTreeVisibilityHandler", () => {
                 modelId: ids.modeledElementId,
                 categoryId: ids.subModelCategoryId,
                 hasChildren: true,
-                parentKeys: [
-                  { type: "instances", instanceKeys: [{ id: ids.subjectId, className: "BisCore.Subject" }] },
-                  { type: "instances", instanceKeys: [{ id: ids.modelId, className: "BisCore.Model" }] },
-                  { type: "instances", instanceKeys: [{ id: ids.categoryId, className: "BisCore.SpatialCategory" }] },
-                  { type: "class-grouping", className: "" },
-                  { type: "instances", instanceKeys: [{ id: ids.modeledElementId, className: "" }] },
-                ],
               }),
             expectations: (ids: IModelWithSubModelIds): ReturnType<typeof VisibilityExpectations.all> => ({
               subject: () => "partial",
@@ -2000,14 +1970,6 @@ describe("ModelsTreeVisibilityHandler", () => {
                 modelId: ids.modeledElementId,
                 categoryId: ids.subModelCategoryId,
                 elementId: ids.subModelElementId,
-                parentKeys: [
-                  { type: "instances", instanceKeys: [{ id: ids.subjectId, className: "BisCore.Subject" }] },
-                  { type: "instances", instanceKeys: [{ id: ids.modelId, className: "BisCore.Model" }] },
-                  { type: "instances", instanceKeys: [{ id: ids.categoryId, className: "BisCore.SpatialCategory" }] },
-                  { type: "class-grouping", className: "" },
-                  { type: "instances", instanceKeys: [{ id: ids.modeledElementId, className: "" }] },
-                  { type: "instances", instanceKeys: [{ id: ids.subModelCategoryId ?? "", className: "BisCore.SpatialCategory" }] },
-                ],
               }),
             expectations: (ids: IModelWithSubModelIds): ReturnType<typeof VisibilityExpectations.all> => ({
               subject: () => "partial",
@@ -2074,7 +2036,6 @@ describe("ModelsTreeVisibilityHandler", () => {
               createModelHierarchyNode({
                 modelId: ids.modelId,
                 hasChildren: true,
-                parentKeys: [{ type: "instances", instanceKeys: [{ id: ids.subjectId, className: "BisCore.Subject" }] }],
               }),
             expectations: () => VisibilityExpectations.all("visible"),
           },
@@ -2085,10 +2046,6 @@ describe("ModelsTreeVisibilityHandler", () => {
                 modelId: ids.modelId,
                 categoryId: ids.categoryId,
                 hasChildren: true,
-                parentKeys: [
-                  { type: "instances", instanceKeys: [{ id: ids.subjectId, className: "BisCore.Subject" }] },
-                  { type: "instances", instanceKeys: [{ id: ids.modelId, className: "BisCore.Model" }] },
-                ],
               }),
             expectations: () => VisibilityExpectations.all("visible"),
           },
@@ -2099,11 +2056,6 @@ describe("ModelsTreeVisibilityHandler", () => {
                 modelId: ids.modelId,
                 categoryId: ids.categoryId,
                 elements: [ids.modeledElementId],
-                parentKeys: [
-                  { type: "instances", instanceKeys: [{ id: ids.subjectId, className: "BisCore.Subject" }] },
-                  { type: "instances", instanceKeys: [{ id: ids.modelId, className: "BisCore.Model" }] },
-                  { type: "instances", instanceKeys: [{ id: ids.categoryId, className: "BisCore.SpatialCategory" }] },
-                ],
               }),
             expectations: () => VisibilityExpectations.all("visible"),
           },
@@ -2115,12 +2067,6 @@ describe("ModelsTreeVisibilityHandler", () => {
                 categoryId: ids.categoryId,
                 elementId: ids.modeledElementId,
                 hasChildren: false,
-                parentKeys: [
-                  { type: "instances", instanceKeys: [{ id: ids.subjectId, className: "BisCore.Subject" }] },
-                  { type: "instances", instanceKeys: [{ id: ids.modelId, className: "BisCore.Model" }] },
-                  { type: "instances", instanceKeys: [{ id: ids.categoryId, className: "BisCore.SpatialCategory" }] },
-                  { type: "class-grouping", className: "" },
-                ],
               }),
             expectations: () => VisibilityExpectations.all("visible"),
           },
@@ -2162,7 +2108,6 @@ describe("ModelsTreeVisibilityHandler", () => {
               createModelHierarchyNode({
                 modelId: ids.modelId,
                 hasChildren: true,
-                parentKeys: [{ type: "instances", instanceKeys: [{ id: ids.subjectId, className: "BisCore.Subject" }] }],
               }),
             expectations: () => VisibilityExpectations.all("visible"),
           },
@@ -2173,10 +2118,6 @@ describe("ModelsTreeVisibilityHandler", () => {
                 modelId: ids.modelId,
                 categoryId: ids.categoryId,
                 hasChildren: true,
-                parentKeys: [
-                  { type: "instances", instanceKeys: [{ id: ids.subjectId, className: "BisCore.Subject" }] },
-                  { type: "instances", instanceKeys: [{ id: ids.modelId, className: "BisCore.Model" }] },
-                ],
               }),
             expectations: () => VisibilityExpectations.all("visible"),
           },
@@ -2187,11 +2128,6 @@ describe("ModelsTreeVisibilityHandler", () => {
                 modelId: ids.modelId,
                 categoryId: ids.categoryId,
                 elements: [ids.modeledElementId],
-                parentKeys: [
-                  { type: "instances", instanceKeys: [{ id: ids.subjectId, className: "BisCore.Subject" }] },
-                  { type: "instances", instanceKeys: [{ id: ids.modelId, className: "BisCore.Model" }] },
-                  { type: "instances", instanceKeys: [{ id: ids.categoryId, className: "BisCore.SpatialCategory" }] },
-                ],
               }),
             expectations: () => VisibilityExpectations.all("visible"),
           },
@@ -2203,12 +2139,6 @@ describe("ModelsTreeVisibilityHandler", () => {
                 categoryId: ids.categoryId,
                 elementId: ids.modeledElementId,
                 hasChildren: false,
-                parentKeys: [
-                  { type: "instances", instanceKeys: [{ id: ids.subjectId, className: "BisCore.Subject" }] },
-                  { type: "instances", instanceKeys: [{ id: ids.modelId, className: "BisCore.Model" }] },
-                  { type: "instances", instanceKeys: [{ id: ids.categoryId, className: "BisCore.SpatialCategory" }] },
-                  { type: "class-grouping", className: "" },
-                ],
               }),
             expectations: () => VisibilityExpectations.all("visible"),
           },
@@ -2438,11 +2368,6 @@ describe("ModelsTreeVisibilityHandler", () => {
           modelId: ids.model,
           categoryId: ids.category,
           elementId: ids.elementToShow,
-          parentKeys: [
-            { type: "instances", instanceKeys: [{ id: ids.model, className: "BisCore.Model" }] },
-            { type: "instances", instanceKeys: [{ id: ids.category, className: "BisCore.SpatialCategory" }] },
-            { type: "class-grouping", className: "BisCore.GeometricElement3d" },
-          ],
         }),
         true,
       );
@@ -2505,11 +2430,6 @@ describe("ModelsTreeVisibilityHandler", () => {
           modelId: ids.model,
           categoryId: ids.category,
           elementId: elementToShow,
-          parentKeys: [
-            { type: "instances", instanceKeys: [{ id: ids.model, className: "BisCore.Model" }] },
-            { type: "instances", instanceKeys: [{ id: ids.category, className: "BisCore.SpatialCategory" }] },
-            { type: "class-grouping", className: "BisCore.GeometricElement3d" },
-          ],
         }),
         true,
       );
@@ -2588,7 +2508,6 @@ describe("ModelsTreeVisibilityHandler", () => {
           modelId: ids.model,
           categoryId: ids.category,
           hasChildren: true,
-          parentKeys: [{ type: "instances", instanceKeys: [{ id: ids.model, className: "BisCore.Model" }] }],
         }),
         true,
       );
@@ -2630,10 +2549,6 @@ describe("ModelsTreeVisibilityHandler", () => {
           modelId: ids.model,
           categoryId: ids.category,
           hasChildren: true,
-          parentKeys: [
-            { type: "instances", instanceKeys: [{ id: IModel.rootSubjectId, className: "BisCore.Subject" }] },
-            { type: "instances", instanceKeys: [{ id: ids.model, className: "BisCore.Model" }] },
-          ],
         }),
         false,
       );
@@ -2678,10 +2593,6 @@ describe("ModelsTreeVisibilityHandler", () => {
           modelId: ids.model,
           categoryId: ids.category,
           elements: [ids.parentElement],
-          parentKeys: [
-            { type: "instances", instanceKeys: [{ id: ids.model, className: "BisCore.Model" }] },
-            { type: "instances", instanceKeys: [{ id: ids.category, className: "BisCore.SpatialCategory" }] },
-          ],
         }),
         true,
       );
@@ -2729,10 +2640,6 @@ describe("ModelsTreeVisibilityHandler", () => {
           modelId: ids.model,
           categoryId: ids.category,
           elements: [ids.parentElement],
-          parentKeys: [
-            { type: "instances", instanceKeys: [{ id: ids.model, className: "BisCore.Model" }] },
-            { type: "instances", instanceKeys: [{ id: ids.category, className: "BisCore.SpatialCategory" }] },
-          ],
         }),
         false,
       );
@@ -2775,7 +2682,6 @@ describe("ModelsTreeVisibilityHandler", () => {
           modelId: ids.model,
           categoryId: [ids.category1, ids.category2],
           hasChildren: true,
-          parentKeys: [{ type: "instances", instanceKeys: [{ id: ids.model, className: "BisCore.Model" }] }],
         }),
         true,
       );
@@ -2823,11 +2729,6 @@ describe("ModelsTreeVisibilityHandler", () => {
           modelId: ids.model,
           categoryId: ids.category1,
           elementId: ids.element1,
-          parentKeys: [
-            { type: "instances", instanceKeys: [{ id: ids.model, className: "BisCore.Model" }] },
-            { type: "instances", instanceKeys: [{ id: ids.category1, className: "BisCore.SpatialCategory" }] },
-            { type: "class-grouping", className: "BisCore.GeometricElement3d" },
-          ],
         }),
         true,
       );
@@ -2858,7 +2759,6 @@ describe("ModelsTreeVisibilityHandler", () => {
         const parentCategoryNode = createCategoryHierarchyNode({
           modelId,
           categoryId: parentCategoryId,
-          parentKeys: [{ type: "instances", instanceKeys: [{ id: modelId, className: "BisCore.Model" }] }],
         });
 
         await handler.changeVisibility(parentCategoryNode, true);
@@ -2895,7 +2795,6 @@ describe("ModelsTreeVisibilityHandler", () => {
         const parentCategoryNode = createCategoryHierarchyNode({
           modelId,
           categoryId: parentCategoryId,
-          parentKeys: [{ type: "instances", instanceKeys: [{ id: modelId, className: "BisCore.Model" }] }],
         });
         await handler.changeVisibility(parentCategoryNode, true);
         viewport.setAlwaysDrawn(new Set([...(viewport.alwaysDrawn ?? []), parentElementId]));
@@ -2938,7 +2837,6 @@ describe("ModelsTreeVisibilityHandler", () => {
         const parentCategoryNode = createCategoryHierarchyNode({
           modelId,
           categoryId: parentCategoryId,
-          parentKeys: [{ type: "instances", instanceKeys: [{ id: modelId, className: "BisCore.Model" }] }],
         });
         // Changing category for hidden model should put all other categories into Hide overrides
         await handler.changeVisibility(parentCategoryNode, true);
@@ -2976,7 +2874,6 @@ describe("ModelsTreeVisibilityHandler", () => {
           modelId,
           categoryId: parentCategoryId,
           hasChildren: true,
-          parentKeys: [{ type: "instances", instanceKeys: [{ id: modelId, className: "BisCore.Model" }] }],
         });
         // Changing category for hidden model should put all other categories into Hide overrides
         await handler.changeVisibility(parentCategoryNode, true);
@@ -3014,11 +2911,6 @@ describe("ModelsTreeVisibilityHandler", () => {
           modelId,
           categoryId,
           elementId,
-          parentKeys: [
-            { type: "instances", instanceKeys: [{ id: modelId, className: "BisCore.Model" }] },
-            { type: "instances", instanceKeys: [{ id: categoryId, className: "BisCore.SpatialCategory" }] },
-            { type: "class-grouping", className: "BisCore.GeometricElement3d" },
-          ],
         });
 
         await handler.changeVisibility(elementNode, true);

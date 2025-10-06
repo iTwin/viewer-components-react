@@ -5,11 +5,13 @@
 
 import {
   BehaviorSubject,
+  bufferCount,
   debounceTime,
   defer,
   EMPTY,
   filter,
   first,
+  from,
   fromEventPattern,
   map,
   mergeMap,
@@ -27,12 +29,12 @@ import {
 } from "rxjs";
 import { Id64 } from "@itwin/core-bentley";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
+import { releaseMainThreadOnItemsCount } from "../Utils.js";
 
+import type { ChildrenTree} from "../Utils.js";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { Observable, Subscription } from "rxjs";
 import type { Viewport } from "@itwin/core-frontend";
-import type { ChildrenTree } from "../Utils.js";
-
 /** @internal */
 export const SET_CHANGE_DEBOUNCE_TIME = 20;
 
@@ -95,7 +97,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
         );
   }
 
-  private getChildrenTree<T>({
+  private getChildrenTree<T extends object>({
     currentChildrenTree,
     parentInstanceNodeIds,
   }: {
@@ -166,19 +168,25 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
   }
 
   private queryAlwaysOrNeverDrawnElementInfo(set: Id64Set | undefined, requestId: string): Observable<CachedNodesMap> {
-    const elementInfo = set?.size ? this.queryElementInfo([...set], requestId) : EMPTY;
+    const elementInfo = set?.size
+      ? from(set).pipe(
+          bufferCount(Math.ceil(set.size / Math.ceil(set.size / 5000))),
+          mergeMap((block, index) => this.queryElementInfo(block, `${requestId}-${index}`), 10),
+        )
+      : EMPTY;
     return elementInfo.pipe(
+      releaseMainThreadOnItemsCount(1000),
       reduce(
         (acc, { categoryId, rootCategoryId, modelId, elementsPath }) => {
           let modelEntry = acc.get(modelId);
           if (!modelEntry) {
-            modelEntry = { additionalProps: { isInList: false }, children: new Map() };
+            modelEntry = { isInList: false, children: new Map() };
             acc.set(modelId, modelEntry);
           }
 
           let categoryEntry = modelEntry.children!.get(rootCategoryId);
           if (!categoryEntry) {
-            categoryEntry = { additionalProps: { isInList: false }, children: new Map() };
+            categoryEntry = { isInList: false, children: new Map() };
             modelEntry.children!.set(rootCategoryId, categoryEntry);
           }
 
@@ -189,9 +197,9 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
             let elementEntry = lastEntry.children?.get(elementId);
             if (!elementEntry) {
               if (i + 1 === pathLength) {
-                elementEntry = { additionalProps: { isInList: true, categoryId } };
+                elementEntry = { isInList: true, categoryId };
               } else {
-                elementEntry = { additionalProps: { isInList: false }, children: new Map() };
+                elementEntry = { isInList: false, children: new Map() };
               }
               if (!lastEntry.children) {
                 lastEntry.children = new Map();
@@ -199,10 +207,8 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
               lastEntry.children.set(elementId, elementEntry);
             }
             if (i + 1 === pathLength) {
-              elementEntry.additionalProps = {
-                isInList: true,
-                categoryId,
-              };
+              elementEntry.isInList = true;
+              elementEntry.categoryId = categoryId;
             }
             lastEntry = elementEntry;
           }

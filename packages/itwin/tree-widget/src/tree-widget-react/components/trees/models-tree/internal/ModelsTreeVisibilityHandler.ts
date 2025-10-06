@@ -34,7 +34,7 @@ import { toggleAllCategories } from "../../common/CategoriesVisibilityUtils.js";
 import { reduceWhile, toVoidPromise } from "../../common/Rxjs.js";
 import { createVisibilityStatus } from "../../common/Tooltip.js";
 import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility.js";
-import { getChildIdsFromChildrenTree, getIdsFromChildrenTree, releaseMainThreadOnItemsCount } from "../Utils.js";
+import { getIdsFromChildrenTree, releaseMainThreadOnItemsCount } from "../Utils.js";
 import { AlwaysAndNeverDrawnElementInfo } from "./AlwaysAndNeverDrawnElementInfo.js";
 import { createFilteredTree, parseCategoryKey } from "./FilteredTree.js";
 import { ModelsTreeNode } from "./ModelsTreeNode.js";
@@ -657,7 +657,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       map((childrenTree): Id64Set => {
         // Children tree contains provided elementIds, they are at the root of this tree.
         // We want to skip them and only get ids of children.
-        return getChildIdsFromChildrenTree({ tree: childrenTree });
+        return getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ depth }) => depth > 0 });
       }),
       mergeMap((children) =>
         this.changeElementsState({
@@ -672,7 +672,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
   }
 
   private changeFilteredNodeVisibility({ on, ...props }: ChangeFilteredNodeVisibilityProps) {
-    const filteredDataObs: Observable<{ filteredTree?: FilteredTree; unfilteredChildrenTree: ChildrenTree<undefined> }> = this._filteredTree
+    const filteredDataObs: Observable<{ filteredTree?: FilteredTree; unfilteredChildrenTree: ChildrenTree<{}> }> = this._filteredTree
       ? forkJoin({
           filteredTree: this._filteredTree,
           unfilteredChildrenTree:
@@ -913,7 +913,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     }).pipe(
       map(({ childrenTree, filteredTree }) => {
         if (!filteredTree) {
-          return getChildIdsFromChildrenTree({ tree: childrenTree });
+          return getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ depth }) => depth > 0 });
         }
         const filteredElements = filteredTree.getElementsFromUnfilteredChildrenTree({
           childrenTree,
@@ -1142,7 +1142,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     if (!this._filteredTree) {
       return this._alwaysAndNeverDrawnElements.getElementChildrenTree({ parentInstanceNodeIds: parentInstanceNodesIds, setType: "always" }).pipe(
         map((childrenTree) => {
-          return getIdsFromChildrenTree({ tree: childrenTree, additionalCheck: (additionalProps) => !!additionalProps?.isInList });
+          return getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ treeEntry }) => !!treeEntry.isInList });
         }),
       );
     }
@@ -1153,7 +1153,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       map(({ filteredTree, childrenTree }) => {
         const elements = filteredTree.getElementsFromUnfilteredChildrenTree({ parentIdsArray: parentInstanceNodesIds, childrenTree });
         return elements
-          ? setIntersection(elements, getIdsFromChildrenTree({ tree: childrenTree, additionalCheck: (additionalProps) => !!additionalProps?.isInList }))
+          ? setIntersection(elements, getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ treeEntry }) => !!treeEntry.isInList }))
           : new Set();
       }),
     );
@@ -1163,7 +1163,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     if (!this._filteredTree) {
       return this._alwaysAndNeverDrawnElements
         .getElementChildrenTree({ parentInstanceNodeIds: parentInstanceNodesIds, setType: "never" })
-        .pipe(map((childrenTree) => getIdsFromChildrenTree({ tree: childrenTree, additionalCheck: (additionalProps) => !!additionalProps?.isInList })));
+        .pipe(map((childrenTree) => getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ treeEntry }) => !!treeEntry.isInList })));
     }
     return forkJoin({
       filteredTree: from(this._filteredTree),
@@ -1172,7 +1172,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       map(({ filteredTree, childrenTree }) => {
         const elements = filteredTree.getElementsFromUnfilteredChildrenTree({ parentIdsArray: parentInstanceNodesIds, childrenTree });
         return elements
-          ? setIntersection(elements, getIdsFromChildrenTree({ tree: childrenTree, additionalCheck: (additionalProps) => !!additionalProps?.isInList }))
+          ? setIntersection(elements, getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ treeEntry }) => !!treeEntry.isInList }))
           : new Set();
       }),
     );
