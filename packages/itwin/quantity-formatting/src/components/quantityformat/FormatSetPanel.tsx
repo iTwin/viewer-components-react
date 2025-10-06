@@ -108,6 +108,7 @@ export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, edita
         <Input
           id={labelInputId}
           value={label}
+          size="small"
           onChange={handleLabelChange}
           disabled={!editable}
           placeholder={translate("QuantityFormat:labels.formatSetDisplayLabel")}
@@ -138,6 +139,7 @@ export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, edita
             style: {
               backgroundColor: !editable ? "var(--iui-color-background-zebra)" : undefined,
             },
+            size: "small",
           }}
           className="quantityFormat--formatSetPanel-inputRow"
         />

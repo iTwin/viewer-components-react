@@ -146,7 +146,7 @@ export const FormatSetsTabPanel: React.FC = () => {
   return (
     <Flex flexDirection="row" gap="l" className="format-tab-panel">
       <Flex.Item className="quantity-format-selector-item">
-        <Flex flexDirection="column" alignItems="flex-start" gap="m">
+        <Flex flexDirection="column" gap="m" alignItems="none">
           {activeFormatSetKey && (
             <Text variant="leading" style={{ marginTop: "0.25rem" }}>
               Active: {formatSets.find((fs) => fs.name === activeFormatSetKey)?.label || activeFormatSetKey}
@@ -167,7 +167,7 @@ export const FormatSetsTabPanel: React.FC = () => {
       </Flex.Item>
 
       <Flex.Item className="quantity-format-panel-item">
-        <Flex flexDirection="column" gap="xs">
+        <Flex flexDirection="column" gap="xs" alignItems="stretch">
           <FormatSetPanel formatSet={clonedSelectedFormatSet} editable={true} onFormatSetChange={handleFormatSetChanged} />
           <Flex.Item alignSelf="flex-end">
             <Flex gap="xs">
