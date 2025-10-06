@@ -5,48 +5,20 @@
  * This validates that the map-layers package contains no inline style attributes
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
+const { glob } = require("glob");
 
-// Function to recursively find all .ts and .tsx files
-function findTsxFiles(dir) {
-  const files = [];
+const mapLayersPath = "packages/itwin/map-layers/**/*.{ts,tsx}";
 
-  function scanDirectory(currentDir) {
-    try {
-      const items = fs.readdirSync(currentDir);
-
-      for (const item of items) {
-        const fullPath = path.join(currentDir, item);
-        const stat = fs.statSync(fullPath);
-
-        if (stat.isDirectory()) {
-          scanDirectory(fullPath);
-        } else if (item.endsWith('.ts') || item.endsWith('.tsx')) {
-          files.push(fullPath);
-        }
-      }
-    } catch (error) {
-      // Skip directories that can't be read
-    }
-  }
-
-  if (fs.existsSync(dir)) {
-    scanDirectory(dir);
-  }
-
-  return files;
-}
-
-function checkForInlineStyles() {
+async function checkForInlineStyles() {
   try {
-    const mapLayersDir = path.join(process.cwd(), 'packages/itwin/map-layers/src');
-    const files = findTsxFiles(mapLayersDir);
+    const files = await glob(mapLayersPath, { cwd: process.cwd() });
     let violations = [];
 
-    files.forEach(file => {
-      const content = fs.readFileSync(file, 'utf8');
-      const lines = content.split('\n');
+    files.forEach((file) => {
+      const content = fs.readFileSync(file, "utf8");
+      const lines = content.split("\n");
 
       lines.forEach((line, index) => {
         // Check for style={{ or style = { patterns
@@ -54,7 +26,7 @@ function checkForInlineStyles() {
           violations.push({
             file,
             line: index + 1,
-            content: line.trim()
+            content: line.trim(),
           });
         }
 
@@ -63,7 +35,7 @@ function checkForInlineStyles() {
           violations.push({
             file,
             line: index + 1,
-            content: line.trim()
+            content: line.trim(),
           });
         }
 
@@ -72,27 +44,27 @@ function checkForInlineStyles() {
           violations.push({
             file,
             line: index + 1,
-            content: line.trim()
+            content: line.trim(),
           });
         }
       });
     });
 
     if (violations.length > 0) {
-      console.error('\nInline styles detected in map-layers package:');
-      violations.forEach(v => {
+      console.error("\nInline styles detected in map-layers package:");
+      violations.forEach((v) => {
         console.error(`In file: ${v.file}`);
         console.error(`On line ${v.line}: ${v.content}`);
-        console.error('');
+        console.error("");
       });
       console.error(`Total violations: ${violations.length}`);
-      console.error('Please convert inline styles to CSS classes.');
+      console.error("Please convert inline styles to CSS classes.");
     } else {
-      console.log('\nNo inline styles found in map-layers package');
+      console.log("\nNo inline styles found in map-layers package");
       console.log(`Checked ${files.length} files`);
     }
   } catch (error) {
-    console.error('Error checking for inline styles:', error);
+    console.error("Error checking for inline styles:", error);
   }
 }
 

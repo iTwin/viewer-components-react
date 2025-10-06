@@ -13,14 +13,14 @@
 
 // Hover-based visibility for settings menus
 .map-manager-source-item {
-  #MapLayerSettingsMenuWrapper,
-  #MapLayerSettingsSubLayersMenu {
+  .map-layer-settings-menu-wrapper,
+  .map-layer-settings-sublayers-menu {
     visibility: hidden;
   }
 
   &:hover {
-    #MapLayerSettingsMenuWrapper,
-    #MapLayerSettingsSubLayersMenu {
+    .map-layer-settings-menu-wrapper,
+    .map-layer-settings-sublayers-menu {
       visibility: visible;
     }
   }

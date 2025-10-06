@@ -192,7 +192,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
         </span>
 
         {/* SubLayersPopupButton */}
-        <div id="MapLayerSettingsSubLayersMenu" className="map-manager-item-sub-layer-container">
+        <div className="map-manager-item-sub-layer-container map-layer-settings-sublayers-menu">
           {activeLayer.subLayers && activeLayer.subLayers.length > 1 && (
             <SubLayersPopupButton
               checkboxStyle="eye"
@@ -240,7 +240,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
             <SvgStatusWarning />
           </IconButton>
         )}
-        <div id="MapLayerSettingsMenuWrapper">
+        <div className="map-layer-settings-menu-wrapper">
           <MapLayerSettingsMenu
             activeViewport={props.activeViewport}
             mapLayerSettings={activeLayer}
