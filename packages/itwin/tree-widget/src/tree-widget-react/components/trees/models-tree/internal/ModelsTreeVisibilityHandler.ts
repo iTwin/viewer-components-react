@@ -6,6 +6,7 @@
 import {
   concat,
   concatAll,
+  defaultIfEmpty,
   defer,
   distinct,
   EMPTY,
@@ -169,6 +170,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
             },
           ),
         ),
+        defaultIfEmpty(createVisibilityStatus("hidden")),
       ),
     );
   }
@@ -600,53 +602,59 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
 
   /** Changes visibility of the items represented by the tree node. */
   private changeVisibilityObs(node: HierarchyNode, on: boolean): Observable<void> {
-    if (node.filtering?.filteredChildrenIdentifierPaths?.length && !node.filtering.isFilterTarget) {
-      return this.changeFilteredNodeVisibility({ node, on });
-    }
+    const changeObs = defer(() => {
+      if (node.filtering?.filteredChildrenIdentifierPaths?.length && !node.filtering.isFilterTarget) {
+        return this.changeFilteredNodeVisibility({ node, on });
+      }
 
-    if (HierarchyNode.isClassGroupingNode(node)) {
-      return this.changeElementGroupingNodeState(node, on);
-    }
+      if (HierarchyNode.isClassGroupingNode(node)) {
+        return this.changeElementGroupingNodeState(node, on);
+      }
 
-    if (!HierarchyNode.isInstancesNode(node)) {
-      return EMPTY;
-    }
+      if (!HierarchyNode.isInstancesNode(node)) {
+        return EMPTY;
+      }
 
-    if (ModelsTreeNode.isSubjectNode(node)) {
-      return this.changeSubjectNodeState(
-        node.key.instanceKeys.map((key) => key.id),
-        on,
-      );
-    }
+      if (ModelsTreeNode.isSubjectNode(node)) {
+        return this.changeSubjectNodeState(
+          node.key.instanceKeys.map((key) => key.id),
+          on,
+        );
+      }
 
-    if (ModelsTreeNode.isModelNode(node)) {
-      return this.changeModelState({ ids: node.key.instanceKeys.map(({ id }) => id), on });
-    }
+      if (ModelsTreeNode.isModelNode(node)) {
+        return this.changeModelState({ ids: node.key.instanceKeys.map(({ id }) => id), on });
+      }
 
-    const modelId = ModelsTreeNode.getModelId(node);
-    if (!modelId) {
-      return EMPTY;
-    }
+      const modelId = ModelsTreeNode.getModelId(node);
+      if (!modelId) {
+        return EMPTY;
+      }
 
-    if (ModelsTreeNode.isCategoryNode(node)) {
-      return this.changeCategoryState({
-        categoryIds: node.key.instanceKeys.map(({ id }) => id),
+      if (ModelsTreeNode.isCategoryNode(node)) {
+        return this.changeCategoryState({
+          categoryIds: node.key.instanceKeys.map(({ id }) => id),
+          modelId,
+          on,
+        });
+      }
+
+      const categoryId = ModelsTreeNode.getCategoryId(node);
+      if (!categoryId) {
+        return EMPTY;
+      }
+
+      return this.changeElementsState({
+        elementIds: new Set([...node.key.instanceKeys.map(({ id }) => id)]),
         modelId,
+        categoryId,
         on,
       });
-    }
-
-    const categoryId = ModelsTreeNode.getCategoryId(node);
-    if (!categoryId) {
-      return EMPTY;
-    }
-
-    return this.changeElementsState({
-      elementIds: new Set([...node.key.instanceKeys.map(({ id }) => id)]),
-      modelId,
-      categoryId,
-      on,
     });
+    if (this._props.viewport.isAlwaysDrawnExclusive) {
+      return this.removeAlwaysDrawnExclusive().pipe(mergeMap(() => changeObs));
+    }
+    return changeObs;
   }
 
   private async getVisibilityChangeTargets({ node }: GetFilteredNodeVisibilityProps) {
@@ -689,6 +697,19 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         }
 
         return merge(...observables);
+      }),
+    );
+  }
+
+  private removeAlwaysDrawnExclusive(): Observable<void> {
+    return from(this._idsCache.getAllCategories()).pipe(
+      map((categoryIds) => {
+        this._props.viewport.changeCategoryDisplay(categoryIds, false, false);
+        this._props.viewport.clearNeverDrawn();
+        this._props.viewport.perModelCategoryVisibility.clearOverrides();
+        if (this._props.viewport.alwaysDrawn) {
+          this._props.viewport.setAlwaysDrawn(this._props.viewport.alwaysDrawn);
+        }
       }),
     );
   }
