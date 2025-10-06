@@ -88,14 +88,6 @@ export const QuantityFormatButton: React.FC = () => {
             <FormatSetsTabPanel />
           </Tabs.Panel>
         </Tabs.Wrapper>
-
-        {/* <Flex justifyContent="flex-end" flexDirection="row" className="quantity-format-button-container">
-          <ModalButtonBar>
-            <Button styleType="default" onClick={handleCloseModal}>
-              Close
-            </Button>
-          </ModalButtonBar>
-        </Flex> */}
       </Modal>
     </>
   );

@@ -49,7 +49,6 @@ export const FormatSetsTabPanel: React.FC = () => {
   React.useEffect(() => {
     const formatManager = FormatManager.instance;
     if (formatManager) {
-      console.log(formatManager.formatSets);
       // Combine FormatManager format sets with test format sets
       const combinedFormatSets = [...formatManager.formatSets, ...testFormatSets];
       setFormatSets(combinedFormatSets);
