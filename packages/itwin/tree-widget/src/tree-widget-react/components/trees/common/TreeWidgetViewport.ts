@@ -217,12 +217,18 @@ export interface TreeWidgetViewport {
    *
    * These elements should be displayed only when their models are displayed as well.
    * @param elementIds The Ids of the elements that should be displayed.
-   * @param exclusive If true, *only* the specified elements should be drawn.
+   * @param exclusive If true, *only* the specified elements should be drawn. When this is set to true `isAlwaysDrawnExclusive` should return true, otherwise `isAlwaysDrawnExclusive` should return false.
    */
   setAlwaysDrawn: (props: { elementIds: Set<Id64String>; exclusive?: boolean }) => void;
   /** Should clear the set of always-drawn elements. */
   clearAlwaysDrawn: () => void;
-  /** Should return true if elements in the [[alwaysDrawn]] set are the *only* elements that are displayed when their models are visible. */
+  /**
+   * Should return true if elements in the [[alwaysDrawn]] set are the *only* elements that are displayed when their models are visible.
+   *
+   * Should be set to true when `setAlwaysDrawn` is called with `exclusive` flag.
+   *
+   * Should be set to false when `setAlwaysDrawn` is called with `exclusive` set to false/undefined or when `clearAlwaysDrawn` is called.
+   */
   readonly isAlwaysDrawnExclusive: boolean;
   /** Event that should be raised when set of always-drawn elements changes. */
   onAlwaysDrawnChanged: BeEvent<() => void>;
