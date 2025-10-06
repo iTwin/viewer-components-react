@@ -88,7 +88,7 @@ export function createTreeWidgetViewport(viewport: Viewport): TreeWidgetViewport
  * - Model is visible *AND* element is in [[alwaysDrawn]] list.
  * - Model is visible *AND* element is not in [[neverDrawn]] list *AND* per-model category override is set to show `Show`.
  * - Model is visible *AND* element is not in [[neverDrawn]] list *AND* per-model category override is not set to `Hide` *AND* category and sub-category are visible.
- * @alpha
+ * @beta
  */
 export interface TreeWidgetViewport {
   /** The type of the view. Generally it should be either `spatial` or `2d`. */

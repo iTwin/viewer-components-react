@@ -479,7 +479,7 @@ interface TreeWidgetProps {
     trees: TreeDefinition[];
 }
 
-// @alpha
+// @beta
 export interface TreeWidgetViewport {
     addViewedModels(modelIds: Id64Arg): Promise<void>;
     alwaysDrawn: ReadonlySet<Id64String> | undefined;
