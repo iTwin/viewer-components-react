@@ -23,7 +23,7 @@ public;interface;TreeDefinition
 beta;function;TreeRenderer
 public;class;TreeWidget
 public;function;TreeWidgetComponent
-beta;interface;TreeWidgetViewport
+public;interface;TreeWidgetViewport
 beta;function;useCategoriesTree
 public;function;useCategoriesTreeButtonProps
 alpha;function;useClassificationsTree
