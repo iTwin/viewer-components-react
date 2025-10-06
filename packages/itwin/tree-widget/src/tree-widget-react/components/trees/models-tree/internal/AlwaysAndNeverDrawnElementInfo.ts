@@ -125,7 +125,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
 
     const resultSubject = new BehaviorSubject<CachedNodesMap | undefined>(undefined);
 
-    const obs = fromEventPattern(
+    const obs: Observable<CachedNodesMap> = fromEventPattern(
       (handler) => event.addListener(handler),
       (handler) => event.removeListener(handler),
     ).pipe(
@@ -157,7 +157,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
         resetOnRefCountZero: false,
       }),
       // Wait until the result is available.
-      first((x): x is CachedNodesMap => !!x),
+      first((x): x is CachedNodesMap => !!x, new Map()),
     );
     return obs;
   }

@@ -6,6 +6,7 @@
 import {
   concat,
   concatAll,
+  defaultIfEmpty,
   defer,
   distinct,
   EMPTY,
@@ -170,6 +171,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
             },
           ),
         ),
+        defaultIfEmpty(createVisibilityStatus("hidden")),
       ),
     );
   }
