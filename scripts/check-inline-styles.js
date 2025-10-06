@@ -40,7 +40,7 @@ async function checkForInlineStyles() {
         }
 
         // Check for .style.property = value patterns
-        if (/\.style\.[a-zA-Z]+\s*=/.test(line)) {
+        if (/\.style\.[a-zA-Z][a-zA-Z0-9]*\s*=/.test(line)) {
           violations.push({
             file,
             line: index + 1,
@@ -65,6 +65,7 @@ async function checkForInlineStyles() {
     }
   } catch (error) {
     console.error("Error checking for inline styles:", error);
+    process.exit(1);
   }
 }
 
