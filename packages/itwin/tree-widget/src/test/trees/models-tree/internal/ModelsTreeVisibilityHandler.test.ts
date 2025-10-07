@@ -1601,7 +1601,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               overrides: {
                 models: new Map([[modelId, "hidden"]]),
               },
-              idsCache: createFakeIdsCache({ modelCategories: new Map([[modelId, [categoryId]]])})
+              idsCache: createFakeIdsCache({ modelCategories: new Map([[modelId, [categoryId]]]) }),
             });
             const { handler } = handlerResult;
             await handler.changeVisibility(node, true);
@@ -1662,7 +1662,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 viewsModel: sinon.fake.returns(true),
               },
             });
-            using handlerResult = createHandler({ viewport, idsCache: createFakeIdsCache({ modelCategories: new Map([[modelId, [categoryId]]])}) });
+            using handlerResult = createHandler({ viewport, idsCache: createFakeIdsCache({ modelCategories: new Map([[modelId, [categoryId]]]) }) });
             const { handler } = handlerResult;
             await handler.changeVisibility(node, false);
             expect(viewport.alwaysDrawn?.size ?? 0).to.eq(0);
