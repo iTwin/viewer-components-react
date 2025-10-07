@@ -103,6 +103,7 @@ describe("categories tree", () => {
     },
     test: async ({ viewport, handler, provider, category }) => {
       await handler.changeVisibility(createCategoryHierarchyNode(category, true), true);
+      viewport.renderFrame();
       await validateHierarchyVisibility({
         provider,
         handler,
@@ -158,6 +159,7 @@ describe("categories tree", () => {
     },
     test: async ({ viewport, handler, provider, definitionContainer }) => {
       await handler.changeVisibility(createDefinitionContainerHierarchyNode(definitionContainer), true);
+      viewport.renderFrame();
       await validateHierarchyVisibility({
         provider,
         handler,
