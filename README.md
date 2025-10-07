@@ -10,10 +10,10 @@ Each one has it's own folder and README describing the package.
 
 ### iTwin.js@^5 Compatible
 
-| Name                             | Folder                                                       | Changelog                                                      | Version                                                                                                                                                        |
-| -------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| @itwin/map-layers                | [map-layers](./packages/itwin/map-layers/)                   | [changelog](./packages/itwin/map-layers/CHANGELOG.md)          | [![npm version](https://badge.fury.io/js/%40itwin%2Fmap-layers.svg)](https://badge.fury.io/js/%40itwin%2Fmap-layers)                                           |
-| @itwin/quantity-formatting-react | [quantity-formatting](./packages/itwin/quantity-formatting/) | [changelog](./packages/itwin/quantity-formatting/CHANGELOG.md) | [![npm version](https://badge.fury.io/js/@itwin%2Fquantity-formatting-react.svg)](https://badge.fury.io/js/@itwin%2Fquantity-formatting-react)                 |
+| Name                             | Folder                                                       | Changelog                                                      | Version                                                                                                                                        |
+| -------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| @itwin/map-layers                | [map-layers](./packages/itwin/map-layers/)                   | [changelog](./packages/itwin/map-layers/CHANGELOG.md)          | [![npm version](https://badge.fury.io/js/%40itwin%2Fmap-layers.svg)](https://badge.fury.io/js/%40itwin%2Fmap-layers)                           |
+| @itwin/quantity-formatting-react | [quantity-formatting](./packages/itwin/quantity-formatting/) | [changelog](./packages/itwin/quantity-formatting/CHANGELOG.md) | [![npm version](https://badge.fury.io/js/@itwin%2Fquantity-formatting-react.svg)](https://badge.fury.io/js/@itwin%2Fquantity-formatting-react) |
 
 ### iTwin.js@^4 Compatible
 
