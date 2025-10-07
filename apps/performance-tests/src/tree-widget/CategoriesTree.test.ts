@@ -6,7 +6,7 @@
 import { expect } from "chai";
 import { SnapshotDb } from "@itwin/core-backend";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { CategoriesTreeDefinition, CategoriesTreeIdsCache, CategoriesVisibilityHandler } from "@itwin/tree-widget-react/internal";
+import { CategoriesTreeDefinition, CategoriesTreeIdsCache } from "@itwin/tree-widget-react/internal";
 import { Datasets } from "../util/Datasets.js";
 import { run, TestIModelConnection } from "../util/TestUtilities.js";
 import { StatelessHierarchyProvider } from "./StatelessHierarchyProvider.js";
@@ -103,7 +103,6 @@ describe("categories tree", () => {
     },
     test: async ({ viewport, handler, provider, category }) => {
       await handler.changeVisibility(createCategoryHierarchyNode(category, true), true);
-      viewport.renderFrame();
       await validateHierarchyVisibility({
         provider,
         handler,
@@ -159,7 +158,6 @@ describe("categories tree", () => {
     },
     test: async ({ viewport, handler, provider, definitionContainer }) => {
       await handler.changeVisibility(createDefinitionContainerHierarchyNode(definitionContainer), true);
-      viewport.renderFrame();
       await validateHierarchyVisibility({
         provider,
         handler,
