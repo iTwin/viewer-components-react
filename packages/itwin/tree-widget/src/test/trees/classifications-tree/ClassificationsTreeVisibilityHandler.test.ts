@@ -1313,7 +1313,7 @@ async function setupInitialDisplayState(props: {
   if (neverDrawn.length > 0) {
     viewport.setNeverDrawn(new Set([...neverDrawn, ...(viewport.neverDrawn ?? [])]));
   }
-  if (viewport.viewType === "3d" || viewport.viewType === "spatial" || viewport.viewType === "2d") {
+  if (viewport.viewType === "spatial" || viewport.viewType === "2d") {
     for (const modelInfo of models) {
       viewport.changeModelDisplay({ modelIds: modelInfo.id, display: modelInfo.visible });
     }

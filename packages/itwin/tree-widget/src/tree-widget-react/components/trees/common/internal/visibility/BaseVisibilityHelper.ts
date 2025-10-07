@@ -319,8 +319,7 @@ export class BaseVisibilityHelper implements Disposable {
       }
 
       const isSupportedInView =
-        ((this.#props.viewport.viewType === "3d" || this.#props.viewport.viewType === "spatial") && type === "SpatialCategory") ||
-        (this.#props.viewport.viewType === "2d" && type === "DrawingCategory");
+        (this.#props.viewport.viewType === "spatial" && type === "SpatialCategory") || (this.#props.viewport.viewType === "2d" && type === "DrawingCategory");
       if (!isSupportedInView) {
         return of(createVisibilityStatus("disabled"));
       }
@@ -449,7 +448,7 @@ export class BaseVisibilityHelper implements Disposable {
       }
 
       const isSupportedInView =
-        ((this.#props.viewport.viewType === "3d" || this.#props.viewport.viewType === "spatial") && type === "GeometricElement3d") ||
+        (this.#props.viewport.viewType === "spatial" && type === "GeometricElement3d") ||
         (this.#props.viewport.viewType === "2d" && type === "GeometricElement2d");
       if (!isSupportedInView) {
         return of(createVisibilityStatus("disabled"));
