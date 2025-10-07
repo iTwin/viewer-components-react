@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { EMPTY, expand, from, mergeMap, retry } from "rxjs";
+import { EMPTY, expand, from, mergeMap } from "rxjs";
 import { waitFor } from "test-utilities";
 import { assert } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";

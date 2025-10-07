@@ -651,7 +651,10 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         on,
       });
     });
-    return concat(this.removeAlwaysDrawnExclusive(), changeObs);
+    if (this._props.viewport.isAlwaysDrawnExclusive) {
+      return concat(this.removeAlwaysDrawnExclusive(), changeObs);
+    }
+    return changeObs;
   }
 
   private async getVisibilityChangeTargets({ node }: GetFilteredNodeVisibilityProps) {

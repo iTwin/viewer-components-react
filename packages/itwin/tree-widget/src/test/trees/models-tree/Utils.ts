@@ -10,7 +10,7 @@ import { ModelsTreeIdsCache } from "../../../tree-widget-react/components/trees/
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import { createIModelAccess } from "../Common.js";
 
-import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
+import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type {
   ClassGroupingNodeKey,
@@ -99,6 +99,11 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
     }),
     getModelCategories: sinon.stub<[Id64String], Promise<Id64Array>>().callsFake(async (modelId) => {
       return props?.modelCategories?.get(modelId) ?? [];
+    }),
+    getAllCategories: sinon.stub<[], Promise<Id64Set>>().callsFake(async () => {
+      const result = new Set<Id64String>();
+      props?.modelCategories?.forEach((categories) => categories.forEach((category) => result.add(category)));
+      return result;
     }),
     getCategoryElementsCount: sinon.stub<[Id64String, Id64String], Promise<number>>().callsFake(async (_, categoryId) => {
       return props?.categoryElements?.get(categoryId)?.length ?? 0;
