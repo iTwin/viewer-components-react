@@ -56,10 +56,10 @@ interface FormatSelectorProps {
     onListItemChange: (formatDefinition: FormatDefinition, key: string) => void;
 }
 
-// @public
+// @beta
 export const FormatSetPanel: React_3.FC<FormatSetPanelProps>;
 
-// @public
+// @internal
 interface FormatSetPanelProps {
     // (undocumented)
     editable?: boolean;
@@ -69,10 +69,10 @@ interface FormatSetPanelProps {
     onFormatSetChange?: (formatSet: FormatSet) => void;
 }
 
-// @public
+// @beta
 export const FormatSetSelector: React_3.FC<FormatSetSelectorProps>;
 
-// @public
+// @internal
 interface FormatSetSelectorProps {
     // (undocumented)
     formatSets?: FormatSet[];

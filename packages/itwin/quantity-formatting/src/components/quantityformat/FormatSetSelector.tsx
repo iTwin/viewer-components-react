@@ -11,6 +11,7 @@ import type { FormatSet } from "@itwin/ecschema-metadata";
 
 /**
  * Props for the FormatSetSelector component
+ * @internal
  */
 interface FormatSetSelectorProps {
   formatSets?: FormatSet[];
@@ -20,7 +21,8 @@ interface FormatSetSelectorProps {
 
 /**
  * A React component that renders a format set selector with searchable list for choosing format sets.
- */
+ * @beta
+*/
 export const FormatSetSelector: React.FC<FormatSetSelectorProps> = ({
   formatSets = [],
   selectedFormatSetKey,

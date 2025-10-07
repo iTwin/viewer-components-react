@@ -12,6 +12,7 @@ import type { UnitSystemKey } from "@itwin/core-quantity";
 import type { FormatSet } from "@itwin/ecschema-metadata";
 /**
  * Props for the FormatSetPanel component
+ * @internal
  */
 interface FormatSetPanelProps {
   formatSet?: FormatSet;
@@ -21,6 +22,7 @@ interface FormatSetPanelProps {
 
 /**
  * A React component that displays and allows editing of format set properties.
+ * @beta
  */
 export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, editable = false, onFormatSetChange }) => {
   const [label, setLabel] = React.useState(formatSet?.label || "");
