@@ -6,7 +6,7 @@
 import { expect } from "chai";
 import { SnapshotDb } from "@itwin/core-backend";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { CategoriesTreeDefinition, CategoriesTreeIdsCache } from "@itwin/tree-widget-react/internal";
+import { CategoriesTreeDefinition, CategoriesTreeIdsCache, CategoriesVisibilityHandler } from "@itwin/tree-widget-react/internal";
 import { Datasets } from "../util/Datasets.js";
 import { run, TestIModelConnection } from "../util/TestUtilities.js";
 import { StatelessHierarchyProvider } from "./StatelessHierarchyProvider.js";
