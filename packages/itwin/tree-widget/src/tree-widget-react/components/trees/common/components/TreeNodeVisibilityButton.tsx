@@ -15,6 +15,7 @@ import { createTooltip } from "../internal/Tooltip.js";
 import type { PropsWithChildren } from "react";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
+/** @beta */
 interface LoadedTreeItemVisibilityButtonState {
   state: "visible" | "hidden" | "partial";
   isDisabled?: boolean;

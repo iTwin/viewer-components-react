@@ -284,7 +284,7 @@ type IModelContentTreeProps = Pick<TreeProps, "imodel" | "selectionStorage" | "s
     hierarchyConfig?: Partial<IModelContentTreeHierarchyConfiguration>;
 };
 
-// @public (undocumented)
+// @beta (undocumented)
 interface LoadedTreeItemVisibilityButtonState {
     // (undocumented)
     isDisabled?: boolean;
