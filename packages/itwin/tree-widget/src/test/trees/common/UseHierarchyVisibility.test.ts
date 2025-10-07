@@ -54,21 +54,19 @@ describe("useHierarchyVisibility", () => {
     visibilityHandler.getVisibilityStatus.resolves({ state: "visible" });
 
     act(() => {
-      // expect initial state to be visible and disabled
+      // expect initial state to be "loading"
       const state = result.current.getVisibilityButtonState(node);
-      expect(state.state).to.be.eq("visible");
-      expect(state.isDisabled).to.be.true;
+      expect(state).to.deep.eq({ isLoading: true });
     });
 
     await waitFor(() => {
       // wait for visibility status to be calculated
       expect(visibilityHandler.getVisibilityStatus).to.be.called;
       const state = result.current.getVisibilityButtonState(node);
-      expect(state.state).to.be.eq("visible");
-      expect(state.isDisabled).to.be.undefined;
+      expect(state).to.deep.eq({ state: "visible", tooltip: "visibilityTooltips.status.visible" });
     });
 
-    expect(result.current.getVisibilityButtonState(node).state).to.be.eq("visible");
+    expect(result.current.getVisibilityButtonState(node)).to.deep.eq({ state: "visible", tooltip: "visibilityTooltips.status.visible" });
     expect(visibilityHandler.getVisibilityStatus).to.be.calledOnce;
   });
 
@@ -80,18 +78,16 @@ describe("useHierarchyVisibility", () => {
     visibilityHandler.getVisibilityStatus.resolves({ state: "visible" });
 
     act(() => {
-      // expect initial state to be visible and disabled
+      // expect initial state to be "loading"
       const state = result.current.getVisibilityButtonState(node);
-      expect(state.state).to.be.eq("visible");
-      expect(state.isDisabled).to.be.true;
+      expect(state).to.deep.eq({ isLoading: true });
     });
 
     await waitFor(() => {
       // wait for visibility status to calculated
       expect(visibilityHandler.getVisibilityStatus).to.be.called;
       const state = result.current.getVisibilityButtonState(node);
-      expect(state.state).to.be.eq("visible");
-      expect(state.isDisabled).to.be.undefined;
+      expect(state).to.deep.eq({ state: "visible", tooltip: "visibilityTooltips.status.visible" });
     });
 
     expect(visibilityHandler.getVisibilityStatus).to.be.calledOnce;
@@ -107,17 +103,17 @@ describe("useHierarchyVisibility", () => {
       // expect visibility state to be same
       expect(visibilityHandler.getVisibilityStatus).to.be.called;
       const state = result.current.getVisibilityButtonState(node);
-      expect(state.state).to.be.eq("visible");
+      expect(state).to.deep.eq({ state: "visible", tooltip: "visibilityTooltips.status.visible" });
     });
 
     await waitFor(() => {
       // wait for visibility status to calculated
       expect(visibilityHandler.getVisibilityStatus).to.be.calledTwice;
       const state = result.current.getVisibilityButtonState(node);
-      expect(state.state).to.be.eq("partial");
+      expect(state).to.deep.eq({ state: "partial", tooltip: "visibilityTooltips.status.partial" });
     });
 
-    expect(result.current.getVisibilityButtonState(node).state).to.be.eq("partial");
+    expect(result.current.getVisibilityButtonState(node)).to.deep.eq({ state: "partial", tooltip: "visibilityTooltips.status.partial" });
     expect(visibilityHandler.getVisibilityStatus).to.be.calledTwice;
   });
 
@@ -129,18 +125,16 @@ describe("useHierarchyVisibility", () => {
     visibilityHandler.getVisibilityStatus.resolves({ state: "visible" });
 
     act(() => {
-      // expect initial state to be visible and disabled
+      // expect initial state to be "loading"
       const state = result.current.getVisibilityButtonState(node);
-      expect(state.state).to.be.eq("visible");
-      expect(state.isDisabled).to.be.true;
+      expect(state).to.deep.eq({ isLoading: true });
     });
 
     await waitFor(() => {
       // wait for visibility status to calculated
       expect(visibilityHandler.getVisibilityStatus).to.be.called;
       const state = result.current.getVisibilityButtonState(node);
-      expect(state.state).to.be.eq("visible");
-      expect(state.isDisabled).to.be.undefined;
+      expect(state).to.deep.eq({ state: "visible", tooltip: "visibilityTooltips.status.visible" });
     });
 
     expect(visibilityHandler.getVisibilityStatus).to.be.calledOnce;
@@ -163,14 +157,14 @@ describe("useHierarchyVisibility", () => {
       // expect visibility state to be optimistically updated to 'visible'
       expect(visibilityHandler.getVisibilityStatus).to.be.calledOnce;
       const state = result.current.getVisibilityButtonState(node);
-      expect(state.state).to.be.eq("visible");
+      expect(state).to.deep.eq({ state: "visible", isDisabled: undefined, tooltip: "visibilityTooltips.status.determining" });
     });
 
     await waitFor(() => {
       // wait for visibility status to recalculated
       expect(visibilityHandler.getVisibilityStatus).to.be.calledTwice;
       const state = result.current.getVisibilityButtonState(node);
-      expect(state.state).to.be.eq("hidden");
+      expect(state).to.deep.eq({ state: "hidden", tooltip: "visibilityTooltips.status.hidden" });
     });
 
     expect(visibilityHandler.getVisibilityStatus).to.be.calledTwice;

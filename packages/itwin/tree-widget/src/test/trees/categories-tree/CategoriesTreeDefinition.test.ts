@@ -208,9 +208,9 @@ describe("Categories tree", () => {
           isPrivate: true,
           modelId: definitionModel.id,
         });
-        const defintionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
+        const definitionModelChild = insertSubModel({ builder, classFullName: CLASS_NAME_DefinitionModel, modeledElementId: definitionContainerChild.id });
 
-        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: defintionModelChild.id });
+        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory", modelId: definitionModelChild.id });
 
         insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
       });

@@ -5,6 +5,8 @@
 
 .map-layer-select-features-dialog {
   z-index: var(--uicore-z-index-cursor-overlay);
+  max-width: 600px;
+  min-height: 250px;
 }
 
 .map-layer-select-features-dialog.core-dialog .core-dialog-container .core-dialog-area > .core-dialog-content {

@@ -118,9 +118,9 @@ describe("CategoryVisibilityUtils", () => {
     });
 
     it("removes overrides per model when enabling category", async () => {
-      const ovrs = [{ modelId: "ModelId", categoryId: "CategoryId", visible: false }];
+      const overrides = [{ modelId: "ModelId", categoryId: "CategoryId", visible: false }];
       perModelCategoryVisibilityMock.reset();
-      perModelCategoryVisibilityMock.setup((x) => x[Symbol.iterator]()).returns(() => ovrs[Symbol.iterator]());
+      perModelCategoryVisibilityMock.setup((x) => x[Symbol.iterator]()).returns(() => overrides[Symbol.iterator]());
       await enableCategoryDisplay(viewportMock.object, "CategoryId", true, false);
       viewportMock.verify((x) => x.changeCategoryDisplay("CategoryId", true, false), moq.Times.once());
       perModelCategoryVisibilityMock.verify((x) => x.setOverride(["ModelId"], "CategoryId", PerModelCategoryVisibility.Override.None), moq.Times.once());

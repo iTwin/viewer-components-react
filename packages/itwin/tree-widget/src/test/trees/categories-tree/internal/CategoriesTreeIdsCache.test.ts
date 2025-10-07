@@ -44,7 +44,7 @@ describe("CategoriesTreeIdsCache", () => {
   });
 
   describe("getDirectChildDefinitionContainersAndCategories", () => {
-    it("retruns empty list when definition container contains nothing", async function () {
+    it("returns empty list when definition container contains nothing", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -462,7 +462,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
     });
 
-    it("returns category when category and definition containers (that dont contain categories) exist", async function () {
+    it("returns category when category and definition containers (that don't contain categories) exist", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -638,7 +638,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
     });
 
-    it("returns definition container when definition container containts category", async function () {
+    it("returns definition container when definition container contains category", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
@@ -728,7 +728,7 @@ describe("CategoriesTreeIdsCache", () => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
         insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-        const subCategory = insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "subc 1" });
+        const subCategory = insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "subC 1" });
 
         return { subCategory, category };
       });
@@ -744,11 +744,11 @@ describe("CategoriesTreeIdsCache", () => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
         insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-        insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "subc 1" });
+        insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "subC 1" });
 
         const category2 = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory2" });
         insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category2.id });
-        const subCategory2 = insertSubCategory({ builder, parentCategoryId: category2.id, codeValue: "subc 2" });
+        const subCategory2 = insertSubCategory({ builder, parentCategoryId: category2.id, codeValue: "subC 2" });
 
         return { subCategory2, category2 };
       });

@@ -329,6 +329,15 @@ export class ModelsTreeIdsCache implements Disposable {
     return this._modelInfos;
   }
 
+  public async getAllCategories(): Promise<Id64Set> {
+    const modelInfos = await this.getModelInfos();
+    const result = new Set<Id64String>();
+    modelInfos.forEach(({ categories }) => {
+      categories.forEach((_, categoryId) => result.add(categoryId));
+    });
+    return result;
+  }
+
   public async getModelCategoryIds(modelId: Id64String): Promise<Id64Array> {
     const modelInfos = await this.getModelInfos();
     const categories = modelInfos.get(modelId)?.categories.keys();
