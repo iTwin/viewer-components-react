@@ -530,7 +530,7 @@ export interface TreeWidgetViewport {
     viewsCategory: (categoryId: Id64String) => boolean;
     viewsModel: (modelId: Id64String) => boolean;
     viewsSubCategory: (subCategoryId: Id64String) => boolean;
-    viewType: "2d" | "3d" | "spatial" | "other";
+    viewType: "2d" | "spatial" | "other";
 }
 
 // @beta
