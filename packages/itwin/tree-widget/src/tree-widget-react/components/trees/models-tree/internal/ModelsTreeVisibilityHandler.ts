@@ -651,10 +651,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         on,
       });
     });
-    if (this._props.viewport.isAlwaysDrawnExclusive) {
-      return this.removeAlwaysDrawnExclusive().pipe(mergeMap(() => changeObs));
-    }
-    return changeObs;
+    return concat(this.removeAlwaysDrawnExclusive(), changeObs);
   }
 
   private async getVisibilityChangeTargets({ node }: GetFilteredNodeVisibilityProps) {
@@ -707,9 +704,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         this._props.viewport.changeCategoryDisplay(categoryIds, false, false);
         this._props.viewport.clearNeverDrawn();
         this._props.viewport.perModelCategoryVisibility.clearOverrides();
-        if (this._props.viewport.alwaysDrawn) {
-          this._props.viewport.setAlwaysDrawn(this._props.viewport.alwaysDrawn);
-        }
+        this._props.viewport.setAlwaysDrawn(this._props.viewport.alwaysDrawn ?? new Set());
       }),
     );
   }
