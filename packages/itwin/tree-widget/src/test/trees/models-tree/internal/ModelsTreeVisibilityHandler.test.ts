@@ -3258,6 +3258,18 @@ describe("ModelsTreeVisibilityHandler", () => {
         viewport.changeModelDisplay(ids.model1, true);
         viewport.setAlwaysDrawn(new Set([ids.element2]), true);
         viewport.renderFrame();
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          visibilityExpectations: {
+            subject: () => "partial",
+            model: (id) => (id === ids.model1 ? "partial" : "hidden"),
+            category: ({ categoryId }) => (categoryId === ids.category1 ? "partial" : "hidden"),
+            groupingNode: ({ elementIds }) => (elementIds.includes(ids.element2) ? "partial" : "hidden"),
+            element: ({ elementId }) => (elementId === ids.element2 ? "visible" : "hidden"),
+          },
+        });
         await handler.changeVisibility(createModelHierarchyNode(ids.model1), true);
         viewport.renderFrame();
 
@@ -3294,6 +3306,18 @@ describe("ModelsTreeVisibilityHandler", () => {
         viewport.changeModelDisplay(ids.model, true);
         viewport.setAlwaysDrawn(new Set([ids.element2]), true);
         viewport.renderFrame();
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          visibilityExpectations: {
+            subject: () => "partial",
+            model: () => "partial",
+            category: ({ categoryId }) => (categoryId === ids.category1 ? "partial" : "hidden"),
+            groupingNode: ({ elementIds }) => (elementIds.includes(ids.element2) ? "partial" : "hidden"),
+            element: ({ elementId }) => (elementId === ids.element2 ? "visible" : "hidden"),
+          },
+        });
         await handler.changeVisibility(createCategoryHierarchyNode(ids.model, ids.category1, true), true);
         viewport.renderFrame();
 
@@ -3335,6 +3359,18 @@ describe("ModelsTreeVisibilityHandler", () => {
         viewport.changeModelDisplay(ids.model, true);
         viewport.setAlwaysDrawn(new Set([ids.element2]), true);
         viewport.renderFrame();
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          visibilityExpectations: {
+            subject: () => "partial",
+            model: () => "partial",
+            category: () => "partial",
+            groupingNode: ({ elementIds }) => (elementIds.includes(ids.element2) ? "partial" : "hidden"),
+            element: ({ elementId }) => (elementId === ids.element2 ? "visible" : "hidden"),
+          },
+        });
         await handler.changeVisibility(
           createClassGroupingHierarchyNode({ elements: [ids.element1, ids.element2], categoryId: ids.category, modelId: ids.model }),
           true,
@@ -3372,6 +3408,18 @@ describe("ModelsTreeVisibilityHandler", () => {
         viewport.changeModelDisplay(ids.model, true);
         viewport.setAlwaysDrawn(new Set([ids.element2]), true);
         viewport.renderFrame();
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          visibilityExpectations: {
+            subject: () => "partial",
+            model: () => "partial",
+            category: () => "partial",
+            groupingNode: ({ elementIds }) => (elementIds.includes(ids.element2) ? "partial" : "hidden"),
+            element: ({ elementId }) => (elementId === ids.element2 ? "visible" : "hidden"),
+          },
+        });
         await handler.changeVisibility(createElementHierarchyNode({ elementId: ids.element1, categoryId: ids.category, modelId: ids.model }), true);
         viewport.renderFrame();
 
