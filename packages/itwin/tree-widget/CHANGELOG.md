@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Fri, 03 Oct 2025 11:22:06 GMT and should not be manually modified. -->
+<!-- This log was last generated on Tue, 07 Oct 2025 08:45:29 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.15.1
+
+Tue, 07 Oct 2025 08:45:29 GMT
+
+### Patches
+
+- Models tree: Fixed visibility change incorrectly setting visibility when `alwaysDrawn` exclusive flag is set to `true`. Now, before making any visibility changes to the desired node, `alwaysDrawn` exclusive flag is reset to `false`, all categories are turned off, never drawn list is cleared and all per-model category overrides are removed. ([#1467](https://github.com/iTwin/viewer-components-react/pull/1467))
 
 ## 3.15.0
 

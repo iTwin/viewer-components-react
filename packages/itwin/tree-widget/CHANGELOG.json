@@ -2,6 +2,21 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Tue, 07 Oct 2025 08:45:29 GMT",
+      "version": "3.15.1",
+      "tag": "@itwin/tree-widget-react_v3.15.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "b2e59937423b7d29257d75d40e5eeb169b651909",
+            "comment": "Models tree: Fixed visibility change incorrectly setting visibility when `alwaysDrawn` exclusive flag is set to `true`. Now, before making any visibility changes to the desired node, `alwaysDrawn` exclusive flag is reset to `false`, all categories are turned off, never drawn list is cleared and all per-model category overrides are removed."
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 03 Oct 2025 11:22:06 GMT",
       "version": "3.15.0",
       "tag": "@itwin/tree-widget-react_v3.15.0",
