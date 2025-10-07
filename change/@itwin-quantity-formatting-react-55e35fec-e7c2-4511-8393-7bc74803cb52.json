@@ -1,6 +1,6 @@
 {
   "type": "patch",
-  "comment": "Update FormatSelector to be a list with a searchbox, instead of dropdown",
+  "comment": "Update FormatSelector to be a list with a searchbox, instead of dropdown. Add FormatSetSelector, FormatSetPanel components, make UI more consistent.",
   "packageName": "@itwin/quantity-formatting-react",
   "email": "50554904+hl662@users.noreply.github.com",
   "dependentChangeType": "patch"
