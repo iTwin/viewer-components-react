@@ -4,12 +4,13 @@
 
 ```ts
 
-import { FormatDefinition } from '@itwin/core-quantity';
+import type { FormatDefinition } from '@itwin/core-quantity';
 import type { FormatSet } from '@itwin/ecschema-metadata';
 import { JSX as JSX_2 } from 'react/jsx-runtime';
 import type { Localization } from '@itwin/core-common';
 import * as React_2 from 'react';
-import { UnitProps } from '@itwin/core-quantity';
+import { default as React_3 } from 'react';
+import type { UnitProps } from '@itwin/core-quantity';
 import type { UnitsProvider } from '@itwin/core-quantity';
 
 // @beta
@@ -53,6 +54,32 @@ interface FormatSelectorProps {
     activeFormatSet?: FormatSet;
     // (undocumented)
     onListItemChange: (formatDefinition: FormatDefinition, key: string) => void;
+}
+
+// @public
+export const FormatSetPanel: React_3.FC<FormatSetPanelProps>;
+
+// @public
+interface FormatSetPanelProps {
+    // (undocumented)
+    editable?: boolean;
+    // (undocumented)
+    formatSet?: FormatSet;
+    // (undocumented)
+    onFormatSetChange?: (formatSet: FormatSet) => void;
+}
+
+// @public
+export const FormatSetSelector: React_3.FC<FormatSetSelectorProps>;
+
+// @public
+interface FormatSetSelectorProps {
+    // (undocumented)
+    formatSets?: FormatSet[];
+    // (undocumented)
+    onFormatSetChange: (formatSet: FormatSet, key: string) => void;
+    // (undocumented)
+    selectedFormatSetKey?: string;
 }
 
 // @beta

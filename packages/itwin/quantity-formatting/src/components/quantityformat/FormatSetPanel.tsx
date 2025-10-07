@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import React from "react";
-import { SvgHelpCircularHollow } from "@itwin/itwinui-icons-react/cjs/icons/index.js";
+import { SvgHelpCircularHollow } from "@itwin/itwinui-icons-react";
 import { ComboBox, Flex, IconButton, Input, Label, Text, Textarea } from "@itwin/itwinui-react";
 import { useTranslation } from "../../useTranslation.js";
 

@@ -3,5 +3,7 @@ Release Tag;API Item Type;API Item Name
 beta;function;FormatPanel
 beta;function;FormatSample
 beta;const;FormatSelector
+public;const;FormatSetPanel
+public;const;FormatSetSelector
 beta;function;QuantityFormatPanel
 beta;class;QuantityFormatting
