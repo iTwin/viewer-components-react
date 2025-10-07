@@ -34,6 +34,7 @@ The typical workflow involves selecting a format and customizing it to meet your
 > FormatSelector and QuantityFormatPanel are separate components, that can be used together. The following example's code can be found in this repository's [QuantityFormatButton.tsx](https://github.com/iTwin/viewer-components-react/blob/master/apps/test-viewer/src/components/QuantityFormatButton.tsx)
 
 #### Editing a Format
+
 Starting with the `FormatSelector`, this component shows all available formats to choose from. It also includes a search bar, allowing you to filter formats based on their labels:
 
 <img src="./media/list-of-formats.png" alt="List of formats of a FormatSelector" width="760" height="440">
