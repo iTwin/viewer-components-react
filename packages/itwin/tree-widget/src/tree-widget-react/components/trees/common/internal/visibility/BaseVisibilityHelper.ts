@@ -603,7 +603,7 @@ export class BaseVisibilityHelper implements Disposable {
 
       const viewport = this.#props.viewport;
 
-      viewport.clearPerModelCategoryOverrides(modelIds);
+      viewport.clearPerModelCategoryOverrides({ modelIds });
       if (!on) {
         return concat(
           from(viewport.changeModelDisplay({ modelIds, display: false })),

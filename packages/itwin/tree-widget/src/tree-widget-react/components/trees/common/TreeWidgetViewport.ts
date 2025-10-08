@@ -3,9 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { IModelConnection, PerModelCategoryVisibility, Viewport } from "@itwin/core-frontend";
+import { PerModelCategoryVisibility, Viewport } from "@itwin/core-frontend";
 
 import type { BeEvent, Id64Arg, Id64String } from "@itwin/core-bentley";
+import type { IModelConnection } from "@itwin/core-frontend";
+
 /** @public */
 export type PerModelCategoryOverride = "show" | "hide" | "none";
 
@@ -54,7 +56,7 @@ export function createTreeWidgetViewport(viewport: Viewport | TreeWidgetViewport
       const override = viewport.perModelCategoryVisibility.getOverride(props.modelId, props.categoryId);
       return override === PerModelCategoryVisibility.Override.Show ? "show" : override === PerModelCategoryVisibility.Override.Hide ? "hide" : "none";
     },
-    clearPerModelCategoryOverrides: (modelIds) => viewport.perModelCategoryVisibility.clearOverrides(modelIds),
+    clearPerModelCategoryOverrides: (props) => viewport.perModelCategoryVisibility.clearOverrides(props?.modelIds),
     get neverDrawn() {
       return viewport.neverDrawn;
     },
@@ -188,7 +190,7 @@ export interface TreeWidgetViewport {
   /** Should return the per-model category override. */
   getPerModelCategoryOverride: (props: { modelId: Id64String; categoryId: Id64String }) => PerModelCategoryOverride;
   /** Should remove per-model category override for the specified models. */
-  clearPerModelCategoryOverrides: (modelIds?: Id64Arg) => void;
+  clearPerModelCategoryOverrides: (props?: { modelIds?: Id64Arg }) => void;
   /**
    * Ids of elements which should not be displayed.
    *

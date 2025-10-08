@@ -15,7 +15,7 @@ import type { Id64Arg } from '@itwin/core-bentley';
 import type { Id64Array } from '@itwin/core-bentley';
 import type { Id64String } from '@itwin/core-bentley';
 import type { ILogger } from '@itwin/presentation-shared';
-import { IModelConnection } from '@itwin/core-frontend';
+import type { IModelConnection } from '@itwin/core-frontend';
 import type { InstanceKey } from '@itwin/presentation-shared';
 import { JSX as JSX_2 } from 'react/jsx-runtime';
 import type { Localization } from '@itwin/core-common';
@@ -504,7 +504,9 @@ export interface TreeWidgetViewport {
     }) => void;
     clearAlwaysDrawn: () => void;
     clearNeverDrawn: () => void;
-    clearPerModelCategoryOverrides: (modelIds?: Id64Arg) => void;
+    clearPerModelCategoryOverrides: (props?: {
+        modelIds?: Id64Arg;
+    }) => void;
     getPerModelCategoryOverride: (props: {
         modelId: Id64String;
         categoryId: Id64String;

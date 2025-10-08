@@ -1398,7 +1398,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             const { handler } = handlerResult;
             await handler.changeVisibility(node, true);
 
-            expect(viewport.clearPerModelCategoryOverrides).to.be.calledWith([modelId]);
+            expect(viewport.clearPerModelCategoryOverrides).to.be.calledWith({ modelIds: [modelId] });
           });
         });
 
