@@ -125,7 +125,7 @@ export interface TreeWidgetViewport {
   /**
    * Should enable or disable display of elements belonging to a set of categories specified by Id.
    *
-   * Visibility of individual sub-categories belonging to a category can be controlled separately through the use of [[changeSubCategoryDisplay]].
+   * Visibility of individual sub-categories belonging to a category can be controlled separately through the use of `changeSubCategoryDisplay`.
    *
    * By default, enabling display of a category does not affect display of sub-categories thereof which have been set to be invisible.
    *
