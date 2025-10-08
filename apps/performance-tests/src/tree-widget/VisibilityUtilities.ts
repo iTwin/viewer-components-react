@@ -10,7 +10,8 @@ import { assert } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
-import { createTreeWidgetViewport, toVoidPromise } from "@itwin/tree-widget-react/internal";
+import { createTreeWidgetViewport } from "@itwin/tree-widget-react";
+import { toVoidPromise } from "@itwin/tree-widget-react/internal";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
