@@ -91,8 +91,7 @@ interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "select
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
     onPerformanceMeasured?: (featureId: string, duration: number) => void;
-    // (undocumented)
-    treeWidgetViewport?: TreeWidgetViewport;
+    viewport?: Viewport | TreeWidgetViewport;
 }
 
 // @public
@@ -149,8 +148,7 @@ interface ClassificationsTreeComponentProps extends Pick<ClassificationsTreeProp
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
     onPerformanceMeasured?: (featureId: string, duration: number) => void;
-    // (undocumented)
-    treeWidgetViewport?: TreeWidgetViewport;
+    viewport?: Viewport | TreeWidgetViewport;
 }
 
 // @alpha (undocumented)
@@ -317,8 +315,7 @@ interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "selectionStora
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
     onPerformanceMeasured?: (featureId: string, duration: number) => void;
-    // (undocumented)
-    treeWidgetViewport?: TreeWidgetViewport;
+    viewport?: Viewport | TreeWidgetViewport;
 }
 
 // @public

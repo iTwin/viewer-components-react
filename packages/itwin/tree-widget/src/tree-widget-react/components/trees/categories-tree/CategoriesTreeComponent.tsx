@@ -13,7 +13,7 @@ import { CategoriesTree } from "./CategoriesTree.js";
 import { HideAllButton, InvertAllButton, ShowAllButton, useCategoriesTreeButtonProps } from "./CategoriesTreeButtons.js";
 
 import type { ReactNode } from "react";
-import type { IModelConnection } from "@itwin/core-frontend";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { CategoriesTreeProps } from "./CategoriesTree.js";
 import type { CategoriesTreeHeaderButtonProps, CategoriesTreeHeaderButtonType } from "./CategoriesTreeButtons.js";
@@ -43,7 +43,12 @@ interface CategoriesTreeComponentProps
    * ```
    */
   headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode>;
-  treeWidgetViewport?: TreeWidgetViewport;
+  /**
+   * Viewport used for visibility controls.
+   *
+   * When viewport is not provided, `IModelApp.viewManager.selectedView` will be used.
+   */
+  viewport?: Viewport | TreeWidgetViewport;
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }
@@ -54,7 +59,7 @@ interface CategoriesTreeComponentProps
  */
 export const CategoriesTreeComponent = (props: CategoriesTreeComponentProps) => {
   const iModel = useActiveIModelConnection();
-  const viewport = useActiveViewport({ treeWidgetViewport: props.treeWidgetViewport });
+  const viewport = useActiveViewport({ viewport: props.viewport });
 
   if (!iModel || !viewport) {
     return null;

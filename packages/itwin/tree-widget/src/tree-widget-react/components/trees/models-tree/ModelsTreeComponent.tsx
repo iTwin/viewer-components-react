@@ -22,7 +22,7 @@ import {
 } from "./ModelsTreeButtons.js";
 
 import type { ReactNode } from "react";
-import type { IModelConnection } from "@itwin/core-frontend";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { ModelsTreeProps } from "./ModelsTree.js";
 import type { ModelsTreeHeaderButtonProps, ModelsTreeHeaderButtonType } from "./ModelsTreeButtons.js";
@@ -59,7 +59,12 @@ interface ModelsTreeComponentProps
    * ```
    */
   headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
-  treeWidgetViewport?: TreeWidgetViewport;
+  /**
+   * Viewport used for visibility controls.
+   *
+   * When viewport is not provided, `IModelApp.viewManager.selectedView` will be used.
+   */
+  viewport?: Viewport | TreeWidgetViewport;
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }
@@ -72,7 +77,7 @@ interface ModelsTreeComponentProps
  */
 export const ModelsTreeComponent = (props: ModelsTreeComponentProps) => {
   const iModel = useActiveIModelConnection();
-  const viewport = useActiveViewport({ treeWidgetViewport: props.treeWidgetViewport });
+  const viewport = useActiveViewport({ viewport: props.viewport });
 
   if (!iModel || !viewport) {
     return null;

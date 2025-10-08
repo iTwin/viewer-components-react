@@ -11,7 +11,7 @@ import { useActiveViewport } from "../common/internal/UseActiveViewport.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { ClassificationsTree } from "./ClassificationsTree.js";
 
-import type { IModelConnection } from "@itwin/core-frontend";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { ClassificationsTreeProps } from "./ClassificationsTree.js";
 
@@ -30,7 +30,12 @@ interface ClassificationsTreeComponentProps
     | "hierarchyConfig"
     | "getEditingProps"
   > {
-  treeWidgetViewport?: TreeWidgetViewport;
+  /**
+   * Viewport used for visibility controls.
+   *
+   * When viewport is not provided, `IModelApp.viewManager.selectedView` will be used.
+   */
+  viewport?: Viewport | TreeWidgetViewport;
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }
@@ -41,7 +46,7 @@ interface ClassificationsTreeComponentProps
  */
 export const ClassificationsTreeComponent = (props: ClassificationsTreeComponentProps) => {
   const iModel = useActiveIModelConnection();
-  const viewport = useActiveViewport({ treeWidgetViewport: props.treeWidgetViewport });
+  const viewport = useActiveViewport({ viewport: props.viewport });
 
   if (!iModel || !viewport) {
     return null;
