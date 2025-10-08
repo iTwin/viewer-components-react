@@ -132,10 +132,8 @@ export async function createViewport({
   );
 }
 
-/** @internal */
 export type TreeWidgetTestingViewport = TreeWidgetViewport & { renderFrame: () => void } & Disposable;
 
-/** @internal */
 export function createTreeWidgetTestingViewport(viewport: Viewport): TreeWidgetTestingViewport {
   const treeWidgetViewport = createTreeWidgetViewport(viewport);
   return {
@@ -296,7 +294,6 @@ export function createElementHierarchyNode(props: {
   };
 }
 
-/** @internal */
 export function createDefinitionContainerHierarchyNode(definitionContainerId: Id64String): NonGroupingHierarchyNode {
   return {
     key: {
