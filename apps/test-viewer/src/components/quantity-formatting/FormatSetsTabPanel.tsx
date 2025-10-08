@@ -25,23 +25,23 @@ export const FormatSetsTabPanel: React.FC<FormatSetsTabPanelProps> = ({ formatMa
 
   // Load format sets from FormatManager (includes test format sets added at startup)
   React.useEffect(() => {
-      setFormatSets(formatManager.formatSets);
+    setFormatSets(formatManager.formatSets);
 
-      // Set active format set if one exists
-      if (formatManager.activeFormatSet) {
-        const activeKey = formatManager.activeFormatSet.name;
-        setActiveFormatSetKey(activeKey);
-        setSelectedFormatSet(formatManager.activeFormatSet);
-        setClonedSelectedFormatSet({ ...formatManager.activeFormatSet });
+    // Set active format set if one exists
+    if (formatManager.activeFormatSet) {
+      const activeKey = formatManager.activeFormatSet.name;
+      setActiveFormatSetKey(activeKey);
+      setSelectedFormatSet(formatManager.activeFormatSet);
+      setClonedSelectedFormatSet({ ...formatManager.activeFormatSet });
+    }
+
+    return formatManager.onActiveFormatSetChanged.addListener((formatSet) => {
+      if (formatSet) {
+        setActiveFormatSetKey(formatSet.name);
+      } else {
+        setActiveFormatSetKey(undefined);
       }
-
-      return formatManager.onActiveFormatSetChanged.addListener((formatSet) => {
-        if (formatSet) {
-          setActiveFormatSetKey(formatSet.name);
-        } else {
-          setActiveFormatSetKey(undefined);
-        }
-      });
+    });
   }, [formatManager]);
 
   const handleFormatSetChange = React.useCallback((formatSet: FormatSet, _key: string) => {
