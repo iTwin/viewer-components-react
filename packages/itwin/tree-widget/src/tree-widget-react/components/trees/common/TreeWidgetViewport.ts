@@ -188,8 +188,8 @@ export interface TreeWidgetViewport {
    * Ids of elements which should be displayed in the viewport, regardless of category and sub-category visibility.
    *
    * These elements should be displayed only when their models are displayed as well.
-   * @param elementIds The Ids of the elements that should be displayed.
-   * @param exclusive If true, *only* the specified elements should be drawn. When this is set to true `isAlwaysDrawnExclusive` should return true, otherwise `isAlwaysDrawnExclusive` should return false.
+   *
+   * When the `exclusive` prop is set to `true`, only the specified elements should be drawn.
    */
   setAlwaysDrawn: (props: { elementIds: Set<Id64String>; exclusive?: boolean }) => void;
   /** Should clear the set of always-drawn elements. */
