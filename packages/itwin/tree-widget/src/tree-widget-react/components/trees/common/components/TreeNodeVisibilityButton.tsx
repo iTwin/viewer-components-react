@@ -54,14 +54,10 @@ export const VisibilityAction = memo(function VisibilityAction({ node, reserveSp
   const context = useVisibilityContext();
   const state = context?.getVisibilityButtonState(node);
 
-  if (!context || !state || ("isDisabled" in state && state.isDisabled)) {
+  if (!context || !state || ("isDisabled" in state && state.isDisabled) || "isLoading" in state) {
     return reserveSpace ? (
       <Tree.ItemAction label={TreeWidget.translate(`visibilityTooltips.status.disabled`)} visible={false} icon={visibilityShowSvg} />
     ) : undefined;
-  }
-
-  if ("isLoading" in state) {
-    return undefined;
   }
 
   const getIcon = () => {

@@ -37,10 +37,10 @@ test.describe("iModel content tree", () => {
     await expandNode(page, plantDocumentModelNode);
 
     const pipeSupportNode = locateNode(treeWidget, "Drawing (4)");
-    await pipeSupportNode.getByLabel("Expand").click();
+    await expandNode(page, pipeSupportNode);
     // cspell:disable-next-line
     const coolersNode = locateNode(treeWidget, "OPPID-04-COOLERS");
-    await coolersNode.getByLabel("Expand").click();
+    await expandNode(page, coolersNode);
 
     const bordersNode = locateNode(treeWidget, "Border");
     await expandNode(page, bordersNode);

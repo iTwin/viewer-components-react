@@ -130,10 +130,10 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
         return;
       }
       entry.status = {
+        ...entry.status,
         state: visibilityState,
-        isDisabled: "isDisabled" in entry.status ? entry.status.isDisabled : undefined,
+        tooltip: createTooltip("determining"),
       };
-      entry.status.tooltip = createTooltip("determining");
       triggerCheckboxUpdate();
     };
 
