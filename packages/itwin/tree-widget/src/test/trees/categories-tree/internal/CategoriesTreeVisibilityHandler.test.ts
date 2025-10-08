@@ -5,7 +5,6 @@
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
-import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
@@ -1955,7 +1954,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         viewport.setPerModelCategoryOverride({
           modelIds: keys.physicalModel.id,
           categoryIds: keys.category.id,
-          override: PerModelCategoryVisibility.Override.Show,
+          override: "show",
         });
 
         await validateHierarchyVisibility({
@@ -1986,7 +1985,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         viewport.setPerModelCategoryOverride({
           modelIds: keys.physicalModel.id,
           categoryIds: keys.category.id,
-          override: PerModelCategoryVisibility.Override.Show,
+          override: "show",
         });
 
         await validateHierarchyVisibility({
@@ -2657,7 +2656,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         viewport.setPerModelCategoryOverride({
           modelIds: keys.physicalModel.id,
           categoryIds: keys.category.id,
-          override: PerModelCategoryVisibility.Override.Hide,
+          override: "hide",
         });
 
         await validateHierarchyVisibility({
@@ -2688,7 +2687,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         viewport.setPerModelCategoryOverride({
           modelIds: keys.physicalModel.id,
           categoryIds: keys.category.id,
-          override: PerModelCategoryVisibility.Override.Hide,
+          override: "hide",
         });
 
         await validateHierarchyVisibility({

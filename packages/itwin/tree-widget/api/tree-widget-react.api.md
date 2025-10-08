@@ -15,12 +15,11 @@ import type { Id64Arg } from '@itwin/core-bentley';
 import type { Id64Array } from '@itwin/core-bentley';
 import type { Id64String } from '@itwin/core-bentley';
 import type { ILogger } from '@itwin/presentation-shared';
-import type { IModelConnection } from '@itwin/core-frontend';
+import { IModelConnection } from '@itwin/core-frontend';
 import type { InstanceKey } from '@itwin/presentation-shared';
 import { JSX as JSX_2 } from 'react/jsx-runtime';
 import type { Localization } from '@itwin/core-common';
 import { NamedExoticComponent } from 'react';
-import type { PerModelCategoryVisibility } from '@itwin/core-frontend';
 import type { PresentationHierarchyNode } from '@itwin/presentation-hierarchies-react';
 import type { PropsWithChildren } from 'react';
 import type { ReactNode } from 'react';
@@ -383,6 +382,9 @@ export interface ModelsTreeVisibilityHandlerOverrides extends BaseTreeVisibility
 // @public (undocumented)
 type NormalizedHierarchyFilteringPath = ReturnType<(typeof HierarchyFilteringPath)["normalize"]>;
 
+// @public (undocumented)
+type PerModelCategoryOverride = "show" | "hide" | "none";
+
 export { RenameAction }
 
 // @beta (undocumented)
@@ -506,7 +508,7 @@ export interface TreeWidgetViewport {
     getPerModelCategoryOverride: (props: {
         modelId: Id64String;
         categoryId: Id64String;
-    }) => PerModelCategoryVisibility.Override;
+    }) => PerModelCategoryOverride;
     iModel: IModelConnection;
     readonly isAlwaysDrawnExclusive: boolean;
     neverDrawn: ReadonlySet<Id64String> | undefined;
@@ -529,7 +531,7 @@ export interface TreeWidgetViewport {
     setPerModelCategoryOverride: (props: {
         modelIds: Id64Arg;
         categoryIds: Id64Arg;
-        override: PerModelCategoryVisibility.Override;
+        override: PerModelCategoryOverride;
     }) => void;
     viewsCategory: (categoryId: Id64String) => boolean;
     viewsModel: (modelId: Id64String) => boolean;

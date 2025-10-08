@@ -3,10 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { Viewport } from "@itwin/core-frontend";
+import { IModelConnection, PerModelCategoryVisibility, Viewport } from "@itwin/core-frontend";
 
 import type { BeEvent, Id64Arg, Id64String } from "@itwin/core-bentley";
-import type { IModelConnection, PerModelCategoryVisibility } from "@itwin/core-frontend";
+/** @public */
+export type PerModelCategoryOverride = "show" | "hide" | "none";
 
 /**
  * Creates a `TreeWidgetViewport`.
@@ -40,8 +41,19 @@ export function createTreeWidgetViewport(viewport: Viewport | TreeWidgetViewport
     get perModelCategoryOverrides() {
       return viewport.perModelCategoryVisibility;
     },
-    setPerModelCategoryOverride: (props) => viewport.perModelCategoryVisibility.setOverride(props.modelIds, props.categoryIds, props.override),
-    getPerModelCategoryOverride: (props) => viewport.perModelCategoryVisibility.getOverride(props.modelId, props.categoryId),
+    setPerModelCategoryOverride: (props) => {
+      const override =
+        props.override === "show"
+          ? PerModelCategoryVisibility.Override.Show
+          : props.override === "hide"
+            ? PerModelCategoryVisibility.Override.Hide
+            : PerModelCategoryVisibility.Override.None;
+      viewport.perModelCategoryVisibility.setOverride(props.modelIds, props.categoryIds, override);
+    },
+    getPerModelCategoryOverride: (props) => {
+      const override = viewport.perModelCategoryVisibility.getOverride(props.modelId, props.categoryId);
+      return override === PerModelCategoryVisibility.Override.Show ? "show" : override === PerModelCategoryVisibility.Override.Hide ? "hide" : "none";
+    },
     clearPerModelCategoryOverrides: (modelIds) => viewport.perModelCategoryVisibility.clearOverrides(modelIds),
     get neverDrawn() {
       return viewport.neverDrawn;
@@ -98,9 +110,9 @@ export function createTreeWidgetViewport(viewport: Viewport | TreeWidgetViewport
  * @public
  */
 export interface TreeWidgetViewport {
-  /** 
+  /**
    * The type of the view. Generally it should be either `3d` or `2d`.
-   * 
+   *
    * The `other` value is reserved for edge cases when viewport doesn't show any elements, e.g. a blank viewport
    */
   viewType: "2d" | "3d" | "other";
@@ -172,9 +184,9 @@ export interface TreeWidgetViewport {
   /** Returns an iterable of per-model-category overrides. */
   perModelCategoryOverrides: Readonly<Iterable<{ modelId: Id64String; categoryId: Id64String; visible: boolean }>>;
   /** Should change the override state of one or more categories for one or more models. */
-  setPerModelCategoryOverride: (props: { modelIds: Id64Arg; categoryIds: Id64Arg; override: PerModelCategoryVisibility.Override }) => void;
+  setPerModelCategoryOverride: (props: { modelIds: Id64Arg; categoryIds: Id64Arg; override: PerModelCategoryOverride }) => void;
   /** Should return the per-model category override. */
-  getPerModelCategoryOverride: (props: { modelId: Id64String; categoryId: Id64String }) => PerModelCategoryVisibility.Override;
+  getPerModelCategoryOverride: (props: { modelId: Id64String; categoryId: Id64String }) => PerModelCategoryOverride;
   /** Should remove per-model category override for the specified models. */
   clearPerModelCategoryOverrides: (modelIds?: Id64Arg) => void;
   /**

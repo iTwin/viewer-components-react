@@ -5,7 +5,6 @@
 
 import { assert, expect } from "chai";
 import { expand, from, mergeMap } from "rxjs";
-import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { toVoidPromise } from "../../../../tree-widget-react/components/trees/common/internal/Rxjs.js";
 import { ModelsTreeNode } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeNode.js";
@@ -105,7 +104,7 @@ export async function validateNodeVisibility({ node, handler, visibilityExpectat
     expect(viewport.viewsCategory(id)).to.eq(categorySelector, `Category selector for: ${JSON.stringify({ modelId, categoryId: id })}`);
 
     const ovr = viewport.getPerModelCategoryOverride({ modelId, categoryId: id });
-    expect(overrideToString(ovr)).to.eq(perModelCategoryOverride, JSON.stringify({ modelId, categoryId: id }));
+    expect(ovr).to.eq(perModelCategoryOverride, JSON.stringify({ modelId, categoryId: id }));
     return;
   }
 
@@ -133,15 +132,4 @@ export async function validateHierarchyVisibility({
       mergeMap(async (node) => waitFor(async () => validateNodeVisibility({ ...props, node }), waitForOptions)),
     ),
   );
-}
-
-export function overrideToString(ovr: PerModelCategoryVisibility.Override) {
-  switch (ovr) {
-    case PerModelCategoryVisibility.Override.None:
-      return "none";
-    case PerModelCategoryVisibility.Override.Show:
-      return "show";
-    case PerModelCategoryVisibility.Override.Hide:
-      return "hide";
-  }
 }

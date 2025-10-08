@@ -5,7 +5,6 @@
 
 import { expect } from "chai";
 import { SnapshotDb } from "@itwin/core-backend";
-import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import {
   createModelsTreeVisibilityHandler,
@@ -304,7 +303,7 @@ describe("models tree", () => {
       props.idsCache[Symbol.dispose]();
     },
     test: async ({ viewport, handler, provider, elementsCategory, elementsModel }) => {
-      viewport.setPerModelCategoryOverride({ modelIds: elementsModel, categoryIds: elementsCategory, override: PerModelCategoryVisibility.Override.Hide });
+      viewport.setPerModelCategoryOverride({ modelIds: elementsModel, categoryIds: elementsCategory, override: "hide" });
       await validateHierarchyVisibility({
         provider,
         handler,

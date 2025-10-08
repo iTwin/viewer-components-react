@@ -7,7 +7,7 @@ import { expect } from "chai";
 import sinon from "sinon";
 import { assert, CompressedId64Set, Id64 } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, IModelReadRpcInterface, RenderMode } from "@itwin/core-common";
-import { IModelApp, NoRenderApp, PerModelCategoryVisibility, SpatialViewState } from "@itwin/core-frontend";
+import { IModelApp, NoRenderApp, SpatialViewState } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
@@ -700,7 +700,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 categoryElements: new Map([[categoryId, elements]]),
               }),
               viewport: createFakeSinonViewport({
-                getPerModelCategoryOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.Show),
+                getPerModelCategoryOverride: sinon.fake.returns("show"),
               }),
             });
             const { handler } = handlerResult;
@@ -796,7 +796,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 categoryElements: new Map([[categoryId, elements]]),
               }),
               viewport: createFakeSinonViewport({
-                getPerModelCategoryOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.Hide),
+                getPerModelCategoryOverride: sinon.fake.returns("hide"),
               }),
             });
             const { handler } = handlerResult;
@@ -816,7 +816,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               viewport: createFakeSinonViewport({
                 alwaysDrawn: new Set(["0x4"]),
                 isAlwaysDrawnExclusive: true,
-                getPerModelCategoryOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.Show),
+                getPerModelCategoryOverride: sinon.fake.returns("show"),
                 queryHandler: () => [{ elementId: "0x4", modelId: "0xff", categoryId: "0xff" }],
               }),
             });
@@ -881,7 +881,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               }),
               viewport: createFakeSinonViewport({
                 neverDrawn: new Set([elements[0]]),
-                getPerModelCategoryOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.Show),
+                getPerModelCategoryOverride: sinon.fake.returns("show"),
                 queryHandler: () => [{ elementId: elements[0], modelId, categoryId }],
               }),
             });
@@ -902,7 +902,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               }),
               viewport: createFakeSinonViewport({
                 alwaysDrawn: new Set([elements[0]]),
-                getPerModelCategoryOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.Hide),
+                getPerModelCategoryOverride: sinon.fake.returns("hide"),
                 queryHandler: () => [{ elementId: elements[0], modelId, categoryId }],
               }),
             });
@@ -1042,7 +1042,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         it("is hidden if category has per model override to hide", async () => {
           using handlerResult = createHandler({
             viewport: createFakeSinonViewport({
-              getPerModelCategoryOverride: () => PerModelCategoryVisibility.Override.Hide,
+              getPerModelCategoryOverride: () => "hide",
             }),
           });
           const { handler } = handlerResult;
@@ -1440,7 +1440,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             const node = createCategoryHierarchyNode(modelId, categoryId);
             const viewport = createFakeSinonViewport({
               viewsModel: sinon.fake.returns(false),
-              getPerModelCategoryOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.Hide),
+              getPerModelCategoryOverride: sinon.fake.returns("hide"),
             });
             using handlerResult = createHandler({ viewport });
             const { handler } = handlerResult;
@@ -1449,7 +1449,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             expect(viewport.setPerModelCategoryOverride).to.be.calledWith({
               modelIds: modelId,
               categoryIds: [categoryId],
-              override: PerModelCategoryVisibility.Override.Show,
+              override: "show",
             });
           });
 
@@ -1460,7 +1460,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             const viewport = createFakeSinonViewport({
               viewsModel: sinon.fake.returns(true),
               viewsCategory: sinon.fake.returns(false),
-              getPerModelCategoryOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.None),
+              getPerModelCategoryOverride: sinon.fake.returns("none"),
             });
             using handlerResult = createHandler({ viewport });
             const { handler } = handlerResult;
@@ -1469,7 +1469,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             expect(viewport.setPerModelCategoryOverride).to.be.calledWith({
               modelIds: modelId,
               categoryIds: [categoryId],
-              override: PerModelCategoryVisibility.Override.Show,
+              override: "show",
             });
           });
         });
@@ -1489,7 +1489,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             expect(viewport.setPerModelCategoryOverride).to.be.calledWith({
               modelIds: modelId,
               categoryIds: [categoryId],
-              override: PerModelCategoryVisibility.Override.Hide,
+              override: "hide",
             });
           });
         });

@@ -5,7 +5,6 @@
 
 import sinon from "sinon";
 import { BeEvent } from "@itwin/core-bentley";
-import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
@@ -62,7 +61,7 @@ export function createFakeSinonViewport(
     onNeverDrawnChanged,
     changeSubCategoryDisplay: sinon.fake(),
     clearPerModelCategoryOverrides: sinon.fake(),
-    getPerModelCategoryOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.None),
+    getPerModelCategoryOverride: sinon.fake.returns("none"),
     setPerModelCategoryOverride: sinon.fake(),
     viewsCategory: sinon.fake.returns(true),
     viewsModel: sinon.fake.returns(true),

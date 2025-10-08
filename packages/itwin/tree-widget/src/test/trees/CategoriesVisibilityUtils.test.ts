@@ -6,7 +6,7 @@
 import { expect } from "chai";
 import sinon from "sinon";
 import { IModelReadRpcInterface, SubCategoryAppearance } from "@itwin/core-common";
-import { IModelApp, NoRenderApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
+import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
@@ -110,7 +110,7 @@ describe("CategoryVisibilityUtils", () => {
       expect(viewport.setPerModelCategoryOverride).to.be.calledOnceWith({
         modelIds: ["ModelId"],
         categoryIds: categoryId,
-        override: PerModelCategoryVisibility.Override.None,
+        override: "none",
       });
     });
   });
@@ -243,16 +243,16 @@ describe("CategoryVisibilityUtils", () => {
       for (let i = 0; i < categoryIds.length; ++i) {
         expect(nonMockedViewport.viewsCategory(categoryIds[i])).to.eq(i === 0);
       }
-      nonMockedViewport.setPerModelCategoryOverride({ modelIds: modelIds[0], categoryIds: categoryIds[0], override: PerModelCategoryVisibility.Override.Hide });
-      nonMockedViewport.setPerModelCategoryOverride({ modelIds: modelIds[1], categoryIds: categoryIds[1], override: PerModelCategoryVisibility.Override.Show });
+      nonMockedViewport.setPerModelCategoryOverride({ modelIds: modelIds[0], categoryIds: categoryIds[0], override: "hide" });
+      nonMockedViewport.setPerModelCategoryOverride({ modelIds: modelIds[1], categoryIds: categoryIds[1], override: "show" });
       await invertAllCategories(
         categoryIds.map((id) => ({ categoryId: id })),
         nonMockedViewport,
       );
       for (const id of categoryIds) {
         expect(nonMockedViewport.viewsCategory(id)).to.be.true;
-        expect(nonMockedViewport.getPerModelCategoryOverride({ modelId: modelIds[0], categoryId: id })).to.eq(PerModelCategoryVisibility.Override.None);
-        expect(nonMockedViewport.getPerModelCategoryOverride({ modelId: modelIds[1], categoryId: id })).to.eq(PerModelCategoryVisibility.Override.None);
+        expect(nonMockedViewport.getPerModelCategoryOverride({ modelId: modelIds[0], categoryId: id })).to.eq("none");
+        expect(nonMockedViewport.getPerModelCategoryOverride({ modelId: modelIds[1], categoryId: id })).to.eq("none");
       }
     });
 
@@ -263,20 +263,16 @@ describe("CategoryVisibilityUtils", () => {
       for (let i = 0; i < categoryIds.length; ++i) {
         expect(nonMockedViewport.viewsCategory(categoryIds[i])).to.eq(i === 0);
       }
-      nonMockedViewport.setPerModelCategoryOverride({ modelIds: modelIds[0], categoryIds: categoryIds[0], override: PerModelCategoryVisibility.Override.Show });
-      nonMockedViewport.setPerModelCategoryOverride({ modelIds: modelIds[1], categoryIds: categoryIds[1], override: PerModelCategoryVisibility.Override.Hide });
+      nonMockedViewport.setPerModelCategoryOverride({ modelIds: modelIds[0], categoryIds: categoryIds[0], override: "show" });
+      nonMockedViewport.setPerModelCategoryOverride({ modelIds: modelIds[1], categoryIds: categoryIds[1], override: "hide" });
       await invertAllCategories(
         categoryIds.map((id) => ({ categoryId: id })),
         nonMockedViewport,
       );
       for (let i = 0; i < categoryIds.length; ++i) {
         expect(nonMockedViewport.viewsCategory(categoryIds[i])).to.eq(i !== 0);
-        expect(nonMockedViewport.getPerModelCategoryOverride({ modelId: modelIds[0], categoryId: categoryIds[i] })).to.eq(
-          PerModelCategoryVisibility.Override.None,
-        );
-        expect(nonMockedViewport.getPerModelCategoryOverride({ modelId: modelIds[1], categoryId: categoryIds[i] })).to.eq(
-          PerModelCategoryVisibility.Override.None,
-        );
+        expect(nonMockedViewport.getPerModelCategoryOverride({ modelId: modelIds[0], categoryId: categoryIds[i] })).to.eq("none");
+        expect(nonMockedViewport.getPerModelCategoryOverride({ modelId: modelIds[1], categoryId: categoryIds[i] })).to.eq("none");
       }
     });
   });

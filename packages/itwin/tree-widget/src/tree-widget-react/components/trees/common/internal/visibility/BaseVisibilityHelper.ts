@@ -25,7 +25,6 @@ import {
   tap,
 } from "rxjs";
 import { assert, Id64 } from "@itwin/core-bentley";
-import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { createVisibilityStatus } from "../Tooltip.js";
 import { getSetFromId64Arg, setDifference, setIntersection } from "../Utils.js";
 import {
@@ -280,7 +279,7 @@ export class BaseVisibilityHelper implements Disposable {
             continue;
           }
           const override = this.#props.viewport.getPerModelCategoryOverride({ modelId, categoryId: props.categoryId });
-          if (override === PerModelCategoryVisibility.Override.Show) {
+          if (override === "show") {
             if (visibility === "hidden") {
               return createVisibilityStatus("partial");
             }
@@ -288,7 +287,7 @@ export class BaseVisibilityHelper implements Disposable {
             ++nonDefaultModelDisplayStatesCount;
             continue;
           }
-          if (override === PerModelCategoryVisibility.Override.Hide) {
+          if (override === "hide") {
             if (visibility === "visible") {
               return createVisibilityStatus("partial");
             }
@@ -433,10 +432,7 @@ export class BaseVisibilityHelper implements Disposable {
     let visibleCount = 0;
     for (const categoryId of Id64.iterable(categoryIds)) {
       const override = this.#props.viewport.getPerModelCategoryOverride({ modelId, categoryId });
-      if (
-        override === PerModelCategoryVisibility.Override.Show ||
-        (override === PerModelCategoryVisibility.Override.None && viewport.viewsCategory(categoryId))
-      ) {
+      if (override === "show" || (override === "none" && viewport.viewsCategory(categoryId))) {
         ++visibleCount;
         continue;
       }
@@ -675,15 +671,10 @@ export class BaseVisibilityHelper implements Disposable {
   private changeCategoryStateInViewportAccordingToModelVisibility(modelId: string, categoryId: string, on: boolean, changeSubCategories: boolean) {
     const viewport = this.#props.viewport;
     const isDisplayedInSelector = viewport.viewsCategory(categoryId);
-    const override =
-      on === isDisplayedInSelector
-        ? PerModelCategoryVisibility.Override.None
-        : on
-          ? PerModelCategoryVisibility.Override.Show
-          : PerModelCategoryVisibility.Override.Hide;
+    const override = on === isDisplayedInSelector ? "none" : on ? "show" : "hide";
     viewport.setPerModelCategoryOverride({ modelIds: modelId, categoryIds: categoryId, override });
 
-    if (override === PerModelCategoryVisibility.Override.None && on) {
+    if (override === "none" && on) {
       // we took off the override which means the category is displayed in selector, but
       // doesn't mean all its subcategories are displayed - this call ensures that
       viewport.changeCategoryDisplay({ categoryIds: categoryId, display: true, enableAllSubCategories: changeSubCategories });
@@ -733,14 +724,14 @@ export class BaseVisibilityHelper implements Disposable {
               viewport.setPerModelCategoryOverride({
                 modelIds: modelIdFromProps,
                 categoryIds,
-                override: on ? PerModelCategoryVisibility.Override.Show : PerModelCategoryVisibility.Override.Hide,
+                override: on ? "show" : "hide",
               }),
             )
           : concat(
               from(enableCategoryDisplay(viewport, categoryIds, on, on)),
               modelIdsObservable.pipe(
                 map(([modelId, modelCategories]) => {
-                  viewport.setPerModelCategoryOverride({ modelIds: modelId, categoryIds: modelCategories, override: PerModelCategoryVisibility.Override.None });
+                  viewport.setPerModelCategoryOverride({ modelIds: modelId, categoryIds: modelCategories, override: "none" });
                 }),
               ),
             ),

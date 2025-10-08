@@ -6,7 +6,6 @@
 import { map, reduce } from "rxjs";
 import { Id64 } from "@itwin/core-bentley";
 import { QueryRowFormat } from "@itwin/core-common";
-import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { reduceWhile } from "./Rxjs.js";
 import { createVisibilityStatus } from "./Tooltip.js";
 import { getClassesByView, releaseMainThreadOnItemsCount } from "./Utils.js";
@@ -178,7 +177,7 @@ export async function enableCategoryDisplay(viewport: TreeWidgetViewport, catego
       modelsContainingOverrides.push(override.modelId);
     }
   }
-  viewport.setPerModelCategoryOverride({ modelIds: modelsContainingOverrides, categoryIds, override: PerModelCategoryVisibility.Override.None });
+  viewport.setPerModelCategoryOverride({ modelIds: modelsContainingOverrides, categoryIds, override: "none" });
 
   // changeCategoryDisplay only enables subcategories, it does not disabled them. So we must do that ourselves.
   if (false === enabled) {
