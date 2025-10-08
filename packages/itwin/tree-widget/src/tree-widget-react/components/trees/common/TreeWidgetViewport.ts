@@ -119,7 +119,7 @@ export interface TreeWidgetViewport {
    *
    * When category is not displayed, all elements and sub-categories which have that category should not be shown in the viewport.
    *
-   * **NOTE** Elements might still be visible if per-model category `Show` override or [[alwaysDrawn]] set makes them visible.
+   * **NOTE** Elements might still be visible if per-model category `Show` override or `alwaysDrawn` set makes them visible.
    */
   viewsCategory: (categoryId: Id64String) => boolean;
   /**
