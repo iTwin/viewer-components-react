@@ -74,18 +74,18 @@ export function createTreeWidgetViewport(viewport: Viewport | TreeWidgetViewport
  * Viewport should only display elements. Since elements have model, category and sub-category assigned to them, each of these can affect element visibility.
  *
  * The order of precedence for visibility is:
- * 1. Model visibility - if model is not visible, elements with that model should never be displayed.
- * 2. [[neverDrawn]] list - elements in that list should never be displayed.
- * 3. [[alwaysDrawn]] list - elements in that list should always be displayed.
+ * 1. Model visibility - if model is not visible, elements from that model should never be displayed.
+ * 2. `neverDrawn` set - elements in that set should never be displayed.
+ * 3. `alwaysDrawn` set - elements in that set should always be displayed.
  * 4. Per-model category visibility overrides:
- * -  if category has `Hide` override for a model, elements which have that category and model should not be displayed.
- * -  if category has `Show` override for a model, elements which have that category and model should be displayed.
- * 5. Category and sub-category visibility - if category or sub-category is not visible, elements with that category/sub-category should not be displayed.
+ * -  if a per-model-category has `Hide` override, elements which have that category and model should not be displayed.
+ * -  if a per-model-category has `Show` override, elements which have that category and model should be displayed.
+ * 5. Category and sub-category visibility - if element's category or sub-category is turned off, it should not be displayed.
  *
  * Based on this order of precedence, element can only be displayed in these scenarios:
- * - Model is visible *AND* element is in [[alwaysDrawn]] list.
- * - Model is visible *AND* element is not in [[neverDrawn]] list *AND* per-model category override is set to show `Show`.
- * - Model is visible *AND* element is not in [[neverDrawn]] list *AND* per-model category override is not set to `Hide` *AND* category and sub-category are visible.
+ * - Model is visible *AND* element is in `alwaysDrawn` set.
+ * - Model is visible *AND* element is not in `neverDrawn` set *AND* per-model category override is set to show `Show`.
+ * - Model is visible *AND* element is not in `neverDrawn` set *AND* per-model category override is not set to `Hide` *AND* category and sub-category are visible.
  * @public
  */
 export interface TreeWidgetViewport {
