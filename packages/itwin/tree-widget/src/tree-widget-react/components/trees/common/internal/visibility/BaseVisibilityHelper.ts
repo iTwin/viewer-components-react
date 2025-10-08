@@ -36,7 +36,7 @@ import {
 } from "../VisibilityUtils.js";
 
 import type { Observable, Subscription } from "rxjs";
-import type { Id64Arg, Id64String } from "@itwin/core-bentley";
+import type { Id64Arg, Id64String, Id64Set } from "@itwin/core-bentley";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { TreeWidgetViewport } from "../../TreeWidgetViewport.js";
 import type { HierarchyVisibilityHandlerOverridableMethod, HierarchyVisibilityOverrideHandler, VisibilityStatus } from "../../UseHierarchyVisibility.js";
@@ -77,6 +77,7 @@ export interface BaseIdsCache {
   getSubModels: (
     props: { modelIds: Id64Arg } | { categoryIds: Id64Arg; modelId: Id64String | undefined },
   ) => Observable<{ id: Id64String; subModels: Id64Arg | undefined }>;
+  getAllCategories: () => Observable<{ drawingCategories?: Id64Set; spatialCategories?: Id64Set }>;
 }
 
 /**
@@ -119,6 +120,28 @@ export class BaseVisibilityHelper implements Disposable {
 
   public [Symbol.dispose]() {
     this.#subscriptions.forEach((x) => x.unsubscribe());
+  }
+
+  /**
+   * Removes "always drawn exclusive" mode from the viewport without affecting any visibilities.
+   *
+   * This is achieved by:
+   * - Resets `alwaysDrawn` exclusive flag to `false`;
+   * - Turns off all categories;
+   * - Clears always drawn list;
+   * - Removes all per-model category overrides. */
+  public removeAlwaysDrawnExclusive(): Observable<void> {
+    return from(this.#props.baseIdsCache.getAllCategories()).pipe(
+      map(({ drawingCategories, spatialCategories }) => {
+        const categoriesToTurnOff = this.#props.viewport.viewType === "2d" ? drawingCategories : spatialCategories;
+        if (categoriesToTurnOff) {
+          this.#props.viewport.changeCategoryDisplay({ categoryIds: categoriesToTurnOff, display: false, enableAllSubCategories: false });
+        }
+        this.#props.viewport.clearNeverDrawn();
+        this.#props.viewport.clearPerModelCategoryOverrides();
+        this.#props.viewport.setAlwaysDrawn({ elementIds: this.#props.viewport.alwaysDrawn ?? new Set() });
+      }),
+    );
   }
 
   /**
@@ -555,6 +578,14 @@ export class BaseVisibilityHelper implements Disposable {
       alwaysDrawn: this.#alwaysAndNeverDrawnElements.getAlwaysDrawnElements(props.queryProps),
       neverDrawn: this.#alwaysAndNeverDrawnElements.getNeverDrawnElements(props.queryProps),
     }).pipe(
+      // There is a known bug:
+      // Categories that don't have root elements will make visibility result incorrect
+      // E.g.:
+      // - CategoryA
+      //  - ElementA (CategoryA is visible)
+      //    - ChildElementB (CategoryB is hidden) ChildElementB is in always drawn list
+      // Result will be "partial" because CategoryB will return hidden visibility, even though all elements are visible
+      // TODO fix with: https://github.com/iTwin/viewer-components-react/issues/1100
       map((state) => {
         return getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
           ...props,

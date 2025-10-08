@@ -60,7 +60,7 @@ interface UseHierarchyVisibilityProps {
 export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarchyVisibilityProps): VisibilityContext & { triggerRefresh: () => void } {
   const visibilityStatusMap = useRef(new Map<string, { node: PresentationHierarchyNode; status: TreeItemVisibilityButtonState; needsRefresh: boolean }>());
   const [state, setState] = useState<VisibilityContext & { triggerRefresh: () => void }>({
-    getVisibilityButtonState: () => ({ state: "visible", isDisabled: true }),
+    getVisibilityButtonState: () => ({ isLoading: true }),
     onVisibilityButtonClick: () => {},
     triggerRefresh: () => {},
   });
@@ -129,8 +129,11 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
       if (!entry) {
         return;
       }
-      entry.status.state = visibilityState;
-      entry.status.tooltip = createTooltip("determining");
+      entry.status = {
+        ...entry.status,
+        state: visibilityState,
+        tooltip: createTooltip("determining"),
+      };
       triggerCheckboxUpdate();
     };
 
@@ -166,18 +169,14 @@ function createStateGetter(
     const entry = map.current.get(node.id);
     if (entry === undefined) {
       calculateVisibility(node);
-      return { state: "visible", isDisabled: true, tooltip: createTooltip("determining") };
+      return { isLoading: true };
     }
+
     if (entry.needsRefresh) {
       calculateVisibility(node);
     }
 
-    const status = entry.status;
-    return {
-      state: status.state,
-      tooltip: status.tooltip,
-      isDisabled: status.isDisabled,
-    };
+    return entry.status;
   };
 }
 

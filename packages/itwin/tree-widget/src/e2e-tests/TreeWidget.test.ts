@@ -9,7 +9,7 @@ import { initTreeWidgetTest, locateNode, selectTree, takeScreenshot } from "./ut
 
 // Skipped because tree selector uses native `select` element. Expanded selected are rendered by OS and they are not
 // part of the page so playwright cannot see them when taking screenshot.
-// Same issue is in pupppeteer https://github.com/puppeteer/puppeteer/issues/1306
+// Same issue is in puppeteer https://github.com/puppeteer/puppeteer/issues/1306
 test.describe.skip("Widget", () => {
   let treeWidget: Locator;
 

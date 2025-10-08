@@ -38,7 +38,7 @@ test.describe("iModel content tree", () => {
 
     const pipeSupportNode = locateNode(treeWidget, "Drawing (4)");
     await expandNode(page, pipeSupportNode);
-
+    // cspell:disable-next-line
     const coolersNode = locateNode(treeWidget, "OPPID-04-COOLERS");
     await expandNode(page, coolersNode);
 

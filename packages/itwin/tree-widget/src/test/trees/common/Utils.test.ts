@@ -21,7 +21,7 @@ describe("Utils", () => {
     const element3 = { id: "0x7", className: "c", imodelKey: "key" };
     const element4 = { id: "0x8", className: "c", imodelKey: "key" };
 
-    it("returns empty when filter and subTree paths dont overlap", () => {
+    it("returns empty when filter and subTree paths don't overlap", () => {
       const subTreePaths: HierarchyNodeIdentifiersPath[] = [[subject, model]];
       const filterPaths: NormalizedHierarchyFilteringPath[] = [
         { path: [subject, { ...model, imodelKey: "random" }] },

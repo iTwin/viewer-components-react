@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import "./MapLayersWidget.scss";
 import * as React from "react";
 import { useActiveViewport } from "@itwin/appui-react";
 import { Flex } from "@itwin/itwinui-react";
@@ -44,7 +45,7 @@ export function MapLayersWidget(props: MapLayersWidgetProps) {
   }
 
   return (
-    <Flex justifyContent="center" style={{ width: "100%", height: "100%" }}>
+    <Flex justifyContent="center" className="map-layers-widget-not-geo-located">
       <div className="map-manager-not-geo-located-text">{notGeoLocatedMsg}</div>
     </Flex>
   );

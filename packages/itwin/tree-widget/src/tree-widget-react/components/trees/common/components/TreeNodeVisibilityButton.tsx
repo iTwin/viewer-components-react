@@ -14,15 +14,24 @@ import { createTooltip } from "../internal/Tooltip.js";
 
 import type { PropsWithChildren } from "react";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+
+/** @beta */
+interface LoadedTreeItemVisibilityButtonState {
+  state: "visible" | "hidden" | "partial";
+  isDisabled?: boolean;
+}
 /**
  * Data structure that describes tree node checkbox state.
  * @beta
  */
-export interface TreeItemVisibilityButtonState {
-  state: "visible" | "partial" | "hidden";
-  isDisabled?: boolean;
+export type TreeItemVisibilityButtonState = (
+  | LoadedTreeItemVisibilityButtonState
+  | {
+      isLoading: true;
+    }
+) & {
   tooltip?: string;
-}
+};
 
 /** @beta */
 export interface TreeItemVisibilityButtonProps {
@@ -45,7 +54,7 @@ export const VisibilityAction = memo(function VisibilityAction({ node, reserveSp
   const context = useVisibilityContext();
   const state = context?.getVisibilityButtonState(node);
 
-  if (!context || !state || state.isDisabled) {
+  if (!context || !state || ("isDisabled" in state && state.isDisabled) || "isLoading" in state) {
     return reserveSpace ? (
       <Tree.ItemAction label={TreeWidget.translate(`visibilityTooltips.status.disabled`)} visible={false} icon={visibilityShowSvg} />
     ) : undefined;
@@ -75,7 +84,7 @@ export const VisibilityAction = memo(function VisibilityAction({ node, reserveSp
 /** @beta */
 export interface VisibilityContext {
   /** Callback that should be invoked when checkbox is clicked. */
-  onVisibilityButtonClick: (node: PresentationHierarchyNode, state: TreeItemVisibilityButtonState["state"]) => void;
+  onVisibilityButtonClick: (node: PresentationHierarchyNode, state: LoadedTreeItemVisibilityButtonState["state"]) => void;
   /** Callback that should be used to determine current checkbox state. */
   getVisibilityButtonState: (node: PresentationHierarchyNode) => TreeItemVisibilityButtonState;
 }

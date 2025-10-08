@@ -377,7 +377,6 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         await setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
 
         await handler.changeVisibility(createClassificationHierarchyNode({ id: keys.childClassification1.id }), true);
-        viewport.renderFrame();
         await validateHierarchyVisibility({
           provider,
           handler,
@@ -469,7 +468,6 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           createPhysicalElementHierarchyNode({ id: keys.targetPhysicalElement.id, categoryId: keys.spatialCategory.id, modelId: keys.physicalModel.id }),
           true,
         );
-        viewport.renderFrame();
         await validateHierarchyVisibility({
           provider,
           handler,
@@ -912,7 +910,6 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         }),
         true,
       );
-      viewport.renderFrame();
 
       await validateHierarchyVisibility({
         provider: filteredProvider,
@@ -1081,7 +1078,6 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         }),
         true,
       );
-      viewport.renderFrame();
 
       await validateHierarchyVisibility({
         provider: filteredProvider,
@@ -1173,7 +1169,6 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         }),
         true,
       );
-      viewport.renderFrame();
 
       await validateHierarchyVisibility({
         provider: filteredProvider,
@@ -1324,10 +1319,12 @@ function createHiddenTestData(keys: { [key: string]: InstanceKey }) {
       categories.push({ id: key.id, visible: false });
       continue;
     }
+    // cspell:disable-next-line
     if (key.className.toLowerCase().includes("physicalobject")) {
       elements.push({ id: key.id, visible: false });
       continue;
     }
+    // cspell:disable-next-line
     if (key.className.toLowerCase().includes("drawinggraphic")) {
       elements.push({ id: key.id, visible: false });
       continue;

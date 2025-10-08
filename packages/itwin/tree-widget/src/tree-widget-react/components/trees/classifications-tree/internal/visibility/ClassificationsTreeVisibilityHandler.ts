@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, from, map, merge, mergeMap, of, toArray } from "rxjs";
+import { concat, defer, EMPTY, from, map, merge, mergeMap, of, toArray } from "rxjs";
 import { Id64 } from "@itwin/core-bentley";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { releaseMainThreadOnItemsCount } from "../../../common/internal/Utils.js";
@@ -43,6 +43,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
     // We won't need to create a custom base ids cache.
     const baseIdsCache: BaseIdsCache = {
       getCategories: (props) => this.getCategories(props),
+      getAllCategories: () => this.getAllCategories(),
       getElementsCount: (props) => this.getElementsCount(props),
       getModels: (props) => this.getModels(props),
       getSubCategories: (props) => this.getSubCategories(props),
@@ -120,30 +121,36 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
 
   /** Changes visibility of the items represented by the tree node. */
   public changeVisibilityStatus(node: HierarchyNode, on: boolean): Observable<void> {
-    if (!HierarchyNode.isInstancesNode(node)) {
-      return EMPTY;
-    }
+    const changeObs = defer(() => {
+      if (!HierarchyNode.isInstancesNode(node)) {
+        return EMPTY;
+      }
 
-    if (ClassificationsTreeNode.isClassificationTableNode(node)) {
-      return this.#visibilityHelper.changeClassificationTablesVisibilityStatus({
-        classificationTableIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
+      if (ClassificationsTreeNode.isClassificationTableNode(node)) {
+        return this.#visibilityHelper.changeClassificationTablesVisibilityStatus({
+          classificationTableIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
+          on,
+        });
+      }
+
+      if (ClassificationsTreeNode.isClassificationNode(node)) {
+        return this.#visibilityHelper.changeClassificationsVisibilityStatus({
+          classificationIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
+          on,
+        });
+      }
+
+      return this.#visibilityHelper.changeElementsVisibilityStatus({
+        elementIds: node.key.instanceKeys.map(({ id }) => id),
+        modelId: ClassificationsTreeNode.getModelId(node),
+        categoryId: ClassificationsTreeNode.getCategoryId(node),
         on,
       });
-    }
-
-    if (ClassificationsTreeNode.isClassificationNode(node)) {
-      return this.#visibilityHelper.changeClassificationsVisibilityStatus({
-        classificationIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
-        on,
-      });
-    }
-
-    return this.#visibilityHelper.changeElementsVisibilityStatus({
-      elementIds: node.key.instanceKeys.map(({ id }) => id),
-      modelId: ClassificationsTreeNode.getModelId(node),
-      categoryId: ClassificationsTreeNode.getCategoryId(node),
-      on,
     });
+    if (this.#props.viewport.isAlwaysDrawnExclusive) {
+      return concat(this.#visibilityHelper.removeAlwaysDrawnExclusive(), changeObs);
+    }
+    return changeObs;
   }
 
   public getFilterTargetsVisibilityStatus(targets: ClassificationsTreeFilterTargets): Observable<VisibilityStatus> {
@@ -200,6 +207,14 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
           map(({ spatial, drawing }) => ({ id: modelId, drawingCategories: drawing, spatialCategories: spatial })),
         ),
       ),
+    );
+  }
+
+  private getAllCategories(): ReturnType<BaseIdsCache["getAllCategories"]> {
+    return from(this.#props.idsCache.getAllCategories()).pipe(
+      map(({ drawing, spatial }) => {
+        return { drawingCategories: drawing, spatialCategories: spatial };
+      }),
     );
   }
 

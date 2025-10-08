@@ -260,7 +260,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
         setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
 
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerRoot.id), true);
-        viewport.renderFrame();
         await validateHierarchyVisibility({
           provider,
           handler,
@@ -303,7 +302,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
         setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
 
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), true);
-        viewport.renderFrame();
         await validateHierarchyVisibility({
           provider,
           handler,
@@ -345,7 +343,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
         setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
 
         await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), true);
-        viewport.renderFrame();
         await validateHierarchyVisibility({
           provider,
           handler,
@@ -879,7 +876,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
           setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
 
           await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerRoot.id), true);
-          viewport.renderFrame();
           await validateHierarchyVisibility({
             provider,
             handler,
@@ -925,7 +921,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
           setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
 
           await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), true);
-          viewport.renderFrame();
           await validateHierarchyVisibility({
             provider,
             handler,
@@ -983,7 +978,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
           setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
 
           await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), true);
-          viewport.renderFrame();
           await validateHierarchyVisibility({
             provider,
             handler,
@@ -1105,7 +1099,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
           setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
 
           await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
-          viewport.renderFrame();
           await validateHierarchyVisibility({
             provider,
             handler,
@@ -1157,7 +1150,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
           setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
 
           await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
-          viewport.renderFrame();
           await validateHierarchyVisibility({
             provider,
             handler,
@@ -1210,7 +1202,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
           setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
 
           await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
-          viewport.renderFrame();
           await validateHierarchyVisibility({
             provider,
             handler,
@@ -1260,7 +1251,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
           setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
 
           await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
-          viewport.renderFrame();
           await validateHierarchyVisibility({
             provider,
             handler,
@@ -1499,7 +1489,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
             createElementHierarchyNode({ modelId: keys.physicalModel.id, categoryId: keys.category.id, elementId: keys.element.id }),
             true,
           );
-          viewport.renderFrame();
 
           await validateHierarchyVisibility({
             provider,
@@ -1545,7 +1534,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
             createElementHierarchyNode({ modelId: keys.physicalModel.id, categoryId: keys.category.id, elementId: keys.element.id }),
             true,
           );
-          viewport.renderFrame();
           await validateHierarchyVisibility({
             provider,
             handler,
@@ -1591,7 +1579,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
             createElementHierarchyNode({ modelId: keys.physicalModel.id, categoryId: keys.category.id, elementId: keys.element.id }),
             true,
           );
-          viewport.renderFrame();
           await validateHierarchyVisibility({
             provider,
             handler,
@@ -1930,7 +1917,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 expectations: "all-hidden",
               });
               await handler.changeVisibility(nodeToChangeVisibility, true);
-              viewport.renderFrame();
               await validateHierarchyVisibility({
                 provider,
                 handler,
@@ -1938,7 +1924,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 expectations: expectations(createdIds),
               });
               await handler.changeVisibility(nodeToChangeVisibility, false);
-              viewport.renderFrame();
               await validateHierarchyVisibility({
                 provider,
                 handler,
@@ -2828,6 +2813,7 @@ function createHiddenTestData(keys: { [key: string]: InstanceKey }) {
       subCategories.push({ id: getDefaultSubCategoryId(key.id), visible: false });
       continue;
     }
+    // cspell:disable-next-line
     if (key.className.toLowerCase().includes("physicalobject")) {
       elements.push({ id: key.id, visible: false });
       continue;

@@ -212,6 +212,17 @@ export class ClassificationsTreeIdsCache implements Disposable {
     };
   }
 
+  public async getAllCategories(): Promise<{ drawing: Id64Set; spatial: Id64Set }> {
+    const resultDrawing = new Set<Id64String>();
+    const resultSpatial = new Set<Id64String>();
+    const modelsCategoriesInfo = await this.getElementModelsCategories();
+    modelsCategoriesInfo.forEach(({ category2dIds, category3dIds }) => {
+      category2dIds.forEach((id) => resultDrawing.add(id));
+      category3dIds.forEach((id) => resultSpatial.add(id));
+    });
+    return { drawing: resultDrawing, spatial: resultSpatial };
+  }
+
   public async hasSubModel(elementId: Id64String): Promise<boolean> {
     const elementModelsCategories = await this.getElementModelsCategories();
     return elementModelsCategories.has(elementId);

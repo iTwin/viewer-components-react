@@ -124,6 +124,9 @@ export async function validateHierarchyVisibility({
   provider: HierarchyProvider;
   waitForOptions?: waitForOptions;
 }) {
+  props.viewport.renderFrame();
+  // This promise allows handler change event to fire if it was scheduled.
+  await new Promise((resolve) => setTimeout(resolve));
   await toVoidPromise(
     from(provider.getNodes({ parentNode: undefined })).pipe(
       expand((node) => provider.getNodes({ parentNode: node })),

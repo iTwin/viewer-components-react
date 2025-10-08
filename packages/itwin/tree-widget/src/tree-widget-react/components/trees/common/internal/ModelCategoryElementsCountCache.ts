@@ -42,7 +42,7 @@ export class ModelCategoryElementsCountCache implements Disposable {
 
   private async queryCategoryElementCounts(
     input: Array<{ modelId: Id64String; categoryId: Id64String }>,
-  ): Promise<Array<{ modelId: number; categoryId: number; elementsCount: number }>> {
+  ): Promise<Array<{ modelId: Id64String; categoryId: Id64String; elementsCount: number }>> {
     return collect(
       from(input).pipe(
         reduce((acc, { modelId, categoryId }) => {
@@ -98,10 +98,15 @@ export class ModelCategoryElementsCountCache implements Disposable {
             { rowFormat: "ECSqlPropertyNames", limit: "unbounded" },
           );
 
-          const result = new Array<{ modelId: number; categoryId: number; elementsCount: number }>();
+          const result = new Array<{ modelId: Id64String; categoryId: Id64String; elementsCount: number }>();
           for await (const row of reader) {
             result.push({ modelId: row.modelId, categoryId: row.categoryId, elementsCount: row.elementsCount });
           }
+          input.forEach(({ modelId, categoryId }) => {
+            if (!result.some((queriedResult) => queriedResult.categoryId === categoryId && queriedResult.modelId === modelId)) {
+              result.push({ categoryId, modelId, elementsCount: 0 });
+            }
+          });
           return result;
         }),
         mergeAll(),

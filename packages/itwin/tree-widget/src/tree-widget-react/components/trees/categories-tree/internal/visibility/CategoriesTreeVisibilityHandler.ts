@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, from, map, merge, mergeMap, of } from "rxjs";
+import { concat, defer, EMPTY, from, map, merge, mergeMap, of } from "rxjs";
 import { assert, Id64 } from "@itwin/core-bentley";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
@@ -51,6 +51,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
     // We won't need to create a custom base ids cache.
     const baseIdsCache: BaseIdsCache = {
       getCategories: (props) => this.getCategories(props),
+      getAllCategories: () => this.getAllCategories(),
       getElementsCount: (props) => this.getElementsCount(props),
       getModels: (props) => this.getModels(props),
       getSubCategories: (props) => this.getSubCategories(props),
@@ -169,65 +170,72 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
 
   /** Changes visibility of the items represented by the tree node. */
   public changeVisibilityStatus(node: HierarchyNode, on: boolean): Observable<void> {
-    if (HierarchyNode.isClassGroupingNode(node)) {
-      const nodeInfo = this.getGroupingNodeInfo(node);
-      return this.#visibilityHelper.changeGroupedElementsVisibilityStatus({
-        categoryId: nodeInfo.categoryId,
-        modelElementsMap: nodeInfo.modelElementsMap,
-        on,
-      });
-    }
+    const changeObs = defer(() => {
+      if (HierarchyNode.isClassGroupingNode(node)) {
+        const nodeInfo = this.getGroupingNodeInfo(node);
+        return this.#visibilityHelper.changeGroupedElementsVisibilityStatus({
+          categoryId: nodeInfo.categoryId,
+          modelElementsMap: nodeInfo.modelElementsMap,
+          on,
+        });
+      }
 
-    if (!HierarchyNode.isInstancesNode(node)) {
-      return EMPTY;
-    }
+      if (!HierarchyNode.isInstancesNode(node)) {
+        return EMPTY;
+      }
 
-    if (CategoriesTreeNode.isDefinitionContainerNode(node)) {
-      return this.#visibilityHelper.changeDefinitionContainersVisibilityStatus({
-        definitionContainerIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
-        on,
-      });
-    }
+      if (CategoriesTreeNode.isDefinitionContainerNode(node)) {
+        return this.#visibilityHelper.changeDefinitionContainersVisibilityStatus({
+          definitionContainerIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
+          on,
+        });
+      }
 
-    if (CategoriesTreeNode.isModelNode(node)) {
-      return this.#visibilityHelper.changeModelsVisibilityStatus({
-        modelIds: node.key.instanceKeys.map(({ id }) => id),
-        on,
-      });
-    }
+      if (CategoriesTreeNode.isModelNode(node)) {
+        return this.#visibilityHelper.changeModelsVisibilityStatus({
+          modelIds: node.key.instanceKeys.map(({ id }) => id),
+          on,
+        });
+      }
 
-    if (CategoriesTreeNode.isCategoryNode(node)) {
-      return this.#visibilityHelper.changeCategoriesVisibilityStatus({
-        categoryIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
-        modelId: CategoriesTreeNode.getModelId(node),
-        on,
-      });
-    }
+      if (CategoriesTreeNode.isCategoryNode(node)) {
+        return this.#visibilityHelper.changeCategoriesVisibilityStatus({
+          categoryIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
+          modelId: CategoriesTreeNode.getModelId(node),
+          on,
+        });
+      }
 
-    const categoryId = CategoriesTreeNode.getCategoryId(node);
-    if (!categoryId) {
-      return EMPTY;
-    }
+      const categoryId = CategoriesTreeNode.getCategoryId(node);
+      if (!categoryId) {
+        return EMPTY;
+      }
 
-    if (CategoriesTreeNode.isSubCategoryNode(node)) {
-      return this.#visibilityHelper.changeSubCategoriesVisibilityStatus({
+      if (CategoriesTreeNode.isSubCategoryNode(node)) {
+        return this.#visibilityHelper.changeSubCategoriesVisibilityStatus({
+          categoryId,
+          subCategoryIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
+          on,
+        });
+      }
+
+      const modelId = CategoriesTreeNode.getModelId(node);
+      if (!modelId) {
+        return EMPTY;
+      }
+
+      return this.#visibilityHelper.changeElementsVisibilityStatus({
+        elementIds: node.key.instanceKeys.map(({ id }) => id),
+        modelId,
         categoryId,
-        subCategoryIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
         on,
       });
-    }
-
-    const modelId = CategoriesTreeNode.getModelId(node);
-    if (!modelId) {
-      return EMPTY;
-    }
-
-    return this.#visibilityHelper.changeElementsVisibilityStatus({
-      elementIds: node.key.instanceKeys.map(({ id }) => id),
-      modelId,
-      categoryId,
-      on,
     });
+
+    if (this.#props.viewport.isAlwaysDrawnExclusive) {
+      return concat(this.#visibilityHelper.removeAlwaysDrawnExclusive(), changeObs);
+    }
+    return changeObs;
   }
 
   public getFilterTargetsVisibilityStatus(targets: CategoriesTreeFilterTargets): Observable<VisibilityStatus> {
@@ -289,6 +297,17 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
           })),
         ),
       ),
+    );
+  }
+
+  private getAllCategories(): ReturnType<BaseIdsCache["getAllCategories"]> {
+    return from(this.#props.idsCache.getAllCategories()).pipe(
+      map((categories) => {
+        if (this.#props.viewport.view.is2d()) {
+          return { drawingCategories: categories };
+        }
+        return { spatialCategories: categories };
+      }),
     );
   }
 
