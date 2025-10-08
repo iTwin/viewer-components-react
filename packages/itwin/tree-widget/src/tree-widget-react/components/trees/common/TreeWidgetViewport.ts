@@ -101,11 +101,7 @@ export interface TreeWidgetViewport {
    * When model is not displayed, all elements that have that model should not be shown in the viewport.
    */
   viewsModel: (modelId: Id64String) => boolean;
-  /** Should add models to the set of those currently displayed in this viewport.
-   * @param modelIds The Ids of the models to add or remove.
-   *
-   * **NOTE** If any of the requested models are not yet loaded this function should asynchronously load them before updating the set of displayed models.
-   */
+  /** Should add models to the set of those currently displayed in this viewport. */
   addViewedModels(modelIds: Id64Arg): Promise<void>;
   /**
    * Should add or remove a set of models from those models currently displayed in this viewport.
