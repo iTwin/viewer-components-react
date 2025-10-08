@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Tree Widget: changed `CategoriesTreeComponentProps`, `ClassificationsTreeComponentProps` and `ModelsTreeComponentProps` to now accept optional viewport of `TreeWidgetViewport` type. It will be used instead of the `Viewport` from `@itwin/core-frontend`. Also, changed `TreeToolbarButtonProps`, `useCategoriesTreeButtonProps`, `UseCategoriesTreeProps`, `UseClassificationsTreeProps`, `useModelsTreeButtonProps` and `UseModelsTreeProps` to accept `TreeWidgetViewport` instead of `Viewport`. To migrate, use `createTreeWidgetViewport` and provide previously used `Viewport` from `@itwin/core-frontend`.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "100586436+JonasDov@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
