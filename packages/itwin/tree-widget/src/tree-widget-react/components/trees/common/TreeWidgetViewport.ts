@@ -197,9 +197,8 @@ export interface TreeWidgetViewport {
   /**
    * Should return true if elements in the [[alwaysDrawn]] set are the *only* elements that are displayed when their models are visible.
    *
-   * Should be set to true when `setAlwaysDrawn` is called with `exclusive` flag.
-   *
-   * Should be set to false when `setAlwaysDrawn` is called with `exclusive` set to false/undefined or when `clearAlwaysDrawn` is called.
+   * Should be set to true when `setAlwaysDrawn` is called with `exclusive` flag. Should be set to false 
+   * when `setAlwaysDrawn` is called with `exclusive` set to `false` or `undefined`, or when `clearAlwaysDrawn` is called.
    */
   readonly isAlwaysDrawnExclusive: boolean;
   /** Event that should be raised when set of always-drawn elements changes. */
