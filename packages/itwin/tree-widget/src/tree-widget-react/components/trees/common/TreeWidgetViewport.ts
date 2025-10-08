@@ -236,10 +236,6 @@ export interface TreeWidgetViewport {
   onDisplayedCategoriesChanged: BeEvent<() => void>;
   /** Event that should be raised when model display changes. */
   onDisplayedModelsChanged: BeEvent<() => void>;
-  /**
-   * Event that should be raised when model, category or sub-category display changes.
-   *
-   * It should also be raised when view changes between `2d`, `3d`, `spatial` or `other`.
-   */
+  /** Event that should be raised when view changes between `2d`, `3d` or `other`. */
   onDisplayStyleChanged: BeEvent<() => void>;
 }
