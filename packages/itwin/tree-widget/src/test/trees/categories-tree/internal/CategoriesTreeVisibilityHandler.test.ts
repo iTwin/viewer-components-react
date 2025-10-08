@@ -5,7 +5,7 @@
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
-import { OffScreenViewport, PerModelCategoryVisibility, ViewRect } from "@itwin/core-frontend";
+import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
@@ -85,12 +85,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
   }) {
     const imodelAccess = createIModelAccess(imodel);
     const idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d");
-    const viewport = createTreeWidgetTestingViewport(
-      OffScreenViewport.create({
-        view: await createViewState(imodel, categoryIds, modelIds),
-        viewRect: new ViewRect(),
-      }),
-    );
+    const viewport = createTreeWidgetTestingViewport({ viewState: await createViewState(imodel, categoryIds, modelIds) });
 
     return {
       imodelAccess,

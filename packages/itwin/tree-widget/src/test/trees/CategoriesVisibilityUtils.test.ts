@@ -6,7 +6,7 @@
 import { expect } from "chai";
 import sinon from "sinon";
 import { IModelReadRpcInterface, SubCategoryAppearance } from "@itwin/core-common";
-import { IModelApp, NoRenderApp, OffScreenViewport, PerModelCategoryVisibility, ViewRect } from "@itwin/core-frontend";
+import { IModelApp, NoRenderApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
@@ -190,12 +190,7 @@ describe("CategoryVisibilityUtils", () => {
       categoryIds = buildIModelResult.categories;
       modelIds = buildIModelResult.models;
       subCategoryIds = buildIModelResult.subCategories;
-      nonMockedViewport = createTreeWidgetTestingViewport(
-        OffScreenViewport.create({
-          view: await createViewState(imodel, categoryIds, modelIds),
-          viewRect: new ViewRect(),
-        }),
-      );
+      nonMockedViewport = createTreeWidgetTestingViewport({ viewState: await createViewState(imodel, categoryIds, modelIds) });
     });
 
     after(async function () {

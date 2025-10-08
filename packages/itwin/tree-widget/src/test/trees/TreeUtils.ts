@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
-import { IModelApp, SpatialViewState } from "@itwin/core-frontend";
+import { IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { createTreeWidgetViewport } from "../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
 
 import type { Id64Array } from "@itwin/core-bentley";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { IModelConnection, ViewState } from "@itwin/core-frontend";
 import type { NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { TreeWidgetViewport } from "../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
@@ -78,11 +78,14 @@ export async function createViewState(iModel: IModelConnection, categoryIds: Id6
   await viewState.load();
   return viewState;
 }
-/** @internal */
+
 export type TreeWidgetTestingViewport = TreeWidgetViewport & { renderFrame: () => void } & Disposable;
 
-/** @internal */
-export function createTreeWidgetTestingViewport(viewport: Viewport): TreeWidgetTestingViewport {
+export function createTreeWidgetTestingViewport({ viewState }: { viewState: ViewState }): TreeWidgetTestingViewport {
+  const viewport = OffScreenViewport.create({
+    view: viewState,
+    viewRect: new ViewRect(),
+  });
   const treeWidgetViewport = createTreeWidgetViewport(viewport);
   return {
     addViewedModels: async (props) => treeWidgetViewport.addViewedModels(props),

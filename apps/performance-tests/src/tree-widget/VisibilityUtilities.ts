@@ -17,7 +17,7 @@ import type { HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/present
 import type { ECSqlQueryDef } from "@itwin/presentation-shared";
 import type { HierarchyVisibilityHandler, TreeWidgetViewport } from "@itwin/tree-widget-react";
 import type { IModelAccess } from "./StatelessHierarchyProvider.js";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { IModelConnection, ViewState } from "@itwin/core-frontend";
 
 type Visibility = "visible" | "hidden" | "partial";
 
@@ -124,17 +124,16 @@ export async function createViewport({
     }
   });
   await viewState.load();
-  return createTreeWidgetTestingViewport(
-    OffScreenViewport.create({
-      view: viewState,
-      viewRect: new ViewRect(),
-    }),
-  );
+  return createTreeWidgetTestingViewport({ viewState });
 }
 
 export type TreeWidgetTestingViewport = TreeWidgetViewport & { renderFrame: () => void } & Disposable;
 
-export function createTreeWidgetTestingViewport(viewport: Viewport): TreeWidgetTestingViewport {
+export function createTreeWidgetTestingViewport({ viewState }: { viewState: ViewState }): TreeWidgetTestingViewport {
+  const viewport = OffScreenViewport.create({
+    view: viewState,
+    viewRect: new ViewRect(),
+  });
   const treeWidgetViewport = createTreeWidgetViewport(viewport);
   return {
     addViewedModels: async (props) => treeWidgetViewport.addViewedModels(props),

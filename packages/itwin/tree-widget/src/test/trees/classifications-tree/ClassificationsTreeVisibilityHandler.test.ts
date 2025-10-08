@@ -5,7 +5,7 @@
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
-import { DrawingViewState, IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
+import { DrawingViewState, IModelApp, SpatialViewState } from "@itwin/core-frontend";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { ClassificationsTreeDefinition } from "../../../tree-widget-react/components/trees/classifications-tree/ClassificationsTreeDefinition.js";
 import { ClassificationsTreeIdsCache } from "../../../tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeIdsCache.js";
@@ -83,12 +83,9 @@ describe("ClassificationsTreeVisibilityHandler", () => {
   }) {
     const imodelAccess = createIModelAccess(imodel);
     const idsCache = new ClassificationsTreeIdsCache(imodelAccess, { rootClassificationSystemCode });
-    const viewport = createTreeWidgetTestingViewport(
-      OffScreenViewport.create({
-        view: view === "3d" ? await createSpatialViewState(imodel, categoryIds, modelIds) : await createDrawingViewState(imodel, categoryIds, modelIds),
-        viewRect: new ViewRect(),
-      }),
-    );
+    const viewport = createTreeWidgetTestingViewport({
+      viewState: view === "3d" ? await createSpatialViewState(imodel, categoryIds, modelIds) : await createDrawingViewState(imodel, categoryIds, modelIds),
+    });
     const handler = createClassificationsTreeVisibilityHandler({ imodelAccess, idsCache, viewport });
     const provider = createProvider({ idsCache, imodelAccess });
     return {
@@ -833,12 +830,9 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     }) {
       const imodelAccess = createIModelAccess(imodel);
       const idsCache = new ClassificationsTreeIdsCache(imodelAccess, { rootClassificationSystemCode });
-      const viewport = createTreeWidgetTestingViewport(
-        OffScreenViewport.create({
-          view: view === "3d" ? await createSpatialViewState(imodel, categoryIds, modelIds) : await createDrawingViewState(imodel, categoryIds, modelIds),
-          viewRect: new ViewRect(),
-        }),
-      );
+      const viewport = createTreeWidgetTestingViewport({
+        viewState: view === "3d" ? await createSpatialViewState(imodel, categoryIds, modelIds) : await createDrawingViewState(imodel, categoryIds, modelIds),
+      });
       const handler = createClassificationsTreeVisibilityHandler({ idsCache, viewport, imodelAccess, filteredPaths: filterPaths });
       const defaultProvider = createProvider({ idsCache, imodelAccess });
       const filteredProvider = createProvider({ idsCache, imodelAccess, filterPaths });

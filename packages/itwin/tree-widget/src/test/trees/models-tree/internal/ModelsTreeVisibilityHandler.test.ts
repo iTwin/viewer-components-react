@@ -7,7 +7,7 @@ import { assert, expect } from "chai";
 import sinon from "sinon";
 import { CompressedId64Set, Id64 } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, IModelReadRpcInterface, RenderMode } from "@itwin/core-common";
-import { IModelApp, NoRenderApp, OffScreenViewport, PerModelCategoryVisibility, SpatialViewState, ViewRect } from "@itwin/core-frontend";
+import { IModelApp, NoRenderApp, PerModelCategoryVisibility, SpatialViewState } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
@@ -1736,12 +1736,7 @@ describe("ModelsTreeVisibilityHandler", () => {
     function createCommonProps(props: { imodel: IModelConnection; hierarchyConfig?: typeof defaultHierarchyConfiguration }) {
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true, ...props.hierarchyConfig };
       const imodelAccess = createIModelAccess(props.imodel);
-      const viewport = createTreeWidgetTestingViewport(
-        OffScreenViewport.create({
-          view: createBlankViewState(props.imodel),
-          viewRect: new ViewRect(),
-        }),
-      );
+      const viewport = createTreeWidgetTestingViewport({ viewState: createBlankViewState(props.imodel) });
       const idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig);
       return {
         imodelAccess,
