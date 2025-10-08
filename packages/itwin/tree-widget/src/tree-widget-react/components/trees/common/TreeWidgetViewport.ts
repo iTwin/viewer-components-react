@@ -26,8 +26,7 @@ export function createTreeWidgetViewport(viewport: Viewport | TreeWidgetViewport
     changeModelDisplay: (props) => viewport.changeModelDisplay(props.modelIds, props.display),
     viewsCategory: (categoryId) => viewport.view.viewsCategory(categoryId),
     changeCategoryDisplay: (props) => viewport.changeCategoryDisplay(props.categoryIds, props.display, props.enableAllSubCategories),
-    // eslint-disable-next-line @itwin/no-internal
-    viewsSubCategory: (subCategoryId) => viewport.view.isSubCategoryVisible(subCategoryId),
+    viewsSubCategory: (subCategoryId) => viewport.isSubCategoryVisible(subCategoryId),
     changeSubCategoryDisplay: (props) => viewport.changeSubCategoryDisplay(props.subCategoryId, props.display),
     get perModelCategoryOverrides() {
       return viewport.perModelCategoryVisibility;
