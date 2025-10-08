@@ -9,7 +9,7 @@ import { IModelApp } from "@itwin/core-frontend";
 import { ExpandableBlock } from "@itwin/itwinui-react";
 import { MapLayersPrefBrowserStorage, MapLayersUI, MapLayersWidget } from "@itwin/map-layers";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
-import { CategoriesTreeIcon, Tree, TreeRenderer, TreeWidget, useCategoriesTree } from "@itwin/tree-widget-react";
+import { CategoriesTreeIcon, createTreeWidgetViewport, Tree, TreeRenderer, TreeWidget, useCategoriesTree } from "@itwin/tree-widget-react";
 import { Icon } from "@stratakit/foundations";
 import { Chip } from "@stratakit/structures";
 import { unifiedSelectionStorage } from "../SelectionStorage";
@@ -134,7 +134,7 @@ function ElementComponent(props: Pick<ElementsProps, "selectionStorage">) {
 type ElementsProps = Pick<ComponentProps<typeof Tree>, "selectionStorage"> & { view: Viewport };
 
 function Elements({ view, ...rest }: ElementsProps) {
-  const { categoriesTreeProps, rendererProps } = useCategoriesTree({ activeView: view });
+  const { categoriesTreeProps, rendererProps } = useCategoriesTree({ activeView: createTreeWidgetViewport(view) });
   return (
     <Tree
       {...rest}

@@ -7,13 +7,13 @@ import { Fragment } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
-import { useActiveViewport } from "../common/internal/UseActiveViewport.js";
+import { useActiveTreeWidgetViewport } from "../common/internal/UseActiveTreeWidgetViewport.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { CategoriesTree } from "./CategoriesTree.js";
 import { HideAllButton, InvertAllButton, ShowAllButton, useCategoriesTreeButtonProps } from "./CategoriesTreeButtons.js";
 
 import type { ReactNode } from "react";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { CategoriesTreeProps } from "./CategoriesTree.js";
 import type { CategoriesTreeHeaderButtonProps, CategoriesTreeHeaderButtonType } from "./CategoriesTreeButtons.js";
@@ -48,7 +48,7 @@ interface CategoriesTreeComponentProps
    *
    * When viewport is not provided, `IModelApp.viewManager.selectedView` will be used.
    */
-  viewport?: Viewport | TreeWidgetViewport;
+  viewport?: TreeWidgetViewport;
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }
@@ -59,7 +59,7 @@ interface CategoriesTreeComponentProps
  */
 export const CategoriesTreeComponent = (props: CategoriesTreeComponentProps) => {
   const iModel = useActiveIModelConnection();
-  const viewport = useActiveViewport({ viewport: props.viewport });
+  const viewport = useActiveTreeWidgetViewport({ treeWidgetViewport: props.viewport });
 
   if (!iModel || !viewport) {
     return null;

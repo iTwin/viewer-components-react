@@ -8,7 +8,7 @@ import { useActiveIModelConnection } from "@itwin/appui-react";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
-import { useActiveViewport } from "../common/internal/UseActiveViewport.js";
+import { useActiveTreeWidgetViewport } from "../common/internal/UseActiveTreeWidgetViewport.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { ModelsTree } from "./ModelsTree.js";
 import {
@@ -22,7 +22,7 @@ import {
 } from "./ModelsTreeButtons.js";
 
 import type { ReactNode } from "react";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { ModelsTreeProps } from "./ModelsTree.js";
 import type { ModelsTreeHeaderButtonProps, ModelsTreeHeaderButtonType } from "./ModelsTreeButtons.js";
@@ -64,7 +64,7 @@ interface ModelsTreeComponentProps
    *
    * When viewport is not provided, `IModelApp.viewManager.selectedView` will be used.
    */
-  viewport?: Viewport | TreeWidgetViewport;
+  viewport?: TreeWidgetViewport;
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }
@@ -77,7 +77,7 @@ interface ModelsTreeComponentProps
  */
 export const ModelsTreeComponent = (props: ModelsTreeComponentProps) => {
   const iModel = useActiveIModelConnection();
-  const viewport = useActiveViewport({ viewport: props.viewport });
+  const viewport = useActiveTreeWidgetViewport({ treeWidgetViewport: props.viewport });
 
   if (!iModel || !viewport) {
     return null;

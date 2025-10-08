@@ -6,6 +6,7 @@ beta;function;CategoriesTreeIcon
 alpha;const;ClassificationsTreeComponent
 beta;function;ClassificationsTreeIcon
 public;function;createTreeWidget
+beta;function;createTreeWidgetViewport
 beta;const;ExternalSourcesTreeComponent
 beta;function;ExternalSourcesTreeIcon
 beta;class;FilterLimitExceededError

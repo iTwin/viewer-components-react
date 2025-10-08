@@ -7,11 +7,11 @@ import { useActiveIModelConnection } from "@itwin/appui-react";
 import { SchemaKey, SchemaMatchType } from "@itwin/ecschema-metadata";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
-import { useActiveViewport } from "../common/internal/UseActiveViewport.js";
+import { useActiveTreeWidgetViewport } from "../common/internal/UseActiveTreeWidgetTreeWidgetViewport.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { ClassificationsTree } from "./ClassificationsTree.js";
 
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { ClassificationsTreeProps } from "./ClassificationsTree.js";
 
@@ -35,7 +35,7 @@ interface ClassificationsTreeComponentProps
    *
    * When viewport is not provided, `IModelApp.viewManager.selectedView` will be used.
    */
-  viewport?: Viewport | TreeWidgetViewport;
+  viewport?: TreeWidgetViewport;
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }
@@ -46,7 +46,7 @@ interface ClassificationsTreeComponentProps
  */
 export const ClassificationsTreeComponent = (props: ClassificationsTreeComponentProps) => {
   const iModel = useActiveIModelConnection();
-  const viewport = useActiveViewport({ viewport: props.viewport });
+  const viewport = useActiveTreeWidgetViewport({ treeWidgetViewport: props.viewport });
 
   if (!iModel || !viewport) {
     return null;

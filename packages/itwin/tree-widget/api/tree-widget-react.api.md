@@ -31,7 +31,7 @@ import type { TranslationOptions } from '@itwin/core-common';
 import type { TreeRendererProps } from '@itwin/presentation-hierarchies-react';
 import type { useIModelTree } from '@itwin/presentation-hierarchies-react';
 import type { useSelectionHandler } from '@itwin/presentation-hierarchies-react';
-import type { Viewport } from '@itwin/core-frontend';
+import { Viewport } from '@itwin/core-frontend';
 import type { Widget } from '@itwin/appui-react';
 
 // @beta (undocumented)
@@ -91,7 +91,7 @@ interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "select
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
     onPerformanceMeasured?: (featureId: string, duration: number) => void;
-    viewport?: Viewport | TreeWidgetViewport;
+    viewport?: TreeWidgetViewport;
 }
 
 // @public
@@ -148,7 +148,7 @@ interface ClassificationsTreeComponentProps extends Pick<ClassificationsTreeProp
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
     onPerformanceMeasured?: (featureId: string, duration: number) => void;
-    viewport?: Viewport | TreeWidgetViewport;
+    viewport?: TreeWidgetViewport;
 }
 
 // @alpha (undocumented)
@@ -170,6 +170,9 @@ type ClassificationsTreeProps = Pick<VisibilityTreeProps, "imodel" | "selectionS
 
 // @public
 export function createTreeWidget(props: TreeWidgetProps): Widget;
+
+// @beta
+export function createTreeWidgetViewport(viewport: Viewport | TreeWidgetViewport): TreeWidgetViewport;
 
 // @beta (undocumented)
 interface ElementsGroupInfo {
@@ -323,7 +326,7 @@ interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "selectionStora
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
     onPerformanceMeasured?: (featureId: string, duration: number) => void;
-    viewport?: Viewport | TreeWidgetViewport;
+    viewport?: TreeWidgetViewport;
 }
 
 // @public
@@ -458,7 +461,7 @@ interface TreeToolbarButtonProps {
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
-    viewport: Viewport | TreeWidgetViewport;
+    viewport: TreeWidgetViewport;
 }
 
 // @public
@@ -540,7 +543,7 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered, em
 
 // @public
 export function useCategoriesTreeButtonProps({ viewport }: {
-    viewport: Viewport | TreeWidgetViewport;
+    viewport: TreeWidgetViewport;
 }): {
     buttonProps: Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport" | "models">;
     onCategoriesFiltered: (props: {
@@ -552,7 +555,7 @@ export function useCategoriesTreeButtonProps({ viewport }: {
 // @beta (undocumented)
 interface UseCategoriesTreeProps {
     // (undocumented)
-    activeView: Viewport | TreeWidgetViewport;
+    activeView: TreeWidgetViewport;
     // (undocumented)
     emptyTreeContent?: ReactNode;
     // (undocumented)
@@ -580,7 +583,7 @@ export function useClassificationsTree({ activeView, emptyTreeContent, filter, .
 // @alpha (undocumented)
 interface UseClassificationsTreeProps {
     // (undocumented)
-    activeView: Viewport | TreeWidgetViewport;
+    activeView: TreeWidgetViewport;
     // (undocumented)
     emptyTreeContent?: ReactNode;
     // (undocumented)
@@ -606,7 +609,7 @@ export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityH
 // @public
 export function useModelsTreeButtonProps({ imodel, viewport }: {
     imodel: IModelConnection;
-    viewport: Viewport | TreeWidgetViewport;
+    viewport: TreeWidgetViewport;
 }): {
     buttonProps: Pick<ModelsTreeHeaderButtonProps, "models" | "viewport">;
     onModelsFiltered: (models: Id64String[] | undefined) => void;
@@ -615,7 +618,7 @@ export function useModelsTreeButtonProps({ imodel, viewport }: {
 // @beta (undocumented)
 interface UseModelsTreeProps {
     // (undocumented)
-    activeView: Viewport | TreeWidgetViewport;
+    activeView: TreeWidgetViewport;
     // (undocumented)
     emptyTreeContent?: ReactNode;
     filter?: string;

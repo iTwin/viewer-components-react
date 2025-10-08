@@ -9,7 +9,6 @@ import iconBisCategory3d from "@stratakit/icons/bis-category-3d.svg";
 import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMatches } from "../common/components/EmptyTree.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
-import { createTreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import { ClassificationsTreeComponent } from "./ClassificationsTreeComponent.js";
 import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.js";
 import { ClassificationsTreeIcon } from "./ClassificationsTreeIcon.js";
@@ -19,7 +18,6 @@ import { ClassificationsTreeVisibilityHandler } from "./internal/visibility/Clas
 import { createFilteredClassificationsTree } from "./internal/visibility/FilteredTree.js";
 
 import type { ReactNode } from "react";
-import type { Viewport } from "@itwin/core-frontend";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { FilteredTree } from "../common/internal/visibility/BaseFilteredTree.js";
@@ -32,7 +30,7 @@ import type { ClassificationsTreeFilterTargets } from "./internal/visibility/Fil
 
 /** @alpha */
 export interface UseClassificationsTreeProps {
-  activeView: Viewport | TreeWidgetViewport;
+  activeView: TreeWidgetViewport;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
   emptyTreeContent?: ReactNode;
   filter?: string;
@@ -57,19 +55,17 @@ export function useClassificationsTree({ activeView, emptyTreeContent, filter, .
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [...Object.values(rest.hierarchyConfig)],
   );
-  const treeWidgetViewport = useMemo(() => {
-    return createTreeWidgetViewport(activeView);
-  }, [activeView]);
+
   const { getCache: getClassificationsTreeIdsCache } = useIdsCache<ClassificationsTreeIdsCache, { hierarchyConfig: ClassificationsTreeHierarchyConfiguration }>(
     {
-      imodel: treeWidgetViewport.iModel,
+      imodel: activeView.iModel,
       createCache,
       cacheSpecificProps: useMemo(() => ({ hierarchyConfig }), [hierarchyConfig]),
     },
   );
 
   const { visibilityHandlerFactory, onFilteredPathsChanged } = useClassificationsCachedVisibility({
-    activeView: treeWidgetViewport,
+    activeView,
     getCache: getClassificationsTreeIdsCache,
   });
 

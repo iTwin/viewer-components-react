@@ -15,7 +15,6 @@ import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMat
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { getClassesByView } from "../common/internal/Utils.js";
-import { createTreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
 import { useFilteredPaths } from "./internal/UseFilteredPaths.js";
@@ -24,7 +23,6 @@ import { createFilteredCategoriesTree } from "./internal/visibility/FilteredTree
 
 import type { ReactNode } from "react";
 import type { Id64Array } from "@itwin/core-bentley";
-import type { Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
@@ -39,7 +37,7 @@ import type { CategoriesTreeFilteringError } from "./internal/UseFilteredPaths.j
 
 /** @beta */
 export interface UseCategoriesTreeProps {
-  activeView: Viewport | TreeWidgetViewport;
+  activeView: TreeWidgetViewport;
   onCategoriesFiltered?: (props: { categories: CategoryInfo[] | undefined; models?: Id64Array }) => void;
   filter?: string;
   emptyTreeContent?: ReactNode;
@@ -74,19 +72,16 @@ export function useCategoriesTree({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     Object.values(hierarchyConfig ?? {}),
   );
-  const treeWidgetViewport = useMemo(() => {
-    return createTreeWidgetViewport(activeView);
-  }, [activeView]);
-  const viewType = treeWidgetViewport.viewType === "2d" ? "2d" : "3d";
+  const viewType = activeView.viewType === "2d" ? "2d" : "3d";
 
   const { getCache: getCategoriesTreeIdsCache } = useIdsCache<CategoriesTreeIdsCache, { viewType: "2d" | "3d" }>({
-    imodel: treeWidgetViewport.iModel,
+    imodel: activeView.iModel,
     createCache,
     cacheSpecificProps: useMemo(() => ({ viewType }), [viewType]),
   });
 
   const { visibilityHandlerFactory, onFilteredPathsChanged } = useCategoriesCachedVisibility({
-    activeView: treeWidgetViewport,
+    activeView,
     viewType,
     getCache: getCategoriesTreeIdsCache,
   });

@@ -25,7 +25,7 @@ export { BaseTreeRendererProps } from "./common/components/BaseTreeRenderer.js";
 export { FocusedInstancesContextProvider, useFocusedInstancesContext } from "./common/FocusedInstancesContext.js";
 
 export { Tree } from "./common/components/Tree.js";
-export { TreeWidgetViewport } from "./common/TreeWidgetViewport.js";
+export { TreeWidgetViewport, createTreeWidgetViewport } from "./common/TreeWidgetViewport.js";
 export { VisibilityTree } from "./common/components/VisibilityTree.js";
 export { VisibilityAction } from "./common/components/TreeNodeVisibilityButton.js";
 export { TreeRenderer } from "./common/components/TreeRenderer.js";

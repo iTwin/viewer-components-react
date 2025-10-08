@@ -22,7 +22,6 @@ import {
 } from "../common/components/EmptyTree.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
-import { createTreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
 import { ModelsTreeNode } from "./internal/ModelsTreeNode.js";
 import { useFilteredPaths } from "./internal/UseFilteredPaths.js";
@@ -32,7 +31,6 @@ import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTre
 
 import type { ReactNode } from "react";
 import type { Id64String } from "@itwin/core-bentley";
-import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { InstanceKey } from "@itwin/presentation-shared";
@@ -58,7 +56,7 @@ export interface UseModelsTreeProps {
    * Instead, the string will be supplied to the given `getFilteredPaths` function for consumers to apply the filtering.
    */
   filter?: string;
-  activeView: Viewport | TreeWidgetViewport;
+  activeView: TreeWidgetViewport;
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
   visibilityHandlerOverrides?: ModelsTreeVisibilityHandlerOverrides;
   /**
@@ -133,9 +131,6 @@ export function useModelsTree({
   emptyTreeContent,
   getSubTreePaths,
 }: UseModelsTreeProps): UseModelsTreeResult {
-  const treeWidgetViewport = useMemo(() => {
-    return createTreeWidgetViewport(activeView);
-  }, [activeView]);
   const hierarchyConfiguration = useMemo<ModelsTreeHierarchyConfiguration>(
     () => ({
       ...defaultHierarchyConfiguration,
@@ -151,7 +146,7 @@ export function useModelsTree({
   });
 
   const { visibilityHandlerFactory, onFilteredPathsChanged } = useCachedVisibility<ModelsTreeIdsCache, ModelsTreeFilterTargets>({
-    activeView: treeWidgetViewport,
+    activeView,
     createFilteredTree,
     createTreeSpecificVisibilityHandler: useCallback(
       (treeProps) => createTreeSpecificVisibilityHandler({ ...treeProps, overrides: visibilityHandlerOverrides }),

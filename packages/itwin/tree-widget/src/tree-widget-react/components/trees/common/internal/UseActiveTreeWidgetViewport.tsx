@@ -4,28 +4,23 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useState } from "react";
-import { IModelApp } from "@itwin/core-frontend";
+import { useActiveViewport } from "@itwin/appui-react";
 import { createTreeWidgetViewport } from "../TreeWidgetViewport.js";
 
 import type { Viewport } from "@itwin/core-frontend";
 import type { TreeWidgetViewport } from "../TreeWidgetViewport.js";
 
-/**
- * A copy of `useActiveViewport` from `@itwin/appui-react` package until X is fixed.
- * @internal
- */
-export function useActiveViewport({ viewport }: { viewport?: Viewport | TreeWidgetViewport }): TreeWidgetViewport | undefined {
-  const [activeViewport, setActiveViewport] = useState(createTreeWidgetViewportInternal(viewport ?? IModelApp.viewManager.selectedView));
+/** @internal */
+export function useActiveTreeWidgetViewport({ treeWidgetViewport }: { treeWidgetViewport?: TreeWidgetViewport }): TreeWidgetViewport | undefined {
+  const viewport = useActiveViewport();
+  const [activeViewport, setActiveViewport] = useState(treeWidgetViewport ?? createTreeWidgetViewportInternal(viewport));
   useEffect(() => {
-    if (viewport) {
-      setActiveViewport(createTreeWidgetViewportInternal(viewport));
+    if (treeWidgetViewport) {
+      setActiveViewport(treeWidgetViewport);
       return;
     }
-    setActiveViewport(createTreeWidgetViewportInternal(IModelApp.viewManager.selectedView));
-    return IModelApp.viewManager.onSelectedViewportChanged.addListener((args) => {
-      setActiveViewport(createTreeWidgetViewportInternal(args.current));
-    });
-  }, [viewport]);
+    setActiveViewport(createTreeWidgetViewportInternal(viewport));
+  }, [treeWidgetViewport]);
 
   return activeViewport;
 }

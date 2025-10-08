@@ -14,10 +14,9 @@ import { TreeWidget } from "../../../TreeWidget.js";
 import { hideAllCategories, invertAllCategories } from "../common/CategoriesVisibilityUtils.js";
 import { getClassesByView } from "../common/internal/Utils.js";
 import { loadCategoriesFromViewport } from "../common/internal/VisibilityUtils.js";
-import { createTreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import { hideAllModels, showAll } from "../common/Utils.js";
 
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { Id64Array } from "@itwin/core-bentley";
 import type { TreeToolbarButtonProps } from "../../tree-header/SelectableTree.js";
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
@@ -54,21 +53,18 @@ export interface CategoriesTreeHeaderButtonProps extends TreeToolbarButtonProps 
  *
  * @public
  */
-export function useCategoriesTreeButtonProps({ viewport }: { viewport: Viewport | TreeWidgetViewport }): {
+export function useCategoriesTreeButtonProps({ viewport }: { viewport: TreeWidgetViewport }): {
   buttonProps: Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport" | "models">;
   onCategoriesFiltered: (props: { categories: CategoryInfo[] | undefined; models?: Id64Array }) => void;
 } {
   const [filteredCategories, setFilteredCategories] = useState<CategoryInfo[] | undefined>();
   const [filteredModels, setFilteredModels] = useState<Id64Array | undefined>();
 
-  const treeWidgetViewport = useMemo(() => {
-    return createTreeWidgetViewport(viewport);
-  }, [viewport]);
-  const categories = useCategories(treeWidgetViewport);
-  const models = useAvailableModels(treeWidgetViewport);
+  const categories = useCategories(viewport);
+  const models = useAvailableModels(viewport);
   return {
     buttonProps: {
-      viewport: treeWidgetViewport,
+      viewport,
       categories: filteredCategories ?? categories,
       models: filteredModels ?? models,
     },
@@ -84,10 +80,6 @@ export type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonP
 
 /** @public */
 export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
-  const treeWidgetViewport = useMemo(() => {
-    return createTreeWidgetViewport(props.viewport);
-  }, [props.viewport]);
-
   return (
     <IconButton
       variant={"ghost"}
@@ -95,7 +87,7 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
       onClick={() => {
         // cspell:disable-next-line
         props.onFeatureUsed?.(`categories-tree-showall`);
-        void showAll({ models: props.models, viewport: treeWidgetViewport, categories: props.categories.map((category) => category.categoryId) });
+        void showAll({ models: props.models, viewport: props.viewport, categories: props.categories.map((category) => category.categoryId) });
       }}
       icon={visibilityShowSvg}
     />
@@ -104,9 +96,6 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
 
 /** @public */
 export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
-  const treeWidgetViewport = useMemo(() => {
-    return createTreeWidgetViewport(props.viewport);
-  }, [props.viewport]);
   return (
     <IconButton
       variant={"ghost"}
@@ -116,9 +105,9 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
         props.onFeatureUsed?.(`categories-tree-hideall`);
         void hideAllCategories(
           props.categories.map((category) => category.categoryId),
-          treeWidgetViewport,
+          props.viewport,
         );
-        void hideAllModels(props.models, treeWidgetViewport);
+        void hideAllModels(props.models, props.viewport);
       }}
       icon={visibilityHideSvg}
     />
@@ -127,16 +116,13 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
 
 /** @public */
 export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
-  const treeWidgetViewport = useMemo(() => {
-    return createTreeWidgetViewport(props.viewport);
-  }, [props.viewport]);
   return (
     <IconButton
       variant={"ghost"}
       label={TreeWidget.translate("categoriesTree.buttons.invert.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.(`categories-tree-invert`);
-        void invertAllCategories(props.categories, treeWidgetViewport);
+        void invertAllCategories(props.categories, props.viewport);
       }}
       icon={visibilityInvertSvg}
     />
