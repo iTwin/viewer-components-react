@@ -19,7 +19,7 @@ import {
   CLASS_NAME_GeometricModel3d,
   CLASS_NAME_InformationPartitionElement,
 } from "../common/internal/ClassNameDefinitions.js";
-import { createTreeWidgetViewport, isTreeWidgetViewport } from "../common/TreeWidgetViewport.js";
+import { createTreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import { areAllModelsVisible, hideAllModels, invertAllModels, showAll, toggleModels } from "../common/Utils.js";
 
 import type { Id64String } from "@itwin/core-bentley";
@@ -72,7 +72,7 @@ export function useModelsTreeButtonProps({ imodel, viewport }: { imodel: IModelC
 } {
   const [filteredModels, setFilteredModels] = useState<Id64String[] | undefined>();
   const treeWidgetViewport = useMemo(() => {
-    return isTreeWidgetViewport(viewport) ? viewport : createTreeWidgetViewport(viewport);
+    return createTreeWidgetViewport(viewport);
   }, [viewport]);
 
   const models = useAvailableModels(imodel);
@@ -126,7 +126,7 @@ export type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) =>
 /** @public */
 export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
   const treeWidgetViewport = useMemo(() => {
-    return isTreeWidgetViewport(props.viewport) ? props.viewport : createTreeWidgetViewport(props.viewport);
+    return createTreeWidgetViewport(props.viewport);
   }, [props.viewport]);
   return (
     <IconButton
@@ -148,7 +148,7 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
 /** @public */
 export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
   const treeWidgetViewport = useMemo(() => {
-    return isTreeWidgetViewport(props.viewport) ? props.viewport : createTreeWidgetViewport(props.viewport);
+    return createTreeWidgetViewport(props.viewport);
   }, [props.viewport]);
   return (
     <IconButton
@@ -170,7 +170,7 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
 /** @public */
 export function InvertButton(props: ModelsTreeHeaderButtonProps) {
   const treeWidgetViewport = useMemo(() => {
-    return isTreeWidgetViewport(props.viewport) ? props.viewport : createTreeWidgetViewport(props.viewport);
+    return createTreeWidgetViewport(props.viewport);
   }, [props.viewport]);
   return (
     <IconButton
@@ -191,7 +191,7 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
 /** @public */
 export function View2DButton(props: ModelsTreeHeaderButtonProps) {
   const treeWidgetViewport = useMemo(() => {
-    return isTreeWidgetViewport(props.viewport) ? props.viewport : createTreeWidgetViewport(props.viewport);
+    return createTreeWidgetViewport(props.viewport);
   }, [props.viewport]);
   const models2d = useMemo(() => {
     return props.models.filter((model) => model.isPlanProjection).map((model) => model.id);
@@ -223,7 +223,7 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
 /** @public */
 export function View3DButton(props: ModelsTreeHeaderButtonProps) {
   const treeWidgetViewport = useMemo(() => {
-    return isTreeWidgetViewport(props.viewport) ? props.viewport : createTreeWidgetViewport(props.viewport);
+    return createTreeWidgetViewport(props.viewport);
   }, [props.viewport]);
   const models3d = useMemo(() => {
     return props.models.filter((model) => !model.isPlanProjection).map((model) => model.id);

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { enableCategoryDisplay } from "./internal/VisibilityUtils.js";
-import { createTreeWidgetViewport, isTreeWidgetViewport } from "./TreeWidgetViewport.js";
+import { createTreeWidgetViewport } from "./TreeWidgetViewport.js";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
@@ -24,7 +24,7 @@ export interface CategoryInfo {
  * @public
  */
 export async function showAllCategories(categories: Id64Array, viewport: Viewport | TreeWidgetViewport) {
-  const treeWidgetViewport = isTreeWidgetViewport(viewport) ? viewport : createTreeWidgetViewport(viewport);
+  const treeWidgetViewport = createTreeWidgetViewport(viewport);
   await enableCategoryDisplay(treeWidgetViewport, categories, true, true);
 }
 
@@ -33,7 +33,7 @@ export async function showAllCategories(categories: Id64Array, viewport: Viewpor
  * @public
  */
 export async function hideAllCategories(categories: Id64Array, viewport: Viewport | TreeWidgetViewport) {
-  const treeWidgetViewport = isTreeWidgetViewport(viewport) ? viewport : createTreeWidgetViewport(viewport);
+  const treeWidgetViewport = createTreeWidgetViewport(viewport);
   await enableCategoryDisplay(treeWidgetViewport, categories, false, true);
 }
 
@@ -48,7 +48,7 @@ export async function hideAllCategories(categories: Id64Array, viewport: Viewpor
 export async function invertAllCategories(categories: CategoryInfo[], viewport: Viewport | TreeWidgetViewport) {
   const categoriesToEnable = new Set<Id64String>();
   const categoriesToDisable = new Set<Id64String>();
-  const treeWidgetViewport = isTreeWidgetViewport(viewport) ? viewport : createTreeWidgetViewport(viewport);
+  const treeWidgetViewport = createTreeWidgetViewport(viewport);
 
   for (const category of categories) {
     if (!treeWidgetViewport.viewsCategory(category.categoryId)) {

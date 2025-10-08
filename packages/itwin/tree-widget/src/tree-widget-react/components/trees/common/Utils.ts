@@ -6,7 +6,7 @@
 import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
 import { showAllCategories } from "./CategoriesVisibilityUtils.js";
 import { toggleAllCategories } from "./internal/VisibilityUtils.js";
-import { createTreeWidgetViewport, isTreeWidgetViewport } from "./TreeWidgetViewport.js";
+import { createTreeWidgetViewport } from "./TreeWidgetViewport.js";
 
 import type { Viewport } from "@itwin/core-frontend";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
@@ -27,8 +27,7 @@ export type FunctionProps<THook extends (props: any) => any> = Parameters<THook>
  * @public
  */
 export async function hideAllModels(models: string[], viewport: Viewport | TreeWidgetViewport) {
-  const treeWidgetViewport = isTreeWidgetViewport(viewport) ? viewport : createTreeWidgetViewport(viewport);
-  treeWidgetViewport.changeModelDisplay({ modelIds: models, display: false });
+  createTreeWidgetViewport(viewport).changeModelDisplay({ modelIds: models, display: false });
 }
 
 /**
@@ -44,7 +43,7 @@ export async function showAll(props: {
   viewport: Viewport | TreeWidgetViewport;
 }) {
   const { models, categories, viewport } = props;
-  const treeWidgetViewport = isTreeWidgetViewport(viewport) ? viewport : createTreeWidgetViewport(viewport);
+  const treeWidgetViewport = createTreeWidgetViewport(viewport);
   await treeWidgetViewport.addViewedModels(models);
   treeWidgetViewport.clearNeverDrawn();
   treeWidgetViewport.clearAlwaysDrawn();
@@ -60,7 +59,7 @@ export async function showAll(props: {
  * @public
  */
 export async function invertAllModels(models: Id64Array, viewport: Viewport | TreeWidgetViewport) {
-  const treeWidgetViewport = isTreeWidgetViewport(viewport) ? viewport : createTreeWidgetViewport(viewport);
+  const treeWidgetViewport = createTreeWidgetViewport(viewport);
   const notViewedModels = new Array<Id64String>();
   const viewedModels = new Array<Id64String>();
   models.forEach((modelId) => {
@@ -79,7 +78,7 @@ export async function invertAllModels(models: Id64Array, viewport: Viewport | Tr
  * @public
  */
 export async function toggleModels(models: string[], enable: boolean, viewport: Viewport | TreeWidgetViewport) {
-  const treeWidgetViewport = isTreeWidgetViewport(viewport) ? viewport : createTreeWidgetViewport(viewport);
+  const treeWidgetViewport = createTreeWidgetViewport(viewport);
   if (!models) {
     return;
   }
@@ -95,7 +94,7 @@ export async function toggleModels(models: string[], enable: boolean, viewport: 
  * @public
  */
 export function areAllModelsVisible(models: string[], viewport: Viewport | TreeWidgetViewport) {
-  const treeWidgetViewport = isTreeWidgetViewport(viewport) ? viewport : createTreeWidgetViewport(viewport);
+  const treeWidgetViewport = createTreeWidgetViewport(viewport);
   return models.length !== 0 ? models.every((id) => treeWidgetViewport.viewsModel(id)) : false;
 }
 

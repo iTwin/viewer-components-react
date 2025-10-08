@@ -22,7 +22,7 @@ import {
 } from "../common/components/EmptyTree.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
-import { createTreeWidgetViewport, isTreeWidgetViewport } from "../common/TreeWidgetViewport.js";
+import { createTreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
 import { ModelsTreeNode } from "./internal/ModelsTreeNode.js";
 import { useFilteredPaths } from "./internal/UseFilteredPaths.js";
@@ -134,7 +134,7 @@ export function useModelsTree({
   getSubTreePaths,
 }: UseModelsTreeProps): UseModelsTreeResult {
   const treeWidgetViewport = useMemo(() => {
-    return isTreeWidgetViewport(activeView) ? activeView : createTreeWidgetViewport(activeView);
+    return createTreeWidgetViewport(activeView);
   }, [activeView]);
   const hierarchyConfiguration = useMemo<ModelsTreeHierarchyConfiguration>(
     () => ({

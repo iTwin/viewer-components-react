@@ -9,7 +9,7 @@ import iconBisCategory3d from "@stratakit/icons/bis-category-3d.svg";
 import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMatches } from "../common/components/EmptyTree.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
-import { createTreeWidgetViewport, isTreeWidgetViewport } from "../common/TreeWidgetViewport.js";
+import { createTreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import { ClassificationsTreeComponent } from "./ClassificationsTreeComponent.js";
 import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.js";
 import { ClassificationsTreeIcon } from "./ClassificationsTreeIcon.js";
@@ -58,7 +58,7 @@ export function useClassificationsTree({ activeView, emptyTreeContent, filter, .
     [...Object.values(rest.hierarchyConfig)],
   );
   const treeWidgetViewport = useMemo(() => {
-    return isTreeWidgetViewport(activeView) ? activeView : createTreeWidgetViewport(activeView);
+    return createTreeWidgetViewport(activeView);
   }, [activeView]);
   const { getCache: getClassificationsTreeIdsCache } = useIdsCache<ClassificationsTreeIdsCache, { hierarchyConfig: ClassificationsTreeHierarchyConfiguration }>(
     {

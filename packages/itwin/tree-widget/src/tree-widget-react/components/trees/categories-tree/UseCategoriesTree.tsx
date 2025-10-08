@@ -15,7 +15,7 @@ import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMat
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { getClassesByView } from "../common/internal/Utils.js";
-import { createTreeWidgetViewport, isTreeWidgetViewport } from "../common/TreeWidgetViewport.js";
+import { createTreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
 import { useFilteredPaths } from "./internal/UseFilteredPaths.js";
@@ -75,7 +75,7 @@ export function useCategoriesTree({
     Object.values(hierarchyConfig ?? {}),
   );
   const treeWidgetViewport = useMemo(() => {
-    return isTreeWidgetViewport(activeView) ? activeView : createTreeWidgetViewport(activeView);
+    return createTreeWidgetViewport(activeView);
   }, [activeView]);
   const viewType = treeWidgetViewport.viewType === "2d" ? "2d" : "3d";
 

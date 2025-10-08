@@ -9,12 +9,11 @@ import type { BeEvent, Id64Arg, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection, PerModelCategoryVisibility } from "@itwin/core-frontend";
 
 /** @internal */
-export function isTreeWidgetViewport(viewport: Viewport | TreeWidgetViewport): viewport is TreeWidgetViewport {
-  return viewport instanceof Viewport ? false : true;
-}
+export function createTreeWidgetViewport(viewport: Viewport | TreeWidgetViewport): TreeWidgetViewport {
+  if (!(viewport instanceof Viewport)) {
+    return viewport;
+  }
 
-/** @internal */
-export function createTreeWidgetViewport(viewport: Viewport): TreeWidgetViewport {
   return {
     get viewType() {
       return viewport.view.is2d() ? "2d" : viewport.view.isSpatialView() ? "spatial" : "other";

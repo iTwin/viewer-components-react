@@ -14,7 +14,7 @@ import { TreeWidget } from "../../../TreeWidget.js";
 import { hideAllCategories, invertAllCategories } from "../common/CategoriesVisibilityUtils.js";
 import { getClassesByView } from "../common/internal/Utils.js";
 import { loadCategoriesFromViewport } from "../common/internal/VisibilityUtils.js";
-import { createTreeWidgetViewport, isTreeWidgetViewport } from "../common/TreeWidgetViewport.js";
+import { createTreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import { hideAllModels, showAll } from "../common/Utils.js";
 
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
@@ -62,7 +62,7 @@ export function useCategoriesTreeButtonProps({ viewport }: { viewport: Viewport 
   const [filteredModels, setFilteredModels] = useState<Id64Array | undefined>();
 
   const treeWidgetViewport = useMemo(() => {
-    return isTreeWidgetViewport(viewport) ? viewport : createTreeWidgetViewport(viewport);
+    return createTreeWidgetViewport(viewport);
   }, [viewport]);
   const categories = useCategories(treeWidgetViewport);
   const models = useAvailableModels(treeWidgetViewport);
@@ -85,7 +85,7 @@ export type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonP
 /** @public */
 export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
   const treeWidgetViewport = useMemo(() => {
-    return isTreeWidgetViewport(props.viewport) ? props.viewport : createTreeWidgetViewport(props.viewport);
+    return createTreeWidgetViewport(props.viewport);
   }, [props.viewport]);
 
   return (
@@ -105,7 +105,7 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
 /** @public */
 export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
   const treeWidgetViewport = useMemo(() => {
-    return isTreeWidgetViewport(props.viewport) ? props.viewport : createTreeWidgetViewport(props.viewport);
+    return createTreeWidgetViewport(props.viewport);
   }, [props.viewport]);
   return (
     <IconButton
@@ -128,7 +128,7 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
 /** @public */
 export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
   const treeWidgetViewport = useMemo(() => {
-    return isTreeWidgetViewport(props.viewport) ? props.viewport : createTreeWidgetViewport(props.viewport);
+    return createTreeWidgetViewport(props.viewport);
   }, [props.viewport]);
   return (
     <IconButton
