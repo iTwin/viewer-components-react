@@ -182,8 +182,6 @@ export interface TreeWidgetViewport {
    * Elements in this set should be displayed only when model is displayed as well.
    *
    * This set takes precedence over category and sub-category display and per-model category override.
-   *
-   * **NOTE** The [[neverDrawn]] set takes precedence - if an element is present in both sets, it is never drawn.
    */
   alwaysDrawn: ReadonlySet<Id64String> | undefined;
   /**
