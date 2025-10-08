@@ -22,10 +22,15 @@ export const QuantityFormatButton: React.FC = () => {
   const [activeFormatSet, setActiveFormatSet] = useState<FormatSet | undefined>(FormatManager.instance?.activeFormatSet);
   const [activeFormatDefinitionKey, setActiveFormatDefinitionKey] = useState<string | undefined>();
 
-  const handleFormatChange = useCallback(async (newFormat: FormatDefinition) => {
-    setFormatDefinition(newFormat);
-    await FormatManager.instance?.activeFormatSetFormatsProvider?.addFormat(newFormat.name ?? "", newFormat);
-  }, []);
+  const formatManager = FormatManager.instance;
+
+  const handleFormatChange = useCallback(
+    async (newFormat: FormatDefinition) => {
+      setFormatDefinition(newFormat);
+      await formatManager?.activeFormatSetFormatsProvider?.addFormat(newFormat.name ?? "", newFormat);
+    },
+    [formatManager],
+  );
 
   const handleFormatSelectorChange = useCallback((formatDef: FormatDefinition, key: string) => {
     setFormatDefinition(formatDef);
@@ -41,26 +46,25 @@ export const QuantityFormatButton: React.FC = () => {
   }, []);
 
   React.useEffect(() => {
-    const _removeListener = IModelApp.quantityFormatter.onUnitsProviderChanged.addListener(() => {
+    return IModelApp.quantityFormatter.onUnitsProviderChanged.addListener(() => {
       // Handle units provider changes if needed
       setUnitsProvider(IModelApp.quantityFormatter.unitsProvider);
     });
-    return () => {
-      _removeListener();
-    };
   }, []);
 
   // Listen for active format set changes
   React.useEffect(() => {
-    const removeFormatSetListener = FormatManager.instance?.onActiveFormatSetChanged.addListener((formatSet) => {
+    formatManager?.onActiveFormatSetChanged.addListener((formatSet) => {
       setActiveFormatSet(formatSet);
       setActiveFormatDefinitionKey(undefined); // Reset selection when format set changes
       setFormatDefinition(undefined); // Reset format definition when format set changes
     });
-    return () => {
-      if (removeFormatSetListener) removeFormatSetListener();
-    };
-  }, []);
+  }, [formatManager]);
+
+  // Don't render if FormatManager is not initialized
+  if (!formatManager) {
+    return null;
+  }
 
   return (
     <>
@@ -85,7 +89,7 @@ export const QuantityFormatButton: React.FC = () => {
             />
           </Tabs.Panel>
           <Tabs.Panel value="format-sets" key="format-sets">
-            <FormatSetsTabPanel />
+            <FormatSetsTabPanel formatManager={formatManager} />
           </Tabs.Panel>
         </Tabs.Wrapper>
       </Modal>

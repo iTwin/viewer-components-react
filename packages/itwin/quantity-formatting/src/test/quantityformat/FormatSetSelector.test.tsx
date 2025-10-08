@@ -232,6 +232,7 @@ describe("FormatSetSelector", () => {
     it("should show no format sets available message when undefined", () => {
       render(
         <FormatSetSelector
+          formatSets={[]}
           onFormatSetChange={mockOnFormatSetChange}
         />
       );

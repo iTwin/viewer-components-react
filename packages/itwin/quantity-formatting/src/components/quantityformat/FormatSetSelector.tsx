@@ -14,7 +14,7 @@ import type { FormatSet } from "@itwin/ecschema-metadata";
  * @internal
  */
 interface FormatSetSelectorProps {
-  formatSets?: FormatSet[];
+  formatSets: FormatSet[];
   selectedFormatSetKey?: string;
   onFormatSetChange: (formatSet: FormatSet, key: string) => void;
 }
@@ -24,7 +24,7 @@ interface FormatSetSelectorProps {
  * @beta
 */
 export const FormatSetSelector: React.FC<FormatSetSelectorProps> = ({
-  formatSets = [],
+  formatSets,
   selectedFormatSetKey,
   onFormatSetChange,
 }) => {
@@ -51,18 +51,11 @@ export const FormatSetSelector: React.FC<FormatSetSelectorProps> = ({
     [onFormatSetChange, formatSets]
   );
 
-  const handleSearchChange = React.useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setSearchTerm(event.target.value);
-    },
-    []
-  );
-
   return (
     <Flex flexDirection="column" gap="none" alignItems="flex-start" className="quantityFormat--formatSetSelector-container">
       <Input
         value={searchTerm}
-        onChange={handleSearchChange}
+        onChange={(e) => setSearchTerm(e.currentTarget.value)}
         placeholder={translate("QuantityFormat:labels.searchFormatSets")}
       />
       <List className="quantityFormat--formatSetSelector-list">

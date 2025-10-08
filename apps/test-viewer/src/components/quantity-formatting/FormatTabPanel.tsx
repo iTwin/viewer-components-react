@@ -10,7 +10,7 @@ import { FormatSelector, QuantityFormatPanel } from "@itwin/quantity-formatting-
 import type { FormatDefinition, UnitsProvider } from "@itwin/core-quantity";
 import type { FormatSet } from "@itwin/ecschema-metadata";
 
-export interface FormatTabPanelProps {
+interface FormatTabPanelProps {
   activeFormatSet: FormatSet | undefined;
   activeFormatDefinitionKey: string | undefined;
   formatDefinition: FormatDefinition | undefined;

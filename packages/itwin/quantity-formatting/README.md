@@ -310,7 +310,7 @@ A component for selecting from multiple format sets. This is useful when you hav
 
 ```typescript
 interface FormatSetSelectorProps {
-  formatSets?: FormatSet[]; // Array of available format sets
+  formatSets: FormatSet[]; // Array of available format sets
   selectedFormatSetKey?: string; // Currently selected format set key
   onFormatSetChange: (formatSet: FormatSet, key: string) => void; // Selection callback
 }
@@ -373,11 +373,18 @@ A component for viewing and editing format set properties such as label, unit sy
 #### FormatSetPanel Properties
 
 ```typescript
-interface FormatSetPanelProps {
-  formatSet?: FormatSet; // Format set to display/edit
-  editable?: boolean; // Whether the panel is in edit mode (default: false)
-  onFormatSetChange?: (formatSet: FormatSet) => void; // Callback when format set properties change
-}
+type FormatSetPanelProps = {
+  formatSet: FormatSet; // Format set to display/edit (required)
+} & (
+  | {
+      editable: true; // Edit mode enabled
+      onFormatSetChange: (formatSet: FormatSet) => void; // Required when editable
+    }
+  | {
+      editable?: false; // Read-only mode (default)
+      onFormatSetChange?: undefined; // Not used in read-only mode
+    }
+);
 ```
 
 #### FormatSetPanel Usage

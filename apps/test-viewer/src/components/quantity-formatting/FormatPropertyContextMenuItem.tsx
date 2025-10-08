@@ -62,12 +62,9 @@ const QuantityFormatPanelDialogWithoutFormatSelector: React.FC<QuantityFormatPan
   }, []);
 
   React.useEffect(() => {
-    const _removeListener = IModelApp.quantityFormatter.onUnitsProviderChanged.addListener(() => {
+    return IModelApp.quantityFormatter.onUnitsProviderChanged.addListener(() => {
       setUnitsProvider(IModelApp.quantityFormatter.unitsProvider);
     });
-    return () => {
-      _removeListener();
-    };
   }, []);
 
   const title = `Format Selected: ${formatDefinition.label ?? formatDefinition.name}`;

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { FormatSetPanel } from "../../components/quantityformat/FormatSetPanel.js";
 
@@ -21,7 +21,6 @@ vi.mock("../../useTranslation.js", () => ({
         "QuantityFormat:labels.formatSetDisplayLabel": "Format set display label",
         "QuantityFormat:labels.selectUnitSystem": "Select unit system",
         "QuantityFormat:labels.formatSetDescription": "Format set description",
-        "QuantityFormat:labels.selectFormatSetToView": "Select a format set to view details",
         "QuantityFormat:labels.unitSystemTooltip": "Test tooltip",
         "QuantityFormat:labels.unitSystemMetric": "Metric",
         "QuantityFormat:labels.unitSystemImperial": "Imperial",
@@ -54,20 +53,6 @@ describe("FormatSetPanel", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-  });
-
-  describe("Empty State", () => {
-    it("should render empty state when no format set is provided", () => {
-      render(<FormatSetPanel />);
-
-      expect(screen.getByText("Select a format set to view details")).toBeTruthy();
-    });
-
-    it("should render empty state with correct CSS class", () => {
-      const { container } = render(<FormatSetPanel />);
-
-      expect(container.querySelector(".quantityFormat--formatSetPanel-emptyState")).toBeTruthy();
-    });
   });
 
   describe("Format Set Display", () => {
@@ -117,7 +102,7 @@ describe("FormatSetPanel", () => {
 
   describe("Editable Mode", () => {
     it("should enable inputs when editable is true", () => {
-      render(<FormatSetPanel formatSet={mockFormatSet} editable={true} />);
+      render(<FormatSetPanel formatSet={mockFormatSet} editable={true} onFormatSetChange={mockOnFormatSetChange} />);
 
       const labelInput = screen.getByLabelText("Label") as HTMLInputElement;
       // Weird behavior with using inputProps directly on Select component
@@ -160,35 +145,18 @@ describe("FormatSetPanel", () => {
         });
       });
     });
-
-    it("should not call onFormatSetChange when not editable", async () => {
-      render(
-        <FormatSetPanel
-          formatSet={mockFormatSet}
-          editable={false}
-          onFormatSetChange={mockOnFormatSetChange}
-        />
-      );
-
-      const labelInput = screen.getByLabelText("Label");
-
-      // Input should be disabled, but let's test the handler logic
-      fireEvent.change(labelInput, { target: { value: "New Label" } });
-
-      expect(mockOnFormatSetChange).not.toHaveBeenCalled();
-    });
   });
 
   describe("Unit System Selection", () => { // TODO: Re-enable once format set supports UnitSystem.
     it("should display unit system select component", () => {
-      render(<FormatSetPanel formatSet={mockFormatSet} editable={true} />);
+      render(<FormatSetPanel formatSet={mockFormatSet} editable={true} onFormatSetChange={mockOnFormatSetChange} />);
 
       const unitSystemSelect = screen.getByText("Unit System");
       expect(unitSystemSelect).toBeTruthy();
     });
 
     it("should show metric as default value", () => {
-      render(<FormatSetPanel formatSet={mockFormatSet} editable={true} />);
+      render(<FormatSetPanel formatSet={mockFormatSet} editable={true} onFormatSetChange={mockOnFormatSetChange} />);
 
       expect(screen.getByDisplayValue("Metric")).toBeTruthy();
     });
@@ -196,7 +164,7 @@ describe("FormatSetPanel", () => {
 
   describe("Description Handling", () => {
     it("should update description when text is changed", async () => {
-      render(<FormatSetPanel formatSet={mockFormatSet} editable={true} />);
+      render(<FormatSetPanel formatSet={mockFormatSet} editable={true} onFormatSetChange={mockOnFormatSetChange} />);
 
       const descriptionTextarea = screen.getByLabelText("Description") as HTMLTextAreaElement;
       await user.clear(descriptionTextarea);
@@ -222,16 +190,6 @@ describe("FormatSetPanel", () => {
       rerender(<FormatSetPanel formatSet={mockFormatSet2} />);
 
       expect(screen.getByDisplayValue("Auto-generated Format Set")).toBeTruthy();
-    });
-
-    it("should clear fields when formatSet becomes undefined", () => {
-      const { rerender } = render(<FormatSetPanel formatSet={mockFormatSet} />);
-
-      expect(screen.getByDisplayValue("Test Format Set 1")).toBeTruthy();
-
-      rerender(<FormatSetPanel formatSet={undefined} />);
-
-      expect(screen.getByText("Select a format set to view details")).toBeTruthy();
     });
   });
 

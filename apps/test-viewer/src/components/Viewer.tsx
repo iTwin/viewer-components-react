@@ -19,7 +19,35 @@ import { useAuthorizationContext } from "./Authorization";
 import { FormatManager } from "./quantity-formatting/FormatManager";
 import { statusBarActionsProvider, ViewerOptionsProvider } from "./ViewerOptions";
 
+import type { FormatSet } from "@itwin/ecschema-metadata";
 import type { UiProvidersConfig } from "../UiProvidersConfig";
+
+// Test format sets for development - added once at startup
+const testFormatSets: FormatSet[] = [
+  {
+    name: "TestFormatSet1",
+    label: "Arizona Highway Project (Civil)",
+    unitSystem: "imperial",
+    description:
+      "This format set contains all the formatting standards used by civil engineers on the Arizona Highway Project. Includes units for measurements, coordinates, and construction materials.",
+    formats: {},
+  },
+  {
+    name: "TestFormatSet2",
+    label: "Arizona Highway Project (Project Manager)",
+    unitSystem: "imperial",
+    description: "This format set contains all the formatting standards used by project managers on the Arizona Highway Project.",
+    formats: {},
+  },
+  {
+    name: "TestFormatSet3",
+    label: "My personal format set",
+    unitSystem: "metric",
+    description: "Custom formatting preferences for individual use. Combines metric and imperial units based on personal workflow requirements.",
+    formats: {},
+  },
+];
+
 export function Viewer() {
   return (
     <ViewerOptionsProvider>
@@ -38,8 +66,8 @@ function ViewerWithOptions() {
     await providersConfig.initialize();
     await FrontendDevTools.initialize();
     await QuantityFormatting.startup();
-    // Initialize FormatManager with sample format sets
-    await FormatManager.initialize([]);
+    // Initialize FormatManager with test format sets
+    await FormatManager.initialize(testFormatSets);
     // ArcGIS Oauth setup
     const accessClient = new ArcGisAccessClient();
     accessClient.initialize({

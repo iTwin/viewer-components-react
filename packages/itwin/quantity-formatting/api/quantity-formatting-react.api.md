@@ -60,14 +60,15 @@ interface FormatSelectorProps {
 export const FormatSetPanel: React_3.FC<FormatSetPanelProps>;
 
 // @internal
-interface FormatSetPanelProps {
-    // (undocumented)
-    editable?: boolean;
-    // (undocumented)
-    formatSet?: FormatSet;
-    // (undocumented)
-    onFormatSetChange?: (formatSet: FormatSet) => void;
-}
+type FormatSetPanelProps = {
+    formatSet: FormatSet;
+} & ({
+    editable: true;
+    onFormatSetChange: (formatSet: FormatSet) => void;
+} | {
+    editable?: false;
+    onFormatSetChange?: undefined;
+});
 
 // @beta
 export const FormatSetSelector: React_3.FC<FormatSetSelectorProps>;
@@ -75,7 +76,7 @@ export const FormatSetSelector: React_3.FC<FormatSetSelectorProps>;
 // @internal
 interface FormatSetSelectorProps {
     // (undocumented)
-    formatSets?: FormatSet[];
+    formatSets: FormatSet[];
     // (undocumented)
     onFormatSetChange: (formatSet: FormatSet, key: string) => void;
     // (undocumented)

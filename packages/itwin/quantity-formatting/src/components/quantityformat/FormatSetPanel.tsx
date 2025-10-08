@@ -14,18 +14,22 @@ import type { FormatSet } from "@itwin/ecschema-metadata";
  * Props for the FormatSetPanel component
  * @internal
  */
-interface FormatSetPanelProps {
-  formatSet?: FormatSet;
-  editable?: boolean;
-  onFormatSetChange?: (formatSet: FormatSet) => void;
-}
+type FormatSetPanelProps = {
+  formatSet: FormatSet;
+} & ({
+  editable: true,
+  onFormatSetChange: (formatSet: FormatSet) => void
+} | {
+  editable?: false,
+  onFormatSetChange?: undefined
+})
 
 /**
  * A React component that displays and allows editing of format set properties.
  * @beta
  */
 export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, editable = false, onFormatSetChange }) => {
-  const [label, setLabel] = React.useState(formatSet?.label || "");
+  const [label, setLabel] = React.useState(formatSet.label || "");
   const [description, setDescription] = React.useState("");
   const [unitSystem, setUnitSystem] = React.useState<string>("metric");
   const { translate } = useTranslation();
@@ -45,9 +49,9 @@ export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, edita
 
   // Update local state when formatSet prop changes
   React.useEffect(() => {
-    setLabel(formatSet?.label || "");
-    setDescription(formatSet?.description || "");
-    setUnitSystem(formatSet?.unitSystem || "metric");
+    setLabel(formatSet.label || "");
+    setDescription(formatSet.description || "");
+    setUnitSystem(formatSet.unitSystem || "metric");
   }, [formatSet]);
 
   const handleLabelChange = React.useCallback(
@@ -90,16 +94,6 @@ export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, edita
         onFormatSetChange(updatedFormatSet);
     }
   }, [editable, formatSet, onFormatSetChange]);
-
-  if (!formatSet) {
-    return (
-      <Flex className="quantityFormat--formatSetPanel-emptyState">
-        <Text variant="leading" isMuted>
-          {translate("QuantityFormat:labels.selectFormatSetToView")}
-        </Text>
-      </Flex>
-    );
-  }
 
   return (
     <Flex className="quantityFormat--formatSetPanel-container">
