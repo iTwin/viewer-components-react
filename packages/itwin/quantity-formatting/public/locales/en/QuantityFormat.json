@@ -64,7 +64,7 @@
       "unitSystemImperial": "Imperial",
       "unitSystemUsCustomary": "US Customary",
       "unitSystemUsSurvey": "US Survey",
-      "unitSystemTooltip": "Formats that aren't configured will adhere to this unit system"
+      "unitSystemTooltip": "Formats that aren't configured will default to this unit system"
   },
   "decimal_precision": {
     "zero": "0",
