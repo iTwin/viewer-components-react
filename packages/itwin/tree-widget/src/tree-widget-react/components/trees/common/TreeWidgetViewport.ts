@@ -153,11 +153,9 @@ export interface TreeWidgetViewport {
    *
    * **NOTE** When turning sub-category display to:
    * - `true`, sub-category display should be turned on. All elements which have specified sub-category should be turned on if model and category are visible,
-   * category does not have per-model `hide` override and element is not in the [[neverDrawn]] list.
+   * category does not have per-model `hide` override and element is not in the `neverDrawn` set.
    * - `false`, sub-category display should be turned off. All elements that have that sub-category should not be displayed in the viewport,
-   * unless element has per-model category `Show` override, or is in the [[alwaysDrawn]] list.
-   * @param subCategoryId The Id of the sub-category to add or remove.
-   * @param display Whether or not to display the specified sub-category in the viewport.
+   * unless element has per-model category `Show` override, or is in the `alwaysDrawn` set.
    */
   changeSubCategoryDisplay: (props: { subCategoryId: Id64String; display: boolean }) => void;
   /**
