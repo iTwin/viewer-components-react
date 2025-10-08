@@ -127,7 +127,7 @@ describe("VisibilityChangeEventListener", () => {
 
   it("raises event when suppression ends and viewport events were raised during suppression", async () => {
     const vpMock = createFakeSinonViewport();
-    const { onViewedCategoriesPerModelChanged, onViewedCategoriesChanged, onViewedModelsChanged, onAlwaysDrawnChanged, onNeverDrawnChanged } = vpMock;
+    const { onPerModelCategoriesOverridesChanged, onDisplayedCategoriesChanged, onDisplayedModelsChanged, onAlwaysDrawnChanged, onNeverDrawnChanged } = vpMock;
     using handler = createVisibilityChangeEventListener({
       viewport: vpMock,
       listeners: { categories: true, displayStyle: true, elements: true, models: true },
@@ -135,11 +135,11 @@ describe("VisibilityChangeEventListener", () => {
     const spy = sinon.spy();
     handler.onVisibilityChange.addListener(spy);
     handler.suppressChangeEvents();
-    onViewedCategoriesPerModelChanged.raiseEvent(vpMock);
-    onViewedCategoriesChanged.raiseEvent(vpMock);
-    onViewedModelsChanged.raiseEvent(vpMock);
-    onAlwaysDrawnChanged.raiseEvent(vpMock);
-    onNeverDrawnChanged.raiseEvent(vpMock);
+    onPerModelCategoriesOverridesChanged.raiseEvent();
+    onDisplayedCategoriesChanged.raiseEvent();
+    onDisplayedModelsChanged.raiseEvent();
+    onAlwaysDrawnChanged.raiseEvent();
+    onNeverDrawnChanged.raiseEvent();
     expect(handler.isVisibilityChangePending()).to.be.false;
     expect(spy).to.not.be.called;
     handler.resumeChangeEvents();
@@ -149,7 +149,7 @@ describe("VisibilityChangeEventListener", () => {
 
   it("raises event when suppression ends and viewport events were raised after suppression", async () => {
     const vpMock = createFakeSinonViewport();
-    const { onViewedCategoriesPerModelChanged, onViewedCategoriesChanged, onViewedModelsChanged, onAlwaysDrawnChanged, onNeverDrawnChanged } = vpMock;
+    const { onPerModelCategoriesOverridesChanged, onDisplayedCategoriesChanged, onDisplayedModelsChanged, onAlwaysDrawnChanged, onNeverDrawnChanged } = vpMock;
     using handler = createVisibilityChangeEventListener({
       viewport: vpMock,
       listeners: { categories: true, displayStyle: true, elements: true, models: true },
@@ -158,11 +158,11 @@ describe("VisibilityChangeEventListener", () => {
     handler.onVisibilityChange.addListener(spy);
     handler.suppressChangeEvents();
     handler.resumeChangeEvents();
-    onViewedCategoriesPerModelChanged.raiseEvent(vpMock);
-    onViewedCategoriesChanged.raiseEvent(vpMock);
-    onViewedModelsChanged.raiseEvent(vpMock);
-    onAlwaysDrawnChanged.raiseEvent(vpMock);
-    onNeverDrawnChanged.raiseEvent(vpMock);
+    onPerModelCategoriesOverridesChanged.raiseEvent();
+    onDisplayedCategoriesChanged.raiseEvent();
+    onDisplayedModelsChanged.raiseEvent();
+    onAlwaysDrawnChanged.raiseEvent();
+    onNeverDrawnChanged.raiseEvent();
     expect(handler.isVisibilityChangePending()).to.be.true;
     await waitFor(() => expect(spy).to.be.calledOnce);
   });

@@ -13,10 +13,10 @@ import { waitFor } from "../../../TestUtils.js";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
-import type { TreeWidgetViewport } from "../../../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
 import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
 import type { Visibility } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
 import type { waitForOptions } from "../../../TestUtils.js";
+import type { TreeWidgetTestingViewport } from "../../TreeUtils.js";
 
 interface VisibilityExpectations {
   subject(id: string): Visibility;
@@ -51,7 +51,7 @@ export namespace VisibilityExpectations {
 
 export interface ValidateNodeProps {
   handler: HierarchyVisibilityHandler;
-  viewport: TreeWidgetViewport;
+  viewport: TreeWidgetTestingViewport;
   visibilityExpectations: VisibilityExpectations;
 }
 

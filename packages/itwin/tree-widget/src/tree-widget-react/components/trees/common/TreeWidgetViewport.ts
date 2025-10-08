@@ -217,7 +217,7 @@ export interface TreeWidgetViewport {
    * @param elementIds The Ids of the elements that should be displayed.
    * @param exclusive If true, *only* the specified elements should be drawn. When this is set to true `isAlwaysDrawnExclusive` should return true, otherwise `isAlwaysDrawnExclusive` should return false.
    */
-  setAlwaysDrawn: (props: { elementIds: ReadonlySet<Id64String>; exclusive?: boolean }) => void;
+  setAlwaysDrawn: (props: { elementIds: Set<Id64String>; exclusive?: boolean }) => void;
   /** Should clear the set of always-drawn elements. */
   clearAlwaysDrawn: () => void;
   /**

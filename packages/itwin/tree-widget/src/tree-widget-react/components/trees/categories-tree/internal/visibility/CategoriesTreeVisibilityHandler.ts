@@ -303,7 +303,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
   private getAllCategories(): ReturnType<BaseIdsCache["getAllCategories"]> {
     return from(this.#props.idsCache.getAllCategories()).pipe(
       map((categories) => {
-        if (this.#props.viewport.view.is2d()) {
+        if (this.#props.viewport.viewType === "2d") {
           return { drawingCategories: categories };
         }
         return { spatialCategories: categories };

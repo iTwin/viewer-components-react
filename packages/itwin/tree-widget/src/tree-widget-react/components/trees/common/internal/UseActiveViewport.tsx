@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { IModelApp } from "@itwin/core-frontend";
 import { createTreeWidgetViewport } from "../TreeWidgetViewport.js";
 
-import type { ScreenViewport, Viewport } from "@itwin/core-frontend";
+import type { Viewport } from "@itwin/core-frontend";
 import type { TreeWidgetViewport } from "../TreeWidgetViewport.js";
 
 /**

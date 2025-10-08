@@ -36,7 +36,7 @@ import {
 } from "../VisibilityUtils.js";
 
 import type { Observable, Subscription } from "rxjs";
-import type { Id64Arg, Id64String, Id64Set } from "@itwin/core-bentley";
+import type { Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { TreeWidgetViewport } from "../../TreeWidgetViewport.js";
 import type { HierarchyVisibilityHandlerOverridableMethod, HierarchyVisibilityOverrideHandler, VisibilityStatus } from "../../UseHierarchyVisibility.js";
@@ -139,7 +139,7 @@ export class BaseVisibilityHelper implements Disposable {
         }
         this.#props.viewport.clearNeverDrawn();
         this.#props.viewport.clearPerModelCategoryOverrides();
-        this.#props.viewport.setAlwaysDrawn({ elementIds: this.#props.viewport.alwaysDrawn ?? new Set() });
+        this.#props.viewport.setAlwaysDrawn({ elementIds: this.#props.viewport.alwaysDrawn ? new Set([...this.#props.viewport.alwaysDrawn]) : new Set() });
       }),
     );
   }
