@@ -143,7 +143,7 @@ export interface TreeWidgetViewport {
    *
    * Sub-category display should not take into account its' child elements.
    *
-   * When sub-category is not displayed, all elements that have that sub-category should not be shown in the viewport, unless they have per-model category `Show` override or are in the [[alwaysDrawn]] list.
+   * When sub-category is not displayed, all elements that have that sub-category should not be shown in the viewport, unless they have per-model category `Show` override or are in the `alwaysDrawn` list.
    */
   viewsSubCategory: (subCategoryId: Id64String) => boolean;
   /**
