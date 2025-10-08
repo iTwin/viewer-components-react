@@ -8,7 +8,12 @@ import { Viewport } from "@itwin/core-frontend";
 import type { BeEvent, Id64Arg, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection, PerModelCategoryVisibility } from "@itwin/core-frontend";
 
-/** @internal */
+/**
+ * Creates a `TreeWidgetViewport`.
+ *
+ * Provided viewport is returned when it is of `TreeWidgetViewport` type, otherwise it is created.
+ * @beta
+ */
 export function createTreeWidgetViewport(viewport: Viewport | TreeWidgetViewport): TreeWidgetViewport {
   if (!(viewport instanceof Viewport)) {
     return viewport;
@@ -22,8 +27,12 @@ export function createTreeWidgetViewport(viewport: Viewport | TreeWidgetViewport
       return viewport.iModel;
     },
     viewsModel: (modelId) => viewport.view.viewsModel(modelId),
-    addViewedModels: async (modelIds) => viewport.addViewedModels(modelIds),
-    changeModelDisplay: (props) => viewport.changeModelDisplay(props.modelIds, props.display),
+    changeModelDisplay: async (props) => {
+      if (props.display) {
+        return viewport.addViewedModels(props.modelIds);
+      }
+      viewport.changeModelDisplay(props.modelIds, false);
+    },
     viewsCategory: (categoryId) => viewport.view.viewsCategory(categoryId),
     changeCategoryDisplay: (props) => viewport.changeCategoryDisplay(props.categoryIds, props.display, props.enableAllSubCategories),
     viewsSubCategory: (subCategoryId) => viewport.isSubCategoryVisible(subCategoryId),
@@ -101,8 +110,6 @@ export interface TreeWidgetViewport {
    * When model is not displayed, all elements that have that model should not be shown in the viewport.
    */
   viewsModel: (modelId: Id64String) => boolean;
-  /** Should add models to the set of those currently displayed in this viewport. */
-  addViewedModels(modelIds: Id64Arg): Promise<void>;
   /**
    * Should add or remove a set of models from those models currently displayed in this viewport.
    *
@@ -111,7 +118,7 @@ export interface TreeWidgetViewport {
    * model visibility should not interfere with elements visibility.
    * - `false`, model display should be turned off. All elements which have that model should not be displayed in the viewport.
    */
-  changeModelDisplay: (props: { modelIds: Id64Arg; display: boolean }) => boolean;
+  changeModelDisplay: (props: { modelIds: Id64Arg; display: boolean }) => Promise<void>;
   /**
    * Should return true if category specified by `categoryId` is visible in the viewport.
    *
@@ -197,7 +204,7 @@ export interface TreeWidgetViewport {
   /**
    * Should return true if elements in the [[alwaysDrawn]] set are the *only* elements that are displayed when their models are visible.
    *
-   * Should be set to true when `setAlwaysDrawn` is called with `exclusive` flag. Should be set to false 
+   * Should be set to true when `setAlwaysDrawn` is called with `exclusive` flag. Should be set to false
    * when `setAlwaysDrawn` is called with `exclusive` set to `false` or `undefined`, or when `clearAlwaysDrawn` is called.
    */
   readonly isAlwaysDrawnExclusive: boolean;

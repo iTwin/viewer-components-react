@@ -20,7 +20,7 @@ export function useActiveTreeWidgetViewport({ treeWidgetViewport }: { treeWidget
       return;
     }
     setActiveViewport(createTreeWidgetViewportInternal(viewport));
-  }, [treeWidgetViewport]);
+  }, [treeWidgetViewport, viewport]);
 
   return activeViewport;
 }

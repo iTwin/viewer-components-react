@@ -1305,7 +1305,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             using handlerResult = createHandler({ viewport });
             const { handler } = handlerResult;
             await handler.changeVisibility(node, true);
-            expect(viewport.addViewedModels).to.be.calledOnceWith([modelId]);
+            expect(viewport.changeModelDisplay).to.be.calledOnceWith({ modelIds: [modelId], display: true });
           });
 
           it("doesn't change always/never drawn sets if they don't have any of the model's children", async () => {
@@ -1543,7 +1543,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             using handlerResult = createHandler({ viewport });
             const { handler } = handlerResult;
             await handler.changeVisibility(node, true);
-            expect(viewport.addViewedModels).to.be.calledWith(modelId);
+            expect(viewport.changeModelDisplay).to.be.calledOnceWith({ modelIds: modelId, display: true });
             expect(viewport.alwaysDrawn).to.deep.eq(new Set([elementId]));
           });
 
@@ -2804,7 +2804,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         const { imodel, firstCategoryId, secondCategoryId, modelId } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodel });
         const { handler, provider, viewport } = visibilityTestData;
-        await viewport.addViewedModels(modelId);
+        await viewport.changeModelDisplay({ modelIds: modelId, display: true });
 
         await validateHierarchyVisibility({
           handler,
@@ -2828,7 +2828,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         const { imodel, firstCategoryId, secondCategoryId, modelId } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodel });
         const { handler, provider, viewport } = visibilityTestData;
-        await viewport.addViewedModels(modelId);
+        await viewport.changeModelDisplay({ modelIds: modelId, display: true });
         viewport.changeCategoryDisplay({ categoryIds: [firstCategoryId, secondCategoryId], display: true, enableAllSubCategories: true });
 
         await validateHierarchyVisibility({
@@ -2853,7 +2853,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         const { imodel, firstCategoryId, modelId, elements1 } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodel });
         const { handler, provider, viewport } = visibilityTestData;
-        await viewport.addViewedModels(modelId);
+        await viewport.changeModelDisplay({ modelIds: modelId, display: true });
         viewport.changeCategoryDisplay({ categoryIds: firstCategoryId, display: true, enableAllSubCategories: true });
         const elementId = elements1[0];
         viewport.setNeverDrawn(new Set([elementId]));
@@ -2886,7 +2886,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         const { imodel, firstCategoryId, secondCategoryId, elements1, modelId } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodel });
         const { handler, provider, viewport } = visibilityTestData;
-        await viewport.addViewedModels(modelId);
+        await viewport.changeModelDisplay({ modelIds: modelId, display: true });
         viewport.changeCategoryDisplay({ categoryIds: secondCategoryId, display: true, enableAllSubCategories: true });
         const elementId = elements1[0];
         viewport.setAlwaysDrawn({ elementIds: new Set([elementId]) });
@@ -2918,7 +2918,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         const { imodel, firstCategoryId, secondCategoryId, elements1, modelId } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodel });
         const { handler, provider, viewport } = visibilityTestData;
-        await viewport.addViewedModels(modelId);
+        await viewport.changeModelDisplay({ modelIds: modelId, display: true });
         viewport.changeCategoryDisplay({ categoryIds: [firstCategoryId, secondCategoryId], display: true, enableAllSubCategories: true });
         viewport.setAlwaysDrawn({ elementIds: new Set(elements1) });
 
@@ -2944,7 +2944,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         const { imodel, firstCategoryId, elements1, modelId } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodel });
         const { handler, provider, viewport } = visibilityTestData;
-        await viewport.addViewedModels(modelId);
+        await viewport.changeModelDisplay({ modelIds: modelId, display: true });
         viewport.setNeverDrawn(new Set(elements1));
 
         await validateHierarchyVisibility({
@@ -3191,7 +3191,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         const { imodel, ...ids } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodel });
         const { handler, provider, viewport } = visibilityTestData;
-        viewport.changeModelDisplay({ modelIds: ids.model1, display: true });
+        await viewport.changeModelDisplay({ modelIds: ids.model1, display: true });
         viewport.setAlwaysDrawn({ elementIds: new Set([ids.element2]), exclusive: true });
 
         await validateHierarchyVisibility({
@@ -3238,7 +3238,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         const { imodel, ...ids } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodel });
         const { handler, provider, viewport } = visibilityTestData;
-        viewport.changeModelDisplay({ modelIds: ids.model, display: true });
+        await viewport.changeModelDisplay({ modelIds: ids.model, display: true });
         viewport.setAlwaysDrawn({ elementIds: new Set([ids.element2]), exclusive: true });
 
         await validateHierarchyVisibility({
@@ -3291,7 +3291,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         using visibilityTestData = createVisibilityTestData({ imodel });
         const { handler, provider, viewport } = visibilityTestData;
 
-        viewport.changeModelDisplay({ modelIds: ids.model, display: true });
+        await viewport.changeModelDisplay({ modelIds: ids.model, display: true });
         viewport.setAlwaysDrawn({ elementIds: new Set([ids.element2]), exclusive: true });
 
         await validateHierarchyVisibility({
@@ -3340,7 +3340,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         using visibilityTestData = createVisibilityTestData({ imodel });
         const { handler, provider, viewport } = visibilityTestData;
 
-        viewport.changeModelDisplay({ modelIds: ids.model, display: true });
+        await viewport.changeModelDisplay({ modelIds: ids.model, display: true });
         viewport.setAlwaysDrawn({ elementIds: new Set([ids.element2]), exclusive: true });
 
         await validateHierarchyVisibility({

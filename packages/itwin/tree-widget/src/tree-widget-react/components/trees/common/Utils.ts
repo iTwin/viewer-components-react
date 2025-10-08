@@ -27,7 +27,7 @@ export type FunctionProps<THook extends (props: any) => any> = Parameters<THook>
  * @public
  */
 export async function hideAllModels(models: string[], viewport: Viewport | TreeWidgetViewport) {
-  createTreeWidgetViewport(viewport).changeModelDisplay({ modelIds: models, display: false });
+  await createTreeWidgetViewport(viewport).changeModelDisplay({ modelIds: models, display: false });
 }
 
 /**
@@ -44,7 +44,7 @@ export async function showAll(props: {
 }) {
   const { models, categories, viewport } = props;
   const treeWidgetViewport = createTreeWidgetViewport(viewport);
-  await treeWidgetViewport.addViewedModels(models);
+  await treeWidgetViewport.changeModelDisplay({ modelIds: models, display: true });
   treeWidgetViewport.clearNeverDrawn();
   treeWidgetViewport.clearAlwaysDrawn();
   if (categories) {
@@ -69,8 +69,10 @@ export async function invertAllModels(models: Id64Array, viewport: Viewport | Tr
       notViewedModels.push(modelId);
     }
   });
-  await treeWidgetViewport.addViewedModels(notViewedModels);
-  treeWidgetViewport.changeModelDisplay({ modelIds: viewedModels, display: false });
+  await Promise.all([
+    treeWidgetViewport.changeModelDisplay({ modelIds: notViewedModels, display: true }),
+    treeWidgetViewport.changeModelDisplay({ modelIds: viewedModels, display: false }),
+  ]);
 }
 
 /**
@@ -82,11 +84,7 @@ export async function toggleModels(models: string[], enable: boolean, viewport: 
   if (!models) {
     return;
   }
-  if (enable) {
-    treeWidgetViewport.changeModelDisplay({ modelIds: models, display: false });
-  } else {
-    await treeWidgetViewport.addViewedModels(models);
-  }
+  await treeWidgetViewport.changeModelDisplay({ modelIds: models, display: !enable });
 }
 
 /**

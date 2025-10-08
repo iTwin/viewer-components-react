@@ -1303,9 +1303,10 @@ async function setupInitialDisplayState(props: {
     viewport.setNeverDrawn(new Set([...neverDrawn, ...(viewport.neverDrawn ?? [])]));
   }
   if (viewport.viewType === "spatial" || viewport.viewType === "2d") {
-    for (const modelInfo of models) {
-      viewport.changeModelDisplay({ modelIds: modelInfo.id, display: modelInfo.visible });
-    }
+    await Promise.all([
+      viewport.changeModelDisplay({ modelIds: models.filter(({ visible }) => visible).map(({ id }) => id), display: true }),
+      viewport.changeModelDisplay({ modelIds: models.filter(({ visible }) => !visible).map(({ id }) => id), display: false }),
+    ]);
   }
   viewport.renderFrame();
 }

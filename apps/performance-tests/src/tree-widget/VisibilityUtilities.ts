@@ -139,7 +139,6 @@ export function createTreeWidgetTestingViewport({ viewState }: { viewState: View
   });
   const treeWidgetViewport = createTreeWidgetViewport(viewport);
   return {
-    addViewedModels: async (props) => treeWidgetViewport.addViewedModels(props),
     iModel: treeWidgetViewport.iModel,
     get alwaysDrawn() {
       return treeWidgetViewport.alwaysDrawn;
@@ -154,7 +153,7 @@ export function createTreeWidgetTestingViewport({ viewState }: { viewState: View
       return treeWidgetViewport.isAlwaysDrawnExclusive;
     },
     changeCategoryDisplay: (props) => treeWidgetViewport.changeCategoryDisplay(props),
-    changeModelDisplay: (props) => treeWidgetViewport.changeModelDisplay(props),
+    changeModelDisplay: async (props) => treeWidgetViewport.changeModelDisplay(props),
     changeSubCategoryDisplay: (props) => treeWidgetViewport.changeSubCategoryDisplay(props),
     clearNeverDrawn: () => treeWidgetViewport.clearNeverDrawn(),
     clearAlwaysDrawn: () => treeWidgetViewport.clearAlwaysDrawn(),
@@ -199,7 +198,7 @@ interface VisibilityInfo {
   visible: boolean;
 }
 
-export function setupInitialDisplayState(props: {
+export async function setupInitialDisplayState(props: {
   viewport: TreeWidgetTestingViewport;
   categories?: Array<VisibilityInfo>;
   subCategories?: Array<VisibilityInfo>;
@@ -226,9 +225,10 @@ export function setupInitialDisplayState(props: {
   if (neverDrawn.length > 0) {
     viewport.setNeverDrawn(new Set([...neverDrawn, ...(viewport.neverDrawn ?? [])]));
   }
-  for (const modelInfo of models) {
-    viewport.changeModelDisplay({ modelIds: modelInfo.id, display: modelInfo.visible });
-  }
+  await Promise.all([
+    viewport.changeModelDisplay({ modelIds: models.filter(({ visible }) => visible).map(({ id }) => id), display: true }),
+    viewport.changeModelDisplay({ modelIds: models.filter(({ visible }) => !visible).map(({ id }) => id), display: false }),
+  ]);
   viewport.renderFrame();
 }
 

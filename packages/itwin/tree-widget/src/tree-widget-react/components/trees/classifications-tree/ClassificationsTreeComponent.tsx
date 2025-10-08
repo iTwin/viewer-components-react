@@ -7,7 +7,7 @@ import { useActiveIModelConnection } from "@itwin/appui-react";
 import { SchemaKey, SchemaMatchType } from "@itwin/ecschema-metadata";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
-import { useActiveTreeWidgetViewport } from "../common/internal/UseActiveTreeWidgetTreeWidgetViewport.js";
+import { useActiveTreeWidgetViewport } from "../common/internal/UseActiveTreeWidgetViewport.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { ClassificationsTree } from "./ClassificationsTree.js";
 

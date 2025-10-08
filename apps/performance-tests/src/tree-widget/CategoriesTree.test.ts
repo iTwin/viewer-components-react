@@ -82,7 +82,7 @@ describe("categories tree", () => {
         iModelConnection,
         testData,
       });
-      setupInitialDisplayState({
+      await setupInitialDisplayState({
         viewport,
         ...testData,
       });
@@ -145,7 +145,7 @@ describe("categories tree", () => {
         iModelConnection,
         testData,
       });
-      setupInitialDisplayState({
+      await setupInitialDisplayState({
         viewport,
         ...testData,
       });

@@ -613,14 +613,16 @@ export class BaseVisibilityHelper implements Disposable {
 
       viewport.clearPerModelCategoryOverrides(modelIds);
       if (!on) {
-        viewport.changeModelDisplay({ modelIds, display: false });
-        return this.#props.baseIdsCache
-          .getSubModels({ modelIds })
-          .pipe(mergeMap(({ subModels }) => (subModels ? this.changeModelsVisibilityStatus({ modelIds: subModels, on }) : EMPTY)));
+        return concat(
+          from(viewport.changeModelDisplay({ modelIds, display: false })),
+          this.#props.baseIdsCache
+            .getSubModels({ modelIds })
+            .pipe(mergeMap(({ subModels }) => (subModels ? this.changeModelsVisibilityStatus({ modelIds: subModels, on }) : EMPTY))),
+        );
       }
 
       return concat(
-        from(viewport.addViewedModels(modelIds)),
+        from(viewport.changeModelDisplay({ modelIds, display: true })),
         this.#props.baseIdsCache.getCategories({ modelIds }).pipe(
           mergeMap(({ id, drawingCategories, spatialCategories }) => {
             return merge(
@@ -668,7 +670,7 @@ export class BaseVisibilityHelper implements Disposable {
         categoriesToOverride.forEach((categoryId) => {
           this.changeCategoryStateInViewportAccordingToModelVisibility(modelId, categoryId, false, false);
         });
-        await viewport.addViewedModels(modelId);
+        await viewport.changeModelDisplay({ modelIds: modelId, display: true });
       }),
     );
   }

@@ -88,7 +88,6 @@ export function createTreeWidgetTestingViewport({ viewState }: { viewState: View
   });
   const treeWidgetViewport = createTreeWidgetViewport(viewport);
   return {
-    addViewedModels: async (props) => treeWidgetViewport.addViewedModels(props),
     iModel: treeWidgetViewport.iModel,
     get alwaysDrawn() {
       return treeWidgetViewport.alwaysDrawn;
@@ -103,7 +102,7 @@ export function createTreeWidgetTestingViewport({ viewState }: { viewState: View
       return treeWidgetViewport.isAlwaysDrawnExclusive;
     },
     changeCategoryDisplay: (props) => treeWidgetViewport.changeCategoryDisplay(props),
-    changeModelDisplay: (props) => treeWidgetViewport.changeModelDisplay(props),
+    changeModelDisplay: async (props) => treeWidgetViewport.changeModelDisplay(props),
     changeSubCategoryDisplay: (props) => treeWidgetViewport.changeSubCategoryDisplay(props),
     clearNeverDrawn: () => treeWidgetViewport.clearNeverDrawn(),
     clearAlwaysDrawn: () => treeWidgetViewport.clearAlwaysDrawn(),
