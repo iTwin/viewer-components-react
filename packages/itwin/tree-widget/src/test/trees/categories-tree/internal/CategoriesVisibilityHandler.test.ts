@@ -1615,6 +1615,7 @@ function createHiddenTestData(keys: { [key: string]: InstanceKey }) {
       subCategories.push({ id: getDefaultSubCategoryId(key.id), visible: false });
       continue;
     }
+    // cspell:disable-next-line
     if (key.className.toLowerCase().includes("physicalobject")) {
       elements.push({ id: key.id, visible: false });
       continue;

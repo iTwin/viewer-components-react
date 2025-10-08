@@ -61,10 +61,13 @@ export async function validateHierarchyVisibility({
 }: ValidateNodeProps & {
   provider: HierarchyProvider;
 }) {
+  props.viewport.renderFrame();
+  // This promise allows handler change event to fire if it was scheduled.
+  await new Promise((resolve) => setTimeout(resolve));
   await toVoidPromise(
     from(provider.getNodes({ parentNode: undefined })).pipe(
       expand((node) => (node.children && !ignoreChildren(node) ? provider.getNodes({ parentNode: node }) : EMPTY), 1000),
-      mergeMap(async (node) => waitFor(async () => validateNodeVisibility({ ...props, node })), 1000),
+      mergeMap(async (node) => waitFor(async () => validateNodeVisibility({ ...props, node }), 5000)),
     ),
   );
 }
@@ -170,6 +173,7 @@ export function setupInitialDisplayState(props: {
   for (const modelInfo of models) {
     viewport.changeModelDisplay(modelInfo.id, modelInfo.visible);
   }
+  viewport.renderFrame();
 }
 
 export function createTestDataForInitialDisplay(props: {
