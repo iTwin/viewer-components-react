@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Remove Dynamically Created Inline Styles",
+  "packageName": "@itwin/map-layers",
+  "email": "andremig-bentley@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
