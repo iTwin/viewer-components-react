@@ -111,7 +111,7 @@ export function releaseMainThreadOnItemsCount<T>(elementCount: number) {
 }
 
 /** @internal */
-export function getClassesByView(viewType: "2d" | "3d" | "spatial") {
+export function getClassesByView(viewType: "2d" | "3d") {
   return viewType === "2d"
     ? ({ categoryClass: CLASS_NAME_DrawingCategory, elementClass: CLASS_NAME_GeometricElement2d, modelClass: CLASS_NAME_GeometricModel2d } as const)
     : ({ categoryClass: CLASS_NAME_SpatialCategory, elementClass: CLASS_NAME_GeometricElement3d, modelClass: CLASS_NAME_GeometricModel3d } as const);

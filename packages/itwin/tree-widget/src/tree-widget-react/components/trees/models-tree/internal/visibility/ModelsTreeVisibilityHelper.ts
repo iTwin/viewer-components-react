@@ -42,7 +42,7 @@ export class ModelsTreeVisibilityHelper extends BaseVisibilityHelper {
   public getSubjectsVisibilityStatus(props: { subjectIds: Id64Arg }): Observable<VisibilityStatus> {
     const result = defer(() => {
       const { subjectIds } = props;
-      if (this.#props.viewport.viewType !== "spatial") {
+      if (this.#props.viewport.viewType !== "3d") {
         return of(createVisibilityStatus("disabled"));
       }
 

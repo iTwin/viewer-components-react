@@ -21,7 +21,7 @@ export function createTreeWidgetViewport(viewport: Viewport | TreeWidgetViewport
 
   return {
     get viewType() {
-      return viewport.view.is2d() ? "2d" : viewport.view.isSpatialView() ? "spatial" : "other";
+      return viewport.view.is2d() ? "2d" : viewport.view.isSpatialView() ? "3d" : "other";
     },
     get iModel() {
       return viewport.iModel;
@@ -98,8 +98,12 @@ export function createTreeWidgetViewport(viewport: Viewport | TreeWidgetViewport
  * @public
  */
 export interface TreeWidgetViewport {
-  /** The type of the view. Generally it should be either `spatial` or `2d`. */
-  viewType: "2d" | "spatial" | "other";
+  /** 
+   * The type of the view. Generally it should be either `3d` or `2d`.
+   * 
+   * The `other` value is reserved for edge cases when viewport doesn't show any elements, e.g. a blank viewport
+   */
+  viewType: "2d" | "3d" | "other";
   /** The iModel of this Viewport. */
   iModel: IModelConnection;
   /**

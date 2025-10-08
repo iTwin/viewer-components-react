@@ -67,7 +67,7 @@ export function createFakeSinonViewport(
     viewsCategory: sinon.fake.returns(true),
     viewsModel: sinon.fake.returns(true),
     viewsSubCategory: sinon.fake.returns(true),
-    viewType: "spatial",
+    viewType: "3d",
     perModelCategoryOverrides: [],
     ...props,
     get alwaysDrawn() {

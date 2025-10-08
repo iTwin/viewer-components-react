@@ -155,10 +155,7 @@ export class BaseVisibilityHelper implements Disposable {
   public getModelsVisibilityStatus(props: { modelIds: Id64Arg; type: "GeometricModel3d" | "GeometricModel2d" }): Observable<VisibilityStatus> {
     const result = defer(() => {
       const { modelIds, type } = props;
-      if (
-        (type === "GeometricModel3d" && this.#props.viewport.viewType !== "spatial") ||
-        (type === "GeometricModel2d" && this.#props.viewport.viewType !== "2d")
-      ) {
+      if ((type === "GeometricModel3d" && this.#props.viewport.viewType !== "3d") || (type === "GeometricModel2d" && this.#props.viewport.viewType !== "2d")) {
         return of(createVisibilityStatus("disabled"));
       }
       return from(Id64.iterable(modelIds)).pipe(
@@ -342,7 +339,7 @@ export class BaseVisibilityHelper implements Disposable {
       }
 
       const isSupportedInView =
-        (this.#props.viewport.viewType === "spatial" && type === "SpatialCategory") || (this.#props.viewport.viewType === "2d" && type === "DrawingCategory");
+        (this.#props.viewport.viewType === "3d" && type === "SpatialCategory") || (this.#props.viewport.viewType === "2d" && type === "DrawingCategory");
       if (!isSupportedInView) {
         return of(createVisibilityStatus("disabled"));
       }
@@ -471,8 +468,7 @@ export class BaseVisibilityHelper implements Disposable {
       }
 
       const isSupportedInView =
-        (this.#props.viewport.viewType === "spatial" && type === "GeometricElement3d") ||
-        (this.#props.viewport.viewType === "2d" && type === "GeometricElement2d");
+        (this.#props.viewport.viewType === "3d" && type === "GeometricElement3d") || (this.#props.viewport.viewType === "2d" && type === "GeometricElement2d");
       if (!isSupportedInView) {
         return of(createVisibilityStatus("disabled"));
       }

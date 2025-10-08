@@ -64,7 +64,7 @@ describe("CategoryVisibilityUtils", () => {
     viewport = createFakeSinonViewport({
       queryHandler: () => [{ id: categoryId }],
       getCategoryInfo: async () => categoriesInfo,
-      viewType: "spatial",
+      viewType: "3d",
     });
   });
 

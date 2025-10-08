@@ -486,7 +486,6 @@ interface TreeWidgetProps {
 
 // @public
 export interface TreeWidgetViewport {
-    addViewedModels(modelIds: Id64Arg): Promise<void>;
     alwaysDrawn: ReadonlySet<Id64String> | undefined;
     changeCategoryDisplay: (props: {
         categoryIds: Id64Arg;
@@ -496,7 +495,7 @@ export interface TreeWidgetViewport {
     changeModelDisplay: (props: {
         modelIds: Id64Arg;
         display: boolean;
-    }) => boolean;
+    }) => Promise<void>;
     changeSubCategoryDisplay: (props: {
         subCategoryId: Id64String;
         display: boolean;
@@ -535,7 +534,7 @@ export interface TreeWidgetViewport {
     viewsCategory: (categoryId: Id64String) => boolean;
     viewsModel: (modelId: Id64String) => boolean;
     viewsSubCategory: (subCategoryId: Id64String) => boolean;
-    viewType: "2d" | "spatial" | "other";
+    viewType: "2d" | "3d" | "other";
 }
 
 // @beta
