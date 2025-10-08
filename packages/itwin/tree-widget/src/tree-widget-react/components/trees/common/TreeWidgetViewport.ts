@@ -158,11 +158,7 @@ export interface TreeWidgetViewport {
    * unless element has per-model category `Show` override, or is in the `alwaysDrawn` set.
    */
   changeSubCategoryDisplay: (props: { subCategoryId: Id64String; display: boolean }) => void;
-  /**
-   * Returns iterable visibility overrides objects.
-   *
-   * The returned value can be a custom object that has `Symbol.iterator` defined, or it can be a built in type like `Array` or `Set`.
-   */
+  /** Returns an iterable of per-model-category overrides. */
   perModelCategoryOverrides: Readonly<Iterable<{ modelId: Id64String; categoryId: Id64String; visible: boolean }>>;
   /** Should change the override state of one or more categories for one or more models. */
   setPerModelCategoryOverride: (props: { modelIds: Id64Arg; categoryIds: Id64Arg; override: PerModelCategoryVisibility.Override }) => void;
