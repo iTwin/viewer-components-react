@@ -284,6 +284,14 @@ type IModelContentTreeProps = Pick<TreeProps, "imodel" | "selectionStorage" | "s
     hierarchyConfig?: Partial<IModelContentTreeHierarchyConfiguration>;
 };
 
+// @beta (undocumented)
+interface LoadedTreeItemVisibilityButtonState {
+    // (undocumented)
+    isDisabled?: boolean;
+    // (undocumented)
+    state: "visible" | "hidden" | "partial";
+}
+
 // @public
 interface ModelInfo {
     // (undocumented)
@@ -408,14 +416,11 @@ interface TreeItemVisibilityButtonProps {
 }
 
 // @beta
-interface TreeItemVisibilityButtonState {
-    // (undocumented)
-    isDisabled?: boolean;
-    // (undocumented)
-    state: "visible" | "partial" | "hidden";
-    // (undocumented)
+type TreeItemVisibilityButtonState = (LoadedTreeItemVisibilityButtonState | {
+    isLoading: true;
+}) & {
     tooltip?: string;
-}
+};
 
 // @beta (undocumented)
 type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPaths" | "getHierarchyDefinition"> & Partial<Pick<FunctionProps<typeof useSelectionHandler>, "selectionMode">> & {
@@ -597,7 +602,7 @@ node: PresentationHierarchyNode;
 // @beta (undocumented)
 interface VisibilityContext {
     getVisibilityButtonState: (node: PresentationHierarchyNode) => TreeItemVisibilityButtonState;
-    onVisibilityButtonClick: (node: PresentationHierarchyNode, state: TreeItemVisibilityButtonState["state"]) => void;
+    onVisibilityButtonClick: (node: PresentationHierarchyNode, state: LoadedTreeItemVisibilityButtonState["state"]) => void;
 }
 
 // @beta

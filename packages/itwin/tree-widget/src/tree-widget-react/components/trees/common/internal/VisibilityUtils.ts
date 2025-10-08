@@ -112,7 +112,9 @@ export function getVisibilityFromAlwaysAndNeverDrawnElementsImpl(
   } & GetVisibilityFromAlwaysAndNeverDrawnElementsProps,
 ): VisibilityStatus {
   const { alwaysDrawn, neverDrawn, totalCount, viewport } = props;
-
+  if (totalCount === 0) {
+    return props.defaultStatus();
+  }
   if (neverDrawn?.size === totalCount) {
     return createVisibilityStatus("hidden");
   }

@@ -440,6 +440,15 @@ export class CategoriesTreeIdsCache implements Disposable {
     return [...(elementModelsCategories.get(modelId)?.categoryIds ?? [])];
   }
 
+  public async getAllCategories(): Promise<Id64Set> {
+    const result = new Set<Id64String>();
+    const modelsCategoriesInfo = await this.getModelsCategoriesInfo();
+    modelsCategoriesInfo.forEach(({ childCategories }) => {
+      childCategories.forEach(({ id }) => result.add(id));
+    });
+    return result;
+  }
+
   public async hasSubModel(elementId: Id64String): Promise<boolean> {
     const elementModelsCategories = await this.getElementModelsCategories();
     return elementModelsCategories.has(elementId);

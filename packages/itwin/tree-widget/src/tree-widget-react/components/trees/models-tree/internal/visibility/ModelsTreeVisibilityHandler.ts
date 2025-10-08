@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, from, map, merge, mergeMap, of } from "rxjs";
+import { concat, defer, EMPTY, from, map, merge, mergeMap, of } from "rxjs";
 import { assert, Id64 } from "@itwin/core-bentley";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
@@ -79,6 +79,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
       getSubCategories: (props) => this.getSubCategories(props),
       getSubModels: (props) => this.getSubModels(props),
       hasSubModel: async (props) => this.#props.idsCache.hasSubModel(props),
+      getAllCategories: () => this.getAllCategories(),
     };
     this.#visibilityHelper = new ModelsTreeVisibilityHelper({
       viewport: this.#props.viewport,
@@ -189,60 +190,67 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
 
   /** Changes visibility of the items represented by the tree node. */
   public changeVisibilityStatus(node: HierarchyNode, on: boolean): Observable<void> {
-    if (HierarchyNode.isClassGroupingNode(node)) {
-      const nodeInfo = this.getGroupingNodeInfo(node);
-      const result = this.#visibilityHelper.changeGroupedElementsVisibilityStatus({
-        categoryId: nodeInfo.categoryId,
-        modelId: nodeInfo.modelId,
-        elementIds: nodeInfo.elementIds,
-        on,
-      });
-      return this.#props.overrideHandler.createVisibilityHandlerResult({
-        overrideProps: { node, on },
-        nonOverriddenResult: result,
-        override: this.#props.overrides?.changeElementGroupingNodeVisibilityStatus,
-      });
-    }
+    const changeObs = defer(() => {
+      if (HierarchyNode.isClassGroupingNode(node)) {
+        const nodeInfo = this.getGroupingNodeInfo(node);
+        const result = this.#visibilityHelper.changeGroupedElementsVisibilityStatus({
+          categoryId: nodeInfo.categoryId,
+          modelId: nodeInfo.modelId,
+          elementIds: nodeInfo.elementIds,
+          on,
+        });
+        return this.#props.overrideHandler.createVisibilityHandlerResult({
+          overrideProps: { node, on },
+          nonOverriddenResult: result,
+          override: this.#props.overrides?.changeElementGroupingNodeVisibilityStatus,
+        });
+      }
 
-    if (!HierarchyNode.isInstancesNode(node)) {
-      return EMPTY;
-    }
+      if (!HierarchyNode.isInstancesNode(node)) {
+        return EMPTY;
+      }
 
-    if (ModelsTreeNode.isSubjectNode(node)) {
-      return this.#visibilityHelper.changeSubjectsVisibilityStatus({
-        subjectIds: node.key.instanceKeys.map((key) => key.id),
-        on,
-      });
-    }
+      if (ModelsTreeNode.isSubjectNode(node)) {
+        return this.#visibilityHelper.changeSubjectsVisibilityStatus({
+          subjectIds: node.key.instanceKeys.map((key) => key.id),
+          on,
+        });
+      }
 
-    if (ModelsTreeNode.isModelNode(node)) {
-      return this.#visibilityHelper.changeModelsVisibilityStatus({ modelIds: node.key.instanceKeys.map(({ id }) => id), on });
-    }
+      if (ModelsTreeNode.isModelNode(node)) {
+        return this.#visibilityHelper.changeModelsVisibilityStatus({ modelIds: node.key.instanceKeys.map(({ id }) => id), on });
+      }
 
-    const modelId = ModelsTreeNode.getModelId(node);
-    if (!modelId) {
-      return EMPTY;
-    }
+      const modelId = ModelsTreeNode.getModelId(node);
+      if (!modelId) {
+        return EMPTY;
+      }
 
-    if (ModelsTreeNode.isCategoryNode(node)) {
-      return this.#visibilityHelper.changeCategoriesVisibilityStatus({
-        categoryIds: node.key.instanceKeys.map(({ id }) => id),
+      if (ModelsTreeNode.isCategoryNode(node)) {
+        return this.#visibilityHelper.changeCategoriesVisibilityStatus({
+          categoryIds: node.key.instanceKeys.map(({ id }) => id),
+          modelId,
+          on,
+        });
+      }
+
+      const categoryId = ModelsTreeNode.getCategoryId(node);
+      if (!categoryId) {
+        return EMPTY;
+      }
+
+      return this.#visibilityHelper.changeElementsVisibilityStatus({
+        elementIds: node.key.instanceKeys.map(({ id }) => id),
         modelId,
+        categoryId,
         on,
       });
-    }
-
-    const categoryId = ModelsTreeNode.getCategoryId(node);
-    if (!categoryId) {
-      return EMPTY;
-    }
-
-    return this.#visibilityHelper.changeElementsVisibilityStatus({
-      elementIds: node.key.instanceKeys.map(({ id }) => id),
-      modelId,
-      categoryId,
-      on,
     });
+
+    if (this.#props.viewport.isAlwaysDrawnExclusive) {
+      return concat(this.#visibilityHelper.removeAlwaysDrawnExclusive(), changeObs);
+    }
+    return changeObs;
   }
 
   public getFilterTargetsVisibilityStatus(targets: ModelsTreeFilterTargets): Observable<VisibilityStatus> {
@@ -292,6 +300,10 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
         from(this.#props.idsCache.getModelCategoryIds(modelId)).pipe(map((categoryIds) => ({ id: modelId, spatialCategories: categoryIds }))),
       ),
     );
+  }
+
+  private getAllCategories(): ReturnType<BaseIdsCache["getAllCategories"]> {
+    return from(this.#props.idsCache.getAllCategories()).pipe(map((categories) => ({ spatialCategories: categories })));
   }
 
   private getElementsCount(props: Parameters<BaseIdsCache["getElementsCount"]>[0]): ReturnType<BaseIdsCache["getElementsCount"]> {
