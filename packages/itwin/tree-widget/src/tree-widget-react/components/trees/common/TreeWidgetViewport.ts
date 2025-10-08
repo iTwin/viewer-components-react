@@ -110,11 +110,6 @@ export interface TreeWidgetViewport {
    * - `true`, model display should be turned on. This does not mean that any elements should be turned on, it only means that
    * model visibility should not interfere with elements visibility.
    * - `false`, model display should be turned off. All elements which have that model should not be displayed in the viewport.
-   * @param modelIds The Ids of the models to add or remove.
-   * @param display Whether or not to display the specified models in the viewport.
-   * @returns
-   * - `false` if change is unsuccessful;
-   * - `true` if change is successful;
    */
   changeModelDisplay: (props: { modelIds: Id64Arg; display: boolean }) => boolean;
   /**
