@@ -169,9 +169,7 @@ export interface TreeWidgetViewport {
   /**
    * Ids of elements which should not be displayed.
    *
-   * This set takes precedence over category and sub-category display and per-model category override.
-   *
-   * **NOTE** This set should take precedence over the [[alwaysDrawn]] set - if an element is present in both sets, it is never drawn.
+   * This set takes precedence over category and sub-category display, per-model category overrides, and the `alwaysDrawn` set.
    */
   neverDrawn: ReadonlySet<Id64String> | undefined;
   /**
