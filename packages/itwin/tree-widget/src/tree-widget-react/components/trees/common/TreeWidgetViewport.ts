@@ -115,7 +115,7 @@ export interface TreeWidgetViewport {
   /**
    * The type of the view. Generally it should be either `3d` or `2d`.
    *
-   * The `other` value is reserved for edge cases when viewport doesn't show any elements, e.g. a blank viewport
+   * The `other` value is reserved for edge cases when viewport doesn't show any elements, e.g. a blank viewport.
    */
   viewType: "2d" | "3d" | "other";
   /** The iModel of this Viewport. */
