@@ -19,7 +19,7 @@ import { StationPrimaryChildren, StationSecondaryChildren } from "./panels/Stati
 import type { PanelProps} from "./panels/Decimal.js";
 import type { UnitsProvider , FormatDefinition, UnitProps } from "@itwin/core-quantity";
 /**
- * @internal
+ * @beta
  */
 interface FormatPanelProps {
   formatProps: FormatDefinition;

@@ -12,7 +12,7 @@ import type { UnitSystemKey } from "@itwin/core-quantity";
 import type { FormatSet } from "@itwin/ecschema-metadata";
 /**
  * Props for the FormatSetPanel component
- * @internal
+ * @beta
  */
 type FormatSetPanelProps = {
   formatSet: FormatSet;
@@ -59,7 +59,7 @@ export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, edita
       const newLabel = event.target.value;
       setLabel(newLabel);
 
-      if (editable && formatSet && onFormatSetChange) {
+      if (editable && onFormatSetChange) {
         const updatedFormatSet: FormatSet = {
           ...formatSet,
           label: newLabel,
@@ -74,7 +74,7 @@ export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, edita
     const newDescription = event.target.value;
     setDescription(newDescription);
 
-    if (editable && formatSet && onFormatSetChange) {
+    if (editable && onFormatSetChange) {
         const updatedFormatSet: FormatSet = {
           ...formatSet,
           description: newDescription,
@@ -86,7 +86,7 @@ export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, edita
   const handleUnitSystemChange = React.useCallback((value: string) => {
     setUnitSystem(value);
 
-    if (editable && formatSet && onFormatSetChange) {
+    if (editable && onFormatSetChange) {
         const updatedFormatSet: FormatSet = {
           ...formatSet,
           unitSystem: value as UnitSystemKey,

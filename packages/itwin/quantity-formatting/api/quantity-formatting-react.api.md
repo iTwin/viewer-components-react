@@ -16,7 +16,7 @@ import type { UnitsProvider } from '@itwin/core-quantity';
 // @beta
 export function FormatPanel(props: FormatPanelProps): JSX_2.Element;
 
-// @internal (undocumented)
+// @beta (undocumented)
 interface FormatPanelProps {
     // (undocumented)
     formatProps: FormatDefinition;
@@ -31,7 +31,7 @@ interface FormatPanelProps {
 // @beta
 export function FormatSample(props: FormatSampleProps): JSX_2.Element;
 
-// @internal (undocumented)
+// @beta (undocumented)
 interface FormatSampleProps {
     // (undocumented)
     formatProps: FormatDefinition;
@@ -46,7 +46,7 @@ interface FormatSampleProps {
 // @beta
 export const FormatSelector: React_2.FC<FormatSelectorProps>;
 
-// @internal (undocumented)
+// @beta (undocumented)
 interface FormatSelectorProps {
     // (undocumented)
     activeFormatDefinitionKey?: string;
@@ -59,7 +59,7 @@ interface FormatSelectorProps {
 // @beta
 export const FormatSetPanel: React_3.FC<FormatSetPanelProps>;
 
-// @internal
+// @beta
 type FormatSetPanelProps = {
     formatSet: FormatSet;
 } & ({
@@ -73,7 +73,7 @@ type FormatSetPanelProps = {
 // @beta
 export const FormatSetSelector: React_3.FC<FormatSetSelectorProps>;
 
-// @internal
+// @beta
 interface FormatSetSelectorProps {
     // (undocumented)
     formatSets: FormatSet[];

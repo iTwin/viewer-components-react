@@ -11,7 +11,7 @@ import type { FormatSet } from "@itwin/ecschema-metadata";
 
 /**
  * Props for the FormatSetSelector component
- * @internal
+ * @beta
  */
 interface FormatSetSelectorProps {
   formatSets: FormatSet[];

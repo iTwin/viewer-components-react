@@ -25,7 +25,6 @@ export const FormatSetsTabPanel: React.FC<FormatSetsTabPanelProps> = ({ formatMa
 
   // Load format sets from FormatManager (includes test format sets added at startup)
   React.useEffect(() => {
-    if (formatManager) {
       setFormatSets(formatManager.formatSets);
 
       // Set active format set if one exists
@@ -36,19 +35,13 @@ export const FormatSetsTabPanel: React.FC<FormatSetsTabPanelProps> = ({ formatMa
         setClonedSelectedFormatSet({ ...formatManager.activeFormatSet });
       }
 
-      // Listen for active format set changes
-      const removeListener = formatManager.onActiveFormatSetChanged.addListener((formatSet) => {
+      return formatManager.onActiveFormatSetChanged.addListener((formatSet) => {
         if (formatSet) {
           setActiveFormatSetKey(formatSet.name);
         } else {
           setActiveFormatSetKey(undefined);
         }
       });
-
-      return () => {
-        removeListener();
-      };
-    }
   }, [formatManager]);
 
   const handleFormatSetChange = React.useCallback((formatSet: FormatSet, _key: string) => {
