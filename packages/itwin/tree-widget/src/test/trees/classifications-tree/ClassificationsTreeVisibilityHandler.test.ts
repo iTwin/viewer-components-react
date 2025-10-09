@@ -84,7 +84,6 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       viewport,
       [Symbol.dispose]() {
         idsCache[Symbol.dispose]();
-        viewport[Symbol.dispose]();
         handler[Symbol.dispose]();
         provider[Symbol.dispose]();
       },
@@ -798,7 +797,6 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         viewport,
         [Symbol.dispose]() {
           idsCache[Symbol.dispose]();
-          viewport[Symbol.dispose]();
           handler[Symbol.dispose]();
           defaultProvider[Symbol.dispose]();
           filteredProvider[Symbol.dispose]();

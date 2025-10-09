@@ -202,7 +202,6 @@ describe("CategoryVisibilityUtils", () => {
     });
 
     after(async function () {
-      nonMockedViewport[Symbol.dispose]();
       await imodel.close();
       await terminatePresentationTesting();
     });

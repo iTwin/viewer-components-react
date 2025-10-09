@@ -162,7 +162,6 @@ describe("useModelsTree", () => {
       });
 
       after(async function () {
-        viewport[Symbol.dispose]();
         await imodel.close();
         await terminatePresentationTesting();
         TreeWidget.terminate();

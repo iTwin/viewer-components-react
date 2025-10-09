@@ -137,7 +137,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
       ...commonProps,
       [Symbol.dispose]() {
         commonProps.idsCache[Symbol.dispose]();
-        commonProps.viewport[Symbol.dispose]();
         handler[Symbol.dispose]();
         provider[Symbol.dispose]();
       },

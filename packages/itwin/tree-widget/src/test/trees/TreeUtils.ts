@@ -43,7 +43,7 @@ function getDefaultSubCategoryId(categoryId: Id64String) {
 
 export type TreeWidgetTestingViewport = TreeWidgetViewport & {
   renderFrame: () => void;
-} & Disposable;
+};
 
 export function createTreeWidgetTestingViewport({
   iModel,
@@ -238,14 +238,6 @@ export function createTreeWidgetTestingViewport({
         onPerModelCategoriesOverridesChanged.shouldFireOnRender = false;
         onPerModelCategoriesOverridesChanged.event.raiseEvent();
       }
-    },
-    [Symbol.dispose]() {
-      onPerModelCategoriesOverridesChanged.event.clear();
-      onDisplayedCategoriesChanged.event.clear();
-      onDisplayStyleChanged.clear();
-      onDisplayedModelsChanged.event.clear();
-      onAlwaysDrawnChanged.event.clear();
-      onNeverDrawnChanged.event.clear();
     },
   };
 }

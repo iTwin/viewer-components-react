@@ -1774,7 +1774,6 @@ describe("ModelsTreeVisibilityHandler", () => {
         hierarchyConfig: commonProps.hierarchyConfig,
         [Symbol.dispose]() {
           commonProps.idsCache[Symbol.dispose]();
-          commonProps.viewport[Symbol.dispose]();
           handler[Symbol.dispose]();
           provider[Symbol.dispose]();
         },
@@ -3390,7 +3389,6 @@ describe("ModelsTreeVisibilityHandler", () => {
             commonProps.idsCache[Symbol.dispose]();
             handler[Symbol.dispose]();
             defaultProvider[Symbol.dispose]();
-            commonProps.viewport[Symbol.dispose]();
             filteredProvider[Symbol.dispose]();
           },
         };
