@@ -113,10 +113,10 @@ export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, edita
       </Flex>
 
       <Flex className="quantityFormat--formatSetPanel-inputRow">
-        <Label htmlFor={unitSystemSelectId} displayStyle="inline">
+        <Label displayStyle="inline" htmlFor={unitSystemSelectId} className="quantityFormat--formatSetPanel-labelWithTooltip">
           {translate("QuantityFormat:labels.unitSystem")}
           <IconButton
-            className="quantityFormat--formatHelpTooltip"
+            className="quantityFormat--comboBoxTooltip"
             styleType="borderless"
             size="small"
             label={translate("QuantityFormat:labels.unitSystemTooltip")}
@@ -124,6 +124,7 @@ export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, edita
             <SvgHelpCircularHollow />
           </IconButton>
         </Label>
+
         <ComboBox
           value={unitSystem}
           onChange={handleUnitSystemChange}
@@ -137,7 +138,7 @@ export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, edita
             },
             size: "small",
           }}
-          className="quantityFormat--formatSetPanel-inputRow"
+          className="quantityFormat--formatSetPanel-comboBox"
         />
       </Flex>
 

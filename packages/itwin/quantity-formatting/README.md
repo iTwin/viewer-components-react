@@ -101,56 +101,37 @@ interface QuantityFormatPanelProps {
 <details>
 <summary>QuantityFormatPanel example code</summary>
 
+<!-- [[include: [QuantityFormat.QuantityFormatPanelExampleImports, QuantityFormat.QuantityFormatPanelExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
 ```tsx
-import React, { useState, useCallback } from "react";
 import { QuantityFormatPanel } from "@itwin/quantity-formatting-react";
 import { IModelApp } from "@itwin/core-frontend";
-import { Modal, Button, ModalButtonBar } from "@itwin/itwinui-react";
 import type { FormatDefinition } from "@itwin/core-quantity";
 
-function QuantityFormatDialog() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [formatDefinition, setFormatDefinition] = useState<FormatDefinition>({
-    precision: 4,
-    type: "Decimal",
-    composite: {
-      units: [{ name: "Units.M", label: "m" }],
-    },
-  });
+const formatDefinition: FormatDefinition = {
+  precision: 4,
+  type: "Decimal",
+  composite: {
+    units: [{ name: "Units.M", label: "m" }],
+  },
+};
 
-  const handleFormatChange = useCallback((newFormat: FormatDefinition) => {
-    setFormatDefinition(newFormat);
-  }, []);
+const handleFormatChange = (_newFormat: FormatDefinition) => {
+  // Handle format change
+};
 
-  const handleApply = useCallback(() => {
-    // Apply the format changes to your application
-    console.log("Applied format:", formatDefinition);
-    setIsOpen(false);
-  }, [formatDefinition]);
-
-  return (
-    <>
-      <Button onClick={() => setIsOpen(true)}>Configure Format</Button>
-
-      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Quantity Format Settings">
-        <QuantityFormatPanel
-          formatDefinition={formatDefinition}
-          unitsProvider={IModelApp.quantityFormatter.unitsProvider}
-          onFormatChange={handleFormatChange}
-          initialMagnitude={123.456}
-        />
-
-        <ModalButtonBar>
-          <Button onClick={() => setIsOpen(false)}>Cancel</Button>
-          <Button styleType="high-visibility" onClick={handleApply}>
-            Apply
-          </Button>
-        </ModalButtonBar>
-      </Modal>
-    </>
-  );
-}
+render(
+  <QuantityFormatPanel
+    formatDefinition={formatDefinition}
+    unitsProvider={IModelApp.quantityFormatter.unitsProvider}
+    onFormatChange={handleFormatChange}
+    initialMagnitude={123.456}
+  />,
+);
 ```
+
+<!-- END EXTRACTION -->
 
 </details>
 
@@ -278,27 +259,37 @@ interface FormatSelectorProps {
 <details>
 <summary>FormatSelector example code</summary>
 
+<!-- [[include: [QuantityFormat.FormatSelectorExampleImports, QuantityFormat.FormatSelectorExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
 ```tsx
-import React, { useState, useCallback } from "react";
 import { FormatSelector } from "@itwin/quantity-formatting-react";
-import type { FormatDefinition, FormatSet } from "@itwin/ecschema-metadata";
+import type { FormatDefinition } from "@itwin/core-quantity";
+import type { FormatSet } from "@itwin/ecschema-metadata";
 
-function FormatSelectionPanel({ formatSet }: { formatSet?: FormatSet }) {
-  const [selectedKey, setSelectedKey] = useState<string>();
+const formatSet: FormatSet = {
+  name: "TestSet",
+  label: "Test Format Set",
+  unitSystem: "metric",
+  formats: {
+    "test-format": {
+      name: "test-format",
+      label: "Test Format",
+      type: "Decimal",
+      precision: 2,
+      composite: { units: [{ name: "Units.M", label: "m" }] },
+    },
+  },
+} as FormatSet;
 
-  const handleFormatSelection = useCallback((formatDef: FormatDefinition, key: string) => {
-    setSelectedKey(key);
-    console.log("Selected format:", formatDef.label, "with key:", key);
-  }, []);
+const handleFormatSelection = (_formatDef: FormatDefinition, _key: string) => {
+  // Handle format selection
+};
 
-  return (
-    <div style={{ padding: "16px" }}>
-      <h3>Select a Format</h3>
-      <FormatSelector activeFormatSet={formatSet} activeFormatDefinitionKey={selectedKey} onListItemChange={handleFormatSelection} />
-    </div>
-  );
-}
+render(<FormatSelector activeFormatSet={formatSet} activeFormatDefinitionKey={undefined} onListItemChange={handleFormatSelection} />);
 ```
+
+<!-- END EXTRACTION -->
 
 </details>
 
@@ -321,48 +312,38 @@ interface FormatSetSelectorProps {
 <details>
 <summary>FormatSetSelector example code</summary>
 
+<!-- [[include: [QuantityFormat.FormatSetSelectorExampleImports, QuantityFormat.FormatSetSelectorExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
 ```tsx
-import React, { useState, useCallback } from "react";
 import { FormatSetSelector } from "@itwin/quantity-formatting-react";
 import type { FormatSet } from "@itwin/ecschema-metadata";
 
-function FormatSetSelectionPanel() {
-  const [formatSets] = useState<FormatSet[]>([
-    {
-      name: "MetricSet",
-      label: "Metric Formats",
-      unitSystem: "metric",
-      description: "Standard metric unit formats for international projects",
-      formats: {
-        /* format definitions */
-      },
-    },
-    {
-      name: "ImperialSet",
-      label: "Imperial Formats",
-      unitSystem: "imperial",
-      description: "Imperial unit formats for US-based projects",
-      formats: {
-        /* format definitions */
-      },
-    },
-  ]);
+const formatSets: FormatSet[] = [
+  {
+    name: "MetricSet",
+    label: "Metric Formats",
+    unitSystem: "metric",
+    description: "Standard metric unit formats",
+    formats: {},
+  } as FormatSet,
+  {
+    name: "ImperialSet",
+    label: "Imperial Formats",
+    unitSystem: "imperial",
+    description: "Imperial unit formats",
+    formats: {},
+  } as FormatSet,
+];
 
-  const [selectedKey, setSelectedKey] = useState<string>();
+const handleFormatSetChange = (_formatSet: FormatSet, _key: string) => {
+  // Handle format set change
+};
 
-  const handleFormatSetChange = useCallback((formatSet: FormatSet, key: string) => {
-    setSelectedKey(key);
-    console.log("Selected format set:", formatSet.label);
-  }, []);
-
-  return (
-    <div style={{ height: "400px", padding: "16px" }}>
-      <h3>Select a Format Set</h3>
-      <FormatSetSelector formatSets={formatSets} selectedFormatSetKey={selectedKey} onFormatSetChange={handleFormatSetChange} />
-    </div>
-  );
-}
+render(<FormatSetSelector formatSets={formatSets} selectedFormatSetKey={undefined} onFormatSetChange={handleFormatSetChange} />);
 ```
+
+<!-- END EXTRACTION -->
 
 </details>
 
@@ -392,58 +373,53 @@ type FormatSetPanelProps = {
 <details>
 <summary>FormatSetPanel example code</summary>
 
+**Editable Mode:**
+
+<!-- [[include: [QuantityFormat.FormatSetPanelExampleImports, QuantityFormat.FormatSetPanelEditableExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
 ```tsx
-import React, { useState, useCallback } from "react";
 import { FormatSetPanel } from "@itwin/quantity-formatting-react";
-import { Button, Flex } from "@itwin/itwinui-react";
 import type { FormatSet } from "@itwin/ecschema-metadata";
 
-function FormatSetEditor() {
-  const [formatSet, setFormatSet] = useState<FormatSet>({
-    name: "CustomSet",
-    label: "Custom Format Set",
-    unitSystem: "metric",
-    description: "A custom format set for my project",
-    formats: {},
-  });
+const formatSet: FormatSet = {
+  name: "CustomSet",
+  label: "Custom Format Set",
+  unitSystem: "metric",
+  description: "A custom format set",
+  formats: {},
+} as FormatSet;
 
-  const [clonedFormatSet, setClonedFormatSet] = useState<FormatSet>({ ...formatSet });
-  const [hasChanges, setHasChanges] = useState(false);
+const handleFormatSetChange = (_updatedFormatSet: FormatSet) => {
+  // Handle format set change
+};
 
-  const handleFormatSetChange = useCallback((updatedFormatSet: FormatSet) => {
-    setClonedFormatSet(updatedFormatSet);
-    setHasChanges(true);
-  }, []);
-
-  const handleSave = useCallback(() => {
-    setFormatSet(clonedFormatSet);
-    setHasChanges(false);
-    console.log("Saved format set:", clonedFormatSet);
-  }, [clonedFormatSet]);
-
-  const handleClear = useCallback(() => {
-    setClonedFormatSet({ ...formatSet });
-    setHasChanges(false);
-  }, [formatSet]);
-
-  return (
-    <Flex flexDirection="column" gap="m" style={{ padding: "16px" }}>
-      <h3>Format Set Editor</h3>
-
-      <FormatSetPanel formatSet={clonedFormatSet} editable={true} onFormatSetChange={handleFormatSetChange} />
-
-      <Flex justifyContent="space-between" gap="s">
-        <Button size="small" styleType="default" onClick={handleClear} disabled={!hasChanges}>
-          Clear
-        </Button>
-        <Button size="small" styleType="high-visibility" onClick={handleSave} disabled={!hasChanges}>
-          Save
-        </Button>
-      </Flex>
-    </Flex>
-  );
-}
+render(<FormatSetPanel formatSet={formatSet} editable={true} onFormatSetChange={handleFormatSetChange} />);
 ```
+
+<!-- END EXTRACTION -->
+
+**Read-only Mode:**
+
+<!-- [[include: [QuantityFormat.FormatSetPanelExampleImports, QuantityFormat.FormatSetPanelReadOnlyExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
+```tsx
+import { FormatSetPanel } from "@itwin/quantity-formatting-react";
+import type { FormatSet } from "@itwin/ecschema-metadata";
+
+const formatSet: FormatSet = {
+  name: "ReadOnlySet",
+  label: "Read-Only Format Set",
+  unitSystem: "imperial",
+  description: "A read-only format set",
+  formats: {},
+} as FormatSet;
+
+render(<FormatSetPanel formatSet={formatSet} editable={false} />);
+```
+
+<!-- END EXTRACTION -->
 
 </details>
 

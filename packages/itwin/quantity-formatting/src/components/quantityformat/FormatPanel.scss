@@ -214,8 +214,23 @@
   align-items: center;
   gap: var(--iui-size-m);
   width: 100%;
+  flex-direction: row;
 }
 
+.quantityFormat--formatSetPanel-comboBox {
+  flex: 1;
+  min-width: 0; /* Prevents flex item from overflowing */
+}
+.quantityFormat--formatSetPanel-labelWithTooltip {
+  display: flex;
+  align-items: center;
+  gap: var(--iui-size-2xs);
+}
+
+.quantityFormat--comboBoxTooltip {
+  position: relative;
+  margin-left: var(--iui-size-s);
+}
 .quantityFormat--formatSetPanel-inputColumn {
   flex-direction: column;
   align-items: flex-start;
