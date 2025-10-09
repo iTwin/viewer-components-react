@@ -12,10 +12,10 @@ import { ClassificationsTreeNode } from "../ClassificationsTreeNode.js";
 import { ClassificationsTreeVisibilityHelper } from "./ClassificationsTreeVisibilityHelper.js";
 
 import type { Observable } from "rxjs";
-import type { Viewport } from "@itwin/core-frontend";
 import type { AlwaysAndNeverDrawnElementInfo } from "../../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
 import type { ModelId } from "../../../common/internal/Types.js";
 import type { BaseIdsCache, TreeSpecificVisibilityHandler } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
+import type { TreeWidgetViewport } from "../../../common/TreeWidgetViewport.js";
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
 import type { ClassificationsTreeIdsCache } from "../ClassificationsTreeIdsCache.js";
 import type { ClassificationsTreeFilterTargets } from "./FilteredTree.js";
@@ -23,7 +23,7 @@ import type { ClassificationsTreeFilterTargets } from "./FilteredTree.js";
 /** @internal */
 export interface ClassificationsTreeVisibilityHandlerProps {
   idsCache: ClassificationsTreeIdsCache;
-  viewport: Viewport;
+  viewport: TreeWidgetViewport;
   alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfo;
 }
 

@@ -31,7 +31,6 @@ import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTre
 
 import type { ReactNode } from "react";
 import type { Id64String } from "@itwin/core-bentley";
-import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { InstanceKey } from "@itwin/presentation-shared";
@@ -40,6 +39,7 @@ import type { VisibilityTreeRendererProps } from "../common/components/Visibilit
 import type { CreateFilteredTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import type { FilteredTree } from "../common/internal/visibility/BaseFilteredTree.js";
+import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { NormalizedHierarchyFilteringPath } from "../common/Utils.js";
 import type { ModelsTreeFilteringError, ModelsTreeSubTreeError } from "./internal/UseFilteredPaths.js";
 import type { ModelsTreeFilterTargets } from "./internal/visibility/FilteredTree.js";
@@ -56,7 +56,7 @@ export interface UseModelsTreeProps {
    * Instead, the string will be supplied to the given `getFilteredPaths` function for consumers to apply the filtering.
    */
   filter?: string;
-  activeView: Viewport;
+  activeView: TreeWidgetViewport;
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
   visibilityHandlerOverrides?: ModelsTreeVisibilityHandlerOverrides;
   /**

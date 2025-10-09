@@ -32,7 +32,7 @@ import { getClassesByView, pushToMap, setDifference } from "./Utils.js";
 
 import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Observable, Subscription } from "rxjs";
-import type { Viewport } from "@itwin/core-frontend";
+import type { TreeWidgetViewport } from "../TreeWidgetViewport.js";
 import type { CategoryId, ElementId, ModelId } from "./Types.js";
 
 /** @internal */
@@ -68,13 +68,13 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
   #alwaysDrawn: { cacheEntryObs: Observable<CacheEntry>; latestCacheEntryValue?: CacheEntry };
   #neverDrawn: { cacheEntryObs: Observable<CacheEntry>; latestCacheEntryValue?: CacheEntry };
   #disposeSubject = new Subject<void>();
-  readonly #viewport: Viewport;
+  readonly #viewport: TreeWidgetViewport;
   readonly #elementClassName?: string;
 
   #suppressors: Observable<number>;
   #suppress = new Subject<boolean>();
 
-  constructor(viewport: Viewport, elementClassName?: string) {
+  constructor(viewport: TreeWidgetViewport, elementClassName?: string) {
     this.#elementClassName = elementClassName;
     this.#viewport = viewport;
     this.#alwaysDrawn = { cacheEntryObs: this.createCacheEntryObservable("always") };
@@ -196,7 +196,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
     this.#disposeSubject.next();
   }
 
-  private queryAlwaysOrNeverDrawnElementInfo(set: Set<ElementId> | undefined, requestId: string): Observable<CacheEntry> {
+  private queryAlwaysOrNeverDrawnElementInfo(set: ReadonlySet<ElementId> | undefined, requestId: string): Observable<CacheEntry> {
     const elementInfo = set?.size ? this.queryElementInfo([...set], requestId) : EMPTY;
     return elementInfo.pipe(
       reduce((state, val) => {
@@ -214,7 +214,9 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
   private queryElementInfo(elementIds: Id64Array, requestId: string): Observable<ElementInfo> {
     return defer(() => {
       const executor = createECSqlQueryExecutor(this.#viewport.iModel);
-      const { elementClass } = this.#elementClassName ? { elementClass: this.#elementClassName } : getClassesByView(this.#viewport.view.is2d() ? "2d" : "3d");
+      const { elementClass } = this.#elementClassName
+        ? { elementClass: this.#elementClassName }
+        : getClassesByView(this.#viewport.viewType === "2d" ? "2d" : "3d");
       return executor.createQueryReader(
         {
           ctes: [
@@ -270,10 +272,10 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
       map(({ alwaysDrawn, neverDrawn }) => {
         const viewport = this.#viewport;
         if (viewport.alwaysDrawn?.size && alwaysDrawn.size) {
-          viewport.setAlwaysDrawn(setDifference(viewport.alwaysDrawn, alwaysDrawn));
+          viewport.setAlwaysDrawn({ elementIds: setDifference(viewport.alwaysDrawn, alwaysDrawn) });
         }
         if (viewport.neverDrawn?.size && neverDrawn.size) {
-          viewport.setNeverDrawn(setDifference(viewport.neverDrawn, neverDrawn));
+          viewport.setNeverDrawn({ elementIds: setDifference(viewport.neverDrawn, neverDrawn) });
         }
       }),
     );

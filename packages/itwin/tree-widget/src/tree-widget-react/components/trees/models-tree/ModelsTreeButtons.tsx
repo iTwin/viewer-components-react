@@ -23,8 +23,9 @@ import { areAllModelsVisible, hideAllModels, invertAllModels, showAll, toggleMod
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { TreeToolbarButtonProps } from "../../tree-header/SelectableTree.js";
+import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 
 /**
  * Information about a single Model.
@@ -64,11 +65,12 @@ export interface ModelsTreeHeaderButtonProps extends TreeToolbarButtonProps {
  *
  * @public
  */
-export function useModelsTreeButtonProps({ imodel, viewport }: { imodel: IModelConnection; viewport: Viewport }): {
+export function useModelsTreeButtonProps({ imodel, viewport }: { imodel: IModelConnection; viewport: TreeWidgetViewport }): {
   buttonProps: Pick<ModelsTreeHeaderButtonProps, "models" | "viewport">;
   onModelsFiltered: (models: Id64String[] | undefined) => void;
 } {
   const [filteredModels, setFilteredModels] = useState<Id64String[] | undefined>();
+
   const models = useAvailableModels(imodel);
   const availableModels = useMemo(() => (!filteredModels ? models : models.filter((model) => filteredModels.includes(model.id))), [models, filteredModels]);
   return {
@@ -145,7 +147,7 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
       onClick={() => {
         // cspell:disable-next-line
         props.onFeatureUsed?.("models-tree-hideall");
-        void hideAllModels(
+        hideAllModels(
           props.models.map((model) => model.id),
           props.viewport,
         );
@@ -163,7 +165,7 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
       label={TreeWidget.translate("modelsTree.buttons.invert.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("models-tree-invert");
-        void invertAllModels(
+        invertAllModels(
           props.models.map((model) => model.id),
           props.viewport,
         );
@@ -183,7 +185,7 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
 
   useEffect(() => {
     setIs2dToggleActive(areAllModelsVisible(models2d, props.viewport));
-    return props.viewport.onViewedModelsChanged.addListener((vp: Viewport) => setIs2dToggleActive(areAllModelsVisible(models2d, vp)));
+    return props.viewport.onDisplayedModelsChanged.addListener(() => setIs2dToggleActive(areAllModelsVisible(models2d, props.viewport)));
   }, [models2d, props.viewport]);
 
   return (
@@ -192,7 +194,7 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
       label={TreeWidget.translate("modelsTree.buttons.toggle2d.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("models-tree-view2d");
-        void toggleModels(models2d, is2dToggleActive, props.viewport);
+        toggleModels(models2d, is2dToggleActive, props.viewport);
       }}
       aria-disabled={models2d.length === 0}
       active={is2dToggleActive}
@@ -212,7 +214,7 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
 
   useEffect(() => {
     setIs3dToggleActive(areAllModelsVisible(models3d, props.viewport));
-    return props.viewport.onViewedModelsChanged.addListener((vp: Viewport) => setIs3dToggleActive(areAllModelsVisible(models3d, vp)));
+    return props.viewport.onDisplayedModelsChanged.addListener(() => setIs3dToggleActive(areAllModelsVisible(models3d, props.viewport)));
   }, [models3d, props.viewport]);
 
   return (
@@ -221,7 +223,7 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
       label={TreeWidget.translate("modelsTree.buttons.toggle3d.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("models-tree-view3d");
-        void toggleModels(models3d, is3dToggleActive, props.viewport);
+        toggleModels(models3d, is3dToggleActive, props.viewport);
       }}
       aria-disabled={models3d.length === 0}
       active={is3dToggleActive}

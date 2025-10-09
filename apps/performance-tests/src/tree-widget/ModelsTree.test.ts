@@ -5,7 +5,6 @@
 
 import { expect } from "chai";
 import { SnapshotDb } from "@itwin/core-backend";
-import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import {
   createModelsTreeVisibilityHandler,
@@ -27,7 +26,7 @@ import {
   validateHierarchyVisibility,
 } from "./VisibilityUtilities.js";
 
-import type { Viewport } from "@itwin/core-frontend";
+import type { TreeWidgetTestingViewport } from "./VisibilityUtilities.js";
 import type { Id64String } from "@itwin/core-bentley";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { ECSqlQueryDef, InstanceKey } from "@itwin/presentation-shared";
@@ -76,7 +75,7 @@ describe("models tree", () => {
     iModel: SnapshotDb;
     idsCache: ModelsTreeIdsCache;
     imodelAccess: IModelAccess;
-    viewport: Viewport;
+    viewport: TreeWidgetTestingViewport;
     handler: HierarchyVisibilityHandler & Disposable;
     provider: HierarchyProvider & Disposable;
     elementsModel: Id64String;
@@ -121,7 +120,7 @@ describe("models tree", () => {
     },
     test: async ({ viewport, handler, provider, elementsModel }) => {
       // Add one element to always draw set to trigger additional queries
-      viewport.setAlwaysDrawn(new Set([elementsModel]));
+      viewport.setAlwaysDrawn({ elementIds: new Set([elementsModel]) });
       viewport.renderFrame();
       await handler.changeVisibility(createModelHierarchyNode(elementsModel), true);
       await validateHierarchyVisibility({
@@ -138,7 +137,7 @@ describe("models tree", () => {
     iModel: SnapshotDb;
     idsCache: ModelsTreeIdsCache;
     imodelAccess: IModelAccess;
-    viewport: Viewport;
+    viewport: TreeWidgetTestingViewport;
     handler: HierarchyVisibilityHandler & Disposable;
     provider: HierarchyProvider & Disposable;
     elementsModel: Id64String;
@@ -195,7 +194,7 @@ describe("models tree", () => {
     iModel: SnapshotDb;
     idsCache: ModelsTreeIdsCache;
     imodelAccess: IModelAccess;
-    viewport: Viewport;
+    viewport: TreeWidgetTestingViewport;
     handler: HierarchyVisibilityHandler & Disposable;
     provider: HierarchyProvider & Disposable;
     elementsCategory: Id64String;
@@ -255,7 +254,7 @@ describe("models tree", () => {
     iModel: SnapshotDb;
     idsCache: ModelsTreeIdsCache;
     imodelAccess: IModelAccess;
-    viewport: Viewport;
+    viewport: TreeWidgetTestingViewport;
     handler: HierarchyVisibilityHandler & Disposable;
     provider: HierarchyProvider & Disposable;
     elementsCategory: Id64String;
@@ -304,7 +303,7 @@ describe("models tree", () => {
       props.idsCache[Symbol.dispose]();
     },
     test: async ({ viewport, handler, provider, elementsCategory, elementsModel }) => {
-      viewport.perModelCategoryVisibility.setOverride(elementsModel, elementsCategory, PerModelCategoryVisibility.Override.Hide);
+      viewport.setPerModelCategoryOverride({ modelIds: elementsModel, categoryIds: elementsCategory, override: "hide" });
       await validateHierarchyVisibility({
         provider,
         handler,
@@ -318,7 +317,7 @@ describe("models tree", () => {
     iModel: SnapshotDb;
     idsCache: ModelsTreeIdsCache;
     imodelAccess: IModelAccess;
-    viewport: Viewport;
+    viewport: TreeWidgetTestingViewport;
     handler: HierarchyVisibilityHandler & Disposable;
     provider: HierarchyProvider & Disposable;
     node: { modelId: Id64String; categoryId: Id64String; elementId: Id64String; subjectId: Id64String };

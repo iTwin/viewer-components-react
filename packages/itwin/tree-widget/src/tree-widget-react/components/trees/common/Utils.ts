@@ -7,9 +7,9 @@ import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presenta
 import { showAllCategories } from "./CategoriesVisibilityUtils.js";
 import { toggleAllCategories } from "./internal/VisibilityUtils.js";
 
-import type { Viewport } from "@itwin/core-frontend";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { HierarchyFilteringPathOptions, HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
+import type { TreeWidgetViewport } from "./TreeWidgetViewport.js";
 
 /**
  * This is a logging namespace for public log messages that may be interesting to consumers.
@@ -24,8 +24,8 @@ export type FunctionProps<THook extends (props: any) => any> = Parameters<THook>
  * Disables display of all given models.
  * @public
  */
-export async function hideAllModels(models: string[], viewport: Viewport) {
-  viewport.changeModelDisplay(models, false);
+export function hideAllModels(models: string[], viewport: TreeWidgetViewport) {
+  viewport.changeModelDisplay({ modelIds: models, display: false });
 }
 
 /**
@@ -38,10 +38,10 @@ export async function showAll(props: {
   models: Id64Array;
   /** ID's of categories to enable, if set to undefined, all categories will be enabled */
   categories?: Id64Array;
-  viewport: Viewport;
+  viewport: TreeWidgetViewport;
 }) {
   const { models, categories, viewport } = props;
-  await viewport.addViewedModels(models);
+  viewport.changeModelDisplay({ modelIds: models, display: true });
   viewport.clearNeverDrawn();
   viewport.clearAlwaysDrawn();
   if (categories) {
@@ -55,7 +55,7 @@ export async function showAll(props: {
  * Inverts display of all given models.
  * @public
  */
-export async function invertAllModels(models: Id64Array, viewport: Viewport) {
+export function invertAllModels(models: Id64Array, viewport: TreeWidgetViewport) {
   const notViewedModels = new Array<Id64String>();
   const viewedModels = new Array<Id64String>();
   models.forEach((modelId) => {
@@ -65,30 +65,26 @@ export async function invertAllModels(models: Id64Array, viewport: Viewport) {
       notViewedModels.push(modelId);
     }
   });
-  await viewport.addViewedModels(notViewedModels);
-  viewport.changeModelDisplay(viewedModels, false);
+  viewport.changeModelDisplay({ modelIds: notViewedModels, display: true });
+  viewport.changeModelDisplay({ modelIds: viewedModels, display: false });
 }
 
 /**
  * Based on the value of `enable` argument, either enables or disables display of given models.
  * @public
  */
-export async function toggleModels(models: string[], enable: boolean, viewport: Viewport) {
+export function toggleModels(models: string[], enable: boolean, viewport: TreeWidgetViewport) {
   if (!models) {
     return;
   }
-  if (enable) {
-    viewport.changeModelDisplay(models, false);
-  } else {
-    await viewport.addViewedModels(models);
-  }
+  viewport.changeModelDisplay({ modelIds: models, display: enable });
 }
 
 /**
  * Checks if all given models are displayed in given viewport.
  * @public
  */
-export function areAllModelsVisible(models: string[], viewport: Viewport) {
+export function areAllModelsVisible(models: string[], viewport: TreeWidgetViewport) {
   return models.length !== 0 ? models.every((id) => viewport.viewsModel(id)) : false;
 }
 

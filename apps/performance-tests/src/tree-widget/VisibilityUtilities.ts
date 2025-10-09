@@ -10,21 +10,22 @@ import { assert } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
+import { createTreeWidgetViewport } from "@itwin/tree-widget-react";
 import { toVoidPromise } from "@itwin/tree-widget-react/internal";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { ECSqlQueryDef } from "@itwin/presentation-shared";
-import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
+import type { HierarchyVisibilityHandler, TreeWidgetViewport } from "@itwin/tree-widget-react";
 import type { IModelAccess } from "./StatelessHierarchyProvider.js";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { IModelConnection, ViewState } from "@itwin/core-frontend";
 
 type Visibility = "visible" | "hidden" | "partial";
 
 export interface ValidateNodeProps {
   ignoreChildren?: (node: HierarchyNode) => boolean;
   handler: HierarchyVisibilityHandler;
-  viewport: Viewport;
+  viewport: TreeWidgetTestingViewport;
   expectations:
     | "all-visible"
     | "all-hidden"
@@ -83,7 +84,7 @@ export async function createViewport({
     elements: VisibilityInfo[];
     models: VisibilityInfo[];
   };
-}): Promise<Viewport> {
+}): Promise<TreeWidgetTestingViewport> {
   const model = IModel.dictionaryId;
   const viewState = SpatialViewState.createFromProps(
     {
@@ -127,10 +128,70 @@ export async function createViewport({
     }
   });
   await viewState.load();
-  return OffScreenViewport.create({
+  return createTreeWidgetTestingViewport({ viewState });
+}
+
+export type TreeWidgetTestingViewport = TreeWidgetViewport & { renderFrame: () => void } & Disposable;
+
+export function createTreeWidgetTestingViewport({ viewState }: { viewState: ViewState }): TreeWidgetTestingViewport {
+  const viewport = OffScreenViewport.create({
     view: viewState,
     viewRect: new ViewRect(),
   });
+  const treeWidgetViewport = createTreeWidgetViewport(viewport);
+  return {
+    iModel: treeWidgetViewport.iModel,
+    get alwaysDrawn() {
+      return treeWidgetViewport.alwaysDrawn;
+    },
+    get neverDrawn() {
+      return treeWidgetViewport.neverDrawn;
+    },
+    get viewType() {
+      return treeWidgetViewport.viewType;
+    },
+    get isAlwaysDrawnExclusive() {
+      return treeWidgetViewport.isAlwaysDrawnExclusive;
+    },
+    changeCategoryDisplay: (props) => treeWidgetViewport.changeCategoryDisplay(props),
+    changeModelDisplay: async (props) => treeWidgetViewport.changeModelDisplay(props),
+    changeSubCategoryDisplay: (props) => treeWidgetViewport.changeSubCategoryDisplay(props),
+    clearNeverDrawn: () => treeWidgetViewport.clearNeverDrawn(),
+    clearAlwaysDrawn: () => treeWidgetViewport.clearAlwaysDrawn(),
+    setNeverDrawn: (props) => treeWidgetViewport.setNeverDrawn(props),
+    setAlwaysDrawn: (props) => treeWidgetViewport.setAlwaysDrawn(props),
+    setPerModelCategoryOverride: (props) => treeWidgetViewport.setPerModelCategoryOverride(props),
+    getPerModelCategoryOverride: (props) => treeWidgetViewport.getPerModelCategoryOverride(props),
+    clearPerModelCategoryOverrides: (props) => treeWidgetViewport.clearPerModelCategoryOverrides(props),
+    get onAlwaysDrawnChanged() {
+      return treeWidgetViewport.onAlwaysDrawnChanged;
+    },
+    get onDisplayedCategoriesChanged() {
+      return treeWidgetViewport.onDisplayedCategoriesChanged;
+    },
+    get onDisplayedModelsChanged() {
+      return treeWidgetViewport.onDisplayedModelsChanged;
+    },
+    get onNeverDrawnChanged() {
+      return treeWidgetViewport.onNeverDrawnChanged;
+    },
+    get onDisplayStyleChanged() {
+      return treeWidgetViewport.onDisplayStyleChanged;
+    },
+    get onPerModelCategoriesOverridesChanged() {
+      return treeWidgetViewport.onPerModelCategoriesOverridesChanged;
+    },
+    get perModelCategoryOverrides() {
+      return treeWidgetViewport.perModelCategoryOverrides;
+    },
+    viewsCategory: (props) => treeWidgetViewport.viewsCategory(props),
+    viewsModel: (props) => treeWidgetViewport.viewsModel(props),
+    viewsSubCategory: (props) => treeWidgetViewport.viewsSubCategory(props),
+    renderFrame: () => viewport.renderFrame(),
+    [Symbol.dispose]() {
+      viewport[Symbol.dispose]();
+    },
+  };
 }
 
 interface VisibilityInfo {
@@ -139,7 +200,7 @@ interface VisibilityInfo {
 }
 
 export function setupInitialDisplayState(props: {
-  viewport: Viewport;
+  viewport: TreeWidgetTestingViewport;
   categories?: Array<VisibilityInfo>;
   subCategories?: Array<VisibilityInfo>;
   models?: Array<VisibilityInfo>;
@@ -151,28 +212,22 @@ export function setupInitialDisplayState(props: {
   const subCategories = props.subCategories ?? [];
   const models = props.models ?? [];
   for (const subCategoryInfo of subCategories) {
-    viewport.changeSubCategoryDisplay(subCategoryInfo.id, subCategoryInfo.visible);
+    viewport.changeSubCategoryDisplay({ subCategoryId: subCategoryInfo.id, display: subCategoryInfo.visible });
   }
   for (const categoryInfo of categories) {
-    viewport.changeCategoryDisplay(categoryInfo.id, categoryInfo.visible, false);
+    viewport.changeCategoryDisplay({ categoryIds: categoryInfo.id, display: categoryInfo.visible, enableAllSubCategories: false });
   }
 
-  for (const elementInfo of elements) {
-    if (elementInfo.visible) {
-      viewport.alwaysDrawn?.add(elementInfo.id);
-      continue;
-    }
-    viewport.neverDrawn?.add(elementInfo.id);
+  const alwaysDrawn = elements.filter(({ visible }) => visible).map(({ id }) => id);
+  if (alwaysDrawn.length > 0) {
+    viewport.setAlwaysDrawn({ elementIds: new Set([...alwaysDrawn, ...(viewport.alwaysDrawn ?? [])]) });
   }
-  if (!viewport.alwaysDrawn) {
-    viewport.setAlwaysDrawn(new Set(elements.filter(({ visible }) => visible).map(({ id }) => id)));
+  const neverDrawn = elements.filter(({ visible }) => !visible).map(({ id }) => id);
+  if (neverDrawn.length > 0) {
+    viewport.setNeverDrawn({ elementIds: new Set([...neverDrawn, ...(viewport.neverDrawn ?? [])]) });
   }
-  if (!viewport.neverDrawn) {
-    viewport.setNeverDrawn(new Set(elements.filter(({ visible }) => !visible).map(({ id }) => id)));
-  }
-  for (const modelInfo of models) {
-    viewport.changeModelDisplay(modelInfo.id, modelInfo.visible);
-  }
+  viewport.changeModelDisplay({ modelIds: models.filter(({ visible }) => visible).map(({ id }) => id), display: true });
+  viewport.changeModelDisplay({ modelIds: models.filter(({ visible }) => !visible).map(({ id }) => id), display: false });
   viewport.renderFrame();
 }
 
@@ -240,7 +295,6 @@ export function createElementHierarchyNode(props: {
   };
 }
 
-/** @internal */
 export function createDefinitionContainerHierarchyNode(definitionContainerId: Id64String): NonGroupingHierarchyNode {
   return {
     key: {

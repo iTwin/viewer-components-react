@@ -16,11 +16,12 @@ import { getClassesByView } from "../common/internal/Utils.js";
 import { loadCategoriesFromViewport } from "../common/internal/VisibilityUtils.js";
 import { hideAllModels, showAll } from "../common/Utils.js";
 
-import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
-import type { TreeToolbarButtonProps } from "../../tree-header/SelectableTree.js";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { Id64Array } from "@itwin/core-bentley";
+import type { TreeToolbarButtonProps } from "../../tree-header/SelectableTree.js";
+import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { ModelId } from "../common/internal/Types.js";
+import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 
 /**
  * Props that get passed to `CategoriesTreeComponent` header button renderer.
@@ -52,12 +53,13 @@ export interface CategoriesTreeHeaderButtonProps extends TreeToolbarButtonProps 
  *
  * @public
  */
-export function useCategoriesTreeButtonProps({ viewport }: { viewport: Viewport }): {
+export function useCategoriesTreeButtonProps({ viewport }: { viewport: TreeWidgetViewport }): {
   buttonProps: Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport" | "models">;
   onCategoriesFiltered: (props: { categories: CategoryInfo[] | undefined; models?: Id64Array }) => void;
 } {
   const [filteredCategories, setFilteredCategories] = useState<CategoryInfo[] | undefined>();
   const [filteredModels, setFilteredModels] = useState<Id64Array | undefined>();
+
   const categories = useCategories(viewport);
   const models = useAvailableModels(viewport);
   return {
@@ -105,7 +107,7 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
           props.categories.map((category) => category.categoryId),
           props.viewport,
         );
-        void hideAllModels(props.models, props.viewport);
+        hideAllModels(props.models, props.viewport);
       }}
       icon={visibilityHideSvg}
     />
@@ -130,15 +132,15 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
 const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
 
 /** @internal */
-export function useCategories(viewport: Viewport) {
+export function useCategories(viewport: TreeWidgetViewport) {
   const categoriesPromise = useMemo(async () => loadCategoriesFromViewport(viewport), [viewport]);
   return useAsyncValue(categoriesPromise) ?? EMPTY_CATEGORIES_ARRAY;
 }
 
-function useAvailableModels(viewport: Viewport): Array<ModelId> {
+function useAvailableModels(viewport: TreeWidgetViewport): Array<ModelId> {
   const [availableModels, setAvailableModels] = useState<Array<ModelId>>([]);
   const imodel = viewport.iModel;
-  const viewType = viewport.view.is2d() ? "2d" : "3d";
+  const viewType = viewport.viewType === "2d" ? "2d" : "3d";
   useEffect(() => {
     queryModelsForHeaderActions(imodel, viewType)
       .then((models) => {

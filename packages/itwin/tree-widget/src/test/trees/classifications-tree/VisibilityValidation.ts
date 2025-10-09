@@ -9,10 +9,10 @@ import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { waitFor } from "@testing-library/react";
 import { toVoidPromise } from "../../../tree-widget-react/components/trees/common/internal/Rxjs.js";
 
-import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { Visibility } from "../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
 import type { HierarchyVisibilityHandler } from "../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
+import type { TreeWidgetTestingViewport } from "../TreeUtils.js";
 
 export interface VisibilityExpectations {
   [id: string]: Visibility;
@@ -20,7 +20,7 @@ export interface VisibilityExpectations {
 
 export interface ValidateNodeProps {
   handler: HierarchyVisibilityHandler;
-  viewport: Viewport;
+  viewport: TreeWidgetTestingViewport;
   expectations: "all-visible" | "all-hidden" | VisibilityExpectations;
 }
 

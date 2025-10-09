@@ -6,7 +6,6 @@
 import { expect } from "chai";
 import sinon from "sinon";
 import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
-import { OffScreenViewport, ViewRect } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
@@ -19,14 +18,15 @@ import { TreeWidget } from "../../../tree-widget-react/TreeWidget.js";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../IModelUtils.js";
 import { act, renderHook, waitFor } from "../../TestUtils.js";
 import { createFakeSinonViewport, createIModelAccess } from "../Common.js";
-import { createViewState } from "../TreeUtils.js";
+import { createTreeWidgetTestingViewport } from "../TreeUtils.js";
 import { createModelHierarchyNode } from "./Utils.js";
 
 import type { Id64Array } from "@itwin/core-bentley";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { SelectionStorage } from "@itwin/unified-selection";
 import type { UseModelsTreeProps } from "../../../tree-widget-react/components/trees/models-tree/UseModelsTree.js";
+import type { TreeWidgetTestingViewport } from "../TreeUtils.js";
 
 describe("useModelsTree", () => {
   before(async () => {
@@ -99,7 +99,7 @@ describe("useModelsTree", () => {
       let categoryIds: Id64Array;
       let elementIds: Id64Array;
       let modelIds: Id64Array;
-      let viewport: Viewport;
+      let viewport: TreeWidgetTestingViewport;
       let initialProps: UseModelsTreeProps;
       let getSubTreePaths: UseModelsTreeProps["getSubTreePaths"];
       let selectionStorage: SelectionStorage;
@@ -143,10 +143,7 @@ describe("useModelsTree", () => {
         categoryIds = buildIModelResult.categories;
         modelIds = buildIModelResult.models;
         elementIds = buildIModelResult.elements;
-        viewport = OffScreenViewport.create({
-          view: await createViewState(imodel, categoryIds, modelIds),
-          viewRect: new ViewRect(),
-        });
+        viewport = createTreeWidgetTestingViewport({ visibleByDefault: false, iModel: imodel, viewType: "3d" });
         initialProps = { activeView: viewport };
         imodelAccess = createIModelAccess(imodel);
         getSubTreePaths = async ({ createInstanceKeyPaths }) => {
@@ -165,7 +162,6 @@ describe("useModelsTree", () => {
       });
 
       after(async function () {
-        viewport[Symbol.dispose]();
         await imodel.close();
         await terminatePresentationTesting();
         TreeWidget.terminate();

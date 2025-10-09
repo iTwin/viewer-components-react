@@ -5,18 +5,17 @@
 
 import { assert, expect } from "chai";
 import { expand, from, mergeMap } from "rxjs";
-import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { toVoidPromise } from "../../../../tree-widget-react/components/trees/common/internal/Rxjs.js";
 import { ModelsTreeNode } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeNode.js";
 import { waitFor } from "../../../TestUtils.js";
 
-import type { Visibility } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
-import type { waitForOptions } from "../../../TestUtils.js";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
-import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
+import type { Visibility } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
+import type { waitForOptions } from "../../../TestUtils.js";
+import type { TreeWidgetTestingViewport } from "../../TreeUtils.js";
 
 interface VisibilityExpectations {
   subject(id: string): Visibility;
@@ -51,7 +50,7 @@ export namespace VisibilityExpectations {
 
 export interface ValidateNodeProps {
   handler: HierarchyVisibilityHandler;
-  viewport: Viewport;
+  viewport: TreeWidgetTestingViewport;
   visibilityExpectations: VisibilityExpectations;
 }
 
@@ -102,10 +101,10 @@ export async function validateNodeVisibility({ node, handler, visibilityExpectat
 
     const { tree: handlerVisibility, categorySelector, perModelCategoryOverride } = expected;
     expect(actualVisibility.state).to.eq(handlerVisibility, JSON.stringify({ modelId, categoryId: id }));
-    expect(viewport.view.viewsCategory(id)).to.eq(categorySelector, `Category selector for: ${JSON.stringify({ modelId, categoryId: id })}`);
+    expect(viewport.viewsCategory(id)).to.eq(categorySelector, `Category selector for: ${JSON.stringify({ modelId, categoryId: id })}`);
 
-    const ovr = viewport.perModelCategoryVisibility.getOverride(modelId, id);
-    expect(overrideToString(ovr)).to.eq(perModelCategoryOverride, JSON.stringify({ modelId, categoryId: id }));
+    const ovr = viewport.getPerModelCategoryOverride({ modelId, categoryId: id });
+    expect(ovr).to.eq(perModelCategoryOverride, JSON.stringify({ modelId, categoryId: id }));
     return;
   }
 
@@ -133,15 +132,4 @@ export async function validateHierarchyVisibility({
       mergeMap(async (node) => waitFor(async () => validateNodeVisibility({ ...props, node }), waitForOptions)),
     ),
   );
-}
-
-export function overrideToString(ovr: PerModelCategoryVisibility.Override) {
-  switch (ovr) {
-    case PerModelCategoryVisibility.Override.None:
-      return "none";
-    case PerModelCategoryVisibility.Override.Show:
-      return "show";
-    case PerModelCategoryVisibility.Override.Hide:
-      return "hide";
-  }
 }

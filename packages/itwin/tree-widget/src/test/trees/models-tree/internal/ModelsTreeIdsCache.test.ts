@@ -13,7 +13,7 @@ import { createIModelMock } from "../../Common.js";
 
 describe("ModelsTreeIdsCache", () => {
   function createIdsCache(queryHandler: (query: string) => any[]) {
-    const iModel = createIModelMock(queryHandler);
+    const iModel = createIModelMock({ queryHandler });
     return new ModelsTreeIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded"), defaultHierarchyConfiguration);
   }
 

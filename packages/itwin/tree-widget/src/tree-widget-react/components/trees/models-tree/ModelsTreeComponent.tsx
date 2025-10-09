@@ -8,7 +8,7 @@ import { useActiveIModelConnection } from "@itwin/appui-react";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
-import { useActiveViewport } from "../common/internal/UseActiveViewport.js";
+import { useActiveTreeWidgetViewport } from "../common/internal/UseActiveTreeWidgetViewport.js";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { ModelsTree } from "./ModelsTree.js";
 import {
@@ -21,9 +21,10 @@ import {
   View3DButton,
 } from "./ModelsTreeButtons.js";
 
-import type { ModelsTreeProps } from "./ModelsTree.js";
 import type { ReactNode } from "react";
-import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
+import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
+import type { ModelsTreeProps } from "./ModelsTree.js";
 import type { ModelsTreeHeaderButtonProps, ModelsTreeHeaderButtonType } from "./ModelsTreeButtons.js";
 
 /** @public */
@@ -58,6 +59,12 @@ interface ModelsTreeComponentProps
    * ```
    */
   headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
+  /**
+   * Viewport used for visibility controls.
+   *
+   * When viewport is not provided, `IModelApp.viewManager.selectedView` will be used.
+   */
+  viewport?: TreeWidgetViewport;
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }
@@ -70,7 +77,7 @@ interface ModelsTreeComponentProps
  */
 export const ModelsTreeComponent = (props: ModelsTreeComponentProps) => {
   const iModel = useActiveIModelConnection();
-  const viewport = useActiveViewport();
+  const viewport = useActiveTreeWidgetViewport({ treeWidgetViewport: props.viewport });
 
   if (!iModel || !viewport) {
     return null;
@@ -144,7 +151,7 @@ function ModelsTreeComponentImpl({
   onPerformanceMeasured,
   filter,
   ...treeProps
-}: ModelsTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
+}: ModelsTreeComponentProps & { iModel: IModelConnection; viewport: TreeWidgetViewport }) {
   const { buttonProps, onModelsFiltered } = useModelsTreeButtonProps({ imodel: iModel, viewport });
   const { enabled: instanceFocusEnabled, toggle: toggleInstanceFocus } = useFocusedInstancesContext();
 

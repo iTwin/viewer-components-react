@@ -20,8 +20,8 @@ import {
   validateHierarchyVisibility,
 } from "./VisibilityUtilities.js";
 
+import type { TreeWidgetTestingViewport } from "./VisibilityUtilities.js";
 import type { Id64String } from "@itwin/core-bentley";
-import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
 import type { IModelAccess } from "./StatelessHierarchyProvider.js";
@@ -65,7 +65,7 @@ describe("categories tree", () => {
   run<{
     iModel: SnapshotDb;
     imodelAccess: IModelAccess;
-    viewport: Viewport;
+    viewport: TreeWidgetTestingViewport;
     idsCache: CategoriesTreeIdsCache;
     handler: HierarchyVisibilityHandler & Disposable;
     provider: HierarchyProvider & Disposable;
@@ -127,7 +127,7 @@ describe("categories tree", () => {
     iModel: SnapshotDb;
     imodelAccess: IModelAccess;
     idsCache: CategoriesTreeIdsCache;
-    viewport: Viewport;
+    viewport: TreeWidgetTestingViewport;
     handler: HierarchyVisibilityHandler & Disposable;
     provider: HierarchyProvider & Disposable;
     definitionContainer: Id64String;
