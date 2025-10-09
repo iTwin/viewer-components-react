@@ -30,7 +30,7 @@ import type { TranslationOptions } from '@itwin/core-common';
 import type { TreeRendererProps } from '@itwin/presentation-hierarchies-react';
 import type { useIModelTree } from '@itwin/presentation-hierarchies-react';
 import type { useSelectionHandler } from '@itwin/presentation-hierarchies-react';
-import { Viewport } from '@itwin/core-frontend';
+import type { Viewport } from '@itwin/core-frontend';
 import type { Widget } from '@itwin/appui-react';
 
 // @beta (undocumented)
@@ -171,7 +171,7 @@ type ClassificationsTreeProps = Pick<VisibilityTreeProps, "imodel" | "selectionS
 export function createTreeWidget(props: TreeWidgetProps): Widget;
 
 // @beta
-export function createTreeWidgetViewport(viewport: Viewport | TreeWidgetViewport): TreeWidgetViewport;
+export function createTreeWidgetViewport(viewport: Viewport): TreeWidgetViewport;
 
 // @beta (undocumented)
 interface ElementsGroupInfo {
@@ -497,7 +497,7 @@ export interface TreeWidgetViewport {
     changeModelDisplay: (props: {
         modelIds: Id64Arg;
         display: boolean;
-    }) => Promise<void>;
+    }) => void;
     changeSubCategoryDisplay: (props: {
         subCategoryId: Id64String;
         display: boolean;
@@ -529,7 +529,9 @@ export interface TreeWidgetViewport {
         elementIds: Set<Id64String>;
         exclusive?: boolean;
     }) => void;
-    setNeverDrawn: (elementIds: Set<Id64String>) => void;
+    setNeverDrawn: (props: {
+        elementIds: Set<Id64String>;
+    }) => void;
     setPerModelCategoryOverride: (props: {
         modelIds: Id64Arg;
         categoryIds: Id64Arg;
