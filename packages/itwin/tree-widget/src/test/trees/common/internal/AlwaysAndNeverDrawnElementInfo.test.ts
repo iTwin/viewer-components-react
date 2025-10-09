@@ -127,7 +127,7 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
           vp.setAlwaysDrawn({ elementIds: ids });
           return;
         }
-        vp.setNeverDrawn(ids);
+        vp.setNeverDrawn({ elementIds: ids });
       };
       setterFunction(new Set(["0x4"]));
 
@@ -154,7 +154,7 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
           vp.setAlwaysDrawn({ elementIds: ids });
           return;
         }
-        vp.setNeverDrawn(ids);
+        vp.setNeverDrawn({ elementIds: ids });
       };
       setterFunction(new Set(["0x2"]));
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
@@ -211,7 +211,7 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
           vp.setAlwaysDrawn({ elementIds: ids });
           return;
         }
-        vp.setNeverDrawn(ids);
+        vp.setNeverDrawn({ elementIds: ids });
       };
       setterFunction(new Set(["0x4"]));
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
@@ -240,7 +240,7 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
           vp.setAlwaysDrawn({ elementIds: ids });
           return;
         }
-        vp.setNeverDrawn(ids);
+        vp.setNeverDrawn({ elementIds: ids });
       };
       setterFunction(new Set(["0x2"]));
       info.resumeChangeEvents();

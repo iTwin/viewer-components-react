@@ -51,7 +51,7 @@ export function createFakeSinonViewport(
   const onNeverDrawnChanged = new BeEvent();
   const result: TreeWidgetTestingViewport = {
     changeCategoryDisplay: sinon.fake(),
-    changeModelDisplay: sinon.fake.resolves((() => {})()),
+    changeModelDisplay: sinon.fake(),
     isAlwaysDrawnExclusive: false,
     onPerModelCategoriesOverridesChanged: new BeEvent(),
     onDisplayedCategoriesChanged: new BeEvent(),
@@ -80,7 +80,7 @@ export function createFakeSinonViewport(
       onAlwaysDrawnChanged.raiseEvent(result);
     }),
     setNeverDrawn: sinon.fake((x) => {
-      neverDrawn = x;
+      neverDrawn = x.elementIds;
       onNeverDrawnChanged.raiseEvent(result);
     }),
     clearAlwaysDrawn: sinon.fake(() => {

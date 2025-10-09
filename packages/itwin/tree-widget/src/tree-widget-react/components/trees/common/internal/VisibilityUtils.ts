@@ -94,7 +94,7 @@ export function changeElementStateNoChildrenOperator(props: {
         },
       ),
       map((state) => {
-        state.changedNeverDrawn && state.neverDrawn && props.viewport.setNeverDrawn(state.neverDrawn);
+        state.changedNeverDrawn && state.neverDrawn && props.viewport.setNeverDrawn({ elementIds: state.neverDrawn });
         state.changedAlwaysDrawn &&
           state.alwaysDrawn &&
           props.viewport.setAlwaysDrawn({ elementIds: state.alwaysDrawn, exclusive: props.viewport.isAlwaysDrawnExclusive });

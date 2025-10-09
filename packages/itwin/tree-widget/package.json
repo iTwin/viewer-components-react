@@ -133,7 +133,6 @@
     "chai-jest-snapshot": "^2.0.0",
     "cpx2": "^3.0.0",
     "cross-env": "^7.0.3",
-    "deep-equal": "^1.0.0",
     "dotenv": "^16.3.1",
     "eslint": "^9.26.0",
     "eslint-config-prettier": "^10.1.5",
@@ -157,7 +156,6 @@
     "sinon-chai": "^4.0.0",
     "stylelint": "^15.11.0",
     "stylelint-config-standard-scss": "^11.1.0",
-    "typemoq": "^2.1.0",
     "typescript": "~5.8.3"
   },
   "eslintConfig": {

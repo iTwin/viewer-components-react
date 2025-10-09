@@ -4,10 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { enableCategoryDisplay } from "./internal/VisibilityUtils.js";
-import { createTreeWidgetViewport } from "./TreeWidgetViewport.js";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
-import type { Viewport } from "@itwin/core-frontend";
 import type { TreeWidgetViewport } from "./TreeWidgetViewport.js";
 
 /**
@@ -23,18 +21,16 @@ export interface CategoryInfo {
  * Enable display of all given categories.
  * @public
  */
-export async function showAllCategories(categories: Id64Array, viewport: Viewport | TreeWidgetViewport) {
-  const treeWidgetViewport = createTreeWidgetViewport(viewport);
-  await enableCategoryDisplay(treeWidgetViewport, categories, true, true);
+export async function showAllCategories(categories: Id64Array, viewport: TreeWidgetViewport) {
+  await enableCategoryDisplay(viewport, categories, true, true);
 }
 
 /**
  * Disable display of all given categories.
  * @public
  */
-export async function hideAllCategories(categories: Id64Array, viewport: Viewport | TreeWidgetViewport) {
-  const treeWidgetViewport = createTreeWidgetViewport(viewport);
-  await enableCategoryDisplay(treeWidgetViewport, categories, false, true);
+export async function hideAllCategories(categories: Id64Array, viewport: TreeWidgetViewport) {
+  await enableCategoryDisplay(viewport, categories, false, true);
 }
 
 /**
@@ -45,18 +41,17 @@ export async function hideAllCategories(categories: Id64Array, viewport: Viewpor
  * - If category is partially visible, it will be fully visible.
  * @public
  */
-export async function invertAllCategories(categories: CategoryInfo[], viewport: Viewport | TreeWidgetViewport) {
+export async function invertAllCategories(categories: CategoryInfo[], viewport: TreeWidgetViewport) {
   const categoriesToEnable = new Set<Id64String>();
   const categoriesToDisable = new Set<Id64String>();
-  const treeWidgetViewport = createTreeWidgetViewport(viewport);
 
   for (const category of categories) {
-    if (!treeWidgetViewport.viewsCategory(category.categoryId)) {
+    if (!viewport.viewsCategory(category.categoryId)) {
       categoriesToEnable.add(category.categoryId);
       continue;
     }
     // Check if category is in partial state
-    if (category.subCategoryIds?.some((subCategory) => !treeWidgetViewport.viewsSubCategory(subCategory))) {
+    if (category.subCategoryIds?.some((subCategory) => !viewport.viewsSubCategory(subCategory))) {
       categoriesToEnable.add(category.categoryId);
     } else {
       categoriesToDisable.add(category.categoryId);
@@ -64,14 +59,14 @@ export async function invertAllCategories(categories: CategoryInfo[], viewport: 
   }
 
   // collect per model overrides that need to be inverted
-  for (const { categoryId, visible } of treeWidgetViewport.perModelCategoryOverrides) {
+  for (const { categoryId, visible } of viewport.perModelCategoryOverrides) {
     if (!visible && categoriesToDisable.has(categoryId)) {
       categoriesToEnable.add(categoryId);
       categoriesToDisable.delete(categoryId);
     }
   }
 
-  await enableCategoryDisplay(treeWidgetViewport, categoriesToDisable, false, true);
+  await enableCategoryDisplay(viewport, categoriesToDisable, false, true);
 
-  await enableCategoryDisplay(treeWidgetViewport, categoriesToEnable, true, true);
+  await enableCategoryDisplay(viewport, categoriesToEnable, true, true);
 }

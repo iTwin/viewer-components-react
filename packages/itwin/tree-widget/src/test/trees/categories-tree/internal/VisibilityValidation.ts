@@ -29,7 +29,7 @@ export async function validateNodeVisibility({ node, handler, expectations }: Va
   const actualVisibility = await handler.getVisibilityStatus(node);
 
   if (expectations === "all-hidden" || expectations === "all-visible") {
-    expect(actualVisibility.state).to.eq(expectations === "all-hidden" ? "hidden" : "visible");
+    expect(actualVisibility.state).to.eq(expectations === "all-hidden" ? "hidden" : "visible", `Node, ${node.label}`);
     return;
   }
 
@@ -48,11 +48,11 @@ export async function validateNodeVisibility({ node, handler, expectations }: Va
         ++visibleCount;
       }
       if (visibleCount > 0 && hiddenCount > 0) {
-        expect(actualVisibility.state).to.eq("partial");
+        expect(actualVisibility.state).to.eq("partial", `Node, ${node.label}`);
         return;
       }
     }
-    expect(actualVisibility.state).to.eq(visibleCount > 0 ? "visible" : "hidden");
+    expect(actualVisibility.state).to.eq(visibleCount > 0 ? "visible" : "hidden", `Node, ${node.label}`);
     return;
   }
 
@@ -75,11 +75,11 @@ export async function validateNodeVisibility({ node, handler, expectations }: Va
     if (modelIds !== undefined) {
       idToUse = `${modelIds[0]}-${id}`;
     }
-    expect(actualVisibility.state).to.eq(expectations[idToUse]);
+    expect(actualVisibility.state).to.eq(expectations[idToUse], `Node, ${node.label}`);
     return;
   }
   if (CategoriesTreeNode.isModelNode(node) || CategoriesTreeNode.isDefinitionContainerNode(node) || CategoriesTreeNode.isElementNode(node)) {
-    expect(actualVisibility.state).to.eq(expectations[id]);
+    expect(actualVisibility.state).to.eq(expectations[id], `Node, ${node.label}`);
     return;
   }
   throw new Error(`Expected hierarchy to contain only definitionContainers, categories, subcategories, models and elements got ${JSON.stringify(node)}`);

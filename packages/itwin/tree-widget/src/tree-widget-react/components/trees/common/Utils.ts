@@ -6,9 +6,7 @@
 import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
 import { showAllCategories } from "./CategoriesVisibilityUtils.js";
 import { toggleAllCategories } from "./internal/VisibilityUtils.js";
-import { createTreeWidgetViewport } from "./TreeWidgetViewport.js";
 
-import type { Viewport } from "@itwin/core-frontend";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { HierarchyFilteringPathOptions, HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
 import type { TreeWidgetViewport } from "./TreeWidgetViewport.js";
@@ -26,8 +24,8 @@ export type FunctionProps<THook extends (props: any) => any> = Parameters<THook>
  * Disables display of all given models.
  * @public
  */
-export async function hideAllModels(models: string[], viewport: Viewport | TreeWidgetViewport) {
-  await createTreeWidgetViewport(viewport).changeModelDisplay({ modelIds: models, display: false });
+export function hideAllModels(models: string[], viewport: TreeWidgetViewport) {
+  viewport.changeModelDisplay({ modelIds: models, display: false });
 }
 
 /**
@@ -40,17 +38,16 @@ export async function showAll(props: {
   models: Id64Array;
   /** ID's of categories to enable, if set to undefined, all categories will be enabled */
   categories?: Id64Array;
-  viewport: Viewport | TreeWidgetViewport;
+  viewport: TreeWidgetViewport;
 }) {
   const { models, categories, viewport } = props;
-  const treeWidgetViewport = createTreeWidgetViewport(viewport);
-  await treeWidgetViewport.changeModelDisplay({ modelIds: models, display: true });
-  treeWidgetViewport.clearNeverDrawn();
-  treeWidgetViewport.clearAlwaysDrawn();
+  viewport.changeModelDisplay({ modelIds: models, display: true });
+  viewport.clearNeverDrawn();
+  viewport.clearAlwaysDrawn();
   if (categories) {
-    await showAllCategories(categories, treeWidgetViewport);
+    await showAllCategories(categories, viewport);
   } else {
-    await toggleAllCategories(treeWidgetViewport, true);
+    await toggleAllCategories(viewport, true);
   }
 }
 
@@ -58,42 +55,37 @@ export async function showAll(props: {
  * Inverts display of all given models.
  * @public
  */
-export async function invertAllModels(models: Id64Array, viewport: Viewport | TreeWidgetViewport) {
-  const treeWidgetViewport = createTreeWidgetViewport(viewport);
+export function invertAllModels(models: Id64Array, viewport: TreeWidgetViewport) {
   const notViewedModels = new Array<Id64String>();
   const viewedModels = new Array<Id64String>();
   models.forEach((modelId) => {
-    if (treeWidgetViewport.viewsModel(modelId)) {
+    if (viewport.viewsModel(modelId)) {
       viewedModels.push(modelId);
     } else {
       notViewedModels.push(modelId);
     }
   });
-  await Promise.all([
-    treeWidgetViewport.changeModelDisplay({ modelIds: notViewedModels, display: true }),
-    treeWidgetViewport.changeModelDisplay({ modelIds: viewedModels, display: false }),
-  ]);
+  viewport.changeModelDisplay({ modelIds: notViewedModels, display: true });
+  viewport.changeModelDisplay({ modelIds: viewedModels, display: false });
 }
 
 /**
  * Based on the value of `enable` argument, either enables or disables display of given models.
  * @public
  */
-export async function toggleModels(models: string[], enable: boolean, viewport: Viewport | TreeWidgetViewport) {
-  const treeWidgetViewport = createTreeWidgetViewport(viewport);
+export function toggleModels(models: string[], enable: boolean, viewport: TreeWidgetViewport) {
   if (!models) {
     return;
   }
-  await treeWidgetViewport.changeModelDisplay({ modelIds: models, display: !enable });
+  viewport.changeModelDisplay({ modelIds: models, display: enable });
 }
 
 /**
  * Checks if all given models are displayed in given viewport.
  * @public
  */
-export function areAllModelsVisible(models: string[], viewport: Viewport | TreeWidgetViewport) {
-  const treeWidgetViewport = createTreeWidgetViewport(viewport);
-  return models.length !== 0 ? models.every((id) => treeWidgetViewport.viewsModel(id)) : false;
+export function areAllModelsVisible(models: string[], viewport: TreeWidgetViewport) {
+  return models.length !== 0 ? models.every((id) => viewport.viewsModel(id)) : false;
 }
 
 /** @public */

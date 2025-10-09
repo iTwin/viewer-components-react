@@ -6,8 +6,8 @@
 import { expect } from "chai";
 import sinon from "sinon";
 import { assert, CompressedId64Set, Id64 } from "@itwin/core-bentley";
-import { Code, ColorDef, IModel, IModelReadRpcInterface, RenderMode } from "@itwin/core-common";
-import { IModelApp, NoRenderApp, SpatialViewState } from "@itwin/core-frontend";
+import { Code, IModel, IModelReadRpcInterface } from "@itwin/core-common";
+import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
@@ -1735,10 +1735,10 @@ describe("ModelsTreeVisibilityHandler", () => {
       await terminatePresentationTesting();
     });
 
-    function createCommonProps(props: { imodel: IModelConnection; hierarchyConfig?: typeof defaultHierarchyConfiguration }) {
+    function createCommonProps(props: { imodel: IModelConnection; hierarchyConfig?: typeof defaultHierarchyConfiguration; visibleByDefault?: boolean }) {
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true, ...props.hierarchyConfig };
       const imodelAccess = createIModelAccess(props.imodel);
-      const viewport = createTreeWidgetTestingViewport({ viewState: createBlankViewState(props.imodel) });
+      const viewport = createTreeWidgetTestingViewport({ iModel: props.imodel, viewType: "3d", visibleByDefault: !!props.visibleByDefault });
       const idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig);
       return {
         imodelAccess,
@@ -1761,7 +1761,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
     }
 
-    function createVisibilityTestData(props: { imodel: IModelConnection; hierarchyConfig?: typeof defaultHierarchyConfiguration }) {
+    function createVisibilityTestData(props: { imodel: IModelConnection; hierarchyConfig?: typeof defaultHierarchyConfiguration; visibleByDefault?: boolean }) {
       const commonProps = createCommonProps(props);
       const handler = createModelsTreeVisibilityHandler(commonProps);
       const provider = createProvider(commonProps);
@@ -2218,7 +2218,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       using visibilityTestData = createVisibilityTestData({ imodel });
       const { handler, provider, viewport } = visibilityTestData;
       await handler.changeVisibility(createModelHierarchyNode(ids.model), true);
-      viewport.setNeverDrawn(new Set([ids.hiddenElement]));
+      viewport.setNeverDrawn({ elementIds: new Set([ids.hiddenElement]) });
 
       await validateHierarchyVisibility({
         provider,
@@ -2804,7 +2804,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         const { imodel, firstCategoryId, secondCategoryId, modelId } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodel });
         const { handler, provider, viewport } = visibilityTestData;
-        await viewport.changeModelDisplay({ modelIds: modelId, display: true });
+        viewport.changeModelDisplay({ modelIds: modelId, display: true });
 
         await validateHierarchyVisibility({
           handler,
@@ -2828,7 +2828,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         const { imodel, firstCategoryId, secondCategoryId, modelId } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodel });
         const { handler, provider, viewport } = visibilityTestData;
-        await viewport.changeModelDisplay({ modelIds: modelId, display: true });
+        viewport.changeModelDisplay({ modelIds: modelId, display: true });
         viewport.changeCategoryDisplay({ categoryIds: [firstCategoryId, secondCategoryId], display: true, enableAllSubCategories: true });
 
         await validateHierarchyVisibility({
@@ -2853,10 +2853,10 @@ describe("ModelsTreeVisibilityHandler", () => {
         const { imodel, firstCategoryId, modelId, elements1 } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodel });
         const { handler, provider, viewport } = visibilityTestData;
-        await viewport.changeModelDisplay({ modelIds: modelId, display: true });
+        viewport.changeModelDisplay({ modelIds: modelId, display: true });
         viewport.changeCategoryDisplay({ categoryIds: firstCategoryId, display: true, enableAllSubCategories: true });
         const elementId = elements1[0];
-        viewport.setNeverDrawn(new Set([elementId]));
+        viewport.setNeverDrawn({ elementIds: new Set([elementId]) });
 
         await validateHierarchyVisibility({
           handler,
@@ -2886,7 +2886,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         const { imodel, firstCategoryId, secondCategoryId, elements1, modelId } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodel });
         const { handler, provider, viewport } = visibilityTestData;
-        await viewport.changeModelDisplay({ modelIds: modelId, display: true });
+        viewport.changeModelDisplay({ modelIds: modelId, display: true });
         viewport.changeCategoryDisplay({ categoryIds: secondCategoryId, display: true, enableAllSubCategories: true });
         const elementId = elements1[0];
         viewport.setAlwaysDrawn({ elementIds: new Set([elementId]) });
@@ -2918,7 +2918,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         const { imodel, firstCategoryId, secondCategoryId, elements1, modelId } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodel });
         const { handler, provider, viewport } = visibilityTestData;
-        await viewport.changeModelDisplay({ modelIds: modelId, display: true });
+        viewport.changeModelDisplay({ modelIds: modelId, display: true });
         viewport.changeCategoryDisplay({ categoryIds: [firstCategoryId, secondCategoryId], display: true, enableAllSubCategories: true });
         viewport.setAlwaysDrawn({ elementIds: new Set(elements1) });
 
@@ -2944,8 +2944,8 @@ describe("ModelsTreeVisibilityHandler", () => {
         const { imodel, firstCategoryId, elements1, modelId } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodel });
         const { handler, provider, viewport } = visibilityTestData;
-        await viewport.changeModelDisplay({ modelIds: modelId, display: true });
-        viewport.setNeverDrawn(new Set(elements1));
+        viewport.changeModelDisplay({ modelIds: modelId, display: true });
+        viewport.setNeverDrawn({ elementIds: new Set(elements1) });
 
         await validateHierarchyVisibility({
           handler,
@@ -3191,7 +3191,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         const { imodel, ...ids } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodel });
         const { handler, provider, viewport } = visibilityTestData;
-        await viewport.changeModelDisplay({ modelIds: ids.model1, display: true });
+        viewport.changeModelDisplay({ modelIds: ids.model1, display: true });
         viewport.setAlwaysDrawn({ elementIds: new Set([ids.element2]), exclusive: true });
 
         await validateHierarchyVisibility({
@@ -3238,7 +3238,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         const { imodel, ...ids } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodel });
         const { handler, provider, viewport } = visibilityTestData;
-        await viewport.changeModelDisplay({ modelIds: ids.model, display: true });
+        viewport.changeModelDisplay({ modelIds: ids.model, display: true });
         viewport.setAlwaysDrawn({ elementIds: new Set([ids.element2]), exclusive: true });
 
         await validateHierarchyVisibility({
@@ -3291,7 +3291,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         using visibilityTestData = createVisibilityTestData({ imodel });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await viewport.changeModelDisplay({ modelIds: ids.model, display: true });
+        viewport.changeModelDisplay({ modelIds: ids.model, display: true });
         viewport.setAlwaysDrawn({ elementIds: new Set([ids.element2]), exclusive: true });
 
         await validateHierarchyVisibility({
@@ -3340,7 +3340,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         using visibilityTestData = createVisibilityTestData({ imodel });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await viewport.changeModelDisplay({ modelIds: ids.model, display: true });
+        viewport.changeModelDisplay({ modelIds: ids.model, display: true });
         viewport.setAlwaysDrawn({ elementIds: new Set([ids.element2]), exclusive: true });
 
         await validateHierarchyVisibility({
@@ -3736,27 +3736,3 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
   });
 });
-
-/** Copied from https://github.com/iTwin/appui/blob/c3683b8acef46572c661c4fa1b7933747a76d3c1/apps/test-providers/src/createBlankConnection.ts#L26 */
-function createBlankViewState(iModel: IModelConnection) {
-  const ext = iModel.projectExtents;
-  const viewState = SpatialViewState.createBlank(iModel, ext.low, ext.high.minus(ext.low));
-
-  viewState.setAllow3dManipulations(true);
-
-  viewState.displayStyle.backgroundColor = ColorDef.white;
-  const flags = viewState.viewFlags.copy({
-    grid: false,
-    renderMode: RenderMode.SmoothShade,
-    backgroundMap: false,
-  });
-  viewState.displayStyle.viewFlags = flags;
-
-  IModelApp.viewManager.onViewOpen.addOnce((vp) => {
-    if (vp.view.hasSameCoordinates(viewState)) {
-      vp.applyViewState(viewState);
-    }
-  });
-
-  return viewState;
-}

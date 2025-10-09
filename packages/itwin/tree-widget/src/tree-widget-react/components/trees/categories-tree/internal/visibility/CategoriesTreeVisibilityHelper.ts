@@ -119,9 +119,9 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
         });
         return acc;
       }, new Set<Id64String>()),
-      mergeMap(async (hiddenModels) => {
+      map((hiddenModels) => {
         if (hiddenModels.size > 0) {
-          await this.#props.viewport.changeModelDisplay({ modelIds: hiddenModels, display: true });
+          this.#props.viewport.changeModelDisplay({ modelIds: hiddenModels, display: true });
         }
       }),
     );

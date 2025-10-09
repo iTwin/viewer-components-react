@@ -18,7 +18,7 @@ import { TreeWidget } from "../../../tree-widget-react/TreeWidget.js";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../IModelUtils.js";
 import { act, renderHook, waitFor } from "../../TestUtils.js";
 import { createFakeSinonViewport, createIModelAccess } from "../Common.js";
-import { createTreeWidgetTestingViewport, createViewState } from "../TreeUtils.js";
+import { createTreeWidgetTestingViewport } from "../TreeUtils.js";
 import { createModelHierarchyNode } from "./Utils.js";
 
 import type { Id64Array } from "@itwin/core-bentley";
@@ -143,7 +143,7 @@ describe("useModelsTree", () => {
         categoryIds = buildIModelResult.categories;
         modelIds = buildIModelResult.models;
         elementIds = buildIModelResult.elements;
-        viewport = createTreeWidgetTestingViewport({ viewState: await createViewState(imodel, categoryIds, modelIds) });
+        viewport = createTreeWidgetTestingViewport({ visibleByDefault: false, iModel: imodel, viewType: "3d" });
         initialProps = { activeView: viewport };
         imodelAccess = createIModelAccess(imodel);
         getSubTreePaths = async ({ createInstanceKeyPaths }) => {

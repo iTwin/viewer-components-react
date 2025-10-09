@@ -605,24 +605,20 @@ export class BaseVisibilityHelper implements Disposable {
 
       viewport.clearPerModelCategoryOverrides({ modelIds });
       if (!on) {
-        return concat(
-          from(viewport.changeModelDisplay({ modelIds, display: false })),
-          this.#props.baseIdsCache
-            .getSubModels({ modelIds })
-            .pipe(mergeMap(({ subModels }) => (subModels ? this.changeModelsVisibilityStatus({ modelIds: subModels, on }) : EMPTY))),
-        );
+        viewport.changeModelDisplay({ modelIds, display: false });
+        return this.#props.baseIdsCache
+          .getSubModels({ modelIds })
+          .pipe(mergeMap(({ subModels }) => (subModels ? this.changeModelsVisibilityStatus({ modelIds: subModels, on }) : EMPTY)));
       }
 
-      return concat(
-        from(viewport.changeModelDisplay({ modelIds, display: true })),
-        this.#props.baseIdsCache.getCategories({ modelIds }).pipe(
-          mergeMap(({ id, drawingCategories, spatialCategories }) => {
-            return merge(
-              drawingCategories ? this.changeCategoriesVisibilityStatus({ categoryIds: drawingCategories, modelId: id, on }) : EMPTY,
-              spatialCategories ? this.changeCategoriesVisibilityStatus({ categoryIds: spatialCategories, modelId: id, on }) : EMPTY,
-            );
-          }),
-        ),
+      viewport.changeModelDisplay({ modelIds, display: true });
+      return this.#props.baseIdsCache.getCategories({ modelIds }).pipe(
+        mergeMap(({ id, drawingCategories, spatialCategories }) => {
+          return merge(
+            drawingCategories ? this.changeCategoriesVisibilityStatus({ categoryIds: drawingCategories, modelId: id, on }) : EMPTY,
+            spatialCategories ? this.changeCategoriesVisibilityStatus({ categoryIds: spatialCategories, modelId: id, on }) : EMPTY,
+          );
+        }),
       );
     });
     return this.#props.overrideHandler
@@ -662,7 +658,7 @@ export class BaseVisibilityHelper implements Disposable {
         categoriesToOverride.forEach((categoryId) => {
           this.changeCategoryStateInViewportAccordingToModelVisibility(modelId, categoryId, false, false);
         });
-        await viewport.changeModelDisplay({ modelIds: modelId, display: true });
+        viewport.changeModelDisplay({ modelIds: modelId, display: true });
       }),
     );
   }

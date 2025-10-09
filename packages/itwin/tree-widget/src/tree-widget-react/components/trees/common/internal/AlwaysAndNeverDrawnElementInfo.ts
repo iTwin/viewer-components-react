@@ -275,7 +275,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
           viewport.setAlwaysDrawn({ elementIds: setDifference(viewport.alwaysDrawn, alwaysDrawn) });
         }
         if (viewport.neverDrawn?.size && neverDrawn.size) {
-          viewport.setNeverDrawn(setDifference(viewport.neverDrawn, neverDrawn));
+          viewport.setNeverDrawn({ elementIds: setDifference(viewport.neverDrawn, neverDrawn) });
         }
       }),
     );

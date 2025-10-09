@@ -3,25 +3,19 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { PerModelCategoryVisibility, Viewport } from "@itwin/core-frontend";
+import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 
 import type { BeEvent, Id64Arg, Id64String } from "@itwin/core-bentley";
-import type { IModelConnection } from "@itwin/core-frontend";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 
 /** @public */
 export type PerModelCategoryOverride = "show" | "hide" | "none";
 
 /**
  * Creates a `TreeWidgetViewport`.
- *
- * Provided viewport is returned when it is of `TreeWidgetViewport` type, otherwise it is created.
  * @beta
  */
-export function createTreeWidgetViewport(viewport: Viewport | TreeWidgetViewport): TreeWidgetViewport {
-  if (!(viewport instanceof Viewport)) {
-    return viewport;
-  }
-
+export function createTreeWidgetViewport(viewport: Viewport): TreeWidgetViewport {
   return {
     get viewType() {
       return viewport.view.is2d() ? "2d" : viewport.view.isSpatialView() ? "3d" : "other";
@@ -30,9 +24,10 @@ export function createTreeWidgetViewport(viewport: Viewport | TreeWidgetViewport
       return viewport.iModel;
     },
     viewsModel: (modelId) => viewport.view.viewsModel(modelId),
-    changeModelDisplay: async (props) => {
+    changeModelDisplay: (props) => {
       if (props.display) {
-        return viewport.addViewedModels(props.modelIds);
+        void viewport.addViewedModels(props.modelIds);
+        return;
       }
       viewport.changeModelDisplay(props.modelIds, false);
     },
@@ -60,7 +55,7 @@ export function createTreeWidgetViewport(viewport: Viewport | TreeWidgetViewport
     get neverDrawn() {
       return viewport.neverDrawn;
     },
-    setNeverDrawn: (elementIds) => viewport.setNeverDrawn(elementIds),
+    setNeverDrawn: (props) => viewport.setNeverDrawn(props.elementIds),
     clearNeverDrawn: () => viewport.clearNeverDrawn(),
     get alwaysDrawn() {
       return viewport.alwaysDrawn;
@@ -136,7 +131,7 @@ export interface TreeWidgetViewport {
    * model visibility should not interfere with elements visibility.
    * - `false`, model display should be turned off. All elements which have that model should not be displayed in the viewport.
    */
-  changeModelDisplay: (props: { modelIds: Id64Arg; display: boolean }) => Promise<void>;
+  changeModelDisplay: (props: { modelIds: Id64Arg; display: boolean }) => void;
   /**
    * Should return true if category specified by `categoryId` is visible in the viewport.
    *
@@ -198,7 +193,7 @@ export interface TreeWidgetViewport {
    */
   neverDrawn: ReadonlySet<Id64String> | undefined;
   /** Ids of elements which should not be displayed in the viewport, regardless of category and sub-category visibility. */
-  setNeverDrawn: (elementIds: Set<Id64String>) => void;
+  setNeverDrawn: (props: { elementIds: Set<Id64String> }) => void;
   /** Should clear the set of never-drawn elements. */
   clearNeverDrawn: () => void;
   /**

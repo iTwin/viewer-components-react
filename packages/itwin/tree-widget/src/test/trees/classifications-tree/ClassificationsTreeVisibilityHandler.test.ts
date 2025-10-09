@@ -3,9 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
-import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
-import { DrawingViewState, IModelApp, SpatialViewState } from "@itwin/core-frontend";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { ClassificationsTreeDefinition } from "../../../tree-widget-react/components/trees/classifications-tree/ClassificationsTreeDefinition.js";
 import { ClassificationsTreeIdsCache } from "../../../tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeIdsCache.js";
@@ -41,11 +38,10 @@ import { validateHierarchyVisibility } from "./VisibilityValidation.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyFilteringPath, HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
+import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { ClassificationsTreeFilterTargets } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/FilteredTree.js";
 import type { FilteredTree } from "../../../tree-widget-react/components/trees/common/internal/visibility/BaseFilteredTree.js";
 import type { TreeWidgetViewport } from "../../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
-import type { TreeWidgetTestingViewport } from "../TreeUtils.js";
 
 describe("ClassificationsTreeVisibilityHandler", () => {
   before(async () => {
@@ -70,21 +66,13 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     });
   }
 
-  async function createVisibilityTestData({
-    imodel,
-    view,
-    categoryIds,
-    modelIds,
-  }: {
-    imodel: IModelConnection;
-    view: "2d" | "3d";
-    categoryIds: Id64Array;
-    modelIds: Id64Array;
-  }) {
+  async function createVisibilityTestData({ imodel, view, visibleByDefault }: { imodel: IModelConnection; view: "2d" | "3d"; visibleByDefault?: boolean }) {
     const imodelAccess = createIModelAccess(imodel);
     const idsCache = new ClassificationsTreeIdsCache(imodelAccess, { rootClassificationSystemCode });
     const viewport = createTreeWidgetTestingViewport({
-      viewState: view === "3d" ? await createSpatialViewState(imodel, categoryIds, modelIds) : await createDrawingViewState(imodel, categoryIds, modelIds),
+      iModel: imodel,
+      visibleByDefault: !!visibleByDefault,
+      viewType: view,
     });
     const handler = createClassificationsTreeVisibilityHandler({ imodelAccess, idsCache, viewport });
     const provider = createProvider({ idsCache, imodelAccess });
@@ -120,7 +108,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           categoryId: spatialCategory.id,
           codeValue: "Parent 3d element",
         });
-        const childPhysicalElement = insertPhysicalElement({
+        insertPhysicalElement({
           builder,
           modelId: physicalModel.id,
           categoryId: spatialCategory.id,
@@ -128,20 +116,15 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           codeValue: "Child 3d element",
         });
         insertElementHasClassificationsRelationship({ builder, elementId: parentPhysicalElement.id, classificationId: classification.id });
-
-        return { table, classification, physicalModel, spatialCategory, parentPhysicalElement, childPhysicalElement };
       });
 
-      const { imodel, ...keys } = buildIModelResult;
+      const { imodel } = buildIModelResult;
 
       using visibilityTestData = await createVisibilityTestData({
         imodel,
         view: "3d",
-        categoryIds: [keys.spatialCategory.id],
-        modelIds: [keys.physicalModel.id],
       });
       const { handler, provider, viewport } = visibilityTestData;
-      await setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
 
       await validateHierarchyVisibility({
         provider,
@@ -167,7 +150,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           categoryId: drawingCategory.id,
           codeValue: "Parent 2d element",
         });
-        const childDrawingElement = insertDrawingGraphic({
+        insertDrawingGraphic({
           builder,
           modelId: drawingModel.id,
           categoryId: drawingCategory.id,
@@ -175,20 +158,15 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           codeValue: "Child 2d element",
         });
         insertElementHasClassificationsRelationship({ builder, elementId: parentDrawingElement.id, classificationId: classification.id });
-
-        return { table, classification, drawingModel, drawingCategory, parentDrawingElement, childDrawingElement };
       });
 
-      const { imodel, ...keys } = buildIModelResult;
+      const { imodel } = buildIModelResult;
 
       using visibilityTestData = await createVisibilityTestData({
         imodel,
         view: "2d",
-        categoryIds: [keys.drawingCategory.id],
-        modelIds: [keys.drawingModel.id],
       });
       const { handler, provider, viewport } = visibilityTestData;
-      await setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
 
       await validateHierarchyVisibility({
         provider,
@@ -232,11 +210,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         using visibilityTestData = await createVisibilityTestData({
           imodel,
           view: "3d",
-          categoryIds: [keys.spatialCategory.id],
-          modelIds: [keys.physicalModel.id],
         });
         const { handler, provider, viewport } = visibilityTestData;
-        await setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
 
         await handler.changeVisibility(createClassificationTableHierarchyNode({ id: keys.table.id }), true);
         await validateHierarchyVisibility({
@@ -288,11 +263,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         using visibilityTestData = await createVisibilityTestData({
           imodel,
           view: "3d",
-          categoryIds: [keys.spatialCategory.id],
-          modelIds: [keys.physicalModel.id],
         });
         const { handler, provider, viewport } = visibilityTestData;
-        await setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
 
         await handler.changeVisibility(createClassificationHierarchyNode({ id: keys.childClassification.id }), true);
         await validateHierarchyVisibility({
@@ -370,11 +342,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         using visibilityTestData = await createVisibilityTestData({
           imodel,
           view: "3d",
-          categoryIds: [keys.spatialCategory1.id, keys.spatialCategory2.id],
-          modelIds: [keys.physicalModel1.id, keys.physicalModel2.id],
         });
         const { handler, provider, viewport } = visibilityTestData;
-        await setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
 
         await handler.changeVisibility(createClassificationHierarchyNode({ id: keys.childClassification1.id }), true);
         await validateHierarchyVisibility({
@@ -458,11 +427,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         using visibilityTestData = await createVisibilityTestData({
           imodel,
           view: "3d",
-          categoryIds: [keys.spatialCategory.id],
-          modelIds: [keys.physicalModel.id],
         });
         const { handler, provider, viewport } = visibilityTestData;
-        await setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
 
         await handler.changeVisibility(
           createPhysicalElementHierarchyNode({ id: keys.targetPhysicalElement.id, categoryId: keys.spatialCategory.id, modelId: keys.physicalModel.id }),
@@ -515,15 +481,13 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         return { table, classification, physicalModel, spatialCategory, parentPhysicalElement, childPhysicalElement };
       });
 
-      const { imodel, ...keys } = buildIModelResult;
+      const { imodel } = buildIModelResult;
       using visibilityTestData = await createVisibilityTestData({
         imodel,
         view: "3d",
-        categoryIds: [keys.spatialCategory.id],
-        modelIds: [keys.physicalModel.id],
+        visibleByDefault: true,
       });
       const { handler, provider, viewport } = visibilityTestData;
-      await setupInitialDisplayState({ viewport });
 
       await validateHierarchyVisibility({
         provider,
@@ -561,15 +525,13 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         return { table, classification, drawingModel, drawingCategory, parentDrawingElement, childDrawingElement };
       });
 
-      const { imodel, ...keys } = buildIModelResult;
+      const { imodel } = buildIModelResult;
       using visibilityTestData = await createVisibilityTestData({
         imodel,
         view: "2d",
-        categoryIds: [keys.drawingCategory.id],
-        modelIds: [keys.drawingModel.id],
+        visibleByDefault: true,
       });
       const { handler, provider, viewport } = visibilityTestData;
-      await setupInitialDisplayState({ viewport });
 
       await validateHierarchyVisibility({
         provider,
@@ -613,11 +575,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         using visibilityTestData = await createVisibilityTestData({
           imodel,
           view: "3d",
-          categoryIds: [keys.spatialCategory.id],
-          modelIds: [keys.physicalModel.id],
         });
         const { handler, provider, viewport } = visibilityTestData;
-        await setupInitialDisplayState({ viewport });
 
         await handler.changeVisibility(createClassificationTableHierarchyNode({ id: keys.table.id }), false);
         await validateHierarchyVisibility({
@@ -697,11 +656,9 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         using visibilityTestData = await createVisibilityTestData({
           imodel,
           view: "3d",
-          categoryIds: [keys.spatialCategory1.id, keys.spatialCategory2.id],
-          modelIds: [keys.physicalModel1.id, keys.physicalModel2.id],
+          visibleByDefault: true,
         });
         const { handler, provider, viewport } = visibilityTestData;
-        await setupInitialDisplayState({ viewport });
 
         await handler.changeVisibility(createClassificationHierarchyNode({ id: keys.childClassification1.id }), false);
         await validateHierarchyVisibility({
@@ -785,11 +742,9 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         using visibilityTestData = await createVisibilityTestData({
           imodel,
           view: "3d",
-          categoryIds: [keys.spatialCategory.id],
-          modelIds: [keys.physicalModel.id],
+          visibleByDefault: true,
         });
         const { handler, provider, viewport } = visibilityTestData;
-        await setupInitialDisplayState({ viewport });
 
         await handler.changeVisibility(
           createPhysicalElementHierarchyNode({ id: keys.targetPhysicalElement.id, categoryId: keys.spatialCategory.id, modelId: keys.physicalModel.id }),
@@ -817,19 +772,19 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     async function createFilteredVisibilityTestData({
       imodel,
       filterPaths,
-      categoryIds,
-      modelIds,
       view,
+      visibleByDefault,
     }: Parameters<typeof createVisibilityTestData>[0] & {
       filterPaths: HierarchyNodeIdentifiersPath[];
-      categoryIds: Id64Array;
-      modelIds: Id64Array;
       view: "3d" | "2d";
+      visibleByDefault?: boolean;
     }) {
       const imodelAccess = createIModelAccess(imodel);
       const idsCache = new ClassificationsTreeIdsCache(imodelAccess, { rootClassificationSystemCode });
       const viewport = createTreeWidgetTestingViewport({
-        viewState: view === "3d" ? await createSpatialViewState(imodel, categoryIds, modelIds) : await createDrawingViewState(imodel, categoryIds, modelIds),
+        iModel: imodel,
+        viewType: view,
+        visibleByDefault: !!visibleByDefault,
       });
       const handler = createClassificationsTreeVisibilityHandler({ idsCache, viewport, imodelAccess, filteredPaths: filterPaths });
       const defaultProvider = createProvider({ idsCache, imodelAccess });
@@ -892,11 +847,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         imodel,
         filterPaths,
         view: "3d",
-        categoryIds: [keys.spatialCategory.id],
-        modelIds: [keys.physicalModel.id],
       });
       const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
-      await setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
 
       await handler.changeVisibility(
         createPhysicalElementHierarchyNode({
@@ -971,11 +923,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         imodel,
         filterPaths,
         view: "2d",
-        categoryIds: [keys.drawingCategory.id],
-        modelIds: [keys.drawingModel.id],
       });
       const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
-      await setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
 
       await handler.changeVisibility(
         createDrawingElementHierarchyNode({
@@ -1062,11 +1011,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         imodel,
         filterPaths,
         view: "3d",
-        categoryIds: [keys.spatialCategory1.id, keys.spatialCategory2.id],
-        modelIds: [keys.physicalModel.id],
       });
       const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
-      await setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
       await handler.changeVisibility(
         createClassificationHierarchyNode({
           id: keys.classification1.id,
@@ -1153,11 +1099,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         imodel,
         filterPaths,
         view: "3d",
-        categoryIds: [keys.spatialCategory1.id, keys.spatialCategory2.id],
-        modelIds: [keys.physicalModel.id],
       });
       const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
-      await setupInitialDisplayState({ viewport, ...createHiddenTestData(keys) });
       await handler.changeVisibility(
         createClassificationTableHierarchyNode({
           hasChildren: true,
@@ -1193,149 +1136,6 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     });
   });
 });
-
-async function createSpatialViewState(iModel: IModelConnection, categoryIds: Id64Array, modelIds: Id64Array) {
-  const model = IModel.dictionaryId;
-  const viewState = SpatialViewState.createFromProps(
-    {
-      categorySelectorProps: { categories: categoryIds, model, code: Code.createEmpty(), classFullName: "BisCore:CategorySelector" },
-      displayStyleProps: { model, code: Code.createEmpty(), classFullName: "BisCore:DisplayStyle3d" },
-      viewDefinitionProps: {
-        model,
-        code: Code.createEmpty(),
-        categorySelectorId: "",
-        classFullName: "BisCore:SpatialViewDefinition",
-        displayStyleId: "",
-      },
-      modelSelectorProps: {
-        models: modelIds,
-        code: Code.createEmpty(),
-        model,
-        classFullName: "BisCore:ModelSelector",
-      },
-    },
-    iModel,
-  );
-
-  viewState.setAllow3dManipulations(true);
-
-  viewState.displayStyle.backgroundColor = ColorDef.white;
-  const flags = viewState.viewFlags.copy({
-    grid: false,
-    renderMode: RenderMode.SmoothShade,
-    backgroundMap: false,
-  });
-  viewState.displayStyle.viewFlags = flags;
-
-  IModelApp.viewManager.onViewOpen.addOnce((vp) => {
-    if (vp.view.hasSameCoordinates(viewState)) {
-      vp.applyViewState(viewState);
-    }
-  });
-  await viewState.load();
-  return viewState;
-}
-
-async function createDrawingViewState(iModel: IModelConnection, categoryIds: Id64Array, modelIds: Id64Array) {
-  const model = IModel.dictionaryId;
-  const viewState = DrawingViewState.createFromProps(
-    {
-      categorySelectorProps: { categories: categoryIds, model, code: Code.createEmpty(), classFullName: "BisCore:CategorySelector" },
-      displayStyleProps: { model, code: Code.createEmpty(), classFullName: "BisCore:DisplayStyle2d" },
-      viewDefinitionProps: {
-        model,
-        code: Code.createEmpty(),
-        categorySelectorId: "",
-        classFullName: "BisCore:DrawingViewDefinition",
-        displayStyleId: "",
-      },
-      modelSelectorProps: {
-        models: modelIds,
-        code: Code.createEmpty(),
-        model,
-        classFullName: "BisCore:ModelSelector",
-      },
-    },
-    iModel,
-  );
-  modelIds.length && (await viewState.changeViewedModel(modelIds[0]));
-
-  viewState.displayStyle.backgroundColor = ColorDef.white;
-  const flags = viewState.viewFlags.copy({
-    grid: false,
-    renderMode: RenderMode.SmoothShade,
-    backgroundMap: false,
-  });
-  viewState.displayStyle.viewFlags = flags;
-
-  IModelApp.viewManager.onViewOpen.addOnce((vp) => {
-    if (vp.view.hasSameCoordinates(viewState)) {
-      vp.applyViewState(viewState);
-    }
-  });
-  await viewState.load();
-  return viewState;
-}
-
-interface VisibilityInfo {
-  id: Id64String;
-  visible: boolean;
-}
-async function setupInitialDisplayState(props: {
-  viewport: TreeWidgetTestingViewport;
-  categories?: Array<VisibilityInfo>;
-  models?: Array<VisibilityInfo>;
-  elements?: Array<VisibilityInfo>;
-}) {
-  const { viewport } = props;
-  const categories = props.categories ?? [];
-  const elements = props.elements ?? [];
-  const models = props.models ?? [];
-  for (const categoryInfo of categories) {
-    viewport.changeCategoryDisplay({ categoryIds: categoryInfo.id, display: categoryInfo.visible, enableAllSubCategories: false });
-  }
-  const alwaysDrawn = elements.filter(({ visible }) => visible).map(({ id }) => id);
-  if (alwaysDrawn.length > 0) {
-    viewport.setAlwaysDrawn({ elementIds: new Set([...alwaysDrawn, ...(viewport.alwaysDrawn ?? [])]) });
-  }
-  const neverDrawn = elements.filter(({ visible }) => !visible).map(({ id }) => id);
-  if (neverDrawn.length > 0) {
-    viewport.setNeverDrawn(new Set([...neverDrawn, ...(viewport.neverDrawn ?? [])]));
-  }
-  if (viewport.viewType === "3d" || viewport.viewType === "2d") {
-    await Promise.all([
-      viewport.changeModelDisplay({ modelIds: models.filter(({ visible }) => visible).map(({ id }) => id), display: true }),
-      viewport.changeModelDisplay({ modelIds: models.filter(({ visible }) => !visible).map(({ id }) => id), display: false }),
-    ]);
-  }
-  viewport.renderFrame();
-}
-
-function createHiddenTestData(keys: { [key: string]: InstanceKey }) {
-  const categories = new Array<VisibilityInfo>();
-  const elements = new Array<VisibilityInfo>();
-  const models = new Array<VisibilityInfo>();
-  for (const key of Object.values(keys)) {
-    if (key.className.toLowerCase().includes("category")) {
-      categories.push({ id: key.id, visible: false });
-      continue;
-    }
-    // cspell:disable-next-line
-    if (key.className.toLowerCase().includes("physicalobject")) {
-      elements.push({ id: key.id, visible: false });
-      continue;
-    }
-    // cspell:disable-next-line
-    if (key.className.toLowerCase().includes("drawinggraphic")) {
-      elements.push({ id: key.id, visible: false });
-      continue;
-    }
-    if (key.className.toLowerCase().includes("model")) {
-      models.push({ id: key.id, visible: false });
-    }
-  }
-  return { categories, elements, models };
-}
 
 function createClassificationsTreeVisibilityHandler(props: {
   viewport: TreeWidgetViewport;

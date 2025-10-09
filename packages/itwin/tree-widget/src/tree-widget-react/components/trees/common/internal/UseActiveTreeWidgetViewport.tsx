@@ -25,6 +25,6 @@ export function useActiveTreeWidgetViewport({ treeWidgetViewport }: { treeWidget
   return activeViewport;
 }
 
-function createTreeWidgetViewportInternal(viewport: TreeWidgetViewport | Viewport | undefined): TreeWidgetViewport | undefined {
+function createTreeWidgetViewportInternal(viewport: Viewport | undefined): TreeWidgetViewport | undefined {
   return viewport ? createTreeWidgetViewport(viewport) : undefined;
 }

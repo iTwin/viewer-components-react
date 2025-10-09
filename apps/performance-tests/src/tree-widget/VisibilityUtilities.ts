@@ -199,7 +199,7 @@ interface VisibilityInfo {
   visible: boolean;
 }
 
-export async function setupInitialDisplayState(props: {
+export function setupInitialDisplayState(props: {
   viewport: TreeWidgetTestingViewport;
   categories?: Array<VisibilityInfo>;
   subCategories?: Array<VisibilityInfo>;
@@ -224,12 +224,10 @@ export async function setupInitialDisplayState(props: {
   }
   const neverDrawn = elements.filter(({ visible }) => !visible).map(({ id }) => id);
   if (neverDrawn.length > 0) {
-    viewport.setNeverDrawn(new Set([...neverDrawn, ...(viewport.neverDrawn ?? [])]));
+    viewport.setNeverDrawn({ elementIds: new Set([...neverDrawn, ...(viewport.neverDrawn ?? [])]) });
   }
-  await Promise.all([
-    viewport.changeModelDisplay({ modelIds: models.filter(({ visible }) => visible).map(({ id }) => id), display: true }),
-    viewport.changeModelDisplay({ modelIds: models.filter(({ visible }) => !visible).map(({ id }) => id), display: false }),
-  ]);
+  viewport.changeModelDisplay({ modelIds: models.filter(({ visible }) => visible).map(({ id }) => id), display: true });
+  viewport.changeModelDisplay({ modelIds: models.filter(({ visible }) => !visible).map(({ id }) => id), display: false });
   viewport.renderFrame();
 }
 

@@ -107,7 +107,7 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
           props.categories.map((category) => category.categoryId),
           props.viewport,
         );
-        void hideAllModels(props.models, props.viewport);
+        hideAllModels(props.models, props.viewport);
       }}
       icon={visibilityHideSvg}
     />

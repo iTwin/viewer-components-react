@@ -21,7 +21,7 @@ import {
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory, insertSubCategory } from "../IModelUtils.js";
 import { TestUtils } from "../TestUtils.js";
 import { createFakeSinonViewport, createIModelMock } from "./Common.js";
-import { createTreeWidgetTestingViewport, createViewState } from "./TreeUtils.js";
+import { createTreeWidgetTestingViewport } from "./TreeUtils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
@@ -190,7 +190,15 @@ describe("CategoryVisibilityUtils", () => {
       categoryIds = buildIModelResult.categories;
       modelIds = buildIModelResult.models;
       subCategoryIds = buildIModelResult.subCategories;
-      nonMockedViewport = createTreeWidgetTestingViewport({ viewState: await createViewState(imodel, categoryIds, modelIds) });
+      nonMockedViewport = createTreeWidgetTestingViewport({
+        iModel: imodel,
+        visibleByDefault: false,
+        viewType: "3d",
+        subCategoriesOfCategories: [
+          { categoryId: buildIModelResult.categories[0], subCategories: buildIModelResult.subCategories[0] },
+          { categoryId: buildIModelResult.categories[1], subCategories: buildIModelResult.subCategories[1] },
+        ],
+      });
     });
 
     after(async function () {

@@ -91,7 +91,7 @@ describe("models tree", () => {
         iModelConnection,
         testData,
       });
-      await setupInitialDisplayState({
+      setupInitialDisplayState({
         viewport,
         ...testData,
       });
@@ -153,7 +153,7 @@ describe("models tree", () => {
         iModelConnection,
         testData,
       });
-      await setupInitialDisplayState({
+      setupInitialDisplayState({
         viewport,
         ...testData,
       });
@@ -211,7 +211,7 @@ describe("models tree", () => {
         iModelConnection,
         testData,
       });
-      await setupInitialDisplayState({
+      setupInitialDisplayState({
         viewport,
         ...testData,
       });
@@ -271,7 +271,7 @@ describe("models tree", () => {
         iModelConnection,
         testData,
       });
-      await setupInitialDisplayState({
+      setupInitialDisplayState({
         viewport,
         ...testData,
       });
@@ -333,7 +333,7 @@ describe("models tree", () => {
         iModelConnection,
         testData,
       });
-      await setupInitialDisplayState({
+      setupInitialDisplayState({
         viewport,
         ...testData,
       });

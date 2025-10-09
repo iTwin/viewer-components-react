@@ -147,7 +147,7 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
       onClick={() => {
         // cspell:disable-next-line
         props.onFeatureUsed?.("models-tree-hideall");
-        void hideAllModels(
+        hideAllModels(
           props.models.map((model) => model.id),
           props.viewport,
         );
@@ -165,7 +165,7 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
       label={TreeWidget.translate("modelsTree.buttons.invert.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("models-tree-invert");
-        void invertAllModels(
+        invertAllModels(
           props.models.map((model) => model.id),
           props.viewport,
         );
@@ -194,7 +194,7 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
       label={TreeWidget.translate("modelsTree.buttons.toggle2d.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("models-tree-view2d");
-        void toggleModels(models2d, is2dToggleActive, props.viewport);
+        toggleModels(models2d, is2dToggleActive, props.viewport);
       }}
       aria-disabled={models2d.length === 0}
       active={is2dToggleActive}
@@ -223,7 +223,7 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
       label={TreeWidget.translate("modelsTree.buttons.toggle3d.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("models-tree-view3d");
-        void toggleModels(models3d, is3dToggleActive, props.viewport);
+        toggleModels(models3d, is3dToggleActive, props.viewport);
       }}
       aria-disabled={models3d.length === 0}
       active={is3dToggleActive}
