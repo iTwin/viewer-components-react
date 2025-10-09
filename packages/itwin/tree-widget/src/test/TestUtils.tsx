@@ -7,7 +7,7 @@ import { createElement, Fragment, StrictMode } from "react";
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
 import { EmptyLocalization } from "@itwin/core-common";
-import { render as renderRTL, renderHook as renderHookRTL } from "@testing-library/react";
+import { renderHook as renderHookRTL, render as renderRTL } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { TreeWidget } from "../tree-widget-react/TreeWidget.js";
 

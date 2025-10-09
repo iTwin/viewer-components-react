@@ -913,7 +913,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
           using visibilityTestData = await createVisibilityTestData({
             imodel,
-
             hierarchyConfig: { showElements: true },
           });
           const { handler, provider, viewport } = visibilityTestData;
@@ -969,7 +968,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
           using visibilityTestData = await createVisibilityTestData({
             imodel,
-
             hierarchyConfig: { showElements: true },
           });
           const { handler, provider, viewport } = visibilityTestData;
