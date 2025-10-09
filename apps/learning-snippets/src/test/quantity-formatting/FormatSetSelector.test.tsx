@@ -45,13 +45,7 @@ describe("Quantity formatting", () => {
           // Handle format set change
         };
 
-        render(
-          <FormatSetSelector
-            formatSets={formatSets}
-            selectedFormatSetKey={undefined}
-            onFormatSetChange={handleFormatSetChange}
-          />,
-        );
+        render(<FormatSetSelector formatSets={formatSets} selectedFormatSetKey={undefined} onFormatSetChange={handleFormatSetChange} />);
         // __PUBLISH_EXTRACT_END__
 
         expect(screen.getByPlaceholderText("labels.searchFormatSets")).to.exist;

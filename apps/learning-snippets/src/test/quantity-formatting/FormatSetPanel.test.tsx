@@ -36,13 +36,7 @@ describe("Quantity formatting", () => {
           // Handle format set change
         };
 
-        render(
-          <FormatSetPanel
-            formatSet={formatSet}
-            editable={true}
-            onFormatSetChange={handleFormatSetChange}
-          />,
-        );
+        render(<FormatSetPanel formatSet={formatSet} editable={true} onFormatSetChange={handleFormatSetChange} />);
         // __PUBLISH_EXTRACT_END__
 
         expect(screen.getByText("labels.formatSetDetails")).to.exist;
@@ -58,12 +52,7 @@ describe("Quantity formatting", () => {
           formats: {},
         } as FormatSet;
 
-        render(
-          <FormatSetPanel
-            formatSet={formatSet}
-            editable={false}
-          />,
-        );
+        render(<FormatSetPanel formatSet={formatSet} editable={false} />);
         // __PUBLISH_EXTRACT_END__
 
         expect(screen.getByText("labels.formatSetDetails")).to.exist;

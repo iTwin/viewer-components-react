@@ -225,11 +225,13 @@
   display: flex;
   align-items: center;
   gap: var(--iui-size-2xs);
+  margin: 0;
 }
 
 .quantityFormat--comboBoxTooltip {
   position: relative;
-  margin-left: var(--iui-size-s);
+  margin-left: var(--iui-size-xs);
+  top: 1px;
 }
 .quantityFormat--formatSetPanel-inputColumn {
   flex-direction: column;
