@@ -142,7 +142,7 @@ export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, edita
         />
       </Flex>
 
-      <Flex className="quantityFormat--formatSetPanel-inputColumn">
+      <Flex className="quantityFormat--formatSetPanel-inputRow quantityFormat--formatSetPanel-inputRow-descr">
         <Label htmlFor={descriptionInputId}>{translate("QuantityFormat:labels.description")}</Label>
         <Textarea
           id={descriptionInputId}

@@ -217,8 +217,12 @@
   flex-direction: row;
 }
 
+.quantityFormat--formatSetPanel-inputRow-descr {
+  align-items: flex-start;
+}
+
 .quantityFormat--formatSetPanel-inputRow > label {
-  flex: 0 0 30%; /* Fixed 30% width for all labels in input rows */
+  flex: 0 0 19%; /* Fixed 19% width for all labels in input rows */
   display: flex;
   align-items: center;
   margin: 0;
