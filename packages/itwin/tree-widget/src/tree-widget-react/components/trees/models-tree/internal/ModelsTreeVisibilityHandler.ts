@@ -44,7 +44,7 @@ import { createVisibilityChangeEventListener } from "./VisibilityChangeEventList
 import type { Observable, OperatorFunction, Subscription } from "rxjs";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
-import type { GroupingHierarchyNode, HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
+import type { ClassGroupingNodeKey, GroupingHierarchyNode, HierarchyFilteringPath, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { Visibility } from "../../common/Tooltip.js";
 import type { HierarchyVisibilityHandler, HierarchyVisibilityHandlerOverridableMethod, VisibilityStatus } from "../../common/UseHierarchyVisibility.js";
@@ -86,7 +86,7 @@ interface ChangeModelVisibilityStateProps {
 
 /** @beta */
 interface GetFilteredNodeVisibilityProps {
-  node: HierarchyNode;
+  node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey };
 }
 
 /** @beta */
@@ -208,10 +208,6 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
   }
 
   private getVisibilityStatusObs(node: HierarchyNode): Observable<VisibilityStatus> {
-    if (node.filtering?.filteredChildrenIdentifierPaths?.length && !node.filtering.isFilterTarget) {
-      return this.getFilteredNodeVisibility({ node });
-    }
-
     if (HierarchyNode.isClassGroupingNode(node)) {
       if (node.extendedData?.hasDirectNonFilteredTargets && !node.filtering?.hasFilterTargetAncestor) {
         return this.getFilteredNodeVisibility({ node });
@@ -221,6 +217,10 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
 
     if (!HierarchyNode.isInstancesNode(node)) {
       return of(createVisibilityStatus("disabled"));
+    }
+
+    if (node.filtering?.filteredChildrenIdentifierPaths?.length && !node.filtering.isFilterTarget) {
+      return this.getFilteredNodeVisibility({ node });
     }
 
     if (ModelsTreeNode.isSubjectNode(node)) {
@@ -253,16 +253,13 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       elementIds: node.key.instanceKeys.map(({ id }) => id),
       modelId,
       categoryId,
-    } );
+    });
   }
 
   private getFilteredNodeVisibility(props: GetFilteredNodeVisibilityProps) {
-    return from(this._filteredTree ?? [undefined]).pipe(
+    assert(this._filteredTree !== undefined);
+    return from(this._filteredTree).pipe(
       map((filteredTree) => {
-        if (!filteredTree) {
-          return {};
-        }
-
         if (HierarchyNode.isInstancesNode(props.node) || HierarchyNode.isClassGroupingNode(props.node)) {
           return filteredTree.getVisibilityChangeTargets(props.node);
         }
@@ -477,18 +474,21 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     return createVisibilityHandlerResult(this, { node }, result, this._props.overrides?.getElementGroupingNodeDisplayStatus);
   }
 
-  private getElementDisplayStatus({ elementIds, modelId, categoryId }: { elementIds: Id64Array; modelId: Id64String; categoryId: Id64String }): Observable<VisibilityStatus> {
+  private getElementDisplayStatus({
+    elementIds,
+    modelId,
+    categoryId,
+  }: {
+    elementIds: Id64Array;
+    modelId: Id64String;
+    categoryId: Id64String;
+  }): Observable<VisibilityStatus> {
     const result = this.getElementsDisplayStatus({
       elementIds,
       modelId,
       categoryId,
     });
-    return createVisibilityHandlerResult(
-      this,
-      { elementId: elementIds[0], modelId, categoryId },
-      result,
-      this._props.overrides?.getElementDisplayStatus,
-    );
+    return createVisibilityHandlerResult(this, { elementId: elementIds[0], modelId, categoryId }, result, this._props.overrides?.getElementDisplayStatus);
   }
 
   private getElementsDisplayStatus(props: { elementIds: Id64Array | Id64Set; modelId: Id64String; categoryId: Id64String }): Observable<VisibilityStatus> {
@@ -541,10 +541,6 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
   /** Changes visibility of the items represented by the tree node. */
   private changeVisibilityObs(node: HierarchyNode, on: boolean): Observable<void> {
     const changeObs = defer(() => {
-      if (node.filtering?.filteredChildrenIdentifierPaths?.length && !node.filtering.isFilterTarget) {
-        return this.changeFilteredNodeVisibility({ node, on });
-      }
-
       if (HierarchyNode.isClassGroupingNode(node)) {
         if (node.extendedData?.hasDirectNonFilteredTargets && !node.filtering?.hasFilterTargetAncestor) {
           return this.changeFilteredNodeVisibility({ node, on });
@@ -554,6 +550,10 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
 
       if (!HierarchyNode.isInstancesNode(node)) {
         return EMPTY;
+      }
+
+      if (node.filtering?.filteredChildrenIdentifierPaths?.length && !node.filtering.isFilterTarget) {
+        return this.changeFilteredNodeVisibility({ node, on });
       }
 
       if (ModelsTreeNode.isSubjectNode(node)) {
@@ -599,13 +599,10 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
   }
 
   private changeFilteredNodeVisibility({ on, ...props }: ChangeFilteredNodeVisibilityProps) {
-    return from(this._filteredTree ?? [undefined])
+    assert(this._filteredTree !== undefined);
+    return from(this._filteredTree)
       .pipe(
         map((filteredTree) => {
-          if (!filteredTree) {
-            return {};
-          }
-
           if (HierarchyNode.isInstancesNode(props.node) || HierarchyNode.isClassGroupingNode(props.node)) {
             return filteredTree.getVisibilityChangeTargets(props.node);
           }
