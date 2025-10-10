@@ -217,10 +217,23 @@
   flex-direction: row;
 }
 
+.quantityFormat--formatSetPanel-inputRow > label {
+  flex: 0 0 30%; /* Fixed 30% width for all labels in input rows */
+  display: flex;
+  align-items: center;
+  margin: 0;
+}
+
 .quantityFormat--formatSetPanel-comboBox {
   flex: 1;
   min-width: 0; /* Prevents flex item from overflowing */
 }
+
+.quantityFormat--formatSetPanel-input {
+  flex: 1;
+  min-width: 0; /* Prevents flex item from overflowing */
+}
+
 .quantityFormat--formatSetPanel-labelWithTooltip {
   display: flex;
   align-items: center;
