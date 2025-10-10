@@ -480,11 +480,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     return createVisibilityHandlerResult(this, { node }, result, this._props.overrides?.getElementGroupingNodeDisplayStatus);
   }
 
-  private getElementsDisplayStatus(props: {
-    elementIds: Id64Array | Id64Set;
-    modelId: Id64String;
-    categoryId: Id64String;
-  }): Observable<VisibilityStatus> {
+  private getElementsDisplayStatus(props: { elementIds: Id64Array | Id64Set; modelId: Id64String; categoryId: Id64String }): Observable<VisibilityStatus> {
     return defer(() => {
       const { modelId, categoryId, elementIds } = props;
 
@@ -531,9 +527,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       );
     });
   }
-  private getElementDisplayStatus({
-    ...props
-  }: GetGeometricElementVisibilityStatusProps & { ignoreTooltip?: boolean }): Observable<VisibilityStatus> {
+  private getElementDisplayStatus({ ...props }: GetGeometricElementVisibilityStatusProps & { ignoreTooltip?: boolean }): Observable<VisibilityStatus> {
     const result = this.getElementsDisplayStatus({
       elementIds: [props.elementId],
       modelId: props.modelId,
@@ -929,7 +923,9 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     ignoreTooltip,
     ...props
   }: GetVisibilityFromAlwaysAndNeverDrawnElementsProps &
-    ({ elements: Id64Set | Id64Array } | { categoryProps: { categoryIds: Id64Arg; modelId: Id64String } }) & { ignoreTooltip?: boolean }): Observable<VisibilityStatus> {
+    ({ elements: Id64Set | Id64Array } | { categoryProps: { categoryIds: Id64Arg; modelId: Id64String } }) & {
+      ignoreTooltip?: boolean;
+    }): Observable<VisibilityStatus> {
     const viewport = this._props.viewport;
     if (viewport.isAlwaysDrawnExclusive) {
       if (!viewport?.alwaysDrawn?.size) {
@@ -1109,7 +1105,7 @@ function setDifference<T>(lhs: Iterable<T>, rhs: Set<T>): Set<T> {
   const result = new Set<T>();
   for (const x of lhs) {
     if (!rhs.has(x)) {
-      result.add(x)
+      result.add(x);
     }
   }
   return result;
@@ -1119,7 +1115,7 @@ function setIntersection<T>(lhs: Iterable<T>, rhs: Set<T>): Set<T> {
   const result = new Set<T>();
   for (const x of lhs) {
     if (rhs.has(x)) {
-      result.add(x)
+      result.add(x);
     }
   }
   return result;
