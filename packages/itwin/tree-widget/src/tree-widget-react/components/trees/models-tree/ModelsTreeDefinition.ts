@@ -204,10 +204,14 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       }
       return {
         ...node,
-        ...(hasFilterTargetAncestor ? { filtering: {
-          ...(node.filtering ?? {}),
-          hasFilterTargetAncestor,
-        } } : {}),
+        ...(hasFilterTargetAncestor
+          ? {
+              filtering: {
+                ...(node.filtering ?? {}),
+                hasFilterTargetAncestor,
+              },
+            }
+          : {}),
         label: this._hierarchyConfig.elementClassGrouping === "enableWithCounts" ? `${node.label} (${node.children.length})` : node.label,
         extendedData: {
           ...node.extendedData,
