@@ -4,16 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { assert, Id64 } from "@itwin/core-bentley";
-import {
-  ClassGroupingNodeKey,
-  HierarchyFilteringPath,
-  HierarchyNode,
-  HierarchyNodeIdentifier,
-  HierarchyNodeKey,
-  InstancesNodeKey,
-} from "@itwin/presentation-hierarchies";
+import { HierarchyFilteringPath, HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 
 import type { Id64Arg, Id64String } from "@itwin/core-bentley";
+import type { ClassGroupingNodeKey, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 
 interface FilteredTreeRootNode {
