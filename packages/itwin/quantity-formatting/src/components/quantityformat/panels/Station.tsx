@@ -4,33 +4,27 @@
  *--------------------------------------------------------------------------------------------*/
 
 
+import "../FormatPanel.scss";
 import * as React from "react";
-import type { PanelProps } from "./Decimal.js";
 import { Format, FormatTraits } from "@itwin/core-quantity";
-import { FormatUnits } from "../internal/FormatUnits.js";
-import { FormatTypeOption } from "../internal/misc/FormatType.js";
-import {
-  AppendUnitLabel,
-  UomSeparatorSelector,
-} from "../internal/FormatUnitLabel.js";
-import { FormatPrecision } from "../internal/FormatPrecision.js";
-import { StationSeparator } from "../internal/StationSeparator.js";
-import { StationOffset } from "../internal/StationOffset.js";
-import { StationBaseFactor } from "../internal/StationBaseFactor.js";
-import { StationBaseFactorPreset } from "../internal/StationBaseFactorPreset.js";
-import { ShowTrailingZeros } from "../internal/ShowTrailingZeros.js";
-import { SignOption } from "../internal/SignOption.js";
-import { KeepDecimalPoint } from "../internal/KeepDecimalPoint.js";
-import { KeepSingleZero } from "../internal/KeepSingleZero.js";
-import { ZeroEmpty } from "../internal/ZeroEmpty.js";
-import {
-  ThousandsSeparatorSelector,
-  UseThousandsSeparator,
-} from "../internal/ThousandsSeparator.js";
 import { Divider, Label, Text } from "@itwin/itwinui-react";
 import { useTranslation } from "../../../useTranslation.js";
-import "../FormatPanel.scss";
+import { FormatPrecision } from "../internal/FormatPrecision.js";
+import { AppendUnitLabel, UomSeparatorSelector } from "../internal/FormatUnitLabel.js";
+import { FormatUnits } from "../internal/FormatUnits.js";
+import { KeepDecimalPoint } from "../internal/KeepDecimalPoint.js";
+import { KeepSingleZero } from "../internal/KeepSingleZero.js";
+import { FormatTypeOption } from "../internal/misc/FormatType.js";
+import { ShowTrailingZeros } from "../internal/ShowTrailingZeros.js";
+import { SignOption } from "../internal/SignOption.js";
+import { StationBaseFactor } from "../internal/StationBaseFactor.js";
+import { StationBaseFactorPreset } from "../internal/StationBaseFactorPreset.js";
+import { StationOffset } from "../internal/StationOffset.js";
+import { StationSeparator } from "../internal/StationSeparator.js";
+import { ThousandsSeparatorSelector, UseThousandsSeparator } from "../internal/ThousandsSeparator.js";
+import { ZeroEmpty } from "../internal/ZeroEmpty.js";
 
+import type { PanelProps } from "./Decimal.js";
 /** Primary children component for station format (always visible)
  * @internal
  */
@@ -46,7 +40,7 @@ export function StationPrimaryChildren(props: PanelProps): React.ReactElement {
       <Text variant="small" isMuted={true}>
         {translate("QuantityFormat:labels.formatTypeSublabel")}
       </Text>
-      <Divider />
+      <Divider className="quantityFormat-formatPanel-unit-divider" />
       <Label>{translate("QuantityFormat:labels.units")}</Label>
       <FormatUnits
         unitsProvider={unitsProvider}
@@ -54,7 +48,7 @@ export function StationPrimaryChildren(props: PanelProps): React.ReactElement {
         initialFormat={formatProps}
         onUnitsChange={onFormatChange}
       />
-      <Divider />
+      <Divider className="quantityFormat-formatPanel-unit-divider" />
       <AppendUnitLabel
         formatProps={formatProps}
         onFormatChange={onFormatChange}

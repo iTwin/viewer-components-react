@@ -11,7 +11,7 @@ import type { FormatDefinition } from "@itwin/core-quantity";
 import type { FormatSet } from "@itwin/ecschema-metadata";
 
 /**
- * @internal
+ * @beta
  */
 interface FormatSelectorProps {
   activeFormatSet?: FormatSet;

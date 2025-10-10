@@ -17,6 +17,7 @@
   "dependencies": {
     "@itwin/tree-widget-react": "workspace:*",
     "@itwin/property-grid-react": "workspace:*",
+    "@itwin/quantity-formatting-react": "workspace:*",
     "@itwin/itwinui-react": "^3.19.3",
     "@itwin/appui-abstract": "^5.1.1",
     "@itwin/appui-react": "^5.13.0",

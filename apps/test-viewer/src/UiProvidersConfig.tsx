@@ -38,6 +38,7 @@ import {
   TreeWidget,
   TreeWidgetComponent,
 } from "@itwin/tree-widget-react";
+import { CustomizeFormatPropertyContextMenuItem } from "./components/quantity-formatting/FormatPropertyContextMenuItem";
 import { RepositoriesTreeComponent } from "./components/repositories-tree/RepositoriesTree";
 import { useViewerOptionsContext } from "./components/ViewerOptions";
 import { unifiedSelectionStorage } from "./SelectionStorage";
@@ -47,7 +48,6 @@ import type { ClientPrefix } from "@itwin/grouping-mapping-widget";
 import type { SelectableTreeDefinition } from "@itwin/tree-widget-react";
 import type { UiItemsProvider } from "@itwin/appui-react";
 import type { ComponentPropsWithRef } from "react";
-
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
   getUiItemsProviders: () => UiItemsProvider[];
@@ -216,13 +216,13 @@ const configuredUiItems = new Map<string, UiItem>([
           getWidgets: () => {
             return [
               createPropertyGrid({
-                editorSystem: "legacy",
                 autoExpandChildCategories: true,
                 ancestorsNavigationControls: (props) => <AncestorsNavigationControls {...props} />,
                 contextMenuItems: [
                   (props) => <AddFavoritePropertyContextMenuItem {...props} />,
                   (props) => <RemoveFavoritePropertyContextMenuItem {...props} />,
                   (props) => <CopyPropertyTextContextMenuItem {...props} />,
+                  (props) => <CustomizeFormatPropertyContextMenuItem {...props} />,
                 ],
                 settingsMenuItems: [(props) => <ShowHideNullValuesSettingsMenuItem {...props} persist={true} />],
                 onPerformanceMeasured: (feature, elapsedTime) => {

@@ -49,7 +49,22 @@
       "azimuthBaseUnit": "Azimuth base unit",
       "save": "Save",
       "clear": "Clear",
-      "searchFormats": "Search formats..."
+      "searchFormats": "Search formats...",
+      "formatSetDetails": "Format set details",
+      "label": "Label",
+      "unitSystem": "Unit system",
+      "description": "Description",
+      "formatSetDisplayLabel": "Format set display label",
+      "selectUnitSystem": "Select unit system",
+      "formatSetDescription": "Format set description",
+      "searchFormatSets": "Search format sets...",
+      "noFormatSetsFound": "No format sets found matching",
+      "noFormatSetsAvailable": "No format sets available",
+      "unitSystemMetric": "Metric",
+      "unitSystemImperial": "Imperial",
+      "unitSystemUsCustomary": "US Customary",
+      "unitSystemUsSurvey": "US Survey",
+      "unitSystemTooltip": "Formats that aren't configured will default to this unit system"
   },
   "decimal_precision": {
     "zero": "0",
