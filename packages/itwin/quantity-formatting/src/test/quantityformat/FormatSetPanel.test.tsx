@@ -70,7 +70,7 @@ describe("FormatSetPanel", () => {
 
       expect(container.querySelector(".quantityFormat--formatSetPanel-container")).toBeTruthy();
       expect(container.querySelector(".quantityFormat--formatSetPanel-inputRow")).toBeTruthy();
-      expect(container.querySelector(".quantityFormat--formatSetPanel-inputColumn")).toBeTruthy();
+      expect(container.querySelector(".quantityFormat--formatSetPanel-inputRow-descr")).toBeTruthy();
     });
   });
 
@@ -206,7 +206,7 @@ describe("FormatSetPanel", () => {
 
       expect(container.querySelector(".quantityFormat--formatSetPanel-container")).toBeTruthy();
       expect(container.querySelector(".quantityFormat--formatSetPanel-inputRow")).toBeTruthy();
-      expect(container.querySelector(".quantityFormat--formatSetPanel-inputColumn")).toBeTruthy();
+      expect(container.querySelector(".quantityFormat--formatSetPanel-inputRow-descr")).toBeTruthy();
     });
   });
 });
