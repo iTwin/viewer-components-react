@@ -188,13 +188,36 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
 
   public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
     if (ProcessedHierarchyNode.isGroupingNode(node)) {
+      let hasDirectNonFilteredTargets = false;
+      let hasFilterTargetAncestor = false;
+      for (const child of node.children) {
+        if (child.filtering) {
+          if (child.filtering.hasFilterTargetAncestor) {
+            hasFilterTargetAncestor = true;
+            break;
+          }
+          if (!child.filtering.isFilterTarget) {
+            hasDirectNonFilteredTargets = true;
+            break;
+          }
+        }
+      }
       return {
         ...node,
+        ...(hasFilterTargetAncestor
+          ? {
+              filtering: {
+                ...(node.filtering ?? {}),
+                hasFilterTargetAncestor,
+              },
+            }
+          : {}),
         label: this._hierarchyConfig.elementClassGrouping === "enableWithCounts" ? `${node.label} (${node.children.length})` : node.label,
         extendedData: {
           ...node.extendedData,
           // add `modelId` and `categoryId` from the first grouped element
           ...node.children[0].extendedData,
+          ...(hasDirectNonFilteredTargets ? { hasDirectNonFilteredTargets } : {}),
           // `imageId` is assigned to instance nodes at query time, but grouping ones need to
           // be handled during post-processing
           imageId: "icon-ec-class",
