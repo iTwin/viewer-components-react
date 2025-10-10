@@ -259,12 +259,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
   private getFilteredNodeVisibility(props: GetFilteredNodeVisibilityProps) {
     assert(this._filteredTree !== undefined);
     return from(this._filteredTree).pipe(
-      map((filteredTree) => {
-        if (HierarchyNode.isInstancesNode(props.node) || HierarchyNode.isClassGroupingNode(props.node)) {
-          return filteredTree.getVisibilityChangeTargets(props.node);
-        }
-        return {};
-      }),
+      map((filteredTree) => filteredTree.getVisibilityChangeTargets(props.node)),
       mergeMap(({ subjects, models, categories, elements }) => {
         const observables = new Array<Observable<VisibilityStatus>>();
         if (subjects?.size) {
@@ -600,51 +595,43 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
 
   private changeFilteredNodeVisibility({ on, ...props }: ChangeFilteredNodeVisibilityProps) {
     assert(this._filteredTree !== undefined);
-    return from(this._filteredTree)
-      .pipe(
-        map((filteredTree) => {
-          if (HierarchyNode.isInstancesNode(props.node) || HierarchyNode.isClassGroupingNode(props.node)) {
-            return filteredTree.getVisibilityChangeTargets(props.node);
-          }
-          return {};
-        }),
-      )
-      .pipe(
-        mergeMap(({ subjects, models, categories, elements }) => {
-          const observables = new Array<Observable<void>>();
-          if (subjects?.size) {
-            observables.push(this.changeSubjectNodeState([...subjects], on));
-          }
+    return from(this._filteredTree).pipe(
+      map((filteredTree) => filteredTree.getVisibilityChangeTargets(props.node)),
+      mergeMap(({ subjects, models, categories, elements }) => {
+        const observables = new Array<Observable<void>>();
+        if (subjects?.size) {
+          observables.push(this.changeSubjectNodeState([...subjects], on));
+        }
 
-          if (models?.size) {
-            observables.push(this.changeModelState({ ids: models, on }));
-          }
+        if (models?.size) {
+          observables.push(this.changeModelState({ ids: models, on }));
+        }
 
-          if (categories?.size) {
-            observables.push(
-              from(categories).pipe(
-                mergeMap((key) => {
-                  const { modelId, categoryId } = parseCategoryKey(key);
-                  return this.changeCategoryState({ modelId, categoryIds: categoryId, on });
-                }),
-              ),
-            );
-          }
+        if (categories?.size) {
+          observables.push(
+            from(categories).pipe(
+              mergeMap((key) => {
+                const { modelId, categoryId } = parseCategoryKey(key);
+                return this.changeCategoryState({ modelId, categoryIds: categoryId, on });
+              }),
+            ),
+          );
+        }
 
-          if (elements?.size) {
-            observables.push(
-              from(elements).pipe(
-                mergeMap(([categoryKey, elementsMap]) => {
-                  const { modelId, categoryId } = parseCategoryKey(categoryKey);
-                  return this.changeElementsState({ modelId, categoryId, elementIds: new Set([...elementsMap.keys()]), on });
-                }),
-              ),
-            );
-          }
+        if (elements?.size) {
+          observables.push(
+            from(elements).pipe(
+              mergeMap(([categoryKey, elementsMap]) => {
+                const { modelId, categoryId } = parseCategoryKey(categoryKey);
+                return this.changeElementsState({ modelId, categoryId, elementIds: new Set([...elementsMap.keys()]), on });
+              }),
+            ),
+          );
+        }
 
-          return merge(...observables);
-        }),
-      );
+        return merge(...observables);
+      }),
+    );
   }
 
   private removeAlwaysDrawnExclusive(): Observable<void> {
