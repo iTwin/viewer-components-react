@@ -190,13 +190,12 @@ function addTarget(filterTargets: VisibilityChangeTargets, node: FilteredTreeNod
       return;
     case "element":
       const categoryKey = createCategoryKey(node.modelId, node.categoryId);
-      const elements = (filterTargets.elements ??= new Map<CategoryKey, Map<Id64String, { isFilterTarget: boolean }>>()).get(categoryKey);
+      const elements = (filterTargets.elements ??= new Map()).get(categoryKey);
       if (elements) {
         elements.set(node.id, { isFilterTarget: node.isFilterTarget });
-        return;
+      } else {
+        filterTargets.elements.set(categoryKey, new Map([[node.id, { isFilterTarget: node.isFilterTarget }]]));
       }
-      filterTargets.elements.set(categoryKey, new Map([[node.id, { isFilterTarget: node.isFilterTarget }]]));
-      return;
   }
 }
 
