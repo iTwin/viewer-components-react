@@ -213,7 +213,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     }
 
     if (HierarchyNode.isClassGroupingNode(node)) {
-      if (node.extendedData?.isFiltered) {
+      if (node.extendedData?.hasDirectNonFilteredTargets && !node.filtering?.hasFilterTargetAncestor) {
         return this.getFilteredNodeVisibility({ node });
       }
       return this.getClassGroupingNodeDisplayStatus(node);
@@ -530,15 +530,6 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       );
     });
   }
-  private getElementDisplayStatus({ ...props }: GetGeometricElementVisibilityStatusProps & { ignoreTooltip?: boolean }): Observable<VisibilityStatus> {
-    const result = this.getElementsDisplayStatus({
-      elementIds: [props.elementId],
-      modelId: props.modelId,
-      categoryId: props.categoryId,
-    });
-    return createVisibilityHandlerResult(this, props, result, this._props.overrides?.getElementDisplayStatus);
-  }
-
   /** Changes visibility of the items represented by the tree node. */
   private changeVisibilityObs(node: HierarchyNode, on: boolean): Observable<void> {
     const changeObs = defer(() => {
@@ -547,7 +538,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       }
 
       if (HierarchyNode.isClassGroupingNode(node)) {
-        if (node.extendedData?.isFiltered) {
+        if (node.extendedData?.hasDirectNonFilteredTargets && !node.filtering?.hasFilterTargetAncestor) {
           return this.changeFilteredNodeVisibility({ node, on });
         }
         return this.changeElementGroupingNodeState(node, on);
