@@ -249,17 +249,11 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       return of(createVisibilityStatus("disabled"));
     }
 
-    const result = this.getElementsDisplayStatus({
+    return this.getElementDisplayStatus({
       elementIds: node.key.instanceKeys.map(({ id }) => id),
       modelId,
       categoryId,
-    });
-    return createVisibilityHandlerResult(
-      this,
-      { elementId: node.key.instanceKeys[0].id, modelId, categoryId },
-      result,
-      this._props.overrides?.getElementDisplayStatus,
-    );
+    } );
   }
 
   private getFilteredNodeVisibility(props: GetFilteredNodeVisibilityProps) {
@@ -481,6 +475,20 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       categoryId,
     });
     return createVisibilityHandlerResult(this, { node }, result, this._props.overrides?.getElementGroupingNodeDisplayStatus);
+  }
+
+  private getElementDisplayStatus({ elementIds, modelId, categoryId }: { elementIds: Id64Array; modelId: Id64String; categoryId: Id64String }): Observable<VisibilityStatus> {
+    const result = this.getElementsDisplayStatus({
+      elementIds,
+      modelId,
+      categoryId,
+    });
+    return createVisibilityHandlerResult(
+      this,
+      { elementId: elementIds[0], modelId, categoryId },
+      result,
+      this._props.overrides?.getElementDisplayStatus,
+    );
   }
 
   private getElementsDisplayStatus(props: { elementIds: Id64Array | Id64Set; modelId: Id64String; categoryId: Id64String }): Observable<VisibilityStatus> {
