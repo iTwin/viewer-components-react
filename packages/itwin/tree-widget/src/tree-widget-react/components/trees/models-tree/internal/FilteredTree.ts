@@ -4,7 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { assert, Id64 } from "@itwin/core-bentley";
-import { HierarchyFilteringPath, HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+import {
+  ClassGroupingNodeKey,
+  HierarchyFilteringPath,
+  HierarchyNode,
+  HierarchyNodeIdentifier,
+  HierarchyNodeKey,
+  InstancesNodeKey,
+} from "@itwin/presentation-hierarchies";
 
 import type { Id64Arg, Id64String } from "@itwin/core-bentley";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
@@ -38,7 +45,7 @@ type FilteredTreeNode = GenericFilteredTreeNode | CategoryFilteredTreeNode | Ele
 
 /** @internal */
 export interface FilteredTree {
-  getVisibilityChangeTargets(node: HierarchyNode): VisibilityChangeTargets;
+  getVisibilityChangeTargets(node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey }): VisibilityChangeTargets;
 }
 
 export const SUBJECT_CLASS_NAME = "BisCore.Subject" as const;
@@ -109,13 +116,10 @@ export async function createFilteredTree(imodelAccess: ECClassHierarchyInspector
   };
 }
 
-function getVisibilityChangeTargets(root: FilteredTreeRootNode, node: HierarchyNode) {
+function getVisibilityChangeTargets(root: FilteredTreeRootNode, node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey }) {
   let lookupParents: Array<FilteredTreeRootNode | FilteredTreeNode> = [root];
   const changeTargets: VisibilityChangeTargets = {};
 
-  if (!HierarchyNode.isClassGroupingNode(node) && !HierarchyNode.isInstancesNode(node)) {
-    return changeTargets;
-  }
   // find the filtered parent nodes of the `node`
   for (const parentKey of node.parentKeys) {
     if (!HierarchyNodeKey.isInstances(parentKey)) {
@@ -133,7 +137,7 @@ function getVisibilityChangeTargets(root: FilteredTreeRootNode, node: HierarchyN
     }
     lookupParents = parentNodes;
   }
-  const ids = HierarchyNode.isClassGroupingNode(node) ? node.groupedInstanceKeys.map(({ id }) => id) : node.key.instanceKeys.map(({ id }) => id);
+  const ids = HierarchyNode.isInstancesNode(node) ? node.key.instanceKeys.map(({ id }) => id) : node.groupedInstanceKeys.map(({ id }) => id);
   // find filtered nodes that match the `node`
   const filteredNodes = findMatchingFilteredNodes(lookupParents, ids);
   if (filteredNodes.length === 0) {
