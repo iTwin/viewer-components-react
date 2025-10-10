@@ -69,7 +69,11 @@ function ViewerWithOptions() {
       enablePerformanceMonitors={false}
       onIModelAppInit={onIModelAppInit}
       // Only set providers once IModelAppInit has fired, otherwise map-layers objects will fail to initialize
-      uiProviders={uiConfig ? [...uiConfig.getUiItemsProviders(), new ViewerStatusbarItemsProvider({ selectionScope: true, selectionInfo: true }), statusBarActionsProvider] : []}
+      uiProviders={
+        uiConfig
+          ? [...uiConfig.getUiItemsProviders(), new ViewerStatusbarItemsProvider({ selectionScope: true, selectionInfo: true }), statusBarActionsProvider]
+          : []
+      }
       defaultUiConfig={{
         hideNavigationAid: false,
         hideStatusBar: false,
