@@ -17,8 +17,8 @@ const packages = [
   },
   {
     name: "@itwin/quantity-formatting-react",
-    dir: "quantity-formatting"
-  }
+    dir: "quantity-formatting",
+  },
 ];
 
 linkPackages();
