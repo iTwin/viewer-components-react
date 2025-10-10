@@ -246,11 +246,17 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       return of(createVisibilityStatus("disabled"));
     }
 
-    return this.getElementDisplayStatus({
-      elementId: node.key.instanceKeys[0].id,
+    const result = this.getElementsDisplayStatus({
+      elementIds: node.key.instanceKeys.map(({ id }) => id),
       modelId,
       categoryId,
     });
+    return createVisibilityHandlerResult(
+      this,
+      { elementId: node.key.instanceKeys[0].id, modelId, categoryId },
+      result,
+      this._props.overrides?.getElementDisplayStatus,
+    );
   }
 
   private getFilteredNodeVisibility(props: GetFilteredNodeVisibilityProps) {
@@ -292,10 +298,11 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
               releaseMainThreadOnItemsCount(50),
               mergeMap(([categoryKey, elementsMap]) => {
                 const { modelId, categoryId } = parseCategoryKey(categoryKey);
-                return from([...elementsMap.keys()]).pipe(
-                  releaseMainThreadOnItemsCount(1000),
-                  mergeMap((elementId) => this.getElementDisplayStatus({ modelId, categoryId, elementId, ignoreTooltip: true })),
-                );
+                return this.getElementsDisplayStatus({
+                  elementIds: [...elementsMap.keys()],
+                  modelId,
+                  categoryId,
+                });
               }),
             ),
           );
