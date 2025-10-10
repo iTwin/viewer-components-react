@@ -213,6 +213,9 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     }
 
     if (HierarchyNode.isClassGroupingNode(node)) {
+      if (node.extendedData?.isFiltered) {
+        return this.getFilteredNodeVisibility({ node });
+      }
       return this.getClassGroupingNodeDisplayStatus(node);
     }
 
@@ -266,8 +269,8 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
           return {};
         }
 
-        if (HierarchyNodeKey.isInstances(props.node.key)) {
-          return filteredTree.getVisibilityChangeTargets({ parentKeys: props.node.parentKeys, ids: props.node.key.instanceKeys.map((key) => key.id) });
+        if (HierarchyNode.isInstancesNode(props.node) || HierarchyNode.isClassGroupingNode(props.node)) {
+          return filteredTree.getVisibilityChangeTargets(props.node);
         }
         return {};
       }),
@@ -544,6 +547,9 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       }
 
       if (HierarchyNode.isClassGroupingNode(node)) {
+        if (node.extendedData?.isFiltered) {
+          return this.changeFilteredNodeVisibility({ node, on });
+        }
         return this.changeElementGroupingNodeState(node, on);
       }
 
@@ -601,8 +607,8 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
             return {};
           }
 
-          if (HierarchyNodeKey.isInstances(props.node.key)) {
-            return filteredTree.getVisibilityChangeTargets({ parentKeys: props.node.parentKeys, ids: props.node.key.instanceKeys.map((key) => key.id) });
+          if (HierarchyNode.isInstancesNode(props.node) || HierarchyNode.isClassGroupingNode(props.node)) {
+            return filteredTree.getVisibilityChangeTargets(props.node);
           }
           return {};
         }),
