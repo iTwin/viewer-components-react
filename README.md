@@ -12,7 +12,12 @@ Each one has it's own folder and README describing the package.
 
 | Name              | Folder                                     | Changelog                                             | Version                                                                                                              |
 | ----------------- | ------------------------------------------ | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| @itwin/geo-tools-react             | [geo-tools](./packages/itwin/geo-tools/)                            | [changelog](./packages/itwin/geo-tools/CHANGELOG.md)               | [![npm version](https://badge.fury.io/js/%40itwin%2Fgeo-tools-react.svg)](https://badge.fury.io/js/%40itwin%2Fgeo-tools-react)                         |
 | @itwin/map-layers | [map-layers](./packages/itwin/map-layers/) | [changelog](./packages/itwin/map-layers/CHANGELOG.md) | [![npm version](https://badge.fury.io/js/%40itwin%2Fmap-layers.svg)](https://badge.fury.io/js/%40itwin%2Fmap-layers) |
+| @itwin/measure-tools-react         | [measure-tools](./packages/itwin/measure-tools)                     | [changelog](./packages/itwin/measure-tools/CHANGELOG.md)           | [![npm version](https://badge.fury.io/js/%40itwin%2Fmeasure-tools-react.svg)](https://badge.fury.io/js/%40itwin%2Fmeasure-tools-react)                 |
+| @itwin/property-grid-react         | [property-grid](./packages/itwin/property-grid)                     | [changelog](./packages/itwin/property-grid/CHANGELOG.md)           | [![npm version](https://badge.fury.io/js/%40itwin%2Fproperty-grid-react.svg)](https://badge.fury.io/js/%40itwin%2Fproperty-grid-react)                 |
+| @itwin/quantity-formatting-react         | [quantity-formatting](./packages/itwin/quantity-formatting)                     | [changelog](./packages/itwin/quantity-formatting/CHANGELOG.md)           | [![npm version](https://badge.fury.io/js/@itwin%2Fquantity-formatting-react.svg)](https://badge.fury.io/js/@itwin%2Fquantity-formatting-react)                 |
+| @itwin/tree-widget-react           | [tree-widget](./packages/itwin/tree-widget/)                        | [changelog](./packages/itwin/tree-widget/CHANGELOG.md)             | [![npm version](https://badge.fury.io/js/%40itwin%2Ftree-widget-react.svg)](https://badge.fury.io/js/%40itwin%2Ftree-widget-react)                     |
 
 ### iTwin.js@^4 Compatible
 
