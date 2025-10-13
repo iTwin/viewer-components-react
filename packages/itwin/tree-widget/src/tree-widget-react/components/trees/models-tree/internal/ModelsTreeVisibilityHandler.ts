@@ -970,13 +970,13 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
   private getAlwaysDrawnElements({ parentInstanceNodesIds }: { parentInstanceNodesIds: Array<Id64Arg> }): Observable<Id64Set> {
     return this._alwaysAndNeverDrawnElements
       .getElementChildrenTree({ parentInstanceNodeIds: parentInstanceNodesIds, setType: "always" })
-      .pipe(map((childrenTree) => getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ treeEntry }) => !!treeEntry.isInList })));
+      .pipe(map((childrenTree) => getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ treeEntry }) => treeEntry.isInAlwaysOrNeverDrawnSet })));
   }
 
   private getNeverDrawnElements({ parentInstanceNodesIds }: { parentInstanceNodesIds: Array<Id64Arg> }): Observable<Id64Set> {
     return this._alwaysAndNeverDrawnElements
       .getElementChildrenTree({ parentInstanceNodeIds: parentInstanceNodesIds, setType: "never" })
-      .pipe(map((childrenTree) => getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ treeEntry }) => !!treeEntry.isInList })));
+      .pipe(map((childrenTree) => getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ treeEntry }) => treeEntry.isInAlwaysOrNeverDrawnSet })));
   }
 
   private clearAlwaysAndNeverDrawnElements(props: { categoryIds: Id64Arg; modelId: Id64String }) {

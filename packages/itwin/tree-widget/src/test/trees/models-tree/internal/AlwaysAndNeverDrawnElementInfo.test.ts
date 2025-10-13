@@ -12,6 +12,7 @@ import {
 } from "../../../../tree-widget-react/components/trees/models-tree/internal/AlwaysAndNeverDrawnElementInfo.js";
 import { createFakeSinonViewport } from "../../Common.js";
 
+import type { MapEntry } from "../../../../tree-widget-react/components/trees/models-tree/internal/AlwaysAndNeverDrawnElementInfo.js";
 import type { ChildrenTree } from "../../../../tree-widget-react/components/trees/models-tree/Utils.js";
 
 describe("AlwaysAndNeverDrawnElementInfo", () => {
@@ -77,8 +78,8 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       using info = new AlwaysAndNeverDrawnElementInfo(vp);
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(info.getElementChildrenTree({ setType, parentInstanceNodeIds: [modelId] }));
-      const expectedResult: ChildrenTree<{ categoryId?: string; isInList: boolean }> = new Map();
-      expectedResult.set(categoryId, { children: new Map([[elementId, { categoryId, isInList: true }]]), isInList: false });
+      const expectedResult: ChildrenTree<MapEntry> = new Map();
+      expectedResult.set(categoryId, { children: new Map([[elementId, { categoryId, isInAlwaysOrNeverDrawnSet: true }]]), isInAlwaysOrNeverDrawnSet: false });
       expect(result).to.deep.eq(expectedResult);
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
     });
@@ -98,8 +99,8 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       using info = new AlwaysAndNeverDrawnElementInfo(vp);
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(info.getElementChildrenTree({ setType, parentInstanceNodeIds: [modelId] }));
-      const expectedResult: ChildrenTree<{ categoryId?: string; isInList: boolean }> = new Map();
-      expectedResult.set(categoryId, { children: new Map([[elementId, { categoryId, isInList: true }]]), isInList: false });
+      const expectedResult: ChildrenTree<MapEntry> = new Map();
+      expectedResult.set(categoryId, { children: new Map([[elementId, { categoryId, isInAlwaysOrNeverDrawnSet: true }]]), isInAlwaysOrNeverDrawnSet: false });
       expect(result).to.deep.eq(expectedResult);
 
       // second request is not delayed because value is cached
@@ -123,8 +124,8 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       using info = new AlwaysAndNeverDrawnElementInfo(vp);
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(info.getElementChildrenTree({ setType, parentInstanceNodeIds: [modelId] }));
-      const expectedResult: ChildrenTree<{ categoryId?: string; isInList: boolean }> = new Map();
-      expectedResult.set(categoryId, { children: new Map([[elementId, { categoryId, isInList: true }]]), isInList: false });
+      const expectedResult: ChildrenTree<MapEntry> = new Map();
+      expectedResult.set(categoryId, { children: new Map([[elementId, { categoryId, isInAlwaysOrNeverDrawnSet: true }]]), isInAlwaysOrNeverDrawnSet: false });
       expect(result).to.deep.eq(expectedResult);
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
 
@@ -172,8 +173,8 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       using info = new AlwaysAndNeverDrawnElementInfo(vp);
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result1 = await firstValueFrom(info.getElementChildrenTree({ setType, parentInstanceNodeIds: [modelId] }));
-      const expectedResult: ChildrenTree<{ categoryId?: string; isInList: boolean }> = new Map();
-      expectedResult.set(categoryId, { children: new Map([[elementId, { categoryId, isInList: true }]]), isInList: false });
+      const expectedResult: ChildrenTree<MapEntry> = new Map();
+      expectedResult.set(categoryId, { children: new Map([[elementId, { categoryId, isInAlwaysOrNeverDrawnSet: true }]]), isInAlwaysOrNeverDrawnSet: false });
       expect(result1).to.deep.eq(expectedResult);
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
       info.suppressChangeEvents();
@@ -199,8 +200,8 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       using info = new AlwaysAndNeverDrawnElementInfo(vp);
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result1 = await firstValueFrom(info.getElementChildrenTree({ setType, parentInstanceNodeIds: [modelId] }));
-      const expectedResult: ChildrenTree<{ categoryId?: string; isInList: boolean }> = new Map();
-      expectedResult.set(categoryId, { children: new Map([[elementId, { categoryId, isInList: true }]]), isInList: false });
+      const expectedResult: ChildrenTree<MapEntry> = new Map();
+      expectedResult.set(categoryId, { children: new Map([[elementId, { categoryId, isInAlwaysOrNeverDrawnSet: true }]]), isInAlwaysOrNeverDrawnSet: false });
       expect(result1).to.deep.eq(expectedResult);
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
       info.suppressChangeEvents();
@@ -269,8 +270,8 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       using info = new AlwaysAndNeverDrawnElementInfo(viewport);
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(info.getElementChildrenTree({ setType, parentInstanceNodeIds: [modelId, categoryId] }));
-      const expectedResult: ChildrenTree<{ categoryId?: string; isInList: boolean }> = new Map();
-      expectedResult.set(elementId, { categoryId, isInList: true });
+      const expectedResult: ChildrenTree<MapEntry> = new Map();
+      expectedResult.set(elementId, { categoryId, isInAlwaysOrNeverDrawnSet: true });
       expect(result).to.deep.eq(expectedResult);
     });
 

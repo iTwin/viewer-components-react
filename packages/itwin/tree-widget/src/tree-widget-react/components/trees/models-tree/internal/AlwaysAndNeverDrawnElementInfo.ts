@@ -62,15 +62,13 @@ export interface GetElementChildrenTreeProps {
   setType: SetType;
 }
 
-interface MapEntry {
-  categoryId?: Id64String;
-  isInList: boolean;
-}
-
 /**
  * - `categoryId` is assigned only to the elements in always/never drawn set.
- * - `isInList` flag determines if key (ECInstanceId) is in always/never set.
+ * - `isInAlwaysOrNeverDrawnSet` flag determines if key (ECInstanceId) is in always/never set.
+ * @internal
  */
+export type MapEntry = { isInAlwaysOrNeverDrawnSet: true; categoryId: Id64String } | { isInAlwaysOrNeverDrawnSet: false };
+
 type CachedNodesMap = ChildrenTree<MapEntry>;
 
 export class AlwaysAndNeverDrawnElementInfo implements Disposable {
@@ -216,10 +214,10 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
           const additionalPropsGetter = (id: Id64String, additionalProps?: MapEntry): MapEntry => {
             if (id === elementIdInList) {
               // Last element in elementsPath is in always/never drawn set. We want to mark it that it is in the list, and save it's categoryId.
-              return { isInList: true, categoryId };
+              return { isInAlwaysOrNeverDrawnSet: true, categoryId };
             }
             // Existing entries can keep their value, if it's a new entry it's not in the list.
-            return additionalProps ?? { isInList: false };
+            return additionalProps ?? { isInAlwaysOrNeverDrawnSet: false };
           };
           updateChildrenTree({ tree: acc, idsToAdd: [modelId, rootCategoryId, ...elementsPath], additionalPropsGetter });
           return acc;
