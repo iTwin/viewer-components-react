@@ -4,11 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { BeEvent } from "@itwin/core-bentley";
-import type { IModelConnection } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
+import { SchemaFormatsProvider, SchemaItem, SchemaItemType, SchemaKey, SchemaMatchType } from "@itwin/ecschema-metadata";
+
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { FormatDefinition, FormatsChangedArgs, FormatsProvider, MutableFormatsProvider } from "@itwin/core-quantity";
 import type { FormatSet } from "@itwin/ecschema-metadata";
-import { SchemaFormatsProvider, SchemaItem, SchemaItemType, SchemaKey, SchemaMatchType } from "@itwin/ecschema-metadata";
 
 export class FormatManager {
   protected static _instance: FormatManager;
@@ -115,6 +116,7 @@ export class FormatManager {
       const schemaFormatSet: FormatSet = {
         name: "SchemaFormats",
         label: "Example Format Set",
+        unitSystem: IModelApp.quantityFormatter.activeUnitSystem,
         formats: {},
       };
       // Used until https://github.com/iTwin/bis-schemas/issues/566 is resolved
