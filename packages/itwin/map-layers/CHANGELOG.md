@@ -1,8 +1,16 @@
 # Change Log - @itwin/map-layers
 
-<!-- This log was last generated on Tue, 23 Sep 2025 14:41:43 GMT and should not be manually modified. -->
+<!-- This log was last generated on Wed, 08 Oct 2025 20:11:56 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 6.0.8
+
+Wed, 08 Oct 2025 20:11:56 GMT
+
+### Patches
+
+- Remove Dynamically Created Inline Styles ([#1463](https://github.com/iTwin/viewer-components-react/pull/1463))
 
 ## 6.0.7
 

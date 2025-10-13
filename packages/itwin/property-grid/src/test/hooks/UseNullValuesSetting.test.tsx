@@ -54,7 +54,7 @@ describe("useNullValuesSetting", () => {
     await waitFor(() => getByRole("button", { name: "Show Null Values" }));
   });
 
-  describe("with persistance", () => {
+  describe("with persistence", () => {
     it("loads persisted value", async () => {
       storage.get.resolves(JSON.stringify(false));
 

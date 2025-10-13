@@ -124,7 +124,6 @@ describe("models tree", () => {
       viewport.setAlwaysDrawn(new Set([elementsModel]));
       viewport.renderFrame();
       await handler.changeVisibility(createModelHierarchyNode(elementsModel), true);
-      viewport.renderFrame();
       await validateHierarchyVisibility({
         ignoreChildren: (node) => !!node.extendedData?.isCategory,
         provider,
@@ -291,7 +290,6 @@ describe("models tree", () => {
       const elementsCategory = visibilityTargets.categories[0];
 
       await handler.changeVisibility(createModelHierarchyNode(elementsModel), true);
-      viewport.renderFrame();
       await validateHierarchyVisibility({
         provider,
         handler,
@@ -371,7 +369,6 @@ describe("models tree", () => {
     },
     test: async ({ viewport, handler, provider, node }) => {
       await handler.changeVisibility(createElementHierarchyNode(node), true);
-      viewport.renderFrame();
       await validateHierarchyVisibility({
         provider,
         handler,

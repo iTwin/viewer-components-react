@@ -220,7 +220,7 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       expect(vp.iModel.createQueryReader).to.be.calledTwice;
     });
 
-    it(`requeries when supression is removed and ${setType}Drawn changes`, async () => {
+    it(`requeries when suppression is removed and ${setType}Drawn changes`, async () => {
       const elementId = "0x1";
       const set = new Set([elementId]);
       const vp = createFakeSinonViewport({

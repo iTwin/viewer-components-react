@@ -8,6 +8,9 @@ import { test } from "@playwright/test";
 import { expandStagePanel, locateNode, locateWidget, takeScreenshot } from "./utils.js";
 
 import type { Page } from "@playwright/test";
+
+// cspell:words networkidle
+
 test.beforeEach(async ({ page, baseURL }) => {
   assert(baseURL);
   await page.goto(baseURL, { waitUntil: "networkidle" });

@@ -190,28 +190,43 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
   public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
     if (ProcessedHierarchyNode.isGroupingNode(node)) {
       let childrenCount = 0;
-      let isFiltered = false;
+      let hasDirectNonFilteredTargets = false;
+      let hasFilterTargetAncestor = false;
       const filterTargets = new Map<Id64String, { childrenCount: number }>();
       node.children.forEach((child) => {
         if (child.extendedData?.childrenCount) {
           childrenCount += child.extendedData.childrenCount;
         }
         if (child.filtering) {
-          isFiltered = true;
+          if (child.filtering.hasFilterTargetAncestor) {
+            hasFilterTargetAncestor = true;
+            return;
+          }
           if ((!child.filtering.filteredChildrenIdentifierPaths?.length || child.filtering.isFilterTarget) && HierarchyNodeKey.isInstances(child.key)) {
             child.key.instanceKeys.forEach((key) => filterTargets.set(key.id, { childrenCount: child.extendedData?.childrenCount ?? 0 }));
+          }
+          if (!child.filtering.isFilterTarget) {
+            hasDirectNonFilteredTargets = true;
           }
         }
       });
       return {
         ...node,
+        ...(hasFilterTargetAncestor
+          ? {
+              filtering: {
+                ...(node.filtering ?? {}),
+                hasFilterTargetAncestor,
+              },
+            }
+          : {}),
         label: this._hierarchyConfig.elementClassGrouping === "enableWithCounts" ? `${node.label} (${node.children.length})` : node.label,
         extendedData: {
           ...node.extendedData,
           modelId: node.children[0].extendedData?.modelId,
           categoryId: node.children[0].extendedData?.categoryId,
           childrenCount,
-          isFiltered,
+          ...(hasDirectNonFilteredTargets ? { hasDirectNonFilteredTargets } : {}),
           filterTargets,
           // `imageId` is assigned to instance nodes at query time, but grouping ones need to
           // be handled during post-processing

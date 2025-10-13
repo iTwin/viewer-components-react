@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { EMPTY, expand, from, mergeMap, retry } from "rxjs";
+import { EMPTY, expand, from, mergeMap } from "rxjs";
 import { waitFor } from "test-utilities";
 import { assert } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
@@ -12,12 +12,12 @@ import { IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin
 import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { toVoidPromise } from "@itwin/tree-widget-react/internal";
 
-import type { HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { ECSqlQueryDef } from "@itwin/presentation-shared";
 import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
 import type { IModelAccess } from "./StatelessHierarchyProvider.js";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 
 type Visibility = "visible" | "hidden" | "partial";
 
@@ -72,11 +72,13 @@ export async function validateHierarchyVisibility({
 }: ValidateNodeProps & {
   provider: HierarchyProvider;
 }) {
+  props.viewport.renderFrame();
+  // This promise allows handler change event to fire if it was scheduled.
+  await new Promise((resolve) => setTimeout(resolve));
   await toVoidPromise(
     from(provider.getNodes({ parentNode: undefined })).pipe(
       expand((node) => (node.children && !ignoreChildren(node) ? provider.getNodes({ parentNode: node }) : EMPTY), 1000),
-      mergeMap(async (node) => waitFor(async () => validateNodeVisibility({ ...props, node })), 1000),
-      retry(1),
+      mergeMap(async (node) => waitFor(async () => validateNodeVisibility({ ...props, node }), 5000)),
     ),
   );
 }

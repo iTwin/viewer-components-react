@@ -4,10 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { assert, Id64 } from "@itwin/core-bentley";
-import { HierarchyFilteringPath, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+import { HierarchyFilteringPath, HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { getIdsFromChildrenTree } from "../Utils.js";
 
 import type { Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { ClassGroupingNodeKey, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { ChildrenTree } from "../Utils.js";
 
@@ -44,7 +45,7 @@ interface GetElementsFromUnfilteredChildrenTreeProps {
 
 /** @internal */
 export interface FilteredTree {
-  getVisibilityChangeTargets(props: { parentKeys: HierarchyNodeKey[]; ids: Id64Arg }): VisibilityChangeTargets;
+  getVisibilityChangeTargets(node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey }): VisibilityChangeTargets;
   getElementsFromUnfilteredChildrenTree(props: GetElementsFromUnfilteredChildrenTreeProps): Id64Set | undefined;
 }
 
@@ -112,7 +113,7 @@ export async function createFilteredTree(imodelAccess: ECClassHierarchyInspector
   }
 
   return {
-    getVisibilityChangeTargets: (props) => getVisibilityChangeTargets(root, props.parentKeys, props.ids),
+    getVisibilityChangeTargets: (node) => getVisibilityChangeTargets(root, node),
     getElementsFromUnfilteredChildrenTree: ({ childrenTree, parentIdsArray }) => getElementsFromUnfilteredChildrenTree({ parentIdsArray, root, childrenTree }),
   };
 }
@@ -126,7 +127,7 @@ function getElementsFromUnfilteredChildrenTree(props: GetElementsFromUnfilteredC
   for (const parentIds of props.parentIdsArray) {
     // When filtered node does not have children, it is filter target and because of this, all elements in the childrenTree are in the filtered tree
     if (lookupParents.every((parent) => !parent.children)) {
-      return new Set(getIdsFromChildrenTree({ tree: props.childrenTree }));
+      return getIdsFromChildrenTree({ tree: props.childrenTree });
     }
 
     const parentNodes = findMatchingFilteredNodes(lookupParents, parentIds);
@@ -183,12 +184,12 @@ function getChildrenTreeIdsMatchingFilteredNodes({
   return getIdsRecursively(tree, filteredNodes);
 }
 
-function getVisibilityChangeTargets(root: FilteredTreeRootNode, parentKeys: HierarchyNodeKey[], ids: Id64Arg) {
+function getVisibilityChangeTargets(root: FilteredTreeRootNode, node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey }) {
   let lookupParents: Array<FilteredTreeRootNode | FilteredTreeNode> = [root];
   const changeTargets: VisibilityChangeTargets = {};
 
   // find the filtered parent nodes of the `node`
-  for (const parentKey of parentKeys) {
+  for (const parentKey of node.parentKeys) {
     if (!HierarchyNodeKey.isInstances(parentKey)) {
       continue;
     }
@@ -204,13 +205,12 @@ function getVisibilityChangeTargets(root: FilteredTreeRootNode, parentKeys: Hier
     }
     lookupParents = parentNodes;
   }
-
+  const ids = HierarchyNode.isInstancesNode(node) ? node.key.instanceKeys.map(({ id }) => id) : node.groupedInstanceKeys.map(({ id }) => id);
   // find filtered nodes that match the `node`
   const filteredNodes = findMatchingFilteredNodes(lookupParents, ids);
   if (filteredNodes.length === 0) {
     return changeTargets;
   }
-
   filteredNodes.forEach((filteredNode) => collectVisibilityChangeTargets(changeTargets, filteredNode));
   return changeTargets;
 }
@@ -264,10 +264,9 @@ function addTarget(filterTargets: VisibilityChangeTargets, node: FilteredTreeNod
       const elements = (filterTargets.elements ??= new Map<CategoryKey, Map<Id64String, { isFilterTarget: boolean }>>()).get(categoryKey);
       if (elements) {
         elements.set(node.id, { isFilterTarget: node.isFilterTarget });
-        return;
+      } else {
+        filterTargets.elements.set(categoryKey, new Map([[node.id, { isFilterTarget: node.isFilterTarget }]]));
       }
-      filterTargets.elements.set(categoryKey, new Map([[node.id, { isFilterTarget: node.isFilterTarget }]]));
-      return;
   }
 }
 
