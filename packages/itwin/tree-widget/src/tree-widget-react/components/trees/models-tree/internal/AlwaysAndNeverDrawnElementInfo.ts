@@ -29,12 +29,12 @@ import {
 } from "rxjs";
 import { Id64 } from "@itwin/core-bentley";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { releaseMainThreadOnItemsCount } from "../Utils.js";
+import { releaseMainThreadOnItemsCount, updateChildrenTree } from "../Utils.js";
 
-import type { ChildrenTree } from "../Utils.js";
-import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { Observable, Subscription } from "rxjs";
+import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
+import type { ChildrenTree } from "../Utils.js";
 
 /** @internal */
 export const SET_CHANGE_DEBOUNCE_TIME = 20;
@@ -42,12 +42,36 @@ export const SET_CHANGE_DEBOUNCE_TIME = 20;
 type SetType = "always" | "never";
 
 /** @internal */
-export interface GetElementsProps {
+export interface GetElementChildrenTreeProps {
+  /**
+   * Ids of parent nodes.
+   *
+   * The array should have the following structure:
+   * - 0 index: modelIds (can be subModel ids)
+   * - 1 index: categoryIds
+   * - Then parentIds for which to get the children tree.
+   *
+   * Array can be of any size.
+   */
   parentInstanceNodeIds: Array<Id64Arg>;
+  /**
+   * The type of set from which tree should be retrieved.
+   * `always` - ChildrenTree will be created from `alwaysDrawn` set.
+   * `never` - ChildrenTree will be created from `neverDrawn` set.
+   */
   setType: SetType;
 }
 
-type CachedNodesMap = ChildrenTree<{ categoryId?: Id64String; isInList: boolean }>;
+interface MapEntry {
+  categoryId?: Id64String;
+  isInList: boolean;
+}
+
+/**
+ * - `categoryId` is assigned only to the elements in always/never drawn set.
+ * - `isInList` flag determines if key (ECInstanceId) is in always/never set.
+ */
+type CachedNodesMap = ChildrenTree<MapEntry>;
 
 export class AlwaysAndNeverDrawnElementInfo implements Disposable {
   #subscriptions: Subscription[];
@@ -79,13 +103,16 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
     this.#suppress.next(false);
   }
 
-  public getElementChildrenTree({ setType, parentInstanceNodeIds }: GetElementsProps): Observable<CachedNodesMap> {
+  public getElementChildrenTree({ setType, parentInstanceNodeIds }: GetElementChildrenTreeProps): Observable<CachedNodesMap> {
     const cache = setType === "always" ? this.#alwaysDrawn : this.#neverDrawn;
-    const getElements = (rootTreeNode: CachedNodesMap | undefined): CachedNodesMap => {
-      if (!rootTreeNode) {
+    const getElements = (rootTreeNodes: CachedNodesMap | undefined): CachedNodesMap => {
+      if (!rootTreeNodes) {
         return new Map();
       }
-      return this.getChildrenTree({ currentChildrenTree: rootTreeNode, parentInstanceNodeIds });
+      if (parentInstanceNodeIds.length === 0) {
+        return rootTreeNodes;
+      }
+      return this.getChildrenTree({ currentChildrenTree: rootTreeNodes, parentInstanceNodeIds, currentIdsIndex: 0 });
     };
 
     return !cache.latestCacheEntryValue
@@ -101,18 +128,24 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
   private getChildrenTree<T extends object>({
     currentChildrenTree,
     parentInstanceNodeIds,
+    currentIdsIndex,
   }: {
     currentChildrenTree: ChildrenTree<T>;
     parentInstanceNodeIds: Array<Id64Arg>;
+    currentIdsIndex: number;
   }): ChildrenTree<T> {
-    if (parentInstanceNodeIds.length === 0) {
+    if (currentIdsIndex >= parentInstanceNodeIds.length) {
       return currentChildrenTree;
     }
     const result: ChildrenTree<T> = new Map();
-    for (const parentId of Id64.iterable(parentInstanceNodeIds[0])) {
+    for (const parentId of Id64.iterable(parentInstanceNodeIds[currentIdsIndex])) {
       const entry = currentChildrenTree.get(parentId);
       if (entry?.children) {
-        const childrenTreeOfChildren = this.getChildrenTree({ currentChildrenTree: entry.children, parentInstanceNodeIds: parentInstanceNodeIds.slice(1) });
+        const childrenTreeOfChildren = this.getChildrenTree({
+          currentChildrenTree: entry.children,
+          parentInstanceNodeIds,
+          currentIdsIndex: currentIdsIndex + 1,
+        });
         childrenTreeOfChildren.forEach((val, childId) => result.set(childId, val));
       }
     }
@@ -179,40 +212,16 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
       releaseMainThreadOnItemsCount(1000),
       reduce(
         (acc, { categoryId, rootCategoryId, modelId, elementsPath }) => {
-          let modelEntry = acc.get(modelId);
-          if (!modelEntry) {
-            modelEntry = { isInList: false, children: new Map() };
-            acc.set(modelId, modelEntry);
-          }
-
-          let categoryEntry = modelEntry.children!.get(rootCategoryId);
-          if (!categoryEntry) {
-            categoryEntry = { isInList: false, children: new Map() };
-            modelEntry.children!.set(rootCategoryId, categoryEntry);
-          }
-
-          let lastEntry = categoryEntry;
-          const pathLength = elementsPath.length;
-          for (let i = 0; i < pathLength; ++i) {
-            const elementId = elementsPath[i];
-            let elementEntry = lastEntry.children?.get(elementId);
-            if (!elementEntry) {
-              if (i + 1 === pathLength) {
-                elementEntry = { isInList: true, categoryId };
-              } else {
-                elementEntry = { isInList: false, children: new Map() };
-              }
-              if (!lastEntry.children) {
-                lastEntry.children = new Map();
-              }
-              lastEntry.children.set(elementId, elementEntry);
+          const elementIdInList = elementsPath[elementsPath.length - 1];
+          const additionalPropsGetter = (id: Id64String, additionalProps?: MapEntry): MapEntry => {
+            if (id === elementIdInList) {
+              // Last element in elementsPath is in always/never drawn set. We want to mark it that it is in the list, and save it's categoryId.
+              return { isInList: true, categoryId };
             }
-            if (i + 1 === pathLength) {
-              elementEntry.isInList = true;
-              elementEntry.categoryId = categoryId;
-            }
-            lastEntry = elementEntry;
-          }
+            // Existing entries can keep their value, if it's a new entry it's not in the list.
+            return additionalProps ?? { isInList: false };
+          };
+          updateChildrenTree({ tree: acc, idsToAdd: [modelId, rootCategoryId, ...elementsPath], additionalPropsGetter });
           return acc;
         },
         ((): CachedNodesMap => new Map())(),

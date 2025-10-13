@@ -6,6 +6,7 @@
 import { bufferCount, concatAll, concatMap, delay, of } from "rxjs";
 
 import type { Observable } from "rxjs";
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
 
 /**
  * Checks if all given models are displayed in given viewport.
@@ -28,10 +29,10 @@ export function releaseMainThreadOnItemsCount<T>(elementCount: number) {
 }
 
 /** @internal */
-export type ChildrenTree<T extends object> = Map<string, T & { children?: ChildrenTree<T> }>;
+export type ChildrenTree<T extends object = {}> = Map<string, T & { children?: ChildrenTree<T> }>;
 
 /** @internal */
-export function getIdsFromChildrenTree<T extends object>({
+export function getIdsFromChildrenTree<T extends object = {}>({
   tree,
   predicate,
 }: {
@@ -52,4 +53,40 @@ export function getIdsFromChildrenTree<T extends object>({
     return result;
   }
   return getIdsInternal({ childrenTree: tree, depth: 0 });
+}
+
+/**
+ * Updates children tree with provided `idsToAdd`:
+ * - All Ids are added (if they are not yet added) to children tree in the same order they appear in `idsToAdd` array.
+ * - `T` is assigned to each entry using the `additionalPropsGetter` function.
+ * @internal
+ */
+export function updateChildrenTree<T extends object = {}>({
+  tree,
+  additionalPropsGetter,
+  idsToAdd,
+}: {
+  tree: ChildrenTree<T>;
+  idsToAdd: Id64Array;
+  additionalPropsGetter: (id: Id64String, additionalProps?: T) => T;
+}) {
+  let currentTree: ChildrenTree<T> = tree;
+  for (let i = 0; i < idsToAdd.length; ++i) {
+    const id = idsToAdd[i];
+    let entry = currentTree.get(id);
+    entry = {
+      // Whoever calls this function knows how to assign the `T` to entry.
+      ...additionalPropsGetter(id, entry),
+      // If children already exists, we reuse it.
+      // If children do not exist and there are still ids left in the `idsToAdd` array, create a new Map, it will have the next id.
+      ...(entry?.children || i + 1 < idsToAdd.length ? { children: entry?.children ?? new Map() } : {}),
+    };
+    // Always update the set with updated entry.
+    currentTree.set(id, entry);
+    // This will only happen if it's the last id in `idsToAdd` array. In such case loop can be exited.
+    if (!entry.children) {
+      break;
+    }
+    currentTree = entry.children;
+  }
 }
