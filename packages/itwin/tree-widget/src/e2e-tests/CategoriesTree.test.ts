@@ -127,7 +127,7 @@ test.describe("Categories tree", () => {
 
       // re-focus on checkbox after resizing the panel
       const nodeBox = await node.boundingBox();
-      await node.click({ position: nodeBox ? { x: nodeBox.width * 0.6, y: nodeBox.height * 0.5 } : undefined });
+      await node.click({ position: nodeBox ? { x: nodeBox.width * 0.4, y: nodeBox.height * 0.5 } : undefined });
       await page.keyboard.press("Tab");
 
       await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
