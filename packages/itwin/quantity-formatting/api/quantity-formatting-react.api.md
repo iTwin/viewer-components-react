@@ -4,18 +4,19 @@
 
 ```ts
 
-import { FormatDefinition } from '@itwin/core-quantity';
+import type { FormatDefinition } from '@itwin/core-quantity';
 import type { FormatSet } from '@itwin/ecschema-metadata';
 import { JSX as JSX_2 } from 'react/jsx-runtime';
 import type { Localization } from '@itwin/core-common';
 import * as React_2 from 'react';
-import { UnitProps } from '@itwin/core-quantity';
+import { default as React_3 } from 'react';
+import type { UnitProps } from '@itwin/core-quantity';
 import type { UnitsProvider } from '@itwin/core-quantity';
 
 // @beta
 export function FormatPanel(props: FormatPanelProps): JSX_2.Element;
 
-// @internal (undocumented)
+// @beta (undocumented)
 interface FormatPanelProps {
     // (undocumented)
     formatProps: FormatDefinition;
@@ -30,7 +31,7 @@ interface FormatPanelProps {
 // @beta
 export function FormatSample(props: FormatSampleProps): JSX_2.Element;
 
-// @internal (undocumented)
+// @beta (undocumented)
 interface FormatSampleProps {
     // (undocumented)
     formatProps: FormatDefinition;
@@ -45,7 +46,7 @@ interface FormatSampleProps {
 // @beta
 export const FormatSelector: React_2.FC<FormatSelectorProps>;
 
-// @internal (undocumented)
+// @beta (undocumented)
 interface FormatSelectorProps {
     // (undocumented)
     activeFormatDefinitionKey?: string;
@@ -53,6 +54,33 @@ interface FormatSelectorProps {
     activeFormatSet?: FormatSet;
     // (undocumented)
     onListItemChange: (formatDefinition: FormatDefinition, key: string) => void;
+}
+
+// @beta
+export const FormatSetPanel: React_3.FC<FormatSetPanelProps>;
+
+// @beta
+type FormatSetPanelProps = {
+    formatSet: FormatSet;
+} & ({
+    editable: true;
+    onFormatSetChange: (formatSet: FormatSet) => void;
+} | {
+    editable?: false;
+    onFormatSetChange?: undefined;
+});
+
+// @beta
+export const FormatSetSelector: React_3.FC<FormatSetSelectorProps>;
+
+// @beta
+interface FormatSetSelectorProps {
+    // (undocumented)
+    formatSets: FormatSet[];
+    // (undocumented)
+    onFormatSetChange: (formatSet: FormatSet, key: string) => void;
+    // (undocumented)
+    selectedFormatSetKey?: string;
 }
 
 // @beta

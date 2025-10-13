@@ -1020,8 +1020,8 @@ packages:
   '@itwin/quantity-formatting-react@file:../../packages/itwin/quantity-formatting':
     resolution: {directory: ../../packages/itwin/quantity-formatting, type: directory}
     peerDependencies:
-      '@itwin/core-frontend': ^5.1.1
-      '@itwin/core-quantity': ^5.1.1
+      '@itwin/core-frontend': ^5.2.0
+      '@itwin/core-quantity': ^5.2.0
       '@itwin/itwinui-react': 3.19.5
       react: ^18.0.0
       react-dom: ^18.0.0
