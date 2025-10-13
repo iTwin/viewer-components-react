@@ -213,7 +213,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
           const elementIdInList = elementsPath[elementsPath.length - 1];
           const additionalPropsGetter = (id: Id64String, additionalProps?: MapEntry): MapEntry => {
             if (id === elementIdInList) {
-              // Last element in elementsPath is in always/never drawn set. We want to mark it that it is in the list, and save it's categoryId.
+              // Last element in elementsPath is in always/never drawn set. We want to mark, that it is in the set, and save it's categoryId.
               return { isInAlwaysOrNeverDrawnSet: true, categoryId };
             }
             // Existing entries can keep their value, if it's a new entry it's not in the list.
