@@ -2516,11 +2516,14 @@ describe("ModelsTreeVisibilityHandler", () => {
       viewport.changeCategoryDisplay(ids.category, true, true);
       viewport.renderFrame();
 
-      await handler.changeVisibility(createCategoryHierarchyNode({
+      await handler.changeVisibility(
+        createCategoryHierarchyNode({
           modelId: ids.model,
           categoryId: ids.category,
           hasChildren: true,
-        }), false);
+        }),
+        false,
+      );
 
       await validateHierarchyVisibility({
         provider,
@@ -2643,11 +2646,14 @@ describe("ModelsTreeVisibilityHandler", () => {
       const { imodel, ...ids } = buildIModelResult;
       using visibilityTestData = createVisibilityTestData({ imodel });
       const { handler, provider, viewport } = visibilityTestData;
-      await handler.changeVisibility(createCategoryHierarchyNode({
+      await handler.changeVisibility(
+        createCategoryHierarchyNode({
           modelId: ids.model,
           categoryId: [ids.category1, ids.category2],
           hasChildren: true,
-        }), true);
+        }),
+        true,
+      );
 
       await validateHierarchyVisibility({
         provider,

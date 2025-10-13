@@ -630,26 +630,26 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       }
 
       const categoryId = ModelsTreeNode.getCategoryId(node);
-    if (!categoryId) {
-      return EMPTY;
-    }
-    const elementIds = new Set(node.key.instanceKeys.map(({ id }) => id));
-    return from(this._idsCache.getChildrenTree({ elementIds })).pipe(
-      map((childrenTree): Id64Set => {
-        // Children tree contains provided elementIds, they are at the root of this tree.
-        // We want to skip them and only get ids of children.
-        return getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ depth }) => depth > 0 });
-      }),
-      mergeMap((children) =>
-        this.changeElementsState({
-          elementIds,
-          modelId,
-          children: children.size > 0 ? children : undefined,
-          categoryId,
-          on,
+      if (!categoryId) {
+        return EMPTY;
+      }
+      const elementIds = new Set(node.key.instanceKeys.map(({ id }) => id));
+      return from(this._idsCache.getChildrenTree({ elementIds })).pipe(
+        map((childrenTree): Id64Set => {
+          // Children tree contains provided elementIds, they are at the root of this tree.
+          // We want to skip them and only get ids of children.
+          return getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ depth }) => depth > 0 });
         }),
-      ),
-    );
+        mergeMap((children) =>
+          this.changeElementsState({
+            elementIds,
+            modelId,
+            children: children.size > 0 ? children : undefined,
+            categoryId,
+            on,
+          }),
+        ),
+      );
     });
     if (this._props.viewport.isAlwaysDrawnExclusive) {
       return concat(this.removeAlwaysDrawnExclusive(), changeObs);
@@ -660,15 +660,15 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
   private changeFilteredNodeVisibility({ on, ...props }: ChangeFilteredNodeVisibilityProps) {
     assert(this._filteredTree !== undefined);
     return forkJoin({
-          filteredTree: this._filteredTree,
-          unfilteredChildrenTree:
-            HierarchyNode.isInstancesNode(props.node) && ModelsTreeNode.getType(props.node) === "element"
-              ? this._idsCache.getChildrenTree({ elementIds: props.node.key.instanceKeys.map(({ id }) => id) })
-              : HierarchyNode.isClassGroupingNode(props.node)
-                ? this._idsCache.getChildrenTree({ elementIds: props.node.groupedInstanceKeys.map(({ id }) => id) })
-                : of(new Map()),
-        }).pipe(
-          map(({ filteredTree, unfilteredChildrenTree }): { targets: VisibilityChangeTargets; childElements?: Id64Set } => {
+      filteredTree: this._filteredTree,
+      unfilteredChildrenTree:
+        HierarchyNode.isInstancesNode(props.node) && ModelsTreeNode.getType(props.node) === "element"
+          ? this._idsCache.getChildrenTree({ elementIds: props.node.key.instanceKeys.map(({ id }) => id) })
+          : HierarchyNode.isClassGroupingNode(props.node)
+            ? this._idsCache.getChildrenTree({ elementIds: props.node.groupedInstanceKeys.map(({ id }) => id) })
+            : of(new Map()),
+    }).pipe(
+      map(({ filteredTree, unfilteredChildrenTree }): { targets: VisibilityChangeTargets; childElements?: Id64Set } => {
         const targets = filteredTree.getVisibilityChangeTargets(props.node);
 
         if (unfilteredChildrenTree.size === 0) {
