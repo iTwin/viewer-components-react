@@ -16,6 +16,7 @@ import {
   CLASS_NAME_GeometricModel3d,
   CLASS_NAME_Subject,
 } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
+import { TreeWidgetIdsCache } from "../../../tree-widget-react/components/trees/common/internal/TreeWidgetIdsCache.js";
 import { joinHierarchyFilteringPaths } from "../../../tree-widget-react/components/trees/common/Utils.js";
 import { ModelsTreeIdsCache } from "../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
@@ -133,7 +134,8 @@ describe("Models tree", () => {
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const config = { ...defaultHierarchyConfiguration, hideRootSubject: true, elementClassSpecification: keys.parentElement.className };
-      using idsCache = new ModelsTreeIdsCache(imodelAccess, config);
+      using treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
+      using idsCache = new ModelsTreeIdsCache(imodelAccess, config, treeWidgetIdsCache);
       const [subTreePaths, filterPaths] = await Promise.all([
         ModelsTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
@@ -1633,13 +1635,14 @@ describe("Models tree", () => {
         });
 
         beforeEach(() => {
-          modelsTreeIdsCache = new ModelsTreeIdsCache(createIModelAccess(imodel), hierarchyConfig);
+          const imodelAccess = createIModelAccess(imodel);
+          modelsTreeIdsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig, new TreeWidgetIdsCache(imodelAccess));
           hierarchyProvider = createModelsTreeProvider({ imodel, filteredNodePaths: instanceKeyPaths, hierarchyConfig });
         });
 
         afterEach(() => {
           modelsTreeIdsCache[Symbol.dispose]();
-          hierarchyProvider.dispose();
+          hierarchyProvider[Symbol.dispose]();
         });
 
         after(async function () {
@@ -1700,7 +1703,8 @@ describe("Models tree", () => {
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
 
       const imodelAccess = createIModelAccess(imodel);
-      using idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig);
+      using treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
+      using idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig, treeWidgetIdsCache);
       const actualInstanceKeyPaths = (
         await ModelsTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
@@ -1723,7 +1727,8 @@ describe("Models tree", () => {
       const { imodel, ...ids } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
-      using idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig);
+      using treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
+      using idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig, treeWidgetIdsCache);
 
       const abortController1 = new AbortController();
       const pathsPromiseAborted = ModelsTreeDefinition.createInstanceKeyPaths({
@@ -1765,7 +1770,8 @@ describe("Models tree", () => {
       const { imodel, ...ids } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
-      using idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig);
+      using treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
+      using idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig, treeWidgetIdsCache);
 
       const abortController1 = new AbortController();
       const pathsPromiseAborted = ModelsTreeDefinition.createInstanceKeyPaths({
@@ -1819,7 +1825,8 @@ describe("Models tree", () => {
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
 
       const imodelAccess = createIModelAccess(imodel);
-      using idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig);
+      using treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
+      using idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig, treeWidgetIdsCache);
 
       expect(
         (

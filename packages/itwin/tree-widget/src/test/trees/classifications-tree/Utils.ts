@@ -8,6 +8,7 @@ import { BisCodeSpec, Code, IModel } from "@itwin/core-common";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { ClassificationsTreeIdsCache } from "../../../tree-widget-react-internal.js";
 import { ClassificationsTreeDefinition } from "../../../tree-widget-react/components/trees/classifications-tree/ClassificationsTreeDefinition.js";
+import { TreeWidgetIdsCache } from "../../../tree-widget-react/components/trees/common/internal/TreeWidgetIdsCache.js";
 import { insertDefinitionSubModel } from "../../IModelUtils.js";
 import { createIModelAccess } from "../Common.js";
 
@@ -23,7 +24,8 @@ export function createClassificationsTreeProvider(
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration,
 ): HierarchyProvider & Disposable {
   const imodelAccess = createIModelAccess(imodel);
-  const idsCache = new ClassificationsTreeIdsCache(imodelAccess, hierarchyConfig);
+  const treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
+  const idsCache = new ClassificationsTreeIdsCache(imodelAccess, hierarchyConfig, treeWidgetIdsCache);
   const hierarchyProvider = createIModelHierarchyProvider({
     imodelAccess,
     hierarchyDefinition: new ClassificationsTreeDefinition({
@@ -41,6 +43,7 @@ export function createClassificationsTreeProvider(
     [Symbol.dispose]() {
       hierarchyProvider[Symbol.dispose]();
       idsCache[Symbol.dispose]();
+      treeWidgetIdsCache[Symbol.dispose]();
     },
   };
 }

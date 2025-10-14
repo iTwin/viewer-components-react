@@ -11,6 +11,7 @@ import {
   CLASS_NAME_GeometricElement2d,
   CLASS_NAME_GeometricElement3d,
 } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
+import { TreeWidgetIdsCache } from "../../../tree-widget-react/components/trees/common/internal/TreeWidgetIdsCache.js";
 import {
   buildIModel,
   insertDrawingCategory,
@@ -67,7 +68,8 @@ describe("Classifications tree", () => {
         });
         const { imodel, ...keys } = buildIModelResult;
         const imodelAccess = createIModelAccess(imodel);
-        using idsCache = new ClassificationsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration);
+        using treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
+        using idsCache = new ClassificationsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration, treeWidgetIdsCache);
         expect(
           await ClassificationsTreeDefinition.createInstanceKeyPaths({
             imodelAccess,
@@ -104,7 +106,8 @@ describe("Classifications tree", () => {
         });
         const { imodel, ...keys } = buildIModelResult;
         const imodelAccess = createIModelAccess(imodel);
-        using idsCache = new ClassificationsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration);
+        using treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
+        using idsCache = new ClassificationsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration, treeWidgetIdsCache);
         expect(
           await ClassificationsTreeDefinition.createInstanceKeyPaths({
             imodelAccess,
@@ -145,7 +148,8 @@ describe("Classifications tree", () => {
         });
         const { imodel, ...keys } = buildIModelResult;
         const imodelAccess = createIModelAccess(imodel);
-        using idsCache = new ClassificationsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration);
+        using treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
+        using idsCache = new ClassificationsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration, treeWidgetIdsCache);
         expect(
           await ClassificationsTreeDefinition.createInstanceKeyPaths({
             imodelAccess,
@@ -194,7 +198,8 @@ describe("Classifications tree", () => {
         });
         const { imodel, ...keys } = buildIModelResult;
         const imodelAccess = createIModelAccess(imodel);
-        using idsCache = new ClassificationsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration);
+        using treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
+        using idsCache = new ClassificationsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration, treeWidgetIdsCache);
         expect(
           await ClassificationsTreeDefinition.createInstanceKeyPaths({
             imodelAccess,
@@ -237,7 +242,8 @@ describe("Classifications tree", () => {
         });
         const { imodel, ...keys } = buildIModelResult;
         const imodelAccess = createIModelAccess(imodel);
-        using idsCache = new ClassificationsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration);
+        using treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
+        using idsCache = new ClassificationsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration, treeWidgetIdsCache);
         expect(
           await ClassificationsTreeDefinition.createInstanceKeyPaths({
             imodelAccess,
@@ -286,7 +292,8 @@ describe("Classifications tree", () => {
       });
       const { imodel } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using idsCache = new ClassificationsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration);
+      using treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
+      using idsCache = new ClassificationsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration, treeWidgetIdsCache);
       expect(
         await ClassificationsTreeDefinition.createInstanceKeyPaths({
           imodelAccess,

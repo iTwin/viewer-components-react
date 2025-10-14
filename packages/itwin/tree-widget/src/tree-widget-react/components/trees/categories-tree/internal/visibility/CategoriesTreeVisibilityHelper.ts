@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { concat, EMPTY, from, map, mergeMap, reduce } from "rxjs";
+import { Id64 } from "@itwin/core-bentley";
 import { BaseVisibilityHelper } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import { enableCategoryDisplay, enableSubCategoryDisplay, mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 
@@ -15,7 +16,7 @@ import type { BaseVisibilityHelperProps } from "../../../common/internal/visibil
 import type { CategoriesTreeIdsCache } from "../CategoriesTreeIdsCache.js";
 
 /** @internal */
-export type CategoriesTreeVisibilityHelperProps = BaseVisibilityHelperProps & {
+export type CategoriesTreeVisibilityHelperProps = Omit<BaseVisibilityHelperProps, "treeWidgetIdsCache"> & {
   idsCache: CategoriesTreeIdsCache;
 };
 
@@ -28,7 +29,7 @@ export type CategoriesTreeVisibilityHelperProps = BaseVisibilityHelperProps & {
 export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
   #props: CategoriesTreeVisibilityHelperProps;
   constructor(props: CategoriesTreeVisibilityHelperProps) {
-    super(props);
+    super({ ...props, treeWidgetIdsCache: props.idsCache });
     this.#props = props;
   }
 
@@ -44,6 +45,7 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
           categoryIds,
           modelId: undefined,
           type: this.#props.viewport.viewType === "2d" ? "DrawingCategory" : "SpatialCategory",
+          checkSubCategories: false,
         }),
       ),
     );
@@ -109,14 +111,16 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
 
   /** Turns on visibility status of models (that are not yet turned on) that are related to categories. */
   private enableCategoriesElementModelsVisibilityStatus(categoryIds: Id64Arg): Observable<void> {
-    return from(this.#props.idsCache.getCategoriesElementModels(categoryIds, true)).pipe(
-      mergeMap((categoriesModelsMap) => categoriesModelsMap.values()),
-      reduce((acc, modelIds) => {
-        modelIds.forEach((modelId) => {
+    return this.#props.idsCache.getModels({ categoryIds, type: this.#props.viewport.viewType === "2d" ? "2d" : "3d", includeSubModels: true }).pipe(
+      reduce((acc, { models }) => {
+        if (!models) {
+          return acc;
+        }
+        for (const modelId of Id64.iterable(models)) {
           if (!this.#props.viewport.viewsModel(modelId)) {
             acc.add(modelId);
           }
-        });
+        }
         return acc;
       }, new Set<Id64String>()),
       map((hiddenModels) => {

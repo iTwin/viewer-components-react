@@ -17,6 +17,7 @@ import {
 import { CategoriesTreeIdsCache } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 import { createCategoriesTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/categories-tree/internal/visibility/CategoriesTreeVisibilityHandler.js";
 import { CLASS_NAME_DefinitionModel, CLASS_NAME_Subject } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
+import { TreeWidgetIdsCache } from "../../../../tree-widget-react/components/trees/common/internal/TreeWidgetIdsCache.js";
 import {
   buildIModel,
   insertDefinitionContainer,
@@ -48,7 +49,6 @@ import type { InstanceKey } from "@itwin/presentation-common";
 import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { CategoriesTreeHierarchyConfiguration } from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import type { VisibilityExpectations } from "./VisibilityValidation.js";
-
 describe("CategoriesTreeVisibilityHandler", () => {
   before(async () => {
     await initializePresentationTesting({
@@ -83,7 +83,8 @@ describe("CategoriesTreeVisibilityHandler", () => {
     visibleByDefault?: boolean;
   }) {
     const imodelAccess = createIModelAccess(imodel);
-    const idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d");
+    const treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
+    const idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d", treeWidgetIdsCache);
     const viewport = createTreeWidgetTestingViewport({ iModel: imodel, subCategoriesOfCategories, viewType: "3d", visibleByDefault: !!visibleByDefault });
 
     return {
@@ -91,6 +92,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       viewport,
       idsCache,
       hierarchyConfig,
+      treeWidgetIdsCache,
     };
   }
 
@@ -136,6 +138,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       provider,
       ...commonProps,
       [Symbol.dispose]() {
+        commonProps.treeWidgetIdsCache[Symbol.dispose]();
         commonProps.idsCache[Symbol.dispose]();
         handler[Symbol.dispose]();
         provider[Symbol.dispose]();

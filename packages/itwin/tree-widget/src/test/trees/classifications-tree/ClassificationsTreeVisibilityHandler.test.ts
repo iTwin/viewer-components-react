@@ -8,6 +8,7 @@ import { ClassificationsTreeDefinition } from "../../../tree-widget-react/compon
 import { ClassificationsTreeIdsCache } from "../../../tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeIdsCache.js";
 import { ClassificationsTreeVisibilityHandler } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/ClassificationsTreeVisibilityHandler.js";
 import { createFilteredClassificationsTree } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/FilteredTree.js";
+import { TreeWidgetIdsCache } from "../../../tree-widget-react/components/trees/common/internal/TreeWidgetIdsCache.js";
 import { HierarchyVisibilityHandlerImpl } from "../../../tree-widget-react/components/trees/common/internal/useTreeHooks/UseCachedVisibility.js";
 import {
   buildIModel,
@@ -42,7 +43,6 @@ import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { ClassificationsTreeFilterTargets } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/FilteredTree.js";
 import type { FilteredTree } from "../../../tree-widget-react/components/trees/common/internal/visibility/BaseFilteredTree.js";
 import type { TreeWidgetViewport } from "../../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
-
 describe("ClassificationsTreeVisibilityHandler", () => {
   before(async () => {
     await initializeITwinJs();
@@ -68,7 +68,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
   async function createVisibilityTestData({ imodel, view, visibleByDefault }: { imodel: IModelConnection; view: "2d" | "3d"; visibleByDefault?: boolean }) {
     const imodelAccess = createIModelAccess(imodel);
-    const idsCache = new ClassificationsTreeIdsCache(imodelAccess, { rootClassificationSystemCode });
+    const treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
+    const idsCache = new ClassificationsTreeIdsCache(imodelAccess, { rootClassificationSystemCode }, treeWidgetIdsCache);
     const viewport = createTreeWidgetTestingViewport({
       iModel: imodel,
       visibleByDefault: !!visibleByDefault,
@@ -86,6 +87,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         idsCache[Symbol.dispose]();
         handler[Symbol.dispose]();
         provider[Symbol.dispose]();
+        treeWidgetIdsCache[Symbol.dispose]();
       },
     };
   }
@@ -779,7 +781,8 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       visibleByDefault?: boolean;
     }) {
       const imodelAccess = createIModelAccess(imodel);
-      const idsCache = new ClassificationsTreeIdsCache(imodelAccess, { rootClassificationSystemCode });
+      const treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
+      const idsCache = new ClassificationsTreeIdsCache(imodelAccess, { rootClassificationSystemCode }, treeWidgetIdsCache);
       const viewport = createTreeWidgetTestingViewport({
         iModel: imodel,
         viewType: view,
@@ -800,6 +803,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           handler[Symbol.dispose]();
           defaultProvider[Symbol.dispose]();
           filteredProvider[Symbol.dispose]();
+          treeWidgetIdsCache[Symbol.dispose]();
         },
       };
     }

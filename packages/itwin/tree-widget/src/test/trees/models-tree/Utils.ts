@@ -3,7 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concatMap, EMPTY, expand, firstValueFrom, from, toArray } from "rxjs";
+import type { Observable } from "rxjs";
+import { concatMap, EMPTY, expand, firstValueFrom, from, map, of, toArray } from "rxjs";
 import sinon from "sinon";
 import { Id64 } from "@itwin/core-bentley";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
@@ -13,10 +14,12 @@ import {
   CLASS_NAME_Model,
   CLASS_NAME_Subject,
 } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
+import { TreeWidgetIdsCache } from "../../../tree-widget-react/components/trees/common/internal/TreeWidgetIdsCache.js";
 import { ModelsTreeIdsCache } from "../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import { createIModelAccess } from "../Common.js";
 
+import type { ITreeWidgetIdsCache } from "../../../tree-widget-react/components/trees/common/internal/TreeWidgetIdsCache.js";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type {
@@ -28,7 +31,6 @@ import type {
   HierarchyProvider,
   NonGroupingHierarchyNode,
 } from "@itwin/presentation-hierarchies";
-
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
 interface CreateModelsTreeProviderProps {
@@ -45,10 +47,11 @@ export function createModelsTreeProvider({
   hierarchyConfig,
   imodelAccess,
   idsCache,
-}: CreateModelsTreeProviderProps): HierarchyProvider & { dispose: () => void; [Symbol.dispose]: () => void } {
+}: CreateModelsTreeProviderProps): HierarchyProvider & Disposable {
   const config = { ...defaultHierarchyConfiguration, hideRootSubject: true, ...hierarchyConfig };
   const createdImodelAccess = imodelAccess ?? createIModelAccess(imodel);
-  const createdIdsCache = idsCache ?? new ModelsTreeIdsCache(createdImodelAccess, config);
+  const treeWidgetIdsCache = new TreeWidgetIdsCache(createdImodelAccess);
+  const createdIdsCache = idsCache ?? new ModelsTreeIdsCache(createdImodelAccess, config, treeWidgetIdsCache);
   const provider = createIModelHierarchyProvider({
     imodelAccess: createdImodelAccess,
     hierarchyDefinition: new ModelsTreeDefinition({
@@ -60,21 +63,18 @@ export function createModelsTreeProvider({
       ? { filtering: { paths: filteredNodePaths.map((path) => ("path" in path ? path : { path, options: { autoExpand: true } })) } }
       : undefined),
   });
-  const dispose = () => {
-    provider[Symbol.dispose]();
-    if (!idsCache) {
-      createdIdsCache[Symbol.dispose]();
-    }
-  };
   return {
     hierarchyChanged: provider.hierarchyChanged,
     getNodes: (props) => provider.getNodes(props),
     getNodeInstanceKeys: (props) => provider.getNodeInstanceKeys(props),
     setFormatter: (formatter) => provider.setFormatter(formatter),
     setHierarchyFilter: (props) => provider.setHierarchyFilter(props),
-    dispose,
     [Symbol.dispose]() {
-      dispose();
+      provider[Symbol.dispose]();
+      treeWidgetIdsCache[Symbol.dispose]();
+      if (!idsCache) {
+        createdIdsCache[Symbol.dispose]();
+      }
     },
   };
 }
@@ -105,19 +105,62 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
       );
       return firstValueFrom(obs);
     }),
-    getModelCategoryIds: sinon.stub<[Id64String], Promise<Id64Array>>().callsFake(async (modelId) => {
-      return props?.modelCategories?.get(modelId) ?? [];
-    }),
-    getAllCategories: sinon.stub<[], Promise<Id64Set>>().callsFake(async () => {
+    getAllCategoriesThatContainElements: sinon.stub<[], Observable<{ drawingCategories?: Id64Set; spatialCategories?: Id64Set }>>().callsFake(() => {
       const result = new Set<Id64String>();
       props?.modelCategories?.forEach((categories) => categories.forEach((category) => result.add(category)));
-      return result;
+      return of({ spatialCategories: result.size > 0 ? result : undefined });
     }),
-    getCategoryElementsCount: sinon.stub<[Id64String, Id64String], Promise<number>>().callsFake(async (_, categoryId) => {
-      return props?.categoryElements?.get(categoryId)?.length ?? 0;
+    hasSubModel: sinon.stub<[Id64String], ReturnType<ITreeWidgetIdsCache["hasSubModel"]>>().callsFake((_modelId) => of(false)),
+    getCategories: sinon
+      .stub<[Parameters<ITreeWidgetIdsCache["getCategories"]>[0]], ReturnType<ITreeWidgetIdsCache["getCategories"]>>()
+      .callsFake(({ modelIds }) => {
+        return from(Id64.iterable(modelIds)).pipe(
+          map((modelId) => {
+            return { id: modelId, spatialCategories: props?.modelCategories?.get(modelId) };
+          }),
+        );
+      }),
+    getElementsCount: sinon
+      .stub<[Parameters<ITreeWidgetIdsCache["getElementsCount"]>[0]], ReturnType<ITreeWidgetIdsCache["getElementsCount"]>>()
+      .callsFake(({ categoryId }) => {
+        return of(props?.categoryElements?.get(categoryId)?.length ?? 0);
+      }),
+    getModels: sinon.stub<[Parameters<ITreeWidgetIdsCache["getModels"]>[0]], ReturnType<ITreeWidgetIdsCache["getModels"]>>().callsFake(({ categoryIds }) => {
+      return from(Id64.iterable(categoryIds)).pipe(
+        map((categoryId) => {
+          const models = new Array<Id64String>();
+          props?.modelCategories?.forEach((categories, modelId) => {
+            if (categories.includes(categoryId)) {
+              models.push(modelId);
+            }
+          });
+          return { id: categoryId, models: models.length > 0 ? models : undefined };
+        }),
+      );
     }),
-    hasSubModel: sinon.stub<[Id64String], Promise<boolean>>().callsFake(async () => false),
-    getCategoriesModeledElements: sinon.stub<[Id64String, Id64Arg], Promise<Id64Array>>().callsFake(async () => []),
+    getSubCategories: sinon
+      .stub<[Parameters<ITreeWidgetIdsCache["getSubCategories"]>[0]], ReturnType<ITreeWidgetIdsCache["getSubCategories"]>>()
+      .callsFake(({ categoryIds }) => {
+        return from(Id64.iterable(categoryIds)).pipe(
+          map((categoryId) => {
+            return { id: categoryId, subCategories: undefined };
+          }),
+        );
+      }),
+    getSubModels: sinon.stub<[Parameters<ITreeWidgetIdsCache["getSubModels"]>[0]], ReturnType<ITreeWidgetIdsCache["getSubModels"]>>().callsFake((fnProps) => {
+      if ("modelIds" in fnProps) {
+        return from(Id64.iterable(fnProps.modelIds)).pipe(
+          map((modelId) => {
+            return { id: modelId, subModels2d: undefined, subModels3d: undefined };
+          }),
+        );
+      }
+      return from(Id64.iterable(fnProps.categoryIds)).pipe(
+        map((categoryId) => {
+          return { id: categoryId, subModels2d: undefined, subModels3d: undefined };
+        }),
+      );
+    }),
   });
 }
 

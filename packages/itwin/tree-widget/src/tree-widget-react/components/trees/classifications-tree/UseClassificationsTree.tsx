@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo } from "react";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import iconBisCategory3d from "@stratakit/icons/bis-category-3d.svg";
 import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMatches } from "../common/components/EmptyTree.js";
+import { TreeWidgetIdsCache } from "../common/internal/TreeWidgetIdsCache.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { ClassificationsTreeComponent } from "./ClassificationsTreeComponent.js";
@@ -27,7 +28,6 @@ import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "./ClassificationsTreeDefinition.js";
 import type { ClassificationsTreeFilteringError } from "./internal/UseFilteredPaths.js";
 import type { ClassificationsTreeFilterTargets } from "./internal/visibility/FilteredTree.js";
-
 /** @alpha */
 export interface UseClassificationsTreeProps {
   activeView: TreeWidgetViewport;
@@ -99,7 +99,12 @@ export function useClassificationsTree({ activeView, emptyTreeContent, filter, .
 }
 
 function createCache(props: CreateCacheProps<{ hierarchyConfig: ClassificationsTreeHierarchyConfiguration }>) {
-  return new ClassificationsTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.hierarchyConfig);
+  const queryExecutor = createECSqlQueryExecutor(props.imodel);
+  if (!props.treeWidgetIdsCache) {
+    // eslint-disable-next-line no-console
+    console.warn("Please wrap TreeWidgetComponent (or ClassificationsTreeComponent if it's the only one used) with TreeWidgetContextProvider.");
+  }
+  return new ClassificationsTreeIdsCache(queryExecutor, props.specificProps.hierarchyConfig, props.treeWidgetIdsCache ?? new TreeWidgetIdsCache(queryExecutor));
 }
 
 function getEmptyTreeContentComponent(filter?: string, error?: ClassificationsTreeFilteringError, emptyTreeContent?: React.ReactNode) {

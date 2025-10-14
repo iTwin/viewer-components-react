@@ -12,6 +12,7 @@ import classSvg from "@stratakit/icons/bis-class.svg";
 import definitionContainerSvg from "@stratakit/icons/bis-definitions-container.svg";
 import elementSvg from "@stratakit/icons/bis-element.svg";
 import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMatches } from "../common/components/EmptyTree.js";
+import { TreeWidgetIdsCache } from "../common/internal/TreeWidgetIdsCache.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { getClassesByView } from "../common/internal/Utils.js";
@@ -211,5 +212,10 @@ async function createFilteredTree(
 }
 
 function createCache(props: CreateCacheProps<{ viewType: "2d" | "3d" }>) {
-  return new CategoriesTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.viewType);
+  const queryExecutor = createECSqlQueryExecutor(props.imodel);
+  if (!props.treeWidgetIdsCache) {
+    // eslint-disable-next-line no-console
+    console.warn("Please wrap TreeWidgetComponent (or CategoriesTreeComponent if it's the only one used) with TreeWidgetContextProvider.");
+  }
+  return new CategoriesTreeIdsCache(queryExecutor, props.specificProps.viewType, props.treeWidgetIdsCache ?? new TreeWidgetIdsCache(queryExecutor));
 }

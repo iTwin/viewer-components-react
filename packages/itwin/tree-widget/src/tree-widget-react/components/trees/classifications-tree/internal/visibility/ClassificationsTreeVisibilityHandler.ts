@@ -3,8 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, defer, EMPTY, from, map, merge, mergeMap, of, toArray } from "rxjs";
-import { Id64 } from "@itwin/core-bentley";
+import { concat, defer, EMPTY, from, merge, mergeMap } from "rxjs";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { releaseMainThreadOnItemsCount } from "../../../common/internal/Utils.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
@@ -13,8 +12,7 @@ import { ClassificationsTreeVisibilityHelper } from "./ClassificationsTreeVisibi
 
 import type { Observable } from "rxjs";
 import type { AlwaysAndNeverDrawnElementInfo } from "../../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
-import type { ModelId } from "../../../common/internal/Types.js";
-import type { BaseIdsCache, TreeSpecificVisibilityHandler } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
+import type { TreeSpecificVisibilityHandler } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import type { TreeWidgetViewport } from "../../../common/TreeWidgetViewport.js";
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
 import type { ClassificationsTreeIdsCache } from "../ClassificationsTreeIdsCache.js";
@@ -39,22 +37,10 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
 
   constructor(constructorProps: ClassificationsTreeVisibilityHandlerProps) {
     this.#props = constructorProps;
-    // Remove after https://github.com/iTwin/viewer-components-react/issues/1421.
-    // We won't need to create a custom base ids cache.
-    const baseIdsCache: BaseIdsCache = {
-      getCategories: (props) => this.getCategories(props),
-      getAllCategories: () => this.getAllCategories(),
-      getElementsCount: (props) => this.getElementsCount(props),
-      getModels: (props) => this.getModels(props),
-      getSubCategories: (props) => this.getSubCategories(props),
-      getSubModels: (props) => this.getSubModels(props),
-      hasSubModel: async (props) => this.#props.idsCache.hasSubModel(props),
-    };
     this.#visibilityHelper = new ClassificationsTreeVisibilityHelper({
       viewport: this.#props.viewport,
       idsCache: this.#props.idsCache,
       alwaysAndNeverDrawnElementInfo: this.#props.alwaysAndNeverDrawnElementInfo,
-      baseIdsCache,
     });
   }
 
@@ -198,82 +184,5 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
 
       return merge(...observables);
     }).pipe(mergeVisibilityStatuses);
-  }
-
-  private getCategories(props: Parameters<BaseIdsCache["getCategories"]>[0]): ReturnType<BaseIdsCache["getCategories"]> {
-    return from(Id64.iterable(props.modelIds)).pipe(
-      mergeMap((modelId) =>
-        from(this.#props.idsCache.getModelCategoryIds(modelId)).pipe(
-          map(({ spatial, drawing }) => ({ id: modelId, drawingCategories: drawing, spatialCategories: spatial })),
-        ),
-      ),
-    );
-  }
-
-  private getAllCategories(): ReturnType<BaseIdsCache["getAllCategories"]> {
-    return from(this.#props.idsCache.getAllCategories()).pipe(
-      map(({ drawing, spatial }) => {
-        return { drawingCategories: drawing, spatialCategories: spatial };
-      }),
-    );
-  }
-
-  private getElementsCount(props: Parameters<BaseIdsCache["getElementsCount"]>[0]): ReturnType<BaseIdsCache["getElementsCount"]> {
-    return from(this.#props.idsCache.getCategoryElementsCount(props.modelId, props.categoryId));
-  }
-
-  private getModels(props: Parameters<BaseIdsCache["getModels"]>[0]): ReturnType<BaseIdsCache["getModels"]> {
-    return from(Id64.iterable(props.categoryIds)).pipe(
-      mergeMap((categoryId) =>
-        from(this.#props.idsCache.getCategoriesElementModels(categoryId, true)).pipe(
-          mergeMap((categoryModelsMap) => (categoryModelsMap.size > 0 ? categoryModelsMap.values() : of(new Array<ModelId>()))),
-          map((categoryModels) => ({ id: categoryId, models: categoryModels })),
-        ),
-      ),
-    );
-  }
-
-  private getSubCategories(props: Parameters<BaseIdsCache["getSubCategories"]>[0]): ReturnType<BaseIdsCache["getSubCategories"]> {
-    return from(Id64.iterable(props.categoryIds)).pipe(map((categoryId) => ({ id: categoryId, subCategories: undefined })));
-  }
-
-  private getSubModels(props: Parameters<BaseIdsCache["getSubModels"]>[0]): ReturnType<BaseIdsCache["getSubModels"]> {
-    if ("modelIds" in props) {
-      return from(Id64.iterable(props.modelIds)).pipe(
-        mergeMap((modelId) =>
-          from(this.#props.idsCache.getModelCategoryIds(modelId)).pipe(
-            mergeMap(({ drawing, spatial }) => merge(drawing, spatial)),
-            toArray(),
-            mergeMap((categoryIds) => from(this.#props.idsCache.getCategoriesModeledElements(modelId, categoryIds))),
-            map((subModels) => ({ id: modelId, subModels })),
-          ),
-        ),
-      );
-    }
-
-    if (props.modelId) {
-      return from(Id64.iterable(props.categoryIds)).pipe(
-        mergeMap((categoryId) =>
-          from(this.#props.idsCache.getCategoriesModeledElements(props.modelId!, categoryId)).pipe(map((subModels) => ({ id: categoryId, subModels }))),
-        ),
-      );
-    }
-
-    return from(Id64.iterable(props.categoryIds)).pipe(
-      mergeMap((categoryId) =>
-        from(this.#props.idsCache.getCategoriesElementModels(categoryId)).pipe(
-          mergeMap((categoryModelsMap) => {
-            const models = categoryModelsMap.get(categoryId);
-            if (!models) {
-              return of({ id: categoryId, subModels: undefined });
-            }
-            return from(models).pipe(
-              mergeMap((modelId) => from(this.#props.idsCache.getCategoriesModeledElements(modelId, categoryId))),
-              map((subModels) => ({ id: categoryId, subModels })),
-            );
-          }),
-        ),
-      ),
-    );
   }
 }

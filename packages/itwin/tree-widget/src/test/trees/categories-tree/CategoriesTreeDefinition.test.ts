@@ -15,6 +15,7 @@ import {
 } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 import { CLASS_NAME_DefinitionModel } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
+import { TreeWidgetIdsCache } from "../../../tree-widget-react/components/trees/common/internal/TreeWidgetIdsCache.js";
 import {
   buildIModel,
   insertDefinitionContainer,
@@ -33,7 +34,6 @@ import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { CategoriesTreeHierarchyConfiguration } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import type { IModelConnection } from "@itwin/core-frontend";
-
 describe("Categories tree", () => {
   describe("Hierarchy definition", () => {
     before(async function () {
@@ -593,7 +593,8 @@ function createCategoryTreeProvider(
   hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>,
 ): HierarchyProvider & Disposable {
   const imodelAccess = createIModelAccess(imodel);
-  const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType);
+  const treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
+  const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType, treeWidgetIdsCache);
   const hierarchyProvider = createIModelHierarchyProvider({
     imodelAccess,
     hierarchyDefinition: new CategoriesTreeDefinition({
@@ -615,6 +616,7 @@ function createCategoryTreeProvider(
     [Symbol.dispose]() {
       hierarchyProvider[Symbol.dispose]();
       idsCache[Symbol.dispose]();
+      treeWidgetIdsCache[Symbol.dispose]();
     },
   };
 }

@@ -15,12 +15,12 @@ import {
   CLASS_NAME_GeometricElement3d,
   CLASS_NAME_SpatialCategory,
 } from "../../common/internal/ClassNameDefinitions.js";
-import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
-import { getDistinctMapValues, joinId64Arg } from "../../common/internal/Utils.js";
+import { joinId64Arg } from "../../common/internal/Utils.js";
 
 import type { Observable } from "rxjs";
-import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
-import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
+import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
+import type { ITreeWidgetIdsCache, TreeWidgetIdsCache } from "../../common/internal/TreeWidgetIdsCache.js";
+import type { CategoryId, ElementId } from "../../common/internal/Types.js";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { ClassificationsTreeHierarchyConfiguration } from "../ClassificationsTreeDefinition.js";
 
@@ -36,200 +36,48 @@ interface ClassificationInfo {
   relatedCategories3d: CategoryId[];
 }
 
-type ModelCategoryKey = `${ModelId}-${CategoryId}`;
-
 /** @internal */
-export class ClassificationsTreeIdsCache implements Disposable {
-  private readonly _categoryElementCounts: ModelCategoryElementsCountCache;
-  private _elementModelsCategories: Promise<Map<ModelId, { category2dIds: Id64Set; category3dIds: Id64Set; isSubModel: boolean }>> | undefined;
-  private _modelWithCategoryModeledElements: Promise<Map<ModelCategoryKey, Set<ElementId>>> | undefined;
-  private _classificationInfos: Promise<Map<ClassificationId | ClassificationTableId, ClassificationInfo>> | undefined;
-  private _filteredElementsData: Promise<Map<ElementId, { modelId: Id64String; categoryId: Id64String }>> | undefined;
+export class ClassificationsTreeIdsCache implements Disposable, ITreeWidgetIdsCache {
+  #classificationInfos: Promise<Map<ClassificationId | ClassificationTableId, ClassificationInfo>> | undefined;
+  #filteredElementsData: Promise<Map<ElementId, { modelId: Id64String; categoryId: Id64String }>> | undefined;
+  #queryExecutor: LimitingECSqlQueryExecutor;
+  #hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
+  #treeWidgetIdsCache: TreeWidgetIdsCache;
 
-  constructor(
-    private _queryExecutor: LimitingECSqlQueryExecutor,
-    private _hierarchyConfig: ClassificationsTreeHierarchyConfiguration,
-  ) {
-    this._categoryElementCounts = new ModelCategoryElementsCountCache(_queryExecutor, ["BisCore.GeometricElement2d", "BisCore.GeometricElement3d"]);
+  constructor(queryExecutor: LimitingECSqlQueryExecutor, hierarchyConfig: ClassificationsTreeHierarchyConfiguration, treeWidgetIdsCache: TreeWidgetIdsCache) {
+    this.#queryExecutor = queryExecutor;
+    this.#hierarchyConfig = hierarchyConfig;
+    this.#treeWidgetIdsCache = treeWidgetIdsCache;
   }
 
-  public [Symbol.dispose]() {
-    this._categoryElementCounts[Symbol.dispose]();
+  public [Symbol.dispose]() {}
+
+  public getAllCategoriesThatContainElements() {
+    return this.#treeWidgetIdsCache.getAllCategoriesThatContainElements();
   }
 
-  private async *queryElementModelCategories(): AsyncIterableIterator<{
-    modelId: Id64String;
-    categoryId: Id64String;
-    type: "2d" | "3d";
-  }> {
-    const query = `
-      SELECT * FROM (
-        SELECT '3d' type, this.Model.Id modelId, this.Category.Id categoryId
-        FROM BisCore.GeometricModel m
-        JOIN BisCore.GeometricElement3d this ON m.ECInstanceId = this.Model.Id
-        WHERE this.Parent.Id IS NULL AND m.IsPrivate = false
-        GROUP BY modelId, categoryId
-      )
-      UNION ALL
-      SELECT * FROM (
-        SELECT '2d' type, this.Model.Id modelId, this.Category.Id categoryId
-        FROM BisCore.GeometricModel m
-        JOIN BisCore.GeometricElement2d this ON m.ECInstanceId = this.Model.Id
-        WHERE this.Parent.Id IS NULL AND m.IsPrivate = false
-        GROUP BY modelId, categoryId
-      )
-    `;
-    for await (const row of this._queryExecutor.createQueryReader(
-      { ecsql: query },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: "tree-widget/classifications-tree/element-models-and-categories-query" },
-    )) {
-      yield { modelId: row.modelId, categoryId: row.categoryId, type: row.type };
-    }
+  public getCategories(props: Parameters<ITreeWidgetIdsCache["getCategories"]>[0]) {
+    return this.#treeWidgetIdsCache.getCategories(props);
   }
 
-  private async getElementModelsCategories() {
-    this._elementModelsCategories ??= (async () => {
-      const [modelCategories, modelWithCategoryModeledElements] = await Promise.all([
-        (async () => {
-          const elementModelsCategories = new Map<ModelId, { category2dIds: Id64Set; category3dIds: Id64Set }>();
-          for await (const queriedCategory of this.queryElementModelCategories()) {
-            let modelEntry = elementModelsCategories.get(queriedCategory.modelId);
-            if (modelEntry === undefined) {
-              modelEntry = { category2dIds: new Set(), category3dIds: new Set() };
-              elementModelsCategories.set(queriedCategory.modelId, modelEntry);
-            }
-            switch (queriedCategory.type) {
-              case "2d":
-                modelEntry.category2dIds.add(queriedCategory.categoryId);
-                break;
-              case "3d":
-                modelEntry.category3dIds.add(queriedCategory.categoryId);
-                break;
-            }
-          }
-          return elementModelsCategories;
-        })(),
-        this.getModelWithCategoryModeledElements(),
-      ]);
-      const result = new Map<ModelId, { category2dIds: Id64Set; category3dIds: Id64Set; isSubModel: boolean }>();
-      const subModels = getDistinctMapValues(modelWithCategoryModeledElements);
-      for (const [modelId, modelEntry] of modelCategories) {
-        const isSubModel = subModels.has(modelId);
-        result.set(modelId, { category2dIds: modelEntry.category2dIds, category3dIds: modelEntry.category3dIds, isSubModel });
-      }
-      return result;
-    })();
-    return this._elementModelsCategories;
+  public hasSubModel(props: Parameters<ITreeWidgetIdsCache["hasSubModel"]>[0]) {
+    return this.#treeWidgetIdsCache.hasSubModel(props);
   }
 
-  private async *queryModeledElements(): AsyncIterableIterator<{
-    modelId: Id64String;
-    modeledElementId: Id64String;
-    categoryId: Id64String;
-    rootCategoryId: Id64String;
-  }> {
-    const query = `
-      SELECT
-        pe.ECInstanceId modeledElementId,
-        pe.Category.Id categoryId,
-        pe.Model.Id modelId
-      FROM BisCore.GeometricModel m
-      JOIN BisCore.GeometricElement3d pe ON pe.ECInstanceId = m.ModeledElement.Id
-      WHERE
-        m.IsPrivate = false
-        AND m.ECInstanceId IN (SELECT Model.Id FROM BisCore.Element)
-      UNION ALL
-      SELECT
-        pe.ECInstanceId modeledElementId,
-        pe.Category.Id categoryId,
-        pe.Model.Id modelId
-      FROM BisCore.GeometricModel m
-      JOIN BisCore.GeometricElement2d pe ON pe.ECInstanceId = m.ModeledElement.Id
-      WHERE
-        m.IsPrivate = false
-        AND m.ECInstanceId IN (SELECT Model.Id FROM BisCore.Element)
-    `;
-    for await (const row of this._queryExecutor.createQueryReader(
-      { ecsql: query },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: "tree-widget/classifications-tree/modeled-elements-query" },
-    )) {
-      yield { modelId: row.modelId, categoryId: row.categoryId, modeledElementId: row.modeledElementId, rootCategoryId: row.rootCategoryId };
-    }
+  public getElementsCount(props: Parameters<ITreeWidgetIdsCache["getElementsCount"]>[0]) {
+    return this.#treeWidgetIdsCache.getElementsCount(props);
   }
 
-  private async getModelWithCategoryModeledElements() {
-    this._modelWithCategoryModeledElements ??= (async () => {
-      const modelWithCategoryModeledElements = new Map<ModelCategoryKey, Set<ElementId>>();
-      for await (const { modelId, categoryId, modeledElementId } of this.queryModeledElements()) {
-        const key: ModelCategoryKey = `${modelId}-${categoryId}`;
-        const entry = modelWithCategoryModeledElements.get(key);
-        if (entry === undefined) {
-          modelWithCategoryModeledElements.set(key, new Set([modeledElementId]));
-        } else {
-          entry.add(modeledElementId);
-        }
-      }
-      return modelWithCategoryModeledElements;
-    })();
-    return this._modelWithCategoryModeledElements;
+  public getModels(props: Parameters<ITreeWidgetIdsCache["getModels"]>[0]) {
+    return this.#treeWidgetIdsCache.getModels(props);
   }
 
-  public async getCategoriesModeledElements(modelId: Id64String, categoryIds: Id64Arg): Promise<Id64Array> {
-    const modelWithCategoryModeledElements = await this.getModelWithCategoryModeledElements();
-    const result = new Array<ElementId>();
-    for (const categoryId of Id64.iterable(categoryIds)) {
-      const entry = modelWithCategoryModeledElements.get(`${modelId}-${categoryId}`);
-      if (entry !== undefined) {
-        result.push(...entry);
-      }
-    }
-    return result;
+  public getSubCategories(props: Parameters<ITreeWidgetIdsCache["getSubCategories"]>[0]) {
+    return this.#treeWidgetIdsCache.getSubCategories(props);
   }
 
-  public async getCategoriesElementModels(categoryIds: Id64Arg, includeSubModels?: boolean): Promise<Map<CategoryId, Set<ModelId>>> {
-    const elementModelsCategories = await this.getElementModelsCategories();
-    const result = new Map<CategoryId, Set<ModelId>>();
-    for (const categoryId of Id64.iterable(categoryIds)) {
-      for (const [modelId, { category2dIds, category3dIds, isSubModel }] of elementModelsCategories) {
-        if ((includeSubModels || !isSubModel) && (category2dIds.has(categoryId) || category3dIds.has(categoryId))) {
-          let categoryModels = result.get(categoryId);
-          if (!categoryModels) {
-            categoryModels = new Set<ModelId>();
-            result.set(categoryId, categoryModels);
-          }
-          categoryModels.add(modelId);
-        }
-      }
-    }
-    return result;
-  }
-
-  public async getModelCategoryIds(modelId: Id64String): Promise<{ drawing: Id64Array; spatial: Id64Array }> {
-    const elementModelsCategories = await this.getElementModelsCategories();
-    return {
-      drawing: Array.from(elementModelsCategories.get(modelId)?.category2dIds ?? []),
-      spatial: Array.from(elementModelsCategories.get(modelId)?.category3dIds ?? []),
-    };
-  }
-
-  public async getAllCategories(): Promise<{ drawing: Id64Set; spatial: Id64Set }> {
-    const resultDrawing = new Set<Id64String>();
-    const resultSpatial = new Set<Id64String>();
-    const modelsCategoriesInfo = await this.getElementModelsCategories();
-    modelsCategoriesInfo.forEach(({ category2dIds, category3dIds }) => {
-      category2dIds.forEach((id) => resultDrawing.add(id));
-      category3dIds.forEach((id) => resultSpatial.add(id));
-    });
-    return { drawing: resultDrawing, spatial: resultSpatial };
-  }
-
-  public async hasSubModel(elementId: Id64String): Promise<boolean> {
-    const elementModelsCategories = await this.getElementModelsCategories();
-    return elementModelsCategories.has(elementId);
-  }
-
-  public async getCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Promise<number> {
-    return this._categoryElementCounts.getCategoryElementsCount(modelId, categoryId);
+  public getSubModels(props: Parameters<ITreeWidgetIdsCache["getSubModels"]>[0]) {
+    return this.#treeWidgetIdsCache.getSubModels(props);
   }
 
   private async *queryClassifications(): AsyncIterableIterator<
@@ -251,7 +99,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
           JOIN ${CLASS_NAME_ClassificationTable} ct ON ct.ECInstanceId = cl.Model.Id
           JOIN ${CLASS_NAME_ClassificationSystem} cs ON cs.ECInstanceId = ct.Parent.Id
           WHERE
-            cs.CodeValue = '${this._hierarchyConfig.rootClassificationSystemCode}'
+            cs.CodeValue = '${this.#hierarchyConfig.rootClassificationSystemCode}'
             AND NOT ct.IsPrivate
             AND NOT cl.IsPrivate
             AND cl.Parent.Id IS NULL
@@ -293,7 +141,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
         ) relatedCategories3d
       FROM ${CLASSIFICATIONS_CTE} cl
     `;
-    for await (const row of this._queryExecutor.createQueryReader(
+    for await (const row of this.#queryExecutor.createQueryReader(
       { ctes, ecsql },
       { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: "tree-widget/classifications-tree/classifications-query" },
     )) {
@@ -308,7 +156,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
   }
 
   private async getClassificationsInfo() {
-    this._classificationInfos ??= (async () => {
+    this.#classificationInfos ??= (async () => {
       const classificationInfos = new Map<ClassificationId | ClassificationTableId, ClassificationInfo>();
       for await (const { id, tableId, parentId, relatedCategories2d, relatedCategories3d } of this.queryClassifications()) {
         const tableOrParentId = tableId ?? parentId;
@@ -328,7 +176,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
       }
       return classificationInfos;
     })();
-    return this._classificationInfos;
+    return this.#classificationInfos;
   }
 
   public async getAllContainedCategories(classificationOrTableIds: Id64Arg): Promise<{ drawing: Id64Array; spatial: Id64Array }> {
@@ -419,7 +267,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
         WHERE ECInstanceId IN (${joinId64Arg(element3dIds, ",")})
       `);
     }
-    for await (const row of this._queryExecutor.createQueryReader(
+    for await (const row of this.#queryExecutor.createQueryReader(
       { ecsql: queries.join(" UNION ALL ") },
       { rowFormat: "ECSqlPropertyNames", limit: "unbounded" },
     )) {
@@ -438,7 +286,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
       return new Map();
     }
 
-    this._filteredElementsData ??= (async () => {
+    this.#filteredElementsData ??= (async () => {
       const filteredElementsData = new Map();
       for await (const { modelId, id, categoryId } of this.queryFilteredElementsData({
         element2dIds,
@@ -448,10 +296,10 @@ export class ClassificationsTreeIdsCache implements Disposable {
       }
       return filteredElementsData;
     })();
-    return this._filteredElementsData;
+    return this.#filteredElementsData;
   }
 
   public clearFilteredElementsData() {
-    this._filteredElementsData = undefined;
+    this.#filteredElementsData = undefined;
   }
 }

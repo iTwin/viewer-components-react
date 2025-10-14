@@ -20,6 +20,7 @@ import {
   TooManyInstancesFocused,
   UnknownInstanceFocusError,
 } from "../common/components/EmptyTree.js";
+import { TreeWidgetIdsCache } from "../common/internal/TreeWidgetIdsCache.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
@@ -45,7 +46,6 @@ import type { ModelsTreeFilteringError, ModelsTreeSubTreeError } from "./interna
 import type { ModelsTreeFilterTargets } from "./internal/visibility/FilteredTree.js";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/visibility/ModelsTreeVisibilityHandler.js";
 import type { ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition.js";
-
 /** @beta */
 export interface UseModelsTreeProps {
   /**
@@ -295,5 +295,14 @@ export function ModelsTreeIcon({ node }: { node: PresentationHierarchyNode }) {
 }
 
 function createCache(props: CreateCacheProps<{ hierarchyConfig: ModelsTreeHierarchyConfiguration }>) {
-  return new ModelsTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.hierarchyConfig);
+  const queryExecutor = createECSqlQueryExecutor(props.imodel);
+  if (!props.treeWidgetIdsCache) {
+    // eslint-disable-next-line no-console
+    console.warn("Please wrap TreeWidgetComponent (or ModelsTreeComponent if it's the only one used) with TreeWidgetContextProvider.");
+  }
+  return new ModelsTreeIdsCache(
+    createECSqlQueryExecutor(props.imodel),
+    props.specificProps.hierarchyConfig,
+    props.treeWidgetIdsCache ?? new TreeWidgetIdsCache(queryExecutor),
+  );
 }
