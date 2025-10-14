@@ -51,19 +51,22 @@ export type GetElementChildrenTreeProps = {
    * `never` - ChildrenTree will be created from `neverDrawn` set.
    */
   setType: SetType;
-} & ({
-  /**
-   * Categories of elements that have no parents.
-   * - When defined elements that have no parents (that have specified categories) and their children (direct and indirect) will be returned (that are in always/never drawn list).
-   * - When undefined, all root elements' categories will be used.
-   */
-  categoryIds?: Id64Arg
-} | {
-  /** Categories of elements that have no parents. Elements that have no parents (that have specified categories) and their children (direct and indirect) will be returned (that are in always/never drawn list). */
-  categoryIds: Id64Arg;
-  /** Path to element for which to get its' child always/never drawn elements. When undefined, models and categories will be used to get the always/never drawn elements. */
-  parentElementIdsPath?: Array<Id64Arg>
-})
+} & (
+  | {
+      /**
+       * Categories of elements that have no parents.
+       * - When defined elements that have no parents (that have specified categories) and their children (direct and indirect) will be returned (that are in always/never drawn list).
+       * - When undefined, all root elements' categories will be used.
+       */
+      categoryIds?: Id64Arg;
+    }
+  | {
+      /** Categories of elements that have no parents. Elements that have no parents (that have specified categories) and their children (direct and indirect) will be returned (that are in always/never drawn list). */
+      categoryIds: Id64Arg;
+      /** Path to element for which to get its' child always/never drawn elements. When undefined, models and categories will be used to get the always/never drawn elements. */
+      parentElementIdsPath?: Array<Id64Arg>;
+    }
+);
 
 /**
  * - `categoryId` is assigned only to the elements in always/never drawn set.
