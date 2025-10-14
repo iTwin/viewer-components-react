@@ -5,13 +5,13 @@
 
 import React, { useCallback, useState } from "react";
 import { IModelApp } from "@itwin/core-frontend";
-import { Button, Flex, Modal, Text } from "@itwin/itwinui-react";
-import { FormatSelector, QuantityFormatPanel } from "@itwin/quantity-formatting-react";
+import { Button, Modal, Tabs } from "@itwin/itwinui-react";
 import { FormatManager } from "./FormatManager";
+import { FormatSetsTabPanel } from "./FormatSetsTabPanel";
+import { FormatTabPanel } from "./FormatTabPanel";
 
 import type { FormatDefinition } from "@itwin/core-quantity";
 import type { FormatSet } from "@itwin/ecschema-metadata";
-
 /** Button component that shows a button to open the Quantity Format Panel in a modal */
 export const QuantityFormatButton: React.FC = () => {
   // Initial format definition is undefined until a format is selected
@@ -22,10 +22,15 @@ export const QuantityFormatButton: React.FC = () => {
   const [activeFormatSet, setActiveFormatSet] = useState<FormatSet | undefined>(FormatManager.instance?.activeFormatSet);
   const [activeFormatDefinitionKey, setActiveFormatDefinitionKey] = useState<string | undefined>();
 
-  const handleFormatChange = useCallback(async (newFormat: FormatDefinition) => {
-    setFormatDefinition(newFormat);
-    await FormatManager.instance?.activeFormatSetFormatsProvider?.addFormat(newFormat.name ?? "", newFormat);
-  }, []);
+  const formatManager = FormatManager.instance;
+
+  const handleFormatChange = useCallback(
+    async (newFormat: FormatDefinition) => {
+      setFormatDefinition(newFormat);
+      await formatManager?.activeFormatSetFormatsProvider?.addFormat(newFormat.name ?? "", newFormat);
+    },
+    [formatManager],
+  );
 
   const handleFormatSelectorChange = useCallback((formatDef: FormatDefinition, key: string) => {
     setFormatDefinition(formatDef);
@@ -41,25 +46,25 @@ export const QuantityFormatButton: React.FC = () => {
   }, []);
 
   React.useEffect(() => {
-    const _removeListener = IModelApp.quantityFormatter.onUnitsProviderChanged.addListener(() => {
+    return IModelApp.quantityFormatter.onUnitsProviderChanged.addListener(() => {
       // Handle units provider changes if needed
       setUnitsProvider(IModelApp.quantityFormatter.unitsProvider);
     });
-    return () => {
-      _removeListener();
-    };
   }, []);
 
   // Listen for active format set changes
   React.useEffect(() => {
-    const removeFormatSetListener = FormatManager.instance?.onActiveFormatSetChanged.addListener((formatSet) => {
+    formatManager?.onActiveFormatSetChanged.addListener((formatSet) => {
       setActiveFormatSet(formatSet);
       setActiveFormatDefinitionKey(undefined); // Reset selection when format set changes
+      setFormatDefinition(undefined); // Reset format definition when format set changes
     });
-    return () => {
-      if (removeFormatSetListener) removeFormatSetListener();
-    };
-  }, []);
+  }, [formatManager]);
+
+  // Don't render if FormatManager is not initialized
+  if (!formatManager) {
+    return null;
+  }
 
   return (
     <>
@@ -68,27 +73,25 @@ export const QuantityFormatButton: React.FC = () => {
       </Button>
 
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} title="Quantity Format Settings" className="quantity-format-modal">
-        <Flex flexDirection="row" gap="l" className="format-selector-container">
-          <Flex.Item className="quantity-format-selector-item">
-            <FormatSelector
+        <Tabs.Wrapper type="borderless">
+          <Tabs.TabList>
+            <Tabs.Tab value="formats" label="Formats" key="formats" />
+            <Tabs.Tab value="format-sets" label="Format Sets" key="format-sets" />
+          </Tabs.TabList>
+          <Tabs.Panel value="formats" key="formats">
+            <FormatTabPanel
               activeFormatSet={activeFormatSet}
               activeFormatDefinitionKey={activeFormatDefinitionKey}
+              formatDefinition={formatDefinition}
+              unitsProvider={unitsProvider}
               onListItemChange={handleFormatSelectorChange}
+              onFormatChange={handleFormatChange}
             />
-          </Flex.Item>
-
-          <Flex.Item className="quantity-format-panel-item">
-            {formatDefinition ? (
-              <QuantityFormatPanel formatDefinition={formatDefinition} unitsProvider={unitsProvider} onFormatChange={handleFormatChange} />
-            ) : (
-              <Flex flexDirection="column" justifyContent="center" alignItems="center" className="quantity-format-empty-state">
-                <Text variant="leading" isMuted>
-                  Select a format in the list to edit
-                </Text>
-              </Flex>
-            )}
-          </Flex.Item>
-        </Flex>
+          </Tabs.Panel>
+          <Tabs.Panel value="format-sets" key="format-sets">
+            <FormatSetsTabPanel formatManager={formatManager} />
+          </Tabs.Panel>
+        </Tabs.Wrapper>
       </Modal>
     </>
   );

@@ -4,19 +4,19 @@
  *--------------------------------------------------------------------------------------------*/
 
 
+import "../FormatPanel.scss";
 import * as React from "react";
+import { SvgHelpCircularHollow } from "@itwin/itwinui-icons-react";
+import { IconButton, Input, Label, Select } from "@itwin/itwinui-react";
+import { useTranslation } from "../../../useTranslation.js";
+import { getUnitName } from "./misc/UnitDescr.js";
+
 import type {
   FormatDefinition,
   UnitProps,
   UnitsProvider,
 } from "@itwin/core-quantity";
-import { IconButton, Input, Label, Select } from "@itwin/itwinui-react";
 import type { SelectOption } from "@itwin/itwinui-react";
-import { SvgHelpCircularHollow } from "@itwin/itwinui-icons-react";
-import { useTranslation } from "../../../useTranslation.js";
-import { getUnitName } from "./misc/UnitDescr.js";
-import "../FormatPanel.scss";
-
 async function getUnitConversionData(
   possibleUnits: UnitProps[],
   toUnit: UnitProps,
@@ -351,7 +351,7 @@ export function FormatUnits(props: FormatUnitsProps) {
             <Label displayStyle="inline" htmlFor={compositeSpacerSelectorId}>
               {translate("QuantityFormat:labels.compositeSpacer")}
               <IconButton
-                className="format-help-tooltip"
+                className="quantityFormat--formatHelpTooltip"
                 size="small"
                 styleType="borderless"
                 label={translate(
@@ -366,6 +366,7 @@ export function FormatUnits(props: FormatUnitsProps) {
               value={formatProps.composite.spacer ?? ""}
               onChange={handleOnSpacerChange}
               size="small"
+              className="quantityFormat--unitInput"
             />
           </div>
         )}

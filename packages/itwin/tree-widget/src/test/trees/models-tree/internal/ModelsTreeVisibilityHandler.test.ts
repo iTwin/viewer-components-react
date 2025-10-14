@@ -3,9 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
+import { assert, expect } from "chai";
 import sinon from "sinon";
-import { assert, CompressedId64Set, Id64 } from "@itwin/core-bentley";
+import { CompressedId64Set, Id64 } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, IModelReadRpcInterface, RenderMode } from "@itwin/core-common";
 import { IModelApp, NoRenderApp, OffScreenViewport, PerModelCategoryVisibility, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
@@ -41,15 +41,14 @@ import {
 } from "../Utils.js";
 import { validateHierarchyVisibility, VisibilityExpectations } from "./VisibilityValidation.js";
 
-import type { Id64String } from "@itwin/core-bentley";
-import type { GeometricElement3dProps, QueryBinder } from "@itwin/core-common";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath, HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
-import type { ModelsTreeVisibilityHandlerProps } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
 import type { Visibility } from "../../../../tree-widget-react/components/trees/common/Tooltip.js";
 import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
+import type { ModelsTreeVisibilityHandlerProps } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { GeometricElement3dProps, QueryBinder } from "@itwin/core-common";
+import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath, HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+import type { Id64String } from "@itwin/core-bentley";
 import type { ValidateNodeProps } from "./VisibilityValidation.js";
-
 interface VisibilityOverrides {
   models?: Map<Id64String, Visibility>;
   categories?: Map<Id64String, Visibility>;
@@ -2177,7 +2176,6 @@ describe("ModelsTreeVisibilityHandler", () => {
               visibilityExpectations: VisibilityExpectations.all("hidden"),
             });
             await handler.changeVisibility(nodeToChangeVisibility, true);
-
             await validateHierarchyVisibility({
               provider,
               handler,
@@ -2185,7 +2183,6 @@ describe("ModelsTreeVisibilityHandler", () => {
               visibilityExpectations: expectations(createdIds),
             });
             await handler.changeVisibility(nodeToChangeVisibility, false);
-
             await validateHierarchyVisibility({
               provider,
               handler,
@@ -2260,8 +2257,13 @@ describe("ModelsTreeVisibilityHandler", () => {
       const { imodel, ...ids } = buildIModelResult;
       using visibilityTestData = createVisibilityTestData({ imodel });
       const { handler, provider, viewport } = visibilityTestData;
-      await handler.changeVisibility(createModelHierarchyNode({ modelId: ids.model, hasChildren: true }), true);
-
+      await handler.changeVisibility(
+        createModelHierarchyNode({
+          modelId: ids.model,
+          hasChildren: true,
+        }),
+        true,
+      );
       await validateHierarchyVisibility({
         provider,
         handler,
@@ -2359,7 +2361,14 @@ describe("ModelsTreeVisibilityHandler", () => {
       const { imodel, ...ids } = buildIModelResult;
       using visibilityTestData = createVisibilityTestData({ imodel });
       const { handler, provider, viewport } = visibilityTestData;
-      await handler.changeVisibility(createElementHierarchyNode({ modelId: ids.model, categoryId: ids.category, elementId: ids.elementToShow }), true);
+      await handler.changeVisibility(
+        createElementHierarchyNode({
+          modelId: ids.model,
+          categoryId: ids.category,
+          elementId: ids.elementToShow,
+        }),
+        true,
+      );
 
       await validateHierarchyVisibility({
         provider,
@@ -2412,7 +2421,14 @@ describe("ModelsTreeVisibilityHandler", () => {
         visibilityExpectations: VisibilityExpectations.all("hidden"),
       });
 
-      await handler.changeVisibility(createElementHierarchyNode({ modelId: ids.model, categoryId: ids.category, elementId: elementToShow }), true);
+      await handler.changeVisibility(
+        createElementHierarchyNode({
+          modelId: ids.model,
+          categoryId: ids.category,
+          elementId: elementToShow,
+        }),
+        true,
+      );
 
       expect(viewport.alwaysDrawn).to.deep.eq(new Set([elementToShow, ...ids.otherModelElements]));
       await validateHierarchyVisibility({
@@ -2446,7 +2462,6 @@ describe("ModelsTreeVisibilityHandler", () => {
       const { handler, provider, viewport } = visibilityTestData;
       await handler.changeVisibility(createSubjectHierarchyNode({ ids: ["0x1"] }), true);
       viewport.setAlwaysDrawn(new Set([ids.exclusiveElement]), true);
-
       await validateHierarchyVisibility({
         provider,
         handler,
@@ -2482,8 +2497,14 @@ describe("ModelsTreeVisibilityHandler", () => {
       const { imodel, ...ids } = buildIModelResult;
       using visibilityTestData = createVisibilityTestData({ imodel });
       const { handler, provider, viewport } = visibilityTestData;
-      await handler.changeVisibility(createCategoryHierarchyNode({ modelId: ids.model, categoryId: ids.category, hasChildren: true }), true);
-
+      await handler.changeVisibility(
+        createCategoryHierarchyNode({
+          modelId: ids.model,
+          categoryId: ids.category,
+          hasChildren: true,
+        }),
+        true,
+      );
       await validateHierarchyVisibility({
         provider,
         handler,
@@ -2604,7 +2625,6 @@ describe("ModelsTreeVisibilityHandler", () => {
       using visibilityTestData = createVisibilityTestData({ imodel });
       const { handler, provider, viewport } = visibilityTestData;
       await handler.changeVisibility(createSubjectHierarchyNode({ ids: IModel.rootSubjectId }), true);
-
       await handler.changeVisibility(
         createClassGroupingHierarchyNode({
           modelId: ids.model,
@@ -2677,7 +2697,6 @@ describe("ModelsTreeVisibilityHandler", () => {
       using visibilityTestData = createVisibilityTestData({ imodel });
       const { handler, provider, viewport } = visibilityTestData;
       await handler.changeVisibility(createElementHierarchyNode({ modelId: ids.model, categoryId: ids.category2, elementId: ids.element2 }), true);
-      // Need to render frame for always/never drawn change event to fire
 
       await validateHierarchyVisibility({
         provider,
@@ -2699,8 +2718,6 @@ describe("ModelsTreeVisibilityHandler", () => {
         }),
         true,
       );
-      // Need to render frame for always/never drawn change event to fire
-
       await validateHierarchyVisibility({
         provider,
         handler,
@@ -2729,7 +2746,6 @@ describe("ModelsTreeVisibilityHandler", () => {
         });
 
         await handler.changeVisibility(parentCategoryNode, true);
-
         await validateHierarchyVisibility({
           ...props,
           handler,
@@ -2765,7 +2781,6 @@ describe("ModelsTreeVisibilityHandler", () => {
         });
         await handler.changeVisibility(parentCategoryNode, true);
         viewport.setAlwaysDrawn(new Set([...(viewport.alwaysDrawn ?? []), parentElementId]));
-
         await validateHierarchyVisibility({
           ...props,
           handler,
@@ -2807,7 +2822,6 @@ describe("ModelsTreeVisibilityHandler", () => {
         });
         // Changing category for hidden model should put all other categories into Hide overrides
         await handler.changeVisibility(parentCategoryNode, true);
-
         await validateHierarchyVisibility({
           ...props,
           handler,
@@ -2844,7 +2858,6 @@ describe("ModelsTreeVisibilityHandler", () => {
         });
         // Changing category for hidden model should put all other categories into Hide overrides
         await handler.changeVisibility(parentCategoryNode, true);
-
         await validateHierarchyVisibility({
           ...props,
           handler,
@@ -2881,7 +2894,6 @@ describe("ModelsTreeVisibilityHandler", () => {
         });
 
         await handler.changeVisibility(elementNode, true);
-
         await validateHierarchyVisibility({
           ...testProps,
           handler,
@@ -3673,6 +3685,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
           const node = await getNodeMatchingPath(filteredProvider, [keys.model]);
           await handler.changeVisibility(node, true);
+          viewport.renderFrame();
 
           await validateHierarchyVisibility({
             provider: filteredProvider,
@@ -3736,6 +3749,7 @@ describe("ModelsTreeVisibilityHandler", () => {
 
           const node = await getNodeMatchingPath(filteredProvider, [keys.model]);
           await handler.changeVisibility(node, true);
+          viewport.renderFrame();
 
           await validateHierarchyVisibility({
             provider: filteredProvider,
@@ -3767,6 +3781,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           const pathToCategory = [keys.model, filteredCategories[0]];
           const node = await getNodeMatchingPath(filteredProvider, pathToCategory);
           await handler.changeVisibility(node, true);
+          viewport.renderFrame();
 
           const clickedCategoryId = filteredCategories[0].id;
 
@@ -3837,6 +3852,7 @@ describe("ModelsTreeVisibilityHandler", () => {
 
           const node = await getNodeMatchingPath(filteredProvider, [parentSubject]);
           await handler.changeVisibility(node, true);
+          viewport.renderFrame();
 
           await validateHierarchyVisibility({
             provider: filteredProvider,
@@ -3862,6 +3878,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           const pathToCategory = filterPaths[0];
           const node = await getNodeMatchingPath(filteredProvider, pathToCategory);
           await handler.changeVisibility(node, true);
+          viewport.renderFrame();
 
           const visibilityExpectations: ValidateNodeProps["visibilityExpectations"] = {
             subject: (id) => {
@@ -3936,6 +3953,7 @@ describe("ModelsTreeVisibilityHandler", () => {
 
         const node = await getNodeMatchingPath(filteredProvider, pathToFirstElement);
         await handler.changeVisibility(node, true);
+        viewport.renderFrame();
 
         const visibilityExpectations: ValidateNodeProps["visibilityExpectations"] = {
           subject: () => "partial",
