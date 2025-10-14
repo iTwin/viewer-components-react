@@ -35,7 +35,7 @@ import { toggleAllCategories } from "../../common/CategoriesVisibilityUtils.js";
 import { reduceWhile, toVoidPromise } from "../../common/Rxjs.js";
 import { createVisibilityStatus } from "../../common/Tooltip.js";
 import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility.js";
-import { releaseMainThreadOnItemsCount } from "../Utils.js";
+import { getIdsFromChildrenTree, releaseMainThreadOnItemsCount } from "../Utils.js";
 import { AlwaysAndNeverDrawnElementInfo } from "./AlwaysAndNeverDrawnElementInfo.js";
 import { createFilteredTree, parseCategoryKey } from "./FilteredTree.js";
 import { ModelsTreeNode } from "./ModelsTreeNode.js";
@@ -48,6 +48,7 @@ import type { ClassGroupingNodeKey, GroupingHierarchyNode, HierarchyFilteringPat
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { Visibility } from "../../common/Tooltip.js";
 import type { HierarchyVisibilityHandler, HierarchyVisibilityHandlerOverridableMethod, VisibilityStatus } from "../../common/UseHierarchyVisibility.js";
+import type { GetElementsTreeProps } from "./AlwaysAndNeverDrawnElementInfo.js";
 import type { FilteredTree } from "./FilteredTree.js";
 import type { ModelsTreeIdsCache } from "./ModelsTreeIdsCache.js";
 import type { IVisibilityChangeEventListener } from "./VisibilityChangeEventListener.js";
@@ -700,7 +701,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     const viewport = this._props.viewport;
     return forkJoin({
       categories: this._idsCache.getModelCategories(modelId),
-      alwaysDrawnElements: this.getAlwaysDrawnElements({ modelId }),
+      alwaysDrawnElements: this.getAlwaysOrNeverDrawnElements({ modelIds: modelId, setType: "always" }),
     }).pipe(
       mergeMap(async ({ categories, alwaysDrawnElements }) => {
         const alwaysDrawn = this._props.viewport.alwaysDrawn;
@@ -942,8 +943,8 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         const totalCount = this._idsCache.getCategoryElementsCount(modelId, categoryId);
         return forkJoin({
           totalCount,
-          alwaysDrawn: this.getAlwaysDrawnElements({ categoryIds: categoryId, modelId }),
-          neverDrawn: this.getNeverDrawnElements({ categoryIds: categoryId, modelId }),
+          alwaysDrawn: this.getAlwaysOrNeverDrawnElements({ modelIds: modelId, categoryIds: categoryId, setType: "always" }),
+          neverDrawn: this.getAlwaysOrNeverDrawnElements({ modelIds: modelId, categoryIds: categoryId, setType: "never" }),
         }).pipe(
           // There is a known bug:
           // Categories that don't have root elements will make visibility result incorrect
@@ -967,18 +968,16 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     );
   }
 
-  private getAlwaysDrawnElements(props: { categoryIds?: Id64Arg; modelId: Id64String }): Observable<Id64Set> {
-    return this._alwaysAndNeverDrawnElements.getElements({ modelId: props.modelId, categoryIds: props.categoryIds, setType: "always" });
-  }
-
-  private getNeverDrawnElements(props: { categoryIds?: Id64Arg; modelId: Id64String }): Observable<Id64Set> {
-    return this._alwaysAndNeverDrawnElements.getElements({ modelId: props.modelId, categoryIds: props.categoryIds, setType: "never" });
+  private getAlwaysOrNeverDrawnElements(props: GetElementsTreeProps): Observable<Id64Set> {
+    return this._alwaysAndNeverDrawnElements
+      .getElementsTree(props)
+      .pipe(map((childrenTree) => getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ treeEntry }) => treeEntry.isInAlwaysOrNeverDrawnSet })));
   }
 
   private clearAlwaysAndNeverDrawnElements(props: { categoryIds: Id64Arg; modelId: Id64String }) {
     return forkJoin({
-      alwaysDrawn: this.getAlwaysDrawnElements(props),
-      neverDrawn: this.getNeverDrawnElements(props),
+      alwaysDrawn: this.getAlwaysOrNeverDrawnElements({ modelIds: props.modelId, categoryIds: props.categoryIds, setType: "always" }),
+      neverDrawn: this.getAlwaysOrNeverDrawnElements({ modelIds: props.modelId, categoryIds: props.categoryIds, setType: "never" }),
     }).pipe(
       map(({ alwaysDrawn, neverDrawn }) => {
         const viewport = this._props.viewport;
