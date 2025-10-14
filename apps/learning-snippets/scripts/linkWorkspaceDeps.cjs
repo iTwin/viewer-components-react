@@ -15,6 +15,10 @@ const packages = [
     name: "@itwin/property-grid-react",
     dir: "property-grid",
   },
+  {
+    name: "@itwin/quantity-formatting-react",
+    dir: "quantity-formatting",
+  },
 ];
 
 linkPackages();

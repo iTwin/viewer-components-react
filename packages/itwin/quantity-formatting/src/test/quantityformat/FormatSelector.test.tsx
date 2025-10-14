@@ -56,6 +56,7 @@ describe("FormatSelector", () => {
     name: "TestFormatSet",
     label: "Test Format Set",
     description: "Test format set for unit tests",
+    unitSystem: "metric",
     formats: {
       "length-format": mockFormatDefinition1,
       "area-format": mockFormatDefinition2,
@@ -242,6 +243,7 @@ describe("FormatSelector", () => {
         name: "NoLabelsSet",
         label: "No Labels Set",
         description: "Format set without labels",
+        unitSystem: "metric",
         formats: {
           "format-key-1": {
             precision: 2,
@@ -260,6 +262,7 @@ describe("FormatSelector", () => {
       const formatSetWithoutDescriptions: FormatSet = {
         name: "NoDescSet",
         label: "No Descriptions Set",
+        unitSystem: "metric",
         description: "Format set without descriptions",
         formats: {
           "format-key-1": {
