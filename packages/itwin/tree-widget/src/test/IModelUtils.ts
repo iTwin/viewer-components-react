@@ -650,31 +650,34 @@ export async function createLocalIModel(name: string, localPath: string, cb: (bu
 }
 
 export class BackendTestIModelBuilder implements TestIModelBuilder {
-  constructor(private readonly _iModel: IModelDb) {}
+  readonly #iModel: IModelDb;
+  constructor(iModel: IModelDb) {
+    this.#iModel = iModel;
+  }
 
   public insertModel(props: ModelProps): string {
-    return this._iModel.models.insertModel(props);
+    return this.#iModel.models.insertModel(props);
   }
 
   public insertElement(props: ElementProps): string {
-    return this._iModel.elements.insertElement(props);
+    return this.#iModel.elements.insertElement(props);
   }
 
   public insertAspect(props: ElementAspectProps): string {
-    return this._iModel.elements.insertAspect(props);
+    return this.#iModel.elements.insertAspect(props);
   }
 
   public insertRelationship(props: RelationshipProps): string {
-    return this._iModel.relationships.insertInstance(props);
+    return this.#iModel.relationships.insertInstance(props);
   }
 
   public createCode(scopeModelId: string, codeSpecName: BisCodeSpec, codeValue: string): Code {
-    const spec = this._iModel.codeSpecs.getByName(codeSpecName).id;
+    const spec = this.#iModel.codeSpecs.getByName(codeSpecName).id;
     return new Code({ scope: scopeModelId, spec, value: codeValue });
   }
 
   public async importSchema(schemaXml: string): Promise<void> {
     // eslint-disable-next-line @itwin/no-internal
-    await this._iModel.importSchemaStrings([schemaXml]);
+    await this.#iModel.importSchemaStrings([schemaXml]);
   }
 }
