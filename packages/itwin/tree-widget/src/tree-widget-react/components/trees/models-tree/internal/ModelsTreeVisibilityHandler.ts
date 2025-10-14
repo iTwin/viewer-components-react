@@ -48,7 +48,7 @@ import type { ClassGroupingNodeKey, GroupingHierarchyNode, HierarchyFilteringPat
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { Visibility } from "../../common/Tooltip.js";
 import type { HierarchyVisibilityHandler, HierarchyVisibilityHandlerOverridableMethod, VisibilityStatus } from "../../common/UseHierarchyVisibility.js";
-import type { GetElementChildrenTreeProps } from "./AlwaysAndNeverDrawnElementInfo.js";
+import type { GetElementsTreeProps } from "./AlwaysAndNeverDrawnElementInfo.js";
 import type { FilteredTree } from "./FilteredTree.js";
 import type { ModelsTreeIdsCache } from "./ModelsTreeIdsCache.js";
 import type { IVisibilityChangeEventListener } from "./VisibilityChangeEventListener.js";
@@ -968,7 +968,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     );
   }
 
-  private getAlwaysOrNeverDrawnElements(props: GetElementChildrenTreeProps): Observable<Id64Set> {
+  private getAlwaysOrNeverDrawnElements(props: GetElementsTreeProps): Observable<Id64Set> {
     return this._alwaysAndNeverDrawnElements
       .getElementsTree(props)
       .pipe(map((childrenTree) => getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ treeEntry }) => treeEntry.isInAlwaysOrNeverDrawnSet })));
