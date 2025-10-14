@@ -42,25 +42,28 @@ export const SET_CHANGE_DEBOUNCE_TIME = 20;
 type SetType = "always" | "never";
 
 /** @internal */
-export interface GetElementChildrenTreeProps {
-  /**
-   * Ids of parent nodes.
-   *
-   * The array should have the following structure:
-   * - 0 index: modelIds (can be subModel ids)
-   * - 1 index: categoryIds
-   * - Then parentIds for which to get the children tree.
-   *
-   * Array can be of any size.
-   */
-  parentInstanceNodeIds: Array<Id64Arg>;
+export type GetElementChildrenTreeProps = {
+  /** Only always/never drawn elements that have the specified models will be returned. */
+  modelIds: Id64Arg;
   /**
    * The type of set from which tree should be retrieved.
    * `always` - ChildrenTree will be created from `alwaysDrawn` set.
    * `never` - ChildrenTree will be created from `neverDrawn` set.
    */
   setType: SetType;
-}
+} & ({
+  /**
+   * Categories of elements that have no parents.
+   * - When defined elements that have no parents (that have specified categories) and their children (direct and indirect) will be returned (that are in always/never drawn list).
+   * - When undefined, all root elements' categories will be used.
+   */
+  categoryIds?: Id64Arg
+} | {
+  /** Categories of elements that have no parents. Elements that have no parents (that have specified categories) and their children (direct and indirect) will be returned (that are in always/never drawn list). */
+  categoryIds: Id64Arg;
+  /** Path to element for which to get its' child always/never drawn elements. When undefined, models and categories will be used to get the always/never drawn elements. */
+  parentElementIdsPath?: Array<Id64Arg>
+})
 
 /**
  * - `categoryId` is assigned only to the elements in always/never drawn set.
@@ -101,16 +104,20 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
     this.#suppress.next(false);
   }
 
-  public getElementChildrenTree({ setType, parentInstanceNodeIds }: GetElementChildrenTreeProps): Observable<CachedNodesMap> {
+  public getElementChildrenTree({ setType, modelIds, ...props }: GetElementChildrenTreeProps): Observable<CachedNodesMap> {
     const cache = setType === "always" ? this.#alwaysDrawn : this.#neverDrawn;
     const getElements = (rootTreeNodes: CachedNodesMap | undefined): CachedNodesMap => {
       if (!rootTreeNodes) {
         return new Map();
       }
-      if (parentInstanceNodeIds.length === 0) {
-        return rootTreeNodes;
+      const pathToElements = [modelIds];
+      if (props.categoryIds) {
+        pathToElements.push(props.categoryIds);
+        if ("parentElementIdsPath" in props && props.parentElementIdsPath) {
+          props.parentElementIdsPath.forEach((parentElementIds) => pathToElements.push(parentElementIds));
+        }
       }
-      return this.getChildrenTree({ currentChildrenTree: rootTreeNodes, parentInstanceNodeIds, currentIdsIndex: 0 });
+      return this.getChildrenTree({ currentChildrenTree: rootTreeNodes, pathToElements, currentIdsIndex: 0 });
     };
 
     return !cache.latestCacheEntryValue
@@ -125,23 +132,23 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
 
   private getChildrenTree<T extends object>({
     currentChildrenTree,
-    parentInstanceNodeIds,
+    pathToElements,
     currentIdsIndex,
   }: {
     currentChildrenTree: ChildrenTree<T>;
-    parentInstanceNodeIds: Array<Id64Arg>;
+    pathToElements: Array<Id64Arg>;
     currentIdsIndex: number;
   }): ChildrenTree<T> {
-    if (currentIdsIndex >= parentInstanceNodeIds.length) {
+    if (currentIdsIndex >= pathToElements.length) {
       return currentChildrenTree;
     }
     const result: ChildrenTree<T> = new Map();
-    for (const parentId of Id64.iterable(parentInstanceNodeIds[currentIdsIndex])) {
+    for (const parentId of Id64.iterable(pathToElements[currentIdsIndex])) {
       const entry = currentChildrenTree.get(parentId);
       if (entry?.children) {
         const childrenTreeOfChildren = this.getChildrenTree({
           currentChildrenTree: entry.children,
-          parentInstanceNodeIds,
+          pathToElements,
           currentIdsIndex: currentIdsIndex + 1,
         });
         childrenTreeOfChildren.forEach((val, childId) => result.set(childId, val));

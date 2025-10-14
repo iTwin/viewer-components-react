@@ -48,6 +48,7 @@ import type { ClassGroupingNodeKey, GroupingHierarchyNode, HierarchyFilteringPat
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { Visibility } from "../../common/Tooltip.js";
 import type { HierarchyVisibilityHandler, HierarchyVisibilityHandlerOverridableMethod, VisibilityStatus } from "../../common/UseHierarchyVisibility.js";
+import type { GetElementChildrenTreeProps } from "./AlwaysAndNeverDrawnElementInfo.js";
 import type { FilteredTree } from "./FilteredTree.js";
 import type { ModelsTreeIdsCache } from "./ModelsTreeIdsCache.js";
 import type { IVisibilityChangeEventListener } from "./VisibilityChangeEventListener.js";
@@ -700,7 +701,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     const viewport = this._props.viewport;
     return forkJoin({
       categories: this._idsCache.getModelCategories(modelId),
-      alwaysDrawnElements: this.getAlwaysDrawnElements({ parentInstanceNodesIds: [modelId] }),
+      alwaysDrawnElements: this.getAlwaysOrNeverDrawnElements({ modelIds: modelId, setType: "always" }),
     }).pipe(
       mergeMap(async ({ categories, alwaysDrawnElements }) => {
         const alwaysDrawn = this._props.viewport.alwaysDrawn;
@@ -942,8 +943,8 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         const totalCount = this._idsCache.getCategoryElementsCount(modelId, categoryId);
         return forkJoin({
           totalCount,
-          alwaysDrawn: this.getAlwaysDrawnElements({ parentInstanceNodesIds: [modelId, categoryId] }),
-          neverDrawn: this.getNeverDrawnElements({ parentInstanceNodesIds: [modelId, categoryId] }),
+          alwaysDrawn: this.getAlwaysOrNeverDrawnElements({ modelIds: modelId, categoryIds: categoryId, setType: "always" }),
+          neverDrawn: this.getAlwaysOrNeverDrawnElements({ modelIds: modelId, categoryIds: categoryId, setType: "never" }),
         }).pipe(
           // There is a known bug:
           // Categories that don't have root elements will make visibility result incorrect
@@ -967,22 +968,16 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     );
   }
 
-  private getAlwaysDrawnElements({ parentInstanceNodesIds }: { parentInstanceNodesIds: Array<Id64Arg> }): Observable<Id64Set> {
+  private getAlwaysOrNeverDrawnElements(props: GetElementChildrenTreeProps): Observable<Id64Set> {
     return this._alwaysAndNeverDrawnElements
-      .getElementChildrenTree({ parentInstanceNodeIds: parentInstanceNodesIds, setType: "always" })
-      .pipe(map((childrenTree) => getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ treeEntry }) => treeEntry.isInAlwaysOrNeverDrawnSet })));
-  }
-
-  private getNeverDrawnElements({ parentInstanceNodesIds }: { parentInstanceNodesIds: Array<Id64Arg> }): Observable<Id64Set> {
-    return this._alwaysAndNeverDrawnElements
-      .getElementChildrenTree({ parentInstanceNodeIds: parentInstanceNodesIds, setType: "never" })
+      .getElementChildrenTree(props)
       .pipe(map((childrenTree) => getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ treeEntry }) => treeEntry.isInAlwaysOrNeverDrawnSet })));
   }
 
   private clearAlwaysAndNeverDrawnElements(props: { categoryIds: Id64Arg; modelId: Id64String }) {
     return forkJoin({
-      alwaysDrawn: this.getAlwaysDrawnElements({ parentInstanceNodesIds: [props.modelId, props.categoryIds] }),
-      neverDrawn: this.getNeverDrawnElements({ parentInstanceNodesIds: [props.modelId, props.categoryIds] }),
+      alwaysDrawn: this.getAlwaysOrNeverDrawnElements({ modelIds: props.modelId, categoryIds: props.categoryIds, setType: "always" }),
+      neverDrawn: this.getAlwaysOrNeverDrawnElements({ modelIds: props.modelId, categoryIds: props.categoryIds, setType: "never" }),
     }).pipe(
       map(({ alwaysDrawn, neverDrawn }) => {
         const viewport = this._props.viewport;
