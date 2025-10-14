@@ -20,7 +20,7 @@ export type IModelName = (typeof IMODEL_NAMES)[number];
 export type IModelPathsMap = { [_ in IModelName]?: string };
 
 export class Datasets {
-  private static readonly _iModels: IModelPathsMap = {};
+  static readonly #iModels: IModelPathsMap = {};
 
   public static readonly CUSTOM_SCHEMA = {
     schemaName: "PerformanceTests",
@@ -33,7 +33,7 @@ export class Datasets {
   };
 
   public static getIModelPath(name: IModelName): string {
-    return this.verifyInitialized(this._iModels[name]);
+    return this.verifyInitialized(this.#iModels[name]);
   }
 
   public static async initialize(datasetsDirPath: string) {
@@ -41,7 +41,7 @@ export class Datasets {
 
     const promises = IMODEL_NAMES.map(async (key) => {
       const elementCount = 1000 * Number.parseInt(/(\d+)k/.exec(key)![1], 10);
-      this._iModels[key] = await this.createIModel(key, datasetsDirPath, this.getIModelFactory(key, elementCount), !!process.env.RECREATE);
+      this.#iModels[key] = await this.createIModel(key, datasetsDirPath, this.getIModelFactory(key, elementCount), !!process.env.RECREATE);
     });
     await Promise.all(promises);
   }

@@ -10,9 +10,9 @@ import { enableCategoryDisplay, enableSubCategoryDisplay } from "../../common/Ca
 import { createVisibilityStatus } from "../../common/Tooltip.js";
 import { CategoriesTreeNode } from "./CategoriesTreeNode.js";
 
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import type { Visibility } from "../../common/Tooltip.js";
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { HierarchyVisibilityHandler, VisibilityStatus } from "../../common/UseHierarchyVisibility.js";
 import type { CategoriesTreeIdsCache } from "./CategoriesTreeIdsCache.js";
 
@@ -24,17 +24,17 @@ export interface CategoriesVisibilityHandlerProps {
 
 /** @internal */
 export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
-  private _pendingVisibilityChange: any;
-  private _viewport: Viewport;
-  private _idsCache: CategoriesTreeIdsCache;
+  #pendingVisibilityChange: any;
+  #viewport: Viewport;
+  #idsCache: CategoriesTreeIdsCache;
 
   constructor(props: CategoriesVisibilityHandlerProps) {
-    this._idsCache = props.idsCache;
-    this._viewport = props.viewport;
-    this._viewport.onDisplayStyleChanged.addListener(this.onDisplayStyleChanged);
-    this._viewport.onViewedCategoriesChanged.addListener(this.onViewedCategoriesChanged);
-    this._viewport.onViewedCategoriesPerModelChanged.addListener(this.onViewedCategoriesPerModelChanged);
-    this._viewport.onViewedModelsChanged.addListener(this.onViewedModelsChanged);
+    this.#idsCache = props.idsCache;
+    this.#viewport = props.viewport;
+    this.#viewport.onDisplayStyleChanged.addListener(this.onDisplayStyleChanged);
+    this.#viewport.onViewedCategoriesChanged.addListener(this.onViewedCategoriesChanged);
+    this.#viewport.onViewedCategoriesPerModelChanged.addListener(this.onViewedCategoriesPerModelChanged);
+    this.#viewport.onViewedModelsChanged.addListener(this.onViewedModelsChanged);
   }
 
   public dispose() {
@@ -42,11 +42,11 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
   }
 
   public [Symbol.dispose]() {
-    this._viewport.onDisplayStyleChanged.removeListener(this.onDisplayStyleChanged);
-    this._viewport.onViewedCategoriesChanged.removeListener(this.onViewedCategoriesChanged);
-    this._viewport.onViewedCategoriesPerModelChanged.removeListener(this.onViewedCategoriesPerModelChanged);
-    this._viewport.onViewedModelsChanged.removeListener(this.onViewedModelsChanged);
-    clearTimeout(this._pendingVisibilityChange);
+    this.#viewport.onDisplayStyleChanged.removeListener(this.onDisplayStyleChanged);
+    this.#viewport.onViewedCategoriesChanged.removeListener(this.onViewedCategoriesChanged);
+    this.#viewport.onViewedCategoriesPerModelChanged.removeListener(this.onViewedCategoriesPerModelChanged);
+    this.#viewport.onViewedModelsChanged.removeListener(this.onViewedModelsChanged);
+    clearTimeout(this.#pendingVisibilityChange);
   }
 
   public onVisibilityChange = new BeEvent();
@@ -97,10 +97,10 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
 
   private async getSubCategoriesVisibility(subCategoryIds: Id64Array, parentCategoryId: Id64String): Promise<Visibility> {
     let visibility: "visible" | "hidden" | "unknown" = "unknown";
-    const categoryModels = [...(await this._idsCache.getCategoriesElementModels([parentCategoryId])).values()].flat();
+    const categoryModels = [...(await this.#idsCache.getCategoriesElementModels([parentCategoryId])).values()].flat();
     let nonDefaultModelDisplayStatesCount = 0;
     for (const modelId of categoryModels) {
-      if (!this._viewport.view.viewsModel(modelId)) {
+      if (!this.#viewport.view.viewsModel(modelId)) {
         if (visibility === "visible") {
           return "partial";
         }
@@ -108,7 +108,7 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
         ++nonDefaultModelDisplayStatesCount;
         continue;
       }
-      const override = this._viewport.perModelCategoryVisibility.getOverride(modelId, parentCategoryId);
+      const override = this.#viewport.perModelCategoryVisibility.getOverride(modelId, parentCategoryId);
       if (override === PerModelCategoryVisibility.Override.Show) {
         if (visibility === "hidden") {
           return "partial";
@@ -131,7 +131,7 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
       return visibility;
     }
 
-    if (!this._viewport.view.viewsCategory(parentCategoryId)) {
+    if (!this.#viewport.view.viewsCategory(parentCategoryId)) {
       return visibility === "visible" ? "partial" : "hidden";
     }
 
@@ -143,7 +143,7 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
     }
 
     for (const subCategoryId of subCategoryIds) {
-      const isSubCategoryVisible = this._viewport.isSubCategoryVisible(subCategoryId);
+      const isSubCategoryVisible = this.#viewport.isSubCategoryVisible(subCategoryId);
       if (isSubCategoryVisible && visibility === "hidden") {
         return "partial";
       }
@@ -157,14 +157,14 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
   }
 
   private async getDefinitionContainerVisibility(node: HierarchyNode): Promise<Visibility> {
-    const categoryIds = await this._idsCache.getAllContainedCategories(CategoriesVisibilityHandler.getInstanceIdsFromHierarchyNode(node));
+    const categoryIds = await this.#idsCache.getAllContainedCategories(CategoriesVisibilityHandler.getInstanceIdsFromHierarchyNode(node));
     return this.getCategoriesVisibility(categoryIds);
   }
 
   private async getCategoriesVisibility(categoryIds: Id64Array): Promise<Visibility> {
     const subCategoriesVisibilities = await Promise.all(
       categoryIds.map(async (categoryId) => {
-        const subCategories = await this._idsCache.getSubCategories(categoryId);
+        const subCategories = await this.#idsCache.getSubCategories(categoryId);
         return this.getSubCategoriesVisibility(subCategories, categoryId);
       }),
     );
@@ -187,11 +187,11 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
   }
 
   private async enableCategoriesElementModelsVisibility(categoryIds: Id64Array) {
-    const categoriesModelsMap = await this._idsCache.getCategoriesElementModels(categoryIds);
+    const categoriesModelsMap = await this.#idsCache.getCategoriesElementModels(categoryIds);
     const modelIds = [...categoriesModelsMap.values()].flat();
-    const hiddenModels = modelIds.filter((modelId) => !this._viewport.view.viewsModel(modelId));
+    const hiddenModels = modelIds.filter((modelId) => !this.#viewport.view.viewsModel(modelId));
     if (hiddenModels.length > 0) {
-      this._viewport.changeModelDisplay(hiddenModels, true);
+      this.#viewport.changeModelDisplay(hiddenModels, true);
     }
   }
 
@@ -218,7 +218,7 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
 
   private async changeDefinitionContainerVisibility(node: HierarchyNode, on: boolean) {
     const definitionContainerId = CategoriesVisibilityHandler.getInstanceIdsFromHierarchyNode(node);
-    const childCategories = await this._idsCache.getAllContainedCategories(definitionContainerId);
+    const childCategories = await this.#idsCache.getAllContainedCategories(definitionContainerId);
     return this.changeCategoryVisibility(childCategories, on);
   }
 
@@ -239,13 +239,13 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
   };
 
   private onVisibilityChangeInternal() {
-    if (this._pendingVisibilityChange) {
+    if (this.#pendingVisibilityChange) {
       return;
     }
 
-    this._pendingVisibilityChange = setTimeout(() => {
+    this.#pendingVisibilityChange = setTimeout(() => {
       this.onVisibilityChange.raiseEvent();
-      this._pendingVisibilityChange = undefined;
+      this.#pendingVisibilityChange = undefined;
     }, 0);
   }
 
@@ -254,10 +254,10 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
   }
 
   private async changeCategoryState(ids: string[], enabled: boolean, enableAllSubCategories: boolean) {
-    await enableCategoryDisplay(this._viewport, ids, enabled, enableAllSubCategories);
+    await enableCategoryDisplay(this.#viewport, ids, enabled, enableAllSubCategories);
   }
 
   private changeSubCategoryState(key: string, enabled: boolean) {
-    enableSubCategoryDisplay(this._viewport, key, enabled);
+    enableSubCategoryDisplay(this.#viewport, key, enabled);
   }
 }
