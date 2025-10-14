@@ -41,8 +41,7 @@ export const SET_CHANGE_DEBOUNCE_TIME = 20;
 
 type SetType = "always" | "never";
 
-/** @internal */
-export type GetElementChildrenTreeProps = {
+interface GetElementsTreeByModelProps {
   /** Only always/never drawn elements that have the specified models will be returned. */
   modelIds: Id64Arg;
   /**
@@ -51,22 +50,22 @@ export type GetElementChildrenTreeProps = {
    * `never` - ChildrenTree will be created from `neverDrawn` set.
    */
   setType: SetType;
-} & (
-  | {
-      /**
-       * Categories of elements that have no parents.
-       * - When defined elements that have no parents (that have specified categories) and their children (direct and indirect) will be returned (that are in always/never drawn list).
-       * - When undefined, all root elements' categories will be used.
-       */
-      categoryIds?: Id64Arg;
-    }
-  | {
-      /** Categories of elements that have no parents. Elements that have no parents (that have specified categories) and their children (direct and indirect) will be returned (that are in always/never drawn list). */
-      categoryIds: Id64Arg;
-      /** Path to element for which to get its' child always/never drawn elements. When undefined, models and categories will be used to get the always/never drawn elements. */
-      parentElementIdsPath?: Array<Id64Arg>;
-    }
-);
+}
+interface GetElementsTreeByCategoryProps extends GetElementsTreeByModelProps {
+  /**
+   * Categories of root elements.
+   *
+   * Elements are filtered by given categories. Children of those elements are also included, no matter their category.
+   */
+  categoryIds: Id64Arg;
+}
+interface GetElementsTreeByElementProps extends GetElementsTreeByCategoryProps {
+  /** Path to element for which to get its' child always/never drawn elements. When undefined, models and categories will be used to get the always/never drawn elements. */
+  parentElementIdsPath: Array<Id64Arg>;
+}
+
+/** @internal */
+export type GetElementsTreeProps = GetElementsTreeByModelProps | GetElementsTreeByCategoryProps | GetElementsTreeByElementProps;
 
 /**
  * - `categoryId` is assigned only to the elements in always/never drawn set.
@@ -107,14 +106,14 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
     this.#suppress.next(false);
   }
 
-  public getElementChildrenTree({ setType, modelIds, ...props }: GetElementChildrenTreeProps): Observable<CachedNodesMap> {
+  public getElementsTree({ setType, modelIds, ...props }: GetElementsTreeProps): Observable<CachedNodesMap> {
     const cache = setType === "always" ? this.#alwaysDrawn : this.#neverDrawn;
     const getElements = (rootTreeNodes: CachedNodesMap | undefined): CachedNodesMap => {
       if (!rootTreeNodes) {
         return new Map();
       }
       const pathToElements = [modelIds];
-      if (props.categoryIds) {
+      if ("categoryIds" in props && props.categoryIds) {
         pathToElements.push(props.categoryIds);
         if ("parentElementIdsPath" in props && props.parentElementIdsPath) {
           props.parentElementIdsPath.forEach((parentElementIds) => pathToElements.push(parentElementIds));

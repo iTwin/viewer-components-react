@@ -970,7 +970,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
 
   private getAlwaysOrNeverDrawnElements(props: GetElementChildrenTreeProps): Observable<Id64Set> {
     return this._alwaysAndNeverDrawnElements
-      .getElementChildrenTree(props)
+      .getElementsTree(props)
       .pipe(map((childrenTree) => getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ treeEntry }) => treeEntry.isInAlwaysOrNeverDrawnSet })));
   }
 
