@@ -3514,7 +3514,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         imodel,
         filterPaths,
       }: Parameters<typeof createVisibilityTestData>[0] & { filterPaths: HierarchyNodeIdentifiersPath[] }) {
-const commonProps = createCommonProps({ imodel });
+        const commonProps = createCommonProps({ imodel });
         const filteredVisibilityHandler = createModelsTreeVisibilityHandler({ ...commonProps, filteredPaths: filterPaths });
         const defaultVisibilityHandler = createModelsTreeVisibilityHandler(commonProps);
         const defaultProvider = createProvider(commonProps);
