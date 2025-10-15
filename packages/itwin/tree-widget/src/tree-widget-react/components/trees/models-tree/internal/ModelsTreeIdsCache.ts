@@ -10,10 +10,10 @@ import { collect } from "../../common/Rxjs.js";
 import { pushToMap } from "../../common/Utils.js";
 
 import type { Subscription } from "rxjs";
-import type { InstanceKey } from "@itwin/presentation-shared";
-import type { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { InstanceKey } from "@itwin/presentation-shared";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import type { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
 
 interface SubjectInfo {
   parentSubject: Id64String | undefined;
@@ -31,27 +31,28 @@ type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeD
 
 /** @internal */
 export class ModelsTreeIdsCache implements Disposable {
-  private readonly _categoryElementCounts: ModelCategoryElementsCountCache;
-  private _subjectInfos: Promise<Map<Id64String, SubjectInfo>> | undefined;
-  private _parentSubjectIds: Promise<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
-  private _modelInfos: Promise<Map<Id64String, ModelInfo>> | undefined;
-  private _modelWithCategoryModeledElements: Promise<Map<string, Id64Set>> | undefined;
-  private _modelKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath[]>>;
-  private _subjectKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath>>;
-  private _categoryKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath[]>>;
+  readonly #categoryElementCounts: ModelCategoryElementsCountCache;
+  #subjectInfos: Promise<Map<Id64String, SubjectInfo>> | undefined;
+  #parentSubjectIds: Promise<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
+  #modelInfos: Promise<Map<Id64String, ModelInfo>> | undefined;
+  #modelWithCategoryModeledElements: Promise<Map<string, Id64Set>> | undefined;
+  #modelKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath[]>>;
+  #subjectKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath>>;
+  #categoryKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath[]>>;
+  #queryExecutor: LimitingECSqlQueryExecutor;
+  #hierarchyConfig: ModelsTreeHierarchyConfiguration;
 
-  constructor(
-    private _queryExecutor: LimitingECSqlQueryExecutor,
-    private _hierarchyConfig: ModelsTreeHierarchyConfiguration,
-  ) {
-    this._categoryElementCounts = new ModelCategoryElementsCountCache(async (input) => this.queryCategoryElementCounts(input));
-    this._modelKeyPaths = new Map();
-    this._subjectKeyPaths = new Map();
-    this._categoryKeyPaths = new Map();
+  constructor(queryExecutor: LimitingECSqlQueryExecutor, hierarchyConfig: ModelsTreeHierarchyConfiguration) {
+    this.#hierarchyConfig = hierarchyConfig;
+    this.#queryExecutor = queryExecutor;
+    this.#categoryElementCounts = new ModelCategoryElementsCountCache(async (input) => this.queryCategoryElementCounts(input));
+    this.#modelKeyPaths = new Map();
+    this.#subjectKeyPaths = new Map();
+    this.#categoryKeyPaths = new Map();
   }
 
   public [Symbol.dispose]() {
-    this._categoryElementCounts[Symbol.dispose]();
+    this.#categoryElementCounts[Symbol.dispose]();
   }
 
   private async *querySubjects(): AsyncIterableIterator<{ id: Id64String; parentId?: Id64String; targetPartitionId?: Id64String; hideInHierarchy: boolean }> {
@@ -64,7 +65,7 @@ export class ModelsTreeIdsCache implements Disposable {
           FROM bis.GeometricModel3d m
           WHERE m.ECInstanceId = HexToId(json_extract(s.JsonProperties, '$.Subject.Model.TargetPartition'))
             AND NOT m.IsPrivate
-            AND EXISTS (SELECT 1 FROM ${this._hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)
+            AND EXISTS (SELECT 1 FROM ${this.#hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)
         ) targetPartitionId,
         CASE
           WHEN (
@@ -75,7 +76,7 @@ export class ModelsTreeIdsCache implements Disposable {
         END hideInHierarchy
       FROM bis.Subject s
     `;
-    for await (const row of this._queryExecutor.createQueryReader({ ecsql: subjectsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this.#queryExecutor.createQueryReader({ ecsql: subjectsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
       yield { id: row.id, parentId: row.parentId, targetPartitionId: row.targetPartitionId, hideInHierarchy: !!row.hideInHierarchy };
     }
   }
@@ -87,15 +88,15 @@ export class ModelsTreeIdsCache implements Disposable {
       INNER JOIN bis.GeometricModel3d m ON m.ModeledElement.Id = p.ECInstanceId
       WHERE
         NOT m.IsPrivate
-        ${this._hierarchyConfig.showEmptyModels ? "" : `AND EXISTS (SELECT 1 FROM ${this._hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)`}
+        ${this.#hierarchyConfig.showEmptyModels ? "" : `AND EXISTS (SELECT 1 FROM ${this.#hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)`}
     `;
-    for await (const row of this._queryExecutor.createQueryReader({ ecsql: modelsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this.#queryExecutor.createQueryReader({ ecsql: modelsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
       yield { id: row.id, parentId: row.parentId };
     }
   }
 
   private async getSubjectInfos() {
-    this._subjectInfos ??= (async () => {
+    this.#subjectInfos ??= (async () => {
       const [subjectInfos, targetPartitionSubjects] = await Promise.all([
         (async () => {
           const result = new Map<Id64String, SubjectInfo>();
@@ -140,12 +141,12 @@ export class ModelsTreeIdsCache implements Disposable {
 
       return subjectInfos;
     })();
-    return this._subjectInfos;
+    return this.#subjectInfos;
   }
 
   /** Returns ECInstanceIDs of Subjects that either have direct Model or at least one child Subject with a Model. */
   public async getParentSubjectIds(): Promise<Id64String[]> {
-    this._parentSubjectIds ??= (async () => {
+    this.#parentSubjectIds ??= (async () => {
       const subjectInfos = await this.getSubjectInfos();
       const parentSubjectIds = new Set<Id64String>();
       subjectInfos.forEach((subjectInfo, subjectId) => {
@@ -160,7 +161,7 @@ export class ModelsTreeIdsCache implements Disposable {
       });
       return [...parentSubjectIds];
     })();
-    return this._parentSubjectIds;
+    return this.#parentSubjectIds;
   }
 
   /**
@@ -226,14 +227,14 @@ export class ModelsTreeIdsCache implements Disposable {
   }
 
   public async createSubjectInstanceKeysPath(targetSubjectId: Id64String): Promise<HierarchyNodeIdentifiersPath> {
-    let entry = this._subjectKeyPaths.get(targetSubjectId);
+    let entry = this.#subjectKeyPaths.get(targetSubjectId);
     if (!entry) {
       entry = (async () => {
         const subjectInfos = await this.getSubjectInfos();
         const result = new Array<InstanceKey>();
         let currParentId: Id64String | undefined = targetSubjectId;
         while (currParentId) {
-          if (this._hierarchyConfig.hideRootSubject && currParentId === IModel.rootSubjectId) {
+          if (this.#hierarchyConfig.hideRootSubject && currParentId === IModel.rootSubjectId) {
             break;
           }
           const parentInfo = subjectInfos.get(currParentId);
@@ -244,7 +245,7 @@ export class ModelsTreeIdsCache implements Disposable {
         }
         return result.reverse();
       })();
-      this._subjectKeyPaths.set(targetSubjectId, entry);
+      this.#subjectKeyPaths.set(targetSubjectId, entry);
     }
     return entry;
   }
@@ -262,10 +263,10 @@ export class ModelsTreeIdsCache implements Disposable {
         m.IsPrivate isModelPrivate,
         MAX(IIF(this.Parent.Id IS NULL, 1, 0)) isRootElementCategory
       FROM BisCore.Model m
-      JOIN ${this._hierarchyConfig.elementClassSpecification} this ON m.ECInstanceId = this.Model.Id
+      JOIN ${this.#hierarchyConfig.elementClassSpecification} this ON m.ECInstanceId = this.Model.Id
       GROUP BY modelId, categoryId, isModelPrivate
     `;
-    for await (const row of this._queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this.#queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
       yield { modelId: row.modelId, categoryId: row.categoryId, isModelPrivate: !!row.isModelPrivate, isRootElementCategory: !!row.isRootElementCategory };
     }
   }
@@ -277,18 +278,18 @@ export class ModelsTreeIdsCache implements Disposable {
         pe.Category.Id categoryId,
         pe.Model.Id modelId
       FROM BisCore.Model m
-      JOIN ${this._hierarchyConfig.elementClassSpecification} pe ON pe.ECInstanceId = m.ModeledElement.Id
+      JOIN ${this.#hierarchyConfig.elementClassSpecification} pe ON pe.ECInstanceId = m.ModeledElement.Id
       WHERE
         m.IsPrivate = false
-        AND m.ECInstanceId IN (SELECT Model.Id FROM ${this._hierarchyConfig.elementClassSpecification})
+        AND m.ECInstanceId IN (SELECT Model.Id FROM ${this.#hierarchyConfig.elementClassSpecification})
     `;
-    for await (const row of this._queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this.#queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
       yield { modelId: row.modelId, categoryId: row.categoryId, modeledElementId: row.modeledElementId };
     }
   }
 
   private async getModelWithCategoryModeledElements() {
-    this._modelWithCategoryModeledElements ??= (async () => {
+    this.#modelWithCategoryModeledElements ??= (async () => {
       const modelWithCategoryModeledElements = new Map<Id64String, Id64Set>();
       for await (const { modelId, categoryId, modeledElementId } of this.queryModeledElements()) {
         const key = `${modelId}-${categoryId}`;
@@ -301,11 +302,11 @@ export class ModelsTreeIdsCache implements Disposable {
       }
       return modelWithCategoryModeledElements;
     })();
-    return this._modelWithCategoryModeledElements;
+    return this.#modelWithCategoryModeledElements;
   }
 
   private async getModelInfos() {
-    this._modelInfos ??= (async () => {
+    this.#modelInfos ??= (async () => {
       const modelInfos = new Map<Id64String, { categories: Map<Id64String, { isRootElementCategory: boolean }>; isModelPrivate: boolean }>();
       for await (const { modelId, categoryId, isModelPrivate, isRootElementCategory } of this.queryModelCategories()) {
         const entry = modelInfos.get(modelId);
@@ -318,7 +319,7 @@ export class ModelsTreeIdsCache implements Disposable {
       }
       return modelInfos;
     })();
-    return this._modelInfos;
+    return this.#modelInfos;
   }
 
   public async getAllCategories(): Promise<Id64Set> {
@@ -358,7 +359,7 @@ export class ModelsTreeIdsCache implements Disposable {
   }
 
   public async createModelInstanceKeyPaths(modelId: Id64String): Promise<HierarchyNodeIdentifiersPath[]> {
-    let entry = this._modelKeyPaths.get(modelId);
+    let entry = this.#modelKeyPaths.get(modelId);
     if (!entry) {
       entry = (async () => {
         const result = new Array<HierarchyNodeIdentifiersPath>();
@@ -372,7 +373,7 @@ export class ModelsTreeIdsCache implements Disposable {
         return result;
       })();
 
-      this._modelKeyPaths.set(modelId, entry);
+      this.#modelKeyPaths.set(modelId, entry);
     }
     return entry;
   }
@@ -397,13 +398,13 @@ export class ModelsTreeIdsCache implements Disposable {
         // long time - instead, split it into smaller chunks
         bufferCount(100),
         mergeMap(async (whereClauses) => {
-          const reader = this._queryExecutor.createQueryReader(
+          const reader = this.#queryExecutor.createQueryReader(
             {
               ctes: [
                 `
                   CategoryElements(id, modelId, categoryId) AS (
                     SELECT ECInstanceId, Model.Id, Category.Id
-                    FROM ${this._hierarchyConfig.elementClassSpecification}
+                    FROM ${this.#hierarchyConfig.elementClassSpecification}
                     WHERE
                       Parent.Id IS NULL
                       AND (
@@ -413,7 +414,7 @@ export class ModelsTreeIdsCache implements Disposable {
                     UNION ALL
 
                     SELECT c.ECInstanceId, p.modelId, p.categoryId
-                    FROM ${this._hierarchyConfig.elementClassSpecification} c
+                    FROM ${this.#hierarchyConfig.elementClassSpecification} c
                     JOIN CategoryElements p ON c.Parent.Id = p.id
                   )
                 `,
@@ -446,11 +447,11 @@ export class ModelsTreeIdsCache implements Disposable {
   }
 
   public async getCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Promise<number> {
-    return this._categoryElementCounts.getCategoryElementsCount(modelId, categoryId);
+    return this.#categoryElementCounts.getCategoryElementsCount(modelId, categoryId);
   }
 
   public async createCategoryInstanceKeyPaths(categoryId: Id64String): Promise<HierarchyNodeIdentifiersPath[]> {
-    let entry = this._categoryKeyPaths.get(categoryId);
+    let entry = this.#categoryKeyPaths.get(categoryId);
     if (!entry) {
       entry = (async () => {
         const result = new Set<Id64String>();
@@ -471,7 +472,7 @@ export class ModelsTreeIdsCache implements Disposable {
         }
         return categoryPaths;
       })();
-      this._categoryKeyPaths.set(categoryId, entry);
+      this.#categoryKeyPaths.set(categoryId, entry);
     }
     return entry;
   }
@@ -494,25 +495,24 @@ function forEachChildSubject(
 }
 
 class ModelCategoryElementsCountCache {
-  private _cache = new Map<string, Subject<number>>();
-  private _requestsStream = new Subject<{ modelId: Id64String; categoryId: Id64String }>();
-  private _subscription: Subscription;
-
+  #cache = new Map<string, Subject<number>>();
+  #requestsStream = new Subject<{ modelId: Id64String; categoryId: Id64String }>();
+  #subscription: Subscription;
   public constructor(
-    private _loader: (
+    loader: (
       input: Array<{ modelId: Id64String; categoryId: Id64String }>,
     ) => Promise<Array<{ modelId: Id64String; categoryId: Id64String; elementsCount: number }>>,
   ) {
-    this._subscription = this._requestsStream
+    this.#subscription = this.#requestsStream
       .pipe(
         bufferTime(20),
         filter((requests) => requests.length > 0),
-        mergeMap(async (requests) => this._loader(requests)),
+        mergeMap(async (requests) => loader(requests)),
         mergeAll(),
       )
       .subscribe({
         next: ({ modelId, categoryId, elementsCount }) => {
-          const subject = this._cache.get(`${modelId}${categoryId}`);
+          const subject = this.#cache.get(`${modelId}${categoryId}`);
           assert(!!subject);
           subject.next(elementsCount);
         },
@@ -520,19 +520,19 @@ class ModelCategoryElementsCountCache {
   }
 
   public [Symbol.dispose]() {
-    this._subscription.unsubscribe();
+    this.#subscription.unsubscribe();
   }
 
   public async getCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Promise<number> {
     const cacheKey = `${modelId}${categoryId}`;
-    let result = this._cache.get(cacheKey);
+    let result = this.#cache.get(cacheKey);
     if (result !== undefined) {
       return firstValueFrom(result);
     }
 
     result = new ReplaySubject(1);
-    this._cache.set(cacheKey, result);
-    this._requestsStream.next({ modelId, categoryId });
+    this.#cache.set(cacheKey, result);
+    this.#requestsStream.next({ modelId, categoryId });
     return firstValueFrom(result);
   }
 }

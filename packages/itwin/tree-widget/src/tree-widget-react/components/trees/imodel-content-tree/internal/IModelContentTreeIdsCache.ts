@@ -22,11 +22,14 @@ interface ModelInfo {
 
 /** @internal */
 export class IModelContentTreeIdsCache {
-  private _subjectInfos: Promise<Map<Id64String, SubjectInfo>> | undefined;
-  private _parentSubjectIds: Promise<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
-  private _modelInfos: Promise<Map<Id64String, ModelInfo>> | undefined;
+  #subjectInfos: Promise<Map<Id64String, SubjectInfo>> | undefined;
+  #parentSubjectIds: Promise<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
+  #modelInfos: Promise<Map<Id64String, ModelInfo>> | undefined;
+  #queryExecutor: LimitingECSqlQueryExecutor;
 
-  constructor(private _queryExecutor: LimitingECSqlQueryExecutor) {}
+  constructor(queryExecutor: LimitingECSqlQueryExecutor) {
+    this.#queryExecutor = queryExecutor;
+  }
 
   private async *querySubjects(): AsyncIterableIterator<{ id: Id64String; parentId?: Id64String; targetPartitionId?: Id64String; hideInHierarchy: boolean }> {
     const subjectsQuery = `
@@ -49,7 +52,7 @@ export class IModelContentTreeIdsCache {
         END hideInHierarchy
       FROM bis.Subject s
     `;
-    for await (const row of this._queryExecutor.createQueryReader({ ecsql: subjectsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this.#queryExecutor.createQueryReader({ ecsql: subjectsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
       yield { id: row.id, parentId: row.parentId, targetPartitionId: row.targetPartitionId, hideInHierarchy: !!row.hideInHierarchy };
     }
   }
@@ -61,13 +64,13 @@ export class IModelContentTreeIdsCache {
       INNER JOIN bis.Model m ON m.ModeledElement.Id = p.ECInstanceId
       WHERE NOT m.IsPrivate
     `;
-    for await (const row of this._queryExecutor.createQueryReader({ ecsql: modelsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this.#queryExecutor.createQueryReader({ ecsql: modelsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
       yield { id: row.id, parentId: row.parentId };
     }
   }
 
   private async getSubjectInfos() {
-    this._subjectInfos ??= (async () => {
+    this.#subjectInfos ??= (async () => {
       const [subjectInfos, targetPartitionSubjects] = await Promise.all([
         (async () => {
           const result = new Map<Id64String, SubjectInfo>();
@@ -112,12 +115,12 @@ export class IModelContentTreeIdsCache {
 
       return subjectInfos;
     })();
-    return this._subjectInfos;
+    return this.#subjectInfos;
   }
 
   /** Returns ECInstanceIDs of Subjects that either have direct Model or at least one child Subject with a Model. */
   public async getParentSubjectIds(): Promise<Id64String[]> {
-    this._parentSubjectIds ??= (async () => {
+    this.#parentSubjectIds ??= (async () => {
       const subjectInfos = await this.getSubjectInfos();
       const parentSubjectIds = new Set<Id64String>();
       subjectInfos.forEach((subjectInfo, subjectId) => {
@@ -133,7 +136,7 @@ export class IModelContentTreeIdsCache {
       });
       return [...parentSubjectIds];
     })();
-    return this._parentSubjectIds;
+    return this.#parentSubjectIds;
   }
 
   /**
@@ -190,13 +193,13 @@ export class IModelContentTreeIdsCache {
       WHERE Parent.Id IS NULL
       GROUP BY Model.Id, Category.Id
     `;
-    for await (const row of this._queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this.#queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
       yield { modelId: row.modelId, categoryId: row.categoryId };
     }
   }
 
   private async getModelInfos() {
-    this._modelInfos ??= (async () => {
+    this.#modelInfos ??= (async () => {
       const modelInfos = new Map<Id64String, { categories: Id64Set; elementCount: number }>();
       for await (const { modelId, categoryId } of this.queryModelCategories()) {
         const entry = modelInfos.get(modelId);
@@ -208,7 +211,7 @@ export class IModelContentTreeIdsCache {
       }
       return modelInfos;
     })();
-    return this._modelInfos;
+    return this.#modelInfos;
   }
 
   public async getModelCategories(modelIds: Id64String[]): Promise<Id64Array> {

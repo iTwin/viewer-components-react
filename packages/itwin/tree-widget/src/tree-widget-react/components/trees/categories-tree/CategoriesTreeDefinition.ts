@@ -12,8 +12,6 @@ import { DEFINITION_CONTAINER_CLASS, DEFINITION_ELEMENT_CLASS, SUB_CATEGORY_CLAS
 
 import type { Observable } from "rxjs";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
-import type { ECClassHierarchyInspector, ECSchemaProvider, IInstanceLabelSelectClauseFactory, InstanceKey } from "@itwin/presentation-shared";
-import type { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
 import type {
   DefineHierarchyLevelProps,
   DefineInstanceNodeChildHierarchyLevelProps,
@@ -25,6 +23,8 @@ import type {
   LimitingECSqlQueryExecutor,
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
+import type { ECClassHierarchyInspector, ECSchemaProvider, IInstanceLabelSelectClauseFactory, InstanceKey } from "@itwin/presentation-shared";
+import type { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
 
 const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
 
@@ -44,32 +44,32 @@ interface CategoriesTreeInstanceKeyPathsFromInstanceLabelProps {
 }
 
 export class CategoriesTreeDefinition implements HierarchyDefinition {
-  private _impl: Promise<HierarchyDefinition> | undefined;
-  private _selectQueryFactory: NodesQueryClauseFactory;
-  private _nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
-  private _idsCache: CategoriesTreeIdsCache;
-  private _viewType: "2d" | "3d";
-  private _iModelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
+  #impl: Promise<HierarchyDefinition> | undefined;
+  #selectQueryFactory: NodesQueryClauseFactory;
+  #nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
+  #idsCache: CategoriesTreeIdsCache;
+  #viewType: "2d" | "3d";
+  #iModelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
 
   public constructor(props: CategoriesTreeDefinitionProps) {
-    this._iModelAccess = props.imodelAccess;
-    this._viewType = props.viewType;
-    this._idsCache = props.idsCache;
-    this._nodeLabelSelectClauseFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
-    this._selectQueryFactory = createNodesQueryClauseFactory({
+    this.#iModelAccess = props.imodelAccess;
+    this.#viewType = props.viewType;
+    this.#idsCache = props.idsCache;
+    this.#nodeLabelSelectClauseFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
+    this.#selectQueryFactory = createNodesQueryClauseFactory({
       imodelAccess: props.imodelAccess,
-      instanceLabelSelectClauseFactory: this._nodeLabelSelectClauseFactory,
+      instanceLabelSelectClauseFactory: this.#nodeLabelSelectClauseFactory,
     });
   }
 
   private async getHierarchyDefinition(): Promise<HierarchyDefinition> {
-    this._impl ??= (async () => {
-      const isDefinitionContainerSupported = await this._idsCache.getIsDefinitionContainerSupported();
+    this.#impl ??= (async () => {
+      const isDefinitionContainerSupported = await this.#idsCache.getIsDefinitionContainerSupported();
       return createPredicateBasedHierarchyDefinition({
-        classHierarchyInspector: this._iModelAccess,
+        classHierarchyInspector: this.#iModelAccess,
         hierarchy: {
           rootNodes: async (requestProps: DefineRootHierarchyLevelProps) =>
-            this.createDefinitionContainersAndCategoriesQuery({ ...requestProps, viewType: this._viewType }),
+            this.createDefinitionContainersAndCategoriesQuery({ ...requestProps, viewType: this.#viewType }),
           childNodes: [
             {
               parentInstancesNodePredicate: "BisCore.Category",
@@ -82,7 +82,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                     definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) =>
                       this.createDefinitionContainersAndCategoriesQuery({
                         ...requestProps,
-                        viewType: this._viewType,
+                        viewType: this.#viewType,
                       }),
                   },
                 ]
@@ -91,7 +91,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         },
       });
     })();
-    return this._impl;
+    return this.#impl;
   }
 
   public async defineHierarchyLevel(props: DefineHierarchyLevelProps) {
@@ -106,8 +106,8 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     const { parentNodeInstanceIds, instanceFilter, viewType } = props;
     const { definitionContainers, categories } =
       parentNodeInstanceIds === undefined
-        ? await this._idsCache.getRootDefinitionContainersAndCategories()
-        : await this._idsCache.getDirectChildDefinitionContainersAndCategories(parentNodeInstanceIds);
+        ? await this.#idsCache.getRootDefinitionContainersAndCategories()
+        : await this.#idsCache.getDirectChildDefinitionContainersAndCategories(parentNodeInstanceIds);
     if (categories.length === 0 && definitionContainers.length === 0) {
       return [];
     }
@@ -130,7 +130,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
 
     const [categoriesInstanceFilterClauses, definitionContainersInstanceFilterClauses] = await Promise.all(
       [categoryClass, ...(definitionContainers.length > 0 ? [DEFINITION_CONTAINER_CLASS] : [])].map(async (className) =>
-        this._selectQueryFactory.createFilterClauses({
+        this.#selectQueryFactory.createFilterClauses({
           filter: instanceFilter,
           contentClass: { fullName: className, alias: "this" },
         }),
@@ -141,11 +141,11 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
       definitionContainers.length > 0
         ? `
           SELECT
-            ${await this._selectQueryFactory.createSelectClause({
+            ${await this.#selectQueryFactory.createSelectClause({
               ecClassId: { selector: ECSql.createRawPropertyValueSelector("this", "ECClassId") },
               ecInstanceId: { selector: "this.ECInstanceId" },
               nodeLabel: {
-                selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
+                selector: await this.#nodeLabelSelectClauseFactory.createSelectClause({
                   classAlias: "this",
                   className: DEFINITION_CONTAINER_CLASS,
                 }),
@@ -170,11 +170,11 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
       categories.length > 0
         ? `
           SELECT
-              ${await this._selectQueryFactory.createSelectClause({
+              ${await this.#selectQueryFactory.createSelectClause({
                 ecClassId: { selector: ECSql.createRawPropertyValueSelector("this", "ECClassId") },
                 ecInstanceId: { selector: "this.ECInstanceId" },
                 nodeLabel: {
-                  selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
+                  selector: await this.#nodeLabelSelectClauseFactory.createSelectClause({
                     classAlias: "this",
                     className: categoryClass,
                   }),
@@ -221,7 +221,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     parentNodeInstanceIds: elementIds,
     instanceFilter,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
+    const instanceFilterClauses = await this.#selectQueryFactory.createFilterClauses({
       filter: instanceFilter,
       contentClass: { fullName: SUB_CATEGORY_CLASS, alias: "this" },
     });
@@ -231,11 +231,11 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         query: {
           ecsql: `
             SELECT
-              ${await this._selectQueryFactory.createSelectClause({
+              ${await this.#selectQueryFactory.createSelectClause({
                 ecClassId: { selector: "this.ECClassId" },
                 ecInstanceId: { selector: "this.ECInstanceId" },
                 nodeLabel: {
-                  selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
+                  selector: await this.#nodeLabelSelectClauseFactory.createSelectClause({
                     classAlias: "this",
                     className: SUB_CATEGORY_CLASS,
                   }),

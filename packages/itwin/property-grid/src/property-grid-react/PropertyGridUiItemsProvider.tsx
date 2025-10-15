@@ -85,12 +85,16 @@ export interface PropertyGridUiItemsProviderProps {
  */
 export class PropertyGridUiItemsProvider implements UiItemsProvider {
   public readonly id = "PropertyGridUiItemsProvider";
+  // eslint-disable-next-line deprecation/deprecation
+  #props: PropertyGridUiItemsProviderProps = {};
 
   // eslint-disable-next-line deprecation/deprecation
-  constructor(private _props: PropertyGridUiItemsProviderProps = {}) {}
+  constructor(props: PropertyGridUiItemsProviderProps = {}) {
+    this.#props = props;
+  }
 
   public provideWidgets(_stageId: string, stageUsage: string, location: StagePanelLocation, section?: StagePanelSection): ReadonlyArray<Widget> {
-    const { defaultPanelLocation, defaultPanelSection, defaultPanelWidgetPriority, propertyGridProps } = this._props;
+    const { defaultPanelLocation, defaultPanelSection, defaultPanelWidgetPriority, propertyGridProps } = this.#props;
 
     const preferredLocation = defaultPanelLocation ?? StagePanelLocation.Right;
     const preferredPanelSection = defaultPanelSection ?? StagePanelSection.End;
