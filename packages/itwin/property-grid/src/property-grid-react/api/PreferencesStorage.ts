@@ -2,9 +2,9 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
- 
-import { IModelApp } from "@itwin/core-frontend";
+
 import { Logger } from "@itwin/core-bentley";
+import { IModelApp } from "@itwin/core-frontend";
 
 const PROPERTY_GRID_NAMESPACE = "PropertyGridPreferences";
 const LOGGER_CATEGORY = "PropertyGrid";
@@ -24,7 +24,10 @@ export interface PreferencesStorage {
  * @public
  */
 export class IModelAppUserPreferencesStorage implements PreferencesStorage {
-  constructor(private _nameSpace = PROPERTY_GRID_NAMESPACE) {}
+  #nameSpace = PROPERTY_GRID_NAMESPACE;
+  constructor(nameSpace = PROPERTY_GRID_NAMESPACE) {
+    this.#nameSpace = nameSpace;
+  }
 
   public async set(key: string, value: string): Promise<void> {
     if (!IModelApp.userPreferences) {
@@ -37,7 +40,7 @@ export class IModelAppUserPreferencesStorage implements PreferencesStorage {
       await IModelApp.userPreferences.save({
         accessToken,
         content: value,
-        namespace: this._nameSpace,
+        namespace: this.#nameSpace,
         key,
       });
     } catch (error) {
@@ -55,7 +58,7 @@ export class IModelAppUserPreferencesStorage implements PreferencesStorage {
     try {
       return await IModelApp.userPreferences.get({
         accessToken,
-        namespace: this._nameSpace,
+        namespace: this.#nameSpace,
         key,
       });
     } catch (error) {

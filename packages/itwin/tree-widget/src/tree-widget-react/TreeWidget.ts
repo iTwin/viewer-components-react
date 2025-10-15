@@ -13,39 +13,39 @@ import type { Localization, TranslationOptions } from "@itwin/core-common";
  * @public
  */
 export class TreeWidget {
-  private static _i18n?: Localization;
-  private static _initialized?: boolean;
+  static #i18n?: Localization;
+  static #initialized?: boolean;
 
   /**
    * Called by IModelApp to initialize the Tree Widget
    * @param i18n - The internationalization service created by the IModelApp.
    */
   public static async initialize(i18n?: Localization): Promise<void> {
-    if (this._initialized) {
+    if (this.#initialized) {
       return;
     }
 
-    TreeWidget._initialized = true;
-    TreeWidget._i18n = i18n ?? IModelApp.localization;
-    return TreeWidget._i18n.registerNamespace(TreeWidget.i18nNamespace);
+    TreeWidget.#initialized = true;
+    TreeWidget.#i18n = i18n ?? IModelApp.localization;
+    return TreeWidget.#i18n.registerNamespace(TreeWidget.i18nNamespace);
   }
 
   /** Unregisters the TreeWidget internationalization service namespace */
   public static terminate() {
-    if (TreeWidget._i18n) {
-      TreeWidget._i18n.unregisterNamespace(TreeWidget.i18nNamespace);
-      TreeWidget._i18n = undefined;
+    if (TreeWidget.#i18n) {
+      TreeWidget.#i18n.unregisterNamespace(TreeWidget.i18nNamespace);
+      TreeWidget.#i18n = undefined;
     }
 
-    TreeWidget._initialized = false;
+    TreeWidget.#initialized = false;
   }
 
   /** The internationalization service created by the IModelApp. */
   public static get i18n(): Localization {
-    if (!TreeWidget._i18n) {
+    if (!TreeWidget.#i18n) {
       throw new BentleyError(BentleyStatus.ERROR, "TreeWidget not initialized");
     }
-    return TreeWidget._i18n;
+    return TreeWidget.#i18n;
   }
 
   /** The internationalization service namespace. */

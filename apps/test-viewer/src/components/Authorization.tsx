@@ -18,23 +18,26 @@ export enum AuthorizationState {
 
 class AccessTokenAuthClient implements WebViewerAuthorizationClient {
   public readonly onAccessTokenChanged: BeEvent<(token: AccessToken) => void> = new BeEvent();
+  #accessToken: string;
 
-  public constructor(private _accessToken: string) {}
+  public constructor(accessToken: string) {
+    this.#accessToken = accessToken;
+  }
 
   public async getAccessToken(): Promise<string> {
-    return this._accessToken;
+    return this.#accessToken;
   }
 }
 
 class ViewerAuthorizationClient implements WebViewerAuthorizationClient {
-  private _client: WebViewerAuthorizationClient | undefined;
+  #client: WebViewerAuthorizationClient | undefined;
   public readonly onAccessTokenChanged = new BeEvent<(token: AccessToken) => void>();
 
   private getClient(): WebViewerAuthorizationClient {
-    if (!this._client) {
+    if (!this.#client) {
       const cookies = document.cookie.split(";").map((c) => c.trim());
       const userAccessToken = cookies.find((c) => c.startsWith("IMJS_USER_ACCESS_TOKEN="))?.split("=")[1];
-      this._client = userAccessToken
+      this.#client = userAccessToken
         ? new AccessTokenAuthClient(userAccessToken)
         : new BrowserAuthorizationClient({
             scope: import.meta.env.IMJS_AUTH_CLIENT_SCOPES ?? "",
@@ -44,9 +47,9 @@ class ViewerAuthorizationClient implements WebViewerAuthorizationClient {
             responseType: "code",
             authority: import.meta.env.IMJS_AUTH_AUTHORITY,
           });
-      this._client.onAccessTokenChanged.addListener((token) => this.onAccessTokenChanged.raiseEvent(token));
+      this.#client.onAccessTokenChanged.addListener((token) => this.onAccessTokenChanged.raiseEvent(token));
     }
-    return this._client;
+    return this.#client;
   }
 
   public get isTokenClient() {
