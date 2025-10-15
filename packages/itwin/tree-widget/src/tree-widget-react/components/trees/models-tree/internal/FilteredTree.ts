@@ -5,10 +5,12 @@
 
 import { assert, Id64 } from "@itwin/core-bentley";
 import { HierarchyFilteringPath, HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+import { getIdsFromChildrenTree } from "../Utils.js";
 
-import type { Id64Arg, Id64String } from "@itwin/core-bentley";
+import type { Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { ClassGroupingNodeKey, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
+import type { ChildrenTree } from "../Utils.js";
 
 interface FilteredTreeRootNode {
   children: Map<Id64String, FilteredTreeNode>;
@@ -37,9 +39,15 @@ interface ElementFilteredTreeNode extends BaseFilteredTreeNode {
 
 type FilteredTreeNode = GenericFilteredTreeNode | CategoryFilteredTreeNode | ElementFilteredTreeNode;
 
+interface GetElementsFromUnfilteredChildrenTreeProps {
+  childrenTree: ChildrenTree<any>;
+  parentIdsPath: Array<Id64Arg>;
+}
+
 /** @internal */
 export interface FilteredTree {
   getVisibilityChangeTargets(node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey }): VisibilityChangeTargets;
+  getElementsFromUnfilteredChildrenTree(props: GetElementsFromUnfilteredChildrenTreeProps): Id64Set | undefined;
 }
 
 export const SUBJECT_CLASS_NAME = "BisCore.Subject" as const;
@@ -107,7 +115,74 @@ export async function createFilteredTree(imodelAccess: ECClassHierarchyInspector
 
   return {
     getVisibilityChangeTargets: (node) => getVisibilityChangeTargets(root, node),
+    getElementsFromUnfilteredChildrenTree: ({ childrenTree, parentIdsPath }) => getElementsFromUnfilteredChildrenTree({ parentIdsPath, root, childrenTree }),
   };
+}
+
+function getElementsFromUnfilteredChildrenTree(props: GetElementsFromUnfilteredChildrenTreeProps & { root: FilteredTreeRootNode }): Id64Set | undefined {
+  let lookupParents: Array<FilteredTreeRootNode | FilteredTreeNode> = [props.root];
+  if (props.parentIdsPath.length === 0) {
+    return undefined;
+  }
+
+  for (const parentIds of props.parentIdsPath) {
+    // When filtered node does not have children, it is filter target and because of this, all elements in the childrenTree are in the filtered tree
+    if (lookupParents.every((parent) => !parent.children)) {
+      return getIdsFromChildrenTree({ tree: props.childrenTree });
+    }
+
+    const parentNodes = findMatchingFilteredNodes(lookupParents, parentIds);
+    if (parentNodes.length === 0) {
+      return undefined;
+    }
+    lookupParents = parentNodes;
+  }
+
+  const result = getChildrenTreeIdsMatchingFilteredNodes({ tree: props.childrenTree, filteredNodes: lookupParents });
+  return result.size > 0 ? result : undefined;
+}
+
+function getChildrenTreeIdsMatchingFilteredNodes({
+  tree,
+  filteredNodes,
+}: {
+  tree: ChildrenTree<any>;
+  filteredNodes: Array<FilteredTreeNode | FilteredTreeRootNode>;
+}): Id64Set {
+  if (tree.size === 0) {
+    return new Set();
+  }
+
+  const getIdsRecursively = (childrenTree: ChildrenTree<any>, childrenFilteredNodes: Array<FilteredTreeNode | FilteredTreeRootNode>): Id64Set => {
+    if (childrenFilteredNodes.some((filteredNode) => !filteredNode.children)) {
+      return getIdsFromChildrenTree({ tree: childrenTree });
+    }
+    const result = new Set<Id64String>();
+    childrenTree.forEach((entry, id) => {
+      const nodes = findMatchingFilteredNodes(childrenFilteredNodes, id);
+      if (nodes.length === 0) {
+        return;
+      }
+      if (!entry.children || entry.children.size === 0) {
+        result.add(id);
+        return;
+      }
+      if (nodes.some((node) => !node.children)) {
+        getIdsFromChildrenTree({ tree: entry.children }).forEach((childId) => result.add(childId));
+        result.add(id);
+        return;
+      }
+      const resultFromChildren = getIdsRecursively(entry.children, nodes);
+      if (resultFromChildren.size === 0) {
+        return;
+      }
+      resultFromChildren.forEach((childId) => result.add(childId));
+      result.add(id);
+    });
+    return result;
+  };
+
+  return getIdsRecursively(tree, filteredNodes);
 }
 
 function getVisibilityChangeTargets(root: FilteredTreeRootNode, node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey }) {
@@ -137,7 +212,6 @@ function getVisibilityChangeTargets(root: FilteredTreeRootNode, node: HierarchyN
   if (filteredNodes.length === 0) {
     return changeTargets;
   }
-
   filteredNodes.forEach((filteredNode) => collectVisibilityChangeTargets(changeTargets, filteredNode));
   return changeTargets;
 }

@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Models tree: Fixed element visibility not taking into account child elements visibility. Also fixed changing element visibility not affecting child elements visibility.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "100586436+JonasDov@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

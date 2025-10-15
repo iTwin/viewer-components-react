@@ -21,11 +21,13 @@ import {
   takeUntil,
   toArray,
 } from "rxjs";
+import { Guid } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import {
   createNodesQueryClauseFactory,
   createPredicateBasedHierarchyDefinition,
   HierarchyFilteringPath,
+  HierarchyNodeKey,
   NodeSelectClauseColumnNames,
   ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
@@ -36,7 +38,7 @@ import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils.js";
 import { releaseMainThreadOnItemsCount } from "./Utils.js";
 
 import type { Observable } from "rxjs";
-import type { Id64String } from "@itwin/core-bentley";
+import type { Id64String} from "@itwin/core-bentley";
 import type {
   ClassGroupingNodeKey,
   DefineHierarchyLevelProps,
@@ -188,20 +190,27 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
 
   public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
     if (ProcessedHierarchyNode.isGroupingNode(node)) {
+      let childrenCount = 0;
       let hasDirectNonFilteredTargets = false;
       let hasFilterTargetAncestor = false;
-      for (const child of node.children) {
+      const filterTargets = new Map<Id64String, { childrenCount: number }>();
+      node.children.forEach((child) => {
+        if (child.extendedData?.childrenCount) {
+          childrenCount += child.extendedData.childrenCount;
+        }
         if (child.filtering) {
           if (child.filtering.hasFilterTargetAncestor) {
             hasFilterTargetAncestor = true;
-            break;
+            return;
+          }
+          if ((!child.filtering.filteredChildrenIdentifierPaths?.length || child.filtering.isFilterTarget) && HierarchyNodeKey.isInstances(child.key)) {
+            child.key.instanceKeys.forEach((key) => filterTargets.set(key.id, { childrenCount: child.extendedData?.childrenCount ?? 0 }));
           }
           if (!child.filtering.isFilterTarget) {
             hasDirectNonFilteredTargets = true;
-            break;
           }
         }
-      }
+      });
       return {
         ...node,
         ...(hasFilterTargetAncestor
@@ -215,9 +224,11 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         label: this.#hierarchyConfig.elementClassGrouping === "enableWithCounts" ? `${node.label} (${node.children.length})` : node.label,
         extendedData: {
           ...node.extendedData,
-          // add `modelId` and `categoryId` from the first grouped element
-          ...node.children[0].extendedData,
+          modelId: node.children[0].extendedData?.modelId,
+          categoryId: node.children[0].extendedData?.categoryId,
+          childrenCount,
           ...(hasDirectNonFilteredTargets ? { hasDirectNonFilteredTargets } : {}),
+          filterTargets,
           // `imageId` is assigned to instance nodes at query time, but grouping ones need to
           // be handled during post-processing
           imageId: "icon-ec-class",
@@ -435,6 +446,40 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     ];
   }
 
+  private getElementChildrenCountCtes(props: { whereClauseFn: (parentAlias: string) => string }): { ctes: Array<string>; cteName: string } {
+    return {
+      ctes: [
+        `
+        ElementWithParent(id, parentId) AS (
+          SELECT
+            c.ECInstanceId,
+            c.Parent.Id
+          FROM ${this.#hierarchyConfig.elementClassSpecification} p
+          JOIN ${this.#hierarchyConfig.elementClassSpecification} c on c.Parent.Id = p.ECInstanceId
+          WHERE
+           ${props.whereClauseFn("p")}
+
+          UNION ALL
+
+          SELECT
+            c.ECInstanceId,
+            p.parentId
+          FROM ${this.#hierarchyConfig.elementClassSpecification} c
+          JOIN ElementWithParent p ON p.id = c.Parent.Id
+        )
+        `,
+        `
+        ParentChildrenCount(parentId, childrenCount) AS (
+          SELECT parentId, COUNT(id)
+          FROM ElementWithParent
+          GROUP BY parentId
+        )
+        `,
+      ],
+      cteName: `ParentChildrenCount`,
+    };
+  }
+
   private async createSpatialCategoryChildrenQuery({
     parentNodeInstanceIds: categoryIds,
     parentNode,
@@ -456,10 +501,22 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         }, new Array<Id64String>()),
       ),
     );
+    const childrenCountWhereClause = (parentAlias: string) => `
+      ${parentAlias}.Category.Id IN (${categoryIds.map(() => "?").join(",")})
+      AND ${parentAlias}.Model.Id IN (${modelIds.map(() => "?").join(",")})
+      AND ${parentAlias}.Parent.Id IS NULL
+    `;
+    const { ctes, cteName } = this.getElementChildrenCountCtes({ whereClauseFn: childrenCountWhereClause });
+    const bindings = new Array<ECSqlBinding>();
+    for (let i = 0; i < 2; ++i) {
+      categoryIds.forEach((id) => bindings.push({ type: "id", value: id }));
+      modelIds.map((id) => bindings.push({ type: "id", value: id }));
+    }
     return [
       {
         fullClassName: this.#hierarchyConfig.elementClassSpecification,
         query: {
+          ctes,
           ecsql: `
             SELECT
               ${await this.#selectQueryFactory.createSelectClause({
@@ -492,10 +549,12 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   modelId: { selector: "IdToHex(this.Model.Id)" },
                   categoryId: { selector: "IdToHex(this.Category.Id)" },
                   imageId: "icon-item",
+                  childrenCount: { selector: "c.ChildrenCount" },
                 },
                 supportsFiltering: this.supportsFiltering(),
               })}
             FROM ${instanceFilterClauses.from} this
+            LEFT JOIN ${cteName} c ON c.parentId = this.ECInstanceId
             ${instanceFilterClauses.joins}
             WHERE
               this.Category.Id IN (${categoryIds.map(() => "?").join(",")})
@@ -503,7 +562,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
               AND this.Parent.Id IS NULL
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
-          bindings: [...categoryIds.map((id) => ({ type: "id", value: id })), ...modelIds.map((id) => ({ type: "id", value: id }))] as ECSqlBinding[],
+          bindings,
         },
       },
     ];
@@ -517,10 +576,20 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       filter: instanceFilter,
       contentClass: { fullName: this.#hierarchyConfig.elementClassSpecification, alias: "this" },
     });
+
+    const childrenCountWhereClause = (parentAlias: string) => `
+      ${parentAlias}.Parent.Id IN (${elementIds.map(() => "?").join(",")})
+    `;
+    const { ctes, cteName } = this.getElementChildrenCountCtes({ whereClauseFn: childrenCountWhereClause });
+    const bindings = new Array<ECSqlBinding>();
+    for (let i = 0; i < 2; ++i) {
+      elementIds.map((id) => bindings.push({ type: "id", value: id }));
+    }
     return [
       {
         fullClassName: this.#hierarchyConfig.elementClassSpecification,
         query: {
+          ctes,
           ecsql: `
             SELECT
               ${await this.#selectQueryFactory.createSelectClause({
@@ -550,16 +619,18 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   modelId: { selector: "IdToHex(this.Model.Id)" },
                   categoryId: { selector: "IdToHex(this.Category.Id)" },
                   imageId: "icon-item",
+                  childrenCount: { selector: "c.ChildrenCount" },
                 },
                 supportsFiltering: this.supportsFiltering(),
               })}
             FROM ${instanceFilterClauses.from} this
+            LEFT JOIN ${cteName} c ON c.parentId = this.ECInstanceId
             ${instanceFilterClauses.joins}
             WHERE
               this.Parent.Id IN (${elementIds.map(() => "?").join(",")})
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
-          bindings: elementIds.map((id) => ({ type: "id", value: id })),
+          bindings,
         },
       },
     ];
@@ -853,7 +924,7 @@ function createInstanceKeyPathsFromInstanceLabelObs(
     mergeMap((queryProps) => {
       return imodelAccess.createQueryReader(queryProps, {
         rowFormat: "Indexes",
-        restartToken: "tree-widget/models-tree/filter-by-label-query",
+        restartToken: `tree-widget/models-tree/filter-by-label-query/${Guid.createValue()}`,
         limit,
       });
     }),

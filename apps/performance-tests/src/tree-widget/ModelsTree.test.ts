@@ -379,6 +379,9 @@ describe("models tree", () => {
             [node.categoryId]: "partial",
             [node.elementId]: "visible",
           },
+          parentIds: {
+            [node.elementId]: "visible",
+          },
         },
       });
     },
