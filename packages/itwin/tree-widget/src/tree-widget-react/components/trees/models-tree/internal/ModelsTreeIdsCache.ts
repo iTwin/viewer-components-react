@@ -126,17 +126,17 @@ export class ModelsTreeIdsCache implements Disposable {
     }
   }
 
-  private getChildrenTreeFromMap({ elementIds }: { elementIds: Id64Arg }): ChildrenTree<{}> {
+  private getChildrenTreeFromMap({ elementIds }: { elementIds: Id64Arg }): ChildrenTree {
     if (Id64.sizeOf(elementIds) === 0 || this.#childrenMap.size === 0) {
       return new Map();
     }
-    const result: ChildrenTree<{}> = new Map();
+    const result: ChildrenTree = new Map();
     for (const elementId of Id64.iterable(elementIds)) {
       const entry = this.#childrenMap.get(elementId);
       if (!entry?.children) {
         continue;
       }
-      const elementChildrenTree: ChildrenTree<{}> = new Map();
+      const elementChildrenTree: ChildrenTree = new Map();
       result.set(elementId, { children: elementChildrenTree });
       entry.children.forEach((childId) => {
         const childrenTreeOfChild = this.getChildrenTreeFromMap({ elementIds: childId });
@@ -215,7 +215,7 @@ export class ModelsTreeIdsCache implements Disposable {
     return Promise.all(promises);
   }
 
-  public async getChildrenTree({ elementIds }: { elementIds: Id64Arg }): Promise<ChildrenTree<{}>> {
+  public async getChildrenTree({ elementIds }: { elementIds: Id64Arg }): Promise<ChildrenTree> {
     await this.createChildrenMapEntries({ elementIds });
     return this.getChildrenTreeFromMap({ elementIds });
   }

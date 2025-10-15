@@ -38,9 +38,10 @@ interface ElementFilteredTreeNode extends BaseFilteredTreeNode {
 }
 
 type FilteredTreeNode = GenericFilteredTreeNode | CategoryFilteredTreeNode | ElementFilteredTreeNode;
+
 interface GetElementsFromUnfilteredChildrenTreeProps {
   childrenTree: ChildrenTree<any>;
-  parentIdsArray: Array<Id64Arg>;
+  parentIdsPath: Array<Id64Arg>;
 }
 
 /** @internal */
@@ -114,17 +115,17 @@ export async function createFilteredTree(imodelAccess: ECClassHierarchyInspector
 
   return {
     getVisibilityChangeTargets: (node) => getVisibilityChangeTargets(root, node),
-    getElementsFromUnfilteredChildrenTree: ({ childrenTree, parentIdsArray }) => getElementsFromUnfilteredChildrenTree({ parentIdsArray, root, childrenTree }),
+    getElementsFromUnfilteredChildrenTree: ({ childrenTree, parentIdsPath }) => getElementsFromUnfilteredChildrenTree({ parentIdsPath, root, childrenTree }),
   };
 }
 
 function getElementsFromUnfilteredChildrenTree(props: GetElementsFromUnfilteredChildrenTreeProps & { root: FilteredTreeRootNode }): Id64Set | undefined {
   let lookupParents: Array<FilteredTreeRootNode | FilteredTreeNode> = [props.root];
-  if (props.parentIdsArray.length === 0) {
+  if (props.parentIdsPath.length === 0) {
     return undefined;
   }
 
-  for (const parentIds of props.parentIdsArray) {
+  for (const parentIds of props.parentIdsPath) {
     // When filtered node does not have children, it is filter target and because of this, all elements in the childrenTree are in the filtered tree
     if (lookupParents.every((parent) => !parent.children)) {
       return getIdsFromChildrenTree({ tree: props.childrenTree });

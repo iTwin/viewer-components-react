@@ -104,7 +104,7 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
     getModelCategories: sinon.stub<[Id64String], Promise<Id64Array>>().callsFake(async (modelId) => {
       return props?.modelCategories?.get(modelId) ?? [];
     }),
-    getChildrenTree: sinon.stub<[{ elementIds: Id64Arg }], Promise<ChildrenTree<{}>>>().callsFake(async () => {
+    getChildrenTree: sinon.stub<[{ elementIds: Id64Arg }], Promise<ChildrenTree>>().callsFake(async () => {
       return new Map();
     }),
     getAllChildrenCount: sinon.stub<[{ elementIds: Id64Arg }], Promise<Map<Id64String, number>>>().callsFake(async () => {
