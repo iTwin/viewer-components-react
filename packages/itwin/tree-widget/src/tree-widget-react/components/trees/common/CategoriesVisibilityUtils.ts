@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { Guid } from "@itwin/core-bentley";
 import { QueryRowFormat } from "@itwin/core-common";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 
@@ -83,7 +84,12 @@ export async function loadCategoriesFromViewport(vp: Viewport) {
 
   const categories: CategoryInfo[] = [];
 
-  const rows = await vp.iModel.createQueryReader(ecsql2, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }).toArray();
+  const rows = await vp.iModel
+    .createQueryReader(ecsql2, undefined, {
+      rowFormat: QueryRowFormat.UseJsPropertyNames,
+      restartToken: `CategoriesVisibilityUtils/categories-query/${Guid.createValue()}`,
+    })
+    .toArray();
   (await vp.iModel.categories.getCategoryInfo(rows.map((row) => row.id))).forEach((val) => {
     categories.push({ categoryId: val.id, subCategoryIds: val.subCategories.size ? [...val.subCategories.keys()] : undefined });
   });

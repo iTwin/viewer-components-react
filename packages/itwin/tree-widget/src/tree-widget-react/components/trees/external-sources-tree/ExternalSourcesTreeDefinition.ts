@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { Guid } from "@itwin/core-bentley";
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 
@@ -300,7 +301,10 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
       WHERE Name = 'BisCore' AND (VersionMajor > 1 OR (VersionMajor = 1 AND VersionMinor > 12))
     `;
 
-    for await (const _row of this.#queryExecutor.createQueryReader({ ecsql: query })) {
+    for await (const _row of this.#queryExecutor.createQueryReader(
+      { ecsql: query },
+      { restartToken: `ExternalSourcesTreeDefinition/is-external-source-supported-query/${Guid.createValue()}` },
+    )) {
       return true;
     }
     return false;

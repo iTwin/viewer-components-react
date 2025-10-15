@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Tree widget: fix issue with queries being cancelled due to the same restart token. Fixed by adding a unique guid to each restart token.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "100586436+JonasDov@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

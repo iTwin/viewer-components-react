@@ -21,6 +21,7 @@ import {
   takeUntil,
   toArray,
 } from "rxjs";
+import { Guid } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import {
   createNodesQueryClauseFactory,
@@ -602,7 +603,9 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       ],
     };
 
-    for await (const _row of this.#queryExecutor.createQueryReader(query)) {
+    for await (const _row of this.#queryExecutor.createQueryReader(query, {
+      restartToken: `ModelsTreeDefinition/is-class-supported-query/${Guid.createValue()}`,
+    })) {
       return true;
     }
     return false;
@@ -681,7 +684,10 @@ function createGeometricElementInstanceKeyPaths(
       WHERE mce.ParentId IS NULL
     `;
 
-    return imodelAccess.createQueryReader({ ctes, ecsql }, { rowFormat: "Indexes", limit: "unbounded" });
+    return imodelAccess.createQueryReader(
+      { ctes, ecsql },
+      { rowFormat: "Indexes", limit: "unbounded", restartToken: `ModelsTreeDefinition/geometric-element-paths-query/${Guid.createValue()}` },
+    );
   }).pipe(
     releaseMainThreadOnItemsCount(300),
     map((row) => parseQueryRow(row, groupInfos, separator, hierarchyConfig.elementClassSpecification)),
@@ -853,7 +859,7 @@ function createInstanceKeyPathsFromInstanceLabelObs(
     mergeMap((queryProps) => {
       return imodelAccess.createQueryReader(queryProps, {
         rowFormat: "Indexes",
-        restartToken: "tree-widget/models-tree/filter-by-label-query",
+        restartToken: `ModelsTreeDefinition/filter-by-label-query/${Guid.createValue()}`,
         limit,
       });
     }),

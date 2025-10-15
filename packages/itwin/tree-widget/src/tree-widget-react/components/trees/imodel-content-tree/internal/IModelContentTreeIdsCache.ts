@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { assert } from "@itwin/core-bentley";
+import { assert, Guid } from "@itwin/core-bentley";
 import { pushToMap } from "../../common/Utils.js";
 
 import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
@@ -52,7 +52,10 @@ export class IModelContentTreeIdsCache {
         END hideInHierarchy
       FROM bis.Subject s
     `;
-    for await (const row of this.#queryExecutor.createQueryReader({ ecsql: subjectsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this.#queryExecutor.createQueryReader(
+      { ecsql: subjectsQuery },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `IModelContentTreeIdsCache/subjects-query/${Guid.createValue()}` },
+    )) {
       yield { id: row.id, parentId: row.parentId, targetPartitionId: row.targetPartitionId, hideInHierarchy: !!row.hideInHierarchy };
     }
   }
@@ -64,7 +67,10 @@ export class IModelContentTreeIdsCache {
       INNER JOIN bis.Model m ON m.ModeledElement.Id = p.ECInstanceId
       WHERE NOT m.IsPrivate
     `;
-    for await (const row of this.#queryExecutor.createQueryReader({ ecsql: modelsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this.#queryExecutor.createQueryReader(
+      { ecsql: modelsQuery },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `IModelContentTreeIdsCache/models-query/${Guid.createValue()}` },
+    )) {
       yield { id: row.id, parentId: row.parentId };
     }
   }
@@ -193,7 +199,10 @@ export class IModelContentTreeIdsCache {
       WHERE Parent.Id IS NULL
       GROUP BY Model.Id, Category.Id
     `;
-    for await (const row of this.#queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this.#queryExecutor.createQueryReader(
+      { ecsql: query },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `IModelContentTreeIdsCache/model-categories-query/${Guid.createValue()}` },
+    )) {
       yield { modelId: row.modelId, categoryId: row.categoryId };
     }
   }

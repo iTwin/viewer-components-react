@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { defaultIfEmpty, defer, EMPTY, from, fromEvent, identity, lastValueFrom, map, mergeMap, takeUntil, toArray } from "rxjs";
+import { Guid } from "@itwin/core-bentley";
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
@@ -378,7 +379,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
         if (!queryProps) {
           return EMPTY;
         }
-        return imodelAccess.createQueryReader(queryProps, { restartToken: "tree-widget/categories-tree/filter-by-label-query", limit });
+        return imodelAccess.createQueryReader(queryProps, { restartToken: `CategoriesTreeDefinition/filter-by-label-query/${Guid.createValue()}`, limit });
       }),
       map(
         (row): InstanceKey => ({
