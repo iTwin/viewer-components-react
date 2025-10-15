@@ -453,8 +453,8 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
           SELECT
             c.ECInstanceId,
             c.Parent.Id
-          FROM ${this._hierarchyConfig.elementClassSpecification} p
-          JOIN ${this._hierarchyConfig.elementClassSpecification} c on c.Parent.Id = p.ECInstanceId
+          FROM ${this.#hierarchyConfig.elementClassSpecification} p
+          JOIN ${this.#hierarchyConfig.elementClassSpecification} c on c.Parent.Id = p.ECInstanceId
           WHERE
            ${props.whereClauseFn("p")}
 
@@ -463,7 +463,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
           SELECT
             c.ECInstanceId,
             p.parentId
-          FROM ${this._hierarchyConfig.elementClassSpecification} c
+          FROM ${this.#hierarchyConfig.elementClassSpecification} c
           JOIN ElementWithParent p ON p.id = c.Parent.Id
         )
         `,
