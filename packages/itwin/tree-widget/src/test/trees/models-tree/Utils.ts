@@ -161,11 +161,13 @@ export function createCategoryHierarchyNode({
   categoryId,
   hasChildren,
   parentKeys,
+  filtering,
 }: {
   modelId?: Id64String;
   categoryId?: Id64Arg;
   hasChildren?: boolean;
   parentKeys?: HierarchyNodeKey[];
+  filtering?: HierarchyNode["filtering"];
 }): NonGroupingHierarchyNode {
   return {
     key: {
@@ -178,6 +180,7 @@ export function createCategoryHierarchyNode({
     children: !!hasChildren,
     label: "",
     parentKeys: parentKeys ?? [],
+    filtering,
     extendedData: {
       isCategory: true,
       modelId: modelId ?? "0x1",

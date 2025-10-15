@@ -27,7 +27,7 @@ import {
   takeUntil,
   tap,
 } from "rxjs";
-import { Id64 } from "@itwin/core-bentley";
+import { Guid, Id64 } from "@itwin/core-bentley";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { releaseMainThreadOnItemsCount, updateChildrenTree } from "../Utils.js";
 
@@ -283,7 +283,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
         },
         {
           rowFormat: "ECSqlPropertyNames",
-          restartToken: `ModelsTreeVisibilityHandler/${requestId}`,
+          restartToken: `AlwaysAndNeverDrawnElementInfo/${requestId}/${Guid.createValue()}`,
         },
       );
     }).pipe(

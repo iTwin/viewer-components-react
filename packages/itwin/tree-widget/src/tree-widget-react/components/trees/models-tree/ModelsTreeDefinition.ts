@@ -21,6 +21,7 @@ import {
   takeUntil,
   toArray,
 } from "rxjs";
+import { Guid } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import {
   createNodesQueryClauseFactory,
@@ -37,7 +38,7 @@ import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils.js";
 import { releaseMainThreadOnItemsCount } from "./Utils.js";
 
 import type { Observable } from "rxjs";
-import type { Id64String } from "@itwin/core-bentley";
+import type { Id64String} from "@itwin/core-bentley";
 import type {
   ClassGroupingNodeKey,
   DefineHierarchyLevelProps,
@@ -923,7 +924,7 @@ function createInstanceKeyPathsFromInstanceLabelObs(
     mergeMap((queryProps) => {
       return imodelAccess.createQueryReader(queryProps, {
         rowFormat: "Indexes",
-        restartToken: "tree-widget/models-tree/filter-by-label-query",
+        restartToken: `tree-widget/models-tree/filter-by-label-query/${Guid.createValue()}`,
         limit,
       });
     }),
