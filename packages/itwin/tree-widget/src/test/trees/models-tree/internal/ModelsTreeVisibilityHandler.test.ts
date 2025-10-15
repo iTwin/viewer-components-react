@@ -16,6 +16,7 @@ import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor, Hierar
 import { InstanceKey } from "@itwin/presentation-shared";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { createVisibilityStatus } from "../../../../tree-widget-react/components/trees/common/Tooltip.js";
+import { CATEGORY_CLASS_NAME, ELEMENT_CLASS_NAME, MODEL_CLASS_NAME } from "../../../../tree-widget-react/components/trees/models-tree/internal/FilteredTree.js";
 import { ModelsTreeIdsCache } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import { createModelsTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
@@ -168,7 +169,16 @@ describe("ModelsTreeVisibilityHandler", () => {
           imodelAccess: createFakeIModelAccess(),
         });
 
-        const node = createElementHierarchyNode({ modelId: "0x1", categoryId: "0x2", elementId: "0x3" });
+        const node = createElementHierarchyNode({
+          modelId: "0x1",
+          categoryId: "0x2",
+          elementId: "0x3",
+          parentKeys: [
+            { type: "instances", instanceKeys: [{ id: "0x1", className: MODEL_CLASS_NAME }] },
+            { type: "instances", instanceKeys: [{ id: "0x2", className: CATEGORY_CLASS_NAME }] },
+            { type: "class-grouping", className: ELEMENT_CLASS_NAME },
+          ],
+        });
         await expect(handler.getVisibilityStatus(node)).to.eventually.include({ state: "hidden" });
 
         useOriginalImplFlag = true;
@@ -955,7 +965,18 @@ describe("ModelsTreeVisibilityHandler", () => {
             imodelAccess: createFakeIModelAccess(),
           });
 
-          const status = await handler.getVisibilityStatus(createElementHierarchyNode({ modelId: "0x1", categoryId: "0x2", elementId: "0x3" }));
+          const status = await handler.getVisibilityStatus(
+            createElementHierarchyNode({
+              modelId: "0x1",
+              categoryId: "0x2",
+              elementId: "0x3",
+              parentKeys: [
+                { type: "instances", instanceKeys: [{ id: "0x1", className: MODEL_CLASS_NAME }] },
+                { type: "instances", instanceKeys: [{ id: "0x2", className: CATEGORY_CLASS_NAME }] },
+                { type: "class-grouping", className: ELEMENT_CLASS_NAME },
+              ],
+            }),
+          );
           expect(overrides.getElementDisplayStatus).to.be.called;
           expect(status.state).to.eq("visible");
         });
@@ -970,7 +991,17 @@ describe("ModelsTreeVisibilityHandler", () => {
         });
 
         it("is hidden when model is hidden", async () => {
-          const node = createElementHierarchyNode({ modelId, categoryId, hasChildren: true, elementId });
+          const node = createElementHierarchyNode({
+            modelId,
+            categoryId,
+            hasChildren: true,
+            elementId,
+            parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x1", className: MODEL_CLASS_NAME }] },
+              { type: "instances", instanceKeys: [{ id: "0x2", className: CATEGORY_CLASS_NAME }] },
+              { type: "class-grouping", className: ELEMENT_CLASS_NAME },
+            ],
+          });
           const viewport = createFakeSinonViewport({
             view: {
               viewsModel: sinon.fake.returns(false),
@@ -983,7 +1014,17 @@ describe("ModelsTreeVisibilityHandler", () => {
         });
 
         it("is visible when model and category is displayed", async () => {
-          const node = createElementHierarchyNode({ modelId, categoryId, hasChildren: true, elementId });
+          const node = createElementHierarchyNode({
+            modelId,
+            categoryId,
+            hasChildren: true,
+            elementId,
+            parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x1", className: MODEL_CLASS_NAME }] },
+              { type: "instances", instanceKeys: [{ id: "0x2", className: CATEGORY_CLASS_NAME }] },
+              { type: "class-grouping", className: ELEMENT_CLASS_NAME },
+            ],
+          });
           const viewport = createFakeSinonViewport({
             view: {
               viewsModel: sinon.fake.returns(true),
@@ -997,7 +1038,16 @@ describe("ModelsTreeVisibilityHandler", () => {
         });
 
         it("is visible if present in the always drawn list", async () => {
-          const node = createElementHierarchyNode({ modelId, categoryId, elementId });
+          const node = createElementHierarchyNode({
+            modelId,
+            categoryId,
+            elementId,
+            parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x1", className: MODEL_CLASS_NAME }] },
+              { type: "instances", instanceKeys: [{ id: "0x2", className: CATEGORY_CLASS_NAME }] },
+              { type: "class-grouping", className: ELEMENT_CLASS_NAME },
+            ],
+          });
           using handlerResult = createHandler({
             viewport: createFakeSinonViewport({
               alwaysDrawn: new Set([elementId]),
@@ -1015,7 +1065,16 @@ describe("ModelsTreeVisibilityHandler", () => {
             }),
           });
           const { handler } = handlerResult;
-          const node = createElementHierarchyNode({ modelId, categoryId, elementId });
+          const node = createElementHierarchyNode({
+            modelId,
+            categoryId,
+            elementId,
+            parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x1", className: MODEL_CLASS_NAME }] },
+              { type: "instances", instanceKeys: [{ id: "0x2", className: CATEGORY_CLASS_NAME }] },
+              { type: "class-grouping", className: ELEMENT_CLASS_NAME },
+            ],
+          });
           const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "hidden" });
         });
@@ -1028,7 +1087,16 @@ describe("ModelsTreeVisibilityHandler", () => {
             }),
           });
           const { handler } = handlerResult;
-          const node = createElementHierarchyNode({ modelId, categoryId, elementId });
+          const node = createElementHierarchyNode({
+            modelId,
+            categoryId,
+            elementId,
+            parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x1", className: MODEL_CLASS_NAME }] },
+              { type: "instances", instanceKeys: [{ id: "0x2", className: CATEGORY_CLASS_NAME }] },
+              { type: "class-grouping", className: ELEMENT_CLASS_NAME },
+            ],
+          });
           const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "hidden" });
         });
@@ -1041,7 +1109,16 @@ describe("ModelsTreeVisibilityHandler", () => {
             }),
           });
           const { handler } = handlerResult;
-          const node = createElementHierarchyNode({ modelId, categoryId, elementId });
+          const node = createElementHierarchyNode({
+            modelId,
+            categoryId,
+            elementId,
+            parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x1", className: MODEL_CLASS_NAME }] },
+              { type: "instances", instanceKeys: [{ id: "0x2", className: CATEGORY_CLASS_NAME }] },
+              { type: "class-grouping", className: ELEMENT_CLASS_NAME },
+            ],
+          });
           const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "visible" });
         });
@@ -1049,7 +1126,16 @@ describe("ModelsTreeVisibilityHandler", () => {
         it("is visible when always/never drawn sets are undefined", async () => {
           using handlerResult = createHandler();
           const { handler } = handlerResult;
-          const node = createElementHierarchyNode({ modelId, categoryId, elementId });
+          const node = createElementHierarchyNode({
+            modelId,
+            categoryId,
+            elementId,
+            parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x1", className: MODEL_CLASS_NAME }] },
+              { type: "instances", instanceKeys: [{ id: "0x2", className: CATEGORY_CLASS_NAME }] },
+              { type: "class-grouping", className: ELEMENT_CLASS_NAME },
+            ],
+          });
           const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "visible" });
         });
@@ -1062,7 +1148,16 @@ describe("ModelsTreeVisibilityHandler", () => {
             }),
           });
           const { handler } = handlerResult;
-          const node = createElementHierarchyNode({ modelId, categoryId, elementId });
+          const node = createElementHierarchyNode({
+            modelId,
+            categoryId,
+            elementId,
+            parentKeys: [
+              { type: "instances", instanceKeys: [{ id: modelId, className: MODEL_CLASS_NAME }] },
+              { type: "instances", instanceKeys: [{ id: categoryId, className: CATEGORY_CLASS_NAME }] },
+              { type: "class-grouping", className: ELEMENT_CLASS_NAME },
+            ],
+          });
           const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "visible" });
         });
@@ -1076,7 +1171,16 @@ describe("ModelsTreeVisibilityHandler", () => {
             }),
           });
           const { handler } = handlerResult;
-          const node = createElementHierarchyNode({ modelId, categoryId, elementId });
+          const node = createElementHierarchyNode({
+            modelId,
+            categoryId,
+            elementId,
+            parentKeys: [
+              { type: "instances", instanceKeys: [{ id: modelId, className: MODEL_CLASS_NAME }] },
+              { type: "instances", instanceKeys: [{ id: categoryId, className: CATEGORY_CLASS_NAME }] },
+              { type: "class-grouping", className: ELEMENT_CLASS_NAME },
+            ],
+          });
           const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "hidden" });
         });

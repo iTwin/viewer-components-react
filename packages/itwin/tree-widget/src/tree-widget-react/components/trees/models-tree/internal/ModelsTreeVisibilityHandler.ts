@@ -249,7 +249,8 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
 
     const categoryId = ModelsTreeNode.getCategoryId(node);
     const rootCategoryIds = getRootCategoryIds({ parentKeys: node.parentKeys, modelId });
-    if (!categoryId || !rootCategoryIds) {
+    assert(rootCategoryIds !== undefined);
+    if (!categoryId) {
       return of(createVisibilityStatus("disabled"));
     }
     return this.getElementDisplayStatus({
