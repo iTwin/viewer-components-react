@@ -200,23 +200,43 @@ export function BasemapPanel(props: BasemapPanelProps) {
   React.useEffect(() => {
     if (
       selectedBaseMap instanceof BaseMapLayerSettings
-       && undefined === baseMapOptions.find((opt) => opt.label === selectedBaseMap.name)
-       && undefined === extraFormats[selectedBaseMap.formatId]
+        && undefined === baseMapOptions.find((opt) => opt.label === selectedBaseMap.name)
+        && undefined === extraFormats[selectedBaseMap.formatId]
     ) {
       setCustomBaseMap(selectedBaseMap);
     }
   }, [baseMapOptions, extraFormats, selectedBaseMap]);
 
-  const [presetColors] = React.useState([
-    ColorValue.fromTbgr(ColorByName.grey),
-    ColorValue.fromTbgr(ColorByName.lightGrey),
-    ColorValue.fromTbgr(ColorByName.darkGrey),
-    ColorValue.fromTbgr(ColorByName.lightBlue),
-    ColorValue.fromTbgr(ColorByName.lightGreen),
-    ColorValue.fromTbgr(ColorByName.darkGreen),
-    ColorValue.fromTbgr(ColorByName.tan),
-    ColorValue.fromTbgr(ColorByName.darkBrown),
-  ]);
+  const getPresetColorsWithSaved = React.useCallback(() => {
+    const defaultColors = [
+      ColorValue.fromTbgr(ColorByName.grey),
+      ColorValue.fromTbgr(ColorByName.lightGrey),
+      ColorValue.fromTbgr(ColorByName.darkGrey),
+      ColorValue.fromTbgr(ColorByName.lightBlue),
+      ColorValue.fromTbgr(ColorByName.lightGreen),
+      ColorValue.fromTbgr(ColorByName.darkGreen),
+      ColorValue.fromTbgr(ColorByName.tan),
+      ColorValue.fromTbgr(ColorByName.darkBrown),
+    ];
+
+    // Add saved color from session storage as the first color if available
+    try {
+      const savedColor = sessionStorage.getItem('basemap-default-color');
+      if (savedColor) {
+        const savedColorValue = ColorValue.fromTbgr(parseInt(savedColor, 10));
+        // Remove the saved color from default colors if it exists there
+        const filteredColors = defaultColors.filter(color => color.toTbgr() !== savedColorValue.toTbgr());
+        // Always put the saved color as the first color
+        return [savedColorValue, ...filteredColors];
+      }
+    } catch {
+      // Silently ignore sessionStorage errors (e.g., in private browsing mode)
+    }
+
+    return defaultColors;
+  }, []);
+
+  const [presetColors, setPresetColors] = React.useState(() => getPresetColorsWithSaved());
 
   const baseIsColor = React.useMemo(() => selectedBaseMap instanceof ColorDef, [selectedBaseMap]);
   const baseIsMap = React.useMemo(() => !baseIsColor && selectedBaseMap !== undefined, [baseIsColor, selectedBaseMap]);
@@ -273,10 +293,19 @@ export function BasemapPanel(props: BasemapPanelProps) {
           activeViewport.displayStyle.backgroundMapBase instanceof ColorDef ? activeViewport.displayStyle.backgroundMapBase.getTransparency() : 0;
         activeViewport.displayStyle.backgroundMapBase = bgColorDef.withTransparency(curTransparency);
 
+        // Save the selected color in session storage for use as default in the rest of the session
+        try {
+          sessionStorage.setItem('basemap-default-color', bgColorValue.toTbgr().toString());
+          // Update preset colors to include the new saved color
+          setPresetColors(getPresetColorsWithSaved());
+        } catch {
+          // Silently ignore sessionStorage errors (e.g., in private browsing mode)
+        }
+
         setSelectedBaseMap(bgColorDef);
       }
     },
-    [activeViewport],
+    [activeViewport, getPresetColorsWithSaved],
   );
 
   const handleBaseMapSelection = React.useCallback(
