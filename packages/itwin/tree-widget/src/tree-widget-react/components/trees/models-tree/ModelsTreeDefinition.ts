@@ -622,14 +622,16 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
   }
 }
 
-function createGeometricElementInstanceKeyPaths(
-  imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor,
-  idsCache: ModelsTreeIdsCache,
-  hierarchyConfig: ModelsTreeHierarchyConfiguration,
-  targetItems: Array<Id64String | ElementsGroupInfo>,
-  componentId: GuidString,
-  componentName: string,
-): Observable<NormalizedHierarchyFilteringPath> {
+function createGeometricElementInstanceKeyPaths(props: {
+  imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
+  idsCache: ModelsTreeIdsCache;
+  hierarchyConfig: ModelsTreeHierarchyConfiguration;
+  targetItems: Array<Id64String | ElementsGroupInfo>;
+  componentId: GuidString;
+  componentName: string;
+  bufferNumber: number;
+}): Observable<NormalizedHierarchyFilteringPath> {
+  const { targetItems, bufferNumber, componentId, componentName, hierarchyConfig, idsCache, imodelAccess } = props;
   const elementIds = targetItems.filter((info): info is Id64String => typeof info === "string");
   const groupInfos = targetItems.filter((info): info is ElementsGroupInfo => typeof info !== "string");
   const separator = ";";
@@ -698,7 +700,7 @@ function createGeometricElementInstanceKeyPaths(
 
     return imodelAccess.createQueryReader(
       { ctes, ecsql },
-      { rowFormat: "Indexes", limit: "unbounded", restartToken: `${componentName}/${componentId}/geometric-element-paths-query` },
+      { rowFormat: "Indexes", limit: "unbounded", restartToken: `${componentName}/${componentId}/geometric-element-paths-query-${bufferNumber}` },
     );
   }).pipe(
     releaseMainThreadOnItemsCount(300),
@@ -824,7 +826,19 @@ function createInstanceKeyPathsFromTargetItemsObs({
           from(ids.elements).pipe(
             bufferCount(Math.ceil(elementsLength / Math.ceil(elementsLength / 5000))),
             releaseMainThreadOnItemsCount(1),
-            mergeMap((block) => createGeometricElementInstanceKeyPaths(imodelAccess, idsCache, hierarchyConfig, block, componentId, componentName), 10),
+            mergeMap(
+              (block, bufferNumber) =>
+                createGeometricElementInstanceKeyPaths({
+                  imodelAccess,
+                  idsCache,
+                  hierarchyConfig,
+                  targetItems: block,
+                  componentId,
+                  componentName,
+                  bufferNumber,
+                }),
+              10,
+            ),
           ),
         ),
       );
