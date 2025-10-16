@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import type { Observable, Subscription } from "rxjs";
 import {
   concat,
   concatAll,
@@ -34,8 +35,8 @@ import {
   mergeVisibilityStatuses,
 } from "../VisibilityUtils.js";
 
-import type { Observable, Subscription } from "rxjs";
-import type { Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { ITreeWidgetIdsCache } from "../TreeWidgetIdsCache.js";
+import type { Id64Arg, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { TreeWidgetViewport } from "../../TreeWidgetViewport.js";
 import type { HierarchyVisibilityHandlerOverridableMethod, HierarchyVisibilityOverrideHandler, VisibilityStatus } from "../../UseHierarchyVisibility.js";
@@ -66,19 +67,6 @@ export interface BaseTreeVisibilityHandlerOverrides {
   >;
 }
 
-/** @internal */
-export interface BaseIdsCache {
-  hasSubModel: (elementId: Id64String) => Promise<boolean>;
-  getElementsCount: (props: { modelId: Id64String; categoryId: Id64String }) => Observable<number>;
-  getSubCategories: (props: { categoryIds: Id64Arg }) => Observable<{ id: Id64String; subCategories: Id64Arg | undefined }>;
-  getModels: (props: { categoryIds: Id64Arg }) => Observable<{ id: Id64String; models: Id64Arg | undefined }>;
-  getCategories: (props: { modelIds: Id64Arg }) => Observable<{ id: Id64String; drawingCategories?: Id64Arg; spatialCategories?: Id64Arg }>;
-  getSubModels: (
-    props: { modelIds: Id64Arg } | { categoryIds: Id64Arg; modelId: Id64String | undefined },
-  ) => Observable<{ id: Id64String; subModels: Id64Arg | undefined }>;
-  getAllCategories: () => Observable<{ drawingCategories?: Id64Set; spatialCategories?: Id64Set }>;
-}
-
 /**
  * Interface for a tree visibility handler that provides methods to get and change visibility status of hierarchy nodes.
  * @internal
@@ -96,7 +84,7 @@ export interface BaseVisibilityHelperProps {
   alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfo;
   overrideHandler?: HierarchyVisibilityOverrideHandler;
   overrides?: BaseTreeVisibilityHandlerOverrides;
-  baseIdsCache: BaseIdsCache;
+  treeWidgetIdsCache: ITreeWidgetIdsCache;
 }
 
 /**
@@ -130,7 +118,7 @@ export class BaseVisibilityHelper implements Disposable {
    * - Clears always drawn list;
    * - Removes all per-model category overrides. */
   public removeAlwaysDrawnExclusive(): Observable<void> {
-    return from(this.#props.baseIdsCache.getAllCategories()).pipe(
+    return from(this.#props.treeWidgetIdsCache.getAllCategoriesThatContainElements()).pipe(
       map(({ drawingCategories, spatialCategories }) => {
         const categoriesToTurnOff = this.#props.viewport.viewType === "2d" ? drawingCategories : spatialCategories;
         if (categoriesToTurnOff) {
@@ -161,7 +149,7 @@ export class BaseVisibilityHelper implements Disposable {
         mergeMap((modelId) => {
           // For hidden models we only need to check subModels
           if (!this.#props.viewport.viewsModel(modelId)) {
-            return this.#props.baseIdsCache.getSubModels({ modelIds: modelId }).pipe(
+            return this.#props.treeWidgetIdsCache.getSubModels({ modelIds: modelId }).pipe(
               mergeMap(({ subModels }) => {
                 if (subModels && Id64.sizeOf(subModels) > 0) {
                   return this.getModelsVisibilityStatus({ modelIds: subModels, type }).pipe(
@@ -175,14 +163,22 @@ export class BaseVisibilityHelper implements Disposable {
             );
           }
           // For visible models we need to check all categories
-          return this.#props.baseIdsCache.getCategories({ modelIds: modelId }).pipe(
+          return this.#props.treeWidgetIdsCache.getCategories({ modelIds: modelId }).pipe(
             mergeMap(({ drawingCategories, spatialCategories }) =>
               merge(
                 drawingCategories
-                  ? of(drawingCategories).pipe(mergeMap((categoryIds) => this.getCategoriesVisibilityStatus({ modelId, categoryIds, type: "DrawingCategory" })))
+                  ? of(drawingCategories).pipe(
+                      mergeMap((categoryIds) =>
+                        this.getCategoriesVisibilityStatus({ modelId, categoryIds, type: "DrawingCategory", checkSubCategories: false }),
+                      ),
+                    )
                   : EMPTY,
                 spatialCategories
-                  ? of(spatialCategories).pipe(mergeMap((categoryIds) => this.getCategoriesVisibilityStatus({ modelId, categoryIds, type: "SpatialCategory" })))
+                  ? of(spatialCategories).pipe(
+                      mergeMap((categoryIds) =>
+                        this.getCategoriesVisibilityStatus({ modelId, categoryIds, type: "SpatialCategory", checkSubCategories: false }),
+                      ),
+                    )
                   : EMPTY,
               ),
             ),
@@ -223,7 +219,7 @@ export class BaseVisibilityHelper implements Disposable {
         queryProps: { modelId, categoryIds },
         defaultStatus: () => this.getVisibleModelCategoriesDirectVisibilityStatus({ modelId, categoryIds }),
       }),
-      this.#props.baseIdsCache.getSubModels({ modelId, categoryIds }).pipe(
+      this.#props.treeWidgetIdsCache.getSubModels({ modelId, categoryIds }).pipe(
         mergeMap(({ subModels }) => {
           if (subModels && Id64.sizeOf(subModels) > 0) {
             return this.getModelsVisibilityStatus({ modelIds: subModels, type });
@@ -264,7 +260,7 @@ export class BaseVisibilityHelper implements Disposable {
    */
   public getSubCategoriesVisibilityStatus(props: { subCategoryIds: Id64Arg; categoryId: Id64String; modelId?: Id64String }): Observable<VisibilityStatus> {
     return (
-      props.modelId ? of({ id: props.categoryId, models: props.modelId }) : from(this.#props.baseIdsCache.getModels({ categoryIds: props.categoryId }))
+      props.modelId ? of({ id: props.categoryId, models: props.modelId }) : from(this.#props.treeWidgetIdsCache.getModels({ categoryIds: props.categoryId }))
     ).pipe(
       map(({ models }) => {
         let visibility: "visible" | "hidden" | "unknown" = "unknown";
@@ -330,6 +326,7 @@ export class BaseVisibilityHelper implements Disposable {
     categoryIds: Id64Arg;
     modelId: Id64String | undefined;
     type: "DrawingCategory" | "SpatialCategory";
+    checkSubCategories: boolean;
   }): Observable<VisibilityStatus> {
     const result = defer(() => {
       const { categoryIds, modelId: modelIdFromProps, type } = props;
@@ -346,7 +343,7 @@ export class BaseVisibilityHelper implements Disposable {
       return (
         modelIdFromProps
           ? from(Id64.iterable(categoryIds)).pipe(map((categoryId) => ({ id: categoryId, models: modelIdFromProps })))
-          : this.#props.baseIdsCache.getModels({ categoryIds })
+          : this.#props.treeWidgetIdsCache.getModels({ categoryIds })
       ).pipe(
         map(({ id, models }) => {
           const acc = { categoryId: id, visibleModels: new Array<Id64String>(), hiddenModels: new Array<Id64String>() };
@@ -366,7 +363,7 @@ export class BaseVisibilityHelper implements Disposable {
           return merge(
             // For hidden models we only need to check subModels
             hiddenModels.length > 0
-              ? this.#props.baseIdsCache.getSubModels({ modelIds: hiddenModels }).pipe(
+              ? this.#props.treeWidgetIdsCache.getSubModels({ modelIds: hiddenModels }).pipe(
                   mergeMap(({ subModels }) => {
                     if (subModels && Id64.sizeOf(subModels) > 0) {
                       return this.getModelsVisibilityStatus({
@@ -395,15 +392,21 @@ export class BaseVisibilityHelper implements Disposable {
                 )
               : EMPTY,
             // We need to check subCategories as well
-            this.#props.baseIdsCache.getSubCategories({ categoryIds: categoryId }).pipe(
-              mergeMap(({ subCategories }) => {
-                if (subCategories && Id64.sizeOf(subCategories) > 0) {
-                  return this.getSubCategoriesVisibilityStatus({ categoryId, modelId: modelIdFromProps, subCategoryIds: subCategories });
-                }
+            props.checkSubCategories
+              ? this.#props.treeWidgetIdsCache.getSubCategories({ categoryIds: categoryId }).pipe(
+                  mergeMap(({ subCategories }) => {
+                    if (subCategories && Id64.sizeOf(subCategories) > 0) {
+                      // We only want to check default sub-category visibility status if category does not have any models
+                      if (Id64.sizeOf(subCategories) === 1 && (hiddenModels.length > 0 || visibleModels.length > 0)) {
+                        return EMPTY;
+                      }
+                      return this.getSubCategoriesVisibilityStatus({ categoryId, modelId: modelIdFromProps, subCategoryIds: subCategories });
+                    }
 
-                return EMPTY;
-              }),
-            ),
+                    return EMPTY;
+                  }),
+                )
+              : EMPTY,
           ).pipe(defaultIfEmpty(createVisibilityStatus(this.#props.viewport.viewsCategory(categoryId) ? "visible" : "hidden")));
         }),
         mergeVisibilityStatuses,
@@ -473,7 +476,7 @@ export class BaseVisibilityHelper implements Disposable {
       if (!this.#props.viewport.viewsModel(modelId)) {
         return from(elementIds).pipe(
           mergeMap((elementId) =>
-            from(this.#props.baseIdsCache.hasSubModel(elementId)).pipe(
+            from(this.#props.treeWidgetIdsCache.hasSubModel(elementId)).pipe(
               mergeMap((isSubModel) => {
                 if (isSubModel) {
                   return this.getModelsVisibilityStatus({
@@ -502,7 +505,7 @@ export class BaseVisibilityHelper implements Disposable {
         mergeMap((visibilityStatusAlwaysAndNeverDraw) => {
           return from(Id64.iterable(elementIds)).pipe(
             mergeMap((elementId) =>
-              from(this.#props.baseIdsCache.hasSubModel(elementId)).pipe(
+              from(this.#props.treeWidgetIdsCache.hasSubModel(elementId)).pipe(
                 mergeMap((isSubModel) => {
                   if (isSubModel) {
                     return this.getModelsVisibilityStatus({
@@ -560,7 +563,7 @@ export class BaseVisibilityHelper implements Disposable {
     }
     const { modelId, categoryIds } = props.queryProps;
     const totalCount = from(Id64.iterable(categoryIds)).pipe(
-      mergeMap((categoryId) => this.#props.baseIdsCache.getElementsCount({ modelId, categoryId })),
+      mergeMap((categoryId) => this.#props.treeWidgetIdsCache.getElementsCount({ modelId, categoryId })),
       reduce((acc, specificModelCategoryCount) => {
         return acc + specificModelCategoryCount;
       }, 0),
@@ -606,13 +609,13 @@ export class BaseVisibilityHelper implements Disposable {
       viewport.clearPerModelCategoryOverrides({ modelIds });
       if (!on) {
         viewport.changeModelDisplay({ modelIds, display: false });
-        return this.#props.baseIdsCache
+        return this.#props.treeWidgetIdsCache
           .getSubModels({ modelIds })
           .pipe(mergeMap(({ subModels }) => (subModels ? this.changeModelsVisibilityStatus({ modelIds: subModels, on }) : EMPTY)));
       }
 
       viewport.changeModelDisplay({ modelIds, display: true });
-      return this.#props.baseIdsCache.getCategories({ modelIds }).pipe(
+      return this.#props.treeWidgetIdsCache.getCategories({ modelIds }).pipe(
         mergeMap(({ id, drawingCategories, spatialCategories }) => {
           return merge(
             drawingCategories ? this.changeCategoriesVisibilityStatus({ categoryIds: drawingCategories, modelId: id, on }) : EMPTY,
@@ -634,7 +637,7 @@ export class BaseVisibilityHelper implements Disposable {
   private showModelWithoutAnyCategoriesOrElements(modelId: Id64String, categoriesToNotOverride?: Id64Arg): Observable<void> {
     const viewport = this.#props.viewport;
     return forkJoin({
-      allModelCategories: this.#props.baseIdsCache.getCategories({ modelIds: modelId }).pipe(
+      allModelCategories: this.#props.treeWidgetIdsCache.getCategories({ modelIds: modelId }).pipe(
         reduce((acc, { drawingCategories, spatialCategories }) => {
           for (const category of Id64.iterable(drawingCategories ?? [])) {
             acc.add(category);
@@ -692,7 +695,7 @@ export class BaseVisibilityHelper implements Disposable {
       const modelIdsObservable = (
         modelIdFromProps
           ? of(new Map<ModelId, Set<CategoryId>>([[modelIdFromProps, getSetFromId64Arg(categoryIds)]]))
-          : this.#props.baseIdsCache.getModels({ categoryIds }).pipe(
+          : this.#props.treeWidgetIdsCache.getModels({ categoryIds }).pipe(
               reduce((acc, { id, models }) => {
                 if (!models) {
                   return acc;
@@ -743,7 +746,7 @@ export class BaseVisibilityHelper implements Disposable {
             )
           : EMPTY,
         this.#alwaysAndNeverDrawnElements.clearAlwaysAndNeverDrawnElements({ categoryIds, modelId: modelIdFromProps }),
-        this.#props.baseIdsCache
+        this.#props.treeWidgetIdsCache
           .getSubModels({ categoryIds, modelId: modelIdFromProps })
           .pipe(mergeMap(({ subModels }) => (subModels ? this.changeModelsVisibilityStatus({ modelIds: subModels, on }) : EMPTY))),
       );
@@ -796,7 +799,7 @@ export class BaseVisibilityHelper implements Disposable {
         // Change visibility of elements that are models
         from(Id64.iterable(elementIds)).pipe(
           mergeMap((elementId) =>
-            from(this.#props.baseIdsCache.hasSubModel(elementId)).pipe(
+            from(this.#props.treeWidgetIdsCache.hasSubModel(elementId)).pipe(
               mergeMap((isSubModel) => {
                 if (isSubModel) {
                   return this.changeModelsVisibilityStatus({ modelIds: elementId, on });

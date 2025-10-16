@@ -477,13 +477,19 @@ export class TreeWidget {
 }
 
 // @public
-export function TreeWidgetComponent(props: TreeWidgetProps): JSX_2.Element;
+export function TreeWidgetComponent(props: TreeWidgetProps): JSX_2.Element | null;
+
+// @public
+export function TreeWidgetContextProvider({ imodelConnection, children }: PropsWithChildren<{
+    imodelConnection: IModelConnection;
+}>): JSX_2.Element;
 
 // @public
 interface TreeWidgetProps {
     onFeatureUsed?: (feature: string) => void;
     onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
     trees: TreeDefinition[];
+    treeWidgetViewport?: TreeWidgetViewport;
 }
 
 // @public

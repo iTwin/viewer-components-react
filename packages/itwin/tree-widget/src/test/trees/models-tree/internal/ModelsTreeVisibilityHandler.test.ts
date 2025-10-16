@@ -15,8 +15,9 @@ import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { InstanceKey } from "@itwin/presentation-shared";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-import { CLASS_NAME_Subject } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
+import { CLASS_NAME_GeometricElement3d, CLASS_NAME_Subject } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import { createVisibilityStatus } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
+import { TreeWidgetIdsCache } from "../../../../tree-widget-react/components/trees/common/internal/TreeWidgetIdsCache.js";
 import { ModelsTreeIdsCache } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import { createModelsTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
@@ -53,7 +54,6 @@ import type { TreeWidgetViewport } from "../../../../tree-widget-react/component
 import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
 import type { ModelsTreeVisibilityHandlerProps } from "../../../../tree-widget-react/components/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
 import type { ValidateNodeProps } from "./VisibilityValidation.js";
-
 interface VisibilityOverrides {
   models?: Map<Id64String, Visibility>;
   categories?: Map<Id64String, Visibility>;
@@ -63,11 +63,15 @@ interface VisibilityOverrides {
 type ModelsTreeHierarchyConfiguration = Partial<ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"]>;
 
 describe("ModelsTreeVisibilityHandler", () => {
-  function createIdsCache(iModel: IModelConnection, hierarchyConfig?: ModelsTreeHierarchyConfiguration) {
-    return new ModelsTreeIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded"), {
-      ...defaultHierarchyConfiguration,
-      ...hierarchyConfig,
-    });
+  function createIdsCache(props: { iModel: IModelConnection; hierarchyConfig?: ModelsTreeHierarchyConfiguration }) {
+    return new ModelsTreeIdsCache(
+      createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(props.iModel), "unbounded"),
+      {
+        ...defaultHierarchyConfiguration,
+        ...props.hierarchyConfig,
+      },
+      { cache: new TreeWidgetIdsCache(props.iModel), shouldDispose: true },
+    );
   }
 
   before(async () => {
@@ -171,7 +175,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       it("can call original implementation", async () => {
         let useOriginalImplFlag = false;
         const viewport = createFakeSinonViewport();
-        using idsCache = createIdsCache(viewport.iModel);
+        using idsCache = createIdsCache({ iModel: viewport.iModel });
         using handler = createModelsTreeVisibilityHandler({
           viewport,
           idsCache,
@@ -216,7 +220,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             getSubjectsVisibilityStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
           };
           const viewport = createFakeSinonViewport();
-          using idsCache = createIdsCache(viewport.iModel);
+          using idsCache = createIdsCache({ iModel: viewport.iModel });
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -659,7 +663,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             getCategoriesVisibilityStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
           };
           const viewport = createFakeSinonViewport();
-          using idsCache = createIdsCache(viewport.iModel);
+          using idsCache = createIdsCache({ iModel: viewport.iModel });
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -923,7 +927,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             getElementsVisibilityStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
           };
           const viewport = createFakeSinonViewport();
-          using idsCache = createIdsCache(viewport.iModel);
+          using idsCache = createIdsCache({ iModel: viewport.iModel });
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -1061,7 +1065,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             getElementGroupingNodeVisibilityStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
           };
           const viewport = createFakeSinonViewport();
-          using idsCache = createIdsCache(viewport.iModel);
+          using idsCache = createIdsCache({ iModel: viewport.iModel });
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -1237,7 +1241,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             changeSubjectsVisibilityStatus: sinon.fake.resolves(undefined),
           };
           const viewport = createFakeSinonViewport();
-          using idsCache = createIdsCache(viewport.iModel);
+          using idsCache = createIdsCache({ iModel: viewport.iModel });
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -1421,7 +1425,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             changeCategoriesVisibilityStatus: sinon.fake.resolves(undefined),
           };
           const viewport = createFakeSinonViewport();
-          using idsCache = createIdsCache(viewport.iModel);
+          using idsCache = createIdsCache({ iModel: viewport.iModel });
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -1504,7 +1508,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             changeElementsVisibilityStatus: sinon.fake.resolves(undefined),
           };
           const viewport = createFakeSinonViewport();
-          using idsCache = createIdsCache(viewport.iModel);
+          using idsCache = createIdsCache({ iModel: viewport.iModel });
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -1660,7 +1664,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             changeElementGroupingNodeVisibilityStatus: sinon.fake.resolves(undefined),
           };
           const viewport = createFakeSinonViewport();
-          using idsCache = createIdsCache(viewport.iModel);
+          using idsCache = createIdsCache({ iModel: viewport.iModel });
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -1739,7 +1743,15 @@ describe("ModelsTreeVisibilityHandler", () => {
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true, ...props.hierarchyConfig };
       const imodelAccess = createIModelAccess(props.imodel);
       const viewport = createTreeWidgetTestingViewport({ iModel: props.imodel, viewType: "3d", visibleByDefault: !!props.visibleByDefault });
-      const idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig);
+      const idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig, {
+        cache: new TreeWidgetIdsCache(
+          props.imodel,
+          hierarchyConfig.elementClassSpecification !== CLASS_NAME_GeometricElement3d
+            ? { type: "3d", elementClassName: hierarchyConfig.elementClassSpecification }
+            : undefined,
+        ),
+        shouldDispose: true,
+      });
       return {
         imodelAccess,
         viewport,

@@ -17,6 +17,7 @@ import {
 import { CategoriesTreeIdsCache } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 import { createCategoriesTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/categories-tree/internal/visibility/CategoriesTreeVisibilityHandler.js";
 import { CLASS_NAME_DefinitionModel, CLASS_NAME_Subject } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
+import { TreeWidgetIdsCache } from "../../../../tree-widget-react/components/trees/common/internal/TreeWidgetIdsCache.js";
 import {
   buildIModel,
   insertDefinitionContainer,
@@ -71,7 +72,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
     TestUtils.terminate();
   });
 
-  async function createCommonProps({
+  function createCommonProps({
     imodel,
     hierarchyConfig,
     subCategoriesOfCategories,
@@ -83,7 +84,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
     visibleByDefault?: boolean;
   }) {
     const imodelAccess = createIModelAccess(imodel);
-    const idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d");
+    const idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d", { cache: new TreeWidgetIdsCache(imodel), shouldDispose: true });
     const viewport = createTreeWidgetTestingViewport({ iModel: imodel, subCategoriesOfCategories, viewType: "3d", visibleByDefault: !!visibleByDefault });
 
     return {
@@ -122,7 +123,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       ...defaultHierarchyConfiguration,
       ...hierarchyConfig,
     };
-    const commonProps = await createCommonProps({ imodel, hierarchyConfig: hierarchyConfiguration, subCategoriesOfCategories, visibleByDefault });
+    const commonProps = createCommonProps({ imodel, hierarchyConfig: hierarchyConfiguration, subCategoriesOfCategories, visibleByDefault });
     const handler = createCategoriesTreeVisibilityHandler({
       viewport: commonProps.viewport,
       idsCache: commonProps.idsCache,

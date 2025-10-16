@@ -16,7 +16,7 @@ import type { ModelsTreeIdsCache } from "../ModelsTreeIdsCache.js";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./ModelsTreeVisibilityHandler.js";
 
 /** @internal */
-export type ModelsTreeVisibilityHelperProps = BaseVisibilityHelperProps & {
+export type ModelsTreeVisibilityHelperProps = Omit<BaseVisibilityHelperProps, "treeWidgetIdsCache"> & {
   idsCache: ModelsTreeIdsCache;
   overrides?: ModelsTreeVisibilityHandlerOverrides;
 };
@@ -30,7 +30,7 @@ export type ModelsTreeVisibilityHelperProps = BaseVisibilityHelperProps & {
 export class ModelsTreeVisibilityHelper extends BaseVisibilityHelper {
   #props: ModelsTreeVisibilityHelperProps;
   constructor(props: ModelsTreeVisibilityHelperProps) {
-    super(props);
+    super({ ...props, treeWidgetIdsCache: props.idsCache });
     this.#props = props;
   }
 

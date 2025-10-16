@@ -20,6 +20,8 @@ import {
   TooManyInstancesFocused,
   UnknownInstanceFocusError,
 } from "../common/components/EmptyTree.js";
+import { CLASS_NAME_GeometricElement3d } from "../common/internal/ClassNameDefinitions.js";
+import { TreeWidgetIdsCache } from "../common/internal/TreeWidgetIdsCache.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
@@ -45,7 +47,6 @@ import type { ModelsTreeFilteringError, ModelsTreeSubTreeError } from "./interna
 import type { ModelsTreeFilterTargets } from "./internal/visibility/FilteredTree.js";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/visibility/ModelsTreeVisibilityHandler.js";
 import type { ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition.js";
-
 /** @beta */
 export interface UseModelsTreeProps {
   /**
@@ -295,5 +296,15 @@ export function ModelsTreeIcon({ node }: { node: PresentationHierarchyNode }) {
 }
 
 function createCache(props: CreateCacheProps<{ hierarchyConfig: ModelsTreeHierarchyConfiguration }>) {
-  return new ModelsTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.hierarchyConfig);
+  const isDefaultClassName = props.specificProps.hierarchyConfig.elementClassSpecification === CLASS_NAME_GeometricElement3d;
+  const treeWidgetIdsCache = !isDefaultClassName
+    ? new TreeWidgetIdsCache(props.imodel, { type: "3d", elementClassName: props.specificProps.hierarchyConfig.elementClassSpecification })
+    : props.treeWidgetIdsCache
+      ? props.treeWidgetIdsCache
+      : new TreeWidgetIdsCache(props.imodel);
+
+  return new ModelsTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.hierarchyConfig, {
+    cache: treeWidgetIdsCache,
+    shouldDispose: !isDefaultClassName || !props.treeWidgetIdsCache,
+  });
 }
