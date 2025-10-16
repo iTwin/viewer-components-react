@@ -258,12 +258,7 @@ export class BaseVisibilityHelper implements Disposable {
    * - Category selector visibility in the viewport.
    * - Sub-categories visibility in the viewport.
    */
-  public getSubCategoriesVisibilityStatus(props: {
-    subCategoryIds: Id64Arg;
-    categoryId: Id64String;
-    modelId?: Id64String;
-    type: "DrawingCategory" | "SpatialCategory";
-  }): Observable<VisibilityStatus> {
+  public getSubCategoriesVisibilityStatus(props: { subCategoryIds: Id64Arg; categoryId: Id64String; modelId?: Id64String }): Observable<VisibilityStatus> {
     return (
       props.modelId ? of({ id: props.categoryId, models: props.modelId }) : from(this.#props.treeWidgetIdsCache.getModels({ categoryIds: props.categoryId }))
     ).pipe(
@@ -401,7 +396,7 @@ export class BaseVisibilityHelper implements Disposable {
               ? this.#props.treeWidgetIdsCache.getSubCategories({ categoryIds: categoryId }).pipe(
                   mergeMap(({ subCategories }) => {
                     if (subCategories && Id64.sizeOf(subCategories) > 0) {
-                      return this.getSubCategoriesVisibilityStatus({ categoryId, modelId: modelIdFromProps, subCategoryIds: subCategories, type });
+                      return this.getSubCategoriesVisibilityStatus({ categoryId, modelId: modelIdFromProps, subCategoryIds: subCategories });
                     }
 
                     return EMPTY;

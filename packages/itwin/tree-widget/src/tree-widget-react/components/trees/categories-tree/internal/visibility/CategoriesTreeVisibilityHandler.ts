@@ -142,7 +142,6 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
       return this.#visibilityHelper.getSubCategoriesVisibilityStatus({
         categoryId,
         subCategoryIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
-        type: this.#props.viewport.viewType === "2d" ? "DrawingCategory" : "SpatialCategory",
       });
     }
 
@@ -262,7 +261,6 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
               this.#visibilityHelper.getSubCategoriesVisibilityStatus({
                 subCategoryIds,
                 categoryId,
-                type: this.#props.viewport.viewType === "2d" ? "DrawingCategory" : "SpatialCategory",
               }),
             ),
           ),
