@@ -6,7 +6,7 @@
 import { Guid } from "@itwin/core-bentley";
 import { DEFINITION_CONTAINER_CLASS, SUB_CATEGORY_CLASS } from "./ClassNameDefinitions.js";
 
-import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
 
@@ -42,13 +42,17 @@ export class CategoriesTreeIdsCache implements Disposable {
   #categoryModelClass: string;
   #isDefinitionContainerSupported: Promise<boolean> | undefined;
   #queryExecutor: LimitingECSqlQueryExecutor;
+  #componentId: GuidString;
+  #componentName: string;
 
-  constructor(queryExecutor: LimitingECSqlQueryExecutor, viewType: "3d" | "2d") {
+  constructor(queryExecutor: LimitingECSqlQueryExecutor, viewType: "3d" | "2d", componentId?: GuidString) {
     this.#queryExecutor = queryExecutor;
     const { categoryClass, categoryElementClass, categoryModelClass } = getClassesByView(viewType);
     this.#categoryClass = categoryClass;
     this.#categoryElementClass = categoryElementClass;
     this.#categoryModelClass = categoryModelClass;
+    this.#componentId = componentId ?? Guid.createValue();
+    this.#componentName = "CategoriesTreeIdsCache";
   }
 
   public [Symbol.dispose]() {}
@@ -69,7 +73,7 @@ export class CategoriesTreeIdsCache implements Disposable {
       {
         rowFormat: "ECSqlPropertyNames",
         limit: "unbounded",
-        restartToken: `CategoriesTreeIdsCache/element-models-and-categories-query/${Guid.createValue()}`,
+        restartToken: `${this.#componentName}/${this.#componentId}/element-models-and-categories-query`,
       },
     )) {
       yield { modelId: row.modelId, categoryId: row.categoryId };
@@ -109,7 +113,7 @@ export class CategoriesTreeIdsCache implements Disposable {
     `;
     for await (const row of this.#queryExecutor.createQueryReader(
       { ecsql: categoriesQuery },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `CategoriesTreeIdsCache/categories-query/${Guid.createValue()}` },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/categories-query` },
     )) {
       yield { id: row.id, modelId: row.modelId, parentDefinitionContainerExists: row.parentDefinitionContainerExists, childCount: row.childCount };
     }
@@ -129,7 +133,7 @@ export class CategoriesTreeIdsCache implements Disposable {
 
     for await (const _row of this.#queryExecutor.createQueryReader(
       { ecsql: query },
-      { restartToken: `CategoriesTreeIdsCache/is-definition-container-supported-query/${Guid.createValue()}` },
+      { restartToken: `${this.#componentName}/${this.#componentId}/is-definition-container-supported-query` },
     )) {
       return true;
     }
@@ -172,7 +176,7 @@ export class CategoriesTreeIdsCache implements Disposable {
     `;
     for await (const row of this.#queryExecutor.createQueryReader(
       { ctes, ecsql: definitionsQuery },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `CategoriesTreeIdsCache/definition-containers-query/${Guid.createValue()}` },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/definition-containers-query` },
     )) {
       yield { id: row.id, modelId: row.modelId };
     }
@@ -191,7 +195,7 @@ export class CategoriesTreeIdsCache implements Disposable {
     `;
     for await (const row of this.#queryExecutor.createQueryReader(
       { ecsql: definitionsQuery },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `CategoriesTreeIdsCache/visible-sub-categories-query/${Guid.createValue()}` },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/visible-sub-categories-query` },
     )) {
       yield { id: row.id, parentId: row.categoryId };
     }

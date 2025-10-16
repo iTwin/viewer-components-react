@@ -7,6 +7,7 @@ import { Guid } from "@itwin/core-bentley";
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 
+import type { GuidString } from "@itwin/core-bentley";
 import type {
   DefineGenericNodeChildHierarchyLevelProps,
   DefineHierarchyLevelProps,
@@ -22,6 +23,7 @@ import type { ECClassHierarchyInspector, ECSchemaProvider, IInstanceLabelSelectC
 
 interface ExternalSourcesTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
+  componentId?: GuidString;
 }
 
 export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
@@ -30,6 +32,8 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
   #nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
   #queryExecutor: LimitingECSqlQueryExecutor;
   #isSupported?: Promise<boolean>;
+  #componentId: GuidString;
+  #componentName: string;
 
   public constructor(props: ExternalSourcesTreeDefinitionProps) {
     this.#impl = createPredicateBasedHierarchyDefinition({
@@ -58,6 +62,8 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
       imodelAccess: props.imodelAccess,
       instanceLabelSelectClauseFactory: this.#nodeLabelSelectClauseFactory,
     });
+    this.#componentId = props.componentId ?? Guid.createValue();
+    this.#componentName = "ExternalSourcesTreeDefinition";
   }
 
   public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
@@ -303,7 +309,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
 
     for await (const _row of this.#queryExecutor.createQueryReader(
       { ecsql: query },
-      { restartToken: `ExternalSourcesTreeDefinition/is-external-source-supported-query/${Guid.createValue()}` },
+      { restartToken: `${this.#componentName}/${this.#componentId}/is-external-source-supported-query` },
     )) {
       return true;
     }

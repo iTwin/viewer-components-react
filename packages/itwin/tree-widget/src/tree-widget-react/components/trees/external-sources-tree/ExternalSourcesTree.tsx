@@ -3,15 +3,19 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import type { ReactElement } from "react";
+import { useMemo } from "react";
+import { Guid } from "@itwin/core-bentley";
 import { SvgDetails, SvgDocument, SvgItem } from "@itwin/itwinui-icons-react";
 import { Tree } from "../common/components/Tree.js";
 import { TreeRenderer } from "../common/components/TreeRenderer.js";
 import { ExternalSourcesTreeComponent } from "./ExternalSourcesTreeComponent.js";
 import { ExternalSourcesTreeDefinition } from "./ExternalSourcesTreeDefinition.js";
 
-import type { TreeProps } from "../common/components/Tree.js";
-import type { ReactElement } from "react";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import type { GuidString } from "@itwin/core-bentley";
+import type { TreeProps } from "../common/components/Tree.js";
+import type { HierarchyDefinition } from "@itwin/presentation-hierarchies";
 
 /** @beta */
 export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode"> & {
@@ -22,19 +26,20 @@ export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "getSchemaCont
 
 /** @beta */
 export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
+  const componentId: GuidString = useMemo(() => Guid.createValue(), []);
   return (
     <Tree
       {...props}
       treeName={ExternalSourcesTreeComponent.id}
-      getHierarchyDefinition={getDefinitionsProvider}
+      getHierarchyDefinition={(definitionProps) => getDefinitionsProvider({ ...definitionProps, componentId })}
       selectionMode={props.selectionMode ?? "none"}
       treeRenderer={(treeProps) => <TreeRenderer {...treeProps} getIcon={getIcon} />}
     />
   );
 }
 
-const getDefinitionsProvider: TreeProps["getHierarchyDefinition"] = (props) => {
-  return new ExternalSourcesTreeDefinition(props);
+const getDefinitionsProvider = (props: Parameters<TreeProps["getHierarchyDefinition"]>[0] & { componentId: GuidString }): HierarchyDefinition => {
+  return new ExternalSourcesTreeDefinition({ ...props, componentId: Guid.createValue() });
 };
 
 function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {

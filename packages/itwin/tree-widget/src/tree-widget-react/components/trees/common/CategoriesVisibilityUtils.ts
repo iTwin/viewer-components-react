@@ -7,7 +7,7 @@ import { Guid } from "@itwin/core-bentley";
 import { QueryRowFormat } from "@itwin/core-common";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 
 /**
@@ -35,8 +35,8 @@ export async function toggleAllCategories(viewport: Viewport, display: boolean) 
 /**
  * Gets ids of all categories from specified imodel and viewport.
  */
-async function getCategories(viewport: Viewport) {
-  const categories = await loadCategoriesFromViewport(viewport);
+async function getCategories(viewport: Viewport, componentId?: GuidString) {
+  const categories = await loadCategoriesFromViewport(viewport, componentId);
   return categories.map((category) => category.categoryId);
 }
 
@@ -73,7 +73,7 @@ export function enableSubCategoryDisplay(viewport: Viewport, key: string, enable
 }
 
 /** @internal */
-export async function loadCategoriesFromViewport(vp: Viewport) {
+export async function loadCategoriesFromViewport(vp: Viewport, componentId?: GuidString) {
   // Query categories and add them to state
   const selectUsedSpatialCategoryIds =
     "SELECT DISTINCT Category.Id as id from BisCore.GeometricElement3d WHERE Category.Id IN (SELECT ECInstanceId from BisCore.SpatialCategory)";
@@ -87,7 +87,7 @@ export async function loadCategoriesFromViewport(vp: Viewport) {
   const rows = await vp.iModel
     .createQueryReader(ecsql2, undefined, {
       rowFormat: QueryRowFormat.UseJsPropertyNames,
-      restartToken: `CategoriesVisibilityUtils/categories-query/${Guid.createValue()}`,
+      restartToken: `CategoriesVisibilityUtils/${componentId ?? Guid.createValue()}/categories-query`,
     })
     .toArray();
   (await vp.iModel.categories.getCategoryInfo(rows.map((row) => row.id))).forEach((val) => {

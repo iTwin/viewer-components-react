@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useMemo, useState } from "react";
-import { assert } from "@itwin/core-bentley";
+import { assert, Guid } from "@itwin/core-bentley";
 import { SvgLayers } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
@@ -56,11 +56,12 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
 
   const viewType = activeView.view.is2d() ? "2d" : "3d";
   const iModel = activeView.iModel;
-
+  const componentId = useMemo(() => Guid.createValue(), []);
   const { getCache: getCategoriesTreeIdsCache } = useIdsCache<CategoriesTreeIdsCache, { viewType: "2d" | "3d" }>({
     imodel: iModel,
     createCache,
     cacheSpecificProps: useMemo(() => ({ viewType }), [viewType]),
+    componentId,
   });
 
   const visibilityHandlerFactory = useCallback(() => {
@@ -99,6 +100,7 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
           viewType,
           idsCache: getCategoriesTreeIdsCache(),
           abortSignal,
+          componentId,
         });
         onCategoriesFiltered?.(await getCategoriesFromPaths(paths, getCategoriesTreeIdsCache()));
         return paths;
@@ -112,7 +114,7 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
         return [];
       }
     };
-  }, [filter, viewType, onFeatureUsed, onCategoriesFiltered, getCategoriesTreeIdsCache]);
+  }, [filter, viewType, onFeatureUsed, onCategoriesFiltered, getCategoriesTreeIdsCache, componentId]);
 
   return {
     categoriesTreeProps: {
@@ -252,5 +254,5 @@ function getSublabel(node: PresentationHierarchyNode) {
 }
 
 function createCache(props: CreateCacheProps<{ viewType: "2d" | "3d" }>) {
-  return new CategoriesTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.viewType);
+  return new CategoriesTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.viewType, props.componentId);
 }

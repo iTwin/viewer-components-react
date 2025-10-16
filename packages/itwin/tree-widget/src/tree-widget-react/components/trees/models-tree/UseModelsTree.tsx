@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Guid } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
 import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
 import { Anchor, Text } from "@itwin/itwinui-react";
@@ -21,7 +22,7 @@ import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibili
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition.js";
 
 import type { ReactElement } from "react";
-import type { Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
@@ -129,24 +130,27 @@ export function useModelsTree({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     Object.values(hierarchyConfig ?? {}),
   );
+  const componentId: GuidString = useMemo(() => Guid.createValue(), []);
   const { onFeatureUsed } = useTelemetryContext();
 
   const { getCache: getModelsTreeIdsCache } = useIdsCache<ModelsTreeIdsCache, { hierarchyConfig: ModelsTreeHierarchyConfiguration }>({
     imodel: activeView.iModel,
     createCache,
     cacheSpecificProps: useMemo(() => ({ hierarchyConfig: hierarchyConfiguration }), [hierarchyConfiguration]),
+    componentId,
   });
 
   const { visibilityHandlerFactory, onFilteredPathsChanged } = useCachedVisibility({
     activeView,
     overrides: visibilityHandlerOverrides,
     getModelsTreeIdsCache,
+    componentId,
   });
   const { loadFocusedItems } = useFocusedInstancesContext();
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
-    ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache: getModelsTreeIdsCache(), hierarchyConfig: hierarchyConfiguration }),
-    [getModelsTreeIdsCache, hierarchyConfiguration],
+    ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache: getModelsTreeIdsCache(), hierarchyConfig: hierarchyConfiguration, componentId }),
+    [getModelsTreeIdsCache, hierarchyConfiguration, componentId],
   );
 
   const onNodeDoubleClick = useCallback(
@@ -178,6 +182,7 @@ export function useModelsTree({
               hierarchyConfig: hierarchyConfiguration,
               limit: "unbounded",
               abortSignal,
+              componentId,
             }),
         });
         return paths.map(HierarchyFilteringPath.normalize).map(({ path }) => path);
@@ -187,7 +192,7 @@ export function useModelsTree({
         return [];
       }
     };
-  }, [getModelsTreeIdsCache, hierarchyConfiguration, getSubTreePaths]);
+  }, [getModelsTreeIdsCache, hierarchyConfiguration, getSubTreePaths, componentId]);
 
   const getPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
     setFilteringError(undefined);
@@ -220,6 +225,7 @@ export function useModelsTree({
                 targetItems: focusedItems,
                 hierarchyConfig: hierarchyConfiguration,
                 abortSignal,
+                componentId,
               });
               return paths.map(({ path, options }) => ({ path, options: { ...options, autoExpand: true } }));
             },
@@ -252,6 +258,7 @@ export function useModelsTree({
                     hierarchyConfig: hierarchyConfiguration,
                     limit: "unbounded",
                     abortSignal,
+                    componentId,
                   }),
                 filter,
               });
@@ -284,6 +291,7 @@ export function useModelsTree({
                 idsCache: getModelsTreeIdsCache(),
                 hierarchyConfig: hierarchyConfiguration,
                 abortSignal,
+                componentId,
               });
               return paths.map(({ path, options }) => ({ path, options: { ...options, autoExpand: true } }));
             },
@@ -312,6 +320,7 @@ export function useModelsTree({
     onModelsFiltered,
     onFilteredPathsChanged,
     getSubTreePathsInternal,
+    componentId,
   ]);
 
   const nodeSelectionPredicate = useCallback<NonNullable<VisibilityTreeProps["selectionPredicate"]>>(
@@ -430,32 +439,38 @@ function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
   return undefined;
 }
 
-function createVisibilityHandlerFactory(
-  activeView: Viewport,
-  idsCacheGetter: () => ModelsTreeIdsCache,
-  overrides?: ModelsTreeVisibilityHandlerOverrides,
-  filteredPaths?: HierarchyFilteringPath[],
-): VisibilityTreeProps["visibilityHandlerFactory"] {
-  return ({ imodelAccess }) => createModelsTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter(), imodelAccess, overrides, filteredPaths });
+function createVisibilityHandlerFactory(props: {
+  activeView: Viewport;
+  idsCacheGetter: () => ModelsTreeIdsCache;
+  overrides?: ModelsTreeVisibilityHandlerOverrides;
+  filteredPaths?: HierarchyFilteringPath[];
+  componentId: GuidString;
+}): VisibilityTreeProps["visibilityHandlerFactory"] {
+  const { activeView, componentId, idsCacheGetter, filteredPaths, overrides } = props;
+  return ({ imodelAccess }) =>
+    createModelsTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter(), imodelAccess, overrides, filteredPaths, componentId });
 }
 
 function useCachedVisibility(props: {
   activeView: Viewport;
   getModelsTreeIdsCache: () => ModelsTreeIdsCache;
   overrides?: ModelsTreeVisibilityHandlerOverrides;
+  componentId: GuidString;
 }) {
-  const { activeView, getModelsTreeIdsCache, overrides } = props;
+  const { activeView, getModelsTreeIdsCache, overrides, componentId } = props;
   const currentIModelRef = useRef(activeView.iModel);
 
   const [filteredPaths, setFilteredPaths] = useState<HierarchyFilteringPath[]>();
   const [visibilityHandlerFactory, setVisibilityHandlerFactory] = useState<VisibilityTreeProps["visibilityHandlerFactory"]>(() =>
-    createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache, overrides, filteredPaths),
+    createVisibilityHandlerFactory({ activeView, idsCacheGetter: getModelsTreeIdsCache, overrides, filteredPaths, componentId }),
   );
 
   useEffect(() => {
     currentIModelRef.current = activeView.iModel;
-    setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache, overrides, filteredPaths));
-  }, [activeView, getModelsTreeIdsCache, overrides, filteredPaths]);
+    setVisibilityHandlerFactory(() =>
+      createVisibilityHandlerFactory({ activeView, idsCacheGetter: getModelsTreeIdsCache, overrides, filteredPaths, componentId }),
+    );
+  }, [activeView, getModelsTreeIdsCache, overrides, filteredPaths, componentId]);
 
   return {
     visibilityHandlerFactory,

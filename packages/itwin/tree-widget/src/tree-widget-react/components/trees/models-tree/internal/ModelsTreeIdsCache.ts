@@ -10,7 +10,7 @@ import { collect } from "../../common/Rxjs.js";
 import { pushToMap } from "../../common/Utils.js";
 
 import type { Subscription } from "rxjs";
-import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
@@ -41,14 +41,18 @@ export class ModelsTreeIdsCache implements Disposable {
   #categoryKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath[]>>;
   #queryExecutor: LimitingECSqlQueryExecutor;
   #hierarchyConfig: ModelsTreeHierarchyConfiguration;
+  #componentId: GuidString;
+  #componentName: string;
 
-  constructor(queryExecutor: LimitingECSqlQueryExecutor, hierarchyConfig: ModelsTreeHierarchyConfiguration) {
+  constructor(queryExecutor: LimitingECSqlQueryExecutor, hierarchyConfig: ModelsTreeHierarchyConfiguration, componentId?: GuidString) {
     this.#hierarchyConfig = hierarchyConfig;
     this.#queryExecutor = queryExecutor;
     this.#categoryElementCounts = new ModelCategoryElementsCountCache(async (input) => this.queryCategoryElementCounts(input));
     this.#modelKeyPaths = new Map();
     this.#subjectKeyPaths = new Map();
     this.#categoryKeyPaths = new Map();
+    this.#componentId = componentId ?? Guid.createValue();
+    this.#componentName = "ModelsTreeIdsCache";
   }
 
   public [Symbol.dispose]() {
@@ -78,7 +82,7 @@ export class ModelsTreeIdsCache implements Disposable {
     `;
     for await (const row of this.#queryExecutor.createQueryReader(
       { ecsql: subjectsQuery },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `ModelsTreeIdsCache/subjects-query/${Guid.createValue()}` },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/subjects-query` },
     )) {
       yield { id: row.id, parentId: row.parentId, targetPartitionId: row.targetPartitionId, hideInHierarchy: !!row.hideInHierarchy };
     }
@@ -95,7 +99,7 @@ export class ModelsTreeIdsCache implements Disposable {
     `;
     for await (const row of this.#queryExecutor.createQueryReader(
       { ecsql: modelsQuery },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `ModelsTreeIdsCache/models-query/${Guid.createValue()}` },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/models-query` },
     )) {
       yield { id: row.id, parentId: row.parentId };
     }
@@ -274,7 +278,7 @@ export class ModelsTreeIdsCache implements Disposable {
     `;
     for await (const row of this.#queryExecutor.createQueryReader(
       { ecsql: query },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `ModelsTreeIdsCache/model-categories-query/${Guid.createValue()}` },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/model-categories-query` },
     )) {
       yield { modelId: row.modelId, categoryId: row.categoryId, isModelPrivate: !!row.isModelPrivate, isRootElementCategory: !!row.isRootElementCategory };
     }
@@ -294,7 +298,7 @@ export class ModelsTreeIdsCache implements Disposable {
     `;
     for await (const row of this.#queryExecutor.createQueryReader(
       { ecsql: query },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `ModelsTreeIdsCache/modeled-elements-query/${Guid.createValue()}` },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/modeled-elements-query` },
     )) {
       yield { modelId: row.modelId, categoryId: row.categoryId, modeledElementId: row.modeledElementId };
     }
@@ -437,7 +441,7 @@ export class ModelsTreeIdsCache implements Disposable {
                 GROUP BY modelId, categoryId
               `,
             },
-            { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `ModelsTreeIdsCache/category-element-counts-query/${Guid.createValue()}` },
+            { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/category-element-counts-query` },
           );
 
           const result = new Array<{ modelId: Id64String; categoryId: Id64String; elementsCount: number }>();
