@@ -149,13 +149,13 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
       if ("modelIds" in fnProps) {
         return from(Id64.iterable(fnProps.modelIds)).pipe(
           map((modelId) => {
-            return { id: modelId, subModels2d: undefined, subModels3d: undefined };
+            return { id: modelId, subModels: undefined };
           }),
         );
       }
       return from(Id64.iterable(fnProps.categoryIds)).pipe(
         map((categoryId) => {
-          return { id: categoryId, subModels2d: undefined, subModels3d: undefined };
+          return { id: categoryId, subModels: undefined };
         }),
       );
     }),

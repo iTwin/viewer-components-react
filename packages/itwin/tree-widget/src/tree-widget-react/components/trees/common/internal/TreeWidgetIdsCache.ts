@@ -40,7 +40,7 @@ export interface ITreeWidgetIdsCache {
   getCategories: (props: { modelIds: Id64Arg }) => Observable<{ id: Id64String; drawingCategories?: Id64Arg; spatialCategories?: Id64Arg }>;
   getSubModels: (
     props: { modelIds: Id64Arg } | { categoryIds: Id64Arg; modelId: Id64String | undefined },
-  ) => Observable<{ id: Id64String; subModels2d: Id64Arg | undefined; subModels3d: Id64Arg | undefined }>;
+  ) => Observable<{ id: Id64String; subModels: Id64Arg | undefined }>;
   getAllCategoriesThatContainElements: () => Observable<{ drawingCategories?: Id64Set; spatialCategories?: Id64Set }>;
 }
 
@@ -359,24 +359,22 @@ export class TreeWidgetIdsCache implements ITreeWidgetIdsCache, Disposable {
         if ("modelIds" in props) {
           return from(Id64.iterable(props.modelIds)).pipe(
             map((modelId) => {
-              const subModels2d = new Array<ModelId>();
-              const subModels3d = new Array<ModelId>();
+              const subModels = new Array<ModelId>();
               const modelEntry = modelWithCategoryModeledElements.get(modelId);
               if (!modelEntry) {
-                return { id: modelId, subModels2d: undefined, subModels3d: undefined };
+                return { id: modelId, subModels: undefined };
               }
               modelEntry.forEach((categoryEntry) => {
                 if (categoryEntry.modeled2dElements) {
-                  subModels2d.push(...categoryEntry.modeled2dElements);
+                  subModels.push(...categoryEntry.modeled2dElements);
                 }
                 if (categoryEntry.modeled3dElements) {
-                  subModels3d.push(...categoryEntry.modeled3dElements);
+                  subModels.push(...categoryEntry.modeled3dElements);
                 }
               });
               return {
                 id: modelId,
-                subModels2d: subModels2d.length > 0 ? subModels2d : undefined,
-                subModels3d: subModels3d.length > 0 ? subModels3d : undefined,
+                subModels: subModels.length > 0 ? subModels : undefined,
               };
             }),
           );
@@ -387,28 +385,30 @@ export class TreeWidgetIdsCache implements ITreeWidgetIdsCache, Disposable {
           return from(Id64.iterable(props.categoryIds)).pipe(
             map((categoryId) => {
               const categoryEntry = modelEntry?.get(categoryId);
-              return { id: categoryId, subModels2d: categoryEntry?.modeled2dElements, subModels3d: categoryEntry?.modeled3dElements };
+              let subModels: Id64Arg | undefined = categoryEntry?.modeled2dElements?.size ? categoryEntry.modeled2dElements : undefined;
+              if (categoryEntry?.modeled3dElements?.size) {
+                subModels = subModels ? [...subModels, ...categoryEntry.modeled3dElements] : categoryEntry.modeled3dElements;
+              }
+              return { id: categoryId, subModels };
             }),
           );
         }
 
         return from(Id64.iterable(props.categoryIds)).pipe(
           map((categoryId) => {
-            const subModels2d = new Array<ModelId>();
-            const subModels3d = new Array<ModelId>();
+            const subModels = new Array<ModelId>();
             modelWithCategoryModeledElements.forEach((modelEntry) => {
               const categoryEntry = modelEntry.get(categoryId);
               if (categoryEntry?.modeled2dElements) {
-                subModels2d.push(...categoryEntry.modeled2dElements);
+                subModels.push(...categoryEntry.modeled2dElements);
               }
               if (categoryEntry?.modeled3dElements) {
-                subModels3d.push(...categoryEntry.modeled3dElements);
+                subModels.push(...categoryEntry.modeled3dElements);
               }
             });
             return {
               id: categoryId,
-              subModels2d: subModels2d.length > 0 ? subModels2d : undefined,
-              subModels3d: subModels3d.length > 0 ? subModels3d : undefined,
+              subModels: subModels.length > 0 ? subModels : undefined,
             };
           }),
         );

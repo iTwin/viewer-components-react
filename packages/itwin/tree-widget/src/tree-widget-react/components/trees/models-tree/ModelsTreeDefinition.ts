@@ -439,11 +439,11 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     });
     const modeledElements = await firstValueFrom(
       this.#idsCache.getSubModels({ modelIds }).pipe(
-        reduce((acc, { subModels3d }) => {
-          if (!subModels3d) {
+        reduce((acc, { subModels }) => {
+          if (!subModels) {
             return acc;
           }
-          acc.push(...subModels3d);
+          acc.push(...subModels);
           return acc;
         }, new Array<ElementId>()),
       ),

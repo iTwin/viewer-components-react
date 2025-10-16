@@ -515,8 +515,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     const modeledElements = await firstValueFrom(
       from(modelIds).pipe(
         mergeMap((modelId) => this.#idsCache.getSubModels({ modelId, categoryIds })),
-        reduce((acc, { subModels2d, subModels3d }) => {
-          const subModels = this.#viewType === "2d" ? subModels2d : subModels3d;
+        reduce((acc, { subModels }) => {
           if (subModels) {
             for (const subModelId of Id64.iterable(subModels)) {
               acc.push(subModelId);
