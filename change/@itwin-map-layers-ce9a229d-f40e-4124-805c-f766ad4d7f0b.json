@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Store user selected solid fill color to use a session default and add as new preset in picker",
+  "packageName": "@itwin/map-layers",
+  "email": "wil.maier@bentley.com",
+  "dependentChangeType": "patch"
+}
