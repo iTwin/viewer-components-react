@@ -45,7 +45,7 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
           categoryIds,
           modelId: undefined,
           type: this.#props.viewport.viewType === "2d" ? "DrawingCategory" : "SpatialCategory",
-          checkSubCategories: false,
+          checkSubCategories: true,
         }),
       ),
     );

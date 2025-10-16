@@ -396,6 +396,10 @@ export class BaseVisibilityHelper implements Disposable {
               ? this.#props.treeWidgetIdsCache.getSubCategories({ categoryIds: categoryId }).pipe(
                   mergeMap(({ subCategories }) => {
                     if (subCategories && Id64.sizeOf(subCategories) > 0) {
+                      // We only want to check default sub-category visibility status if category does not have any models
+                      if (Id64.sizeOf(subCategories) === 1 && (hiddenModels.length > 0 || visibleModels.length > 0)) {
+                        return EMPTY;
+                      }
                       return this.getSubCategoriesVisibilityStatus({ categoryId, modelId: modelIdFromProps, subCategoryIds: subCategories });
                     }
 

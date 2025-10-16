@@ -15,7 +15,7 @@ import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { InstanceKey } from "@itwin/presentation-shared";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-import { CLASS_NAME_Subject } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
+import { CLASS_NAME_GeometricElement3d, CLASS_NAME_Subject } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import { createVisibilityStatus } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
 import { TreeWidgetIdsCache } from "../../../../tree-widget-react/components/trees/common/internal/TreeWidgetIdsCache.js";
 import { ModelsTreeIdsCache } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
@@ -1743,7 +1743,15 @@ describe("ModelsTreeVisibilityHandler", () => {
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true, ...props.hierarchyConfig };
       const imodelAccess = createIModelAccess(props.imodel);
       const viewport = createTreeWidgetTestingViewport({ iModel: props.imodel, viewType: "3d", visibleByDefault: !!props.visibleByDefault });
-      const idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig, { cache: new TreeWidgetIdsCache(props.imodel), shouldDispose: true });
+      const idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig, {
+        cache: new TreeWidgetIdsCache(
+          props.imodel,
+          hierarchyConfig.elementClassSpecification !== CLASS_NAME_GeometricElement3d
+            ? { type: "3d", elementClassName: hierarchyConfig.elementClassSpecification }
+            : undefined,
+        ),
+        shouldDispose: true,
+      });
       return {
         imodelAccess,
         viewport,

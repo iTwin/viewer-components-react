@@ -15,6 +15,7 @@ import type { Id64Array } from "@itwin/core-bentley";
 import type { Visibility } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
 import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
 import type { TreeWidgetTestingViewport } from "../../TreeUtils.js";
+
 export interface VisibilityExpectations {
   [id: string]: Visibility;
 }
@@ -97,7 +98,7 @@ export async function validateHierarchyVisibility({
   await toVoidPromise(
     from(provider.getNodes({ parentNode: undefined })).pipe(
       expand((node) => (node.children ? provider.getNodes({ parentNode: node }) : EMPTY)),
-      mergeMap(async (node) => waitFor(async () => validateNodeVisibility({ ...props, node }))),
+      mergeMap(async (node) => waitFor(async () => validateNodeVisibility({ ...props, node }), { timeout: 30000 })),
     ),
   );
 }

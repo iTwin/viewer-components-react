@@ -82,7 +82,7 @@ export class CategoriesTreeIdsCache implements Disposable, ITreeWidgetIdsCache {
   }
 
   public getModels(props: Parameters<ITreeWidgetIdsCache["getModels"]>[0]) {
-    return this.#treeWidgetIdsCache.getModels(props);
+    return this.#treeWidgetIdsCache.getModels({ ...props, includeSubModels: true });
   }
 
   public getSubCategories(props: Parameters<ITreeWidgetIdsCache["getSubCategories"]>[0]) {

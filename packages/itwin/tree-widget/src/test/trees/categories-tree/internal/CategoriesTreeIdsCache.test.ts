@@ -24,6 +24,7 @@ import {
   insertSubModel,
 } from "../../../IModelUtils.js";
 import { createIModelAccess } from "../../Common.js";
+import { getDefaultSubCategoryId } from "../../TreeUtils.js";
 
 import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 describe("CategoriesTreeIdsCache", () => {
@@ -821,7 +822,7 @@ describe("CategoriesTreeIdsCache", () => {
       expect(result).to.deep.eq([]);
     });
 
-    it("returns empty list when category has one subCategory", async function () {
+    it("returns default subcategory when category has one subCategory", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
@@ -833,7 +834,7 @@ describe("CategoriesTreeIdsCache", () => {
       using treeWidgetIdsCache = new TreeWidgetIdsCache(imodel);
       using idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d", { cache: treeWidgetIdsCache, shouldDispose: false });
       const result = await getSubCategoriesArray(idsCache, keys.category.id);
-      expect(result).to.deep.eq([]);
+      expect(result).to.deep.eq([getDefaultSubCategoryId(keys.category.id)]);
     });
 
     it("returns subCategories when category has multiple subCategories", async function () {

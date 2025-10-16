@@ -72,7 +72,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
     TestUtils.terminate();
   });
 
-  async function createCommonProps({
+  function createCommonProps({
     imodel,
     hierarchyConfig,
     subCategoriesOfCategories,
@@ -123,7 +123,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       ...defaultHierarchyConfiguration,
       ...hierarchyConfig,
     };
-    const commonProps = await createCommonProps({ imodel, hierarchyConfig: hierarchyConfiguration, subCategoriesOfCategories, visibleByDefault });
+    const commonProps = createCommonProps({ imodel, hierarchyConfig: hierarchyConfiguration, subCategoriesOfCategories, visibleByDefault });
     const handler = createCategoriesTreeVisibilityHandler({
       viewport: commonProps.viewport,
       idsCache: commonProps.idsCache,

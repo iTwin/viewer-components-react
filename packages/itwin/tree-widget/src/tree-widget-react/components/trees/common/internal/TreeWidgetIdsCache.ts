@@ -278,12 +278,7 @@ export class TreeWidgetIdsCache implements ITreeWidgetIdsCache, Disposable {
   }
 
   public hasSubModel(elementId: Parameters<ITreeWidgetIdsCache["hasSubModel"]>[0]): ReturnType<ITreeWidgetIdsCache["hasSubModel"]> {
-    return from(this.getModelInfos()).pipe(
-      map((modelInfos) => {
-        const modeledElementInfo = modelInfos.get(elementId);
-        return !modeledElementInfo;
-      }),
-    );
+    return from(this.getModelInfos()).pipe(map((modelInfos) => modelInfos.has(elementId)));
   }
 
   public getElementsCount({
