@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { Guid } from "@itwin/core-bentley";
 import { SvgDetails, SvgDocument, SvgItem } from "@itwin/itwinui-icons-react";
 import { Tree } from "../common/components/Tree.js";
@@ -31,7 +31,7 @@ export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
     <Tree
       {...props}
       treeName={ExternalSourcesTreeComponent.id}
-      getHierarchyDefinition={(definitionProps) => getDefinitionsProvider({ ...definitionProps, componentId })}
+      getHierarchyDefinition={useCallback((definitionProps) => getDefinitionsProvider({ ...definitionProps, componentId }), [componentId])}
       selectionMode={props.selectionMode ?? "none"}
       treeRenderer={(treeProps) => <TreeRenderer {...treeProps} getIcon={getIcon} />}
     />
