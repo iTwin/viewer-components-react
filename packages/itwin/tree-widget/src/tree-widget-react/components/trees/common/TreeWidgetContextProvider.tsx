@@ -6,8 +6,8 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { TreeWidgetIdsCache } from "./internal/TreeWidgetIdsCache.js";
 
-import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { PropsWithChildren } from "react";
+import type { IModelConnection } from "@itwin/core-frontend";
 
 /** @internal */
 interface TreeWidgetContext {
@@ -27,22 +27,18 @@ export function useTreeWidgetContext(): TreeWidgetContext {
 }
 
 /**
- * A React context provider for setting up tree widget context, which can then be acquired
- * using `useTreeWidgetContext` hook.
+ * A React context provider for setting up tree widget context. Use this context provider to wrap T
  *
  * @public
  */
-export function TreeWidgetContextProvider({
-  queryExecutor,
-  children,
-}: PropsWithChildren<{ queryExecutor: LimitingECSqlQueryExecutor; treeType: "2d" }>) {
+export function TreeWidgetContextProvider({ imodelConnection, children }: PropsWithChildren<{ imodelConnection: IModelConnection }>) {
   const [state, setState] = useState<TreeWidgetContext>({
-    treeWidgetIdsCache: new TreeWidgetIdsCache(queryExecutor),
+    treeWidgetIdsCache: new TreeWidgetIdsCache(imodelConnection),
   });
 
   useEffect(() => {
-    setState({ treeWidgetIdsCache: new TreeWidgetIdsCache(queryExecutor) });
-  }, [queryExecutor])
+    setState({ treeWidgetIdsCache: new TreeWidgetIdsCache(imodelConnection) });
+  }, [imodelConnection]);
 
   return <treeWidgetContext.Provider value={state}>{children}</treeWidgetContext.Provider>;
 }

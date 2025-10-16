@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Fragment, useEffect } from "react";
-import { useActiveIModelConnection } from "@itwin/appui-react";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
@@ -60,7 +59,7 @@ interface ModelsTreeComponentProps
    */
   headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
   /**
-   * Viewport used for visibility controls.
+   * Viewport used for visibility controls and data querying.
    *
    * When viewport is not provided, `IModelApp.viewManager.selectedView` will be used.
    */
@@ -76,16 +75,15 @@ interface ModelsTreeComponentProps
  * @public
  */
 export const ModelsTreeComponent = (props: ModelsTreeComponentProps) => {
-  const iModel = useActiveIModelConnection();
   const viewport = useActiveTreeWidgetViewport({ treeWidgetViewport: props.viewport });
 
-  if (!iModel || !viewport) {
+  if (!viewport) {
     return null;
   }
 
   return (
-    <FocusedInstancesContextProvider selectionStorage={props.selectionStorage} imodelKey={iModel.key}>
-      <ModelsTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />
+    <FocusedInstancesContextProvider selectionStorage={props.selectionStorage} imodelKey={viewport.iModel.key}>
+      <ModelsTreeComponentImpl {...props} iModel={viewport.iModel} viewport={viewport} />
     </FocusedInstancesContextProvider>
   );
 };

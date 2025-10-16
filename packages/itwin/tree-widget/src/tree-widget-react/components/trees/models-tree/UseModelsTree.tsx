@@ -20,6 +20,7 @@ import {
   TooManyInstancesFocused,
   UnknownInstanceFocusError,
 } from "../common/components/EmptyTree.js";
+import { CLASS_NAME_GeometricElement3d } from "../common/internal/ClassNameDefinitions.js";
 import { TreeWidgetIdsCache } from "../common/internal/TreeWidgetIdsCache.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
@@ -295,14 +296,15 @@ export function ModelsTreeIcon({ node }: { node: PresentationHierarchyNode }) {
 }
 
 function createCache(props: CreateCacheProps<{ hierarchyConfig: ModelsTreeHierarchyConfiguration }>) {
-  const queryExecutor = createECSqlQueryExecutor(props.imodel);
-  if (!props.treeWidgetIdsCache) {
-    // eslint-disable-next-line no-console
-    console.warn("Please wrap TreeWidgetComponent (or ModelsTreeComponent if it's the only one used) with TreeWidgetContextProvider.");
-  }
-  return new ModelsTreeIdsCache(
-    createECSqlQueryExecutor(props.imodel),
-    props.specificProps.hierarchyConfig,
-    props.treeWidgetIdsCache ?? new TreeWidgetIdsCache(queryExecutor),
-  );
+  const isDefaultClassName = props.specificProps.hierarchyConfig.elementClassSpecification === CLASS_NAME_GeometricElement3d;
+  const treeWidgetIdsCache = !isDefaultClassName
+    ? new TreeWidgetIdsCache(props.imodel, { type: "3d", elementClassName: props.specificProps.hierarchyConfig.elementClassSpecification })
+    : props.treeWidgetIdsCache
+      ? props.treeWidgetIdsCache
+      : new TreeWidgetIdsCache(props.imodel);
+
+  return new ModelsTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.hierarchyConfig, {
+    cache: treeWidgetIdsCache,
+    shouldDispose: !isDefaultClassName || !props.treeWidgetIdsCache,
+  });
 }

@@ -504,9 +504,9 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 acc.add(modelId);
               }
               return acc;
-            }, new Set<Id64String>),
-            map((modelIdsSet) => [...modelIdsSet])
-          )
+            }, new Set<Id64String>()),
+            map((modelIdsSet) => [...modelIdsSet]),
+          ),
         );
 
     if (modelIds.length === 0) {
@@ -514,7 +514,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     }
     const modeledElements = await firstValueFrom(
       from(modelIds).pipe(
-        mergeMap((modelId) => this.#idsCache.getSubModels({ modelId, categoryIds})),
+        mergeMap((modelId) => this.#idsCache.getSubModels({ modelId, categoryIds })),
         reduce((acc, { subModels2d, subModels3d }) => {
           const subModels = this.#viewType === "2d" ? subModels2d : subModels3d;
           if (subModels) {

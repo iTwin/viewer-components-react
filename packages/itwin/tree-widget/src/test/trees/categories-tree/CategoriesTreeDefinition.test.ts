@@ -593,8 +593,7 @@ function createCategoryTreeProvider(
   hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>,
 ): HierarchyProvider & Disposable {
   const imodelAccess = createIModelAccess(imodel);
-  const treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
-  const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType, treeWidgetIdsCache);
+  const idsCache = new CategoriesTreeIdsCache(imodelAccess, viewType, { cache: new TreeWidgetIdsCache(imodel), shouldDispose: true });
   const hierarchyProvider = createIModelHierarchyProvider({
     imodelAccess,
     hierarchyDefinition: new CategoriesTreeDefinition({
@@ -616,7 +615,6 @@ function createCategoryTreeProvider(
     [Symbol.dispose]() {
       hierarchyProvider[Symbol.dispose]();
       idsCache[Symbol.dispose]();
-      treeWidgetIdsCache[Symbol.dispose]();
     },
   };
 }

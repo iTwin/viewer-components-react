@@ -28,6 +28,7 @@ import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "./ClassificationsTreeDefinition.js";
 import type { ClassificationsTreeFilteringError } from "./internal/UseFilteredPaths.js";
 import type { ClassificationsTreeFilterTargets } from "./internal/visibility/FilteredTree.js";
+
 /** @alpha */
 export interface UseClassificationsTreeProps {
   activeView: TreeWidgetViewport;
@@ -100,11 +101,10 @@ export function useClassificationsTree({ activeView, emptyTreeContent, filter, .
 
 function createCache(props: CreateCacheProps<{ hierarchyConfig: ClassificationsTreeHierarchyConfiguration }>) {
   const queryExecutor = createECSqlQueryExecutor(props.imodel);
-  if (!props.treeWidgetIdsCache) {
-    // eslint-disable-next-line no-console
-    console.warn("Please wrap TreeWidgetComponent (or ClassificationsTreeComponent if it's the only one used) with TreeWidgetContextProvider.");
-  }
-  return new ClassificationsTreeIdsCache(queryExecutor, props.specificProps.hierarchyConfig, props.treeWidgetIdsCache ?? new TreeWidgetIdsCache(queryExecutor));
+  return new ClassificationsTreeIdsCache(queryExecutor, props.specificProps.hierarchyConfig, {
+    cache: props.treeWidgetIdsCache ?? new TreeWidgetIdsCache(props.imodel),
+    shouldDispose: !props.treeWidgetIdsCache,
+  });
 }
 
 function getEmptyTreeContentComponent(filter?: string, error?: ClassificationsTreeFilteringError, emptyTreeContent?: React.ReactNode) {

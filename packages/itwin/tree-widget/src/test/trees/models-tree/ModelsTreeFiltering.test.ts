@@ -134,8 +134,7 @@ describe("Models tree", () => {
       const { imodel, ...keys } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const config = { ...defaultHierarchyConfiguration, hideRootSubject: true, elementClassSpecification: keys.parentElement.className };
-      using treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
-      using idsCache = new ModelsTreeIdsCache(imodelAccess, config, treeWidgetIdsCache);
+      using idsCache = new ModelsTreeIdsCache(imodelAccess, config, { cache: new TreeWidgetIdsCache(imodel), shouldDispose: true });
       const [subTreePaths, filterPaths] = await Promise.all([
         ModelsTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
@@ -1636,7 +1635,7 @@ describe("Models tree", () => {
 
         beforeEach(() => {
           const imodelAccess = createIModelAccess(imodel);
-          modelsTreeIdsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig, new TreeWidgetIdsCache(imodelAccess));
+          modelsTreeIdsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig, { cache: new TreeWidgetIdsCache(imodel), shouldDispose: true });
           hierarchyProvider = createModelsTreeProvider({ imodel, filteredNodePaths: instanceKeyPaths, hierarchyConfig });
         });
 
@@ -1703,8 +1702,7 @@ describe("Models tree", () => {
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
 
       const imodelAccess = createIModelAccess(imodel);
-      using treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
-      using idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig, treeWidgetIdsCache);
+      using idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig, { cache: new TreeWidgetIdsCache(imodel), shouldDispose: true });
       const actualInstanceKeyPaths = (
         await ModelsTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
@@ -1727,8 +1725,7 @@ describe("Models tree", () => {
       const { imodel, ...ids } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
-      using treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
-      using idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig, treeWidgetIdsCache);
+      using idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig, { cache: new TreeWidgetIdsCache(imodel), shouldDispose: true });
 
       const abortController1 = new AbortController();
       const pathsPromiseAborted = ModelsTreeDefinition.createInstanceKeyPaths({
@@ -1770,8 +1767,7 @@ describe("Models tree", () => {
       const { imodel, ...ids } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
-      using treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
-      using idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig, treeWidgetIdsCache);
+      using idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig, { cache: new TreeWidgetIdsCache(imodel), shouldDispose: true });
 
       const abortController1 = new AbortController();
       const pathsPromiseAborted = ModelsTreeDefinition.createInstanceKeyPaths({
@@ -1825,8 +1821,7 @@ describe("Models tree", () => {
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true };
 
       const imodelAccess = createIModelAccess(imodel);
-      using treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
-      using idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig, treeWidgetIdsCache);
+      using idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig, { cache: new TreeWidgetIdsCache(imodel), shouldDispose: true });
 
       expect(
         (

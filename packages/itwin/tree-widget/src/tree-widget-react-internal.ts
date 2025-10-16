@@ -22,3 +22,5 @@ export { CategoriesTreeNode } from "./tree-widget-react/components/trees/categor
 
 export { ClassificationsTreeDefinition } from "./tree-widget-react/components/trees/classifications-tree/ClassificationsTreeDefinition.js";
 export { ClassificationsTreeIdsCache } from "./tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeIdsCache.js";
+
+export { TreeWidgetIdsCache } from "./tree-widget-react/components/trees/common/internal/TreeWidgetIdsCache.js";

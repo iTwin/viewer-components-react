@@ -3,9 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-
 import { from, map, mergeMap } from "rxjs";
 import { Id64 } from "@itwin/core-bentley";
+import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import {
   CLASS_NAME_Category,
   CLASS_NAME_GeometricElement2d,
@@ -15,10 +15,11 @@ import {
 } from "./ClassNameDefinitions.js";
 import { ModelCategoryElementsCountCache } from "./ModelCategoryElementsCountCache.js";
 
+import type { Observable } from "rxjs";
 import type { Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { CategoryId, ElementId, ModelId, SubCategoryId } from "./Types.js";
-import type { Observable } from "rxjs";
 
 interface ModelInfo {
   categories2d: Map<CategoryId, { isRootElementCategory: boolean }>;
@@ -44,7 +45,6 @@ export interface ITreeWidgetIdsCache {
   getAllCategoriesThatContainElements: () => Observable<{ drawingCategories?: Id64Set; spatialCategories?: Id64Set }>;
 }
 
-
 /** @internal */
 export class TreeWidgetIdsCache implements ITreeWidgetIdsCache, Disposable {
   readonly #categoryElementCounts: ModelCategoryElementsCountCache;
@@ -58,18 +58,25 @@ export class TreeWidgetIdsCache implements ITreeWidgetIdsCache, Disposable {
     element2dClassName: CLASS_NAME_GeometricElement2d,
     element3dClassName: CLASS_NAME_GeometricElement3d,
   };
+  readonly #iModelConnection: IModelConnection;
 
-  constructor(queryExecutor: LimitingECSqlQueryExecutor, classNameInfo?: { type: "2d" | "3d"; elementClassName: string }) {
+  constructor(iModelConnection: IModelConnection, classNameInfo?: { type: "2d" | "3d"; elementClassName: string }) {
     if (classNameInfo) {
       this.#classNamesInfo = {
         ...(classNameInfo.type === "2d" ? { element2dClassName: classNameInfo.elementClassName } : { element3dClassName: classNameInfo.elementClassName }),
       };
     }
-    this.#queryExecutor = queryExecutor;
+    iModelConnection.key;
+    this.#iModelConnection = iModelConnection;
+    this.#queryExecutor = createECSqlQueryExecutor(this.#iModelConnection);
     this.#categoryElementCounts = new ModelCategoryElementsCountCache(
       this.#queryExecutor,
       [this.#classNamesInfo.element2dClassName, this.#classNamesInfo.element3dClassName].filter((className) => className !== undefined),
     );
+  }
+
+  public get usedIModelConnection() {
+    return this.#iModelConnection;
   }
 
   public [Symbol.dispose]() {

@@ -43,14 +43,24 @@ export class ClassificationsTreeIdsCache implements Disposable, ITreeWidgetIdsCa
   #queryExecutor: LimitingECSqlQueryExecutor;
   #hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
   #treeWidgetIdsCache: TreeWidgetIdsCache;
+  #shouldDisposeTreeWidgetIdsCache = false;
 
-  constructor(queryExecutor: LimitingECSqlQueryExecutor, hierarchyConfig: ClassificationsTreeHierarchyConfiguration, treeWidgetIdsCache: TreeWidgetIdsCache) {
+  constructor(
+    queryExecutor: LimitingECSqlQueryExecutor,
+    hierarchyConfig: ClassificationsTreeHierarchyConfiguration,
+    treeWidgetIdsCacheInfo: { cache: TreeWidgetIdsCache; shouldDispose: boolean },
+  ) {
     this.#queryExecutor = queryExecutor;
     this.#hierarchyConfig = hierarchyConfig;
-    this.#treeWidgetIdsCache = treeWidgetIdsCache;
+    this.#treeWidgetIdsCache = treeWidgetIdsCacheInfo.cache;
+    this.#shouldDisposeTreeWidgetIdsCache = treeWidgetIdsCacheInfo.shouldDispose;
   }
 
-  public [Symbol.dispose]() {}
+  public [Symbol.dispose]() {
+    if (this.#shouldDisposeTreeWidgetIdsCache) {
+      this.#treeWidgetIdsCache[Symbol.dispose]();
+    }
+  }
 
   public getAllCategoriesThatContainElements() {
     return this.#treeWidgetIdsCache.getAllCategoriesThatContainElements();

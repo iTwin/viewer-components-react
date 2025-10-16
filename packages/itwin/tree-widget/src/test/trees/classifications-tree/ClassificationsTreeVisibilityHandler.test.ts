@@ -68,8 +68,11 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
   async function createVisibilityTestData({ imodel, view, visibleByDefault }: { imodel: IModelConnection; view: "2d" | "3d"; visibleByDefault?: boolean }) {
     const imodelAccess = createIModelAccess(imodel);
-    const treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
-    const idsCache = new ClassificationsTreeIdsCache(imodelAccess, { rootClassificationSystemCode }, treeWidgetIdsCache);
+    const idsCache = new ClassificationsTreeIdsCache(
+      imodelAccess,
+      { rootClassificationSystemCode },
+      { cache: new TreeWidgetIdsCache(imodel), shouldDispose: true },
+    );
     const viewport = createTreeWidgetTestingViewport({
       iModel: imodel,
       visibleByDefault: !!visibleByDefault,
@@ -87,7 +90,6 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         idsCache[Symbol.dispose]();
         handler[Symbol.dispose]();
         provider[Symbol.dispose]();
-        treeWidgetIdsCache[Symbol.dispose]();
       },
     };
   }
@@ -781,8 +783,11 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       visibleByDefault?: boolean;
     }) {
       const imodelAccess = createIModelAccess(imodel);
-      const treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
-      const idsCache = new ClassificationsTreeIdsCache(imodelAccess, { rootClassificationSystemCode }, treeWidgetIdsCache);
+      const idsCache = new ClassificationsTreeIdsCache(
+        imodelAccess,
+        { rootClassificationSystemCode },
+        { cache: new TreeWidgetIdsCache(imodel), shouldDispose: true },
+      );
       const viewport = createTreeWidgetTestingViewport({
         iModel: imodel,
         viewType: view,
@@ -803,7 +808,6 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           handler[Symbol.dispose]();
           defaultProvider[Symbol.dispose]();
           filteredProvider[Symbol.dispose]();
-          treeWidgetIdsCache[Symbol.dispose]();
         },
       };
     }

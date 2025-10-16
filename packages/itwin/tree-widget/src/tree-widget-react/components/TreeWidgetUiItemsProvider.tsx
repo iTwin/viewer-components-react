@@ -11,11 +11,15 @@ import { Icon } from "@stratakit/foundations";
 import hierarchyTreeSvg from "@stratakit/icons/hierarchy-tree.svg";
 import { TreeWidget } from "../TreeWidget.js";
 import { ErrorState } from "./tree-header/ErrorState.js";
+import { useActiveTreeWidgetViewport } from "./trees/common/internal/UseActiveTreeWidgetViewport.js";
+import { TreeWidgetContextProvider } from "./trees/common/TreeWidgetContextProvider.js";
 import { TreeWidgetComponentImpl } from "./TreeWidgetComponentImpl.js";
 
 import type { Ref } from "react";
 import type { Widget } from "@itwin/appui-react";
+import type { TreeWidgetViewport } from "./trees/common/TreeWidgetViewport.js";
 import type { TreeDefinition } from "./TreeWidgetComponentImpl.js";
+
 /**
  * Props for `createWidget`.
  * @public
@@ -33,6 +37,12 @@ interface TreeWidgetProps {
   onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
   /** Callback that is invoked when a tracked feature is used. */
   onFeatureUsed?: (feature: string) => void;
+  /**
+   * Viewport used data querying.
+   *
+   * When viewport is not provided, `IModelApp.viewManager.selectedView` will be used.
+   */
+  treeWidgetViewport?: TreeWidgetViewport;
 }
 
 /**
@@ -50,7 +60,14 @@ export function createTreeWidget(props: TreeWidgetProps): Widget {
         location: StagePanelLocation.Right,
       },
     },
-    content: <TreeWidgetComponent trees={props.trees} onPerformanceMeasured={props.onPerformanceMeasured} onFeatureUsed={props.onFeatureUsed} />,
+    content: (
+      <TreeWidgetComponent
+        trees={props.trees}
+        onPerformanceMeasured={props.onPerformanceMeasured}
+        onFeatureUsed={props.onFeatureUsed}
+        treeWidgetViewport={props.treeWidgetViewport}
+      />
+    ),
   };
 }
 
@@ -60,10 +77,17 @@ export function createTreeWidget(props: TreeWidgetProps): Widget {
  */
 export function TreeWidgetComponent(props: TreeWidgetProps) {
   const ref = useTreeWidgetTransientState();
+  const viewport = useActiveTreeWidgetViewport({ treeWidgetViewport: props.treeWidgetViewport });
+  if (!viewport) {
+    return null;
+  }
+
   return (
     <div ref={ref} className="tree-widget">
       <ErrorBoundary FallbackComponent={ErrorState}>
-        <TreeWidgetComponentImpl {...props} />
+        <TreeWidgetContextProvider imodelConnection={viewport.iModel}>
+          <TreeWidgetComponentImpl {...props} />
+        </TreeWidgetContextProvider>
       </ErrorBoundary>
     </div>
   );

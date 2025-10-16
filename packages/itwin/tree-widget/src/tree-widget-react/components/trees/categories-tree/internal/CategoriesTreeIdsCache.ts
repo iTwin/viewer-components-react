@@ -47,17 +47,23 @@ export class CategoriesTreeIdsCache implements Disposable, ITreeWidgetIdsCache {
   #filteredElementsModels: Promise<Map<ElementId, ModelId>> | undefined;
   #queryExecutor: LimitingECSqlQueryExecutor;
   #treeWidgetIdsCache: TreeWidgetIdsCache;
+  #shouldDisposeTreeWidgetIdsCache = false;
 
-  constructor(queryExecutor: LimitingECSqlQueryExecutor, viewType: "3d" | "2d", treeWidgetIdsCache: TreeWidgetIdsCache) {
+  constructor(queryExecutor: LimitingECSqlQueryExecutor, viewType: "3d" | "2d", treeWidgetIdsCacheInfo: { cache: TreeWidgetIdsCache; shouldDispose: boolean }) {
     this.#queryExecutor = queryExecutor;
-    this.#treeWidgetIdsCache = treeWidgetIdsCache;
     const { categoryClass, elementClass, modelClass } = getClassesByView(viewType);
     this.#categoryClass = categoryClass;
     this.#categoryElementClass = elementClass;
     this.#categoryModelClass = modelClass;
+    this.#treeWidgetIdsCache = treeWidgetIdsCacheInfo.cache;
+    this.#shouldDisposeTreeWidgetIdsCache = treeWidgetIdsCacheInfo.shouldDispose;
   }
 
-  public [Symbol.dispose]() {}
+  public [Symbol.dispose]() {
+    if (this.#shouldDisposeTreeWidgetIdsCache) {
+      this.#treeWidgetIdsCache[Symbol.dispose]();
+    }
+  }
 
   public getAllCategoriesThatContainElements() {
     return this.#treeWidgetIdsCache.getAllCategoriesThatContainElements();

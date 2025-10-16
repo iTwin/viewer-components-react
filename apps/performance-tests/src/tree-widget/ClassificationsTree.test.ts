@@ -4,14 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { SnapshotDb } from "@itwin/core-backend";
-import { ClassificationsTreeDefinition, ClassificationsTreeIdsCache } from "@itwin/tree-widget-react/internal";
+import { ClassificationsTreeDefinition, ClassificationsTreeIdsCache, TreeWidgetIdsCache } from "@itwin/tree-widget-react/internal";
 import { Datasets } from "../util/Datasets.js";
-import { run } from "../util/TestUtilities.js";
+import { run, TestIModelConnection } from "../util/TestUtilities.js";
 import { StatelessHierarchyProvider } from "./StatelessHierarchyProvider.js";
 
-import type { IModelAccess } from "./StatelessHierarchyProvider.js";
+import type { SnapshotDb } from "@itwin/core-backend";
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyDefinition } from "@itwin/presentation-hierarchies";
+import type { IModelAccess } from "./StatelessHierarchyProvider.js";
 
 describe("classifications tree", () => {
   const rootClassificationSystemCode = "50k classifications";
@@ -46,18 +47,27 @@ function runClassificationsPerformanceTest({
   loadHierarchyProps?: Parameters<StatelessHierarchyProvider["loadHierarchy"]>[0];
   validateResult?: (result: number) => Promise<void> | void;
 }) {
-  return run<{ imodel: SnapshotDb; imodelAccess: IModelAccess; idsCache: ClassificationsTreeIdsCache; hierarchyDefinition: HierarchyDefinition }>({
+  return run<{
+    iModel: SnapshotDb;
+    imodelAccess: IModelAccess;
+    idsCache: ClassificationsTreeIdsCache;
+    hierarchyDefinition: HierarchyDefinition;
+    iModelConnection: IModelConnection;
+  }>({
     testName,
     setup: async () => {
-      const imodel = SnapshotDb.openFile(Datasets.getIModelPath("50k classifications"));
-      const imodelAccess = StatelessHierarchyProvider.createIModelAccess(imodel, "unbounded");
-      const idsCache = new ClassificationsTreeIdsCache(imodelAccess, hierarchyConfig);
+      const { iModelConnection, iModel } = TestIModelConnection.openFile(Datasets.getIModelPath("50k classifications"));
+      const imodelAccess = StatelessHierarchyProvider.createIModelAccess(iModel, "unbounded");
+      const idsCache = new ClassificationsTreeIdsCache(imodelAccess, hierarchyConfig, { cache: new TreeWidgetIdsCache(iModelConnection), shouldDispose: true });
       const hierarchyDefinition = new ClassificationsTreeDefinition({ imodelAccess, idsCache, hierarchyConfig });
-      return { imodel, imodelAccess, idsCache, hierarchyDefinition };
+      return { iModel, imodelAccess, idsCache, hierarchyDefinition, iModelConnection };
     },
-    cleanup: (props) => {
-      props.imodel.close();
+    cleanup: async (props) => {
+      props.iModel.close();
       props.idsCache[Symbol.dispose]();
+      if (!props.iModelConnection.isClosed) {
+        await props.iModelConnection.close();
+      }
     },
     test: async ({ imodelAccess, hierarchyDefinition }) => {
       using provider = new StatelessHierarchyProvider({

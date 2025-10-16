@@ -213,9 +213,8 @@ async function createFilteredTree(
 
 function createCache(props: CreateCacheProps<{ viewType: "2d" | "3d" }>) {
   const queryExecutor = createECSqlQueryExecutor(props.imodel);
-  if (!props.treeWidgetIdsCache) {
-    // eslint-disable-next-line no-console
-    console.warn("Please wrap TreeWidgetComponent (or CategoriesTreeComponent if it's the only one used) with TreeWidgetContextProvider.");
-  }
-  return new CategoriesTreeIdsCache(queryExecutor, props.specificProps.viewType, props.treeWidgetIdsCache ?? new TreeWidgetIdsCache(queryExecutor));
+  return new CategoriesTreeIdsCache(queryExecutor, props.specificProps.viewType, {
+    cache: props.treeWidgetIdsCache ?? new TreeWidgetIdsCache(props.imodel),
+    shouldDispose: !props.treeWidgetIdsCache,
+  });
 }

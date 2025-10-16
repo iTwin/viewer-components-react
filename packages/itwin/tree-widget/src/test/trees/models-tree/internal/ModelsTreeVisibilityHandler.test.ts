@@ -63,14 +63,14 @@ interface VisibilityOverrides {
 type ModelsTreeHierarchyConfiguration = Partial<ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"]>;
 
 describe("ModelsTreeVisibilityHandler", () => {
-  function createIdsCache(props: { iModel: IModelConnection; hierarchyConfig?: ModelsTreeHierarchyConfiguration; treeWidgetIdsCache: TreeWidgetIdsCache }) {
+  function createIdsCache(props: { iModel: IModelConnection; hierarchyConfig?: ModelsTreeHierarchyConfiguration }) {
     return new ModelsTreeIdsCache(
       createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(props.iModel), "unbounded"),
       {
         ...defaultHierarchyConfiguration,
         ...props.hierarchyConfig,
       },
-      props.treeWidgetIdsCache,
+      { cache: new TreeWidgetIdsCache(props.iModel), shouldDispose: true },
     );
   }
 
@@ -175,8 +175,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       it("can call original implementation", async () => {
         let useOriginalImplFlag = false;
         const viewport = createFakeSinonViewport();
-        using treeWidgetIdsCache = new TreeWidgetIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(viewport.iModel), "unbounded"));
-        using idsCache = createIdsCache({ iModel: viewport.iModel, treeWidgetIdsCache });
+        using idsCache = createIdsCache({ iModel: viewport.iModel });
         using handler = createModelsTreeVisibilityHandler({
           viewport,
           idsCache,
@@ -221,8 +220,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             getSubjectsVisibilityStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
           };
           const viewport = createFakeSinonViewport();
-          using treeWidgetIdsCache = new TreeWidgetIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(viewport.iModel), "unbounded"));
-          using idsCache = createIdsCache({ iModel: viewport.iModel, treeWidgetIdsCache });
+          using idsCache = createIdsCache({ iModel: viewport.iModel });
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -665,8 +663,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             getCategoriesVisibilityStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
           };
           const viewport = createFakeSinonViewport();
-          using treeWidgetIdsCache = new TreeWidgetIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(viewport.iModel), "unbounded"));
-          using idsCache = createIdsCache({ iModel: viewport.iModel, treeWidgetIdsCache });
+          using idsCache = createIdsCache({ iModel: viewport.iModel });
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -930,8 +927,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             getElementsVisibilityStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
           };
           const viewport = createFakeSinonViewport();
-          using treeWidgetIdsCache = new TreeWidgetIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(viewport.iModel), "unbounded"));
-          using idsCache = createIdsCache({ iModel: viewport.iModel, treeWidgetIdsCache });
+          using idsCache = createIdsCache({ iModel: viewport.iModel });
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -1069,8 +1065,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             getElementGroupingNodeVisibilityStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
           };
           const viewport = createFakeSinonViewport();
-          using treeWidgetIdsCache = new TreeWidgetIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(viewport.iModel), "unbounded"));
-          using idsCache = createIdsCache({ iModel: viewport.iModel, treeWidgetIdsCache });
+          using idsCache = createIdsCache({ iModel: viewport.iModel });
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -1246,8 +1241,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             changeSubjectsVisibilityStatus: sinon.fake.resolves(undefined),
           };
           const viewport = createFakeSinonViewport();
-          using treeWidgetIdsCache = new TreeWidgetIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(viewport.iModel), "unbounded"));
-          using idsCache = createIdsCache({ iModel: viewport.iModel, treeWidgetIdsCache });
+          using idsCache = createIdsCache({ iModel: viewport.iModel });
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -1431,8 +1425,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             changeCategoriesVisibilityStatus: sinon.fake.resolves(undefined),
           };
           const viewport = createFakeSinonViewport();
-          using treeWidgetIdsCache = new TreeWidgetIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(viewport.iModel), "unbounded"));
-          using idsCache = createIdsCache({ iModel: viewport.iModel, treeWidgetIdsCache });
+          using idsCache = createIdsCache({ iModel: viewport.iModel });
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -1515,8 +1508,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             changeElementsVisibilityStatus: sinon.fake.resolves(undefined),
           };
           const viewport = createFakeSinonViewport();
-          using treeWidgetIdsCache = new TreeWidgetIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(viewport.iModel), "unbounded"));
-          using idsCache = createIdsCache({ iModel: viewport.iModel, treeWidgetIdsCache });
+          using idsCache = createIdsCache({ iModel: viewport.iModel });
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -1672,8 +1664,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             changeElementGroupingNodeVisibilityStatus: sinon.fake.resolves(undefined),
           };
           const viewport = createFakeSinonViewport();
-          using treeWidgetIdsCache = new TreeWidgetIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(viewport.iModel), "unbounded"));
-          using idsCache = createIdsCache({ iModel: viewport.iModel, treeWidgetIdsCache });
+          using idsCache = createIdsCache({ iModel: viewport.iModel });
           using handler = createModelsTreeVisibilityHandler({
             viewport,
             idsCache,
@@ -1752,13 +1743,11 @@ describe("ModelsTreeVisibilityHandler", () => {
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true, ...props.hierarchyConfig };
       const imodelAccess = createIModelAccess(props.imodel);
       const viewport = createTreeWidgetTestingViewport({ iModel: props.imodel, viewType: "3d", visibleByDefault: !!props.visibleByDefault });
-      const treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
-      const idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig, treeWidgetIdsCache);
+      const idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig, { cache: new TreeWidgetIdsCache(props.imodel), shouldDispose: true });
       return {
         imodelAccess,
         viewport,
         idsCache,
-        treeWidgetIdsCache,
         hierarchyConfig,
       };
     }
@@ -1788,7 +1777,6 @@ describe("ModelsTreeVisibilityHandler", () => {
         idsCache: commonProps.idsCache,
         hierarchyConfig: commonProps.hierarchyConfig,
         [Symbol.dispose]() {
-          commonProps.treeWidgetIdsCache[Symbol.dispose]();
           commonProps.idsCache[Symbol.dispose]();
           handler[Symbol.dispose]();
           provider[Symbol.dispose]();

@@ -68,8 +68,10 @@ describe("Classifications tree", () => {
         });
         const { imodel, ...keys } = buildIModelResult;
         const imodelAccess = createIModelAccess(imodel);
-        using treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
-        using idsCache = new ClassificationsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration, treeWidgetIdsCache);
+        using idsCache = new ClassificationsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration, {
+          cache: new TreeWidgetIdsCache(imodel),
+          shouldDispose: true,
+        });
         expect(
           await ClassificationsTreeDefinition.createInstanceKeyPaths({
             imodelAccess,
@@ -106,8 +108,10 @@ describe("Classifications tree", () => {
         });
         const { imodel, ...keys } = buildIModelResult;
         const imodelAccess = createIModelAccess(imodel);
-        using treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
-        using idsCache = new ClassificationsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration, treeWidgetIdsCache);
+        using idsCache = new ClassificationsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration, {
+          cache: new TreeWidgetIdsCache(imodel),
+          shouldDispose: true,
+        });
         expect(
           await ClassificationsTreeDefinition.createInstanceKeyPaths({
             imodelAccess,
@@ -148,8 +152,10 @@ describe("Classifications tree", () => {
         });
         const { imodel, ...keys } = buildIModelResult;
         const imodelAccess = createIModelAccess(imodel);
-        using treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
-        using idsCache = new ClassificationsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration, treeWidgetIdsCache);
+        using idsCache = new ClassificationsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration, {
+          cache: new TreeWidgetIdsCache(imodel),
+          shouldDispose: true,
+        });
         expect(
           await ClassificationsTreeDefinition.createInstanceKeyPaths({
             imodelAccess,
@@ -198,8 +204,10 @@ describe("Classifications tree", () => {
         });
         const { imodel, ...keys } = buildIModelResult;
         const imodelAccess = createIModelAccess(imodel);
-        using treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
-        using idsCache = new ClassificationsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration, treeWidgetIdsCache);
+        using idsCache = new ClassificationsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration, {
+          cache: new TreeWidgetIdsCache(imodel),
+          shouldDispose: true,
+        });
         expect(
           await ClassificationsTreeDefinition.createInstanceKeyPaths({
             imodelAccess,
@@ -242,8 +250,10 @@ describe("Classifications tree", () => {
         });
         const { imodel, ...keys } = buildIModelResult;
         const imodelAccess = createIModelAccess(imodel);
-        using treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
-        using idsCache = new ClassificationsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration, treeWidgetIdsCache);
+        using idsCache = new ClassificationsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration, {
+          cache: new TreeWidgetIdsCache(imodel),
+          shouldDispose: true,
+        });
         expect(
           await ClassificationsTreeDefinition.createInstanceKeyPaths({
             imodelAccess,
@@ -292,8 +302,10 @@ describe("Classifications tree", () => {
       });
       const { imodel } = buildIModelResult;
       const imodelAccess = createIModelAccess(imodel);
-      using treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
-      using idsCache = new ClassificationsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration, treeWidgetIdsCache);
+      using idsCache = new ClassificationsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration, {
+        cache: new TreeWidgetIdsCache(imodel),
+        shouldDispose: true,
+      });
       expect(
         await ClassificationsTreeDefinition.createInstanceKeyPaths({
           imodelAccess,

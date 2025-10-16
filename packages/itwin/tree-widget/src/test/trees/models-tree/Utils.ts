@@ -50,8 +50,7 @@ export function createModelsTreeProvider({
 }: CreateModelsTreeProviderProps): HierarchyProvider & Disposable {
   const config = { ...defaultHierarchyConfiguration, hideRootSubject: true, ...hierarchyConfig };
   const createdImodelAccess = imodelAccess ?? createIModelAccess(imodel);
-  const treeWidgetIdsCache = new TreeWidgetIdsCache(createdImodelAccess);
-  const createdIdsCache = idsCache ?? new ModelsTreeIdsCache(createdImodelAccess, config, treeWidgetIdsCache);
+  const createdIdsCache = idsCache ?? new ModelsTreeIdsCache(createdImodelAccess, config, { cache: new TreeWidgetIdsCache(imodel), shouldDispose: true });
   const provider = createIModelHierarchyProvider({
     imodelAccess: createdImodelAccess,
     hierarchyDefinition: new ModelsTreeDefinition({
@@ -71,7 +70,6 @@ export function createModelsTreeProvider({
     setHierarchyFilter: (props) => provider.setHierarchyFilter(props),
     [Symbol.dispose]() {
       provider[Symbol.dispose]();
-      treeWidgetIdsCache[Symbol.dispose]();
       if (!idsCache) {
         createdIdsCache[Symbol.dispose]();
       }

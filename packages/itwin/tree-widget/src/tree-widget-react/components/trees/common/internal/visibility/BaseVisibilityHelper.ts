@@ -168,10 +168,18 @@ export class BaseVisibilityHelper implements Disposable {
             mergeMap(({ drawingCategories, spatialCategories }) =>
               merge(
                 drawingCategories
-                  ? of(drawingCategories).pipe(mergeMap((categoryIds) => this.getCategoriesVisibilityStatus({ modelId, categoryIds, type: "DrawingCategory", checkSubCategories: false })))
+                  ? of(drawingCategories).pipe(
+                      mergeMap((categoryIds) =>
+                        this.getCategoriesVisibilityStatus({ modelId, categoryIds, type: "DrawingCategory", checkSubCategories: false }),
+                      ),
+                    )
                   : EMPTY,
                 spatialCategories
-                  ? of(spatialCategories).pipe(mergeMap((categoryIds) => this.getCategoriesVisibilityStatus({ modelId, categoryIds, type: "SpatialCategory", checkSubCategories: false })))
+                  ? of(spatialCategories).pipe(
+                      mergeMap((categoryIds) =>
+                        this.getCategoriesVisibilityStatus({ modelId, categoryIds, type: "SpatialCategory", checkSubCategories: false }),
+                      ),
+                    )
                   : EMPTY,
               ),
             ),
@@ -394,15 +402,17 @@ export class BaseVisibilityHelper implements Disposable {
                 )
               : EMPTY,
             // We need to check subCategories as well
-            props.checkSubCategories ? this.#props.treeWidgetIdsCache.getSubCategories({ categoryIds: categoryId }).pipe(
-              mergeMap(({ subCategories }) => {
-                if (subCategories && Id64.sizeOf(subCategories) > 0) {
-                  return this.getSubCategoriesVisibilityStatus({ categoryId, modelId: modelIdFromProps, subCategoryIds: subCategories, type });
-                }
+            props.checkSubCategories
+              ? this.#props.treeWidgetIdsCache.getSubCategories({ categoryIds: categoryId }).pipe(
+                  mergeMap(({ subCategories }) => {
+                    if (subCategories && Id64.sizeOf(subCategories) > 0) {
+                      return this.getSubCategoriesVisibilityStatus({ categoryId, modelId: modelIdFromProps, subCategoryIds: subCategories, type });
+                    }
 
-                return EMPTY;
-              }),
-            ) : EMPTY,
+                    return EMPTY;
+                  }),
+                )
+              : EMPTY,
           ).pipe(defaultIfEmpty(createVisibilityStatus(this.#props.viewport.viewsCategory(categoryId) ? "visible" : "hidden")));
         }),
         mergeVisibilityStatuses,

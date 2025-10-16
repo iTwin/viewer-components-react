@@ -49,6 +49,7 @@ import type { InstanceKey } from "@itwin/presentation-common";
 import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { CategoriesTreeHierarchyConfiguration } from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import type { VisibilityExpectations } from "./VisibilityValidation.js";
+
 describe("CategoriesTreeVisibilityHandler", () => {
   before(async () => {
     await initializePresentationTesting({
@@ -83,8 +84,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
     visibleByDefault?: boolean;
   }) {
     const imodelAccess = createIModelAccess(imodel);
-    const treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
-    const idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d", treeWidgetIdsCache);
+    const idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d", { cache: new TreeWidgetIdsCache(imodel), shouldDispose: true });
     const viewport = createTreeWidgetTestingViewport({ iModel: imodel, subCategoriesOfCategories, viewType: "3d", visibleByDefault: !!visibleByDefault });
 
     return {
@@ -92,7 +92,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
       viewport,
       idsCache,
       hierarchyConfig,
-      treeWidgetIdsCache,
     };
   }
 
@@ -138,7 +137,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
       provider,
       ...commonProps,
       [Symbol.dispose]() {
-        commonProps.treeWidgetIdsCache[Symbol.dispose]();
         commonProps.idsCache[Symbol.dispose]();
         handler[Symbol.dispose]();
         provider[Symbol.dispose]();

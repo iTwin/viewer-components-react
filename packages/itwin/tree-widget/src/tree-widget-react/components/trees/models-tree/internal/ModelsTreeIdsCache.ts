@@ -7,19 +7,17 @@ import { firstValueFrom } from "rxjs";
 import { assert, Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import {
-  CLASS_NAME_GeometricElement3d,
   CLASS_NAME_GeometricModel3d,
   CLASS_NAME_InformationPartitionElement,
   CLASS_NAME_SpatialCategory,
   CLASS_NAME_Subject,
 } from "../../common/internal/ClassNameDefinitions.js";
-import { TreeWidgetIdsCache } from "../../common/internal/TreeWidgetIdsCache.js";
 import { pushToMap } from "../../common/internal/Utils.js";
 
-import type { ITreeWidgetIdsCache } from "../../common/internal/TreeWidgetIdsCache.js";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
+import type { ITreeWidgetIdsCache, TreeWidgetIdsCache } from "../../common/internal/TreeWidgetIdsCache.js";
 import type { CategoryId, ModelId, SubjectId } from "../../common/internal/Types.js";
 import type { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
 
@@ -42,24 +40,24 @@ export class ModelsTreeIdsCache implements Disposable, ITreeWidgetIdsCache {
   #queryExecutor: LimitingECSqlQueryExecutor;
   #hierarchyConfig: ModelsTreeHierarchyConfiguration;
   #treeWidgetIdsCache: TreeWidgetIdsCache;
-  #newTreeWidgetCacheCreated = false;
+  #shouldDisposeTreeWidgetIdsCache = false;
 
-  constructor(queryExecutor: LimitingECSqlQueryExecutor, hierarchyConfig: ModelsTreeHierarchyConfiguration, treeWidgetIdsCache: TreeWidgetIdsCache) {
+  constructor(
+    queryExecutor: LimitingECSqlQueryExecutor,
+    hierarchyConfig: ModelsTreeHierarchyConfiguration,
+    treeWidgetIdsCacheInfo: { cache: TreeWidgetIdsCache; shouldDispose: boolean },
+  ) {
     this.#modelKeyPaths = new Map();
     this.#subjectKeyPaths = new Map();
     this.#categoryKeyPaths = new Map();
     this.#queryExecutor = queryExecutor;
     this.#hierarchyConfig = hierarchyConfig;
-    if (hierarchyConfig.elementClassSpecification !== CLASS_NAME_GeometricElement3d) {
-      this.#newTreeWidgetCacheCreated = true;
-      this.#treeWidgetIdsCache = new TreeWidgetIdsCache(this.#queryExecutor, { type: "3d", elementClassName: hierarchyConfig.elementClassSpecification });
-    } else {
-      this.#treeWidgetIdsCache = treeWidgetIdsCache;
-    }
+    this.#treeWidgetIdsCache = treeWidgetIdsCacheInfo.cache;
+    this.#shouldDisposeTreeWidgetIdsCache = treeWidgetIdsCacheInfo.shouldDispose;
   }
 
   public [Symbol.dispose]() {
-    if (this.#newTreeWidgetCacheCreated) {
+    if (this.#shouldDisposeTreeWidgetIdsCache) {
       this.#treeWidgetIdsCache[Symbol.dispose]();
     }
   }

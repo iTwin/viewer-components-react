@@ -24,8 +24,7 @@ export function createClassificationsTreeProvider(
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration,
 ): HierarchyProvider & Disposable {
   const imodelAccess = createIModelAccess(imodel);
-  const treeWidgetIdsCache = new TreeWidgetIdsCache(imodelAccess);
-  const idsCache = new ClassificationsTreeIdsCache(imodelAccess, hierarchyConfig, treeWidgetIdsCache);
+  const idsCache = new ClassificationsTreeIdsCache(imodelAccess, hierarchyConfig, { cache: new TreeWidgetIdsCache(imodel), shouldDispose: true });
   const hierarchyProvider = createIModelHierarchyProvider({
     imodelAccess,
     hierarchyDefinition: new ClassificationsTreeDefinition({
@@ -43,7 +42,6 @@ export function createClassificationsTreeProvider(
     [Symbol.dispose]() {
       hierarchyProvider[Symbol.dispose]();
       idsCache[Symbol.dispose]();
-      treeWidgetIdsCache[Symbol.dispose]();
     },
   };
 }
