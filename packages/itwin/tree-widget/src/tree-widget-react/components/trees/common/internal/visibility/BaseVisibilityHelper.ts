@@ -607,7 +607,7 @@ export class BaseVisibilityHelper implements Disposable {
         viewport.changeModelDisplay({ modelIds, display: false });
         return this.#props.treeWidgetIdsCache
           .getSubModels({ modelIds })
-          .pipe(mergeMap(({ subModels }) => merge(subModels ? this.changeModelsVisibilityStatus({ modelIds: subModels, on }) : EMPTY)));
+          .pipe(mergeMap(({ subModels }) => (subModels ? this.changeModelsVisibilityStatus({ modelIds: subModels, on }) : EMPTY)));
       }
 
       viewport.changeModelDisplay({ modelIds, display: true });
@@ -744,7 +744,7 @@ export class BaseVisibilityHelper implements Disposable {
         this.#alwaysAndNeverDrawnElements.clearAlwaysAndNeverDrawnElements({ categoryIds, modelId: modelIdFromProps }),
         this.#props.treeWidgetIdsCache
           .getSubModels({ categoryIds, modelId: modelIdFromProps })
-          .pipe(mergeMap(({ subModels }) => merge(subModels ? this.changeModelsVisibilityStatus({ modelIds: subModels, on }) : EMPTY))),
+          .pipe(mergeMap(({ subModels }) => (subModels ? this.changeModelsVisibilityStatus({ modelIds: subModels, on }) : EMPTY))),
       );
     });
     return this.#props.overrideHandler
