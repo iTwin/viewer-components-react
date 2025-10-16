@@ -49,7 +49,8 @@ export function useCategoriesTreeButtonProps({ viewport }: { viewport: Viewport 
   onCategoriesFiltered: (categories: CategoryInfo[] | undefined) => void;
 } {
   const [filteredCategories, setFilteredCategories] = useState<CategoryInfo[] | undefined>();
-  const categories = useCategories(viewport);
+  const componentId: GuidString = useMemo(() => Guid.createValue(), []);
+  const categories = useCategories(viewport, componentId);
   return {
     buttonProps: {
       viewport,
@@ -123,8 +124,7 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
 
 const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
 
-function useCategories(viewport: Viewport) {
-  const componentId: GuidString = useMemo(() => Guid.createValue(), []);
+function useCategories(viewport: Viewport, componentId: GuidString) {
   const categoriesPromise = useMemo(async () => loadCategoriesFromViewport(viewport, componentId), [viewport, componentId]);
   return useAsyncValue(categoriesPromise) ?? EMPTY_CATEGORIES_ARRAY;
 }
