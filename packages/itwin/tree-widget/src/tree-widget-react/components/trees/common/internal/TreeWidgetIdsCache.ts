@@ -91,15 +91,17 @@ export class TreeWidgetIdsCache implements ITreeWidgetIdsCache, Disposable {
   }> {
     const getClassNameQuery = (elementClassName: string, type: "2d" | "3d") => {
       return `
-        SELECT
-          '${type}' type,
-          this.Model.Id modelId,
-          this.Category.Id categoryId,
-          MAX(IIF(this.Parent.Id IS NULL, 1, 0)) isRootElementCategory
-        FROM ${CLASS_NAME_GeometricModel} m
-        JOIN ${elementClassName} this ON m.ECInstanceId = this.Model.Id
-        WHERE m.IsPrivate = false
-        GROUP BY modelId, categoryId
+        SELECT * FROM (
+          SELECT
+            '${type}' type,
+            this.Model.Id modelId,
+            this.Category.Id categoryId,
+            MAX(IIF(this.Parent.Id IS NULL, 1, 0)) isRootElementCategory
+          FROM ${CLASS_NAME_GeometricModel} m
+          JOIN ${elementClassName} this ON m.ECInstanceId = this.Model.Id
+          WHERE m.IsPrivate = false
+          GROUP BY modelId, categoryId
+        )
       `;
     };
     const queryArr = new Array<string>();
