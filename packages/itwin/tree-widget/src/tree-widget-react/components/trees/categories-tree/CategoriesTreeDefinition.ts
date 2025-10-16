@@ -495,7 +495,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     const modelIds: Id64Array = parentNode.extendedData?.isCategoryOfSubModel
       ? parseIdsSelectorResult(parentNode.extendedData?.modelIds)
       : await firstValueFrom(
-          this.#idsCache.getModels({ categoryIds, type: this.#viewType }).pipe(
+          this.#idsCache.getModels({ categoryIds }).pipe(
             reduce((acc, entry) => {
               if (!entry.models) {
                 return acc;

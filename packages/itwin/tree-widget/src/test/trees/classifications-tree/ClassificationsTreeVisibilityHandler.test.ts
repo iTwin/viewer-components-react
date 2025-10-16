@@ -180,7 +180,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     });
 
     describe("classification table", () => {
-      it("showing classification table makes contained elements under it visible", async function () {
+      it.only("showing classification table makes contained elements under it visible", async function () {
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           await importClassificationSchema(builder);
 

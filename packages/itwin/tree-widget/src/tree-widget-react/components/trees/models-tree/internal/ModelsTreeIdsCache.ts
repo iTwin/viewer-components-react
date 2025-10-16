@@ -310,7 +310,7 @@ export class ModelsTreeIdsCache implements Disposable, ITreeWidgetIdsCache {
     if (!entry) {
       entry = (async () => {
         const categoryPaths = new Array<HierarchyNodeIdentifiersPath>();
-        const { models } = await firstValueFrom(this.#treeWidgetIdsCache.getModels({ categoryIds: categoryId, type: "3d", onlyIfRootCategory: true }));
+        const { models } = await firstValueFrom(this.#treeWidgetIdsCache.getModels({ categoryIds: categoryId, onlyIfRootCategory: true }));
         if (!models) {
           return categoryPaths;
         }

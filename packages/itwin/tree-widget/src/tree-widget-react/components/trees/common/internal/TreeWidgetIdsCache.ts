@@ -34,7 +34,6 @@ export interface ITreeWidgetIdsCache {
   getSubCategories: (props: { categoryIds: Id64Arg }) => Observable<{ id: Id64String; subCategories: Id64Arg | undefined }>;
   getModels: (props: {
     categoryIds: Id64Arg;
-    type: "2d" | "3d";
     onlyIfRootCategory?: boolean;
     includeSubModels?: boolean;
   }) => Observable<{ id: Id64String; models: Id64Arg | undefined }>;
@@ -308,7 +307,6 @@ export class TreeWidgetIdsCache implements ITreeWidgetIdsCache, Disposable {
 
   public getModels({
     categoryIds,
-    type,
     onlyIfRootCategory,
     includeSubModels,
   }: Parameters<ITreeWidgetIdsCache["getModels"]>[0]): ReturnType<ITreeWidgetIdsCache["getModels"]> {
@@ -317,12 +315,11 @@ export class TreeWidgetIdsCache implements ITreeWidgetIdsCache, Disposable {
         from(Id64.iterable(categoryIds)).pipe(
           map((categoryId) => {
             const models = new Array<ModelId>();
-            const accessor = type === "2d" ? "categories2d" : "categories3d";
             modelInfos.forEach((modelEntry, modelId) => {
               if (!includeSubModels && modelEntry.isSubModel) {
                 return;
               }
-              const entry = modelEntry[accessor].get(categoryId);
+              const entry = modelEntry.categories2d.get(categoryId) ?? modelEntry.categories3d.get(categoryId);
               if (entry && (!onlyIfRootCategory || entry.isRootElementCategory)) {
                 models.push(modelId);
               }

@@ -267,9 +267,7 @@ export class BaseVisibilityHelper implements Disposable {
     type: "DrawingCategory" | "SpatialCategory";
   }): Observable<VisibilityStatus> {
     return (
-      props.modelId
-        ? of({ id: props.categoryId, models: props.modelId })
-        : from(this.#props.treeWidgetIdsCache.getModels({ categoryIds: props.categoryId, type: props.type === "DrawingCategory" ? "2d" : "3d" }))
+      props.modelId ? of({ id: props.categoryId, models: props.modelId }) : from(this.#props.treeWidgetIdsCache.getModels({ categoryIds: props.categoryId }))
     ).pipe(
       map(({ models }) => {
         let visibility: "visible" | "hidden" | "unknown" = "unknown";
@@ -352,7 +350,7 @@ export class BaseVisibilityHelper implements Disposable {
       return (
         modelIdFromProps
           ? from(Id64.iterable(categoryIds)).pipe(map((categoryId) => ({ id: categoryId, models: modelIdFromProps })))
-          : this.#props.treeWidgetIdsCache.getModels({ categoryIds, type: props.type === "DrawingCategory" ? "2d" : "3d" })
+          : this.#props.treeWidgetIdsCache.getModels({ categoryIds })
       ).pipe(
         map(({ id, models }) => {
           const acc = { categoryId: id, visibleModels: new Array<Id64String>(), hiddenModels: new Array<Id64String>() };
@@ -708,7 +706,7 @@ export class BaseVisibilityHelper implements Disposable {
       const modelIdsObservable = (
         modelIdFromProps
           ? of(new Map<ModelId, Set<CategoryId>>([[modelIdFromProps, getSetFromId64Arg(categoryIds)]]))
-          : this.#props.treeWidgetIdsCache.getModels({ categoryIds, type: viewport.viewType === "2d" ? "2d" : "3d" }).pipe(
+          : this.#props.treeWidgetIdsCache.getModels({ categoryIds }).pipe(
               reduce((acc, { id, models }) => {
                 if (!models) {
                   return acc;
