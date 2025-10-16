@@ -24,6 +24,7 @@ public;interface;TreeDefinition
 beta;function;TreeRenderer
 public;class;TreeWidget
 public;function;TreeWidgetComponent
+public;function;TreeWidgetContextProvider
 public;interface;TreeWidgetViewport
 beta;function;useCategoriesTree
 public;function;useCategoriesTreeButtonProps
