@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { ReactElement } from "react";
 import { useMemo } from "react";
 import { Guid } from "@itwin/core-bentley";
 import { SvgDetails, SvgDocument, SvgItem } from "@itwin/itwinui-icons-react";
@@ -12,10 +11,11 @@ import { TreeRenderer } from "../common/components/TreeRenderer.js";
 import { ExternalSourcesTreeComponent } from "./ExternalSourcesTreeComponent.js";
 import { ExternalSourcesTreeDefinition } from "./ExternalSourcesTreeDefinition.js";
 
-import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import type { ReactElement } from "react";
 import type { GuidString } from "@itwin/core-bentley";
-import type { TreeProps } from "../common/components/Tree.js";
 import type { HierarchyDefinition } from "@itwin/presentation-hierarchies";
+import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import type { TreeProps } from "../common/components/Tree.js";
 
 /** @beta */
 export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode"> & {
