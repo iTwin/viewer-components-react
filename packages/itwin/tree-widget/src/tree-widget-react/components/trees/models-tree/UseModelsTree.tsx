@@ -181,7 +181,7 @@ export function useModelsTree({
               hierarchyConfig: hierarchyConfiguration,
               limit: "unbounded",
               abortSignal,
-              componentId,
+              componentId: `${componentId}/subTree`,
             }),
         });
         return paths.map(HierarchyFilteringPath.normalize).map(({ path }) => path);
