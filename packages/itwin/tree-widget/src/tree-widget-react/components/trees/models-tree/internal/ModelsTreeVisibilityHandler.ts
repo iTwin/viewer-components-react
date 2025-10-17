@@ -31,7 +31,7 @@ import {
 import { assert, Id64 } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
-import { toggleAllCategories } from "../../common/CategoriesVisibilityUtils.js";
+import { enableCategoryDisplay, loadCategoriesFromViewport } from "../../common/CategoriesVisibilityUtils.js";
 import { reduceWhile, toVoidPromise } from "../../common/Rxjs.js";
 import { createVisibilityStatus } from "../../common/Tooltip.js";
 import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility.js";
@@ -1117,11 +1117,17 @@ function setIntersection<T>(lhs: Iterable<T>, rhs: Set<T>): Set<T> {
  * never drawn lists in the viewport.
  * @public
  */
-export async function showAllModels(models: string[], viewport: Viewport) {
+export async function showAllModels(models: string[], viewport: Viewport, componentId?: GuidString) {
   await viewport.addViewedModels(models);
   viewport.clearNeverDrawn();
   viewport.clearAlwaysDrawn();
-  await toggleAllCategories(viewport, true);
+
+  const categories = await loadCategoriesFromViewport(viewport, componentId);
+  if (categories.length === 0) {
+    return;
+  }
+  const ids = categories.map((category) => category.categoryId);
+  await enableCategoryDisplay(viewport, ids, true);
 }
 
 /**

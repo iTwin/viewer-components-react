@@ -3,17 +3,16 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useMemo } from "react";
-import { Guid } from "@itwin/core-bentley";
+import { useCallback } from "react";
 import { SvgFolder, SvgGroup, SvgHierarchyTree, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
 import { Tree } from "../common/components/Tree.js";
 import { TreeRenderer } from "../common/components/TreeRenderer.js";
+import { useGuid } from "../common/useGuid.js";
 import { IModelContentTreeComponent } from "./IModelContentTreeComponent.js";
 import { defaultHierarchyConfiguration, IModelContentTreeDefinition } from "./IModelContentTreeDefinition.js";
 import { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache.js";
 
 import type { ReactElement } from "react";
-import type { GuidString } from "@itwin/core-bentley";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { TreeProps } from "../common/components/Tree.js";
 import type { IModelContentTreeHierarchyConfiguration } from "./IModelContentTreeDefinition.js";
@@ -28,7 +27,7 @@ export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContex
 
 /** @beta */
 export function IModelContentTree({ hierarchyConfig: hierarchyConfigProp, ...props }: IModelContentTreeProps) {
-  const componentId: GuidString = useMemo(() => Guid.createValue(), []);
+  const componentId = useGuid();
   const getHierarchyDefinition = useCallback<TreeProps["getHierarchyDefinition"]>(
     ({ imodelAccess }) => {
       const hierarchyConfig = {

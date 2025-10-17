@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Guid } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
 import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
 import { Anchor, Text } from "@itwin/itwinui-react";
@@ -14,6 +13,7 @@ import { TreeWidget } from "../../../TreeWidget.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
+import { useGuid } from "../common/useGuid.js";
 import { useTelemetryContext } from "../common/UseTelemetryContext.js";
 import { joinHierarchyFilteringPaths } from "../common/Utils.js";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
@@ -33,7 +33,6 @@ import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCac
 import type { NormalizedHierarchyFilteringPath } from "../common/Utils.js";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/ModelsTreeVisibilityHandler.js";
 import type { ClassGroupingHierarchyNode, ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition.js";
-
 type ModelsTreeFilteringError = "tooManyFilterMatches" | "tooManyInstancesFocused" | "unknownFilterError" | "unknownInstanceFocusError";
 type ModelsTreeSubTreeError = "unknownSubTreeError";
 
@@ -130,7 +129,7 @@ export function useModelsTree({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     Object.values(hierarchyConfig ?? {}),
   );
-  const componentId: GuidString = useMemo(() => Guid.createValue(), []);
+  const componentId = useGuid();
   const { onFeatureUsed } = useTelemetryContext();
 
   const { getCache: getModelsTreeIdsCache } = useIdsCache<ModelsTreeIdsCache, { hierarchyConfig: ModelsTreeHierarchyConfiguration }>({

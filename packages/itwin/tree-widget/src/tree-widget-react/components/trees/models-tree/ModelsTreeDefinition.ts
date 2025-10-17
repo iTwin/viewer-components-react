@@ -574,16 +574,16 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
   public static async createInstanceKeyPaths(props: ModelsTreeInstanceKeyPathsProps): Promise<NormalizedHierarchyFilteringPath[]> {
     return lastValueFrom(
       defer(() => {
+        const componentInfo = { componentId: props.componentId ?? Guid.createValue(), componentName: this.#componentName };
         if (ModelsTreeInstanceKeyPathsProps.isLabelProps(props)) {
           const labelsFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
           return createInstanceKeyPathsFromInstanceLabelObs({
             ...props,
+            ...componentInfo,
             labelsFactory,
-            componentId: props.componentId ?? Guid.createValue(),
-            componentName: this.#componentName,
           });
         }
-        return createInstanceKeyPathsFromTargetItemsObs({ ...props, componentId: props.componentId ?? Guid.createValue(), componentName: this.#componentName });
+        return createInstanceKeyPathsFromTargetItemsObs({ ...props, ...componentInfo });
       }).pipe(props.abortSignal ? takeUntil(fromEvent(props.abortSignal, "abort")) : identity, defaultIfEmpty([])),
     );
   }
@@ -614,7 +614,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     };
 
     for await (const _row of this.#queryExecutor.createQueryReader(query, {
-      restartToken: `${ModelsTreeDefinition.#componentName}/${this.#componentId}/is-class-supported-query`,
+      restartToken: `${ModelsTreeDefinition.#componentName}/${this.#componentId}/is-class-supported`,
     })) {
       return true;
     }
@@ -629,9 +629,9 @@ function createGeometricElementInstanceKeyPaths(props: {
   targetItems: Array<Id64String | ElementsGroupInfo>;
   componentId: GuidString;
   componentName: string;
-  bufferNumber: number;
+  chunkIndex: number;
 }): Observable<NormalizedHierarchyFilteringPath> {
-  const { targetItems, bufferNumber, componentId, componentName, hierarchyConfig, idsCache, imodelAccess } = props;
+  const { targetItems, chunkIndex, componentId, componentName, hierarchyConfig, idsCache, imodelAccess } = props;
   const elementIds = targetItems.filter((info): info is Id64String => typeof info === "string");
   const groupInfos = targetItems.filter((info): info is ElementsGroupInfo => typeof info !== "string");
   const separator = ";";
@@ -700,7 +700,7 @@ function createGeometricElementInstanceKeyPaths(props: {
 
     return imodelAccess.createQueryReader(
       { ctes, ecsql },
-      { rowFormat: "Indexes", limit: "unbounded", restartToken: `${componentName}/${componentId}/geometric-element-paths/${bufferNumber}` },
+      { rowFormat: "Indexes", limit: "unbounded", restartToken: `${componentName}/${componentId}/geometric-element-paths/${chunkIndex}` },
     );
   }).pipe(
     releaseMainThreadOnItemsCount(300),
@@ -827,7 +827,7 @@ function createInstanceKeyPathsFromTargetItemsObs({
             bufferCount(Math.ceil(elementsLength / Math.ceil(elementsLength / 5000))),
             releaseMainThreadOnItemsCount(1),
             mergeMap(
-              (block, bufferNumber) =>
+              (block, chunkIndex) =>
                 createGeometricElementInstanceKeyPaths({
                   imodelAccess,
                   idsCache,
@@ -835,7 +835,7 @@ function createInstanceKeyPathsFromTargetItemsObs({
                   targetItems: block,
                   componentId,
                   componentName,
-                  bufferNumber,
+                  chunkIndex,
                 }),
               10,
             ),
@@ -893,7 +893,7 @@ function createInstanceKeyPathsFromInstanceLabelObs(
     mergeMap((queryProps) => {
       return imodelAccess.createQueryReader(queryProps, {
         rowFormat: "Indexes",
-        restartToken: `${props.componentName}/${props.componentId}/filter-by-label-query`,
+        restartToken: `${props.componentName}/${props.componentId}/filter-by-label`,
         limit,
       });
     }),

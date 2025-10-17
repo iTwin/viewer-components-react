@@ -5,17 +5,16 @@
 
 import { useMemo, useState } from "react";
 import { useAsyncValue } from "@itwin/components-react";
-import { Guid } from "@itwin/core-bentley";
 import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { hideAllCategories, invertAllCategories, loadCategoriesFromViewport, showAllCategories } from "../common/CategoriesVisibilityUtils.js";
+import { useGuid } from "../common/useGuid.js";
 
 import type { GuidString } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader.js";
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
-
 /**
  * Props that get passed to `CategoriesTreeComponent` header button renderer.
  * @see CategoriesTreeComponentProps.headerButtons
@@ -49,7 +48,7 @@ export function useCategoriesTreeButtonProps({ viewport }: { viewport: Viewport 
   onCategoriesFiltered: (categories: CategoryInfo[] | undefined) => void;
 } {
   const [filteredCategories, setFilteredCategories] = useState<CategoryInfo[] | undefined>();
-  const componentId: GuidString = useMemo(() => Guid.createValue(), []);
+  const componentId = useGuid();
   const categories = useCategories(viewport, componentId);
   return {
     buttonProps: {

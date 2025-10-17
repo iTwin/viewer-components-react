@@ -309,7 +309,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
 
     for await (const _row of this.#queryExecutor.createQueryReader(
       { ecsql: query },
-      { restartToken: `${this.#componentName}/${this.#componentId}/is-external-source-supported-query` },
+      { restartToken: `${this.#componentName}/${this.#componentId}/is-external-source-supported` },
     )) {
       return true;
     }

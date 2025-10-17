@@ -3,11 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useMemo } from "react";
-import { Guid } from "@itwin/core-bentley";
+import { useCallback } from "react";
 import { SvgDetails, SvgDocument, SvgItem } from "@itwin/itwinui-icons-react";
 import { Tree } from "../common/components/Tree.js";
 import { TreeRenderer } from "../common/components/TreeRenderer.js";
+import { useGuid } from "../common/useGuid.js";
 import { ExternalSourcesTreeComponent } from "./ExternalSourcesTreeComponent.js";
 import { ExternalSourcesTreeDefinition } from "./ExternalSourcesTreeDefinition.js";
 
@@ -26,7 +26,7 @@ export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "getSchemaCont
 
 /** @beta */
 export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
-  const componentId: GuidString = useMemo(() => Guid.createValue(), []);
+  const componentId = useGuid();
   return (
     <Tree
       {...props}

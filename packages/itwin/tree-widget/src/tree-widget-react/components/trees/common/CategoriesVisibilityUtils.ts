@@ -20,27 +20,6 @@ export interface CategoryInfo {
 }
 
 /**
- * Toggles visibility of categories to show or hide.
- * @internal
- */
-export async function toggleAllCategories(viewport: Viewport, display: boolean) {
-  const ids = await getCategories(viewport);
-  if (ids.length === 0) {
-    return;
-  }
-
-  await enableCategoryDisplay(viewport, ids, display);
-}
-
-/**
- * Gets ids of all categories from specified imodel and viewport.
- */
-async function getCategories(viewport: Viewport, componentId?: GuidString) {
-  const categories = await loadCategoriesFromViewport(viewport, componentId);
-  return categories.map((category) => category.categoryId);
-}
-
-/**
  * Changes category display in the viewport.
  * @internal
  */
@@ -87,7 +66,7 @@ export async function loadCategoriesFromViewport(vp: Viewport, componentId?: Gui
   const rows = await vp.iModel
     .createQueryReader(ecsql2, undefined, {
       rowFormat: QueryRowFormat.UseJsPropertyNames,
-      restartToken: `CategoriesVisibilityUtils/${componentId ?? Guid.createValue()}/categories-query`,
+      restartToken: `CategoriesVisibilityUtils/${componentId ?? Guid.createValue()}/categories`,
     })
     .toArray();
   (await vp.iModel.categories.getCategoryInfo(rows.map((row) => row.id))).forEach((val) => {

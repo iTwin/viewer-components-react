@@ -392,7 +392,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
         if (!queryProps) {
           return EMPTY;
         }
-        return imodelAccess.createQueryReader(queryProps, { restartToken: `${componentName}/${componentId}/filter-by-label-query`, limit });
+        return imodelAccess.createQueryReader(queryProps, { restartToken: `${componentName}/${componentId}/filter-by-label`, limit });
       }),
       map(
         (row): InstanceKey => ({
