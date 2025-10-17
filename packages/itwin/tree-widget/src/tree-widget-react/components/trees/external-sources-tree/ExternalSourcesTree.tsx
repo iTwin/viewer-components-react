@@ -39,7 +39,7 @@ export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
 }
 
 const getDefinitionsProvider = (props: Parameters<TreeProps["getHierarchyDefinition"]>[0] & { componentId: GuidString }): HierarchyDefinition => {
-  return new ExternalSourcesTreeDefinition({ ...props, componentId: Guid.createValue() });
+  return new ExternalSourcesTreeDefinition(props);
 };
 
 function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
