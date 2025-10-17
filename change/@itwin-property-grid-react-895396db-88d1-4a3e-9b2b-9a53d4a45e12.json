@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Bump versions of presentation packages.",
-  "packageName": "@itwin/property-grid-react",
-  "email": "100586436+JonasDov@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
