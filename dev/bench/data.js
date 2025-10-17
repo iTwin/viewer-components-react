@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1760510758393,
+  "lastUpdate": 1760706933306,
   "repoUrl": "https://github.com/iTwin/viewer-components-react",
   "entries": {
     "Tree-Widget benchmark": [
@@ -6339,6 +6339,129 @@ window.BENCHMARK_DATA = {
             "value": 1121,
             "unit": "ms",
             "extra": "count: 19\nmax: 1121\np95: 1121\nmedian: 38"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "100586436+JonasDov@users.noreply.github.com",
+            "name": "JonasDov",
+            "username": "JonasDov"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9195eabf5029dd473682bba04a4c7a7bf2648c69",
+          "message": "[Tree widget]: Fix restart token cancelling queries (#1478)\n\n* Fix restart token cancelling queries\n\n* prettier\n\n* Add componentId to executed queries\n\n* Add buffer number\n\n* Fix import order\n\n* add componentId to useCategoriesTreeButtonProps\n\n* Address comments\n\n* Update packages/itwin/tree-widget/src/tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.ts\n\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>\n\n* Update packages/itwin/tree-widget/src/tree-widget-react/components/trees/external-sources-tree/ExternalSourcesTree.tsx\n\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>\n\n* Address comments\n\n* Add comments\n\n* Update presentation packages versions\n\n* Add changeset\n\n---------\n\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>",
+          "timestamp": "2025-10-17T09:04:04-04:00",
+          "tree_id": "d9b244a388e910863ec3ab79f0adc5dcee7a7851",
+          "url": "https://github.com/iTwin/viewer-components-react/commit/9195eabf5029dd473682bba04a4c7a7bf2648c69"
+        },
+        "date": 1760706930871,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "categories tree creates initial filtered view for 50k items",
+            "value": 2503.15,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree creates initial filtered view for 50k items (P95 of main thread blocks)",
+            "value": 1769,
+            "unit": "ms",
+            "extra": "count: 6\nmax: 1769\np95: 1769\nmedian: 36.5"
+          },
+          {
+            "name": "categories tree changing category visibility changes visibility for 50k subCategories",
+            "value": 13905.45,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree changing category visibility changes visibility for 50k subCategories (P95 of main thread blocks)",
+            "value": 760,
+            "unit": "ms",
+            "extra": "count: 35\nmax: 2690\np95: 760\nmedian: 63"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k categories",
+            "value": 6877.27,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k categories (P95 of main thread blocks)",
+            "value": 3762,
+            "unit": "ms",
+            "extra": "count: 9\nmax: 3762\np95: 3762\nmedian: 51"
+          },
+          {
+            "name": "models tree creates initial filtered view for 50k target items",
+            "value": 2383.43,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree creates initial filtered view for 50k target items (P95 of main thread blocks)",
+            "value": 240,
+            "unit": "ms",
+            "extra": "count: 17\nmax: 240\np95: 240\nmedian: 39"
+          },
+          {
+            "name": "models tree validates categories visibility for imodel with 50k categories",
+            "value": 22903.09,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree validates categories visibility for imodel with 50k categories (P95 of main thread blocks)",
+            "value": 6605,
+            "unit": "ms",
+            "extra": "count: 15\nmax: 6605\np95: 6605\nmedian: 40"
+          },
+          {
+            "name": "models tree changing model visibility changes visibility for 50k elements",
+            "value": 60396.04,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing model visibility changes visibility for 50k elements (P95 of main thread blocks)",
+            "value": 145,
+            "unit": "ms",
+            "extra": "count: 26\nmax: 336\np95: 145\nmedian: 41.5"
+          },
+          {
+            "name": "models tree changing category visibility changes visibility for 50k elements",
+            "value": 57369.4,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing category visibility changes visibility for 50k elements (P95 of main thread blocks)",
+            "value": 155,
+            "unit": "ms",
+            "extra": "count: 22\nmax: 324\np95: 155\nmedian: 63"
+          },
+          {
+            "name": "models tree changing per-model-category override changes visibility for 50k elements",
+            "value": 57459.31,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing per-model-category override changes visibility for 50k elements (P95 of main thread blocks)",
+            "value": 152,
+            "unit": "ms",
+            "extra": "count: 23\nmax: 325\np95: 152\nmedian: 59"
+          },
+          {
+            "name": "models tree changing element visibility changes only parent nodes visibility with 50k elements",
+            "value": 61125.01,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing element visibility changes only parent nodes visibility with 50k elements (P95 of main thread blocks)",
+            "value": 283,
+            "unit": "ms",
+            "extra": "count: 30\nmax: 1136\np95: 283\nmedian: 52"
           }
         ]
       }
