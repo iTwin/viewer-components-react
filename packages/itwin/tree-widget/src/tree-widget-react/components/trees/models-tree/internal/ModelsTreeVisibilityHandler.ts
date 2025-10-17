@@ -1115,6 +1115,9 @@ function setIntersection<T>(lhs: Iterable<T>, rhs: Set<T>): Set<T> {
 /**
  * Enables display of all given models. Also enables display of all categories and clears always and
  * never drawn lists in the viewport.
+ *
+ * @param componentId Optional unique id of the component that consumes this function.
+ * It can be any string, as long as it is not shared across different components.
  * @public
  */
 export async function showAllModels(models: string[], viewport: Viewport, componentId?: GuidString) {
