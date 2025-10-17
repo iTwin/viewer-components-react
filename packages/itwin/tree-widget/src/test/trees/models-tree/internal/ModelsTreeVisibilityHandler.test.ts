@@ -3515,20 +3515,23 @@ describe("ModelsTreeVisibilityHandler", () => {
         filterPaths,
       }: Parameters<typeof createVisibilityTestData>[0] & { filterPaths: HierarchyNodeIdentifiersPath[] }) {
         const commonProps = createCommonProps({ imodel });
-        const handler = createModelsTreeVisibilityHandler({ ...commonProps, filteredPaths: filterPaths });
+        const filteredVisibilityHandler = createModelsTreeVisibilityHandler({ ...commonProps, filteredPaths: filterPaths });
+        const defaultVisibilityHandler = createModelsTreeVisibilityHandler(commonProps);
         const defaultProvider = createProvider(commonProps);
         const filteredProvider = createProvider({ ...commonProps, filterPaths });
         return {
-          handler,
+          defaultVisibilityHandler,
           defaultProvider,
           filteredProvider,
+          filteredVisibilityHandler,
           ...commonProps,
           [Symbol.dispose]() {
             commonProps.idsCache[Symbol.dispose]();
-            handler[Symbol.dispose]();
+            defaultVisibilityHandler[Symbol.dispose]();
+            filteredVisibilityHandler[Symbol.dispose]();
             defaultProvider[Symbol.dispose]();
-            commonProps.viewport[Symbol.dispose]();
             filteredProvider[Symbol.dispose]();
+            commonProps.viewport[Symbol.dispose]();
           },
         };
       }
@@ -3581,21 +3584,21 @@ describe("ModelsTreeVisibilityHandler", () => {
 
           const { imodel, filterPaths, ...keys } = buildIModelResult;
           using visibilityTestData = createFilteredVisibilityTestData({ imodel, filterPaths });
-          const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
+          const { defaultVisibilityHandler, filteredVisibilityHandler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
           const node = await getNodeMatchingPath(filteredProvider, [keys.model]);
-          await handler.changeVisibility(node, true);
+          await filteredVisibilityHandler.changeVisibility(node, true);
           viewport.renderFrame();
 
           await validateHierarchyVisibility({
             provider: filteredProvider,
-            handler,
+            handler: filteredVisibilityHandler,
             viewport,
             visibilityExpectations: VisibilityExpectations.all("visible"),
           });
 
           await validateHierarchyVisibility({
             provider: defaultProvider,
-            handler,
+            handler: defaultVisibilityHandler,
             viewport,
             visibilityExpectations: {
               subject: () => "partial",
@@ -3644,22 +3647,22 @@ describe("ModelsTreeVisibilityHandler", () => {
           await using buildIModelResult = await createIModel(this);
           const { imodel, filterPaths, filterTargetElements, ...keys } = buildIModelResult;
           using visibilityTestData = createFilteredVisibilityTestData({ imodel, filterPaths });
-          const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
+          const { defaultVisibilityHandler, filteredVisibilityHandler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
 
           const node = await getNodeMatchingPath(filteredProvider, [keys.model]);
-          await handler.changeVisibility(node, true);
+          await filteredVisibilityHandler.changeVisibility(node, true);
           viewport.renderFrame();
 
           await validateHierarchyVisibility({
             provider: filteredProvider,
-            handler,
+            handler: filteredVisibilityHandler,
             viewport,
             visibilityExpectations: VisibilityExpectations.all("visible"),
           });
 
           await validateHierarchyVisibility({
             provider: defaultProvider,
-            handler,
+            handler: defaultVisibilityHandler,
             viewport,
             visibilityExpectations: {
               subject: () => "partial",
@@ -3675,18 +3678,18 @@ describe("ModelsTreeVisibilityHandler", () => {
           await using buildIModelResult = await createIModel(this);
           const { imodel, filterPaths, filteredCategories, filterTargetElements, ...keys } = buildIModelResult;
           using visibilityTestData = createFilteredVisibilityTestData({ imodel, filterPaths });
-          const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
+          const { defaultVisibilityHandler, filteredVisibilityHandler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
 
           const pathToCategory = [keys.model, filteredCategories[0]];
           const node = await getNodeMatchingPath(filteredProvider, pathToCategory);
-          await handler.changeVisibility(node, true);
+          await filteredVisibilityHandler.changeVisibility(node, true);
           viewport.renderFrame();
 
           const clickedCategoryId = filteredCategories[0].id;
 
           await validateHierarchyVisibility({
             provider: filteredProvider,
-            handler,
+            handler: filteredVisibilityHandler,
             viewport,
             visibilityExpectations: {
               subject: () => "partial",
@@ -3699,7 +3702,7 @@ describe("ModelsTreeVisibilityHandler", () => {
 
           await validateHierarchyVisibility({
             provider: defaultProvider,
-            handler,
+            handler: defaultVisibilityHandler,
             viewport,
             visibilityExpectations: {
               subject: () => "partial",
@@ -3747,22 +3750,22 @@ describe("ModelsTreeVisibilityHandler", () => {
           await using buildIModelResult = await createIModel(this);
           const { imodel, filterPaths, parentSubject } = buildIModelResult;
           using visibilityTestData = createFilteredVisibilityTestData({ imodel, filterPaths });
-          const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
+          const { defaultVisibilityHandler, filteredVisibilityHandler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
 
           const node = await getNodeMatchingPath(filteredProvider, [parentSubject]);
-          await handler.changeVisibility(node, true);
+          await filteredVisibilityHandler.changeVisibility(node, true);
           viewport.renderFrame();
 
           await validateHierarchyVisibility({
             provider: filteredProvider,
-            handler,
+            handler: filteredVisibilityHandler,
             viewport,
             visibilityExpectations: VisibilityExpectations.all("visible"),
           });
 
           await validateHierarchyVisibility({
             provider: defaultProvider,
-            handler,
+            handler: defaultVisibilityHandler,
             viewport,
             visibilityExpectations: VisibilityExpectations.all("visible"),
           });
@@ -3772,11 +3775,11 @@ describe("ModelsTreeVisibilityHandler", () => {
           await using buildIModelResult = await createIModel(this);
           const { imodel, filterPaths, parentSubject, subjectIds, modelIds } = buildIModelResult;
           using visibilityTestData = createFilteredVisibilityTestData({ imodel, filterPaths });
-          const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
+          const { defaultVisibilityHandler, filteredVisibilityHandler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
 
           const pathToCategory = filterPaths[0];
           const node = await getNodeMatchingPath(filteredProvider, pathToCategory);
-          await handler.changeVisibility(node, true);
+          await filteredVisibilityHandler.changeVisibility(node, true);
           viewport.renderFrame();
 
           const visibilityExpectations: ValidateNodeProps["visibilityExpectations"] = {
@@ -3794,14 +3797,14 @@ describe("ModelsTreeVisibilityHandler", () => {
 
           await validateHierarchyVisibility({
             provider: filteredProvider,
-            handler,
+            handler: filteredVisibilityHandler,
             viewport,
             visibilityExpectations,
           });
 
           await validateHierarchyVisibility({
             provider: defaultProvider,
-            handler,
+            handler: defaultVisibilityHandler,
             viewport,
             visibilityExpectations,
           });
@@ -3848,10 +3851,10 @@ describe("ModelsTreeVisibilityHandler", () => {
 
         const { imodel, filterPaths, firstElement, pathToFirstElement } = buildIModelResult;
         using visibilityTestData = createFilteredVisibilityTestData({ imodel, filterPaths });
-        const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
+        const { defaultVisibilityHandler, filteredVisibilityHandler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
 
         const node = await getNodeMatchingPath(filteredProvider, pathToFirstElement);
-        await handler.changeVisibility(node, true);
+        await filteredVisibilityHandler.changeVisibility(node, true);
         viewport.renderFrame();
 
         const visibilityExpectations: ValidateNodeProps["visibilityExpectations"] = {
@@ -3864,14 +3867,14 @@ describe("ModelsTreeVisibilityHandler", () => {
 
         await validateHierarchyVisibility({
           provider: filteredProvider,
-          handler,
+          handler: filteredVisibilityHandler,
           viewport,
           visibilityExpectations,
         });
 
         await validateHierarchyVisibility({
           provider: defaultProvider,
-          handler,
+          handler: defaultVisibilityHandler,
           viewport,
           visibilityExpectations,
         });

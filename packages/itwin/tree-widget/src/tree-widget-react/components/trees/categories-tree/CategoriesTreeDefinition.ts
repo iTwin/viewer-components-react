@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { defaultIfEmpty, defer, EMPTY, from, fromEvent, identity, lastValueFrom, map, mergeMap, takeUntil, toArray } from "rxjs";
+import { Guid } from "@itwin/core-bentley";
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
@@ -11,7 +12,7 @@ import { getClassesByView } from "./internal/CategoriesTreeIdsCache.js";
 import { DEFINITION_CONTAINER_CLASS, DEFINITION_ELEMENT_CLASS, SUB_CATEGORY_CLASS } from "./internal/ClassNameDefinitions.js";
 
 import type { Observable } from "rxjs";
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
 import type {
   DefineHierarchyLevelProps,
   DefineInstanceNodeChildHierarchyLevelProps,
@@ -41,6 +42,7 @@ interface CategoriesTreeInstanceKeyPathsFromInstanceLabelProps {
   limit?: number | "unbounded";
   idsCache: CategoriesTreeIdsCache;
   abortSignal?: AbortSignal;
+  componentId?: GuidString;
 }
 
 export class CategoriesTreeDefinition implements HierarchyDefinition {
@@ -50,6 +52,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   #idsCache: CategoriesTreeIdsCache;
   #viewType: "2d" | "3d";
   #iModelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
+  static #componentName = "CategoriesTreeDefinition";
 
   public constructor(props: CategoriesTreeDefinitionProps) {
     this.#iModelAccess = props.imodelAccess;
@@ -261,14 +264,25 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
 
   public static async createInstanceKeyPaths(props: CategoriesTreeInstanceKeyPathsFromInstanceLabelProps): Promise<HierarchyFilteringPath[]> {
     const labelsFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
-    return createInstanceKeyPathsFromInstanceLabel({ ...props, labelsFactory, cache: props.idsCache });
+    return createInstanceKeyPathsFromInstanceLabel({
+      ...props,
+      labelsFactory,
+      cache: props.idsCache,
+      componentId: props.componentId ?? Guid.createValue(),
+      componentName: this.#componentName,
+    });
   }
 }
 
 async function createInstanceKeyPathsFromInstanceLabel(
-  props: CategoriesTreeInstanceKeyPathsFromInstanceLabelProps & { labelsFactory: IInstanceLabelSelectClauseFactory; cache: CategoriesTreeIdsCache },
+  props: Omit<CategoriesTreeInstanceKeyPathsFromInstanceLabelProps, "componentId"> & {
+    labelsFactory: IInstanceLabelSelectClauseFactory;
+    cache: CategoriesTreeIdsCache;
+    componentName: string;
+    componentId: GuidString;
+  },
 ): Promise<HierarchyFilteringPath[]> {
-  const { cache, abortSignal, label, viewType, labelsFactory, limit, imodelAccess } = props;
+  const { cache, abortSignal, label, viewType, labelsFactory, limit, imodelAccess, componentId, componentName } = props;
   const { categoryClass } = getClassesByView(viewType);
 
   const adjustedLabel = label.replace(/[%_\\]/g, "\\$&");
@@ -378,7 +392,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
         if (!queryProps) {
           return EMPTY;
         }
-        return imodelAccess.createQueryReader(queryProps, { restartToken: "tree-widget/categories-tree/filter-by-label-query", limit });
+        return imodelAccess.createQueryReader(queryProps, { restartToken: `${componentName}/${componentId}/filter-by-label`, limit });
       }),
       map(
         (row): InstanceKey => ({

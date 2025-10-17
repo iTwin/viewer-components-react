@@ -7,14 +7,15 @@ import { useCallback } from "react";
 import { SvgFolder, SvgGroup, SvgHierarchyTree, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
 import { Tree } from "../common/components/Tree.js";
 import { TreeRenderer } from "../common/components/TreeRenderer.js";
+import { useGuid } from "../common/useGuid.js";
 import { IModelContentTreeComponent } from "./IModelContentTreeComponent.js";
 import { defaultHierarchyConfiguration, IModelContentTreeDefinition } from "./IModelContentTreeDefinition.js";
 import { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache.js";
 
 import type { ReactElement } from "react";
-import type { IModelContentTreeHierarchyConfiguration } from "./IModelContentTreeDefinition.js";
-import type { TreeProps } from "../common/components/Tree.js";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import type { TreeProps } from "../common/components/Tree.js";
+import type { IModelContentTreeHierarchyConfiguration } from "./IModelContentTreeDefinition.js";
 
 /** @beta */
 export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode"> & {
@@ -26,16 +27,17 @@ export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContex
 
 /** @beta */
 export function IModelContentTree({ hierarchyConfig: hierarchyConfigProp, ...props }: IModelContentTreeProps) {
+  const componentId = useGuid();
   const getHierarchyDefinition = useCallback<TreeProps["getHierarchyDefinition"]>(
     ({ imodelAccess }) => {
       const hierarchyConfig = {
         ...defaultHierarchyConfiguration,
         ...hierarchyConfigProp,
       };
-      return new IModelContentTreeDefinition({ imodelAccess, idsCache: new IModelContentTreeIdsCache(imodelAccess), hierarchyConfig });
+      return new IModelContentTreeDefinition({ imodelAccess, idsCache: new IModelContentTreeIdsCache(imodelAccess, componentId), hierarchyConfig });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    Object.values(hierarchyConfigProp ?? {}),
+    Object.values({ ...(hierarchyConfigProp ?? {}), componentId }),
   );
 
   return (
