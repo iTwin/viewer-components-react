@@ -163,7 +163,6 @@
     "sinon-chai": "^3.7.0",
     "stylelint": "^15.11.0",
     "stylelint-config-standard-scss": "^11.1.0",
-    "test-utilities": "workspace:*",
     "typemoq": "^2.1.0",
     "typescript": "~5.6.3"
   },
