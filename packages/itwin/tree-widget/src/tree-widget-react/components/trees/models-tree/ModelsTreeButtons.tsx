@@ -8,13 +8,13 @@ import { SvgCursorClick, SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow
 import { Button, IconButton, Tooltip } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js";
+import { useGuid } from "../common/useGuid.js";
 import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, toggleModels } from "./internal/ModelsTreeVisibilityHandler.js";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader.js";
-
 /**
  * Information about a single Model.
  * @public
@@ -108,6 +108,7 @@ export type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) =>
 
 /** @public */
 export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
+  const componentId = useGuid();
   return (
     <IconButton
       size={props.density === "enlarged" ? "large" : "small"}
@@ -119,6 +120,7 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
         void showAllModels(
           props.models.map((model) => model.id),
           props.viewport,
+          componentId,
         );
       }}
     >

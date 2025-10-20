@@ -4,13 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { bufferCount, bufferTime, filter, firstValueFrom, from, map, mergeAll, mergeMap, reduce, ReplaySubject, Subject } from "rxjs";
-import { assert, Id64 } from "@itwin/core-bentley";
+import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import { collect } from "../../common/Rxjs.js";
 import { pushToMap } from "../../common/Utils.js";
 
 import type { Subscription } from "rxjs";
-import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
@@ -46,8 +46,10 @@ export class ModelsTreeIdsCache implements Disposable {
   #hierarchyConfig: ModelsTreeHierarchyConfiguration;
   #childrenMap: ChildrenMap;
   #childrenLoadingMap: ChildrenLoadingMap;
+  #componentId: GuidString;
+  #componentName: string;
 
-  constructor(queryExecutor: LimitingECSqlQueryExecutor, hierarchyConfig: ModelsTreeHierarchyConfiguration) {
+  constructor(queryExecutor: LimitingECSqlQueryExecutor, hierarchyConfig: ModelsTreeHierarchyConfiguration, componentId?: GuidString) {
     this.#hierarchyConfig = hierarchyConfig;
     this.#queryExecutor = queryExecutor;
     this.#categoryElementCounts = new ModelCategoryElementsCountCache(async (input) => this.queryCategoryElementCounts(input));
@@ -56,6 +58,8 @@ export class ModelsTreeIdsCache implements Disposable {
     this.#categoryKeyPaths = new Map();
     this.#childrenMap = new Map();
     this.#childrenLoadingMap = new Map();
+    this.#componentId = componentId ?? Guid.createValue();
+    this.#componentName = "ModelsTreeIdsCache";
   }
 
   public [Symbol.dispose]() {
@@ -83,7 +87,10 @@ export class ModelsTreeIdsCache implements Disposable {
         END hideInHierarchy
       FROM bis.Subject s
     `;
-    for await (const row of this.#queryExecutor.createQueryReader({ ecsql: subjectsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this.#queryExecutor.createQueryReader(
+      { ecsql: subjectsQuery },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/subjects` },
+    )) {
       yield { id: row.id, parentId: row.parentId, targetPartitionId: row.targetPartitionId, hideInHierarchy: !!row.hideInHierarchy };
     }
   }
@@ -97,7 +104,10 @@ export class ModelsTreeIdsCache implements Disposable {
         NOT m.IsPrivate
         ${this.#hierarchyConfig.showEmptyModels ? "" : `AND EXISTS (SELECT 1 FROM ${this.#hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)`}
     `;
-    for await (const row of this.#queryExecutor.createQueryReader({ ecsql: modelsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this.#queryExecutor.createQueryReader(
+      { ecsql: modelsQuery },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/models` },
+    )) {
       yield { id: row.id, parentId: row.parentId };
     }
   }
@@ -122,7 +132,7 @@ export class ModelsTreeIdsCache implements Disposable {
       SELECT id, parentId
       FROM ElementChildren
     `;
-    for await (const row of this.#queryExecutor.createQueryReader({ ecsql, ctes }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this.#queryExecutor.createQueryReader({ ecsql, ctes }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/children` })) {
       yield { id: row.id, parentId: row.parentId };
     }
   }
@@ -397,7 +407,10 @@ export class ModelsTreeIdsCache implements Disposable {
       JOIN ${this.#hierarchyConfig.elementClassSpecification} this ON m.ECInstanceId = this.Model.Id
       GROUP BY modelId, categoryId, isModelPrivate
     `;
-    for await (const row of this.#queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this.#queryExecutor.createQueryReader(
+      { ecsql: query },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/model-categories` },
+    )) {
       yield { modelId: row.modelId, categoryId: row.categoryId, isModelPrivate: !!row.isModelPrivate, isRootElementCategory: !!row.isRootElementCategory };
     }
   }
@@ -414,7 +427,10 @@ export class ModelsTreeIdsCache implements Disposable {
         m.IsPrivate = false
         AND m.ECInstanceId IN (SELECT Model.Id FROM ${this.#hierarchyConfig.elementClassSpecification})
     `;
-    for await (const row of this.#queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this.#queryExecutor.createQueryReader(
+      { ecsql: query },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/modeled-elements` },
+    )) {
       yield { modelId: row.modelId, categoryId: row.categoryId, modeledElementId: row.modeledElementId };
     }
   }
@@ -556,7 +572,7 @@ export class ModelsTreeIdsCache implements Disposable {
                 GROUP BY modelId, categoryId
               `,
             },
-            { rowFormat: "ECSqlPropertyNames", limit: "unbounded" },
+            { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/category-element-counts` },
           );
 
           const result = new Array<{ modelId: Id64String; categoryId: Id64String; elementsCount: number }>();
