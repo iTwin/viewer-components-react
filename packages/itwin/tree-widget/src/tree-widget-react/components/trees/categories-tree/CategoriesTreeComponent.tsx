@@ -43,7 +43,7 @@ interface CategoriesTreeComponentProps
    */
   headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode>;
   /**
-   * Viewport used for visibility controls.
+   * Viewport used for visibility controls and data querying.
    *
    * When viewport is not provided, `IModelApp.viewManager.selectedView` will be used.
    */

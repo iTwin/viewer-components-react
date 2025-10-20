@@ -21,6 +21,7 @@ import {
   takeUntil,
   toArray,
 } from "rxjs";
+import { Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import {
   createNodesQueryClauseFactory,
@@ -44,8 +45,8 @@ import { collect } from "../common/internal/Rxjs.js";
 import { createIdsSelector, parseIdsSelectorResult, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 
-import type { NormalizedHierarchyFilteringPath } from "../common/Utils.js";
 import type { Id64String } from "@itwin/core-bentley";
+import type { NormalizedHierarchyFilteringPath } from "../common/Utils.js";
 import type { Observable } from "rxjs";
 import type {
   ECClassHierarchyInspector,
@@ -443,7 +444,9 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
           if (!subModels) {
             return acc;
           }
-          acc.push(...subModels);
+          for (const subModelId of Id64.iterable(subModels)) {
+            acc.push(subModelId);
+          }
           return acc;
         }, new Array<ElementId>()),
       ),

@@ -47,6 +47,7 @@ import type { ModelsTreeFilteringError, ModelsTreeSubTreeError } from "./interna
 import type { ModelsTreeFilterTargets } from "./internal/visibility/FilteredTree.js";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/visibility/ModelsTreeVisibilityHandler.js";
 import type { ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition.js";
+
 /** @beta */
 export interface UseModelsTreeProps {
   /**
