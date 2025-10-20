@@ -223,6 +223,8 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       return of(createVisibilityStatus("disabled"));
     }
 
+    // Only call getFilteredNodeVisibility when node is not a filter target, is not a child of filter target and has filtered children.
+    // Otherwise, it can be handled normally.
     if (node.filtering?.filteredChildrenIdentifierPaths?.length && !node.filtering.isFilterTarget && !node.filtering.hasFilterTargetAncestor) {
       return this.getFilteredNodeVisibility({ node });
     }
@@ -302,16 +304,20 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
           if (HierarchyNode.isClassGroupingNode(props.node)) {
             const groupingNodesFilterTargets: Map<Id64String, { childrenCount: number }> | undefined = props.node.extendedData?.filterTargets;
             const nestedFilterTargetElements = filterTargetElements.filter((filterTarget) => !groupingNodesFilterTargets?.has(filterTarget));
+            // Only need to request children count for indirect children filter targets.
+            // Direct children filter targets already have children count stored in grouping nodes extended data.
             childrenCountMapPromise = this.#idsCache.getAllChildrenCount({ elementIds: nestedFilterTargetElements });
           } else {
             childrenCountMapPromise = this.#idsCache.getAllChildrenCount({ elementIds: filterTargetElements });
           }
           observables.push(
             from(childrenCountMapPromise).pipe(
+              // Get children count for all filter target elements.
               map((elementCountMap) => {
                 if (!HierarchyNode.isClassGroupingNode(props.node) || !props.node.extendedData?.filterTargets) {
                   return elementCountMap;
                 }
+                // Need to add children count (stored in grouping nodes' extended data) of direct children filter targets.
                 const groupingNodesFilterTargets: Map<Id64String, { childrenCount: number }> = props.node.extendedData.filterTargets;
                 groupingNodesFilterTargets.forEach((value, key) => elementCountMap.set(key, value.childrenCount));
                 return elementCountMap;
@@ -521,6 +527,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     });
     return createVisibilityHandlerResult(this, { node }, result, this.#props.overrides?.getElementGroupingNodeDisplayStatus);
   }
+
   private getElementDisplayStatus({
     parentKeys,
     totalChildrenCount,
@@ -619,6 +626,8 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         return EMPTY;
       }
 
+      // Only call changeFilteredNodeVisibility when node is not a filter target, is not a child of filter target and has filtered children.
+      // Otherwise, it can be handled normally.
       if (node.filtering?.filteredChildrenIdentifierPaths?.length && !node.filtering.isFilterTarget && !node.filtering.hasFilterTargetAncestor) {
         return this.changeFilteredNodeVisibility({ node, on });
       }
@@ -869,7 +878,10 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         defer(() => {
           const categoryVisibility = this.getDefaultCategoryVisibilityStatus({ categoryIds: categoryId, modelId, ignoreTooltip: true });
           const isCategoryVisible = categoryVisibility.state === "visible";
+          // Make sure to add all children to always/never drawn list.
           const isDisplayedByDefault =
+            // When category is visible and elements need to be turned off, or when category is hidden and elements need to be turned on,
+            // We can set isDisplayedByDefault to isCategoryVisible. This allows to not check if each element is in the elementIds list or not.
             isCategoryVisible === !on
               ? () => isCategoryVisible
               : (elementId: Id64String) => {
@@ -1128,6 +1140,8 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         .getElementsTree(props)
         .pipe(map((childrenTree) => getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ treeEntry }) => treeEntry.isInAlwaysOrNeverDrawnSet })));
     }
+    // When filtered tree is present, children tree retrieved from alwaysAndNeverDrawnElements may include elements that are not present in filtered tree.
+    // Need to filter out such elements.
     return forkJoin({
       filteredTree: from(this.#filteredTree),
       childrenTree: this.#alwaysAndNeverDrawnElements.getElementsTree(props),
@@ -1140,9 +1154,11 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
             props.parentElementIdsPath.forEach((parentElementIds) => parentIdsPath.push(parentElementIds));
           }
         }
+        // Get all ids that exist in filtered tree.
         const elements = filteredTree.getElementsFromUnfilteredChildrenTree({ parentIdsPath, childrenTree });
         return elements
-          ? setIntersection(elements, getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ treeEntry }) => treeEntry.isInAlwaysOrNeverDrawnSet }))
+          ? // Need to filter elements that are in always/never drawn set.
+            setIntersection(elements, getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ treeEntry }) => treeEntry.isInAlwaysOrNeverDrawnSet }))
           : new Set();
       }),
     );
