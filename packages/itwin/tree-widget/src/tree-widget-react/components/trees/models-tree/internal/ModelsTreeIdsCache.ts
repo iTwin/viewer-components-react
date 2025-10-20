@@ -132,7 +132,7 @@ export class ModelsTreeIdsCache implements Disposable {
       SELECT id, parentId
       FROM ElementChildren
     `;
-    for await (const row of this.#queryExecutor.createQueryReader({ ecsql, ctes }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/children` })) {
+    for await (const row of this.#queryExecutor.createQueryReader({ ecsql, ctes }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/children/${Guid.createValue()}` })) {
       yield { id: row.id, parentId: row.parentId };
     }
   }
