@@ -31,7 +31,7 @@ import {
 import { assert, Id64 } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
-import { toggleAllCategories } from "../../common/CategoriesVisibilityUtils.js";
+import { enableCategoryDisplay, loadCategoriesFromViewport } from "../../common/CategoriesVisibilityUtils.js";
 import { reduceWhile, toVoidPromise } from "../../common/Rxjs.js";
 import { createVisibilityStatus } from "../../common/Tooltip.js";
 import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility.js";
@@ -42,7 +42,7 @@ import { ModelsTreeNode } from "./ModelsTreeNode.js";
 import { createVisibilityChangeEventListener } from "./VisibilityChangeEventListener.js";
 
 import type { Observable, OperatorFunction, Subscription } from "rxjs";
-import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import type { ClassGroupingNodeKey, GroupingHierarchyNode, HierarchyFilteringPath, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
@@ -124,6 +124,7 @@ export interface ModelsTreeVisibilityHandlerProps {
   imodelAccess: ECClassHierarchyInspector;
   overrides?: ModelsTreeVisibilityHandlerOverrides;
   filteredPaths?: HierarchyFilteringPath[];
+  componentId?: GuidString;
 }
 
 /**
@@ -147,7 +148,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
   constructor(props: ModelsTreeVisibilityHandlerProps) {
     this.#props = props;
     this.#eventListener = createVisibilityChangeEventListener(this.#props.viewport);
-    this.#alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfo(this.#props.viewport);
+    this.#alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfo(this.#props.viewport, this.#props.componentId);
     this.#idsCache = this.#props.idsCache;
     this.#filteredTree = this.#props.filteredPaths ? createFilteredTree(this.#props.imodelAccess, this.#props.filteredPaths) : undefined;
     this.#subscriptions.push(this.#elementChangeQueue.pipe(concatAll()).subscribe());
@@ -1114,13 +1115,22 @@ function setIntersection<T>(lhs: Iterable<T>, rhs: Set<T>): Set<T> {
 /**
  * Enables display of all given models. Also enables display of all categories and clears always and
  * never drawn lists in the viewport.
+ *
+ * @param componentId Optional unique id of the component that consumes this function.
+ * It can be any string, as long as it is not shared across different components.
  * @public
  */
-export async function showAllModels(models: string[], viewport: Viewport) {
+export async function showAllModels(models: string[], viewport: Viewport, componentId?: GuidString) {
   await viewport.addViewedModels(models);
   viewport.clearNeverDrawn();
   viewport.clearAlwaysDrawn();
-  await toggleAllCategories(viewport, true);
+
+  const categories = await loadCategoriesFromViewport(viewport, componentId);
+  if (categories.length === 0) {
+    return;
+  }
+  const ids = categories.map((category) => category.categoryId);
+  await enableCategoryDisplay(viewport, ids, true);
 }
 
 /**

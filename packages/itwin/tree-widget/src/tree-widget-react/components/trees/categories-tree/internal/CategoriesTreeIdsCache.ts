@@ -3,9 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { Guid } from "@itwin/core-bentley";
 import { DEFINITION_CONTAINER_CLASS, SUB_CATEGORY_CLASS } from "./ClassNameDefinitions.js";
 
-import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
 
@@ -41,13 +42,17 @@ export class CategoriesTreeIdsCache implements Disposable {
   #categoryModelClass: string;
   #isDefinitionContainerSupported: Promise<boolean> | undefined;
   #queryExecutor: LimitingECSqlQueryExecutor;
+  #componentId: GuidString;
+  #componentName: string;
 
-  constructor(queryExecutor: LimitingECSqlQueryExecutor, viewType: "3d" | "2d") {
+  constructor(queryExecutor: LimitingECSqlQueryExecutor, viewType: "3d" | "2d", componentId?: GuidString) {
     this.#queryExecutor = queryExecutor;
     const { categoryClass, categoryElementClass, categoryModelClass } = getClassesByView(viewType);
     this.#categoryClass = categoryClass;
     this.#categoryElementClass = categoryElementClass;
     this.#categoryModelClass = categoryModelClass;
+    this.#componentId = componentId ?? Guid.createValue();
+    this.#componentName = "CategoriesTreeIdsCache";
   }
 
   public [Symbol.dispose]() {}
@@ -65,7 +70,11 @@ export class CategoriesTreeIdsCache implements Disposable {
     `;
     for await (const row of this.#queryExecutor.createQueryReader(
       { ecsql: query },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: "tree-widget/categories-tree/element-models-and-categories-query" },
+      {
+        rowFormat: "ECSqlPropertyNames",
+        limit: "unbounded",
+        restartToken: `${this.#componentName}/${this.#componentId}/element-models-and-categories`,
+      },
     )) {
       yield { modelId: row.modelId, categoryId: row.categoryId };
     }
@@ -102,7 +111,10 @@ export class CategoriesTreeIdsCache implements Disposable {
         AND EXISTS (SELECT 1 FROM ${this.#categoryElementClass} e WHERE e.Category.Id = this.ECInstanceId)
       GROUP BY this.ECInstanceId
     `;
-    for await (const row of this.#queryExecutor.createQueryReader({ ecsql: categoriesQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this.#queryExecutor.createQueryReader(
+      { ecsql: categoriesQuery },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/categories` },
+    )) {
       yield { id: row.id, modelId: row.modelId, parentDefinitionContainerExists: row.parentDefinitionContainerExists, childCount: row.childCount };
     }
   }
@@ -119,7 +131,10 @@ export class CategoriesTreeIdsCache implements Disposable {
         AND c.Name = 'DefinitionContainer'
     `;
 
-    for await (const _row of this.#queryExecutor.createQueryReader({ ecsql: query })) {
+    for await (const _row of this.#queryExecutor.createQueryReader(
+      { ecsql: query },
+      { restartToken: `${this.#componentName}/${this.#componentId}/is-definition-container-supported` },
+    )) {
       return true;
     }
     return false;
@@ -159,7 +174,10 @@ export class CategoriesTreeIdsCache implements Disposable {
     const definitionsQuery = `
       SELECT dc.ECInstanceId id, dc.ModelId modelId FROM ${DEFINITION_CONTAINERS_CTE} dc GROUP BY dc.ECInstanceId
     `;
-    for await (const row of this.#queryExecutor.createQueryReader({ ctes, ecsql: definitionsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this.#queryExecutor.createQueryReader(
+      { ctes, ecsql: definitionsQuery },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/definition-containers` },
+    )) {
       yield { id: row.id, modelId: row.modelId };
     }
   }
@@ -175,7 +193,10 @@ export class CategoriesTreeIdsCache implements Disposable {
         NOT sc.IsPrivate
         AND sc.Parent.Id IN (${categoriesInfo.join(",")})
     `;
-    for await (const row of this.#queryExecutor.createQueryReader({ ecsql: definitionsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this.#queryExecutor.createQueryReader(
+      { ecsql: definitionsQuery },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/visible-sub-categories` },
+    )) {
       yield { id: row.id, parentId: row.categoryId };
     }
   }

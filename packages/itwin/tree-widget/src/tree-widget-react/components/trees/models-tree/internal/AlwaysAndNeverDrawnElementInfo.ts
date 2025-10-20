@@ -27,12 +27,12 @@ import {
   takeUntil,
   tap,
 } from "rxjs";
-import { Id64 } from "@itwin/core-bentley";
+import { Guid, Id64 } from "@itwin/core-bentley";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { releaseMainThreadOnItemsCount, updateChildrenTree } from "../Utils.js";
 
 import type { Observable, Subscription } from "rxjs";
-import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import type { ChildrenTree } from "../Utils.js";
 
@@ -82,11 +82,13 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
   #neverDrawn: { cacheEntryObs: Observable<CachedNodesMap>; latestCacheEntryValue?: CachedNodesMap };
   #disposeSubject = new Subject<void>();
   readonly #viewport: Viewport;
+  #componentId: GuidString;
+  #componentName: string;
 
   #suppressors: Observable<number>;
   #suppress = new Subject<boolean>();
 
-  constructor(viewport: Viewport) {
+  constructor(viewport: Viewport, componentId?: GuidString) {
     this.#viewport = viewport;
     this.#alwaysDrawn = { cacheEntryObs: this.createCacheEntryObservable("always") };
     this.#neverDrawn = { cacheEntryObs: this.createCacheEntryObservable("never") };
@@ -96,6 +98,8 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
       shareReplay(1),
     );
     this.#subscriptions = [this.#alwaysDrawn.cacheEntryObs.subscribe(), this.#neverDrawn.cacheEntryObs.subscribe()];
+    this.#componentId = componentId ?? Guid.createValue();
+    this.#componentName = "AlwaysAndNeverDrawnElementInfo";
   }
 
   public suppressChangeEvents() {
@@ -283,7 +287,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
         },
         {
           rowFormat: "ECSqlPropertyNames",
-          restartToken: `ModelsTreeVisibilityHandler/${requestId}`,
+          restartToken: `${this.#componentName}/${this.#componentId}/${requestId}`,
         },
       );
     }).pipe(

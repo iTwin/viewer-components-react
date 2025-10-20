@@ -12,6 +12,7 @@ import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presenta
 import { TreeWidget } from "../../../TreeWidget.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
+import { useGuid } from "../common/useGuid.js";
 import { useTelemetryContext } from "../common/UseTelemetryContext.js";
 import { CategoriesTreeDefinition } from "./CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
@@ -27,7 +28,6 @@ import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
-
 type CategoriesTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError";
 type HierarchyFilteringPaths = Awaited<ReturnType<Required<VisibilityTreeProps>["getFilteredPaths"]>>;
 
@@ -56,11 +56,12 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
 
   const viewType = activeView.view.is2d() ? "2d" : "3d";
   const iModel = activeView.iModel;
-
+  const componentId = useGuid();
   const { getCache: getCategoriesTreeIdsCache } = useIdsCache<CategoriesTreeIdsCache, { viewType: "2d" | "3d" }>({
     imodel: iModel,
     createCache,
     cacheSpecificProps: useMemo(() => ({ viewType }), [viewType]),
+    componentId,
   });
 
   const visibilityHandlerFactory = useCallback(() => {
@@ -99,6 +100,7 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
           viewType,
           idsCache: getCategoriesTreeIdsCache(),
           abortSignal,
+          componentId,
         });
         onCategoriesFiltered?.(await getCategoriesFromPaths(paths, getCategoriesTreeIdsCache()));
         return paths;
@@ -112,7 +114,7 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
         return [];
       }
     };
-  }, [filter, viewType, onFeatureUsed, onCategoriesFiltered, getCategoriesTreeIdsCache]);
+  }, [filter, viewType, onFeatureUsed, onCategoriesFiltered, getCategoriesTreeIdsCache, componentId]);
 
   return {
     categoriesTreeProps: {
@@ -252,5 +254,5 @@ function getSublabel(node: PresentationHierarchyNode) {
 }
 
 function createCache(props: CreateCacheProps<{ viewType: "2d" | "3d" }>) {
-  return new CategoriesTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.viewType);
+  return new CategoriesTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.viewType, props.componentId);
 }

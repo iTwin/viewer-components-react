@@ -3,10 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { assert } from "@itwin/core-bentley";
+import { assert, Guid } from "@itwin/core-bentley";
 import { pushToMap } from "../../common/Utils.js";
 
-import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 
 interface SubjectInfo {
@@ -26,9 +26,13 @@ export class IModelContentTreeIdsCache {
   #parentSubjectIds: Promise<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
   #modelInfos: Promise<Map<Id64String, ModelInfo>> | undefined;
   #queryExecutor: LimitingECSqlQueryExecutor;
+  #componentId: GuidString;
+  #componentName: string;
 
-  constructor(queryExecutor: LimitingECSqlQueryExecutor) {
+  constructor(queryExecutor: LimitingECSqlQueryExecutor, componentId?: GuidString) {
     this.#queryExecutor = queryExecutor;
+    this.#componentId = componentId ?? Guid.createValue();
+    this.#componentName = "IModelContentTreeIdsCache";
   }
 
   private async *querySubjects(): AsyncIterableIterator<{ id: Id64String; parentId?: Id64String; targetPartitionId?: Id64String; hideInHierarchy: boolean }> {
@@ -52,7 +56,10 @@ export class IModelContentTreeIdsCache {
         END hideInHierarchy
       FROM bis.Subject s
     `;
-    for await (const row of this.#queryExecutor.createQueryReader({ ecsql: subjectsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this.#queryExecutor.createQueryReader(
+      { ecsql: subjectsQuery },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/subjects` },
+    )) {
       yield { id: row.id, parentId: row.parentId, targetPartitionId: row.targetPartitionId, hideInHierarchy: !!row.hideInHierarchy };
     }
   }
@@ -64,7 +71,10 @@ export class IModelContentTreeIdsCache {
       INNER JOIN bis.Model m ON m.ModeledElement.Id = p.ECInstanceId
       WHERE NOT m.IsPrivate
     `;
-    for await (const row of this.#queryExecutor.createQueryReader({ ecsql: modelsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this.#queryExecutor.createQueryReader(
+      { ecsql: modelsQuery },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/models` },
+    )) {
       yield { id: row.id, parentId: row.parentId };
     }
   }
@@ -182,7 +192,7 @@ export class IModelContentTreeIdsCache {
   }
 
   private async *queryModelCategories() {
-    const query = /* sql */ `
+    const query = `
       SELECT Model.Id modelId, Category.Id categoryId
       FROM BisCore.GeometricElement3d
       WHERE Parent.Id IS NULL
@@ -193,7 +203,10 @@ export class IModelContentTreeIdsCache {
       WHERE Parent.Id IS NULL
       GROUP BY Model.Id, Category.Id
     `;
-    for await (const row of this.#queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this.#queryExecutor.createQueryReader(
+      { ecsql: query },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/model-categories` },
+    )) {
       yield { modelId: row.modelId, categoryId: row.categoryId };
     }
   }
