@@ -45,6 +45,7 @@ export class ModelsTreeIdsCache implements Disposable {
   #queryExecutor: LimitingECSqlQueryExecutor;
   #hierarchyConfig: ModelsTreeHierarchyConfiguration;
   #childrenMap: ChildrenMap;
+  /** Stores element ids which have children query scheduled to execute. */
   #childrenLoadingMap: ChildrenLoadingMap;
   #componentId: GuidString;
   #componentName: string;
@@ -132,7 +133,10 @@ export class ModelsTreeIdsCache implements Disposable {
       SELECT id, parentId
       FROM ElementChildren
     `;
-    for await (const row of this.#queryExecutor.createQueryReader({ ecsql, ctes }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/children/${Guid.createValue()}` })) {
+    for await (const row of this.#queryExecutor.createQueryReader(
+      { ecsql, ctes },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/children/${Guid.createValue()}` },
+    )) {
       yield { id: row.id, parentId: row.parentId };
     }
   }
@@ -151,10 +155,12 @@ export class ModelsTreeIdsCache implements Disposable {
       result.set(elementId, { children: elementChildrenTree });
       entry.children.forEach((childId) => {
         const childrenTreeOfChild = this.getChildrenTreeFromMap({ elementIds: childId });
+        // Need to add children tree created from childId. This tree includes childId as root element
         if (childrenTreeOfChild.size > 0) {
           elementChildrenTree.set(childId, { children: childrenTreeOfChild });
           return;
         }
+        // If child does not have children, children tree won't be created. Need to add childId with undefined children
         elementChildrenTree.set(childId, { children: undefined });
       });
     }
@@ -169,9 +175,9 @@ export class ModelsTreeIdsCache implements Disposable {
     for (const elementId of Id64.iterable(elementIds)) {
       const entry = this.#childrenMap.get(elementId);
       if (entry?.children) {
-        let allElementChildrenCount = entry.children.length;
-        this.getChildrenCountMap({ elementIds: entry.children }).forEach((childrenCount) => (allElementChildrenCount += childrenCount));
-        result.set(elementId, allElementChildrenCount);
+        let totalChildrenCount = entry.children.length;
+        this.getChildrenCountMap({ elementIds: entry.children }).forEach((childrenOfChildCount) => (totalChildrenCount += childrenOfChildCount));
+        result.set(elementId, totalChildrenCount);
       }
     }
     return result;
@@ -179,24 +185,23 @@ export class ModelsTreeIdsCache implements Disposable {
 
   private createChildrenLoadingMapEntries({ elementsToQuery }: { elementsToQuery: Id64Array }): { promise: Promise<void> } {
     const elementsToQueryPromise = (async ({ childrenMap, childrenLoadingMap }: { childrenMap: ChildrenMap; childrenLoadingMap: ChildrenLoadingMap }) => {
-      const result = new Map<Id64String, { children: Id64Array | undefined }>();
       for await (const { id, parentId } of this.queryChildren({ elementIds: elementsToQuery })) {
-        let entry = result.get(parentId);
+        // Add parent to children map if not present
+        let entry = childrenMap.get(parentId);
         if (!entry) {
           entry = { children: [] };
-          result.set(parentId, entry);
+          childrenMap.set(parentId, entry);
         }
         if (!entry.children) {
           entry.children = [];
         }
-
+        // Add child to parent's entry and add child to children map
         entry.children.push(id);
-        if (!result.has(id)) {
-          result.set(id, { children: undefined });
+        if (!childrenMap.has(id)) {
+          childrenMap.set(id, { children: undefined });
         }
       }
 
-      result.forEach((entry, id) => childrenMap.set(id, entry));
       elementsToQuery.forEach((elementId) => childrenLoadingMap.delete(elementId));
       return;
     })({ childrenLoadingMap: this.#childrenLoadingMap, childrenMap: this.#childrenMap });
@@ -209,9 +214,11 @@ export class ModelsTreeIdsCache implements Disposable {
     const promises = new Array<Promise<void>>();
     const elementsToQuery = new Array<Id64String>();
     for (const elementId of Id64.iterable(elementIds)) {
+      // check if children for this element is loaded already
       if (this.#childrenMap.has(elementId)) {
         continue;
       }
+      // check if children for this element is being loaded already
       const loadingPromise = this.#childrenLoadingMap.get(elementId);
       if (loadingPromise) {
         promises.push(loadingPromise);
@@ -220,6 +227,7 @@ export class ModelsTreeIdsCache implements Disposable {
       elementsToQuery.push(elementId);
     }
 
+    // Elements which are not yet scheduled to load we need to query children for
     if (elementsToQuery.length > 0) {
       promises.push(this.createChildrenLoadingMapEntries({ elementsToQuery }).promise);
     }
