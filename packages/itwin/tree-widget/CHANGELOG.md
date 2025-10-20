@@ -1,8 +1,20 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Tue, 07 Oct 2025 08:45:29 GMT and should not be manually modified. -->
+<!-- This log was last generated on Fri, 17 Oct 2025 15:36:01 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.16.0
+
+Fri, 17 Oct 2025 15:36:01 GMT
+
+### Minor changes
+
+- Tree widget: fix issue with queries being cancelled due to the same restart token. Fixed by adding a unique guid to each restart token. Changed `showAllModels` to now accept optional componentId, which is used in the restart tokens. ([#1478](https://github.com/iTwin/viewer-components-react/pull/1478))
+
+### Patches
+
+- Bump versions of presentation packages ([#1480](https://github.com/iTwin/viewer-components-react/pull/1480))
 
 ## 3.15.1
 

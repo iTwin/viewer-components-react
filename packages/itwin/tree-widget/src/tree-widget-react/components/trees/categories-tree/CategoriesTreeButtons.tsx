@@ -9,11 +9,12 @@ import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/
 import { IconButton } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { hideAllCategories, invertAllCategories, loadCategoriesFromViewport, showAllCategories } from "../common/CategoriesVisibilityUtils.js";
+import { useGuid } from "../common/useGuid.js";
 
-import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
-import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader.js";
+import type { GuidString } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
-
+import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader.js";
+import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 /**
  * Props that get passed to `CategoriesTreeComponent` header button renderer.
  * @see CategoriesTreeComponentProps.headerButtons
@@ -47,7 +48,8 @@ export function useCategoriesTreeButtonProps({ viewport }: { viewport: Viewport 
   onCategoriesFiltered: (categories: CategoryInfo[] | undefined) => void;
 } {
   const [filteredCategories, setFilteredCategories] = useState<CategoryInfo[] | undefined>();
-  const categories = useCategories(viewport);
+  const componentId = useGuid();
+  const categories = useCategories(viewport, componentId);
   return {
     buttonProps: {
       viewport,
@@ -121,7 +123,7 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
 
 const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
 
-export function useCategories(viewport: Viewport) {
-  const categoriesPromise = useMemo(async () => loadCategoriesFromViewport(viewport), [viewport]);
+function useCategories(viewport: Viewport, componentId: GuidString) {
+  const categoriesPromise = useMemo(async () => loadCategoriesFromViewport(viewport, componentId), [viewport, componentId]);
   return useAsyncValue(categoriesPromise) ?? EMPTY_CATEGORIES_ARRAY;
 }

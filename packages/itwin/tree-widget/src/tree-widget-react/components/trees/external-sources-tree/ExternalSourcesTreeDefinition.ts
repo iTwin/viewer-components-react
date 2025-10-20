@@ -3,9 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { Guid } from "@itwin/core-bentley";
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 
+import type { GuidString } from "@itwin/core-bentley";
 import type {
   DefineGenericNodeChildHierarchyLevelProps,
   DefineHierarchyLevelProps,
@@ -21,6 +23,7 @@ import type { ECClassHierarchyInspector, ECSchemaProvider, IInstanceLabelSelectC
 
 interface ExternalSourcesTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
+  componentId?: GuidString;
 }
 
 export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
@@ -29,6 +32,8 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
   #nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
   #queryExecutor: LimitingECSqlQueryExecutor;
   #isSupported?: Promise<boolean>;
+  #componentId: GuidString;
+  #componentName: string;
 
   public constructor(props: ExternalSourcesTreeDefinitionProps) {
     this.#impl = createPredicateBasedHierarchyDefinition({
@@ -57,6 +62,8 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
       imodelAccess: props.imodelAccess,
       instanceLabelSelectClauseFactory: this.#nodeLabelSelectClauseFactory,
     });
+    this.#componentId = props.componentId ?? Guid.createValue();
+    this.#componentName = "ExternalSourcesTreeDefinition";
   }
 
   public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
@@ -300,7 +307,10 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
       WHERE Name = 'BisCore' AND (VersionMajor > 1 OR (VersionMajor = 1 AND VersionMinor > 12))
     `;
 
-    for await (const _row of this.#queryExecutor.createQueryReader({ ecsql: query })) {
+    for await (const _row of this.#queryExecutor.createQueryReader(
+      { ecsql: query },
+      { restartToken: `${this.#componentName}/${this.#componentId}/is-external-source-supported` },
+    )) {
       return true;
     }
     return false;
