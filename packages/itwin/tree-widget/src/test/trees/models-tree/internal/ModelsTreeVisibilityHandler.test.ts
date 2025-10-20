@@ -2771,7 +2771,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
     });
 
-    it("hiding grouping node makes it and its grouped elements hidden", async function () {
+    it("hiding grouping node makes it, its grouped elements and children hidden", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const category = insertSpatialCategory({ builder, codeValue: "category" }).id;
         const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
@@ -3724,7 +3724,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       }
 
       describe("single path to element", () => {
-        it("showing category turns on only filtered children", async function () {
+        it("showing category turns on only it and filtered children", async function () {
           await using buildIModelResult = await buildIModel(this, async (builder) => {
             const category = insertSpatialCategory({ builder, codeValue: "category" });
             const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
@@ -3781,7 +3781,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           });
         });
 
-        it("showing element turns on only filtered children", async function () {
+        it("showing element turns on only it and filtered children", async function () {
           await using buildIModelResult = await buildIModel(this, async (builder) => {
             const category = insertSpatialCategory({ builder, codeValue: "category" });
             const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
@@ -3837,7 +3837,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           });
         });
 
-        it("showing class grouping node turns on only filtered children", async function () {
+        it("showing class grouping node turns on only it and filtered children", async function () {
           await using buildIModelResult = await buildIModel(this, async (builder) => {
             const category = insertSpatialCategory({ builder, codeValue: "category" });
             const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
@@ -3882,7 +3882,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           });
         });
 
-        it("hiding category turns off only filtered children", async function () {
+        it("hiding category turns off only it and filtered children", async function () {
           await using buildIModelResult = await buildIModel(this, async (builder) => {
             const category = insertSpatialCategory({ builder, codeValue: "category" });
             const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
@@ -3940,7 +3940,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           });
         });
 
-        it("hiding element turns off only filtered children", async function () {
+        it("hiding element turns off only it and filtered children", async function () {
           await using buildIModelResult = await buildIModel(this, async (builder) => {
             const category = insertSpatialCategory({ builder, codeValue: "category" });
             const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
@@ -4004,7 +4004,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           });
         });
 
-        it("hiding class grouping node turns on only filtered children", async function () {
+        it("hiding class grouping node turns on only it and filtered children", async function () {
           await using buildIModelResult = await buildIModel(this, async (builder) => {
             const category = insertSpatialCategory({ builder, codeValue: "category" });
             const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
