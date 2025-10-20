@@ -119,7 +119,14 @@ export async function createFilteredTree(imodelAccess: ECClassHierarchyInspector
   };
 }
 
+/**
+ * Unfiltered tree can contain ids of models/categories/elements which are not present in the filtered tree.
+ * This function retrieves only those ids which are either filter tree targets, or are their children (direct and indirect).
+ */
 function getElementsFromUnfilteredChildrenTree(props: GetElementsFromUnfilteredChildrenTreeProps & { root: FilteredTreeRootNode }): Id64Set | undefined {
+  if (props.childrenTree.size === 0) {
+    return undefined;
+  }
   let lookupParents: Array<FilteredTreeRootNode | FilteredTreeNode> = [props.root];
   if (props.parentIdsPath.length === 0) {
     return undefined;
@@ -138,6 +145,8 @@ function getElementsFromUnfilteredChildrenTree(props: GetElementsFromUnfilteredC
     lookupParents = parentNodes;
   }
 
+  // We have unfiltered children tree and filtered nodes that are parents of first level nodes in unfiltered children tree.
+  // We can start filtering unfiltered children tree based on filtered nodes.
   const result = getChildrenTreeIdsMatchingFilteredNodes({ tree: props.childrenTree, filteredNodes: lookupParents });
   return result.size > 0 ? result : undefined;
 }
@@ -149,35 +158,29 @@ function getChildrenTreeIdsMatchingFilteredNodes({
   tree: ChildrenTree<any>;
   filteredNodes: Array<FilteredTreeNode | FilteredTreeRootNode>;
 }): Id64Set {
-  if (tree.size === 0) {
-    return new Set();
-  }
-
-  const getIdsRecursively = (childrenTree: ChildrenTree<any>, childrenFilteredNodes: Array<FilteredTreeNode | FilteredTreeRootNode>): Id64Set => {
-    if (childrenFilteredNodes.some((filteredNode) => !filteredNode.children)) {
+  const getIdsRecursively = (childrenTree: ChildrenTree<any>, parentFilteredNodes: Array<FilteredTreeNode | FilteredTreeRootNode>): Id64Set => {
+    // If one of the parent filtered nodes does not have children, it is filter target and because of this, all elements in the childrenTree are in the filtered tree.
+    if (parentFilteredNodes.some((filteredNode) => !filteredNode.children)) {
       return getIdsFromChildrenTree({ tree: childrenTree });
     }
     const result = new Set<Id64String>();
     childrenTree.forEach((entry, id) => {
-      const nodes = findMatchingFilteredNodes(childrenFilteredNodes, id);
+      const nodes = findMatchingFilteredNodes(parentFilteredNodes, id);
+      // If no filtered nodes match this id, skip it since it's not in the filtered tree.
       if (nodes.length === 0) {
         return;
       }
+      // Id was found in filtered nodes children, add it to the result.
+      result.add(id);
       if (!entry.children || entry.children.size === 0) {
-        result.add(id);
         return;
       }
-      if (nodes.some((node) => !node.children)) {
-        getIdsFromChildrenTree({ tree: entry.children }).forEach((childId) => result.add(childId));
-        result.add(id);
-        return;
-      }
+      // Continue recursively for children.
       const resultFromChildren = getIdsRecursively(entry.children, nodes);
       if (resultFromChildren.size === 0) {
         return;
       }
       resultFromChildren.forEach((childId) => result.add(childId));
-      result.add(id);
     });
     return result;
   };
@@ -212,6 +215,7 @@ function getVisibilityChangeTargets(root: FilteredTreeRootNode, node: HierarchyN
   if (filteredNodes.length === 0) {
     return changeTargets;
   }
+
   filteredNodes.forEach((filteredNode) => collectVisibilityChangeTargets(changeTargets, filteredNode));
   return changeTargets;
 }
