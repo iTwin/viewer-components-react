@@ -38,7 +38,7 @@ interface TreeWidgetProps {
   /** Callback that is invoked when a tracked feature is used. */
   onFeatureUsed?: (feature: string) => void;
   /**
-   * Viewport used data querying.
+   * Viewport used for data querying.
    *
    * When viewport is not provided, `IModelApp.viewManager.selectedView` will be used.
    */

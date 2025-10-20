@@ -17,8 +17,8 @@ interface TreeWidgetContext {
 const treeWidgetContext = createContext<TreeWidgetContext>({ treeWidgetIdsCache: undefined });
 
 /**
- * A React hook for getting focused instances context. The context must be provided
- * using `FocusedInstancesContextProvider`.
+ * A React hook for getting tree widget context. The context must be provided
+ * using `TreeWidgetContextProvider`.
  *
  * @internal
  */
@@ -27,7 +27,7 @@ export function useTreeWidgetContext(): TreeWidgetContext {
 }
 
 /**
- * A React context provider for setting up tree widget context. Use this context provider to wrap T
+ * A React context provider for setting up tree widget context. Use this context provider to wrap trees if you are not using TreeWidgetComponent.
  *
  * @public
  */
