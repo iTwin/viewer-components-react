@@ -98,7 +98,7 @@ export async function validateHierarchyVisibility({
   await toVoidPromise(
     from(provider.getNodes({ parentNode: undefined })).pipe(
       expand((node) => (node.children ? provider.getNodes({ parentNode: node }) : EMPTY)),
-      mergeMap(async (node) => waitFor(async () => validateNodeVisibility({ ...props, node }), { timeout: 30000 })),
+      mergeMap(async (node) => waitFor(async () => validateNodeVisibility({ ...props, node }))),
     ),
   );
 }

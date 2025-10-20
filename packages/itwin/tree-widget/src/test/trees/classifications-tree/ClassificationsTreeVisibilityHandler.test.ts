@@ -43,6 +43,7 @@ import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { ClassificationsTreeFilterTargets } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/FilteredTree.js";
 import type { FilteredTree } from "../../../tree-widget-react/components/trees/common/internal/visibility/BaseFilteredTree.js";
 import type { TreeWidgetViewport } from "../../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
+
 describe("ClassificationsTreeVisibilityHandler", () => {
   before(async () => {
     await initializeITwinJs();
