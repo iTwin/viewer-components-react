@@ -168,9 +168,6 @@ export class ModelsTreeIdsCache implements Disposable {
   }
 
   private getChildrenCountMap({ elementIds }: { elementIds: Id64Arg }): Map<Id64String, number> {
-    if (Id64.sizeOf(elementIds) === 0) {
-      return new Map();
-    }
     const result = new Map<Id64String, number>();
     for (const elementId of Id64.iterable(elementIds)) {
       const entry = this.#childrenMap.get(elementId);
