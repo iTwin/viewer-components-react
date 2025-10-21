@@ -222,9 +222,9 @@ export class ModelsTreeIdsCache implements Disposable {
       const loadingPromise = this.#childrenLoadingMap.get(elementId);
       if (loadingPromise) {
         promises.push(loadingPromise);
-        continue;
+      } else {
+        elementsToQuery.push(elementId);
       }
-      elementsToQuery.push(elementId);
     }
 
     // Elements which are not yet scheduled to load we need to query children for
