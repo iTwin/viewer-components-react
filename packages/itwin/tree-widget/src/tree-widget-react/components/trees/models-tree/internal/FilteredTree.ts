@@ -172,15 +172,10 @@ function getChildrenTreeIdsMatchingFilteredNodes({
       }
       // Id was found in filtered nodes children, add it to the result.
       result.add(id);
-      if (!entry.children || entry.children.size === 0) {
-        return;
+      if (entry.children) {
+        // Continue recursively for children
+        getIdsRecursively(entry.children, nodes).forEach((childId) => result.add(childId));
       }
-      // Continue recursively for children.
-      const resultFromChildren = getIdsRecursively(entry.children, nodes);
-      if (resultFromChildren.size === 0) {
-        return;
-      }
-      resultFromChildren.forEach((childId) => result.add(childId));
     });
     return result;
   };
