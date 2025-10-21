@@ -473,14 +473,14 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         )
         `,
         `
-        ParentChildrenCount(parentId, childrenCount) AS (
+        ElementChildrenCount(parentId, childrenCount) AS (
           SELECT parentId, COUNT(id)
           FROM ElementWithParent
           GROUP BY parentId
         )
         `,
       ],
-      cteName: `ParentChildrenCount`,
+      cteName: `ElementChildrenCount`,
     };
   }
 
