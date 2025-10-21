@@ -35,7 +35,7 @@ import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/present
 import { collect } from "../common/Rxjs.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils.js";
-import { releaseMainThreadOnItemsCount } from "./Utils.js";
+import { getOptimalBatchSize, releaseMainThreadOnItemsCount } from "./Utils.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64String } from "@itwin/core-bentley";
@@ -233,7 +233,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
           categoryId: node.children[0].extendedData?.categoryId,
           childrenCount,
           ...(hasDirectNonFilteredTargets ? { hasDirectNonFilteredTargets } : {}),
-          filterTargets,
+          ...(filterTargets.size > 0 && !hasFilterTargetAncestor ? { filterTargets } : {}),
           // `imageId` is assigned to instance nodes at query time, but grouping ones need to
           // be handled during post-processing
           imageId: "icon-ec-class",
@@ -896,7 +896,7 @@ function createInstanceKeyPathsFromTargetItemsObs({
             mergeMap((id) => from(idsCache.createCategoryInstanceKeyPaths(id)).pipe(mergeAll(), map(HierarchyFilteringPath.normalize))),
           ),
           from(ids.elements).pipe(
-            bufferCount(Math.ceil(elementsLength / Math.ceil(elementsLength / 5000))),
+            bufferCount(getOptimalBatchSize({ totalSize: elementsLength, maximumBatchSize: 5000 })),
             releaseMainThreadOnItemsCount(1),
             mergeMap(
               (block, chunkIndex) =>

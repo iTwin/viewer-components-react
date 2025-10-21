@@ -157,9 +157,7 @@ function getChildrenTreeIdsMatchingFilteredNodes({
 }): Id64Set {
   const getIdsRecursively = (childrenTree: ChildrenTree, parentFilteredNodes: Array<FilteredTreeNode | FilteredTreeRootNode>): Id64Set => {
     // If one of the parent filtered nodes does not have children, it is filter target and because of this, all elements in the childrenTree are in the filtered tree.
-    const hasParentFilterTarget = parentFilteredNodes.some(
-      (filteredNode) => !filteredNode.children || ("isFilterTarget" in filteredNode && filteredNode.isFilterTarget),
-    );
+    const hasParentFilterTarget = parentFilteredNodes.some((filteredNode) => "isFilterTarget" in filteredNode && filteredNode.isFilterTarget);
     if (hasParentFilterTarget) {
       return getIdsFromChildrenTree({ tree: childrenTree });
     }

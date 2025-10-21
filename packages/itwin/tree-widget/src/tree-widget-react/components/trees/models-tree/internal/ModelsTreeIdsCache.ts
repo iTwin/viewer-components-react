@@ -8,11 +8,12 @@ import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import { collect } from "../../common/Rxjs.js";
 import { pushToMap } from "../../common/Utils.js";
+import { getOptimalBatchSize } from "../Utils.js";
 
 import type { Subscription } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
-import type { InstanceKey } from "@itwin/presentation-shared";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import type { InstanceKey } from "@itwin/presentation-shared";
 import type { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
 import type { ChildrenTree } from "../Utils.js";
 
@@ -179,9 +180,9 @@ export class ModelsTreeIdsCache implements Disposable {
   /**
    * Populates #childrenLoadingMap with promises. When these promises resolve, they will populate #childrenMap with values and delete entries from #childrenLoadingMap.
    */
-  private createChildrenLoadingMapEntries({ elementsToQuery }: { elementsToQuery: Id64Array }): { loadingMapEntry: Promise<void> } {
-    const elementsToQueryPromise = (async () => {
-      for await (const { id, parentId } of this.queryChildren({ elementIds: elementsToQuery })) {
+  private createChildrenLoadingMapEntries({ elementsToQuery }: { elementsToQuery: Id64Array }): { loadingMapEntries: Array<Promise<void>> } {
+    const getElementsToQueryPromise = async (batchedElementsToQuery: Id64Array) => {
+      for await (const { id, parentId } of this.queryChildren({ elementIds: batchedElementsToQuery })) {
         // Add parent to children map if not present
         let entry = this.#childrenMap.get(parentId);
         if (!entry) {
@@ -200,10 +201,22 @@ export class ModelsTreeIdsCache implements Disposable {
 
       elementsToQuery.forEach((elementId) => this.#childrenLoadingMap.delete(elementId));
       return;
-    })();
+    };
+    const maximumBatchSize = 1000;
+    const totalSize = elementsToQuery.length;
+    const optimalBatchSize = getOptimalBatchSize({ totalSize, maximumBatchSize });
+    const loadingMapEntries = new Array<Promise<void>>();
+    // Don't want to slice if its not necessary
+    if (totalSize <= maximumBatchSize) {
+      loadingMapEntries.push(getElementsToQueryPromise(elementsToQuery));
+    } else {
+      for (let i = 0; i < elementsToQuery.length; i += optimalBatchSize) {
+        loadingMapEntries.push(getElementsToQueryPromise(elementsToQuery.slice(i, i + optimalBatchSize)));
+      }
+    }
 
-    elementsToQuery.forEach((elementId) => this.#childrenLoadingMap.set(elementId, elementsToQueryPromise));
-    return { loadingMapEntry: elementsToQueryPromise };
+    elementsToQuery.forEach((elementId, index) => this.#childrenLoadingMap.set(elementId, loadingMapEntries[Math.floor(index / optimalBatchSize)]));
+    return { loadingMapEntries };
   }
 
   private async createChildrenMapEntries({ elementIds }: { elementIds: Id64Arg }): Promise<void[]> {
@@ -225,7 +238,7 @@ export class ModelsTreeIdsCache implements Disposable {
 
     // Elements which are not yet scheduled to load we need to query children for
     if (elementsToQuery.length > 0) {
-      promises.push(this.createChildrenLoadingMapEntries({ elementsToQuery }).loadingMapEntry);
+      promises.push(...this.createChildrenLoadingMapEntries({ elementsToQuery }).loadingMapEntries);
     }
     return Promise.all(promises);
   }

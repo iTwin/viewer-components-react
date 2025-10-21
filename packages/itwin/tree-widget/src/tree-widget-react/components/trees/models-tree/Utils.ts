@@ -90,3 +90,8 @@ export function updateChildrenTree<T extends object = {}>({
     currentTree = entry.children;
   }
 }
+
+/** @internal */
+export function getOptimalBatchSize({ totalSize, maximumBatchSize }: { totalSize: number; maximumBatchSize: number }): number {
+  return Math.ceil(totalSize / Math.ceil(totalSize / maximumBatchSize));
+}

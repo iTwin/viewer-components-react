@@ -29,7 +29,7 @@ import {
 } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { releaseMainThreadOnItemsCount, updateChildrenTree } from "../Utils.js";
+import { getOptimalBatchSize, releaseMainThreadOnItemsCount, updateChildrenTree } from "../Utils.js";
 
 import type { Observable, Subscription } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
@@ -215,7 +215,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
   private queryAlwaysOrNeverDrawnElementInfo(set: Id64Set | undefined, requestId: string): Observable<CachedNodesMap> {
     const elementInfo = set?.size
       ? from(set).pipe(
-          bufferCount(Math.ceil(set.size / Math.ceil(set.size / 5000))),
+          bufferCount(getOptimalBatchSize({ totalSize: set.size, maximumBatchSize: 5000 })),
           mergeMap((block, index) => this.queryElementInfo(block, `${requestId}-${index}`), 10),
         )
       : EMPTY;
