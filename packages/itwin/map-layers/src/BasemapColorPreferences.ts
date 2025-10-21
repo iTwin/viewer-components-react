@@ -33,7 +33,7 @@ export class BasemapColorPreferences {
       const existing = await BasemapColorPreferences.getPreferences(iTwinId, iModelId);
       const colorPreference: BasemapColorPreferencesContent = {
         customColor: color,
-        activeColor: existing?.activeColor || color, // Keep existing active or set to this color
+        activeColor: existing?.activeColor ?? color, // Keep existing active or set to this color
       };
       return await BasemapColorPreferences.savePreferences(colorPreference, iTwinId, iModelId);
     } catch {
