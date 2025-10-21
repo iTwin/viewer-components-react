@@ -124,14 +124,11 @@ export async function createFilteredTree(imodelAccess: ECClassHierarchyInspector
  * This function retrieves only those ids which are either filter tree targets, or are their children (direct and indirect).
  */
 function getElementsFromUnfilteredChildrenTree(props: GetElementsFromUnfilteredChildrenTreeProps & { root: FilteredTreeRootNode }): Id64Set | undefined {
-  if (props.childrenTree.size === 0) {
-    return undefined;
-  }
-  let lookupParents: Array<FilteredTreeRootNode | FilteredTreeNode> = [props.root];
-  if (props.parentIdsPath.length === 0) {
+  if (props.childrenTree.size === 0 || props.parentIdsPath.length === 0) {
     return undefined;
   }
 
+  let lookupParents: Array<FilteredTreeRootNode | FilteredTreeNode> = [props.root];
   for (const parentIds of props.parentIdsPath) {
     // When filtered node does not have children, it is filter target and because of this, all elements in the childrenTree are in the filtered tree
     if (lookupParents.every((parent) => !parent.children)) {
