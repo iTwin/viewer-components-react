@@ -231,7 +231,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
       if (iModel?.iTwinId) {
         const savedColor = await BasemapColorPreferences.getCustomColor(iModel.iTwinId, iModel.iModelId);
         if (savedColor) {
-          const savedColorValue = ColorValue.fromTbgr(parseInt(savedColor, 10));
+          const savedColorValue = ColorValue.fromTbgr(Number(savedColor));
           // Remove the saved color from default colors if it exists there
           const filteredColors = defaultColors.filter(color => color.toTbgr() !== savedColorValue.toTbgr());
           // Always put the saved color as the first color
