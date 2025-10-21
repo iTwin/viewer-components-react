@@ -142,10 +142,10 @@ export class ModelsTreeIdsCache implements Disposable {
   }
 
   private getChildrenTreeFromMap({ elementIds }: { elementIds: Id64Arg }): ChildrenTree {
-    if (Id64.sizeOf(elementIds) === 0 || this.#childrenMap.size === 0) {
-      return new Map();
-    }
     const result: ChildrenTree = new Map();
+    if (Id64.sizeOf(elementIds) === 0 || this.#childrenMap.size === 0) {
+      return result;
+    }
     for (const elementId of Id64.iterable(elementIds)) {
       const entry = this.#childrenMap.get(elementId);
       if (!entry?.children) {
