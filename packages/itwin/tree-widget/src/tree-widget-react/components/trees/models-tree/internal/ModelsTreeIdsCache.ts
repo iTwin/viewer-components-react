@@ -180,7 +180,7 @@ export class ModelsTreeIdsCache implements Disposable {
   /**
    * Populates #childrenLoadingMap with promises. When these promises resolve, they will populate #childrenMap with values and delete entries from #childrenLoadingMap.
    */
-  private createChildrenLoadingMapEntries({ elementsToQuery }: { elementsToQuery: Id64Array }): { loadingMapEntries: Array<Promise<void>> } {
+  private createChildrenLoadingMapEntries({ elementsToQuery }: { elementsToQuery: Id64Array }): { loadingMapEntries: Promise<void> } {
     const getElementsToQueryPromise = async (batchedElementsToQuery: Id64Array) => {
       for await (const { id, parentId } of this.queryChildren({ elementIds: batchedElementsToQuery })) {
         // Add parent to children map if not present
@@ -216,7 +216,7 @@ export class ModelsTreeIdsCache implements Disposable {
     }
 
     elementsToQuery.forEach((elementId, index) => this.#childrenLoadingMap.set(elementId, loadingMapEntries[Math.floor(index / optimalBatchSize)]));
-    return { loadingMapEntries };
+    return { loadingMapEntries: Promise.all(loadingMapEntries).then(() => {}) };
   }
 
   private async createChildrenMapEntries({ elementIds }: { elementIds: Id64Arg }): Promise<void[]> {
@@ -238,7 +238,7 @@ export class ModelsTreeIdsCache implements Disposable {
 
     // Elements which are not yet scheduled to load we need to query children for
     if (elementsToQuery.length > 0) {
-      promises.push(...this.createChildrenLoadingMapEntries({ elementsToQuery }).loadingMapEntries);
+      promises.push(this.createChildrenLoadingMapEntries({ elementsToQuery }).loadingMapEntries);
     }
     return Promise.all(promises);
   }
