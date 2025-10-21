@@ -177,27 +177,27 @@ export class ModelsTreeIdsCache implements Disposable {
   }
 
   private createChildrenLoadingMapEntries({ elementsToQuery }: { elementsToQuery: Id64Array }): { promise: Promise<void> } {
-    const elementsToQueryPromise = (async ({ childrenMap, childrenLoadingMap }: { childrenMap: ChildrenMap; childrenLoadingMap: ChildrenLoadingMap }) => {
+    const elementsToQueryPromise = (async () => {
       for await (const { id, parentId } of this.queryChildren({ elementIds: elementsToQuery })) {
         // Add parent to children map if not present
-        let entry = childrenMap.get(parentId);
+        let entry = this.#childrenMap.get(parentId);
         if (!entry) {
           entry = { children: [] };
-          childrenMap.set(parentId, entry);
+          this.#childrenMap.set(parentId, entry);
         }
         if (!entry.children) {
           entry.children = [];
         }
         // Add child to parent's entry and add child to children map
         entry.children.push(id);
-        if (!childrenMap.has(id)) {
-          childrenMap.set(id, { children: undefined });
+        if (!this.#childrenMap.has(id)) {
+          this.#childrenMap.set(id, { children: undefined });
         }
       }
 
-      elementsToQuery.forEach((elementId) => childrenLoadingMap.delete(elementId));
+      elementsToQuery.forEach((elementId) => this.#childrenLoadingMap.delete(elementId));
       return;
-    })({ childrenLoadingMap: this.#childrenLoadingMap, childrenMap: this.#childrenMap });
+    })();
 
     elementsToQuery.forEach((elementId) => this.#childrenLoadingMap.set(elementId, elementsToQueryPromise));
     return { promise: elementsToQueryPromise };

@@ -451,9 +451,12 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     ];
   }
 
-  private getElementChildrenCountCtes(props: { whereClauseFn: (parentAlias: string) => string }): { ctes: Array<string>; cteName: string } {
+  private getElementChildrenCountCtes(props: { whereClauseFn: (parentAlias: string) => string }): {
+    elementChildrenCountCte: Array<string>;
+    elementChildrenCountCteName: string;
+  } {
     return {
-      ctes: [
+      elementChildrenCountCte: [
         `
         ElementWithParent(id, parentId) AS (
           SELECT
@@ -480,7 +483,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         )
         `,
       ],
-      cteName: `ElementChildrenCount`,
+      elementChildrenCountCteName: `ElementChildrenCount`,
     };
   }
 
@@ -510,7 +513,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       AND ${parentAlias}.Model.Id IN (${modelIds.map(() => "?").join(",")})
       AND ${parentAlias}.Parent.Id IS NULL
     `;
-    const { ctes, cteName } = this.getElementChildrenCountCtes({ whereClauseFn: childrenCountWhereClause });
+    const { elementChildrenCountCte, elementChildrenCountCteName } = this.getElementChildrenCountCtes({ whereClauseFn: childrenCountWhereClause });
     const bindings = new Array<ECSqlBinding>();
     for (let i = 0; i < 2; ++i) {
       categoryIds.forEach((id) => bindings.push({ type: "id", value: id }));
@@ -520,7 +523,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       {
         fullClassName: this.#hierarchyConfig.elementClassSpecification,
         query: {
-          ctes,
+          ctes: elementChildrenCountCte,
           ecsql: `
             SELECT
               ${await this.#selectQueryFactory.createSelectClause({
@@ -558,7 +561,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 supportsFiltering: this.supportsFiltering(),
               })}
             FROM ${instanceFilterClauses.from} this
-            LEFT JOIN ${cteName} c ON c.parentId = this.ECInstanceId
+            LEFT JOIN ${elementChildrenCountCteName} c ON c.parentId = this.ECInstanceId
             ${instanceFilterClauses.joins}
             WHERE
               this.Category.Id IN (${categoryIds.map(() => "?").join(",")})
@@ -584,7 +587,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     const childrenCountWhereClause = (parentAlias: string) => `
       ${parentAlias}.Parent.Id IN (${elementIds.map(() => "?").join(",")})
     `;
-    const { ctes, cteName } = this.getElementChildrenCountCtes({ whereClauseFn: childrenCountWhereClause });
+    const { elementChildrenCountCte, elementChildrenCountCteName } = this.getElementChildrenCountCtes({ whereClauseFn: childrenCountWhereClause });
     const bindings = new Array<ECSqlBinding>();
     for (let i = 0; i < 2; ++i) {
       elementIds.map((id) => bindings.push({ type: "id", value: id }));
@@ -593,7 +596,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       {
         fullClassName: this.#hierarchyConfig.elementClassSpecification,
         query: {
-          ctes,
+          ctes: elementChildrenCountCte,
           ecsql: `
             SELECT
               ${await this.#selectQueryFactory.createSelectClause({
@@ -628,7 +631,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 supportsFiltering: this.supportsFiltering(),
               })}
             FROM ${instanceFilterClauses.from} this
-            LEFT JOIN ${cteName} c ON c.parentId = this.ECInstanceId
+            LEFT JOIN ${elementChildrenCountCteName} c ON c.parentId = this.ECInstanceId
             ${instanceFilterClauses.joins}
             WHERE
               this.Parent.Id IN (${elementIds.map(() => "?").join(",")})

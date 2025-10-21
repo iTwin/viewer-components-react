@@ -40,7 +40,7 @@ interface ElementFilteredTreeNode extends BaseFilteredTreeNode {
 type FilteredTreeNode = GenericFilteredTreeNode | CategoryFilteredTreeNode | ElementFilteredTreeNode;
 
 interface GetElementsFromUnfilteredChildrenTreeProps {
-  childrenTree: ChildrenTree<any>;
+  childrenTree: ChildrenTree;
   parentIdsPath: Array<Id64Arg>;
 }
 
@@ -152,12 +152,15 @@ function getChildrenTreeIdsMatchingFilteredNodes({
   tree,
   filteredNodes,
 }: {
-  tree: ChildrenTree<any>;
+  tree: ChildrenTree;
   filteredNodes: Array<FilteredTreeNode | FilteredTreeRootNode>;
 }): Id64Set {
-  const getIdsRecursively = (childrenTree: ChildrenTree<any>, parentFilteredNodes: Array<FilteredTreeNode | FilteredTreeRootNode>): Id64Set => {
+  const getIdsRecursively = (childrenTree: ChildrenTree, parentFilteredNodes: Array<FilteredTreeNode | FilteredTreeRootNode>): Id64Set => {
     // If one of the parent filtered nodes does not have children, it is filter target and because of this, all elements in the childrenTree are in the filtered tree.
-    if (parentFilteredNodes.some((filteredNode) => !filteredNode.children)) {
+    const hasParentFilterTarget = parentFilteredNodes.some(
+      (filteredNode) => !filteredNode.children || ("isFilterTarget" in filteredNode && filteredNode.isFilterTarget),
+    );
+    if (hasParentFilterTarget) {
       return getIdsFromChildrenTree({ tree: childrenTree });
     }
     const result = new Set<Id64String>();
