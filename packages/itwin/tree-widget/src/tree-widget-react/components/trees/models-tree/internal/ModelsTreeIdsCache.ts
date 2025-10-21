@@ -156,12 +156,8 @@ export class ModelsTreeIdsCache implements Disposable {
       entry.children.forEach((childId) => {
         const childrenTreeOfChild = this.getChildrenTreeFromMap({ elementIds: childId });
         // Need to add children tree created from childId. This tree includes childId as root element
-        if (childrenTreeOfChild.size > 0) {
-          elementChildrenTree.set(childId, { children: childrenTreeOfChild });
-          return;
-        }
         // If child does not have children, children tree won't be created. Need to add childId with undefined children
-        elementChildrenTree.set(childId, { children: undefined });
+        elementChildrenTree.set(childId, { children: childrenTreeOfChild.size > 0 ? childrenTreeOfChild : undefined });
       });
     }
     return result;
