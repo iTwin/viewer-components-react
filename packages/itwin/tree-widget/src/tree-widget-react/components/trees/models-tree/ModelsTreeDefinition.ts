@@ -461,8 +461,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             c.Parent.Id
           FROM ${this.#hierarchyConfig.elementClassSpecification} p
           JOIN ${this.#hierarchyConfig.elementClassSpecification} c on c.Parent.Id = p.ECInstanceId
-          WHERE
-           ${props.whereClauseFn("p")}
+          WHERE ${props.whereClauseFn("p")}
 
           UNION ALL
 
