@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Fri, 17 Oct 2025 15:36:01 GMT and should not be manually modified. -->
+<!-- This log was last generated on Wed, 22 Oct 2025 08:09:53 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.16.1
+
+Wed, 22 Oct 2025 08:09:53 GMT
+
+### Patches
+
+- Fix category elements count query being cancelled due to restart token. ([#1484](https://github.com/iTwin/viewer-components-react/pull/1484))
 
 ## 3.16.0
 
