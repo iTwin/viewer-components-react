@@ -8,12 +8,14 @@ import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import { collect } from "../../common/Rxjs.js";
 import { pushToMap } from "../../common/Utils.js";
+import { getOptimalBatchSize } from "../Utils.js";
 
 import type { Subscription } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
-import type { InstanceKey } from "@itwin/presentation-shared";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import type { InstanceKey } from "@itwin/presentation-shared";
 import type { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
+import type { ChildrenTree } from "../Utils.js";
 
 interface SubjectInfo {
   parentSubject: Id64String | undefined;
@@ -28,6 +30,8 @@ interface ModelInfo {
 }
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
+type ChildrenMap = Map<Id64String, { children: Id64Array | undefined }>;
+type ChildrenLoadingMap = Map<Id64String, Promise<void>>;
 
 /** @internal */
 export class ModelsTreeIdsCache implements Disposable {
@@ -41,6 +45,9 @@ export class ModelsTreeIdsCache implements Disposable {
   #categoryKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath[]>>;
   #queryExecutor: LimitingECSqlQueryExecutor;
   #hierarchyConfig: ModelsTreeHierarchyConfiguration;
+  #childrenMap: ChildrenMap;
+  /** Stores element ids which have children query scheduled to execute. */
+  #childrenLoadingMap: ChildrenLoadingMap;
   #componentId: GuidString;
   #componentName: string;
 
@@ -51,6 +58,8 @@ export class ModelsTreeIdsCache implements Disposable {
     this.#modelKeyPaths = new Map();
     this.#subjectKeyPaths = new Map();
     this.#categoryKeyPaths = new Map();
+    this.#childrenMap = new Map();
+    this.#childrenLoadingMap = new Map();
     this.#componentId = componentId ?? Guid.createValue();
     this.#componentName = "ModelsTreeIdsCache";
   }
@@ -103,6 +112,145 @@ export class ModelsTreeIdsCache implements Disposable {
     )) {
       yield { id: row.id, parentId: row.parentId };
     }
+  }
+
+  private async *queryChildren({ elementIds }: { elementIds: Id64Array }): AsyncIterableIterator<{ id: Id64String; parentId: Id64String }> {
+    const ctes = [
+      `
+        ElementChildren(id, parentId) AS (
+          SELECT ECInstanceId id, Parent.Id parentId
+          FROM ${this.#hierarchyConfig.elementClassSpecification}
+          WHERE Parent.Id IN (${elementIds.join(", ")})
+
+          UNION ALL
+
+          SELECT c.ECInstanceId id, c.Parent.Id
+          FROM ${this.#hierarchyConfig.elementClassSpecification} c
+          JOIN ElementChildren p ON c.Parent.Id = p.id
+        )
+      `,
+    ];
+    const ecsql = `
+      SELECT id, parentId
+      FROM ElementChildren
+    `;
+    for await (const row of this.#queryExecutor.createQueryReader(
+      { ecsql, ctes },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/children/${Guid.createValue()}` },
+    )) {
+      yield { id: row.id, parentId: row.parentId };
+    }
+  }
+
+  private getChildrenTreeFromMap({ elementIds }: { elementIds: Id64Arg }): ChildrenTree {
+    const result: ChildrenTree = new Map();
+    if (Id64.sizeOf(elementIds) === 0 || this.#childrenMap.size === 0) {
+      return result;
+    }
+    for (const elementId of Id64.iterable(elementIds)) {
+      const entry = this.#childrenMap.get(elementId);
+      if (!entry?.children) {
+        continue;
+      }
+      const elementChildrenTree: ChildrenTree = new Map();
+      result.set(elementId, { children: elementChildrenTree });
+      entry.children.forEach((childId) => {
+        const childrenTreeOfChild = this.getChildrenTreeFromMap({ elementIds: childId });
+        // Need to add children tree created from childId. This tree includes childId as root element
+        // If child does not have children, children tree won't be created. Need to add childId with undefined children
+        elementChildrenTree.set(childId, { children: childrenTreeOfChild.size > 0 ? childrenTreeOfChild : undefined });
+      });
+    }
+    return result;
+  }
+
+  private getChildrenCountMap({ elementIds }: { elementIds: Id64Arg }): Map<Id64String, number> {
+    const result = new Map<Id64String, number>();
+    for (const elementId of Id64.iterable(elementIds)) {
+      const entry = this.#childrenMap.get(elementId);
+      if (entry?.children) {
+        let totalChildrenCount = entry.children.length;
+        this.getChildrenCountMap({ elementIds: entry.children }).forEach((childrenOfChildCount) => (totalChildrenCount += childrenOfChildCount));
+        result.set(elementId, totalChildrenCount);
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Populates #childrenLoadingMap with promises. When these promises resolve, they will populate #childrenMap with values and delete entries from #childrenLoadingMap.
+   */
+  private createChildrenLoadingMapEntries({ elementsToQuery }: { elementsToQuery: Id64Array }): { loadingMapEntries: Promise<void> } {
+    const getElementsToQueryPromise = async (batchedElementsToQuery: Id64Array) => {
+      for await (const { id, parentId } of this.queryChildren({ elementIds: batchedElementsToQuery })) {
+        // Add parent to children map if not present
+        let entry = this.#childrenMap.get(parentId);
+        if (!entry) {
+          entry = { children: [] };
+          this.#childrenMap.set(parentId, entry);
+        }
+        if (!entry.children) {
+          entry.children = [];
+        }
+        // Add child to parent's entry and add child to children map
+        entry.children.push(id);
+        if (!this.#childrenMap.has(id)) {
+          this.#childrenMap.set(id, { children: undefined });
+        }
+      }
+
+      elementsToQuery.forEach((elementId) => this.#childrenLoadingMap.delete(elementId));
+      return;
+    };
+    const maximumBatchSize = 1000;
+    const totalSize = elementsToQuery.length;
+    const optimalBatchSize = getOptimalBatchSize({ totalSize, maximumBatchSize });
+    const loadingMapEntries = new Array<Promise<void>>();
+    // Don't want to slice if its not necessary
+    if (totalSize <= maximumBatchSize) {
+      loadingMapEntries.push(getElementsToQueryPromise(elementsToQuery));
+    } else {
+      for (let i = 0; i < elementsToQuery.length; i += optimalBatchSize) {
+        loadingMapEntries.push(getElementsToQueryPromise(elementsToQuery.slice(i, i + optimalBatchSize)));
+      }
+    }
+
+    elementsToQuery.forEach((elementId, index) => this.#childrenLoadingMap.set(elementId, loadingMapEntries[Math.floor(index / optimalBatchSize)]));
+    return { loadingMapEntries: Promise.all(loadingMapEntries).then(() => {}) };
+  }
+
+  private async createChildrenMapEntries({ elementIds }: { elementIds: Id64Arg }): Promise<void[]> {
+    const promises = new Array<Promise<void>>();
+    const elementsToQuery = new Array<Id64String>();
+    for (const elementId of Id64.iterable(elementIds)) {
+      // check if children for this element is loaded already
+      if (this.#childrenMap.has(elementId)) {
+        continue;
+      }
+      // check if children for this element is being loaded already
+      const loadingPromise = this.#childrenLoadingMap.get(elementId);
+      if (loadingPromise) {
+        promises.push(loadingPromise);
+      } else {
+        elementsToQuery.push(elementId);
+      }
+    }
+
+    // Elements which are not yet scheduled to load we need to query children for
+    if (elementsToQuery.length > 0) {
+      promises.push(this.createChildrenLoadingMapEntries({ elementsToQuery }).loadingMapEntries);
+    }
+    return Promise.all(promises);
+  }
+
+  public async getChildrenTree({ elementIds }: { elementIds: Id64Arg }): Promise<ChildrenTree> {
+    await this.createChildrenMapEntries({ elementIds });
+    return this.getChildrenTreeFromMap({ elementIds });
+  }
+
+  public async getAllChildrenCount({ elementIds }: { elementIds: Id64Arg }): Promise<Map<Id64String, number>> {
+    await this.createChildrenMapEntries({ elementIds });
+    return this.getChildrenCountMap({ elementIds });
   }
 
   private async getSubjectInfos() {
