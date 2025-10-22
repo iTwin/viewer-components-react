@@ -458,32 +458,31 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     return {
       elementChildrenCountCte: [
         `
-        ElementWithParent(id, parentId) AS (
+        ElementWithParent(id, initialElementId) AS (
           SELECT
-            c.ECInstanceId,
-            c.Parent.Id
-          FROM ${this.#hierarchyConfig.elementClassSpecification} p
-          JOIN ${this.#hierarchyConfig.elementClassSpecification} c on c.Parent.Id = p.ECInstanceId
-          WHERE ${props.whereClauseFn("p")}
+            e.ECInstanceId,
+            e.ECInstanceId
+          FROM ${this.#hierarchyConfig.elementClassSpecification} e
+          WHERE ${props.whereClauseFn("e")}
 
           UNION ALL
 
           SELECT
             c.ECInstanceId,
-            p.parentId
+            p.initialElementId
           FROM ${this.#hierarchyConfig.elementClassSpecification} c
           JOIN ElementWithParent p ON p.id = c.Parent.Id
         )
         `,
         `
-        ElementChildrenCount(parentId, childrenCount) AS (
-          SELECT parentId, COUNT(id)
+        ElementWithChildrenCount(elementId, childrenCount) AS (
+          SELECT initialElementId, COUNT(id) - 1
           FROM ElementWithParent
-          GROUP BY parentId
+          GROUP BY initialElementId
         )
         `,
       ],
-      elementChildrenCountCteName: `ElementChildrenCount`,
+      elementChildrenCountCteName: `ElementWithChildrenCount`,
     };
   }
 
@@ -515,10 +514,8 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     `;
     const { elementChildrenCountCte, elementChildrenCountCteName } = this.getElementChildrenCountCtes({ whereClauseFn: childrenCountWhereClause });
     const bindings = new Array<ECSqlBinding>();
-    for (let i = 0; i < 2; ++i) {
-      categoryIds.forEach((id) => bindings.push({ type: "id", value: id }));
-      modelIds.map((id) => bindings.push({ type: "id", value: id }));
-    }
+    categoryIds.forEach((id) => bindings.push({ type: "id", value: id }));
+    modelIds.map((id) => bindings.push({ type: "id", value: id }));
     return [
       {
         fullClassName: this.#hierarchyConfig.elementClassSpecification,
@@ -561,13 +558,9 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 supportsFiltering: this.supportsFiltering(),
               })}
             FROM ${instanceFilterClauses.from} this
-            LEFT JOIN ${elementChildrenCountCteName} c ON c.parentId = this.ECInstanceId
+            JOIN ${elementChildrenCountCteName} c ON c.elementId = this.ECInstanceId
             ${instanceFilterClauses.joins}
-            WHERE
-              this.Category.Id IN (${categoryIds.map(() => "?").join(",")})
-              AND this.Model.Id IN (${modelIds.map(() => "?").join(",")})
-              AND this.Parent.Id IS NULL
-              ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+            ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
           `,
           bindings,
         },
@@ -589,9 +582,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     `;
     const { elementChildrenCountCte, elementChildrenCountCteName } = this.getElementChildrenCountCtes({ whereClauseFn: childrenCountWhereClause });
     const bindings = new Array<ECSqlBinding>();
-    for (let i = 0; i < 2; ++i) {
-      elementIds.map((id) => bindings.push({ type: "id", value: id }));
-    }
+    elementIds.map((id) => bindings.push({ type: "id", value: id }));
     return [
       {
         fullClassName: this.#hierarchyConfig.elementClassSpecification,
@@ -631,11 +622,9 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 supportsFiltering: this.supportsFiltering(),
               })}
             FROM ${instanceFilterClauses.from} this
-            LEFT JOIN ${elementChildrenCountCteName} c ON c.parentId = this.ECInstanceId
+            JOIN ${elementChildrenCountCteName} c ON c.elementId = this.ECInstanceId
             ${instanceFilterClauses.joins}
-            WHERE
-              this.Parent.Id IN (${elementIds.map(() => "?").join(",")})
-              ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+            ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
           `,
           bindings,
         },
