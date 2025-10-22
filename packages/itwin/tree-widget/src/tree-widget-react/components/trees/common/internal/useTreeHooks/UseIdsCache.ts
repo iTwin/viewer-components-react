@@ -42,7 +42,7 @@ export function useIdsCache<TCache extends Disposable, TCacheSpecificProps exten
           // Need to check if treeWidgetIds cache uses the same iModelConnection as the cache that will be created
           // When they differ, treeWidgetIds cache can't be used.
           const cache = currImodel === currTreeWidgetIdsCache?.usedIModelConnection ? currTreeWidgetIdsCache : undefined;
-          if (cache) {
+          if (!cache) {
             // eslint-disable-next-line no-console
             console.warn(
               "Please wrap specific tree with `TreeWidgetContextProvider` (this should be done if you are not using `TreeWidgetComponent`), and make sure to use the same `treeWidgetViewport` in `TreeWidgetComponent` and specific tree component.",
