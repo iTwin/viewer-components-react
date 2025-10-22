@@ -8,6 +8,7 @@ import { ClassificationsTreeDefinition } from "../../../tree-widget-react/compon
 import { ClassificationsTreeIdsCache } from "../../../tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeIdsCache.js";
 import { ClassificationsTreeVisibilityHandler } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/ClassificationsTreeVisibilityHandler.js";
 import { createFilteredClassificationsTree } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/FilteredTree.js";
+import { TreeWidgetIdsCache } from "../../../tree-widget-react/components/trees/common/internal/TreeWidgetIdsCache.js";
 import { HierarchyVisibilityHandlerImpl } from "../../../tree-widget-react/components/trees/common/internal/useTreeHooks/UseCachedVisibility.js";
 import {
   buildIModel,
@@ -68,7 +69,11 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
   async function createVisibilityTestData({ imodel, view, visibleByDefault }: { imodel: IModelConnection; view: "2d" | "3d"; visibleByDefault?: boolean }) {
     const imodelAccess = createIModelAccess(imodel);
-    const idsCache = new ClassificationsTreeIdsCache(imodelAccess, { rootClassificationSystemCode });
+    const idsCache = new ClassificationsTreeIdsCache(
+      imodelAccess,
+      { rootClassificationSystemCode },
+      { cache: new TreeWidgetIdsCache(imodel), shouldDispose: true },
+    );
     const viewport = createTreeWidgetTestingViewport({
       iModel: imodel,
       visibleByDefault: !!visibleByDefault,
@@ -779,7 +784,11 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       visibleByDefault?: boolean;
     }) {
       const imodelAccess = createIModelAccess(imodel);
-      const idsCache = new ClassificationsTreeIdsCache(imodelAccess, { rootClassificationSystemCode });
+      const idsCache = new ClassificationsTreeIdsCache(
+        imodelAccess,
+        { rootClassificationSystemCode },
+        { cache: new TreeWidgetIdsCache(imodel), shouldDispose: true },
+      );
       const viewport = createTreeWidgetTestingViewport({
         iModel: imodel,
         viewType: view,

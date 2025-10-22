@@ -14,7 +14,7 @@ import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js
 import type { ClassificationsTreeIdsCache } from "../ClassificationsTreeIdsCache.js";
 
 /** @internal */
-export type ClassificationsTreeVisibilityHelperProps = BaseVisibilityHelperProps & {
+export type ClassificationsTreeVisibilityHelperProps = Omit<BaseVisibilityHelperProps, "treeWidgetIdsCache"> & {
   idsCache: ClassificationsTreeIdsCache;
 };
 
@@ -27,7 +27,7 @@ export type ClassificationsTreeVisibilityHelperProps = BaseVisibilityHelperProps
 export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
   #props: ClassificationsTreeVisibilityHelperProps;
   constructor(props: ClassificationsTreeVisibilityHelperProps) {
-    super(props);
+    super({ ...props, treeWidgetIdsCache: props.idsCache });
     this.#props = props;
   }
 
@@ -40,8 +40,16 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
     return from(this.#props.idsCache.getAllContainedCategories(props.classificationTableIds)).pipe(
       mergeMap(({ drawing, spatial }) =>
         merge(
-          of(drawing).pipe(mergeMap((categoryIds) => this.getCategoriesVisibilityStatus({ modelId: undefined, categoryIds, type: "DrawingCategory" }))),
-          of(spatial).pipe(mergeMap((categoryIds) => this.getCategoriesVisibilityStatus({ modelId: undefined, categoryIds, type: "SpatialCategory" }))),
+          of(drawing).pipe(
+            mergeMap((categoryIds) =>
+              this.getCategoriesVisibilityStatus({ modelId: undefined, categoryIds, type: "DrawingCategory", checkSubCategories: false }),
+            ),
+          ),
+          of(spatial).pipe(
+            mergeMap((categoryIds) =>
+              this.getCategoriesVisibilityStatus({ modelId: undefined, categoryIds, type: "SpatialCategory", checkSubCategories: false }),
+            ),
+          ),
         ),
       ),
       mergeVisibilityStatuses,
@@ -57,8 +65,16 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
     return from(this.#props.idsCache.getAllContainedCategories(props.classificationIds)).pipe(
       mergeMap(({ drawing, spatial }) =>
         merge(
-          of(drawing).pipe(mergeMap((categoryIds) => this.getCategoriesVisibilityStatus({ modelId: undefined, categoryIds, type: "DrawingCategory" }))),
-          of(spatial).pipe(mergeMap((categoryIds) => this.getCategoriesVisibilityStatus({ modelId: undefined, categoryIds, type: "SpatialCategory" }))),
+          of(drawing).pipe(
+            mergeMap((categoryIds) =>
+              this.getCategoriesVisibilityStatus({ modelId: undefined, categoryIds, type: "DrawingCategory", checkSubCategories: false }),
+            ),
+          ),
+          of(spatial).pipe(
+            mergeMap((categoryIds) =>
+              this.getCategoriesVisibilityStatus({ modelId: undefined, categoryIds, type: "SpatialCategory", checkSubCategories: false }),
+            ),
+          ),
         ),
       ),
       mergeVisibilityStatuses,

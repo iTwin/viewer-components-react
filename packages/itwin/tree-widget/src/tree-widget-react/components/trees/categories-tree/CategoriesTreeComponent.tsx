@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Fragment } from "react";
-import { useActiveIModelConnection } from "@itwin/appui-react";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
 import { useActiveTreeWidgetViewport } from "../common/internal/UseActiveTreeWidgetViewport.js";
@@ -44,7 +43,7 @@ interface CategoriesTreeComponentProps
    */
   headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode>;
   /**
-   * Viewport used for visibility controls.
+   * Viewport used for visibility controls and data querying.
    *
    * When viewport is not provided, `IModelApp.viewManager.selectedView` will be used.
    */
@@ -58,14 +57,13 @@ interface CategoriesTreeComponentProps
  * @public
  */
 export const CategoriesTreeComponent = (props: CategoriesTreeComponentProps) => {
-  const iModel = useActiveIModelConnection();
   const viewport = useActiveTreeWidgetViewport({ treeWidgetViewport: props.viewport });
 
-  if (!iModel || !viewport) {
+  if (!viewport) {
     return null;
   }
 
-  return <CategoriesTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />;
+  return <CategoriesTreeComponentImpl {...props} iModel={viewport.iModel} viewport={viewport} />;
 };
 
 /**

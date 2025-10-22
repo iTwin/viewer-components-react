@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useActiveIModelConnection } from "@itwin/appui-react";
 import { SchemaKey, SchemaMatchType } from "@itwin/ecschema-metadata";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { SelectableTree } from "../../tree-header/SelectableTree.js";
@@ -31,7 +30,7 @@ interface ClassificationsTreeComponentProps
     | "getEditingProps"
   > {
   /**
-   * Viewport used for visibility controls.
+   * Viewport used for visibility controls and data querying.
    *
    * When viewport is not provided, `IModelApp.viewManager.selectedView` will be used.
    */
@@ -45,14 +44,13 @@ interface ClassificationsTreeComponentProps
  * @alpha
  */
 export const ClassificationsTreeComponent = (props: ClassificationsTreeComponentProps) => {
-  const iModel = useActiveIModelConnection();
   const viewport = useActiveTreeWidgetViewport({ treeWidgetViewport: props.viewport });
 
-  if (!iModel || !viewport) {
+  if (!viewport) {
     return null;
   }
 
-  return <ClassificationsTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />;
+  return <ClassificationsTreeComponentImpl {...props} iModel={viewport.iModel} viewport={viewport} />;
 };
 
 /**

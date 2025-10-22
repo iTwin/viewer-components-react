@@ -35,7 +35,7 @@ export function createNonGroupingHierarchyNode(partial?: Partial<NonGroupingHier
   };
 }
 
-function getDefaultSubCategoryId(categoryId: Id64String) {
+export function getDefaultSubCategoryId(categoryId: Id64String) {
   const categoryIdNumber = Number.parseInt(categoryId, 16);
   const subCategoryId = `0x${(categoryIdNumber + 1).toString(16)}`;
   return subCategoryId;
@@ -215,7 +215,9 @@ export function createTreeWidgetTestingViewport({
           return entry.isVisible;
         }
       }
-      return visibleByDefault;
+      // In this case there are only default subCategories (automatically created when creating category).
+      // In such cases we want the default subCategories to not affect the visibility.
+      return true;
     },
     renderFrame: () => {
       if (onAlwaysDrawnChanged.shouldFireOnRender) {

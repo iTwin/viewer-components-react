@@ -39,6 +39,8 @@ export const CLASS_NAME_ISubModeledElement = "BisCore.ISubModeledElement";
 /** @internal */
 export const CLASS_NAME_Model = "BisCore.Model";
 /** @internal */
+export const CLASS_NAME_GeometricModel = "BisCore.GeometricModel";
+/** @internal */
 export const CLASS_NAME_GeometricModel2d = "BisCore.GeometricModel2d";
 /** @internal */
 export const CLASS_NAME_GeometricModel3d = "BisCore.GeometricModel3d";
