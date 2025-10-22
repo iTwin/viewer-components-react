@@ -446,7 +446,12 @@ type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPaths" | 
 };
 
 // @beta
-export function TreeRenderer({ getInlineActions, getHierarchyLevelDetails, onFilterClick, ...props }: BaseTreeRendererProps): JSX_2.Element;
+export function TreeRenderer(props: TreeRendererProps_2): JSX_2.Element;
+
+// @beta (undocumented)
+type TreeRendererProps_2 = Omit<BaseTreeRendererProps, "getInlineActions" | "getMenuActions" | "getDecorations"> & {
+    [Property in keyof Pick<BaseTreeRendererProps, "getInlineActions" | "getMenuActions" | "getDecorations">]?: (node: PresentationHierarchyNode, treeRendererProps: TreeRendererProps_2) => ReturnType<NonNullable<BaseTreeRendererProps[Property]>>;
+};
 
 // @public
 interface TreeRenderProps {
@@ -689,10 +694,12 @@ type VisibilityTreeProps = Omit<TreeProps, "treeRenderer" | "imodelAccess"> & {
 };
 
 // @beta
-export function VisibilityTreeRenderer({ getVisibilityButtonState, onVisibilityButtonClick: onClick, getInlineActions, onFilterClick, getHierarchyLevelDetails, ...props }: VisibilityTreeRendererProps): JSX_2.Element;
+export function VisibilityTreeRenderer(props: VisibilityTreeRendererProps): JSX_2.Element;
 
 // @beta (undocumented)
-type VisibilityTreeRendererProps = BaseTreeRendererProps & VisibilityContext;
+type VisibilityTreeRendererProps = Omit<BaseTreeRendererProps, "getInlineActions" | "getMenuActions" | "getDecorations"> & {
+    [Property in keyof Pick<BaseTreeRendererProps, "getInlineActions" | "getMenuActions" | "getDecorations">]?: (node: PresentationHierarchyNode, treeRendererProps: VisibilityTreeRendererProps) => ReturnType<NonNullable<BaseTreeRendererProps[Property]>>;
+} & VisibilityContext;
 
 // (No @packageDocumentation comment for this package)
 
