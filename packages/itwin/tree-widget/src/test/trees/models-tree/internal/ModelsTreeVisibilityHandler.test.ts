@@ -16,7 +16,12 @@ import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor, Hierar
 import { InstanceKey } from "@itwin/presentation-shared";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { createVisibilityStatus } from "../../../../tree-widget-react/components/trees/common/Tooltip.js";
-import { CATEGORY_CLASS_NAME, ELEMENT_CLASS_NAME, MODEL_CLASS_NAME } from "../../../../tree-widget-react/components/trees/models-tree/internal/FilteredTree.js";
+import {
+  CATEGORY_CLASS_NAME,
+  ELEMENT_CLASS_NAME,
+  MODEL_CLASS_NAME,
+  SUBJECT_CLASS_NAME,
+} from "../../../../tree-widget-react/components/trees/models-tree/internal/FilteredTree.js";
 import { ModelsTreeIdsCache } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import { createModelsTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
@@ -50,6 +55,7 @@ import type { GeometricElement3dProps, QueryBinder } from "@itwin/core-common";
 import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath, HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { Id64String } from "@itwin/core-bentley";
 import type { ValidateNodeProps } from "./VisibilityValidation.js";
+
 interface VisibilityOverrides {
   models?: Map<Id64String, Visibility>;
   categories?: Map<Id64String, Visibility>;
@@ -174,6 +180,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           categoryId: "0x2",
           elementId: "0x3",
           parentKeys: [
+            { type: "instances", instanceKeys: [{ id: "0x11", className: SUBJECT_CLASS_NAME }] },
             { type: "instances", instanceKeys: [{ id: "0x1", className: MODEL_CLASS_NAME }] },
             { type: "instances", instanceKeys: [{ id: "0x2", className: CATEGORY_CLASS_NAME }] },
             { type: "class-grouping", className: ELEMENT_CLASS_NAME },
@@ -971,6 +978,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               categoryId: "0x2",
               elementId: "0x3",
               parentKeys: [
+                { type: "instances", instanceKeys: [{ id: "0x11", className: SUBJECT_CLASS_NAME }] },
                 { type: "instances", instanceKeys: [{ id: "0x1", className: MODEL_CLASS_NAME }] },
                 { type: "instances", instanceKeys: [{ id: "0x2", className: CATEGORY_CLASS_NAME }] },
                 { type: "class-grouping", className: ELEMENT_CLASS_NAME },
@@ -997,6 +1005,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             hasChildren: true,
             elementId,
             parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x11", className: SUBJECT_CLASS_NAME }] },
               { type: "instances", instanceKeys: [{ id: "0x1", className: MODEL_CLASS_NAME }] },
               { type: "instances", instanceKeys: [{ id: "0x2", className: CATEGORY_CLASS_NAME }] },
               { type: "class-grouping", className: ELEMENT_CLASS_NAME },
@@ -1020,6 +1029,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             hasChildren: true,
             elementId,
             parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x11", className: SUBJECT_CLASS_NAME }] },
               { type: "instances", instanceKeys: [{ id: "0x1", className: MODEL_CLASS_NAME }] },
               { type: "instances", instanceKeys: [{ id: "0x2", className: CATEGORY_CLASS_NAME }] },
               { type: "class-grouping", className: ELEMENT_CLASS_NAME },
@@ -1043,6 +1053,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             categoryId,
             elementId,
             parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x11", className: SUBJECT_CLASS_NAME }] },
               { type: "instances", instanceKeys: [{ id: "0x1", className: MODEL_CLASS_NAME }] },
               { type: "instances", instanceKeys: [{ id: "0x2", className: CATEGORY_CLASS_NAME }] },
               { type: "class-grouping", className: ELEMENT_CLASS_NAME },
@@ -1070,6 +1081,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             categoryId,
             elementId,
             parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x11", className: SUBJECT_CLASS_NAME }] },
               { type: "instances", instanceKeys: [{ id: "0x1", className: MODEL_CLASS_NAME }] },
               { type: "instances", instanceKeys: [{ id: "0x2", className: CATEGORY_CLASS_NAME }] },
               { type: "class-grouping", className: ELEMENT_CLASS_NAME },
@@ -1092,6 +1104,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             categoryId,
             elementId,
             parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x11", className: SUBJECT_CLASS_NAME }] },
               { type: "instances", instanceKeys: [{ id: "0x1", className: MODEL_CLASS_NAME }] },
               { type: "instances", instanceKeys: [{ id: "0x2", className: CATEGORY_CLASS_NAME }] },
               { type: "class-grouping", className: ELEMENT_CLASS_NAME },
@@ -1114,6 +1127,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             categoryId,
             elementId,
             parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x11", className: SUBJECT_CLASS_NAME }] },
               { type: "instances", instanceKeys: [{ id: "0x1", className: MODEL_CLASS_NAME }] },
               { type: "instances", instanceKeys: [{ id: "0x2", className: CATEGORY_CLASS_NAME }] },
               { type: "class-grouping", className: ELEMENT_CLASS_NAME },
@@ -1131,6 +1145,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             categoryId,
             elementId,
             parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x11", className: SUBJECT_CLASS_NAME }] },
               { type: "instances", instanceKeys: [{ id: "0x1", className: MODEL_CLASS_NAME }] },
               { type: "instances", instanceKeys: [{ id: "0x2", className: CATEGORY_CLASS_NAME }] },
               { type: "class-grouping", className: ELEMENT_CLASS_NAME },
@@ -1153,6 +1168,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             categoryId,
             elementId,
             parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x11", className: SUBJECT_CLASS_NAME }] },
               { type: "instances", instanceKeys: [{ id: modelId, className: MODEL_CLASS_NAME }] },
               { type: "instances", instanceKeys: [{ id: categoryId, className: CATEGORY_CLASS_NAME }] },
               { type: "class-grouping", className: ELEMENT_CLASS_NAME },
@@ -1176,6 +1192,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             categoryId,
             elementId,
             parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x11", className: SUBJECT_CLASS_NAME }] },
               { type: "instances", instanceKeys: [{ id: modelId, className: MODEL_CLASS_NAME }] },
               { type: "instances", instanceKeys: [{ id: categoryId, className: CATEGORY_CLASS_NAME }] },
               { type: "class-grouping", className: ELEMENT_CLASS_NAME },
