@@ -105,12 +105,10 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   #categoryClass: string;
   #categoryElementClass: string;
   #categoryModelClass: string;
-  #viewType: "2d" | "3d";
 
   public constructor(props: CategoriesTreeDefinitionProps) {
     this.#iModelAccess = props.imodelAccess;
     this.#idsCache = props.idsCache;
-    this.#viewType = props.viewType;
     this.#nodeLabelSelectClauseFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
     this.#selectQueryFactory = createNodesQueryClauseFactory({
       imodelAccess: props.imodelAccess,
