@@ -317,7 +317,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
 
         // Save the color using preferences
         const saveColor = async () => {
-          const newColorTbgr = selectedColorTbgr.toString();
+          const colorTbgrString = selectedColorTbgr.toString();
 
           // Only save custom colors to preferences - preset colors don't overwrite user's custom color
           if (!isPresetColor) {
@@ -326,7 +326,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
               const iModel = activeViewport.iModel;
               if (iModel?.iTwinId) {
                 // For custom colors, store as user-selected color
-                const saved = await BasemapColorPreferences.saveCustomColor(newColorTbgr, iModel.iTwinId, iModel.iModelId);
+                const saved = await BasemapColorPreferences.saveCustomColor(colorTbgrString, iModel.iTwinId, iModel.iModelId);
                 if (saved) {
                   // If preferences save succeeded, update preset colors
                   const colors = await getPresetColorsWithSaved();
