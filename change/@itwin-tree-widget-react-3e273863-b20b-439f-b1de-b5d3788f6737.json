@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fix category elements count query being cancelled due to restart token.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "100586436+JonasDov@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
