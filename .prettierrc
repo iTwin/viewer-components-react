@@ -7,7 +7,7 @@
   "importOrder": ["", ".s?css$", "", "^[A-Za-z]", "^@", "^[.]", "", "<TYPES>", "<TYPES>^@", "<TYPES>^[.]", "", "<BUILTIN_MODULES>"],
   "overrides": [
     {
-      "files": ["**/learning-snippets/**/*.ts*", "**/test/**/setup.ts"],
+      "files": ["**/learning-snippets/**/*.ts*", "**/test/**/setup.ts", "**/README.md"],
       "options": {
         "importOrder": []
       }
