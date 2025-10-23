@@ -134,7 +134,8 @@
   },
   "LayerMenu": {
     "Detach": "Detach",
-    "ZoomToLayer": "Zoom to layer"
+    "ZoomToLayer": "Zoom to layer",
+    "Loading": "Loading..."
   },
   "Settings": {
     "ElevationOffset": "Elevation Offset",
