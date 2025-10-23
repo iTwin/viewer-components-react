@@ -10,7 +10,10 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-import { CategoriesTreeDefinition } from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
+import {
+  CategoriesTreeDefinition,
+  defaultHierarchyConfiguration,
+} from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 import { CategoriesVisibilityHandler } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesVisibilityHandler.js";
 import {
@@ -28,10 +31,11 @@ import { createViewState } from "../../TreeUtils.js";
 import { createCategoryHierarchyNode, createDefinitionContainerHierarchyNode, createSubCategoryHierarchyNode } from "./Utils.js";
 import { validateHierarchyVisibility } from "./VisibilityValidation.js";
 
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { InstanceKey } from "@itwin/presentation-common";
-import type { HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { InstanceKey } from "@itwin/presentation-common";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
+import type { CategoriesTreeHierarchyConfiguration } from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 
 describe("CategoriesVisibilityHandler", () => {
   before(async () => {
@@ -73,6 +77,7 @@ describe("CategoriesVisibilityHandler", () => {
     idsCache: CategoriesTreeIdsCache;
     imodelAccess: ReturnType<typeof createIModelAccess>;
     filterPaths?: HierarchyNodeIdentifiersPath[];
+    hierarchyConfig: CategoriesTreeHierarchyConfiguration;
   }) {
     return createIModelHierarchyProvider({
       hierarchyDefinition: new CategoriesTreeDefinition({ ...props, viewType: "3d" }),
@@ -81,10 +86,28 @@ describe("CategoriesVisibilityHandler", () => {
     });
   }
 
-  async function createVisibilityTestData({ imodel, categoryIds, modelIds }: { imodel: IModelConnection; categoryIds: Id64Array; modelIds: Id64Array }) {
+  async function createVisibilityTestData({
+    imodel,
+    categoryIds,
+    modelIds,
+    hierarchyConfig,
+  }: {
+    imodel: IModelConnection;
+    categoryIds: Id64Array;
+    modelIds: Id64Array;
+    hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>;
+  }) {
+    const hierarchyConfiguration = {
+      ...defaultHierarchyConfiguration,
+      ...hierarchyConfig,
+    };
     const commonProps = await createCommonProps({ imodel, categoryIds, modelIds });
-    const handler = new CategoriesVisibilityHandler({ idsCache: commonProps.idsCache, viewport: commonProps.viewport });
-    const provider = createProvider({ ...commonProps });
+    const handler = new CategoriesVisibilityHandler({
+      idsCache: commonProps.idsCache,
+      viewport: commonProps.viewport,
+      hierarchyConfig: hierarchyConfiguration,
+    });
+    const provider = createProvider({ ...commonProps, hierarchyConfig: hierarchyConfiguration });
     return {
       handler,
       provider,

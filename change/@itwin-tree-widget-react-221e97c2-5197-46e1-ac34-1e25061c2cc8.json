@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Categories tree: Add option to show categories that don't contain any elements.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "100586436+JonasDov@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

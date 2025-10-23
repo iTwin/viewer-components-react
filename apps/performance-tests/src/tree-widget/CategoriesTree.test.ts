@@ -36,6 +36,9 @@ describe("categories tree", () => {
     },
     cleanup: (props) => props.iModel.close(),
     test: async ({ imodelAccess }) => {
+      const hierarchyConfig = {
+        showEmptyCategories: false,
+      };
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d");
       const filtering = {
         paths: await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -44,12 +47,13 @@ describe("categories tree", () => {
           label: "sc",
           viewType: "3d",
           idsCache,
+          hierarchyConfig,
         }),
       };
       expect(filtering.paths.length).to.eq(50000);
       const provider = new StatelessHierarchyProvider({
         imodelAccess,
-        getHierarchyFactory: () => new CategoriesTreeDefinition({ imodelAccess, idsCache, viewType: "3d" }),
+        getHierarchyFactory: () => new CategoriesTreeDefinition({ imodelAccess, idsCache, viewType: "3d", hierarchyConfig }),
         filtering,
       });
       const result = await provider.loadHierarchy({ depth: 1 });
@@ -80,10 +84,13 @@ describe("categories tree", () => {
         viewport,
         ...testData,
       });
+      const hierarchyConfig = {
+        showEmptyCategories: false,
+      };
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d");
-      const handler = new CategoriesVisibilityHandler({ idsCache, viewport });
+      const handler = new CategoriesVisibilityHandler({ idsCache, viewport, hierarchyConfig });
       const provider = createIModelHierarchyProvider({
-        hierarchyDefinition: new CategoriesTreeDefinition({ idsCache, imodelAccess, viewType: "3d" }),
+        hierarchyDefinition: new CategoriesTreeDefinition({ idsCache, imodelAccess, viewType: "3d", hierarchyConfig }),
         imodelAccess,
       });
       await validateHierarchyVisibility({
@@ -135,10 +142,13 @@ describe("categories tree", () => {
         viewport,
         ...testData,
       });
+      const hierarchyConfig = {
+        showEmptyCategories: false,
+      };
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d");
-      const handler = new CategoriesVisibilityHandler({ idsCache, viewport });
+      const handler = new CategoriesVisibilityHandler({ idsCache, viewport, hierarchyConfig });
       const provider = createIModelHierarchyProvider({
-        hierarchyDefinition: new CategoriesTreeDefinition({ idsCache, imodelAccess, viewType: "3d" }),
+        hierarchyDefinition: new CategoriesTreeDefinition({ idsCache, imodelAccess, viewType: "3d", hierarchyConfig }),
         imodelAccess,
       });
       await validateHierarchyVisibility({
