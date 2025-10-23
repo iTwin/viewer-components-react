@@ -158,20 +158,36 @@ export class Datasets {
       const { id: physicalModelId } = insertPhysicalModelWithPartition({ builder, codeValue: "test physical model" });
       const { id: categoryId } = insertSpatialCategory({ builder, codeValue: "test category" });
 
-      const numberOfGroups = 1000;
-      const elementsPerGroup = numElements / numberOfGroups;
+      const numberOfRootElements = 1000;
+      const numberOfDirectChildren = 2;
+      const numberOfIndirectChildren =
+        (numElements - numberOfRootElements - numberOfDirectChildren * numberOfRootElements) / (numberOfRootElements * numberOfDirectChildren);
 
-      for (let i = 0; i < numberOfGroups; ++i) {
-        let physicalElementParentId: string | undefined;
-
-        for (let j = 0; j < elementsPerGroup; ++j) {
-          physicalElementParentId = insertPhysicalElement({
+      for (let i = 0; i < numberOfRootElements; ++i) {
+        const rootElementId = insertPhysicalElement({
+          builder,
+          parentId: undefined,
+          modelId: physicalModelId,
+          categoryId,
+          userLabel: `root element${i}`,
+        }).id;
+        for (let j = 0; j < numberOfDirectChildren; ++j) {
+          const directChildId = insertPhysicalElement({
             builder,
-            parentId: physicalElementParentId,
+            parentId: rootElementId,
             modelId: physicalModelId,
             categoryId,
-            userLabel: "test_element",
+            userLabel: `direct child ${i}-${j}`,
           }).id;
+          for (let z = 0; z < numberOfIndirectChildren; ++z) {
+            insertPhysicalElement({
+              builder,
+              parentId: directChildId,
+              modelId: physicalModelId,
+              categoryId,
+              userLabel: `indirect child ${i}-${j}-${z}`,
+            }).id;
+          }
         }
       }
     });
