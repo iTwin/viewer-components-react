@@ -3,8 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import fs from "fs";
 import asTable from "as-table";
+import fs from "fs";
 import Mocha from "mocha";
 import { LOGGER } from "./Logging.cjs";
 import { MainThreadBlocksDetector } from "./MainThreadBlocksDetector.cjs";

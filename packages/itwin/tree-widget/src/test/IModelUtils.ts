@@ -3,8 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import fs from "fs";
 import { XMLParser } from "fast-xml-parser";
+import fs from "fs";
 import { SnapshotDb } from "@itwin/core-backend";
 import { Id64 } from "@itwin/core-bentley";
 import { BisCodeSpec, Code, IModel } from "@itwin/core-common";

@@ -3,8 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import * as fs from "fs";
 import dotenv from "dotenv";
+import * as fs from "fs";
 import { defineConfig, devices } from "@playwright/test";
 
 /**
