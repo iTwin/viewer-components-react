@@ -4,7 +4,7 @@
   "tabWidth": 2,
   "singleQuote": false,
   "plugins": ["@ianvs/prettier-plugin-sort-imports"],
-  "importOrder": ["", "<BUILTIN_MODULES>", "^[A-Za-z]", "^@", "^[.]", "", "<TYPES>", "<TYPES>^@", "<TYPES>^[.]", ""],
+  "importOrder": ["", ".s?css$", "", "<BUILTIN_MODULES>", "^[A-Za-z]", "^@", "^[.]", "", "<TYPES>", "<TYPES>^@", "<TYPES>^[.]", ""],
   "overrides": [
     {
       "files": ["**/learning-snippets/**/*.ts*", "**/test/**/setup.ts"],
@@ -13,6 +13,7 @@
       }
     }
   ],
+  "importOrderSafeSideEffects": [".s?css$"],
   "importOrderTypeScriptVersion": "5.0.0",
   "importOrderCaseSensitive": false
 }
