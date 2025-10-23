@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Fix disabled Zoom to layer issue using retry of range data request",
+  "packageName": "@itwin/map-layers",
+  "email": "wil.maier@bentley.com",
+  "dependentChangeType": "patch"
+}
