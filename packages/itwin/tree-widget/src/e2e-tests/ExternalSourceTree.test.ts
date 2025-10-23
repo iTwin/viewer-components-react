@@ -3,9 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Locator } from "@playwright/test";
 import { test } from "@playwright/test";
 import { initTreeWidgetTest, selectTree, takeScreenshot, withDifferentDensities } from "./utils.js";
+
+import type { Locator } from "@playwright/test";
 
 test.describe("External sources tree", () => {
   let treeWidget: Locator;

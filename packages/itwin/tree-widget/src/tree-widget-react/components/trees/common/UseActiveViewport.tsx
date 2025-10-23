@@ -4,8 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useState } from "react";
-import type { ScreenViewport } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
+
+import type { ScreenViewport } from "@itwin/core-frontend";
 
 /**
  * A copy of `useActiveViewport` from `@itwin/appui-react` package until X is fixed.

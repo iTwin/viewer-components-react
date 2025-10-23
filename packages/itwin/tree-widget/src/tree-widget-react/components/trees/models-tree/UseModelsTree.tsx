@@ -33,6 +33,7 @@ import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCac
 import type { NormalizedHierarchyFilteringPath } from "../common/Utils.js";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/ModelsTreeVisibilityHandler.js";
 import type { ClassGroupingHierarchyNode, ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition.js";
+
 type ModelsTreeFilteringError = "tooManyFilterMatches" | "tooManyInstancesFocused" | "unknownFilterError" | "unknownInstanceFocusError";
 type ModelsTreeSubTreeError = "unknownSubTreeError";
 

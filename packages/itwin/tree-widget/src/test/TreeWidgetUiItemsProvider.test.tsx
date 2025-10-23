@@ -3,8 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
 import { mock } from "node:test";
+import { expect } from "chai";
 import React from "react";
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";

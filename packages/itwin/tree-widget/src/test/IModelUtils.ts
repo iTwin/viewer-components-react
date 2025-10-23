@@ -3,8 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { XMLParser } from "fast-xml-parser";
 import fs from "fs";
+import { XMLParser } from "fast-xml-parser";
 import { SnapshotDb } from "@itwin/core-backend";
 import { Id64 } from "@itwin/core-bentley";
 import { BisCodeSpec, Code, IModel } from "@itwin/core-common";
@@ -12,8 +12,6 @@ import { buildTestIModel } from "@itwin/presentation-testing";
 
 import type { IModelDb } from "@itwin/core-backend";
 import type { Id64String } from "@itwin/core-bentley";
-import type { IModelConnection } from "@itwin/core-frontend";
-import type { TestIModelBuilder } from "@itwin/presentation-testing";
 import type {
   CategoryProps,
   ElementAspectProps,
@@ -33,6 +31,8 @@ import type {
   SubCategoryProps,
   SubjectProps,
 } from "@itwin/core-common";
+import type { IModelConnection } from "@itwin/core-frontend";
+import type { TestIModelBuilder } from "@itwin/presentation-testing";
 
 // cspell:words ecdbmap jpath
 

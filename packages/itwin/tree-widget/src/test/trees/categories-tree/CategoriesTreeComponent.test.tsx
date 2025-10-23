@@ -3,8 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
 import { mock } from "node:test";
+import { expect } from "chai";
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
@@ -16,11 +16,11 @@ import * as categoriesVisibilityUtilsModule from "../../../tree-widget-react/com
 import { TreeWidget } from "../../../tree-widget-react/TreeWidget.js";
 import { mockPresentationManager, render, waitFor } from "../../TestUtils.js";
 
-import type * as categoriesTreeComponentModule from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeComponent.js";
 import type { ComponentPropsWithoutRef } from "react";
-import type { CategoryInfo } from "../../../tree-widget-react/components/trees/common/CategoriesVisibilityUtils.js";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type * as categoriesTreeComponentModule from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeComponent.js";
+import type { CategoryInfo } from "../../../tree-widget-react/components/trees/common/CategoriesVisibilityUtils.js";
 
 describe("<CategoriesTreeComponent />", () => {
   const defaultCategoriesTreeComponentProps: ComponentPropsWithoutRef<typeof categoriesTreeComponentModule.CategoriesTreeComponent> = {

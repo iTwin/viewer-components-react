@@ -22,9 +22,9 @@ import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, i
 import { TestUtils } from "../TestUtils.js";
 import { createViewState } from "./TreeUtils.js";
 
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { ECSqlReader } from "@itwin/core-common";
 import type { IModelConnection, SpatialViewState, Viewport } from "@itwin/core-frontend";
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
 
 describe("CategoryVisibilityUtils", () => {
   before(async () => {
