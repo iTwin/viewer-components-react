@@ -11,11 +11,11 @@ import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor } from 
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 import { LOGGER } from "../util/Logging.cjs";
 
-import type { CategoriesTreeIdsCache, ModelsTreeIdsCache } from "@itwin/tree-widget-react/internal";
 import type { IModelDb } from "@itwin/core-backend";
 import type { SchemaKey, SchemaMatchType, SchemaPropsGetter } from "@itwin/ecschema-metadata";
 import type { HierarchyDefinition, HierarchyFilteringPath, HierarchyNode, HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { EC, ECClassHierarchyInspector, ECSchemaProvider, ECSqlQueryDef, ECSqlQueryExecutor, ECSqlQueryReaderOptions } from "@itwin/presentation-shared";
+import type { CategoriesTreeIdsCache, ModelsTreeIdsCache } from "@itwin/tree-widget-react/internal";
 
 interface ProviderOptionsBase {
   rowLimit?: number | "unbounded";
@@ -26,6 +26,7 @@ interface ProviderOptionsBase {
   filtering?: {
     paths: HierarchyFilteringPath[];
   };
+  queryCacheSize?: number;
 }
 type ProviderOptionsWithIModel = { iModel: IModelDb } & ProviderOptionsBase;
 
@@ -107,7 +108,7 @@ export class StatelessHierarchyProvider implements Disposable {
     return createIModelHierarchyProvider({
       imodelAccess,
       hierarchyDefinition: this.#props.getHierarchyFactory(imodelAccess),
-      queryCacheSize: 0,
+      queryCacheSize: this.#props.queryCacheSize ?? 0,
       filtering: this.#props.filtering,
     });
   }

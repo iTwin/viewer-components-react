@@ -27,8 +27,8 @@ import {
   validateHierarchyVisibility,
 } from "./VisibilityUtilities.js";
 
-import type { Viewport } from "@itwin/core-frontend";
 import type { Id64String } from "@itwin/core-bentley";
+import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { ECSqlQueryDef, InstanceKey } from "@itwin/presentation-shared";
 import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
@@ -101,6 +101,7 @@ describe("models tree", () => {
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
         imodelAccess,
+        queryCacheSize: Number.MAX_SAFE_INTEGER,
       });
       await validateHierarchyVisibility({
         ignoreChildren: (node) => !!node.extendedData?.isCategory,
@@ -163,6 +164,7 @@ describe("models tree", () => {
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
         imodelAccess,
+        queryCacheSize: Number.MAX_SAFE_INTEGER,
       });
       await validateHierarchyVisibility({
         provider,
@@ -221,6 +223,7 @@ describe("models tree", () => {
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
         imodelAccess,
+        queryCacheSize: Number.MAX_SAFE_INTEGER,
       });
       await validateHierarchyVisibility({
         provider,
@@ -281,6 +284,7 @@ describe("models tree", () => {
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
         imodelAccess,
+        queryCacheSize: Number.MAX_SAFE_INTEGER,
       });
 
       const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
@@ -343,6 +347,7 @@ describe("models tree", () => {
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
         imodelAccess,
+        queryCacheSize: Number.MAX_SAFE_INTEGER,
       });
 
       const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;

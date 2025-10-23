@@ -85,6 +85,7 @@ describe("categories tree", () => {
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new CategoriesTreeDefinition({ idsCache, imodelAccess, viewType: "3d" }),
         imodelAccess,
+        queryCacheSize: Number.MAX_SAFE_INTEGER,
       });
       await validateHierarchyVisibility({
         provider,
@@ -140,6 +141,7 @@ describe("categories tree", () => {
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new CategoriesTreeDefinition({ idsCache, imodelAccess, viewType: "3d" }),
         imodelAccess,
+        queryCacheSize: Number.MAX_SAFE_INTEGER,
       });
       await validateHierarchyVisibility({
         provider,
