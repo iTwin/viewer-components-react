@@ -159,10 +159,9 @@ export class Datasets {
       const { id: categoryId } = insertSpatialCategory({ builder, codeValue: "test category" });
 
       const numberOfRootElements = 1000;
-      const numberOfDirectChildren = 2;
+      const numberOfDirectChildren = 1;
       const numberOfIndirectChildren =
         (numElements - numberOfRootElements - numberOfDirectChildren * numberOfRootElements) / (numberOfRootElements * numberOfDirectChildren);
-
       for (let i = 0; i < numberOfRootElements; ++i) {
         const rootElementId = insertPhysicalElement({
           builder,
