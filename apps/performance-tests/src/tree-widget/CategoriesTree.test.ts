@@ -97,6 +97,7 @@ describe("categories tree", () => {
           hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration,
         }),
         imodelAccess,
+        queryCacheSize: Number.MAX_SAFE_INTEGER,
       });
       await validateHierarchyVisibility({
         provider,
@@ -157,6 +158,7 @@ describe("categories tree", () => {
           hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration,
         }),
         imodelAccess,
+        queryCacheSize: Number.MAX_SAFE_INTEGER,
       });
       await validateHierarchyVisibility({
         provider,

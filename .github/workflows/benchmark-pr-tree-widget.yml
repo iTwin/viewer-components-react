@@ -5,8 +5,7 @@ on:
     branches:
       - master
     paths:
-      - apps/performance-tests/tree-widget/**
-      - apps/performance-tests/util/**
+      - apps/performance-tests/**
       - packages/itwin/tree-widget/**
       - .github/workflows/benchmark-pr-tree-widget.yml
     types: [opened, synchronize, reopened, ready_for_review]
