@@ -33,6 +33,7 @@ interface CategoriesTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   viewType: "2d" | "3d";
   idsCache: CategoriesTreeIdsCache;
+  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
 }
 
 interface CategoriesTreeInstanceKeyPathsFromInstanceLabelProps {
@@ -41,15 +42,32 @@ interface CategoriesTreeInstanceKeyPathsFromInstanceLabelProps {
   viewType: "2d" | "3d";
   limit?: number | "unbounded";
   idsCache: CategoriesTreeIdsCache;
+  hierarchyConfig?: CategoriesTreeHierarchyConfiguration;
   abortSignal?: AbortSignal;
   componentId?: GuidString;
 }
 
+/**
+ * Defines hierarchy configuration supported by `CategoriesTree`.
+ * @beta
+ */
+export interface CategoriesTreeHierarchyConfiguration {
+  /** Should categories without elements be shown. Defaults to `false`. */
+  showEmptyCategories: boolean;
+}
+
+/** @internal */
+export const defaultHierarchyConfiguration: CategoriesTreeHierarchyConfiguration = {
+  showEmptyCategories: false,
+};
+
+/** @internal */
 export class CategoriesTreeDefinition implements HierarchyDefinition {
   #impl: Promise<HierarchyDefinition> | undefined;
   #selectQueryFactory: NodesQueryClauseFactory;
   #nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
   #idsCache: CategoriesTreeIdsCache;
+  #hierarchyConfig: CategoriesTreeHierarchyConfiguration;
   #viewType: "2d" | "3d";
   #iModelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   static #componentName = "CategoriesTreeDefinition";
@@ -63,6 +81,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
       imodelAccess: props.imodelAccess,
       instanceLabelSelectClauseFactory: this.#nodeLabelSelectClauseFactory,
     });
+    this.#hierarchyConfig = props.hierarchyConfig;
   }
 
   private async getHierarchyDefinition(): Promise<HierarchyDefinition> {
@@ -109,8 +128,12 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     const { parentNodeInstanceIds, instanceFilter, viewType } = props;
     const { definitionContainers, categories } =
       parentNodeInstanceIds === undefined
-        ? await this.#idsCache.getRootDefinitionContainersAndCategories()
-        : await this.#idsCache.getDirectChildDefinitionContainersAndCategories(parentNodeInstanceIds);
+        ? await this.#idsCache.getRootDefinitionContainersAndCategories({ includeEmpty: this.#hierarchyConfig.showEmptyCategories })
+        : await this.#idsCache.getDirectChildDefinitionContainersAndCategories({
+            parentDefinitionContainerIds: parentNodeInstanceIds,
+            includeEmpty: this.#hierarchyConfig.showEmptyCategories,
+          });
+
     if (categories.length === 0 && definitionContainers.length === 0) {
       return [];
     }
@@ -264,22 +287,25 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
 
   public static async createInstanceKeyPaths(props: CategoriesTreeInstanceKeyPathsFromInstanceLabelProps): Promise<HierarchyFilteringPath[]> {
     const labelsFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
+    const hierarchyConfig = props.hierarchyConfig ?? defaultHierarchyConfiguration;
     return createInstanceKeyPathsFromInstanceLabel({
       ...props,
       labelsFactory,
       cache: props.idsCache,
       componentId: props.componentId ?? Guid.createValue(),
       componentName: this.#componentName,
+      hierarchyConfig,
     });
   }
 }
 
 async function createInstanceKeyPathsFromInstanceLabel(
-  props: Omit<CategoriesTreeInstanceKeyPathsFromInstanceLabelProps, "componentId"> & {
+  props: Omit<CategoriesTreeInstanceKeyPathsFromInstanceLabelProps, "componentId" | "hierarchyConfig"> & {
     labelsFactory: IInstanceLabelSelectClauseFactory;
     cache: CategoriesTreeIdsCache;
     componentName: string;
     componentId: GuidString;
+    hierarchyConfig: CategoriesTreeHierarchyConfiguration;
   },
 ): Promise<HierarchyFilteringPath[]> {
   const { cache, abortSignal, label, viewType, labelsFactory, limit, imodelAccess, componentId, componentName } = props;
@@ -292,7 +318,9 @@ async function createInstanceKeyPathsFromInstanceLabel(
   const DEFINITION_CONTAINERS_WITH_LABELS_CTE = "DefinitionContainersWithLabels";
   return lastValueFrom(
     defer(async () => {
-      const { definitionContainers, categories } = await cache.getAllDefinitionContainersAndCategories();
+      const { definitionContainers, categories } = await cache.getAllDefinitionContainersAndCategories({
+        includeEmpty: props.hierarchyConfig.showEmptyCategories,
+      });
       if (categories.length === 0) {
         return undefined;
       }

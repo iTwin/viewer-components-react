@@ -20,7 +20,7 @@ import type { CategoriesTreeHeaderButtonProps, CategoriesTreeHeaderButtonType } 
 
 /** @public */
 interface CategoriesTreeComponentProps
-  extends Pick<CategoriesTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
+  extends Pick<CategoriesTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode" | "hierarchyConfig"> {
   /**
    * Renderers of header buttons. Defaults to:
    * ```ts

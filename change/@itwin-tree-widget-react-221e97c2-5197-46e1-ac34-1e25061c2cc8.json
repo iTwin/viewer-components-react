@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Categories tree: Add option to show categories that don't contain any elements. This option can be provided to `CategoriesTree`, `CategoriesTreeComponent` or `useCategoriesTree`. It can be provided as `hierarchyConfig` property called `showEmptyCategories`",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "100586436+JonasDov@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
