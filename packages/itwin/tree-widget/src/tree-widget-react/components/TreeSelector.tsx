@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./TreeSelector.scss";
+
 import { useMemo, useState } from "react";
 import { MenuItem, Select } from "@itwin/itwinui-react";
 

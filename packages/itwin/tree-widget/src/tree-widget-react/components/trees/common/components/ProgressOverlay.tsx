@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./ProgressOverlay.scss";
+
 import { ProgressLinear } from "@itwin/itwinui-react";
 
 export function ProgressOverlay() {

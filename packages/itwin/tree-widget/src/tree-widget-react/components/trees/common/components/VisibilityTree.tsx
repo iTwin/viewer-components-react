@@ -8,12 +8,12 @@ import { useHierarchyVisibility } from "../UseHierarchyVisibility.js";
 import { useIModelAccess } from "../UseIModelAccess.js";
 import { TreeBase } from "./Tree.js";
 
-import type { TreeProps } from "./Tree.js";
-import type { FunctionProps } from "../Utils.js";
 import type { ReactNode } from "react";
-import type { VisibilityTreeRendererProps } from "./VisibilityTreeRenderer.js";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { HierarchyVisibilityHandler } from "../UseHierarchyVisibility.js";
+import type { FunctionProps } from "../Utils.js";
+import type { TreeProps } from "./Tree.js";
+import type { VisibilityTreeRendererProps } from "./VisibilityTreeRenderer.js";
 
 /** @beta */
 export type VisibilityTreeProps = Omit<TreeProps, "treeRenderer" | "imodelAccess"> & {

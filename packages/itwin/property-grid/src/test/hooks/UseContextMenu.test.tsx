@@ -19,9 +19,9 @@ import { TelemetryContextProvider } from "../../property-grid-react/hooks/UseTel
 import { PropertyGridManager } from "../../property-grid-react/PropertyGridManager.js";
 import { createFunctionStub, createPropertyRecord, render, stubFavoriteProperties, waitFor } from "../TestUtils.js";
 
+import type { MouseEvent } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { IPresentationPropertyDataProvider, PresentationPropertyDataProvider } from "@itwin/presentation-components";
-import type { MouseEvent } from "react";
 import type { ContextMenuItemProps, UseContentMenuProps } from "../../property-grid-react/hooks/UseContextMenu.js";
 
 describe("useContextMenu", () => {

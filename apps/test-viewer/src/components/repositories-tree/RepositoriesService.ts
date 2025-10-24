@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IModelApp } from "@itwin/core-frontend";
+
 import type { ITwinRepositoryType } from "./RepositoriesType";
 
 interface RepositoryData {

@@ -8,6 +8,7 @@ import { FormatManager } from "./FormatManager";
 
 import type { FormatDefinition } from "@itwin/core-quantity";
 import type { DefaultContextMenuItemProps } from "@itwin/property-grid-react";
+
 export function CustomizeFormatPropertyContextMenuItem({ record }: DefaultContextMenuItemProps): React.JSX.Element | null {
   const defaultAction = async (): Promise<void> => {
     if (!record.property.kindOfQuantityName) {

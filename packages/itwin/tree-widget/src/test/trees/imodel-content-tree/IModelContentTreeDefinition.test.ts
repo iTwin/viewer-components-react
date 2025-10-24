@@ -30,9 +30,9 @@ import {
 import { createIModelAccess } from "../Common.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
 
-import type { IModelContentTreeHierarchyConfiguration } from "../../../tree-widget-react/components/trees/imodel-content-tree/IModelContentTreeDefinition.js";
-import type { InstanceKey } from "@itwin/presentation-common";
 import type { IModelConnection } from "@itwin/core-frontend";
+import type { InstanceKey } from "@itwin/presentation-common";
+import type { IModelContentTreeHierarchyConfiguration } from "../../../tree-widget-react/components/trees/imodel-content-tree/IModelContentTreeDefinition.js";
 
 describe("iModel content tree", () => {
   describe("Hierarchy definition", () => {

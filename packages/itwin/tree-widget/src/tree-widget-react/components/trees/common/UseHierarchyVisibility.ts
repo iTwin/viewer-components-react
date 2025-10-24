@@ -21,8 +21,8 @@ import {
 } from "rxjs";
 import { useTelemetryContext } from "./UseTelemetryContext.js";
 
-import type { Observable } from "rxjs";
 import type { MutableRefObject } from "react";
+import type { Observable } from "rxjs";
 import type { BeEvent, IDisposable } from "@itwin/core-bentley";
 import type { HierarchyNode, PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { TreeCheckboxProps } from "./components/TreeNodeCheckbox.js";
