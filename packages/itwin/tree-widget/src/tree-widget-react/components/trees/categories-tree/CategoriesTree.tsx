@@ -27,6 +27,7 @@ export function CategoriesTree({
   filter,
   density,
   hierarchyLevelConfig,
+  hierarchyConfig,
   selectionMode,
   onCategoriesFiltered,
 }: CategoriesTreeProps) {
@@ -34,6 +35,7 @@ export function CategoriesTree({
     filter,
     activeView,
     onCategoriesFiltered,
+    hierarchyConfig,
   });
 
   return (
