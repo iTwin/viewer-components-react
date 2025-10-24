@@ -7,8 +7,8 @@ import { useMemo } from "react";
 import { useMultiCheckboxHandler } from "../UseMultiCheckboxHandler.js";
 import { TreeRenderer } from "./TreeRenderer.js";
 
-import type { TreeRendererProps } from "./TreeRenderer.js";
 import type { TreeCheckboxProps } from "./TreeNodeCheckbox.js";
+import type { TreeRendererProps } from "./TreeRenderer.js";
 
 /** @beta */
 export type VisibilityTreeRendererProps = TreeRendererProps & TreeCheckboxProps;

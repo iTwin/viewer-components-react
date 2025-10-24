@@ -12,6 +12,7 @@ import { FormatTabPanel } from "./FormatTabPanel";
 
 import type { FormatDefinition } from "@itwin/core-quantity";
 import type { FormatSet } from "@itwin/ecschema-metadata";
+
 /** Button component that shows a button to open the Quantity Format Panel in a modal */
 export const QuantityFormatButton: React.FC = () => {
   // Initial format definition is undefined until a format is selected

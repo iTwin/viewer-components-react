@@ -7,8 +7,8 @@ import { VisibilityTree } from "../common/components/VisibilityTree.js";
 import { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRenderer.js";
 import { useModelsTree } from "./UseModelsTree.js";
 
-import type { UseModelsTreeProps } from "./UseModelsTree.js";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
+import type { UseModelsTreeProps } from "./UseModelsTree.js";
 
 /** @beta */
 export type ModelsTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode"> &

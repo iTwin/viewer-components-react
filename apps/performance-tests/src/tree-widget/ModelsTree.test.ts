@@ -27,8 +27,8 @@ import {
   validateHierarchyVisibility,
 } from "./VisibilityUtilities.js";
 
-import type { Viewport } from "@itwin/core-frontend";
 import type { Id64String } from "@itwin/core-bentley";
+import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { ECSqlQueryDef, InstanceKey } from "@itwin/presentation-shared";
 import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";

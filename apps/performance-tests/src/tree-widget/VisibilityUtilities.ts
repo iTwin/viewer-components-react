@@ -13,11 +13,11 @@ import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { toVoidPromise } from "@itwin/tree-widget-react/internal";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { ECSqlQueryDef } from "@itwin/presentation-shared";
 import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
 import type { IModelAccess } from "./StatelessHierarchyProvider.js";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 
 type Visibility = "visible" | "hidden" | "partial";
 

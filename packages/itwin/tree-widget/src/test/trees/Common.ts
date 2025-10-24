@@ -12,8 +12,8 @@ import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/present
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 
-import type { IModelConnection, Viewport, ViewState } from "@itwin/core-frontend";
 import type { QueryBinder, QueryOptions } from "@itwin/core-common";
+import type { IModelConnection, Viewport, ViewState } from "@itwin/core-frontend";
 
 export function createIModelMock(queryHandler?: (query: string, params?: QueryBinder, config?: QueryOptions) => any[] | Promise<any[]>) {
   return {
