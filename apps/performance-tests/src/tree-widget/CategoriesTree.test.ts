@@ -6,7 +6,12 @@
 import { expect } from "chai";
 import { SnapshotDb } from "@itwin/core-backend";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
-import { CategoriesTreeDefinition, CategoriesTreeIdsCache, CategoriesVisibilityHandler } from "@itwin/tree-widget-react/internal";
+import {
+  CategoriesTreeDefinition,
+  CategoriesTreeIdsCache,
+  CategoriesVisibilityHandler,
+  defaultCategoriesTreeHierarchyConfiguration,
+} from "@itwin/tree-widget-react/internal";
 import { Datasets } from "../util/Datasets.js";
 import { run, TestIModelConnection } from "../util/TestUtilities.js";
 import { StatelessHierarchyProvider } from "./StatelessHierarchyProvider.js";
@@ -36,9 +41,6 @@ describe("categories tree", () => {
     },
     cleanup: (props) => props.iModel.close(),
     test: async ({ imodelAccess }) => {
-      const hierarchyConfig = {
-        showEmptyCategories: false,
-      };
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d");
       const filtering = {
         paths: await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -47,13 +49,14 @@ describe("categories tree", () => {
           label: "sc",
           viewType: "3d",
           idsCache,
-          hierarchyConfig,
+          hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration,
         }),
       };
       expect(filtering.paths.length).to.eq(50000);
       const provider = new StatelessHierarchyProvider({
         imodelAccess,
-        getHierarchyFactory: () => new CategoriesTreeDefinition({ imodelAccess, idsCache, viewType: "3d", hierarchyConfig }),
+        getHierarchyFactory: () =>
+          new CategoriesTreeDefinition({ imodelAccess, idsCache, viewType: "3d", hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration }),
         filtering,
       });
       const result = await provider.loadHierarchy({ depth: 1 });
@@ -84,13 +87,15 @@ describe("categories tree", () => {
         viewport,
         ...testData,
       });
-      const hierarchyConfig = {
-        showEmptyCategories: false,
-      };
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d");
-      const handler = new CategoriesVisibilityHandler({ idsCache, viewport, hierarchyConfig });
+      const handler = new CategoriesVisibilityHandler({ idsCache, viewport, hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration });
       const provider = createIModelHierarchyProvider({
-        hierarchyDefinition: new CategoriesTreeDefinition({ idsCache, imodelAccess, viewType: "3d", hierarchyConfig }),
+        hierarchyDefinition: new CategoriesTreeDefinition({
+          idsCache,
+          imodelAccess,
+          viewType: "3d",
+          hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration,
+        }),
         imodelAccess,
       });
       await validateHierarchyVisibility({
@@ -142,13 +147,15 @@ describe("categories tree", () => {
         viewport,
         ...testData,
       });
-      const hierarchyConfig = {
-        showEmptyCategories: false,
-      };
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d");
-      const handler = new CategoriesVisibilityHandler({ idsCache, viewport, hierarchyConfig });
+      const handler = new CategoriesVisibilityHandler({ idsCache, viewport, hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration });
       const provider = createIModelHierarchyProvider({
-        hierarchyDefinition: new CategoriesTreeDefinition({ idsCache, imodelAccess, viewType: "3d", hierarchyConfig }),
+        hierarchyDefinition: new CategoriesTreeDefinition({
+          idsCache,
+          imodelAccess,
+          viewType: "3d",
+          hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration,
+        }),
         imodelAccess,
       });
       await validateHierarchyVisibility({
