@@ -32,8 +32,8 @@ import { createCategoryHierarchyNode, createDefinitionContainerHierarchyNode, cr
 import { validateHierarchyVisibility } from "./VisibilityValidation.js";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
-import type { InstanceKey } from "@itwin/presentation-common";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { InstanceKey } from "@itwin/presentation-common";
 import type { HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
 import type { CategoriesTreeHierarchyConfiguration } from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 
