@@ -332,13 +332,8 @@ export class CategoriesTreeIdsCache implements Disposable {
     parentDefinitionContainerIds.forEach((parentDefinitionContainerId) => {
       const parentDefinitionContainerInfo = definitionContainersInfo.get(parentDefinitionContainerId);
       if (parentDefinitionContainerInfo !== undefined) {
-        if (includeEmpty) {
-          result.definitionContainers.push(...parentDefinitionContainerInfo.childDefinitionContainers.map((dc) => dc.id));
-          result.categories.push(...parentDefinitionContainerInfo.childCategories);
-        } else {
-          result.definitionContainers.push(...parentDefinitionContainerInfo.childDefinitionContainers.filter((dc) => dc.hasElements).map((dc) => dc.id));
-          result.categories.push(...parentDefinitionContainerInfo.childCategories.filter((category) => category.hasElements));
-        }
+        result.definitionContainers.push(...applyElementsFilter(parentDefinitionContainerInfo.childDefinitionContainers, includeEmpty).map((dc) => dc.id));
+        result.categories.push(...applyElementsFilter(parentDefinitionContainerInfo.childCategories, includeEmpty));
       }
     });
     return result;
@@ -378,11 +373,9 @@ export class CategoriesTreeIdsCache implements Disposable {
         if (definitionContainerInfo === undefined) {
           return [];
         }
-        if (includeEmptyCategories) {
-          result.push(...definitionContainerInfo.childCategories.map((category) => category.id));
-        } else {
-          result.push(...definitionContainerInfo.childCategories.filter((category) => category.hasElements).map((category) => category.id));
-        }
+
+        result.push(...applyElementsFilter(definitionContainerInfo.childCategories, includeEmptyCategories).map((category) => category.id));
+
         return this.getAllContainedCategories({
           definitionContainerIds: definitionContainerInfo.childDefinitionContainers.map(({ id }) => id),
           includeEmptyCategories,
@@ -453,10 +446,8 @@ export class CategoriesTreeIdsCache implements Disposable {
       }
     });
     modelsCategoriesInfo.forEach((modelCategoriesInfo) => {
-      modelCategoriesInfo.childCategories.forEach((childCategory) => {
-        if (childCategory.hasElements || props?.includeEmpty) {
-          result.categories.push(childCategory.id);
-        }
+      applyElementsFilter(modelCategoriesInfo.childCategories, props?.includeEmpty).forEach((childCategory) => {
+        result.categories.push(childCategory.id);
       });
     });
     return result;
@@ -470,11 +461,7 @@ export class CategoriesTreeIdsCache implements Disposable {
     const result = { definitionContainers: new Array<Id64String>(), categories: new Array<CategoryInfo>() };
     for (const modelCategoriesInfo of modelsCategoriesInfo.values()) {
       if (!modelCategoriesInfo.parentDefinitionContainerExists) {
-        if (props?.includeEmpty) {
-          result.categories.push(...modelCategoriesInfo.childCategories);
-          continue;
-        }
-        result.categories.push(...modelCategoriesInfo.childCategories.filter((category) => category.hasElements));
+        result.categories.push(...applyElementsFilter(modelCategoriesInfo.childCategories, props?.includeEmpty));
       }
     }
 
@@ -511,4 +498,8 @@ export function getClassesByView(viewType: "2d" | "3d") {
   return viewType === "2d"
     ? { categoryClass: "BisCore.DrawingCategory", categoryElementClass: "BisCore.GeometricElement2d", categoryModelClass: "BisCore.GeometricModel2d" }
     : { categoryClass: "BisCore.SpatialCategory", categoryElementClass: "BisCore.GeometricElement3d", categoryModelClass: "BisCore.GeometricModel3d" };
+}
+
+function applyElementsFilter<T extends { hasElements?: boolean }>(list: T[], includeEmpty: boolean | undefined): T[] {
+  return includeEmpty ? list : list.filter(({ hasElements }) => !!hasElements);
 }
