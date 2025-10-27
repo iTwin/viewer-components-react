@@ -11,8 +11,8 @@ import { pushToMap } from "../../common/Utils.js";
 
 import type { Subscription } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
-import type { InstanceKey } from "@itwin/presentation-shared";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import type { InstanceKey } from "@itwin/presentation-shared";
 import type { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
 
 interface SubjectInfo {

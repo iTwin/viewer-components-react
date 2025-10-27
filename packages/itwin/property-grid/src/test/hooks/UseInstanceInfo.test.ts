@@ -10,8 +10,8 @@ import { useLoadedInstanceInfo } from "../../property-grid-react/hooks/UseInstan
 import { act, createFunctionStub, createResolvablePromise, renderHook, waitFor } from "../TestUtils.js";
 
 import type { PrimitiveValue } from "@itwin/appui-abstract";
-import type { IPresentationPropertyDataProvider, PresentationPropertyDataProvider } from "@itwin/presentation-components";
 import type { PropertyData } from "@itwin/components-react";
+import type { IPresentationPropertyDataProvider, PresentationPropertyDataProvider } from "@itwin/presentation-components";
 
 describe("useInstanceInfo", () => {
   const dataProvider = {

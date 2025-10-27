@@ -29,6 +29,7 @@
     "benchmark:tree-widget": "pnpm run -C ./apps/performance-tests benchmark:tree-widget"
   },
   "devDependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "^4.7.0",
     "beachball": "^2.54.0",
     "cpx2": "^7.0.2",
     "cspell": "^9.2.0",

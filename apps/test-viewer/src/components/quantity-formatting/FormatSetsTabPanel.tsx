@@ -7,9 +7,8 @@ import React from "react";
 import { Button, Flex, Text } from "@itwin/itwinui-react";
 import { FormatSetPanel, FormatSetSelector } from "@itwin/quantity-formatting-react";
 
-import type { FormatManager } from "./FormatManager";
-
 import type { FormatSet } from "@itwin/ecschema-metadata";
+import type { FormatManager } from "./FormatManager";
 
 interface FormatSetsTabPanelProps {
   formatManager: FormatManager;

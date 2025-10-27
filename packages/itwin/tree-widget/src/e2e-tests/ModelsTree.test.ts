@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Locator } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import {
   expandStagePanel,
@@ -18,6 +17,8 @@ import {
   takeScreenshot,
   withDifferentDensities,
 } from "./utils.js";
+
+import type { Locator } from "@playwright/test";
 
 test.describe("Models tree", () => {
   let treeWidget: Locator;

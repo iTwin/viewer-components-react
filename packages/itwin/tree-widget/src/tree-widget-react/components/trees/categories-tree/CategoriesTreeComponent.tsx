@@ -13,14 +13,14 @@ import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { CategoriesTree } from "./CategoriesTree.js";
 import { HideAllButton, InvertAllButton, ShowAllButton, useCategoriesTreeButtonProps } from "./CategoriesTreeButtons.js";
 
-import type { CategoriesTreeProps } from "./CategoriesTree.js";
 import type { ReactNode } from "react";
 import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
+import type { CategoriesTreeProps } from "./CategoriesTree.js";
 import type { CategoriesTreeHeaderButtonProps, CategoriesTreeHeaderButtonType } from "./CategoriesTreeButtons.js";
 
 /** @public */
 interface CategoriesTreeComponentProps
-  extends Pick<CategoriesTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
+  extends Pick<CategoriesTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode" | "hierarchyConfig"> {
   /**
    * Renderers of header buttons. Defaults to:
    * ```ts

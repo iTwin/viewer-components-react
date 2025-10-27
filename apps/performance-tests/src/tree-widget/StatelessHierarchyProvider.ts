@@ -28,6 +28,7 @@ interface ProviderOptionsBase {
   };
   queryCacheSize?: number;
 }
+
 type ProviderOptionsWithIModel = { iModel: IModelDb } & ProviderOptionsBase;
 
 type ProviderOptionsWithIModelAccess = { imodelAccess: IModelAccess } & ProviderOptionsBase;

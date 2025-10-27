@@ -41,14 +41,15 @@ import {
 } from "../Utils.js";
 import { validateHierarchyVisibility, VisibilityExpectations } from "./VisibilityValidation.js";
 
+import type { Id64String } from "@itwin/core-bentley";
+import type { GeometricElement3dProps, QueryBinder } from "@itwin/core-common";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath, HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { Visibility } from "../../../../tree-widget-react/components/trees/common/Tooltip.js";
 import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
 import type { ModelsTreeVisibilityHandlerProps } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { GeometricElement3dProps, QueryBinder } from "@itwin/core-common";
-import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath, HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
-import type { Id64String } from "@itwin/core-bentley";
 import type { ValidateNodeProps } from "./VisibilityValidation.js";
+
 interface VisibilityOverrides {
   models?: Map<Id64String, Visibility>;
   categories?: Map<Id64String, Visibility>;

@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./TreeWidgetUiItemsProvider.scss";
+
 import { useRef } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { StagePanelLocation, StagePanelSection, useTransientState } from "@itwin/appui-react";
@@ -13,10 +14,10 @@ import { Button, NonIdealState } from "@itwin/itwinui-react";
 import { TreeWidget } from "../TreeWidget.js";
 import { SelectableTree } from "./SelectableTree.js";
 
+import type { Ref } from "react";
+import type { FallbackProps } from "react-error-boundary";
 import type { Widget } from "@itwin/appui-react";
 import type { SelectableTreeDefinition, SelectableTreeProps } from "./SelectableTree.js";
-import type { FallbackProps } from "react-error-boundary";
-import type { Ref } from "react";
 
 /**
  * Props for `createWidget`.

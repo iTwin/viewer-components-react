@@ -45,7 +45,7 @@ export const CategoriesTreeComponent: {
 };
 
 // @public (undocumented)
-interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
+interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode" | "hierarchyConfig"> {
     headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode>;
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
@@ -60,6 +60,11 @@ interface CategoriesTreeHeaderButtonProps extends TreeHeaderButtonProps {
 
 // @public (undocumented)
 type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonProps) => JSX.Element | null;
+
+// @beta
+interface CategoriesTreeHierarchyConfiguration {
+    showEmptyCategories: boolean;
+}
 
 // @beta (undocumented)
 type CategoriesTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode"> & UseCategoriesTreeProps & {
@@ -479,7 +484,7 @@ interface TreeWithHeaderProps {
 }
 
 // @beta
-export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: UseCategoriesTreeProps): UseCategoriesTreeResult;
+export function useCategoriesTree({ hierarchyConfig, filter, activeView, onCategoriesFiltered }: UseCategoriesTreeProps): UseCategoriesTreeResult;
 
 // @public
 export function useCategoriesTreeButtonProps({ viewport }: {
@@ -495,6 +500,8 @@ interface UseCategoriesTreeProps {
     activeView: Viewport;
     // (undocumented)
     filter: string;
+    // (undocumented)
+    hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>;
     // (undocumented)
     onCategoriesFiltered?: (categories: CategoryInfo[] | undefined) => void;
 }

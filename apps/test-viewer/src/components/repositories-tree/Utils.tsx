@@ -4,9 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./Utils.scss";
-import type { PropsWithChildren } from "react";
+
 import { useLayoutEffect, useState } from "react";
 import { ProgressLinear } from "@itwin/itwinui-react";
+
+import type { PropsWithChildren } from "react";
 
 export function Delayed({ show, children }: PropsWithChildren<{ show: boolean }>) {
   const [visible, setVisible] = useState(false);
