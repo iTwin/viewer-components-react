@@ -4,10 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
+import { EMPTY, expand, from, mergeMap, queueScheduler } from "rxjs";
+import { waitFor } from "test-utilities";
 import { assert } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
+import { toVoidPromise } from "@itwin/tree-widget-react/internal";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
@@ -15,9 +18,6 @@ import type { HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/present
 import type { ECSqlQueryDef } from "@itwin/presentation-shared";
 import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
 import type { IModelAccess } from "./StatelessHierarchyProvider.js";
-import { toVoidPromise } from "@itwin/tree-widget-react/internal";
-import { EMPTY, expand, from, mergeMap, queueScheduler } from "rxjs";
-import { waitFor } from "test-utilities";
 
 type Visibility = "visible" | "hidden" | "partial";
 
