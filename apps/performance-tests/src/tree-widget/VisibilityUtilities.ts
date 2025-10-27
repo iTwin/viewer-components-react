@@ -4,13 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { EMPTY, expand, from, mergeMap } from "rxjs";
-import { waitFor } from "test-utilities";
 import { assert } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
-import { toVoidPromise } from "@itwin/tree-widget-react/internal";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
@@ -18,6 +15,9 @@ import type { ECSqlQueryDef } from "@itwin/presentation-shared";
 import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
 import type { IModelAccess } from "./StatelessHierarchyProvider.js";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import { toVoidPromise } from "@itwin/tree-widget-react/internal";
+import { EMPTY, expand, from, mergeMap, queueScheduler } from "rxjs";
+import { waitFor } from "test-utilities";
 
 type Visibility = "visible" | "hidden" | "partial";
 
@@ -66,7 +66,7 @@ export async function validateHierarchyVisibility({
   await new Promise((resolve) => setTimeout(resolve));
   await toVoidPromise(
     from(provider.getNodes({ parentNode: undefined })).pipe(
-      expand((node) => (node.children && !ignoreChildren(node) ? provider.getNodes({ parentNode: node }) : EMPTY), 1000),
+      expand((node) => (node.children && !ignoreChildren(node) ? provider.getNodes({ parentNode: node }) : EMPTY), 1000, queueScheduler),
       mergeMap(async (node) => waitFor(async () => validateNodeVisibility({ ...props, node }), 5000)),
     ),
   );

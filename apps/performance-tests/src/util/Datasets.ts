@@ -159,9 +159,16 @@ export class Datasets {
       const { id: categoryId } = insertSpatialCategory({ builder, codeValue: "test category" });
 
       const numberOfRootElements = 1000;
-      const numberOfDirectChildren = 1;
-      const numberOfIndirectChildren =
-        (numElements - numberOfRootElements - numberOfDirectChildren * numberOfRootElements) / (numberOfRootElements * numberOfDirectChildren);
+      // Number of children each direct child should have
+      const numberOfIndirectChildren = 2;
+      // Number of children each root element should have
+      const numberOfDirectChildren = Math.floor((numElements - numberOfRootElements) / (numberOfRootElements * (numberOfIndirectChildren + 1)));
+      // Due to rounding not enough elements would be inserted, calculate how many more nodes we need to add
+      let numberOfMissingElements =
+        numElements -
+        numberOfRootElements -
+        numberOfRootElements * numberOfDirectChildren -
+        numberOfRootElements * numberOfDirectChildren * numberOfIndirectChildren;
       for (let i = 0; i < numberOfRootElements; ++i) {
         const rootElementId = insertPhysicalElement({
           builder,
@@ -185,7 +192,17 @@ export class Datasets {
               modelId: physicalModelId,
               categoryId,
               userLabel: `indirect child ${i}-${j}-${z}`,
-            }).id;
+            });
+          }
+          if (numberOfMissingElements > 0) {
+            insertPhysicalElement({
+              builder,
+              parentId: directChildId,
+              modelId: physicalModelId,
+              categoryId,
+              userLabel: `indirect child ${i}-${j}-missing`,
+            });
+            --numberOfMissingElements;
           }
         }
       }
