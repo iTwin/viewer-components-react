@@ -240,14 +240,17 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
   private getSubModels(props: Parameters<BaseIdsCache["getSubModels"]>[0]): ReturnType<BaseIdsCache["getSubModels"]> {
     if ("modelIds" in props) {
       return from(Id64.iterable(props.modelIds)).pipe(
-        mergeMap((modelId) =>
-          from(this.#props.idsCache.getModelCategoryIds(modelId)).pipe(
+        mergeMap((modelId) => {
+          if (props.categoryId) {
+            return from(this.#props.idsCache.getCategoriesModeledElements(modelId, props.categoryId)).pipe(map((subModels) => ({ id: modelId, subModels })));
+          }
+          return from(this.#props.idsCache.getModelCategoryIds(modelId)).pipe(
             mergeMap(({ drawing, spatial }) => merge(drawing, spatial)),
             toArray(),
             mergeMap((categoryIds) => from(this.#props.idsCache.getCategoriesModeledElements(modelId, categoryIds))),
             map((subModels) => ({ id: modelId, subModels })),
-          ),
-        ),
+          );
+        }),
       );
     }
 

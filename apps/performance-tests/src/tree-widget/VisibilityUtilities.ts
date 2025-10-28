@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { EMPTY, expand, from, mergeMap } from "rxjs";
+import { EMPTY, expand, from, mergeMap, queueScheduler } from "rxjs";
 import { waitFor } from "test-utilities";
 import { assert } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
@@ -67,7 +67,7 @@ export async function validateHierarchyVisibility({
   await new Promise((resolve) => setTimeout(resolve));
   await toVoidPromise(
     from(provider.getNodes({ parentNode: undefined })).pipe(
-      expand((node) => (node.children && !ignoreChildren(node) ? provider.getNodes({ parentNode: node }) : EMPTY), 1000),
+      expand((node) => (node.children && !ignoreChildren(node) ? provider.getNodes({ parentNode: node }) : EMPTY), 1000, queueScheduler),
       mergeMap(async (node) => waitFor(async () => validateNodeVisibility({ ...props, node }), 5000)),
     ),
   );
@@ -312,7 +312,7 @@ export function createDefinitionContainerHierarchyNode(definitionContainerId: Id
 
 export async function getVisibilityTargets(
   imodelAccess: IModelAccess,
-): Promise<{ models: Id64Array; categories: Id64Array; subCategories: Id64Array; elements: Id64Array }> {
+): Promise<{ models: Id64Array; categories: Id64Array; subCategories: Id64Array; elements: Id64Array; definitionContainers: Id64Array }> {
   const query: ECSqlQueryDef = {
     ecsql: `
       SELECT
@@ -334,12 +334,18 @@ export async function getVisibilityTargets(
         CAST(IdToHex(ECInstanceId) AS TEXT) AS ECInstanceId,
         'BisCore.SubCategory' as ClassName
       FROM bis.SubCategory
+      UNION ALL
+      SELECT
+        CAST(IdToHex(ECInstanceId) AS TEXT) AS ECInstanceId,
+        'BisCore.DefinitionContainer' as ClassName
+      FROM bis.DefinitionContainer
     `,
   };
   const categories = new Array<Id64String>();
   const subCategories = new Array<Id64String>();
   const elements = new Array<Id64String>();
   const models = new Array<Id64String>();
+  const definitionContainers = new Array<Id64String>();
   for await (const row of imodelAccess.createQueryReader(query, { limit: "unbounded" })) {
     if (row.ClassName.toLowerCase().includes("subcategory")) {
       subCategories.push(row.ECInstanceId);
@@ -355,7 +361,11 @@ export async function getVisibilityTargets(
     }
     if (row.ClassName.toLowerCase().includes("model")) {
       models.push(row.ECInstanceId);
+      continue;
+    }
+    if (row.ClassName.toLowerCase().includes("container")) {
+      definitionContainers.push(row.ECInstanceId);
     }
   }
-  return { categories, subCategories, elements, models };
+  return { categories, subCategories, elements, models, definitionContainers };
 }

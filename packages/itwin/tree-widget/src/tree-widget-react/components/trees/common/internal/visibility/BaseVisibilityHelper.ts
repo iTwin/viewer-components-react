@@ -74,7 +74,7 @@ export interface BaseIdsCache {
   getModels: (props: { categoryIds: Id64Arg }) => Observable<{ id: Id64String; models: Id64Arg | undefined }>;
   getCategories: (props: { modelIds: Id64Arg }) => Observable<{ id: Id64String; drawingCategories?: Id64Arg; spatialCategories?: Id64Arg }>;
   getSubModels: (
-    props: { modelIds: Id64Arg } | { categoryIds: Id64Arg; modelId: Id64String | undefined },
+    props: { modelIds: Id64Arg; categoryId?: Id64String } | { categoryIds: Id64Arg; modelId: Id64String | undefined },
   ) => Observable<{ id: Id64String; subModels: Id64Arg | undefined }>;
   getAllCategories: () => Observable<{ drawingCategories?: Id64Set; spatialCategories?: Id64Set }>;
 }
@@ -366,7 +366,7 @@ export class BaseVisibilityHelper implements Disposable {
           return merge(
             // For hidden models we only need to check subModels
             hiddenModels.length > 0
-              ? this.#props.baseIdsCache.getSubModels({ modelIds: hiddenModels }).pipe(
+              ? this.#props.baseIdsCache.getSubModels({ modelIds: hiddenModels, categoryId }).pipe(
                   mergeMap(({ subModels }) => {
                     if (subModels && Id64.sizeOf(subModels) > 0) {
                       return this.getModelsVisibilityStatus({
