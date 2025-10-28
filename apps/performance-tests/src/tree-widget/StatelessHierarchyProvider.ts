@@ -26,6 +26,7 @@ interface ProviderOptionsBase {
   filtering?: {
     paths: HierarchyFilteringPath[];
   };
+  queryCacheSize?: number;
 }
 
 type ProviderOptionsWithIModel = { iModel: IModelDb } & ProviderOptionsBase;
@@ -108,7 +109,7 @@ export class StatelessHierarchyProvider implements Disposable {
     return createIModelHierarchyProvider({
       imodelAccess,
       hierarchyDefinition: this.#props.getHierarchyFactory(imodelAccess),
-      queryCacheSize: 0,
+      queryCacheSize: this.#props.queryCacheSize ?? 0,
       filtering: this.#props.filtering,
     });
   }

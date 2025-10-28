@@ -28,7 +28,7 @@ import {
 } from "./VisibilityUtilities.js";
 
 import type { Id64String } from "@itwin/core-bentley";
-import type { Viewport } from "@itwin/core-frontend";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { ECSqlQueryDef, InstanceKey } from "@itwin/presentation-shared";
 import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
@@ -80,6 +80,7 @@ describe("models tree", () => {
     handler: HierarchyVisibilityHandler & Disposable;
     provider: HierarchyProvider & Disposable;
     elementsModel: Id64String;
+    iModelConnection: IModelConnection;
   }>({
     testName: "validates categories visibility for imodel with 50k categories",
     setup: async () => {
@@ -101,6 +102,7 @@ describe("models tree", () => {
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
         imodelAccess,
+        queryCacheSize: Number.MAX_SAFE_INTEGER,
       });
       await validateHierarchyVisibility({
         ignoreChildren: (node) => !!node.extendedData?.isCategory,
@@ -110,7 +112,7 @@ describe("models tree", () => {
         expectations: "all-hidden",
       });
       const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
-      return { iModel, imodelAccess, viewport, provider, handler, elementsModel, idsCache };
+      return { iModel, imodelAccess, viewport, provider, handler, elementsModel, idsCache, iModelConnection };
     },
     cleanup: async (props) => {
       props.iModel.close();
@@ -118,6 +120,9 @@ describe("models tree", () => {
       props.handler[Symbol.dispose]();
       props.provider[Symbol.dispose]();
       props.idsCache[Symbol.dispose]();
+      if (!props.iModelConnection.isClosed) {
+        await props.iModelConnection.close();
+      }
     },
     test: async ({ viewport, handler, provider, elementsModel }) => {
       // Add one element to always draw set to trigger additional queries
@@ -142,6 +147,7 @@ describe("models tree", () => {
     handler: HierarchyVisibilityHandler & Disposable;
     provider: HierarchyProvider & Disposable;
     elementsModel: Id64String;
+    iModelConnection: IModelConnection;
   }>({
     testName: "changing model visibility changes visibility for 50k elements",
     setup: async () => {
@@ -163,6 +169,7 @@ describe("models tree", () => {
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
         imodelAccess,
+        queryCacheSize: Number.MAX_SAFE_INTEGER,
       });
       await validateHierarchyVisibility({
         provider,
@@ -171,7 +178,7 @@ describe("models tree", () => {
         expectations: "all-hidden",
       });
       const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
-      return { iModel, imodelAccess, viewport, provider, handler, elementsModel, idsCache };
+      return { iModel, imodelAccess, viewport, provider, handler, elementsModel, idsCache, iModelConnection };
     },
     cleanup: async (props) => {
       props.iModel.close();
@@ -179,6 +186,9 @@ describe("models tree", () => {
       props.handler[Symbol.dispose]();
       props.provider[Symbol.dispose]();
       props.idsCache[Symbol.dispose]();
+      if (!props.iModelConnection.isClosed) {
+        await props.iModelConnection.close();
+      }
     },
     test: async ({ viewport, handler, provider, elementsModel }) => {
       await handler.changeVisibility(createModelHierarchyNode(elementsModel), true);
@@ -200,6 +210,7 @@ describe("models tree", () => {
     provider: HierarchyProvider & Disposable;
     elementsCategory: Id64String;
     elementsModel: Id64String;
+    iModelConnection: IModelConnection;
   }>({
     testName: "changing category visibility changes visibility for 50k elements",
     setup: async () => {
@@ -221,6 +232,7 @@ describe("models tree", () => {
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
         imodelAccess,
+        queryCacheSize: Number.MAX_SAFE_INTEGER,
       });
       await validateHierarchyVisibility({
         provider,
@@ -231,7 +243,7 @@ describe("models tree", () => {
       const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
       expect(visibilityTargets.categories.length).to.be.eq(1);
       const elementsCategory = visibilityTargets.categories[0];
-      return { iModel, imodelAccess, viewport, provider, handler, elementsCategory, elementsModel, idsCache };
+      return { iModel, imodelAccess, viewport, provider, handler, elementsCategory, elementsModel, idsCache, iModelConnection };
     },
     cleanup: async (props) => {
       props.iModel.close();
@@ -239,6 +251,9 @@ describe("models tree", () => {
       props.handler[Symbol.dispose]();
       props.provider[Symbol.dispose]();
       props.idsCache[Symbol.dispose]();
+      if (!props.iModelConnection.isClosed) {
+        await props.iModelConnection.close();
+      }
     },
     test: async ({ viewport, handler, provider, elementsCategory, elementsModel }) => {
       await handler.changeVisibility(createCategoryHierarchyNode(elementsCategory, true, elementsModel), false);
@@ -260,6 +275,7 @@ describe("models tree", () => {
     provider: HierarchyProvider & Disposable;
     elementsCategory: Id64String;
     elementsModel: Id64String;
+    iModelConnection: IModelConnection;
   }>({
     testName: "changing per-model-category override changes visibility for 50k elements",
     setup: async () => {
@@ -281,6 +297,7 @@ describe("models tree", () => {
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
         imodelAccess,
+        queryCacheSize: Number.MAX_SAFE_INTEGER,
       });
 
       const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
@@ -294,7 +311,7 @@ describe("models tree", () => {
         viewport,
         expectations: "all-visible",
       });
-      return { iModel, imodelAccess, viewport, provider, handler, elementsCategory, elementsModel, idsCache };
+      return { iModel, imodelAccess, viewport, provider, handler, elementsCategory, elementsModel, idsCache, iModelConnection };
     },
     cleanup: async (props) => {
       props.iModel.close();
@@ -302,6 +319,9 @@ describe("models tree", () => {
       props.handler[Symbol.dispose]();
       props.provider[Symbol.dispose]();
       props.idsCache[Symbol.dispose]();
+      if (!props.iModelConnection.isClosed) {
+        await props.iModelConnection.close();
+      }
     },
     test: async ({ viewport, handler, provider, elementsCategory, elementsModel }) => {
       viewport.perModelCategoryVisibility.setOverride(elementsModel, elementsCategory, PerModelCategoryVisibility.Override.Hide);
@@ -322,6 +342,7 @@ describe("models tree", () => {
     handler: HierarchyVisibilityHandler & Disposable;
     provider: HierarchyProvider & Disposable;
     node: { modelId: Id64String; categoryId: Id64String; elementId: Id64String; subjectId: Id64String };
+    iModelConnection: IModelConnection;
   }>({
     testName: "changing element visibility changes only parent nodes visibility with 50k elements",
     setup: async () => {
@@ -343,6 +364,7 @@ describe("models tree", () => {
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new ModelsTreeDefinition({ idsCache, imodelAccess, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
         imodelAccess,
+        queryCacheSize: Number.MAX_SAFE_INTEGER,
       });
 
       const elementsModel = iModel.elements.getElementProps(visibilityTargets.elements[0]).model;
@@ -356,7 +378,7 @@ describe("models tree", () => {
         expectations: "all-hidden",
       });
 
-      return { iModel, imodelAccess, viewport, provider, handler, node, idsCache };
+      return { iModel, imodelAccess, viewport, provider, handler, node, idsCache, iModelConnection };
     },
     cleanup: async (props) => {
       props.iModel.close();
@@ -364,6 +386,9 @@ describe("models tree", () => {
       props.handler[Symbol.dispose]();
       props.provider[Symbol.dispose]();
       props.idsCache[Symbol.dispose]();
+      if (!props.iModelConnection.isClosed) {
+        await props.iModelConnection.close();
+      }
     },
     test: async ({ viewport, handler, provider, node }) => {
       await handler.changeVisibility(createElementHierarchyNode(node), true);
