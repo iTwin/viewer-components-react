@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./TreeHeader.scss";
+
 import classnames from "classnames";
 import { Children, useEffect, useRef, useState } from "react";
 import { SvgCaretDownSmall, SvgCaretUpSmall, SvgMore } from "@itwin/itwinui-icons-react";

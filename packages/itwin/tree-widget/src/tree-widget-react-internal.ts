@@ -12,7 +12,10 @@ export {
 } from "./tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 export { ModelsTreeIdsCache } from "./tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 export { createModelsTreeVisibilityHandler } from "./tree-widget-react/components/trees/models-tree/internal/ModelsTreeVisibilityHandler.js";
-export { CategoriesTreeDefinition } from "./tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
+export {
+  CategoriesTreeDefinition,
+  defaultHierarchyConfiguration as defaultCategoriesTreeHierarchyConfiguration,
+} from "./tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 export { CategoriesTreeIdsCache } from "./tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 export { CategoriesVisibilityHandler } from "./tree-widget-react/components/trees/categories-tree/internal/CategoriesVisibilityHandler.js";
 export { toVoidPromise, collect } from "./tree-widget-react/components/trees/common/Rxjs.js";

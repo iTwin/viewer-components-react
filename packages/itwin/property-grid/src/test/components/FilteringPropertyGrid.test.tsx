@@ -17,6 +17,7 @@ import { PropertyGridManager } from "../../property-grid-react/PropertyGridManag
 import { createPropertyRecord, render, waitFor } from "../TestUtils.js";
 
 import type { IPropertyDataProvider, PropertyData } from "@itwin/components-react";
+
 describe("<FilteringPropertyGrid />", () => {
   const provider: IPropertyDataProvider = {
     onDataChanged: new PropertyDataChangeEvent(),

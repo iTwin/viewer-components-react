@@ -6,12 +6,12 @@
 import { useCallback } from "react";
 import { Tree } from "@itwin/itwinui-react";
 import { createRenderedTreeNodeData, LocalizationContextProvider } from "@itwin/presentation-hierarchies-react";
-import { TreeNodeRenderer } from "./TreeNodeRenderer.js";
 import { useHierarchiesLocalization } from "../UseHierarchiesLocalization.js";
+import { TreeNodeRenderer } from "./TreeNodeRenderer.js";
 
-import type { TreeNodeRendererProps } from "./TreeNodeRenderer.js";
 import type { ComponentPropsWithoutRef } from "react";
 import type { PresentationHierarchyNode, PresentationTreeNode, RenderedTreeNode } from "@itwin/presentation-hierarchies-react";
+import type { TreeNodeRendererProps } from "./TreeNodeRenderer.js";
 
 /** @beta */
 export type TreeRendererProps = Pick<

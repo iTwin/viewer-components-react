@@ -14,12 +14,14 @@ import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import type { Visibility } from "../../common/Tooltip.js";
 import type { HierarchyVisibilityHandler, VisibilityStatus } from "../../common/UseHierarchyVisibility.js";
+import type { CategoriesTreeHierarchyConfiguration } from "../CategoriesTreeDefinition.js";
 import type { CategoriesTreeIdsCache } from "./CategoriesTreeIdsCache.js";
 
 /** @internal */
 export interface CategoriesVisibilityHandlerProps {
   viewport: Viewport;
   idsCache: CategoriesTreeIdsCache;
+  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
 }
 
 /** @internal */
@@ -27,6 +29,7 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
   #pendingVisibilityChange: any;
   #viewport: Viewport;
   #idsCache: CategoriesTreeIdsCache;
+  #hierarchyConfig: CategoriesTreeHierarchyConfiguration;
 
   constructor(props: CategoriesVisibilityHandlerProps) {
     this.#idsCache = props.idsCache;
@@ -35,6 +38,7 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
     this.#viewport.onViewedCategoriesChanged.addListener(this.onViewedCategoriesChanged);
     this.#viewport.onViewedCategoriesPerModelChanged.addListener(this.onViewedCategoriesPerModelChanged);
     this.#viewport.onViewedModelsChanged.addListener(this.onViewedModelsChanged);
+    this.#hierarchyConfig = props.hierarchyConfig;
   }
 
   public dispose() {
@@ -157,7 +161,10 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
   }
 
   private async getDefinitionContainerVisibility(node: HierarchyNode): Promise<Visibility> {
-    const categoryIds = await this.#idsCache.getAllContainedCategories(CategoriesVisibilityHandler.getInstanceIdsFromHierarchyNode(node));
+    const categoryIds = await this.#idsCache.getAllContainedCategories({
+      definitionContainerIds: CategoriesVisibilityHandler.getInstanceIdsFromHierarchyNode(node),
+      includeEmptyCategories: this.#hierarchyConfig.showEmptyCategories,
+    });
     return this.getCategoriesVisibility(categoryIds);
   }
 
@@ -218,7 +225,10 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
 
   private async changeDefinitionContainerVisibility(node: HierarchyNode, on: boolean) {
     const definitionContainerId = CategoriesVisibilityHandler.getInstanceIdsFromHierarchyNode(node);
-    const childCategories = await this.#idsCache.getAllContainedCategories(definitionContainerId);
+    const childCategories = await this.#idsCache.getAllContainedCategories({
+      definitionContainerIds: definitionContainerId,
+      includeEmptyCategories: this.#hierarchyConfig.showEmptyCategories,
+    });
     return this.changeCategoryVisibility(childCategories, on);
   }
 

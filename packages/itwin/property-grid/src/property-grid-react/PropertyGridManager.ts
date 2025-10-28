@@ -3,9 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Localization, TranslationOptions } from "@itwin/core-common";
 import { BentleyError, BentleyStatus } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
+
+import type { Localization, TranslationOptions } from "@itwin/core-common";
 
 /**
  * Entry point for static initialization required by various components used in the package.

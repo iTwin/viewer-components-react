@@ -12,11 +12,11 @@ import { computeSelection, Selectables } from "@itwin/unified-selection";
 import { useTelemetryContext } from "./UseTelemetryContext.js";
 import { useSelectionHandler } from "./UseUnifiedSelectionHandler.js";
 
-import type { SelectionStorage } from "./UseUnifiedSelectionHandler.js";
-import type { ECSqlQueryExecutor } from "@itwin/presentation-shared";
-import type { InstanceKey } from "@itwin/presentation-common";
 import type { IModelConnection } from "@itwin/core-frontend";
+import type { InstanceKey } from "@itwin/presentation-common";
+import type { ECSqlQueryExecutor } from "@itwin/presentation-shared";
 import type { SelectableInstanceKey } from "@itwin/unified-selection";
+import type { SelectionStorage } from "./UseUnifiedSelectionHandler.js";
 
 const PropertyGridSelectionScope = "Property Grid";
 

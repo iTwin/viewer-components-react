@@ -11,12 +11,12 @@ import { toVoidPromise } from "../../../../tree-widget-react/components/trees/co
 import { ModelsTreeNode } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeNode.js";
 import { waitFor } from "../../../TestUtils.js";
 
-import type { waitForOptions } from "../../../TestUtils.js";
-import type { Visibility } from "../../../../tree-widget-react/components/trees/common/Tooltip.js";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
+import type { Visibility } from "../../../../tree-widget-react/components/trees/common/Tooltip.js";
 import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
+import type { waitForOptions } from "../../../TestUtils.js";
 
 interface VisibilityExpectations {
   subject(id: string): Visibility;

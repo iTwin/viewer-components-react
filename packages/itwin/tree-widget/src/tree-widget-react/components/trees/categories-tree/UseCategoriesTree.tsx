@@ -14,7 +14,7 @@ import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 import { useGuid } from "../common/useGuid.js";
 import { useTelemetryContext } from "../common/UseTelemetryContext.js";
-import { CategoriesTreeDefinition } from "./CategoriesTreeDefinition.js";
+import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
 import { CategoriesVisibilityHandler } from "./internal/CategoriesVisibilityHandler.js";
 import { DEFINITION_CONTAINER_CLASS, SUB_CATEGORY_CLASS } from "./internal/ClassNameDefinitions.js";
@@ -28,6 +28,8 @@ import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
+import type { CategoriesTreeHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
+
 type CategoriesTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError";
 type HierarchyFilteringPaths = Awaited<ReturnType<Required<VisibilityTreeProps>["getFilteredPaths"]>>;
 
@@ -36,6 +38,7 @@ export interface UseCategoriesTreeProps {
   filter: string;
   activeView: Viewport;
   onCategoriesFiltered?: (categories: CategoryInfo[] | undefined) => void;
+  hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>;
 }
 
 /** @beta */
@@ -51,9 +54,17 @@ interface UseCategoriesTreeResult {
  * Custom hook to create and manage state for the categories tree.
  * @beta
  */
-export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: UseCategoriesTreeProps): UseCategoriesTreeResult {
+export function useCategoriesTree({ hierarchyConfig, filter, activeView, onCategoriesFiltered }: UseCategoriesTreeProps): UseCategoriesTreeResult {
   const [filteringError, setFilteringError] = useState<CategoriesTreeFilteringError | undefined>();
 
+  const hierarchyConfiguration = useMemo<CategoriesTreeHierarchyConfiguration>(
+    () => ({
+      ...defaultHierarchyConfiguration,
+      ...hierarchyConfig,
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    Object.values(hierarchyConfig ?? {}),
+  );
   const viewType = activeView.view.is2d() ? "2d" : "3d";
   const iModel = activeView.iModel;
   const componentId = useGuid();
@@ -68,6 +79,7 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
     const visibilityHandler = new CategoriesVisibilityHandler({
       viewport: activeView,
       idsCache: getCategoriesTreeIdsCache(),
+      hierarchyConfig: hierarchyConfiguration,
     });
     return {
       getVisibilityStatus: async (node: HierarchyNode) => visibilityHandler.getVisibilityStatus(node),
@@ -75,14 +87,14 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
       onVisibilityChange: visibilityHandler.onVisibilityChange,
       dispose: () => visibilityHandler.dispose(),
     };
-  }, [activeView, getCategoriesTreeIdsCache]);
+  }, [activeView, getCategoriesTreeIdsCache, hierarchyConfiguration]);
   const { onFeatureUsed } = useTelemetryContext();
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
     (props) => {
-      return new CategoriesTreeDefinition({ ...props, viewType, idsCache: getCategoriesTreeIdsCache() });
+      return new CategoriesTreeDefinition({ ...props, viewType, idsCache: getCategoriesTreeIdsCache(), hierarchyConfig: hierarchyConfiguration });
     },
-    [viewType, getCategoriesTreeIdsCache],
+    [viewType, getCategoriesTreeIdsCache, hierarchyConfiguration],
   );
 
   const getFilteredPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
@@ -101,8 +113,9 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
           idsCache: getCategoriesTreeIdsCache(),
           abortSignal,
           componentId,
+          hierarchyConfig: hierarchyConfiguration,
         });
-        onCategoriesFiltered?.(await getCategoriesFromPaths(paths, getCategoriesTreeIdsCache()));
+        onCategoriesFiltered?.(await getCategoriesFromPaths({ paths, idsCache: getCategoriesTreeIdsCache(), hierarchyConfig: hierarchyConfiguration }));
         return paths;
       } catch (e) {
         const newError = e instanceof FilterLimitExceededError ? "tooManyFilterMatches" : "unknownFilterError";
@@ -114,7 +127,7 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
         return [];
       }
     };
-  }, [filter, viewType, onFeatureUsed, onCategoriesFiltered, getCategoriesTreeIdsCache, componentId]);
+  }, [filter, viewType, onFeatureUsed, onCategoriesFiltered, getCategoriesTreeIdsCache, componentId, hierarchyConfiguration]);
 
   return {
     categoriesTreeProps: {
@@ -132,7 +145,12 @@ export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: 
   };
 }
 
-async function getCategoriesFromPaths(paths: HierarchyFilteringPaths, idsCache: CategoriesTreeIdsCache): Promise<CategoryInfo[] | undefined> {
+async function getCategoriesFromPaths(props: {
+  paths: HierarchyFilteringPaths;
+  idsCache: CategoriesTreeIdsCache;
+  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
+}): Promise<CategoryInfo[] | undefined> {
+  const { paths, idsCache, hierarchyConfig } = props;
   if (!paths) {
     return undefined;
   }
@@ -153,7 +171,10 @@ async function getCategoriesFromPaths(paths: HierarchyFilteringPaths, idsCache: 
     }
 
     if (lastNode.className === DEFINITION_CONTAINER_CLASS) {
-      const definitionContainerCategories = await idsCache.getAllContainedCategories([lastNode.id]);
+      const definitionContainerCategories = await idsCache.getAllContainedCategories({
+        definitionContainerIds: [lastNode.id],
+        includeEmptyCategories: hierarchyConfig.showEmptyCategories,
+      });
       for (const categoryId of definitionContainerCategories) {
         const value = categories.get(categoryId);
         if (value === undefined) {

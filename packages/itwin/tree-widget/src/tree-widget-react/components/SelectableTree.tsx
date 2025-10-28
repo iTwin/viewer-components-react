@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./SelectableTree.scss";
+
 import { useEffect, useState } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Flex, ProgressLinear } from "@itwin/itwinui-react";
