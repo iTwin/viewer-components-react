@@ -178,7 +178,7 @@
 
 .quantityFormat--formatSetSelector-listItem {
   cursor: pointer;
-  padding: var(--iui-size-xs);
+  padding: var(--iui-size-xs) var(--iui-size-s);
   transition: background-color 0.2s ease;
 }
 
@@ -200,7 +200,6 @@
   flex-direction: column;
   align-items: flex-start;
   gap: var(--iui-size-m);
-  padding: var(--iui-size-s);
 }
 
 .quantityFormat--formatSetPanel-emptyState {
