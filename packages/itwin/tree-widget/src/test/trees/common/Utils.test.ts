@@ -7,8 +7,8 @@ import { expect } from "chai";
 import { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
 import { joinHierarchyFilteringPaths } from "../../../tree-widget-react/components/trees/common/Utils.js";
 
-import type { NormalizedHierarchyFilteringPath } from "../../../tree-widget-react/components/trees/common/Utils.js";
 import type { HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
+import type { NormalizedHierarchyFilteringPath } from "../../../tree-widget-react/components/trees/common/Utils.js";
 
 describe("Utils", () => {
   describe("joinHierarchyFilteringPaths", () => {

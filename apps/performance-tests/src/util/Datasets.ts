@@ -158,20 +158,52 @@ export class Datasets {
       const { id: physicalModelId } = insertPhysicalModelWithPartition({ builder, codeValue: "test physical model" });
       const { id: categoryId } = insertSpatialCategory({ builder, codeValue: "test category" });
 
-      const numberOfGroups = 1000;
-      const elementsPerGroup = numElements / numberOfGroups;
-
-      for (let i = 0; i < numberOfGroups; ++i) {
-        let physicalElementParentId: string | undefined;
-
-        for (let j = 0; j < elementsPerGroup; ++j) {
-          physicalElementParentId = insertPhysicalElement({
+      const numberOfRootElements = 1000;
+      // Number of children each direct child should have
+      const numberOfIndirectChildren = 2;
+      // Number of children each root element should have
+      const numberOfDirectChildren = Math.floor((numElements - numberOfRootElements) / (numberOfRootElements * (numberOfIndirectChildren + 1)));
+      // Due to rounding not enough elements would be inserted, calculate how many more nodes we need to add
+      let numberOfMissingElements =
+        numElements -
+        numberOfRootElements -
+        numberOfRootElements * numberOfDirectChildren -
+        numberOfRootElements * numberOfDirectChildren * numberOfIndirectChildren;
+      for (let i = 0; i < numberOfRootElements; ++i) {
+        const rootElementId = insertPhysicalElement({
+          builder,
+          parentId: undefined,
+          modelId: physicalModelId,
+          categoryId,
+          userLabel: `root element${i}`,
+        }).id;
+        for (let j = 0; j < numberOfDirectChildren; ++j) {
+          const directChildId = insertPhysicalElement({
             builder,
-            parentId: physicalElementParentId,
+            parentId: rootElementId,
             modelId: physicalModelId,
             categoryId,
-            userLabel: "test_element",
+            userLabel: `direct child ${i}-${j}`,
           }).id;
+          for (let z = 0; z < numberOfIndirectChildren; ++z) {
+            insertPhysicalElement({
+              builder,
+              parentId: directChildId,
+              modelId: physicalModelId,
+              categoryId,
+              userLabel: `indirect child ${i}-${j}-${z}`,
+            });
+          }
+          if (numberOfMissingElements > 0) {
+            insertPhysicalElement({
+              builder,
+              parentId: directChildId,
+              modelId: physicalModelId,
+              categoryId,
+              userLabel: `indirect child ${i}-${j}-missing`,
+            });
+            --numberOfMissingElements;
+          }
         }
       }
     });

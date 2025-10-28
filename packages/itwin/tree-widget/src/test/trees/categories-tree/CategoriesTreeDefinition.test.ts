@@ -9,7 +9,10 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-import { CategoriesTreeDefinition } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
+import {
+  CategoriesTreeDefinition,
+  defaultHierarchyConfiguration,
+} from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 import {
   buildIModel,
@@ -27,6 +30,7 @@ import { createIModelAccess } from "../Common.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
+import type { CategoriesTreeHierarchyConfiguration } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 
 describe("Categories tree", () => {
   describe("Hierarchy definition", () => {
@@ -162,6 +166,44 @@ describe("Categories tree", () => {
       await validateHierarchy({
         provider,
         expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.category],
+            supportsFiltering: true,
+            children: false,
+          }),
+        ],
+      });
+    });
+
+    it("shows definition container and category when category does not have elements and showEmptyCategories is true", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+
+        const emptyCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory1", modelId: definitionModel.id });
+        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
+
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+        return { category, emptyCategory, definitionContainer };
+      });
+
+      const { imodel, ...keys } = buildIModelResult;
+      using provider = createCategoryTreeProvider(imodel, "3d", { showEmptyCategories: true });
+
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.definitionContainer],
+            supportsFiltering: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.emptyCategory],
+                children: false,
+              }),
+            ],
+          }),
           NodeValidators.createForInstanceNode({
             instanceKeys: [keys.category],
             supportsFiltering: true,
@@ -439,10 +481,18 @@ describe("Categories tree", () => {
   });
 });
 
-function createCategoryTreeProvider(imodel: IModelConnection, viewType: "2d" | "3d") {
+function createCategoryTreeProvider(imodel: IModelConnection, viewType: "2d" | "3d", hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>) {
   const imodelAccess = createIModelAccess(imodel);
   return createIModelHierarchyProvider({
     imodelAccess,
-    hierarchyDefinition: new CategoriesTreeDefinition({ imodelAccess, viewType, idsCache: new CategoriesTreeIdsCache(imodelAccess, viewType) }),
+    hierarchyDefinition: new CategoriesTreeDefinition({
+      imodelAccess,
+      viewType,
+      idsCache: new CategoriesTreeIdsCache(imodelAccess, viewType),
+      hierarchyConfig: {
+        ...defaultHierarchyConfiguration,
+        ...hierarchyConfig,
+      },
+    }),
   });
 }

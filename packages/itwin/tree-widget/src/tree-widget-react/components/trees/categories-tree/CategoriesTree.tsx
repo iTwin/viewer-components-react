@@ -7,8 +7,8 @@ import { VisibilityTree } from "../common/components/VisibilityTree.js";
 import { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRenderer.js";
 import { useCategoriesTree } from "./UseCategoriesTree.js";
 
-import type { UseCategoriesTreeProps } from "./UseCategoriesTree.js";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
+import type { UseCategoriesTreeProps } from "./UseCategoriesTree.js";
 
 /** @beta */
 export type CategoriesTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode"> &
@@ -27,6 +27,7 @@ export function CategoriesTree({
   filter,
   density,
   hierarchyLevelConfig,
+  hierarchyConfig,
   selectionMode,
   onCategoriesFiltered,
 }: CategoriesTreeProps) {
@@ -34,6 +35,7 @@ export function CategoriesTree({
     filter,
     activeView,
     onCategoriesFiltered,
+    hierarchyConfig,
   });
 
   return (

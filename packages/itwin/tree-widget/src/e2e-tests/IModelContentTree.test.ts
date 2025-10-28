@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Locator } from "@playwright/test";
 import { test } from "@playwright/test";
 import {
   initTreeWidgetTest,
@@ -16,6 +15,8 @@ import {
   takeScreenshot,
   withDifferentDensities,
 } from "./utils.js";
+
+import type { Locator } from "@playwright/test";
 
 test.describe("iModel content tree", () => {
   let treeWidget: Locator;

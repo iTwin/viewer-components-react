@@ -18,13 +18,13 @@ import { useReportingAction, useTelemetryContext } from "../UseTelemetryContext.
 import { Delayed } from "./Delayed.js";
 import { ProgressOverlay } from "./ProgressOverlay.js";
 
-import type { MarkRequired } from "@itwin/core-bentley";
-import type { FunctionProps } from "../Utils.js";
 import type { ReactNode } from "react";
+import type { MarkRequired } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type { PresentationHierarchyNode, SelectionStorage, useIModelTree } from "@itwin/presentation-hierarchies-react";
 import type { HighlightInfo } from "../UseNodeHighlighting.js";
+import type { FunctionProps } from "../Utils.js";
 import type { TreeRendererProps } from "./TreeRenderer.js";
 
 /** @beta */

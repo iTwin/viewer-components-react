@@ -43,11 +43,12 @@ import { RepositoriesTreeComponent } from "./components/repositories-tree/Reposi
 import { useViewerOptionsContext } from "./components/ViewerOptions";
 import { unifiedSelectionStorage } from "./SelectionStorage";
 
+import type { ComponentPropsWithRef } from "react";
+import type { UiItemsProvider } from "@itwin/appui-react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ClientPrefix } from "@itwin/grouping-mapping-widget";
 import type { SelectableTreeDefinition } from "@itwin/tree-widget-react";
-import type { UiItemsProvider } from "@itwin/appui-react";
-import type { ComponentPropsWithRef } from "react";
+
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
   getUiItemsProviders: () => UiItemsProvider[];

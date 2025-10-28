@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { EMPTY, expand, from, mergeMap } from "rxjs";
+import { EMPTY, expand, from, mergeMap, queueScheduler } from "rxjs";
 import { waitFor } from "test-utilities";
 import { assert } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
@@ -77,7 +77,7 @@ export async function validateHierarchyVisibility({
   await new Promise((resolve) => setTimeout(resolve));
   await toVoidPromise(
     from(provider.getNodes({ parentNode: undefined })).pipe(
-      expand((node) => (node.children && !ignoreChildren(node) ? provider.getNodes({ parentNode: node }) : EMPTY), 1000),
+      expand((node) => (node.children && !ignoreChildren(node) ? provider.getNodes({ parentNode: node }) : EMPTY), 1000, queueScheduler),
       mergeMap(async (node) => waitFor(async () => validateNodeVisibility({ ...props, node }), 5000)),
     ),
   );

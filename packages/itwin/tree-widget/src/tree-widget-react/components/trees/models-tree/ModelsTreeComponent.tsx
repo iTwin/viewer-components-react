@@ -22,9 +22,9 @@ import {
   View3DButton,
 } from "./ModelsTreeButtons.js";
 
-import type { ModelsTreeProps } from "./ModelsTree.js";
 import type { ReactNode } from "react";
 import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
+import type { ModelsTreeProps } from "./ModelsTree.js";
 import type { ModelsTreeHeaderButtonProps, ModelsTreeHeaderButtonType } from "./ModelsTreeButtons.js";
 
 /** @public */

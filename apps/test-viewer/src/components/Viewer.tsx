@@ -16,8 +16,8 @@ import { unifiedSelectionStorage } from "../SelectionStorage";
 import { getUiProvidersConfig } from "../UiProvidersConfig";
 import { ApiKeys } from "./ApiKeys";
 import { useAuthorizationContext } from "./Authorization";
-import { statusBarActionsProvider, ViewerOptionsProvider } from "./ViewerOptions";
 import { FormatManager } from "./quantity-formatting/FormatManager";
+import { statusBarActionsProvider, ViewerOptionsProvider } from "./ViewerOptions";
 
 import type { ComponentPropsWithoutRef } from "react";
 import type { FormatSet } from "@itwin/ecschema-metadata";

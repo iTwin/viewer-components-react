@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./App.scss";
+
 import { ErrorBoundary } from "react-error-boundary";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { FillCentered } from "@itwin/core-react";

@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./PropertyGridUiItemsProvider.scss";
+
 import { useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { StagePanelLocation, StagePanelSection, StageUsage, useActiveIModelConnection, useSpecificWidgetDef, WidgetState } from "@itwin/appui-react";
@@ -20,9 +21,9 @@ import { PropertyGridComponent } from "./PropertyGridComponent.js";
 import { PropertyGridManager } from "./PropertyGridManager.js";
 
 import type { ReactNode } from "react";
-import type { SelectionStorage } from "./hooks/UseUnifiedSelectionHandler.js";
 import type { FallbackProps } from "react-error-boundary";
 import type { UiItemsProvider, Widget, WidgetDef } from "@itwin/appui-react";
+import type { SelectionStorage } from "./hooks/UseUnifiedSelectionHandler.js";
 import type { PropertyGridComponentProps } from "./PropertyGridComponent.js";
 
 /**

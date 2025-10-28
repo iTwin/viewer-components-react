@@ -6,8 +6,8 @@
 import { Checkbox, Tooltip } from "@itwin/itwinui-react";
 import { isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
-import type { PresentationHierarchyNode, RenderedTreeNode } from "@itwin/presentation-hierarchies-react";
 import type { ComponentPropsWithoutRef } from "react";
+import type { PresentationHierarchyNode, RenderedTreeNode } from "@itwin/presentation-hierarchies-react";
 
 /**
  * Data structure that describes tree node checkbox state.

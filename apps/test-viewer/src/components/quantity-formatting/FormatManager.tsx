@@ -10,6 +10,7 @@ import { SchemaFormatsProvider, SchemaItem, SchemaItemType, SchemaKey, SchemaMat
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { FormatDefinition, FormatsChangedArgs, FormatsProvider, MutableFormatsProvider } from "@itwin/core-quantity";
 import type { FormatSet } from "@itwin/ecschema-metadata";
+
 export class FormatManager {
   protected static _instance: FormatManager;
   private _formatSets: FormatSet[] = [];

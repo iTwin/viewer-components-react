@@ -14,12 +14,12 @@ import { renderHook as renderHookRTL, render as renderRTL } from "@testing-libra
 import { userEvent } from "@testing-library/user-event";
 import { TreeWidget } from "../tree-widget-react/TreeWidget.js";
 
+import type { PropsWithChildren, ReactElement } from "react";
 import type { IModelConnection, PerModelCategoryVisibility, Viewport, ViewState } from "@itwin/core-frontend";
 import type { RegisteredRuleset, Ruleset, VariableValue } from "@itwin/presentation-common";
-import type { PropsWithChildren, ReactElement } from "react";
+import type { IModelHierarchyChangeEventArgs, PresentationManager, RulesetManager, RulesetVariablesManager } from "@itwin/presentation-frontend";
 import type { RenderHookOptions, RenderHookResult, RenderOptions, RenderResult } from "@testing-library/react";
 import type { UserEvent } from "@testing-library/user-event";
-import type { IModelHierarchyChangeEventArgs, PresentationManager, RulesetManager, RulesetVariablesManager } from "@itwin/presentation-frontend";
 
 export class TestUtils {
   private static _initialized = false;
