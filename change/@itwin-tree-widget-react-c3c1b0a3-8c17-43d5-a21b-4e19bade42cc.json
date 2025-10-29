@@ -1,7 +1,7 @@
 {
-  "type": "none",
+  "type": "patch",
   "comment": "",
   "packageName": "@itwin/tree-widget-react",
   "email": "100586436+JonasDov@users.noreply.github.com",
-  "dependentChangeType": "none"
+  "dependentChangeType": "patch"
 }
