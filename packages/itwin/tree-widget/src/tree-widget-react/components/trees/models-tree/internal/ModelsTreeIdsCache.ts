@@ -3,13 +3,13 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, bufferTime, filter, firstValueFrom, from, map, mergeAll, mergeMap, reduce, ReplaySubject, Subject } from "rxjs";
+import { bufferCount, bufferTime, defer, filter, firstValueFrom, forkJoin, from, map, mergeAll, mergeMap, reduce, ReplaySubject, Subject } from "rxjs";
 import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import { collect } from "../../common/Rxjs.js";
 import { pushToMap } from "../../common/Utils.js";
 
-import type { Subscription } from "rxjs";
+import type { Observable, Subscription } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
@@ -59,58 +59,65 @@ export class ModelsTreeIdsCache implements Disposable {
     this.#categoryElementCounts[Symbol.dispose]();
   }
 
-  private async *querySubjects(): AsyncIterableIterator<{ id: Id64String; parentId?: Id64String; targetPartitionId?: Id64String; hideInHierarchy: boolean }> {
-    const subjectsQuery = `
-      SELECT
-        s.ECInstanceId id,
-        s.Parent.Id parentId,
-        (
-          SELECT m.ECInstanceId
-          FROM bis.GeometricModel3d m
-          WHERE m.ECInstanceId = HexToId(json_extract(s.JsonProperties, '$.Subject.Model.TargetPartition'))
-            AND NOT m.IsPrivate
-            AND EXISTS (SELECT 1 FROM ${this.#hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)
-        ) targetPartitionId,
-        CASE
-          WHEN (
-            json_extract(s.JsonProperties, '$.Subject.Job.Bridge') IS NOT NULL
-            OR json_extract(s.JsonProperties, '$.Subject.Model.Type') = 'Hierarchy'
-          ) THEN 1
-          ELSE 0
-        END hideInHierarchy
-      FROM bis.Subject s
-    `;
-    for await (const row of this.#queryExecutor.createQueryReader(
-      { ecsql: subjectsQuery },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/subjects` },
-    )) {
-      yield { id: row.id, parentId: row.parentId, targetPartitionId: row.targetPartitionId, hideInHierarchy: !!row.hideInHierarchy };
-    }
+  private querySubjects(): Observable<{ id: Id64String; parentId?: Id64String; targetPartitionId?: Id64String; hideInHierarchy: boolean }> {
+    return defer(() => {
+      const subjectsQuery = `
+        SELECT
+          s.ECInstanceId id,
+          s.Parent.Id parentId,
+          (
+            SELECT m.ECInstanceId
+            FROM bis.GeometricModel3d m
+            WHERE m.ECInstanceId = HexToId(json_extract(s.JsonProperties, '$.Subject.Model.TargetPartition'))
+              AND NOT m.IsPrivate
+              AND EXISTS (SELECT 1 FROM ${this.#hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)
+          ) targetPartitionId,
+          CASE
+            WHEN (
+              json_extract(s.JsonProperties, '$.Subject.Job.Bridge') IS NOT NULL
+              OR json_extract(s.JsonProperties, '$.Subject.Model.Type') = 'Hierarchy'
+            ) THEN 1
+            ELSE 0
+          END hideInHierarchy
+        FROM bis.Subject s
+      `;
+      return this.#queryExecutor.createQueryReader(
+        { ecsql: subjectsQuery },
+        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/subjects` },
+      );
+    }).pipe(
+      map((row) => {
+        return { id: row.id, parentId: row.parentId, targetPartitionId: row.targetPartitionId, hideInHierarchy: !!row.hideInHierarchy };
+      }),
+    );
   }
 
-  private async *queryModels(): AsyncIterableIterator<{ id: Id64String; parentId: Id64String }> {
-    const modelsQuery = `
+  private queryModels(): Observable<{ id: Id64String; parentId: Id64String }> {
+    return defer(() => {
+      const modelsQuery = `
       SELECT p.ECInstanceId id, p.Parent.Id parentId
-      FROM bis.InformationPartitionElement p
-      INNER JOIN bis.GeometricModel3d m ON m.ModeledElement.Id = p.ECInstanceId
-      WHERE
-        NOT m.IsPrivate
-        ${this.#hierarchyConfig.showEmptyModels ? "" : `AND EXISTS (SELECT 1 FROM ${this.#hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)`}
-    `;
-    for await (const row of this.#queryExecutor.createQueryReader(
-      { ecsql: modelsQuery },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/models` },
-    )) {
-      yield { id: row.id, parentId: row.parentId };
-    }
+        FROM bis.InformationPartitionElement p
+        INNER JOIN bis.GeometricModel3d m ON m.ModeledElement.Id = p.ECInstanceId
+        WHERE
+          NOT m.IsPrivate
+          ${this.#hierarchyConfig.showEmptyModels ? "" : `AND EXISTS (SELECT 1 FROM ${this.#hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)`}
+      `;
+      return this.#queryExecutor.createQueryReader(
+        { ecsql: modelsQuery },
+        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/models` },
+      );
+    }).pipe(
+      map((row) => {
+        return { id: row.id, parentId: row.parentId };
+      }),
+    );
   }
 
   private async getSubjectInfos() {
-    this.#subjectInfos ??= (async () => {
-      const [subjectInfos, targetPartitionSubjects] = await Promise.all([
-        (async () => {
-          const result = new Map<Id64String, SubjectInfo>();
-          for await (const subject of this.querySubjects()) {
+    this.#subjectInfos ??= firstValueFrom(
+      forkJoin({
+        subjectInfos: this.querySubjects().pipe(
+          reduce((acc, subject) => {
             const subjectInfo: SubjectInfo = {
               parentSubject: subject.parentId,
               hideInHierarchy: subject.hideInHierarchy,
@@ -120,37 +127,39 @@ export class ModelsTreeIdsCache implements Disposable {
             if (subject.targetPartitionId) {
               subjectInfo.childModels.add(subject.targetPartitionId);
             }
-            result.set(subject.id, subjectInfo);
+            acc.set(subject.id, subjectInfo);
+            return acc;
+          }, new Map<Id64String, SubjectInfo>()),
+          map((subjectInfos) => {
+            for (const [subjectId, { parentSubject: parentSubjectId }] of subjectInfos.entries()) {
+              if (parentSubjectId) {
+                const parentSubjectInfo = subjectInfos.get(parentSubjectId);
+                assert(!!parentSubjectInfo);
+                parentSubjectInfo.childSubjects.add(subjectId);
+              }
+            }
+            return subjectInfos;
+          }),
+        ),
+        targetPartitionSubjects: this.queryModels().pipe(
+          reduce((acc, model) => {
+            pushToMap(acc, model.id, model.parentId);
+            return acc;
+          }, new Map<Id64String, Set<Id64String>>()),
+        ),
+      }).pipe(
+        map(({ subjectInfos, targetPartitionSubjects }) => {
+          for (const [partitionId, subjectIds] of targetPartitionSubjects) {
+            subjectIds.forEach((subjectId) => {
+              const subjectInfo = subjectInfos.get(subjectId);
+              assert(!!subjectInfo);
+              subjectInfo.childModels.add(partitionId);
+            });
           }
-          return result;
-        })(),
-        (async () => {
-          const result = new Map<Id64String, Set<Id64String>>();
-          for await (const model of this.queryModels()) {
-            pushToMap(result, model.id, model.parentId);
-          }
-          return result;
-        })(),
-      ]);
-
-      for (const [subjectId, { parentSubject: parentSubjectId }] of subjectInfos.entries()) {
-        if (parentSubjectId) {
-          const parentSubjectInfo = subjectInfos.get(parentSubjectId);
-          assert(!!parentSubjectInfo);
-          parentSubjectInfo.childSubjects.add(subjectId);
-        }
-      }
-
-      for (const [partitionId, subjectIds] of targetPartitionSubjects) {
-        subjectIds.forEach((subjectId) => {
-          const subjectInfo = subjectInfos.get(subjectId);
-          assert(!!subjectInfo);
-          subjectInfo.childModels.add(partitionId);
-        });
-      }
-
-      return subjectInfos;
-    })();
+          return subjectInfos;
+        }),
+      ),
+    );
     return this.#subjectInfos;
   }
 
@@ -260,81 +269,91 @@ export class ModelsTreeIdsCache implements Disposable {
     return entry;
   }
 
-  private async *queryModelCategories(): AsyncIterableIterator<{
+  private queryModelCategories(): Observable<{
     modelId: Id64String;
     categoryId: Id64String;
     isModelPrivate: boolean;
     isRootElementCategory: boolean;
   }> {
-    const query = `
-      SELECT
-        this.Model.Id modelId,
-        this.Category.Id categoryId,
-        m.IsPrivate isModelPrivate,
-        MAX(IIF(this.Parent.Id IS NULL, 1, 0)) isRootElementCategory
-      FROM BisCore.Model m
-      JOIN ${this.#hierarchyConfig.elementClassSpecification} this ON m.ECInstanceId = this.Model.Id
-      GROUP BY modelId, categoryId, isModelPrivate
-    `;
-    for await (const row of this.#queryExecutor.createQueryReader(
-      { ecsql: query },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/model-categories` },
-    )) {
-      yield { modelId: row.modelId, categoryId: row.categoryId, isModelPrivate: !!row.isModelPrivate, isRootElementCategory: !!row.isRootElementCategory };
-    }
+    return defer(() => {
+      const query = `
+        SELECT
+          this.Model.Id modelId,
+          this.Category.Id categoryId,
+          m.IsPrivate isModelPrivate,
+          MAX(IIF(this.Parent.Id IS NULL, 1, 0)) isRootElementCategory
+        FROM BisCore.Model m
+        JOIN ${this.#hierarchyConfig.elementClassSpecification} this ON m.ECInstanceId = this.Model.Id
+        GROUP BY modelId, categoryId, isModelPrivate
+      `;
+      return this.#queryExecutor.createQueryReader(
+        { ecsql: query },
+        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/model-categories` },
+      );
+    }).pipe(
+      map((row) => {
+        return { modelId: row.modelId, categoryId: row.categoryId, isModelPrivate: !!row.isModelPrivate, isRootElementCategory: !!row.isRootElementCategory };
+      }),
+    );
   }
 
-  private async *queryModeledElements() {
-    const query = `
-      SELECT
-        pe.ECInstanceId modeledElementId,
-        pe.Category.Id categoryId,
-        pe.Model.Id modelId
-      FROM BisCore.Model m
-      JOIN ${this.#hierarchyConfig.elementClassSpecification} pe ON pe.ECInstanceId = m.ModeledElement.Id
-      WHERE
-        m.IsPrivate = false
-        AND m.ECInstanceId IN (SELECT Model.Id FROM ${this.#hierarchyConfig.elementClassSpecification})
-    `;
-    for await (const row of this.#queryExecutor.createQueryReader(
-      { ecsql: query },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/modeled-elements` },
-    )) {
-      yield { modelId: row.modelId, categoryId: row.categoryId, modeledElementId: row.modeledElementId };
-    }
+  private queryModeledElements(): Observable<{ modelId: Id64String; categoryId: Id64String; modeledElementId: Id64String }> {
+    return defer(() => {
+      const query = `
+        SELECT
+          pe.ECInstanceId modeledElementId,
+          pe.Category.Id categoryId,
+          pe.Model.Id modelId
+        FROM BisCore.Model m
+        JOIN ${this.#hierarchyConfig.elementClassSpecification} pe ON pe.ECInstanceId = m.ModeledElement.Id
+        WHERE
+          m.IsPrivate = false
+          AND m.ECInstanceId IN (SELECT Model.Id FROM ${this.#hierarchyConfig.elementClassSpecification})
+      `;
+      return this.#queryExecutor.createQueryReader(
+        { ecsql: query },
+        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/modeled-elements` },
+      );
+    }).pipe(
+      map((row) => {
+        return { modelId: row.modelId, categoryId: row.categoryId, modeledElementId: row.modeledElementId };
+      }),
+    );
   }
 
   private async getModelWithCategoryModeledElements() {
-    this.#modelWithCategoryModeledElements ??= (async () => {
-      const modelWithCategoryModeledElements = new Map<Id64String, Id64Set>();
-      for await (const { modelId, categoryId, modeledElementId } of this.queryModeledElements()) {
-        const key = `${modelId}-${categoryId}`;
-        const entry = modelWithCategoryModeledElements.get(key);
-        if (entry === undefined) {
-          modelWithCategoryModeledElements.set(key, new Set([modeledElementId]));
-        } else {
-          entry.add(modeledElementId);
-        }
-      }
-      return modelWithCategoryModeledElements;
-    })();
+    this.#modelWithCategoryModeledElements ??= firstValueFrom(
+      this.queryModeledElements().pipe(
+        reduce((acc, { modelId, categoryId, modeledElementId }) => {
+          const key = `${modelId}-${categoryId}`;
+          const entry = acc.get(key);
+          if (entry === undefined) {
+            acc.set(key, new Set([modeledElementId]));
+          } else {
+            entry.add(modeledElementId);
+          }
+          return acc;
+        }, new Map<Id64String, Id64Set>()),
+      ),
+    );
     return this.#modelWithCategoryModeledElements;
   }
 
   private async getModelInfos() {
-    this.#modelInfos ??= (async () => {
-      const modelInfos = new Map<Id64String, { categories: Map<Id64String, { isRootElementCategory: boolean }>; isModelPrivate: boolean }>();
-      for await (const { modelId, categoryId, isModelPrivate, isRootElementCategory } of this.queryModelCategories()) {
-        const entry = modelInfos.get(modelId);
-        if (entry) {
-          entry.categories.set(categoryId, { isRootElementCategory });
-          entry.isModelPrivate = isModelPrivate;
-        } else {
-          modelInfos.set(modelId, { categories: new Map([[categoryId, { isRootElementCategory }]]), isModelPrivate });
-        }
-      }
-      return modelInfos;
-    })();
+    this.#modelInfos ??= firstValueFrom(
+      this.queryModelCategories().pipe(
+        reduce((acc, { modelId, categoryId, isModelPrivate, isRootElementCategory }) => {
+          const entry = acc.get(modelId);
+          if (entry) {
+            entry.categories.set(categoryId, { isRootElementCategory });
+            entry.isModelPrivate = isModelPrivate;
+          } else {
+            acc.set(modelId, { categories: new Map([[categoryId, { isRootElementCategory }]]), isModelPrivate });
+          }
+          return acc;
+        }, new Map<Id64String, { categories: Map<Id64String, { isRootElementCategory: boolean }>; isModelPrivate: boolean }>()),
+      ),
+    );
     return this.#modelInfos;
   }
 
@@ -413,55 +432,66 @@ export class ModelsTreeIdsCache implements Disposable {
         // we may have thousands of where clauses here, and sending a single query with all of them could take a
         // long time - instead, split it into smaller chunks
         bufferCount(100),
-        mergeMap(async (whereClauses) => {
-          const reader = this.#queryExecutor.createQueryReader(
-            {
-              ctes: [
-                `
-                  CategoryElements(id, modelId, categoryId) AS (
-                    SELECT ECInstanceId, Model.Id, Category.Id
-                    FROM ${this.#hierarchyConfig.elementClassSpecification}
-                    WHERE
-                      Parent.Id IS NULL
-                      AND (
-                        ${whereClauses.join(" OR ")}
-                      )
+        mergeMap((whereClauses) =>
+          defer(() =>
+            this.#queryExecutor.createQueryReader(
+              {
+                ctes: [
+                  `
+                    CategoryElements(id, modelId, categoryId) AS (
+                      SELECT ECInstanceId, Model.Id, Category.Id
+                      FROM ${this.#hierarchyConfig.elementClassSpecification}
+                      WHERE
+                        Parent.Id IS NULL
+                        AND (
+                          ${whereClauses.join(" OR ")}
+                        )
 
-                    UNION ALL
+                      UNION ALL
 
-                    SELECT c.ECInstanceId, p.modelId, p.categoryId
-                    FROM ${this.#hierarchyConfig.elementClassSpecification} c
-                    JOIN CategoryElements p ON c.Parent.Id = p.id
-                  )
+                      SELECT c.ECInstanceId, p.modelId, p.categoryId
+                      FROM ${this.#hierarchyConfig.elementClassSpecification} c
+                      JOIN CategoryElements p ON c.Parent.Id = p.id
+                    )
+                  `,
+                ],
+                ecsql: `
+                  SELECT modelId, categoryId, COUNT(id) elementsCount
+                  FROM CategoryElements
+                  GROUP BY modelId, categoryId
                 `,
-              ],
-              ecsql: `
-                SELECT modelId, categoryId, COUNT(id) elementsCount
-                FROM CategoryElements
-                GROUP BY modelId, categoryId
-              `,
-            },
-            {
-              rowFormat: "ECSqlPropertyNames",
-              limit: "unbounded",
-              restartToken: `${this.#componentName}/${this.#componentId}/category-element-counts/${Guid.createValue()}`,
-            },
-          );
-
-          const result = new Array<{ modelId: Id64String; categoryId: Id64String; elementsCount: number }>();
-          for await (const row of reader) {
-            result.push({ modelId: row.modelId, categoryId: row.categoryId, elementsCount: row.elementsCount });
-          }
-
+              },
+              {
+                rowFormat: "ECSqlPropertyNames",
+                limit: "unbounded",
+                restartToken: `${this.#componentName}/${this.#componentId}/category-element-counts/${Guid.createValue()}`,
+              },
+            ),
+          ),
+        ),
+        reduce(
+          ({ acc, createKey }, row) => {
+            acc.set(createKey({ modelId: row.modelId, categoryId: row.categoryId }), {
+              modelId: row.modelId,
+              categoryId: row.categoryId,
+              elementsCount: row.elementsCount,
+            });
+            return { acc, createKey };
+          },
+          {
+            acc: new Map<string, { modelId: Id64String; categoryId: Id64String; elementsCount: number }>(),
+            createKey: (keyProps: { modelId: Id64String; categoryId: Id64String }) => `${keyProps.modelId}-${keyProps.categoryId}`,
+          },
+        ),
+        mergeMap(({ acc: result, createKey }) => {
           input.forEach(({ modelId, categoryId }) => {
-            if (!result.some((queriedResult) => queriedResult.categoryId === categoryId && queriedResult.modelId === modelId)) {
-              result.push({ categoryId, modelId, elementsCount: 0 });
+            if (!result.has(createKey({ modelId, categoryId }))) {
+              result.set(createKey({ modelId, categoryId }), { categoryId, modelId, elementsCount: 0 });
             }
           });
 
-          return result;
+          return from(result.values());
         }),
-        mergeAll(),
       ),
     );
   }
