@@ -101,13 +101,8 @@ export const FormatSetsTabPanel: React.FC<FormatSetsTabPanelProps> = ({ formatMa
     <Flex flexDirection="row" gap="l" className="format-tab-panel">
       <Flex.Item className="quantity-format-selector-item">
         <Flex flexDirection="column" gap="m" alignItems="none">
-          {activeFormatSetKey && (
-            <Text variant="leading" style={{ marginTop: "0.25rem" }}>
-              Active: {formatSets.find((fs) => fs.name === activeFormatSetKey)?.label || activeFormatSetKey}
-            </Text>
-          )}
           <div style={{ height: "30rem" }}>
-            <FormatSetSelector formatSets={formatSets} selectedFormatSetKey={selectedFormatSet?.name} onFormatSetChange={handleFormatSetChange} />
+            <FormatSetSelector formatSets={formatSets} selectedFormatSetKey={selectedFormatSet?.name} activeFormatSetKey={activeFormatSetKey} onFormatSetChange={handleFormatSetChange} />
           </div>
           <Flex flexDirection="row" gap="xs" justifyContent="flex-end">
             <Button size="small" styleType="default" onClick={handleCancelSelection} disabled={!hasChanges}>

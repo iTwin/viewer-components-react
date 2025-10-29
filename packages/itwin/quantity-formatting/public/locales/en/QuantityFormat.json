@@ -10,6 +10,7 @@
     "azimuth": "Azimuth",
     "ratio": "Ratio",
     "labels": {
+      "active": "Active",
       "compositeSpacer": "Composite spacer",
       "compositeSpacerDescription": "Character that appears between units when displaying measurements with multiple units",
       "formatted": "Formatted",

@@ -302,7 +302,8 @@ A component for selecting from multiple format sets. This is useful when you hav
 ```typescript
 interface FormatSetSelectorProps {
   formatSets: FormatSet[]; // Array of available format sets
-  selectedFormatSetKey?: string; // Currently selected format set key
+  selectedFormatSetKey?: string; // Key of currently selected format set in the UI
+  activeFormatSetKey?: string; // Key of currently active/applied format set (shows badge)
   onFormatSetChange: (formatSet: FormatSet, key: string) => void; // Selection callback
 }
 ```

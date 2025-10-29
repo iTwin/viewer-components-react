@@ -199,6 +199,80 @@ describe("FormatSetSelector", () => {
 
     });
 
+    it("should display active badge on active format set", () => {
+      render(
+        <FormatSetSelector
+          formatSets={mockFormatSets}
+          selectedFormatSetKey="TestFormatSet1"
+          activeFormatSetKey="TestFormatSet3"
+          onFormatSetChange={mockOnFormatSetChange}
+        />
+      );
+
+      // The active badge should only appear next to the active format set
+      const activeBadge = screen.getByText("QuantityFormat:labels.active");
+      expect(activeBadge).toBeTruthy();
+
+      // Verify it's associated with the correct format set
+      const formatSetItem = screen.getByText("My personal format set");
+      const listItem = formatSetItem.closest(".quantityFormat--formatSetSelector-listItem");
+      expect(listItem?.contains(activeBadge)).toBe(true);
+    });
+
+    it("should show both selected highlight and active badge when they differ", () => {
+      const { container } = render(
+        <FormatSetSelector
+          formatSets={mockFormatSets}
+          selectedFormatSetKey="TestFormatSet1"
+          activeFormatSetKey="TestFormatSet3"
+          onFormatSetChange={mockOnFormatSetChange}
+        />
+      );
+
+      // TestFormatSet1 should be highlighted (selected)
+      const listItems = container.querySelectorAll(".quantityFormat--formatSetSelector-listItem");
+      const selectedItem = listItems[0]; // TestFormatSet1 is first item
+      expect(selectedItem?.getAttribute("data-iui-active")).toBe("true");
+
+      // TestFormatSet3 should have active badge
+      const activeBadge = screen.getByText("QuantityFormat:labels.active");
+      const activeFormatSetItem = screen.getByText("My personal format set");
+      const activeListItem = activeFormatSetItem.closest(".quantityFormat--formatSetSelector-listItem");
+      expect(activeListItem?.contains(activeBadge)).toBe(true);
+    });
+
+    it("should show both selected highlight and active badge on same item when they match", () => {
+      const { container } = render(
+        <FormatSetSelector
+          formatSets={mockFormatSets}
+          selectedFormatSetKey="TestFormatSet2"
+          activeFormatSetKey="TestFormatSet2"
+          onFormatSetChange={mockOnFormatSetChange}
+        />
+      );
+
+      // TestFormatSet2 should be both highlighted and have active badge
+      const listItems = container.querySelectorAll(".quantityFormat--formatSetSelector-listItem");
+      const item = listItems[1]; // TestFormatSet2 is second item
+
+      expect(item?.getAttribute("data-iui-active")).toBe("true");
+
+      const activeBadge = screen.getByText("QuantityFormat:labels.active");
+      expect(item?.contains(activeBadge)).toBe(true);
+    });
+
+    it("should not show active badge when activeFormatSetKey is undefined", () => {
+      render(
+        <FormatSetSelector
+          formatSets={mockFormatSets}
+          selectedFormatSetKey="TestFormatSet1"
+          onFormatSetChange={mockOnFormatSetChange}
+        />
+      );
+
+      expect(screen.queryByText("QuantityFormat:labels.active")).toBeNull();
+    });
+
     it("should handle format sets with index-based keys when name is missing", () => {
       const formatSetsWithoutNames = [
         { label: "Format Set 1" } as FormatSet,

@@ -13,7 +13,6 @@
   /* Always visible primary controls */
   border-radius: var(--iui-border-radius-1);
   padding: var(--iui-size-s);
-  background: var(--iui-color-background);
   flex: 1;
   width: 100%;
 }
@@ -140,7 +139,7 @@
 
 .quantityFormat--formatSelector-listItem {
   cursor: pointer;
-  padding: var(--iui-size-xs);
+  padding: var(--iui-size-xs) var(--iui-size-s);
   transition: background-color 0.2s ease;
 }
 
