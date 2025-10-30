@@ -697,9 +697,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         }),
         idsObs.pipe(
           mergeMap((modelId) => {
-            return this.#idsCache.getModelCategories(modelId).pipe(
-              mergeMap((categoryIds) => this.changeCategoryState({ categoryIds, modelId, on: true })),
-            );
+            return this.#idsCache.getModelCategories(modelId).pipe(mergeMap((categoryIds) => this.changeCategoryState({ categoryIds, modelId, on: true })));
           }),
         ),
       );
@@ -755,9 +753,9 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
           }
           return this.clearAlwaysAndNeverDrawnElements(props);
         }),
-        this.#idsCache.getCategoriesModeledElements(modelId, categoryIds).pipe(
-          mergeMap((modeledElementIds) => this.changeModelState({ ids: modeledElementIds, on })),
-        ),
+        this.#idsCache
+          .getCategoriesModeledElements(modelId, categoryIds)
+          .pipe(mergeMap((modeledElementIds) => this.changeModelState({ ids: modeledElementIds, on }))),
       );
     });
     return createVisibilityHandlerResult(this, props, result, this.#props.overrides?.changeCategoryState);
@@ -955,13 +953,13 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     const { modelId, categoryIds } = props.categoryProps;
 
     return from(Id64.iterable(categoryIds)).pipe(
-      mergeMap((categoryId) => 
+      mergeMap((categoryId) =>
         forkJoin({
           categoryId: of(categoryId),
           totalCount: this.#idsCache.getCategoryElementsCount(modelId, categoryId),
           alwaysDrawn: this.getAlwaysOrNeverDrawnElements({ modelIds: modelId, categoryIds: categoryId, setType: "always" }),
           neverDrawn: this.getAlwaysOrNeverDrawnElements({ modelIds: modelId, categoryIds: categoryId, setType: "never" }),
-        })
+        }),
       ),
       // There is a known bug:
       // Categories that don't have root elements will make visibility result incorrect
