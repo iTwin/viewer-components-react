@@ -774,11 +774,10 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         }),
         from(elementIds).pipe(
           mergeMap((elementId) =>
-            this.#idsCache.hasSubModel(elementId).pipe(
-              map((isSubModel) => {
-                return { elementId, isSubModel };
-              }),
-            ),
+            forkJoin({
+              elementId: of(elementId),
+              isSubModel: this.#idsCache.hasSubModel(elementId),
+            }),
           ),
           filter(({ isSubModel }) => isSubModel),
           map(({ elementId }) => elementId),
@@ -1033,11 +1032,10 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
           }
           return from(Id64.iterable(modeledElementIds)).pipe(
             mergeMap((elementId) =>
-              this.#idsCache.hasSubModel(elementId).pipe(
-                map((hasSubModel) => {
-                  return { elementId, hasSubModel };
-                }),
-              ),
+              forkJoin({
+                hasSubModel: this.#idsCache.hasSubModel(elementId),
+                elementId: of(elementId),
+              }),
             ),
             filter(({ hasSubModel }) => hasSubModel),
             map(({ elementId }) => elementId),
