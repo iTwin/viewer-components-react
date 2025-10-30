@@ -80,42 +80,49 @@ export class Datasets {
   }
 
   /**
-   * Create an iModel with `numElements` categories all belonging to the same definition container.
+   * Create an iModel with one root definition container which has child definition containers which contain 1k categories each.
+   * In total there are `numElements` number of categories.
    */
   private static async createCategoryIModel(name: string, localPath: string, numElements: number) {
-    // eslint-disable-next-line no-console
-    console.log(`${numElements} elements: Creating...`);
+    console.log(`${numElements} categories: Creating...`);
     await createIModel(name, localPath, async (builder) => {
       const { id: physicalModelId } = insertPhysicalModelWithPartition({ builder, codeValue: "test physical model" });
-      const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
-      const definitionModel = insertPhysicalSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
-
-      for (let i = 0; i < numElements; ++i) {
-        const { id: categoryId } = insertSpatialCategory({
-          builder,
-          codeValue: `c${i}`,
-          userLabel: `test_category${i}`,
-          modelId: definitionModel.id,
-        });
-        insertPhysicalElement({
-          builder,
-          modelId: physicalModelId,
-          categoryId,
-          userLabel: "test_element",
-        }).id;
+      const rootDefinitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
+      const rootDefinitionModel = insertPhysicalSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: rootDefinitionContainer.id });
+      const numberOfCategoriesPerDefinitionContainer = 1000;
+      const numberOfDefinitionContainers = Math.round(numElements / numberOfCategoriesPerDefinitionContainer);
+      for (let i = 0; i < numberOfDefinitionContainers; ++i) {
+        const definitionContainer = insertDefinitionContainer({ builder, codeValue: `DefinitionContainer ${i}`, modelId: rootDefinitionModel.id });
+        const definitionModel = insertPhysicalSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+        const numberOfCategories =
+          i + 1 < numberOfDefinitionContainers
+            ? numberOfCategoriesPerDefinitionContainer
+            : numElements - (numberOfDefinitionContainers - 1) * numberOfCategoriesPerDefinitionContainer;
+        for (let j = 0; j < numberOfCategories; ++j) {
+          const { id: categoryId } = insertSpatialCategory({
+            builder,
+            codeValue: `c${i}-${j}`,
+            userLabel: `test_category${i}-${j}`,
+            modelId: definitionModel.id,
+          });
+          insertPhysicalElement({
+            builder,
+            modelId: physicalModelId,
+            categoryId,
+            userLabel: "test_element",
+          });
+        }
       }
     });
 
-    // eslint-disable-next-line no-console
-    console.log(`${numElements} elements: Done.`);
+    console.log(`${numElements} categories: Done.`);
   }
 
   /**
    * Create an iModel with `numElements` subcategories all belonging to the same parent spatial category.
    */
   private static async createSubCategoryIModel(name: string, localPath: string, numElements: number) {
-    // eslint-disable-next-line no-console
-    console.log(`${numElements} elements: Creating...`);
+    console.log(`${numElements} sub-categories: Creating...`);
     await createIModel(name, localPath, async (builder) => {
       const { id: physicalModelId } = insertPhysicalModelWithPartition({ builder, codeValue: "test physical model" });
       const { id: categoryId } = insertSpatialCategory({
@@ -141,8 +148,7 @@ export class Datasets {
       }
     });
 
-    // eslint-disable-next-line no-console
-    console.log(`${numElements} elements: Done.`);
+    console.log(`${numElements} sub-categories: Done.`);
   }
 
   /**
@@ -151,7 +157,6 @@ export class Datasets {
    * and so on until the depth of `numElements` / 1000 elements is reached.
    */
   private static async create3dElementIModel(name: string, localPath: string, numElements: number) {
-    // eslint-disable-next-line no-console
     console.log(`${numElements} physical elements: Creating...`);
 
     await createIModel(name, localPath, async (builder) => {
@@ -208,7 +213,6 @@ export class Datasets {
       }
     });
 
-    // eslint-disable-next-line no-console
     console.log(`${numElements} elements: Done.`);
   }
 }

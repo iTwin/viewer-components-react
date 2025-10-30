@@ -6,7 +6,6 @@
 import asTable from "as-table";
 import fs from "fs";
 import Mocha from "mocha";
-import { LOGGER } from "./Logging.cjs";
 import { MainThreadBlocksDetector } from "./MainThreadBlocksDetector.cjs";
 
 import type { Summary } from "./MainThreadBlocksDetector.cjs";
@@ -155,16 +154,8 @@ export class TestReporter extends Base {
 
     const outputPath = this.#outputPath!;
     fs.writeFileSync(outputPath, JSON.stringify(data, undefined, 2));
+
     console.log(`Test results saved at ${outputPath}`);
-  }
-}
-
-const ENABLE_PINGS = false;
-const LOG_CATEGORY = "Presentation.PerformanceTests.MainThreadBlocksDetector";
-
-function log(messageOrCallback: string | (() => string)) {
-  if (LOGGER.isEnabled(LOG_CATEGORY, "trace")) {
-    LOGGER.logTrace(LOG_CATEGORY, typeof messageOrCallback === "string" ? messageOrCallback : messageOrCallback());
   }
 }
 
