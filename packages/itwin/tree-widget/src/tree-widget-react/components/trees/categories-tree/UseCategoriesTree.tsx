@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useMemo, useState } from "react";
+import { firstValueFrom } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { SvgLayers } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react";
@@ -171,10 +172,12 @@ async function getCategoriesFromPaths(props: {
     }
 
     if (lastNode.className === DEFINITION_CONTAINER_CLASS) {
-      const definitionContainerCategories = await idsCache.getAllContainedCategories({
-        definitionContainerIds: [lastNode.id],
-        includeEmptyCategories: hierarchyConfig.showEmptyCategories,
-      });
+      const definitionContainerCategories = await firstValueFrom(
+        idsCache.getAllContainedCategories({
+          definitionContainerIds: [lastNode.id],
+          includeEmptyCategories: hierarchyConfig.showEmptyCategories,
+        }),
+      );
       for (const categoryId of definitionContainerCategories) {
         const value = categories.get(categoryId);
         if (value === undefined) {

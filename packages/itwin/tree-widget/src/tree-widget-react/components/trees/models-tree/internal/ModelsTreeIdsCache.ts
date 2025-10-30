@@ -3,7 +3,23 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, bufferTime, defer, filter, firstValueFrom, forkJoin, from, map, mergeAll, mergeMap, reduce, ReplaySubject, Subject } from "rxjs";
+import {
+  bufferCount,
+  bufferTime,
+  defer,
+  filter,
+  firstValueFrom,
+  forkJoin,
+  from,
+  map,
+  mergeAll,
+  mergeMap,
+  reduce,
+  ReplaySubject,
+  shareReplay,
+  Subject,
+  toArray,
+} from "rxjs";
 import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import { collect } from "../../common/Rxjs.js";
@@ -32,13 +48,13 @@ type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeD
 /** @internal */
 export class ModelsTreeIdsCache implements Disposable {
   readonly #categoryElementCounts: ModelCategoryElementsCountCache;
-  #subjectInfos: Promise<Map<Id64String, SubjectInfo>> | undefined;
-  #parentSubjectIds: Promise<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
-  #modelInfos: Promise<Map<Id64String, ModelInfo>> | undefined;
-  #modelWithCategoryModeledElements: Promise<Map<string, Id64Set>> | undefined;
-  #modelKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath[]>>;
-  #subjectKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath>>;
-  #categoryKeyPaths: Map<Id64String, Promise<HierarchyNodeIdentifiersPath[]>>;
+  #subjectInfos: Observable<Map<Id64String, SubjectInfo>> | undefined;
+  #parentSubjectIds: Observable<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
+  #modelInfos: Observable<Map<Id64String, ModelInfo>> | undefined;
+  #modelWithCategoryModeledElements: Observable<Map<string, Id64Set>> | undefined;
+  #modelKeyPaths: Map<Id64String, Observable<HierarchyNodeIdentifiersPath[]>>;
+  #subjectKeyPaths: Map<Id64String, Observable<HierarchyNodeIdentifiersPath>>;
+  #categoryKeyPaths: Map<Id64String, Observable<HierarchyNodeIdentifiersPath[]>>;
   #queryExecutor: LimitingECSqlQueryExecutor;
   #hierarchyConfig: ModelsTreeHierarchyConfiguration;
   #componentId: GuidString;
@@ -113,73 +129,74 @@ export class ModelsTreeIdsCache implements Disposable {
     );
   }
 
-  private async getSubjectInfos() {
-    this.#subjectInfos ??= firstValueFrom(
-      forkJoin({
-        subjectInfos: this.querySubjects().pipe(
-          reduce((acc, subject) => {
-            const subjectInfo: SubjectInfo = {
-              parentSubject: subject.parentId,
-              hideInHierarchy: subject.hideInHierarchy,
-              childSubjects: new Set(),
-              childModels: new Set(),
-            };
-            if (subject.targetPartitionId) {
-              subjectInfo.childModels.add(subject.targetPartitionId);
+  private getSubjectInfos() {
+    this.#subjectInfos ??= forkJoin({
+      subjectInfos: this.querySubjects().pipe(
+        reduce((acc, subject) => {
+          const subjectInfo: SubjectInfo = {
+            parentSubject: subject.parentId,
+            hideInHierarchy: subject.hideInHierarchy,
+            childSubjects: new Set(),
+            childModels: new Set(),
+          };
+          if (subject.targetPartitionId) {
+            subjectInfo.childModels.add(subject.targetPartitionId);
+          }
+          acc.set(subject.id, subjectInfo);
+          return acc;
+        }, new Map<Id64String, SubjectInfo>()),
+        map((subjectInfos) => {
+          for (const [subjectId, { parentSubject: parentSubjectId }] of subjectInfos.entries()) {
+            if (parentSubjectId) {
+              const parentSubjectInfo = subjectInfos.get(parentSubjectId);
+              assert(!!parentSubjectInfo);
+              parentSubjectInfo.childSubjects.add(subjectId);
             }
-            acc.set(subject.id, subjectInfo);
-            return acc;
-          }, new Map<Id64String, SubjectInfo>()),
-          map((subjectInfos) => {
-            for (const [subjectId, { parentSubject: parentSubjectId }] of subjectInfos.entries()) {
-              if (parentSubjectId) {
-                const parentSubjectInfo = subjectInfos.get(parentSubjectId);
-                assert(!!parentSubjectInfo);
-                parentSubjectInfo.childSubjects.add(subjectId);
-              }
-            }
-            return subjectInfos;
-          }),
-        ),
-        targetPartitionSubjects: this.queryModels().pipe(
-          reduce((acc, model) => {
-            pushToMap(acc, model.id, model.parentId);
-            return acc;
-          }, new Map<Id64String, Set<Id64String>>()),
-        ),
-      }).pipe(
-        map(({ subjectInfos, targetPartitionSubjects }) => {
-          for (const [partitionId, subjectIds] of targetPartitionSubjects) {
-            subjectIds.forEach((subjectId) => {
-              const subjectInfo = subjectInfos.get(subjectId);
-              assert(!!subjectInfo);
-              subjectInfo.childModels.add(partitionId);
-            });
           }
           return subjectInfos;
         }),
       ),
+      targetPartitionSubjects: this.queryModels().pipe(
+        reduce((acc, model) => {
+          pushToMap(acc, model.id, model.parentId);
+          return acc;
+        }, new Map<Id64String, Set<Id64String>>()),
+      ),
+    }).pipe(
+      map(({ subjectInfos, targetPartitionSubjects }) => {
+        for (const [partitionId, subjectIds] of targetPartitionSubjects) {
+          subjectIds.forEach((subjectId) => {
+            const subjectInfo = subjectInfos.get(subjectId);
+            assert(!!subjectInfo);
+            subjectInfo.childModels.add(partitionId);
+          });
+        }
+        return subjectInfos;
+      }),
+      shareReplay(),
     );
     return this.#subjectInfos;
   }
 
   /** Returns ECInstanceIDs of Subjects that either have direct Model or at least one child Subject with a Model. */
-  public async getParentSubjectIds(): Promise<Id64String[]> {
-    this.#parentSubjectIds ??= (async () => {
-      const subjectInfos = await this.getSubjectInfos();
-      const parentSubjectIds = new Set<Id64String>();
-      subjectInfos.forEach((subjectInfo, subjectId) => {
-        if (subjectInfo.childModels.size > 0) {
-          parentSubjectIds.add(subjectId);
-          let currParentId = subjectInfo.parentSubject;
-          while (currParentId) {
-            parentSubjectIds.add(currParentId);
-            currParentId = subjectInfos.get(currParentId)?.parentSubject;
+  public getParentSubjectIds(): Observable<Id64Array> {
+    this.#parentSubjectIds ??= this.getSubjectInfos().pipe(
+      map((subjectInfos) => {
+        const parentSubjectIds = new Set<Id64String>();
+        subjectInfos.forEach((subjectInfo, subjectId) => {
+          if (subjectInfo.childModels.size > 0) {
+            parentSubjectIds.add(subjectId);
+            let currParentId = subjectInfo.parentSubject;
+            while (currParentId) {
+              parentSubjectIds.add(currParentId);
+              currParentId = subjectInfos.get(currParentId)?.parentSubject;
+            }
           }
-        }
-      });
-      return [...parentSubjectIds];
-    })();
+        });
+        return [...parentSubjectIds];
+      }),
+      shareReplay(),
+    );
     return this.#parentSubjectIds;
   }
 
@@ -187,83 +204,92 @@ export class ModelsTreeIdsCache implements Disposable {
    * Returns child subjects of the specified parent subjects as they're displayed in the hierarchy - taking into
    * account `hideInHierarchy` flag.
    */
-  public async getChildSubjectIds(parentSubjectIds: Id64String[]): Promise<Id64String[]> {
-    const childSubjectIds = new Array<Id64String>();
-    const subjectInfos = await this.getSubjectInfos();
-    parentSubjectIds.forEach((subjectId) => {
-      forEachChildSubject(subjectInfos, subjectId, (childSubjectId, childSubjectInfo) => {
-        if (!childSubjectInfo.hideInHierarchy) {
-          childSubjectIds.push(childSubjectId);
-          return "break";
-        }
-        return "continue";
-      });
-    });
-    return childSubjectIds;
+  public getChildSubjectIds(parentSubjectIds: Id64Array): Observable<Id64Array> {
+    return this.getSubjectInfos().pipe(
+      map((subjectInfos) => {
+        const childSubjectIds = new Array<Id64String>();
+        parentSubjectIds.forEach((subjectId) => {
+          forEachChildSubject(subjectInfos, subjectId, (childSubjectId, childSubjectInfo) => {
+            if (!childSubjectInfo.hideInHierarchy) {
+              childSubjectIds.push(childSubjectId);
+              return "break";
+            }
+            return "continue";
+          });
+        });
+        return childSubjectIds;
+      }),
+    );
   }
 
   /** Returns ECInstanceIDs of all Models under specific parent Subjects, including their child Subjects, etc. */
-  public async getSubjectModelIds(subjectIds: Id64Array): Promise<Id64Array> {
-    const subjectInfos = await this.getSubjectInfos();
-    const subjectStack = [...subjectIds];
-    const result = new Array<Id64String>();
-    while (true) {
-      const subjectId = subjectStack.pop();
-      if (subjectId === undefined) {
-        break;
-      }
-      const subjectInfo = subjectInfos.get(subjectId);
-      if (!subjectInfo) {
-        continue;
-      }
-      result.push(...subjectInfo.childModels);
-      subjectStack.push(...subjectInfo.childSubjects);
-    }
-    return result;
+  public getSubjectModelIds(subjectIds: Id64Array): Observable<Id64Array> {
+    return this.getSubjectInfos().pipe(
+      map((subjectInfos) => {
+        const subjectStack = [...subjectIds];
+        const result = new Array<Id64String>();
+        while (true) {
+          const subjectId = subjectStack.pop();
+          if (subjectId === undefined) {
+            break;
+          }
+          const subjectInfo = subjectInfos.get(subjectId);
+          if (!subjectInfo) {
+            continue;
+          }
+          result.push(...subjectInfo.childModels);
+          subjectStack.push(...subjectInfo.childSubjects);
+        }
+        return result;
+      }),
+    );
   }
 
   /** Returns ECInstanceIDs of Models under specific parent Subjects as they are displayed in the hierarchy. */
-  public async getChildSubjectModelIds(parentSubjectIds: Id64String[]): Promise<Id64String[]> {
-    const subjectInfos = await this.getSubjectInfos();
-
-    const hiddenSubjectIds = new Array<Id64String>();
-    parentSubjectIds.forEach((subjectId) => {
-      forEachChildSubject(subjectInfos, subjectId, (childSubjectId, childSubjectInfo) => {
-        if (childSubjectInfo.hideInHierarchy) {
-          hiddenSubjectIds.push(childSubjectId);
-          return "continue";
-        }
-        return "break";
-      });
-    });
-
-    const modelIds = new Array<Id64String>();
-    [...parentSubjectIds, ...hiddenSubjectIds].forEach((subjectId) => {
-      const subjectInfo = subjectInfos.get(subjectId);
-      subjectInfo && modelIds.push(...subjectInfo.childModels);
-    });
-    return modelIds;
+  public getChildSubjectModelIds(parentSubjectIds: Id64Array): Observable<Id64Array> {
+    return this.getSubjectInfos().pipe(
+      map((subjectInfos) => {
+        const hiddenSubjectIds = new Array<Id64String>();
+        parentSubjectIds.forEach((subjectId) => {
+          forEachChildSubject(subjectInfos, subjectId, (childSubjectId, childSubjectInfo) => {
+            if (childSubjectInfo.hideInHierarchy) {
+              hiddenSubjectIds.push(childSubjectId);
+              return "continue";
+            }
+            return "break";
+          });
+        });
+        const modelIds = new Array<Id64String>();
+        [...parentSubjectIds, ...hiddenSubjectIds].forEach((subjectId) => {
+          const subjectInfo = subjectInfos.get(subjectId);
+          subjectInfo && modelIds.push(...subjectInfo.childModels);
+        });
+        return modelIds;
+      }),
+    );
   }
 
-  public async createSubjectInstanceKeysPath(targetSubjectId: Id64String): Promise<HierarchyNodeIdentifiersPath> {
+  public createSubjectInstanceKeysPath(targetSubjectId: Id64String): Observable<HierarchyNodeIdentifiersPath> {
     let entry = this.#subjectKeyPaths.get(targetSubjectId);
     if (!entry) {
-      entry = (async () => {
-        const subjectInfos = await this.getSubjectInfos();
-        const result = new Array<InstanceKey>();
-        let currParentId: Id64String | undefined = targetSubjectId;
-        while (currParentId) {
-          if (this.#hierarchyConfig.hideRootSubject && currParentId === IModel.rootSubjectId) {
-            break;
+      entry = this.getSubjectInfos().pipe(
+        map((subjectInfos) => {
+          const result = new Array<InstanceKey>();
+          let currParentId: Id64String | undefined = targetSubjectId;
+          while (currParentId) {
+            if (this.#hierarchyConfig.hideRootSubject && currParentId === IModel.rootSubjectId) {
+              break;
+            }
+            const parentInfo = subjectInfos.get(currParentId);
+            if (!parentInfo?.hideInHierarchy) {
+              result.push({ className: "BisCore.Subject", id: currParentId });
+            }
+            currParentId = parentInfo?.parentSubject;
           }
-          const parentInfo = subjectInfos.get(currParentId);
-          if (!parentInfo?.hideInHierarchy) {
-            result.push({ className: "BisCore.Subject", id: currParentId });
-          }
-          currParentId = parentInfo?.parentSubject;
-        }
-        return result.reverse();
-      })();
+          return result.reverse();
+        }),
+        shareReplay(),
+      );
       this.#subjectKeyPaths.set(targetSubjectId, entry);
     }
     return entry;
@@ -321,92 +347,98 @@ export class ModelsTreeIdsCache implements Disposable {
     );
   }
 
-  private async getModelWithCategoryModeledElements() {
-    this.#modelWithCategoryModeledElements ??= firstValueFrom(
-      this.queryModeledElements().pipe(
-        reduce((acc, { modelId, categoryId, modeledElementId }) => {
-          const key = `${modelId}-${categoryId}`;
-          const entry = acc.get(key);
-          if (entry === undefined) {
-            acc.set(key, new Set([modeledElementId]));
-          } else {
-            entry.add(modeledElementId);
-          }
-          return acc;
-        }, new Map<Id64String, Id64Set>()),
-      ),
+  private getModelWithCategoryModeledElements() {
+    this.#modelWithCategoryModeledElements ??= this.queryModeledElements().pipe(
+      reduce((acc, { modelId, categoryId, modeledElementId }) => {
+        const key = `${modelId}-${categoryId}`;
+        const entry = acc.get(key);
+        if (entry === undefined) {
+          acc.set(key, new Set([modeledElementId]));
+        } else {
+          entry.add(modeledElementId);
+        }
+        return acc;
+      }, new Map<Id64String, Id64Set>()),
+      shareReplay(),
     );
     return this.#modelWithCategoryModeledElements;
   }
 
-  private async getModelInfos() {
-    this.#modelInfos ??= firstValueFrom(
-      this.queryModelCategories().pipe(
-        reduce((acc, { modelId, categoryId, isModelPrivate, isRootElementCategory }) => {
-          const entry = acc.get(modelId);
-          if (entry) {
-            entry.categories.set(categoryId, { isRootElementCategory });
-            entry.isModelPrivate = isModelPrivate;
-          } else {
-            acc.set(modelId, { categories: new Map([[categoryId, { isRootElementCategory }]]), isModelPrivate });
-          }
-          return acc;
-        }, new Map<Id64String, { categories: Map<Id64String, { isRootElementCategory: boolean }>; isModelPrivate: boolean }>()),
-      ),
+  private getModelInfos() {
+    this.#modelInfos ??= this.queryModelCategories().pipe(
+      reduce((acc, { modelId, categoryId, isModelPrivate, isRootElementCategory }) => {
+        const entry = acc.get(modelId);
+        if (entry) {
+          entry.categories.set(categoryId, { isRootElementCategory });
+          entry.isModelPrivate = isModelPrivate;
+        } else {
+          acc.set(modelId, { categories: new Map([[categoryId, { isRootElementCategory }]]), isModelPrivate });
+        }
+        return acc;
+      }, new Map<Id64String, { categories: Map<Id64String, { isRootElementCategory: boolean }>; isModelPrivate: boolean }>()),
+      shareReplay(),
     );
     return this.#modelInfos;
   }
 
-  public async getAllCategories(): Promise<Id64Set> {
-    const modelInfos = await this.getModelInfos();
-    const result = new Set<Id64String>();
-    modelInfos.forEach(({ categories }) => {
-      categories.forEach((_, categoryId) => result.add(categoryId));
-    });
-    return result;
+  public getAllCategories(): Observable<Id64Set> {
+    return this.getModelInfos().pipe(
+      mergeMap((modelInfos) => modelInfos.values()),
+      mergeMap(({ categories }) => categories.keys()),
+      reduce((acc, categoryId) => {
+        acc.add(categoryId);
+        return acc;
+      }, new Set<Id64String>()),
+    );
   }
 
-  public async getModelCategories(modelId: Id64String): Promise<Id64Array> {
-    const modelInfos = await this.getModelInfos();
-    const categories = modelInfos.get(modelId)?.categories.keys();
-    return categories ? [...categories] : [];
+  public getModelCategories(modelId: Id64String): Observable<Id64Array> {
+    return this.getModelInfos().pipe(
+      mergeMap((modelInfos) => modelInfos.get(modelId)?.categories.keys() ?? []),
+      toArray(),
+    );
   }
 
-  public async hasSubModel(elementId: Id64String): Promise<boolean> {
-    const modelInfos = await this.getModelInfos();
-    const modeledElementInfo = modelInfos.get(elementId);
-    if (!modeledElementInfo) {
-      return false;
-    }
-    return !modeledElementInfo.isModelPrivate;
+  public hasSubModel(elementId: Id64String): Observable<boolean> {
+    return this.getModelInfos().pipe(
+      map((modelInfos) => {
+        const modeledElementInfo = modelInfos.get(elementId);
+        if (!modeledElementInfo) {
+          return false;
+        }
+        return !modeledElementInfo.isModelPrivate;
+      }),
+    );
   }
 
-  public async getCategoriesModeledElements(modelId: Id64String, categoryIds: Id64Arg): Promise<Id64Array> {
-    const modelWithCategoryModeledElements = await this.getModelWithCategoryModeledElements();
-    const result = new Array<Id64String>();
-    for (const categoryId of Id64.iterable(categoryIds)) {
-      const entry = modelWithCategoryModeledElements.get(`${modelId}-${categoryId}`);
-      if (entry !== undefined) {
-        result.push(...entry);
-      }
-    }
-    return result;
+  public getCategoriesModeledElements(modelId: Id64String, categoryIds: Id64Arg): Observable<Id64Array> {
+    return this.getModelWithCategoryModeledElements().pipe(
+      mergeMap((modelWithCategoryModeledElements) =>
+        from(Id64.iterable(categoryIds)).pipe(
+          reduce((acc, categoryId) => {
+            const entry = modelWithCategoryModeledElements.get(`${modelId}-${categoryId}`);
+            if (entry !== undefined) {
+              acc.push(...entry);
+            }
+            return acc;
+          }, new Array<Id64String>()),
+        ),
+      ),
+    );
   }
 
-  public async createModelInstanceKeyPaths(modelId: Id64String): Promise<HierarchyNodeIdentifiersPath[]> {
+  public createModelInstanceKeyPaths(modelId: Id64String): Observable<HierarchyNodeIdentifiersPath[]> {
     let entry = this.#modelKeyPaths.get(modelId);
     if (!entry) {
-      entry = (async () => {
-        const result = new Array<HierarchyNodeIdentifiersPath>();
-        const subjectInfos = (await this.getSubjectInfos()).entries();
-        for (const [modelSubjectId, subjectInfo] of subjectInfos) {
-          if (subjectInfo.childModels.has(modelId)) {
-            const subjectPath = await this.createSubjectInstanceKeysPath(modelSubjectId);
-            result.push([...subjectPath, { className: "BisCore.GeometricModel3d", id: modelId }]);
-          }
-        }
-        return result;
-      })();
+      entry = this.getSubjectInfos().pipe(
+        mergeMap((subjectInfos) => subjectInfos.entries()),
+        filter(([_, subjectInfo]) => subjectInfo.childModels.has(modelId)),
+        mergeMap(([modelSubjectId]) =>
+          this.createSubjectInstanceKeysPath(modelSubjectId).pipe(map((path) => [...path, { className: "BisCore.GeometricModel3d", id: modelId }])),
+        ),
+        toArray(),
+        shareReplay(),
+      );
 
       this.#modelKeyPaths.set(modelId, entry);
     }
@@ -500,28 +532,20 @@ export class ModelsTreeIdsCache implements Disposable {
     return this.#categoryElementCounts.getCategoryElementsCount(modelId, categoryId);
   }
 
-  public async createCategoryInstanceKeyPaths(categoryId: Id64String): Promise<HierarchyNodeIdentifiersPath[]> {
+  public createCategoryInstanceKeyPaths(categoryId: Id64String): Observable<HierarchyNodeIdentifiersPath[]> {
     let entry = this.#categoryKeyPaths.get(categoryId);
     if (!entry) {
-      entry = (async () => {
-        const result = new Set<Id64String>();
-        const modelInfos = await this.getModelInfos();
-        modelInfos?.forEach((modelInfo, modelId) => {
-          const categoryEntry = modelInfo.categories.get(categoryId);
-          if (categoryEntry?.isRootElementCategory) {
-            result.add(modelId);
-          }
-        });
-
-        const categoryPaths = new Array<HierarchyNodeIdentifiersPath>();
-        for (const categoryModelId of [...result]) {
-          const modelPaths = await this.createModelInstanceKeyPaths(categoryModelId);
-          for (const modelPath of modelPaths) {
-            categoryPaths.push([...modelPath, { className: "BisCore.SpatialCategory", id: categoryId }]);
-          }
-        }
-        return categoryPaths;
-      })();
+      entry = this.getModelInfos().pipe(
+        mergeMap((modelInfos) => modelInfos.entries()),
+        filter(([_, modelInfo]) => !!modelInfo.categories.get(categoryId)?.isRootElementCategory),
+        mergeMap(([categoryModelId]) => this.createModelInstanceKeyPaths(categoryModelId)),
+        mergeMap((modelPaths) => modelPaths),
+        reduce((acc, modelPath) => {
+          acc.push([...modelPath, { className: "BisCore.SpatialCategory", id: categoryId }]);
+          return acc;
+        }, new Array<HierarchyNodeIdentifiersPath>()),
+        shareReplay(),
+      );
       this.#categoryKeyPaths.set(categoryId, entry);
     }
     return entry;

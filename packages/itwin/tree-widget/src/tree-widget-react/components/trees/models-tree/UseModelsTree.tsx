@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { firstValueFrom } from "rxjs";
 import { IModelApp } from "@itwin/core-frontend";
 import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
 import { Anchor, Text } from "@itwin/itwinui-react";
@@ -378,7 +379,7 @@ async function getModels(paths: HierarchyFilteringPath[], idsCache: ModelsTreeId
     }
   }
 
-  const matchingModels = await idsCache.getSubjectModelIds([...targetSubjects]);
+  const matchingModels = await firstValueFrom(idsCache.getSubjectModelIds([...targetSubjects]));
   return [...targetModels, ...matchingModels];
 }
 
