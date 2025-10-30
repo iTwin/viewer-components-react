@@ -33,12 +33,7 @@ interface ExternalSourcesTreeComponentProps
  * A component that renders `ExternalSourcesTree`.
  * @beta
  */
-export const ExternalSourcesTreeComponent = ({
-  onFeatureUsed,
-  onPerformanceMeasured,
-  treeLabel,
-  ...props
-}: ExternalSourcesTreeComponentProps) => {
+export const ExternalSourcesTreeComponent = ({ onFeatureUsed, onPerformanceMeasured, treeLabel, ...props }: ExternalSourcesTreeComponentProps) => {
   const imodel = useActiveIModelConnection();
 
   if (!imodel) {

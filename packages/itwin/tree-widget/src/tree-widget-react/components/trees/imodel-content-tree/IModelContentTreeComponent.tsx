@@ -32,12 +32,7 @@ interface IModelContentTreeComponentProps
  * A component that renders `IModelContentTree`.
  * @beta
  */
-export const IModelContentTreeComponent = ({
-  onFeatureUsed,
-  onPerformanceMeasured,
-  treeLabel,
-  ...props
-}: IModelContentTreeComponentProps) => {
+export const IModelContentTreeComponent = ({ onFeatureUsed, onPerformanceMeasured, treeLabel, ...props }: IModelContentTreeComponentProps) => {
   const imodel = useActiveIModelConnection();
 
   if (!imodel) {
