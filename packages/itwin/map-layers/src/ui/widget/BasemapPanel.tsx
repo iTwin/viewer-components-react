@@ -256,6 +256,26 @@ export function BasemapPanel(props: BasemapPanelProps) {
     void loadSavedColor();
   }, [activeViewport, getPresetColorsWithSaved]);
 
+  // Persist a custom (non-preset) basemap color to user preferences and refresh preset list
+  const saveCustomBasemapColorPreference = React.useCallback(async (selectedColorTbgr: number, isPresetColor: boolean) => {
+    // Only save custom colors to preferences - preset colors don't overwrite user's custom color
+    if (isPresetColor)
+      return;
+
+    try {
+      const iModel = activeViewport?.iModel;
+      if (iModel?.iTwinId) {
+        const saved = await BasemapColorPreferences.saveCustomColor(selectedColorTbgr.toString(), iModel.iTwinId, iModel.iModelId);
+        if (saved) {
+          const colors = await getPresetColorsWithSaved();
+            setPresetColors(colors);
+        }
+      }
+    } catch {
+      // Silently ignore preferences errors
+    }
+  }, [activeViewport, getPresetColorsWithSaved]);
+
   const baseIsColor = React.useMemo(() => selectedBaseMap instanceof ColorDef, [selectedBaseMap]);
   const baseIsMap = React.useMemo(() => !baseIsColor && selectedBaseMap !== undefined, [baseIsColor, selectedBaseMap]);
   // bgColor is a 32 bit number represented in TBGR format
@@ -315,35 +335,12 @@ export function BasemapPanel(props: BasemapPanelProps) {
         const selectedColorTbgr = bgColorValue.toTbgr();
         const isPresetColor = presetColors.some((presetColor: ColorValue) => presetColor.toTbgr() === selectedColorTbgr);
 
-        // Save the color using preferences
-        const saveColor = async () => {
-          const colorTbgrString = selectedColorTbgr.toString();
-
-          // Only save custom colors to preferences - preset colors don't overwrite user's custom color
-          if (!isPresetColor) {
-            // Try to save using preferences
-            try {
-              const iModel = activeViewport.iModel;
-              if (iModel?.iTwinId) {
-                // For custom colors, store as user-selected color
-                const saved = await BasemapColorPreferences.saveCustomColor(colorTbgrString, iModel.iTwinId, iModel.iModelId);
-                if (saved) {
-                  // If preferences save succeeded, update preset colors
-                  const colors = await getPresetColorsWithSaved();
-                  setPresetColors(colors);
-                }
-              }
-            } catch {
-              // Silently ignore preferences errors
-            }
-          }
-        };
-
-        void saveColor();
+        // Persist custom color (no-op if preset)
+        void saveCustomBasemapColorPreference(selectedColorTbgr, isPresetColor);
         setSelectedBaseMap(bgColorDef);
       }
     },
-    [activeViewport, getPresetColorsWithSaved, presetColors],
+    [activeViewport, presetColors, saveCustomBasemapColorPreference],
   );
 
   const handleBaseMapSelection = React.useCallback(
