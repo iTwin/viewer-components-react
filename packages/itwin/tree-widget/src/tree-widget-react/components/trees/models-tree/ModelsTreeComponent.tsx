@@ -44,6 +44,7 @@ interface ModelsTreeComponentProps
     | "getMenuActions"
     | "getDecorations"
     | "getSubTreePaths"
+    | "treeLabel"
   > {
   /**
    * Renderers of header buttons. Defaults to:
@@ -150,6 +151,7 @@ function ModelsTreeComponentImpl({
   onFeatureUsed,
   onPerformanceMeasured,
   filter,
+  treeLabel,
   ...treeProps
 }: ModelsTreeComponentProps & { iModel: IModelConnection; viewport: TreeWidgetViewport }) {
   const { buttonProps, onModelsFiltered } = useModelsTreeButtonProps({ imodel: iModel, viewport });
@@ -175,7 +177,7 @@ function ModelsTreeComponentImpl({
   return (
     <TelemetryContextProvider componentIdentifier={ModelsTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
       <SelectableTree buttons={buttons}>
-        <ModelsTree {...treeProps} imodel={iModel} activeView={viewport} filter={filter} onModelsFiltered={onModelsFiltered} />
+        <ModelsTree {...treeProps} imodel={iModel} activeView={viewport} filter={filter} treeLabel={treeLabel} onModelsFiltered={onModelsFiltered} />
       </SelectableTree>
     </TelemetryContextProvider>
   );
