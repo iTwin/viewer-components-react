@@ -5,10 +5,12 @@
 
 import { assert, Id64 } from "@itwin/core-bentley";
 import { HierarchyFilteringPath, HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+import { getIdsFromChildrenTree } from "../Utils.js";
 
-import type { Id64Arg, Id64String } from "@itwin/core-bentley";
+import type { Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { ClassGroupingNodeKey, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
+import type { ChildrenTree } from "../Utils.js";
 
 interface FilteredTreeRootNode {
   children: Map<Id64String, FilteredTreeNode>;
@@ -37,9 +39,15 @@ interface ElementFilteredTreeNode extends BaseFilteredTreeNode {
 
 type FilteredTreeNode = GenericFilteredTreeNode | CategoryFilteredTreeNode | ElementFilteredTreeNode;
 
+interface GetElementsFromUnfilteredChildrenTreeProps {
+  childrenTree: ChildrenTree;
+  parentIdsPath: Array<Id64Arg>;
+}
+
 /** @internal */
 export interface FilteredTree {
   getVisibilityChangeTargets(node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey }): VisibilityChangeTargets;
+  getElementsFromUnfilteredChildrenTree(props: GetElementsFromUnfilteredChildrenTreeProps): Id64Set | undefined;
 }
 
 export const SUBJECT_CLASS_NAME = "BisCore.Subject" as const;
@@ -107,7 +115,70 @@ export async function createFilteredTree(imodelAccess: ECClassHierarchyInspector
 
   return {
     getVisibilityChangeTargets: (node) => getVisibilityChangeTargets(root, node),
+    getElementsFromUnfilteredChildrenTree: ({ childrenTree, parentIdsPath }) => getElementsFromUnfilteredChildrenTree({ parentIdsPath, root, childrenTree }),
   };
+}
+
+/**
+ * Unfiltered tree can contain ids of models/categories/elements which are not present in the filtered tree.
+ * This function retrieves only those ids which are either filter tree targets, or are their children (direct and indirect).
+ */
+function getElementsFromUnfilteredChildrenTree(props: GetElementsFromUnfilteredChildrenTreeProps & { root: FilteredTreeRootNode }): Id64Set | undefined {
+  if (props.childrenTree.size === 0 || props.parentIdsPath.length === 0) {
+    return undefined;
+  }
+
+  let lookupParents: Array<FilteredTreeRootNode | FilteredTreeNode> = [props.root];
+  for (const parentIds of props.parentIdsPath) {
+    // When filtered node does not have children, it is filter target and because of this, all elements in the childrenTree are in the filtered tree
+    if (lookupParents.every((parent) => !parent.children)) {
+      return getIdsFromChildrenTree({ tree: props.childrenTree });
+    }
+
+    const parentNodes = findMatchingFilteredNodes(lookupParents, parentIds);
+    if (parentNodes.length === 0) {
+      return undefined;
+    }
+    lookupParents = parentNodes;
+  }
+
+  // We have unfiltered children tree and filtered nodes that are parents of first level nodes in unfiltered children tree.
+  // We can start filtering unfiltered children tree based on filtered nodes.
+  const result = getChildrenTreeIdsMatchingFilteredNodes({ tree: props.childrenTree, filteredNodes: lookupParents });
+  return result.size > 0 ? result : undefined;
+}
+
+function getChildrenTreeIdsMatchingFilteredNodes({
+  tree,
+  filteredNodes,
+}: {
+  tree: ChildrenTree;
+  filteredNodes: Array<FilteredTreeNode | FilteredTreeRootNode>;
+}): Id64Set {
+  const getIdsRecursively = (childrenTree: ChildrenTree, parentFilteredNodes: Array<FilteredTreeNode | FilteredTreeRootNode>): Id64Set => {
+    // If one of the parent filtered nodes does not have children, it is filter target and because of this, all elements in the childrenTree are in the filtered tree.
+    const hasParentFilterTarget = parentFilteredNodes.some((filteredNode) => "isFilterTarget" in filteredNode && filteredNode.isFilterTarget);
+    if (hasParentFilterTarget) {
+      return getIdsFromChildrenTree({ tree: childrenTree });
+    }
+    const result = new Set<Id64String>();
+    childrenTree.forEach((entry, id) => {
+      const nodes = findMatchingFilteredNodes(parentFilteredNodes, id);
+      // If no filtered nodes match this id, skip it since it's not in the filtered tree.
+      if (nodes.length === 0) {
+        return;
+      }
+      // Id was found in filtered nodes children, add it to the result.
+      result.add(id);
+      if (entry.children) {
+        // Continue recursively for children
+        getIdsRecursively(entry.children, nodes).forEach((childId) => result.add(childId));
+      }
+    });
+    return result;
+  };
+
+  return getIdsRecursively(tree, filteredNodes);
 }
 
 function getVisibilityChangeTargets(root: FilteredTreeRootNode, node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey }) {

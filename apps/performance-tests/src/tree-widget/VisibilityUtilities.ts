@@ -8,7 +8,7 @@ import { EMPTY, expand, firstValueFrom, from, mergeMap, queueScheduler, toArray 
 import { assert } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
-import { HierarchyNode } from "@itwin/presentation-hierarchies";
+import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { releaseMainThreadOnItemsCount, toVoidPromise } from "@itwin/tree-widget-react/internal";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
@@ -29,6 +29,7 @@ export interface ValidateNodeProps {
     | {
         default: "all-visible" | "all-hidden";
         instances: { [id: string]: Visibility };
+        parentIds?: { [id: string]: Visibility };
       };
 }
 
@@ -40,16 +41,26 @@ async function validateNodeVisibility({ node, handler, expectations }: ValidateN
   const ids = node.key.instanceKeys.map((instanceKey) => instanceKey.id);
   const actualVisibility = await handler.getVisibilityStatus(node);
   if (expectations === "all-visible" || expectations === "all-hidden") {
-    expect(actualVisibility.state).to.eq(expectations === "all-hidden" ? "hidden" : "visible");
+    expect(actualVisibility.state).to.eq(expectations === "all-hidden" ? "hidden" : "visible", node.label);
     return;
   }
   const idInExpectations = ids.find((id) => id in expectations.instances);
   if (idInExpectations) {
     const expectedVisibility = expectations.instances[idInExpectations];
-    expect(actualVisibility.state).to.eq(expectedVisibility);
-  } else {
-    expect(actualVisibility.state).to.eq(expectations.default === "all-hidden" ? "hidden" : "visible");
+    expect(actualVisibility.state).to.eq(expectedVisibility, node.label);
+    return;
   }
+  const parentIds = node.parentKeys
+    .filter((key) => HierarchyNodeKey.isInstances(key))
+    .map((key) => key.instanceKeys.map(({ id }) => id))
+    .flat();
+  const parentIdInExpectations = expectations.parentIds ? parentIds.find((id) => id in expectations.parentIds!) : undefined;
+  if (parentIdInExpectations) {
+    const expectedVisibility = expectations.parentIds![parentIdInExpectations];
+    expect(actualVisibility.state).to.eq(expectedVisibility, node.label);
+    return;
+  }
+  expect(actualVisibility.state).to.eq(expectations.default === "all-hidden" ? "hidden" : "visible", node.label);
 }
 
 export async function collectNodes({
