@@ -169,12 +169,12 @@ export class ModelsTreeIdsCache implements Disposable {
       return this.#queryExecutor.createQueryReader(
         { ecsql, ctes },
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/children/${Guid.createValue()}` },
-      )
+      );
     }).pipe(
       map((row) => {
         return { id: row.id, parentId: row.parentId };
       }),
-    )
+    );
   }
 
   private getChildrenTreeFromMap({ elementIds }: { elementIds: Id64Arg }): ChildrenTree {
@@ -216,29 +216,33 @@ export class ModelsTreeIdsCache implements Disposable {
    * Populates #childrenLoadingMap with promises. When these promises resolve, they will populate #childrenMap with values and delete entries from #childrenLoadingMap.
    */
   private createChildrenLoadingMapEntries({ elementsToQuery }: { elementsToQuery: Id64Array }): { loadingMapEntries: Promise<void> } {
-    const getElementsToQueryPromise = async (batchedElementsToQuery: Id64Array) => firstValueFrom(
-      this.queryChildren({ elementIds: batchedElementsToQuery }).pipe(
-        // Want to have void at the end instead of void[], so using reduce
-        reduce((acc, { parentId, id }) => {
-          let entry = this.#childrenMap.get(parentId);
-          if (!entry) {
-            entry = { children: [] };
-            this.#childrenMap.set(parentId, entry);
-          }
-          if (!entry.children) {
-            entry.children = [];
-          }
-          // Add child to parent's entry and add child to children map
-          entry.children.push(id);
-          if (!this.#childrenMap.has(id)) {
-            this.#childrenMap.set(id, { children: undefined });
-          }
-          return acc;
-        }, (() => {})()),
-        tap({ complete: () => batchedElementsToQuery.forEach((elementId) => this.#childrenLoadingMap.delete(elementId))}),
-        defaultIfEmpty((() => {})())
-      )
-    );
+    const getElementsToQueryPromise = async (batchedElementsToQuery: Id64Array) =>
+      firstValueFrom(
+        this.queryChildren({ elementIds: batchedElementsToQuery }).pipe(
+          // Want to have void at the end instead of void[], so using reduce
+          reduce(
+            (acc, { parentId, id }) => {
+              let entry = this.#childrenMap.get(parentId);
+              if (!entry) {
+                entry = { children: [] };
+                this.#childrenMap.set(parentId, entry);
+              }
+              if (!entry.children) {
+                entry.children = [];
+              }
+              // Add child to parent's entry and add child to children map
+              entry.children.push(id);
+              if (!this.#childrenMap.has(id)) {
+                this.#childrenMap.set(id, { children: undefined });
+              }
+              return acc;
+            },
+            (() => {})(),
+          ),
+          tap({ complete: () => batchedElementsToQuery.forEach((elementId) => this.#childrenLoadingMap.delete(elementId)) }),
+          defaultIfEmpty((() => {})()),
+        ),
+      );
     const maximumBatchSize = 1000;
     const totalSize = elementsToQuery.length;
     const optimalBatchSize = getOptimalBatchSize({ totalSize, maximumBatchSize });
@@ -258,35 +262,34 @@ export class ModelsTreeIdsCache implements Disposable {
 
   private createChildrenMapEntries({ elementIds }: { elementIds: Id64Arg }): Observable<void[]> {
     return from(Id64.iterable(elementIds)).pipe(
-      reduce((acc, elementId) => {
-        if (this.#childrenMap.has(elementId)) {
+      reduce(
+        (acc, elementId) => {
+          if (this.#childrenMap.has(elementId)) {
+            return acc;
+          }
+          const loadingPromise = this.#childrenLoadingMap.get(elementId);
+          if (loadingPromise) {
+            acc.existingPromises.push(loadingPromise);
+          } else {
+            acc.elementsToQuery.push(elementId);
+          }
           return acc;
-        }
-        const loadingPromise = this.#childrenLoadingMap.get(elementId);
-        if (loadingPromise) {
-          acc.existingPromises.push(loadingPromise);
-        } else {
-          acc.elementsToQuery.push(elementId);
-        }
-        return acc;
-      }, { existingPromises: new Array<Promise<void>>(), elementsToQuery: new Array<Id64String>() }),
+        },
+        { existingPromises: new Array<Promise<void>>(), elementsToQuery: new Array<Id64String>() },
+      ),
       mergeMap(async ({ elementsToQuery, existingPromises }) => {
         existingPromises.push(this.createChildrenLoadingMapEntries({ elementsToQuery }).loadingMapEntries);
         return Promise.all(existingPromises);
       }),
-    )
+    );
   }
 
   public getChildrenTree({ elementIds }: { elementIds: Id64Arg }): Observable<ChildrenTree> {
-    return this.createChildrenMapEntries({ elementIds }).pipe(
-      map(() => this.getChildrenTreeFromMap({ elementIds }))
-    )
+    return this.createChildrenMapEntries({ elementIds }).pipe(map(() => this.getChildrenTreeFromMap({ elementIds })));
   }
 
   public getAllChildrenCount({ elementIds }: { elementIds: Id64Arg }): Observable<Map<Id64String, number>> {
-    return this.createChildrenMapEntries({ elementIds }).pipe(
-      map(() => this.getChildrenCountMap({ elementIds }))
-    )
+    return this.createChildrenMapEntries({ elementIds }).pipe(map(() => this.getChildrenCountMap({ elementIds })));
   }
 
   private getSubjectInfos() {
