@@ -4,14 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { bufferCount, concatAll, concatMap, delay, EMPTY, expand, firstValueFrom, from, mergeMap, of, queueScheduler, toArray } from "rxjs";
+import { EMPTY, expand, firstValueFrom, from, mergeMap, queueScheduler, toArray } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
-import { toVoidPromise } from "@itwin/tree-widget-react/internal";
+import { releaseMainThreadOnItemsCount, toVoidPromise } from "@itwin/tree-widget-react/internal";
 
-import type { Observable } from "rxjs";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
@@ -83,22 +82,6 @@ export async function validateHierarchyVisibility(
       mergeMap(async (node) => validateNodeVisibility({ ...props, node })),
     ),
   );
-}
-
-function releaseMainThreadOnItemsCount<T>(elementCount: number) {
-  return (obs: Observable<T>): Observable<T> => {
-    return obs.pipe(
-      bufferCount(elementCount),
-      concatMap((buff, i) => {
-        const out = of(buff);
-        if (i === 0 && buff.length < elementCount) {
-          return out;
-        }
-        return out.pipe(delay(0));
-      }),
-      concatAll(),
-    );
-  };
 }
 
 export async function createViewport({
