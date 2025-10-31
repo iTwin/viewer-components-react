@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defaultIfEmpty, defer, EMPTY, from, fromEvent, identity, lastValueFrom, map, mergeMap, takeUntil, toArray } from "rxjs";
+import { defaultIfEmpty, EMPTY, firstValueFrom, from, fromEvent, identity, lastValueFrom, map, mergeMap, takeUntil, toArray } from "rxjs";
 import { Guid } from "@itwin/core-bentley";
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
@@ -86,7 +86,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
 
   private async getHierarchyDefinition(): Promise<HierarchyDefinition> {
     this.#impl ??= (async () => {
-      const isDefinitionContainerSupported = await this.#idsCache.getIsDefinitionContainerSupported();
+      const isDefinitionContainerSupported = await firstValueFrom(this.#idsCache.getIsDefinitionContainerSupported());
       return createPredicateBasedHierarchyDefinition({
         classHierarchyInspector: this.#iModelAccess,
         hierarchy: {
@@ -126,13 +126,14 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     viewType: "2d" | "3d";
   }): Promise<HierarchyLevelDefinition> {
     const { parentNodeInstanceIds, instanceFilter, viewType } = props;
-    const { definitionContainers, categories } =
+    const { definitionContainers, categories } = await firstValueFrom(
       parentNodeInstanceIds === undefined
-        ? await this.#idsCache.getRootDefinitionContainersAndCategories({ includeEmpty: this.#hierarchyConfig.showEmptyCategories })
-        : await this.#idsCache.getDirectChildDefinitionContainersAndCategories({
+        ? this.#idsCache.getRootDefinitionContainersAndCategories({ includeEmpty: this.#hierarchyConfig.showEmptyCategories })
+        : this.#idsCache.getDirectChildDefinitionContainersAndCategories({
             parentDefinitionContainerIds: parentNodeInstanceIds,
             includeEmpty: this.#hierarchyConfig.showEmptyCategories,
-          });
+          }),
+    );
 
     if (categories.length === 0 && definitionContainers.length === 0) {
       return [];
@@ -317,123 +318,125 @@ async function createInstanceKeyPathsFromInstanceLabel(
   const SUBCATEGORIES_WITH_LABELS_CTE = "SubCategoriesWithLabels";
   const DEFINITION_CONTAINERS_WITH_LABELS_CTE = "DefinitionContainersWithLabels";
   return lastValueFrom(
-    defer(async () => {
-      const { definitionContainers, categories } = await cache.getAllDefinitionContainersAndCategories({
+    cache
+      .getAllDefinitionContainersAndCategories({
         includeEmpty: props.hierarchyConfig.showEmptyCategories,
-      });
-      if (categories.length === 0) {
-        return undefined;
-      }
-      const [categoryLabelSelectClause, subCategoryLabelSelectClause, definitionContainerLabelSelectClause] = await Promise.all(
-        [categoryClass, SUB_CATEGORY_CLASS, ...(definitionContainers.length > 0 ? [DEFINITION_CONTAINER_CLASS] : [])].map(async (className) =>
-          labelsFactory.createSelectClause({ classAlias: "this", className }),
-        ),
-      );
-      const ctes = [
-        `${CATEGORIES_WITH_LABELS_CTE}(ClassName, ECInstanceId, ChildCount, DisplayLabel) AS (
-            SELECT
-              'c',
-              this.ECInstanceId,
-              COUNT(sc.ECInstanceId),
-              ${categoryLabelSelectClause}
-            FROM
-              ${categoryClass} this
-              JOIN ${SUB_CATEGORY_CLASS} sc ON sc.Parent.Id = this.ECInstanceId
-            WHERE
-              this.ECInstanceId IN (${categories.join(", ")})
-              GROUP BY this.ECInstanceId
-          )`,
-        `${SUBCATEGORIES_WITH_LABELS_CTE}(ClassName, ECInstanceId, ParentId, DisplayLabel) AS (
-            SELECT
-              'sc',
-              this.ECInstanceId,
-              this.Parent.Id,
-              ${subCategoryLabelSelectClause}
-            FROM
-              ${SUB_CATEGORY_CLASS} this
-            WHERE
-              NOT this.IsPrivate
-              AND this.Parent.Id IN (${categories.join(", ")})
-          )`,
-        ...(definitionContainers.length > 0
-          ? [
-              `${DEFINITION_CONTAINERS_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (
+      })
+      .pipe(
+        mergeMap(async ({ definitionContainers, categories }) => {
+          if (categories.length === 0) {
+            return undefined;
+          }
+          const [categoryLabelSelectClause, subCategoryLabelSelectClause, definitionContainerLabelSelectClause] = await Promise.all(
+            [categoryClass, SUB_CATEGORY_CLASS, ...(definitionContainers.length > 0 ? [DEFINITION_CONTAINER_CLASS] : [])].map(async (className) =>
+              labelsFactory.createSelectClause({ classAlias: "this", className }),
+            ),
+          );
+          const ctes = [
+            `${CATEGORIES_WITH_LABELS_CTE}(ClassName, ECInstanceId, ChildCount, DisplayLabel) AS (
                 SELECT
-                  'dc',
+                  'c',
                   this.ECInstanceId,
-                  ${definitionContainerLabelSelectClause}
+                  COUNT(sc.ECInstanceId),
+                  ${categoryLabelSelectClause}
                 FROM
-                  ${DEFINITION_CONTAINER_CLASS} this
+                  ${categoryClass} this
+                  JOIN ${SUB_CATEGORY_CLASS} sc ON sc.Parent.Id = this.ECInstanceId
                 WHERE
-                  this.ECInstanceId IN (${definitionContainers.join(", ")})
+                  this.ECInstanceId IN (${categories.join(", ")})
+                  GROUP BY this.ECInstanceId
               )`,
-            ]
-          : []),
-      ];
-      const ecsql = `
-        SELECT * FROM (
-            SELECT
-              sc.ClassName AS ClassName,
-              sc.ECInstanceId AS ECInstanceId
-            FROM
-              ${CATEGORIES_WITH_LABELS_CTE} c
-              JOIN ${SUBCATEGORIES_WITH_LABELS_CTE} sc ON sc.ParentId = c.ECInstanceId
-            WHERE
-              c.ChildCount > 1
-              AND sc.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
+            `${SUBCATEGORIES_WITH_LABELS_CTE}(ClassName, ECInstanceId, ParentId, DisplayLabel) AS (
+                SELECT
+                  'sc',
+                  this.ECInstanceId,
+                  this.Parent.Id,
+                  ${subCategoryLabelSelectClause}
+                FROM
+                  ${SUB_CATEGORY_CLASS} this
+                WHERE
+                  NOT this.IsPrivate
+                  AND this.Parent.Id IN (${categories.join(", ")})
+              )`,
+            ...(definitionContainers.length > 0
+              ? [
+                  `${DEFINITION_CONTAINERS_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (
+                    SELECT
+                      'dc',
+                      this.ECInstanceId,
+                      ${definitionContainerLabelSelectClause}
+                    FROM
+                      ${DEFINITION_CONTAINER_CLASS} this
+                    WHERE
+                      this.ECInstanceId IN (${definitionContainers.join(", ")})
+                  )`,
+                ]
+              : []),
+          ];
+          const ecsql = `
+            SELECT * FROM (
+                SELECT
+                  sc.ClassName AS ClassName,
+                  sc.ECInstanceId AS ECInstanceId
+                FROM
+                  ${CATEGORIES_WITH_LABELS_CTE} c
+                  JOIN ${SUBCATEGORIES_WITH_LABELS_CTE} sc ON sc.ParentId = c.ECInstanceId
+                WHERE
+                  c.ChildCount > 1
+                  AND sc.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
 
-            UNION ALL
+                UNION ALL
 
-            SELECT
-              c.ClassName AS ClassName,
-              c.ECInstanceId AS ECInstanceId
-            FROM
-              ${CATEGORIES_WITH_LABELS_CTE} c
-            WHERE
-              c.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
+                SELECT
+                  c.ClassName AS ClassName,
+                  c.ECInstanceId AS ECInstanceId
+                FROM
+                  ${CATEGORIES_WITH_LABELS_CTE} c
+                WHERE
+                  c.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
 
-            ${
-              definitionContainers.length > 0
-                ? `
-                  UNION ALL
-                  SELECT
-                    dc.ClassName AS ClassName,
-                    dc.ECInstanceId AS ECInstanceId
-                  FROM
-                    ${DEFINITION_CONTAINERS_WITH_LABELS_CTE} dc
-                  WHERE
-                    dc.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
-                `
-                : ""
-            }
-        )
-        ${limit === undefined ? `LIMIT ${MAX_FILTERING_INSTANCE_KEY_COUNT + 1}` : limit !== "unbounded" ? `LIMIT ${limit}` : ""}
-      `;
-      const bindings = [
-        { type: "string" as const, value: adjustedLabel },
-        { type: "string" as const, value: adjustedLabel },
-        ...(definitionContainers.length > 0 ? [{ type: "string" as const, value: adjustedLabel }] : []),
-      ];
-      return { ctes, ecsql, bindings };
-    }).pipe(
-      mergeMap((queryProps) => {
-        if (!queryProps) {
-          return EMPTY;
-        }
-        return imodelAccess.createQueryReader(queryProps, { restartToken: `${componentName}/${componentId}/filter-by-label`, limit });
-      }),
-      map(
-        (row): InstanceKey => ({
-          className: row.ClassName === "c" ? categoryClass : row.ClassName === "sc" ? SUB_CATEGORY_CLASS : DEFINITION_CONTAINER_CLASS,
-          id: row.ECInstanceId,
+                ${
+                  definitionContainers.length > 0
+                    ? `
+                      UNION ALL
+                      SELECT
+                        dc.ClassName AS ClassName,
+                        dc.ECInstanceId AS ECInstanceId
+                      FROM
+                        ${DEFINITION_CONTAINERS_WITH_LABELS_CTE} dc
+                      WHERE
+                        dc.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
+                    `
+                    : ""
+                }
+            )
+            ${limit === undefined ? `LIMIT ${MAX_FILTERING_INSTANCE_KEY_COUNT + 1}` : limit !== "unbounded" ? `LIMIT ${limit}` : ""}
+          `;
+          const bindings = [
+            { type: "string" as const, value: adjustedLabel },
+            { type: "string" as const, value: adjustedLabel },
+            ...(definitionContainers.length > 0 ? [{ type: "string" as const, value: adjustedLabel }] : []),
+          ];
+          return { ctes, ecsql, bindings };
         }),
+        mergeMap((queryProps) => {
+          if (!queryProps) {
+            return EMPTY;
+          }
+          return imodelAccess.createQueryReader(queryProps, { restartToken: `${componentName}/${componentId}/filter-by-label`, limit });
+        }),
+        map(
+          (row): InstanceKey => ({
+            className: row.ClassName === "c" ? categoryClass : row.ClassName === "sc" ? SUB_CATEGORY_CLASS : DEFINITION_CONTAINER_CLASS,
+            id: row.ECInstanceId,
+          }),
+        ),
+        toArray(),
+        mergeMap((targetItems): Observable<HierarchyFilteringPath> => createInstanceKeyPathsFromTargetItems({ ...props, targetItems })),
+        toArray(),
+        abortSignal ? takeUntil(fromEvent(abortSignal, "abort")) : identity,
+        defaultIfEmpty([]),
       ),
-      toArray(),
-      mergeMap((targetItems): Observable<HierarchyFilteringPath> => createInstanceKeyPathsFromTargetItems({ ...props, targetItems })),
-      toArray(),
-      abortSignal ? takeUntil(fromEvent(abortSignal, "abort")) : identity,
-      defaultIfEmpty([]),
-    ),
   );
 }
 
@@ -453,14 +456,17 @@ function createInstanceKeyPathsFromTargetItems(
 
   const { categoryClass } = getClassesByView(viewType);
   return from(targetItems).pipe(
-    mergeMap(async (targetItem) => {
+    mergeMap((targetItem) => {
       if (targetItem.className === SUB_CATEGORY_CLASS) {
-        return { path: await idsCache.getInstanceKeyPaths({ subCategoryId: targetItem.id }), options: { autoExpand: true } };
+        return idsCache.getInstanceKeyPaths({ subCategoryId: targetItem.id });
       }
       if (targetItem.className === categoryClass) {
-        return { path: await idsCache.getInstanceKeyPaths({ categoryId: targetItem.id }), options: { autoExpand: true } };
+        return idsCache.getInstanceKeyPaths({ categoryId: targetItem.id });
       }
-      return { path: await idsCache.getInstanceKeyPaths({ definitionContainerId: targetItem.id }), options: { autoExpand: true } };
+      return idsCache.getInstanceKeyPaths({ definitionContainerId: targetItem.id });
+    }),
+    map((path) => {
+      return { path, options: { autoExpand: true } };
     }),
   );
 }
