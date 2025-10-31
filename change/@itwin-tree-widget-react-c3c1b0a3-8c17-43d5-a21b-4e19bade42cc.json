@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Tree widget: change caches of categories and models trees to use observables.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "100586436+JonasDov@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
