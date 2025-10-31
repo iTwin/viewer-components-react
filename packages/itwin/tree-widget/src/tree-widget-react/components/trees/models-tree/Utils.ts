@@ -8,10 +8,7 @@ import { bufferCount, concatAll, concatMap, delay, of } from "rxjs";
 import type { Observable } from "rxjs";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 
-/**
- * Checks if all given models are displayed in given viewport.
- * @internal
- */
+/** @internal */
 export function releaseMainThreadOnItemsCount<T>(elementCount: number) {
   return (obs: Observable<T>): Observable<T> => {
     return obs.pipe(

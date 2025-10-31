@@ -4,13 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { EMPTY, expand, from, mergeMap, queueScheduler } from "rxjs";
-import { waitFor } from "test-utilities";
+import { EMPTY, expand, firstValueFrom, from, mergeMap, queueScheduler, toArray } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
-import { toVoidPromise } from "@itwin/tree-widget-react/internal";
+import { releaseMainThreadOnItemsCount, toVoidPromise } from "@itwin/tree-widget-react/internal";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
@@ -22,7 +21,6 @@ import type { IModelAccess } from "./StatelessHierarchyProvider.js";
 type Visibility = "visible" | "hidden" | "partial";
 
 export interface ValidateNodeProps {
-  ignoreChildren?: (node: HierarchyNode) => boolean;
   handler: HierarchyVisibilityHandler;
   viewport: Viewport;
   expectations:
@@ -54,20 +52,34 @@ async function validateNodeVisibility({ node, handler, expectations }: ValidateN
   }
 }
 
-export async function validateHierarchyVisibility({
+export async function collectNodes({
   provider,
   ignoreChildren = () => false,
-  ...props
-}: ValidateNodeProps & {
+}: {
+  ignoreChildren?: (node: HierarchyNode) => boolean;
   provider: HierarchyProvider;
-}) {
+}): Promise<HierarchyNode[]> {
+  return firstValueFrom(
+    from(provider.getNodes({ parentNode: undefined })).pipe(
+      expand((node) => (node.children && !ignoreChildren(node) ? provider.getNodes({ parentNode: node }) : EMPTY), 1000, queueScheduler),
+      toArray(),
+    ),
+  );
+}
+
+export async function validateHierarchyVisibility(
+  props: ValidateNodeProps & {
+    hierarchyNodes: HierarchyNode[];
+    releaseOn?: number;
+  },
+) {
   props.viewport.renderFrame();
   // This promise allows handler change event to fire if it was scheduled.
   await new Promise((resolve) => setTimeout(resolve));
   await toVoidPromise(
-    from(provider.getNodes({ parentNode: undefined })).pipe(
-      expand((node) => (node.children && !ignoreChildren(node) ? provider.getNodes({ parentNode: node }) : EMPTY), 1000, queueScheduler),
-      mergeMap(async (node) => waitFor(async () => validateNodeVisibility({ ...props, node }), 5000)),
+    from(props.hierarchyNodes).pipe(
+      releaseMainThreadOnItemsCount(200),
+      mergeMap(async (node) => validateNodeVisibility({ ...props, node })),
     ),
   );
 }
@@ -258,7 +270,7 @@ export function createDefinitionContainerHierarchyNode(definitionContainerId: Id
 
 export async function getVisibilityTargets(
   imodelAccess: IModelAccess,
-): Promise<{ models: Id64Array; categories: Id64Array; subCategories: Id64Array; elements: Id64Array }> {
+): Promise<{ models: Id64Array; categories: Id64Array; subCategories: Id64Array; elements: Id64Array; definitionContainers: Id64Array }> {
   const query: ECSqlQueryDef = {
     ecsql: `
       SELECT
@@ -280,12 +292,18 @@ export async function getVisibilityTargets(
         CAST(IdToHex(ECInstanceId) AS TEXT) AS ECInstanceId,
         'BisCore.SubCategory' as ClassName
       FROM bis.SubCategory
+      UNION ALL
+      SELECT
+        CAST(IdToHex(ECInstanceId) AS TEXT) AS ECInstanceId,
+        'BisCore.DefinitionContainer' as ClassName
+      FROM bis.DefinitionContainer
     `,
   };
   const categories = new Array<Id64String>();
   const subCategories = new Array<Id64String>();
   const elements = new Array<Id64String>();
   const models = new Array<Id64String>();
+  const definitionContainers = new Array<Id64String>();
   for await (const row of imodelAccess.createQueryReader(query, { limit: "unbounded" })) {
     if (row.ClassName.toLowerCase().includes("subcategory")) {
       subCategories.push(row.ECInstanceId);
@@ -301,7 +319,11 @@ export async function getVisibilityTargets(
     }
     if (row.ClassName.toLowerCase().includes("model")) {
       models.push(row.ECInstanceId);
+      continue;
+    }
+    if (row.ClassName.toLowerCase().includes("container")) {
+      definitionContainers.push(row.ECInstanceId);
     }
   }
-  return { categories, subCategories, elements, models };
+  return { categories, subCategories, elements, models, definitionContainers };
 }
