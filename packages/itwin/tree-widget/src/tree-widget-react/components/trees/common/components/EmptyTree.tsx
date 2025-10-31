@@ -49,13 +49,12 @@ export function TooManyInstancesFocused({ base }: FilterEmptyTreeProps) {
     <div className={"tw-filter-empty-tree-container"}>
       <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.filtering.tooManyInstancesFocused`)}</Text>
       <Anchor
-        style={{ textDecoration: "underline" }}
         onClick={(e) => {
           e.stopPropagation();
           toggle();
         }}
       >
-        {TreeWidget.translate(`${base}.filtering.disableInstanceFocusMode`)}
+        <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.filtering.disableInstanceFocusMode`)}</Text>
       </Anchor>
     </div>
   );
@@ -68,13 +67,12 @@ export function UnknownInstanceFocusError({ base }: FilterEmptyTreeProps) {
     <div className={"tw-filter-empty-tree-container"}>
       <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.filtering.unknownInstanceFocusError`)}</Text>
       <Anchor
-        style={{ textDecoration: "underline" }}
         onClick={(e) => {
           e.stopPropagation();
           toggle();
         }}
       >
-        {TreeWidget.translate(`${base}.filtering.disableInstanceFocusMode`)}
+        <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.filtering.disableInstanceFocusMode`)}</Text>
       </Anchor>
     </div>
   );

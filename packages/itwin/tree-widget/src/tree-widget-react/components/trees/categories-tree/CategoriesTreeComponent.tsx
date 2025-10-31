@@ -31,6 +31,7 @@ interface CategoriesTreeComponentProps
     | "getMenuActions"
     | "getDecorations"
     | "hierarchyConfig"
+    | "treeLabel"
   > {
   /**
    * Renderers of header buttons. Defaults to:
@@ -105,6 +106,7 @@ function CategoriesTreeComponentImpl({
   onPerformanceMeasured,
   onFeatureUsed,
   filter,
+  treeLabel,
   ...treeProps
 }: CategoriesTreeComponentProps & { iModel: IModelConnection; viewport: TreeWidgetViewport }) {
   const { buttonProps, onCategoriesFiltered } = useCategoriesTreeButtonProps({ viewport });
@@ -120,7 +122,14 @@ function CategoriesTreeComponentImpl({
   return (
     <TelemetryContextProvider componentIdentifier={CategoriesTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
       <SelectableTree buttons={buttons}>
-        <CategoriesTree {...treeProps} imodel={iModel} activeView={viewport} filter={filter} onCategoriesFiltered={onCategoriesFiltered} />
+        <CategoriesTree
+          {...treeProps}
+          imodel={iModel}
+          activeView={viewport}
+          filter={filter}
+          treeLabel={treeLabel}
+          onCategoriesFiltered={onCategoriesFiltered}
+        />
       </SelectableTree>
     </TelemetryContextProvider>
   );

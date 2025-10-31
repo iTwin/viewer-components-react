@@ -13,7 +13,7 @@ import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js
 
 /** @beta */
 export type CategoriesTreeProps = Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
-  Pick<VisibilityTreeRendererProps, "getInlineActions" | "getMenuActions" | "getDecorations"> &
+  Pick<VisibilityTreeRendererProps, "getInlineActions" | "getMenuActions" | "getDecorations" | "treeLabel"> &
   UseCategoriesTreeProps & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
@@ -34,6 +34,7 @@ export function CategoriesTree({
   getInlineActions,
   getMenuActions,
   hierarchyConfig,
+  treeLabel,
 }: CategoriesTreeProps) {
   const { categoriesTreeProps, rendererProps } = useCategoriesTree({
     filter,
@@ -54,6 +55,7 @@ export function CategoriesTree({
         <VisibilityTreeRenderer
           {...treeProps}
           {...rendererProps}
+          treeLabel={treeLabel}
           getInlineActions={getInlineActions}
           getMenuActions={getMenuActions}
           getDecorations={getDecorations ?? rendererProps.getDecorations}

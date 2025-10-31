@@ -22,6 +22,7 @@ interface IModelContentTreeComponentProps
     | "getInlineActions"
     | "getMenuActions"
     | "getDecorations"
+    | "treeLabel"
   > {
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
@@ -31,7 +32,7 @@ interface IModelContentTreeComponentProps
  * A component that renders `IModelContentTree`.
  * @beta
  */
-export const IModelContentTreeComponent = ({ onFeatureUsed, onPerformanceMeasured, ...props }: IModelContentTreeComponentProps) => {
+export const IModelContentTreeComponent = ({ onFeatureUsed, onPerformanceMeasured, treeLabel, ...props }: IModelContentTreeComponentProps) => {
   const imodel = useActiveIModelConnection();
 
   if (!imodel) {
@@ -41,7 +42,7 @@ export const IModelContentTreeComponent = ({ onFeatureUsed, onPerformanceMeasure
   return (
     <TelemetryContextProvider componentIdentifier={IModelContentTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
       <SelectableTree>
-        <IModelContentTree {...props} imodel={imodel} />
+        <IModelContentTree {...props} imodel={imodel} treeLabel={treeLabel} />
       </SelectableTree>
     </TelemetryContextProvider>
   );

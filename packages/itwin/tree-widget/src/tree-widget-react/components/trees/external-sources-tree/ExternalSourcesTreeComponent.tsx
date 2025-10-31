@@ -23,6 +23,7 @@ interface ExternalSourcesTreeComponentProps
     | "getInlineActions"
     | "getMenuActions"
     | "getDecorations"
+    | "treeLabel"
   > {
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
@@ -32,7 +33,7 @@ interface ExternalSourcesTreeComponentProps
  * A component that renders `ExternalSourcesTree`.
  * @beta
  */
-export const ExternalSourcesTreeComponent = ({ onFeatureUsed, onPerformanceMeasured, ...props }: ExternalSourcesTreeComponentProps) => {
+export const ExternalSourcesTreeComponent = ({ onFeatureUsed, onPerformanceMeasured, treeLabel, ...props }: ExternalSourcesTreeComponentProps) => {
   const imodel = useActiveIModelConnection();
 
   if (!imodel) {
@@ -42,7 +43,7 @@ export const ExternalSourcesTreeComponent = ({ onFeatureUsed, onPerformanceMeasu
   return (
     <TelemetryContextProvider componentIdentifier={ExternalSourcesTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
       <SelectableTree>
-        <ExternalSourcesTree {...props} imodel={imodel} />
+        <ExternalSourcesTree {...props} imodel={imodel} treeLabel={treeLabel} />
       </SelectableTree>
     </TelemetryContextProvider>
   );

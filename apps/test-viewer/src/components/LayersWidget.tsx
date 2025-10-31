@@ -144,6 +144,7 @@ function Elements({ view, ...rest }: ElementsProps) {
         <TreeRenderer
           {...treeProps}
           {...rendererProps}
+          treeLabel="Layers"
           getDecorations={(node) => (
             <>
               <Chip label={node.label.substring(0, 1)} variant="outline" />
