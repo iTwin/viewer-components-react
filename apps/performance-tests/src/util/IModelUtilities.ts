@@ -6,6 +6,7 @@
 import * as fs from "fs";
 import { getFullSchemaXml } from "test-utilities";
 import { SnapshotDb } from "@itwin/core-backend";
+import { assert, DbResult } from "@itwin/core-bentley";
 import { Code } from "@itwin/core-common";
 
 import type { TestIModelBuilder } from "test-utilities";
@@ -20,6 +21,11 @@ export async function createIModel(name: string, localPath: string, cb: (builder
     await cb(builder);
   } finally {
     iModel.saveChanges("Initial commit");
+    iModel.withSqliteStatement("ANALYZE", (stmt) => {
+      const analyzeResult = stmt.step();
+      assert(analyzeResult === DbResult.BE_SQLITE_DONE, `ANALYZE failed with result ${DbResult[analyzeResult]}`);
+    });
+    iModel.saveChanges("Analyze");
     iModel.close();
   }
 }
