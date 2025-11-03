@@ -341,7 +341,9 @@ const handleFormatSetChange = (_formatSet: FormatSet, _key: string) => {
   // Handle format set change
 };
 
-render(<FormatSetSelector formatSets={formatSets} selectedFormatSetKey={undefined} onFormatSetChange={handleFormatSetChange} />);
+render(
+  <FormatSetSelector formatSets={formatSets} selectedFormatSetKey="MetricSet" activeFormatSetKey="ImperialSet" onFormatSetChange={handleFormatSetChange} />,
+);
 ```
 
 <!-- END EXTRACTION -->
