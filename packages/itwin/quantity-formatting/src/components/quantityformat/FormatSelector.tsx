@@ -38,12 +38,14 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
       return [];
     }
 
-    return Object.entries(activeFormatSet.formats).map(([key, formatDef]) => ({
-      key,
-      formatDef,
-      label: formatDef.label || key,
-      description: formatDef.description || "",
-    }));
+    return Object.entries(activeFormatSet.formats)
+      .filter(([, formatDef]) => typeof formatDef === 'object' && formatDef !== null)
+      .map(([key, formatDef]) => ({
+        key,
+        formatDef: formatDef as FormatDefinition,
+        label: (formatDef as FormatDefinition).label || key,
+        description: (formatDef as FormatDefinition).description || "",
+      }));
   }, [activeFormatSet?.formats]);
 
   // Filter formats based on search term
@@ -60,12 +62,12 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
 
   const handleFormatSelect = React.useCallback(
     (key: string) => {
-      if (activeFormatSet?.formats) {
-        const formatDef = activeFormatSet.formats[key];
-        onListItemChange(formatDef, key);
+      const formatEntry = formatEntries.find(entry => entry.key === key);
+      if (formatEntry) {
+        onListItemChange(formatEntry.formatDef, key);
       }
     },
-    [onListItemChange, activeFormatSet]
+    [onListItemChange, formatEntries]
   );
 
   const handleSearchChange = React.useCallback(
