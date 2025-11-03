@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fix tree scrollbar not persisting when switching widgets",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "43886789+MartynasStrazdas@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
