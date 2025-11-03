@@ -44,6 +44,7 @@ export const FormatSetSelector: React.FC<FormatSetSelectorProps> = ({
   onFormatSetChange,
 }) => {
   const [searchTerm, setSearchTerm] = React.useState("");
+  const [hoveredKey, setHoveredKey] = React.useState<string | undefined>();
   const { translate } = useTranslation();
 
   // Filter format sets based on search term
@@ -80,15 +81,30 @@ export const FormatSetSelector: React.FC<FormatSetSelectorProps> = ({
             <ListItem
               key={key}
               onClick={() => handleFormatSetSelect(formatSet)}
+              onMouseEnter={() => setHoveredKey(key)}
+              onMouseLeave={() => setHoveredKey(undefined)}
               active={selectedFormatSetKey === key}
               className="quantityFormat--formatSetSelector-listItem"
             >
-              <Text variant="body">{formatSet.label}</Text>
-              {activeFormatSetKey === key && (
-                <Badge backgroundColor="positive">
-                  {translate("QuantityFormat:labels.active")}
-                </Badge>
-              )}
+              <Flex flexDirection="column" alignItems="flex-start">
+                <Flex flexDirection="row" alignItems="center" gap="xs">
+                  <Text variant="body">{formatSet.label}</Text>
+                  {activeFormatSetKey === key && (
+                    <Badge backgroundColor="positive">
+                      {translate("QuantityFormat:labels.active")}
+                    </Badge>
+                  )}
+                </Flex>
+                {formatSet.description && (hoveredKey === key || selectedFormatSetKey === key) && (
+                  <Text
+                    variant="small"
+                    isMuted
+                    className="quantityFormat--formatSelector-description"
+                  >
+                    {formatSet.description}
+                  </Text>
+                )}
+              </Flex>
             </ListItem>
           );
         })}

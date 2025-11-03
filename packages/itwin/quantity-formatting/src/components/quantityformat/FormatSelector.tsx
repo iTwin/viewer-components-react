@@ -30,6 +30,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
 }) => {
   const { translate } = useTranslation();
   const [searchTerm, setSearchTerm] = React.useState("");
+  const [hoveredKey, setHoveredKey] = React.useState<string | undefined>();
 
   // Prepare format entries
   const formatEntries = React.useMemo(() => {
@@ -90,13 +91,19 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
               <ListItem
                 key={key}
                 onClick={() => handleFormatSelect(key)}
+                onMouseEnter={() => setHoveredKey(key)}
+                onMouseLeave={() => setHoveredKey(undefined)}
                 active={activeFormatDefinitionKey === key}
                 className={`quantityFormat--formatSelector-listItem`}
               >
                 <Flex flexDirection="column" alignItems="flex-start">
                   <Text variant="body">{label}</Text>
-                  {description && (
-                    <Text variant="small" isMuted>
+                  {description && (hoveredKey === key || activeFormatDefinitionKey === key) && (
+                    <Text
+                      variant="small"
+                      isMuted
+                      className="quantityFormat--formatSelector-description"
+                    >
                       {description}
                     </Text>
                   )}

@@ -98,11 +98,14 @@ describe("FormatSelector", () => {
     });
 
     it("should display format descriptions when available", () => {
-      render(<FormatSelector {...defaultProps} />);
+      render(<FormatSelector {...defaultProps} activeFormatDefinitionKey="length-format" />);
 
+      // Description should be visible for the active format
       expect(screen.getByText("Format for length measurements")).toBeDefined();
-      expect(screen.getByText("Format for area measurements")).toBeDefined();
-      expect(screen.getByText("Imperial units for length")).toBeDefined();
+
+      // Other descriptions should not be visible initially (not hovered or active)
+      expect(screen.queryByText("Format for area measurements")).toBeNull();
+      expect(screen.queryByText("Imperial units for length")).toBeNull();
     });
 
     it("should highlight the active format when activeFormatDefinitionKey is provided", () => {
@@ -219,6 +222,138 @@ describe("FormatSelector", () => {
       await user.click(noResultsItem);
 
       expect(mockOnListItemChange).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("Hover and Description Display", () => {
+    it("should show description when hovering over a format item", async () => {
+      const user = userEvent.setup();
+      render(<FormatSelector {...defaultProps} />);
+
+      const lengthFormatItem = screen.getByText("Length Format");
+
+      // Initially, description should not be visible
+      expect(screen.queryByText("Format for length measurements")).toBeNull();
+
+      // Hover over the item
+      await user.hover(lengthFormatItem);
+
+      // Description should now be visible
+      await waitFor(() => {
+        expect(screen.getByText("Format for length measurements")).toBeDefined();
+      });
+    });
+
+    it("should hide description when unhhovering from a format item", async () => {
+      const user = userEvent.setup();
+      render(<FormatSelector {...defaultProps} />);
+
+      const lengthFormatItem = screen.getByText("Length Format");
+
+      // Hover over the item to show description
+      await user.hover(lengthFormatItem);
+      await waitFor(() => {
+        expect(screen.getByText("Format for length measurements")).toBeDefined();
+      });
+
+      // Unhover from the item
+      await user.unhover(lengthFormatItem);
+
+      // Description should be hidden again
+      await waitFor(() => {
+        expect(screen.queryByText("Format for length measurements")).toBeNull();
+      });
+    });
+
+    it("should show description for active format item even without hover", () => {
+      render(<FormatSelector {...defaultProps} activeFormatDefinitionKey="area-format" />);
+
+      // Active format description should be visible without hovering
+      expect(screen.getByText("Format for area measurements")).toBeDefined();
+
+      // Non-active format descriptions should not be visible
+      expect(screen.queryByText("Format for length measurements")).toBeNull();
+      expect(screen.queryByText("Imperial units for length")).toBeNull();
+    });
+
+    it("should show description for both hovered and active items simultaneously", async () => {
+      const user = userEvent.setup();
+      render(<FormatSelector {...defaultProps} activeFormatDefinitionKey="area-format" />);
+
+      // Active format description should be visible
+      expect(screen.getByText("Format for area measurements")).toBeDefined();
+
+      // Hover over a different format
+      const lengthFormatItem = screen.getByText("Length Format");
+      await user.hover(lengthFormatItem);
+
+      // Both descriptions should now be visible
+      await waitFor(() => {
+        expect(screen.getByText("Format for area measurements")).toBeDefined(); // Active
+        expect(screen.getByText("Format for length measurements")).toBeDefined(); // Hovered
+      });
+    });
+
+    it("should not show description for items without description text", async () => {
+      const user = userEvent.setup();
+      const formatSetWithoutDescription: FormatSet = {
+        name: "TestSet",
+        label: "Test Set",
+        unitSystem: "metric",
+        formats: {
+          "no-desc-format": {
+            precision: 2,
+            type: "Decimal",
+            label: "No Description Format",
+            // No description property
+          } as FormatDefinition,
+        },
+      } as FormatSet;
+
+      render(<FormatSelector {...defaultProps} activeFormatSet={formatSetWithoutDescription} />);
+
+      const formatItem = screen.getByText("No Description Format");
+
+      // Hover over the item
+      await user.hover(formatItem);
+
+      // No description should appear
+      await waitFor(() => {
+        const listItem = formatItem.closest(".quantityFormat--formatSelector-listItem");
+        expect(listItem?.querySelector(".quantityFormat--formatSelector-description")).toBeNull();
+      });
+    });
+
+    it("should apply the correct CSS class to description elements", async () => {
+      const user = userEvent.setup();
+      render(<FormatSelector {...defaultProps} />);
+
+      const lengthFormatItem = screen.getByText("Length Format");
+      await user.hover(lengthFormatItem);
+
+      await waitFor(() => {
+        const descriptionElement = screen.getByText("Format for length measurements");
+        expect(descriptionElement.classList.contains("quantityFormat--formatSelector-description")).toBe(true);
+      });
+    });
+
+    it("should handle rapid hover events correctly", async () => {
+      const user = userEvent.setup();
+      render(<FormatSelector {...defaultProps} />);
+
+      const lengthFormatItem = screen.getByText("Length Format");
+      const areaFormatItem = screen.getByText("Area Format");
+
+      // Rapidly hover between items
+      await user.hover(lengthFormatItem);
+      await user.hover(areaFormatItem);
+      await user.hover(lengthFormatItem);
+
+      // Only the last hovered item's description should be visible
+      await waitFor(() => {
+        expect(screen.getByText("Format for length measurements")).toBeDefined();
+        expect(screen.queryByText("Format for area measurements")).toBeNull();
+      });
     });
   });
 

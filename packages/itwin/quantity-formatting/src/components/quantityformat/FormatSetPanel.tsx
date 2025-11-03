@@ -97,8 +97,6 @@ export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, edita
 
   return (
     <Flex className="quantityFormat--formatSetPanel-container">
-      <Text variant="subheading">{translate("QuantityFormat:labels.formatSetDetails")}</Text>
-
       <Flex className="quantityFormat--formatSetPanel-inputRow">
         <Label htmlFor={labelInputId}>{translate("QuantityFormat:labels.label")}</Label>
         <Input

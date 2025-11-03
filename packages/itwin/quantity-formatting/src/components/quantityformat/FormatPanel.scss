@@ -197,8 +197,9 @@
 /* Format Set Panel Styles */
 .quantityFormat--formatSetPanel-container {
   flex-direction: column;
-  align-items: flex-start;
+  align-items: stretch;
   gap: var(--iui-size-m);
+  width: 100%;
 }
 
 .quantityFormat--formatSetPanel-emptyState {
@@ -257,4 +258,21 @@
 
 .quantityFormat--formatSetPanel-input:disabled {
   background-color: var(--iui-color-background-zebra);
+}
+
+/* Description reveal animation for FormatSelector hover */
+.quantityFormat--formatSelector-description {
+  animation: fadeInDown var(--iui-duration-1) cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: top;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
