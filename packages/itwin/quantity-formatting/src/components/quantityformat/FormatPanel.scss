@@ -262,6 +262,7 @@
 
 /* Description reveal animation for FormatSelector hover */
 .quantityFormat--formatSelector-description {
+  /* cubic-bezier 0.4 and 0.2 equates to iui-duration 2 and iui-duration-1 */
   animation: fadeInDown var(--iui-duration-1) cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: top;
 }
