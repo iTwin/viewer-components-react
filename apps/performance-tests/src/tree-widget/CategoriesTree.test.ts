@@ -18,7 +18,6 @@ import { run, TestIModelConnection } from "../util/TestUtilities.js";
 import { StatelessHierarchyProvider } from "./StatelessHierarchyProvider.js";
 import {
   collectNodes,
-  createCategoryHierarchyNode,
   createDefinitionContainerHierarchyNode,
   createTestDataForInitialDisplay,
   createViewport,
@@ -72,11 +71,11 @@ describe("categories tree", () => {
     viewport: Viewport;
     handler: HierarchyVisibilityHandler & Disposable;
     provider: HierarchyProvider & Disposable;
-    category: Id64String;
+    definitionContainer: Id64String;
     iModelConnection: IModelConnection;
     hierarchyNodes: HierarchyNode[];
   }>({
-    testName: "changing category visibility changes visibility for 50k subCategories",
+    testName: "changing definition container visibility changes visibility for 50k subCategories",
     setup: async () => {
       const { iModelConnection, iModel } = TestIModelConnection.openFile(Datasets.getIModelPath("50k subcategories"));
       const imodelAccess = StatelessHierarchyProvider.createIModelAccess(iModel, "unbounded");
@@ -109,8 +108,18 @@ describe("categories tree", () => {
         viewport,
         expectations: "all-hidden",
       });
-      expect(visibilityTargets.categories.length).to.be.eq(1);
-      return { iModel, imodelAccess, viewport, provider, handler, category: visibilityTargets.categories[0], iModelConnection, hierarchyNodes };
+
+      expect(visibilityTargets.definitionContainers.length).to.be.eq(1);
+      return {
+        iModel,
+        imodelAccess,
+        viewport,
+        provider,
+        handler,
+        definitionContainer: visibilityTargets.definitionContainers[0],
+        iModelConnection,
+        hierarchyNodes,
+      };
     },
     cleanup: async (props) => {
       props.iModel.close();
@@ -121,8 +130,8 @@ describe("categories tree", () => {
         await props.iModelConnection.close();
       }
     },
-    test: async ({ viewport, handler, hierarchyNodes, category }) => {
-      await handler.changeVisibility(createCategoryHierarchyNode(category, true), true);
+    test: async ({ viewport, handler, hierarchyNodes, definitionContainer }) => {
+      await handler.changeVisibility(createDefinitionContainerHierarchyNode(definitionContainer), true);
       await validateHierarchyVisibility({
         hierarchyNodes,
         handler,
