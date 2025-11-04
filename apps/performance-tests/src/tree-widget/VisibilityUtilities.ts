@@ -78,7 +78,7 @@ export async function validateHierarchyVisibility(
   await new Promise((resolve) => setTimeout(resolve));
   await toVoidPromise(
     from(props.hierarchyNodes).pipe(
-      releaseMainThreadOnItemsCount(200),
+      releaseMainThreadOnItemsCount(100),
       mergeMap(async (node) => validateNodeVisibility({ ...props, node })),
     ),
   );

@@ -119,32 +119,41 @@ export class Datasets {
   }
 
   /**
-   * Create an iModel with `numElements` subcategories all belonging to the same parent spatial category.
+   * Create an iModel with `numElements` sub-categories. There are a total of `numElements` / 1000 categories, where each category has 1k sub-categories.
+   * There is also one definition container that contains all the categories.
    */
   private static async createSubCategoryIModel(name: string, localPath: string, numElements: number) {
     console.log(`${numElements} sub-categories: Creating...`);
     await createIModel(name, localPath, async (builder) => {
       const { id: physicalModelId } = insertPhysicalModelWithPartition({ builder, codeValue: "test physical model" });
-      const { id: categoryId } = insertSpatialCategory({
-        builder,
-        codeValue: "sc",
-        userLabel: "test_category",
-      });
-      insertPhysicalElement({
-        builder,
-        modelId: physicalModelId,
-        categoryId,
-        userLabel: "test_element",
-      }).id;
-
-      // Insert `numElements` - 1 subcategories as `insertSpatialCategory` provides one additional subcategory
-      for (let i = 0; i < numElements - 1; ++i) {
-        insertSubCategory({
-          parentCategoryId: categoryId,
+      const rootDefinitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
+      const rootDefinitionModel = insertPhysicalSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: rootDefinitionContainer.id });
+      const numberOfSubcategoriesPerCategory = 1000;
+      const categoryCount = numElements / numberOfSubcategoriesPerCategory;
+      for (let i = 0; i < categoryCount; ++i) {
+        const { id: categoryId } = insertSpatialCategory({
           builder,
-          codeValue: `${i}`,
-          userLabel: `sc`,
+          codeValue: `sc${i}`,
+          userLabel: `test_category${i}`,
+          modelId: rootDefinitionModel.id,
         });
+        insertPhysicalElement({
+          builder,
+          modelId: physicalModelId,
+          categoryId,
+          userLabel: "test_element",
+        }).id;
+
+        // Insert `numberOfSubcategoriesPerCategory` - 1 subcategories as `insertSpatialCategory` provides one additional subcategory
+        for (let j = 0; j < numberOfSubcategoriesPerCategory - 1; ++j) {
+          insertSubCategory({
+            parentCategoryId: categoryId,
+            builder,
+            codeValue: `sc${i}-${j}`,
+            userLabel: `sc${i}-${j}`,
+            modelId: rootDefinitionModel.id,
+          });
+        }
       }
     });
 
