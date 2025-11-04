@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { firstValueFrom } from "rxjs";
 import { assert, BeEvent } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
@@ -101,7 +102,7 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
 
   private async getSubCategoriesVisibility(subCategoryIds: Id64Array, parentCategoryId: Id64String): Promise<Visibility> {
     let visibility: "visible" | "hidden" | "unknown" = "unknown";
-    const categoryModels = [...(await this.#idsCache.getCategoriesElementModels([parentCategoryId])).values()].flat();
+    const categoryModels = [...(await firstValueFrom(this.#idsCache.getCategoriesElementModels([parentCategoryId]))).values()].flat();
     let nonDefaultModelDisplayStatesCount = 0;
     for (const modelId of categoryModels) {
       if (!this.#viewport.view.viewsModel(modelId)) {
@@ -161,17 +162,19 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
   }
 
   private async getDefinitionContainerVisibility(node: HierarchyNode): Promise<Visibility> {
-    const categoryIds = await this.#idsCache.getAllContainedCategories({
-      definitionContainerIds: CategoriesVisibilityHandler.getInstanceIdsFromHierarchyNode(node),
-      includeEmptyCategories: this.#hierarchyConfig.showEmptyCategories,
-    });
-    return this.getCategoriesVisibility(categoryIds);
+    const categoryIds = await firstValueFrom(
+      this.#idsCache.getAllContainedCategories({
+        definitionContainerIds: CategoriesVisibilityHandler.getInstanceIdsFromHierarchyNode(node),
+        includeEmptyCategories: this.#hierarchyConfig.showEmptyCategories,
+      }),
+    );
+    return this.getCategoriesVisibility([...categoryIds]);
   }
 
   private async getCategoriesVisibility(categoryIds: Id64Array): Promise<Visibility> {
     const subCategoriesVisibilities = await Promise.all(
       categoryIds.map(async (categoryId) => {
-        const subCategories = await this.#idsCache.getSubCategories(categoryId);
+        const subCategories = await firstValueFrom(this.#idsCache.getSubCategories(categoryId));
         return this.getSubCategoriesVisibility(subCategories, categoryId);
       }),
     );
@@ -194,7 +197,7 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
   }
 
   private async enableCategoriesElementModelsVisibility(categoryIds: Id64Array) {
-    const categoriesModelsMap = await this.#idsCache.getCategoriesElementModels(categoryIds);
+    const categoriesModelsMap = await firstValueFrom(this.#idsCache.getCategoriesElementModels(categoryIds));
     const modelIds = [...categoriesModelsMap.values()].flat();
     const hiddenModels = modelIds.filter((modelId) => !this.#viewport.view.viewsModel(modelId));
     if (hiddenModels.length > 0) {
@@ -225,11 +228,13 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
 
   private async changeDefinitionContainerVisibility(node: HierarchyNode, on: boolean) {
     const definitionContainerId = CategoriesVisibilityHandler.getInstanceIdsFromHierarchyNode(node);
-    const childCategories = await this.#idsCache.getAllContainedCategories({
-      definitionContainerIds: definitionContainerId,
-      includeEmptyCategories: this.#hierarchyConfig.showEmptyCategories,
-    });
-    return this.changeCategoryVisibility(childCategories, on);
+    const childCategories = await firstValueFrom(
+      this.#idsCache.getAllContainedCategories({
+        definitionContainerIds: definitionContainerId,
+        includeEmptyCategories: this.#hierarchyConfig.showEmptyCategories,
+      }),
+    );
+    return this.changeCategoryVisibility([...childCategories], on);
   }
 
   private onDisplayStyleChanged = () => {

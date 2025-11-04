@@ -1,8 +1,21 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Wed, 22 Oct 2025 08:09:53 GMT and should not be manually modified. -->
+<!-- This log was last generated on Mon, 03 Nov 2025 07:50:14 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.17.0
+
+Mon, 03 Nov 2025 07:50:14 GMT
+
+### Minor changes
+
+- Categories tree: Add option to show categories that don't contain any elements. This option can be provided to `CategoriesTree`, `CategoriesTreeComponent` or `useCategoriesTree`. It can be provided as `hierarchyConfig` property called `showEmptyCategories` ([#1486](https://github.com/iTwin/viewer-components-react/pull/1486))
+
+### Patches
+
+- Tree widget: change caches of categories and models trees to use observables. ([#1494](https://github.com/iTwin/viewer-components-react/pull/1494))
+- Fix tree scrollbar not persisting when switching widgets ([#1497](https://github.com/iTwin/viewer-components-react/pull/1497))
 
 ## 3.16.1
 

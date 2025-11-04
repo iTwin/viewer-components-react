@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { ILogger, LogLevel } from "@itwin/presentation-shared";
+import type { ILogger, LogLevel } from "@itwin/presentation-shared";
 
 export const LOGGER: ILogger = {
   isEnabled: (_category: string, level: LogLevel) => {

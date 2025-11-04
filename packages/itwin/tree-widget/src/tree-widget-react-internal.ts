@@ -20,3 +20,4 @@ export { CategoriesTreeIdsCache } from "./tree-widget-react/components/trees/cat
 export { CategoriesVisibilityHandler } from "./tree-widget-react/components/trees/categories-tree/internal/CategoriesVisibilityHandler.js";
 export { toVoidPromise, collect } from "./tree-widget-react/components/trees/common/Rxjs.js";
 export { CategoriesTreeNode } from "./tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeNode.js";
+export { releaseMainThreadOnItemsCount } from "./tree-widget-react/components/trees/models-tree/Utils.js";
