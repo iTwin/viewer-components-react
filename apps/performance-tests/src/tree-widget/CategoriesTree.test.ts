@@ -75,7 +75,7 @@ describe("categories tree", () => {
     iModelConnection: IModelConnection;
     hierarchyNodes: HierarchyNode[];
   }>({
-    testName: "changing category visibility changes visibility for 50k subCategories",
+    testName: "changing definition container visibility changes visibility for 50k subCategories",
     setup: async () => {
       const { iModelConnection, iModel } = TestIModelConnection.openFile(Datasets.getIModelPath("50k subcategories"));
       const imodelAccess = StatelessHierarchyProvider.createIModelAccess(iModel, "unbounded");
