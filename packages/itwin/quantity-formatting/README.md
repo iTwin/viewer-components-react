@@ -65,7 +65,7 @@ A format set might not capture all the formatting options used in an iTwin appli
 
 <img src="./media/show-unit-system-list.png" alt="Unit system selector" width="760" height="440">
 
-After making changes, notice how the Save and Clear buttons become enabled (highlighted), indicating that modifications can now be applied or discarded.
+After making changes, notice how the Apply and Clear buttons become enabled (highlighted), indicating that modifications can now be applied or discarded.
 
 <img src="./media/after-click-unit-system.png" alt="After unit system select" width="760" height="440">
 

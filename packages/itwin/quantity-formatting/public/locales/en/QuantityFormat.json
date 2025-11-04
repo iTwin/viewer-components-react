@@ -48,7 +48,7 @@
       "addSubUnit": "Add sub unit",
       "removeUnit": "Remove unit",
       "azimuthBaseUnit": "Azimuth base unit",
-      "save": "Apply",
+      "apply": "Apply",
       "clear": "Clear",
       "searchFormats": "Search formats...",
       "label": "Label",

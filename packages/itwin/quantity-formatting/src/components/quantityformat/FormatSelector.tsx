@@ -9,6 +9,8 @@ import { useTranslation } from "../../useTranslation.js";
 
 import type { FormatDefinition } from "@itwin/core-quantity";
 import type { FormatSet } from "@itwin/ecschema-metadata";
+import { Logger } from "@itwin/core-bentley";
+
 
 /**
  * @beta
@@ -30,7 +32,6 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
 }) => {
   const { translate } = useTranslation();
   const [searchTerm, setSearchTerm] = React.useState("");
-  const [hoveredKey, setHoveredKey] = React.useState<string | undefined>();
 
   // Prepare format entries
   const formatEntries = React.useMemo(() => {
@@ -39,12 +40,11 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
     }
 
     return Object.entries(activeFormatSet.formats)
-      .filter(([, formatDef]) => typeof formatDef === 'object' && formatDef !== null)
+      .filter(([, formatDef]) => typeof formatDef === "object" && formatDef !== null)
       .map(([key, formatDef]) => ({
         key,
         formatDef: formatDef as FormatDefinition,
         label: (formatDef as FormatDefinition).label || key,
-        description: (formatDef as FormatDefinition).description || "",
       }));
   }, [activeFormatSet?.formats]);
 
@@ -65,6 +65,12 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
       const formatEntry = formatEntries.find(entry => entry.key === key);
       if (formatEntry) {
         onListItemChange(formatEntry.formatDef, key);
+      } else {
+        Logger.logWarning(`QuantityFormatting.FormatSelector`,`Format entry not found for key: ${key}`, {
+          key,
+          availableKeys: formatEntries.map(e => e.key),
+          activeFormatSet: activeFormatSet?.name
+        });
       }
     },
     [onListItemChange, formatEntries]
@@ -89,27 +95,14 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
           <List
             className="quantityFormat--formatSelector-list"
           >
-            {filteredFormats.map(({ key, label, description }) => (
+            {filteredFormats.map(({ key, label }) => (
               <ListItem
                 key={key}
                 onClick={() => handleFormatSelect(key)}
-                onMouseEnter={() => setHoveredKey(key)}
-                onMouseLeave={() => setHoveredKey(undefined)}
                 active={activeFormatDefinitionKey === key}
                 className={`quantityFormat--formatSelector-listItem`}
               >
-                <Flex flexDirection="column" alignItems="flex-start">
-                  <Text variant="body">{label}</Text>
-                  {description && (hoveredKey === key || activeFormatDefinitionKey === key) && (
-                    <Text
-                      variant="small"
-                      isMuted
-                      className="quantityFormat--formatSelector-description"
-                    >
-                      {description}
-                    </Text>
-                  )}
-                </Flex>
+                <Text variant="body">{label}</Text>
               </ListItem>
             ))}
             {filteredFormats.length === 0 && searchTerm.trim() && (

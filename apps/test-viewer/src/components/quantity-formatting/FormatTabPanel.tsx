@@ -36,7 +36,19 @@ export const FormatTabPanel: React.FC<FormatTabPanelProps> = ({
 
       <Flex.Item className="quantity-format-panel-item">
         {formatDefinition ? (
-          <QuantityFormatPanel formatDefinition={formatDefinition} unitsProvider={unitsProvider} onFormatChange={onFormatChange} />
+          <>
+            {(formatDefinition.label || formatDefinition.description) && (
+              <Flex flexDirection="column" alignItems="flex-start" gap="xs" className="format-definition-header">
+                {formatDefinition.label && <Text variant="subheading">{formatDefinition.label}</Text>}
+                {formatDefinition.description && (
+                  <Text variant="body" isMuted>
+                    {formatDefinition.description}
+                  </Text>
+                )}
+              </Flex>
+            )}
+            <QuantityFormatPanel formatDefinition={formatDefinition} unitsProvider={unitsProvider} onFormatChange={onFormatChange} />
+          </>
         ) : (
           <Flex flexDirection="column" justifyContent="center" alignItems="center" className="quantity-format-empty-state">
             <Text variant="leading" isMuted>

@@ -47,6 +47,7 @@
     "url": "http://www.bentley.com"
   },
   "peerDependencies": {
+    "@itwin/core-bentley": "^5.3.0",
     "@itwin/core-frontend": "^5.3.0",
     "@itwin/core-quantity": "^5.3.0",
     "@itwin/itwinui-react": "^3.19.0",

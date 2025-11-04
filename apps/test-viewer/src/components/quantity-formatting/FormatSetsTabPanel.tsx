@@ -86,22 +86,11 @@ export const FormatSetsTabPanel: React.FC<FormatSetsTabPanelProps> = ({ formatMa
     }
   }, [selectedFormatSet]);
 
-  const handleCancelSelection = React.useCallback(() => {
-    // Reset selection to the currently active format set
-    if (formatManager.activeFormatSet) {
-      setSelectedFormatSet(formatManager.activeFormatSet);
-      setClonedSelectedFormatSet({ ...formatManager.activeFormatSet });
-    }
-    setSaveEnabled(false);
-  }, [formatManager]);
-
-  const hasChanges = selectedFormatSet?.name !== activeFormatSetKey;
-
   return (
     <Flex flexDirection="row" gap="l" className="format-tab-panel">
       <Flex.Item className="quantity-format-selector-item">
         <Flex flexDirection="column" gap="m" alignItems="none">
-          <div style={{ height: "30rem" }}>
+          <div style={{ height: "36rem" }}>
             <FormatSetSelector
               formatSets={formatSets}
               selectedFormatSetKey={selectedFormatSet?.name}
@@ -109,14 +98,6 @@ export const FormatSetsTabPanel: React.FC<FormatSetsTabPanelProps> = ({ formatMa
               onFormatSetChange={handleFormatSetChange}
             />
           </div>
-          <Flex flexDirection="row" gap="xs" justifyContent="flex-end">
-            <Button size="small" styleType="default" onClick={handleCancelSelection} disabled={!hasChanges}>
-              Cancel
-            </Button>
-            <Button size="small" styleType="high-visibility" onClick={handleApplyFormatSet} disabled={!hasChanges || !selectedFormatSet}>
-              Set as Active
-            </Button>
-          </Flex>
         </Flex>
       </Flex.Item>
 
@@ -138,6 +119,14 @@ export const FormatSetsTabPanel: React.FC<FormatSetsTabPanelProps> = ({ formatMa
               </Button>
               <Button size="small" styleType="high-visibility" onClick={handleSaveFormatSet} disabled={!saveEnabled}>
                 Save
+              </Button>
+              <Button
+                size="small"
+                styleType="default"
+                onClick={handleApplyFormatSet}
+                disabled={activeFormatSetKey === selectedFormatSet?.name || !selectedFormatSet}
+              >
+                Set as Active
               </Button>
             </Flex>
           </Flex.Item>
