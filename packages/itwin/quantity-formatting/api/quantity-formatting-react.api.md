@@ -109,4 +109,10 @@ export class QuantityFormatting {
     static terminate(): void;
 }
 
+// @beta
+export enum QuantityFormattingLoggerCategory {
+    // (undocumented)
+    Frontend = "QuantityFormat.Frontend"
+}
+
 ```

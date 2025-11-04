@@ -10,8 +10,9 @@ import { useTranslation } from "../../useTranslation.js";
 import type { FormatDefinition } from "@itwin/core-quantity";
 import type { FormatSet } from "@itwin/ecschema-metadata";
 import { Logger } from "@itwin/core-bentley";
+import { QuantityFormattingLoggerCategory } from "../../QuantityFormatting.js";
 
-
+const logCategory = QuantityFormattingLoggerCategory.Frontend;
 /**
  * @beta
  */
@@ -66,7 +67,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
       if (formatEntry) {
         onListItemChange(formatEntry.formatDef, key);
       } else {
-        Logger.logWarning(`QuantityFormatting.FormatSelector`,`Format entry not found for key: ${key}`, {
+        Logger.logWarning(logCategory,`Format entry not found for key: ${key}`, {
           key,
           availableKeys: formatEntries.map(e => e.key),
           activeFormatSet: activeFormatSet?.name

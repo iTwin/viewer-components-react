@@ -7,6 +7,14 @@ import { IModelApp } from "@itwin/core-frontend";
 import type { Localization } from "@itwin/core-common";
 
 /**
+ * Logger categories for quantity formatting
+ * @beta
+ */
+export enum QuantityFormattingLoggerCategory {
+  Frontend = "QuantityFormat.Frontend",
+}
+
+/**
  * Static class for managing quantity formatting localization and initialization.
  * This class handles the setup and management of internationalization resources
  * for quantity formatting components.
