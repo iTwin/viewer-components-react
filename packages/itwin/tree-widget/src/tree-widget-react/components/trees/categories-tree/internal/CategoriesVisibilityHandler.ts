@@ -195,7 +195,9 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
         mergeMap((categoryId) => this.#idsCache.getSubCategories(categoryId)),
         mergeMap((subCategorySet) => subCategorySet),
         toArray(),
-        mergeMap((subCategories) => this.changeCategoryState(categoryIds, on, false, subCategories)),
+        mergeMap((subCategories) =>
+          subCategories.length > 0 ? this.changeCategoryState(categoryIds, on, false, subCategories) : this.changeCategoryState(categoryIds, on, on),
+        ),
       ),
     );
   }
