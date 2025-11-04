@@ -127,7 +127,10 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
         if (!isDefault || visibility === "hidden" || Id64.sizeOf(subCategoryIds) === 0) {
           return of(visibility);
         }
-        return from(Id64.iterable(subCategoryIds)).pipe(map((subCategoryId) => (this.#viewport.isSubCategoryVisible(subCategoryId) ? "visible" : "hidden")));
+        return from(Id64.iterable(subCategoryIds)).pipe(
+          releaseMainThreadOnItemsCount(200),
+          map((subCategoryId) => (this.#viewport.isSubCategoryVisible(subCategoryId) ? "visible" : "hidden")),
+        );
       }),
       mergeVisibilities,
       map((visibility) => (visibility === "empty" ? "hidden" : visibility)),
