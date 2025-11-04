@@ -7,4 +7,4 @@ beta;const;FormatSetPanel
 beta;const;FormatSetSelector
 beta;function;QuantityFormatPanel
 beta;class;QuantityFormatting
-beta;enum;QuantityFormattingLoggerCategory
+beta;const;QuantityFormattingLoggerCategory

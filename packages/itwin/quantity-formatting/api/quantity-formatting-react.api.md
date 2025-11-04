@@ -110,9 +110,6 @@ export class QuantityFormatting {
 }
 
 // @beta
-export enum QuantityFormattingLoggerCategory {
-    // (undocumented)
-    Frontend = "QuantityFormat.Frontend"
-}
+export const QuantityFormattingLoggerCategory = "QuantityFormat";
 
 ```

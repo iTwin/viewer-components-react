@@ -12,7 +12,7 @@ import type { FormatSet } from "@itwin/ecschema-metadata";
 import { Logger } from "@itwin/core-bentley";
 import { QuantityFormattingLoggerCategory } from "../../QuantityFormatting.js";
 
-const logCategory = QuantityFormattingLoggerCategory.Frontend;
+const logCategory = QuantityFormattingLoggerCategory;
 /**
  * @beta
  */
