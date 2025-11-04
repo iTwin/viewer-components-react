@@ -119,6 +119,7 @@ export function TreeRenderer({
       <Tree<RenderedTreeNode>
         {...props}
         data={rootNodes}
+        id={"tw-tree-renderer"}
         nodeRenderer={nodeRenderer}
         getNode={getNode}
         enableVirtualization={enableVirtualization ?? true}

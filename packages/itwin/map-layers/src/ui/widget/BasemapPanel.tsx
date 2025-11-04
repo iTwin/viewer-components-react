@@ -10,6 +10,7 @@ import { BackgroundMapType, BaseLayerSettings, BaseMapLayerSettings, ColorByName
 import { IModelApp } from "@itwin/core-frontend";
 import { SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { ColorBuilder, ColorInputPanel, ColorPalette, ColorPicker, ColorSwatch, ColorValue, IconButton, Popover, Select } from "@itwin/itwinui-react";
+import { BasemapColorPreferences } from "../../BasemapColorPreferences";
 import { MapLayersUI } from "../../mapLayers";
 import { useSourceMapContext } from "./MapLayerManager";
 import { TransparencyPopupButton } from "./TransparencyPopupButton";
@@ -18,6 +19,19 @@ import type {
   MapImagerySettings} from "@itwin/core-common";
 import type { Viewport } from "@itwin/core-frontend";
 import type { SelectOption } from "@itwin/itwinui-react";
+
+// Define preset colors in a single place to avoid duplication
+const PRESET_COLORS = [
+  ColorValue.fromTbgr(ColorByName.grey),
+  ColorValue.fromTbgr(ColorByName.lightGrey),
+  ColorValue.fromTbgr(ColorByName.darkGrey),
+  ColorValue.fromTbgr(ColorByName.lightBlue),
+  ColorValue.fromTbgr(ColorByName.lightGreen),
+  ColorValue.fromTbgr(ColorByName.darkGreen),
+  ColorValue.fromTbgr(ColorByName.tan),
+  ColorValue.fromTbgr(ColorByName.darkBrown),
+];
+
 const customBaseMapValue = "customBaseMap";
 interface ExtraFormat {
     selectKeyFromSetting: (base: BaseMapLayerSettings) => string;
@@ -74,7 +88,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
       if (mapImagery.backgroundBase instanceof ImageMapLayerSettings) {
         return mapImagery.backgroundBase.transparency;
       } else if (mapImagery.backgroundBase instanceof ColorDef) {
-        return mapImagery.backgroundBase.getAlpha() / 255;
+        return 1.0 - (mapImagery.backgroundBase.getAlpha() / 255);
       } else {
         return 0;
       }
@@ -158,8 +172,9 @@ export function BasemapPanel(props: BasemapPanelProps) {
           setBaseMapVisible(baseMap.visible);
         }
       } else if (baseMap instanceof ColorDef) {
-        if (baseMap.getAlpha() !== baseMapTransparencyValue) {
-          setBaseMapTransparencyValue(baseMap.getAlpha() / 255);
+        const transparency = 1.0 - (baseMap.getAlpha() / 255);
+        if (transparency !== baseMapTransparencyValue) {
+          setBaseMapTransparencyValue(transparency);
         }
       }
     },
@@ -200,23 +215,66 @@ export function BasemapPanel(props: BasemapPanelProps) {
   React.useEffect(() => {
     if (
       selectedBaseMap instanceof BaseMapLayerSettings
-       && undefined === baseMapOptions.find((opt) => opt.label === selectedBaseMap.name)
-       && undefined === extraFormats[selectedBaseMap.formatId]
+        && undefined === baseMapOptions.find((opt) => opt.label === selectedBaseMap.name)
+        && undefined === extraFormats[selectedBaseMap.formatId]
     ) {
       setCustomBaseMap(selectedBaseMap);
     }
   }, [baseMapOptions, extraFormats, selectedBaseMap]);
 
-  const [presetColors] = React.useState([
-    ColorValue.fromTbgr(ColorByName.grey),
-    ColorValue.fromTbgr(ColorByName.lightGrey),
-    ColorValue.fromTbgr(ColorByName.darkGrey),
-    ColorValue.fromTbgr(ColorByName.lightBlue),
-    ColorValue.fromTbgr(ColorByName.lightGreen),
-    ColorValue.fromTbgr(ColorByName.darkGreen),
-    ColorValue.fromTbgr(ColorByName.tan),
-    ColorValue.fromTbgr(ColorByName.darkBrown),
-  ]);
+  const getPresetColorsWithSaved = React.useCallback(async () => {
+    const defaultColors = [...PRESET_COLORS];
+
+    // Add saved custom color from preferences as the first color if available
+    try {
+      const iModel = activeViewport?.iModel;
+      if (iModel?.iTwinId) {
+        const savedColor = await BasemapColorPreferences.getCustomColor(iModel.iTwinId, iModel.iModelId);
+        if (savedColor) {
+          const savedColorValue = ColorValue.fromTbgr(Number(savedColor));
+          // Remove the saved color from default colors if it exists there
+          const filteredColors = defaultColors.filter(color => color.toTbgr() !== savedColorValue.toTbgr());
+          // Always put the saved color as the first color
+          return [savedColorValue, ...filteredColors];
+        }
+      }
+    } catch {
+      // Silently ignore preferences errors
+    }
+
+    return defaultColors;
+  }, [activeViewport]);
+
+  const [presetColors, setPresetColors] = React.useState<ColorValue[]>(() => [...PRESET_COLORS]);
+
+  // Load saved color on component mount and when activeViewport changes
+  React.useEffect(() => {
+    const loadSavedColor = async () => {
+      const colors = await getPresetColorsWithSaved();
+      setPresetColors(colors);
+    };
+    void loadSavedColor();
+  }, [activeViewport, getPresetColorsWithSaved]);
+
+  // Persist a custom (non-preset) basemap color to user preferences and refresh preset list
+  const saveCustomBasemapColorPreference = React.useCallback(async (selectedColorTbgr: number, isPresetColor: boolean) => {
+    // Only save custom colors to preferences - preset colors don't overwrite user's custom color
+    if (isPresetColor)
+      return;
+
+    try {
+      const iModel = activeViewport?.iModel;
+      if (iModel?.iTwinId) {
+        const saved = await BasemapColorPreferences.saveCustomColor(selectedColorTbgr.toString(), iModel.iTwinId, iModel.iModelId);
+        if (saved) {
+          const colors = await getPresetColorsWithSaved();
+            setPresetColors(colors);
+        }
+      }
+    } catch {
+      // Silently ignore preferences errors
+    }
+  }, [activeViewport, getPresetColorsWithSaved]);
 
   const baseIsColor = React.useMemo(() => selectedBaseMap instanceof ColorDef, [selectedBaseMap]);
   const baseIsMap = React.useMemo(() => !baseIsColor && selectedBaseMap !== undefined, [baseIsColor, selectedBaseMap]);
@@ -273,10 +331,16 @@ export function BasemapPanel(props: BasemapPanelProps) {
           activeViewport.displayStyle.backgroundMapBase instanceof ColorDef ? activeViewport.displayStyle.backgroundMapBase.getTransparency() : 0;
         activeViewport.displayStyle.backgroundMapBase = bgColorDef.withTransparency(curTransparency);
 
+        // Determine if this is a preset color or a custom color
+        const selectedColorTbgr = bgColorValue.toTbgr();
+        const isPresetColor = presetColors.some((presetColor: ColorValue) => presetColor.toTbgr() === selectedColorTbgr);
+
+        // Persist custom color (no-op if preset)
+        void saveCustomBasemapColorPreference(selectedColorTbgr, isPresetColor);
         setSelectedBaseMap(bgColorDef);
       }
     },
-    [activeViewport],
+    [activeViewport, presetColors, saveCustomBasemapColorPreference],
   );
 
   const handleBaseMapSelection = React.useCallback(
