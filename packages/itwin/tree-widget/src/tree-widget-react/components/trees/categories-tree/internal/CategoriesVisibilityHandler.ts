@@ -149,12 +149,8 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
   private getCategoriesVisibility(categoryIds: Id64Arg): Observable<Visibility> {
     return from(categoryIds).pipe(
       releaseMainThreadOnItemsCount(50),
-      mergeMap((categoryId) =>
-        forkJoin({ subCategoryIds: this.#idsCache.getSubCategories(categoryId), categoryId: of(categoryId) })
-      ),
-      mergeMap(({ subCategoryIds, categoryId }) =>
-        this.getSubCategoriesVisibility(subCategoryIds, categoryId)
-      ),
+      mergeMap((categoryId) => forkJoin({ subCategoryIds: this.#idsCache.getSubCategories(categoryId), categoryId: of(categoryId) })),
+      mergeMap(({ subCategoryIds, categoryId }) => this.getSubCategoriesVisibility(subCategoryIds, categoryId)),
       mergeVisibilities,
       map((visibility) => {
         return visibility === "empty" ? "hidden" : visibility;
