@@ -149,12 +149,12 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
   private getCategoriesVisibility(categoryIds: Id64Arg): Observable<Visibility> {
     return from(categoryIds).pipe(
       releaseMainThreadOnItemsCount(50),
-      mergeMap((categoryId) => {
-        return forkJoin({ subCategoryIds: this.#idsCache.getSubCategories(categoryId), categoryId: of(categoryId) });
-      }),
-      mergeMap(({ subCategoryIds, categoryId }) => {
-        return this.getSubCategoriesVisibility(subCategoryIds, categoryId);
-      }),
+      mergeMap((categoryId) =>
+        forkJoin({ subCategoryIds: this.#idsCache.getSubCategories(categoryId), categoryId: of(categoryId) })
+      ),
+      mergeMap(({ subCategoryIds, categoryId }) =>
+        this.getSubCategoriesVisibility(subCategoryIds, categoryId)
+      ),
       mergeVisibilities,
       map((visibility) => {
         return visibility === "empty" ? "hidden" : visibility;
@@ -167,9 +167,9 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
       mergeMap((categoriesModelsMap) => categoriesModelsMap.keys()),
       filter((modelId) => !this.#viewport.view.viewsModel(modelId)),
       toArray(),
-      map((hiddenModels) => {
+      mergeMap(async (hiddenModels) => {
         if (hiddenModels.length > 0) {
-          this.#viewport.changeModelDisplay(hiddenModels, true);
+          await this.#viewport.addViewedModels(hiddenModels);
         }
       }),
     );
