@@ -14,7 +14,6 @@ vi.mock("../../useTranslation.js", () => ({
   useTranslation: () => ({
     translate: (key: string) => {
       const translations: Record<string, string> = {
-        "QuantityFormat:labels.formatSetDetails": "Format Set Details",
         "QuantityFormat:labels.label": "Label",
         "QuantityFormat:labels.unitSystem": "Unit System",
         "QuantityFormat:labels.description": "Description",
@@ -59,7 +58,6 @@ describe("FormatSetPanel", () => {
     it("should render format set details when format set is provided", () => {
       render(<FormatSetPanel formatSet={mockFormatSet} />);
 
-      expect(screen.getByText("Format Set Details")).toBeTruthy();
       expect(screen.getByDisplayValue("Test Format Set 1")).toBeTruthy();
       expect(screen.getByDisplayValue("Metric")).toBeTruthy();
       expect(screen.getByDisplayValue("A test format set")).toBeTruthy();
