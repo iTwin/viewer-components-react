@@ -24,7 +24,6 @@ import {
   startWith,
   Subject,
   take,
-  takeLast,
   takeUntil,
   tap,
   toArray,
@@ -713,11 +712,12 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
           viewport.setAlwaysDrawn(setDifference(alwaysDrawn, alwaysDrawnElements));
         }
 
-        return from(Id64.iterable(categories)).pipe(
-          releaseMainThreadOnItemsCount(300),
-          map((categoryId) => this.changeCategoryStateInViewportAccordingToModelVisibility(modelId, categoryId, false)),
-          takeLast(1),
-          mergeMap(async () => viewport.addViewedModels(modelId)),
+        return concat(
+          from(Id64.iterable(categories)).pipe(
+            releaseMainThreadOnItemsCount(300),
+            map((categoryId) => this.changeCategoryStateInViewportAccordingToModelVisibility(modelId, categoryId, false)),
+          ),
+          defer(async () => viewport.addViewedModels(modelId)),
         );
       }),
     );
@@ -749,9 +749,8 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
         from(Id64.iterable(categoryIds)).pipe(
           releaseMainThreadOnItemsCount(300),
           map((categoryId) => this.changeCategoryStateInViewportAccordingToModelVisibility(modelId, categoryId, on)),
-          takeLast(1),
-          mergeMap(() => this.clearAlwaysAndNeverDrawnElements(props)),
         ),
+        this.clearAlwaysAndNeverDrawnElements(props),
         this.#idsCache
           .getCategoriesModeledElements(modelId, categoryIds)
           .pipe(mergeMap((modeledElementIds) => this.changeModelState({ ids: modeledElementIds, on }))),

@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, EMPTY, from, merge, mergeMap, of } from "rxjs";
+import { bufferCount, from, mergeMap } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { QueryRowFormat } from "@itwin/core-common";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
@@ -46,12 +46,12 @@ export async function enableCategoryDisplay(viewport: Viewport, categoryIds: Id6
     from(categoryIds).pipe(
       releaseMainThreadOnItemsCount(500),
       bufferCount(getOptimalBatchSize({ totalSize: categoryIds.length, maximumBatchSize: 500 })),
-      mergeMap((bufferedCategories) => {
-        return merge(
-          of(viewport.changeCategoryDisplay(bufferedCategories, enabled, enableAllSubCategories)),
-          of(removeOverrides(bufferedCategories)),
-          false === enabled ? from(disableSubCategories(bufferedCategories)) : EMPTY,
-        );
+      mergeMap(async (bufferedCategories) => {
+        viewport.changeCategoryDisplay(bufferedCategories, enabled, enableAllSubCategories);
+        removeOverrides(bufferedCategories);
+        if (!enabled) {
+          await disableSubCategories(bufferedCategories);
+        }
       }),
     ),
   );
