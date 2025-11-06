@@ -7,7 +7,10 @@ import "./SkeletonTree.css";
 import { Skeleton, VisuallyHidden } from "@stratakit/bricks";
 import { TreeWidget } from "../../../../TreeWidget.js";
 
-/** @internal */
+/**
+ * Represents the loaded tree content before it finishes loading.
+ * @beta
+ */
 export function SkeletonTree() {
   return (
     <div className="tw-skeleton-container">
