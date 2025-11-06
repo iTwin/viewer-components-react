@@ -5,7 +5,7 @@
 
 import "./FormatPanel.scss";
 import * as React from "react";
-import { Button, Flex } from "@itwin/itwinui-react";
+import { Button, Flex, Text } from "@itwin/itwinui-react";
 import { useTranslation } from "../../useTranslation.js";
 import { FormatPanel } from "./FormatPanel.js";
 import { FormatSample } from "./FormatSample.js";
@@ -121,7 +121,7 @@ export function QuantityFormatPanel(props: QuantityFormatPanelProps) {
           {translate("QuantityFormat:labels.clear")}
         </Button>
         <Button size="small" styleType="high-visibility" onClick={handleSave} disabled={!saveEnabled}>
-          {translate("QuantityFormat:labels.save")}
+          {translate("QuantityFormat:labels.apply")}
         </Button>
       </Flex>
     </div>

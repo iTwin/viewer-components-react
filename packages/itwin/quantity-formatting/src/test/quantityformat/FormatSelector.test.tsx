@@ -98,11 +98,10 @@ describe("FormatSelector", () => {
     });
 
     it("should display format descriptions when available", () => {
-      render(<FormatSelector {...defaultProps} />);
+      render(<FormatSelector {...defaultProps} activeFormatDefinitionKey="length-format" />);
 
-      expect(screen.getByText("Format for length measurements")).toBeDefined();
-      expect(screen.getByText("Format for area measurements")).toBeDefined();
-      expect(screen.getByText("Imperial units for length")).toBeDefined();
+      expect(screen.getByText("Length Format")).toBeDefined();
+      expect(screen.queryByText("Format for length measurements")).toBeNull();
     });
 
     it("should highlight the active format when activeFormatDefinitionKey is provided", () => {
@@ -223,6 +222,84 @@ describe("FormatSelector", () => {
   });
 
   describe("Edge Cases", () => {
+    it("should filter out string values and only display FormatDefinition objects", () => {
+      const mixedFormatSet: FormatSet = {
+        name: "MixedSet",
+        label: "Mixed Format Set",
+        description: "Format set with mixed types",
+        unitSystem: "metric",
+        formats: {
+          "valid-format-1": {
+            precision: 2,
+            type: "Decimal",
+            label: "Valid Format 1",
+            description: "This is a valid format definition",
+          } as FormatDefinition,
+          "string-reference-1": "SomeStringReference",
+          "valid-format-2": {
+            precision: 4,
+            type: "Decimal",
+            label: "Valid Format 2",
+            description: "Another valid format definition",
+          } as FormatDefinition,
+          "string-reference-2": "AnotherStringReference",
+          "null-reference": null,
+        },
+      } as any; // Use 'any' to allow mixed types for testing
+
+      render(<FormatSelector {...defaultProps} activeFormatSet={mixedFormatSet} />);
+
+      // Valid FormatDefinition objects should be displayed
+      expect(screen.getByText("Valid Format 1")).toBeDefined();
+      expect(screen.getByText("Valid Format 2")).toBeDefined();
+
+      // String values should not be displayed
+      expect(screen.queryByText("SomeStringReference")).toBeNull();
+      expect(screen.queryByText("AnotherStringReference")).toBeNull();
+      expect(screen.queryByText("string-reference-1")).toBeNull();
+      expect(screen.queryByText("string-reference-2")).toBeNull();
+
+      // Should only show 2 list items (the valid formats)
+      const listItems = screen.getAllByRole("listitem");
+      expect(listItems).toHaveLength(2);
+    });
+
+    it("should handle clicking on filtered FormatDefinition objects correctly", async () => {
+      const user = userEvent.setup();
+      const mixedFormatSet: FormatSet = {
+        name: "MixedSet",
+        label: "Mixed Format Set",
+        unitSystem: "metric",
+        formats: {
+          "valid-format": {
+            precision: 2,
+            type: "Decimal",
+            label: "Valid Format",
+            description: "Valid format description",
+          } as FormatDefinition,
+          "string-reference": "SomeStringReference",
+        },
+      } as any;
+
+      render(<FormatSelector {...defaultProps} activeFormatSet={mixedFormatSet} />);
+
+      // Click on the valid format
+      const validFormatItem = screen.getByText("Valid Format");
+      await user.click(validFormatItem);
+
+      // Should call onListItemChange with the correct FormatDefinition
+      expect(mockOnListItemChange).toHaveBeenCalledTimes(1);
+      expect(mockOnListItemChange).toHaveBeenCalledWith(
+        {
+          precision: 2,
+          type: "Decimal",
+          label: "Valid Format",
+          description: "Valid format description",
+        },
+        "valid-format"
+      );
+    });
+
     it("should handle empty format set gracefully", () => {
       const emptyFormatSet: FormatSet = {
         name: "EmptySet",
