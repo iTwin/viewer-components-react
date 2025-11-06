@@ -217,13 +217,13 @@ export async function loadCategoriesFromViewport(vp: TreeWidgetViewport) {
 
   const categories: CategoryInfo[] = [];
   const rows = await (async () => {
-      const result = new Array<Id64String>();
-      for await (const row of vp.iModel.createQueryReader(ecsql, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames })) {
-        result.push(row.id);
-      }
-      return result;
-    })();
-    (await vp.iModel.categories.getCategoryInfo(rows)).forEach((val) => {
+    const result = new Array<Id64String>();
+    for await (const row of vp.iModel.createQueryReader(ecsql, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames })) {
+      result.push(row.id);
+    }
+    return result;
+  })();
+  (await vp.iModel.categories.getCategoryInfo(rows)).forEach((val) => {
     categories.push({ categoryId: val.id, subCategoryIds: val.subCategories.size ? [...val.subCategories.keys()] : undefined });
   });
   return categories;
