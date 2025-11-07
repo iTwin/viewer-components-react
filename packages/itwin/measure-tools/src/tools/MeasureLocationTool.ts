@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { GeoServiceStatus } from "@itwin/core-bentley";
-import { Vector3d } from "@itwin/core-geometry";
+import { Point2d, Vector3d } from "@itwin/core-geometry";
 import { IModelError } from "@itwin/core-common";
 import type {
   BeButtonEvent,
@@ -32,7 +32,7 @@ import { MeasureLocationToolModel } from "../toolmodels/MeasureLocationToolModel
 import { MeasureTools } from "../MeasureTools.js";
 import type { DialogItem, DialogItemValue, DialogPropertySyncItem } from "@itwin/appui-abstract";
 import { PropertyDescriptionHelper } from "@itwin/appui-abstract";
-import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper.js";
+import { SheetMeasurementHelper } from "../api/SheetMeasurementHelper.js";
 import type { DrawingMetadata, DrawingMetadataProps } from "../api/Measurement.js";
 import { ViewHelper } from "../api/ViewHelper.js";
 
@@ -44,8 +44,9 @@ MeasureLocationToolModel
   public static override toolId = "MeasureTools.MeasureLocation";
   public static override iconSpec = "icon-measure-location";
   private static readonly useDynamicMeasurementPropertyName = "useDynamicMeasurement";
-  protected override get allowedDrawingTypes(): SheetMeasurementsHelper.DrawingType[] {
-    return [SheetMeasurementsHelper.DrawingType.CrossSection, SheetMeasurementsHelper.DrawingType.Plan];
+
+  protected override get allowedDrawingTypes(): SheetMeasurementHelper.DrawingType[] {
+    return [SheetMeasurementHelper.DrawingType.Section, SheetMeasurementHelper.DrawingType.Plan, SheetMeasurementHelper.DrawingType.ProfileOrElevation];
   }
 
   private static _isUserNotifiedOfGeolocationFailure = false;
@@ -106,10 +107,11 @@ MeasureLocationToolModel
 
     if (this._enableSheetMeasurements) {
       if (ev.viewport.view.id !== undefined) {
-        const drawingInfo = await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point);
+        const drawingInfo = await SheetMeasurementHelper.getDrawingData(this.iModel, ev.viewport.view.id, ev.point);
+        this.toolModel.sheetViewId = ev.viewport.view.id;
 
-        if (drawingInfo?.drawingId !== undefined && drawingInfo.origin !== undefined && drawingInfo.worldScale !== undefined) {
-          const data: DrawingMetadata = { origin: drawingInfo.origin, drawingId: drawingInfo.drawingId, worldScale: drawingInfo.worldScale, extents: drawingInfo.extents, sheetToWorldTransform: drawingInfo.sheetToWorldTransform};
+        if (drawingInfo?.drawingId !== undefined && drawingInfo.viewAttachmentOrigin !== undefined && drawingInfo.transformProps !== undefined) {
+          const data: DrawingMetadata = { origin: Point2d.fromJSON(drawingInfo.viewAttachmentOrigin), drawingId: drawingInfo.drawingId, sheetToWorldTransformProps: drawingInfo.transformProps, extents: Point2d.fromJSON(drawingInfo.viewAttachmentExtent), sheetToWorldTransform: drawingInfo.sheetToWorldTransform};
           return data;
         }
       }
@@ -159,7 +161,7 @@ MeasureLocationToolModel
     if (!this._enableSheetMeasurements || !ev.viewport?.view.isSheetView())
       return true;
 
-    if (!SheetMeasurementsHelper.checkIfAllowedDrawingType(ev.viewport, ev.point, this.allowedDrawingTypes))
+    if (!SheetMeasurementHelper.checkIfAllowedDrawingType(ev.viewport, ev.point, this.allowedDrawingTypes))
       return false;
 
     return true;

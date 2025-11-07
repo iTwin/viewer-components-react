@@ -8,8 +8,8 @@ import type { Id64String } from "@itwin/core-bentley";
 import type { GeometryStreamProps } from "@itwin/core-common";
 import type { DecorateContext, HitDetail } from "@itwin/core-frontend";
 import { BeButton, BeButtonEvent, IModelApp } from "@itwin/core-frontend";
-import type { TransformProps, XYProps, XYZProps } from "@itwin/core-geometry";
-import { Point3d, Transform } from "@itwin/core-geometry";
+import type { TransformProps, XYProps, XYZProps , Point3d} from "@itwin/core-geometry";
+import { Transform } from "@itwin/core-geometry";
 import { Point2d } from "@itwin/core-geometry";
 import type { FormatterSpec } from "@itwin/core-quantity";
 import { MeasurementButtonHandledEvent, WellKnownMeasurementStyle, WellKnownViewType } from "./MeasurementEnums.js";
@@ -17,7 +17,7 @@ import { MeasurementPreferences } from "./MeasurementPreferences.js";
 import type { MeasurementProps } from "./MeasurementProps.js";
 import { MeasurementViewTarget } from "./MeasurementViewTarget.js";
 import { ShimFunctions } from "./ShimFunctions.js";
-import { SheetMeasurementsHelper } from "./SheetMeasurementHelper.js";
+import { SheetMeasurementHelper } from "./SheetMeasurementHelper.js";
 
 /** A property value on a measurement that can be aggregated with other similarly-named properties from other measurements so aggregate totals can be displayed in the UI. */
 export interface AggregatableValue {
@@ -59,26 +59,44 @@ export namespace DrawingMetadata {
       return undefined;
     const origin = obj.origin?.toJSONXY();
     const extents = obj.extents?.toJSONXY();
-    const masterOrigin = obj.sheetToWorldTransform?.masterOrigin.toJSONXYZ();
-    const sheetTov8Drawing = obj.sheetToWorldTransform?.sheetTov8Drawing.toJSON();
-    const v8DrawingToDesign = obj.sheetToWorldTransform?.v8DrawingToDesign.toJSON();
-    if (origin !== undefined)
-      return { origin, extents, worldScale: obj.worldScale, drawingId: obj.drawingId, sheetToWorldTransform: (masterOrigin !== undefined && sheetTov8Drawing !== undefined && v8DrawingToDesign !== undefined) ? {masterOrigin, sheetTov8Drawing, v8DrawingToDesign}: undefined };
+    if (origin !== undefined) {
+      return {
+        origin, extents, drawingId: obj.drawingId,
+        sheetToWorldTransform: {
+          DVDOrigin: obj.sheetToWorldTransformProps?.DVDOrigin,
+          sheetScale: obj.sheetToWorldTransformProps?.sheetScale,
+          SVDExtents: obj.sheetToWorldTransformProps?.SVDExtents,
+          SVDOrigin: obj.sheetToWorldTransformProps?.SVDOrigin,
+          SVDPitch: obj.sheetToWorldTransformProps?.SVDPitch,
+          SVDRoll: obj.sheetToWorldTransformProps?.SVDRoll,
+          SVDYaw: obj.sheetToWorldTransformProps?.SVDYaw
+        }
+      };
+    }
+
     return undefined;
   }
 
   export function fromJSON(json: DrawingMetadataProps): DrawingMetadata {
 
+    const sheetToWorldTransformProps = json.sheetToWorldTransformProps ? {
+        DVDOrigin: json.sheetToWorldTransformProps.DVDOrigin,
+        sheetScale: json.sheetToWorldTransformProps.sheetScale,
+        SVDExtents: json.sheetToWorldTransformProps.SVDExtents,
+        SVDOrigin: json.sheetToWorldTransformProps.SVDOrigin,
+        SVDPitch: json.sheetToWorldTransformProps.SVDPitch,
+        SVDRoll: json.sheetToWorldTransformProps.SVDRoll,
+        SVDYaw: json.sheetToWorldTransformProps.SVDYaw
+      }: undefined;
+
+    const sheetToWorldTransform = SheetMeasurementHelper.getTransform(json.origin, sheetToWorldTransformProps);
+
     return {
       origin: Point2d.fromJSON(json.origin),
-      worldScale: json.worldScale,
       drawingId: json.drawingId,
       extents: Point2d.fromJSON(json.extents),
-      sheetToWorldTransform: json.sheetToWorldTransform ? {
-        masterOrigin: Point3d.fromJSON(json.sheetToWorldTransform?.masterOrigin),
-        sheetTov8Drawing: Transform.fromJSON(json.sheetToWorldTransform?.sheetTov8Drawing),
-        v8DrawingToDesign: Transform.fromJSON(json.sheetToWorldTransform?.v8DrawingToDesign),
-      }: undefined,
+      sheetToWorldTransformProps,
+      sheetToWorldTransform
     };
 
   }
@@ -275,19 +293,12 @@ export interface MeasurementEqualityOptions {
 export interface DrawingMetadataProps extends Omit<DrawingMetadata, "origin" | "extents" | "sheetToWorldTransform"> {
   origin: XYProps;
   extents?: XYProps;
-  sheetToWorldTransform?: {
-    masterOrigin: XYZProps;
-    sheetTov8Drawing: TransformProps;
-    v8DrawingToDesign: TransformProps;
-  };
+  sheetToWorldTransform?: SheetMeasurementHelper.SheetToWorldTransformProps;
 }
 
 export interface DrawingMetadata {
   /** Id of the drawing */
   drawingId?: string;
-
-  /** Scaling from sheet to world distance */
-  worldScale: number;
 
   /** Origin of the drawing in sheet coordinates */
   origin: Point2d;
@@ -296,11 +307,10 @@ export interface DrawingMetadata {
   extents?: Point2d;
 
   /** Represents the transform from sheet points to 3d points */
-  sheetToWorldTransform?: SheetMeasurementsHelper.SheetTransformParams;
+  sheetToWorldTransform?: (point: Point2d | Point3d) => Point3d;
 
-  /** Represents the transform from sheet points to distance along alignment (X) and vertical position related to alignment (Y) */
-  sheetToProfileTransform?: Transform;
-
+  /** Props needed in order to reconstruct the sheetToWorldTransform */
+  sheetToWorldTransformProps?: SheetMeasurementHelper.SheetToWorldTransformProps;
 }
 
 /** Handler function that modifies the data sent to the widget for display. */
@@ -369,7 +379,7 @@ export abstract class Measurement {
   }
 
   public get worldScale(): Readonly<number> {
-    return this.drawingMetadata?.worldScale ?? 1.0;
+    return this.drawingMetadata?.sheetToWorldTransformProps?.sheetScale ?? 1.0;
   }
 
   public set sheetViewId(id: string | undefined) {
@@ -695,7 +705,7 @@ export abstract class Measurement {
    */
   protected adjustPointWithSheetToWorldTransform(point: Point3d): Readonly<Point3d> {
     if (this.drawingMetadata?.sheetToWorldTransform)
-      return SheetMeasurementsHelper.measurementTransform(point, this.drawingMetadata.sheetToWorldTransform);
+      return this.drawingMetadata.sheetToWorldTransform(point);
     return point;
   }
 
@@ -724,7 +734,7 @@ export abstract class Measurement {
     this.viewTarget.copyFrom(other.viewTarget);
     this.displayLabels = other.displayLabels;
     if (other.drawingMetadata)
-      this._drawingMetadata = { origin: other.drawingMetadata.origin.clone(), worldScale: other.drawingMetadata.worldScale, drawingId: other.drawingMetadata.drawingId, extents: other.drawingMetadata.extents?.clone(), sheetToWorldTransform: other.drawingMetadata.sheetToWorldTransform};
+      this._drawingMetadata = { origin: other.drawingMetadata.origin.clone(), drawingId: other.drawingMetadata.drawingId, extents: other.drawingMetadata.extents?.clone(), sheetToWorldTransform: other.drawingMetadata.sheetToWorldTransform, sheetToWorldTransformProps: other.drawingMetadata.sheetToWorldTransformProps };
   }
 
   /**
