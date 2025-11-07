@@ -26,6 +26,7 @@ import {
 } from "rxjs";
 import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
+import { releaseMainThreadOnItemsCount } from "../../common/internal/Utils.js";
 import { pushToMap } from "../../common/Utils.js";
 import { getOptimalBatchSize } from "../Utils.js";
 
@@ -663,6 +664,7 @@ export class ModelsTreeIdsCache implements Disposable {
           ),
         ),
       ),
+      releaseMainThreadOnItemsCount(500),
       reduce(
         ({ acc, createKey }, row) => {
           acc.set(createKey({ modelId: row.modelId, categoryId: row.categoryId }), {

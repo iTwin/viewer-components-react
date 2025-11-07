@@ -65,7 +65,7 @@ A format set might not capture all the formatting options used in an iTwin appli
 
 <img src="./media/show-unit-system-list.png" alt="Unit system selector" width="760" height="440">
 
-After making changes, notice how the Save and Clear buttons become enabled (highlighted), indicating that modifications can now be applied or discarded.
+After making changes, notice how the Apply and Clear buttons become enabled (highlighted), indicating that modifications can now be applied or discarded.
 
 <img src="./media/after-click-unit-system.png" alt="After unit system select" width="760" height="440">
 
@@ -302,7 +302,8 @@ A component for selecting from multiple format sets. This is useful when you hav
 ```typescript
 interface FormatSetSelectorProps {
   formatSets: FormatSet[]; // Array of available format sets
-  selectedFormatSetKey?: string; // Currently selected format set key
+  selectedFormatSetKey?: string; // Key of currently selected format set in the UI
+  activeFormatSetKey?: string; // Key of currently active/applied format set (shows badge)
   onFormatSetChange: (formatSet: FormatSet, key: string) => void; // Selection callback
 }
 ```
@@ -340,7 +341,9 @@ const handleFormatSetChange = (_formatSet: FormatSet, _key: string) => {
   // Handle format set change
 };
 
-render(<FormatSetSelector formatSets={formatSets} selectedFormatSetKey={undefined} onFormatSetChange={handleFormatSetChange} />);
+render(
+  <FormatSetSelector formatSets={formatSets} selectedFormatSetKey="MetricSet" activeFormatSetKey="ImperialSet" onFormatSetChange={handleFormatSetChange} />,
+);
 ```
 
 <!-- END EXTRACTION -->
