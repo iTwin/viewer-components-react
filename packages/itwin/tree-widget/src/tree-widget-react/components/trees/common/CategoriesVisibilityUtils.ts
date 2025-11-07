@@ -3,9 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { Guid } from "@itwin/core-bentley";
+import { bufferCount, from, mergeMap } from "rxjs";
+import { Guid, Id64 } from "@itwin/core-bentley";
 import { QueryRowFormat } from "@itwin/core-common";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
+import { getOptimalBatchSize, releaseMainThreadOnItemsCount } from "./internal/Utils.js";
+import { toVoidPromise } from "./Rxjs.js";
 
 import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
@@ -24,23 +27,34 @@ export interface CategoryInfo {
  * @internal
  */
 export async function enableCategoryDisplay(viewport: Viewport, categoryIds: Id64Array, enabled: boolean, enableAllSubCategories = true) {
-  viewport.changeCategoryDisplay(categoryIds, enabled, enableAllSubCategories);
-
-  // remove category overrides per model
-  const modelsContainingOverrides: string[] = [];
-  for (const ovr of viewport.perModelCategoryVisibility) {
-    if (categoryIds.findIndex((id) => id === ovr.categoryId) !== -1) {
-      modelsContainingOverrides.push(ovr.modelId);
+  const removeOverrides = (bufferedCategories: Id64Array) => {
+    const modelsContainingOverrides: string[] = [];
+    for (const ovr of viewport.perModelCategoryVisibility) {
+      if (Id64.has(bufferedCategories, ovr.categoryId)) {
+        modelsContainingOverrides.push(ovr.modelId);
+      }
     }
-  }
-  viewport.perModelCategoryVisibility.setOverride(modelsContainingOverrides, categoryIds, PerModelCategoryVisibility.Override.None);
-
-  // changeCategoryDisplay only enables subcategories, it does not disabled them. So we must do that ourselves.
-  if (false === enabled) {
-    (await viewport.iModel.categories.getCategoryInfo(categoryIds)).forEach((categoryInfo) => {
+    viewport.perModelCategoryVisibility.setOverride(modelsContainingOverrides, bufferedCategories, PerModelCategoryVisibility.Override.None);
+  };
+  const disableSubCategories = async (bufferedCategories: Id64Array) => {
+    // changeCategoryDisplay only enables subcategories, it does not disabled them. So we must do that ourselves.
+    (await viewport.iModel.categories.getCategoryInfo(bufferedCategories)).forEach((categoryInfo) => {
       categoryInfo.subCategories.forEach((value) => enableSubCategoryDisplay(viewport, value.id, false));
     });
-  }
+  };
+  return toVoidPromise(
+    from(categoryIds).pipe(
+      releaseMainThreadOnItemsCount(500),
+      bufferCount(getOptimalBatchSize({ totalSize: categoryIds.length, maximumBatchSize: 500 })),
+      mergeMap(async (bufferedCategories) => {
+        viewport.changeCategoryDisplay(bufferedCategories, enabled, enableAllSubCategories);
+        removeOverrides(bufferedCategories);
+        if (!enabled) {
+          await disableSubCategories(bufferedCategories);
+        }
+      }),
+    ),
+  );
 }
 
 /**

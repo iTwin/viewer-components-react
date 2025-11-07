@@ -898,7 +898,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      expect(await firstValueFrom(idsCache.getSubCategories("0x123"))).to.deep.eq([]);
+      expect(await firstValueFrom(idsCache.getSubCategories("0x123"))).to.deep.eq(new Set());
     });
 
     it("returns empty list when category has one subCategory", async function () {
@@ -910,7 +910,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      expect(await firstValueFrom(idsCache.getSubCategories(keys.category.id))).to.deep.eq([]);
+      expect(await firstValueFrom(idsCache.getSubCategories(keys.category.id))).to.deep.eq(new Set());
     });
 
     it("returns subCategories when category has multiple subCategories", async function () {
@@ -925,8 +925,8 @@ describe("CategoriesTreeIdsCache", () => {
       const { imodel, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
       const result = await firstValueFrom(idsCache.getSubCategories(keys.category.id));
-      expect(result.includes(keys.subCategory.id)).to.be.true;
-      expect(result.length).to.be.eq(2);
+      expect(result.has(keys.subCategory.id)).to.be.true;
+      expect(result.size).to.be.eq(2);
     });
 
     it("returns only child subCategories when multiple categories have multiple subCategories", async function () {
@@ -945,8 +945,8 @@ describe("CategoriesTreeIdsCache", () => {
       const { imodel, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
       const result = await firstValueFrom(idsCache.getSubCategories(keys.category2.id));
-      expect(result.includes(keys.subCategory2.id)).to.be.true;
-      expect(result.length).to.be.eq(2);
+      expect(result.has(keys.subCategory2.id)).to.be.true;
+      expect(result.size).to.be.eq(2);
     });
   });
 });
