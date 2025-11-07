@@ -7,6 +7,7 @@ import { defaultIfEmpty, EMPTY, firstValueFrom, from, fromEvent, identity, lastV
 import { Guid } from "@itwin/core-bentley";
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
+import { releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 import { getClassesByView } from "./internal/CategoriesTreeIdsCache.js";
 import { DEFINITION_CONTAINER_CLASS, DEFINITION_ELEMENT_CLASS, SUB_CATEGORY_CLASS } from "./internal/ClassNameDefinitions.js";
@@ -425,6 +426,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
           }
           return imodelAccess.createQueryReader(queryProps, { restartToken: `${componentName}/${componentId}/filter-by-label`, limit });
         }),
+        releaseMainThreadOnItemsCount(1000),
         map(
           (row): InstanceKey => ({
             className: row.ClassName === "c" ? categoryClass : row.ClassName === "sc" ? SUB_CATEGORY_CLASS : DEFINITION_CONTAINER_CLASS,
@@ -456,6 +458,7 @@ function createInstanceKeyPathsFromTargetItems(
 
   const { categoryClass } = getClassesByView(viewType);
   return from(targetItems).pipe(
+    releaseMainThreadOnItemsCount(500),
     mergeMap((targetItem) => {
       if (targetItem.className === SUB_CATEGORY_CLASS) {
         return idsCache.getInstanceKeyPaths({ subCategoryId: targetItem.id });
