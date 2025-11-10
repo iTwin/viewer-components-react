@@ -414,7 +414,7 @@ export class LocationMeasurement extends Measurement {
       value: fCoordinates,
     });
 
-    if (this._geoLocation && this.drawingMetadata?.sheetToWorldTransform === undefined)
+    if (this._geoLocation && this.drawingMetadata?.sheetToWorldTransformFunc === undefined)
       data.properties.push({
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureLocation.latLong"
@@ -434,7 +434,7 @@ export class LocationMeasurement extends Measurement {
         value: await FormatterUtils.formatLength(adjustedLocation.z, coordinateSpec),
       });
     }
-    if (this.drawingMetadata?.sheetToWorldTransform === undefined) {
+    if (this.drawingMetadata?.sheetToWorldTransformFunc === undefined) {
       let slopeValue: string;
       if (undefined !== this._slope)
         slopeValue = FormatterUtils.formatSlope(100.0 * this._slope, true);

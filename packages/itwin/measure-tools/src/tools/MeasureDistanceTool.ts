@@ -130,7 +130,7 @@ MeasureDistanceToolModel
         this.toolModel.sheetViewId = ev.viewport.view.id;
 
         if (drawingInfo?.drawingId !== undefined && drawingInfo.viewAttachmentOrigin !== undefined && drawingInfo.transformProps.sheetScale !== undefined) {
-          const data: DrawingMetadata = { origin: Point2d.fromJSON(drawingInfo.viewAttachmentOrigin), drawingId: drawingInfo.drawingId, sheetToWorldTransformProps: drawingInfo.transformProps, extents: Point2d.fromJSON(drawingInfo.viewAttachmentExtent), sheetToWorldTransform: drawingInfo.sheetToWorldTransform};
+          const data: DrawingMetadata = { origin: Point2d.fromJSON(drawingInfo.viewAttachmentOrigin), drawingId: drawingInfo.drawingId, sheetToWorldTransformProps: drawingInfo.transformProps, extents: Point2d.fromJSON(drawingInfo.viewAttachmentExtent), sheetToWorldTransformFunc: drawingInfo.sheetToWorldTransform};
           this.toolModel.drawingMetadata = data;
         }
       }
