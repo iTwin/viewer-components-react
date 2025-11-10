@@ -69,7 +69,8 @@ export namespace DrawingMetadata {
           SVDOrigin: obj.sheetToWorldTransformProps?.SVDOrigin,
           SVDPitch: obj.sheetToWorldTransformProps?.SVDPitch,
           SVDRoll: obj.sheetToWorldTransformProps?.SVDRoll,
-          SVDYaw: obj.sheetToWorldTransformProps?.SVDYaw
+          SVDYaw: obj.sheetToWorldTransformProps?.SVDYaw,
+          transformParams: obj.sheetToWorldTransformProps?.transformParams
         }
       };
     }
@@ -86,7 +87,8 @@ export namespace DrawingMetadata {
         SVDOrigin: json.sheetToWorldTransformProps.SVDOrigin,
         SVDPitch: json.sheetToWorldTransformProps.SVDPitch,
         SVDRoll: json.sheetToWorldTransformProps.SVDRoll,
-        SVDYaw: json.sheetToWorldTransformProps.SVDYaw
+        SVDYaw: json.sheetToWorldTransformProps.SVDYaw,
+        transformParams: json.sheetToWorldTransformProps.transformParams
       }: undefined;
 
     const sheetToWorldTransform = SheetMeasurementHelper.getTransform(json.origin, sheetToWorldTransformProps);

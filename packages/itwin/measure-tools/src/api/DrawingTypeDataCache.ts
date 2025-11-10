@@ -12,6 +12,7 @@ import { SheetMeasurementHelper } from "./SheetMeasurementHelper.js";
 export class DrawingDataCache {
 
   private _drawingDataCache: Map<IModelConnection, Map<Id64String, SheetMeasurementHelper.DrawingTypeData[]>>;
+  private _spatialDataCache: Map<IModelConnection, Map<Id64String, SheetMeasurementHelper.SheetToWorldTransformProps>>;
   private _drawingTypeDataCache: Map<IModelConnection, Map<Id64String, number>>;
   private _viewportModelChangedListeners: Map<Viewport, () => void>;
   private static _instance: DrawingDataCache | undefined;
@@ -19,6 +20,7 @@ export class DrawingDataCache {
   private constructor() {
     this._drawingDataCache = new Map<IModelConnection, Map<Id64String, SheetMeasurementHelper.DrawingTypeData[]>>();
     this._drawingTypeDataCache = new Map<IModelConnection, Map<Id64String, number>>();
+    this._spatialDataCache = new Map<IModelConnection, Map<Id64String, SheetMeasurementHelper.SheetToWorldTransformProps>>();
     this._viewportModelChangedListeners = new Map<Viewport, () => void>();
 
     this.setupEvents();
@@ -40,6 +42,7 @@ export class DrawingDataCache {
     IModelConnection.onClose.addListener((imodel) => {
       this._drawingDataCache.delete(imodel);
       this._drawingTypeDataCache.delete(imodel);
+      this._spatialDataCache.delete(imodel);
     });
 
     // Listen for new viewports opening
@@ -113,6 +116,22 @@ export class DrawingDataCache {
     }
 
     return sheetData;
+  }
+
+  public async querySpatialInfo(imodel: IModelConnection, drawing: SheetMeasurementHelper.DrawingTypeData): Promise<SheetMeasurementHelper.SheetToWorldTransformProps | undefined> {
+    let cache = this._spatialDataCache.get(imodel);
+    if (!cache) {
+      cache = new Map<string, SheetMeasurementHelper.SheetToWorldTransformProps>();
+      this._spatialDataCache.set(imodel, cache);
+    }
+
+    let transformProps = cache.get(drawing.id);
+    if (!transformProps) {
+      transformProps = await SheetMeasurementHelper.getSpatialInfo(imodel, drawing);
+      if (transformProps)
+        cache.set(drawing.id, transformProps);
+    }
+    return transformProps;
   }
 
 }

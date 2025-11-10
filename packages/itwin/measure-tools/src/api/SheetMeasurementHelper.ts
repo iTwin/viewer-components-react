@@ -31,6 +31,7 @@ export namespace SheetMeasurementHelper {
     SVDRoll?: number;
     sheetScale?: number;
     DVDOrigin?: XYProps;
+    transformParams?: CivilSheetTransformParams;
   }
 
   export interface DrawingTypeData {
@@ -219,10 +220,19 @@ export namespace SheetMeasurementHelper {
    * @param transform
    * @returns Point in world coordinates
    */
-  export function getCivilTransform(point: Point3d, transform: CivilSheetTransformParams): Point3d {
-    const drawingPoint = transform.sheetTov8Drawing.multiplyPoint3d(point);
-    const adjustedDrawingPoint = new Point3d(drawingPoint.x, drawingPoint.y, transform.masterOrigin.z);
-    const final3dPoint = transform.v8DrawingToDesign.multiplyPoint3d(adjustedDrawingPoint);
+  export function getCivilTransform(sheetPoint: Point3d | Point2d, sheetToWorldTransform?: SheetToWorldTransformProps): Point3d {
+
+    const sheetPointAs3D = Point3d.createFrom(sheetPoint);
+    if (sheetToWorldTransform?.transformParams?.masterOrigin === undefined ||
+      sheetToWorldTransform.transformParams.sheetTov8Drawing === undefined ||
+      sheetToWorldTransform.transformParams.v8DrawingToDesign === undefined
+    ) {
+      return sheetPointAs3D;
+    }
+
+    const drawingPoint = sheetToWorldTransform.transformParams.sheetTov8Drawing.multiplyPoint3d(sheetPointAs3D);
+    const adjustedDrawingPoint = new Point3d(drawingPoint.x, drawingPoint.y, sheetToWorldTransform.transformParams.masterOrigin.z);
+    const final3dPoint = sheetToWorldTransform.transformParams.v8DrawingToDesign.multiplyPoint3d(adjustedDrawingPoint);
     return final3dPoint;
   }
 
@@ -237,7 +247,7 @@ export namespace SheetMeasurementHelper {
         sheetToWorldTransform.SVDRoll === undefined ||
         sheetToWorldTransform.SVDYaw === undefined ||
         sheetToWorldTransform.sheetScale ===  undefined) {
-          return Point3d.createFrom(sheetPoint);
+          return getCivilTransform(sheetPoint, sheetToWorldTransform);
       }
 
       const VAOrigin = Point2d.createZero();
@@ -272,6 +282,47 @@ export namespace SheetMeasurementHelper {
 
   }
 
+  export async function getSpatialInfo(imodel: IModelConnection, drawing: DrawingTypeData): Promise<SheetToWorldTransformProps | undefined> {
+    const spatialEcsql = getSpatialViewInfoECSQL(drawing.id);
+
+    const spatialReader = imodel.createQueryReader(spatialEcsql.ecsql, QueryBinder.from(spatialEcsql.parameters));
+
+    const isValid = await spatialReader.step();
+    if (isValid) {
+      const spatialData = spatialReader.current;
+
+      const transformProps = {
+        DVDOrigin: spatialData[6],
+        sheetScale: spatialData[5],
+        SVDExtents: spatialData[1],
+        SVDOrigin: spatialData[0],
+        SVDPitch: spatialData[3],
+        SVDRoll: spatialData[4],
+        SVDYaw: spatialData[2]
+        };
+      return transformProps;
+    } else {
+      // We don't have the section drawing relations, let's try the civil json props
+      const civilEcsql = getCivilDrawingInfoECSQL(drawing.id);
+      const iter = imodel.createQueryReader(civilEcsql.ecsql, QueryBinder.from(civilEcsql.parameters));
+
+      const isValid = await iter.step();
+
+      if (isValid) {
+        const row = iter.current;
+        const jsonProp = JSON.parse(row[4]);
+        if (jsonProp.civilimodelconn) {
+          const sheetToWorldTransform: CivilSheetTransformParams = { masterOrigin: Point3d.fromJSON(jsonProp.civilimodelconn.masterOrigin), sheetTov8Drawing: Transform.fromJSON(jsonProp.civilimodelconn.sheetToV8DrawingTransform), v8DrawingToDesign: Transform.fromJSON(jsonProp.civilimodelconn.v8DrawingToDesignTransform)};
+          return {
+            transformParams: sheetToWorldTransform,
+            sheetScale: row[5]
+          };
+        }
+      }
+    }
+    return undefined;
+  }
+
   /**
    * Gives all the data needed for transforming points from 2d to 3d and what's needed to draw drawing contour
    * @param imodel
@@ -297,54 +348,24 @@ export namespace SheetMeasurementHelper {
     if (correctVAData === undefined)
       return undefined;
 
-    const spatialEcsql = getSpatialViewInfoECSQL(correctVAData.id);
+    const spatialInfo = await DrawingDataCache.getInstance().querySpatialInfo(imodel, correctVAData);
 
-    const spatialReader = imodel.createQueryReader(spatialEcsql.ecsql, QueryBinder.from(spatialEcsql.parameters));
+    if (spatialInfo === undefined)
+      return undefined;
 
-    const isValid = await spatialReader.step();
-    if (isValid) {
-      const spatialData = spatialReader.current;
-
-      const transformProps = {
-        DVDOrigin: spatialData[6],
-        sheetScale: spatialData[5],
-        SVDExtents: spatialData[1],
-        SVDOrigin: spatialData[0],
-        SVDPitch: spatialData[3],
-        SVDRoll: spatialData[4],
-        SVDYaw: spatialData[2]
-        };
-      const transform = getTransform(correctVAData.origin, transformProps);
-      return {sheetToWorldTransform: transform, viewAttachmentOrigin: correctVAData.origin, viewAttachmentExtent: correctVAData.bBoxHigh, drawingId: correctVAData.id, transformProps};
+    if (spatialInfo.transformParams === undefined) {
+      const transform = getTransform(correctVAData.origin, spatialInfo);
+      return {sheetToWorldTransform: transform, viewAttachmentOrigin: correctVAData.origin, viewAttachmentExtent: correctVAData.bBoxHigh, drawingId: correctVAData.id, transformProps: spatialInfo};
     } else {
-      // We don't have the section drawing relations, let's try the civil json props
-      const civilEcsql = getCivilDrawingInfoECSQL(correctVAData.id);
-      const iter = imodel.createQueryReader(civilEcsql.ecsql, QueryBinder.from(civilEcsql.parameters));
-
-      const isValid = await iter.step();
-
-      if (isValid) {
-        const row = iter.current;
-        const jsonProp = JSON.parse(row[4]);
-        if (jsonProp.civilimodelconn) {
-          const sheetToWorldTransform: CivilSheetTransformParams = { masterOrigin: Point3d.fromJSON(jsonProp.civilimodelconn.masterOrigin), sheetTov8Drawing: Transform.fromJSON(jsonProp.civilimodelconn.sheetToV8DrawingTransform), v8DrawingToDesign: Transform.fromJSON(jsonProp.civilimodelconn.v8DrawingToDesignTransform)};
-            const result = {
-              drawingId: row[0],
-              viewAttachmentOrigin: new Point2d(row[1].X, row[1].Y),
-              viewAttachmentExtent: new Point2d(row[3].X - row[2].X, row[3].Y - row[2].Y),
-              sheetToWorldTransform: (sheetPoint: Point2d | Point3d) => {
-                const sheetPointAs3D = Point3d.createFrom(sheetPoint);
-                return getCivilTransform(sheetPointAs3D, sheetToWorldTransform);
-              },
-              transformProps: {
-                sheetScale: row[5]
-              }
-            };
-            return result;
-          }
-      }
+      const sheetToWorldTransform: CivilSheetTransformParams = { masterOrigin: Point3d.fromJSON(spatialInfo.transformParams.masterOrigin), sheetTov8Drawing: spatialInfo.transformParams.sheetTov8Drawing, v8DrawingToDesign: spatialInfo.transformParams.v8DrawingToDesign};
+      return {
+        drawingId: correctVAData.id,
+        viewAttachmentOrigin: correctVAData.origin,
+        viewAttachmentExtent: correctVAData.bBoxHigh,
+        sheetToWorldTransform: getTransform(correctVAData.origin, {transformParams: sheetToWorldTransform}),
+        transformProps: spatialInfo
+      };
     }
-    return undefined;
   }
 
   function getNameFromDrawingType(type: SheetMeasurementHelper.DrawingType): string  {
