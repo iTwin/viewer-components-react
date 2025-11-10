@@ -92,14 +92,6 @@ export const FormatSetSelector: React.FC<FormatSetSelectorProps> = ({
                     </Badge>
                   )}
                 </Flex>
-                {formatSet.description && selectedFormatSetKey === key && (
-                  <Text
-                    variant="small"
-                    isMuted
-                  >
-                    {formatSet.description}
-                  </Text>
-                )}
               </Flex>
             </ListItem>
           );
