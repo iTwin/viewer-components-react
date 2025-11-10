@@ -4,12 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { EMPTY, expand, firstValueFrom, from, mergeMap, queueScheduler, toArray } from "rxjs";
+import { bufferCount, concatMap, delay, EMPTY, expand, firstValueFrom, from, identity, mergeMap, of, queueScheduler, toArray } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
-import { releaseMainThreadOnItemsCount, toVoidPromise } from "@itwin/tree-widget-react/internal";
+import { toVoidPromise } from "@itwin/tree-widget-react/internal";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
@@ -50,15 +50,18 @@ async function validateNodeVisibility({ node, handler, expectations }: ValidateN
     expect(actualVisibility.state).to.eq(expectedVisibility, node.label);
     return;
   }
-  const parentIds = node.parentKeys
-    .filter((key) => HierarchyNodeKey.isInstances(key))
-    .map((key) => key.instanceKeys.map(({ id }) => id))
-    .flat();
-  const parentIdInExpectations = expectations.parentIds ? parentIds.find((id) => id in expectations.parentIds!) : undefined;
-  if (parentIdInExpectations) {
-    const expectedVisibility = expectations.parentIds![parentIdInExpectations];
-    expect(actualVisibility.state).to.eq(expectedVisibility, node.label);
-    return;
+
+  if (expectations.parentIds) {
+    const parentIds = node.parentKeys
+      .filter((key) => HierarchyNodeKey.isInstances(key))
+      .map((key) => key.instanceKeys.map(({ id }) => id))
+      .flat();
+    const parentIdInExpectations = parentIds.find((id) => id in expectations.parentIds!);
+    if (parentIdInExpectations) {
+      const expectedVisibility = expectations.parentIds[parentIdInExpectations];
+      expect(actualVisibility.state).to.eq(expectedVisibility, node.label);
+      return;
+    }
   }
   expect(actualVisibility.state).to.eq(expectations.default === "all-hidden" ? "hidden" : "visible", node.label);
 }
@@ -84,13 +87,26 @@ export async function validateHierarchyVisibility(
     releaseOn?: number;
   },
 ) {
+  const releaseAfterCount = 100;
   props.viewport.renderFrame();
   // This promise allows handler change event to fire if it was scheduled.
   await new Promise((resolve) => setTimeout(resolve));
   await toVoidPromise(
     from(props.hierarchyNodes).pipe(
-      releaseMainThreadOnItemsCount(100),
-      mergeMap(async (node) => validateNodeVisibility({ ...props, node })),
+      // Custom releaseMainThreadOnItemsCount
+      bufferCount(releaseAfterCount),
+      concatMap((nodes, index) => {
+        const isDelayed = nodes.length === releaseAfterCount || index > 0;
+        return of({ nodes, isDelayed }).pipe(isDelayed ? delay(0) : identity);
+      }),
+      concatMap(({ nodes: delayedNodes, isDelayed }) => {
+        return from(delayedNodes).pipe(
+          mergeMap(async (node) => validateNodeVisibility({ ...props, node })),
+          toArray(),
+          // Release again after validating the delayed nodes.
+          isDelayed ? delay(0) : identity,
+        );
+      }),
     ),
   );
 }
