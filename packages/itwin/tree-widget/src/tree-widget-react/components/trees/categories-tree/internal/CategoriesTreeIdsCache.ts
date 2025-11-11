@@ -3,10 +3,13 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { Guid } from "@itwin/core-bentley";
+import { defer, forkJoin, from, map, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
+import { Guid, Id64 } from "@itwin/core-bentley";
+import { setIntersection } from "../../common/internal/Utils.js";
 import { DEFINITION_CONTAINER_CLASS, SUB_CATEGORY_CLASS } from "./ClassNameDefinitions.js";
 
-import type { GuidString, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { Observable } from "rxjs";
+import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
 
@@ -29,20 +32,16 @@ interface CategoryInfo {
   hasElements: boolean;
 }
 
-interface SubCategoryInfo {
-  categoryId: Id64String;
-}
-
 /** @internal */
 export class CategoriesTreeIdsCache implements Disposable {
-  #definitionContainersInfo: Promise<Map<Id64String, DefinitionContainerInfo>> | undefined;
-  #modelsCategoriesInfo: Promise<Map<Id64String, CategoriesInfo>> | undefined;
-  #subCategoriesInfo: Promise<Map<Id64String, SubCategoryInfo>> | undefined;
-  #elementModelsCategories: Promise<Map<Id64String, Id64Set>> | undefined;
+  #definitionContainersInfo: Observable<Map<Id64String, DefinitionContainerInfo>> | undefined;
+  #modelsCategoriesInfo: Observable<Map<Id64String, CategoriesInfo>> | undefined;
+  #subCategoriesInfo: Observable<Map<Id64String, Id64Set>> | undefined;
+  #elementModelsCategories: Observable<Map<Id64String, Id64Set>> | undefined;
   #categoryClass: string;
   #categoryElementClass: string;
   #categoryModelClass: string;
-  #isDefinitionContainerSupported: Promise<boolean> | undefined;
+  #isDefinitionContainerSupported: Observable<boolean> | undefined;
   #queryExecutor: LimitingECSqlQueryExecutor;
   #componentId: GuidString;
   #componentName: string;
@@ -59,436 +58,497 @@ export class CategoriesTreeIdsCache implements Disposable {
 
   public [Symbol.dispose]() {}
 
-  private async *queryElementModelCategories(): AsyncIterableIterator<{
+  private queryElementModelCategories(): Observable<{
     modelId: Id64String;
     categoryId: Id64String;
   }> {
-    const query = `
-      SELECT this.Model.Id modelId, this.Category.Id categoryId
-      FROM ${this.#categoryModelClass} m
-      JOIN ${this.#categoryElementClass} this ON m.ECInstanceId = this.Model.Id
-      WHERE m.IsPrivate = false
-      GROUP BY modelId, categoryId
-    `;
-    for await (const row of this.#queryExecutor.createQueryReader(
-      { ecsql: query },
-      {
-        rowFormat: "ECSqlPropertyNames",
-        limit: "unbounded",
-        restartToken: `${this.#componentName}/${this.#componentId}/element-models-and-categories`,
-      },
-    )) {
-      yield { modelId: row.modelId, categoryId: row.categoryId };
-    }
+    return defer(() => {
+      const query = `
+        SELECT this.Model.Id modelId, this.Category.Id categoryId
+        FROM ${this.#categoryModelClass} m
+        JOIN ${this.#categoryElementClass} this ON m.ECInstanceId = this.Model.Id
+        WHERE m.IsPrivate = false
+        GROUP BY modelId, categoryId
+      `;
+      return this.#queryExecutor.createQueryReader(
+        { ecsql: query },
+        {
+          rowFormat: "ECSqlPropertyNames",
+          limit: "unbounded",
+          restartToken: `${this.#componentName}/${this.#componentId}/element-models-and-categories`,
+        },
+      );
+    }).pipe(
+      map((row) => {
+        return { modelId: row.modelId, categoryId: row.categoryId };
+      }),
+    );
   }
 
-  private async *queryCategories(): AsyncIterableIterator<{
+  private queryCategories(): Observable<{
     id: Id64String;
     modelId: Id64String;
     parentDefinitionContainerExists: boolean;
     childCount: number;
     hasElements: boolean;
   }> {
-    const isDefinitionContainerSupported = await this.getIsDefinitionContainerSupported();
-    const categoriesQuery = `
-      SELECT
-        this.ECInstanceId id,
-        COUNT(sc.ECInstanceId) childCount,
-        this.Model.Id modelId,
-        ${
-          isDefinitionContainerSupported
-            ? `
-            IIF(this.Model.Id IN (SELECT dc.ECInstanceId FROM ${DEFINITION_CONTAINER_CLASS} dc),
-              true,
-              false
-            )`
-            : "false"
-        } parentDefinitionContainerExists,
-        IFNULL(
-          (SELECT 1 FROM ${this.#categoryElementClass} e WHERE e.Category.Id = this.ECInstanceId LIMIT 1),
-          0
-        ) hasElements
-      FROM
-        ${this.#categoryClass} this
-        JOIN ${SUB_CATEGORY_CLASS} sc ON sc.Parent.Id = this.ECInstanceId
-        JOIN BisCore.Model m ON m.ECInstanceId = this.Model.Id
-      WHERE
-        NOT this.IsPrivate
-        AND (NOT m.IsPrivate OR m.ECClassId IS (BisCore.DictionaryModel))
-      GROUP BY this.ECInstanceId
-    `;
-    for await (const row of this.#queryExecutor.createQueryReader(
-      { ecsql: categoriesQuery },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/categories` },
-    )) {
-      yield {
-        id: row.id,
-        modelId: row.modelId,
-        parentDefinitionContainerExists: row.parentDefinitionContainerExists,
-        childCount: row.childCount,
-        hasElements: !!row.hasElements,
-      };
-    }
+    return this.getIsDefinitionContainerSupported().pipe(
+      mergeMap((isDefinitionContainerSupported) =>
+        defer(() => {
+          const categoriesQuery = `
+            SELECT
+              this.ECInstanceId id,
+              COUNT(sc.ECInstanceId) childCount,
+              this.Model.Id modelId,
+              ${
+                isDefinitionContainerSupported
+                  ? `
+                  IIF(this.Model.Id IN (SELECT dc.ECInstanceId FROM ${DEFINITION_CONTAINER_CLASS} dc),
+                    true,
+                    false
+                  )`
+                  : "false"
+              } parentDefinitionContainerExists,
+              IFNULL(
+                (SELECT 1 FROM ${this.#categoryElementClass} e WHERE e.Category.Id = this.ECInstanceId LIMIT 1),
+                0
+              ) hasElements
+            FROM
+              ${this.#categoryClass} this
+              JOIN ${SUB_CATEGORY_CLASS} sc ON sc.Parent.Id = this.ECInstanceId
+              JOIN BisCore.Model m ON m.ECInstanceId = this.Model.Id
+            WHERE
+              NOT this.IsPrivate
+              AND (NOT m.IsPrivate OR m.ECClassId IS (BisCore.DictionaryModel))
+            GROUP BY this.ECInstanceId
+          `;
+          return this.#queryExecutor.createQueryReader(
+            { ecsql: categoriesQuery },
+            { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/categories` },
+          );
+        }).pipe(
+          map((row) => {
+            return {
+              id: row.id,
+              modelId: row.modelId,
+              parentDefinitionContainerExists: row.parentDefinitionContainerExists,
+              childCount: row.childCount,
+              hasElements: !!row.hasElements,
+            };
+          }),
+        ),
+      ),
+    );
   }
 
-  private async queryIsDefinitionContainersSupported(): Promise<boolean> {
-    const query = `
-      SELECT
-        1
-      FROM
-        ECDbMeta.ECSchemaDef s
-        JOIN ECDbMeta.ECClassDef c ON c.Schema.Id = s.ECInstanceId
-      WHERE
-        s.Name = 'BisCore'
-        AND c.Name = 'DefinitionContainer'
-    `;
-
-    for await (const _row of this.#queryExecutor.createQueryReader(
-      { ecsql: query },
-      { restartToken: `${this.#componentName}/${this.#componentId}/is-definition-container-supported` },
-    )) {
-      return true;
-    }
-    return false;
-  }
-
-  private async *queryDefinitionContainers(): AsyncIterableIterator<{ id: Id64String; modelId: Id64String; hasElements: boolean }> {
-    // DefinitionModel ECInstanceId will always be the same as modeled DefinitionContainer ECInstanceId, if this wasn't the case, we would need to do something like:
-    //  JOIN BisCore.DefinitionModel dm ON dm.ECInstanceId = ${modelIdAccessor}
-    //  JOIN BisCore.DefinitionModelBreaksDownDefinitionContainer dr ON dr.SourceECInstanceId = dm.ECInstanceId
-    //  JOIN BisCore.DefinitionContainer dc ON dc.ECInstanceId = dr.TargetECInstanceId
-    const DEFINITION_CONTAINERS_CTE = "DefinitionContainers";
-    const CATEGORIES_MODELS_CTE = "CategoriesModels";
-    const ctes = [
-      `${CATEGORIES_MODELS_CTE}(ModelId, HasElements) AS (
+  private queryIsDefinitionContainersSupported(): Observable<boolean> {
+    return defer(() => {
+      const query = `
         SELECT
-          c.Model.Id,
-          IFNULL((
-            SELECT 1
-            FROM ${this.#categoryElementClass} e
-            WHERE e.Category.Id = c.ECInstanceId
-            LIMIT 1
-          ), 0)
+          1
         FROM
-          ${this.#categoryClass} c
+          ECDbMeta.ECSchemaDef s
+          JOIN ECDbMeta.ECClassDef c ON c.Schema.Id = s.ECInstanceId
         WHERE
-          NOT c.IsPrivate
-      )`,
-      `
-        ${DEFINITION_CONTAINERS_CTE}(ECInstanceId, ModelId, HasElements) AS (
-          SELECT
-            dc.ECInstanceId,
-            dc.Model.Id,
-            c.HasElements
-          FROM ${DEFINITION_CONTAINER_CLASS} dc
-          JOIN ${CATEGORIES_MODELS_CTE} c ON dc.ECInstanceId = c.ModelId
-          WHERE NOT dc.IsPrivate
+          s.Name = 'BisCore'
+          AND c.Name = 'DefinitionContainer'
+        LIMIT 1
+      `;
+      return this.#queryExecutor.createQueryReader(
+        { ecsql: query },
+        { restartToken: `${this.#componentName}/${this.#componentId}/is-definition-container-supported` },
+      );
+    }).pipe(
+      toArray(),
+      map((rows) => rows.length > 0),
+    );
+  }
 
-          UNION ALL
-
+  private queryDefinitionContainers(): Observable<{ id: Id64String; modelId: Id64String; hasElements: boolean }> {
+    return defer(() => {
+      // DefinitionModel ECInstanceId will always be the same as modeled DefinitionContainer ECInstanceId, if this wasn't the case, we would need to do something like:
+      //  JOIN BisCore.DefinitionModel dm ON dm.ECInstanceId = ${modelIdAccessor}
+      //  JOIN BisCore.DefinitionModelBreaksDownDefinitionContainer dr ON dr.SourceECInstanceId = dm.ECInstanceId
+      //  JOIN BisCore.DefinitionContainer dc ON dc.ECInstanceId = dr.TargetECInstanceId
+      const DEFINITION_CONTAINERS_CTE = "DefinitionContainers";
+      const CATEGORIES_MODELS_CTE = "CategoriesModels";
+      const ctes = [
+        `${CATEGORIES_MODELS_CTE}(ModelId, HasElements) AS (
           SELECT
-            pdc.ECInstanceId,
-            pdc.Model.Id,
-            cdc.HasElements
+            c.Model.Id,
+            IFNULL((
+              SELECT 1
+              FROM ${this.#categoryElementClass} e
+              WHERE e.Category.Id = c.ECInstanceId
+              LIMIT 1
+            ), 0)
           FROM
-            ${DEFINITION_CONTAINERS_CTE} cdc
-            JOIN ${DEFINITION_CONTAINER_CLASS} pdc ON pdc.ECInstanceId = cdc.ModelId
-          WHERE NOT pdc.IsPrivate
-        )
-      `,
-    ];
-    const definitionsQuery = `
-      SELECT dc.ECInstanceId id, dc.ModelId modelId, MAX(dc.HasElements) hasElements FROM ${DEFINITION_CONTAINERS_CTE} dc GROUP BY dc.ECInstanceId
-    `;
-    for await (const row of this.#queryExecutor.createQueryReader(
-      { ctes, ecsql: definitionsQuery },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/definition-containers` },
-    )) {
-      yield { id: row.id, modelId: row.modelId, hasElements: !!row.hasElements };
-    }
+            ${this.#categoryClass} c
+          WHERE
+            NOT c.IsPrivate
+        )`,
+        `
+          ${DEFINITION_CONTAINERS_CTE}(ECInstanceId, ModelId, HasElements) AS (
+            SELECT
+              dc.ECInstanceId,
+              dc.Model.Id,
+              c.HasElements
+            FROM ${DEFINITION_CONTAINER_CLASS} dc
+            JOIN ${CATEGORIES_MODELS_CTE} c ON dc.ECInstanceId = c.ModelId
+            WHERE NOT dc.IsPrivate
+
+            UNION ALL
+
+            SELECT
+              pdc.ECInstanceId,
+              pdc.Model.Id,
+              cdc.HasElements
+            FROM
+              ${DEFINITION_CONTAINERS_CTE} cdc
+              JOIN ${DEFINITION_CONTAINER_CLASS} pdc ON pdc.ECInstanceId = cdc.ModelId
+            WHERE NOT pdc.IsPrivate
+          )
+        `,
+      ];
+      const definitionsQuery = `
+        SELECT dc.ECInstanceId id, dc.ModelId modelId, MAX(dc.HasElements) hasElements FROM ${DEFINITION_CONTAINERS_CTE} dc GROUP BY dc.ECInstanceId
+      `;
+      return this.#queryExecutor.createQueryReader(
+        { ctes, ecsql: definitionsQuery },
+        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/definition-containers` },
+      );
+    }).pipe(
+      map((row) => {
+        return { id: row.id, modelId: row.modelId, hasElements: !!row.hasElements };
+      }),
+    );
   }
 
-  private async *queryVisibleSubCategories(categoriesInfo: Id64Array): AsyncIterableIterator<{ id: Id64String; parentId: Id64String }> {
-    const definitionsQuery = `
-      SELECT
-        sc.ECInstanceId id,
-        sc.Parent.Id categoryId
-      FROM
-        ${SUB_CATEGORY_CLASS} sc
-      WHERE
-        NOT sc.IsPrivate
-        AND sc.Parent.Id IN (${categoriesInfo.join(",")})
-    `;
-    for await (const row of this.#queryExecutor.createQueryReader(
-      { ecsql: definitionsQuery },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/visible-sub-categories` },
-    )) {
-      yield { id: row.id, parentId: row.categoryId };
-    }
+  private queryVisibleSubCategories(categoriesInfo: Id64Array): Observable<{ id: Id64String; parentId: Id64String }> {
+    return defer(() => {
+      const definitionsQuery = `
+        SELECT
+          sc.ECInstanceId id,
+          sc.Parent.Id categoryId
+        FROM
+          ${SUB_CATEGORY_CLASS} sc
+        WHERE
+          NOT sc.IsPrivate
+          AND sc.Parent.Id IN (${categoriesInfo.join(",")})
+      `;
+      return this.#queryExecutor.createQueryReader(
+        { ecsql: definitionsQuery },
+        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/visible-sub-categories` },
+      );
+    }).pipe(
+      map((row) => {
+        return { id: row.id, parentId: row.categoryId };
+      }),
+    );
   }
 
-  private async getModelsCategoriesInfo() {
-    this.#modelsCategoriesInfo ??= (async () => {
-      const allModelsCategories = new Map<Id64String, CategoriesInfo>();
-      for await (const queriedCategory of this.queryCategories()) {
-        let modelCategories = allModelsCategories.get(queriedCategory.modelId);
-        if (modelCategories === undefined) {
-          modelCategories = { parentDefinitionContainerExists: queriedCategory.parentDefinitionContainerExists, childCategories: [] };
-          allModelsCategories.set(queriedCategory.modelId, modelCategories);
-        }
-        modelCategories.childCategories.push({ id: queriedCategory.id, childCount: queriedCategory.childCount, hasElements: queriedCategory.hasElements });
-      }
-      return allModelsCategories;
-    })();
+  private getModelsCategoriesInfo() {
+    this.#modelsCategoriesInfo ??= this.queryCategories()
+      .pipe(
+        reduce((acc, queriedCategory) => {
+          let modelCategories = acc.get(queriedCategory.modelId);
+          if (modelCategories === undefined) {
+            modelCategories = { parentDefinitionContainerExists: queriedCategory.parentDefinitionContainerExists, childCategories: [] };
+            acc.set(queriedCategory.modelId, modelCategories);
+          }
+          modelCategories.childCategories.push({ id: queriedCategory.id, childCount: queriedCategory.childCount, hasElements: queriedCategory.hasElements });
+          return acc;
+        }, new Map<Id64String, CategoriesInfo>()),
+      )
+      .pipe(shareReplay());
     return this.#modelsCategoriesInfo;
   }
 
-  private async getElementModelsCategories() {
-    this.#elementModelsCategories ??= (async () => {
-      const elementModelsCategories = new Map<Id64String, Id64Set>();
-      for await (const queriedCategory of this.queryElementModelCategories()) {
-        let modelEntry = elementModelsCategories.get(queriedCategory.modelId);
-        if (modelEntry === undefined) {
-          modelEntry = new Set();
-          elementModelsCategories.set(queriedCategory.modelId, modelEntry);
-        }
-        modelEntry.add(queriedCategory.categoryId);
-      }
-      return elementModelsCategories;
-    })();
+  private getElementModelsCategories() {
+    this.#elementModelsCategories ??= this.queryElementModelCategories()
+      .pipe(
+        reduce((acc, queriedCategory) => {
+          let modelEntry = acc.get(queriedCategory.modelId);
+          if (modelEntry === undefined) {
+            modelEntry = new Set();
+            acc.set(queriedCategory.modelId, modelEntry);
+          }
+          modelEntry.add(queriedCategory.categoryId);
+          return acc;
+        }, new Map<Id64String, Id64Set>()),
+      )
+      .pipe(shareReplay());
     return this.#elementModelsCategories;
   }
 
-  private async getSubCategoriesInfo() {
-    this.#subCategoriesInfo ??= (async () => {
-      const allSubCategories = new Map<Id64String, SubCategoryInfo>();
-      const modelsCategoriesInfo = await this.getModelsCategoriesInfo();
-      const categoriesWithMoreThanOneSubCategory = new Array<Id64String>();
-      for (const modelCategoriesInfo of modelsCategoriesInfo.values()) {
-        categoriesWithMoreThanOneSubCategory.push(
-          ...modelCategoriesInfo.childCategories.filter((categoryInfo) => categoryInfo.childCount > 1).map((categoryInfo) => categoryInfo.id),
-        );
-      }
-
-      if (categoriesWithMoreThanOneSubCategory.length === 0) {
-        return allSubCategories;
-      }
-
-      for await (const queriedSubCategory of this.queryVisibleSubCategories(categoriesWithMoreThanOneSubCategory)) {
-        allSubCategories.set(queriedSubCategory.id, { categoryId: queriedSubCategory.parentId });
-      }
-      return allSubCategories;
-    })();
+  private getSubCategoriesInfo() {
+    this.#subCategoriesInfo ??= this.getModelsCategoriesInfo()
+      .pipe(
+        mergeMap((modelsCategoriesInfo) => from(modelsCategoriesInfo.values())),
+        reduce((acc, modelCategoriesInfo) => {
+          acc.push(...modelCategoriesInfo.childCategories.filter((categoryInfo) => categoryInfo.childCount > 1).map((categoryInfo) => categoryInfo.id));
+          return acc;
+        }, new Array<Id64String>()),
+        mergeMap((categoriesWithMoreThanOneSubCategory) => {
+          const allSubCategories = new Map<Id64String, Id64Set>();
+          if (categoriesWithMoreThanOneSubCategory.length === 0) {
+            return of(allSubCategories);
+          }
+          return this.queryVisibleSubCategories(categoriesWithMoreThanOneSubCategory).pipe(
+            reduce((acc, queriedSubCategory) => {
+              const entry = acc.get(queriedSubCategory.parentId);
+              if (!entry) {
+                acc.set(queriedSubCategory.parentId, new Set([queriedSubCategory.id]));
+                return acc;
+              }
+              entry.add(queriedSubCategory.id);
+              return acc;
+            }, allSubCategories),
+          );
+        }),
+      )
+      .pipe(shareReplay());
     return this.#subCategoriesInfo;
   }
 
-  private async getDefinitionContainersInfo() {
-    this.#definitionContainersInfo ??= (async () => {
-      const definitionContainersInfo = new Map<Id64String, DefinitionContainerInfo>();
-      const [isDefinitionContainerSupported, modelsCategoriesInfo] = await Promise.all([
-        this.getIsDefinitionContainerSupported(),
-        this.getModelsCategoriesInfo(),
-      ]);
-      if (!isDefinitionContainerSupported || modelsCategoriesInfo.size === 0) {
-        return definitionContainersInfo;
-      }
+  private getDefinitionContainersInfo() {
+    this.#definitionContainersInfo ??= forkJoin({
+      isDefinitionContainerSupported: this.getIsDefinitionContainerSupported(),
+      modelsCategoriesInfo: this.getModelsCategoriesInfo(),
+    })
+      .pipe(
+        mergeMap(({ isDefinitionContainerSupported, modelsCategoriesInfo }) => {
+          const definitionContainersInfo = new Map<Id64String, DefinitionContainerInfo>();
+          if (!isDefinitionContainerSupported || modelsCategoriesInfo.size === 0) {
+            return of(definitionContainersInfo);
+          }
+          return this.queryDefinitionContainers().pipe(
+            reduce((acc, queriedDefinitionContainer) => {
+              const modelCategoriesInfo = modelsCategoriesInfo.get(queriedDefinitionContainer.id);
+              acc.set(queriedDefinitionContainer.id, {
+                childCategories: modelCategoriesInfo?.childCategories ?? [],
+                modelId: queriedDefinitionContainer.modelId,
+                childDefinitionContainers: [],
+                parentDefinitionContainerExists: false,
+                hasElements: queriedDefinitionContainer.hasElements,
+              });
+              return acc;
+            }, definitionContainersInfo),
+            map((result) => {
+              for (const [definitionContainerId, definitionContainerInfo] of result) {
+                const parentDefinitionContainer = result.get(definitionContainerInfo.modelId);
+                if (parentDefinitionContainer !== undefined) {
+                  parentDefinitionContainer.childDefinitionContainers.push({ id: definitionContainerId, hasElements: definitionContainerInfo.hasElements });
+                  definitionContainerInfo.parentDefinitionContainerExists = true;
+                  parentDefinitionContainer.hasElements = parentDefinitionContainer.hasElements || definitionContainerInfo.hasElements;
+                }
+              }
 
-      for await (const queriedDefinitionContainer of this.queryDefinitionContainers()) {
-        const modelCategoriesInfo = modelsCategoriesInfo.get(queriedDefinitionContainer.id);
-
-        definitionContainersInfo.set(queriedDefinitionContainer.id, {
-          childCategories: modelCategoriesInfo?.childCategories ?? [],
-          modelId: queriedDefinitionContainer.modelId,
-          childDefinitionContainers: [],
-          parentDefinitionContainerExists: false,
-          hasElements: queriedDefinitionContainer.hasElements,
-        });
-      }
-
-      for (const [definitionContainerId, definitionContainerInfo] of definitionContainersInfo) {
-        const parentDefinitionContainer = definitionContainersInfo.get(definitionContainerInfo.modelId);
-        if (parentDefinitionContainer !== undefined) {
-          parentDefinitionContainer.childDefinitionContainers.push({ id: definitionContainerId, hasElements: definitionContainerInfo.hasElements });
-          definitionContainerInfo.parentDefinitionContainerExists = true;
-        }
-      }
-
-      return definitionContainersInfo;
-    })();
+              return result;
+            }),
+          );
+        }),
+      )
+      .pipe(shareReplay());
     return this.#definitionContainersInfo;
   }
 
-  public async getDirectChildDefinitionContainersAndCategories({
+  public getDirectChildDefinitionContainersAndCategories({
     parentDefinitionContainerIds,
     includeEmpty,
   }: {
     parentDefinitionContainerIds: Id64Array;
     includeEmpty?: boolean;
-  }): Promise<{ categories: CategoryInfo[]; definitionContainers: Id64Array }> {
-    const definitionContainersInfo = await this.getDefinitionContainersInfo();
-
-    const result = { definitionContainers: new Array<Id64String>(), categories: new Array<CategoryInfo>() };
-
-    parentDefinitionContainerIds.forEach((parentDefinitionContainerId) => {
-      const parentDefinitionContainerInfo = definitionContainersInfo.get(parentDefinitionContainerId);
-      if (parentDefinitionContainerInfo !== undefined) {
-        result.definitionContainers.push(...applyElementsFilter(parentDefinitionContainerInfo.childDefinitionContainers, includeEmpty).map((dc) => dc.id));
-        result.categories.push(...applyElementsFilter(parentDefinitionContainerInfo.childCategories, includeEmpty));
-      }
-    });
-    return result;
+  }): Observable<{ categories: CategoryInfo[]; definitionContainers: Id64Array }> {
+    return this.getDefinitionContainersInfo().pipe(
+      mergeMap((definitionContainersInfo) =>
+        from(parentDefinitionContainerIds).pipe(
+          reduce(
+            (acc, parentDefinitionContainerId) => {
+              const parentDefinitionContainerInfo = definitionContainersInfo.get(parentDefinitionContainerId);
+              if (parentDefinitionContainerInfo !== undefined) {
+                acc.definitionContainers.push(...applyElementsFilter(parentDefinitionContainerInfo.childDefinitionContainers, includeEmpty).map((dc) => dc.id));
+                acc.categories.push(...applyElementsFilter(parentDefinitionContainerInfo.childCategories, includeEmpty));
+              }
+              return acc;
+            },
+            { definitionContainers: new Array<Id64String>(), categories: new Array<CategoryInfo>() },
+          ),
+        ),
+      ),
+    );
   }
 
-  public async getCategoriesElementModels(categoryIds: Id64Array): Promise<Map<Id64String, Id64Array>> {
-    const elementModelsCategories = await this.getElementModelsCategories();
-    const result = new Map<Id64String, Id64Array>();
-    for (const categoryId of categoryIds) {
-      for (const [modelId, categories] of elementModelsCategories) {
-        if (categories.has(categoryId)) {
-          let categoryModels = result.get(categoryId);
-          if (!categoryModels) {
-            categoryModels = new Array<Id64String>();
-            result.set(categoryId, categoryModels);
-          }
-          categoryModels.push(modelId);
+  public getCategoriesElementModels(categoryIds: Id64Arg): Observable<Map<Id64String, Id64Set>> {
+    return this.getElementModelsCategories().pipe(
+      mergeMap((elementModelsCategories) => elementModelsCategories.entries()),
+      reduce((acc, [modelId, modelCategoryIds]) => {
+        const sharedCategories = setIntersection(Id64.iterable(categoryIds), modelCategoryIds);
+        if (sharedCategories.size > 0) {
+          acc.set(modelId, sharedCategories);
         }
-      }
-    }
-    return result;
+        return acc;
+      }, new Map<Id64String, Id64Set>()),
+    );
   }
 
-  public async getAllContainedCategories({
+  public getAllContainedCategories({
     definitionContainerIds,
     includeEmptyCategories,
   }: {
     definitionContainerIds: Id64Array;
     includeEmptyCategories?: boolean;
-  }): Promise<Id64Array> {
-    const result = new Array<Id64String>();
-
-    const definitionContainersInfo = await this.getDefinitionContainersInfo();
-    const indirectCategories = await Promise.all(
-      definitionContainerIds.map(async (definitionContainerId) => {
-        const definitionContainerInfo = definitionContainersInfo.get(definitionContainerId);
-        if (definitionContainerInfo === undefined) {
-          return [];
-        }
-
-        result.push(...applyElementsFilter(definitionContainerInfo.childCategories, includeEmptyCategories).map((category) => category.id));
-
-        return this.getAllContainedCategories({
-          definitionContainerIds: definitionContainerInfo.childDefinitionContainers.map(({ id }) => id),
-          includeEmptyCategories,
-        });
-      }),
+  }): Observable<Id64Set> {
+    return this.getDefinitionContainersInfo().pipe(
+      mergeMap((definitionContainersInfo) =>
+        from(definitionContainerIds).pipe(
+          mergeMap((definitionContainerId) => {
+            const definitionContainerInfo = definitionContainersInfo.get(definitionContainerId);
+            if (definitionContainerInfo === undefined) {
+              return of({ directCategories: undefined, indirectCategories: undefined });
+            }
+            const childDefinitionContainerIds = definitionContainerInfo.childDefinitionContainers.map(({ id }) => id);
+            return (
+              childDefinitionContainerIds.length > 0
+                ? this.getAllContainedCategories({
+                    definitionContainerIds: childDefinitionContainerIds,
+                    includeEmptyCategories,
+                  })
+                : of(new Set<string>())
+            ).pipe(
+              map((indirectCategories) => {
+                return {
+                  directCategories: applyElementsFilter(definitionContainerInfo.childCategories, includeEmptyCategories).map((category) => category.id),
+                  indirectCategories,
+                };
+              }),
+            );
+          }),
+          reduce((acc, { directCategories, indirectCategories }) => {
+            directCategories?.forEach((categoryId) => acc.add(categoryId));
+            indirectCategories?.forEach((categoryId) => acc.add(categoryId));
+            return acc;
+          }, new Set<Id64String>()),
+        ),
+      ),
     );
-    for (const categories of indirectCategories) {
-      result.push(...categories);
-    }
-
-    return result;
   }
 
-  public async getInstanceKeyPaths(
+  public getInstanceKeyPaths(
     props: { categoryId: Id64String } | { definitionContainerId: Id64String } | { subCategoryId: Id64String },
-  ): Promise<InstanceKey[]> {
+  ): Observable<InstanceKey[]> {
     if ("subCategoryId" in props) {
-      const subCategoriesInfo = await this.getSubCategoriesInfo();
-      const subCategoryInfo = subCategoriesInfo.get(props.subCategoryId);
-      if (subCategoryInfo === undefined) {
-        return [];
-      }
-      return [...(await this.getInstanceKeyPaths({ categoryId: subCategoryInfo.categoryId })), { id: props.subCategoryId, className: SUB_CATEGORY_CLASS }];
+      return this.getSubCategoriesInfo().pipe(
+        mergeMap((subCategoriesInfo) => {
+          let categoryOfSubCategory: Id64String | undefined;
+          for (const [categoryId, subCategories] of subCategoriesInfo.entries()) {
+            if (subCategories.has(props.subCategoryId)) {
+              categoryOfSubCategory = categoryId;
+              break;
+            }
+          }
+          if (categoryOfSubCategory === undefined) {
+            return of([]);
+          }
+          return this.getInstanceKeyPaths({ categoryId: categoryOfSubCategory }).pipe(
+            map((pathToCategory) => [...pathToCategory, { id: props.subCategoryId, className: SUB_CATEGORY_CLASS }]),
+          );
+        }),
+      );
     }
 
     if ("categoryId" in props) {
-      const modelsCategoriesInfo = await this.getModelsCategoriesInfo();
-      for (const [modelId, modelCategoriesInfo] of modelsCategoriesInfo) {
-        if (modelCategoriesInfo.childCategories.find((childCategory) => childCategory.id === props.categoryId)) {
-          if (!modelCategoriesInfo.parentDefinitionContainerExists) {
-            return [{ id: props.categoryId, className: this.#categoryClass }];
+      return this.getModelsCategoriesInfo().pipe(
+        mergeMap((modelsCategoriesInfo) => {
+          for (const [modelId, modelCategoriesInfo] of modelsCategoriesInfo) {
+            if (modelCategoriesInfo.childCategories.find((childCategory) => childCategory.id === props.categoryId)) {
+              const instanceKey = { id: props.categoryId, className: this.#categoryClass };
+              if (!modelCategoriesInfo.parentDefinitionContainerExists) {
+                return of([instanceKey]);
+              }
+
+              return this.getInstanceKeyPaths({ definitionContainerId: modelId }).pipe(
+                map((pathToDefinitionContainer) => [...pathToDefinitionContainer, instanceKey]),
+              );
+            }
           }
-
-          return [...(await this.getInstanceKeyPaths({ definitionContainerId: modelId })), { id: props.categoryId, className: this.#categoryClass }];
+          return of([]);
+        }),
+      );
+    }
+    return this.getDefinitionContainersInfo().pipe(
+      mergeMap((definitionContainersInfo) => {
+        const definitionContainerInfo = definitionContainersInfo.get(props.definitionContainerId);
+        if (definitionContainerInfo === undefined) {
+          return of([]);
         }
-      }
-      return [];
-    }
-
-    const definitionContainersInfo = await this.getDefinitionContainersInfo();
-    const definitionContainerInfo = definitionContainersInfo.get(props.definitionContainerId);
-    if (definitionContainerInfo === undefined) {
-      return [];
-    }
-
-    if (!definitionContainerInfo.parentDefinitionContainerExists) {
-      return [{ id: props.definitionContainerId, className: DEFINITION_CONTAINER_CLASS }];
-    }
-
-    return [
-      ...(await this.getInstanceKeyPaths({ definitionContainerId: definitionContainerInfo.modelId })),
-      { id: props.definitionContainerId, className: DEFINITION_CONTAINER_CLASS },
-    ];
+        const instanceKey = { id: props.definitionContainerId, className: DEFINITION_CONTAINER_CLASS };
+        if (!definitionContainerInfo.parentDefinitionContainerExists) {
+          return of([instanceKey]);
+        }
+        return this.getInstanceKeyPaths({ definitionContainerId: definitionContainerInfo.modelId }).pipe(
+          map((pathToParentDefinitionContainer) => [...pathToParentDefinitionContainer, instanceKey]),
+        );
+      }),
+    );
   }
 
-  public async getAllDefinitionContainersAndCategories(props?: { includeEmpty?: boolean }): Promise<{
+  public getAllDefinitionContainersAndCategories(props?: { includeEmpty?: boolean }): Observable<{
     categories: Id64Array;
     definitionContainers: Id64Array;
   }> {
-    const [modelsCategoriesInfo, definitionContainersInfo] = await Promise.all([this.getModelsCategoriesInfo(), this.getDefinitionContainersInfo()]);
-    const result = {
-      definitionContainers: new Array<Id64String>(),
-      categories: new Array<Id64String>(),
-    };
-    definitionContainersInfo.forEach((definitionContainerInfo, definitionContainerId) => {
-      if (definitionContainerInfo.hasElements || props?.includeEmpty) {
-        result.definitionContainers.push(definitionContainerId);
-      }
+    return forkJoin({
+      categories: this.getModelsCategoriesInfo().pipe(
+        mergeMap((modelsCategoriesInfo) => modelsCategoriesInfo.values()),
+        reduce((acc, modelCategoriesInfo) => {
+          applyElementsFilter(modelCategoriesInfo.childCategories, props?.includeEmpty).forEach((categoryInfo) => acc.push(categoryInfo.id));
+          return acc;
+        }, new Array<Id64String>()),
+      ),
+      definitionContainers: this.getDefinitionContainersInfo().pipe(
+        mergeMap((definitionContainersInfo) => definitionContainersInfo.entries()),
+        reduce((acc, [definitionContainerId, definitionContainerInfo]) => {
+          if (definitionContainerInfo.hasElements || !!props?.includeEmpty) {
+            acc.push(definitionContainerId);
+          }
+          return acc;
+        }, new Array<Id64String>()),
+      ),
     });
-    modelsCategoriesInfo.forEach((modelCategoriesInfo) => {
-      applyElementsFilter(modelCategoriesInfo.childCategories, props?.includeEmpty).forEach((childCategory) => {
-        result.categories.push(childCategory.id);
-      });
-    });
-    return result;
   }
 
-  public async getRootDefinitionContainersAndCategories(props?: { includeEmpty?: boolean }): Promise<{
+  public getRootDefinitionContainersAndCategories(props?: { includeEmpty?: boolean }): Observable<{
     categories: CategoryInfo[];
     definitionContainers: Id64Array;
   }> {
-    const [modelsCategoriesInfo, definitionContainersInfo] = await Promise.all([this.getModelsCategoriesInfo(), this.getDefinitionContainersInfo()]);
-    const result = { definitionContainers: new Array<Id64String>(), categories: new Array<CategoryInfo>() };
-    for (const modelCategoriesInfo of modelsCategoriesInfo.values()) {
-      if (!modelCategoriesInfo.parentDefinitionContainerExists) {
-        result.categories.push(...applyElementsFilter(modelCategoriesInfo.childCategories, props?.includeEmpty));
-      }
-    }
-
-    for (const [definitionContainerId, definitionContainerInfo] of definitionContainersInfo) {
-      if (!definitionContainerInfo.parentDefinitionContainerExists) {
-        if (definitionContainerInfo.hasElements || props?.includeEmpty) {
-          result.definitionContainers.push(definitionContainerId);
-          continue;
-        }
-      }
-    }
-    return result;
+    return forkJoin({
+      categories: this.getModelsCategoriesInfo().pipe(
+        mergeMap((modelsCategoriesInfo) => modelsCategoriesInfo.values()),
+        reduce((acc, modelCategoriesInfo) => {
+          if (!modelCategoriesInfo.parentDefinitionContainerExists) {
+            applyElementsFilter(modelCategoriesInfo.childCategories, props?.includeEmpty).forEach((categoryInfo) => acc.push(categoryInfo));
+          }
+          return acc;
+        }, new Array<CategoryInfo>()),
+      ),
+      definitionContainers: this.getDefinitionContainersInfo().pipe(
+        mergeMap((definitionContainersInfo) => definitionContainersInfo.entries()),
+        reduce((acc, [definitionContainerId, definitionContainerInfo]) => {
+          if (!definitionContainerInfo.parentDefinitionContainerExists && (definitionContainerInfo.hasElements || !!props?.includeEmpty)) {
+            acc.push(definitionContainerId);
+          }
+          return acc;
+        }, new Array<Id64String>()),
+      ),
+    });
   }
 
-  public async getSubCategories(categoryId: Id64String): Promise<Id64Array> {
-    const subCategoriesInfo = await this.getSubCategoriesInfo();
-    const result = new Array<Id64String>();
-    for (const [subCategoryId, subCategoryInfo] of subCategoriesInfo) {
-      if (subCategoryInfo.categoryId === categoryId) {
-        result.push(subCategoryId);
-      }
-    }
-    return result;
+  public getSubCategories(categoryId: Id64String): Observable<Id64Set> {
+    return this.getSubCategoriesInfo().pipe(map((subCategoriesInfo) => subCategoriesInfo.get(categoryId) ?? new Set()));
   }
 
-  public async getIsDefinitionContainerSupported(): Promise<boolean> {
-    this.#isDefinitionContainerSupported ??= this.queryIsDefinitionContainersSupported();
+  public getIsDefinitionContainerSupported(): Observable<boolean> {
+    this.#isDefinitionContainerSupported ??= this.queryIsDefinitionContainersSupported().pipe(shareReplay());
     return this.#isDefinitionContainerSupported;
   }
 }

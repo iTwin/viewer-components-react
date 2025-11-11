@@ -75,11 +75,9 @@ export const FormatSetSelector: React_3.FC<FormatSetSelectorProps>;
 
 // @beta
 interface FormatSetSelectorProps {
-    // (undocumented)
+    activeFormatSetKey?: string;
     formatSets: FormatSet[];
-    // (undocumented)
     onFormatSetChange: (formatSet: FormatSet, key: string) => void;
-    // (undocumented)
     selectedFormatSetKey?: string;
 }
 
@@ -110,5 +108,8 @@ export class QuantityFormatting {
     }): Promise<void>;
     static terminate(): void;
 }
+
+// @beta
+export const QuantityFormattingLoggerCategory = "QuantityFormat";
 
 ```

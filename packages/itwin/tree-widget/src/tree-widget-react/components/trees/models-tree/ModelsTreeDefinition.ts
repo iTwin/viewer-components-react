@@ -8,6 +8,7 @@ import {
   defaultIfEmpty,
   defer,
   firstValueFrom,
+  forkJoin,
   from,
   fromEvent,
   identity,
@@ -31,10 +32,10 @@ import {
   ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
+import { getOptimalBatchSize, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { collect } from "../common/Rxjs.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils.js";
-import { releaseMainThreadOnItemsCount } from "./Utils.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64String } from "@itwin/core-bentley";
@@ -259,9 +260,14 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         contentClass: { fullName: "BisCore.GeometricModel3d", alias: "this" },
       }),
     ]);
-    const [childSubjectIds, childModelIds] = parentSubjectIds.length
-      ? await Promise.all([this.#idsCache.getChildSubjectIds(parentSubjectIds), this.#idsCache.getChildSubjectModelIds(parentSubjectIds)])
-      : [[IModel.rootSubjectId], []];
+    const { childSubjectIds, childModelIds } = parentSubjectIds.length
+      ? await firstValueFrom(
+          forkJoin({
+            childSubjectIds: this.#idsCache.getChildSubjectIds(parentSubjectIds),
+            childModelIds: this.#idsCache.getChildSubjectModelIds(parentSubjectIds),
+          }),
+        )
+      : { childSubjectIds: [IModel.rootSubjectId], childModelIds: [] };
     const defs = new Array<HierarchyNodesDefinition>();
     childSubjectIds.length &&
       defs.push({
@@ -295,7 +301,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
               ${subjectFilterClauses.where ? `AND ${subjectFilterClauses.where}` : ""}
           `,
           bindings: [
-            { type: "idset", value: await this.#idsCache.getParentSubjectIds() },
+            { type: "idset", value: await firstValueFrom(this.#idsCache.getParentSubjectIds()) },
             ...childSubjectIds.map((id): ECSqlBinding => ({ type: "id", value: id })),
           ],
         },
@@ -456,7 +462,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     });
     const modeledElements = await firstValueFrom(
       from(modelIds).pipe(
-        mergeMap(async (modelId) => this.#idsCache.getCategoriesModeledElements(modelId, categoryIds)),
+        mergeMap((modelId) => this.#idsCache.getCategoriesModeledElements(modelId, categoryIds)),
         reduce((acc, foundModeledElements) => {
           return acc.concat(foundModeledElements);
         }, new Array<Id64String>()),
@@ -824,7 +830,7 @@ function createInstanceKeyPathsFromTargetItemsObs({
             mergeMap((id) => from(idsCache.createCategoryInstanceKeyPaths(id)).pipe(mergeAll(), map(HierarchyFilteringPath.normalize))),
           ),
           from(ids.elements).pipe(
-            bufferCount(Math.ceil(elementsLength / Math.ceil(elementsLength / 5000))),
+            bufferCount(getOptimalBatchSize({ totalSize: elementsLength, maximumBatchSize: 5000 })),
             releaseMainThreadOnItemsCount(1),
             mergeMap(
               (block, chunkIndex) =>

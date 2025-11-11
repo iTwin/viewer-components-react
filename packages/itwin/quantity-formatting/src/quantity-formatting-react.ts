@@ -8,8 +8,8 @@
  * @module QuantityFormatting
  */
 
-// Export main class for localization initialization
-export { QuantityFormatting } from "./QuantityFormatting.js";
+// Export main class for localization initialization and logging
+export { QuantityFormatting, QuantityFormattingLoggerCategory } from "./QuantityFormatting.js";
 
 // Export React components here
 export { QuantityFormatPanel } from "./components/quantityformat/QuantityFormatPanel.js";

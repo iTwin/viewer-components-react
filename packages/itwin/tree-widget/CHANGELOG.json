@@ -2,6 +2,49 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Mon, 03 Nov 2025 07:50:14 GMT",
+      "version": "3.17.0",
+      "tag": "@itwin/tree-widget-react_v3.17.0",
+      "comments": {
+        "none": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "5ca518d982efe132c0cda9e3db82b97cfb5055e5",
+            "comment": ""
+          },
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "3304757bff254fb6aefb6218bef82c6401f2625b",
+            "comment": ""
+          }
+        ],
+        "minor": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "5b7994eefa45055e8dc32554d0c06a330ec0b3b8",
+            "comment": "Categories tree: Add option to show categories that don't contain any elements. This option can be provided to `CategoriesTree`, `CategoriesTreeComponent` or `useCategoriesTree`. It can be provided as `hierarchyConfig` property called `showEmptyCategories`"
+          }
+        ],
+        "patch": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "76476ab75ef9a0e842b76d33a0b73f015b711511",
+            "comment": "Tree widget: change caches of categories and models trees to use observables."
+          },
+          {
+            "author": "43886789+MartynasStrazdas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "70397d85f2c152c407c389c828ae746bc602f259",
+            "comment": "Fix tree scrollbar not persisting when switching widgets"
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 22 Oct 2025 08:09:53 GMT",
       "version": "3.16.1",
       "tag": "@itwin/tree-widget-react_v3.16.1",

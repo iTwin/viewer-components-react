@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import React from "react";
-import { Flex, Input, List, ListItem, Text } from "@itwin/itwinui-react";
+import { Badge, Flex, Input, List, ListItem, Text } from "@itwin/itwinui-react";
 import { useTranslation } from "../../useTranslation.js";
 
 import type { FormatSet } from "@itwin/ecschema-metadata";
@@ -14,8 +14,22 @@ import type { FormatSet } from "@itwin/ecschema-metadata";
  * @beta
  */
 interface FormatSetSelectorProps {
+  /** Array of format sets to display in the selector */
   formatSets: FormatSet[];
+  /**
+   * Key of the currently selected format set in the UI.
+   * This represents the format set the user has clicked on but not necessarily applied.
+   * Used to highlight the selected item in the list.
+   */
   selectedFormatSetKey?: string;
+  /**
+   * Key of the currently active/applied format set in the application.
+   * This represents the format set that is actively being used for formatting.
+   * A badge is displayed next to this item to indicate it's the active format set.
+   * This may differ from `selectedFormatSetKey` when a user selects a format set but hasn't applied it yet.
+   */
+  activeFormatSetKey?: string;
+  /** Callback fired when a format set is selected from the list */
   onFormatSetChange: (formatSet: FormatSet, key: string) => void;
 }
 
@@ -26,6 +40,7 @@ interface FormatSetSelectorProps {
 export const FormatSetSelector: React.FC<FormatSetSelectorProps> = ({
   formatSets,
   selectedFormatSetKey,
+  activeFormatSetKey,
   onFormatSetChange,
 }) => {
   const [searchTerm, setSearchTerm] = React.useState("");
@@ -68,7 +83,16 @@ export const FormatSetSelector: React.FC<FormatSetSelectorProps> = ({
               active={selectedFormatSetKey === key}
               className="quantityFormat--formatSetSelector-listItem"
             >
-              <Text variant="body">{formatSet.label}</Text>
+              <Flex flexDirection="column" alignItems="flex-start">
+                <Flex flexDirection="row" alignItems="center" gap="xs">
+                  <Text variant="body">{formatSet.label}</Text>
+                  {activeFormatSetKey === key && (
+                    <Badge backgroundColor="positive">
+                      {translate("QuantityFormat:labels.active")}
+                    </Badge>
+                  )}
+                </Flex>
+              </Flex>
             </ListItem>
           );
         })}

@@ -39,7 +39,7 @@ describe("Quantity formatting", () => {
         render(<FormatSetPanel formatSet={formatSet} editable={true} onFormatSetChange={handleFormatSetChange} />);
         // __PUBLISH_EXTRACT_END__
 
-        expect(screen.getByText("labels.formatSetDetails")).to.exist;
+        expect(screen.getByText("labels.description")).to.exist;
       });
 
       it("renders FormatSetPanel in read-only mode", async function () {
@@ -55,7 +55,6 @@ describe("Quantity formatting", () => {
         render(<FormatSetPanel formatSet={formatSet} editable={false} />);
         // __PUBLISH_EXTRACT_END__
 
-        expect(screen.getByText("labels.formatSetDetails")).to.exist;
         const labelInput = screen.getByLabelText("labels.description");
         expect((labelInput as HTMLInputElement).disabled).to.be.true;
       });
