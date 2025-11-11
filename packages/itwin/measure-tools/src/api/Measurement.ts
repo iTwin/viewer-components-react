@@ -63,7 +63,7 @@ export namespace DrawingMetadata {
     if (origin !== undefined) {
       return {
         origin, extents, drawingId: obj.drawingId,
-        sheetToWorldTransform: {
+        sheetToWorldTransformProps: {
           DVDOrigin: obj.sheetToWorldTransformProps?.DVDOrigin,
           sheetScale: obj.sheetToWorldTransformProps?.sheetScale,
           SVDExtents: obj.sheetToWorldTransformProps?.SVDExtents,
@@ -296,7 +296,13 @@ export interface MeasurementEqualityOptions {
 export interface DrawingMetadataProps extends Omit<DrawingMetadata, "origin" | "extents" | "sheetToWorldTransform"> {
   origin: XYProps;
   extents?: XYProps;
-  sheetToWorldTransform?: SheetMeasurementHelper.SheetToWorldTransformProps;
+  /** @deprecated Will be removed, use sheetToWorldTransformProps.transformParams instead */
+  sheetToWorldTransform?: {
+    masterOrigin: XYZProps;
+    sheetTov8Drawing: TransformProps;
+    v8DrawingToDesign: TransformProps;
+  };
+  sheetToWorldTransformProps?: SheetMeasurementHelper.SheetToWorldTransformProps;
 }
 
 export interface DrawingMetadata {
@@ -315,12 +321,17 @@ export interface DrawingMetadata {
   /** Props needed in order to reconstruct the sheetToWorldTransform */
   sheetToWorldTransformProps?: SheetMeasurementHelper.SheetToWorldTransformProps;
 
+  /** @deprecated Is replaced by sheetToWorldTransformProps.sheetScale */
   worldScale?: number;
 
-  /** Represents the transform from sheet points to 3d points */
+  /** Represents the transform from sheet points to 3d points
+   * @deprecated Use sheetToWorldTransformFunc
+  */
   sheetToWorldTransform?: SheetMeasurementsHelper.SheetTransformParams;
 
-  /** Represents the transform from sheet points to distance along alignment (X) and vertical position related to alignment (Y) */
+  /** Represents the transform from sheet points to distance along alignment (X) and vertical position related to alignment (Y)
+   * @deprecated
+  */
   sheetToProfileTransform?: Transform;
 }
 

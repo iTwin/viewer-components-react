@@ -43,6 +43,7 @@ export namespace SheetMeasurementHelper {
     bBoxHigh: { x: number, y: number};
   }
 
+  /** Information needed to use the old Civil transform but will eventually be removed @deprecated */
   export interface CivilSheetTransformParams {
     masterOrigin: Point3d;
     sheetTov8Drawing: Transform;
@@ -126,6 +127,11 @@ export namespace SheetMeasurementHelper {
     return { ecsql, parameters: { id }};
   }
 
+  /**
+   * Maps out the drawing types of every drawing in the imodel
+   * @param imodel
+   * @returns
+   */
   export async function getDrawingsTypes(imodel: IModelConnection): Promise<Map<string, number>> {
 
     if (imodel.isBlank) {
@@ -164,6 +170,12 @@ export namespace SheetMeasurementHelper {
     return result;
   }
 
+  /**
+   * Position and general information for every drawing in the given sheet
+   * @param imodel
+   * @param sheetId
+   * @returns
+   */
   export async function getDrawingInfo(imodel: IModelConnection, sheetId: string): Promise<DrawingTypeData[]> {
 
     if (imodel.isBlank) {
@@ -237,32 +249,38 @@ export namespace SheetMeasurementHelper {
     return final3dPoint;
   }
 
-  export function getTransform(viewAttachmentOrigin?: XYProps, sheetToWorldTransform?: SheetToWorldTransformProps): (point: Point2d | Point3d) => Point3d {
+  /**
+   * Main transform for drawings, takes a sheet point and transforms it to world coordinates
+   * @param viewAttachmentOrigin
+   * @param sheetToWorldTransform
+   * @returns
+   */
+  export function getTransform(viewAttachmentOrigin?: XYProps, sheetToWorldTransformProps?: SheetToWorldTransformProps): (point: Point2d | Point3d) => Point3d {
     return (sheetPoint: Point2d | Point3d) => {
       if (viewAttachmentOrigin === undefined ||
-        sheetToWorldTransform === undefined ||
-        sheetToWorldTransform.DVDOrigin === undefined ||
-        sheetToWorldTransform.SVDExtents === undefined ||
-        sheetToWorldTransform.SVDOrigin === undefined ||
-        sheetToWorldTransform.SVDPitch === undefined ||
-        sheetToWorldTransform.SVDRoll === undefined ||
-        sheetToWorldTransform.SVDYaw === undefined ||
-        sheetToWorldTransform.sheetScale ===  undefined) {
-          return getCivilTransform(sheetPoint, sheetToWorldTransform);
+        sheetToWorldTransformProps === undefined ||
+        sheetToWorldTransformProps.DVDOrigin === undefined ||
+        sheetToWorldTransformProps.SVDExtents === undefined ||
+        sheetToWorldTransformProps.SVDOrigin === undefined ||
+        sheetToWorldTransformProps.SVDPitch === undefined ||
+        sheetToWorldTransformProps.SVDRoll === undefined ||
+        sheetToWorldTransformProps.SVDYaw === undefined ||
+        sheetToWorldTransformProps.sheetScale ===  undefined) {
+          return getCivilTransform(sheetPoint, sheetToWorldTransformProps);
       }
 
       const VAOrigin = Point2d.createZero();
       VAOrigin.setFromJSON(viewAttachmentOrigin);
-      const scale = sheetToWorldTransform.sheetScale;
+      const scale = sheetToWorldTransformProps.sheetScale;
       const DVDOrigin = Point2d.createZero();
-      DVDOrigin.setFromJSON(sheetToWorldTransform.DVDOrigin);
+      DVDOrigin.setFromJSON(sheetToWorldTransformProps.DVDOrigin);
       const SVDExtents = Point3d.createZero();
-      SVDExtents.setFromJSON(sheetToWorldTransform.SVDExtents);
-      const SVDYaw = sheetToWorldTransform.SVDYaw;
-      const SVDPitch = sheetToWorldTransform.SVDPitch;
-      const SVDRoll = sheetToWorldTransform.SVDRoll;
+      SVDExtents.setFromJSON(sheetToWorldTransformProps.SVDExtents);
+      const SVDYaw = sheetToWorldTransformProps.SVDYaw;
+      const SVDPitch = sheetToWorldTransformProps.SVDPitch;
+      const SVDRoll = sheetToWorldTransformProps.SVDRoll;
       const SVDOrigin = Point3d.createZero();
-      SVDOrigin.setFromJSON(sheetToWorldTransform.SVDOrigin);
+      SVDOrigin.setFromJSON(sheetToWorldTransformProps.SVDOrigin);
 
       // We start with sheet coordinates so we tranform them to be relative to the viewAttachment
       const vACords = new Point2d(sheetPoint.x - VAOrigin.x, sheetPoint.y - VAOrigin.y);
@@ -283,6 +301,13 @@ export namespace SheetMeasurementHelper {
 
   }
 
+  /**
+   * Gets the spatial info needed to create the transform, it will first check if it can do the generic transform but if not
+   * every relation needed is present in the model, it'll try to fall back to the old civil method
+   * @param imodel
+   * @param drawing
+   * @returns
+   */
   export async function getSpatialInfo(imodel: IModelConnection, drawing: DrawingTypeData): Promise<SheetToWorldTransformProps | undefined> {
     const spatialEcsql = getSpatialViewInfoECSQL(drawing.id);
 
