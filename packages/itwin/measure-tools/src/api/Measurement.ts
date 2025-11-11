@@ -756,7 +756,13 @@ export abstract class Measurement {
     this.viewTarget.copyFrom(other.viewTarget);
     this.displayLabels = other.displayLabels;
     if (other.drawingMetadata)
-      this._drawingMetadata = { origin: other.drawingMetadata.origin.clone(), drawingId: other.drawingMetadata.drawingId, extents: other.drawingMetadata.extents?.clone(), sheetToWorldTransformFunc: other.drawingMetadata.sheetToWorldTransformFunc, sheetToWorldTransformProps: other.drawingMetadata.sheetToWorldTransformProps };
+      this._drawingMetadata = {
+        origin: other.drawingMetadata.origin.clone(),
+        drawingId: other.drawingMetadata.drawingId,
+        extents: other.drawingMetadata.extents?.clone(),
+        sheetToWorldTransformFunc: SheetMeasurementHelper.getTransform(other.drawingMetadata.origin.clone(), other.drawingMetadata.sheetToWorldTransformProps),
+        sheetToWorldTransformProps: other.drawingMetadata.sheetToWorldTransformProps
+    };
   }
 
   /**
