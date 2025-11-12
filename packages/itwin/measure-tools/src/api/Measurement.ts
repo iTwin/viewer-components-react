@@ -63,16 +63,7 @@ export namespace DrawingMetadata {
     if (origin !== undefined) {
       return {
         origin, extents, drawingId: obj.drawingId,
-        sheetToWorldTransformProps: {
-          DVDOrigin: obj.sheetToWorldTransformProps?.DVDOrigin,
-          sheetScale: obj.sheetToWorldTransformProps?.sheetScale,
-          SVDExtents: obj.sheetToWorldTransformProps?.SVDExtents,
-          SVDOrigin: obj.sheetToWorldTransformProps?.SVDOrigin,
-          SVDPitch: obj.sheetToWorldTransformProps?.SVDPitch,
-          SVDRoll: obj.sheetToWorldTransformProps?.SVDRoll,
-          SVDYaw: obj.sheetToWorldTransformProps?.SVDYaw,
-          transformParams: obj.sheetToWorldTransformProps?.transformParams
-        }
+        sheetToWorldTransformProps: obj.sheetToWorldTransformProps ? { ...obj.sheetToWorldTransformProps } : undefined
       };
     }
 
@@ -81,16 +72,7 @@ export namespace DrawingMetadata {
 
   export function fromJSON(json: DrawingMetadataProps): DrawingMetadata {
 
-    const sheetToWorldTransformProps = json.sheetToWorldTransformProps ? {
-        DVDOrigin: json.sheetToWorldTransformProps.DVDOrigin,
-        sheetScale: json.sheetToWorldTransformProps.sheetScale,
-        SVDExtents: json.sheetToWorldTransformProps.SVDExtents,
-        SVDOrigin: json.sheetToWorldTransformProps.SVDOrigin,
-        SVDPitch: json.sheetToWorldTransformProps.SVDPitch,
-        SVDRoll: json.sheetToWorldTransformProps.SVDRoll,
-        SVDYaw: json.sheetToWorldTransformProps.SVDYaw,
-        transformParams: json.sheetToWorldTransformProps.transformParams
-      }: undefined;
+    const sheetToWorldTransformProps = json.sheetToWorldTransformProps ? { ...json.sheetToWorldTransformProps } : undefined;
 
     const sheetToWorldTransformFunc = SheetMeasurementHelper.getTransform(json.origin, sheetToWorldTransformProps);
 
