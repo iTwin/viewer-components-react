@@ -46,17 +46,18 @@ export function FilterUnknownError({ base }: FilterEmptyTreeProps) {
 export function TooManyInstancesFocused({ base }: FilterEmptyTreeProps) {
   const { toggle } = useFocusedInstancesContext();
   return (
-    <div className={"tw-filter-empty-tree-container"}>
-      <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.filtering.tooManyInstancesFocused`)}</Text>
+    <Text variant="body-sm" className={"tw-filter-empty-tree-container"}>
+      {TreeWidget.translate(`${base}.filtering.tooManyInstancesFocused`)}
       <Anchor
         onClick={(e) => {
           e.stopPropagation();
           toggle();
         }}
+        render={<button />}
       >
-        <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.filtering.disableInstanceFocusMode`)}</Text>
+        {TreeWidget.translate(`${base}.filtering.disableInstanceFocusMode`)}
       </Anchor>
-    </div>
+    </Text>
   );
 }
 
@@ -64,17 +65,18 @@ export function TooManyInstancesFocused({ base }: FilterEmptyTreeProps) {
 export function UnknownInstanceFocusError({ base }: FilterEmptyTreeProps) {
   const { toggle } = useFocusedInstancesContext();
   return (
-    <div className={"tw-filter-empty-tree-container"}>
-      <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.filtering.unknownInstanceFocusError`)}</Text>
+    <Text variant="body-sm" className={"tw-filter-empty-tree-container"}>
+      {TreeWidget.translate(`${base}.filtering.unknownInstanceFocusError`)}
       <Anchor
         onClick={(e) => {
           e.stopPropagation();
           toggle();
         }}
+        render={<button />}
       >
-        <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.filtering.disableInstanceFocusMode`)}</Text>
+        {TreeWidget.translate(`${base}.filtering.disableInstanceFocusMode`)}
       </Anchor>
-    </div>
+    </Text>
   );
 }
 

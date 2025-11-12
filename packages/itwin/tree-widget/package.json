@@ -73,7 +73,7 @@
   "dependencies": {
     "@itwin/presentation-core-interop": "^1.4.0-alpha.3",
     "@itwin/presentation-hierarchies": "^2.0.0-alpha.4",
-    "@itwin/presentation-hierarchies-react": "2.0.0-alpha.38",
+    "@itwin/presentation-hierarchies-react": "2.0.0-alpha.39",
     "@itwin/presentation-shared": "^2.0.0-alpha.2",
     "@itwin/unified-selection": "^1.5.1-alpha.1",
     "classnames": "^2.5.1",
