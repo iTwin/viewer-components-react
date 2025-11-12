@@ -17,12 +17,14 @@ import type { DrawingMetadata } from "./Measurement.js";
 
 export namespace SheetMeasurementHelper {
 
-  export enum DrawingType {
+  export enum DrawingTypeEnum {
     ProfileOrElevation = 5,
     Section = 3,
     Detail = 4,
     Plan = 6
   }
+
+  export type DrawingType = DrawingTypeEnum | SheetMeasurementsHelper.DrawingType;
 
   export interface SheetToWorldTransformProps {
     SVDOrigin?: XYZProps;
@@ -395,13 +397,13 @@ export namespace SheetMeasurementHelper {
   }
 
   function getNameFromDrawingType(type: SheetMeasurementHelper.DrawingType): string  {
-    if (type === SheetMeasurementHelper.DrawingType.Detail) {
+    if (type === SheetMeasurementHelper.DrawingTypeEnum.Detail) {
       return IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.MeasurementNames.Detail");
-    } else if (type === SheetMeasurementHelper.DrawingType.Plan) {
+    } else if (type === SheetMeasurementHelper.DrawingTypeEnum.Plan) {
       return IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.MeasurementNames.Plan");
-    } else if (type === SheetMeasurementHelper.DrawingType.ProfileOrElevation) {
+    } else if (type === SheetMeasurementHelper.DrawingTypeEnum.ProfileOrElevation) {
       return IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.MeasurementNames.Elevation");
-    } else if (type === SheetMeasurementHelper.DrawingType.Section) {
+    } else if (type === SheetMeasurementHelper.DrawingTypeEnum.Section) {
       return IModelApp.localization.getLocalizedString("MeasureTools:SheetMeasurementTooltip.MeasurementNames.Section");
     } else {
       return "";

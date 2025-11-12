@@ -42,7 +42,7 @@ MeasureDistanceToolModel
   private _useMultiPointMeasurement: boolean = false;
 
   protected override get allowedDrawingTypes(): SheetMeasurementHelper.DrawingType[] {
-    return [SheetMeasurementHelper.DrawingType.Section, SheetMeasurementHelper.DrawingType.Plan, SheetMeasurementHelper.DrawingType.ProfileOrElevation];
+    return [SheetMeasurementHelper.DrawingTypeEnum.Section, SheetMeasurementHelper.DrawingTypeEnum.Plan, SheetMeasurementHelper.DrawingTypeEnum.ProfileOrElevation];
   }
 
   public static override get flyover() {
