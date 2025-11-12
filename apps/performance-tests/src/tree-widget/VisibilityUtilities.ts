@@ -4,7 +4,22 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { bufferCount, concatMap, defaultIfEmpty, delay, EMPTY, expand, firstValueFrom, from, identity, mergeMap, of, queueScheduler, takeLast, toArray } from "rxjs";
+import {
+  bufferCount,
+  concatMap,
+  defaultIfEmpty,
+  delay,
+  EMPTY,
+  expand,
+  firstValueFrom,
+  from,
+  identity,
+  mergeMap,
+  of,
+  queueScheduler,
+  takeLast,
+  toArray,
+} from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
