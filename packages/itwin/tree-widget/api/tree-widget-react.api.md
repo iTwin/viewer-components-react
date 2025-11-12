@@ -390,6 +390,9 @@ export { RenameAction }
 // @beta (undocumented)
 export function SelectableTree({ buttons, children }: PropsWithChildren<TreeHeaderProps>): JSX_2.Element;
 
+// @beta
+export function SkeletonTree(): JSX_2.Element;
+
 // @beta (undocumented)
 export function TelemetryContextProvider({ children, onPerformanceMeasured, onFeatureUsed, componentIdentifier, }: PropsWithChildren<TelemetryContextProviderProps>): JSX_2.Element;
 

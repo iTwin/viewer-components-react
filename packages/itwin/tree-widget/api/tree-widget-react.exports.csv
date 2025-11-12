@@ -18,6 +18,7 @@ public;const;ModelsTreeComponent
 beta;function;ModelsTreeIcon
 beta;interface;ModelsTreeVisibilityHandlerOverrides
 beta;function;SelectableTree
+beta;function;SkeletonTree
 beta;function;TelemetryContextProvider
 beta;function;Tree
 public;interface;TreeDefinition
