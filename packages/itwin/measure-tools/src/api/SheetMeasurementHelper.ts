@@ -460,6 +460,13 @@ export namespace SheetMeasurementHelper {
     return false;
   }
 
+  export async function getDrawingMetadata(imodel: IModelConnection, id: string, mousePos: Point3d): Promise<DrawingMetadata | undefined> {
+    const drawingData = await getDrawingData(imodel, id, mousePos);
+    if (drawingData?.drawingId !== undefined && drawingData.viewAttachmentOrigin !== undefined && drawingData.transformProps !== undefined)
+      return { origin: Point2d.fromJSON(drawingData.viewAttachmentOrigin), drawingId: drawingData.drawingId, sheetToWorldTransformProps: drawingData.transformProps, extents: Point2d.fromJSON(drawingData.viewAttachmentExtent), sheetToWorldTransformFunc: drawingData.sheetToWorldTransform};
+    return undefined;
+  }
+
 }
 
 /**

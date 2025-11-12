@@ -107,13 +107,8 @@ MeasureLocationToolModel
 
     if (this._enableSheetMeasurements) {
       if (ev.viewport.view.id !== undefined) {
-        const drawingInfo = await SheetMeasurementHelper.getDrawingData(this.iModel, ev.viewport.view.id, ev.point);
         this.toolModel.sheetViewId = ev.viewport.view.id;
-
-        if (drawingInfo?.drawingId !== undefined && drawingInfo.viewAttachmentOrigin !== undefined && drawingInfo.transformProps !== undefined) {
-          const data: DrawingMetadata = { origin: Point2d.fromJSON(drawingInfo.viewAttachmentOrigin), drawingId: drawingInfo.drawingId, sheetToWorldTransformProps: drawingInfo.transformProps, extents: Point2d.fromJSON(drawingInfo.viewAttachmentExtent), sheetToWorldTransformFunc: drawingInfo.sheetToWorldTransform};
-          return data;
-        }
+        return await SheetMeasurementHelper.getDrawingMetadata(this.iModel, ev.viewport.view.id, ev.point);
       }
     }
     return undefined;
