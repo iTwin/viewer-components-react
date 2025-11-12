@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { bufferCount, concatMap, delay, EMPTY, expand, firstValueFrom, from, identity, mergeMap, of, queueScheduler, toArray } from "rxjs";
+import { bufferCount, concatMap, defaultIfEmpty, delay, EMPTY, expand, firstValueFrom, from, identity, mergeMap, of, queueScheduler, takeLast, toArray } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
@@ -102,7 +102,8 @@ export async function validateHierarchyVisibility(
       concatMap(({ nodes: delayedNodes, isDelayed }) => {
         return from(delayedNodes).pipe(
           mergeMap(async (node) => validateNodeVisibility({ ...props, node })),
-          toArray(),
+          takeLast(1),
+          defaultIfEmpty(undefined),
           // Release again after validating the delayed nodes.
           isDelayed ? delay(0) : identity,
         );
