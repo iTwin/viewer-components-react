@@ -6,8 +6,11 @@
 import {
   bufferCount,
   bufferTime,
+  defaultIfEmpty,
   defer,
+  EMPTY,
   filter,
+  firstValueFrom,
   forkJoin,
   from,
   map,
@@ -18,18 +21,21 @@ import {
   shareReplay,
   Subject,
   take,
+  tap,
   toArray,
 } from "rxjs";
 import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import { releaseMainThreadOnItemsCount } from "../../common/internal/Utils.js";
 import { pushToMap } from "../../common/Utils.js";
+import { getOptimalBatchSize } from "../Utils.js";
 
 import type { Observable, Subscription } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
+import type { ChildrenTree } from "../Utils.js";
 
 interface SubjectInfo {
   parentSubject: Id64String | undefined;
@@ -44,6 +50,8 @@ interface ModelInfo {
 }
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
+type ChildrenMap = Map<Id64String, { children: Id64Array | undefined }>;
+type ChildrenLoadingMap = Map<Id64String, Promise<void>>;
 
 /** @internal */
 export class ModelsTreeIdsCache implements Disposable {
@@ -57,6 +65,9 @@ export class ModelsTreeIdsCache implements Disposable {
   #categoryKeyPaths: Map<Id64String, Observable<HierarchyNodeIdentifiersPath[]>>;
   #queryExecutor: LimitingECSqlQueryExecutor;
   #hierarchyConfig: ModelsTreeHierarchyConfiguration;
+  #childrenMap: ChildrenMap;
+  /** Stores element ids which have children query scheduled to execute. */
+  #childrenLoadingMap: ChildrenLoadingMap;
   #componentId: GuidString;
   #componentName: string;
 
@@ -67,6 +78,8 @@ export class ModelsTreeIdsCache implements Disposable {
     this.#modelKeyPaths = new Map();
     this.#subjectKeyPaths = new Map();
     this.#categoryKeyPaths = new Map();
+    this.#childrenMap = new Map();
+    this.#childrenLoadingMap = new Map();
     this.#componentId = componentId ?? Guid.createValue();
     this.#componentName = "ModelsTreeIdsCache";
   }
@@ -127,6 +140,157 @@ export class ModelsTreeIdsCache implements Disposable {
         return { id: row.id, parentId: row.parentId };
       }),
     );
+  }
+
+  private queryChildren({ elementIds }: { elementIds: Id64Array }): Observable<{ id: Id64String; parentId: Id64String }> {
+    if (elementIds.length === 0) {
+      return EMPTY;
+    }
+
+    return defer(() => {
+      const ctes = [
+        `
+          ElementChildren(id, parentId) AS (
+            SELECT ECInstanceId id, Parent.Id parentId
+            FROM ${this.#hierarchyConfig.elementClassSpecification}
+            WHERE Parent.Id IN (${elementIds.join(", ")})
+
+            UNION ALL
+
+            SELECT c.ECInstanceId id, c.Parent.Id
+            FROM ${this.#hierarchyConfig.elementClassSpecification} c
+            JOIN ElementChildren p ON c.Parent.Id = p.id
+          )
+        `,
+      ];
+      const ecsql = `
+        SELECT id, parentId
+        FROM ElementChildren
+      `;
+      return this.#queryExecutor.createQueryReader(
+        { ecsql, ctes },
+        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/children/${Guid.createValue()}` },
+      );
+    }).pipe(
+      map((row) => {
+        return { id: row.id, parentId: row.parentId };
+      }),
+    );
+  }
+
+  private getChildrenTreeFromMap({ elementIds }: { elementIds: Id64Arg }): ChildrenTree {
+    const result: ChildrenTree = new Map();
+    if (Id64.sizeOf(elementIds) === 0 || this.#childrenMap.size === 0) {
+      return result;
+    }
+    for (const elementId of Id64.iterable(elementIds)) {
+      const entry = this.#childrenMap.get(elementId);
+      if (!entry?.children) {
+        continue;
+      }
+      const elementChildrenTree: ChildrenTree = new Map();
+      result.set(elementId, { children: elementChildrenTree });
+      entry.children.forEach((childId) => {
+        const childrenTreeOfChild = this.getChildrenTreeFromMap({ elementIds: childId });
+        // Need to add children tree created from childId. This tree includes childId as root element
+        // If child does not have children, children tree won't be created. Need to add childId with undefined children
+        elementChildrenTree.set(childId, { children: childrenTreeOfChild.size > 0 ? childrenTreeOfChild : undefined });
+      });
+    }
+    return result;
+  }
+
+  private getChildrenCountMap({ elementIds }: { elementIds: Id64Arg }): Map<Id64String, number> {
+    const result = new Map<Id64String, number>();
+    for (const elementId of Id64.iterable(elementIds)) {
+      const entry = this.#childrenMap.get(elementId);
+      if (entry?.children) {
+        let totalChildrenCount = entry.children.length;
+        this.getChildrenCountMap({ elementIds: entry.children }).forEach((childrenOfChildCount) => (totalChildrenCount += childrenOfChildCount));
+        result.set(elementId, totalChildrenCount);
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Populates #childrenLoadingMap with promises. When these promises resolve, they will populate #childrenMap with values and delete entries from #childrenLoadingMap.
+   */
+  private createChildrenLoadingMapEntries({ elementsToQuery }: { elementsToQuery: Id64Array }): { loadingMapEntries: Promise<void> } {
+    const getElementsToQueryPromise = async (batchedElementsToQuery: Id64Array) =>
+      firstValueFrom(
+        this.queryChildren({ elementIds: batchedElementsToQuery }).pipe(
+          // Want to have void at the end instead of void[], so using reduce
+          reduce(
+            (acc, { parentId, id }) => {
+              let entry = this.#childrenMap.get(parentId);
+              if (!entry) {
+                entry = { children: [] };
+                this.#childrenMap.set(parentId, entry);
+              }
+              if (!entry.children) {
+                entry.children = [];
+              }
+              // Add child to parent's entry and add child to children map
+              entry.children.push(id);
+              if (!this.#childrenMap.has(id)) {
+                this.#childrenMap.set(id, { children: undefined });
+              }
+              return acc;
+            },
+            (() => {})(),
+          ),
+          tap({ complete: () => batchedElementsToQuery.forEach((elementId) => this.#childrenLoadingMap.delete(elementId)) }),
+          defaultIfEmpty((() => {})()),
+        ),
+      );
+    const maximumBatchSize = 1000;
+    const totalSize = elementsToQuery.length;
+    const optimalBatchSize = getOptimalBatchSize({ totalSize, maximumBatchSize });
+    const loadingMapEntries = new Array<Promise<void>>();
+    // Don't want to slice if its not necessary
+    if (totalSize <= maximumBatchSize) {
+      loadingMapEntries.push(getElementsToQueryPromise(elementsToQuery));
+    } else {
+      for (let i = 0; i < elementsToQuery.length; i += optimalBatchSize) {
+        loadingMapEntries.push(getElementsToQueryPromise(elementsToQuery.slice(i, i + optimalBatchSize)));
+      }
+    }
+
+    elementsToQuery.forEach((elementId, index) => this.#childrenLoadingMap.set(elementId, loadingMapEntries[Math.floor(index / optimalBatchSize)]));
+    return { loadingMapEntries: Promise.all(loadingMapEntries).then(() => {}) };
+  }
+
+  private createChildrenMapEntries({ elementIds }: { elementIds: Id64Arg }): Observable<void[]> {
+    return from(Id64.iterable(elementIds)).pipe(
+      reduce(
+        (acc, elementId) => {
+          if (this.#childrenMap.has(elementId)) {
+            return acc;
+          }
+          const loadingPromise = this.#childrenLoadingMap.get(elementId);
+          if (loadingPromise) {
+            acc.existingPromises.push(loadingPromise);
+          } else {
+            acc.elementsToQuery.push(elementId);
+          }
+          return acc;
+        },
+        { existingPromises: new Array<Promise<void>>(), elementsToQuery: new Array<Id64String>() },
+      ),
+      mergeMap(async ({ elementsToQuery, existingPromises }) => {
+        existingPromises.push(this.createChildrenLoadingMapEntries({ elementsToQuery }).loadingMapEntries);
+        return Promise.all(existingPromises);
+      }),
+    );
+  }
+
+  public getChildrenTree({ elementIds }: { elementIds: Id64Arg }): Observable<ChildrenTree> {
+    return this.createChildrenMapEntries({ elementIds }).pipe(map(() => this.getChildrenTreeFromMap({ elementIds })));
+  }
+
+  public getAllChildrenCount({ elementIds }: { elementIds: Id64Arg }): Observable<Map<Id64String, number>> {
+    return this.createChildrenMapEntries({ elementIds }).pipe(map(() => this.getChildrenCountMap({ elementIds })));
   }
 
   private getSubjectInfos() {

@@ -11,8 +11,8 @@ const ENABLE_PINGS = false;
 const LOG_CATEGORY = "Presentation.PerformanceTests.MainThreadBlocksDetector";
 
 function log(messageOrCallback: string | (() => string)) {
-  if (LOGGER.isEnabled(LOG_CATEGORY, "trace")) {
-    LOGGER.logTrace(LOG_CATEGORY, typeof messageOrCallback === "string" ? messageOrCallback : messageOrCallback());
+  if (LOGGER.isEnabled(LOG_CATEGORY, "warning")) {
+    LOGGER.logWarning(LOG_CATEGORY, typeof messageOrCallback === "string" ? messageOrCallback : messageOrCallback());
   }
 }
 

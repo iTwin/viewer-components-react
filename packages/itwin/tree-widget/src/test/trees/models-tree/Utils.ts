@@ -24,6 +24,7 @@ import type {
   NonGroupingHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
+import type { ChildrenTree } from "../../../tree-widget-react/components/trees/models-tree/Utils.js";
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
@@ -102,6 +103,12 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
     getModelCategories: sinon.stub<[Id64String], Observable<Id64Array>>().callsFake((modelId) => {
       return of(props?.modelCategories?.get(modelId) ?? []);
     }),
+    getChildrenTree: sinon.stub<[{ elementIds: Id64Arg }], Observable<ChildrenTree>>().callsFake(() => {
+      return of(new Map());
+    }),
+    getAllChildrenCount: sinon.stub<[{ elementIds: Id64Arg }], Observable<Map<Id64String, number>>>().callsFake(() => {
+      return of(new Map());
+    }),
     getAllCategories: sinon.stub<[], Observable<Id64Set>>().callsFake(() => {
       const result = new Set<Id64String>();
       props?.modelCategories?.forEach((categories) => categories.forEach((category) => result.add(category)));
@@ -153,11 +160,13 @@ export function createCategoryHierarchyNode({
   categoryId,
   hasChildren,
   parentKeys,
+  filtering,
 }: {
   modelId?: Id64String;
   categoryId?: Id64Arg;
   hasChildren?: boolean;
   parentKeys?: HierarchyNodeKey[];
+  filtering?: HierarchyNode["filtering"];
 }): NonGroupingHierarchyNode {
   return {
     key: {
@@ -170,6 +179,7 @@ export function createCategoryHierarchyNode({
     children: !!hasChildren,
     label: "",
     parentKeys: parentKeys ?? [],
+    filtering,
     extendedData: {
       isCategory: true,
       modelId: modelId ?? "0x1",

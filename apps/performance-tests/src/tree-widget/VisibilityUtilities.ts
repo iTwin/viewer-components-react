@@ -4,12 +4,27 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { EMPTY, expand, firstValueFrom, from, mergeMap, queueScheduler, toArray } from "rxjs";
+import {
+  bufferCount,
+  concatMap,
+  defaultIfEmpty,
+  delay,
+  EMPTY,
+  expand,
+  firstValueFrom,
+  from,
+  identity,
+  mergeMap,
+  of,
+  queueScheduler,
+  takeLast,
+  toArray,
+} from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { IModelApp, OffScreenViewport, SpatialViewState, ViewRect } from "@itwin/core-frontend";
-import { HierarchyNode } from "@itwin/presentation-hierarchies";
-import { releaseMainThreadOnItemsCount, toVoidPromise } from "@itwin/tree-widget-react/internal";
+import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+import { toVoidPromise } from "@itwin/tree-widget-react/internal";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
@@ -29,6 +44,7 @@ export interface ValidateNodeProps {
     | {
         default: "all-visible" | "all-hidden";
         instances: { [id: string]: Visibility };
+        parentIds?: { [id: string]: Visibility };
       };
 }
 
@@ -40,16 +56,29 @@ async function validateNodeVisibility({ node, handler, expectations }: ValidateN
   const ids = node.key.instanceKeys.map((instanceKey) => instanceKey.id);
   const actualVisibility = await handler.getVisibilityStatus(node);
   if (expectations === "all-visible" || expectations === "all-hidden") {
-    expect(actualVisibility.state).to.eq(expectations === "all-hidden" ? "hidden" : "visible");
+    expect(actualVisibility.state).to.eq(expectations === "all-hidden" ? "hidden" : "visible", node.label);
     return;
   }
   const idInExpectations = ids.find((id) => id in expectations.instances);
   if (idInExpectations) {
     const expectedVisibility = expectations.instances[idInExpectations];
-    expect(actualVisibility.state).to.eq(expectedVisibility);
-  } else {
-    expect(actualVisibility.state).to.eq(expectations.default === "all-hidden" ? "hidden" : "visible");
+    expect(actualVisibility.state).to.eq(expectedVisibility, node.label);
+    return;
   }
+
+  if (expectations.parentIds) {
+    const parentIds = node.parentKeys
+      .filter((key) => HierarchyNodeKey.isInstances(key))
+      .map((key) => key.instanceKeys.map(({ id }) => id))
+      .flat();
+    const parentIdInExpectations = parentIds.find((id) => id in expectations.parentIds!);
+    if (parentIdInExpectations) {
+      const expectedVisibility = expectations.parentIds[parentIdInExpectations];
+      expect(actualVisibility.state).to.eq(expectedVisibility, node.label);
+      return;
+    }
+  }
+  expect(actualVisibility.state).to.eq(expectations.default === "all-hidden" ? "hidden" : "visible", node.label);
 }
 
 export async function collectNodes({
@@ -73,13 +102,27 @@ export async function validateHierarchyVisibility(
     releaseOn?: number;
   },
 ) {
+  const releaseAfterCount = 100;
   props.viewport.renderFrame();
   // This promise allows handler change event to fire if it was scheduled.
   await new Promise((resolve) => setTimeout(resolve));
   await toVoidPromise(
     from(props.hierarchyNodes).pipe(
-      releaseMainThreadOnItemsCount(100),
-      mergeMap(async (node) => validateNodeVisibility({ ...props, node })),
+      // Custom releaseMainThreadOnItemsCount
+      bufferCount(releaseAfterCount),
+      concatMap((nodes, index) => {
+        const isDelayed = nodes.length === releaseAfterCount || index > 0;
+        return of({ nodes, isDelayed }).pipe(isDelayed ? delay(0) : identity);
+      }),
+      concatMap(({ nodes: delayedNodes, isDelayed }) => {
+        return from(delayedNodes).pipe(
+          mergeMap(async (node) => validateNodeVisibility({ ...props, node })),
+          takeLast(1),
+          defaultIfEmpty(undefined),
+          // Release again after validating the delayed nodes.
+          isDelayed ? delay(0) : identity,
+        );
+      }),
     ),
   );
 }
