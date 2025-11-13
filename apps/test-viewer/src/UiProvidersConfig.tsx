@@ -18,6 +18,7 @@ import {
 import { MapLayersFormats } from "@itwin/map-layers-formats";
 import { MeasurementActionToolbar, MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
 import { OneClickLCAProvider } from "@itwin/one-click-lca-react";
+import { CustomizeFormatPropertyContextMenuItem } from "./components/quantity-formatting/FormatPropertyContextMenuItem";
 import {
   AddFavoritePropertyContextMenuItem,
   AncestorsNavigationControls,
@@ -39,7 +40,6 @@ import {
   TreeWidgetComponent,
 } from "@itwin/tree-widget-react";
 import { createLayersUiProvider, initializeLayers } from "./components/LayersWidget";
-import { CustomizeFormatPropertyContextMenuItem } from "./components/quantity-formatting/FormatPropertyContextMenuItem";
 import { RepositoriesTreeComponent } from "./components/repositories-tree/RepositoriesTree";
 import { useViewerOptionsContext } from "./components/ViewerOptions";
 import { unifiedSelectionStorage } from "./SelectionStorage";
