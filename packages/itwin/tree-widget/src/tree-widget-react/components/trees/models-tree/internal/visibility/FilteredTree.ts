@@ -143,9 +143,9 @@ class ModelsTreeFilteredNodesHandler extends FilteredNodesHandler<void, ModelsTr
         const elements = (filterTargets.elements ??= new Map()).get(modelCategoryKey);
         if (elements) {
           elements.set(node.id, { isFilterTarget: node.isFilterTarget });
-      } else {
-        filterTargets.elements.set(modelCategoryKey, new Map([[node.id, { isFilterTarget: node.isFilterTarget }]]));
-      }
+        } else {
+          filterTargets.elements.set(modelCategoryKey, new Map([[node.id, { isFilterTarget: node.isFilterTarget }]]));
+        }
     }
   }
 
