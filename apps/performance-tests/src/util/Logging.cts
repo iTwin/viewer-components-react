@@ -3,11 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { ILogger, LogLevel } from "@itwin/presentation-shared";
+import type { ILogger, LogLevel } from "@itwin/presentation-shared";
 
 export const LOGGER: ILogger = {
   isEnabled: (_category: string, level: LogLevel) => {
-    return level === "error";
+    return level === "error" || level === "warning";
   },
   logError: (category: string, message: string) => console.log(createLogMessage("error", category, message)),
   logWarning: (category: string, message: string) => console.log(createLogMessage("warning", category, message)),

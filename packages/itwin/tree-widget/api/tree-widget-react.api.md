@@ -108,6 +108,11 @@ interface CategoriesTreeHierarchyConfiguration {
     showElements: boolean;
 }
 
+// @beta
+interface CategoriesTreeHierarchyConfiguration {
+    showEmptyCategories: boolean;
+}
+
 // @beta (undocumented)
 export function CategoriesTreeIcon({ node }: {
     node: PresentationHierarchyNode;

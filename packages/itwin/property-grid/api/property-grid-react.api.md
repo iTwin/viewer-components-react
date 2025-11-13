@@ -86,7 +86,7 @@ export interface FilteringPropertyGridProps extends React.ComponentProps<typeof 
 
 // @public
 export class IModelAppUserPreferencesStorage implements PreferencesStorage {
-    constructor(_nameSpace?: string);
+    constructor(nameSpace?: string);
     // (undocumented)
     get(key: string): Promise<string | undefined>;
     // (undocumented)
@@ -199,7 +199,7 @@ export interface PropertyGridSettingsMenuItemProps {
 
 // @public @deprecated
 export class PropertyGridUiItemsProvider implements UiItemsProvider {
-    constructor(_props?: PropertyGridUiItemsProviderProps);
+    constructor(props?: PropertyGridUiItemsProviderProps);
     // (undocumented)
     readonly id = "PropertyGridUiItemsProvider";
     // (undocumented)

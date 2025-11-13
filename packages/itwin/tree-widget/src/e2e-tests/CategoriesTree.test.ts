@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Locator } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import {
   expandNode,
@@ -17,6 +16,8 @@ import {
   selectValueInDialog,
   takeScreenshot,
 } from "./utils.js";
+
+import type { Locator } from "@playwright/test";
 
 test.describe("Categories tree", () => {
   let treeWidget: Locator;
@@ -127,8 +128,10 @@ test.describe("Categories tree", () => {
     await selectOperatorInDialog(page, "Equal");
     await selectValueInDialog(page, "Equipment - Insulation");
 
-    await page.getByRole("button", { name: "Apply" }).click();
-    await locateNode(treeWidget, "Equipment - Insulation").waitFor();
+    // re-focus on checkbox after resizing the panel
+    const nodeBox = await node.boundingBox();
+    await node.click({ position: nodeBox ? { x: nodeBox.width * 0.4, y: nodeBox.height * 0.5 } : undefined });
+    await page.keyboard.press("Tab");
 
     await takeScreenshot(page, node, { resetScroll: true, boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
   });

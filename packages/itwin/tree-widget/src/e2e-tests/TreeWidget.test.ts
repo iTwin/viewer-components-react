@@ -3,9 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Locator } from "@playwright/test";
 import { test } from "@playwright/test";
 import { initTreeWidgetTest, locateNode, selectTree, takeScreenshot } from "./utils.js";
+import type { Locator } from "@playwright/test";
 
 // Skipped because tree selector uses native `select` element. Expanded selected are rendered by OS and they are not
 // part of the page so playwright cannot see them when taking screenshot.

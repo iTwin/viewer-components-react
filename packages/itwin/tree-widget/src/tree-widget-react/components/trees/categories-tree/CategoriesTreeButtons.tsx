@@ -17,11 +17,12 @@ import { loadCategoriesFromViewport } from "../common/internal/VisibilityUtils.j
 import { hideAllModels, showAll } from "../common/Utils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { Id64Array } from "@itwin/core-bentley";
+import type { GuidString, Id64Array } from "@itwin/core-bentley";
 import type { TreeToolbarButtonProps } from "../../tree-header/SelectableTree.js";
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { ModelId } from "../common/internal/Types.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
+import { useGuid } from "../common/useGuid.js";
 
 /**
  * Props that get passed to `CategoriesTreeComponent` header button renderer.
@@ -60,8 +61,10 @@ export function useCategoriesTreeButtonProps({ viewport }: { viewport: TreeWidge
   const [filteredCategories, setFilteredCategories] = useState<CategoryInfo[] | undefined>();
   const [filteredModels, setFilteredModels] = useState<Id64Array | undefined>();
 
-  const categories = useCategories(viewport);
+  const componentId = useGuid();
+  const categories = useCategories(viewport, componentId);
   const models = useAvailableModels(viewport);
+
   return {
     buttonProps: {
       viewport,
@@ -131,9 +134,8 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
 
 const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
 
-/** @internal */
-export function useCategories(viewport: TreeWidgetViewport) {
-  const categoriesPromise = useMemo(async () => loadCategoriesFromViewport(viewport), [viewport]);
+function useCategories(viewport: TreeWidgetViewport, componentId: GuidString) {
+  const categoriesPromise = useMemo(async () => loadCategoriesFromViewport(viewport, componentId), [viewport, componentId]);
   return useAsyncValue(categoriesPromise) ?? EMPTY_CATEGORIES_ARRAY;
 }
 

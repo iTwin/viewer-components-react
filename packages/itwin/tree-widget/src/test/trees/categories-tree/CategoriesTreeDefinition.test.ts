@@ -177,6 +177,44 @@ describe("Categories tree", () => {
       });
     });
 
+    it("shows definition container and category when category does not have elements and showEmptyCategories is true", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer" });
+        const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
+
+        const emptyCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory1", modelId: definitionModel.id });
+        const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
+
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+        return { category, emptyCategory, definitionContainer };
+      });
+
+      const { imodel, ...keys } = buildIModelResult;
+      using provider = createCategoryTreeProvider(imodel, "3d", { showEmptyCategories: true });
+
+      await validateHierarchy({
+        provider,
+        expect: [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.definitionContainer],
+            supportsFiltering: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [keys.emptyCategory],
+                children: false,
+              }),
+            ],
+          }),
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [keys.category],
+            supportsFiltering: true,
+            children: false,
+          }),
+        ],
+      });
+    });
+
     it("does not show definition container or category when definition container is private", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });

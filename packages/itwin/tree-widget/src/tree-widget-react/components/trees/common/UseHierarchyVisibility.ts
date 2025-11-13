@@ -22,7 +22,6 @@ import {
 import { createTooltip } from "./internal/Tooltip.js";
 import { useTelemetryContext } from "./UseTelemetryContext.js";
 
-import type { Observable } from "rxjs";
 import type { MutableRefObject } from "react";
 import type { BeEvent } from "@itwin/core-bentley";
 import type { HierarchyNode, PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";

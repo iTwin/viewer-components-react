@@ -10,16 +10,44 @@ import { SchemaFormatsProvider, SchemaUnitProvider } from "@itwin/ecschema-metad
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { FrontendDevTools } from "@itwin/frontend-devtools";
 import { ArcGisAccessClient } from "@itwin/map-layers-auth";
-import { Viewer as WebViewer } from "@itwin/web-viewer-react";
+import { QuantityFormatting } from "@itwin/quantity-formatting-react";
+import { ViewerStatusbarItemsProvider, Viewer as WebViewer } from "@itwin/web-viewer-react";
 import { unifiedSelectionStorage } from "../SelectionStorage";
 import { getUiProvidersConfig } from "../UiProvidersConfig";
 import { ApiKeys } from "./ApiKeys";
 import { useAuthorizationContext } from "./Authorization";
+import { FormatManager } from "./quantity-formatting/FormatManager";
 import { statusBarActionsProvider, ViewerOptionsProvider } from "./ViewerOptions";
-import { FormatManager } from "./FormatManager";
 
+import type { ComponentPropsWithoutRef } from "react";
+import type { FormatSet } from "@itwin/ecschema-metadata";
 import type { UiProvidersConfig } from "../UiProvidersConfig";
-import { QuantityFormatting } from "@itwin/quantity-formatting-react";
+
+// Test format sets for development - added once at startup
+const testFormatSets: FormatSet[] = [
+  {
+    name: "TestFormatSet1",
+    label: "Arizona Highway Project (Civil)",
+    unitSystem: "imperial",
+    description:
+      "This format set contains all the formatting standards used by civil engineers on the Arizona Highway Project. Includes units for measurements, coordinates, and construction materials.",
+    formats: {},
+  },
+  {
+    name: "TestFormatSet2",
+    label: "Arizona Highway Project (Project Manager)",
+    unitSystem: "imperial",
+    description: "This format set contains all the formatting standards used by project managers on the Arizona Highway Project.",
+    formats: {},
+  },
+  {
+    name: "TestFormatSet3",
+    label: "My personal format set",
+    unitSystem: "metric",
+    description: "Custom formatting preferences for individual use. Combines metric and imperial units based on personal workflow requirements.",
+    formats: {},
+  },
+];
 
 export function Viewer() {
   return (
@@ -39,8 +67,8 @@ function ViewerWithOptions() {
     await providersConfig.initialize();
     await FrontendDevTools.initialize();
     await QuantityFormatting.startup();
-    // Initialize FormatManager with sample format sets
-    await FormatManager.initialize([]);
+    // Initialize FormatManager with test format sets
+    await FormatManager.initialize(testFormatSets);
     // ArcGIS Oauth setup
     const accessClient = new ArcGisAccessClient();
     accessClient.initialize({
@@ -68,7 +96,11 @@ function ViewerWithOptions() {
       enablePerformanceMonitors={false}
       onIModelAppInit={onIModelAppInit}
       // Only set providers once IModelAppInit has fired, otherwise map-layers objects will fail to initialize
-      uiProviders={uiConfig ? [...uiConfig.getUiItemsProviders(), statusBarActionsProvider] : []}
+      uiProviders={
+        uiConfig
+          ? [...uiConfig.getUiItemsProviders(), new ViewerStatusbarItemsProvider({ selectionScope: true, selectionInfo: true }), statusBarActionsProvider]
+          : []
+      }
       defaultUiConfig={{
         hideNavigationAid: false,
         hideStatusBar: false,
@@ -90,9 +122,37 @@ function ViewerWithOptions() {
           selectionStorage: unifiedSelectionStorage,
         },
       }}
+      selectionStorage={unifiedSelectionStorage}
+      selectionScopes={selectionScopes}
     />
   );
 }
+
+const selectionScopes: ComponentPropsWithoutRef<typeof WebViewer>["selectionScopes"] = {
+  available: {
+    element: {
+      def: { id: "element" },
+      label: "Element",
+    },
+    assembly: {
+      def: { id: "element", ancestorLevel: 1 },
+      label: "Assembly",
+    },
+    "top-assembly": {
+      def: { id: "element", ancestorLevel: 2 },
+      label: "Top assembly",
+    },
+    model: {
+      def: { id: "model" },
+      label: "Model",
+    },
+    category: {
+      def: { id: "category" },
+      label: "Category",
+    },
+  },
+  active: "element",
+};
 
 function onIModelConnected(imodel: IModelConnection) {
   const setupFormatsProvider = async () => {

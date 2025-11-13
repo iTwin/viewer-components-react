@@ -19,6 +19,7 @@
     "change": "beachball change --no-commit",
     "change:dev": "beachball change --config beachball.config.dev.js --no-commit",
     "cspell": "cspell .",
+    "check-inline-styles": "node scripts/check-inline-styles.js",
     "publish": "beachball publish --new",
     "bump": "beachball bump",
     "prettier": "prettier --check .",
@@ -28,9 +29,11 @@
     "benchmark:tree-widget": "pnpm run -C ./apps/performance-tests benchmark:tree-widget"
   },
   "devDependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "^4.7.0",
     "beachball": "^2.54.0",
     "cpx2": "^7.0.2",
     "cspell": "^9.2.0",
+    "glob": "^11.0.0",
     "lage": "^2.14.6",
     "prettier": "^3.6.2",
     "yargs": "^17.7.2"

@@ -121,6 +121,7 @@ export type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) =>
 
 /** @public */
 export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
+  const componentId = useGuid();
   return (
     <IconButton
       variant={"ghost"}

@@ -26,7 +26,7 @@ import {
   takeUntil,
   tap,
 } from "rxjs";
-import { Id64 } from "@itwin/core-bentley";
+import { Guid, Id64 } from "@itwin/core-bentley";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { getClassesByView, pushToMap, setDifference } from "./Utils.js";
 
@@ -65,8 +65,8 @@ type SetType = "always" | "never";
 /** @internal */
 export class AlwaysAndNeverDrawnElementInfo implements Disposable {
   #subscriptions: Subscription[];
-  #alwaysDrawn: { cacheEntryObs: Observable<CacheEntry>; latestCacheEntryValue?: CacheEntry };
-  #neverDrawn: { cacheEntryObs: Observable<CacheEntry>; latestCacheEntryValue?: CacheEntry };
+  #alwaysDrawn: { cacheEntryObs: Observable<CachedNodesMap>; latestCacheEntryValue?: CachedNodesMap };
+  #neverDrawn: { cacheEntryObs: Observable<CachedNodesMap>; latestCacheEntryValue?: CachedNodesMap };
   #disposeSubject = new Subject<void>();
   readonly #viewport: TreeWidgetViewport;
   readonly #elementClassName?: string;
@@ -85,6 +85,8 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
       shareReplay(1),
     );
     this.#subscriptions = [this.#alwaysDrawn.cacheEntryObs.subscribe(), this.#neverDrawn.cacheEntryObs.subscribe()];
+    this.#componentId = componentId ?? Guid.createValue();
+    this.#componentName = "AlwaysAndNeverDrawnElementInfo";
   }
 
   public suppressChangeEvents() {
@@ -147,13 +149,40 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
         );
   }
 
-  private createCacheEntryObservable(setType: SetType): Observable<CacheEntry> {
+  private getChildrenTree<T extends object>({
+    currentChildrenTree,
+    pathToElements,
+    currentIdsIndex,
+  }: {
+    currentChildrenTree: ChildrenTree<T>;
+    pathToElements: Array<Id64Arg>;
+    currentIdsIndex: number;
+  }): ChildrenTree<T> {
+    if (currentIdsIndex >= pathToElements.length) {
+      return currentChildrenTree;
+    }
+    const result: ChildrenTree<T> = new Map();
+    for (const parentId of Id64.iterable(pathToElements[currentIdsIndex])) {
+      const entry = currentChildrenTree.get(parentId);
+      if (entry?.children) {
+        const childrenTreeOfChildren = this.getChildrenTree({
+          currentChildrenTree: entry.children,
+          pathToElements,
+          currentIdsIndex: currentIdsIndex + 1,
+        });
+        childrenTreeOfChildren.forEach((val, childId) => result.set(childId, val));
+      }
+    }
+    return result;
+  }
+
+  private createCacheEntryObservable(setType: SetType): Observable<CachedNodesMap> {
     const event = setType === "always" ? this.#viewport.onAlwaysDrawnChanged : this.#viewport.onNeverDrawnChanged;
     const getIds = setType === "always" ? () => this.#viewport.alwaysDrawn : () => this.#viewport.neverDrawn;
 
-    const resultSubject = new BehaviorSubject<CacheEntry | undefined>(undefined);
+    const resultSubject = new BehaviorSubject<CachedNodesMap | undefined>(undefined);
 
-    const obs = fromEventPattern(
+    const obs: Observable<CachedNodesMap> = fromEventPattern(
       (handler) => event.addListener(handler),
       (handler) => event.removeListener(handler),
     ).pipe(
@@ -185,7 +214,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
         resetOnRefCountZero: false,
       }),
       // Wait until the result is available.
-      first((x): x is CacheEntry => !!x),
+      first((x): x is CachedNodesMap => !!x, new Map()),
     );
     return obs;
   }
@@ -221,10 +250,10 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
         {
           ctes: [
             `
-            ElementInfo(elementId, modelId, categoryId, parentId) AS (
+            ElementInfo(modelId, rootCategoryId, categoryId, parentId, elementsPath) AS (
               SELECT
-                ECInstanceId elementId,
                 Model.Id modelId,
+                Category.Id rootCategoryId,
                 Category.Id categoryId,
                 Parent.Id parentId
               FROM ${elementClass}
@@ -250,10 +279,15 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
           bindings: [{ type: "idset", value: elementIds }],
         },
         {
-          restartToken: `ModelsTreeVisibilityHandler/${requestId}`,
+          rowFormat: "ECSqlPropertyNames",
+          restartToken: `${this.#componentName}/${this.#componentId}/${requestId}`,
         },
       );
-    }).pipe(map((row) => ({ elementId: row.elementId, modelId: row.modelId, categoryId: row.categoryId })));
+    }).pipe(
+      map((row) => {
+        return { elementsPath: row.elementsPath.split(";"), modelId: row.modelId, categoryId: row.categoryId, rootCategoryId: row.rootCategoryId };
+      }),
+    );
   }
 
   public getAlwaysDrawnElements(props: AlwaysOrNeverDrawnElementsQueryProps) {

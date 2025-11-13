@@ -143,6 +143,7 @@ export function useModelsTree({
     imodel: activeView.iModel,
     createCache,
     cacheSpecificProps: useMemo(() => ({ hierarchyConfig: hierarchyConfiguration }), [hierarchyConfiguration]),
+    componentId,
   });
 
   const { visibilityHandlerFactory, onFilteredPathsChanged } = useCachedVisibility<ModelsTreeIdsCache, ModelsTreeFilterTargets>({
@@ -156,8 +157,8 @@ export function useModelsTree({
   });
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
-    ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache: getModelsTreeIdsCache(), hierarchyConfig: hierarchyConfiguration }),
-    [getModelsTreeIdsCache, hierarchyConfiguration],
+    ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache: getModelsTreeIdsCache(), hierarchyConfig: hierarchyConfiguration, componentId }),
+    [getModelsTreeIdsCache, hierarchyConfiguration, componentId],
   );
 
   const { getPaths, filteringError, subTreeError } = useFilteredPaths({

@@ -48,7 +48,7 @@ export function ExternalSourcesTree({ getInlineActions, getMenuActions, getDecor
   );
 }
 
-const getDefinitionsProvider: TreeProps["getHierarchyDefinition"] = (props) => {
+const getDefinitionsProvider = (props: Parameters<TreeProps["getHierarchyDefinition"]>[0] & { componentId: GuidString }): HierarchyDefinition => {
   return new ExternalSourcesTreeDefinition(props);
 };
 

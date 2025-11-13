@@ -12,11 +12,11 @@ import { TelemetryContextProvider } from "../../property-grid-react/hooks/UseTel
 import { createKeysFromSelectable } from "../../property-grid-react/hooks/UseUnifiedSelectionHandler.js";
 import { act, createResolvablePromise, renderHook, stubSelectionManager, stubSelectionStorage, waitFor } from "../TestUtils.js";
 
-import type { Selectable, SelectableInstanceKey } from "@itwin/unified-selection";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ECInstancesNodeKey, InstanceKey } from "@itwin/presentation-common";
-import type { EventArgs } from "@itwin/presentation-shared";
 import type { ISelectionProvider } from "@itwin/presentation-frontend";
+import type { EventArgs } from "@itwin/presentation-shared";
+import type { Selectable, SelectableInstanceKey } from "@itwin/unified-selection";
 
 describe("useInstanceSelection", () => {
   const imodel = {

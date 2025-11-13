@@ -34,6 +34,8 @@ interface ModelInfo {
 }
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
+type ChildrenMap = Map<Id64String, { children: Id64Array | undefined }>;
+type ChildrenLoadingMap = Map<Id64String, Promise<void>>;
 
 type ModelCategoryKey = `${ModelId}-${CategoryId}`;
 
@@ -59,7 +61,7 @@ export class ModelsTreeIdsCache implements Disposable {
   }
 
   public [Symbol.dispose]() {
-    this._categoryElementCounts[Symbol.dispose]();
+    this.#categoryElementCounts[Symbol.dispose]();
   }
 
   private async *querySubjects(): AsyncIterableIterator<{ id: SubjectId; parentId?: SubjectId; targetPartitionId?: ModelId; hideInHierarchy: boolean }> {
@@ -117,7 +119,6 @@ export class ModelsTreeIdsCache implements Disposable {
             if (subject.targetPartitionId) {
               subjectInfo.childModelIds.add(subject.targetPartitionId);
             }
-            result.set(subject.id, subjectInfo);
           }
           return result;
         })(),
@@ -164,11 +165,12 @@ export class ModelsTreeIdsCache implements Disposable {
             parentSubjectIds.add(currParentId);
             currParentId = subjectInfos.get(currParentId)?.parentSubjectId;
           }
-        }
-      });
-      return [...parentSubjectIds];
-    })();
-    return this._parentSubjectIds;
+        });
+        return [...parentSubjectIds];
+      }),
+      shareReplay(),
+    );
+    return this.#parentSubjectIds;
   }
 
   /**
@@ -233,8 +235,8 @@ export class ModelsTreeIdsCache implements Disposable {
     return modelIds;
   }
 
-  public async createSubjectInstanceKeysPath(targetSubjectId: Id64String): Promise<HierarchyNodeIdentifiersPath> {
-    let entry = this._subjectKeyPaths.get(targetSubjectId);
+  public createSubjectInstanceKeysPath(targetSubjectId: Id64String): Observable<HierarchyNodeIdentifiersPath> {
+    let entry = this.#subjectKeyPaths.get(targetSubjectId);
     if (!entry) {
       entry = (async () => {
         const subjectInfos = await this.getSubjectInfos();
@@ -257,7 +259,7 @@ export class ModelsTreeIdsCache implements Disposable {
     return entry;
   }
 
-  private async *queryModelCategories(): AsyncIterableIterator<{
+  private queryModelCategories(): Observable<{
     modelId: Id64String;
     categoryId: Id64String;
     isModelPrivate: boolean;
@@ -302,14 +304,15 @@ export class ModelsTreeIdsCache implements Disposable {
         const key: ModelCategoryKey = `${modelId}-${categoryId}`;
         const entry = modelWithCategoryModeledElements.get(key);
         if (entry === undefined) {
-          modelWithCategoryModeledElements.set(key, new Set([modeledElementId]));
+          acc.set(key, new Set([modeledElementId]));
         } else {
           entry.add(modeledElementId);
         }
-      }
-      return modelWithCategoryModeledElements;
-    })();
-    return this._modelWithCategoryModeledElements;
+        return acc;
+      }, new Map<Id64String, Id64Set>()),
+      shareReplay(),
+    );
+    return this.#modelWithCategoryModeledElements;
   }
 
   private async getModelInfos() {
@@ -321,21 +324,24 @@ export class ModelsTreeIdsCache implements Disposable {
           entry.categories.set(categoryId, { isRootElementCategory });
           entry.isModelPrivate = isModelPrivate;
         } else {
-          modelInfos.set(modelId, { categories: new Map([[categoryId, { isRootElementCategory }]]), isModelPrivate });
+          acc.set(modelId, { categories: new Map([[categoryId, { isRootElementCategory }]]), isModelPrivate });
         }
-      }
-      return modelInfos;
-    })();
-    return this._modelInfos;
+        return acc;
+      }, new Map<Id64String, { categories: Map<Id64String, { isRootElementCategory: boolean }>; isModelPrivate: boolean }>()),
+      shareReplay(),
+    );
+    return this.#modelInfos;
   }
 
-  public async getAllCategories(): Promise<Id64Set> {
-    const modelInfos = await this.getModelInfos();
-    const result = new Set<Id64String>();
-    modelInfos.forEach(({ categories }) => {
-      categories.forEach((_, categoryId) => result.add(categoryId));
-    });
-    return result;
+  public getAllCategories(): Observable<Id64Set> {
+    return this.getModelInfos().pipe(
+      mergeMap((modelInfos) => modelInfos.values()),
+      mergeMap(({ categories }) => categories.keys()),
+      reduce((acc, categoryId) => {
+        acc.add(categoryId);
+        return acc;
+      }, new Set<Id64String>()),
+    );
   }
 
   public async getModelCategoryIds(modelId: Id64String): Promise<Id64Array> {
@@ -393,12 +399,9 @@ export class ModelsTreeIdsCache implements Disposable {
             result.push([...subjectPath, { className: "BisCore.GeometricModel3d", id: modelId }]);
           }
         }
-        return result;
-      })();
-
-      this._modelKeyPaths.set(modelId, entry);
-    }
-    return entry;
+        return !modeledElementInfo.isModelPrivate;
+      }),
+    );
   }
 
   public async getCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Promise<number> {

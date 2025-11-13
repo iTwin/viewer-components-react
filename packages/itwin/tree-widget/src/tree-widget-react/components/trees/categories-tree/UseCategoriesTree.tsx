@@ -78,6 +78,7 @@ export function useCategoriesTree({
     imodel: activeView.iModel,
     createCache,
     cacheSpecificProps: useMemo(() => ({ viewType }), [viewType]),
+    componentId,
   });
 
   const { visibilityHandlerFactory, onFilteredPathsChanged } = useCategoriesCachedVisibility({
@@ -211,5 +212,5 @@ async function createFilteredTree(
 }
 
 function createCache(props: CreateCacheProps<{ viewType: "2d" | "3d" }>) {
-  return new CategoriesTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.viewType);
+  return new CategoriesTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.viewType, props.componentId);
 }

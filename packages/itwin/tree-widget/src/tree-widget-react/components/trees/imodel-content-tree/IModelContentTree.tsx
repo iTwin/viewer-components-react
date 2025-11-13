@@ -49,10 +49,10 @@ export function IModelContentTree({
         ...defaultHierarchyConfiguration,
         ...hierarchyConfigProp,
       };
-      return new IModelContentTreeDefinition({ imodelAccess, idsCache: new IModelContentTreeIdsCache(imodelAccess), hierarchyConfig });
+      return new IModelContentTreeDefinition({ imodelAccess, idsCache: new IModelContentTreeIdsCache(imodelAccess, componentId), hierarchyConfig });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    Object.values(hierarchyConfigProp ?? {}),
+    Object.values({ ...(hierarchyConfigProp ?? {}), componentId }),
   );
 
   return (

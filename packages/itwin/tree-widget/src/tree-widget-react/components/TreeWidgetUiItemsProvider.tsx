@@ -86,7 +86,7 @@ function useTreeStorage(): UseTreeStorageResult {
   const scrollTop = useRef<number | undefined>();
 
   const getContainer = () => {
-    return ref.current?.querySelector("#tw-tree-renderer-container");
+    return ref.current?.querySelector("#tw-tree-renderer");
   };
 
   const persist = () => {

@@ -27,8 +27,8 @@
   height: 45rem;
 }
 
-.format-selector-container {
-  height: 36rem;
+.format-tab-panel {
+  max-height: 36rem;
 }
 
 .quantity-format-selector-item {
@@ -48,4 +48,8 @@
 
 .quantity-format-button-container {
   margin-top: 1rem;
+}
+
+.format-definition-header {
+  margin-bottom: 1rem;
 }

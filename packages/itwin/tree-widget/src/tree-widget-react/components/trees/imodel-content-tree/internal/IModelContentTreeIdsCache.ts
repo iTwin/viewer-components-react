@@ -13,7 +13,7 @@ import {
 } from "../../common/internal/ClassNameDefinitions.js";
 import { pushToMap } from "../../common/internal/Utils.js";
 
-import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { ModelId, SubjectId } from "../../common/internal/Types.js";
 
@@ -34,7 +34,11 @@ export class IModelContentTreeIdsCache {
   private _parentSubjectIds: Promise<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
   private _modelInfos: Promise<Map<ModelId, ModelInfo>> | undefined;
 
-  constructor(private _queryExecutor: LimitingECSqlQueryExecutor) {}
+  constructor(queryExecutor: LimitingECSqlQueryExecutor, componentId?: GuidString) {
+    this.#queryExecutor = queryExecutor;
+    this.#componentId = componentId ?? Guid.createValue();
+    this.#componentName = "IModelContentTreeIdsCache";
+  }
 
   private async *querySubjects(): AsyncIterableIterator<{ id: SubjectId; parentId?: SubjectId; targetPartitionId?: ModelId; hideInHierarchy: boolean }> {
     const subjectsQuery = `
@@ -57,7 +61,10 @@ export class IModelContentTreeIdsCache {
         END hideInHierarchy
       FROM ${CLASS_NAME_Subject} s
     `;
-    for await (const row of this._queryExecutor.createQueryReader({ ecsql: subjectsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this.#queryExecutor.createQueryReader(
+      { ecsql: subjectsQuery },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/subjects` },
+    )) {
       yield { id: row.id, parentId: row.parentId, targetPartitionId: row.targetPartitionId, hideInHierarchy: !!row.hideInHierarchy };
     }
   }
@@ -69,13 +76,16 @@ export class IModelContentTreeIdsCache {
       INNER JOIN ${CLASS_NAME_Model} m ON m.ModeledElement.Id = p.ECInstanceId
       WHERE NOT m.IsPrivate
     `;
-    for await (const row of this._queryExecutor.createQueryReader({ ecsql: modelsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this.#queryExecutor.createQueryReader(
+      { ecsql: modelsQuery },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/models` },
+    )) {
       yield { id: row.id, parentId: row.parentId };
     }
   }
 
   private async getSubjectInfos() {
-    this._subjectInfos ??= (async () => {
+    this.#subjectInfos ??= (async () => {
       const [subjectInfos, targetPartitionSubjects] = await Promise.all([
         (async () => {
           const result = new Map<SubjectId, SubjectInfo>();
@@ -120,7 +130,7 @@ export class IModelContentTreeIdsCache {
 
       return subjectInfos;
     })();
-    return this._subjectInfos;
+    return this.#subjectInfos;
   }
 
   /** Returns ECInstanceIDs of Subjects that either have direct Model or at least one child Subject with a Model. */
@@ -141,7 +151,7 @@ export class IModelContentTreeIdsCache {
       });
       return [...parentSubjectIds];
     })();
-    return this._parentSubjectIds;
+    return this.#parentSubjectIds;
   }
 
   /**
@@ -198,7 +208,10 @@ export class IModelContentTreeIdsCache {
       WHERE Parent.Id IS NULL
       GROUP BY Model.Id, Category.Id
     `;
-    for await (const row of this._queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
+    for await (const row of this.#queryExecutor.createQueryReader(
+      { ecsql: query },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/model-categories` },
+    )) {
       yield { modelId: row.modelId, categoryId: row.categoryId };
     }
   }
@@ -216,7 +229,7 @@ export class IModelContentTreeIdsCache {
       }
       return modelInfos;
     })();
-    return this._modelInfos;
+    return this.#modelInfos;
   }
 
   public async getModelCategoryIds(modelIds: Id64Array): Promise<Id64Array> {

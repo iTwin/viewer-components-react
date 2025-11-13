@@ -5,13 +5,12 @@
 
 import "./FormatPanel.scss";
 import * as React from "react";
-import { Button, ButtonGroup, Flex } from "@itwin/itwinui-react";
+import { Button, Flex, Text } from "@itwin/itwinui-react";
 import { useTranslation } from "../../useTranslation.js";
 import { FormatPanel } from "./FormatPanel.js";
 import { FormatSample } from "./FormatSample.js";
 
-import type { UnitProps, FormatDefinition } from "@itwin/core-quantity";
-import type { UnitsProvider } from "@itwin/core-quantity";
+import type { UnitProps, FormatDefinition, UnitsProvider } from "@itwin/core-quantity";
 /** Properties of [[QuantityFormatPanel]] component.
  * @beta
  */
@@ -118,14 +117,12 @@ export function QuantityFormatPanel(props: QuantityFormatPanelProps) {
         persistenceUnit={persistenceUnit}
       />
       <Flex justifyContent="flex-end" gap="xs">
-        <ButtonGroup>
-          <Button styleType="default" onClick={handleClear} disabled={!saveEnabled}>
-            {translate("QuantityFormat:labels.clear")}
-          </Button>
-          <Button styleType="high-visibility" onClick={handleSave} disabled={!saveEnabled}>
-            {translate("QuantityFormat:labels.save")}
-          </Button>
-        </ButtonGroup>
+        <Button size="small" styleType="default" onClick={handleClear} disabled={!saveEnabled}>
+          {translate("QuantityFormat:labels.clear")}
+        </Button>
+        <Button size="small" styleType="high-visibility" onClick={handleSave} disabled={!saveEnabled}>
+          {translate("QuantityFormat:labels.apply")}
+        </Button>
       </Flex>
     </div>
   );
