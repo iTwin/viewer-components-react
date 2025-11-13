@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1762499965247,
+  "lastUpdate": 1763025509588,
   "repoUrl": "https://github.com/iTwin/viewer-components-react",
   "entries": {
     "Tree-Widget benchmark": [
@@ -8184,6 +8184,129 @@ window.BENCHMARK_DATA = {
             "value": 89,
             "unit": "ms",
             "extra": "count: 8\nmax: 89\np95: 89\nmedian: 39.5"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "100586436+JonasDov@users.noreply.github.com",
+            "name": "JonasDov",
+            "username": "JonasDov"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "36aa209cbd1aaed8c8e8a9aabeafab469c254b65",
+          "message": "[Tree widget]: Fix element visibility ignoring children elements (#1477)\n\n* Update child elements visibility\n\n* Merge fixes\n\n* Run prettier\n\n* Run changeset\n\n* Remove api changes\n\n* Set parentInstanceNodesIds up to nearest model\n\n* Run prettier\n\n* Address comments\n\n* Run prettier\n\n* Add retry to performance tests\n\n* Run prettier\n\n* Fix bugs\n\n* Fix merge issue\n\n* Remove redundant changes\n\n* Add parentIds to tests\n\n* Add tests\n\n* Run pnpm install\n\n* Make each children query restart token unique\n\n* Rename tests\n\n* Add comments\n\n* Add more comments\n\n* Add more comments\n\n* Run pnpm install\n\n* Run fresh install\n\n* Remove test-utilities from dev dependencies\n\n* Update packages/itwin/tree-widget/src/tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.ts\n\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>\n\n* Update packages/itwin/tree-widget/src/tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.ts\n\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>\n\n* Update packages/itwin/tree-widget/src/tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.ts\n\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>\n\n* Update packages/itwin/tree-widget/src/tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.ts\n\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>\n\n* Update packages/itwin/tree-widget/src/tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.ts\n\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>\n\n* Update packages/itwin/tree-widget/src/tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.ts\n\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>\n\n* Update packages/itwin/tree-widget/src/tree-widget-react/components/trees/models-tree/internal/FilteredTree.ts\n\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>\n\n* Update packages/itwin/tree-widget/src/tree-widget-react/components/trees/models-tree/internal/FilteredTree.ts\n\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>\n\n* Address some comments\n\n* Add comment\n\n* Address comments\n\n* Return a single promise instead of array of promises\n\n* Address comments\n\n* Update element nodes query to be more efficient\n\n* Remove changes from lock file\n\n* Undo changes to lock files\n\n* Undo root lock file changes\n\n* Run prettier\n\n* Add release main thread after validating visibility\n\n* Remove toArray, replace with takeLast\n\n* Prettier\n\n---------\n\nCo-authored-by: Grigas <35135765+grigasp@users.noreply.github.com>",
+          "timestamp": "2025-11-13T11:12:24+02:00",
+          "tree_id": "37064461e7940a185a4c8dd843dce97a0f51033c",
+          "url": "https://github.com/iTwin/viewer-components-react/commit/36aa209cbd1aaed8c8e8a9aabeafab469c254b65"
+        },
+        "date": 1763025506426,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "categories tree creates initial filtered view for 50k items",
+            "value": 1460.72,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree creates initial filtered view for 50k items (P95 of main thread blocks)",
+            "value": 417,
+            "unit": "ms",
+            "extra": "count: 8\nmax: 417\np95: 417\nmedian: 30.5"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k subCategories",
+            "value": 5775.82,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k subCategories (P95 of main thread blocks)",
+            "value": 51,
+            "unit": "ms",
+            "extra": "count: 1\nmax: 51\np95: 51\nmedian: 51"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k categories",
+            "value": 7932.08,
+            "unit": "ms"
+          },
+          {
+            "name": "categories tree changing definition container visibility changes visibility for 50k categories (P95 of main thread blocks)",
+            "value": 83,
+            "unit": "ms",
+            "extra": "count: 34\nmax: 109\np95: 83\nmedian: 39.5"
+          },
+          {
+            "name": "models tree creates initial filtered view for 50k target items",
+            "value": 804.27,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree creates initial filtered view for 50k target items (P95 of main thread blocks)",
+            "value": 68,
+            "unit": "ms",
+            "extra": "count: 7\nmax: 68\np95: 68\nmedian: 28"
+          },
+          {
+            "name": "models tree validates categories visibility for imodel with 50k categories",
+            "value": 7893.99,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree validates categories visibility for imodel with 50k categories (P95 of main thread blocks)",
+            "value": 89,
+            "unit": "ms",
+            "extra": "count: 1\nmax: 89\np95: 89\nmedian: 89"
+          },
+          {
+            "name": "models tree changing model visibility changes visibility for 50k elements",
+            "value": 2368.24,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing model visibility changes visibility for 50k elements (P95 of main thread blocks)",
+            "value": 0,
+            "unit": "ms",
+            "extra": "count: 0\nmax: N/A\np95: N/A\nmedian: N/A"
+          },
+          {
+            "name": "models tree changing category visibility changes visibility for 50k elements",
+            "value": 2492.52,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing category visibility changes visibility for 50k elements (P95 of main thread blocks)",
+            "value": 0,
+            "unit": "ms",
+            "extra": "count: 0\nmax: N/A\np95: N/A\nmedian: N/A"
+          },
+          {
+            "name": "models tree changing per-model-category override changes visibility for 50k elements",
+            "value": 2634.18,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing per-model-category override changes visibility for 50k elements (P95 of main thread blocks)",
+            "value": 0,
+            "unit": "ms",
+            "extra": "count: 0\nmax: N/A\np95: N/A\nmedian: N/A"
+          },
+          {
+            "name": "models tree changing element visibility changes only parent nodes visibility with 50k elements",
+            "value": 4574.42,
+            "unit": "ms"
+          },
+          {
+            "name": "models tree changing element visibility changes only parent nodes visibility with 50k elements (P95 of main thread blocks)",
+            "value": 78,
+            "unit": "ms",
+            "extra": "count: 6\nmax: 78\np95: 78\nmedian: 44.5"
           }
         ]
       }
