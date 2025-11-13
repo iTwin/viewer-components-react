@@ -2,6 +2,27 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Thu, 13 Nov 2025 09:36:43 GMT",
+      "version": "3.17.1",
+      "tag": "@itwin/tree-widget-react_v3.17.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "15a94dc04b5b7664947e764d56a0503e26fd6e83",
+            "comment": "Models and Categories trees: reduce main thread blockage for large iModels when determining visibility."
+          },
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "36aa209cbd1aaed8c8e8a9aabeafab469c254b65",
+            "comment": "Models tree: Fixed parent / child elements visibility controls. Now, changing element visibility also changes visibility of all nested children. Also, determining element visibility takes into account all child elements that are in the always/never drawn sets."
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 03 Nov 2025 07:50:14 GMT",
       "version": "3.17.0",
       "tag": "@itwin/tree-widget-react_v3.17.0",
