@@ -1,8 +1,17 @@
 # Change Log - @itwin/quantity-formatting-react
 
-<!-- This log was last generated on Mon, 13 Oct 2025 14:06:11 GMT and should not be manually modified. -->
+<!-- This log was last generated on Thu, 13 Nov 2025 09:36:43 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.1.3
+
+Thu, 13 Nov 2025 09:36:43 GMT
+
+### Patches
+
+- Remove unwanted description from FormatSetSelector ([#1506](https://github.com/iTwin/viewer-components-react/pull/1506))
+- Add active badge to FormatSetSelector, show descriptions onHover and onFocus for selector lists ([#1498](https://github.com/iTwin/viewer-components-react/pull/1498))
 
 ## 0.1.2
 

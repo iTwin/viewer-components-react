@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Add active badge to FormatSetSelector, show descriptions onHover and onFocus for selector lists",
-  "packageName": "@itwin/quantity-formatting-react",
-  "email": "50554904+hl662@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

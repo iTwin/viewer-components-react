@@ -1,8 +1,17 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Mon, 03 Nov 2025 07:50:14 GMT and should not be manually modified. -->
+<!-- This log was last generated on Thu, 13 Nov 2025 09:36:43 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.17.1
+
+Thu, 13 Nov 2025 09:36:43 GMT
+
+### Patches
+
+- Models and Categories trees: reduce main thread blockage for large iModels when determining visibility. ([#1499](https://github.com/iTwin/viewer-components-react/pull/1499))
+- Models tree: Fixed parent / child elements visibility controls. Now, changing element visibility also changes visibility of all nested children. Also, determining element visibility takes into account all child elements that are in the always/never drawn sets. ([#1477](https://github.com/iTwin/viewer-components-react/pull/1477))
 
 ## 3.17.0
 
