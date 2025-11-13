@@ -6,6 +6,8 @@
 import { expect } from "chai";
 import { firstValueFrom } from "rxjs";
 import sinon from "sinon";
+import type {
+  MapEntry} from "../../../../tree-widget-react/components/trees/common/internal/AlwaysAndNeverDrawnElementInfo.js";
 import {
   AlwaysAndNeverDrawnElementInfo,
   SET_CHANGE_DEBOUNCE_TIME,
@@ -13,8 +15,7 @@ import {
 import { createFakeSinonViewport } from "../../Common.js";
 
 import type { Id64String } from "@itwin/core-bentley";
-import type { MapEntry } from "../../../../tree-widget-react/components/trees/models-tree/internal/AlwaysAndNeverDrawnElementInfo.js";
-import type { ChildrenTree } from "../../../../tree-widget-react/components/trees/models-tree/Utils.js";
+import type { ChildrenTree } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
 
 describe("AlwaysAndNeverDrawnElementInfo", () => {
   beforeEach(() => {
@@ -156,7 +157,7 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       await firstValueFrom(info.getElementsTree({ setType, modelIds: "0x2" }));
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
-      const resultPromise2 = firstValueFrom(info.getElements({ setType, modelId: "0x2" }));
+      const resultPromise2 = firstValueFrom(info.getElementsTree({ setType, modelIds: "0x2" }));
       const setterFunction = (ids: Set<Id64String>) => {
         if (setType === "always") {
           vp.setAlwaysDrawn({ elementIds: ids });

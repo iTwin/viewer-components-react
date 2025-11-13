@@ -5,12 +5,14 @@
 
 import {
   BehaviorSubject,
+  bufferCount,
   debounceTime,
   defer,
   EMPTY,
   filter,
   first,
   forkJoin,
+  from,
   fromEventPattern,
   map,
   mergeMap,
@@ -26,41 +28,62 @@ import {
   takeUntil,
   tap,
 } from "rxjs";
-import { Guid, Id64 } from "@itwin/core-bentley";
+import { Id64 } from "@itwin/core-bentley";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { getClassesByView, pushToMap, setDifference } from "./Utils.js";
+import type { ChildrenTree} from "./Utils.js";
+import { getClassesByView, getIdsFromChildrenTree, releaseMainThreadOnItemsCount, setDifference, updateChildrenTree } from "./Utils.js";
 
 import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Observable, Subscription } from "rxjs";
 import type { TreeWidgetViewport } from "../TreeWidgetViewport.js";
-import type { CategoryId, ElementId, ModelId } from "./Types.js";
 
-/** @internal */
-export interface ModelAlwaysOrNeverDrawnElementsQueryProps {
-  modelId: Id64String;
-}
-
-/** @internal */
-export interface CategoryAlwaysOrNeverDrawnElementsQueryProps {
-  modelId?: Id64String;
-  categoryIds: Id64Arg;
-}
-
-/** @internal */
-export type AlwaysOrNeverDrawnElementsQueryProps = ModelAlwaysOrNeverDrawnElementsQueryProps | CategoryAlwaysOrNeverDrawnElementsQueryProps;
 
 /** @internal */
 export const SET_CHANGE_DEBOUNCE_TIME = 20;
 
-interface ElementInfo {
-  elementId: Id64String;
-  modelId: Id64String;
-  categoryId: Id64String;
+type SetType = "always" | "never";
+
+interface GetElementsTreeByModelProps {
+  /** Only always/never drawn elements that have the specified models will be returned. */
+  modelIds: Id64Arg;
+  /**
+   * The type of set from which tree should be retrieved.
+   * `always` - ChildrenTree will be created from `alwaysDrawn` set.
+   * `never` - ChildrenTree will be created from `neverDrawn` set.
+   */
+  setType: SetType;
+}
+interface GetElementsTreeByCategoryProps {
+  modelIds: Id64Arg | undefined;
+  /**
+   * Categories of root elements.
+   *
+   * Elements are filtered by given categories. Children of those elements are also included, no matter their category.
+   */
+  categoryIds: Id64Arg;
+  /**
+   * The type of set from which tree should be retrieved.
+   * `always` - ChildrenTree will be created from `alwaysDrawn` set.
+   * `never` - ChildrenTree will be created from `neverDrawn` set.
+   */
+  setType: SetType;
+}
+interface GetElementsTreeByElementProps extends GetElementsTreeByCategoryProps {
+  /** Path to element for which to get its' child always/never drawn elements. When undefined, models and categories will be used to get the always/never drawn elements. */
+  parentElementIdsPath: Array<Id64Arg>;
 }
 
-type CacheEntry = Map<ModelId, Map<CategoryId, Set<ElementId>>>;
+/** @internal */
+export type GetElementsTreeProps = GetElementsTreeByModelProps | GetElementsTreeByCategoryProps | GetElementsTreeByElementProps;
 
-type SetType = "always" | "never";
+/**
+ * - `categoryId` is assigned only to the elements in always/never drawn set.
+ * - `isInAlwaysOrNeverDrawnSet` flag determines if key (ECInstanceId) is in always/never set.
+ * @internal
+ */
+export type MapEntry = { isInAlwaysOrNeverDrawnSet: true; categoryId: Id64String } | { isInAlwaysOrNeverDrawnSet: false };
+
+type CachedNodesMap = ChildrenTree<MapEntry>;
 
 /** @internal */
 export class AlwaysAndNeverDrawnElementInfo implements Disposable {
@@ -85,8 +108,6 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
       shareReplay(1),
     );
     this.#subscriptions = [this.#alwaysDrawn.cacheEntryObs.subscribe(), this.#neverDrawn.cacheEntryObs.subscribe()];
-    this.#componentId = componentId ?? Guid.createValue();
-    this.#componentName = "AlwaysAndNeverDrawnElementInfo";
   }
 
   public suppressChangeEvents() {
@@ -97,47 +118,21 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
     this.#suppress.next(false);
   }
 
-  public getElements(props: { setType: SetType } & AlwaysOrNeverDrawnElementsQueryProps): Observable<Set<ElementId>> {
-    const cache = props.setType === "always" ? this.#alwaysDrawn : this.#neverDrawn;
-    const getElements =
-      "categoryIds" in props
-        ? (entry: CacheEntry | undefined) => {
-            const result = new Set<ElementId>();
-            if (props.modelId) {
-              const categoryMap = entry?.get(props.modelId);
-              if (!categoryMap) {
-                return result;
-              }
-              for (const categoryId of Id64.iterable(props.categoryIds)) {
-                const elements = categoryMap.get(categoryId);
-                if (elements) {
-                  elements.forEach((element) => {
-                    result.add(element);
-                  });
-                }
-              }
-              return result;
-            }
-            for (const [, categoryMap] of entry ?? []) {
-              for (const categoryId of Id64.iterable(props.categoryIds)) {
-                const elements = categoryMap.get(categoryId);
-                if (elements) {
-                  elements.forEach((element) => {
-                    result.add(element);
-                  });
-                }
-              }
-            }
-            return result;
-          }
-        : (entry: CacheEntry | undefined) => {
-            const modelEntry = entry?.get(props.modelId);
-            const elements = new Set<ElementId>();
-            for (const set of modelEntry?.values() ?? []) {
-              set.forEach((id) => elements.add(id));
-            }
-            return elements;
-          };
+ public getElementsTree({ setType, modelIds, ...props }: GetElementsTreeProps): Observable<CachedNodesMap> {
+    const cache = setType === "always" ? this.#alwaysDrawn : this.#neverDrawn;
+    const getElements = (rootTreeNodes: CachedNodesMap | undefined): CachedNodesMap => {
+      if (!rootTreeNodes) {
+        return new Map();
+      }
+      const pathToElements = [modelIds];
+      if ("categoryIds" in props && props.categoryIds) {
+        pathToElements.push(props.categoryIds);
+        if ("parentElementIdsPath" in props && props.parentElementIdsPath) {
+          props.parentElementIdsPath.forEach((parentElementIds) => pathToElements.push(parentElementIds));
+        }
+      }
+      return this.getChildrenTree({ currentChildrenTree: rootTreeNodes, pathToElements, currentIdsIndex: 0 });
+    };
 
     return !cache.latestCacheEntryValue
       ? cache.cacheEntryObs.pipe(map(getElements))
@@ -155,14 +150,29 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
     currentIdsIndex,
   }: {
     currentChildrenTree: ChildrenTree<T>;
-    pathToElements: Array<Id64Arg>;
+    pathToElements: Array<Id64Arg | undefined>;
     currentIdsIndex: number;
   }): ChildrenTree<T> {
     if (currentIdsIndex >= pathToElements.length) {
       return currentChildrenTree;
     }
     const result: ChildrenTree<T> = new Map();
-    for (const parentId of Id64.iterable(pathToElements[currentIdsIndex])) {
+    const currentParentIds = pathToElements[currentIdsIndex];
+    // currentParentIds is undefined - it means that we are getting children for categories that don't have model as parent
+    if (!currentParentIds) {
+      for (const entry of currentChildrenTree.values()) {
+        if (entry.children) {
+          const childrenTreeOfChildren = this.getChildrenTree({
+            currentChildrenTree: entry.children,
+            pathToElements,
+            currentIdsIndex: currentIdsIndex + 1,
+          });
+          childrenTreeOfChildren.forEach((val, childId) => result.set(childId, val));
+        }
+      }
+      return result;
+    }
+    for (const parentId of Id64.iterable(currentParentIds)) {
       const entry = currentChildrenTree.get(parentId);
       if (entry?.children) {
         const childrenTreeOfChildren = this.getChildrenTree({
@@ -182,7 +192,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
 
     const resultSubject = new BehaviorSubject<CachedNodesMap | undefined>(undefined);
 
-    const obs: Observable<CachedNodesMap> = fromEventPattern(
+    const obs = fromEventPattern(
       (handler) => event.addListener(handler),
       (handler) => event.removeListener(handler),
     ).pipe(
@@ -225,22 +235,40 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
     this.#disposeSubject.next();
   }
 
-  private queryAlwaysOrNeverDrawnElementInfo(set: ReadonlySet<ElementId> | undefined, requestId: string): Observable<CacheEntry> {
-    const elementInfo = set?.size ? this.queryElementInfo([...set], requestId) : EMPTY;
+ private queryAlwaysOrNeverDrawnElementInfo(set: ReadonlySet<Id64String> | undefined, requestId: string): Observable<CachedNodesMap> {
+    const elementInfo = set?.size
+      ? from(set).pipe(
+          bufferCount(Math.ceil(set.size / Math.ceil(set.size / 5000))),
+          mergeMap((block, index) => this.queryElementInfo(block, `${requestId}-${index}`), 10),
+        )
+      : EMPTY;
     return elementInfo.pipe(
-      reduce((state, val) => {
-        let entry = state.get(val.modelId);
-        if (!entry) {
-          entry = new Map();
-          state.set(val.modelId, entry);
-        }
-        pushToMap(entry, val.categoryId, val.elementId);
-        return state;
-      }, new Map<ModelId, Map<CategoryId, Set<ElementId>>>()),
+      releaseMainThreadOnItemsCount(1000),
+      reduce(
+        (acc, { categoryId, rootCategoryId, modelId, elementsPath }) => {
+          const elementIdInList = elementsPath[elementsPath.length - 1];
+          const additionalPropsGetter = (id: Id64String, additionalProps?: MapEntry): MapEntry => {
+            if (id === elementIdInList) {
+              // Last element in elementsPath is in always/never drawn set. We want to mark, that it is in the set, and save it's categoryId.
+              return { isInAlwaysOrNeverDrawnSet: true, categoryId };
+            }
+            // Existing entries can keep their value, if it's a new entry it's not in the list.
+            return additionalProps ?? { isInAlwaysOrNeverDrawnSet: false };
+          };
+          updateChildrenTree({ tree: acc, idsToAdd: [modelId, rootCategoryId, ...elementsPath], additionalPropsGetter });
+          return acc;
+        },
+        ((): CachedNodesMap => new Map())(),
+      ),
     );
   }
 
-  private queryElementInfo(elementIds: Id64Array, requestId: string): Observable<ElementInfo> {
+  private queryElementInfo(elementIds: Id64Array, requestId: string): Observable<{
+    rootCategoryId: Id64String;
+    modelId: Id64String;
+    categoryId: Id64String;
+    elementsPath: Id64Array;
+  }> {
     return defer(() => {
       const executor = createECSqlQueryExecutor(this.#viewport.iModel);
       const { elementClass } = this.#elementClassName
@@ -255,32 +283,34 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
                 Model.Id modelId,
                 Category.Id rootCategoryId,
                 Category.Id categoryId,
-                Parent.Id parentId
+                Parent.Id parentId,
+                CAST(IdToHex(ECInstanceId) AS TEXT) elementsPath
               FROM ${elementClass}
               WHERE InVirtualSet(?, ECInstanceId)
 
               UNION ALL
 
               SELECT
-                e.elementId,
-                e.modelId,
-                p.Category.Id categoryId,
-                p.Parent.Id parentId
+                e.modelId modelId,
+                p.Category.Id rootCategoryId,
+                e.categoryId categoryId,
+                p.Parent.Id parentId,
+                CAST(IdToHex(p.ECInstanceId) AS TEXT) || ';' || e.elementsPath
               FROM ${elementClass} p
               JOIN ElementInfo e ON p.ECInstanceId = e.parentId
             )
-          `,
+            `,
           ],
           ecsql: `
-          SELECT elementId, modelId, categoryId
-          FROM ElementInfo
-          WHERE parentId IS NULL
-        `,
+            SELECT elementId, modelId, categoryId
+            FROM ElementInfo
+            WHERE parentId IS NULL
+          `,
           bindings: [{ type: "idset", value: elementIds }],
         },
         {
           rowFormat: "ECSqlPropertyNames",
-          restartToken: `${this.#componentName}/${this.#componentId}/${requestId}`,
+          restartToken: `ModelsTreeVisibilityHandler/${requestId}`,
         },
       );
     }).pipe(
@@ -290,18 +320,14 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
     );
   }
 
-  public getAlwaysDrawnElements(props: AlwaysOrNeverDrawnElementsQueryProps) {
-    return this.getElements({ ...props, setType: "always" });
+  public getAlwaysOrNeverDrawnElements(props: GetElementsTreeProps) {
+    return this.getElementsTree(props).pipe(map((childrenTree) => getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ treeEntry }) => treeEntry.isInAlwaysOrNeverDrawnSet })));
   }
 
-  public getNeverDrawnElements(props: AlwaysOrNeverDrawnElementsQueryProps) {
-    return this.getElements({ ...props, setType: "never" });
-  }
-
-  public clearAlwaysAndNeverDrawnElements(props: AlwaysOrNeverDrawnElementsQueryProps) {
+  public clearAlwaysAndNeverDrawnElements(props: { categoryIds: Id64Arg; modelId: Id64String | undefined }) {
     return forkJoin({
-      alwaysDrawn: this.getAlwaysDrawnElements(props),
-      neverDrawn: this.getNeverDrawnElements(props),
+      alwaysDrawn: this.getAlwaysOrNeverDrawnElements({ modelIds: props.modelId, categoryIds: props.categoryIds, setType: "always" }),
+      neverDrawn: this.getAlwaysOrNeverDrawnElements({ modelIds: props.modelId, categoryIds: props.categoryIds, setType: "never" }),
     }).pipe(
       map(({ alwaysDrawn, neverDrawn }) => {
         const viewport = this.#viewport;

@@ -567,8 +567,8 @@ export class BaseVisibilityHelper implements Disposable {
     );
     return forkJoin({
       totalCount,
-      alwaysDrawn: this.#alwaysAndNeverDrawnElements.getAlwaysDrawnElements(props.queryProps),
-      neverDrawn: this.#alwaysAndNeverDrawnElements.getNeverDrawnElements(props.queryProps),
+      alwaysDrawn: this.#alwaysAndNeverDrawnElements.getAlwaysOrNeverDrawnElements({ modelIds: props.queryProps.modelId, categoryIds: props.queryProps.categoryIds, setType: "always" }),
+      neverDrawn: this.#alwaysAndNeverDrawnElements.getAlwaysOrNeverDrawnElements({ modelIds: props.queryProps.modelId, categoryIds: props.queryProps.categoryIds, setType: "never" }),
     }).pipe(
       // There is a known bug:
       // Categories that don't have root elements will make visibility result incorrect
@@ -645,7 +645,7 @@ export class BaseVisibilityHelper implements Disposable {
           return acc;
         }, new Set<Id64String>()),
       ),
-      modelAlwaysDrawnElements: this.#alwaysAndNeverDrawnElements.getAlwaysDrawnElements({ modelId }),
+      modelAlwaysDrawnElements: this.#alwaysAndNeverDrawnElements.getAlwaysOrNeverDrawnElements({ modelIds: modelId, setType: "always" }),
     }).pipe(
       mergeMap(async ({ allModelCategories, modelAlwaysDrawnElements }) => {
         const alwaysDrawn = this.#props.viewport.alwaysDrawn;

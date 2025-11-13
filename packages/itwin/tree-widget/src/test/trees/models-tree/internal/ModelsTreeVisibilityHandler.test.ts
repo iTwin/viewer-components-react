@@ -15,7 +15,7 @@ import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { InstanceKey } from "@itwin/presentation-shared";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-import { CLASS_NAME_Category, CLASS_NAME_GeometricElement, CLASS_NAME_Model, CLASS_NAME_Subject } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
+import { CLASS_NAME_Subject } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import { createVisibilityStatus } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
 import { ModelsTreeIdsCache } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import { createModelsTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
@@ -183,17 +183,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           imodelAccess: createFakeIModelAccess(),
         });
 
-        const node = createElementHierarchyNode({
-          modelId: "0x1",
-          categoryId: "0x2",
-          elementId: "0x3",
-          parentKeys: [
-            { type: "instances", instanceKeys: [{ id: "0x11", className: CLASS_NAME_Subject }] },
-            { type: "instances", instanceKeys: [{ id: "0x1", className: CLASS_NAME_Model }] },
-            { type: "instances", instanceKeys: [{ id: "0x2", className: CLASS_NAME_Category }] },
-            { type: "class-grouping", className: CLASS_NAME_GeometricElement },
-          ],
-        });
+        const node = createElementHierarchyNode({ modelId: "0x1", categoryId: "0x2", elementId: "0x3" });
         await expect(handler.getVisibilityStatus(node)).to.eventually.include({ state: "hidden" });
 
         useOriginalImplFlag = true;
@@ -767,7 +757,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 alwaysDrawn: new Set(["0x4"]),
                 isAlwaysDrawnExclusive: true,
                 viewsCategory: sinon.fake.returns(true),
-                queryHandler: () => [{ elementId: "0x4", modelId: "0xff", categoryId: "0xff" }],
+                queryHandler: () => [{ rootCategoryId: "0xff", elementsPath: "0x4", modelId: "0xff", categoryId: "0xff" }],
               }),
             });
             const { handler } = handlerResult;
@@ -788,7 +778,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               viewport: createFakeSinonViewport({
                 neverDrawn: new Set(elements),
                 viewsCategory: sinon.fake.returns(true),
-                queryHandler: () => elements.map((elementId) => ({ elementId, modelId, categoryId })),
+                queryHandler: () => elements.map((elementId) => ({ rootCategoryId: categoryId, elementsPath: elementId, modelId, categoryId })),
               }),
             });
             const { handler } = handlerResult;
@@ -827,7 +817,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 alwaysDrawn: new Set(["0x4"]),
                 isAlwaysDrawnExclusive: true,
                 getPerModelCategoryOverride: sinon.fake.returns("show"),
-                queryHandler: () => [{ elementId: "0x4", modelId: "0xff", categoryId: "0xff" }],
+                queryHandler: () => [{ rootCategoryId: "0xff", elementsPath: "0x4", modelId: "0xff", categoryId: "0xff" }],
               }),
             });
             const { handler } = handlerResult;
@@ -850,7 +840,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               viewport: createFakeSinonViewport({
                 neverDrawn: new Set([elements[0]]),
                 viewsCategory: sinon.fake.returns(true),
-                queryHandler: () => [{ elementId: elements[0], modelId, categoryId }],
+                queryHandler: () => [{ elementsPath: elements[0], modelId, rootCategoryId: categoryId, categoryId }],
               }),
             });
             const { handler } = handlerResult;
@@ -871,7 +861,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               viewport: createFakeSinonViewport({
                 alwaysDrawn: new Set([elements[0]]),
                 viewsCategory: sinon.fake.returns(false),
-                queryHandler: () => [{ elementId: elements[0], modelId, categoryId }],
+                queryHandler: () => [{ rootCategoryId: categoryId, elementsPath: elements[0], modelId, categoryId }],
               }),
             });
             const { handler } = handlerResult;
@@ -892,7 +882,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               viewport: createFakeSinonViewport({
                 neverDrawn: new Set([elements[0]]),
                 getPerModelCategoryOverride: sinon.fake.returns("show"),
-                queryHandler: () => [{ elementId: elements[0], modelId, categoryId }],
+                queryHandler: () => [{ rootCategoryId: categoryId, elementsPath: elements[0], modelId, categoryId }],
               }),
             });
             const { handler } = handlerResult;
@@ -913,7 +903,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               viewport: createFakeSinonViewport({
                 alwaysDrawn: new Set([elements[0]]),
                 getPerModelCategoryOverride: sinon.fake.returns("hide"),
-                queryHandler: () => [{ elementId: elements[0], modelId, categoryId }],
+                queryHandler: () => [{ rootCategoryId: categoryId, elementsPath: elements[0], modelId, categoryId }],
               }),
             });
             const { handler } = handlerResult;
@@ -941,19 +931,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             imodelAccess: createFakeIModelAccess(),
           });
 
-          const status = await handler.getVisibilityStatus(
-            createElementHierarchyNode({
-              modelId: "0x1",
-              categoryId: "0x2",
-              elementId: "0x3",
-              parentKeys: [
-                { type: "instances", instanceKeys: [{ id: "0x11", className: CLASS_NAME_Subject }] },
-                { type: "instances", instanceKeys: [{ id: "0x1", className: CLASS_NAME_Model }] },
-                { type: "instances", instanceKeys: [{ id: "0x2", className: CLASS_NAME_Category }] },
-                { type: "class-grouping", className: CLASS_NAME_GeometricElement },
-              ],
-            }),
-          );
+          const status = await handler.getVisibilityStatus(createElementHierarchyNode({ modelId: "0x1", categoryId: "0x2", elementId: "0x3" }));
           expect(overrides?.getElementsVisibilityStatus).to.be.called;
           expect(status.state).to.eq("visible");
         });
@@ -968,18 +946,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         });
 
         it("is hidden when model is hidden", async () => {
-          const node = createElementHierarchyNode({
-            modelId,
-            categoryId,
-            hasChildren: true,
-            elementId,
-            parentKeys: [
-              { type: "instances", instanceKeys: [{ id: "0x11", className: CLASS_NAME_Subject }] },
-              { type: "instances", instanceKeys: [{ id: "0x1", className: CLASS_NAME_Model }] },
-              { type: "instances", instanceKeys: [{ id: "0x2", className: CLASS_NAME_Category }] },
-              { type: "class-grouping", className: CLASS_NAME_GeometricElement },
-            ],
-          });
+          const node = createElementHierarchyNode({ modelId, categoryId, hasChildren: true, elementId });
           const viewport = createFakeSinonViewport({
             viewsModel: sinon.fake.returns(false),
           });
@@ -990,18 +957,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         });
 
         it("is visible when model and category is displayed", async () => {
-          const node = createElementHierarchyNode({
-            modelId,
-            categoryId,
-            hasChildren: true,
-            elementId,
-            parentKeys: [
-              { type: "instances", instanceKeys: [{ id: "0x11", className: CLASS_NAME_Subject }] },
-              { type: "instances", instanceKeys: [{ id: "0x1", className: CLASS_NAME_Model }] },
-              { type: "instances", instanceKeys: [{ id: "0x2", className: CLASS_NAME_Category }] },
-              { type: "class-grouping", className: CLASS_NAME_GeometricElement },
-            ],
-          });
+          const node = createElementHierarchyNode({ modelId, categoryId, hasChildren: true, elementId });
           const viewport = createFakeSinonViewport({
             viewsModel: sinon.fake.returns(true),
             viewsCategory: sinon.fake.returns(true),
@@ -1013,17 +969,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         });
 
         it("is visible if present in the always drawn list", async () => {
-          const node = createElementHierarchyNode({
-            modelId,
-            categoryId,
-            elementId,
-            parentKeys: [
-              { type: "instances", instanceKeys: [{ id: "0x11", className: CLASS_NAME_Subject }] },
-              { type: "instances", instanceKeys: [{ id: "0x1", className: CLASS_NAME_Model }] },
-              { type: "instances", instanceKeys: [{ id: "0x2", className: CLASS_NAME_Category }] },
-              { type: "class-grouping", className: CLASS_NAME_GeometricElement },
-            ],
-          });
+          const node = createElementHierarchyNode({ modelId, categoryId, elementId });
           using handlerResult = createHandler({
             viewport: createFakeSinonViewport({
               alwaysDrawn: new Set([elementId]),
@@ -1041,17 +987,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             }),
           });
           const { handler } = handlerResult;
-          const node = createElementHierarchyNode({
-            modelId,
-            categoryId,
-            elementId,
-            parentKeys: [
-              { type: "instances", instanceKeys: [{ id: "0x11", className: CLASS_NAME_Subject }] },
-              { type: "instances", instanceKeys: [{ id: "0x1", className: CLASS_NAME_Model }] },
-              { type: "instances", instanceKeys: [{ id: "0x2", className: CLASS_NAME_Category }] },
-              { type: "class-grouping", className: CLASS_NAME_GeometricElement },
-            ],
-          });
+          const node = createElementHierarchyNode({ modelId, categoryId, elementId });
           const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "hidden" });
         });
@@ -1064,17 +1000,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             }),
           });
           const { handler } = handlerResult;
-          const node = createElementHierarchyNode({
-            modelId,
-            categoryId,
-            elementId,
-            parentKeys: [
-              { type: "instances", instanceKeys: [{ id: "0x11", className: CLASS_NAME_Subject }] },
-              { type: "instances", instanceKeys: [{ id: "0x1", className: CLASS_NAME_Model }] },
-              { type: "instances", instanceKeys: [{ id: "0x2", className: CLASS_NAME_Category }] },
-              { type: "class-grouping", className: CLASS_NAME_GeometricElement },
-            ],
-          });
+          const node = createElementHierarchyNode({ modelId, categoryId, elementId });
           const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "hidden" });
         });
@@ -1087,17 +1013,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             }),
           });
           const { handler } = handlerResult;
-          const node = createElementHierarchyNode({
-            modelId,
-            categoryId,
-            elementId,
-            parentKeys: [
-              { type: "instances", instanceKeys: [{ id: "0x11", className: CLASS_NAME_Subject }] },
-              { type: "instances", instanceKeys: [{ id: "0x1", className: CLASS_NAME_Model }] },
-              { type: "instances", instanceKeys: [{ id: "0x2", className: CLASS_NAME_Category }] },
-              { type: "class-grouping", className: CLASS_NAME_GeometricElement },
-            ],
-          });
+          const node = createElementHierarchyNode({ modelId, categoryId, elementId });
           const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "visible" });
         });
@@ -1105,17 +1021,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         it("is visible when always/never drawn sets are undefined", async () => {
           using handlerResult = createHandler();
           const { handler } = handlerResult;
-          const node = createElementHierarchyNode({
-            modelId,
-            categoryId,
-            elementId,
-            parentKeys: [
-              { type: "instances", instanceKeys: [{ id: "0x11", className: CLASS_NAME_Subject }] },
-              { type: "instances", instanceKeys: [{ id: "0x1", className: CLASS_NAME_Model }] },
-              { type: "instances", instanceKeys: [{ id: "0x2", className: CLASS_NAME_Category }] },
-              { type: "class-grouping", className: CLASS_NAME_GeometricElement },
-            ],
-          });
+          const node = createElementHierarchyNode({ modelId, categoryId, elementId });
           const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "visible" });
         });
@@ -1128,17 +1034,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             }),
           });
           const { handler } = handlerResult;
-          const node = createElementHierarchyNode({
-            modelId,
-            categoryId,
-            elementId,
-            parentKeys: [
-              { type: "instances", instanceKeys: [{ id: "0x11", className: CLASS_NAME_Subject }] },
-              { type: "instances", instanceKeys: [{ id: modelId, className: CLASS_NAME_Model }] },
-              { type: "instances", instanceKeys: [{ id: categoryId, className: CLASS_NAME_Category }] },
-              { type: "class-grouping", className: CLASS_NAME_GeometricElement },
-            ],
-          });
+          const node = createElementHierarchyNode({ modelId, categoryId, elementId });
           const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "visible" });
         });
@@ -1150,17 +1046,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             }),
           });
           const { handler } = handlerResult;
-          const node = createElementHierarchyNode({
-            modelId,
-            categoryId,
-            elementId,
-            parentKeys: [
-              { type: "instances", instanceKeys: [{ id: "0x11", className: CLASS_NAME_Subject }] },
-              { type: "instances", instanceKeys: [{ id: modelId, className: CLASS_NAME_Model }] },
-              { type: "instances", instanceKeys: [{ id: categoryId, className: CLASS_NAME_Category }] },
-              { type: "class-grouping", className: CLASS_NAME_GeometricElement },
-            ],
-          });
+          const node = createElementHierarchyNode({ modelId, categoryId, elementId });
           const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "hidden" });
         });
@@ -1949,8 +1835,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           },
           {
             name: "modeled element's children display is turned on when its model display is turned on",
-            getTargetNode: (ids: IModelWithSubModelIds) =>
-              createModelHierarchyNode({
+            getTargetNode: (ids: IModelWithSubModelIds) => createModelHierarchyNode({
                 modelId: ids.modelId,
                 hasChildren: true,
               }),
@@ -1958,8 +1843,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           },
           {
             name: "modeled element's children display is turned on when its category display is turned on",
-            getTargetNode: (ids: IModelWithSubModelIds) =>
-              createCategoryHierarchyNode({
+            getTargetNode: (ids: IModelWithSubModelIds) => createCategoryHierarchyNode({
                 modelId: ids.modelId,
                 categoryId: ids.categoryId,
                 hasChildren: true,
@@ -1989,8 +1873,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           },
           {
             name: "modeled element's children display is turned on when its sub-model display is turned on",
-            getTargetNode: (ids: IModelWithSubModelIds) =>
-              createModelHierarchyNode({
+            getTargetNode: (ids: IModelWithSubModelIds) => createModelHierarchyNode({
                 modelId: ids.modeledElementId,
                 hasChildren: true,
               }),
@@ -2019,8 +1902,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           },
           {
             name: "modeled element, its model and category have partial visibility when its sub-model element's category display is turned on",
-            getTargetNode: (ids: IModelWithSubModelIds) =>
-              createCategoryHierarchyNode({
+            getTargetNode: (ids: IModelWithSubModelIds) => createCategoryHierarchyNode({
                 modelId: ids.modeledElementId,
                 categoryId: ids.subModelCategoryId,
                 hasChildren: true,
@@ -2117,8 +1999,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           },
           {
             name: "everything is visible when model display is turned on",
-            getTargetNode: (ids: IModelWithSubModelIds) =>
-              createModelHierarchyNode({
+            getTargetNode: (ids: IModelWithSubModelIds) => createModelHierarchyNode({
                 modelId: ids.modelId,
                 hasChildren: true,
               }),
@@ -2126,8 +2007,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           },
           {
             name: "everything is visible when category display is turned on",
-            getTargetNode: (ids: IModelWithSubModelIds) =>
-              createCategoryHierarchyNode({
+            getTargetNode: (ids: IModelWithSubModelIds) => createCategoryHierarchyNode({
                 modelId: ids.modelId,
                 categoryId: ids.categoryId,
                 hasChildren: true,
@@ -2189,8 +2069,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           },
           {
             name: "everything is visible when model display is turned on",
-            getTargetNode: (ids: IModelWithSubModelIds) =>
-              createModelHierarchyNode({
+            getTargetNode: (ids: IModelWithSubModelIds) => createModelHierarchyNode({
                 modelId: ids.modelId,
                 hasChildren: true,
               }),
@@ -2198,8 +2077,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           },
           {
             name: "everything is visible when category display is turned on",
-            getTargetNode: (ids: IModelWithSubModelIds) =>
-              createCategoryHierarchyNode({
+            getTargetNode: (ids: IModelWithSubModelIds) => createCategoryHierarchyNode({
                 modelId: ids.modelId,
                 categoryId: ids.categoryId,
                 hasChildren: true,
@@ -2340,13 +2218,11 @@ describe("ModelsTreeVisibilityHandler", () => {
       const { imodel, ...ids } = buildIModelResult;
       using visibilityTestData = createVisibilityTestData({ imodel });
       const { handler, provider, viewport } = visibilityTestData;
-      await handler.changeVisibility(
-        createModelHierarchyNode({
+      await handler.changeVisibility(createModelHierarchyNode({
           modelId: ids.model,
           hasChildren: true,
-        }),
-        true,
-      );
+        }), true);
+
       await validateHierarchyVisibility({
         provider,
         handler,
@@ -2400,7 +2276,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
     });
 
-    it("hiding parent element makes it, its children, model and category hidden", async function () {
+    it("hiding parent element makes it hidden, model and category partially visible, while children remain visible", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const category = insertSpatialCategory({ builder, codeValue: "category" }).id;
         const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
@@ -2421,67 +2297,13 @@ describe("ModelsTreeVisibilityHandler", () => {
         provider,
         handler,
         viewport,
-        visibilityExpectations: VisibilityExpectations.all("hidden"),
-      });
-    });
-
-    it("hiding parent element makes it, its children (with different categories), model and category hidden", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
-        const category = insertSpatialCategory({ builder, codeValue: "category" }).id;
-        const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
-        const parentElement = insertPhysicalElement({ builder, modelId: model, categoryId: category }).id;
-        const category2 = insertSpatialCategory({ builder, codeValue: "category2" }).id;
-        const category3 = insertSpatialCategory({ builder, codeValue: "category3" }).id;
-        const child = insertPhysicalElement({ builder, modelId: model, categoryId: category2, parentId: parentElement }).id;
-        const childOfChild = insertPhysicalElement({ builder, modelId: model, categoryId: category3, parentId: child }).id;
-        return { model, category, category2, category3, parentElement, child, childOfChild };
-      });
-
-      const { imodel, ...ids } = buildIModelResult;
-      using visibilityTestData = createVisibilityTestData({ imodel });
-      const { handler, provider, viewport } = visibilityTestData;
-      viewport.changeModelDisplay({ modelIds: ids.model, display: true });
-      viewport.changeCategoryDisplay({ categoryIds: [ids.category2, ids.category3], display: false });
-      viewport.setAlwaysDrawn({ elementIds: new Set([ids.parentElement, ids.child, ids.childOfChild]) });
-      viewport.renderFrame();
-
-      await handler.changeVisibility(createElementHierarchyNode({ modelId: ids.model, categoryId: ids.category, elementId: ids.parentElement }), false);
-
-      await validateHierarchyVisibility({
-        provider,
-        handler,
-        viewport,
-        visibilityExpectations: VisibilityExpectations.all("hidden"),
-      });
-    });
-
-    it("showing parent element makes it, its children (with different categories), model and category visible", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
-        const category = insertSpatialCategory({ builder, codeValue: "category" }).id;
-        const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
-        const parentElement = insertPhysicalElement({ builder, modelId: model, categoryId: category }).id;
-        const category2 = insertSpatialCategory({ builder, codeValue: "category2" }).id;
-        const category3 = insertSpatialCategory({ builder, codeValue: "category3" }).id;
-        const child = insertPhysicalElement({ builder, modelId: model, categoryId: category2, parentId: parentElement }).id;
-        const childOfChild = insertPhysicalElement({ builder, modelId: model, categoryId: category3, parentId: child }).id;
-        return { model, category, category2, category3, parentElement, child, childOfChild };
-      });
-
-      const { imodel, ...ids } = buildIModelResult;
-      using visibilityTestData = createVisibilityTestData({ imodel });
-      const { handler, provider, viewport } = visibilityTestData;
-      viewport.changeModelDisplay({ modelIds: ids.model, display: true });
-      viewport.setNeverDrawn({ elementIds: new Set([ids.parentElement, ids.child, ids.childOfChild]) });
-      viewport.changeCategoryDisplay({ categoryIds: [ids.category2, ids.category3], display: true, enableAllSubCategories: true });
-      viewport.renderFrame();
-
-      await handler.changeVisibility(createElementHierarchyNode({ modelId: ids.model, categoryId: ids.category, elementId: ids.parentElement }), true);
-
-      await validateHierarchyVisibility({
-        provider,
-        handler,
-        viewport,
-        visibilityExpectations: VisibilityExpectations.all("visible"),
+        visibilityExpectations: {
+          subject: () => "partial",
+          model: () => ({ tree: "partial", modelSelector: true }),
+          category: () => ({ tree: "partial", categorySelector: false, perModelCategoryOverride: "show" }),
+          groupingNode: ({ elementIds }) => (elementIds.includes(ids.parentElement) ? "hidden" : "visible"),
+          element: ({ elementId }) => (elementId === ids.parentElement ? "hidden" : "visible"),
+        },
       });
     });
 
@@ -2640,14 +2462,12 @@ describe("ModelsTreeVisibilityHandler", () => {
       const { imodel, ...ids } = buildIModelResult;
       using visibilityTestData = createVisibilityTestData({ imodel });
       const { handler, provider, viewport } = visibilityTestData;
-      await handler.changeVisibility(
-        createCategoryHierarchyNode({
+      await handler.changeVisibility(createCategoryHierarchyNode({
           modelId: ids.model,
           categoryId: ids.category,
           hasChildren: true,
-        }),
-        true,
-      );
+        }), true);
+
       await validateHierarchyVisibility({
         provider,
         handler,
@@ -2680,14 +2500,11 @@ describe("ModelsTreeVisibilityHandler", () => {
       viewport.changeCategoryDisplay({ categoryIds: ids.category, display: true, enableAllSubCategories: true });
       viewport.renderFrame();
 
-      await handler.changeVisibility(
-        createCategoryHierarchyNode({
+      await handler.changeVisibility(createCategoryHierarchyNode({
           modelId: ids.model,
           categoryId: ids.category,
           hasChildren: true,
-        }),
-        false,
-      );
+        }), false);
 
       await validateHierarchyVisibility({
         provider,
@@ -2706,7 +2523,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
     });
 
-    it("showing grouping node makes it, its grouped elements and children visible", async function () {
+    it("showing grouping node makes it and its grouped elements visible", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const category = insertSpatialCategory({ builder, codeValue: "category" }).id;
         const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
@@ -2741,16 +2558,15 @@ describe("ModelsTreeVisibilityHandler", () => {
           model: () => ({ tree: "partial", modelSelector: true }),
           category: ({ categoryId }) =>
             categoryId === ids.category
-              ? { tree: "visible", categorySelector: false, perModelCategoryOverride: "none" }
+              ? { tree: "partial", categorySelector: false, perModelCategoryOverride: "none" }
               : { tree: "hidden", categorySelector: false, perModelCategoryOverride: "none" },
-          groupingNode: ({ elementIds }) =>
-            elementIds.some((elementId) => [ids.parentElement, ids.child, ids.childOfChild].includes(elementId)) ? "visible" : "hidden",
-          element: ({ elementId }) => ([ids.parentElement, ids.child, ids.childOfChild].includes(elementId) ? "visible" : "hidden"),
+          groupingNode: ({ elementIds }) => (elementIds.includes(ids.parentElement) ? "visible" : "hidden"),
+          element: ({ elementId }) => (elementId === ids.parentElement ? "visible" : "hidden"),
         },
       });
     });
 
-    it("hiding grouping node makes it, its grouped elements and children hidden", async function () {
+    it("hiding grouping node makes it and its grouped elements hidden", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const category = insertSpatialCategory({ builder, codeValue: "category" }).id;
         const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
@@ -2786,13 +2602,12 @@ describe("ModelsTreeVisibilityHandler", () => {
           subject: () => "partial",
           model: () => ({ tree: "partial", modelSelector: true }),
           category: ({ categoryId }) => ({
-            tree: categoryId === ids.category ? "hidden" : "visible",
+            tree: categoryId === ids.category ? "partial" : "visible",
             categorySelector: false,
             perModelCategoryOverride: "show",
           }),
-          groupingNode: ({ elementIds }) =>
-            elementIds.some((elementId) => [ids.parentElement, ids.child, ids.childOfChild].includes(elementId)) ? "hidden" : "visible",
-          element: ({ elementId }) => ([ids.parentElement, ids.child, ids.childOfChild].includes(elementId) ? "hidden" : "visible"),
+          groupingNode: ({ elementIds }) => (elementIds.includes(ids.parentElement) ? "hidden" : "visible"),
+          element: ({ elementId }) => (elementId === ids.parentElement ? "hidden" : "visible"),
         },
       });
     });
@@ -2854,7 +2669,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           element: (props) => (props.elementId === ids.element2 ? "visible" : "hidden"),
         },
       });
-      await handler.changeVisibility(
+       await handler.changeVisibility(
         createElementHierarchyNode({
           modelId: ids.model,
           categoryId: ids.category1,
@@ -2919,10 +2734,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         const { imodel, modelId, parentCategoryId, parentElementId, childElementId } = buildIModelResult;
         using visibilityTestData = createVisibilityTestData({ imodel });
         const { handler, viewport, ...props } = visibilityTestData;
-        const parentCategoryNode = createCategoryHierarchyNode({
-          modelId,
-          categoryId: parentCategoryId,
-        });
+        const parentCategoryNode = createCategoryHierarchyNode({ modelId, categoryId: parentCategoryId, hasChildren: true });
         await handler.changeVisibility(parentCategoryNode, true);
         viewport.setAlwaysDrawn({ elementIds: new Set([...(viewport.alwaysDrawn ?? []), parentElementId]) });
         await validateHierarchyVisibility({
@@ -3002,6 +2814,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         });
         // Changing category for hidden model should put all other categories into Hide overrides
         await handler.changeVisibility(parentCategoryNode, true);
+
         await validateHierarchyVisibility({
           ...props,
           handler,
@@ -3038,6 +2851,7 @@ describe("ModelsTreeVisibilityHandler", () => {
         });
 
         await handler.changeVisibility(elementNode, true);
+
         await validateHierarchyVisibility({
           ...testProps,
           handler,
@@ -3296,7 +3110,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       }
 
       describe("subject with empty model", () => {
-        const node = createSubjectHierarchyNode({ ids: IModel.rootSubjectId });
+        const node = createSubjectHierarchyNode({ ids: [IModel.rootSubjectId] });
 
         it("empty model hidden by default", async function () {
           await using buildIModelResult = await createHierarchyConfigurationModel(this);
@@ -3656,20 +3470,17 @@ describe("ModelsTreeVisibilityHandler", () => {
         filterPaths,
       }: Parameters<typeof createVisibilityTestData>[0] & { filterPaths: HierarchyNodeIdentifiersPath[] }) {
         const commonProps = createCommonProps({ imodel });
-        const filteredVisibilityHandler = createModelsTreeVisibilityHandler({ ...commonProps, filteredPaths: filterPaths });
-        const defaultVisibilityHandler = createModelsTreeVisibilityHandler(commonProps);
+        const handler = createModelsTreeVisibilityHandler({ ...commonProps, filteredPaths: filterPaths });
         const defaultProvider = createProvider(commonProps);
         const filteredProvider = createProvider({ ...commonProps, filterPaths });
         return {
-          defaultVisibilityHandler,
+          handler,
           defaultProvider,
           filteredProvider,
-          filteredVisibilityHandler,
           ...commonProps,
           [Symbol.dispose]() {
             commonProps.idsCache[Symbol.dispose]();
-            defaultVisibilityHandler[Symbol.dispose]();
-            filteredVisibilityHandler[Symbol.dispose]();
+            handler[Symbol.dispose]();
             defaultProvider[Symbol.dispose]();
             filteredProvider[Symbol.dispose]();
           },
@@ -3704,335 +3515,6 @@ describe("ModelsTreeVisibilityHandler", () => {
       }
 
       describe("single path to element", () => {
-        it("showing category turns on only it and filtered children", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
-            const category = insertSpatialCategory({ builder, codeValue: "category" });
-            const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
-            const parentElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
-            const filteredChildElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
-            const unfilteredChildElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
-
-            return {
-              model,
-              category,
-              filteredChildElement,
-              unfilteredChildElement,
-              parentElement,
-              filterPaths: [[model, category, parentElement, filteredChildElement]],
-            };
-          });
-
-          const { imodel, filterPaths, ...keys } = buildIModelResult;
-          using visibilityTestData = createFilteredVisibilityTestData({ imodel, filterPaths });
-          const { defaultVisibilityHandler, filteredVisibilityHandler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
-
-          viewport.setNeverDrawn({ elementIds: new Set([keys.parentElement.id, keys.filteredChildElement.id, keys.unfilteredChildElement.id]) });
-          viewport.renderFrame();
-
-          const node = createCategoryHierarchyNode({
-            categoryId: keys.category.id,
-            modelId: keys.model.id,
-            parentKeys: [{ type: "instances", instanceKeys: [keys.model] }],
-            filtering: {
-              isFilterTarget: false,
-              filteredChildrenIdentifierPaths: [[keys.parentElement], [keys.filteredChildElement]],
-            },
-          });
-          await filteredVisibilityHandler.changeVisibility(node, true);
-
-          await validateHierarchyVisibility({
-            provider: filteredProvider,
-            handler: filteredVisibilityHandler,
-            viewport,
-            visibilityExpectations: VisibilityExpectations.all("visible"),
-          });
-
-          await validateHierarchyVisibility({
-            provider: defaultProvider,
-            handler: defaultVisibilityHandler,
-            viewport,
-            visibilityExpectations: {
-              subject: () => "partial",
-              model: () => "partial",
-              category: () => "partial",
-              groupingNode: () => "partial",
-              element: ({ elementId }) => (elementId === keys.parentElement.id ? "partial" : elementId === keys.filteredChildElement.id ? "visible" : "hidden"),
-            },
-          });
-        });
-
-        it("showing element turns on only it and filtered children", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
-            const category = insertSpatialCategory({ builder, codeValue: "category" });
-            const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
-            const parentElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
-            const filteredChildElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
-            const unfilteredChildElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
-
-            return {
-              model,
-              category,
-              filteredChildElement,
-              unfilteredChildElement,
-              parentElement,
-              filterPaths: [[model, category, parentElement, filteredChildElement]],
-            };
-          });
-
-          const { imodel, filterPaths, ...keys } = buildIModelResult;
-          using visibilityTestData = createFilteredVisibilityTestData({ imodel, filterPaths });
-          const { defaultVisibilityHandler, filteredVisibilityHandler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
-          const node = createElementHierarchyNode({
-            elementId: keys.parentElement.id,
-            categoryId: keys.category.id,
-            modelId: keys.model.id,
-            childrenCount: 2,
-            parentKeys: [
-              { type: "instances", instanceKeys: [keys.model] },
-              { type: "instances", instanceKeys: [keys.category] },
-            ],
-            filtering: {
-              isFilterTarget: false,
-              filteredChildrenIdentifierPaths: [[keys.filteredChildElement]],
-            },
-          });
-          await filteredVisibilityHandler.changeVisibility(node, true);
-          await validateHierarchyVisibility({
-            provider: filteredProvider,
-            handler: filteredVisibilityHandler,
-            viewport,
-            visibilityExpectations: VisibilityExpectations.all("visible"),
-          });
-          await validateHierarchyVisibility({
-            provider: defaultProvider,
-            handler: defaultVisibilityHandler,
-            viewport,
-            visibilityExpectations: {
-              subject: () => "partial",
-              model: () => "partial",
-              category: () => "partial",
-              groupingNode: () => "partial",
-              element: ({ elementId }) => (elementId === keys.parentElement.id ? "partial" : elementId === keys.filteredChildElement.id ? "visible" : "hidden"),
-            },
-          });
-        });
-
-        it("showing class grouping node turns on only it and filtered children", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
-            const category = insertSpatialCategory({ builder, codeValue: "category" });
-            const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
-            const parentElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
-            const filteredChildElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
-            const unfilteredChildElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
-
-            return {
-              model,
-              category,
-              filteredChildElement,
-              unfilteredChildElement,
-              parentElement,
-              filterPaths: [[model, category, parentElement, filteredChildElement]],
-            };
-          });
-
-          const { imodel, filterPaths, ...keys } = buildIModelResult;
-          using visibilityTestData = createFilteredVisibilityTestData({ imodel, filterPaths });
-          const { defaultVisibilityHandler, filteredVisibilityHandler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
-          const node = await getNodeMatchingPath(filteredProvider, [keys.model, keys.category, keys.parentElement]);
-          await filteredVisibilityHandler.changeVisibility(node, true);
-
-          await validateHierarchyVisibility({
-            provider: filteredProvider,
-            handler: filteredVisibilityHandler,
-            viewport,
-            visibilityExpectations: VisibilityExpectations.all("visible"),
-          });
-
-          await validateHierarchyVisibility({
-            provider: defaultProvider,
-            handler: defaultVisibilityHandler,
-            viewport,
-            visibilityExpectations: {
-              subject: () => "partial",
-              model: () => "partial",
-              category: () => "partial",
-              groupingNode: () => "partial",
-              element: ({ elementId }) => (elementId === keys.parentElement.id ? "partial" : elementId === keys.filteredChildElement.id ? "visible" : "hidden"),
-            },
-          });
-        });
-
-        it("hiding category turns off only it and filtered children", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
-            const category = insertSpatialCategory({ builder, codeValue: "category" });
-            const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
-            const parentElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
-            const filteredChildElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
-            const unfilteredChildElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
-
-            return {
-              model,
-              category,
-              filteredChildElement,
-              unfilteredChildElement,
-              parentElement,
-              filterPaths: [[model, category, parentElement, filteredChildElement]],
-            };
-          });
-
-          const { imodel, filterPaths, ...keys } = buildIModelResult;
-          using visibilityTestData = createFilteredVisibilityTestData({ imodel, filterPaths });
-          const { defaultVisibilityHandler, filteredVisibilityHandler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
-          viewport.changeModelDisplay({ modelIds: keys.model.id, display: true });
-          viewport.setAlwaysDrawn({ elementIds: new Set([keys.parentElement.id, keys.filteredChildElement.id, keys.unfilteredChildElement.id]) });
-          viewport.renderFrame();
-
-          const node = createCategoryHierarchyNode({
-            categoryId: keys.category.id,
-            modelId: keys.model.id,
-            parentKeys: [{ type: "instances", instanceKeys: [keys.model] }],
-            filtering: {
-              isFilterTarget: false,
-              filteredChildrenIdentifierPaths: [[keys.parentElement], [keys.filteredChildElement]],
-            },
-          });
-          await filteredVisibilityHandler.changeVisibility(node, false);
-
-          await validateHierarchyVisibility({
-            provider: filteredProvider,
-            handler: filteredVisibilityHandler,
-            viewport,
-            visibilityExpectations: VisibilityExpectations.all("hidden"),
-          });
-
-          await validateHierarchyVisibility({
-            provider: defaultProvider,
-            handler: defaultVisibilityHandler,
-            viewport,
-            visibilityExpectations: {
-              subject: () => "partial",
-              model: () => "partial",
-              category: () => "partial",
-              groupingNode: () => "partial",
-              element: ({ elementId }) =>
-                elementId === keys.parentElement.id ? "partial" : elementId === keys.unfilteredChildElement.id ? "visible" : "hidden",
-            },
-          });
-        });
-
-        it("hiding element turns off only it and filtered children", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
-            const category = insertSpatialCategory({ builder, codeValue: "category" });
-            const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
-            const parentElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
-            const filteredChildElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
-            const unfilteredChildElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
-
-            return {
-              model,
-              category,
-              filteredChildElement,
-              unfilteredChildElement,
-              parentElement,
-              filterPaths: [[model, category, parentElement, filteredChildElement]],
-            };
-          });
-
-          const { imodel, filterPaths, ...keys } = buildIModelResult;
-          using visibilityTestData = createFilteredVisibilityTestData({ imodel, filterPaths });
-          const { defaultVisibilityHandler, filteredVisibilityHandler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
-
-          viewport.changeModelDisplay({ modelIds: keys.model.id, display: true });
-          viewport.setAlwaysDrawn({ elementIds: new Set([keys.parentElement.id, keys.filteredChildElement.id, keys.unfilteredChildElement.id])});
-          viewport.renderFrame();
-
-          const node = createElementHierarchyNode({
-            elementId: keys.parentElement.id,
-            categoryId: keys.category.id,
-            modelId: keys.model.id,
-            childrenCount: 2,
-            parentKeys: [
-              { type: "instances", instanceKeys: [keys.model] },
-              { type: "instances", instanceKeys: [keys.category] },
-            ],
-            filtering: {
-              isFilterTarget: false,
-              filteredChildrenIdentifierPaths: [[keys.filteredChildElement]],
-            },
-          });
-          await filteredVisibilityHandler.changeVisibility(node, false);
-
-          await validateHierarchyVisibility({
-            provider: filteredProvider,
-            handler: filteredVisibilityHandler,
-            viewport,
-            visibilityExpectations: VisibilityExpectations.all("hidden"),
-          });
-
-          await validateHierarchyVisibility({
-            provider: defaultProvider,
-            handler: defaultVisibilityHandler,
-            viewport,
-            visibilityExpectations: {
-              subject: () => "partial",
-              model: () => "partial",
-              category: () => "partial",
-              groupingNode: () => "partial",
-              element: ({ elementId }) =>
-                elementId === keys.parentElement.id ? "partial" : elementId === keys.unfilteredChildElement.id ? "visible" : "hidden",
-            },
-          });
-        });
-
-        it("hiding class grouping node turns on only it and filtered children", async function () {
-          await using buildIModelResult = await buildIModel(this, async (builder) => {
-            const category = insertSpatialCategory({ builder, codeValue: "category" });
-            const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
-            const parentElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
-            const filteredChildElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
-            const unfilteredChildElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
-
-            return {
-              model,
-              category,
-              filteredChildElement,
-              unfilteredChildElement,
-              parentElement,
-              filterPaths: [[model, category, parentElement, filteredChildElement]],
-            };
-          });
-
-          const { imodel, filterPaths, ...keys } = buildIModelResult;
-          using visibilityTestData = createFilteredVisibilityTestData({ imodel, filterPaths });
-          const { defaultVisibilityHandler, filteredVisibilityHandler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
-
-          viewport.changeModelDisplay({ modelIds: keys.model.id, display: true });
-          viewport.setAlwaysDrawn({ elementIds: new Set([keys.parentElement.id, keys.filteredChildElement.id, keys.unfilteredChildElement.id]) });
-          viewport.renderFrame();
-
-          const node = await getNodeMatchingPath(filteredProvider, [keys.model, keys.category, keys.parentElement]);
-          await filteredVisibilityHandler.changeVisibility(node, false);
-          await validateHierarchyVisibility({
-            provider: filteredProvider,
-            handler: filteredVisibilityHandler,
-            viewport,
-            visibilityExpectations: VisibilityExpectations.all("hidden"),
-          });
-          await validateHierarchyVisibility({
-            provider: defaultProvider,
-            handler: defaultVisibilityHandler,
-            viewport,
-            visibilityExpectations: {
-              subject: () => "partial",
-              model: () => "partial",
-              category: () => "partial",
-              groupingNode: () => "partial",
-              element: ({ elementId }) =>
-                elementId === keys.parentElement.id ? "partial" : elementId === keys.unfilteredChildElement.id ? "visible" : "hidden",
-            },
-          });
-        });
-
         it("switches on only filtered hierarchy when root node is clicked", async function () {
           await using buildIModelResult = await buildIModel(this, async (builder) => {
             const category = insertSpatialCategory({ builder, codeValue: "category" });
@@ -4053,20 +3535,20 @@ describe("ModelsTreeVisibilityHandler", () => {
 
           const { imodel, filterPaths, ...keys } = buildIModelResult;
           using visibilityTestData = createFilteredVisibilityTestData({ imodel, filterPaths });
-          const { defaultVisibilityHandler, filteredVisibilityHandler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
+          const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
           const node = await getNodeMatchingPath(filteredProvider, [keys.model]);
-          await filteredVisibilityHandler.changeVisibility(node, true);
+          await handler.changeVisibility(node, true);
 
           await validateHierarchyVisibility({
             provider: filteredProvider,
-            handler: filteredVisibilityHandler,
+            handler,
             viewport,
             visibilityExpectations: VisibilityExpectations.all("visible"),
           });
 
           await validateHierarchyVisibility({
             provider: defaultProvider,
-            handler: defaultVisibilityHandler,
+            handler,
             viewport,
             visibilityExpectations: {
               subject: () => "partial",
@@ -4115,20 +3597,21 @@ describe("ModelsTreeVisibilityHandler", () => {
           await using buildIModelResult = await createIModel(this);
           const { imodel, filterPaths, filterTargetElements, ...keys } = buildIModelResult;
           using visibilityTestData = createFilteredVisibilityTestData({ imodel, filterPaths });
-          const { defaultVisibilityHandler, filteredVisibilityHandler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
+          const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
 
           const node = await getNodeMatchingPath(filteredProvider, [keys.model]);
-          await filteredVisibilityHandler.changeVisibility(node, true);
+          await handler.changeVisibility(node, true);
+
           await validateHierarchyVisibility({
             provider: filteredProvider,
-            handler: filteredVisibilityHandler,
+            handler,
             viewport,
             visibilityExpectations: VisibilityExpectations.all("visible"),
           });
 
           await validateHierarchyVisibility({
             provider: defaultProvider,
-            handler: defaultVisibilityHandler,
+            handler,
             viewport,
             visibilityExpectations: {
               subject: () => "partial",
@@ -4144,17 +3627,17 @@ describe("ModelsTreeVisibilityHandler", () => {
           await using buildIModelResult = await createIModel(this);
           const { imodel, filterPaths, filteredCategories, filterTargetElements, ...keys } = buildIModelResult;
           using visibilityTestData = createFilteredVisibilityTestData({ imodel, filterPaths });
-          const { defaultVisibilityHandler, filteredVisibilityHandler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
+          const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
 
           const pathToCategory = [keys.model, filteredCategories[0]];
           const node = await getNodeMatchingPath(filteredProvider, pathToCategory);
-          await filteredVisibilityHandler.changeVisibility(node, true);
+          await handler.changeVisibility(node, true);
 
           const clickedCategoryId = filteredCategories[0].id;
 
           await validateHierarchyVisibility({
             provider: filteredProvider,
-            handler: filteredVisibilityHandler,
+            handler,
             viewport,
             visibilityExpectations: {
               subject: () => "partial",
@@ -4167,7 +3650,7 @@ describe("ModelsTreeVisibilityHandler", () => {
 
           await validateHierarchyVisibility({
             provider: defaultProvider,
-            handler: defaultVisibilityHandler,
+            handler,
             viewport,
             visibilityExpectations: {
               subject: () => "partial",
@@ -4215,21 +3698,21 @@ describe("ModelsTreeVisibilityHandler", () => {
           await using buildIModelResult = await createIModel(this);
           const { imodel, filterPaths, parentSubject } = buildIModelResult;
           using visibilityTestData = createFilteredVisibilityTestData({ imodel, filterPaths });
-          const { defaultVisibilityHandler, filteredVisibilityHandler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
+          const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
 
           const node = await getNodeMatchingPath(filteredProvider, [parentSubject]);
-          await filteredVisibilityHandler.changeVisibility(node, true);
+          await handler.changeVisibility(node, true);
 
           await validateHierarchyVisibility({
             provider: filteredProvider,
-            handler: filteredVisibilityHandler,
+            handler,
             viewport,
             visibilityExpectations: VisibilityExpectations.all("visible"),
           });
 
           await validateHierarchyVisibility({
             provider: defaultProvider,
-            handler: defaultVisibilityHandler,
+            handler,
             viewport,
             visibilityExpectations: VisibilityExpectations.all("visible"),
           });
@@ -4239,11 +3722,11 @@ describe("ModelsTreeVisibilityHandler", () => {
           await using buildIModelResult = await createIModel(this);
           const { imodel, filterPaths, parentSubject, subjectIds, modelIds } = buildIModelResult;
           using visibilityTestData = createFilteredVisibilityTestData({ imodel, filterPaths });
-          const { defaultVisibilityHandler, filteredVisibilityHandler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
+          const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
 
           const pathToCategory = filterPaths[0];
           const node = await getNodeMatchingPath(filteredProvider, pathToCategory);
-          await filteredVisibilityHandler.changeVisibility(node, true);
+          await handler.changeVisibility(node, true);
 
           const visibilityExpectations: ValidateNodeProps["visibilityExpectations"] = {
             subject: (id) => {
@@ -4260,14 +3743,14 @@ describe("ModelsTreeVisibilityHandler", () => {
 
           await validateHierarchyVisibility({
             provider: filteredProvider,
-            handler: filteredVisibilityHandler,
+            handler,
             viewport,
             visibilityExpectations,
           });
 
           await validateHierarchyVisibility({
             provider: defaultProvider,
-            handler: defaultVisibilityHandler,
+            handler,
             viewport,
             visibilityExpectations,
           });
@@ -4314,10 +3797,10 @@ describe("ModelsTreeVisibilityHandler", () => {
 
         const { imodel, filterPaths, firstElement, pathToFirstElement } = buildIModelResult;
         using visibilityTestData = createFilteredVisibilityTestData({ imodel, filterPaths });
-        const { defaultVisibilityHandler, filteredVisibilityHandler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
+        const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
 
         const node = await getNodeMatchingPath(filteredProvider, pathToFirstElement);
-        await filteredVisibilityHandler.changeVisibility(node, true);
+        await handler.changeVisibility(node, true);
 
         const visibilityExpectations: ValidateNodeProps["visibilityExpectations"] = {
           subject: () => "partial",
@@ -4329,14 +3812,14 @@ describe("ModelsTreeVisibilityHandler", () => {
 
         await validateHierarchyVisibility({
           provider: filteredProvider,
-          handler: filteredVisibilityHandler,
+          handler,
           viewport,
           visibilityExpectations,
         });
 
         await validateHierarchyVisibility({
           provider: defaultProvider,
-          handler: defaultVisibilityHandler,
+          handler,
           viewport,
           visibilityExpectations,
         });

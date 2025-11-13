@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concatMap, EMPTY, expand, from, of, toArray } from "rxjs";
+import { concatMap, EMPTY, expand, firstValueFrom, from, toArray } from "rxjs";
 import sinon from "sinon";
 import { Id64 } from "@itwin/core-bentley";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
@@ -18,7 +18,6 @@ import { ModelsTreeIdsCache } from "../../../tree-widget-react/components/trees/
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import { createIModelAccess } from "../Common.js";
 
-import type { Observable } from "rxjs";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type {
@@ -32,7 +31,6 @@ import type {
   NonGroupingHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
-import type { ChildrenTree } from "../../../tree-widget-react/components/trees/models-tree/Utils.js";
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
@@ -99,6 +97,7 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
         expand((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
         toArray(),
       );
+      return firstValueFrom(obs);
     }),
     getChildSubjectModelIds: sinon.stub(),
     getSubjectModelIds: sinon.stub<[Id64Arg], Promise<Id64Array>>().callsFake(async (subjectIds) => {
@@ -107,26 +106,21 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
         concatMap((id) => props?.subjectModels?.get(id) ?? EMPTY),
         toArray(),
       );
+      return firstValueFrom(obs);
     }),
     getModelCategoryIds: sinon.stub<[Id64String], Promise<Id64Array>>().callsFake(async (modelId) => {
       return props?.modelCategories?.get(modelId) ?? [];
     }),
-    getChildrenTree: sinon.stub<[{ elementIds: Id64Arg }], Observable<ChildrenTree>>().callsFake(() => {
-      return of(new Map());
-    }),
-    getAllChildrenCount: sinon.stub<[{ elementIds: Id64Arg }], Observable<Map<Id64String, number>>>().callsFake(() => {
-      return of(new Map());
-    }),
-    getAllCategories: sinon.stub<[], Observable<Id64Set>>().callsFake(() => {
+    getAllCategories: sinon.stub<[], Promise<Id64Set>>().callsFake(async () => {
       const result = new Set<Id64String>();
       props?.modelCategories?.forEach((categories) => categories.forEach((category) => result.add(category)));
-      return of(result);
+      return result;
     }),
-    getCategoryElementsCount: sinon.stub<[Id64String, Id64String], Observable<number>>().callsFake((_, categoryId) => {
-      return of(props?.categoryElements?.get(categoryId)?.length ?? 0);
+    getCategoryElementsCount: sinon.stub<[Id64String, Id64String], Promise<number>>().callsFake(async (_, categoryId) => {
+      return props?.categoryElements?.get(categoryId)?.length ?? 0;
     }),
-    hasSubModel: sinon.stub<[Id64String], Observable<boolean>>().callsFake(() => of(false)),
-    getCategoriesModeledElements: sinon.stub<[Id64String, Id64Arg], Observable<Id64Array>>().callsFake(() => of([])),
+    hasSubModel: sinon.stub<[Id64String], Promise<boolean>>().callsFake(async () => false),
+    getCategoriesModeledElements: sinon.stub<[Id64String, Id64Arg], Promise<Id64Array>>().callsFake(async () => []),
   });
 }
 
@@ -168,13 +162,11 @@ export function createCategoryHierarchyNode({
   categoryId,
   hasChildren,
   parentKeys,
-  filtering,
 }: {
   modelId?: Id64String;
   categoryId?: Id64Arg;
   hasChildren?: boolean;
   parentKeys?: HierarchyNodeKey[];
-  filtering?: HierarchyNode["filtering"];
 }): NonGroupingHierarchyNode {
   return {
     key: {
@@ -187,7 +179,6 @@ export function createCategoryHierarchyNode({
     children: !!hasChildren,
     label: "",
     parentKeys: parentKeys ?? [],
-    filtering,
     extendedData: {
       isCategory: true,
       modelId: modelId ?? "0x1",
