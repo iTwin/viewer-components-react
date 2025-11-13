@@ -270,7 +270,6 @@ export namespace SheetMeasurementHelper {
         sheetToWorldTransformProps.sheetScale ===  undefined) {
           return getCivilTransform(sheetPoint, sheetToWorldTransformProps);
       }
-      console.log(sheetToWorldTransformProps);
 
       const VAOrigin = Point2d.createZero();
       VAOrigin.setFromJSON(viewAttachmentOrigin);
@@ -293,11 +292,9 @@ export namespace SheetMeasurementHelper {
       const cordsAdjustedForDrawingOrigin = new Point2d(attachedDrawingCoords.x - DVDOrigin.x, attachedDrawingCoords.y - DVDOrigin.y);
 
       const boxPoint3d = new Point3d(cordsAdjustedForDrawingOrigin.x, cordsAdjustedForDrawingOrigin.y);
-      console.log(boxPoint3d)
 
       // We recreate the spatialViewDefinition positioning matrix and transform the point to get the final 3d position
       const rotation = YawPitchRollAngles.createRadians(SVDYaw * Math.PI / 180, SVDPitch * Math.PI / 180, SVDRoll * Math.PI / 180).toMatrix3d();
-      console.log(rotation);
       const origin = new Point3d(SVDOrigin.x, SVDOrigin.y, SVDOrigin.z);
       const boxToWorldMatrix = Transform.createRefs(origin, rotation);
       const finalPoint = boxToWorldMatrix.multiplyPoint3d(boxPoint3d);
