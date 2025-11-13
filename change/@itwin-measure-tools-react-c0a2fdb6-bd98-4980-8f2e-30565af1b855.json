@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Measure tools in non civil sheets",
+  "packageName": "@itwin/measure-tools-react",
+  "email": "maxime.brassard@bentley.com",
+  "dependentChangeType": "patch"
+}
