@@ -87,7 +87,7 @@ export const FormatSetSelector: React.FC<FormatSetSelectorProps> = ({
                 <Flex flexDirection="row" alignItems="center" gap="xs">
                   <Text variant="body">{formatSet.label}</Text>
                   {activeFormatSetKey === key && (
-                    <Badge backgroundColor="positive">
+                    <Badge backgroundColor="positive" className="quantityFormat--formatSetSelector-badge">
                       {translate("QuantityFormat:labels.active")}
                     </Badge>
                   )}
