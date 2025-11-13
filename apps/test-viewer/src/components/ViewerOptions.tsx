@@ -8,7 +8,7 @@ import { StatusBarSection, useActiveIModelConnection } from "@itwin/appui-react"
 import { TransientIdSequence } from "@itwin/core-bentley";
 import { SvgSelection, SvgVisibilityShow, SvgZoomInCircular } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
-import { QuantityFormatButton } from "./quantity-formatting/QuantityFormatButton";
+import { QuantityFormatButton } from "./QuantityFormatButton";
 
 import type { PropsWithChildren } from "react";
 import type { UiItemsProvider } from "@itwin/appui-react";
