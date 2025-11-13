@@ -289,8 +289,8 @@ export namespace SheetMeasurementHelper {
       const vACords = new Point2d(sheetPoint.x - VAOrigin.x, sheetPoint.y - VAOrigin.y);
 
       // We multiply by the sheet scale and adjust to the drawing origin to end up with DrawingViewDefinition coordinates
-      const cordsAdjustedForDrawingOrigin = new Point2d(vACords.x * scale, vACords.y * scale);
-      // const cordsAdjustedForDrawingOrigin = new Point2d(attachedDrawingCoords.x - DVDOrigin.x, attachedDrawingCoords.y - DVDOrigin.y);
+      const attachedDrawingCoords = new Point2d(vACords.x * scale, vACords.y * scale);
+      const cordsAdjustedForDrawingOrigin = new Point2d(attachedDrawingCoords.x - DVDOrigin.x, attachedDrawingCoords.y - DVDOrigin.y);
 
       const boxPoint3d = new Point3d(cordsAdjustedForDrawingOrigin.x, cordsAdjustedForDrawingOrigin.y);
       console.log(boxPoint3d)
