@@ -125,7 +125,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
         observables.push(
           from(elements).pipe(
             releaseMainThreadOnItemsCount(50),
-            mergeMap(({ modelId, elementIds, categoryId }) => this.#visibilityHelper.changeElementsVisibilityStatus({ modelId, categoryId, elementIds, on })),
+            mergeMap(({ modelId, elements: elementsMap, categoryId }) => this.#visibilityHelper.changeElementsVisibilityStatus({ modelId, categoryId, elementIds: [...elementsMap.keys()], on })),
           ),
         );
       }
@@ -283,8 +283,8 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
         observables.push(
           from(elements).pipe(
             releaseMainThreadOnItemsCount(50),
-            mergeMap(({ modelId, elementIds, categoryId }) =>
-              this.#visibilityHelper.getElementsVisibilityStatus({ modelId, categoryId, elementIds, type: "GeometricElement3d" }),
+            mergeMap(({ modelId, elements: elementsMap, categoryId }) =>
+              this.#visibilityHelper.getElementsVisibilityStatus({ modelId, categoryId, elementIds: [...elementsMap.keys()], type: "GeometricElement3d" }),
             ),
           ),
         );

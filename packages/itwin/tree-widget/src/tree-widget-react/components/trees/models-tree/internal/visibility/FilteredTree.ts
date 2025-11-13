@@ -35,7 +35,7 @@ export interface ModelsTreeFilterTargets {
   subjectIds?: Id64Set;
   modelIds?: Id64Set;
   categories?: Array<{ modelId: Id64String | undefined; categoryIds: Id64Set }>;
-  elements?: Array<{ modelId: Id64String; categoryId: Id64String; elementIds: Id64Set }>;
+  elements?: Array<{ modelId: Id64String; categoryId: Id64String; elements: Map<ElementId, { isFilterTarget: boolean }> }>;
 }
 
 /** @internal */
@@ -54,7 +54,7 @@ interface FilterTargetsInternal {
   subjectIds?: Id64Set;
   modelIds?: Id64Set;
   categories?: Map<ModelId, Set<CategoryId>>;
-  elements?: Map<ModelCategoryKey, Set<ElementId>>;
+  elements?: Map<ModelCategoryKey, Map<ElementId, { isFilterTarget: boolean }>>;
 }
 
 interface ModelsTreeFilteredNodesHandlerProps {
@@ -92,9 +92,9 @@ class ModelsTreeFilteredNodesHandler extends FilteredNodesHandler<void, ModelsTr
           })
         : undefined,
       elements: filterTargets.elements
-        ? [...filterTargets.elements.entries()].map(([modelCategoryKey, elementIds]) => {
+        ? [...filterTargets.elements.entries()].map(([modelCategoryKey, elements]) => {
             const { modelId, categoryId } = this.parseModelCategoryKey(modelCategoryKey);
-            return { modelId, categoryId, elementIds };
+            return { modelId, categoryId, elements };
           })
         : undefined,
       modelIds: filterTargets.modelIds,
@@ -142,11 +142,10 @@ class ModelsTreeFilteredNodesHandler extends FilteredNodesHandler<void, ModelsTr
         const modelCategoryKey = this.createModelCategoryKey(node.modelId, node.categoryId);
         const elements = (filterTargets.elements ??= new Map()).get(modelCategoryKey);
         if (elements) {
-          elements.add(node.id);
-          return;
-        }
-        filterTargets.elements.set(modelCategoryKey, new Set([node.id]));
-        return;
+          elements.set(node.id, { isFilterTarget: node.isFilterTarget });
+      } else {
+        filterTargets.elements.set(modelCategoryKey, new Map([[node.id, { isFilterTarget: node.isFilterTarget }]]));
+      }
     }
   }
 
