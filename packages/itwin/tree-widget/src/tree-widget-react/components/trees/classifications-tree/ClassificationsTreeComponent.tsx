@@ -29,6 +29,7 @@ interface ClassificationsTreeComponentProps
     | "getDecorations"
     | "hierarchyConfig"
     | "getEditingProps"
+    | "treeLabel"
   > {
   /**
    * Viewport used for visibility controls.
@@ -82,12 +83,13 @@ function ClassificationsTreeComponentImpl({
   onPerformanceMeasured,
   onFeatureUsed,
   filter,
+  treeLabel,
   ...treeProps
 }: ClassificationsTreeComponentProps & { iModel: IModelConnection; viewport: TreeWidgetViewport }) {
   return (
     <TelemetryContextProvider componentIdentifier={ClassificationsTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
       <SelectableTree>
-        <ClassificationsTree {...treeProps} imodel={iModel} activeView={viewport} filter={filter} />
+        <ClassificationsTree {...treeProps} imodel={iModel} activeView={viewport} filter={filter} treeLabel={treeLabel} />
       </SelectableTree>
     </TelemetryContextProvider>
   );

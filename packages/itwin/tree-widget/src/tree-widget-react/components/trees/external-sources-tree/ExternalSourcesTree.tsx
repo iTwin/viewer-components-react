@@ -20,14 +20,14 @@ import type { TreeProps } from "../common/components/Tree.js";
 
 /** @beta */
 export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
-  Pick<BaseTreeRendererProps, "getInlineActions" | "getMenuActions" | "getDecorations"> & {
+  Pick<BaseTreeRendererProps, "getInlineActions" | "getMenuActions" | "getDecorations" | "treeLabel"> & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
     };
   };
 
 /** @beta */
-export function ExternalSourcesTree({ getInlineActions, getMenuActions, getDecorations, selectionMode, ...rest }: ExternalSourcesTreeProps) {
+export function ExternalSourcesTree({ getInlineActions, getMenuActions, getDecorations, selectionMode, treeLabel, ...rest }: ExternalSourcesTreeProps) {
   return (
     <Tree
       emptyTreeContent={<EmptyTreeContent icon={documentSvg} />}
@@ -38,6 +38,7 @@ export function ExternalSourcesTree({ getInlineActions, getMenuActions, getDecor
       treeRenderer={(treeProps) => (
         <TreeRenderer
           {...treeProps}
+          treeLabel={treeLabel}
           getInlineActions={getInlineActions}
           getMenuActions={getMenuActions}
           getDecorations={getDecorations ?? ((node) => <ExternalSourcesTreeIcon node={node} />)}

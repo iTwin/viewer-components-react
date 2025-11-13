@@ -28,7 +28,7 @@
     "@itwin/imodels-client-management": "^6.0.1",
     "@itwin/itwinui-icons-react": "^2.10.0",
     "@itwin/itwinui-illustrations-react": "^2.1.0",
-    "@itwin/itwinui-react": "3.19.0",
+    "@itwin/itwinui-react": "3.19.6",
     "@itwin/map-layers": "workspace:*",
     "@itwin/map-layers-auth": "^5.1.1",
     "@itwin/map-layers-formats": "^5.1.1",
@@ -45,10 +45,10 @@
     "@itwin/reports-config-widget-react": "workspace:*",
     "@itwin/tree-widget-react": "workspace:*",
     "@itwin/unified-selection": "^1.5.1",
-    "@stratakit/foundations": "^0.3.2",
-    "@stratakit/bricks": "^0.4.2",
-    "@stratakit/structures": "^0.4.2",
-    "@stratakit/icons": "^0.1.5",
+    "@stratakit/foundations": "^0.4.0",
+    "@stratakit/bricks": "^0.5.0",
+    "@stratakit/structures": "^0.5.0",
+    "@stratakit/icons": "^0.2.0",
     "@itwin/web-viewer-react": "^5.0.0",
     "@itwin/webgl-compatibility": "^5.1.1",
     "react": "^18.3.1",
@@ -111,7 +111,7 @@
   "pnpm": {
     "overrides": {
       "@itwin/itwinui-react@^2": "2.12.26",
-      "@itwin/itwinui-react@^3": "3.19.0"
+      "@itwin/itwinui-react@^3": "3.19.6"
     }
   }
 }

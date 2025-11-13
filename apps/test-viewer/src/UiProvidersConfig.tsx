@@ -119,6 +119,7 @@ const configuredUiItems = new Map<string, UiItem>([
                     selectionMode={"extended"}
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}
+                    treeLabel={props.treeLabel}
                   />
                 ),
               },
@@ -132,6 +133,7 @@ const configuredUiItems = new Map<string, UiItem>([
                     selectionStorage={unifiedSelectionStorage}
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}
+                    treeLabel={props.treeLabel}
                   />
                 ),
               },
@@ -146,6 +148,7 @@ const configuredUiItems = new Map<string, UiItem>([
                     selectionStorage={unifiedSelectionStorage}
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}
+                    treeLabel={props.treeLabel}
                   />
                 ),
               },
@@ -157,6 +160,7 @@ const configuredUiItems = new Map<string, UiItem>([
                     selectionStorage={unifiedSelectionStorage}
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}
+                    treeLabel={props.treeLabel}
                   />
                 ),
               },
@@ -180,6 +184,7 @@ const configuredUiItems = new Map<string, UiItem>([
                         console.log("node label changed", node, newLabel);
                       },
                     })}
+                    treeLabel={props.treeLabel}
                   />
                 ),
                 shouldShow: async (imodel) => ClassificationsTreeComponent.isSupportedByIModel(imodel),

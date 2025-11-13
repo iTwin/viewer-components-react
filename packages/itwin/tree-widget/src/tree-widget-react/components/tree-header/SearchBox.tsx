@@ -5,7 +5,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { IconButton, TextBox } from "@stratakit/bricks";
-import closeSvg from "@stratakit/icons/close.svg";
+import dismissSvg from "@stratakit/icons/dismiss.svg";
 import searchSvg from "@stratakit/icons/search.svg";
 import { TreeWidget } from "../../TreeWidget.js";
 
@@ -54,7 +54,7 @@ export function DebouncedSearchBox({ isOpened, onSearch, setIsOpened, delay, cla
         className={"tw-search-box-button"}
         variant={"ghost"}
         label={TreeWidget.translate("header.searchBox.close")}
-        icon={closeSvg}
+        icon={dismissSvg}
         onClick={() => {
           setIsOpened(false);
           setInputValue(undefined);
