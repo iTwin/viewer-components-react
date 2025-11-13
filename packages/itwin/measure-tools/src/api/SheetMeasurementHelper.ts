@@ -6,7 +6,7 @@
 import { ColorDef, QueryBinder } from "@itwin/core-common";
 import type { DecorateContext, GraphicBuilder, HitDetail, ScreenViewport} from "@itwin/core-frontend";
 import { GraphicType, IModelApp, type IModelConnection } from "@itwin/core-frontend";
-import type { XYProps, XYZProps} from "@itwin/core-geometry";
+import type { XYProps, XYZ, XYZProps} from "@itwin/core-geometry";
 import { Point3d, YawPitchRollAngles } from "@itwin/core-geometry";
 import { Transform } from "@itwin/core-geometry";
 import { Point2d } from "@itwin/core-geometry";
@@ -235,20 +235,18 @@ export namespace SheetMeasurementHelper {
    * @param transform
    * @returns Point in world coordinates
    */
-  export function getCivilTransform(sheetPoint: Point3d | Point2d, sheetToWorldTransform?: SheetToWorldTransformProps): Point3d {
-
-    const sheetPointAs3D = Point3d.createFrom(sheetPoint);
+  export function getCivilTransform(sheetToWorldTransform?: SheetToWorldTransformProps): Transform {
     if (sheetToWorldTransform?.transformParams?.masterOrigin === undefined ||
       sheetToWorldTransform.transformParams.sheetTov8Drawing === undefined ||
       sheetToWorldTransform.transformParams.v8DrawingToDesign === undefined
     ) {
-      return sheetPointAs3D;
+      return Transform.createIdentity();
     }
 
-    const drawingPoint = sheetToWorldTransform.transformParams.sheetTov8Drawing.multiplyPoint3d(sheetPointAs3D);
-    const adjustedDrawingPoint = new Point3d(drawingPoint.x, drawingPoint.y, sheetToWorldTransform.transformParams.masterOrigin.z);
-    const final3dPoint = sheetToWorldTransform.transformParams.v8DrawingToDesign.multiplyPoint3d(adjustedDrawingPoint);
-    return final3dPoint;
+    const transform = sheetToWorldTransform.transformParams.sheetTov8Drawing;
+    transform.setMultiplyTransformTransform(Transform.createTranslation(Point3d.create(0, 0, sheetToWorldTransform.transformParams.masterOrigin.z)), transform);
+    transform.setMultiplyTransformTransform(sheetToWorldTransform.transformParams.v8DrawingToDesign, transform);
+    return transform;
   }
 
   /**
@@ -257,49 +255,46 @@ export namespace SheetMeasurementHelper {
    * @param sheetToWorldTransform
    * @returns
    */
-  export function getTransform(viewAttachmentOrigin?: XYProps, sheetToWorldTransformProps?: SheetToWorldTransformProps): (point: Point2d | Point3d) => Point3d {
-    return (sheetPoint: Point2d | Point3d) => {
-      if (viewAttachmentOrigin === undefined ||
-        sheetToWorldTransformProps === undefined ||
-        sheetToWorldTransformProps.DVDOrigin === undefined ||
-        sheetToWorldTransformProps.SVDExtents === undefined ||
-        sheetToWorldTransformProps.SVDOrigin === undefined ||
-        sheetToWorldTransformProps.SVDPitch === undefined ||
-        sheetToWorldTransformProps.SVDRoll === undefined ||
-        sheetToWorldTransformProps.SVDYaw === undefined ||
-        sheetToWorldTransformProps.sheetScale ===  undefined) {
-          return getCivilTransform(sheetPoint, sheetToWorldTransformProps);
-      }
+  export function getTransform(viewAttachmentOrigin?: XYProps, sheetToWorldTransformProps?: SheetToWorldTransformProps): Transform {
 
-      const VAOrigin = Point2d.createZero();
-      VAOrigin.setFromJSON(viewAttachmentOrigin);
-      const scale = sheetToWorldTransformProps.sheetScale;
-      const DVDOrigin = Point2d.createZero();
-      DVDOrigin.setFromJSON(sheetToWorldTransformProps.DVDOrigin);
-      const SVDExtents = Point3d.createZero();
-      SVDExtents.setFromJSON(sheetToWorldTransformProps.SVDExtents);
-      const SVDYaw = sheetToWorldTransformProps.SVDYaw;
-      const SVDPitch = sheetToWorldTransformProps.SVDPitch;
-      const SVDRoll = sheetToWorldTransformProps.SVDRoll;
-      const SVDOrigin = Point3d.createZero();
-      SVDOrigin.setFromJSON(sheetToWorldTransformProps.SVDOrigin);
-
-      // We start with sheet coordinates so we tranform them to be relative to the viewAttachment
-      const vACords = new Point2d(sheetPoint.x - VAOrigin.x, sheetPoint.y - VAOrigin.y);
-
-      // We multiply by the sheet scale and adjust to the drawing origin to end up with DrawingViewDefinition coordinates
-      const attachedDrawingCoords = new Point2d(vACords.x * scale, vACords.y * scale);
-      const cordsAdjustedForDrawingOrigin = new Point2d(attachedDrawingCoords.x - DVDOrigin.x, attachedDrawingCoords.y - DVDOrigin.y);
-
-      const boxPoint3d = new Point3d(cordsAdjustedForDrawingOrigin.x, cordsAdjustedForDrawingOrigin.y);
-
-      // We recreate the spatialViewDefinition positioning matrix and transform the point to get the final 3d position
-      const rotation = YawPitchRollAngles.createRadians(SVDYaw * Math.PI / 180, SVDPitch * Math.PI / 180, SVDRoll * Math.PI / 180).toMatrix3d();
-      const origin = new Point3d(SVDOrigin.x, SVDOrigin.y, SVDOrigin.z);
-      const boxToWorldMatrix = Transform.createRefs(origin, rotation);
-      const finalPoint = boxToWorldMatrix.multiplyPoint3d(boxPoint3d);
-      return finalPoint;
+    if (viewAttachmentOrigin === undefined ||
+      sheetToWorldTransformProps === undefined ||
+      sheetToWorldTransformProps.DVDOrigin === undefined ||
+      sheetToWorldTransformProps.SVDExtents === undefined ||
+      sheetToWorldTransformProps.SVDOrigin === undefined ||
+      sheetToWorldTransformProps.SVDPitch === undefined ||
+      sheetToWorldTransformProps.SVDRoll === undefined ||
+      sheetToWorldTransformProps.SVDYaw === undefined ||
+      sheetToWorldTransformProps.sheetScale ===  undefined) {
+        return getCivilTransform(sheetToWorldTransformProps);
     }
+
+    const VAOrigin = Point2d.createZero();
+    VAOrigin.setFromJSON(viewAttachmentOrigin);
+    const scale = sheetToWorldTransformProps.sheetScale;
+    const DVDOrigin = Point2d.createZero();
+    DVDOrigin.setFromJSON(sheetToWorldTransformProps.DVDOrigin);
+    const SVDExtents = Point3d.createZero();
+    SVDExtents.setFromJSON(sheetToWorldTransformProps.SVDExtents);
+    const SVDYaw = sheetToWorldTransformProps.SVDYaw;
+    const SVDPitch = sheetToWorldTransformProps.SVDPitch;
+    const SVDRoll = sheetToWorldTransformProps.SVDRoll;
+    const SVDOrigin = Point3d.createZero();
+    SVDOrigin.setFromJSON(sheetToWorldTransformProps.SVDOrigin);
+
+    // We start with sheet coordinates so we tranform them to be relative to the viewAttachment
+    let transform = Transform.createTranslation(Point3d.create(-VAOrigin.x, -VAOrigin.y));
+
+    // We multiply by the sheet scale and adjust to the drawing origin to end up with DrawingViewDefinition coordinates
+    transform.setMultiplyTransformTransform(Transform.createScaleAboutPoint(Point3d.createZero(), scale), transform);
+    transform.setMultiplyTransformTransform(Transform.createTranslation(Point3d.create(-DVDOrigin.x, -DVDOrigin.y)), transform);
+
+    // We recreate the spatialViewDefinition positioning matrix and transform the point to get the final 3d position
+    const rotation = YawPitchRollAngles.createRadians(SVDYaw * Math.PI / 180, SVDPitch * Math.PI / 180, SVDRoll * Math.PI / 180).toMatrix3d();
+    const origin = new Point3d(SVDOrigin.x, SVDOrigin.y, SVDOrigin.z);
+    const boxToWorldMatrix = Transform.createRefs(origin, rotation);
+    transform.setMultiplyTransformTransform(boxToWorldMatrix, transform);
+    return transform;
 
   }
 
@@ -358,7 +353,7 @@ export namespace SheetMeasurementHelper {
    * @param mousePos
    */
   export async function getDrawingData(imodel: IModelConnection, id: string, mousePos: Point3d): Promise<{
-    sheetToWorldTransform :((sheetPoint: Point2d | Point3d) => Point3d),
+    sheetToWorldTransform : Transform,
     viewAttachmentOrigin: {x: number, y: number},
     viewAttachmentExtent: {x: number, y: number},
     transformProps: SheetToWorldTransformProps,
@@ -463,7 +458,7 @@ export namespace SheetMeasurementHelper {
   export async function getDrawingMetadata(imodel: IModelConnection, id: string, mousePos: Point3d): Promise<DrawingMetadata | undefined> {
     const drawingData = await getDrawingData(imodel, id, mousePos);
     if (drawingData?.drawingId !== undefined && drawingData.viewAttachmentOrigin !== undefined && drawingData.transformProps !== undefined)
-      return { origin: Point2d.fromJSON(drawingData.viewAttachmentOrigin), drawingId: drawingData.drawingId, sheetToWorldTransformProps: drawingData.transformProps, extents: Point2d.fromJSON(drawingData.viewAttachmentExtent), sheetToWorldTransformFunc: drawingData.sheetToWorldTransform};
+      return { origin: Point2d.fromJSON(drawingData.viewAttachmentOrigin), drawingId: drawingData.drawingId, sheetToWorldTransformProps: drawingData.transformProps, extents: Point2d.fromJSON(drawingData.viewAttachmentExtent), sheetToWorldTransformv2: drawingData.sheetToWorldTransform};
     return undefined;
   }
 

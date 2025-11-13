@@ -74,14 +74,14 @@ export namespace DrawingMetadata {
 
     const sheetToWorldTransformProps = json.sheetToWorldTransformProps ? { ...json.sheetToWorldTransformProps } : undefined;
 
-    const sheetToWorldTransformFunc = SheetMeasurementHelper.getTransform(json.origin, sheetToWorldTransformProps);
+    const sheetToWorldTransformv2 = SheetMeasurementHelper.getTransform(json.origin, sheetToWorldTransformProps);
 
     return {
       origin: Point2d.fromJSON(json.origin),
       drawingId: json.drawingId,
       extents: Point2d.fromJSON(json.extents),
       sheetToWorldTransformProps,
-      sheetToWorldTransformFunc
+      sheetToWorldTransformv2
     };
 
   }
@@ -298,7 +298,7 @@ export interface DrawingMetadata {
   extents?: Point2d;
 
   /** Represents the transform from sheet points to 3d points */
-  sheetToWorldTransformFunc?: (point: Point2d | Point3d) => Point3d;
+  sheetToWorldTransformv2?: Transform;
 
   /** Props needed in order to reconstruct the sheetToWorldTransform */
   sheetToWorldTransformProps?: SheetMeasurementHelper.SheetToWorldTransformProps;
@@ -708,8 +708,11 @@ export abstract class Measurement {
    * This is used to display 3d world information in sheets
    */
   protected adjustPointWithSheetToWorldTransform(point: Point3d): Readonly<Point3d> {
-    if (this.drawingMetadata?.sheetToWorldTransformFunc)
-      return this.drawingMetadata.sheetToWorldTransformFunc(point);
+    if (this.drawingMetadata?.sheetToWorldTransformv2) {
+      const newPoint = this.drawingMetadata.sheetToWorldTransformv2.multiplyInversePoint3d(point);
+      if (newPoint)
+        return newPoint
+    }
     return point;
   }
 
@@ -742,7 +745,7 @@ export abstract class Measurement {
         origin: other.drawingMetadata.origin.clone(),
         drawingId: other.drawingMetadata.drawingId,
         extents: other.drawingMetadata.extents?.clone(),
-        sheetToWorldTransformFunc: SheetMeasurementHelper.getTransform(other.drawingMetadata.origin.clone(), other.drawingMetadata.sheetToWorldTransformProps),
+        sheetToWorldTransformv2: SheetMeasurementHelper.getTransform(other.drawingMetadata.origin.clone(), other.drawingMetadata.sheetToWorldTransformProps),
         sheetToWorldTransformProps: other.drawingMetadata.sheetToWorldTransformProps
     };
   }
