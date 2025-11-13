@@ -270,6 +270,7 @@ export namespace SheetMeasurementHelper {
         sheetToWorldTransformProps.sheetScale ===  undefined) {
           return getCivilTransform(sheetPoint, sheetToWorldTransformProps);
       }
+      console.log(sheetToWorldTransformProps);
 
       const VAOrigin = Point2d.createZero();
       VAOrigin.setFromJSON(viewAttachmentOrigin);
@@ -288,13 +289,15 @@ export namespace SheetMeasurementHelper {
       const vACords = new Point2d(sheetPoint.x - VAOrigin.x, sheetPoint.y - VAOrigin.y);
 
       // We multiply by the sheet scale and adjust to the drawing origin to end up with DrawingViewDefinition coordinates
-      const attachedDrawingCoords = new Point2d(vACords.x * scale, vACords.y * scale);
-      const cordsAdjustedForDrawingOrigin = new Point2d(attachedDrawingCoords.x - DVDOrigin.x, attachedDrawingCoords.y - DVDOrigin.x);
+      const cordsAdjustedForDrawingOrigin = new Point2d(vACords.x * scale, vACords.y * scale);
+      // const cordsAdjustedForDrawingOrigin = new Point2d(attachedDrawingCoords.x - DVDOrigin.x, attachedDrawingCoords.y - DVDOrigin.y);
 
-      const boxPoint3d = new Point3d(cordsAdjustedForDrawingOrigin.x, cordsAdjustedForDrawingOrigin.y, SVDExtents.z / 2);
+      const boxPoint3d = new Point3d(cordsAdjustedForDrawingOrigin.x, cordsAdjustedForDrawingOrigin.y);
+      console.log(boxPoint3d)
 
       // We recreate the spatialViewDefinition positioning matrix and transform the point to get the final 3d position
-      const rotation = YawPitchRollAngles.createDegrees(SVDYaw, SVDPitch, SVDRoll).toMatrix3d();
+      const rotation = YawPitchRollAngles.createRadians(SVDYaw * Math.PI / 180, SVDPitch * Math.PI / 180, SVDRoll * Math.PI / 180).toMatrix3d();
+      console.log(rotation);
       const origin = new Point3d(SVDOrigin.x, SVDOrigin.y, SVDOrigin.z);
       const boxToWorldMatrix = Transform.createRefs(origin, rotation);
       const finalPoint = boxToWorldMatrix.multiplyPoint3d(boxPoint3d);
@@ -320,10 +323,10 @@ export namespace SheetMeasurementHelper {
       const spatialData = spatialReader.current;
 
       const transformProps = {
-        DVDOrigin: spatialData[6],
+        DVDOrigin: {x: spatialData[6].X, y: spatialData[6].Y},
         sheetScale: spatialData[5],
-        SVDExtents: spatialData[1],
-        SVDOrigin: spatialData[0],
+        SVDExtents: {x: spatialData[1].X, y: spatialData[1].Y, z: spatialData[1].Z},
+        SVDOrigin: {x: spatialData[0].X, y: spatialData[0].Y, z: spatialData[0].Z},
         SVDPitch: spatialData[3],
         SVDRoll: spatialData[4],
         SVDYaw: spatialData[2]
