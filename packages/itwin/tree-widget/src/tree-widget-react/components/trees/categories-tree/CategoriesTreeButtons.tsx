@@ -17,12 +17,12 @@ import { loadCategoriesFromViewport } from "../common/internal/VisibilityUtils.j
 import { hideAllModels, showAll } from "../common/Utils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { GuidString, Id64Array } from "@itwin/core-bentley";
+import { type GuidString, type Id64Array } from "@itwin/core-bentley";
 import type { TreeToolbarButtonProps } from "../../tree-header/SelectableTree.js";
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { ModelId } from "../common/internal/Types.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
-import { useGuid } from "../common/useGuid.js";
+import { useGuid } from "../common/internal/useGuid.js";
 
 /**
  * Props that get passed to `CategoriesTreeComponent` header button renderer.
@@ -63,7 +63,7 @@ export function useCategoriesTreeButtonProps({ viewport }: { viewport: TreeWidge
 
   const componentId = useGuid();
   const categories = useCategories(viewport, componentId);
-  const models = useAvailableModels(viewport);
+  const models = useAvailableModels(viewport, componentId);
 
   return {
     buttonProps: {
@@ -83,6 +83,7 @@ export type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonP
 
 /** @public */
 export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
+  const componentId = useGuid();
   return (
     <IconButton
       variant={"ghost"}
@@ -90,7 +91,7 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
       onClick={() => {
         // cspell:disable-next-line
         props.onFeatureUsed?.(`categories-tree-showall`);
-        void showAll({ models: props.models, viewport: props.viewport, categories: props.categories.map((category) => category.categoryId) });
+        void showAll({ models: props.models, viewport: props.viewport, categories: props.categories.map((category) => category.categoryId), componentId });
       }}
       icon={visibilityShowSvg}
     />
@@ -139,24 +140,24 @@ function useCategories(viewport: TreeWidgetViewport, componentId: GuidString) {
   return useAsyncValue(categoriesPromise) ?? EMPTY_CATEGORIES_ARRAY;
 }
 
-function useAvailableModels(viewport: TreeWidgetViewport): Array<ModelId> {
+function useAvailableModels(viewport: TreeWidgetViewport, componentId: GuidString): Array<ModelId> {
   const [availableModels, setAvailableModels] = useState<Array<ModelId>>([]);
   const imodel = viewport.iModel;
   const viewType = viewport.viewType === "2d" ? "2d" : "3d";
   useEffect(() => {
-    queryModelsForHeaderActions(imodel, viewType)
+    queryModelsForHeaderActions(imodel, viewType, componentId)
       .then((models) => {
         setAvailableModels(models);
       })
       .catch(() => {
         setAvailableModels([]);
       });
-  }, [imodel, viewType]);
+  }, [imodel, viewType, componentId]);
 
   return availableModels;
 }
 
-async function queryModelsForHeaderActions(iModel: IModelConnection, viewType: "2d" | "3d"): Promise<Array<ModelId>> {
+async function queryModelsForHeaderActions(iModel: IModelConnection, viewType: "2d" | "3d", componentId: GuidString): Promise<Array<ModelId>> {
   const { modelClass } = getClassesByView(viewType);
   const models = new Array<ModelId>();
   const query = `
@@ -168,7 +169,7 @@ async function queryModelsForHeaderActions(iModel: IModelConnection, viewType: "
       m.IsPrivate = false
   `;
   for await (const _row of iModel.createQueryReader(query, undefined, {
-    restartToken: "tree-widget/categories-tree/all-models-query",
+    restartToken: `CategoriesTreeButtons/${componentId}/all-models`,
     rowFormat: QueryRowFormat.UseECSqlPropertyNames,
   })) {
     models.push(_row.id);

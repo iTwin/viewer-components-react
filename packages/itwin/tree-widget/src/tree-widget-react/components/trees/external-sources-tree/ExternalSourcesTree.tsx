@@ -17,6 +17,10 @@ import { ExternalSourcesTreeDefinition } from "./ExternalSourcesTreeDefinition.j
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { BaseTreeRendererProps } from "../common/components/BaseTreeRenderer.js";
 import type { TreeProps } from "../common/components/Tree.js";
+import { useGuid } from "../common/internal/useGuid.js";
+import { useCallback } from "react";
+import type { Props } from "@itwin/presentation-shared";
+import type { GuidString } from "@itwin/core-bentley";
 
 /** @beta */
 export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
@@ -28,12 +32,13 @@ export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "selectionStor
 
 /** @beta */
 export function ExternalSourcesTree({ getInlineActions, getMenuActions, getDecorations, selectionMode, treeLabel, ...rest }: ExternalSourcesTreeProps) {
+  const componentId = useGuid();
   return (
     <Tree
       emptyTreeContent={<EmptyTreeContent icon={documentSvg} />}
       {...rest}
       treeName={ExternalSourcesTreeComponent.id}
-      getHierarchyDefinition={getDefinitionsProvider}
+      getHierarchyDefinition={useCallback((definitionProps) => getDefinitionsProvider({ ...definitionProps, componentId }), [componentId])}
       selectionMode={selectionMode ?? "none"}
       treeRenderer={(treeProps) => (
         <TreeRenderer
@@ -48,7 +53,7 @@ export function ExternalSourcesTree({ getInlineActions, getMenuActions, getDecor
   );
 }
 
-const getDefinitionsProvider = (props: Parameters<TreeProps["getHierarchyDefinition"]>[0] & { componentId: GuidString }): HierarchyDefinition => {
+const getDefinitionsProvider = (props: Props<TreeProps["getHierarchyDefinition"]> & { componentId: GuidString }) => {
   return new ExternalSourcesTreeDefinition(props);
 };
 

@@ -4,14 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { map, reduce } from "rxjs";
-import { Id64 } from "@itwin/core-bentley";
+import { Guid, Id64 } from "@itwin/core-bentley";
 import { QueryRowFormat } from "@itwin/core-common";
 import { reduceWhile } from "./Rxjs.js";
 import { createVisibilityStatus } from "./Tooltip.js";
 import { getClassesByView, releaseMainThreadOnItemsCount } from "./Utils.js";
 
 import type { Observable, OperatorFunction } from "rxjs";
-import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Arg, Id64String } from "@itwin/core-bentley";
 import type { CategoryInfo } from "../CategoriesVisibilityUtils.js";
 import type { TreeWidgetViewport } from "../TreeWidgetViewport.js";
 import type { VisibilityStatus } from "../UseHierarchyVisibility.js";
@@ -142,28 +142,6 @@ export interface GetVisibilityFromAlwaysAndNeverDrawnElementsProps {
 }
 
 /**
- * Toggles visibility of categories to show or hide.
- * @internal
- */
-export async function toggleAllCategories(viewport: TreeWidgetViewport, display: boolean) {
-  const categoryIds = await getCategoryIds(viewport);
-  if (categoryIds.length === 0) {
-    return;
-  }
-
-  await enableCategoryDisplay(viewport, categoryIds, display);
-}
-
-/**
- * Gets ids of all categories from specified imodel and viewport.
- * @internal
- */
-async function getCategoryIds(viewport: TreeWidgetViewport): Promise<Id64Array> {
-  const categories = await loadCategoriesFromViewport(viewport);
-  return categories.map((category) => category.categoryId);
-}
-
-/**
  * Changes category display in the viewport.
  * @internal
  */
@@ -196,7 +174,7 @@ export function enableSubCategoryDisplay(viewport: TreeWidgetViewport, subCatego
 }
 
 /** @internal */
-export async function loadCategoriesFromViewport(vp: TreeWidgetViewport) {
+export async function loadCategoriesFromViewport(vp: TreeWidgetViewport, componentId?: GuidString) {
   // Query categories and add them to state
   if (vp.viewType === "other") {
     return [];
@@ -218,7 +196,7 @@ export async function loadCategoriesFromViewport(vp: TreeWidgetViewport) {
   const categories: CategoryInfo[] = [];
   const rows = await (async () => {
     const result = new Array<Id64String>();
-    for await (const row of vp.iModel.createQueryReader(ecsql, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames })) {
+    for await (const row of vp.iModel.createQueryReader(ecsql, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames, restartToken: `CategoriesVisibilityUtils/${componentId ?? Guid.createValue()}/categories` })) {
       result.push(row.id);
     }
     return result;

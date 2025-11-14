@@ -12,6 +12,7 @@ import type { ClassificationsTreeHierarchyConfiguration } from "../Classificatio
 import type { ClassificationsTreeIdsCache } from "./ClassificationsTreeIdsCache.js";
 
 import type { VisibilityTreeProps } from "../../common/components/VisibilityTree.js";
+import type { GuidString } from "@itwin/core-bentley";
 /** @internal */
 export type ClassificationsTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError";
 
@@ -23,11 +24,13 @@ export function useFilteredPaths({
   hierarchyConfiguration,
   getClassificationsTreeIdsCache,
   onFilteredPathsChanged,
+  componentId
 }: {
   filter?: string;
   hierarchyConfiguration: ClassificationsTreeHierarchyConfiguration;
   getClassificationsTreeIdsCache: () => ClassificationsTreeIdsCache;
   onFilteredPathsChanged: (paths: HierarchyFilteringPaths | undefined) => void;
+  componentId: GuidString;
 }): {
   getPaths: VisibilityTreeProps["getFilteredPaths"] | undefined;
   filteringError: ClassificationsTreeFilteringError | undefined;
@@ -54,6 +57,7 @@ export function useFilteredPaths({
           label: filter,
           idsCache: getClassificationsTreeIdsCache(),
           hierarchyConfig: hierarchyConfiguration,
+          componentId
         });
         onFilteredPathsChanged(paths);
         return paths;
@@ -67,7 +71,7 @@ export function useFilteredPaths({
         return [];
       }
     };
-  }, [filter, onFilteredPathsChanged, onFeatureUsed, getClassificationsTreeIdsCache, hierarchyConfiguration]);
+  }, [filter, onFilteredPathsChanged, onFeatureUsed, getClassificationsTreeIdsCache, hierarchyConfiguration, componentId]);
 
   return {
     getPaths: getFilteredPaths,

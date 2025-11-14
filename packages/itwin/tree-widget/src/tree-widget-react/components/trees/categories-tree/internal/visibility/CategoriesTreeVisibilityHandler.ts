@@ -420,5 +420,6 @@ export function createCategoriesTreeVisibilityHandler(props: {
       });
     },
     viewport: props.viewport,
+    componentId: "Test"
   });
 }

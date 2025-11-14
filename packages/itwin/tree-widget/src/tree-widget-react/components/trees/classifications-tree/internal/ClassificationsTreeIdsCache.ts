@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { from, map, mergeMap } from "rxjs";
-import { Id64 } from "@itwin/core-bentley";
+import { Guid, Id64 } from "@itwin/core-bentley";
 import {
   CLASS_NAME_Classification,
   CLASS_NAME_ClassificationSystem,
@@ -19,7 +19,7 @@ import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCate
 import { getDistinctMapValues, joinId64Arg } from "../../common/internal/Utils.js";
 
 import type { Observable } from "rxjs";
-import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { ClassificationsTreeHierarchyConfiguration } from "../ClassificationsTreeDefinition.js";
@@ -47,14 +47,19 @@ export class ClassificationsTreeIdsCache implements Disposable {
   #filteredElementsData: Promise<Map<ElementId, { modelId: Id64String; categoryId: Id64String }>> | undefined;
   #queryExecutor: LimitingECSqlQueryExecutor;
   #hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
+  #componentId: GuidString;
+  #componentName: string;
 
   constructor(
     queryExecutor: LimitingECSqlQueryExecutor,
     hierarchyConfig: ClassificationsTreeHierarchyConfiguration,
+    componentId?: GuidString
   ) {
     this.#queryExecutor = queryExecutor;
     this.#hierarchyConfig = hierarchyConfig;
-    this.#categoryElementCounts = new ModelCategoryElementsCountCache(this.#queryExecutor, ["BisCore.GeometricElement2d", "BisCore.GeometricElement3d"]);
+    this.#componentId = componentId ?? Guid.createValue();
+    this.#componentName = "ClassificationsTreeIdsCache";
+    this.#categoryElementCounts = new ModelCategoryElementsCountCache(this.#queryExecutor, ["BisCore.GeometricElement2d", "BisCore.GeometricElement3d"], this.#componentId);
   }
 
   public [Symbol.dispose]() {
@@ -85,7 +90,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
     `;
     for await (const row of this.#queryExecutor.createQueryReader(
       { ecsql: query },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: "tree-widget/classifications-tree/element-models-and-categories-query" },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/element-models-and-categories` },
     )) {
       yield { modelId: row.modelId, categoryId: row.categoryId, type: row.type };
     }
@@ -155,7 +160,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
     `;
     for await (const row of this.#queryExecutor.createQueryReader(
       { ecsql: query },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: "tree-widget/classifications-tree/modeled-elements-query" },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/modeled-elements` },
     )) {
       yield { modelId: row.modelId, categoryId: row.categoryId, modeledElementId: row.modeledElementId, rootCategoryId: row.rootCategoryId };
     }
@@ -299,7 +304,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
     `;
     for await (const row of this.#queryExecutor.createQueryReader(
       { ctes, ecsql },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: "tree-widget/classifications-tree/classifications-query" },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/classifications` },
     )) {
       yield {
         id: row.id,
@@ -425,7 +430,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
     }
     for await (const row of this.#queryExecutor.createQueryReader(
       { ecsql: queries.join(" UNION ALL ") },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded" },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/filtered-elements/${Guid.createValue()}` },
     )) {
       yield { modelId: row.modelId, id: row.id, categoryId: row.categoryId };
     }

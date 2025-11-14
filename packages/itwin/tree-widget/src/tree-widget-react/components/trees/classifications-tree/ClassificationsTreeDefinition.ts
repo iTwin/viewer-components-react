@@ -20,7 +20,7 @@ import { releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 
 import type { Observable, OperatorFunction } from "rxjs";
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import { Guid, type GuidString, type Id64Array, type Id64String, type MarkRequired } from "@itwin/core-bentley";
 import type {
   DefineHierarchyLevelProps,
   DefineInstanceNodeChildHierarchyLevelProps,
@@ -61,6 +61,7 @@ export interface ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps {
   limit?: number | "unbounded";
   idsCache: ClassificationsTreeIdsCache;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
+  componentId?: GuidString;
 }
 
 /** @internal */
@@ -69,6 +70,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
   #selectQueryFactory: NodesQueryClauseFactory;
   #nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
   #props: ClassificationsTreeDefinitionProps;
+  static #componentName = "ClassificationsTreeDefinition";
 
   public constructor(props: ClassificationsTreeDefinitionProps) {
     this.#props = props;
@@ -335,7 +337,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
 
   public static async createInstanceKeyPaths(props: ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps): Promise<NormalizedHierarchyFilteringPath[]> {
     const labelsFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
-    return createInstanceKeyPathsFromInstanceLabel({ ...props, labelsFactory });
+    return createInstanceKeyPathsFromInstanceLabel({ ...props, labelsFactory, componentId: props.componentId ?? Guid.createValue(), componentName: this.#componentName });
   }
 }
 
@@ -358,7 +360,7 @@ function createClassificationHasChildrenSelector(classificationAlias: string) {
 }
 
 async function createInstanceKeyPathsFromInstanceLabel(
-  props: ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps & { labelsFactory: IInstanceLabelSelectClauseFactory },
+  props: MarkRequired<ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps, "componentId"> & { labelsFactory: IInstanceLabelSelectClauseFactory; componentName: string },
 ): Promise<NormalizedHierarchyFilteringPath[]> {
   const adjustedLabel = props.label.replace(/[%_\\]/g, "\\$&");
 
@@ -509,7 +511,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
       return { ctes, ecsql, bindings };
     }).pipe(
       mergeMap((queryProps) =>
-        props.imodelAccess.createQueryReader(queryProps, { restartToken: "tree-widget/classifications-tree/filter-by-label-query", limit: props.limit }),
+        props.imodelAccess.createQueryReader(queryProps, { restartToken: `${props.componentName}/${props.componentId}/filter-by-label`, limit: props.limit }),
       ),
       map((row): InstanceKey => {
         let className: string;
@@ -542,7 +544,9 @@ function createInstanceKeyPathsFromTargetItems({
   idsCache,
   imodelAccess,
   limit,
-}: Pick<ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps, "limit" | "imodelAccess" | "idsCache">): OperatorFunction<
+  componentId,
+  componentName
+}: Pick<ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps, "limit" | "imodelAccess" | "idsCache"> & { componentId: GuidString; componentName: string}): OperatorFunction<
   InstanceKey,
   NormalizedHierarchyFilteringPath
 > {
@@ -592,12 +596,12 @@ function createInstanceKeyPathsFromTargetItems({
           from(ids.element2dIds).pipe(
             bufferCount(Math.ceil(elements2dLength / Math.ceil(elements2dLength / 5000))),
             releaseMainThreadOnItemsCount(1),
-            mergeMap((block) => createGeometricElementInstanceKeyPaths({ idsCache, imodelAccess, targetItems: block, type: "2d" }), 10),
+            mergeMap((block, chunkIndex) => createGeometricElementInstanceKeyPaths({ idsCache, imodelAccess, targetItems: block, type: "2d", chunkIndex, componentId, componentName }), 10),
           ),
           from(ids.element3dIds).pipe(
             bufferCount(Math.ceil(elements3dLength / Math.ceil(elements3dLength / 5000))),
             releaseMainThreadOnItemsCount(1),
-            mergeMap((block) => createGeometricElementInstanceKeyPaths({ idsCache, imodelAccess, targetItems: block, type: "3d" }), 10),
+            mergeMap((block, chunkIndex) => createGeometricElementInstanceKeyPaths({ idsCache, imodelAccess, targetItems: block, type: "3d", chunkIndex, componentId, componentName }), 10),
           ),
         );
       }),
@@ -610,8 +614,11 @@ function createGeometricElementInstanceKeyPaths(props: {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   targetItems: Id64Array;
   type: "2d" | "3d";
+  componentId: GuidString;
+  componentName: string;
+  chunkIndex: number;
 }): Observable<NormalizedHierarchyFilteringPath> {
-  const { targetItems, imodelAccess, type, idsCache } = props;
+  const { targetItems, imodelAccess, type, idsCache, componentId, componentName, chunkIndex } = props;
   if (targetItems.length === 0) {
     return EMPTY;
   }
@@ -651,7 +658,7 @@ function createGeometricElementInstanceKeyPaths(props: {
 
     return imodelAccess.createQueryReader(
       { ctes, ecsql },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `tree-widget/classifications-tree/elements${type}-filter-paths-query` },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${componentName}/${componentId}/elements${type}-filter-paths/${chunkIndex}` },
     );
   }).pipe(
     releaseMainThreadOnItemsCount(300),

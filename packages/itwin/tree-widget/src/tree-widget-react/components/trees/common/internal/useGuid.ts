@@ -6,6 +6,7 @@
 import { useState } from "react";
 import { Guid } from "@itwin/core-bentley";
 
+/** @internal */
 export function useGuid() {
   const [componentId] = useState(() => Guid.createValue());
   return componentId;

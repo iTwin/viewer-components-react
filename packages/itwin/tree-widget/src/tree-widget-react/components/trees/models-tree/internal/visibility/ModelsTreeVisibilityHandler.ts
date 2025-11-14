@@ -404,5 +404,6 @@ export function createModelsTreeVisibilityHandler(props: {
       });
     },
     viewport: props.viewport,
+    componentId: "Test"
   });
 }

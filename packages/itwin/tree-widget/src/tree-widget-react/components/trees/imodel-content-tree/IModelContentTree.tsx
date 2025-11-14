@@ -23,6 +23,7 @@ import type { IModelContentTreeHierarchyConfiguration } from "./IModelContentTre
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { BaseTreeRendererProps } from "../common/components/BaseTreeRenderer.js";
 import type { TreeProps } from "../common/components/Tree.js";
+import { useGuid } from "../common/internal/useGuid.js";
 
 /** @beta */
 export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
@@ -43,6 +44,7 @@ export function IModelContentTree({
   hierarchyConfig: hierarchyConfigProp,
   ...rest
 }: IModelContentTreeProps) {
+  const componentId = useGuid();
   const getHierarchyDefinition = useCallback<TreeProps["getHierarchyDefinition"]>(
     ({ imodelAccess }) => {
       const hierarchyConfig = {

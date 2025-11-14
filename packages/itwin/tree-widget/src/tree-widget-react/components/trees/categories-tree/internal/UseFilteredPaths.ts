@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useMemo, useState } from "react";
+import type { GuidString } from "@itwin/core-bentley";
 import { assert } from "@itwin/core-bentley";
 import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
@@ -31,6 +32,7 @@ export function useFilteredPaths({
   getCategoriesTreeIdsCache,
   onCategoriesFiltered,
   onFilteredPathsChanged,
+  componentId
 }: {
   viewType: "2d" | "3d";
   filter?: string;
@@ -38,6 +40,7 @@ export function useFilteredPaths({
   getCategoriesTreeIdsCache: () => CategoriesTreeIdsCache;
   onCategoriesFiltered?: (categories: { categories: CategoryInfo[] | undefined; models?: Array<ModelId> }) => void;
   onFilteredPathsChanged: (paths: HierarchyFilteringPaths | undefined) => void;
+  componentId: GuidString;
 }): {
   getPaths: VisibilityTreeProps["getFilteredPaths"] | undefined;
   filteringError: CategoriesTreeFilteringError | undefined;
@@ -68,6 +71,7 @@ export function useFilteredPaths({
           viewType,
           idsCache: getCategoriesTreeIdsCache(),
           hierarchyConfig: hierarchyConfiguration,
+          componentId
         });
         onFilteredPathsChanged(paths);
         const { elementClass, modelClass } = getClassesByView(viewType);
@@ -83,7 +87,7 @@ export function useFilteredPaths({
         return [];
       }
     };
-  }, [onCategoriesFiltered, filter, onFilteredPathsChanged, onFeatureUsed, viewType, getCategoriesTreeIdsCache, hierarchyConfiguration]);
+  }, [onCategoriesFiltered, filter, onFilteredPathsChanged, onFeatureUsed, viewType, getCategoriesTreeIdsCache, hierarchyConfiguration, componentId]);
 
   return {
     getPaths: getFilteredPaths,

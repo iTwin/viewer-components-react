@@ -16,7 +16,6 @@ import {
   enableCategoryDisplay,
   enableSubCategoryDisplay,
   loadCategoriesFromViewport,
-  toggleAllCategories,
 } from "../../tree-widget-react/components/trees/common/internal/VisibilityUtils.js";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory, insertSubCategory } from "../IModelUtils.js";
 import { TestUtils } from "../TestUtils.js";
@@ -70,18 +69,6 @@ describe("CategoryVisibilityUtils", () => {
 
   afterEach(() => {
     sinon.restore();
-  });
-
-  describe("toggleAllCategories", () => {
-    it("enables all categories", async () => {
-      await toggleAllCategories(viewport, true);
-      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: [categoryId], display: true, enableAllSubCategories: true });
-    });
-
-    it("disables all categories", async () => {
-      await toggleAllCategories(viewport, false);
-      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: [categoryId], display: false, enableAllSubCategories: true });
-    });
   });
 
   describe("enableCategoryDisplay", () => {

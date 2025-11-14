@@ -45,6 +45,7 @@ import type { ModelsTreeFilteringError, ModelsTreeSubTreeError } from "./interna
 import type { ModelsTreeFilterTargets } from "./internal/visibility/FilteredTree.js";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/visibility/ModelsTreeVisibilityHandler.js";
 import type { ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition.js";
+import { useGuid } from "../common/internal/useGuid.js";
 
 /** @beta */
 export interface UseModelsTreeProps {
@@ -139,11 +140,12 @@ export function useModelsTree({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     Object.values(hierarchyConfig ?? {}),
   );
+  const componentId = useGuid();
   const { getCache: getModelsTreeIdsCache } = useIdsCache<ModelsTreeIdsCache, { hierarchyConfig: ModelsTreeHierarchyConfiguration }>({
     imodel: activeView.iModel,
     createCache,
     cacheSpecificProps: useMemo(() => ({ hierarchyConfig: hierarchyConfiguration }), [hierarchyConfiguration]),
-    componentId,
+    componentId
   });
 
   const { visibilityHandlerFactory, onFilteredPathsChanged } = useCachedVisibility<ModelsTreeIdsCache, ModelsTreeFilterTargets>({
@@ -154,6 +156,7 @@ export function useModelsTree({
       [visibilityHandlerOverrides],
     ),
     getCache: getModelsTreeIdsCache,
+    componentId
   });
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
@@ -169,6 +172,7 @@ export function useModelsTree({
     onFilteredPathsChanged,
     onModelsFiltered,
     getSubTreePaths,
+    componentId
   });
 
   const nodeSelectionPredicate = useCallback<NonNullable<VisibilityTreeProps["selectionPredicate"]>>(
@@ -296,5 +300,5 @@ export function ModelsTreeIcon({ node }: { node: PresentationHierarchyNode }) {
 }
 
 function createCache(props: CreateCacheProps<{ hierarchyConfig: ModelsTreeHierarchyConfiguration }>) {
-  return new ModelsTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.hierarchyConfig);
+  return new ModelsTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.hierarchyConfig, props.componentId);
 }

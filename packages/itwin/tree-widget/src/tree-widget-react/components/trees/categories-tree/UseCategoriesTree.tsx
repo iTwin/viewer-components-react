@@ -22,7 +22,7 @@ import { CategoriesTreeVisibilityHandler } from "./internal/visibility/Categorie
 import { createFilteredCategoriesTree } from "./internal/visibility/FilteredTree.js";
 
 import type { ReactNode } from "react";
-import type { Id64Array } from "@itwin/core-bentley";
+import type { GuidString, Id64Array } from "@itwin/core-bentley";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
@@ -34,6 +34,7 @@ import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { CategoriesTreeHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
 import type { CategoriesTreeFilterTargets } from "./internal/visibility/FilteredTree.js";
 import type { CategoriesTreeFilteringError } from "./internal/UseFilteredPaths.js";
+import { useGuid } from "../common/internal/useGuid.js";
 
 /** @beta */
 export interface UseCategoriesTreeProps {
@@ -73,18 +74,20 @@ export function useCategoriesTree({
     Object.values(hierarchyConfig ?? {}),
   );
   const viewType = activeView.viewType === "2d" ? "2d" : "3d";
+  const componentId = useGuid();
 
   const { getCache: getCategoriesTreeIdsCache } = useIdsCache<CategoriesTreeIdsCache, { viewType: "2d" | "3d" }>({
     imodel: activeView.iModel,
     createCache,
     cacheSpecificProps: useMemo(() => ({ viewType }), [viewType]),
-    componentId,
+    componentId
   });
 
   const { visibilityHandlerFactory, onFilteredPathsChanged } = useCategoriesCachedVisibility({
     activeView,
     viewType,
     getCache: getCategoriesTreeIdsCache,
+    componentId
   });
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
@@ -101,6 +104,7 @@ export function useCategoriesTree({
     onFilteredPathsChanged,
     viewType,
     onCategoriesFiltered,
+    componentId
   });
 
   return {
@@ -165,8 +169,8 @@ function getSublabel(node: PresentationHierarchyNode) {
   return node.nodeData.extendedData?.description;
 }
 
-function useCategoriesCachedVisibility(props: { activeView: TreeWidgetViewport; getCache: () => CategoriesTreeIdsCache; viewType: "2d" | "3d" }) {
-  const { activeView, getCache, viewType } = props;
+function useCategoriesCachedVisibility(props: { activeView: TreeWidgetViewport; getCache: () => CategoriesTreeIdsCache; viewType: "2d" | "3d"; componentId: GuidString }) {
+  const { activeView, getCache, viewType, componentId } = props;
   const { visibilityHandlerFactory, filteredPaths, onFilteredPathsChanged } = useCachedVisibility<CategoriesTreeIdsCache, CategoriesTreeFilterTargets>({
     activeView,
     getCache,
@@ -176,6 +180,7 @@ function useCategoriesCachedVisibility(props: { activeView: TreeWidgetViewport; 
       [viewType],
     ),
     createTreeSpecificVisibilityHandler,
+    componentId
   });
 
   useEffect(() => {

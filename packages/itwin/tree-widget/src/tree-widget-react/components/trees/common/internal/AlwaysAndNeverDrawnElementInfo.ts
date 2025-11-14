@@ -28,12 +28,12 @@ import {
   takeUntil,
   tap,
 } from "rxjs";
-import { Id64 } from "@itwin/core-bentley";
+import { Guid, Id64 } from "@itwin/core-bentley";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import type { ChildrenTree} from "./Utils.js";
 import { getClassesByView, getIdsFromChildrenTree, releaseMainThreadOnItemsCount, setDifference, updateChildrenTree } from "./Utils.js";
 
-import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Observable, Subscription } from "rxjs";
 import type { TreeWidgetViewport } from "../TreeWidgetViewport.js";
 
@@ -93,13 +93,15 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
   #disposeSubject = new Subject<void>();
   readonly #viewport: TreeWidgetViewport;
   readonly #elementClassName?: string;
+  #componentId: GuidString;
+  #componentName: string;
 
   #suppressors: Observable<number>;
   #suppress = new Subject<boolean>();
 
-  constructor(viewport: TreeWidgetViewport, elementClassName?: string) {
-    this.#elementClassName = elementClassName;
-    this.#viewport = viewport;
+  constructor(props: { viewport: TreeWidgetViewport; elementClassName?: string; componentId?: GuidString }) {
+    this.#elementClassName = props.elementClassName;
+    this.#viewport = props.viewport;
     this.#alwaysDrawn = { cacheEntryObs: this.createCacheEntryObservable("always") };
     this.#neverDrawn = { cacheEntryObs: this.createCacheEntryObservable("never") };
     this.#suppressors = this.#suppress.pipe(
@@ -108,6 +110,8 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
       shareReplay(1),
     );
     this.#subscriptions = [this.#alwaysDrawn.cacheEntryObs.subscribe(), this.#neverDrawn.cacheEntryObs.subscribe()];
+    this.#componentId = props.componentId ?? Guid.createValue();
+    this.#componentName = "AlwaysAndNeverDrawnElementInfo";
   }
 
   public suppressChangeEvents() {
@@ -310,7 +314,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
         },
         {
           rowFormat: "ECSqlPropertyNames",
-          restartToken: `ModelsTreeVisibilityHandler/${requestId}`,
+          restartToken: `${this.#componentName}/${this.#componentId}/${requestId}`,
         },
       );
     }).pipe(
