@@ -87,12 +87,8 @@ describe("categories tree", () => {
         viewport,
         ...testData,
       });
-      const hierarchyConfig = {
-        hideSubCategories: false,
-        showElements: false,
-      };
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d");
-      const handler = createCategoriesTreeVisibilityHandler({ imodelAccess, idsCache, viewport });
+      const handler = createCategoriesTreeVisibilityHandler({ imodelAccess, idsCache, viewport, hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration });
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new CategoriesTreeDefinition({ idsCache, imodelAccess, viewType: "3d", hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration }),
         imodelAccess,
@@ -111,6 +107,7 @@ describe("categories tree", () => {
         imodelAccess,
         viewport,
         provider,
+        idsCache,
         handler,
         definitionContainer: visibilityTargets.definitionContainers[0],
         iModelConnection,
@@ -165,7 +162,7 @@ describe("categories tree", () => {
         ...testData,
       });
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d");
-      const handler = createCategoriesTreeVisibilityHandler({ imodelAccess, idsCache, viewport });
+      const handler = createCategoriesTreeVisibilityHandler({ imodelAccess, idsCache, viewport, hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration });
       const provider = createIModelHierarchyProvider({
         hierarchyDefinition: new CategoriesTreeDefinition({ idsCache, imodelAccess, viewType: "3d", hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration }),
         imodelAccess,

@@ -25,12 +25,14 @@ import type { BaseIdsCache, TreeSpecificVisibilityHandler } from "../../../commo
 import type { TreeWidgetViewport } from "../../../common/TreeWidgetViewport.js";
 import type { CategoriesTreeIdsCache } from "../CategoriesTreeIdsCache.js";
 import type { CategoriesTreeFilterTargets } from "./FilteredTree.js";
+import type { CategoriesTreeHierarchyConfiguration } from "../../CategoriesTreeDefinition.js";
 
 /** @internal */
 export interface CategoriesTreeVisibilityHandlerProps {
   idsCache: CategoriesTreeIdsCache;
   viewport: TreeWidgetViewport;
   alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfo;
+  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
 }
 
 /**
@@ -63,6 +65,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
       idsCache: this.#props.idsCache,
       alwaysAndNeverDrawnElementInfo: this.#props.alwaysAndNeverDrawnElementInfo,
       baseIdsCache,
+      hierarchyConfig: constructorProps.hierarchyConfig
     });
 
     this.#elementType = this.#props.viewport.viewType === "2d" ? "GeometricElement2d" : "GeometricElement3d";
@@ -396,6 +399,7 @@ export function createCategoriesTreeVisibilityHandler(props: {
   idsCache: CategoriesTreeIdsCache;
   imodelAccess: ECClassHierarchyInspector;
   filteredPaths?: HierarchyFilteringPath[];
+  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
 }) {
   return new HierarchyVisibilityHandlerImpl<CategoriesTreeFilterTargets>({
     getFilteredTree: (): undefined | Promise<FilteredTree<CategoriesTreeFilterTargets>> => {
@@ -417,6 +421,7 @@ export function createCategoriesTreeVisibilityHandler(props: {
         alwaysAndNeverDrawnElementInfo: info,
         idsCache: props.idsCache,
         viewport: props.viewport,
+        hierarchyConfig: props.hierarchyConfig
       });
     },
     viewport: props.viewport,

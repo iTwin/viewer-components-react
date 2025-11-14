@@ -87,7 +87,8 @@ export function useCategoriesTree({
     activeView,
     viewType,
     getCache: getCategoriesTreeIdsCache,
-    componentId
+    componentId,
+    hierarchyConfig: hierarchyConfiguration
   });
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
@@ -169,7 +170,7 @@ function getSublabel(node: PresentationHierarchyNode) {
   return node.nodeData.extendedData?.description;
 }
 
-function useCategoriesCachedVisibility(props: { activeView: TreeWidgetViewport; getCache: () => CategoriesTreeIdsCache; viewType: "2d" | "3d"; componentId: GuidString }) {
+function useCategoriesCachedVisibility(props: { activeView: TreeWidgetViewport; getCache: () => CategoriesTreeIdsCache; viewType: "2d" | "3d"; componentId: GuidString; hierarchyConfig: CategoriesTreeHierarchyConfiguration }) {
   const { activeView, getCache, viewType, componentId } = props;
   const { visibilityHandlerFactory, filteredPaths, onFilteredPathsChanged } = useCachedVisibility<CategoriesTreeIdsCache, CategoriesTreeFilterTargets>({
     activeView,
@@ -179,7 +180,7 @@ function useCategoriesCachedVisibility(props: { activeView: TreeWidgetViewport; 
         createFilteredTree({ ...filteredTreeProps, viewClasses: getClassesByView(viewType) }),
       [viewType],
     ),
-    createTreeSpecificVisibilityHandler,
+    createTreeSpecificVisibilityHandler: (specificProps) => createTreeSpecificVisibilityHandler({ ...specificProps, hierarchyConfig: props.hierarchyConfig }),
     componentId
   });
 
@@ -193,12 +194,13 @@ function useCategoriesCachedVisibility(props: { activeView: TreeWidgetViewport; 
   };
 }
 
-function createTreeSpecificVisibilityHandler(props: CreateTreeSpecificVisibilityHandlerProps<CategoriesTreeIdsCache>) {
-  const { info, getCache, viewport } = props;
+function createTreeSpecificVisibilityHandler(props: CreateTreeSpecificVisibilityHandlerProps<CategoriesTreeIdsCache> & { hierarchyConfig: CategoriesTreeHierarchyConfiguration }) {
+  const { info, getCache, viewport, hierarchyConfig } = props;
   return new CategoriesTreeVisibilityHandler({
     alwaysAndNeverDrawnElementInfo: info,
     idsCache: getCache(),
     viewport,
+    hierarchyConfig
   });
 }
 

@@ -87,12 +87,15 @@ export interface CategoriesTreeHierarchyConfiguration {
   hideSubCategories: boolean;
   /** Should Elements be shown. Defaults to `false` */
   showElements: boolean;
+  /** Should categories without elements be shown. Defaults to `false`. */
+  showEmptyCategories: boolean;
 }
 
 /** @internal */
 export const defaultHierarchyConfiguration: CategoriesTreeHierarchyConfiguration = {
   hideSubCategories: false,
   showElements: false,
+  showEmptyCategories: false,
 };
 
 /** @internal */
@@ -321,8 +324,11 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     const { parentNodeInstanceIds, instanceFilter } = props;
     const { definitionContainers, categories } =
       parentNodeInstanceIds === undefined
-        ? await this.#idsCache.getRootDefinitionContainersAndCategories()
-        : await this.#idsCache.getDirectChildDefinitionContainersAndCategories(parentNodeInstanceIds);
+        ? await this.#idsCache.getRootDefinitionContainersAndCategories({ includeEmpty: this.#hierarchyConfig.showEmptyCategories })
+        : await this.#idsCache.getDirectChildDefinitionContainersAndCategories({
+            parentDefinitionContainerIds: parentNodeInstanceIds,
+            includeEmpty: this.#hierarchyConfig.showEmptyCategories,
+          });
     const hierarchyDefinition = new Array<HierarchyNodesDefinition>();
     if (categories.length > 0) {
       hierarchyDefinition.push(...(await this.createCategoriesQuery({ categories, instanceFilter })));
@@ -662,7 +668,9 @@ async function createInstanceKeyPathsFromInstanceLabel(
 
   return lastValueFrom(
     defer(async () => {
-      const { definitionContainers, categories } = await idsCache.getAllDefinitionContainersAndCategories();
+      const { definitionContainers, categories } = await idsCache.getAllDefinitionContainersAndCategories({
+        includeEmpty: props.hierarchyConfig.showEmptyCategories,
+      });
       if (categories.length === 0) {
         return undefined;
       }

@@ -128,6 +128,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       idsCache: commonProps.idsCache,
       imodelAccess: commonProps.imodelAccess,
       filteredPaths: undefined,
+      hierarchyConfig: hierarchyConfiguration
     });
     const provider = createProvider({ ...commonProps });
 

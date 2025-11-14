@@ -75,7 +75,7 @@ export function useFilteredPaths({
         });
         onFilteredPathsChanged(paths);
         const { elementClass, modelClass } = getClassesByView(viewType);
-        onCategoriesFiltered?.(await getCategoriesFromPaths(paths, getCategoriesTreeIdsCache(), elementClass, modelClass));
+        onCategoriesFiltered?.(await getCategoriesFromPaths(paths, getCategoriesTreeIdsCache(), elementClass, modelClass, hierarchyConfiguration));
         return paths;
       } catch (e) {
         const newError = e instanceof FilterLimitExceededError ? "tooManyFilterMatches" : "unknownFilterError";
@@ -100,6 +100,7 @@ async function getCategoriesFromPaths(
   idsCache: CategoriesTreeIdsCache,
   elementClassName: string,
   modelsClassName: string,
+  hierarchyConfig: CategoriesTreeHierarchyConfiguration
 ): Promise<{ categories: CategoryInfo[] | undefined; models?: Array<ModelId> }> {
   if (!paths) {
     return { categories: undefined };
@@ -144,7 +145,7 @@ async function getCategoriesFromPaths(
     assert(lastNodeInfo !== undefined && HierarchyNodeIdentifier.isInstanceNodeIdentifier(lastNodeInfo.lastNode));
 
     if (lastNodeInfo.lastNode.className === CLASS_NAME_DefinitionContainer) {
-      const definitionContainerCategories = await idsCache.getAllContainedCategories(lastNodeInfo.lastNode.id);
+      const definitionContainerCategories = await idsCache.getAllContainedCategories({ definitionContainerIds: lastNodeInfo.lastNode.id, includeEmptyCategories: hierarchyConfig.showEmptyCategories});
       for (const categoryId of definitionContainerCategories) {
         const value = categories.get(categoryId);
         if (value === undefined) {

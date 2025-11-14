@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import { VisibilityTree } from "../common/components/VisibilityTree.js";
 import { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRenderer.js";
 import { useCategoriesTree } from "./UseCategoriesTree.js";
@@ -33,7 +34,6 @@ export function CategoriesTree({
   getDecorations,
   getInlineActions,
   getMenuActions,
-  hierarchyConfig,
   treeLabel,
 }: CategoriesTreeProps) {
   const { categoriesTreeProps, rendererProps } = useCategoriesTree({

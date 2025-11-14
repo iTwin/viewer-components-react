@@ -13,10 +13,12 @@ import type { ElementId, ModelId } from "../../../common/internal/Types.js";
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
 import type { BaseVisibilityHelperProps } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import type { CategoriesTreeIdsCache } from "../CategoriesTreeIdsCache.js";
+import type { CategoriesTreeHierarchyConfiguration } from "../../CategoriesTreeDefinition.js";
 
 /** @internal */
 export type CategoriesTreeVisibilityHelperProps = BaseVisibilityHelperProps & {
   idsCache: CategoriesTreeIdsCache;
+  hierarchyConfig: CategoriesTreeHierarchyConfiguration
 };
 
 /**
@@ -38,7 +40,10 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
    * Determines visibility status by checking visibility status of related categories.
    */
   public getDefinitionContainersVisibilityStatus(props: { definitionContainerIds: Id64Arg }): Observable<VisibilityStatus> {
-    return from(this.#props.idsCache.getAllContainedCategories(props.definitionContainerIds)).pipe(
+    return from(this.#props.idsCache.getAllContainedCategories({
+      definitionContainerIds: props.definitionContainerIds,
+      includeEmptyCategories: this.#props.hierarchyConfig.showEmptyCategories
+  })).pipe(
       mergeMap((categoryIds) =>
         this.getCategoriesVisibilityStatus({
           categoryIds,
@@ -71,7 +76,7 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
    * Does this by changing visibility status of related categories.
    */
   public changeDefinitionContainersVisibilityStatus(props: { definitionContainerIds: Id64Arg; on: boolean }): Observable<void> {
-    return from(this.#props.idsCache.getAllContainedCategories(props.definitionContainerIds)).pipe(
+    return from(this.#props.idsCache.getAllContainedCategories({ definitionContainerIds: props.definitionContainerIds, includeEmptyCategories: this.#props.hierarchyConfig.showEmptyCategories})).pipe(
       mergeMap((categoryIds) => this.changeCategoriesVisibilityStatus({ categoryIds, modelId: undefined, on: props.on })),
     );
   }
