@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { bufferCount, bufferTime, filter, firstValueFrom, from, map, mergeAll, mergeMap, reduce, ReplaySubject, Subject } from "rxjs";
-import { assert } from "@itwin/core-bentley";
+import { assert, Guid } from "@itwin/core-bentley";
 import { collect } from "./Rxjs.js";
 
 import type { GuidString, Id64Set, Id64String } from "@itwin/core-bentley";
@@ -104,7 +104,7 @@ export class ModelCategoryElementsCountCache implements Disposable {
                 GROUP BY modelId, categoryId
               `,
             },
-            { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/category-element-counts` },
+            { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/category-element-counts/${Guid.createValue()}` },
           );
 
           const result = new Array<{ modelId: Id64String; categoryId: Id64String; elementsCount: number }>();
