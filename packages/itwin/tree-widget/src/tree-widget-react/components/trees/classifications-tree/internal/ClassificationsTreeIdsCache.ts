@@ -40,21 +40,25 @@ type ModelCategoryKey = `${ModelId}-${CategoryId}`;
 
 /** @internal */
 export class ClassificationsTreeIdsCache implements Disposable {
-  private readonly _categoryElementCounts: ModelCategoryElementsCountCache;
-  private _elementModelsCategories: Promise<Map<ModelId, { category2dIds: Id64Set; category3dIds: Id64Set; isSubModel: boolean }>> | undefined;
-  private _modelWithCategoryModeledElements: Promise<Map<ModelCategoryKey, Set<ElementId>>> | undefined;
-  private _classificationInfos: Promise<Map<ClassificationId | ClassificationTableId, ClassificationInfo>> | undefined;
-  private _filteredElementsData: Promise<Map<ElementId, { modelId: Id64String; categoryId: Id64String }>> | undefined;
+  readonly #categoryElementCounts: ModelCategoryElementsCountCache;
+  #elementModelsCategories: Promise<Map<ModelId, { category2dIds: Id64Set; category3dIds: Id64Set; isSubModel: boolean }>> | undefined;
+  #modelWithCategoryModeledElements: Promise<Map<ModelCategoryKey, Set<ElementId>>> | undefined;
+  #classificationInfos: Promise<Map<ClassificationId | ClassificationTableId, ClassificationInfo>> | undefined;
+  #filteredElementsData: Promise<Map<ElementId, { modelId: Id64String; categoryId: Id64String }>> | undefined;
+  #queryExecutor: LimitingECSqlQueryExecutor;
+  #hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
 
   constructor(
-    private _queryExecutor: LimitingECSqlQueryExecutor,
-    private _hierarchyConfig: ClassificationsTreeHierarchyConfiguration,
+    queryExecutor: LimitingECSqlQueryExecutor,
+    hierarchyConfig: ClassificationsTreeHierarchyConfiguration,
   ) {
-    this._categoryElementCounts = new ModelCategoryElementsCountCache(_queryExecutor, ["BisCore.GeometricElement2d", "BisCore.GeometricElement3d"]);
+    this.#queryExecutor = queryExecutor;
+    this.#hierarchyConfig = hierarchyConfig;
+    this.#categoryElementCounts = new ModelCategoryElementsCountCache(this.#queryExecutor, ["BisCore.GeometricElement2d", "BisCore.GeometricElement3d"]);
   }
 
   public [Symbol.dispose]() {
-    this._categoryElementCounts[Symbol.dispose]();
+    this.#categoryElementCounts[Symbol.dispose]();
   }
 
   private async *queryElementModelCategories(): AsyncIterableIterator<{
@@ -79,7 +83,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
         GROUP BY modelId, categoryId
       )
     `;
-    for await (const row of this._queryExecutor.createQueryReader(
+    for await (const row of this.#queryExecutor.createQueryReader(
       { ecsql: query },
       { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: "tree-widget/classifications-tree/element-models-and-categories-query" },
     )) {
@@ -88,7 +92,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
   }
 
   private async getElementModelsCategories() {
-    this._elementModelsCategories ??= (async () => {
+    this.#elementModelsCategories ??= (async () => {
       const [modelCategories, modelWithCategoryModeledElements] = await Promise.all([
         (async () => {
           const elementModelsCategories = new Map<ModelId, { category2dIds: Id64Set; category3dIds: Id64Set }>();
@@ -119,7 +123,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
       }
       return result;
     })();
-    return this._elementModelsCategories;
+    return this.#elementModelsCategories;
   }
 
   private async *queryModeledElements(): AsyncIterableIterator<{
@@ -149,7 +153,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
         m.IsPrivate = false
         AND m.ECInstanceId IN (SELECT Model.Id FROM BisCore.Element)
     `;
-    for await (const row of this._queryExecutor.createQueryReader(
+    for await (const row of this.#queryExecutor.createQueryReader(
       { ecsql: query },
       { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: "tree-widget/classifications-tree/modeled-elements-query" },
     )) {
@@ -158,7 +162,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
   }
 
   private async getModelWithCategoryModeledElements() {
-    this._modelWithCategoryModeledElements ??= (async () => {
+    this.#modelWithCategoryModeledElements ??= (async () => {
       const modelWithCategoryModeledElements = new Map<ModelCategoryKey, Set<ElementId>>();
       for await (const { modelId, categoryId, modeledElementId } of this.queryModeledElements()) {
         const key: ModelCategoryKey = `${modelId}-${categoryId}`;
@@ -171,7 +175,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
       }
       return modelWithCategoryModeledElements;
     })();
-    return this._modelWithCategoryModeledElements;
+    return this.#modelWithCategoryModeledElements;
   }
 
   public async getCategoriesModeledElements(modelId: Id64String, categoryIds: Id64Arg): Promise<Id64Array> {
@@ -229,7 +233,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
   }
 
   public async getCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Promise<number> {
-    return this._categoryElementCounts.getCategoryElementsCount(modelId, categoryId);
+    return this.#categoryElementCounts.getCategoryElementsCount(modelId, categoryId);
   }
 
   private async *queryClassifications(): AsyncIterableIterator<
@@ -251,7 +255,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
           JOIN ${CLASS_NAME_ClassificationTable} ct ON ct.ECInstanceId = cl.Model.Id
           JOIN ${CLASS_NAME_ClassificationSystem} cs ON cs.ECInstanceId = ct.Parent.Id
           WHERE
-            cs.CodeValue = '${this._hierarchyConfig.rootClassificationSystemCode}'
+            cs.CodeValue = '${this.#hierarchyConfig.rootClassificationSystemCode}'
             AND NOT ct.IsPrivate
             AND NOT cl.IsPrivate
             AND cl.Parent.Id IS NULL
@@ -293,7 +297,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
         ) relatedCategories3d
       FROM ${CLASSIFICATIONS_CTE} cl
     `;
-    for await (const row of this._queryExecutor.createQueryReader(
+    for await (const row of this.#queryExecutor.createQueryReader(
       { ctes, ecsql },
       { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: "tree-widget/classifications-tree/classifications-query" },
     )) {
@@ -308,7 +312,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
   }
 
   private async getClassificationsInfo() {
-    this._classificationInfos ??= (async () => {
+    this.#classificationInfos ??= (async () => {
       const classificationInfos = new Map<ClassificationId | ClassificationTableId, ClassificationInfo>();
       for await (const { id, tableId, parentId, relatedCategories2d, relatedCategories3d } of this.queryClassifications()) {
         const tableOrParentId = tableId ?? parentId;
@@ -328,7 +332,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
       }
       return classificationInfos;
     })();
-    return this._classificationInfos;
+    return this.#classificationInfos;
   }
 
   public async getAllContainedCategories(classificationOrTableIds: Id64Arg): Promise<{ drawing: Id64Array; spatial: Id64Array }> {
@@ -419,7 +423,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
         WHERE ECInstanceId IN (${joinId64Arg(element3dIds, ",")})
       `);
     }
-    for await (const row of this._queryExecutor.createQueryReader(
+    for await (const row of this.#queryExecutor.createQueryReader(
       { ecsql: queries.join(" UNION ALL ") },
       { rowFormat: "ECSqlPropertyNames", limit: "unbounded" },
     )) {
@@ -438,7 +442,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
       return new Map();
     }
 
-    this._filteredElementsData ??= (async () => {
+    this.#filteredElementsData ??= (async () => {
       const filteredElementsData = new Map();
       for await (const { modelId, id, categoryId } of this.queryFilteredElementsData({
         element2dIds,
@@ -448,10 +452,10 @@ export class ClassificationsTreeIdsCache implements Disposable {
       }
       return filteredElementsData;
     })();
-    return this._filteredElementsData;
+    return this.#filteredElementsData;
   }
 
   public clearFilteredElementsData() {
-    this._filteredElementsData = undefined;
+    this.#filteredElementsData = undefined;
   }
 }
