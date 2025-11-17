@@ -16,7 +16,7 @@ import {
   CLASS_NAME_GeometricElement2d,
   CLASS_NAME_GeometricElement3d,
 } from "../common/internal/ClassNameDefinitions.js";
-import { releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
+import { getOptimalBatchSize, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 
 import type { Observable, OperatorFunction } from "rxjs";
@@ -594,12 +594,12 @@ function createInstanceKeyPathsFromTargetItems({
           from(ids.classificationTableIds).pipe(map((id) => ({ path: [{ id, className: CLASS_NAME_ClassificationTable }], options: { autoExpand: true } }))),
           idsCache.getClassificationsPathObs(ids.classificationIds).pipe(map((path) => ({ path, options: { autoExpand: true } }))),
           from(ids.element2dIds).pipe(
-            bufferCount(Math.ceil(elements2dLength / Math.ceil(elements2dLength / 5000))),
+            bufferCount(getOptimalBatchSize({ totalSize: elements2dLength, maximumBatchSize: 5000 })),
             releaseMainThreadOnItemsCount(1),
             mergeMap((block, chunkIndex) => createGeometricElementInstanceKeyPaths({ idsCache, imodelAccess, targetItems: block, type: "2d", chunkIndex, componentId, componentName }), 10),
           ),
           from(ids.element3dIds).pipe(
-            bufferCount(Math.ceil(elements3dLength / Math.ceil(elements3dLength / 5000))),
+            bufferCount(getOptimalBatchSize({ totalSize: elements3dLength, maximumBatchSize: 5000 })),
             releaseMainThreadOnItemsCount(1),
             mergeMap((block, chunkIndex) => createGeometricElementInstanceKeyPaths({ idsCache, imodelAccess, targetItems: block, type: "3d", chunkIndex, componentId, componentName }), 10),
           ),

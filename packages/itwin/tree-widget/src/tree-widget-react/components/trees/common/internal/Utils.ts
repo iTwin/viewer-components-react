@@ -39,6 +39,12 @@ export function setIntersection<T>(lhs: Readonly<Iterable<T>>, rhs: ReadonlySet<
   }
   return result;
 }
+
+/** @internal */
+export function getOptimalBatchSize({ totalSize, maximumBatchSize }: { totalSize: number; maximumBatchSize: number }): number {
+  return Math.ceil(totalSize / Math.ceil(totalSize / maximumBatchSize));
+}
+
 /** @internal */
 export function getDistinctMapValues(map: Map<any, Array<string> | Set<string>>): Set<string> {
   const result = new Set<string>();

@@ -10,6 +10,7 @@ import type { GuidString, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { Observable, Subscription } from "rxjs";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { CategoryId, ModelId } from "./Types.js";
+import { releaseMainThreadOnItemsCount } from "./Utils.js";
 
 type ModelCategoryKey = `${ModelId}-${CategoryId}`;
 
@@ -107,6 +108,7 @@ export class ModelCategoryElementsCountCache implements Disposable {
           )
         )
       ),
+      releaseMainThreadOnItemsCount(500),
       reduce(
         ({ acc, createKey }, row) => {
           acc.set(createKey({ modelId: row.modelId, categoryId: row.categoryId }), {

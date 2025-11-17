@@ -3,10 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { map, reduce } from "rxjs";
+import { bufferCount, from, map, mergeMap, reduce } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { QueryRowFormat } from "@itwin/core-common";
-import { reduceWhile } from "./Rxjs.js";
+import { reduceWhile, toVoidPromise } from "./Rxjs.js";
 import { createVisibilityStatus } from "./Tooltip.js";
 import { getClassesByView, releaseMainThreadOnItemsCount } from "./Utils.js";
 
@@ -16,7 +16,7 @@ import type { CategoryInfo } from "../CategoriesVisibilityUtils.js";
 import type { TreeWidgetViewport } from "../TreeWidgetViewport.js";
 import type { VisibilityStatus } from "../UseHierarchyVisibility.js";
 import type { Visibility } from "./Tooltip.js";
-import type { ElementId, ModelId } from "./Types.js";
+import type { ElementId } from "./Types.js";
 
 function mergeVisibilities(obs: Observable<Visibility>): Observable<Visibility | "empty"> {
   return obs.pipe(
@@ -146,23 +146,34 @@ export interface GetVisibilityFromAlwaysAndNeverDrawnElementsProps {
  * @internal
  */
 export async function enableCategoryDisplay(viewport: TreeWidgetViewport, categoryIds: Id64Arg, enabled: boolean, enableAllSubCategories = true) {
-  viewport.changeCategoryDisplay({ categoryIds, display: enabled, enableAllSubCategories });
-
-  // remove category overrides per model
-  const modelsContainingOverrides = new Array<ModelId>();
-  for (const override of viewport.perModelCategoryOverrides) {
-    if (Id64.has(categoryIds, override.categoryId)) {
-      modelsContainingOverrides.push(override.modelId);
+  const removeOverrides = (bufferedCategories: Id64Array) => {
+    const modelsContainingOverrides: string[] = [];
+    for (const ovr of viewport.perModelCategoryVisibility) {
+      if (Id64.has(bufferedCategories, ovr.categoryId)) {
+        modelsContainingOverrides.push(ovr.modelId);
+      }
     }
-  }
-  viewport.setPerModelCategoryOverride({ modelIds: modelsContainingOverrides, categoryIds, override: "none" });
-
-  // changeCategoryDisplay only enables subcategories, it does not disabled them. So we must do that ourselves.
-  if (false === enabled) {
-    (await viewport.iModel.categories.getCategoryInfo(Id64.iterable(categoryIds))).forEach((categoryInfo) => {
+    viewport.perModelCategoryVisibility.setOverride(modelsContainingOverrides, bufferedCategories, PerModelCategoryVisibility.Override.None);
+  };
+  const disableSubCategories = async (bufferedCategories: Id64Array) => {
+    // changeCategoryDisplay only enables subcategories, it does not disabled them. So we must do that ourselves.
+    (await viewport.iModel.categories.getCategoryInfo(bufferedCategories)).forEach((categoryInfo) => {
       categoryInfo.subCategories.forEach((value) => enableSubCategoryDisplay(viewport, value.id, false));
     });
-  }
+  };
+  return toVoidPromise(
+    from(Id64.iterable(categoryIds)).pipe(
+      releaseMainThreadOnItemsCount(500),
+      bufferCount(getOptimalBatchSize({ totalSize: Id64.sizeOf(categoryIds), maximumBatchSize: 500 })),
+      mergeMap(async (bufferedCategories) => {
+        viewport.changeCategoryDisplay({ categoryIds: bufferedCategories, display: enabled, enableAllSubCategories });
+        removeOverrides(bufferedCategories);
+        if (!enabled) {
+          await disableSubCategories(bufferedCategories);
+        }
+      }),
+    ),
+  );
 }
 
 /**

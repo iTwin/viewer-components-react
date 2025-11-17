@@ -32,7 +32,7 @@ import {
   CLASS_NAME_Model,
   CLASS_NAME_SubCategory,
 } from "../common/internal/ClassNameDefinitions.js";
-import { createIdsSelector, getClassesByView, getDistinctMapValues, parseIdsSelectorResult, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
+import { createIdsSelector, getClassesByView, getDistinctMapValues, getOptimalBatchSize, parseIdsSelectorResult, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 
 import type { GuidString, Id64Array, MarkRequired } from "@itwin/core-bentley";
@@ -814,6 +814,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
         }
         return imodelAccess.createQueryReader(queryProps, { restartToken: `${componentName}/${componentId}/filter-by-label`, limit });
       }),
+      releaseMainThreadOnItemsCount(1000),
       map((row): InstanceKey => {
         let className: string;
         switch (row.ClassName) {
@@ -860,7 +861,7 @@ function createInstanceKeyPathsFromTargetItems({
   const { categoryClass } = getClassesByView(viewType);
 
   return from(targetItems).pipe(
-    releaseMainThreadOnItemsCount(2000),
+    releaseMainThreadOnItemsCount(500),
     reduce(
       (acc, { id, className }) => {
         if (className === categoryClass) {
@@ -908,7 +909,7 @@ function createInstanceKeyPathsFromTargetItems({
           map((path) => ({ path, options: { autoExpand: true } })),
         ),
         from(ids.elementIds).pipe(
-          bufferCount(Math.ceil(elementsLength / Math.ceil(elementsLength / 5000))),
+          bufferCount(getOptimalBatchSize({ totalSize: elementsLength, maximumBatchSize: 5000 })),
           releaseMainThreadOnItemsCount(1),
           mergeMap((block, chunkIndex) => createGeometricElementInstanceKeyPaths({ imodelAccess, idsCache, hierarchyConfig, viewType, targetItems: block, chunkIndex, componentId, componentName }), 10),
         ),

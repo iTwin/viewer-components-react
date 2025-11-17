@@ -42,7 +42,7 @@ import {
   CLASS_NAME_Subject,
 } from "../common/internal/ClassNameDefinitions.js";
 import { collect } from "../common/internal/Rxjs.js";
-import { createIdsSelector, parseIdsSelectorResult, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
+import { createIdsSelector, getOptimalBatchSize, parseIdsSelectorResult, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 
 import type { NormalizedHierarchyFilteringPath } from "../common/Utils.js";
@@ -829,7 +829,7 @@ function createInstanceKeyPathsFromTargetItemsObs({
             mergeMap((id) => idsCache.createCategoryInstanceKeyPaths(id).pipe(mergeAll(), map(HierarchyFilteringPath.normalize))),
           ),
           from(ids.elementIds).pipe(
-            bufferCount(Math.ceil(elementsLength / Math.ceil(elementsLength / 5000))),
+            bufferCount(getOptimalBatchSize({ totalSize: elementsLength, maximumBatchSize: 5000 })),
             releaseMainThreadOnItemsCount(1),
             mergeMap((block, chunkIndex) => createGeometricElementInstanceKeyPaths({
                   imodelAccess,
