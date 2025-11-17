@@ -9,6 +9,7 @@ import {
   defer,
   EMPTY,
   firstValueFrom,
+  forkJoin,
   from,
   fromEvent,
   identity,
@@ -16,6 +17,7 @@ import {
   map,
   merge,
   mergeMap,
+  of,
   reduce,
   takeUntil,
   toArray,
@@ -182,7 +184,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
 
   private async getHierarchyDefinition(): Promise<HierarchyDefinition> {
     this.#impl ??= (async () => {
-      const isDefinitionContainerSupported = await this.#idsCache.getIsDefinitionContainerSupported();
+      const isDefinitionContainerSupported = await firstValueFrom(this.#idsCache.getIsDefinitionContainerSupported());
       return createPredicateBasedHierarchyDefinition({
         classHierarchyInspector: this.#iModelAccess,
         hierarchy: {
@@ -322,13 +324,14 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     instanceFilter?: GenericInstanceFilter;
   }): Promise<HierarchyLevelDefinition> {
     const { parentNodeInstanceIds, instanceFilter } = props;
-    const { definitionContainers, categories } =
+    const { definitionContainers, categories } = await firstValueFrom(
       parentNodeInstanceIds === undefined
-        ? await this.#idsCache.getRootDefinitionContainersAndCategories({ includeEmpty: this.#hierarchyConfig.showEmptyCategories })
-        : await this.#idsCache.getDirectChildDefinitionContainersAndCategories({
+        ? this.#idsCache.getRootDefinitionContainersAndCategories({ includeEmpty: this.#hierarchyConfig.showEmptyCategories })
+        : this.#idsCache.getDirectChildDefinitionContainersAndCategories({
             parentDefinitionContainerIds: parentNodeInstanceIds,
             includeEmpty: this.#hierarchyConfig.showEmptyCategories,
-          });
+          })
+    );
     const hierarchyDefinition = new Array<HierarchyNodesDefinition>();
     if (categories.length > 0) {
       hierarchyDefinition.push(...(await this.createCategoriesQuery({ categories, instanceFilter })));
@@ -523,14 +526,14 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     });
     const modelIds: Id64Array = parentNode.extendedData?.isCategoryOfSubModel
       ? parseIdsSelectorResult(parentNode.extendedData?.modelIds)
-      : [...getDistinctMapValues(await this.#idsCache.getCategoriesElementModels(categoryIds))];
+      : [...getDistinctMapValues(await firstValueFrom(this.#idsCache.getCategoriesElementModels(categoryIds)))];
 
     if (modelIds.length === 0) {
       return [];
     }
     const modeledElements = await firstValueFrom(
       from(modelIds).pipe(
-        mergeMap(async (modelId) => this.#idsCache.getCategoriesModeledElements(modelId, categoryIds)),
+        mergeMap((modelId) => this.#idsCache.getCategoriesModeledElements(modelId, categoryIds)),
         reduce((acc, foundModeledElements) => {
           return acc.concat(foundModeledElements);
         }, new Array<ElementId>()),
@@ -667,11 +670,11 @@ async function createInstanceKeyPathsFromInstanceLabel(
   const DEFINITION_CONTAINERS_WITH_LABELS_CTE = "DefinitionContainersWithLabels";
 
   return lastValueFrom(
-    defer(async () => {
-      const { definitionContainers, categories } = await idsCache.getAllDefinitionContainersAndCategories({
+    idsCache.getAllDefinitionContainersAndCategories({
         includeEmpty: props.hierarchyConfig.showEmptyCategories,
-      });
-      if (categories.length === 0) {
+    }).pipe(
+      mergeMap(async ({ definitionContainers, categories }) => {
+        if (categories.length === 0) {
         return undefined;
       }
       const [categoryLabelSelectClause, subCategoryLabelSelectClause, elementLabelSelectClause, definitionContainerLabelSelectClause] = await Promise.all(
@@ -804,7 +807,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
         ...(definitionContainers.length > 0 ? [{ type: "string" as const, value: adjustedLabel }] : []),
       ];
       return { ctes, ecsql, bindings };
-    }).pipe(
+      }),
       mergeMap((queryProps) => {
         if (!queryProps) {
           return EMPTY;
@@ -837,7 +840,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
       toArray(),
       abortSignal ? takeUntil(fromEvent(abortSignal, "abort")) : identity,
       defaultIfEmpty([]),
-    ),
+    )
   );
 }
 
@@ -893,11 +896,16 @@ function createInstanceKeyPathsFromTargetItems({
       const elementsLength = ids.elementIds.length;
       return merge(
         from(ids.definitionContainerIds).pipe(
-          mergeMap(async (id) => ({ path: await idsCache.getInstanceKeyPaths({ definitionContainerId: id }), options: { autoExpand: true } })),
+          mergeMap((id) => idsCache.getInstanceKeyPaths({ definitionContainerId: id })),
+          map((path) => ({ path, options: { autoExpand: true } })),
         ),
-        from(ids.categoryIds).pipe(mergeMap(async (id) => ({ path: await idsCache.getInstanceKeyPaths({ categoryId: id }), options: { autoExpand: true } }))),
+        from(ids.categoryIds).pipe(
+          mergeMap((id) => idsCache.getInstanceKeyPaths({ categoryId: id })),
+          map((path) => ({ path, options: { autoExpand: true } }))
+        ),
         from(ids.subCategoryIds).pipe(
-          mergeMap(async (id) => ({ path: await idsCache.getInstanceKeyPaths({ subCategoryId: id }), options: { autoExpand: true } })),
+          mergeMap((id) => idsCache.getInstanceKeyPaths({ subCategoryId: id })),
+          map((path) => ({ path, options: { autoExpand: true } })),
         ),
         from(ids.elementIds).pipe(
           bufferCount(Math.ceil(elementsLength / Math.ceil(elementsLength / 5000))),
@@ -971,8 +979,10 @@ function createGeometricElementInstanceKeyPaths(props: {
   }).pipe(
     releaseMainThreadOnItemsCount(300),
     map((row) => parseQueryRow(row, separator, elementClass, categoryClass, modelClass)),
-    mergeMap(async (elementHierarchyPath) => {
-      const pathToCategory = await idsCache.getInstanceKeyPaths({ categoryId: elementHierarchyPath[0].id });
+    mergeMap((elementHierarchyPath) =>
+      forkJoin({ elementHierarchyPath: of(elementHierarchyPath), pathToCategory: idsCache.getInstanceKeyPaths({ categoryId: elementHierarchyPath[0].id })}),
+    ),
+    map(({ elementHierarchyPath, pathToCategory}) => {
       pathToCategory.pop(); // category is already included in the element hierarchy path
       const path = [...pathToCategory, ...elementHierarchyPath];
       return { path, options: { autoExpand: true } };

@@ -8,6 +8,7 @@ import {
   defaultIfEmpty,
   defer,
   firstValueFrom,
+  forkJoin,
   from,
   fromEvent,
   identity,
@@ -270,9 +271,12 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         contentClass: { fullName: CLASS_NAME_GeometricModel3d, alias: "this" },
       }),
     ]);
-    const [childSubjectIds, childModelIds] = parentSubjectIds.length
-      ? await Promise.all([this.#idsCache.getChildSubjectIds(parentSubjectIds), this.#idsCache.getChildSubjectModelIds(parentSubjectIds)])
-      : [[IModel.rootSubjectId], []];
+    const { childSubjectIds, childModelIds } = parentSubjectIds.length
+      ? await firstValueFrom(
+        forkJoin({childSubjectIds: this.#idsCache.getChildSubjectIds(parentSubjectIds),
+        childModelIds: this.#idsCache.getChildSubjectModelIds(parentSubjectIds)
+      }))
+      : { childSubjectIds: [IModel.rootSubjectId], childModelIds: []};
     const defs = new Array<HierarchyNodesDefinition>();
     childSubjectIds.length &&
       defs.push({
@@ -306,7 +310,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
               ${subjectFilterClauses.where ? `AND ${subjectFilterClauses.where}` : ""}
           `,
           bindings: [
-            { type: "idset", value: await this.#idsCache.getParentSubjectIds() },
+            { type: "idset", value: await firstValueFrom(this.#idsCache.getParentSubjectIds()) },
             ...childSubjectIds.map((id): ECSqlBinding => ({ type: "id", value: id })),
           ],
         },
@@ -467,7 +471,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     });
     const modeledElements = await firstValueFrom(
       from(modelIds).pipe(
-        mergeMap(async (modelId) => this.#idsCache.getCategoriesModeledElements(modelId, categoryIds)),
+        mergeMap((modelId) => this.#idsCache.getCategoriesModeledElements(modelId, categoryIds)),
         reduce((acc, foundModeledElements) => {
           return acc.concat(foundModeledElements);
         }, new Array<ElementId>()),
@@ -710,7 +714,7 @@ function createGeometricElementInstanceKeyPaths(props: {
     releaseMainThreadOnItemsCount(300),
     map((row) => parseQueryRow(row, groupInfos, separator, hierarchyConfig.elementClassSpecification)),
     mergeMap(({ modelId, elementHierarchyPath, groupingNode }) =>
-      from(idsCache.createModelInstanceKeyPaths(modelId)).pipe(
+      idsCache.createModelInstanceKeyPaths(modelId).pipe(
         mergeAll(),
         map((modelPath) => {
           // We don't want to modify the original path, we create a copy that we can modify
@@ -819,10 +823,10 @@ function createInstanceKeyPathsFromTargetItemsObs({
       const elementsLength = ids.elementIds.length;
       return collect(
         merge(
-          from(ids.subjectIds).pipe(mergeMap((id) => from(idsCache.createSubjectInstanceKeysPath(id)).pipe(map(HierarchyFilteringPath.normalize)))),
-          from(ids.modelIds).pipe(mergeMap((id) => from(idsCache.createModelInstanceKeyPaths(id)).pipe(mergeAll(), map(HierarchyFilteringPath.normalize)))),
+          from(ids.subjectIds).pipe(mergeMap((id) => idsCache.createSubjectInstanceKeysPath(id).pipe(map(HierarchyFilteringPath.normalize)))),
+          from(ids.modelIds).pipe(mergeMap((id) => idsCache.createModelInstanceKeyPaths(id).pipe(mergeAll(), map(HierarchyFilteringPath.normalize)))),
           from(ids.categoryIds).pipe(
-            mergeMap((id) => from(idsCache.createCategoryInstanceKeyPaths(id)).pipe(mergeAll(), map(HierarchyFilteringPath.normalize))),
+            mergeMap((id) => idsCache.createCategoryInstanceKeyPaths(id).pipe(mergeAll(), map(HierarchyFilteringPath.normalize))),
           ),
           from(ids.elementIds).pipe(
             bufferCount(Math.ceil(elementsLength / Math.ceil(elementsLength / 5000))),

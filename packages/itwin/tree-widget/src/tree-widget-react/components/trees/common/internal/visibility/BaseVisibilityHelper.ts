@@ -68,7 +68,7 @@ export interface BaseTreeVisibilityHandlerOverrides {
 
 /** @internal */
 export interface BaseIdsCache {
-  hasSubModel: (elementId: Id64String) => Promise<boolean>;
+  hasSubModel: (elementId: Id64String) => Observable<boolean>;
   getElementsCount: (props: { modelId: Id64String; categoryId: Id64String }) => Observable<number>;
   getSubCategories: (props: { categoryIds: Id64Arg }) => Observable<{ id: Id64String; subCategories: Id64Arg | undefined }>;
   getModels: (props: { categoryIds: Id64Arg }) => Observable<{ id: Id64String; models: Id64Arg | undefined }>;
@@ -473,7 +473,7 @@ export class BaseVisibilityHelper implements Disposable {
       if (!this.#props.viewport.viewsModel(modelId)) {
         return from(elementIds).pipe(
           mergeMap((elementId) =>
-            from(this.#props.baseIdsCache.hasSubModel(elementId)).pipe(
+            this.#props.baseIdsCache.hasSubModel(elementId).pipe(
               mergeMap((isSubModel) => {
                 if (isSubModel) {
                   return this.getModelsVisibilityStatus({
@@ -502,7 +502,7 @@ export class BaseVisibilityHelper implements Disposable {
         mergeMap((visibilityStatusAlwaysAndNeverDraw) => {
           return from(Id64.iterable(elementIds)).pipe(
             mergeMap((elementId) =>
-              from(this.#props.baseIdsCache.hasSubModel(elementId)).pipe(
+              this.#props.baseIdsCache.hasSubModel(elementId).pipe(
                 mergeMap((isSubModel) => {
                   if (isSubModel) {
                     return this.getModelsVisibilityStatus({
@@ -796,7 +796,7 @@ export class BaseVisibilityHelper implements Disposable {
         // Change visibility of elements that are models
         from(Id64.iterable(elementIds)).pipe(
           mergeMap((elementId) =>
-            from(this.#props.baseIdsCache.hasSubModel(elementId)).pipe(
+            this.#props.baseIdsCache.hasSubModel(elementId).pipe(
               mergeMap((isSubModel) => {
                 if (isSubModel) {
                   return this.changeModelsVisibilityStatus({ modelIds: elementId, on });

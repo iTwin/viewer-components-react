@@ -18,6 +18,7 @@ import type { CategoriesTreeHierarchyConfiguration } from "../CategoriesTreeDefi
 import type { CategoriesTreeIdsCache } from "./CategoriesTreeIdsCache.js";
 import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../../common/internal/Types.js";
 import type { CategoryInfo } from "../../common/CategoriesVisibilityUtils.js";
+import { firstValueFrom } from "rxjs";
 
 /** @internal */
 export type CategoriesTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError";
@@ -145,7 +146,7 @@ async function getCategoriesFromPaths(
     assert(lastNodeInfo !== undefined && HierarchyNodeIdentifier.isInstanceNodeIdentifier(lastNodeInfo.lastNode));
 
     if (lastNodeInfo.lastNode.className === CLASS_NAME_DefinitionContainer) {
-      const definitionContainerCategories = await idsCache.getAllContainedCategories({ definitionContainerIds: lastNodeInfo.lastNode.id, includeEmptyCategories: hierarchyConfig.showEmptyCategories});
+      const definitionContainerCategories = await firstValueFrom(idsCache.getAllContainedCategories({ definitionContainerIds: lastNodeInfo.lastNode.id, includeEmptyCategories: hierarchyConfig.showEmptyCategories}));
       for (const categoryId of definitionContainerCategories) {
         const value = categories.get(categoryId);
         if (value === undefined) {
@@ -175,7 +176,7 @@ async function getCategoriesFromPaths(
       entry.push(subCategory.id);
     }
   }
-  const rootElementModelMap = await idsCache.getFilteredElementsModels(rootFilteredElementIds);
+  const rootElementModelMap = await firstValueFrom(idsCache.getFilteredElementsModels(rootFilteredElementIds));
   const models = [...subModelIds, ...new Set(rootElementModelMap.values())];
   return {
     categories: [...categories.entries()].map(([categoryId, subCategoryIds]) => ({

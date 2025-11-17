@@ -3,12 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, bufferTime, filter, firstValueFrom, from, map, mergeAll, mergeMap, reduce, ReplaySubject, Subject } from "rxjs";
+import { bufferCount, bufferTime, defer, filter, from, map, mergeAll, mergeMap, reduce, ReplaySubject, Subject, take, toArray } from "rxjs";
 import { assert, Guid } from "@itwin/core-bentley";
-import { collect } from "./Rxjs.js";
 
 import type { GuidString, Id64Set, Id64String } from "@itwin/core-bentley";
-import type { Subscription } from "rxjs";
+import type { Observable, Subscription } from "rxjs";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { CategoryId, ModelId } from "./Types.js";
 
@@ -37,7 +36,7 @@ export class ModelCategoryElementsCountCache implements Disposable {
       .pipe(
         bufferTime(20),
         filter((requests) => requests.length > 0),
-        mergeMap(async (requests) => this.queryCategoryElementCounts(requests)),
+        mergeMap((requests) => this.queryCategoryElementCounts(requests)),
         mergeAll(),
       )
       .subscribe({
@@ -49,27 +48,27 @@ export class ModelCategoryElementsCountCache implements Disposable {
       });
   }
 
-  private async queryCategoryElementCounts(
+  private queryCategoryElementCounts(
     input: Array<{ modelId: Id64String; categoryId: Id64String }>,
-  ): Promise<Array<{ modelId: Id64String; categoryId: Id64String; elementsCount: number }>> {
-    return collect(
-      from(input).pipe(
-        reduce((acc, { modelId, categoryId }) => {
-          const entry = acc.get(modelId);
-          if (!entry) {
-            acc.set(modelId, new Set([categoryId]));
-          } else {
-            entry.add(categoryId);
-          }
-          return acc;
-        }, new Map<Id64String, Id64Set>()),
-        mergeMap((modelCategoryMap) => modelCategoryMap.entries()),
-        map(([modelId, categoryIds]) => `Model.Id = ${modelId} AND Category.Id IN (${[...categoryIds].join(", ")})`),
-        // we may have thousands of where clauses here, and sending a single query with all of them could take a
-        // long time - instead, split it into smaller chunks
-        bufferCount(100),
-        mergeMap(async (whereClauses) => {
-          const reader = this.#queryExecutor.createQueryReader(
+  ): Observable<Array<{ modelId: Id64String; categoryId: Id64String; elementsCount: number }>> {
+    return from(input).pipe(
+      reduce((acc, { modelId, categoryId }) => {
+        const entry = acc.get(modelId);
+        if (!entry) {
+          acc.set(modelId, new Set([categoryId]));
+        } else {
+          entry.add(categoryId);
+        }
+        return acc;
+      }, new Map<Id64String, Id64Set>()),
+      mergeMap((modelCategoryMap) => modelCategoryMap.entries()),
+      map(([modelId, categoryIds]) => `Model.Id = ${modelId} AND Category.Id IN (${[...categoryIds].join(", ")})`),
+      // we may have thousands of where clauses here, and sending a single query with all of them could take a
+      // long time - instead, split it into smaller chunks
+      bufferCount(100),
+      mergeMap((whereClauses) =>
+        defer(() =>
+          this.#queryExecutor.createQueryReader(
             {
               ctes: this.#elementsClassNames.map(
                 (elementsClassName, index) => `
@@ -105,21 +104,33 @@ export class ModelCategoryElementsCountCache implements Disposable {
               `,
             },
             { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/category-element-counts/${Guid.createValue()}` },
-          );
-
-          const result = new Array<{ modelId: Id64String; categoryId: Id64String; elementsCount: number }>();
-          for await (const row of reader) {
-            result.push({ modelId: row.modelId, categoryId: row.categoryId, elementsCount: row.elementsCount });
-          }
-          input.forEach(({ modelId, categoryId }) => {
-            if (!result.some((queriedResult) => queriedResult.categoryId === categoryId && queriedResult.modelId === modelId)) {
-              result.push({ categoryId, modelId, elementsCount: 0 });
-            }
-          });
-          return result;
-        }),
-        mergeAll(),
+          )
+        )
       ),
+      reduce(
+        ({ acc, createKey }, row) => {
+          acc.set(createKey({ modelId: row.modelId, categoryId: row.categoryId }), {
+            modelId: row.modelId,
+            categoryId: row.categoryId,
+            elementsCount: row.elementsCount,
+          });
+          return { acc, createKey };
+        },
+        {
+          acc: new Map<string, { modelId: Id64String; categoryId: Id64String; elementsCount: number }>(),
+          createKey: (keyProps: { modelId: Id64String; categoryId: Id64String }) => `${keyProps.modelId}-${keyProps.categoryId}`,
+        },
+      ),
+      mergeMap(({ acc: result, createKey }) => {
+        input.forEach(({ modelId, categoryId }) => {
+          if (!result.has(createKey({ modelId, categoryId }))) {
+            result.set(createKey({ modelId, categoryId }), { categoryId, modelId, elementsCount: 0 });
+          }
+        });
+
+        return from(result.values());
+      }),
+      toArray(),
     );
   }
 
@@ -127,16 +138,16 @@ export class ModelCategoryElementsCountCache implements Disposable {
     this.#subscription.unsubscribe();
   }
 
-  public async getCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Promise<number> {
+  public getCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Observable<number> {
     const cacheKey: ModelCategoryKey = `${modelId}-${categoryId}`;
     let result = this.#cache.get(cacheKey);
     if (result !== undefined) {
-      return firstValueFrom(result);
+      return from(result).pipe(take(1));
     }
 
     result = new ReplaySubject(1);
     this.#cache.set(cacheKey, result);
     this.#requestsStream.next({ modelId, categoryId });
-    return firstValueFrom(result);
+    return from(result).pipe(take(1));
   }
 }

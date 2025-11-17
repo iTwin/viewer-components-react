@@ -19,6 +19,7 @@ import type { VisibilityTreeProps } from "../../common/components/VisibilityTree
 import type { NormalizedHierarchyFilteringPath } from "../../common/Utils.js";
 import type { ClassGroupingHierarchyNode, ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "../ModelsTreeDefinition.js";
 import type { ModelsTreeIdsCache } from "./ModelsTreeIdsCache.js";
+import { firstValueFrom } from "rxjs";
 
 /** @internal */
 export type ModelsTreeFilteringError = "tooManyFilterMatches" | "tooManyInstancesFocused" | "unknownFilterError" | "unknownInstanceFocusError";
@@ -259,7 +260,7 @@ async function getModels(paths: HierarchyFilteringPath[], idsCache: ModelsTreeId
     }
   }
 
-  const matchingModels = await idsCache.getSubjectModelIds(targetSubjectIds);
+  const matchingModels = await firstValueFrom(idsCache.getSubjectModelIds(targetSubjectIds));
   return [...targetModelIds, ...matchingModels];
 }
 

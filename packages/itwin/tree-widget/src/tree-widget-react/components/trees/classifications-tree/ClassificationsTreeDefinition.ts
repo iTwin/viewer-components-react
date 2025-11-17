@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, defer, EMPTY, from, identity, lastValueFrom, map, merge, mergeMap, of, reduce, toArray } from "rxjs";
+import { bufferCount, defer, EMPTY, firstValueFrom, from, identity, lastValueFrom, map, merge, mergeMap, of, reduce, toArray } from "rxjs";
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql, parseFullClassName } from "@itwin/presentation-shared";
 import {
@@ -164,7 +164,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
       filter: instanceFilter,
       contentClass: { fullName: CLASS_NAME_Classification, alias: "this" },
     });
-    const classificationIds = await this.#props.idsCache.getDirectChildClassifications(classificationTableIds);
+    const classificationIds = await firstValueFrom(this.#props.idsCache.getDirectChildClassifications(classificationTableIds));
     return classificationIds.length
       ? [
           {
@@ -207,7 +207,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
     instanceFilter?: GenericInstanceFilter;
   }): Promise<HierarchyLevelDefinition> {
     const { parentNodeInstanceIds: parentClassificationIds, instanceFilter } = props;
-    const classificationIds = await this.#props.idsCache.getDirectChildClassifications(parentClassificationIds);
+    const classificationIds = await firstValueFrom(this.#props.idsCache.getDirectChildClassifications(parentClassificationIds));
     return [
       // load child classifications
       ...(classificationIds.length
@@ -375,7 +375,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
           props.labelsFactory.createSelectClause({ classAlias: "this", className }),
         ),
       );
-      const classificationIds = await props.idsCache.getAllClassifications();
+      const classificationIds = await firstValueFrom(props.idsCache.getAllClassifications());
       const ctes = [
         `
           ${CLASSIFICATION_TABLES_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (

@@ -40,10 +40,10 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
    * Determines visibility status by checking visibility status of related categories.
    */
   public getDefinitionContainersVisibilityStatus(props: { definitionContainerIds: Id64Arg }): Observable<VisibilityStatus> {
-    return from(this.#props.idsCache.getAllContainedCategories({
+    return this.#props.idsCache.getAllContainedCategories({
       definitionContainerIds: props.definitionContainerIds,
       includeEmptyCategories: this.#props.hierarchyConfig.showEmptyCategories
-  })).pipe(
+  }).pipe(
       mergeMap((categoryIds) =>
         this.getCategoriesVisibilityStatus({
           categoryIds,
@@ -76,7 +76,7 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
    * Does this by changing visibility status of related categories.
    */
   public changeDefinitionContainersVisibilityStatus(props: { definitionContainerIds: Id64Arg; on: boolean }): Observable<void> {
-    return from(this.#props.idsCache.getAllContainedCategories({ definitionContainerIds: props.definitionContainerIds, includeEmptyCategories: this.#props.hierarchyConfig.showEmptyCategories})).pipe(
+    return this.#props.idsCache.getAllContainedCategories({ definitionContainerIds: props.definitionContainerIds, includeEmptyCategories: this.#props.hierarchyConfig.showEmptyCategories}).pipe(
       mergeMap((categoryIds) => this.changeCategoriesVisibilityStatus({ categoryIds, modelId: undefined, on: props.on })),
     );
   }
@@ -114,7 +114,7 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
 
   /** Turns on visibility status of models (that are not yet turned on) that are related to categories. */
   private enableCategoriesElementModelsVisibilityStatus(categoryIds: Id64Arg): Observable<void> {
-    return from(this.#props.idsCache.getCategoriesElementModels(categoryIds, true)).pipe(
+    return this.#props.idsCache.getCategoriesElementModels(categoryIds, true).pipe(
       mergeMap((categoriesModelsMap) => categoriesModelsMap.values()),
       reduce((acc, modelIds) => {
         modelIds.forEach((modelId) => {

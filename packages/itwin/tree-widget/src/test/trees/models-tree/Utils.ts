@@ -3,7 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concatMap, EMPTY, expand, firstValueFrom, from, toArray } from "rxjs";
+import type { Observable} from "rxjs";
+import { concatMap, EMPTY, expand, from, of, toArray } from "rxjs";
 import sinon from "sinon";
 import { Id64 } from "@itwin/core-bentley";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
@@ -91,36 +92,34 @@ interface IdsCacheMockProps {
 
 export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCache {
   return sinon.createStubInstance(ModelsTreeIdsCache, {
-    getChildSubjectIds: sinon.stub<[Id64Arg], Promise<Id64Array>>().callsFake(async (subjectIds) => {
-      const obs = from(Id64.iterable(subjectIds)).pipe(
+    getChildSubjectIds: sinon.stub<[Id64Arg], Observable<Id64Array>>().callsFake((subjectIds) => {
+      return from(Id64.iterable(subjectIds)).pipe(
         concatMap((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
         expand((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
         toArray(),
       );
-      return firstValueFrom(obs);
     }),
     getChildSubjectModelIds: sinon.stub(),
-    getSubjectModelIds: sinon.stub<[Id64Arg], Promise<Id64Array>>().callsFake(async (subjectIds) => {
-      const obs = from(Id64.iterable(subjectIds)).pipe(
+    getSubjectModelIds: sinon.stub<[Id64Arg], Observable<Id64Array>>().callsFake((subjectIds) => {
+      return from(Id64.iterable(subjectIds)).pipe(
         expand((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
         concatMap((id) => props?.subjectModels?.get(id) ?? EMPTY),
         toArray(),
       );
-      return firstValueFrom(obs);
     }),
-    getModelCategoryIds: sinon.stub<[Id64String], Promise<Id64Array>>().callsFake(async (modelId) => {
-      return props?.modelCategories?.get(modelId) ?? [];
+    getModelCategoryIds: sinon.stub<[Id64String], Observable<Id64Array>>().callsFake((modelId) => {
+      return of(props?.modelCategories?.get(modelId) ?? []);
     }),
-    getAllCategories: sinon.stub<[], Promise<Id64Set>>().callsFake(async () => {
+    getAllCategories: sinon.stub<[], Observable<Id64Set>>().callsFake(() => {
       const result = new Set<Id64String>();
       props?.modelCategories?.forEach((categories) => categories.forEach((category) => result.add(category)));
-      return result;
+      return of(result);
     }),
-    getCategoryElementsCount: sinon.stub<[Id64String, Id64String], Promise<number>>().callsFake(async (_, categoryId) => {
-      return props?.categoryElements?.get(categoryId)?.length ?? 0;
+    getCategoryElementsCount: sinon.stub<[Id64String, Id64String], Observable<number>>().callsFake((_, categoryId) => {
+      return of(props?.categoryElements?.get(categoryId)?.length ?? 0);
     }),
-    hasSubModel: sinon.stub<[Id64String], Promise<boolean>>().callsFake(async () => false),
-    getCategoriesModeledElements: sinon.stub<[Id64String, Id64Arg], Promise<Id64Array>>().callsFake(async () => []),
+    hasSubModel: sinon.stub<[Id64String], Observable<boolean>>().callsFake(() => of(false)),
+    getCategoriesModeledElements: sinon.stub<[Id64String, Id64Arg], Observable<Id64Array>>().callsFake(() => of([])),
   });
 }
 

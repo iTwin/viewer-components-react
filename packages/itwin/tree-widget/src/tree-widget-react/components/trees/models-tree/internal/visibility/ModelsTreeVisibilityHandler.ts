@@ -78,7 +78,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
       getModels: (props) => this.getModels(props),
       getSubCategories: (props) => this.getSubCategories(props),
       getSubModels: (props) => this.getSubModels(props),
-      hasSubModel: async (props) => this.#props.idsCache.hasSubModel(props),
+      hasSubModel: (props) => this.#props.idsCache.hasSubModel(props),
       getAllCategories: () => this.getAllCategories(),
     };
     this.#visibilityHelper = new ModelsTreeVisibilityHelper({
@@ -297,22 +297,22 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
   private getCategories(props: Parameters<BaseIdsCache["getCategories"]>[0]): ReturnType<BaseIdsCache["getCategories"]> {
     return from(Id64.iterable(props.modelIds)).pipe(
       mergeMap((modelId) =>
-        from(this.#props.idsCache.getModelCategoryIds(modelId)).pipe(map((categoryIds) => ({ id: modelId, spatialCategories: categoryIds }))),
+        this.#props.idsCache.getModelCategoryIds(modelId).pipe(map((categoryIds) => ({ id: modelId, spatialCategories: categoryIds }))),
       ),
     );
   }
 
   private getAllCategories(): ReturnType<BaseIdsCache["getAllCategories"]> {
-    return from(this.#props.idsCache.getAllCategories()).pipe(map((categories) => ({ spatialCategories: categories })));
+    return this.#props.idsCache.getAllCategories().pipe(map((categories) => ({ spatialCategories: categories })));
   }
 
   private getElementsCount(props: Parameters<BaseIdsCache["getElementsCount"]>[0]): ReturnType<BaseIdsCache["getElementsCount"]> {
-    return from(this.#props.idsCache.getCategoryElementsCount(props.modelId, props.categoryId));
+    return this.#props.idsCache.getCategoryElementsCount(props.modelId, props.categoryId);
   }
 
   private getModels(props: Parameters<BaseIdsCache["getModels"]>[0]): ReturnType<BaseIdsCache["getModels"]> {
     // Models cache for categories that don't have models still adds them to the final map
-    return from(this.#props.idsCache.getCategoriesElementModels(props.categoryIds)).pipe(
+    return this.#props.idsCache.getCategoriesElementModels(props.categoryIds).pipe(
       mergeMap((categoryModelsMap) => categoryModelsMap.entries()),
       map(([categoryId, categoryModels]) => ({ id: categoryId, models: categoryModels })),
     );
@@ -327,10 +327,10 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
       return from(Id64.iterable(props.modelIds)).pipe(
         mergeMap((modelId) => {
           if (props.categoryId) {
-            return from(this.#props.idsCache.getCategoriesModeledElements(modelId, props.categoryId)).pipe(map((subModels) => ({ id: modelId, subModels })));
+            return this.#props.idsCache.getCategoriesModeledElements(modelId, props.categoryId).pipe(map((subModels) => ({ id: modelId, subModels })));
           }
-          return from(this.#props.idsCache.getModelCategoryIds(modelId)).pipe(
-            mergeMap((categoryIds) => from(this.#props.idsCache.getCategoriesModeledElements(modelId, categoryIds))),
+          return this.#props.idsCache.getModelCategoryIds(modelId).pipe(
+            mergeMap((categoryIds) => this.#props.idsCache.getCategoriesModeledElements(modelId, categoryIds)),
             map((subModels) => ({ id: modelId, subModels })),
           );
         }),
@@ -340,21 +340,21 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
     if (props.modelId) {
       return from(Id64.iterable(props.categoryIds)).pipe(
         mergeMap((categoryId) =>
-          from(this.#props.idsCache.getCategoriesModeledElements(props.modelId!, categoryId)).pipe(map((subModels) => ({ id: categoryId, subModels }))),
+          this.#props.idsCache.getCategoriesModeledElements(props.modelId!, categoryId).pipe(map((subModels) => ({ id: categoryId, subModels }))),
         ),
       );
     }
 
     return from(Id64.iterable(props.categoryIds)).pipe(
       mergeMap((categoryId) =>
-        from(this.#props.idsCache.getCategoriesElementModels(categoryId)).pipe(
+        this.#props.idsCache.getCategoriesElementModels(categoryId).pipe(
           mergeMap((categoryModelsMap) => {
             const models = categoryModelsMap.get(categoryId);
             if (!models) {
               return of({ id: categoryId, subModels: undefined });
             }
             return from(models).pipe(
-              mergeMap((modelId) => from(this.#props.idsCache.getCategoriesModeledElements(modelId, categoryId))),
+              mergeMap((modelId) => this.#props.idsCache.getCategoriesModeledElements(modelId, categoryId)),
               map((subModels) => ({ id: categoryId, subModels })),
             );
           }),

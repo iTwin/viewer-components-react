@@ -13,6 +13,7 @@ import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
 import type { BaseFilteredTreeNode, FilteredTree, FilteredTreeNodeChildren } from "../../../common/internal/visibility/BaseFilteredTree.js";
 import type { ClassificationsTreeIdsCache } from "../ClassificationsTreeIdsCache.js";
+import { firstValueFrom } from "rxjs";
 
 interface ClassificationTableFilteredTreeNode extends BaseFilteredTreeNode<ClassificationTableFilteredTreeNode> {
   type: "classificationTable";
@@ -120,10 +121,10 @@ class ClassificationsTreeFilteredNodesHandler extends FilteredNodesHandler<
       }
     }
 
-    const filteredElementsModels = await this.#props.idsCache.getFilteredElementsData({
+    const filteredElementsModels = await firstValueFrom(this.#props.idsCache.getFilteredElementsData({
       element2dIds: [...filteredTemporary2dElements.keys()],
       element3dIds: [...filteredTemporary3dElements.keys()],
-    });
+    }));
     filteredTemporary2dElements.forEach((element, id) => {
       const entry = filteredElementsModels.get(element.id);
       assert(entry !== undefined);
