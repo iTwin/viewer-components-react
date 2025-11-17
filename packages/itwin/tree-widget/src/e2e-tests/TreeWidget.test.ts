@@ -5,6 +5,7 @@
 
 import { test } from "@playwright/test";
 import { initTreeWidgetTest, locateNode, selectTree, takeScreenshot } from "./utils.js";
+
 import type { Locator } from "@playwright/test";
 
 // Skipped because tree selector uses native `select` element. Expanded selected are rendered by OS and they are not

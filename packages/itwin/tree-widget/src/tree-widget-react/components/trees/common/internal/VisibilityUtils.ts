@@ -8,10 +8,10 @@ import { Guid, Id64 } from "@itwin/core-bentley";
 import { QueryRowFormat } from "@itwin/core-common";
 import { reduceWhile, toVoidPromise } from "./Rxjs.js";
 import { createVisibilityStatus } from "./Tooltip.js";
-import { getClassesByView, releaseMainThreadOnItemsCount } from "./Utils.js";
+import { getClassesByView, getOptimalBatchSize, releaseMainThreadOnItemsCount } from "./Utils.js";
 
 import type { Observable, OperatorFunction } from "rxjs";
-import type { GuidString, Id64Arg, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { CategoryInfo } from "../CategoriesVisibilityUtils.js";
 import type { TreeWidgetViewport } from "../TreeWidgetViewport.js";
 import type { VisibilityStatus } from "../UseHierarchyVisibility.js";
@@ -148,12 +148,12 @@ export interface GetVisibilityFromAlwaysAndNeverDrawnElementsProps {
 export async function enableCategoryDisplay(viewport: TreeWidgetViewport, categoryIds: Id64Arg, enabled: boolean, enableAllSubCategories = true) {
   const removeOverrides = (bufferedCategories: Id64Array) => {
     const modelsContainingOverrides: string[] = [];
-    for (const ovr of viewport.perModelCategoryVisibility) {
+    for (const ovr of viewport.perModelCategoryOverrides) {
       if (Id64.has(bufferedCategories, ovr.categoryId)) {
         modelsContainingOverrides.push(ovr.modelId);
       }
     }
-    viewport.perModelCategoryVisibility.setOverride(modelsContainingOverrides, bufferedCategories, PerModelCategoryVisibility.Override.None);
+    viewport.setPerModelCategoryOverride({ modelIds: modelsContainingOverrides, categoryIds: bufferedCategories, override: "none" });
   };
   const disableSubCategories = async (bufferedCategories: Id64Array) => {
     // changeCategoryDisplay only enables subcategories, it does not disabled them. So we must do that ourselves.
@@ -207,7 +207,10 @@ export async function loadCategoriesFromViewport(vp: TreeWidgetViewport, compone
   const categories: CategoryInfo[] = [];
   const rows = await (async () => {
     const result = new Array<Id64String>();
-    for await (const row of vp.iModel.createQueryReader(ecsql, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames, restartToken: `CategoriesVisibilityUtils/${componentId ?? Guid.createValue()}/categories` })) {
+    for await (const row of vp.iModel.createQueryReader(ecsql, undefined, {
+      rowFormat: QueryRowFormat.UseJsPropertyNames,
+      restartToken: `CategoriesVisibilityUtils/${componentId ?? Guid.createValue()}/categories`,
+    })) {
       result.push(row.id);
     }
     return result;

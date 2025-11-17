@@ -3,17 +3,17 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { defer, forkJoin, from, map, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_Model, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
 import { getClassesByView, getDistinctMapValues, joinId64Arg } from "../../common/internal/Utils.js";
 
+import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
-import type { CategoryId, DefinitionContainerId, ElementId, ModelId, SubCategoryId } from "../../common/internal/Types.js";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
-import type { Observable} from "rxjs";
-import { defer, forkJoin, from, map, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
+import type { CategoryId, DefinitionContainerId, ElementId, ModelId, SubCategoryId } from "../../common/internal/Types.js";
 
 interface DefinitionContainerInfo {
   modelId: Id64String;
@@ -58,11 +58,7 @@ export class CategoriesTreeIdsCache implements Disposable {
   #componentId: GuidString;
   #componentName: string;
 
-  constructor(
-    queryExecutor: LimitingECSqlQueryExecutor,
-    viewType: "3d" | "2d",
-    componentId?: GuidString
-  ) {
+  constructor(queryExecutor: LimitingECSqlQueryExecutor, viewType: "3d" | "2d", componentId?: GuidString) {
     this.#queryExecutor = queryExecutor;
     const { categoryClass, elementClass, modelClass } = getClassesByView(viewType);
     this.#categoryClass = categoryClass;
@@ -87,12 +83,19 @@ export class CategoriesTreeIdsCache implements Disposable {
         FROM ${this.#categoryElementClass}
         WHERE ECInstanceId IN (${joinId64Arg(filteredElementIds, ",")})
       `;
-      return this.#queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/filtered-element-models/${Guid.createValue()}` })
+      return this.#queryExecutor.createQueryReader(
+        { ecsql: query },
+        {
+          rowFormat: "ECSqlPropertyNames",
+          limit: "unbounded",
+          restartToken: `${this.#componentName}/${this.#componentId}/filtered-element-models/${Guid.createValue()}`,
+        },
+      );
     }).pipe(
       map((row) => {
         return { modelId: row.modelId, id: row.id };
-      })
-    )
+      }),
+    );
   }
 
   public getFilteredElementsModels(filteredElementIds: Id64Arg) {
@@ -106,7 +109,7 @@ export class CategoriesTreeIdsCache implements Disposable {
         return acc;
       }, new Map<ElementId, ModelId>()),
       shareReplay(),
-    )
+    );
     return this.#filteredElementsModels;
   }
 
@@ -126,15 +129,15 @@ export class CategoriesTreeIdsCache implements Disposable {
         WHERE this.Parent.Id IS NULL AND m.IsPrivate = false
         GROUP BY modelId, categoryId
       `;
-    return this.#queryExecutor.createQueryReader(
-      { ecsql: query },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/element-models-and-categories` },
-    )
+      return this.#queryExecutor.createQueryReader(
+        { ecsql: query },
+        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/element-models-and-categories` },
+      );
     }).pipe(
       map((row) => {
-        return { modelId: row.modelId, categoryId: row.categoryId }
-      })
-    )
+        return { modelId: row.modelId, categoryId: row.categoryId };
+      }),
+    );
   }
 
   private queryCategories(): Observable<{
@@ -178,7 +181,7 @@ export class CategoriesTreeIdsCache implements Disposable {
           return this.#queryExecutor.createQueryReader(
             { ecsql: categoriesQuery },
             { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/categories` },
-          )
+          );
         }).pipe(
           map((row) => {
             return {
@@ -186,17 +189,17 @@ export class CategoriesTreeIdsCache implements Disposable {
               modelId: row.modelId,
               parentDefinitionContainerExists: row.parentDefinitionContainerExists,
               subCategoryChildCount: row.subCategoryChildCount,
-              hasElements: !!row.hasElements
-            }
-          })
-        )
-      )
-    )
+              hasElements: !!row.hasElements,
+            };
+          }),
+        ),
+      ),
+    );
   }
 
   private queryIsDefinitionContainersSupported(): Observable<boolean> {
     return defer(() => {
-       const query = `
+      const query = `
         SELECT
           1
         FROM
@@ -210,7 +213,7 @@ export class CategoriesTreeIdsCache implements Disposable {
       return this.#queryExecutor.createQueryReader(
         { ecsql: query },
         { restartToken: `${this.#componentName}/${this.#componentId}/is-definition-container-supported` },
-      )
+      );
     }).pipe(
       toArray(),
       map((rows) => rows.length > 0),
@@ -220,13 +223,13 @@ export class CategoriesTreeIdsCache implements Disposable {
   private queryDefinitionContainers(): Observable<{ id: DefinitionContainerId; modelId: Id64String; hasElements: boolean }> {
     return defer(() => {
       // DefinitionModel ECInstanceId will always be the same as modeled DefinitionContainer ECInstanceId, if this wasn't the case, we would need to do something like:
-    //  JOIN BisCore.DefinitionModel dm ON dm.ECInstanceId = ${modelIdAccessor}
-    //  JOIN BisCore.DefinitionModelBreaksDownDefinitionContainer dr ON dr.SourceECInstanceId = dm.ECInstanceId
-    //  JOIN BisCore.DefinitionContainer dc ON dc.ECInstanceId = dr.TargetECInstanceId
-    const DEFINITION_CONTAINERS_CTE = "DefinitionContainers";
-    const CATEGORIES_MODELS_CTE = "CategoriesModels";
-    const ctes = [
-      `
+      //  JOIN BisCore.DefinitionModel dm ON dm.ECInstanceId = ${modelIdAccessor}
+      //  JOIN BisCore.DefinitionModelBreaksDownDefinitionContainer dr ON dr.SourceECInstanceId = dm.ECInstanceId
+      //  JOIN BisCore.DefinitionContainer dc ON dc.ECInstanceId = dr.TargetECInstanceId
+      const DEFINITION_CONTAINERS_CTE = "DefinitionContainers";
+      const CATEGORIES_MODELS_CTE = "CategoriesModels";
+      const ctes = [
+        `
         ${CATEGORIES_MODELS_CTE}(ModelId, HasElements) AS (
           SELECT
             c.Model.Id,
@@ -242,7 +245,7 @@ export class CategoriesTreeIdsCache implements Disposable {
             NOT c.IsPrivate
         )
       `,
-      `
+        `
         ${DEFINITION_CONTAINERS_CTE}(ECInstanceId, ModelId, HasElements) AS (
           SELECT
             dc.ECInstanceId,
@@ -266,19 +269,19 @@ export class CategoriesTreeIdsCache implements Disposable {
             NOT pdc.IsPrivate
         )
       `,
-    ];
-    const definitionsQuery = `
+      ];
+      const definitionsQuery = `
       SELECT dc.ECInstanceId id, dc.ModelId, MAX(dc.HasElements) hasElements modelId FROM ${DEFINITION_CONTAINERS_CTE} dc GROUP BY dc.ECInstanceId
     `;
-    return this.#queryExecutor.createQueryReader(
-      { ctes, ecsql: definitionsQuery },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/definition-containers` },
-    )
+      return this.#queryExecutor.createQueryReader(
+        { ctes, ecsql: definitionsQuery },
+        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/definition-containers` },
+      );
     }).pipe(
       map((row) => {
-        return { id: row.id, modelId: row.modelId, hasElements: !!row.hasElements }
-      })
-    )
+        return { id: row.id, modelId: row.modelId, hasElements: !!row.hasElements };
+      }),
+    );
   }
 
   private queryVisibleSubCategories(categoryIds: Id64Array): Observable<{ id: SubCategoryId; parentId: CategoryId }> {
@@ -296,34 +299,38 @@ export class CategoriesTreeIdsCache implements Disposable {
       return this.#queryExecutor.createQueryReader(
         { ecsql: definitionsQuery },
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/visible-sub-categories` },
-      )
+      );
     }).pipe(
       map((row) => {
         return { id: row.id, parentId: row.categoryId };
-      })
-    )
+      }),
+    );
   }
 
   private getModelsCategoriesInfo() {
-    this.#modelsCategoriesInfo ??= this.queryCategories().pipe(
-      reduce((acc, queriedCategory) => {
-        let modelCategories = acc.get(queriedCategory.modelId);
-        if (modelCategories === undefined) {
-          modelCategories = { parentDefinitionContainerExists: queriedCategory.parentDefinitionContainerExists, childCategories: [] };
-          acc.set(queriedCategory.modelId, modelCategories);
-        }
-        modelCategories.childCategories.push({ id: queriedCategory.id, subCategoryChildCount: queriedCategory.subCategoryChildCount, hasElements: queriedCategory.hasElements });
-        return acc;
-      }, new Map<ModelId, CategoriesInfo>()),
-    )
-    .pipe(shareReplay());
+    this.#modelsCategoriesInfo ??= this.queryCategories()
+      .pipe(
+        reduce((acc, queriedCategory) => {
+          let modelCategories = acc.get(queriedCategory.modelId);
+          if (modelCategories === undefined) {
+            modelCategories = { parentDefinitionContainerExists: queriedCategory.parentDefinitionContainerExists, childCategories: [] };
+            acc.set(queriedCategory.modelId, modelCategories);
+          }
+          modelCategories.childCategories.push({
+            id: queriedCategory.id,
+            subCategoryChildCount: queriedCategory.subCategoryChildCount,
+            hasElements: queriedCategory.hasElements,
+          });
+          return acc;
+        }, new Map<ModelId, CategoriesInfo>()),
+      )
+      .pipe(shareReplay());
     return this.#modelsCategoriesInfo;
   }
 
   private getElementModelsCategories() {
     this.#elementModelsCategories ??= forkJoin({
-      modelCategories: this.queryElementModelCategories()
-      .pipe(
+      modelCategories: this.queryElementModelCategories().pipe(
         reduce((acc, queriedCategory) => {
           let modelEntry = acc.get(queriedCategory.modelId);
           if (modelEntry === undefined) {
@@ -334,7 +341,7 @@ export class CategoriesTreeIdsCache implements Disposable {
           return acc;
         }, new Map<ModelId, { categoryIds: Id64Set }>()),
       ),
-      modelWithCategoryModeledElements: this.getModelWithCategoryModeledElements()
+      modelWithCategoryModeledElements: this.getModelWithCategoryModeledElements(),
     }).pipe(
       map(({ modelCategories, modelWithCategoryModeledElements }) => {
         const result = new Map<ModelId, { categoryIds: Set<CategoryId>; isSubModel: boolean }>();
@@ -345,8 +352,8 @@ export class CategoriesTreeIdsCache implements Disposable {
         }
         return result;
       }),
-      shareReplay()
-    )
+      shareReplay(),
+    );
     return this.#elementModelsCategories;
   }
 
@@ -357,7 +364,7 @@ export class CategoriesTreeIdsCache implements Disposable {
     rootCategoryId: Id64String;
   }> {
     return defer(() => {
-        const query = `
+      const query = `
           SELECT
             pe.ECInstanceId modeledElementId,
             pe.Category.Id categoryId,
@@ -371,12 +378,12 @@ export class CategoriesTreeIdsCache implements Disposable {
       return this.#queryExecutor.createQueryReader(
         { ecsql: query },
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/modeled-elements` },
-      )
+      );
     }).pipe(
       map((row) => {
         return { modelId: row.modelId, categoryId: row.categoryId, modeledElementId: row.modeledElementId, rootCategoryId: row.rootCategoryId };
-      })
-    )
+      }),
+    );
   }
 
   private getModelWithCategoryModeledElements() {
@@ -391,8 +398,8 @@ export class CategoriesTreeIdsCache implements Disposable {
         }
         return acc;
       }, new Map<ModelCategoryKey, Set<ElementId>>()),
-      shareReplay()
-    )
+      shareReplay(),
+    );
     return this.#modelWithCategoryModeledElements;
   }
 
@@ -407,16 +414,18 @@ export class CategoriesTreeIdsCache implements Disposable {
           }
         }
         return result;
-      })
-    )
+      }),
+    );
   }
 
   private getSubCategoriesInfo() {
-     this.#subCategoriesInfo ??= this.getModelsCategoriesInfo()
+    this.#subCategoriesInfo ??= this.getModelsCategoriesInfo()
       .pipe(
         mergeMap((modelsCategoriesInfo) => from(modelsCategoriesInfo.values())),
         reduce((acc, modelCategoriesInfo) => {
-          acc.push(...modelCategoriesInfo.childCategories.filter((categoryInfo) => categoryInfo.subCategoryChildCount > 1).map((categoryInfo) => categoryInfo.id));
+          acc.push(
+            ...modelCategoriesInfo.childCategories.filter((categoryInfo) => categoryInfo.subCategoryChildCount > 1).map((categoryInfo) => categoryInfo.id),
+          );
           return acc;
         }, new Array<CategoryId>()),
         mergeMap((categoriesWithMoreThanOneSubCategory) => {
@@ -520,17 +529,17 @@ export class CategoriesTreeIdsCache implements Disposable {
               }
             }
             return acc;
-          }, new Map<CategoryId, Set<ModelId>>())
-        )
-      )
-    )
+          }, new Map<CategoryId, Set<ModelId>>()),
+        ),
+      ),
+    );
   }
 
   public getModelCategoryIds(modelId: Id64String): Observable<Id64Array> {
     return this.getElementModelsCategories().pipe(
-      map((elementModelsCategories) =>  {
-        return [...(elementModelsCategories.get(modelId)?.categoryIds ?? [])]
-      })
+      map((elementModelsCategories) => {
+        return [...(elementModelsCategories.get(modelId)?.categoryIds ?? [])];
+      }),
     );
   }
 
@@ -538,16 +547,14 @@ export class CategoriesTreeIdsCache implements Disposable {
     return this.getModelsCategoriesInfo().pipe(
       mergeMap((modelsCategoriesInfo) => modelsCategoriesInfo.values()),
       reduce((acc, { childCategories }) => {
-        childCategories.forEach(({ id }) => acc.add(id))
+        childCategories.forEach(({ id }) => acc.add(id));
         return acc;
-      }, new Set<Id64String>())
-    )
+      }, new Set<Id64String>()),
+    );
   }
 
   public hasSubModel(elementId: Id64String): Observable<boolean> {
-    return this.getElementModelsCategories().pipe(
-      map((elementModelsCategories) => elementModelsCategories.has(elementId))
-    )
+    return this.getElementModelsCategories().pipe(map((elementModelsCategories) => elementModelsCategories.has(elementId)));
   }
 
   public getAllContainedCategories({
@@ -557,7 +564,6 @@ export class CategoriesTreeIdsCache implements Disposable {
     definitionContainerIds: Id64Arg;
     includeEmptyCategories?: boolean;
   }): Observable<Id64Set> {
-
     return this.getDefinitionContainersInfo().pipe(
       mergeMap((definitionContainersInfo) =>
         from(Id64.iterable(definitionContainerIds)).pipe(
@@ -650,7 +656,9 @@ export class CategoriesTreeIdsCache implements Disposable {
     return this.#categoryElementCounts.getCategoryElementsCount(modelId, categoryId);
   }
 
-  public getAllDefinitionContainersAndCategories(props?: { includeEmpty?: boolean }): Observable<{ categories: Array<CategoryId>; definitionContainers: Array<DefinitionContainerId> }> {
+  public getAllDefinitionContainersAndCategories(props?: {
+    includeEmpty?: boolean;
+  }): Observable<{ categories: Array<CategoryId>; definitionContainers: Array<DefinitionContainerId> }> {
     return forkJoin({
       categories: this.getModelsCategoriesInfo().pipe(
         mergeMap((modelsCategoriesInfo) => modelsCategoriesInfo.values()),
@@ -671,7 +679,9 @@ export class CategoriesTreeIdsCache implements Disposable {
     });
   }
 
-  public getRootDefinitionContainersAndCategories(props?: { includeEmpty?: boolean }): Observable<{ categories: CategoryInfo[]; definitionContainers: Array<DefinitionContainerId> }> {
+  public getRootDefinitionContainersAndCategories(props?: {
+    includeEmpty?: boolean;
+  }): Observable<{ categories: CategoryInfo[]; definitionContainers: Array<DefinitionContainerId> }> {
     return forkJoin({
       categories: this.getModelsCategoriesInfo().pipe(
         mergeMap((modelsCategoriesInfo) => modelsCategoriesInfo.values()),
@@ -715,14 +725,12 @@ export class CategoriesTreeIdsCache implements Disposable {
           }
         }
         return result;
-      })
+      }),
     );
   }
 
   public getIsDefinitionContainerSupported(): Observable<boolean> {
-    this.#isDefinitionContainerSupported ??= this.queryIsDefinitionContainersSupported().pipe(
-      shareReplay()
-    );
+    this.#isDefinitionContainerSupported ??= this.queryIsDefinitionContainersSupported().pipe(shareReplay());
     return this.#isDefinitionContainerSupported;
   }
 }

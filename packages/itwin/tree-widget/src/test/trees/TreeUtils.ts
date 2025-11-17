@@ -8,8 +8,8 @@ import { BeEvent, Id64 } from "@itwin/core-bentley";
 import type { Id64Arg, Id64String } from "@itwin/core-bentley";
 import type { NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
-import type { TreeWidgetViewport } from "../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
 import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../../tree-widget-react/components/trees/common/internal/Types.js";
+import type { TreeWidgetViewport } from "../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
 
 export function createPresentationHierarchyNode(partial?: Partial<PresentationHierarchyNode>): PresentationHierarchyNode {
   return {

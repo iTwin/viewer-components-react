@@ -20,8 +20,8 @@ import { getDistinctMapValues, joinId64Arg } from "../../common/internal/Utils.j
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
-import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "../ClassificationsTreeDefinition.js";
 
 /** @internal */
@@ -50,16 +50,16 @@ export class ClassificationsTreeIdsCache implements Disposable {
   #componentId: GuidString;
   #componentName: string;
 
-  constructor(
-    queryExecutor: LimitingECSqlQueryExecutor,
-    hierarchyConfig: ClassificationsTreeHierarchyConfiguration,
-    componentId?: GuidString
-  ) {
+  constructor(queryExecutor: LimitingECSqlQueryExecutor, hierarchyConfig: ClassificationsTreeHierarchyConfiguration, componentId?: GuidString) {
     this.#queryExecutor = queryExecutor;
     this.#hierarchyConfig = hierarchyConfig;
     this.#componentId = componentId ?? Guid.createValue();
     this.#componentName = "ClassificationsTreeIdsCache";
-    this.#categoryElementCounts = new ModelCategoryElementsCountCache(this.#queryExecutor, ["BisCore.GeometricElement2d", "BisCore.GeometricElement3d"], this.#componentId);
+    this.#categoryElementCounts = new ModelCategoryElementsCountCache(
+      this.#queryExecutor,
+      ["BisCore.GeometricElement2d", "BisCore.GeometricElement3d"],
+      this.#componentId,
+    );
   }
 
   public [Symbol.dispose]() {
@@ -92,13 +92,12 @@ export class ClassificationsTreeIdsCache implements Disposable {
       return this.#queryExecutor.createQueryReader(
         { ecsql: query },
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/element-models-and-categories` },
-      )
+      );
     }).pipe(
       map((row) => {
         return { modelId: row.modelId, categoryId: row.categoryId, type: row.type };
-      })
-    )
-
+      }),
+    );
   }
 
   private getElementModelsCategories() {
@@ -119,11 +118,11 @@ export class ClassificationsTreeIdsCache implements Disposable {
               break;
           }
           return acc;
-        }, new Map<ModelId, { category2dIds: Id64Set; category3dIds: Id64Set }>())
+        }, new Map<ModelId, { category2dIds: Id64Set; category3dIds: Id64Set }>()),
       ),
-      modelWithCategoryModeledElements: this.getModelWithCategoryModeledElements()
+      modelWithCategoryModeledElements: this.getModelWithCategoryModeledElements(),
     }).pipe(
-      map(({modelCategories, modelWithCategoryModeledElements}) => {
+      map(({ modelCategories, modelWithCategoryModeledElements }) => {
         const result = new Map<ModelId, { category2dIds: Id64Set; category3dIds: Id64Set; isSubModel: boolean }>();
         const subModels = getDistinctMapValues(modelWithCategoryModeledElements);
         for (const [modelId, modelEntry] of modelCategories) {
@@ -132,8 +131,8 @@ export class ClassificationsTreeIdsCache implements Disposable {
         }
         return result;
       }),
-      shareReplay()
-    )
+      shareReplay(),
+    );
     return this.#elementModelsCategories;
   }
 
@@ -168,12 +167,12 @@ export class ClassificationsTreeIdsCache implements Disposable {
       return this.#queryExecutor.createQueryReader(
         { ecsql: query },
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/modeled-elements` },
-      )
+      );
     }).pipe(
       map((row) => {
         return { modelId: row.modelId, categoryId: row.categoryId, modeledElementId: row.modeledElementId, rootCategoryId: row.rootCategoryId };
-      })
-    )
+      }),
+    );
   }
 
   private getModelWithCategoryModeledElements() {
@@ -188,8 +187,8 @@ export class ClassificationsTreeIdsCache implements Disposable {
         }
         return acc;
       }, new Map<ModelCategoryKey, Set<ElementId>>()),
-      shareReplay()
-    )
+      shareReplay(),
+    );
     return this.#modelWithCategoryModeledElements;
   }
 
@@ -203,10 +202,10 @@ export class ClassificationsTreeIdsCache implements Disposable {
               acc.push(...entry);
             }
             return acc;
-          }, new Array<ElementId>())
-        )
-      )
-    )
+          }, new Array<ElementId>()),
+        ),
+      ),
+    );
   }
 
   public getCategoriesElementModels(categoryIds: Id64Arg, includeSubModels?: boolean): Observable<Map<CategoryId, Set<ModelId>>> {
@@ -225,10 +224,10 @@ export class ClassificationsTreeIdsCache implements Disposable {
               }
             }
             return acc;
-          }, new Map<CategoryId, Set<ModelId>>())
-        )
-      )
-    )
+          }, new Map<CategoryId, Set<ModelId>>()),
+        ),
+      ),
+    );
   }
 
   public getModelCategoryIds(modelId: Id64String): Observable<{ drawing: Id64Array; spatial: Id64Array }> {
@@ -237,26 +236,27 @@ export class ClassificationsTreeIdsCache implements Disposable {
         return {
           drawing: Array.from(elementModelsCategories.get(modelId)?.category2dIds ?? []),
           spatial: Array.from(elementModelsCategories.get(modelId)?.category3dIds ?? []),
-        }
-      })
-    )
+        };
+      }),
+    );
   }
 
   public getAllCategories(): Observable<{ drawing: Id64Set; spatial: Id64Set }> {
     return this.getElementModelsCategories().pipe(
       mergeMap((modelsCategoriesInfo) => modelsCategoriesInfo.values()),
-      reduce((acc, { category2dIds, category3dIds }) => {
-        category2dIds.forEach((id) => acc.drawing.add(id));
-        category3dIds.forEach((id) => acc.spatial.add(id));
-        return acc;
-      }, { drawing: new Set<Id64String>(), spatial: new Set<Id64String>() })
-    )
+      reduce(
+        (acc, { category2dIds, category3dIds }) => {
+          category2dIds.forEach((id) => acc.drawing.add(id));
+          category3dIds.forEach((id) => acc.spatial.add(id));
+          return acc;
+        },
+        { drawing: new Set<Id64String>(), spatial: new Set<Id64String>() },
+      ),
+    );
   }
 
   public hasSubModel(elementId: Id64String): Observable<boolean> {
-    return this.getElementModelsCategories().pipe(
-      map((elementModelsCategories) => elementModelsCategories.has(elementId))
-    )
+    return this.getElementModelsCategories().pipe(map((elementModelsCategories) => elementModelsCategories.has(elementId)));
   }
 
   public getCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Observable<number> {
@@ -337,9 +337,9 @@ export class ClassificationsTreeIdsCache implements Disposable {
           parentId: row.parentId,
           relatedCategories2d: row.relatedCategories2d ? (row.relatedCategories2d as string).split(",") : [],
           relatedCategories3d: row.relatedCategories3d ? (row.relatedCategories3d as string).split(",") : [],
-        }
-      })
-    )
+        };
+      }),
+    );
   }
 
   private getClassificationsInfo() {
@@ -361,8 +361,8 @@ export class ClassificationsTreeIdsCache implements Disposable {
         }
         return acc;
       }, new Map<ClassificationId | ClassificationTableId, ClassificationInfo>()),
-      shareReplay()
-    )
+      shareReplay(),
+    );
     return this.#classificationInfos;
   }
 
@@ -374,17 +374,20 @@ export class ClassificationsTreeIdsCache implements Disposable {
     return this.getClassificationsInfo().pipe(
       mergeMap((classificationsInfo) =>
         from(Id64.iterable(classificationOrTableIds)).pipe(
-          reduce((acc, classificationOrTableId) => {
-            const classificationInfo = classificationsInfo.get(classificationOrTableId);
-            if (classificationInfo === undefined) {
+          reduce(
+            (acc, classificationOrTableId) => {
+              const classificationInfo = classificationsInfo.get(classificationOrTableId);
+              if (classificationInfo === undefined) {
+                return acc;
+              }
+              acc.drawing.push(...classificationInfo.relatedCategories2d);
+              acc.spatial.push(...classificationInfo.relatedCategories3d);
+              acc.childClassifications.push(...classificationInfo.childClassificationIds);
               return acc;
-            }
-            acc.drawing.push(...classificationInfo.relatedCategories2d);
-            acc.spatial.push(...classificationInfo.relatedCategories3d);
-            acc.childClassifications.push(...classificationInfo.childClassificationIds);
-            return acc;
-          }, { drawing: new Array<Id64String>(), spatial: new Array<Id64String>(), childClassifications: new Array<Id64String>() }),
-          mergeMap(({drawing, spatial, childClassifications }) => {
+            },
+            { drawing: new Array<Id64String>(), spatial: new Array<Id64String>(), childClassifications: new Array<Id64String>() },
+          ),
+          mergeMap(({ drawing, spatial, childClassifications }) => {
             if (childClassifications.length === 0) {
               return of({ drawing, spatial });
             }
@@ -392,13 +395,13 @@ export class ClassificationsTreeIdsCache implements Disposable {
               map((childResult) => {
                 drawing.push(...childResult.drawing);
                 spatial.push(...childResult.spatial);
-                return { drawing, spatial}
-              })
-            )
-          })
-        )
-      )
-    )
+                return { drawing, spatial };
+              }),
+            );
+          }),
+        ),
+      ),
+    );
   }
 
   public getDirectChildClassifications(classificationOrTableIds: Id64Arg): Observable<ClassificationId[]> {
@@ -415,10 +418,10 @@ export class ClassificationsTreeIdsCache implements Disposable {
               acc.push(...classificationInfo.childClassificationIds);
             }
             return acc;
-          }, result)
-        )
-      )
-    )
+          }, result),
+        ),
+      ),
+    );
   }
 
   public getClassificationsPathObs(classificationIds: Id64Arg): Observable<HierarchyNodeIdentifiersPath> {
@@ -445,9 +448,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
   }
 
   public getAllClassifications(): Observable<ClassificationId[]> {
-    return this.getClassificationsInfo().pipe(
-      map((classificationsInfo) => [...classificationsInfo.keys()])
-    )
+    return this.getClassificationsInfo().pipe(map((classificationsInfo) => [...classificationsInfo.keys()]));
   }
 
   private queryFilteredElementsData({ element2dIds, element3dIds }: { element2dIds: Id64Arg; element3dIds: Id64Arg }): Observable<{
@@ -473,13 +474,17 @@ export class ClassificationsTreeIdsCache implements Disposable {
       }
       return this.#queryExecutor.createQueryReader(
         { ecsql: queries.join(" UNION ALL ") },
-        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/filtered-elements/${Guid.createValue()}` },
-      )
+        {
+          rowFormat: "ECSqlPropertyNames",
+          limit: "unbounded",
+          restartToken: `${this.#componentName}/${this.#componentId}/filtered-elements/${Guid.createValue()}`,
+        },
+      );
     }).pipe(
       map((row) => {
         return { modelId: row.modelId, id: row.id, categoryId: row.categoryId };
-      })
-    )
+      }),
+    );
   }
 
   public getFilteredElementsData({
@@ -498,11 +503,11 @@ export class ClassificationsTreeIdsCache implements Disposable {
       element3dIds,
     }).pipe(
       reduce((acc, { modelId, id, categoryId }) => {
-        acc.set(id, { modelId, categoryId })
+        acc.set(id, { modelId, categoryId });
         return acc;
       }, result),
-      shareReplay()
-    )
+      shareReplay(),
+    );
     return this.#filteredElementsData;
   }
 

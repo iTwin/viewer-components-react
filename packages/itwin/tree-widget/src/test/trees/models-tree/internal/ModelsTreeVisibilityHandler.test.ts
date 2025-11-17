@@ -1835,7 +1835,8 @@ describe("ModelsTreeVisibilityHandler", () => {
           },
           {
             name: "modeled element's children display is turned on when its model display is turned on",
-            getTargetNode: (ids: IModelWithSubModelIds) => createModelHierarchyNode({
+            getTargetNode: (ids: IModelWithSubModelIds) =>
+              createModelHierarchyNode({
                 modelId: ids.modelId,
                 hasChildren: true,
               }),
@@ -1843,7 +1844,8 @@ describe("ModelsTreeVisibilityHandler", () => {
           },
           {
             name: "modeled element's children display is turned on when its category display is turned on",
-            getTargetNode: (ids: IModelWithSubModelIds) => createCategoryHierarchyNode({
+            getTargetNode: (ids: IModelWithSubModelIds) =>
+              createCategoryHierarchyNode({
                 modelId: ids.modelId,
                 categoryId: ids.categoryId,
                 hasChildren: true,
@@ -1873,7 +1875,8 @@ describe("ModelsTreeVisibilityHandler", () => {
           },
           {
             name: "modeled element's children display is turned on when its sub-model display is turned on",
-            getTargetNode: (ids: IModelWithSubModelIds) => createModelHierarchyNode({
+            getTargetNode: (ids: IModelWithSubModelIds) =>
+              createModelHierarchyNode({
                 modelId: ids.modeledElementId,
                 hasChildren: true,
               }),
@@ -1902,7 +1905,8 @@ describe("ModelsTreeVisibilityHandler", () => {
           },
           {
             name: "modeled element, its model and category have partial visibility when its sub-model element's category display is turned on",
-            getTargetNode: (ids: IModelWithSubModelIds) => createCategoryHierarchyNode({
+            getTargetNode: (ids: IModelWithSubModelIds) =>
+              createCategoryHierarchyNode({
                 modelId: ids.modeledElementId,
                 categoryId: ids.subModelCategoryId,
                 hasChildren: true,
@@ -1999,7 +2003,8 @@ describe("ModelsTreeVisibilityHandler", () => {
           },
           {
             name: "everything is visible when model display is turned on",
-            getTargetNode: (ids: IModelWithSubModelIds) => createModelHierarchyNode({
+            getTargetNode: (ids: IModelWithSubModelIds) =>
+              createModelHierarchyNode({
                 modelId: ids.modelId,
                 hasChildren: true,
               }),
@@ -2007,7 +2012,8 @@ describe("ModelsTreeVisibilityHandler", () => {
           },
           {
             name: "everything is visible when category display is turned on",
-            getTargetNode: (ids: IModelWithSubModelIds) => createCategoryHierarchyNode({
+            getTargetNode: (ids: IModelWithSubModelIds) =>
+              createCategoryHierarchyNode({
                 modelId: ids.modelId,
                 categoryId: ids.categoryId,
                 hasChildren: true,
@@ -2069,7 +2075,8 @@ describe("ModelsTreeVisibilityHandler", () => {
           },
           {
             name: "everything is visible when model display is turned on",
-            getTargetNode: (ids: IModelWithSubModelIds) => createModelHierarchyNode({
+            getTargetNode: (ids: IModelWithSubModelIds) =>
+              createModelHierarchyNode({
                 modelId: ids.modelId,
                 hasChildren: true,
               }),
@@ -2077,7 +2084,8 @@ describe("ModelsTreeVisibilityHandler", () => {
           },
           {
             name: "everything is visible when category display is turned on",
-            getTargetNode: (ids: IModelWithSubModelIds) => createCategoryHierarchyNode({
+            getTargetNode: (ids: IModelWithSubModelIds) =>
+              createCategoryHierarchyNode({
                 modelId: ids.modelId,
                 categoryId: ids.categoryId,
                 hasChildren: true,
@@ -2218,10 +2226,13 @@ describe("ModelsTreeVisibilityHandler", () => {
       const { imodel, ...ids } = buildIModelResult;
       using visibilityTestData = createVisibilityTestData({ imodel });
       const { handler, provider, viewport } = visibilityTestData;
-      await handler.changeVisibility(createModelHierarchyNode({
+      await handler.changeVisibility(
+        createModelHierarchyNode({
           modelId: ids.model,
           hasChildren: true,
-        }), true);
+        }),
+        true,
+      );
 
       await validateHierarchyVisibility({
         provider,
@@ -2462,11 +2473,14 @@ describe("ModelsTreeVisibilityHandler", () => {
       const { imodel, ...ids } = buildIModelResult;
       using visibilityTestData = createVisibilityTestData({ imodel });
       const { handler, provider, viewport } = visibilityTestData;
-      await handler.changeVisibility(createCategoryHierarchyNode({
+      await handler.changeVisibility(
+        createCategoryHierarchyNode({
           modelId: ids.model,
           categoryId: ids.category,
           hasChildren: true,
-        }), true);
+        }),
+        true,
+      );
 
       await validateHierarchyVisibility({
         provider,
@@ -2500,11 +2514,14 @@ describe("ModelsTreeVisibilityHandler", () => {
       viewport.changeCategoryDisplay({ categoryIds: ids.category, display: true, enableAllSubCategories: true });
       viewport.renderFrame();
 
-      await handler.changeVisibility(createCategoryHierarchyNode({
+      await handler.changeVisibility(
+        createCategoryHierarchyNode({
           modelId: ids.model,
           categoryId: ids.category,
           hasChildren: true,
-        }), false);
+        }),
+        false,
+      );
 
       await validateHierarchyVisibility({
         provider,
@@ -2669,7 +2686,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           element: (props) => (props.elementId === ids.element2 ? "visible" : "hidden"),
         },
       });
-       await handler.changeVisibility(
+      await handler.changeVisibility(
         createElementHierarchyNode({
           modelId: ids.model,
           categoryId: ids.category1,

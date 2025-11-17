@@ -20,6 +20,7 @@ import {
   TooManyInstancesFocused,
   UnknownInstanceFocusError,
 } from "../common/components/EmptyTree.js";
+import { useGuid } from "../common/internal/useGuid.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
@@ -45,7 +46,6 @@ import type { ModelsTreeFilteringError, ModelsTreeSubTreeError } from "./interna
 import type { ModelsTreeFilterTargets } from "./internal/visibility/FilteredTree.js";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/visibility/ModelsTreeVisibilityHandler.js";
 import type { ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition.js";
-import { useGuid } from "../common/internal/useGuid.js";
 
 /** @beta */
 export interface UseModelsTreeProps {
@@ -145,7 +145,7 @@ export function useModelsTree({
     imodel: activeView.iModel,
     createCache,
     cacheSpecificProps: useMemo(() => ({ hierarchyConfig: hierarchyConfiguration }), [hierarchyConfiguration]),
-    componentId
+    componentId,
   });
 
   const { visibilityHandlerFactory, onFilteredPathsChanged } = useCachedVisibility<ModelsTreeIdsCache, ModelsTreeFilterTargets>({
@@ -156,7 +156,7 @@ export function useModelsTree({
       [visibilityHandlerOverrides],
     ),
     getCache: getModelsTreeIdsCache,
-    componentId
+    componentId,
   });
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
@@ -172,7 +172,7 @@ export function useModelsTree({
     onFilteredPathsChanged,
     onModelsFiltered,
     getSubTreePaths,
-    componentId
+    componentId,
   });
 
   const nodeSelectionPredicate = useCallback<NonNullable<VisibilityTreeProps["selectionPredicate"]>>(

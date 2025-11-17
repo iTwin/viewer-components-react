@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { bufferCount, defer, EMPTY, firstValueFrom, from, identity, lastValueFrom, map, merge, mergeMap, of, reduce, toArray } from "rxjs";
+import { Guid } from "@itwin/core-bentley";
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql, parseFullClassName } from "@itwin/presentation-shared";
 import {
@@ -20,7 +21,7 @@ import { getOptimalBatchSize, releaseMainThreadOnItemsCount } from "../common/in
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 
 import type { Observable, OperatorFunction } from "rxjs";
-import { Guid, type GuidString, type Id64Array, type Id64String, type MarkRequired } from "@itwin/core-bentley";
+import type { GuidString, Id64Array, Id64String, MarkRequired } from "@itwin/core-bentley";
 import type {
   DefineHierarchyLevelProps,
   DefineInstanceNodeChildHierarchyLevelProps,
@@ -337,7 +338,12 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
 
   public static async createInstanceKeyPaths(props: ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps): Promise<NormalizedHierarchyFilteringPath[]> {
     const labelsFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
-    return createInstanceKeyPathsFromInstanceLabel({ ...props, labelsFactory, componentId: props.componentId ?? Guid.createValue(), componentName: this.#componentName });
+    return createInstanceKeyPathsFromInstanceLabel({
+      ...props,
+      labelsFactory,
+      componentId: props.componentId ?? Guid.createValue(),
+      componentName: this.#componentName,
+    });
   }
 }
 
@@ -360,7 +366,10 @@ function createClassificationHasChildrenSelector(classificationAlias: string) {
 }
 
 async function createInstanceKeyPathsFromInstanceLabel(
-  props: MarkRequired<ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps, "componentId"> & { labelsFactory: IInstanceLabelSelectClauseFactory; componentName: string },
+  props: MarkRequired<ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps, "componentId"> & {
+    labelsFactory: IInstanceLabelSelectClauseFactory;
+    componentName: string;
+  },
 ): Promise<NormalizedHierarchyFilteringPath[]> {
   const adjustedLabel = props.label.replace(/[%_\\]/g, "\\$&");
 
@@ -545,11 +554,11 @@ function createInstanceKeyPathsFromTargetItems({
   imodelAccess,
   limit,
   componentId,
-  componentName
-}: Pick<ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps, "limit" | "imodelAccess" | "idsCache"> & { componentId: GuidString; componentName: string}): OperatorFunction<
-  InstanceKey,
-  NormalizedHierarchyFilteringPath
-> {
+  componentName,
+}: Pick<ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps, "limit" | "imodelAccess" | "idsCache"> & {
+  componentId: GuidString;
+  componentName: string;
+}): OperatorFunction<InstanceKey, NormalizedHierarchyFilteringPath> {
   const actualLimit = limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT;
   return (targetItems: Observable<InstanceKey>) => {
     return targetItems.pipe(
@@ -596,12 +605,20 @@ function createInstanceKeyPathsFromTargetItems({
           from(ids.element2dIds).pipe(
             bufferCount(getOptimalBatchSize({ totalSize: elements2dLength, maximumBatchSize: 5000 })),
             releaseMainThreadOnItemsCount(1),
-            mergeMap((block, chunkIndex) => createGeometricElementInstanceKeyPaths({ idsCache, imodelAccess, targetItems: block, type: "2d", chunkIndex, componentId, componentName }), 10),
+            mergeMap(
+              (block, chunkIndex) =>
+                createGeometricElementInstanceKeyPaths({ idsCache, imodelAccess, targetItems: block, type: "2d", chunkIndex, componentId, componentName }),
+              10,
+            ),
           ),
           from(ids.element3dIds).pipe(
             bufferCount(getOptimalBatchSize({ totalSize: elements3dLength, maximumBatchSize: 5000 })),
             releaseMainThreadOnItemsCount(1),
-            mergeMap((block, chunkIndex) => createGeometricElementInstanceKeyPaths({ idsCache, imodelAccess, targetItems: block, type: "3d", chunkIndex, componentId, componentName }), 10),
+            mergeMap(
+              (block, chunkIndex) =>
+                createGeometricElementInstanceKeyPaths({ idsCache, imodelAccess, targetItems: block, type: "3d", chunkIndex, componentId, componentName }),
+              10,
+            ),
           ),
         );
       }),

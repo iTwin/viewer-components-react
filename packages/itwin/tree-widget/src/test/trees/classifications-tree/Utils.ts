@@ -11,12 +11,12 @@ import { ClassificationsTreeDefinition } from "../../../tree-widget-react/compon
 import { insertDefinitionSubModel } from "../../IModelUtils.js";
 import { createIModelAccess } from "../Common.js";
 
-import type { TestIModelBuilder } from "@itwin/presentation-testing";
-import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
-import type { IModelConnection } from "@itwin/core-frontend";
-import type { ClassificationsTreeHierarchyConfiguration } from "../../../tree-widget-react/components/trees/classifications-tree/ClassificationsTreeDefinition.js";
 import type { Id64String } from "@itwin/core-bentley";
 import type { DefinitionElementProps } from "@itwin/core-common";
+import type { IModelConnection } from "@itwin/core-frontend";
+import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
+import type { TestIModelBuilder } from "@itwin/presentation-testing";
+import type { ClassificationsTreeHierarchyConfiguration } from "../../../tree-widget-react/components/trees/classifications-tree/ClassificationsTreeDefinition.js";
 
 export function createClassificationsTreeProvider(
   imodel: IModelConnection,

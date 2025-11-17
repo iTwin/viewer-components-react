@@ -6,8 +6,6 @@
 import { expect } from "chai";
 import { firstValueFrom } from "rxjs";
 import sinon from "sinon";
-import type {
-  MapEntry} from "../../../../tree-widget-react/components/trees/common/internal/AlwaysAndNeverDrawnElementInfo.js";
 import {
   AlwaysAndNeverDrawnElementInfo,
   SET_CHANGE_DEBOUNCE_TIME,
@@ -15,6 +13,7 @@ import {
 import { createFakeSinonViewport } from "../../Common.js";
 
 import type { Id64String } from "@itwin/core-bentley";
+import type { MapEntry } from "../../../../tree-widget-react/components/trees/common/internal/AlwaysAndNeverDrawnElementInfo.js";
 import type { ChildrenTree } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
 
 describe("AlwaysAndNeverDrawnElementInfo", () => {

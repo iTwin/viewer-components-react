@@ -12,8 +12,8 @@ import { waitFor } from "../../../TestUtils.js";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
-import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
 import type { Visibility } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
+import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
 import type { waitForOptions } from "../../../TestUtils.js";
 import type { TreeWidgetTestingViewport } from "../../TreeUtils.js";
 

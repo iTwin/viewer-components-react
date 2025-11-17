@@ -30,13 +30,12 @@ import {
 } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import type { ChildrenTree} from "./Utils.js";
 import { getClassesByView, getIdsFromChildrenTree, getOptimalBatchSize, releaseMainThreadOnItemsCount, setDifference, updateChildrenTree } from "./Utils.js";
 
-import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Observable, Subscription } from "rxjs";
+import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { TreeWidgetViewport } from "../TreeWidgetViewport.js";
-
+import type { ChildrenTree } from "./Utils.js";
 
 /** @internal */
 export const SET_CHANGE_DEBOUNCE_TIME = 20;
@@ -122,7 +121,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
     this.#suppress.next(false);
   }
 
- public getElementsTree({ setType, modelIds, ...props }: GetElementsTreeProps): Observable<CachedNodesMap> {
+  public getElementsTree({ setType, modelIds, ...props }: GetElementsTreeProps): Observable<CachedNodesMap> {
     const cache = setType === "always" ? this.#alwaysDrawn : this.#neverDrawn;
     const getElements = (rootTreeNodes: CachedNodesMap | undefined): CachedNodesMap => {
       if (!rootTreeNodes) {
@@ -239,7 +238,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
     this.#disposeSubject.next();
   }
 
- private queryAlwaysOrNeverDrawnElementInfo(set: ReadonlySet<Id64String> | undefined, requestId: string): Observable<CachedNodesMap> {
+  private queryAlwaysOrNeverDrawnElementInfo(set: ReadonlySet<Id64String> | undefined, requestId: string): Observable<CachedNodesMap> {
     const elementInfo = set?.size
       ? from(set).pipe(
           bufferCount(getOptimalBatchSize({ totalSize: set.size, maximumBatchSize: 5000 })),
@@ -268,7 +267,10 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
     );
   }
 
-  private queryElementInfo(elementIds: Id64Array, requestId: string): Observable<{
+  private queryElementInfo(
+    elementIds: Id64Array,
+    requestId: string,
+  ): Observable<{
     rootCategoryId: Id64String;
     modelId: Id64String;
     categoryId: Id64String;
@@ -326,7 +328,9 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
   }
 
   public getAlwaysOrNeverDrawnElements(props: GetElementsTreeProps) {
-    return this.getElementsTree(props).pipe(map((childrenTree) => getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ treeEntry }) => treeEntry.isInAlwaysOrNeverDrawnSet })));
+    return this.getElementsTree(props).pipe(
+      map((childrenTree) => getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ treeEntry }) => treeEntry.isInAlwaysOrNeverDrawnSet })),
+    );
   }
 
   public clearAlwaysAndNeverDrawnElements(props: { categoryIds: Id64Arg; modelId: Id64String | undefined }) {

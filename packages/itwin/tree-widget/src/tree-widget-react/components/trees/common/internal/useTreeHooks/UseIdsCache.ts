@@ -6,8 +6,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useIModelChangeListener } from "../UseIModelChangeListener.js";
 
-import type { IModelConnection } from "@itwin/core-frontend";
 import type { GuidString } from "@itwin/core-bentley";
+import type { IModelConnection } from "@itwin/core-frontend";
 
 /** @internal */
 export interface CreateCacheProps<TCacheSpecificProps> {

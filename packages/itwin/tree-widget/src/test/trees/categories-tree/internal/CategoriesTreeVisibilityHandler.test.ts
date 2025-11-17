@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Id64Arg, Id64String } from "@itwin/core-bentley";
 import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
@@ -42,11 +41,12 @@ import {
 } from "./Utils.js";
 import { validateHierarchyVisibility } from "./VisibilityValidation.js";
 
-import type { TreeWidgetTestingViewport } from "../../TreeUtils.js";
+import type { Id64Arg, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { CategoriesTreeHierarchyConfiguration } from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
+import type { TreeWidgetTestingViewport } from "../../TreeUtils.js";
 import type { VisibilityExpectations } from "./VisibilityValidation.js";
 
 describe("CategoriesTreeVisibilityHandler", () => {
@@ -128,7 +128,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       idsCache: commonProps.idsCache,
       imodelAccess: commonProps.imodelAccess,
       filteredPaths: undefined,
-      hierarchyConfig: hierarchyConfiguration
+      hierarchyConfig: hierarchyConfiguration,
     });
     const provider = createProvider({ ...commonProps });
 

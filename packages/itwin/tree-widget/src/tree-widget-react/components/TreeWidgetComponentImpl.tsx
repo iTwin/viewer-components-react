@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./TreeWidgetComponentImpl.css";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Skeleton } from "@stratakit/bricks";
@@ -14,6 +15,7 @@ import { SkeletonTree } from "./trees/common/components/SkeletonTree.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { TreeContentDefinition, TreeSelectionProps } from "./tree-header/WidgetHeader.js";
+
 /**
  * Props for rendering trees
  * @public

@@ -661,8 +661,8 @@ export class BaseVisibilityHelper implements Disposable {
           categoriesToNotOverride ? filter((modelCategory) => !Id64.has(categoriesToNotOverride, modelCategory)) : identity,
           map((categoryId) => this.changeCategoryStateInViewportAccordingToModelVisibility(modelId, categoryId, false, false)),
           takeLast(1),
-          defaultIfEmpty(undefined)
-        )
+          defaultIfEmpty(undefined),
+        );
       }),
     );
   }

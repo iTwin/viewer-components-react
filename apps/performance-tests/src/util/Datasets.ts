@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-
 import fs from "fs";
 import path from "path";
 import {
@@ -91,10 +90,10 @@ export class Datasets {
     }
   }
 
- /**
-  * Create an iModel with one root definition container which has child definition containers which contain 1k categories each.
-  * In total there are `numElements` number of categories.
-  */
+  /**
+   * Create an iModel with one root definition container which has child definition containers which contain 1k categories each.
+   * In total there are `numElements` number of categories.
+   */
   private static async createCategoryIModel(name: string, localPath: string, numElements: number) {
     console.log(`${numElements} categories: Creating...`);
     await createIModel(name, localPath, async (builder) => {
@@ -130,7 +129,7 @@ export class Datasets {
     console.log(`${numElements} categories: Done.`);
   }
 
- /**
+  /**
    * Create an iModel with `numElements` sub-categories. There are a total of `numElements` / 1000 categories, where each category has 1k sub-categories.
    * There is also one definition container that contains all the categories.
    */

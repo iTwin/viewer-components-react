@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { firstValueFrom } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { CLASS_NAME_SubCategory } from "../../../common/internal/ClassNameDefinitions.js";
 import { createFilteredTree, FilteredNodesHandler } from "../../../common/internal/visibility/BaseFilteredTree.js";
@@ -133,7 +134,7 @@ class CategoriesTreeFilteredNodesHandler extends FilteredNodesHandler<ProcessedF
       }
     });
 
-    const filteredElementsModels = await this.#props.idsCache.getFilteredElementsModels([...filteredTemporaryElements.keys()]);
+    const filteredElementsModels = await firstValueFrom(this.#props.idsCache.getFilteredElementsModels([...filteredTemporaryElements.keys()]));
     filteredTemporaryElements.forEach((element, id) => {
       const modelId = filteredElementsModels.get(element.id);
       assert(modelId !== undefined);

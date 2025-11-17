@@ -5,6 +5,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAsyncValue } from "@itwin/components-react";
+import { type GuidString, type Id64Array } from "@itwin/core-bentley";
 import { QueryRowFormat } from "@itwin/core-common";
 import { IconButton } from "@stratakit/bricks";
 import visibilityHideSvg from "@stratakit/icons/visibility-hide.svg";
@@ -12,17 +13,16 @@ import visibilityInvertSvg from "@stratakit/icons/visibility-invert.svg";
 import visibilityShowSvg from "@stratakit/icons/visibility-show.svg";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { hideAllCategories, invertAllCategories } from "../common/CategoriesVisibilityUtils.js";
+import { useGuid } from "../common/internal/useGuid.js";
 import { getClassesByView } from "../common/internal/Utils.js";
 import { loadCategoriesFromViewport } from "../common/internal/VisibilityUtils.js";
 import { hideAllModels, showAll } from "../common/Utils.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
-import { type GuidString, type Id64Array } from "@itwin/core-bentley";
 import type { TreeToolbarButtonProps } from "../../tree-header/SelectableTree.js";
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { ModelId } from "../common/internal/Types.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
-import { useGuid } from "../common/internal/useGuid.js";
 
 /**
  * Props that get passed to `CategoriesTreeComponent` header button renderer.

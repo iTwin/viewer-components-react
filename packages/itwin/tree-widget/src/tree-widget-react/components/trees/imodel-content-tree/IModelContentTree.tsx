@@ -15,15 +15,15 @@ import hierarchyTreeSvg from "@stratakit/icons/selection-children.svg";
 import { EmptyTreeContent } from "../common/components/EmptyTree.js";
 import { Tree } from "../common/components/Tree.js";
 import { TreeRenderer } from "../common/components/TreeRenderer.js";
+import { useGuid } from "../common/internal/useGuid.js";
 import { IModelContentTreeComponent } from "./IModelContentTreeComponent.js";
 import { defaultHierarchyConfiguration, IModelContentTreeDefinition } from "./IModelContentTreeDefinition.js";
 import { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache.js";
 
-import type { IModelContentTreeHierarchyConfiguration } from "./IModelContentTreeDefinition.js";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { BaseTreeRendererProps } from "../common/components/BaseTreeRenderer.js";
 import type { TreeProps } from "../common/components/Tree.js";
-import { useGuid } from "../common/internal/useGuid.js";
+import type { IModelContentTreeHierarchyConfiguration } from "./IModelContentTreeDefinition.js";
 
 /** @beta */
 export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &

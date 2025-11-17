@@ -22,8 +22,8 @@ import { TestUtils } from "../TestUtils.js";
 import { createFakeSinonViewport, createIModelMock } from "./Common.js";
 import { createTreeWidgetTestingViewport } from "./TreeUtils.js";
 
-import type { IModelConnection } from "@itwin/core-frontend";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { TreeWidgetTestingViewport } from "./TreeUtils.js";
 
 describe("CategoryVisibilityUtils", () => {

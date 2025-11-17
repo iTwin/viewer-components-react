@@ -19,6 +19,7 @@ import {
   CLASS_NAME_GeometricModel3d,
   CLASS_NAME_InformationPartitionElement,
 } from "../common/internal/ClassNameDefinitions.js";
+import { useGuid } from "../common/internal/useGuid.js";
 import { areAllModelsVisible, hideAllModels, invertAllModels, showAll, toggleModels } from "../common/Utils.js";
 
 import type { Id64String } from "@itwin/core-bentley";
@@ -26,7 +27,6 @@ import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { TreeToolbarButtonProps } from "../../tree-header/SelectableTree.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
-import { useGuid } from "../common/internal/useGuid.js";
 
 /**
  * Information about a single Model.

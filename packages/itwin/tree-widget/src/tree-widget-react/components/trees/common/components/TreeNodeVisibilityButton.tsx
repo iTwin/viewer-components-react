@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./TreeNodeVisibilityButton.css";
+
 import { createContext, memo, useContext, useMemo } from "react";
 import visibilityHideSvg from "@stratakit/icons/visibility-hide.svg";
 import visibilityPartialSvg from "@stratakit/icons/visibility-partial.svg";

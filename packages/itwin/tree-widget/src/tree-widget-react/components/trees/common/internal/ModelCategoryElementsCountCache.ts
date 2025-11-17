@@ -5,12 +5,12 @@
 
 import { bufferCount, bufferTime, defer, filter, from, map, mergeAll, mergeMap, reduce, ReplaySubject, Subject, take, toArray } from "rxjs";
 import { assert, Guid } from "@itwin/core-bentley";
+import { releaseMainThreadOnItemsCount } from "./Utils.js";
 
-import type { GuidString, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { Observable, Subscription } from "rxjs";
+import type { GuidString, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { CategoryId, ModelId } from "./Types.js";
-import { releaseMainThreadOnItemsCount } from "./Utils.js";
 
 type ModelCategoryKey = `${ModelId}-${CategoryId}`;
 
@@ -24,11 +24,7 @@ export class ModelCategoryElementsCountCache implements Disposable {
   #componentId: GuidString;
   #componentName: string;
 
-  public constructor(
-    queryExecutor: LimitingECSqlQueryExecutor,
-    elementsClassNames: string[],
-    componentId: GuidString
-  ) {
+  public constructor(queryExecutor: LimitingECSqlQueryExecutor, elementsClassNames: string[], componentId: GuidString) {
     this.#componentId = componentId;
     this.#queryExecutor = queryExecutor;
     this.#elementsClassNames = elementsClassNames;
@@ -104,9 +100,13 @@ export class ModelCategoryElementsCountCache implements Disposable {
                 GROUP BY modelId, categoryId
               `,
             },
-            { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/category-element-counts/${Guid.createValue()}` },
-          )
-        )
+            {
+              rowFormat: "ECSqlPropertyNames",
+              limit: "unbounded",
+              restartToken: `${this.#componentName}/${this.#componentId}/category-element-counts/${Guid.createValue()}`,
+            },
+          ),
+        ),
       ),
       releaseMainThreadOnItemsCount(500),
       reduce(

@@ -30,9 +30,9 @@ import {
 import { createIModelAccess } from "../Common.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
 
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { CategoriesTreeHierarchyConfiguration } from "../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
-import type { IModelConnection } from "@itwin/core-frontend";
 
 describe("Categories tree", () => {
   describe("Hierarchy definition", () => {

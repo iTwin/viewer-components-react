@@ -19,13 +19,13 @@ import type { GroupingHierarchyNode, HierarchyFilteringPath } from "@itwin/prese
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { AlwaysAndNeverDrawnElementInfo } from "../../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
 import type { ElementId, ModelId } from "../../../common/internal/Types.js";
-import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
 import type { FilteredTree } from "../../../common/internal/visibility/BaseFilteredTree.js";
 import type { BaseIdsCache, TreeSpecificVisibilityHandler } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import type { TreeWidgetViewport } from "../../../common/TreeWidgetViewport.js";
+import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
+import type { CategoriesTreeHierarchyConfiguration } from "../../CategoriesTreeDefinition.js";
 import type { CategoriesTreeIdsCache } from "../CategoriesTreeIdsCache.js";
 import type { CategoriesTreeFilterTargets } from "./FilteredTree.js";
-import type { CategoriesTreeHierarchyConfiguration } from "../../CategoriesTreeDefinition.js";
 
 /** @internal */
 export interface CategoriesTreeVisibilityHandlerProps {
@@ -65,7 +65,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
       idsCache: this.#props.idsCache,
       alwaysAndNeverDrawnElementInfo: this.#props.alwaysAndNeverDrawnElementInfo,
       baseIdsCache,
-      hierarchyConfig: constructorProps.hierarchyConfig
+      hierarchyConfig: constructorProps.hierarchyConfig,
     });
 
     this.#elementType = this.#props.viewport.viewType === "2d" ? "GeometricElement2d" : "GeometricElement3d";
@@ -107,7 +107,9 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
         observables.push(
           from(elements).pipe(
             releaseMainThreadOnItemsCount(50),
-            mergeMap(({ modelId, elements: elementsMap, categoryId }) => this.#visibilityHelper.changeElementsVisibilityStatus({ modelId, categoryId, elementIds: [...elementsMap.keys()], on })),
+            mergeMap(({ modelId, elements: elementsMap, categoryId }) =>
+              this.#visibilityHelper.changeElementsVisibilityStatus({ modelId, categoryId, elementIds: [...elementsMap.keys()], on }),
+            ),
           ),
         );
       }
@@ -421,10 +423,10 @@ export function createCategoriesTreeVisibilityHandler(props: {
         alwaysAndNeverDrawnElementInfo: info,
         idsCache: props.idsCache,
         viewport: props.viewport,
-        hierarchyConfig: props.hierarchyConfig
+        hierarchyConfig: props.hierarchyConfig,
       });
     },
     viewport: props.viewport,
-    componentId: "Test"
+    componentId: "Test",
   });
 }

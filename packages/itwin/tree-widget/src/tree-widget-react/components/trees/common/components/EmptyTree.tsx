@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./EmptyTree.css";
+
 import { Anchor, Text } from "@stratakit/bricks";
 import { Icon } from "@stratakit/foundations";
 import { TreeWidget } from "../../../../TreeWidget.js";

@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { firstValueFrom } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { CLASS_NAME_Classification, CLASS_NAME_ClassificationTable, CLASS_NAME_GeometricElement2d } from "../../../common/internal/ClassNameDefinitions.js";
 import { createFilteredTree, FilteredNodesHandler } from "../../../common/internal/visibility/BaseFilteredTree.js";
@@ -13,7 +14,6 @@ import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
 import type { BaseFilteredTreeNode, FilteredTree, FilteredTreeNodeChildren } from "../../../common/internal/visibility/BaseFilteredTree.js";
 import type { ClassificationsTreeIdsCache } from "../ClassificationsTreeIdsCache.js";
-import { firstValueFrom } from "rxjs";
 
 interface ClassificationTableFilteredTreeNode extends BaseFilteredTreeNode<ClassificationTableFilteredTreeNode> {
   type: "classificationTable";
@@ -121,10 +121,12 @@ class ClassificationsTreeFilteredNodesHandler extends FilteredNodesHandler<
       }
     }
 
-    const filteredElementsModels = await firstValueFrom(this.#props.idsCache.getFilteredElementsData({
-      element2dIds: [...filteredTemporary2dElements.keys()],
-      element3dIds: [...filteredTemporary3dElements.keys()],
-    }));
+    const filteredElementsModels = await firstValueFrom(
+      this.#props.idsCache.getFilteredElementsData({
+        element2dIds: [...filteredTemporary2dElements.keys()],
+        element3dIds: [...filteredTemporary3dElements.keys()],
+      }),
+    );
     filteredTemporary2dElements.forEach((element, id) => {
       const entry = filteredElementsModels.get(element.id);
       assert(entry !== undefined);

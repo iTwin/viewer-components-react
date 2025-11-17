@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
+import { firstValueFrom } from "rxjs";
 import { IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
@@ -22,7 +23,6 @@ import {
   insertSubModel,
 } from "../../../IModelUtils.js";
 import { createIModelAccess } from "../../Common.js";
-import { firstValueFrom } from "rxjs";
 
 describe("CategoriesTreeIdsCache", () => {
   before(async function () {
@@ -57,7 +57,9 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       using idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      expect(await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainer.id] }))).to.deep.eq({
+      expect(
+        await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainer.id] })),
+      ).to.deep.eq({
         categories: [],
         definitionContainers: [],
       });
@@ -74,7 +76,9 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       using idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      expect(await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id] }))).to.deep.eq({
+      expect(
+        await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id] })),
+      ).to.deep.eq({
         categories: [],
         definitionContainers: [],
       });
@@ -94,13 +98,15 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       using idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      expect(await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id] }))).to.deep.eq({
+      expect(
+        await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id] })),
+      ).to.deep.eq({
         categories: [],
         definitionContainers: [keys.definitionContainerChild.id],
       });
     });
 
-     it("returns child definition container when definition container contains definition container, that has empty categories and includeEmpty is true", async function () {
+    it("returns child definition container when definition container contains definition container, that has empty categories and includeEmpty is true", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
         const definitionModelRoot = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
@@ -113,7 +119,9 @@ describe("CategoriesTreeIdsCache", () => {
       const { imodel, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
       expect(
-        await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id], includeEmpty: true })),
+        await firstValueFrom(
+          idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id], includeEmpty: true }),
+        ),
       ).to.deep.eq({
         categories: [],
         definitionContainers: [keys.definitionContainerChild.id],
@@ -133,10 +141,12 @@ describe("CategoriesTreeIdsCache", () => {
       const { imodel, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
       expect(
-        await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({
-          parentDefinitionContainerIds: [keys.definitionContainerRoot.id],
-          includeEmpty: false,
-        })),
+        await firstValueFrom(
+          idsCache.getDirectChildDefinitionContainersAndCategories({
+            parentDefinitionContainerIds: [keys.definitionContainerRoot.id],
+            includeEmpty: false,
+          }),
+        ),
       ).to.deep.eq({
         categories: [],
         definitionContainers: [],
@@ -155,13 +165,15 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       using idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      expect(await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id] }))).to.deep.eq({
+      expect(
+        await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id] })),
+      ).to.deep.eq({
         categories: [{ id: keys.category.id, subCategoryChildCount: 1, hasElements: true }],
         definitionContainers: [],
       });
     });
 
-     it("returns child categories when definition container contains empty categories and includeEmpty is true", async function () {
+    it("returns child categories when definition container contains empty categories and includeEmpty is true", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
         const definitionModelRoot = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
@@ -172,14 +184,16 @@ describe("CategoriesTreeIdsCache", () => {
       const { imodel, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
       expect(
-        await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id], includeEmpty: true })),
+        await firstValueFrom(
+          idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id], includeEmpty: true }),
+        ),
       ).to.deep.eq({
         categories: [{ id: keys.category.id, subCategoryChildCount: 1, hasElements: false }],
         definitionContainers: [],
       });
     });
 
-     it("returns empty when definition container contains empty categories", async function () {
+    it("returns empty when definition container contains empty categories", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
         const definitionModelRoot = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainerRoot.id });
@@ -189,7 +203,9 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      expect(await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id] }))).to.deep.eq({
+      expect(
+        await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id] })),
+      ).to.deep.eq({
         categories: [],
         definitionContainers: [],
       });
@@ -209,7 +225,9 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       using idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      expect(await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id] }))).to.deep.eq({
+      expect(
+        await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id] })),
+      ).to.deep.eq({
         categories: [{ id: keys.category.id, subCategoryChildCount: 1, hasElements: true }],
         definitionContainers: [],
       });
@@ -232,7 +250,9 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       using idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      expect(await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id] }))).to.deep.eq({
+      expect(
+        await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionContainerRoot.id] })),
+      ).to.deep.eq({
         categories: [{ id: keys.directCategory.id, subCategoryChildCount: 1, hasElements: true }],
         definitionContainers: [keys.definitionModelChild.id],
       });
@@ -253,7 +273,9 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       using idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      expect(await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionModelChild.id] }))).to.deep.eq({
+      expect(
+        await firstValueFrom(idsCache.getDirectChildDefinitionContainersAndCategories({ parentDefinitionContainerIds: [keys.definitionModelChild.id] })),
+      ).to.deep.eq({
         categories: [{ id: keys.indirectCategory.id, subCategoryChildCount: 1, hasElements: true }],
         definitionContainers: [],
       });
@@ -298,9 +320,9 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      expect(await firstValueFrom(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainer.id], includeEmptyCategories: true }))).to.deep.eq(new Set([
-        keys.category.id,
-      ]));
+      expect(
+        await firstValueFrom(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainer.id], includeEmptyCategories: true })),
+      ).to.deep.eq(new Set([keys.category.id]));
     });
 
     it("returns indirectly contained categories when definition container contains definition container that has categories", async function () {
@@ -317,7 +339,9 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       using idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      expect(await firstValueFrom(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainerRoot.id] }))).to.deep.eq(new Set([keys.category.id]));
+      expect(await firstValueFrom(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainerRoot.id] }))).to.deep.eq(
+        new Set([keys.category.id]),
+      );
     });
 
     it("returns child categories when definition container contains categories", async function () {
@@ -332,7 +356,9 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       using idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      expect(await firstValueFrom(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainer.id] }))).to.deep.eq(new Set([keys.category.id]));
+      expect(await firstValueFrom(idsCache.getAllContainedCategories({ definitionContainerIds: [keys.definitionContainer.id] }))).to.deep.eq(
+        new Set([keys.category.id]),
+      );
     });
 
     it("returns direct and indirect categories when definition container contains categories and definition containers that contain categories", async function () {
@@ -516,7 +542,9 @@ describe("CategoriesTreeIdsCache", () => {
         });
         const { imodel, ...keys } = buildIModelResult;
         using idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-        expect(await firstValueFrom(idsCache.getInstanceKeyPaths({ definitionContainerId: keys.definitionContainer.id }))).to.deep.eq([keys.definitionContainer]);
+        expect(await firstValueFrom(idsCache.getInstanceKeyPaths({ definitionContainerId: keys.definitionContainer.id }))).to.deep.eq([
+          keys.definitionContainer,
+        ]);
       });
 
       it("returns path to definition container when definition container is contained by definition container", async function () {

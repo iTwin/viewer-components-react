@@ -10,15 +10,15 @@ import { enableCategoryDisplay, enableSubCategoryDisplay, mergeVisibilityStatuse
 import type { Observable } from "rxjs";
 import type { Id64Arg, Id64String } from "@itwin/core-bentley";
 import type { ElementId, ModelId } from "../../../common/internal/Types.js";
-import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
 import type { BaseVisibilityHelperProps } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
-import type { CategoriesTreeIdsCache } from "../CategoriesTreeIdsCache.js";
+import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
 import type { CategoriesTreeHierarchyConfiguration } from "../../CategoriesTreeDefinition.js";
+import type { CategoriesTreeIdsCache } from "../CategoriesTreeIdsCache.js";
 
 /** @internal */
 export type CategoriesTreeVisibilityHelperProps = BaseVisibilityHelperProps & {
   idsCache: CategoriesTreeIdsCache;
-  hierarchyConfig: CategoriesTreeHierarchyConfiguration
+  hierarchyConfig: CategoriesTreeHierarchyConfiguration;
 };
 
 /**
@@ -40,18 +40,20 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
    * Determines visibility status by checking visibility status of related categories.
    */
   public getDefinitionContainersVisibilityStatus(props: { definitionContainerIds: Id64Arg }): Observable<VisibilityStatus> {
-    return this.#props.idsCache.getAllContainedCategories({
-      definitionContainerIds: props.definitionContainerIds,
-      includeEmptyCategories: this.#props.hierarchyConfig.showEmptyCategories
-  }).pipe(
-      mergeMap((categoryIds) =>
-        this.getCategoriesVisibilityStatus({
-          categoryIds,
-          modelId: undefined,
-          type: this.#props.viewport.viewType === "2d" ? "DrawingCategory" : "SpatialCategory",
-        }),
-      ),
-    );
+    return this.#props.idsCache
+      .getAllContainedCategories({
+        definitionContainerIds: props.definitionContainerIds,
+        includeEmptyCategories: this.#props.hierarchyConfig.showEmptyCategories,
+      })
+      .pipe(
+        mergeMap((categoryIds) =>
+          this.getCategoriesVisibilityStatus({
+            categoryIds,
+            modelId: undefined,
+            type: this.#props.viewport.viewType === "2d" ? "DrawingCategory" : "SpatialCategory",
+          }),
+        ),
+      );
   }
 
   /** Gets grouped elements visibility status. */
@@ -76,9 +78,12 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
    * Does this by changing visibility status of related categories.
    */
   public changeDefinitionContainersVisibilityStatus(props: { definitionContainerIds: Id64Arg; on: boolean }): Observable<void> {
-    return this.#props.idsCache.getAllContainedCategories({ definitionContainerIds: props.definitionContainerIds, includeEmptyCategories: this.#props.hierarchyConfig.showEmptyCategories}).pipe(
-      mergeMap((categoryIds) => this.changeCategoriesVisibilityStatus({ categoryIds, modelId: undefined, on: props.on })),
-    );
+    return this.#props.idsCache
+      .getAllContainedCategories({
+        definitionContainerIds: props.definitionContainerIds,
+        includeEmptyCategories: this.#props.hierarchyConfig.showEmptyCategories,
+      })
+      .pipe(mergeMap((categoryIds) => this.changeCategoriesVisibilityStatus({ categoryIds, modelId: undefined, on: props.on })));
   }
 
   /**

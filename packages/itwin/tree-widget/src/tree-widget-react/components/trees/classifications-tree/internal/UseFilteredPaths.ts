@@ -8,11 +8,11 @@ import { FilterLimitExceededError } from "../../common/TreeErrors.js";
 import { useTelemetryContext } from "../../common/UseTelemetryContext.js";
 import { ClassificationsTreeDefinition } from "../ClassificationsTreeDefinition.js";
 
+import type { GuidString } from "@itwin/core-bentley";
+import type { VisibilityTreeProps } from "../../common/components/VisibilityTree.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "../ClassificationsTreeDefinition.js";
 import type { ClassificationsTreeIdsCache } from "./ClassificationsTreeIdsCache.js";
 
-import type { VisibilityTreeProps } from "../../common/components/VisibilityTree.js";
-import type { GuidString } from "@itwin/core-bentley";
 /** @internal */
 export type ClassificationsTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError";
 
@@ -24,7 +24,7 @@ export function useFilteredPaths({
   hierarchyConfiguration,
   getClassificationsTreeIdsCache,
   onFilteredPathsChanged,
-  componentId
+  componentId,
 }: {
   filter?: string;
   hierarchyConfiguration: ClassificationsTreeHierarchyConfiguration;
@@ -57,7 +57,7 @@ export function useFilteredPaths({
           label: filter,
           idsCache: getClassificationsTreeIdsCache(),
           hierarchyConfig: hierarchyConfiguration,
-          componentId
+          componentId,
         });
         onFilteredPathsChanged(paths);
         return paths;

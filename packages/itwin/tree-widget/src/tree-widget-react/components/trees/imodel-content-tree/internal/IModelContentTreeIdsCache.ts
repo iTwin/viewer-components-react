@@ -64,7 +64,10 @@ export class IModelContentTreeIdsCache {
         END hideInHierarchy
       FROM ${CLASS_NAME_Subject} s
     `;
-    for await (const row of this.#queryExecutor.createQueryReader({ ecsql: subjectsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/subjects` })) {
+    for await (const row of this.#queryExecutor.createQueryReader(
+      { ecsql: subjectsQuery },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/subjects` },
+    )) {
       yield { id: row.id, parentId: row.parentId, targetPartitionId: row.targetPartitionId, hideInHierarchy: !!row.hideInHierarchy };
     }
   }
@@ -76,7 +79,10 @@ export class IModelContentTreeIdsCache {
       INNER JOIN ${CLASS_NAME_Model} m ON m.ModeledElement.Id = p.ECInstanceId
       WHERE NOT m.IsPrivate
     `;
-    for await (const row of this.#queryExecutor.createQueryReader({ ecsql: modelsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/models` })) {
+    for await (const row of this.#queryExecutor.createQueryReader(
+      { ecsql: modelsQuery },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/models` },
+    )) {
       yield { id: row.id, parentId: row.parentId };
     }
   }
@@ -205,7 +211,10 @@ export class IModelContentTreeIdsCache {
       WHERE Parent.Id IS NULL
       GROUP BY Model.Id, Category.Id
     `;
-    for await (const row of this.#queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/model-categories` })) {
+    for await (const row of this.#queryExecutor.createQueryReader(
+      { ecsql: query },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/model-categories` },
+    )) {
       yield { modelId: row.modelId, categoryId: row.categoryId };
     }
   }

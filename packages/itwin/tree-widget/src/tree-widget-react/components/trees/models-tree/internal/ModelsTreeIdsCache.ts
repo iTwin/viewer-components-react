@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { defer, filter, forkJoin, from, map, mergeAll, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
 import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import {
@@ -15,13 +16,12 @@ import {
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
 import { pushToMap } from "../../common/internal/Utils.js";
 
-import type { InstanceKey } from "@itwin/presentation-shared";
+import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import type { InstanceKey } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId, SubjectId } from "../../common/internal/Types.js";
 import type { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
-import type { Observable } from "rxjs";
-import { defer, filter, forkJoin, from, map, mergeAll, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
 
 interface SubjectInfo {
   parentSubjectId: Id64String | undefined;
@@ -54,16 +54,16 @@ export class ModelsTreeIdsCache implements Disposable {
   #componentId: GuidString;
   #componentName: string;
 
-  constructor(
-    queryExecutor: LimitingECSqlQueryExecutor,
-    hierarchyConfig: ModelsTreeHierarchyConfiguration,
-    componentId?: GuidString
-  ) {
+  constructor(queryExecutor: LimitingECSqlQueryExecutor, hierarchyConfig: ModelsTreeHierarchyConfiguration, componentId?: GuidString) {
     this.#queryExecutor = queryExecutor;
     this.#hierarchyConfig = hierarchyConfig;
     this.#componentId = componentId ?? Guid.createValue();
     this.#componentName = "ModelsTreeIdsCache";
-    this.#categoryElementCounts = new ModelCategoryElementsCountCache(this.#queryExecutor, [this.#hierarchyConfig.elementClassSpecification], this.#componentId);
+    this.#categoryElementCounts = new ModelCategoryElementsCountCache(
+      this.#queryExecutor,
+      [this.#hierarchyConfig.elementClassSpecification],
+      this.#componentId,
+    );
     this.#modelKeyPaths = new Map();
     this.#subjectKeyPaths = new Map();
     this.#categoryKeyPaths = new Map();
@@ -95,10 +95,15 @@ export class ModelsTreeIdsCache implements Disposable {
           END hideInHierarchy
         FROM bis.Subject s
       `;
-      return this.#queryExecutor.createQueryReader({ ecsql: subjectsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/subjects` })
-    }).pipe(map((row) => {
-      return { id: row.id, parentId: row.parentId, targetPartitionId: row.targetPartitionId, hideInHierarchy: !!row.hideInHierarchy };
-    }))
+      return this.#queryExecutor.createQueryReader(
+        { ecsql: subjectsQuery },
+        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/subjects` },
+      );
+    }).pipe(
+      map((row) => {
+        return { id: row.id, parentId: row.parentId, targetPartitionId: row.targetPartitionId, hideInHierarchy: !!row.hideInHierarchy };
+      }),
+    );
   }
 
   private queryModels(): Observable<{ id: ModelId; parentId: SubjectId }> {
@@ -111,10 +116,15 @@ export class ModelsTreeIdsCache implements Disposable {
           NOT m.IsPrivate
           ${this.#hierarchyConfig.showEmptyModels ? "" : `AND EXISTS (SELECT 1 FROM ${this.#hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)`}
       `;
-      return this.#queryExecutor.createQueryReader({ ecsql: modelsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/models` })
-    }).pipe(map((row) => {
-      return { id: row.id, parentId: row.parentId };
-    }))
+      return this.#queryExecutor.createQueryReader(
+        { ecsql: modelsQuery },
+        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/models` },
+      );
+    }).pipe(
+      map((row) => {
+        return { id: row.id, parentId: row.parentId };
+      }),
+    );
   }
 
   private getSubjectInfos() {
@@ -231,10 +241,10 @@ export class ModelsTreeIdsCache implements Disposable {
           map((modelsOfChildSubjects) => {
             result.push(...modelsOfChildSubjects);
             return result;
-          })
-        )
-      })
-    )
+          }),
+        );
+      }),
+    );
   }
 
   /** Returns ECInstanceIDs of Models under specific parent Subjects as they are displayed in the hierarchy. */
@@ -304,17 +314,20 @@ export class ModelsTreeIdsCache implements Disposable {
         JOIN ${this.#hierarchyConfig.elementClassSpecification} this ON m.ECInstanceId = this.Model.Id
         GROUP BY modelId, categoryId, isModelPrivate
       `;
-      return this.#queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/model-categories` });
+      return this.#queryExecutor.createQueryReader(
+        { ecsql: query },
+        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/model-categories` },
+      );
     }).pipe(
       map((row) => {
-        return { modelId: row.modelId, categoryId: row.categoryId, isModelPrivate: !!row.isModelPrivate, isRootElementCategory: !!row.isRootElementCategory }
-      })
-    )
+        return { modelId: row.modelId, categoryId: row.categoryId, isModelPrivate: !!row.isModelPrivate, isRootElementCategory: !!row.isRootElementCategory };
+      }),
+    );
   }
 
   private queryModeledElements(): Observable<{ modelId: Id64String; categoryId: Id64String; modeledElementId: Id64String }> {
     return defer(() => {
-       const query = `
+      const query = `
       SELECT
         pe.ECInstanceId modeledElementId,
         pe.Category.Id categoryId,
@@ -325,12 +338,15 @@ export class ModelsTreeIdsCache implements Disposable {
         m.IsPrivate = false
         AND m.ECInstanceId IN (SELECT Model.Id FROM ${this.#hierarchyConfig.elementClassSpecification})
     `;
-      return this.#queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/modeled-elements` })
+      return this.#queryExecutor.createQueryReader(
+        { ecsql: query },
+        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/modeled-elements` },
+      );
     }).pipe(
       map((row) => {
         return { modelId: row.modelId, categoryId: row.categoryId, modeledElementId: row.modeledElementId };
-      })
-    )
+      }),
+    );
   }
 
   private getModelWithCategoryModeledElements() {
@@ -427,9 +443,9 @@ export class ModelsTreeIdsCache implements Disposable {
             acc.set(categoryId, entry);
             return acc;
           }, new Map<CategoryId, Array<ModelId>>()),
-        )
-      )
-    )
+        ),
+      ),
+    );
   }
 
   public createModelInstanceKeyPaths(modelId: Id64String): Observable<HierarchyNodeIdentifiersPath[]> {
@@ -473,8 +489,8 @@ export class ModelsTreeIdsCache implements Disposable {
           acc.push([...modelPath, { className: CLASS_NAME_SpatialCategory, id: categoryId }]);
           return acc;
         }, new Array<HierarchyNodeIdentifiersPath>()),
-        shareReplay()
-      )
+        shareReplay(),
+      );
       this.#categoryKeyPaths.set(categoryId, entry);
     }
     return entry;

@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useMemo, useState } from "react";
+import { firstValueFrom } from "rxjs";
 import { HierarchyFilteringPath, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { useFocusedInstancesContext } from "../../common/FocusedInstancesContext.js";
 import { CLASS_NAME_GeometricModel3d, CLASS_NAME_Subject } from "../../common/internal/ClassNameDefinitions.js";
@@ -19,7 +20,6 @@ import type { VisibilityTreeProps } from "../../common/components/VisibilityTree
 import type { NormalizedHierarchyFilteringPath } from "../../common/Utils.js";
 import type { ClassGroupingHierarchyNode, ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "../ModelsTreeDefinition.js";
 import type { ModelsTreeIdsCache } from "./ModelsTreeIdsCache.js";
-import { firstValueFrom } from "rxjs";
 
 /** @internal */
 export type ModelsTreeFilteringError = "tooManyFilterMatches" | "tooManyInstancesFocused" | "unknownFilterError" | "unknownInstanceFocusError";
@@ -35,7 +35,7 @@ export function useFilteredPaths({
   getModelsTreeIdsCache,
   onModelsFiltered,
   onFilteredPathsChanged,
-  componentId
+  componentId,
 }: {
   hierarchyConfiguration: ModelsTreeHierarchyConfiguration;
   filter?: string;
@@ -92,7 +92,7 @@ export function useFilteredPaths({
               hierarchyConfig: hierarchyConfiguration,
               limit: "unbounded",
               abortSignal,
-              componentId: `${componentId}/subTree`
+              componentId: `${componentId}/subTree`,
             }),
         });
         return paths.map(HierarchyFilteringPath.normalize).map(({ path }) => path);
@@ -127,7 +127,7 @@ export function useFilteredPaths({
                 targetItems: focusedItems,
                 hierarchyConfig: hierarchyConfiguration,
                 abortSignal,
-                componentId
+                componentId,
               });
               return paths.map(({ path, options }) => ({ path, options: { ...options, autoExpand: true } }));
             },
@@ -160,7 +160,7 @@ export function useFilteredPaths({
                     hierarchyConfig: hierarchyConfiguration,
                     limit: "unbounded",
                     abortSignal,
-                    componentId
+                    componentId,
                   }),
                 filter,
               });
@@ -193,7 +193,7 @@ export function useFilteredPaths({
                 idsCache: getModelsTreeIdsCache(),
                 hierarchyConfig: hierarchyConfiguration,
                 abortSignal,
-                componentId
+                componentId,
               });
               return paths.map(({ path, options }) => ({ path, options: { ...options, autoExpand: true } }));
             },
@@ -222,7 +222,7 @@ export function useFilteredPaths({
     onModelsFiltered,
     onFilteredPathsChanged,
     getSubTreePathsInternal,
-    componentId
+    componentId,
   ]);
 
   return {

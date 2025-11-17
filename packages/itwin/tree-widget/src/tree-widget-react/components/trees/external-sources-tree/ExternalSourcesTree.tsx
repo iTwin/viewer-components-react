@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { useCallback } from "react";
 import { Icon } from "@stratakit/foundations";
 import classSvg from "@stratakit/icons/bis-class.svg";
 import elementSvg from "@stratakit/icons/bis-element.svg";
@@ -11,16 +12,15 @@ import ecSchemaSvg from "@stratakit/icons/selection-children.svg";
 import { EmptyTreeContent } from "../common/components/EmptyTree.js";
 import { Tree } from "../common/components/Tree.js";
 import { TreeRenderer } from "../common/components/TreeRenderer.js";
+import { useGuid } from "../common/internal/useGuid.js";
 import { ExternalSourcesTreeComponent } from "./ExternalSourcesTreeComponent.js";
 import { ExternalSourcesTreeDefinition } from "./ExternalSourcesTreeDefinition.js";
 
+import type { GuidString } from "@itwin/core-bentley";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import type { Props } from "@itwin/presentation-shared";
 import type { BaseTreeRendererProps } from "../common/components/BaseTreeRenderer.js";
 import type { TreeProps } from "../common/components/Tree.js";
-import { useGuid } from "../common/internal/useGuid.js";
-import { useCallback } from "react";
-import type { Props } from "@itwin/presentation-shared";
-import type { GuidString } from "@itwin/core-bentley";
 
 /** @beta */
 export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &

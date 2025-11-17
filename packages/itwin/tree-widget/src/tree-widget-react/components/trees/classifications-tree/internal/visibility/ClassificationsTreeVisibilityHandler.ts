@@ -77,7 +77,9 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       if (elements2d?.length) {
         observables.push(
           from(elements2d).pipe(
-            mergeMap(({ modelId, categoryId, elements }) => this.#visibilityHelper.changeElementsVisibilityStatus({ modelId, categoryId, elementIds: [...elements.keys()], on })),
+            mergeMap(({ modelId, categoryId, elements }) =>
+              this.#visibilityHelper.changeElementsVisibilityStatus({ modelId, categoryId, elementIds: [...elements.keys()], on }),
+            ),
           ),
         );
       }
@@ -85,7 +87,9 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       if (elements3d?.length) {
         observables.push(
           from(elements3d).pipe(
-            mergeMap(({ modelId, categoryId, elements }) => this.#visibilityHelper.changeElementsVisibilityStatus({ modelId, categoryId, elementIds: [...elements.keys()], on })),
+            mergeMap(({ modelId, categoryId, elements }) =>
+              this.#visibilityHelper.changeElementsVisibilityStatus({ modelId, categoryId, elementIds: [...elements.keys()], on }),
+            ),
           ),
         );
       }
@@ -203,9 +207,9 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
   private getCategories(props: Parameters<BaseIdsCache["getCategories"]>[0]): ReturnType<BaseIdsCache["getCategories"]> {
     return from(Id64.iterable(props.modelIds)).pipe(
       mergeMap((modelId) =>
-        this.#props.idsCache.getModelCategoryIds(modelId).pipe(
-          map(({ spatial, drawing }) => ({ id: modelId, drawingCategories: drawing, spatialCategories: spatial })),
-        ),
+        this.#props.idsCache
+          .getModelCategoryIds(modelId)
+          .pipe(map(({ spatial, drawing }) => ({ id: modelId, drawingCategories: drawing, spatialCategories: spatial }))),
       ),
     );
   }

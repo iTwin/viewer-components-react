@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./TreeWidgetUiItemsProvider.css";
+
 import { useRef } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { StagePanelLocation, StagePanelSection, useTransientState } from "@itwin/appui-react";
@@ -16,6 +17,7 @@ import { TreeWidgetComponentImpl } from "./TreeWidgetComponentImpl.js";
 import type { Ref } from "react";
 import type { Widget } from "@itwin/appui-react";
 import type { TreeDefinition } from "./TreeWidgetComponentImpl.js";
+
 /**
  * Props for `createWidget`.
  * @public

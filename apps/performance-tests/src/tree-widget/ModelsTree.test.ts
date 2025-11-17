@@ -27,13 +27,13 @@ import {
   validateHierarchyVisibility,
 } from "./VisibilityUtilities.js";
 
-import type { TreeWidgetTestingViewport } from "./VisibilityUtilities.js";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyNode, HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { ECSqlQueryDef, InstanceKey } from "@itwin/presentation-shared";
 import type { HierarchyVisibilityHandler } from "@itwin/tree-widget-react";
 import type { IModelAccess } from "./StatelessHierarchyProvider.js";
+import type { TreeWidgetTestingViewport } from "./VisibilityUtilities.js";
 
 describe("models tree", () => {
   run<{ iModel: SnapshotDb; imodelAccess: IModelAccess; targetItems: Array<InstanceKey> }>({

@@ -3,10 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { ClassGroupingNodeKey, InstancesNodeKey } from "@itwin/presentation-hierarchies";
-import { HierarchyFilteringPath, HierarchyNode, HierarchyNodeIdentifier , HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+import { Id64 } from "@itwin/core-bentley";
+import { HierarchyFilteringPath, HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 
-import { Id64, type Id64Arg, type Id64String } from "@itwin/core-bentley";
+import type { Id64Arg, Id64String } from "@itwin/core-bentley";
+import type { ClassGroupingNodeKey, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
 
 /** @internal */
@@ -70,7 +71,9 @@ export abstract class FilteredNodesHandler<TProcessedFilteredNodes, TFilterTarge
     parent: TFilteredTreeNode | FilteredTreeRootNode<TFilteredTreeNode>;
   }): TFilteredTreeNode;
 
-  public async processFilteredNodes(): Promise<{ getNodeFilterTargets: (node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey }) => TFilterTargets | undefined }> {
+  public async processFilteredNodes(): Promise<{
+    getNodeFilterTargets: (node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey }) => TFilterTargets | undefined;
+  }> {
     const processedFilteredNodes = await this.getProcessedFilteredNodes();
     return {
       getNodeFilterTargets: (node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey }) => this.getNodeFilterTargets(node, processedFilteredNodes),
@@ -98,9 +101,11 @@ export abstract class FilteredNodesHandler<TProcessedFilteredNodes, TFilterTarge
   }
 
   /** Takes a specific node and gets all filter targets related to it. */
-  private getNodeFilterTargets(node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey }, processedFilteredNodes: TProcessedFilteredNodes): TFilterTargets | undefined {
+  private getNodeFilterTargets(
+    node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey },
+    processedFilteredNodes: TProcessedFilteredNodes,
+  ): TFilterTargets | undefined {
     let lookupParents: Array<FilteredTreeRootNode<TFilteredTreeNode> | TFilteredTreeNode> = [this.root];
-
 
     // find the filtered parent nodes of the `node`
     for (const parentKey of node.parentKeys) {
@@ -110,7 +115,10 @@ export abstract class FilteredNodesHandler<TProcessedFilteredNodes, TFilterTarge
 
       // tree node might be merged from multiple instances. As filtered tree stores only one instance per node, we need to find all matching nodes
       // and use them when checking for matching node in one level deeper.
-      const parentNodes = this.findMatchingFilteredNodes(lookupParents, parentKey.instanceKeys.map((key) => key.id));
+      const parentNodes = this.findMatchingFilteredNodes(
+        lookupParents,
+        parentKey.instanceKeys.map((key) => key.id),
+      );
       if (parentNodes.length === 0) {
         return undefined;
       }

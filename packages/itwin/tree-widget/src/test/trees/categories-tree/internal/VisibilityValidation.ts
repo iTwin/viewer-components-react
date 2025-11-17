@@ -10,11 +10,12 @@ import { waitFor } from "@testing-library/react";
 import { CategoriesTreeNode } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeNode.js";
 import { toVoidPromise } from "../../../../tree-widget-react/components/trees/common/internal/Rxjs.js";
 
-import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { Id64Array } from "@itwin/core-bentley";
+import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { Visibility } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
 import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
 import type { TreeWidgetTestingViewport } from "../../TreeUtils.js";
+
 export interface VisibilityExpectations {
   [id: string]: Visibility;
 }

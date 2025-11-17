@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Observable} from "rxjs";
 import { concatMap, EMPTY, expand, from, of, toArray } from "rxjs";
 import sinon from "sinon";
 import { Id64 } from "@itwin/core-bentley";
@@ -19,6 +18,7 @@ import { ModelsTreeIdsCache } from "../../../tree-widget-react/components/trees/
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import { createIModelAccess } from "../Common.js";
 
+import type { Observable } from "rxjs";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type {

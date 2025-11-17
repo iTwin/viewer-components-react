@@ -10,8 +10,8 @@ import { Datasets } from "../util/Datasets.js";
 import { run } from "../util/TestUtilities.js";
 import { StatelessHierarchyProvider } from "./StatelessHierarchyProvider.js";
 
-import type { IModelAccess } from "./StatelessHierarchyProvider.js";
 import type { HierarchyDefinition } from "@itwin/presentation-hierarchies";
+import type { IModelAccess } from "./StatelessHierarchyProvider.js";
 
 describe("classifications tree", () => {
   const rootClassificationSystemCode = "50k classifications";
