@@ -90,10 +90,7 @@ export function useLatest<T>(value: T) {
   return ref;
 }
 
-/**
- * Checks if all given models are displayed in given viewport.
- * @internal
- */
+/** @internal */
 export function releaseMainThreadOnItemsCount<T>(elementCount: number) {
   return (obs: Observable<T>): Observable<T> => {
     return obs.pipe(

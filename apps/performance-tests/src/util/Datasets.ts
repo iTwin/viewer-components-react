@@ -91,10 +91,10 @@ export class Datasets {
     }
   }
 
-  /**
-   * Create an iModel with one root definition container which has child definition containers which contain 1k categories each.
-   * In total there are `numElements` number of categories.
-   */
+ /**
+  * Create an iModel with one root definition container which has child definition containers which contain 1k categories each.
+  * In total there are `numElements` number of categories.
+  */
   private static async createCategoryIModel(name: string, localPath: string, numElements: number) {
     console.log(`${numElements} categories: Creating...`);
     await createIModel(name, localPath, async (builder) => {
@@ -113,8 +113,8 @@ export class Datasets {
         for (let j = 0; j < numberOfCategories; ++j) {
           const { id: categoryId } = insertSpatialCategory({
             builder,
-            codeValue: `c${j}`,
-            userLabel: `test_category${j}`,
+            codeValue: `c${i}-${j}`,
+            userLabel: `test_category${i}-${j}`,
             modelId: definitionModel.id,
           });
           insertPhysicalElement({
