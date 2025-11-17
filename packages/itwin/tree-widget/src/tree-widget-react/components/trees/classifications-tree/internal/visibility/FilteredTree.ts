@@ -57,8 +57,8 @@ type TemporaryFilteredTreeNode =
 
 /** @internal */
 export interface ClassificationsTreeFilterTargets {
-  elements2d?: Array<{ modelId: Id64String; categoryId: Id64String; elementIds: Set<Id64String> }>;
-  elements3d?: Array<{ modelId: Id64String; categoryId: Id64String; elementIds: Set<Id64String> }>;
+  elements2d?: Array<{ modelId: Id64String; categoryId: Id64String; elements: Map<ElementId, { isFilterTarget: boolean }> }>;
+  elements3d?: Array<{ modelId: Id64String; categoryId: Id64String; elements: Map<ElementId, { isFilterTarget: boolean }> }>;
   classificationTableIds?: Id64Set;
   classificationIds?: Id64Set;
 }
@@ -77,8 +77,8 @@ export async function createFilteredClassificationsTree(props: {
 }
 
 interface FilterTargetsInternal {
-  elements2d?: Map<ModelCategoryKey, Set<ElementId>>;
-  elements3d?: Map<ModelCategoryKey, Set<ElementId>>;
+  elements2d?: Map<ModelCategoryKey, Map<ElementId, { isFilterTarget: boolean }>>;
+  elements3d?: Map<ModelCategoryKey, Map<ElementId, { isFilterTarget: boolean }>>;
   classificationTableIds?: Id64Set;
   classificationIds?: Id64Set;
 }
@@ -158,15 +158,15 @@ class ClassificationsTreeFilteredNodesHandler extends FilteredNodesHandler<
       classificationIds: filterTargets.classificationIds,
       classificationTableIds: filterTargets.classificationIds,
       elements2d: filterTargets.elements2d
-        ? [...filterTargets.elements2d?.entries()].map(([modelCategoryKey, elementIds]) => {
+        ? [...filterTargets.elements2d?.entries()].map(([modelCategoryKey, elements]) => {
             const { modelId, categoryId } = this.parseModelCategoryKey(modelCategoryKey);
-            return { modelId, categoryId, elementIds };
+            return { modelId, categoryId, elements };
           })
         : undefined,
       elements3d: filterTargets.elements3d
-        ? [...filterTargets.elements3d?.entries()].map(([modelCategoryKey, elementIds]) => {
+        ? [...filterTargets.elements3d?.entries()].map(([modelCategoryKey, elements]) => {
             const { modelId, categoryId } = this.parseModelCategoryKey(modelCategoryKey);
-            return { modelId, categoryId, elementIds };
+            return { modelId, categoryId, elements };
           })
         : undefined,
     };
@@ -211,19 +211,19 @@ class ClassificationsTreeFilteredNodesHandler extends FilteredNodesHandler<
         const element2dKey = this.createModelCategoryKey(node.modelId, node.categoryId);
         const elements2d = (filterTargets.elements2d ??= new Map()).get(element2dKey);
         if (elements2d) {
-          elements2d.add(node.id);
-          return;
+          elements2d.set(node.id, { isFilterTarget: node.isFilterTarget });
+        } else {
+          filterTargets.elements2d.set(element2dKey, new Map([[node.id, { isFilterTarget: node.isFilterTarget }]]));
         }
-        filterTargets.elements2d.set(element2dKey, new Set([node.id]));
         return;
       case "element3d":
         const element3dKey = this.createModelCategoryKey(node.modelId, node.categoryId);
         const elements3d = (filterTargets.elements3d ??= new Map()).get(element3dKey);
         if (elements3d) {
-          elements3d.add(node.id);
-          return;
+          elements3d.set(node.id, { isFilterTarget: node.isFilterTarget });
+        } else {
+          filterTargets.elements3d.set(element3dKey, new Map([[node.id, { isFilterTarget: node.isFilterTarget }]]));
         }
-        filterTargets.elements3d.set(element3dKey, new Set([node.id]));
         return;
     }
   }

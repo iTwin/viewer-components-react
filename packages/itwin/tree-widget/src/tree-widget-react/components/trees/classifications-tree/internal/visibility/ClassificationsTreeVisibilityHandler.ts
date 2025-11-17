@@ -77,7 +77,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       if (elements2d?.length) {
         observables.push(
           from(elements2d).pipe(
-            mergeMap(({ modelId, categoryId, elementIds }) => this.#visibilityHelper.changeElementsVisibilityStatus({ modelId, categoryId, elementIds, on })),
+            mergeMap(({ modelId, categoryId, elements }) => this.#visibilityHelper.changeElementsVisibilityStatus({ modelId, categoryId, elementIds: [...elements.keys()], on })),
           ),
         );
       }
@@ -85,7 +85,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       if (elements3d?.length) {
         observables.push(
           from(elements3d).pipe(
-            mergeMap(({ modelId, categoryId, elementIds }) => this.#visibilityHelper.changeElementsVisibilityStatus({ modelId, categoryId, elementIds, on })),
+            mergeMap(({ modelId, categoryId, elements }) => this.#visibilityHelper.changeElementsVisibilityStatus({ modelId, categoryId, elementIds: [...elements.keys()], on })),
           ),
         );
       }
@@ -168,8 +168,8 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
         observables.push(
           from(elements2d).pipe(
             releaseMainThreadOnItemsCount(50),
-            mergeMap(({ modelId, categoryId, elementIds }) => {
-              return from(elementIds).pipe(
+            mergeMap(({ modelId, categoryId, elements }) => {
+              return from(elements.keys()).pipe(
                 releaseMainThreadOnItemsCount(1000),
                 mergeMap((elementId) =>
                   this.#visibilityHelper.getElementsVisibilityStatus({ modelId, categoryId, elementIds: elementId, type: "GeometricElement2d" }),
@@ -184,8 +184,8 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
         observables.push(
           from(elements3d).pipe(
             releaseMainThreadOnItemsCount(50),
-            mergeMap(({ modelId, categoryId, elementIds }) => {
-              return from(elementIds).pipe(
+            mergeMap(({ modelId, categoryId, elements }) => {
+              return from(elements.keys()).pipe(
                 releaseMainThreadOnItemsCount(1000),
                 mergeMap((elementId) =>
                   this.#visibilityHelper.getElementsVisibilityStatus({ modelId, categoryId, elementIds: elementId, type: "GeometricElement3d" }),
