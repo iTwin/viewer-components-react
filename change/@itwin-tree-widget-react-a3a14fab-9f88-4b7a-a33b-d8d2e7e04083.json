@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Models tree: Fixed an issue where models/subjects with child-only categories would have partial visibility (instead of hidden) when elements from other models were added to the exclusive always drawn list.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "100586436+JonasDov@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
