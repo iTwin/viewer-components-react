@@ -139,27 +139,26 @@ export class NonEmptyValuesPropertyDataFilterer extends PropertyRecordDataFilter
 
 class AutoExpandingPropertyFilterDataProvider implements IPropertyDataProvider {
   public onDataChanged = new PropertyDataChangeEvent();
-  private _removeListener: () => void;
-  private _autoExpandChildCategories = true;
+  #removeListener: () => void;
+  #autoExpandChildCategories = true;
+  #wrapped: FilteringPropertyDataProvider;
 
-  constructor(
-    private _wrapped: FilteringPropertyDataProvider,
-    autoExpandChildCategories?: boolean,
-  ) {
+  constructor(wrapped: FilteringPropertyDataProvider, autoExpandChildCategories?: boolean) {
+    this.#wrapped = wrapped;
     /* c8 ignore next*/
-    this._removeListener = this._wrapped.onDataChanged.addListener(() => this.onDataChanged.raiseEvent());
+    this.#removeListener = this.#wrapped.onDataChanged.addListener(() => this.onDataChanged.raiseEvent());
     if (undefined !== autoExpandChildCategories) {
-      this._autoExpandChildCategories = autoExpandChildCategories;
+      this.#autoExpandChildCategories = autoExpandChildCategories;
     }
   }
 
   public [Symbol.dispose](): void {
-    this._removeListener();
-    safeDispose(this._wrapped);
+    this.#removeListener();
+    safeDispose(this.#wrapped);
   }
 
   public async getData(): Promise<PropertyData> {
-    const autoExpandChildCategories = this._autoExpandChildCategories;
+    const autoExpandChildCategories = this.#autoExpandChildCategories;
     function expandCategories(categories: PropertyCategory[]) {
       categories.forEach((category: PropertyCategory) => {
         category.expand = true;
@@ -169,7 +168,7 @@ class AutoExpandingPropertyFilterDataProvider implements IPropertyDataProvider {
       });
     }
 
-    const result = await this._wrapped.getData();
+    const result = await this.#wrapped.getData();
     expandCategories(result.categories);
     return result;
   }

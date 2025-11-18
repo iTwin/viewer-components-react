@@ -3,8 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Id64String } from "@itwin/core-bentley";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+
+import type { Id64String } from "@itwin/core-bentley";
 
 interface ModelsTreeNode {
   key: HierarchyNodeKey;

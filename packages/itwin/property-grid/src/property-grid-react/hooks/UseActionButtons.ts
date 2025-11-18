@@ -3,11 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { ReactNode } from "react";
 import { useMemo } from "react";
 
-import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
+import type { ReactNode } from "react";
 import type { ActionButtonRendererProps } from "@itwin/components-react";
+import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
 
 /** @public */
 interface PropertyGridActionButtonRendererProps extends ActionButtonRendererProps {

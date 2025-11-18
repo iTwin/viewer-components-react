@@ -7,6 +7,12 @@ import { IModelApp } from "@itwin/core-frontend";
 import type { Localization } from "@itwin/core-common";
 
 /**
+ * Logger category for quantity formatting
+ * @beta
+ */
+export const QuantityFormattingLoggerCategory = "QuantityFormat"
+
+/**
  * Static class for managing quantity formatting localization and initialization.
  * This class handles the setup and management of internationalization resources
  * for quantity formatting components.

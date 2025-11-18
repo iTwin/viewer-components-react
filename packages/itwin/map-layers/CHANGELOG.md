@@ -1,8 +1,24 @@
 # Change Log - @itwin/map-layers
 
-<!-- This log was last generated on Tue, 23 Sep 2025 14:41:43 GMT and should not be manually modified. -->
+<!-- This log was last generated on Mon, 03 Nov 2025 14:36:22 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 6.0.9
+
+Mon, 03 Nov 2025 14:36:22 GMT
+
+### Patches
+
+- Store user selected solid fill color to use as session default and add as new preset in picker ([#1481](https://github.com/iTwin/viewer-components-react/pull/1481))
+
+## 6.0.8
+
+Wed, 08 Oct 2025 20:11:56 GMT
+
+### Patches
+
+- Remove Dynamically Created Inline Styles ([#1463](https://github.com/iTwin/viewer-components-react/pull/1463))
 
 ## 6.0.7
 

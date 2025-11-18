@@ -11,10 +11,10 @@ import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/present
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 
-import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector, ECSchemaProvider } from "@itwin/presentation-shared";
 import type { QueryBinder, QueryOptions } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
+import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import type { ECClassHierarchyInspector, ECSchemaProvider } from "@itwin/presentation-shared";
 import type { TreeWidgetViewport } from "../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
 import type { TreeWidgetTestingViewport } from "./TreeUtils.js";
 

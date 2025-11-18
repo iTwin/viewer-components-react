@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, from, mergeMap, of } from "rxjs";
+import { defer, mergeMap, of } from "rxjs";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
 import { BaseVisibilityHelper } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
@@ -46,7 +46,7 @@ export class ModelsTreeVisibilityHelper extends BaseVisibilityHelper {
         return of(createVisibilityStatus("disabled"));
       }
 
-      return from(this.#props.idsCache.getSubjectModelIds(subjectIds)).pipe(
+      return this.#props.idsCache.getSubjectModelIds(subjectIds).pipe(
         mergeMap((modelIds) => this.getModelsVisibilityStatus({ modelIds, type: "GeometricModel3d" })),
         mergeVisibilityStatuses,
       );
@@ -74,7 +74,7 @@ export class ModelsTreeVisibilityHelper extends BaseVisibilityHelper {
   public changeSubjectsVisibilityStatus(props: { subjectIds: Id64Arg; on: boolean }): Observable<void> {
     const result = defer(() => {
       const { on, subjectIds } = props;
-      return from(this.#props.idsCache.getSubjectModelIds(subjectIds)).pipe(mergeMap((modelIds) => this.changeModelsVisibilityStatus({ modelIds, on })));
+      return this.#props.idsCache.getSubjectModelIds(subjectIds).pipe(mergeMap((modelIds) => this.changeModelsVisibilityStatus({ modelIds, on })));
     });
     return this.#props.overrideHandler
       ? this.#props.overrideHandler.createVisibilityHandlerResult({

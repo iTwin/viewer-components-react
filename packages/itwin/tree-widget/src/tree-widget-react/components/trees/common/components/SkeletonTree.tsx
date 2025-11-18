@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./SkeletonTree.css";
+
 import { Skeleton, VisuallyHidden } from "@stratakit/bricks";
 import { TreeWidget } from "../../../../TreeWidget.js";
 

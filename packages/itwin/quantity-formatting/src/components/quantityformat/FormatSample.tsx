@@ -12,7 +12,7 @@ import { useTranslation } from "../../useTranslation.js";
 import type { FormatDefinition, UnitProps } from "@itwin/core-quantity";
 import type { UnitsProvider } from "@itwin/core-quantity";
 /**
- * @internal
+ * @beta
 */
 interface FormatSampleProps {
   formatProps: FormatDefinition;
@@ -131,13 +131,8 @@ export function FormatSample(props: FormatSampleProps) {
     [sampleValue]
   );
 
-  const activePersistenceUnitLabel = formatSpec
-    ? formatSpec.persistenceUnit.label
-    : persistenceUnit?.label ?? "";
-
   return (
     <div className="quantityFormat--formatSample-container">
-      <div className="quantityFormat--formatSample-box">
         <Label
           className="quantityFormat--samplePreviewTitle"
           htmlFor={inputId}
@@ -163,7 +158,6 @@ export function FormatSample(props: FormatSampleProps) {
             </Label>
           </div>
         </div>
-      </div>
     </div>
   );
 }

@@ -3,7 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, defer, EMPTY, from, identity, lastValueFrom, map, merge, mergeMap, of, reduce, toArray } from "rxjs";
+import { bufferCount, defer, EMPTY, firstValueFrom, from, identity, lastValueFrom, map, merge, mergeMap, of, reduce, toArray } from "rxjs";
+import { Guid } from "@itwin/core-bentley";
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql, parseFullClassName } from "@itwin/presentation-shared";
 import {
@@ -16,11 +17,11 @@ import {
   CLASS_NAME_GeometricElement2d,
   CLASS_NAME_GeometricElement3d,
 } from "../common/internal/ClassNameDefinitions.js";
-import { releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
+import { getOptimalBatchSize, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 
 import type { Observable, OperatorFunction } from "rxjs";
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Array, Id64String, MarkRequired } from "@itwin/core-bentley";
 import type {
   DefineHierarchyLevelProps,
   DefineInstanceNodeChildHierarchyLevelProps,
@@ -61,22 +62,26 @@ export interface ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps {
   limit?: number | "unbounded";
   idsCache: ClassificationsTreeIdsCache;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
+  componentId?: GuidString;
 }
 
 /** @internal */
 export class ClassificationsTreeDefinition implements HierarchyDefinition {
-  private _impl: HierarchyDefinition;
-  private _selectQueryFactory: NodesQueryClauseFactory;
-  private _nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
+  #impl: HierarchyDefinition;
+  #selectQueryFactory: NodesQueryClauseFactory;
+  #nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
+  #props: ClassificationsTreeDefinitionProps;
+  static #componentName = "ClassificationsTreeDefinition";
 
-  public constructor(private _props: ClassificationsTreeDefinitionProps) {
-    this._nodeLabelSelectClauseFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: this._props.imodelAccess });
-    this._selectQueryFactory = createNodesQueryClauseFactory({
-      imodelAccess: this._props.imodelAccess,
-      instanceLabelSelectClauseFactory: this._nodeLabelSelectClauseFactory,
+  public constructor(props: ClassificationsTreeDefinitionProps) {
+    this.#props = props;
+    this.#nodeLabelSelectClauseFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: this.#props.imodelAccess });
+    this.#selectQueryFactory = createNodesQueryClauseFactory({
+      imodelAccess: props.imodelAccess,
+      instanceLabelSelectClauseFactory: this.#nodeLabelSelectClauseFactory,
     });
-    this._impl = createPredicateBasedHierarchyDefinition({
-      classHierarchyInspector: this._props.imodelAccess,
+    this.#impl = createPredicateBasedHierarchyDefinition({
+      classHierarchyInspector: props.imodelAccess,
       hierarchy: {
         rootNodes: async (requestProps: DefineRootHierarchyLevelProps) => this.#createClassificationTablesQuery(requestProps),
         childNodes: [
@@ -98,12 +103,12 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
   }
 
   public async defineHierarchyLevel(props: DefineHierarchyLevelProps) {
-    return this._impl.defineHierarchyLevel(props);
+    return this.#impl.defineHierarchyLevel(props);
   }
 
   async #createClassificationTablesQuery(props: { instanceFilter?: GenericInstanceFilter }): Promise<HierarchyLevelDefinition> {
     const { instanceFilter } = props;
-    const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
+    const instanceFilterClauses = await this.#selectQueryFactory.createFilterClauses({
       filter: instanceFilter,
       contentClass: { fullName: CLASS_NAME_ClassificationTable, alias: "this" },
     });
@@ -113,11 +118,11 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
         query: {
           ecsql: `
             SELECT
-              ${await this._selectQueryFactory.createSelectClause({
+              ${await this.#selectQueryFactory.createSelectClause({
                 ecClassId: { selector: ECSql.createRawPropertyValueSelector("this", "ECClassId") },
                 ecInstanceId: { selector: "this.ECInstanceId" },
                 nodeLabel: {
-                  selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
+                  selector: await this.#nodeLabelSelectClauseFactory.createSelectClause({
                     classAlias: "this",
                     className: CLASS_NAME_ClassificationTable,
                   }),
@@ -142,7 +147,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
             JOIN ${CLASS_NAME_ClassificationSystem} system ON system.ECInstanceId = this.Parent.Id
             ${instanceFilterClauses.joins}
             WHERE
-              system.CodeValue = '${this._props.hierarchyConfig.rootClassificationSystemCode}'
+              system.CodeValue = '${this.#props.hierarchyConfig.rootClassificationSystemCode}'
               AND NOT this.IsPrivate
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
@@ -156,11 +161,11 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
     instanceFilter?: GenericInstanceFilter;
   }): Promise<HierarchyLevelDefinition> {
     const { parentNodeInstanceIds: classificationTableIds, instanceFilter } = props;
-    const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
+    const instanceFilterClauses = await this.#selectQueryFactory.createFilterClauses({
       filter: instanceFilter,
       contentClass: { fullName: CLASS_NAME_Classification, alias: "this" },
     });
-    const classificationIds = await this._props.idsCache.getDirectChildClassifications(classificationTableIds);
+    const classificationIds = await firstValueFrom(this.#props.idsCache.getDirectChildClassifications(classificationTableIds));
     return classificationIds.length
       ? [
           {
@@ -168,11 +173,11 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
             query: {
               ecsql: `
                 SELECT
-                  ${await this._selectQueryFactory.createSelectClause({
+                  ${await this.#selectQueryFactory.createSelectClause({
                     ecClassId: { selector: ECSql.createRawPropertyValueSelector("this", "ECClassId") },
                     ecInstanceId: { selector: "this.ECInstanceId" },
                     nodeLabel: {
-                      selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
+                      selector: await this.#nodeLabelSelectClauseFactory.createSelectClause({
                         classAlias: "this",
                         className: CLASS_NAME_Classification,
                       }),
@@ -203,13 +208,13 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
     instanceFilter?: GenericInstanceFilter;
   }): Promise<HierarchyLevelDefinition> {
     const { parentNodeInstanceIds: parentClassificationIds, instanceFilter } = props;
-    const classificationIds = await this._props.idsCache.getDirectChildClassifications(parentClassificationIds);
+    const classificationIds = await firstValueFrom(this.#props.idsCache.getDirectChildClassifications(parentClassificationIds));
     return [
       // load child classifications
       ...(classificationIds.length
         ? [
             await (async () => {
-              const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
+              const instanceFilterClauses = await this.#selectQueryFactory.createFilterClauses({
                 filter: instanceFilter,
                 contentClass: { fullName: CLASS_NAME_Classification, alias: "this" },
               });
@@ -218,11 +223,11 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
                 query: {
                   ecsql: `
                     SELECT
-                      ${await this._selectQueryFactory.createSelectClause({
+                      ${await this.#selectQueryFactory.createSelectClause({
                         ecClassId: { selector: ECSql.createRawPropertyValueSelector("this", "ECClassId") },
                         ecInstanceId: { selector: "this.ECInstanceId" },
                         nodeLabel: {
-                          selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
+                          selector: await this.#nodeLabelSelectClauseFactory.createSelectClause({
                             classAlias: "this",
                             className: CLASS_NAME_Classification,
                           }),
@@ -250,7 +255,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
       // load classification elements
       ...(await Promise.all(
         [CLASS_NAME_GeometricElement2d, CLASS_NAME_GeometricElement3d].map(async (elementClassName) => {
-          const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
+          const instanceFilterClauses = await this.#selectQueryFactory.createFilterClauses({
             filter: instanceFilter,
             contentClass: { fullName: elementClassName, alias: "this" },
           });
@@ -280,7 +285,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
     return Promise.all(
       [CLASS_NAME_GeometricElement2d, CLASS_NAME_GeometricElement3d].map(async (elementClassName) => {
-        const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
+        const instanceFilterClauses = await this.#selectQueryFactory.createFilterClauses({
           filter: instanceFilter,
           contentClass: { fullName: elementClassName, alias: "this" },
         });
@@ -303,11 +308,11 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
 
   async #createElementSelectClause(elementFullClassName: string): Promise<string> {
     const { className: elementClassName } = parseFullClassName(elementFullClassName);
-    return this._selectQueryFactory.createSelectClause({
+    return this.#selectQueryFactory.createSelectClause({
       ecClassId: { selector: "this.ECClassId" },
       ecInstanceId: { selector: "this.ECInstanceId" },
       nodeLabel: {
-        selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
+        selector: await this.#nodeLabelSelectClauseFactory.createSelectClause({
           classAlias: "this",
           className: elementFullClassName,
         }),
@@ -333,7 +338,12 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
 
   public static async createInstanceKeyPaths(props: ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps): Promise<NormalizedHierarchyFilteringPath[]> {
     const labelsFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
-    return createInstanceKeyPathsFromInstanceLabel({ ...props, labelsFactory });
+    return createInstanceKeyPathsFromInstanceLabel({
+      ...props,
+      labelsFactory,
+      componentId: props.componentId ?? Guid.createValue(),
+      componentName: this.#componentName,
+    });
   }
 }
 
@@ -356,7 +366,10 @@ function createClassificationHasChildrenSelector(classificationAlias: string) {
 }
 
 async function createInstanceKeyPathsFromInstanceLabel(
-  props: ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps & { labelsFactory: IInstanceLabelSelectClauseFactory },
+  props: MarkRequired<ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps, "componentId"> & {
+    labelsFactory: IInstanceLabelSelectClauseFactory;
+    componentName: string;
+  },
 ): Promise<NormalizedHierarchyFilteringPath[]> {
   const adjustedLabel = props.label.replace(/[%_\\]/g, "\\$&");
 
@@ -371,7 +384,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
           props.labelsFactory.createSelectClause({ classAlias: "this", className }),
         ),
       );
-      const classificationIds = await props.idsCache.getAllClassifications();
+      const classificationIds = await firstValueFrom(props.idsCache.getAllClassifications());
       const ctes = [
         `
           ${CLASSIFICATION_TABLES_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (
@@ -507,7 +520,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
       return { ctes, ecsql, bindings };
     }).pipe(
       mergeMap((queryProps) =>
-        props.imodelAccess.createQueryReader(queryProps, { restartToken: "tree-widget/classifications-tree/filter-by-label-query", limit: props.limit }),
+        props.imodelAccess.createQueryReader(queryProps, { restartToken: `${props.componentName}/${props.componentId}/filter-by-label`, limit: props.limit }),
       ),
       map((row): InstanceKey => {
         let className: string;
@@ -540,10 +553,12 @@ function createInstanceKeyPathsFromTargetItems({
   idsCache,
   imodelAccess,
   limit,
-}: Pick<ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps, "limit" | "imodelAccess" | "idsCache">): OperatorFunction<
-  InstanceKey,
-  NormalizedHierarchyFilteringPath
-> {
+  componentId,
+  componentName,
+}: Pick<ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps, "limit" | "imodelAccess" | "idsCache"> & {
+  componentId: GuidString;
+  componentName: string;
+}): OperatorFunction<InstanceKey, NormalizedHierarchyFilteringPath> {
   const actualLimit = limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT;
   return (targetItems: Observable<InstanceKey>) => {
     return targetItems.pipe(
@@ -588,14 +603,22 @@ function createInstanceKeyPathsFromTargetItems({
           from(ids.classificationTableIds).pipe(map((id) => ({ path: [{ id, className: CLASS_NAME_ClassificationTable }], options: { autoExpand: true } }))),
           idsCache.getClassificationsPathObs(ids.classificationIds).pipe(map((path) => ({ path, options: { autoExpand: true } }))),
           from(ids.element2dIds).pipe(
-            bufferCount(Math.ceil(elements2dLength / Math.ceil(elements2dLength / 5000))),
+            bufferCount(getOptimalBatchSize({ totalSize: elements2dLength, maximumBatchSize: 5000 })),
             releaseMainThreadOnItemsCount(1),
-            mergeMap((block) => createGeometricElementInstanceKeyPaths({ idsCache, imodelAccess, targetItems: block, type: "2d" }), 10),
+            mergeMap(
+              (block, chunkIndex) =>
+                createGeometricElementInstanceKeyPaths({ idsCache, imodelAccess, targetItems: block, type: "2d", chunkIndex, componentId, componentName }),
+              10,
+            ),
           ),
           from(ids.element3dIds).pipe(
-            bufferCount(Math.ceil(elements3dLength / Math.ceil(elements3dLength / 5000))),
+            bufferCount(getOptimalBatchSize({ totalSize: elements3dLength, maximumBatchSize: 5000 })),
             releaseMainThreadOnItemsCount(1),
-            mergeMap((block) => createGeometricElementInstanceKeyPaths({ idsCache, imodelAccess, targetItems: block, type: "3d" }), 10),
+            mergeMap(
+              (block, chunkIndex) =>
+                createGeometricElementInstanceKeyPaths({ idsCache, imodelAccess, targetItems: block, type: "3d", chunkIndex, componentId, componentName }),
+              10,
+            ),
           ),
         );
       }),
@@ -608,8 +631,11 @@ function createGeometricElementInstanceKeyPaths(props: {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   targetItems: Id64Array;
   type: "2d" | "3d";
+  componentId: GuidString;
+  componentName: string;
+  chunkIndex: number;
 }): Observable<NormalizedHierarchyFilteringPath> {
-  const { targetItems, imodelAccess, type, idsCache } = props;
+  const { targetItems, imodelAccess, type, idsCache, componentId, componentName, chunkIndex } = props;
   if (targetItems.length === 0) {
     return EMPTY;
   }
@@ -649,7 +675,7 @@ function createGeometricElementInstanceKeyPaths(props: {
 
     return imodelAccess.createQueryReader(
       { ctes, ecsql },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `tree-widget/classifications-tree/elements${type}-filter-paths-query` },
+      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${componentName}/${componentId}/elements${type}-filter-paths/${chunkIndex}` },
     );
   }).pipe(
     releaseMainThreadOnItemsCount(300),

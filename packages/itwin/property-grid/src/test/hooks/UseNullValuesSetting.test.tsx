@@ -11,8 +11,8 @@ import { PreferencesContextProvider } from "../../property-grid-react/PropertyGr
 import { createFunctionStub, render, waitFor } from "../TestUtils.js";
 
 import type { ReactNode } from "react";
-import type { PreferencesContextProviderProps } from "../../property-grid-react/PropertyGridPreferencesContext.js";
 import type { PreferencesStorage } from "../../property-grid-react/api/PreferencesStorage.js";
+import type { PreferencesContextProviderProps } from "../../property-grid-react/PropertyGridPreferencesContext.js";
 
 function renderWithContext(element: ReactNode, contextProps: Partial<PreferencesContextProviderProps>) {
   return render(<PreferencesContextProvider {...contextProps}>{element}</PreferencesContextProvider>);

@@ -21,9 +21,10 @@ import {
   SvgList,
   SvgRealityMesh,
 } from "@itwin/itwinui-icons-react";
-import type { ITwinRepositoryType } from "./RepositoriesType";
 
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import type { ITwinRepositoryType } from "./RepositoriesType";
+
 const StorageNodeIcons: { [key: string]: React.JSX.Element } = {
   folder: <SvgFolder />,
   file: <SvgDocument />,

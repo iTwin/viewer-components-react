@@ -20,6 +20,7 @@ import {
   TooManyInstancesFocused,
   UnknownInstanceFocusError,
 } from "../common/components/EmptyTree.js";
+import { useGuid } from "../common/internal/useGuid.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
@@ -139,10 +140,12 @@ export function useModelsTree({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     Object.values(hierarchyConfig ?? {}),
   );
+  const componentId = useGuid();
   const { getCache: getModelsTreeIdsCache } = useIdsCache<ModelsTreeIdsCache, { hierarchyConfig: ModelsTreeHierarchyConfiguration }>({
     imodel: activeView.iModel,
     createCache,
     cacheSpecificProps: useMemo(() => ({ hierarchyConfig: hierarchyConfiguration }), [hierarchyConfiguration]),
+    componentId,
   });
 
   const { visibilityHandlerFactory, onFilteredPathsChanged } = useCachedVisibility<ModelsTreeIdsCache, ModelsTreeFilterTargets>({
@@ -153,11 +156,12 @@ export function useModelsTree({
       [visibilityHandlerOverrides],
     ),
     getCache: getModelsTreeIdsCache,
+    componentId,
   });
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
-    ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache: getModelsTreeIdsCache(), hierarchyConfig: hierarchyConfiguration }),
-    [getModelsTreeIdsCache, hierarchyConfiguration],
+    ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache: getModelsTreeIdsCache(), hierarchyConfig: hierarchyConfiguration, componentId }),
+    [getModelsTreeIdsCache, hierarchyConfiguration, componentId],
   );
 
   const { getPaths, filteringError, subTreeError } = useFilteredPaths({
@@ -168,6 +172,7 @@ export function useModelsTree({
     onFilteredPathsChanged,
     onModelsFiltered,
     getSubTreePaths,
+    componentId,
   });
 
   const nodeSelectionPredicate = useCallback<NonNullable<VisibilityTreeProps["selectionPredicate"]>>(
@@ -295,5 +300,5 @@ export function ModelsTreeIcon({ node }: { node: PresentationHierarchyNode }) {
 }
 
 function createCache(props: CreateCacheProps<{ hierarchyConfig: ModelsTreeHierarchyConfiguration }>) {
-  return new ModelsTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.hierarchyConfig);
+  return new ModelsTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.hierarchyConfig, props.componentId);
 }

@@ -10,8 +10,8 @@ import { PropertyGridContent } from "./PropertyGridContent.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
-import type { PropertyGridContentProps } from "./PropertyGridContent.js";
 import type { DataProviderProps } from "../hooks/UseDataProvider.js";
+import type { PropertyGridContentProps } from "./PropertyGridContent.js";
 
 /**
  * Props for data provider used by `SingleElementPropertyGrid`.

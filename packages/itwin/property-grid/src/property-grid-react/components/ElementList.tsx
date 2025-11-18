@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./ElementList.scss";
+
 import classnames from "classnames";
 import * as React from "react";
 import { MenuItem, Text } from "@itwin/itwinui-react";

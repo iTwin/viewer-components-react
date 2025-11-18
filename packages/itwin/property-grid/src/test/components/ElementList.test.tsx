@@ -12,9 +12,9 @@ import { PropertyGridManager } from "../../property-grid-react/PropertyGridManag
 import { act, createResolvablePromise, render, waitFor } from "../TestUtils.js";
 
 import type { PropsWithChildren } from "react";
-import type { PerformanceTrackedFeatures } from "../../property-grid-react/hooks/UseTelemetryContext.js";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
+import type { PerformanceTrackedFeatures } from "../../property-grid-react/hooks/UseTelemetryContext.js";
 
 describe("<ElementList />", () => {
   const imodel = {} as IModelConnection;

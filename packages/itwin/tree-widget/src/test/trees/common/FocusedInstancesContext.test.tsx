@@ -8,8 +8,8 @@ import { createStorage } from "@itwin/unified-selection";
 import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../../../tree-widget-react/components/trees/common/FocusedInstancesContext.js";
 import { act, createAsyncIterator, renderHook, waitFor } from "../../TestUtils.js";
 
-import type { GroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { PropsWithChildren } from "react";
+import type { GroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 
 async function collectKeys<T>(loader?: () => AsyncIterableIterator<T>): Promise<T[]> {
   const items: T[] = [];

@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { from, merge, mergeMap, of, toArray } from "rxjs";
+import { merge, mergeMap, of, toArray } from "rxjs";
 import { BaseVisibilityHelper } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 
@@ -37,7 +37,7 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
    * Determines visibility status by checking visibility status of related categories.
    */
   public getClassificationTablesVisibilityStatus(props: { classificationTableIds: Id64Arg }): Observable<VisibilityStatus> {
-    return from(this.#props.idsCache.getAllContainedCategories(props.classificationTableIds)).pipe(
+    return this.#props.idsCache.getAllContainedCategories(props.classificationTableIds).pipe(
       mergeMap(({ drawing, spatial }) =>
         merge(
           of(drawing).pipe(mergeMap((categoryIds) => this.getCategoriesVisibilityStatus({ modelId: undefined, categoryIds, type: "DrawingCategory" }))),
@@ -54,7 +54,7 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
    * Determines visibility status by checking visibility status of related categories.
    */
   public getClassificationsVisibilityStatus(props: { classificationIds: Id64Arg }): Observable<VisibilityStatus> {
-    return from(this.#props.idsCache.getAllContainedCategories(props.classificationIds)).pipe(
+    return this.#props.idsCache.getAllContainedCategories(props.classificationIds).pipe(
       mergeMap(({ drawing, spatial }) =>
         merge(
           of(drawing).pipe(mergeMap((categoryIds) => this.getCategoriesVisibilityStatus({ modelId: undefined, categoryIds, type: "DrawingCategory" }))),
@@ -71,7 +71,7 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
    * Does this by changing visibility status of related categories.
    */
   public changeClassificationTablesVisibilityStatus(props: { classificationTableIds: Id64Arg; on: boolean }): Observable<void> {
-    return from(this.#props.idsCache.getAllContainedCategories(props.classificationTableIds)).pipe(
+    return this.#props.idsCache.getAllContainedCategories(props.classificationTableIds).pipe(
       mergeMap(({ drawing, spatial }) => merge(drawing, spatial)),
       toArray(),
       mergeMap((categoryIds) => this.changeCategoriesVisibilityStatus({ modelId: undefined, categoryIds, on: props.on })),
@@ -84,7 +84,7 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
    * Does this by changing visibility status of related categories.
    */
   public changeClassificationsVisibilityStatus(props: { classificationIds: Id64Arg; on: boolean }): Observable<void> {
-    return from(this.#props.idsCache.getAllContainedCategories(props.classificationIds)).pipe(
+    return this.#props.idsCache.getAllContainedCategories(props.classificationIds).pipe(
       mergeMap(({ drawing, spatial }) => merge(drawing, spatial)),
       toArray(),
       mergeMap((categoryIds) => this.changeCategoriesVisibilityStatus({ modelId: undefined, categoryIds, on: props.on })),

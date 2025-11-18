@@ -12,10 +12,11 @@ import { useTelemetryContext } from "./UseTelemetryContext.js";
 
 import type { PropsWithChildren, ReactNode } from "react";
 import type { PropertyRecord } from "@itwin/appui-abstract";
-import type { Field } from "@itwin/presentation-common";
-import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
 import type { PropertyGridContextMenuArgs } from "@itwin/components-react";
 import type { IModelConnection } from "@itwin/core-frontend";
+import type { Field } from "@itwin/presentation-common";
+import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
+
 /**
  * Props for single context menu item.
  * @public

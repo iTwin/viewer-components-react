@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { firstValueFrom } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { CLASS_NAME_SubCategory } from "../../../common/internal/ClassNameDefinitions.js";
 import { createFilteredTree, FilteredNodesHandler } from "../../../common/internal/visibility/BaseFilteredTree.js";
@@ -22,7 +23,7 @@ import type { CategoriesTreeIdsCache } from "../CategoriesTreeIdsCache.js";
 /** @internal */
 export interface CategoriesTreeFilterTargets {
   categories?: Array<{ modelId: Id64String | undefined; categoryIds: Id64Set }>;
-  elements?: Array<{ modelId: Id64String; categoryId: Id64String; elementIds: Id64Set }>;
+  elements?: Array<{ modelId: Id64String; categoryId: Id64String; elements: Map<ElementId, { isFilterTarget: boolean }> }>;
   definitionContainerIds?: Id64Set;
   modelIds?: Id64Set;
   subCategories?: Array<{ categoryId: Id64String; subCategoryIds: Id64Set }>;
@@ -94,7 +95,7 @@ export async function createFilteredCategoriesTree(props: {
 }
 
 interface FilterTargetsInternal {
-  elements?: Map<ModelCategoryKey, Set<ElementId>>;
+  elements?: Map<ModelCategoryKey, Map<ElementId, { isFilterTarget: boolean }>>;
   categories?: Map<ModelId | undefined, Set<CategoryId>>;
   definitionContainerIds?: Id64Set;
   modelIds?: Id64Set;
@@ -133,7 +134,7 @@ class CategoriesTreeFilteredNodesHandler extends FilteredNodesHandler<ProcessedF
       }
     });
 
-    const filteredElementsModels = await this.#props.idsCache.getFilteredElementsModels([...filteredTemporaryElements.keys()]);
+    const filteredElementsModels = await firstValueFrom(this.#props.idsCache.getFilteredElementsModels([...filteredTemporaryElements.keys()]));
     filteredTemporaryElements.forEach((element, id) => {
       const modelId = filteredElementsModels.get(element.id);
       assert(modelId !== undefined);
@@ -170,9 +171,9 @@ class CategoriesTreeFilteredNodesHandler extends FilteredNodesHandler<ProcessedF
           })
         : undefined,
       elements: filterTargets.elements
-        ? [...filterTargets.elements.entries()].map(([modelCategoryKey, elementIds]) => {
+        ? [...filterTargets.elements.entries()].map(([modelCategoryKey, elements]) => {
             const { modelId, categoryId } = this.parseModelCategoryKey(modelCategoryKey);
-            return { modelId, categoryId, elementIds };
+            return { modelId, categoryId, elements };
           })
         : undefined,
       definitionContainerIds: filterTargets.definitionContainerIds,
@@ -235,11 +236,10 @@ class CategoriesTreeFilteredNodesHandler extends FilteredNodesHandler<ProcessedF
         const modelCategoryKey = this.createModelCategoryKey(node.modelId, node.categoryId);
         const elements = (filterTargets.elements ??= new Map()).get(modelCategoryKey);
         if (elements) {
-          elements.add(node.id);
-          return;
+          elements.set(node.id, { isFilterTarget: node.isFilterTarget });
+        } else {
+          filterTargets.elements.set(modelCategoryKey, new Map([[node.id, { isFilterTarget: node.isFilterTarget }]]));
         }
-        filterTargets.elements.set(modelCategoryKey, new Set([node.id]));
-        return;
     }
   }
 

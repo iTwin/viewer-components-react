@@ -9,10 +9,10 @@ import { MultiElementPropertyGrid } from "./components/MultiElementPropertyGrid.
 import { TelemetryContextProvider } from "./hooks/UseTelemetryContext.js";
 import { PreferencesContextProvider } from "./PropertyGridPreferencesContext.js";
 
-import type { TelemetryContextProviderProps } from "./hooks/UseTelemetryContext.js";
-import type { MultiElementPropertyGridProps } from "./components/MultiElementPropertyGrid.js";
-import type { PreferencesStorage } from "./api/PreferencesStorage.js";
 import type { IModelConnection } from "@itwin/core-frontend";
+import type { PreferencesStorage } from "./api/PreferencesStorage.js";
+import type { MultiElementPropertyGridProps } from "./components/MultiElementPropertyGrid.js";
+import type { TelemetryContextProviderProps } from "./hooks/UseTelemetryContext.js";
 
 /**
  * Props for `PropertyGridComponent`.

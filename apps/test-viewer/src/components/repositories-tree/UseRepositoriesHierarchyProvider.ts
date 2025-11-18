@@ -8,8 +8,8 @@ import { BeEvent } from "@itwin/core-bentley";
 import { formatLabel } from "./FormatLabel";
 import { getItwinRepositories, getRepositoryData } from "./RepositoriesService";
 
-import type { EventListener } from "@itwin/presentation-shared";
 import type { HierarchyNode, HierarchyProvider } from "@itwin/presentation-hierarchies";
+import type { EventListener } from "@itwin/presentation-shared";
 
 interface UseRepositoriesHierarchyProviderProps {
   itwinId: string;

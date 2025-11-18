@@ -14,8 +14,8 @@ import { Icon } from "@stratakit/foundations";
 import { Chip } from "@stratakit/structures";
 import { unifiedSelectionStorage } from "../SelectionStorage";
 
-import type { UiItemsProvider } from "@itwin/appui-react";
 import type { ComponentProps, PropsWithChildren, ReactNode } from "react";
+import type { UiItemsProvider } from "@itwin/appui-react";
 import type { Viewport } from "@itwin/core-frontend";
 
 const mapIcon = new URL("@stratakit/icons/map.svg", import.meta.url).href;

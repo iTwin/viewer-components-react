@@ -17,9 +17,9 @@ import type { ILogger } from "@itwin/presentation-shared";
  * @public
  */
 export class TreeWidget {
-  private static _i18n?: Localization;
-  private static _logger?: ILogger;
-  private static _initialized?: boolean;
+  static #i18n?: Localization;
+  static #logger?: ILogger;
+  static #initialized?: boolean;
 
   /**
    * Called by IModelApp to initialize the Tree Widget
@@ -27,48 +27,48 @@ export class TreeWidget {
    * @param logger - The logger to use for logging messages. Defaults to `Logger` from `@itwin/core-bentley`.
    */
   public static async initialize(i18n?: Localization, logger?: ILogger): Promise<void> {
-    if (this._initialized) {
+    if (this.#initialized) {
       return;
     }
 
-    TreeWidget._initialized = true;
+    TreeWidget.#initialized = true;
 
-    TreeWidget._logger = logger ?? createLogger(Logger);
-    setHierarchiesLogger(TreeWidget._logger);
-    setHierarchiesReactLogger(TreeWidget._logger);
+    TreeWidget.#logger = logger ?? createLogger(Logger);
+    setHierarchiesLogger(TreeWidget.#logger);
+    setHierarchiesReactLogger(TreeWidget.#logger);
 
-    TreeWidget._i18n = i18n ?? IModelApp.localization;
-    return TreeWidget._i18n.registerNamespace(TreeWidget.i18nNamespace);
+    TreeWidget.#i18n = i18n ?? IModelApp.localization;
+    return TreeWidget.#i18n.registerNamespace(TreeWidget.i18nNamespace);
   }
 
   /** Unregisters the TreeWidget internationalization service namespace */
   public static terminate() {
-    if (TreeWidget._i18n) {
-      TreeWidget._i18n.unregisterNamespace(TreeWidget.i18nNamespace);
-      TreeWidget._i18n = undefined;
+    if (TreeWidget.#i18n) {
+      TreeWidget.#i18n.unregisterNamespace(TreeWidget.i18nNamespace);
+      TreeWidget.#i18n = undefined;
     }
 
-    TreeWidget._logger = undefined;
+    TreeWidget.#logger = undefined;
     setHierarchiesLogger(undefined);
     setHierarchiesReactLogger(undefined);
 
-    TreeWidget._initialized = false;
+    TreeWidget.#initialized = false;
   }
 
   /** The logger used by this components in this package. */
   public static get logger(): ILogger {
-    if (!TreeWidget._logger) {
+    if (!TreeWidget.#logger) {
       throw new BentleyError(BentleyStatus.ERROR, "TreeWidget not initialized");
     }
-    return TreeWidget._logger;
+    return TreeWidget.#logger;
   }
 
   /** The internationalization service created by the IModelApp. */
   public static get i18n(): Localization {
-    if (!TreeWidget._i18n) {
+    if (!TreeWidget.#i18n) {
       throw new BentleyError(BentleyStatus.ERROR, "TreeWidget not initialized");
     }
-    return TreeWidget._i18n;
+    return TreeWidget.#i18n;
   }
 
   /** The internationalization service namespace. */

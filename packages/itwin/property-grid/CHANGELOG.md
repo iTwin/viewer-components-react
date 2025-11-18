@@ -1,8 +1,17 @@
 # Change Log - @itwin/property-grid-react
 
-<!-- This log was last generated on Wed, 27 Aug 2025 11:06:53 GMT and should not be manually modified. -->
+<!-- This log was last generated on Fri, 17 Oct 2025 15:36:01 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 1.19.5
+
+Fri, 17 Oct 2025 15:36:01 GMT
+
+### Patches
+
+- Bump versions of presentation packages. ([#1480](https://github.com/iTwin/viewer-components-react/pull/1480))
+- Bump versions of presentation packages. ([#1478](https://github.com/iTwin/viewer-components-react/pull/1478))
 
 ## 1.19.4
 

@@ -5,6 +5,7 @@
 // WARNING: The order of imports in this file is important!
 
 // get rid of various xhr errors in the console
+
 import globalJsdom from "global-jsdom";
 import * as jsdom from "jsdom";
 

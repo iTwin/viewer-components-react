@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./MultiElementPropertyGrid.scss";
+
 import classnames from "classnames";
 import { useEffect, useState } from "react";
 import { SvgArrowDown, SvgArrowUp, SvgPropertiesList } from "@itwin/itwinui-icons-react";
@@ -17,12 +18,12 @@ import { ElementList as ElementListComponent } from "./ElementList.js";
 import { PropertyGrid as PropertyGridComponent } from "./PropertyGrid.js";
 import { SingleElementPropertyGrid as SingleElementPropertyGridComponent } from "./SingleElementPropertyGrid.js";
 
-import type { ElementListProps } from "./ElementList.js";
 import type { ReactNode } from "react";
-import type { PropertyGridProps } from "./PropertyGrid.js";
-import type { SingleElementPropertyGridProps } from "./SingleElementPropertyGrid.js";
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { UsageTrackedFeatures } from "../hooks/UseTelemetryContext.js";
+import type { ElementListProps } from "./ElementList.js";
+import type { PropertyGridProps } from "./PropertyGrid.js";
+import type { SingleElementPropertyGridProps } from "./SingleElementPropertyGrid.js";
 
 enum MultiElementPropertyContent {
   PropertyGrid = 0,

@@ -2,6 +2,36 @@
   "name": "@itwin/map-layers",
   "entries": [
     {
+      "date": "Mon, 03 Nov 2025 14:36:22 GMT",
+      "version": "6.0.9",
+      "tag": "@itwin/map-layers_v6.0.9",
+      "comments": {
+        "patch": [
+          {
+            "author": "wil.maier@bentley.com",
+            "package": "@itwin/map-layers",
+            "commit": "c0e4a823a3a10bf620458fd776e930b07415e715",
+            "comment": "Store user selected solid fill color to use as session default and add as new preset in picker"
+          }
+        ]
+      }
+    },
+    {
+      "date": "Wed, 08 Oct 2025 20:11:56 GMT",
+      "version": "6.0.8",
+      "tag": "@itwin/map-layers_v6.0.8",
+      "comments": {
+        "patch": [
+          {
+            "author": "andremig-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "45f2433eb18015461e1b0843e23aabf76e84b7e3",
+            "comment": "Remove Dynamically Created Inline Styles"
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 23 Sep 2025 14:41:43 GMT",
       "version": "6.0.7",
       "tag": "@itwin/map-layers_v6.0.7",

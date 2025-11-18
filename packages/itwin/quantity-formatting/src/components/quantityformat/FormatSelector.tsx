@@ -9,9 +9,12 @@ import { useTranslation } from "../../useTranslation.js";
 
 import type { FormatDefinition } from "@itwin/core-quantity";
 import type { FormatSet } from "@itwin/ecschema-metadata";
+import { Logger } from "@itwin/core-bentley";
+import { QuantityFormattingLoggerCategory } from "../../QuantityFormatting.js";
 
+const logCategory = QuantityFormattingLoggerCategory;
 /**
- * @internal
+ * @beta
  */
 interface FormatSelectorProps {
   activeFormatSet?: FormatSet;
@@ -37,12 +40,13 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
       return [];
     }
 
-    return Object.entries(activeFormatSet.formats).map(([key, formatDef]) => ({
-      key,
-      formatDef,
-      label: formatDef.label || key,
-      description: formatDef.description || "",
-    }));
+    return Object.entries(activeFormatSet.formats)
+      .filter(([, formatDef]) => typeof formatDef === "object" && formatDef !== null)
+      .map(([key, formatDef]) => ({
+        key,
+        formatDef: formatDef as FormatDefinition,
+        label: (formatDef as FormatDefinition).label || key,
+      }));
   }, [activeFormatSet?.formats]);
 
   // Filter formats based on search term
@@ -59,12 +63,18 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
 
   const handleFormatSelect = React.useCallback(
     (key: string) => {
-      if (activeFormatSet?.formats) {
-        const formatDef = activeFormatSet.formats[key];
-        onListItemChange(formatDef, key);
+      const formatEntry = formatEntries.find(entry => entry.key === key);
+      if (formatEntry) {
+        onListItemChange(formatEntry.formatDef, key);
+      } else {
+        Logger.logWarning(logCategory,`Format entry not found for key: ${key}`, {
+          key,
+          availableKeys: formatEntries.map(e => e.key),
+          activeFormatSet: activeFormatSet?.name
+        });
       }
     },
-    [onListItemChange, activeFormatSet]
+    [onListItemChange, formatEntries]
   );
 
   const handleSearchChange = React.useCallback(
@@ -86,21 +96,14 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
           <List
             className="quantityFormat--formatSelector-list"
           >
-            {filteredFormats.map(({ key, label, description }) => (
+            {filteredFormats.map(({ key, label }) => (
               <ListItem
                 key={key}
                 onClick={() => handleFormatSelect(key)}
                 active={activeFormatDefinitionKey === key}
                 className={`quantityFormat--formatSelector-listItem`}
               >
-                <Flex flexDirection="column" alignItems="flex-start">
-                  <Text variant="body">{label}</Text>
-                  {description && (
-                    <Text variant="small" isMuted>
-                      {description}
-                    </Text>
-                  )}
-                </Flex>
+                <Text variant="body">{label}</Text>
               </ListItem>
             ))}
             {filteredFormats.length === 0 && searchTerm.trim() && (

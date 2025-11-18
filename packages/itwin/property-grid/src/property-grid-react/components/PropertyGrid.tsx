@@ -10,10 +10,10 @@ import { PropertyGridManager } from "../PropertyGridManager.js";
 import { FilteringPropertyGrid } from "./FilteringPropertyGrid.js";
 import { PropertyGridContent } from "./PropertyGridContent.js";
 
+import type { SelectionStorage } from "@itwin/unified-selection";
 import type { DataProviderProps } from "../hooks/UseDataProvider.js";
 import type { FilteringPropertyGridProps } from "./FilteringPropertyGrid.js";
 import type { PropertyGridContentProps } from "./PropertyGridContent.js";
-import type { SelectionStorage } from "@itwin/unified-selection";
 
 /**
  * Props for `PropertyGrid` component.

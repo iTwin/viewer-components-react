@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useMemo, useState } from "react";
+import { firstValueFrom } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
@@ -12,11 +13,12 @@ import { FilterLimitExceededError } from "../../common/TreeErrors.js";
 import { useTelemetryContext } from "../../common/UseTelemetryContext.js";
 import { CategoriesTreeDefinition } from "../CategoriesTreeDefinition.js";
 
+import type { GuidString } from "@itwin/core-bentley";
+import type { CategoryInfo } from "../../common/CategoriesVisibilityUtils.js";
 import type { VisibilityTreeProps } from "../../common/components/VisibilityTree.js";
+import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../../common/internal/Types.js";
 import type { CategoriesTreeHierarchyConfiguration } from "../CategoriesTreeDefinition.js";
 import type { CategoriesTreeIdsCache } from "./CategoriesTreeIdsCache.js";
-import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../../common/internal/Types.js";
-import type { CategoryInfo } from "../../common/CategoriesVisibilityUtils.js";
 
 /** @internal */
 export type CategoriesTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError";
@@ -31,6 +33,7 @@ export function useFilteredPaths({
   getCategoriesTreeIdsCache,
   onCategoriesFiltered,
   onFilteredPathsChanged,
+  componentId,
 }: {
   viewType: "2d" | "3d";
   filter?: string;
@@ -38,6 +41,7 @@ export function useFilteredPaths({
   getCategoriesTreeIdsCache: () => CategoriesTreeIdsCache;
   onCategoriesFiltered?: (categories: { categories: CategoryInfo[] | undefined; models?: Array<ModelId> }) => void;
   onFilteredPathsChanged: (paths: HierarchyFilteringPaths | undefined) => void;
+  componentId: GuidString;
 }): {
   getPaths: VisibilityTreeProps["getFilteredPaths"] | undefined;
   filteringError: CategoriesTreeFilteringError | undefined;
@@ -68,10 +72,11 @@ export function useFilteredPaths({
           viewType,
           idsCache: getCategoriesTreeIdsCache(),
           hierarchyConfig: hierarchyConfiguration,
+          componentId,
         });
         onFilteredPathsChanged(paths);
         const { elementClass, modelClass } = getClassesByView(viewType);
-        onCategoriesFiltered?.(await getCategoriesFromPaths(paths, getCategoriesTreeIdsCache(), elementClass, modelClass));
+        onCategoriesFiltered?.(await getCategoriesFromPaths(paths, getCategoriesTreeIdsCache(), elementClass, modelClass, hierarchyConfiguration));
         return paths;
       } catch (e) {
         const newError = e instanceof FilterLimitExceededError ? "tooManyFilterMatches" : "unknownFilterError";
@@ -83,7 +88,7 @@ export function useFilteredPaths({
         return [];
       }
     };
-  }, [onCategoriesFiltered, filter, onFilteredPathsChanged, onFeatureUsed, viewType, getCategoriesTreeIdsCache, hierarchyConfiguration]);
+  }, [onCategoriesFiltered, filter, onFilteredPathsChanged, onFeatureUsed, viewType, getCategoriesTreeIdsCache, hierarchyConfiguration, componentId]);
 
   return {
     getPaths: getFilteredPaths,
@@ -96,6 +101,7 @@ async function getCategoriesFromPaths(
   idsCache: CategoriesTreeIdsCache,
   elementClassName: string,
   modelsClassName: string,
+  hierarchyConfig: CategoriesTreeHierarchyConfiguration,
 ): Promise<{ categories: CategoryInfo[] | undefined; models?: Array<ModelId> }> {
   if (!paths) {
     return { categories: undefined };
@@ -140,7 +146,9 @@ async function getCategoriesFromPaths(
     assert(lastNodeInfo !== undefined && HierarchyNodeIdentifier.isInstanceNodeIdentifier(lastNodeInfo.lastNode));
 
     if (lastNodeInfo.lastNode.className === CLASS_NAME_DefinitionContainer) {
-      const definitionContainerCategories = await idsCache.getAllContainedCategories(lastNodeInfo.lastNode.id);
+      const definitionContainerCategories = await firstValueFrom(
+        idsCache.getAllContainedCategories({ definitionContainerIds: lastNodeInfo.lastNode.id, includeEmptyCategories: hierarchyConfig.showEmptyCategories }),
+      );
       for (const categoryId of definitionContainerCategories) {
         const value = categories.get(categoryId);
         if (value === undefined) {
@@ -170,7 +178,7 @@ async function getCategoriesFromPaths(
       entry.push(subCategory.id);
     }
   }
-  const rootElementModelMap = await idsCache.getFilteredElementsModels(rootFilteredElementIds);
+  const rootElementModelMap = await firstValueFrom(idsCache.getFilteredElementsModels(rootFilteredElementIds));
   const models = [...subModelIds, ...new Set(rootElementModelMap.values())];
   return {
     categories: [...categories.entries()].map(([categoryId, subCategoryIds]) => ({

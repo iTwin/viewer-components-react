@@ -16,7 +16,7 @@ vi.mock("../../useTranslation.js", () => ({
   useTranslation: () => ({
     translate: (key: string) => {
       const translations: Record<string, string> = {
-        "QuantityFormat:labels.save": "Save",
+        "QuantityFormat:labels.apply": "Apply",
         "QuantityFormat:labels.clear": "Clear",
       };
       return translations[key] || key;
@@ -80,7 +80,7 @@ describe("QuantityFormatPanel", () => {
     mockOnFormatChange = vi.fn();
   });
 
-  it("should render with Save button disabled initially", async () => {
+  it("should render with Apply button disabled initially", async () => {
     render(
       <QuantityFormatPanel
         formatDefinition={mockFormatDefinition}
@@ -89,11 +89,11 @@ describe("QuantityFormatPanel", () => {
       />
     );
 
-    const saveButton = screen.getByRole("button", { name: "Save" });
-    expect(saveButton.getAttribute("aria-disabled")).toEqual("true");
+    const applyButton = screen.getByRole("button", { name: "Apply" });
+    expect(applyButton.getAttribute("aria-disabled")).toEqual("true");
   });
 
-  it("should enable Save button when format is changed", async () => {
+  it("should enable Apply button when format is changed", async () => {
     render(
       <QuantityFormatPanel
         formatDefinition={mockFormatDefinition}
@@ -102,19 +102,19 @@ describe("QuantityFormatPanel", () => {
       />
     );
 
-    const saveButton = screen.getByRole("button", { name: "Save" });
+    const applyButton = screen.getByRole("button", { name: "Apply" });
     const triggerChangeButton = screen.getByTestId("trigger-format-change");
 
     // Initially disabled
-    expect(saveButton.getAttribute("aria-disabled")).toEqual("true");
+    expect(applyButton.getAttribute("aria-disabled")).toEqual("true");
 
     // Trigger format change
     await user.click(triggerChangeButton);
     // Should be enabled after change
-    expect(saveButton.getAttribute("aria-disabled")).toBeNull();
+    expect(applyButton.getAttribute("aria-disabled")).toBeNull();
   });
 
-  it("should call onFormatChange only when Save button is clicked", async () => {
+  it("should call onFormatChange only when Apply button is clicked", async () => {
     render(
       <QuantityFormatPanel
         formatDefinition={mockFormatDefinition}
@@ -123,7 +123,7 @@ describe("QuantityFormatPanel", () => {
       />
     );
 
-    const saveButton = screen.getByRole("button", { name: "Save" });
+    const applyButton = screen.getByRole("button", { name: "Apply" });
     const triggerChangeButton = screen.getByTestId("trigger-format-change");
 
     // Trigger format change - should not call parent onFormatChange yet
@@ -131,8 +131,8 @@ describe("QuantityFormatPanel", () => {
 
     expect(mockOnFormatChange).not.toHaveBeenCalled();
 
-    // Click Save button - should call parent onFormatChange
-    await user.click(saveButton);
+    // Click Apply button - should call parent onFormatChange
+    await user.click(applyButton);
 
     expect(mockOnFormatChange).toHaveBeenCalledTimes(1);
     expect(mockOnFormatChange).toHaveBeenCalledWith(
@@ -142,7 +142,7 @@ describe("QuantityFormatPanel", () => {
     );
   });
 
-  it("should disable Save button after Save is clicked", async () => {
+  it("should disable Apply button after Apply is clicked", async () => {
     render(
       <QuantityFormatPanel
         formatDefinition={mockFormatDefinition}
@@ -151,18 +151,18 @@ describe("QuantityFormatPanel", () => {
       />
     );
 
-    const saveButton = screen.getByRole("button", { name: "Save" });
+    const applyButton = screen.getByRole("button", { name: "Apply" });
     const triggerChangeButton = screen.getByTestId("trigger-format-change");
 
-    // Trigger format change and save
+    // Trigger format change and apply
     await user.click(triggerChangeButton);
-    await user.click(saveButton);
+    await user.click(applyButton);
 
-    // Save button should be disabled again
-    expect(saveButton.getAttribute("aria-disabled")).toEqual("true");
+    // Apply button should be disabled again
+    expect(applyButton.getAttribute("aria-disabled")).toEqual("true");
   });
 
-  it("should disable Save button and reset changes when Clear is clicked", async () => {
+  it("should disable Apply button and reset changes when Clear is clicked", async () => {
     render(
       <QuantityFormatPanel
         formatDefinition={mockFormatDefinition}
@@ -171,23 +171,23 @@ describe("QuantityFormatPanel", () => {
       />
     );
 
-    const saveButton = screen.getByRole("button", { name: "Save" });
+    const applyButton = screen.getByRole("button", { name: "Apply" });
     const clearButton = screen.getByRole("button", { name: "Clear" });
     const triggerChangeButton = screen.getByTestId("trigger-format-change");
 
     // Trigger format change
     await user.click(triggerChangeButton);
-    expect(saveButton.getAttribute("aria-disabled")).toBeNull();
+    expect(applyButton.getAttribute("aria-disabled")).toBeNull();
 
     // Click Clear button
     await user.click(clearButton);
 
-    // Save button should be disabled and onFormatChange should not be called
-    expect(saveButton.getAttribute("aria-disabled")).toEqual("true");
+    // Apply button should be disabled and onFormatChange should not be called
+    expect(applyButton.getAttribute("aria-disabled")).toEqual("true");
     expect(mockOnFormatChange).not.toHaveBeenCalled();
   });
 
-  it("should reset Save button state when formatDefinition prop changes", async () => {
+  it("should reset Apply button state when formatDefinition prop changes", async () => {
     const { rerender } = render(
       <QuantityFormatPanel
         formatDefinition={mockFormatDefinition}
@@ -196,17 +196,17 @@ describe("QuantityFormatPanel", () => {
       />
     );
 
-    const saveButton = screen.getByRole("button", { name: "Save" });
+    const applyButton = screen.getByRole("button", { name: "Apply" });
     const triggerChangeButton = screen.getByTestId("trigger-format-change");
 
     // Trigger format change
     await user.click(triggerChangeButton);
-    expect(saveButton.getAttribute("aria-disabled")).toBeNull();
+    expect(applyButton.getAttribute("aria-disabled")).toBeNull();
 
-    await user.click(saveButton);
+    await user.click(applyButton);
 
-    // Save button should be disabled again
-    expect(saveButton.getAttribute("aria-disabled")).toEqual("true");
+    // Apply button should be disabled again
+    expect(applyButton.getAttribute("aria-disabled")).toEqual("true");
   });
 
   it("should not show sample when showSample is false", () => {

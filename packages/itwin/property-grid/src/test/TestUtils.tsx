@@ -14,11 +14,11 @@ import { renderHook as renderHookRTL, render as renderRTL } from "@testing-libra
 import { userEvent } from "@testing-library/user-event";
 
 import type { PropsWithChildren, ReactElement } from "react";
-import type { RenderHookOptions, RenderHookResult, RenderOptions, RenderResult } from "@testing-library/react";
-import type { UserEvent } from "@testing-library/user-event";
 import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
 import type { FavoritePropertiesManager, SelectionManager } from "@itwin/presentation-frontend";
 import type { SelectionStorage, StorageSelectionChangesListener } from "@itwin/unified-selection";
+import type { RenderHookOptions, RenderHookResult, RenderOptions, RenderResult } from "@testing-library/react";
+import type { UserEvent } from "@testing-library/user-event";
 
 export function createPropertyRecord(value: PropertyValue, description: Partial<PropertyDescription>) {
   const propertyDescription: PropertyDescription = {

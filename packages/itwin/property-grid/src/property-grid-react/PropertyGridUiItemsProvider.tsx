@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./PropertyGridUiItemsProvider.scss";
+
 import { useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { StagePanelLocation, StagePanelSection, StageUsage, useActiveIModelConnection, useSpecificWidgetDef, WidgetState } from "@itwin/appui-react";
@@ -20,9 +21,9 @@ import { PropertyGridComponent } from "./PropertyGridComponent.js";
 import { PropertyGridManager } from "./PropertyGridManager.js";
 
 import type { ReactNode } from "react";
-import type { SelectionStorage } from "./hooks/UseUnifiedSelectionHandler.js";
 import type { FallbackProps } from "react-error-boundary";
 import type { UiItemsProvider, Widget, WidgetDef } from "@itwin/appui-react";
+import type { SelectionStorage } from "./hooks/UseUnifiedSelectionHandler.js";
 import type { PropertyGridComponentProps } from "./PropertyGridComponent.js";
 
 /**
@@ -85,12 +86,16 @@ export interface PropertyGridUiItemsProviderProps {
  */
 export class PropertyGridUiItemsProvider implements UiItemsProvider {
   public readonly id = "PropertyGridUiItemsProvider";
+  // eslint-disable-next-line deprecation/deprecation
+  #props: PropertyGridUiItemsProviderProps = {};
 
   // eslint-disable-next-line deprecation/deprecation
-  constructor(private _props: PropertyGridUiItemsProviderProps = {}) {}
+  constructor(props: PropertyGridUiItemsProviderProps = {}) {
+    this.#props = props;
+  }
 
   public provideWidgets(_stageId: string, stageUsage: string, location: StagePanelLocation, section?: StagePanelSection): ReadonlyArray<Widget> {
-    const { defaultPanelLocation, defaultPanelSection, defaultPanelWidgetPriority, propertyGridProps } = this._props;
+    const { defaultPanelLocation, defaultPanelSection, defaultPanelWidgetPriority, propertyGridProps } = this.#props;
 
     const preferredLocation = defaultPanelLocation ?? StagePanelLocation.Right;
     const preferredPanelSection = defaultPanelSection ?? StagePanelSection.End;

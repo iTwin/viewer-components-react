@@ -10,9 +10,9 @@ import { createIModelKey } from "@itwin/presentation-core-interop";
 import { Presentation } from "@itwin/presentation-frontend";
 import { Selectable, Selectables } from "@itwin/unified-selection";
 
-import type { SelectableInstanceKey, SelectionStorage as UnifiedSelectionStorage } from "@itwin/unified-selection";
-import type { BaseNodeKey, KeySet } from "@itwin/presentation-common";
 import type { IModelConnection } from "@itwin/core-frontend";
+import type { BaseNodeKey, KeySet } from "@itwin/presentation-common";
+import type { SelectableInstanceKey, SelectionStorage as UnifiedSelectionStorage } from "@itwin/unified-selection";
 
 /** @public */
 export type SelectionStorage = Pick<UnifiedSelectionStorage, "getSelection" | "replaceSelection" | "selectionChangeEvent">;

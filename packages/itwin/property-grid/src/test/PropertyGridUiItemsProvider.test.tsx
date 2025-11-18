@@ -7,6 +7,7 @@ import { expect } from "chai";
 import { act } from "react-dom/test-utils";
 import sinon from "sinon";
 import * as appuiReactModule from "@itwin/appui-react";
+import { UiFramework } from "@itwin/appui-react";
 import { EmptyLocalization } from "@itwin/core-common";
 import { KeySet, StandardNodeTypes } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
@@ -21,14 +22,14 @@ import {
 } from "../property-grid-react/PropertyGridUiItemsProvider.js";
 import { render, stubSelectionManager, stubSelectionStorage, waitFor } from "./TestUtils.js";
 
-import type { Selectable } from "@itwin/unified-selection";
+import type { ReactElement } from "react";
+import type { WidgetDef } from "@itwin/appui-react";
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { ECClassGroupingNodeKey } from "@itwin/presentation-common";
 import type { ISelectionProvider } from "@itwin/presentation-frontend";
 import type { EventArgs, Props } from "@itwin/presentation-shared";
-import type { IModelConnection } from "@itwin/core-frontend";
+import type { Selectable } from "@itwin/unified-selection";
 import type { PropertyGridWidgetProps } from "../property-grid-react/PropertyGridUiItemsProvider.js";
-import type { ReactElement } from "react";
-import { UiFramework, type WidgetDef } from "@itwin/appui-react";
 
 /* eslint-disable deprecation/deprecation */
 describe("PropertyGridUiItemsProvider", () => {
