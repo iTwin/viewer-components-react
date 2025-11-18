@@ -2667,6 +2667,49 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
     });
 
+    it("model gets hidden when it has child only categories and elements from other model are added to the exclusive always drawn list", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const categoryId = insertSpatialCategory({ builder, codeValue: "category" }).id;
+        const childCategoryId = insertSpatialCategory({ builder, codeValue: "childCategory" }).id;
+        const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
+        const rootElement = insertPhysicalElement({ builder, modelId: model, categoryId });
+        insertPhysicalElement({ builder, modelId: model, categoryId: childCategoryId, parentId: rootElement.id });
+
+        const exclusiveModel = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "2" }).id;
+        const exclusiveElement = insertPhysicalElement({ builder, modelId: exclusiveModel, categoryId }).id;
+        insertPhysicalElement({ builder, modelId: exclusiveModel, categoryId });
+        return { exclusiveModel, exclusiveElement };
+      });
+
+      const { imodel, ...ids } = buildIModelResult;
+      using visibilityTestData = createVisibilityTestData({ imodel });
+      const { handler, provider, viewport } = visibilityTestData;
+      await handler.changeVisibility(createSubjectHierarchyNode({ ids: ["0x1"] }), true);
+      viewport.setAlwaysDrawn(new Set([ids.exclusiveElement]), true);
+      await validateHierarchyVisibility({
+        provider,
+        handler,
+        viewport,
+        visibilityExpectations: {
+          subject: () => "partial",
+          model: (id) => {
+            if (id === ids.exclusiveModel) {
+              return { tree: "partial", modelSelector: true };
+            }
+            return { tree: "hidden", modelSelector: true };
+          },
+          category: ({ modelId }) => {
+            if (modelId === ids.exclusiveModel) {
+              return { tree: "partial", categorySelector: false, perModelCategoryOverride: "show" };
+            }
+            return { tree: "hidden", categorySelector: false, perModelCategoryOverride: "show" };
+          },
+          groupingNode: ({ modelId }) => (modelId === ids.exclusiveModel ? "partial" : "hidden"),
+          element: ({ elementId }) => (elementId === ids.exclusiveElement ? "visible" : "hidden"),
+        },
+      });
+    });
+
     it("showing category makes its model visible in the viewport and per model override for that category is set to SHOW", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const category = insertSpatialCategory({ builder, codeValue: "category" }).id;
