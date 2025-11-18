@@ -175,7 +175,6 @@ export class CategoriesTreeIdsCache implements Disposable {
             WHERE
               NOT this.IsPrivate
               AND (NOT m.IsPrivate OR m.ECClassId IS (BisCore.DictionaryModel))
-              AND EXISTS (SELECT 1 FROM ${this.#categoryElementClass} e WHERE e.Category.Id = this.ECInstanceId)
             GROUP BY this.ECInstanceId
           `;
           return this.#queryExecutor.createQueryReader(
@@ -229,8 +228,7 @@ export class CategoriesTreeIdsCache implements Disposable {
       const DEFINITION_CONTAINERS_CTE = "DefinitionContainers";
       const CATEGORIES_MODELS_CTE = "CategoriesModels";
       const ctes = [
-        `
-        ${CATEGORIES_MODELS_CTE}(ModelId, HasElements) AS (
+        `${CATEGORIES_MODELS_CTE}(ModelId, HasElements) AS (
           SELECT
             c.Model.Id,
             IFNULL((
@@ -243,36 +241,33 @@ export class CategoriesTreeIdsCache implements Disposable {
             ${this.#categoryClass} c
           WHERE
             NOT c.IsPrivate
-        )
-      `,
+        )`,
         `
-        ${DEFINITION_CONTAINERS_CTE}(ECInstanceId, ModelId, HasElements) AS (
-          SELECT
-            dc.ECInstanceId,
-            dc.Model.Id,
-            c.HasElements
-          FROM
-            ${CLASS_NAME_DefinitionContainer} dc
-          JOIN ${CATEGORIES_MODELS_CTE} c ON dc.ECInstanceId = c.ModelId
-          WHERE NOT dc.IsPrivate
+          ${DEFINITION_CONTAINERS_CTE}(ECInstanceId, ModelId, HasElements) AS (
+            SELECT
+              dc.ECInstanceId,
+              dc.Model.Id,
+              c.HasElements
+            FROM ${CLASS_NAME_DefinitionContainer} dc
+            JOIN ${CATEGORIES_MODELS_CTE} c ON dc.ECInstanceId = c.ModelId
+            WHERE NOT dc.IsPrivate
 
-          UNION ALL
+            UNION ALL
 
-          SELECT
-            pdc.ECInstanceId,
-            pdc.Model.Id,
-            cdc.HasElements
-          FROM
-            ${DEFINITION_CONTAINERS_CTE} cdc
-            JOIN ${CLASS_NAME_DefinitionContainer} pdc ON pdc.ECInstanceId = cdc.ModelId
-          WHERE
-            NOT pdc.IsPrivate
-        )
-      `,
+            SELECT
+              pdc.ECInstanceId,
+              pdc.Model.Id,
+              cdc.HasElements
+            FROM
+              ${DEFINITION_CONTAINERS_CTE} cdc
+              JOIN ${CLASS_NAME_DefinitionContainer} pdc ON pdc.ECInstanceId = cdc.ModelId
+            WHERE NOT pdc.IsPrivate
+          )
+        `,
       ];
       const definitionsQuery = `
-      SELECT dc.ECInstanceId id, dc.ModelId, MAX(dc.HasElements) hasElements modelId FROM ${DEFINITION_CONTAINERS_CTE} dc GROUP BY dc.ECInstanceId
-    `;
+        SELECT dc.ECInstanceId id, dc.ModelId modelId, MAX(dc.HasElements) hasElements FROM ${DEFINITION_CONTAINERS_CTE} dc GROUP BY dc.ECInstanceId
+      `;
       return this.#queryExecutor.createQueryReader(
         { ctes, ecsql: definitionsQuery },
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/definition-containers` },

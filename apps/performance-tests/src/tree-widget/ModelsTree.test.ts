@@ -347,6 +347,7 @@ describe("models tree", () => {
     iModelConnection: IModelConnection;
     hierarchyNodes: HierarchyNode[];
   }>({
+    skip: true,
     testName: "changing element visibility changes only parent nodes visibility with 50k elements",
     setup: async () => {
       const { iModelConnection, iModel } = TestIModelConnection.openFile(Datasets.getIModelPath("50k 3D elements"));

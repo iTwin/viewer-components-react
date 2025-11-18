@@ -12,7 +12,7 @@ import type { GroupingHierarchyNode } from '@itwin/presentation-hierarchies';
 import { HierarchyFilteringPath } from '@itwin/presentation-hierarchies';
 import type { HierarchyNode } from '@itwin/presentation-hierarchies-react';
 import type { Id64Arg } from '@itwin/core-bentley';
-import type { Id64Array } from '@itwin/core-bentley';
+import { Id64Array } from '@itwin/core-bentley';
 import type { Id64String } from '@itwin/core-bentley';
 import type { ILogger } from '@itwin/presentation-shared';
 import type { IModelConnection } from '@itwin/core-frontend';
@@ -106,10 +106,6 @@ type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonProps) =
 interface CategoriesTreeHierarchyConfiguration {
     hideSubCategories: boolean;
     showElements: boolean;
-}
-
-// @beta
-interface CategoriesTreeHierarchyConfiguration {
     showEmptyCategories: boolean;
 }
 

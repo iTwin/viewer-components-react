@@ -758,7 +758,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
     });
 
-    it("returns empty list when only empty categories exist", async function () {
+    it("returns empty categories and definition containers when only `includeEmpty` is set to true", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "Test DefinitionContainer" });
         const definitionModel = insertSubModel({ builder, classFullName: "BisCore.DefinitionModel", modeledElementId: definitionContainer.id });
@@ -769,7 +769,7 @@ describe("CategoriesTreeIdsCache", () => {
       const { imodel, ...keys } = buildIModelResult;
       const idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
       expect(await firstValueFrom(idsCache.getRootDefinitionContainersAndCategories({ includeEmpty: true }))).to.deep.eq({
-        categories: [{ id: keys.rootCategory.id, childCount: 1, hasElements: false }],
+        categories: [{ id: keys.rootCategory.id, subCategoryChildCount: 1, hasElements: false }],
         definitionContainers: [keys.definitionContainer.id],
       });
     });

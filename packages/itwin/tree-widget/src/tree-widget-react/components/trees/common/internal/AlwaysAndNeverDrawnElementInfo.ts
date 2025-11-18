@@ -309,7 +309,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
             `,
           ],
           ecsql: `
-            SELECT elementId, modelId, categoryId
+            SELECT elementsPath elementsPath, modelId modelId, categoryId categoryId, rootCategoryId rootCategoryId
             FROM ElementInfo
             WHERE parentId IS NULL
           `,

@@ -74,17 +74,17 @@ describe("CategoryVisibilityUtils", () => {
   describe("enableCategoryDisplay", () => {
     it("enables category", async () => {
       await enableCategoryDisplay(viewport, categoryId, true, false);
-      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: categoryId, display: true, enableAllSubCategories: false });
+      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: [categoryId], display: true, enableAllSubCategories: false });
     });
 
     it("disables category", async () => {
       await enableCategoryDisplay(viewport, categoryId, false, false);
-      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: categoryId, display: false, enableAllSubCategories: false });
+      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: [categoryId], display: false, enableAllSubCategories: false });
     });
 
     it("disables category and subcategories", async () => {
       await enableCategoryDisplay(viewport, categoryId, false, true);
-      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: categoryId, display: false, enableAllSubCategories: true });
+      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: [categoryId], display: false, enableAllSubCategories: true });
       expect(viewport.changeSubCategoryDisplay).to.be.calledOnceWith({ subCategoryId, display: false });
     });
 
@@ -93,10 +93,10 @@ describe("CategoryVisibilityUtils", () => {
       viewport.perModelCategoryOverrides = overrides;
       await enableCategoryDisplay(viewport, categoryId, true, false);
 
-      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: categoryId, display: true, enableAllSubCategories: false });
+      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: [categoryId], display: true, enableAllSubCategories: false });
       expect(viewport.setPerModelCategoryOverride).to.be.calledOnceWith({
         modelIds: ["ModelId"],
-        categoryIds: categoryId,
+        categoryIds: [categoryId],
         override: "none",
       });
     });
