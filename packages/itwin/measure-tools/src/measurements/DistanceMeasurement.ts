@@ -20,6 +20,7 @@ import { MeasureTools } from "../MeasureTools.js";
 import type { GeometryStreamProps } from "@itwin/core-common";
 import type { BeButtonEvent, DecorateContext } from "@itwin/core-frontend";
 import type {
+  DrawingMetadata,
   MeasurementEqualityOptions,
   MeasurementWidgetData,
 } from "../api/Measurement.js";
@@ -540,8 +541,8 @@ export class DistanceMeasurement extends Measurement {
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
 
     const distance = this.worldScale * this._startPoint.distance(this._endPoint);
-    const run = this.drawingMetadata?.worldScale !== undefined ? this.worldScale * Math.abs(this._endPoint.x - this._startPoint.x): this._startPoint.distanceXY(this._endPoint);
-    const rise = this.drawingMetadata?.worldScale !== undefined ? this.worldScale * (this._endPoint.y - this._startPoint.y): this._endPoint.z - this._startPoint.z;
+    const run = this.drawingMetadata?.sheetToWorldTransformProps?.sheetScale !== undefined ? this.worldScale * Math.abs(this._endPoint.x - this._startPoint.x): this._startPoint.distanceXY(this._endPoint);
+    const rise = this.drawingMetadata?.sheetToWorldTransformProps?.sheetScale !== undefined ? this.worldScale * (this._endPoint.y - this._startPoint.y): this._endPoint.z - this._startPoint.z;
     const slope = 0.0 < run ? (100 * rise) / run : 0.0;
 
     const dx = Math.abs(this._endPoint.x - this._startPoint.x);
@@ -618,7 +619,7 @@ export class DistanceMeasurement extends Measurement {
         value: fBearing,
       });
     }
-    if (this.drawingMetadata?.worldScale === undefined) {
+    if (this.drawingMetadata?.sheetToWorldTransformProps?.sheetScale === undefined) {
       data.properties.push(
         {
           label: MeasureTools.localization.getLocalizedString(
