@@ -1130,13 +1130,18 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       //    - ChildElementB (CategoryB is hidden) ChildElementB is in always drawn list
       // Result will be "partial" because CategoryB will return hidden visibility, even though all elements are visible
       // TODO fix with: https://github.com/iTwin/viewer-components-react/issues/1100
-      map((state) => {
-        return this.getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
-          ...props,
-          ...state,
-          defaultStatus: () => props.defaultStatus(state.categoryId),
-          ignoreTooltip,
-        });
+      mergeMap((state) => {
+        if (this.#props.viewport.isAlwaysDrawnExclusive && state.totalCount === 0) {
+          return EMPTY;
+        }
+        return of(
+          this.getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
+            ...props,
+            ...state,
+            defaultStatus: () => props.defaultStatus(state.categoryId),
+            ignoreTooltip,
+          }),
+        );
       }),
       mergeVisibilityStatuses(),
     );
