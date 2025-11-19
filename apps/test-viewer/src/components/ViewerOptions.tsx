@@ -4,10 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { createContext, useContext, useState } from "react";
-import { StatusBarSection, useActiveIModelConnection } from "@itwin/appui-react";
+import { StatusBarSection, useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { TransientIdSequence } from "@itwin/core-bentley";
-import { SvgSelection, SvgVisibilityShow, SvgZoomInCircular } from "@itwin/itwinui-icons-react";
-import { IconButton } from "@itwin/itwinui-react";
+import { EmphasizeElements } from "@itwin/core-frontend";
+import { SvgIsolate, SvgSelection, SvgVisibilityShow, SvgZoomInCircular } from "@itwin/itwinui-icons-react";
+import { IconButton, ToggleSwitch } from "@itwin/itwinui-react";
 import { QuantityFormatButton } from "./quantity-formatting/QuantityFormatButton";
 
 import type { PropsWithChildren } from "react";
@@ -71,6 +72,12 @@ export const statusBarActionsProvider: UiItemsProvider = {
       itemPriority: 5,
       section: StatusBarSection.Left,
     },
+    {
+      id: `isolateButton`,
+      content: <IsolateButton />,
+      itemPriority: 6,
+      section: StatusBarSection.Left,
+    },
   ],
 };
 
@@ -102,5 +109,29 @@ function AddTransientElementToSelectionButton() {
     <IconButton label="Add transient element to selection" styleType="borderless" onClick={onClick}>
       <SvgZoomInCircular />
     </IconButton>
+  );
+}
+
+function IsolateButton() {
+  const viewport = useActiveViewport();
+  const onClick = (isChecked: boolean) => {
+    if (viewport) {
+      if (isChecked) {
+        EmphasizeElements.getOrCreate(viewport).isolateSelectedElements(viewport, true, false);
+      } else {
+        EmphasizeElements.getOrCreate(viewport).clearIsolatedElements(viewport);
+      }
+    }
+  };
+  return (
+    <ToggleSwitch
+      defaultChecked={false}
+      label="Isolate"
+      labelPosition="right"
+      onChange={(event) => {
+        onClick(event.currentTarget.checked);
+      }}
+      icon={<SvgIsolate />}
+    />
   );
 }

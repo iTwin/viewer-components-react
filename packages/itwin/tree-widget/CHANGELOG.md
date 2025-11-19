@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Thu, 13 Nov 2025 09:36:43 GMT and should not be manually modified. -->
+<!-- This log was last generated on Tue, 18 Nov 2025 15:20:07 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.17.2
+
+Tue, 18 Nov 2025 15:20:07 GMT
+
+### Patches
+
+- Models tree: Fixed an issue where models/subjects with child-only categories would have partial visibility (instead of hidden) when elements from other models were added to the exclusive always drawn list. ([#1514](https://github.com/iTwin/viewer-components-react/pull/1514))
 
 ## 3.17.1
 

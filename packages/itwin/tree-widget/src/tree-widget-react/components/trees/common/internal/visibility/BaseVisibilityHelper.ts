@@ -350,6 +350,28 @@ export class BaseVisibilityHelper implements Disposable {
           ? from(Id64.iterable(categoryIds)).pipe(map((categoryId) => ({ id: categoryId, models: modelIdFromProps })))
           : this.#props.baseIdsCache.getModels({ categoryIds })
       ).pipe(
+        mergeMap(({ id, models }) => {
+          if (!this.#props.viewport.isAlwaysDrawnExclusive) {
+            return of({ id, models });
+          }
+          // Ignore categories that don't have root geometric elements in always drawn exclusive mode
+          if (!models) {
+            return EMPTY;
+          }
+          return from(Id64.iterable(models)).pipe(
+            mergeMap((modelId) => forkJoin({
+              modelId: of(modelId),
+              elementCount: this.#props.baseIdsCache.getElementsCount({ modelId, categoryId: id }),
+            })),
+            reduce((acc, { modelId, elementCount }) => {
+              if (elementCount > 0) {
+                acc.models.push(modelId);
+              }
+              return acc;
+            }, { id, models: new Array<Id64String>() }),
+            filter(({ models: modelsWithElements }) => modelsWithElements.length > 0),
+          )
+        }),
         map(({ id, models }) => {
           const acc = { categoryId: id, visibleModels: new Array<Id64String>(), hiddenModels: new Array<Id64String>() };
           if (!models) {
@@ -406,7 +428,7 @@ export class BaseVisibilityHelper implements Disposable {
                 return EMPTY;
               }),
             ),
-          ).pipe(defaultIfEmpty(createVisibilityStatus(this.#props.viewport.viewsCategory(categoryId) ? "visible" : "hidden")));
+          ).pipe(defaultIfEmpty(createVisibilityStatus(!this.#props.viewport.isAlwaysDrawnExclusive && this.#props.viewport.viewsCategory(categoryId) ? "visible" : "hidden")));
         }),
         mergeVisibilityStatuses,
       );
@@ -580,14 +602,20 @@ export class BaseVisibilityHelper implements Disposable {
       //    - ChildElementB (CategoryB is hidden) ChildElementB is in always drawn list
       // Result will be "partial" because CategoryB will return hidden visibility, even though all elements are visible
       // TODO fix with: https://github.com/iTwin/viewer-components-react/issues/1100
-      map((state) => {
-        return getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
-          ...props,
-          ...state,
-          viewport,
-          defaultStatus: () => props.defaultStatus(state.categoryId),
-        });
+      mergeMap((state) => {
+        if (this.#props.viewport.isAlwaysDrawnExclusive && state.totalCount === 0) {
+          return EMPTY;
+        }
+        return of(
+          getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
+            ...props,
+            ...state,
+            viewport,
+            defaultStatus: () => props.defaultStatus(state.categoryId),
+          }),
+        );
       }),
+      defaultIfEmpty(createVisibilityStatus("hidden")),
       mergeVisibilityStatuses,
     );
   }

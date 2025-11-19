@@ -30,7 +30,7 @@ import type { Feature } from "./FeatureTracking.js";
 import { FeatureTracking } from "./FeatureTracking.js";
 import type { Measurement } from "./Measurement.js";
 import type { MeasurementToolModel } from "./MeasurementToolModel.js";
-import { SheetMeasurementsHelper } from "./SheetMeasurementHelper.js";
+import { SheetMeasurementHelper } from "./SheetMeasurementHelper.js";
 
 /** Interface for any interactive tool that creates measurements. */
 export interface MeasurementTool {
@@ -221,7 +221,7 @@ export abstract class MeasurementToolBase<
     return true;
   }
 
-  protected get allowedDrawingTypes(): SheetMeasurementsHelper.DrawingType[] {
+  protected get allowedDrawingTypes(): SheetMeasurementHelper.DrawingType[] {
     return [];
   }
 
@@ -361,7 +361,7 @@ export abstract class MeasurementToolBase<
     if (!this._enableSheetMeasurements) {
       return defaultToolTip(hit);
     } else {
-      return SheetMeasurementsHelper.getSheetToolTipText(hit, this.allowedDrawingTypes, defaultToolTip);
+      return SheetMeasurementHelper.getSheetToolTipText(hit, this.allowedDrawingTypes, defaultToolTip);
     }
   }
 

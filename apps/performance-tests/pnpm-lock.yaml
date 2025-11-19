@@ -88,8 +88,8 @@ importers:
         specifier: workspace:*
         version: file:../../packages/itwin/tree-widget(e47c3cbdb24ef776212f2b37289ae6eb)
       '@itwin/unified-selection':
-        specifier: ^1.4.2-alpha.1
-        version: 1.4.2
+        specifier: ^1.6.2-alpha.0
+        version: 1.6.2-alpha.0
       '@stratakit/bricks':
         specifier: ^0.5
         version: 0.5.0(@stratakit/foundations@0.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -677,6 +677,9 @@ packages:
   '@itwin/presentation-shared@2.0.0-alpha.2':
     resolution: {integrity: sha512-IkOKDPl3Fn4Rh07BL93aDnhUfZ+7Q1Ut+mJNCZneZB0vwNZpUuoM7tFJXCViwNJdAB9mPmUUOLtO3UCgCCdroQ==}
 
+  '@itwin/presentation-shared@2.0.0-alpha.3':
+    resolution: {integrity: sha512-R5wMmkTOIZw39a8XFWI7Kc8m4knt3zJ3XIelFgBfo79OPz5dQlbaAQjLYf3RLyl73P4TOIK+93Tc7ZiSbDLKOw==}
+
   '@itwin/presentation-testing@5.4.9':
     resolution: {integrity: sha512-Fypp7QtUEG8GaFMQnNNtjDYuzSkWMhPcv6a+84TZpUz0krylp6UZJFaNmPNT9Rpet352tjk3P7yRGnZetuJKoQ==}
     peerDependencies:
@@ -709,11 +712,11 @@ packages:
       react: ^18.0.0
       react-dom: ^18.0.0
 
-  '@itwin/unified-selection@1.4.2':
-    resolution: {integrity: sha512-RdX/SfX7pH5DyArNeNor3iuKr5NsPYWo7P0YXr6eOQOGda3CoEO3KTv3/QLZRXKtDlUt+Xs9dfzBfrWCsRtIxA==}
-
   '@itwin/unified-selection@1.6.1':
     resolution: {integrity: sha512-8upidTlmknva8A/flr5l4R1wH6CmYUPyrfBIkZCwxztrszHJFDSQVNOU+EF8BN4RLeSJVsHv1XCWWK+REsKjoQ==}
+
+  '@itwin/unified-selection@1.6.2-alpha.0':
+    resolution: {integrity: sha512-uiTr1PjAdtHRoBFAxG/X4Xvviuz9Mv5+0Inng/xpItqg87MAV+VLQVuSQgOQrXC8qYXKvXodggiOF+N5jezY6w==}
 
   '@itwin/webgl-compatibility@5.0.0':
     resolution: {integrity: sha512-ZEew+kioa7BFM3JasRrxORdGTctJ3ZHaUJkQR99dD3xEBV7wHPfYoUqhQbBe8f3mZAyZgIIt7z5Eb3GdXRrzVQ==}
@@ -3921,7 +3924,7 @@ snapshots:
       '@itwin/core-quantity': 5.0.0(@itwin/core-bentley@5.0.0)
       '@itwin/ecschema-metadata': 5.0.0(@itwin/core-bentley@5.0.0)(@itwin/core-quantity@5.0.0(@itwin/core-bentley@5.0.0))
       '@itwin/presentation-common': 5.0.0(@itwin/core-bentley@5.0.0)(@itwin/core-common@5.0.0(@itwin/core-bentley@5.0.0)(@itwin/core-geometry@5.0.0))(@itwin/core-quantity@5.0.0(@itwin/core-bentley@5.0.0))(@itwin/ecschema-metadata@5.0.0(@itwin/core-bentley@5.0.0)(@itwin/core-quantity@5.0.0(@itwin/core-bentley@5.0.0)))
-      '@itwin/unified-selection': 1.4.2
+      '@itwin/unified-selection': 1.6.1
       rxjs: 7.8.2
       rxjs-for-await: 1.0.0(rxjs@7.8.2)
 
@@ -3960,6 +3963,10 @@ snapshots:
   '@itwin/presentation-shared@2.0.0-alpha.2':
     dependencies:
       '@itwin/core-bentley': 5.1.4
+
+  '@itwin/presentation-shared@2.0.0-alpha.3':
+    dependencies:
+      '@itwin/core-bentley': 5.3.2
 
   '@itwin/presentation-testing@5.4.9(d2b6a7eb17174b963480f4be2f1d71ae)':
     dependencies:
@@ -4001,7 +4008,7 @@ snapshots:
       '@itwin/presentation-hierarchies': 2.0.0-alpha.4
       '@itwin/presentation-hierarchies-react': 2.0.0-alpha.39(@stratakit/bricks@0.5.0(@stratakit/foundations@0.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/foundations@0.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/icons@0.2.0)(@stratakit/structures@0.5.0(@stratakit/foundations@0.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(immer@10.1.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.5.0(react@18.3.1)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@itwin/presentation-shared': 2.0.0-alpha.2
-      '@itwin/unified-selection': 1.6.1
+      '@itwin/unified-selection': 1.6.2-alpha.0
       '@stratakit/bricks': 0.5.0(@stratakit/foundations@0.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@stratakit/foundations': 0.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@stratakit/icons': 0.2.0
@@ -4015,17 +4022,17 @@ snapshots:
       - '@itwin/core-geometry'
       - '@itwin/core-quantity'
 
-  '@itwin/unified-selection@1.4.2':
-    dependencies:
-      '@itwin/core-bentley': 5.0.0
-      '@itwin/presentation-shared': 1.2.3
-      rxjs: 7.8.2
-      rxjs-for-await: 1.0.0(rxjs@7.8.2)
-
   '@itwin/unified-selection@1.6.1':
     dependencies:
       '@itwin/core-bentley': 5.3.2
       '@itwin/presentation-shared': 1.2.3
+      rxjs: 7.8.2
+      rxjs-for-await: 1.0.0(rxjs@7.8.2)
+
+  '@itwin/unified-selection@1.6.2-alpha.0':
+    dependencies:
+      '@itwin/core-bentley': 5.3.2
+      '@itwin/presentation-shared': 2.0.0-alpha.3
       rxjs: 7.8.2
       rxjs-for-await: 1.0.0(rxjs@7.8.2)
 

@@ -40,7 +40,8 @@ describe("Property grid", () => {
         sinon.restore();
       });
 
-      it("renders context menu item", async function () {
+      // TODO: https://github.com/iTwin/viewer-components-react/issues/1516
+      it.skip("renders context menu item", async function () {
         const imodel = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
