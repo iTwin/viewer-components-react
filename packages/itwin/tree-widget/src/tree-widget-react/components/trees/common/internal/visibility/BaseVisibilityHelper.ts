@@ -359,18 +359,23 @@ export class BaseVisibilityHelper implements Disposable {
             return EMPTY;
           }
           return from(Id64.iterable(models)).pipe(
-            mergeMap((modelId) => forkJoin({
-              modelId: of(modelId),
-              elementCount: this.#props.baseIdsCache.getElementsCount({ modelId, categoryId: id }),
-            })),
-            reduce((acc, { modelId, elementCount }) => {
-              if (elementCount > 0) {
-                acc.models.push(modelId);
-              }
-              return acc;
-            }, { id, models: new Array<Id64String>() }),
+            mergeMap((modelId) =>
+              forkJoin({
+                modelId: of(modelId),
+                elementCount: this.#props.baseIdsCache.getElementsCount({ modelId, categoryId: id }),
+              }),
+            ),
+            reduce(
+              (acc, { modelId, elementCount }) => {
+                if (elementCount > 0) {
+                  acc.models.push(modelId);
+                }
+                return acc;
+              },
+              { id, models: new Array<Id64String>() },
+            ),
             filter(({ models: modelsWithElements }) => modelsWithElements.length > 0),
-          )
+          );
         }),
         map(({ id, models }) => {
           const acc = { categoryId: id, visibleModels: new Array<Id64String>(), hiddenModels: new Array<Id64String>() };
@@ -428,7 +433,11 @@ export class BaseVisibilityHelper implements Disposable {
                 return EMPTY;
               }),
             ),
-          ).pipe(defaultIfEmpty(createVisibilityStatus(!this.#props.viewport.isAlwaysDrawnExclusive && this.#props.viewport.viewsCategory(categoryId) ? "visible" : "hidden")));
+          ).pipe(
+            defaultIfEmpty(
+              createVisibilityStatus(!this.#props.viewport.isAlwaysDrawnExclusive && this.#props.viewport.viewsCategory(categoryId) ? "visible" : "hidden"),
+            ),
+          );
         }),
         mergeVisibilityStatuses,
       );

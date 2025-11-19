@@ -186,7 +186,10 @@ function useCategoriesCachedVisibility(props: {
         createFilteredTree({ ...filteredTreeProps, viewClasses: getClassesByView(viewType) }),
       [viewType],
     ),
-    createTreeSpecificVisibilityHandler: useCallback((specificProps) => createTreeSpecificVisibilityHandler({ ...specificProps, hierarchyConfig: props.hierarchyConfig }), [props.hierarchyConfig]),
+    createTreeSpecificVisibilityHandler: useCallback(
+      (specificProps) => createTreeSpecificVisibilityHandler({ ...specificProps, hierarchyConfig: props.hierarchyConfig }),
+      [props.hierarchyConfig],
+    ),
     componentId,
   });
 
