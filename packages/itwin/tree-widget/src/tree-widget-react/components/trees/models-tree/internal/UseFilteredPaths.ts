@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useMemo, useState } from "react";
+import { firstValueFrom } from "rxjs";
 import { HierarchyFilteringPath, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { useFocusedInstancesContext } from "../../common/FocusedInstancesContext.js";
 import { CLASS_NAME_GeometricModel3d, CLASS_NAME_Subject } from "../../common/internal/ClassNameDefinitions.js";
@@ -12,7 +13,7 @@ import { useTelemetryContext } from "../../common/UseTelemetryContext.js";
 import { joinHierarchyFilteringPaths } from "../../common/Utils.js";
 import { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
 
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../../common/components/VisibilityTree.js";
@@ -34,6 +35,7 @@ export function useFilteredPaths({
   getModelsTreeIdsCache,
   onModelsFiltered,
   onFilteredPathsChanged,
+  componentId,
 }: {
   hierarchyConfiguration: ModelsTreeHierarchyConfiguration;
   filter?: string;
@@ -50,6 +52,7 @@ export function useFilteredPaths({
   getModelsTreeIdsCache: () => ModelsTreeIdsCache;
   onModelsFiltered?: (modelIds: Id64String[] | undefined) => void;
   onFilteredPathsChanged: (paths: HierarchyFilteringPath[] | undefined) => void;
+  componentId: GuidString;
 }): {
   getPaths: VisibilityTreeProps["getFilteredPaths"] | undefined;
   filteringError: ModelsTreeFilteringError | undefined;
@@ -89,6 +92,7 @@ export function useFilteredPaths({
               hierarchyConfig: hierarchyConfiguration,
               limit: "unbounded",
               abortSignal,
+              componentId: `${componentId}/subTree`,
             }),
         });
         return paths.map(HierarchyFilteringPath.normalize).map(({ path }) => path);
@@ -98,7 +102,7 @@ export function useFilteredPaths({
         return [];
       }
     };
-  }, [getModelsTreeIdsCache, hierarchyConfiguration, getSubTreePaths]);
+  }, [getModelsTreeIdsCache, hierarchyConfiguration, getSubTreePaths, componentId]);
 
   const getPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
     const handlePaths = async (filteredPaths: HierarchyFilteringPath[] | undefined, classInspector: ECClassHierarchyInspector) => {
@@ -123,6 +127,7 @@ export function useFilteredPaths({
                 targetItems: focusedItems,
                 hierarchyConfig: hierarchyConfiguration,
                 abortSignal,
+                componentId,
               });
               return paths.map(({ path, options }) => ({ path, options: { ...options, autoExpand: true } }));
             },
@@ -155,6 +160,7 @@ export function useFilteredPaths({
                     hierarchyConfig: hierarchyConfiguration,
                     limit: "unbounded",
                     abortSignal,
+                    componentId,
                   }),
                 filter,
               });
@@ -187,6 +193,7 @@ export function useFilteredPaths({
                 idsCache: getModelsTreeIdsCache(),
                 hierarchyConfig: hierarchyConfiguration,
                 abortSignal,
+                componentId,
               });
               return paths.map(({ path, options }) => ({ path, options: { ...options, autoExpand: true } }));
             },
@@ -215,6 +222,7 @@ export function useFilteredPaths({
     onModelsFiltered,
     onFilteredPathsChanged,
     getSubTreePathsInternal,
+    componentId,
   ]);
 
   return {
@@ -252,7 +260,7 @@ async function getModels(paths: HierarchyFilteringPath[], idsCache: ModelsTreeId
     }
   }
 
-  const matchingModels = await idsCache.getSubjectModelIds(targetSubjectIds);
+  const matchingModels = await firstValueFrom(idsCache.getSubjectModelIds(targetSubjectIds));
   return [...targetModelIds, ...matchingModels];
 }
 

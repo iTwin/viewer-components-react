@@ -8,6 +8,7 @@ import {
   defaultIfEmpty,
   defer,
   firstValueFrom,
+  forkJoin,
   from,
   fromEvent,
   identity,
@@ -21,6 +22,7 @@ import {
   takeUntil,
   toArray,
 } from "rxjs";
+import { Guid } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import {
   createNodesQueryClauseFactory,
@@ -41,21 +43,11 @@ import {
   CLASS_NAME_Subject,
 } from "../common/internal/ClassNameDefinitions.js";
 import { collect } from "../common/internal/Rxjs.js";
-import { createIdsSelector, parseIdsSelectorResult, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
+import { createIdsSelector, getOptimalBatchSize, parseIdsSelectorResult, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 
-import type { NormalizedHierarchyFilteringPath } from "../common/Utils.js";
-import type { Id64String } from "@itwin/core-bentley";
 import type { Observable } from "rxjs";
-import type {
-  ECClassHierarchyInspector,
-  ECSchemaProvider,
-  ECSqlBinding,
-  ECSqlQueryDef,
-  ECSqlQueryRow,
-  IInstanceLabelSelectClauseFactory,
-  InstanceKey,
-} from "@itwin/presentation-shared";
+import type { GuidString, Id64String } from "@itwin/core-bentley";
 import type {
   ClassGroupingNodeKey,
   DefineHierarchyLevelProps,
@@ -67,8 +59,18 @@ import type {
   LimitingECSqlQueryExecutor,
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
-import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
+import type {
+  ECClassHierarchyInspector,
+  ECSchemaProvider,
+  ECSqlBinding,
+  ECSqlQueryDef,
+  ECSqlQueryRow,
+  IInstanceLabelSelectClauseFactory,
+  InstanceKey,
+} from "@itwin/presentation-shared";
 import type { ElementId } from "../common/internal/Types.js";
+import type { NormalizedHierarchyFilteringPath } from "../common/Utils.js";
+import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
 
 /** @beta */
 export type ClassGroupingHierarchyNode = GroupingHierarchyNode & { key: ClassGroupingNodeKey };
@@ -105,6 +107,7 @@ interface ModelsTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
   hierarchyConfig: ModelsTreeHierarchyConfiguration;
+  componentId?: GuidString;
 }
 
 /** @beta */
@@ -128,6 +131,7 @@ interface ModelsTreeInstanceKeyPathsBaseProps {
   hierarchyConfig: ModelsTreeHierarchyConfiguration;
   limit?: number | "unbounded";
   abortSignal?: AbortSignal;
+  componentId?: string;
 }
 
 type ModelsTreeInstanceKeyPathsFromTargetItemsProps = {
@@ -150,20 +154,22 @@ export namespace ModelsTreeInstanceKeyPathsProps {
 
 /** @internal */
 export class ModelsTreeDefinition implements HierarchyDefinition {
-  private _impl: HierarchyDefinition;
-  private _idsCache: ModelsTreeIdsCache;
-  private _hierarchyConfig: ModelsTreeHierarchyConfiguration;
-  private _selectQueryFactory: NodesQueryClauseFactory;
-  private _nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
-  private _queryExecutor: LimitingECSqlQueryExecutor;
-  private _isSupported?: Promise<boolean>;
+  #impl: HierarchyDefinition;
+  #idsCache: ModelsTreeIdsCache;
+  #hierarchyConfig: ModelsTreeHierarchyConfiguration;
+  #selectQueryFactory: NodesQueryClauseFactory;
+  #nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
+  #queryExecutor: LimitingECSqlQueryExecutor;
+  #isSupported?: Promise<boolean>;
+  static #componentName = "ModelsTreeDefinition";
+  #componentId: GuidString;
 
   public constructor(props: ModelsTreeDefinitionProps) {
-    this._impl = createPredicateBasedHierarchyDefinition({
+    this.#impl = createPredicateBasedHierarchyDefinition({
       classHierarchyInspector: props.imodelAccess,
       hierarchy: {
         rootNodes: async (requestProps) =>
-          this.createSubjectChildrenQuery({ ...requestProps, parentNodeInstanceIds: this._hierarchyConfig.hideRootSubject ? [IModel.rootSubjectId] : [] }),
+          this.createSubjectChildrenQuery({ ...requestProps, parentNodeInstanceIds: this.#hierarchyConfig.hideRootSubject ? [IModel.rootSubjectId] : [] }),
         childNodes: [
           {
             parentInstancesNodePredicate: CLASS_NAME_Subject,
@@ -188,25 +194,49 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         ],
       },
     });
-    this._idsCache = props.idsCache;
-    this._queryExecutor = props.imodelAccess;
-    this._hierarchyConfig = props.hierarchyConfig;
-    this._nodeLabelSelectClauseFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
-    this._selectQueryFactory = createNodesQueryClauseFactory({
+    this.#componentId = props.componentId ?? Guid.createValue();
+    this.#idsCache = props.idsCache;
+    this.#queryExecutor = props.imodelAccess;
+    this.#hierarchyConfig = props.hierarchyConfig;
+    this.#nodeLabelSelectClauseFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
+    this.#selectQueryFactory = createNodesQueryClauseFactory({
       imodelAccess: props.imodelAccess,
-      instanceLabelSelectClauseFactory: this._nodeLabelSelectClauseFactory,
+      instanceLabelSelectClauseFactory: this.#nodeLabelSelectClauseFactory,
     });
   }
 
   public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
     if (ProcessedHierarchyNode.isGroupingNode(node)) {
+      let hasDirectNonFilteredTargets = false;
+      let hasFilterTargetAncestor = false;
+      for (const child of node.children) {
+        if (child.filtering) {
+          if (child.filtering.hasFilterTargetAncestor) {
+            hasFilterTargetAncestor = true;
+            break;
+          }
+          if (!child.filtering.isFilterTarget) {
+            hasDirectNonFilteredTargets = true;
+            break;
+          }
+        }
+      }
       return {
         ...node,
-        label: this._hierarchyConfig.elementClassGrouping === "enableWithCounts" ? `${node.label} (${node.children.length})` : node.label,
+        ...(hasFilterTargetAncestor
+          ? {
+              filtering: {
+                ...(node.filtering ?? {}),
+                hasFilterTargetAncestor,
+              },
+            }
+          : {}),
+        label: this.#hierarchyConfig.elementClassGrouping === "enableWithCounts" ? `${node.label} (${node.children.length})` : node.label,
         extendedData: {
           ...node.extendedData,
           // add `modelId` and `categoryId` from the first grouped element
           ...node.children[0].extendedData,
+          ...(hasDirectNonFilteredTargets ? { hasDirectNonFilteredTargets } : {}),
           // `imageId` is assigned to instance nodes at query time, but grouping ones need to
           // be handled during post-processing
           imageId: "icon-ec-class",
@@ -217,15 +247,15 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
   }
 
   public async defineHierarchyLevel(props: DefineHierarchyLevelProps) {
-    if (this._isSupported === undefined) {
-      this._isSupported = this.isSupported();
+    if (this.#isSupported === undefined) {
+      this.#isSupported = this.isSupported();
     }
 
-    if ((await this._isSupported) === false) {
+    if ((await this.#isSupported) === false) {
       return [];
     }
 
-    return this._impl.defineHierarchyLevel(props);
+    return this.#impl.defineHierarchyLevel(props);
   }
 
   private async createSubjectChildrenQuery({
@@ -233,18 +263,23 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     instanceFilter,
   }: Pick<DefineInstanceNodeChildHierarchyLevelProps, "parentNodeInstanceIds" | "instanceFilter">): Promise<HierarchyLevelDefinition> {
     const [subjectFilterClauses, modelFilterClauses] = await Promise.all([
-      this._selectQueryFactory.createFilterClauses({
+      this.#selectQueryFactory.createFilterClauses({
         filter: instanceFilter,
         contentClass: { fullName: CLASS_NAME_Subject, alias: "this" },
       }),
-      this._selectQueryFactory.createFilterClauses({
+      this.#selectQueryFactory.createFilterClauses({
         filter: instanceFilter,
         contentClass: { fullName: CLASS_NAME_GeometricModel3d, alias: "this" },
       }),
     ]);
-    const [childSubjectIds, childModelIds] = parentSubjectIds.length
-      ? await Promise.all([this._idsCache.getChildSubjectIds(parentSubjectIds), this._idsCache.getChildSubjectModelIds(parentSubjectIds)])
-      : [[IModel.rootSubjectId], []];
+    const { childSubjectIds, childModelIds } = parentSubjectIds.length
+      ? await firstValueFrom(
+          forkJoin({
+            childSubjectIds: this.#idsCache.getChildSubjectIds(parentSubjectIds),
+            childModelIds: this.#idsCache.getChildSubjectModelIds(parentSubjectIds),
+          }),
+        )
+      : { childSubjectIds: [IModel.rootSubjectId], childModelIds: [] };
     const defs = new Array<HierarchyNodesDefinition>();
     childSubjectIds.length &&
       defs.push({
@@ -252,11 +287,11 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         query: {
           ecsql: `
             SELECT
-              ${await this._selectQueryFactory.createSelectClause({
+              ${await this.#selectQueryFactory.createSelectClause({
                 ecClassId: { selector: "this.ECClassId" },
                 ecInstanceId: { selector: "this.ECInstanceId" },
                 nodeLabel: {
-                  selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
+                  selector: await this.#nodeLabelSelectClauseFactory.createSelectClause({
                     classAlias: "this",
                     className: CLASS_NAME_Subject,
                   }),
@@ -278,7 +313,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
               ${subjectFilterClauses.where ? `AND ${subjectFilterClauses.where}` : ""}
           `,
           bindings: [
-            { type: "idset", value: await this._idsCache.getParentSubjectIds() },
+            { type: "idset", value: await firstValueFrom(this.#idsCache.getParentSubjectIds()) },
             ...childSubjectIds.map((id): ECSqlBinding => ({ type: "id", value: id })),
           ],
         },
@@ -291,11 +326,11 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             SELECT model.ECInstanceId AS ECInstanceId, model.*
             FROM (
               SELECT
-                ${await this._selectQueryFactory.createSelectClause({
+                ${await this.#selectQueryFactory.createSelectClause({
                   ecClassId: { selector: "m.ECClassId" },
                   ecInstanceId: { selector: "m.ECInstanceId" },
                   nodeLabel: {
-                    selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
+                    selector: await this.#nodeLabelSelectClauseFactory.createSelectClause({
                       classAlias: "partition",
                       className: CLASS_NAME_InformationPartitionElement,
                     }),
@@ -311,12 +346,12 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                       END
                     `,
                   },
-                  hasChildren: this._hierarchyConfig.showEmptyModels
+                  hasChildren: this.#hierarchyConfig.showEmptyModels
                     ? {
                         selector: `
                           IFNULL((
                             SELECT 1
-                            FROM ${this._hierarchyConfig.elementClassSpecification} e
+                            FROM ${this.#hierarchyConfig.elementClassSpecification} e
                             WHERE e.Model.Id = m.ECInstanceId
                             LIMIT 1
                           ), 0)
@@ -355,7 +390,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         query: {
           ecsql: `
             SELECT
-              ${await this._selectQueryFactory.createSelectClause({
+              ${await this.#selectQueryFactory.createSelectClause({
                 ecClassId: { selector: "this.ECClassId" },
                 ecInstanceId: { selector: "this.ECInstanceId" },
                 nodeLabel: "", // doesn't matter - the node is always hidden
@@ -365,7 +400,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             WHERE
               this.ModeledElement.Id IN (${elementIds.map(() => "?").join(",")})
               AND NOT this.IsPrivate
-              AND this.ECInstanceId IN (SELECT Model.Id FROM ${this._hierarchyConfig.elementClassSpecification})
+              AND this.ECInstanceId IN (SELECT Model.Id FROM ${this.#hierarchyConfig.elementClassSpecification})
           `,
           bindings: [...elementIds.map((id): ECSqlBinding => ({ type: "id", value: id }))],
         },
@@ -377,7 +412,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     parentNodeInstanceIds: modelIds,
     instanceFilter,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
+    const instanceFilterClauses = await this.#selectQueryFactory.createFilterClauses({
       filter: instanceFilter,
       contentClass: { fullName: CLASS_NAME_SpatialCategory, alias: "this" },
     });
@@ -387,11 +422,11 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         query: {
           ecsql: `
             SELECT
-              ${await this._selectQueryFactory.createSelectClause({
+              ${await this.#selectQueryFactory.createSelectClause({
                 ecClassId: { selector: "this.ECClassId" },
                 ecInstanceId: { selector: "this.ECInstanceId" },
                 nodeLabel: {
-                  selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
+                  selector: await this.#nodeLabelSelectClauseFactory.createSelectClause({
                     classAlias: "this",
                     className: CLASS_NAME_SpatialCategory,
                   }),
@@ -410,7 +445,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             WHERE
               EXISTS (
                 SELECT 1
-                FROM ${this._hierarchyConfig.elementClassSpecification} element
+                FROM ${this.#hierarchyConfig.elementClassSpecification} element
                 WHERE
                   element.Model.Id IN (${modelIds.map(() => "?").join(",")})
                   AND element.Category.Id = +this.ECInstanceId
@@ -433,13 +468,13 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     if (modelIds.length === 0) {
       throw new Error(`Invalid category node "${parentNode.label}" - missing model information.`);
     }
-    const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
+    const instanceFilterClauses = await this.#selectQueryFactory.createFilterClauses({
       filter: instanceFilter,
-      contentClass: { fullName: this._hierarchyConfig.elementClassSpecification, alias: "this" },
+      contentClass: { fullName: this.#hierarchyConfig.elementClassSpecification, alias: "this" },
     });
     const modeledElements = await firstValueFrom(
       from(modelIds).pipe(
-        mergeMap(async (modelId) => this._idsCache.getCategoriesModeledElements(modelId, categoryIds)),
+        mergeMap((modelId) => this.#idsCache.getCategoriesModeledElements(modelId, categoryIds)),
         reduce((acc, foundModeledElements) => {
           return acc.concat(foundModeledElements);
         }, new Array<ElementId>()),
@@ -447,21 +482,21 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     );
     return [
       {
-        fullClassName: this._hierarchyConfig.elementClassSpecification,
+        fullClassName: this.#hierarchyConfig.elementClassSpecification,
         query: {
           ecsql: `
             SELECT
-              ${await this._selectQueryFactory.createSelectClause({
+              ${await this.#selectQueryFactory.createSelectClause({
                 ecClassId: { selector: "this.ECClassId" },
                 ecInstanceId: { selector: "this.ECInstanceId" },
                 nodeLabel: {
-                  selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
+                  selector: await this.#nodeLabelSelectClauseFactory.createSelectClause({
                     classAlias: "this",
-                    className: this._hierarchyConfig.elementClassSpecification,
+                    className: this.#hierarchyConfig.elementClassSpecification,
                   }),
                 },
                 grouping: {
-                  byClass: this._hierarchyConfig.elementClassGrouping !== "disable",
+                  byClass: this.#hierarchyConfig.elementClassGrouping !== "disable",
                 },
                 hasChildren: {
                   selector: `
@@ -470,7 +505,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                       1,
                       IFNULL((
                         SELECT 1
-                        FROM ${this._hierarchyConfig.elementClassSpecification} ce
+                        FROM ${this.#hierarchyConfig.elementClassSpecification} ce
                         WHERE ce.Parent.Id = this.ECInstanceId
                         LIMIT 1
                       ), 0)
@@ -502,33 +537,33 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     parentNodeInstanceIds: elementIds,
     instanceFilter,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
+    const instanceFilterClauses = await this.#selectQueryFactory.createFilterClauses({
       filter: instanceFilter,
-      contentClass: { fullName: this._hierarchyConfig.elementClassSpecification, alias: "this" },
+      contentClass: { fullName: this.#hierarchyConfig.elementClassSpecification, alias: "this" },
     });
     return [
       {
-        fullClassName: this._hierarchyConfig.elementClassSpecification,
+        fullClassName: this.#hierarchyConfig.elementClassSpecification,
         query: {
           ecsql: `
             SELECT
-              ${await this._selectQueryFactory.createSelectClause({
+              ${await this.#selectQueryFactory.createSelectClause({
                 ecClassId: { selector: "this.ECClassId" },
                 ecInstanceId: { selector: "this.ECInstanceId" },
                 nodeLabel: {
-                  selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
+                  selector: await this.#nodeLabelSelectClauseFactory.createSelectClause({
                     classAlias: "this",
-                    className: this._hierarchyConfig.elementClassSpecification,
+                    className: this.#hierarchyConfig.elementClassSpecification,
                   }),
                 },
                 grouping: {
-                  byClass: this._hierarchyConfig.elementClassGrouping !== "disable",
+                  byClass: this.#hierarchyConfig.elementClassGrouping !== "disable",
                 },
                 hasChildren: {
                   selector: `
                     IFNULL((
                       SELECT 1
-                      FROM ${this._hierarchyConfig.elementClassSpecification} ce
+                      FROM ${this.#hierarchyConfig.elementClassSpecification} ce
                       JOIN ${CLASS_NAME_Model} m ON ce.Model.Id = m.ECInstanceId
                       WHERE ce.Parent.Id = this.ECInstanceId OR (ce.Model.Id = this.ECInstanceId AND m.IsPrivate = false)
                       LIMIT 1
@@ -557,24 +592,25 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
   public static async createInstanceKeyPaths(props: ModelsTreeInstanceKeyPathsProps): Promise<NormalizedHierarchyFilteringPath[]> {
     return lastValueFrom(
       defer(() => {
+        const componentInfo = { componentId: props.componentId ?? Guid.createValue(), componentName: this.#componentName };
         if (ModelsTreeInstanceKeyPathsProps.isLabelProps(props)) {
           const labelsFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
-          return createInstanceKeyPathsFromInstanceLabelObs({ ...props, labelsFactory });
+          return createInstanceKeyPathsFromInstanceLabelObs({ ...props, ...componentInfo, labelsFactory });
         }
-        return createInstanceKeyPathsFromTargetItemsObs(props);
+        return createInstanceKeyPathsFromTargetItemsObs({ ...props, ...componentInfo });
       }).pipe(props.abortSignal ? takeUntil(fromEvent(props.abortSignal, "abort")) : identity, defaultIfEmpty([])),
     );
   }
 
   private supportsFiltering() {
-    return this._hierarchyConfig.hierarchyLevelFiltering === "enable";
+    return this.#hierarchyConfig.hierarchyLevelFiltering === "enable";
   }
 
   private async isSupported() {
-    const [schemaName, className] = this._hierarchyConfig.elementClassSpecification.split(/[\.:]/);
+    const [schemaName, className] = this.#hierarchyConfig.elementClassSpecification.split(/[\.:]/);
     if (!schemaName || !className) {
       throw new Error(
-        `Provided class specification ${this._hierarchyConfig.elementClassSpecification} should be in format {SchemaName}:{ClassName} or {SchemaName}.{ClassName}`,
+        `Provided class specification ${this.#hierarchyConfig.elementClassSpecification} should be in format {SchemaName}:{ClassName} or {SchemaName}.{ClassName}`,
       );
     }
 
@@ -591,19 +627,25 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       ],
     };
 
-    for await (const _row of this._queryExecutor.createQueryReader(query)) {
+    for await (const _row of this.#queryExecutor.createQueryReader(query, {
+      restartToken: `${ModelsTreeDefinition.#componentName}/${this.#componentId}/is-class-supported`,
+    })) {
       return true;
     }
     return false;
   }
 }
 
-function createGeometricElementInstanceKeyPaths(
-  imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor,
-  idsCache: ModelsTreeIdsCache,
-  hierarchyConfig: ModelsTreeHierarchyConfiguration,
-  targetItems: Array<Id64String | ElementsGroupInfo>,
-): Observable<NormalizedHierarchyFilteringPath> {
+function createGeometricElementInstanceKeyPaths(props: {
+  imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
+  idsCache: ModelsTreeIdsCache;
+  hierarchyConfig: ModelsTreeHierarchyConfiguration;
+  targetItems: Array<Id64String | ElementsGroupInfo>;
+  componentId: GuidString;
+  componentName: string;
+  chunkIndex: number;
+}): Observable<NormalizedHierarchyFilteringPath> {
+  const { targetItems, chunkIndex, componentId, componentName, hierarchyConfig, idsCache, imodelAccess } = props;
   const elementIds = targetItems.filter((info): info is Id64String => typeof info === "string");
   const groupInfos = targetItems.filter((info): info is ElementsGroupInfo => typeof info !== "string");
   const separator = ";";
@@ -670,12 +712,15 @@ function createGeometricElementInstanceKeyPaths(
       WHERE mce.ParentId IS NULL
     `;
 
-    return imodelAccess.createQueryReader({ ctes, ecsql }, { rowFormat: "Indexes", limit: "unbounded" });
+    return imodelAccess.createQueryReader(
+      { ctes, ecsql },
+      { rowFormat: "Indexes", limit: "unbounded", restartToken: `${componentName}/${componentId}/geometric-element-paths/${chunkIndex}` },
+    );
   }).pipe(
     releaseMainThreadOnItemsCount(300),
     map((row) => parseQueryRow(row, groupInfos, separator, hierarchyConfig.elementClassSpecification)),
     mergeMap(({ modelId, elementHierarchyPath, groupingNode }) =>
-      from(idsCache.createModelInstanceKeyPaths(modelId)).pipe(
+      idsCache.createModelInstanceKeyPaths(modelId).pipe(
         mergeAll(),
         map((modelPath) => {
           // We don't want to modify the original path, we create a copy that we can modify
@@ -728,7 +773,11 @@ function createInstanceKeyPathsFromTargetItemsObs({
   hierarchyConfig,
   idsCache,
   limit,
-}: Omit<ModelsTreeInstanceKeyPathsFromTargetItemsProps, "abortSignal">): Observable<NormalizedHierarchyFilteringPath[]> {
+  componentId,
+  componentName,
+}: Omit<ModelsTreeInstanceKeyPathsFromTargetItemsProps, "abortSignal" | "componentId"> & { componentId: GuidString; componentName: string }): Observable<
+  NormalizedHierarchyFilteringPath[]
+> {
   if (limit !== "unbounded" && targetItems.length > (limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT)) {
     throw new FilterLimitExceededError(limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT);
   }
@@ -782,15 +831,25 @@ function createInstanceKeyPathsFromTargetItemsObs({
       const elementsLength = ids.elementIds.length;
       return collect(
         merge(
-          from(ids.subjectIds).pipe(mergeMap((id) => from(idsCache.createSubjectInstanceKeysPath(id)).pipe(map(HierarchyFilteringPath.normalize)))),
-          from(ids.modelIds).pipe(mergeMap((id) => from(idsCache.createModelInstanceKeyPaths(id)).pipe(mergeAll(), map(HierarchyFilteringPath.normalize)))),
-          from(ids.categoryIds).pipe(
-            mergeMap((id) => from(idsCache.createCategoryInstanceKeyPaths(id)).pipe(mergeAll(), map(HierarchyFilteringPath.normalize))),
-          ),
+          from(ids.subjectIds).pipe(mergeMap((id) => idsCache.createSubjectInstanceKeysPath(id).pipe(map(HierarchyFilteringPath.normalize)))),
+          from(ids.modelIds).pipe(mergeMap((id) => idsCache.createModelInstanceKeyPaths(id).pipe(mergeAll(), map(HierarchyFilteringPath.normalize)))),
+          from(ids.categoryIds).pipe(mergeMap((id) => idsCache.createCategoryInstanceKeyPaths(id).pipe(mergeAll(), map(HierarchyFilteringPath.normalize)))),
           from(ids.elementIds).pipe(
-            bufferCount(Math.ceil(elementsLength / Math.ceil(elementsLength / 5000))),
+            bufferCount(getOptimalBatchSize({ totalSize: elementsLength, maximumBatchSize: 5000 })),
             releaseMainThreadOnItemsCount(1),
-            mergeMap((block) => createGeometricElementInstanceKeyPaths(imodelAccess, idsCache, hierarchyConfig, block), 10),
+            mergeMap(
+              (block, chunkIndex) =>
+                createGeometricElementInstanceKeyPaths({
+                  imodelAccess,
+                  idsCache,
+                  hierarchyConfig,
+                  targetItems: block,
+                  componentId,
+                  componentName,
+                  chunkIndex,
+                }),
+              10,
+            ),
           ),
         ),
       );
@@ -799,7 +858,11 @@ function createInstanceKeyPathsFromTargetItemsObs({
 }
 
 function createInstanceKeyPathsFromInstanceLabelObs(
-  props: Omit<ModelsTreeInstanceKeyPathsFromInstanceLabelProps, "abortSignal"> & { labelsFactory: IInstanceLabelSelectClauseFactory },
+  props: Omit<ModelsTreeInstanceKeyPathsFromInstanceLabelProps, "abortSignal" | "componentId"> & {
+    labelsFactory: IInstanceLabelSelectClauseFactory;
+    componentId: GuidString;
+    componentName: string;
+  },
 ) {
   const { labelsFactory, hierarchyConfig, label, imodelAccess, limit } = props;
   return defer(async () => {
@@ -840,7 +903,7 @@ function createInstanceKeyPathsFromInstanceLabelObs(
     mergeMap((queryProps) => {
       return imodelAccess.createQueryReader(queryProps, {
         rowFormat: "Indexes",
-        restartToken: "tree-widget/models-tree/filter-by-label-query",
+        restartToken: `${props.componentName}/${props.componentId}/filter-by-label`,
         limit,
       });
     }),

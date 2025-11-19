@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
+import { firstValueFrom } from "rxjs";
 import sinon from "sinon";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
@@ -28,9 +29,9 @@ describe("ModelsTreeIdsCache", () => {
       throw new Error(`Unexpected query: ${query}`);
     });
     using cache = createIdsCache(stub);
-    await expect(cache.getCategoryElementsCount(modelId, categoryId)).to.eventually.eq(elementIds.length);
+    await expect(firstValueFrom(cache.getCategoryElementsCount(modelId, categoryId))).to.eventually.eq(elementIds.length);
     expect(stub).to.have.callCount(1);
-    await expect(cache.getCategoryElementsCount(modelId, categoryId)).to.eventually.eq(elementIds.length);
+    await expect(firstValueFrom(cache.getCategoryElementsCount(modelId, categoryId))).to.eventually.eq(elementIds.length);
     expect(stub).to.have.callCount(1);
   });
 });

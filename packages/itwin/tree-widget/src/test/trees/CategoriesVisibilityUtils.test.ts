@@ -16,15 +16,14 @@ import {
   enableCategoryDisplay,
   enableSubCategoryDisplay,
   loadCategoriesFromViewport,
-  toggleAllCategories,
 } from "../../tree-widget-react/components/trees/common/internal/VisibilityUtils.js";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory, insertSubCategory } from "../IModelUtils.js";
 import { TestUtils } from "../TestUtils.js";
 import { createFakeSinonViewport, createIModelMock } from "./Common.js";
 import { createTreeWidgetTestingViewport } from "./TreeUtils.js";
 
-import type { IModelConnection } from "@itwin/core-frontend";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { TreeWidgetTestingViewport } from "./TreeUtils.js";
 
 describe("CategoryVisibilityUtils", () => {
@@ -72,32 +71,20 @@ describe("CategoryVisibilityUtils", () => {
     sinon.restore();
   });
 
-  describe("toggleAllCategories", () => {
-    it("enables all categories", async () => {
-      await toggleAllCategories(viewport, true);
-      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: [categoryId], display: true, enableAllSubCategories: true });
-    });
-
-    it("disables all categories", async () => {
-      await toggleAllCategories(viewport, false);
-      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: [categoryId], display: false, enableAllSubCategories: true });
-    });
-  });
-
   describe("enableCategoryDisplay", () => {
     it("enables category", async () => {
       await enableCategoryDisplay(viewport, categoryId, true, false);
-      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: categoryId, display: true, enableAllSubCategories: false });
+      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: [categoryId], display: true, enableAllSubCategories: false });
     });
 
     it("disables category", async () => {
       await enableCategoryDisplay(viewport, categoryId, false, false);
-      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: categoryId, display: false, enableAllSubCategories: false });
+      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: [categoryId], display: false, enableAllSubCategories: false });
     });
 
     it("disables category and subcategories", async () => {
       await enableCategoryDisplay(viewport, categoryId, false, true);
-      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: categoryId, display: false, enableAllSubCategories: true });
+      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: [categoryId], display: false, enableAllSubCategories: true });
       expect(viewport.changeSubCategoryDisplay).to.be.calledOnceWith({ subCategoryId, display: false });
     });
 
@@ -106,10 +93,10 @@ describe("CategoryVisibilityUtils", () => {
       viewport.perModelCategoryOverrides = overrides;
       await enableCategoryDisplay(viewport, categoryId, true, false);
 
-      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: categoryId, display: true, enableAllSubCategories: false });
+      expect(viewport.changeCategoryDisplay).to.be.calledOnceWith({ categoryIds: [categoryId], display: true, enableAllSubCategories: false });
       expect(viewport.setPerModelCategoryOverride).to.be.calledOnceWith({
         modelIds: ["ModelId"],
-        categoryIds: categoryId,
+        categoryIds: [categoryId],
         override: "none",
       });
     });

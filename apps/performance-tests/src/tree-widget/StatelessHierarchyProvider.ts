@@ -11,11 +11,11 @@ import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor } from 
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 import { LOGGER } from "../util/Logging.cjs";
 
-import type { CategoriesTreeIdsCache, ModelsTreeIdsCache } from "@itwin/tree-widget-react/internal";
 import type { IModelDb } from "@itwin/core-backend";
 import type { SchemaKey, SchemaMatchType, SchemaPropsGetter } from "@itwin/ecschema-metadata";
 import type { HierarchyDefinition, HierarchyFilteringPath, HierarchyNode, HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { EC, ECClassHierarchyInspector, ECSchemaProvider, ECSqlQueryDef, ECSqlQueryExecutor, ECSqlQueryReaderOptions } from "@itwin/presentation-shared";
+import type { CategoriesTreeIdsCache, ModelsTreeIdsCache } from "@itwin/tree-widget-react/internal";
 
 interface ProviderOptionsBase {
   rowLimit?: number | "unbounded";
@@ -26,7 +26,9 @@ interface ProviderOptionsBase {
   filtering?: {
     paths: HierarchyFilteringPath[];
   };
+  queryCacheSize?: number;
 }
+
 type ProviderOptionsWithIModel = { iModel: IModelDb } & ProviderOptionsBase;
 
 type ProviderOptionsWithIModelAccess = { imodelAccess: IModelAccess } & ProviderOptionsBase;
@@ -56,10 +58,12 @@ export interface IModelAccess {
 }
 
 export class StatelessHierarchyProvider implements Disposable {
-  private readonly _provider: HierarchyProvider & Disposable;
+  readonly #provider: HierarchyProvider & Disposable;
+  #props: ProviderOptions;
 
-  constructor(private readonly _props: ProviderOptions) {
-    this._provider = this.createProvider();
+  constructor(props: ProviderOptions) {
+    this.#props = props;
+    this.#provider = this.createProvider();
   }
 
   public async loadHierarchy(props?: { shouldExpand?: (node: HierarchyNode, index: number) => boolean }): Promise<number> {
@@ -69,7 +73,7 @@ export class StatelessHierarchyProvider implements Disposable {
         expand((parentNode) => {
           const parentNodeLabel = parentNode ? parentNode.label : "<root>";
           log(`Requesting children for ${parentNodeLabel}`);
-          return from(this._provider.getNodes({ parentNode })).pipe(
+          return from(this.#provider.getNodes({ parentNode })).pipe(
             finalize(() => {
               log(`Got children for ${parentNodeLabel}`);
             }),
@@ -87,7 +91,7 @@ export class StatelessHierarchyProvider implements Disposable {
   }
 
   public [Symbol.dispose]() {
-    this._provider[Symbol.dispose]();
+    this.#provider[Symbol.dispose]();
   }
 
   private static createECSchemaProvider(iModel: IModelDb) {
@@ -99,12 +103,12 @@ export class StatelessHierarchyProvider implements Disposable {
 
   private createProvider() {
     const imodelAccess =
-      "iModel" in this._props ? StatelessHierarchyProvider.createIModelAccess(this._props.iModel, this._props.rowLimit) : this._props.imodelAccess;
+      "iModel" in this.#props ? StatelessHierarchyProvider.createIModelAccess(this.#props.iModel, this.#props.rowLimit) : this.#props.imodelAccess;
     return createIModelHierarchyProvider({
       imodelAccess,
-      hierarchyDefinition: this._props.getHierarchyFactory(imodelAccess),
-      queryCacheSize: 0,
-      filtering: this._props.filtering,
+      hierarchyDefinition: this.#props.getHierarchyFactory(imodelAccess),
+      queryCacheSize: this.#props.queryCacheSize ?? 0,
+      filtering: this.#props.filtering,
     });
   }
 

@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./Tree.css";
+
 import { useCallback, useState } from "react";
 import { BeEvent } from "@itwin/core-bentley";
 import { SchemaMetadataContextProvider } from "@itwin/presentation-components";

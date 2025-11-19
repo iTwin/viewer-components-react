@@ -6,8 +6,7 @@ on:
     branches:
       - master
     paths:
-      - apps/performance-tests/tree-widget/**
-      - apps/performance-tests/util/**
+      - apps/performance-tests/**
       - packages/itwin/tree-widget/**
 
 jobs:

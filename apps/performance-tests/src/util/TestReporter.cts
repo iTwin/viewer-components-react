@@ -6,7 +6,6 @@
 import asTable from "as-table";
 import fs from "fs";
 import Mocha from "mocha";
-import { LOGGER } from "./Logging.cjs";
 import { MainThreadBlocksDetector } from "./MainThreadBlocksDetector.cjs";
 
 import type { Summary } from "./MainThreadBlocksDetector.cjs";
@@ -29,21 +28,21 @@ const tableFormatter = asTable.configure({
  * Measures test time and the amounts of time when the main thread was blocked.
  */
 export class TestReporter extends Base {
-  private readonly _testStartTimes = new Map<string, number>();
-  private readonly _testInfo = new Map<string, TestInfo>();
-  private readonly _blockHandler = new MainThreadBlocksDetector();
-  private readonly _outputPath?: string;
-  private _indentLevel = 0;
+  readonly #testStartTimes = new Map<string, number>();
+  readonly #testInfo = new Map<string, TestInfo>();
+  readonly #blockHandler = new MainThreadBlocksDetector();
+  readonly #outputPath?: string;
+  #indentLevel = 0;
 
   constructor(runner: Mocha.Runner, options: Mocha.MochaOptions) {
     super(runner, options);
-    this._outputPath = options.reporterOptions?.BENCHMARK_OUTPUT_PATH;
+    this.#outputPath = options.reporterOptions?.BENCHMARK_OUTPUT_PATH;
 
     runner.on(EVENT_SUITE_BEGIN, (suite) => {
       this.print(`${suite.title}`);
-      this._indentLevel++;
+      this.#indentLevel++;
     });
-    runner.on(EVENT_SUITE_END, () => this._indentLevel--);
+    runner.on(EVENT_SUITE_END, () => this.#indentLevel--);
     runner.on(EVENT_TEST_BEGIN, (test) => {
       // This event can be fired before beforeEach() and we do not want to measure beforeEach() blocking time.
       // Add callback to the test context, so that it could be called at the actual beginning of the test.
@@ -57,7 +56,7 @@ export class TestReporter extends Base {
     runner.on(EVENT_TEST_END, async (test) => this.onTestEnd(test));
     runner.on(EVENT_RUN_END, () => {
       this.printResults();
-      if (this._outputPath && this.failures.length === 0) {
+      if (this.#outputPath && this.failures.length === 0) {
         this.saveResults();
       }
     });
@@ -65,48 +64,48 @@ export class TestReporter extends Base {
 
   /** Print a line indented according to the level of depth in nested test suites. */
   private print(line: string = "", newLine = true) {
-    line = `\r${"  ".repeat(this._indentLevel)}${line}${newLine ? "\n" : ""}`;
+    line = `\r${"  ".repeat(this.#indentLevel)}${line}${newLine ? "\n" : ""}`;
     process.stdout.write(line);
   }
 
   /** Run before each test starts. */
   private onTestStart(test: Mocha.Runnable) {
-    this._blockHandler.start();
+    this.#blockHandler.start();
     this.print(`${test.title}...`, false);
-    this._testStartTimes.set(test.fullTitle(), performance.now());
+    this.#testStartTimes.set(test.fullTitle(), performance.now());
   }
 
   /** Run after each test passes or fails. */
   private async measureTestTime(test: Mocha.Test) {
     const endTime = performance.now();
     const fullTitle = test.fullTitle();
-    const startTime = this._testStartTimes.get(fullTitle);
+    const startTime = this.#testStartTimes.get(fullTitle);
     if (startTime === undefined) {
       return;
     }
 
     const duration = Math.round((endTime - startTime) * 100) / 100;
-    await this._blockHandler.stop();
+    await this.#blockHandler.stop();
 
-    const blockingSummary = this._blockHandler.getSummary();
-    this._testInfo.set(fullTitle, {
+    const blockingSummary = this.#blockHandler.getSummary();
+    this.#testInfo.set(fullTitle, {
       test,
       duration,
       blockingSummary,
     });
-    this._testStartTimes.delete(fullTitle);
+    this.#testStartTimes.delete(fullTitle);
   }
 
   private async onTestEnd(test: Mocha.Test) {
     await this.measureTestTime(test);
 
     const pass = test.isPassed();
-    const duration = this._testInfo.get(test.fullTitle())!.duration;
+    const duration = this.#testInfo.get(test.fullTitle())!.duration;
     this.print(`${pass ? Base.symbols.ok : Base.symbols.err} ${test.title} (${duration} ms)`);
   }
 
   private printResults() {
-    const results = [...this._testInfo.entries()].map(([testFullName, { test, duration, blockingSummary }]) => {
+    const results = [...this.#testInfo.entries()].map(([testFullName, { test, duration, blockingSummary }]) => {
       const blockingInfo = Object.entries(blockingSummary)
         .filter(([_, val]) => val !== undefined)
         .map(([key, val]) => `${key}: ${(key === "count" ? val : val?.toFixed(2)) ?? "N/A"}`)
@@ -134,7 +133,7 @@ export class TestReporter extends Base {
 
   /** Saves performance results in a format that is compatible with Github benchmark action. */
   private saveResults() {
-    const data = [...this._testInfo.entries()].flatMap(([fullTitle, { duration, blockingSummary }]) => {
+    const data = [...this.#testInfo.entries()].flatMap(([fullTitle, { duration, blockingSummary }]) => {
       const durationEntry = {
         name: fullTitle,
         unit: "ms",
@@ -153,18 +152,10 @@ export class TestReporter extends Base {
       return [durationEntry, blockingEntry];
     });
 
-    const outputPath = this._outputPath!;
+    const outputPath = this.#outputPath!;
     fs.writeFileSync(outputPath, JSON.stringify(data, undefined, 2));
+
     console.log(`Test results saved at ${outputPath}`);
-  }
-}
-
-const ENABLE_PINGS = false;
-const LOG_CATEGORY = "Presentation.PerformanceTests.MainThreadBlocksDetector";
-
-function log(messageOrCallback: string | (() => string)) {
-  if (LOGGER.isEnabled(LOG_CATEGORY, "trace")) {
-    LOGGER.logTrace(LOG_CATEGORY, typeof messageOrCallback === "string" ? messageOrCallback : messageOrCallback());
   }
 }
 

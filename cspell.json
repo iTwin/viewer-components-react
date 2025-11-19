@@ -55,6 +55,7 @@
     "quantity-formatting",
     "reports-config-widget",
     "e2e.Dockerfile.dockerignore",
-    "**/*.d.ts"
+    "**/*.d.ts",
+    ".prettierrc"
   ]
 }

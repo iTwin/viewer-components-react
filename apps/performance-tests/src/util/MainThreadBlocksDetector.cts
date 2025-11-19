@@ -11,8 +11,8 @@ const ENABLE_PINGS = false;
 const LOG_CATEGORY = "Presentation.PerformanceTests.MainThreadBlocksDetector";
 
 function log(messageOrCallback: string | (() => string)) {
-  if (LOGGER.isEnabled(LOG_CATEGORY, "trace")) {
-    LOGGER.logTrace(LOG_CATEGORY, typeof messageOrCallback === "string" ? messageOrCallback : messageOrCallback());
+  if (LOGGER.isEnabled(LOG_CATEGORY, "warning")) {
+    LOGGER.logWarning(LOG_CATEGORY, typeof messageOrCallback === "string" ? messageOrCallback : messageOrCallback());
   }
 }
 
@@ -30,11 +30,11 @@ export interface Summary {
  * This is measured by running a timer which detects cases when it is fired later than expected.
  */
 export class MainThreadBlocksDetector {
-  private readonly _samples = new SortedArray<number>((a, b) => a - b);
-  private _promise?: Promise<void>;
+  readonly #samples = new SortedArray<number>((a, b) => a - b);
+  #promise?: Promise<void>;
 
   public getSummary(): Summary {
-    const arr = this._samples.extractArray();
+    const arr = this.#samples.extractArray();
     return {
       count: arr.length,
       max: arr.length ? arr[arr.length - 1] : undefined,
@@ -50,7 +50,7 @@ export class MainThreadBlocksDetector {
    */
   public start(threshold: number = 20, interval: number = 10) {
     const runTimer = async () => {
-      this._samples.clear();
+      this.#samples.clear();
 
       let lastTime = new Date();
       for await (const _ of setInterval(interval)) {
@@ -58,28 +58,28 @@ export class MainThreadBlocksDetector {
         const lateAmount = currentTime.getTime() - lastTime.getTime() - interval;
         if (lateAmount > threshold) {
           log(() => `${lateAmount} ms, ${lastTime.toISOString()} - ${currentTime.toISOString()}`);
-          this._samples.insert(lateAmount);
+          this.#samples.insert(lateAmount);
         } else if (ENABLE_PINGS) {
           log(() => `[${currentTime.toISOString()}] Ping`);
         }
         lastTime = new Date();
 
-        if (!this._promise) {
+        if (!this.#promise) {
           break;
         }
       }
     };
 
-    if (this._promise) {
+    if (this.#promise) {
       throw new Error("MainThreadBlocksDetector already running.");
     }
-    this._promise = runTimer();
+    this.#promise = runTimer();
   }
 
   /** Stops the blocking timer. */
   public async stop() {
-    const promise = this._promise;
-    this._promise = undefined;
+    const promise = this.#promise;
+    this.#promise = undefined;
     return promise;
   }
 }

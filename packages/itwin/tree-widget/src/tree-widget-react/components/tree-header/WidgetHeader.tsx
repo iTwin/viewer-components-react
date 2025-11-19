@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./WidgetHeader.css";
+
 import { useState } from "react";
 import { Select, Skeleton } from "@stratakit/bricks";
 import { DebouncedSearchBox } from "./SearchBox.js";

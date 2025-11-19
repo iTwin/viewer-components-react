@@ -10,6 +10,7 @@ import { TelemetryContextProvider } from "../common/UseTelemetryContext.js";
 import { IModelContentTree } from "./IModelContentTree.js";
 
 import type { IModelContentTreeProps } from "./IModelContentTree.js";
+
 /** @beta */
 interface IModelContentTreeComponentProps
   extends Pick<

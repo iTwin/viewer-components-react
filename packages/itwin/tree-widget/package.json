@@ -75,7 +75,7 @@
     "@itwin/presentation-hierarchies": "^2.0.0-alpha.4",
     "@itwin/presentation-hierarchies-react": "2.0.0-alpha.39",
     "@itwin/presentation-shared": "^2.0.0-alpha.2",
-    "@itwin/unified-selection": "^1.5.1-alpha.1",
+    "@itwin/unified-selection": "^1.6.2-alpha.0",
     "classnames": "^2.5.1",
     "react-error-boundary": "^5.0.0",
     "rxjs": "^7.8.1"
@@ -106,7 +106,7 @@
     "@itwin/presentation-common": "^5.0.0",
     "@itwin/presentation-components": "5.12.9-alpha.0",
     "@itwin/presentation-frontend": "^5.0.0",
-    "@itwin/presentation-testing": "^5.4.7-alpha.2",
+    "@itwin/presentation-testing": "^5.4.10-alpha.0",
     "@itwin/webgl-compatibility": "^5.0.0",
     "@stratakit/foundations": "^0.4.0",
     "@stratakit/bricks": "^0.5.0",

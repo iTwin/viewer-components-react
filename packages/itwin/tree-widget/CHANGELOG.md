@@ -1,8 +1,58 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Tue, 07 Oct 2025 08:45:29 GMT and should not be manually modified. -->
+<!-- This log was last generated on Tue, 18 Nov 2025 15:20:07 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.17.2
+
+Tue, 18 Nov 2025 15:20:07 GMT
+
+### Patches
+
+- Models tree: Fixed an issue where models/subjects with child-only categories would have partial visibility (instead of hidden) when elements from other models were added to the exclusive always drawn list. ([#1514](https://github.com/iTwin/viewer-components-react/pull/1514))
+
+## 3.17.1
+
+Thu, 13 Nov 2025 09:36:43 GMT
+
+### Patches
+
+- Models and Categories trees: reduce main thread blockage for large iModels when determining visibility. ([#1499](https://github.com/iTwin/viewer-components-react/pull/1499))
+- Models tree: Fixed parent / child elements visibility controls. Now, changing element visibility also changes visibility of all nested children. Also, determining element visibility takes into account all child elements that are in the always/never drawn sets. ([#1477](https://github.com/iTwin/viewer-components-react/pull/1477))
+
+## 3.17.0
+
+Mon, 03 Nov 2025 07:50:14 GMT
+
+### Minor changes
+
+- Categories tree: Add option to show categories that don't contain any elements. This option can be provided to `CategoriesTree`, `CategoriesTreeComponent` or `useCategoriesTree`. It can be provided as `hierarchyConfig` property called `showEmptyCategories` ([#1486](https://github.com/iTwin/viewer-components-react/pull/1486))
+
+### Patches
+
+- Tree widget: change caches of categories and models trees to use observables. ([#1494](https://github.com/iTwin/viewer-components-react/pull/1494))
+- Fix tree scrollbar not persisting when switching widgets ([#1497](https://github.com/iTwin/viewer-components-react/pull/1497))
+
+## 3.16.1
+
+Wed, 22 Oct 2025 08:09:53 GMT
+
+### Patches
+
+- Fix category elements count query being cancelled due to restart token. ([#1484](https://github.com/iTwin/viewer-components-react/pull/1484))
+
+## 3.16.0
+
+Fri, 17 Oct 2025 15:36:01 GMT
+
+### Minor changes
+
+- Tree widget: fix issue with queries being cancelled due to the same restart token. Fixed by adding a unique guid to each restart token. Changed `showAllModels` to now accept optional componentId, which is used in the restart tokens. ([#1478](https://github.com/iTwin/viewer-components-react/pull/1478))
+
+### Patches
+
+- Bump versions of presentation packages ([#1480](https://github.com/iTwin/viewer-components-react/pull/1480))
 
 ## 3.15.1
 

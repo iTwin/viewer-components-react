@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Locator } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import {
   expandNode,
@@ -17,6 +16,8 @@ import {
   selectValueInDialog,
   takeScreenshot,
 } from "./utils.js";
+
+import type { Locator } from "@playwright/test";
 
 test.describe("Categories tree", () => {
   let treeWidget: Locator;
@@ -127,6 +128,7 @@ test.describe("Categories tree", () => {
     await selectOperatorInDialog(page, "Equal");
     await selectValueInDialog(page, "Equipment - Insulation");
 
+    // TODO: CHECK
     await page.getByRole("button", { name: "Apply" }).click();
     await locateNode(treeWidget, "Equipment - Insulation").waitFor();
 

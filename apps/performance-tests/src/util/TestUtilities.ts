@@ -62,18 +62,20 @@ export function run<T>(props: RunOptions<T>): void {
  * @beta
  */
 export class TestIModelConnection extends IModelConnection {
+  readonly #db: IModelDb;
   // This was added based on this: https://github.com/iTwin/itwinjs-core/pull/7171/files#diff-9d26b04e7ae074b911fb87be3425360d7bd55a7c9f947f5aed1ba36d359f01eb
-  constructor(private readonly _db: IModelDb) {
-    super(_db.getConnectionProps());
+  constructor(db: IModelDb) {
+    super(db.getConnectionProps());
+    this.#db = db;
     IModelConnection.onOpen.raiseEvent(this);
   }
 
   public override get isClosed(): boolean {
-    return !this._db.isOpen;
+    return !this.#db.isOpen;
   }
 
   public override async close(): Promise<void> {
-    this._db.close();
+    this.#db.close();
   }
 
   public static openFile(filePath: string): { iModelConnection: IModelConnection; iModel: SnapshotDb } {

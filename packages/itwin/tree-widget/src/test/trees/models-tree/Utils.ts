@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concatMap, EMPTY, expand, firstValueFrom, from, toArray } from "rxjs";
+import { concatMap, EMPTY, expand, from, of, toArray } from "rxjs";
 import sinon from "sinon";
 import { Id64 } from "@itwin/core-bentley";
 import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
@@ -11,12 +11,14 @@ import {
   CLASS_NAME_Element,
   CLASS_NAME_GeometricElement3d,
   CLASS_NAME_Model,
+  CLASS_NAME_SpatialCategory,
   CLASS_NAME_Subject,
 } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import { ModelsTreeIdsCache } from "../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import { createIModelAccess } from "../Common.js";
 
+import type { Observable } from "rxjs";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type {
@@ -24,10 +26,12 @@ import type {
   GroupingHierarchyNode,
   GroupingNodeKey,
   HierarchyFilteringPath,
+  HierarchyNode,
   HierarchyNodeKey,
   HierarchyProvider,
   NonGroupingHierarchyNode,
 } from "@itwin/presentation-hierarchies";
+import type { InstanceKey } from "@itwin/presentation-shared";
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
@@ -88,80 +92,92 @@ interface IdsCacheMockProps {
 
 export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCache {
   return sinon.createStubInstance(ModelsTreeIdsCache, {
-    getChildSubjectIds: sinon.stub<[Id64Arg], Promise<Id64Array>>().callsFake(async (subjectIds) => {
-      const obs = from(Id64.iterable(subjectIds)).pipe(
+    getChildSubjectIds: sinon.stub<[Id64Arg], Observable<Id64Array>>().callsFake((subjectIds) => {
+      return from(Id64.iterable(subjectIds)).pipe(
         concatMap((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
         expand((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
         toArray(),
       );
-      return firstValueFrom(obs);
     }),
     getChildSubjectModelIds: sinon.stub(),
-    getSubjectModelIds: sinon.stub<[Id64Arg], Promise<Id64Array>>().callsFake(async (subjectIds) => {
-      const obs = from(Id64.iterable(subjectIds)).pipe(
+    getSubjectModelIds: sinon.stub<[Id64Arg], Observable<Id64Array>>().callsFake((subjectIds) => {
+      return from(Id64.iterable(subjectIds)).pipe(
         expand((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),
         concatMap((id) => props?.subjectModels?.get(id) ?? EMPTY),
         toArray(),
       );
-      return firstValueFrom(obs);
     }),
-    getModelCategoryIds: sinon.stub<[Id64String], Promise<Id64Array>>().callsFake(async (modelId) => {
-      return props?.modelCategories?.get(modelId) ?? [];
+    getModelCategoryIds: sinon.stub<[Id64String], Observable<Id64Array>>().callsFake((modelId) => {
+      return of(props?.modelCategories?.get(modelId) ?? []);
     }),
-    getAllCategories: sinon.stub<[], Promise<Id64Set>>().callsFake(async () => {
+    getAllCategories: sinon.stub<[], Observable<Id64Set>>().callsFake(() => {
       const result = new Set<Id64String>();
       props?.modelCategories?.forEach((categories) => categories.forEach((category) => result.add(category)));
-      return result;
+      return of(result);
     }),
-    getCategoryElementsCount: sinon.stub<[Id64String, Id64String], Promise<number>>().callsFake(async (_, categoryId) => {
-      return props?.categoryElements?.get(categoryId)?.length ?? 0;
+    getCategoryElementsCount: sinon.stub<[Id64String, Id64String], Observable<number>>().callsFake((_, categoryId) => {
+      return of(props?.categoryElements?.get(categoryId)?.length ?? 0);
     }),
-    hasSubModel: sinon.stub<[Id64String], Promise<boolean>>().callsFake(async () => false),
-    getCategoriesModeledElements: sinon.stub<[Id64String, Id64Arg], Promise<Id64Array>>().callsFake(async () => []),
+    hasSubModel: sinon.stub<[Id64String], Observable<boolean>>().callsFake(() => of(false)),
+    getCategoriesModeledElements: sinon.stub<[Id64String, Id64Arg], Observable<Id64Array>>().callsFake(() => of([])),
   });
 }
 
-export function createSubjectHierarchyNode(...ids: Id64String[]): NonGroupingHierarchyNode {
+export function createSubjectHierarchyNode(props?: { ids?: Id64Arg; parentKeys?: HierarchyNodeKey[] }): NonGroupingHierarchyNode {
+  const instanceKeys = new Array<InstanceKey>();
+  for (const id of props?.ids ? Id64.iterable(props.ids) : []) {
+    instanceKeys.push({ className: CLASS_NAME_Subject, id });
+  }
   return {
     key: {
       type: "instances",
-      instanceKeys: ids.map((id) => ({ className: CLASS_NAME_Subject, id })),
+      instanceKeys,
     },
     children: false,
     label: "",
-    parentKeys: [],
+    parentKeys: props?.parentKeys ?? [],
     extendedData: {
       isSubject: true,
     },
   };
 }
-export function createModelHierarchyNode(modelId?: Id64String, hasChildren?: boolean): NonGroupingHierarchyNode {
+export function createModelHierarchyNode(props?: { modelId?: Id64String; hasChildren?: boolean; parentKeys?: HierarchyNodeKey[] }): NonGroupingHierarchyNode {
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: CLASS_NAME_Model, id: modelId ?? "" }],
+      instanceKeys: [{ className: CLASS_NAME_Model, id: props?.modelId ?? "" }],
     },
-    children: !!hasChildren,
+    children: !!props?.hasChildren,
     label: "",
-    parentKeys: [],
+    parentKeys: props?.parentKeys ?? [],
     extendedData: {
       isModel: true,
-      modelId: modelId ?? "0x1",
+      modelId: props?.modelId ?? "0x1",
     },
   };
 }
-export function createCategoryHierarchyNode(modelId?: Id64String, categoryId?: Id64Arg, hasChildren?: boolean): NonGroupingHierarchyNode {
+export function createCategoryHierarchyNode({
+  modelId,
+  categoryId,
+  hasChildren,
+  parentKeys,
+}: {
+  modelId?: Id64String;
+  categoryId?: Id64Arg;
+  hasChildren?: boolean;
+  parentKeys?: HierarchyNodeKey[];
+}): NonGroupingHierarchyNode {
   return {
     key: {
       type: "instances",
       instanceKeys:
         typeof categoryId === "string"
-          ? [{ className: "bis:SpatialCategory", id: categoryId ?? "" }]
-          : [...(categoryId ?? [])].map((id) => ({ className: "bis:SpatialCategory", id })),
+          ? [{ className: CLASS_NAME_SpatialCategory, id: categoryId ?? "" }]
+          : [...(categoryId ?? [])].map((id) => ({ className: CLASS_NAME_SpatialCategory, id })),
     },
     children: !!hasChildren,
     label: "",
-    parentKeys: [],
+    parentKeys: parentKeys ?? [],
     extendedData: {
       isCategory: true,
       modelId: modelId ?? "0x1",
@@ -174,6 +190,9 @@ export function createElementHierarchyNode(props: {
   categoryId: Id64String | undefined;
   hasChildren?: boolean;
   elementId?: Id64String;
+  parentKeys?: HierarchyNodeKey[];
+  filtering?: HierarchyNode["filtering"];
+  childrenCount?: number;
 }): NonGroupingHierarchyNode {
   return {
     key: {
@@ -182,23 +201,27 @@ export function createElementHierarchyNode(props: {
     },
     children: !!props.hasChildren,
     label: "",
-    parentKeys: [],
+    filtering: props.filtering,
+    parentKeys: props.parentKeys ?? [],
     extendedData: {
       modelId: props.modelId,
       categoryId: props.categoryId,
+      childrenCount: props.childrenCount !== undefined ? props.childrenCount : undefined,
     },
   };
 }
 export function createClassGroupingHierarchyNode({
   elements,
   parentKeys,
+  modelId,
+  categoryId,
   ...props
 }: {
-  modelId: Id64String | undefined;
-  categoryId: Id64String | undefined;
   elements: Id64Array;
   className?: string;
   parentKeys?: HierarchyNodeKey[];
+  modelId: Id64String;
+  categoryId: Id64String;
 }): GroupingHierarchyNode & { key: ClassGroupingNodeKey } {
   const className = props.className ?? CLASS_NAME_Element;
   return {
@@ -210,7 +233,7 @@ export function createClassGroupingHierarchyNode({
     groupedInstanceKeys: elements ? elements.map((id) => ({ className, id })) : [],
     label: "",
     parentKeys: parentKeys ?? [],
-    extendedData: props,
+    extendedData: { categoryId, modelId },
   };
 }
 

@@ -5,9 +5,9 @@
 
 import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
 import { showAllCategories } from "./CategoriesVisibilityUtils.js";
-import { toggleAllCategories } from "./internal/VisibilityUtils.js";
+import { enableCategoryDisplay, loadCategoriesFromViewport } from "./internal/VisibilityUtils.js";
 
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { HierarchyFilteringPathOptions, HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
 import type { TreeWidgetViewport } from "./TreeWidgetViewport.js";
 
@@ -39,15 +39,21 @@ export async function showAll(props: {
   /** ID's of categories to enable, if set to undefined, all categories will be enabled */
   categories?: Id64Array;
   viewport: TreeWidgetViewport;
+  componentId?: GuidString;
 }) {
-  const { models, categories, viewport } = props;
+  const { models, categories, viewport, componentId } = props;
   viewport.changeModelDisplay({ modelIds: models, display: true });
   viewport.clearNeverDrawn();
   viewport.clearAlwaysDrawn();
   if (categories) {
     await showAllCategories(categories, viewport);
   } else {
-    await toggleAllCategories(viewport, true);
+    const categoryInfos = await loadCategoriesFromViewport(viewport, componentId);
+    if (categoryInfos.length === 0) {
+      return;
+    }
+    const ids = categoryInfos.map((categoryInfo) => categoryInfo.categoryId);
+    await enableCategoryDisplay(viewport, ids, true);
   }
 }
 

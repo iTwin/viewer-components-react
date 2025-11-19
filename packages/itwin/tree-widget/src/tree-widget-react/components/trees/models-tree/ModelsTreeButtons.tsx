@@ -19,6 +19,7 @@ import {
   CLASS_NAME_GeometricModel3d,
   CLASS_NAME_InformationPartitionElement,
 } from "../common/internal/ClassNameDefinitions.js";
+import { useGuid } from "../common/internal/useGuid.js";
 import { areAllModelsVisible, hideAllModels, invertAllModels, showAll, toggleModels } from "../common/Utils.js";
 
 import type { Id64String } from "@itwin/core-bentley";
@@ -121,6 +122,7 @@ export type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) =>
 
 /** @public */
 export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
+  const componentId = useGuid();
   return (
     <IconButton
       variant={"ghost"}
@@ -131,6 +133,7 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
         void showAll({
           models: props.models.map((model) => model.id),
           viewport: props.viewport,
+          componentId,
         });
       }}
       icon={visibilityShowSvg}

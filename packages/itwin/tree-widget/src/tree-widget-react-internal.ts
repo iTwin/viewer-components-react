@@ -15,10 +15,14 @@ export {
 export { ModelsTreeIdsCache } from "./tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 export { createModelsTreeVisibilityHandler } from "./tree-widget-react/components/trees/models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
 
-export { CategoriesTreeDefinition } from "./tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
+export {
+  CategoriesTreeDefinition,
+  defaultHierarchyConfiguration as defaultCategoriesTreeHierarchyConfiguration,
+} from "./tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 export { CategoriesTreeIdsCache } from "./tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 export { createCategoriesTreeVisibilityHandler } from "./tree-widget-react/components/trees/categories-tree/internal/visibility/CategoriesTreeVisibilityHandler.js";
 export { CategoriesTreeNode } from "./tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeNode.js";
 
 export { ClassificationsTreeDefinition } from "./tree-widget-react/components/trees/classifications-tree/ClassificationsTreeDefinition.js";
 export { ClassificationsTreeIdsCache } from "./tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeIdsCache.js";
+export { releaseMainThreadOnItemsCount } from "./tree-widget-react/components/trees/common/internal/Utils.js";

@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./Header.scss";
+
 import classnames from "classnames";
 import { useEffect, useRef, useState } from "react";
 import { SvgProgressBackwardCircular } from "@itwin/itwinui-icons-react";

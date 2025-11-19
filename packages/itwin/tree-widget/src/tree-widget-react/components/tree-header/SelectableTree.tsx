@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./SelectableTree.css";
+
 import { ErrorBoundary } from "react-error-boundary";
 import { Divider } from "@stratakit/bricks";
 import { ErrorState } from "./ErrorState.js";

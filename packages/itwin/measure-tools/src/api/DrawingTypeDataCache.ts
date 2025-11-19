@@ -6,17 +6,21 @@
 import type { Viewport } from "@itwin/core-frontend";
 import { IModelConnection } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
-import { SheetMeasurementsHelper } from "./SheetMeasurementHelper.js";
 import type { Id64String } from "@itwin/core-bentley";
+import { SheetMeasurementHelper } from "./SheetMeasurementHelper.js";
 
 export class DrawingDataCache {
 
-  private _drawingTypeCache: Map<IModelConnection, Map<Id64String, SheetMeasurementsHelper.DrawingTypeData[]>>;
+  private _drawingDataCache: Map<IModelConnection, Map<Id64String, SheetMeasurementHelper.DrawingTypeData[]>>;
+  private _spatialDataCache: Map<IModelConnection, Map<Id64String, SheetMeasurementHelper.SheetToWorldTransformProps>>;
+  private _drawingTypeDataCache: Map<IModelConnection, Map<Id64String, number>>;
   private _viewportModelChangedListeners: Map<Viewport, () => void>;
   private static _instance: DrawingDataCache | undefined;
 
   private constructor() {
-    this._drawingTypeCache = new Map<IModelConnection, Map<Id64String, SheetMeasurementsHelper.DrawingTypeData[]>>();
+    this._drawingDataCache = new Map<IModelConnection, Map<Id64String, SheetMeasurementHelper.DrawingTypeData[]>>();
+    this._drawingTypeDataCache = new Map<IModelConnection, Map<Id64String, number>>();
+    this._spatialDataCache = new Map<IModelConnection, Map<Id64String, SheetMeasurementHelper.SheetToWorldTransformProps>>();
     this._viewportModelChangedListeners = new Map<Viewport, () => void>();
 
     this.setupEvents();
@@ -36,7 +40,9 @@ export class DrawingDataCache {
   private setupEvents() {
     // If an imodel closes, clear the cache for it
     IModelConnection.onClose.addListener((imodel) => {
-      this._drawingTypeCache.delete(imodel);
+      this._drawingDataCache.delete(imodel);
+      this._drawingTypeDataCache.delete(imodel);
+      this._spatialDataCache.delete(imodel);
     });
 
     // Listen for new viewports opening
@@ -67,31 +73,65 @@ export class DrawingDataCache {
     }
   }
 
-  public getSheetDrawingDataForViewport(vp: Viewport): ReadonlyArray<SheetMeasurementsHelper.DrawingTypeData> {
+  public getSheetDrawingDataForViewport(vp: Viewport): ReadonlyArray<SheetMeasurementHelper.DrawingTypeData> {
     if (!vp.view.isSheetView())
       return [];
 
-    const cache = this._drawingTypeCache.get(vp.iModel);
+    const cache = this._drawingDataCache.get(vp.iModel);
     if (cache)
       return cache.get(vp.view.id) ?? [];
 
     return [];
   }
 
-  public async querySheetDrawingData(imodel: IModelConnection, viewedModelID: string): Promise<ReadonlyArray<SheetMeasurementsHelper.DrawingTypeData>> {
-    let cache = this._drawingTypeCache.get(imodel);
+  public async queryDrawingType(imodel: IModelConnection, drawingId: string) {
+    let cache = this._drawingTypeDataCache.get(imodel);
+
     if (!cache) {
-      cache = new Map<Id64String, SheetMeasurementsHelper.DrawingTypeData[]>();
-      this._drawingTypeCache.set(imodel, cache);
+      cache = new Map<Id64String, number>();
+      this._drawingTypeDataCache.set(imodel, cache);
+    }
+
+    let drawingType = cache?.get(drawingId);
+
+    if (!drawingType) {
+      this._drawingTypeDataCache.set(imodel, await SheetMeasurementHelper.getDrawingsTypes(imodel));
+      drawingType = this._drawingTypeDataCache.get(imodel)?.get(drawingId);
+    }
+
+    return drawingType;
+  }
+
+  public async querySheetDrawingData(imodel: IModelConnection, viewedModelID: string): Promise<SheetMeasurementHelper.DrawingTypeData[]> {
+    let cache = this._drawingDataCache.get(imodel);
+    if (!cache) {
+      cache = new Map<Id64String, SheetMeasurementHelper.DrawingTypeData[]>();
+      this._drawingDataCache.set(imodel, cache);
     }
 
     let sheetData = cache.get(viewedModelID);
     if (!sheetData) {
-      sheetData = await SheetMeasurementsHelper.getSheetTypes(imodel, viewedModelID);
+      sheetData = await SheetMeasurementHelper.getDrawingInfo(imodel, viewedModelID);
       cache.set(viewedModelID, sheetData);
     }
 
     return sheetData;
+  }
+
+  public async querySpatialInfo(imodel: IModelConnection, drawing: SheetMeasurementHelper.DrawingTypeData): Promise<SheetMeasurementHelper.SheetToWorldTransformProps | undefined> {
+    let cache = this._spatialDataCache.get(imodel);
+    if (!cache) {
+      cache = new Map<string, SheetMeasurementHelper.SheetToWorldTransformProps>();
+      this._spatialDataCache.set(imodel, cache);
+    }
+
+    let transformProps = cache.get(drawing.id);
+    if (!transformProps) {
+      transformProps = await SheetMeasurementHelper.getSpatialInfo(imodel, drawing);
+      if (transformProps)
+        cache.set(drawing.id, transformProps);
+    }
+    return transformProps;
   }
 
 }
