@@ -709,7 +709,7 @@ export abstract class Measurement {
    */
   protected adjustPointWithSheetToWorldTransform(point: Point3d): Readonly<Point3d> {
     if (this.drawingMetadata?.sheetToWorldTransformv2) {
-      const newPoint = this.drawingMetadata.sheetToWorldTransformv2.multiplyInversePoint3d(point);
+      const newPoint = this.drawingMetadata.sheetToWorldTransformv2.multiplyPoint3d(point);
       if (newPoint)
         return newPoint
     }
