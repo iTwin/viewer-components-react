@@ -1,6 +1,6 @@
 {
   "type": "patch",
-  "comment": "Fixed measure-tools's sheetToWorld transform displaying incorrect world values.",
+  "comment": "Fixed sheetToWorld transform displaying incorrect world values.",
   "packageName": "@itwin/measure-tools-react",
   "email": "maxime.brassard@bentley.com",
   "dependentChangeType": "patch"
