@@ -18,7 +18,6 @@ export class Polygon {
   public drawMarker: boolean;
   public drawFillArea: boolean;
 
-  private _worldScale: number | undefined;
   private _sheetToWorldTransform?: Transform;
 
   private _points: Point3d[];
@@ -75,12 +74,12 @@ export class Polygon {
 
   /** @deprecated Not used in Polygon.ts anymore, will eventually be removed */
   public set worldScale(scale: number | undefined) {
-    this._worldScale = scale;
+
   }
 
   /** @deprecated Not used in Polygon.ts anymore, will eventually be removed */
   public get worldScale(): number {
-    return this._worldScale ?? 1.0;
+    return 1.0;
   }
 
   public set sheetToWorldTransform(transform: Transform) {
@@ -115,7 +114,7 @@ export class Polygon {
     this._styleSet = (styleSet !== undefined) ? styleSet : StyleSet.default;
     this.drawMarker = true;
     this.drawFillArea = true;
-    this._worldScale = worldScale;
+    this.worldScale = worldScale;
     this._points = (copyPoints) ? this.copyPoints(points) : points;
     this._perimeter = this.calculatePerimeter(this.points);
     this._area = Math.abs(PolygonOps.area(this.points));
