@@ -504,9 +504,9 @@ export class DistanceMeasurement extends Measurement {
     const lengthSpec = FormatterUtils.getFormatterSpecWithFallback(this._lengthKoQ, QuantityType.LengthEngineering);
 
     const adjustedStartPoint = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._startPoint));
-    const adjsutedEndPoint = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._endPoint));
+    const adjustedEndPoint = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._endPoint));
 
-    const distance = adjustedStartPoint.distance(adjsutedEndPoint);
+    const distance = adjustedStartPoint.distance(adjustedEndPoint);
     const fDistance = await FormatterUtils.formatLength(
       distance,
       lengthSpec
@@ -544,18 +544,18 @@ export class DistanceMeasurement extends Measurement {
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
 
     const adjustedStartPoint = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._startPoint));
-    const adjsutedEndPoint = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._endPoint));
+    const adjustedEndPoint = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._endPoint));
 
-    const distance = adjustedStartPoint.distance(adjsutedEndPoint);
-    const run = adjustedStartPoint.distanceXY(adjsutedEndPoint);
-    const rise = adjsutedEndPoint.z - adjustedStartPoint.z;
+    const distance = adjustedStartPoint.distance(adjustedEndPoint);
+    const run = adjustedStartPoint.distanceXY(adjustedEndPoint);
+    const rise = adjustedEndPoint.z - adjustedStartPoint.z;
     const slope = 0.0 < run ? (100 * rise) / run : 0.0;
 
-    const dx = Math.abs(adjsutedEndPoint.x - adjustedStartPoint.x);
-    const dy = Math.abs(adjsutedEndPoint.y - adjustedStartPoint.y);
-    const bearing = FormatterUtils.calculateBearing(adjsutedEndPoint.x - adjustedStartPoint.x, adjsutedEndPoint.y - adjustedStartPoint.y);
+    const dx = Math.abs(adjustedEndPoint.x - adjustedStartPoint.x);
+    const dy = Math.abs(adjustedEndPoint.y - adjustedStartPoint.y);
+    const bearing = FormatterUtils.calculateBearing(adjustedEndPoint.x - adjustedStartPoint.x, adjustedEndPoint.y - adjustedStartPoint.y);
     const adjustedStart = this.adjustPointForGlobalOrigin(adjustedStartPoint);
-    const adjustedEnd = this.adjustPointForGlobalOrigin(adjsutedEndPoint);
+    const adjustedEnd = this.adjustPointForGlobalOrigin(adjustedEndPoint);
     const lengthSpec = FormatterUtils.getFormatterSpecWithFallback(this._lengthKoQ, QuantityType.LengthEngineering);
     const coordinateSpec = FormatterUtils.getFormatterSpecWithFallback(this._coordinateKoQ, QuantityType.Coordinate);
 
