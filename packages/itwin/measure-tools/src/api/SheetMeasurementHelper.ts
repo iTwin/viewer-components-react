@@ -245,7 +245,7 @@ export namespace SheetMeasurementHelper {
 
     const transform = sheetToWorldTransform.transformParams.sheetTov8Drawing.clone();
     transform.setMultiplyTransformTransform(Transform.createTranslation(Point3d.create(0, 0, sheetToWorldTransform.transformParams.masterOrigin.z)), transform);
-    transform.setMultiplyTransformTransform(sheetToWorldTransform.transformParams.v8DrawingToDesign.clone(), transform);
+    transform.setMultiplyTransformTransform(sheetToWorldTransform.transformParams.v8DrawingToDesign, transform);
     return transform;
   }
 
