@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { firstValueFrom } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { SvgLayers } from "@itwin/itwinui-icons-react";
@@ -98,15 +98,21 @@ export function useCategoriesTree({ hierarchyConfig, filter, activeView, onCateg
     [viewType, getCategoriesTreeIdsCache, hierarchyConfiguration],
   );
 
+  useEffect(() => {
+    if (!filter) {
+      setFilteringError(undefined);
+      onCategoriesFiltered?.(undefined);
+    }
+  }, [filter, onCategoriesFiltered]);
+
   const getFilteredPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
-    setFilteringError(undefined);
-    onCategoriesFiltered?.(undefined);
     if (!filter) {
       return undefined;
     }
     return async ({ imodelAccess, abortSignal }) => {
       onFeatureUsed({ featureId: "filtering", reportInteraction: true });
       try {
+        setFilteringError(undefined);
         const paths = await CategoriesTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
           label: filter,
