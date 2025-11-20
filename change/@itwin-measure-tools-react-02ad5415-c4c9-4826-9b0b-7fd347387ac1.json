@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "a few fixes",
+  "packageName": "@itwin/measure-tools-react",
+  "email": "maxime.brassard@bentley.com",
+  "dependentChangeType": "patch"
+}
