@@ -243,7 +243,7 @@ export namespace SheetMeasurementHelper {
       return Transform.createIdentity();
     }
 
-    const transform = sheetToWorldTransform.transformParams.sheetTov8Drawing;
+    const transform = sheetToWorldTransform.transformParams.sheetTov8Drawing.clone();
     transform.setMultiplyTransformTransform(Transform.createTranslation(Point3d.create(0, 0, sheetToWorldTransform.transformParams.masterOrigin.z)), transform);
     transform.setMultiplyTransformTransform(sheetToWorldTransform.transformParams.v8DrawingToDesign, transform);
     return transform;
@@ -338,7 +338,7 @@ export namespace SheetMeasurementHelper {
           const sheetToWorldTransform: CivilSheetTransformParams = { masterOrigin: Point3d.fromJSON(jsonProp.civilimodelconn.masterOrigin), sheetTov8Drawing: Transform.fromJSON(jsonProp.civilimodelconn.sheetToV8DrawingTransform), v8DrawingToDesign: Transform.fromJSON(jsonProp.civilimodelconn.v8DrawingToDesignTransform)};
           return {
             transformParams: sheetToWorldTransform,
-            sheetScale: row[5]
+            sheetScale: jsonProp.scale
           };
         }
       }
