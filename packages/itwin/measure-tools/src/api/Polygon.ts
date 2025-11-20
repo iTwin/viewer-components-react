@@ -73,7 +73,7 @@ export class Polygon {
   }
 
   /** @deprecated Not used in Polygon.ts anymore, will eventually be removed */
-  public set worldScale(scale: number | undefined) {
+  public set worldScale(_scale: number | undefined) {
 
   }
 
@@ -108,13 +108,12 @@ export class Polygon {
     this.recomputeFromPoints();
   }
 
-  constructor(points: Point3d[], copyPoints: boolean = true, styleSet?: StyleSet, worldScale?: number, formatting?: MeasurementFormattingProps) {
+  constructor(points: Point3d[], copyPoints: boolean = true, styleSet?: StyleSet, formatting?: MeasurementFormattingProps) {
     this._areaKoQ = formatting?.koqName ?? "AecUnits.AREA";
     this._areaPersistenceUnitName = formatting?.persistenceUnitName ?? "Units.SQ_M";
     this._styleSet = (styleSet !== undefined) ? styleSet : StyleSet.default;
     this.drawMarker = true;
     this.drawFillArea = true;
-    this.worldScale = worldScale;
     this._points = (copyPoints) ? this.copyPoints(points) : points;
     this._perimeter = this.calculatePerimeter(this.points);
     this._area = Math.abs(PolygonOps.area(this.points));
