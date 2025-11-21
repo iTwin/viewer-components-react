@@ -49,7 +49,7 @@
       "removeUnit": "Remove unit",
       "azimuthBaseUnit": "Azimuth base unit",
       "apply": "Apply",
-      "clear": "Clear",
+      "revert": "Revert",
       "searchFormats": "Search formats...",
       "label": "Label",
       "unitSystem": "Unit system",

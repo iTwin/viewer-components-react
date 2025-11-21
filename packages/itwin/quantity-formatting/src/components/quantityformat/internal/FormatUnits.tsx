@@ -184,7 +184,7 @@ function UnitDescr(props: {
   );
 
   return (
-    <div className="quantityFormat--formatInlineRow">
+    <div className="quantityFormat-formatInlineRow">
       <Select
         id={unitSelectorId}
         options={unitOptions}
@@ -193,7 +193,7 @@ function UnitDescr(props: {
         onChange={(newValue) => onUnitChange(newValue, index)}
         disabled={readonly}
         size="small"
-        className="quantityFormat--unitSelect"
+        className="quantityFormat-unitSelect"
       />
       <Input
         id={labelInputId}
@@ -202,7 +202,7 @@ function UnitDescr(props: {
         onChange={handleOnLabelChange}
         size="small"
         disabled={readonly}
-        className="quantityFormat--unitInput"
+        className="quantityFormat-unitInput"
       />
     </div>
   );
@@ -347,11 +347,11 @@ export function FormatUnits(props: FormatUnitsProps) {
 
       {formatProps.composite?.units &&
         formatProps.composite.units.length > 1 && (
-          <div className="quantityFormat--formatInlineRow">
+          <div className="quantityFormat-formatInlineRow">
             <Label displayStyle="inline" htmlFor={compositeSpacerSelectorId}>
               {translate("QuantityFormat:labels.compositeSpacer")}
               <IconButton
-                className="quantityFormat--formatHelpTooltip"
+                className="quantityFormat-formatHelpTooltip"
                 size="small"
                 styleType="borderless"
                 label={translate(
@@ -366,7 +366,7 @@ export function FormatUnits(props: FormatUnitsProps) {
               value={formatProps.composite.spacer ?? ""}
               onChange={handleOnSpacerChange}
               size="small"
-              className="quantityFormat--unitInput"
+              className="quantityFormat-unitInput"
             />
           </div>
         )}

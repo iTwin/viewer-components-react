@@ -55,7 +55,7 @@ export function KeepSingleZero(props: KeepSingleZeroProps) {
   );
 
   return (
-    <div className="quantityFormat--formatInlineRow">
+    <div className="quantityFormat-formatInlineRow">
       <Label displayStyle="inline" htmlFor={keepSingleZeroId}>
         {translate("QuantityFormat:labels.keepSingleZeroLabel")}
       </Label>

@@ -31,8 +31,8 @@ export function FractionalPrimaryChildren(
   const { translate } = useTranslation();
 
   return (
-    <div className="quantityFormat--formatPanel-primaryChildren">
-      <div className="quantityFormat--formatTypeRow">
+    <div className="quantityFormat-formatPanel-primaryChildren">
+      <div className="quantityFormat-formatTypeRow">
         <FormatTypeOption formatProps={formatProps} onChange={onFormatChange} />
       </div>
       <Text variant="small" isMuted={true}>
@@ -75,7 +75,7 @@ export function FractionalSecondaryChildren(
   const { formatProps, onFormatChange } = props;
 
   return (
-    <div className="quantityFormat--formatPanel-secondaryChildren">
+    <div className="quantityFormat-formatPanel-secondaryChildren">
       <SignOption formatProps={formatProps} onChange={onFormatChange} />
       <FractionDash formatProps={formatProps} onChange={onFormatChange} />
       <UseThousandsSeparator

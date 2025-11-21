@@ -70,7 +70,7 @@ export function UseThousandsSeparator(props: UseThousandsSeparatorProps) {
   );
 
   return (
-    <div className="quantityFormat--formatInlineRow">
+    <div className="quantityFormat-formatInlineRow">
       <Label displayStyle="inline" htmlFor={useThousandsId}>
         {translate("QuantityFormat:labels.useThousandSeparatorLabel")}
       </Label>
@@ -133,12 +133,12 @@ export function ThousandsSeparatorSelector(
   }
 
   return (
-    <div className="quantityFormat--formatInlineRow">
+    <div className="quantityFormat-formatInlineRow">
       <Label displayStyle="inline" htmlFor={thousandsSelectorId}>
         {translate("QuantityFormat:labels.thousandSeparatorLabel")}
       </Label>
       <IconButton
-        className="quantityFormat--formatHelpTooltip"
+        className="quantityFormat-formatHelpTooltip"
         styleType="borderless"
         size="small"
         label={translate("QuantityFormat:labels.thousandSelectorTooltip")}

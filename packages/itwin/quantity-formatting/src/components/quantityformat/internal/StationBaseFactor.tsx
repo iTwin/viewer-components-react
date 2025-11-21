@@ -86,7 +86,7 @@ export function StationBaseFactor(props: StationBaseFactorProps) {
 
 
   return (
-    <div className="quantityFormat--formatInlineRow">
+    <div className="quantityFormat-formatInlineRow">
       <Label displayStyle="inline" htmlFor={stationBaseFactorInputId}>
         {translate("QuantityFormat:labels.stationBaseFactorLabel")}
       </Label>

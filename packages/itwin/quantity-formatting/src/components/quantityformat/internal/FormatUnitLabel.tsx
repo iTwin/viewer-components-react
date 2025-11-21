@@ -49,7 +49,7 @@ export function UomSeparatorSelector(props: UomSeparatorSelectorProps) {
   }, [formatProps.uomSeparator, translate]);
 
   return (
-    <div className="quantityFormat--formatInlineRow">
+    <div className="quantityFormat-formatInlineRow">
       <LabeledSelect
         label={translate("QuantityFormat:labels.labelSeparator")}
         options={separatorOptions}
@@ -114,7 +114,7 @@ export function AppendUnitLabel(props: AppendUnitLabelProps) {
   );
 
   return (
-    <div className="quantityFormat--formatInlineRow quantityFormat--appendUnitLabel">
+    <div className="quantityFormat-formatInlineRow quantityFormat-appendUnitLabel">
       <Label htmlFor={appendUnitLabelId}>
         {translate("QuantityFormat:labels.appendUnitLabel")}
       </Label>

@@ -93,11 +93,11 @@ export function FormatPanel(props: FormatPanelProps) {
     <Flex
       flexDirection="column"
       alignItems="flex-start"
-      className="quantityFormat--formatPanel"
+      className="quantityFormat-formatPanel"
     >
       <Surface
         elevation={0}
-        className="quantityFormat--formatPanel-primaryChildren"
+        className="quantityFormat-formatPanel-primaryChildren"
         border={false}
       >
         {primaryChildren}
@@ -114,7 +114,7 @@ export function FormatPanel(props: FormatPanelProps) {
         isExpanded={isExpanded}
         onToggle={() => setIsExpanded(!isExpanded)}
       >
-        <div className="quantityFormat--formatPanel-secondaryChildren">
+        <div className="quantityFormat-formatPanel-secondaryChildren">
           {secondaryChildren}
         </div>
       </ExpandableBlock>

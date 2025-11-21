@@ -31,8 +31,8 @@ export function RatioPrimaryChildren(props: PanelProps): React.ReactElement {
   const { translate } = useTranslation();
 
   return (
-    <div className="quantityFormat--formatPanel-primaryChildren">
-      <div className="quantityFormat--formatTypeRow">
+    <div className="quantityFormat-formatPanel-primaryChildren">
+      <div className="quantityFormat-formatTypeRow">
         <FormatTypeOption formatProps={formatProps} onChange={onFormatChange} />
       </div>
       <Text variant="small" isMuted={true}>
@@ -74,7 +74,7 @@ export function RatioSecondaryChildren(props: PanelProps): React.ReactElement {
   const { formatProps, onFormatChange } = props;
 
   return (
-    <div className="quantityFormat--formatPanel-secondaryChildren">
+    <div className="quantityFormat-formatPanel-secondaryChildren">
       <SignOption formatProps={formatProps} onChange={onFormatChange} />
       <DecimalSeparator formatProps={formatProps} onChange={onFormatChange} />
       <UseThousandsSeparator

@@ -27,7 +27,7 @@ export function StationOffset(props: StationOffsetProps) {
   const stationOffsetSelectorId = React.useId();
 
   return (
-    <div className="quantityFormat--formatInlineRow">
+    <div className="quantityFormat-formatInlineRow">
       <Label displayStyle="inline" id={stationOffsetSelectorId}>
         {translate("QuantityFormat:labels.stationOffsetLabel")}
       </Label>
