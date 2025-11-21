@@ -30,7 +30,7 @@ export function FormatPrecision(props: FormatPrecisionProps) {
   const formatType = parseFormatType(formatProps.type, "format");
 
   return (
-    <div className="quantityFormat--formatInlineRow">
+    <div className="quantityFormat-formatInlineRow">
       <Label displayStyle="inline" id={precisionSelectorId}>
         {translate("QuantityFormat:labels.precision")}
       </Label>

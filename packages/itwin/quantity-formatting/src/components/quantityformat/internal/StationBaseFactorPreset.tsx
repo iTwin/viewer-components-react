@@ -71,7 +71,7 @@ export function StationBaseFactorPreset(props: StationBaseFactorPresetProps) {
   );
 
   return (
-    <div className="quantityFormat--formatInlineRow">
+    <div className="quantityFormat-formatInlineRow">
       <Label displayStyle="inline">
         {translate("QuantityFormat:labels.stationPresetLabel")}
       </Label>

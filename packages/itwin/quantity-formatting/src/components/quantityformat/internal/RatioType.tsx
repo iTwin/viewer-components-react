@@ -67,13 +67,13 @@ export function RatioType(props: RatioTypeProps) {
   );
 
   return (
-    <div className="quantityFormat--formatInlineRow">
+    <div className="quantityFormat-formatInlineRow">
       <LabeledSelect
         label={
           <>
             {translate("QuantityFormat:labels.ratioTypeLabel")}
             <IconButton
-              className="quantityFormat--formatHelpTooltip"
+              className="quantityFormat-formatHelpTooltip"
               styleType="borderless"
               size="small"
               label={translate("QuantityFormat:ratio-type.default.description")}

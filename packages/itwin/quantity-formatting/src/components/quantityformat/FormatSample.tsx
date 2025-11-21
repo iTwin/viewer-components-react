@@ -132,18 +132,18 @@ export function FormatSample(props: FormatSampleProps) {
   );
 
   return (
-    <div className="quantityFormat--formatSample-container">
+    <div className="quantityFormat-formatSample-container">
         <Label
-          className="quantityFormat--samplePreviewTitle"
+          className="quantityFormat-samplePreviewTitle"
           htmlFor={inputId}
         >
           {translate("QuantityFormat:labels.samplePreview")}
         </Label>
-        <div className="quantityFormat--formatSample-previewRow">
-          <div className="quantityFormat--formatSample-inputGroup">
+        <div className="quantityFormat-formatSample-previewRow">
+          <div className="quantityFormat-formatSample-inputGroup">
             <Input
               id={inputId}
-              className="quantityFormat--formatSample-input"
+              className="quantityFormat-formatSample-input"
               value={sampleValue}
               onChange={handleOnValueChange}
               onKeyDown={handleKeyDown}
@@ -152,8 +152,8 @@ export function FormatSample(props: FormatSampleProps) {
             />
           </div>
           <Divider orientation="vertical" />
-          <div className="quantityFormat--formatSample-resultSection">
-            <Label className="quantityFormat--formattedValueLabel">
+          <div className="quantityFormat-formatSample-resultSection">
+            <Label className="quantityFormat-formattedValueLabel">
               {formattedValue}
             </Label>
           </div>

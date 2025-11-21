@@ -85,7 +85,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
   );
 
   return (
-    <Flex flexDirection="column" alignItems="flex-start" gap="none" className="quantityFormat--formatSelector-container">
+    <Flex flexDirection="column" alignItems="flex-start" gap="none" className="quantityFormat-formatSelector-container">
       {activeFormatSet && (
         <>
           <Input
@@ -94,14 +94,14 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
             placeholder={translate("QuantityFormat:labels.searchFormats")}
           />
           <List
-            className="quantityFormat--formatSelector-list"
+            className="quantityFormat-formatSelector-list"
           >
             {filteredFormats.map(({ key, label }) => (
               <ListItem
                 key={key}
                 onClick={() => handleFormatSelect(key)}
                 active={activeFormatDefinitionKey === key}
-                className={`quantityFormat--formatSelector-listItem`}
+                className={`quantityFormat-formatSelector-listItem`}
               >
                 <Text variant="body">{label}</Text>
               </ListItem>

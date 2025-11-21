@@ -66,9 +66,9 @@ describe("FormatSetPanel", () => {
     it("should render with correct CSS classes", () => {
       const { container } = render(<FormatSetPanel formatSet={mockFormatSet} />);
 
-      expect(container.querySelector(".quantityFormat--formatSetPanel-container")).toBeTruthy();
-      expect(container.querySelector(".quantityFormat--formatSetPanel-inputRow")).toBeTruthy();
-      expect(container.querySelector(".quantityFormat--formatSetPanel-inputRow-descr")).toBeTruthy();
+      expect(container.querySelector(".quantityFormat-formatSetPanel-container")).toBeTruthy();
+      expect(container.querySelector(".quantityFormat-formatSetPanel-inputRow")).toBeTruthy();
+      expect(container.querySelector(".quantityFormat-formatSetPanel-inputRow-descr")).toBeTruthy();
     });
   });
 
@@ -195,16 +195,16 @@ describe("FormatSetPanel", () => {
     it("should apply correct CSS classes to inputs", () => {
       const { container } = render(<FormatSetPanel formatSet={mockFormatSet} />);
 
-      const inputs = container.querySelectorAll(".quantityFormat--formatSetPanel-input");
+      const inputs = container.querySelectorAll(".quantityFormat-formatSetPanel-input");
       expect(inputs.length).toBeGreaterThan(0);
     });
 
     it("should apply correct CSS classes to layout containers", () => {
       const { container } = render(<FormatSetPanel formatSet={mockFormatSet} />);
 
-      expect(container.querySelector(".quantityFormat--formatSetPanel-container")).toBeTruthy();
-      expect(container.querySelector(".quantityFormat--formatSetPanel-inputRow")).toBeTruthy();
-      expect(container.querySelector(".quantityFormat--formatSetPanel-inputRow-descr")).toBeTruthy();
+      expect(container.querySelector(".quantityFormat-formatSetPanel-container")).toBeTruthy();
+      expect(container.querySelector(".quantityFormat-formatSetPanel-inputRow")).toBeTruthy();
+      expect(container.querySelector(".quantityFormat-formatSetPanel-inputRow-descr")).toBeTruthy();
     });
   });
 });
