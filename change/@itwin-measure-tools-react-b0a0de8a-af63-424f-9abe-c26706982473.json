@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Distance and Area tools working with vertical exaggeration",
-  "packageName": "@itwin/measure-tools-react",
-  "email": "maxime.brassard@bentley.com",
-  "dependentChangeType": "patch"
-}
