@@ -3,11 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { FilterAction } from "@itwin/presentation-hierarchies-react";
 import { BaseTreeRenderer } from "./BaseTreeRenderer.js";
 
-import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
 
 /** @beta */
@@ -33,16 +32,16 @@ export function TreeRenderer(props: TreeRendererProps) {
     },
     [getInlineActions, onFilterClick, getHierarchyLevelDetails, props],
   );
-  const nodeMenuActions = useCallback<Required<BaseTreeRendererProps>["getMenuActions"]>(
-    (actionsProps) => (getMenuActions ? getMenuActions(actionsProps, props) : []),
+  const nodeMenuActions = useMemo<BaseTreeRendererProps["getMenuActions"]>(
+    () => (getMenuActions ? (actionsProps) => getMenuActions(actionsProps, props) : undefined),
     [getMenuActions, props],
   );
-  const nodeContextMenuActions = useCallback<Required<BaseTreeRendererProps>["getContextMenuActions"]>(
-    (actionsProps) => (getContextMenuActions ? getContextMenuActions(actionsProps, props) : []),
+  const nodeContextMenuActions = useMemo<BaseTreeRendererProps["getContextMenuActions"]>(
+    () => (getContextMenuActions ? (actionsProps) => getContextMenuActions(actionsProps, props) : undefined),
     [getContextMenuActions, props],
   );
-  const nodeDecorations = useCallback<Required<BaseTreeRendererProps>["getDecorations"]>(
-    (node: PresentationHierarchyNode) => (getDecorations ? getDecorations(node, props) : []),
+  const nodeDecorations = useMemo<BaseTreeRendererProps["getDecorations"]>(
+    () => (getDecorations ? (node) => getDecorations(node, props) : undefined),
     [getDecorations, props],
   );
 
