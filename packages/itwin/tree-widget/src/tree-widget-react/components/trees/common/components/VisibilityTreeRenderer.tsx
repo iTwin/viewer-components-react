@@ -14,9 +14,9 @@ import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
 import type { VisibilityContext } from "./TreeNodeVisibilityButton.js";
 
 /** @beta */
-export type VisibilityTreeRendererProps = Omit<BaseTreeRendererProps, "getInlineActions" | "getMenuActions" | "getDecorations"> & {
-  [Property in keyof Pick<BaseTreeRendererProps, "getInlineActions" | "getMenuActions" | "getDecorations">]?: (
-    node: PresentationHierarchyNode,
+export type VisibilityTreeRendererProps = Omit<BaseTreeRendererProps, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getDecorations"> & {
+  [Property in keyof Pick<BaseTreeRendererProps, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getDecorations">]?: (
+    args: Parameters<NonNullable<BaseTreeRendererProps[Property]>>[0],
     treeRendererProps: VisibilityTreeRendererProps,
   ) => ReturnType<NonNullable<BaseTreeRendererProps[Property]>>;
 } & VisibilityContext;
@@ -31,6 +31,7 @@ export function VisibilityTreeRenderer(props: VisibilityTreeRendererProps) {
     onVisibilityButtonClick: onClick,
     getInlineActions,
     getMenuActions,
+    getContextMenuActions,
     getDecorations,
     onFilterClick,
     getHierarchyLevelDetails,
@@ -38,19 +39,29 @@ export function VisibilityTreeRenderer(props: VisibilityTreeRendererProps) {
   } = props;
   const { onVisibilityButtonClick } = useVisibilityButtonHandler({ rootNodes: props.rootNodes, isNodeSelected: props.isNodeSelected, onClick });
 
-  const nodeInlineActions = useCallback(
-    (node: PresentationHierarchyNode) => {
+  const nodeInlineActions = useCallback<Required<BaseTreeRendererProps>["getInlineActions"]>(
+    (actionsProps) => {
       return getInlineActions
-        ? getInlineActions(node, props)
+        ? getInlineActions(actionsProps, props)
         : [
-            <VisibilityAction key={"Visibility"} node={node} reserveSpace />,
-            <FilterAction key={"Filter"} node={node} onFilter={onFilterClick} getHierarchyLevelDetails={getHierarchyLevelDetails} reserveSpace />,
+            <VisibilityAction key={"Visibility"} node={actionsProps.targetNode} />,
+            <FilterAction key={"Filter"} node={actionsProps.targetNode} onFilter={onFilterClick} getHierarchyLevelDetails={getHierarchyLevelDetails} />,
           ];
     },
     [onFilterClick, getHierarchyLevelDetails, getInlineActions, props],
   );
-  const nodeMenuActions = useCallback((node: PresentationHierarchyNode) => (getMenuActions ? getMenuActions(node, props) : []), [getMenuActions, props]);
-  const nodeDecorations = useCallback((node: PresentationHierarchyNode) => (getDecorations ? getDecorations(node, props) : []), [getDecorations, props]);
+  const nodeMenuActions = useCallback<Required<BaseTreeRendererProps>["getMenuActions"]>(
+    (actionsProps) => (getMenuActions ? getMenuActions(actionsProps, props) : []),
+    [getMenuActions, props],
+  );
+  const nodeContextMenuActions = useCallback<Required<BaseTreeRendererProps>["getContextMenuActions"]>(
+    (actionsProps) => (getContextMenuActions ? getContextMenuActions(actionsProps, props) : []),
+    [getContextMenuActions, props],
+  );
+  const nodeDecorations = useCallback<Required<BaseTreeRendererProps>["getDecorations"]>(
+    (node: PresentationHierarchyNode) => (getDecorations ? getDecorations(node, props) : []),
+    [getDecorations, props],
+  );
 
   return (
     <VisibilityContextProvider onVisibilityButtonClick={onVisibilityButtonClick} getVisibilityButtonState={getVisibilityButtonState}>
@@ -60,6 +71,7 @@ export function VisibilityTreeRenderer(props: VisibilityTreeRendererProps) {
         getHierarchyLevelDetails={getHierarchyLevelDetails}
         getInlineActions={nodeInlineActions}
         getMenuActions={nodeMenuActions}
+        getContextMenuActions={nodeContextMenuActions}
         getDecorations={nodeDecorations}
       />
     </VisibilityContextProvider>

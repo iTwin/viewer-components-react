@@ -27,7 +27,7 @@ import type { IModelContentTreeHierarchyConfiguration } from "./IModelContentTre
 
 /** @beta */
 export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
-  Pick<BaseTreeRendererProps, "getInlineActions" | "getMenuActions" | "getDecorations" | "treeLabel"> & {
+  Pick<BaseTreeRendererProps, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getDecorations" | "treeLabel"> & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
     };
@@ -38,6 +38,7 @@ export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "selectionStorag
 export function IModelContentTree({
   getInlineActions,
   getMenuActions,
+  getContextMenuActions,
   getDecorations,
   selectionMode,
   treeLabel,
@@ -70,6 +71,7 @@ export function IModelContentTree({
           treeLabel={treeLabel}
           getInlineActions={getInlineActions}
           getMenuActions={getMenuActions}
+          getContextMenuActions={getContextMenuActions}
           getDecorations={getDecorations ?? ((node) => <IModelContentTreeIcon node={node} />)}
         />
       )}
