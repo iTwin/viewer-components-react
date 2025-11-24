@@ -37,7 +37,6 @@ import {
   RenameAction,
   TreeWidget,
   TreeWidgetComponent,
-  VisibilityAction,
 } from "@itwin/tree-widget-react";
 import { createLayersUiProvider, initializeLayers } from "./components/LayersWidget";
 import { CustomizeFormatPropertyContextMenuItem } from "./components/quantity-formatting/FormatPropertyContextMenuItem";
@@ -122,8 +121,6 @@ const configuredUiItems = new Map<string, UiItem>([
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}
                     treeLabel={props.treeLabel}
-                    getContextMenuActions={({ targetNode }) => [<VisibilityAction key="visibility" node={targetNode} />]}
-                    getMenuActions={({ targetNode }) => [<VisibilityAction key="visibility" node={targetNode} />]}
                   />
                 ),
               },
