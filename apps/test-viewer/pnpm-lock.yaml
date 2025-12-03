@@ -109,6 +109,9 @@ importers:
       '@itwin/presentation-components':
         specifier: ^5.12.12
         version: 5.12.12(6edcfa3244b0fc3e0e2682344d658fb3)
+      '@itwin/presentation-core-interop':
+        specifier: 1.4.0-alpha.3
+        version: 1.4.0-alpha.3(@itwin/core-bentley@5.3.0)(@itwin/core-common@5.3.0(@itwin/core-bentley@5.3.0)(@itwin/core-geometry@5.3.0))(@itwin/core-geometry@5.3.0)(@itwin/core-quantity@5.3.0(@itwin/core-bentley@5.3.0))(@itwin/ecschema-metadata@5.3.0(@itwin/core-bentley@5.3.0)(@itwin/core-quantity@5.3.0(@itwin/core-bentley@5.3.0)))
       '@itwin/presentation-frontend':
         specifier: ^5.3.0
         version: 5.3.0(633ad3a9494bbe7fb151a7c98a886f05)

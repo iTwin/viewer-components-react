@@ -37,6 +37,7 @@
     "@itwin/presentation-common": "^5.3.0",
     "@itwin/presentation-components": "^5.12.12",
     "@itwin/presentation-frontend": "^5.3.0",
+    "@itwin/presentation-core-interop": "1.4.0-alpha.3",
     "@itwin/presentation-hierarchies": "^2.0.0-alpha.5",
     "@itwin/presentation-hierarchies-react": "^2.0.0-alpha.42",
     "@itwin/presentation-shared": "^2.0.0-alpha.3",

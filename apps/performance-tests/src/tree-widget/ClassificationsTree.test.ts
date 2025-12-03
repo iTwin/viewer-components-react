@@ -52,7 +52,7 @@ function runClassificationsPerformanceTest({
       const imodel = SnapshotDb.openFile(Datasets.getIModelPath("50k classifications"));
       const imodelAccess = StatelessHierarchyProvider.createIModelAccess(imodel, "unbounded");
       const idsCache = new ClassificationsTreeIdsCache(imodelAccess, hierarchyConfig);
-      const hierarchyDefinition = new ClassificationsTreeDefinition({ imodelAccess, idsCache, hierarchyConfig });
+      const hierarchyDefinition = new ClassificationsTreeDefinition({ imodelAccess, getIdsCache: () => idsCache, hierarchyConfig });
       return { imodel, imodelAccess, idsCache, hierarchyDefinition };
     },
     cleanup: (props) => {
