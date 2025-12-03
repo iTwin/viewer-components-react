@@ -101,7 +101,7 @@ describe("LocationMeasurement tests", () => {
 
       // Verify that the KoQ lookup was attempted (coordinate is used first in createTextMarker)
       assert.isTrue(getSpecsByNameSpy.mock.calls.length > 0, "getSpecsByName should have been called during construction");
-      assert.strictEqual(getSpecsByNameSpy.mock.calls[0][0], "AecUnits.LENGTH_COORDINATE", "Should lookup the default coordinate KoQ string");
+      assert.strictEqual(getSpecsByNameSpy.mock.calls[0][0], "DefaultToolsUnits.LENGTH_COORDINATE", "Should lookup the default coordinate KoQ string");
 
       // Verify that the fallback method was called
       assert.isTrue(findFormatterSpecSpy.mock.calls.length > 0, "findFormatterSpecByQuantityType should have been called as fallback");
@@ -110,7 +110,7 @@ describe("LocationMeasurement tests", () => {
       // Verify the measurement was created successfully
       assert.isDefined(measurement);
       assert.isDefined(measurement.location);
-      assert.strictEqual(measurement.coordinateKoQ, "AecUnits.LENGTH_COORDINATE");
+      assert.strictEqual(measurement.coordinateKoQ, "DefaultToolsUnits.LENGTH_COORDINATE");
     } finally {
       // Restore original methods
       IModelApp.quantityFormatter.getSpecsByName = originalGetSpecsByName;

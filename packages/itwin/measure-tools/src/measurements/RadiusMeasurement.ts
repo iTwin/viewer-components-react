@@ -36,7 +36,7 @@ export interface RadiusMeasurementProps extends MeasurementProps {
 
 /** Formatting properties for Radius measurement. */
 export interface RadiusMeasurementFormattingProps {
-  /** Defaults to "AecUnits.LENGTH" and "Units.M" */
+  /** Defaults to "DefaultToolsUnits.LENGTH" and "Units.M" */
   length?: MeasurementFormattingProps;
 }
 
@@ -101,7 +101,7 @@ export class RadiusMeasurement extends Measurement {
     super();
 
     this._isDynamic = false;
-    this._lengthKoQ = "AecUnits.LENGTH";
+    this._lengthKoQ = "DefaultToolsUnits.LENGTH";
     this._lengthPersistenceUnitName = "Units.M";
     if (props) this.readFromJSON(props);
 

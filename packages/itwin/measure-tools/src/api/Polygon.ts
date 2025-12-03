@@ -109,7 +109,7 @@ export class Polygon {
   }
 
   constructor(points: Point3d[], copyPoints: boolean = true, styleSet?: StyleSet, formatting?: MeasurementFormattingProps) {
-    this._areaKoQ = formatting?.koqName ?? "AecUnits.AREA";
+    this._areaKoQ = formatting?.koqName ?? "DefaultToolsUnits.AREA";
     this._areaPersistenceUnitName = formatting?.persistenceUnitName ?? "Units.SQ_M";
     this._styleSet = (styleSet !== undefined) ? styleSet : StyleSet.default;
     this.drawMarker = true;
