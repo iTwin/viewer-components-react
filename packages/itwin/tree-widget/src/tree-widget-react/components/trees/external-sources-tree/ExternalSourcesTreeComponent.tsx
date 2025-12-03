@@ -22,6 +22,7 @@ interface ExternalSourcesTreeComponentProps
     | "emptyTreeContent"
     | "getInlineActions"
     | "getMenuActions"
+    | "getContextMenuActions"
     | "getDecorations"
     | "treeLabel"
   > {

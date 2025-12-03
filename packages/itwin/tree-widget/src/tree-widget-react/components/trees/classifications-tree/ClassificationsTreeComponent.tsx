@@ -26,6 +26,7 @@ interface ClassificationsTreeComponentProps
     | "emptyTreeContent"
     | "getInlineActions"
     | "getMenuActions"
+    | "getContextMenuActions"
     | "getDecorations"
     | "hierarchyConfig"
     | "getEditingProps"

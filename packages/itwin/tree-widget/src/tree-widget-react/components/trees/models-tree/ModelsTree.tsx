@@ -13,7 +13,7 @@ import type { UseModelsTreeProps } from "./UseModelsTree.js";
 
 /** @beta */
 export type ModelsTreeProps = Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
-  Pick<VisibilityTreeRendererProps, "getInlineActions" | "getMenuActions" | "getDecorations" | "treeLabel"> &
+  Pick<VisibilityTreeRendererProps, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getDecorations" | "treeLabel"> &
   UseModelsTreeProps & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
@@ -36,6 +36,7 @@ export function ModelsTree({
   onModelsFiltered,
   getInlineActions,
   getMenuActions,
+  getContextMenuActions,
   emptyTreeContent,
   getSubTreePaths,
   treeLabel,
@@ -66,6 +67,7 @@ export function ModelsTree({
           treeLabel={treeLabel}
           getInlineActions={getInlineActions}
           getMenuActions={getMenuActions}
+          getContextMenuActions={getContextMenuActions}
           getDecorations={getDecorations ?? rendererProps.getDecorations}
         />
       )}
