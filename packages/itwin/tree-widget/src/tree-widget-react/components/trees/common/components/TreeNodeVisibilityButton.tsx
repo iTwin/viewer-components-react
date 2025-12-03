@@ -6,15 +6,15 @@
 import "./TreeNodeVisibilityButton.css";
 
 import { createContext, memo, useContext, useMemo } from "react";
+import { TreeActionBase } from "@itwin/presentation-hierarchies-react";
 import visibilityHideSvg from "@stratakit/icons/visibility-hide.svg";
 import visibilityPartialSvg from "@stratakit/icons/visibility-partial.svg";
 import visibilityShowSvg from "@stratakit/icons/visibility-show.svg";
-import { Tree } from "@stratakit/structures";
 import { TreeWidget } from "../../../../TreeWidget.js";
 import { createTooltip } from "../internal/Tooltip.js";
 
 import type { PropsWithChildren } from "react";
-import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import type { PresentationHierarchyNode, TreeActionBaseAttributes } from "@itwin/presentation-hierarchies-react";
 
 /** @beta */
 interface LoadedTreeItemVisibilityButtonState {
@@ -34,31 +34,25 @@ export type TreeItemVisibilityButtonState = (
   tooltip?: string;
 };
 
-/** @beta */
-export interface TreeItemVisibilityButtonProps {
-  /**
-   * Indicates that space for this action button should be reserved, even when the action is not available.
-   * For nodes that don't support visibility, `<VisibilityAction reserveSpace />` renders:
-   *
-   * - Blank space when the action is used as an inline action. It's recommended to set this prop to keep all action buttons of the same kind vertically aligned.
-   * - Disabled menu item when the action is used as a menu action.
-   */
-  reserveSpace?: true;
-}
-
 /**
  * React component that renders a visibility action for a tree item.
  * Should be used with `VisibilityTreeRenderer`.
  * @beta
  */
-export const VisibilityAction = memo(function VisibilityAction({ node, reserveSpace }: TreeItemVisibilityButtonProps & { node: PresentationHierarchyNode }) {
+export const VisibilityAction = memo(function VisibilityAction({ node, ...actionAttributes }: { node: PresentationHierarchyNode } & TreeActionBaseAttributes) {
   const context = useVisibilityContext();
   const state = context?.getVisibilityButtonState(node);
 
   if (!context || !state || ("isDisabled" in state && state.isDisabled) || "isLoading" in state) {
-    return reserveSpace ? (
-      <Tree.ItemAction label={TreeWidget.translate(`visibilityTooltips.status.disabled`)} visible={false} icon={visibilityShowSvg} />
-    ) : undefined;
+    return (
+      <TreeActionBase
+        {...actionAttributes}
+        label={TreeWidget.translate(`visibilityTooltips.status.disabled`)}
+        visible={false}
+        icon={visibilityShowSvg}
+        hide={true}
+      />
+    );
   }
 
   const getIcon = () => {
@@ -73,7 +67,8 @@ export const VisibilityAction = memo(function VisibilityAction({ node, reserveSp
   };
 
   return (
-    <Tree.ItemAction
+    <TreeActionBase
+      {...actionAttributes}
       label={state.tooltip ?? createTooltip(state.state)}
       onClick={() => context.onVisibilityButtonClick(node, state.state)}
       visible={state.state !== "visible" ? true : undefined}
