@@ -3,13 +3,13 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-.quantityFormat-formatPanel {
+.quantityFormat--formatPanel {
   display: flex;
   flex-direction: column;
 }
 
-.quantityFormat-formatPanel
-  .quantityFormat-formatPanel-primaryChildren {
+.quantityFormat--formatPanel
+  .quantityFormat--formatPanel-primaryChildren {
   /* Always visible primary controls */
   border-radius: var(--iui-border-radius-1);
   padding: var(--iui-size-s);
@@ -17,8 +17,8 @@
   width: 100%;
 }
 
-.quantityFormat-formatPanel
-  .quantityFormat-formatPanel-secondaryChildren {
+.quantityFormat--formatPanel
+  .quantityFormat--formatPanel-secondaryChildren {
   /* Expandable secondary controls */
   padding: var(--iui-size-xs);
   border-radius: var(--iui-border-radius-1);
@@ -27,7 +27,7 @@
 }
 
 /* FormatSample styles */
-.quantityFormat-formatSample-container {
+.quantityFormat--formatSample-container {
   align-items: center;
   border: 1px solid var(--iui-color-border-subtle);
   border-radius: var(--iui-border-radius-1);
@@ -35,18 +35,18 @@
   margin: var(--iui-size-xs) 0;
 }
 
-.quantityFormat-formatSample-previewRow {
+.quantityFormat--formatSample-previewRow {
   display: flex;
   align-items: center;
   gap: var(--iui-size-s);
 }
 
-.quantityFormat-formatSample-input {
+.quantityFormat--formatSample-input {
   min-width: 120px;
 }
 
 /* Format type row styling */
-.quantityFormat-formatTypeRow {
+.quantityFormat--formatTypeRow {
   display: flex;
   align-items: center;
   gap: var(--iui-size-xs);
@@ -64,69 +64,69 @@
 }
 
 /* Inline styling for unit label components */
-.quantityFormat-formatInlineRow {
+.quantityFormat--formatInlineRow {
   display: flex;
   align-items: center;
   min-height: var(--iui-size-xl);
   margin-bottom: var(--iui-size-xs);
 }
 
-.quantityFormat-appendUnitLabel {
+.quantityFormat--appendUnitLabel {
   gap: var(--iui-size-m);
 }
 
-.quantityFormat-formatHelpTooltip {
+.quantityFormat--formatHelpTooltip {
   position: relative;
   top: 1px;
   margin-left: var(--iui-size-xs);
 }
 
 /* UnitDescr component styling */
-.quantityFormat-formatInlineRow .quantityFormat-unitSelect {
+.quantityFormat--formatInlineRow .quantityFormat--unitSelect {
   min-width: 20%;
   width: fit-content;
 }
 
-.quantityFormat-formatInlineRow .quantityFormat-unitInput {
+.quantityFormat--formatInlineRow .quantityFormat--unitInput {
   min-width: 25%;
   width: fit-content;
 }
 
 /* Input group styling for input and label together */
-.quantityFormat-formatSample-inputGroup {
+.quantityFormat--formatSample-inputGroup {
   display: flex;
   align-items: stretch;
   min-width: 200px;
 }
 
-.quantityFormat-formatSample-inputGroup
-  .quantityFormat-formatSample-input {
+.quantityFormat--formatSample-inputGroup
+  .quantityFormat--formatSample-input {
   border-radius: var(--iui-border-radius-1);
 }
 
 /* Formatted value label styling */
-.quantityFormat-formattedValueLabel {
+.quantityFormat--formattedValueLabel {
   margin-left: var(--iui-size-xs);
   background-color: var(--iui-color-background-base);
 }
 
 /* Sample preview title label styling */
-.quantityFormat-samplePreviewTitle {
+.quantityFormat--samplePreviewTitle {
   margin-bottom: var(--iui-size-s);
 }
 
-.quantityFormat-format-selector-menu {
+.quantityFormat--format-selector-menu {
   --iui-menu-max-height: min(calc((var(--iui-component-height) - 1px) * 15.5), 70vh);
 }
 
 /* Result section styling for vertical layout */
-.quantityFormat-formatSample-resultSection {
+.quantityFormat--formatSample-resultSection {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
 }
 
-.quantityFormat-formatSelector-list {
+.quantityFormat--formatSelector-list {
   height: inherit;
   width: 100%;
   overflow-y: auto;
@@ -136,35 +136,35 @@
   border-radius: 0 0 var(--iui-border-radius-1) var(--iui-border-radius-1);
 }
 
-.quantityFormat-formatSelector-listItem {
+.quantityFormat--formatSelector-listItem {
   cursor: pointer;
   padding: var(--iui-size-xs) var(--iui-size-s);
   transition: background-color 0.2s ease;
 }
 
-.quantityFormat-formatSelector-listItem:hover {
+.quantityFormat--formatSelector-listItem:hover {
   background-color: var(--iui-color-background-hover);
 }
 
-.quantityFormat-formatSelector-listItem.active {
+.quantityFormat--formatSelector-listItem.active {
   background-color: var(--iui-color-background-accent-muted);
   border-left: 3px solid var(--iui-color-border-accent);
 }
 
-.quantityFormat-formatSelector-listItem:last-child {
+.quantityFormat--formatSelector-listItem:last-child {
   border-bottom: none;
 }
 
-.quantityFormat-formatSelector-container {
+.quantityFormat--formatSelector-container {
   height: inherit;
 }
 
 /* Format Set Selector Styles */
-.quantityFormat-formatSetSelector-container {
+.quantityFormat--formatSetSelector-container {
   height: inherit;
 }
 
-.quantityFormat-formatSetSelector-list {
+.quantityFormat--formatSetSelector-list {
   height: inherit;
   width: 100%;
   overflow-y: auto;
@@ -174,91 +174,91 @@
   border-radius: 0 0 var(--iui-border-radius-1) var(--iui-border-radius-1);
 }
 
-.quantityFormat-formatSetSelector-listItem {
+.quantityFormat--formatSetSelector-listItem {
   cursor: pointer;
   padding: var(--iui-size-xs) var(--iui-size-s);
   transition: background-color 0.2s ease;
 }
 
-.quantityFormat-formatSetSelector-listItem:hover {
+.quantityFormat--formatSetSelector-listItem:hover {
   background-color: var(--iui-color-background-hover);
 }
 
-.quantityFormat-formatSetSelector-listItem.active {
+.quantityFormat--formatSetSelector-listItem.active {
   background-color: var(--iui-color-background-accent-muted);
   border-left: 3px solid var(--iui-color-border-accent);
 }
 
-.quantityFormat-formatSetSelector-listItem:last-child {
+.quantityFormat--formatSetSelector-listItem:last-child {
   border-bottom: none;
 }
 
-.quantityFormat-formatSetSelector-badge {
+.quantityFormat--formatSetSelector-badge {
   flex-shrink: 0; /* Prevents badge from shrinking */
 }
 
 /* Format Set Panel Styles */
-.quantityFormat-formatSetPanel-container {
+.quantityFormat--formatSetPanel-container {
   flex-direction: column;
   align-items: stretch;
   gap: var(--iui-size-m);
   width: 100%;
 }
 
-.quantityFormat-formatSetPanel-emptyState {
+.quantityFormat--formatSetPanel-emptyState {
   flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 100%;
 }
 
-.quantityFormat-formatSetPanel-inputRow {
+.quantityFormat--formatSetPanel-inputRow {
   align-items: center;
   gap: var(--iui-size-m);
   width: 100%;
   flex-direction: row;
 }
 
-.quantityFormat-formatSetPanel-inputRow-descr {
+.quantityFormat--formatSetPanel-inputRow-descr {
   align-items: flex-start;
 }
 
-.quantityFormat-formatSetPanel-inputRow > label {
+.quantityFormat--formatSetPanel-inputRow > label {
   flex: 0 0 20%; /* Fixed 20% width for all labels in input rows */
   display: flex;
   align-items: center;
   margin: 0;
 }
 
-.quantityFormat-formatSetPanel-comboBox {
+.quantityFormat--formatSetPanel-comboBox {
   flex: 1;
   min-width: 0; /* Prevents flex item from overflowing */
 }
 
-.quantityFormat-formatSetPanel-input {
+.quantityFormat--formatSetPanel-input {
   flex: 1;
   min-width: 0; /* Prevents flex item from overflowing */
 }
 
-.quantityFormat-formatSetPanel-labelWithTooltip {
+.quantityFormat--formatSetPanel-labelWithTooltip {
   display: flex;
   align-items: center;
   gap: var(--iui-size-2xs);
   margin: 0;
 }
 
-.quantityFormat-comboBoxTooltip {
+.quantityFormat--comboBoxTooltip {
   position: relative;
   margin-left: var(--iui-size-xs);
   top: 1px;
 }
-.quantityFormat-formatSetPanel-inputColumn {
+.quantityFormat--formatSetPanel-inputColumn {
   flex-direction: column;
   align-items: flex-start;
   gap: var(--iui-size-xs);
   width: 100%;
 }
 
-.quantityFormat-formatSetPanel-input:disabled {
+.quantityFormat--formatSetPanel-input:disabled {
   background-color: var(--iui-color-background-zebra);
 }

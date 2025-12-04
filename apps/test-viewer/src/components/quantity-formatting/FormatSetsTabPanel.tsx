@@ -106,7 +106,7 @@ export const FormatSetsTabPanel: React.FC<FormatSetsTabPanelProps> = ({ formatMa
           {clonedSelectedFormatSet ? (
             <FormatSetPanel formatSet={clonedSelectedFormatSet} editable={true} onFormatSetChange={handleSelectedFormatSetChange} />
           ) : (
-            <Flex className="quantityFormat-formatSetPanel-emptyState">
+            <Flex className="quantityFormat--formatSetPanel-emptyState">
               <Text variant="leading" isMuted>
                 Select a format set to view details
               </Text>

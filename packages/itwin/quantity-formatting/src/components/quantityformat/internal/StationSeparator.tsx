@@ -27,7 +27,7 @@ export function StationSeparator(props: StationSeparatorProps) {
   const stationSeparatorSelectorId = React.useId();
 
   return (
-    <div className="quantityFormat-formatInlineRow">
+    <div className="quantityFormat--formatInlineRow">
       <Label displayStyle="inline" id={stationSeparatorSelectorId}>
         {translate("QuantityFormat:labels.stationSeparatorLabel")}
       </Label>

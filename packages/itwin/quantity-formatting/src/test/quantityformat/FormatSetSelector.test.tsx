@@ -93,9 +93,9 @@ describe("FormatSetSelector", () => {
         />
       );
 
-      expect(container.querySelector(".quantityFormat-formatSetSelector-container")).toBeTruthy();
-      expect(container.querySelector(".quantityFormat-formatSetSelector-list")).toBeTruthy();
-      const listItems = container.querySelectorAll(".quantityFormat-formatSetSelector-listItem");
+      expect(container.querySelector(".quantityFormat--formatSetSelector-container")).toBeTruthy();
+      expect(container.querySelector(".quantityFormat--formatSetSelector-list")).toBeTruthy();
+      const listItems = container.querySelectorAll(".quantityFormat--formatSetSelector-listItem");
       expect(listItems.length).toBe(4);
     });
   });
@@ -196,7 +196,7 @@ describe("FormatSetSelector", () => {
         />
       );
 
-      const listItems = container.querySelectorAll(".quantityFormat-formatSetSelector-listItem");
+      const listItems = container.querySelectorAll(".quantityFormat--formatSetSelector-listItem");
       const selectedItem = listItems[1]; // TestFormatSet2 is second item
 
       expect(selectedItem?.getAttribute("data-iui-active")).toBe("true");
@@ -219,7 +219,7 @@ describe("FormatSetSelector", () => {
 
       // Verify it's associated with the correct format set
       const formatSetItem = screen.getByText("My personal format set");
-      const listItem = formatSetItem.closest(".quantityFormat-formatSetSelector-listItem");
+      const listItem = formatSetItem.closest(".quantityFormat--formatSetSelector-listItem");
       expect(listItem?.contains(activeBadge)).toBe(true);
     });
 
@@ -234,14 +234,14 @@ describe("FormatSetSelector", () => {
       );
 
       // TestFormatSet1 should be highlighted (selected)
-      const listItems = container.querySelectorAll(".quantityFormat-formatSetSelector-listItem");
+      const listItems = container.querySelectorAll(".quantityFormat--formatSetSelector-listItem");
       const selectedItem = listItems[0]; // TestFormatSet1 is first item
       expect(selectedItem?.getAttribute("data-iui-active")).toBe("true");
 
       // TestFormatSet3 should have active badge
       const activeBadge = screen.getByText("QuantityFormat:labels.active");
       const activeFormatSetItem = screen.getByText("My personal format set");
-      const activeListItem = activeFormatSetItem.closest(".quantityFormat-formatSetSelector-listItem");
+      const activeListItem = activeFormatSetItem.closest(".quantityFormat--formatSetSelector-listItem");
       expect(activeListItem?.contains(activeBadge)).toBe(true);
     });
 
@@ -256,7 +256,7 @@ describe("FormatSetSelector", () => {
       );
 
       // TestFormatSet2 should be both highlighted and have active badge
-      const listItems = container.querySelectorAll(".quantityFormat-formatSetSelector-listItem");
+      const listItems = container.querySelectorAll(".quantityFormat--formatSetSelector-listItem");
       const item = listItems[1]; // TestFormatSet2 is second item
 
       expect(item?.getAttribute("data-iui-active")).toBe("true");

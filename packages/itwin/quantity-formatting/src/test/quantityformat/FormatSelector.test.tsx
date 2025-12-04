@@ -107,7 +107,7 @@ describe("FormatSelector", () => {
     it("should highlight the active format when activeFormatDefinitionKey is provided", () => {
       render(<FormatSelector {...defaultProps} activeFormatDefinitionKey="length-format" />);
 
-      const activeItem = screen.getByText("Length Format").closest(".quantityFormat-formatSelector-listItem");
+      const activeItem = screen.getByText("Length Format").closest(".quantityFormat--formatSelector-listItem");
       expect(activeItem?.getAttribute("data-iui-active")).toBe("true");
     });
   });
@@ -382,7 +382,7 @@ describe("FormatSelector", () => {
 
       expect(searchInput.getAttribute("class")).toBeTruthy();
       expect(list.getAttribute("class")).toBeTruthy();
-      expect(list.classList.contains("quantityFormat-formatSelector-list")).toBe(true);
+      expect(list.classList.contains("quantityFormat--formatSelector-list")).toBe(true);
     });
 
     it("should maintain proper list structure", () => {
@@ -392,7 +392,7 @@ describe("FormatSelector", () => {
       expect(listItems).toHaveLength(3); // Three format items
 
       listItems.forEach(item => {
-        expect(item.classList.contains("quantityFormat-formatSelector-listItem")).toBe(true);
+        expect(item.classList.contains("quantityFormat--formatSelector-listItem")).toBe(true);
       });
     });
   });

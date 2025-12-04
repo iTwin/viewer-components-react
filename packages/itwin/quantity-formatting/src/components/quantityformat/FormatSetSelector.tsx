@@ -67,13 +67,13 @@ export const FormatSetSelector: React.FC<FormatSetSelectorProps> = ({
   );
 
   return (
-    <Flex flexDirection="column" gap="none" alignItems="flex-start" className="quantityFormat-formatSetSelector-container">
+    <Flex flexDirection="column" gap="none" alignItems="flex-start" className="quantityFormat--formatSetSelector-container">
       <Input
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.currentTarget.value)}
         placeholder={translate("QuantityFormat:labels.searchFormatSets")}
       />
-      <List className="quantityFormat-formatSetSelector-list">
+      <List className="quantityFormat--formatSetSelector-list">
         {filteredFormatSets.map((formatSet, index) => {
           const key = formatSet.name || `formatSet-${index}`;
           return (
@@ -81,13 +81,13 @@ export const FormatSetSelector: React.FC<FormatSetSelectorProps> = ({
               key={key}
               onClick={() => handleFormatSetSelect(formatSet)}
               active={selectedFormatSetKey === key}
-              className="quantityFormat-formatSetSelector-listItem"
+              className="quantityFormat--formatSetSelector-listItem"
             >
               <Flex flexDirection="column" alignItems="flex-start">
                 <Flex flexDirection="row" alignItems="center" gap="xs">
                   <Text variant="body">{formatSet.label}</Text>
                   {activeFormatSetKey === key && (
-                    <Badge backgroundColor="positive" className="quantityFormat-formatSetSelector-badge">
+                    <Badge backgroundColor="positive" className="quantityFormat--formatSetSelector-badge">
                       {translate("QuantityFormat:labels.active")}
                     </Badge>
                   )}

@@ -26,8 +26,8 @@ export function BearingPrimaryChildren(props: PanelProps): React.ReactElement {
   const { translate } = useTranslation();
 
   return (
-    <div className="quantityFormat-formatPanel-primaryChildren">
-      <div className="quantityFormat-formatTypeRow">
+    <div className="quantityFormat--formatPanel-primaryChildren">
+      <div className="quantityFormat--formatTypeRow">
         <FormatTypeOption formatProps={formatProps} onChange={onFormatChange} />
       </div>
       <Text variant="small" isMuted={true}>
@@ -61,7 +61,7 @@ export function BearingSecondaryChildren(
   const { formatProps, onFormatChange } = _props;
 
   return (
-    <div className="quantityFormat-formatPanel-secondaryChildren">
+    <div className="quantityFormat--formatPanel-secondaryChildren">
       <DecimalSeparator formatProps={formatProps} onChange={onFormatChange} />
       <KeepDecimalPoint formatProps={formatProps} onChange={onFormatChange} />
       <ShowTrailingZeros

@@ -96,8 +96,8 @@ export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, edita
   }, [editable, formatSet, onFormatSetChange]);
 
   return (
-    <Flex className="quantityFormat-formatSetPanel-container">
-      <Flex className="quantityFormat-formatSetPanel-inputRow">
+    <Flex className="quantityFormat--formatSetPanel-container">
+      <Flex className="quantityFormat--formatSetPanel-inputRow">
         <Label htmlFor={labelInputId}>{translate("QuantityFormat:labels.label")}</Label>
         <Input
           id={labelInputId}
@@ -106,15 +106,15 @@ export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, edita
           onChange={handleLabelChange}
           disabled={!editable}
           placeholder={translate("QuantityFormat:labels.formatSetDisplayLabel")}
-          className="quantityFormat-formatSetPanel-input"
+          className="quantityFormat--formatSetPanel-input"
         />
       </Flex>
 
-      <Flex className="quantityFormat-formatSetPanel-inputRow">
-        <Label displayStyle="inline" htmlFor={unitSystemSelectId} className="quantityFormat-formatSetPanel-labelWithTooltip">
+      <Flex className="quantityFormat--formatSetPanel-inputRow">
+        <Label displayStyle="inline" htmlFor={unitSystemSelectId} className="quantityFormat--formatSetPanel-labelWithTooltip">
           {translate("QuantityFormat:labels.unitSystem")}
           <IconButton
-            className="quantityFormat-comboBoxTooltip"
+            className="quantityFormat--comboBoxTooltip"
             styleType="borderless"
             size="small"
             label={translate("QuantityFormat:labels.unitSystemTooltip")}
@@ -136,11 +136,11 @@ export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, edita
             },
             size: "small",
           }}
-          className="quantityFormat-formatSetPanel-comboBox"
+          className="quantityFormat--formatSetPanel-comboBox"
         />
       </Flex>
 
-      <Flex className="quantityFormat-formatSetPanel-inputRow quantityFormat-formatSetPanel-inputRow-descr">
+      <Flex className="quantityFormat--formatSetPanel-inputRow quantityFormat--formatSetPanel-inputRow-descr">
         <Label htmlFor={descriptionInputId}>{translate("QuantityFormat:labels.description")}</Label>
         <Textarea
           id={descriptionInputId}
@@ -148,7 +148,7 @@ export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, edita
           onChange={handleDescriptionChange}
           disabled={!editable}
           placeholder={translate("QuantityFormat:labels.formatSetDescription")}
-          className="quantityFormat-formatSetPanel-input"
+          className="quantityFormat--formatSetPanel-input"
           rows={4}
         />
       </Flex>

@@ -66,7 +66,7 @@ function AzimuthBaseUnitSelector(props: {
   }, [currentUnit, unitsProvider]);
 
   return (
-    <div className="quantityFormat-formatInlineRow">
+    <div className="quantityFormat--formatInlineRow">
       <LabeledSelect
         label={
           <>
@@ -136,7 +136,7 @@ export function AzimuthOptions(props: {
 
   return (
     <>
-      <div className="quantityFormat-formatInlineRow">
+      <div className="quantityFormat--formatInlineRow">
         <Label htmlFor={ccwCheckboxId} displayStyle="inline">
           {translate("QuantityFormat:labels.azimuthCounterClockwise")}
         </Label>
@@ -159,7 +159,7 @@ export function AzimuthOptions(props: {
         unitsProvider={unitsProvider}
         onChange={(value) => onChange({ ...formatProps, azimuthBaseUnit: value })}
       />
-      <div className="quantityFormat-formatInlineRow">
+      <div className="quantityFormat--formatInlineRow">
         <Label htmlFor={baseInputId} displayStyle="inline">
           {translate("QuantityFormat:labels.azimuthBase")}
         </Label>
