@@ -72,7 +72,7 @@ export function useClassificationsTreeDefinition(props: UseClassificationsTreeDe
       return undefined;
     }
 
-    return async () => {
+    return async ({ abortSignal }) => {
       const [first, ...rest] = await Promise.all(
         imodels.map(async ({ imodelAccess }) =>
           ClassificationsTreeDefinition.createInstanceKeyPaths({
@@ -85,6 +85,7 @@ export function useClassificationsTreeDefinition(props: UseClassificationsTreeDe
             }),
             imodelAccess,
             label: searchText,
+            abortSignal,
           }),
         ),
       );
