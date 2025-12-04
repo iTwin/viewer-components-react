@@ -1,10 +1,10 @@
-name: Tree-Widget performance benchmark
+name: Tree-Widget Next performance benchmark
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - master
+      - tree-widget/next
     paths:
       - apps/performance-tests/**
       - packages/itwin/tree-widget/**
@@ -13,7 +13,7 @@ jobs:
   benchmark:
     uses: ./.github/workflows/benchmark-tree-widget-shared.yml
     with:
-      display-name: 'Tree-Widget: Benchmark performance'
-      benchmark-name: 'Tree-Widget benchmark'
+      display-name: 'Tree-Widget Next: Benchmark performance'
+      benchmark-name: 'Tree-Widget Next benchmark'
       mode: 'push'
-      gh-pages-branch: gh-pages
+      gh-pages-branch: gh-pages-next
