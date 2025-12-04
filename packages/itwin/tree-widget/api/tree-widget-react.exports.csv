@@ -29,6 +29,7 @@ public;interface;TreeWidgetViewport
 beta;function;useCategoriesTree
 public;function;useCategoriesTreeButtonProps
 alpha;function;useClassificationsTree
+alpha;function;useClassificationsTreeDefinition
 public;function;useFocusedInstancesContext
 beta;function;useModelsTree
 public;function;useModelsTreeButtonProps

@@ -54,13 +54,16 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
   const rootClassificationSystemCode = "TestClassificationSystem";
 
-  function createProvider(props: {
+  function createProvider({
+    idsCache,
+    ...props
+  }: {
     idsCache: ClassificationsTreeIdsCache;
     imodelAccess: ReturnType<typeof createIModelAccess>;
     filterPaths?: HierarchyNodeIdentifiersPath[];
   }) {
     return createIModelHierarchyProvider({
-      hierarchyDefinition: new ClassificationsTreeDefinition({ ...props, hierarchyConfig: { rootClassificationSystemCode } }),
+      hierarchyDefinition: new ClassificationsTreeDefinition({ ...props, getIdsCache: () => idsCache, hierarchyConfig: { rootClassificationSystemCode } }),
       imodelAccess: props.imodelAccess,
       ...(props.filterPaths ? { filtering: { paths: props.filterPaths } } : undefined),
     });

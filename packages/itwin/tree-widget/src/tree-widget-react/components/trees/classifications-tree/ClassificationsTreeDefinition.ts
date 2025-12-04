@@ -47,6 +47,7 @@ import type {
   HierarchyDefinition,
   HierarchyLevelDefinition,
   HierarchyNodeIdentifiersPath,
+  InstancesNodeKey,
   LimitingECSqlQueryExecutor,
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
@@ -58,8 +59,8 @@ import type { ClassificationId, ClassificationsTreeIdsCache, ClassificationTable
 const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
 
 interface ClassificationsTreeDefinitionProps {
-  imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
-  idsCache: ClassificationsTreeIdsCache;
+  imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor & { imodelKey: string };
+  getIdsCache: (imodelKey: string) => ClassificationsTreeIdsCache;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
 }
 
@@ -72,7 +73,7 @@ export interface ClassificationsTreeHierarchyConfiguration {
   rootClassificationSystemCode: string;
 }
 
-/** @alpha */
+/** @internal */
 export interface ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   label: string;
@@ -174,16 +175,17 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
     ];
   }
 
-  async #createClassificationTableChildrenQuery(props: {
-    parentNodeInstanceIds: ClassificationTableId[];
-    instanceFilter?: GenericInstanceFilter;
-  }): Promise<HierarchyLevelDefinition> {
-    const { parentNodeInstanceIds: classificationTableIds, instanceFilter } = props;
+  async #createClassificationTableChildrenQuery(props: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
+    const { parentNodeInstanceIds: classificationTableIds, instanceFilter, parentNode } = props;
+    const imodelKey = getParentNodeIModelKey(parentNode.key);
+    if (!imodelKey) {
+      return [];
+    }
     const instanceFilterClauses = await this.#selectQueryFactory.createFilterClauses({
       filter: instanceFilter,
       contentClass: { fullName: CLASS_NAME_Classification, alias: "this" },
     });
-    const classificationIds = await firstValueFrom(this.#props.idsCache.getDirectChildClassifications(classificationTableIds));
+    const classificationIds = await firstValueFrom(this.#props.getIdsCache(imodelKey).getDirectChildClassifications(classificationTableIds));
     return classificationIds.length
       ? [
           {
@@ -221,12 +223,13 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
       : [];
   }
 
-  async #createClassificationChildrenQuery(props: {
-    parentNodeInstanceIds: ClassificationId[];
-    instanceFilter?: GenericInstanceFilter;
-  }): Promise<HierarchyLevelDefinition> {
-    const { parentNodeInstanceIds: parentClassificationIds, instanceFilter } = props;
-    const classificationIds = await firstValueFrom(this.#props.idsCache.getDirectChildClassifications(parentClassificationIds));
+  async #createClassificationChildrenQuery(props: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
+    const { parentNodeInstanceIds: parentClassificationIds, instanceFilter, parentNode } = props;
+    const parentImodelKey = getParentNodeIModelKey(parentNode.key);
+    if (!parentImodelKey) {
+      return [];
+    }
+    const classificationIds = await firstValueFrom(this.#props.getIdsCache(parentImodelKey).getDirectChildClassifications(parentClassificationIds));
     return [
       // load child classifications
       ...(classificationIds.length
@@ -363,6 +366,10 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
       componentName: this.#componentName,
     });
   }
+}
+
+function getParentNodeIModelKey(instanceKey: InstancesNodeKey): string | undefined {
+  return instanceKey.instanceKeys[0]?.imodelKey;
 }
 
 function createClassificationHasChildrenSelector(classificationAlias: string) {

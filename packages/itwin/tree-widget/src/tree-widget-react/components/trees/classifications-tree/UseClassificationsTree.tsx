@@ -76,7 +76,7 @@ export function useClassificationsTree({ activeView, emptyTreeContent, filter, .
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
     (props) => {
-      return new ClassificationsTreeDefinition({ ...props, idsCache: getClassificationsTreeIdsCache(), hierarchyConfig });
+      return new ClassificationsTreeDefinition({ ...props, getIdsCache: getClassificationsTreeIdsCache, hierarchyConfig });
     },
     [getClassificationsTreeIdsCache, hierarchyConfig],
   );

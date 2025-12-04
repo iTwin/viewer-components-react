@@ -28,7 +28,7 @@ export function createClassificationsTreeProvider(
     imodelAccess,
     hierarchyDefinition: new ClassificationsTreeDefinition({
       imodelAccess,
-      idsCache,
+      getIdsCache: () => idsCache,
       hierarchyConfig,
     }),
   });
