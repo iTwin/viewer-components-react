@@ -296,5 +296,60 @@ describe("Classifications tree", () => {
         }),
       ).to.deep.eq([]);
     });
+
+    it("filtering by label aborts when abort signal fires", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        await importClassificationSchema(builder);
+
+        const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
+        const table = insertClassificationTable({ builder, parentId: system.id, codeValue: "ClassificationTable", userLabel: `TestTable` });
+        const classification = insertClassification({ builder, modelId: table.id, codeValue: "Classification" });
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "physical model" });
+        const spatialCategory = insertSpatialCategory({ builder, codeValue: "physical category" });
+        const physicalElement = insertPhysicalElement({
+          builder,
+          modelId: physicalModel.id,
+          categoryId: spatialCategory.id,
+          codeValue: "Physical element",
+        });
+        insertElementHasClassificationsRelationship({ builder, elementId: physicalElement.id, classificationId: classification.id });
+        const drawingModel = insertDrawingModelWithPartition({ builder, codeValue: "drawing model" });
+        const drawingCategory = insertDrawingCategory({ builder, codeValue: "drawing category" });
+        const drawingElement = insertDrawingGraphic({
+          builder,
+          modelId: drawingModel.id,
+          categoryId: drawingCategory.id,
+          codeValue: "Drawing element",
+        });
+        insertElementHasClassificationsRelationship({ builder, elementId: drawingElement.id, classificationId: classification.id });
+        return { classificationTable: table };
+      });
+      const { imodel, ...ids } = buildIModelResult;
+      const imodelAccess = createIModelAccess(imodel);
+      const idsCache = new ClassificationsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration);
+
+      const abortController1 = new AbortController();
+      const pathsPromiseAborted = ClassificationsTreeDefinition.createInstanceKeyPaths({
+        imodelAccess,
+        hierarchyConfig: defaultHierarchyConfiguration,
+        label: "Test",
+        idsCache,
+        abortSignal: abortController1.signal,
+      });
+      abortController1.abort();
+      expect(await pathsPromiseAborted).to.deep.eq([]);
+
+      const abortController2 = new AbortController();
+      const pathsPromise = ClassificationsTreeDefinition.createInstanceKeyPaths({
+        imodelAccess,
+        hierarchyConfig: defaultHierarchyConfiguration,
+        label: "Test",
+        idsCache,
+        abortSignal: abortController2.signal,
+      });
+      expect(await pathsPromise).to.deep.eq([
+        { path: [{ className: ids.classificationTable.className, id: ids.classificationTable.id }], options: { autoExpand: true } },
+      ]);
+    });
   });
 });
