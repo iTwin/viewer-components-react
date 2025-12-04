@@ -14,6 +14,7 @@ export { useCategoriesTreeButtonProps } from "./categories-tree/CategoriesTreeBu
 export { ClassificationsTreeComponent } from "./classifications-tree/ClassificationsTreeComponent.js";
 export { ClassificationsTreeIcon } from "./classifications-tree/ClassificationsTreeIcon.js";
 export { useClassificationsTree } from "./classifications-tree/UseClassificationsTree.js";
+export { useClassificationsTreeDefinition } from "./classifications-tree/UseClassificationsTreeDefinition.js";
 
 export { IModelContentTreeComponent } from "./imodel-content-tree/IModelContentTreeComponent.js";
 export { IModelContentTreeIcon } from "./imodel-content-tree/IModelContentTree.js";
