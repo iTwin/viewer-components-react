@@ -9,6 +9,7 @@ import type { ClassGroupingNodeKey } from '@itwin/presentation-hierarchies';
 import type { ECClassHierarchyInspector } from '@itwin/presentation-shared';
 import { FilterAction } from '@itwin/presentation-hierarchies-react';
 import type { GroupingHierarchyNode } from '@itwin/presentation-hierarchies';
+import type { HierarchyDefinition } from '@itwin/presentation-hierarchies';
 import { HierarchyFilteringPath } from '@itwin/presentation-hierarchies';
 import type { HierarchyNode } from '@itwin/presentation-hierarchies-react';
 import type { Id64Arg } from '@itwin/core-bentley';
@@ -31,6 +32,7 @@ import type { TreeActionBaseAttributes } from '@itwin/presentation-hierarchies-r
 import type { TreeRendererProps } from '@itwin/presentation-hierarchies-react';
 import type { useIModelTree } from '@itwin/presentation-hierarchies-react';
 import type { useSelectionHandler } from '@itwin/presentation-hierarchies-react';
+import type { useTree } from '@itwin/presentation-hierarchies-react';
 import type { Viewport } from '@itwin/core-frontend';
 import type { Widget } from '@itwin/appui-react';
 
@@ -257,6 +259,9 @@ type HierarchyVisibilityHandlerOverridableMethodProps<TFunc> = TFunc extends (pr
     readonly originalImplementation: () => TResult;
     readonly handler: HierarchyVisibilityHandler;
 } : never;
+
+// @public (undocumented)
+type IModelAccess = FunctionProps<typeof useIModelTree>["imodelAccess"];
 
 // @beta
 export const IModelContentTreeComponent: {
@@ -591,6 +596,27 @@ interface UseCategoriesTreeResult {
 
 // @alpha
 export function useClassificationsTree({ activeView, emptyTreeContent, filter, ...rest }: UseClassificationsTreeProps): UseClassificationsTreeResult;
+
+// @alpha (undocumented)
+export function useClassificationsTreeDefinition(props: UseClassificationsTreeDefinitionProps): UseClassificationsTreeDefinitionResult;
+
+// @alpha (undocumented)
+interface UseClassificationsTreeDefinitionProps {
+    // (undocumented)
+    hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
+    imodelAccesses: Array<IModelAccess>;
+    search?: {
+        searchText: string;
+    };
+}
+
+// @alpha (undocumented)
+interface UseClassificationsTreeDefinitionResult {
+    // (undocumented)
+    definition: HierarchyDefinition;
+    // (undocumented)
+    getFilteredPaths?: FunctionProps<typeof useTree>["getFilteredPaths"];
+}
 
 // @alpha (undocumented)
 interface UseClassificationsTreeProps {

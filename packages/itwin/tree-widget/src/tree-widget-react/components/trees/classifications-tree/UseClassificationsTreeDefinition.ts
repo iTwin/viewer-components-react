@@ -9,6 +9,7 @@ import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.j
 import { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
 
 import type { MutableRefObject } from "react";
+import type { HierarchyDefinition } from "@itwin/presentation-hierarchies";
 import type { useIModelTree, useTree } from "@itwin/presentation-hierarchies-react";
 import type { FunctionProps } from "../common/Utils.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "./ClassificationsTreeDefinition.js";
@@ -35,7 +36,13 @@ interface UseClassificationsTreeDefinitionProps {
 }
 
 /** @alpha */
-export function useClassificationsTreeDefinition(props: UseClassificationsTreeDefinitionProps) {
+interface UseClassificationsTreeDefinitionResult {
+  definition: HierarchyDefinition;
+  getFilteredPaths?: FunctionProps<typeof useTree>["getFilteredPaths"];
+}
+
+/** @alpha */
+export function useClassificationsTreeDefinition(props: UseClassificationsTreeDefinitionProps): UseClassificationsTreeDefinitionResult {
   const { imodelAccesses, hierarchyConfig, search } = props;
 
   const idsCaches = useRef<Map<string, ClassificationsTreeIdsCache>>(new Map());
