@@ -17,10 +17,17 @@ import type { ClassificationsTreeHierarchyConfiguration } from "./Classification
 /** @alpha */
 interface UseClassificationsTreeDefinitionProps {
   /**
-   * List of iModels that will be used to merge tree data based on this definition.
-   * First iModel in the list is considered the primary iModel and should be the latest version used.
+   * A list of iModels to create merged hierarchy for.
+   *
+   * **Warning:** These **must** all be different versions of the same iModel, ordered from the earliest to the
+   * latest version. Not obeying this rule may result in undefined behavior.
    */
-  imodelAccesses: Array<FunctionProps<typeof useIModelTree>["imodelAccess"]>;
+  imodels: Array<{
+    /**
+     * An object that provides access to iModel's data and metadata.
+     */
+    imodelAccess: FunctionProps<typeof useIModelTree>["imodelAccess"];
+  }>;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
   /**
    * Optional search parameters to filter tree nodes.
@@ -41,23 +48,23 @@ interface UseClassificationsTreeDefinitionResult {
 
 /** @alpha */
 export function useClassificationsTreeDefinition(props: UseClassificationsTreeDefinitionProps): UseClassificationsTreeDefinitionResult {
-  const { imodelAccesses, hierarchyConfig, search } = props;
+  const { imodels, hierarchyConfig, search } = props;
 
   const idsCaches = useRef<Map<string, ClassificationsTreeIdsCache>>(new Map());
 
   const definition = useMemo(() => {
     return new ClassificationsTreeDefinition({
-      imodelAccess: imodelAccesses[0],
+      imodelAccess: imodels[imodels.length - 1].imodelAccess,
       getIdsCache: (imodelKey: string) =>
-        lookupIdsCache({
+        getOrCreateIdsCache({
           imodelKey,
-          imodels: imodelAccesses,
+          imodels,
           idsCaches,
           hierarchyConfig,
         }),
       hierarchyConfig,
     });
-  }, [imodelAccesses, hierarchyConfig]);
+  }, [imodels, hierarchyConfig]);
 
   const searchText = search?.searchText;
   const getFilteredPaths = useMemo<FunctionProps<typeof useTree>["getFilteredPaths"]>(() => {
@@ -67,12 +74,12 @@ export function useClassificationsTreeDefinition(props: UseClassificationsTreeDe
 
     return async () => {
       const [first, ...rest] = await Promise.all(
-        imodelAccesses.map(async (imodelAccess) =>
+        imodels.map(async ({ imodelAccess }) =>
           ClassificationsTreeDefinition.createInstanceKeyPaths({
             hierarchyConfig,
-            idsCache: lookupIdsCache({
+            idsCache: getOrCreateIdsCache({
               imodelKey: imodelAccess.imodelKey,
-              imodels: imodelAccesses,
+              imodels,
               idsCaches,
               hierarchyConfig,
             }),
@@ -84,7 +91,7 @@ export function useClassificationsTreeDefinition(props: UseClassificationsTreeDe
 
       return first.concat(...rest);
     };
-  }, [imodelAccesses, hierarchyConfig, searchText]);
+  }, [imodels, hierarchyConfig, searchText]);
 
   return {
     definition,
@@ -92,22 +99,24 @@ export function useClassificationsTreeDefinition(props: UseClassificationsTreeDe
   };
 }
 
-function lookupIdsCache({
+function getOrCreateIdsCache({
   imodelKey,
   imodels,
   hierarchyConfig,
   idsCaches,
 }: {
   imodelKey: string;
-  imodels: Array<FunctionProps<typeof useIModelTree>["imodelAccess"]>;
+  imodels: Array<{
+    imodelAccess: FunctionProps<typeof useIModelTree>["imodelAccess"];
+  }>;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
   idsCaches: MutableRefObject<Map<string, ClassificationsTreeIdsCache>>;
 }) {
   let idsCache = idsCaches.current.get(imodelKey);
   if (!idsCache) {
-    const imodel = imodels.find((currImodel) => currImodel.imodelKey === imodelKey);
+    const imodel = imodels.find((currImodel) => currImodel.imodelAccess.imodelKey === imodelKey);
     assert(!!imodel);
-    idsCache = new ClassificationsTreeIdsCache(imodel, hierarchyConfig);
+    idsCache = new ClassificationsTreeIdsCache(imodel.imodelAccess, hierarchyConfig);
     idsCaches.current.set(imodelKey, idsCache);
   }
   return idsCache;
