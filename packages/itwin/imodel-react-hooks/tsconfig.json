@@ -1,8 +1,0 @@
-{
-  "extends": "./node_modules/@itwin/build-tools/tsconfig-base.json",
-  "compilerOptions": {
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true
-  },
-  "include": ["./src/**/*.ts"]
-}

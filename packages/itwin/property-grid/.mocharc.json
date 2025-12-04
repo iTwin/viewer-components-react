@@ -1,8 +1,0 @@
-{
-  "require": ["raf/polyfill", "ignore-styles", "lib/esm/test/setup.js"],
-  "check-leaks": true,
-  "timeout": "60000",
-  "globals": ["IS_REACT_ACT_ENVIRONMENT"],
-  "spec": ["./lib/esm/test/**/*.test.js"],
-  "exclude": ["./lib/test/coverage/**/*"]
-}
