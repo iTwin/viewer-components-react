@@ -39,9 +39,9 @@ export interface AreaMeasurementProps extends MeasurementProps {
 
 /** Formatting properties for area measurement. */
 export interface AreaMeasurementFormattingProps {
-  /** Defaults to "AecUnits.LENGTH" and "Units.M" */
+  /** Defaults to "DefaultToolsUnits.LENGTH" and "Units.M" */
   length?: MeasurementFormattingProps;
-  /** Defaults to "AecUnits.AREA" and "Units.SQ_M" */
+  /** Defaults to "DefaultToolsUnits.AREA" and "Units.SQ_M" */
   area? : MeasurementFormattingProps;
 }
 
@@ -163,9 +163,9 @@ export class AreaMeasurement extends Measurement {
     this._polygon.textMarker.setMouseButtonHandler(
       this.handleTextMarkerButtonEvent.bind(this)
     );
-    this._lengthKoQ = "AecUnits.LENGTH";
+    this._lengthKoQ = "DefaultToolsUnits.LENGTH";
     this._lengthPersistenceUnitName = "Units.M";
-    this._areaKoQ = "AecUnits.AREA";
+    this._areaKoQ = "DefaultToolsUnits.AREA";
     this._areaPersistenceUnitName = "Units.SQ_M";
     this._polygon.textMarker.transientHiliteId = this.transientId;
     this._polygon.makeSelectable(true);

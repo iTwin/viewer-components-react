@@ -38,11 +38,11 @@ export interface DistanceMeasurementProps extends MeasurementProps {
 
 /** Formatting properties for distance measurement. */
 export interface DistanceMeasurementFormattingProps {
-  /** Defaults to "AecUnits.LENGTH" and "Units.M" */
+  /** Defaults to "DefaultToolsUnits.LENGTH" and "Units.M" */
   length?: MeasurementFormattingProps;
-  /** Defaults to "RoadRailUnits.BEARING" and "Units.RAD" */
+  /** Defaults to "CivilUnits.BEARING" and "Units.RAD" */
   bearing? : MeasurementFormattingProps;
-  /** Defaults to "AecUnits.LENGTH_COORDINATE" and "Units.M" */
+  /** Defaults to "DefaultToolsUnits.LENGTH_COORDINATE" and "Units.M" */
   coordinate?: MeasurementFormattingProps;
 }
 
@@ -194,9 +194,9 @@ export class DistanceMeasurement extends Measurement {
     this._isDynamic = false;
     this._showAxes = MeasurementPreferences.current.displayMeasurementAxes;
     this._runRiseAxes = [];
-    this._lengthKoQ = "AecUnits.LENGTH";
+    this._lengthKoQ = "DefaultToolsUnits.LENGTH";
     this._lengthPersistenceUnitName = "Units.M";
-    this._coordinateKoQ = "AecUnits.LENGTH_COORDINATE";
+    this._coordinateKoQ = "DefaultToolsUnits.LENGTH_COORDINATE";
     this._coordinatePersistenceUnitName = "Units.M";
 
     if (props) this.readFromJSON(props);
