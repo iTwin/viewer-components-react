@@ -5,7 +5,7 @@
 
 import { BeEvent } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
-import { FormatSetFormatsProvider, SchemaFormatsProvider, SchemaItemType, SchemaKey, SchemaMatchType } from "@itwin/ecschema-metadata";
+import { FormatSetFormatsProvider, SchemaFormatsProvider } from "@itwin/ecschema-metadata";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { FormatsProvider } from "@itwin/core-quantity";
@@ -107,9 +107,13 @@ export class FormatManager {
     const schemaFormatsProvider = new SchemaFormatsProvider(iModel.schemaContext, IModelApp.quantityFormatter.activeUnitSystem);
     this.fallbackFormatsProvider = schemaFormatsProvider;
     this._removeListeners.push(
-      this.onActiveFormatSetChanged.addListener((formatSet) => {
+      this.onActiveFormatSetChanged.addListener(async (formatSet) => {
         if (formatSet && formatSet.unitSystem !== schemaFormatsProvider.unitSystem) {
           schemaFormatsProvider.unitSystem = formatSet.unitSystem;
+        }
+        // While there are tools still using IModelApp.quantityFormatter.activeUnitSystem, keep it in sync with the active format set.
+        if (formatSet && formatSet.unitSystem !== IModelApp.quantityFormatter.activeUnitSystem) {
+          await IModelApp.quantityFormatter.setActiveUnitSystem(formatSet.unitSystem);
         }
       }),
     );
@@ -126,33 +130,6 @@ export class FormatManager {
       // Used until https://github.com/iTwin/bis-schemas/issues/566 is resolved
       // If there are duplicate labels, use the unique fullName of the KoQ instead of it's label.
       const usedLabels: Set<string> = new Set();
-
-      // Try to get known schemas that typically contain KindOfQuantity items, and get all the formats from kind of quantities
-      const schemaNames = ["AecUnits"];
-
-      for (const schemaName of schemaNames) {
-        try {
-          const schema = await iModel.schemaContext.getSchema(new SchemaKey(schemaName, SchemaMatchType.Latest));
-          if (schema) {
-            for (const schemaItem of schema.getItems()) {
-              if (schemaItem.schemaItemType === SchemaItemType.KindOfQuantity) {
-                const format = await schemaFormatsProvider.getFormat(schemaItem.fullName);
-                if (format) {
-                  if (format.label) {
-                    if (usedLabels.has(format.label)) {
-                      (format as any).label = `${format.label} (${schemaItem.key.schemaName})`;
-                    }
-                    usedLabels.add(format.label);
-                  }
-                  schemaFormatSet.formats[schemaItem.fullName] = format;
-                }
-              }
-            }
-          }
-        } catch (error) {
-          console.warn(`Schema ${schemaName} not found or failed to load:`, error);
-        }
-      }
 
       // Get all used KindOfQuantities from the iModel, and populate the formatSet.
       const ecsqlQuery = `

@@ -257,7 +257,7 @@ const configuredUiItems = new Map<string, UiItem>([
           measurementFormattingProps: {
             distance: {
               bearing: {
-                koqName: "RoadRailUnits.BEARING",
+                koqName: "Nonexistent.BEARING", // Intentionally non existent KoQ to fallback to default bearing formatting by the tool
                 persistenceUnitName: "Units.RAD",
               },
             },
