@@ -49,7 +49,7 @@ export function useFilteredPaths({
       return undefined;
     }
 
-    return async ({ imodelAccess }) => {
+    return async ({ imodelAccess, abortSignal }) => {
       onFeatureUsed({ featureId: "filtering", reportInteraction: true });
       try {
         const paths = await ClassificationsTreeDefinition.createInstanceKeyPaths({
@@ -58,6 +58,7 @@ export function useFilteredPaths({
           idsCache: getClassificationsTreeIdsCache(),
           hierarchyConfig: hierarchyConfiguration,
           componentId,
+          abortSignal,
         });
         onFilteredPathsChanged(paths);
         return paths;

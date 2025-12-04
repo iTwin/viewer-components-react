@@ -3,7 +3,24 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, defer, EMPTY, firstValueFrom, from, identity, lastValueFrom, map, merge, mergeMap, of, reduce, toArray } from "rxjs";
+import {
+  bufferCount,
+  defaultIfEmpty,
+  defer,
+  EMPTY,
+  firstValueFrom,
+  from,
+  fromEvent,
+  identity,
+  lastValueFrom,
+  map,
+  merge,
+  mergeMap,
+  of,
+  reduce,
+  takeUntil,
+  toArray,
+} from "rxjs";
 import { Guid } from "@itwin/core-bentley";
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql, parseFullClassName } from "@itwin/presentation-shared";
@@ -64,6 +81,7 @@ export interface ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps {
   idsCache: ClassificationsTreeIdsCache;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
   componentId?: GuidString;
+  abortSignal?: AbortSignal;
 }
 
 /** @internal */
@@ -552,6 +570,8 @@ async function createInstanceKeyPathsFromInstanceLabel(
       }),
       createInstanceKeyPathsFromTargetItems(props),
       toArray(),
+      props.abortSignal ? takeUntil(fromEvent(props.abortSignal, "abort")) : identity,
+      defaultIfEmpty([]),
     ),
   );
 }
