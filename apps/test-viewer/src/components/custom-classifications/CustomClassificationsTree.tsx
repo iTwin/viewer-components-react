@@ -76,7 +76,7 @@ function CustomClassificationImpl({
     };
   }, [checkpointIModel]);
 
-  const { definition, createFilterPaths } = useClassificationsTreeDefinition({
+  const { definition, getFilteredPaths } = useClassificationsTreeDefinition({
     imodelAccesses: useMemo(() => [primaryAccess, checkpointAccess], [primaryAccess, checkpointAccess]),
     hierarchyConfig: useMemo(
       () => ({
@@ -85,19 +85,6 @@ function CustomClassificationImpl({
       [],
     ),
   });
-
-  const getFilteredPaths = useCallback(async () => {
-    if (!filter) {
-      return undefined;
-    }
-
-    const [sourcePath, checkpointPaths] = await Promise.all([
-      createFilterPaths({ imodelAccess: primaryAccess, label: filter }),
-      createFilterPaths({ imodelAccess: checkpointAccess, label: filter }),
-    ]);
-
-    return [...sourcePath, ...checkpointPaths];
-  }, [createFilterPaths, primaryAccess, checkpointAccess, filter]);
 
   const treeProps = useTree({
     getHierarchyProvider: useCallback(() => {

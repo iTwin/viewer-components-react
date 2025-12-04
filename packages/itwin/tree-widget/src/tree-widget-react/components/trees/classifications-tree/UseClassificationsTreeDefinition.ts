@@ -3,13 +3,13 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import { assert } from "@itwin/core-bentley";
 import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.js";
 import { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
 
 import type { MutableRefObject } from "react";
-import type { useIModelTree } from "@itwin/presentation-hierarchies-react";
+import type { useIModelTree, useTree } from "@itwin/presentation-hierarchies-react";
 import type { FunctionProps } from "../common/Utils.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "./ClassificationsTreeDefinition.js";
 
@@ -23,11 +23,20 @@ interface UseClassificationsTreeDefinitionProps {
    */
   imodelAccesses: Array<IModelAccess>;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
+  /**
+   * Optional search parameters to filter tree nodes.
+   */
+  search?: {
+    /**
+     * Text used to filter tree nodes by label.
+     */
+    searchText: string;
+  };
 }
 
 /** @alpha */
 export function useClassificationsTreeDefinition(props: UseClassificationsTreeDefinitionProps) {
-  const { imodelAccesses, hierarchyConfig } = props;
+  const { imodelAccesses, hierarchyConfig, search } = props;
 
   const idsCaches = useRef<Map<string, ClassificationsTreeIdsCache>>(new Map());
 
@@ -45,26 +54,36 @@ export function useClassificationsTreeDefinition(props: UseClassificationsTreeDe
     });
   }, [imodelAccesses, hierarchyConfig]);
 
-  const createFilterPaths = useCallback(
-    async (filterProps: { imodelAccess: IModelAccess; label: string }) => {
-      return ClassificationsTreeDefinition.createInstanceKeyPaths({
-        hierarchyConfig,
-        idsCache: lookupIdsCache({
-          imodelKey: filterProps.imodelAccess.imodelKey,
-          imodels: imodelAccesses,
-          idsCaches,
-          hierarchyConfig,
-        }),
-        imodelAccess: filterProps.imodelAccess,
-        label: filterProps.label,
-      });
-    },
-    [hierarchyConfig, imodelAccesses],
-  );
+  const searchText = search?.searchText;
+  const getFilteredPaths = useMemo<FunctionProps<typeof useTree>["getFilteredPaths"]>(() => {
+    if (!searchText) {
+      return undefined;
+    }
+
+    return async () => {
+      const [first, ...rest] = await Promise.all(
+        imodelAccesses.map(async (imodelAccess) =>
+          ClassificationsTreeDefinition.createInstanceKeyPaths({
+            hierarchyConfig,
+            idsCache: lookupIdsCache({
+              imodelKey: imodelAccess.imodelKey,
+              imodels: imodelAccesses,
+              idsCaches,
+              hierarchyConfig,
+            }),
+            imodelAccess,
+            label: searchText,
+          }),
+        ),
+      );
+
+      return first.concat(...rest);
+    };
+  }, [imodelAccesses, hierarchyConfig, searchText]);
 
   return {
     definition,
-    createFilterPaths,
+    getFilteredPaths,
   };
 }
 
