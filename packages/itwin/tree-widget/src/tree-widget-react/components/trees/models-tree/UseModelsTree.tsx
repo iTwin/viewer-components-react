@@ -174,6 +174,7 @@ export function useModelsTree({
     }
     return async ({ imodelAccess, abortSignal }) => {
       try {
+        setSubTreeError(undefined);
         const paths = await getSubTreePaths({
           createInstanceKeyPaths: async ({ targetItems }) =>
             ModelsTreeDefinition.createInstanceKeyPaths({
@@ -195,15 +196,16 @@ export function useModelsTree({
     };
   }, [getModelsTreeIdsCache, hierarchyConfiguration, getSubTreePaths, componentId]);
 
-  const getPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
-    setFilteringError(undefined);
-    onModelsFiltered?.(undefined);
-
+  useEffect(() => {
     // reset filtered paths if there is no filters applied. This allows to keep current filtered paths until new paths are loaded.
     if (!loadFocusedItems && !getFilteredPaths && !filter && !getSubTreePathsInternal) {
       onFilteredPathsChanged(undefined);
+      setFilteringError(undefined);
+      onModelsFiltered?.(undefined);
     }
+  }, [loadFocusedItems, getFilteredPaths, filter, getSubTreePathsInternal, onFilteredPathsChanged, onModelsFiltered]);
 
+  const getPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
     const handlePaths = async (filteredPaths: HierarchyFilteringPath[] | undefined, classInspector: ECClassHierarchyInspector) => {
       onFilteredPathsChanged(filteredPaths);
       if (!onModelsFiltered) {
@@ -217,6 +219,7 @@ export function useModelsTree({
     if (loadFocusedItems) {
       return async ({ imodelAccess, abortSignal }) => {
         try {
+          setFilteringError(undefined);
           const focusedItems = await collectFocusedItems(loadFocusedItems);
           return await createFilteringPathsResult({
             getFilteringPaths: async () => {
@@ -248,6 +251,7 @@ export function useModelsTree({
     if (getFilteredPaths) {
       return async ({ imodelAccess, abortSignal }) => {
         try {
+          setFilteringError(undefined);
           return await createFilteringPathsResult({
             getFilteringPaths: async () => {
               const paths = await getFilteredPaths({
@@ -284,6 +288,7 @@ export function useModelsTree({
       return async ({ imodelAccess, abortSignal }) => {
         onFeatureUsed({ featureId: "filtering", reportInteraction: true });
         try {
+          setFilteringError(undefined);
           return await createFilteringPathsResult({
             getFilteringPaths: async () => {
               const paths = await ModelsTreeDefinition.createInstanceKeyPaths({

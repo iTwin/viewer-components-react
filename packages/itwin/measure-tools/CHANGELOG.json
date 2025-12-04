@@ -2,6 +2,44 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Fri, 21 Nov 2025 16:14:12 GMT",
+      "version": "0.31.0",
+      "tag": "@itwin/measure-tools-react_v0.31.0",
+      "comments": {
+        "patch": [
+          {
+            "author": "maxime.brassard@bentley.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "3deeb8b4492ee56e6b34e29b62cbb50d7d22390d",
+            "comment": "Fixed sheetToWorld transform displaying incorrect world values."
+          }
+        ],
+        "minor": [
+          {
+            "author": "maxime.brassard@bentley.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "dcf848505aca9a540ae753ec47c199edf219d768",
+            "comment": "Distance and Area tools working with vertical exaggeration"
+          }
+        ]
+      }
+    },
+    {
+      "date": "Wed, 19 Nov 2025 16:26:23 GMT",
+      "version": "0.30.0",
+      "tag": "@itwin/measure-tools-react_v0.30.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "maxime.brassard@bentley.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "1f783ae7e73ed0abb0a1ba873cad74e6f6d03b5f",
+            "comment": "Measure tools in non civil sheets"
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 08 Sep 2025 17:12:28 GMT",
       "version": "0.29.5",
       "tag": "@itwin/measure-tools-react_v0.29.5",

@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Models and Categories trees: reduce main thread blockage for large iModels when determining visibility.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "100586436+JonasDov@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

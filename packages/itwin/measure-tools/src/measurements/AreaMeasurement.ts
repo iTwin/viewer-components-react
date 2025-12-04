@@ -6,7 +6,7 @@
 import type { Id64String } from "@itwin/core-bentley";
 import type { XYZProps } from "@itwin/core-geometry";
 import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
-import { Geometry, IModelJson, Point3d, PointString3d, PolygonOps } from "@itwin/core-geometry";
+import { Geometry, IModelJson, Point3d, PointString3d, PolygonOps, Transform } from "@itwin/core-geometry";
 import { FormatterUtils } from "../api/FormatterUtils.js";
 import { StyleSet, WellKnownGraphicStyleType } from "../api/GraphicStyle.js";
 import { Measurement, MeasurementPickContext, MeasurementSerializer } from "../api/Measurement.js";
@@ -24,6 +24,7 @@ import type {
   RenderGraphicOwner,
 } from "@itwin/core-frontend";
 import type {
+  DrawingMetadataProps,
   MeasurementEqualityOptions,
   MeasurementWidgetData,
 } from "../api/Measurement.js";
@@ -158,7 +159,7 @@ export class AreaMeasurement extends Measurement {
   constructor(props?: AreaMeasurementProps) {
     super(props);
 
-    this._polygon = new Polygon([], false, undefined, undefined, props?.formatting?.area);
+    this._polygon = new Polygon([], false, undefined, props?.formatting?.area);
     this._polygon.textMarker.setMouseButtonHandler(
       this.handleTextMarkerButtonEvent.bind(this)
     );
@@ -234,10 +235,11 @@ export class AreaMeasurement extends Measurement {
     const length = this.polygonPoints.length;
     if (length === 0) return;
 
+    const drawingMetadata: DrawingMetadataProps | undefined = this.drawingMetadata !== undefined ? { origin: this.drawingMetadata.origin, sheetToWorldTransformProps: this.drawingMetadata.sheetToWorldTransformProps }: undefined
+
     const start = this.polygonPoints[length - 1];
-    this._dynamicEdge = DistanceMeasurement.create(start, point, undefined, { length: { koqName: this._lengthKoQ, persistenceUnitName: this._lengthPersistenceUnitName }});
-    if (this.drawingMetadata?.origin)
-      this._dynamicEdge.drawingMetadata = { origin: this.drawingMetadata.origin, worldScale: this.worldScale };
+    this._dynamicEdge = new DistanceMeasurement({startPoint: start, endPoint: point, formatting: { length: { koqName: this._lengthKoQ, persistenceUnitName: this._lengthPersistenceUnitName }}, drawingMetadata: drawingMetadata});
+
     this._dynamicEdge.sheetViewId = this.sheetViewId;
     this._dynamicEdge.viewTarget.copyFrom(this.viewTarget);
     this._dynamicEdge.style = this.style;
@@ -362,7 +364,7 @@ export class AreaMeasurement extends Measurement {
   }
 
   public override onDrawingMetadataChanged(): void {
-    this.polygon.worldScale = this.worldScale;
+    this.polygon.sheetToWorldTransform = this.drawingMetadata?.sheetToWorldTransformv2 ?? Transform.createIdentity();
     this._polygon.recomputeFromPoints();
   }
 
@@ -464,11 +466,11 @@ export class AreaMeasurement extends Measurement {
     const areaSpec = FormatterUtils.getFormatterSpecWithFallback(this._areaKoQ, QuantityType.Area);
 
     const fPerimeter = await FormatterUtils.formatLength(
-      this.worldScale * this._polygon.perimeter,
+      this._polygon.perimeter,
       lengthSpec
     );
     const fArea = await FormatterUtils.formatArea(
-      this.worldScale * this.worldScale * this._polygon.area,
+      this._polygon.area,
       areaSpec
     );
     const fAreaXY = await FormatterUtils.formatArea(
@@ -499,7 +501,7 @@ export class AreaMeasurement extends Measurement {
       }
     );
 
-    if (this.drawingMetadata?.worldScale === undefined) {
+    if (this.drawingMetadata?.sheetToWorldTransformProps?.sheetScale === undefined) {
       data.properties.push(
         {
           label: MeasureTools.localization.getLocalizedString(
