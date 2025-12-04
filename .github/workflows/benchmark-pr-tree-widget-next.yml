@@ -16,5 +16,5 @@ jobs:
     with:
       display-name: 'Tree-Widget Next: Benchmark performance'
       benchmark-name: 'Tree-Widget Next benchmark'
-      mode: 'pr'
+      mode: 'push'
       gh-pages-branch: gh-pages-next
