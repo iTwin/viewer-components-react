@@ -13,7 +13,7 @@ import type { UseCategoriesTreeProps } from "./UseCategoriesTree.js";
 
 /** @beta */
 export type CategoriesTreeProps = Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
-  Pick<VisibilityTreeRendererProps, "getInlineActions" | "getMenuActions" | "getDecorations" | "treeLabel"> &
+  Pick<VisibilityTreeRendererProps, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getDecorations" | "treeLabel"> &
   UseCategoriesTreeProps & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
@@ -34,6 +34,7 @@ export function CategoriesTree({
   getDecorations,
   getInlineActions,
   getMenuActions,
+  getContextMenuActions,
   treeLabel,
 }: CategoriesTreeProps) {
   const { categoriesTreeProps, rendererProps } = useCategoriesTree({
@@ -58,6 +59,7 @@ export function CategoriesTree({
           treeLabel={treeLabel}
           getInlineActions={getInlineActions}
           getMenuActions={getMenuActions}
+          getContextMenuActions={getContextMenuActions}
           getDecorations={getDecorations ?? rendererProps.getDecorations}
         />
       )}

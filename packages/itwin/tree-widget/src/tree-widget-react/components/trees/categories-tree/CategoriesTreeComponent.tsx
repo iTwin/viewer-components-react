@@ -29,6 +29,7 @@ interface CategoriesTreeComponentProps
     | "emptyTreeContent"
     | "getInlineActions"
     | "getMenuActions"
+    | "getContextMenuActions"
     | "getDecorations"
     | "hierarchyConfig"
     | "treeLabel"

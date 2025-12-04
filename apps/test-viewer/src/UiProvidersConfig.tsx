@@ -40,7 +40,6 @@ import {
 } from "@itwin/tree-widget-react";
 import { createLayersUiProvider, initializeLayers } from "./components/LayersWidget";
 import { CustomizeFormatPropertyContextMenuItem } from "./components/quantity-formatting/FormatPropertyContextMenuItem";
-import { RepositoriesTreeComponent } from "./components/repositories-tree/RepositoriesTree";
 import { useViewerOptionsContext } from "./components/ViewerOptions";
 import { unifiedSelectionStorage } from "./SelectionStorage";
 
@@ -164,11 +163,6 @@ const configuredUiItems = new Map<string, UiItem>([
                     treeLabel={props.treeLabel}
                   />
                 ),
-              },
-              {
-                id: "RepositoriesTree",
-                getLabel: () => "Repositories tree",
-                render: () => <RepositoriesTreeComponent baseUrl={`https://${globalThis.IMJS_URL_PREFIX ?? ""}api.bentley.com`} />,
               },
               {
                 id: ClassificationsTreeComponent.id,

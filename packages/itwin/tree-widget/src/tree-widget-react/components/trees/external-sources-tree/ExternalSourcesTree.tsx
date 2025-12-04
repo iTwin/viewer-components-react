@@ -24,14 +24,22 @@ import type { TreeProps } from "../common/components/Tree.js";
 
 /** @beta */
 export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
-  Pick<BaseTreeRendererProps, "getInlineActions" | "getMenuActions" | "getDecorations" | "treeLabel"> & {
+  Pick<BaseTreeRendererProps, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getDecorations" | "treeLabel"> & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
     };
   };
 
 /** @beta */
-export function ExternalSourcesTree({ getInlineActions, getMenuActions, getDecorations, selectionMode, treeLabel, ...rest }: ExternalSourcesTreeProps) {
+export function ExternalSourcesTree({
+  getInlineActions,
+  getMenuActions,
+  getContextMenuActions,
+  getDecorations,
+  selectionMode,
+  treeLabel,
+  ...rest
+}: ExternalSourcesTreeProps) {
   const componentId = useGuid();
   return (
     <Tree
@@ -46,6 +54,7 @@ export function ExternalSourcesTree({ getInlineActions, getMenuActions, getDecor
           treeLabel={treeLabel}
           getInlineActions={getInlineActions}
           getMenuActions={getMenuActions}
+          getContextMenuActions={getContextMenuActions}
           getDecorations={getDecorations ?? ((node) => <ExternalSourcesTreeIcon node={node} />)}
         />
       )}

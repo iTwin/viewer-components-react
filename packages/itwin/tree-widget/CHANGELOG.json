@@ -2,6 +2,21 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Thu, 20 Nov 2025 11:23:22 GMT",
+      "version": "3.17.3",
+      "tag": "@itwin/tree-widget-react_v3.17.3",
+      "comments": {
+        "patch": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "58fc2bcf609603602a3f198dae190e0667229777",
+            "comment": "Fixed `ModelsTreeComponent` and `CategoriesTreeComponent` logging error due to setState calls during render."
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 18 Nov 2025 15:20:07 GMT",
       "version": "3.17.2",
       "tag": "@itwin/tree-widget-react_v3.17.2",
