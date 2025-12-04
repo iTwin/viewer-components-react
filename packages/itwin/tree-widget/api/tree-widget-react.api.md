@@ -601,7 +601,9 @@ export function useClassificationsTreeDefinition(props: UseClassificationsTreeDe
 interface UseClassificationsTreeDefinitionProps {
     // (undocumented)
     hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
-    imodelAccesses: Array<FunctionProps<typeof useIModelTree>["imodelAccess"]>;
+    imodels: Array<{
+        imodelAccess: FunctionProps<typeof useIModelTree>["imodelAccess"];
+    }>;
     search?: {
         searchText: string;
     };
