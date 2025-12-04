@@ -14,15 +14,13 @@ import type { useIModelTree, useTree } from "@itwin/presentation-hierarchies-rea
 import type { FunctionProps } from "../common/Utils.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "./ClassificationsTreeDefinition.js";
 
-type IModelAccess = FunctionProps<typeof useIModelTree>["imodelAccess"];
-
 /** @alpha */
 interface UseClassificationsTreeDefinitionProps {
   /**
    * List of iModels that will be used to merge tree data based on this definition.
    * First iModel in the list is considered the primary iModel and should be the latest version used.
    */
-  imodelAccesses: Array<IModelAccess>;
+  imodelAccesses: Array<FunctionProps<typeof useIModelTree>["imodelAccess"]>;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
   /**
    * Optional search parameters to filter tree nodes.
@@ -101,7 +99,7 @@ function lookupIdsCache({
   idsCaches,
 }: {
   imodelKey: string;
-  imodels: Array<IModelAccess>;
+  imodels: Array<FunctionProps<typeof useIModelTree>["imodelAccess"]>;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
   idsCaches: MutableRefObject<Map<string, ClassificationsTreeIdsCache>>;
 }) {

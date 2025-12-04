@@ -260,9 +260,6 @@ type HierarchyVisibilityHandlerOverridableMethodProps<TFunc> = TFunc extends (pr
     readonly handler: HierarchyVisibilityHandler;
 } : never;
 
-// @public (undocumented)
-type IModelAccess = FunctionProps<typeof useIModelTree>["imodelAccess"];
-
 // @beta
 export const IModelContentTreeComponent: {
     ({ onFeatureUsed, onPerformanceMeasured, treeLabel, ...props }: IModelContentTreeComponentProps): JSX_2.Element | null;
@@ -604,7 +601,7 @@ export function useClassificationsTreeDefinition(props: UseClassificationsTreeDe
 interface UseClassificationsTreeDefinitionProps {
     // (undocumented)
     hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
-    imodelAccesses: Array<IModelAccess>;
+    imodelAccesses: Array<FunctionProps<typeof useIModelTree>["imodelAccess"]>;
     search?: {
         searchText: string;
     };
