@@ -84,6 +84,7 @@ function CustomClassificationImpl({
       }),
       [],
     ),
+    search: filter ? { searchText: filter } : undefined,
   });
 
   const treeProps = useTree({
