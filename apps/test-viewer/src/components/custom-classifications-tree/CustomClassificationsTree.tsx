@@ -82,7 +82,7 @@ function CustomClassificationTreeImpl({
   }, [checkpointIModel]);
 
   const { definition, getFilteredPaths } = useClassificationsTreeDefinition({
-    imodelAccesses: useMemo(() => [primaryAccess, checkpointAccess], [primaryAccess, checkpointAccess]),
+    imodels: useMemo(() => [{ imodelAccess: checkpointAccess }, { imodelAccess: primaryAccess }], [primaryAccess, checkpointAccess]),
     hierarchyConfig: useMemo(
       () => ({
         rootClassificationSystemCode: "50k classifications",
