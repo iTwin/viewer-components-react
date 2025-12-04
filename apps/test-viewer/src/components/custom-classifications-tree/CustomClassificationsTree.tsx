@@ -18,7 +18,7 @@ const SECONDARY_CONNECTION = {
   iModelId: "",
 };
 
-export function CustomClassifications(props: { filter?: string }) {
+export function CustomClassificationsTree(props: { filter?: string }) {
   const [state, setState] = useState<{ primary: IModelConnection; checkpoint: IModelConnection } | undefined>(undefined);
 
   useEffect(() => {
@@ -44,10 +44,10 @@ export function CustomClassifications(props: { filter?: string }) {
   }
 
   const { primary, checkpoint } = state;
-  return <CustomClassificationImpl {...props} primaryIModel={primary} checkpointIModel={checkpoint} />;
+  return <CustomClassificationTreeImpl {...props} primaryIModel={primary} checkpointIModel={checkpoint} />;
 }
 
-function CustomClassificationImpl({
+function CustomClassificationTreeImpl({
   primaryIModel,
   checkpointIModel,
   filter,
@@ -80,7 +80,7 @@ function CustomClassificationImpl({
     imodelAccesses: useMemo(() => [primaryAccess, checkpointAccess], [primaryAccess, checkpointAccess]),
     hierarchyConfig: useMemo(
       () => ({
-        rootClassificationSystemCode: "OpenSite+ Hierarchy",
+        rootClassificationSystemCode: "50k classifications",
       }),
       [],
     ),

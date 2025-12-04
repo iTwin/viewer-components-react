@@ -38,7 +38,7 @@ import {
   TreeWidget,
   TreeWidgetComponent,
 } from "@itwin/tree-widget-react";
-import { CustomClassifications } from "./components/custom-classifications/CustomClassificationsTree";
+import { CustomClassificationsTree } from "./components/custom-classifications-tree/CustomClassificationsTree";
 import { createLayersUiProvider, initializeLayers } from "./components/LayersWidget";
 import { CustomizeFormatPropertyContextMenuItem } from "./components/quantity-formatting/FormatPropertyContextMenuItem";
 import { useViewerOptionsContext } from "./components/ViewerOptions";
@@ -189,7 +189,7 @@ const configuredUiItems = new Map<string, UiItem>([
                 id: "CustomClassificationsTree",
                 getLabel: () => "Custom Classifications tree",
                 isSearchable: true,
-                render: (props) => <CustomClassifications filter={props.filter} />,
+                render: (props) => <CustomClassificationsTree filter={props.filter} />,
               },
             ];
             return [
