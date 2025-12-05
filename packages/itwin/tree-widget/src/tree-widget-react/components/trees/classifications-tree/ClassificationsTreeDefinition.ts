@@ -648,27 +648,22 @@ function createInstanceKeyPathsFromTargetItemsObs({
     mergeMap((ids) => {
       const elements2dLength = ids.element2dIds.length;
       const elements3dLength = ids.element3dIds.length;
+      const getElementsPathsObs = (elementType: "2d" | "3d") =>
+        from(elementType === "2d" ? ids.element2dIds : ids.element3dIds).pipe(
+          bufferCount(getOptimalBatchSize({ totalSize: elementType === "2d" ? elements2dLength : elements3dLength, maximumBatchSize: 5000 })),
+          releaseMainThreadOnItemsCount(1),
+          mergeMap(
+            (block, chunkIndex) =>
+              createGeometricElementInstanceKeyPaths({ idsCache, imodelAccess, targetItems: block, type: elementType, chunkIndex, componentId, componentName }),
+            10,
+          ),
+        );
+
       return merge(
         from(ids.classificationTableIds).pipe(map((id) => ({ path: [{ id, className: CLASS_NAME_ClassificationTable }], options: { autoExpand: true } }))),
         idsCache.getClassificationsPathObs(ids.classificationIds).pipe(map((path) => ({ path, options: { autoExpand: true } }))),
-        from(ids.element2dIds).pipe(
-          bufferCount(getOptimalBatchSize({ totalSize: elements2dLength, maximumBatchSize: 5000 })),
-          releaseMainThreadOnItemsCount(1),
-          mergeMap(
-            (block, chunkIndex) =>
-              createGeometricElementInstanceKeyPaths({ idsCache, imodelAccess, targetItems: block, type: "2d", chunkIndex, componentId, componentName }),
-            10,
-          ),
-        ),
-        from(ids.element3dIds).pipe(
-          bufferCount(getOptimalBatchSize({ totalSize: elements3dLength, maximumBatchSize: 5000 })),
-          releaseMainThreadOnItemsCount(1),
-          mergeMap(
-            (block, chunkIndex) =>
-              createGeometricElementInstanceKeyPaths({ idsCache, imodelAccess, targetItems: block, type: "3d", chunkIndex, componentId, componentName }),
-            10,
-          ),
-        ),
+        getElementsPathsObs("2d"),
+        getElementsPathsObs("3d"),
       );
     }),
     toArray(),

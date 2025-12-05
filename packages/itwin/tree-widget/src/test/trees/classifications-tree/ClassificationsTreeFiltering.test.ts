@@ -259,7 +259,7 @@ describe("Classifications tree", () => {
     });
 
     describe("by instance key", () => {
-      it("finds classifications table by instance key", async function () {
+      it("finds classifications table", async function () {
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           await importClassificationSchema(builder);
 
@@ -308,7 +308,7 @@ describe("Classifications tree", () => {
         ]);
       });
 
-      it("finds classifications table by instance key", async function () {
+      it("finds classifications", async function () {
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           await importClassificationSchema(builder);
 
@@ -360,7 +360,7 @@ describe("Classifications tree", () => {
         ]);
       });
 
-      it("finds geometric element 3d by instance key", async function () {
+      it("finds geometric element 3d", async function () {
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           await importClassificationSchema(builder);
 
@@ -413,7 +413,7 @@ describe("Classifications tree", () => {
         ]);
       });
 
-      it("finds geometric element 2d by instance key", async function () {
+      it("finds geometric element 2d", async function () {
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           await importClassificationSchema(builder);
 
@@ -466,7 +466,7 @@ describe("Classifications tree", () => {
         ]);
       });
 
-      it("finds child geometric element 3d by instance key", async function () {
+      it("finds child geometric element 3d", async function () {
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           await importClassificationSchema(builder);
 
