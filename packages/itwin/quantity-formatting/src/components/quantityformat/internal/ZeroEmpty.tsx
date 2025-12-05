@@ -9,6 +9,7 @@ import type { FormatProps } from "@itwin/core-quantity";
 import { Format, FormatTraits, getTraitString } from "@itwin/core-quantity";
 import { Checkbox, Label } from "@itwin/itwinui-react";
 import { useTranslation } from "../../../useTranslation.js";
+import { useTelemetryContext } from "../../../hooks/UseTelemetryContext.js";
 import "../FormatPanel.scss";
 
 /** Properties of [[ZeroEmpty]] component.
@@ -25,6 +26,7 @@ export interface ZeroEmptyProps {
 export function ZeroEmpty(props: ZeroEmptyProps) {
   const { formatProps, onChange } = props;
   const { translate } = useTranslation();
+  const { onFeatureUsed } = useTelemetryContext();
   const zeroEmptyId = React.useId();
 
   const setFormatTrait = React.useCallback(
@@ -65,7 +67,10 @@ export function ZeroEmpty(props: ZeroEmptyProps) {
           formatProps,
           FormatTraits.ZeroEmpty
         )}
-        onChange={(e) => setFormatTrait(FormatTraits.ZeroEmpty, e.target.checked)}
+        onChange={(e) => {
+          onFeatureUsed("zero-empty-toggle");
+          setFormatTrait(FormatTraits.ZeroEmpty, e.target.checked);
+        }}
       />
     </div>
   );
