@@ -606,6 +606,8 @@ interface UseClassificationsTreeDefinitionProps {
     }>;
     search?: {
         searchText: string;
+    } | {
+        targetItems: Array<InstanceKey>;
     };
 }
 

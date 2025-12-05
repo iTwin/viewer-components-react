@@ -37,8 +37,8 @@ import {
 import { getOptimalBatchSize, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 
-import type { Observable, OperatorFunction } from "rxjs";
-import type { GuidString, Id64Array, Id64String, MarkRequired } from "@itwin/core-bentley";
+import type { Observable } from "rxjs";
+import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
 import type {
   DefineHierarchyLevelProps,
   DefineInstanceNodeChildHierarchyLevelProps,
@@ -73,15 +73,23 @@ export interface ClassificationsTreeHierarchyConfiguration {
   rootClassificationSystemCode: string;
 }
 
-/** @internal */
-export interface ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps {
+interface ClassificationsTreeInstanceKeyPathsBaseProps {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
-  label: string;
   limit?: number | "unbounded";
   idsCache: ClassificationsTreeIdsCache;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
   componentId?: GuidString;
   abortSignal?: AbortSignal;
+}
+
+/** @internal */
+export interface ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps extends ClassificationsTreeInstanceKeyPathsBaseProps {
+  label: string;
+}
+
+/** @internal */
+export interface ClassificationsTreeInstanceKeyPathsFromInstanceKeysProps extends ClassificationsTreeInstanceKeyPathsBaseProps {
+  targetItems: Array<InstanceKey>;
 }
 
 /** @internal */
@@ -357,14 +365,19 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
     });
   }
 
-  public static async createInstanceKeyPaths(props: ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps): Promise<NormalizedHierarchyFilteringPath[]> {
-    const labelsFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
-    return createInstanceKeyPathsFromInstanceLabel({
-      ...props,
-      labelsFactory,
-      componentId: props.componentId ?? Guid.createValue(),
-      componentName: this.#componentName,
-    });
+  public static async createInstanceKeyPaths(
+    props: ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps | ClassificationsTreeInstanceKeyPathsFromInstanceKeysProps,
+  ): Promise<NormalizedHierarchyFilteringPath[]> {
+    return lastValueFrom(
+      defer(() => {
+        const componentInfo = { componentId: props.componentId ?? Guid.createValue(), componentName: this.#componentName };
+        if ("label" in props) {
+          const labelsFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
+          return createInstanceKeyPathsFromInstanceLabelObs({ ...props, ...componentInfo, labelsFactory });
+        }
+        return createInstanceKeyPathsFromTargetItemsObs({ ...props, ...componentInfo });
+      }).pipe(props.abortSignal ? takeUntil(fromEvent(props.abortSignal, "abort")) : identity, defaultIfEmpty([])),
+    );
   }
 }
 
@@ -390,28 +403,29 @@ function createClassificationHasChildrenSelector(classificationAlias: string) {
   `;
 }
 
-async function createInstanceKeyPathsFromInstanceLabel(
-  props: MarkRequired<ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps, "componentId"> & {
-    labelsFactory: IInstanceLabelSelectClauseFactory;
-    componentName: string;
-  },
-): Promise<NormalizedHierarchyFilteringPath[]> {
-  const adjustedLabel = props.label.replace(/[%_\\]/g, "\\$&");
+function createInstanceKeyPathsFromInstanceLabelObs({
+  label,
+  ...props
+}: Omit<ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps, "componentId" | "componentName" | "abortSignal"> & {
+  labelsFactory: IInstanceLabelSelectClauseFactory;
+  componentName: string;
+  componentId: string;
+}): Observable<NormalizedHierarchyFilteringPath[]> {
+  const adjustedLabel = label.replace(/[%_\\]/g, "\\$&");
 
   const CLASSIFICATION_TABLES_WITH_LABELS_CTE = "ClassificationTablesWithLabels";
   const CLASSIFICATIONS_WITH_LABELS_CTE = "ClassificationsWithLabels";
   const ELEMENTS_2D_WITH_LABELS_CTE = "Elements2dWithLabels";
   const ELEMENTS_3D_WITH_LABELS_CTE = "Elements3dWithLabels";
-  return lastValueFrom(
-    defer(async () => {
-      const [classificationTableLabelSelectClause, classificationLabelSelectClause, element2dLabelSelectClause, element3dLabelSelectClause] = await Promise.all(
-        [CLASS_NAME_ClassificationTable, CLASS_NAME_Classification, CLASS_NAME_GeometricElement2d, CLASS_NAME_GeometricElement3d].map(async (className) =>
-          props.labelsFactory.createSelectClause({ classAlias: "this", className }),
-        ),
-      );
-      const classificationIds = await firstValueFrom(props.idsCache.getAllClassifications());
-      const ctes = [
-        `
+  return defer(async () => {
+    const [classificationTableLabelSelectClause, classificationLabelSelectClause, element2dLabelSelectClause, element3dLabelSelectClause] = await Promise.all(
+      [CLASS_NAME_ClassificationTable, CLASS_NAME_Classification, CLASS_NAME_GeometricElement2d, CLASS_NAME_GeometricElement3d].map(async (className) =>
+        props.labelsFactory.createSelectClause({ classAlias: "this", className }),
+      ),
+    );
+    const classificationIds = await firstValueFrom(props.idsCache.getAllClassifications());
+    const ctes = [
+      `
           ${CLASSIFICATION_TABLES_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (
             SELECT
               'ct',
@@ -425,9 +439,9 @@ async function createInstanceKeyPathsFromInstanceLabel(
               AND NOT this.IsPrivate
           )
         `,
-        ...(classificationIds.length > 0
-          ? [
-              `${CLASSIFICATIONS_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (
+      ...(classificationIds.length > 0
+        ? [
+            `${CLASSIFICATIONS_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (
             SELECT
               'c',
               this.ECInstanceId,
@@ -437,7 +451,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
             WHERE
               this.ECInstanceId IN (${classificationIds.join(",")})
           )`,
-              `${ELEMENTS_2D_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (
+            `${ELEMENTS_2D_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (
             SELECT
               'e2d',
               this.ECInstanceId,
@@ -459,7 +473,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
               ${CLASS_NAME_GeometricElement2d} this
               JOIN ${ELEMENTS_2D_WITH_LABELS_CTE} pe ON pe.ECInstanceId = this.Parent.Id
           )`,
-              `${ELEMENTS_3D_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (
+            `${ELEMENTS_3D_WITH_LABELS_CTE}(ClassName, ECInstanceId, DisplayLabel) AS (
             SELECT
               'e3d',
               this.ECInstanceId,
@@ -481,10 +495,10 @@ async function createInstanceKeyPathsFromInstanceLabel(
               ${CLASS_NAME_GeometricElement3d} this
               JOIN ${ELEMENTS_3D_WITH_LABELS_CTE} pe ON pe.ECInstanceId = this.Parent.Id
           )`,
-            ]
-          : []),
-      ];
-      const ecsql = `
+          ]
+        : []),
+    ];
+    const ecsql = `
         SELECT * FROM (
           SELECT
             ct.ClassName AS ClassName,
@@ -532,125 +546,128 @@ async function createInstanceKeyPathsFromInstanceLabel(
         )
         ${props.limit === undefined ? `LIMIT ${MAX_FILTERING_INSTANCE_KEY_COUNT + 1}` : props.limit !== "unbounded" ? `LIMIT ${props.limit}` : ""}
       `;
-      const bindings = [
-        { type: "string" as const, value: adjustedLabel },
-        ...(classificationIds.length > 0
-          ? [
-              { type: "string" as const, value: adjustedLabel },
-              { type: "string" as const, value: adjustedLabel },
-              { type: "string" as const, value: adjustedLabel },
-            ]
-          : []),
-      ];
-      return { ctes, ecsql, bindings };
-    }).pipe(
-      mergeMap((queryProps) =>
-        props.imodelAccess.createQueryReader(queryProps, { restartToken: `${props.componentName}/${props.componentId}/filter-by-label`, limit: props.limit }),
-      ),
-      map((row): InstanceKey => {
-        let className: string;
-        switch (row.ClassName) {
-          case "ct":
-            className = CLASS_NAME_ClassificationTable;
-            break;
-          case "c":
-            className = CLASS_NAME_Classification;
-            break;
-          case "e2d":
-            className = CLASS_NAME_GeometricElement2d;
-            break;
-          default:
-            className = CLASS_NAME_GeometricElement3d;
-            break;
-        }
-        return {
-          className,
-          id: row.ECInstanceId,
-        };
-      }),
-      createInstanceKeyPathsFromTargetItems(props),
-      toArray(),
-      props.abortSignal ? takeUntil(fromEvent(props.abortSignal, "abort")) : identity,
-      defaultIfEmpty([]),
+    const bindings = [
+      { type: "string" as const, value: adjustedLabel },
+      ...(classificationIds.length > 0
+        ? [
+            { type: "string" as const, value: adjustedLabel },
+            { type: "string" as const, value: adjustedLabel },
+            { type: "string" as const, value: adjustedLabel },
+          ]
+        : []),
+    ];
+    return { ctes, ecsql, bindings };
+  }).pipe(
+    mergeMap((queryProps) =>
+      props.imodelAccess.createQueryReader(queryProps, { restartToken: `${props.componentName}/${props.componentId}/filter-by-label`, limit: props.limit }),
     ),
+    map((row): InstanceKey => {
+      let className: string;
+      switch (row.ClassName) {
+        case "ct":
+          className = CLASS_NAME_ClassificationTable;
+          break;
+        case "c":
+          className = CLASS_NAME_Classification;
+          break;
+        case "e2d":
+          className = CLASS_NAME_GeometricElement2d;
+          break;
+        default:
+          className = CLASS_NAME_GeometricElement3d;
+          break;
+      }
+      return {
+        className,
+        id: row.ECInstanceId,
+      };
+    }),
+    toArray(),
+    mergeMap((targetKeys) => createInstanceKeyPathsFromTargetItemsObs({ ...props, targetItems: targetKeys })),
   );
 }
 
-function createInstanceKeyPathsFromTargetItems({
+function createInstanceKeyPathsFromTargetItemsObs({
   idsCache,
   imodelAccess,
   limit,
   componentId,
+  targetItems,
   componentName,
-}: Pick<ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps, "limit" | "imodelAccess" | "idsCache"> & {
+}: Omit<ClassificationsTreeInstanceKeyPathsFromInstanceKeysProps, "abortSignal" | "componentId"> & {
   componentId: GuidString;
   componentName: string;
-}): OperatorFunction<InstanceKey, NormalizedHierarchyFilteringPath> {
+}): Observable<NormalizedHierarchyFilteringPath[]> {
   const actualLimit = limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT;
-  return (targetItems: Observable<InstanceKey>) => {
-    return targetItems.pipe(
-      actualLimit !== "unbounded"
-        ? map((targetItem, index) => {
-            if (index >= actualLimit) {
-              throw new FilterLimitExceededError(actualLimit);
-            }
-            return targetItem;
-          })
-        : identity,
-      releaseMainThreadOnItemsCount(2000),
-      reduce(
-        (acc, { id, className }) => {
-          if (className === CLASS_NAME_ClassificationTable) {
-            acc.classificationTableIds.push(id);
-            return acc;
-          }
-          if (className === CLASS_NAME_Classification) {
-            acc.classificationIds.push(id);
-            return acc;
-          }
-          if (className === CLASS_NAME_GeometricElement2d) {
-            acc.element2dIds.push(id);
-            return acc;
-          }
+  if (actualLimit !== "unbounded" && targetItems.length > actualLimit) {
+    throw new FilterLimitExceededError(actualLimit);
+  }
+  return from(targetItems).pipe(
+    releaseMainThreadOnItemsCount(2000),
+    mergeMap(async (key): Promise<{ id: Id64String; type: number }> => {
+      if (await imodelAccess.classDerivesFrom(key.className, CLASS_NAME_ClassificationTable)) {
+        return { id: key.id, type: 0 };
+      }
 
-          acc.element3dIds.push(id);
-          return acc;
-        },
-        {
-          classificationTableIds: new Array<ClassificationTableId>(),
-          classificationIds: new Array<ClassificationId>(),
-          element2dIds: new Array<ElementId>(),
-          element3dIds: new Array<ElementId>(),
-        },
-      ),
-      mergeMap((ids) => {
-        const elements2dLength = ids.element2dIds.length;
-        const elements3dLength = ids.element3dIds.length;
-        return merge(
-          from(ids.classificationTableIds).pipe(map((id) => ({ path: [{ id, className: CLASS_NAME_ClassificationTable }], options: { autoExpand: true } }))),
-          idsCache.getClassificationsPathObs(ids.classificationIds).pipe(map((path) => ({ path, options: { autoExpand: true } }))),
-          from(ids.element2dIds).pipe(
-            bufferCount(getOptimalBatchSize({ totalSize: elements2dLength, maximumBatchSize: 5000 })),
-            releaseMainThreadOnItemsCount(1),
-            mergeMap(
-              (block, chunkIndex) =>
-                createGeometricElementInstanceKeyPaths({ idsCache, imodelAccess, targetItems: block, type: "2d", chunkIndex, componentId, componentName }),
-              10,
-            ),
-          ),
-          from(ids.element3dIds).pipe(
-            bufferCount(getOptimalBatchSize({ totalSize: elements3dLength, maximumBatchSize: 5000 })),
-            releaseMainThreadOnItemsCount(1),
-            mergeMap(
-              (block, chunkIndex) =>
-                createGeometricElementInstanceKeyPaths({ idsCache, imodelAccess, targetItems: block, type: "3d", chunkIndex, componentId, componentName }),
-              10,
-            ),
+      if (await imodelAccess.classDerivesFrom(key.className, CLASS_NAME_Classification)) {
+        return { id: key.id, type: 1 };
+      }
+
+      if (await imodelAccess.classDerivesFrom(key.className, CLASS_NAME_GeometricElement2d)) {
+        return { id: key.id, type: 2 };
+      }
+
+      return { id: key.id, type: 3 };
+    }, 2),
+
+    reduce(
+      (acc, { id, type }) => {
+        switch (type) {
+          case 0:
+            acc.classificationTableIds.push(id);
+            break;
+          case 1:
+            acc.classificationIds.push(id);
+            break;
+          case 2:
+            acc.element2dIds.push(id);
+            break;
+          case 3:
+            acc.element3dIds.push(id);
+            break;
+        }
+        return acc;
+      },
+      {
+        classificationTableIds: new Array<ClassificationTableId>(),
+        classificationIds: new Array<ClassificationId>(),
+        element2dIds: new Array<ElementId>(),
+        element3dIds: new Array<ElementId>(),
+      },
+    ),
+    mergeMap((ids) => {
+      const elements2dLength = ids.element2dIds.length;
+      const elements3dLength = ids.element3dIds.length;
+      const getElementsPathsObs = (elementType: "2d" | "3d") =>
+        from(elementType === "2d" ? ids.element2dIds : ids.element3dIds).pipe(
+          bufferCount(getOptimalBatchSize({ totalSize: elementType === "2d" ? elements2dLength : elements3dLength, maximumBatchSize: 5000 })),
+          releaseMainThreadOnItemsCount(1),
+          mergeMap(
+            (block, chunkIndex) =>
+              createGeometricElementInstanceKeyPaths({ idsCache, imodelAccess, targetItems: block, type: elementType, chunkIndex, componentId, componentName }),
+            10,
           ),
         );
-      }),
-    );
-  };
+
+      return merge(
+        from(ids.classificationTableIds).pipe(map((id) => ({ path: [{ id, className: CLASS_NAME_ClassificationTable }], options: { autoExpand: true } }))),
+        idsCache.getClassificationsPathObs(ids.classificationIds).pipe(map((path) => ({ path, options: { autoExpand: true } }))),
+        getElementsPathsObs("2d"),
+        getElementsPathsObs("3d"),
+      );
+    }),
+    toArray(),
+  );
 }
 
 function createGeometricElementInstanceKeyPaths(props: {

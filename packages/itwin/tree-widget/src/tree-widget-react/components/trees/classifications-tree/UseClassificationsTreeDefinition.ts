@@ -11,6 +11,7 @@ import { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCa
 import type { MutableRefObject } from "react";
 import type { HierarchyDefinition } from "@itwin/presentation-hierarchies";
 import type { useIModelTree, useTree } from "@itwin/presentation-hierarchies-react";
+import type { InstanceKey } from "@itwin/presentation-shared";
 import type { FunctionProps } from "../common/Utils.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "./ClassificationsTreeDefinition.js";
 
@@ -32,12 +33,19 @@ interface UseClassificationsTreeDefinitionProps {
   /**
    * Optional search parameters to filter tree nodes.
    */
-  search?: {
-    /**
-     * Text used to filter tree nodes by label.
-     */
-    searchText: string;
-  };
+  search?:
+    | {
+        /**
+         * Text used to filter tree nodes by label.
+         */
+        searchText: string;
+      }
+    | {
+        /**
+         * List of instance keys to filter tree nodes by.
+         */
+        targetItems: Array<InstanceKey>;
+      };
 }
 
 /** @alpha */
@@ -66,9 +74,9 @@ export function useClassificationsTreeDefinition(props: UseClassificationsTreeDe
     });
   }, [imodels, hierarchyConfig]);
 
-  const searchText = search?.searchText;
+  const searchTerm = search ? ("searchText" in search ? search.searchText : search.targetItems) : undefined;
   const getFilteredPaths = useMemo<FunctionProps<typeof useTree>["getFilteredPaths"]>(() => {
-    if (!searchText) {
+    if (!searchTerm) {
       return undefined;
     }
 
@@ -84,15 +92,15 @@ export function useClassificationsTreeDefinition(props: UseClassificationsTreeDe
               hierarchyConfig,
             }),
             imodelAccess,
-            label: searchText,
             abortSignal,
+            ...(typeof searchTerm === "string" ? { label: searchTerm } : { targetItems: searchTerm }),
           }),
         ),
       );
 
       return first.concat(...rest);
     };
-  }, [imodels, hierarchyConfig, searchText]);
+  }, [imodels, hierarchyConfig, searchTerm]);
 
   return {
     definition,
