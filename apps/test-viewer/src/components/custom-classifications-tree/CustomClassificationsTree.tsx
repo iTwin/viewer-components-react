@@ -4,9 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { IModelVersion } from "@itwin/core-common";
 import { CheckpointConnection } from "@itwin/core-frontend";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { createIModelHierarchyProvider, createLimitingECSqlQueryExecutor, mergeProviders } from "@itwin/presentation-hierarchies";
+import { createLimitingECSqlQueryExecutor, createMergedIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { StrataKitTreeRenderer, useTree } from "@itwin/presentation-hierarchies-react";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 import { useClassificationsTreeDefinition } from "@itwin/tree-widget-react";
@@ -24,18 +25,22 @@ const SECONDARY_CONNECTION = {
 };
 
 export function CustomClassificationsTree(props: { filter?: string }) {
-  const [state, setState] = useState<{ primary: IModelConnection; checkpoint: IModelConnection } | undefined>(undefined);
+  const [state, setState] = useState<{ latest: IModelConnection; checkpoint: IModelConnection } | undefined>(undefined);
 
   useEffect(() => {
     let disposed = false;
     async function loadIModels() {
-      const primaryConnection = await CheckpointConnection.openRemote(PRIMARY_CONNECTION.iTwinId, PRIMARY_CONNECTION.iModelId);
-      const checkpointConnection = await CheckpointConnection.openRemote(SECONDARY_CONNECTION.iTwinId, SECONDARY_CONNECTION.iModelId);
+      const latestConnection = await CheckpointConnection.openRemote(PRIMARY_CONNECTION.iTwinId, PRIMARY_CONNECTION.iModelId, IModelVersion.latest());
+      const checkpointConnection = await CheckpointConnection.openRemote(
+        SECONDARY_CONNECTION.iTwinId,
+        SECONDARY_CONNECTION.iModelId,
+        IModelVersion.asOfChangeSet("f79623ed229a486cdb25613748178075a8f6cf58"),
+      );
       if (disposed) {
         return;
       }
 
-      setState({ primary: primaryConnection, checkpoint: checkpointConnection });
+      setState({ latest: latestConnection, checkpoint: checkpointConnection });
     }
 
     void loadIModels();
@@ -48,28 +53,28 @@ export function CustomClassificationsTree(props: { filter?: string }) {
     return null;
   }
 
-  const { primary, checkpoint } = state;
-  return <CustomClassificationTreeImpl {...props} primaryIModel={primary} checkpointIModel={checkpoint} />;
+  const { latest, checkpoint } = state;
+  return <CustomClassificationTreeImpl {...props} latestIModel={latest} checkpointIModel={checkpoint} />;
 }
 
 function CustomClassificationTreeImpl({
-  primaryIModel,
+  latestIModel,
   checkpointIModel,
   filter,
 }: {
-  primaryIModel: IModelConnection;
+  latestIModel: IModelConnection;
   checkpointIModel: IModelConnection;
   filter?: string;
 }) {
-  const primaryAccess = useMemo(() => {
-    const schemaProvider = createECSchemaProvider(primaryIModel.schemaContext);
+  const latestAccess = useMemo(() => {
+    const schemaProvider = createECSchemaProvider(latestIModel.schemaContext);
     return {
-      imodelKey: primaryIModel.key,
-      ...createECSchemaProvider(primaryIModel.schemaContext),
+      imodelKey: latestIModel.key,
+      ...createECSchemaProvider(latestIModel.schemaContext),
       ...createCachingECClassHierarchyInspector({ schemaProvider, cacheSize: 100 }),
-      ...createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(primaryIModel), 1000),
+      ...createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(latestIModel), 1000),
     };
-  }, [primaryIModel]);
+  }, [latestIModel]);
 
   const checkpointAccess = useMemo(() => {
     const schemaProvider = createECSchemaProvider(checkpointIModel.schemaContext);
@@ -81,8 +86,9 @@ function CustomClassificationTreeImpl({
     };
   }, [checkpointIModel]);
 
+  const imodels = useMemo(() => [{ imodelAccess: checkpointAccess }, { imodelAccess: latestAccess }], [latestAccess, checkpointAccess]);
   const { definition, getFilteredPaths } = useClassificationsTreeDefinition({
-    imodels: useMemo(() => [{ imodelAccess: checkpointAccess }, { imodelAccess: primaryAccess }], [primaryAccess, checkpointAccess]),
+    imodels,
     hierarchyConfig: useMemo(
       () => ({
         rootClassificationSystemCode: "50k classifications",
@@ -91,22 +97,13 @@ function CustomClassificationTreeImpl({
     ),
     search: filter ? { searchText: filter } : undefined,
   });
-
   const treeProps = useTree({
     getHierarchyProvider: useCallback(() => {
-      return mergeProviders({
-        providers: [
-          createIModelHierarchyProvider({
-            hierarchyDefinition: definition,
-            imodelAccess: primaryAccess,
-          }),
-          createIModelHierarchyProvider({
-            hierarchyDefinition: definition,
-            imodelAccess: checkpointAccess,
-          }),
-        ],
+      return createMergedIModelHierarchyProvider({
+        hierarchyDefinition: definition,
+        imodels,
       });
-    }, [definition, primaryAccess, checkpointAccess]),
+    }, [definition, imodels]),
     getFilteredPaths,
   });
 
