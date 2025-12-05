@@ -22,6 +22,7 @@ const PRIMARY_CONNECTION = {
 const SECONDARY_CONNECTION = {
   iTwinId: "",
   iModelId: "",
+  changesetId: "",
 };
 
 export function CustomClassificationsTree(props: { filter?: string }) {
@@ -34,7 +35,7 @@ export function CustomClassificationsTree(props: { filter?: string }) {
       const checkpointConnection = await CheckpointConnection.openRemote(
         SECONDARY_CONNECTION.iTwinId,
         SECONDARY_CONNECTION.iModelId,
-        IModelVersion.asOfChangeSet("f79623ed229a486cdb25613748178075a8f6cf58"),
+        IModelVersion.asOfChangeSet(SECONDARY_CONNECTION.changesetId),
       );
       if (disposed) {
         return;
