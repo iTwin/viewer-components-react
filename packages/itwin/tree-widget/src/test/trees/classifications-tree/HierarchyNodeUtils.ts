@@ -6,7 +6,7 @@
 import { CLASS_NAME_Classification, CLASS_NAME_ClassificationTable } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 
 import type { Id64String } from "@itwin/core-bentley";
-import type { HierarchyNode, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+import type { NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
 
 export function createClassificationTableHierarchyNode({
@@ -16,7 +16,7 @@ export function createClassificationTableHierarchyNode({
 }: {
   id: Id64String;
   hasChildren?: boolean;
-  filtering?: HierarchyNode["filtering"];
+  filtering?: NonGroupingHierarchyNode["filtering"];
 }): NonGroupingHierarchyNode {
   return {
     key: {
@@ -41,7 +41,7 @@ export function createClassificationHierarchyNode({
 }: {
   id: Id64String;
   hasChildren?: boolean;
-  filtering?: HierarchyNode["filtering"];
+  filtering?: NonGroupingHierarchyNode["filtering"];
   parentKeys?: InstanceKey[];
 }): NonGroupingHierarchyNode {
   return {
@@ -69,7 +69,7 @@ export function createPhysicalElementHierarchyNode({
   id: Id64String;
   modelId: Id64String;
   categoryId: Id64String;
-  filtering?: HierarchyNode["filtering"];
+  filtering?: NonGroupingHierarchyNode["filtering"];
   parentKeys?: InstanceKey[];
 }): NonGroupingHierarchyNode {
   return {
@@ -99,7 +99,7 @@ export function createDrawingElementHierarchyNode({
   id: Id64String;
   modelId: Id64String;
   categoryId: Id64String;
-  filtering?: HierarchyNode["filtering"];
+  filtering?: NonGroupingHierarchyNode["filtering"];
   parentKeys?: InstanceKey[];
 }): NonGroupingHierarchyNode {
   return {

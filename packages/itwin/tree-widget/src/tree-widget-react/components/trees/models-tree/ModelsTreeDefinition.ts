@@ -43,7 +43,13 @@ import {
   CLASS_NAME_Subject,
 } from "../common/internal/ClassNameDefinitions.js";
 import { collect } from "../common/internal/Rxjs.js";
-import { createIdsSelector, getOptimalBatchSize, parseIdsSelectorResult, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
+import {
+  createIdsSelector,
+  getOptimalBatchSize,
+  groupingNodeHasFilterTargets,
+  parseIdsSelectorResult,
+  releaseMainThreadOnItemsCount,
+} from "../common/internal/Utils.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 
 import type { Observable } from "rxjs";
@@ -207,36 +213,16 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
 
   public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
     if (ProcessedHierarchyNode.isGroupingNode(node)) {
-      let hasDirectNonFilteredTargets = false;
-      let hasFilterTargetAncestor = false;
-      for (const child of node.children) {
-        if (child.filtering) {
-          if (child.filtering.hasFilterTargetAncestor) {
-            hasFilterTargetAncestor = true;
-            break;
-          }
-          if (!child.filtering.isFilterTarget) {
-            hasDirectNonFilteredTargets = true;
-            break;
-          }
-        }
-      }
+      const { hasFilterTargetAncestor, hasDirectNonFilteredTargets } = groupingNodeHasFilterTargets(node.children);
       return {
         ...node,
-        ...(hasFilterTargetAncestor
-          ? {
-              filtering: {
-                ...(node.filtering ?? {}),
-                hasFilterTargetAncestor,
-              },
-            }
-          : {}),
         label: this.#hierarchyConfig.elementClassGrouping === "enableWithCounts" ? `${node.label} (${node.children.length})` : node.label,
         extendedData: {
           ...node.extendedData,
           // add `modelId` and `categoryId` from the first grouped element
           ...node.children[0].extendedData,
           ...(hasDirectNonFilteredTargets ? { hasDirectNonFilteredTargets } : {}),
+          ...(hasFilterTargetAncestor ? { hasFilterTargetAncestor } : {}),
           // `imageId` is assigned to instance nodes at query time, but grouping ones need to
           // be handled during post-processing
           imageId: "icon-ec-class",
@@ -733,7 +719,7 @@ function createGeometricElementInstanceKeyPaths(props: {
           return {
             path,
             options: {
-              autoExpand: {
+              reveal: {
                 depthInHierarchy: groupingNode.parentKeys.length,
               },
             },

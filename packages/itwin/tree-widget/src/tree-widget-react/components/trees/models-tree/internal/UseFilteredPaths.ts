@@ -129,7 +129,7 @@ export function useFilteredPaths({
                 abortSignal,
                 componentId,
               });
-              return paths.map(({ path, options }) => ({ path, options: { ...options, autoExpand: true } }));
+              return paths.map(({ path, options }) => ({ path, options: { ...options, reveal: true } }));
             },
             getSubTreePaths: async () => (getSubTreePathsInternal ? getSubTreePathsInternal({ imodelAccess, abortSignal }) : undefined),
             handlePaths: async (paths) => handlePaths(paths, imodelAccess),
@@ -195,7 +195,7 @@ export function useFilteredPaths({
                 abortSignal,
                 componentId,
               });
-              return paths.map(({ path, options }) => ({ path, options: { ...options, autoExpand: true } }));
+              return paths.map(({ path, options }) => ({ path, options: { ...options, reveal: true } }));
             },
             getSubTreePaths: async () => (getSubTreePathsInternal ? getSubTreePathsInternal({ imodelAccess, abortSignal }) : undefined),
             handlePaths: async (paths) => handlePaths(paths, imodelAccess),

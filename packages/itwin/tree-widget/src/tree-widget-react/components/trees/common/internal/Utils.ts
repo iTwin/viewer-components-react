@@ -6,6 +6,7 @@
 import { useEffect, useRef } from "react";
 import { bufferCount, concatAll, concatMap, delay, of } from "rxjs";
 import { Id64 } from "@itwin/core-bentley";
+import { ProcessedHierarchyNode } from "@itwin/presentation-hierarchies";
 import {
   CLASS_NAME_DrawingCategory,
   CLASS_NAME_GeometricElement2d,
@@ -199,4 +200,31 @@ export function updateChildrenTree<T extends object = {}>({
     }
     currentTree = entry.children;
   }
+}
+
+/** @internal */
+export function groupingNodeHasFilterTargets(children: ProcessedHierarchyNode[]): {
+  hasFilterTargetAncestor: boolean;
+  hasDirectNonFilteredTargets: boolean;
+} {
+  for (const child of children) {
+    if (ProcessedHierarchyNode.isGroupingNode(child)) {
+      const result = groupingNodeHasFilterTargets(child.children);
+      if (result.hasFilterTargetAncestor || result.hasDirectNonFilteredTargets) {
+        return result;
+      }
+      continue;
+    }
+
+    if (child.filtering) {
+      if (child.filtering.hasFilterTargetAncestor) {
+        return { hasFilterTargetAncestor: true, hasDirectNonFilteredTargets: false };
+      }
+      if (!child.filtering.isFilterTarget) {
+        return { hasFilterTargetAncestor: false, hasDirectNonFilteredTargets: true };
+      }
+    }
+  }
+
+  return { hasFilterTargetAncestor: false, hasDirectNonFilteredTargets: false };
 }

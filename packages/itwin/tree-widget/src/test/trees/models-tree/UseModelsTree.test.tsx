@@ -225,7 +225,7 @@ describe("useModelsTree", () => {
                 { id: categoryIds[1], className: categoryClass },
                 { id: elementIds[1], className: elementClass },
               ],
-              options: { autoExpand: true },
+              options: { reveal: true },
             },
           ];
           expect(result).to.deep.eq(expectedResult);
@@ -309,7 +309,7 @@ describe("useModelsTree", () => {
                 { id: modelIds[1], className: modelClass },
                 { id: categoryIds[1], className: categoryClass },
               ],
-              options: { autoExpand: { depthInPath: 2 } },
+              options: { reveal: { depthInPath: 1 } },
             },
           ];
           expect(result).to.deep.eq(expectedResult);

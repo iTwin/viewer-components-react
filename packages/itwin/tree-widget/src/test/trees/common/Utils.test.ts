@@ -38,23 +38,17 @@ describe("Utils", () => {
     });
 
     it("returns subTree paths when filter paths are shorter than subTree paths", () => {
-      const filterPath1 = { path: [subject] };
-      const filterPath2 = { path: [element1, element2, element3], options: { autoExpand: true } };
-      const filterPath3 = { path: [element1, element2, category1], options: { autoExpand: { depth: 1 } } };
-      const filterPath4 = { path: [element1, element2, category2], options: { autoExpand: { depth: 2, includeGroupingNodes: true } } };
-      const filterPath5 = { path: [element2, element3], options: { autoExpand: { depth: 2, key: { className: element2.className, type: "class-grouping" } } } };
-      const filterPath6 = { path: [element3, element4], options: { autoExpand: { depthInHierarchy: 1 } } };
-      const filterPath7 = { path: [element4, category1], options: { autoExpand: { depthInPath: 1 } } };
-      const filterPaths: NormalizedHierarchyFilteringPath[] = [filterPath1, filterPath2, filterPath3, filterPath4, filterPath5, filterPath6, filterPath7];
+      const filterPath1: NormalizedHierarchyFilteringPath = { path: [subject] };
+      const filterPath2: NormalizedHierarchyFilteringPath = { path: [element1, element2, element3], options: { reveal: true } };
+      const filterPath3: NormalizedHierarchyFilteringPath = { path: [element3, element4], options: { reveal: { depthInHierarchy: 1 } } };
+      const filterPath4: NormalizedHierarchyFilteringPath = { path: [element4, category1], options: { reveal: { depthInPath: 1 } } };
+      const filterPaths: NormalizedHierarchyFilteringPath[] = [filterPath1, filterPath2, filterPath3, filterPath4];
 
       const subTreePath1 = [...filterPath1.path, model];
       const subTreePath2 = [...filterPath2.path, element4];
-      const subTreePath3 = [...filterPath3.path, element4];
-      const subTreePath4 = [...filterPath4.path, element4];
-      const subTreePath5 = [...filterPath5.path, category1, element4];
-      const subTreePath6 = [...filterPath6.path, category1, category2];
-      const subTreePath7 = [...filterPath7.path, category2];
-      const subTreePaths: HierarchyNodeIdentifiersPath[] = [subTreePath1, subTreePath2, subTreePath3, subTreePath4, subTreePath5, subTreePath6, subTreePath7];
+      const subTreePath3 = [...filterPath3.path, category1, category2];
+      const subTreePath4 = [...filterPath4.path, category2];
+      const subTreePaths: HierarchyNodeIdentifiersPath[] = [subTreePath1, subTreePath2, subTreePath3, subTreePath4];
 
       const joinedPaths = joinHierarchyFilteringPaths(subTreePaths, filterPaths);
       const expectedPaths = [
@@ -64,7 +58,7 @@ describe("Utils", () => {
         },
         {
           path: subTreePath2,
-          options: { autoExpand: { depthInPath: 3 } },
+          options: { reveal: { depthInPath: 2 } },
         },
         {
           path: subTreePath3,
@@ -73,18 +67,6 @@ describe("Utils", () => {
         {
           path: subTreePath4,
           options: filterPath4.options,
-        },
-        {
-          path: subTreePath5,
-          options: filterPath5.options,
-        },
-        {
-          path: subTreePath6,
-          options: filterPath6.options,
-        },
-        {
-          path: subTreePath7,
-          options: filterPath7.options,
         },
       ];
       expect(joinedPaths).to.deep.eq(expectedPaths);
@@ -98,8 +80,8 @@ describe("Utils", () => {
       ];
       const filterPaths: NormalizedHierarchyFilteringPath[] = [
         { path: [subject, model, category1] },
-        { path: [model, category1, element1, element2, element3], options: { autoExpand: true } },
-        { path: [model, category1, element1, element3, element1], options: { autoExpand: { depthInPath: 2 } } },
+        { path: [model, category1, element1, element2, element3], options: { reveal: true } },
+        { path: [model, category1, element1, element3, element1], options: { reveal: { depthInPath: 1 } } },
       ];
       const sortFn = (lhs: HierarchyFilteringPath, rhs: HierarchyFilteringPath) => {
         const lhsStr = JSON.stringify(lhs);

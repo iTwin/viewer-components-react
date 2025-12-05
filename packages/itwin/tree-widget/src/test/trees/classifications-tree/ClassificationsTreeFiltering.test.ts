@@ -78,7 +78,7 @@ describe("Classifications tree", () => {
         ).to.deep.eq([
           {
             path: [{ id: keys.table.id, className: CLASS_NAME_ClassificationTable }],
-            options: { autoExpand: true },
+            options: { reveal: true },
           },
         ]);
       });
@@ -118,7 +118,7 @@ describe("Classifications tree", () => {
               { id: keys.table.id, className: CLASS_NAME_ClassificationTable },
               { id: keys.classification.id, className: CLASS_NAME_Classification },
             ],
-            options: { autoExpand: true },
+            options: { reveal: true },
           },
         ]);
       });
@@ -160,7 +160,7 @@ describe("Classifications tree", () => {
               { id: keys.classification.id, className: CLASS_NAME_Classification },
               { id: keys.element.id, className: CLASS_NAME_GeometricElement3d },
             ],
-            options: { autoExpand: true },
+            options: { reveal: true },
           },
         ]);
       });
@@ -210,7 +210,7 @@ describe("Classifications tree", () => {
               { id: keys.parentElement.id, className: CLASS_NAME_GeometricElement3d },
               { id: keys.childElement.id, className: CLASS_NAME_GeometricElement3d },
             ],
-            options: { autoExpand: true },
+            options: { reveal: true },
           },
         ]);
       });
@@ -252,7 +252,7 @@ describe("Classifications tree", () => {
               { id: keys.classification.id, className: CLASS_NAME_Classification },
               { id: keys.element.id, className: CLASS_NAME_GeometricElement2d },
             ],
-            options: { autoExpand: true },
+            options: { reveal: true },
           },
         ]);
       });
@@ -303,7 +303,7 @@ describe("Classifications tree", () => {
         ).to.deep.eq([
           {
             path: [{ id: keys.table2.id, className: CLASS_NAME_ClassificationTable }],
-            options: { autoExpand: true },
+            options: { reveal: true },
           },
         ]);
       });
@@ -355,7 +355,7 @@ describe("Classifications tree", () => {
               { id: keys.table2.id, className: CLASS_NAME_ClassificationTable },
               { id: keys.classification2.id, className: CLASS_NAME_Classification },
             ],
-            options: { autoExpand: true },
+            options: { reveal: true },
           },
         ]);
       });
@@ -408,7 +408,7 @@ describe("Classifications tree", () => {
               { id: keys.classification2.id, className: CLASS_NAME_Classification },
               { id: keys.element2.id, className: CLASS_NAME_GeometricElement3d },
             ],
-            options: { autoExpand: true },
+            options: { reveal: true },
           },
         ]);
       });
@@ -461,7 +461,7 @@ describe("Classifications tree", () => {
               { id: keys.classification2.id, className: CLASS_NAME_Classification },
               { id: keys.element2.id, className: CLASS_NAME_GeometricElement2d },
             ],
-            options: { autoExpand: true },
+            options: { reveal: true },
           },
         ]);
       });
@@ -524,7 +524,7 @@ describe("Classifications tree", () => {
               { id: keys.element2.id, className: CLASS_NAME_GeometricElement3d },
               { id: keys.childElement.id, className: CLASS_NAME_GeometricElement3d },
             ],
-            options: { autoExpand: true },
+            options: { reveal: true },
           },
         ]);
       });
@@ -620,7 +620,7 @@ describe("Classifications tree", () => {
         abortSignal: abortController2.signal,
       });
       expect(await pathsPromise).to.deep.eq([
-        { path: [{ className: ids.classificationTable.className, id: ids.classificationTable.id }], options: { autoExpand: true } },
+        { path: [{ className: ids.classificationTable.className, id: ids.classificationTable.id }], options: { reveal: true } },
       ]);
     });
   });

@@ -660,8 +660,8 @@ function createInstanceKeyPathsFromTargetItemsObs({
         );
 
       return merge(
-        from(ids.classificationTableIds).pipe(map((id) => ({ path: [{ id, className: CLASS_NAME_ClassificationTable }], options: { autoExpand: true } }))),
-        idsCache.getClassificationsPathObs(ids.classificationIds).pipe(map((path) => ({ path, options: { autoExpand: true } }))),
+        from(ids.classificationTableIds).pipe(map((id) => ({ path: [{ id, className: CLASS_NAME_ClassificationTable }], options: { reveal: true } }))),
+        idsCache.getClassificationsPathObs(ids.classificationIds).pipe(map((path) => ({ path, options: { reveal: true } }))),
         getElementsPathsObs("2d"),
         getElementsPathsObs("3d"),
       );
@@ -728,9 +728,9 @@ function createGeometricElementInstanceKeyPaths(props: {
       if (parentClassificationId) {
         return idsCache
           .getClassificationsPathObs(parentClassificationId)
-          .pipe(map((parentClassificationPath) => ({ path: parentClassificationPath.concat(path), options: { autoExpand: true } })));
+          .pipe(map((parentClassificationPath) => ({ path: parentClassificationPath.concat(path), options: { reveal: true } })));
       }
-      return of({ path, options: { autoExpand: true } });
+      return of({ path, options: { reveal: true } });
     }),
   );
 }
