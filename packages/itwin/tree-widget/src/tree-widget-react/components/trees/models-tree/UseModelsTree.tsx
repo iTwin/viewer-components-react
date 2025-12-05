@@ -74,8 +74,8 @@ export interface UseModelsTreeProps {
    * - You want to create filter paths based on node label, but also apply some extra conditions (for example exclude paths with sub-models).
    * - You want to construct custom filtered paths. For example: create a filter path for each geometric element which has a parent element.
    *
-   * @note Paths returned  by `createInstanceKeyPaths` will not have `autoExpand` flag set. If you want nodes to be expanded, iterate over the paths and
-   * set `autoExpand: true` manually.
+   * @note Paths returned  by `createInstanceKeyPaths` will not have `reveal` flag set. If you want nodes to be expanded, iterate over the paths and
+   * set `reveal: true` manually.
    */
   getFilteredPaths?: (props: {
     /** A function that creates filtering paths based on provided target instance keys or node label. */

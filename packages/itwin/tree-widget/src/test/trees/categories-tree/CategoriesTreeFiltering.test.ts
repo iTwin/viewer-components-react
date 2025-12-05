@@ -75,7 +75,7 @@ describe("Categories tree", () => {
           viewType,
           idsCache,
         }),
-      ).to.deep.eq([{ path: [keys.definitionContainer], options: { autoExpand: true } }]);
+      ).to.deep.eq([{ path: [keys.definitionContainer], options: { reveal: true } }]);
     });
 
     it("filtering by label aborts when abort signal fires", async function () {
@@ -114,7 +114,7 @@ describe("Categories tree", () => {
         abortSignal: abortController2.signal,
       });
       expect(await pathsPromise).to.deep.eq([
-        { path: [{ className: "BisCore.DefinitionContainer", id: ids.definitionContainer.id }], options: { autoExpand: true } },
+        { path: [{ className: "BisCore.DefinitionContainer", id: ids.definitionContainer.id }], options: { reveal: true } },
       ]);
     });
 
@@ -147,7 +147,7 @@ describe("Categories tree", () => {
           viewType,
           idsCache,
         }),
-      ).to.deep.eq([{ path: [keys.definitionContainer, keys.definitionContainerChild], options: { autoExpand: true } }]);
+      ).to.deep.eq([{ path: [keys.definitionContainer, keys.definitionContainerChild], options: { reveal: true } }]);
     });
 
     it("does not find definition container by label when it doesn't contain categories", async function () {
@@ -195,7 +195,7 @@ describe("Categories tree", () => {
           viewType,
           idsCache,
         }),
-      ).to.deep.eq([{ path: [keys.definitionContainer, keys.category], options: { autoExpand: true } }]);
+      ).to.deep.eq([{ path: [keys.definitionContainer, keys.category], options: { reveal: true } }]);
     });
 
     it("finds subCategory by label when its parent category is contained by definition container", async function () {
@@ -221,7 +221,7 @@ describe("Categories tree", () => {
           viewType,
           idsCache,
         }),
-      ).to.deep.eq([{ path: [keys.definitionContainer, keys.category, keys.subCategory1], options: { autoExpand: true } }]);
+      ).to.deep.eq([{ path: [keys.definitionContainer, keys.category, keys.subCategory1], options: { reveal: true } }]);
     });
 
     it("finds 3d categories by label containing special SQLite characters", async function () {
@@ -250,7 +250,7 @@ describe("Categories tree", () => {
           viewType: "3d",
           idsCache,
         }),
-      ).to.deep.eq([{ path: [keys.category1], options: { autoExpand: true } }]);
+      ).to.deep.eq([{ path: [keys.category1], options: { reveal: true } }]);
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -260,7 +260,7 @@ describe("Categories tree", () => {
           viewType: "3d",
           idsCache,
         }),
-      ).to.deep.eq([{ path: [keys.category2], options: { autoExpand: true } }]);
+      ).to.deep.eq([{ path: [keys.category2], options: { reveal: true } }]);
     });
 
     it("finds 3d subcategories by label containing special SQLite characters", async function () {
@@ -289,7 +289,7 @@ describe("Categories tree", () => {
           viewType: "3d",
           idsCache,
         }),
-      ).to.deep.eq([{ path: [keys.category, keys.subCategory1], options: { autoExpand: true } }]);
+      ).to.deep.eq([{ path: [keys.category, keys.subCategory1], options: { reveal: true } }]);
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -299,7 +299,7 @@ describe("Categories tree", () => {
           viewType: "3d",
           idsCache,
         }),
-      ).to.deep.eq([{ path: [keys.category, keys.subCategory2], options: { autoExpand: true } }]);
+      ).to.deep.eq([{ path: [keys.category, keys.subCategory2], options: { reveal: true } }]);
     });
 
     it("finds 3d categories by label when subCategory count is 1 and labels of category and subCategory differ", async function () {
@@ -325,7 +325,7 @@ describe("Categories tree", () => {
           viewType: "3d",
           idsCache,
         }),
-      ).to.deep.eq([{ path: [keys.category], options: { autoExpand: true } }]);
+      ).to.deep.eq([{ path: [keys.category], options: { reveal: true } }]);
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -365,7 +365,7 @@ describe("Categories tree", () => {
           viewType: "3d",
           idsCache,
         }),
-      ).to.deep.eq([{ path: [keys.category], options: { autoExpand: true } }]);
+      ).to.deep.eq([{ path: [keys.category], options: { reveal: true } }]);
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -375,7 +375,7 @@ describe("Categories tree", () => {
           viewType: "3d",
           idsCache,
         }),
-      ).to.deep.eq([{ path: [keys.category, keys.subCategory1], options: { autoExpand: true } }]);
+      ).to.deep.eq([{ path: [keys.category, keys.subCategory1], options: { reveal: true } }]);
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -385,7 +385,7 @@ describe("Categories tree", () => {
           viewType: "3d",
           idsCache,
         }),
-      ).to.deep.eq([{ path: [keys.category, keys.subCategory2], options: { autoExpand: true } }]);
+      ).to.deep.eq([{ path: [keys.category, keys.subCategory2], options: { reveal: true } }]);
     });
 
     it("finds 2d categories by label containing special SQLite characters", async function () {
@@ -414,7 +414,7 @@ describe("Categories tree", () => {
           viewType: "2d",
           idsCache,
         }),
-      ).to.deep.eq([{ path: [keys.category1], options: { autoExpand: true } }]);
+      ).to.deep.eq([{ path: [keys.category1], options: { reveal: true } }]);
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -424,7 +424,7 @@ describe("Categories tree", () => {
           viewType: "2d",
           idsCache,
         }),
-      ).to.deep.eq([{ path: [keys.category2], options: { autoExpand: true } }]);
+      ).to.deep.eq([{ path: [keys.category2], options: { reveal: true } }]);
     });
 
     it("finds 2d subcategories by label containing special SQLite characters", async function () {
@@ -453,7 +453,7 @@ describe("Categories tree", () => {
           viewType: "2d",
           idsCache,
         }),
-      ).to.deep.eq([{ path: [keys.category, keys.subCategory1], options: { autoExpand: true } }]);
+      ).to.deep.eq([{ path: [keys.category, keys.subCategory1], options: { reveal: true } }]);
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -463,7 +463,7 @@ describe("Categories tree", () => {
           viewType: "2d",
           idsCache,
         }),
-      ).to.deep.eq([{ path: [keys.category, keys.subCategory2], options: { autoExpand: true } }]);
+      ).to.deep.eq([{ path: [keys.category, keys.subCategory2], options: { reveal: true } }]);
     });
   });
 });

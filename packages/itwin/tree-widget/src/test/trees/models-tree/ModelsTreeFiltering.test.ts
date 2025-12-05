@@ -148,7 +148,7 @@ describe("Models tree", () => {
         subTreePaths.map((path) => HierarchyFilteringPath.normalize(path).path),
         filterPaths.map((path) => {
           const normalizedPath = HierarchyFilteringPath.normalize(path);
-          normalizedPath.options = { autoExpand: true };
+          normalizedPath.options = { reveal: true };
           return normalizedPath;
         }),
       );
@@ -1032,7 +1032,7 @@ describe("Models tree", () => {
           (x) =>
             x.groupingNode.groupedInstanceKeys.map((elementKey) => ({
               path: [...x.pathUntilTargetElement, adjustedElementKey(elementKey)],
-              options: { autoExpand: { depthInHierarchy: x.groupingNode.parentKeys.length } },
+              options: { reveal: { depthInHierarchy: x.groupingNode.parentKeys.length } },
             })),
           (x) => [
             {
@@ -1123,7 +1123,7 @@ describe("Models tree", () => {
           (x) =>
             x.targetGroupingNode.groupedInstanceKeys.map((elementKey) => ({
               path: [...x.pathUntilTargetElement, adjustedElementKey(elementKey)],
-              options: { autoExpand: { depthInHierarchy: x.targetGroupingNode.parentKeys.length } },
+              options: { reveal: { depthInHierarchy: x.targetGroupingNode.parentKeys.length } },
             })),
           (x) => [
             {
@@ -1254,11 +1254,11 @@ describe("Models tree", () => {
           (x) => [
             ...x.physicalElementGroupingNode.groupedInstanceKeys.map((elementKey) => ({
               path: [...x.pathUntilTargetElement, adjustedElementKey(elementKey)],
-              options: { autoExpand: { depthInHierarchy: x.physicalElementGroupingNode.parentKeys.length } },
+              options: { reveal: { depthInHierarchy: x.physicalElementGroupingNode.parentKeys.length } },
             })),
             ...x.testElementGroupingNode.groupedInstanceKeys.map((elementKey) => ({
               path: [...x.pathUntilTargetElement, adjustedElementKey(elementKey)],
-              options: { autoExpand: { depthInHierarchy: x.testElementGroupingNode.parentKeys.length } },
+              options: { reveal: { depthInHierarchy: x.testElementGroupingNode.parentKeys.length } },
             })),
           ],
           (x) => [
@@ -1382,15 +1382,15 @@ describe("Models tree", () => {
           (x) => [
             {
               path: [...x.pathUntilParentElement, adjustedElementKey(x.parentElement)],
-              options: { autoExpand: { depthInHierarchy: x.parentElementGroupingNode.parentKeys.length } },
+              options: { reveal: { depthInHierarchy: x.parentElementGroupingNode.parentKeys.length } },
             },
             {
               path: [...x.pathUntilParentElement, adjustedElementKey(x.parentElement), adjustedElementKey(x.middleElement)],
-              options: { autoExpand: { depthInHierarchy: x.middleElementGroupingNode.parentKeys.length } },
+              options: { reveal: { depthInHierarchy: x.middleElementGroupingNode.parentKeys.length } },
             },
             {
               path: [...x.pathUntilParentElement, adjustedElementKey(x.parentElement), adjustedElementKey(x.middleElement), adjustedElementKey(x.childElement)],
-              options: { autoExpand: { depthInHierarchy: x.childElementGroupingNode.parentKeys.length } },
+              options: { reveal: { depthInHierarchy: x.childElementGroupingNode.parentKeys.length } },
             },
           ],
           (x) => [
@@ -1477,7 +1477,7 @@ describe("Models tree", () => {
             [...x.pathUntilTargetElement, adjustedElementKey(x.element)],
             {
               path: [...x.pathUntilTargetElement, adjustedElementKey(x.element)],
-              options: { autoExpand: { depthInHierarchy: x.groupingNode.parentKeys.length } },
+              options: { reveal: { depthInHierarchy: x.groupingNode.parentKeys.length } },
             },
           ],
           (x) => [
@@ -1551,11 +1551,11 @@ describe("Models tree", () => {
           (x) => [
             {
               path: [adjustedModelKey(x.model), x.category1, adjustedElementKey(x.element1)],
-              options: { autoExpand: { depthInHierarchy: x.groupingNode1.parentKeys.length } },
+              options: { reveal: { depthInHierarchy: x.groupingNode1.parentKeys.length } },
             },
             {
               path: [adjustedModelKey(x.model), x.category2, adjustedElementKey(x.element2)],
-              options: { autoExpand: { depthInHierarchy: x.groupingNode2.parentKeys.length } },
+              options: { reveal: { depthInHierarchy: x.groupingNode2.parentKeys.length } },
             },
           ],
           (x) => [

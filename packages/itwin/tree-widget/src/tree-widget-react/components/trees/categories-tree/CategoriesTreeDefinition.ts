@@ -37,6 +37,7 @@ import {
   getClassesByView,
   getDistinctMapValues,
   getOptimalBatchSize,
+  groupingNodeHasFilterTargets,
   parseIdsSelectorResult,
   releaseMainThreadOnItemsCount,
 } from "../common/internal/Utils.js";
@@ -149,30 +150,11 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
           modelEntry.add(id);
         }
       });
-      let hasDirectNonFilteredTargets = false;
-      let hasFilterTargetAncestor = false;
-      for (const child of node.children) {
-        if (child.filtering) {
-          if (child.filtering.hasFilterTargetAncestor) {
-            hasFilterTargetAncestor = true;
-            break;
-          }
-          if (!child.filtering.isFilterTarget) {
-            hasDirectNonFilteredTargets = true;
-            break;
-          }
-        }
-      }
+
+      const { hasFilterTargetAncestor, hasDirectNonFilteredTargets } = groupingNodeHasFilterTargets(node.children);
+
       return {
         ...node,
-        ...(hasFilterTargetAncestor
-          ? {
-              filtering: {
-                ...(node.filtering ?? {}),
-                hasFilterTargetAncestor,
-              },
-            }
-          : {}),
         label: node.label,
         extendedData: {
           ...node.extendedData,
@@ -180,6 +162,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
           categoryId: node.children[0].extendedData?.categoryId,
           modelElementsMap,
           ...(hasDirectNonFilteredTargets ? { hasDirectNonFilteredTargets } : {}),
+          ...(hasFilterTargetAncestor ? { hasFilterTargetAncestor } : {}),
           // `imageId` is assigned to instance nodes at query time, but grouping ones need to
           // be handled during post-processing
           imageId: "icon-ec-class",
@@ -918,15 +901,15 @@ function createInstanceKeyPathsFromTargetItems({
       return merge(
         from(ids.definitionContainerIds).pipe(
           mergeMap((id) => idsCache.getInstanceKeyPaths({ definitionContainerId: id })),
-          map((path) => ({ path, options: { autoExpand: true } })),
+          map((path) => ({ path, options: { reveal: true } })),
         ),
         from(ids.categoryIds).pipe(
           mergeMap((id) => idsCache.getInstanceKeyPaths({ categoryId: id })),
-          map((path) => ({ path, options: { autoExpand: true } })),
+          map((path) => ({ path, options: { reveal: true } })),
         ),
         from(ids.subCategoryIds).pipe(
           mergeMap((id) => idsCache.getInstanceKeyPaths({ subCategoryId: id })),
-          map((path) => ({ path, options: { autoExpand: true } })),
+          map((path) => ({ path, options: { reveal: true } })),
         ),
         from(ids.elementIds).pipe(
           bufferCount(getOptimalBatchSize({ totalSize: elementsLength, maximumBatchSize: 5000 })),
@@ -1019,7 +1002,7 @@ function createGeometricElementInstanceKeyPaths(props: {
     map(({ elementHierarchyPath, pathToCategory }) => {
       pathToCategory.pop(); // category is already included in the element hierarchy path
       const path = [...pathToCategory, ...elementHierarchyPath];
-      return { path, options: { autoExpand: true } };
+      return { path, options: { reveal: true } };
     }),
   );
 }

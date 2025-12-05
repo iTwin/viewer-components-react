@@ -124,12 +124,12 @@ export function joinHierarchyFilteringPaths(
         // filtering paths that are shorter or equal than subTree paths length don't need to be added to the result
         if (filteringPath.path.length === j + 1) {
           addSubTreePathToResult = true;
-          // If filtering path has autoExpand set to true, it means that we should expand only to the targeted filtered node
+          // If filtering path has reveal set to true, it means that we should expand only to the targeted filtered node
           // This is done by setting depthInPath
           options =
-            filteringPath.options?.autoExpand !== true
+            filteringPath.options?.reveal !== true
               ? HierarchyFilteringPath.mergeOptions(options, filteringPath.options)
-              : { autoExpand: { depthInPath: filteringPath.path.length } };
+              : { reveal: { depthInPath: filteringPath.path.length - 1 } };
           break;
         }
 

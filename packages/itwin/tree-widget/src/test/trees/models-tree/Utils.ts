@@ -26,7 +26,6 @@ import type {
   GroupingHierarchyNode,
   GroupingNodeKey,
   HierarchyFilteringPath,
-  HierarchyNode,
   HierarchyNodeKey,
   HierarchyProvider,
   NonGroupingHierarchyNode,
@@ -61,7 +60,7 @@ export function createModelsTreeProvider({
       hierarchyConfig: config,
     }),
     ...(filteredNodePaths
-      ? { filtering: { paths: filteredNodePaths.map((path) => ("path" in path ? path : { path, options: { autoExpand: true } })) } }
+      ? { filtering: { paths: filteredNodePaths.map((path) => ("path" in path ? path : { path, options: { reveal: true } })) } }
       : undefined),
   });
   const dispose = () => {
@@ -191,7 +190,7 @@ export function createElementHierarchyNode(props: {
   hasChildren?: boolean;
   elementId?: Id64String;
   parentKeys?: HierarchyNodeKey[];
-  filtering?: HierarchyNode["filtering"];
+  filtering?: NonGroupingHierarchyNode["filtering"];
   childrenCount?: number;
 }): NonGroupingHierarchyNode {
   return {

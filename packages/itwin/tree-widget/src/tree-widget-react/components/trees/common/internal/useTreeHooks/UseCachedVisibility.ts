@@ -211,7 +211,7 @@ export class HierarchyVisibilityHandlerImpl<TFilterTargets> implements Hierarchy
 
   private getVisibilityStatusInternal(node: HierarchyNode) {
     if (HierarchyNode.isClassGroupingNode(node)) {
-      if (node.extendedData?.hasDirectNonFilteredTargets && !node.filtering?.hasFilterTargetAncestor) {
+      if (node.extendedData?.hasDirectNonFilteredTargets && !node.extendedData?.hasFilterTargetAncestor) {
         return this.getFilteredNodeVisibility({ node });
       }
     }
@@ -224,7 +224,7 @@ export class HierarchyVisibilityHandlerImpl<TFilterTargets> implements Hierarchy
 
   private changeVisibilityStatusInternal(node: HierarchyNode, on: boolean): Observable<void> {
     if (HierarchyNode.isClassGroupingNode(node)) {
-      if (node.extendedData?.hasDirectNonFilteredTargets && !node.filtering?.hasFilterTargetAncestor) {
+      if (node.extendedData?.hasDirectNonFilteredTargets && !node.extendedData?.hasFilterTargetAncestor) {
         return this.changeFilteredNodeVisibility({ node, on });
       }
     }
