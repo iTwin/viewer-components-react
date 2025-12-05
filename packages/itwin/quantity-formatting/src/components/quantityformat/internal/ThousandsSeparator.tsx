@@ -10,6 +10,7 @@ import { Format, FormatTraits, getTraitString } from "@itwin/core-quantity";
 import { Checkbox, IconButton, Label } from "@itwin/itwinui-react";
 import { SvgHelpCircularHollow } from "@itwin/itwinui-icons-react";
 import { useTranslation } from "../../../useTranslation.js";
+import { useTelemetryContext } from "../../../hooks/UseTelemetryContext.js";
 import { ThousandsSelector } from "./misc/ThousandsSelector.js";
 
 /** Properties of [[UseThousandsSeparator]] component.
@@ -26,6 +27,7 @@ export interface UseThousandsSeparatorProps {
 export function UseThousandsSeparator(props: UseThousandsSeparatorProps) {
   const { formatProps, onChange } = props;
   const { translate } = useTranslation();
+  const { onFeatureUsed } = useTelemetryContext();
 
   const useThousandsId = React.useId();
 
@@ -57,9 +59,10 @@ export function UseThousandsSeparator(props: UseThousandsSeparatorProps) {
 
   const handleUseThousandsSeparatorChange = React.useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
+      onFeatureUsed("thousands-separator-toggle");
       setFormatTrait(FormatTraits.Use1000Separator, e.target.checked);
     },
-    [setFormatTrait]
+    [setFormatTrait, onFeatureUsed]
   );
 
   const isFormatTraitSet = React.useCallback(
@@ -99,6 +102,7 @@ export function ThousandsSeparatorSelector(
 ) {
   const { formatProps, onChange } = props;
   const { translate } = useTranslation();
+  const { onFeatureUsed } = useTelemetryContext();
 
   const thousandsSelectorId = React.useId();
 
@@ -111,6 +115,7 @@ export function ThousandsSeparatorSelector(
 
   const handleThousandSeparatorChange = React.useCallback(
     (thousandSeparator: string) => {
+      onFeatureUsed("thousands-separator-change");
       let decimalSeparator = formatProps.decimalSeparator;
       // make sure 1000 and decimal separator do not match
       if (isFormatTraitSet(FormatTraits.Use1000Separator)) {
@@ -124,7 +129,7 @@ export function ThousandsSeparatorSelector(
         decimalSeparator,
       });
     },
-    [formatProps, isFormatTraitSet]
+    [formatProps, isFormatTraitSet, onFeatureUsed, onChange]
   );
 
   // Only show if the Use1000Separator trait is set

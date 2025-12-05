@@ -6,6 +6,7 @@
 import React from "react";
 import { Badge, Flex, Input, List, ListItem, Text } from "@itwin/itwinui-react";
 import { useTranslation } from "../../useTranslation.js";
+import { useTelemetryContext } from "../../hooks/UseTelemetryContext.js";
 
 import type { FormatSet } from "@itwin/ecschema-metadata";
 
@@ -45,6 +46,7 @@ export const FormatSetSelector: React.FC<FormatSetSelectorProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = React.useState("");
   const { translate } = useTranslation();
+  const { onFeatureUsed } = useTelemetryContext();
 
   // Filter format sets based on search term
   const filteredFormatSets = React.useMemo(() => {
@@ -60,17 +62,28 @@ export const FormatSetSelector: React.FC<FormatSetSelectorProps> = ({
 
   const handleFormatSetSelect = React.useCallback(
     (formatSet: FormatSet) => {
+      onFeatureUsed("format-set-select");
       const key = formatSet.name || `formatSet-${formatSets.indexOf(formatSet)}`;
       onFormatSetChange(formatSet, key);
     },
-    [onFormatSetChange, formatSets]
+    [onFormatSetChange, formatSets, onFeatureUsed]
+  );
+
+  const handleSearchChange = React.useCallback(
+    (value: string) => {
+      if (value && !searchTerm) {
+        onFeatureUsed("format-set-search");
+      }
+      setSearchTerm(value);
+    },
+    [onFeatureUsed, searchTerm]
   );
 
   return (
     <Flex flexDirection="column" gap="none" alignItems="flex-start" className="quantityFormat--formatSetSelector-container">
       <Input
         value={searchTerm}
-        onChange={(e) => setSearchTerm(e.currentTarget.value)}
+        onChange={(e) => handleSearchChange(e.currentTarget.value)}
         placeholder={translate("QuantityFormat:labels.searchFormatSets")}
       />
       <List className="quantityFormat--formatSetSelector-list">

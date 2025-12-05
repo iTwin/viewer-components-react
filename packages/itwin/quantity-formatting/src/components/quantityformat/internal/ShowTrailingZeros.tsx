@@ -8,6 +8,7 @@ import * as React from "react";
 import type { FormatProps } from "@itwin/core-quantity";
 import { Format, FormatTraits, getTraitString } from "@itwin/core-quantity";
 import { useTranslation } from "../../../useTranslation.js";
+import { useTelemetryContext } from "../../../hooks/UseTelemetryContext.js";
 import { Checkbox, Label } from "@itwin/itwinui-react";
 
 /** Properties of [[ShowTrailingZeros]] component.
@@ -24,6 +25,7 @@ export interface ShowTrailingZerosProps {
 export function ShowTrailingZeros(props: ShowTrailingZerosProps) {
   const { formatProps, onChange } = props;
   const { translate } = useTranslation();
+  const { onFeatureUsed } = useTelemetryContext();
   const showTrailZerosId = React.useId();
 
   const setFormatTrait = React.useCallback(
@@ -64,7 +66,10 @@ export function ShowTrailingZeros(props: ShowTrailingZerosProps) {
           formatProps,
           FormatTraits.TrailZeroes
         )}
-        onChange={(e) => setFormatTrait(FormatTraits.TrailZeroes, e.target.checked)}
+        onChange={(e) => {
+          onFeatureUsed("show-trailing-zeros-toggle");
+          setFormatTrait(FormatTraits.TrailZeroes, e.target.checked);
+        }}
       />
     </div>
   );

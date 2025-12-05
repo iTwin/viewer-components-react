@@ -9,6 +9,7 @@ import type { FormatProps } from "@itwin/core-quantity";
 import { Format, FormatTraits, getTraitString } from "@itwin/core-quantity";
 import { Checkbox, Label } from "@itwin/itwinui-react";
 import { useTranslation } from "../../../useTranslation.js";
+import { useTelemetryContext } from "../../../hooks/UseTelemetryContext.js";
 import "../FormatPanel.scss";
 
 /** Properties of [[KeepDecimalPoint]] component.
@@ -25,6 +26,7 @@ export interface KeepDecimalPointProps {
 export function KeepDecimalPoint(props: KeepDecimalPointProps) {
   const { formatProps, onChange } = props;
   const { translate } = useTranslation();
+  const { onFeatureUsed } = useTelemetryContext();
   const keepDecimalPointId = React.useId();
 
   const setFormatTrait = React.useCallback(
@@ -65,7 +67,10 @@ export function KeepDecimalPoint(props: KeepDecimalPointProps) {
           formatProps,
           FormatTraits.KeepDecimalPoint
         )}
-        onChange={(e) => setFormatTrait(FormatTraits.KeepDecimalPoint, e.target.checked)}
+        onChange={(e) => {
+          onFeatureUsed("keep-decimal-point-toggle");
+          setFormatTrait(FormatTraits.KeepDecimalPoint, e.target.checked);
+        }}
       />
     </div>
   );

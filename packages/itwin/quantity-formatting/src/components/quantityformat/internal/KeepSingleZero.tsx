@@ -9,6 +9,7 @@ import type { FormatProps } from "@itwin/core-quantity";
 import { Format, FormatTraits, getTraitString } from "@itwin/core-quantity";
 import { Checkbox, Label } from "@itwin/itwinui-react";
 import { useTranslation } from "../../../useTranslation.js";
+import { useTelemetryContext } from "../../../hooks/UseTelemetryContext.js";
 import "../FormatPanel.scss";
 
 /** Properties of [[KeepSingleZero]] component.
@@ -25,6 +26,7 @@ export interface KeepSingleZeroProps {
 export function KeepSingleZero(props: KeepSingleZeroProps) {
   const { formatProps, onChange } = props;
   const { translate } = useTranslation();
+  const { onFeatureUsed } = useTelemetryContext();
   const keepSingleZeroId = React.useId();
 
   const setFormatTrait = React.useCallback(
@@ -65,7 +67,10 @@ export function KeepSingleZero(props: KeepSingleZeroProps) {
           formatProps,
           FormatTraits.KeepSingleZero
         )}
-        onChange={(e) => setFormatTrait(FormatTraits.KeepSingleZero, e.target.checked)}
+        onChange={(e) => {
+          onFeatureUsed("keep-single-zero-toggle");
+          setFormatTrait(FormatTraits.KeepSingleZero, e.target.checked);
+        }}
       />
     </div>
   );

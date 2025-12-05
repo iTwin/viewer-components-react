@@ -9,6 +9,7 @@ import type { FormatDefinition } from "@itwin/core-quantity";
 import { FormatType, parseFormatType } from "@itwin/core-quantity";
 import { FractionPrecisionSelector } from "./misc/FractionPrecision.js";
 import { useTranslation } from "../../../useTranslation.js";
+import { useTelemetryContext } from "../../../hooks/UseTelemetryContext.js";
 import { Label } from "@itwin/itwinui-react";
 import { DecimalPrecisionSelector } from "./misc/DecimalPrecision.js";
 
@@ -26,8 +27,17 @@ export interface FormatPrecisionProps {
 export function FormatPrecision(props: FormatPrecisionProps) {
   const { formatProps, onChange } = props;
   const { translate } = useTranslation();
+  const { onFeatureUsed } = useTelemetryContext();
   const precisionSelectorId = React.useId();
   const formatType = parseFormatType(formatProps.type, "format");
+
+  const handlePrecisionChange = React.useCallback(
+    (value: number) => {
+      onFeatureUsed("precision-change");
+      onChange({ ...formatProps, precision: value });
+    },
+    [onChange, formatProps, onFeatureUsed]
+  );
 
   return (
     <div className="quantityFormat--formatInlineRow">
@@ -37,13 +47,13 @@ export function FormatPrecision(props: FormatPrecisionProps) {
       {formatType === FormatType.Fractional ? (
         <FractionPrecisionSelector
           precision={formatProps.precision ?? 0}
-          onChange={(value) => onChange({ ...formatProps, precision: value })}
+          onChange={handlePrecisionChange}
           aria-labelledby={precisionSelectorId}
         />
       ) : (
         <DecimalPrecisionSelector
           precision={formatProps.precision ?? 0}
-          onChange={(value) => onChange({ ...formatProps, precision: value })}
+          onChange={handlePrecisionChange}
           aria-labelledby={precisionSelectorId}
         />
       )}
