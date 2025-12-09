@@ -3,11 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, forkJoin, from, map, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
+import { defer, EMPTY, forkJoin, from, map, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_Model, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
-import { getClassesByView, getDistinctMapValues, joinId64Arg } from "../../common/internal/Utils.js";
+import { getClassesByView, joinId64Arg } from "../../common/internal/Utils.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
@@ -39,8 +39,6 @@ interface SubCategoryInfo {
   categoryId: Id64String;
 }
 
-type ModelCategoryKey = `${ModelId}-${CategoryId}`;
-
 /** @internal */
 export class CategoriesTreeIdsCache implements Disposable {
   #definitionContainersInfo: Observable<Map<DefinitionContainerId, DefinitionContainerInfo>> | undefined;
@@ -48,7 +46,7 @@ export class CategoriesTreeIdsCache implements Disposable {
   #elementModelsCategories: Observable<Map<ModelId, { categoryIds: Id64Set; isSubModel: boolean }>> | undefined;
   #subCategoriesInfo: Observable<Map<SubCategoryId, SubCategoryInfo>> | undefined;
   readonly #categoryElementCounts: ModelCategoryElementsCountCache;
-  #modelWithCategoryModeledElements: Observable<Map<ModelCategoryKey, Set<ElementId>>> | undefined;
+  #modelWithCategoryModeledElements: Observable<Map<ModelId, Map<CategoryId, Set<ElementId>>>> | undefined;
   #categoryClass: string;
   #categoryElementClass: string;
   #categoryModelClass: string;
@@ -340,7 +338,10 @@ export class CategoriesTreeIdsCache implements Disposable {
     }).pipe(
       map(({ modelCategories, modelWithCategoryModeledElements }) => {
         const result = new Map<ModelId, { categoryIds: Set<CategoryId>; isSubModel: boolean }>();
-        const subModels = getDistinctMapValues(modelWithCategoryModeledElements);
+        const subModels = new Set<Id64String>();
+        modelWithCategoryModeledElements.forEach((categoryMap) =>
+          categoryMap.forEach((categorySubModels) => categorySubModels.forEach((subModelId) => subModels.add(subModelId))),
+        );
         for (const [modelId, modelEntry] of modelCategories) {
           const isSubModel = subModels.has(modelId);
           result.set(modelId, { categoryIds: modelEntry.categoryIds, isSubModel });
@@ -384,15 +385,19 @@ export class CategoriesTreeIdsCache implements Disposable {
   private getModelWithCategoryModeledElements() {
     this.#modelWithCategoryModeledElements ??= this.queryModeledElements().pipe(
       reduce((acc, { modelId, categoryId, modeledElementId }) => {
-        const key: ModelCategoryKey = `${modelId}-${categoryId}`;
-        const entry = acc.get(key);
-        if (entry === undefined) {
-          acc.set(key, new Set([modeledElementId]));
+        let modelEntry = acc.get(modelId);
+        if (!modelEntry) {
+          modelEntry = new Map();
+          acc.set(modelId, modelEntry);
+        }
+        const categoryEntry = modelEntry.get(categoryId);
+        if (!categoryEntry) {
+          modelEntry.set(categoryId, new Set([modeledElementId]));
         } else {
-          entry.add(modeledElementId);
+          categoryEntry.add(modeledElementId);
         }
         return acc;
-      }, new Map<ModelCategoryKey, Set<ElementId>>()),
+      }, new Map<ModelId, Map<CategoryId, Set<ElementId>>>()),
       shareReplay(),
     );
     return this.#modelWithCategoryModeledElements;
@@ -400,15 +405,17 @@ export class CategoriesTreeIdsCache implements Disposable {
 
   public getCategoriesModeledElements(modelId: Id64String, categoryIds: Id64Arg): Observable<Id64Array> {
     return this.getModelWithCategoryModeledElements().pipe(
-      map((modelWithCategoryModeledElements) => {
+      mergeMap((modelWithCategoryModeledElements) => {
         const result = new Array<ElementId>();
-        for (const categoryId of Id64.iterable(categoryIds)) {
-          const entry = modelWithCategoryModeledElements.get(`${modelId}-${categoryId}`);
-          if (entry !== undefined) {
-            result.push(...entry);
-          }
+        const categoryMap = modelWithCategoryModeledElements.get(modelId);
+        if (!categoryMap) {
+          return of(result);
         }
-        return result;
+        return from(Id64.iterable(categoryIds)).pipe(
+          map((categoryId) => categoryMap.get(categoryId)),
+          mergeMap((elementsSet) => (elementsSet ? from(elementsSet) : EMPTY)),
+          toArray(),
+        );
       }),
     );
   }
@@ -508,23 +515,19 @@ export class CategoriesTreeIdsCache implements Disposable {
     );
   }
 
-  public getCategoriesElementModels(categoryIds: Id64Arg, includeSubModels?: boolean): Observable<Map<CategoryId, Set<ModelId>>> {
+  public getCategoriesElementModels(categoryIds: Id64Arg, includeSubModels?: boolean): Observable<{ id: CategoryId; models: Array<ModelId> | undefined }> {
     return this.getElementModelsCategories().pipe(
       mergeMap((elementModelsCategories) =>
         from(Id64.iterable(categoryIds)).pipe(
-          reduce((acc, categoryId) => {
-            for (const [modelId, { categoryIds: categories, isSubModel }] of elementModelsCategories) {
+          map((categoryId) => {
+            const categoryModels = new Array<ModelId>();
+            elementModelsCategories.forEach(({ categoryIds: categories, isSubModel }, modelId) => {
               if ((includeSubModels || !isSubModel) && categories.has(categoryId)) {
-                let categoryModels = acc.get(categoryId);
-                if (!categoryModels) {
-                  categoryModels = new Set<ModelId>();
-                  acc.set(categoryId, categoryModels);
-                }
-                categoryModels.add(modelId);
+                categoryModels.push(modelId);
               }
-            }
-            return acc;
-          }, new Map<CategoryId, Set<ModelId>>()),
+            });
+            return { id: categoryId, models: categoryModels.length > 0 ? categoryModels : undefined };
+          }),
         ),
       ),
     );

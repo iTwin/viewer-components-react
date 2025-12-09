@@ -227,14 +227,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
   }
 
   private getModels(props: Parameters<BaseIdsCache["getModels"]>[0]): ReturnType<BaseIdsCache["getModels"]> {
-    return from(Id64.iterable(props.categoryIds)).pipe(
-      mergeMap((categoryId) =>
-        this.#props.idsCache.getCategoriesElementModels(categoryId, true).pipe(
-          mergeMap((categoryModelsMap) => (categoryModelsMap.size > 0 ? categoryModelsMap.values() : of(new Array<ModelId>()))),
-          map((categoryModels) => ({ id: categoryId, models: categoryModels })),
-        ),
-      ),
-    );
+    return this.#props.idsCache.getCategoriesElementModels(props.categoryIds, true);
   }
 
   private getSubCategories(props: Parameters<BaseIdsCache["getSubCategories"]>[0]): ReturnType<BaseIdsCache["getSubCategories"]> {
@@ -266,21 +259,16 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       );
     }
 
-    return from(Id64.iterable(props.categoryIds)).pipe(
-      mergeMap((categoryId) =>
-        this.#props.idsCache.getCategoriesElementModels(categoryId).pipe(
-          mergeMap((categoryModelsMap) => {
-            const models = categoryModelsMap.get(categoryId);
-            if (!models) {
-              return of({ id: categoryId, subModels: undefined });
-            }
-            return from(models).pipe(
-              mergeMap((modelId) => this.#props.idsCache.getCategoriesModeledElements(modelId, categoryId)),
-              map((subModels) => ({ id: categoryId, subModels })),
-            );
-          }),
-        ),
-      ),
+    return this.#props.idsCache.getCategoriesElementModels(props.categoryIds).pipe(
+      mergeMap(({ id, models }) => {
+        if (!models) {
+          return of({ id, subModels: undefined });
+        }
+        return from(models).pipe(
+          mergeMap((modelId) => this.#props.idsCache.getCategoriesModeledElements(modelId, id)),
+          map((subModels) => ({ id, subModels })),
+        );
+      }),
     );
   }
 }

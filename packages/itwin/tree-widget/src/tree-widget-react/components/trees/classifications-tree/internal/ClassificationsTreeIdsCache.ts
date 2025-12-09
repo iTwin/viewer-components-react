@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, forkJoin, from, map, mergeMap, of, reduce, shareReplay } from "rxjs";
+import { defer, EMPTY, forkJoin, from, map, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import {
   CLASS_NAME_Classification,
@@ -36,13 +36,11 @@ interface ClassificationInfo {
   relatedCategories3d: CategoryId[];
 }
 
-type ModelCategoryKey = `${ModelId}-${CategoryId}`;
-
 /** @internal */
 export class ClassificationsTreeIdsCache implements Disposable {
   readonly #categoryElementCounts: ModelCategoryElementsCountCache;
   #elementModelsCategories: Observable<Map<ModelId, { category2dIds: Id64Set; category3dIds: Id64Set; isSubModel: boolean }>> | undefined;
-  #modelWithCategoryModeledElements: Observable<Map<ModelCategoryKey, Set<ElementId>>> | undefined;
+  #modelWithCategoryModeledElements: Observable<Map<ModelId, Map<CategoryId, Set<ElementId>>>> | undefined;
   #classificationInfos: Observable<Map<ClassificationId | ClassificationTableId, ClassificationInfo>> | undefined;
   #filteredElementsData: Observable<Map<ElementId, { modelId: Id64String; categoryId: Id64String }>> | undefined;
   #queryExecutor: LimitingECSqlQueryExecutor;
@@ -124,7 +122,10 @@ export class ClassificationsTreeIdsCache implements Disposable {
     }).pipe(
       map(({ modelCategories, modelWithCategoryModeledElements }) => {
         const result = new Map<ModelId, { category2dIds: Id64Set; category3dIds: Id64Set; isSubModel: boolean }>();
-        const subModels = getDistinctMapValues(modelWithCategoryModeledElements);
+        const subModels = new Set<Id64String>();
+        modelWithCategoryModeledElements.forEach((categoryMap) =>
+          categoryMap.forEach((categorySubModels) => categorySubModels.forEach((subModelId) => subModels.add(subModelId))),
+        );
         for (const [modelId, modelEntry] of modelCategories) {
           const isSubModel = subModels.has(modelId);
           result.set(modelId, { category2dIds: modelEntry.category2dIds, category3dIds: modelEntry.category3dIds, isSubModel });
@@ -178,15 +179,19 @@ export class ClassificationsTreeIdsCache implements Disposable {
   private getModelWithCategoryModeledElements() {
     this.#modelWithCategoryModeledElements ??= this.queryModeledElements().pipe(
       reduce((acc, { modelId, categoryId, modeledElementId }) => {
-        const key: ModelCategoryKey = `${modelId}-${categoryId}`;
-        const entry = acc.get(key);
-        if (entry === undefined) {
-          acc.set(key, new Set([modeledElementId]));
+        let modelEntry = acc.get(modelId);
+        if (!modelEntry) {
+          modelEntry = new Map();
+          acc.set(modelId, modelEntry);
+        }
+        const categoryEntry = modelEntry.get(categoryId);
+        if (!categoryEntry) {
+          modelEntry.set(categoryId, new Set([modeledElementId]));
         } else {
-          entry.add(modeledElementId);
+          categoryEntry.add(modeledElementId);
         }
         return acc;
-      }, new Map<ModelCategoryKey, Set<ElementId>>()),
+      }, new Map<ModelId, Map<CategoryId, Set<ElementId>>>()),
       shareReplay(),
     );
     return this.#modelWithCategoryModeledElements;
@@ -194,37 +199,34 @@ export class ClassificationsTreeIdsCache implements Disposable {
 
   public getCategoriesModeledElements(modelId: Id64String, categoryIds: Id64Arg): Observable<Id64Array> {
     return this.getModelWithCategoryModeledElements().pipe(
-      mergeMap((modelWithCategoryModeledElements) =>
-        from(Id64.iterable(categoryIds)).pipe(
-          reduce((acc, categoryId) => {
-            const entry = modelWithCategoryModeledElements.get(`${modelId}-${categoryId}`);
-            if (entry !== undefined) {
-              acc.push(...entry);
-            }
-            return acc;
-          }, new Array<ElementId>()),
-        ),
-      ),
+      mergeMap((modelWithCategoryModeledElements) => {
+        const result = new Array<ElementId>();
+        const categoryMap = modelWithCategoryModeledElements.get(modelId);
+        if (!categoryMap) {
+          return of(result);
+        }
+        return from(Id64.iterable(categoryIds)).pipe(
+          map((categoryId) => categoryMap.get(categoryId)),
+          mergeMap((elementsSet) => (elementsSet ? from(elementsSet) : EMPTY)),
+          toArray(),
+        );
+      }),
     );
   }
 
-  public getCategoriesElementModels(categoryIds: Id64Arg, includeSubModels?: boolean): Observable<Map<CategoryId, Set<ModelId>>> {
+  public getCategoriesElementModels(categoryIds: Id64Arg, includeSubModels?: boolean): Observable<{ id: CategoryId; models: Array<ModelId> | undefined }> {
     return this.getElementModelsCategories().pipe(
       mergeMap((elementModelsCategories) =>
         from(Id64.iterable(categoryIds)).pipe(
-          reduce((acc, categoryId) => {
-            for (const [modelId, { category2dIds, category3dIds, isSubModel }] of elementModelsCategories) {
+          map((categoryId) => {
+            const categoryModels = new Array<ModelId>();
+            elementModelsCategories.forEach(({ category2dIds, category3dIds, isSubModel }, modelId) => {
               if ((includeSubModels || !isSubModel) && (category2dIds.has(categoryId) || category3dIds.has(categoryId))) {
-                let categoryModels = acc.get(categoryId);
-                if (!categoryModels) {
-                  categoryModels = new Set<ModelId>();
-                  acc.set(categoryId, categoryModels);
-                }
-                categoryModels.add(modelId);
+                categoryModels.push(modelId);
               }
-            }
-            return acc;
-          }, new Map<CategoryId, Set<ModelId>>()),
+            });
+            return { id: categoryId, models: categoryModels.length > 0 ? categoryModels : undefined };
+          }),
         ),
       ),
     );

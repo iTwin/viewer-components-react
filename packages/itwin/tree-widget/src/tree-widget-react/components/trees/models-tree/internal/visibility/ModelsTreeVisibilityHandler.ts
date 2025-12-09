@@ -311,11 +311,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
   }
 
   private getModels(props: Parameters<BaseIdsCache["getModels"]>[0]): ReturnType<BaseIdsCache["getModels"]> {
-    // Models cache for categories that don't have models still adds them to the final map
-    return this.#props.idsCache.getCategoriesElementModels(props.categoryIds).pipe(
-      mergeMap((categoryModelsMap) => categoryModelsMap.entries()),
-      map(([categoryId, categoryModels]) => ({ id: categoryId, models: categoryModels })),
-    );
+    return this.#props.idsCache.getCategoriesElementModels(props.categoryIds);
   }
 
   private getSubCategories(props: Parameters<BaseIdsCache["getSubCategories"]>[0]): ReturnType<BaseIdsCache["getSubCategories"]> {
@@ -345,21 +341,16 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
       );
     }
 
-    return from(Id64.iterable(props.categoryIds)).pipe(
-      mergeMap((categoryId) =>
-        this.#props.idsCache.getCategoriesElementModels(categoryId).pipe(
-          mergeMap((categoryModelsMap) => {
-            const models = categoryModelsMap.get(categoryId);
-            if (!models) {
-              return of({ id: categoryId, subModels: undefined });
-            }
-            return from(models).pipe(
-              mergeMap((modelId) => this.#props.idsCache.getCategoriesModeledElements(modelId, categoryId)),
-              map((subModels) => ({ id: categoryId, subModels })),
-            );
-          }),
-        ),
-      ),
+    return this.#props.idsCache.getCategoriesElementModels(props.categoryIds).pipe(
+      mergeMap(({ id, models }) => {
+        if (!models) {
+          return of({ id, subModels: undefined });
+        }
+        return from(models).pipe(
+          mergeMap((modelId) => this.#props.idsCache.getCategoriesModeledElements(modelId, id)),
+          map((subModels) => ({ id, subModels })),
+        );
+      }),
     );
   }
 
