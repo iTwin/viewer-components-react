@@ -16,7 +16,7 @@ import {
   CLASS_NAME_SpatialCategory,
 } from "../../common/internal/ClassNameDefinitions.js";
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
-import { getDistinctMapValues, joinId64Arg } from "../../common/internal/Utils.js";
+import { joinId64Arg } from "../../common/internal/Utils.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";

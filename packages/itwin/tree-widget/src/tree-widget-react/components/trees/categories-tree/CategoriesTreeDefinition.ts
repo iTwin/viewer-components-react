@@ -36,7 +36,6 @@ import {
 import {
   createIdsSelector,
   getClassesByView,
-  getDistinctMapValues,
   getOptimalBatchSize,
   groupingNodeHasFilterTargets,
   parseIdsSelectorResult,

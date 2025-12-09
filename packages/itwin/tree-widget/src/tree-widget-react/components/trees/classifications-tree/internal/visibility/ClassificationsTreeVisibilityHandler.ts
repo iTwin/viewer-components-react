@@ -13,7 +13,6 @@ import { ClassificationsTreeVisibilityHelper } from "./ClassificationsTreeVisibi
 
 import type { Observable } from "rxjs";
 import type { AlwaysAndNeverDrawnElementInfo } from "../../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
-import type { ModelId } from "../../../common/internal/Types.js";
 import type { BaseIdsCache, TreeSpecificVisibilityHandler } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import type { TreeWidgetViewport } from "../../../common/TreeWidgetViewport.js";
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
