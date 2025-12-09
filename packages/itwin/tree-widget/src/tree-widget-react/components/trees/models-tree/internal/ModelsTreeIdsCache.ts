@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, filter, forkJoin, from, map, mergeAll, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
+import { defer, EMPTY, filter, forkJoin, from, map, mergeAll, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
 import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import {
@@ -37,15 +37,13 @@ interface ModelInfo {
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
-type ModelCategoryKey = `${ModelId}-${CategoryId}`;
-
 /** @internal */
 export class ModelsTreeIdsCache implements Disposable {
   readonly #categoryElementCounts: ModelCategoryElementsCountCache;
   #subjectInfos: Observable<Map<SubjectId, SubjectInfo>> | undefined;
   #parentSubjectIds: Observable<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
   #modelInfos: Observable<Map<ModelId, ModelInfo>> | undefined;
-  #modelWithCategoryModeledElements: Observable<Map<ModelCategoryKey, Set<ElementId>>> | undefined;
+  #modelWithCategoryModeledElements: Observable<Map<ModelId, Map<CategoryId, Set<ElementId>>>> | undefined;
   #modelKeyPaths: Map<ModelId, Observable<HierarchyNodeIdentifiersPath[]>>;
   #subjectKeyPaths: Map<SubjectId, Observable<HierarchyNodeIdentifiersPath>>;
   #categoryKeyPaths: Map<CategoryId, Observable<HierarchyNodeIdentifiersPath[]>>;
@@ -352,15 +350,19 @@ export class ModelsTreeIdsCache implements Disposable {
   private getModelWithCategoryModeledElements() {
     this.#modelWithCategoryModeledElements ??= this.queryModeledElements().pipe(
       reduce((acc, { modelId, categoryId, modeledElementId }) => {
-        const key: ModelCategoryKey = `${modelId}-${categoryId}`;
-        const entry = acc.get(key);
-        if (entry === undefined) {
-          acc.set(key, new Set([modeledElementId]));
+        let modelEntry = acc.get(modelId);
+        if (!modelEntry) {
+          modelEntry = new Map();
+          acc.set(modelId, modelEntry);
+        }
+        const categoryEntry = modelEntry.get(categoryId);
+        if (!categoryEntry) {
+          modelEntry.set(categoryId, new Set([modeledElementId]));
         } else {
-          entry.add(modeledElementId);
+          categoryEntry.add(modeledElementId);
         }
         return acc;
-      }, new Map<ModelCategoryKey, Set<ElementId>>()),
+      }, new Map<ModelId, Map<CategoryId, Set<ElementId>>>()),
       shareReplay(),
     );
     return this.#modelWithCategoryModeledElements;
@@ -415,34 +417,34 @@ export class ModelsTreeIdsCache implements Disposable {
 
   public getCategoriesModeledElements(modelId: Id64String, categoryIds: Id64Arg): Observable<Id64Array> {
     return this.getModelWithCategoryModeledElements().pipe(
-      mergeMap((modelWithCategoryModeledElements) =>
-        from(Id64.iterable(categoryIds)).pipe(
-          reduce((acc, categoryId) => {
-            const entry = modelWithCategoryModeledElements.get(`${modelId}-${categoryId}`);
-            if (entry !== undefined) {
-              acc.push(...entry);
-            }
-            return acc;
-          }, new Array<Id64String>()),
-        ),
-      ),
+      mergeMap((modelWithCategoryModeledElements) => {
+        const result = new Array<ElementId>();
+        const categoryMap = modelWithCategoryModeledElements.get(modelId);
+        if (!categoryMap) {
+          return of(result);
+        }
+        return from(Id64.iterable(categoryIds)).pipe(
+          map((categoryId) => categoryMap.get(categoryId)),
+          mergeMap((elementsSet) => (elementsSet ? from(elementsSet) : EMPTY)),
+          toArray(),
+        );
+      }),
     );
   }
 
-  public getCategoriesElementModels(categoryIds: Id64Arg): Observable<Map<CategoryId, Array<ModelId>>> {
+  public getCategoriesElementModels(categoryIds: Id64Arg): Observable<{ id: CategoryId; models: Array<ModelId> | undefined }> {
     return this.getModelInfos().pipe(
       mergeMap((modelInfos) =>
         from(Id64.iterable(categoryIds)).pipe(
-          reduce((acc, categoryId) => {
-            const entry = new Array<ModelId>();
-            for (const [modelId, { categories }] of modelInfos.entries()) {
+          map((categoryId) => {
+            const categoryModels = new Array<ModelId>();
+            modelInfos.forEach(({ categories }, modelId) => {
               if (categories.has(categoryId)) {
-                entry.push(modelId);
+                categoryModels.push(modelId);
               }
-            }
-            acc.set(categoryId, entry);
-            return acc;
-          }, new Map<CategoryId, Array<ModelId>>()),
+            });
+            return { id: categoryId, models: categoryModels.length > 0 ? categoryModels : undefined };
+          }),
         ),
       ),
     );

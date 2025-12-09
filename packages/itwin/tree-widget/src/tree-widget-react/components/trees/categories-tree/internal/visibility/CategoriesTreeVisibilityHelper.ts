@@ -120,9 +120,8 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
   /** Turns on visibility status of models (that are not yet turned on) that are related to categories. */
   private enableCategoriesElementModelsVisibilityStatus(categoryIds: Id64Arg): Observable<void> {
     return this.#props.idsCache.getCategoriesElementModels(categoryIds, true).pipe(
-      mergeMap((categoriesModelsMap) => categoriesModelsMap.values()),
-      reduce((acc, modelIds) => {
-        modelIds.forEach((modelId) => {
+      reduce((acc, { models }) => {
+        models?.forEach((modelId) => {
           if (!this.#props.viewport.viewsModel(modelId)) {
             acc.add(modelId);
           }

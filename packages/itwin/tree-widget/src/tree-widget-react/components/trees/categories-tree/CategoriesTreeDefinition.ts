@@ -7,6 +7,7 @@ import {
   bufferCount,
   defaultIfEmpty,
   defer,
+  distinct,
   EMPTY,
   firstValueFrom,
   forkJoin,
@@ -35,7 +36,6 @@ import {
 import {
   createIdsSelector,
   getClassesByView,
-  getDistinctMapValues,
   getOptimalBatchSize,
   groupingNodeHasFilterTargets,
   parseIdsSelectorResult,
@@ -516,7 +516,13 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     });
     const modelIds: Id64Array = parentNode.extendedData?.isCategoryOfSubModel
       ? parseIdsSelectorResult(parentNode.extendedData?.modelIds)
-      : [...getDistinctMapValues(await firstValueFrom(this.#idsCache.getCategoriesElementModels(categoryIds)))];
+      : await firstValueFrom(
+          this.#idsCache.getCategoriesElementModels(categoryIds).pipe(
+            mergeMap(({ models }) => models ?? []),
+            distinct(),
+            toArray(),
+          ),
+        );
 
     if (modelIds.length === 0) {
       return [];
@@ -862,7 +868,6 @@ function createInstanceKeyPathsFromTargetItems({
     throw new FilterLimitExceededError(limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT);
   }
   const { categoryClass } = getClassesByView(viewType);
-
   return from(targetItems).pipe(
     releaseMainThreadOnItemsCount(500),
     reduce(
@@ -900,14 +905,17 @@ function createInstanceKeyPathsFromTargetItems({
       const elementsLength = ids.elementIds.length;
       return merge(
         from(ids.definitionContainerIds).pipe(
+          releaseMainThreadOnItemsCount(200),
           mergeMap((id) => idsCache.getInstanceKeyPaths({ definitionContainerId: id })),
           map((path) => ({ path, options: { reveal: true } })),
         ),
         from(ids.categoryIds).pipe(
+          releaseMainThreadOnItemsCount(200),
           mergeMap((id) => idsCache.getInstanceKeyPaths({ categoryId: id })),
           map((path) => ({ path, options: { reveal: true } })),
         ),
         from(ids.subCategoryIds).pipe(
+          releaseMainThreadOnItemsCount(200),
           mergeMap((id) => idsCache.getInstanceKeyPaths({ subCategoryId: id })),
           map((path) => ({ path, options: { reveal: true } })),
         ),
