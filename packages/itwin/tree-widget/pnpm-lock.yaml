@@ -24,8 +24,8 @@ importers:
         specifier: ^2.0.0-alpha.4
         version: 2.0.0-alpha.4
       '@itwin/unified-selection':
-        specifier: ^1.6.2-alpha.0
-        version: 1.6.2-alpha.0
+        specifier: ^1.6.2
+        version: 1.6.2
       classnames:
         specifier: ^2.5.1
         version: 2.5.1
@@ -579,12 +579,6 @@ packages:
   '@itwin/core-bentley@5.1.1':
     resolution: {integrity: sha512-l909mfvdnXkV7qOxsWjvIUvc5MuT7Tn8gytyz8PGvsSSa2ipQ6Zj3nvd7M5RlV8V3WH3STLZbcCo3hhp3/jA3w==}
 
-  '@itwin/core-bentley@5.2.4':
-    resolution: {integrity: sha512-Ogl1JGsOtZ0vYOl5LowPr+P17HArZvAkH4Xm3AvNMW27O4DwMHxKxsf/9VYoQhWbQqpI6Ewks8rEJ7yC6ZG+SA==}
-
-  '@itwin/core-bentley@5.3.2':
-    resolution: {integrity: sha512-uvaJprI8d0ndR6ARt1y7uBIXyoIRuw4OqPEf6Ztfcm7QYzNHaXJN3oMu8p/M4Q9N59uWbKZn0SwVOKApX7jCZw==}
-
   '@itwin/core-bentley@5.3.3':
     resolution: {integrity: sha512-oc5+gNL5B7h4P2Qbmk8EmyE21lmlppIImYUCm4+k8800JnppT31vLqtB5uPhzhwhaiM+7bsojz3aJi38l/y1kA==}
 
@@ -831,6 +825,9 @@ packages:
   '@itwin/presentation-shared@1.2.3':
     resolution: {integrity: sha512-YHwmyMfWH5re0m0DVDEnO7BeSE2pfOQI/bbk6j2KS+Y0am1IJ+LEgE/0bQu+MVsAFQqrThrGvLMDu6AbCl7+8w==}
 
+  '@itwin/presentation-shared@1.2.4':
+    resolution: {integrity: sha512-oGGIeqryhn8OwDBvGaMP7qFcLGaItKBZU2SoXCP4ciJz+oTn9deQPN2dU9mOGTuHeFopXPLO0f9k4sMkMMgNnA==}
+
   '@itwin/presentation-shared@2.0.0-alpha.4':
     resolution: {integrity: sha512-brS7ZcBS8a746UgTmJXE4eQ77drE29eOYUHyjzAu4AICRgRBgETTf3vEhVu7WMYtp0+FIKY/kOAzNKa/aNrXtA==}
 
@@ -852,11 +849,8 @@ packages:
     peerDependencies:
       '@itwin/core-bentley': ^5.0.0
 
-  '@itwin/unified-selection@1.6.1':
-    resolution: {integrity: sha512-8upidTlmknva8A/flr5l4R1wH6CmYUPyrfBIkZCwxztrszHJFDSQVNOU+EF8BN4RLeSJVsHv1XCWWK+REsKjoQ==}
-
-  '@itwin/unified-selection@1.6.2-alpha.0':
-    resolution: {integrity: sha512-uiTr1PjAdtHRoBFAxG/X4Xvviuz9Mv5+0Inng/xpItqg87MAV+VLQVuSQgOQrXC8qYXKvXodggiOF+N5jezY6w==}
+  '@itwin/unified-selection@1.6.2':
+    resolution: {integrity: sha512-h6GEF2CaPujt3uLYWRLP635G8Ox/yJ9VTtHafh0AtaWrl+dZ9UbDb4l8QQOce7w6YfQFhgIi4FuyR/p8x2ZnBQ==}
 
   '@itwin/unified-selection@1.6.3-alpha.0':
     resolution: {integrity: sha512-hwRY76HpFDQaOwOaBC0wh/RqDQPavTHHETkyamGfR+GJIeOxILC/lM0Ff8Gq8CMh0rY+a/miboBocEGVQVuBlQ==}
@@ -4810,10 +4804,6 @@ snapshots:
 
   '@itwin/core-bentley@5.1.1': {}
 
-  '@itwin/core-bentley@5.2.4': {}
-
-  '@itwin/core-bentley@5.3.2': {}
-
   '@itwin/core-bentley@5.3.3': {}
 
   '@itwin/core-common@5.0.0(@itwin/core-bentley@5.0.0)(@itwin/core-geometry@5.0.0)':
@@ -5098,7 +5088,7 @@ snapshots:
       '@itwin/core-quantity': 5.0.0(@itwin/core-bentley@5.0.0)
       '@itwin/ecschema-metadata': 5.0.0(@itwin/core-bentley@5.0.0)(@itwin/core-quantity@5.0.0(@itwin/core-bentley@5.0.0))
       '@itwin/presentation-common': 5.0.0(@itwin/core-bentley@5.0.0)(@itwin/core-common@5.0.0(@itwin/core-bentley@5.0.0)(@itwin/core-geometry@5.0.0))(@itwin/core-quantity@5.0.0(@itwin/core-bentley@5.0.0))(@itwin/ecschema-metadata@5.0.0(@itwin/core-bentley@5.0.0)(@itwin/core-quantity@5.0.0(@itwin/core-bentley@5.0.0)))
-      '@itwin/unified-selection': 1.6.1
+      '@itwin/unified-selection': 1.6.2
       rxjs: 7.8.1
       rxjs-for-await: 1.0.0(rxjs@7.8.1)
 
@@ -5133,6 +5123,10 @@ snapshots:
   '@itwin/presentation-shared@1.2.3':
     dependencies:
       '@itwin/core-bentley': 5.1.1
+
+  '@itwin/presentation-shared@1.2.4':
+    dependencies:
+      '@itwin/core-bentley': 5.3.3
 
   '@itwin/presentation-shared@2.0.0-alpha.4':
     dependencies:
@@ -5172,17 +5166,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@itwin/unified-selection@1.6.1':
+  '@itwin/unified-selection@1.6.2':
     dependencies:
-      '@itwin/core-bentley': 5.2.4
-      '@itwin/presentation-shared': 1.2.3
-      rxjs: 7.8.1
-      rxjs-for-await: 1.0.0(rxjs@7.8.1)
-
-  '@itwin/unified-selection@1.6.2-alpha.0':
-    dependencies:
-      '@itwin/core-bentley': 5.3.2
-      '@itwin/presentation-shared': 2.0.0-alpha.4
+      '@itwin/core-bentley': 5.3.3
+      '@itwin/presentation-shared': 1.2.4
       rxjs: 7.8.2
       rxjs-for-await: 1.0.0(rxjs@7.8.2)
 
