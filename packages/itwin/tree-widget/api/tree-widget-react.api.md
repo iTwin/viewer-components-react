@@ -28,7 +28,8 @@ import { RenameAction } from '@itwin/presentation-hierarchies-react';
 import type { SelectionStorage } from '@itwin/presentation-hierarchies-react';
 import { StrataKitTreeRenderer } from '@itwin/presentation-hierarchies-react';
 import type { TranslationOptions } from '@itwin/core-common';
-import type { TreeActionBaseAttributes } from '@itwin/presentation-hierarchies-react';
+import { TreeActionBase } from '@itwin/presentation-hierarchies-react';
+import { TreeActionBaseAttributes } from '@itwin/presentation-hierarchies-react';
 import type { TreeRendererProps } from '@itwin/presentation-hierarchies-react';
 import type { useIModelTree } from '@itwin/presentation-hierarchies-react';
 import type { useSelectionHandler } from '@itwin/presentation-hierarchies-react';
@@ -409,6 +410,10 @@ interface TelemetryContextProviderProps {
 
 // @beta
 export function Tree({ hierarchyLevelSizeLimit, getHierarchyDefinition, getFilteredPaths, selectionStorage, imodelAccess: providedIModelAccess, treeName, onReload, ...props }: TreeProps): JSX_2.Element;
+
+export { TreeActionBase }
+
+export { TreeActionBaseAttributes }
 
 // @public
 export interface TreeDefinition {
