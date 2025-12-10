@@ -39,4 +39,5 @@ export { FilterLimitExceededError } from "./common/TreeErrors.js";
 export { ModelsTreeVisibilityHandlerOverrides } from "./models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
 
 // reexport actions from presentation-hierarchies-react to keep naming consistent
-export { RenameAction, FilterAction } from "@itwin/presentation-hierarchies-react";
+// reexport TreeActionBase to allow consumers defining custom actions without @itwin/presentation-hierarchies-react dependency
+export { RenameAction, FilterAction, TreeActionBase, TreeActionBaseAttributes } from "@itwin/presentation-hierarchies-react";
