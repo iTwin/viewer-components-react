@@ -93,6 +93,7 @@ export function useClassificationsTreeDefinition(props: UseClassificationsTreeDe
             }),
             imodelAccess,
             abortSignal,
+            limit: typeof searchTerm !== "string" ? "unbounded" : undefined,
             ...(typeof searchTerm === "string" ? { label: searchTerm } : { targetItems: searchTerm }),
           }),
         ),
