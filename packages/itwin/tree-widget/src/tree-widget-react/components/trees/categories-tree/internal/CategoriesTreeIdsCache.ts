@@ -35,16 +35,14 @@ export interface CategoryInfo {
   hasElements: boolean;
 }
 
-interface SubCategoryInfo {
-  categoryId: Id64String;
-}
-
 /** @internal */
 export class CategoriesTreeIdsCache implements Disposable {
   #definitionContainersInfo: Observable<Map<DefinitionContainerId, DefinitionContainerInfo>> | undefined;
   #modelsCategoriesInfo: Observable<Map<ModelId, CategoriesInfo>> | undefined;
   #elementModelsCategories: Observable<Map<ModelId, { categoryIds: Id64Set; isSubModel: boolean }>> | undefined;
-  #subCategoriesInfo: Observable<Map<SubCategoryId, SubCategoryInfo>> | undefined;
+  #subCategoriesInfo:
+    | Observable<{ subCategoryCategories: Map<SubCategoryId, CategoryId>; categorySubCategories: Map<CategoryId, Array<SubCategoryId>> }>
+    | undefined;
   readonly #categoryElementCounts: ModelCategoryElementsCountCache;
   #modelWithCategoryModeledElements: Observable<Map<ModelId, Map<CategoryId, Set<ElementId>>>> | undefined;
   #categoryClass: string;
@@ -277,7 +275,7 @@ export class CategoriesTreeIdsCache implements Disposable {
     );
   }
 
-  private queryVisibleSubCategories(categoryIds: Id64Array): Observable<{ id: SubCategoryId; parentId: CategoryId }> {
+  private querySubCategories(categoryIds: Id64Array): Observable<{ id: SubCategoryId; parentId: CategoryId }> {
     return defer(() => {
       const definitionsQuery = `
       SELECT
@@ -425,21 +423,29 @@ export class CategoriesTreeIdsCache implements Disposable {
       .pipe(
         mergeMap((modelsCategoriesInfo) => from(modelsCategoriesInfo.values())),
         reduce((acc, modelCategoriesInfo) => {
-          acc.push(
-            ...modelCategoriesInfo.childCategories.filter((categoryInfo) => categoryInfo.subCategoryChildCount > 1).map((categoryInfo) => categoryInfo.id),
-          );
+          acc.push(...modelCategoriesInfo.childCategories.map((categoryInfo) => categoryInfo.id));
           return acc;
         }, new Array<CategoryId>()),
-        mergeMap((categoriesWithMoreThanOneSubCategory) => {
-          const allSubCategories = new Map<Id64String, SubCategoryInfo>();
-          if (categoriesWithMoreThanOneSubCategory.length === 0) {
-            return of(allSubCategories);
+        mergeMap((allCategories) => {
+          const subCategoryCategories = new Map<SubCategoryId, CategoryId>();
+          const categorySubCategories = new Map<CategoryId, Array<SubCategoryId>>();
+          if (allCategories.length === 0) {
+            return of({ subCategoryCategories, categorySubCategories });
           }
-          return this.queryVisibleSubCategories(categoriesWithMoreThanOneSubCategory).pipe(
-            reduce((acc, queriedSubCategory) => {
-              acc.set(queriedSubCategory.id, { categoryId: queriedSubCategory.parentId });
-              return acc;
-            }, allSubCategories),
+          return this.querySubCategories(allCategories).pipe(
+            reduce(
+              (acc, queriedSubCategory) => {
+                acc.subCategoryCategories.set(queriedSubCategory.id, queriedSubCategory.parentId);
+                const entry = acc.categorySubCategories.get(queriedSubCategory.parentId);
+                if (entry) {
+                  entry.push(queriedSubCategory.id);
+                } else {
+                  acc.categorySubCategories.set(queriedSubCategory.parentId, [queriedSubCategory.id]);
+                }
+                return acc;
+              },
+              { subCategoryCategories, categorySubCategories },
+            ),
           );
         }),
       )
@@ -602,12 +608,16 @@ export class CategoriesTreeIdsCache implements Disposable {
   ): Observable<InstanceKey[]> {
     if ("subCategoryId" in props) {
       return this.getSubCategoriesInfo().pipe(
-        mergeMap((subCategoriesInfo) => {
-          const subCategoryInfo = subCategoriesInfo.get(props.subCategoryId);
-          if (subCategoryInfo === undefined) {
+        mergeMap(({ subCategoryCategories, categorySubCategories }) => {
+          const categoryOfSubCategory = subCategoryCategories.get(props.subCategoryId);
+          if (categoryOfSubCategory === undefined) {
             return of([]);
           }
-          return this.getInstanceKeyPaths({ categoryId: subCategoryInfo.categoryId }).pipe(
+          const subCategories = categorySubCategories.get(subCategoryCategories.categoryOfSubCategory);
+          if (!subCategories || subCategories.length <= 1) {
+            return of([]);
+          }
+          return this.getInstanceKeyPaths({ categoryId: categoryOfSubCategory }).pipe(
             map((pathToCategory) => [...pathToCategory, { id: props.subCategoryId, className: CLASS_NAME_SubCategory }]),
           );
         }),
@@ -702,27 +712,10 @@ export class CategoriesTreeIdsCache implements Disposable {
     });
   }
 
-  public getSubCategories(categoryIds: Id64Arg): Observable<Map<CategoryId, Array<SubCategoryId>>> {
+  public getSubCategories(categoryId: Id64String): Observable<{ id: CategoryId; subCategories: Array<SubCategoryId> | undefined }> {
     return this.getSubCategoriesInfo().pipe(
-      mergeMap((subCategoriesInfo) => subCategoriesInfo.entries()),
-      reduce((acc, [subCategoryId, subCategoryInfo]) => {
-        let entry = acc.get(subCategoryInfo.categoryId);
-        if (!entry) {
-          entry = [];
-          acc.set(subCategoryInfo.categoryId, entry);
-        }
-        entry.push(subCategoryId);
-        return acc;
-      }, new Map<CategoryId, Array<Id64String>>()),
-      map((subCategoriesMap) => {
-        const result = new Map<CategoryId, Array<Id64String>>();
-        for (const categoryId of Id64.iterable(categoryIds)) {
-          const entry = subCategoriesMap.get(categoryId);
-          if (entry) {
-            result.set(categoryId, entry);
-          }
-        }
-        return result;
+      map(({ categorySubCategories }) => {
+        return { id: categoryId, subCategories: categorySubCategories.get(categoryId) };
       }),
     );
   }

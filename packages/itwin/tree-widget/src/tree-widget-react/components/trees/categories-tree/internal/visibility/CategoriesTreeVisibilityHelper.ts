@@ -100,7 +100,7 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
             this.enableCategoriesElementModelsVisibilityStatus(props.categoryId),
           )
         : EMPTY,
-      from(props.subCategoryIds).pipe(map((subCategoryId) => enableSubCategoryDisplay(this.#props.viewport, subCategoryId, props.on))),
+      from(props.subCategoryIds).pipe(map((subCategoryId) => this.#props.viewport.changeSubCategoryDisplay({ subCategoryId, display: props.on }))),
     );
   }
 

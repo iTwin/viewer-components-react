@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { firstValueFrom } from "rxjs";
+import { firstValueFrom, toArray } from "rxjs";
 import { IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
@@ -12,7 +12,6 @@ import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { CategoriesTreeIdsCache } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 import { CLASS_NAME_DefinitionModel } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
-import { getDistinctMapValues } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
 import {
   buildIModel,
   insertDefinitionContainer,
@@ -23,6 +22,7 @@ import {
   insertSubModel,
 } from "../../../IModelUtils.js";
 import { createIModelAccess } from "../../Common.js";
+import { getDefaultSubCategoryId } from "../../TreeUtils.js";
 
 describe("CategoriesTreeIdsCache", () => {
   before(async function () {
@@ -902,10 +902,10 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel } = buildIModelResult;
       using idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      expect([...getDistinctMapValues(await firstValueFrom(idsCache.getSubCategories("0x123")))]).to.deep.eq([]);
+      expect(await firstValueFrom(idsCache.getSubCategories("0x123"))).to.deep.eq({ id: "0x123", subCategories: undefined });
     });
 
-    it("returns empty list when category has one subCategory", async function () {
+    it("returns subcategory when category has one subCategory", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
@@ -914,7 +914,10 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       using idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      expect([...getDistinctMapValues(await firstValueFrom(idsCache.getSubCategories(keys.category.id)))]).to.deep.eq([]);
+      expect(await firstValueFrom(idsCache.getSubCategories(keys.category.id))).to.deep.eq({
+        id: keys.category.id,
+        subCategories: [getDefaultSubCategoryId(keys.category.id)],
+      });
     });
 
     it("returns subCategories when category has multiple subCategories", async function () {
@@ -928,9 +931,9 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       using idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      const result = [...getDistinctMapValues(await firstValueFrom(idsCache.getSubCategories(keys.category.id)))];
-      expect(result.includes(keys.subCategory.id)).to.be.true;
-      expect(result.length).to.be.eq(2);
+      const result = await firstValueFrom(idsCache.getSubCategories(keys.category.id).pipe(toArray()));
+      expect(result.some(({ subCategories }) => subCategories?.includes(keys.subCategory.id))).to.be.true;
+      expect(result[0].subCategories?.length).to.be.eq(2);
     });
 
     it("returns only child subCategories when multiple categories have multiple subCategories", async function () {
@@ -948,9 +951,9 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       using idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      const result = [...getDistinctMapValues(await firstValueFrom(idsCache.getSubCategories(keys.category2.id)))];
-      expect(result.includes(keys.subCategory2.id)).to.be.true;
-      expect(result.length).to.be.eq(2);
+      const result = await firstValueFrom(idsCache.getSubCategories(keys.category2.id).pipe(toArray()));
+      expect(result.some(({ subCategories }) => subCategories?.includes(keys.subCategory2.id))).to.be.true;
+      expect(result[0].subCategories?.length).to.be.eq(2);
     });
   });
 });
