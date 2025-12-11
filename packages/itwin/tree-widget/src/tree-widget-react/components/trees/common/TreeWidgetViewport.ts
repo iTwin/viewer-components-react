@@ -72,7 +72,7 @@ export function createTreeWidgetViewport(viewport: Viewport): TreeWidgetViewport
       return viewport.onNeverDrawnChanged;
     },
     get onDisplayStyleChanged() {
-      return viewport.view.onDisplayStyleChanged;
+      return viewport.onDisplayStyleChanged;
     },
     get onDisplayedModelsChanged() {
       return viewport.onViewedModelsChanged;
