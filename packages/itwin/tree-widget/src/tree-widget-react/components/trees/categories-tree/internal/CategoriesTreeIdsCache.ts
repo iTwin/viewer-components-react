@@ -613,7 +613,7 @@ export class CategoriesTreeIdsCache implements Disposable {
           if (categoryOfSubCategory === undefined) {
             return of([]);
           }
-          const subCategories = categorySubCategories.get(subCategoryCategories.categoryOfSubCategory);
+          const subCategories = categorySubCategories.get(categoryOfSubCategory);
           if (!subCategories || subCategories.length <= 1) {
             return of([]);
           }
