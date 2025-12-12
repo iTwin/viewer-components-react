@@ -10,8 +10,8 @@ import type { ECClassHierarchyInspector } from '@itwin/presentation-shared';
 import { FilterAction } from '@itwin/presentation-hierarchies-react';
 import type { GroupingHierarchyNode } from '@itwin/presentation-hierarchies';
 import type { HierarchyDefinition } from '@itwin/presentation-hierarchies';
-import { HierarchyFilteringPath } from '@itwin/presentation-hierarchies';
 import type { HierarchyNode } from '@itwin/presentation-hierarchies-react';
+import { HierarchySearchPath } from '@itwin/presentation-hierarchies';
 import type { Id64Arg } from '@itwin/core-bentley';
 import type { Id64Array } from '@itwin/core-bentley';
 import type { Id64String } from '@itwin/core-bentley';
@@ -324,7 +324,7 @@ export const ModelsTreeComponent: {
 };
 
 // @public (undocumented)
-interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "selectionPredicate" | "hierarchyConfig" | "visibilityHandlerOverrides" | "getFilteredPaths" | "filter" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getDecorations" | "getSubTreePaths" | "treeLabel"> {
+interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "selectionPredicate" | "hierarchyConfig" | "visibilityHandlerOverrides" | "getSearchPaths" | "filter" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getDecorations" | "getSubTreePaths" | "treeLabel"> {
     headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
@@ -385,7 +385,7 @@ export interface ModelsTreeVisibilityHandlerOverrides extends BaseTreeVisibility
 }
 
 // @public (undocumented)
-type NormalizedHierarchyFilteringPath = ReturnType<(typeof HierarchyFilteringPath)["normalize"]>;
+type NormalizedHierarchySearchPath = ReturnType<(typeof HierarchySearchPath)["normalize"]>;
 
 // @public (undocumented)
 type PerModelCategoryOverride = "show" | "hide" | "none";
@@ -409,7 +409,7 @@ interface TelemetryContextProviderProps {
 }
 
 // @beta
-export function Tree({ hierarchyLevelSizeLimit, getHierarchyDefinition, getFilteredPaths, selectionStorage, imodelAccess: providedIModelAccess, treeName, onReload, ...props }: TreeProps): JSX_2.Element;
+export function Tree({ hierarchyLevelSizeLimit, getHierarchyDefinition, getSearchPaths, selectionStorage, imodelAccess: providedIModelAccess, treeName, onReload, ...props }: TreeProps): JSX_2.Element;
 
 export { TreeActionBase }
 
@@ -439,7 +439,7 @@ type TreeItemVisibilityButtonState = (LoadedTreeItemVisibilityButtonState | {
 };
 
 // @beta (undocumented)
-type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPaths" | "getHierarchyDefinition"> & Partial<Pick<FunctionProps<typeof useSelectionHandler>, "selectionMode">> & {
+type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getSearchPaths" | "getHierarchyDefinition"> & Partial<Pick<FunctionProps<typeof useSelectionHandler>, "selectionMode">> & {
     imodel: IModelConnection;
     treeName: string;
     selectionStorage: SelectionStorage;
@@ -591,7 +591,7 @@ interface UseCategoriesTreeProps {
 // @beta (undocumented)
 interface UseCategoriesTreeResult {
     // (undocumented)
-    categoriesTreeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent">;
+    categoriesTreeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "getSearchPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent">;
     // (undocumented)
     rendererProps: Required<Pick<VisibilityTreeRendererProps, "getDecorations" | "getSublabel">>;
 }
@@ -621,7 +621,7 @@ interface UseClassificationsTreeDefinitionResult {
     // (undocumented)
     definition: HierarchyDefinition;
     // (undocumented)
-    getFilteredPaths?: FunctionProps<typeof useTree>["getFilteredPaths"];
+    getSearchPaths?: FunctionProps<typeof useTree>["getSearchPaths"];
 }
 
 // @alpha (undocumented)
@@ -639,7 +639,7 @@ interface UseClassificationsTreeProps {
 // @alpha (undocumented)
 interface UseClassificationsTreeResult {
     // (undocumented)
-    classificationsTreeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "visibilityHandlerFactory" | "getFilteredPaths" | "emptyTreeContent" | "highlightText">;
+    classificationsTreeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "visibilityHandlerFactory" | "getSearchPaths" | "emptyTreeContent" | "highlightText">;
     // (undocumented)
     rendererProps: Required<Pick<VisibilityTreeRendererProps, "getDecorations">>;
 }
@@ -648,7 +648,7 @@ interface UseClassificationsTreeResult {
 export function useFocusedInstancesContext(): FocusedInstancesContext;
 
 // @beta
-export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getFilteredPaths, onModelsFiltered, selectionPredicate: nodeTypeSelectionPredicate, emptyTreeContent, getSubTreePaths, }: UseModelsTreeProps): UseModelsTreeResult;
+export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getSearchPaths, onModelsFiltered, selectionPredicate: nodeTypeSelectionPredicate, emptyTreeContent, getSubTreePaths, }: UseModelsTreeProps): UseModelsTreeResult;
 
 // @public
 export function useModelsTreeButtonProps({ imodel, viewport }: {
@@ -666,19 +666,19 @@ interface UseModelsTreeProps {
     // (undocumented)
     emptyTreeContent?: ReactNode;
     filter?: string;
-    getFilteredPaths?: (props: {
+    getSearchPaths?: (props: {
         createInstanceKeyPaths: (props: {
             targetItems: Array<InstanceKey | ElementsGroupInfo>;
         } | {
             label: string;
-        }) => Promise<NormalizedHierarchyFilteringPath[]>;
+        }) => Promise<NormalizedHierarchySearchPath[]>;
         filter?: string;
-    }) => Promise<HierarchyFilteringPath[] | undefined>;
+    }) => Promise<HierarchySearchPath[] | undefined>;
     getSubTreePaths?: (props: {
         createInstanceKeyPaths: (props: {
             targetItems: Array<InstanceKey | ElementsGroupInfo>;
-        }) => Promise<NormalizedHierarchyFilteringPath[]>;
-    }) => Promise<HierarchyFilteringPath[]>;
+        }) => Promise<NormalizedHierarchySearchPath[]>;
+    }) => Promise<HierarchySearchPath[]>;
     // (undocumented)
     hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
     // (undocumented)
@@ -694,7 +694,7 @@ interface UseModelsTreeProps {
 // @beta (undocumented)
 interface UseModelsTreeResult {
     // (undocumented)
-    modelsTreeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent" | "selectionPredicate">;
+    modelsTreeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "getSearchPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent" | "selectionPredicate">;
     // (undocumented)
     rendererProps: Required<Pick<VisibilityTreeRendererProps, "getDecorations">>;
 }

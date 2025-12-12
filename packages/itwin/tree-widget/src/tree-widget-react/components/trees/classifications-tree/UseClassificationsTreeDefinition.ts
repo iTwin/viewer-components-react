@@ -1,3 +1,4 @@
+;
 /*---------------------------------------------------------------------------------------------
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
@@ -8,9 +9,11 @@ import { assert } from "@itwin/core-bentley";
 import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.js";
 import { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
 
+
+
 import type { MutableRefObject } from "react";
-import type { HierarchyDefinition, HierarchySearchPath } from "@itwin/presentation-hierarchies";
-import type { useIModelTree } from "@itwin/presentation-hierarchies-react";
+import type { HierarchyDefinition } from "@itwin/presentation-hierarchies";
+import type { useIModelTree, useTree } from "@itwin/presentation-hierarchies-react";
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { FunctionProps } from "../common/Utils.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "./ClassificationsTreeDefinition.js";
@@ -51,7 +54,7 @@ interface UseClassificationsTreeDefinitionProps {
 /** @alpha */
 interface UseClassificationsTreeDefinitionResult {
   definition: HierarchyDefinition;
-  getHierarchySearchPaths?: ({ abortSignal }: { abortSignal: AbortSignal }) => Promise<HierarchySearchPath[] | undefined>;
+  getSearchPaths?: FunctionProps<typeof useTree>["getSearchPaths"];
 }
 
 /** @alpha */
@@ -75,12 +78,12 @@ export function useClassificationsTreeDefinition(props: UseClassificationsTreeDe
   }, [imodels, hierarchyConfig]);
 
   const searchTerm = search ? ("searchText" in search ? search.searchText : search.targetItems) : undefined;
-  const getHierarchySearchPaths = useMemo<(({ abortSignal }: { abortSignal: AbortSignal }) => Promise<HierarchySearchPath[] | undefined>) | undefined>(() => {
+  const getSearchPaths = useMemo<FunctionProps<typeof useTree>["getSearchPaths"]>(() => {
     if (!searchTerm) {
       return undefined;
     }
 
-    return async ({ abortSignal }: { abortSignal: AbortSignal }) => {
+    return async ({ abortSignal }) => {
       const [first, ...rest] = await Promise.all(
         imodels.map(async ({ imodelAccess }) =>
           ClassificationsTreeDefinition.createInstanceKeyPaths({
@@ -105,7 +108,7 @@ export function useClassificationsTreeDefinition(props: UseClassificationsTreeDe
 
   return {
     definition,
-    getHierarchySearchPaths,
+    getSearchPaths,
   };
 }
 
