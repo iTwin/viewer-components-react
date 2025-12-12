@@ -1738,7 +1738,7 @@ describe("ModelsTreeVisibilityHandler", () => {
     function createCommonProps(props: { imodel: IModelConnection; hierarchyConfig?: typeof defaultHierarchyConfiguration; visibleByDefault?: boolean }) {
       const hierarchyConfig = { ...defaultHierarchyConfiguration, hideRootSubject: true, ...props.hierarchyConfig };
       const imodelAccess = createIModelAccess(props.imodel);
-      const viewport = createTreeWidgetTestingViewport({ iModel: props.imodel, viewType: "3d", visibleByDefault: !!props.visibleByDefault });
+      const viewport = createTreeWidgetTestingViewport({ iModel: props.imodel, viewType: "3d", visibleByDefault: props.visibleByDefault });
       const idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig);
       return {
         imodelAccess,

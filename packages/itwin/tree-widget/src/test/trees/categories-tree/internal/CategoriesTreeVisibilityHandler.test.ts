@@ -84,7 +84,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
   }) {
     const imodelAccess = createIModelAccess(imodel);
     const idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d");
-    const viewport = createTreeWidgetTestingViewport({ iModel: imodel, subCategoriesOfCategories, viewType: "3d", visibleByDefault: !!visibleByDefault });
+    const viewport = createTreeWidgetTestingViewport({ iModel: imodel, subCategoriesOfCategories, viewType: "3d", visibleByDefault });
 
     return {
       imodelAccess,
@@ -1731,7 +1731,15 @@ describe("CategoriesTreeVisibilityHandler", () => {
               name: "modeled element's children display is turned on when its class grouping node display is turned on",
               getTargetNode: (ids: IModelWithSubModelIds) =>
                 createClassGroupingHierarchyNode({ categoryId: ids.category.id, modelElementsMap: new Map([[ids.model.id, [ids.modeledElement.id]]]) }),
-              expectations: () => "all-visible",
+              expectations: (ids: IModelWithSubModelIds) => ({
+                [ids.subModelCategory?.id ?? ""]: "visible",
+                [`${ids.modeledElement.id}-${ids.subModelCategory?.id ?? ""}`]: "visible",
+                [ids.subModelCategory?.id ?? ""]: "visible",
+                [ids.category.id]: "partial",
+                [ids.modeledElement.id]: "visible",
+                [ids.subModelElement?.id ?? ""]: "visible",
+                [ids.model.id]: "visible",
+              }),
             },
             {
               name: "modeled element's children display is turned on when its display is turned on",
@@ -1742,7 +1750,15 @@ describe("CategoriesTreeVisibilityHandler", () => {
                   elementId: ids.modeledElement.id,
                   hasChildren: true,
                 }),
-              expectations: () => "all-visible",
+              expectations: (ids: IModelWithSubModelIds) => ({
+                [ids.subModelCategory?.id ?? ""]: "visible",
+                [`${ids.modeledElement.id}-${ids.subModelCategory?.id ?? ""}`]: "visible",
+                [ids.subModelCategory?.id ?? ""]: "visible",
+                [ids.category.id]: "partial",
+                [ids.modeledElement.id]: "visible",
+                [ids.subModelElement?.id ?? ""]: "visible",
+                [ids.model.id]: "visible",
+              }),
             },
             {
               name: "modeled element's children display is turned on when its sub-model display is turned on",
@@ -1778,7 +1794,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                   elementId: ids.subModelElement?.id,
                 }),
               expectations: (ids: IModelWithSubModelIds) => ({
-                [ids.subModelCategory?.id ?? ""]: "visible",
+                [ids.subModelCategory?.id ?? ""]: "partial",
                 [`${ids.modeledElement.id}-${ids.subModelCategory?.id ?? ""}`]: "visible",
                 [ids.category.id]: "partial",
                 [ids.modeledElement.id]: "partial",
@@ -1827,17 +1843,18 @@ describe("CategoriesTreeVisibilityHandler", () => {
               }),
             },
             {
-              name: "parent category and child elements are visible when elements class grouping node display is turned on",
+              name: "child elements are visible when elements class grouping node display is turned on",
               getTargetNode: (ids: IModelWithSubModelIds) =>
                 createClassGroupingHierarchyNode({ categoryId: ids.category.id, modelElementsMap: new Map([[ids.model.id, [ids.modeledElement.id]]]) }),
+              // Category has partial visibility, since its sub-category is not visible
               expectations: (ids: IModelWithSubModelIds) => ({
                 [ids.subModelCategory?.id ?? ""]: "hidden",
-                [ids.category.id]: "visible",
+                [ids.category.id]: "partial",
                 [ids.modeledElement.id]: "visible",
               }),
             },
             {
-              name: "parents are visible when elements display is turned on",
+              name: "everything under model is visible when elements display is turned on",
               getTargetNode: (ids: IModelWithSubModelIds) =>
                 createElementHierarchyNode({
                   modelId: ids.model.id,
@@ -1845,9 +1862,10 @@ describe("CategoriesTreeVisibilityHandler", () => {
                   elementId: ids.modeledElement.id,
                   hasChildren: false,
                 }),
+              // Category has partial visibility, since its sub-category is not visible
               expectations: (ids: IModelWithSubModelIds) => ({
                 [ids.subModelCategory?.id ?? ""]: "hidden",
-                [ids.category.id]: "visible",
+                [ids.category.id]: "partial",
                 [ids.modeledElement.id]: "visible",
               }),
             },
@@ -1885,13 +1903,18 @@ describe("CategoriesTreeVisibilityHandler", () => {
               expectations: () => "all-visible",
             },
             {
-              name: "everything is visible when elements class grouping node display is turned on",
+              name: "everything under model is visible when elements class grouping node display is turned on",
               getTargetNode: (ids: IModelWithSubModelIds) =>
                 createClassGroupingHierarchyNode({ categoryId: ids.category.id, modelElementsMap: new Map([[ids.model.id, [ids.modeledElement.id]]]) }),
-              expectations: () => "all-visible",
+              // Category has partial visibility, since its sub-category is not visible
+              expectations: (ids) => ({
+                [ids.category.id]: "partial",
+                [ids.modeledElement.id]: "visible",
+                [ids.model.id]: "visible",
+              }),
             },
             {
-              name: "everything is visible when elements display is turned on",
+              name: "everything under model is visible when elements display is turned on",
               getTargetNode: (ids: IModelWithSubModelIds) =>
                 createElementHierarchyNode({
                   modelId: ids.model.id,
@@ -1899,7 +1922,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
                   elementId: ids.modeledElement.id,
                   hasChildren: false,
                 }),
-              expectations: () => "all-visible",
+              // Category has partial visibility, since its sub-category is not visible
+              expectations: (ids) => ({
+                [ids.category.id]: "partial",
+                [ids.modeledElement.id]: "visible",
+                [ids.model.id]: "visible",
+              }),
             },
           ],
         },
@@ -1923,7 +1951,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
             (only ? it.only : it)(name, async function () {
               using visibilityTestData = await createVisibilityTestData({
                 imodel: iModel,
-                ...getModelAndCategoryIds(createdIds as any),
                 hierarchyConfig: { showElements: true },
               });
               const { handler, provider, viewport } = visibilityTestData;
@@ -2867,22 +2894,4 @@ function setupInitialDisplayState(props: {
   viewport.changeModelDisplay({ modelIds: models.filter(({ visible }) => visible).map(({ id }) => id), display: true });
   viewport.changeModelDisplay({ modelIds: models.filter(({ visible }) => !visible).map(({ id }) => id), display: false });
   viewport.renderFrame();
-}
-
-function getModelAndCategoryIds(keys: { [key: string]: InstanceKey }) {
-  const categoryIds = new Array<Id64String>();
-  const modelIds = new Array<Id64String>();
-  for (const key of Object.values(keys)) {
-    if (key.className.toLowerCase().includes("subcategory")) {
-      continue;
-    }
-    if (key.className.toLowerCase().includes("category")) {
-      categoryIds.push(key.id);
-      continue;
-    }
-    if (key.className.toLowerCase().includes("model")) {
-      modelIds.push(key.id);
-    }
-  }
-  return { categoryIds, modelIds };
 }

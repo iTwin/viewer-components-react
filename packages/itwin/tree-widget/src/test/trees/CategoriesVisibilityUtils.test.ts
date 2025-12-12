@@ -12,11 +12,7 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { invertAllCategories } from "../../tree-widget-react/components/trees/common/CategoriesVisibilityUtils.js";
-import {
-  enableCategoryDisplay,
-  enableSubCategoryDisplay,
-  loadCategoriesFromViewport,
-} from "../../tree-widget-react/components/trees/common/internal/VisibilityUtils.js";
+import { enableCategoryDisplay, loadCategoriesFromViewport } from "../../tree-widget-react/components/trees/common/internal/VisibilityUtils.js";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory, insertSubCategory } from "../IModelUtils.js";
 import { TestUtils } from "../TestUtils.js";
 import { createFakeSinonViewport, createIModelMock } from "./Common.js";
@@ -99,18 +95,6 @@ describe("CategoryVisibilityUtils", () => {
         categoryIds: [categoryId],
         override: "none",
       });
-    });
-  });
-
-  describe("enableSubCategoryDisplay", () => {
-    it("enables subCategory", () => {
-      enableSubCategoryDisplay(viewport, subCategoryId, true);
-      expect(viewport.changeSubCategoryDisplay).to.be.calledOnceWith({ subCategoryId, display: true });
-    });
-
-    it("disables subCategory", () => {
-      enableSubCategoryDisplay(viewport, subCategoryId, false);
-      expect(viewport.changeSubCategoryDisplay).to.be.calledOnceWith({ subCategoryId, display: false });
     });
   });
 

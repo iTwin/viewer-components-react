@@ -158,7 +158,7 @@ export async function enableCategoryDisplay(viewport: TreeWidgetViewport, catego
   const disableSubCategories = async (bufferedCategories: Id64Array) => {
     // changeCategoryDisplay only enables subcategories, it does not disabled them. So we must do that ourselves.
     (await viewport.iModel.categories.getCategoryInfo(bufferedCategories)).forEach((categoryInfo) => {
-      categoryInfo.subCategories.forEach((value) => enableSubCategoryDisplay(viewport, value.id, false));
+      categoryInfo.subCategories.forEach((value) => viewport.changeSubCategoryDisplay({ subCategoryId: value.id, display: false }));
     });
   };
   return toVoidPromise(
@@ -174,14 +174,6 @@ export async function enableCategoryDisplay(viewport: TreeWidgetViewport, catego
       }),
     ),
   );
-}
-
-/**
- * Changes subcategory display in the viewport
- * @internal
- */
-export function enableSubCategoryDisplay(viewport: TreeWidgetViewport, subCategoryId: Id64String, enabled: boolean) {
-  viewport.changeSubCategoryDisplay({ subCategoryId, display: enabled });
 }
 
 /** @internal */

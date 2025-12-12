@@ -5,7 +5,7 @@
 
 import { concat, EMPTY, from, map, mergeMap, reduce } from "rxjs";
 import { BaseVisibilityHelper } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
-import { enableCategoryDisplay, enableSubCategoryDisplay, mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
+import { enableCategoryDisplay, mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 
 import type { Observable } from "rxjs";
 import type { Id64Arg, Id64String } from "@itwin/core-bentley";
@@ -100,7 +100,7 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
             this.enableCategoriesElementModelsVisibilityStatus(props.categoryId),
           )
         : EMPTY,
-      from(props.subCategoryIds).pipe(map((subCategoryId) => enableSubCategoryDisplay(this.#props.viewport, subCategoryId, props.on))),
+      from(props.subCategoryIds).pipe(map((subCategoryId) => this.#props.viewport.changeSubCategoryDisplay({ subCategoryId, display: props.on }))),
     );
   }
 

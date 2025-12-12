@@ -72,7 +72,7 @@ export interface BaseTreeVisibilityHandlerOverrides {
 export interface BaseIdsCache {
   hasSubModel: (elementId: Id64String) => Observable<boolean>;
   getElementsCount: (props: { modelId: Id64String; categoryId: Id64String }) => Observable<number>;
-  getSubCategories: (props: { categoryIds: Id64Arg }) => Observable<{ id: Id64String; subCategories: Id64Arg | undefined }>;
+  getSubCategories: (props: { categoryId: Id64String }) => Observable<{ id: Id64String; subCategories: Id64Arg | undefined }>;
   getModels: (props: { categoryIds: Id64Arg }) => Observable<{ id: Id64String; models: Id64Arg | undefined }>;
   getCategories: (props: { modelIds: Id64Arg }) => Observable<{ id: Id64String; drawingCategories?: Id64Arg; spatialCategories?: Id64Arg }>;
   getSubModels: (
@@ -265,9 +265,7 @@ export class BaseVisibilityHelper implements Disposable {
    * - Sub-categories visibility in the viewport.
    */
   public getSubCategoriesVisibilityStatus(props: { subCategoryIds: Id64Arg; categoryId: Id64String; modelId?: Id64String }): Observable<VisibilityStatus> {
-    return (
-      props.modelId ? of({ id: props.categoryId, models: props.modelId }) : from(this.#props.baseIdsCache.getModels({ categoryIds: props.categoryId }))
-    ).pipe(
+    return (props.modelId ? of({ id: props.categoryId, models: props.modelId }) : this.#props.baseIdsCache.getModels({ categoryIds: props.categoryId })).pipe(
       map(({ models }) => {
         let visibility: "visible" | "hidden" | "unknown" = "unknown";
         let nonDefaultModelDisplayStatesCount = 0;
@@ -424,15 +422,17 @@ export class BaseVisibilityHelper implements Disposable {
                 )
               : EMPTY,
             // We need to check subCategories as well
-            this.#props.baseIdsCache.getSubCategories({ categoryIds: categoryId }).pipe(
-              mergeMap(({ subCategories }) => {
-                if (subCategories && Id64.sizeOf(subCategories) > 0) {
-                  return this.getSubCategoriesVisibilityStatus({ categoryId, modelId: modelIdFromProps, subCategoryIds: subCategories });
-                }
+            !modelIdFromProps
+              ? this.#props.baseIdsCache.getSubCategories({ categoryId }).pipe(
+                  mergeMap(({ subCategories }) => {
+                    if (subCategories && Id64.sizeOf(subCategories) > 0) {
+                      return this.getSubCategoriesVisibilityStatus({ categoryId, modelId: modelIdFromProps, subCategoryIds: subCategories });
+                    }
 
-                return EMPTY;
-              }),
-            ),
+                    return EMPTY;
+                  }),
+                )
+              : EMPTY,
           ).pipe(
             defaultIfEmpty(
               createVisibilityStatus(!this.#props.viewport.isAlwaysDrawnExclusive && this.#props.viewport.viewsCategory(categoryId) ? "visible" : "hidden"),
@@ -764,8 +764,28 @@ export class BaseVisibilityHelper implements Disposable {
                 override: on ? "show" : "hide",
               }),
             )
-          : concat(
-              from(enableCategoryDisplay(viewport, categoryIds, on, on)),
+          : merge(
+              // In case of turning categories on, need to change sub-categories separately as enableCategoryDisplay
+              // takes a long time to get sub-categories for each category
+              on
+                ? from(Id64.iterable(categoryIds)).pipe(
+                    releaseMainThreadOnItemsCount(200),
+                    mergeMap((categoryId) => this.#props.baseIdsCache.getSubCategories({ categoryId })),
+                    mergeMap(({ subCategories }) =>
+                      subCategories
+                        ? from(subCategories).pipe(
+                            releaseMainThreadOnItemsCount(200),
+                            map((subCategoryId) => {
+                              if (!this.#props.viewport.viewsSubCategory(subCategoryId)) {
+                                this.#props.viewport.changeSubCategoryDisplay({ subCategoryId, display: true });
+                              }
+                            }),
+                          )
+                        : EMPTY,
+                    ),
+                  )
+                : EMPTY,
+              from(enableCategoryDisplay(viewport, categoryIds, on, false)),
               modelIdsObservable.pipe(
                 map(([modelId, modelCategories]) => {
                   viewport.setPerModelCategoryOverride({ modelIds: modelId, categoryIds: modelCategories, override: "none" });
