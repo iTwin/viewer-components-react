@@ -59,9 +59,7 @@ export function createModelsTreeProvider({
       idsCache: createdIdsCache,
       hierarchyConfig: config,
     }),
-    ...(filteredNodePaths
-      ? { filtering: { paths: filteredNodePaths.map((path) => ("path" in path ? path : { path, options: { reveal: true } })) } }
-      : undefined),
+    ...(filteredNodePaths ? { search: { paths: filteredNodePaths.map((path) => ("path" in path ? path : { path, options: { reveal: true } })) } } : undefined),
   });
   const dispose = () => {
     provider[Symbol.dispose]();
