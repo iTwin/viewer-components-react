@@ -6,7 +6,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { firstValueFrom } from "rxjs";
 import { assert } from "@itwin/core-bentley";
-import { HierarchySearchPath, HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
+import { HierarchyNodeIdentifier, HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
 import { getClassesByView } from "../../common/internal/Utils.js";
 import { FilterLimitExceededError } from "../../common/TreeErrors.js";

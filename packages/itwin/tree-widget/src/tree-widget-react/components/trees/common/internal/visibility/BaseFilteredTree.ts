@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Id64 } from "@itwin/core-bentley";
-import { HierarchySearchPath, HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+import { HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey, HierarchySearchPath } from "@itwin/presentation-hierarchies";
 
 import type { Id64Arg, Id64String } from "@itwin/core-bentley";
 import type { ClassGroupingNodeKey, InstancesNodeKey } from "@itwin/presentation-hierarchies";
