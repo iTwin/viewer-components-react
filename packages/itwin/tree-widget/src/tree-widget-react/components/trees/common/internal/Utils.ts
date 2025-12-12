@@ -205,24 +205,24 @@ export function updateChildrenTree<T extends object = {}>({
 /** @internal */
 export function groupingNodeHasFilterTargets(children: ProcessedHierarchyNode[]):
   | {
-      hasFilterTargetAncestor: true;
+      hasSearchTargetAncestor: true;
       hasDirectNonFilteredTargets: undefined;
     }
   | {
-      hasFilterTargetAncestor: false;
+      hasSearchTargetAncestor: false;
       hasDirectNonFilteredTargets: boolean;
     } {
   for (const child of children) {
     assert(!ProcessedHierarchyNode.isGroupingNode(child), "Expected only non-grouping nodes as children");
-    if (child.filtering) {
-      if (child.filtering.hasFilterTargetAncestor) {
-        return { hasFilterTargetAncestor: true, hasDirectNonFilteredTargets: undefined };
+    if (child.search) {
+      if (child.search.hasSearchTargetAncestor) {
+        return { hasSearchTargetAncestor: true, hasDirectNonFilteredTargets: undefined };
       }
-      if (!child.filtering.isFilterTarget) {
-        return { hasFilterTargetAncestor: false, hasDirectNonFilteredTargets: true };
+      if (!child.search.isSearchTarget) {
+        return { hasSearchTargetAncestor: false, hasDirectNonFilteredTargets: true };
       }
     }
   }
 
-  return { hasFilterTargetAncestor: false, hasDirectNonFilteredTargets: false };
+  return { hasSearchTargetAncestor: false, hasDirectNonFilteredTargets: false };
 }

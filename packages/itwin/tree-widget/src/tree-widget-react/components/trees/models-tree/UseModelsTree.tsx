@@ -32,7 +32,7 @@ import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTre
 
 import type { ReactNode } from "react";
 import type { Id64String } from "@itwin/core-bentley";
-import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
+import type { HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
@@ -41,7 +41,7 @@ import type { CreateFilteredTreeProps, CreateTreeSpecificVisibilityHandlerProps 
 import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import type { FilteredTree } from "../common/internal/visibility/BaseFilteredTree.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
-import type { NormalizedHierarchyFilteringPath } from "../common/Utils.js";
+import type { NormalizedHierarchySearchPath } from "../common/Utils.js";
 import type { ModelsTreeFilteringError, ModelsTreeSubTreeError } from "./internal/UseFilteredPaths.js";
 import type { ModelsTreeFilterTargets } from "./internal/visibility/FilteredTree.js";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/visibility/ModelsTreeVisibilityHandler.js";
@@ -53,8 +53,8 @@ export interface UseModelsTreeProps {
    * Optional search string used to filter tree nodes by label, as well as highlight matching substrings in the tree.
    * Nodes that do not contain this string in their label will be filtered out.
    *
-   * If `getFilteredPaths` function is provided, it will take precedence and automatic filtering by this string will not be applied.
-   * Instead, the string will be supplied to the given `getFilteredPaths` function for consumers to apply the filtering.
+   * If `getSearchPaths` function is provided, it will take precedence and automatic filtering by this string will not be applied.
+   * Instead, the string will be supplied to the given `getSearchPaths` function for consumers to apply the filtering.
    */
   filter?: string;
   activeView: TreeWidgetViewport;
@@ -63,9 +63,9 @@ export interface UseModelsTreeProps {
   /**
    * Optional function for applying custom filtering on the hierarchy. Use it when you want full control over which nodes should be displayed, based on more complex logic or known instance keys.
    *
-   * When defined, this function takes precedence over filtering by `filter` string. If both are supplied, the `filter` is provided as an argument to `getFilteredPaths`.
+   * When defined, this function takes precedence over filtering by `filter` string. If both are supplied, the `filter` is provided as an argument to `getSearchPaths`.
    *
-   * @param props Parameters provided when `getFilteredPaths` is called:
+   * @param props Parameters provided when `getSearchPaths` is called:
    * - `createInstanceKeyPaths`: Helper function to create filter paths.
    * - `filter`: The filter string which would otherwise be used for default filtering.
    *
@@ -77,12 +77,12 @@ export interface UseModelsTreeProps {
    * @note Paths returned  by `createInstanceKeyPaths` will not have `reveal` flag set. If you want nodes to be expanded, iterate over the paths and
    * set `reveal: true` manually.
    */
-  getFilteredPaths?: (props: {
+  getSearchPaths?: (props: {
     /** A function that creates filtering paths based on provided target instance keys or node label. */
-    createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<NormalizedHierarchyFilteringPath[]>;
-    /** Filter which would be used to create filter paths if `getFilteredPaths` wouldn't be provided. */
+    createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<NormalizedHierarchySearchPath[]>;
+    /** Filter which would be used to create filter paths if `getSearchPaths` wouldn't be provided. */
     filter?: string;
-  }) => Promise<HierarchyFilteringPath[] | undefined>;
+  }) => Promise<HierarchySearchPath[] | undefined>;
   /**
    * Optional function for restricting the visible hierarchy to a specific sub-tree of nodes, without changing how filtering works.
    *
@@ -92,13 +92,13 @@ export interface UseModelsTreeProps {
    * Filtering (by label or custom logic) will still apply within this sub-tree.
    *
    * Key difference:
-   * - `getFilteredPaths` determines which nodes should be shown, giving you full control over filtering logic.
+   * - `getSearchPaths` determines which nodes should be shown, giving you full control over filtering logic.
    * - `getSubTreePaths` restricts the hierarchy to a sub-tree, but does not override the filtering logic — filtering is still applied within the restricted sub-tree.
    */
   getSubTreePaths?: (props: {
     /** A function that creates filtering paths based on provided target instance keys. */
-    createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> }) => Promise<NormalizedHierarchyFilteringPath[]>;
-  }) => Promise<HierarchyFilteringPath[]>;
+    createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> }) => Promise<NormalizedHierarchySearchPath[]>;
+  }) => Promise<HierarchySearchPath[]>;
   onModelsFiltered?: (modelIds: Id64String[] | undefined) => void;
   /**
    * An optional predicate to allow or prohibit selection of a node.
@@ -112,7 +112,7 @@ export interface UseModelsTreeProps {
 interface UseModelsTreeResult {
   modelsTreeProps: Pick<
     VisibilityTreeProps,
-    "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent" | "selectionPredicate"
+    "treeName" | "getHierarchyDefinition" | "getSearchPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent" | "selectionPredicate"
   >;
   rendererProps: Required<Pick<VisibilityTreeRendererProps, "getDecorations">>;
 }
@@ -126,7 +126,7 @@ export function useModelsTree({
   filter,
   hierarchyConfig,
   visibilityHandlerOverrides,
-  getFilteredPaths,
+  getSearchPaths,
   onModelsFiltered,
   selectionPredicate: nodeTypeSelectionPredicate,
   emptyTreeContent,
@@ -167,7 +167,7 @@ export function useModelsTree({
   const { getPaths, filteringError, subTreeError } = useFilteredPaths({
     hierarchyConfiguration,
     filter,
-    getFilteredPaths,
+    getSearchPaths,
     getModelsTreeIdsCache,
     onFilteredPathsChanged,
     onModelsFiltered,
@@ -191,7 +191,7 @@ export function useModelsTree({
       treeName: "models-tree-v2",
       visibilityHandlerFactory,
       getHierarchyDefinition,
-      getFilteredPaths: getPaths,
+      getSearchPaths: getPaths,
       emptyTreeContent: useMemo(
         () => getEmptyTreeContentComponent(filter, subTreeError, filteringError, emptyTreeContent),
         [filter, subTreeError, filteringError, emptyTreeContent],

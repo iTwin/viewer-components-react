@@ -49,7 +49,7 @@ export interface UseCategoriesTreeProps {
 interface UseCategoriesTreeResult {
   categoriesTreeProps: Pick<
     VisibilityTreeProps,
-    "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent"
+    "treeName" | "getHierarchyDefinition" | "getSearchPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent"
   >;
   rendererProps: Required<Pick<VisibilityTreeRendererProps, "getDecorations" | "getSublabel">>;
 }
@@ -112,7 +112,7 @@ export function useCategoriesTree({
     categoriesTreeProps: {
       treeName: "categories-tree-v2",
       getHierarchyDefinition,
-      getFilteredPaths: getPaths,
+      getSearchPaths: getPaths,
       visibilityHandlerFactory,
       emptyTreeContent: useMemo(() => getEmptyTreeContentComponent(filter, filteringError, emptyTreeContent), [filter, filteringError, emptyTreeContent]),
       highlightText: filter,

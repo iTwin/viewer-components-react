@@ -9,7 +9,7 @@ import { CLASS_NAME_SubCategory } from "../../../common/internal/ClassNameDefini
 import { createFilteredTree, FilteredNodesHandler } from "../../../common/internal/visibility/BaseFilteredTree.js";
 
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
-import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
+import type { HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../../../common/internal/Types.js";
 import type {
@@ -75,7 +75,7 @@ type TemporaryFilteredTreeNode =
 /** @internal */
 export async function createFilteredCategoriesTree(props: {
   imodelAccess: ECClassHierarchyInspector;
-  filteringPaths: HierarchyFilteringPath[];
+  filteringPaths: HierarchySearchPath[];
   categoryClassName: string;
   categoryElementClassName: string;
   categoryModelClassName: string;

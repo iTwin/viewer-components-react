@@ -6,7 +6,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { firstValueFrom } from "rxjs";
 import { assert } from "@itwin/core-bentley";
-import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
+import { HierarchySearchPath, HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
 import { getClassesByView } from "../../common/internal/Utils.js";
 import { FilterLimitExceededError } from "../../common/TreeErrors.js";
@@ -23,7 +23,7 @@ import type { CategoriesTreeIdsCache } from "./CategoriesTreeIdsCache.js";
 /** @internal */
 export type CategoriesTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError";
 
-type HierarchyFilteringPaths = Awaited<ReturnType<Required<VisibilityTreeProps>["getFilteredPaths"]>>;
+type HierarchySearchPaths = Awaited<ReturnType<Required<VisibilityTreeProps>["getSearchPaths"]>>;
 
 /** @internal */
 export function useFilteredPaths({
@@ -40,10 +40,10 @@ export function useFilteredPaths({
   hierarchyConfiguration: CategoriesTreeHierarchyConfiguration;
   getCategoriesTreeIdsCache: () => CategoriesTreeIdsCache;
   onCategoriesFiltered?: (categories: { categories: CategoryInfo[] | undefined; models?: Array<ModelId> }) => void;
-  onFilteredPathsChanged: (paths: HierarchyFilteringPaths | undefined) => void;
+  onFilteredPathsChanged: (paths: HierarchySearchPaths | undefined) => void;
   componentId: GuidString;
 }): {
-  getPaths: VisibilityTreeProps["getFilteredPaths"] | undefined;
+  getPaths: VisibilityTreeProps["getSearchPaths"] | undefined;
   filteringError: CategoriesTreeFilteringError | undefined;
 } {
   const [filteringError, setFilteringError] = useState<CategoriesTreeFilteringError | undefined>();
@@ -57,7 +57,7 @@ export function useFilteredPaths({
     }
   }, [filter, onCategoriesFiltered, onFilteredPathsChanged]);
 
-  const getFilteredPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
+  const getSearchPaths = useMemo<VisibilityTreeProps["getSearchPaths"] | undefined>(() => {
     if (!filter) {
       return undefined;
     }
@@ -91,13 +91,13 @@ export function useFilteredPaths({
   }, [onCategoriesFiltered, filter, onFilteredPathsChanged, onFeatureUsed, viewType, getCategoriesTreeIdsCache, hierarchyConfiguration, componentId]);
 
   return {
-    getPaths: getFilteredPaths,
+    getPaths: getSearchPaths,
     filteringError,
   };
 }
 
 async function getCategoriesFromPaths(
-  paths: HierarchyFilteringPaths,
+  paths: HierarchySearchPaths,
   idsCache: CategoriesTreeIdsCache,
   elementClassName: string,
   modelsClassName: string,
@@ -112,7 +112,7 @@ async function getCategoriesFromPaths(
 
   const categories = new Map<CategoryId, Array<SubCategoryId>>();
   for (const path of paths) {
-    const currPath = HierarchyFilteringPath.normalize(path).path;
+    const currPath = HierarchySearchPath.normalize(path).path;
     if (currPath.length === 0) {
       continue;
     }

@@ -9,14 +9,14 @@ import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
+import { HierarchyNodeIdentifier, HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import {
   CLASS_NAME_GeometricElement3d,
   CLASS_NAME_GeometricModel3d,
   CLASS_NAME_Subject,
 } from "../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
-import { joinHierarchyFilteringPaths } from "../../../tree-widget-react/components/trees/common/Utils.js";
+import { joinHierarchySearchPaths } from "../../../tree-widget-react/components/trees/common/Utils.js";
 import { ModelsTreeIdsCache } from "../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeIdsCache.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../tree-widget-react/components/trees/models-tree/ModelsTreeDefinition.js";
 import {
@@ -45,7 +45,7 @@ interface TreeFilteringTestCaseDefinition<TIModelSetupResult extends {}> {
   name: string;
   only?: boolean;
   setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[1];
-  getTargetInstancePaths: (setupResult: TIModelSetupResult) => HierarchyFilteringPath[];
+  getTargetInstancePaths: (setupResult: TIModelSetupResult) => HierarchySearchPath[];
   getTargetItems: (setupResult: TIModelSetupResult) => Array<InstanceKey | ElementsGroupInfo>;
   getTargetInstanceLabel?: (setupResult: TIModelSetupResult) => string;
   getExpectedHierarchy: (setupResult: TIModelSetupResult) => ExpectedHierarchyDef[];
@@ -57,7 +57,7 @@ namespace TreeFilteringTestCaseDefinition {
   export function create<TIModelSetupResult extends {}>(
     name: string,
     setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[1],
-    getTargetInstancePaths: (setupResult: TIModelSetupResult) => HierarchyFilteringPath[],
+    getTargetInstancePaths: (setupResult: TIModelSetupResult) => HierarchySearchPath[],
     getTargetItems: (setupResult: TIModelSetupResult) => Array<InstanceKey | ElementsGroupInfo>,
     getTargetInstanceLabel: ((setupResult: TIModelSetupResult) => string) | undefined,
     getExpectedHierarchy: (setupResult: TIModelSetupResult) => ExpectedHierarchyDef[],
@@ -144,10 +144,10 @@ describe("Models tree", () => {
         }),
         ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, idsCache, hierarchyConfig: config, label: "parent" }),
       ]);
-      const joinedPaths = joinHierarchyFilteringPaths(
-        subTreePaths.map((path) => HierarchyFilteringPath.normalize(path).path),
+      const joinedPaths = joinHierarchySearchPaths(
+        subTreePaths.map((path) => HierarchySearchPath.normalize(path).path),
         filterPaths.map((path) => {
-          const normalizedPath = HierarchyFilteringPath.normalize(path);
+          const normalizedPath = HierarchySearchPath.normalize(path);
           normalizedPath.options = { reveal: true };
           return normalizedPath;
         }),
@@ -1611,7 +1611,7 @@ describe("Models tree", () => {
     testCases.forEach((testCase: TreeFilteringTestCaseDefinition<any>) => {
       (testCase.only ? describe.only : describe)(testCase.name, () => {
         let imodel: IModelConnection;
-        let instanceKeyPaths!: HierarchyFilteringPath[];
+        let instanceKeyPaths!: HierarchySearchPath[];
         let targetItems!: Array<InstanceKey | ElementsGroupInfo>;
         let targetInstanceLabel: string | undefined;
         let expectedHierarchy!: ExpectedHierarchyDef[];
@@ -1663,7 +1663,7 @@ describe("Models tree", () => {
               hierarchyConfig,
             })
           ).sort(instanceKeyPathSorter);
-          expect(actualInstanceKeyPaths).to.deep.eq(instanceKeyPaths.map(HierarchyFilteringPath.normalize));
+          expect(actualInstanceKeyPaths).to.deep.eq(instanceKeyPaths.map(HierarchySearchPath.normalize));
         });
 
         it("finds instance key paths by target instance label", async function () {
@@ -1679,7 +1679,7 @@ describe("Models tree", () => {
               hierarchyConfig,
             })
           ).sort(instanceKeyPathSorter);
-          expect(actualInstanceKeyPaths).to.deep.eq(instanceKeyPaths.map(HierarchyFilteringPath.normalize));
+          expect(actualInstanceKeyPaths).to.deep.eq(instanceKeyPaths.map(HierarchySearchPath.normalize));
         });
       });
     });
@@ -1710,7 +1710,7 @@ describe("Models tree", () => {
           hierarchyConfig,
         })
       ).sort(instanceKeyPathSorter);
-      expect(actualInstanceKeyPaths).to.deep.eq(expectedPaths.map(HierarchyFilteringPath.normalize));
+      expect(actualInstanceKeyPaths).to.deep.eq(expectedPaths.map(HierarchySearchPath.normalize));
     });
 
     it("filtering by label aborts when abort signal fires", async function () {
@@ -1864,7 +1864,7 @@ function insertModelWithElements(builder: TestIModelBuilder, modelNo: number, el
   return modelKey;
 }
 
-function instanceKeyPathSorter(lhs: HierarchyFilteringPath, rhs: HierarchyFilteringPath) {
+function instanceKeyPathSorter(lhs: HierarchySearchPath, rhs: HierarchySearchPath) {
   const lhsPath = "path" in lhs ? lhs.path : lhs;
   const rhsPath = "path" in rhs ? rhs.path : rhs;
   if (lhsPath.length !== rhsPath.length) {

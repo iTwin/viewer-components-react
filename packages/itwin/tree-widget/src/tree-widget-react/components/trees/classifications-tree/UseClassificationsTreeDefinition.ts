@@ -9,8 +9,8 @@ import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.j
 import { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
 
 import type { MutableRefObject } from "react";
-import type { HierarchyDefinition } from "@itwin/presentation-hierarchies";
-import type { useIModelTree, useTree } from "@itwin/presentation-hierarchies-react";
+import type { HierarchyDefinition, HierarchySearchPath } from "@itwin/presentation-hierarchies";
+import type { useIModelTree } from "@itwin/presentation-hierarchies-react";
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { FunctionProps } from "../common/Utils.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "./ClassificationsTreeDefinition.js";
@@ -51,7 +51,7 @@ interface UseClassificationsTreeDefinitionProps {
 /** @alpha */
 interface UseClassificationsTreeDefinitionResult {
   definition: HierarchyDefinition;
-  getFilteredPaths?: FunctionProps<typeof useTree>["getFilteredPaths"];
+  getHierarchySearchPaths?: ({ abortSignal }: { abortSignal: AbortSignal }) => Promise<HierarchySearchPath[] | undefined>;
 }
 
 /** @alpha */
@@ -75,12 +75,12 @@ export function useClassificationsTreeDefinition(props: UseClassificationsTreeDe
   }, [imodels, hierarchyConfig]);
 
   const searchTerm = search ? ("searchText" in search ? search.searchText : search.targetItems) : undefined;
-  const getFilteredPaths = useMemo<FunctionProps<typeof useTree>["getFilteredPaths"]>(() => {
+  const getHierarchySearchPaths = useMemo<(({ abortSignal }: { abortSignal: AbortSignal }) => Promise<HierarchySearchPath[] | undefined>) | undefined>(() => {
     if (!searchTerm) {
       return undefined;
     }
 
-    return async ({ abortSignal }) => {
+    return async ({ abortSignal }: { abortSignal: AbortSignal }) => {
       const [first, ...rest] = await Promise.all(
         imodels.map(async ({ imodelAccess }) =>
           ClassificationsTreeDefinition.createInstanceKeyPaths({
@@ -105,7 +105,7 @@ export function useClassificationsTreeDefinition(props: UseClassificationsTreeDe
 
   return {
     definition,
-    getFilteredPaths,
+    getHierarchySearchPaths,
   };
 }
 

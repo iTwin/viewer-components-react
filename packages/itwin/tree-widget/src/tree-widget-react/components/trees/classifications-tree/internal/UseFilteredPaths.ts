@@ -16,7 +16,7 @@ import type { ClassificationsTreeIdsCache } from "./ClassificationsTreeIdsCache.
 /** @internal */
 export type ClassificationsTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError";
 
-type HierarchyFilteringPaths = Awaited<ReturnType<Required<VisibilityTreeProps>["getFilteredPaths"]>>;
+type HierarchySearchPaths = Awaited<ReturnType<Required<VisibilityTreeProps>["getSearchPaths"]>>;
 
 /** @internal */
 export function useFilteredPaths({
@@ -29,10 +29,10 @@ export function useFilteredPaths({
   filter?: string;
   hierarchyConfiguration: ClassificationsTreeHierarchyConfiguration;
   getClassificationsTreeIdsCache: () => ClassificationsTreeIdsCache;
-  onFilteredPathsChanged: (paths: HierarchyFilteringPaths | undefined) => void;
+  onFilteredPathsChanged: (paths: HierarchySearchPaths | undefined) => void;
   componentId: GuidString;
 }): {
-  getPaths: VisibilityTreeProps["getFilteredPaths"] | undefined;
+  getPaths: VisibilityTreeProps["getSearchPaths"] | undefined;
   filteringError: ClassificationsTreeFilteringError | undefined;
 } {
   const [filteringError, setFilteringError] = useState<ClassificationsTreeFilteringError | undefined>();
@@ -44,7 +44,7 @@ export function useFilteredPaths({
     }
   }, [filter, onFilteredPathsChanged]);
 
-  const getFilteredPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
+  const getSearchPaths = useMemo<VisibilityTreeProps["getSearchPaths"] | undefined>(() => {
     if (!filter) {
       return undefined;
     }
@@ -75,7 +75,7 @@ export function useFilteredPaths({
   }, [filter, onFilteredPathsChanged, onFeatureUsed, getClassificationsTreeIdsCache, hierarchyConfiguration, componentId]);
 
   return {
-    getPaths: getFilteredPaths,
+    getPaths: getSearchPaths,
     filteringError,
   };
 }

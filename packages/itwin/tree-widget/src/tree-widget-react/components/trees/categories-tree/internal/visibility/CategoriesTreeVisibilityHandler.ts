@@ -15,7 +15,7 @@ import { CategoriesTreeVisibilityHelper } from "./CategoriesTreeVisibilityHelper
 import { createFilteredCategoriesTree } from "./FilteredTree.js";
 
 import type { Observable } from "rxjs";
-import type { GroupingHierarchyNode, HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
+import type { GroupingHierarchyNode, HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { AlwaysAndNeverDrawnElementInfo } from "../../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
 import type { ElementId, ModelId } from "../../../common/internal/Types.js";
@@ -388,7 +388,7 @@ export function createCategoriesTreeVisibilityHandler(props: {
   viewport: TreeWidgetViewport;
   idsCache: CategoriesTreeIdsCache;
   imodelAccess: ECClassHierarchyInspector;
-  filteredPaths?: HierarchyFilteringPath[];
+  filteredPaths?: HierarchySearchPath[];
   hierarchyConfig: CategoriesTreeHierarchyConfiguration;
 }) {
   return new HierarchyVisibilityHandlerImpl<CategoriesTreeFilterTargets>({

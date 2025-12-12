@@ -9,7 +9,7 @@ import { IModel, IModelReadRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
+import { HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { createStorage } from "@itwin/unified-selection";
 import { FocusedInstancesContextProvider, useFocusedInstancesContext } from "../../../tree-widget-react/components/trees/common/FocusedInstancesContext.js";
@@ -63,32 +63,32 @@ describe("useModelsTree", () => {
     const { result: renderHookResult, rerender } = renderHook(useModelsTree, {
       initialProps: {
         activeView: viewport,
-        getFilteredPaths: async () => [[{ id: keys.modelId, className: "BisCore.Model" }]],
+        getSearchPaths: async () => [[{ id: keys.modelId, className: "BisCore.Model" }]],
       },
     });
 
-    let getFilteredPaths = renderHookResult.current.modelsTreeProps.getFilteredPaths;
+    let getSearchPaths = renderHookResult.current.modelsTreeProps.getSearchPaths;
     let visibilityHandler = renderHookResult.current.modelsTreeProps.visibilityHandlerFactory({ imodelAccess });
     await waitFor(async () => {
-      expect(getFilteredPaths).to.not.be.undefined;
-      await getFilteredPaths!({ imodelAccess, abortSignal: new AbortController().signal });
+      expect(getSearchPaths).to.not.be.undefined;
+      await getSearchPaths!({ imodelAccess, abortSignal: new AbortController().signal });
       await visibilityHandler.getVisibilityStatus(createModelHierarchyNode({ modelId: keys.modelId }));
       expect(viewport.iModel.createQueryReader).to.be.called;
       sinon.reset();
       rerender({
         activeView: viewport,
-        getFilteredPaths: async () => [],
+        getSearchPaths: async () => [],
       });
-      getFilteredPaths = renderHookResult.current.modelsTreeProps.getFilteredPaths;
+      getSearchPaths = renderHookResult.current.modelsTreeProps.getSearchPaths;
       visibilityHandler = renderHookResult.current.modelsTreeProps.visibilityHandlerFactory({ imodelAccess });
-      expect(getFilteredPaths).to.not.be.undefined;
-      await getFilteredPaths!({ imodelAccess, abortSignal: new AbortController().signal });
+      expect(getSearchPaths).to.not.be.undefined;
+      await getSearchPaths!({ imodelAccess, abortSignal: new AbortController().signal });
       await visibilityHandler.getVisibilityStatus(createModelHierarchyNode({ modelId: keys.modelId }));
       expect(viewport.iModel.createQueryReader).not.to.be.called;
     });
   });
 
-  describe("getFilteredPaths", () => {
+  describe("getSearchPaths", () => {
     describe("with getSubTreePaths", () => {
       const categoryClass = "BisCore.SpatialCategory";
       const elementClass = "BisCore.GeometricElement3d";
@@ -167,25 +167,25 @@ describe("useModelsTree", () => {
         TreeWidget.terminate();
       });
 
-      it("getFilteredPaths returns correct result when getSubTreePaths is not defined", async () => {
+      it("getSearchPaths returns correct result when getSubTreePaths is not defined", async () => {
         const { result: renderHookResult } = renderHook(useModelsTree, { initialProps });
-        const { getFilteredPaths } = renderHookResult.current.modelsTreeProps;
-        expect(getFilteredPaths).to.be.undefined;
+        const { getSearchPaths } = renderHookResult.current.modelsTreeProps;
+        expect(getSearchPaths).to.be.undefined;
       });
 
-      it("getFilteredPaths returns correct result when getSubTreePaths is defined", async () => {
+      it("getSearchPaths returns correct result when getSubTreePaths is defined", async () => {
         const { result: renderHookResult } = renderHook(useModelsTree, { initialProps: { ...initialProps, getSubTreePaths } });
-        const { getFilteredPaths } = renderHookResult.current.modelsTreeProps;
+        const { getSearchPaths } = renderHookResult.current.modelsTreeProps;
         const abortSignal = new AbortController().signal;
         await waitFor(async () => {
-          expect(getFilteredPaths).to.not.be.undefined;
-          const result = (await getFilteredPaths!({ imodelAccess, abortSignal }))?.sort((lhs, rhs) => {
-            if (HierarchyFilteringPath.normalize(lhs).path.length > HierarchyFilteringPath.normalize(rhs).path.length) {
+          expect(getSearchPaths).to.not.be.undefined;
+          const result = (await getSearchPaths!({ imodelAccess, abortSignal }))?.sort((lhs, rhs) => {
+            if (HierarchySearchPath.normalize(lhs).path.length > HierarchySearchPath.normalize(rhs).path.length) {
               return -1;
             }
             return 1;
           });
-          const expectedResult: HierarchyFilteringPath[] = [
+          const expectedResult: HierarchySearchPath[] = [
             [
               { id: IModel.rootSubjectId, className: subjectClass },
               { id: modelIds[0], className: modelClass },
@@ -202,14 +202,14 @@ describe("useModelsTree", () => {
         });
       });
 
-      it("getFilteredPaths returns correct result when getSubTreePaths and filter is defined", async () => {
+      it("getSearchPaths returns correct result when getSubTreePaths and filter is defined", async () => {
         const { result: renderHookResult } = renderHook(useModelsTree, { initialProps: { ...initialProps, getSubTreePaths, filter: "element2" } });
-        const { getFilteredPaths } = renderHookResult.current.modelsTreeProps;
+        const { getSearchPaths } = renderHookResult.current.modelsTreeProps;
         const abortSignal = new AbortController().signal;
         await waitFor(async () => {
-          expect(getFilteredPaths).to.not.be.undefined;
-          const result = await getFilteredPaths!({ imodelAccess, abortSignal });
-          const expectedResult: HierarchyFilteringPath[] = [
+          expect(getSearchPaths).to.not.be.undefined;
+          const result = await getSearchPaths!({ imodelAccess, abortSignal });
+          const expectedResult: HierarchySearchPath[] = [
             {
               path: [
                 { id: IModel.rootSubjectId, className: subjectClass },
@@ -232,22 +232,22 @@ describe("useModelsTree", () => {
         });
       });
 
-      it("getFilteredPaths returns correct result when getSubTreePaths and getFilteredPaths is defined", async () => {
-        const getFilteredPathsForProps: UseModelsTreeProps["getFilteredPaths"] = async ({ createInstanceKeyPaths }) => {
+      it("getSearchPaths returns correct result when getSubTreePaths and getSearchPaths is defined", async () => {
+        const getSearchPathsForProps: UseModelsTreeProps["getSearchPaths"] = async ({ createInstanceKeyPaths }) => {
           return createInstanceKeyPaths({
             targetItems: [{ className: categoryClass, id: categoryIds[0] }],
           });
         };
         const { result: renderHookResult } = renderHook(useModelsTree, {
-          initialProps: { ...initialProps, getSubTreePaths, getFilteredPaths: getFilteredPathsForProps },
+          initialProps: { ...initialProps, getSubTreePaths, getSearchPaths: getSearchPathsForProps },
         });
-        const { getFilteredPaths } = renderHookResult.current.modelsTreeProps;
+        const { getSearchPaths } = renderHookResult.current.modelsTreeProps;
         const abortSignal = new AbortController().signal;
 
         await waitFor(async () => {
-          expect(getFilteredPaths).to.not.be.undefined;
-          const result = await getFilteredPaths!({ imodelAccess, abortSignal });
-          const expectedResult: HierarchyFilteringPath[] = [
+          expect(getSearchPaths).to.not.be.undefined;
+          const result = await getSearchPaths!({ imodelAccess, abortSignal });
+          const expectedResult: HierarchySearchPath[] = [
             {
               path: [
                 { id: IModel.rootSubjectId, className: subjectClass },
@@ -262,7 +262,7 @@ describe("useModelsTree", () => {
         });
       });
 
-      it("getFilteredPaths returns correct result when getSubTreePaths and selection context is defined", async () => {
+      it("getSearchPaths returns correct result when getSubTreePaths and selection context is defined", async () => {
         // render both hooks with a single renderHook call, in order for them both to use the same context
         const { result: hooksResult } = renderHook(
           (props) => {
@@ -296,13 +296,13 @@ describe("useModelsTree", () => {
           selectionStorage.addToSelection({ imodelKey: imodel.key, level: 0, source: "test", selectables: [{ className: modelClass, id: modelIds[1] }] });
         });
 
-        const { getFilteredPaths } = hooksResult.current.modelsTree.modelsTreeProps;
+        const { getSearchPaths } = hooksResult.current.modelsTree.modelsTreeProps;
         const abortSignal = new AbortController().signal;
 
         await waitFor(async () => {
-          expect(getFilteredPaths).to.not.be.undefined;
-          const result = await getFilteredPaths!({ imodelAccess, abortSignal });
-          const expectedResult: HierarchyFilteringPath[] = [
+          expect(getSearchPaths).to.not.be.undefined;
+          const result = await getSearchPaths!({ imodelAccess, abortSignal });
+          const expectedResult: HierarchySearchPath[] = [
             {
               path: [
                 { id: IModel.rootSubjectId, className: subjectClass },

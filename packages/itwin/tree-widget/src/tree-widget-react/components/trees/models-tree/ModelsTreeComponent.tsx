@@ -37,7 +37,7 @@ interface ModelsTreeComponentProps
     | "selectionPredicate"
     | "hierarchyConfig"
     | "visibilityHandlerOverrides"
-    | "getFilteredPaths"
+    | "getSearchPaths"
     | "filter"
     | "emptyTreeContent"
     | "getInlineActions"

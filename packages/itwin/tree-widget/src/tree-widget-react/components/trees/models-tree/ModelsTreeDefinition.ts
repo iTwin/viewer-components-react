@@ -27,7 +27,7 @@ import { IModel } from "@itwin/core-common";
 import {
   createNodesQueryClauseFactory,
   createPredicateBasedHierarchyDefinition,
-  HierarchyFilteringPath,
+  HierarchySearchPath,
   NodeSelectClauseColumnNames,
   ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
@@ -75,7 +75,7 @@ import type {
   InstanceKey,
 } from "@itwin/presentation-shared";
 import type { ElementId } from "../common/internal/Types.js";
-import type { NormalizedHierarchyFilteringPath } from "../common/Utils.js";
+import type { NormalizedHierarchySearchPath } from "../common/Utils.js";
 import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
 
 /** @beta */
@@ -213,7 +213,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
 
   public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
     if (ProcessedHierarchyNode.isGroupingNode(node)) {
-      const { hasFilterTargetAncestor, hasDirectNonFilteredTargets } = groupingNodeHasFilterTargets(node.children);
+      const { hasSearchTargetAncestor, hasDirectNonFilteredTargets } = groupingNodeHasFilterTargets(node.children);
       return {
         ...node,
         label: this.#hierarchyConfig.elementClassGrouping === "enableWithCounts" ? `${node.label} (${node.children.length})` : node.label,
@@ -222,7 +222,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
           // add `modelId` and `categoryId` from the first grouped element
           ...node.children[0].extendedData,
           ...(hasDirectNonFilteredTargets ? { hasDirectNonFilteredTargets } : {}),
-          ...(hasFilterTargetAncestor ? { hasFilterTargetAncestor } : {}),
+          ...(hasSearchTargetAncestor ? { hasSearchTargetAncestor } : {}),
           // `imageId` is assigned to instance nodes at query time, but grouping ones need to
           // be handled during post-processing
           imageId: "icon-ec-class",
@@ -575,7 +575,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     ];
   }
 
-  public static async createInstanceKeyPaths(props: ModelsTreeInstanceKeyPathsProps): Promise<NormalizedHierarchyFilteringPath[]> {
+  public static async createInstanceKeyPaths(props: ModelsTreeInstanceKeyPathsProps): Promise<NormalizedHierarchySearchPath[]> {
     return lastValueFrom(
       defer(() => {
         const componentInfo = { componentId: props.componentId ?? Guid.createValue(), componentName: this.#componentName };
@@ -630,7 +630,7 @@ function createGeometricElementInstanceKeyPaths(props: {
   componentId: GuidString;
   componentName: string;
   chunkIndex: number;
-}): Observable<NormalizedHierarchyFilteringPath> {
+}): Observable<NormalizedHierarchySearchPath> {
   const { targetItems, chunkIndex, componentId, componentName, hierarchyConfig, idsCache, imodelAccess } = props;
   const elementIds = targetItems.filter((info): info is Id64String => typeof info === "string");
   const groupInfos = targetItems.filter((info): info is ElementsGroupInfo => typeof info !== "string");
@@ -762,7 +762,7 @@ function createInstanceKeyPathsFromTargetItemsObs({
   componentId,
   componentName,
 }: Omit<ModelsTreeInstanceKeyPathsFromTargetItemsProps, "abortSignal" | "componentId"> & { componentId: GuidString; componentName: string }): Observable<
-  NormalizedHierarchyFilteringPath[]
+  NormalizedHierarchySearchPath[]
 > {
   if (limit !== "unbounded" && targetItems.length > (limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT)) {
     throw new FilterLimitExceededError(limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT);
@@ -817,9 +817,9 @@ function createInstanceKeyPathsFromTargetItemsObs({
       const elementsLength = ids.elementIds.length;
       return collect(
         merge(
-          from(ids.subjectIds).pipe(mergeMap((id) => idsCache.createSubjectInstanceKeysPath(id).pipe(map(HierarchyFilteringPath.normalize)))),
-          from(ids.modelIds).pipe(mergeMap((id) => idsCache.createModelInstanceKeyPaths(id).pipe(mergeAll(), map(HierarchyFilteringPath.normalize)))),
-          from(ids.categoryIds).pipe(mergeMap((id) => idsCache.createCategoryInstanceKeyPaths(id).pipe(mergeAll(), map(HierarchyFilteringPath.normalize)))),
+          from(ids.subjectIds).pipe(mergeMap((id) => idsCache.createSubjectInstanceKeysPath(id).pipe(map(HierarchySearchPath.normalize)))),
+          from(ids.modelIds).pipe(mergeMap((id) => idsCache.createModelInstanceKeyPaths(id).pipe(mergeAll(), map(HierarchySearchPath.normalize)))),
+          from(ids.categoryIds).pipe(mergeMap((id) => idsCache.createCategoryInstanceKeyPaths(id).pipe(mergeAll(), map(HierarchySearchPath.normalize)))),
           from(ids.elementIds).pipe(
             bufferCount(getOptimalBatchSize({ totalSize: elementsLength, maximumBatchSize: 5000 })),
             releaseMainThreadOnItemsCount(1),

@@ -5,19 +5,19 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { firstValueFrom } from "rxjs";
-import { HierarchyFilteringPath, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+import { HierarchyNodeIdentifier, HierarchyNodeKey, HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import { useFocusedInstancesContext } from "../../common/FocusedInstancesContext.js";
 import { CLASS_NAME_GeometricModel3d, CLASS_NAME_Subject } from "../../common/internal/ClassNameDefinitions.js";
 import { FilterLimitExceededError } from "../../common/TreeErrors.js";
 import { useTelemetryContext } from "../../common/UseTelemetryContext.js";
-import { joinHierarchyFilteringPaths } from "../../common/Utils.js";
+import { joinHierarchySearchPaths } from "../../common/Utils.js";
 import { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
 
 import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../../common/components/VisibilityTree.js";
-import type { NormalizedHierarchyFilteringPath } from "../../common/Utils.js";
+import type { NormalizedHierarchySearchPath } from "../../common/Utils.js";
 import type { ClassGroupingHierarchyNode, ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "../ModelsTreeDefinition.js";
 import type { ModelsTreeIdsCache } from "./ModelsTreeIdsCache.js";
 
@@ -30,7 +30,7 @@ export type ModelsTreeSubTreeError = "unknownSubTreeError";
 export function useFilteredPaths({
   hierarchyConfiguration,
   filter,
-  getFilteredPaths,
+  getSearchPaths,
   getSubTreePaths,
   getModelsTreeIdsCache,
   onModelsFiltered,
@@ -39,22 +39,22 @@ export function useFilteredPaths({
 }: {
   hierarchyConfiguration: ModelsTreeHierarchyConfiguration;
   filter?: string;
-  getFilteredPaths?: (props: {
+  getSearchPaths?: (props: {
     /** A function that creates filtering paths based on provided target instance keys or node label. */
-    createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<NormalizedHierarchyFilteringPath[]>;
-    /** Filter which would be used to create filter paths if `getFilteredPaths` wouldn't be provided. */
+    createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<NormalizedHierarchySearchPath[]>;
+    /** Filter which would be used to create filter paths if `getSearchPaths` wouldn't be provided. */
     filter?: string;
-  }) => Promise<HierarchyFilteringPath[] | undefined>;
+  }) => Promise<HierarchySearchPath[] | undefined>;
   getSubTreePaths?: (props: {
     /** A function that creates filtering paths based on provided target instance keys. */
-    createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> }) => Promise<NormalizedHierarchyFilteringPath[]>;
-  }) => Promise<HierarchyFilteringPath[]>;
+    createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> }) => Promise<NormalizedHierarchySearchPath[]>;
+  }) => Promise<HierarchySearchPath[]>;
   getModelsTreeIdsCache: () => ModelsTreeIdsCache;
   onModelsFiltered?: (modelIds: Id64String[] | undefined) => void;
-  onFilteredPathsChanged: (paths: HierarchyFilteringPath[] | undefined) => void;
+  onFilteredPathsChanged: (paths: HierarchySearchPath[] | undefined) => void;
   componentId: GuidString;
 }): {
-  getPaths: VisibilityTreeProps["getFilteredPaths"] | undefined;
+  getPaths: VisibilityTreeProps["getSearchPaths"] | undefined;
   filteringError: ModelsTreeFilteringError | undefined;
   subTreeError: ModelsTreeSubTreeError | undefined;
 } {
@@ -70,13 +70,13 @@ export function useFilteredPaths({
     onModelsFiltered?.(undefined);
 
     // reset filtered paths if there is no filters applied. This allows to keep current filtered paths until new paths are loaded.
-    if (!loadFocusedItems && !getFilteredPaths && !filter && !getSubTreePaths) {
+    if (!loadFocusedItems && !getSearchPaths && !filter && !getSubTreePaths) {
       onFilteredPathsChanged(undefined);
     }
-  }, [loadFocusedItems, getFilteredPaths, getSubTreePaths, filter, onModelsFiltered, onFilteredPathsChanged]);
+  }, [loadFocusedItems, getSearchPaths, getSubTreePaths, filter, onModelsFiltered, onFilteredPathsChanged]);
 
   const getSubTreePathsInternal = useMemo<
-    ((...props: Parameters<Required<VisibilityTreeProps>["getFilteredPaths"]>) => Promise<HierarchyNodeIdentifiersPath[]>) | undefined
+    ((...props: Parameters<Required<VisibilityTreeProps>["getSearchPaths"]>) => Promise<HierarchyNodeIdentifiersPath[]>) | undefined
   >(() => {
     if (!getSubTreePaths) {
       return undefined;
@@ -95,7 +95,7 @@ export function useFilteredPaths({
               componentId: `${componentId}/subTree`,
             }),
         });
-        return paths.map(HierarchyFilteringPath.normalize).map(({ path }) => path);
+        return paths.map(HierarchySearchPath.normalize).map(({ path }) => path);
       } catch {
         const newError = "unknownSubTreeError";
         setSubTreeError(newError);
@@ -104,8 +104,8 @@ export function useFilteredPaths({
     };
   }, [getModelsTreeIdsCache, hierarchyConfiguration, getSubTreePaths, componentId]);
 
-  const getPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
-    const handlePaths = async (filteredPaths: HierarchyFilteringPath[] | undefined, classInspector: ECClassHierarchyInspector) => {
+  const getPaths = useMemo<VisibilityTreeProps["getSearchPaths"] | undefined>(() => {
+    const handlePaths = async (filteredPaths: HierarchySearchPath[] | undefined, classInspector: ECClassHierarchyInspector) => {
       onFilteredPathsChanged(filteredPaths);
       if (!onModelsFiltered) {
         return;
@@ -146,12 +146,12 @@ export function useFilteredPaths({
       };
     }
 
-    if (getFilteredPaths) {
+    if (getSearchPaths) {
       return async ({ imodelAccess, abortSignal }) => {
         try {
           return await createFilteringPathsResult({
             getFilteringPaths: async () => {
-              const paths = await getFilteredPaths({
+              const paths = await getSearchPaths({
                 createInstanceKeyPaths: async (props) =>
                   ModelsTreeDefinition.createInstanceKeyPaths({
                     ...props,
@@ -164,7 +164,7 @@ export function useFilteredPaths({
                   }),
                 filter,
               });
-              return paths?.map(HierarchyFilteringPath.normalize);
+              return paths?.map(HierarchySearchPath.normalize);
             },
             getSubTreePaths: async () => (getSubTreePathsInternal ? getSubTreePathsInternal({ imodelAccess, abortSignal }) : undefined),
             handlePaths: async (paths) => handlePaths(paths, imodelAccess),
@@ -217,7 +217,7 @@ export function useFilteredPaths({
     loadFocusedItems,
     getModelsTreeIdsCache,
     onFeatureUsed,
-    getFilteredPaths,
+    getSearchPaths,
     hierarchyConfiguration,
     onModelsFiltered,
     onFilteredPathsChanged,
@@ -232,7 +232,7 @@ export function useFilteredPaths({
   };
 }
 
-async function getModels(paths: HierarchyFilteringPath[], idsCache: ModelsTreeIdsCache, classInspector: ECClassHierarchyInspector) {
+async function getModels(paths: HierarchySearchPath[], idsCache: ModelsTreeIdsCache, classInspector: ECClassHierarchyInspector) {
   if (!paths) {
     return undefined;
   }
@@ -310,14 +310,14 @@ async function createFilteringPathsResult({
   handlePaths,
 }: {
   getSubTreePaths: () => Promise<HierarchyNodeIdentifiersPath[] | undefined>;
-  getFilteringPaths: () => Promise<NormalizedHierarchyFilteringPath[] | undefined>;
-  handlePaths: (filteredPaths: HierarchyFilteringPath[] | undefined) => Promise<void>;
-}): Promise<HierarchyFilteringPath[] | undefined> {
+  getFilteringPaths: () => Promise<NormalizedHierarchySearchPath[] | undefined>;
+  handlePaths: (filteredPaths: HierarchySearchPath[] | undefined) => Promise<void>;
+}): Promise<HierarchySearchPath[] | undefined> {
   const [subTreePaths, filterPaths] = await Promise.all([getSubTreePaths(), getFilteringPaths()]);
-  let joinedPaths: HierarchyFilteringPath[] | undefined;
+  let joinedPaths: HierarchySearchPath[] | undefined;
   try {
     if (subTreePaths && filterPaths) {
-      return (joinedPaths = joinHierarchyFilteringPaths(subTreePaths, filterPaths));
+      return (joinedPaths = joinHierarchySearchPaths(subTreePaths, filterPaths));
     }
     if (subTreePaths) {
       return (joinedPaths = subTreePaths);

@@ -42,7 +42,7 @@ export interface UseClassificationsTreeProps {
 interface UseClassificationsTreeResult {
   classificationsTreeProps: Pick<
     VisibilityTreeProps,
-    "treeName" | "getHierarchyDefinition" | "visibilityHandlerFactory" | "getFilteredPaths" | "emptyTreeContent" | "highlightText"
+    "treeName" | "getHierarchyDefinition" | "visibilityHandlerFactory" | "getSearchPaths" | "emptyTreeContent" | "highlightText"
   >;
   rendererProps: Required<Pick<VisibilityTreeRendererProps, "getDecorations">>;
 }
@@ -94,7 +94,7 @@ export function useClassificationsTree({ activeView, emptyTreeContent, filter, .
       treeName: ClassificationsTreeComponent.id,
       getHierarchyDefinition,
       visibilityHandlerFactory,
-      getFilteredPaths: getPaths,
+      getSearchPaths: getPaths,
       emptyTreeContent: useMemo(() => getEmptyTreeContentComponent(filter, filteringError, emptyTreeContent), [filter, filteringError, emptyTreeContent]),
       highlightText: filter,
     },
