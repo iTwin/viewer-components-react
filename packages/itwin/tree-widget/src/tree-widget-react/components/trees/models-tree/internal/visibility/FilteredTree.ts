@@ -8,7 +8,7 @@ import { CLASS_NAME_Category, CLASS_NAME_Model, CLASS_NAME_Subject } from "../..
 import { createFilteredTree, FilteredNodesHandler } from "../../../common/internal/visibility/BaseFilteredTree.js";
 
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
-import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
+import type { HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
 import type { BaseFilteredTreeNode, FilteredTree, FilteredTreeRootNode } from "../../../common/internal/visibility/BaseFilteredTree.js";
@@ -41,7 +41,7 @@ export interface ModelsTreeFilterTargets {
 /** @internal */
 export async function createFilteredModelsTree(props: {
   imodelAccess: ECClassHierarchyInspector;
-  filteringPaths: HierarchyFilteringPath[];
+  filteringPaths: HierarchySearchPath[];
 }): Promise<FilteredTree<ModelsTreeFilterTargets>> {
   const { imodelAccess, filteringPaths } = props;
   return createFilteredTree({

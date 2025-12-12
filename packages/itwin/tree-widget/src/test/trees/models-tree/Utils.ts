@@ -25,9 +25,9 @@ import type {
   ClassGroupingNodeKey,
   GroupingHierarchyNode,
   GroupingNodeKey,
-  HierarchyFilteringPath,
   HierarchyNodeKey,
   HierarchyProvider,
+  HierarchySearchPath,
   NonGroupingHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
@@ -36,7 +36,7 @@ type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeD
 
 interface CreateModelsTreeProviderProps {
   imodel: IModelConnection;
-  filteredNodePaths?: HierarchyFilteringPath[];
+  filteredNodePaths?: HierarchySearchPath[];
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
   idsCache?: ModelsTreeIdsCache;
   imodelAccess?: ReturnType<typeof createIModelAccess>;
@@ -59,9 +59,7 @@ export function createModelsTreeProvider({
       idsCache: createdIdsCache,
       hierarchyConfig: config,
     }),
-    ...(filteredNodePaths
-      ? { filtering: { paths: filteredNodePaths.map((path) => ("path" in path ? path : { path, options: { reveal: true } })) } }
-      : undefined),
+    ...(filteredNodePaths ? { search: { paths: filteredNodePaths.map((path) => ("path" in path ? path : { path, options: { reveal: true } })) } } : undefined),
   });
   const dispose = () => {
     provider[Symbol.dispose]();
@@ -74,7 +72,7 @@ export function createModelsTreeProvider({
     getNodes: (props) => provider.getNodes(props),
     getNodeInstanceKeys: (props) => provider.getNodeInstanceKeys(props),
     setFormatter: (formatter) => provider.setFormatter(formatter),
-    setHierarchyFilter: (props) => provider.setHierarchyFilter(props),
+    setHierarchySearch: (props) => provider.setHierarchySearch(props),
     dispose,
     [Symbol.dispose]() {
       dispose();
@@ -190,7 +188,7 @@ export function createElementHierarchyNode(props: {
   hasChildren?: boolean;
   elementId?: Id64String;
   parentKeys?: HierarchyNodeKey[];
-  filtering?: NonGroupingHierarchyNode["filtering"];
+  search?: NonGroupingHierarchyNode["search"];
   childrenCount?: number;
 }): NonGroupingHierarchyNode {
   return {
@@ -200,7 +198,7 @@ export function createElementHierarchyNode(props: {
     },
     children: !!props.hasChildren,
     label: "",
-    filtering: props.filtering,
+    search: props.search,
     parentKeys: props.parentKeys ?? [],
     extendedData: {
       modelId: props.modelId,

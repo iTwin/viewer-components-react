@@ -51,7 +51,7 @@ interface UseClassificationsTreeDefinitionProps {
 /** @alpha */
 interface UseClassificationsTreeDefinitionResult {
   definition: HierarchyDefinition;
-  getFilteredPaths?: FunctionProps<typeof useTree>["getFilteredPaths"];
+  getSearchPaths?: FunctionProps<typeof useTree>["getSearchPaths"];
 }
 
 /** @alpha */
@@ -75,7 +75,7 @@ export function useClassificationsTreeDefinition(props: UseClassificationsTreeDe
   }, [imodels, hierarchyConfig]);
 
   const searchTerm = search ? ("searchText" in search ? search.searchText : search.targetItems) : undefined;
-  const getFilteredPaths = useMemo<FunctionProps<typeof useTree>["getFilteredPaths"]>(() => {
+  const getSearchPaths = useMemo<FunctionProps<typeof useTree>["getSearchPaths"]>(() => {
     if (!searchTerm) {
       return undefined;
     }
@@ -105,7 +105,7 @@ export function useClassificationsTreeDefinition(props: UseClassificationsTreeDe
 
   return {
     definition,
-    getFilteredPaths,
+    getSearchPaths,
   };
 }
 

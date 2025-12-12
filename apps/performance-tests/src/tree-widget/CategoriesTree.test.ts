@@ -44,7 +44,7 @@ describe("categories tree", () => {
     cleanup: (props) => props.iModel.close(),
     test: async ({ imodelAccess }) => {
       using idsCache = new CategoriesTreeIdsCache(imodelAccess, "3d");
-      const filtering = {
+      const search = {
         paths: await CategoriesTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
           limit: "unbounded",
@@ -54,12 +54,12 @@ describe("categories tree", () => {
           hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration,
         }),
       };
-      expect(filtering.paths.length).to.eq(50000);
+      expect(search.paths.length).to.eq(50000);
       using provider = new StatelessHierarchyProvider({
         imodelAccess,
         getHierarchyFactory: () =>
           new CategoriesTreeDefinition({ imodelAccess, idsCache, viewType: "3d", hierarchyConfig: defaultCategoriesTreeHierarchyConfiguration }),
-        filtering,
+        search,
       });
       const result = await provider.loadHierarchy({ shouldExpand: () => false });
       expect(result).to.eq(1);

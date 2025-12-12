@@ -53,7 +53,7 @@ import type {
 } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlQueryRow, IInstanceLabelSelectClauseFactory, InstanceKey } from "@itwin/presentation-shared";
 import type { ElementId } from "../common/internal/Types.js";
-import type { NormalizedHierarchyFilteringPath } from "../common/Utils.js";
+import type { NormalizedHierarchySearchPath } from "../common/Utils.js";
 import type { ClassificationId, ClassificationsTreeIdsCache, ClassificationTableId } from "./internal/ClassificationsTreeIdsCache.js";
 
 const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
@@ -367,7 +367,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
 
   public static async createInstanceKeyPaths(
     props: ClassificationsTreeInstanceKeyPathsFromInstanceLabelProps | ClassificationsTreeInstanceKeyPathsFromInstanceKeysProps,
-  ): Promise<NormalizedHierarchyFilteringPath[]> {
+  ): Promise<NormalizedHierarchySearchPath[]> {
     return lastValueFrom(
       defer(() => {
         const componentInfo = { componentId: props.componentId ?? Guid.createValue(), componentName: this.#componentName };
@@ -410,7 +410,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
   labelsFactory: IInstanceLabelSelectClauseFactory;
   componentName: string;
   componentId: string;
-}): Observable<NormalizedHierarchyFilteringPath[]> {
+}): Observable<NormalizedHierarchySearchPath[]> {
   const adjustedLabel = label.replace(/[%_\\]/g, "\\$&");
 
   const CLASSIFICATION_TABLES_WITH_LABELS_CTE = "ClassificationTablesWithLabels";
@@ -597,7 +597,7 @@ function createInstanceKeyPathsFromTargetItemsObs({
 }: Omit<ClassificationsTreeInstanceKeyPathsFromInstanceKeysProps, "abortSignal" | "componentId"> & {
   componentId: GuidString;
   componentName: string;
-}): Observable<NormalizedHierarchyFilteringPath[]> {
+}): Observable<NormalizedHierarchySearchPath[]> {
   const actualLimit = limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT;
   if (actualLimit !== "unbounded" && targetItems.length > actualLimit) {
     throw new FilterLimitExceededError(actualLimit);
@@ -678,7 +678,7 @@ function createGeometricElementInstanceKeyPaths(props: {
   componentId: GuidString;
   componentName: string;
   chunkIndex: number;
-}): Observable<NormalizedHierarchyFilteringPath> {
+}): Observable<NormalizedHierarchySearchPath> {
   const { targetItems, imodelAccess, type, idsCache, componentId, componentName, chunkIndex } = props;
   if (targetItems.length === 0) {
     return EMPTY;
