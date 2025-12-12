@@ -1,4 +1,3 @@
-;
 /*---------------------------------------------------------------------------------------------
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
@@ -13,13 +12,7 @@ import { StrataKitTreeRenderer, useTree } from "@itwin/presentation-hierarchies-
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 import { useClassificationsTreeDefinition } from "@itwin/tree-widget-react";
 
-
-
 import type { IModelConnection } from "@itwin/core-frontend";
-
-
-
-
 
 const PRIMARY_CONNECTION = {
   iTwinId: "",

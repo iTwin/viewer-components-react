@@ -1,4 +1,3 @@
-;
 /*---------------------------------------------------------------------------------------------
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
@@ -8,8 +7,6 @@ import { useMemo, useRef } from "react";
 import { assert } from "@itwin/core-bentley";
 import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.js";
 import { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
-
-
 
 import type { MutableRefObject } from "react";
 import type { HierarchyDefinition } from "@itwin/presentation-hierarchies";
