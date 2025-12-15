@@ -12,11 +12,11 @@ import type { InstanceKey } from "@itwin/presentation-shared";
 export function createClassificationTableHierarchyNode({
   id,
   hasChildren,
-  filtering,
+  search,
 }: {
   id: Id64String;
   hasChildren?: boolean;
-  filtering?: NonGroupingHierarchyNode["filtering"];
+  search?: NonGroupingHierarchyNode["search"];
 }): NonGroupingHierarchyNode {
   return {
     key: {
@@ -29,19 +29,19 @@ export function createClassificationTableHierarchyNode({
     extendedData: {
       type: "ClassificationTable",
     },
-    filtering,
+    search,
   };
 }
 
 export function createClassificationHierarchyNode({
   id,
   hasChildren,
-  filtering,
+  search,
   parentKeys,
 }: {
   id: Id64String;
   hasChildren?: boolean;
-  filtering?: NonGroupingHierarchyNode["filtering"];
+  search?: NonGroupingHierarchyNode["search"];
   parentKeys?: InstanceKey[];
 }): NonGroupingHierarchyNode {
   return {
@@ -55,7 +55,7 @@ export function createClassificationHierarchyNode({
     extendedData: {
       type: "Classification",
     },
-    filtering,
+    search,
   };
 }
 
@@ -63,13 +63,13 @@ export function createPhysicalElementHierarchyNode({
   id,
   modelId,
   categoryId,
-  filtering,
+  search,
   parentKeys,
 }: {
   id: Id64String;
   modelId: Id64String;
   categoryId: Id64String;
-  filtering?: NonGroupingHierarchyNode["filtering"];
+  search?: NonGroupingHierarchyNode["search"];
   parentKeys?: InstanceKey[];
 }): NonGroupingHierarchyNode {
   return {
@@ -85,7 +85,7 @@ export function createPhysicalElementHierarchyNode({
       modelId,
       categoryId,
     },
-    filtering,
+    search,
   };
 }
 
@@ -93,13 +93,13 @@ export function createDrawingElementHierarchyNode({
   id,
   modelId,
   categoryId,
-  filtering,
+  search,
   parentKeys,
 }: {
   id: Id64String;
   modelId: Id64String;
   categoryId: Id64String;
-  filtering?: NonGroupingHierarchyNode["filtering"];
+  search?: NonGroupingHierarchyNode["search"];
   parentKeys?: InstanceKey[];
 }): NonGroupingHierarchyNode {
   return {
@@ -115,6 +115,6 @@ export function createDrawingElementHierarchyNode({
       modelId,
       categoryId,
     },
-    filtering,
+    search,
   };
 }

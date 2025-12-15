@@ -65,7 +65,7 @@ import type {
   InstanceKey,
 } from "@itwin/presentation-shared";
 import type { CategoryId, DefinitionContainerId, ElementId, ModelId, SubCategoryId } from "../common/internal/Types.js";
-import type { NormalizedHierarchyFilteringPath } from "../common/Utils.js";
+import type { NormalizedHierarchySearchPath } from "../common/Utils.js";
 import type { CategoriesTreeIdsCache, CategoryInfo } from "./internal/CategoriesTreeIdsCache.js";
 
 const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
@@ -151,7 +151,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         }
       });
 
-      const { hasFilterTargetAncestor, hasDirectNonFilteredTargets } = groupingNodeHasFilterTargets(node.children);
+      const { hasSearchTargetAncestor, hasDirectNonFilteredTargets } = groupingNodeHasFilterTargets(node.children);
 
       return {
         ...node,
@@ -162,7 +162,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
           categoryId: node.children[0].extendedData?.categoryId,
           modelElementsMap,
           ...(hasDirectNonFilteredTargets ? { hasDirectNonFilteredTargets } : {}),
-          ...(hasFilterTargetAncestor ? { hasFilterTargetAncestor } : {}),
+          ...(hasSearchTargetAncestor ? { hasSearchTargetAncestor } : {}),
           // `imageId` is assigned to instance nodes at query time, but grouping ones need to
           // be handled during post-processing
           imageId: "icon-ec-class",
@@ -646,7 +646,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     ];
   }
 
-  public static async createInstanceKeyPaths(props: CategoriesTreeInstanceKeyPathsFromInstanceLabelProps): Promise<NormalizedHierarchyFilteringPath[]> {
+  public static async createInstanceKeyPaths(props: CategoriesTreeInstanceKeyPathsFromInstanceLabelProps): Promise<NormalizedHierarchySearchPath[]> {
     const labelsFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
     return createInstanceKeyPathsFromInstanceLabel({
       ...props,
@@ -662,7 +662,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
     labelsFactory: IInstanceLabelSelectClauseFactory;
     componentName: string;
   },
-): Promise<NormalizedHierarchyFilteringPath[]> {
+): Promise<NormalizedHierarchySearchPath[]> {
   const { idsCache, abortSignal, label, viewType, labelsFactory, limit, hierarchyConfig, imodelAccess, componentId, componentName } = props;
   const { categoryClass, elementClass } = getClassesByView(viewType);
 
@@ -863,7 +863,7 @@ function createInstanceKeyPathsFromTargetItems({
 }: MarkRequired<CategoriesTreeInstanceKeyPathsFromInstanceLabelProps, "componentId"> & {
   targetItems: InstanceKey[];
   componentName: string;
-}): Observable<NormalizedHierarchyFilteringPath> {
+}): Observable<NormalizedHierarchySearchPath> {
   if (limit !== "unbounded" && targetItems.length > (limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT)) {
     throw new FilterLimitExceededError(limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT);
   }
@@ -951,7 +951,7 @@ function createGeometricElementInstanceKeyPaths(props: {
   componentId: GuidString;
   componentName: string;
   chunkIndex: number;
-}): Observable<NormalizedHierarchyFilteringPath> {
+}): Observable<NormalizedHierarchySearchPath> {
   const separator = ";";
   const { targetItems, chunkIndex, componentId, componentName, hierarchyConfig, idsCache, imodelAccess, viewType } = props;
   const { categoryClass, elementClass, modelClass } = getClassesByView(viewType);

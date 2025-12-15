@@ -1757,7 +1757,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       return createIModelHierarchyProvider({
         hierarchyDefinition: new ModelsTreeDefinition({ ...props }),
         imodelAccess: props.imodelAccess,
-        ...(props.filterPaths ? { filtering: { paths: props.filterPaths } } : undefined),
+        ...(props.filterPaths ? { search: { paths: props.filterPaths } } : undefined),
       });
     }
 

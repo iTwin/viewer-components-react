@@ -53,7 +53,7 @@ describe("models tree", () => {
     cleanup: (props) => props.iModel.close(),
     test: async ({ imodelAccess, targetItems }) => {
       using idsCache = new ModelsTreeIdsCache(imodelAccess, defaultModelsTreeHierarchyConfiguration);
-      const filtering = {
+      const search = {
         paths: await ModelsTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
           limit: "unbounded",
@@ -62,11 +62,11 @@ describe("models tree", () => {
           hierarchyConfig: defaultModelsTreeHierarchyConfiguration,
         }),
       };
-      expect(filtering.paths.length).to.eq(50000);
+      expect(search.paths.length).to.eq(50000);
       using provider = new StatelessHierarchyProvider({
         imodelAccess,
         getHierarchyFactory: () => new ModelsTreeDefinition({ imodelAccess, idsCache, hierarchyConfig: defaultModelsTreeHierarchyConfiguration }),
-        filtering,
+        search,
       });
       const result = await provider.loadHierarchy({ shouldExpand: (node) => node.children && !!node.autoExpand });
       expect(result).to.eq(2);

@@ -37,7 +37,7 @@ import {
 import { validateHierarchyVisibility } from "./VisibilityValidation.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { HierarchyFilteringPath, HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
+import type { HierarchyNodeIdentifiersPath, HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { ClassificationsTreeFilterTargets } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/FilteredTree.js";
 import type { FilteredTree } from "../../../tree-widget-react/components/trees/common/internal/visibility/BaseFilteredTree.js";
@@ -65,7 +65,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     return createIModelHierarchyProvider({
       hierarchyDefinition: new ClassificationsTreeDefinition({ ...props, getIdsCache: () => idsCache, hierarchyConfig: { rootClassificationSystemCode } }),
       imodelAccess: props.imodelAccess,
-      ...(props.filterPaths ? { filtering: { paths: props.filterPaths } } : undefined),
+      ...(props.filterPaths ? { search: { paths: props.filterPaths } } : undefined),
     });
   }
 
@@ -856,9 +856,9 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           id: keys.element1.id,
           categoryId: keys.spatialCategory.id,
           modelId: keys.physicalModel.id,
-          filtering: {
-            isFilterTarget: true,
-            filteredChildrenIdentifierPaths: [],
+          search: {
+            isSearchTarget: true,
+            childrenTargetPaths: [],
           },
         }),
         true,
@@ -932,9 +932,9 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           id: keys.element1.id,
           categoryId: keys.drawingCategory.id,
           modelId: keys.drawingModel.id,
-          filtering: {
-            isFilterTarget: true,
-            filteredChildrenIdentifierPaths: [],
+          search: {
+            isSearchTarget: true,
+            childrenTargetPaths: [],
           },
         }),
         true,
@@ -1017,9 +1017,9 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       await handler.changeVisibility(
         createClassificationHierarchyNode({
           id: keys.classification1.id,
-          filtering: {
-            isFilterTarget: false,
-            filteredChildrenIdentifierPaths: [[keys.element1]],
+          search: {
+            isSearchTarget: false,
+            childrenTargetPaths: [[keys.element1]],
           },
           parentKeys: [keys.table],
         }),
@@ -1106,9 +1106,9 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         createClassificationTableHierarchyNode({
           hasChildren: true,
           id: keys.table.id,
-          filtering: {
-            isFilterTarget: false,
-            filteredChildrenIdentifierPaths: [[keys.classification1, keys.element1]],
+          search: {
+            isSearchTarget: false,
+            childrenTargetPaths: [[keys.classification1, keys.element1]],
           },
         }),
         true,
@@ -1142,7 +1142,7 @@ function createClassificationsTreeVisibilityHandler(props: {
   viewport: TreeWidgetViewport;
   idsCache: ClassificationsTreeIdsCache;
   imodelAccess: ECClassHierarchyInspector;
-  filteredPaths?: HierarchyFilteringPath[];
+  filteredPaths?: HierarchySearchPath[];
 }) {
   return new HierarchyVisibilityHandlerImpl<ClassificationsTreeFilterTargets>({
     getFilteredTree: (): undefined | Promise<FilteredTree<ClassificationsTreeFilterTargets>> => {

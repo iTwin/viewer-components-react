@@ -649,7 +649,7 @@ function createCategoryTreeProvider(
     getNodes: (props) => hierarchyProvider.getNodes(props),
     getNodeInstanceKeys: (props) => hierarchyProvider.getNodeInstanceKeys(props),
     setFormatter: (formatter) => hierarchyProvider.setFormatter(formatter),
-    setHierarchyFilter: (props) => hierarchyProvider.setHierarchyFilter(props),
+    setHierarchySearch: (props) => hierarchyProvider.setHierarchySearch(props),
     [Symbol.dispose]() {
       hierarchyProvider[Symbol.dispose]();
       idsCache[Symbol.dispose]();

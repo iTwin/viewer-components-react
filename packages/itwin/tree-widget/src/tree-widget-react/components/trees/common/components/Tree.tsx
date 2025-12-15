@@ -35,7 +35,7 @@ import type { FunctionProps } from "../Utils.js";
 import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
 
 /** @beta */
-export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPaths" | "getHierarchyDefinition"> &
+export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getSearchPaths" | "getHierarchyDefinition"> &
   Partial<Pick<FunctionProps<typeof useSelectionHandler>, "selectionMode">> & {
     /** iModel connection that should be used to pull data from. */
     imodel: IModelConnection;
@@ -71,7 +71,7 @@ export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPa
 export function Tree({
   hierarchyLevelSizeLimit,
   getHierarchyDefinition,
-  getFilteredPaths,
+  getSearchPaths,
   selectionStorage,
   imodelAccess: providedIModelAccess,
   treeName,
@@ -98,7 +98,7 @@ export function Tree({
     imodelAccess,
     imodelChanged,
     getHierarchyDefinition,
-    getFilteredPaths,
+    getSearchPaths,
     sourceName: treeName,
     localizedStrings,
     selectionStorage,

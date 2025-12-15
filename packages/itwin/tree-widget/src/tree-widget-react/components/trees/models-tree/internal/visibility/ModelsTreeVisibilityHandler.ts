@@ -16,7 +16,7 @@ import { ModelsTreeVisibilityHelper } from "./ModelsTreeVisibilityHelper.js";
 
 import type { Observable } from "rxjs";
 import type { Id64Arg } from "@itwin/core-bentley";
-import type { GroupingHierarchyNode, HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
+import type { GroupingHierarchyNode, HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { AlwaysAndNeverDrawnElementInfo } from "../../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
 import type { FilteredTree } from "../../../common/internal/visibility/BaseFilteredTree.js";
@@ -373,7 +373,7 @@ export function createModelsTreeVisibilityHandler(props: {
   idsCache: ModelsTreeIdsCache;
   imodelAccess: ECClassHierarchyInspector;
   overrides?: ModelsTreeVisibilityHandlerOverrides;
-  filteredPaths?: HierarchyFilteringPath[];
+  filteredPaths?: HierarchySearchPath[];
 }) {
   return new HierarchyVisibilityHandlerImpl<ModelsTreeFilterTargets>({
     getFilteredTree: (): undefined | Promise<FilteredTree<ModelsTreeFilterTargets>> => {

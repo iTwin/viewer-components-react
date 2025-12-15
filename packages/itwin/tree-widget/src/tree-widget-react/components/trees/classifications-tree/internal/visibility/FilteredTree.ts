@@ -9,7 +9,7 @@ import { CLASS_NAME_Classification, CLASS_NAME_ClassificationTable, CLASS_NAME_G
 import { createFilteredTree, FilteredNodesHandler } from "../../../common/internal/visibility/BaseFilteredTree.js";
 
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
-import type { HierarchyFilteringPath } from "@itwin/presentation-hierarchies";
+import type { HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
 import type { BaseFilteredTreeNode, FilteredTree, FilteredTreeNodeChildren } from "../../../common/internal/visibility/BaseFilteredTree.js";
@@ -66,7 +66,7 @@ export interface ClassificationsTreeFilterTargets {
 /** @internal */
 export async function createFilteredClassificationsTree(props: {
   imodelAccess: ECClassHierarchyInspector;
-  filteringPaths: HierarchyFilteringPath[];
+  filteringPaths: HierarchySearchPath[];
   idsCache: ClassificationsTreeIdsCache;
 }): Promise<FilteredTree<ClassificationsTreeFilterTargets>> {
   const { imodelAccess, filteringPaths, idsCache } = props;

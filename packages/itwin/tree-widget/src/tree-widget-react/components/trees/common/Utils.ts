@@ -3,12 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { HierarchyFilteringPath, HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
+import { HierarchyNodeIdentifier, HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import { showAllCategories } from "./CategoriesVisibilityUtils.js";
 import { enableCategoryDisplay, loadCategoriesFromViewport } from "./internal/VisibilityUtils.js";
 
 import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
-import type { HierarchyFilteringPathOptions, HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
+import type { HierarchyNodeIdentifiersPath, HierarchySearchPathOptions } from "@itwin/presentation-hierarchies";
 import type { TreeWidgetViewport } from "./TreeWidgetViewport.js";
 
 /**
@@ -95,18 +95,18 @@ export function areAllModelsVisible(models: string[], viewport: TreeWidgetViewpo
 }
 
 /** @public */
-export type NormalizedHierarchyFilteringPath = ReturnType<(typeof HierarchyFilteringPath)["normalize"]>;
+export type NormalizedHierarchySearchPath = ReturnType<(typeof HierarchySearchPath)["normalize"]>;
 
 /** @internal */
-export function joinHierarchyFilteringPaths(
+export function joinHierarchySearchPaths(
   subTreePaths: HierarchyNodeIdentifiersPath[],
-  filteringPaths: NormalizedHierarchyFilteringPath[],
-): NormalizedHierarchyFilteringPath[] {
-  const result = new Array<NormalizedHierarchyFilteringPath>();
+  filteringPaths: NormalizedHierarchySearchPath[],
+): NormalizedHierarchySearchPath[] {
+  const result = new Array<NormalizedHierarchySearchPath>();
   const filteringPathsToIncludeIndexes = new Set<number>();
 
   subTreePaths.forEach((subTreePath) => {
-    let options: HierarchyFilteringPathOptions | undefined;
+    let options: HierarchySearchPathOptions | undefined;
     let addSubTreePathToResult = false;
 
     for (let i = 0; i < filteringPaths.length; ++i) {
@@ -128,7 +128,7 @@ export function joinHierarchyFilteringPaths(
           // This is done by setting depthInPath
           options =
             filteringPath.options?.reveal !== true
-              ? HierarchyFilteringPath.mergeOptions(options, filteringPath.options)
+              ? HierarchySearchPath.mergeOptions(options, filteringPath.options)
               : { reveal: { depthInPath: filteringPath.path.length - 1 } };
           break;
         }

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Id64 } from "@itwin/core-bentley";
-import { HierarchyFilteringPath, HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+import { HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey, HierarchySearchPath } from "@itwin/presentation-hierarchies";
 
 import type { Id64Arg, Id64String } from "@itwin/core-bentley";
 import type { ClassGroupingNodeKey, InstancesNodeKey } from "@itwin/presentation-hierarchies";
@@ -158,7 +158,7 @@ export interface FilteredTree<TFilterTargets> {
 /** @internal */
 export interface CreateFilteredTreeProps<TProcessedFilteredNodes, TFilterTargets, TFilteredTreeNode extends BaseFilteredTreeNode<TFilteredTreeNode>> {
   filteredNodesHandler: FilteredNodesHandler<TProcessedFilteredNodes, TFilterTargets, TFilteredTreeNode>;
-  filteringPaths: HierarchyFilteringPath[];
+  filteringPaths: HierarchySearchPath[];
 }
 
 /**
@@ -171,7 +171,7 @@ export async function createFilteredTree<TProcessedFilteredNodes, TFilterTargets
   const { filteringPaths, filteredNodesHandler } = props;
 
   for (const filteringPath of filteringPaths) {
-    const normalizedPath = HierarchyFilteringPath.normalize(filteringPath).path;
+    const normalizedPath = HierarchySearchPath.normalize(filteringPath).path;
 
     let parentNode: FilteredTreeRootNode<TFilteredTreeNode> | TFilteredTreeNode = filteredNodesHandler.root;
     for (let i = 0; i < normalizedPath.length; ++i) {
