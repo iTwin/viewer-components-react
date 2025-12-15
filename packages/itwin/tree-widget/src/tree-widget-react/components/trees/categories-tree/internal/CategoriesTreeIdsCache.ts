@@ -275,17 +275,16 @@ export class CategoriesTreeIdsCache implements Disposable {
     );
   }
 
-  private querySubCategories(categoryIds: Id64Array): Observable<{ id: SubCategoryId; parentId: CategoryId }> {
+  private querySubCategories(): Observable<{ id: SubCategoryId; parentId: CategoryId }> {
     return defer(() => {
       const definitionsQuery = `
-      SELECT
+        SELECT
           sc.ECInstanceId id,
           sc.Parent.Id categoryId
         FROM
           ${CLASS_NAME_SubCategory} sc
         WHERE
           NOT sc.IsPrivate
-          AND sc.Parent.Id IN (${categoryIds.join(",")})
       `;
       return this.#queryExecutor.createQueryReader(
         { ecsql: definitionsQuery },
@@ -419,35 +418,21 @@ export class CategoriesTreeIdsCache implements Disposable {
   }
 
   private getSubCategoriesInfo() {
-    this.#subCategoriesInfo ??= this.getModelsCategoriesInfo()
+    this.#subCategoriesInfo ??= this.querySubCategories()
       .pipe(
-        mergeMap((modelsCategoriesInfo) => from(modelsCategoriesInfo.values())),
-        reduce((acc, modelCategoriesInfo) => {
-          acc.push(...modelCategoriesInfo.childCategories.map((categoryInfo) => categoryInfo.id));
-          return acc;
-        }, new Array<CategoryId>()),
-        mergeMap((allCategories) => {
-          const subCategoryCategories = new Map<SubCategoryId, CategoryId>();
-          const categorySubCategories = new Map<CategoryId, Array<SubCategoryId>>();
-          if (allCategories.length === 0) {
-            return of({ subCategoryCategories, categorySubCategories });
-          }
-          return this.querySubCategories(allCategories).pipe(
-            reduce(
-              (acc, queriedSubCategory) => {
-                acc.subCategoryCategories.set(queriedSubCategory.id, queriedSubCategory.parentId);
-                const entry = acc.categorySubCategories.get(queriedSubCategory.parentId);
-                if (entry) {
-                  entry.push(queriedSubCategory.id);
-                } else {
-                  acc.categorySubCategories.set(queriedSubCategory.parentId, [queriedSubCategory.id]);
-                }
-                return acc;
-              },
-              { subCategoryCategories, categorySubCategories },
-            ),
-          );
-        }),
+        reduce(
+          (acc, queriedSubCategory) => {
+            acc.subCategoryCategories.set(queriedSubCategory.id, queriedSubCategory.parentId);
+            const entry = acc.categorySubCategories.get(queriedSubCategory.parentId);
+            if (entry) {
+              entry.push(queriedSubCategory.id);
+            } else {
+              acc.categorySubCategories.set(queriedSubCategory.parentId, [queriedSubCategory.id]);
+            }
+            return acc;
+          },
+          { subCategoryCategories: new Map<SubCategoryId, CategoryId>(), categorySubCategories: new Map<CategoryId, Array<SubCategoryId>>() },
+        ),
       )
       .pipe(shareReplay());
     return this.#subCategoriesInfo;
@@ -712,12 +697,8 @@ export class CategoriesTreeIdsCache implements Disposable {
     });
   }
 
-  public getSubCategories(categoryId: Id64String): Observable<{ id: CategoryId; subCategories: Array<SubCategoryId> | undefined }> {
-    return this.getSubCategoriesInfo().pipe(
-      map(({ categorySubCategories }) => {
-        return { id: categoryId, subCategories: categorySubCategories.get(categoryId) };
-      }),
-    );
+  public getSubCategories(categoryId: Id64String): Observable<Array<SubCategoryId>> {
+    return this.getSubCategoriesInfo().pipe(map(({ categorySubCategories }) => categorySubCategories.get(categoryId) ?? []));
   }
 
   public getIsDefinitionContainerSupported(): Observable<boolean> {

@@ -37,7 +37,7 @@ import {
 } from "../VisibilityUtils.js";
 
 import type { Observable, Subscription } from "rxjs";
-import type { Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { TreeWidgetViewport } from "../../TreeWidgetViewport.js";
 import type { HierarchyVisibilityHandlerOverridableMethod, HierarchyVisibilityOverrideHandler, VisibilityStatus } from "../../UseHierarchyVisibility.js";
@@ -72,7 +72,7 @@ export interface BaseTreeVisibilityHandlerOverrides {
 export interface BaseIdsCache {
   hasSubModel: (elementId: Id64String) => Observable<boolean>;
   getElementsCount: (props: { modelId: Id64String; categoryId: Id64String }) => Observable<number>;
-  getSubCategories: (props: { categoryId: Id64String }) => Observable<{ id: Id64String; subCategories: Id64Arg | undefined }>;
+  getSubCategories: (props: { categoryId: Id64String }) => Observable<Id64Array>;
   getModels: (props: { categoryIds: Id64Arg }) => Observable<{ id: Id64String; models: Id64Arg | undefined }>;
   getCategories: (props: { modelIds: Id64Arg }) => Observable<{ id: Id64String; drawingCategories?: Id64Arg; spatialCategories?: Id64Arg }>;
   getSubModels: (
@@ -424,8 +424,8 @@ export class BaseVisibilityHelper implements Disposable {
             // We need to check subCategories as well
             !modelIdFromProps
               ? this.#props.baseIdsCache.getSubCategories({ categoryId }).pipe(
-                  mergeMap(({ subCategories }) => {
-                    if (subCategories && Id64.sizeOf(subCategories) > 0) {
+                  mergeMap((subCategories) => {
+                    if (subCategories.length > 0) {
                       return this.getSubCategoriesVisibilityStatus({ categoryId, modelId: modelIdFromProps, subCategoryIds: subCategories });
                     }
 
@@ -771,17 +771,15 @@ export class BaseVisibilityHelper implements Disposable {
                 ? from(Id64.iterable(categoryIds)).pipe(
                     releaseMainThreadOnItemsCount(200),
                     mergeMap((categoryId) => this.#props.baseIdsCache.getSubCategories({ categoryId })),
-                    mergeMap(({ subCategories }) =>
-                      subCategories
-                        ? from(subCategories).pipe(
-                            releaseMainThreadOnItemsCount(200),
-                            map((subCategoryId) => {
-                              if (!this.#props.viewport.viewsSubCategory(subCategoryId)) {
-                                this.#props.viewport.changeSubCategoryDisplay({ subCategoryId, display: true });
-                              }
-                            }),
-                          )
-                        : EMPTY,
+                    mergeMap((subCategories) =>
+                      from(subCategories).pipe(
+                        releaseMainThreadOnItemsCount(200),
+                        map((subCategoryId) => {
+                          if (!this.#props.viewport.viewsSubCategory(subCategoryId)) {
+                            this.#props.viewport.changeSubCategoryDisplay({ subCategoryId, display: true });
+                          }
+                        }),
+                      ),
                     ),
                   )
                 : EMPTY,

@@ -1733,12 +1733,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 createClassGroupingHierarchyNode({ categoryId: ids.category.id, modelElementsMap: new Map([[ids.model.id, [ids.modeledElement.id]]]) }),
               expectations: (ids: IModelWithSubModelIds) => ({
                 [ids.subModelCategory?.id ?? ""]: "visible",
-                [`${ids.modeledElement.id}-${ids.subModelCategory?.id ?? ""}`]: "visible",
-                [ids.subModelCategory?.id ?? ""]: "visible",
+
                 [ids.category.id]: "partial",
                 [ids.modeledElement.id]: "visible",
+                [`${ids.modeledElement.id}-${ids.subModelCategory?.id ?? ""}`]: "visible",
                 [ids.subModelElement?.id ?? ""]: "visible",
-                [ids.model.id]: "visible",
               }),
             },
             {
@@ -1752,12 +1751,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 }),
               expectations: (ids: IModelWithSubModelIds) => ({
                 [ids.subModelCategory?.id ?? ""]: "visible",
-                [`${ids.modeledElement.id}-${ids.subModelCategory?.id ?? ""}`]: "visible",
-                [ids.subModelCategory?.id ?? ""]: "visible",
+
                 [ids.category.id]: "partial",
                 [ids.modeledElement.id]: "visible",
+                [`${ids.modeledElement.id}-${ids.subModelCategory?.id ?? ""}`]: "visible",
                 [ids.subModelElement?.id ?? ""]: "visible",
-                [ids.model.id]: "visible",
               }),
             },
             {
@@ -1765,12 +1763,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
               getTargetNode: (ids: IModelWithSubModelIds) => createModelHierarchyNode(ids.modeledElement.id, true),
               expectations: (ids: IModelWithSubModelIds) => ({
                 [ids.subModelCategory?.id ?? ""]: "visible",
-                [`${ids.modeledElement.id}-${ids.subModelCategory?.id ?? ""}`]: "visible",
-                [ids.subModelCategory?.id ?? ""]: "visible",
+
                 [ids.category.id]: "partial",
                 [ids.modeledElement.id]: "partial",
+                [`${ids.modeledElement.id}-${ids.subModelCategory?.id ?? ""}`]: "visible",
                 [ids.subModelElement?.id ?? ""]: "visible",
-                [ids.model.id]: "partial",
               }),
             },
             {
@@ -1778,11 +1775,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
               getTargetNode: (ids: IModelWithSubModelIds) => createSubModelCategoryHierarchyNode(ids.modeledElement.id, ids.subModelCategory?.id, true),
               expectations: (ids: IModelWithSubModelIds) => ({
                 [ids.subModelCategory?.id ?? ""]: "visible",
-                [`${ids.modeledElement.id}-${ids.subModelCategory?.id ?? ""}`]: "visible",
+
                 [ids.category.id]: "partial",
                 [ids.modeledElement.id]: "partial",
+                [`${ids.modeledElement.id}-${ids.subModelCategory?.id ?? ""}`]: "visible",
                 [ids.subModelElement?.id ?? ""]: "visible",
-                [ids.model.id]: "partial",
               }),
             },
             {
@@ -1795,11 +1792,11 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 }),
               expectations: (ids: IModelWithSubModelIds) => ({
                 [ids.subModelCategory?.id ?? ""]: "partial",
-                [`${ids.modeledElement.id}-${ids.subModelCategory?.id ?? ""}`]: "visible",
+
                 [ids.category.id]: "partial",
                 [ids.modeledElement.id]: "partial",
+                [`${ids.modeledElement.id}-${ids.subModelCategory?.id ?? ""}`]: "visible",
                 [ids.subModelElement?.id ?? ""]: "visible",
-                [ids.model.id]: "partial",
               }),
             },
           ],
@@ -1838,6 +1835,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               getTargetNode: (ids: IModelWithSubModelIds) => createCategoryHierarchyNode(ids.category.id, true),
               expectations: (ids: IModelWithSubModelIds) => ({
                 [ids.subModelCategory?.id ?? ""]: "hidden",
+
                 [ids.category.id]: "visible",
                 [ids.modeledElement.id]: "visible",
               }),
@@ -1849,6 +1847,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               // Category has partial visibility, since its sub-category is not visible
               expectations: (ids: IModelWithSubModelIds) => ({
                 [ids.subModelCategory?.id ?? ""]: "hidden",
+
                 [ids.category.id]: "partial",
                 [ids.modeledElement.id]: "visible",
               }),
@@ -1865,6 +1864,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
               // Category has partial visibility, since its sub-category is not visible
               expectations: (ids: IModelWithSubModelIds) => ({
                 [ids.subModelCategory?.id ?? ""]: "hidden",
+
                 [ids.category.id]: "partial",
                 [ids.modeledElement.id]: "visible",
               }),
@@ -1910,7 +1910,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
               expectations: (ids) => ({
                 [ids.category.id]: "partial",
                 [ids.modeledElement.id]: "visible",
-                [ids.model.id]: "visible",
               }),
             },
             {
@@ -1926,7 +1925,6 @@ describe("CategoriesTreeVisibilityHandler", () => {
               expectations: (ids) => ({
                 [ids.category.id]: "partial",
                 [ids.modeledElement.id]: "visible",
-                [ids.model.id]: "visible",
               }),
             },
           ],
