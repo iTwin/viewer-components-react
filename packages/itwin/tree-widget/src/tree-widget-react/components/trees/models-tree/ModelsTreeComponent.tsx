@@ -38,7 +38,7 @@ interface ModelsTreeComponentProps
     | "hierarchyConfig"
     | "visibilityHandlerOverrides"
     | "getSearchPaths"
-    | "filter"
+    | "searchText"
     | "emptyTreeContent"
     | "getInlineActions"
     | "getMenuActions"
@@ -151,7 +151,7 @@ function ModelsTreeComponentImpl({
   headerButtons,
   onFeatureUsed,
   onPerformanceMeasured,
-  filter,
+  searchText,
   treeLabel,
   ...treeProps
 }: ModelsTreeComponentProps & { iModel: IModelConnection; viewport: TreeWidgetViewport }) {
@@ -166,19 +166,19 @@ function ModelsTreeComponentImpl({
         <InvertButton {...buttonProps} key="invert-all-btn" onFeatureUsed={onFeatureUsed} />,
         <View2DButton {...buttonProps} key="view-2d-btn" onFeatureUsed={onFeatureUsed} />,
         <View3DButton {...buttonProps} key="view-3d-btn" onFeatureUsed={onFeatureUsed} />,
-        <ToggleInstancesFocusButton disabled={filter !== undefined} key="toggle-instances-focus-btn" onFeatureUsed={onFeatureUsed} />,
+        <ToggleInstancesFocusButton disabled={searchText !== undefined} key="toggle-instances-focus-btn" onFeatureUsed={onFeatureUsed} />,
       ];
 
   useEffect(() => {
-    if (instanceFocusEnabled && filter !== undefined) {
+    if (instanceFocusEnabled && searchText !== undefined) {
       toggleInstanceFocus();
     }
-  }, [instanceFocusEnabled, filter, toggleInstanceFocus]);
+  }, [instanceFocusEnabled, searchText, toggleInstanceFocus]);
 
   return (
     <TelemetryContextProvider componentIdentifier={ModelsTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
       <SelectableTree buttons={buttons}>
-        <ModelsTree {...treeProps} imodel={iModel} activeView={viewport} filter={filter} treeLabel={treeLabel} onModelsFiltered={onModelsFiltered} />
+        <ModelsTree {...treeProps} imodel={iModel} activeView={viewport} searchText={searchText} treeLabel={treeLabel} onModelsFiltered={onModelsFiltered} />
       </SelectableTree>
     </TelemetryContextProvider>
   );

@@ -41,12 +41,12 @@ export interface ModelsTreeFilterTargets {
 /** @internal */
 export async function createFilteredModelsTree(props: {
   imodelAccess: ECClassHierarchyInspector;
-  filteringPaths: HierarchySearchPath[];
+  searchPaths: HierarchySearchPath[];
 }): Promise<FilteredTree<ModelsTreeFilterTargets>> {
-  const { imodelAccess, filteringPaths } = props;
+  const { imodelAccess, searchPaths } = props;
   return createFilteredTree({
     filteredNodesHandler: new ModelsTreeFilteredNodesHandler({ imodelAccess }),
-    filteringPaths,
+    searchPaths,
   });
 }
 

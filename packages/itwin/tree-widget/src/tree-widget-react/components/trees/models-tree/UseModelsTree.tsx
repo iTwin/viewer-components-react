@@ -25,7 +25,7 @@ import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVi
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
 import { ModelsTreeNode } from "./internal/ModelsTreeNode.js";
-import { useFilteredPaths } from "./internal/UseFilteredPaths.js";
+import { useSearchPaths } from "./internal/UseSearchPaths.js";
 import { createFilteredModelsTree } from "./internal/visibility/FilteredTree.js";
 import { ModelsTreeVisibilityHandler } from "./internal/visibility/ModelsTreeVisibilityHandler.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition.js";
@@ -42,7 +42,7 @@ import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCac
 import type { FilteredTree } from "../common/internal/visibility/BaseFilteredTree.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { NormalizedHierarchySearchPath } from "../common/Utils.js";
-import type { ModelsTreeFilteringError, ModelsTreeSubTreeError } from "./internal/UseFilteredPaths.js";
+import type { ModelsTreeSearchError, ModelsTreeSubTreeError } from "./internal/UseSearchPaths.js";
 import type { ModelsTreeFilterTargets } from "./internal/visibility/FilteredTree.js";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/visibility/ModelsTreeVisibilityHandler.js";
 import type { ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition.js";
@@ -56,7 +56,7 @@ export interface UseModelsTreeProps {
    * If `getSearchPaths` function is provided, it will take precedence and automatic filtering by this string will not be applied.
    * Instead, the string will be supplied to the given `getSearchPaths` function for consumers to apply the filtering.
    */
-  filter?: string;
+  searchText?: string;
   activeView: TreeWidgetViewport;
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
   visibilityHandlerOverrides?: ModelsTreeVisibilityHandlerOverrides;
@@ -80,8 +80,8 @@ export interface UseModelsTreeProps {
   getSearchPaths?: (props: {
     /** A function that creates filtering paths based on provided target instance keys or node label. */
     createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<NormalizedHierarchySearchPath[]>;
-    /** Filter which would be used to create filter paths if `getSearchPaths` wouldn't be provided. */
-    filter?: string;
+    /** Search text which would be used to create search paths if `getSearchPaths` wouldn't be provided. */
+    searchText?: string;
   }) => Promise<HierarchySearchPath[] | undefined>;
   /**
    * Optional function for restricting the visible hierarchy to a specific sub-tree of nodes, without changing how filtering works.
@@ -123,7 +123,7 @@ interface UseModelsTreeResult {
  */
 export function useModelsTree({
   activeView,
-  filter,
+  searchText,
   hierarchyConfig,
   visibilityHandlerOverrides,
   getSearchPaths,
@@ -148,7 +148,7 @@ export function useModelsTree({
     componentId,
   });
 
-  const { visibilityHandlerFactory, onFilteredPathsChanged } = useCachedVisibility<ModelsTreeIdsCache, ModelsTreeFilterTargets>({
+  const { visibilityHandlerFactory, onSearchPathsChanged } = useCachedVisibility<ModelsTreeIdsCache, ModelsTreeFilterTargets>({
     activeView,
     createFilteredTree,
     createTreeSpecificVisibilityHandler: useCallback(
@@ -164,12 +164,12 @@ export function useModelsTree({
     [getModelsTreeIdsCache, hierarchyConfiguration, componentId],
   );
 
-  const { getPaths, filteringError, subTreeError } = useFilteredPaths({
+  const { getPaths, searchError, subTreeError } = useSearchPaths({
     hierarchyConfiguration,
-    filter,
+    searchText,
     getSearchPaths,
     getModelsTreeIdsCache,
-    onFilteredPathsChanged,
+    onSearchPathsChanged,
     onModelsFiltered,
     getSubTreePaths,
     componentId,
@@ -193,10 +193,10 @@ export function useModelsTree({
       getHierarchyDefinition,
       getSearchPaths: getPaths,
       emptyTreeContent: useMemo(
-        () => getEmptyTreeContentComponent(filter, subTreeError, filteringError, emptyTreeContent),
-        [filter, subTreeError, filteringError, emptyTreeContent],
+        () => getEmptyTreeContentComponent(searchText, subTreeError, searchError, emptyTreeContent),
+        [searchText, subTreeError, searchError, emptyTreeContent],
       ),
-      highlightText: filter,
+      highlightText: searchText,
       selectionPredicate: nodeSelectionPredicate,
     },
     rendererProps: {
@@ -207,10 +207,10 @@ export function useModelsTree({
 }
 
 async function createFilteredTree(props: CreateFilteredTreeProps<ModelsTreeIdsCache>): Promise<FilteredTree<ModelsTreeFilterTargets>> {
-  const { filteringPaths, imodelAccess } = props;
+  const { searchPaths, imodelAccess } = props;
   return createFilteredModelsTree({
     imodelAccess,
-    filteringPaths,
+    searchPaths,
   });
 }
 
@@ -230,7 +230,7 @@ function createTreeSpecificVisibilityHandler(
 function getEmptyTreeContentComponent(
   filter?: string,
   subTreeError?: ModelsTreeSubTreeError,
-  error?: ModelsTreeFilteringError,
+  error?: ModelsTreeSearchError,
   emptyTreeContent?: React.ReactNode,
 ) {
   if (isSubTreeError(subTreeError)) {
@@ -240,7 +240,7 @@ function getEmptyTreeContentComponent(
     return <InstanceFocusError error={error} />;
   }
   if (isFilterError(error)) {
-    if (error === "tooManyFilterMatches") {
+    if (error === "tooManySearchMatches") {
       return <TooManyFilterMatches base={"modelsTree"} />;
     }
     return <FilterUnknownError base={"modelsTree"} />;
@@ -258,15 +258,15 @@ function isSubTreeError(error: ModelsTreeSubTreeError | undefined) {
   return error === "unknownSubTreeError";
 }
 
-function isFilterError(error: ModelsTreeFilteringError | undefined) {
-  return error === "tooManyFilterMatches" || error === "unknownFilterError";
+function isFilterError(error: ModelsTreeSearchError | undefined) {
+  return error === "tooManySearchMatches" || error === "unknownSearchError";
 }
 
-function isInstanceFocusError(error: ModelsTreeFilteringError | undefined): error is "tooManyInstancesFocused" | "unknownInstanceFocusError" {
+function isInstanceFocusError(error: ModelsTreeSearchError | undefined): error is "tooManyInstancesFocused" | "unknownInstanceFocusError" {
   return error === "tooManyInstancesFocused" || error === "unknownInstanceFocusError";
 }
 
-function InstanceFocusError({ error }: { error: ModelsTreeFilteringError }) {
+function InstanceFocusError({ error }: { error: ModelsTreeSearchError }) {
   if (error === "tooManyInstancesFocused") {
     return <TooManyInstancesFocused base={"modelsTree"} />;
   }

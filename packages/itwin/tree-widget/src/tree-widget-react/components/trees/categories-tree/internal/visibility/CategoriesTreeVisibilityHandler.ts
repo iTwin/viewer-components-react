@@ -388,18 +388,18 @@ export function createCategoriesTreeVisibilityHandler(props: {
   viewport: TreeWidgetViewport;
   idsCache: CategoriesTreeIdsCache;
   imodelAccess: ECClassHierarchyInspector;
-  filteredPaths?: HierarchySearchPath[];
+  searchPaths?: HierarchySearchPath[];
   hierarchyConfig: CategoriesTreeHierarchyConfiguration;
 }) {
   return new HierarchyVisibilityHandlerImpl<CategoriesTreeFilterTargets>({
     getFilteredTree: (): undefined | Promise<FilteredTree<CategoriesTreeFilterTargets>> => {
-      if (!props.filteredPaths) {
+      if (!props.searchPaths) {
         return undefined;
       }
       const { categoryClass, elementClass, modelClass } = getClassesByView(props.viewport.viewType === "2d" ? "2d" : "3d");
       return createFilteredCategoriesTree({
         idsCache: props.idsCache,
-        filteringPaths: props.filteredPaths,
+        searchPaths: props.searchPaths,
         imodelAccess: props.imodelAccess,
         categoryClassName: categoryClass,
         categoryElementClassName: elementClass,

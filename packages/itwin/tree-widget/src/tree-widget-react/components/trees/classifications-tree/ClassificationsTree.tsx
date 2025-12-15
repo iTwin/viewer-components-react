@@ -34,14 +34,14 @@ export function ClassificationsTree({
   getMenuActions,
   getContextMenuActions,
   getEditingProps,
-  filter,
+  searchText,
   treeLabel,
 }: ClassificationsTreeProps) {
   const { classificationsTreeProps, rendererProps } = useClassificationsTree({
     activeView,
     hierarchyConfig,
     emptyTreeContent,
-    filter,
+    searchText,
   });
 
   return (

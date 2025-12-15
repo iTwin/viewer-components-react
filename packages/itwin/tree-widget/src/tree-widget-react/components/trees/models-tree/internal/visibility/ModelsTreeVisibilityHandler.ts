@@ -373,15 +373,15 @@ export function createModelsTreeVisibilityHandler(props: {
   idsCache: ModelsTreeIdsCache;
   imodelAccess: ECClassHierarchyInspector;
   overrides?: ModelsTreeVisibilityHandlerOverrides;
-  filteredPaths?: HierarchySearchPath[];
+  searchPaths?: HierarchySearchPath[];
 }) {
   return new HierarchyVisibilityHandlerImpl<ModelsTreeFilterTargets>({
     getFilteredTree: (): undefined | Promise<FilteredTree<ModelsTreeFilterTargets>> => {
-      if (!props.filteredPaths) {
+      if (!props.searchPaths) {
         return undefined;
       }
       return createFilteredModelsTree({
-        filteringPaths: props.filteredPaths,
+        searchPaths: props.searchPaths,
         imodelAccess: props.imodelAccess,
       });
     },

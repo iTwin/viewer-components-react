@@ -115,7 +115,7 @@ const configuredUiItems = new Map<string, UiItem>([
                     hierarchyConfig={{
                       hideRootSubject: true,
                     }}
-                    filter={props.filter}
+                    searchText={props.searchText}
                     selectionStorage={unifiedSelectionStorage}
                     selectionMode={"extended"}
                     onPerformanceMeasured={props.onPerformanceMeasured}
@@ -130,7 +130,7 @@ const configuredUiItems = new Map<string, UiItem>([
                 isSearchable: true,
                 render: (props) => (
                   <CategoriesTreeComponent
-                    filter={props.filter}
+                    searchText={props.searchText}
                     selectionStorage={unifiedSelectionStorage}
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}
@@ -171,7 +171,7 @@ const configuredUiItems = new Map<string, UiItem>([
                 isSearchable: true,
                 render: (props) => (
                   <ClassificationsTreeComponent
-                    filter={props.filter}
+                    searchText={props.searchText}
                     selectionStorage={unifiedSelectionStorage}
                     hierarchyConfig={{ rootClassificationSystemCode: "50k classifications" }}
                     getMenuActions={() => [<RenameAction key={"renameAction"} />]}
@@ -189,7 +189,7 @@ const configuredUiItems = new Map<string, UiItem>([
                 id: "CustomClassificationsTree",
                 getLabel: () => "Custom Classifications tree",
                 isSearchable: true,
-                render: (props) => <CustomClassificationsTree filter={props.filter} />,
+                render: (props) => <CustomClassificationsTree searchText={props.searchText} />,
               },
             ];
             return [

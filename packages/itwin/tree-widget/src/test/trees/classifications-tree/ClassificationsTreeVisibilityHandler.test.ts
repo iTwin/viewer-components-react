@@ -60,12 +60,12 @@ describe("ClassificationsTreeVisibilityHandler", () => {
   }: {
     idsCache: ClassificationsTreeIdsCache;
     imodelAccess: ReturnType<typeof createIModelAccess>;
-    filterPaths?: HierarchyNodeIdentifiersPath[];
+    searchPaths?: HierarchyNodeIdentifiersPath[];
   }) {
     return createIModelHierarchyProvider({
       hierarchyDefinition: new ClassificationsTreeDefinition({ ...props, getIdsCache: () => idsCache, hierarchyConfig: { rootClassificationSystemCode } }),
       imodelAccess: props.imodelAccess,
-      ...(props.filterPaths ? { search: { paths: props.filterPaths } } : undefined),
+      ...(props.searchPaths ? { search: { paths: props.searchPaths } } : undefined),
     });
   }
 
@@ -773,11 +773,11 @@ describe("ClassificationsTreeVisibilityHandler", () => {
   describe("filtered nodes", () => {
     async function createFilteredVisibilityTestData({
       imodel,
-      filterPaths,
+      searchPaths,
       view,
       visibleByDefault,
     }: Parameters<typeof createVisibilityTestData>[0] & {
-      filterPaths: HierarchyNodeIdentifiersPath[];
+      searchPaths: HierarchyNodeIdentifiersPath[];
       view: "3d" | "2d";
       visibleByDefault?: boolean;
     }) {
@@ -788,9 +788,9 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         viewType: view,
         visibleByDefault: !!visibleByDefault,
       });
-      const handler = createClassificationsTreeVisibilityHandler({ idsCache, viewport, imodelAccess, filteredPaths: filterPaths });
+      const handler = createClassificationsTreeVisibilityHandler({ idsCache, viewport, imodelAccess, searchPaths });
       const defaultProvider = createProvider({ idsCache, imodelAccess });
-      const filteredProvider = createProvider({ idsCache, imodelAccess, filterPaths });
+      const filteredProvider = createProvider({ idsCache, imodelAccess, searchPaths });
       return {
         handler,
         defaultProvider,
@@ -839,14 +839,14 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           spatialCategory,
           element1,
           element2,
-          filterPaths: [[table, classification, element1]],
+          searchPaths: [[table, classification, element1]],
         };
       });
 
-      const { imodel, filterPaths, ...keys } = buildIModelResult;
+      const { imodel, searchPaths, ...keys } = buildIModelResult;
       using visibilityTestData = await createFilteredVisibilityTestData({
         imodel,
-        filterPaths,
+        searchPaths,
         view: "3d",
       });
       const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
@@ -915,14 +915,14 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           drawingCategory,
           element1,
           element2,
-          filterPaths: [[table, classification, element1]],
+          searchPaths: [[table, classification, element1]],
         };
       });
 
-      const { imodel, filterPaths, ...keys } = buildIModelResult;
+      const { imodel, searchPaths, ...keys } = buildIModelResult;
       using visibilityTestData = await createFilteredVisibilityTestData({
         imodel,
-        filterPaths,
+        searchPaths,
         view: "2d",
       });
       const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
@@ -1003,14 +1003,14 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           element1,
           element2,
           element3,
-          filterPaths: [[table, classification1, element1]],
+          searchPaths: [[table, classification1, element1]],
         };
       });
 
-      const { imodel, filterPaths, ...keys } = buildIModelResult;
+      const { imodel, searchPaths, ...keys } = buildIModelResult;
       using visibilityTestData = await createFilteredVisibilityTestData({
         imodel,
-        filterPaths,
+        searchPaths,
         view: "3d",
       });
       const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
@@ -1091,14 +1091,14 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           element1,
           element2,
           element3,
-          filterPaths: [[table, classification1, element1]],
+          searchPaths: [[table, classification1, element1]],
         };
       });
 
-      const { imodel, filterPaths, ...keys } = buildIModelResult;
+      const { imodel, searchPaths, ...keys } = buildIModelResult;
       using visibilityTestData = await createFilteredVisibilityTestData({
         imodel,
-        filterPaths,
+        searchPaths,
         view: "3d",
       });
       const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
@@ -1142,16 +1142,16 @@ function createClassificationsTreeVisibilityHandler(props: {
   viewport: TreeWidgetViewport;
   idsCache: ClassificationsTreeIdsCache;
   imodelAccess: ECClassHierarchyInspector;
-  filteredPaths?: HierarchySearchPath[];
+  searchPaths?: HierarchySearchPath[];
 }) {
   return new HierarchyVisibilityHandlerImpl<ClassificationsTreeFilterTargets>({
     getFilteredTree: (): undefined | Promise<FilteredTree<ClassificationsTreeFilterTargets>> => {
-      if (!props.filteredPaths) {
+      if (!props.searchPaths) {
         return undefined;
       }
       return createFilteredClassificationsTree({
         idsCache: props.idsCache,
-        filteringPaths: props.filteredPaths,
+        searchPaths: props.searchPaths,
         imodelAccess: props.imodelAccess,
       });
     },

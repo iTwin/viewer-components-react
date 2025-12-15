@@ -97,13 +97,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
   function createProvider(props: {
     idsCache: CategoriesTreeIdsCache;
     imodelAccess: ReturnType<typeof createIModelAccess>;
-    filterPaths?: HierarchyNodeIdentifiersPath[];
+    searchPaths?: HierarchyNodeIdentifiersPath[];
     hierarchyConfig: CategoriesTreeHierarchyConfiguration;
   }) {
     return createIModelHierarchyProvider({
       hierarchyDefinition: new CategoriesTreeDefinition({ ...props, viewType: "3d" }),
       imodelAccess: props.imodelAccess,
-      ...(props.filterPaths ? { filtering: { paths: props.filterPaths } } : undefined),
+      ...(props.searchPaths ? { search: { paths: props.searchPaths } } : undefined),
     });
   }
 
@@ -127,7 +127,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       viewport: commonProps.viewport,
       idsCache: commonProps.idsCache,
       imodelAccess: commonProps.imodelAccess,
-      filteredPaths: undefined,
+      searchPaths: undefined,
       hierarchyConfig: hierarchyConfiguration,
     });
     const provider = createProvider({ ...commonProps });

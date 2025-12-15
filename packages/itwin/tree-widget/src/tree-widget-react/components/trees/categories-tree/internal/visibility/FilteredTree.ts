@@ -75,13 +75,13 @@ type TemporaryFilteredTreeNode =
 /** @internal */
 export async function createFilteredCategoriesTree(props: {
   imodelAccess: ECClassHierarchyInspector;
-  filteringPaths: HierarchySearchPath[];
+  searchPaths: HierarchySearchPath[];
   categoryClassName: string;
   categoryElementClassName: string;
   categoryModelClassName: string;
   idsCache: CategoriesTreeIdsCache;
 }): Promise<FilteredTree<CategoriesTreeFilterTargets>> {
-  const { imodelAccess, filteringPaths, categoryClassName, categoryElementClassName, categoryModelClassName, idsCache } = props;
+  const { imodelAccess, searchPaths, categoryClassName, categoryElementClassName, categoryModelClassName, idsCache } = props;
   return createFilteredTree({
     filteredNodesHandler: new CategoriesTreeFilteredNodesHandler({
       idsCache,
@@ -90,7 +90,7 @@ export async function createFilteredCategoriesTree(props: {
       categoryElementClassName,
       categoryModelClassName,
     }),
-    filteringPaths,
+    searchPaths,
   });
 }
 

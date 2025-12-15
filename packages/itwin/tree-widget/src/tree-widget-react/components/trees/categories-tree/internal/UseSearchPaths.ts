@@ -21,44 +21,44 @@ import type { CategoriesTreeHierarchyConfiguration } from "../CategoriesTreeDefi
 import type { CategoriesTreeIdsCache } from "./CategoriesTreeIdsCache.js";
 
 /** @internal */
-export type CategoriesTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError";
+export type CategoriesTreeSearchError = "tooManySearchMatches" | "unknownSearchError";
 
 type HierarchySearchPaths = Awaited<ReturnType<Required<VisibilityTreeProps>["getSearchPaths"]>>;
 
 /** @internal */
-export function useFilteredPaths({
-  filter,
+export function useSearchPaths({
+  searchText,
   viewType,
   hierarchyConfiguration,
   getCategoriesTreeIdsCache,
   onCategoriesFiltered,
-  onFilteredPathsChanged,
+  onSearchPathsChanged,
   componentId,
 }: {
   viewType: "2d" | "3d";
-  filter?: string;
+  searchText?: string;
   hierarchyConfiguration: CategoriesTreeHierarchyConfiguration;
   getCategoriesTreeIdsCache: () => CategoriesTreeIdsCache;
   onCategoriesFiltered?: (categories: { categories: CategoryInfo[] | undefined; models?: Array<ModelId> }) => void;
-  onFilteredPathsChanged: (paths: HierarchySearchPaths | undefined) => void;
+  onSearchPathsChanged: (paths: HierarchySearchPaths | undefined) => void;
   componentId: GuidString;
 }): {
   getPaths: VisibilityTreeProps["getSearchPaths"] | undefined;
-  filteringError: CategoriesTreeFilteringError | undefined;
+  searchError: CategoriesTreeSearchError | undefined;
 } {
-  const [filteringError, setFilteringError] = useState<CategoriesTreeFilteringError | undefined>();
+  const [searchError, setSearchError] = useState<CategoriesTreeSearchError | undefined>();
   const { onFeatureUsed } = useTelemetryContext();
 
   useEffect(() => {
-    setFilteringError(undefined);
+    setSearchError(undefined);
     onCategoriesFiltered?.({ categories: undefined, models: undefined });
-    if (!filter) {
-      onFilteredPathsChanged(undefined);
+    if (!searchText) {
+      onSearchPathsChanged(undefined);
     }
-  }, [filter, onCategoriesFiltered, onFilteredPathsChanged]);
+  }, [searchText, onCategoriesFiltered, onSearchPathsChanged]);
 
   const getSearchPaths = useMemo<VisibilityTreeProps["getSearchPaths"] | undefined>(() => {
-    if (!filter) {
+    if (!searchText) {
       return undefined;
     }
 
@@ -68,31 +68,31 @@ export function useFilteredPaths({
         const paths = await CategoriesTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
           abortSignal,
-          label: filter,
+          label: searchText,
           viewType,
           idsCache: getCategoriesTreeIdsCache(),
           hierarchyConfig: hierarchyConfiguration,
           componentId,
         });
-        onFilteredPathsChanged(paths);
+        onSearchPathsChanged(paths);
         const { elementClass, modelClass } = getClassesByView(viewType);
         onCategoriesFiltered?.(await getCategoriesFromPaths(paths, getCategoriesTreeIdsCache(), elementClass, modelClass, hierarchyConfiguration));
         return paths;
       } catch (e) {
-        const newError = e instanceof FilterLimitExceededError ? "tooManyFilterMatches" : "unknownFilterError";
-        if (newError !== "tooManyFilterMatches") {
+        const newError = e instanceof FilterLimitExceededError ? "tooManySearchMatches" : "unknownSearchError";
+        if (newError !== "tooManySearchMatches") {
           const feature = e instanceof Error && e.message.includes("query too long to execute or server is too busy") ? "error-timeout" : "error-unknown";
           onFeatureUsed({ featureId: feature, reportInteraction: false });
         }
-        setFilteringError(newError);
+        setSearchError(newError);
         return [];
       }
     };
-  }, [onCategoriesFiltered, filter, onFilteredPathsChanged, onFeatureUsed, viewType, getCategoriesTreeIdsCache, hierarchyConfiguration, componentId]);
+  }, [onCategoriesFiltered, searchText, onSearchPathsChanged, onFeatureUsed, viewType, getCategoriesTreeIdsCache, hierarchyConfiguration, componentId]);
 
   return {
     getPaths: getSearchPaths,
-    filteringError,
+    searchError,
   };
 }
 

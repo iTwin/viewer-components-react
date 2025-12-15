@@ -18,7 +18,7 @@ import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { getClassesByView } from "../common/internal/Utils.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
-import { useFilteredPaths } from "./internal/UseFilteredPaths.js";
+import { useSearchPaths } from "./internal/UseSearchPaths.js";
 import { CategoriesTreeVisibilityHandler } from "./internal/visibility/CategoriesTreeVisibilityHandler.js";
 import { createFilteredCategoriesTree } from "./internal/visibility/FilteredTree.js";
 
@@ -33,14 +33,14 @@ import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCac
 import type { FilteredTree } from "../common/internal/visibility/BaseFilteredTree.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { CategoriesTreeHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
-import type { CategoriesTreeFilteringError } from "./internal/UseFilteredPaths.js";
+import type { CategoriesTreeSearchError } from "./internal/UseSearchPaths.js";
 import type { CategoriesTreeFilterTargets } from "./internal/visibility/FilteredTree.js";
 
 /** @beta */
 export interface UseCategoriesTreeProps {
   activeView: TreeWidgetViewport;
   onCategoriesFiltered?: (props: { categories: CategoryInfo[] | undefined; models?: Id64Array }) => void;
-  filter?: string;
+  searchText?: string;
   emptyTreeContent?: ReactNode;
   hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>;
 }
@@ -59,7 +59,7 @@ interface UseCategoriesTreeResult {
  * @beta
  */
 export function useCategoriesTree({
-  filter,
+  searchText,
   activeView,
   onCategoriesFiltered,
   emptyTreeContent,
@@ -83,7 +83,7 @@ export function useCategoriesTree({
     componentId,
   });
 
-  const { visibilityHandlerFactory, onFilteredPathsChanged } = useCategoriesCachedVisibility({
+  const { visibilityHandlerFactory, onSearchPathsChanged } = useCategoriesCachedVisibility({
     activeView,
     viewType,
     getCache: getCategoriesTreeIdsCache,
@@ -98,11 +98,11 @@ export function useCategoriesTree({
     [viewType, getCategoriesTreeIdsCache, hierarchyConfiguration],
   );
 
-  const { getPaths, filteringError } = useFilteredPaths({
+  const { getPaths, searchError } = useSearchPaths({
     hierarchyConfiguration,
-    filter,
+    searchText,
     getCategoriesTreeIdsCache,
-    onFilteredPathsChanged,
+    onSearchPathsChanged,
     viewType,
     onCategoriesFiltered,
     componentId,
@@ -114,8 +114,8 @@ export function useCategoriesTree({
       getHierarchyDefinition,
       getSearchPaths: getPaths,
       visibilityHandlerFactory,
-      emptyTreeContent: useMemo(() => getEmptyTreeContentComponent(filter, filteringError, emptyTreeContent), [filter, filteringError, emptyTreeContent]),
-      highlightText: filter,
+      emptyTreeContent: useMemo(() => getEmptyTreeContentComponent(searchText, searchError, emptyTreeContent), [searchText, searchError, emptyTreeContent]),
+      highlightText: searchText,
     },
     rendererProps: {
       getDecorations: useCallback((node) => <CategoriesTreeIcon node={node} />, []),
@@ -124,14 +124,14 @@ export function useCategoriesTree({
   };
 }
 
-function getEmptyTreeContentComponent(filter?: string, error?: CategoriesTreeFilteringError, emptyTreeContent?: React.ReactNode) {
+function getEmptyTreeContentComponent(searchText?: string, error?: CategoriesTreeSearchError, emptyTreeContent?: React.ReactNode) {
   if (error) {
-    if (error === "tooManyFilterMatches") {
+    if (error === "tooManySearchMatches") {
       return <TooManyFilterMatches base={"categoriesTree"} />;
     }
     return <FilterUnknownError base={"categoriesTree"} />;
   }
-  if (filter) {
+  if (searchText) {
     return <NoFilterMatches base={"categoriesTree"} />;
   }
   if (emptyTreeContent) {
@@ -178,7 +178,7 @@ function useCategoriesCachedVisibility(props: {
   hierarchyConfig: CategoriesTreeHierarchyConfiguration;
 }) {
   const { activeView, getCache, viewType, componentId } = props;
-  const { visibilityHandlerFactory, filteredPaths, onFilteredPathsChanged } = useCachedVisibility<CategoriesTreeIdsCache, CategoriesTreeFilterTargets>({
+  const { visibilityHandlerFactory, searchPaths, onSearchPathsChanged } = useCachedVisibility<CategoriesTreeIdsCache, CategoriesTreeFilterTargets>({
     activeView,
     getCache,
     createFilteredTree: useCallback(
@@ -195,11 +195,11 @@ function useCategoriesCachedVisibility(props: {
 
   useEffect(() => {
     getCache().clearFilteredElementsModels();
-  }, [filteredPaths, getCache]);
+  }, [searchPaths, getCache]);
 
   return {
     visibilityHandlerFactory,
-    onFilteredPathsChanged,
+    onSearchPathsChanged,
   };
 }
 
@@ -218,10 +218,10 @@ function createTreeSpecificVisibilityHandler(
 async function createFilteredTree(
   props: CreateFilteredTreeProps<CategoriesTreeIdsCache> & { viewClasses: ReturnType<typeof getClassesByView> },
 ): Promise<FilteredTree<CategoriesTreeFilterTargets>> {
-  const { filteringPaths, imodelAccess, getCache, viewClasses } = props;
+  const { searchPaths, imodelAccess, getCache, viewClasses } = props;
   return createFilteredCategoriesTree({
     imodelAccess,
-    filteringPaths,
+    searchPaths,
     idsCache: getCache(),
     categoryClassName: viewClasses.categoryClass,
     categoryElementClassName: viewClasses.elementClass,

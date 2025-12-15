@@ -25,7 +25,7 @@ const SECONDARY_CONNECTION = {
   changesetId: "",
 };
 
-export function CustomClassificationsTree(props: { filter?: string }) {
+export function CustomClassificationsTree(props: { searchText?: string }) {
   const [state, setState] = useState<{ latest: IModelConnection; checkpoint: IModelConnection } | undefined>(undefined);
 
   useEffect(() => {
@@ -61,11 +61,11 @@ export function CustomClassificationsTree(props: { filter?: string }) {
 function CustomClassificationTreeImpl({
   latestIModel,
   checkpointIModel,
-  filter,
+  searchText,
 }: {
   latestIModel: IModelConnection;
   checkpointIModel: IModelConnection;
-  filter?: string;
+  searchText?: string;
 }) {
   const latestAccess = useMemo(() => {
     const schemaProvider = createECSchemaProvider(latestIModel.schemaContext);
@@ -96,7 +96,7 @@ function CustomClassificationTreeImpl({
       }),
       [],
     ),
-    search: filter ? { searchText: filter } : undefined,
+    search: searchText ? { searchText } : undefined,
   });
   const treeProps = useTree({
     getHierarchyProvider: useCallback(() => {

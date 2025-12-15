@@ -158,7 +158,7 @@ export interface FilteredTree<TFilterTargets> {
 /** @internal */
 export interface CreateFilteredTreeProps<TProcessedFilteredNodes, TFilterTargets, TFilteredTreeNode extends BaseFilteredTreeNode<TFilteredTreeNode>> {
   filteredNodesHandler: FilteredNodesHandler<TProcessedFilteredNodes, TFilterTargets, TFilteredTreeNode>;
-  filteringPaths: HierarchySearchPath[];
+  searchPaths: HierarchySearchPath[];
 }
 
 /**
@@ -168,10 +168,10 @@ export interface CreateFilteredTreeProps<TProcessedFilteredNodes, TFilterTargets
 export async function createFilteredTree<TProcessedFilteredNodes, TFilterTargets, TFilteredTreeNode extends BaseFilteredTreeNode<TFilteredTreeNode>>(
   props: CreateFilteredTreeProps<TProcessedFilteredNodes, TFilterTargets, TFilteredTreeNode>,
 ): Promise<FilteredTree<TFilterTargets>> {
-  const { filteringPaths, filteredNodesHandler } = props;
+  const { searchPaths, filteredNodesHandler } = props;
 
-  for (const filteringPath of filteringPaths) {
-    const normalizedPath = HierarchySearchPath.normalize(filteringPath).path;
+  for (const searchPath of searchPaths) {
+    const normalizedPath = HierarchySearchPath.normalize(searchPath).path;
 
     let parentNode: FilteredTreeRootNode<TFilteredTreeNode> | TFilteredTreeNode = filteredNodesHandler.root;
     for (let i = 0; i < normalizedPath.length; ++i) {

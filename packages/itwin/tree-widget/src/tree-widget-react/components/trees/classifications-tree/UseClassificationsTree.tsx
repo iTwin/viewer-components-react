@@ -14,7 +14,7 @@ import { ClassificationsTreeComponent } from "./ClassificationsTreeComponent.js"
 import { ClassificationsTreeDefinition } from "./ClassificationsTreeDefinition.js";
 import { ClassificationsTreeIcon } from "./ClassificationsTreeIcon.js";
 import { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
-import { useFilteredPaths } from "./internal/UseFilteredPaths.js";
+import { useSearchPaths } from "./internal/UseSearchPaths.js";
 import { ClassificationsTreeVisibilityHandler } from "./internal/visibility/ClassificationsTreeVisibilityHandler.js";
 import { createFilteredClassificationsTree } from "./internal/visibility/FilteredTree.js";
 
@@ -27,7 +27,7 @@ import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCac
 import type { FilteredTree } from "../common/internal/visibility/BaseFilteredTree.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "./ClassificationsTreeDefinition.js";
-import type { ClassificationsTreeFilteringError } from "./internal/UseFilteredPaths.js";
+import type { ClassificationsTreeSearchError } from "./internal/UseSearchPaths.js";
 import type { ClassificationsTreeFilterTargets } from "./internal/visibility/FilteredTree.js";
 
 /** @alpha */
@@ -35,7 +35,7 @@ export interface UseClassificationsTreeProps {
   activeView: TreeWidgetViewport;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
   emptyTreeContent?: ReactNode;
-  filter?: string;
+  searchText?: string;
 }
 
 /** @alpha */
@@ -51,7 +51,7 @@ interface UseClassificationsTreeResult {
  * Custom hook to create and manage state for the categories tree.
  * @alpha
  */
-export function useClassificationsTree({ activeView, emptyTreeContent, filter, ...rest }: UseClassificationsTreeProps): UseClassificationsTreeResult {
+export function useClassificationsTree({ activeView, emptyTreeContent, searchText, ...rest }: UseClassificationsTreeProps): UseClassificationsTreeResult {
   const hierarchyConfig = useMemo(
     () => ({ ...rest.hierarchyConfig }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -68,7 +68,7 @@ export function useClassificationsTree({ activeView, emptyTreeContent, filter, .
     },
   );
 
-  const { visibilityHandlerFactory, onFilteredPathsChanged } = useClassificationsCachedVisibility({
+  const { visibilityHandlerFactory, onSearchPathsChanged } = useClassificationsCachedVisibility({
     activeView,
     getCache: getClassificationsTreeIdsCache,
     componentId,
@@ -81,11 +81,11 @@ export function useClassificationsTree({ activeView, emptyTreeContent, filter, .
     [getClassificationsTreeIdsCache, hierarchyConfig],
   );
 
-  const { getPaths, filteringError } = useFilteredPaths({
+  const { getPaths, searchError } = useSearchPaths({
     hierarchyConfiguration: hierarchyConfig,
-    filter,
+    searchText,
     getClassificationsTreeIdsCache,
-    onFilteredPathsChanged,
+    onSearchPathsChanged,
     componentId,
   });
 
@@ -95,8 +95,8 @@ export function useClassificationsTree({ activeView, emptyTreeContent, filter, .
       getHierarchyDefinition,
       visibilityHandlerFactory,
       getSearchPaths: getPaths,
-      emptyTreeContent: useMemo(() => getEmptyTreeContentComponent(filter, filteringError, emptyTreeContent), [filter, filteringError, emptyTreeContent]),
-      highlightText: filter,
+      emptyTreeContent: useMemo(() => getEmptyTreeContentComponent(searchText, searchError, emptyTreeContent), [searchText, searchError, emptyTreeContent]),
+      highlightText: searchText,
     },
     rendererProps: {
       getDecorations: useCallback((node) => <ClassificationsTreeIcon node={node} />, []),
@@ -108,14 +108,14 @@ function createCache(props: CreateCacheProps<{ hierarchyConfig: ClassificationsT
   return new ClassificationsTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.hierarchyConfig, props.componentId);
 }
 
-function getEmptyTreeContentComponent(filter?: string, error?: ClassificationsTreeFilteringError, emptyTreeContent?: React.ReactNode) {
+function getEmptyTreeContentComponent(searchText?: string, error?: ClassificationsTreeSearchError, emptyTreeContent?: React.ReactNode) {
   if (error) {
-    if (error === "tooManyFilterMatches") {
+    if (error === "tooManySearchMatches") {
       return <TooManyFilterMatches base={"classificationsTree"} />;
     }
     return <FilterUnknownError base={"classificationsTree"} />;
   }
-  if (filter) {
+  if (searchText) {
     return <NoFilterMatches base={"classificationsTree"} />;
   }
   if (emptyTreeContent) {
@@ -126,10 +126,7 @@ function getEmptyTreeContentComponent(filter?: string, error?: ClassificationsTr
 
 function useClassificationsCachedVisibility(props: { activeView: TreeWidgetViewport; getCache: () => ClassificationsTreeIdsCache; componentId: GuidString }) {
   const { activeView, getCache, componentId } = props;
-  const { visibilityHandlerFactory, filteredPaths, onFilteredPathsChanged } = useCachedVisibility<
-    ClassificationsTreeIdsCache,
-    ClassificationsTreeFilterTargets
-  >({
+  const { visibilityHandlerFactory, searchPaths, onSearchPathsChanged } = useCachedVisibility<ClassificationsTreeIdsCache, ClassificationsTreeFilterTargets>({
     activeView,
     getCache,
     createFilteredTree,
@@ -139,19 +136,19 @@ function useClassificationsCachedVisibility(props: { activeView: TreeWidgetViewp
 
   useEffect(() => {
     getCache().clearFilteredElementsData();
-  }, [filteredPaths, getCache]);
+  }, [searchPaths, getCache]);
 
   return {
     visibilityHandlerFactory,
-    onFilteredPathsChanged,
+    onSearchPathsChanged,
   };
 }
 
 async function createFilteredTree(props: CreateFilteredTreeProps<ClassificationsTreeIdsCache>): Promise<FilteredTree<ClassificationsTreeFilterTargets>> {
-  const { filteringPaths, getCache, imodelAccess } = props;
+  const { searchPaths, getCache, imodelAccess } = props;
   return createFilteredClassificationsTree({
     idsCache: getCache(),
-    filteringPaths,
+    searchPaths,
     imodelAccess,
   });
 }

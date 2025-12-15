@@ -1752,12 +1752,12 @@ describe("ModelsTreeVisibilityHandler", () => {
       idsCache: ModelsTreeIdsCache;
       imodelAccess: ReturnType<typeof createIModelAccess>;
       hierarchyConfig: typeof defaultHierarchyConfiguration;
-      filterPaths?: HierarchyNodeIdentifiersPath[];
+      searchPaths?: HierarchyNodeIdentifiersPath[];
     }) {
       return createIModelHierarchyProvider({
         hierarchyDefinition: new ModelsTreeDefinition({ ...props }),
         imodelAccess: props.imodelAccess,
-        ...(props.filterPaths ? { search: { paths: props.filterPaths } } : undefined),
+        ...(props.searchPaths ? { search: { paths: props.searchPaths } } : undefined),
       });
     }
 
@@ -3527,13 +3527,13 @@ describe("ModelsTreeVisibilityHandler", () => {
     describe("filtered nodes", () => {
       function createFilteredVisibilityTestData({
         imodel,
-        filterPaths,
-      }: Parameters<typeof createVisibilityTestData>[0] & { filterPaths: HierarchyNodeIdentifiersPath[] }) {
+        searchPaths,
+      }: Parameters<typeof createVisibilityTestData>[0] & { searchPaths: HierarchyNodeIdentifiersPath[] }) {
         const commonProps = createCommonProps({ imodel });
-        const filteredVisibilityHandler = createModelsTreeVisibilityHandler({ ...commonProps, filteredPaths: filterPaths });
+        const filteredVisibilityHandler = createModelsTreeVisibilityHandler({ ...commonProps, searchPaths });
         const defaultVisibilityHandler = createModelsTreeVisibilityHandler(commonProps);
         const defaultProvider = createProvider(commonProps);
-        const filteredProvider = createProvider({ ...commonProps, filterPaths });
+        const filteredProvider = createProvider({ ...commonProps, searchPaths });
         return {
           defaultVisibilityHandler,
           defaultProvider,
@@ -3592,12 +3592,12 @@ describe("ModelsTreeVisibilityHandler", () => {
               model,
               category,
               filterTargetElement,
-              filterPaths: [[model, category, filterTargetElement]],
+              searchPaths: [[model, category, filterTargetElement]],
             };
           });
 
-          const { imodel, filterPaths, ...keys } = buildIModelResult;
-          using visibilityTestData = createFilteredVisibilityTestData({ imodel, filterPaths });
+          const { imodel, searchPaths, ...keys } = buildIModelResult;
+          using visibilityTestData = createFilteredVisibilityTestData({ imodel, searchPaths });
           const { defaultVisibilityHandler, filteredVisibilityHandler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
           const node = await getNodeMatchingPath(filteredProvider, [keys.model]);
           await filteredVisibilityHandler.changeVisibility(node, true);
@@ -3650,7 +3650,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             return {
               model,
               filteredCategories,
-              filterPaths: paths,
+              searchPaths: paths,
               filterTargetElements: filterTargets,
             };
           });
@@ -3658,8 +3658,8 @@ describe("ModelsTreeVisibilityHandler", () => {
 
         it("switches on only filtered hierarchy when root node is clicked", async function () {
           await using buildIModelResult = await createIModel(this);
-          const { imodel, filterPaths, filterTargetElements, ...keys } = buildIModelResult;
-          using visibilityTestData = createFilteredVisibilityTestData({ imodel, filterPaths });
+          const { imodel, searchPaths, filterTargetElements, ...keys } = buildIModelResult;
+          using visibilityTestData = createFilteredVisibilityTestData({ imodel, searchPaths });
           const { defaultVisibilityHandler, filteredVisibilityHandler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
 
           const node = await getNodeMatchingPath(filteredProvider, [keys.model]);
@@ -3688,8 +3688,8 @@ describe("ModelsTreeVisibilityHandler", () => {
 
         it("switches on only filtered hierarchy when one of the filtered categories is clicked", async function () {
           await using buildIModelResult = await createIModel(this);
-          const { imodel, filterPaths, filteredCategories, filterTargetElements, ...keys } = buildIModelResult;
-          using visibilityTestData = createFilteredVisibilityTestData({ imodel, filterPaths });
+          const { imodel, searchPaths, filteredCategories, filterTargetElements, ...keys } = buildIModelResult;
+          using visibilityTestData = createFilteredVisibilityTestData({ imodel, searchPaths });
           const { defaultVisibilityHandler, filteredVisibilityHandler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
 
           const pathToCategory = [keys.model, filteredCategories[0]];
@@ -3729,7 +3729,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       describe("multiple paths to a category and element under it", () => {
         async function createIModel(context: Mocha.Context) {
           return buildIModel(context, async (builder) => {
-            const filterPaths = new Array<InstanceKey[]>();
+            const searchPaths = new Array<InstanceKey[]>();
             const subjectIds = new Array<Id64String>();
             const modelIds = new Array<Id64String>();
 
@@ -3745,22 +3745,22 @@ describe("ModelsTreeVisibilityHandler", () => {
               ];
               subjectIds.push(subject.id);
               modelIds.push(model.id);
-              filterPaths.push([parentSubject, subject, model, category], [parentSubject, subject, model, category, elements[0]]);
+              searchPaths.push([parentSubject, subject, model, category], [parentSubject, subject, model, category, elements[0]]);
             }
 
             return {
               parentSubject,
               subjectIds,
               modelIds,
-              filterPaths,
+              searchPaths,
             };
           });
         }
 
         it("when clicking on model turns on category and all its elements", async function () {
           await using buildIModelResult = await createIModel(this);
-          const { imodel, filterPaths, parentSubject } = buildIModelResult;
-          using visibilityTestData = createFilteredVisibilityTestData({ imodel, filterPaths });
+          const { imodel, searchPaths, parentSubject } = buildIModelResult;
+          using visibilityTestData = createFilteredVisibilityTestData({ imodel, searchPaths });
           const { defaultVisibilityHandler, filteredVisibilityHandler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
 
           const node = await getNodeMatchingPath(filteredProvider, [parentSubject]);
@@ -3783,11 +3783,11 @@ describe("ModelsTreeVisibilityHandler", () => {
 
         it("when clicking on one of the categories it turns on only that category", async function () {
           await using buildIModelResult = await createIModel(this);
-          const { imodel, filterPaths, parentSubject, subjectIds, modelIds } = buildIModelResult;
-          using visibilityTestData = createFilteredVisibilityTestData({ imodel, filterPaths });
+          const { imodel, searchPaths, parentSubject, subjectIds, modelIds } = buildIModelResult;
+          using visibilityTestData = createFilteredVisibilityTestData({ imodel, searchPaths });
           const { defaultVisibilityHandler, filteredVisibilityHandler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
 
-          const pathToCategory = filterPaths[0];
+          const pathToCategory = searchPaths[0];
           const node = await getNodeMatchingPath(filteredProvider, pathToCategory);
           await filteredVisibilityHandler.changeVisibility(node, true);
 
@@ -3854,12 +3854,12 @@ describe("ModelsTreeVisibilityHandler", () => {
           return {
             firstElement: element1.id,
             pathToFirstElement: paths[0],
-            filterPaths: paths,
+            searchPaths: paths,
           };
         });
 
-        const { imodel, filterPaths, firstElement, pathToFirstElement } = buildIModelResult;
-        using visibilityTestData = createFilteredVisibilityTestData({ imodel, filterPaths });
+        const { imodel, searchPaths, firstElement, pathToFirstElement } = buildIModelResult;
+        using visibilityTestData = createFilteredVisibilityTestData({ imodel, searchPaths });
         const { defaultVisibilityHandler, filteredVisibilityHandler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
 
         const node = await getNodeMatchingPath(filteredProvider, pathToFirstElement);

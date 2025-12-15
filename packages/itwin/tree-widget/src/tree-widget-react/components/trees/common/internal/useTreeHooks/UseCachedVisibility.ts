@@ -28,7 +28,7 @@ import type { IVisibilityChangeEventListener } from "../VisibilityChangeEventLis
 export interface CreateFilteredTreeProps<TCache> {
   getCache: () => TCache;
   imodelAccess: ECClassHierarchyInspector;
-  filteringPaths: HierarchySearchPath[];
+  searchPaths: HierarchySearchPath[];
 }
 
 /** @internal */
@@ -50,7 +50,7 @@ export interface UseCachedVisibilityProps<TCache, TFilterTargets> {
 
 /** @internal */
 export function useCachedVisibility<TCache, TFilterTargets>(props: UseCachedVisibilityProps<TCache, TFilterTargets>) {
-  const [filteredPaths, setFilteredPaths] = useState<HierarchySearchPath[] | undefined>(undefined);
+  const [searchPaths, setSearchPaths] = useState<HierarchySearchPath[] | undefined>(undefined);
   const { activeView, getCache, createFilteredTree, createTreeSpecificVisibilityHandler, componentId } = props;
 
   const [visibilityHandlerFactory, setVisibilityHandlerFactory] = useState<VisibilityTreeProps["visibilityHandlerFactory"]>(() =>
@@ -59,7 +59,7 @@ export function useCachedVisibility<TCache, TFilterTargets>(props: UseCachedVisi
       getCache,
       createFilteredTree,
       createTreeSpecificVisibilityHandler,
-      filteringPaths: filteredPaths,
+      searchPaths,
       componentId,
     }),
   );
@@ -71,32 +71,32 @@ export function useCachedVisibility<TCache, TFilterTargets>(props: UseCachedVisi
         getCache,
         createFilteredTree,
         createTreeSpecificVisibilityHandler,
-        filteringPaths: filteredPaths,
+        searchPaths,
         componentId,
       }),
     );
-  }, [activeView, getCache, filteredPaths, createFilteredTree, createTreeSpecificVisibilityHandler, componentId]);
+  }, [activeView, getCache, searchPaths, createFilteredTree, createTreeSpecificVisibilityHandler, componentId]);
 
   return {
     visibilityHandlerFactory,
-    onFilteredPathsChanged: useCallback((paths: HierarchySearchPath[] | undefined) => setFilteredPaths(paths), []),
-    filteredPaths,
+    onSearchPathsChanged: useCallback((paths: HierarchySearchPath[] | undefined) => setSearchPaths(paths), []),
+    searchPaths,
   };
 }
 
 function createVisibilityHandlerFactory<TCache, TFilterTargets>(
   props: UseCachedVisibilityProps<TCache, TFilterTargets> & {
-    filteringPaths: HierarchySearchPath[] | undefined;
+    searchPaths: HierarchySearchPath[] | undefined;
   },
 ): VisibilityTreeProps["visibilityHandlerFactory"] {
-  const { activeView, createFilteredTree, createTreeSpecificVisibilityHandler, getCache, filteringPaths, componentId } = props;
+  const { activeView, createFilteredTree, createTreeSpecificVisibilityHandler, getCache, searchPaths, componentId } = props;
   return ({ imodelAccess }) =>
     new HierarchyVisibilityHandlerImpl<TFilterTargets>({
       componentId,
       viewport: activeView,
       getFilteredTree: (): Promise<FilteredTree<TFilterTargets>> | undefined => {
-        if (filteringPaths) {
-          return createFilteredTree({ imodelAccess, filteringPaths, getCache });
+        if (searchPaths) {
+          return createFilteredTree({ imodelAccess, searchPaths, getCache });
         }
         return undefined;
       },

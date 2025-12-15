@@ -66,13 +66,13 @@ export interface ClassificationsTreeFilterTargets {
 /** @internal */
 export async function createFilteredClassificationsTree(props: {
   imodelAccess: ECClassHierarchyInspector;
-  filteringPaths: HierarchySearchPath[];
+  searchPaths: HierarchySearchPath[];
   idsCache: ClassificationsTreeIdsCache;
 }): Promise<FilteredTree<ClassificationsTreeFilterTargets>> {
-  const { imodelAccess, filteringPaths, idsCache } = props;
+  const { imodelAccess, searchPaths, idsCache } = props;
   return createFilteredTree({
     filteredNodesHandler: new ClassificationsTreeFilteredNodesHandler({ idsCache, imodelAccess }),
-    filteringPaths,
+    searchPaths,
   });
 }
 
