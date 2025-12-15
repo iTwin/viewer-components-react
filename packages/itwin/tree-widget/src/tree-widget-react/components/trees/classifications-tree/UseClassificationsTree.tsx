@@ -144,7 +144,9 @@ function useClassificationsCachedVisibility(props: { activeView: TreeWidgetViewp
   };
 }
 
-async function createSearchResultsTree(props: CreateSearchResultsTreeProps<ClassificationsTreeIdsCache>): Promise<SearchResultsTree<ClassificationsTreeSearchTargets>> {
+async function createSearchResultsTree(
+  props: CreateSearchResultsTreeProps<ClassificationsTreeIdsCache>,
+): Promise<SearchResultsTree<ClassificationsTreeSearchTargets>> {
   const { searchPaths, getCache, imodelAccess } = props;
   return createClassificationsSearchResultsTree({
     idsCache: getCache(),

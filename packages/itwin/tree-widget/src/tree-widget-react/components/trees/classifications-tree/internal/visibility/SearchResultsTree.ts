@@ -35,7 +35,11 @@ interface Element3dSearchResultsTreeNode extends BaseSearchResultsTreeNode<Eleme
   modelId: Id64String;
 }
 
-type SearchResultsTreeNode = ClassificationTableSearchResultsTreeNode | ClassificationSearchResultsTreeNode | Element2dSearchResultsTreeNode | Element3dSearchResultsTreeNode;
+type SearchResultsTreeNode =
+  | ClassificationTableSearchResultsTreeNode
+  | ClassificationSearchResultsTreeNode
+  | Element2dSearchResultsTreeNode
+  | Element3dSearchResultsTreeNode;
 
 type TemporaryElement2dSearchResultsNode = Omit<Element2dSearchResultsTreeNode, "modelId" | "categoryId" | "children"> & {
   modelId: string | undefined;
@@ -174,7 +178,11 @@ class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHan
     };
   }
 
-  private collectSearchTargets(searchTargets: SearchTargetsInternal, node: TemporarySearchResultsTreeNode, processedSearchResultsNodes: ProcessedSearchResultsNodes) {
+  private collectSearchTargets(
+    searchTargets: SearchTargetsInternal,
+    node: TemporarySearchResultsTreeNode,
+    processedSearchResultsNodes: ProcessedSearchResultsNodes,
+  ) {
     const searchResultsNode =
       node.type === "element2d"
         ? processedSearchResultsNodes.searchResults2dElements.get(node.id)

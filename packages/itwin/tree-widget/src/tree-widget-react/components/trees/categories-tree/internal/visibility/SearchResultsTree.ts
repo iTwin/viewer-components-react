@@ -116,7 +116,11 @@ interface ProcessedSearchResultsNodes {
   searchResultsElements: Map<Id64String, Omit<ElementSearchResultsTreeNode, "children">>;
 }
 
-class CategoriesTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<ProcessedSearchResultsNodes, CategoriesTreeSearchTargets, TemporarySearchResultsTreeNode> {
+class CategoriesTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<
+  ProcessedSearchResultsNodes,
+  CategoriesTreeSearchTargets,
+  TemporarySearchResultsTreeNode
+> {
   readonly #props: CategoriesTreeSearchResultsNodesHandlerProps;
   constructor(props: CategoriesTreeSearchResultsNodesHandlerProps) {
     super();
@@ -186,7 +190,11 @@ class CategoriesTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<
     };
   }
 
-  private collectSearchTargets(searchTargets: SearchTargetsInternal, node: TemporarySearchResultsTreeNode, processedSearchResultsNodes: ProcessedSearchResultsNodes) {
+  private collectSearchTargets(
+    searchTargets: SearchTargetsInternal,
+    node: TemporarySearchResultsTreeNode,
+    processedSearchResultsNodes: ProcessedSearchResultsNodes,
+  ) {
     const searchResultsNode = node.type !== "element" ? node : processedSearchResultsNodes.searchResultsElements.get(node.id);
     assert(searchResultsNode !== undefined);
     if (searchResultsNode.isSearchTarget) {
