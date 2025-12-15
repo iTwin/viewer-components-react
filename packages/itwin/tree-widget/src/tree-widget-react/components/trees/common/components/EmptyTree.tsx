@@ -10,45 +10,45 @@ import { Icon } from "@stratakit/foundations";
 import { TreeWidget } from "../../../../TreeWidget.js";
 import { useFocusedInstancesContext } from "../FocusedInstancesContext.js";
 
-interface FilterEmptyTreeProps {
+interface SearchEmptyTreeProps {
   base: string;
 }
 
 /** @internal */
-export function TooManyFilterMatches({ base }: FilterEmptyTreeProps) {
+export function TooManySearchMatches({ base }: SearchEmptyTreeProps) {
   return (
     <div className={"tw-filter-empty-tree-container"}>
-      <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.filtering.tooManyFilterMatches`)}</Text>
-      <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.filtering.tooManyFilterMatchesRetry`)}</Text>
+      <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.search.tooManySearchMatches`)}</Text>
+      <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.search.tooManySearchMatchesRetry`)}</Text>
     </div>
   );
 }
 
 /** @internal */
-export function NoFilterMatches({ base }: FilterEmptyTreeProps) {
+export function NoSearchMatches({ base }: SearchEmptyTreeProps) {
   return (
     <div className={"tw-filter-empty-tree-container"}>
-      <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.filtering.noMatches`)}</Text>
-      <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.filtering.noMatchesRetry`)}</Text>
+      <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.search.noMatches`)}</Text>
+      <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.search.noMatchesRetry`)}</Text>
     </div>
   );
 }
 
 /** @internal */
-export function FilterUnknownError({ base }: FilterEmptyTreeProps) {
+export function SearchUnknownError({ base }: SearchEmptyTreeProps) {
   return (
     <div className={"tw-filter-empty-tree-container"}>
-      <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.filtering.unknownFilterError`)}</Text>
+      <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.search.unknownSearchError`)}</Text>
     </div>
   );
 }
 
 /** @internal */
-export function TooManyInstancesFocused({ base }: FilterEmptyTreeProps) {
+export function TooManyInstancesFocused({ base }: SearchEmptyTreeProps) {
   const { toggle } = useFocusedInstancesContext();
   return (
     <Text variant="body-sm" className={"tw-filter-empty-tree-container"}>
-      {TreeWidget.translate(`${base}.filtering.tooManyInstancesFocused`)}
+      {TreeWidget.translate(`${base}.search.tooManyInstancesFocused`)}
       <Anchor
         onClick={(e) => {
           e.stopPropagation();
@@ -56,18 +56,18 @@ export function TooManyInstancesFocused({ base }: FilterEmptyTreeProps) {
         }}
         render={<button />}
       >
-        {TreeWidget.translate(`${base}.filtering.disableInstanceFocusMode`)}
+        {TreeWidget.translate(`${base}.search.disableInstanceFocusMode`)}
       </Anchor>
     </Text>
   );
 }
 
 /** @internal */
-export function UnknownInstanceFocusError({ base }: FilterEmptyTreeProps) {
+export function UnknownInstanceFocusError({ base }: SearchEmptyTreeProps) {
   const { toggle } = useFocusedInstancesContext();
   return (
     <Text variant="body-sm" className={"tw-filter-empty-tree-container"}>
-      {TreeWidget.translate(`${base}.filtering.unknownInstanceFocusError`)}
+      {TreeWidget.translate(`${base}.search.unknownInstanceFocusError`)}
       <Anchor
         onClick={(e) => {
           e.stopPropagation();
@@ -75,7 +75,7 @@ export function UnknownInstanceFocusError({ base }: FilterEmptyTreeProps) {
         }}
         render={<button />}
       >
-        {TreeWidget.translate(`${base}.filtering.disableInstanceFocusMode`)}
+        {TreeWidget.translate(`${base}.search.disableInstanceFocusMode`)}
       </Anchor>
     </Text>
   );

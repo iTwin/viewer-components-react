@@ -11,7 +11,7 @@ import subcategorySvg from "@stratakit/icons/bis-category-subcategory.svg";
 import classSvg from "@stratakit/icons/bis-class.svg";
 import definitionContainerSvg from "@stratakit/icons/bis-definitions-container.svg";
 import elementSvg from "@stratakit/icons/bis-element.svg";
-import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMatches } from "../common/components/EmptyTree.js";
+import { EmptyTreeContent, NoSearchMatches, SearchUnknownError, TooManySearchMatches } from "../common/components/EmptyTree.js";
 import { useGuid } from "../common/internal/useGuid.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
@@ -127,12 +127,12 @@ export function useCategoriesTree({
 function getEmptyTreeContentComponent(searchText?: string, error?: CategoriesTreeSearchError, emptyTreeContent?: React.ReactNode) {
   if (error) {
     if (error === "tooManySearchMatches") {
-      return <TooManyFilterMatches base={"categoriesTree"} />;
+      return <TooManySearchMatches base={"categoriesTree"} />;
     }
-    return <FilterUnknownError base={"categoriesTree"} />;
+    return <SearchUnknownError base={"categoriesTree"} />;
   }
   if (searchText) {
-    return <NoFilterMatches base={"categoriesTree"} />;
+    return <NoSearchMatches base={"categoriesTree"} />;
   }
   if (emptyTreeContent) {
     return emptyTreeContent;

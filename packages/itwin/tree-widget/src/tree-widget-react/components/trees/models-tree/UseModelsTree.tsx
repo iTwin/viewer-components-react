@@ -13,11 +13,11 @@ import subjectSvg from "@stratakit/icons/bis-subject.svg";
 import modelSvg from "@stratakit/icons/model-cube.svg";
 import {
   EmptyTreeContent,
-  FilterUnknownError,
-  NoFilterMatches,
+  NoSearchMatches,
+  SearchUnknownError,
   SubTreeError,
-  TooManyFilterMatches,
   TooManyInstancesFocused,
+  TooManySearchMatches,
   UnknownInstanceFocusError,
 } from "../common/components/EmptyTree.js";
 import { useGuid } from "../common/internal/useGuid.js";
@@ -228,7 +228,7 @@ function createTreeSpecificVisibilityHandler(
 }
 
 function getEmptyTreeContentComponent(
-  filter?: string,
+  searchText?: string,
   subTreeError?: ModelsTreeSubTreeError,
   error?: ModelsTreeSearchError,
   emptyTreeContent?: React.ReactNode,
@@ -239,14 +239,14 @@ function getEmptyTreeContentComponent(
   if (isInstanceFocusError(error)) {
     return <InstanceFocusError error={error} />;
   }
-  if (isFilterError(error)) {
+  if (isSearchError(error)) {
     if (error === "tooManySearchMatches") {
-      return <TooManyFilterMatches base={"modelsTree"} />;
+      return <TooManySearchMatches base={"modelsTree"} />;
     }
-    return <FilterUnknownError base={"modelsTree"} />;
+    return <SearchUnknownError base={"modelsTree"} />;
   }
-  if (filter) {
-    return <NoFilterMatches base={"modelsTree"} />;
+  if (searchText) {
+    return <NoSearchMatches base={"modelsTree"} />;
   }
   if (emptyTreeContent) {
     return emptyTreeContent;
@@ -258,7 +258,7 @@ function isSubTreeError(error: ModelsTreeSubTreeError | undefined) {
   return error === "unknownSubTreeError";
 }
 
-function isFilterError(error: ModelsTreeSearchError | undefined) {
+function isSearchError(error: ModelsTreeSearchError | undefined) {
   return error === "tooManySearchMatches" || error === "unknownSearchError";
 }
 

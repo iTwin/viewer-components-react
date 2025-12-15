@@ -6,7 +6,7 @@
 import { useCallback, useEffect, useMemo } from "react";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import iconBisCategory3d from "@stratakit/icons/bis-category-3d.svg";
-import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMatches } from "../common/components/EmptyTree.js";
+import { EmptyTreeContent, NoSearchMatches, SearchUnknownError, TooManySearchMatches } from "../common/components/EmptyTree.js";
 import { useGuid } from "../common/internal/useGuid.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
@@ -111,12 +111,12 @@ function createCache(props: CreateCacheProps<{ hierarchyConfig: ClassificationsT
 function getEmptyTreeContentComponent(searchText?: string, error?: ClassificationsTreeSearchError, emptyTreeContent?: React.ReactNode) {
   if (error) {
     if (error === "tooManySearchMatches") {
-      return <TooManyFilterMatches base={"classificationsTree"} />;
+      return <TooManySearchMatches base={"classificationsTree"} />;
     }
-    return <FilterUnknownError base={"classificationsTree"} />;
+    return <SearchUnknownError base={"classificationsTree"} />;
   }
   if (searchText) {
-    return <NoFilterMatches base={"classificationsTree"} />;
+    return <NoSearchMatches base={"classificationsTree"} />;
   }
   if (emptyTreeContent) {
     return emptyTreeContent;
