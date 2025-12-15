@@ -3582,7 +3582,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           await using buildIModelResult = await buildIModel(this, async (builder) => {
             const category = insertSpatialCategory({ builder, codeValue: "category" });
             const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
-            const filterTargetElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
+            const searchTargetElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
 
             const unfilteredCategory = insertSpatialCategory({ builder, codeValue: "otherCategory" });
             const unfilteredModel = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
@@ -3591,8 +3591,8 @@ describe("ModelsTreeVisibilityHandler", () => {
             return {
               model,
               category,
-              filterTargetElement,
-              searchPaths: [[model, category, filterTargetElement]],
+              searchTargetElement,
+              searchPaths: [[model, category, searchTargetElement]],
             };
           });
 
@@ -3634,11 +3634,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             ];
             const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
             const paths: InstanceKey[][] = [];
-            const filterTargets = new Set<Id64String>();
+            const searchTargets = new Set<Id64String>();
             filteredCategories.forEach((category) => {
-              const filterTarget = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
-              paths.push([model, category, filterTarget]);
-              filterTargets.add(filterTarget.id);
+              const searchTarget = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
+              paths.push([model, category, searchTarget]);
+              searchTargets.add(searchTarget.id);
 
               insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
             });
@@ -3651,14 +3651,14 @@ describe("ModelsTreeVisibilityHandler", () => {
               model,
               filteredCategories,
               searchPaths: paths,
-              filterTargetElements: filterTargets,
+              searchTargetElements: searchTargets,
             };
           });
         }
 
         it("switches on only filtered hierarchy when root node is clicked", async function () {
           await using buildIModelResult = await createIModel(this);
-          const { imodel, searchPaths, filterTargetElements, ...keys } = buildIModelResult;
+          const { imodel, searchPaths, searchTargetElements, ...keys } = buildIModelResult;
           using visibilityTestData = createFilteredVisibilityTestData({ imodel, searchPaths });
           const { defaultVisibilityHandler, filteredVisibilityHandler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
 
@@ -3681,14 +3681,14 @@ describe("ModelsTreeVisibilityHandler", () => {
               model: (id) => (id === keys.model.id ? "partial" : "hidden"),
               category: ({ modelId }) => (modelId === keys.model.id ? "partial" : "hidden"),
               groupingNode: ({ modelId }) => (modelId === keys.model.id ? "partial" : "hidden"),
-              element: ({ elementId }) => (filterTargetElements.has(elementId) ? "visible" : "hidden"),
+              element: ({ elementId }) => (searchTargetElements.has(elementId) ? "visible" : "hidden"),
             },
           });
         });
 
         it("switches on only filtered hierarchy when one of the filtered categories is clicked", async function () {
           await using buildIModelResult = await createIModel(this);
-          const { imodel, searchPaths, filteredCategories, filterTargetElements, ...keys } = buildIModelResult;
+          const { imodel, searchPaths, filteredCategories, searchTargetElements, ...keys } = buildIModelResult;
           using visibilityTestData = createFilteredVisibilityTestData({ imodel, searchPaths });
           const { defaultVisibilityHandler, filteredVisibilityHandler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
 
@@ -3720,7 +3720,7 @@ describe("ModelsTreeVisibilityHandler", () => {
               model: (id) => (id === keys.model.id ? "partial" : "hidden"),
               category: ({ categoryId }) => (categoryId === clickedCategoryId ? "partial" : "hidden"),
               groupingNode: ({ categoryId }) => (categoryId === clickedCategoryId ? "partial" : "hidden"),
-              element: ({ categoryId, elementId }) => (categoryId === clickedCategoryId && filterTargetElements.has(elementId) ? "visible" : "hidden"),
+              element: ({ categoryId, elementId }) => (categoryId === clickedCategoryId && searchTargetElements.has(elementId) ? "visible" : "hidden"),
             },
           });
         });

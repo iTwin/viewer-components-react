@@ -20,7 +20,7 @@ import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./Categ
 import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
 import { useSearchPaths } from "./internal/UseSearchPaths.js";
 import { CategoriesTreeVisibilityHandler } from "./internal/visibility/CategoriesTreeVisibilityHandler.js";
-import { createFilteredCategoriesTree } from "./internal/visibility/FilteredTree.js";
+import { createCategoriesSearchResultsTree } from "./internal/visibility/SearchResultsTree.js";
 
 import type { ReactNode } from "react";
 import type { GuidString, Id64Array } from "@itwin/core-bentley";
@@ -28,13 +28,13 @@ import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
-import type { CreateFilteredTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
+import type { CreateSearchResultsTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
-import type { FilteredTree } from "../common/internal/visibility/BaseFilteredTree.js";
+import type { SearchResultsTree } from "../common/internal/visibility/BaseSearchResultsTree.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { CategoriesTreeHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
 import type { CategoriesTreeSearchError } from "./internal/UseSearchPaths.js";
-import type { CategoriesTreeFilterTargets } from "./internal/visibility/FilteredTree.js";
+import type { CategoriesTreeSearchTargets } from "./internal/visibility/SearchResultsTree.js";
 
 /** @beta */
 export interface UseCategoriesTreeProps {
@@ -178,12 +178,12 @@ function useCategoriesCachedVisibility(props: {
   hierarchyConfig: CategoriesTreeHierarchyConfiguration;
 }) {
   const { activeView, getCache, viewType, componentId } = props;
-  const { visibilityHandlerFactory, searchPaths, onSearchPathsChanged } = useCachedVisibility<CategoriesTreeIdsCache, CategoriesTreeFilterTargets>({
+  const { visibilityHandlerFactory, searchPaths, onSearchPathsChanged } = useCachedVisibility<CategoriesTreeIdsCache, CategoriesTreeSearchTargets>({
     activeView,
     getCache,
-    createFilteredTree: useCallback(
-      async (filteredTreeProps: CreateFilteredTreeProps<CategoriesTreeIdsCache>) =>
-        createFilteredTree({ ...filteredTreeProps, viewClasses: getClassesByView(viewType) }),
+    createSearchResultsTree: useCallback(
+      async (filteredTreeProps: CreateSearchResultsTreeProps<CategoriesTreeIdsCache>) =>
+        createSearchResultsTree({ ...filteredTreeProps, viewClasses: getClassesByView(viewType) }),
       [viewType],
     ),
     createTreeSpecificVisibilityHandler: useCallback(
@@ -215,11 +215,11 @@ function createTreeSpecificVisibilityHandler(
   });
 }
 
-async function createFilteredTree(
-  props: CreateFilteredTreeProps<CategoriesTreeIdsCache> & { viewClasses: ReturnType<typeof getClassesByView> },
-): Promise<FilteredTree<CategoriesTreeFilterTargets>> {
+async function createSearchResultsTree(
+  props: CreateSearchResultsTreeProps<CategoriesTreeIdsCache> & { viewClasses: ReturnType<typeof getClassesByView> },
+): Promise<SearchResultsTree<CategoriesTreeSearchTargets>> {
   const { searchPaths, imodelAccess, getCache, viewClasses } = props;
-  return createFilteredCategoriesTree({
+  return createCategoriesSearchResultsTree({
     imodelAccess,
     searchPaths,
     idsCache: getCache(),

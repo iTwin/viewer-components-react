@@ -16,19 +16,19 @@ import { ClassificationsTreeIcon } from "./ClassificationsTreeIcon.js";
 import { ClassificationsTreeIdsCache } from "./internal/ClassificationsTreeIdsCache.js";
 import { useSearchPaths } from "./internal/UseSearchPaths.js";
 import { ClassificationsTreeVisibilityHandler } from "./internal/visibility/ClassificationsTreeVisibilityHandler.js";
-import { createFilteredClassificationsTree } from "./internal/visibility/FilteredTree.js";
+import { createClassificationsSearchResultsTree } from "./internal/visibility/SearchResultsTree.js";
 
 import type { ReactNode } from "react";
 import type { GuidString } from "@itwin/core-bentley";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
-import type { CreateFilteredTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
+import type { CreateSearchResultsTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
-import type { FilteredTree } from "../common/internal/visibility/BaseFilteredTree.js";
+import type { SearchResultsTree } from "../common/internal/visibility/BaseSearchResultsTree.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "./ClassificationsTreeDefinition.js";
 import type { ClassificationsTreeSearchError } from "./internal/UseSearchPaths.js";
-import type { ClassificationsTreeFilterTargets } from "./internal/visibility/FilteredTree.js";
+import type { ClassificationsTreeSearchTargets } from "./internal/visibility/SearchResultsTree.js";
 
 /** @alpha */
 export interface UseClassificationsTreeProps {
@@ -126,10 +126,10 @@ function getEmptyTreeContentComponent(searchText?: string, error?: Classificatio
 
 function useClassificationsCachedVisibility(props: { activeView: TreeWidgetViewport; getCache: () => ClassificationsTreeIdsCache; componentId: GuidString }) {
   const { activeView, getCache, componentId } = props;
-  const { visibilityHandlerFactory, searchPaths, onSearchPathsChanged } = useCachedVisibility<ClassificationsTreeIdsCache, ClassificationsTreeFilterTargets>({
+  const { visibilityHandlerFactory, searchPaths, onSearchPathsChanged } = useCachedVisibility<ClassificationsTreeIdsCache, ClassificationsTreeSearchTargets>({
     activeView,
     getCache,
-    createFilteredTree,
+    createSearchResultsTree,
     createTreeSpecificVisibilityHandler,
     componentId,
   });
@@ -144,9 +144,9 @@ function useClassificationsCachedVisibility(props: { activeView: TreeWidgetViewp
   };
 }
 
-async function createFilteredTree(props: CreateFilteredTreeProps<ClassificationsTreeIdsCache>): Promise<FilteredTree<ClassificationsTreeFilterTargets>> {
+async function createSearchResultsTree(props: CreateSearchResultsTreeProps<ClassificationsTreeIdsCache>): Promise<SearchResultsTree<ClassificationsTreeSearchTargets>> {
   const { searchPaths, getCache, imodelAccess } = props;
-  return createFilteredClassificationsTree({
+  return createClassificationsSearchResultsTree({
     idsCache: getCache(),
     searchPaths,
     imodelAccess,

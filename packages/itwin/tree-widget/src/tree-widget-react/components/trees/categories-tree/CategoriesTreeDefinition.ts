@@ -37,7 +37,7 @@ import {
   createIdsSelector,
   getClassesByView,
   getOptimalBatchSize,
-  groupingNodeHasFilterTargets,
+  groupingNodeHasSearchTargets,
   parseIdsSelectorResult,
   releaseMainThreadOnItemsCount,
 } from "../common/internal/Utils.js";
@@ -151,7 +151,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         }
       });
 
-      const { hasSearchTargetAncestor, hasDirectNonFilteredTargets } = groupingNodeHasFilterTargets(node.children);
+      const { hasSearchTargetAncestor, hasDirectNonSearchTargets } = groupingNodeHasSearchTargets(node.children);
 
       return {
         ...node,
@@ -161,7 +161,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
           // add `categoryId` from the first grouped element
           categoryId: node.children[0].extendedData?.categoryId,
           modelElementsMap,
-          ...(hasDirectNonFilteredTargets ? { hasDirectNonFilteredTargets } : {}),
+          ...(hasDirectNonSearchTargets ? { hasDirectNonSearchTargets } : {}),
           ...(hasSearchTargetAncestor ? { hasSearchTargetAncestor } : {}),
           // `imageId` is assigned to instance nodes at query time, but grouping ones need to
           // be handled during post-processing

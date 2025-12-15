@@ -7,7 +7,7 @@ import { createIModelHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { ClassificationsTreeDefinition } from "../../../tree-widget-react/components/trees/classifications-tree/ClassificationsTreeDefinition.js";
 import { ClassificationsTreeIdsCache } from "../../../tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeIdsCache.js";
 import { ClassificationsTreeVisibilityHandler } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/ClassificationsTreeVisibilityHandler.js";
-import { createFilteredClassificationsTree } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/FilteredTree.js";
+import { createClassificationsSearchResultsTree } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/SearchResultsTree.js";
 import { HierarchyVisibilityHandlerImpl } from "../../../tree-widget-react/components/trees/common/internal/useTreeHooks/UseCachedVisibility.js";
 import {
   buildIModel,
@@ -39,8 +39,8 @@ import { validateHierarchyVisibility } from "./VisibilityValidation.js";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyNodeIdentifiersPath, HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
-import type { ClassificationsTreeFilterTargets } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/FilteredTree.js";
-import type { FilteredTree } from "../../../tree-widget-react/components/trees/common/internal/visibility/BaseFilteredTree.js";
+import type { ClassificationsTreeSearchTargets } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/SearchResultsTree.js";
+import type { SearchResultsTree } from "../../../tree-widget-react/components/trees/common/internal/visibility/BaseSearchResultsTree.js";
 import type { TreeWidgetViewport } from "../../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
 
 describe("ClassificationsTreeVisibilityHandler", () => {
@@ -1144,12 +1144,12 @@ function createClassificationsTreeVisibilityHandler(props: {
   imodelAccess: ECClassHierarchyInspector;
   searchPaths?: HierarchySearchPath[];
 }) {
-  return new HierarchyVisibilityHandlerImpl<ClassificationsTreeFilterTargets>({
-    getFilteredTree: (): undefined | Promise<FilteredTree<ClassificationsTreeFilterTargets>> => {
+  return new HierarchyVisibilityHandlerImpl<ClassificationsTreeSearchTargets>({
+    getSearchResultsTree: (): undefined | Promise<SearchResultsTree<ClassificationsTreeSearchTargets>> => {
       if (!props.searchPaths) {
         return undefined;
       }
-      return createFilteredClassificationsTree({
+      return createClassificationsSearchResultsTree({
         idsCache: props.idsCache,
         searchPaths: props.searchPaths,
         imodelAccess: props.imodelAccess,

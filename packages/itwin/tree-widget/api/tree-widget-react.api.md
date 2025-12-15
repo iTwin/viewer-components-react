@@ -88,7 +88,7 @@ export const CategoriesTreeComponent: {
 };
 
 // @public (undocumented)
-interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "filter" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getDecorations" | "hierarchyConfig" | "treeLabel"> {
+interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "searchText" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getDecorations" | "hierarchyConfig" | "treeLabel"> {
     headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode>;
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
@@ -147,7 +147,7 @@ export const ClassificationsTreeComponent: {
 };
 
 // @alpha (undocumented)
-interface ClassificationsTreeComponentProps extends Pick<ClassificationsTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "filter" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getDecorations" | "hierarchyConfig" | "getEditingProps" | "treeLabel"> {
+interface ClassificationsTreeComponentProps extends Pick<ClassificationsTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "searchText" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getDecorations" | "hierarchyConfig" | "getEditingProps" | "treeLabel"> {
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
@@ -324,7 +324,7 @@ export const ModelsTreeComponent: {
 };
 
 // @public (undocumented)
-interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "selectionPredicate" | "hierarchyConfig" | "visibilityHandlerOverrides" | "getSearchPaths" | "filter" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getDecorations" | "getSubTreePaths" | "treeLabel"> {
+interface ModelsTreeComponentProps extends Pick<ModelsTreeProps, "selectionStorage" | "hierarchyLevelConfig" | "selectionMode" | "selectionPredicate" | "hierarchyConfig" | "visibilityHandlerOverrides" | "getSearchPaths" | "searchText" | "emptyTreeContent" | "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getDecorations" | "getSubTreePaths" | "treeLabel"> {
     headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
     // (undocumented)
     onFeatureUsed?: (feature: string) => void;
@@ -463,11 +463,11 @@ type TreeRendererProps_2 = Omit<BaseTreeRendererProps, "getInlineActions" | "get
 // @public
 interface TreeRenderProps {
     // (undocumented)
-    filter?: string;
-    // (undocumented)
     onFeatureUsed?: (feature: string) => void;
     // (undocumented)
     onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
+    // (undocumented)
+    searchText?: string;
     // (undocumented)
     treeLabel: string;
 }
@@ -558,7 +558,7 @@ export interface TreeWidgetViewport {
 }
 
 // @beta
-export function useCategoriesTree({ filter, activeView, onCategoriesFiltered, emptyTreeContent, hierarchyConfig, }: UseCategoriesTreeProps): UseCategoriesTreeResult;
+export function useCategoriesTree({ searchText, activeView, onCategoriesFiltered, emptyTreeContent, hierarchyConfig, }: UseCategoriesTreeProps): UseCategoriesTreeResult;
 
 // @public
 export function useCategoriesTreeButtonProps({ viewport }: {
@@ -578,14 +578,14 @@ interface UseCategoriesTreeProps {
     // (undocumented)
     emptyTreeContent?: ReactNode;
     // (undocumented)
-    filter?: string;
-    // (undocumented)
     hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>;
     // (undocumented)
     onCategoriesFiltered?: (props: {
         categories: CategoryInfo[] | undefined;
         models?: Id64Array;
     }) => void;
+    // (undocumented)
+    searchText?: string;
 }
 
 // @beta (undocumented)
@@ -597,7 +597,7 @@ interface UseCategoriesTreeResult {
 }
 
 // @alpha
-export function useClassificationsTree({ activeView, emptyTreeContent, filter, ...rest }: UseClassificationsTreeProps): UseClassificationsTreeResult;
+export function useClassificationsTree({ activeView, emptyTreeContent, searchText, ...rest }: UseClassificationsTreeProps): UseClassificationsTreeResult;
 
 // @alpha (undocumented)
 export function useClassificationsTreeDefinition(props: UseClassificationsTreeDefinitionProps): UseClassificationsTreeDefinitionResult;
@@ -631,9 +631,9 @@ interface UseClassificationsTreeProps {
     // (undocumented)
     emptyTreeContent?: ReactNode;
     // (undocumented)
-    filter?: string;
-    // (undocumented)
     hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
+    // (undocumented)
+    searchText?: string;
 }
 
 // @alpha (undocumented)
@@ -648,7 +648,7 @@ interface UseClassificationsTreeResult {
 export function useFocusedInstancesContext(): FocusedInstancesContext;
 
 // @beta
-export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getSearchPaths, onModelsFiltered, selectionPredicate: nodeTypeSelectionPredicate, emptyTreeContent, getSubTreePaths, }: UseModelsTreeProps): UseModelsTreeResult;
+export function useModelsTree({ activeView, searchText, hierarchyConfig, visibilityHandlerOverrides, getSearchPaths, onModelsFiltered, selectionPredicate: nodeTypeSelectionPredicate, emptyTreeContent, getSubTreePaths, }: UseModelsTreeProps): UseModelsTreeResult;
 
 // @public
 export function useModelsTreeButtonProps({ imodel, viewport }: {
@@ -665,14 +665,13 @@ interface UseModelsTreeProps {
     activeView: TreeWidgetViewport;
     // (undocumented)
     emptyTreeContent?: ReactNode;
-    filter?: string;
     getSearchPaths?: (props: {
         createInstanceKeyPaths: (props: {
             targetItems: Array<InstanceKey | ElementsGroupInfo>;
         } | {
             label: string;
         }) => Promise<NormalizedHierarchySearchPath[]>;
-        filter?: string;
+        searchText?: string;
     }) => Promise<HierarchySearchPath[] | undefined>;
     getSubTreePaths?: (props: {
         createInstanceKeyPaths: (props: {
@@ -683,6 +682,7 @@ interface UseModelsTreeProps {
     hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
     // (undocumented)
     onModelsFiltered?: (modelIds: Id64String[] | undefined) => void;
+    searchText?: string;
     selectionPredicate?: (props: {
         node: PresentationHierarchyNode;
         type: "subject" | "model" | "category" | "element" | "elements-class-group";

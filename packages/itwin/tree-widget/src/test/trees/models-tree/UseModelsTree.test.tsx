@@ -203,7 +203,7 @@ describe("useModelsTree", () => {
       });
 
       it("getSearchPaths returns correct result when getSubTreePaths and filter is defined", async () => {
-        const { result: renderHookResult } = renderHook(useModelsTree, { initialProps: { ...initialProps, getSubTreePaths, filter: "element2" } });
+        const { result: renderHookResult } = renderHook(useModelsTree, { initialProps: { ...initialProps, getSubTreePaths, searchText: "element2" } });
         const { getSearchPaths } = renderHookResult.current.modelsTreeProps;
         const abortSignal = new AbortController().signal;
         await waitFor(async () => {

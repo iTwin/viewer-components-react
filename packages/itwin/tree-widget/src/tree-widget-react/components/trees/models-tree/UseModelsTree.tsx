@@ -26,7 +26,7 @@ import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
 import { ModelsTreeNode } from "./internal/ModelsTreeNode.js";
 import { useSearchPaths } from "./internal/UseSearchPaths.js";
-import { createFilteredModelsTree } from "./internal/visibility/FilteredTree.js";
+import { createModelsSearchResultsTree } from "./internal/visibility/SearchResultsTree.js";
 import { ModelsTreeVisibilityHandler } from "./internal/visibility/ModelsTreeVisibilityHandler.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition.js";
 
@@ -37,13 +37,13 @@ import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
-import type { CreateFilteredTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
+import type { CreateSearchResultsTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
-import type { FilteredTree } from "../common/internal/visibility/BaseFilteredTree.js";
+import type { SearchResultsTree } from "../common/internal/visibility/BaseSearchResultsTree.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { NormalizedHierarchySearchPath } from "../common/Utils.js";
 import type { ModelsTreeSearchError, ModelsTreeSubTreeError } from "./internal/UseSearchPaths.js";
-import type { ModelsTreeFilterTargets } from "./internal/visibility/FilteredTree.js";
+import type { ModelsTreeSearchTargets } from "./internal/visibility/SearchResultsTree.js";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/visibility/ModelsTreeVisibilityHandler.js";
 import type { ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition.js";
 
@@ -148,9 +148,9 @@ export function useModelsTree({
     componentId,
   });
 
-  const { visibilityHandlerFactory, onSearchPathsChanged } = useCachedVisibility<ModelsTreeIdsCache, ModelsTreeFilterTargets>({
+  const { visibilityHandlerFactory, onSearchPathsChanged } = useCachedVisibility<ModelsTreeIdsCache, ModelsTreeSearchTargets>({
     activeView,
-    createFilteredTree,
+    createSearchResultsTree,
     createTreeSpecificVisibilityHandler: useCallback(
       (treeProps) => createTreeSpecificVisibilityHandler({ ...treeProps, overrides: visibilityHandlerOverrides }),
       [visibilityHandlerOverrides],
@@ -206,9 +206,9 @@ export function useModelsTree({
   };
 }
 
-async function createFilteredTree(props: CreateFilteredTreeProps<ModelsTreeIdsCache>): Promise<FilteredTree<ModelsTreeFilterTargets>> {
+async function createSearchResultsTree(props: CreateSearchResultsTreeProps<ModelsTreeIdsCache>): Promise<SearchResultsTree<ModelsTreeSearchTargets>> {
   const { searchPaths, imodelAccess } = props;
-  return createFilteredModelsTree({
+  return createModelsSearchResultsTree({
     imodelAccess,
     searchPaths,
   });
