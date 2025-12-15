@@ -36,7 +36,7 @@ const defaultHierarchyConfiguration = {
 };
 
 describe("Classifications tree", () => {
-  describe("Hierarchy filtering", () => {
+  describe("Hierarchy search", () => {
     before(async function () {
       await initializeITwinJs();
     });
@@ -530,7 +530,7 @@ describe("Classifications tree", () => {
       });
     });
 
-    it("returns empty array when nothing matches provided filter", async function () {
+    it("returns empty array when nothing matches provided search text", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         await importClassificationSchema(builder);
 
@@ -569,7 +569,7 @@ describe("Classifications tree", () => {
       ).to.deep.eq([]);
     });
 
-    it("filtering by label aborts when abort signal fires", async function () {
+    it("aborts when abort signal fires", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         await importClassificationSchema(builder);
 

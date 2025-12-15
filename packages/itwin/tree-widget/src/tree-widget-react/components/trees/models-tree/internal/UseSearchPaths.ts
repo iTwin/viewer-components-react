@@ -40,13 +40,13 @@ export function useSearchPaths({
   hierarchyConfiguration: ModelsTreeHierarchyConfiguration;
   searchText?: string;
   getSearchPaths?: (props: {
-    /** A function that creates filtering paths based on provided target instance keys or node label. */
+    /** A function that creates search paths based on provided target instance keys or node label. */
     createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<NormalizedHierarchySearchPath[]>;
     /** Search text which would be used to create search paths if `getSearchPaths` wouldn't be provided. */
     searchText?: string;
   }) => Promise<HierarchySearchPath[] | undefined>;
   getSubTreePaths?: (props: {
-    /** A function that creates filtering paths based on provided target instance keys. */
+    /** A function that creates search paths based on provided target instance keys. */
     createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> }) => Promise<NormalizedHierarchySearchPath[]>;
   }) => Promise<HierarchySearchPath[]>;
   getModelsTreeIdsCache: () => ModelsTreeIdsCache;
@@ -69,7 +69,7 @@ export function useSearchPaths({
     setSubTreeError(undefined);
     onModelsFiltered?.(undefined);
 
-    // reset filtered paths if there is no filters applied. This allows to keep current filtered paths until new paths are loaded.
+    // reset search paths if there is no search applied. This allows to keep current search paths until new paths are loaded.
     if (!loadFocusedItems && !getSearchPaths && !searchText && !getSubTreePaths) {
       onSearchPathsChanged(undefined);
     }
@@ -105,13 +105,13 @@ export function useSearchPaths({
   }, [getModelsTreeIdsCache, hierarchyConfiguration, getSubTreePaths, componentId]);
 
   const getPaths = useMemo<VisibilityTreeProps["getSearchPaths"] | undefined>(() => {
-    const handlePaths = async (filteredPaths: HierarchySearchPath[] | undefined, classInspector: ECClassHierarchyInspector) => {
-      onSearchPathsChanged(filteredPaths);
+    const handlePaths = async (searchPaths: HierarchySearchPath[] | undefined, classInspector: ECClassHierarchyInspector) => {
+      onSearchPathsChanged(searchPaths);
       if (!onModelsFiltered) {
         return;
       }
 
-      const modelIds = filteredPaths ? await getModels(filteredPaths, getModelsTreeIdsCache(), classInspector) : undefined;
+      const modelIds = searchPaths ? await getModels(searchPaths, getModelsTreeIdsCache(), classInspector) : undefined;
       onModelsFiltered(modelIds);
     };
 
@@ -119,8 +119,8 @@ export function useSearchPaths({
       return async ({ imodelAccess, abortSignal }) => {
         try {
           const focusedItems = await collectFocusedItems(loadFocusedItems);
-          return await createFilteringPathsResult({
-            getFilteringPaths: async () => {
+          return await createSearchPathsResult({
+            getSearchPaths: async () => {
               const paths = await ModelsTreeDefinition.createInstanceKeyPaths({
                 imodelAccess,
                 idsCache: getModelsTreeIdsCache(),
@@ -149,8 +149,8 @@ export function useSearchPaths({
     if (getSearchPaths) {
       return async ({ imodelAccess, abortSignal }) => {
         try {
-          return await createFilteringPathsResult({
-            getFilteringPaths: async () => {
+          return await createSearchPathsResult({
+            getSearchPaths: async () => {
               const paths = await getSearchPaths({
                 createInstanceKeyPaths: async (props) =>
                   ModelsTreeDefinition.createInstanceKeyPaths({
@@ -183,10 +183,10 @@ export function useSearchPaths({
 
     if (searchText) {
       return async ({ imodelAccess, abortSignal }) => {
-        onFeatureUsed({ featureId: "filtering", reportInteraction: true });
+        onFeatureUsed({ featureId: "search", reportInteraction: true });
         try {
-          return await createFilteringPathsResult({
-            getFilteringPaths: async () => {
+          return await createSearchPathsResult({
+            getSearchPaths: async () => {
               const paths = await ModelsTreeDefinition.createInstanceKeyPaths({
                 imodelAccess,
                 label: searchText,
@@ -253,7 +253,7 @@ async function getModels(paths: HierarchySearchPath[], idsCache: ModelsTreeIdsCa
         break;
       }
 
-      // collect all the models from the filtered path
+      // collect all the models from the search path
       if (await classInspector.classDerivesFrom(currStep.className, CLASS_NAME_GeometricModel3d)) {
         targetModelIds.add(currStep.id);
       }
@@ -304,26 +304,26 @@ async function collectFocusedItems(loadFocusedItems: () => AsyncIterableIterator
   return focusedItems;
 }
 
-async function createFilteringPathsResult({
+async function createSearchPathsResult({
   getSubTreePaths,
-  getFilteringPaths,
+  getSearchPaths,
   handlePaths,
 }: {
   getSubTreePaths: () => Promise<HierarchyNodeIdentifiersPath[] | undefined>;
-  getFilteringPaths: () => Promise<NormalizedHierarchySearchPath[] | undefined>;
-  handlePaths: (filteredPaths: HierarchySearchPath[] | undefined) => Promise<void>;
+  getSearchPaths: () => Promise<NormalizedHierarchySearchPath[] | undefined>;
+  handlePaths: (searchPaths: HierarchySearchPath[] | undefined) => Promise<void>;
 }): Promise<HierarchySearchPath[] | undefined> {
-  const [subTreePaths, filterPaths] = await Promise.all([getSubTreePaths(), getFilteringPaths()]);
+  const [subTreePaths, searchPaths] = await Promise.all([getSubTreePaths(), getSearchPaths()]);
   let joinedPaths: HierarchySearchPath[] | undefined;
   try {
-    if (subTreePaths && filterPaths) {
-      return (joinedPaths = joinHierarchySearchPaths(subTreePaths, filterPaths));
+    if (subTreePaths && searchPaths) {
+      return (joinedPaths = joinHierarchySearchPaths(subTreePaths, searchPaths));
     }
     if (subTreePaths) {
       return (joinedPaths = subTreePaths);
     }
-    if (filterPaths) {
-      return (joinedPaths = filterPaths);
+    if (searchPaths) {
+      return (joinedPaths = searchPaths);
     }
   } finally {
     void handlePaths(joinedPaths);

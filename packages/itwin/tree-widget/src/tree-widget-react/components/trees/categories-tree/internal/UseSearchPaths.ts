@@ -63,7 +63,7 @@ export function useSearchPaths({
     }
 
     return async ({ imodelAccess, abortSignal }) => {
-      onFeatureUsed({ featureId: "filtering", reportInteraction: true });
+      onFeatureUsed({ featureId: "search", reportInteraction: true });
       try {
         const paths = await CategoriesTreeDefinition.createInstanceKeyPaths({
           imodelAccess,

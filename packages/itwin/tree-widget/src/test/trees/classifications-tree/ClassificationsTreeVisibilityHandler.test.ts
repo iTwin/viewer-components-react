@@ -807,7 +807,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       };
     }
 
-    it("showing filtered geometric element changes visibility for nodes in filter paths", async function () {
+    it("showing filtered geometric element changes visibility for nodes in search paths", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         await importClassificationSchema(builder);
 
@@ -884,7 +884,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       });
     });
 
-    it("showing filtered drawing element changes visibility for nodes in filter paths", async function () {
+    it("showing filtered drawing element changes visibility for nodes in search paths", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         await importClassificationSchema(builder);
 
@@ -960,7 +960,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       });
     });
 
-    it("showing filtered classification changes visibility for nodes in filter paths", async function () {
+    it("showing filtered classification changes visibility for nodes in search paths", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         await importClassificationSchema(builder);
 
@@ -1048,7 +1048,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       });
     });
 
-    it("showing filtered classification table changes visibility for nodes in filter paths", async function () {
+    it("showing filtered classification table changes visibility for nodes in search paths", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         await importClassificationSchema(builder);
 

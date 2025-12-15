@@ -40,11 +40,15 @@ export interface BaseSearchResultsTreeNode<TSearchResultsTreeNode extends BaseSe
  * Class that provides methods to handle search results nodes in a tree structure.
  *
  * It provides two methods that can be shared across different search results trees:
- * - `processSearchResultsNodes` - processes search results nodes and returns a function to get filter targets for a node.
+ * - `processSearchResultsNodes` - processes search results nodes and returns a function to get search targets for a node.
  * - `accept` - accepts a new node and adds it to the tree structure.
  * @internal
  */
-export abstract class SearchResultsNodesHandler<TProcessedSearchResultsNodes, TSearchTargets, TSearchResultsTreeNode extends BaseSearchResultsTreeNode<TSearchResultsTreeNode>> {
+export abstract class SearchResultsNodesHandler<
+  TProcessedSearchResultsNodes,
+  TSearchTargets,
+  TSearchResultsTreeNode extends BaseSearchResultsTreeNode<TSearchResultsTreeNode>,
+> {
   public readonly root: SearchResultsTreeRootNode<TSearchResultsTreeNode> = {
     children: new Map(),
   };
@@ -52,8 +56,11 @@ export abstract class SearchResultsNodesHandler<TProcessedSearchResultsNodes, TS
 
   /** Returns search results tree node type based on its' className */
   public abstract getType(className: string): Promise<TSearchResultsTreeNode["type"]>;
-  /** Converts nodes to filter targets */
-  public abstract convertNodesToSearchTargets(searchResultsNodes: TSearchResultsTreeNode[], processedSearchResultsNodes: TProcessedSearchResultsNodes): TSearchTargets | undefined;
+  /** Converts nodes to search targets */
+  public abstract convertNodesToSearchTargets(
+    searchResultsNodes: TSearchResultsTreeNode[],
+    processedSearchResultsNodes: TProcessedSearchResultsNodes,
+  ): TSearchTargets | undefined;
   /**
    * Processes search results nodes.
    *
@@ -76,7 +83,8 @@ export abstract class SearchResultsNodesHandler<TProcessedSearchResultsNodes, TS
   }> {
     const processedSearchResultsNodes = await this.getProcessedSearchResultsNodes();
     return {
-      getNodeSearchTargets: (node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey }) => this.getNodeSearchTargets(node, processedSearchResultsNodes),
+      getNodeSearchTargets: (node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey }) =>
+        this.getNodeSearchTargets(node, processedSearchResultsNodes),
     };
   }
 
@@ -100,7 +108,7 @@ export abstract class SearchResultsNodesHandler<TProcessedSearchResultsNodes, TS
     return newNode;
   }
 
-  /** Takes a specific node and gets all filter targets related to it. */
+  /** Takes a specific node and gets all search targets related to it. */
   private getNodeSearchTargets(
     node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey },
     processedSearchResultsNodes: TProcessedSearchResultsNodes,
@@ -156,7 +164,11 @@ export interface SearchResultsTree<TSearchTargets> {
 }
 
 /** @internal */
-export interface CreateSearchResultsTreeProps<TProcessedSearchResultsNodes, TSearchTargets, TSearchResultsTreeNode extends BaseSearchResultsTreeNode<TSearchResultsTreeNode>> {
+export interface CreateSearchResultsTreeProps<
+  TProcessedSearchResultsNodes,
+  TSearchTargets,
+  TSearchResultsTreeNode extends BaseSearchResultsTreeNode<TSearchResultsTreeNode>,
+> {
   searchResultsNodesHandler: SearchResultsNodesHandler<TProcessedSearchResultsNodes, TSearchTargets, TSearchResultsTreeNode>;
   searchPaths: HierarchySearchPath[];
 }
@@ -165,9 +177,11 @@ export interface CreateSearchResultsTreeProps<TProcessedSearchResultsNodes, TSea
  * Function iterates over search paths and uses `searchResultsNodesHandler` to create a search results tree.
  * @internal
  */
-export async function createSearchResultsTree<TProcessedSearchResultsNodes, TSearchTargets, TSearchResultsTreeNode extends BaseSearchResultsTreeNode<TSearchResultsTreeNode>>(
-  props: CreateSearchResultsTreeProps<TProcessedSearchResultsNodes, TSearchTargets, TSearchResultsTreeNode>,
-): Promise<SearchResultsTree<TSearchTargets>> {
+export async function createSearchResultsTree<
+  TProcessedSearchResultsNodes,
+  TSearchTargets,
+  TSearchResultsTreeNode extends BaseSearchResultsTreeNode<TSearchResultsTreeNode>,
+>(props: CreateSearchResultsTreeProps<TProcessedSearchResultsNodes, TSearchTargets, TSearchResultsTreeNode>): Promise<SearchResultsTree<TSearchTargets>> {
   const { searchPaths, searchResultsNodesHandler } = props;
 
   for (const searchPath of searchPaths) {

@@ -48,7 +48,7 @@ describe("useModelsTree", () => {
     TreeWidget.terminate();
   });
 
-  it("preserves cache when filter changes", async function () {
+  it("preserves cache when search changes", async function () {
     await using buildIModelResult = await buildIModel(this, async (builder) => {
       const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
       const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
@@ -202,7 +202,7 @@ describe("useModelsTree", () => {
         });
       });
 
-      it("getSearchPaths returns correct result when getSubTreePaths and filter is defined", async () => {
+      it("getSearchPaths returns correct result when getSubTreePaths and search text is defined", async () => {
         const { result: renderHookResult } = renderHook(useModelsTree, { initialProps: { ...initialProps, getSubTreePaths, searchText: "element2" } });
         const { getSearchPaths } = renderHookResult.current.modelsTreeProps;
         const abortSignal = new AbortController().signal;

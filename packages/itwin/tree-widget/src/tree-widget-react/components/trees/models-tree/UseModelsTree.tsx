@@ -26,8 +26,8 @@ import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
 import { ModelsTreeNode } from "./internal/ModelsTreeNode.js";
 import { useSearchPaths } from "./internal/UseSearchPaths.js";
-import { createModelsSearchResultsTree } from "./internal/visibility/SearchResultsTree.js";
 import { ModelsTreeVisibilityHandler } from "./internal/visibility/ModelsTreeVisibilityHandler.js";
+import { createModelsSearchResultsTree } from "./internal/visibility/SearchResultsTree.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition.js";
 
 import type { ReactNode } from "react";
@@ -43,8 +43,8 @@ import type { SearchResultsTree } from "../common/internal/visibility/BaseSearch
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { NormalizedHierarchySearchPath } from "../common/Utils.js";
 import type { ModelsTreeSearchError, ModelsTreeSubTreeError } from "./internal/UseSearchPaths.js";
-import type { ModelsTreeSearchTargets } from "./internal/visibility/SearchResultsTree.js";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/visibility/ModelsTreeVisibilityHandler.js";
+import type { ModelsTreeSearchTargets } from "./internal/visibility/SearchResultsTree.js";
 import type { ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition.js";
 
 /** @beta */
@@ -53,50 +53,50 @@ export interface UseModelsTreeProps {
    * Optional search string used to filter tree nodes by label, as well as highlight matching substrings in the tree.
    * Nodes that do not contain this string in their label will be filtered out.
    *
-   * If `getSearchPaths` function is provided, it will take precedence and automatic filtering by this string will not be applied.
-   * Instead, the string will be supplied to the given `getSearchPaths` function for consumers to apply the filtering.
+   * If `getSearchPaths` function is provided, it will take precedence and automatic search by this string will not be applied.
+   * Instead, the string will be supplied to the given `getSearchPaths` function for consumers to apply the search.
    */
   searchText?: string;
   activeView: TreeWidgetViewport;
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
   visibilityHandlerOverrides?: ModelsTreeVisibilityHandlerOverrides;
   /**
-   * Optional function for applying custom filtering on the hierarchy. Use it when you want full control over which nodes should be displayed, based on more complex logic or known instance keys.
+   * Optional function for applying custom search on the hierarchy. Use it when you want full control over which nodes should be displayed, based on more complex logic or known instance keys.
    *
-   * When defined, this function takes precedence over filtering by `filter` string. If both are supplied, the `filter` is provided as an argument to `getSearchPaths`.
+   * When defined, this function takes precedence over search by `searchText` string. If both are supplied, the `searchText` is provided as an argument to `getSearchPaths`.
    *
    * @param props Parameters provided when `getSearchPaths` is called:
-   * - `createInstanceKeyPaths`: Helper function to create filter paths.
-   * - `filter`: The filter string which would otherwise be used for default filtering.
+   * - `createInstanceKeyPaths`: Helper function to create search paths.
+   * - `searchText`: The search text which would otherwise be used for default searching.
    *
    * **Example use cases:**
-   * - You have a list of `InstanceKey` items, which you want to use for filtering the hierarchy.
-   * - You want to create filter paths based on node label, but also apply some extra conditions (for example exclude paths with sub-models).
-   * - You want to construct custom filtered paths. For example: create a filter path for each geometric element which has a parent element.
+   * - You have a list of `InstanceKey` items, which you want to use for searching the hierarchy.
+   * - You want to create search paths based on node label, but also apply some extra conditions (for example exclude paths with sub-models).
+   * - You want to construct custom search paths. For example: create a search path for each geometric element which has a parent element.
    *
    * @note Paths returned  by `createInstanceKeyPaths` will not have `reveal` flag set. If you want nodes to be expanded, iterate over the paths and
    * set `reveal: true` manually.
    */
   getSearchPaths?: (props: {
-    /** A function that creates filtering paths based on provided target instance keys or node label. */
+    /** A function that creates search paths based on provided target instance keys or node label. */
     createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<NormalizedHierarchySearchPath[]>;
     /** Search text which would be used to create search paths if `getSearchPaths` wouldn't be provided. */
     searchText?: string;
   }) => Promise<HierarchySearchPath[] | undefined>;
   /**
-   * Optional function for restricting the visible hierarchy to a specific sub-tree of nodes, without changing how filtering works.
+   * Optional function for restricting the visible hierarchy to a specific sub-tree of nodes, without changing how search works.
    *
-   * Use when you want to display only part of the hierarchy, but still allow normal filtering within that sub-tree.
+   * Use when you want to display only part of the hierarchy, but still allow normal searching within that sub-tree.
    *
    * When defined, only nodes that are in the provided paths or children of target nodes will be part of the hierarchy.
-   * Filtering (by label or custom logic) will still apply within this sub-tree.
+   * Searching (by label or custom logic) will still apply within this sub-tree.
    *
    * Key difference:
-   * - `getSearchPaths` determines which nodes should be shown, giving you full control over filtering logic.
-   * - `getSubTreePaths` restricts the hierarchy to a sub-tree, but does not override the filtering logic — filtering is still applied within the restricted sub-tree.
+   * - `getSearchPaths` determines which nodes should be shown, giving you full control over search logic.
+   * - `getSubTreePaths` restricts the hierarchy to a sub-tree, but does not override the search logic — search is still applied within the restricted sub-tree.
    */
   getSubTreePaths?: (props: {
-    /** A function that creates filtering paths based on provided target instance keys. */
+    /** A function that creates search paths based on provided target instance keys. */
     createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> }) => Promise<NormalizedHierarchySearchPath[]>;
   }) => Promise<HierarchySearchPath[]>;
   onModelsFiltered?: (modelIds: Id64String[] | undefined) => void;

@@ -11,7 +11,7 @@ import type { PropsWithChildren } from "react";
 type TrackedFeatures =
   | "visibility-change"
   | "hierarchy-level-filtering"
-  | "filtering"
+  | "search"
   | "hierarchy-level-size-limit-hit"
   | "zoom-to-node"
   | "error-timeout"

@@ -41,7 +41,7 @@ import type { ExpectedHierarchyDef } from "../HierarchyValidation.js";
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
-interface TreeFilteringTestCaseDefinition<TIModelSetupResult extends {}> {
+interface TreeSearchTestCaseDefinition<TIModelSetupResult extends {}> {
   name: string;
   only?: boolean;
   setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[1];
@@ -52,7 +52,7 @@ interface TreeFilteringTestCaseDefinition<TIModelSetupResult extends {}> {
   getHierarchyConfig?: (setupResult: TIModelSetupResult) => Partial<ModelsTreeHierarchyConfiguration>;
 }
 
-namespace TreeFilteringTestCaseDefinition {
+namespace TreeSearchTestCaseDefinition {
   // only need this to get generic type inferred using setupIModel return type
   export function create<TIModelSetupResult extends {}>(
     name: string,
@@ -62,7 +62,7 @@ namespace TreeFilteringTestCaseDefinition {
     getTargetInstanceLabel: ((setupResult: TIModelSetupResult) => string) | undefined,
     getExpectedHierarchy: (setupResult: TIModelSetupResult) => ExpectedHierarchyDef[],
     getHierarchyConfig?: (setupResult: TIModelSetupResult) => Partial<ModelsTreeHierarchyConfiguration>,
-  ): TreeFilteringTestCaseDefinition<TIModelSetupResult> {
+  ): TreeSearchTestCaseDefinition<TIModelSetupResult> {
     return {
       name,
       setupIModel,
@@ -76,7 +76,7 @@ namespace TreeFilteringTestCaseDefinition {
 
   export const only: typeof create = function <TIModelSetupResult extends {}>(
     ...args: Parameters<typeof create<TIModelSetupResult>>
-  ): TreeFilteringTestCaseDefinition<TIModelSetupResult> {
+  ): TreeSearchTestCaseDefinition<TIModelSetupResult> {
     return {
       ...create(...args),
       only: true,
@@ -85,7 +85,7 @@ namespace TreeFilteringTestCaseDefinition {
 }
 
 describe("Models tree", () => {
-  describe("Hierarchy filtering", () => {
+  describe("Hierarchy search", () => {
     before(async function () {
       await initializePresentationTesting({
         backendProps: {
@@ -105,7 +105,7 @@ describe("Models tree", () => {
       await terminatePresentationTesting();
     });
 
-    it("sets auto-expand on correct nodes with merged sub-tree and filter paths", async function () {
+    it("sets auto-expand on correct nodes with merged sub-tree and search paths", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
@@ -135,7 +135,7 @@ describe("Models tree", () => {
       const imodelAccess = createIModelAccess(imodel);
       const config = { ...defaultHierarchyConfiguration, hideRootSubject: true, elementClassSpecification: keys.parentElement.className };
       using idsCache = new ModelsTreeIdsCache(imodelAccess, config);
-      const [subTreePaths, filterPaths] = await Promise.all([
+      const [subTreePaths, searchPaths] = await Promise.all([
         ModelsTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
           idsCache,
@@ -146,7 +146,7 @@ describe("Models tree", () => {
       ]);
       const joinedPaths = joinHierarchySearchPaths(
         subTreePaths.map((path) => HierarchySearchPath.normalize(path).path),
-        filterPaths.map((path) => {
+        searchPaths.map((path) => {
           const normalizedPath = HierarchySearchPath.normalize(path);
           normalizedPath.options = { reveal: true };
           return normalizedPath;
@@ -156,7 +156,7 @@ describe("Models tree", () => {
       using provider = createModelsTreeProvider({
         imodel,
         hierarchyConfig: config,
-        filteredNodePaths: joinedPaths,
+        searchPaths: joinedPaths,
         imodelAccess,
         idsCache,
       });
@@ -202,7 +202,7 @@ describe("Models tree", () => {
     });
 
     runTestCases(
-      TreeFilteringTestCaseDefinition.create(
+      TreeSearchTestCaseDefinition.create(
         "immediate Subject nodes",
         async (builder) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
@@ -263,7 +263,7 @@ describe("Models tree", () => {
           }),
         ],
       ),
-      TreeFilteringTestCaseDefinition.create(
+      TreeSearchTestCaseDefinition.create(
         "nested Subject nodes",
         async (builder) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
@@ -333,7 +333,7 @@ describe("Models tree", () => {
           }),
         ],
       ),
-      TreeFilteringTestCaseDefinition.create(
+      TreeSearchTestCaseDefinition.create(
         "two levels of Subject nodes",
         async (builder) => {
           const category = insertSpatialCategory({ builder, codeValue: "category" });
@@ -402,7 +402,7 @@ describe("Models tree", () => {
           }),
         ],
       ),
-      TreeFilteringTestCaseDefinition.create(
+      TreeSearchTestCaseDefinition.create(
         "Model nodes",
         async (builder) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
@@ -453,7 +453,7 @@ describe("Models tree", () => {
           }),
         ],
       ),
-      TreeFilteringTestCaseDefinition.create(
+      TreeSearchTestCaseDefinition.create(
         "Empty model nodes",
         async (builder) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
@@ -481,7 +481,7 @@ describe("Models tree", () => {
         ],
         () => ({ showEmptyModels: true }),
       ),
-      TreeFilteringTestCaseDefinition.create(
+      TreeSearchTestCaseDefinition.create(
         "Subject with hidden child Model node",
         async (builder) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
@@ -537,7 +537,7 @@ describe("Models tree", () => {
           }),
         ],
       ),
-      TreeFilteringTestCaseDefinition.create(
+      TreeSearchTestCaseDefinition.create(
         "Category nodes",
         async (builder) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
@@ -599,7 +599,7 @@ describe("Models tree", () => {
           }),
         ],
       ),
-      TreeFilteringTestCaseDefinition.create(
+      TreeSearchTestCaseDefinition.create(
         "root Element nodes",
         async (builder) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
@@ -660,7 +660,7 @@ describe("Models tree", () => {
           }),
         ],
       ),
-      TreeFilteringTestCaseDefinition.create(
+      TreeSearchTestCaseDefinition.create(
         "category and element nodes",
         async (builder) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
@@ -707,7 +707,7 @@ describe("Models tree", () => {
           }),
         ],
       ),
-      TreeFilteringTestCaseDefinition.create(
+      TreeSearchTestCaseDefinition.create(
         "child Element nodes",
         async (builder) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
@@ -791,7 +791,7 @@ describe("Models tree", () => {
           }),
         ],
       ),
-      TreeFilteringTestCaseDefinition.create(
+      TreeSearchTestCaseDefinition.create(
         "child Element nodes when custom element specification class is used",
         async (builder, testSchema) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
@@ -861,7 +861,7 @@ describe("Models tree", () => {
         ],
         (x) => ({ elementClassSpecification: x.rootElement1.className }),
       ),
-      TreeFilteringTestCaseDefinition.create(
+      TreeSearchTestCaseDefinition.create(
         "sub-modeled Element nodes",
         async (builder, testSchema) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
@@ -955,7 +955,7 @@ describe("Models tree", () => {
           }),
         ],
       ),
-      TreeFilteringTestCaseDefinition.create(
+      TreeSearchTestCaseDefinition.create(
         "Element node through hidden ancestors",
         async (builder) => {
           const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
@@ -998,7 +998,7 @@ describe("Models tree", () => {
 
     describe("when expanding up to element class grouping nodes", () => {
       runTestCases(
-        TreeFilteringTestCaseDefinition.create(
+        TreeSearchTestCaseDefinition.create(
           "grouped root element",
           async (builder) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
@@ -1066,7 +1066,7 @@ describe("Models tree", () => {
             }),
           ],
         ),
-        TreeFilteringTestCaseDefinition.create(
+        TreeSearchTestCaseDefinition.create(
           "grouped child element",
           async (builder, testSchema) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
@@ -1176,7 +1176,7 @@ describe("Models tree", () => {
             }),
           ],
         ),
-        TreeFilteringTestCaseDefinition.create(
+        TreeSearchTestCaseDefinition.create(
           "grouped child elements of different classes",
           async (builder, testSchema) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
@@ -1317,7 +1317,7 @@ describe("Models tree", () => {
             }),
           ],
         ),
-        TreeFilteringTestCaseDefinition.create(
+        TreeSearchTestCaseDefinition.create(
           "hierarchy of grouped elements",
           async (builder) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
@@ -1456,7 +1456,7 @@ describe("Models tree", () => {
             }),
           ],
         ),
-        TreeFilteringTestCaseDefinition.create(
+        TreeSearchTestCaseDefinition.create(
           "grouped element with auto expansion to the grouping node and to the element",
           async (builder) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
@@ -1514,7 +1514,7 @@ describe("Models tree", () => {
             }),
           ],
         ),
-        TreeFilteringTestCaseDefinition.create(
+        TreeSearchTestCaseDefinition.create(
           "grouped elements under different categories",
           async (builder) => {
             const rootSubject: InstanceKey = { className: CLASS_NAME_Subject, id: IModel.rootSubjectId };
@@ -1607,8 +1607,8 @@ describe("Models tree", () => {
     });
   });
 
-  function runTestCases(...testCases: TreeFilteringTestCaseDefinition<any>[]) {
-    testCases.forEach((testCase: TreeFilteringTestCaseDefinition<any>) => {
+  function runTestCases(...testCases: TreeSearchTestCaseDefinition<any>[]) {
+    testCases.forEach((testCase: TreeSearchTestCaseDefinition<any>) => {
       (testCase.only ? describe.only : describe)(testCase.name, () => {
         let imodel: IModelConnection;
         let instanceKeyPaths!: HierarchySearchPath[];
@@ -1635,7 +1635,7 @@ describe("Models tree", () => {
 
         beforeEach(() => {
           modelsTreeIdsCache = new ModelsTreeIdsCache(createIModelAccess(imodel), hierarchyConfig);
-          hierarchyProvider = createModelsTreeProvider({ imodel, filteredNodePaths: instanceKeyPaths, hierarchyConfig });
+          hierarchyProvider = createModelsTreeProvider({ imodel, searchPaths: instanceKeyPaths, hierarchyConfig });
         });
 
         afterEach(() => {
@@ -1647,7 +1647,7 @@ describe("Models tree", () => {
           await imodel.close();
         });
 
-        it("filters hierarchy by instance key paths", async function () {
+        it("searches hierarchy by instance key paths", async function () {
           await validateHierarchy({
             provider: hierarchyProvider,
             expect: expectedHierarchy,
@@ -1713,7 +1713,7 @@ describe("Models tree", () => {
       expect(actualInstanceKeyPaths).to.deep.eq(expectedPaths.map(HierarchySearchPath.normalize));
     });
 
-    it("filtering by label aborts when abort signal fires", async function () {
+    it("search by label aborts when abort signal fires", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
@@ -1755,7 +1755,7 @@ describe("Models tree", () => {
       ]);
     });
 
-    it("filtering by target items aborts when abort signal fires", async function () {
+    it("search by target items aborts when abort signal fires", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
