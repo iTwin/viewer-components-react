@@ -17,7 +17,7 @@ import type { ContextMenuItemProps } from "@itwin/property-grid-react";
 // __PUBLISH_EXTRACT_START__ PropertyGrid.PropertyGridWithContextMenuItemImports
 import { PropertyGridComponent } from "@itwin/property-grid-react";
 // __PUBLISH_EXTRACT_END__
-import { cleanup, queryByText, render, waitFor } from "@testing-library/react";
+import { cleanup, queryByText, render, waitFor, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils.js";
 import { initializeLearningSnippetsTests, terminateLearningSnippetsTests } from "../../utils/InitializationUtils.js";
@@ -40,8 +40,8 @@ describe("Property grid", () => {
         sinon.restore();
       });
 
-      // TODO: https://github.com/iTwin/viewer-components-react/issues/1516
-      it.skip("renders context menu item", async function () {
+      it("renders context menu item", async function () {
+        this.timeout(10000);
         const imodel = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
@@ -78,8 +78,20 @@ describe("Property grid", () => {
 
         using _ = { [Symbol.dispose]: cleanup };
         const { baseElement, getAllByText } = render(<MyPropertyGrid />);
-        await waitFor(async () => {
-          await user.pointer({ keys: "[MouseRight>]", target: getAllByText("Test SpatialCategory")[1] });
+        
+        // Wait for PropertyGrid to load and display the category
+        await waitFor(
+          () => {
+            const elements = getAllByText("Test SpatialCategory");
+            expect(elements.length).to.be.greaterThan(0);
+          },
+          { timeout: 5000 }
+        );
+        
+        const targetElement = getAllByText("Test SpatialCategory")[1];
+        await user.pointer({ keys: "[MouseRight>]", target: targetElement });
+        
+        await waitFor(() => {
           expect(queryByText(baseElement, "Click me!")).to.not.be.null;
         });
       });
