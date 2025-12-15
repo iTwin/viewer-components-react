@@ -38,16 +38,16 @@ describe("Utils", () => {
     });
 
     it("returns subTree paths when search paths are shorter than subTree paths", () => {
-      const searchPaths: NormalizedHierarchySearchPath = { path: [subject] };
-      const searchPaths2: NormalizedHierarchySearchPath = { path: [element1, element2, element3], options: { reveal: true } };
-      const searchPaths3: NormalizedHierarchySearchPath = { path: [element3, element4], options: { reveal: { depthInHierarchy: 1 } } };
-      const searchPaths4: NormalizedHierarchySearchPath = { path: [element4, category1], options: { reveal: { depthInPath: 1 } } };
-      const searchPathsArray: NormalizedHierarchySearchPath[] = [searchPaths, searchPaths2, searchPaths3, searchPaths4];
+      const searchPath: NormalizedHierarchySearchPath = { path: [subject] };
+      const searchPath2: NormalizedHierarchySearchPath = { path: [element1, element2, element3], options: { reveal: true } };
+      const searchPath3: NormalizedHierarchySearchPath = { path: [element3, element4], options: { reveal: { depthInHierarchy: 1 } } };
+      const searchPath4: NormalizedHierarchySearchPath = { path: [element4, category1], options: { reveal: { depthInPath: 1 } } };
+      const searchPathsArray: NormalizedHierarchySearchPath[] = [searchPath, searchPath2, searchPath3, searchPath4];
 
-      const subTreePath1 = [...searchPaths.path, model];
-      const subTreePath2 = [...searchPaths2.path, element4];
-      const subTreePath3 = [...searchPaths3.path, category1, category2];
-      const subTreePath4 = [...searchPaths4.path, category2];
+      const subTreePath1 = [...searchPath.path, model];
+      const subTreePath2 = [...searchPath2.path, element4];
+      const subTreePath3 = [...searchPath3.path, category1, category2];
+      const subTreePath4 = [...searchPath4.path, category2];
       const subTreePaths: HierarchyNodeIdentifiersPath[] = [subTreePath1, subTreePath2, subTreePath3, subTreePath4];
 
       const joinedPaths = joinHierarchySearchPaths(subTreePaths, searchPathsArray);
@@ -62,11 +62,11 @@ describe("Utils", () => {
         },
         {
           path: subTreePath3,
-          options: searchPaths3.options,
+          options: searchPath3.options,
         },
         {
           path: subTreePath4,
-          options: searchPaths4.options,
+          options: searchPath4.options,
         },
       ];
       expect(joinedPaths).to.deep.eq(expectedPaths);
