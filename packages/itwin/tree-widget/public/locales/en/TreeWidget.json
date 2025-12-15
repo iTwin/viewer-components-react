@@ -51,7 +51,7 @@
       "noMatches": "No results were found for your search query.",
       "noMatchesRetry": "Please modify your search and try again.",
       "unknownSearchError": "An unknown error occurred while searching the tree.",
-      "tooManySearchMatches": "There are too many matches for your search query.",
+      "tooManySearchMatches": "There are too many matches for your search query."
     }
   },
   "classificationsTree": {
@@ -60,7 +60,7 @@
       "noMatches": "No results were found for your search query.",
       "noMatchesRetry": "Please modify your search and try again.",
       "unknownSearchError": "An unknown error occurred while searching the tree.",
-      "tooManySearchMatches": "There are too many matches for your search query.",
+      "tooManySearchMatches": "There are too many matches for your search query."
     }
   },
   "modelsTree": {
