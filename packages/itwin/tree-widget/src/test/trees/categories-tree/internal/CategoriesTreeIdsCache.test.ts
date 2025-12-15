@@ -905,7 +905,7 @@ describe("CategoriesTreeIdsCache", () => {
       expect(await firstValueFrom(idsCache.getSubCategories("0x123"))).to.deep.eq([]);
     });
 
-    it("returns subcategory when category has one subCategory", async function () {
+    it("returns sub-category when category has one sub-category", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
