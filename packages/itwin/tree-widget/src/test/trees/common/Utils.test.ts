@@ -42,7 +42,7 @@ describe("Utils", () => {
       const searchPath2: NormalizedHierarchySearchPath = { path: [element1, element2, element3], options: { reveal: true } };
       const searchPath3: NormalizedHierarchySearchPath = { path: [element3, element4], options: { reveal: { depthInHierarchy: 1 } } };
       const searchPath4: NormalizedHierarchySearchPath = { path: [element4, category1], options: { reveal: { depthInPath: 1 } } };
-      const searchPathsArray: NormalizedHierarchySearchPath[] = [searchPath, searchPath2, searchPath3, searchPath4];
+      const searchPaths: NormalizedHierarchySearchPath[] = [searchPath, searchPath2, searchPath3, searchPath4];
 
       const subTreePath1 = [...searchPath.path, model];
       const subTreePath2 = [...searchPath2.path, element4];
@@ -50,7 +50,7 @@ describe("Utils", () => {
       const subTreePath4 = [...searchPath4.path, category2];
       const subTreePaths: HierarchyNodeIdentifiersPath[] = [subTreePath1, subTreePath2, subTreePath3, subTreePath4];
 
-      const joinedPaths = joinHierarchySearchPaths(subTreePaths, searchPathsArray);
+      const joinedPaths = joinHierarchySearchPaths(subTreePaths, searchPaths);
       const expectedPaths = [
         {
           path: subTreePath1,
