@@ -41,7 +41,7 @@ import {
   parseIdsSelectorResult,
   releaseMainThreadOnItemsCount,
 } from "../common/internal/Utils.js";
-import { FilterLimitExceededError } from "../common/TreeErrors.js";
+import { SearchLimitExceededError } from "../common/TreeErrors.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Array, MarkRequired } from "@itwin/core-bentley";
@@ -68,7 +68,7 @@ import type { CategoryId, DefinitionContainerId, ElementId, ModelId, SubCategory
 import type { NormalizedHierarchySearchPath } from "../common/Utils.js";
 import type { CategoriesTreeIdsCache, CategoryInfo } from "./internal/CategoriesTreeIdsCache.js";
 
-const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
+const MAX_SEARCH_INSTANCE_KEY_COUNT = 100;
 
 interface CategoriesTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
@@ -804,7 +804,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
               : ""
           }
         )
-        ${limit === undefined ? `LIMIT ${MAX_FILTERING_INSTANCE_KEY_COUNT + 1}` : limit !== "unbounded" ? `LIMIT ${limit}` : ""}
+        ${limit === undefined ? `LIMIT ${MAX_SEARCH_INSTANCE_KEY_COUNT + 1}` : limit !== "unbounded" ? `LIMIT ${limit}` : ""}
       `;
           const bindings = [
             { type: "string" as const, value: adjustedLabel },
@@ -864,8 +864,8 @@ function createInstanceKeyPathsFromTargetItems({
   targetItems: InstanceKey[];
   componentName: string;
 }): Observable<NormalizedHierarchySearchPath> {
-  if (limit !== "unbounded" && targetItems.length > (limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT)) {
-    throw new FilterLimitExceededError(limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT);
+  if (limit !== "unbounded" && targetItems.length > (limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT)) {
+    throw new SearchLimitExceededError(limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT);
   }
   const { categoryClass } = getClassesByView(viewType);
   return from(targetItems).pipe(

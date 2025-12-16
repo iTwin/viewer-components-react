@@ -14,7 +14,7 @@
     }
   },
   "loading": {
-    "filter": "Filtering in progress",
+    "search": "Search in progress",
     "skeleton": "Loading tree"
   },
   "selectableTree": {

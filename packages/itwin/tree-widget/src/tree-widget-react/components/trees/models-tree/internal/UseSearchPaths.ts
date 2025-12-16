@@ -8,7 +8,7 @@ import { firstValueFrom } from "rxjs";
 import { HierarchyNodeIdentifier, HierarchyNodeKey, HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import { useFocusedInstancesContext } from "../../common/FocusedInstancesContext.js";
 import { CLASS_NAME_GeometricModel3d, CLASS_NAME_Subject } from "../../common/internal/ClassNameDefinitions.js";
-import { FilterLimitExceededError } from "../../common/TreeErrors.js";
+import { SearchLimitExceededError } from "../../common/TreeErrors.js";
 import { useTelemetryContext } from "../../common/UseTelemetryContext.js";
 import { joinHierarchySearchPaths } from "../../common/Utils.js";
 import { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
@@ -135,7 +135,7 @@ export function useSearchPaths({
             handlePaths: async (paths) => handlePaths(paths, imodelAccess),
           });
         } catch (e) {
-          const newError = e instanceof FilterLimitExceededError ? "tooManyInstancesFocused" : "unknownInstanceFocusError";
+          const newError = e instanceof SearchLimitExceededError ? "tooManyInstancesFocused" : "unknownInstanceFocusError";
           if (newError !== "tooManyInstancesFocused") {
             const feature = e instanceof Error && e.message.includes("query too long to execute or server is too busy") ? "error-timeout" : "error-unknown";
             onFeatureUsed({ featureId: feature, reportInteraction: false });
@@ -170,7 +170,7 @@ export function useSearchPaths({
             handlePaths: async (paths) => handlePaths(paths, imodelAccess),
           });
         } catch (e) {
-          const newError = e instanceof FilterLimitExceededError ? "tooManySearchMatches" : "unknownSearchError";
+          const newError = e instanceof SearchLimitExceededError ? "tooManySearchMatches" : "unknownSearchError";
           if (newError !== "tooManySearchMatches") {
             const feature = e instanceof Error && e.message.includes("query too long to execute or server is too busy") ? "error-timeout" : "error-unknown";
             onFeatureUsed({ featureId: feature, reportInteraction: false });
@@ -201,7 +201,7 @@ export function useSearchPaths({
             handlePaths: async (paths) => handlePaths(paths, imodelAccess),
           });
         } catch (e) {
-          const newError = e instanceof FilterLimitExceededError ? "tooManySearchMatches" : "unknownSearchError";
+          const newError = e instanceof SearchLimitExceededError ? "tooManySearchMatches" : "unknownSearchError";
           if (newError !== "tooManySearchMatches") {
             const feature = e instanceof Error && e.message.includes("query too long to execute or server is too busy") ? "error-timeout" : "error-unknown";
             onFeatureUsed({ featureId: feature, reportInteraction: false });

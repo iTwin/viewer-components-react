@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useMemo, useState } from "react";
-import { FilterLimitExceededError } from "../../common/TreeErrors.js";
+import { SearchLimitExceededError } from "../../common/TreeErrors.js";
 import { useTelemetryContext } from "../../common/UseTelemetryContext.js";
 import { ClassificationsTreeDefinition } from "../ClassificationsTreeDefinition.js";
 
@@ -63,7 +63,7 @@ export function useSearchPaths({
         onSearchPathsChanged(paths);
         return paths;
       } catch (e) {
-        const newError = e instanceof FilterLimitExceededError ? "tooManySearchMatches" : "unknownSearchError";
+        const newError = e instanceof SearchLimitExceededError ? "tooManySearchMatches" : "unknownSearchError";
         if (newError !== "tooManySearchMatches") {
           const feature = e instanceof Error && e.message.includes("query too long to execute or server is too busy") ? "error-timeout" : "error-unknown";
           onFeatureUsed({ featureId: feature, reportInteraction: false });

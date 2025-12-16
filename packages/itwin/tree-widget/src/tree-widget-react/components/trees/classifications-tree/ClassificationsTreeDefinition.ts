@@ -35,7 +35,7 @@ import {
   CLASS_NAME_GeometricElement3d,
 } from "../common/internal/ClassNameDefinitions.js";
 import { getOptimalBatchSize, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
-import { FilterLimitExceededError } from "../common/TreeErrors.js";
+import { SearchLimitExceededError } from "../common/TreeErrors.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
@@ -56,7 +56,7 @@ import type { ElementId } from "../common/internal/Types.js";
 import type { NormalizedHierarchySearchPath } from "../common/Utils.js";
 import type { ClassificationId, ClassificationsTreeIdsCache, ClassificationTableId } from "./internal/ClassificationsTreeIdsCache.js";
 
-const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
+const MAX_SEARCH_INSTANCE_KEY_COUNT = 100;
 
 interface ClassificationsTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor & { imodelKey: string };
@@ -544,7 +544,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
               : ""
           }
         )
-        ${props.limit === undefined ? `LIMIT ${MAX_FILTERING_INSTANCE_KEY_COUNT + 1}` : props.limit !== "unbounded" ? `LIMIT ${props.limit}` : ""}
+        ${props.limit === undefined ? `LIMIT ${MAX_SEARCH_INSTANCE_KEY_COUNT + 1}` : props.limit !== "unbounded" ? `LIMIT ${props.limit}` : ""}
       `;
     const bindings = [
       { type: "string" as const, value: adjustedLabel },
@@ -598,9 +598,9 @@ function createInstanceKeyPathsFromTargetItemsObs({
   componentId: GuidString;
   componentName: string;
 }): Observable<NormalizedHierarchySearchPath[]> {
-  const actualLimit = limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT;
+  const actualLimit = limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT;
   if (actualLimit !== "unbounded" && targetItems.length > actualLimit) {
-    throw new FilterLimitExceededError(actualLimit);
+    throw new SearchLimitExceededError(actualLimit);
   }
   return from(targetItems).pipe(
     releaseMainThreadOnItemsCount(2000),

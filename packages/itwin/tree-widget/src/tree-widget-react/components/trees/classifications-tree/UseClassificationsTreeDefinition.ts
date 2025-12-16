@@ -31,18 +31,18 @@ interface UseClassificationsTreeDefinitionProps {
   }>;
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
   /**
-   * Optional search parameters to filter tree nodes.
+   * Optional parameters to search for tree nodes.
    */
   search?:
     | {
         /**
-         * Text used to filter tree nodes by label.
+         * Text used to search tree nodes by label.
          */
         searchText: string;
       }
     | {
         /**
-         * List of instance keys to filter tree nodes by.
+         * List of instance keys to search tree nodes by.
          */
         targetItems: Array<InstanceKey>;
       };

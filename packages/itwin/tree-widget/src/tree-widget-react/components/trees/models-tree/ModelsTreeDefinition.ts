@@ -50,7 +50,7 @@ import {
   parseIdsSelectorResult,
   releaseMainThreadOnItemsCount,
 } from "../common/internal/Utils.js";
-import { FilterLimitExceededError } from "../common/TreeErrors.js";
+import { SearchLimitExceededError } from "../common/TreeErrors.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64String } from "@itwin/core-bentley";
@@ -81,7 +81,7 @@ import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
 /** @beta */
 export type ClassGroupingHierarchyNode = GroupingHierarchyNode & { key: ClassGroupingNodeKey };
 
-const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
+const MAX_SEARCH_INSTANCE_KEY_COUNT = 100;
 
 /**
  * Defines hierarchy configuration supported by `ModelsTree`.
@@ -764,8 +764,8 @@ function createInstanceKeyPathsFromTargetItemsObs({
 }: Omit<ModelsTreeInstanceKeyPathsFromTargetItemsProps, "abortSignal" | "componentId"> & { componentId: GuidString; componentName: string }): Observable<
   NormalizedHierarchySearchPath[]
 > {
-  if (limit !== "unbounded" && targetItems.length > (limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT)) {
-    throw new FilterLimitExceededError(limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT);
+  if (limit !== "unbounded" && targetItems.length > (limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT)) {
+    throw new SearchLimitExceededError(limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT);
   }
 
   return from(targetItems).pipe(
@@ -881,7 +881,7 @@ function createInstanceKeyPathsFromInstanceLabelObs(
             AND json_extract(e.JsonProperties, '$.GraphicalPartition3d.Model.Content') IS NULL
         )
         WHERE Label LIKE '%' || ? || '%' ESCAPE '\\'
-        LIMIT ${MAX_FILTERING_INSTANCE_KEY_COUNT + 1}
+        LIMIT ${MAX_SEARCH_INSTANCE_KEY_COUNT + 1}
       `;
     const bindings: ECSqlBinding[] = [{ type: "string", value: label.replace(/[%_\\]/g, "\\$&") }];
     return { ecsql, bindings };

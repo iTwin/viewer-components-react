@@ -13,7 +13,7 @@ export function ProgressOverlay() {
   return (
     <div className="tw-progress-overlay-container">
       <ProgressBar aria-labelledby={"tw-progress-bar"} tone={"accent"} />
-      <VisuallyHidden id={"tw-progress-bar"}>{TreeWidget.translate("loading.filter")}</VisuallyHidden>
+      <VisuallyHidden id={"tw-progress-bar"}>{TreeWidget.translate("loading.search")}</VisuallyHidden>
       <div className="tw-progress-overlay-backdrop" />
     </div>
   );

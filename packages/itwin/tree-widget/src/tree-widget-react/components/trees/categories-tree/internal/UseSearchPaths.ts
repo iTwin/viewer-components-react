@@ -9,7 +9,7 @@ import { assert } from "@itwin/core-bentley";
 import { HierarchyNodeIdentifier, HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
 import { getClassesByView } from "../../common/internal/Utils.js";
-import { FilterLimitExceededError } from "../../common/TreeErrors.js";
+import { SearchLimitExceededError } from "../../common/TreeErrors.js";
 import { useTelemetryContext } from "../../common/UseTelemetryContext.js";
 import { CategoriesTreeDefinition } from "../CategoriesTreeDefinition.js";
 
@@ -79,7 +79,7 @@ export function useSearchPaths({
         onCategoriesFiltered?.(await getCategoriesFromPaths(paths, getCategoriesTreeIdsCache(), elementClass, modelClass, hierarchyConfiguration));
         return paths;
       } catch (e) {
-        const newError = e instanceof FilterLimitExceededError ? "tooManySearchMatches" : "unknownSearchError";
+        const newError = e instanceof SearchLimitExceededError ? "tooManySearchMatches" : "unknownSearchError";
         if (newError !== "tooManySearchMatches") {
           const feature = e instanceof Error && e.message.includes("query too long to execute or server is too busy") ? "error-timeout" : "error-unknown";
           onFeatureUsed({ featureId: feature, reportInteraction: false });
