@@ -17,7 +17,7 @@ interface SearchEmptyTreeProps {
 /** @internal */
 export function TooManySearchMatches({ base }: SearchEmptyTreeProps) {
   return (
-    <div className={"tw-filter-empty-tree-container"}>
+    <div className={"tw-search-empty-tree-container"}>
       <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.search.tooManySearchMatches`)}</Text>
       <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.search.tooManySearchMatchesRetry`)}</Text>
     </div>
@@ -27,7 +27,7 @@ export function TooManySearchMatches({ base }: SearchEmptyTreeProps) {
 /** @internal */
 export function NoSearchMatches({ base }: SearchEmptyTreeProps) {
   return (
-    <div className={"tw-filter-empty-tree-container"}>
+    <div className={"tw-search-empty-tree-container"}>
       <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.search.noMatches`)}</Text>
       <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.search.noMatchesRetry`)}</Text>
     </div>
@@ -37,7 +37,7 @@ export function NoSearchMatches({ base }: SearchEmptyTreeProps) {
 /** @internal */
 export function SearchUnknownError({ base }: SearchEmptyTreeProps) {
   return (
-    <div className={"tw-filter-empty-tree-container"}>
+    <div className={"tw-search-empty-tree-container"}>
       <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.search.unknownSearchError`)}</Text>
     </div>
   );
@@ -47,7 +47,7 @@ export function SearchUnknownError({ base }: SearchEmptyTreeProps) {
 export function TooManyInstancesFocused({ base }: SearchEmptyTreeProps) {
   const { toggle } = useFocusedInstancesContext();
   return (
-    <Text variant="body-sm" className={"tw-filter-empty-tree-container"}>
+    <Text variant="body-sm" className={"tw-search-empty-tree-container"}>
       {TreeWidget.translate(`${base}.search.tooManyInstancesFocused`)}
       <Anchor
         onClick={(e) => {
@@ -66,7 +66,7 @@ export function TooManyInstancesFocused({ base }: SearchEmptyTreeProps) {
 export function UnknownInstanceFocusError({ base }: SearchEmptyTreeProps) {
   const { toggle } = useFocusedInstancesContext();
   return (
-    <Text variant="body-sm" className={"tw-filter-empty-tree-container"}>
+    <Text variant="body-sm" className={"tw-search-empty-tree-container"}>
       {TreeWidget.translate(`${base}.search.unknownInstanceFocusError`)}
       <Anchor
         onClick={(e) => {
@@ -89,7 +89,7 @@ interface SubTreeErrorProps {
 /** @internal */
 export function SubTreeError({ base, error }: SubTreeErrorProps) {
   return (
-    <div className={"tw-filter-empty-tree-container"}>
+    <div className={"tw-search-empty-tree-container"}>
       <Text variant={"body-sm"}>{TreeWidget.translate(`${base}.subTree.${error}`)}</Text>
     </div>
   );
