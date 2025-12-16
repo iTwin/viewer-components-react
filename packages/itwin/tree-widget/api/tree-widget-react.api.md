@@ -222,13 +222,6 @@ type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "selectionStorage" | 
 
 export { FilterAction }
 
-// @beta
-export class FilterLimitExceededError extends Error {
-    constructor(limit: number);
-    // (undocumented)
-    readonly limit: number;
-}
-
 // @public (undocumented)
 interface FocusedInstancesContext {
     enabled: boolean;
@@ -391,6 +384,13 @@ type NormalizedHierarchySearchPath = ReturnType<(typeof HierarchySearchPath)["no
 type PerModelCategoryOverride = "show" | "hide" | "none";
 
 export { RenameAction }
+
+// @beta
+export class SearchLimitExceededError extends Error {
+    constructor(limit: number);
+    // (undocumented)
+    readonly limit: number;
+}
 
 // @beta (undocumented)
 export function SelectableTree({ buttons, children }: PropsWithChildren<TreeHeaderProps>): JSX_2.Element;
