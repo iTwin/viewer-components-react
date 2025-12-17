@@ -503,7 +503,7 @@ export class BaseVisibilityHelper implements Disposable {
 
       // TODO: check child elements that are subModels
       if (!this.#props.viewport.viewsModel(modelId)) {
-        return fromWithRelease({ ids: elementIds, releaseOnCount: 100 }).pipe(
+        return fromWithRelease({ source: elementIds, releaseOnCount: 100 }).pipe(
           mergeMap((elementId) =>
             this.#props.baseIdsCache.hasSubModel(elementId).pipe(
               mergeMap((isSubModel) => {
@@ -591,7 +591,7 @@ export class BaseVisibilityHelper implements Disposable {
       );
     }
     const { modelId, categoryIds } = props.queryProps;
-    return fromWithRelease({ ids: categoryIds, releaseOnCount: 100 }).pipe(
+    return fromWithRelease({ source: categoryIds, releaseOnCount: 100 }).pipe(
       mergeMap((categoryId) => {
         return forkJoin({
           categoryId: of(categoryId),
@@ -765,8 +765,9 @@ export class BaseVisibilityHelper implements Disposable {
               // In case of turning categories on, need to change sub-categories separately as enableCategoryDisplay
               // takes a long time to get sub-categories for each category
               on
-                ? fromWithRelease({ ids: categoryIds, releaseOnCount: 200 }).pipe(
-                    mergeMap((categoryId) => this.#props.baseIdsCache.getSubCategories({ categoryId }).pipe(mergeAll())),
+                ? fromWithRelease({ source: categoryIds, releaseOnCount: 200 }).pipe(
+                    mergeMap((categoryId) => this.#props.baseIdsCache.getSubCategories({ categoryId })),
+                    mergeAll(),
                     releaseMainThreadOnItemsCount(200),
                     map((subCategoryId) => {
                       if (!this.#props.viewport.viewsSubCategory(subCategoryId)) {
@@ -845,7 +846,7 @@ export class BaseVisibilityHelper implements Disposable {
           return this.queueElementsVisibilityChange(elementIds, on, isDisplayedByDefault);
         }),
         // Change visibility of elements that are models
-        fromWithRelease({ ids: elementIds, releaseOnCount: 100 }).pipe(
+        fromWithRelease({ source: elementIds, releaseOnCount: 100 }).pipe(
           mergeMap((elementId) =>
             this.#props.baseIdsCache.hasSubModel(elementId).pipe(
               mergeMap((isSubModel) => {

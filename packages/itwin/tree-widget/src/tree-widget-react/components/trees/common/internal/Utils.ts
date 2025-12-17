@@ -143,27 +143,18 @@ export function getSetFromId64Arg(arg: Id64Arg): Set<Id64String> {
  * Creates an Observable from provided props. If `releaseOnCount` is provided, main thread will be released after processing specified number of items.
  * @internal
  */
-export function fromWithRelease(props: { ids: Id64Arg; releaseOnCount?: number }): Observable<Id64String>;
-export function fromWithRelease<T>(props: { set: Set<T>; releaseOnCount?: number }): Observable<T>;
-// eslint-disable-next-line @typescript-eslint/unified-signatures
-export function fromWithRelease<T>(props: { array: Array<T>; releaseOnCount?: number }): Observable<T>;
-export function fromWithRelease<T>({
-  releaseOnCount,
-  ...props
-}: { releaseOnCount?: number } & ({ ids: Id64Arg } | { set: Set<T> } | { array: Array<T> })): Observable<T> | Observable<Id64String> {
-  // releaseMainThreadOnItemsCount complains if provided obs of type Observable<T> | Observable<Id64String>, so need to split here
-  const obsT = "array" in props ? from(props.array) : "set" in props ? from(props.set) : undefined;
-  const obsId64 = "ids" in props ? from(Id64.iterable(props.ids)) : undefined;
-  const obs = obsT ?? obsId64!;
-  if (releaseOnCount === undefined) {
-    return obs;
+export function fromWithRelease(props: { source: Id64Arg; releaseOnCount?: number }): Observable<Id64String>;
+export function fromWithRelease<T>(props: { source: Set<T> | Array<T>; releaseOnCount?: number }): Observable<T>;
+export function fromWithRelease(props: { source: Id64Arg | Set<unknown> | Array<unknown>; releaseOnCount?: number }): Observable<unknown> {
+  const source = Array.isArray(props.source)
+    ? { obs: from(props.source), size: props.source.length }
+    : props.source instanceof Set
+      ? { obs: from(props.source), size: props.source.size }
+      : { obs: from(Id64.iterable(props.source)), size: Id64.sizeOf(props.source) };
+  if (props.releaseOnCount === undefined || source.size < props.releaseOnCount) {
+    return source.obs;
   }
-  const itemsCount = "ids" in props ? Id64.sizeOf(props.ids) : "set" in props ? props.set.size : props.array.length;
-  return itemsCount >= releaseOnCount
-    ? obsT
-      ? obsT.pipe(releaseMainThreadOnItemsCount(releaseOnCount))
-      : obsId64!.pipe(releaseMainThreadOnItemsCount(releaseOnCount))
-    : obs;
+  return source.obs.pipe(releaseMainThreadOnItemsCount(props.releaseOnCount));
 }
 
 /** @internal */

@@ -105,7 +105,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
 
       if (elements?.length) {
         observables.push(
-          fromWithRelease({ array: elements, releaseOnCount: 50 }).pipe(
+          fromWithRelease({ source: elements, releaseOnCount: 50 }).pipe(
             mergeMap(({ modelId, elements: elementsMap, categoryId }) =>
               this.#visibilityHelper.changeElementsVisibilityStatus({ modelId, categoryId, elementIds: [...elementsMap.keys()], on }),
             ),
@@ -278,7 +278,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
 
       if (elements?.length) {
         observables.push(
-          fromWithRelease({ array: elements, releaseOnCount: 50 }).pipe(
+          fromWithRelease({ source: elements, releaseOnCount: 50 }).pipe(
             mergeMap(({ modelId, elements: elementsMap, categoryId }) =>
               this.#visibilityHelper.getElementsVisibilityStatus({ modelId, categoryId, elementIds: [...elementsMap.keys()], type: this.#elementType }),
             ),

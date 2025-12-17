@@ -169,9 +169,9 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       }
       if (elements2d?.length) {
         observables.push(
-          fromWithRelease({ array: elements2d, releaseOnCount: 50 }).pipe(
+          fromWithRelease({ source: elements2d, releaseOnCount: 50 }).pipe(
             mergeMap(({ modelId, categoryId, elements }) => {
-              return (elements.size >= 1000 ? from(elements.keys()).pipe(releaseMainThreadOnItemsCount(1000)) : from(elements.keys())).pipe(
+              return fromWithRelease({ source: [...elements.keys()], releaseOnCount: 1000 }).pipe(
                 mergeMap((elementId) =>
                   this.#visibilityHelper.getElementsVisibilityStatus({ modelId, categoryId, elementIds: elementId, type: "GeometricElement2d" }),
                 ),
@@ -183,9 +183,9 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
 
       if (elements3d?.length) {
         observables.push(
-          fromWithRelease({ array: elements3d, releaseOnCount: 50 }).pipe(
+          fromWithRelease({ source: elements3d, releaseOnCount: 50 }).pipe(
             mergeMap(({ modelId, categoryId, elements }) => {
-              return (elements.size >= 1000 ? from(elements.keys()).pipe(releaseMainThreadOnItemsCount(1000)) : from(elements.keys())).pipe(
+              return fromWithRelease({ source: [...elements.keys()], releaseOnCount: 1000 }).pipe(
                 mergeMap((elementId) =>
                   this.#visibilityHelper.getElementsVisibilityStatus({ modelId, categoryId, elementIds: elementId, type: "GeometricElement3d" }),
                 ),

@@ -162,7 +162,7 @@ export async function enableCategoryDisplay(viewport: TreeWidgetViewport, catego
     });
   };
   return toVoidPromise(
-    fromWithRelease({ ids: categoryIds, releaseOnCount: 500 }).pipe(
+    fromWithRelease({ source: categoryIds, releaseOnCount: 500 }).pipe(
       bufferCount(getOptimalBatchSize({ totalSize: Id64.sizeOf(categoryIds), maximumBatchSize: 500 })),
       mergeMap(async (bufferedCategories) => {
         viewport.changeCategoryDisplay({ categoryIds: bufferedCategories, display: enabled, enableAllSubCategories });

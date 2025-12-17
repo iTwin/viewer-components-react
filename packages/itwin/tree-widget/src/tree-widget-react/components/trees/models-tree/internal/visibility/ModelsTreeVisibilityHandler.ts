@@ -123,7 +123,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
 
       if (elements?.length) {
         observables.push(
-          fromWithRelease({ array: elements, releaseOnCount: 50 }).pipe(
+          fromWithRelease({ source: elements, releaseOnCount: 50 }).pipe(
             mergeMap(({ modelId, elements: elementsMap, categoryId }) =>
               this.#visibilityHelper.changeElementsVisibilityStatus({ modelId, categoryId, elementIds: [...elementsMap.keys()], on }),
             ),
@@ -282,7 +282,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
 
       if (elements?.length) {
         observables.push(
-          fromWithRelease({ array: elements, releaseOnCount: 50 }).pipe(
+          fromWithRelease({ source: elements, releaseOnCount: 50 }).pipe(
             mergeMap(({ modelId, elements: elementsMap, categoryId }) =>
               this.#visibilityHelper.getElementsVisibilityStatus({ modelId, categoryId, elementIds: [...elementsMap.keys()], type: "GeometricElement3d" }),
             ),
