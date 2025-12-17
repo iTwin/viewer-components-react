@@ -503,7 +503,8 @@ export class BaseVisibilityHelper implements Disposable {
 
       // TODO: check child elements that are subModels
       if (!this.#props.viewport.viewsModel(modelId)) {
-        const elementsObs = Id64.sizeOf(elementIds) > 100 ? from(Id64.iterable(elementIds)).pipe(releaseMainThreadOnItemsCount(100)) : from(Id64.iterable(elementIds));
+        const elementsObs =
+          Id64.sizeOf(elementIds) > 100 ? from(Id64.iterable(elementIds)).pipe(releaseMainThreadOnItemsCount(100)) : from(Id64.iterable(elementIds));
         return elementsObs.pipe(
           mergeMap((elementId) =>
             this.#props.baseIdsCache.hasSubModel(elementId).pipe(
