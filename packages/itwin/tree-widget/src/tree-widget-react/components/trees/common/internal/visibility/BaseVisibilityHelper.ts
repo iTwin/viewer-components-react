@@ -15,6 +15,7 @@ import {
   identity,
   map,
   merge,
+  mergeAll,
   mergeMap,
   of,
   reduce,
@@ -264,8 +265,8 @@ export class BaseVisibilityHelper implements Disposable {
    * - Category selector visibility in the viewport.
    * - Sub-categories visibility in the viewport.
    */
-  public getSubCategoriesVisibilityStatus(props: { subCategoryIds: Id64Arg; categoryId: Id64String; modelId?: Id64String }): Observable<VisibilityStatus> {
-    return (props.modelId ? of({ id: props.categoryId, models: props.modelId }) : this.#props.baseIdsCache.getModels({ categoryIds: props.categoryId })).pipe(
+  public getSubCategoriesVisibilityStatus(props: { subCategoryIds: Id64Arg; categoryId: Id64String }): Observable<VisibilityStatus> {
+    return this.#props.baseIdsCache.getModels({ categoryIds: props.categoryId }).pipe(
       map(({ models }) => {
         let visibility: "visible" | "hidden" | "unknown" = "unknown";
         let nonDefaultModelDisplayStatesCount = 0;
@@ -342,12 +343,10 @@ export class BaseVisibilityHelper implements Disposable {
       if (!isSupportedInView) {
         return of(createVisibilityStatus("disabled"));
       }
-
-      return (
-        modelIdFromProps
-          ? from(Id64.iterable(categoryIds)).pipe(map((categoryId) => ({ id: categoryId, models: modelIdFromProps })))
-          : this.#props.baseIdsCache.getModels({ categoryIds })
-      ).pipe(
+      const categoryModelsObs = modelIdFromProps
+        ? from(Id64.iterable(categoryIds)).pipe(map((categoryId) => ({ id: categoryId, models: modelIdFromProps })))
+        : this.#props.baseIdsCache.getModels({ categoryIds });
+      return (Id64.sizeOf(categoryIds) > 100 ? categoryModelsObs.pipe(releaseMainThreadOnItemsCount(100)) : categoryModelsObs).pipe(
         mergeMap(({ id, models }) => {
           if (!this.#props.viewport.isAlwaysDrawnExclusive) {
             return of({ id, models });
@@ -424,9 +423,9 @@ export class BaseVisibilityHelper implements Disposable {
             // We need to check subCategories as well
             !modelIdFromProps
               ? this.#props.baseIdsCache.getSubCategories({ categoryId }).pipe(
-                  mergeMap((subCategories) => {
-                    if (subCategories.length > 0) {
-                      return this.getSubCategoriesVisibilityStatus({ categoryId, modelId: modelIdFromProps, subCategoryIds: subCategories });
+                  mergeMap((subCategoryIds) => {
+                    if (subCategoryIds.length > 0) {
+                      return this.getSubCategoriesVisibilityStatus({ categoryId, subCategoryIds });
                     }
 
                     return EMPTY;
@@ -504,8 +503,8 @@ export class BaseVisibilityHelper implements Disposable {
 
       // TODO: check child elements that are subModels
       if (!this.#props.viewport.viewsModel(modelId)) {
-        return from(elementIds).pipe(
-          releaseMainThreadOnItemsCount(100),
+        const elementsObs = Id64.sizeOf(elementIds) > 100 ? from(Id64.iterable(elementIds)).pipe(releaseMainThreadOnItemsCount(100)) : from(Id64.iterable(elementIds));
+        return elementsObs.pipe(
           mergeMap((elementId) =>
             this.#props.baseIdsCache.hasSubModel(elementId).pipe(
               mergeMap((isSubModel) => {
@@ -593,8 +592,9 @@ export class BaseVisibilityHelper implements Disposable {
       );
     }
     const { modelId, categoryIds } = props.queryProps;
-    return from(Id64.iterable(categoryIds)).pipe(
-      releaseMainThreadOnItemsCount(100),
+    const categoryIdsObs =
+      Id64.sizeOf(categoryIds) > 100 ? from(Id64.iterable(categoryIds)).pipe(releaseMainThreadOnItemsCount(100)) : from(Id64.iterable(categoryIds));
+    return categoryIdsObs.pipe(
       mergeMap((categoryId) => {
         return forkJoin({
           categoryId: of(categoryId),
@@ -768,19 +768,17 @@ export class BaseVisibilityHelper implements Disposable {
               // In case of turning categories on, need to change sub-categories separately as enableCategoryDisplay
               // takes a long time to get sub-categories for each category
               on
-                ? from(Id64.iterable(categoryIds)).pipe(
+                ? (Id64.sizeOf(categoryIds) > 200
+                    ? from(Id64.iterable(categoryIds)).pipe(releaseMainThreadOnItemsCount(200))
+                    : from(Id64.iterable(categoryIds))
+                  ).pipe(
+                    mergeMap((categoryId) => this.#props.baseIdsCache.getSubCategories({ categoryId }).pipe(mergeAll())),
                     releaseMainThreadOnItemsCount(200),
-                    mergeMap((categoryId) => this.#props.baseIdsCache.getSubCategories({ categoryId })),
-                    mergeMap((subCategories) =>
-                      from(subCategories).pipe(
-                        releaseMainThreadOnItemsCount(200),
-                        map((subCategoryId) => {
-                          if (!this.#props.viewport.viewsSubCategory(subCategoryId)) {
-                            this.#props.viewport.changeSubCategoryDisplay({ subCategoryId, display: true });
-                          }
-                        }),
-                      ),
-                    ),
+                    map((subCategoryId) => {
+                      if (!this.#props.viewport.viewsSubCategory(subCategoryId)) {
+                        this.#props.viewport.changeSubCategoryDisplay({ subCategoryId, display: true });
+                      }
+                    }),
                   )
                 : EMPTY,
               from(enableCategoryDisplay(viewport, categoryIds, on, false)),
@@ -853,8 +851,7 @@ export class BaseVisibilityHelper implements Disposable {
           return this.queueElementsVisibilityChange(elementIds, on, isDisplayedByDefault);
         }),
         // Change visibility of elements that are models
-        from(Id64.iterable(elementIds)).pipe(
-          releaseMainThreadOnItemsCount(100),
+        (Id64.sizeOf(elementIds) > 100 ? from(Id64.iterable(elementIds)).pipe(releaseMainThreadOnItemsCount(100)) : from(Id64.iterable(elementIds))).pipe(
           mergeMap((elementId) =>
             this.#props.baseIdsCache.hasSubModel(elementId).pipe(
               mergeMap((isSubModel) => {
