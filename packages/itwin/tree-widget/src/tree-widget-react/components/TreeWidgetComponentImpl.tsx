@@ -21,7 +21,7 @@ import type { TreeContentDefinition, TreeSelectionProps } from "./tree-header/Wi
  * @public
  */
 export interface TreeRenderProps {
-  filter?: string;
+  searchText?: string;
   treeLabel: string;
   onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
   onFeatureUsed?: (feature: string) => void;
@@ -107,7 +107,7 @@ function SelectableTreeContent({
           isLoading={selectedContent.id === "loading"}
         />
         <div className="tw-content-wrapper">
-          {selectedContent?.render({ onPerformanceMeasured, onFeatureUsed, filter: searchValue, treeLabel: selectedContent.label })}
+          {selectedContent?.render({ onPerformanceMeasured, onFeatureUsed, searchText: searchValue, treeLabel: selectedContent.label })}
         </div>
       </div>
     </div>

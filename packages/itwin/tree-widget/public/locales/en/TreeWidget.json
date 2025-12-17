@@ -14,7 +14,7 @@
     }
   },
   "loading": {
-    "filter": "Filtering in progress",
+    "search": "Search in progress",
     "skeleton": "Loading tree"
   },
   "selectableTree": {
@@ -47,22 +47,22 @@
         "tooltip": "Invert"
       }
     },
-    "filtering": {
+    "search": {
       "noMatches": "No results were found for your search query.",
       "noMatchesRetry": "Please modify your search and try again.",
-      "unknownFilterError": "An unknown error occurred while filtering the tree.",
-      "tooManyFilterMatches": "There are too many matches for your search query.",
-      "tooManyFilterMatchesRetry": "Please refine your search and try again."
+      "unknownSearchError": "An unknown error occurred while searching the tree.",
+      "tooManySearchMatches": "There are too many matches for your search query.",
+      "tooManySearchMatchesRetry": "Please refine your search and try again."
     }
   },
   "classificationsTree": {
     "label": "Classifications",
-    "filtering": {
+    "search": {
       "noMatches": "No results were found for your search query.",
       "noMatchesRetry": "Please modify your search and try again.",
-      "unknownFilterError": "An unknown error occurred while filtering the tree.",
-      "tooManyFilterMatches": "There are too many matches for your search query.",
-      "tooManyFilterMatchesRetry": "Please refine your search and try again."
+      "unknownSearchError": "An unknown error occurred while searching the tree.",
+      "tooManySearchMatches": "There are too many matches for your search query.",
+      "tooManySearchMatchesRetry": "Please refine your search and try again."
     }
   },
   "modelsTree": {
@@ -100,13 +100,13 @@
     "subTree": {
       "unknownSubTreeError": "An unknown error occurred while creating a sub-tree."
     },
-    "filtering": {
+    "search": {
       "noMatches": "No results were found for your search query.",
       "noMatchesRetry": "Please modify your search and try again.",
-      "unknownFilterError": "An unknown error occurred while filtering the tree.",
+      "unknownSearchError": "An unknown error occurred while searching the tree.",
       "unknownInstanceFocusError": "An unknown error occurred while focusing instances.",
-      "tooManyFilterMatches": "There are too many matches for your search query.",
-      "tooManyFilterMatchesRetry": "Please refine your search and try again.",
+      "tooManySearchMatches": "There are too many matches for your search query.",
+      "tooManySearchMatchesRetry": "Please refine your search and try again.",
       "tooManyInstancesFocused": "There are too many elements selected for focus mode.",
       "disableInstanceFocusMode": "Disable the focus mode"
     }

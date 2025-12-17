@@ -36,7 +36,7 @@ type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeD
 
 interface CreateModelsTreeProviderProps {
   imodel: IModelConnection;
-  filteredNodePaths?: HierarchySearchPath[];
+  searchPaths?: HierarchySearchPath[];
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
   idsCache?: ModelsTreeIdsCache;
   imodelAccess?: ReturnType<typeof createIModelAccess>;
@@ -44,7 +44,7 @@ interface CreateModelsTreeProviderProps {
 
 export function createModelsTreeProvider({
   imodel,
-  filteredNodePaths,
+  searchPaths,
   hierarchyConfig,
   imodelAccess,
   idsCache,
@@ -59,7 +59,7 @@ export function createModelsTreeProvider({
       idsCache: createdIdsCache,
       hierarchyConfig: config,
     }),
-    ...(filteredNodePaths ? { search: { paths: filteredNodePaths.map((path) => ("path" in path ? path : { path, options: { reveal: true } })) } } : undefined),
+    ...(searchPaths ? { search: { paths: searchPaths.map((path) => ("path" in path ? path : { path, options: { reveal: true } })) } } : undefined),
   });
   const dispose = () => {
     provider[Symbol.dispose]();

@@ -100,43 +100,43 @@ export type NormalizedHierarchySearchPath = ReturnType<(typeof HierarchySearchPa
 /** @internal */
 export function joinHierarchySearchPaths(
   subTreePaths: HierarchyNodeIdentifiersPath[],
-  filteringPaths: NormalizedHierarchySearchPath[],
+  searchPaths: NormalizedHierarchySearchPath[],
 ): NormalizedHierarchySearchPath[] {
   const result = new Array<NormalizedHierarchySearchPath>();
-  const filteringPathsToIncludeIndexes = new Set<number>();
+  const searchPathsToIncludeIndexes = new Set<number>();
 
   subTreePaths.forEach((subTreePath) => {
     let options: HierarchySearchPathOptions | undefined;
     let addSubTreePathToResult = false;
 
-    for (let i = 0; i < filteringPaths.length; ++i) {
-      const filteringPath = filteringPaths[i];
-      if (filteringPath.path.length === 0) {
+    for (let i = 0; i < searchPaths.length; ++i) {
+      const searchPath = searchPaths[i];
+      if (searchPath.path.length === 0) {
         continue;
       }
 
       for (let j = 0; j < subTreePath.length; ++j) {
         const identifier = subTreePath[j];
-        if (filteringPath.path.length <= j || !HierarchyNodeIdentifier.equal(filteringPath.path[j], identifier)) {
+        if (searchPath.path.length <= j || !HierarchyNodeIdentifier.equal(searchPath.path[j], identifier)) {
           break;
         }
 
-        // filtering paths that are shorter or equal than subTree paths length don't need to be added to the result
-        if (filteringPath.path.length === j + 1) {
+        // search paths that are shorter or equal than subTree paths length don't need to be added to the result
+        if (searchPath.path.length === j + 1) {
           addSubTreePathToResult = true;
-          // If filtering path has reveal set to true, it means that we should expand only to the targeted filtered node
+          // If search path has reveal set to true, it means that we should expand only to the targeted search node
           // This is done by setting depthInPath
           options =
-            filteringPath.options?.reveal !== true
-              ? HierarchySearchPath.mergeOptions(options, filteringPath.options)
-              : { reveal: { depthInPath: filteringPath.path.length - 1 } };
+            searchPath.options?.reveal !== true
+              ? HierarchySearchPath.mergeOptions(options, searchPath.options)
+              : { reveal: { depthInPath: searchPath.path.length - 1 } };
           break;
         }
 
-        // filtering paths that are longer than subTree paths need to be added to the result
+        // search paths that are longer than subTree paths need to be added to the result
         if (subTreePath.length === j + 1) {
           addSubTreePathToResult = true;
-          filteringPathsToIncludeIndexes.add(i);
+          searchPathsToIncludeIndexes.add(i);
         }
       }
     }
@@ -148,8 +148,8 @@ export function joinHierarchySearchPaths(
       });
     }
   });
-  for (const index of filteringPathsToIncludeIndexes) {
-    result.push(filteringPaths[index]);
+  for (const index of searchPathsToIncludeIndexes) {
+    result.push(searchPaths[index]);
   }
   return result;
 }

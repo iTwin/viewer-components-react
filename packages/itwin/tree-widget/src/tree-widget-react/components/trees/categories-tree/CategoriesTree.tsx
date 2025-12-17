@@ -25,7 +25,7 @@ export function CategoriesTree({
   imodel,
   selectionStorage,
   activeView,
-  filter,
+  searchText,
   hierarchyLevelConfig,
   hierarchyConfig,
   selectionMode,
@@ -38,7 +38,7 @@ export function CategoriesTree({
   treeLabel,
 }: CategoriesTreeProps) {
   const { categoriesTreeProps, rendererProps } = useCategoriesTree({
-    filter,
+    searchText,
     activeView,
     onCategoriesFiltered,
     emptyTreeContent,

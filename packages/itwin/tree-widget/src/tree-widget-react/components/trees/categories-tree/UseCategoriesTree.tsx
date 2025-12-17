@@ -11,16 +11,16 @@ import subcategorySvg from "@stratakit/icons/bis-category-subcategory.svg";
 import classSvg from "@stratakit/icons/bis-class.svg";
 import definitionContainerSvg from "@stratakit/icons/bis-definitions-container.svg";
 import elementSvg from "@stratakit/icons/bis-element.svg";
-import { EmptyTreeContent, FilterUnknownError, NoFilterMatches, TooManyFilterMatches } from "../common/components/EmptyTree.js";
+import { EmptyTreeContent, NoSearchMatches, SearchUnknownError, TooManySearchMatches } from "../common/components/EmptyTree.js";
 import { useGuid } from "../common/internal/useGuid.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { getClassesByView } from "../common/internal/Utils.js";
 import { CategoriesTreeDefinition, defaultHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "./internal/CategoriesTreeIdsCache.js";
-import { useFilteredPaths } from "./internal/UseFilteredPaths.js";
+import { useSearchPaths } from "./internal/UseSearchPaths.js";
 import { CategoriesTreeVisibilityHandler } from "./internal/visibility/CategoriesTreeVisibilityHandler.js";
-import { createFilteredCategoriesTree } from "./internal/visibility/FilteredTree.js";
+import { createCategoriesSearchResultsTree } from "./internal/visibility/SearchResultsTree.js";
 
 import type { ReactNode } from "react";
 import type { GuidString, Id64Array } from "@itwin/core-bentley";
@@ -28,19 +28,19 @@ import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
-import type { CreateFilteredTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
+import type { CreateSearchResultsTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
-import type { FilteredTree } from "../common/internal/visibility/BaseFilteredTree.js";
+import type { SearchResultsTree } from "../common/internal/visibility/BaseSearchResultsTree.js";
 import type { TreeWidgetViewport } from "../common/TreeWidgetViewport.js";
 import type { CategoriesTreeHierarchyConfiguration } from "./CategoriesTreeDefinition.js";
-import type { CategoriesTreeFilteringError } from "./internal/UseFilteredPaths.js";
-import type { CategoriesTreeFilterTargets } from "./internal/visibility/FilteredTree.js";
+import type { CategoriesTreeSearchError } from "./internal/UseSearchPaths.js";
+import type { CategoriesTreeSearchTargets } from "./internal/visibility/SearchResultsTree.js";
 
 /** @beta */
 export interface UseCategoriesTreeProps {
   activeView: TreeWidgetViewport;
   onCategoriesFiltered?: (props: { categories: CategoryInfo[] | undefined; models?: Id64Array }) => void;
-  filter?: string;
+  searchText?: string;
   emptyTreeContent?: ReactNode;
   hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>;
 }
@@ -59,7 +59,7 @@ interface UseCategoriesTreeResult {
  * @beta
  */
 export function useCategoriesTree({
-  filter,
+  searchText,
   activeView,
   onCategoriesFiltered,
   emptyTreeContent,
@@ -83,7 +83,7 @@ export function useCategoriesTree({
     componentId,
   });
 
-  const { visibilityHandlerFactory, onFilteredPathsChanged } = useCategoriesCachedVisibility({
+  const { visibilityHandlerFactory, onSearchPathsChanged } = useCategoriesCachedVisibility({
     activeView,
     viewType,
     getCache: getCategoriesTreeIdsCache,
@@ -98,11 +98,11 @@ export function useCategoriesTree({
     [viewType, getCategoriesTreeIdsCache, hierarchyConfiguration],
   );
 
-  const { getPaths, filteringError } = useFilteredPaths({
+  const { getPaths, searchError } = useSearchPaths({
     hierarchyConfiguration,
-    filter,
+    searchText,
     getCategoriesTreeIdsCache,
-    onFilteredPathsChanged,
+    onSearchPathsChanged,
     viewType,
     onCategoriesFiltered,
     componentId,
@@ -114,8 +114,8 @@ export function useCategoriesTree({
       getHierarchyDefinition,
       getSearchPaths: getPaths,
       visibilityHandlerFactory,
-      emptyTreeContent: useMemo(() => getEmptyTreeContentComponent(filter, filteringError, emptyTreeContent), [filter, filteringError, emptyTreeContent]),
-      highlightText: filter,
+      emptyTreeContent: useMemo(() => getEmptyTreeContentComponent(searchText, searchError, emptyTreeContent), [searchText, searchError, emptyTreeContent]),
+      highlightText: searchText,
     },
     rendererProps: {
       getDecorations: useCallback((node) => <CategoriesTreeIcon node={node} />, []),
@@ -124,15 +124,15 @@ export function useCategoriesTree({
   };
 }
 
-function getEmptyTreeContentComponent(filter?: string, error?: CategoriesTreeFilteringError, emptyTreeContent?: React.ReactNode) {
+function getEmptyTreeContentComponent(searchText?: string, error?: CategoriesTreeSearchError, emptyTreeContent?: React.ReactNode) {
   if (error) {
-    if (error === "tooManyFilterMatches") {
-      return <TooManyFilterMatches base={"categoriesTree"} />;
+    if (error === "tooManySearchMatches") {
+      return <TooManySearchMatches base={"categoriesTree"} />;
     }
-    return <FilterUnknownError base={"categoriesTree"} />;
+    return <SearchUnknownError base={"categoriesTree"} />;
   }
-  if (filter) {
-    return <NoFilterMatches base={"categoriesTree"} />;
+  if (searchText) {
+    return <NoSearchMatches base={"categoriesTree"} />;
   }
   if (emptyTreeContent) {
     return emptyTreeContent;
@@ -178,12 +178,12 @@ function useCategoriesCachedVisibility(props: {
   hierarchyConfig: CategoriesTreeHierarchyConfiguration;
 }) {
   const { activeView, getCache, viewType, componentId } = props;
-  const { visibilityHandlerFactory, filteredPaths, onFilteredPathsChanged } = useCachedVisibility<CategoriesTreeIdsCache, CategoriesTreeFilterTargets>({
+  const { visibilityHandlerFactory, searchPaths, onSearchPathsChanged } = useCachedVisibility<CategoriesTreeIdsCache, CategoriesTreeSearchTargets>({
     activeView,
     getCache,
-    createFilteredTree: useCallback(
-      async (filteredTreeProps: CreateFilteredTreeProps<CategoriesTreeIdsCache>) =>
-        createFilteredTree({ ...filteredTreeProps, viewClasses: getClassesByView(viewType) }),
+    createSearchResultsTree: useCallback(
+      async (filteredTreeProps: CreateSearchResultsTreeProps<CategoriesTreeIdsCache>) =>
+        createSearchResultsTree({ ...filteredTreeProps, viewClasses: getClassesByView(viewType) }),
       [viewType],
     ),
     createTreeSpecificVisibilityHandler: useCallback(
@@ -195,11 +195,11 @@ function useCategoriesCachedVisibility(props: {
 
   useEffect(() => {
     getCache().clearFilteredElementsModels();
-  }, [filteredPaths, getCache]);
+  }, [searchPaths, getCache]);
 
   return {
     visibilityHandlerFactory,
-    onFilteredPathsChanged,
+    onSearchPathsChanged,
   };
 }
 
@@ -215,13 +215,13 @@ function createTreeSpecificVisibilityHandler(
   });
 }
 
-async function createFilteredTree(
-  props: CreateFilteredTreeProps<CategoriesTreeIdsCache> & { viewClasses: ReturnType<typeof getClassesByView> },
-): Promise<FilteredTree<CategoriesTreeFilterTargets>> {
-  const { filteringPaths, imodelAccess, getCache, viewClasses } = props;
-  return createFilteredCategoriesTree({
+async function createSearchResultsTree(
+  props: CreateSearchResultsTreeProps<CategoriesTreeIdsCache> & { viewClasses: ReturnType<typeof getClassesByView> },
+): Promise<SearchResultsTree<CategoriesTreeSearchTargets>> {
+  const { searchPaths, imodelAccess, getCache, viewClasses } = props;
+  return createCategoriesSearchResultsTree({
     imodelAccess,
-    filteringPaths,
+    searchPaths,
     idsCache: getCache(),
     categoryClassName: viewClasses.categoryClass,
     categoryElementClassName: viewClasses.elementClass,

@@ -34,7 +34,7 @@ export { VisibilityTreeRenderer } from "./common/components/VisibilityTreeRender
 export { SkeletonTree } from "./common/components/SkeletonTree.js";
 export { HierarchyVisibilityHandler, VisibilityStatus } from "./common/UseHierarchyVisibility.js";
 export { TelemetryContextProvider } from "./common/UseTelemetryContext.js";
-export { FilterLimitExceededError } from "./common/TreeErrors.js";
+export { SearchLimitExceededError } from "./common/TreeErrors.js";
 
 export { ModelsTreeVisibilityHandlerOverrides } from "./models-tree/internal/visibility/ModelsTreeVisibilityHandler.js";
 

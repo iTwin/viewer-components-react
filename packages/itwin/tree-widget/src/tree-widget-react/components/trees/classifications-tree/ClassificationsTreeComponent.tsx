@@ -22,7 +22,7 @@ interface ClassificationsTreeComponentProps
     | "selectionStorage"
     | "hierarchyLevelConfig"
     | "selectionMode"
-    | "filter"
+    | "searchText"
     | "emptyTreeContent"
     | "getInlineActions"
     | "getMenuActions"
@@ -83,14 +83,14 @@ function ClassificationsTreeComponentImpl({
   viewport,
   onPerformanceMeasured,
   onFeatureUsed,
-  filter,
+  searchText,
   treeLabel,
   ...treeProps
 }: ClassificationsTreeComponentProps & { iModel: IModelConnection; viewport: TreeWidgetViewport }) {
   return (
     <TelemetryContextProvider componentIdentifier={ClassificationsTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
       <SelectableTree>
-        <ClassificationsTree {...treeProps} imodel={iModel} activeView={viewport} filter={filter} treeLabel={treeLabel} />
+        <ClassificationsTree {...treeProps} imodel={iModel} activeView={viewport} searchText={searchText} treeLabel={treeLabel} />
       </SelectableTree>
     </TelemetryContextProvider>
   );

@@ -25,7 +25,7 @@ interface CategoriesTreeComponentProps
     | "selectionStorage"
     | "hierarchyLevelConfig"
     | "selectionMode"
-    | "filter"
+    | "searchText"
     | "emptyTreeContent"
     | "getInlineActions"
     | "getMenuActions"
@@ -56,7 +56,7 @@ interface CategoriesTreeComponentProps
 }
 
 /**
- * A component that renders `CategoriesTree` and a header with filtering capabilities and header buttons.
+ * A component that renders `CategoriesTree` and a header with search capabilities and header buttons.
  * @public
  */
 export const CategoriesTreeComponent = (props: CategoriesTreeComponentProps) => {
@@ -106,7 +106,7 @@ function CategoriesTreeComponentImpl({
   headerButtons,
   onPerformanceMeasured,
   onFeatureUsed,
-  filter,
+  searchText,
   treeLabel,
   ...treeProps
 }: CategoriesTreeComponentProps & { iModel: IModelConnection; viewport: TreeWidgetViewport }) {
@@ -127,7 +127,7 @@ function CategoriesTreeComponentImpl({
           {...treeProps}
           imodel={iModel}
           activeView={viewport}
-          filter={filter}
+          searchText={searchText}
           treeLabel={treeLabel}
           onCategoriesFiltered={onCategoriesFiltered}
         />

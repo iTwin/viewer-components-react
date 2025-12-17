@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 /**
- * Error that is thrown when too many matches are found while filtering the tree.
+ * Error that is thrown when too many matches are found while searching the tree.
  * @beta
  */
-export class FilterLimitExceededError extends Error {
+export class SearchLimitExceededError extends Error {
   public constructor(public readonly limit: number) {
-    super("Too many filter matches");
+    super("Too many search matches");
   }
 }
