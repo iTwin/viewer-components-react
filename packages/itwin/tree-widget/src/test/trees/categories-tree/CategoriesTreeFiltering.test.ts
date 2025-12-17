@@ -33,7 +33,7 @@ import { createIModelAccess } from "../Common.js";
 // cspell complains about Cat_egory and Cat%egory
 
 describe("Categories tree", () => {
-  describe("Hierarchy filtering", () => {
+  describe("Hierarchy search", () => {
     before(async function () {
       await initializePresentationTesting({
         backendProps: {
@@ -78,7 +78,7 @@ describe("Categories tree", () => {
       ).to.deep.eq([{ path: [keys.definitionContainer], options: { reveal: true } }]);
     });
 
-    it("filtering by label aborts when abort signal fires", async function () {
+    it("aborts when abort signal fires", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const definitionContainer = insertDefinitionContainer({ builder, codeValue: "DefinitionContainer", userLabel: "Test" });

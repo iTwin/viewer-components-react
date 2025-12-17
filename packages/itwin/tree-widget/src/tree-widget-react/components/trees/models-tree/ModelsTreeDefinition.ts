@@ -47,11 +47,11 @@ import {
   createIdsSelector,
   fromWithRelease,
   getOptimalBatchSize,
-  groupingNodeHasFilterTargets,
+  groupingNodeHasSearchTargets,
   parseIdsSelectorResult,
   releaseMainThreadOnItemsCount,
 } from "../common/internal/Utils.js";
-import { FilterLimitExceededError } from "../common/TreeErrors.js";
+import { SearchLimitExceededError } from "../common/TreeErrors.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64String } from "@itwin/core-bentley";
@@ -82,7 +82,7 @@ import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
 /** @beta */
 export type ClassGroupingHierarchyNode = GroupingHierarchyNode & { key: ClassGroupingNodeKey };
 
-const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
+const MAX_SEARCH_INSTANCE_KEY_COUNT = 100;
 
 /**
  * Defines hierarchy configuration supported by `ModelsTree`.
@@ -214,7 +214,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
 
   public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
     if (ProcessedHierarchyNode.isGroupingNode(node)) {
-      const { hasSearchTargetAncestor, hasDirectNonFilteredTargets } = groupingNodeHasFilterTargets(node.children);
+      const { hasSearchTargetAncestor, hasDirectNonSearchTargets } = groupingNodeHasSearchTargets(node.children);
       return {
         ...node,
         label: this.#hierarchyConfig.elementClassGrouping === "enableWithCounts" ? `${node.label} (${node.children.length})` : node.label,
@@ -222,7 +222,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
           ...node.extendedData,
           // add `modelId` and `categoryId` from the first grouped element
           ...node.children[0].extendedData,
-          ...(hasDirectNonFilteredTargets ? { hasDirectNonFilteredTargets } : {}),
+          ...(hasDirectNonSearchTargets ? { hasDirectNonSearchTargets } : {}),
           ...(hasSearchTargetAncestor ? { hasSearchTargetAncestor } : {}),
           // `imageId` is assigned to instance nodes at query time, but grouping ones need to
           // be handled during post-processing
@@ -765,8 +765,8 @@ function createInstanceKeyPathsFromTargetItemsObs({
 }: Omit<ModelsTreeInstanceKeyPathsFromTargetItemsProps, "abortSignal" | "componentId"> & { componentId: GuidString; componentName: string }): Observable<
   NormalizedHierarchySearchPath[]
 > {
-  if (limit !== "unbounded" && targetItems.length > (limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT)) {
-    throw new FilterLimitExceededError(limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT);
+  if (limit !== "unbounded" && targetItems.length > (limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT)) {
+    throw new SearchLimitExceededError(limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT);
   }
 
   return fromWithRelease({ array: targetItems, releaseOnCount: 2000 }).pipe(
@@ -881,7 +881,7 @@ function createInstanceKeyPathsFromInstanceLabelObs(
             AND json_extract(e.JsonProperties, '$.GraphicalPartition3d.Model.Content') IS NULL
         )
         WHERE Label LIKE '%' || ? || '%' ESCAPE '\\'
-        LIMIT ${MAX_FILTERING_INSTANCE_KEY_COUNT + 1}
+        LIMIT ${MAX_SEARCH_INSTANCE_KEY_COUNT + 1}
       `;
     const bindings: ECSqlBinding[] = [{ type: "string", value: label.replace(/[%_\\]/g, "\\$&") }];
     return { ecsql, bindings };

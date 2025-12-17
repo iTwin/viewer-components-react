@@ -11,15 +11,15 @@ import { HierarchyVisibilityHandlerImpl } from "../../../common/internal/useTree
 import { fromWithRelease } from "../../../common/internal/Utils.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 import { ModelsTreeNode } from "../ModelsTreeNode.js";
-import { createFilteredModelsTree } from "./FilteredTree.js";
 import { ModelsTreeVisibilityHelper } from "./ModelsTreeVisibilityHelper.js";
+import { createModelsSearchResultsTree } from "./SearchResultsTree.js";
 
 import type { Observable } from "rxjs";
 import type { Id64Arg } from "@itwin/core-bentley";
 import type { GroupingHierarchyNode, HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { AlwaysAndNeverDrawnElementInfo } from "../../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
-import type { FilteredTree } from "../../../common/internal/visibility/BaseFilteredTree.js";
+import type { SearchResultsTree } from "../../../common/internal/visibility/BaseSearchResultsTree.js";
 import type {
   BaseIdsCache,
   BaseTreeVisibilityHandlerOverrides,
@@ -32,7 +32,7 @@ import type {
   VisibilityStatus,
 } from "../../../common/UseHierarchyVisibility.js";
 import type { ModelsTreeIdsCache } from "../ModelsTreeIdsCache.js";
-import type { ModelsTreeFilterTargets } from "./FilteredTree.js";
+import type { ModelsTreeSearchTargets } from "./SearchResultsTree.js";
 
 /**
  * Functionality of Models tree visibility handler that can be overridden.
@@ -64,7 +64,7 @@ export interface ModelsTreeVisibilityHandlerProps {
  * It knows how to get and change visibility status of nodes created by hierarchy definition.
  * @internal
  */
-export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisibilityHandler<ModelsTreeFilterTargets> {
+export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisibilityHandler<ModelsTreeSearchTargets> {
   #visibilityHelper: ModelsTreeVisibilityHelper;
   readonly #props: ModelsTreeVisibilityHandlerProps;
 
@@ -95,7 +95,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
     this.#visibilityHelper[Symbol.dispose]();
   }
 
-  public changeFilterTargetsVisibilityStatus(targets: ModelsTreeFilterTargets, on: boolean): Observable<void> {
+  public changeSearchTargetsVisibilityStatus(targets: ModelsTreeSearchTargets, on: boolean): Observable<void> {
     return defer(() => {
       const { subjectIds, modelIds, categories, elements } = targets;
       const observables = new Array<Observable<void>>();
@@ -254,7 +254,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
     return changeObs;
   }
 
-  public getFilterTargetsVisibilityStatus(targets: ModelsTreeFilterTargets): Observable<VisibilityStatus> {
+  public getSearchTargetsVisibilityStatus(targets: ModelsTreeSearchTargets): Observable<VisibilityStatus> {
     return defer(() => {
       const { subjectIds, modelIds, categories, elements } = targets;
       const observables = new Array<Observable<VisibilityStatus>>();
@@ -371,15 +371,15 @@ export function createModelsTreeVisibilityHandler(props: {
   idsCache: ModelsTreeIdsCache;
   imodelAccess: ECClassHierarchyInspector;
   overrides?: ModelsTreeVisibilityHandlerOverrides;
-  filteredPaths?: HierarchySearchPath[];
+  searchPaths?: HierarchySearchPath[];
 }) {
-  return new HierarchyVisibilityHandlerImpl<ModelsTreeFilterTargets>({
-    getFilteredTree: (): undefined | Promise<FilteredTree<ModelsTreeFilterTargets>> => {
-      if (!props.filteredPaths) {
+  return new HierarchyVisibilityHandlerImpl<ModelsTreeSearchTargets>({
+    getSearchResultsTree: (): undefined | Promise<SearchResultsTree<ModelsTreeSearchTargets>> => {
+      if (!props.searchPaths) {
         return undefined;
       }
-      return createFilteredModelsTree({
-        filteringPaths: props.filteredPaths,
+      return createModelsSearchResultsTree({
+        searchPaths: props.searchPaths,
         imodelAccess: props.imodelAccess,
       });
     },

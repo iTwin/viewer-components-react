@@ -86,11 +86,11 @@ export interface BaseIdsCache {
  * Interface for a tree visibility handler that provides methods to get and change visibility status of hierarchy nodes.
  * @internal
  */
-export interface TreeSpecificVisibilityHandler<TFilterTargets> {
+export interface TreeSpecificVisibilityHandler<TSearchTargets> {
   getVisibilityStatus: (node: HierarchyNode) => Observable<VisibilityStatus>;
   changeVisibilityStatus: (node: HierarchyNode, on: boolean) => Observable<void>;
-  getFilterTargetsVisibilityStatus: (targets: TFilterTargets) => Observable<VisibilityStatus>;
-  changeFilterTargetsVisibilityStatus: (targets: TFilterTargets, on: boolean) => Observable<void>;
+  getSearchTargetsVisibilityStatus: (targets: TSearchTargets) => Observable<VisibilityStatus>;
+  changeSearchTargetsVisibilityStatus: (targets: TSearchTargets, on: boolean) => Observable<void>;
 }
 
 /** @internal */

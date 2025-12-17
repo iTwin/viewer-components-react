@@ -12,20 +12,20 @@ import { fromWithRelease, getClassesByView } from "../../../common/internal/Util
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 import { CategoriesTreeNode } from "../CategoriesTreeNode.js";
 import { CategoriesTreeVisibilityHelper } from "./CategoriesTreeVisibilityHelper.js";
-import { createFilteredCategoriesTree } from "./FilteredTree.js";
+import { createCategoriesSearchResultsTree } from "./SearchResultsTree.js";
 
 import type { Observable } from "rxjs";
 import type { GroupingHierarchyNode, HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { AlwaysAndNeverDrawnElementInfo } from "../../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
 import type { ElementId, ModelId } from "../../../common/internal/Types.js";
-import type { FilteredTree } from "../../../common/internal/visibility/BaseFilteredTree.js";
+import type { SearchResultsTree } from "../../../common/internal/visibility/BaseSearchResultsTree.js";
 import type { BaseIdsCache, TreeSpecificVisibilityHandler } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import type { TreeWidgetViewport } from "../../../common/TreeWidgetViewport.js";
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
 import type { CategoriesTreeHierarchyConfiguration } from "../../CategoriesTreeDefinition.js";
 import type { CategoriesTreeIdsCache } from "../CategoriesTreeIdsCache.js";
-import type { CategoriesTreeFilterTargets } from "./FilteredTree.js";
+import type { CategoriesTreeSearchTargets } from "./SearchResultsTree.js";
 
 /** @internal */
 export interface CategoriesTreeVisibilityHandlerProps {
@@ -41,7 +41,7 @@ export interface CategoriesTreeVisibilityHandlerProps {
  * This handler knows how to get and change visibility status of nodes created by hierarchy definition.
  * @internal
  */
-export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecificVisibilityHandler<CategoriesTreeFilterTargets> {
+export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecificVisibilityHandler<CategoriesTreeSearchTargets> {
   readonly #props: CategoriesTreeVisibilityHandlerProps;
   #visibilityHelper: CategoriesTreeVisibilityHelper;
   #elementType: "GeometricElement3d" | "GeometricElement2d";
@@ -77,7 +77,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
     this.#visibilityHelper[Symbol.dispose]();
   }
 
-  public changeFilterTargetsVisibilityStatus(targets: CategoriesTreeFilterTargets, on: boolean): Observable<void> {
+  public changeSearchTargetsVisibilityStatus(targets: CategoriesTreeSearchTargets, on: boolean): Observable<void> {
     return defer(() => {
       const { definitionContainerIds, subCategories, modelIds, categories, elements } = targets;
       const observables = new Array<Observable<void>>();
@@ -242,7 +242,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
     return changeObs;
   }
 
-  public getFilterTargetsVisibilityStatus(targets: CategoriesTreeFilterTargets): Observable<VisibilityStatus> {
+  public getSearchTargetsVisibilityStatus(targets: CategoriesTreeSearchTargets): Observable<VisibilityStatus> {
     return defer(() => {
       const { definitionContainerIds, subCategories, modelIds, categories, elements } = targets;
       const observables = new Array<Observable<VisibilityStatus>>();
@@ -379,18 +379,18 @@ export function createCategoriesTreeVisibilityHandler(props: {
   viewport: TreeWidgetViewport;
   idsCache: CategoriesTreeIdsCache;
   imodelAccess: ECClassHierarchyInspector;
-  filteredPaths?: HierarchySearchPath[];
+  searchPaths?: HierarchySearchPath[];
   hierarchyConfig: CategoriesTreeHierarchyConfiguration;
 }) {
-  return new HierarchyVisibilityHandlerImpl<CategoriesTreeFilterTargets>({
-    getFilteredTree: (): undefined | Promise<FilteredTree<CategoriesTreeFilterTargets>> => {
-      if (!props.filteredPaths) {
+  return new HierarchyVisibilityHandlerImpl<CategoriesTreeSearchTargets>({
+    getSearchResultsTree: (): undefined | Promise<SearchResultsTree<CategoriesTreeSearchTargets>> => {
+      if (!props.searchPaths) {
         return undefined;
       }
       const { categoryClass, elementClass, modelClass } = getClassesByView(props.viewport.viewType === "2d" ? "2d" : "3d");
-      return createFilteredCategoriesTree({
+      return createCategoriesSearchResultsTree({
         idsCache: props.idsCache,
-        filteringPaths: props.filteredPaths,
+        searchPaths: props.searchPaths,
         imodelAccess: props.imodelAccess,
         categoryClassName: categoryClass,
         categoryElementClassName: elementClass,

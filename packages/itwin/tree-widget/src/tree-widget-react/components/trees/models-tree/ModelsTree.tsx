@@ -25,7 +25,7 @@ export function ModelsTree({
   imodel,
   selectionStorage,
   activeView,
-  filter,
+  searchText,
   hierarchyLevelConfig,
   hierarchyConfig,
   selectionMode,
@@ -43,7 +43,7 @@ export function ModelsTree({
 }: ModelsTreeProps) {
   const { modelsTreeProps, rendererProps } = useModelsTree({
     activeView,
-    filter,
+    searchText,
     hierarchyConfig,
     visibilityHandlerOverrides,
     getSearchPaths,

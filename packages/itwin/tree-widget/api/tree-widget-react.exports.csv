@@ -9,7 +9,6 @@ public;function;createTreeWidget
 beta;function;createTreeWidgetViewport
 beta;const;ExternalSourcesTreeComponent
 beta;function;ExternalSourcesTreeIcon
-beta;class;FilterLimitExceededError
 public;function;FocusedInstancesContextProvider
 beta;interface;HierarchyVisibilityHandler
 beta;const;IModelContentTreeComponent
@@ -17,6 +16,7 @@ beta;function;IModelContentTreeIcon
 public;const;ModelsTreeComponent
 beta;function;ModelsTreeIcon
 beta;interface;ModelsTreeVisibilityHandlerOverrides
+beta;class;SearchLimitExceededError
 beta;function;SelectableTree
 beta;function;SkeletonTree
 beta;function;TelemetryContextProvider

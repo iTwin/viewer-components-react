@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useMemo, useState } from "react";
-import { FilterLimitExceededError } from "../../common/TreeErrors.js";
+import { SearchLimitExceededError } from "../../common/TreeErrors.js";
 import { useTelemetryContext } from "../../common/UseTelemetryContext.js";
 import { ClassificationsTreeDefinition } from "../ClassificationsTreeDefinition.js";
 
@@ -14,68 +14,68 @@ import type { ClassificationsTreeHierarchyConfiguration } from "../Classificatio
 import type { ClassificationsTreeIdsCache } from "./ClassificationsTreeIdsCache.js";
 
 /** @internal */
-export type ClassificationsTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError";
+export type ClassificationsTreeSearchError = "tooManySearchMatches" | "unknownSearchError";
 
 type HierarchySearchPaths = Awaited<ReturnType<Required<VisibilityTreeProps>["getSearchPaths"]>>;
 
 /** @internal */
-export function useFilteredPaths({
-  filter,
+export function useSearchPaths({
+  searchText,
   hierarchyConfiguration,
   getClassificationsTreeIdsCache,
-  onFilteredPathsChanged,
+  onSearchPathsChanged,
   componentId,
 }: {
-  filter?: string;
+  searchText?: string;
   hierarchyConfiguration: ClassificationsTreeHierarchyConfiguration;
   getClassificationsTreeIdsCache: () => ClassificationsTreeIdsCache;
-  onFilteredPathsChanged: (paths: HierarchySearchPaths | undefined) => void;
+  onSearchPathsChanged: (paths: HierarchySearchPaths | undefined) => void;
   componentId: GuidString;
 }): {
   getPaths: VisibilityTreeProps["getSearchPaths"] | undefined;
-  filteringError: ClassificationsTreeFilteringError | undefined;
+  searchError: ClassificationsTreeSearchError | undefined;
 } {
-  const [filteringError, setFilteringError] = useState<ClassificationsTreeFilteringError | undefined>();
+  const [searchError, setSearchError] = useState<ClassificationsTreeSearchError | undefined>();
   const { onFeatureUsed } = useTelemetryContext();
   useEffect(() => {
-    setFilteringError(undefined);
-    if (!filter) {
-      onFilteredPathsChanged(undefined);
+    setSearchError(undefined);
+    if (!searchText) {
+      onSearchPathsChanged(undefined);
     }
-  }, [filter, onFilteredPathsChanged]);
+  }, [searchText, onSearchPathsChanged]);
 
   const getSearchPaths = useMemo<VisibilityTreeProps["getSearchPaths"] | undefined>(() => {
-    if (!filter) {
+    if (!searchText) {
       return undefined;
     }
 
     return async ({ imodelAccess, abortSignal }) => {
-      onFeatureUsed({ featureId: "filtering", reportInteraction: true });
+      onFeatureUsed({ featureId: "search", reportInteraction: true });
       try {
         const paths = await ClassificationsTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
-          label: filter,
+          label: searchText,
           idsCache: getClassificationsTreeIdsCache(),
           hierarchyConfig: hierarchyConfiguration,
           componentId,
           abortSignal,
         });
-        onFilteredPathsChanged(paths);
+        onSearchPathsChanged(paths);
         return paths;
       } catch (e) {
-        const newError = e instanceof FilterLimitExceededError ? "tooManyFilterMatches" : "unknownFilterError";
-        if (newError !== "tooManyFilterMatches") {
+        const newError = e instanceof SearchLimitExceededError ? "tooManySearchMatches" : "unknownSearchError";
+        if (newError !== "tooManySearchMatches") {
           const feature = e instanceof Error && e.message.includes("query too long to execute or server is too busy") ? "error-timeout" : "error-unknown";
           onFeatureUsed({ featureId: feature, reportInteraction: false });
         }
-        setFilteringError(newError);
+        setSearchError(newError);
         return [];
       }
     };
-  }, [filter, onFilteredPathsChanged, onFeatureUsed, getClassificationsTreeIdsCache, hierarchyConfiguration, componentId]);
+  }, [searchText, onSearchPathsChanged, onFeatureUsed, getClassificationsTreeIdsCache, hierarchyConfiguration, componentId]);
 
   return {
     getPaths: getSearchPaths,
-    filteringError,
+    searchError,
   };
 }

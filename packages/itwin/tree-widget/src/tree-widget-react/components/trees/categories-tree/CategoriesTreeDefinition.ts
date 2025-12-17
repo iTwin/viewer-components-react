@@ -38,11 +38,11 @@ import {
   fromWithRelease,
   getClassesByView,
   getOptimalBatchSize,
-  groupingNodeHasFilterTargets,
+  groupingNodeHasSearchTargets,
   parseIdsSelectorResult,
   releaseMainThreadOnItemsCount,
 } from "../common/internal/Utils.js";
-import { FilterLimitExceededError } from "../common/TreeErrors.js";
+import { SearchLimitExceededError } from "../common/TreeErrors.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Array, MarkRequired } from "@itwin/core-bentley";
@@ -69,7 +69,7 @@ import type { CategoryId, DefinitionContainerId, ElementId, ModelId, SubCategory
 import type { NormalizedHierarchySearchPath } from "../common/Utils.js";
 import type { CategoriesTreeIdsCache, CategoryInfo } from "./internal/CategoriesTreeIdsCache.js";
 
-const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
+const MAX_SEARCH_INSTANCE_KEY_COUNT = 100;
 
 interface CategoriesTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
@@ -152,7 +152,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         }
       });
 
-      const { hasSearchTargetAncestor, hasDirectNonFilteredTargets } = groupingNodeHasFilterTargets(node.children);
+      const { hasSearchTargetAncestor, hasDirectNonSearchTargets } = groupingNodeHasSearchTargets(node.children);
 
       return {
         ...node,
@@ -162,7 +162,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
           // add `categoryId` from the first grouped element
           categoryId: node.children[0].extendedData?.categoryId,
           modelElementsMap,
-          ...(hasDirectNonFilteredTargets ? { hasDirectNonFilteredTargets } : {}),
+          ...(hasDirectNonSearchTargets ? { hasDirectNonSearchTargets } : {}),
           ...(hasSearchTargetAncestor ? { hasSearchTargetAncestor } : {}),
           // `imageId` is assigned to instance nodes at query time, but grouping ones need to
           // be handled during post-processing
@@ -805,7 +805,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
               : ""
           }
         )
-        ${limit === undefined ? `LIMIT ${MAX_FILTERING_INSTANCE_KEY_COUNT + 1}` : limit !== "unbounded" ? `LIMIT ${limit}` : ""}
+        ${limit === undefined ? `LIMIT ${MAX_SEARCH_INSTANCE_KEY_COUNT + 1}` : limit !== "unbounded" ? `LIMIT ${limit}` : ""}
       `;
           const bindings = [
             { type: "string" as const, value: adjustedLabel },
@@ -865,8 +865,8 @@ function createInstanceKeyPathsFromTargetItems({
   targetItems: InstanceKey[];
   componentName: string;
 }): Observable<NormalizedHierarchySearchPath> {
-  if (limit !== "unbounded" && targetItems.length > (limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT)) {
-    throw new FilterLimitExceededError(limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT);
+  if (limit !== "unbounded" && targetItems.length > (limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT)) {
+    throw new SearchLimitExceededError(limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT);
   }
   const { categoryClass } = getClassesByView(viewType);
   return fromWithRelease({ array: targetItems, releaseOnCount: 500 }).pipe(

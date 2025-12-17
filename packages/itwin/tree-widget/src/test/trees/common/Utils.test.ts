@@ -21,9 +21,9 @@ describe("Utils", () => {
     const element3 = { id: "0x7", className: "c", imodelKey: "key" };
     const element4 = { id: "0x8", className: "c", imodelKey: "key" };
 
-    it("returns empty when filter and subTree paths don't overlap", () => {
+    it("returns empty when search and subTree paths don't overlap", () => {
       const subTreePaths: HierarchyNodeIdentifiersPath[] = [[subject, model]];
-      const filterPaths: NormalizedHierarchySearchPath[] = [
+      const searchPaths: NormalizedHierarchySearchPath[] = [
         { path: [subject, { ...model, imodelKey: "random" }] },
         { path: [subject, { ...model, className: "random" }] },
         { path: [subject, { ...model, id: "random" }] },
@@ -33,24 +33,24 @@ describe("Utils", () => {
         { path: [category1] },
         { path: [] },
       ];
-      const joinedPaths = joinHierarchySearchPaths(subTreePaths, filterPaths);
+      const joinedPaths = joinHierarchySearchPaths(subTreePaths, searchPaths);
       expect(joinedPaths).to.deep.eq([]);
     });
 
-    it("returns subTree paths when filter paths are shorter than subTree paths", () => {
-      const filterPath1: NormalizedHierarchySearchPath = { path: [subject] };
-      const filterPath2: NormalizedHierarchySearchPath = { path: [element1, element2, element3], options: { reveal: true } };
-      const filterPath3: NormalizedHierarchySearchPath = { path: [element3, element4], options: { reveal: { depthInHierarchy: 1 } } };
-      const filterPath4: NormalizedHierarchySearchPath = { path: [element4, category1], options: { reveal: { depthInPath: 1 } } };
-      const filterPaths: NormalizedHierarchySearchPath[] = [filterPath1, filterPath2, filterPath3, filterPath4];
+    it("returns subTree paths when search paths are shorter than subTree paths", () => {
+      const searchPath: NormalizedHierarchySearchPath = { path: [subject] };
+      const searchPath2: NormalizedHierarchySearchPath = { path: [element1, element2, element3], options: { reveal: true } };
+      const searchPath3: NormalizedHierarchySearchPath = { path: [element3, element4], options: { reveal: { depthInHierarchy: 1 } } };
+      const searchPath4: NormalizedHierarchySearchPath = { path: [element4, category1], options: { reveal: { depthInPath: 1 } } };
+      const searchPaths: NormalizedHierarchySearchPath[] = [searchPath, searchPath2, searchPath3, searchPath4];
 
-      const subTreePath1 = [...filterPath1.path, model];
-      const subTreePath2 = [...filterPath2.path, element4];
-      const subTreePath3 = [...filterPath3.path, category1, category2];
-      const subTreePath4 = [...filterPath4.path, category2];
+      const subTreePath1 = [...searchPath.path, model];
+      const subTreePath2 = [...searchPath2.path, element4];
+      const subTreePath3 = [...searchPath3.path, category1, category2];
+      const subTreePath4 = [...searchPath4.path, category2];
       const subTreePaths: HierarchyNodeIdentifiersPath[] = [subTreePath1, subTreePath2, subTreePath3, subTreePath4];
 
-      const joinedPaths = joinHierarchySearchPaths(subTreePaths, filterPaths);
+      const joinedPaths = joinHierarchySearchPaths(subTreePaths, searchPaths);
       const expectedPaths = [
         {
           path: subTreePath1,
@@ -62,23 +62,23 @@ describe("Utils", () => {
         },
         {
           path: subTreePath3,
-          options: filterPath3.options,
+          options: searchPath3.options,
         },
         {
           path: subTreePath4,
-          options: filterPath4.options,
+          options: searchPath4.options,
         },
       ];
       expect(joinedPaths).to.deep.eq(expectedPaths);
     });
 
-    it("returns subTree paths and filter paths when filter paths are longer than subTree paths", () => {
+    it("returns subTree paths and search paths when search paths are longer than subTree paths", () => {
       const subTreePaths: HierarchyNodeIdentifiersPath[] = [
         [subject, model],
         [model, category1, element1, element2],
         [model, category1, element1, element3],
       ];
-      const filterPaths: NormalizedHierarchySearchPath[] = [
+      const searchPaths: NormalizedHierarchySearchPath[] = [
         { path: [subject, model, category1] },
         { path: [model, category1, element1, element2, element3], options: { reveal: true } },
         { path: [model, category1, element1, element3, element1], options: { reveal: { depthInPath: 1 } } },
@@ -94,7 +94,7 @@ describe("Utils", () => {
         }
         return 1;
       };
-      const joinedPaths = joinHierarchySearchPaths(subTreePaths, filterPaths).sort(sortFn);
+      const joinedPaths = joinHierarchySearchPaths(subTreePaths, searchPaths).sort(sortFn);
       const expectedPaths = [
         {
           path: subTreePaths[0],
@@ -108,9 +108,9 @@ describe("Utils", () => {
           path: subTreePaths[2],
           options: undefined,
         },
-        { path: HierarchySearchPath.normalize(filterPaths[0]).path },
-        filterPaths[1],
-        filterPaths[2],
+        { path: HierarchySearchPath.normalize(searchPaths[0]).path },
+        searchPaths[1],
+        searchPaths[2],
       ].sort(sortFn);
       expect(joinedPaths).to.deep.eq(expectedPaths);
     });

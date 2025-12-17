@@ -17,7 +17,7 @@ import type { BaseIdsCache, TreeSpecificVisibilityHandler } from "../../../commo
 import type { TreeWidgetViewport } from "../../../common/TreeWidgetViewport.js";
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
 import type { ClassificationsTreeIdsCache } from "../ClassificationsTreeIdsCache.js";
-import type { ClassificationsTreeFilterTargets } from "./FilteredTree.js";
+import type { ClassificationsTreeSearchTargets } from "./SearchResultsTree.js";
 
 /** @internal */
 export interface ClassificationsTreeVisibilityHandlerProps {
@@ -32,7 +32,7 @@ export interface ClassificationsTreeVisibilityHandlerProps {
  * This handler knows how to get and change visibility status of nodes created by hierarchy definition.
  * @internal
  */
-export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpecificVisibilityHandler<ClassificationsTreeFilterTargets> {
+export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpecificVisibilityHandler<ClassificationsTreeSearchTargets> {
   readonly #props: ClassificationsTreeVisibilityHandlerProps;
   #visibilityHelper: ClassificationsTreeVisibilityHelper;
 
@@ -61,7 +61,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
     this.#visibilityHelper[Symbol.dispose]();
   }
 
-  public changeFilterTargetsVisibilityStatus(targets: ClassificationsTreeFilterTargets, on: boolean): Observable<void> {
+  public changeSearchTargetsVisibilityStatus(targets: ClassificationsTreeSearchTargets, on: boolean): Observable<void> {
     return defer(() => {
       const { classificationIds, classificationTableIds, elements2d, elements3d } = targets;
       const observables = new Array<Observable<void>>();
@@ -156,7 +156,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
     return changeObs;
   }
 
-  public getFilterTargetsVisibilityStatus(targets: ClassificationsTreeFilterTargets): Observable<VisibilityStatus> {
+  public getSearchTargetsVisibilityStatus(targets: ClassificationsTreeSearchTargets): Observable<VisibilityStatus> {
     return defer(() => {
       const { classificationIds, classificationTableIds, elements2d, elements3d } = targets;
       const observables = new Array<Observable<VisibilityStatus>>();
