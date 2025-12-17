@@ -6,7 +6,7 @@
 import { concat, defer, EMPTY, from, map, merge, mergeMap, of, toArray } from "rxjs";
 import { Id64 } from "@itwin/core-bentley";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
-import { fromWithRelease, releaseMainThreadOnItemsCount } from "../../../common/internal/Utils.js";
+import { fromWithRelease } from "../../../common/internal/Utils.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 import { ClassificationsTreeNode } from "../ClassificationsTreeNode.js";
 import { ClassificationsTreeVisibilityHelper } from "./ClassificationsTreeVisibilityHelper.js";
