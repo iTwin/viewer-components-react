@@ -8,7 +8,7 @@ import { assert, Id64 } from "@itwin/core-bentley";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
 import { HierarchyVisibilityHandlerImpl } from "../../../common/internal/useTreeHooks/UseCachedVisibility.js";
-import { releaseMainThreadOnItemsCount } from "../../../common/internal/Utils.js";
+import { fromWithRelease } from "../../../common/internal/Utils.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 import { ModelsTreeNode } from "../ModelsTreeNode.js";
 import { createFilteredModelsTree } from "./FilteredTree.js";
@@ -123,8 +123,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
 
       if (elements?.length) {
         observables.push(
-          from(elements).pipe(
-            releaseMainThreadOnItemsCount(50),
+          fromWithRelease({ array: elements, releaseOnCount: 50 }).pipe(
             mergeMap(({ modelId, elements: elementsMap, categoryId }) =>
               this.#visibilityHelper.changeElementsVisibilityStatus({ modelId, categoryId, elementIds: [...elementsMap.keys()], on }),
             ),
@@ -283,8 +282,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
 
       if (elements?.length) {
         observables.push(
-          from(elements).pipe(
-            releaseMainThreadOnItemsCount(50),
+          fromWithRelease({ array: elements, releaseOnCount: 50 }).pipe(
             mergeMap(({ modelId, elements: elementsMap, categoryId }) =>
               this.#visibilityHelper.getElementsVisibilityStatus({ modelId, categoryId, elementIds: [...elementsMap.keys()], type: "GeometricElement3d" }),
             ),

@@ -3,12 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, from, map, mergeMap, reduce } from "rxjs";
+import { bufferCount, map, mergeMap, reduce } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { QueryRowFormat } from "@itwin/core-common";
 import { reduceWhile, toVoidPromise } from "./Rxjs.js";
 import { createVisibilityStatus } from "./Tooltip.js";
-import { getClassesByView, getOptimalBatchSize, releaseMainThreadOnItemsCount } from "./Utils.js";
+import { fromWithRelease, getClassesByView, getOptimalBatchSize, releaseMainThreadOnItemsCount } from "./Utils.js";
 
 import type { Observable, OperatorFunction } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
@@ -162,8 +162,7 @@ export async function enableCategoryDisplay(viewport: TreeWidgetViewport, catego
     });
   };
   return toVoidPromise(
-    from(Id64.iterable(categoryIds)).pipe(
-      releaseMainThreadOnItemsCount(500),
+    fromWithRelease({ ids: categoryIds, releaseOnCount: 500 }).pipe(
       bufferCount(getOptimalBatchSize({ totalSize: Id64.sizeOf(categoryIds), maximumBatchSize: 500 })),
       mergeMap(async (bufferedCategories) => {
         viewport.changeCategoryDisplay({ categoryIds: bufferedCategories, display: enabled, enableAllSubCategories });

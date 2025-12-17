@@ -8,7 +8,7 @@ import { assert, Id64 } from "@itwin/core-bentley";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
 import { HierarchyVisibilityHandlerImpl } from "../../../common/internal/useTreeHooks/UseCachedVisibility.js";
-import { getClassesByView, releaseMainThreadOnItemsCount } from "../../../common/internal/Utils.js";
+import { fromWithRelease, getClassesByView } from "../../../common/internal/Utils.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 import { CategoriesTreeNode } from "../CategoriesTreeNode.js";
 import { CategoriesTreeVisibilityHelper } from "./CategoriesTreeVisibilityHelper.js";
@@ -105,8 +105,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
 
       if (elements?.length) {
         observables.push(
-          from(elements).pipe(
-            releaseMainThreadOnItemsCount(50),
+          fromWithRelease({ array: elements, releaseOnCount: 50 }).pipe(
             mergeMap(({ modelId, elements: elementsMap, categoryId }) =>
               this.#visibilityHelper.changeElementsVisibilityStatus({ modelId, categoryId, elementIds: [...elementsMap.keys()], on }),
             ),
@@ -279,8 +278,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
 
       if (elements?.length) {
         observables.push(
-          from(elements).pipe(
-            releaseMainThreadOnItemsCount(50),
+          fromWithRelease({ array: elements, releaseOnCount: 50 }).pipe(
             mergeMap(({ modelId, elements: elementsMap, categoryId }) =>
               this.#visibilityHelper.getElementsVisibilityStatus({ modelId, categoryId, elementIds: [...elementsMap.keys()], type: this.#elementType }),
             ),

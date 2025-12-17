@@ -29,7 +29,7 @@ import {
 } from "rxjs";
 import { assert, Id64 } from "@itwin/core-bentley";
 import { createVisibilityStatus } from "../Tooltip.js";
-import { getSetFromId64Arg, releaseMainThreadOnItemsCount, setDifference, setIntersection } from "../Utils.js";
+import { fromWithRelease, getSetFromId64Arg, releaseMainThreadOnItemsCount, setDifference, setIntersection } from "../Utils.js";
 import {
   changeElementStateNoChildrenOperator,
   enableCategoryDisplay,
@@ -503,9 +503,7 @@ export class BaseVisibilityHelper implements Disposable {
 
       // TODO: check child elements that are subModels
       if (!this.#props.viewport.viewsModel(modelId)) {
-        const elementsObs =
-          Id64.sizeOf(elementIds) > 100 ? from(Id64.iterable(elementIds)).pipe(releaseMainThreadOnItemsCount(100)) : from(Id64.iterable(elementIds));
-        return elementsObs.pipe(
+        return fromWithRelease({ ids: elementIds, releaseOnCount: 100 }).pipe(
           mergeMap((elementId) =>
             this.#props.baseIdsCache.hasSubModel(elementId).pipe(
               mergeMap((isSubModel) => {
@@ -593,9 +591,7 @@ export class BaseVisibilityHelper implements Disposable {
       );
     }
     const { modelId, categoryIds } = props.queryProps;
-    const categoryIdsObs =
-      Id64.sizeOf(categoryIds) > 100 ? from(Id64.iterable(categoryIds)).pipe(releaseMainThreadOnItemsCount(100)) : from(Id64.iterable(categoryIds));
-    return categoryIdsObs.pipe(
+    return fromWithRelease({ ids: categoryIds, releaseOnCount: 100 }).pipe(
       mergeMap((categoryId) => {
         return forkJoin({
           categoryId: of(categoryId),
@@ -769,10 +765,7 @@ export class BaseVisibilityHelper implements Disposable {
               // In case of turning categories on, need to change sub-categories separately as enableCategoryDisplay
               // takes a long time to get sub-categories for each category
               on
-                ? (Id64.sizeOf(categoryIds) > 200
-                    ? from(Id64.iterable(categoryIds)).pipe(releaseMainThreadOnItemsCount(200))
-                    : from(Id64.iterable(categoryIds))
-                  ).pipe(
+                ? fromWithRelease({ ids: categoryIds, releaseOnCount: 200 }).pipe(
                     mergeMap((categoryId) => this.#props.baseIdsCache.getSubCategories({ categoryId }).pipe(mergeAll())),
                     releaseMainThreadOnItemsCount(200),
                     map((subCategoryId) => {
@@ -852,7 +845,7 @@ export class BaseVisibilityHelper implements Disposable {
           return this.queueElementsVisibilityChange(elementIds, on, isDisplayedByDefault);
         }),
         // Change visibility of elements that are models
-        (Id64.sizeOf(elementIds) > 100 ? from(Id64.iterable(elementIds)).pipe(releaseMainThreadOnItemsCount(100)) : from(Id64.iterable(elementIds))).pipe(
+        fromWithRelease({ ids: elementIds, releaseOnCount: 100 }).pipe(
           mergeMap((elementId) =>
             this.#props.baseIdsCache.hasSubModel(elementId).pipe(
               mergeMap((isSubModel) => {

@@ -45,6 +45,7 @@ import {
 import { collect } from "../common/internal/Rxjs.js";
 import {
   createIdsSelector,
+  fromWithRelease,
   getOptimalBatchSize,
   groupingNodeHasFilterTargets,
   parseIdsSelectorResult,
@@ -768,8 +769,7 @@ function createInstanceKeyPathsFromTargetItemsObs({
     throw new FilterLimitExceededError(limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT);
   }
 
-  return from(targetItems).pipe(
-    releaseMainThreadOnItemsCount(2000),
+  return fromWithRelease({ array: targetItems, releaseOnCount: 2000 }).pipe(
     mergeMap(async (key): Promise<{ key: Id64String; type: number } | { key: ElementsGroupInfo; type: 0 }> => {
       if ("parent" in key) {
         return { key, type: 0 };

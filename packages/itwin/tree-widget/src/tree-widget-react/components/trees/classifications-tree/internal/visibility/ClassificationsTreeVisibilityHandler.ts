@@ -6,7 +6,7 @@
 import { concat, defer, EMPTY, from, map, merge, mergeMap, of, toArray } from "rxjs";
 import { Id64 } from "@itwin/core-bentley";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
-import { releaseMainThreadOnItemsCount } from "../../../common/internal/Utils.js";
+import { fromWithRelease, releaseMainThreadOnItemsCount } from "../../../common/internal/Utils.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 import { ClassificationsTreeNode } from "../ClassificationsTreeNode.js";
 import { ClassificationsTreeVisibilityHelper } from "./ClassificationsTreeVisibilityHelper.js";
@@ -169,11 +169,9 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       }
       if (elements2d?.length) {
         observables.push(
-          from(elements2d).pipe(
-            releaseMainThreadOnItemsCount(50),
+          fromWithRelease({ array: elements2d, releaseOnCount: 50 }).pipe(
             mergeMap(({ modelId, categoryId, elements }) => {
-              return from(elements.keys()).pipe(
-                releaseMainThreadOnItemsCount(1000),
+              return (elements.size >= 1000 ? from(elements.keys()).pipe(releaseMainThreadOnItemsCount(1000)) : from(elements.keys())).pipe(
                 mergeMap((elementId) =>
                   this.#visibilityHelper.getElementsVisibilityStatus({ modelId, categoryId, elementIds: elementId, type: "GeometricElement2d" }),
                 ),
@@ -185,11 +183,9 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
 
       if (elements3d?.length) {
         observables.push(
-          from(elements3d).pipe(
-            releaseMainThreadOnItemsCount(50),
+          fromWithRelease({ array: elements3d, releaseOnCount: 50 }).pipe(
             mergeMap(({ modelId, categoryId, elements }) => {
-              return from(elements.keys()).pipe(
-                releaseMainThreadOnItemsCount(1000),
+              return (elements.size >= 1000 ? from(elements.keys()).pipe(releaseMainThreadOnItemsCount(1000)) : from(elements.keys())).pipe(
                 mergeMap((elementId) =>
                   this.#visibilityHelper.getElementsVisibilityStatus({ modelId, categoryId, elementIds: elementId, type: "GeometricElement3d" }),
                 ),
