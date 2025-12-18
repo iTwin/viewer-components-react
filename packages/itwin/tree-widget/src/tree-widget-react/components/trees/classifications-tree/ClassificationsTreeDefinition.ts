@@ -34,7 +34,7 @@ import {
   CLASS_NAME_GeometricElement2d,
   CLASS_NAME_GeometricElement3d,
 } from "../common/internal/ClassNameDefinitions.js";
-import { getOptimalBatchSize, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
+import { fromWithRelease, getOptimalBatchSize, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { SearchLimitExceededError } from "../common/TreeErrors.js";
 
 import type { Observable } from "rxjs";
@@ -602,8 +602,7 @@ function createInstanceKeyPathsFromTargetItemsObs({
   if (actualLimit !== "unbounded" && targetItems.length > actualLimit) {
     throw new SearchLimitExceededError(actualLimit);
   }
-  return from(targetItems).pipe(
-    releaseMainThreadOnItemsCount(2000),
+  return fromWithRelease({ source: targetItems, releaseOnCount: 2000 }).pipe(
     mergeMap(async (key): Promise<{ id: Id64String; type: number }> => {
       if (await imodelAccess.classDerivesFrom(key.className, CLASS_NAME_ClassificationTable)) {
         return { id: key.id, type: 0 };

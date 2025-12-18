@@ -12,7 +12,6 @@ import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { CategoriesTreeIdsCache } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 import { CLASS_NAME_DefinitionModel } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
-import { getDistinctMapValues } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
 import {
   buildIModel,
   insertDefinitionContainer,
@@ -23,6 +22,7 @@ import {
   insertSubModel,
 } from "../../../IModelUtils.js";
 import { createIModelAccess } from "../../Common.js";
+import { getDefaultSubCategoryId } from "../../TreeUtils.js";
 
 describe("CategoriesTreeIdsCache", () => {
   before(async function () {
@@ -902,10 +902,10 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel } = buildIModelResult;
       using idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      expect([...getDistinctMapValues(await firstValueFrom(idsCache.getSubCategories("0x123")))]).to.deep.eq([]);
+      expect(await firstValueFrom(idsCache.getSubCategories("0x123"))).to.deep.eq([]);
     });
 
-    it("returns empty list when category has one subCategory", async function () {
+    it("returns sub-category when category has one sub-category", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
@@ -914,10 +914,10 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       using idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      expect([...getDistinctMapValues(await firstValueFrom(idsCache.getSubCategories(keys.category.id)))]).to.deep.eq([]);
+      expect(await firstValueFrom(idsCache.getSubCategories(keys.category.id))).to.deep.eq([getDefaultSubCategoryId(keys.category.id)]);
     });
 
-    it("returns subCategories when category has multiple subCategories", async function () {
+    it("returns sub-categories when category has multiple sub-categories", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
         const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
@@ -928,7 +928,7 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       using idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      const result = [...getDistinctMapValues(await firstValueFrom(idsCache.getSubCategories(keys.category.id)))];
+      const result = await firstValueFrom(idsCache.getSubCategories(keys.category.id));
       expect(result.includes(keys.subCategory.id)).to.be.true;
       expect(result.length).to.be.eq(2);
     });
@@ -948,7 +948,8 @@ describe("CategoriesTreeIdsCache", () => {
       });
       const { imodel, ...keys } = buildIModelResult;
       using idsCache = new CategoriesTreeIdsCache(createIModelAccess(imodel), "3d");
-      const result = [...getDistinctMapValues(await firstValueFrom(idsCache.getSubCategories(keys.category2.id)))];
+      const result = await firstValueFrom(idsCache.getSubCategories(keys.category2.id));
+      expect(result).to.not.be.undefined;
       expect(result.includes(keys.subCategory2.id)).to.be.true;
       expect(result.length).to.be.eq(2);
     });

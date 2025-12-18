@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useRef } from "react";
-import { bufferCount, concatAll, concatMap, delay, of } from "rxjs";
+import { bufferCount, concatAll, concatMap, delay, from, of } from "rxjs";
 import { assert, Id64 } from "@itwin/core-bentley";
 import { ProcessedHierarchyNode } from "@itwin/presentation-hierarchies";
 import {
@@ -137,6 +137,34 @@ export function joinId64Arg(arg: Id64Arg, separator: string): string {
 /** @internal */
 export function getSetFromId64Arg(arg: Id64Arg): Set<Id64String> {
   return typeof arg === "string" ? new Set([arg]) : Array.isArray(arg) ? new Set(arg) : arg;
+}
+
+function isIterable(x: unknown): x is Iterable<unknown> {
+  return typeof x === "object" && !!x && typeof (x as Iterable<unknown>)[Symbol.iterator] === "function";
+}
+
+/**
+ * Creates an Observable from provided props. If `releaseOnCount` is provided, main thread will be released after processing specified number of items.
+ * @internal
+ */
+export function fromWithRelease(props: { source: Id64Arg; releaseOnCount?: number }): Observable<Id64String>;
+export function fromWithRelease<T>(props: ({ source: Set<T> | Array<T> } | { source: Iterable<T>; size: number }) & { releaseOnCount?: number }): Observable<T>;
+export function fromWithRelease(props: {
+  source: Id64Arg | Set<unknown> | Array<unknown> | Iterable<unknown>;
+  size?: number;
+  releaseOnCount?: number;
+}): Observable<unknown> {
+  const source = Array.isArray(props.source)
+    ? { obs: from(props.source), size: props.source.length }
+    : props.source instanceof Set
+      ? { obs: from(props.source), size: props.source.size }
+      : isIterable(props.source)
+        ? { obs: from(props.source), size: props.size! }
+        : { obs: from(Id64.iterable(props.source)), size: Id64.sizeOf(props.source) };
+  if (props.releaseOnCount === undefined || source.size < props.releaseOnCount) {
+    return source.obs;
+  }
+  return source.obs.pipe(releaseMainThreadOnItemsCount(props.releaseOnCount));
 }
 
 /** @internal */

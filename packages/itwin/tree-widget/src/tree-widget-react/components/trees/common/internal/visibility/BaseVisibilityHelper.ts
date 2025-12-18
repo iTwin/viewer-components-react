@@ -15,6 +15,7 @@ import {
   identity,
   map,
   merge,
+  mergeAll,
   mergeMap,
   of,
   reduce,
@@ -28,7 +29,7 @@ import {
 } from "rxjs";
 import { assert, Id64 } from "@itwin/core-bentley";
 import { createVisibilityStatus } from "../Tooltip.js";
-import { getSetFromId64Arg, releaseMainThreadOnItemsCount, setDifference, setIntersection } from "../Utils.js";
+import { fromWithRelease, getSetFromId64Arg, releaseMainThreadOnItemsCount, setDifference, setIntersection } from "../Utils.js";
 import {
   changeElementStateNoChildrenOperator,
   enableCategoryDisplay,
@@ -37,7 +38,7 @@ import {
 } from "../VisibilityUtils.js";
 
 import type { Observable, Subscription } from "rxjs";
-import type { Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { TreeWidgetViewport } from "../../TreeWidgetViewport.js";
 import type { HierarchyVisibilityHandlerOverridableMethod, HierarchyVisibilityOverrideHandler, VisibilityStatus } from "../../UseHierarchyVisibility.js";
@@ -72,7 +73,7 @@ export interface BaseTreeVisibilityHandlerOverrides {
 export interface BaseIdsCache {
   hasSubModel: (elementId: Id64String) => Observable<boolean>;
   getElementsCount: (props: { modelId: Id64String; categoryId: Id64String }) => Observable<number>;
-  getSubCategories: (props: { categoryIds: Id64Arg }) => Observable<{ id: Id64String; subCategories: Id64Arg | undefined }>;
+  getSubCategories: (props: { categoryId: Id64String }) => Observable<Id64Array>;
   getModels: (props: { categoryIds: Id64Arg }) => Observable<{ id: Id64String; models: Id64Arg | undefined }>;
   getCategories: (props: { modelIds: Id64Arg }) => Observable<{ id: Id64String; drawingCategories?: Id64Arg; spatialCategories?: Id64Arg }>;
   getSubModels: (
@@ -264,10 +265,8 @@ export class BaseVisibilityHelper implements Disposable {
    * - Category selector visibility in the viewport.
    * - Sub-categories visibility in the viewport.
    */
-  public getSubCategoriesVisibilityStatus(props: { subCategoryIds: Id64Arg; categoryId: Id64String; modelId?: Id64String }): Observable<VisibilityStatus> {
-    return (
-      props.modelId ? of({ id: props.categoryId, models: props.modelId }) : from(this.#props.baseIdsCache.getModels({ categoryIds: props.categoryId }))
-    ).pipe(
+  public getSubCategoriesVisibilityStatus(props: { subCategoryIds: Id64Arg; categoryId: Id64String }): Observable<VisibilityStatus> {
+    return this.#props.baseIdsCache.getModels({ categoryIds: props.categoryId }).pipe(
       map(({ models }) => {
         let visibility: "visible" | "hidden" | "unknown" = "unknown";
         let nonDefaultModelDisplayStatesCount = 0;
@@ -344,12 +343,10 @@ export class BaseVisibilityHelper implements Disposable {
       if (!isSupportedInView) {
         return of(createVisibilityStatus("disabled"));
       }
-
-      return (
-        modelIdFromProps
-          ? from(Id64.iterable(categoryIds)).pipe(map((categoryId) => ({ id: categoryId, models: modelIdFromProps })))
-          : this.#props.baseIdsCache.getModels({ categoryIds })
-      ).pipe(
+      const categoryModelsObs = modelIdFromProps
+        ? from(Id64.iterable(categoryIds)).pipe(map((categoryId) => ({ id: categoryId, models: modelIdFromProps })))
+        : this.#props.baseIdsCache.getModels({ categoryIds });
+      return (Id64.sizeOf(categoryIds) > 100 ? categoryModelsObs.pipe(releaseMainThreadOnItemsCount(100)) : categoryModelsObs).pipe(
         mergeMap(({ id, models }) => {
           if (!this.#props.viewport.isAlwaysDrawnExclusive) {
             return of({ id, models });
@@ -424,15 +421,17 @@ export class BaseVisibilityHelper implements Disposable {
                 )
               : EMPTY,
             // We need to check subCategories as well
-            this.#props.baseIdsCache.getSubCategories({ categoryIds: categoryId }).pipe(
-              mergeMap(({ subCategories }) => {
-                if (subCategories && Id64.sizeOf(subCategories) > 0) {
-                  return this.getSubCategoriesVisibilityStatus({ categoryId, modelId: modelIdFromProps, subCategoryIds: subCategories });
-                }
+            !modelIdFromProps
+              ? this.#props.baseIdsCache.getSubCategories({ categoryId }).pipe(
+                  mergeMap((subCategoryIds) => {
+                    if (subCategoryIds.length > 0) {
+                      return this.getSubCategoriesVisibilityStatus({ categoryId, subCategoryIds });
+                    }
 
-                return EMPTY;
-              }),
-            ),
+                    return EMPTY;
+                  }),
+                )
+              : EMPTY,
           ).pipe(
             defaultIfEmpty(
               createVisibilityStatus(!this.#props.viewport.isAlwaysDrawnExclusive && this.#props.viewport.viewsCategory(categoryId) ? "visible" : "hidden"),
@@ -504,8 +503,7 @@ export class BaseVisibilityHelper implements Disposable {
 
       // TODO: check child elements that are subModels
       if (!this.#props.viewport.viewsModel(modelId)) {
-        return from(elementIds).pipe(
-          releaseMainThreadOnItemsCount(100),
+        return fromWithRelease({ source: elementIds, releaseOnCount: 100 }).pipe(
           mergeMap((elementId) =>
             this.#props.baseIdsCache.hasSubModel(elementId).pipe(
               mergeMap((isSubModel) => {
@@ -593,8 +591,7 @@ export class BaseVisibilityHelper implements Disposable {
       );
     }
     const { modelId, categoryIds } = props.queryProps;
-    return from(Id64.iterable(categoryIds)).pipe(
-      releaseMainThreadOnItemsCount(100),
+    return fromWithRelease({ source: categoryIds, releaseOnCount: 100 }).pipe(
       mergeMap((categoryId) => {
         return forkJoin({
           categoryId: of(categoryId),
@@ -764,8 +761,22 @@ export class BaseVisibilityHelper implements Disposable {
                 override: on ? "show" : "hide",
               }),
             )
-          : concat(
-              from(enableCategoryDisplay(viewport, categoryIds, on, on)),
+          : merge(
+              // In case of turning categories on, need to change sub-categories separately as enableCategoryDisplay
+              // takes a long time to get sub-categories for each category
+              on
+                ? fromWithRelease({ source: categoryIds, releaseOnCount: 200 }).pipe(
+                    mergeMap((categoryId) => this.#props.baseIdsCache.getSubCategories({ categoryId })),
+                    mergeAll(),
+                    releaseMainThreadOnItemsCount(200),
+                    map((subCategoryId) => {
+                      if (!this.#props.viewport.viewsSubCategory(subCategoryId)) {
+                        this.#props.viewport.changeSubCategoryDisplay({ subCategoryId, display: true });
+                      }
+                    }),
+                  )
+                : EMPTY,
+              from(enableCategoryDisplay(viewport, categoryIds, on, false)),
               modelIdsObservable.pipe(
                 map(([modelId, modelCategories]) => {
                   viewport.setPerModelCategoryOverride({ modelIds: modelId, categoryIds: modelCategories, override: "none" });
@@ -835,8 +846,7 @@ export class BaseVisibilityHelper implements Disposable {
           return this.queueElementsVisibilityChange(elementIds, on, isDisplayedByDefault);
         }),
         // Change visibility of elements that are models
-        from(Id64.iterable(elementIds)).pipe(
-          releaseMainThreadOnItemsCount(100),
+        fromWithRelease({ source: elementIds, releaseOnCount: 100 }).pipe(
           mergeMap((elementId) =>
             this.#props.baseIdsCache.hasSubModel(elementId).pipe(
               mergeMap((isSubModel) => {

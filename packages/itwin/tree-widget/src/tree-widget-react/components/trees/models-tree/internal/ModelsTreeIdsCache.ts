@@ -11,6 +11,7 @@ import {
   CLASS_NAME_InformationPartitionElement,
   CLASS_NAME_Model,
   CLASS_NAME_SpatialCategory,
+  CLASS_NAME_SubCategory,
   CLASS_NAME_Subject,
 } from "../../common/internal/ClassNameDefinitions.js";
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
@@ -20,7 +21,7 @@ import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
-import type { CategoryId, ElementId, ModelId, SubjectId } from "../../common/internal/Types.js";
+import type { CategoryId, ElementId, ModelId, SubCategoryId, SubjectId } from "../../common/internal/Types.js";
 import type { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
 
 interface SubjectInfo {
@@ -40,6 +41,7 @@ type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeD
 /** @internal */
 export class ModelsTreeIdsCache implements Disposable {
   readonly #categoryElementCounts: ModelCategoryElementsCountCache;
+  #categorySubCategories: Observable<Map<CategoryId, Array<SubCategoryId>>> | undefined;
   #subjectInfos: Observable<Map<SubjectId, SubjectInfo>> | undefined;
   #parentSubjectIds: Observable<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
   #modelInfos: Observable<Map<ModelId, ModelInfo>> | undefined;
@@ -69,6 +71,48 @@ export class ModelsTreeIdsCache implements Disposable {
 
   public [Symbol.dispose]() {
     this.#categoryElementCounts[Symbol.dispose]();
+  }
+
+  private querySubCategories(): Observable<{ id: SubCategoryId; parentId: CategoryId }> {
+    return defer(() => {
+      const definitionsQuery = `
+        SELECT
+          sc.ECInstanceId id,
+          sc.Parent.Id categoryId
+        FROM
+          ${CLASS_NAME_SubCategory} sc
+        WHERE
+          NOT sc.IsPrivate
+      `;
+      return this.#queryExecutor.createQueryReader(
+        { ecsql: definitionsQuery },
+        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/visible-sub-categories` },
+      );
+    }).pipe(
+      map((row) => {
+        return { id: row.id, parentId: row.categoryId };
+      }),
+    );
+  }
+  private getSubCategoriesInfo() {
+    this.#categorySubCategories ??= this.querySubCategories()
+      .pipe(
+        reduce((acc, queriedSubCategory) => {
+          const entry = acc.get(queriedSubCategory.parentId);
+          if (entry) {
+            entry.push(queriedSubCategory.id);
+          } else {
+            acc.set(queriedSubCategory.parentId, [queriedSubCategory.id]);
+          }
+          return acc;
+        }, new Map<CategoryId, Array<SubCategoryId>>()),
+      )
+      .pipe(shareReplay());
+    return this.#categorySubCategories;
+  }
+
+  public getSubCategories(categoryId: Id64String): Observable<Array<SubCategoryId>> {
+    return this.getSubCategoriesInfo().pipe(map((categorySubCategories) => categorySubCategories.get(categoryId) ?? []));
   }
 
   private querySubjects(): Observable<{ id: SubjectId; parentId?: SubjectId; targetPartitionId?: ModelId; hideInHierarchy: boolean }> {

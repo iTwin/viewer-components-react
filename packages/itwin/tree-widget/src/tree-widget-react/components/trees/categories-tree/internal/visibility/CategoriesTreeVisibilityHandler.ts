@@ -8,7 +8,7 @@ import { assert, Id64 } from "@itwin/core-bentley";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
 import { HierarchyVisibilityHandlerImpl } from "../../../common/internal/useTreeHooks/UseCachedVisibility.js";
-import { getClassesByView, releaseMainThreadOnItemsCount } from "../../../common/internal/Utils.js";
+import { fromWithRelease, getClassesByView } from "../../../common/internal/Utils.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 import { CategoriesTreeNode } from "../CategoriesTreeNode.js";
 import { CategoriesTreeVisibilityHelper } from "./CategoriesTreeVisibilityHelper.js";
@@ -105,8 +105,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
 
       if (elements?.length) {
         observables.push(
-          from(elements).pipe(
-            releaseMainThreadOnItemsCount(50),
+          fromWithRelease({ source: elements, releaseOnCount: 50 }).pipe(
             mergeMap(({ modelId, elements: elementsMap, categoryId }) =>
               this.#visibilityHelper.changeElementsVisibilityStatus({ modelId, categoryId, elementIds: [...elementsMap.keys()], on }),
             ),
@@ -279,8 +278,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
 
       if (elements?.length) {
         observables.push(
-          from(elements).pipe(
-            releaseMainThreadOnItemsCount(50),
+          fromWithRelease({ source: elements, releaseOnCount: 50 }).pipe(
             mergeMap(({ modelId, elements: elementsMap, categoryId }) =>
               this.#visibilityHelper.getElementsVisibilityStatus({ modelId, categoryId, elementIds: [...elementsMap.keys()], type: this.#elementType }),
             ),
@@ -325,14 +323,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
   }
 
   private getSubCategories(props: Parameters<BaseIdsCache["getSubCategories"]>[0]): ReturnType<BaseIdsCache["getSubCategories"]> {
-    return from(Id64.iterable(props.categoryIds)).pipe(
-      mergeMap((categoryId) =>
-        this.#props.idsCache.getSubCategories(categoryId).pipe(
-          mergeMap((categorySubCategoriesMap) => (categorySubCategoriesMap.size > 0 ? categorySubCategoriesMap.values() : of(undefined))),
-          map((subCategories) => ({ id: categoryId, subCategories })),
-        ),
-      ),
-    );
+    return this.#props.idsCache.getSubCategories(props.categoryId);
   }
 
   private getSubModels(props: Parameters<BaseIdsCache["getSubModels"]>[0]): ReturnType<BaseIdsCache["getSubModels"]> {

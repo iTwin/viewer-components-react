@@ -14,6 +14,7 @@ import {
   CLASS_NAME_GeometricElement2d,
   CLASS_NAME_GeometricElement3d,
   CLASS_NAME_SpatialCategory,
+  CLASS_NAME_SubCategory,
 } from "../../common/internal/ClassNameDefinitions.js";
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
 import { joinId64Arg } from "../../common/internal/Utils.js";
@@ -21,7 +22,7 @@ import { joinId64Arg } from "../../common/internal/Utils.js";
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import type { CategoryId, ElementId, ModelId } from "../../common/internal/Types.js";
+import type { CategoryId, ElementId, ModelId, SubCategoryId } from "../../common/internal/Types.js";
 import type { ClassificationsTreeHierarchyConfiguration } from "../ClassificationsTreeDefinition.js";
 
 /** @internal */
@@ -39,6 +40,7 @@ interface ClassificationInfo {
 /** @internal */
 export class ClassificationsTreeIdsCache implements Disposable {
   readonly #categoryElementCounts: ModelCategoryElementsCountCache;
+  #categorySubCategories: Observable<Map<CategoryId, Array<SubCategoryId>>> | undefined;
   #elementModelsCategories: Observable<Map<ModelId, { category2dIds: Id64Set; category3dIds: Id64Set; isSubModel: boolean }>> | undefined;
   #modelWithCategoryModeledElements: Observable<Map<ModelId, Map<CategoryId, Set<ElementId>>>> | undefined;
   #classificationInfos: Observable<Map<ClassificationId | ClassificationTableId, ClassificationInfo>> | undefined;
@@ -62,6 +64,48 @@ export class ClassificationsTreeIdsCache implements Disposable {
 
   public [Symbol.dispose]() {
     this.#categoryElementCounts[Symbol.dispose]();
+  }
+
+  private querySubCategories(): Observable<{ id: SubCategoryId; parentId: CategoryId }> {
+    return defer(() => {
+      const definitionsQuery = `
+        SELECT
+          sc.ECInstanceId id,
+          sc.Parent.Id categoryId
+        FROM
+          ${CLASS_NAME_SubCategory} sc
+        WHERE
+          NOT sc.IsPrivate
+      `;
+      return this.#queryExecutor.createQueryReader(
+        { ecsql: definitionsQuery },
+        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/visible-sub-categories` },
+      );
+    }).pipe(
+      map((row) => {
+        return { id: row.id, parentId: row.categoryId };
+      }),
+    );
+  }
+  private getSubCategoriesInfo() {
+    this.#categorySubCategories ??= this.querySubCategories()
+      .pipe(
+        reduce((acc, queriedSubCategory) => {
+          const entry = acc.get(queriedSubCategory.parentId);
+          if (entry) {
+            entry.push(queriedSubCategory.id);
+          } else {
+            acc.set(queriedSubCategory.parentId, [queriedSubCategory.id]);
+          }
+          return acc;
+        }, new Map<CategoryId, Array<SubCategoryId>>()),
+      )
+      .pipe(shareReplay());
+    return this.#categorySubCategories;
+  }
+
+  public getSubCategories(categoryId: Id64String): Observable<Array<SubCategoryId>> {
+    return this.getSubCategoriesInfo().pipe(map((categorySubCategories) => categorySubCategories.get(categoryId) ?? []));
   }
 
   private queryElementModelCategories(): Observable<{

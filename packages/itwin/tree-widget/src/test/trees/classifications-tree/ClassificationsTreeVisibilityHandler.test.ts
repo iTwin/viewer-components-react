@@ -74,7 +74,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     const idsCache = new ClassificationsTreeIdsCache(imodelAccess, { rootClassificationSystemCode });
     const viewport = createTreeWidgetTestingViewport({
       iModel: imodel,
-      visibleByDefault: !!visibleByDefault,
+      visibleByDefault,
       viewType: view,
     });
     const handler = createClassificationsTreeVisibilityHandler({ imodelAccess, idsCache, viewport });
@@ -786,7 +786,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       const viewport = createTreeWidgetTestingViewport({
         iModel: imodel,
         viewType: view,
-        visibleByDefault: !!visibleByDefault,
+        visibleByDefault,
       });
       const handler = createClassificationsTreeVisibilityHandler({ idsCache, viewport, imodelAccess, searchPaths });
       const defaultProvider = createProvider({ idsCache, imodelAccess });

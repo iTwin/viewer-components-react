@@ -35,6 +35,7 @@ import {
 } from "../common/internal/ClassNameDefinitions.js";
 import {
   createIdsSelector,
+  fromWithRelease,
   getClassesByView,
   getOptimalBatchSize,
   groupingNodeHasSearchTargets,
@@ -868,8 +869,7 @@ function createInstanceKeyPathsFromTargetItems({
     throw new SearchLimitExceededError(limit ?? MAX_SEARCH_INSTANCE_KEY_COUNT);
   }
   const { categoryClass } = getClassesByView(viewType);
-  return from(targetItems).pipe(
-    releaseMainThreadOnItemsCount(500),
+  return fromWithRelease({ source: targetItems, releaseOnCount: 500 }).pipe(
     reduce(
       (acc, { id, className }) => {
         if (className === categoryClass) {
@@ -904,18 +904,15 @@ function createInstanceKeyPathsFromTargetItems({
     mergeMap((ids) => {
       const elementsLength = ids.elementIds.length;
       return merge(
-        from(ids.definitionContainerIds).pipe(
-          releaseMainThreadOnItemsCount(200),
+        fromWithRelease({ source: ids.definitionContainerIds, releaseOnCount: 200 }).pipe(
           mergeMap((id) => idsCache.getInstanceKeyPaths({ definitionContainerId: id })),
           map((path) => ({ path, options: { reveal: true } })),
         ),
-        from(ids.categoryIds).pipe(
-          releaseMainThreadOnItemsCount(200),
+        fromWithRelease({ source: ids.categoryIds, releaseOnCount: 200 }).pipe(
           mergeMap((id) => idsCache.getInstanceKeyPaths({ categoryId: id })),
           map((path) => ({ path, options: { reveal: true } })),
         ),
-        from(ids.subCategoryIds).pipe(
-          releaseMainThreadOnItemsCount(200),
+        fromWithRelease({ source: ids.subCategoryIds, releaseOnCount: 200 }).pipe(
           mergeMap((id) => idsCache.getInstanceKeyPaths({ subCategoryId: id })),
           map((path) => ({ path, options: { reveal: true } })),
         ),

@@ -35,7 +35,7 @@ export function createNonGroupingHierarchyNode(partial?: Partial<NonGroupingHier
   };
 }
 
-function getDefaultSubCategoryId(categoryId: Id64String) {
+export function getDefaultSubCategoryId(categoryId: Id64String) {
   const categoryIdNumber = Number.parseInt(categoryId, 16);
   const subCategoryId = `0x${(categoryIdNumber + 1).toString(16)}`;
   return subCategoryId;
@@ -49,10 +49,10 @@ export function createTreeWidgetTestingViewport({
   iModel,
   viewType,
   subCategoriesOfCategories,
-  visibleByDefault = false,
+  visibleByDefault,
 }: Pick<TreeWidgetViewport, "iModel" | "viewType"> & {
   subCategoriesOfCategories?: Array<{ categoryId: Id64String; subCategories: Id64Arg }>;
-  visibleByDefault: boolean;
+  visibleByDefault: boolean | undefined;
 }): TreeWidgetTestingViewport {
   const models = new Map<ModelId, { isVisible: boolean }>();
   const categories = new Map<CategoryId, { isVisible: boolean }>();
@@ -61,9 +61,9 @@ export function createTreeWidgetTestingViewport({
     const subCategoryMap = new Map<Id64String, { isVisible: boolean }>();
     subCategories.set(entry.categoryId, subCategoryMap);
     for (const subCategoryId of Id64.iterable(entry.subCategories)) {
-      subCategoryMap.set(subCategoryId, { isVisible: visibleByDefault });
+      subCategoryMap.set(subCategoryId, { isVisible: !!visibleByDefault });
     }
-    subCategoryMap.set(getDefaultSubCategoryId(entry.categoryId), { isVisible: visibleByDefault });
+    subCategoryMap.set(getDefaultSubCategoryId(entry.categoryId), { isVisible: !!visibleByDefault });
   }
   let alwaysDrawn = new Set<ElementId>();
   let neverDrawn = new Set<ElementId>();
@@ -197,14 +197,14 @@ export function createTreeWidgetTestingViewport({
     viewsCategory: (categoryId) => {
       const entry = categories.get(categoryId);
       if (!entry) {
-        return visibleByDefault;
+        return !!visibleByDefault;
       }
       return entry.isVisible;
     },
     viewsModel: (modelId) => {
       const entry = models.get(modelId);
       if (!entry) {
-        return visibleByDefault;
+        return !!visibleByDefault;
       }
       return entry.isVisible;
     },
@@ -215,7 +215,7 @@ export function createTreeWidgetTestingViewport({
           return entry.isVisible;
         }
       }
-      return visibleByDefault;
+      return visibleByDefault === undefined ? true : visibleByDefault;
     },
     renderFrame: () => {
       if (onAlwaysDrawnChanged.shouldFireOnRender) {

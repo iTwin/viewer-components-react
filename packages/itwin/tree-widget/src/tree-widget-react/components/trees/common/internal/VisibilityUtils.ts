@@ -3,12 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, from, map, mergeMap, reduce } from "rxjs";
+import { bufferCount, map, mergeMap, reduce } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { QueryRowFormat } from "@itwin/core-common";
 import { reduceWhile, toVoidPromise } from "./Rxjs.js";
 import { createVisibilityStatus } from "./Tooltip.js";
-import { getClassesByView, getOptimalBatchSize, releaseMainThreadOnItemsCount } from "./Utils.js";
+import { fromWithRelease, getClassesByView, getOptimalBatchSize, releaseMainThreadOnItemsCount } from "./Utils.js";
 
 import type { Observable, OperatorFunction } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
@@ -158,12 +158,11 @@ export async function enableCategoryDisplay(viewport: TreeWidgetViewport, catego
   const disableSubCategories = async (bufferedCategories: Id64Array) => {
     // changeCategoryDisplay only enables subcategories, it does not disabled them. So we must do that ourselves.
     (await viewport.iModel.categories.getCategoryInfo(bufferedCategories)).forEach((categoryInfo) => {
-      categoryInfo.subCategories.forEach((value) => enableSubCategoryDisplay(viewport, value.id, false));
+      categoryInfo.subCategories.forEach((value) => viewport.changeSubCategoryDisplay({ subCategoryId: value.id, display: false }));
     });
   };
   return toVoidPromise(
-    from(Id64.iterable(categoryIds)).pipe(
-      releaseMainThreadOnItemsCount(500),
+    fromWithRelease({ source: categoryIds, releaseOnCount: 500 }).pipe(
       bufferCount(getOptimalBatchSize({ totalSize: Id64.sizeOf(categoryIds), maximumBatchSize: 500 })),
       mergeMap(async (bufferedCategories) => {
         viewport.changeCategoryDisplay({ categoryIds: bufferedCategories, display: enabled, enableAllSubCategories });
@@ -174,14 +173,6 @@ export async function enableCategoryDisplay(viewport: TreeWidgetViewport, catego
       }),
     ),
   );
-}
-
-/**
- * Changes subcategory display in the viewport
- * @internal
- */
-export function enableSubCategoryDisplay(viewport: TreeWidgetViewport, subCategoryId: Id64String, enabled: boolean) {
-  viewport.changeSubCategoryDisplay({ subCategoryId, display: enabled });
 }
 
 /** @internal */
