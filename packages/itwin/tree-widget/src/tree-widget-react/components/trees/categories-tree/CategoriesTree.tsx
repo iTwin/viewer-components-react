@@ -8,12 +8,15 @@ import { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRende
 import { useCategoriesTree } from "./UseCategoriesTree.js";
 
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
-import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
+import type { ExtendedVisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { UseCategoriesTreeProps } from "./UseCategoriesTree.js";
 
 /** @beta */
-export type CategoriesTreeProps = Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
-  Pick<VisibilityTreeRendererProps, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getDecorations" | "treeLabel"> &
+export type CategoriesTreeProps = Pick<
+  ExtendedVisibilityTreeRendererProps,
+  "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "treeLabel"
+> &
+  Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
   UseCategoriesTreeProps & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
@@ -31,18 +34,19 @@ export function CategoriesTree({
   selectionMode,
   onCategoriesFiltered,
   emptyTreeContent,
-  getDecorations,
   getInlineActions,
   getMenuActions,
   getContextMenuActions,
+  getTreeItemProps,
   treeLabel,
 }: CategoriesTreeProps) {
-  const { categoriesTreeProps, rendererProps } = useCategoriesTree({
+  const { categoriesTreeProps, getTreeItemProps: categoriesTreeItemProps } = useCategoriesTree({
     searchText,
     activeView,
     onCategoriesFiltered,
     emptyTreeContent,
     hierarchyConfig,
+    getTreeItemProps,
   });
 
   return (
@@ -55,12 +59,11 @@ export function CategoriesTree({
       treeRenderer={(treeProps) => (
         <VisibilityTreeRenderer
           {...treeProps}
-          {...rendererProps}
           treeLabel={treeLabel}
-          getInlineActions={getInlineActions}
-          getMenuActions={getMenuActions}
-          getContextMenuActions={getContextMenuActions}
-          getDecorations={getDecorations ?? rendererProps.getDecorations}
+          getInlineActions={getInlineActions ? (node) => getInlineActions(node, treeProps) : undefined}
+          getMenuActions={getMenuActions ? (node) => getMenuActions(node, treeProps) : undefined}
+          getContextMenuActions={getContextMenuActions ? (node) => getContextMenuActions(node, treeProps) : undefined}
+          getTreeItemProps={(node) => categoriesTreeItemProps(node, treeProps)}
         />
       )}
     />

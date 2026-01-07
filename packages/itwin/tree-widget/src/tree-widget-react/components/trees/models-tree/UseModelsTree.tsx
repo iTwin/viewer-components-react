@@ -36,7 +36,7 @@ import type { HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
-import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
+import type { ExtendedVisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { CreateSearchResultsTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import type { SearchResultsTree } from "../common/internal/visibility/BaseSearchResultsTree.js";
@@ -106,6 +106,7 @@ export interface UseModelsTreeProps {
    */
   selectionPredicate?: (props: { node: PresentationHierarchyNode; type: "subject" | "model" | "category" | "element" | "elements-class-group" }) => boolean;
   emptyTreeContent?: ReactNode;
+  getTreeItemProps?: ExtendedVisibilityTreeRendererProps["getTreeItemProps"];
 }
 
 /** @beta */
@@ -114,7 +115,7 @@ interface UseModelsTreeResult {
     VisibilityTreeProps,
     "treeName" | "getHierarchyDefinition" | "getSearchPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent" | "selectionPredicate"
   >;
-  rendererProps: Required<Pick<VisibilityTreeRendererProps, "getDecorations">>;
+  getTreeItemProps: Required<ExtendedVisibilityTreeRendererProps>["getTreeItemProps"];
 }
 
 /**
@@ -131,6 +132,7 @@ export function useModelsTree({
   selectionPredicate: nodeTypeSelectionPredicate,
   emptyTreeContent,
   getSubTreePaths,
+  getTreeItemProps,
 }: UseModelsTreeProps): UseModelsTreeResult {
   const hierarchyConfiguration = useMemo<ModelsTreeHierarchyConfiguration>(
     () => ({
@@ -199,10 +201,10 @@ export function useModelsTree({
       highlightText: searchText,
       selectionPredicate: nodeSelectionPredicate,
     },
-    rendererProps: {
-      // onDoubleClick,
-      getDecorations: useCallback((node) => <ModelsTreeIcon node={node} />, []),
-    },
+    getTreeItemProps: (node, rendererProps) => ({
+      decorations: <ModelsTreeIcon node={node} />,
+      ...getTreeItemProps?.(node, rendererProps),
+    }),
   };
 }
 

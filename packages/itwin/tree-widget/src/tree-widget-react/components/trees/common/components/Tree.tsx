@@ -49,9 +49,7 @@ export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getSearchPath
      */
     selectionPredicate?: (node: PresentationHierarchyNode) => boolean;
     /** Tree renderer that should be used to render tree data. */
-    treeRenderer: (
-      treeProps: Required<Pick<BaseTreeRendererProps, "getLabel" | "onFilterClick" | "selectionMode" | "getLabel"> & TreeRendererProps>,
-    ) => ReactNode;
+    treeRenderer: (treeProps: Required<CommonTreeRendererProps & Pick<BaseTreeRendererProps, "getTreeItemProps">>) => ReactNode;
     /** Custom iModel access that is stored outside tree component. If not provided it new iModel access will be created using `imodel` prop. */
     imodelAccess?: FunctionProps<typeof useIModelTree>["imodelAccess"];
     /** Size limit that should be applied on each hierarchy level. Default to `1000`. */
@@ -63,6 +61,15 @@ export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getSearchPath
     /** Text that should be highlighted in node labels. */
     highlightText?: string;
   };
+
+/** @beta */
+export type CommonTreeRendererProps = Pick<BaseTreeRendererProps, "onFilterClick" | "selectionMode" | "getTreeItemProps"> & TreeRendererProps;
+
+export type CallbacksWithCommonProps<T extends BaseTreeRendererProps, K extends keyof T> = Omit<T, K> & {
+  [P in keyof Pick<T, K>]?: T[P] extends ((props: any) => any) | undefined
+    ? (args: Parameters<NonNullable<T[P]>>[0], treeRendererProps: CommonTreeRendererProps) => ReturnType<NonNullable<T[P]>>
+    : never;
+};
 
 /**
  * Default tree component that manages tree state and renders using supplied `treeRenderer`.
@@ -196,7 +203,9 @@ function TreeBaseImpl({
     selectionMode: selectionMode ?? "single",
     expandNode: reportingExpandNode,
     onFilterClick: reportingOnFilterClicked,
-    getLabel,
+    getTreeItemProps: (node) => ({
+      label: getLabel(node),
+    }),
   };
 
   return (

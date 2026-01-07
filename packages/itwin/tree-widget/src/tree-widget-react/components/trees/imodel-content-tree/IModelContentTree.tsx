@@ -21,13 +21,16 @@ import { defaultHierarchyConfiguration, IModelContentTreeDefinition } from "./IM
 import { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache.js";
 
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
-import type { BaseTreeRendererProps } from "../common/components/BaseTreeRenderer.js";
 import type { TreeProps } from "../common/components/Tree.js";
+import type { ExtendedTreeRendererProps } from "../common/components/TreeRenderer.js";
 import type { IModelContentTreeHierarchyConfiguration } from "./IModelContentTreeDefinition.js";
 
 /** @beta */
-export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
-  Pick<BaseTreeRendererProps, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getDecorations" | "treeLabel"> & {
+export type IModelContentTreeProps = Pick<
+  ExtendedTreeRendererProps,
+  "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "treeLabel"
+> &
+  Pick<TreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
     };
@@ -39,7 +42,7 @@ export function IModelContentTree({
   getInlineActions,
   getMenuActions,
   getContextMenuActions,
-  getDecorations,
+  getTreeItemProps,
   selectionMode,
   treeLabel,
   hierarchyConfig: hierarchyConfigProp,
@@ -69,10 +72,13 @@ export function IModelContentTree({
         <TreeRenderer
           {...treeProps}
           treeLabel={treeLabel}
-          getInlineActions={getInlineActions}
-          getMenuActions={getMenuActions}
-          getContextMenuActions={getContextMenuActions}
-          getDecorations={getDecorations ?? ((node) => <IModelContentTreeIcon node={node} />)}
+          getInlineActions={getInlineActions ? (node) => getInlineActions(node, treeProps) : undefined}
+          getMenuActions={getMenuActions ? (node) => getMenuActions(node, treeProps) : undefined}
+          getContextMenuActions={getContextMenuActions ? (node) => getContextMenuActions(node, treeProps) : undefined}
+          getTreeItemProps={(node) => ({
+            decorations: <IModelContentTreeIcon node={node} />,
+            ...(getTreeItemProps ? getTreeItemProps(node, treeProps) : {}),
+          })}
         />
       )}
     />
