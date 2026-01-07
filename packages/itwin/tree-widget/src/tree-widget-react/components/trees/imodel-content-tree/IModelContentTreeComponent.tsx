@@ -23,7 +23,7 @@ interface IModelContentTreeComponentProps
     | "getInlineActions"
     | "getMenuActions"
     | "getContextMenuActions"
-    | "getDecorations"
+    | "getTreeItemProps"
     | "treeLabel"
   > {
   onPerformanceMeasured?: (featureId: string, duration: number) => void;

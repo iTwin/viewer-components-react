@@ -30,7 +30,7 @@ interface CategoriesTreeComponentProps
     | "getInlineActions"
     | "getMenuActions"
     | "getContextMenuActions"
-    | "getDecorations"
+    | "getTreeItemProps"
     | "hierarchyConfig"
     | "treeLabel"
   > {

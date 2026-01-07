@@ -19,12 +19,15 @@ import { ExternalSourcesTreeDefinition } from "./ExternalSourcesTreeDefinition.j
 import type { GuidString } from "@itwin/core-bentley";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { Props } from "@itwin/presentation-shared";
-import type { BaseTreeRendererProps } from "../common/components/BaseTreeRenderer.js";
 import type { TreeProps } from "../common/components/Tree.js";
+import type { ExtendedTreeRendererProps } from "../common/components/TreeRenderer.js";
 
 /** @beta */
-export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
-  Pick<BaseTreeRendererProps, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getDecorations" | "treeLabel"> & {
+export type ExternalSourcesTreeProps = Pick<
+  ExtendedTreeRendererProps,
+  "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "treeLabel"
+> &
+  Pick<TreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
     };
@@ -35,7 +38,7 @@ export function ExternalSourcesTree({
   getInlineActions,
   getMenuActions,
   getContextMenuActions,
-  getDecorations,
+  getTreeItemProps,
   selectionMode,
   treeLabel,
   ...rest
@@ -52,10 +55,13 @@ export function ExternalSourcesTree({
         <TreeRenderer
           {...treeProps}
           treeLabel={treeLabel}
-          getInlineActions={getInlineActions}
-          getMenuActions={getMenuActions}
-          getContextMenuActions={getContextMenuActions}
-          getDecorations={getDecorations ?? ((node) => <ExternalSourcesTreeIcon node={node} />)}
+          getInlineActions={getInlineActions ? (node) => getInlineActions(node, treeProps) : undefined}
+          getMenuActions={getMenuActions ? (node) => getMenuActions(node, treeProps) : undefined}
+          getContextMenuActions={getContextMenuActions ? (node) => getContextMenuActions(node, treeProps) : undefined}
+          getTreeItemProps={(node) => ({
+            decorations: <ExternalSourcesTreeIcon node={node} />,
+            ...(getTreeItemProps ? getTreeItemProps(node, treeProps) : {}),
+          })}
         />
       )}
     />

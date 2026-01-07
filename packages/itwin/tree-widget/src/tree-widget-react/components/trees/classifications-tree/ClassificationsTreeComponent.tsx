@@ -27,7 +27,7 @@ interface ClassificationsTreeComponentProps
     | "getInlineActions"
     | "getMenuActions"
     | "getContextMenuActions"
-    | "getDecorations"
+    | "getTreeItemProps"
     | "hierarchyConfig"
     | "getEditingProps"
     | "treeLabel"

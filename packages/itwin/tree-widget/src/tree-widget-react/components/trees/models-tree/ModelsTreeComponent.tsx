@@ -43,7 +43,7 @@ interface ModelsTreeComponentProps
     | "getInlineActions"
     | "getMenuActions"
     | "getContextMenuActions"
-    | "getDecorations"
+    | "getTreeItemProps"
     | "getSubTreePaths"
     | "treeLabel"
   > {
