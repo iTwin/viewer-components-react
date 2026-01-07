@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { useMemo } from "react";
 import { StagePanelLocation, StagePanelSection } from "@itwin/appui-react";
 import { EC3Provider, EC3Widget } from "@itwin/ec3-widget-react";
 import { SchemaContext } from "@itwin/ecschema-metadata";
@@ -43,7 +44,7 @@ import { RepositoriesTreeComponent } from "./components/repositories-tree/Reposi
 import { useViewerOptionsContext } from "./components/ViewerOptions";
 import { unifiedSelectionStorage } from "./SelectionStorage";
 
-import type { ComponentPropsWithRef } from "react";
+import type { ComponentProps, ComponentPropsWithRef } from "react";
 import type { UiItemsProvider } from "@itwin/appui-react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ClientPrefix } from "@itwin/grouping-mapping-widget";
@@ -335,7 +336,30 @@ const configuredUiItems = new Map<string, UiItem>([
 
 function ModelsTreeWithOption(props: ComponentPropsWithRef<typeof ModelsTreeComponent>) {
   const { disableNodesSelection } = useViewerOptionsContext();
-  return <ModelsTreeComponent {...props} selectionPredicate={disableNodesSelection ? disabledSelectionPredicate : undefined} />;
+
+  // this flag would come from somewhere else
+  const isEverythingVisible = disableNodesSelection;
+  const visibilityOverrides = useMemo<ComponentProps<typeof ModelsTreeComponent>["visibilityHandlerOverrides"]>(
+    () =>
+      isEverythingVisible
+        ? {
+            getSubjectNodeVisibility: async () => ({ state: "visible" }),
+            getModelDisplayStatus: async () => ({ state: "visible" }),
+            getCategoryDisplayStatus: async () => ({ state: "visible" }),
+            getElementGroupingNodeDisplayStatus: async () => ({ state: "visible" }),
+            getElementDisplayStatus: async () => ({ state: "visible" }),
+          }
+        : undefined,
+    [isEverythingVisible],
+  );
+
+  return (
+    <ModelsTreeComponent
+      {...props}
+      selectionPredicate={disableNodesSelection ? disabledSelectionPredicate : undefined}
+      visibilityHandlerOverrides={visibilityOverrides}
+    />
+  );
 }
 
 function TreeWidgetWithOptions(props: { trees: SelectableTreeDefinition[] }) {
