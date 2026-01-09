@@ -3,7 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { StagePanelLocation, StagePanelSection } from "@itwin/appui-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { StagePanelLocation, StagePanelSection, useActiveViewport } from "@itwin/appui-react";
+import { assert } from "@itwin/core-bentley";
 import { EC3Provider, EC3Widget } from "@itwin/ec3-widget-react";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
 import { GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
@@ -18,6 +20,7 @@ import {
 import { MapLayersFormats } from "@itwin/map-layers-formats";
 import { MeasurementActionToolbar, MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
 import { OneClickLCAProvider } from "@itwin/one-click-lca-react";
+import { HierarchyNode } from "@itwin/presentation-hierarchies-react";
 import {
   AddFavoritePropertyContextMenuItem,
   AncestorsNavigationControls,
@@ -31,12 +34,16 @@ import { REPORTS_CONFIG_BASE_URL, ReportsConfigProvider, ReportsConfigWidget } f
 import {
   CategoriesTreeComponent,
   ClassificationsTreeComponent,
+  createTreeWidgetViewport,
   ExternalSourcesTreeComponent,
   IModelContentTreeComponent,
   ModelsTreeComponent,
   RenameAction,
   TreeWidget,
   TreeWidgetComponent,
+  useClassificationsTree,
+  VisibilityTree,
+  VisibilityTreeRenderer,
 } from "@itwin/tree-widget-react";
 import { CustomClassificationsTree } from "./components/custom-classifications-tree/CustomClassificationsTree";
 import { createLayersUiProvider, initializeLayers } from "./components/LayersWidget";
@@ -46,7 +53,10 @@ import { unifiedSelectionStorage } from "./SelectionStorage";
 
 import type { ComponentProps } from "react";
 import type { UiItemsProvider } from "@itwin/appui-react";
+import type { Id64Array } from "@itwin/core-bentley";
+import type { Viewport } from "@itwin/core-frontend";
 import type { ClientPrefix } from "@itwin/grouping-mapping-widget";
+import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { TreeDefinition } from "@itwin/tree-widget-react";
 
 export interface UiProvidersConfig {
@@ -170,10 +180,10 @@ const configuredUiItems = new Map<string, UiItem>([
                 getLabel: () => "Classifications tree",
                 isSearchable: true,
                 render: (props) => (
-                  <ClassificationsTreeComponent
+                  <MyClassificationsTree
                     searchText={props.searchText}
                     selectionStorage={unifiedSelectionStorage}
-                    hierarchyConfig={{ rootClassificationSystemCode: "50k classifications" }}
+                    hierarchyConfig={{ rootClassificationSystemCode: "OpenSite+ Hierarchy" }}
                     getMenuActions={() => [<RenameAction key={"renameAction"} />]}
                     getEditingProps={(node) => ({
                       onLabelChanged: (newLabel: string) => {
@@ -367,4 +377,74 @@ function TreeWidgetWithOptions(props: { trees: TreeDefinition[] }) {
 
 function disabledSelectionPredicate() {
   return false;
+}
+
+function MyClassificationsTree(props: Omit<ComponentProps<typeof ClassificationsTreeComponent>, "viewport">) {
+  const viewport = useActiveViewport();
+  if (!viewport) {
+    return null;
+  }
+  return <MyClassificationsTreeImpl {...props} viewport={viewport} />;
+}
+
+function MyClassificationsTreeImpl(props: ComponentProps<typeof MyClassificationsTree> & { viewport: Viewport }) {
+  const { classificationsTreeProps, rendererProps: classificationsTreeRendererProps } = useClassificationsTree({
+    activeView: useMemo(() => createTreeWidgetViewport(props.viewport), [props.viewport]),
+    hierarchyConfig: props.hierarchyConfig,
+    searchText: props.searchText,
+    emptyTreeContent: props.emptyTreeContent,
+  });
+  return (
+    <VisibilityTree
+      {...classificationsTreeProps}
+      imodel={props.viewport.iModel}
+      selectionStorage={props.selectionStorage}
+      hierarchyLevelSizeLimit={props.hierarchyLevelConfig?.sizeLimit}
+      selectionMode={props.selectionMode ?? "none"}
+      treeRenderer={(treeRendererProps) => (
+        <MyClassificationsTreeRenderer
+          {...treeRendererProps}
+          {...classificationsTreeRendererProps}
+          treeLabel={props.treeLabel}
+          getEditingProps={props.getEditingProps}
+          getInlineActions={props.getInlineActions}
+          getMenuActions={props.getMenuActions}
+          getContextMenuActions={props.getContextMenuActions}
+          getDecorations={props.getDecorations ?? classificationsTreeRendererProps.getDecorations}
+        />
+      )}
+    />
+  );
+}
+
+function MyClassificationsTreeRenderer(props: ComponentProps<typeof VisibilityTreeRenderer>) {
+  const { getLabel: defaultLabelFactory } = props;
+  const getLabel = useCallback(
+    (node: PresentationHierarchyNode): React.ReactElement | undefined => {
+      const defaultLabel = defaultLabelFactory ? defaultLabelFactory(node) : <>{node.label}</>;
+      // note: the tree-widget package should provide type guards for these
+      if (node.nodeData.extendedData?.type === "Classification" || node.nodeData.extendedData?.type === "ClassificationTable") {
+        assert(HierarchyNode.isInstancesNode(node.nodeData));
+        return (
+          <>
+            {defaultLabel}
+            <ClassificationElementsCount classificationOrTableIds={node.nodeData.key.instanceKeys.map((key) => key.id)} />
+          </>
+        );
+      }
+      return defaultLabel;
+    },
+    [defaultLabelFactory],
+  );
+  return <VisibilityTreeRenderer {...props} getLabel={getLabel} />;
+}
+
+// just a sample implementation...
+function ClassificationElementsCount(_props: { classificationOrTableIds: Id64Array }) {
+  const [count, setCount] = useState<number | undefined>();
+  useEffect(() => {
+    const t = setTimeout(() => setCount(Math.random() * 100), Math.random() * 2000);
+    return () => clearTimeout(t);
+  }, []);
+  return <span style={{ marginLeft: "8px", color: "gray" }}>({count ? `${count.toFixed(0)} elements` : "..."})</span>;
 }
