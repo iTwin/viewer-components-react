@@ -21,7 +21,7 @@ import { pushToMap } from "../../common/internal/Utils.js";
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import type { ECSqlQueryRow, InstanceKey } from "@itwin/presentation-shared";
+import type { InstanceKey } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId, SubCategoryId, SubjectId } from "../../common/internal/Types.js";
 import type { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
 
