@@ -3,10 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, forkJoin, from, map, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
+import { catchError, defer, EMPTY, forkJoin, from, map, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_Model, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
+import { isBeSqliteInterruptError } from "../../common/internal/UseErrorState.js";
 import { getClassesByView, joinId64Arg } from "../../common/internal/Utils.js";
 
 import type { Observable } from "rxjs";
@@ -88,6 +89,12 @@ export class CategoriesTreeIdsCache implements Disposable {
         },
       );
     }).pipe(
+      catchError((error) => {
+        if (isBeSqliteInterruptError(error)) {
+          return EMPTY;
+        }
+        throw error;
+      }),
       map((row) => {
         return { modelId: row.modelId, id: row.id };
       }),
@@ -130,6 +137,12 @@ export class CategoriesTreeIdsCache implements Disposable {
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/element-models-and-categories` },
       );
     }).pipe(
+      catchError((error) => {
+        if (isBeSqliteInterruptError(error)) {
+          return EMPTY;
+        }
+        throw error;
+      }),
       map((row) => {
         return { modelId: row.modelId, categoryId: row.categoryId };
       }),
@@ -178,6 +191,12 @@ export class CategoriesTreeIdsCache implements Disposable {
             { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/categories` },
           );
         }).pipe(
+          catchError((error) => {
+            if (isBeSqliteInterruptError(error)) {
+              return EMPTY;
+            }
+            throw error;
+          }),
           map((row) => {
             return {
               id: row.id,
@@ -210,6 +229,12 @@ export class CategoriesTreeIdsCache implements Disposable {
         { restartToken: `${this.#componentName}/${this.#componentId}/is-definition-container-supported` },
       );
     }).pipe(
+      catchError((error) => {
+        if (isBeSqliteInterruptError(error)) {
+          return EMPTY;
+        }
+        throw error;
+      }),
       toArray(),
       map((rows) => rows.length > 0),
     );
@@ -269,6 +294,12 @@ export class CategoriesTreeIdsCache implements Disposable {
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/definition-containers` },
       );
     }).pipe(
+      catchError((error) => {
+        if (isBeSqliteInterruptError(error)) {
+          return EMPTY;
+        }
+        throw error;
+      }),
       map((row) => {
         return { id: row.id, modelId: row.modelId, hasElements: !!row.hasElements };
       }),
@@ -291,6 +322,12 @@ export class CategoriesTreeIdsCache implements Disposable {
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/visible-sub-categories` },
       );
     }).pipe(
+      catchError((error) => {
+        if (isBeSqliteInterruptError(error)) {
+          return EMPTY;
+        }
+        throw error;
+      }),
       map((row) => {
         return { id: row.id, parentId: row.categoryId };
       }),
@@ -373,6 +410,12 @@ export class CategoriesTreeIdsCache implements Disposable {
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/modeled-elements` },
       );
     }).pipe(
+      catchError((error) => {
+        if (isBeSqliteInterruptError(error)) {
+          return EMPTY;
+        }
+        throw error;
+      }),
       map((row) => {
         return { modelId: row.modelId, categoryId: row.categoryId, modeledElementId: row.modeledElementId, rootCategoryId: row.rootCategoryId };
       }),

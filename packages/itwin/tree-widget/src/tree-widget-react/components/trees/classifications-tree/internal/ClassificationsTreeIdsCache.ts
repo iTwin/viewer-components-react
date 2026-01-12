@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, forkJoin, from, map, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
+import { catchError, defer, EMPTY, forkJoin, from, map, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import {
   CLASS_NAME_Classification,
@@ -17,6 +17,7 @@ import {
   CLASS_NAME_SubCategory,
 } from "../../common/internal/ClassNameDefinitions.js";
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
+import { isBeSqliteInterruptError } from "../../common/internal/UseErrorState.js";
 import { joinId64Arg } from "../../common/internal/Utils.js";
 
 import type { Observable } from "rxjs";
@@ -82,6 +83,12 @@ export class ClassificationsTreeIdsCache implements Disposable {
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/visible-sub-categories` },
       );
     }).pipe(
+      catchError((error) => {
+        if (isBeSqliteInterruptError(error)) {
+          return EMPTY;
+        }
+        throw error;
+      }),
       map((row) => {
         return { id: row.id, parentId: row.categoryId };
       }),
@@ -136,6 +143,12 @@ export class ClassificationsTreeIdsCache implements Disposable {
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/element-models-and-categories` },
       );
     }).pipe(
+      catchError((error) => {
+        if (isBeSqliteInterruptError(error)) {
+          return EMPTY;
+        }
+        throw error;
+      }),
       map((row) => {
         return { modelId: row.modelId, categoryId: row.categoryId, type: row.type };
       }),
@@ -214,6 +227,12 @@ export class ClassificationsTreeIdsCache implements Disposable {
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/modeled-elements` },
       );
     }).pipe(
+      catchError((error) => {
+        if (isBeSqliteInterruptError(error)) {
+          return EMPTY;
+        }
+        throw error;
+      }),
       map((row) => {
         return { modelId: row.modelId, categoryId: row.categoryId, modeledElementId: row.modeledElementId, rootCategoryId: row.rootCategoryId };
       }),
@@ -376,6 +395,12 @@ export class ClassificationsTreeIdsCache implements Disposable {
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/classifications` },
       );
     }).pipe(
+      catchError((error) => {
+        if (isBeSqliteInterruptError(error)) {
+          return EMPTY;
+        }
+        throw error;
+      }),
       map((row) => {
         return {
           id: row.id,
@@ -527,6 +552,12 @@ export class ClassificationsTreeIdsCache implements Disposable {
         },
       );
     }).pipe(
+      catchError((error) => {
+        if (isBeSqliteInterruptError(error)) {
+          return EMPTY;
+        }
+        throw error;
+      }),
       map((row) => {
         return { modelId: row.modelId, id: row.id, categoryId: row.categoryId };
       }),

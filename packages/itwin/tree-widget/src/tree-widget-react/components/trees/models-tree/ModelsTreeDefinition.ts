@@ -5,8 +5,10 @@
 
 import {
   bufferCount,
+  catchError,
   defaultIfEmpty,
   defer,
+  EMPTY,
   firstValueFrom,
   forkJoin,
   from,
@@ -43,6 +45,7 @@ import {
   CLASS_NAME_Subject,
 } from "../common/internal/ClassNameDefinitions.js";
 import { collect } from "../common/internal/Rxjs.js";
+import { isBeSqliteInterruptError } from "../common/internal/UseErrorState.js";
 import {
   createIdsSelector,
   fromWithRelease,
@@ -704,6 +707,12 @@ function createGeometricElementInstanceKeyPaths(props: {
       { rowFormat: "Indexes", limit: "unbounded", restartToken: `${componentName}/${componentId}/geometric-element-paths/${chunkIndex}` },
     );
   }).pipe(
+    catchError((error) => {
+      if (isBeSqliteInterruptError(error)) {
+        return EMPTY;
+      }
+      throw error;
+    }),
     releaseMainThreadOnItemsCount(300),
     map((row) => parseQueryRow(row, groupInfos, separator, hierarchyConfig.elementClassSpecification)),
     mergeMap(({ modelId, elementHierarchyPath, groupingNode }) =>
@@ -892,6 +901,12 @@ function createInstanceKeyPathsFromInstanceLabelObs(
         restartToken: `${props.componentName}/${props.componentId}/filter-by-label`,
         limit,
       });
+    }),
+    catchError((error) => {
+      if (isBeSqliteInterruptError(error)) {
+        return EMPTY;
+      }
+      throw error;
     }),
     map((row) => ({ className: row[0], id: row[1] })),
     toArray(),

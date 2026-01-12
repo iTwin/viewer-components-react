@@ -11,6 +11,7 @@ import {
   CLASS_NAME_Model,
   CLASS_NAME_Subject,
 } from "../../common/internal/ClassNameDefinitions.js";
+import { isBeSqliteInterruptError } from "../../common/internal/UseErrorState.js";
 import { pushToMap } from "../../common/internal/Utils.js";
 
 import type { GuidString, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
@@ -44,46 +45,58 @@ export class IModelContentTreeIdsCache {
   }
 
   private async *querySubjects(): AsyncIterableIterator<{ id: SubjectId; parentId?: SubjectId; targetPartitionId?: ModelId; hideInHierarchy: boolean }> {
-    const subjectsQuery = `
-      SELECT
-        s.ECInstanceId id,
-        s.Parent.Id parentId,
-        (
-          SELECT m.ECInstanceId
-          FROM ${CLASS_NAME_Model} m
-          WHERE
-            m.ECInstanceId = HexToId(json_extract(s.JsonProperties, '$.Subject.Model.TargetPartition'))
-            AND NOT m.IsPrivate
-        ) targetPartitionId,
-        CASE
-          WHEN (
-            json_extract(s.JsonProperties, '$.Subject.Job.Bridge') IS NOT NULL
-            OR json_extract(s.JsonProperties, '$.Subject.Model.Type') = 'Hierarchy'
-          ) THEN 1
-          ELSE 0
-        END hideInHierarchy
-      FROM ${CLASS_NAME_Subject} s
-    `;
-    for await (const row of this.#queryExecutor.createQueryReader(
-      { ecsql: subjectsQuery },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/subjects` },
-    )) {
-      yield { id: row.id, parentId: row.parentId, targetPartitionId: row.targetPartitionId, hideInHierarchy: !!row.hideInHierarchy };
+    try {
+      const subjectsQuery = `
+        SELECT
+          s.ECInstanceId id,
+          s.Parent.Id parentId,
+          (
+            SELECT m.ECInstanceId
+            FROM ${CLASS_NAME_Model} m
+            WHERE
+              m.ECInstanceId = HexToId(json_extract(s.JsonProperties, '$.Subject.Model.TargetPartition'))
+              AND NOT m.IsPrivate
+          ) targetPartitionId,
+          CASE
+            WHEN (
+              json_extract(s.JsonProperties, '$.Subject.Job.Bridge') IS NOT NULL
+              OR json_extract(s.JsonProperties, '$.Subject.Model.Type') = 'Hierarchy'
+            ) THEN 1
+            ELSE 0
+          END hideInHierarchy
+        FROM ${CLASS_NAME_Subject} s
+      `;
+      for await (const row of this.#queryExecutor.createQueryReader(
+        { ecsql: subjectsQuery },
+        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/subjects` },
+      )) {
+        yield { id: row.id, parentId: row.parentId, targetPartitionId: row.targetPartitionId, hideInHierarchy: !!row.hideInHierarchy };
+      }
+    } catch (error) {
+      if (!isBeSqliteInterruptError(error)) {
+        throw error;
+      }
     }
   }
 
   private async *queryModels(): AsyncIterableIterator<{ id: ModelId; parentId: SubjectId }> {
-    const modelsQuery = `
-      SELECT p.ECInstanceId id, p.Parent.Id parentId
-      FROM ${CLASS_NAME_InformationPartitionElement} p
-      INNER JOIN ${CLASS_NAME_Model} m ON m.ModeledElement.Id = p.ECInstanceId
-      WHERE NOT m.IsPrivate
-    `;
-    for await (const row of this.#queryExecutor.createQueryReader(
-      { ecsql: modelsQuery },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/models` },
-    )) {
-      yield { id: row.id, parentId: row.parentId };
+    try {
+      const modelsQuery = `
+        SELECT p.ECInstanceId id, p.Parent.Id parentId
+        FROM ${CLASS_NAME_InformationPartitionElement} p
+        INNER JOIN ${CLASS_NAME_Model} m ON m.ModeledElement.Id = p.ECInstanceId
+        WHERE NOT m.IsPrivate
+      `;
+      for await (const row of this.#queryExecutor.createQueryReader(
+        { ecsql: modelsQuery },
+        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/models` },
+      )) {
+        yield { id: row.id, parentId: row.parentId };
+      }
+    } catch (error) {
+      if (!isBeSqliteInterruptError(error)) {
+        throw error;
+      }
     }
   }
 
@@ -200,22 +213,28 @@ export class IModelContentTreeIdsCache {
   }
 
   private async *queryModelCategories(): AsyncIterableIterator<{ modelId: Id64String; categoryId: Id64String }> {
-    const query = `
-      SELECT Model.Id modelId, Category.Id categoryId
-      FROM ${CLASS_NAME_GeometricElement3d}
-      WHERE Parent.Id IS NULL
-      GROUP BY Model.Id, Category.Id
-      UNION ALL
-      SELECT Model.Id modelId, Category.Id categoryId
-      FROM ${CLASS_NAME_GeometricElement2d}
-      WHERE Parent.Id IS NULL
-      GROUP BY Model.Id, Category.Id
-    `;
-    for await (const row of this.#queryExecutor.createQueryReader(
-      { ecsql: query },
-      { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/model-categories` },
-    )) {
-      yield { modelId: row.modelId, categoryId: row.categoryId };
+    try {
+      const query = `
+        SELECT Model.Id modelId, Category.Id categoryId
+        FROM ${CLASS_NAME_GeometricElement3d}
+        WHERE Parent.Id IS NULL
+        GROUP BY Model.Id, Category.Id
+        UNION ALL
+        SELECT Model.Id modelId, Category.Id categoryId
+        FROM ${CLASS_NAME_GeometricElement2d}
+        WHERE Parent.Id IS NULL
+        GROUP BY Model.Id, Category.Id
+      `;
+      for await (const row of this.#queryExecutor.createQueryReader(
+        { ecsql: query },
+        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/model-categories` },
+      )) {
+        yield { modelId: row.modelId, categoryId: row.categoryId };
+      }
+    } catch (error) {
+      if (!isBeSqliteInterruptError(error)) {
+        throw error;
+      }
     }
   }
 

@@ -4,22 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useRef, useState } from "react";
-import {
-  asyncScheduler,
-  defer,
-  distinct,
-  EMPTY,
-  from,
-  lastValueFrom,
-  mergeMap,
-  observeOn,
-  onErrorResumeNextWith,
-  Subject,
-  takeUntil,
-  tap,
-  throttleTime,
-} from "rxjs";
+import { asyncScheduler, catchError, defer, distinct, EMPTY, from, lastValueFrom, mergeMap, observeOn, Subject, takeUntil, tap, throttleTime } from "rxjs";
 import { createTooltip } from "./internal/Tooltip.js";
+import { useErrorState } from "./internal/UseErrorState.js";
 import { useTelemetryContext } from "./UseTelemetryContext.js";
 
 import type { MutableRefObject } from "react";
@@ -65,6 +52,7 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
     triggerRefresh: () => {},
   });
   const { onFeatureUsed } = useTelemetryContext();
+  const setErrorState = useErrorState();
 
   useEffect(() => {
     visibilityStatusMap.current.clear();
@@ -109,7 +97,10 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
               },
             }),
             takeUntil(visibilityChanged),
-            onErrorResumeNextWith(EMPTY),
+            catchError((error) => {
+              setErrorState(error);
+              return EMPTY;
+            }),
           ),
         ),
         throttleTime(100, undefined, { leading: false, trailing: true }),
@@ -124,7 +115,7 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
       onFeatureUsed({ featureId: "visibility-change", reportInteraction: true });
       // visible should become hidden, partial and hidden should become visible TODO: redo for clarity
       const on = visibilityState === "visible" ? false : true;
-      void handler.changeVisibility(node.nodeData, on);
+      void handler.changeVisibility(node.nodeData, on).catch((error) => setErrorState(error));
       const entry = visibilityStatusMap.current.get(node.id);
       if (!entry) {
         return;
@@ -156,7 +147,7 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
       removeListener();
       handler[Symbol.dispose]();
     };
-  }, [visibilityHandlerFactory, onFeatureUsed]);
+  }, [visibilityHandlerFactory, onFeatureUsed, setErrorState]);
 
   return state;
 }

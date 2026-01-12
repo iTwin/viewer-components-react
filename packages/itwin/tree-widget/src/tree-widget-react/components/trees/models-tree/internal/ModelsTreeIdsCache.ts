@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, filter, forkJoin, from, map, mergeAll, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
+import { catchError, defer, EMPTY, filter, forkJoin, from, map, mergeAll, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
 import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import {
@@ -15,12 +15,13 @@ import {
   CLASS_NAME_Subject,
 } from "../../common/internal/ClassNameDefinitions.js";
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
+import { isBeSqliteInterruptError } from "../../common/internal/UseErrorState.js";
 import { pushToMap } from "../../common/internal/Utils.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import type { InstanceKey } from "@itwin/presentation-shared";
+import type { ECSqlQueryRow, InstanceKey } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId, SubCategoryId, SubjectId } from "../../common/internal/Types.js";
 import type { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
 
@@ -89,6 +90,12 @@ export class ModelsTreeIdsCache implements Disposable {
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/visible-sub-categories` },
       );
     }).pipe(
+      catchError((error) => {
+        if (isBeSqliteInterruptError(error)) {
+          return EMPTY;
+        }
+        throw error;
+      }),
       map((row) => {
         return { id: row.id, parentId: row.categoryId };
       }),
@@ -142,6 +149,12 @@ export class ModelsTreeIdsCache implements Disposable {
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/subjects` },
       );
     }).pipe(
+      catchError((error) => {
+        if (isBeSqliteInterruptError(error)) {
+          return EMPTY;
+        }
+        throw error;
+      }),
       map((row) => {
         return { id: row.id, parentId: row.parentId, targetPartitionId: row.targetPartitionId, hideInHierarchy: !!row.hideInHierarchy };
       }),
@@ -149,7 +162,7 @@ export class ModelsTreeIdsCache implements Disposable {
   }
 
   private queryModels(): Observable<{ id: ModelId; parentId: SubjectId }> {
-    return defer(() => {
+    return defer(async () => {
       const modelsQuery = `
         SELECT p.ECInstanceId id, p.Parent.Id parentId
         FROM ${CLASS_NAME_InformationPartitionElement} p
@@ -158,11 +171,26 @@ export class ModelsTreeIdsCache implements Disposable {
           NOT m.IsPrivate
           ${this.#hierarchyConfig.showEmptyModels ? "" : `AND EXISTS (SELECT 1 FROM ${this.#hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)`}
       `;
-      return this.#queryExecutor.createQueryReader(
-        { ecsql: modelsQuery },
-        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/models` },
-      );
+      const fn = async () => {
+        const result: ECSqlQueryRow[] = [];
+        for await (const row of this.#queryExecutor.createQueryReader(
+          { ecsql: modelsQuery },
+          { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/models` },
+        )) {
+          result.push(row);
+        }
+        return result;
+      };
+      const r = await Promise.all([fn(), fn()]);
+      return r;
     }).pipe(
+      mergeMap((r) => r[0]),
+      catchError((error) => {
+        if (isBeSqliteInterruptError(error)) {
+          return EMPTY;
+        }
+        throw error;
+      }),
       map((row) => {
         return { id: row.id, parentId: row.parentId };
       }),
@@ -361,6 +389,12 @@ export class ModelsTreeIdsCache implements Disposable {
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/model-categories` },
       );
     }).pipe(
+      catchError((error) => {
+        if (isBeSqliteInterruptError(error)) {
+          return EMPTY;
+        }
+        throw error;
+      }),
       map((row) => {
         return { modelId: row.modelId, categoryId: row.categoryId, isModelPrivate: !!row.isModelPrivate, isRootElementCategory: !!row.isRootElementCategory };
       }),
@@ -385,6 +419,12 @@ export class ModelsTreeIdsCache implements Disposable {
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/modeled-elements` },
       );
     }).pipe(
+      catchError((error) => {
+        if (isBeSqliteInterruptError(error)) {
+          return EMPTY;
+        }
+        throw error;
+      }),
       map((row) => {
         return { modelId: row.modelId, categoryId: row.categoryId, modeledElementId: row.modeledElementId };
       }),

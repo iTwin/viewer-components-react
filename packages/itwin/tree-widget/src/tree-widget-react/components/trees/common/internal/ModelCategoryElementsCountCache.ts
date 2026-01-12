@@ -3,8 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, bufferTime, defer, filter, from, map, mergeAll, mergeMap, reduce, ReplaySubject, Subject, take, toArray } from "rxjs";
+import { bufferCount, bufferTime, catchError, defer, EMPTY, filter, from, map, mergeAll, mergeMap, reduce, ReplaySubject, Subject, take, toArray } from "rxjs";
 import { assert, Guid } from "@itwin/core-bentley";
+import { isBeSqliteInterruptError } from "./UseErrorState.js";
 import { releaseMainThreadOnItemsCount } from "./Utils.js";
 
 import type { Observable, Subscription } from "rxjs";
@@ -106,6 +107,13 @@ export class ModelCategoryElementsCountCache implements Disposable {
               restartToken: `${this.#componentName}/${this.#componentId}/category-element-counts/${Guid.createValue()}`,
             },
           ),
+        ).pipe(
+          catchError((error) => {
+            if (isBeSqliteInterruptError(error)) {
+              return EMPTY;
+            }
+            throw error;
+          }),
         ),
       ),
       releaseMainThreadOnItemsCount(500),

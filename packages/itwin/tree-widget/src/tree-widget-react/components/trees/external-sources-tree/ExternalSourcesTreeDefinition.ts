@@ -6,6 +6,7 @@
 import { Guid } from "@itwin/core-bentley";
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
+import { isBeSqliteInterruptError } from "../common/internal/UseErrorState.js";
 
 import type { GuidString } from "@itwin/core-bentley";
 import type {
@@ -302,18 +303,25 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
   }
 
   private async isSupported() {
-    const query = `
-      SELECT 1
-      FROM ECDbMeta.ECSchemaDef
-      WHERE Name = 'BisCore' AND (VersionMajor > 1 OR (VersionMajor = 1 AND VersionMinor > 12))
-    `;
+    try {
+      const query = `
+        SELECT 1
+        FROM ECDbMeta.ECSchemaDef
+        WHERE Name = 'BisCore' AND (VersionMajor > 1 OR (VersionMajor = 1 AND VersionMinor > 12))
+      `;
 
-    for await (const _row of this.#queryExecutor.createQueryReader(
-      { ecsql: query },
-      { restartToken: `${this.#componentName}/${this.#componentId}/is-external-source-supported` },
-    )) {
-      return true;
+      for await (const _row of this.#queryExecutor.createQueryReader(
+        { ecsql: query },
+        { restartToken: `${this.#componentName}/${this.#componentId}/is-external-source-supported` },
+      )) {
+        return true;
+      }
+      return false;
+    } catch (error) {
+      if (!isBeSqliteInterruptError(error)) {
+        throw error;
+      }
+      return false;
     }
-    return false;
   }
 }
