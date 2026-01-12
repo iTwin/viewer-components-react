@@ -72,7 +72,7 @@
   },
   "dependencies": {
     "@itwin/presentation-core-interop": "^1.4.0-alpha.4",
-    "@itwin/presentation-hierarchies": "^2.0.0-alpha.8",
+    "@itwin/presentation-hierarchies": "^2.0.0-alpha.9",
     "@itwin/presentation-hierarchies-react": "2.0.0-alpha.48",
     "@itwin/presentation-shared": "^2.0.0-alpha.5",
     "@itwin/unified-selection": "^1.6.2",

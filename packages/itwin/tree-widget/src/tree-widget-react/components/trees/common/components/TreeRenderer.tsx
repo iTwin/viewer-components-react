@@ -8,13 +8,13 @@ import { FilterAction } from "@itwin/presentation-hierarchies-react";
 import { BaseTreeRenderer } from "./BaseTreeRenderer.js";
 
 import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
-import type { CallbacksWithCommonProps } from "./Tree.js";
+import type { CallbacksWithCommonTreeRendererProps } from "./Tree.js";
 
 /** @beta */
 export type TreeRendererProps = BaseTreeRendererProps;
 
 /** @beta */
-export type ExtendedTreeRendererProps = CallbacksWithCommonProps<
+export type ExtendedTreeRendererProps = CallbacksWithCommonTreeRendererProps<
   TreeRendererProps,
   "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps"
 >;

@@ -65,7 +65,8 @@ export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getSearchPath
 /** @beta */
 export type CommonTreeRendererProps = Pick<BaseTreeRendererProps, "onFilterClick" | "selectionMode" | "getTreeItemProps"> & TreeRendererProps;
 
-export type CallbacksWithCommonProps<T extends BaseTreeRendererProps, K extends keyof T> = Omit<T, K> & {
+/** @beta */
+export type CallbacksWithCommonTreeRendererProps<T extends BaseTreeRendererProps, K extends keyof T> = Omit<T, K> & {
   [P in keyof Pick<T, K>]?: T[P] extends ((props: any) => any) | undefined
     ? (args: Parameters<NonNullable<T[P]>>[0], treeRendererProps: CommonTreeRendererProps) => ReturnType<NonNullable<T[P]>>
     : never;

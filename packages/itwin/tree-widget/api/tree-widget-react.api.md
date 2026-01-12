@@ -77,8 +77,8 @@ interface BaseTreeVisibilityHandlerOverrides {
     }) => Promise<VisibilityStatus>>;
 }
 
-// @public (undocumented)
-type CallbacksWithCommonProps<T extends BaseTreeRendererProps, K extends keyof T> = Omit<T, K> & {
+// @beta (undocumented)
+type CallbacksWithCommonTreeRendererProps<T extends BaseTreeRendererProps, K extends keyof T> = Omit<T, K> & {
     [P in keyof Pick<T, K>]?: T[P] extends ((props: any) => any) | undefined ? (args: Parameters<NonNullable<T[P]>>[0], treeRendererProps: CommonTreeRendererProps) => ReturnType<NonNullable<T[P]>> : never;
 };
 
@@ -202,10 +202,10 @@ interface ElementsGroupInfo {
 }
 
 // @beta (undocumented)
-type ExtendedTreeRendererProps = CallbacksWithCommonProps<TreeRendererProps_2, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps">;
+type ExtendedTreeRendererProps = CallbacksWithCommonTreeRendererProps<TreeRendererProps_2, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps">;
 
 // @beta (undocumented)
-type ExtendedVisibilityTreeRendererProps = CallbacksWithCommonProps<VisibilityTreeRendererProps, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps">;
+type ExtendedVisibilityTreeRendererProps = CallbacksWithCommonTreeRendererProps<VisibilityTreeRendererProps, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps">;
 
 // @beta
 export const ExternalSourcesTreeComponent: {

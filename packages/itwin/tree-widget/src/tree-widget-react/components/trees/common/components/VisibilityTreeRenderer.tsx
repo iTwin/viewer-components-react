@@ -10,14 +10,14 @@ import { VisibilityAction, VisibilityContextProvider } from "./TreeNodeVisibilit
 import { useVisibilityButtonHandler } from "./UseVisibilityButtonHandler.js";
 
 import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
-import type { CallbacksWithCommonProps } from "./Tree.js";
+import type { CallbacksWithCommonTreeRendererProps } from "./Tree.js";
 import type { VisibilityContext } from "./TreeNodeVisibilityButton.js";
 
 /** @beta */
 export type VisibilityTreeRendererProps = BaseTreeRendererProps & VisibilityContext;
 
 /** @beta */
-export type ExtendedVisibilityTreeRendererProps = CallbacksWithCommonProps<
+export type ExtendedVisibilityTreeRendererProps = CallbacksWithCommonTreeRendererProps<
   VisibilityTreeRendererProps,
   "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps"
 >;
