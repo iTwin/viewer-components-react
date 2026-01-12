@@ -117,7 +117,7 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
       const on = visibilityState === "visible" ? false : true;
       void (async () => {
         try {
-          await handler.changeVisibility(node.nodeData, on)
+          await handler.changeVisibility(node.nodeData, on);
         } catch (error) {
           setErrorState(error);
         }
