@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { concat, defer, EMPTY, from, map, merge, mergeMap, of } from "rxjs";
-import { assert, Id64 } from "@itwin/core-bentley";
+import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
 import { HierarchyVisibilityHandlerImpl } from "../../../common/internal/useTreeHooks/UseCachedVisibility.js";
@@ -393,6 +393,6 @@ export function createModelsTreeVisibilityHandler(props: {
       });
     },
     viewport: props.viewport,
-    componentId: "Test",
+    componentId: Guid.createValue(),
   });
 }

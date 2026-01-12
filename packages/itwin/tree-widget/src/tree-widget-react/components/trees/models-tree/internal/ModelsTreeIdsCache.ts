@@ -162,7 +162,7 @@ export class ModelsTreeIdsCache implements Disposable {
   }
 
   private queryModels(): Observable<{ id: ModelId; parentId: SubjectId }> {
-    return defer(async () => {
+    return defer(() => {
       const modelsQuery = `
         SELECT p.ECInstanceId id, p.Parent.Id parentId
         FROM ${CLASS_NAME_InformationPartitionElement} p
@@ -171,20 +171,11 @@ export class ModelsTreeIdsCache implements Disposable {
           NOT m.IsPrivate
           ${this.#hierarchyConfig.showEmptyModels ? "" : `AND EXISTS (SELECT 1 FROM ${this.#hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)`}
       `;
-      const fn = async () => {
-        const result: ECSqlQueryRow[] = [];
-        for await (const row of this.#queryExecutor.createQueryReader(
-          { ecsql: modelsQuery },
-          { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/models` },
-        )) {
-          result.push(row);
-        }
-        return result;
-      };
-      const r = await Promise.all([fn(), fn()]);
-      return r;
+      return this.#queryExecutor.createQueryReader(
+        { ecsql: modelsQuery },
+        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/models` },
+      );
     }).pipe(
-      mergeMap((r) => r[0]),
       catchError((error) => {
         if (isBeSqliteInterruptError(error)) {
           return EMPTY;

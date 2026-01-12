@@ -115,7 +115,13 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
       onFeatureUsed({ featureId: "visibility-change", reportInteraction: true });
       // visible should become hidden, partial and hidden should become visible TODO: redo for clarity
       const on = visibilityState === "visible" ? false : true;
-      void handler.changeVisibility(node.nodeData, on).catch((error) => setErrorState(error));
+      void (async () => {
+        try {
+          await handler.changeVisibility(node.nodeData, on)
+        } catch (error) {
+          setErrorState(error);
+        }
+      })();
       const entry = visibilityStatusMap.current.get(node.id);
       if (!entry) {
         return;
