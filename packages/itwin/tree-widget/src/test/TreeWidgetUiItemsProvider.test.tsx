@@ -29,7 +29,7 @@ describe("createTreeWidget", () => {
     mock.module("@itwin/appui-react", {
       namedExports: {
         ...appuiModule,
-        useTransientState: () => [undefined, () => {}],
+        useTransientState: () => {},
       },
     });
     await appuiModule.UiFramework.initialize();
