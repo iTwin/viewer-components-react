@@ -6,7 +6,6 @@
 import { Guid } from "@itwin/core-bentley";
 import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
-import { isBeSqliteInterruptError } from "../common/internal/UseErrorState.js";
 
 import type { GuidString } from "@itwin/core-bentley";
 import type {
