@@ -85,7 +85,6 @@ export type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonP
 /** @public */
 export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
   const componentId = useGuid();
-  const setErrorState = useErrorState();
   return (
     <IconButton
       variant={"ghost"}
@@ -98,7 +97,7 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
           viewport: props.viewport,
           categories: props.categories.map((category) => category.categoryId),
           componentId,
-        }).catch((error) => setErrorState(error));
+        }).catch(() => {});
       }}
       icon={visibilityShowSvg}
     />

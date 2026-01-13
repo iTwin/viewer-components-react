@@ -19,7 +19,6 @@ import {
   CLASS_NAME_GeometricModel3d,
   CLASS_NAME_InformationPartitionElement,
 } from "../common/internal/ClassNameDefinitions.js";
-import { useErrorState } from "../common/internal/UseErrorState.js";
 import { useGuid } from "../common/internal/useGuid.js";
 import { areAllModelsVisible, hideAllModels, invertAllModels, showAll, toggleModels } from "../common/Utils.js";
 
@@ -124,7 +123,6 @@ export type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) =>
 /** @public */
 export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
   const componentId = useGuid();
-  const setErrorState = useErrorState();
   return (
     <IconButton
       variant={"ghost"}
@@ -136,7 +134,7 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
           models: props.models.map((model) => model.id),
           viewport: props.viewport,
           componentId,
-        }).catch((error) => setErrorState(error));
+        }).catch(() => {});
       }}
       icon={visibilityShowSvg}
     />
