@@ -8,12 +8,15 @@ import { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRende
 import { useClassificationsTree } from "./UseClassificationsTree.js";
 
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
-import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
+import type { ExtendedVisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { UseClassificationsTreeProps } from "./UseClassificationsTree.js";
 
 /** @alpha */
-export type ClassificationsTreeProps = Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
-  Pick<VisibilityTreeRendererProps, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getDecorations" | "getEditingProps" | "treeLabel"> &
+export type ClassificationsTreeProps = Pick<
+  ExtendedVisibilityTreeRendererProps,
+  "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "getEditingProps" | "treeLabel"
+> &
+  Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
   UseClassificationsTreeProps & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
@@ -29,7 +32,7 @@ export function ClassificationsTree({
   hierarchyLevelConfig,
   selectionMode,
   emptyTreeContent,
-  getDecorations,
+  getTreeItemProps,
   getInlineActions,
   getMenuActions,
   getContextMenuActions,
@@ -37,16 +40,17 @@ export function ClassificationsTree({
   searchText,
   treeLabel,
 }: ClassificationsTreeProps) {
-  const { classificationsTreeProps, rendererProps } = useClassificationsTree({
+  const classificationsTree = useClassificationsTree({
     activeView,
     hierarchyConfig,
     emptyTreeContent,
     searchText,
+    getTreeItemProps,
   });
 
   return (
     <VisibilityTree
-      {...classificationsTreeProps}
+      {...classificationsTree.treeProps}
       imodel={imodel}
       selectionStorage={selectionStorage}
       hierarchyLevelSizeLimit={hierarchyLevelConfig?.sizeLimit}
@@ -54,13 +58,12 @@ export function ClassificationsTree({
       treeRenderer={(treeProps) => (
         <VisibilityTreeRenderer
           {...treeProps}
-          {...rendererProps}
           treeLabel={treeLabel}
           getEditingProps={getEditingProps}
-          getInlineActions={getInlineActions}
-          getMenuActions={getMenuActions}
-          getContextMenuActions={getContextMenuActions}
-          getDecorations={getDecorations ?? rendererProps.getDecorations}
+          getInlineActions={getInlineActions ? (node) => getInlineActions(node, treeProps) : undefined}
+          getMenuActions={getMenuActions ? (node) => getMenuActions(node, treeProps) : undefined}
+          getContextMenuActions={getContextMenuActions ? (node) => getContextMenuActions(node, treeProps) : undefined}
+          getTreeItemProps={(node) => classificationsTree.getTreeItemProps(node, treeProps)}
         />
       )}
     />

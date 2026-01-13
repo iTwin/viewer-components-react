@@ -8,12 +8,15 @@ import { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRende
 import { useModelsTree } from "./UseModelsTree.js";
 
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
-import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
+import type { ExtendedVisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { UseModelsTreeProps } from "./UseModelsTree.js";
 
 /** @beta */
-export type ModelsTreeProps = Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
-  Pick<VisibilityTreeRendererProps, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getDecorations" | "treeLabel"> &
+export type ModelsTreeProps = Pick<
+  ExtendedVisibilityTreeRendererProps,
+  "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "treeLabel"
+> &
+  Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> &
   UseModelsTreeProps & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
@@ -32,16 +35,16 @@ export function ModelsTree({
   selectionPredicate,
   visibilityHandlerOverrides,
   getSearchPaths,
-  getDecorations,
   onModelsFiltered,
   getInlineActions,
   getMenuActions,
   getContextMenuActions,
   emptyTreeContent,
   getSubTreePaths,
+  getTreeItemProps,
   treeLabel,
 }: ModelsTreeProps) {
-  const { modelsTreeProps, rendererProps } = useModelsTree({
+  const modelsTree = useModelsTree({
     activeView,
     searchText,
     hierarchyConfig,
@@ -51,11 +54,12 @@ export function ModelsTree({
     selectionPredicate,
     emptyTreeContent,
     getSubTreePaths,
+    getTreeItemProps,
   });
 
   return (
     <VisibilityTree
-      {...modelsTreeProps}
+      {...modelsTree.treeProps}
       imodel={imodel}
       selectionStorage={selectionStorage}
       hierarchyLevelSizeLimit={hierarchyLevelConfig?.sizeLimit}
@@ -63,12 +67,11 @@ export function ModelsTree({
       treeRenderer={(treeProps) => (
         <VisibilityTreeRenderer
           {...treeProps}
-          {...rendererProps}
           treeLabel={treeLabel}
-          getInlineActions={getInlineActions}
-          getMenuActions={getMenuActions}
-          getContextMenuActions={getContextMenuActions}
-          getDecorations={getDecorations ?? rendererProps.getDecorations}
+          getInlineActions={getInlineActions ? (node) => getInlineActions(node, treeProps) : undefined}
+          getMenuActions={getMenuActions ? (node) => getMenuActions(node, treeProps) : undefined}
+          getContextMenuActions={getContextMenuActions ? (node) => getContextMenuActions(node, treeProps) : undefined}
+          getTreeItemProps={(node) => modelsTree.getTreeItemProps(node, treeProps)}
         />
       )}
     />

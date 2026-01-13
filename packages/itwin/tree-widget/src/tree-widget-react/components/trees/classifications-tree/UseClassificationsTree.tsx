@@ -21,7 +21,7 @@ import { createClassificationsSearchResultsTree } from "./internal/visibility/Se
 import type { ReactNode } from "react";
 import type { GuidString } from "@itwin/core-bentley";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
-import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
+import type { ExtendedVisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { CreateSearchResultsTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import type { SearchResultsTree } from "../common/internal/visibility/BaseSearchResultsTree.js";
@@ -36,22 +36,29 @@ export interface UseClassificationsTreeProps {
   hierarchyConfig: ClassificationsTreeHierarchyConfiguration;
   emptyTreeContent?: ReactNode;
   searchText?: string;
+  getTreeItemProps?: ExtendedVisibilityTreeRendererProps["getTreeItemProps"];
 }
 
 /** @alpha */
 interface UseClassificationsTreeResult {
-  classificationsTreeProps: Pick<
+  treeProps: Pick<
     VisibilityTreeProps,
     "treeName" | "getHierarchyDefinition" | "visibilityHandlerFactory" | "getSearchPaths" | "emptyTreeContent" | "highlightText"
   >;
-  rendererProps: Required<Pick<VisibilityTreeRendererProps, "getDecorations">>;
+  getTreeItemProps: Required<ExtendedVisibilityTreeRendererProps>["getTreeItemProps"];
 }
 
 /**
  * Custom hook to create and manage state for the categories tree.
  * @alpha
  */
-export function useClassificationsTree({ activeView, emptyTreeContent, searchText, ...rest }: UseClassificationsTreeProps): UseClassificationsTreeResult {
+export function useClassificationsTree({
+  activeView,
+  emptyTreeContent,
+  searchText,
+  getTreeItemProps,
+  ...rest
+}: UseClassificationsTreeProps): UseClassificationsTreeResult {
   const hierarchyConfig = useMemo(
     () => ({ ...rest.hierarchyConfig }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -90,7 +97,7 @@ export function useClassificationsTree({ activeView, emptyTreeContent, searchTex
   });
 
   return {
-    classificationsTreeProps: {
+    treeProps: {
       treeName: ClassificationsTreeComponent.id,
       getHierarchyDefinition,
       visibilityHandlerFactory,
@@ -98,9 +105,10 @@ export function useClassificationsTree({ activeView, emptyTreeContent, searchTex
       emptyTreeContent: useMemo(() => getEmptyTreeContentComponent(searchText, searchError, emptyTreeContent), [searchText, searchError, emptyTreeContent]),
       highlightText: searchText,
     },
-    rendererProps: {
-      getDecorations: useCallback((node) => <ClassificationsTreeIcon node={node} />, []),
-    },
+    getTreeItemProps: (node, rendererProps) => ({
+      decorations: <ClassificationsTreeIcon node={node} />,
+      ...getTreeItemProps?.(node, rendererProps),
+    }),
   };
 }
 

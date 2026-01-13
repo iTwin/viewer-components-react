@@ -27,7 +27,7 @@ import type { GuidString, Id64Array } from "@itwin/core-bentley";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
-import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
+import type { ExtendedVisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
 import type { CreateSearchResultsTreeProps, CreateTreeSpecificVisibilityHandlerProps } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import type { CreateCacheProps } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import type { SearchResultsTree } from "../common/internal/visibility/BaseSearchResultsTree.js";
@@ -43,15 +43,16 @@ export interface UseCategoriesTreeProps {
   searchText?: string;
   emptyTreeContent?: ReactNode;
   hierarchyConfig?: Partial<CategoriesTreeHierarchyConfiguration>;
+  getTreeItemProps?: ExtendedVisibilityTreeRendererProps["getTreeItemProps"];
 }
 
 /** @beta */
 interface UseCategoriesTreeResult {
-  categoriesTreeProps: Pick<
+  treeProps: Pick<
     VisibilityTreeProps,
     "treeName" | "getHierarchyDefinition" | "getSearchPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent"
   >;
-  rendererProps: Required<Pick<VisibilityTreeRendererProps, "getDecorations" | "getSublabel">>;
+  getTreeItemProps: Required<ExtendedVisibilityTreeRendererProps>["getTreeItemProps"];
 }
 
 /**
@@ -64,6 +65,7 @@ export function useCategoriesTree({
   onCategoriesFiltered,
   emptyTreeContent,
   hierarchyConfig,
+  getTreeItemProps,
 }: UseCategoriesTreeProps): UseCategoriesTreeResult {
   const hierarchyConfiguration = useMemo<CategoriesTreeHierarchyConfiguration>(
     () => ({
@@ -109,7 +111,7 @@ export function useCategoriesTree({
   });
 
   return {
-    categoriesTreeProps: {
+    treeProps: {
       treeName: "categories-tree-v2",
       getHierarchyDefinition,
       getSearchPaths: getPaths,
@@ -117,10 +119,12 @@ export function useCategoriesTree({
       emptyTreeContent: useMemo(() => getEmptyTreeContentComponent(searchText, searchError, emptyTreeContent), [searchText, searchError, emptyTreeContent]),
       highlightText: searchText,
     },
-    rendererProps: {
-      getDecorations: useCallback((node) => <CategoriesTreeIcon node={node} />, []),
-      getSublabel,
-    },
+    getTreeItemProps: (node, rendererProps) => ({
+      ...rendererProps.getTreeItemProps?.(node),
+      decorations: <CategoriesTreeIcon node={node} />,
+      description: node.nodeData.extendedData?.description,
+      ...getTreeItemProps?.(node, rendererProps),
+    }),
   };
 }
 
@@ -164,10 +168,6 @@ export function CategoriesTreeIcon({ node }: { node: PresentationHierarchyNode }
   };
 
   return <Icon href={getIcon()} />;
-}
-
-function getSublabel(node: PresentationHierarchyNode) {
-  return node.nodeData.extendedData?.description;
 }
 
 function useCategoriesCachedVisibility(props: {

@@ -149,16 +149,18 @@ import type { ComponentPropsWithoutRef } from "react";
 type VisibilityTreeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>;
 type CustomModelsTreeRendererProps = Parameters<ComponentPropsWithoutRef<typeof VisibilityTree>["treeRenderer"]>[0];
 function CustomModelsTreeRenderer(props: CustomModelsTreeRendererProps) {
-  const getLabel = props.getLabel;
-  const getLabelCallback = useCallback<Required<VisibilityTreeRendererProps>["getLabel"]>(
+  const getTreeItemProps = useCallback<Required<VisibilityTreeRendererProps>["getTreeItemProps"]>(
     (node) => {
-      const originalLabel = getLabel(node);
-      return <>Custom node - {originalLabel}</>;
+      const treeProps = props.getTreeItemProps(node);
+      const label = treeProps.label ?? node.label;
+      return {
+        label: <>Custom node - {label}</>
+        description: <>Sublabel - {label}</>
+      };
     },
-    [getLabel],
+    [props.getTreeItemProps],
   );
-  const getSublabelCallback = useCallback<Required<VisibilityTreeRendererProps>["getSublabel"]>((node) => <>Sublabel - {node.label}</>, []);
-  return <VisibilityTreeRenderer {...props} getLabel={getLabelCallback} getSublabel={getSublabelCallback} />;
+  return <VisibilityTreeRenderer {...props} getTreeItemProps={getTreeItemProps} />;
 }
 
 interface CustomModelsTreeProps {
@@ -169,7 +171,7 @@ interface CustomModelsTreeProps {
 
 function CustomModelsTreeComponent({ imodel, viewport, selectionStorage }: CustomModelsTreeProps) {
   const { buttonProps } = useModelsTreeButtonProps({ imodel, viewport });
-  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport });
+  const modelsTree = useModelsTree({ activeView: viewport });
 
   return (
     <TreeWithHeader
@@ -179,10 +181,10 @@ function CustomModelsTreeComponent({ imodel, viewport, selectionStorage }: Custo
       ]}
     >
       <VisibilityTree
-        {...modelsTreeProps}
+        {...modelsTree.treeProps}
         selectionStorage={selectionStorage}
         imodel={imodel}
-        treeRenderer={(props) => <CustomModelsTreeRenderer {...props} {...rendererProps} />}
+        treeRenderer={(rendererProps) => <CustomModelsTreeRenderer {...rendererProps} getTreeItemProps={(node) => modelsTree.getTreeItemProps(node, rendererProps)} />}
       />
     </TreeWithHeader>
   );
@@ -232,15 +234,17 @@ Use `getFilteredPaths` when you need more control over filtering behaviour. Here
       [targetItems],
     );
 
-    const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths });
+    const modelsTree = useModelsTree({ activeView: viewport, getFilteredPaths });
 
     return (
       <VisibilityTree
-        {...modelsTreeProps}
+        {...modelsTree.treeProps}
         getSchemaContext={getSchemaContext}
         selectionStorage={selectionStorage}
         imodel={imodel}
-        treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
+        treeRenderer={(rendererProps) => (
+          <VisibilityTreeRenderer {...rendererProps} getTreeItemProps={(node) => modelsTree.getTreeItemProps(node, rendererProps)} />
+        )}
       />
     );
   }
@@ -271,15 +275,17 @@ Use `getFilteredPaths` when you need more control over filtering behaviour. Here
       return result;
     }, []);
 
-    const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths });
+    const modelsTree = useModelsTree({ activeView: viewport, getFilteredPaths });
 
     return (
       <VisibilityTree
-        {...modelsTreeProps}
+        {...modelsTree.treeProps}
         getSchemaContext={getSchemaContext}
         selectionStorage={selectionStorage}
         imodel={imodel}
-        treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
+        treeRenderer={(rendererProps) => (
+          <VisibilityTreeRenderer {...rendererProps} getTreeItemProps={(node) => modelsTree.getTreeItemProps(node, rendererProps)} />
+        )}
       />
     );
   }
@@ -343,14 +349,16 @@ Use `getFilteredPaths` when you need more control over filtering behaviour. Here
       [imodel],
     );
 
-    const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths, filter });
+    const modelsTree = useModelsTree({ activeView: viewport, getFilteredPaths, filter });
     return (
       <VisibilityTree
-        {...modelsTreeProps}
+        {...modelsTree.treeProps}
         getSchemaContext={getSchemaContext}
         selectionStorage={selectionStorage}
         imodel={imodel}
-        treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
+        treeRenderer={(rendererProps) => (
+          <VisibilityTreeRenderer {...rendererProps} getTreeItemProps={(node) => modelsTree.getTreeItemProps(node, rendererProps)} />
+        )}
       />
     );
   }
@@ -386,14 +394,14 @@ function CustomModelsTreeComponentWithTargetItems({
     [targetItems],
   );
 
-  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getSubTreePaths });
+  const modelsTree = useModelsTree({ activeView: viewport, getSubTreePaths });
 
   return (
     <VisibilityTree
-      {...modelsTreeProps}
+      {...modelsTree.treeProps}
       selectionStorage={selectionStorage}
       imodel={imodel}
-      treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
+      treeRenderer={(rendererProps) => <VisibilityTreeRenderer {...props} getTreeItemProps={(node) => modelsTree.getTreeItemProps(node, rendererProps)} />}
     />
   );
 }
@@ -446,18 +454,17 @@ type VisibilityTreeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTre
 type CustomCategoriesTreeRendererProps = Parameters<ComponentPropsWithoutRef<typeof VisibilityTree>["treeRenderer"]>[0];
 
 function CustomCategoriesTreeRenderer(props: CustomCategoriesTreeRendererProps) {
-  const getLabel = props.getLabel;
-  const getLabelCallback = useCallback<Required<VisibilityTreeRendererProps>["getLabel"]>(
+  const getTreeItemProps = useCallback<Required<VisibilityTreeRendererProps>["getTreeItemProps"]>(
     (node) => {
-      const originalLabel = getLabel(node);
-      return <>Custom node - {originalLabel}</>;
+      const treeProps = props.getTreeItemProps(node);
+      return {
+        label: <>Custom node - {treeProps.label ?? node.label}</>,
+        description: <>Custom sub label</>,
+      };
     },
-    [getLabel],
+    [props.getTreeItemProps],
   );
-  const getSublabel = useCallback<Required<VisibilityTreeRendererProps>["getSublabel"]>(() => {
-    return <>Custom sub label</>;
-  }, []);
-  return <VisibilityTreeRenderer {...props} getLabel={getLabelCallback} getSublabel={getSublabel} />;
+  return <VisibilityTreeRenderer {...props} getTreeItemProps={getTreeItemProps} />;
 }
 
 interface CustomCategoriesTreeProps {
@@ -468,7 +475,7 @@ interface CustomCategoriesTreeProps {
 
 function CustomCategoriesTreeComponent({ imodel, viewport, selectionStorage }: CustomCategoriesTreeProps) {
   const { buttonProps } = useCategoriesTreeButtonProps({ viewport });
-  const { categoriesTreeProps, rendererProps } = useCategoriesTree({ activeView: viewport, filter: "" });
+  const categoriesTree = useCategoriesTree({ activeView: viewport, filter: "" });
   return (
     <TreeWithHeader
       buttons={[
@@ -477,10 +484,12 @@ function CustomCategoriesTreeComponent({ imodel, viewport, selectionStorage }: C
       ]}
     >
       <VisibilityTree
-        {...categoriesTreeProps}
+        {...categoriesTree.treeProps}
         selectionStorage={selectionStorage}
         imodel={imodel}
-        treeRenderer={(props) => <CustomCategoriesTreeRenderer {...props} {...rendererProps} />}
+        treeRenderer={(rendererProps) => (
+          <CustomCategoriesTreeRenderer {...rendererProps} getTreeItemProps={(node) => categoriesTree.getTreeItemProps(node, rendererProps)} />
+        )}
       />
     </TreeWithHeader>
   );
@@ -803,14 +812,16 @@ function MyWidget() {
 }
 
 function MyTree() {
-  const { categoriesTreeProps, rendererProps } = useCategoriesTree({ activeView: viewport, filter: "" });
+  const categoriesTree = useCategoriesTree({ activeView: viewport, filter: "" });
   return (
     // VisibilityTree will use provided telemetry context to report used features and their performance
     <VisibilityTree
-      {...categoriesTreeProps}
+      {...categoriesTree.treeProps}
       selectionStorage={unifiedSelectionStorage}
       imodel={imodel}
-      treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
+      treeRenderer={(rendererProps) => (
+        <VisibilityTreeRenderer {...rendererProps} getTreeItemProps={(node) => categoriesTree.getTreeItemProps(node, rendererProps)} />
+      )}
     />
   );
   // see "Custom trees" section for more example implementations
