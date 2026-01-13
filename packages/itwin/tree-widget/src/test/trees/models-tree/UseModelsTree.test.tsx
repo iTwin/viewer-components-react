@@ -67,8 +67,8 @@ describe("useModelsTree", () => {
       },
     });
 
-    let getSearchPaths = renderHookResult.current.modelsTreeProps.getSearchPaths;
-    let visibilityHandler = renderHookResult.current.modelsTreeProps.visibilityHandlerFactory({ imodelAccess });
+    let getSearchPaths = renderHookResult.current.treeProps.getSearchPaths;
+    let visibilityHandler = renderHookResult.current.treeProps.visibilityHandlerFactory({ imodelAccess });
     await waitFor(async () => {
       expect(getSearchPaths).to.not.be.undefined;
       await getSearchPaths!({ imodelAccess, abortSignal: new AbortController().signal });
@@ -79,8 +79,8 @@ describe("useModelsTree", () => {
         activeView: viewport,
         getSearchPaths: async () => [],
       });
-      getSearchPaths = renderHookResult.current.modelsTreeProps.getSearchPaths;
-      visibilityHandler = renderHookResult.current.modelsTreeProps.visibilityHandlerFactory({ imodelAccess });
+      getSearchPaths = renderHookResult.current.treeProps.getSearchPaths;
+      visibilityHandler = renderHookResult.current.treeProps.visibilityHandlerFactory({ imodelAccess });
       expect(getSearchPaths).to.not.be.undefined;
       await getSearchPaths!({ imodelAccess, abortSignal: new AbortController().signal });
       await visibilityHandler.getVisibilityStatus(createModelHierarchyNode({ modelId: keys.modelId }));
@@ -169,13 +169,13 @@ describe("useModelsTree", () => {
 
       it("getSearchPaths returns correct result when getSubTreePaths is not defined", async () => {
         const { result: renderHookResult } = renderHook(useModelsTree, { initialProps });
-        const { getSearchPaths } = renderHookResult.current.modelsTreeProps;
+        const { getSearchPaths } = renderHookResult.current.treeProps;
         expect(getSearchPaths).to.be.undefined;
       });
 
       it("getSearchPaths returns correct result when getSubTreePaths is defined", async () => {
         const { result: renderHookResult } = renderHook(useModelsTree, { initialProps: { ...initialProps, getSubTreePaths } });
-        const { getSearchPaths } = renderHookResult.current.modelsTreeProps;
+        const { getSearchPaths } = renderHookResult.current.treeProps;
         const abortSignal = new AbortController().signal;
         await waitFor(async () => {
           expect(getSearchPaths).to.not.be.undefined;
@@ -204,7 +204,7 @@ describe("useModelsTree", () => {
 
       it("getSearchPaths returns correct result when getSubTreePaths and search text is defined", async () => {
         const { result: renderHookResult } = renderHook(useModelsTree, { initialProps: { ...initialProps, getSubTreePaths, searchText: "element2" } });
-        const { getSearchPaths } = renderHookResult.current.modelsTreeProps;
+        const { getSearchPaths } = renderHookResult.current.treeProps;
         const abortSignal = new AbortController().signal;
         await waitFor(async () => {
           expect(getSearchPaths).to.not.be.undefined;
@@ -241,7 +241,7 @@ describe("useModelsTree", () => {
         const { result: renderHookResult } = renderHook(useModelsTree, {
           initialProps: { ...initialProps, getSubTreePaths, getSearchPaths: getSearchPathsForProps },
         });
-        const { getSearchPaths } = renderHookResult.current.modelsTreeProps;
+        const { getSearchPaths } = renderHookResult.current.treeProps;
         const abortSignal = new AbortController().signal;
 
         await waitFor(async () => {
@@ -296,7 +296,7 @@ describe("useModelsTree", () => {
           selectionStorage.addToSelection({ imodelKey: imodel.key, level: 0, source: "test", selectables: [{ className: modelClass, id: modelIds[1] }] });
         });
 
-        const { getSearchPaths } = hooksResult.current.modelsTree.modelsTreeProps;
+        const { getSearchPaths } = hooksResult.current.modelsTree.treeProps;
         const abortSignal = new AbortController().signal;
 
         await waitFor(async () => {

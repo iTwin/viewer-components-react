@@ -242,7 +242,9 @@ Use `getFilteredPaths` when you need more control over filtering behaviour. Here
         getSchemaContext={getSchemaContext}
         selectionStorage={selectionStorage}
         imodel={imodel}
-        treeRenderer={(rendererProps) => <VisibilityTreeRenderer {...rendererProps} getTreeItemProps={(node) => modelsTree.getTreeItemProps(node, rendererProps)} />}
+        treeRenderer={(rendererProps) => (
+          <VisibilityTreeRenderer {...rendererProps} getTreeItemProps={(node) => modelsTree.getTreeItemProps(node, rendererProps)} />
+        )}
       />
     );
   }
@@ -281,7 +283,9 @@ Use `getFilteredPaths` when you need more control over filtering behaviour. Here
         getSchemaContext={getSchemaContext}
         selectionStorage={selectionStorage}
         imodel={imodel}
-        treeRenderer={(rendererProps) => <VisibilityTreeRenderer {...rendererProps} getTreeItemProps={(node) => modelsTree.getTreeItemProps(node, rendererProps)} />}
+        treeRenderer={(rendererProps) => (
+          <VisibilityTreeRenderer {...rendererProps} getTreeItemProps={(node) => modelsTree.getTreeItemProps(node, rendererProps)} />
+        )}
       />
     );
   }
@@ -317,9 +321,9 @@ Use `getFilteredPaths` when you need more control over filtering behaviour. Here
                 e.ECInstanceId Id,
                 COALESCE(e.UserLabel, e.CodeValue) Label
               FROM BisCore.Subject e
-
+  
               UNION ALL
-
+  
               SELECT
                 ec_classname(m.ECClassId, 's.c') ClassName,
                 m.ECInstanceId Id,
@@ -352,7 +356,9 @@ Use `getFilteredPaths` when you need more control over filtering behaviour. Here
         getSchemaContext={getSchemaContext}
         selectionStorage={selectionStorage}
         imodel={imodel}
-        treeRenderer={(rendererProps) => <VisibilityTreeRenderer {...rendererProps} getTreeItemProps={(node) => modelsTree.getTreeItemProps(node, rendererProps)} />}
+        treeRenderer={(rendererProps) => (
+          <VisibilityTreeRenderer {...rendererProps} getTreeItemProps={(node) => modelsTree.getTreeItemProps(node, rendererProps)} />
+        )}
       />
     );
   }
@@ -453,7 +459,7 @@ function CustomCategoriesTreeRenderer(props: CustomCategoriesTreeRendererProps) 
       const treeProps = props.getTreeItemProps(node);
       return {
         label: <>Custom node - {treeProps.label ?? node.label}</>,
-        description: <>Custom sub label</>
+        description: <>Custom sub label</>,
       };
     },
     [props.getTreeItemProps],
@@ -481,7 +487,9 @@ function CustomCategoriesTreeComponent({ imodel, viewport, selectionStorage }: C
         {...categoriesTree.treeProps}
         selectionStorage={selectionStorage}
         imodel={imodel}
-        treeRenderer={(rendererProps) => <CustomCategoriesTreeRenderer {...rendererProps} getTreeItemProps={(node) => categoriesTree.getTreeItemProps(node, rendererProps)} />}
+        treeRenderer={(rendererProps) => (
+          <CustomCategoriesTreeRenderer {...rendererProps} getTreeItemProps={(node) => categoriesTree.getTreeItemProps(node, rendererProps)} />
+        )}
       />
     </TreeWithHeader>
   );
@@ -811,7 +819,9 @@ function MyTree() {
       {...categoriesTree.treeProps}
       selectionStorage={unifiedSelectionStorage}
       imodel={imodel}
-      treeRenderer={(rendererProps) => <VisibilityTreeRenderer {...rendererProps} getTreeItemProps={(node) => categoriesTree.getTreeItemProps(node, rendererProps)} />}
+      treeRenderer={(rendererProps) => (
+        <VisibilityTreeRenderer {...rendererProps} getTreeItemProps={(node) => categoriesTree.getTreeItemProps(node, rendererProps)} />
+      )}
     />
   );
   // see "Custom trees" section for more example implementations

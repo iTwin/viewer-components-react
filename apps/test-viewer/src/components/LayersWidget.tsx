@@ -134,7 +134,7 @@ function ElementComponent(props: Pick<ElementsProps, "selectionStorage">) {
 type ElementsProps = Pick<ComponentProps<typeof Tree>, "selectionStorage"> & { view: Viewport };
 
 function Elements({ view, ...rest }: ElementsProps) {
-  const { categoriesTreeProps, getTreeItemProps: categoriesTreeItemProps } = useCategoriesTree({
+  const categoriesTree = useCategoriesTree({
     activeView: createTreeWidgetViewport(view),
     getTreeItemProps: (node) => ({
       decorations: (
@@ -149,9 +149,11 @@ function Elements({ view, ...rest }: ElementsProps) {
   return (
     <Tree
       {...rest}
-      {...categoriesTreeProps}
+      {...categoriesTree.treeProps}
       imodel={view.iModel}
-      treeRenderer={(treeProps) => <TreeRenderer {...treeProps} treeLabel="Layers" getTreeItemProps={(node) => categoriesTreeItemProps(node, treeProps)} />}
+      treeRenderer={(treeProps) => (
+        <TreeRenderer {...treeProps} treeLabel="Layers" getTreeItemProps={(node) => categoriesTree.getTreeItemProps(node, treeProps)} />
+      )}
     />
   );
 }
