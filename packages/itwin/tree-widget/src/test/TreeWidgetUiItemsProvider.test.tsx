@@ -7,7 +7,7 @@ import { expect } from "chai";
 import { mock } from "node:test";
 import React from "react";
 import sinon from "sinon";
-import { UiFramework } from "@itwin/appui-react";
+import * as appuiModule from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { EmptyLocalization } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
@@ -25,9 +25,15 @@ describe("createTreeWidget", () => {
   before(async () => {
     sinon.stub(IModelApp, "viewManager").get(() => ({ onSelectedViewportChanged: new BeEvent() }));
     sinon.stub(IModelApp, "toolAdmin").get(() => ({ activeToolChanged: new BeEvent() }));
-
-    await UiFramework.initialize();
-    UiFramework.setIModelConnection({
+    // TODO: Remove after https://github.com/iTwin/appui/issues/1021 is resolved
+    mock.module("@itwin/appui-react", {
+      namedExports: {
+        ...appuiModule,
+        useTransientState: () => [undefined, () => {}],
+      },
+    });
+    await appuiModule.UiFramework.initialize();
+    appuiModule.UiFramework.setIModelConnection({
       isBlankConnection: () => true,
       selectionSet: {
         onChanged: new BeEvent(),

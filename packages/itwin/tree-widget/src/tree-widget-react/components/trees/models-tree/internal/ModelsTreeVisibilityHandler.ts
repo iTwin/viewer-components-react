@@ -252,11 +252,11 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     }
 
     const categoryId = ModelsTreeNode.getCategoryId(node);
-    const rootCategoryIds = getRootCategoryIds({ parentKeys: node.parentKeys, modelId });
-    assert(rootCategoryIds !== undefined);
     if (!categoryId) {
       return of(createVisibilityStatus("disabled"));
     }
+    const rootCategoryIds = getRootCategoryIds({ parentKeys: node.parentKeys, modelId });
+    assert(rootCategoryIds !== undefined);
     return this.getElementDisplayStatus({
       elementIds: node.key.instanceKeys.map(({ id }) => id),
       parentKeys: node.parentKeys,
@@ -517,15 +517,17 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
 
   private getClassGroupingNodeDisplayStatus(node: GroupingHierarchyNode): Observable<VisibilityStatus> {
     const { elementIds, modelId, categoryId, childrenCount } = this.getGroupingNodeInfo(node);
-    const rootCategoryIds = getRootCategoryIds({ parentKeys: node.parentKeys, modelId });
-    assert(rootCategoryIds !== undefined);
-    const result = this.getElementsDisplayStatus({
-      elementIds,
-      modelId,
-      categoryId,
-      rootCategoryIds,
-      parentElementIdsPath: getParentElementsIdsPath({ parentKeys: node.parentKeys, modelId }),
-      childrenCount: childrenCount ?? 0,
+    const result = defer(() => {
+      const rootCategoryIds = getRootCategoryIds({ parentKeys: node.parentKeys, modelId });
+      assert(rootCategoryIds !== undefined);
+      return this.getElementsDisplayStatus({
+        elementIds,
+        modelId,
+        categoryId,
+        rootCategoryIds,
+        parentElementIdsPath: getParentElementsIdsPath({ parentKeys: node.parentKeys, modelId }),
+        childrenCount: childrenCount ?? 0,
+      });
     });
     return createVisibilityHandlerResult(this, { node }, result, this.#props.overrides?.getElementGroupingNodeDisplayStatus);
   }

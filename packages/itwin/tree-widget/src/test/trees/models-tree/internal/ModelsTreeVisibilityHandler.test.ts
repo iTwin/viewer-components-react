@@ -1237,6 +1237,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             modelId,
             categoryId,
             elements: elementIds,
+            parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x1", className: "BisCore.Subject" }] },
+              { type: "instances", instanceKeys: [{ id: modelId, className: "BisCore.GeometricModel3d" }] },
+              { type: "instances", instanceKeys: [{ id: categoryId, className: "BisCore.SpatialCategory" }] },
+            ],
           });
           using handlerResult = createHandler({
             idsCache: createFakeIdsCache({
@@ -1258,6 +1263,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             modelId,
             categoryId,
             elements: elementIds,
+            parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x1", className: "BisCore.Subject" }] },
+              { type: "instances", instanceKeys: [{ id: modelId, className: "BisCore.GeometricModel3d" }] },
+              { type: "instances", instanceKeys: [{ id: categoryId, className: "BisCore.SpatialCategory" }] },
+            ],
           });
           using handlerResult = createHandler({
             idsCache: createFakeIdsCache({
@@ -1279,6 +1289,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             modelId,
             categoryId,
             elements: elementIds,
+            parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x1", className: "BisCore.Subject" }] },
+              { type: "instances", instanceKeys: [{ id: modelId, className: "BisCore.GeometricModel3d" }] },
+              { type: "instances", instanceKeys: [{ id: categoryId, className: "BisCore.SpatialCategory" }] },
+            ],
           });
           using handlerResult = createHandler({
             idsCache: createFakeIdsCache({
@@ -1301,6 +1316,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             modelId,
             categoryId,
             elements: elementIds,
+            parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x1", className: "BisCore.Subject" }] },
+              { type: "instances", instanceKeys: [{ id: modelId, className: "BisCore.GeometricModel3d" }] },
+              { type: "instances", instanceKeys: [{ id: categoryId, className: "BisCore.SpatialCategory" }] },
+            ],
           });
           using handlerResult = createHandler({
             idsCache: createFakeIdsCache({
@@ -1319,6 +1339,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             modelId,
             categoryId,
             elements: elementIds,
+            parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x1", className: "BisCore.Subject" }] },
+              { type: "instances", instanceKeys: [{ id: modelId, className: "BisCore.GeometricModel3d" }] },
+              { type: "instances", instanceKeys: [{ id: categoryId, className: "BisCore.SpatialCategory" }] },
+            ],
           });
           using handlerResult = createHandler({
             idsCache: createFakeIdsCache({
@@ -1340,6 +1365,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             modelId,
             categoryId,
             elements: elementIds,
+            parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x1", className: "BisCore.Subject" }] },
+              { type: "instances", instanceKeys: [{ id: modelId, className: "BisCore.GeometricModel3d" }] },
+              { type: "instances", instanceKeys: [{ id: categoryId, className: "BisCore.SpatialCategory" }] },
+            ],
           });
           using handlerResult = createHandler({
             idsCache: createFakeIdsCache({
@@ -1361,6 +1391,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             modelId,
             categoryId,
             elements: elementIds,
+            parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x1", className: "BisCore.Subject" }] },
+              { type: "instances", instanceKeys: [{ id: modelId, className: "BisCore.GeometricModel3d" }] },
+              { type: "instances", instanceKeys: [{ id: categoryId, className: "BisCore.SpatialCategory" }] },
+            ],
           });
 
           for (const categoryOn of [true, false]) {
