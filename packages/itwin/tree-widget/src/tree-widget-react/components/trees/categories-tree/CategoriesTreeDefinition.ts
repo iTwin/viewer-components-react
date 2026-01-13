@@ -5,7 +5,6 @@
 
 import {
   bufferCount,
-  catchError,
   defaultIfEmpty,
   defer,
   distinct,
@@ -34,7 +33,7 @@ import {
   CLASS_NAME_Model,
   CLASS_NAME_SubCategory,
 } from "../common/internal/ClassNameDefinitions.js";
-import { isBeSqliteInterruptError } from "../common/internal/UseErrorState.js";
+import { catchBeSQLiteInterrupts } from "../common/internal/UseErrorState.js";
 import {
   createIdsSelector,
   fromWithRelease,
@@ -822,12 +821,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
             return EMPTY;
           }
           return defer(() => imodelAccess.createQueryReader(queryProps, { restartToken: `${componentName}/${componentId}/filter-by-label`, limit })).pipe(
-            catchError((error) => {
-              if (isBeSqliteInterruptError(error)) {
-                return EMPTY;
-              }
-              throw error;
-            }),
+            catchBeSQLiteInterrupts,
           );
         }),
         releaseMainThreadOnItemsCount(1000),
@@ -1008,12 +1002,7 @@ function createGeometricElementInstanceKeyPaths(props: {
       { rowFormat: "Indexes", limit: "unbounded", restartToken: `${componentName}/${componentId}/element-paths/${chunkIndex}` },
     );
   }).pipe(
-    catchError((error) => {
-      if (isBeSqliteInterruptError(error)) {
-        return EMPTY;
-      }
-      throw error;
-    }),
+    catchBeSQLiteInterrupts,
     releaseMainThreadOnItemsCount(300),
     map((row) => parseQueryRow(row, separator, elementClass, categoryClass, modelClass)),
     mergeMap((elementHierarchyPath) =>

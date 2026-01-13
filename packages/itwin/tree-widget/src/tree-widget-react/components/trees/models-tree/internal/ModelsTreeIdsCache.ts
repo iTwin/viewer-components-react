@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { catchError, defer, EMPTY, filter, forkJoin, from, map, mergeAll, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
+import { defer, EMPTY, filter, forkJoin, from, map, mergeAll, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
 import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import {
@@ -15,7 +15,7 @@ import {
   CLASS_NAME_Subject,
 } from "../../common/internal/ClassNameDefinitions.js";
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
-import { isBeSqliteInterruptError } from "../../common/internal/UseErrorState.js";
+import { catchBeSQLiteInterrupts } from "../../common/internal/UseErrorState.js";
 import { pushToMap } from "../../common/internal/Utils.js";
 
 import type { Observable } from "rxjs";
@@ -90,12 +90,7 @@ export class ModelsTreeIdsCache implements Disposable {
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/visible-sub-categories` },
       );
     }).pipe(
-      catchError((error) => {
-        if (isBeSqliteInterruptError(error)) {
-          return EMPTY;
-        }
-        throw error;
-      }),
+      catchBeSQLiteInterrupts,
       map((row) => {
         return { id: row.id, parentId: row.categoryId };
       }),
@@ -149,12 +144,7 @@ export class ModelsTreeIdsCache implements Disposable {
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/subjects` },
       );
     }).pipe(
-      catchError((error) => {
-        if (isBeSqliteInterruptError(error)) {
-          return EMPTY;
-        }
-        throw error;
-      }),
+      catchBeSQLiteInterrupts,
       map((row) => {
         return { id: row.id, parentId: row.parentId, targetPartitionId: row.targetPartitionId, hideInHierarchy: !!row.hideInHierarchy };
       }),
@@ -176,12 +166,7 @@ export class ModelsTreeIdsCache implements Disposable {
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/models` },
       );
     }).pipe(
-      catchError((error) => {
-        if (isBeSqliteInterruptError(error)) {
-          return EMPTY;
-        }
-        throw error;
-      }),
+      catchBeSQLiteInterrupts,
       map((row) => {
         return { id: row.id, parentId: row.parentId };
       }),
@@ -380,12 +365,7 @@ export class ModelsTreeIdsCache implements Disposable {
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/model-categories` },
       );
     }).pipe(
-      catchError((error) => {
-        if (isBeSqliteInterruptError(error)) {
-          return EMPTY;
-        }
-        throw error;
-      }),
+      catchBeSQLiteInterrupts,
       map((row) => {
         return { modelId: row.modelId, categoryId: row.categoryId, isModelPrivate: !!row.isModelPrivate, isRootElementCategory: !!row.isRootElementCategory };
       }),
@@ -410,12 +390,7 @@ export class ModelsTreeIdsCache implements Disposable {
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/modeled-elements` },
       );
     }).pipe(
-      catchError((error) => {
-        if (isBeSqliteInterruptError(error)) {
-          return EMPTY;
-        }
-        throw error;
-      }),
+      catchBeSQLiteInterrupts,
       map((row) => {
         return { modelId: row.modelId, categoryId: row.categoryId, modeledElementId: row.modeledElementId };
       }),

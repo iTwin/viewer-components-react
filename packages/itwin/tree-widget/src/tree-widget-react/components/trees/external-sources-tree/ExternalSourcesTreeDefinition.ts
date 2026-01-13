@@ -303,25 +303,18 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
   }
 
   private async isSupported() {
-    try {
-      const query = `
-        SELECT 1
-        FROM ECDbMeta.ECSchemaDef
-        WHERE Name = 'BisCore' AND (VersionMajor > 1 OR (VersionMajor = 1 AND VersionMinor > 12))
-      `;
+    const query = `
+      SELECT 1
+      FROM ECDbMeta.ECSchemaDef
+      WHERE Name = 'BisCore' AND (VersionMajor > 1 OR (VersionMajor = 1 AND VersionMinor > 12))
+    `;
 
-      for await (const _row of this.#queryExecutor.createQueryReader(
-        { ecsql: query },
-        { restartToken: `${this.#componentName}/${this.#componentId}/is-external-source-supported` },
-      )) {
-        return true;
-      }
-      return false;
-    } catch (error) {
-      if (!isBeSqliteInterruptError(error)) {
-        throw error;
-      }
-      return false;
+    for await (const _row of this.#queryExecutor.createQueryReader(
+      { ecsql: query },
+      { restartToken: `${this.#componentName}/${this.#componentId}/is-external-source-supported` },
+    )) {
+      return true;
     }
+    return false;
   }
 }

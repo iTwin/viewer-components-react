@@ -118,9 +118,7 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
       void (async () => {
         try {
           await handler.changeVisibility(node.nodeData, on);
-        } catch (error) {
-          setErrorState(error);
-        }
+        } catch {}
       })();
       const entry = visibilityStatusMap.current.get(node.id);
       if (!entry) {

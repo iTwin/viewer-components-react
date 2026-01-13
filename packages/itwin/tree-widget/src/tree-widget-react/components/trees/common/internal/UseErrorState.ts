@@ -4,6 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useState } from "react";
+import { catchError, EMPTY } from "rxjs";
+
+import type { Observable } from "rxjs";
 
 /**
  * A hook that helps components throw errors in React's render loop so they can be captured by React error
@@ -26,4 +29,16 @@ export function useErrorState() {
 /** @internal */
 export function isBeSqliteInterruptError(error: unknown): boolean {
   return typeof error === "object" && !!error && "name" in error && error.name === "BE_SQLITE_INTERRUPT";
+}
+
+/** @internal */
+export function catchBeSQLiteInterrupts<T>(obs: Observable<T>): Observable<T> {
+  return obs.pipe(
+    catchError((error) => {
+      if (isBeSqliteInterruptError(error)) {
+        return EMPTY;
+      }
+      throw error;
+    }),
+  );
 }
