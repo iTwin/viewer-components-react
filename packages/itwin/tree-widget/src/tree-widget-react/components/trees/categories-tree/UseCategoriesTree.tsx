@@ -120,7 +120,8 @@ export function useCategoriesTree({
       highlightText: searchText,
     },
     getTreeItemProps: (node, rendererProps) => ({
-      getDecorations: <CategoriesTreeIcon node={node} />,
+      ...rendererProps.getTreeItemProps?.(node),
+      decorations: <CategoriesTreeIcon node={node} />,
       description: node.nodeData.extendedData?.description,
       ...getTreeItemProps?.(node, rendererProps),
     }),

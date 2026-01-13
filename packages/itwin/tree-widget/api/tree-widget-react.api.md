@@ -605,9 +605,9 @@ interface UseCategoriesTreeProps {
 // @beta (undocumented)
 interface UseCategoriesTreeResult {
     // (undocumented)
-    categoriesTreeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "getSearchPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent">;
-    // (undocumented)
     getTreeItemProps: Required<ExtendedVisibilityTreeRendererProps>["getTreeItemProps"];
+    // (undocumented)
+    treeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "getSearchPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent">;
 }
 
 // @alpha
@@ -655,9 +655,9 @@ interface UseClassificationsTreeProps {
 // @alpha (undocumented)
 interface UseClassificationsTreeResult {
     // (undocumented)
-    classificationsTreeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "visibilityHandlerFactory" | "getSearchPaths" | "emptyTreeContent" | "highlightText">;
-    // (undocumented)
     getTreeItemProps: Required<ExtendedVisibilityTreeRendererProps>["getTreeItemProps"];
+    // (undocumented)
+    treeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "visibilityHandlerFactory" | "getSearchPaths" | "emptyTreeContent" | "highlightText">;
 }
 
 // @public
@@ -714,7 +714,7 @@ interface UseModelsTreeResult {
     // (undocumented)
     getTreeItemProps: Required<ExtendedVisibilityTreeRendererProps>["getTreeItemProps"];
     // (undocumented)
-    modelsTreeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "getSearchPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent" | "selectionPredicate">;
+    treeProps: Pick<VisibilityTreeProps, "treeName" | "getHierarchyDefinition" | "getSearchPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent" | "selectionPredicate">;
 }
 
 // @beta

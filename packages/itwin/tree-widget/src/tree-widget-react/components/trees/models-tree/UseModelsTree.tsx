@@ -202,6 +202,7 @@ export function useModelsTree({
       selectionPredicate: nodeSelectionPredicate,
     },
     getTreeItemProps: (node, rendererProps) => ({
+      ...rendererProps.getTreeItemProps?.(node),
       decorations: <ModelsTreeIcon node={node} />,
       ...getTreeItemProps?.(node, rendererProps),
     }),
