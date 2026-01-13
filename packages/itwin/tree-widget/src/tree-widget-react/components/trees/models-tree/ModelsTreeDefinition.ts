@@ -43,6 +43,7 @@ import {
   CLASS_NAME_Subject,
 } from "../common/internal/ClassNameDefinitions.js";
 import { collect } from "../common/internal/Rxjs.js";
+import { catchBeSQLiteInterrupts } from "../common/internal/UseErrorState.js";
 import {
   createIdsSelector,
   fromWithRelease,
@@ -704,6 +705,7 @@ function createGeometricElementInstanceKeyPaths(props: {
       { rowFormat: "Indexes", limit: "unbounded", restartToken: `${componentName}/${componentId}/geometric-element-paths/${chunkIndex}` },
     );
   }).pipe(
+    catchBeSQLiteInterrupts,
     releaseMainThreadOnItemsCount(300),
     map((row) => parseQueryRow(row, groupInfos, separator, hierarchyConfig.elementClassSpecification)),
     mergeMap(({ modelId, elementHierarchyPath, groupingNode }) =>
@@ -893,6 +895,7 @@ function createInstanceKeyPathsFromInstanceLabelObs(
         limit,
       });
     }),
+    catchBeSQLiteInterrupts,
     map((row) => ({ className: row[0], id: row[1] })),
     toArray(),
     mergeMap((targetKeys) => createInstanceKeyPathsFromTargetItemsObs({ ...props, targetItems: targetKeys })),

@@ -12,6 +12,7 @@ import visibilityInvertSvg from "@stratakit/icons/visibility-invert.svg";
 import visibilityShowSvg from "@stratakit/icons/visibility-show.svg";
 import { TreeWidget } from "../../../TreeWidget.js";
 import { hideAllCategories, invertAllCategories } from "../common/CategoriesVisibilityUtils.js";
+import { isBeSqliteInterruptError, useErrorState } from "../common/internal/UseErrorState.js";
 import { useGuid } from "../common/internal/useGuid.js";
 import { getClassesByView } from "../common/internal/Utils.js";
 import { loadCategoriesFromViewport } from "../common/internal/VisibilityUtils.js";
@@ -91,7 +92,12 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
       onClick={() => {
         // cspell:disable-next-line
         props.onFeatureUsed?.(`categories-tree-showall`);
-        void showAll({ models: props.models, viewport: props.viewport, categories: props.categories.map((category) => category.categoryId), componentId });
+        void showAll({
+          models: props.models,
+          viewport: props.viewport,
+          categories: props.categories.map((category) => category.categoryId),
+          componentId,
+        }).catch(() => {});
       }}
       icon={visibilityShowSvg}
     />
@@ -136,12 +142,22 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
 const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
 
 function useCategories(viewport: TreeWidgetViewport, componentId: GuidString) {
-  const categoriesPromise = useMemo(async () => loadCategoriesFromViewport(viewport, componentId), [viewport, componentId]);
+  const setErrorState = useErrorState();
+
+  const categoriesPromise = useMemo(async () => {
+    try {
+      return await loadCategoriesFromViewport(viewport, componentId);
+    } catch (error) {
+      setErrorState(error);
+      return [];
+    }
+  }, [viewport, componentId, setErrorState]);
   return useAsyncValue(categoriesPromise) ?? EMPTY_CATEGORIES_ARRAY;
 }
 
 function useAvailableModels(viewport: TreeWidgetViewport, componentId: GuidString): Array<ModelId> {
   const [availableModels, setAvailableModels] = useState<Array<ModelId>>([]);
+  const setErrorState = useErrorState();
   const imodel = viewport.iModel;
   const viewType = viewport.viewType === "2d" ? "2d" : "3d";
   useEffect(() => {
@@ -149,10 +165,11 @@ function useAvailableModels(viewport: TreeWidgetViewport, componentId: GuidStrin
       .then((models) => {
         setAvailableModels(models);
       })
-      .catch(() => {
+      .catch((error) => {
+        setErrorState(error);
         setAvailableModels([]);
       });
-  }, [imodel, viewType, componentId]);
+  }, [imodel, viewType, componentId, setErrorState]);
 
   return availableModels;
 }
@@ -160,19 +177,26 @@ function useAvailableModels(viewport: TreeWidgetViewport, componentId: GuidStrin
 async function queryModelsForHeaderActions(iModel: IModelConnection, viewType: "2d" | "3d", componentId: GuidString): Promise<Array<ModelId>> {
   const { modelClass } = getClassesByView(viewType);
   const models = new Array<ModelId>();
-  const query = `
-    SELECT
-      m.ECInstanceId id
-    FROM
-      ${modelClass} m
-    WHERE
-      m.IsPrivate = false
-  `;
-  for await (const _row of iModel.createQueryReader(query, undefined, {
-    restartToken: `CategoriesTreeButtons/${componentId}/all-models`,
-    rowFormat: QueryRowFormat.UseECSqlPropertyNames,
-  })) {
-    models.push(_row.id);
+  try {
+    const query = `
+      SELECT
+        m.ECInstanceId id
+      FROM
+        ${modelClass} m
+      WHERE
+        m.IsPrivate = false
+    `;
+    for await (const _row of iModel.createQueryReader(query, undefined, {
+      restartToken: `CategoriesTreeButtons/${componentId}/all-models`,
+      rowFormat: QueryRowFormat.UseECSqlPropertyNames,
+    })) {
+      models.push(_row.id);
+    }
+    return models;
+  } catch (error) {
+    if (isBeSqliteInterruptError(error)) {
+      return [];
+    }
+    throw error;
   }
-  return models;
 }

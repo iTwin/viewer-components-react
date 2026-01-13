@@ -30,6 +30,7 @@ import {
 } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
+import { catchBeSQLiteInterrupts } from "./UseErrorState.js";
 import { getClassesByView, getIdsFromChildrenTree, getOptimalBatchSize, releaseMainThreadOnItemsCount, setDifference, updateChildrenTree } from "./Utils.js";
 
 import type { Observable, Subscription } from "rxjs";
@@ -321,6 +322,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
         },
       );
     }).pipe(
+      catchBeSQLiteInterrupts,
       map((row) => {
         return { elementsPath: row.elementsPath.split(";"), modelId: row.modelId, categoryId: row.categoryId, rootCategoryId: row.rootCategoryId };
       }),

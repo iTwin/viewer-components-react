@@ -134,7 +134,7 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
           models: props.models.map((model) => model.id),
           viewport: props.viewport,
           componentId,
-        });
+        }).catch(() => {});
       }}
       icon={visibilityShowSvg}
     />

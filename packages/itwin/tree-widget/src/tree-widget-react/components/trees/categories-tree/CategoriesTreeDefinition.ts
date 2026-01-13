@@ -33,6 +33,7 @@ import {
   CLASS_NAME_Model,
   CLASS_NAME_SubCategory,
 } from "../common/internal/ClassNameDefinitions.js";
+import { catchBeSQLiteInterrupts } from "../common/internal/UseErrorState.js";
 import {
   createIdsSelector,
   fromWithRelease,
@@ -819,7 +820,9 @@ async function createInstanceKeyPathsFromInstanceLabel(
           if (!queryProps) {
             return EMPTY;
           }
-          return imodelAccess.createQueryReader(queryProps, { restartToken: `${componentName}/${componentId}/filter-by-label`, limit });
+          return from(imodelAccess.createQueryReader(queryProps, { restartToken: `${componentName}/${componentId}/filter-by-label`, limit })).pipe(
+            catchBeSQLiteInterrupts,
+          );
         }),
         releaseMainThreadOnItemsCount(1000),
         map((row): InstanceKey => {
@@ -999,6 +1002,7 @@ function createGeometricElementInstanceKeyPaths(props: {
       { rowFormat: "Indexes", limit: "unbounded", restartToken: `${componentName}/${componentId}/element-paths/${chunkIndex}` },
     );
   }).pipe(
+    catchBeSQLiteInterrupts,
     releaseMainThreadOnItemsCount(300),
     map((row) => parseQueryRow(row, separator, elementClass, categoryClass, modelClass)),
     mergeMap((elementHierarchyPath) =>

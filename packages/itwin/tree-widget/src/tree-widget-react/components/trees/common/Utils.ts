@@ -42,9 +42,6 @@ export async function showAll(props: {
   componentId?: GuidString;
 }) {
   const { models, categories, viewport, componentId } = props;
-  viewport.changeModelDisplay({ modelIds: models, display: true });
-  viewport.clearNeverDrawn();
-  viewport.clearAlwaysDrawn();
   if (categories) {
     await showAllCategories(categories, viewport);
   } else {
@@ -55,6 +52,9 @@ export async function showAll(props: {
     const ids = categoryInfos.map((categoryInfo) => categoryInfo.categoryId);
     await enableCategoryDisplay(viewport, ids, true);
   }
+  viewport.changeModelDisplay({ modelIds: models, display: true });
+  viewport.clearNeverDrawn();
+  viewport.clearAlwaysDrawn();
 }
 
 /**

@@ -34,6 +34,7 @@ import {
   CLASS_NAME_GeometricElement2d,
   CLASS_NAME_GeometricElement3d,
 } from "../common/internal/ClassNameDefinitions.js";
+import { catchBeSQLiteInterrupts } from "../common/internal/UseErrorState.js";
 import { fromWithRelease, getOptimalBatchSize, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { SearchLimitExceededError } from "../common/TreeErrors.js";
 
@@ -561,6 +562,7 @@ function createInstanceKeyPathsFromInstanceLabelObs({
     mergeMap((queryProps) =>
       props.imodelAccess.createQueryReader(queryProps, { restartToken: `${props.componentName}/${props.componentId}/filter-by-label`, limit: props.limit }),
     ),
+    catchBeSQLiteInterrupts,
     map((row): InstanceKey => {
       let className: string;
       switch (row.ClassName) {
@@ -721,6 +723,7 @@ function createGeometricElementInstanceKeyPaths(props: {
       { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${componentName}/${componentId}/elements${type}-filter-paths/${chunkIndex}` },
     );
   }).pipe(
+    catchBeSQLiteInterrupts,
     releaseMainThreadOnItemsCount(300),
     map((row) => parseQueryRow(row, separator)),
     mergeMap(({ path, parentClassificationId }) => {

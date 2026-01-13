@@ -17,6 +17,7 @@ import {
   CLASS_NAME_SubCategory,
 } from "../../common/internal/ClassNameDefinitions.js";
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
+import { catchBeSQLiteInterrupts } from "../../common/internal/UseErrorState.js";
 import { joinId64Arg } from "../../common/internal/Utils.js";
 
 import type { Observable } from "rxjs";
@@ -82,6 +83,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/visible-sub-categories` },
       );
     }).pipe(
+      catchBeSQLiteInterrupts,
       map((row) => {
         return { id: row.id, parentId: row.categoryId };
       }),
@@ -136,6 +138,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/element-models-and-categories` },
       );
     }).pipe(
+      catchBeSQLiteInterrupts,
       map((row) => {
         return { modelId: row.modelId, categoryId: row.categoryId, type: row.type };
       }),
@@ -214,6 +217,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/modeled-elements` },
       );
     }).pipe(
+      catchBeSQLiteInterrupts,
       map((row) => {
         return { modelId: row.modelId, categoryId: row.categoryId, modeledElementId: row.modeledElementId, rootCategoryId: row.rootCategoryId };
       }),
@@ -376,6 +380,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/classifications` },
       );
     }).pipe(
+      catchBeSQLiteInterrupts,
       map((row) => {
         return {
           id: row.id,
@@ -527,6 +532,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
         },
       );
     }).pipe(
+      catchBeSQLiteInterrupts,
       map((row) => {
         return { modelId: row.modelId, id: row.id, categoryId: row.categoryId };
       }),
