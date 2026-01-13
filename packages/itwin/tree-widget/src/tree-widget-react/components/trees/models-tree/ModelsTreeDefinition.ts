@@ -562,7 +562,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     });
 
     const bindings = new Array<ECSqlBinding>();
-    elementIds.map((id) => bindings.push({ type: "id", value: id }));
+    elementIds.forEach((id) => bindings.push({ type: "id", value: id }));
     return [
       {
         fullClassName: this.#hierarchyConfig.elementClassSpecification,
