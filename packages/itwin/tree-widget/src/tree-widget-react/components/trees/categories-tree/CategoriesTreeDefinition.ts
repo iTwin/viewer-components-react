@@ -820,7 +820,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
           if (!queryProps) {
             return EMPTY;
           }
-          return defer(() => imodelAccess.createQueryReader(queryProps, { restartToken: `${componentName}/${componentId}/filter-by-label`, limit })).pipe(
+          return from(imodelAccess.createQueryReader(queryProps, { restartToken: `${componentName}/${componentId}/filter-by-label`, limit })).pipe(
             catchBeSQLiteInterrupts,
           );
         }),
