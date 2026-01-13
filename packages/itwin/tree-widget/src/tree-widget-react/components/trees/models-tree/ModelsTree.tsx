@@ -44,7 +44,7 @@ export function ModelsTree({
   getTreeItemProps,
   treeLabel,
 }: ModelsTreeProps) {
-  const { modelsTreeProps, getTreeItemProps: modelsTreeItemProps } = useModelsTree({
+  const modelsTree = useModelsTree({
     activeView,
     searchText,
     hierarchyConfig,
@@ -59,7 +59,7 @@ export function ModelsTree({
 
   return (
     <VisibilityTree
-      {...modelsTreeProps}
+      {...modelsTree.treeProps}
       imodel={imodel}
       selectionStorage={selectionStorage}
       hierarchyLevelSizeLimit={hierarchyLevelConfig?.sizeLimit}
@@ -71,7 +71,7 @@ export function ModelsTree({
           getInlineActions={getInlineActions ? (node) => getInlineActions(node, treeProps) : undefined}
           getMenuActions={getMenuActions ? (node) => getMenuActions(node, treeProps) : undefined}
           getContextMenuActions={getContextMenuActions ? (node) => getContextMenuActions(node, treeProps) : undefined}
-          getTreeItemProps={(node) => modelsTreeItemProps(node, treeProps)}
+          getTreeItemProps={(node) => modelsTree.getTreeItemProps(node, treeProps)}
         />
       )}
     />

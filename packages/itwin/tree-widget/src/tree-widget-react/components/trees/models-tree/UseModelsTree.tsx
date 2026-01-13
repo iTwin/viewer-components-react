@@ -111,7 +111,7 @@ export interface UseModelsTreeProps {
 
 /** @beta */
 interface UseModelsTreeResult {
-  modelsTreeProps: Pick<
+  treeProps: Pick<
     VisibilityTreeProps,
     "treeName" | "getHierarchyDefinition" | "getSearchPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent" | "selectionPredicate"
   >;
@@ -189,7 +189,7 @@ export function useModelsTree({
 
   // TODO: add double click logic
   return {
-    modelsTreeProps: {
+    treeProps: {
       treeName: "models-tree-v2",
       visibilityHandlerFactory,
       getHierarchyDefinition,

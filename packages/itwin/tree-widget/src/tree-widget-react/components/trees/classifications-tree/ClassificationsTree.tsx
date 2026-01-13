@@ -40,7 +40,7 @@ export function ClassificationsTree({
   searchText,
   treeLabel,
 }: ClassificationsTreeProps) {
-  const { classificationsTreeProps, getTreeItemProps: classificationsTreeItemProps } = useClassificationsTree({
+  const classificationsTree = useClassificationsTree({
     activeView,
     hierarchyConfig,
     emptyTreeContent,
@@ -50,7 +50,7 @@ export function ClassificationsTree({
 
   return (
     <VisibilityTree
-      {...classificationsTreeProps}
+      {...classificationsTree.treeProps}
       imodel={imodel}
       selectionStorage={selectionStorage}
       hierarchyLevelSizeLimit={hierarchyLevelConfig?.sizeLimit}
@@ -63,7 +63,7 @@ export function ClassificationsTree({
           getInlineActions={getInlineActions ? (node) => getInlineActions(node, treeProps) : undefined}
           getMenuActions={getMenuActions ? (node) => getMenuActions(node, treeProps) : undefined}
           getContextMenuActions={getContextMenuActions ? (node) => getContextMenuActions(node, treeProps) : undefined}
-          getTreeItemProps={(node) => classificationsTreeItemProps(node, treeProps)}
+          getTreeItemProps={(node) => classificationsTree.getTreeItemProps(node, treeProps)}
         />
       )}
     />

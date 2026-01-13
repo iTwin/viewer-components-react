@@ -40,7 +40,7 @@ export function CategoriesTree({
   getTreeItemProps,
   treeLabel,
 }: CategoriesTreeProps) {
-  const { categoriesTreeProps, getTreeItemProps: categoriesTreeItemProps } = useCategoriesTree({
+  const categoriesTree = useCategoriesTree({
     searchText,
     activeView,
     onCategoriesFiltered,
@@ -51,7 +51,7 @@ export function CategoriesTree({
 
   return (
     <VisibilityTree
-      {...categoriesTreeProps}
+      {...categoriesTree.treeProps}
       imodel={imodel}
       selectionStorage={selectionStorage}
       hierarchyLevelSizeLimit={hierarchyLevelConfig?.sizeLimit}
@@ -63,7 +63,7 @@ export function CategoriesTree({
           getInlineActions={getInlineActions ? (node) => getInlineActions(node, treeProps) : undefined}
           getMenuActions={getMenuActions ? (node) => getMenuActions(node, treeProps) : undefined}
           getContextMenuActions={getContextMenuActions ? (node) => getContextMenuActions(node, treeProps) : undefined}
-          getTreeItemProps={(node) => categoriesTreeItemProps(node, treeProps)}
+          getTreeItemProps={(node) => categoriesTree.getTreeItemProps(node, treeProps)}
         />
       )}
     />

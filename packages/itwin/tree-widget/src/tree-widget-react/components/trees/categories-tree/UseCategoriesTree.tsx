@@ -48,7 +48,7 @@ export interface UseCategoriesTreeProps {
 
 /** @beta */
 interface UseCategoriesTreeResult {
-  categoriesTreeProps: Pick<
+  treeProps: Pick<
     VisibilityTreeProps,
     "treeName" | "getHierarchyDefinition" | "getSearchPaths" | "visibilityHandlerFactory" | "highlightText" | "emptyTreeContent"
   >;
@@ -111,7 +111,7 @@ export function useCategoriesTree({
   });
 
   return {
-    categoriesTreeProps: {
+    treeProps: {
       treeName: "categories-tree-v2",
       getHierarchyDefinition,
       getSearchPaths: getPaths,

@@ -41,7 +41,7 @@ export interface UseClassificationsTreeProps {
 
 /** @alpha */
 interface UseClassificationsTreeResult {
-  classificationsTreeProps: Pick<
+  treeProps: Pick<
     VisibilityTreeProps,
     "treeName" | "getHierarchyDefinition" | "visibilityHandlerFactory" | "getSearchPaths" | "emptyTreeContent" | "highlightText"
   >;
@@ -97,7 +97,7 @@ export function useClassificationsTree({
   });
 
   return {
-    classificationsTreeProps: {
+    treeProps: {
       treeName: ClassificationsTreeComponent.id,
       getHierarchyDefinition,
       visibilityHandlerFactory,
