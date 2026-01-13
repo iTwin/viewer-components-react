@@ -8,6 +8,7 @@ import { Guid, Id64 } from "@itwin/core-bentley";
 import { QueryRowFormat } from "@itwin/core-common";
 import { reduceWhile, toVoidPromise } from "./Rxjs.js";
 import { createVisibilityStatus } from "./Tooltip.js";
+import { isBeSqliteInterruptError } from "./UseErrorState.js";
 import { fromWithRelease, getClassesByView, getOptimalBatchSize, releaseMainThreadOnItemsCount } from "./Utils.js";
 
 import type { Observable, OperatorFunction } from "rxjs";
@@ -198,13 +199,21 @@ export async function loadCategoriesFromViewport(vp: TreeWidgetViewport, compone
   const categories: CategoryInfo[] = [];
   const rows = await (async () => {
     const result = new Array<Id64String>();
-    for await (const row of vp.iModel.createQueryReader(ecsql, undefined, {
-      rowFormat: QueryRowFormat.UseJsPropertyNames,
-      restartToken: `CategoriesVisibilityUtils/${componentId ?? Guid.createValue()}/categories`,
-    })) {
-      result.push(row.id);
+    try {
+      for await (const row of vp.iModel.createQueryReader(ecsql, undefined, {
+        rowFormat: QueryRowFormat.UseJsPropertyNames,
+        restartToken: `CategoriesVisibilityUtils/${componentId ?? Guid.createValue()}/categories`,
+      })) {
+        result.push(row.id);
+      }
+      return result;
+      // This can happen when query is cancelled
+    } catch (error) {
+      if (isBeSqliteInterruptError(error)) {
+        return [];
+      }
+      throw error;
     }
-    return result;
   })();
   (await vp.iModel.categories.getCategoryInfo(rows)).forEach((val) => {
     categories.push({ categoryId: val.id, subCategoryIds: val.subCategories.size ? [...val.subCategories.keys()] : undefined });

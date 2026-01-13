@@ -15,6 +15,7 @@ import {
   CLASS_NAME_Subject,
 } from "../../common/internal/ClassNameDefinitions.js";
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
+import { catchBeSQLiteInterrupts } from "../../common/internal/UseErrorState.js";
 import { pushToMap } from "../../common/internal/Utils.js";
 
 import type { Observable } from "rxjs";
@@ -89,6 +90,7 @@ export class ModelsTreeIdsCache implements Disposable {
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/visible-sub-categories` },
       );
     }).pipe(
+      catchBeSQLiteInterrupts,
       map((row) => {
         return { id: row.id, parentId: row.categoryId };
       }),
@@ -142,6 +144,7 @@ export class ModelsTreeIdsCache implements Disposable {
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/subjects` },
       );
     }).pipe(
+      catchBeSQLiteInterrupts,
       map((row) => {
         return { id: row.id, parentId: row.parentId, targetPartitionId: row.targetPartitionId, hideInHierarchy: !!row.hideInHierarchy };
       }),
@@ -163,6 +166,7 @@ export class ModelsTreeIdsCache implements Disposable {
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/models` },
       );
     }).pipe(
+      catchBeSQLiteInterrupts,
       map((row) => {
         return { id: row.id, parentId: row.parentId };
       }),
@@ -361,6 +365,7 @@ export class ModelsTreeIdsCache implements Disposable {
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/model-categories` },
       );
     }).pipe(
+      catchBeSQLiteInterrupts,
       map((row) => {
         return { modelId: row.modelId, categoryId: row.categoryId, isModelPrivate: !!row.isModelPrivate, isRootElementCategory: !!row.isRootElementCategory };
       }),
@@ -385,6 +390,7 @@ export class ModelsTreeIdsCache implements Disposable {
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/modeled-elements` },
       );
     }).pipe(
+      catchBeSQLiteInterrupts,
       map((row) => {
         return { modelId: row.modelId, categoryId: row.categoryId, modeledElementId: row.modeledElementId };
       }),
