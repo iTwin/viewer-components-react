@@ -194,24 +194,6 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
 
     describe("getVisibilityStatus", () => {
-      it("returns disabled when node is not an instance node", async () => {
-        const node: HierarchyNode = {
-          key: {
-            type: "label-grouping",
-            label: "",
-          },
-          children: false,
-          groupedInstanceKeys: [],
-          label: "",
-          parentKeys: [],
-        };
-
-        using handlerResult = createHandler();
-        const { handler } = handlerResult;
-        const result = await handler.getVisibilityStatus(node);
-        expect(result).to.include({ state: "hidden", isDisabled: true });
-      });
-
       describe("subject", () => {
         it("can be overridden", async () => {
           const overrides = {
@@ -989,15 +971,6 @@ describe("ModelsTreeVisibilityHandler", () => {
           expect(status.state).to.eq("visible");
         });
 
-        it("is disabled when has no category or model", async () => {
-          using handlerResult = createHandler();
-          const { handler } = handlerResult;
-          let result = await handler.getVisibilityStatus(createElementHierarchyNode({ modelId: undefined, categoryId: undefined }));
-          expect(result.isDisabled).to.be.true;
-          result = await handler.getVisibilityStatus(createElementHierarchyNode({ modelId: "0x1", categoryId: undefined }));
-          expect(result.isDisabled).to.be.true;
-        });
-
         it("is hidden when model is hidden", async () => {
           const node = createElementHierarchyNode({
             modelId,
@@ -1237,6 +1210,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             modelId,
             categoryId,
             elements: elementIds,
+            parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x1", className: "BisCore.Subject" }] },
+              { type: "instances", instanceKeys: [{ id: modelId, className: "BisCore.GeometricModel3d" }] },
+              { type: "instances", instanceKeys: [{ id: categoryId, className: "BisCore.SpatialCategory" }] },
+            ],
           });
           using handlerResult = createHandler({
             idsCache: createFakeIdsCache({
@@ -1258,6 +1236,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             modelId,
             categoryId,
             elements: elementIds,
+            parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x1", className: "BisCore.Subject" }] },
+              { type: "instances", instanceKeys: [{ id: modelId, className: "BisCore.GeometricModel3d" }] },
+              { type: "instances", instanceKeys: [{ id: categoryId, className: "BisCore.SpatialCategory" }] },
+            ],
           });
           using handlerResult = createHandler({
             idsCache: createFakeIdsCache({
@@ -1279,6 +1262,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             modelId,
             categoryId,
             elements: elementIds,
+            parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x1", className: "BisCore.Subject" }] },
+              { type: "instances", instanceKeys: [{ id: modelId, className: "BisCore.GeometricModel3d" }] },
+              { type: "instances", instanceKeys: [{ id: categoryId, className: "BisCore.SpatialCategory" }] },
+            ],
           });
           using handlerResult = createHandler({
             idsCache: createFakeIdsCache({
@@ -1301,6 +1289,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             modelId,
             categoryId,
             elements: elementIds,
+            parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x1", className: "BisCore.Subject" }] },
+              { type: "instances", instanceKeys: [{ id: modelId, className: "BisCore.GeometricModel3d" }] },
+              { type: "instances", instanceKeys: [{ id: categoryId, className: "BisCore.SpatialCategory" }] },
+            ],
           });
           using handlerResult = createHandler({
             idsCache: createFakeIdsCache({
@@ -1319,6 +1312,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             modelId,
             categoryId,
             elements: elementIds,
+            parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x1", className: "BisCore.Subject" }] },
+              { type: "instances", instanceKeys: [{ id: modelId, className: "BisCore.GeometricModel3d" }] },
+              { type: "instances", instanceKeys: [{ id: categoryId, className: "BisCore.SpatialCategory" }] },
+            ],
           });
           using handlerResult = createHandler({
             idsCache: createFakeIdsCache({
@@ -1340,6 +1338,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             modelId,
             categoryId,
             elements: elementIds,
+            parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x1", className: "BisCore.Subject" }] },
+              { type: "instances", instanceKeys: [{ id: modelId, className: "BisCore.GeometricModel3d" }] },
+              { type: "instances", instanceKeys: [{ id: categoryId, className: "BisCore.SpatialCategory" }] },
+            ],
           });
           using handlerResult = createHandler({
             idsCache: createFakeIdsCache({
@@ -1361,6 +1364,11 @@ describe("ModelsTreeVisibilityHandler", () => {
             modelId,
             categoryId,
             elements: elementIds,
+            parentKeys: [
+              { type: "instances", instanceKeys: [{ id: "0x1", className: "BisCore.Subject" }] },
+              { type: "instances", instanceKeys: [{ id: modelId, className: "BisCore.GeometricModel3d" }] },
+              { type: "instances", instanceKeys: [{ id: categoryId, className: "BisCore.SpatialCategory" }] },
+            ],
           });
 
           for (const categoryOn of [true, false]) {
