@@ -504,7 +504,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                   }),
                 },
                 extendedData: {
-                  categoryId: { selector: "IdToHex(this.Parent.Id)" },
+                  categoryId: { selector: "printf('0x%x', this.Parent.Id)" },
                   isSubCategory: true,
                   imageId: "icon-layers-isolate",
                 },
