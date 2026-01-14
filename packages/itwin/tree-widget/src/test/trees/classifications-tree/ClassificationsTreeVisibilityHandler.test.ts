@@ -20,6 +20,7 @@ import {
 } from "../../IModelUtils.js";
 import { initializeITwinJs, terminateITwinJs } from "../../Initialize.js";
 import { createIModelAccess } from "../Common.js";
+import { validateHierarchyVisibility } from "../common/VisibilityValidation.js";
 import { createTreeWidgetTestingViewport } from "../TreeUtils.js";
 import {
   createClassificationHierarchyNode,
@@ -34,11 +35,11 @@ import {
   insertClassificationTable,
   insertElementHasClassificationsRelationship,
 } from "./Utils.js";
-import { validateHierarchyVisibility } from "./VisibilityValidation.js";
+import { validateNodeVisibility } from "./VisibilityValidation.js";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyNodeIdentifiersPath, HierarchySearchPath } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
+import type { ECClassHierarchyInspector, Props } from "@itwin/presentation-shared";
 import type { ClassificationsTreeSearchTargets } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/SearchResultsTree.js";
 import type { SearchResultsTree } from "../../../tree-widget-react/components/trees/common/internal/visibility/BaseSearchResultsTree.js";
 import type { TreeWidgetViewport } from "../../../tree-widget-react/components/trees/common/TreeWidgetViewport.js";
@@ -128,7 +129,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       });
       const { handler, provider, viewport } = visibilityTestData;
 
-      await validateHierarchyVisibility({
+      await validateClassificationsTreeHierarchyVisibility({
         provider,
         handler,
         viewport,
@@ -170,7 +171,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       });
       const { handler, provider, viewport } = visibilityTestData;
 
-      await validateHierarchyVisibility({
+      await validateClassificationsTreeHierarchyVisibility({
         provider,
         handler,
         viewport,
@@ -216,7 +217,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createClassificationTableHierarchyNode({ id: keys.table.id }), true);
-        await validateHierarchyVisibility({
+        await validateClassificationsTreeHierarchyVisibility({
           provider,
           handler,
           viewport,
@@ -269,7 +270,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createClassificationHierarchyNode({ id: keys.childClassification.id }), true);
-        await validateHierarchyVisibility({
+        await validateClassificationsTreeHierarchyVisibility({
           provider,
           handler,
           viewport,
@@ -348,18 +349,20 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createClassificationHierarchyNode({ id: keys.childClassification1.id }), true);
-        await validateHierarchyVisibility({
+        await validateClassificationsTreeHierarchyVisibility({
           provider,
           handler,
           viewport,
+          // prettier-ignore
           expectations: {
             [keys.table.id]: "partial",
-            [keys.parentClassification.id]: "partial",
-            [keys.childClassification1.id]: "visible",
-            [keys.parentPhysicalElement1.id]: "visible",
-            [keys.childPhysicalElement1.id]: "visible",
-            [keys.childClassification2.id]: "hidden",
-            [keys.parentPhysicalElement2.id]: "hidden",
+              [keys.parentClassification.id]: "partial",
+                [keys.childClassification1.id]: "visible",
+                  [keys.parentPhysicalElement1.id]: "visible",
+                    [keys.childPhysicalElement1.id]: "visible",
+
+                [keys.childClassification2.id]: "hidden",
+                  [keys.parentPhysicalElement2.id]: "hidden",
           },
         });
       });
@@ -436,18 +439,20 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           createPhysicalElementHierarchyNode({ id: keys.targetPhysicalElement.id, categoryId: keys.spatialCategory.id, modelId: keys.physicalModel.id }),
           true,
         );
-        await validateHierarchyVisibility({
+        await validateClassificationsTreeHierarchyVisibility({
           provider,
           handler,
           viewport,
+          // prettier-ignore
           expectations: {
             [keys.table.id]: "partial",
-            [keys.parentClassification.id]: "partial",
-            [keys.childClassification.id]: "partial",
-            [keys.parentPhysicalElement.id]: "hidden",
-            [keys.siblingPhysicalElement.id]: "hidden",
-            [keys.targetPhysicalElement.id]: "visible",
-            [keys.childPhysicalElement.id]: "hidden",
+              [keys.parentClassification.id]: "partial",
+                [keys.childClassification.id]: "partial",
+                  [keys.parentPhysicalElement.id]: "hidden",
+                    [keys.siblingPhysicalElement.id]: "hidden",
+
+                    [keys.targetPhysicalElement.id]: "visible",
+                      [keys.childPhysicalElement.id]: "hidden",
           },
         });
       });
@@ -491,7 +496,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       });
       const { handler, provider, viewport } = visibilityTestData;
 
-      await validateHierarchyVisibility({
+      await validateClassificationsTreeHierarchyVisibility({
         provider,
         handler,
         viewport,
@@ -535,7 +540,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       });
       const { handler, provider, viewport } = visibilityTestData;
 
-      await validateHierarchyVisibility({
+      await validateClassificationsTreeHierarchyVisibility({
         provider,
         handler,
         viewport,
@@ -581,7 +586,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createClassificationTableHierarchyNode({ id: keys.table.id }), false);
-        await validateHierarchyVisibility({
+        await validateClassificationsTreeHierarchyVisibility({
           provider,
           handler,
           viewport,
@@ -663,25 +668,27 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         const { handler, provider, viewport } = visibilityTestData;
 
         await handler.changeVisibility(createClassificationHierarchyNode({ id: keys.childClassification1.id }), false);
-        await validateHierarchyVisibility({
+        await validateClassificationsTreeHierarchyVisibility({
           provider,
           handler,
           viewport,
+          // prettier-ignore
           expectations: {
             [keys.table.id]: "partial",
-            [keys.parentClassification.id]: "partial",
-            [keys.childClassification1.id]: "hidden",
-            [keys.parentPhysicalElement1.id]: "hidden",
-            [keys.childPhysicalElement1.id]: "hidden",
-            [keys.childClassification2.id]: "visible",
-            [keys.parentPhysicalElement2.id]: "visible",
+              [keys.parentClassification.id]: "partial",
+                [keys.childClassification1.id]: "hidden",
+                  [keys.parentPhysicalElement1.id]: "hidden",
+                    [keys.childPhysicalElement1.id]: "hidden",
+
+                [keys.childClassification2.id]: "visible",
+                  [keys.parentPhysicalElement2.id]: "visible",
           },
         });
       });
     });
 
     describe("geometric element", () => {
-      it("hiding geometric element makes ancestors partially visible, and the element hidden", async function () {
+      it("hiding geometric element makes ancestors partially visible, element and its children hidden", async function () {
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           await importClassificationSchema(builder);
 
@@ -752,25 +759,27 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           createPhysicalElementHierarchyNode({ id: keys.targetPhysicalElement.id, categoryId: keys.spatialCategory.id, modelId: keys.physicalModel.id }),
           false,
         );
-        await validateHierarchyVisibility({
+        await validateClassificationsTreeHierarchyVisibility({
           provider,
           handler,
           viewport,
+          // prettier-ignore
           expectations: {
             [keys.table.id]: "partial",
-            [keys.parentClassification.id]: "partial",
-            [keys.childClassification.id]: "partial",
-            [keys.parentPhysicalElement.id]: "visible",
-            [keys.siblingPhysicalElement.id]: "visible",
-            [keys.targetPhysicalElement.id]: "hidden",
-            [keys.childPhysicalElement.id]: "visible",
+              [keys.parentClassification.id]: "partial",
+                [keys.childClassification.id]: "partial",
+                  [keys.parentPhysicalElement.id]: "visible",
+                    [keys.siblingPhysicalElement.id]: "visible",
+
+                    [keys.targetPhysicalElement.id]: "hidden",
+                      [keys.childPhysicalElement.id]: "visible",
           },
         });
       });
     });
   });
 
-  describe("filtered nodes", () => {
+  describe("search nodes", () => {
     async function createFilteredVisibilityTestData({
       imodel,
       searchPaths,
@@ -788,26 +797,29 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         viewType: view,
         visibleByDefault,
       });
-      const handler = createClassificationsTreeVisibilityHandler({ idsCache, viewport, imodelAccess, searchPaths });
+      const visibilityHandlerWithSearchPaths = createClassificationsTreeVisibilityHandler({ idsCache, searchPaths, imodelAccess, viewport });
+      const defaultVisibilityHandler = createClassificationsTreeVisibilityHandler({ idsCache, imodelAccess, viewport });
       const defaultProvider = createProvider({ idsCache, imodelAccess });
-      const filteredProvider = createProvider({ idsCache, imodelAccess, searchPaths });
+      const providerWithSearchPaths = createProvider({ idsCache, imodelAccess, searchPaths });
       return {
-        handler,
+        defaultVisibilityHandler,
+        visibilityHandlerWithSearchPaths,
         defaultProvider,
-        filteredProvider,
+        providerWithSearchPaths,
         imodel,
         imodelAccess,
         viewport,
         [Symbol.dispose]() {
           idsCache[Symbol.dispose]();
-          handler[Symbol.dispose]();
+          defaultVisibilityHandler[Symbol.dispose]();
+          visibilityHandlerWithSearchPaths[Symbol.dispose]();
           defaultProvider[Symbol.dispose]();
-          filteredProvider[Symbol.dispose]();
+          providerWithSearchPaths[Symbol.dispose]();
         },
       };
     }
 
-    it("showing filtered geometric element changes visibility for nodes in search paths", async function () {
+    it("showing parent geometric element of search target changes visibility for nodes in search paths", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         await importClassificationSchema(builder);
 
@@ -817,29 +829,45 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "physical model" });
         const spatialCategory = insertSpatialCategory({ builder, codeValue: "spatial category" });
-        const element1 = insertPhysicalElement({
+        const parentOfSearchTargetElement = insertPhysicalElement({
           builder,
           modelId: physicalModel.id,
           categoryId: spatialCategory.id,
-          codeValue: "3d element1",
+          codeValue: "3d parent of search target",
         });
-        const element2 = insertPhysicalElement({
+        const searchTargetChildElement = insertPhysicalElement({
           builder,
           modelId: physicalModel.id,
           categoryId: spatialCategory.id,
-          codeValue: "3d element2",
+          codeValue: "3d search target",
+          parentId: parentOfSearchTargetElement.id,
         });
-        insertElementHasClassificationsRelationship({ builder, elementId: element1.id, classificationId: classification.id });
-        insertElementHasClassificationsRelationship({ builder, elementId: element2.id, classificationId: classification.id });
+        const childElement = insertPhysicalElement({
+          builder,
+          modelId: physicalModel.id,
+          categoryId: spatialCategory.id,
+          codeValue: "3d child",
+          parentId: parentOfSearchTargetElement.id,
+        });
+        const siblingElement = insertPhysicalElement({
+          builder,
+          modelId: physicalModel.id,
+          categoryId: spatialCategory.id,
+          codeValue: "3d sibling",
+        });
+        insertElementHasClassificationsRelationship({ builder, elementId: parentOfSearchTargetElement.id, classificationId: classification.id });
+        insertElementHasClassificationsRelationship({ builder, elementId: siblingElement.id, classificationId: classification.id });
 
         return {
           table,
           classification,
           physicalModel,
           spatialCategory,
-          element1,
-          element2,
-          searchPaths: [[table, classification, element1]],
+          parentOfSearchTargetElement,
+          searchTargetChildElement,
+          childElement,
+          siblingElement,
+          searchPaths: [[table, classification, parentOfSearchTargetElement, searchTargetChildElement]],
         };
       });
 
@@ -849,42 +877,148 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         searchPaths,
         view: "3d",
       });
-      const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
+      const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
 
-      await handler.changeVisibility(
+      await visibilityHandlerWithSearchPaths.changeVisibility(
         createPhysicalElementHierarchyNode({
-          id: keys.element1.id,
+          id: keys.parentOfSearchTargetElement.id,
           categoryId: keys.spatialCategory.id,
           modelId: keys.physicalModel.id,
+          parentKeys: [keys.table, keys.classification],
           search: {
-            isSearchTarget: true,
-            childrenTargetPaths: [],
+            isSearchTarget: false,
+            childrenTargetPaths: [[keys.searchTargetChildElement]],
           },
         }),
         true,
       );
 
-      await validateHierarchyVisibility({
-        provider: filteredProvider,
-        handler,
+      await validateClassificationsTreeHierarchyVisibility({
+        provider: providerWithSearchPaths,
+        handler: visibilityHandlerWithSearchPaths,
         viewport,
         expectations: "all-visible",
       });
 
-      await validateHierarchyVisibility({
+      await validateClassificationsTreeHierarchyVisibility({
         provider: defaultProvider,
-        handler,
+        handler: defaultVisibilityHandler,
         viewport,
+        // prettier-ignore
         expectations: {
           [keys.table.id]: "partial",
-          [keys.classification.id]: "partial",
-          [keys.element1.id]: "visible",
-          [keys.element2.id]: "hidden",
+            [keys.classification.id]: "partial",
+              [keys.siblingElement.id]: "hidden",
+
+              [keys.parentOfSearchTargetElement.id]: "visible",
+                [keys.searchTargetChildElement.id]: "visible",
+                [keys.childElement.id]: "hidden",
         },
       });
     });
 
-    it("showing filtered drawing element changes visibility for nodes in search paths", async function () {
+    it("showing search target geometric element changes visibility for nodes in search paths", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        await importClassificationSchema(builder);
+
+        const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
+        const table = insertClassificationTable({ builder, parentId: system.id, codeValue: "ClassificationTable" });
+        const classification = insertClassification({ builder, modelId: table.id, codeValue: "Classification" });
+
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "physical model" });
+        const spatialCategory = insertSpatialCategory({ builder, codeValue: "spatial category" });
+        const parentOfSearchTargetElement = insertPhysicalElement({
+          builder,
+          modelId: physicalModel.id,
+          categoryId: spatialCategory.id,
+          codeValue: "3d parent of search target",
+        });
+        const searchTargetChildElement = insertPhysicalElement({
+          builder,
+          modelId: physicalModel.id,
+          categoryId: spatialCategory.id,
+          codeValue: "3d search target child",
+          parentId: parentOfSearchTargetElement.id,
+        });
+        const childElement = insertPhysicalElement({
+          builder,
+          modelId: physicalModel.id,
+          categoryId: spatialCategory.id,
+          codeValue: "3d child",
+          parentId: parentOfSearchTargetElement.id,
+        });
+        const siblingElement = insertPhysicalElement({
+          builder,
+          modelId: physicalModel.id,
+          categoryId: spatialCategory.id,
+          codeValue: "3d sibling",
+        });
+        insertElementHasClassificationsRelationship({ builder, elementId: parentOfSearchTargetElement.id, classificationId: classification.id });
+        insertElementHasClassificationsRelationship({ builder, elementId: siblingElement.id, classificationId: classification.id });
+
+        return {
+          table,
+          classification,
+          physicalModel,
+          spatialCategory,
+          parentOfSearchTargetElement,
+          searchTargetChildElement,
+          childElement,
+          siblingElement,
+          searchPaths: [[table, classification, parentOfSearchTargetElement, searchTargetChildElement]],
+        };
+      });
+
+      const { imodel, searchPaths, ...keys } = buildIModelResult;
+      using visibilityTestData = await createFilteredVisibilityTestData({
+        imodel,
+        searchPaths,
+        view: "3d",
+      });
+      const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
+
+      await visibilityHandlerWithSearchPaths.changeVisibility(
+        createPhysicalElementHierarchyNode({
+          id: keys.searchTargetChildElement.id,
+          categoryId: keys.spatialCategory.id,
+          modelId: keys.physicalModel.id,
+          parentKeys: [keys.table, keys.classification, keys.parentOfSearchTargetElement],
+          search: { isSearchTarget: true },
+        }),
+        true,
+      );
+
+      await validateClassificationsTreeHierarchyVisibility({
+        provider: providerWithSearchPaths,
+        handler: visibilityHandlerWithSearchPaths,
+        viewport,
+        // prettier-ignore
+        expectations: {
+          [keys.table.id]: "partial",
+            [keys.classification.id]: "partial",
+              [keys.parentOfSearchTargetElement.id]: "partial",
+                [keys.searchTargetChildElement.id]: "visible",
+        },
+      });
+
+      await validateClassificationsTreeHierarchyVisibility({
+        provider: defaultProvider,
+        handler: defaultVisibilityHandler,
+        viewport,
+        // prettier-ignore
+        expectations: {
+          [keys.table.id]: "partial",
+            [keys.classification.id]: "partial",
+              [keys.siblingElement.id]: "hidden",
+
+              [keys.parentOfSearchTargetElement.id]: "hidden",
+                [keys.searchTargetChildElement.id]: "visible",
+                [keys.childElement.id]: "hidden",
+        },
+      });
+    });
+
+    it("showing parent drawing element of search target changes visibility for nodes in search paths", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         await importClassificationSchema(builder);
 
@@ -893,29 +1027,45 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         const classification = insertClassification({ builder, modelId: table.id, codeValue: "Classification" });
         const drawingModel = insertDrawingModelWithPartition({ builder, codeValue: "drawing model" });
         const drawingCategory = insertDrawingCategory({ builder, codeValue: "drawing category" });
-        const element1 = insertDrawingGraphic({
+        const parentOfSearchTargetElement = insertDrawingGraphic({
           builder,
           modelId: drawingModel.id,
           categoryId: drawingCategory.id,
-          codeValue: "2d element1",
+          codeValue: "2d parent of search target",
         });
-        const element2 = insertDrawingGraphic({
+        const searchTargetChildElement = insertDrawingGraphic({
           builder,
           modelId: drawingModel.id,
           categoryId: drawingCategory.id,
-          codeValue: "2d element2",
+          codeValue: "2d search target",
+          parentId: parentOfSearchTargetElement.id,
         });
-        insertElementHasClassificationsRelationship({ builder, elementId: element1.id, classificationId: classification.id });
-        insertElementHasClassificationsRelationship({ builder, elementId: element2.id, classificationId: classification.id });
+        const childElement = insertDrawingGraphic({
+          builder,
+          modelId: drawingModel.id,
+          categoryId: drawingCategory.id,
+          codeValue: "2d child",
+          parentId: parentOfSearchTargetElement.id,
+        });
+        const siblingElement = insertDrawingGraphic({
+          builder,
+          modelId: drawingModel.id,
+          categoryId: drawingCategory.id,
+          codeValue: "2d sibling",
+        });
+        insertElementHasClassificationsRelationship({ builder, elementId: parentOfSearchTargetElement.id, classificationId: classification.id });
+        insertElementHasClassificationsRelationship({ builder, elementId: siblingElement.id, classificationId: classification.id });
 
         return {
           table,
           classification,
           drawingModel,
           drawingCategory,
-          element1,
-          element2,
-          searchPaths: [[table, classification, element1]],
+          parentOfSearchTargetElement,
+          searchTargetChildElement,
+          childElement,
+          siblingElement,
+          searchPaths: [[table, classification, parentOfSearchTargetElement, searchTargetChildElement]],
         };
       });
 
@@ -925,42 +1075,147 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         searchPaths,
         view: "2d",
       });
-      const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
+      const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
 
-      await handler.changeVisibility(
+      await visibilityHandlerWithSearchPaths.changeVisibility(
         createDrawingElementHierarchyNode({
-          id: keys.element1.id,
+          id: keys.parentOfSearchTargetElement.id,
           categoryId: keys.drawingCategory.id,
           modelId: keys.drawingModel.id,
+          parentKeys: [keys.table, keys.classification],
           search: {
-            isSearchTarget: true,
-            childrenTargetPaths: [],
+            isSearchTarget: false,
+            childrenTargetPaths: [[keys.searchTargetChildElement]],
           },
         }),
         true,
       );
 
-      await validateHierarchyVisibility({
-        provider: filteredProvider,
-        handler,
+      await validateClassificationsTreeHierarchyVisibility({
+        provider: providerWithSearchPaths,
+        handler: visibilityHandlerWithSearchPaths,
         viewport,
         expectations: "all-visible",
       });
 
-      await validateHierarchyVisibility({
+      await validateClassificationsTreeHierarchyVisibility({
         provider: defaultProvider,
-        handler,
+        handler: defaultVisibilityHandler,
         viewport,
+        // prettier-ignore
         expectations: {
           [keys.table.id]: "partial",
-          [keys.classification.id]: "partial",
-          [keys.element1.id]: "visible",
-          [keys.element2.id]: "hidden",
+            [keys.classification.id]: "partial",
+              [keys.siblingElement.id]: "hidden",
+
+              [keys.parentOfSearchTargetElement.id]: "visible",
+                [keys.searchTargetChildElement.id]: "visible",
+                [keys.childElement.id]: "hidden",
         },
       });
     });
 
-    it("showing filtered classification changes visibility for nodes in search paths", async function () {
+    it("showing search target drawing element changes visibility for nodes in search paths", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        await importClassificationSchema(builder);
+
+        const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
+        const table = insertClassificationTable({ builder, parentId: system.id, codeValue: "ClassificationTable" });
+        const classification = insertClassification({ builder, modelId: table.id, codeValue: "Classification" });
+        const drawingModel = insertDrawingModelWithPartition({ builder, codeValue: "drawing model" });
+        const drawingCategory = insertDrawingCategory({ builder, codeValue: "drawing category" });
+        const parentOfSearchTargetElement = insertDrawingGraphic({
+          builder,
+          modelId: drawingModel.id,
+          categoryId: drawingCategory.id,
+          codeValue: "2d parent of search target",
+        });
+        const searchTargetChildElement = insertDrawingGraphic({
+          builder,
+          modelId: drawingModel.id,
+          categoryId: drawingCategory.id,
+          codeValue: "2d search target",
+          parentId: parentOfSearchTargetElement.id,
+        });
+        const childElement = insertDrawingGraphic({
+          builder,
+          modelId: drawingModel.id,
+          categoryId: drawingCategory.id,
+          codeValue: "2d child",
+          parentId: parentOfSearchTargetElement.id,
+        });
+        const siblingElement = insertDrawingGraphic({
+          builder,
+          modelId: drawingModel.id,
+          categoryId: drawingCategory.id,
+          codeValue: "2d sibling",
+        });
+        insertElementHasClassificationsRelationship({ builder, elementId: parentOfSearchTargetElement.id, classificationId: classification.id });
+        insertElementHasClassificationsRelationship({ builder, elementId: siblingElement.id, classificationId: classification.id });
+
+        return {
+          table,
+          classification,
+          drawingModel,
+          drawingCategory,
+          parentOfSearchTargetElement,
+          searchTargetChildElement,
+          childElement,
+          siblingElement,
+          searchPaths: [[table, classification, parentOfSearchTargetElement, searchTargetChildElement]],
+        };
+      });
+
+      const { imodel, searchPaths, ...keys } = buildIModelResult;
+      using visibilityTestData = await createFilteredVisibilityTestData({
+        imodel,
+        searchPaths,
+        view: "2d",
+      });
+      const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
+
+      await visibilityHandlerWithSearchPaths.changeVisibility(
+        createDrawingElementHierarchyNode({
+          id: keys.searchTargetChildElement.id,
+          categoryId: keys.drawingCategory.id,
+          modelId: keys.drawingModel.id,
+          parentKeys: [keys.table, keys.classification, keys.parentOfSearchTargetElement],
+          search: { isSearchTarget: true },
+        }),
+        true,
+      );
+
+      await validateClassificationsTreeHierarchyVisibility({
+        provider: providerWithSearchPaths,
+        handler: visibilityHandlerWithSearchPaths,
+        viewport,
+        // prettier-ignore
+        expectations: {
+          [keys.table.id]: "partial",
+            [keys.classification.id]: "partial",
+              [keys.parentOfSearchTargetElement.id]: "partial",
+                [keys.searchTargetChildElement.id]: "visible",
+        },
+      });
+
+      await validateClassificationsTreeHierarchyVisibility({
+        provider: defaultProvider,
+        handler: defaultVisibilityHandler,
+        viewport,
+        // prettier-ignore
+        expectations: {
+          [keys.table.id]: "partial",
+            [keys.classification.id]: "partial",
+              [keys.siblingElement.id]: "hidden",
+
+              [keys.parentOfSearchTargetElement.id]: "hidden",
+                [keys.searchTargetChildElement.id]: "visible",
+                [keys.childElement.id]: "hidden",
+        },
+      });
+    });
+
+    it("showing classification of search target element changes visibility for nodes in search paths", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         await importClassificationSchema(builder);
 
@@ -971,27 +1226,41 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "physical model" });
         const spatialCategory1 = insertSpatialCategory({ builder, codeValue: "spatial category1" });
         const spatialCategory2 = insertSpatialCategory({ builder, codeValue: "spatial category2" });
-        const element1 = insertPhysicalElement({
+        const parentOfSearchTargetElement = insertPhysicalElement({
           builder,
           modelId: physicalModel.id,
           categoryId: spatialCategory1.id,
-          codeValue: "3d element1",
+          codeValue: "3d parent of search target",
         });
-        const element2 = insertPhysicalElement({
+        const searchTargetChildElement = insertPhysicalElement({
           builder,
           modelId: physicalModel.id,
           categoryId: spatialCategory1.id,
-          codeValue: "3d element2",
+          codeValue: "3d search target",
+          parentId: parentOfSearchTargetElement.id,
         });
-        const element3 = insertPhysicalElement({
+        const childElement = insertPhysicalElement({
+          builder,
+          modelId: physicalModel.id,
+          categoryId: spatialCategory1.id,
+          codeValue: "3d child",
+          parentId: parentOfSearchTargetElement.id,
+        });
+        const siblingElement = insertPhysicalElement({
+          builder,
+          modelId: physicalModel.id,
+          categoryId: spatialCategory1.id,
+          codeValue: "3d sibling",
+        });
+        const elementFromOtherClassification = insertPhysicalElement({
           builder,
           modelId: physicalModel.id,
           categoryId: spatialCategory2.id,
-          codeValue: "3d element3",
+          codeValue: "3d other classification",
         });
-        insertElementHasClassificationsRelationship({ builder, elementId: element1.id, classificationId: classification1.id });
-        insertElementHasClassificationsRelationship({ builder, elementId: element2.id, classificationId: classification1.id });
-        insertElementHasClassificationsRelationship({ builder, elementId: element3.id, classificationId: classification2.id });
+        insertElementHasClassificationsRelationship({ builder, elementId: parentOfSearchTargetElement.id, classificationId: classification1.id });
+        insertElementHasClassificationsRelationship({ builder, elementId: siblingElement.id, classificationId: classification1.id });
+        insertElementHasClassificationsRelationship({ builder, elementId: elementFromOtherClassification.id, classificationId: classification2.id });
 
         return {
           table,
@@ -1000,10 +1269,12 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           physicalModel,
           spatialCategory1,
           spatialCategory2,
-          element1,
-          element2,
-          element3,
-          searchPaths: [[table, classification1, element1]],
+          parentOfSearchTargetElement,
+          searchTargetChildElement,
+          childElement,
+          siblingElement,
+          elementFromOtherClassification,
+          searchPaths: [[table, classification1, parentOfSearchTargetElement, searchTargetChildElement]],
         };
       });
 
@@ -1013,42 +1284,47 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         searchPaths,
         view: "3d",
       });
-      const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
-      await handler.changeVisibility(
+      const { visibilityHandlerWithSearchPaths, defaultVisibilityHandler, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
+      await visibilityHandlerWithSearchPaths.changeVisibility(
         createClassificationHierarchyNode({
           id: keys.classification1.id,
           search: {
             isSearchTarget: false,
-            childrenTargetPaths: [[keys.element1]],
+            childrenTargetPaths: [[keys.parentOfSearchTargetElement, keys.searchTargetChildElement]],
           },
           parentKeys: [keys.table],
         }),
         true,
       );
 
-      await validateHierarchyVisibility({
-        provider: filteredProvider,
-        handler,
+      await validateClassificationsTreeHierarchyVisibility({
+        provider: providerWithSearchPaths,
+        handler: visibilityHandlerWithSearchPaths,
         viewport,
         expectations: "all-visible",
       });
 
-      await validateHierarchyVisibility({
+      await validateClassificationsTreeHierarchyVisibility({
         provider: defaultProvider,
-        handler,
+        handler: defaultVisibilityHandler,
         viewport,
+        // prettier-ignore
         expectations: {
           [keys.table.id]: "partial",
-          [keys.classification1.id]: "partial",
-          [keys.element1.id]: "visible",
-          [keys.element2.id]: "hidden",
-          [keys.classification2.id]: "hidden",
-          [keys.element3.id]: "hidden",
+            [keys.classification1.id]: "partial",
+              [keys.siblingElement.id]: "hidden",
+
+              [keys.parentOfSearchTargetElement.id]: "visible",
+                [keys.searchTargetChildElement.id]: "visible",
+                [keys.childElement.id]: "hidden",
+
+            [keys.classification2.id]: "hidden",
+              [keys.elementFromOtherClassification.id]: "hidden",
         },
       });
     });
 
-    it("showing filtered classification table changes visibility for nodes in search paths", async function () {
+    it("showing classification table of search target element changes visibility for nodes in search paths", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         await importClassificationSchema(builder);
 
@@ -1059,27 +1335,41 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "physical model" });
         const spatialCategory1 = insertSpatialCategory({ builder, codeValue: "spatial category1" });
         const spatialCategory2 = insertSpatialCategory({ builder, codeValue: "spatial category2" });
-        const element1 = insertPhysicalElement({
+        const parentOfSearchTargetElement = insertPhysicalElement({
           builder,
           modelId: physicalModel.id,
           categoryId: spatialCategory1.id,
-          codeValue: "3d element1",
+          codeValue: "3d parent of search target",
         });
-        const element2 = insertPhysicalElement({
+        const searchTargetChildElement = insertPhysicalElement({
           builder,
           modelId: physicalModel.id,
           categoryId: spatialCategory1.id,
-          codeValue: "3d element2",
+          codeValue: "3d search target",
+          parentId: parentOfSearchTargetElement.id,
         });
-        const element3 = insertPhysicalElement({
+        const childElement = insertPhysicalElement({
+          builder,
+          modelId: physicalModel.id,
+          categoryId: spatialCategory1.id,
+          codeValue: "3d child",
+          parentId: parentOfSearchTargetElement.id,
+        });
+        const siblingElement = insertPhysicalElement({
+          builder,
+          modelId: physicalModel.id,
+          categoryId: spatialCategory1.id,
+          codeValue: "3d sibling",
+        });
+        const elementFromOtherClassification = insertPhysicalElement({
           builder,
           modelId: physicalModel.id,
           categoryId: spatialCategory2.id,
-          codeValue: "3d element3",
+          codeValue: "3d other classification",
         });
-        insertElementHasClassificationsRelationship({ builder, elementId: element1.id, classificationId: classification1.id });
-        insertElementHasClassificationsRelationship({ builder, elementId: element2.id, classificationId: classification1.id });
-        insertElementHasClassificationsRelationship({ builder, elementId: element3.id, classificationId: classification2.id });
+        insertElementHasClassificationsRelationship({ builder, elementId: parentOfSearchTargetElement.id, classificationId: classification1.id });
+        insertElementHasClassificationsRelationship({ builder, elementId: siblingElement.id, classificationId: classification1.id });
+        insertElementHasClassificationsRelationship({ builder, elementId: elementFromOtherClassification.id, classificationId: classification2.id });
 
         return {
           table,
@@ -1088,10 +1378,12 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           physicalModel,
           spatialCategory1,
           spatialCategory2,
-          element1,
-          element2,
-          element3,
-          searchPaths: [[table, classification1, element1]],
+          parentOfSearchTargetElement,
+          searchTargetChildElement,
+          childElement,
+          siblingElement,
+          elementFromOtherClassification,
+          searchPaths: [[table, classification1, parentOfSearchTargetElement, searchTargetChildElement]],
         };
       });
 
@@ -1101,37 +1393,42 @@ describe("ClassificationsTreeVisibilityHandler", () => {
         searchPaths,
         view: "3d",
       });
-      const { handler, viewport, defaultProvider, filteredProvider } = visibilityTestData;
-      await handler.changeVisibility(
+      const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
+      await visibilityHandlerWithSearchPaths.changeVisibility(
         createClassificationTableHierarchyNode({
           hasChildren: true,
           id: keys.table.id,
           search: {
             isSearchTarget: false,
-            childrenTargetPaths: [[keys.classification1, keys.element1]],
+            childrenTargetPaths: [[keys.classification1, keys.parentOfSearchTargetElement, keys.searchTargetChildElement]],
           },
         }),
         true,
       );
 
-      await validateHierarchyVisibility({
-        provider: filteredProvider,
-        handler,
+      await validateClassificationsTreeHierarchyVisibility({
+        provider: providerWithSearchPaths,
+        handler: visibilityHandlerWithSearchPaths,
         viewport,
         expectations: "all-visible",
       });
 
-      await validateHierarchyVisibility({
+      await validateClassificationsTreeHierarchyVisibility({
         provider: defaultProvider,
-        handler,
+        handler: defaultVisibilityHandler,
         viewport,
+        // prettier-ignore
         expectations: {
           [keys.table.id]: "partial",
-          [keys.classification1.id]: "partial",
-          [keys.element1.id]: "visible",
-          [keys.element2.id]: "hidden",
-          [keys.classification2.id]: "hidden",
-          [keys.element3.id]: "hidden",
+            [keys.classification1.id]: "partial",
+              [keys.siblingElement.id]: "hidden",
+
+              [keys.parentOfSearchTargetElement.id]: "visible",
+                [keys.searchTargetChildElement.id]: "visible",
+                [keys.childElement.id]: "hidden",
+
+            [keys.classification2.id]: "hidden",
+              [keys.elementFromOtherClassification.id]: "hidden",
         },
       });
     });
@@ -1163,5 +1460,12 @@ function createClassificationsTreeVisibilityHandler(props: {
       });
     },
     viewport: props.viewport,
+  });
+}
+
+async function validateClassificationsTreeHierarchyVisibility(props: Omit<Props<typeof validateHierarchyVisibility>, "validateNodeVisibility">) {
+  return validateHierarchyVisibility({
+    ...props,
+    validateNodeVisibility,
   });
 }

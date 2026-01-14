@@ -4,60 +4,27 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { EMPTY, expand, from, mergeMap } from "rxjs";
-import { HierarchyNode } from "@itwin/presentation-hierarchies";
-import { waitFor } from "@testing-library/react";
-import { toVoidPromise } from "../../../tree-widget-react/components/trees/common/internal/Rxjs.js";
+import { ClassificationsTreeNode } from "../../../tree-widget-react.js";
 
-import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
-import type { Visibility } from "../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
-import type { HierarchyVisibilityHandler } from "../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
-import type { TreeWidgetTestingViewport } from "../TreeUtils.js";
-
-export interface VisibilityExpectations {
-  [id: string]: Visibility;
-}
-
-export interface ValidateNodeProps {
-  handler: HierarchyVisibilityHandler;
-  viewport: TreeWidgetTestingViewport;
-  expectations: "all-visible" | "all-hidden" | VisibilityExpectations;
-}
+import type { HierarchyNode } from "@itwin/presentation-hierarchies";
+import type { ValidateNodeProps } from "../common/VisibilityValidation.js";
 
 export async function validateNodeVisibility({ node, handler, expectations }: ValidateNodeProps & { node: HierarchyNode }) {
   const actualVisibility = await handler.getVisibilityStatus(node);
 
   if (expectations === "all-hidden" || expectations === "all-visible") {
-    expect(actualVisibility.state).to.eq(
-      expectations === "all-hidden" ? "hidden" : "visible",
-      `Expected [${node.label}] visibility to be ${expectations}, but got ${actualVisibility.state}`,
-    );
+    expect(actualVisibility.state).to.eq(expectations === "all-hidden" ? "hidden" : "visible", `Node, ${JSON.stringify(node)}}`);
     return;
   }
 
-  if (!HierarchyNode.isInstancesNode(node)) {
-    throw new Error(`Expected hierarchy to only have instance nodes, got ${JSON.stringify(node)}`);
+  if (
+    ClassificationsTreeNode.isClassificationNode(node) ||
+    ClassificationsTreeNode.isClassificationTableNode(node) ||
+    ClassificationsTreeNode.isGeometricElementNode(node)
+  ) {
+    const { id } = node.key.instanceKeys[0];
+    expect(actualVisibility.state).to.eq(expectations[id], `Node, ${JSON.stringify(node)}`);
+    return;
   }
-
-  const { id } = node.key.instanceKeys[0];
-  if (expectations[id] !== undefined) {
-    expect(actualVisibility.state).to.eq(expectations[id], `Expected [${node.label}] visibility to be ${expectations[id]}, but got ${actualVisibility.state}`);
-  }
-}
-
-export async function validateHierarchyVisibility({
-  provider,
-  ...props
-}: ValidateNodeProps & {
-  provider: HierarchyProvider;
-}) {
-  props.viewport.renderFrame();
-  // This promise allows handler change event to fire if it was scheduled.
-  await new Promise((resolve) => setTimeout(resolve));
-  await toVoidPromise(
-    from(provider.getNodes({ parentNode: undefined })).pipe(
-      expand((node) => (node.children ? provider.getNodes({ parentNode: node }) : EMPTY)),
-      mergeMap(async (node) => waitFor(async () => validateNodeVisibility({ ...props, node }))),
-    ),
-  );
+  throw new Error(`Expected hierarchy to contain only classification tables, classifications and elements got ${JSON.stringify(node)}`);
 }

@@ -24,8 +24,6 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import type {
   ClassGroupingNodeKey,
   GroupingHierarchyNode,
-  GroupingNodeKey,
-  HierarchyNodeKey,
   HierarchyProvider,
   HierarchySearchPath,
   NonGroupingHierarchyNode,
@@ -120,7 +118,7 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
   });
 }
 
-export function createSubjectHierarchyNode(props?: { ids?: Id64Arg; parentKeys?: HierarchyNodeKey[] }): NonGroupingHierarchyNode {
+export function createSubjectHierarchyNode(props?: { ids?: Id64Arg; parentKeys?: InstanceKey[] }): NonGroupingHierarchyNode {
   const instanceKeys = new Array<InstanceKey>();
   for (const id of props?.ids ? Id64.iterable(props.ids) : []) {
     instanceKeys.push({ className: CLASS_NAME_Subject, id });
@@ -132,13 +130,18 @@ export function createSubjectHierarchyNode(props?: { ids?: Id64Arg; parentKeys?:
     },
     children: false,
     label: "",
-    parentKeys: props?.parentKeys ?? [],
+    parentKeys: props?.parentKeys ? props.parentKeys.map((parentKey) => ({ type: "instances", instanceKeys: [parentKey] })) : [],
     extendedData: {
       isSubject: true,
     },
   };
 }
-export function createModelHierarchyNode(props?: { modelId?: Id64String; hasChildren?: boolean; parentKeys?: HierarchyNodeKey[] }): NonGroupingHierarchyNode {
+export function createModelHierarchyNode(props?: {
+  modelId?: Id64String;
+  hasChildren?: boolean;
+  parentKeys?: InstanceKey[];
+  search?: NonGroupingHierarchyNode["search"];
+}): NonGroupingHierarchyNode {
   return {
     key: {
       type: "instances",
@@ -146,7 +149,8 @@ export function createModelHierarchyNode(props?: { modelId?: Id64String; hasChil
     },
     children: !!props?.hasChildren,
     label: "",
-    parentKeys: props?.parentKeys ?? [],
+    parentKeys: props?.parentKeys ? props.parentKeys.map((parentKey) => ({ type: "instances", instanceKeys: [parentKey] })) : [],
+    search: props?.search,
     extendedData: {
       isModel: true,
       modelId: props?.modelId ?? "0x1",
@@ -158,11 +162,13 @@ export function createCategoryHierarchyNode({
   categoryId,
   hasChildren,
   parentKeys,
+  search,
 }: {
   modelId?: Id64String;
   categoryId?: Id64Arg;
   hasChildren?: boolean;
-  parentKeys?: HierarchyNodeKey[];
+  parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
+  search?: NonGroupingHierarchyNode["search"];
 }): NonGroupingHierarchyNode {
   return {
     key: {
@@ -174,7 +180,8 @@ export function createCategoryHierarchyNode({
     },
     children: !!hasChildren,
     label: "",
-    parentKeys: parentKeys ?? [],
+    parentKeys: parentKeys ? parentKeys.map((parentKey) => ("type" in parentKey ? parentKey : { type: "instances", instanceKeys: [parentKey] })) : [],
+    search,
     extendedData: {
       isCategory: true,
       modelIds: [modelId ?? "0x1"],
@@ -187,7 +194,7 @@ export function createElementHierarchyNode(props: {
   categoryId: Id64String | undefined;
   hasChildren?: boolean;
   elementId?: Id64String;
-  parentKeys?: HierarchyNodeKey[];
+  parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
   search?: NonGroupingHierarchyNode["search"];
 }): NonGroupingHierarchyNode {
   return {
@@ -198,7 +205,9 @@ export function createElementHierarchyNode(props: {
     children: !!props.hasChildren,
     label: "",
     search: props.search,
-    parentKeys: props.parentKeys ?? [],
+    parentKeys: props.parentKeys
+      ? props.parentKeys.map((parentKey) => ("type" in parentKey ? parentKey : { type: "instances", instanceKeys: [parentKey] }))
+      : [],
     extendedData: {
       isElement: true,
       modelId: props.modelId ?? "0x1",
@@ -215,9 +224,11 @@ export function createClassGroupingHierarchyNode({
 }: {
   elements: Id64Array;
   className?: string;
-  parentKeys?: HierarchyNodeKey[];
+  parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
   modelId: Id64String;
   categoryId: Id64String;
+  hasDirectNonSearchTargets?: boolean;
+  hasSearchTargetAncestor?: boolean;
 }): GroupingHierarchyNode & { key: ClassGroupingNodeKey } {
   const className = props.className ?? CLASS_NAME_Element;
   return {
@@ -228,28 +239,12 @@ export function createClassGroupingHierarchyNode({
     children: !!elements?.length,
     groupedInstanceKeys: elements ? elements.map((id) => ({ className, id })) : [],
     label: "",
-    parentKeys: parentKeys ?? [],
-    extendedData: { categoryId, modelId },
+    parentKeys: parentKeys ? parentKeys.map((parentKey) => ("type" in parentKey ? parentKey : { type: "instances", instanceKeys: [parentKey] })) : [],
+    extendedData: {
+      categoryId,
+      modelId,
+      ...(props.hasDirectNonSearchTargets ? { hasDirectNonSearchTargets: props.hasDirectNonSearchTargets } : {}),
+      ...(props.hasSearchTargetAncestor ? { hasSearchTargetAncestor: props.hasSearchTargetAncestor } : {}),
+    },
   };
-}
-
-export function getNodeParentKeys(
-  keys: (
-    | GroupingNodeKey
-    | {
-        className: string;
-        id: string;
-      }
-  )[],
-): HierarchyNodeKey[] {
-  return keys.map((key) => {
-    if ("type" in key) {
-      return key;
-    }
-
-    return {
-      type: "instances",
-      instanceKeys: [key],
-    };
-  });
 }
