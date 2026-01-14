@@ -220,9 +220,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
       return this.getClassGroupingNodeDisplayStatus(node);
     }
 
-    if (!HierarchyNode.isInstancesNode(node)) {
-      return of(createVisibilityStatus("disabled"));
-    }
+    assert(HierarchyNode.isInstancesNode(node));
 
     // Only call getFilteredNodeVisibility when node is not a filter target, is not a child of filter target and has filtered children.
     // Otherwise, it can be handled normally.
@@ -240,9 +238,7 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     }
 
     const modelId = ModelsTreeNode.getModelId(node);
-    if (!modelId) {
-      return of(createVisibilityStatus("disabled"));
-    }
+    assert(modelId !== undefined);
 
     if (ModelsTreeNode.isCategoryNode(node)) {
       return this.getCategoryDisplayStatus({
@@ -252,11 +248,8 @@ class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
     }
 
     const categoryId = ModelsTreeNode.getCategoryId(node);
-    if (!categoryId) {
-      return of(createVisibilityStatus("disabled"));
-    }
     const rootCategoryIds = getRootCategoryIds({ parentKeys: node.parentKeys, modelId });
-    assert(rootCategoryIds !== undefined);
+    assert(rootCategoryIds !== undefined && categoryId !== undefined);
     return this.getElementDisplayStatus({
       elementIds: node.key.instanceKeys.map(({ id }) => id),
       parentKeys: node.parentKeys,
