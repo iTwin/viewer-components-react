@@ -49,7 +49,7 @@
     "lint:stylelint": "stylelint \"./src/**/*.scss\"",
     "lint:fix": "npm run lint:eslint -- --fix && npm run lint:stylelint -- --fix",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
-    "test:dev": "node --experimental-test-module-mocks --enable-source-maps --import ../../../node-hooks/ignore-styles/register.cjs ./node_modules/mocha/bin/mocha.js --config ./.mocharc.json",
+    "test:dev": "cross-env NODE_ENV=development node --experimental-test-module-mocks --enable-source-maps --import ../../../node-hooks/ignore-styles/register.cjs ./node_modules/mocha/bin/mocha.js --config ./.mocharc.json",
     "test": "npm run test:dev -- --parallel --jobs=4",
     "test:e2e": "node ../../../scripts/run-e2e-with-docker.js tree-widget",
     "test:e2e:local": "node ../../../scripts/run-e2e-tests.js",
