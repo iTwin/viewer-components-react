@@ -65,7 +65,7 @@ export namespace CategoriesTreeNode {
   } => !!node.extendedData && "isElement" in node.extendedData && !!node.extendedData.isElement;
 
   /**
-   * Checks if the given node represents a `BisCore.SubCategory` element.
+   * Checks if the given node is a class grouping node of `BisCore.GeometricElement` nodes.
    *
    * If it does, the node's `extendedData` will contain the following properties:
    * - `categoryId`: `Id64String` of the category of the element
