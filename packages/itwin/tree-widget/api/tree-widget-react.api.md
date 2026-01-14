@@ -11,6 +11,7 @@ import { FilterAction } from '@itwin/presentation-hierarchies-react';
 import type { GroupingHierarchyNode } from '@itwin/presentation-hierarchies';
 import type { HierarchyDefinition } from '@itwin/presentation-hierarchies';
 import type { HierarchyNode } from '@itwin/presentation-hierarchies-react';
+import { HierarchyNode as HierarchyNode_2 } from '@itwin/presentation-hierarchies';
 import { HierarchySearchPath } from '@itwin/presentation-hierarchies';
 import type { Id64Arg } from '@itwin/core-bentley';
 import type { Id64Array } from '@itwin/core-bentley';
@@ -18,9 +19,11 @@ import type { Id64String } from '@itwin/core-bentley';
 import type { ILogger } from '@itwin/presentation-shared';
 import type { IModelConnection } from '@itwin/core-frontend';
 import type { InstanceKey } from '@itwin/presentation-shared';
+import type { InstancesNodeKey } from '@itwin/presentation-hierarchies';
 import { JSX as JSX_2 } from 'react/jsx-runtime';
 import type { Localization } from '@itwin/core-common';
 import { NamedExoticComponent } from 'react';
+import type { NonGroupingHierarchyNode } from '@itwin/presentation-hierarchies';
 import type { PresentationHierarchyNode } from '@itwin/presentation-hierarchies-react';
 import type { PropsWithChildren } from 'react';
 import type { ReactNode } from 'react';
@@ -123,6 +126,52 @@ export function CategoriesTreeIcon({ node }: {
     node: PresentationHierarchyNode;
 }): JSX_2.Element | undefined;
 
+// @beta
+export namespace CategoriesTreeNode {
+    const isDefinitionContainerNode: (node: Pick<HierarchyNode_2, "extendedData">) => node is NonGroupingHierarchyNode & {
+        key: InstancesNodeKey;
+    };
+    const isCategoryNode: (node: Pick<HierarchyNode_2, "extendedData">) => node is Omit<NonGroupingHierarchyNode, "extendedData"> & {
+        key: InstancesNodeKey;
+    } & {
+        extendedData: {
+            description?: string;
+            hasSubCategories?: boolean;
+        } & ({
+            isCategoryOfSubModel?: false;
+        } | {
+            modelIds: Id64Array;
+            isCategoryOfSubModel: true;
+        });
+    };
+    const isModelNode: (node: Pick<HierarchyNode_2, "extendedData">) => node is NonGroupingHierarchyNode & {
+        key: InstancesNodeKey;
+    };
+    const isElementNode: (node: Pick<HierarchyNode_2, "extendedData">) => node is Omit<NonGroupingHierarchyNode, "extendedData"> & {
+        key: InstancesNodeKey;
+    } & {
+        extendedData: {
+            modelId: Id64String;
+            categoryId: Id64String;
+        };
+    };
+    const isElementClassGroupingNode: (node: Pick<HierarchyNode_2, "key">) => node is Omit<GroupingHierarchyNode, "extendedData"> & {
+        key: ClassGroupingNodeKey;
+    } & {
+        extendedData: {
+            categoryId: Id64String;
+            modelElementsMap: Map<Id64String, Set<Id64String>>;
+        };
+    };
+    const isSubCategoryNode: (node: Pick<HierarchyNode_2, "extendedData">) => node is Omit<NonGroupingHierarchyNode, "extendedData"> & {
+        key: InstancesNodeKey;
+    } & {
+        extendedData: {
+            categoryId: Id64String;
+        };
+    };
+}
+
 // @beta (undocumented)
 type CategoriesTreeProps = Pick<ExtendedVisibilityTreeRendererProps, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "treeLabel"> & Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> & UseCategoriesTreeProps & {
     hierarchyLevelConfig?: {
@@ -169,6 +218,25 @@ interface ClassificationsTreeHierarchyConfiguration {
 export function ClassificationsTreeIcon({ node }: {
     node: PresentationHierarchyNode;
 }): JSX_2.Element | undefined;
+
+// @beta
+export namespace ClassificationsTreeNode {
+    const isClassificationTableNode: (node: Pick<HierarchyNode_2, "extendedData">) => node is NonGroupingHierarchyNode & {
+        key: InstancesNodeKey;
+    };
+    const isClassificationNode: (node: Pick<HierarchyNode_2, "extendedData">) => node is NonGroupingHierarchyNode & {
+        key: InstancesNodeKey;
+    };
+    const isGeometricElementNode: (node: Pick<HierarchyNode_2, "extendedData">) => node is Omit<NonGroupingHierarchyNode, "extendedData"> & {
+        key: InstancesNodeKey;
+    } & {
+        extendedData: {
+            type: "GeometricElement3d" | "GeometricElement2d";
+            modelId: Id64String;
+            categoryId: Id64String;
+        };
+    };
+}
 
 // @alpha (undocumented)
 type ClassificationsTreeProps = Pick<ExtendedVisibilityTreeRendererProps, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "getEditingProps" | "treeLabel"> & Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> & UseClassificationsTreeProps & {
@@ -361,6 +429,40 @@ interface ModelsTreeHierarchyConfiguration {
 export function ModelsTreeIcon({ node }: {
     node: PresentationHierarchyNode;
 }): JSX_2.Element | undefined;
+
+// @beta
+export namespace ModelsTreeNode {
+    const isSubjectNode: (node: Pick<HierarchyNode_2, "extendedData">) => node is NonGroupingHierarchyNode & {
+        key: InstancesNodeKey;
+    };
+    const isModelNode: (node: Pick<HierarchyNode_2, "extendedData">) => node is NonGroupingHierarchyNode & {
+        key: InstancesNodeKey;
+    };
+    const isCategoryNode: (node: Pick<HierarchyNode_2, "extendedData">) => node is Omit<NonGroupingHierarchyNode, "extendedData"> & {
+        key: InstancesNodeKey;
+    } & {
+        extendedData: {
+            modelIds: Id64String[];
+        };
+    };
+    const isElementNode: (node: Pick<HierarchyNode_2, "extendedData">) => node is Omit<NonGroupingHierarchyNode, "extendedData"> & {
+        key: InstancesNodeKey;
+    } & {
+        extendedData: {
+            modelId: Id64String;
+            categoryId: Id64String;
+        };
+    };
+    const isElementClassGroupingNode: (node: Pick<HierarchyNode_2, "key">) => node is Omit<GroupingHierarchyNode, "extendedData"> & {
+        key: ClassGroupingNodeKey;
+    } & {
+        extendedData: {
+            modelId: Id64String;
+            categoryId: Id64String;
+        };
+    };
+    const getType: (node: HierarchyNode_2) => "subject" | "model" | "category" | "element" | "elements-class-group";
+}
 
 // @beta (undocumented)
 type ModelsTreeProps = Pick<ExtendedVisibilityTreeRendererProps, "getInlineActions" | "getMenuActions" | "getContextMenuActions" | "getTreeItemProps" | "treeLabel"> & Pick<VisibilityTreeProps, "imodel" | "selectionStorage" | "selectionMode" | "emptyTreeContent"> & UseModelsTreeProps & {

@@ -3,20 +3,18 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, defer, EMPTY, from, map, merge, mergeMap, of } from "rxjs";
+import { concat, defer, from, map, merge, mergeMap, of } from "rxjs";
 import { assert, Guid, Id64 } from "@itwin/core-bentley";
-import { HierarchyNode } from "@itwin/presentation-hierarchies";
-import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
 import { HierarchyVisibilityHandlerImpl } from "../../../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { fromWithRelease } from "../../../common/internal/Utils.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
-import { ModelsTreeNode } from "../ModelsTreeNode.js";
+import { ModelsTreeNode } from "../../ModelsTreeNode.js";
 import { ModelsTreeVisibilityHelper } from "./ModelsTreeVisibilityHelper.js";
 import { createModelsSearchResultsTree } from "./SearchResultsTree.js";
 
 import type { Observable } from "rxjs";
 import type { Id64Arg } from "@itwin/core-bentley";
-import type { GroupingHierarchyNode, HierarchySearchPath } from "@itwin/presentation-hierarchies";
+import type { GroupingHierarchyNode, HierarchyNode, HierarchySearchPath } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { AlwaysAndNeverDrawnElementInfo } from "../../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
 import type { SearchResultsTree } from "../../../common/internal/visibility/BaseSearchResultsTree.js";
@@ -136,22 +134,17 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
   }
 
   public getVisibilityStatus(node: HierarchyNode): Observable<VisibilityStatus> {
-    if (HierarchyNode.isClassGroupingNode(node)) {
-      const nodeInfo = this.getGroupingNodeInfo(node);
+    if (ModelsTreeNode.isElementClassGroupingNode(node)) {
       const result = this.#visibilityHelper.getGroupedElementsVisibilityStatus({
-        categoryId: nodeInfo.categoryId,
-        modelId: nodeInfo.modelId,
-        elementIds: nodeInfo.elementIds,
+        categoryId: node.extendedData.categoryId,
+        modelId: node.extendedData.modelId,
+        elementIds: node.groupedInstanceKeys.map((key) => key.id),
       });
       return this.#props.overrideHandler.createVisibilityHandlerResult({
         overrideProps: { node },
         nonOverriddenResult: result,
         override: this.#props.overrides?.getElementGroupingNodeVisibilityStatus,
       });
-    }
-
-    if (!HierarchyNode.isInstancesNode(node)) {
-      return of(createVisibilityStatus("disabled"));
     }
 
     if (ModelsTreeNode.isSubjectNode(node)) {
@@ -163,28 +156,19 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
       return this.#visibilityHelper.getModelsVisibilityStatus({ modelIds: node.key.instanceKeys.map(({ id }) => id), type: "GeometricModel3d" });
     }
 
-    const modelId = ModelsTreeNode.getModelId(node);
-    if (!modelId) {
-      return of(createVisibilityStatus("disabled"));
-    }
-
     if (ModelsTreeNode.isCategoryNode(node)) {
       return this.#visibilityHelper.getCategoriesVisibilityStatus({
         categoryIds: node.key.instanceKeys.map(({ id }) => id),
-        modelId,
+        modelId: node.extendedData.modelIds[0],
         type: "SpatialCategory",
       });
     }
 
-    const categoryId = ModelsTreeNode.getCategoryId(node);
-    if (!categoryId) {
-      return of(createVisibilityStatus("disabled"));
-    }
-
+    assert(ModelsTreeNode.isElementNode(node));
     return this.#visibilityHelper.getElementsVisibilityStatus({
       elementIds: node.key.instanceKeys.map(({ id }) => id),
-      modelId,
-      categoryId,
+      modelId: node.extendedData.modelId,
+      categoryId: node.extendedData.categoryId,
       type: "GeometricElement3d",
     });
   }
@@ -192,12 +176,11 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
   /** Changes visibility of the items represented by the tree node. */
   public changeVisibilityStatus(node: HierarchyNode, on: boolean): Observable<void> {
     const changeObs = defer(() => {
-      if (HierarchyNode.isClassGroupingNode(node)) {
-        const nodeInfo = this.getGroupingNodeInfo(node);
+      if (ModelsTreeNode.isElementClassGroupingNode(node)) {
         const result = this.#visibilityHelper.changeGroupedElementsVisibilityStatus({
-          categoryId: nodeInfo.categoryId,
-          modelId: nodeInfo.modelId,
-          elementIds: nodeInfo.elementIds,
+          categoryId: node.extendedData.categoryId,
+          modelId: node.extendedData.modelId,
+          elementIds: node.groupedInstanceKeys.map((key) => key.id),
           on,
         });
         return this.#props.overrideHandler.createVisibilityHandlerResult({
@@ -205,10 +188,6 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
           nonOverriddenResult: result,
           override: this.#props.overrides?.changeElementGroupingNodeVisibilityStatus,
         });
-      }
-
-      if (!HierarchyNode.isInstancesNode(node)) {
-        return EMPTY;
       }
 
       if (ModelsTreeNode.isSubjectNode(node)) {
@@ -222,28 +201,19 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
         return this.#visibilityHelper.changeModelsVisibilityStatus({ modelIds: node.key.instanceKeys.map(({ id }) => id), on });
       }
 
-      const modelId = ModelsTreeNode.getModelId(node);
-      if (!modelId) {
-        return EMPTY;
-      }
-
       if (ModelsTreeNode.isCategoryNode(node)) {
         return this.#visibilityHelper.changeCategoriesVisibilityStatus({
           categoryIds: node.key.instanceKeys.map(({ id }) => id),
-          modelId,
+          modelId: node.extendedData.modelIds[0],
           on,
         });
       }
 
-      const categoryId = ModelsTreeNode.getCategoryId(node);
-      if (!categoryId) {
-        return EMPTY;
-      }
-
+      assert(ModelsTreeNode.isElementNode(node));
       return this.#visibilityHelper.changeElementsVisibilityStatus({
         elementIds: node.key.instanceKeys.map(({ id }) => id),
-        modelId,
-        categoryId,
+        modelId: node.extendedData.modelId,
+        categoryId: node.extendedData.categoryId,
         on,
       });
     });
@@ -350,15 +320,6 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
         );
       }),
     );
-  }
-
-  private getGroupingNodeInfo(node: GroupingHierarchyNode) {
-    const modelId = ModelsTreeNode.getModelId(node);
-    const categoryId = ModelsTreeNode.getCategoryId(node);
-    assert(!!modelId && !!categoryId);
-
-    const elementIds = node.groupedInstanceKeys.map((key) => key.id);
-    return { modelId, categoryId, elementIds };
   }
 }
 
