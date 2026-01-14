@@ -3,9 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { StagePanelLocation, StagePanelSection, useActiveViewport } from "@itwin/appui-react";
-import { assert } from "@itwin/core-bentley";
 import { EC3Provider, EC3Widget } from "@itwin/ec3-widget-react";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
 import { GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
@@ -20,7 +19,6 @@ import {
 import { MapLayersFormats } from "@itwin/map-layers-formats";
 import { MeasurementActionToolbar, MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
 import { OneClickLCAProvider } from "@itwin/one-click-lca-react";
-import { HierarchyNode } from "@itwin/presentation-hierarchies-react";
 import {
   AddFavoritePropertyContextMenuItem,
   AncestorsNavigationControls,
@@ -34,6 +32,7 @@ import { REPORTS_CONFIG_BASE_URL, ReportsConfigProvider, ReportsConfigWidget } f
 import {
   CategoriesTreeComponent,
   ClassificationsTreeComponent,
+  ClassificationsTreeNode,
   createTreeWidgetViewport,
   ExternalSourcesTreeComponent,
   IModelContentTreeComponent,
@@ -56,7 +55,6 @@ import type { UiItemsProvider } from "@itwin/appui-react";
 import type { Id64Array } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import type { ClientPrefix } from "@itwin/grouping-mapping-widget";
-import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { TreeDefinition } from "@itwin/tree-widget-react";
 
 export interface UiProvidersConfig {
@@ -379,7 +377,8 @@ function disabledSelectionPredicate() {
   return false;
 }
 
-function MyClassificationsTree(props: Omit<ComponentProps<typeof ClassificationsTreeComponent>, "viewport">) {
+type MyClassificationsTreeProps = Omit<ComponentProps<typeof ClassificationsTreeComponent>, "viewport">;
+function MyClassificationsTree(props: MyClassificationsTreeProps) {
   const viewport = useActiveViewport();
   if (!viewport) {
     return null;
@@ -387,56 +386,48 @@ function MyClassificationsTree(props: Omit<ComponentProps<typeof Classifications
   return <MyClassificationsTreeImpl {...props} viewport={viewport} />;
 }
 
-function MyClassificationsTreeImpl(props: ComponentProps<typeof MyClassificationsTree> & { viewport: Viewport }) {
-  const { classificationsTreeProps, rendererProps: classificationsTreeRendererProps } = useClassificationsTree({
-    activeView: useMemo(() => createTreeWidgetViewport(props.viewport), [props.viewport]),
-    hierarchyConfig: props.hierarchyConfig,
-    searchText: props.searchText,
-    emptyTreeContent: props.emptyTreeContent,
+function MyClassificationsTreeImpl({
+  treeLabel,
+  selectionMode,
+  selectionStorage,
+  viewport,
+  hierarchyConfig,
+  hierarchyLevelConfig,
+  searchText,
+  emptyTreeContent,
+}: MyClassificationsTreeProps & { viewport: Viewport }) {
+  const classificationsTree = useClassificationsTree({
+    activeView: useMemo(() => createTreeWidgetViewport(viewport), [viewport]),
+    hierarchyConfig,
+    searchText,
+    emptyTreeContent,
+    getTreeItemProps: (node, treeRendererProps) => ({
+      label: (
+        <>
+          {treeRendererProps.getTreeItemProps?.(node).label ?? node.label}
+          {ClassificationsTreeNode.isClassificationNode(node.nodeData) || ClassificationsTreeNode.isClassificationTableNode(node.nodeData) ? (
+            <ClassificationElementsCount classificationOrTableIds={node.nodeData.key.instanceKeys.map((key) => key.id)} />
+          ) : null}
+        </>
+      ),
+    }),
   });
   return (
     <VisibilityTree
-      {...classificationsTreeProps}
-      imodel={props.viewport.iModel}
-      selectionStorage={props.selectionStorage}
-      hierarchyLevelSizeLimit={props.hierarchyLevelConfig?.sizeLimit}
-      selectionMode={props.selectionMode ?? "none"}
+      {...classificationsTree.treeProps}
+      imodel={viewport.iModel}
+      selectionStorage={selectionStorage}
+      hierarchyLevelSizeLimit={hierarchyLevelConfig?.sizeLimit}
+      selectionMode={selectionMode ?? "none"}
       treeRenderer={(treeRendererProps) => (
-        <MyClassificationsTreeRenderer
+        <VisibilityTreeRenderer
           {...treeRendererProps}
-          {...classificationsTreeRendererProps}
-          treeLabel={props.treeLabel}
-          getEditingProps={props.getEditingProps}
-          getInlineActions={props.getInlineActions}
-          getMenuActions={props.getMenuActions}
-          getContextMenuActions={props.getContextMenuActions}
-          getDecorations={props.getDecorations ?? classificationsTreeRendererProps.getDecorations}
+          treeLabel={treeLabel}
+          getTreeItemProps={(node) => classificationsTree.getTreeItemProps(node, treeRendererProps)}
         />
       )}
     />
   );
-}
-
-function MyClassificationsTreeRenderer(props: ComponentProps<typeof VisibilityTreeRenderer>) {
-  const { getLabel: defaultLabelFactory } = props;
-  const getLabel = useCallback(
-    (node: PresentationHierarchyNode): React.ReactElement | undefined => {
-      const defaultLabel = defaultLabelFactory ? defaultLabelFactory(node) : <>{node.label}</>;
-      // note: the tree-widget package should provide type guards for these
-      if (node.nodeData.extendedData?.type === "Classification" || node.nodeData.extendedData?.type === "ClassificationTable") {
-        assert(HierarchyNode.isInstancesNode(node.nodeData));
-        return (
-          <>
-            {defaultLabel}
-            <ClassificationElementsCount classificationOrTableIds={node.nodeData.key.instanceKeys.map((key) => key.id)} />
-          </>
-        );
-      }
-      return defaultLabel;
-    },
-    [defaultLabelFactory],
-  );
-  return <VisibilityTreeRenderer {...props} getLabel={getLabel} />;
 }
 
 // just a sample implementation...
