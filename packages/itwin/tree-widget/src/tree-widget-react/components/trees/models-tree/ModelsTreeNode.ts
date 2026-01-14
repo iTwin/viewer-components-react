@@ -25,7 +25,7 @@ export namespace ModelsTreeNode {
    * Checks if the given node represents a `BisCore.Category` element.
    *
    * If it does, the node's `extendedData` will contain the following properties:
-   * - `modelIds`: `Id64String[]` of the model that his category node is contained under
+   * - `modelIds`: `Id64String[]` of the model that this category node is contained under
    */
   export const isCategoryNode = (
     node: Pick<HierarchyNode, "extendedData">,
