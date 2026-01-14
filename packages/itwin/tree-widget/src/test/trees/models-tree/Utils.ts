@@ -177,7 +177,7 @@ export function createCategoryHierarchyNode({
     parentKeys: parentKeys ?? [],
     extendedData: {
       isCategory: true,
-      modelId: modelId ?? "0x1",
+      modelIds: [modelId ?? "0x1"],
       categoryId: categoryId ?? "0x2",
     },
   };
@@ -189,7 +189,6 @@ export function createElementHierarchyNode(props: {
   elementId?: Id64String;
   parentKeys?: HierarchyNodeKey[];
   search?: NonGroupingHierarchyNode["search"];
-  childrenCount?: number;
 }): NonGroupingHierarchyNode {
   return {
     key: {
@@ -201,9 +200,9 @@ export function createElementHierarchyNode(props: {
     search: props.search,
     parentKeys: props.parentKeys ?? [],
     extendedData: {
-      modelId: props.modelId,
-      categoryId: props.categoryId,
-      childrenCount: props.childrenCount !== undefined ? props.childrenCount : undefined,
+      isElement: true,
+      modelId: props.modelId ?? "0x1",
+      categoryId: props.categoryId ?? "0x2",
     },
   };
 }

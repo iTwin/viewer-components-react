@@ -3,8 +3,10 @@ Release Tag;API Item Type;API Item Name
 beta;type;BaseTreeRendererProps
 public;const;CategoriesTreeComponent
 beta;function;CategoriesTreeIcon
+beta;namespace;CategoriesTreeNode
 alpha;const;ClassificationsTreeComponent
 beta;function;ClassificationsTreeIcon
+beta;namespace;ClassificationsTreeNode
 public;function;createTreeWidget
 beta;function;createTreeWidgetViewport
 beta;const;ExternalSourcesTreeComponent
@@ -15,6 +17,7 @@ beta;const;IModelContentTreeComponent
 beta;function;IModelContentTreeIcon
 public;const;ModelsTreeComponent
 beta;function;ModelsTreeIcon
+beta;namespace;ModelsTreeNode
 beta;interface;ModelsTreeVisibilityHandlerOverrides
 beta;class;SearchLimitExceededError
 beta;function;SelectableTree

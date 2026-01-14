@@ -192,24 +192,6 @@ describe("ModelsTreeVisibilityHandler", () => {
     });
 
     describe("getVisibilityStatus", () => {
-      it("returns disabled when node is not an instance node", async () => {
-        const node: HierarchyNode = {
-          key: {
-            type: "label-grouping",
-            label: "",
-          },
-          children: false,
-          groupedInstanceKeys: [],
-          label: "",
-          parentKeys: [],
-        };
-
-        using handlerResult = createHandler();
-        const { handler } = handlerResult;
-        const result = await handler.getVisibilityStatus(node);
-        expect(result).to.include({ isDisabled: true });
-      });
-
       describe("subject", () => {
         it("can be overridden", async () => {
           const overrides = {
@@ -934,15 +916,6 @@ describe("ModelsTreeVisibilityHandler", () => {
           const status = await handler.getVisibilityStatus(createElementHierarchyNode({ modelId: "0x1", categoryId: "0x2", elementId: "0x3" }));
           expect(overrides?.getElementsVisibilityStatus).to.be.called;
           expect(status.state).to.eq("visible");
-        });
-
-        it("is disabled when has no category or model", async () => {
-          using handlerResult = createHandler();
-          const { handler } = handlerResult;
-          let result = await handler.getVisibilityStatus(createElementHierarchyNode({ modelId: undefined, categoryId: undefined }));
-          expect(result.isDisabled).to.be.true;
-          result = await handler.getVisibilityStatus(createElementHierarchyNode({ modelId: "0x1", categoryId: undefined }));
-          expect(result.isDisabled).to.be.true;
         });
 
         it("is hidden when model is hidden", async () => {

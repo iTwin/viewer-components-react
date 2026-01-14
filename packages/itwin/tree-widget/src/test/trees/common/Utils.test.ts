@@ -12,21 +12,21 @@ import type { NormalizedHierarchySearchPath } from "../../../tree-widget-react/c
 
 describe("Utils", () => {
   describe("joinHierarchySearchPaths", () => {
-    const subject = { id: "0x1", className: "s", imodelKey: "key" };
-    const model = { id: "0x2", className: "m", imodelKey: "key" };
-    const category1 = { id: "0x3", className: "c", imodelKey: "key" };
-    const category2 = { id: "0x4", className: "c", imodelKey: "key" };
-    const element1 = { id: "0x5", className: "c", imodelKey: "key" };
-    const element2 = { id: "0x6", className: "c", imodelKey: "key" };
-    const element3 = { id: "0x7", className: "c", imodelKey: "key" };
-    const element4 = { id: "0x8", className: "c", imodelKey: "key" };
+    const subject = { id: "0x1", className: "s:s", imodelKey: "key" };
+    const model = { id: "0x2", className: "s:m", imodelKey: "key" };
+    const category1 = { id: "0x3", className: "s:c", imodelKey: "key" };
+    const category2 = { id: "0x4", className: "s:c", imodelKey: "key" };
+    const element1 = { id: "0x5", className: "s:c", imodelKey: "key" };
+    const element2 = { id: "0x6", className: "s:c", imodelKey: "key" };
+    const element3 = { id: "0x7", className: "s:c", imodelKey: "key" };
+    const element4 = { id: "0x8", className: "s:c", imodelKey: "key" };
 
     it("returns empty when search and subTree paths don't overlap", () => {
       const subTreePaths: HierarchyNodeIdentifiersPath[] = [[subject, model]];
       const searchPaths: NormalizedHierarchySearchPath[] = [
         { path: [subject, { ...model, imodelKey: "random" }] },
-        { path: [subject, { ...model, className: "random" }] },
-        { path: [subject, { ...model, id: "random" }] },
+        { path: [subject, { ...model, className: "s:random" }] },
+        { path: [subject, { ...model, id: "0x123" }] },
         { path: [subject, category1] },
         { path: [category1, model] },
         { path: [model] },

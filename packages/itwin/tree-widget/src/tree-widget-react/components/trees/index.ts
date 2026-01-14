@@ -6,15 +6,18 @@
 export { ModelsTreeComponent } from "./models-tree/ModelsTreeComponent.js";
 export { useModelsTree, ModelsTreeIcon } from "./models-tree/UseModelsTree.js";
 export { useModelsTreeButtonProps } from "./models-tree/ModelsTreeButtons.js";
+export { ModelsTreeNode } from "./models-tree/ModelsTreeNode.js";
 
 export { CategoriesTreeComponent } from "./categories-tree/CategoriesTreeComponent.js";
 export { useCategoriesTree, CategoriesTreeIcon } from "./categories-tree/UseCategoriesTree.js";
 export { useCategoriesTreeButtonProps } from "./categories-tree/CategoriesTreeButtons.js";
+export { CategoriesTreeNode } from "./categories-tree/CategoriesTreeNode.js";
 
 export { ClassificationsTreeComponent } from "./classifications-tree/ClassificationsTreeComponent.js";
 export { ClassificationsTreeIcon } from "./classifications-tree/ClassificationsTreeIcon.js";
 export { useClassificationsTree } from "./classifications-tree/UseClassificationsTree.js";
 export { useClassificationsTreeDefinition } from "./classifications-tree/UseClassificationsTreeDefinition.js";
+export { ClassificationsTreeNode } from "./classifications-tree/ClassificationsTreeNode.js";
 
 export { IModelContentTreeComponent } from "./imodel-content-tree/IModelContentTreeComponent.js";
 export { IModelContentTreeIcon } from "./imodel-content-tree/IModelContentTree.js";

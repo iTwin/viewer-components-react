@@ -24,11 +24,11 @@ import { useGuid } from "../common/internal/useGuid.js";
 import { useCachedVisibility } from "../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { useIdsCache } from "../common/internal/useTreeHooks/UseIdsCache.js";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
-import { ModelsTreeNode } from "./internal/ModelsTreeNode.js";
 import { useSearchPaths } from "./internal/UseSearchPaths.js";
 import { ModelsTreeVisibilityHandler } from "./internal/visibility/ModelsTreeVisibilityHandler.js";
 import { createModelsSearchResultsTree } from "./internal/visibility/SearchResultsTree.js";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition.js";
+import { ModelsTreeNode } from "./ModelsTreeNode.js";
 
 import type { ReactNode } from "react";
 import type { Id64String } from "@itwin/core-bentley";

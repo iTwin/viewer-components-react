@@ -259,7 +259,7 @@ describe("models tree", () => {
       }
     },
     test: async ({ viewport, handler, hierarchyNodes, elementsCategory, elementsModel }) => {
-      await handler.changeVisibility(createCategoryHierarchyNode(elementsCategory, true, elementsModel), false);
+      await handler.changeVisibility(createCategoryHierarchyNode(elementsCategory, elementsModel, true), false);
       await validateHierarchyVisibility({
         hierarchyNodes,
         handler,

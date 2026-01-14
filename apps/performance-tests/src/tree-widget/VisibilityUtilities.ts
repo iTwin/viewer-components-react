@@ -298,7 +298,7 @@ export function createTestDataForInitialDisplay(props: {
   };
 }
 
-export function createCategoryHierarchyNode(categoryId: Id64String, hasChildren = false, modelId?: Id64String): NonGroupingHierarchyNode {
+export function createCategoryHierarchyNode(categoryId: Id64String, modelId: Id64String, hasChildren = false): NonGroupingHierarchyNode {
   return {
     key: {
       type: "instances",
@@ -309,7 +309,7 @@ export function createCategoryHierarchyNode(categoryId: Id64String, hasChildren 
     parentKeys: [],
     extendedData: {
       isCategory: true,
-      modelId,
+      modelIds: [modelId],
     },
   };
 }
@@ -344,6 +344,7 @@ export function createElementHierarchyNode(props: {
     label: "",
     parentKeys: [],
     extendedData: {
+      isElement: true,
       modelId: props.modelId,
       categoryId: props.categoryId,
     },

@@ -65,6 +65,7 @@ import type {
   HierarchyLevelDefinition,
   HierarchyNodesDefinition,
   LimitingECSqlQueryExecutor,
+  NodePreProcessor,
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
 import type {
@@ -212,6 +213,19 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       instanceLabelSelectClauseFactory: this.#nodeLabelSelectClauseFactory,
     });
   }
+
+  public preProcessNode: NodePreProcessor = async (node) => {
+    if (node.extendedData?.isCategory) {
+      return {
+        ...node,
+        extendedData: {
+          ...node.extendedData,
+          modelIds: parseIdsSelectorResult(node.extendedData.modelIds),
+        },
+      };
+    }
+    return node;
+  };
 
   public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
     if (ProcessedHierarchyNode.isGroupingNode(node)) {
@@ -501,6 +515,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   `,
                 },
                 extendedData: {
+                  isElement: true,
                   modelId: { selector: "IdToHex(this.Model.Id)" },
                   categoryId: { selector: "IdToHex(this.Category.Id)" },
                   imageId: "icon-item",
@@ -559,6 +574,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   `,
                 },
                 extendedData: {
+                  isElement: true,
                   modelId: { selector: "IdToHex(this.Model.Id)" },
                   categoryId: { selector: "IdToHex(this.Category.Id)" },
                   imageId: "icon-item",

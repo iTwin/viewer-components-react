@@ -3,15 +3,14 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { assert, expect } from "chai";
+import { expect } from "chai";
 import { expand, from, mergeMap } from "rxjs";
-import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { toVoidPromise } from "../../../../tree-widget-react/components/trees/common/internal/Rxjs.js";
-import { ModelsTreeNode } from "../../../../tree-widget-react/components/trees/models-tree/internal/ModelsTreeNode.js";
+import { ModelsTreeNode } from "../../../../tree-widget-react/components/trees/models-tree/ModelsTreeNode.js";
 import { waitFor } from "../../../TestUtils.js";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
-import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
+import type { HierarchyNode, HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { Visibility } from "../../../../tree-widget-react/components/trees/common/internal/Tooltip.js";
 import type { HierarchyVisibilityHandler } from "../../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
 import type { waitForOptions } from "../../../TestUtils.js";
@@ -57,28 +56,21 @@ export interface ValidateNodeProps {
 export async function validateNodeVisibility({ node, handler, visibilityExpectations, viewport }: ValidateNodeProps & { node: HierarchyNode }) {
   const actualVisibility = await handler.getVisibilityStatus(node);
 
-  // modelId, categoryId, id are redefined at the bottom
-  /* eslint-disable @typescript-eslint/no-shadow */
-
-  if (HierarchyNode.isClassGroupingNode(node)) {
-    assert(!!node.extendedData);
-    const modelId = ModelsTreeNode.getModelId(node)!;
-    const categoryId = ModelsTreeNode.getCategoryId(node)!;
+  if (ModelsTreeNode.isElementClassGroupingNode(node)) {
     const elementIds = node.groupedInstanceKeys.map(({ id }) => id);
-    const expected = visibilityExpectations.groupingNode({ modelId, categoryId, elementIds });
+    const expected = visibilityExpectations.groupingNode({ modelId: node.extendedData.modelId, categoryId: node.extendedData.categoryId, elementIds });
     expect(actualVisibility.state).to.eq(expected, JSON.stringify({ className: node.key.className, ids: node.groupedInstanceKeys.map(({ id }) => id) }));
     return;
   }
 
-  assert(HierarchyNode.isInstancesNode(node));
-  const { id } = node.key.instanceKeys[0];
-
   if (ModelsTreeNode.isSubjectNode(node)) {
+    const { id } = node.key.instanceKeys[0];
     expect(actualVisibility.state).to.eq(visibilityExpectations.subject(id), `Subject ${id}`);
     return;
   }
 
   if (ModelsTreeNode.isModelNode(node)) {
+    const { id } = node.key.instanceKeys[0];
     const expected = visibilityExpectations.model(id);
     if (typeof expected === "string") {
       expect(actualVisibility.state).to.eq(expected, `Model ${id}`);
@@ -92,7 +84,8 @@ export async function validateNodeVisibility({ node, handler, visibilityExpectat
   }
 
   if (ModelsTreeNode.isCategoryNode(node)) {
-    const modelId = ModelsTreeNode.getModelId(node)!;
+    const { id } = node.key.instanceKeys[0];
+    const modelId = node.extendedData.modelIds[0];
     const expected = visibilityExpectations.category({ modelId, categoryId: id });
     if (typeof expected === "string") {
       expect(actualVisibility.state).to.eq(expected, JSON.stringify({ modelId, categoryId: id }));
@@ -108,10 +101,13 @@ export async function validateNodeVisibility({ node, handler, visibilityExpectat
     return;
   }
 
-  const modelId = ModelsTreeNode.getModelId(node)!;
-  const categoryId = ModelsTreeNode.getCategoryId(node)!;
-  const expected = visibilityExpectations.element({ modelId, categoryId, elementId: id });
-  expect(actualVisibility.state).to.eq(expected, JSON.stringify({ modelId, categoryId, elementId: id }));
+  if (ModelsTreeNode.isElementNode(node)) {
+    const { id } = node.key.instanceKeys[0];
+    const modelId = node.extendedData.modelId;
+    const categoryId = node.extendedData.categoryId;
+    const expected = visibilityExpectations.element({ modelId, categoryId, elementId: id });
+    expect(actualVisibility.state).to.eq(expected, JSON.stringify({ modelId, categoryId, elementId: id }));
+  }
 }
 
 export async function validateHierarchyVisibility({

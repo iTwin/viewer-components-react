@@ -7,7 +7,7 @@ import { expect } from "chai";
 import { EMPTY, expand, from, mergeMap } from "rxjs";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { waitFor } from "@testing-library/react";
-import { CategoriesTreeNode } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeNode.js";
+import { CategoriesTreeNode } from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeNode.js";
 import { toVoidPromise } from "../../../../tree-widget-react/components/trees/common/internal/Rxjs.js";
 
 import type { Id64Array } from "@itwin/core-bentley";
@@ -71,7 +71,7 @@ export async function validateNodeVisibility({ node, handler, expectations }: Va
     return;
   }
   if (CategoriesTreeNode.isCategoryNode(node)) {
-    const modelIds: Id64Array | undefined = node.extendedData?.modelIds;
+    const modelIds: Id64Array | undefined = node.extendedData.isCategoryOfSubModel ? node.extendedData.modelIds : undefined;
     let idToUse = id;
     if (modelIds !== undefined) {
       idToUse = `${modelIds[0]}-${id}`;

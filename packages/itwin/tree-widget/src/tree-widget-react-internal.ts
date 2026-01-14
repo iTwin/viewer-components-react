@@ -21,7 +21,6 @@ export {
 } from "./tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 export { CategoriesTreeIdsCache } from "./tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 export { createCategoriesTreeVisibilityHandler } from "./tree-widget-react/components/trees/categories-tree/internal/visibility/CategoriesTreeVisibilityHandler.js";
-export { CategoriesTreeNode } from "./tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeNode.js";
 
 export { ClassificationsTreeDefinition } from "./tree-widget-react/components/trees/classifications-tree/ClassificationsTreeDefinition.js";
 export { ClassificationsTreeIdsCache } from "./tree-widget-react/components/trees/classifications-tree/internal/ClassificationsTreeIdsCache.js";
