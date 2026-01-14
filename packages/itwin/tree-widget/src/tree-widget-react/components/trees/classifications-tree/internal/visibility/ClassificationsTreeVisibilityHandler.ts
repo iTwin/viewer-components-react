@@ -136,7 +136,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
         });
       }
 
-    assert(ClassificationsTreeNode.isGeometricElementNode(node));
+      assert(ClassificationsTreeNode.isGeometricElementNode(node));
       return this.#visibilityHelper.changeElementsVisibilityStatus({
         elementIds: node.key.instanceKeys.map(({ id }) => id),
         modelId: node.extendedData.modelId,

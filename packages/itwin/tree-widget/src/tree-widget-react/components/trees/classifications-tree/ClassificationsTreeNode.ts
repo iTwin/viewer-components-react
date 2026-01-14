@@ -12,10 +12,12 @@ import type { HierarchyNode, InstancesNodeKey, NonGroupingHierarchyNode } from "
  */
 export namespace ClassificationsTreeNode {
   /** Checks if the given node represents a `ClassificationSystems.ClassificationTable` element. */
-  export const isClassificationTableNode = (node: Pick<HierarchyNode, "extendedData">): node is NonGroupingHierarchyNode & { key: InstancesNodeKey } => node.extendedData?.type === "ClassificationTable";
+  export const isClassificationTableNode = (node: Pick<HierarchyNode, "extendedData">): node is NonGroupingHierarchyNode & { key: InstancesNodeKey } =>
+    node.extendedData?.type === "ClassificationTable";
 
   /** Checks if the given node represents a `ClassificationSystems.Classification` element. */
-  export const isClassificationNode = (node: Pick<HierarchyNode, "extendedData">): node is NonGroupingHierarchyNode & { key: InstancesNodeKey } => node.extendedData?.type === "Classification";
+  export const isClassificationNode = (node: Pick<HierarchyNode, "extendedData">): node is NonGroupingHierarchyNode & { key: InstancesNodeKey } =>
+    node.extendedData?.type === "Classification";
 
   /**
    * Checks if the given node represents a `BisCore.GeometricElement` element.

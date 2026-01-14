@@ -226,7 +226,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     }
     return node;
   };
-  
+
   public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
     if (ProcessedHierarchyNode.isGroupingNode(node)) {
       const { hasSearchTargetAncestor, hasDirectNonSearchTargets } = groupingNodeHasSearchTargets(node.children);
