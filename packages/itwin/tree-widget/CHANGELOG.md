@@ -1,8 +1,17 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Thu, 20 Nov 2025 11:23:22 GMT and should not be manually modified. -->
+<!-- This log was last generated on Thu, 15 Jan 2026 14:30:28 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.17.4
+
+Thu, 15 Jan 2026 14:30:28 GMT
+
+### Patches
+
+- Models tree: Improve performance of loading element nodes ([#1544](https://github.com/iTwin/viewer-components-react/pull/1544))
+- Models tree: Remove unnecessary checks when ModelsTreeVisibilityHandlerOverrides are provided. ([#1546](https://github.com/iTwin/viewer-components-react/pull/1546))
 
 ## 3.17.3
 

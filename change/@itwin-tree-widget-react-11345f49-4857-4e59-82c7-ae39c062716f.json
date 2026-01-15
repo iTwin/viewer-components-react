@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Models tree: Improve performance of loading element nodes",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "35135765+grigasp@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

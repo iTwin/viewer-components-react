@@ -1,8 +1,16 @@
 # Change Log - @itwin/quantity-formatting-react
 
-<!-- This log was last generated on Thu, 13 Nov 2025 09:36:43 GMT and should not be manually modified. -->
+<!-- This log was last generated on Thu, 15 Jan 2026 14:30:28 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.1.4
+
+Thu, 15 Jan 2026 14:30:28 GMT
+
+### Patches
+
+- Reword localized labels to accurately convey functionality ([#1507](https://github.com/iTwin/viewer-components-react/pull/1507))
 
 ## 0.1.3
 

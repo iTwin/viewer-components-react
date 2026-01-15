@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Models tree: Remove unnecessary checks when ModelsTreeVisibilityHandlerOverrides are provided.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "100586436+JonasDov@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

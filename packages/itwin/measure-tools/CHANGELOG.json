@@ -2,6 +2,21 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Thu, 15 Jan 2026 14:30:28 GMT",
+      "version": "0.32.0",
+      "tag": "@itwin/measure-tools-react_v0.32.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "50554904+hl662@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "c596ab153013f4f54b5541c647fa99b11e38a48f",
+            "comment": "Update default KoQs used by measuring tools"
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 21 Nov 2025 16:14:12 GMT",
       "version": "0.31.0",
       "tag": "@itwin/measure-tools-react_v0.31.0",

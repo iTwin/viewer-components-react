@@ -2,6 +2,27 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Thu, 15 Jan 2026 14:30:28 GMT",
+      "version": "3.17.4",
+      "tag": "@itwin/tree-widget-react_v3.17.4",
+      "comments": {
+        "patch": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "fb63266c0640ef6be59aa3b53920b3a362534b31",
+            "comment": "Models tree: Improve performance of loading element nodes"
+          },
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "4b14e9b74e626792b50062e6d8046fc3cd60cd85",
+            "comment": "Models tree: Remove unnecessary checks when ModelsTreeVisibilityHandlerOverrides are provided."
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 20 Nov 2025 11:23:22 GMT",
       "version": "3.17.3",
       "tag": "@itwin/tree-widget-react_v3.17.3",
