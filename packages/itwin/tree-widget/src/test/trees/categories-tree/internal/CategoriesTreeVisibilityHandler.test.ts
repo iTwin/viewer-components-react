@@ -206,7 +206,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerRoot.id), true);
+        await handler.changeVisibility(createDefinitionContainerHierarchyNode({ id: keys.definitionContainerRoot.id }), true);
         await validateCategoriesTreeHierarchyVisibility({
           provider,
           handler,
@@ -260,7 +260,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerRoot.id), true);
+        await handler.changeVisibility(createDefinitionContainerHierarchyNode({ id: keys.definitionContainerRoot.id }), true);
         await validateCategoriesTreeHierarchyVisibility({
           provider,
           handler,
@@ -302,7 +302,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), true);
+        await handler.changeVisibility(createDefinitionContainerHierarchyNode({ id: keys.definitionContainerChild.id }), true);
         await validateCategoriesTreeHierarchyVisibility({
           provider,
           handler,
@@ -343,7 +343,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), true);
+        await handler.changeVisibility(createDefinitionContainerHierarchyNode({ id: keys.definitionContainerChild.id }), true);
         await validateCategoriesTreeHierarchyVisibility({
           provider,
           handler,
@@ -387,7 +387,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), true);
+        await handler.changeVisibility(createDefinitionContainerHierarchyNode({ id: keys.definitionContainerChild.id }), true);
         await validateCategoriesTreeHierarchyVisibility({
           provider,
           handler,
@@ -420,7 +420,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
+        await handler.changeVisibility(createCategoryHierarchyNode({ id: keys.category.id }), true);
         await validateCategoriesTreeHierarchyVisibility({
           provider,
           handler,
@@ -461,7 +461,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
+        await handler.changeVisibility(createCategoryHierarchyNode({ id: keys.category.id }), true);
         await validateCategoriesTreeHierarchyVisibility({
           provider,
           handler,
@@ -513,17 +513,17 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
+        await handler.changeVisibility(createCategoryHierarchyNode({ id: keys.category.id }), true);
         await validateCategoriesTreeHierarchyVisibility({
           provider,
           handler,
           viewport,
           // prettier-ignore
           expectations: {
-            [keys.definitionContainer.id]: "hidden",
-              [keys.category.id]: "visible",
-                [keys.subCategory.id]: "visible",
+            [keys.category.id]: "visible",
+              [keys.subCategory.id]: "visible",
 
+            [keys.definitionContainer.id]: "hidden",
               [keys.category2.id]: "hidden",
                 [keys.subCategory2.id]: "hidden",
           },
@@ -566,7 +566,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
+        await handler.changeVisibility(createCategoryHierarchyNode({ id: keys.category.id }), true);
         await validateCategoriesTreeHierarchyVisibility({
           provider,
           handler,
@@ -613,7 +613,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
+        await handler.changeVisibility(createCategoryHierarchyNode({ id: keys.category.id }), true);
         await validateCategoriesTreeHierarchyVisibility({
           provider,
           handler,
@@ -660,7 +660,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
+        await handler.changeVisibility(createSubCategoryHierarchyNode({ id: keys.subCategory.id, categoryId: keys.category.id }), true);
 
         await validateCategoriesTreeHierarchyVisibility({
           provider,
@@ -699,7 +699,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
+        await handler.changeVisibility(createSubCategoryHierarchyNode({ id: keys.subCategory.id, categoryId: keys.category.id }), true);
         await validateCategoriesTreeHierarchyVisibility({
           provider,
           handler,
@@ -739,7 +739,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
+        await handler.changeVisibility(createSubCategoryHierarchyNode({ id: keys.subCategory.id, categoryId: keys.category.id }), true);
         await validateCategoriesTreeHierarchyVisibility({
           provider,
           handler,
@@ -788,7 +788,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
+        await handler.changeVisibility(createSubCategoryHierarchyNode({ id: keys.subCategory.id, categoryId: keys.category.id }), true);
         await validateCategoriesTreeHierarchyVisibility({
           provider,
           handler,
@@ -839,7 +839,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
           const { handler, provider, viewport } = visibilityTestData;
 
-          await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerRoot.id), true);
+          await handler.changeVisibility(createDefinitionContainerHierarchyNode({ id: keys.definitionContainerRoot.id }), true);
           await validateCategoriesTreeHierarchyVisibility({
             provider,
             handler,
@@ -896,7 +896,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
           const { handler, provider, viewport } = visibilityTestData;
 
-          await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerRoot.id), true);
+          await handler.changeVisibility(createDefinitionContainerHierarchyNode({ id: keys.definitionContainerRoot.id }), true);
           await validateCategoriesTreeHierarchyVisibility({
             provider,
             handler,
@@ -941,7 +941,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
           const { handler, provider, viewport } = visibilityTestData;
 
-          await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), true);
+          await handler.changeVisibility(createDefinitionContainerHierarchyNode({ id: keys.definitionContainerChild.id }), true);
           await validateCategoriesTreeHierarchyVisibility({
             provider,
             handler,
@@ -998,7 +998,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
           const { handler, provider, viewport } = visibilityTestData;
 
-          await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), true);
+          await handler.changeVisibility(createDefinitionContainerHierarchyNode({ id: keys.definitionContainerChild.id }), true);
           await validateCategoriesTreeHierarchyVisibility({
             provider,
             handler,
@@ -1045,7 +1045,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
           const { handler, provider, viewport } = visibilityTestData;
 
-          await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), true);
+          await handler.changeVisibility(createDefinitionContainerHierarchyNode({ id: keys.definitionContainerChild.id }), true);
           await validateCategoriesTreeHierarchyVisibility({
             provider,
             handler,
@@ -1079,7 +1079,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
           const { handler, provider, viewport } = visibilityTestData;
 
-          await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
+          await handler.changeVisibility(createCategoryHierarchyNode({ id: keys.category.id }), true);
           await validateCategoriesTreeHierarchyVisibility({
             provider,
             handler,
@@ -1121,7 +1121,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
           const { handler, provider, viewport } = visibilityTestData;
 
-          await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
+          await handler.changeVisibility(createCategoryHierarchyNode({ id: keys.category.id }), true);
           await validateCategoriesTreeHierarchyVisibility({
             provider,
             handler,
@@ -1176,7 +1176,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
           const { handler, provider, viewport } = visibilityTestData;
 
-          await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
+          await handler.changeVisibility(createCategoryHierarchyNode({ id: keys.category.id }), true);
           await validateCategoriesTreeHierarchyVisibility({
             provider,
             handler,
@@ -1232,7 +1232,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
           const { handler, provider, viewport } = visibilityTestData;
 
-          await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
+          await handler.changeVisibility(createCategoryHierarchyNode({ id: keys.category.id }), true);
           await validateCategoriesTreeHierarchyVisibility({
             provider,
             handler,
@@ -1282,7 +1282,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
           const { handler, provider, viewport } = visibilityTestData;
 
-          await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
+          await handler.changeVisibility(createCategoryHierarchyNode({ id: keys.category.id }), true);
           await validateCategoriesTreeHierarchyVisibility({
             provider,
             handler,
@@ -1331,7 +1331,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
           const { handler, provider, viewport } = visibilityTestData;
           setupInitialDisplayState({ viewport, elements: [{ id: keys.element.id, visible: false }] });
-          await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
+          await handler.changeVisibility(createSubCategoryHierarchyNode({ id: keys.subCategory.id, categoryId: keys.category.id }), true);
 
           await validateCategoriesTreeHierarchyVisibility({
             provider,
@@ -1379,7 +1379,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             ],
           });
 
-          await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
+          await handler.changeVisibility(createSubCategoryHierarchyNode({ id: keys.subCategory.id, categoryId: keys.category.id }), true);
           await validateCategoriesTreeHierarchyVisibility({
             provider,
             handler,
@@ -1423,7 +1423,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           const { handler, provider, viewport } = visibilityTestData;
           setupInitialDisplayState({ viewport, elements: [{ id: keys.element.id, visible: false }] });
 
-          await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
+          await handler.changeVisibility(createSubCategoryHierarchyNode({ id: keys.subCategory.id, categoryId: keys.category.id }), true);
           await validateCategoriesTreeHierarchyVisibility({
             provider,
             handler,
@@ -1490,7 +1490,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             ],
           });
 
-          await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
+          await handler.changeVisibility(createSubCategoryHierarchyNode({ id: keys.subCategory.id, categoryId: keys.category.id }), true);
           await validateCategoriesTreeHierarchyVisibility({
             provider,
             handler,
@@ -1702,7 +1702,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             ],
           });
 
-          await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), true);
+          await handler.changeVisibility(createSubCategoryHierarchyNode({ id: keys.subCategory.id, categoryId: keys.category.id }), true);
           await validateCategoriesTreeHierarchyVisibility({
             provider,
             handler,
@@ -1772,7 +1772,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           cases: [
             {
               name: "modeled element's children display is turned on when its category display is turned on",
-              getTargetNode: (ids: IModelWithSubModelIds) => createCategoryHierarchyNode(ids.category.id, true),
+              getTargetNode: (ids: IModelWithSubModelIds) => createCategoryHierarchyNode({ id: ids.category.id, hasChildren: true }),
               expectations: () => "all-visible",
             },
             {
@@ -1810,7 +1810,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             },
             {
               name: "modeled element's children display is turned on when its sub-model display is turned on",
-              getTargetNode: (ids: IModelWithSubModelIds) => createModelHierarchyNode(ids.modeledElement.id, true),
+              getTargetNode: (ids: IModelWithSubModelIds) => createModelHierarchyNode({ id: ids.modeledElement.id, hasChildren: true }),
               // prettier-ignore
               expectations: (ids: IModelWithSubModelIds) => ({
                 [ids.subModelCategory?.id ?? ""]: "visible",
@@ -1840,7 +1840,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 createElementHierarchyNode({
                   modelId: ids.modeledElement.id,
                   categoryId: ids.subModelCategory?.id,
-                  elementId: ids.subModelElement?.id,
+                  elementId: ids.subModelElement!.id,
                 }),
               // prettier-ignore
               expectations: (ids: IModelWithSubModelIds) => ({
@@ -1885,7 +1885,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           cases: [
             {
               name: "children are visible when category display is turned on",
-              getTargetNode: (ids: IModelWithSubModelIds) => createCategoryHierarchyNode(ids.category.id, true),
+              getTargetNode: (ids: IModelWithSubModelIds) => createCategoryHierarchyNode({ id: ids.category.id, hasChildren: true }),
               // prettier-ignore
               expectations: (ids: IModelWithSubModelIds) => ({
                 [ids.subModelCategory?.id ?? ""]: "hidden",
@@ -1955,7 +1955,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           cases: [
             {
               name: "everything is visible when category display is turned on",
-              getTargetNode: (ids: IModelWithSubModelIds) => createCategoryHierarchyNode(ids.category.id, true),
+              getTargetNode: (ids: IModelWithSubModelIds) => createCategoryHierarchyNode({ id: ids.category.id, hasChildren: true }),
               expectations: () => "all-visible",
             },
             {
@@ -2225,7 +2225,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerRoot.id), false);
+        await handler.changeVisibility(createDefinitionContainerHierarchyNode({ id: keys.definitionContainerRoot.id }), false);
         await validateCategoriesTreeHierarchyVisibility({
           provider,
           handler,
@@ -2279,7 +2279,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerRoot.id), false);
+        await handler.changeVisibility(createDefinitionContainerHierarchyNode({ id: keys.definitionContainerRoot.id }), false);
         await validateCategoriesTreeHierarchyVisibility({
           provider,
           handler,
@@ -2318,7 +2318,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         using visibilityTestData = await createVisibilityTestData({ imodel, visibleByDefault: true });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), false);
+        await handler.changeVisibility(createDefinitionContainerHierarchyNode({ id: keys.definitionContainerChild.id }), false);
         await validateCategoriesTreeHierarchyVisibility({
           provider,
           handler,
@@ -2356,7 +2356,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         using visibilityTestData = await createVisibilityTestData({ imodel, visibleByDefault: true });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), false);
+        await handler.changeVisibility(createDefinitionContainerHierarchyNode({ id: keys.definitionContainerChild.id }), false);
         await validateCategoriesTreeHierarchyVisibility({
           provider,
           handler,
@@ -2400,7 +2400,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createDefinitionContainerHierarchyNode(keys.definitionContainerChild.id), false);
+        await handler.changeVisibility(createDefinitionContainerHierarchyNode({ id: keys.definitionContainerChild.id }), false);
         await validateCategoriesTreeHierarchyVisibility({
           provider,
           handler,
@@ -2433,7 +2433,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), false);
+        await handler.changeVisibility(createCategoryHierarchyNode({ id: keys.category.id }), false);
         await validateCategoriesTreeHierarchyVisibility({
           provider,
           handler,
@@ -2474,7 +2474,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), false);
+        await handler.changeVisibility(createCategoryHierarchyNode({ id: keys.category.id }), false);
         await validateCategoriesTreeHierarchyVisibility({
           provider,
           handler,
@@ -2526,7 +2526,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), false);
+        await handler.changeVisibility(createCategoryHierarchyNode({ id: keys.category.id }), false);
         await validateCategoriesTreeHierarchyVisibility({
           provider,
           handler,
@@ -2579,7 +2579,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), false);
+        await handler.changeVisibility(createCategoryHierarchyNode({ id: keys.category.id }), false);
         await validateCategoriesTreeHierarchyVisibility({
           provider,
           handler,
@@ -2626,7 +2626,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), false);
+        await handler.changeVisibility(createCategoryHierarchyNode({ id: keys.category.id }), false);
         await validateCategoriesTreeHierarchyVisibility({
           provider,
           handler,
@@ -2672,7 +2672,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), false);
+        await handler.changeVisibility(createSubCategoryHierarchyNode({ id: keys.subCategory.id, categoryId: keys.category.id }), false);
         await validateCategoriesTreeHierarchyVisibility({
           provider,
           handler,
@@ -2710,7 +2710,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), false);
+        await handler.changeVisibility(createSubCategoryHierarchyNode({ id: keys.subCategory.id, categoryId: keys.category.id }), false);
         await validateCategoriesTreeHierarchyVisibility({
           provider,
           handler,
@@ -2750,7 +2750,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), false);
+        await handler.changeVisibility(createSubCategoryHierarchyNode({ id: keys.subCategory.id, categoryId: keys.category.id }), false);
         await validateCategoriesTreeHierarchyVisibility({
           provider,
           handler,
@@ -2799,7 +2799,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         });
         const { handler, provider, viewport } = visibilityTestData;
 
-        await handler.changeVisibility(createSubCategoryHierarchyNode(keys.subCategory.id, keys.category.id), false);
+        await handler.changeVisibility(createSubCategoryHierarchyNode({ id: keys.subCategory.id, categoryId: keys.category.id }), false);
         await validateCategoriesTreeHierarchyVisibility({
           provider,
           handler,
