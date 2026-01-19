@@ -15,7 +15,11 @@ import {
 } from "../../../../tree-widget-react/components/trees/categories-tree/CategoriesTreeDefinition.js";
 import { CategoriesTreeIdsCache } from "../../../../tree-widget-react/components/trees/categories-tree/internal/CategoriesTreeIdsCache.js";
 import { createCategoriesTreeVisibilityHandler } from "../../../../tree-widget-react/components/trees/categories-tree/internal/visibility/CategoriesTreeVisibilityHandler.js";
-import { CLASS_NAME_DefinitionModel, CLASS_NAME_SubCategory, CLASS_NAME_Subject } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
+import {
+  CLASS_NAME_DefinitionModel,
+  CLASS_NAME_SubCategory,
+  CLASS_NAME_Subject,
+} from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
 import {
   buildIModel,
   insertDefinitionContainer,
@@ -2860,7 +2864,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
     });
   });
-  
+
   describe("search nodes", () => {
     let createIModelResult: Awaited<ReturnType<typeof createIModel>>;
     let visibilityTestData: Awaited<ReturnType<typeof createFilteredVisibilityTestData>>;
@@ -2900,12 +2904,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
       searchPaths,
       view,
       visibleByDefault,
-      subCategoriesOfCategories
+      subCategoriesOfCategories,
     }: Parameters<typeof createVisibilityTestData>[0] & {
       searchPaths: HierarchyNodeIdentifiersPath[];
       view: "2d" | "3d";
       visibleByDefault?: boolean;
-      subCategoriesOfCategories: Array<{categoryId: string; subCategories: Id64Arg }>;
+      subCategoriesOfCategories: Array<{ categoryId: string; subCategories: Id64Arg }>;
     }) {
       const imodelAccess = createIModelAccess(imodel);
       const idsCache = new CategoriesTreeIdsCache(imodelAccess, view);
@@ -2913,7 +2917,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         iModel: imodel,
         viewType: view,
         visibleByDefault,
-        subCategoriesOfCategories
+        subCategoriesOfCategories,
       });
       const visibilityHandlerWithSearchPaths = createCategoriesTreeVisibilityHandler({
         idsCache,
@@ -2958,9 +2962,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
         searchPaths: createIModelResult.searchPaths,
         view: "3d",
         visibleByDefault: false,
-        subCategoriesOfCategories: [
-          { categoryId: createIModelResult.category.id, subCategories: createIModelResult.subCategory.id },
-        ]
+        subCategoriesOfCategories: [{ categoryId: createIModelResult.category.id, subCategories: createIModelResult.subCategory.id }],
       });
     });
 
@@ -2974,24 +2976,13 @@ describe("CategoriesTreeVisibilityHandler", () => {
 
     it("showing root category changes visibility for related nodes in search paths", async function () {
       const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
-      const {
-        category,
-        defaultSubCategory,
-        subCategory,
-        parentElement,
-        childElement,
-        element,
-      } = createIModelResult;
+      const { category, defaultSubCategory, subCategory, parentElement, childElement, element } = createIModelResult;
       await visibilityHandlerWithSearchPaths.changeVisibility(
         createCategoryHierarchyNode({
           id: category.id,
           search: {
             isSearchTarget: false,
-            childrenTargetPaths: [
-              [parentElement, childElement],
-              [subCategory],
-              [defaultSubCategory],
-            ],
+            childrenTargetPaths: [[parentElement, childElement], [subCategory], [defaultSubCategory]],
           },
         }),
         true,
