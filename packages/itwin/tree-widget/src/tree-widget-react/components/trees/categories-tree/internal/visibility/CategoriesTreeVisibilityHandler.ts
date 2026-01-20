@@ -144,10 +144,12 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
     }
 
     if (CategoriesTreeNode.isSubCategoryNode(node)) {
-      return this.#visibilityHelper.getSubCategoriesVisibilityStatus({
-        categoryId: node.extendedData.categoryId,
-        subCategoryIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
-      });
+      return of(
+        this.#visibilityHelper.getSubCategoriesVisibilityStatus({
+          categoryId: node.extendedData.categoryId,
+          subCategoryIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
+        }),
+      );
     }
 
     assert(CategoriesTreeNode.isElementNode(node));
@@ -244,7 +246,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
       if (subCategories?.length) {
         observables.push(
           from(subCategories).pipe(
-            mergeMap(({ categoryId, subCategoryIds }) => this.#visibilityHelper.getSubCategoriesVisibilityStatus({ subCategoryIds, categoryId })),
+            map(({ categoryId, subCategoryIds }) => this.#visibilityHelper.getSubCategoriesVisibilityStatus({ subCategoryIds, categoryId })),
           ),
         );
       }

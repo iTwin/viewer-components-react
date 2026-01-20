@@ -27,7 +27,7 @@ import {
   takeUntil,
   tap,
 } from "rxjs";
-import { assert, Id64 } from "@itwin/core-bentley";
+import { Id64 } from "@itwin/core-bentley";
 import { createVisibilityStatus } from "../Tooltip.js";
 import { fromWithRelease, getSetFromId64Arg, releaseMainThreadOnItemsCount, setDifference, setIntersection } from "../Utils.js";
 import {
@@ -237,11 +237,20 @@ export class BaseVisibilityHelper implements Disposable {
     ).pipe(mergeVisibilityStatuses);
   }
 
-  /** Gets visibility status of sub-categories, assuming category is visible. */
-  private getVisibleCategorySubCategoriesVisibilityStatus(props: { subCategoryIds: Id64Arg }): VisibilityStatus {
-    const { subCategoryIds } = props;
+  /**
+   * Gets visibility status of sub-categories.
+   *
+   * Determines visibility status by checking:
+   * - Category selector visibility in the viewport.
+   * - Sub-categories visibility in the viewport.
+   */
+  public getSubCategoriesVisibilityStatus(props: { subCategoryIds: Id64Arg; categoryId: Id64String }): VisibilityStatus {
+    if (!this.#props.viewport.viewsCategory(props.categoryId)) {
+      return createVisibilityStatus("hidden");
+    }
+
     let subCategoryVisibility: "visible" | "hidden" | "unknown" = "unknown";
-    for (const subCategoryId of Id64.iterable(subCategoryIds)) {
+    for (const subCategoryId of Id64.iterable(props.subCategoryIds)) {
       const isSubCategoryVisible = this.#props.viewport.viewsSubCategory(subCategoryId);
       if (isSubCategoryVisible && subCategoryVisibility === "hidden") {
         return createVisibilityStatus("partial");
@@ -254,69 +263,6 @@ export class BaseVisibilityHelper implements Disposable {
     // If visibility is unknown, no subCategories were provided,
     // Since category is visible we return visible
     return createVisibilityStatus(subCategoryVisibility === "unknown" ? "visible" : subCategoryVisibility);
-  }
-
-  /**
-   * Gets visibility status of sub-categories.
-   *
-   * Determines visibility status by checking:
-   * - Models that contain the category visibility;
-   * - Per model category visibility overrides;
-   * - Category selector visibility in the viewport.
-   * - Sub-categories visibility in the viewport.
-   */
-  public getSubCategoriesVisibilityStatus(props: { subCategoryIds: Id64Arg; categoryId: Id64String }): Observable<VisibilityStatus> {
-    return this.#props.baseIdsCache.getModels({ categoryIds: props.categoryId }).pipe(
-      map(({ models }) => {
-        let visibility: "visible" | "hidden" | "unknown" = "unknown";
-        let nonDefaultModelDisplayStatesCount = 0;
-        for (const modelId of Id64.iterable(models ?? [])) {
-          if (!this.#props.viewport.viewsModel(modelId)) {
-            if (visibility === "visible") {
-              return createVisibilityStatus("partial");
-            }
-            visibility = "hidden";
-            ++nonDefaultModelDisplayStatesCount;
-            continue;
-          }
-          const override = this.#props.viewport.getPerModelCategoryOverride({ modelId, categoryId: props.categoryId });
-          if (override === "show") {
-            if (visibility === "hidden") {
-              return createVisibilityStatus("partial");
-            }
-            visibility = "visible";
-            ++nonDefaultModelDisplayStatesCount;
-            continue;
-          }
-          if (override === "hide") {
-            if (visibility === "visible") {
-              return createVisibilityStatus("partial");
-            }
-            visibility = "hidden";
-            ++nonDefaultModelDisplayStatesCount;
-            continue;
-          }
-        }
-        if (models && Id64.sizeOf(models) > 0 && nonDefaultModelDisplayStatesCount === Id64.sizeOf(models)) {
-          assert(visibility === "visible" || visibility === "hidden");
-          return createVisibilityStatus(visibility);
-        }
-        if (!this.#props.viewport.viewsCategory(props.categoryId)) {
-          return createVisibilityStatus(visibility === "visible" ? "partial" : "hidden");
-        }
-
-        if (Id64.sizeOf(props.subCategoryIds) === 0) {
-          if (visibility === "hidden") {
-            return createVisibilityStatus("partial");
-          }
-          return createVisibilityStatus("visible");
-        }
-
-        const subCategoriesVisibility = this.getVisibleCategorySubCategoriesVisibilityStatus({ subCategoryIds: props.subCategoryIds });
-        return subCategoriesVisibility.state === visibility || visibility === "unknown" ? subCategoriesVisibility : createVisibilityStatus("partial");
-      }),
-      mergeVisibilityStatuses,
-    );
   }
 
   /**
@@ -425,7 +371,7 @@ export class BaseVisibilityHelper implements Disposable {
               ? this.#props.baseIdsCache.getSubCategories({ categoryId }).pipe(
                   mergeMap((subCategoryIds) => {
                     if (subCategoryIds.length > 0) {
-                      return this.getSubCategoriesVisibilityStatus({ categoryId, subCategoryIds });
+                      return of(this.getSubCategoriesVisibilityStatus({ categoryId, subCategoryIds }));
                     }
 
                     return EMPTY;
