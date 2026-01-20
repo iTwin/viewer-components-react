@@ -3347,7 +3347,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
             siblingCategory,
             siblingElement,
             defaultSiblingSubCategory,
-            searchPaths: [[category, modeledElement, subModel,subModelCategory, subModelElement]],
+            searchPaths: [[category, modeledElement, subModel, subModelCategory, subModelElement]],
           };
         });
       }
