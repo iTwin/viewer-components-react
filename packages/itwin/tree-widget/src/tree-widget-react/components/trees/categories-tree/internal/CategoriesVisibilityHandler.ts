@@ -8,7 +8,7 @@ import { BeEvent, Id64 } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { enableCategoryDisplay, enableSubCategoryDisplay } from "../../common/CategoriesVisibilityUtils.js";
-import { mergeVisibilities, releaseMainThreadOnItemsCount, setDifference } from "../../common/internal/Utils.js";
+import { mergeVisibilities, releaseMainThreadOnItemsCount } from "../../common/internal/Utils.js";
 import { toVoidPromise } from "../../common/Rxjs.js";
 import { createVisibilityStatus } from "../../common/Tooltip.js";
 import { CategoriesTreeNode } from "./CategoriesTreeNode.js";
