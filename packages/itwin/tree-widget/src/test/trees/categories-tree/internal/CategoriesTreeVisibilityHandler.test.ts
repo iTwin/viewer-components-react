@@ -3069,7 +3069,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
     });
 
     // TODO: Enable with https://github.com/iTwin/viewer-components-react/issues/1513
-    describe.skip(" category with child elements hierarchy", () => {
+    describe.skip("category with child elements hierarchy", () => {
       let createIModelResult: Awaited<ReturnType<typeof createIModel>>;
       let visibilityTestData: Awaited<ReturnType<typeof createFilteredVisibilityTestData>>;
       async function createIModel(context: Mocha.Context) {
