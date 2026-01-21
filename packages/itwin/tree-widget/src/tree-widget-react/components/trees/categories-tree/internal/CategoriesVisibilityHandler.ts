@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { EMPTY, filter, firstValueFrom, forkJoin, from, map, merge, mergeMap, of, toArray } from "rxjs";
+import { EMPTY, firstValueFrom, forkJoin, from, map, merge, mergeMap, of, toArray } from "rxjs";
 import { BeEvent, Id64 } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
@@ -160,8 +160,22 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
 
   private enableCategoriesElementModelsVisibility(categoryIds: Id64Array) {
     return this.#idsCache.getCategoriesElementModels(categoryIds).pipe(
-      mergeMap((categoriesModelsMap) => categoriesModelsMap.keys()),
-      filter((modelId) => !this.#viewport.view.viewsModel(modelId)),
+      mergeMap((categoriesModelsMap) => categoriesModelsMap.entries()),
+      mergeMap(([modelId, categoriesFromPropsInModel]) =>
+        this.#viewport.view.viewsModel(modelId)
+          ? EMPTY
+          : this.#idsCache.getCategoriesOfElementModel(modelId).pipe(
+              map((allModelCategories) => {
+                // Add 'Hide' override to categories that were hidden before model is turned on
+                allModelCategories?.forEach((categoryId) => {
+                  if (!categoriesFromPropsInModel.has(categoryId)) {
+                    this.#viewport.perModelCategoryVisibility.setOverride(modelId, categoryId, PerModelCategoryVisibility.Override.Hide);
+                  }
+                });
+                return modelId;
+              }),
+            ),
+      ),
       toArray(),
       mergeMap(async (hiddenModels) => {
         if (hiddenModels.length > 0) {
