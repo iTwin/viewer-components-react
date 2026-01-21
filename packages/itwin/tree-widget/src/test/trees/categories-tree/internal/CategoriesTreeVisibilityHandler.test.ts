@@ -3541,7 +3541,9 @@ describe("CategoriesTreeVisibilityHandler", () => {
           }),
           true,
         );
-
+        // In this case when turning on subModelCategory, only subModelElement is put into always drawn list (due to search paths).
+        // Because subModelElement and subModelCategory visibility is not affected by visibility of nodes above them (in hierarchy),
+        // visibility handler does not change the visibility of modeledElement or category (They get partial visibility because their subModels are visible, but they themselves are not).
         await validateCategoriesTreeHierarchyVisibility({
           provider: providerWithSearchPaths,
           handler: visibilityHandlerWithSearchPaths,
@@ -3607,6 +3609,9 @@ describe("CategoriesTreeVisibilityHandler", () => {
           true,
         );
 
+        // In this case when turning on subModelElement visibility, it is put into always drawn list.
+        // Because subModelElement and subModelCategory visibility is not affected by visibility of nodes above them (in hierarchy),
+        // visibility handler does not change the visibility of modeledElement or category (They get partial visibility because their subModels are visible, but they themselves are not).
         await validateCategoriesTreeHierarchyVisibility({
           provider: providerWithSearchPaths,
           handler: visibilityHandlerWithSearchPaths,
