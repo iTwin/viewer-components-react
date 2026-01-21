@@ -8,7 +8,7 @@ import { BeEvent, Id64 } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { enableCategoryDisplay, enableSubCategoryDisplay } from "../../common/CategoriesVisibilityUtils.js";
-import { mergeVisibilities, releaseMainThreadOnItemsCount } from "../../common/internal/Utils.js";
+import { mergeVisibilities, releaseMainThreadOnItemsCount, setDifference } from "../../common/internal/Utils.js";
 import { toVoidPromise } from "../../common/Rxjs.js";
 import { createVisibilityStatus } from "../../common/Tooltip.js";
 import { CategoriesTreeNode } from "./CategoriesTreeNode.js";
@@ -160,8 +160,21 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
 
   private enableCategoriesElementModelsVisibility(categoryIds: Id64Array) {
     return this.#idsCache.getCategoriesElementModels(categoryIds).pipe(
-      mergeMap((categoriesModelsMap) => categoriesModelsMap.keys()),
-      filter((modelId) => !this.#viewport.view.viewsModel(modelId)),
+      mergeMap((categoriesModelsMap) => categoriesModelsMap.entries()),
+      filter(([modelId, _]) => !this.#viewport.view.viewsModel(modelId)),
+      mergeMap(([modelId, categoriesFromPropsInModel]) => 
+        this.#idsCache.getCategoriesOfElementModel(modelId).pipe(
+          map((allModelCategories) => {
+            // Add 'Hide' override to categories that were hidden before model is turned on
+            allModelCategories?.forEach((categoryId) => {
+              if (!categoriesFromPropsInModel.has(categoryId) && this.#viewport.perModelCategoryVisibility.getOverride(modelId, categoryId) === PerModelCategoryVisibility.Override.None) {
+                this.#viewport.perModelCategoryVisibility.setOverride(modelId, categoryId, PerModelCategoryVisibility.Override.Hide);
+              }
+            })
+            return modelId;
+          }),
+        ),
+      ),
       toArray(),
       mergeMap(async (hiddenModels) => {
         if (hiddenModels.length > 0) {
