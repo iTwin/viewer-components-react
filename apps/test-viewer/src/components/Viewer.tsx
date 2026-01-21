@@ -59,7 +59,7 @@ export function Viewer() {
 
 function ViewerWithOptions() {
   const { client: authClient } = useAuthorizationContext();
-  const { iTwinId, iModelId } = useIModelInfo();
+  const { iTwinId, iModelId, changesetId } = useIModelInfo();
   const [uiConfig, setUiConfig] = useState<UiProvidersConfig | undefined>();
 
   const onIModelAppInit = useCallback(async () => {
@@ -92,6 +92,7 @@ function ViewerWithOptions() {
     <WebViewer
       iTwinId={iTwinId}
       iModelId={iModelId}
+      changeSetId={changesetId}
       authClient={authClient}
       enablePerformanceMonitors={false}
       onIModelAppInit={onIModelAppInit}
@@ -200,11 +201,14 @@ function useIModelInfo() {
       );
     }
 
-    navigate(`/?iTwinId=${import.meta.env.IMJS_ITWIN_ID}&iModelId=${import.meta.env.IMJS_IMODEL_ID}`);
+    navigate(
+      `/?iTwinId=${import.meta.env.IMJS_ITWIN_ID}&iModelId=${import.meta.env.IMJS_IMODEL_ID}${import.meta.env.IMJS_IMODEL_CHANGESET_ID ? `&changesetId=${import.meta.env.IMJS_IMODEL_CHANGESET_ID}` : ""}`,
+    );
   }, [searchParams, navigate]);
 
   return {
     iTwinId: searchParams.get("iTwinId"),
     iModelId: searchParams.get("iModelId"),
+    changesetId: searchParams.get("changesetId") ?? undefined,
   };
 }
