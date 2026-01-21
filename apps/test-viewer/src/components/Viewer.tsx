@@ -92,7 +92,7 @@ function ViewerWithOptions() {
     <WebViewer
       iTwinId={iTwinId}
       iModelId={iModelId}
-      changeSetId={changesetId ?? undefined}
+      changeSetId={changesetId}
       authClient={authClient}
       enablePerformanceMonitors={false}
       onIModelAppInit={onIModelAppInit}
@@ -209,6 +209,6 @@ function useIModelInfo() {
   return {
     iTwinId: searchParams.get("iTwinId"),
     iModelId: searchParams.get("iModelId"),
-    changesetId: searchParams.get("changesetId"),
+    changesetId: searchParams.get("changesetId") ?? undefined,
   };
 }
