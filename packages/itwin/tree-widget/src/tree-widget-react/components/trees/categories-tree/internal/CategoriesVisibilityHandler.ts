@@ -168,10 +168,7 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
               map((allModelCategories) => {
                 // Add 'Hide' override to categories that were hidden before model is turned on
                 allModelCategories?.forEach((categoryId) => {
-                  if (
-                    !categoriesFromPropsInModel.has(categoryId) &&
-                    this.#viewport.perModelCategoryVisibility.getOverride(modelId, categoryId) === PerModelCategoryVisibility.Override.None
-                  ) {
+                  if (!categoriesFromPropsInModel.has(categoryId)) {
                     this.#viewport.perModelCategoryVisibility.setOverride(modelId, categoryId, PerModelCategoryVisibility.Override.Hide);
                   }
                 });

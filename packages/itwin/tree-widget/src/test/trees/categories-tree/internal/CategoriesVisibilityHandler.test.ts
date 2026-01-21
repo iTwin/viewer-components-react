@@ -366,17 +366,19 @@ describe("CategoriesVisibilityHandler", () => {
     });
 
     describe("categories", () => {
-      it("showing category of hidden model does not turn on categories without overrides in that model", async function () {
+      it("showing category of hidden model does not enable other categories", async function () {
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
           const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
           const otherCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory2" });
-          const categoryWithOverride = insertSpatialCategory({ builder, codeValue: "SpatialCategory3" });
+          const categoryWithHideOverride = insertSpatialCategory({ builder, codeValue: "SpatialCategory3" });
+          const categoryWithShowOverride = insertSpatialCategory({ builder, codeValue: "SpatialCategory4" });
           insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
           insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: otherCategory.id });
-          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: categoryWithOverride.id });
-          return { category, otherCategory, categoryWithOverride, physicalModel };
+          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: categoryWithHideOverride.id });
+          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: categoryWithShowOverride.id });
+          return { category, otherCategory, categoryWithHideOverride, categoryWithShowOverride, physicalModel };
         });
 
         const { imodel, ...keys } = buildIModelResult;
@@ -389,7 +391,8 @@ describe("CategoriesVisibilityHandler", () => {
 
         viewport.changeModelDisplay(keys.physicalModel.id, false);
         viewport.changeCategoryDisplay(keys.otherCategory.id, true);
-        viewport.perModelCategoryVisibility.setOverride(keys.physicalModel.id, keys.categoryWithOverride.id, PerModelCategoryVisibility.Override.Show);
+        viewport.perModelCategoryVisibility.setOverride(keys.physicalModel.id, keys.categoryWithHideOverride.id, PerModelCategoryVisibility.Override.Hide);
+        viewport.perModelCategoryVisibility.setOverride(keys.physicalModel.id, keys.categoryWithShowOverride.id, PerModelCategoryVisibility.Override.Show);
         viewport.renderFrame();
         await handler.changeVisibility(createCategoryHierarchyNode(keys.category.id), true);
         await validateHierarchyVisibility({
@@ -399,7 +402,8 @@ describe("CategoriesVisibilityHandler", () => {
           expectations: {
             [keys.category.id]: "visible",
             [keys.otherCategory.id]: "hidden",
-            [keys.categoryWithOverride.id]: "visible",
+            [keys.categoryWithHideOverride.id]: "hidden",
+            [keys.categoryWithShowOverride.id]: "hidden",
           },
         });
       });
