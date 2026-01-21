@@ -366,7 +366,7 @@ describe("CategoriesVisibilityHandler", () => {
     });
 
     describe("categories", () => {
-      it.only("showing category of hidden model does not turn on other categories in that model", async function () {
+      it("showing category of hidden model does not turn on other categories in that model", async function () {
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
