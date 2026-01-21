@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { EMPTY, filter, firstValueFrom, forkJoin, from, map, merge, mergeMap, of, toArray } from "rxjs";
+import { EMPTY, firstValueFrom, forkJoin, from, map, merge, mergeMap, of, toArray } from "rxjs";
 import { BeEvent, Id64 } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
