@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-<!-- This log was last generated on Thu, 15 Jan 2026 14:30:28 GMT and should not be manually modified. -->
+<!-- This log was last generated on Wed, 21 Jan 2026 12:50:36 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 3.17.5
+
+Wed, 21 Jan 2026 12:50:36 GMT
+
+### Patches
+
+- Fix enabling category display in categories tree making other categories also visible, when their elements are under hidden model. ([#1556](https://github.com/iTwin/viewer-components-react/pull/1556))
 
 ## 3.17.4
 

@@ -2,6 +2,21 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Wed, 21 Jan 2026 12:50:36 GMT",
+      "version": "3.17.5",
+      "tag": "@itwin/tree-widget-react_v3.17.5",
+      "comments": {
+        "patch": [
+          {
+            "author": "100586436+JonasDov@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "3922007f320b2b0c54f68fcec1fd7240ed510e7d",
+            "comment": "Fix enabling category display in categories tree making other categories also visible, when their elements are under hidden model."
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 15 Jan 2026 14:30:28 GMT",
       "version": "3.17.4",
       "tag": "@itwin/tree-widget-react_v3.17.4",
