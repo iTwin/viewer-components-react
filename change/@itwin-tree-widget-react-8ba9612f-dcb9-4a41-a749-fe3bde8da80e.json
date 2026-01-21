@@ -1,6 +1,6 @@
 {
   "type": "patch",
-  "comment": "[Tree widget]: Adjust visibility handling in categories tree. Now, showing categories of hidden models does not turn on other categories in that model.",
+  "comment": "Adjust visibility handling in categories tree. Now, showing categories of hidden models does not turn on other categories in that model.",
   "packageName": "@itwin/tree-widget-react",
   "email": "100586436+JonasDov@users.noreply.github.com",
   "dependentChangeType": "patch"

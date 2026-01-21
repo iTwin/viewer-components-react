@@ -161,22 +161,23 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
   private enableCategoriesElementModelsVisibility(categoryIds: Id64Array) {
     return this.#idsCache.getCategoriesElementModels(categoryIds).pipe(
       mergeMap((categoriesModelsMap) => categoriesModelsMap.entries()),
-      filter(([modelId, _]) => !this.#viewport.view.viewsModel(modelId)),
       mergeMap(([modelId, categoriesFromPropsInModel]) =>
-        this.#idsCache.getCategoriesOfElementModel(modelId).pipe(
-          map((allModelCategories) => {
-            // Add 'Hide' override to categories that were hidden before model is turned on
-            allModelCategories?.forEach((categoryId) => {
-              if (
-                !categoriesFromPropsInModel.has(categoryId) &&
-                this.#viewport.perModelCategoryVisibility.getOverride(modelId, categoryId) === PerModelCategoryVisibility.Override.None
-              ) {
-                this.#viewport.perModelCategoryVisibility.setOverride(modelId, categoryId, PerModelCategoryVisibility.Override.Hide);
-              }
-            });
-            return modelId;
-          }),
-        ),
+        this.#viewport.view.viewsModel(modelId)
+          ? EMPTY
+          : this.#idsCache.getCategoriesOfElementModel(modelId).pipe(
+              map((allModelCategories) => {
+                // Add 'Hide' override to categories that were hidden before model is turned on
+                allModelCategories?.forEach((categoryId) => {
+                  if (
+                    !categoriesFromPropsInModel.has(categoryId) &&
+                    this.#viewport.perModelCategoryVisibility.getOverride(modelId, categoryId) === PerModelCategoryVisibility.Override.None
+                  ) {
+                    this.#viewport.perModelCategoryVisibility.setOverride(modelId, categoryId, PerModelCategoryVisibility.Override.Hide);
+                  }
+                });
+                return modelId;
+              }),
+            ),
       ),
       toArray(),
       mergeMap(async (hiddenModels) => {
