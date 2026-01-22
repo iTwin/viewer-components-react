@@ -43,4 +43,4 @@ export { ModelsTreeVisibilityHandlerOverrides } from "./models-tree/internal/vis
 
 // reexport actions from presentation-hierarchies-react to keep naming consistent
 // reexport TreeActionBase to allow consumers defining custom actions without @itwin/presentation-hierarchies-react dependency
-export { RenameAction, FilterAction, TreeActionBase, TreeActionBaseAttributes } from "@itwin/presentation-hierarchies-react";
+export { TreeNodeRenameAction, TreeNodeFilterAction, TreeActionBase, TreeActionBaseAttributes } from "@itwin/presentation-hierarchies-react";

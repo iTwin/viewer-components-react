@@ -14,7 +14,7 @@ import { TreeWidget } from "../../../../TreeWidget.js";
 import { createTooltip } from "../internal/Tooltip.js";
 
 import type { PropsWithChildren } from "react";
-import type { PresentationHierarchyNode, TreeActionBaseAttributes } from "@itwin/presentation-hierarchies-react";
+import type { TreeActionBaseAttributes, TreeNode } from "@itwin/presentation-hierarchies-react";
 
 /** @beta */
 interface LoadedTreeItemVisibilityButtonState {
@@ -39,7 +39,7 @@ export type TreeItemVisibilityButtonState = (
  * Should be used with `VisibilityTreeRenderer`.
  * @beta
  */
-export const VisibilityAction = memo(function VisibilityAction({ node, ...actionAttributes }: { node: PresentationHierarchyNode } & TreeActionBaseAttributes) {
+export const VisibilityAction = memo(function VisibilityAction({ node, ...actionAttributes }: { node: TreeNode } & TreeActionBaseAttributes) {
   const context = useVisibilityContext();
   const state = context?.getVisibilityButtonState(node);
 
@@ -80,9 +80,9 @@ export const VisibilityAction = memo(function VisibilityAction({ node, ...action
 /** @beta */
 export interface VisibilityContext {
   /** Callback that should be invoked when checkbox is clicked. */
-  onVisibilityButtonClick: (node: PresentationHierarchyNode, state: LoadedTreeItemVisibilityButtonState["state"]) => void;
+  onVisibilityButtonClick: (node: TreeNode, state: LoadedTreeItemVisibilityButtonState["state"]) => void;
   /** Callback that should be used to determine current checkbox state. */
-  getVisibilityButtonState: (node: PresentationHierarchyNode) => TreeItemVisibilityButtonState;
+  getVisibilityButtonState: (node: TreeNode) => TreeItemVisibilityButtonState;
 }
 
 const visibilityContext = createContext<VisibilityContext | undefined>(undefined);

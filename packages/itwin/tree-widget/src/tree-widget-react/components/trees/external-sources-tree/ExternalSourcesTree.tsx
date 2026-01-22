@@ -17,7 +17,7 @@ import { ExternalSourcesTreeComponent } from "./ExternalSourcesTreeComponent.js"
 import { ExternalSourcesTreeDefinition } from "./ExternalSourcesTreeDefinition.js";
 
 import type { GuidString } from "@itwin/core-bentley";
-import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import type { TreeNode } from "@itwin/presentation-hierarchies-react";
 import type { Props } from "@itwin/presentation-shared";
 import type { TreeProps } from "../common/components/Tree.js";
 import type { ExtendedTreeRendererProps } from "../common/components/TreeRenderer.js";
@@ -73,7 +73,7 @@ const getDefinitionsProvider = (props: Props<TreeProps["getHierarchyDefinition"]
 };
 
 /** @beta */
-export function ExternalSourcesTreeIcon({ node }: { node: PresentationHierarchyNode }) {
+export function ExternalSourcesTreeIcon({ node }: { node: TreeNode }) {
   if (node.nodeData.extendedData?.imageId === undefined) {
     return undefined;
   }
