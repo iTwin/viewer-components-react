@@ -548,10 +548,6 @@ export class CategoriesTreeIdsCache implements Disposable {
     );
   }
 
-  public getCategoriesOfElementModel(modelId: Id64String): Observable<Id64Set | undefined> {
-    return this.getElementModelsCategories().pipe(map((elementModelsCategories) => elementModelsCategories.get(modelId)?.categoryIds));
-  }
-
   public getModelCategoryIds(modelId: Id64String): Observable<Id64Array> {
     return this.getElementModelsCategories().pipe(
       map((elementModelsCategories) => {
