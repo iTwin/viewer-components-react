@@ -11,7 +11,7 @@ import type { HierarchyNode, InstancesNodeKey, NonGroupingHierarchyNode } from "
 /**
  * Contains utility functions for working with Classifications Tree nodes.
  *
- * It is a wrapper around `ClassificationsTreeNode` that exposes some internal details that should not be exposed vie public api.
+ * It is a wrapper around `ClassificationsTreeNode` that exposes some internal details that should not be exposed via public api.
  *
  * @internal
  */
