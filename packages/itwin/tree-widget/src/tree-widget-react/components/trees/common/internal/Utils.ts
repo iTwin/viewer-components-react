@@ -6,7 +6,7 @@
 import { useEffect, useRef } from "react";
 import { bufferCount, concatAll, concatMap, delay, from, of } from "rxjs";
 import { assert, Id64 } from "@itwin/core-bentley";
-import { ProcessedHierarchyNode } from "@itwin/presentation-hierarchies";
+import { HierarchyNodeKey, ProcessedHierarchyNode } from "@itwin/presentation-hierarchies";
 import {
   CLASS_NAME_DrawingCategory,
   CLASS_NAME_GeometricElement2d,
@@ -231,26 +231,40 @@ export function updateChildrenTree<T extends object = {}>({
 }
 
 /** @internal */
-export function groupingNodeHasSearchTargets(children: ProcessedHierarchyNode[]):
+export function groupingNodeDataFromChildren(children: ProcessedHierarchyNode[]):
   | {
       hasSearchTargetAncestor: true;
       hasDirectNonSearchTargets: undefined;
+      childrenCount: number;
+      searchTargets: undefined;
     }
   | {
       hasSearchTargetAncestor: false;
       hasDirectNonSearchTargets: boolean;
+      childrenCount: number;
+      searchTargets: Map<Id64String, { childrenCount: number }>;
     } {
+  let childrenCount = 0;
+  const searchTargets = new Map<Id64String, { childrenCount: number }>();
+  let hasDirectNonSearchTargets = false;
   for (const child of children) {
     assert(!ProcessedHierarchyNode.isGroupingNode(child), "Expected only non-grouping nodes as children");
+    if (child.extendedData?.childrenCount) {
+      childrenCount += child.extendedData.childrenCount;
+    }
     if (child.search) {
       if (child.search.hasSearchTargetAncestor) {
-        return { hasSearchTargetAncestor: true, hasDirectNonSearchTargets: undefined };
+        return { hasSearchTargetAncestor: true, hasDirectNonSearchTargets: undefined, childrenCount, searchTargets: undefined };
       }
       if (!child.search.isSearchTarget) {
-        return { hasSearchTargetAncestor: false, hasDirectNonSearchTargets: true };
+        hasDirectNonSearchTargets = true;
+        if (!child.search.childrenTargetPaths?.length || child.search.isSearchTarget) {
+          assert(HierarchyNodeKey.isInstances(child.key));
+          child.key.instanceKeys.forEach((key) => searchTargets.set(key.id, { childrenCount: child.extendedData?.childrenCount ?? 0 }));
+        }
       }
     }
   }
 
-  return { hasSearchTargetAncestor: false, hasDirectNonSearchTargets: false };
+  return { hasSearchTargetAncestor: false, hasDirectNonSearchTargets, childrenCount, searchTargets };
 }

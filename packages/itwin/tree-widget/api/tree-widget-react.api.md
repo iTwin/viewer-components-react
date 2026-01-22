@@ -160,7 +160,9 @@ export namespace CategoriesTreeNode {
     } & {
         extendedData: {
             categoryId: Id64String;
-            modelElementsMap: Map<Id64String, Set<Id64String>>;
+            modelElementsMap: Map<Id64String, {
+                elementIds: Set<Id64String>;
+            }>;
         };
     };
     const isSubCategoryNode: (node: Pick<HierarchyNode_2, "extendedData">) => node is Omit<NonGroupingHierarchyNode, "extendedData"> & {

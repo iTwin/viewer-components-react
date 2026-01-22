@@ -39,11 +39,14 @@ import {
 
 import type { Observable, Subscription } from "rxjs";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
-import type { HierarchyNode } from "@itwin/presentation-hierarchies";
+import type { InstanceKey } from "@itwin/presentation-common";
+import type { ClassGroupingNodeKey, HierarchyNode, InstancesNodeKey } from "@itwin/presentation-hierarchies";
+import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { TreeWidgetViewport } from "../../TreeWidgetViewport.js";
 import type { HierarchyVisibilityHandlerOverridableMethod, HierarchyVisibilityOverrideHandler, VisibilityStatus } from "../../UseHierarchyVisibility.js";
 import type { AlwaysAndNeverDrawnElementInfo } from "../AlwaysAndNeverDrawnElementInfo.js";
 import type { CategoryId, ModelId } from "../Types.js";
+import type { ChildrenTree } from "../Utils.js";
 import type { GetVisibilityFromAlwaysAndNeverDrawnElementsProps } from "../VisibilityUtils.js";
 
 /**
@@ -80,6 +83,8 @@ export interface BaseIdsCache {
     props: { modelIds: Id64Arg; categoryId?: Id64String } | { categoryIds: Id64Arg; modelId: Id64String | undefined },
   ) => Observable<{ id: Id64String; subModels: Id64Arg | undefined }>;
   getAllCategories: () => Observable<{ drawingCategories?: Id64Set; spatialCategories?: Id64Set }>;
+  getChildrenTree: (props: { elementIds: Id64Arg; type: "2d" | "3d" }) => Observable<ChildrenTree>;
+  getAllChildrenCount: (props: { elementIds: Id64Arg; type: "2d" | "3d" }) => Observable<Map<Id64String, number>>;
 }
 
 /**
@@ -89,17 +94,23 @@ export interface BaseIdsCache {
 export interface TreeSpecificVisibilityHandler<TSearchTargets> {
   getVisibilityStatus: (node: HierarchyNode) => Observable<VisibilityStatus>;
   changeVisibilityStatus: (node: HierarchyNode, on: boolean) => Observable<void>;
-  getSearchTargetsVisibilityStatus: (targets: TSearchTargets) => Observable<VisibilityStatus>;
+  getSearchTargetsVisibilityStatus: (
+    targets: TSearchTargets,
+    node: HierarchyNode & {
+      key: ClassGroupingNodeKey | InstancesNodeKey;
+    },
+  ) => Observable<VisibilityStatus>;
   changeSearchTargetsVisibilityStatus: (targets: TSearchTargets, on: boolean) => Observable<void>;
 }
 
 /** @internal */
-export interface BaseVisibilityHelperProps {
+export interface BaseVisibilityHelperProps<TSearchResultsTargets> {
   viewport: TreeWidgetViewport;
-  alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfo;
+  alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfo<TSearchResultsTargets>;
   overrideHandler?: HierarchyVisibilityOverrideHandler;
   overrides?: BaseTreeVisibilityHandlerOverrides;
   baseIdsCache: BaseIdsCache;
+  classInspector: ECClassHierarchyInspector;
 }
 
 /**
@@ -108,13 +119,13 @@ export interface BaseVisibilityHelperProps {
  * It provides methods that help retrieve and change visibility status of models, categories, elements.
  * @internal
  */
-export class BaseVisibilityHelper implements Disposable {
-  readonly #props: BaseVisibilityHelperProps;
-  readonly #alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo;
+export class BaseVisibilityHelper<TSearchResultsTargets> implements Disposable {
+  readonly #props: BaseVisibilityHelperProps<TSearchResultsTargets>;
+  readonly #alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo<TSearchResultsTargets>;
   #elementChangeQueue = new Subject<Observable<void>>();
   #subscriptions: Subscription[] = [];
 
-  constructor(props: BaseVisibilityHelperProps) {
+  constructor(props: BaseVisibilityHelperProps<TSearchResultsTargets>) {
     this.#props = props;
     this.#alwaysAndNeverDrawnElements = this.#props.alwaysAndNeverDrawnElementInfo;
     this.#subscriptions.push(this.#elementChangeQueue.pipe(concatAll()).subscribe());
@@ -434,9 +445,22 @@ export class BaseVisibilityHelper implements Disposable {
     modelId: Id64String;
     categoryId: Id64String;
     type: "GeometricElement3d" | "GeometricElement2d";
+    categoryOfElementOrParentElementWhichIsNotChild: CategoryId;
+    parentElementsIdsPath: Array<Id64Arg>;
+    childrenCount: number;
+    searchPathToElements?: InstanceKey[];
   }): Observable<VisibilityStatus> {
     const result = defer(() => {
-      const { elementIds, modelId, categoryId, type } = props;
+      const {
+        elementIds,
+        modelId,
+        categoryId,
+        type,
+        parentElementsIdsPath,
+        childrenCount,
+        categoryOfElementOrParentElementWhichIsNotChild,
+        searchPathToElements,
+      } = props;
       if (this.#props.viewport.viewType === "other") {
         return EMPTY;
       }
@@ -470,12 +494,17 @@ export class BaseVisibilityHelper implements Disposable {
           mergeVisibilityStatuses,
         );
       }
-      // TODO: check child elements
+
       // TODO: check child element categories
       // TODO: check child elements that are subModels
       return this.getVisibilityFromAlwaysAndNeverDrawnElements({
         elements: elementIds,
         defaultStatus: () => this.getVisibleModelCategoriesDirectVisibilityStatus({ categoryIds: categoryId, modelId }),
+        parentElementsIdsPath,
+        modelId,
+        categoryOfElementOrParentElementWhichIsNotChild,
+        childrenCount,
+        searchPathToElements,
       }).pipe(
         mergeMap((visibilityStatusAlwaysAndNeverDraw) => {
           return from(Id64.iterable(elementIds)).pipe(
@@ -514,7 +543,18 @@ export class BaseVisibilityHelper implements Disposable {
 
   /** Gets visibility status of elements based on viewport's always/never drawn elements and related categories and models. */
   private getVisibilityFromAlwaysAndNeverDrawnElements(
-    props: GetVisibilityFromAlwaysAndNeverDrawnElementsProps & ({ elements: Id64Arg } | { queryProps: { modelId: Id64String; categoryIds: Id64Arg } }),
+    props: GetVisibilityFromAlwaysAndNeverDrawnElementsProps &
+      (
+        | {
+            elements: Id64Arg;
+            parentElementsIdsPath: Array<Id64Arg>;
+            categoryOfElementOrParentElementWhichIsNotChild: Id64String;
+            modelId: Id64String;
+            childrenCount: number;
+            searchPathToElements?: InstanceKey[];
+          }
+        | { queryProps: { modelId: Id64String; categoryIds: Id64Arg } }
+      ),
   ): Observable<VisibilityStatus> {
     const viewport = this.#props.viewport;
     if (viewport.isAlwaysDrawnExclusive) {
@@ -526,13 +566,47 @@ export class BaseVisibilityHelper implements Disposable {
     }
 
     if ("elements" in props) {
-      return of(
-        getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
-          ...props,
-          alwaysDrawn: viewport.alwaysDrawn?.size ? setIntersection(Id64.iterable(props.elements), viewport.alwaysDrawn) : undefined,
-          neverDrawn: viewport.neverDrawn?.size ? setIntersection(Id64.iterable(props.elements), viewport.neverDrawn) : undefined,
-          totalCount: Id64.sizeOf(props.elements),
-          viewport,
+      const parentElementIdsPath = [...props.parentElementsIdsPath, props.elements];
+      // When element does not have children, we don't need to query for child always/never drawn elements.
+      if (props.childrenCount === 0) {
+        return of(
+          getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
+            ...props,
+            alwaysDrawn: viewport.alwaysDrawn ? setIntersection(props.elements, viewport.alwaysDrawn) : undefined,
+            neverDrawn: viewport.neverDrawn ? setIntersection(props.elements, viewport.neverDrawn) : undefined,
+            totalCount: Id64.sizeOf(props.elements),
+            viewport,
+          }),
+        );
+      }
+      // Get child always/never drawn elements.
+      return forkJoin({
+        childAlwaysDrawn: this.#alwaysAndNeverDrawnElements.getAlwaysOrNeverDrawnElements({
+          modelIds: props.modelId,
+          categoryIds: props.categoryOfElementOrParentElementWhichIsNotChild,
+          parentElementIdsPath,
+          setType: "always",
+          searchPathToElements: props.searchPathToElements,
+        }),
+        childNeverDrawn: this.#alwaysAndNeverDrawnElements.getAlwaysOrNeverDrawnElements({
+          modelIds: props.modelId,
+          categoryIds: props.categoryOfElementOrParentElementWhichIsNotChild,
+          parentElementIdsPath,
+          setType: "never",
+          searchPathToElements: props.searchPathToElements,
+        }),
+      }).pipe(
+        map(({ childAlwaysDrawn, childNeverDrawn }) => {
+          // Combine child always/never drawn with the ones provided in props.
+          const alwaysDrawn = new Set([...childAlwaysDrawn, ...(viewport.alwaysDrawn?.size ? setIntersection(props.elements, viewport.alwaysDrawn) : [])]);
+          const neverDrawn = new Set([...childNeverDrawn, ...(viewport.neverDrawn?.size ? setIntersection(props.elements, viewport.neverDrawn) : [])]);
+          return getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
+            ...props,
+            alwaysDrawn: alwaysDrawn.size > 0 ? alwaysDrawn : undefined,
+            neverDrawn: neverDrawn.size > 0 ? neverDrawn : undefined,
+            totalCount: props.childrenCount + Id64.sizeOf(props.elements),
+            viewport,
+          });
         }),
       );
     }
@@ -760,9 +834,15 @@ export class BaseVisibilityHelper implements Disposable {
    *
    * Also, changes visibility status of specified elements that are models.
    */
-  public changeElementsVisibilityStatus(props: { elementIds: Id64Arg; modelId: Id64String; categoryId: Id64String; on: boolean }): Observable<void> {
+  public changeElementsVisibilityStatus(props: {
+    elementIds: Id64Arg;
+    modelId: Id64String;
+    categoryId: Id64String;
+    on: boolean;
+    children: Id64Arg | undefined;
+  }): Observable<void> {
     const result = defer(() => {
-      const { modelId, categoryId, elementIds, on } = props;
+      const { modelId, categoryId, elementIds, on, children } = props;
       const viewport = this.#props.viewport;
       // TODO: change child elements
       // TODO: change child element categories
@@ -770,9 +850,21 @@ export class BaseVisibilityHelper implements Disposable {
       return concat(
         // Change elements state
         defer(() => {
+          const elementsToChange = children ? [...elementIds, ...(typeof children === "string" ? [children] : children)] : elementIds;
+          const isDisplayedByDefault = (isCategoryVisible: boolean) =>
+            // When category is visible and elements need to be turned off, or when category is hidden and elements need to be turned on,
+            // We can set isDisplayedByDefault to isCategoryVisible. This allows to not check if each element is in the elementIds list or not.
+            isCategoryVisible === !on
+              ? () => isCategoryVisible
+              : (elementId: Id64String) => {
+                  if (Id64.has(elementIds, elementId)) {
+                    return isCategoryVisible;
+                  }
+                  return !on;
+                };
           if (!viewport.viewsModel(modelId)) {
             if (!on) {
-              return this.queueElementsVisibilityChange(elementIds, on, false);
+              return this.queueElementsVisibilityChange(elementsToChange, on, () => false);
             }
 
             return this.showModelWithoutAnyCategoriesOrElements(modelId).pipe(
@@ -781,15 +873,13 @@ export class BaseVisibilityHelper implements Disposable {
                   categoryIds: categoryId,
                   modelId,
                 });
-                const displayedByDefault = defaultVisibility.state === "visible";
-                return this.queueElementsVisibilityChange(elementIds, on, displayedByDefault);
+                return this.queueElementsVisibilityChange(elementsToChange, on, isDisplayedByDefault(defaultVisibility.state === "visible"));
               }),
             );
           }
 
           const categoryVisibility = this.getVisibleModelCategoriesDirectVisibilityStatus({ categoryIds: categoryId, modelId });
-          const isDisplayedByDefault = categoryVisibility.state === "visible";
-          return this.queueElementsVisibilityChange(elementIds, on, isDisplayedByDefault);
+          return this.queueElementsVisibilityChange(elementsToChange, on, isDisplayedByDefault(categoryVisibility.state === "visible"));
         }),
         // Change visibility of elements that are models
         fromWithRelease({ source: elementIds, releaseOnCount: 100 }).pipe(
@@ -816,7 +906,7 @@ export class BaseVisibilityHelper implements Disposable {
   }
 
   /** Queues visibility change for elements. */
-  private queueElementsVisibilityChange(elementIds: Id64Arg, on: boolean, visibleByDefault: boolean) {
+  private queueElementsVisibilityChange(elementIds: Id64Arg, on: boolean, visibleByDefault: (elementId: Id64String) => boolean) {
     const finishedSubject = new Subject<boolean>();
     // observable to track if visibility change is finished/cancelled
     const changeFinished = finishedSubject.pipe(

@@ -232,6 +232,23 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
       : [];
   }
 
+  #createElementChildrenCountSelector(props: { elementIdSelector: string; elementFullClassName: string }): string {
+    return `(
+      WITH RECURSIVE
+        ElementWithParent(id) AS (
+          SELECT e.ECInstanceId
+          FROM ${props.elementFullClassName} e
+          WHERE e.ECInstanceId = ${props.elementIdSelector}
+          UNION ALL
+          SELECT c.ECInstanceId
+          FROM ${props.elementFullClassName} c
+          JOIN ElementWithParent p ON p.id = c.Parent.Id
+        )
+      SELECT COUNT(1) - 1
+      FROM ElementWithParent
+    )`;
+  }
+
   async #createClassificationChildrenQuery(props: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
     const { parentNodeInstanceIds: parentClassificationIds, instanceFilter, parentNode } = props;
     const parentImodelKey = getParentNodeIModelKey(parentNode.key);
@@ -312,6 +329,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
   async #createGeometricElementChildrenQuery({
     parentNodeInstanceIds: parentElementIds,
     instanceFilter,
+    parentNode,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
     return Promise.all(
       [CLASS_NAME_GeometricElement2d, CLASS_NAME_GeometricElement3d].map(async (elementClassName) => {
@@ -323,7 +341,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
           fullClassName: elementClassName,
           query: {
             ecsql: `
-              SELECT ${await this.#createElementSelectClause(elementClassName)}
+              SELECT ${await this.#createElementSelectClause(elementClassName, parentNode.extendedData?.categoryOfElementOrParentElementWhichIsNotChild)}
               FROM ${instanceFilterClauses.from} this
               ${instanceFilterClauses.joins}
               WHERE
@@ -336,7 +354,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
     );
   }
 
-  async #createElementSelectClause(elementFullClassName: string): Promise<string> {
+  async #createElementSelectClause(elementFullClassName: string, categoryOfElementOrParentElementWhichIsNotChild?: string): Promise<string> {
     const { className: elementClassName } = parseFullClassName(elementFullClassName);
     return this.#selectQueryFactory.createSelectClause({
       ecClassId: { selector: "this.ECClassId" },
@@ -361,6 +379,10 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
         type: elementClassName,
         modelId: { selector: "IdToHex(this.Model.Id)" },
         categoryId: { selector: "IdToHex(this.Category.Id)" },
+        childrenCount: { selector: this.#createElementChildrenCountSelector({ elementIdSelector: "this.ECInstanceId", elementFullClassName }) },
+        categoryOfElementOrParentElementWhichIsNotChild: {
+          selector: `IdToHex(${categoryOfElementOrParentElementWhichIsNotChild ?? "this.Category.Id"})`,
+        },
       },
       supportsFiltering: true,
     });

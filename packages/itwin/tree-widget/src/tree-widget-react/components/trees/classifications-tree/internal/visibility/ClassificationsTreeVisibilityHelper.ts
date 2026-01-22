@@ -3,18 +3,20 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { merge, mergeMap, of, toArray } from "rxjs";
+import { defer, merge, mergeMap, of, toArray } from "rxjs";
 import { BaseVisibilityHelper } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 
 import type { Observable } from "rxjs";
 import type { Id64Arg } from "@itwin/core-bentley";
+import type { InstanceKey } from "@itwin/presentation-shared";
 import type { BaseVisibilityHelperProps } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
 import type { ClassificationsTreeIdsCache } from "../ClassificationsTreeIdsCache.js";
+import type { ClassificationsTreeSearchTargets } from "./SearchResultsTree.js";
 
 /** @internal */
-export type ClassificationsTreeVisibilityHelperProps = BaseVisibilityHelperProps & {
+export type ClassificationsTreeVisibilityHelperProps = BaseVisibilityHelperProps<ClassificationsTreeSearchTargets> & {
   idsCache: ClassificationsTreeIdsCache;
 };
 
@@ -24,11 +26,37 @@ export type ClassificationsTreeVisibilityHelperProps = BaseVisibilityHelperProps
  * It extends base visibility status helper and provides methods to get and change visibility status of classification tables and classifications.
  * @internal
  */
-export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
+export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper<ClassificationsTreeSearchTargets> {
   #props: ClassificationsTreeVisibilityHelperProps;
   constructor(props: ClassificationsTreeVisibilityHelperProps) {
     super(props);
     this.#props = props;
+  }
+
+  public getParentElementsIdsPath({
+    parentsInstanceKeys,
+    elementClass,
+  }: {
+    parentsInstanceKeys: Array<Array<InstanceKey>>;
+    elementClass: string;
+  }): Observable<Array<Id64Arg>> {
+    // Parent instance keys can have classifications, classification tables or elements, need to determine which ones are elements.
+    return defer(async () => {
+      for (let i = 0; i < parentsInstanceKeys.length; ++i) {
+        const instanceKeys = parentsInstanceKeys[i];
+        // Only need to check the first instance key class to determine if it's an element.
+        // This is because nodes' which have multiple instance keys always share the same class.
+        const [isDerivedFrom, isDerivedTo] = await Promise.all([
+          this.#props.classInspector.classDerivesFrom(instanceKeys[0].className, elementClass),
+          this.#props.classInspector.classDerivesFrom(elementClass, instanceKeys[0].className),
+        ]);
+        if (isDerivedFrom || isDerivedTo) {
+          // Found element in the path, classifications tree contains only elements under elements so return all the ids from this point downwards.
+          return parentsInstanceKeys.slice(i).map((keys) => keys.map((key) => key.id));
+        }
+      }
+      return [];
+    });
   }
 
   /**

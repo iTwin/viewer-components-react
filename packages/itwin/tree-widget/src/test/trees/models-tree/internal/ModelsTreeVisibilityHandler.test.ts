@@ -2212,7 +2212,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
     });
 
-    it("hiding parent element makes it hidden, model and category partially visible, while children remain visible", async function () {
+    it("hiding parent element makes it, its children, model and category hidden", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const category = insertSpatialCategory({ builder, codeValue: "category" }).id;
         const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
@@ -2233,15 +2233,67 @@ describe("ModelsTreeVisibilityHandler", () => {
         provider,
         handler,
         viewport,
-        // prettier-ignore
-        expectations: {
-          [IModel.rootSubjectId]: "partial",
-            [ids.model]: "partial",
-              [`${ids.model}-${ids.category}`]: "partial",
-                [ids.parentElement]: "hidden",
-                  [ids.child]: "visible",
-                    [ids.childOfChild]: "visible",
-        },
+        expectations: "all-hidden",
+      });
+    });
+
+    it("hiding parent element makes it, its children (with different categories), model and category hidden", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const category = insertSpatialCategory({ builder, codeValue: "category" }).id;
+        const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
+        const parentElement = insertPhysicalElement({ builder, modelId: model, categoryId: category }).id;
+        const category2 = insertSpatialCategory({ builder, codeValue: "category2" }).id;
+        const category3 = insertSpatialCategory({ builder, codeValue: "category3" }).id;
+        const child = insertPhysicalElement({ builder, modelId: model, categoryId: category2, parentId: parentElement }).id;
+        const childOfChild = insertPhysicalElement({ builder, modelId: model, categoryId: category3, parentId: child }).id;
+        return { model, category, category2, category3, parentElement, child, childOfChild };
+      });
+
+      const { imodel, ...ids } = buildIModelResult;
+      using visibilityTestData = createVisibilityTestData({ imodel });
+      const { handler, provider, viewport } = visibilityTestData;
+      viewport.changeModelDisplay({ modelIds: ids.model, display: true });
+      viewport.changeCategoryDisplay({ categoryIds: [ids.category2, ids.category3], display: false });
+      viewport.setAlwaysDrawn({ elementIds: new Set([ids.parentElement, ids.child, ids.childOfChild]) });
+      viewport.renderFrame();
+
+      await handler.changeVisibility(createElementHierarchyNode({ modelId: ids.model, categoryId: ids.category, elementId: ids.parentElement }), false);
+
+      await validateModelsTreeHierarchyVisibility({
+        provider,
+        handler,
+        viewport,
+        expectations: "all-hidden",
+      });
+    });
+
+    it("showing parent element makes it, its children (with different categories), model and category visible", async function () {
+      await using buildIModelResult = await buildIModel(this, async (builder) => {
+        const category = insertSpatialCategory({ builder, codeValue: "category" }).id;
+        const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
+        const parentElement = insertPhysicalElement({ builder, modelId: model, categoryId: category }).id;
+        const category2 = insertSpatialCategory({ builder, codeValue: "category2" }).id;
+        const category3 = insertSpatialCategory({ builder, codeValue: "category3" }).id;
+        const child = insertPhysicalElement({ builder, modelId: model, categoryId: category2, parentId: parentElement }).id;
+        const childOfChild = insertPhysicalElement({ builder, modelId: model, categoryId: category3, parentId: child }).id;
+        return { model, category, category2, category3, parentElement, child, childOfChild };
+      });
+
+      const { imodel, ...ids } = buildIModelResult;
+      using visibilityTestData = createVisibilityTestData({ imodel });
+      const { handler, provider, viewport } = visibilityTestData;
+      viewport.changeModelDisplay({ modelIds: ids.model, display: true });
+      viewport.setNeverDrawn({ elementIds: new Set([ids.parentElement, ids.child, ids.childOfChild]) });
+      viewport.changeCategoryDisplay({ categoryIds: [ids.category2, ids.category3], display: true, enableAllSubCategories: true });
+      viewport.renderFrame();
+
+      await handler.changeVisibility(createElementHierarchyNode({ modelId: ids.model, categoryId: ids.category, elementId: ids.parentElement }), true);
+
+      await validateModelsTreeHierarchyVisibility({
+        provider,
+        handler,
+        viewport,
+        expectations: "all-visible",
       });
     });
 
@@ -2421,7 +2473,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           [IModel.rootSubjectId]: "partial",
             [ids.model]: "partial",
               [`${ids.model}-${ids.categoryId}`]: "partial",
-                [ids.exclusiveElement]: "visible",
+                [ids.exclusiveElement]: "partial",
                   [ids.childElement]: "hidden",
 
             [ids.otherModel]: "hidden",
@@ -2503,7 +2555,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
     });
 
-    it("showing grouping node makes it and its grouped elements visible", async function () {
+    it("showing grouping node makes it, its grouped elements and children visible", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const category = insertSpatialCategory({ builder, codeValue: "category" }).id;
         const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
@@ -2537,10 +2589,10 @@ describe("ModelsTreeVisibilityHandler", () => {
         expectations: {
           [IModel.rootSubjectId]: "partial",
             [ids.model]: "partial",
-              [`${ids.model}-${ids.category}`]: "partial",
+              [`${ids.model}-${ids.category}`]: "visible",
                 [ids.parentElement]: "visible",
-                  [ids.child]: "hidden",
-                    [ids.childOfChild]: "hidden",
+                  [ids.child]: "visible",
+                    [ids.childOfChild]: "visible",
 
               [`${ids.model}-${ids.otherCategory}`]: "hidden",
                 [ids.otherElement]: "hidden",
@@ -2548,7 +2600,7 @@ describe("ModelsTreeVisibilityHandler", () => {
       });
     });
 
-    it("hiding grouping node makes it and its grouped elements hidden", async function () {
+    it("hiding grouping node makes it, its grouped elements and children hidden", async function () {
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const category = insertSpatialCategory({ builder, codeValue: "category" }).id;
         const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
@@ -2584,10 +2636,10 @@ describe("ModelsTreeVisibilityHandler", () => {
         expectations: {
           [IModel.rootSubjectId]: "partial",
             [ids.model]: "partial",
-              [`${ids.model}-${ids.category}`]: "partial",
+              [`${ids.model}-${ids.category}`]: "hidden",
                 [ids.parentElement]: "hidden",
-                  [ids.child]: "visible",
-                    [ids.childOfChild]: "visible",
+                  [ids.child]: "hidden",
+                    [ids.childOfChild]: "hidden",
 
               [`${ids.model}-${ids.otherCategory}`]: "visible",
                 [ids.otherElement]: "visible",
@@ -3217,7 +3269,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             expectations: {
               [IModel.rootSubjectId]: "partial",
                 [ids.emptyModelId]: "visible",
-              
+
                 [ids.configurationModelId]: "hidden",
                   [`${ids.configurationModelId}-${ids.configurationCategoryId}`]: "hidden",
                   [ids.customClassElement1]: "hidden",
@@ -3367,7 +3419,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 [`${ids.model1}-${ids.category1}`]: "partial",
                   [ids.element1]: "hidden",
                   [ids.element2]: "visible",
-              
+
               [ids.otherModel]: "hidden",
                 [`${ids.otherModel}-${ids.otherCategory}`]: "hidden",
                   [ids.otherElement]: "hidden",
@@ -3386,7 +3438,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 [`${ids.model1}-${ids.category1}`]: "visible",
                   [ids.element1]: "visible",
                   [ids.element2]: "visible",
-              
+
               [ids.otherModel]: "hidden",
                 [`${ids.otherModel}-${ids.otherCategory}`]: "hidden",
                   [ids.otherElement]: "hidden",
@@ -3424,7 +3476,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 [`${ids.model}-${ids.category1}`]: "partial",
                   [ids.element1]: "hidden",
                   [ids.element2]: "visible",
-              
+
                 [`${ids.model}-${ids.otherCategory}`]: "hidden",
                   [ids.otherElement]: "hidden",
           },
@@ -3442,7 +3494,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                 [`${ids.model}-${ids.category1}`]: "visible",
                   [ids.element1]: "visible",
                   [ids.element2]: "visible",
-              
+
                 [`${ids.model}-${ids.otherCategory}`]: "hidden",
                   [ids.otherElement]: "hidden",
           },
@@ -3639,16 +3691,14 @@ describe("ModelsTreeVisibilityHandler", () => {
               [IModel.rootSubjectId]: "partial",
                 [keys.model.id]: "partial",
                   [`${keys.model.id}-${keys.category.id}`]: "partial",
-                    [keys.parentElement.id]: "visible",
+                    [keys.parentElement.id]: "partial",
                       [keys.searchTargetChildElement.id]: "visible",
                       [keys.childElement.id]: "hidden",
             },
           });
         });
 
-        // TODO re-enable test below after https://github.com/iTwin/viewer-components-react/issues/1513
-
-        it.skip("showing element changes visibility for nodes in search paths", async function () {
+        it("showing element changes visibility for nodes in search paths", async function () {
           await using buildIModelResult = await buildIModel(this, async (builder) => {
             const category = insertSpatialCategory({ builder, codeValue: "category" });
             const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
@@ -3702,7 +3752,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           });
         });
 
-        it.skip("showing class grouping node changes visibility for nodes in search paths", async function () {
+        it("showing class grouping node changes visibility for nodes in search paths", async function () {
           await using buildIModelResult = await buildIModel(this, async (builder) => {
             const category = insertSpatialCategory({ builder, codeValue: "category" });
             const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
@@ -3728,7 +3778,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             modelId: keys.model.id,
             categoryId: keys.category.id,
             parentKeys: [keys.model, keys.category],
-            hasDirectNonSearchTargets: false,
+            hasDirectNonSearchTargets: true,
             hasSearchTargetAncestor: false,
           });
           await visibilityHandlerWithSearchPaths.changeVisibility(node, true);
@@ -3756,7 +3806,7 @@ describe("ModelsTreeVisibilityHandler", () => {
           });
         });
 
-        it.skip("hiding category changes visibility for nodes in search paths", async function () {
+        it("hiding category changes visibility for nodes in search paths", async function () {
           await using buildIModelResult = await buildIModel(this, async (builder) => {
             const category = insertSpatialCategory({ builder, codeValue: "category" });
             const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
@@ -3809,13 +3859,13 @@ describe("ModelsTreeVisibilityHandler", () => {
                 [keys.model.id]: "partial",
                   [`${keys.model.id}-${keys.category.id}`]: "partial",
                     [keys.parentElement.id]: "partial",
-                      [keys.searchTargetChildElement.id]: "visible",
-                      [keys.childElement.id]: "hidden",
+                      [keys.searchTargetChildElement.id]: "hidden",
+                      [keys.childElement.id]: "visible",
             },
           });
         });
 
-        it.skip("hiding element changes visibility for nodes in search paths", async function () {
+        it("hiding element changes visibility for nodes in search paths", async function () {
           await using buildIModelResult = await buildIModel(this, async (builder) => {
             const category = insertSpatialCategory({ builder, codeValue: "category" });
             const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
@@ -3870,13 +3920,13 @@ describe("ModelsTreeVisibilityHandler", () => {
                 [keys.model.id]: "partial",
                   [`${keys.model.id}-${keys.category.id}`]: "partial",
                     [keys.parentElement.id]: "partial",
-                      [keys.searchTargetChildElement.id]: "visible",
-                      [keys.childElement.id]: "hidden",
+                      [keys.searchTargetChildElement.id]: "hidden",
+                      [keys.childElement.id]: "visible",
             },
           });
         });
 
-        it.skip("hiding class grouping node changes visibility for nodes in search paths", async function () {
+        it("hiding class grouping node changes visibility for nodes in search paths", async function () {
           await using buildIModelResult = await buildIModel(this, async (builder) => {
             const category = insertSpatialCategory({ builder, codeValue: "category" });
             const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
@@ -3907,7 +3957,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             modelId: keys.model.id,
             categoryId: keys.category.id,
             parentKeys: [keys.model, keys.category],
-            hasDirectNonSearchTargets: false,
+            hasDirectNonSearchTargets: true,
             hasSearchTargetAncestor: false,
           });
           await visibilityHandlerWithSearchPaths.changeVisibility(node, false);
@@ -3927,8 +3977,8 @@ describe("ModelsTreeVisibilityHandler", () => {
                 [keys.model.id]: "partial",
                   [`${keys.model.id}-${keys.category.id}`]: "partial",
                     [keys.parentElement.id]: "partial",
-                      [keys.searchTargetChildElement.id]: "visible",
-                      [keys.childElement.id]: "hidden",
+                      [keys.searchTargetChildElement.id]: "hidden",
+                      [keys.childElement.id]: "visible",
             },
           });
         });
@@ -4069,7 +4119,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                   [`${keys.model.id}-${keys.categoriesOfSearchTargets[2].id}`]: "partial",
                     [keys.searchTargetElements[2]]: "visible",
                     [keys.nonSearchTargetElements[2]]: "hidden",
-                  
+
                 [keys.otherModel.id]: "hidden",
                   [`${keys.otherModel.id}-${keys.otherCategory.id}`]: "hidden",
                     [keys.otherElement.id]: "hidden",
@@ -4129,7 +4179,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                   [`${keys.model.id}-${keys.categoriesOfSearchTargets[2].id}`]: "hidden",
                     [keys.searchTargetElements[2]]: "hidden",
                     [keys.nonSearchTargetElements[2]]: "hidden",
-                  
+
                 [keys.otherModel.id]: "hidden",
                   [`${keys.otherModel.id}-${keys.otherCategory.id}`]: "hidden",
                     [keys.otherElement.id]: "hidden",
@@ -4228,7 +4278,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                       [`${keys.modelIds[0]}-${keys.categoryIds[0]}`]: "visible",
                         [keys.elementsOfModels[0][0]]: "visible",
                         [keys.elementsOfModels[0][1]]: "visible",
-                
+
                 [keys.subjectIds[1]]: "hidden",
                   [keys.modelIds[1]]: "hidden",
                     [`${keys.modelIds[1]}-${keys.categoryIds[1]}`]: "hidden",
@@ -4250,7 +4300,7 @@ describe("ModelsTreeVisibilityHandler", () => {
                       [`${keys.modelIds[0]}-${keys.categoryIds[0]}`]: "visible",
                         [keys.elementsOfModels[0][0]]: "visible",
                         [keys.elementsOfModels[0][1]]: "visible",
-                
+
                 [keys.subjectIds[1]]: "hidden",
                   [keys.modelIds[1]]: "hidden",
                     [`${keys.modelIds[1]}-${keys.categoryIds[1]}`]: "hidden",
@@ -4311,7 +4361,7 @@ describe("ModelsTreeVisibilityHandler", () => {
             { id: keys.model, className: CLASS_NAME_GeometricModel3d },
             { id: keys.category, className: CLASS_NAME_SpatialCategory },
           ],
-          hasDirectNonSearchTargets: false,
+          hasDirectNonSearchTargets: true,
           hasSearchTargetAncestor: false,
         });
         await visibilityHandlerWithSearchPaths.changeVisibility(node, true);

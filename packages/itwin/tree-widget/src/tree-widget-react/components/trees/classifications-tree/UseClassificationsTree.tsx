@@ -163,11 +163,12 @@ async function createSearchResultsTree(
   });
 }
 
-function createTreeSpecificVisibilityHandler(props: CreateTreeSpecificVisibilityHandlerProps<ClassificationsTreeIdsCache>) {
-  const { info, getCache, viewport } = props;
+function createTreeSpecificVisibilityHandler(props: CreateTreeSpecificVisibilityHandlerProps<ClassificationsTreeIdsCache, ClassificationsTreeSearchTargets>) {
+  const { info, getCache, viewport, classInspector } = props;
   return new ClassificationsTreeVisibilityHandler({
     alwaysAndNeverDrawnElementInfo: info,
     idsCache: getCache(),
     viewport,
+    classInspector,
   });
 }

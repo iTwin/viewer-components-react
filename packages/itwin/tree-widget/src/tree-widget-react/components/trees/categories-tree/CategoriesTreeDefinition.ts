@@ -39,7 +39,7 @@ import {
   fromWithRelease,
   getClassesByView,
   getOptimalBatchSize,
-  groupingNodeHasSearchTargets,
+  groupingNodeDataFromChildren,
   parseIdsSelectorResult,
   releaseMainThreadOnItemsCount,
 } from "../common/internal/Utils.js";
@@ -154,20 +154,23 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
 
   public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
     if (ProcessedHierarchyNode.isGroupingNode(node)) {
-      const modelElementsMap = new Map<ModelId, Set<ElementId>>();
+      const modelElementsMap = new Map<ModelId, { elementIds: Set<ElementId>; categoryOfElementOrParentElementWhichIsNotChild: CategoryId }>();
       node.children.forEach((child) => {
         let modelEntry = modelElementsMap.get(child.extendedData?.modelId);
         if (!modelEntry) {
-          modelEntry = new Set();
+          modelEntry = {
+            elementIds: new Set(),
+            categoryOfElementOrParentElementWhichIsNotChild: child.extendedData?.categoryOfElementOrParentElementWhichIsNotChild,
+          };
           modelElementsMap.set(child.extendedData?.modelId, modelEntry);
         }
         assert(child.key.type === "instances");
         for (const { id } of child.key.instanceKeys) {
-          modelEntry.add(id);
+          modelEntry.elementIds.add(id);
         }
       });
 
-      const { hasSearchTargetAncestor, hasDirectNonSearchTargets } = groupingNodeHasSearchTargets(node.children);
+      const { hasSearchTargetAncestor, hasDirectNonSearchTargets, childrenCount, searchTargets } = groupingNodeDataFromChildren(node.children);
 
       return {
         ...node,
@@ -177,6 +180,8 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
           // add `categoryId` from the first grouped element
           categoryId: node.children[0].extendedData?.categoryId,
           modelElementsMap,
+          childrenCount,
+          ...(!!searchTargets?.size ? { searchTargets } : {}),
           ...(hasDirectNonSearchTargets ? { hasDirectNonSearchTargets } : {}),
           ...(hasSearchTargetAncestor ? { hasSearchTargetAncestor } : {}),
           // `imageId` is assigned to instance nodes at query time, but grouping ones need to
@@ -521,6 +526,23 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     ];
   }
 
+  private createElementChildrenCountSelector(props: { elementIdSelector: string }): string {
+    return `(
+      WITH RECURSIVE
+        ElementWithParent(id) AS (
+          SELECT e.ECInstanceId
+          FROM ${this.#categoryElementClass} e
+          WHERE e.ECInstanceId = ${props.elementIdSelector}
+          UNION ALL
+          SELECT c.ECInstanceId
+          FROM ${this.#categoryElementClass} c
+          JOIN ElementWithParent p ON p.id = c.Parent.Id
+        )
+      SELECT COUNT(1) - 1
+      FROM ElementWithParent
+    )`;
+  }
+
   private async createCategoryElementsQuery({
     parentNodeInstanceIds: categoryIds,
     instanceFilter,
@@ -551,7 +573,9 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         }, new Array<ElementId>()),
       ),
     );
-
+    const bindings = new Array<ECSqlBinding>();
+    categoryIds.forEach((id) => bindings.push({ type: "id", value: id }));
+    modelIds.forEach((id) => bindings.push({ type: "id", value: id }));
     return [
       {
         fullClassName: this.#categoryElementClass,
@@ -589,6 +613,8 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 categoryId: { selector: "IdToHex(this.Category.Id)" },
                 imageId: "icon-item",
                 isElement: true,
+                childrenCount: { selector: this.createElementChildrenCountSelector({ elementIdSelector: "this.ECInstanceId" }) },
+                categoryOfElementOrParentElementWhichIsNotChild: { selector: "IdToHex(this.Category.Id)" },
               },
               supportsFiltering: true,
             })}
@@ -596,11 +622,12 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
           ${parentNode.extendedData?.isCategoryOfSubModel ? "" : `JOIN ${CLASS_NAME_InformationPartitionElement} ipe ON ipe.ECInstanceId = this.Model.Id`}
           ${instanceFilterClauses.joins}
           WHERE
-            this.Category.Id IN (${categoryIds.join(",")})
-            AND this.Model.Id IN (${modelIds.join(",")})
+            this.Category.Id IN (${categoryIds.map(() => "?").join(",")})
+            AND this.Model.Id IN (${modelIds.map(() => "?").join(",")})
             AND this.Parent.Id IS NULL
             ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
+          bindings,
         },
       },
     ];
@@ -609,11 +636,14 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   private async createElementChildrenQuery({
     parentNodeInstanceIds: elementIds,
     instanceFilter,
+    parentNode,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
     const instanceFilterClauses = await this.#selectQueryFactory.createFilterClauses({
       filter: instanceFilter,
       contentClass: { fullName: this.#categoryElementClass, alias: "this" },
     });
+    const bindings = new Array<ECSqlBinding>();
+    elementIds.forEach((id) => bindings.push({ type: "id", value: id }));
     return [
       {
         fullClassName: this.#categoryElementClass,
@@ -648,6 +678,10 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                   categoryId: { selector: "IdToHex(this.Category.Id)" },
                   imageId: "icon-item",
                   isElement: true,
+                  childrenCount: { selector: this.createElementChildrenCountSelector({ elementIdSelector: "this.ECInstanceId" }) },
+                  categoryOfElementOrParentElementWhichIsNotChild: {
+                    selector: `IdToHex(${parentNode.extendedData?.categoryOfElementOrParentElementWhichIsNotChild})`,
+                  },
                 },
                 supportsFiltering: true,
               })}
@@ -878,7 +912,7 @@ function createInstanceKeyPathsFromTargetItems({
   limit,
   componentId,
   componentName,
-}: MarkRequired<CategoriesTreeInstanceKeyPathsFromInstanceLabelProps, "componentId"> & {
+}: Omit<MarkRequired<CategoriesTreeInstanceKeyPathsFromInstanceLabelProps, "componentId">, "label"> & {
   targetItems: InstanceKey[];
   componentName: string;
 }): Observable<NormalizedHierarchySearchPath> {

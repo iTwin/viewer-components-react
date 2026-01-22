@@ -6,6 +6,7 @@
 import { defer, EMPTY, forkJoin, from, map, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_Model, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
+import { ElementChildrenCache } from "../../common/internal/ElementChildrenCache.js";
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
 import { catchBeSQLiteInterrupts } from "../../common/internal/UseErrorState.js";
 import { getClassesByView, joinId64Arg } from "../../common/internal/Utils.js";
@@ -15,6 +16,7 @@ import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { CategoryId, DefinitionContainerId, ElementId, ModelId, SubCategoryId } from "../../common/internal/Types.js";
+import type { ChildrenTree } from "../../common/internal/Utils.js";
 
 interface DefinitionContainerInfo {
   modelId: Id64String;
@@ -51,6 +53,7 @@ export class CategoriesTreeIdsCache implements Disposable {
   #categoryModelClass: string;
   #isDefinitionContainerSupported: Observable<boolean> | undefined;
   #filteredElementsModels: Observable<Map<ElementId, ModelId>> | undefined;
+  #elementChildrenCache: ElementChildrenCache;
   #queryExecutor: LimitingECSqlQueryExecutor;
   #componentId: GuidString;
   #componentName: string;
@@ -64,10 +67,23 @@ export class CategoriesTreeIdsCache implements Disposable {
     this.#componentId = componentId ?? Guid.createValue();
     this.#componentName = "CategoriesTreeIdsCache";
     this.#categoryElementCounts = new ModelCategoryElementsCountCache(this.#queryExecutor, [elementClass], this.#componentId);
+    this.#elementChildrenCache = new ElementChildrenCache({
+      queryExecutor: this.#queryExecutor,
+      elementClassName: this.#categoryElementClass,
+      componentId: this.#componentId,
+    });
   }
 
   public [Symbol.dispose]() {
     this.#categoryElementCounts[Symbol.dispose]();
+  }
+
+  public getChildrenTree({ elementIds }: { elementIds: Id64Arg }): Observable<ChildrenTree> {
+    return this.#elementChildrenCache.getChildrenTree({ elementIds });
+  }
+
+  public getAllChildrenCount({ elementIds }: { elementIds: Id64Arg }): Observable<Map<Id64String, number>> {
+    return this.#elementChildrenCache.getAllChildrenCount({ elementIds });
   }
 
   private queryFilteredElementsModels(filteredElementIds: Id64Arg): Observable<{
@@ -530,6 +546,10 @@ export class CategoriesTreeIdsCache implements Disposable {
         ),
       ),
     );
+  }
+
+  public getCategoriesOfElementModel(modelId: Id64String): Observable<Id64Set | undefined> {
+    return this.getElementModelsCategories().pipe(map((elementModelsCategories) => elementModelsCategories.get(modelId)?.categoryIds));
   }
 
   public getModelCategoryIds(modelId: Id64String): Observable<Id64Array> {

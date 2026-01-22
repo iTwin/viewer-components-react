@@ -76,7 +76,7 @@ export namespace CategoriesTreeNode {
   ): node is Omit<GroupingHierarchyNode, "extendedData"> & { key: ClassGroupingNodeKey } & {
     extendedData: {
       categoryId: Id64String;
-      modelElementsMap: Map<Id64String, Set<Id64String>>;
+      modelElementsMap: Map<Id64String, { elementIds: Set<Id64String> }>;
     };
   } => HierarchyNode.isClassGroupingNode(node);
 

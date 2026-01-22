@@ -29,6 +29,7 @@ import type {
   NonGroupingHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
+import type { ChildrenTree } from "../../../tree-widget-react/components/trees/common/internal/Utils.js";
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
@@ -113,6 +114,12 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
     getCategoryElementsCount: sinon.stub<[Id64String, Id64String], Observable<number>>().callsFake((_, categoryId) => {
       return of(props?.categoryElements?.get(categoryId)?.length ?? 0);
     }),
+    getChildrenTree: sinon.stub<[{ elementIds: Id64Arg }], Observable<ChildrenTree>>().callsFake(() => {
+      return of(new Map());
+    }),
+    getAllChildrenCount: sinon.stub<[{ elementIds: Id64Arg }], Observable<Map<Id64String, number>>>().callsFake(() => {
+      return of(new Map());
+    }),
     hasSubModel: sinon.stub<[Id64String], Observable<boolean>>().callsFake(() => of(false)),
     getCategoriesModeledElements: sinon.stub<[Id64String, Id64Arg], Observable<Id64Array>>().callsFake(() => of([])),
   });
@@ -196,6 +203,7 @@ export function createElementHierarchyNode(props: {
   elementId?: Id64String;
   parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
   search?: NonGroupingHierarchyNode["search"];
+  childrenCount?: number;
 }): NonGroupingHierarchyNode {
   return {
     key: {
@@ -210,8 +218,9 @@ export function createElementHierarchyNode(props: {
       : [],
     extendedData: {
       isElement: true,
-      modelId: props.modelId ?? "0x1",
-      categoryId: props.categoryId ?? "0x2",
+      modelId: props.modelId,
+      categoryId: props.categoryId,
+      childrenCount: props.childrenCount !== undefined ? props.childrenCount : 0,
     },
   };
 }
@@ -220,6 +229,7 @@ export function createClassGroupingHierarchyNode({
   parentKeys,
   modelId,
   categoryId,
+  childrenCount,
   ...props
 }: {
   elements: Id64Array;
@@ -229,6 +239,7 @@ export function createClassGroupingHierarchyNode({
   categoryId: Id64String;
   hasDirectNonSearchTargets?: boolean;
   hasSearchTargetAncestor?: boolean;
+  childrenCount?: number;
 }): GroupingHierarchyNode & { key: ClassGroupingNodeKey } {
   const className = props.className ?? CLASS_NAME_Element;
   return {
@@ -243,6 +254,8 @@ export function createClassGroupingHierarchyNode({
     extendedData: {
       categoryId,
       modelId,
+      categoryOfElementOrParentElementWhichIsNotChild: categoryId,
+      childrenCount: childrenCount !== undefined ? childrenCount : 0,
       ...(props.hasDirectNonSearchTargets ? { hasDirectNonSearchTargets: props.hasDirectNonSearchTargets } : {}),
       ...(props.hasSearchTargetAncestor ? { hasSearchTargetAncestor: props.hasSearchTargetAncestor } : {}),
     },

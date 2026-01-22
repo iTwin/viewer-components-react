@@ -425,6 +425,9 @@ describe("Models tree", () => {
           type: "instances" as const,
           instanceKeys: [keys.parentElement],
         },
+        extendedData: {
+          categoryOfElementOrParentElementWhichIsNotChild: keys.category.id,
+        },
         parentKeys: [
           {
             type: "instances" as const,
@@ -522,6 +525,9 @@ describe("Models tree", () => {
         key: {
           type: "instances" as const,
           instanceKeys: [keys.modeledElement],
+        },
+        extendedData: {
+          categoryOfElementOrParentElementWhichIsNotChild: keys.category.id,
         },
         parentKeys: [
           {

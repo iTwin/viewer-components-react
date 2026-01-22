@@ -8,11 +8,12 @@ import {
   CLASS_NAME_Element,
   CLASS_NAME_SubCategory,
 } from "../../../../tree-widget-react/components/trees/common/internal/ClassNameDefinitions.js";
-import { getClassesByView, getDistinctMapValues } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
+import { getClassesByView } from "../../../../tree-widget-react/components/trees/common/internal/Utils.js";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { ClassGroupingNodeKey, GroupingHierarchyNode, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
+import type { ElementId, ModelId } from "../../../../tree-widget-react/components/trees/common/internal/Types.js";
 
 /** @internal */
 export function createCategoryHierarchyNode(
@@ -98,7 +99,7 @@ export function createClassGroupingHierarchyNode({
   ...props
 }: {
   categoryId: Id64String | undefined;
-  modelElementsMap: Map<Id64String, Id64Array>;
+  modelElementsMap: Map<ModelId, { elementIds: Set<ElementId>; categoryOfElementOrParentElementWhichIsNotChild?: Id64String }>;
   className?: string;
   parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
   hasDirectNonSearchTargets?: boolean;
@@ -112,7 +113,10 @@ export function createClassGroupingHierarchyNode({
       className,
     },
     children: !!modelElementsMap.size,
-    groupedInstanceKeys: [...getDistinctMapValues(modelElementsMap)].map((elementId) => ({ className, id: elementId })),
+    groupedInstanceKeys: [...modelElementsMap.values()]
+      .map(({ elementIds }) => [...elementIds])
+      .flat()
+      .map((elementId) => ({ className, id: elementId })),
     label: "",
     parentKeys: parentKeys ? parentKeys.map((parentKey) => ("type" in parentKey ? parentKey : { type: "instances", instanceKeys: [parentKey] })) : [],
     extendedData: {

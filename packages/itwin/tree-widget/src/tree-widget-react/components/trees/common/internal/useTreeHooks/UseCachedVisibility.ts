@@ -32,11 +32,12 @@ export interface CreateSearchResultsTreeProps<TCache> {
 }
 
 /** @internal */
-export interface CreateTreeSpecificVisibilityHandlerProps<TCache> {
-  info: AlwaysAndNeverDrawnElementInfo;
+export interface CreateTreeSpecificVisibilityHandlerProps<TCache, TSearchTargets> {
+  info: AlwaysAndNeverDrawnElementInfo<TSearchTargets>;
   getCache: () => TCache;
   viewport: TreeWidgetViewport;
   overrideHandler: HierarchyVisibilityOverrideHandler;
+  classInspector: ECClassHierarchyInspector;
 }
 
 /** @internal */
@@ -45,7 +46,9 @@ export interface UseCachedVisibilityProps<TCache, TSearchTargets> {
   activeView: TreeWidgetViewport;
   getCache: () => TCache;
   createSearchResultsTree: (props: CreateSearchResultsTreeProps<TCache>) => Promise<SearchResultsTree<TSearchTargets>>;
-  createTreeSpecificVisibilityHandler: (props: CreateTreeSpecificVisibilityHandlerProps<TCache>) => TreeSpecificVisibilityHandler<TSearchTargets> & Disposable;
+  createTreeSpecificVisibilityHandler: (
+    props: CreateTreeSpecificVisibilityHandlerProps<TCache, TSearchTargets>,
+  ) => TreeSpecificVisibilityHandler<TSearchTargets> & Disposable;
 }
 
 /** @internal */
@@ -106,6 +109,7 @@ function createVisibilityHandlerFactory<TCache, TSearchTargets>(
           getCache,
           viewport: activeView,
           overrideHandler,
+          classInspector: imodelAccess,
         }),
     });
 }
@@ -114,7 +118,7 @@ function createVisibilityHandlerFactory<TCache, TSearchTargets>(
 export interface HierarchyVisibilityHandlerImplProps<TSearchTargets> {
   viewport: TreeWidgetViewport;
   getTreeSpecificVisibilityHandler: (
-    info: AlwaysAndNeverDrawnElementInfo,
+    info: AlwaysAndNeverDrawnElementInfo<TSearchTargets>,
     overrideHandler: HierarchyVisibilityOverrideHandler,
   ) => TreeSpecificVisibilityHandler<TSearchTargets> & Disposable;
   getSearchResultsTree: () => Promise<SearchResultsTree<TSearchTargets>> | undefined;
@@ -132,7 +136,7 @@ export interface HierarchyVisibilityHandlerImplProps<TSearchTargets> {
 export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements HierarchyVisibilityHandler, Disposable {
   readonly #props: HierarchyVisibilityHandlerImplProps<TSearchTargets>;
   readonly #eventListener: IVisibilityChangeEventListener;
-  readonly #alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo;
+  readonly #alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo<TSearchTargets>;
   #treeSpecificVisibilityHandler: TreeSpecificVisibilityHandler<TSearchTargets> & Disposable;
   #changeRequest = new Subject<{ key: HierarchyNodeKey; depth: number }>();
   #searchResultsTree: Promise<SearchResultsTree<TSearchTargets>> | undefined;
@@ -148,12 +152,16 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
         displayStyle: true,
       },
     });
-    this.#alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfo({ viewport: this.#props.viewport, componentId: props.componentId });
+    this.#searchResultsTree = this.#props.getSearchResultsTree();
+    this.#alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfo({
+      viewport: this.#props.viewport,
+      componentId: props.componentId,
+      searchResultsTree: this.#searchResultsTree,
+    });
     this.#treeSpecificVisibilityHandler = this.#props.getTreeSpecificVisibilityHandler(
       this.#alwaysAndNeverDrawnElements,
       new HierarchyVisibilityOverrideHandler(this),
     );
-    this.#searchResultsTree = this.#props.getSearchResultsTree();
   }
 
   public get onVisibilityChange() {
@@ -244,7 +252,7 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
         if (!targets) {
           return EMPTY;
         }
-        return this.#treeSpecificVisibilityHandler.getSearchTargetsVisibilityStatus(targets);
+        return this.#treeSpecificVisibilityHandler.getSearchTargetsVisibilityStatus(targets, props.node);
       }),
     );
   }
