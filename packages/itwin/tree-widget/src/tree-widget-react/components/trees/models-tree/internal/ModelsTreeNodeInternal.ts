@@ -12,7 +12,7 @@ import type { CategoryId } from "../../common/internal/Types.js";
 /**
  * Contains utility functions for working with Models Tree nodes.
  *
- * It is a wrapper around `ModelsTreeNode` that exposes some internal details that should not be exposed vie public api.
+ * It is a wrapper around `ModelsTreeNode` that exposes some internal details that should not be exposed via public api.
  *
  * @internal
  */
