@@ -30,12 +30,24 @@ export function TreeRenderer(props: TreeRendererProps) {
     (actionsProps) => {
       return getInlineActions
         ? getInlineActions(actionsProps)
-        : [<TreeNodeFilterAction key={"Filter"} node={actionsProps.targetNode} onFilter={filterHierarchyLevel} getHierarchyLevelDetails={getHierarchyLevelDetails} />];
+        : [
+            <TreeNodeFilterAction
+              key={"Filter"}
+              node={actionsProps.targetNode}
+              onFilter={filterHierarchyLevel}
+              getHierarchyLevelDetails={getHierarchyLevelDetails}
+            />,
+          ];
     },
     [getInlineActions, filterHierarchyLevel, getHierarchyLevelDetails],
   );
 
   return (
-    <BaseTreeRenderer {...restProps} filterHierarchyLevel={filterHierarchyLevel} getHierarchyLevelDetails={getHierarchyLevelDetails} getInlineActions={nodeInlineActions} />
+    <BaseTreeRenderer
+      {...restProps}
+      filterHierarchyLevel={filterHierarchyLevel}
+      getHierarchyLevelDetails={getHierarchyLevelDetails}
+      getInlineActions={nodeInlineActions}
+    />
   );
 }

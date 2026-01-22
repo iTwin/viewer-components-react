@@ -36,7 +36,12 @@ export function VisibilityTreeRenderer(props: VisibilityTreeRendererProps) {
         ? getInlineActions(actionsProps)
         : [
             <VisibilityAction key={"Visibility"} node={actionsProps.targetNode} />,
-            <TreeNodeFilterAction key={"Filter"} node={actionsProps.targetNode} onFilter={filterHierarchyLevel} getHierarchyLevelDetails={getHierarchyLevelDetails} />,
+            <TreeNodeFilterAction
+              key={"Filter"}
+              node={actionsProps.targetNode}
+              onFilter={filterHierarchyLevel}
+              getHierarchyLevelDetails={getHierarchyLevelDetails}
+            />,
           ];
     },
     [filterHierarchyLevel, getHierarchyLevelDetails, getInlineActions],
@@ -44,7 +49,12 @@ export function VisibilityTreeRenderer(props: VisibilityTreeRendererProps) {
 
   return (
     <VisibilityContextProvider onVisibilityButtonClick={onVisibilityButtonClick} getVisibilityButtonState={getVisibilityButtonState}>
-      <BaseTreeRenderer {...restProps} filterHierarchyLevel={filterHierarchyLevel} getHierarchyLevelDetails={getHierarchyLevelDetails} getInlineActions={nodeInlineActions} />
+      <BaseTreeRenderer
+        {...restProps}
+        filterHierarchyLevel={filterHierarchyLevel}
+        getHierarchyLevelDetails={getHierarchyLevelDetails}
+        getInlineActions={nodeInlineActions}
+      />
     </VisibilityContextProvider>
   );
 }

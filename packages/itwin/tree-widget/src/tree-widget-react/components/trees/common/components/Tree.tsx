@@ -23,13 +23,7 @@ import { SkeletonTree } from "./SkeletonTree.js";
 
 import type { ReactNode } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type {
-  SelectionStorage,
-  TreeNode,
-  TreeRendererProps,
-  useIModelTree,
-  useTree,
-} from "@itwin/presentation-hierarchies-react";
+import type { SelectionStorage, TreeNode, TreeRendererProps, useIModelTree, useTree } from "@itwin/presentation-hierarchies-react";
 import type { FunctionProps } from "../Utils.js";
 import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
 

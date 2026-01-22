@@ -38,11 +38,7 @@ export function useVisibilityButtonHandler({ rootNodes, isNodeSelected, onClick 
   return { onVisibilityButtonClick };
 }
 
-function forEachSelectedNode(
-  nodes: Array<TreeNode>,
-  isNodeSelected: (nodeId: string) => boolean,
-  callback: (node: TreeNode) => void,
-) {
+function forEachSelectedNode(nodes: Array<TreeNode>, isNodeSelected: (nodeId: string) => boolean, callback: (node: TreeNode) => void) {
   nodes.forEach((node) => {
     if (isNodeSelected(node.id)) {
       callback(node);
