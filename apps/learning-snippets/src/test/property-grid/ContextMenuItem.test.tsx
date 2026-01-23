@@ -40,8 +40,7 @@ describe("Property grid", () => {
         sinon.restore();
       });
 
-      // TODO: https://github.com/iTwin/viewer-components-react/issues/1516
-      it.skip("renders context menu item", async function () {
+      it("renders context menu item", async function () {
         const imodel = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
           const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
@@ -78,8 +77,19 @@ describe("Property grid", () => {
 
         using _ = { [Symbol.dispose]: cleanup };
         const { baseElement, getAllByText } = render(<MyPropertyGrid />);
-        await waitFor(async () => {
-          await user.pointer({ keys: "[MouseRight>]", target: getAllByText("Test SpatialCategory")[1] });
+        
+        // Wait for property grid to render with the category text
+        await waitFor(() => {
+          const elements = getAllByText("Test SpatialCategory");
+          expect(elements.length).to.be.greaterThan(1);
+        });
+
+        // Get the second occurrence (the property value) and right-click on it
+        const categoryElements = getAllByText("Test SpatialCategory");
+        await user.pointer({ keys: "[MouseRight>]", target: categoryElements[1] });
+
+        // Wait for context menu to appear
+        await waitFor(() => {
           expect(queryByText(baseElement, "Click me!")).to.not.be.null;
         });
       });
