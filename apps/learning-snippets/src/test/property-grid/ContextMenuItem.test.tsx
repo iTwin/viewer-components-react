@@ -78,15 +78,15 @@ describe("Property grid", () => {
         using _ = { [Symbol.dispose]: cleanup };
         const { baseElement, getAllByText } = render(<MyPropertyGrid />);
         
-        // Wait for property grid to render with the category text
+        // Wait for property grid to render with the category text and get the elements
+        let categoryElements: HTMLElement[];
         await waitFor(() => {
-          const elements = getAllByText("Test SpatialCategory");
-          expect(elements.length).to.be.greaterThan(1);
+          categoryElements = getAllByText("Test SpatialCategory");
+          expect(categoryElements.length).to.be.greaterThan(1);
         });
 
-        // Get the second occurrence (the property value) and right-click on it
-        const categoryElements = getAllByText("Test SpatialCategory");
-        await user.pointer({ keys: "[MouseRight>]", target: categoryElements[1] });
+        // Right-click on the second occurrence (the property value)
+        await user.pointer({ keys: "[MouseRight>]", target: categoryElements![1] });
 
         // Wait for context menu to appear
         await waitFor(() => {
