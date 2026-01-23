@@ -7,6 +7,7 @@ import React from "react";
 import { SvgHelpCircularHollow } from "@itwin/itwinui-icons-react";
 import { ComboBox, Flex, IconButton, Input, Label, Text, Textarea } from "@itwin/itwinui-react";
 import { useTranslation } from "../../useTranslation.js";
+import { useTelemetryContext } from "../../hooks/UseTelemetryContext.js";
 
 import type { UnitSystemKey } from "@itwin/core-quantity";
 import type { FormatSet } from "@itwin/ecschema-metadata";
@@ -33,6 +34,7 @@ export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, edita
   const [description, setDescription] = React.useState("");
   const [unitSystem, setUnitSystem] = React.useState<string>("metric");
   const { translate } = useTranslation();
+  const { onFeatureUsed } = useTelemetryContext();
 
   // Generate unique IDs for form elements
   const labelInputId = React.useId();
@@ -85,6 +87,7 @@ export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, edita
 
   const handleUnitSystemChange = React.useCallback((value: string) => {
     setUnitSystem(value);
+    onFeatureUsed("unit-system-change");
 
     if (editable && onFormatSetChange) {
         const updatedFormatSet: FormatSet = {
@@ -93,7 +96,7 @@ export const FormatSetPanel: React.FC<FormatSetPanelProps> = ({ formatSet, edita
         };
         onFormatSetChange(updatedFormatSet);
     }
-  }, [editable, formatSet, onFormatSetChange]);
+  }, [editable, formatSet, onFormatSetChange, onFeatureUsed]);
 
   return (
     <Flex className="quantityFormat--formatSetPanel-container">

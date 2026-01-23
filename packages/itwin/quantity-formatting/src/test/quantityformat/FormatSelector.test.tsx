@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { FormatSelector } from "../../components/quantityformat/FormatSelector.js";
+import { TelemetryContextProvider } from "../../hooks/UseTelemetryContext.js";
 
 import type { FormatDefinition } from "@itwin/core-quantity";
 import type { FormatSet } from "@itwin/ecschema-metadata";
@@ -394,6 +395,42 @@ describe("FormatSelector", () => {
       listItems.forEach(item => {
         expect(item.classList.contains("quantityFormat--formatSelector-listItem")).toBe(true);
       });
+    });
+  });
+
+  describe("Telemetry", () => {
+    it("should report 'format-select' when a format is clicked", async () => {
+      const user = userEvent.setup();
+      const onFeatureUsedSpy = vi.fn();
+
+      render(
+        <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
+          <FormatSelector {...defaultProps} />
+        </TelemetryContextProvider>
+      );
+
+      const lengthFormatItem = screen.getByText("Length Format");
+      await user.click(lengthFormatItem);
+
+      expect(onFeatureUsedSpy).toHaveBeenCalledWith("format-select");
+    });
+
+    it("should report 'format-search' when search starts (fire once)", async () => {
+      const user = userEvent.setup();
+      const onFeatureUsedSpy = vi.fn();
+
+      render(
+        <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
+          <FormatSelector {...defaultProps} />
+        </TelemetryContextProvider>
+      );
+
+      const searchInput = screen.getByPlaceholderText("QuantityFormat:labels.searchFormats");
+      await user.type(searchInput, "Length");
+
+      // Should only fire once at the start of typing
+      expect(onFeatureUsedSpy).toHaveBeenCalledWith("format-search");
+      expect(onFeatureUsedSpy).toHaveBeenCalledTimes(1);
     });
   });
 });

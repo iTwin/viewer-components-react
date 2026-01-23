@@ -8,6 +8,7 @@ import * as React from "react";
 import { FormatType, parseFormatType } from "@itwin/core-quantity";
 import { Divider, ExpandableBlock, Flex, Surface, Text } from "@itwin/itwinui-react";
 import { useTranslation } from "../../useTranslation.js";
+import { useTelemetryContext } from "../../hooks/UseTelemetryContext.js";
 import { AzimuthPrimaryChildren, AzimuthSecondaryChildren } from "./panels/Azimuth.js";
 import { BearingPrimaryChildren, BearingSecondaryChildren } from "./panels/Bearing.js";
 import { DecimalPrimaryChildren, DecimalSecondaryChildren } from "./panels/Decimal.js";
@@ -35,6 +36,13 @@ export function FormatPanel(props: FormatPanelProps) {
   const { formatProps, unitsProvider, onFormatChange, persistenceUnit } = props;
   const [isExpanded, setIsExpanded] = React.useState(false);
   const { translate } = useTranslation();
+  const { onFeatureUsed } = useTelemetryContext();
+
+  const handleToggleExpanded = React.useCallback(() => {
+    const newExpanded = !isExpanded;
+    onFeatureUsed(newExpanded ? "advanced-options-expand" : "advanced-options-collapse");
+    setIsExpanded(newExpanded);
+  }, [isExpanded, onFeatureUsed]);
 
   const [primaryChildren, secondaryChildren] = React.useMemo(() => {
     const panelProps: PanelProps = {
@@ -112,7 +120,7 @@ export function FormatPanel(props: FormatPanelProps) {
         size="small"
         styleType="borderless"
         isExpanded={isExpanded}
-        onToggle={() => setIsExpanded(!isExpanded)}
+        onToggle={handleToggleExpanded}
       >
         <div className="quantityFormat--formatPanel-secondaryChildren">
           {secondaryChildren}
