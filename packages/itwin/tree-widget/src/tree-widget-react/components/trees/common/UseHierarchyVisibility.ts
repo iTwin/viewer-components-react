@@ -12,7 +12,7 @@ import { useTelemetryContext } from "./UseTelemetryContext.js";
 import type { MutableRefObject } from "react";
 import type { Observable } from "rxjs";
 import type { BeEvent } from "@itwin/core-bentley";
-import type { HierarchyNode, PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import type { HierarchyNode, TreeNode } from "@itwin/presentation-hierarchies-react";
 import type { TreeItemVisibilityButtonState, VisibilityContext } from "./components/TreeNodeVisibilityButton.js";
 
 /**
@@ -45,7 +45,7 @@ interface UseHierarchyVisibilityProps {
 
 /** @internal */
 export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarchyVisibilityProps): VisibilityContext & { triggerRefresh: () => void } {
-  const visibilityStatusMap = useRef(new Map<string, { node: PresentationHierarchyNode; status: TreeItemVisibilityButtonState; needsRefresh: boolean }>());
+  const visibilityStatusMap = useRef(new Map<string, { node: TreeNode; status: TreeItemVisibilityButtonState; needsRefresh: boolean }>());
   const [state, setState] = useState<VisibilityContext & { triggerRefresh: () => void }>({
     getVisibilityButtonState: () => ({ isLoading: true }),
     onVisibilityButtonClick: () => {},
@@ -59,8 +59,8 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
     const handler = visibilityHandlerFactory();
 
     const visibilityChanged = new Subject<void>();
-    const calculate = new Subject<PresentationHierarchyNode>();
-    const calculateNodeStatus = (node: PresentationHierarchyNode) => {
+    const calculate = new Subject<TreeNode>();
+    const calculateNodeStatus = (node: TreeNode) => {
       calculate.next(node);
     };
 
@@ -157,8 +157,8 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
 }
 
 function createStateGetter(
-  map: MutableRefObject<Map<string, { node: PresentationHierarchyNode; status: TreeItemVisibilityButtonState; needsRefresh: boolean }>>,
-  calculateVisibility: (node: PresentationHierarchyNode) => void,
+  map: MutableRefObject<Map<string, { node: TreeNode; status: TreeItemVisibilityButtonState; needsRefresh: boolean }>>,
+  calculateVisibility: (node: TreeNode) => void,
 ): VisibilityContext["getVisibilityButtonState"] {
   return (node) => {
     const entry = map.current.get(node.id);

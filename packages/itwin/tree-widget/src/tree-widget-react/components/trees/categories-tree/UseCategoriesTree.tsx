@@ -24,7 +24,7 @@ import { createCategoriesSearchResultsTree } from "./internal/visibility/SearchR
 
 import type { ReactNode } from "react";
 import type { GuidString, Id64Array } from "@itwin/core-bentley";
-import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import type { TreeNode } from "@itwin/presentation-hierarchies-react";
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { ExtendedVisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
@@ -145,7 +145,7 @@ function getEmptyTreeContentComponent(searchText?: string, error?: CategoriesTre
 }
 
 /** @beta */
-export function CategoriesTreeIcon({ node }: { node: PresentationHierarchyNode }) {
+export function CategoriesTreeIcon({ node }: { node: TreeNode }) {
   if (node.nodeData.extendedData?.imageId === undefined) {
     return undefined;
   }
