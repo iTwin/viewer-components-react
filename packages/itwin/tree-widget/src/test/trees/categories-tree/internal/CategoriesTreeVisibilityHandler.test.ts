@@ -402,6 +402,48 @@ describe("CategoriesTreeVisibilityHandler", () => {
     });
 
     describe("categories", () => {
+      it("showing category of hidden model does not enable other categories", async function () {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
+          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+
+          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
+          const otherCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory2" });
+          const categoryWithHideOverride = insertSpatialCategory({ builder, codeValue: "SpatialCategory3" });
+          const categoryWithShowOverride = insertSpatialCategory({ builder, codeValue: "SpatialCategory4" });
+          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: otherCategory.id });
+          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: categoryWithHideOverride.id });
+          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: categoryWithShowOverride.id });
+          return { category, otherCategory, categoryWithHideOverride, categoryWithShowOverride, physicalModel };
+        });
+
+        const { imodel, ...keys } = buildIModelResult;
+        using visibilityTestData = await createVisibilityTestData({
+          imodel,
+          subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: getDefaultSubCategoryId(keys.category.id) }],
+        });
+        const { handler, provider, viewport } = visibilityTestData;
+
+        viewport.changeModelDisplay({ modelIds: keys.physicalModel.id, display: false });
+        viewport.changeCategoryDisplay({ categoryIds: keys.otherCategory.id, display: true });
+        viewport.changeSubCategoryDisplay({ subCategoryId: getDefaultSubCategoryId(keys.category.id), display: true });
+        viewport.setPerModelCategoryOverride({ modelIds: keys.physicalModel.id, categoryIds: keys.categoryWithHideOverride.id, override: "hide" });
+        viewport.setPerModelCategoryOverride({ modelIds: keys.physicalModel.id, categoryIds: keys.categoryWithShowOverride.id, override: "show" });
+        viewport.renderFrame();
+        await handler.changeVisibility(createCategoryHierarchyNode({ id: keys.category.id }), true);
+        await validateCategoriesTreeHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          expectations: {
+            [keys.category.id]: "visible",
+            [keys.otherCategory.id]: "partial",
+            [keys.categoryWithHideOverride.id]: "hidden",
+            [keys.categoryWithShowOverride.id]: "hidden",
+          },
+        });
+      });
+
       it("showing category makes it and all of its subCategories visible", async function () {
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
@@ -636,6 +678,56 @@ describe("CategoriesTreeVisibilityHandler", () => {
     });
 
     describe("subCategories", () => {
+      it("showing subCategory of hidden model does not enable other categories", async function () {
+        await using buildIModelResult = await buildIModel(this, async (builder) => {
+          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+
+          const category = insertSpatialCategory({ builder, codeValue: "SpatialCategory" });
+          const subCategory = insertSubCategory({
+            builder,
+            parentCategoryId: category.id,
+            codeValue: "subCategory",
+          });
+          const otherCategory = insertSpatialCategory({ builder, codeValue: "SpatialCategory2" });
+          const categoryWithHideOverride = insertSpatialCategory({ builder, codeValue: "SpatialCategory3" });
+          const categoryWithShowOverride = insertSpatialCategory({ builder, codeValue: "SpatialCategory4" });
+          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: otherCategory.id });
+          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: categoryWithHideOverride.id });
+          insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: categoryWithShowOverride.id });
+          return { category, otherCategory, categoryWithHideOverride, categoryWithShowOverride, physicalModel, subCategory };
+        });
+
+        const { imodel, ...keys } = buildIModelResult;
+        using visibilityTestData = await createVisibilityTestData({
+          imodel,
+          subCategoriesOfCategories: [{ categoryId: keys.category.id, subCategories: [keys.subCategory.id, getDefaultSubCategoryId(keys.category.id)] }],
+        });
+        const { handler, provider, viewport } = visibilityTestData;
+
+        viewport.changeModelDisplay({ modelIds: keys.physicalModel.id, display: false });
+        viewport.changeCategoryDisplay({ categoryIds: keys.otherCategory.id, display: true });
+        viewport.setPerModelCategoryOverride({ modelIds: keys.physicalModel.id, categoryIds: keys.categoryWithHideOverride.id, override: "hide" });
+        viewport.setPerModelCategoryOverride({ modelIds: keys.physicalModel.id, categoryIds: keys.categoryWithShowOverride.id, override: "show" });
+        viewport.renderFrame();
+        await handler.changeVisibility(createSubCategoryHierarchyNode({ id: keys.subCategory.id, categoryId: keys.category.id }), true);
+        await validateCategoriesTreeHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          // prettier-ignore
+          expectations: {
+            [keys.category.id]: "partial",
+              [keys.subCategory.id]: "visible",
+              [getDefaultSubCategoryId(keys.category.id)]: "hidden",
+
+            [keys.otherCategory.id]: "partial",
+            [keys.categoryWithHideOverride.id]: "hidden",
+            [keys.categoryWithShowOverride.id]: "hidden",
+          },
+        });
+      });
+
       it("showing subCategory makes it visible and its parent category partially visible, and doesn't affect other subCategories", async function () {
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
