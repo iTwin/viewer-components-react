@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, EMPTY, from, map, mergeMap, reduce } from "rxjs";
+import { concat, EMPTY, from, map, mergeMap, toArray } from "rxjs";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import {
   CLASS_NAME_GeometricElement2d,
@@ -13,7 +13,7 @@ import {
 } from "../../../common/internal/ClassNameDefinitions.js";
 import { getIdsFromChildrenTree, getParentElementsIdsPath } from "../../../common/internal/Utils.js";
 import { BaseVisibilityHelper } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
-import { enableCategoryDisplay, mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
+import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 
 import type { Observable } from "rxjs";
 import type { Id64Arg, Id64String } from "@itwin/core-bentley";
@@ -121,12 +121,7 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper<Categor
   public changeSubCategoriesVisibilityStatus(props: { categoryId: Id64String; subCategoryIds: Id64Arg; on: boolean }): Observable<void> {
     return concat(
       // make sure parent category and models are enabled
-      props.on
-        ? concat(
-            from(enableCategoryDisplay(this.#props.viewport, props.categoryId, props.on, false)),
-            this.enableCategoriesElementModelsVisibilityStatus(props.categoryId),
-          )
-        : EMPTY,
+      props.on ? this.enableCategoryWithoutEnablingOtherCategories(props.categoryId) : EMPTY,
       from(props.subCategoryIds).pipe(map((subCategoryId) => this.#props.viewport.changeSubCategoryDisplay({ subCategoryId, display: props.on }))),
     );
   }
@@ -153,19 +148,30 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper<Categor
     );
   }
 
-  /** Turns on visibility status of models (that are not yet turned on) that are related to categories. */
-  private enableCategoriesElementModelsVisibilityStatus(categoryIds: Id64Arg): Observable<void> {
-    return this.#props.idsCache.getCategoriesElementModels(categoryIds, true).pipe(
-      reduce((acc, { models }) => {
-        models?.forEach((modelId) => {
-          if (!this.#props.viewport.viewsModel(modelId)) {
-            acc.add(modelId);
-          }
-        });
-        return acc;
-      }, new Set<Id64String>()),
+  /** Turns on category and its' related models. Does not turn on other categories contained in those models.*/
+  private enableCategoryWithoutEnablingOtherCategories(categoryId: Id64String): Observable<void> {
+    this.#props.viewport.changeCategoryDisplay({ categoryIds: categoryId, display: true });
+    return this.#props.idsCache.getCategoriesElementModels(categoryId, true).pipe(
+      mergeMap(({ models }) => from(models ?? [])),
+      mergeMap((modelId) => {
+        this.#props.viewport.setPerModelCategoryOverride({ modelIds: modelId, categoryIds: categoryId, override: "none" });
+        return this.#props.viewport.viewsModel(modelId)
+          ? EMPTY
+          : this.#props.idsCache.getCategoriesOfElementModel(modelId).pipe(
+              map((allModelCategories) => {
+                // Add 'Hide' override to categories that were hidden before model is turned on
+                allModelCategories?.forEach((modelCategoryId) => {
+                  if (modelCategoryId !== categoryId) {
+                    this.#props.viewport.setPerModelCategoryOverride({ modelIds: modelId, categoryIds: modelCategoryId, override: "hide" });
+                  }
+                });
+                return modelId;
+              }),
+            );
+      }),
+      toArray(),
       map((hiddenModels) => {
-        if (hiddenModels.size > 0) {
+        if (hiddenModels.length > 0) {
           this.#props.viewport.changeModelDisplay({ modelIds: hiddenModels, display: true });
         }
       }),

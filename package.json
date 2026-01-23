@@ -17,7 +17,7 @@
     "check": "beachball check",
     "check:dev": "beachball check --config beachball.config.dev.js",
     "change": "beachball change --no-commit",
-    "change:dev": "beachball change --config beachball.config.dev.js --no-commit",
+    "change:next": "beachball change --config beachball.config.dev.js --no-commit -b origin/tree-widget/next",
     "cspell:contents": "cspell .",
     "cspell:filenames": "node scripts/cspellFileNames.js",
     "cspell": "pnpm run cspell:contents && pnpm run cspell:filenames",
