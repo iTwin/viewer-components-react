@@ -79,14 +79,14 @@ describe("Property grid", () => {
         const { baseElement, getAllByText } = render(<MyPropertyGrid />);
         
         // Wait for property grid to render with the category text and get the elements
-        let categoryElements: HTMLElement[];
-        await waitFor(() => {
-          categoryElements = getAllByText("Test SpatialCategory");
-          expect(categoryElements.length).to.be.greaterThan(1);
+        const categoryElements = await waitFor(() => {
+          const elements = getAllByText("Test SpatialCategory");
+          expect(elements.length).to.be.greaterThan(1);
+          return elements;
         });
 
         // Right-click on the second occurrence (the property value)
-        await user.pointer({ keys: "[MouseRight>]", target: categoryElements![1] });
+        await user.pointer({ keys: "[MouseRight>]", target: categoryElements[1] });
 
         // Wait for context menu to appear
         await waitFor(() => {
