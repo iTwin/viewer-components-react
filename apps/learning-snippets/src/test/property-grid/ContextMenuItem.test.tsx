@@ -77,7 +77,7 @@ describe("Property grid", () => {
 
         using _ = { [Symbol.dispose]: cleanup };
         const { baseElement, getAllByText } = render(<MyPropertyGrid />);
-        
+
         // Wait for property grid to render with the category text and get the elements
         const categoryElements = await waitFor(() => {
           const elements = getAllByText("Test SpatialCategory");
