@@ -119,8 +119,8 @@ importers:
         specifier: ^2.0.0-alpha.10
         version: 2.0.0-alpha.10
       '@itwin/presentation-hierarchies-react':
-        specifier: ^2.0.0-alpha.51
-        version: 2.0.0-alpha.51(@stratakit/bricks@0.5.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/foundations@0.4.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/icons@0.2.2)(@stratakit/structures@0.5.4(@types/react@18.3.23)(immer@10.2.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^2.0.0-alpha.52
+        version: 2.0.0-alpha.52(@stratakit/bricks@0.5.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/foundations@0.4.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/icons@0.2.2)(@stratakit/structures@0.5.4(@types/react@18.3.23)(immer@10.2.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@itwin/presentation-shared':
         specifier: ^2.0.0-alpha.6
         version: 2.0.0-alpha.6
@@ -1007,8 +1007,8 @@ packages:
       '@itwin/ecschema-metadata': 5.3.0
       '@itwin/presentation-common': 5.3.0
 
-  '@itwin/presentation-hierarchies-react@2.0.0-alpha.51':
-    resolution: {integrity: sha512-inCMuPPLfHVyIQybe8JNE9IjgP27ZHAulXnvoKaeO+K6v9nF7SSFjem2XH5F0ocNtQvoMRWiHs7cdCgWO9W3ZQ==}
+  '@itwin/presentation-hierarchies-react@2.0.0-alpha.52':
+    resolution: {integrity: sha512-veyGY5t3Hhsq6nrCr8dnHkklhmQFIzkM9ZCrSiRSyNddVtnKEnPtdFrJGkV2/DSr3KL2s2kQc8CU5gRICiA7jA==}
     peerDependencies:
       '@stratakit/bricks': ^0.5.4
       '@stratakit/foundations': ^0.4.5
@@ -4391,7 +4391,7 @@ snapshots:
       rxjs: 7.8.2
       rxjs-for-await: 1.0.0(rxjs@7.8.2)
 
-  '@itwin/presentation-hierarchies-react@2.0.0-alpha.51(@stratakit/bricks@0.5.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/foundations@0.4.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/icons@0.2.2)(@stratakit/structures@0.5.4(@types/react@18.3.23)(immer@10.2.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@itwin/presentation-hierarchies-react@2.0.0-alpha.52(@stratakit/bricks@0.5.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/foundations@0.4.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/icons@0.2.2)(@stratakit/structures@0.5.4(@types/react@18.3.23)(immer@10.2.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@itwin/core-bentley': 5.5.1
       '@itwin/presentation-hierarchies': 2.0.0-alpha.10
@@ -4506,7 +4506,7 @@ snapshots:
       '@itwin/presentation-components': 5.12.15(f5268f468b24c69bca742fdda25e480f)
       '@itwin/presentation-core-interop': 1.4.0-alpha.5(@itwin/core-bentley@5.3.0)(@itwin/core-common@5.3.0(@itwin/core-bentley@5.3.0)(@itwin/core-geometry@5.3.0))(@itwin/core-geometry@5.3.0)(@itwin/core-quantity@5.3.0(@itwin/core-bentley@5.3.0))(@itwin/ecschema-metadata@5.3.0(@itwin/core-bentley@5.3.0)(@itwin/core-quantity@5.3.0(@itwin/core-bentley@5.3.0)))
       '@itwin/presentation-hierarchies': 2.0.0-alpha.10
-      '@itwin/presentation-hierarchies-react': 2.0.0-alpha.51(@stratakit/bricks@0.5.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/foundations@0.4.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/icons@0.2.2)(@stratakit/structures@0.5.4(@types/react@18.3.23)(immer@10.2.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@itwin/presentation-hierarchies-react': 2.0.0-alpha.52(@stratakit/bricks@0.5.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/foundations@0.4.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@stratakit/icons@0.2.2)(@stratakit/structures@0.5.4(@types/react@18.3.23)(immer@10.2.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@itwin/presentation-shared': 2.0.0-alpha.6
       '@itwin/unified-selection': 1.6.5
       '@stratakit/bricks': 0.5.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
