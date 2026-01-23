@@ -9,10 +9,10 @@ import icon3d from "@stratakit/icons/3d.svg";
 import iconBisDefinitionsContainer from "@stratakit/icons/bis-definitions-container.svg";
 import iconBisElement from "@stratakit/icons/bis-element.svg";
 
-import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import type { TreeNode } from "@itwin/presentation-hierarchies-react";
 
 /** @beta */
-export function ClassificationsTreeIcon({ node }: { node: PresentationHierarchyNode }) {
+export function ClassificationsTreeIcon({ node }: { node: TreeNode }) {
   if (node.nodeData.extendedData?.type === undefined) {
     return undefined;
   }

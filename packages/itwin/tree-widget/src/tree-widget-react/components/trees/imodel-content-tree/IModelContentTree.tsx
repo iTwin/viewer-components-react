@@ -20,7 +20,7 @@ import { IModelContentTreeComponent } from "./IModelContentTreeComponent.js";
 import { defaultHierarchyConfiguration, IModelContentTreeDefinition } from "./IModelContentTreeDefinition.js";
 import { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache.js";
 
-import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import type { TreeNode } from "@itwin/presentation-hierarchies-react";
 import type { TreeProps } from "../common/components/Tree.js";
 import type { ExtendedTreeRendererProps } from "../common/components/TreeRenderer.js";
 import type { IModelContentTreeHierarchyConfiguration } from "./IModelContentTreeDefinition.js";
@@ -86,7 +86,7 @@ export function IModelContentTree({
 }
 
 /** @beta */
-export function IModelContentTreeIcon({ node }: { node: PresentationHierarchyNode }) {
+export function IModelContentTreeIcon({ node }: { node: TreeNode }) {
   if (node.nodeData.extendedData?.imageId === undefined) {
     return undefined;
   }

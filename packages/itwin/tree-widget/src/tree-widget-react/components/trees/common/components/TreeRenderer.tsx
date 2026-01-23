@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback } from "react";
-import { FilterAction } from "@itwin/presentation-hierarchies-react";
+import { TreeNodeFilterAction } from "@itwin/presentation-hierarchies-react";
 import { BaseTreeRenderer } from "./BaseTreeRenderer.js";
 
 import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
@@ -24,18 +24,30 @@ export type ExtendedTreeRendererProps = CallbacksWithCommonTreeRendererProps<
  * @beta
  */
 export function TreeRenderer(props: TreeRendererProps) {
-  const { getInlineActions, getHierarchyLevelDetails, onFilterClick, ...restProps } = props;
+  const { getInlineActions, getHierarchyLevelDetails, filterHierarchyLevel, ...restProps } = props;
 
   const nodeInlineActions = useCallback<Required<BaseTreeRendererProps>["getInlineActions"]>(
     (actionsProps) => {
       return getInlineActions
         ? getInlineActions(actionsProps)
-        : [<FilterAction key={"Filter"} node={actionsProps.targetNode} onFilter={onFilterClick} getHierarchyLevelDetails={getHierarchyLevelDetails} />];
+        : [
+            <TreeNodeFilterAction
+              key={"Filter"}
+              node={actionsProps.targetNode}
+              onFilter={filterHierarchyLevel}
+              getHierarchyLevelDetails={getHierarchyLevelDetails}
+            />,
+          ];
     },
-    [getInlineActions, onFilterClick, getHierarchyLevelDetails],
+    [getInlineActions, filterHierarchyLevel, getHierarchyLevelDetails],
   );
 
   return (
-    <BaseTreeRenderer {...restProps} onFilterClick={onFilterClick} getHierarchyLevelDetails={getHierarchyLevelDetails} getInlineActions={nodeInlineActions} />
+    <BaseTreeRenderer
+      {...restProps}
+      filterHierarchyLevel={filterHierarchyLevel}
+      getHierarchyLevelDetails={getHierarchyLevelDetails}
+      getInlineActions={nodeInlineActions}
+    />
   );
 }

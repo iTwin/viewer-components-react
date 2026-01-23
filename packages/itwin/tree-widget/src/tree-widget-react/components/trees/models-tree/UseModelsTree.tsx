@@ -33,7 +33,7 @@ import { ModelsTreeNode } from "./ModelsTreeNode.js";
 import type { ReactNode } from "react";
 import type { Id64String } from "@itwin/core-bentley";
 import type { HierarchySearchPath } from "@itwin/presentation-hierarchies";
-import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import type { TreeNode } from "@itwin/presentation-hierarchies-react";
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
 import type { ExtendedVisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer.js";
@@ -104,7 +104,7 @@ export interface UseModelsTreeProps {
    * An optional predicate to allow or prohibit selection of a node.
    * When not supplied, all nodes are selectable.
    */
-  selectionPredicate?: (props: { node: PresentationHierarchyNode; type: "subject" | "model" | "category" | "element" | "elements-class-group" }) => boolean;
+  selectionPredicate?: (props: { node: TreeNode; type: "subject" | "model" | "category" | "element" | "elements-class-group" }) => boolean;
   emptyTreeContent?: ReactNode;
   getTreeItemProps?: ExtendedVisibilityTreeRendererProps["getTreeItemProps"];
 }
@@ -278,7 +278,7 @@ function InstanceFocusError({ error }: { error: ModelsTreeSearchError }) {
 }
 
 /** @beta */
-export function ModelsTreeIcon({ node }: { node: PresentationHierarchyNode }) {
+export function ModelsTreeIcon({ node }: { node: TreeNode }) {
   if (node.nodeData.extendedData?.imageId === undefined) {
     return undefined;
   }

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback } from "react";
-import { FilterAction } from "@itwin/presentation-hierarchies-react";
+import { TreeNodeFilterAction } from "@itwin/presentation-hierarchies-react";
 import { BaseTreeRenderer } from "./BaseTreeRenderer.js";
 import { VisibilityAction, VisibilityContextProvider } from "./TreeNodeVisibilityButton.js";
 import { useVisibilityButtonHandler } from "./UseVisibilityButtonHandler.js";
@@ -27,7 +27,7 @@ export type ExtendedVisibilityTreeRendererProps = CallbacksWithCommonTreeRendere
  * @beta
  */
 export function VisibilityTreeRenderer(props: VisibilityTreeRendererProps) {
-  const { getVisibilityButtonState, onVisibilityButtonClick: onClick, getInlineActions, onFilterClick, getHierarchyLevelDetails, ...restProps } = props;
+  const { getVisibilityButtonState, onVisibilityButtonClick: onClick, getInlineActions, filterHierarchyLevel, getHierarchyLevelDetails, ...restProps } = props;
   const { onVisibilityButtonClick } = useVisibilityButtonHandler({ rootNodes: props.rootNodes, isNodeSelected: props.isNodeSelected, onClick });
 
   const nodeInlineActions = useCallback<Required<BaseTreeRendererProps>["getInlineActions"]>(
@@ -36,15 +36,25 @@ export function VisibilityTreeRenderer(props: VisibilityTreeRendererProps) {
         ? getInlineActions(actionsProps)
         : [
             <VisibilityAction key={"Visibility"} node={actionsProps.targetNode} />,
-            <FilterAction key={"Filter"} node={actionsProps.targetNode} onFilter={onFilterClick} getHierarchyLevelDetails={getHierarchyLevelDetails} />,
+            <TreeNodeFilterAction
+              key={"Filter"}
+              node={actionsProps.targetNode}
+              onFilter={filterHierarchyLevel}
+              getHierarchyLevelDetails={getHierarchyLevelDetails}
+            />,
           ];
     },
-    [onFilterClick, getHierarchyLevelDetails, getInlineActions],
+    [filterHierarchyLevel, getHierarchyLevelDetails, getInlineActions],
   );
 
   return (
     <VisibilityContextProvider onVisibilityButtonClick={onVisibilityButtonClick} getVisibilityButtonState={getVisibilityButtonState}>
-      <BaseTreeRenderer {...restProps} onFilterClick={onFilterClick} getHierarchyLevelDetails={getHierarchyLevelDetails} getInlineActions={nodeInlineActions} />
+      <BaseTreeRenderer
+        {...restProps}
+        filterHierarchyLevel={filterHierarchyLevel}
+        getHierarchyLevelDetails={getHierarchyLevelDetails}
+        getInlineActions={nodeInlineActions}
+      />
     </VisibilityContextProvider>
   );
 }

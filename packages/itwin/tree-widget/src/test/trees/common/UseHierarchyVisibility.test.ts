@@ -10,7 +10,7 @@ import { EmptyLocalization } from "@itwin/core-common";
 import { useHierarchyVisibility } from "../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
 import { TreeWidget } from "../../../tree-widget-react/TreeWidget.js";
 import { act, renderHook, waitFor } from "../../TestUtils.js";
-import { createPresentationHierarchyNode } from "../TreeUtils.js";
+import { createTreeNode } from "../TreeUtils.js";
 
 import type { HierarchyVisibilityHandler } from "../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
 
@@ -47,7 +47,7 @@ describe("useHierarchyVisibility", () => {
   });
 
   it("checks visibility status only once", async () => {
-    const node = createPresentationHierarchyNode({ id: "node-1" });
+    const node = createTreeNode({ id: "node-1" });
     const { result } = renderHook(useHierarchyVisibility, { initialProps });
 
     expect(visibilityHandler.getVisibilityStatus).to.not.be.called;
@@ -71,7 +71,7 @@ describe("useHierarchyVisibility", () => {
   });
 
   it("recalculates node visibility status after visibility changed", async () => {
-    const node = createPresentationHierarchyNode({ id: "node-1" });
+    const node = createTreeNode({ id: "node-1" });
     const { result } = renderHook(useHierarchyVisibility, { initialProps });
 
     expect(visibilityHandler.getVisibilityStatus).to.not.be.called;
@@ -118,7 +118,7 @@ describe("useHierarchyVisibility", () => {
   });
 
   it("changes visibility status", async () => {
-    const node = createPresentationHierarchyNode({ id: "node-1" });
+    const node = createTreeNode({ id: "node-1" });
     const { result } = renderHook(useHierarchyVisibility, { initialProps });
 
     expect(visibilityHandler.getVisibilityStatus).to.not.be.called;

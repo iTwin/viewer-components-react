@@ -7,7 +7,6 @@
 import type { BeEvent } from '@itwin/core-bentley';
 import type { ClassGroupingNodeKey } from '@itwin/presentation-hierarchies';
 import type { ECClassHierarchyInspector } from '@itwin/presentation-shared';
-import { FilterAction } from '@itwin/presentation-hierarchies-react';
 import type { GroupingHierarchyNode } from '@itwin/presentation-hierarchies';
 import type { HierarchyDefinition } from '@itwin/presentation-hierarchies';
 import type { HierarchyNode } from '@itwin/presentation-hierarchies-react';
@@ -24,18 +23,18 @@ import { JSX as JSX_2 } from 'react/jsx-runtime';
 import type { Localization } from '@itwin/core-common';
 import { NamedExoticComponent } from 'react';
 import type { NonGroupingHierarchyNode } from '@itwin/presentation-hierarchies';
-import type { PresentationHierarchyNode } from '@itwin/presentation-hierarchies-react';
 import type { PropsWithChildren } from 'react';
 import type { ReactNode } from 'react';
-import { RenameAction } from '@itwin/presentation-hierarchies-react';
 import type { SelectionStorage } from '@itwin/presentation-hierarchies-react';
 import { StrataKitTreeRenderer } from '@itwin/presentation-hierarchies-react';
 import type { TranslationOptions } from '@itwin/core-common';
 import { TreeActionBase } from '@itwin/presentation-hierarchies-react';
 import { TreeActionBaseAttributes } from '@itwin/presentation-hierarchies-react';
+import type { TreeNode } from '@itwin/presentation-hierarchies-react';
+import { TreeNodeFilterAction } from '@itwin/presentation-hierarchies-react';
+import { TreeNodeRenameAction } from '@itwin/presentation-hierarchies-react';
 import type { TreeRendererProps } from '@itwin/presentation-hierarchies-react';
 import type { useIModelTree } from '@itwin/presentation-hierarchies-react';
-import type { useSelectionHandler } from '@itwin/presentation-hierarchies-react';
 import type { useTree } from '@itwin/presentation-hierarchies-react';
 import type { Viewport } from '@itwin/core-frontend';
 import type { Widget } from '@itwin/appui-react';
@@ -123,7 +122,7 @@ interface CategoriesTreeHierarchyConfiguration {
 
 // @beta (undocumented)
 export function CategoriesTreeIcon({ node }: {
-    node: PresentationHierarchyNode;
+    node: TreeNode;
 }): JSX_2.Element | undefined;
 
 // @beta
@@ -218,7 +217,7 @@ interface ClassificationsTreeHierarchyConfiguration {
 
 // @beta (undocumented)
 export function ClassificationsTreeIcon({ node }: {
-    node: PresentationHierarchyNode;
+    node: TreeNode;
 }): JSX_2.Element | undefined;
 
 // @beta
@@ -248,7 +247,7 @@ type ClassificationsTreeProps = Pick<ExtendedVisibilityTreeRendererProps, "getIn
 };
 
 // @beta (undocumented)
-type CommonTreeRendererProps = Pick<BaseTreeRendererProps, "onFilterClick" | "selectionMode" | "getTreeItemProps"> & TreeRendererProps;
+type CommonTreeRendererProps = Pick<BaseTreeRendererProps, "filterHierarchyLevel" | "selectionMode" | "getTreeItemProps"> & TreeRendererProps;
 
 // @public
 export function createTreeWidget(props: TreeWidgetProps): Widget;
@@ -294,7 +293,7 @@ interface ExternalSourcesTreeComponentProps extends Pick<ExternalSourcesTreeProp
 
 // @beta (undocumented)
 export function ExternalSourcesTreeIcon({ node }: {
-    node: PresentationHierarchyNode;
+    node: TreeNode;
 }): JSX_2.Element | undefined;
 
 // @beta (undocumented)
@@ -303,8 +302,6 @@ type ExternalSourcesTreeProps = Pick<ExtendedTreeRendererProps, "getInlineAction
         sizeLimit?: number;
     };
 };
-
-export { FilterAction }
 
 // @public (undocumented)
 interface FocusedInstancesContext {
@@ -360,7 +357,7 @@ interface IModelContentTreeHierarchyConfiguration {
 
 // @beta (undocumented)
 export function IModelContentTreeIcon({ node }: {
-    node: PresentationHierarchyNode;
+    node: TreeNode;
 }): JSX_2.Element | undefined;
 
 // @beta (undocumented)
@@ -429,7 +426,7 @@ interface ModelsTreeHierarchyConfiguration {
 
 // @beta (undocumented)
 export function ModelsTreeIcon({ node }: {
-    node: PresentationHierarchyNode;
+    node: TreeNode;
 }): JSX_2.Element | undefined;
 
 // @beta
@@ -501,8 +498,6 @@ type NormalizedHierarchySearchPath = ReturnType<(typeof HierarchySearchPath)["no
 // @public (undocumented)
 type PerModelCategoryOverride = "show" | "hide" | "none";
 
-export { RenameAction }
-
 // @beta
 export class SearchLimitExceededError extends Error {
     constructor(limit: number);
@@ -556,12 +551,16 @@ type TreeItemVisibilityButtonState = (LoadedTreeItemVisibilityButtonState | {
     tooltip?: string;
 };
 
+export { TreeNodeFilterAction }
+
+export { TreeNodeRenameAction }
+
 // @beta (undocumented)
-type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getSearchPaths" | "getHierarchyDefinition"> & Partial<Pick<FunctionProps<typeof useSelectionHandler>, "selectionMode">> & {
+type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getSearchPaths" | "getHierarchyDefinition"> & Pick<BaseTreeRendererProps, "selectionMode"> & {
     imodel: IModelConnection;
     treeName: string;
     selectionStorage: SelectionStorage;
-    selectionPredicate?: (node: PresentationHierarchyNode) => boolean;
+    selectionPredicate?: (node: TreeNode) => boolean;
     treeRenderer: (treeProps: Required<CommonTreeRendererProps & Pick<BaseTreeRendererProps, "getTreeItemProps">>) => ReactNode;
     imodelAccess?: FunctionProps<typeof useIModelTree>["imodelAccess"];
     hierarchyLevelSizeLimit?: number;
@@ -806,7 +805,7 @@ interface UseModelsTreeProps {
     onModelsFiltered?: (modelIds: Id64String[] | undefined) => void;
     searchText?: string;
     selectionPredicate?: (props: {
-        node: PresentationHierarchyNode;
+        node: TreeNode;
         type: "subject" | "model" | "category" | "element" | "elements-class-group";
     }) => boolean;
     // (undocumented)
@@ -823,13 +822,13 @@ interface UseModelsTreeResult {
 
 // @beta
 export const VisibilityAction: NamedExoticComponent<    {
-node: PresentationHierarchyNode;
+node: TreeNode;
 } & TreeActionBaseAttributes>;
 
 // @beta (undocumented)
 interface VisibilityContext {
-    getVisibilityButtonState: (node: PresentationHierarchyNode) => TreeItemVisibilityButtonState;
-    onVisibilityButtonClick: (node: PresentationHierarchyNode, state: LoadedTreeItemVisibilityButtonState["state"]) => void;
+    getVisibilityButtonState: (node: TreeNode) => TreeItemVisibilityButtonState;
+    onVisibilityButtonClick: (node: TreeNode, state: LoadedTreeItemVisibilityButtonState["state"]) => void;
 }
 
 // @beta

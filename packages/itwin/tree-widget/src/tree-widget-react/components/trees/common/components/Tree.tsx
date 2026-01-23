@@ -23,20 +23,13 @@ import { SkeletonTree } from "./SkeletonTree.js";
 
 import type { ReactNode } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type {
-  PresentationHierarchyNode,
-  SelectionStorage,
-  TreeRendererProps,
-  useIModelTree,
-  useSelectionHandler,
-  useTree,
-} from "@itwin/presentation-hierarchies-react";
+import type { SelectionStorage, TreeNode, TreeRendererProps, useIModelTree, useTree } from "@itwin/presentation-hierarchies-react";
 import type { FunctionProps } from "../Utils.js";
 import type { BaseTreeRendererProps } from "./BaseTreeRenderer.js";
 
 /** @beta */
 export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getSearchPaths" | "getHierarchyDefinition"> &
-  Partial<Pick<FunctionProps<typeof useSelectionHandler>, "selectionMode">> & {
+  Pick<BaseTreeRendererProps, "selectionMode"> & {
     /** iModel connection that should be used to pull data from. */
     imodel: IModelConnection;
     /** Unique tree component name that will be used as unified selection change event source when selecting node. */
@@ -47,7 +40,7 @@ export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getSearchPath
      * An optional predicate to allow or prohibit selection of a node.
      * When not supplied, all nodes are selectable.
      */
-    selectionPredicate?: (node: PresentationHierarchyNode) => boolean;
+    selectionPredicate?: (node: TreeNode) => boolean;
     /** Tree renderer that should be used to render tree data. */
     treeRenderer: (treeProps: Required<CommonTreeRendererProps & Pick<BaseTreeRendererProps, "getTreeItemProps">>) => ReactNode;
     /** Custom iModel access that is stored outside tree component. If not provided it new iModel access will be created using `imodel` prop. */
@@ -63,7 +56,7 @@ export type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getSearchPath
   };
 
 /** @beta */
-export type CommonTreeRendererProps = Pick<BaseTreeRendererProps, "onFilterClick" | "selectionMode" | "getTreeItemProps"> & TreeRendererProps;
+export type CommonTreeRendererProps = Pick<BaseTreeRendererProps, "filterHierarchyLevel" | "selectionMode" | "getTreeItemProps"> & TreeRendererProps;
 
 /** @beta */
 export type CallbacksWithCommonTreeRendererProps<T extends BaseTreeRendererProps, K extends keyof T> = Omit<T, K> & {
@@ -148,7 +141,7 @@ export function Tree({
 
 type TreeBaseProps = {
   currentHierarchyLevelSizeLimit: number;
-  getNode: (nodeId: string) => PresentationHierarchyNode | undefined;
+  getNode: (nodeId: string) => TreeNode | undefined;
   treeRendererProps?: TreeRendererProps;
 } & Omit<TreeProps, "selectionStorage" | "treeName" | "getHierarchyDefinition"> &
   Pick<ReturnType<typeof useTree>, "getNode" | "isReloading">;
@@ -203,7 +196,7 @@ function TreeBaseImpl({
     selectNodes,
     selectionMode: selectionMode ?? "single",
     expandNode: reportingExpandNode,
-    onFilterClick: reportingOnFilterClicked,
+    filterHierarchyLevel: reportingOnFilterClicked,
     getTreeItemProps: (node) => ({
       label: getLabel(node),
     }),
@@ -228,8 +221,8 @@ function useSelectionPredicate({
   getNode,
 }: {
   action: (...args: any[]) => void;
-  predicate?: (node: PresentationHierarchyNode) => boolean;
-  getNode: (nodeId: string) => PresentationHierarchyNode | undefined;
+  predicate?: (node: TreeNode) => boolean;
+  getNode: (nodeId: string) => TreeNode | undefined;
 }): TreeRendererProps["selectNodes"] {
   return useCallback(
     (nodeIds, changeType) =>
