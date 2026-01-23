@@ -6,8 +6,7 @@
 import { concat, defer, from, map, merge, mergeMap, of, toArray } from "rxjs";
 import { assert, Id64 } from "@itwin/core-bentley";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
-import { CLASS_NAME_GeometricElement2d, CLASS_NAME_GeometricElement3d } from "../../../common/internal/ClassNameDefinitions.js";
-import { fromWithRelease, getIdsFromChildrenTree, setDifference, setIntersection } from "../../../common/internal/Utils.js";
+import { fromWithRelease, getIdsFromChildrenTree, getParentElementsIdsPath, setDifference, setIntersection } from "../../../common/internal/Utils.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 import { ClassificationsTreeNodeInternal } from "../ClassificationsTreeNodeInternal.js";
 import { ClassificationsTreeVisibilityHelper } from "./ClassificationsTreeVisibilityHelper.js";
@@ -15,7 +14,6 @@ import { ClassificationsTreeVisibilityHelper } from "./ClassificationsTreeVisibi
 import type { Observable } from "rxjs";
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { AlwaysAndNeverDrawnElementInfo } from "../../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
 import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
 import type { ChildrenTree } from "../../../common/internal/Utils.js";
@@ -30,7 +28,6 @@ export interface ClassificationsTreeVisibilityHandlerProps {
   idsCache: ClassificationsTreeIdsCache;
   viewport: TreeWidgetViewport;
   alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfo<ClassificationsTreeSearchTargets>;
-  classInspector: ECClassHierarchyInspector;
 }
 
 /**
@@ -63,7 +60,6 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       idsCache: this.#props.idsCache,
       alwaysAndNeverDrawnElementInfo: this.#props.alwaysAndNeverDrawnElementInfo,
       baseIdsCache,
-      classInspector: this.#props.classInspector,
     });
   }
 
@@ -174,25 +170,19 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       });
     }
     assert(ClassificationsTreeNodeInternal.isGeometricElementNode(node));
-
-    return this.#visibilityHelper
-      .getParentElementsIdsPath({
-        parentsInstanceKeys: node.parentKeys.filter((parentKey) => HierarchyNodeKey.isInstances(parentKey)).map((parentKey) => parentKey.instanceKeys),
-        elementClass: node.extendedData.type === "GeometricElement3d" ? CLASS_NAME_GeometricElement3d : CLASS_NAME_GeometricElement2d,
-      })
-      .pipe(
-        mergeMap((parentElementsIdsPath) =>
-          this.#visibilityHelper.getElementsVisibilityStatus({
-            elementIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
-            modelId: node.extendedData.modelId,
-            categoryId: node.extendedData.categoryId,
-            type: node.extendedData.type,
-            parentElementsIdsPath,
-            childrenCount: node.extendedData.childrenCount,
-            categoryOfElementOrParentElementWhichIsNotChild: node.extendedData.categoryOfElementOrParentElementWhichIsNotChild,
-          }),
-        ),
-      );
+    const parentElementsIdsPath = getParentElementsIdsPath({
+      parentInstanceKeys: node.parentKeys.filter((parentKey) => HierarchyNodeKey.isInstances(parentKey)).map((parentKey) => parentKey.instanceKeys),
+      topMostParentElementId: node.extendedData.topMostParentElementId,
+    });
+    return this.#visibilityHelper.getElementsVisibilityStatus({
+      elementIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
+      modelId: node.extendedData.modelId,
+      categoryId: node.extendedData.categoryId,
+      type: node.extendedData.type,
+      parentElementsIdsPath,
+      childrenCount: node.extendedData.childrenCount,
+      categoryOfTopMostParentElement: node.extendedData.categoryOfTopMostParentElement,
+    });
   }
 
   /** Changes visibility of the items represented by the tree node. */
@@ -278,33 +268,30 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
     return this.#props.idsCache.getAllChildrenCount({ elementIds: searchTargetElements, type }).pipe(
       mergeMap((elementsChildrenCountMap) =>
         fromWithRelease({ source: elements, releaseOnCount: 50 }).pipe(
-          mergeMap(({ modelId, categoryId, elements: elementsMap, pathToElements, categoryOfElementOrParentElementWhichIsNotChild }) =>
-            this.#visibilityHelper
-              .getParentElementsIdsPath({
-                parentsInstanceKeys: pathToElements.map((instanceKey) => [instanceKey]),
-                elementClass: type === "3d" ? CLASS_NAME_GeometricElement3d : CLASS_NAME_GeometricElement2d,
-              })
-              .pipe(
-                mergeMap((parentElementsIdsPath) => {
-                  let totalChildrenCount = 0;
-                  elementsMap.forEach((_, elementId) => {
-                    const childCount = elementsChildrenCountMap.get(elementId);
-                    if (childCount) {
-                      totalChildrenCount += childCount;
-                    }
-                  });
-                  return this.#visibilityHelper.getElementsVisibilityStatus({
-                    modelId,
-                    categoryId,
-                    elementIds: [...elementsMap.keys()],
-                    type: type === "3d" ? "GeometricElement3d" : "GeometricElement2d",
-                    parentElementsIdsPath,
-                    childrenCount: totalChildrenCount,
-                    categoryOfElementOrParentElementWhichIsNotChild,
-                  });
-                }),
-              ),
-          ),
+          mergeMap(({ modelId, categoryId, elements: elementsMap, pathToElements, categoryOfTopMostParentElement, topMostParentElementId }) => {
+            const parentElementsIdsPath = topMostParentElementId
+              ? getParentElementsIdsPath({
+                  parentInstanceKeys: pathToElements.map((instanceKey) => [instanceKey]),
+                  topMostParentElementId,
+                })
+              : [];
+            let totalChildrenCount = 0;
+            elementsMap.forEach((_, elementId) => {
+              const childCount = elementsChildrenCountMap.get(elementId);
+              if (childCount) {
+                totalChildrenCount += childCount;
+              }
+            });
+            return this.#visibilityHelper.getElementsVisibilityStatus({
+              modelId,
+              categoryId,
+              elementIds: [...elementsMap.keys()],
+              type: type === "3d" ? "GeometricElement3d" : "GeometricElement2d",
+              parentElementsIdsPath,
+              childrenCount: totalChildrenCount,
+              categoryOfTopMostParentElement,
+            });
+          }),
         ),
       ),
     );

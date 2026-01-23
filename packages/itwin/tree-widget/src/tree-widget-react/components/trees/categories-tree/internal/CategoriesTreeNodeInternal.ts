@@ -45,7 +45,8 @@ export namespace CategoriesTreeNodeInternal {
       modelId: Id64String;
       categoryId: Id64String;
       childrenCount: number;
-      categoryOfElementOrParentElementWhichIsNotChild: Id64String;
+      categoryOfTopMostParentElement: Id64String;
+      topMostParentElementId: Id64String;
     };
   } => CategoriesTreeNode.isElementNode(node);
 
@@ -54,7 +55,8 @@ export namespace CategoriesTreeNodeInternal {
   ): node is Omit<GroupingHierarchyNode, "extendedData"> & { key: ClassGroupingNodeKey } & {
     extendedData: {
       categoryId: Id64String;
-      modelElementsMap: Map<Id64String, { elementIds: Set<Id64String>; categoryOfElementOrParentElementWhichIsNotChild: Id64String }>;
+      topMostParentElementId?: Id64String;
+      modelElementsMap: Map<Id64String, { elementIds: Set<Id64String>; categoryOfTopMostParentElement: Id64String }>;
       childrenCount: number;
       searchTargets?: Map<Id64String, { childrenCount: number }>;
     };

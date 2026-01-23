@@ -47,9 +47,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
   #elementModelsCategories: Observable<Map<ModelId, { category2dIds: Id64Set; category3dIds: Id64Set; isSubModel: boolean }>> | undefined;
   #modelWithCategoryModeledElements: Observable<Map<ModelId, Map<CategoryId, Set<ElementId>>>> | undefined;
   #classificationInfos: Observable<Map<ClassificationId | ClassificationTableId, ClassificationInfo>> | undefined;
-  #filteredElementsData:
-    | Observable<Map<ElementId, { modelId: Id64String; categoryId: Id64String; categoryOfElementOrParentElementWhichIsNotChild: CategoryId }>>
-    | undefined;
+  #filteredElementsData: Observable<Map<ElementId, { modelId: Id64String; categoryId: Id64String; categoryOfTopMostParentElement: CategoryId }>> | undefined;
   #elementChildren2dCache: ElementChildrenCache;
   #elementChildren3dCache: ElementChildrenCache;
   #queryExecutor: LimitingECSqlQueryExecutor;
@@ -548,7 +546,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
     modelId: Id64String;
     id: ElementId;
     categoryId: Id64String;
-    categoryOfElementOrParentElementWhichIsNotChild: Id64String;
+    categoryOfTopMostParentElement: Id64String;
   }> {
     return defer(() => {
       const queries = new Array<string>();
@@ -558,7 +556,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
             this.Model.Id modelId,
             this.Category.Id categoryId,
             this.ECInstanceId id,
-            ${this.getCategoryOfModelsRootElementSelector({ elementIdSelector: "this.ECInstanceId", type: "2d" })} categoryOfElementOrParentElementWhichIsNotChild
+            ${this.getCategoryOfModelsRootElementSelector({ elementIdSelector: "this.ECInstanceId", type: "2d" })} categoryOfTopMostParentElement
           FROM ${CLASS_NAME_GeometricElement2d} this
           WHERE ECInstanceId IN (${joinId64Arg(element2dIds, ",")})
         `);
@@ -569,7 +567,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
             this.Model.Id modelId,
             this.Category.Id categoryId,
             this.ECInstanceId id,
-            ${this.getCategoryOfModelsRootElementSelector({ elementIdSelector: "this.ECInstanceId", type: "3d" })} categoryOfElementOrParentElementWhichIsNotChild
+            ${this.getCategoryOfModelsRootElementSelector({ elementIdSelector: "this.ECInstanceId", type: "3d" })} categoryOfTopMostParentElement
           FROM ${CLASS_NAME_GeometricElement3d} this
           WHERE ECInstanceId IN (${joinId64Arg(element3dIds, ",")})
         `);
@@ -589,7 +587,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
           modelId: row.modelId,
           id: row.id,
           categoryId: row.categoryId,
-          categoryOfElementOrParentElementWhichIsNotChild: row.categoryOfElementOrParentElementWhichIsNotChild,
+          categoryOfTopMostParentElement: row.categoryOfTopMostParentElement,
         };
       }),
     );
@@ -601,8 +599,8 @@ export class ClassificationsTreeIdsCache implements Disposable {
   }: {
     element2dIds: Id64Arg;
     element3dIds: Id64Arg;
-  }): Observable<Map<ElementId, { categoryId: Id64String; modelId: Id64String; categoryOfElementOrParentElementWhichIsNotChild: CategoryId }>> {
-    const result = new Map<ElementId, { categoryId: Id64String; modelId: Id64String; categoryOfElementOrParentElementWhichIsNotChild: CategoryId }>();
+  }): Observable<Map<ElementId, { categoryId: Id64String; modelId: Id64String; categoryOfTopMostParentElement: CategoryId }>> {
+    const result = new Map<ElementId, { categoryId: Id64String; modelId: Id64String; categoryOfTopMostParentElement: CategoryId }>();
     if (Id64.sizeOf(element2dIds) === 0 && Id64.sizeOf(element3dIds) === 0) {
       return of(result);
     }
@@ -610,8 +608,8 @@ export class ClassificationsTreeIdsCache implements Disposable {
       element2dIds,
       element3dIds,
     }).pipe(
-      reduce((acc, { modelId, id, categoryId, categoryOfElementOrParentElementWhichIsNotChild }) => {
-        acc.set(id, { modelId, categoryId, categoryOfElementOrParentElementWhichIsNotChild });
+      reduce((acc, { modelId, id, categoryId, categoryOfTopMostParentElement }) => {
+        acc.set(id, { modelId, categoryId, categoryOfTopMostParentElement });
         return acc;
       }, result),
       shareReplay(),

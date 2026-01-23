@@ -99,7 +99,7 @@ export function createClassGroupingHierarchyNode({
   ...props
 }: {
   categoryId: Id64String | undefined;
-  modelElementsMap: Map<ModelId, { elementIds: Set<ElementId>; categoryOfElementOrParentElementWhichIsNotChild?: Id64String }>;
+  modelElementsMap: Map<ModelId, { elementIds: Set<ElementId>; categoryOfTopMostParentElement?: Id64String }>;
   className?: string;
   parentKeys?: Array<InstanceKey | ClassGroupingNodeKey>;
   hasDirectNonSearchTargets?: boolean;

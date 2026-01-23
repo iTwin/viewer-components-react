@@ -30,7 +30,8 @@ export namespace ModelsTreeNodeInternal {
       modelId: Id64String;
       categoryId: Id64String;
       childrenCount: number;
-      categoryOfElementOrParentElementWhichIsNotChild: CategoryId;
+      categoryOfTopMostParentElement: CategoryId;
+      topMostParentElementId: Id64String;
     };
   } => ModelsTreeNode.isElementNode(node);
 
@@ -42,7 +43,8 @@ export namespace ModelsTreeNodeInternal {
       categoryId: Id64String;
       childrenCount: number;
       searchTargets?: Map<Id64String, { childrenCount: number }>;
-      categoryOfElementOrParentElementWhichIsNotChild: CategoryId;
+      categoryOfTopMostParentElement: CategoryId;
+      topMostParentElementId?: Id64String;
     };
   } => ModelsTreeNode.isElementClassGroupingNode(node);
 

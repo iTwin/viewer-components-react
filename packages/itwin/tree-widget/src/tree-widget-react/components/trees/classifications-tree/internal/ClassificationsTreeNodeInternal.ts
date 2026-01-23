@@ -28,7 +28,8 @@ export namespace ClassificationsTreeNodeInternal {
       modelId: Id64String;
       categoryId: Id64String;
       childrenCount: number;
-      categoryOfElementOrParentElementWhichIsNotChild: Id64String;
+      categoryOfTopMostParentElement: Id64String;
+      topMostParentElementId: Id64String;
     };
   } => ClassificationsTreeNode.isGeometricElementNode(node);
 }

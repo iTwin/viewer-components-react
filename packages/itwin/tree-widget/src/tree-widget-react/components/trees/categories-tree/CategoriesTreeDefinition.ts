@@ -24,7 +24,7 @@ import {
   toArray,
 } from "rxjs";
 import { assert, Guid } from "@itwin/core-bentley";
-import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition, ProcessedHierarchyNode } from "@itwin/presentation-hierarchies";
+import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition, HierarchyNode, ProcessedHierarchyNode } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import {
   CLASS_NAME_DefinitionContainer,
@@ -154,13 +154,13 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
 
   public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
     if (ProcessedHierarchyNode.isGroupingNode(node)) {
-      const modelElementsMap = new Map<ModelId, { elementIds: Set<ElementId>; categoryOfElementOrParentElementWhichIsNotChild: CategoryId }>();
+      const modelElementsMap = new Map<ModelId, { elementIds: Set<ElementId>; categoryOfTopMostParentElement: CategoryId }>();
       node.children.forEach((child) => {
         let modelEntry = modelElementsMap.get(child.extendedData?.modelId);
         if (!modelEntry) {
           modelEntry = {
             elementIds: new Set(),
-            categoryOfElementOrParentElementWhichIsNotChild: child.extendedData?.categoryOfElementOrParentElementWhichIsNotChild,
+            categoryOfTopMostParentElement: child.extendedData?.categoryOfTopMostParentElement,
           };
           modelElementsMap.set(child.extendedData?.modelId, modelEntry);
         }
@@ -171,14 +171,18 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
       });
 
       const { hasSearchTargetAncestor, hasDirectNonSearchTargets, childrenCount, searchTargets } = groupingNodeDataFromChildren(node.children);
-
+      const firstChild = node.children[0];
+      assert(HierarchyNode.isInstancesNode(firstChild));
       return {
         ...node,
         label: node.label,
         extendedData: {
           ...node.extendedData,
+          topMostParentElementId: firstChild.key.instanceKeys.every((instanceKey) => instanceKey.id !== firstChild.extendedData?.topMostParentElementId)
+            ? firstChild.extendedData?.topMostParentElementId
+            : undefined,
           // add `categoryId` from the first grouped element
-          categoryId: node.children[0].extendedData?.categoryId,
+          categoryId: firstChild.extendedData?.categoryId,
           modelElementsMap,
           childrenCount,
           ...(!!searchTargets?.size ? { searchTargets } : {}),
@@ -614,7 +618,8 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                 imageId: "icon-item",
                 isElement: true,
                 childrenCount: { selector: this.createElementChildrenCountSelector({ elementIdSelector: "this.ECInstanceId" }) },
-                categoryOfElementOrParentElementWhichIsNotChild: { selector: "IdToHex(this.Category.Id)" },
+                categoryOfTopMostParentElement: { selector: "IdToHex(this.Category.Id)" },
+                topMostParentElementId: { selector: "IdToHex(this.ECInstanceId)" },
               },
               supportsFiltering: true,
             })}
@@ -679,9 +684,10 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                   imageId: "icon-item",
                   isElement: true,
                   childrenCount: { selector: this.createElementChildrenCountSelector({ elementIdSelector: "this.ECInstanceId" }) },
-                  categoryOfElementOrParentElementWhichIsNotChild: {
-                    selector: `IdToHex(${parentNode.extendedData?.categoryOfElementOrParentElementWhichIsNotChild})`,
+                  categoryOfTopMostParentElement: {
+                    selector: `IdToHex(${parentNode.extendedData?.categoryOfTopMostParentElement})`,
                   },
+                  topMostParentElementId: { selector: `IdToHex(${parentNode.extendedData?.topMostParentElementId})` },
                 },
                 supportsFiltering: true,
               })}

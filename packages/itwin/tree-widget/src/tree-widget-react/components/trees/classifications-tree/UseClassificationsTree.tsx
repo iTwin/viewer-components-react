@@ -164,11 +164,10 @@ async function createSearchResultsTree(
 }
 
 function createTreeSpecificVisibilityHandler(props: CreateTreeSpecificVisibilityHandlerProps<ClassificationsTreeIdsCache, ClassificationsTreeSearchTargets>) {
-  const { info, getCache, viewport, classInspector } = props;
+  const { info, getCache, viewport } = props;
   return new ClassificationsTreeVisibilityHandler({
     alwaysAndNeverDrawnElementInfo: info,
     idsCache: getCache(),
     viewport,
-    classInspector,
   });
 }

@@ -18,6 +18,8 @@ import {
 
 import type { Observable } from "rxjs";
 import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
+import type { InstanceKey } from "@itwin/presentation-common";
+import type { ElementId } from "./Types.js";
 
 /** @internal */
 export function setDifference<T>(lhs: Readonly<Iterable<T>>, rhs: ReadonlySet<T>): Set<T> {
@@ -267,4 +269,24 @@ export function groupingNodeDataFromChildren(children: ProcessedHierarchyNode[])
   }
 
   return { hasSearchTargetAncestor: false, hasDirectNonSearchTargets, childrenCount, searchTargets };
+}
+
+/** @internal */
+export function getParentElementsIdsPath({
+  parentInstanceKeys,
+  topMostParentElementId,
+}: {
+  parentInstanceKeys: Array<Array<InstanceKey>>;
+  topMostParentElementId: ElementId;
+}): Array<Id64Arg> {
+  for (let i = 0; i < parentInstanceKeys.length; ++i) {
+    const instanceKeys = parentInstanceKeys[i];
+    for (const instanceKey of instanceKeys) {
+      if (instanceKey.id !== topMostParentElementId) {
+        continue;
+      }
+      return parentInstanceKeys.slice(i).map((keys) => keys.map((key) => key.id));
+    }
+  }
+  return [];
 }

@@ -310,7 +310,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
             fullClassName: elementClassName,
             query: {
               ecsql: `
-                SELECT ${await this.#createElementSelectClause(elementClassName)}
+                SELECT ${await this.#createElementSelectClause({ elementFullClassName: elementClassName })}
                 FROM ${instanceFilterClauses.from} this
                 JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = this.ECInstanceId
                 ${instanceFilterClauses.joins}
@@ -341,7 +341,7 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
           fullClassName: elementClassName,
           query: {
             ecsql: `
-              SELECT ${await this.#createElementSelectClause(elementClassName, parentNode.extendedData?.categoryOfElementOrParentElementWhichIsNotChild)}
+              SELECT ${await this.#createElementSelectClause({ elementFullClassName: elementClassName, categoryOfTopMostParentElement: parentNode.extendedData?.categoryOfTopMostParentElement, topMostParentElementId: parentNode.extendedData?.topMostParentElementId })}
               FROM ${instanceFilterClauses.from} this
               ${instanceFilterClauses.joins}
               WHERE
@@ -354,7 +354,15 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
     );
   }
 
-  async #createElementSelectClause(elementFullClassName: string, categoryOfElementOrParentElementWhichIsNotChild?: string): Promise<string> {
+  async #createElementSelectClause({
+    elementFullClassName,
+    categoryOfTopMostParentElement,
+    topMostParentElementId,
+  }: {
+    elementFullClassName: string;
+    categoryOfTopMostParentElement?: string;
+    topMostParentElementId?: string;
+  }): Promise<string> {
     const { className: elementClassName } = parseFullClassName(elementFullClassName);
     return this.#selectQueryFactory.createSelectClause({
       ecClassId: { selector: "this.ECClassId" },
@@ -380,9 +388,10 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
         modelId: { selector: "IdToHex(this.Model.Id)" },
         categoryId: { selector: "IdToHex(this.Category.Id)" },
         childrenCount: { selector: this.#createElementChildrenCountSelector({ elementIdSelector: "this.ECInstanceId", elementFullClassName }) },
-        categoryOfElementOrParentElementWhichIsNotChild: {
-          selector: `IdToHex(${categoryOfElementOrParentElementWhichIsNotChild ?? "this.Category.Id"})`,
+        categoryOfTopMostParentElement: {
+          selector: `IdToHex(${categoryOfTopMostParentElement ?? "this.Category.Id"})`,
         },
+        topMostParentElementId: { selector: `IdToHex(${topMostParentElementId ?? "this.ECInstanceId"})` },
       },
       supportsFiltering: true,
     });

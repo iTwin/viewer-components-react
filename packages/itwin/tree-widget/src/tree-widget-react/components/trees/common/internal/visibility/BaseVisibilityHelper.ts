@@ -41,7 +41,6 @@ import type { Observable, Subscription } from "rxjs";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { ClassGroupingNodeKey, HierarchyNode, InstancesNodeKey } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { TreeWidgetViewport } from "../../TreeWidgetViewport.js";
 import type { HierarchyVisibilityHandlerOverridableMethod, HierarchyVisibilityOverrideHandler, VisibilityStatus } from "../../UseHierarchyVisibility.js";
 import type { AlwaysAndNeverDrawnElementInfo } from "../AlwaysAndNeverDrawnElementInfo.js";
@@ -110,7 +109,6 @@ export interface BaseVisibilityHelperProps<TSearchResultsTargets> {
   overrideHandler?: HierarchyVisibilityOverrideHandler;
   overrides?: BaseTreeVisibilityHandlerOverrides;
   baseIdsCache: BaseIdsCache;
-  classInspector: ECClassHierarchyInspector;
 }
 
 /**
@@ -445,22 +443,13 @@ export class BaseVisibilityHelper<TSearchResultsTargets> implements Disposable {
     modelId: Id64String;
     categoryId: Id64String;
     type: "GeometricElement3d" | "GeometricElement2d";
-    categoryOfElementOrParentElementWhichIsNotChild: CategoryId;
+    categoryOfTopMostParentElement: CategoryId;
     parentElementsIdsPath: Array<Id64Arg>;
     childrenCount: number;
     searchPathToElements?: InstanceKey[];
   }): Observable<VisibilityStatus> {
     const result = defer(() => {
-      const {
-        elementIds,
-        modelId,
-        categoryId,
-        type,
-        parentElementsIdsPath,
-        childrenCount,
-        categoryOfElementOrParentElementWhichIsNotChild,
-        searchPathToElements,
-      } = props;
+      const { elementIds, modelId, categoryId, type, parentElementsIdsPath, childrenCount, categoryOfTopMostParentElement, searchPathToElements } = props;
       if (this.#props.viewport.viewType === "other") {
         return EMPTY;
       }
@@ -502,7 +491,7 @@ export class BaseVisibilityHelper<TSearchResultsTargets> implements Disposable {
         defaultStatus: () => this.getVisibleModelCategoriesDirectVisibilityStatus({ categoryIds: categoryId, modelId }),
         parentElementsIdsPath,
         modelId,
-        categoryOfElementOrParentElementWhichIsNotChild,
+        categoryOfTopMostParentElement,
         childrenCount,
         searchPathToElements,
       }).pipe(
@@ -548,7 +537,7 @@ export class BaseVisibilityHelper<TSearchResultsTargets> implements Disposable {
         | {
             elements: Id64Arg;
             parentElementsIdsPath: Array<Id64Arg>;
-            categoryOfElementOrParentElementWhichIsNotChild: Id64String;
+            categoryOfTopMostParentElement: Id64String;
             modelId: Id64String;
             childrenCount: number;
             searchPathToElements?: InstanceKey[];
@@ -583,14 +572,14 @@ export class BaseVisibilityHelper<TSearchResultsTargets> implements Disposable {
       return forkJoin({
         childAlwaysDrawn: this.#alwaysAndNeverDrawnElements.getAlwaysOrNeverDrawnElements({
           modelIds: props.modelId,
-          categoryIds: props.categoryOfElementOrParentElementWhichIsNotChild,
+          categoryIds: props.categoryOfTopMostParentElement,
           parentElementIdsPath,
           setType: "always",
           searchPathToElements: props.searchPathToElements,
         }),
         childNeverDrawn: this.#alwaysAndNeverDrawnElements.getAlwaysOrNeverDrawnElements({
           modelIds: props.modelId,
-          categoryIds: props.categoryOfElementOrParentElementWhichIsNotChild,
+          categoryIds: props.categoryOfTopMostParentElement,
           parentElementIdsPath,
           setType: "never",
           searchPathToElements: props.searchPathToElements,

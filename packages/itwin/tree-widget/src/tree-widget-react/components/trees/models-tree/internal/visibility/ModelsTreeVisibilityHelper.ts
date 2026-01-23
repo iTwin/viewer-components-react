@@ -5,16 +5,14 @@
 
 import { defer, map, mergeMap, of } from "rxjs";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
-import { CLASS_NAME_GeometricElement3d, CLASS_NAME_GeometricModel3d } from "../../../common/internal/ClassNameDefinitions.js";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
-import { getIdsFromChildrenTree } from "../../../common/internal/Utils.js";
+import { getIdsFromChildrenTree, getParentElementsIdsPath } from "../../../common/internal/Utils.js";
 import { BaseVisibilityHelper } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 
 import type { Observable } from "rxjs";
 import type { Id64Arg, Id64String } from "@itwin/core-bentley";
-import type { InstanceKey } from "@itwin/presentation-shared";
-import type { CategoryId } from "../../../common/internal/Types.js";
+import type { CategoryId, ElementId } from "../../../common/internal/Types.js";
 import type { BaseVisibilityHelperProps } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
 import type { ModelsTreeIdsCache } from "../ModelsTreeIdsCache.js";
@@ -73,75 +71,25 @@ export class ModelsTreeVisibilityHelper extends BaseVisibilityHelper<ModelsTreeS
     elementIds: Id64Arg;
     parentKeys: HierarchyNodeKey[];
     childrenCount: number;
-    categoryOfElementOrParentElementWhichIsNotChild: CategoryId;
+    categoryOfTopMostParentElement: CategoryId;
+    topMostParentElementId?: ElementId;
   }): Observable<VisibilityStatus> {
-    const { modelId, categoryId, elementIds, parentKeys, categoryOfElementOrParentElementWhichIsNotChild, childrenCount } = props;
-    return this.getParentElementsIdsPath({
-      parentInstanceKeys: parentKeys.filter((key) => HierarchyNodeKey.isInstances(key)).map((key) => key.instanceKeys),
+    const { modelId, categoryId, elementIds, parentKeys, categoryOfTopMostParentElement, childrenCount, topMostParentElementId } = props;
+    const parentElementsIdsPath = topMostParentElementId
+      ? getParentElementsIdsPath({
+          parentInstanceKeys: parentKeys.filter((key) => HierarchyNodeKey.isInstances(key)).map((key) => key.instanceKeys),
+          topMostParentElementId,
+        })
+      : [];
+    return this.getElementsVisibilityStatus({
+      elementIds,
       modelId,
-    }).pipe(
-      mergeMap((parentElementsIdsPath) =>
-        this.getElementsVisibilityStatus({
-          elementIds,
-          modelId,
-          categoryId,
-          type: "GeometricElement3d",
-          parentElementsIdsPath,
-          childrenCount,
-          categoryOfElementOrParentElementWhichIsNotChild,
-        }),
-      ),
-    );
-  }
-
-  public getParentElementsIdsPath({
-    parentInstanceKeys,
-    modelId,
-  }: {
-    parentInstanceKeys: Array<Array<InstanceKey>>;
-    modelId: Id64String;
-  }): Observable<Array<Id64Arg>> {
-    // Parent instance keys can have models, categories or elements, need to determine which ones are elements.
-    // But need to get those parent id's starting from the model node.
-    return defer(async () => {
-      for (let i = 0; i < parentInstanceKeys.length; ++i) {
-        const instanceKeys = parentInstanceKeys[i];
-        for (const instanceKey of instanceKeys) {
-          if (instanceKey.id !== modelId) {
-            continue;
-          }
-
-          const [isDerivedFrom, isDerivedTo] = await Promise.all([
-            this.#props.classInspector.classDerivesFrom(instanceKey.className, CLASS_NAME_GeometricModel3d),
-            this.#props.classInspector.classDerivesFrom(CLASS_NAME_GeometricModel3d, instanceKey.className),
-          ]);
-          if (isDerivedFrom || isDerivedTo) {
-            // Found model node, after model category node will be present, so we can skip first two parent keys.
-            return parentInstanceKeys.slice(i + 2);
-          }
-        }
-      }
-      return [];
-    }).pipe(
-      mergeMap(async (parentKeysToCheck) => {
-        return (
-          await Promise.all(
-            parentKeysToCheck.map(async (instanceKeysOfParentNode) => {
-              // Only need to check the first instance key class to determine if it's an element.
-              // This is because nodes' which have multiple instance keys always share the same class.
-              const [isDerivedFrom, isDerivedTo] = await Promise.all([
-                this.#props.classInspector.classDerivesFrom(instanceKeysOfParentNode[0].className, CLASS_NAME_GeometricElement3d),
-                this.#props.classInspector.classDerivesFrom(CLASS_NAME_GeometricElement3d, instanceKeysOfParentNode[0].className),
-              ]);
-              if (isDerivedFrom || isDerivedTo) {
-                return instanceKeysOfParentNode.map((instanceKey) => instanceKey.id);
-              }
-              return undefined;
-            }),
-          )
-        ).filter((elementParentKeys) => !!elementParentKeys);
-      }),
-    );
+      categoryId,
+      type: "GeometricElement3d",
+      parentElementsIdsPath,
+      childrenCount,
+      categoryOfTopMostParentElement,
+    });
   }
 
   /**

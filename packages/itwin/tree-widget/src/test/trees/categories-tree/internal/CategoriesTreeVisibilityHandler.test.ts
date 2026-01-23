@@ -1795,7 +1795,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 createClassGroupingHierarchyNode({
                   categoryId: ids.category.id,
                   modelElementsMap: new Map([
-                    [ids.model.id, { elementIds: new Set([ids.modeledElement.id]), categoryOfElementOrParentElementWhichIsNotChild: ids.category.id }],
+                    [ids.model.id, { elementIds: new Set([ids.modeledElement.id]), categoryOfTopMostParentElement: ids.category.id }],
                   ]),
                 }),
               // prettier-ignore
@@ -1919,7 +1919,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 createClassGroupingHierarchyNode({
                   categoryId: ids.category.id,
                   modelElementsMap: new Map([
-                    [ids.model.id, { elementIds: new Set([ids.modeledElement.id]), categoryOfElementOrParentElementWhichIsNotChild: ids.category.id }],
+                    [ids.model.id, { elementIds: new Set([ids.modeledElement.id]), categoryOfTopMostParentElement: ids.category.id }],
                   ]),
                 }),
               // Category has partial visibility, since its sub-category is not visible
@@ -1988,7 +1988,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
                 createClassGroupingHierarchyNode({
                   categoryId: ids.category.id,
                   modelElementsMap: new Map([
-                    [ids.model.id, { elementIds: new Set([ids.modeledElement.id]), categoryOfElementOrParentElementWhichIsNotChild: ids.category.id }],
+                    [ids.model.id, { elementIds: new Set([ids.modeledElement.id]), categoryOfTopMostParentElement: ids.category.id }],
                   ]),
                 }),
               // Category has partial visibility, since its sub-category is not visible

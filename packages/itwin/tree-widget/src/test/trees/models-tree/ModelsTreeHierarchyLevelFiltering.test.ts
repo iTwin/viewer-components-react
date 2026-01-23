@@ -426,7 +426,8 @@ describe("Models tree", () => {
           instanceKeys: [keys.parentElement],
         },
         extendedData: {
-          categoryOfElementOrParentElementWhichIsNotChild: keys.category.id,
+          categoryOfTopMostParentElement: keys.category.id,
+          topMostParentElementId: keys.parentElement.id,
         },
         parentKeys: [
           {
@@ -527,7 +528,8 @@ describe("Models tree", () => {
           instanceKeys: [keys.modeledElement],
         },
         extendedData: {
-          categoryOfElementOrParentElementWhichIsNotChild: keys.category.id,
+          categoryOfTopMostParentElement: keys.category.id,
+          topMostParentElementId: keys.modeledElement.id,
         },
         parentKeys: [
           {

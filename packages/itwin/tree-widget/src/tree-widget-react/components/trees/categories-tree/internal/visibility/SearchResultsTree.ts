@@ -24,7 +24,13 @@ import type { CategoriesTreeIdsCache } from "../CategoriesTreeIdsCache.js";
 /** @internal */
 export interface CategoriesTreeSearchTargets {
   categories?: Array<{ modelId: Id64String | undefined; categoryIds: Id64Set }>;
-  elements?: Array<{ pathToElements: InstanceKey[]; modelId: Id64String; categoryId: Id64String; elements: Map<ElementId, { isSearchTarget: boolean }> }>;
+  elements?: Array<{
+    pathToElements: InstanceKey[];
+    modelId: Id64String;
+    categoryId: Id64String;
+    elements: Map<ElementId, { isSearchTarget: boolean }>;
+    topMostParentElementId?: ElementId;
+  }>;
   definitionContainerIds?: Id64Set;
   modelIds?: Id64Set;
   subCategories?: Array<{ categoryId: Id64String; subCategoryIds: Id64Set }>;
@@ -97,7 +103,11 @@ export async function createCategoriesSearchResultsTree(props: {
 
 type SearchTargetsInternalElements = Map<
   SearchResultsNodeIdentifierAsString,
-  { children?: SearchTargetsInternalElements; modelCategoryElements?: Map<ModelCategoryKey, Map<ElementId, { isSearchTarget: boolean }>> }
+  {
+    children?: SearchTargetsInternalElements;
+    topMostParentElementId?: Id64String;
+    modelCategoryElements?: Map<ModelCategoryKey, Map<ElementId, { isSearchTarget: boolean }>>;
+  }
 >;
 
 interface SearchTargetsInternal {
@@ -175,7 +185,7 @@ class CategoriesTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<
       if (entry.modelCategoryElements) {
         entry.modelCategoryElements.forEach((elements, modelCategoryKey) => {
           const { modelId, categoryId } = this.parseModelCategoryKey(modelCategoryKey);
-          result.push({ pathToElements: [...currentPath, identifier], modelId, categoryId, elements });
+          result.push({ pathToElements: [...currentPath, identifier], modelId, categoryId, elements, topMostParentElementId: entry.topMostParentElementId });
         });
       }
       if (entry.children) {
@@ -268,12 +278,16 @@ class CategoriesTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<
         const modelCategoryKey = this.createModelCategoryKey(node.modelId, node.categoryId);
         searchTargets.elements ??= new Map();
         let entry = searchTargets.elements;
+        let topMostParentElementId: Id64String | undefined;
         for (let i = 0; i < node.pathToNode.length; ++i) {
+          if (topMostParentElementId === undefined && node.pathToNode[i].type === "element") {
+            topMostParentElementId = node.pathToNode[i].id;
+          }
           const identifierAsString = this.convertSearchResultsNodeIdentifierToString(node.pathToNode[i]);
           let identifierEntry = entry.get(identifierAsString);
           // create a new entry for parent node if it does not exist
           if (!identifierEntry) {
-            identifierEntry = {};
+            identifierEntry = { topMostParentElementId };
             entry.set(identifierAsString, identifierEntry);
           }
           // last entry in the path don't need to have children
@@ -283,9 +297,6 @@ class CategoriesTreeSearchResultsNodesHandler extends SearchResultsNodesHandler<
             continue;
           }
 
-          if (!identifierEntry.modelCategoryElements) {
-            identifierEntry.modelCategoryElements = new Map();
-          }
           const elements = (identifierEntry.modelCategoryElements ??= new Map()).get(modelCategoryKey);
           // Add elements who share the same path to the modelCategoryElements map
           if (elements) {

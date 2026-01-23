@@ -7,7 +7,14 @@ import { concat, defer, from, map, merge, mergeMap, of } from "rxjs";
 import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { HierarchyVisibilityHandlerImpl } from "../../../common/internal/useTreeHooks/UseCachedVisibility.js";
-import { fromWithRelease, getClassesByView, getIdsFromChildrenTree, setDifference, setIntersection } from "../../../common/internal/Utils.js";
+import {
+  fromWithRelease,
+  getClassesByView,
+  getIdsFromChildrenTree,
+  getParentElementsIdsPath,
+  setDifference,
+  setIntersection,
+} from "../../../common/internal/Utils.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 import { CategoriesTreeNodeInternal } from "../../internal/CategoriesTreeNodeInternal.js";
 import { CategoriesTreeVisibilityHelper } from "./CategoriesTreeVisibilityHelper.js";
@@ -34,7 +41,6 @@ export interface CategoriesTreeVisibilityHandlerProps {
   viewport: TreeWidgetViewport;
   alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfo<CategoriesTreeSearchTargets>;
   hierarchyConfig: CategoriesTreeHierarchyConfiguration;
-  classInspector: ECClassHierarchyInspector;
 }
 
 /**
@@ -70,7 +76,6 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
       alwaysAndNeverDrawnElementInfo: this.#props.alwaysAndNeverDrawnElementInfo,
       baseIdsCache,
       hierarchyConfig: constructorProps.hierarchyConfig,
-      classInspector: this.#props.classInspector,
     });
     const { elementType, categoryType, modelType } =
       this.#props.viewport.viewType === "2d"
@@ -224,24 +229,19 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
     }
 
     assert(CategoriesTreeNodeInternal.isElementNode(node));
-    return this.#visibilityHelper
-      .getParentElementsIdsPath({
-        parentInstanceKeys: node.parentKeys.filter((parentKey) => HierarchyNodeKey.isInstances(parentKey)).map((key) => key.instanceKeys),
-        modelId: node.extendedData.modelId,
-      })
-      .pipe(
-        mergeMap((parentElementsIdsPath) =>
-          this.#visibilityHelper.getElementsVisibilityStatus({
-            elementIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
-            modelId: node.extendedData.modelId,
-            categoryId: node.extendedData.categoryId,
-            type: this.#elementType,
-            parentElementsIdsPath,
-            childrenCount: node.extendedData.childrenCount,
-            categoryOfElementOrParentElementWhichIsNotChild: node.extendedData.categoryOfElementOrParentElementWhichIsNotChild,
-          }),
-        ),
-      );
+    const parentElementsIdsPath = getParentElementsIdsPath({
+      parentInstanceKeys: node.parentKeys.filter((parentKey) => HierarchyNodeKey.isInstances(parentKey)).map((key) => key.instanceKeys),
+      topMostParentElementId: node.extendedData.topMostParentElementId,
+    });
+    return this.#visibilityHelper.getElementsVisibilityStatus({
+      elementIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
+      modelId: node.extendedData.modelId,
+      categoryId: node.extendedData.categoryId,
+      type: this.#elementType,
+      parentElementsIdsPath,
+      childrenCount: node.extendedData.childrenCount,
+      categoryOfTopMostParentElement: node.extendedData.categoryOfTopMostParentElement,
+    });
   }
 
   /** Changes visibility of the items represented by the tree node. */
@@ -379,30 +379,32 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
           childrenCountMapObs.pipe(
             mergeMap((elementsChildrenCountMap) =>
               fromWithRelease({ source: elements, releaseOnCount: 50 }).pipe(
-                mergeMap(({ modelId, elements: elementsMap, categoryId, pathToElements }) =>
-                  this.#visibilityHelper.getParentElementsIdsPath({ parentInstanceKeys: pathToElements.map((instanceKey) => [instanceKey]), modelId }).pipe(
-                    mergeMap((parentElementsIdsPath) => {
-                      let totalChildrenCount = 0;
-                      elementsMap.forEach((_, elementId) => {
-                        const childCount = elementsChildrenCountMap.get(elementId);
-                        if (childCount) {
-                          totalChildrenCount += childCount;
-                        }
-                      });
-                      return this.#visibilityHelper.getElementsVisibilityStatus({
-                        modelId,
-                        categoryId,
-                        elementIds: [...elementsMap.keys()],
-                        type: this.#elementType,
-                        parentElementsIdsPath,
-                        childrenCount: totalChildrenCount,
-                        // Search results tree is created on search paths. Since search paths contain only categories that are directly under models
-                        // or at the root, categoryId can be used here here.
-                        categoryOfElementOrParentElementWhichIsNotChild: categoryId,
-                      });
-                    }),
-                  ),
-                ),
+                mergeMap(({ modelId, elements: elementsMap, categoryId, pathToElements, topMostParentElementId }) => {
+                  const parentElementsIdsPath = topMostParentElementId
+                    ? getParentElementsIdsPath({
+                        parentInstanceKeys: pathToElements.map((instanceKey) => [instanceKey]),
+                        topMostParentElementId,
+                      })
+                    : [];
+                  let totalChildrenCount = 0;
+                  elementsMap.forEach((_, elementId) => {
+                    const childCount = elementsChildrenCountMap.get(elementId);
+                    if (childCount) {
+                      totalChildrenCount += childCount;
+                    }
+                  });
+                  return this.#visibilityHelper.getElementsVisibilityStatus({
+                    modelId,
+                    categoryId,
+                    elementIds: [...elementsMap.keys()],
+                    type: this.#elementType,
+                    parentElementsIdsPath,
+                    childrenCount: totalChildrenCount,
+                    // Search results tree is created on search paths. Since search paths contain only categories that are directly under models
+                    // or at the root, categoryId can be used here here.
+                    categoryOfTopMostParentElement: categoryId,
+                  });
+                }),
               ),
             ),
           ),
@@ -526,7 +528,6 @@ export function createCategoriesTreeVisibilityHandler(props: {
         idsCache: props.idsCache,
         viewport: props.viewport,
         hierarchyConfig: props.hierarchyConfig,
-        classInspector: props.imodelAccess,
       });
     },
     viewport: props.viewport,

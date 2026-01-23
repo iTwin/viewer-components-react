@@ -235,10 +235,11 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         label: this.#hierarchyConfig.elementClassGrouping === "enableWithCounts" ? `${node.label} (${node.children.length})` : node.label,
         extendedData: {
           ...node.extendedData,
-          // `modelId`, `categoryId`, `categoryOfElementOrParentElementWhichIsNotChild` are shared by all grouped elements.
+          // `modelId`, `categoryId`, `categoryOfTopMostParentElement`, `topMostParentElementId` are shared by all grouped elements.
           categoryId: node.children[0].extendedData?.categoryId,
           modelId: node.children[0].extendedData?.modelId,
-          categoryOfElementOrParentElementWhichIsNotChild: node.children[0].extendedData?.categoryOfElementOrParentElementWhichIsNotChild,
+          categoryOfTopMostParentElement: node.children[0].extendedData?.categoryOfTopMostParentElement,
+          topMostParentElementId: node.children[0].extendedData?.topMostParentElementId,
           childrenCount,
           ...(!!searchTargets?.size ? { searchTargets } : {}),
           ...(hasDirectNonSearchTargets ? { hasDirectNonSearchTargets } : {}),
@@ -544,7 +545,8 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   categoryId: { selector: "IdToHex(this.Category.Id)" },
                   imageId: "icon-item",
                   childrenCount: { selector: this.createElementChildrenCountSelector({ elementIdSelector: "this.ECInstanceId" }) },
-                  categoryOfElementOrParentElementWhichIsNotChild: { selector: "IdToHex(this.Category.Id)" },
+                  categoryOfTopMostParentElement: { selector: "IdToHex(this.Category.Id)" },
+                  topMostParentElementId: { selector: "IdToHex(this.ECInstanceId)" },
                 },
                 supportsFiltering: this.supportsFiltering(),
               })}
@@ -608,9 +610,10 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   categoryId: { selector: "IdToHex(this.Category.Id)" },
                   imageId: "icon-item",
                   childrenCount: { selector: this.createElementChildrenCountSelector({ elementIdSelector: "this.ECInstanceId" }) },
-                  categoryOfElementOrParentElementWhichIsNotChild: {
-                    selector: `IdToHex(${parentNode.extendedData?.categoryOfElementOrParentElementWhichIsNotChild})`,
+                  categoryOfTopMostParentElement: {
+                    selector: `IdToHex(${parentNode.extendedData?.categoryOfTopMostParentElement})`,
                   },
+                  topMostParentElementId: { selector: `IdToHex(${parentNode.extendedData?.topMostParentElementId})` },
                 },
                 supportsFiltering: this.supportsFiltering(),
               })}

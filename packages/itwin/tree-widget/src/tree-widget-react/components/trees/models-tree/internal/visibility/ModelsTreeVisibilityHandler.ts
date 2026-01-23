@@ -7,7 +7,7 @@ import { concat, defer, from, map, merge, mergeMap, of } from "rxjs";
 import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { HierarchyVisibilityHandlerImpl } from "../../../common/internal/useTreeHooks/UseCachedVisibility.js";
-import { fromWithRelease, getIdsFromChildrenTree, setDifference, setIntersection } from "../../../common/internal/Utils.js";
+import { fromWithRelease, getIdsFromChildrenTree, getParentElementsIdsPath, setDifference, setIntersection } from "../../../common/internal/Utils.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 import { ModelsTreeNodeInternal } from "../ModelsTreeNodeInternal.js";
 import { ModelsTreeVisibilityHelper } from "./ModelsTreeVisibilityHelper.js";
@@ -57,7 +57,6 @@ export interface ModelsTreeVisibilityHandlerProps {
   alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfo<ModelsTreeSearchTargets>;
   overrideHandler: HierarchyVisibilityOverrideHandler;
   overrides?: ModelsTreeVisibilityHandlerOverrides;
-  classInspector: ECClassHierarchyInspector;
 }
 
 /**
@@ -92,7 +91,6 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
       overrideHandler: this.#props.overrideHandler,
       baseIdsCache,
       overrides: this.#props.overrides,
-      classInspector: this.#props.classInspector,
     });
   }
 
@@ -198,7 +196,8 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
         elementIds: node.groupedInstanceKeys.map((key) => key.id),
         parentKeys: node.parentKeys,
         childrenCount: node.extendedData.childrenCount,
-        categoryOfElementOrParentElementWhichIsNotChild: node.extendedData.categoryOfElementOrParentElementWhichIsNotChild,
+        categoryOfTopMostParentElement: node.extendedData.categoryOfTopMostParentElement,
+        topMostParentElementId: node.extendedData.topMostParentElementId,
       });
       return this.#props.overrideHandler.createVisibilityHandlerResult({
         overrideProps: { node },
@@ -225,24 +224,19 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
     }
 
     assert(ModelsTreeNodeInternal.isElementNode(node));
-    return this.#visibilityHelper
-      .getParentElementsIdsPath({
-        parentInstanceKeys: node.parentKeys.filter((key) => HierarchyNodeKey.isInstances(key)).map((key) => key.instanceKeys),
-        modelId: node.extendedData.modelId,
-      })
-      .pipe(
-        mergeMap((parentElementsIdsPath) =>
-          this.#visibilityHelper.getElementsVisibilityStatus({
-            elementIds: node.key.instanceKeys.map(({ id }) => id),
-            modelId: node.extendedData.modelId,
-            categoryId: node.extendedData.categoryId,
-            type: "GeometricElement3d",
-            parentElementsIdsPath,
-            childrenCount: node.extendedData?.childrenCount,
-            categoryOfElementOrParentElementWhichIsNotChild: node.extendedData.categoryOfElementOrParentElementWhichIsNotChild,
-          }),
-        ),
-      );
+    const parentElementsIdsPath = getParentElementsIdsPath({
+      parentInstanceKeys: node.parentKeys.filter((key) => HierarchyNodeKey.isInstances(key)).map((key) => key.instanceKeys),
+      topMostParentElementId: node.extendedData.topMostParentElementId,
+    });
+    return this.#visibilityHelper.getElementsVisibilityStatus({
+      elementIds: node.key.instanceKeys.map(({ id }) => id),
+      modelId: node.extendedData.modelId,
+      categoryId: node.extendedData.categoryId,
+      type: "GeometricElement3d",
+      parentElementsIdsPath,
+      childrenCount: node.extendedData?.childrenCount,
+      categoryOfTopMostParentElement: node.extendedData.categoryOfTopMostParentElement,
+    });
   }
 
   /** Changes visibility of the items represented by the tree node. */
@@ -366,30 +360,32 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
           childrenCountMapObs.pipe(
             mergeMap((elementsChildrenCountMap) =>
               fromWithRelease({ source: elements, releaseOnCount: 50 }).pipe(
-                mergeMap(({ modelId, elements: elementsMap, categoryId, pathToElements }) =>
-                  this.#visibilityHelper.getParentElementsIdsPath({ parentInstanceKeys: pathToElements.map((instanceKey) => [instanceKey]), modelId }).pipe(
-                    mergeMap((parentElementsIdsPath) => {
-                      let totalChildrenCount = 0;
-                      elementsMap.forEach((_, elementId) => {
-                        const childCount = elementsChildrenCountMap.get(elementId);
-                        if (childCount) {
-                          totalChildrenCount += childCount;
-                        }
-                      });
-                      return this.#visibilityHelper.getElementsVisibilityStatus({
-                        modelId,
-                        categoryId,
-                        elementIds: [...elementsMap.keys()],
-                        type: "GeometricElement3d",
-                        parentElementsIdsPath,
-                        childrenCount: totalChildrenCount,
-                        // Search results tree is created on search paths. Since search paths contain only categories that are directly under models,
-                        // categoryId can be used here here.
-                        categoryOfElementOrParentElementWhichIsNotChild: categoryId,
-                      });
-                    }),
-                  ),
-                ),
+                mergeMap(({ modelId, elements: elementsMap, categoryId, pathToElements, topMostParentElementId }) => {
+                  const parentElementsIdsPath = topMostParentElementId
+                    ? getParentElementsIdsPath({
+                        parentInstanceKeys: pathToElements.map((instanceKey) => [instanceKey]),
+                        topMostParentElementId,
+                      })
+                    : [];
+                  let totalChildrenCount = 0;
+                  elementsMap.forEach((_, elementId) => {
+                    const childCount = elementsChildrenCountMap.get(elementId);
+                    if (childCount) {
+                      totalChildrenCount += childCount;
+                    }
+                  });
+                  return this.#visibilityHelper.getElementsVisibilityStatus({
+                    modelId,
+                    categoryId,
+                    elementIds: [...elementsMap.keys()],
+                    type: "GeometricElement3d",
+                    parentElementsIdsPath,
+                    childrenCount: totalChildrenCount,
+                    // Search results tree is created on search paths. Since search paths contain only categories that are directly under models,
+                    // categoryId can be used here here.
+                    categoryOfTopMostParentElement: categoryId,
+                  });
+                }),
               ),
             ),
           ),
@@ -495,7 +491,6 @@ export function createModelsTreeVisibilityHandler(props: {
         viewport: props.viewport,
         overrideHandler,
         overrides: props.overrides,
-        classInspector: props.imodelAccess,
       });
     },
     viewport: props.viewport,

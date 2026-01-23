@@ -1457,7 +1457,6 @@ function createClassificationsTreeVisibilityHandler(props: {
         alwaysAndNeverDrawnElementInfo: info,
         idsCache: props.idsCache,
         viewport: props.viewport,
-        classInspector: props.imodelAccess,
       });
     },
     viewport: props.viewport,

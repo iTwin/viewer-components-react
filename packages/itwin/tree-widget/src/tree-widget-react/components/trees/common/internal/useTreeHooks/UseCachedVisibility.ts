@@ -37,7 +37,6 @@ export interface CreateTreeSpecificVisibilityHandlerProps<TCache, TSearchTargets
   getCache: () => TCache;
   viewport: TreeWidgetViewport;
   overrideHandler: HierarchyVisibilityOverrideHandler;
-  classInspector: ECClassHierarchyInspector;
 }
 
 /** @internal */
@@ -109,7 +108,6 @@ function createVisibilityHandlerFactory<TCache, TSearchTargets>(
           getCache,
           viewport: activeView,
           overrideHandler,
-          classInspector: imodelAccess,
         }),
     });
 }
