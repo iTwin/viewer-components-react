@@ -18,7 +18,7 @@ import {
 
 import type { Observable } from "rxjs";
 import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
-import type { InstanceKey } from "@itwin/presentation-common";
+import type { InstanceKey } from "@itwin/presentation-shared";
 import type { ElementId } from "./Types.js";
 
 /** @internal */
