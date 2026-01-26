@@ -460,7 +460,7 @@ export class BaseVisibilityHelper<TSearchResultsTargets> implements Disposable {
         return of(createVisibilityStatus("disabled"));
       }
 
-      // TODO: check child elements that are subModels
+      // TODO: check child elements that are subModels https://github.com/iTwin/viewer-components-react/issues/1564
       if (!this.#props.viewport.viewsModel(modelId)) {
         return fromWithRelease({ source: elementIds, releaseOnCount: 100 }).pipe(
           mergeMap((elementId) =>
@@ -485,7 +485,7 @@ export class BaseVisibilityHelper<TSearchResultsTargets> implements Disposable {
       }
 
       // TODO: check child element categories https://github.com/iTwin/viewer-components-react/issues/1563
-      // TODO: check child elements that are subModels https://github.com/iTwin/viewer-components-react/issues/1563
+      // TODO: check child elements that are subModels https://github.com/iTwin/viewer-components-react/issues/1564
       return this.getVisibilityFromAlwaysAndNeverDrawnElements({
         elements: elementIds,
         defaultStatus: () => this.getVisibleModelCategoriesDirectVisibilityStatus({ categoryIds: categoryId, modelId }),
