@@ -282,10 +282,9 @@ export function getParentElementsIdsPath({
   for (let i = 0; i < parentInstanceKeys.length; ++i) {
     const instanceKeys = parentInstanceKeys[i];
     for (const instanceKey of instanceKeys) {
-      if (instanceKey.id !== topMostParentElementId) {
-        continue;
+      if (instanceKey.id === topMostParentElementId) {
+        return parentInstanceKeys.slice(i).map((keys) => keys.map((key) => key.id));
       }
-      return parentInstanceKeys.slice(i).map((keys) => keys.map((key) => key.id));
     }
   }
   return [];
