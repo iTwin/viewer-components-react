@@ -31,7 +31,7 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       const vp = createFakeSinonViewport();
       const event = setType === "always" ? vp.onAlwaysDrawnChanged : vp.onNeverDrawnChanged;
       (() => {
-        using _ = new AlwaysAndNeverDrawnElementInfo({ viewport: vp });
+        using _ = new AlwaysAndNeverDrawnElementInfo({ viewport: vp, searchResultsTree: undefined });
         expect(event.numberOfListeners).to.eq(1);
       })();
       expect(event.numberOfListeners).to.eq(0);
@@ -43,7 +43,8 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       const vp = createFakeSinonViewport({
         [`${setType}Drawn`]: new Set(),
       });
-      using info = new AlwaysAndNeverDrawnElementInfo({ viewport: vp });
+
+      using info = new AlwaysAndNeverDrawnElementInfo({ viewport: vp, searchResultsTree: undefined });
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(info.getElementsTree({ setType, modelIds: modelId }));
       expect(result).to.deep.eq(new Map());
@@ -56,7 +57,8 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       const vp = createFakeSinonViewport({
         [`${setType}Drawn`]: undefined,
       });
-      using info = new AlwaysAndNeverDrawnElementInfo({ viewport: vp });
+
+      using info = new AlwaysAndNeverDrawnElementInfo({ viewport: vp, searchResultsTree: undefined });
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(info.getElementsTree({ setType, modelIds: modelId }));
       expect(result).to.deep.eq(new Map());
@@ -76,7 +78,8 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
         [`${setType}Drawn`]: set,
         queryHandler,
       });
-      using info = new AlwaysAndNeverDrawnElementInfo({ viewport: vp });
+
+      using info = new AlwaysAndNeverDrawnElementInfo({ viewport: vp, searchResultsTree: undefined });
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(info.getElementsTree({ setType, modelIds: modelId }));
       const expectedResult: ChildrenTree<MapEntry> = new Map();
@@ -97,7 +100,8 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
         [`${setType}Drawn`]: set,
         queryHandler,
       });
-      using info = new AlwaysAndNeverDrawnElementInfo({ viewport: vp });
+
+      using info = new AlwaysAndNeverDrawnElementInfo({ viewport: vp, searchResultsTree: undefined });
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(info.getElementsTree({ setType, modelIds: modelId }));
       const expectedResult: ChildrenTree<MapEntry> = new Map();
@@ -122,7 +126,8 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
         [`${setType}Drawn`]: set,
         queryHandler,
       });
-      using info = new AlwaysAndNeverDrawnElementInfo({ viewport: vp });
+
+      using info = new AlwaysAndNeverDrawnElementInfo({ viewport: vp, searchResultsTree: undefined });
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(info.getElementsTree({ setType, modelIds: modelId }));
       const expectedResult: ChildrenTree<MapEntry> = new Map();
@@ -152,7 +157,8 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       const vp = createFakeSinonViewport({
         [`${setType}Drawn`]: set,
       });
-      using info = new AlwaysAndNeverDrawnElementInfo({ viewport: vp });
+
+      using info = new AlwaysAndNeverDrawnElementInfo({ viewport: vp, searchResultsTree: undefined });
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       await firstValueFrom(info.getElementsTree({ setType, modelIds: "0x2" }));
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
@@ -183,7 +189,8 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
         [`${setType}Drawn`]: set,
         queryHandler,
       });
-      using info = new AlwaysAndNeverDrawnElementInfo({ viewport: vp });
+
+      using info = new AlwaysAndNeverDrawnElementInfo({ viewport: vp, searchResultsTree: undefined });
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result1 = await firstValueFrom(info.getElementsTree({ setType, modelIds: modelId }));
       const expectedResult: ChildrenTree<MapEntry> = new Map();
@@ -210,7 +217,7 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
         [`${setType}Drawn`]: set,
         queryHandler,
       });
-      using info = new AlwaysAndNeverDrawnElementInfo({ viewport: vp });
+      using info = new AlwaysAndNeverDrawnElementInfo({ viewport: vp, searchResultsTree: undefined });
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result1 = await firstValueFrom(info.getElementsTree({ setType, modelIds: modelId }));
       const expectedResult: ChildrenTree<MapEntry> = new Map();
@@ -242,7 +249,7 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       const vp = createFakeSinonViewport({
         [`${setType}Drawn`]: set,
       });
-      using info = new AlwaysAndNeverDrawnElementInfo({ viewport: vp });
+      using info = new AlwaysAndNeverDrawnElementInfo({ viewport: vp, searchResultsTree: undefined });
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       await firstValueFrom(info.getElementsTree({ setType, modelIds: "0x2" }));
       expect(vp.iModel.createQueryReader).to.be.calledOnce;
@@ -271,7 +278,7 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
         [`${setType}Drawn`]: new Set(["0x30"]),
         queryHandler,
       });
-      using info = new AlwaysAndNeverDrawnElementInfo({ viewport });
+      using info = new AlwaysAndNeverDrawnElementInfo({ viewport, searchResultsTree: undefined });
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(info.getElementsTree({ setType, modelIds: modelId }));
       expect(result).to.deep.eq(new Map());
@@ -293,7 +300,7 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
         [`${setType}Drawn`]: new Set([elementId]),
         queryHandler,
       });
-      using info = new AlwaysAndNeverDrawnElementInfo({ viewport });
+      using info = new AlwaysAndNeverDrawnElementInfo({ viewport, searchResultsTree: undefined });
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(info.getElementsTree({ setType, modelIds: modelId, categoryIds: categoryId }));
       const expectedResult: ChildrenTree<MapEntry> = new Map();
@@ -313,7 +320,7 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
         [`${setType}Drawn`]: new Set([elementId, childElementId]),
         queryHandler,
       });
-      using info = new AlwaysAndNeverDrawnElementInfo({ viewport });
+      using info = new AlwaysAndNeverDrawnElementInfo({ viewport, searchResultsTree: undefined });
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(info.getElementsTree({ setType, modelIds: modelId, categoryIds: categoryId, parentElementIdsPath: [elementId] }));
       const expectedResult: ChildrenTree<MapEntry> = new Map();
@@ -332,7 +339,7 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
         [`${setType}Drawn`]: new Set([elementId]),
         queryHandler,
       });
-      using info = new AlwaysAndNeverDrawnElementInfo({ viewport });
+      using info = new AlwaysAndNeverDrawnElementInfo({ viewport, searchResultsTree: undefined });
       await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
       const result = await firstValueFrom(info.getElementsTree({ setType, modelIds: modelId, categoryIds: categoryId }));
       expect(result).to.deep.eq(new Map());

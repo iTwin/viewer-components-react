@@ -48,7 +48,7 @@ import {
   createIdsSelector,
   fromWithRelease,
   getOptimalBatchSize,
-  groupingNodeHasSearchTargets,
+  groupingNodeDataFromChildren,
   parseIdsSelectorResult,
   releaseMainThreadOnItemsCount,
 } from "../common/internal/Utils.js";
@@ -229,14 +229,19 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
 
   public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
     if (ProcessedHierarchyNode.isGroupingNode(node)) {
-      const { hasSearchTargetAncestor, hasDirectNonSearchTargets } = groupingNodeHasSearchTargets(node.children);
+      const { hasSearchTargetAncestor, hasDirectNonSearchTargets, childrenCount, searchTargets } = groupingNodeDataFromChildren(node.children);
       return {
         ...node,
         label: this.#hierarchyConfig.elementClassGrouping === "enableWithCounts" ? `${node.label} (${node.children.length})` : node.label,
         extendedData: {
           ...node.extendedData,
-          // add `modelId` and `categoryId` from the first grouped element
-          ...node.children[0].extendedData,
+          // `modelId`, `categoryId`, `categoryOfTopMostParentElement`, `topMostParentElementId` are shared by all grouped elements.
+          categoryId: node.children[0].extendedData?.categoryId,
+          modelId: node.children[0].extendedData?.modelId,
+          categoryOfTopMostParentElement: node.children[0].extendedData?.categoryOfTopMostParentElement,
+          topMostParentElementId: node.children[0].extendedData?.topMostParentElementId,
+          childrenCount,
+          ...(!!searchTargets?.size ? { searchTargets } : {}),
           ...(hasDirectNonSearchTargets ? { hasDirectNonSearchTargets } : {}),
           ...(hasSearchTargetAncestor ? { hasSearchTargetAncestor } : {}),
           // `imageId` is assigned to instance nodes at query time, but grouping ones need to
@@ -461,6 +466,23 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     ];
   }
 
+  private createElementChildrenCountSelector(props: { elementIdSelector: string }): string {
+    return `(
+      WITH RECURSIVE
+        ElementWithParent(id) AS (
+          SELECT e.ECInstanceId
+          FROM ${this.#hierarchyConfig.elementClassSpecification} e
+          WHERE e.ECInstanceId = ${props.elementIdSelector}
+          UNION ALL
+          SELECT c.ECInstanceId
+          FROM ${this.#hierarchyConfig.elementClassSpecification} c
+          JOIN ElementWithParent p ON p.id = c.Parent.Id
+        )
+      SELECT COUNT(1) - 1
+      FROM ElementWithParent
+    )`;
+  }
+
   private async createSpatialCategoryChildrenQuery({
     parentNodeInstanceIds: categoryIds,
     parentNode,
@@ -482,6 +504,9 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         }, new Array<ElementId>()),
       ),
     );
+    const bindings = new Array<ECSqlBinding>();
+    categoryIds.forEach((id) => bindings.push({ type: "id", value: id }));
+    modelIds.forEach((id) => bindings.push({ type: "id", value: id }));
     return [
       {
         fullClassName: this.#hierarchyConfig.elementClassSpecification,
@@ -519,6 +544,9 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   modelId: { selector: "IdToHex(this.Model.Id)" },
                   categoryId: { selector: "IdToHex(this.Category.Id)" },
                   imageId: "icon-item",
+                  childrenCount: { selector: this.createElementChildrenCountSelector({ elementIdSelector: "this.ECInstanceId" }) },
+                  categoryOfTopMostParentElement: { selector: "IdToHex(this.Category.Id)" },
+                  topMostParentElementId: { selector: "IdToHex(this.ECInstanceId)" },
                 },
                 supportsFiltering: this.supportsFiltering(),
               })}
@@ -530,7 +558,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
               AND this.Parent.Id IS NULL
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
-          bindings: [...categoryIds.map((id) => ({ type: "id", value: id })), ...modelIds.map((id) => ({ type: "id", value: id }))] as ECSqlBinding[],
+          bindings,
         },
       },
     ];
@@ -539,11 +567,14 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
   private async createGeometricElement3dChildrenQuery({
     parentNodeInstanceIds: elementIds,
     instanceFilter,
+    parentNode,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
     const instanceFilterClauses = await this.#selectQueryFactory.createFilterClauses({
       filter: instanceFilter,
       contentClass: { fullName: this.#hierarchyConfig.elementClassSpecification, alias: "this" },
     });
+    const bindings = new Array<ECSqlBinding>();
+    elementIds.forEach((id) => bindings.push({ type: "id", value: id }));
     return [
       {
         fullClassName: this.#hierarchyConfig.elementClassSpecification,
@@ -578,6 +609,11 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   modelId: { selector: "IdToHex(this.Model.Id)" },
                   categoryId: { selector: "IdToHex(this.Category.Id)" },
                   imageId: "icon-item",
+                  childrenCount: { selector: this.createElementChildrenCountSelector({ elementIdSelector: "this.ECInstanceId" }) },
+                  categoryOfTopMostParentElement: {
+                    selector: `IdToHex(${parentNode.extendedData?.categoryOfTopMostParentElement})`,
+                  },
+                  topMostParentElementId: { selector: `IdToHex(${parentNode.extendedData?.topMostParentElementId})` },
                 },
                 supportsFiltering: this.supportsFiltering(),
               })}
@@ -587,7 +623,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
               this.Parent.Id IN (${elementIds.map(() => "?").join(",")})
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
-          bindings: elementIds.map((id) => ({ type: "id", value: id })),
+          bindings,
         },
       },
     ];

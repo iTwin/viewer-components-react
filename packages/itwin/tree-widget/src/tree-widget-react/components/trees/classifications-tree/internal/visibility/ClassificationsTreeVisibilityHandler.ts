@@ -5,14 +5,18 @@
 
 import { concat, defer, from, map, merge, mergeMap, of, toArray } from "rxjs";
 import { assert, Id64 } from "@itwin/core-bentley";
-import { fromWithRelease } from "../../../common/internal/Utils.js";
+import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+import { fromWithRelease, getIdsFromChildrenTree, getParentElementsIdsPath, setDifference, setIntersection } from "../../../common/internal/Utils.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
-import { ClassificationsTreeNode } from "../../ClassificationsTreeNode.js";
+import { ClassificationsTreeNodeInternal } from "../ClassificationsTreeNodeInternal.js";
 import { ClassificationsTreeVisibilityHelper } from "./ClassificationsTreeVisibilityHelper.js";
 
 import type { Observable } from "rxjs";
+import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { AlwaysAndNeverDrawnElementInfo } from "../../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
+import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
+import type { ChildrenTree } from "../../../common/internal/Utils.js";
 import type { BaseIdsCache, TreeSpecificVisibilityHandler } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import type { TreeWidgetViewport } from "../../../common/TreeWidgetViewport.js";
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
@@ -23,7 +27,7 @@ import type { ClassificationsTreeSearchTargets } from "./SearchResultsTree.js";
 export interface ClassificationsTreeVisibilityHandlerProps {
   idsCache: ClassificationsTreeIdsCache;
   viewport: TreeWidgetViewport;
-  alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfo;
+  alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfo<ClassificationsTreeSearchTargets>;
 }
 
 /**
@@ -41,6 +45,8 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
     // Remove after https://github.com/iTwin/viewer-components-react/issues/1421.
     // We won't need to create a custom base ids cache.
     const baseIdsCache: BaseIdsCache = {
+      getAllChildElementsCount: (props) => this.getAllChildElementsCount(props),
+      getChildElementsTree: (props) => this.getChildElementsTree(props),
       getCategories: (props) => this.getCategories(props),
       getAllCategories: () => this.getAllCategories(),
       getElementsCount: (props) => this.getElementsCount(props),
@@ -74,76 +80,147 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       }
 
       if (elements2d?.length) {
-        observables.push(
-          from(elements2d).pipe(
-            mergeMap(({ modelId, categoryId, elements }) =>
-              this.#visibilityHelper.changeElementsVisibilityStatus({ modelId, categoryId, elementIds: [...elements.keys()], on }),
-            ),
-          ),
-        );
+        observables.push(this.changeSearchTargetElementsVisibilityStatus({ elements: elements2d, on, type: "2d" }));
       }
 
       if (elements3d?.length) {
-        observables.push(
-          from(elements3d).pipe(
-            mergeMap(({ modelId, categoryId, elements }) =>
-              this.#visibilityHelper.changeElementsVisibilityStatus({ modelId, categoryId, elementIds: [...elements.keys()], on }),
-            ),
-          ),
-        );
+        observables.push(this.changeSearchTargetElementsVisibilityStatus({ elements: elements3d, on, type: "3d" }));
       }
 
       return merge(...observables);
     });
   }
 
+  private changeSearchTargetElementsVisibilityStatus({
+    elements,
+    on,
+    type,
+  }: {
+    elements: Required<ClassificationsTreeSearchTargets>["elements2d"] | Required<ClassificationsTreeSearchTargets>["elements3d"];
+    on: boolean;
+    type: "2d" | "3d";
+  }): Observable<void> {
+    const searchTargetElements = new Array<Id64String>();
+    const elementIdsSet = new Set<Id64String>();
+    const modelCategoryElementMap = new Map<`${ModelId}-${CategoryId}`, Array<ElementId>>();
+    // elements is an array that stores elements grouped by:
+    // 1. Their path
+    // 2. Their modelId and categoryId
+    // When changing visibility of elements, visibility handler does not care about the path.
+    // So we can first get all elements and group them only by modelId and categoryId.
+    elements.forEach(({ elements: elementsMap, categoryId, modelId }) => {
+      const key: `${ModelId}-${CategoryId}` = `${modelId}-${categoryId}`;
+      let mapEntry = modelCategoryElementMap.get(key);
+      if (!mapEntry) {
+        mapEntry = [];
+        modelCategoryElementMap.set(key, mapEntry);
+      }
+      elementsMap.forEach(({ isSearchTarget }, elementId) => {
+        mapEntry.push(elementId);
+        elementIdsSet.add(elementId);
+        if (isSearchTarget) {
+          searchTargetElements.push(elementId);
+        }
+      });
+    });
+    // Get children for search targets, since non search targets don't have all the children present in the hierarchy.
+    return this.#props.idsCache.getChildElementsTree({ elementIds: searchTargetElements, type }).pipe(
+      // Need to filter out and keep only those children ids that are not part of elements that are present in search paths.
+      // Elements in search paths will have their visibility changed directly: they will be provided as elementIds to changeElementsVisibilityStatus.
+      map((childrenTree) => ({
+        childrenNotInSearchPaths: setDifference(getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ depth }) => depth > 0 }), elementIdsSet),
+        childrenTree,
+      })),
+      mergeMap(({ childrenNotInSearchPaths, childrenTree }) =>
+        fromWithRelease({ source: modelCategoryElementMap.entries(), size: modelCategoryElementMap.size, releaseOnCount: 50 }).pipe(
+          mergeMap(([key, elementsInSearchPathsGroupedByModelAndCategory]) => {
+            const [modelId, categoryId] = key.split("-");
+            const childrenIds = new Set<Id64String>();
+            // A shared children tree was created, need to get the children for each element in the group.
+            elementsInSearchPathsGroupedByModelAndCategory.forEach((elementId) => {
+              const elementChildrenTree: ChildrenTree | undefined = childrenTree.get(elementId)?.children;
+              if (elementChildrenTree) {
+                getIdsFromChildrenTree({ tree: elementChildrenTree }).forEach((childId) => childrenIds.add(childId));
+              }
+            });
+            return this.#visibilityHelper.changeElementsVisibilityStatus({
+              modelId,
+              categoryId,
+              elementIds: elementsInSearchPathsGroupedByModelAndCategory,
+              // Pass only those children that are not part of search paths.
+              children: setIntersection(childrenIds, childrenNotInSearchPaths),
+              on,
+            });
+          }),
+        ),
+      ),
+    );
+  }
+
   public getVisibilityStatus(node: HierarchyNode): Observable<VisibilityStatus> {
-    if (ClassificationsTreeNode.isClassificationTableNode(node)) {
+    if (ClassificationsTreeNodeInternal.isClassificationTableNode(node)) {
       return this.#visibilityHelper.getClassificationTablesVisibilityStatus({
         classificationTableIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
       });
     }
 
-    if (ClassificationsTreeNode.isClassificationNode(node)) {
+    if (ClassificationsTreeNodeInternal.isClassificationNode(node)) {
       return this.#visibilityHelper.getClassificationsVisibilityStatus({
         classificationIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
       });
     }
-
-    assert(ClassificationsTreeNode.isGeometricElementNode(node));
+    assert(ClassificationsTreeNodeInternal.isGeometricElementNode(node));
+    const parentElementsIdsPath = getParentElementsIdsPath({
+      parentInstanceKeys: node.parentKeys.filter((parentKey) => HierarchyNodeKey.isInstances(parentKey)).map((parentKey) => parentKey.instanceKeys),
+      topMostParentElementId: node.extendedData.topMostParentElementId,
+    });
     return this.#visibilityHelper.getElementsVisibilityStatus({
       elementIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
       modelId: node.extendedData.modelId,
       categoryId: node.extendedData.categoryId,
       type: node.extendedData.type,
+      parentElementsIdsPath,
+      childrenCount: node.extendedData.childrenCount,
+      categoryOfTopMostParentElement: node.extendedData.categoryOfTopMostParentElement,
     });
   }
 
   /** Changes visibility of the items represented by the tree node. */
   public changeVisibilityStatus(node: HierarchyNode, on: boolean): Observable<void> {
     const changeObs = defer(() => {
-      if (ClassificationsTreeNode.isClassificationTableNode(node)) {
+      if (ClassificationsTreeNodeInternal.isClassificationTableNode(node)) {
         return this.#visibilityHelper.changeClassificationTablesVisibilityStatus({
           classificationTableIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
           on,
         });
       }
 
-      if (ClassificationsTreeNode.isClassificationNode(node)) {
+      if (ClassificationsTreeNodeInternal.isClassificationNode(node)) {
         return this.#visibilityHelper.changeClassificationsVisibilityStatus({
           classificationIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
           on,
         });
       }
-
-      assert(ClassificationsTreeNode.isGeometricElementNode(node));
-      return this.#visibilityHelper.changeElementsVisibilityStatus({
-        elementIds: node.key.instanceKeys.map(({ id }) => id),
-        modelId: node.extendedData.modelId,
-        categoryId: node.extendedData.categoryId,
-        on,
-      });
+      assert(ClassificationsTreeNodeInternal.isGeometricElementNode(node));
+      const elementIds = node.key.instanceKeys.map(({ id }) => id);
+      return this.#props.idsCache.getChildElementsTree({ elementIds, type: node.extendedData.type === "GeometricElement3d" ? "3d" : "2d" }).pipe(
+        map((childrenTree): Id64Set => {
+          // Children tree contains provided elementIds, they are at the root of this tree.
+          // We want to skip them and only get ids of children.
+          return getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ depth }) => depth > 0 });
+        }),
+        mergeMap((children) =>
+          this.#visibilityHelper.changeElementsVisibilityStatus({
+            elementIds,
+            modelId: node.extendedData.modelId,
+            categoryId: node.extendedData.categoryId,
+            children: children.size > 0 ? children : undefined,
+            on,
+          }),
+        ),
+      );
     });
+
     if (this.#props.viewport.isAlwaysDrawnExclusive) {
       return concat(this.#visibilityHelper.removeAlwaysDrawnExclusive(), changeObs);
     }
@@ -162,35 +239,62 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
         observables.push(this.#visibilityHelper.getClassificationsVisibilityStatus({ classificationIds }));
       }
       if (elements2d?.length) {
-        observables.push(
-          fromWithRelease({ source: elements2d, releaseOnCount: 50 }).pipe(
-            mergeMap(({ modelId, categoryId, elements }) => {
-              return fromWithRelease({ source: elements.keys(), size: elements.size, releaseOnCount: 1000 }).pipe(
-                mergeMap((elementId) =>
-                  this.#visibilityHelper.getElementsVisibilityStatus({ modelId, categoryId, elementIds: elementId, type: "GeometricElement2d" }),
-                ),
-              );
-            }),
-          ),
-        );
+        observables.push(this.getSearchTargetElementsVisibilityStatus({ elements: elements2d, type: "2d" }));
       }
 
       if (elements3d?.length) {
-        observables.push(
-          fromWithRelease({ source: elements3d, releaseOnCount: 50 }).pipe(
-            mergeMap(({ modelId, categoryId, elements }) => {
-              return fromWithRelease({ source: elements.keys(), size: elements.size, releaseOnCount: 1000 }).pipe(
-                mergeMap((elementId) =>
-                  this.#visibilityHelper.getElementsVisibilityStatus({ modelId, categoryId, elementIds: elementId, type: "GeometricElement3d" }),
-                ),
-              );
-            }),
-          ),
-        );
+        observables.push(this.getSearchTargetElementsVisibilityStatus({ elements: elements3d, type: "3d" }));
       }
 
       return merge(...observables);
     }).pipe(mergeVisibilityStatuses);
+  }
+
+  private getSearchTargetElementsVisibilityStatus({
+    elements,
+    type,
+  }: {
+    elements: Required<ClassificationsTreeSearchTargets>["elements2d"] | Required<ClassificationsTreeSearchTargets>["elements3d"];
+    type: "2d" | "3d";
+  }): Observable<VisibilityStatus> {
+    const searchTargetElements = new Array<Id64String>();
+    elements.forEach(({ elements: elementsMap }) =>
+      elementsMap.forEach(({ isSearchTarget }, elementId) => {
+        if (isSearchTarget) {
+          searchTargetElements.push(elementId);
+        }
+      }),
+    );
+    return this.#props.idsCache.getAllChildElementsCount({ elementIds: searchTargetElements, type }).pipe(
+      mergeMap((elementsChildrenCountMap) =>
+        fromWithRelease({ source: elements, releaseOnCount: 50 }).pipe(
+          mergeMap(({ modelId, categoryId, elements: elementsMap, pathToElements, categoryOfTopMostParentElement, topMostParentElementId }) => {
+            const parentElementsIdsPath = topMostParentElementId
+              ? getParentElementsIdsPath({
+                  parentInstanceKeys: pathToElements.map((instanceKey) => [instanceKey]),
+                  topMostParentElementId,
+                })
+              : [];
+            let totalChildrenCount = 0;
+            elementsMap.forEach((_, elementId) => {
+              const childCount = elementsChildrenCountMap.get(elementId);
+              if (childCount) {
+                totalChildrenCount += childCount;
+              }
+            });
+            return this.#visibilityHelper.getElementsVisibilityStatus({
+              modelId,
+              categoryId,
+              elementIds: [...elementsMap.keys()],
+              type: type === "3d" ? "GeometricElement3d" : "GeometricElement2d",
+              parentElementsIdsPath,
+              childrenCount: totalChildrenCount,
+              categoryOfTopMostParentElement,
+            });
+          }),
+        ),
+      ),
+    );
   }
 
   private getCategories(props: Parameters<BaseIdsCache["getCategories"]>[0]): ReturnType<BaseIdsCache["getCategories"]> {
@@ -221,6 +325,14 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
 
   private getSubCategories(props: Parameters<BaseIdsCache["getSubCategories"]>[0]): ReturnType<BaseIdsCache["getSubCategories"]> {
     return this.#props.idsCache.getSubCategories(props.categoryId);
+  }
+
+  private getChildElementsTree(props: Parameters<BaseIdsCache["getChildElementsTree"]>[0]): ReturnType<BaseIdsCache["getChildElementsTree"]> {
+    return this.#props.idsCache.getChildElementsTree({ elementIds: props.elementIds, type: props.type });
+  }
+
+  private getAllChildElementsCount(props: Parameters<BaseIdsCache["getAllChildElementsCount"]>[0]): ReturnType<BaseIdsCache["getAllChildElementsCount"]> {
+    return this.#props.idsCache.getAllChildElementsCount({ elementIds: props.elementIds, type: props.type });
   }
 
   private getSubModels(props: Parameters<BaseIdsCache["getSubModels"]>[0]): ReturnType<BaseIdsCache["getSubModels"]> {

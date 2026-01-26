@@ -6,7 +6,7 @@
 import { useEffect, useRef } from "react";
 import { bufferCount, concatAll, concatMap, delay, from, of } from "rxjs";
 import { assert, Id64 } from "@itwin/core-bentley";
-import { ProcessedHierarchyNode } from "@itwin/presentation-hierarchies";
+import { HierarchyNodeKey, ProcessedHierarchyNode } from "@itwin/presentation-hierarchies";
 import {
   CLASS_NAME_DrawingCategory,
   CLASS_NAME_GeometricElement2d,
@@ -18,6 +18,8 @@ import {
 
 import type { Observable } from "rxjs";
 import type { Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
+import type { InstanceKey } from "@itwin/presentation-shared";
+import type { ElementId } from "./Types.js";
 
 /** @internal */
 export function setDifference<T>(lhs: Readonly<Iterable<T>>, rhs: ReadonlySet<T>): Set<T> {
@@ -37,6 +39,18 @@ export function setIntersection<T>(lhs: Readonly<Iterable<T>>, rhs: ReadonlySet<
     if (rhs.has(x)) {
       result.add(x);
     }
+  }
+  return result;
+}
+
+/** @internal */
+export function getMergedSet<T>(lhs: Readonly<Iterable<T>>, rhs: Readonly<Iterable<T>>): Set<T> {
+  const result = new Set<T>();
+  for (const x of lhs) {
+    result.add(x);
+  }
+  for (const y of rhs) {
+    result.add(y);
   }
   return result;
 }
@@ -139,10 +153,6 @@ export function getSetFromId64Arg(arg: Id64Arg): Set<Id64String> {
   return typeof arg === "string" ? new Set([arg]) : Array.isArray(arg) ? new Set(arg) : arg;
 }
 
-function isIterable(x: unknown): x is Iterable<unknown> {
-  return typeof x === "object" && !!x && typeof (x as Iterable<unknown>)[Symbol.iterator] === "function";
-}
-
 /**
  * Creates an Observable from provided props. If `releaseOnCount` is provided, main thread will be released after processing specified number of items.
  * @internal
@@ -158,9 +168,9 @@ export function fromWithRelease(props: {
     ? { obs: from(props.source), size: props.source.length }
     : props.source instanceof Set
       ? { obs: from(props.source), size: props.source.size }
-      : isIterable(props.source)
-        ? { obs: from(props.source), size: props.size! }
-        : { obs: from(Id64.iterable(props.source)), size: Id64.sizeOf(props.source) };
+      : typeof props.source === "string"
+        ? { obs: from(Id64.iterable(props.source)), size: Id64.sizeOf(props.source) }
+        : { obs: from(props.source), size: props.size! };
   if (props.releaseOnCount === undefined || source.size < props.releaseOnCount) {
     return source.obs;
   }
@@ -231,26 +241,63 @@ export function updateChildrenTree<T extends object = {}>({
 }
 
 /** @internal */
-export function groupingNodeHasSearchTargets(children: ProcessedHierarchyNode[]):
+export function groupingNodeDataFromChildren(children: ProcessedHierarchyNode[]):
   | {
       hasSearchTargetAncestor: true;
       hasDirectNonSearchTargets: undefined;
+      childrenCount: number;
+      searchTargets: undefined;
     }
   | {
       hasSearchTargetAncestor: false;
       hasDirectNonSearchTargets: boolean;
+      childrenCount: number;
+      searchTargets: Map<Id64String, { childrenCount: number }>;
     } {
+  let childrenCount = 0;
+  const searchTargets = new Map<Id64String, { childrenCount: number }>();
+  let hasDirectNonSearchTargets = false;
+  let hasSearchTargetAncestor = false;
   for (const child of children) {
     assert(!ProcessedHierarchyNode.isGroupingNode(child), "Expected only non-grouping nodes as children");
-    if (child.search) {
+    if (child.extendedData?.childrenCount) {
+      childrenCount += child.extendedData.childrenCount;
+    }
+    if (!hasSearchTargetAncestor && child.search) {
       if (child.search.hasSearchTargetAncestor) {
-        return { hasSearchTargetAncestor: true, hasDirectNonSearchTargets: undefined };
+        hasSearchTargetAncestor = true;
+        continue;
       }
       if (!child.search.isSearchTarget) {
-        return { hasSearchTargetAncestor: false, hasDirectNonSearchTargets: true };
+        hasDirectNonSearchTargets = true;
+        if (!child.search.childrenTargetPaths?.length || child.search.isSearchTarget) {
+          assert(HierarchyNodeKey.isInstances(child.key));
+          child.key.instanceKeys.forEach((key) => searchTargets.set(key.id, { childrenCount: child.extendedData?.childrenCount ?? 0 }));
+        }
       }
     }
   }
 
-  return { hasSearchTargetAncestor: false, hasDirectNonSearchTargets: false };
+  return hasSearchTargetAncestor
+    ? { hasSearchTargetAncestor, hasDirectNonSearchTargets: undefined, childrenCount, searchTargets: undefined }
+    : { hasSearchTargetAncestor, hasDirectNonSearchTargets, childrenCount, searchTargets };
+}
+
+/** @internal */
+export function getParentElementsIdsPath({
+  parentInstanceKeys,
+  topMostParentElementId,
+}: {
+  parentInstanceKeys: Array<Array<InstanceKey>>;
+  topMostParentElementId: ElementId;
+}): Array<Id64Arg> {
+  for (let i = 0; i < parentInstanceKeys.length; ++i) {
+    const instanceKeys = parentInstanceKeys[i];
+    for (const instanceKey of instanceKeys) {
+      if (instanceKey.id === topMostParentElementId) {
+        return parentInstanceKeys.slice(i).map((keys) => keys.map((key) => key.id));
+      }
+    }
+  }
+  return [];
 }

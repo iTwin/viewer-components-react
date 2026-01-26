@@ -12,9 +12,10 @@ import type { Id64Arg } from "@itwin/core-bentley";
 import type { BaseVisibilityHelperProps } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
 import type { ClassificationsTreeIdsCache } from "../ClassificationsTreeIdsCache.js";
+import type { ClassificationsTreeSearchTargets } from "./SearchResultsTree.js";
 
 /** @internal */
-export type ClassificationsTreeVisibilityHelperProps = BaseVisibilityHelperProps & {
+export type ClassificationsTreeVisibilityHelperProps = BaseVisibilityHelperProps<ClassificationsTreeSearchTargets> & {
   idsCache: ClassificationsTreeIdsCache;
 };
 
@@ -24,7 +25,7 @@ export type ClassificationsTreeVisibilityHelperProps = BaseVisibilityHelperProps
  * It extends base visibility status helper and provides methods to get and change visibility status of classification tables and classifications.
  * @internal
  */
-export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
+export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper<ClassificationsTreeSearchTargets> {
   #props: ClassificationsTreeVisibilityHelperProps;
   constructor(props: ClassificationsTreeVisibilityHelperProps) {
     super(props);

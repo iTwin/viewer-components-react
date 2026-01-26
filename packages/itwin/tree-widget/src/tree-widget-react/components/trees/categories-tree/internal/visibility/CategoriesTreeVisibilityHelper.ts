@@ -4,19 +4,22 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { concat, EMPTY, from, map, mergeMap, toArray } from "rxjs";
+import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+import { getIdsFromChildrenTree, getParentElementsIdsPath } from "../../../common/internal/Utils.js";
 import { BaseVisibilityHelper } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 
 import type { Observable } from "rxjs";
 import type { Id64Arg, Id64String } from "@itwin/core-bentley";
-import type { ElementId, ModelId } from "../../../common/internal/Types.js";
+import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
 import type { BaseVisibilityHelperProps } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
 import type { CategoriesTreeHierarchyConfiguration } from "../../CategoriesTreeDefinition.js";
 import type { CategoriesTreeIdsCache } from "../CategoriesTreeIdsCache.js";
+import type { CategoriesTreeSearchTargets } from "./SearchResultsTree.js";
 
 /** @internal */
-export type CategoriesTreeVisibilityHelperProps = BaseVisibilityHelperProps & {
+export type CategoriesTreeVisibilityHelperProps = BaseVisibilityHelperProps<CategoriesTreeSearchTargets> & {
   idsCache: CategoriesTreeIdsCache;
   hierarchyConfig: CategoriesTreeHierarchyConfiguration;
 };
@@ -27,7 +30,7 @@ export type CategoriesTreeVisibilityHelperProps = BaseVisibilityHelperProps & {
  * It extends base visibility status helper and provides methods to get and change visibility status of definition containers and grouped elements.
  * @internal
  */
-export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
+export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper<CategoriesTreeSearchTargets> {
   #props: CategoriesTreeVisibilityHelperProps;
   constructor(props: CategoriesTreeVisibilityHelperProps) {
     super(props);
@@ -57,15 +60,29 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
   }
 
   /** Gets grouped elements visibility status. */
-  public getGroupedElementsVisibilityStatus(props: { modelElementsMap: Map<ModelId, Set<ElementId>>; categoryId: Id64String }): Observable<VisibilityStatus> {
-    const { modelElementsMap, categoryId } = props;
+  public getGroupedElementsVisibilityStatus(props: {
+    modelElementsMap: Map<ModelId, { elementIds: Set<ElementId>; categoryOfTopMostParentElement: CategoryId }>;
+    categoryId: Id64String;
+    parentKeys: HierarchyNodeKey[];
+    childrenCount: number;
+    topMostParentElementId?: ElementId;
+  }): Observable<VisibilityStatus> {
+    const { modelElementsMap, categoryId, topMostParentElementId } = props;
     return from(modelElementsMap).pipe(
-      mergeMap(([modelId, elementIds]) =>
+      mergeMap(([modelId, { elementIds, categoryOfTopMostParentElement }]) =>
         this.getElementsVisibilityStatus({
           elementIds,
           modelId,
           categoryId,
           type: this.#props.viewport.viewType === "2d" ? "GeometricElement2d" : "GeometricElement3d",
+          parentElementsIdsPath: topMostParentElementId
+            ? getParentElementsIdsPath({
+                parentInstanceKeys: props.parentKeys.filter((key) => HierarchyNodeKey.isInstances(key)).map((key) => key.instanceKeys),
+                topMostParentElementId,
+              })
+            : [],
+          childrenCount: props.childrenCount,
+          categoryOfTopMostParentElement,
         }),
       ),
       mergeVisibilityStatuses,
@@ -101,14 +118,23 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
 
   /** Changes grouped elements visibility status. */
   public changeGroupedElementsVisibilityStatus(props: {
-    modelElementsMap: Map<ModelId, Set<ElementId>>;
+    modelElementsMap: Map<ModelId, { elementIds: Set<ElementId> }>;
     categoryId: Id64String;
     on: boolean;
   }): Observable<void> {
-    return from(props.modelElementsMap).pipe(
-      mergeMap(([modelId, elementIds]) => {
-        return this.changeElementsVisibilityStatus({ modelId, elementIds, categoryId: props.categoryId, on: props.on });
-      }),
+    const elementIds = new Array<ElementId>();
+    for (const { elementIds: ids } of props.modelElementsMap.values()) {
+      ids.forEach((id) => elementIds.push(id));
+    }
+    return this.#props.idsCache.getChildElementsTree({ elementIds }).pipe(
+      map((childrenTree) => getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ depth }) => depth > 0 })),
+      mergeMap((children) =>
+        from(props.modelElementsMap).pipe(
+          mergeMap(([modelId, { elementIds: modelElementIds }]) => {
+            return this.changeElementsVisibilityStatus({ modelId, elementIds: modelElementIds, categoryId: props.categoryId, on: props.on, children });
+          }),
+        ),
+      ),
     );
   }
 

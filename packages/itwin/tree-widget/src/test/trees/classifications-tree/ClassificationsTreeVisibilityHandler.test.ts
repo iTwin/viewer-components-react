@@ -448,11 +448,11 @@ describe("ClassificationsTreeVisibilityHandler", () => {
             [keys.table.id]: "partial",
               [keys.parentClassification.id]: "partial",
                 [keys.childClassification.id]: "partial",
-                  [keys.parentPhysicalElement.id]: "hidden",
+                  [keys.parentPhysicalElement.id]: "partial",
                     [keys.siblingPhysicalElement.id]: "hidden",
 
                     [keys.targetPhysicalElement.id]: "visible",
-                      [keys.childPhysicalElement.id]: "hidden",
+                      [keys.childPhysicalElement.id]: "visible",
           },
         });
       });
@@ -768,11 +768,11 @@ describe("ClassificationsTreeVisibilityHandler", () => {
             [keys.table.id]: "partial",
               [keys.parentClassification.id]: "partial",
                 [keys.childClassification.id]: "partial",
-                  [keys.parentPhysicalElement.id]: "visible",
+                  [keys.parentPhysicalElement.id]: "partial",
                     [keys.siblingPhysicalElement.id]: "visible",
 
                     [keys.targetPhysicalElement.id]: "hidden",
-                      [keys.childPhysicalElement.id]: "visible",
+                      [keys.childPhysicalElement.id]: "hidden",
           },
         });
       });
@@ -910,7 +910,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
             [keys.classification.id]: "partial",
               [keys.siblingElement.id]: "hidden",
 
-              [keys.parentOfSearchTargetElement.id]: "visible",
+              [keys.parentOfSearchTargetElement.id]: "partial",
                 [keys.searchTargetChildElement.id]: "visible",
                 [keys.childElement.id]: "hidden",
         },
@@ -1011,7 +1011,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
             [keys.classification.id]: "partial",
               [keys.siblingElement.id]: "hidden",
 
-              [keys.parentOfSearchTargetElement.id]: "hidden",
+              [keys.parentOfSearchTargetElement.id]: "partial",
                 [keys.searchTargetChildElement.id]: "visible",
                 [keys.childElement.id]: "hidden",
         },
@@ -1108,7 +1108,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
             [keys.classification.id]: "partial",
               [keys.siblingElement.id]: "hidden",
 
-              [keys.parentOfSearchTargetElement.id]: "visible",
+              [keys.parentOfSearchTargetElement.id]: "partial",
                 [keys.searchTargetChildElement.id]: "visible",
                 [keys.childElement.id]: "hidden",
         },
@@ -1208,7 +1208,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
             [keys.classification.id]: "partial",
               [keys.siblingElement.id]: "hidden",
 
-              [keys.parentOfSearchTargetElement.id]: "hidden",
+              [keys.parentOfSearchTargetElement.id]: "partial",
                 [keys.searchTargetChildElement.id]: "visible",
                 [keys.childElement.id]: "hidden",
         },
@@ -1314,7 +1314,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
             [keys.classification1.id]: "partial",
               [keys.siblingElement.id]: "hidden",
 
-              [keys.parentOfSearchTargetElement.id]: "visible",
+              [keys.parentOfSearchTargetElement.id]: "partial",
                 [keys.searchTargetChildElement.id]: "visible",
                 [keys.childElement.id]: "hidden",
 
@@ -1423,7 +1423,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
             [keys.classification1.id]: "partial",
               [keys.siblingElement.id]: "hidden",
 
-              [keys.parentOfSearchTargetElement.id]: "visible",
+              [keys.parentOfSearchTargetElement.id]: "partial",
                 [keys.searchTargetChildElement.id]: "visible",
                 [keys.childElement.id]: "hidden",
 

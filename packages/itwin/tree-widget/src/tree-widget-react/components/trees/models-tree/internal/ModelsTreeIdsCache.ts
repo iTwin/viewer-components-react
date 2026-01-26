@@ -14,6 +14,7 @@ import {
   CLASS_NAME_SubCategory,
   CLASS_NAME_Subject,
 } from "../../common/internal/ClassNameDefinitions.js";
+import { ElementChildrenCache } from "../../common/internal/ElementChildrenCache.js";
 import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
 import { catchBeSQLiteInterrupts } from "../../common/internal/UseErrorState.js";
 import { pushToMap } from "../../common/internal/Utils.js";
@@ -23,6 +24,7 @@ import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId, SubCategoryId, SubjectId } from "../../common/internal/Types.js";
+import type { ChildrenTree } from "../../common/internal/Utils.js";
 import type { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
 
 interface SubjectInfo {
@@ -49,6 +51,7 @@ export class ModelsTreeIdsCache implements Disposable {
   #modelWithCategoryModeledElements: Observable<Map<ModelId, Map<CategoryId, Set<ElementId>>>> | undefined;
   #modelKeyPaths: Map<ModelId, Observable<HierarchyNodeIdentifiersPath[]>>;
   #subjectKeyPaths: Map<SubjectId, Observable<HierarchyNodeIdentifiersPath>>;
+  #elementChildrenCache: ElementChildrenCache;
   #categoryKeyPaths: Map<CategoryId, Observable<HierarchyNodeIdentifiersPath[]>>;
   #queryExecutor: LimitingECSqlQueryExecutor;
   #hierarchyConfig: ModelsTreeHierarchyConfiguration;
@@ -67,11 +70,24 @@ export class ModelsTreeIdsCache implements Disposable {
     );
     this.#modelKeyPaths = new Map();
     this.#subjectKeyPaths = new Map();
+    this.#elementChildrenCache = new ElementChildrenCache({
+      queryExecutor: this.#queryExecutor,
+      elementClassName: this.#hierarchyConfig.elementClassSpecification,
+      componentId: this.#componentId,
+    });
     this.#categoryKeyPaths = new Map();
   }
 
   public [Symbol.dispose]() {
     this.#categoryElementCounts[Symbol.dispose]();
+  }
+
+  public getChildElementsTree({ elementIds }: { elementIds: Id64Arg }): Observable<ChildrenTree> {
+    return this.#elementChildrenCache.getChildElementsTree({ elementIds });
+  }
+
+  public getAllChildElementsCount({ elementIds }: { elementIds: Id64Arg }): Observable<Map<Id64String, number>> {
+    return this.#elementChildrenCache.getAllChildElementsCount({ elementIds });
   }
 
   private querySubCategories(): Observable<{ id: SubCategoryId; parentId: CategoryId }> {
@@ -277,15 +293,15 @@ export class ModelsTreeIdsCache implements Disposable {
           if (!subjectInfo) {
             continue;
           }
-          result.push(...subjectInfo.childModelIds);
-          childSubjects.push(...subjectInfo.childSubjectIds);
+          subjectInfo.childModelIds.forEach((modelId) => result.push(modelId));
+          subjectInfo.childSubjectIds.forEach((childSubjectId) => childSubjects.push(childSubjectId));
         }
         if (childSubjects.length === 0) {
           return of(result);
         }
         return this.getSubjectModelIds(childSubjects).pipe(
           map((modelsOfChildSubjects) => {
-            result.push(...modelsOfChildSubjects);
+            modelsOfChildSubjects.forEach((modelId) => result.push(modelId));
             return result;
           }),
         );
@@ -308,9 +324,18 @@ export class ModelsTreeIdsCache implements Disposable {
           });
         }
         const modelIds = new Array<ModelId>();
-        [...parentSubjectIds, ...hiddenSubjectIds].forEach((subjectId) => {
+        const addModelsForExistingSubject = (subjectId: Id64String) => {
           const subjectInfo = subjectInfos.get(subjectId);
-          subjectInfo && modelIds.push(...subjectInfo.childModelIds);
+          if (subjectInfo) {
+            subjectInfo.childModelIds.forEach((modelId) => modelIds.push(modelId));
+          }
+        };
+        for (const subjectId of Id64.iterable(parentSubjectIds)) {
+          addModelsForExistingSubject(subjectId);
+        }
+
+        hiddenSubjectIds.forEach((subjectId) => {
+          addModelsForExistingSubject(subjectId);
         });
         return modelIds;
       }),
@@ -375,16 +400,16 @@ export class ModelsTreeIdsCache implements Disposable {
   private queryModeledElements(): Observable<{ modelId: Id64String; categoryId: Id64String; modeledElementId: Id64String }> {
     return defer(() => {
       const query = `
-      SELECT
-        pe.ECInstanceId modeledElementId,
-        pe.Category.Id categoryId,
-        pe.Model.Id modelId
-      FROM ${CLASS_NAME_Model} m
-      JOIN ${this.#hierarchyConfig.elementClassSpecification} pe ON pe.ECInstanceId = m.ModeledElement.Id
-      WHERE
-        m.IsPrivate = false
-        AND m.ECInstanceId IN (SELECT Model.Id FROM ${this.#hierarchyConfig.elementClassSpecification})
-    `;
+        SELECT
+          pe.ECInstanceId modeledElementId,
+          pe.Category.Id categoryId,
+          pe.Model.Id modelId
+        FROM ${CLASS_NAME_Model} m
+        JOIN ${this.#hierarchyConfig.elementClassSpecification} pe ON pe.ECInstanceId = m.ModeledElement.Id
+        WHERE
+          m.IsPrivate = false
+          AND m.ECInstanceId IN (SELECT Model.Id FROM ${this.#hierarchyConfig.elementClassSpecification})
+      `;
       return this.#queryExecutor.createQueryReader(
         { ecsql: query },
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/modeled-elements` },

@@ -5,14 +5,25 @@
 
 import { firstValueFrom } from "rxjs";
 import { assert } from "@itwin/core-bentley";
-import { CLASS_NAME_Classification, CLASS_NAME_ClassificationTable, CLASS_NAME_GeometricElement2d } from "../../../common/internal/ClassNameDefinitions.js";
+import {
+  CLASS_NAME_Classification,
+  CLASS_NAME_ClassificationTable,
+  CLASS_NAME_GeometricElement2d,
+  CLASS_NAME_GeometricElement3d,
+} from "../../../common/internal/ClassNameDefinitions.js";
 import { createSearchResultsTree, SearchResultsNodesHandler } from "../../../common/internal/visibility/BaseSearchResultsTree.js";
 
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchySearchPath } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
+import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
 import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
-import type { BaseSearchResultsTreeNode, SearchResultsTree, SearchResultsTreeNodeChildren } from "../../../common/internal/visibility/BaseSearchResultsTree.js";
+import type {
+  BaseSearchResultsTreeNode,
+  SearchResultsNodeIdentifierAsString,
+  SearchResultsTree,
+  SearchResultsTreeNodeChildren,
+  SearchResultsTreeRootNode,
+} from "../../../common/internal/visibility/BaseSearchResultsTree.js";
 import type { ClassificationsTreeIdsCache } from "../ClassificationsTreeIdsCache.js";
 
 interface ClassificationTableSearchResultsTreeNode extends BaseSearchResultsTreeNode<ClassificationTableSearchResultsTreeNode> {
@@ -27,12 +38,14 @@ interface Element2dSearchResultsTreeNode extends BaseSearchResultsTreeNode<Eleme
   type: "element2d";
   categoryId: Id64String;
   modelId: Id64String;
+  categoryOfTopMostParentElement: CategoryId;
 }
 
 interface Element3dSearchResultsTreeNode extends BaseSearchResultsTreeNode<Element3dSearchResultsTreeNode> {
   type: "element3d";
   categoryId: Id64String;
   modelId: Id64String;
+  categoryOfTopMostParentElement: CategoryId;
 }
 
 type SearchResultsTreeNode =
@@ -41,15 +54,17 @@ type SearchResultsTreeNode =
   | Element2dSearchResultsTreeNode
   | Element3dSearchResultsTreeNode;
 
-type TemporaryElement2dSearchResultsNode = Omit<Element2dSearchResultsTreeNode, "modelId" | "categoryId" | "children"> & {
-  modelId: string | undefined;
-  categoryId: string | undefined;
+type TemporaryElement2dSearchResultsNode = Omit<Element2dSearchResultsTreeNode, "modelId" | "categoryId" | "categoryOfTopMostParentElement" | "children"> & {
+  modelId: Id64String | undefined;
+  categoryId: Id64String | undefined;
+  categoryOfTopMostParentElement: CategoryId | undefined;
   children?: SearchResultsTreeNodeChildren<TemporaryElement2dSearchResultsNode>;
 };
 
-type TemporaryElement3dSearchResultsNode = Omit<Element3dSearchResultsTreeNode, "modelId" | "categoryId" | "children"> & {
-  modelId: string | undefined;
-  categoryId: string | undefined;
+type TemporaryElement3dSearchResultsNode = Omit<Element3dSearchResultsTreeNode, "modelId" | "categoryId" | "categoryOfTopMostParentElement" | "children"> & {
+  modelId: Id64String | undefined;
+  categoryId: Id64String | undefined;
+  categoryOfTopMostParentElement: CategoryId | undefined;
   children?: SearchResultsTreeNodeChildren<TemporaryElement3dSearchResultsNode>;
 };
 
@@ -61,8 +76,22 @@ type TemporarySearchResultsTreeNode =
 
 /** @internal */
 export interface ClassificationsTreeSearchTargets {
-  elements2d?: Array<{ modelId: Id64String; categoryId: Id64String; elements: Map<ElementId, { isSearchTarget: boolean }> }>;
-  elements3d?: Array<{ modelId: Id64String; categoryId: Id64String; elements: Map<ElementId, { isSearchTarget: boolean }> }>;
+  elements2d?: Array<{
+    pathToElements: InstanceKey[];
+    modelId: Id64String;
+    categoryId: Id64String;
+    topMostParentElementId?: Id64String;
+    elements: Map<ElementId, { isSearchTarget: boolean }>;
+    categoryOfTopMostParentElement: CategoryId;
+  }>;
+  elements3d?: Array<{
+    pathToElements: InstanceKey[];
+    modelId: Id64String;
+    categoryId: Id64String;
+    topMostParentElementId?: Id64String;
+    elements: Map<ElementId, { isSearchTarget: boolean }>;
+    categoryOfTopMostParentElement: CategoryId;
+  }>;
   classificationTableIds?: Id64Set;
   classificationIds?: Id64Set;
 }
@@ -80,9 +109,17 @@ export async function createClassificationsSearchResultsTree(props: {
   });
 }
 
+type SearchTargetsInternalElements = Map<
+  SearchResultsNodeIdentifierAsString,
+  {
+    children?: SearchTargetsInternalElements;
+    topMostParentElementId?: Id64String;
+    modelCategoryElements?: Map<ModelCategoryKey, { elementsMap: Map<ElementId, { isSearchTarget: boolean }>; categoryOfTopMostParentElement: CategoryId }>;
+  }
+>;
 interface SearchTargetsInternal {
-  elements2d?: Map<ModelCategoryKey, Map<ElementId, { isSearchTarget: boolean }>>;
-  elements3d?: Map<ModelCategoryKey, Map<ElementId, { isSearchTarget: boolean }>>;
+  elements2d?: SearchTargetsInternalElements;
+  elements3d?: SearchTargetsInternalElements;
   classificationTableIds?: Id64Set;
   classificationIds?: Id64Set;
 }
@@ -134,12 +171,22 @@ class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHan
     searchResultsTemporary2dElements.forEach((element, id) => {
       const entry = searchResultsElementsModels.get(element.id);
       assert(entry !== undefined);
-      result.searchResults2dElements.set(id, { ...element, modelId: entry.modelId, categoryId: entry.categoryId });
+      result.searchResults2dElements.set(id, {
+        ...element,
+        modelId: entry.modelId,
+        categoryId: entry.categoryId,
+        categoryOfTopMostParentElement: entry.categoryOfTopMostParentElement,
+      });
     });
     searchResultsTemporary3dElements.forEach((element, id) => {
       const entry = searchResultsElementsModels.get(element.id);
       assert(entry !== undefined);
-      result.searchResults3dElements.set(id, { ...element, modelId: entry.modelId, categoryId: entry.categoryId });
+      result.searchResults3dElements.set(id, {
+        ...element,
+        modelId: entry.modelId,
+        categoryId: entry.categoryId,
+        categoryOfTopMostParentElement: entry.categoryOfTopMostParentElement,
+      });
     });
     return result;
   }
@@ -155,6 +202,34 @@ class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHan
     return this.convertInternalSearchTargets(searchTargets);
   }
 
+  private convertInternalSearchTargetElementsRecursively(
+    searchTargetsInternalElements: SearchTargetsInternalElements,
+    currentPath: InstanceKey[],
+  ): Required<ClassificationsTreeSearchTargets>["elements2d" | "elements3d"] {
+    const result: Required<ClassificationsTreeSearchTargets>["elements2d" | "elements3d"] = [];
+    // Internal search target elements are stored in a tree structure, need to convert that to array structure.
+    searchTargetsInternalElements.forEach((entry, identifierAsString) => {
+      const identifier = this.convertSearchResultsNodeIdentifierStringToHierarchyNodeIdentifier(identifierAsString);
+      if (entry.modelCategoryElements) {
+        entry.modelCategoryElements.forEach(({ elementsMap: elements, categoryOfTopMostParentElement }, modelCategoryKey) => {
+          const { modelId, categoryId } = this.parseModelCategoryKey(modelCategoryKey);
+          result.push({
+            pathToElements: [...currentPath, identifier],
+            modelId,
+            categoryId,
+            elements,
+            categoryOfTopMostParentElement,
+            topMostParentElementId: entry.topMostParentElementId,
+          });
+        });
+      }
+      if (entry.children) {
+        this.convertInternalSearchTargetElementsRecursively(entry.children, [...currentPath, identifier]).forEach((childValue) => result.push(childValue));
+      }
+    });
+    return result;
+  }
+
   private convertInternalSearchTargets(searchTargets: SearchTargetsInternal): ClassificationsTreeSearchTargets | undefined {
     if (!searchTargets.classificationIds && !searchTargets.classificationIds && !searchTargets.elements2d && !searchTargets.elements3d) {
       return undefined;
@@ -163,18 +238,8 @@ class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHan
     return {
       classificationIds: searchTargets.classificationIds,
       classificationTableIds: searchTargets.classificationIds,
-      elements2d: searchTargets.elements2d
-        ? [...searchTargets.elements2d?.entries()].map(([modelCategoryKey, elements]) => {
-            const { modelId, categoryId } = this.parseModelCategoryKey(modelCategoryKey);
-            return { modelId, categoryId, elements };
-          })
-        : undefined,
-      elements3d: searchTargets.elements3d
-        ? [...searchTargets.elements3d?.entries()].map(([modelCategoryKey, elements]) => {
-            const { modelId, categoryId } = this.parseModelCategoryKey(modelCategoryKey);
-            return { modelId, categoryId, elements };
-          })
-        : undefined,
+      elements2d: searchTargets.elements2d ? this.convertInternalSearchTargetElementsRecursively(searchTargets.elements2d, []) : undefined,
+      elements3d: searchTargets.elements3d ? this.convertInternalSearchTargetElementsRecursively(searchTargets.elements3d, []) : undefined,
     };
   }
 
@@ -209,6 +274,54 @@ class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHan
     }
   }
 
+  private addTargetElement(
+    searchTargets: SearchTargetsInternal,
+    node: Element2dSearchResultsTreeNode | Element3dSearchResultsTreeNode,
+    type: "element2d" | "element3d",
+  ) {
+    // Internal search target elements need to have path saved in some way.
+    // For this, a tree structure is used, where keys are stringified identifiers of parent nodes depending on the hierarchy.
+    const modelCategoryKey = this.createModelCategoryKey(node.modelId, node.categoryId);
+    if (type === "element2d" && !searchTargets.elements2d) {
+      searchTargets.elements2d = new Map();
+    } else if (type === "element3d" && !searchTargets.elements3d) {
+      searchTargets.elements3d = new Map();
+    }
+    const searchTargetElementsMap = type === "element2d" ? searchTargets.elements2d : searchTargets.elements3d;
+    assert(searchTargetElementsMap !== undefined);
+    let entry = searchTargetElementsMap;
+    let topMostParentElementId: Id64String | undefined;
+    for (let i = 0; i < node.pathToNode.length; ++i) {
+      if (topMostParentElementId === undefined && (node.type === "element2d" || node.type === "element3d")) {
+        topMostParentElementId = node.pathToNode[i].id;
+      }
+      const identifierAsString = this.convertSearchResultsNodeIdentifierToString(node.pathToNode[i]);
+      let identifierEntry = entry.get(identifierAsString);
+      // create a new entry for parent node if it does not exist
+      if (!identifierEntry) {
+        identifierEntry = { topMostParentElementId };
+        entry.set(identifierAsString, identifierEntry);
+      }
+      // last entry in the path don't need to have children
+      if (i < node.pathToNode.length - 1) {
+        identifierEntry.children ??= new Map();
+        entry = identifierEntry.children;
+        continue;
+      }
+
+      const elements = (identifierEntry.modelCategoryElements ??= new Map()).get(modelCategoryKey);
+      // Add elements who share the same path to the modelCategoryElements map
+      if (elements) {
+        elements.set(node.id, { isSearchTarget: node.isSearchTarget });
+      } else {
+        identifierEntry.modelCategoryElements.set(modelCategoryKey, {
+          elementsMap: new Map([[node.id, { isSearchTarget: node.isSearchTarget }]]),
+          categoryOfTopMostParentElement: node.categoryOfTopMostParentElement,
+        });
+      }
+    }
+  }
+
   private addTarget(searchTargets: SearchTargetsInternal, node: SearchResultsTreeNode) {
     switch (node.type) {
       case "classificationTable":
@@ -218,22 +331,10 @@ class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHan
         (searchTargets.classificationIds ??= new Set()).add(node.id);
         return;
       case "element2d":
-        const element2dKey = this.createModelCategoryKey(node.modelId, node.categoryId);
-        const elements2d = (searchTargets.elements2d ??= new Map()).get(element2dKey);
-        if (elements2d) {
-          elements2d.set(node.id, { isSearchTarget: node.isSearchTarget });
-        } else {
-          searchTargets.elements2d.set(element2dKey, new Map([[node.id, { isSearchTarget: node.isSearchTarget }]]));
-        }
+        this.addTargetElement(searchTargets, node, "element2d");
         return;
       case "element3d":
-        const element3dKey = this.createModelCategoryKey(node.modelId, node.categoryId);
-        const elements3d = (searchTargets.elements3d ??= new Map()).get(element3dKey);
-        if (elements3d) {
-          elements3d.set(node.id, { isSearchTarget: node.isSearchTarget });
-        } else {
-          searchTargets.elements3d.set(element3dKey, new Map([[node.id, { isSearchTarget: node.isSearchTarget }]]));
-        }
+        this.addTargetElement(searchTargets, node, "element3d");
         return;
     }
   }
@@ -251,11 +352,14 @@ class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHan
     type,
     id,
     isSearchTarget,
+    parent,
   }: {
     type: SearchResultsTreeNode["type"];
     id: Id64String;
     isSearchTarget: boolean;
+    parent: SearchResultsTreeNode | SearchResultsTreeRootNode<SearchResultsTreeNode>;
   }): TemporarySearchResultsTreeNode {
+    const pathToNode = "pathToNode" in parent ? [...parent.pathToNode, { type: parent.type, id: parent.id }] : [];
     if (type === "element2d" || type === "element3d") {
       return {
         id,
@@ -263,12 +367,15 @@ class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHan
         type,
         modelId: undefined,
         categoryId: undefined,
+        categoryOfTopMostParentElement: undefined,
+        pathToNode,
       };
     }
     return {
       id,
       isSearchTarget,
       type,
+      pathToNode,
     };
   }
 
@@ -283,5 +390,18 @@ class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHan
       return "element2d";
     }
     return "element3d";
+  }
+
+  public getClassName(type: TemporarySearchResultsTreeNode["type"]): string {
+    switch (type) {
+      case "classificationTable":
+        return CLASS_NAME_ClassificationTable;
+      case "classification":
+        return CLASS_NAME_Classification;
+      case "element2d":
+        return CLASS_NAME_GeometricElement2d;
+      default:
+        return CLASS_NAME_GeometricElement3d;
+    }
   }
 }

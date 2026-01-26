@@ -51,7 +51,7 @@ export function mergeVisibilityStatuses(obs: Observable<VisibilityStatus>): Obse
 /** @internal */
 export function changeElementStateNoChildrenOperator(props: {
   on: boolean;
-  isDisplayedByDefault: boolean;
+  isDisplayedByDefault: (elementId: Id64String) => boolean;
   viewport: TreeWidgetViewport;
 }): OperatorFunction<string, void> {
   return (elementIds: Observable<Id64String>) => {
@@ -72,7 +72,7 @@ export function changeElementStateNoChildrenOperator(props: {
             const wasRemoved = acc.neverDrawn.delete(elementId);
             acc.changedNeverDrawn ||= wasRemoved;
             // If exclusive mode is enabled, we must add the element to the always drawn list.
-            if ((!isDisplayedByDefault || isAlwaysDrawnExclusive) && !acc.alwaysDrawn.has(elementId)) {
+            if ((!isDisplayedByDefault(elementId) || isAlwaysDrawnExclusive) && !acc.alwaysDrawn.has(elementId)) {
               acc.alwaysDrawn.add(elementId);
               acc.changedAlwaysDrawn = true;
             }
@@ -80,7 +80,7 @@ export function changeElementStateNoChildrenOperator(props: {
             const wasRemoved = acc.alwaysDrawn.delete(elementId);
             acc.changedAlwaysDrawn ||= wasRemoved;
             // If exclusive mode is not enabled, we have to add the element to the never drawn list.
-            if (isDisplayedByDefault && !isAlwaysDrawnExclusive && !acc.neverDrawn.has(elementId)) {
+            if (isDisplayedByDefault(elementId) && !isAlwaysDrawnExclusive && !acc.neverDrawn.has(elementId)) {
               acc.neverDrawn.add(elementId);
               acc.changedNeverDrawn = true;
             }
@@ -107,30 +107,30 @@ export function changeElementStateNoChildrenOperator(props: {
 /** @internal */
 export function getVisibilityFromAlwaysAndNeverDrawnElementsImpl(
   props: {
-    alwaysDrawn: Set<ElementId> | undefined;
-    neverDrawn: Set<ElementId> | undefined;
+    alwaysDrawnSize: number;
+    neverDrawnSize: number;
     totalCount: number;
     viewport: TreeWidgetViewport;
   } & GetVisibilityFromAlwaysAndNeverDrawnElementsProps,
 ): VisibilityStatus {
-  const { alwaysDrawn, neverDrawn, totalCount, viewport } = props;
+  const { alwaysDrawnSize, neverDrawnSize, totalCount, viewport } = props;
   if (totalCount === 0) {
     return props.defaultStatus();
   }
-  if (neverDrawn?.size === totalCount) {
+  if (neverDrawnSize === totalCount) {
     return createVisibilityStatus("hidden");
   }
 
-  if (alwaysDrawn?.size === totalCount) {
+  if (alwaysDrawnSize === totalCount) {
     return createVisibilityStatus("visible");
   }
 
   if (viewport.isAlwaysDrawnExclusive) {
-    return createVisibilityStatus(alwaysDrawn?.size ? "partial" : "hidden");
+    return createVisibilityStatus(alwaysDrawnSize ? "partial" : "hidden");
   }
 
   const status = props.defaultStatus();
-  if ((status.state === "visible" && neverDrawn?.size) || (status.state === "hidden" && alwaysDrawn?.size)) {
+  if ((status.state === "visible" && neverDrawnSize) || (status.state === "hidden" && alwaysDrawnSize)) {
     return createVisibilityStatus("partial");
   }
   return status;

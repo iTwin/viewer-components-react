@@ -1701,8 +1701,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
           });
         });
 
-        // TODO: Enable with https://github.com/iTwin/viewer-components-react/issues/1513
-        it.skip("showing element makes it, its children visible and parents partially visible", async function () {
+        it("showing element makes it, its children visible and parents partially visible", async function () {
           await using buildIModelResult = await buildIModel(this, async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
             const definitionContainerRoot = insertDefinitionContainer({ builder, codeValue: "DefinitionContainerRoot" });
@@ -1885,7 +1884,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
             {
               name: "modeled element's children display is turned on when its class grouping node display is turned on",
               getTargetNode: (ids: IModelWithSubModelIds) =>
-                createClassGroupingHierarchyNode({ categoryId: ids.category.id, modelElementsMap: new Map([[ids.model.id, [ids.modeledElement.id]]]) }),
+                createClassGroupingHierarchyNode({
+                  categoryId: ids.category.id,
+                  modelElementsMap: new Map([
+                    [ids.model.id, { elementIds: new Set([ids.modeledElement.id]), categoryOfTopMostParentElement: ids.category.id }],
+                  ]),
+                }),
               // prettier-ignore
               expectations: (ids: IModelWithSubModelIds) => ({
                 [ids.subModelCategory?.id ?? ""]: "partial",
@@ -2004,7 +2008,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
             {
               name: "child elements are visible when elements class grouping node display is turned on",
               getTargetNode: (ids: IModelWithSubModelIds) =>
-                createClassGroupingHierarchyNode({ categoryId: ids.category.id, modelElementsMap: new Map([[ids.model.id, [ids.modeledElement.id]]]) }),
+                createClassGroupingHierarchyNode({
+                  categoryId: ids.category.id,
+                  modelElementsMap: new Map([
+                    [ids.model.id, { elementIds: new Set([ids.modeledElement.id]), categoryOfTopMostParentElement: ids.category.id }],
+                  ]),
+                }),
               // Category has partial visibility, since its sub-category is not visible
               // prettier-ignore
               expectations: (ids: IModelWithSubModelIds) => ({
@@ -2068,7 +2077,12 @@ describe("CategoriesTreeVisibilityHandler", () => {
             {
               name: "everything under model is visible when elements class grouping node display is turned on",
               getTargetNode: (ids: IModelWithSubModelIds) =>
-                createClassGroupingHierarchyNode({ categoryId: ids.category.id, modelElementsMap: new Map([[ids.model.id, [ids.modeledElement.id]]]) }),
+                createClassGroupingHierarchyNode({
+                  categoryId: ids.category.id,
+                  modelElementsMap: new Map([
+                    [ids.model.id, { elementIds: new Set([ids.modeledElement.id]), categoryOfTopMostParentElement: ids.category.id }],
+                  ]),
+                }),
               // Category has partial visibility, since its sub-category is not visible
               // prettier-ignore
               expectations: (ids) => ({
@@ -3160,8 +3174,7 @@ describe("CategoriesTreeVisibilityHandler", () => {
       });
     });
 
-    // TODO: Enable with https://github.com/iTwin/viewer-components-react/issues/1513
-    describe.skip("category with child elements hierarchy", () => {
+    describe("category with child elements hierarchy", () => {
       let createIModelResult: Awaited<ReturnType<typeof createIModel>>;
       let visibilityTestData: Awaited<ReturnType<typeof createFilteredVisibilityTestData>>;
       async function createIModel(context: Mocha.Context) {
