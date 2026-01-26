@@ -81,12 +81,12 @@ export class ClassificationsTreeIdsCache implements Disposable {
     this.#categoryElementCounts[Symbol.dispose]();
   }
 
-  public getChildrenTree({ elementIds, type }: { elementIds: Id64Arg; type: "2d" | "3d" }): Observable<ChildrenTree> {
-    return (type === "2d" ? this.#elementChildren2dCache : this.#elementChildren3dCache).getChildrenTree({ elementIds });
+  public getChildElementsTree({ elementIds, type }: { elementIds: Id64Arg; type: "2d" | "3d" }): Observable<ChildrenTree> {
+    return (type === "2d" ? this.#elementChildren2dCache : this.#elementChildren3dCache).getChildElementsTree({ elementIds });
   }
 
-  public getAllChildrenCount({ elementIds, type }: { elementIds: Id64Arg; type: "2d" | "3d" }): Observable<Map<Id64String, number>> {
-    return (type === "2d" ? this.#elementChildren2dCache : this.#elementChildren3dCache).getAllChildrenCount({ elementIds });
+  public getAllChildElementsCount({ elementIds, type }: { elementIds: Id64Arg; type: "2d" | "3d" }): Observable<Map<Id64String, number>> {
+    return (type === "2d" ? this.#elementChildren2dCache : this.#elementChildren3dCache).getAllChildElementsCount({ elementIds });
   }
 
   private querySubCategories(): Observable<{ id: SubCategoryId; parentId: CategoryId }> {
@@ -453,9 +453,9 @@ export class ClassificationsTreeIdsCache implements Disposable {
               if (classificationInfo === undefined) {
                 return acc;
               }
-              acc.drawing.push(...classificationInfo.relatedCategories2d);
-              acc.spatial.push(...classificationInfo.relatedCategories3d);
-              acc.childClassifications.push(...classificationInfo.childClassificationIds);
+              classificationInfo.relatedCategories2d.forEach((id) => acc.drawing.push(id));
+              classificationInfo.relatedCategories3d.forEach((id) => acc.spatial.push(id));
+              classificationInfo.childClassificationIds.forEach((id) => acc.childClassifications.push(id));
               return acc;
             },
             { drawing: new Array<Id64String>(), spatial: new Array<Id64String>(), childClassifications: new Array<Id64String>() },
@@ -466,8 +466,8 @@ export class ClassificationsTreeIdsCache implements Disposable {
             }
             return this.getAllContainedCategories(childClassifications).pipe(
               map((childResult) => {
-                drawing.push(...childResult.drawing);
-                spatial.push(...childResult.spatial);
+                childResult.drawing.forEach((id) => drawing.push(id));
+                childResult.spatial.forEach((id) => spatial.push(id));
                 return { drawing, spatial };
               }),
             );
@@ -488,7 +488,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
           reduce((acc, classificationOrTableId) => {
             const classificationInfo = classificationsInfo.get(classificationOrTableId);
             if (classificationInfo !== undefined) {
-              acc.push(...classificationInfo.childClassificationIds);
+              classificationInfo.childClassificationIds.forEach((id) => acc.push(id));
             }
             return acc;
           }, result),
@@ -529,11 +529,11 @@ export class ClassificationsTreeIdsCache implements Disposable {
       WITH RECURSIVE
         ParentWithCategory${type}(id, categoryId, parentId) AS (
           SELECT e.ECInstanceId, e.Category.Id, e.Parent.Id
-          FROM ${CLASS_NAME_GeometricElement2d} e
+          FROM ${type === "2d" ? CLASS_NAME_GeometricElement2d : CLASS_NAME_GeometricElement3d} e
           WHERE e.ECInstanceId = ${elementIdSelector}
           UNION ALL
           SELECT p.ECInstanceId, p.Category.Id, p.Parent.Id
-          FROM ${CLASS_NAME_GeometricElement2d} p
+          FROM ${type === "2d" ? CLASS_NAME_GeometricElement2d : CLASS_NAME_GeometricElement3d} p
           JOIN ParentWithCategory${type} c ON p.ECInstanceId = c.parentId
         )
       SELECT IdToHex(categoryId)

@@ -78,12 +78,12 @@ export class CategoriesTreeIdsCache implements Disposable {
     this.#categoryElementCounts[Symbol.dispose]();
   }
 
-  public getChildrenTree({ elementIds }: { elementIds: Id64Arg }): Observable<ChildrenTree> {
-    return this.#elementChildrenCache.getChildrenTree({ elementIds });
+  public getChildElementsTree({ elementIds }: { elementIds: Id64Arg }): Observable<ChildrenTree> {
+    return this.#elementChildrenCache.getChildElementsTree({ elementIds });
   }
 
-  public getAllChildrenCount({ elementIds }: { elementIds: Id64Arg }): Observable<Map<Id64String, number>> {
-    return this.#elementChildrenCache.getAllChildrenCount({ elementIds });
+  public getAllChildElementsCount({ elementIds }: { elementIds: Id64Arg }): Observable<Map<Id64String, number>> {
+    return this.#elementChildrenCache.getAllChildElementsCount({ elementIds });
   }
 
   private queryFilteredElementsModels(filteredElementIds: Id64Arg): Observable<{
@@ -518,8 +518,10 @@ export class CategoriesTreeIdsCache implements Disposable {
             (acc, parentDefinitionContainerId) => {
               const parentDefinitionContainerInfo = definitionContainersInfo.get(parentDefinitionContainerId);
               if (parentDefinitionContainerInfo !== undefined) {
-                acc.definitionContainers.push(...applyElementsFilter(parentDefinitionContainerInfo.childDefinitionContainers, includeEmpty).map((dc) => dc.id));
-                acc.categories.push(...applyElementsFilter(parentDefinitionContainerInfo.childCategories, includeEmpty));
+                applyElementsFilter(parentDefinitionContainerInfo.childDefinitionContainers, includeEmpty).forEach((dc) =>
+                  acc.definitionContainers.push(dc.id),
+                );
+                applyElementsFilter(parentDefinitionContainerInfo.childCategories, includeEmpty).forEach((category) => acc.categories.push(category));
               }
               return acc;
             },

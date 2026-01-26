@@ -82,12 +82,12 @@ export class ModelsTreeIdsCache implements Disposable {
     this.#categoryElementCounts[Symbol.dispose]();
   }
 
-  public getChildrenTree({ elementIds }: { elementIds: Id64Arg }): Observable<ChildrenTree> {
-    return this.#elementChildrenCache.getChildrenTree({ elementIds });
+  public getChildElementsTree({ elementIds }: { elementIds: Id64Arg }): Observable<ChildrenTree> {
+    return this.#elementChildrenCache.getChildElementsTree({ elementIds });
   }
 
-  public getAllChildrenCount({ elementIds }: { elementIds: Id64Arg }): Observable<Map<Id64String, number>> {
-    return this.#elementChildrenCache.getAllChildrenCount({ elementIds });
+  public getAllChildElementsCount({ elementIds }: { elementIds: Id64Arg }): Observable<Map<Id64String, number>> {
+    return this.#elementChildrenCache.getAllChildElementsCount({ elementIds });
   }
 
   private querySubCategories(): Observable<{ id: SubCategoryId; parentId: CategoryId }> {
@@ -293,15 +293,15 @@ export class ModelsTreeIdsCache implements Disposable {
           if (!subjectInfo) {
             continue;
           }
-          result.push(...subjectInfo.childModelIds);
-          childSubjects.push(...subjectInfo.childSubjectIds);
+          subjectInfo.childModelIds.forEach((modelId) => result.push(modelId));
+          subjectInfo.childSubjectIds.forEach((childSubjectId) => childSubjects.push(childSubjectId));
         }
         if (childSubjects.length === 0) {
           return of(result);
         }
         return this.getSubjectModelIds(childSubjects).pipe(
           map((modelsOfChildSubjects) => {
-            result.push(...modelsOfChildSubjects);
+            modelsOfChildSubjects.forEach((modelId) => result.push(modelId));
             return result;
           }),
         );
@@ -324,9 +324,18 @@ export class ModelsTreeIdsCache implements Disposable {
           });
         }
         const modelIds = new Array<ModelId>();
-        [...parentSubjectIds, ...hiddenSubjectIds].forEach((subjectId) => {
+        const addModelsForExistingSubject = (subjectId: Id64String) => {
           const subjectInfo = subjectInfos.get(subjectId);
-          subjectInfo && modelIds.push(...subjectInfo.childModelIds);
+          if (subjectInfo) {
+            subjectInfo.childModelIds.forEach((modelId) => modelIds.push(modelId));
+          }
+        };
+        for (const subjectId of Id64.iterable(parentSubjectIds)) {
+          addModelsForExistingSubject(subjectId);
+        }
+
+        hiddenSubjectIds.forEach((subjectId) => {
+          addModelsForExistingSubject(subjectId);
         });
         return modelIds;
       }),

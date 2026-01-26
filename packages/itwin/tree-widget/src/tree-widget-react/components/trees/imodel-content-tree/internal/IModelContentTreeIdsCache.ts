@@ -205,9 +205,19 @@ export class IModelContentTreeIdsCache {
     });
 
     const modelIds = new Array<ModelId>();
-    [...parentSubjectIds, ...hiddenSubjectIds].forEach((subjectId) => {
+    const addModelsForExistingSubject = (subjectId: Id64String) => {
       const subjectInfo = subjectInfos.get(subjectId);
-      subjectInfo && modelIds.push(...subjectInfo.childModelIds);
+      if (subjectInfo) {
+        subjectInfo.childModelIds.forEach((modelId) => modelIds.push(modelId));
+      }
+    };
+
+    parentSubjectIds.forEach((subjectId) => {
+      addModelsForExistingSubject(subjectId);
+    });
+
+    hiddenSubjectIds.forEach((subjectId) => {
+      addModelsForExistingSubject(subjectId);
     });
     return modelIds;
   }

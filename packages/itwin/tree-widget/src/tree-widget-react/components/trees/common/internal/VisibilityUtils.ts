@@ -107,30 +107,30 @@ export function changeElementStateNoChildrenOperator(props: {
 /** @internal */
 export function getVisibilityFromAlwaysAndNeverDrawnElementsImpl(
   props: {
-    alwaysDrawn: Set<ElementId> | undefined;
-    neverDrawn: Set<ElementId> | undefined;
+    alwaysDrawnSize: number;
+    neverDrawnSize: number;
     totalCount: number;
     viewport: TreeWidgetViewport;
   } & GetVisibilityFromAlwaysAndNeverDrawnElementsProps,
 ): VisibilityStatus {
-  const { alwaysDrawn, neverDrawn, totalCount, viewport } = props;
+  const { alwaysDrawnSize, neverDrawnSize, totalCount, viewport } = props;
   if (totalCount === 0) {
     return props.defaultStatus();
   }
-  if (neverDrawn?.size === totalCount) {
+  if (neverDrawnSize === totalCount) {
     return createVisibilityStatus("hidden");
   }
 
-  if (alwaysDrawn?.size === totalCount) {
+  if (alwaysDrawnSize === totalCount) {
     return createVisibilityStatus("visible");
   }
 
   if (viewport.isAlwaysDrawnExclusive) {
-    return createVisibilityStatus(alwaysDrawn?.size ? "partial" : "hidden");
+    return createVisibilityStatus(alwaysDrawnSize ? "partial" : "hidden");
   }
 
   const status = props.defaultStatus();
-  if ((status.state === "visible" && neverDrawn?.size) || (status.state === "hidden" && alwaysDrawn?.size)) {
+  if ((status.state === "visible" && neverDrawnSize) || (status.state === "hidden" && alwaysDrawnSize)) {
     return createVisibilityStatus("partial");
   }
   return status;

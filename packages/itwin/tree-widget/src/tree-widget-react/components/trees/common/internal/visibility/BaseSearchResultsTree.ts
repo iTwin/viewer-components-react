@@ -52,6 +52,22 @@ export interface BaseSearchResultsTreeNode<TSearchResultsTreeNode extends BaseSe
   pathToNode: Array<SearchResultsNodeIdentifier>;
 }
 
+/** Props for getChildrenTreeIdsBasedOnSearchResultsNodes */
+interface GetChildrenTreeIdsBasedOnSearchResultsNodesProps {
+  /**
+   * Tree specific hierarchy path to children tree. This path is similar to search paths provided to search results tree,
+   * but it contains only instance keys. So this path should depend on the hierarchy structure used to create children tree.
+   */
+  pathToChildrenTree: InstanceKey[];
+  /**
+   * Unfiltered children tree from which ids will be retrieved based on search results nodes.
+   * This tree should have the same structure as search paths used to create search results tree.
+   */
+  unfilteredChildrenTree: ChildrenTree<MapEntry>;
+  /** Predicate to use when filtering out matching ids from children tree. */
+  childrenTreePredicate: Required<Props<typeof getIdsFromChildrenTree<MapEntry>>>["predicate"];
+}
+
 /**
  * Class that provides methods to handle search results nodes in a tree structure.
  *
@@ -98,21 +114,13 @@ export abstract class SearchResultsNodesHandler<
 
   public async processSearchResultsNodes(): Promise<{
     getNodeSearchTargets: (node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey }) => TSearchTargets | undefined;
-    getChildrenTreeIdsBasedOnSearchResultsNodes: (props: {
-      pathToChildrenTree: InstanceKey[];
-      unfilteredChildrenTree: ChildrenTree<MapEntry>;
-      childrenTreePredicate: Required<Props<typeof getIdsFromChildrenTree<MapEntry>>>["predicate"];
-    }) => Id64Set;
+    getChildrenTreeIdsBasedOnSearchResultsNodes: (props: GetChildrenTreeIdsBasedOnSearchResultsNodesProps) => Id64Set;
   }> {
     const processedSearchResultsNodes = await this.getProcessedSearchResultsNodes();
     return {
       getNodeSearchTargets: (node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey }) =>
         this.getNodeSearchTargets(node, processedSearchResultsNodes),
-      getChildrenTreeIdsBasedOnSearchResultsNodes: (props: {
-        pathToChildrenTree: InstanceKey[];
-        unfilteredChildrenTree: ChildrenTree<MapEntry>;
-        childrenTreePredicate: Required<Props<typeof getIdsFromChildrenTree<MapEntry>>>["predicate"];
-      }) => {
+      getChildrenTreeIdsBasedOnSearchResultsNodes: (props: GetChildrenTreeIdsBasedOnSearchResultsNodesProps) => {
         const { pathToChildrenTree, unfilteredChildrenTree, childrenTreePredicate } = props;
         let lookupParent: SearchResultsTreeRootNode<TSearchResultsTreeNode> | TSearchResultsTreeNode = this.root;
         for (const instanceKey of pathToChildrenTree) {
@@ -263,11 +271,14 @@ export abstract class SearchResultsNodesHandler<
 /** @internal */
 export interface SearchResultsTree<TSearchTargets> {
   getSearchTargets: (node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey }) => TSearchTargets | undefined;
-  getChildrenTreeIdsBasedOnSearchResultsNodes: (props: {
-    pathToChildrenTree: InstanceKey[];
-    unfilteredChildrenTree: ChildrenTree<MapEntry>;
-    childrenTreePredicate: Required<Props<typeof getIdsFromChildrenTree<MapEntry>>>["predicate"];
-  }) => Id64Set;
+  /**
+   * Retrieves ids from unfiltered children tree that exist under search results tree.
+   *
+   * 1. Finds search results nodes that match the path to children tree.
+   * 2. Using those search results nodes, filters out ids in unfiltered children tree.
+   * 3. Returns ids from children tree that match the provided predicate.
+   */
+  getChildrenTreeIdsBasedOnSearchResultsNodes: (props: GetChildrenTreeIdsBasedOnSearchResultsNodesProps) => Id64Set;
 }
 
 /** @internal */
@@ -321,10 +332,7 @@ export async function createSearchResultsTree<
   const processedSearchResultsNodes = await searchResultsNodesHandler.processSearchResultsNodes();
   return {
     getSearchTargets: (node: HierarchyNode & { key: ClassGroupingNodeKey | InstancesNodeKey }) => processedSearchResultsNodes.getNodeSearchTargets(node),
-    getChildrenTreeIdsBasedOnSearchResultsNodes: (fnProps: {
-      pathToChildrenTree: InstanceKey[];
-      unfilteredChildrenTree: ChildrenTree<MapEntry>;
-      childrenTreePredicate: Required<Props<typeof getIdsFromChildrenTree<MapEntry>>>["predicate"];
-    }) => processedSearchResultsNodes.getChildrenTreeIdsBasedOnSearchResultsNodes(fnProps),
+    getChildrenTreeIdsBasedOnSearchResultsNodes: (fnProps: GetChildrenTreeIdsBasedOnSearchResultsNodesProps) =>
+      processedSearchResultsNodes.getChildrenTreeIdsBasedOnSearchResultsNodes(fnProps),
   };
 }

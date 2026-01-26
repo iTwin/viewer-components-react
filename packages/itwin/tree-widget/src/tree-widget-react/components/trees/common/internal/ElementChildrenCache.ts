@@ -13,8 +13,8 @@ import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-ben
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { ChildrenTree } from "./Utils.js";
 
-type ChildrenMap = Map<Id64String, { children: Id64Array | undefined }>;
-type ChildrenLoadingMap = Map<Id64String, Promise<void>>;
+type ChildElementsMap = Map<Id64String, { children: Id64Array | undefined }>;
+type ChildElementsLoadingMap = Map<Id64String, Promise<void>>;
 
 interface ElementChildrenCacheProps {
   queryExecutor: LimitingECSqlQueryExecutor;
@@ -28,17 +28,17 @@ export class ElementChildrenCache {
   readonly #elementClassName: string;
   #componentId: GuidString;
   #componentName: string;
-  #childrenMap: ChildrenMap;
+  #childElementsMap: ChildElementsMap;
   /** Stores element ids which have children query scheduled to execute. */
-  #childrenLoadingMap: ChildrenLoadingMap;
+  #childElementsLoadingMap: ChildElementsLoadingMap;
 
   constructor(props: ElementChildrenCacheProps) {
     this.#queryExecutor = props.queryExecutor;
     this.#elementClassName = props.elementClassName;
     this.#componentId = props.componentId ?? Guid.createValue();
     this.#componentName = "ElementChildrenCache";
-    this.#childrenMap = new Map();
-    this.#childrenLoadingMap = new Map();
+    this.#childElementsMap = new Map();
+    this.#childElementsLoadingMap = new Map();
   }
 
   private queryChildren({ elementIds }: { elementIds: Id64Array }): Observable<{ id: Id64String; parentId: Id64String }> {
@@ -76,20 +76,20 @@ export class ElementChildrenCache {
     );
   }
 
-  private getChildrenTreeFromMap({ elementIds }: { elementIds: Id64Arg }): ChildrenTree {
+  private getChildElementsTreeFromMap({ elementIds }: { elementIds: Id64Arg }): ChildrenTree {
     const result: ChildrenTree = new Map();
-    if (Id64.sizeOf(elementIds) === 0 || this.#childrenMap.size === 0) {
+    if (Id64.sizeOf(elementIds) === 0 || this.#childElementsMap.size === 0) {
       return result;
     }
     for (const elementId of Id64.iterable(elementIds)) {
-      const entry = this.#childrenMap.get(elementId);
+      const entry = this.#childElementsMap.get(elementId);
       if (!entry?.children) {
         continue;
       }
       const elementChildrenTree: ChildrenTree = new Map();
       result.set(elementId, { children: elementChildrenTree });
       entry.children.forEach((childId) => {
-        const childrenTreeOfChild = this.getChildrenTreeFromMap({ elementIds: childId });
+        const childrenTreeOfChild = this.getChildElementsTreeFromMap({ elementIds: childId });
         // Need to add children tree created from childId. This tree includes childId as root element
         // If child does not have children, children tree won't be created. Need to add childId with undefined children
         elementChildrenTree.set(childId, { children: childrenTreeOfChild.size > 0 ? childrenTreeOfChild : undefined });
@@ -98,13 +98,13 @@ export class ElementChildrenCache {
     return result;
   }
 
-  private getChildrenCountMap({ elementIds }: { elementIds: Id64Arg }): Map<Id64String, number> {
+  private getChildElementsCountMap({ elementIds }: { elementIds: Id64Arg }): Map<Id64String, number> {
     const result = new Map<Id64String, number>();
     for (const elementId of Id64.iterable(elementIds)) {
-      const entry = this.#childrenMap.get(elementId);
+      const entry = this.#childElementsMap.get(elementId);
       if (entry?.children) {
         let totalChildrenCount = entry.children.length;
-        this.getChildrenCountMap({ elementIds: entry.children }).forEach((childrenOfChildCount) => (totalChildrenCount += childrenOfChildCount));
+        this.getChildElementsCountMap({ elementIds: entry.children }).forEach((childrenOfChildCount) => (totalChildrenCount += childrenOfChildCount));
         result.set(elementId, totalChildrenCount);
       }
     }
@@ -112,33 +112,33 @@ export class ElementChildrenCache {
   }
 
   /**
-   * Populates #childrenLoadingMap with promises. When these promises resolve, they will populate #childrenMap with values and delete entries from #childrenLoadingMap.
+   * Populates #childElementsLoadingMap with promises. When these promises resolve, they will populate #childElementsMap with values and delete entries from #childElementsLoadingMap.
    */
-  private createChildrenLoadingMapEntries({ elementsToQuery }: { elementsToQuery: Id64Array }): { loadingMapEntries: Promise<void> } {
+  private createChildElementsLoadingMapEntries({ elementsToQuery }: { elementsToQuery: Id64Array }): { loadingMapEntries: Promise<void> } {
     const getElementsToQueryPromise = async (batchedElementsToQuery: Id64Array) =>
       firstValueFrom(
         this.queryChildren({ elementIds: batchedElementsToQuery }).pipe(
           // Want to have void at the end instead of void[], so using reduce
           reduce(
             (acc, { parentId, id }) => {
-              let entry = this.#childrenMap.get(parentId);
+              let entry = this.#childElementsMap.get(parentId);
               if (!entry) {
                 entry = { children: [] };
-                this.#childrenMap.set(parentId, entry);
+                this.#childElementsMap.set(parentId, entry);
               }
               if (!entry.children) {
                 entry.children = [];
               }
               // Add child to parent's entry and add child to children map
               entry.children.push(id);
-              if (!this.#childrenMap.has(id)) {
-                this.#childrenMap.set(id, { children: undefined });
+              if (!this.#childElementsMap.has(id)) {
+                this.#childElementsMap.set(id, { children: undefined });
               }
               return acc;
             },
             (() => {})(),
           ),
-          tap({ complete: () => batchedElementsToQuery.forEach((elementId) => this.#childrenLoadingMap.delete(elementId)) }),
+          tap({ complete: () => batchedElementsToQuery.forEach((elementId) => this.#childElementsLoadingMap.delete(elementId)) }),
           defaultIfEmpty((() => {})()),
         ),
       );
@@ -155,18 +155,18 @@ export class ElementChildrenCache {
       }
     }
 
-    elementsToQuery.forEach((elementId, index) => this.#childrenLoadingMap.set(elementId, loadingMapEntries[Math.floor(index / optimalBatchSize)]));
+    elementsToQuery.forEach((elementId, index) => this.#childElementsLoadingMap.set(elementId, loadingMapEntries[Math.floor(index / optimalBatchSize)]));
     return { loadingMapEntries: Promise.all(loadingMapEntries).then(() => {}) };
   }
 
-  private createChildrenMapEntries({ elementIds }: { elementIds: Id64Arg }): Observable<void[]> {
+  private createChildElementsMapEntries({ elementIds }: { elementIds: Id64Arg }): Observable<void[]> {
     return from(Id64.iterable(elementIds)).pipe(
       reduce(
         (acc, elementId) => {
-          if (this.#childrenMap.has(elementId)) {
+          if (this.#childElementsMap.has(elementId)) {
             return acc;
           }
-          const loadingPromise = this.#childrenLoadingMap.get(elementId);
+          const loadingPromise = this.#childElementsLoadingMap.get(elementId);
           if (loadingPromise) {
             acc.existingPromises.push(loadingPromise);
           } else {
@@ -177,17 +177,17 @@ export class ElementChildrenCache {
         { existingPromises: new Array<Promise<void>>(), elementsToQuery: new Array<Id64String>() },
       ),
       mergeMap(async ({ elementsToQuery, existingPromises }) => {
-        existingPromises.push(this.createChildrenLoadingMapEntries({ elementsToQuery }).loadingMapEntries);
+        existingPromises.push(this.createChildElementsLoadingMapEntries({ elementsToQuery }).loadingMapEntries);
         return Promise.all(existingPromises);
       }),
     );
   }
 
-  public getChildrenTree({ elementIds }: { elementIds: Id64Arg }): Observable<ChildrenTree> {
-    return this.createChildrenMapEntries({ elementIds }).pipe(map(() => this.getChildrenTreeFromMap({ elementIds })));
+  public getChildElementsTree({ elementIds }: { elementIds: Id64Arg }): Observable<ChildrenTree> {
+    return this.createChildElementsMapEntries({ elementIds }).pipe(map(() => this.getChildElementsTreeFromMap({ elementIds })));
   }
 
-  public getAllChildrenCount({ elementIds }: { elementIds: Id64Arg }): Observable<Map<Id64String, number>> {
-    return this.createChildrenMapEntries({ elementIds }).pipe(map(() => this.getChildrenCountMap({ elementIds })));
+  public getAllChildElementsCount({ elementIds }: { elementIds: Id64Arg }): Observable<Map<Id64String, number>> {
+    return this.createChildElementsMapEntries({ elementIds }).pipe(map(() => this.getChildElementsCountMap({ elementIds })));
   }
 }

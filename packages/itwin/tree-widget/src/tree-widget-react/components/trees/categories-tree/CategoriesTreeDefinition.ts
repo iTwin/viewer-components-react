@@ -349,10 +349,12 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     );
     const hierarchyDefinition = new Array<HierarchyNodesDefinition>();
     if (categories.length > 0) {
-      hierarchyDefinition.push(...(await this.createCategoriesQuery({ categories, instanceFilter })));
+      (await this.createCategoriesQuery({ categories, instanceFilter })).forEach((def) => hierarchyDefinition.push(def));
     }
     if (definitionContainers.length > 0) {
-      hierarchyDefinition.push(...(await this.createDefinitionContainersQuery({ definitionContainerIds: definitionContainers, instanceFilter })));
+      (await this.createDefinitionContainersQuery({ definitionContainerIds: definitionContainers, instanceFilter })).forEach((def) =>
+        hierarchyDefinition.push(def),
+      );
     }
     return hierarchyDefinition;
   }

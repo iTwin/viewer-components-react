@@ -114,10 +114,10 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
     getCategoryElementsCount: sinon.stub<[Id64String, Id64String], Observable<number>>().callsFake((_, categoryId) => {
       return of(props?.categoryElements?.get(categoryId)?.length ?? 0);
     }),
-    getChildrenTree: sinon.stub<[{ elementIds: Id64Arg }], Observable<ChildrenTree>>().callsFake(() => {
+    getChildElementsTree: sinon.stub<[{ elementIds: Id64Arg }], Observable<ChildrenTree>>().callsFake(() => {
       return of(new Map());
     }),
-    getAllChildrenCount: sinon.stub<[{ elementIds: Id64Arg }], Observable<Map<Id64String, number>>>().callsFake(() => {
+    getAllChildElementsCount: sinon.stub<[{ elementIds: Id64Arg }], Observable<Map<Id64String, number>>>().callsFake(() => {
       return of(new Map());
     }),
     hasSubModel: sinon.stub<[Id64String], Observable<boolean>>().callsFake(() => of(false)),

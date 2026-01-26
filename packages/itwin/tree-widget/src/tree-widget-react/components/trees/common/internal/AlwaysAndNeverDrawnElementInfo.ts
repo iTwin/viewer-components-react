@@ -346,7 +346,6 @@ export class AlwaysAndNeverDrawnElementInfo<TSearchResultsTargets> implements Di
           return of(getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ treeEntry }) => treeEntry.isInAlwaysOrNeverDrawnSet }));
         }
         // In cases where always/never drawn elements are requested for elements, childrenTree needs to be aligned with search results tree.
-        assert("searchPathToElements" in props);
         const searchPathToElements = props.searchPathToElements;
         assert(searchPathToElements !== undefined);
         return from(this.#searchResultsTree).pipe(

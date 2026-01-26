@@ -224,7 +224,7 @@ class ClassificationsTreeSearchResultsNodesHandler extends SearchResultsNodesHan
         });
       }
       if (entry.children) {
-        result.push(...this.convertInternalSearchTargetElementsRecursively(entry.children, [...currentPath, identifier]));
+        this.convertInternalSearchTargetElementsRecursively(entry.children, [...currentPath, identifier]).forEach((childValue) => result.push(childValue));
       }
     });
     return result;

@@ -114,7 +114,7 @@ export class ModelsTreeVisibilityHelper extends BaseVisibilityHelper<ModelsTreeS
   /** Changes visibility of grouped elements. */
   public changeGroupedElementsVisibilityStatus(props: { modelId: Id64String; categoryId: Id64String; elementIds: Id64Arg; on: boolean }): Observable<void> {
     const { modelId, categoryId, elementIds, on } = props;
-    return this.#props.idsCache.getChildrenTree({ elementIds }).pipe(
+    return this.#props.idsCache.getChildElementsTree({ elementIds }).pipe(
       map((childrenTree) => getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ depth }) => depth > 0 })),
       mergeMap((children) => this.changeElementsVisibilityStatus({ modelId, elementIds, categoryId, on, children })),
     );

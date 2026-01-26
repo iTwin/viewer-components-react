@@ -5,12 +5,6 @@
 
 import { concat, EMPTY, from, map, mergeMap, toArray } from "rxjs";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
-import {
-  CLASS_NAME_GeometricElement2d,
-  CLASS_NAME_GeometricElement3d,
-  CLASS_NAME_GeometricModel2d,
-  CLASS_NAME_GeometricModel3d,
-} from "../../../common/internal/ClassNameDefinitions.js";
 import { getIdsFromChildrenTree, getParentElementsIdsPath } from "../../../common/internal/Utils.js";
 import { BaseVisibilityHelper } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
@@ -38,13 +32,9 @@ export type CategoriesTreeVisibilityHelperProps = BaseVisibilityHelperProps<Cate
  */
 export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper<CategoriesTreeSearchTargets> {
   #props: CategoriesTreeVisibilityHelperProps;
-  #elementClassName: string;
-  #modelClassName: string;
   constructor(props: CategoriesTreeVisibilityHelperProps) {
     super(props);
     this.#props = props;
-    this.#elementClassName = this.#props.viewport.viewType === "2d" ? CLASS_NAME_GeometricElement2d : CLASS_NAME_GeometricElement3d;
-    this.#modelClassName = this.#props.viewport.viewType === "2d" ? CLASS_NAME_GeometricModel2d : CLASS_NAME_GeometricModel3d;
   }
 
   /**
@@ -134,9 +124,9 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper<Categor
   }): Observable<void> {
     const elementIds = new Array<ElementId>();
     for (const { elementIds: ids } of props.modelElementsMap.values()) {
-      elementIds.push(...ids);
+      ids.forEach((id) => elementIds.push(id));
     }
-    return this.#props.idsCache.getChildrenTree({ elementIds }).pipe(
+    return this.#props.idsCache.getChildElementsTree({ elementIds }).pipe(
       map((childrenTree) => getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ depth }) => depth > 0 })),
       mergeMap((children) =>
         from(props.modelElementsMap).pipe(

@@ -45,8 +45,8 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
     // Remove after https://github.com/iTwin/viewer-components-react/issues/1421.
     // We won't need to create a custom base ids cache.
     const baseIdsCache: BaseIdsCache = {
-      getAllChildrenCount: (props) => this.getAllChildrenCount(props),
-      getChildrenTree: (props) => this.getChildrenTree(props),
+      getAllChildElementsCount: (props) => this.getAllChildElementsCount(props),
+      getChildElementsTree: (props) => this.getChildElementsTree(props),
       getCategories: (props) => this.getCategories(props),
       getAllCategories: () => this.getAllCategories(),
       getElementsCount: (props) => this.getElementsCount(props),
@@ -124,7 +124,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       });
     });
     // Get children for search targets, since non search targets don't have all the children present in the hierarchy.
-    return this.#props.idsCache.getChildrenTree({ elementIds: searchTargetElements, type }).pipe(
+    return this.#props.idsCache.getChildElementsTree({ elementIds: searchTargetElements, type }).pipe(
       // Need to filter out and keep only those children ids that are not part of elements that are present in search paths.
       // Elements in search paths will have their visibility changed directly: they will be provided as elementIds to changeElementsVisibilityStatus.
       map((childrenTree) => ({
@@ -132,7 +132,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
         childrenTree,
       })),
       mergeMap(({ childrenNotInSearchPaths, childrenTree }) =>
-        fromWithRelease({ source: [...modelCategoryElementMap.entries()], releaseOnCount: 50 }).pipe(
+        fromWithRelease({ source: modelCategoryElementMap.entries(), size: modelCategoryElementMap.size, releaseOnCount: 50 }).pipe(
           mergeMap(([key, elementsInSearchPathsGroupedByModelAndCategory]) => {
             const [modelId, categoryId] = key.split("-");
             const childrenIds = new Set<Id64String>();
@@ -203,7 +203,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       }
       assert(ClassificationsTreeNodeInternal.isGeometricElementNode(node));
       const elementIds = node.key.instanceKeys.map(({ id }) => id);
-      return this.#props.idsCache.getChildrenTree({ elementIds, type: node.extendedData.type === "GeometricElement3d" ? "3d" : "2d" }).pipe(
+      return this.#props.idsCache.getChildElementsTree({ elementIds, type: node.extendedData.type === "GeometricElement3d" ? "3d" : "2d" }).pipe(
         map((childrenTree): Id64Set => {
           // Children tree contains provided elementIds, they are at the root of this tree.
           // We want to skip them and only get ids of children.
@@ -265,7 +265,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
         }
       }),
     );
-    return this.#props.idsCache.getAllChildrenCount({ elementIds: searchTargetElements, type }).pipe(
+    return this.#props.idsCache.getAllChildElementsCount({ elementIds: searchTargetElements, type }).pipe(
       mergeMap((elementsChildrenCountMap) =>
         fromWithRelease({ source: elements, releaseOnCount: 50 }).pipe(
           mergeMap(({ modelId, categoryId, elements: elementsMap, pathToElements, categoryOfTopMostParentElement, topMostParentElementId }) => {
@@ -327,12 +327,12 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
     return this.#props.idsCache.getSubCategories(props.categoryId);
   }
 
-  private getChildrenTree(props: Parameters<BaseIdsCache["getChildrenTree"]>[0]): ReturnType<BaseIdsCache["getChildrenTree"]> {
-    return this.#props.idsCache.getChildrenTree({ elementIds: props.elementIds, type: props.type });
+  private getChildElementsTree(props: Parameters<BaseIdsCache["getChildElementsTree"]>[0]): ReturnType<BaseIdsCache["getChildElementsTree"]> {
+    return this.#props.idsCache.getChildElementsTree({ elementIds: props.elementIds, type: props.type });
   }
 
-  private getAllChildrenCount(props: Parameters<BaseIdsCache["getAllChildrenCount"]>[0]): ReturnType<BaseIdsCache["getAllChildrenCount"]> {
-    return this.#props.idsCache.getAllChildrenCount({ elementIds: props.elementIds, type: props.type });
+  private getAllChildElementsCount(props: Parameters<BaseIdsCache["getAllChildElementsCount"]>[0]): ReturnType<BaseIdsCache["getAllChildElementsCount"]> {
+    return this.#props.idsCache.getAllChildElementsCount({ elementIds: props.elementIds, type: props.type });
   }
 
   private getSubModels(props: Parameters<BaseIdsCache["getSubModels"]>[0]): ReturnType<BaseIdsCache["getSubModels"]> {

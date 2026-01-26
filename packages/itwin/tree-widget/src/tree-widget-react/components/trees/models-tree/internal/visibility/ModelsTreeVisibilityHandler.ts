@@ -74,9 +74,9 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
     // Remove after https://github.com/iTwin/viewer-components-react/issues/1421.
     // We won't need to create a custom base ids cache.
     const baseIdsCache: BaseIdsCache = {
-      getAllChildrenCount: (props) => this.getAllChildrenCount(props),
+      getAllChildElementsCount: (props) => this.getAllChildElementsCount(props),
       getCategories: (props) => this.getCategories(props),
-      getChildrenTree: (props) => this.getChildrenTree(props),
+      getChildElementsTree: (props) => this.getChildElementsTree(props),
       getElementsCount: (props) => this.getElementsCount(props),
       getModels: (props) => this.getModels(props),
       getSubCategories: (props) => this.getSubCategories(props),
@@ -150,7 +150,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
         });
         observables.push(
           // Get children for search targets, since non search targets don't have all the children present in the hierarchy.
-          this.#props.idsCache.getChildrenTree({ elementIds: searchTargetElements }).pipe(
+          this.#props.idsCache.getChildElementsTree({ elementIds: searchTargetElements }).pipe(
             // Need to filter out and keep only those children ids that are not part of elements that are present in search paths.
             // Elements in search paths will have their visibility changed directly: they will be provided as elementIds to changeElementsVisibilityStatus.
             map((childrenTree) => ({
@@ -158,7 +158,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
               childrenTree,
             })),
             mergeMap(({ childrenNotInSearchPaths, childrenTree }) =>
-              fromWithRelease({ source: [...modelCategoryElementMap.entries()], releaseOnCount: 50 }).pipe(
+              fromWithRelease({ source: modelCategoryElementMap.entries(), size: modelCategoryElementMap.size, releaseOnCount: 50 }).pipe(
                 mergeMap(([key, elementsInSearchPathsGroupedByModelAndCategory]) => {
                   const [modelId, categoryId] = key.split("-");
                   const childrenIds = new Set<Id64String>();
@@ -277,7 +277,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
 
       assert(ModelsTreeNodeInternal.isElementNode(node));
       const elementIds = node.key.instanceKeys.map(({ id }) => id);
-      return this.#props.idsCache.getChildrenTree({ elementIds }).pipe(
+      return this.#props.idsCache.getChildElementsTree({ elementIds }).pipe(
         map((childrenTree): Id64Set => {
           // Children tree contains provided elementIds, they are at the root of this tree.
           // We want to skip them and only get ids of children.
@@ -346,7 +346,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
           const groupingNodesSearchTargets: Map<Id64String, { childrenCount: number }> | undefined = node.extendedData.searchTargets;
           const nestedSearchTargetElements = searchTargetElements.filter((searchTarget) => !groupingNodesSearchTargets?.has(searchTarget));
           // Only need to request children count for indirect children search targets.
-          childrenCountMapObs = this.#props.idsCache.getAllChildrenCount({ elementIds: nestedSearchTargetElements }).pipe(
+          childrenCountMapObs = this.#props.idsCache.getAllChildElementsCount({ elementIds: nestedSearchTargetElements }).pipe(
             map((elementCountMap) => {
               // Direct children search targets already have children count stored in grouping nodes extended data.
               node.extendedData.searchTargets?.forEach((value, key) => elementCountMap.set(key, value.childrenCount));
@@ -354,7 +354,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
             }),
           );
         } else {
-          childrenCountMapObs = this.#props.idsCache.getAllChildrenCount({ elementIds: searchTargetElements });
+          childrenCountMapObs = this.#props.idsCache.getAllChildElementsCount({ elementIds: searchTargetElements });
         }
         observables.push(
           childrenCountMapObs.pipe(
@@ -402,16 +402,16 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
     );
   }
 
-  private getChildrenTree(props: Parameters<BaseIdsCache["getChildrenTree"]>[0]): ReturnType<BaseIdsCache["getChildrenTree"]> {
-    return this.#props.idsCache.getChildrenTree({ elementIds: props.elementIds });
+  private getChildElementsTree(props: Parameters<BaseIdsCache["getChildElementsTree"]>[0]): ReturnType<BaseIdsCache["getChildElementsTree"]> {
+    return this.#props.idsCache.getChildElementsTree({ elementIds: props.elementIds });
   }
 
   private getAllCategories(): ReturnType<BaseIdsCache["getAllCategories"]> {
     return this.#props.idsCache.getAllCategories().pipe(map((categories) => ({ spatialCategories: categories })));
   }
 
-  private getAllChildrenCount(props: Parameters<BaseIdsCache["getAllChildrenCount"]>[0]): ReturnType<BaseIdsCache["getAllChildrenCount"]> {
-    return this.#props.idsCache.getAllChildrenCount({ elementIds: props.elementIds });
+  private getAllChildElementsCount(props: Parameters<BaseIdsCache["getAllChildElementsCount"]>[0]): ReturnType<BaseIdsCache["getAllChildElementsCount"]> {
+    return this.#props.idsCache.getAllChildElementsCount({ elementIds: props.elementIds });
   }
 
   private getElementsCount(props: Parameters<BaseIdsCache["getElementsCount"]>[0]): ReturnType<BaseIdsCache["getElementsCount"]> {

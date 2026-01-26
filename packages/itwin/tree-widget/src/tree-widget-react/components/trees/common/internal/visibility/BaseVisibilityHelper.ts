@@ -29,7 +29,7 @@ import {
 } from "rxjs";
 import { Id64 } from "@itwin/core-bentley";
 import { createVisibilityStatus } from "../Tooltip.js";
-import { fromWithRelease, getSetFromId64Arg, releaseMainThreadOnItemsCount, setDifference, setIntersection } from "../Utils.js";
+import { fromWithRelease, getMergedSet, getSetFromId64Arg, releaseMainThreadOnItemsCount, setDifference, setIntersection } from "../Utils.js";
 import {
   changeElementStateNoChildrenOperator,
   enableCategoryDisplay,
@@ -82,8 +82,8 @@ export interface BaseIdsCache {
     props: { modelIds: Id64Arg; categoryId?: Id64String } | { categoryIds: Id64Arg; modelId: Id64String | undefined },
   ) => Observable<{ id: Id64String; subModels: Id64Arg | undefined }>;
   getAllCategories: () => Observable<{ drawingCategories?: Id64Set; spatialCategories?: Id64Set }>;
-  getChildrenTree: (props: { elementIds: Id64Arg; type: "2d" | "3d" }) => Observable<ChildrenTree>;
-  getAllChildrenCount: (props: { elementIds: Id64Arg; type: "2d" | "3d" }) => Observable<Map<Id64String, number>>;
+  getChildElementsTree: (props: { elementIds: Id64Arg; type: "2d" | "3d" }) => Observable<ChildrenTree>;
+  getAllChildElementsCount: (props: { elementIds: Id64Arg; type: "2d" | "3d" }) => Observable<Map<Id64String, number>>;
 }
 
 /**
@@ -139,7 +139,7 @@ export class BaseVisibilityHelper<TSearchResultsTargets> implements Disposable {
    * This is achieved by:
    * - Resets `alwaysDrawn` exclusive flag to `false`;
    * - Turns off all categories;
-   * - Clears always drawn list;
+   * - Clears never drawn list;
    * - Removes all per-model category overrides. */
   public removeAlwaysDrawnExclusive(): Observable<void> {
     return from(this.#props.baseIdsCache.getAllCategories()).pipe(
@@ -484,8 +484,8 @@ export class BaseVisibilityHelper<TSearchResultsTargets> implements Disposable {
         );
       }
 
-      // TODO: check child element categories
-      // TODO: check child elements that are subModels
+      // TODO: check child element categories https://github.com/iTwin/viewer-components-react/issues/1563
+      // TODO: check child elements that are subModels https://github.com/iTwin/viewer-components-react/issues/1563
       return this.getVisibilityFromAlwaysAndNeverDrawnElements({
         elements: elementIds,
         defaultStatus: () => this.getVisibleModelCategoriesDirectVisibilityStatus({ categoryIds: categoryId, modelId }),
@@ -561,8 +561,8 @@ export class BaseVisibilityHelper<TSearchResultsTargets> implements Disposable {
         return of(
           getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
             ...props,
-            alwaysDrawn: viewport.alwaysDrawn ? setIntersection(props.elements, viewport.alwaysDrawn) : undefined,
-            neverDrawn: viewport.neverDrawn ? setIntersection(props.elements, viewport.neverDrawn) : undefined,
+            alwaysDrawnSize: viewport.alwaysDrawn?.size ? setIntersection(props.elements, viewport.alwaysDrawn).size : 0,
+            neverDrawnSize: viewport.neverDrawn?.size ? setIntersection(props.elements, viewport.neverDrawn).size : 0,
             totalCount: Id64.sizeOf(props.elements),
             viewport,
           }),
@@ -587,12 +587,14 @@ export class BaseVisibilityHelper<TSearchResultsTargets> implements Disposable {
       }).pipe(
         map(({ childAlwaysDrawn, childNeverDrawn }) => {
           // Combine child always/never drawn with the ones provided in props.
-          const alwaysDrawn = new Set([...childAlwaysDrawn, ...(viewport.alwaysDrawn?.size ? setIntersection(props.elements, viewport.alwaysDrawn) : [])]);
-          const neverDrawn = new Set([...childNeverDrawn, ...(viewport.neverDrawn?.size ? setIntersection(props.elements, viewport.neverDrawn) : [])]);
           return getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
             ...props,
-            alwaysDrawn: alwaysDrawn.size > 0 ? alwaysDrawn : undefined,
-            neverDrawn: neverDrawn.size > 0 ? neverDrawn : undefined,
+            alwaysDrawnSize: viewport.alwaysDrawn?.size
+              ? getMergedSet(childAlwaysDrawn, setIntersection(props.elements, viewport.alwaysDrawn)).size
+              : childAlwaysDrawn.size,
+            neverDrawnSize: viewport.neverDrawn?.size
+              ? getMergedSet(childNeverDrawn, setIntersection(props.elements, viewport.neverDrawn)).size
+              : childNeverDrawn.size,
             totalCount: props.childrenCount + Id64.sizeOf(props.elements),
             viewport,
           });
@@ -624,8 +626,10 @@ export class BaseVisibilityHelper<TSearchResultsTargets> implements Disposable {
         return of(
           getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
             ...props,
-            ...state,
+            totalCount: state.totalCount,
             viewport,
+            alwaysDrawnSize: state.alwaysDrawn.size,
+            neverDrawnSize: state.neverDrawn.size,
             defaultStatus: () => props.defaultStatus(state.categoryId),
           }),
         );
@@ -833,9 +837,8 @@ export class BaseVisibilityHelper<TSearchResultsTargets> implements Disposable {
     const result = defer(() => {
       const { modelId, categoryId, elementIds, on, children } = props;
       const viewport = this.#props.viewport;
-      // TODO: change child elements
-      // TODO: change child element categories
-      // TODO: change child subModels
+      // TODO: determine which child elements to change based on their categories https://github.com/iTwin/viewer-components-react/issues/1561
+      // TODO: change child subModels https://github.com/iTwin/viewer-components-react/issues/1562
       return concat(
         // Change elements state
         defer(() => {

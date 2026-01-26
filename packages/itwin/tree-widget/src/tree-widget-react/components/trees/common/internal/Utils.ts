@@ -44,6 +44,18 @@ export function setIntersection<T>(lhs: Readonly<Iterable<T>>, rhs: ReadonlySet<
 }
 
 /** @internal */
+export function getMergedSet<T>(lhs: Readonly<Iterable<T>>, rhs: Readonly<Iterable<T>>): Set<T> {
+  const result = new Set<T>();
+  for (const x of lhs) {
+    result.add(x);
+  }
+  for (const y of rhs) {
+    result.add(y);
+  }
+  return result;
+}
+
+/** @internal */
 export function getOptimalBatchSize({ totalSize, maximumBatchSize }: { totalSize: number; maximumBatchSize: number }): number {
   return Math.ceil(totalSize / Math.ceil(totalSize / maximumBatchSize));
 }
@@ -141,18 +153,16 @@ export function getSetFromId64Arg(arg: Id64Arg): Set<Id64String> {
   return typeof arg === "string" ? new Set([arg]) : Array.isArray(arg) ? new Set(arg) : arg;
 }
 
-function isIterable(x: unknown): x is Iterable<unknown> {
-  return typeof x === "object" && !!x && typeof (x as Iterable<unknown>)[Symbol.iterator] === "function";
-}
-
 /**
  * Creates an Observable from provided props. If `releaseOnCount` is provided, main thread will be released after processing specified number of items.
  * @internal
  */
 export function fromWithRelease(props: { source: Id64Arg; releaseOnCount?: number }): Observable<Id64String>;
-export function fromWithRelease<T>(props: ({ source: Set<T> | Array<T> } | { source: Iterable<T>; size: number }) & { releaseOnCount?: number }): Observable<T>;
+export function fromWithRelease<T>(
+  props: ({ source: Set<T> | Array<T> } | { source: Iterable<T>; size: number } | { source: MapIterator<T>; size: number }) & { releaseOnCount?: number },
+): Observable<T>;
 export function fromWithRelease(props: {
-  source: Id64Arg | Set<unknown> | Array<unknown> | Iterable<unknown>;
+  source: Id64Arg | Set<unknown> | Array<unknown> | Iterable<unknown> | MapIterator<unknown>;
   size?: number;
   releaseOnCount?: number;
 }): Observable<unknown> {
@@ -160,9 +170,9 @@ export function fromWithRelease(props: {
     ? { obs: from(props.source), size: props.source.length }
     : props.source instanceof Set
       ? { obs: from(props.source), size: props.source.size }
-      : isIterable(props.source)
-        ? { obs: from(props.source), size: props.size! }
-        : { obs: from(Id64.iterable(props.source)), size: Id64.sizeOf(props.source) };
+      : typeof props.source === "string"
+        ? { obs: from(Id64.iterable(props.source)), size: Id64.sizeOf(props.source) }
+        : { obs: from(props.source), size: props.size! };
   if (props.releaseOnCount === undefined || source.size < props.releaseOnCount) {
     return source.obs;
   }
@@ -249,14 +259,16 @@ export function groupingNodeDataFromChildren(children: ProcessedHierarchyNode[])
   let childrenCount = 0;
   const searchTargets = new Map<Id64String, { childrenCount: number }>();
   let hasDirectNonSearchTargets = false;
+  let hasSearchTargetAncestor = false;
   for (const child of children) {
     assert(!ProcessedHierarchyNode.isGroupingNode(child), "Expected only non-grouping nodes as children");
     if (child.extendedData?.childrenCount) {
       childrenCount += child.extendedData.childrenCount;
     }
-    if (child.search) {
+    if (!hasSearchTargetAncestor && child.search) {
       if (child.search.hasSearchTargetAncestor) {
-        return { hasSearchTargetAncestor: true, hasDirectNonSearchTargets: undefined, childrenCount, searchTargets: undefined };
+        hasSearchTargetAncestor = true;
+        continue;
       }
       if (!child.search.isSearchTarget) {
         hasDirectNonSearchTargets = true;
@@ -268,7 +280,9 @@ export function groupingNodeDataFromChildren(children: ProcessedHierarchyNode[])
     }
   }
 
-  return { hasSearchTargetAncestor: false, hasDirectNonSearchTargets, childrenCount, searchTargets };
+  return hasSearchTargetAncestor
+    ? { hasSearchTargetAncestor, hasDirectNonSearchTargets: undefined, childrenCount, searchTargets: undefined }
+    : { hasSearchTargetAncestor, hasDirectNonSearchTargets, childrenCount, searchTargets };
 }
 
 /** @internal */
