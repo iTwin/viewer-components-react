@@ -158,11 +158,9 @@ export function getSetFromId64Arg(arg: Id64Arg): Set<Id64String> {
  * @internal
  */
 export function fromWithRelease(props: { source: Id64Arg; releaseOnCount?: number }): Observable<Id64String>;
-export function fromWithRelease<T>(
-  props: ({ source: Set<T> | Array<T> } | { source: Iterable<T>; size: number } | { source: MapIterator<T>; size: number }) & { releaseOnCount?: number },
-): Observable<T>;
+export function fromWithRelease<T>(props: ({ source: Set<T> | Array<T> } | { source: Iterable<T>; size: number }) & { releaseOnCount?: number }): Observable<T>;
 export function fromWithRelease(props: {
-  source: Id64Arg | Set<unknown> | Array<unknown> | Iterable<unknown> | MapIterator<unknown>;
+  source: Id64Arg | Set<unknown> | Array<unknown> | Iterable<unknown>;
   size?: number;
   releaseOnCount?: number;
 }): Observable<unknown> {
