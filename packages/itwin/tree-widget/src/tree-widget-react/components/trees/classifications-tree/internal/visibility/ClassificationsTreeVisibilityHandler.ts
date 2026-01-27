@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, defer, from, map, merge, mergeMap, of, toArray } from "rxjs";
+import { concat, defer, EMPTY, from, map, merge, mergeMap, of, toArray } from "rxjs";
 import { assert, Id64 } from "@itwin/core-bentley";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { fromWithRelease, getIdsFromChildrenTree, getParentElementsIdsPath, setDifference, setIntersection } from "../../../common/internal/Utils.js";
@@ -27,7 +27,7 @@ import type { ClassificationsTreeSearchTargets } from "./SearchResultsTree.js";
 export interface ClassificationsTreeVisibilityHandlerProps {
   idsCache: ClassificationsTreeIdsCache;
   viewport: TreeWidgetViewport;
-  alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfo<ClassificationsTreeSearchTargets>;
+  alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfo;
 }
 
 /**
@@ -275,22 +275,47 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
                   topMostParentElementId,
                 })
               : [];
-            let totalChildrenCount = 0;
-            elementsMap.forEach((_, elementId) => {
+            let totalSearchTargetsChildrenCount = 0;
+            const nonSearchTargetIds = new Array<Id64String>();
+            const searchTargetIds = new Array<Id64String>();
+            elementsMap.forEach(({ isSearchTarget }, elementId) => {
+              if (!isSearchTarget) {
+                nonSearchTargetIds.push(elementId);
+                return;
+              }
+              searchTargetIds.push(elementId);
               const childCount = elementsChildrenCountMap.get(elementId);
               if (childCount) {
-                totalChildrenCount += childCount;
+                totalSearchTargetsChildrenCount += childCount;
               }
             });
-            return this.#visibilityHelper.getElementsVisibilityStatus({
-              modelId,
-              categoryId,
-              elementIds: [...elementsMap.keys()],
-              type: type === "3d" ? "GeometricElement3d" : "GeometricElement2d",
-              parentElementsIdsPath,
-              childrenCount: totalChildrenCount,
-              categoryOfTopMostParentElement,
-            });
+            return merge(
+              searchTargetIds.length > 0
+                ? this.#visibilityHelper.getElementsVisibilityStatus({
+                    modelId,
+                    categoryId,
+                    elementIds: searchTargetIds,
+                    type: type === "3d" ? "GeometricElement3d" : "GeometricElement2d",
+                    parentElementsIdsPath,
+                    childrenCount: totalSearchTargetsChildrenCount,
+                    categoryOfTopMostParentElement,
+                  })
+                : EMPTY,
+              // Set childrenCount to 0 for non search targets, as some of their child elements might be filtered out.
+              // Since childrenCount is set to 0, these elements won't check child always/never drawn child elements status.
+              // Child always/never drawn elements will be in search paths, and their visibility status will be handled separately.
+              nonSearchTargetIds.length > 0
+                ? this.#visibilityHelper.getElementsVisibilityStatus({
+                    modelId,
+                    categoryId,
+                    elementIds: nonSearchTargetIds,
+                    type: type === "3d" ? "GeometricElement3d" : "GeometricElement2d",
+                    parentElementsIdsPath,
+                    childrenCount: 0,
+                    categoryOfTopMostParentElement,
+                  })
+                : EMPTY,
+            ).pipe(mergeVisibilityStatuses);
           }),
         ),
       ),

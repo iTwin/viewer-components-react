@@ -28,17 +28,15 @@ import {
   takeUntil,
   tap,
 } from "rxjs";
-import { assert, Guid, Id64 } from "@itwin/core-bentley";
+import { Guid, Id64 } from "@itwin/core-bentley";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { catchBeSQLiteInterrupts } from "./UseErrorState.js";
 import { getClassesByView, getIdsFromChildrenTree, getOptimalBatchSize, releaseMainThreadOnItemsCount, setDifference, updateChildrenTree } from "./Utils.js";
 
 import type { Observable, Subscription } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
-import type { InstanceKey } from "@itwin/presentation-shared";
 import type { TreeWidgetViewport } from "../TreeWidgetViewport.js";
 import type { ChildrenTree } from "./Utils.js";
-import type { SearchResultsTree } from "./visibility/BaseSearchResultsTree.js";
 
 /** @internal */
 export const SET_CHANGE_DEBOUNCE_TIME = 20;
@@ -70,11 +68,10 @@ interface GetElementsTreeByCategoryProps {
    */
   setType: SetType;
 }
+
 interface GetElementsTreeByElementProps extends GetElementsTreeByCategoryProps {
   /** Path to element for which to get its' child always/never drawn elements. When undefined, models and categories will be used to get the always/never drawn elements. */
   parentElementIdsPath: Array<Id64Arg>;
-  /** Search path to elements. It should be defined if hierarchy is searched. */
-  searchPathToElements?: InstanceKey[];
 }
 
 /** @internal */
@@ -89,15 +86,14 @@ export type MapEntry = { isInAlwaysOrNeverDrawnSet: true; categoryId: Id64String
 
 type CachedNodesMap = ChildrenTree<MapEntry>;
 
-interface AlwaysAndNeverDrawnElementInfoProps<TSearchResultsTargets> {
+interface AlwaysAndNeverDrawnElementInfoProps {
   viewport: TreeWidgetViewport;
   elementClassName?: string;
   componentId?: GuidString;
-  searchResultsTree: Promise<SearchResultsTree<TSearchResultsTargets>> | undefined;
 }
 
 /** @internal */
-export class AlwaysAndNeverDrawnElementInfo<TSearchResultsTargets> implements Disposable {
+export class AlwaysAndNeverDrawnElementInfo implements Disposable {
   #subscriptions: Subscription[];
   #alwaysDrawn: { cacheEntryObs: Observable<CachedNodesMap>; latestCacheEntryValue?: CachedNodesMap };
   #neverDrawn: { cacheEntryObs: Observable<CachedNodesMap>; latestCacheEntryValue?: CachedNodesMap };
@@ -106,12 +102,11 @@ export class AlwaysAndNeverDrawnElementInfo<TSearchResultsTargets> implements Di
   readonly #elementClassName: string;
   #componentId: GuidString;
   #componentName: string;
-  #searchResultsTree: Promise<SearchResultsTree<TSearchResultsTargets>> | undefined;
 
   #suppressors: Observable<number>;
   #suppress = new Subject<boolean>();
 
-  constructor(props: AlwaysAndNeverDrawnElementInfoProps<TSearchResultsTargets>) {
+  constructor(props: AlwaysAndNeverDrawnElementInfoProps) {
     this.#viewport = props.viewport;
     this.#alwaysDrawn = { cacheEntryObs: this.createCacheEntryObservable("always") };
     this.#neverDrawn = { cacheEntryObs: this.createCacheEntryObservable("never") };
@@ -123,7 +118,6 @@ export class AlwaysAndNeverDrawnElementInfo<TSearchResultsTargets> implements Di
     this.#subscriptions = [this.#alwaysDrawn.cacheEntryObs.subscribe(), this.#neverDrawn.cacheEntryObs.subscribe()];
     this.#componentId = props.componentId ?? Guid.createValue();
     this.#componentName = "AlwaysAndNeverDrawnElementInfo";
-    this.#searchResultsTree = props.searchResultsTree;
     this.#elementClassName = props.elementClassName ? props.elementClassName : getClassesByView(this.#viewport.viewType === "2d" ? "2d" : "3d").elementClass;
   }
 
@@ -161,19 +155,19 @@ export class AlwaysAndNeverDrawnElementInfo<TSearchResultsTargets> implements Di
         );
   }
 
-  private getChildrenTree<T extends object>({
+  private getChildrenTree({
     currentChildrenTree,
     pathToElements,
     currentIdsIndex,
   }: {
-    currentChildrenTree: ChildrenTree<T>;
+    currentChildrenTree: ChildrenTree<MapEntry>;
     pathToElements: Array<Id64Arg | undefined>;
     currentIdsIndex: number;
-  }): ChildrenTree<T> {
+  }): ChildrenTree<MapEntry> {
     if (currentIdsIndex >= pathToElements.length) {
       return currentChildrenTree;
     }
-    const result: ChildrenTree<T> = new Map();
+    const result: ChildrenTree<MapEntry> = new Map();
     const currentParentIds = pathToElements[currentIdsIndex];
     // currentParentIds is undefined - it means that we are getting children for categories that don't have model as parent
     if (!currentParentIds) {
@@ -338,26 +332,7 @@ export class AlwaysAndNeverDrawnElementInfo<TSearchResultsTargets> implements Di
 
   public getAlwaysOrNeverDrawnElements(props: GetElementsTreeProps) {
     return this.getElementsTree(props).pipe(
-      mergeMap((childrenTree) => {
-        // When always/never drawn elements are requested for model or category, it means that they are search targets.
-        // Search results trees can return either search targets or elements that are parents of search targets.
-        // So when getting always/never drawn elements for model or category, we don't need to filter them by search results tree.
-        if (!this.#searchResultsTree || !("parentElementIdsPath" in props)) {
-          return of(getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ treeEntry }) => treeEntry.isInAlwaysOrNeverDrawnSet }));
-        }
-        // In cases where always/never drawn elements are requested for elements, childrenTree needs to be aligned with search results tree.
-        const searchPathToElements = props.searchPathToElements;
-        assert(searchPathToElements !== undefined);
-        return from(this.#searchResultsTree).pipe(
-          map((searchResultsTree) =>
-            searchResultsTree.getChildrenTreeIdsBasedOnSearchResultsNodes({
-              unfilteredChildrenTree: childrenTree,
-              childrenTreePredicate: ({ treeEntry }) => treeEntry.isInAlwaysOrNeverDrawnSet,
-              pathToChildrenTree: searchPathToElements,
-            }),
-          ),
-        );
-      }),
+      map((childrenTree) => getIdsFromChildrenTree({ tree: childrenTree, predicate: ({ treeEntry }) => treeEntry.isInAlwaysOrNeverDrawnSet })),
     );
   }
 

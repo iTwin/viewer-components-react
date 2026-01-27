@@ -204,7 +204,7 @@ function useCategoriesCachedVisibility(props: {
 }
 
 function createTreeSpecificVisibilityHandler(
-  props: CreateTreeSpecificVisibilityHandlerProps<CategoriesTreeIdsCache, CategoriesTreeSearchTargets> & {
+  props: CreateTreeSpecificVisibilityHandlerProps<CategoriesTreeIdsCache> & {
     hierarchyConfig: CategoriesTreeHierarchyConfiguration;
   },
 ) {

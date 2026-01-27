@@ -218,7 +218,7 @@ async function createSearchResultsTree(props: CreateSearchResultsTreeProps<Model
 }
 
 function createTreeSpecificVisibilityHandler(
-  props: CreateTreeSpecificVisibilityHandlerProps<ModelsTreeIdsCache, ModelsTreeSearchTargets> & { overrides?: ModelsTreeVisibilityHandlerOverrides },
+  props: CreateTreeSpecificVisibilityHandlerProps<ModelsTreeIdsCache> & { overrides?: ModelsTreeVisibilityHandlerOverrides },
 ) {
   const { info, getCache, overrideHandler, overrides, viewport } = props;
   return new ModelsTreeVisibilityHandler({

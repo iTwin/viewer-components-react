@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, defer, from, map, merge, mergeMap, of } from "rxjs";
+import { concat, defer, EMPTY, from, map, merge, mergeMap, of } from "rxjs";
 import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { HierarchyVisibilityHandlerImpl } from "../../../common/internal/useTreeHooks/UseCachedVisibility.js";
@@ -54,7 +54,7 @@ export interface ModelsTreeVisibilityHandlerOverrides extends BaseTreeVisibility
 export interface ModelsTreeVisibilityHandlerProps {
   idsCache: ModelsTreeIdsCache;
   viewport: TreeWidgetViewport;
-  alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfo<ModelsTreeSearchTargets>;
+  alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfo;
   overrideHandler: HierarchyVisibilityOverrideHandler;
   overrides?: ModelsTreeVisibilityHandlerOverrides;
 }
@@ -367,24 +367,51 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
                         topMostParentElementId,
                       })
                     : [];
-                  let totalChildrenCount = 0;
-                  elementsMap.forEach((_, elementId) => {
+                  let totalSearchTargetsChildrenCount = 0;
+                  const nonSearchTargetIds = new Array<Id64String>();
+                  const searchTargetIds = new Array<Id64String>();
+                  elementsMap.forEach(({ isSearchTarget }, elementId) => {
+                    if (!isSearchTarget) {
+                      nonSearchTargetIds.push(elementId);
+                      return;
+                    }
+                    searchTargetIds.push(elementId);
                     const childCount = elementsChildrenCountMap.get(elementId);
                     if (childCount) {
-                      totalChildrenCount += childCount;
+                      totalSearchTargetsChildrenCount += childCount;
                     }
                   });
-                  return this.#visibilityHelper.getElementsVisibilityStatus({
-                    modelId,
-                    categoryId,
-                    elementIds: [...elementsMap.keys()],
-                    type: "GeometricElement3d",
-                    parentElementsIdsPath,
-                    childrenCount: totalChildrenCount,
-                    // Search results tree is created on search paths. Since search paths contain only categories that are directly under models,
-                    // categoryId can be used here here.
-                    categoryOfTopMostParentElement: categoryId,
-                  });
+                  return merge(
+                    searchTargetIds.length > 0
+                      ? this.#visibilityHelper.getElementsVisibilityStatus({
+                          modelId,
+                          categoryId,
+                          elementIds: searchTargetIds,
+                          type: "GeometricElement3d",
+                          parentElementsIdsPath,
+                          childrenCount: totalSearchTargetsChildrenCount,
+                          // Search results tree is created on search paths. Since search paths contain only categories that are directly under models
+                          // or at the root, categoryId can be used here here.
+                          categoryOfTopMostParentElement: categoryId,
+                        })
+                      : EMPTY,
+                    // Set childrenCount to 0 for non search targets, as some of their child elements might be filtered out.
+                    // Since childrenCount is set to 0, these elements won't check child always/never drawn child elements status.
+                    // Child always/never drawn elements will be in search paths, and their visibility status will be handled separately.
+                    nonSearchTargetIds.length > 0
+                      ? this.#visibilityHelper.getElementsVisibilityStatus({
+                          modelId,
+                          categoryId,
+                          elementIds: nonSearchTargetIds,
+                          type: "GeometricElement3d",
+                          parentElementsIdsPath,
+                          childrenCount: 0,
+                          // Search results tree is created on search paths. Since search paths contain only categories that are directly under models
+                          // or at the root, categoryId can be used here here.
+                          categoryOfTopMostParentElement: categoryId,
+                        })
+                      : EMPTY,
+                  ).pipe(mergeVisibilityStatuses);
                 }),
               ),
             ),
