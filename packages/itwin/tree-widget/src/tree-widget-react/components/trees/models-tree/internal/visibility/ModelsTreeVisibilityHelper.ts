@@ -17,10 +17,9 @@ import type { BaseVisibilityHelperProps } from "../../../common/internal/visibil
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
 import type { ModelsTreeIdsCache } from "../ModelsTreeIdsCache.js";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./ModelsTreeVisibilityHandler.js";
-import type { ModelsTreeSearchTargets } from "./SearchResultsTree.js";
 
 /** @internal */
-export type ModelsTreeVisibilityHelperProps = BaseVisibilityHelperProps<ModelsTreeSearchTargets> & {
+export type ModelsTreeVisibilityHelperProps = BaseVisibilityHelperProps & {
   idsCache: ModelsTreeIdsCache;
   overrides?: ModelsTreeVisibilityHandlerOverrides;
 };
@@ -31,7 +30,7 @@ export type ModelsTreeVisibilityHelperProps = BaseVisibilityHelperProps<ModelsTr
  * It extends base visibility status helper and provides methods to get and change visibility status of subjects and grouped elements.
  * @internal
  */
-export class ModelsTreeVisibilityHelper extends BaseVisibilityHelper<ModelsTreeSearchTargets> {
+export class ModelsTreeVisibilityHelper extends BaseVisibilityHelper {
   #props: ModelsTreeVisibilityHelperProps;
   constructor(props: ModelsTreeVisibilityHelperProps) {
     super(props);

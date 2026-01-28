@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, defer, from, map, merge, mergeMap, of } from "rxjs";
+import { concat, defer, EMPTY, from, map, merge, mergeMap, of } from "rxjs";
 import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { HierarchyVisibilityHandlerImpl } from "../../../common/internal/useTreeHooks/UseCachedVisibility.js";
@@ -39,7 +39,7 @@ import type { CategoriesTreeSearchTargets } from "./SearchResultsTree.js";
 export interface CategoriesTreeVisibilityHandlerProps {
   idsCache: CategoriesTreeIdsCache;
   viewport: TreeWidgetViewport;
-  alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfo<CategoriesTreeSearchTargets>;
+  alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfo;
   hierarchyConfig: CategoriesTreeHierarchyConfiguration;
 }
 
@@ -195,6 +195,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
         modelElementsMap: node.extendedData.modelElementsMap,
         parentKeys: node.parentKeys,
         childrenCount: node.extendedData.childrenCount,
+        topMostParentElementId: node.extendedData.topMostParentElementId,
       });
     }
 
@@ -386,24 +387,51 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
                         topMostParentElementId,
                       })
                     : [];
-                  let totalChildrenCount = 0;
-                  elementsMap.forEach((_, elementId) => {
+                  let totalSearchTargetsChildrenCount = 0;
+                  const nonSearchTargetIds = new Array<Id64String>();
+                  const searchTargetIds = new Array<Id64String>();
+                  elementsMap.forEach(({ isSearchTarget }, elementId) => {
+                    if (!isSearchTarget) {
+                      nonSearchTargetIds.push(elementId);
+                      return;
+                    }
+                    searchTargetIds.push(elementId);
                     const childCount = elementsChildrenCountMap.get(elementId);
                     if (childCount) {
-                      totalChildrenCount += childCount;
+                      totalSearchTargetsChildrenCount += childCount;
                     }
                   });
-                  return this.#visibilityHelper.getElementsVisibilityStatus({
-                    modelId,
-                    categoryId,
-                    elementIds: [...elementsMap.keys()],
-                    type: this.#elementType,
-                    parentElementsIdsPath,
-                    childrenCount: totalChildrenCount,
-                    // Search results tree is created on search paths. Since search paths contain only categories that are directly under models
-                    // or at the root, categoryId can be used here here.
-                    categoryOfTopMostParentElement: categoryId,
-                  });
+                  return merge(
+                    searchTargetIds.length > 0
+                      ? this.#visibilityHelper.getElementsVisibilityStatus({
+                          modelId,
+                          categoryId,
+                          elementIds: searchTargetIds,
+                          type: this.#elementType,
+                          parentElementsIdsPath,
+                          childrenCount: totalSearchTargetsChildrenCount,
+                          // Search results tree is created on search paths. Since search paths contain only categories that are directly under models
+                          // or at the root, categoryId can be used here here.
+                          categoryOfTopMostParentElement: categoryId,
+                        })
+                      : EMPTY,
+                    // Set childrenCount to undefined for non search targets, as some of their child elements might be filtered out.
+                    // Since childrenCount is set to undefined, these elements won't check child always/never drawn child elements status.
+                    // Child always/never drawn elements will be in search paths, and their visibility status will be handled separately.
+                    nonSearchTargetIds.length > 0
+                      ? this.#visibilityHelper.getElementsVisibilityStatus({
+                          modelId,
+                          categoryId,
+                          elementIds: nonSearchTargetIds,
+                          type: this.#elementType,
+                          parentElementsIdsPath,
+                          childrenCount: undefined,
+                          // Search results tree is created on search paths. Since search paths contain only categories that are directly under models
+                          // or at the root, categoryId can be used here here.
+                          categoryOfTopMostParentElement: categoryId,
+                        })
+                      : EMPTY,
+                  ).pipe(mergeVisibilityStatuses);
                 }),
               ),
             ),

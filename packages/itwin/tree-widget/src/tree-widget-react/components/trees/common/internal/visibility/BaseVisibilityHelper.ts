@@ -39,7 +39,6 @@ import {
 
 import type { Observable, Subscription } from "rxjs";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
-import type { InstanceKey } from "@itwin/presentation-common";
 import type { ClassGroupingNodeKey, HierarchyNode, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { TreeWidgetViewport } from "../../TreeWidgetViewport.js";
 import type { HierarchyVisibilityHandlerOverridableMethod, HierarchyVisibilityOverrideHandler, VisibilityStatus } from "../../UseHierarchyVisibility.js";
@@ -103,9 +102,9 @@ export interface TreeSpecificVisibilityHandler<TSearchTargets> {
 }
 
 /** @internal */
-export interface BaseVisibilityHelperProps<TSearchResultsTargets> {
+export interface BaseVisibilityHelperProps {
   viewport: TreeWidgetViewport;
-  alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfo<TSearchResultsTargets>;
+  alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfo;
   overrideHandler?: HierarchyVisibilityOverrideHandler;
   overrides?: BaseTreeVisibilityHandlerOverrides;
   baseIdsCache: BaseIdsCache;
@@ -117,13 +116,13 @@ export interface BaseVisibilityHelperProps<TSearchResultsTargets> {
  * It provides methods that help retrieve and change visibility status of models, categories, elements.
  * @internal
  */
-export class BaseVisibilityHelper<TSearchResultsTargets> implements Disposable {
-  readonly #props: BaseVisibilityHelperProps<TSearchResultsTargets>;
-  readonly #alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo<TSearchResultsTargets>;
+export class BaseVisibilityHelper implements Disposable {
+  readonly #props: BaseVisibilityHelperProps;
+  readonly #alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo;
   #elementChangeQueue = new Subject<Observable<void>>();
   #subscriptions: Subscription[] = [];
 
-  constructor(props: BaseVisibilityHelperProps<TSearchResultsTargets>) {
+  constructor(props: BaseVisibilityHelperProps) {
     this.#props = props;
     this.#alwaysAndNeverDrawnElements = this.#props.alwaysAndNeverDrawnElementInfo;
     this.#subscriptions.push(this.#elementChangeQueue.pipe(concatAll()).subscribe());
@@ -445,11 +444,10 @@ export class BaseVisibilityHelper<TSearchResultsTargets> implements Disposable {
     type: "GeometricElement3d" | "GeometricElement2d";
     categoryOfTopMostParentElement: CategoryId;
     parentElementsIdsPath: Array<Id64Arg>;
-    childrenCount: number;
-    searchPathToElements?: InstanceKey[];
+    childrenCount: number | undefined;
   }): Observable<VisibilityStatus> {
     const result = defer(() => {
-      const { elementIds, modelId, categoryId, type, parentElementsIdsPath, childrenCount, categoryOfTopMostParentElement, searchPathToElements } = props;
+      const { elementIds, modelId, categoryId, type, parentElementsIdsPath, childrenCount, categoryOfTopMostParentElement } = props;
       if (this.#props.viewport.viewType === "other") {
         return EMPTY;
       }
@@ -493,7 +491,6 @@ export class BaseVisibilityHelper<TSearchResultsTargets> implements Disposable {
         modelId,
         categoryOfTopMostParentElement,
         childrenCount,
-        searchPathToElements,
       }).pipe(
         mergeMap((visibilityStatusAlwaysAndNeverDraw) => {
           return from(Id64.iterable(elementIds)).pipe(
@@ -539,8 +536,7 @@ export class BaseVisibilityHelper<TSearchResultsTargets> implements Disposable {
             parentElementsIdsPath: Array<Id64Arg>;
             categoryOfTopMostParentElement: Id64String;
             modelId: Id64String;
-            childrenCount: number;
-            searchPathToElements?: InstanceKey[];
+            childrenCount: number | undefined;
           }
         | { queryProps: { modelId: Id64String; categoryIds: Id64Arg } }
       ),
@@ -555,9 +551,10 @@ export class BaseVisibilityHelper<TSearchResultsTargets> implements Disposable {
     }
 
     if ("elements" in props) {
+      const { childrenCount } = props;
       const parentElementIdsPath = [...props.parentElementsIdsPath, props.elements];
-      // When element does not have children, we don't need to query for child always/never drawn elements.
-      if (props.childrenCount === 0) {
+      // When elements children count is 0 or undefined, no need to query for child always/never drawn elements.
+      if (!childrenCount) {
         return of(
           getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
             ...props,
@@ -575,14 +572,12 @@ export class BaseVisibilityHelper<TSearchResultsTargets> implements Disposable {
           categoryIds: props.categoryOfTopMostParentElement,
           parentElementIdsPath,
           setType: "always",
-          searchPathToElements: props.searchPathToElements,
         }),
         childNeverDrawn: this.#alwaysAndNeverDrawnElements.getAlwaysOrNeverDrawnElements({
           modelIds: props.modelId,
           categoryIds: props.categoryOfTopMostParentElement,
           parentElementIdsPath,
           setType: "never",
-          searchPathToElements: props.searchPathToElements,
         }),
       }).pipe(
         map(({ childAlwaysDrawn, childNeverDrawn }) => {
@@ -595,7 +590,7 @@ export class BaseVisibilityHelper<TSearchResultsTargets> implements Disposable {
             neverDrawnSize: viewport.neverDrawn?.size
               ? getMergedSet(childNeverDrawn, setIntersection(props.elements, viewport.neverDrawn)).size
               : childNeverDrawn.size,
-            totalCount: props.childrenCount + Id64.sizeOf(props.elements),
+            totalCount: childrenCount + Id64.sizeOf(props.elements),
             viewport,
           });
         }),

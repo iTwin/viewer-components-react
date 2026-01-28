@@ -16,10 +16,9 @@ import type { BaseVisibilityHelperProps } from "../../../common/internal/visibil
 import type { VisibilityStatus } from "../../../common/UseHierarchyVisibility.js";
 import type { CategoriesTreeHierarchyConfiguration } from "../../CategoriesTreeDefinition.js";
 import type { CategoriesTreeIdsCache } from "../CategoriesTreeIdsCache.js";
-import type { CategoriesTreeSearchTargets } from "./SearchResultsTree.js";
 
 /** @internal */
-export type CategoriesTreeVisibilityHelperProps = BaseVisibilityHelperProps<CategoriesTreeSearchTargets> & {
+export type CategoriesTreeVisibilityHelperProps = BaseVisibilityHelperProps & {
   idsCache: CategoriesTreeIdsCache;
   hierarchyConfig: CategoriesTreeHierarchyConfiguration;
 };
@@ -30,7 +29,7 @@ export type CategoriesTreeVisibilityHelperProps = BaseVisibilityHelperProps<Cate
  * It extends base visibility status helper and provides methods to get and change visibility status of definition containers and grouped elements.
  * @internal
  */
-export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper<CategoriesTreeSearchTargets> {
+export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
   #props: CategoriesTreeVisibilityHelperProps;
   constructor(props: CategoriesTreeVisibilityHelperProps) {
     super(props);

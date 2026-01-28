@@ -32,8 +32,8 @@ export interface CreateSearchResultsTreeProps<TCache> {
 }
 
 /** @internal */
-export interface CreateTreeSpecificVisibilityHandlerProps<TCache, TSearchTargets> {
-  info: AlwaysAndNeverDrawnElementInfo<TSearchTargets>;
+export interface CreateTreeSpecificVisibilityHandlerProps<TCache> {
+  info: AlwaysAndNeverDrawnElementInfo;
   getCache: () => TCache;
   viewport: TreeWidgetViewport;
   overrideHandler: HierarchyVisibilityOverrideHandler;
@@ -45,9 +45,7 @@ export interface UseCachedVisibilityProps<TCache, TSearchTargets> {
   activeView: TreeWidgetViewport;
   getCache: () => TCache;
   createSearchResultsTree: (props: CreateSearchResultsTreeProps<TCache>) => Promise<SearchResultsTree<TSearchTargets>>;
-  createTreeSpecificVisibilityHandler: (
-    props: CreateTreeSpecificVisibilityHandlerProps<TCache, TSearchTargets>,
-  ) => TreeSpecificVisibilityHandler<TSearchTargets> & Disposable;
+  createTreeSpecificVisibilityHandler: (props: CreateTreeSpecificVisibilityHandlerProps<TCache>) => TreeSpecificVisibilityHandler<TSearchTargets> & Disposable;
 }
 
 /** @internal */
@@ -116,7 +114,7 @@ function createVisibilityHandlerFactory<TCache, TSearchTargets>(
 export interface HierarchyVisibilityHandlerImplProps<TSearchTargets> {
   viewport: TreeWidgetViewport;
   getTreeSpecificVisibilityHandler: (
-    info: AlwaysAndNeverDrawnElementInfo<TSearchTargets>,
+    info: AlwaysAndNeverDrawnElementInfo,
     overrideHandler: HierarchyVisibilityOverrideHandler,
   ) => TreeSpecificVisibilityHandler<TSearchTargets> & Disposable;
   getSearchResultsTree: () => Promise<SearchResultsTree<TSearchTargets>> | undefined;
@@ -134,7 +132,7 @@ export interface HierarchyVisibilityHandlerImplProps<TSearchTargets> {
 export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements HierarchyVisibilityHandler, Disposable {
   readonly #props: HierarchyVisibilityHandlerImplProps<TSearchTargets>;
   readonly #eventListener: IVisibilityChangeEventListener;
-  readonly #alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo<TSearchTargets>;
+  readonly #alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo;
   #treeSpecificVisibilityHandler: TreeSpecificVisibilityHandler<TSearchTargets> & Disposable;
   #changeRequest = new Subject<{ key: HierarchyNodeKey; depth: number }>();
   #searchResultsTree: Promise<SearchResultsTree<TSearchTargets>> | undefined;
@@ -154,7 +152,6 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
     this.#alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfo({
       viewport: this.#props.viewport,
       componentId: props.componentId,
-      searchResultsTree: this.#searchResultsTree,
     });
     this.#treeSpecificVisibilityHandler = this.#props.getTreeSpecificVisibilityHandler(
       this.#alwaysAndNeverDrawnElements,
@@ -222,7 +219,12 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
       }
     }
 
-    if (HierarchyNode.isInstancesNode(node) && node.search?.childrenTargetPaths?.length && !node.search.isSearchTarget) {
+    if (
+      HierarchyNode.isInstancesNode(node) &&
+      node.search?.childrenTargetPaths?.length &&
+      !node.search.isSearchTarget &&
+      !node.search.hasSearchTargetAncestor
+    ) {
       return this.getSearchResultsNodeVisibility({ node });
     }
     return this.#treeSpecificVisibilityHandler.getVisibilityStatus(node);
@@ -234,7 +236,12 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
         return this.changeSearchResultsNodeVisibility({ node, on });
       }
     }
-    if (HierarchyNode.isInstancesNode(node) && node.search?.childrenTargetPaths?.length && !node.search.isSearchTarget) {
+    if (
+      HierarchyNode.isInstancesNode(node) &&
+      node.search?.childrenTargetPaths?.length &&
+      !node.search.isSearchTarget &&
+      !node.search.hasSearchTargetAncestor
+    ) {
       return this.changeSearchResultsNodeVisibility({ node, on });
     }
     return this.#treeSpecificVisibilityHandler.changeVisibilityStatus(node, on);
