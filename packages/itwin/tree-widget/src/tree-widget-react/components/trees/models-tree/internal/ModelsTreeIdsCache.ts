@@ -6,6 +6,8 @@
 import { defer, EMPTY, filter, forkJoin, from, map, mergeAll, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
 import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
+import { ElementChildrenCache } from "../../common/internal/caches/ElementChildrenCache.js";
+import { ModelCategoryElementsCountCache } from "../../common/internal/caches/ModelCategoryElementsCountCache.js";
 import {
   CLASS_NAME_GeometricModel3d,
   CLASS_NAME_InformationPartitionElement,
@@ -14,8 +16,6 @@ import {
   CLASS_NAME_SubCategory,
   CLASS_NAME_Subject,
 } from "../../common/internal/ClassNameDefinitions.js";
-import { ElementChildrenCache } from "../../common/internal/ElementChildrenCache.js";
-import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
 import { catchBeSQLiteInterrupts } from "../../common/internal/UseErrorState.js";
 import { pushToMap } from "../../common/internal/Utils.js";
 

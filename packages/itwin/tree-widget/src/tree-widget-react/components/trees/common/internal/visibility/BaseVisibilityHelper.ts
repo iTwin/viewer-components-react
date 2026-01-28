@@ -42,7 +42,7 @@ import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentle
 import type { ClassGroupingNodeKey, HierarchyNode, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { TreeWidgetViewport } from "../../TreeWidgetViewport.js";
 import type { HierarchyVisibilityHandlerOverridableMethod, HierarchyVisibilityOverrideHandler, VisibilityStatus } from "../../UseHierarchyVisibility.js";
-import type { AlwaysAndNeverDrawnElementInfo } from "../AlwaysAndNeverDrawnElementInfo.js";
+import type { AlwaysAndNeverDrawnElementInfoCache } from "../caches/AlwaysAndNeverDrawnElementInfoCache.js";
 import type { CategoryId, ModelId } from "../Types.js";
 import type { ChildrenTree } from "../Utils.js";
 import type { GetVisibilityFromAlwaysAndNeverDrawnElementsProps } from "../VisibilityUtils.js";
@@ -104,7 +104,7 @@ export interface TreeSpecificVisibilityHandler<TSearchTargets> {
 /** @internal */
 export interface BaseVisibilityHelperProps {
   viewport: TreeWidgetViewport;
-  alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfo;
+  alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfoCache;
   overrideHandler?: HierarchyVisibilityOverrideHandler;
   overrides?: BaseTreeVisibilityHandlerOverrides;
   baseIdsCache: BaseIdsCache;
@@ -118,7 +118,7 @@ export interface BaseVisibilityHelperProps {
  */
 export class BaseVisibilityHelper implements Disposable {
   readonly #props: BaseVisibilityHelperProps;
-  readonly #alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo;
+  readonly #alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfoCache;
   #elementChangeQueue = new Subject<Observable<void>>();
   #subscriptions: Subscription[] = [];
 

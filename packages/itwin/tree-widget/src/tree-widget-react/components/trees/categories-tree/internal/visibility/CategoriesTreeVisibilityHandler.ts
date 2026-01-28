@@ -24,7 +24,7 @@ import type { Observable } from "rxjs";
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { ClassGroupingNodeKey, HierarchyNode, HierarchySearchPath, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
-import type { AlwaysAndNeverDrawnElementInfo } from "../../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
+import type { AlwaysAndNeverDrawnElementInfoCache } from "../../../common/internal/caches/AlwaysAndNeverDrawnElementInfoCache.js";
 import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
 import type { ChildrenTree } from "../../../common/internal/Utils.js";
 import type { SearchResultsTree } from "../../../common/internal/visibility/BaseSearchResultsTree.js";
@@ -39,7 +39,7 @@ import type { CategoriesTreeSearchTargets } from "./SearchResultsTree.js";
 export interface CategoriesTreeVisibilityHandlerProps {
   idsCache: CategoriesTreeIdsCache;
   viewport: TreeWidgetViewport;
-  alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfo;
+  alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfoCache;
   hierarchyConfig: CategoriesTreeHierarchyConfiguration;
 }
 

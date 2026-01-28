@@ -5,9 +5,9 @@
 
 import { defer, EMPTY, forkJoin, from, map, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
+import { ElementChildrenCache } from "../../common/internal/caches/ElementChildrenCache.js";
+import { ModelCategoryElementsCountCache } from "../../common/internal/caches/ModelCategoryElementsCountCache.js";
 import { CLASS_NAME_DefinitionContainer, CLASS_NAME_Model, CLASS_NAME_SubCategory } from "../../common/internal/ClassNameDefinitions.js";
-import { ElementChildrenCache } from "../../common/internal/ElementChildrenCache.js";
-import { ModelCategoryElementsCountCache } from "../../common/internal/ModelCategoryElementsCountCache.js";
 import { catchBeSQLiteInterrupts } from "../../common/internal/UseErrorState.js";
 import { getClassesByView, joinId64Arg } from "../../common/internal/Utils.js";
 

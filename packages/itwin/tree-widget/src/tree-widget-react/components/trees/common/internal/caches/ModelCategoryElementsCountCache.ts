@@ -5,13 +5,13 @@
 
 import { bufferCount, bufferTime, defer, filter, from, map, mergeAll, mergeMap, reduce, ReplaySubject, Subject, take, toArray } from "rxjs";
 import { assert, Guid } from "@itwin/core-bentley";
-import { catchBeSQLiteInterrupts } from "./UseErrorState.js";
-import { releaseMainThreadOnItemsCount } from "./Utils.js";
+import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
+import { releaseMainThreadOnItemsCount } from "../Utils.js";
 
 import type { Observable, Subscription } from "rxjs";
 import type { GuidString, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import type { CategoryId, ModelId } from "./Types.js";
+import type { CategoryId, ModelId } from "../Types.js";
 
 type ModelCategoryKey = `${ModelId}-${CategoryId}`;
 

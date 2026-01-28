@@ -5,13 +5,13 @@
 
 import { defaultIfEmpty, defer, EMPTY, firstValueFrom, from, map, mergeMap, reduce, tap } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
-import { catchBeSQLiteInterrupts } from "./UseErrorState.js";
-import { getOptimalBatchSize } from "./Utils.js";
+import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
+import { getOptimalBatchSize } from "../Utils.js";
 
 import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import type { ChildrenTree } from "./Utils.js";
+import type { ChildrenTree } from "../Utils.js";
 
 type ChildElementsMap = Map<Id64String, { children: Id64Array | undefined }>;
 type ChildElementsLoadingMap = Map<Id64String, Promise<void>>;
