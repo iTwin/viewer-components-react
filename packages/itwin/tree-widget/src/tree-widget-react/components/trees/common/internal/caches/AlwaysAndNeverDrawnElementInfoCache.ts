@@ -30,13 +30,13 @@ import {
 } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { catchBeSQLiteInterrupts } from "./UseErrorState.js";
-import { getClassesByView, getIdsFromChildrenTree, getOptimalBatchSize, releaseMainThreadOnItemsCount, setDifference, updateChildrenTree } from "./Utils.js";
+import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
+import { getClassesByView, getIdsFromChildrenTree, getOptimalBatchSize, releaseMainThreadOnItemsCount, setDifference, updateChildrenTree } from "../Utils.js";
 
 import type { Observable, Subscription } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64String } from "@itwin/core-bentley";
-import type { TreeWidgetViewport } from "../TreeWidgetViewport.js";
-import type { ChildrenTree } from "./Utils.js";
+import type { TreeWidgetViewport } from "../../TreeWidgetViewport.js";
+import type { ChildrenTree } from "../Utils.js";
 
 /** @internal */
 export const SET_CHANGE_DEBOUNCE_TIME = 20;
@@ -86,14 +86,14 @@ export type MapEntry = { isInAlwaysOrNeverDrawnSet: true; categoryId: Id64String
 
 type CachedNodesMap = ChildrenTree<MapEntry>;
 
-interface AlwaysAndNeverDrawnElementInfoProps {
+interface AlwaysAndNeverDrawnElementInfoCacheProps {
   viewport: TreeWidgetViewport;
   elementClassName?: string;
   componentId?: GuidString;
 }
 
 /** @internal */
-export class AlwaysAndNeverDrawnElementInfo implements Disposable {
+export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
   #subscriptions: Subscription[];
   #alwaysDrawn: { cacheEntryObs: Observable<CachedNodesMap>; latestCacheEntryValue?: CachedNodesMap };
   #neverDrawn: { cacheEntryObs: Observable<CachedNodesMap>; latestCacheEntryValue?: CachedNodesMap };
@@ -106,7 +106,7 @@ export class AlwaysAndNeverDrawnElementInfo implements Disposable {
   #suppressors: Observable<number>;
   #suppress = new Subject<boolean>();
 
-  constructor(props: AlwaysAndNeverDrawnElementInfoProps) {
+  constructor(props: AlwaysAndNeverDrawnElementInfoCacheProps) {
     this.#viewport = props.viewport;
     this.#alwaysDrawn = { cacheEntryObs: this.createCacheEntryObservable("always") };
     this.#neverDrawn = { cacheEntryObs: this.createCacheEntryObservable("never") };
