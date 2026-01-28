@@ -395,8 +395,8 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
                           categoryOfTopMostParentElement: categoryId,
                         })
                       : EMPTY,
-                    // Set childrenCount to 0 for non search targets, as some of their child elements might be filtered out.
-                    // Since childrenCount is set to 0, these elements won't check child always/never drawn child elements status.
+                    // Set childrenCount to undefined for non search targets, as some of their child elements might be filtered out.
+                    // Since childrenCount is set to undefined, these elements won't check child always/never drawn child elements status.
                     // Child always/never drawn elements will be in search paths, and their visibility status will be handled separately.
                     nonSearchTargetIds.length > 0
                       ? this.#visibilityHelper.getElementsVisibilityStatus({
@@ -405,7 +405,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
                           elementIds: nonSearchTargetIds,
                           type: "GeometricElement3d",
                           parentElementsIdsPath,
-                          childrenCount: 0,
+                          childrenCount: undefined,
                           // Search results tree is created on search paths. Since search paths contain only categories that are directly under models
                           // or at the root, categoryId can be used here here.
                           categoryOfTopMostParentElement: categoryId,

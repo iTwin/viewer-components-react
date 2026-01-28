@@ -444,7 +444,7 @@ export class BaseVisibilityHelper implements Disposable {
     type: "GeometricElement3d" | "GeometricElement2d";
     categoryOfTopMostParentElement: CategoryId;
     parentElementsIdsPath: Array<Id64Arg>;
-    childrenCount: number;
+    childrenCount: number | undefined;
   }): Observable<VisibilityStatus> {
     const result = defer(() => {
       const { elementIds, modelId, categoryId, type, parentElementsIdsPath, childrenCount, categoryOfTopMostParentElement } = props;
@@ -536,7 +536,7 @@ export class BaseVisibilityHelper implements Disposable {
             parentElementsIdsPath: Array<Id64Arg>;
             categoryOfTopMostParentElement: Id64String;
             modelId: Id64String;
-            childrenCount: number;
+            childrenCount: number | undefined;
           }
         | { queryProps: { modelId: Id64String; categoryIds: Id64Arg } }
       ),
@@ -551,9 +551,10 @@ export class BaseVisibilityHelper implements Disposable {
     }
 
     if ("elements" in props) {
+      const { childrenCount } = props;
       const parentElementIdsPath = [...props.parentElementsIdsPath, props.elements];
-      // When element does not have children, we don't need to query for child always/never drawn elements.
-      if (props.childrenCount === 0) {
+      // When elements children count is 0 or undefined, no need to query for child always/never drawn elements.
+      if (!childrenCount) {
         return of(
           getVisibilityFromAlwaysAndNeverDrawnElementsImpl({
             ...props,
@@ -589,7 +590,7 @@ export class BaseVisibilityHelper implements Disposable {
             neverDrawnSize: viewport.neverDrawn?.size
               ? getMergedSet(childNeverDrawn, setIntersection(props.elements, viewport.neverDrawn)).size
               : childNeverDrawn.size,
-            totalCount: props.childrenCount + Id64.sizeOf(props.elements),
+            totalCount: childrenCount + Id64.sizeOf(props.elements),
             viewport,
           });
         }),

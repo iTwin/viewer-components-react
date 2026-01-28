@@ -301,8 +301,8 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
                     categoryOfTopMostParentElement,
                   })
                 : EMPTY,
-              // Set childrenCount to 0 for non search targets, as some of their child elements might be filtered out.
-              // Since childrenCount is set to 0, these elements won't check child always/never drawn child elements status.
+              // Set childrenCount to undefined for non search targets, as some of their child elements might be filtered out.
+              // Since childrenCount is set to undefined, these elements won't check child always/never drawn child elements status.
               // Child always/never drawn elements will be in search paths, and their visibility status will be handled separately.
               nonSearchTargetIds.length > 0
                 ? this.#visibilityHelper.getElementsVisibilityStatus({
@@ -311,7 +311,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
                     elementIds: nonSearchTargetIds,
                     type: type === "3d" ? "GeometricElement3d" : "GeometricElement2d",
                     parentElementsIdsPath,
-                    childrenCount: 0,
+                    childrenCount: undefined,
                     categoryOfTopMostParentElement,
                   })
                 : EMPTY,
