@@ -3,11 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, filter, forkJoin, from, map, mergeAll, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
+import { defer, filter, forkJoin, from, map, mergeAll, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
 import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import { ElementChildrenCache } from "../../common/internal/caches/ElementChildrenCache.js";
 import { ModelCategoryElementsCountCache } from "../../common/internal/caches/ModelCategoryElementsCountCache.js";
+import { ModeledElementsCache } from "../../common/internal/caches/ModeledElementsCache.js";
 import { SubCategoriesCache } from "../../common/internal/caches/SubCategoriesCache.js";
 import {
   CLASS_NAME_GeometricModel3d,
@@ -23,7 +24,7 @@ import type { Observable } from "rxjs";
 import type { GuidString, Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNodeIdentifiersPath, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
-import type { CategoryId, ElementId, ModelId, SubCategoryId, SubjectId } from "../../common/internal/Types.js";
+import type { CategoryId, ModelId, SubCategoryId, SubjectId } from "../../common/internal/Types.js";
 import type { ChildrenTree } from "../../common/internal/Utils.js";
 import type { ModelsTreeDefinition } from "../ModelsTreeDefinition.js";
 
@@ -47,11 +48,11 @@ export class ModelsTreeIdsCache implements Disposable {
   #subjectInfos: Observable<Map<SubjectId, SubjectInfo>> | undefined;
   #parentSubjectIds: Observable<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
   #modelInfos: Observable<Map<ModelId, ModelInfo>> | undefined;
-  #modelWithCategoryModeledElements: Observable<Map<ModelId, Map<CategoryId, Set<ElementId>>>> | undefined;
   #modelKeyPaths: Map<ModelId, Observable<HierarchyNodeIdentifiersPath[]>>;
   #subjectKeyPaths: Map<SubjectId, Observable<HierarchyNodeIdentifiersPath>>;
   #elementChildrenCache: ElementChildrenCache;
   #subCategoriesCache: SubCategoriesCache;
+  #modeledElementsCache: ModeledElementsCache;
   #categoryKeyPaths: Map<CategoryId, Observable<HierarchyNodeIdentifiersPath[]>>;
   #queryExecutor: LimitingECSqlQueryExecutor;
   #hierarchyConfig: ModelsTreeHierarchyConfiguration;
@@ -80,6 +81,12 @@ export class ModelsTreeIdsCache implements Disposable {
       componentId: this.#componentId,
     });
     this.#categoryKeyPaths = new Map();
+    this.#modeledElementsCache = new ModeledElementsCache({
+      queryExecutor: this.#queryExecutor,
+      componentId: this.#componentId,
+      elementClassNames: [this.#hierarchyConfig.elementClassSpecification],
+      modelClassName: CLASS_NAME_Model,
+    });
   }
 
   public [Symbol.dispose]() {
@@ -362,52 +369,6 @@ export class ModelsTreeIdsCache implements Disposable {
     );
   }
 
-  private queryModeledElements(): Observable<{ modelId: Id64String; categoryId: Id64String; modeledElementId: Id64String }> {
-    return defer(() => {
-      const query = `
-        SELECT
-          pe.ECInstanceId modeledElementId,
-          pe.Category.Id categoryId,
-          pe.Model.Id modelId
-        FROM ${CLASS_NAME_Model} m
-        JOIN ${this.#hierarchyConfig.elementClassSpecification} pe ON pe.ECInstanceId = m.ModeledElement.Id
-        WHERE
-          m.IsPrivate = false
-          AND m.ECInstanceId IN (SELECT Model.Id FROM ${this.#hierarchyConfig.elementClassSpecification})
-      `;
-      return this.#queryExecutor.createQueryReader(
-        { ecsql: query },
-        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/modeled-elements` },
-      );
-    }).pipe(
-      catchBeSQLiteInterrupts,
-      map((row) => {
-        return { modelId: row.modelId, categoryId: row.categoryId, modeledElementId: row.modeledElementId };
-      }),
-    );
-  }
-
-  private getModelWithCategoryModeledElements() {
-    this.#modelWithCategoryModeledElements ??= this.queryModeledElements().pipe(
-      reduce((acc, { modelId, categoryId, modeledElementId }) => {
-        let modelEntry = acc.get(modelId);
-        if (!modelEntry) {
-          modelEntry = new Map();
-          acc.set(modelId, modelEntry);
-        }
-        const categoryEntry = modelEntry.get(categoryId);
-        if (!categoryEntry) {
-          modelEntry.set(categoryId, new Set([modeledElementId]));
-        } else {
-          categoryEntry.add(modeledElementId);
-        }
-        return acc;
-      }, new Map<ModelId, Map<CategoryId, Set<ElementId>>>()),
-      shareReplay(),
-    );
-    return this.#modelWithCategoryModeledElements;
-  }
-
   private getModelInfos() {
     this.#modelInfos ??= this.queryModelCategories().pipe(
       reduce((acc, { modelId, categoryId, isModelPrivate, isRootElementCategory }) => {
@@ -444,32 +405,11 @@ export class ModelsTreeIdsCache implements Disposable {
   }
 
   public hasSubModel(elementId: Id64String): Observable<boolean> {
-    return this.getModelInfos().pipe(
-      map((modelInfos) => {
-        const modeledElementInfo = modelInfos.get(elementId);
-        if (!modeledElementInfo) {
-          return false;
-        }
-        return !modeledElementInfo.isModelPrivate;
-      }),
-    );
+    return this.#modeledElementsCache.hasSubModel(elementId);
   }
 
   public getCategoriesModeledElements(modelId: Id64String, categoryIds: Id64Arg): Observable<Id64Array> {
-    return this.getModelWithCategoryModeledElements().pipe(
-      mergeMap((modelWithCategoryModeledElements) => {
-        const result = new Array<ElementId>();
-        const categoryMap = modelWithCategoryModeledElements.get(modelId);
-        if (!categoryMap) {
-          return of(result);
-        }
-        return from(Id64.iterable(categoryIds)).pipe(
-          map((categoryId) => categoryMap.get(categoryId)),
-          mergeMap((elementsSet) => (elementsSet ? from(elementsSet) : EMPTY)),
-          toArray(),
-        );
-      }),
-    );
+    return this.#modeledElementsCache.getCategoriesModeledElements(modelId, categoryIds);
   }
 
   public getCategoriesElementModels(categoryIds: Id64Arg): Observable<{ id: CategoryId; models: Array<ModelId> | undefined }> {
