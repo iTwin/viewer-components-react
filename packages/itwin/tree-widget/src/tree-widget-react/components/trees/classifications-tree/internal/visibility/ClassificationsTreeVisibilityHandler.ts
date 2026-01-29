@@ -14,7 +14,7 @@ import { ClassificationsTreeVisibilityHelper } from "./ClassificationsTreeVisibi
 import type { Observable } from "rxjs";
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
-import type { AlwaysAndNeverDrawnElementInfo } from "../../../common/internal/AlwaysAndNeverDrawnElementInfo.js";
+import type { AlwaysAndNeverDrawnElementInfoCache } from "../../../common/internal/caches/AlwaysAndNeverDrawnElementInfoCache.js";
 import type { CategoryId, ElementId, ModelId } from "../../../common/internal/Types.js";
 import type { ChildrenTree } from "../../../common/internal/Utils.js";
 import type { BaseIdsCache, TreeSpecificVisibilityHandler } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
@@ -27,7 +27,7 @@ import type { ClassificationsTreeSearchTargets } from "./SearchResultsTree.js";
 export interface ClassificationsTreeVisibilityHandlerProps {
   idsCache: ClassificationsTreeIdsCache;
   viewport: TreeWidgetViewport;
-  alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfo;
+  alwaysAndNeverDrawnElementInfo: AlwaysAndNeverDrawnElementInfoCache;
 }
 
 /**

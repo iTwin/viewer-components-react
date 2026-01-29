@@ -8,7 +8,7 @@ import { defaultIfEmpty, EMPTY, filter, firstValueFrom, from, fromEventPattern, 
 import { assert } from "@itwin/core-bentley";
 import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { HierarchyVisibilityOverrideHandler } from "../../UseHierarchyVisibility.js";
-import { AlwaysAndNeverDrawnElementInfo } from "../AlwaysAndNeverDrawnElementInfo.js";
+import { AlwaysAndNeverDrawnElementInfoCache } from "../caches/AlwaysAndNeverDrawnElementInfoCache.js";
 import { toVoidPromise } from "../Rxjs.js";
 import { createVisibilityStatus } from "../Tooltip.js";
 import { createVisibilityChangeEventListener } from "../VisibilityChangeEventListener.js";
@@ -33,7 +33,7 @@ export interface CreateSearchResultsTreeProps<TCache> {
 
 /** @internal */
 export interface CreateTreeSpecificVisibilityHandlerProps<TCache> {
-  info: AlwaysAndNeverDrawnElementInfo;
+  info: AlwaysAndNeverDrawnElementInfoCache;
   getCache: () => TCache;
   viewport: TreeWidgetViewport;
   overrideHandler: HierarchyVisibilityOverrideHandler;
@@ -114,7 +114,7 @@ function createVisibilityHandlerFactory<TCache, TSearchTargets>(
 export interface HierarchyVisibilityHandlerImplProps<TSearchTargets> {
   viewport: TreeWidgetViewport;
   getTreeSpecificVisibilityHandler: (
-    info: AlwaysAndNeverDrawnElementInfo,
+    info: AlwaysAndNeverDrawnElementInfoCache,
     overrideHandler: HierarchyVisibilityOverrideHandler,
   ) => TreeSpecificVisibilityHandler<TSearchTargets> & Disposable;
   getSearchResultsTree: () => Promise<SearchResultsTree<TSearchTargets>> | undefined;
@@ -132,7 +132,7 @@ export interface HierarchyVisibilityHandlerImplProps<TSearchTargets> {
 export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements HierarchyVisibilityHandler, Disposable {
   readonly #props: HierarchyVisibilityHandlerImplProps<TSearchTargets>;
   readonly #eventListener: IVisibilityChangeEventListener;
-  readonly #alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo;
+  readonly #alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfoCache;
   #treeSpecificVisibilityHandler: TreeSpecificVisibilityHandler<TSearchTargets> & Disposable;
   #changeRequest = new Subject<{ key: HierarchyNodeKey; depth: number }>();
   #searchResultsTree: Promise<SearchResultsTree<TSearchTargets>> | undefined;
@@ -149,7 +149,7 @@ export class HierarchyVisibilityHandlerImpl<TSearchTargets> implements Hierarchy
       },
     });
     this.#searchResultsTree = this.#props.getSearchResultsTree();
-    this.#alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfo({
+    this.#alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfoCache({
       viewport: this.#props.viewport,
       componentId: props.componentId,
     });
