@@ -8,12 +8,12 @@ import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import { ElementChildrenCache } from "../../common/internal/caches/ElementChildrenCache.js";
 import { ModelCategoryElementsCountCache } from "../../common/internal/caches/ModelCategoryElementsCountCache.js";
+import { SubCategoriesCache } from "../../common/internal/caches/SubCategoriesCache.js";
 import {
   CLASS_NAME_GeometricModel3d,
   CLASS_NAME_InformationPartitionElement,
   CLASS_NAME_Model,
   CLASS_NAME_SpatialCategory,
-  CLASS_NAME_SubCategory,
   CLASS_NAME_Subject,
 } from "../../common/internal/ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../../common/internal/UseErrorState.js";
@@ -44,7 +44,6 @@ type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeD
 /** @internal */
 export class ModelsTreeIdsCache implements Disposable {
   readonly #categoryElementCounts: ModelCategoryElementsCountCache;
-  #categorySubCategories: Observable<Map<CategoryId, Array<SubCategoryId>>> | undefined;
   #subjectInfos: Observable<Map<SubjectId, SubjectInfo>> | undefined;
   #parentSubjectIds: Observable<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
   #modelInfos: Observable<Map<ModelId, ModelInfo>> | undefined;
@@ -52,6 +51,7 @@ export class ModelsTreeIdsCache implements Disposable {
   #modelKeyPaths: Map<ModelId, Observable<HierarchyNodeIdentifiersPath[]>>;
   #subjectKeyPaths: Map<SubjectId, Observable<HierarchyNodeIdentifiersPath>>;
   #elementChildrenCache: ElementChildrenCache;
+  #subCategoriesCache: SubCategoriesCache;
   #categoryKeyPaths: Map<CategoryId, Observable<HierarchyNodeIdentifiersPath[]>>;
   #queryExecutor: LimitingECSqlQueryExecutor;
   #hierarchyConfig: ModelsTreeHierarchyConfiguration;
@@ -75,6 +75,10 @@ export class ModelsTreeIdsCache implements Disposable {
       elementClassName: this.#hierarchyConfig.elementClassSpecification,
       componentId: this.#componentId,
     });
+    this.#subCategoriesCache = new SubCategoriesCache({
+      queryExecutor: this.#queryExecutor,
+      componentId: this.#componentId,
+    });
     this.#categoryKeyPaths = new Map();
   }
 
@@ -90,47 +94,8 @@ export class ModelsTreeIdsCache implements Disposable {
     return this.#elementChildrenCache.getAllChildElementsCount({ elementIds });
   }
 
-  private querySubCategories(): Observable<{ id: SubCategoryId; parentId: CategoryId }> {
-    return defer(() => {
-      const definitionsQuery = `
-        SELECT
-          sc.ECInstanceId id,
-          sc.Parent.Id categoryId
-        FROM
-          ${CLASS_NAME_SubCategory} sc
-        WHERE
-          NOT sc.IsPrivate
-      `;
-      return this.#queryExecutor.createQueryReader(
-        { ecsql: definitionsQuery },
-        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/visible-sub-categories` },
-      );
-    }).pipe(
-      catchBeSQLiteInterrupts,
-      map((row) => {
-        return { id: row.id, parentId: row.categoryId };
-      }),
-    );
-  }
-  private getSubCategoriesInfo() {
-    this.#categorySubCategories ??= this.querySubCategories()
-      .pipe(
-        reduce((acc, queriedSubCategory) => {
-          const entry = acc.get(queriedSubCategory.parentId);
-          if (entry) {
-            entry.push(queriedSubCategory.id);
-          } else {
-            acc.set(queriedSubCategory.parentId, [queriedSubCategory.id]);
-          }
-          return acc;
-        }, new Map<CategoryId, Array<SubCategoryId>>()),
-      )
-      .pipe(shareReplay());
-    return this.#categorySubCategories;
-  }
-
   public getSubCategories(categoryId: Id64String): Observable<Array<SubCategoryId>> {
-    return this.getSubCategoriesInfo().pipe(map((categorySubCategories) => categorySubCategories.get(categoryId) ?? []));
+    return this.#subCategoriesCache.getSubCategories(categoryId);
   }
 
   private querySubjects(): Observable<{ id: SubjectId; parentId?: SubjectId; targetPartitionId?: ModelId; hideInHierarchy: boolean }> {
