@@ -49,16 +49,16 @@ export class ModeledElementsCache {
       const query = this.#elementsClassNames
         .map((elementClassName) => {
           return `
-          SELECT
-            pe.ECInstanceId modeledElementId,
-            pe.Category.Id categoryId,
-            pe.Model.Id modelId
-          FROM ${this.#modelClassName} m
-          JOIN ${elementClassName} pe ON pe.ECInstanceId = m.ModeledElement.Id
-          WHERE
-            m.IsPrivate = false
-            AND m.ECInstanceId IN (SELECT Model.Id FROM ${this.#elementsClassNames.length > 1 ? CLASS_NAME_Element : elementClassName})
-        `;
+            SELECT
+              pe.ECInstanceId modeledElementId,
+              pe.Category.Id categoryId,
+              pe.Model.Id modelId
+            FROM ${this.#modelClassName} m
+            JOIN ${elementClassName} pe ON pe.ECInstanceId = m.ModeledElement.Id
+            WHERE
+              m.IsPrivate = false
+              AND m.ECInstanceId IN (SELECT Model.Id FROM ${this.#elementsClassNames.length > 1 ? CLASS_NAME_Element : elementClassName})
+          `;
         })
         .join(" UNION ALL ");
       return this.#queryExecutor.createQueryReader(
