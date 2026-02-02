@@ -78,11 +78,12 @@ export function useCategoriesTree({
   const viewType = activeView.viewType === "2d" ? "2d" : "3d";
   const componentId = useGuid();
 
-  const { getCache: getCategoriesTreeIdsCache } = useIdsCache<CategoriesTreeIdsCache, { viewType: "2d" | "3d" }>({
+  const { getCache: getCategoriesTreeIdsCache } = useIdsCache<CategoriesTreeIdsCache>({
     imodel: activeView.iModel,
     createCache,
-    cacheSpecificProps: useMemo(() => ({ viewType }), [viewType]),
     componentId,
+    cacheSpecificProps: {},
+    cacheType: viewType,
   });
 
   const { visibilityHandlerFactory, onSearchPathsChanged } = useCategoriesCachedVisibility({
@@ -95,7 +96,12 @@ export function useCategoriesTree({
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
     (props) => {
-      return new CategoriesTreeDefinition({ ...props, viewType, idsCache: getCategoriesTreeIdsCache(), hierarchyConfig: hierarchyConfiguration });
+      return new CategoriesTreeDefinition({
+        ...props,
+        viewType,
+        idsCache: getCategoriesTreeIdsCache(),
+        hierarchyConfig: hierarchyConfiguration,
+      });
     },
     [viewType, getCategoriesTreeIdsCache, hierarchyConfiguration],
   );
@@ -231,6 +237,6 @@ async function createSearchResultsTree(
   });
 }
 
-function createCache(props: CreateCacheProps<{ viewType: "2d" | "3d" }>) {
-  return new CategoriesTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.specificProps.viewType, props.componentId);
+function createCache(props: CreateCacheProps) {
+  return new CategoriesTreeIdsCache(createECSqlQueryExecutor(props.imodel), props.viewType, props.componentId);
 }

@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Adjust useTree hooks to not recreate caches when switching views.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "100586436+JonasDov@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

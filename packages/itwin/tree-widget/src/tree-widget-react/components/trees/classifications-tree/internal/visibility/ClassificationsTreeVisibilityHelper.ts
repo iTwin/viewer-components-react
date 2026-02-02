@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { merge, mergeMap, of, toArray } from "rxjs";
+import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
 import { BaseVisibilityHelper } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 
@@ -38,13 +39,19 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
    */
   public getClassificationTablesVisibilityStatus(props: { classificationTableIds: Id64Arg }): Observable<VisibilityStatus> {
     return this.#props.idsCache.getAllContainedCategories(props.classificationTableIds).pipe(
-      mergeMap(({ drawing, spatial }) =>
-        merge(
+      mergeMap(({ drawing, spatial }) => {
+        if (
+          this.#props.viewport.viewType === "other" ||
+          (this.#props.viewport.viewType === "2d" && spatial.length > 0) ||
+          (this.#props.viewport.viewType === "3d" && drawing.length > 0)
+        ) {
+          return of(createVisibilityStatus("disabled"));
+        }
+        return merge(
           of(drawing).pipe(mergeMap((categoryIds) => this.getCategoriesVisibilityStatus({ modelId: undefined, categoryIds, type: "DrawingCategory" }))),
           of(spatial).pipe(mergeMap((categoryIds) => this.getCategoriesVisibilityStatus({ modelId: undefined, categoryIds, type: "SpatialCategory" }))),
-        ),
-      ),
-      mergeVisibilityStatuses,
+        ).pipe(mergeVisibilityStatuses);
+      }),
     );
   }
 
@@ -55,13 +62,19 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
    */
   public getClassificationsVisibilityStatus(props: { classificationIds: Id64Arg }): Observable<VisibilityStatus> {
     return this.#props.idsCache.getAllContainedCategories(props.classificationIds).pipe(
-      mergeMap(({ drawing, spatial }) =>
-        merge(
+      mergeMap(({ drawing, spatial }) => {
+        if (
+          this.#props.viewport.viewType === "other" ||
+          (this.#props.viewport.viewType === "2d" && spatial.length > 0) ||
+          (this.#props.viewport.viewType === "3d" && drawing.length > 0)
+        ) {
+          return of(createVisibilityStatus("disabled"));
+        }
+        return merge(
           of(drawing).pipe(mergeMap((categoryIds) => this.getCategoriesVisibilityStatus({ modelId: undefined, categoryIds, type: "DrawingCategory" }))),
           of(spatial).pipe(mergeMap((categoryIds) => this.getCategoriesVisibilityStatus({ modelId: undefined, categoryIds, type: "SpatialCategory" }))),
-        ),
-      ),
-      mergeVisibilityStatuses,
+        ).pipe(mergeVisibilityStatuses);
+      }),
     );
   }
 

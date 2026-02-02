@@ -217,7 +217,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                   },
                   {
                     parentInstancesNodePredicate: this.#categoryModelClass,
-                    definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createGeometricModel3dChildrenQuery(requestProps),
+                    definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createGeometricModelChildrenQuery(requestProps),
                   },
                 ]
               : []),
@@ -282,7 +282,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     ];
   }
 
-  private async createGeometricModel3dChildrenQuery({
+  private async createGeometricModelChildrenQuery({
     parentNodeInstanceIds: modelIds,
     instanceFilter,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {

@@ -10,23 +10,24 @@ import type { GuidString } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 
 /** @internal */
-export interface CreateCacheProps<TCacheSpecificProps> {
+export interface CreateCacheProps<TCacheSpecificProps extends object = {}> {
   imodel: IModelConnection;
   specificProps: TCacheSpecificProps;
   componentId: GuidString;
+  viewType: "2d" | "3d";
 }
 
 /** @internal */
-export interface UseIdsCacheProps<TCache, TCacheSpecificProps> {
+export interface UseIdsCacheProps<TCache, TCacheSpecificProps extends object = {}> {
   imodel: IModelConnection;
   createCache: (props: CreateCacheProps<TCacheSpecificProps>) => TCache;
   cacheSpecificProps: TCacheSpecificProps;
   componentId: GuidString;
+  cacheType: "2d" | "3d";
 }
 
-/** @internal */
-export function useIdsCache<TCache extends Disposable, TCacheSpecificProps extends object>(
-  props: UseIdsCacheProps<TCache, TCacheSpecificProps>,
+function useIdsCacheOfSpecificViewType<TCache extends Disposable, TCacheSpecificProps extends object>(
+  props: UseIdsCacheProps<TCache, TCacheSpecificProps> & { viewType: "2d" | "3d" },
 ): { getCache: () => TCache } {
   const cacheRef = useRef<TCache | undefined>(undefined);
   const clearCacheRef = useRef(() => {
@@ -38,7 +39,7 @@ export function useIdsCache<TCache extends Disposable, TCacheSpecificProps exten
   const createCacheGetterRef = useRef((currImodel: IModelConnection, specificProps: TCacheSpecificProps, componentId: GuidString) => {
     return () => {
       if (cacheRef.current === undefined) {
-        cacheRef.current = createCache({ imodel: currImodel, specificProps, componentId });
+        cacheRef.current = createCache({ imodel: currImodel, specificProps, componentId, viewType: props.viewType });
       }
       return cacheRef.current;
     };
@@ -66,6 +67,22 @@ export function useIdsCache<TCache extends Disposable, TCacheSpecificProps exten
       setCacheGetter(() => createCacheGetterRef.current(imodel, cacheSpecificProps, props.componentId));
     }, [imodel, cacheSpecificProps, props.componentId]),
   });
+
+  return {
+    getCache,
+  };
+}
+
+/** @internal */
+export function useIdsCache<TCache extends Disposable, TCacheSpecificProps extends object = {}>(
+  props: UseIdsCacheProps<TCache, TCacheSpecificProps>,
+): { getCache: () => TCache } {
+  const { getCache: get2dCache } = useIdsCacheOfSpecificViewType<TCache, TCacheSpecificProps>({ ...props, viewType: "2d" });
+  const { getCache: get3dCache } = useIdsCacheOfSpecificViewType<TCache, TCacheSpecificProps>({ ...props, viewType: "3d" });
+
+  const getCache = useCallback(() => {
+    return props.cacheType === "2d" ? get2dCache() : get3dCache();
+  }, [props.cacheType, get2dCache, get3dCache]);
 
   return {
     getCache,
