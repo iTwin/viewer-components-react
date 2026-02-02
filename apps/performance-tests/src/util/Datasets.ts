@@ -7,9 +7,6 @@ import fs from "fs";
 import path from "path";
 import {
   insertDefinitionContainer,
-  insertDrawingCategory,
-  insertDrawingElement,
-  insertDrawingModelWithPartition,
   insertPhysicalElement,
   insertPhysicalModelWithPartition,
   insertPhysicalSubModel,
@@ -270,7 +267,6 @@ export class Datasets {
       );
 
       const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "physical model" });
-      const drawingModel = insertDrawingModelWithPartition({ builder, codeValue: "drawing model" });
 
       const systemId = builder.insertElement({
         classFullName: "ClassificationSystems.ClassificationSystem",
@@ -332,28 +328,6 @@ export class Datasets {
           builder.insertRelationship({
             classFullName: "TestClassificationSchema.CategorySymbolizesClassification",
             sourceId: spatialCategory.id,
-            targetId: classificationId,
-          });
-
-          const drawingCategory = insertDrawingCategory({
-            builder,
-            codeValue: `Drawing category ${j + 1}`,
-            modelId: tableModelId,
-          });
-          const drawingElement = insertDrawingElement({
-            builder,
-            modelId: drawingModel.id,
-            categoryId: drawingCategory.id,
-            userLabel: `drawing element ${i + 1} ${j + 1}`,
-          });
-          builder.insertRelationship({
-            classFullName: "ClassificationSystems.ElementHasClassifications",
-            sourceId: drawingElement.id,
-            targetId: classificationId,
-          });
-          builder.insertRelationship({
-            classFullName: "TestClassificationSchema.CategorySymbolizesClassification",
-            sourceId: drawingCategory.id,
             targetId: classificationId,
           });
         }

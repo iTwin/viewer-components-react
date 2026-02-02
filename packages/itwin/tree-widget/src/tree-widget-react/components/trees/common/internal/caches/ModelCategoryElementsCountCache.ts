@@ -21,15 +21,15 @@ export class ModelCategoryElementsCountCache implements Disposable {
   #requestsStream = new Subject<{ modelId: Id64String; categoryId: Id64String }>();
   #subscription: Subscription;
   #queryExecutor: LimitingECSqlQueryExecutor;
-  #elementsClassNames: string[];
+  #elementsClassName: string;
   #componentId: GuidString;
   #componentName: string;
 
-  public constructor(queryExecutor: LimitingECSqlQueryExecutor, elementsClassNames: string[], componentId: GuidString) {
-    this.#componentId = componentId;
-    this.#queryExecutor = queryExecutor;
-    this.#elementsClassNames = elementsClassNames;
-    this.#componentName = "ModelCategoryElementsCountCache";
+  public constructor(props: { queryExecutor: LimitingECSqlQueryExecutor; elementsClassName: string; componentId: GuidString; viewType: "2d" | "3d" }) {
+    this.#componentId = props.componentId;
+    this.#queryExecutor = props.queryExecutor;
+    this.#elementsClassName = props.elementsClassName;
+    this.#componentName = `ModelCategoryElementsCountCache${props.viewType}`;
     this.#subscription = this.#requestsStream
       .pipe(
         bufferTime(20),
@@ -68,11 +68,11 @@ export class ModelCategoryElementsCountCache implements Disposable {
         defer(() =>
           this.#queryExecutor.createQueryReader(
             {
-              ctes: this.#elementsClassNames.map(
-                (elementsClassName, index) => `
-                  CategoryElements${index}(id, modelId, categoryId) AS (
+              ctes: [
+                `
+                  CategoryElements(id, modelId, categoryId) AS (
                     SELECT ECInstanceId, Model.Id, Category.Id
-                    FROM ${elementsClassName}
+                    FROM ${this.#elementsClassName}
                     WHERE
                       Parent.Id IS NULL
                       AND (
@@ -82,22 +82,14 @@ export class ModelCategoryElementsCountCache implements Disposable {
                     UNION ALL
 
                     SELECT c.ECInstanceId, p.modelId, p.categoryId
-                    FROM ${elementsClassName} c
-                    JOIN CategoryElements${index} p ON c.Parent.Id = p.id
+                    FROM ${this.#elementsClassName} c
+                    JOIN CategoryElements p ON c.Parent.Id = p.id
                   )
                 `,
-              ),
+              ],
               ecsql: `
                 SELECT modelId, categoryId, COUNT(id) elementsCount
-                FROM (
-                  ${this.#elementsClassNames
-                    .map(
-                      (_, index) => `
-                      SELECT * FROM CategoryElements${index}
-                    `,
-                    )
-                    .join(" UNION ALL ")}
-                )
+                FROM (SELECT * FROM CategoryElements)
                 GROUP BY modelId, categoryId
               `,
             },
@@ -141,7 +133,7 @@ export class ModelCategoryElementsCountCache implements Disposable {
     this.#subscription.unsubscribe();
   }
 
-  public getCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Observable<number> {
+  public getCategoryElementsCount({ modelId, categoryId }: { modelId: Id64String; categoryId: Id64String }): Observable<number> {
     const cacheKey: ModelCategoryKey = `${modelId}-${categoryId}`;
     let result = this.#cache.get(cacheKey);
     if (result !== undefined) {

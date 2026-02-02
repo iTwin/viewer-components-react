@@ -29,9 +29,9 @@ describe("ModelsTreeIdsCache", () => {
       throw new Error(`Unexpected query: ${query}`);
     });
     using cache = createIdsCache(stub);
-    await expect(firstValueFrom(cache.getCategoryElementsCount(modelId, categoryId))).to.eventually.eq(elementIds.length);
+    await expect(firstValueFrom(cache.getCategoryElementsCount({ modelId, categoryId }))).to.eventually.eq(elementIds.length);
     expect(stub).to.have.callCount(1);
-    await expect(firstValueFrom(cache.getCategoryElementsCount(modelId, categoryId))).to.eventually.eq(elementIds.length);
+    await expect(firstValueFrom(cache.getCategoryElementsCount({ modelId, categoryId }))).to.eventually.eq(elementIds.length);
     expect(stub).to.have.callCount(1);
   });
 });

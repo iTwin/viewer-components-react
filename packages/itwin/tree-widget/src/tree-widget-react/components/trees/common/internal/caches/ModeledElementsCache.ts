@@ -5,7 +5,6 @@
 
 import { defer, EMPTY, from, map, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
-import { CLASS_NAME_Element } from "../ClassNameDefinitions.js";
 import { catchBeSQLiteInterrupts } from "../UseErrorState.js";
 
 import type { Observable } from "rxjs";
@@ -16,8 +15,9 @@ import type { CategoryId, ElementId, ModelId } from "../Types.js";
 interface ModeledElementsCacheProps {
   queryExecutor: LimitingECSqlQueryExecutor;
   componentId?: GuidString;
-  elementClassNames: Array<string>;
+  elementClassName: string;
   modelClassName: string;
+  viewType: "2d" | "3d";
 }
 
 /** @internal */
@@ -25,7 +25,7 @@ export class ModeledElementsCache {
   #queryExecutor: LimitingECSqlQueryExecutor;
   #componentId: GuidString;
   #componentName: string;
-  #elementsClassNames: Array<string>;
+  #elementsClassName: string;
   #modelClassName: string;
   // ElementId here is also a ModelId, since those elements are sub models.
   #modeledElementsInfo:
@@ -35,8 +35,8 @@ export class ModeledElementsCache {
   constructor(props: ModeledElementsCacheProps) {
     this.#queryExecutor = props.queryExecutor;
     this.#componentId = props.componentId ?? Guid.createValue();
-    this.#componentName = "ModeledElementsCache";
-    this.#elementsClassNames = props.elementClassNames;
+    this.#componentName = `ModeledElementsCache${props.viewType}`;
+    this.#elementsClassName = props.elementClassName;
     this.#modelClassName = props.modelClassName;
   }
 
@@ -46,21 +46,17 @@ export class ModeledElementsCache {
     categoryId: Id64String;
   }> {
     return defer(() => {
-      const query = this.#elementsClassNames
-        .map((elementClassName) => {
-          return `
-            SELECT
-              pe.ECInstanceId modeledElementId,
-              pe.Category.Id categoryId,
-              pe.Model.Id modelId
-            FROM ${this.#modelClassName} m
-            JOIN ${elementClassName} pe ON pe.ECInstanceId = m.ModeledElement.Id
-            WHERE
-              m.IsPrivate = false
-              AND m.ECInstanceId IN (SELECT Model.Id FROM ${this.#elementsClassNames.length > 1 ? CLASS_NAME_Element : elementClassName})
-          `;
-        })
-        .join(" UNION ALL ");
+      const query = `
+        SELECT
+          pe.ECInstanceId modeledElementId,
+          pe.Category.Id categoryId,
+          pe.Model.Id modelId
+        FROM ${this.#modelClassName} m
+        JOIN ${this.#elementsClassName} pe ON pe.ECInstanceId = m.ModeledElement.Id
+        WHERE
+          m.IsPrivate = false
+          AND m.ECInstanceId IN (SELECT Model.Id FROM ${this.#elementsClassName})
+      `;
       return this.#queryExecutor.createQueryReader(
         { ecsql: query },
         { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/modeled-elements` },
@@ -102,7 +98,7 @@ export class ModeledElementsCache {
     return this.getModeledElementsInfo().pipe(map(({ allSubModels }) => allSubModels.has(elementId)));
   }
 
-  public getCategoriesModeledElements(modelId: Id64String, categoryIds: Id64Arg): Observable<Id64Array> {
+  public getCategoriesModeledElements({ modelId, categoryIds }: { modelId: Id64String; categoryIds: Id64Arg }): Observable<Id64Array> {
     return this.getModeledElementsInfo().pipe(
       mergeMap(({ modelWithCategoryModeledElements }) => {
         const result = new Array<ElementId>();
