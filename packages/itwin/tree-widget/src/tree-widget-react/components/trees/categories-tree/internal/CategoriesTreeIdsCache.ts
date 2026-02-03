@@ -66,11 +66,17 @@ export class CategoriesTreeIdsCache implements Disposable {
     this.#categoryModelClass = modelClass;
     this.#componentId = componentId ?? Guid.createValue();
     this.#componentName = "CategoriesTreeIdsCache";
-    this.#categoryElementCounts = new ModelCategoryElementsCountCache(this.#queryExecutor, [elementClass], this.#componentId);
+    this.#categoryElementCounts = new ModelCategoryElementsCountCache({
+      queryExecutor: this.#queryExecutor,
+      elementsClassName: elementClass,
+      componentId: this.#componentId,
+      viewType,
+    });
     this.#elementChildrenCache = new ElementChildrenCache({
       queryExecutor: this.#queryExecutor,
       elementClassName: this.#categoryElementClass,
       componentId: this.#componentId,
+      viewType,
     });
     this.#subCategoriesCache = new SubCategoriesCache({
       queryExecutor: this.#queryExecutor,
@@ -79,8 +85,9 @@ export class CategoriesTreeIdsCache implements Disposable {
     this.#modeledElementsCache = new ModeledElementsCache({
       queryExecutor: this.#queryExecutor,
       componentId: this.#componentId,
-      elementClassNames: [this.#categoryElementClass],
+      elementClassName: this.#categoryElementClass,
       modelClassName: this.#categoryModelClass,
+      viewType,
     });
   }
 
@@ -356,8 +363,8 @@ export class CategoriesTreeIdsCache implements Disposable {
     return this.#elementModelsCategories;
   }
 
-  public getCategoriesModeledElements(modelId: Id64String, categoryIds: Id64Arg): Observable<Id64Array> {
-    return this.#modeledElementsCache.getCategoriesModeledElements(modelId, categoryIds);
+  public getCategoriesModeledElements(props: { modelId: Id64String; categoryIds: Id64Arg }): Observable<Id64Array> {
+    return this.#modeledElementsCache.getCategoriesModeledElements(props);
   }
 
   private getDefinitionContainersInfo() {
@@ -573,8 +580,8 @@ export class CategoriesTreeIdsCache implements Disposable {
     );
   }
 
-  public getCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Observable<number> {
-    return this.#categoryElementCounts.getCategoryElementsCount(modelId, categoryId);
+  public getCategoryElementsCount(props: { modelId: Id64String; categoryId: Id64String }): Observable<number> {
+    return this.#categoryElementCounts.getCategoryElementsCount(props);
   }
 
   public getAllDefinitionContainersAndCategories(props?: {

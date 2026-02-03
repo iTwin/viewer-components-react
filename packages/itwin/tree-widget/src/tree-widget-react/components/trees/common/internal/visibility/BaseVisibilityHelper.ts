@@ -76,13 +76,13 @@ export interface BaseIdsCache {
   getElementsCount: (props: { modelId: Id64String; categoryId: Id64String }) => Observable<number>;
   getSubCategories: (props: { categoryId: Id64String }) => Observable<Id64Array>;
   getModels: (props: { categoryIds: Id64Arg }) => Observable<{ id: Id64String; models: Id64Arg | undefined }>;
-  getCategories: (props: { modelIds: Id64Arg }) => Observable<{ id: Id64String; drawingCategories?: Id64Arg; spatialCategories?: Id64Arg }>;
+  getCategories: (props: { modelIds: Id64Arg }) => Observable<{ id: Id64String; categories: Id64Arg | undefined }>;
   getSubModels: (
     props: { modelIds: Id64Arg; categoryId?: Id64String } | { categoryIds: Id64Arg; modelId: Id64String | undefined },
   ) => Observable<{ id: Id64String; subModels: Id64Arg | undefined }>;
-  getAllCategories: () => Observable<{ drawingCategories?: Id64Set; spatialCategories?: Id64Set }>;
-  getChildElementsTree: (props: { elementIds: Id64Arg; type: "2d" | "3d" }) => Observable<ChildrenTree>;
-  getAllChildElementsCount: (props: { elementIds: Id64Arg; type: "2d" | "3d" }) => Observable<Map<Id64String, number>>;
+  getAllCategories: () => Observable<Id64Set>;
+  getChildElementsTree: (props: { elementIds: Id64Arg }) => Observable<ChildrenTree>;
+  getAllChildElementsCount: (props: { elementIds: Id64Arg }) => Observable<Map<Id64String, number>>;
 }
 
 /**
@@ -142,10 +142,9 @@ export class BaseVisibilityHelper implements Disposable {
    * - Removes all per-model category overrides. */
   public removeAlwaysDrawnExclusive(): Observable<void> {
     return from(this.#props.baseIdsCache.getAllCategories()).pipe(
-      map(({ drawingCategories, spatialCategories }) => {
-        const categoriesToTurnOff = this.#props.viewport.viewType === "2d" ? drawingCategories : spatialCategories;
-        if (categoriesToTurnOff) {
-          this.#props.viewport.changeCategoryDisplay({ categoryIds: categoriesToTurnOff, display: false, enableAllSubCategories: false });
+      map((categories) => {
+        if (categories.size) {
+          this.#props.viewport.changeCategoryDisplay({ categoryIds: categories, display: false, enableAllSubCategories: false });
         }
         this.#props.viewport.clearNeverDrawn();
         this.#props.viewport.clearPerModelCategoryOverrides();
@@ -162,12 +161,9 @@ export class BaseVisibilityHelper implements Disposable {
    * - Models' subModels visibility (if elements' modelId is in the provided modelIds, and element is itself a model, then it is considered a subModel);
    * - Categories visibility in the viewport (if elements' modelId is in the provided modelIds, then its' category gets checked).
    */
-  public getModelsVisibilityStatus(props: { modelIds: Id64Arg; type: "GeometricModel3d" | "GeometricModel2d" }): Observable<VisibilityStatus> {
+  public getModelsVisibilityStatus(props: { modelIds: Id64Arg }): Observable<VisibilityStatus> {
     const result = defer(() => {
-      const { modelIds, type } = props;
-      if ((type === "GeometricModel3d" && this.#props.viewport.viewType !== "3d") || (type === "GeometricModel2d" && this.#props.viewport.viewType !== "2d")) {
-        return of(createVisibilityStatus("disabled"));
-      }
+      const { modelIds } = props;
       return from(Id64.iterable(modelIds)).pipe(
         mergeMap((modelId) => {
           // For hidden models we only need to check subModels
@@ -175,7 +171,7 @@ export class BaseVisibilityHelper implements Disposable {
             return this.#props.baseIdsCache.getSubModels({ modelIds: modelId }).pipe(
               mergeMap(({ subModels }) => {
                 if (subModels && Id64.sizeOf(subModels) > 0) {
-                  return this.getModelsVisibilityStatus({ modelIds: subModels, type }).pipe(
+                  return this.getModelsVisibilityStatus({ modelIds: subModels }).pipe(
                     map((subModelsVisibilityStatus) =>
                       subModelsVisibilityStatus.state !== "hidden" ? createVisibilityStatus("partial") : createVisibilityStatus("hidden"),
                     ),
@@ -187,15 +183,8 @@ export class BaseVisibilityHelper implements Disposable {
           }
           // For visible models we need to check all categories
           return this.#props.baseIdsCache.getCategories({ modelIds: modelId }).pipe(
-            mergeMap(({ drawingCategories, spatialCategories }) =>
-              merge(
-                drawingCategories
-                  ? of(drawingCategories).pipe(mergeMap((categoryIds) => this.getCategoriesVisibilityStatus({ modelId, categoryIds, type: "DrawingCategory" })))
-                  : EMPTY,
-                spatialCategories
-                  ? of(spatialCategories).pipe(mergeMap((categoryIds) => this.getCategoriesVisibilityStatus({ modelId, categoryIds, type: "SpatialCategory" })))
-                  : EMPTY,
-              ),
+            mergeMap(({ categories }) =>
+              merge(categories ? of(categories).pipe(mergeMap((categoryIds) => this.getCategoriesVisibilityStatus({ modelId, categoryIds }))) : EMPTY),
             ),
             defaultIfEmpty(createVisibilityStatus("visible")),
           );
@@ -220,15 +209,7 @@ export class BaseVisibilityHelper implements Disposable {
    * - Default categories visibility status in the viewport;
    * - SubModels that are related to the modelId and categoryIds
    */
-  private getVisibleModelCategoriesVisibilityStatus({
-    modelId,
-    categoryIds,
-    type,
-  }: {
-    modelId: Id64String;
-    categoryIds: Id64Arg;
-    type: "GeometricModel3d" | "GeometricModel2d";
-  }) {
+  private getVisibleModelCategoriesVisibilityStatus({ modelId, categoryIds }: { modelId: Id64String; categoryIds: Id64Arg }) {
     return merge(
       this.getVisibilityFromAlwaysAndNeverDrawnElements({
         queryProps: { modelId, categoryIds },
@@ -237,7 +218,7 @@ export class BaseVisibilityHelper implements Disposable {
       this.#props.baseIdsCache.getSubModels({ modelId, categoryIds }).pipe(
         mergeMap(({ subModels }) => {
           if (subModels && Id64.sizeOf(subModels) > 0) {
-            return this.getModelsVisibilityStatus({ modelIds: subModels, type });
+            return this.getModelsVisibilityStatus({ modelIds: subModels });
           }
           return EMPTY;
         }),
@@ -281,22 +262,9 @@ export class BaseVisibilityHelper implements Disposable {
    * - Visibility of models that are related to the categories;
    * - sub-categories visibility.
    */
-  public getCategoriesVisibilityStatus(props: {
-    categoryIds: Id64Arg;
-    modelId: Id64String | undefined;
-    type: "DrawingCategory" | "SpatialCategory";
-  }): Observable<VisibilityStatus> {
+  public getCategoriesVisibilityStatus(props: { categoryIds: Id64Arg; modelId: Id64String | undefined }): Observable<VisibilityStatus> {
     const result = defer(() => {
-      const { categoryIds, modelId: modelIdFromProps, type } = props;
-      if (Id64.sizeOf(categoryIds) === 0 || this.#props.viewport.viewType === "other") {
-        return EMPTY;
-      }
-
-      const isSupportedInView =
-        (this.#props.viewport.viewType === "3d" && type === "SpatialCategory") || (this.#props.viewport.viewType === "2d" && type === "DrawingCategory");
-      if (!isSupportedInView) {
-        return of(createVisibilityStatus("disabled"));
-      }
+      const { categoryIds, modelId: modelIdFromProps } = props;
       const categoryModelsObs = modelIdFromProps
         ? from(Id64.iterable(categoryIds)).pipe(map((categoryId) => ({ id: categoryId, models: modelIdFromProps })))
         : this.#props.baseIdsCache.getModels({ categoryIds });
@@ -351,7 +319,6 @@ export class BaseVisibilityHelper implements Disposable {
                     if (subModels && Id64.sizeOf(subModels) > 0) {
                       return this.getModelsVisibilityStatus({
                         modelIds: subModels,
-                        type: this.#props.viewport.viewType === "2d" ? "GeometricModel2d" : "GeometricModel3d",
                       }).pipe(
                         map((subModelsVisibilityStatus) =>
                           subModelsVisibilityStatus.state !== "hidden" ? createVisibilityStatus("partial") : createVisibilityStatus("hidden"),
@@ -369,7 +336,6 @@ export class BaseVisibilityHelper implements Disposable {
                     this.getVisibleModelCategoriesVisibilityStatus({
                       modelId,
                       categoryIds: categoryId,
-                      type: this.#props.viewport.viewType === "2d" ? "GeometricModel2d" : "GeometricModel3d",
                     }),
                   ),
                 )
@@ -441,22 +407,12 @@ export class BaseVisibilityHelper implements Disposable {
     elementIds: Id64Arg;
     modelId: Id64String;
     categoryId: Id64String;
-    type: "GeometricElement3d" | "GeometricElement2d";
     categoryOfTopMostParentElement: CategoryId;
     parentElementsIdsPath: Array<Id64Arg>;
     childrenCount: number | undefined;
   }): Observable<VisibilityStatus> {
     const result = defer(() => {
-      const { elementIds, modelId, categoryId, type, parentElementsIdsPath, childrenCount, categoryOfTopMostParentElement } = props;
-      if (this.#props.viewport.viewType === "other") {
-        return EMPTY;
-      }
-
-      const isSupportedInView =
-        (this.#props.viewport.viewType === "3d" && type === "GeometricElement3d") || (this.#props.viewport.viewType === "2d" && type === "GeometricElement2d");
-      if (!isSupportedInView) {
-        return of(createVisibilityStatus("disabled"));
-      }
+      const { elementIds, modelId, categoryId, parentElementsIdsPath, childrenCount, categoryOfTopMostParentElement } = props;
 
       // TODO: check child elements that are subModels https://github.com/iTwin/viewer-components-react/issues/1564
       if (!this.#props.viewport.viewsModel(modelId)) {
@@ -467,7 +423,6 @@ export class BaseVisibilityHelper implements Disposable {
                 if (isSubModel) {
                   return this.getModelsVisibilityStatus({
                     modelIds: elementId,
-                    type: this.#props.viewport.viewType === "2d" ? "GeometricModel2d" : "GeometricModel3d",
                   }).pipe(
                     map((subModelVisibilityStatus) =>
                       subModelVisibilityStatus.state !== "hidden" ? createVisibilityStatus("partial") : createVisibilityStatus("hidden"),
@@ -500,7 +455,6 @@ export class BaseVisibilityHelper implements Disposable {
                   if (isSubModel) {
                     return this.getModelsVisibilityStatus({
                       modelIds: elementId,
-                      type: this.#props.viewport.viewType === "2d" ? "GeometricModel2d" : "GeometricModel3d",
                     }).pipe(
                       map((subModelVisibilityStatus) =>
                         subModelVisibilityStatus.state !== visibilityStatusAlwaysAndNeverDraw.state
@@ -659,11 +613,8 @@ export class BaseVisibilityHelper implements Disposable {
 
       viewport.changeModelDisplay({ modelIds, display: true });
       return this.#props.baseIdsCache.getCategories({ modelIds }).pipe(
-        mergeMap(({ id, drawingCategories, spatialCategories }) => {
-          return merge(
-            drawingCategories ? this.changeCategoriesVisibilityStatus({ categoryIds: drawingCategories, modelId: id, on }) : EMPTY,
-            spatialCategories ? this.changeCategoriesVisibilityStatus({ categoryIds: spatialCategories, modelId: id, on }) : EMPTY,
-          );
+        mergeMap(({ id, categories }) => {
+          return merge(categories ? this.changeCategoriesVisibilityStatus({ categoryIds: categories, modelId: id, on }) : EMPTY);
         }),
       );
     });
@@ -680,17 +631,7 @@ export class BaseVisibilityHelper implements Disposable {
   private showModelWithoutAnyCategoriesOrElements(modelId: Id64String, categoriesToNotOverride?: Id64Arg): Observable<void> {
     const viewport = this.#props.viewport;
     return forkJoin({
-      allModelCategories: this.#props.baseIdsCache.getCategories({ modelIds: modelId }).pipe(
-        reduce((acc, { drawingCategories, spatialCategories }) => {
-          for (const category of Id64.iterable(drawingCategories ?? [])) {
-            acc.add(category);
-          }
-          for (const category of Id64.iterable(spatialCategories ?? [])) {
-            acc.add(category);
-          }
-          return acc;
-        }, new Set<Id64String>()),
-      ),
+      allModelCategories: this.#props.baseIdsCache.getCategories({ modelIds: modelId }).pipe(map(({ categories }) => categories)),
       modelAlwaysDrawnElements: this.#alwaysAndNeverDrawnElements.getAlwaysOrNeverDrawnElements({ modelIds: modelId, setType: "always" }),
     }).pipe(
       mergeMap(({ allModelCategories, modelAlwaysDrawnElements }) => {
@@ -699,12 +640,14 @@ export class BaseVisibilityHelper implements Disposable {
           viewport.setAlwaysDrawn({ elementIds: setDifference(alwaysDrawn, modelAlwaysDrawnElements) });
         }
         viewport.changeModelDisplay({ modelIds: modelId, display: true });
-        return from(Id64.iterable(allModelCategories)).pipe(
-          categoriesToNotOverride ? filter((modelCategory) => !Id64.has(categoriesToNotOverride, modelCategory)) : identity,
-          map((categoryId) => this.changeCategoryStateInViewportAccordingToModelVisibility(modelId, categoryId, false, false)),
-          takeLast(1),
-          defaultIfEmpty(undefined),
-        );
+        return allModelCategories
+          ? from(Id64.iterable(allModelCategories)).pipe(
+              categoriesToNotOverride ? filter((modelCategory) => !Id64.has(categoriesToNotOverride, modelCategory)) : identity,
+              map((categoryId) => this.changeCategoryStateInViewportAccordingToModelVisibility(modelId, categoryId, false, false)),
+              takeLast(1),
+              defaultIfEmpty(undefined),
+            )
+          : EMPTY;
       }),
     );
   }

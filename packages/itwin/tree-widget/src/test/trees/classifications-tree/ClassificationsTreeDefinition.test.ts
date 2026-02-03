@@ -3,15 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  buildIModel,
-  insertDrawingCategory,
-  insertDrawingGraphic,
-  insertDrawingModelWithPartition,
-  insertPhysicalElement,
-  insertPhysicalModelWithPartition,
-  insertSpatialCategory,
-} from "../../IModelUtils.js";
+import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../IModelUtils.js";
 import { initializeITwinJs, terminateITwinJs } from "../../Initialize.js";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation.js";
 import {
@@ -104,24 +96,7 @@ describe("Classifications tree", () => {
         });
         insertElementHasClassificationsRelationship({ builder, elementId: parentPhysicalElement.id, classificationId: classification.id });
 
-        const drawingModel = insertDrawingModelWithPartition({ builder, codeValue: "Test drawing model" });
-        const drawingCategory = insertDrawingCategory({ builder, codeValue: "Test drawing category" });
-        const parentDrawingElement = insertDrawingGraphic({
-          builder,
-          modelId: drawingModel.id,
-          categoryId: drawingCategory.id,
-          codeValue: "Parent 2d element",
-        });
-        const childDrawingElement = insertDrawingGraphic({
-          builder,
-          modelId: drawingModel.id,
-          categoryId: drawingCategory.id,
-          parentId: parentDrawingElement.id,
-          codeValue: "Child 2d element",
-        });
-        insertElementHasClassificationsRelationship({ builder, elementId: parentDrawingElement.id, classificationId: classification.id });
-
-        return { table, classification, parentPhysicalElement, childPhysicalElement, parentDrawingElement, childDrawingElement };
+        return { table, classification, parentPhysicalElement, childPhysicalElement };
       });
 
       const { imodel, ...keys } = buildIModelResult;
@@ -138,17 +113,6 @@ describe("Classifications tree", () => {
                 instanceKeys: [keys.classification],
                 supportsFiltering: true,
                 children: [
-                  NodeValidators.createForInstanceNode({
-                    instanceKeys: [keys.parentDrawingElement],
-                    supportsFiltering: true,
-                    children: [
-                      NodeValidators.createForInstanceNode({
-                        instanceKeys: [keys.childDrawingElement],
-                        supportsFiltering: true,
-                        children: false,
-                      }),
-                    ],
-                  }),
                   NodeValidators.createForInstanceNode({
                     instanceKeys: [keys.parentPhysicalElement],
                     supportsFiltering: true,

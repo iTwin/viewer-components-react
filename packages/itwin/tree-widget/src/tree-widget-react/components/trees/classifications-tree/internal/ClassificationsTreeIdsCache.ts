@@ -13,10 +13,9 @@ import {
   CLASS_NAME_Classification,
   CLASS_NAME_ClassificationSystem,
   CLASS_NAME_ClassificationTable,
-  CLASS_NAME_DrawingCategory,
   CLASS_NAME_ElementHasClassifications,
-  CLASS_NAME_GeometricElement2d,
   CLASS_NAME_GeometricElement3d,
+  CLASS_NAME_GeometricModel3d,
   CLASS_NAME_Model,
   CLASS_NAME_SpatialCategory,
 } from "../../common/internal/ClassNameDefinitions.js";
@@ -38,18 +37,16 @@ export type ClassificationTableId = Id64String;
 interface ClassificationInfo {
   parentClassificationOrTableId: ClassificationId | ClassificationTableId | undefined;
   childClassificationIds: ClassificationId[];
-  relatedCategories2d: CategoryId[];
-  relatedCategories3d: CategoryId[];
+  relatedCategories: CategoryId[];
 }
 
 /** @internal */
 export class ClassificationsTreeIdsCache implements Disposable {
-  readonly #categoryElementCounts: ModelCategoryElementsCountCache;
-  #elementModelsCategories: Observable<Map<ModelId, { category2dIds: Id64Set; category3dIds: Id64Set; isSubModel: boolean }>> | undefined;
+  #elementModelsCategories: Observable<Map<ModelId, { categoryIds: Id64Set; isSubModel: boolean }>> | undefined;
   #classificationInfos: Observable<Map<ClassificationId | ClassificationTableId, ClassificationInfo>> | undefined;
   #filteredElementsData: Observable<Map<ElementId, { modelId: Id64String; categoryId: Id64String; categoryOfTopMostParentElement: CategoryId }>> | undefined;
-  #elementChildren2dCache: ElementChildrenCache;
-  #elementChildren3dCache: ElementChildrenCache;
+  readonly #categoryElementCounts: ModelCategoryElementsCountCache;
+  #elementChildrenCache: ElementChildrenCache;
   #subCategoriesCache: SubCategoriesCache;
   #modeledElementsCache: ModeledElementsCache;
   #queryExecutor: LimitingECSqlQueryExecutor;
@@ -62,20 +59,17 @@ export class ClassificationsTreeIdsCache implements Disposable {
     this.#hierarchyConfig = hierarchyConfig;
     this.#componentId = componentId ?? Guid.createValue();
     this.#componentName = "ClassificationsTreeIdsCache";
-    this.#categoryElementCounts = new ModelCategoryElementsCountCache(
-      this.#queryExecutor,
-      [CLASS_NAME_GeometricElement2d, CLASS_NAME_GeometricElement3d],
-      this.#componentId,
-    );
-    this.#elementChildren2dCache = new ElementChildrenCache({
+    this.#categoryElementCounts = new ModelCategoryElementsCountCache({
       queryExecutor: this.#queryExecutor,
-      elementClassName: CLASS_NAME_GeometricElement2d,
+      elementsClassName: CLASS_NAME_GeometricElement3d,
       componentId: this.#componentId,
+      viewType: "3d",
     });
-    this.#elementChildren3dCache = new ElementChildrenCache({
+    this.#elementChildrenCache = new ElementChildrenCache({
       queryExecutor: this.#queryExecutor,
       elementClassName: CLASS_NAME_GeometricElement3d,
       componentId: this.#componentId,
+      viewType: "3d",
     });
     this.#subCategoriesCache = new SubCategoriesCache({
       queryExecutor: this.#queryExecutor,
@@ -84,8 +78,9 @@ export class ClassificationsTreeIdsCache implements Disposable {
     this.#modeledElementsCache = new ModeledElementsCache({
       queryExecutor: this.#queryExecutor,
       componentId: this.#componentId,
-      elementClassNames: [CLASS_NAME_GeometricElement2d, CLASS_NAME_GeometricElement3d],
+      elementClassName: CLASS_NAME_GeometricElement3d,
       modelClassName: CLASS_NAME_Model,
+      viewType: "3d",
     });
   }
 
@@ -93,12 +88,12 @@ export class ClassificationsTreeIdsCache implements Disposable {
     this.#categoryElementCounts[Symbol.dispose]();
   }
 
-  public getChildElementsTree({ elementIds, type }: { elementIds: Id64Arg; type: "2d" | "3d" }): Observable<ChildrenTree> {
-    return (type === "2d" ? this.#elementChildren2dCache : this.#elementChildren3dCache).getChildElementsTree({ elementIds });
+  public getChildElementsTree({ elementIds }: { elementIds: Id64Arg }): Observable<ChildrenTree> {
+    return this.#elementChildrenCache.getChildElementsTree({ elementIds });
   }
 
-  public getAllChildElementsCount({ elementIds, type }: { elementIds: Id64Arg; type: "2d" | "3d" }): Observable<Map<Id64String, number>> {
-    return (type === "2d" ? this.#elementChildren2dCache : this.#elementChildren3dCache).getAllChildElementsCount({ elementIds });
+  public getAllChildElementsCount({ elementIds }: { elementIds: Id64Arg }): Observable<Map<Id64String, number>> {
+    return this.#elementChildrenCache.getAllChildElementsCount({ elementIds });
   }
 
   public getSubCategories(categoryId: Id64String): Observable<Array<SubCategoryId>> {
@@ -108,22 +103,13 @@ export class ClassificationsTreeIdsCache implements Disposable {
   private queryElementModelCategories(): Observable<{
     modelId: Id64String;
     categoryId: Id64String;
-    type: "2d" | "3d";
   }> {
     return defer(() => {
       const query = `
         SELECT * FROM (
-          SELECT '3d' type, this.Model.Id modelId, this.Category.Id categoryId
-          FROM BisCore.GeometricModel m
-          JOIN BisCore.GeometricElement3d this ON m.ECInstanceId = this.Model.Id
-          WHERE this.Parent.Id IS NULL AND m.IsPrivate = false
-          GROUP BY modelId, categoryId
-        )
-        UNION ALL
-        SELECT * FROM (
-          SELECT '2d' type, this.Model.Id modelId, this.Category.Id categoryId
-          FROM BisCore.GeometricModel m
-          JOIN BisCore.GeometricElement2d this ON m.ECInstanceId = this.Model.Id
+          SELECT this.Model.Id modelId, this.Category.Id categoryId
+          FROM ${CLASS_NAME_GeometricModel3d} m
+          JOIN ${CLASS_NAME_GeometricElement3d} this ON m.ECInstanceId = this.Model.Id
           WHERE this.Parent.Id IS NULL AND m.IsPrivate = false
           GROUP BY modelId, categoryId
         )
@@ -135,7 +121,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
     }).pipe(
       catchBeSQLiteInterrupts,
       map((row) => {
-        return { modelId: row.modelId, categoryId: row.categoryId, type: row.type };
+        return { modelId: row.modelId, categoryId: row.categoryId };
       }),
     );
   }
@@ -146,28 +132,21 @@ export class ClassificationsTreeIdsCache implements Disposable {
         reduce((acc, queriedCategory) => {
           let modelEntry = acc.get(queriedCategory.modelId);
           if (modelEntry === undefined) {
-            modelEntry = { category2dIds: new Set(), category3dIds: new Set() };
+            modelEntry = new Set();
             acc.set(queriedCategory.modelId, modelEntry);
           }
-          switch (queriedCategory.type) {
-            case "2d":
-              modelEntry.category2dIds.add(queriedCategory.categoryId);
-              break;
-            case "3d":
-              modelEntry.category3dIds.add(queriedCategory.categoryId);
-              break;
-          }
+          modelEntry.add(queriedCategory.categoryId);
           return acc;
-        }, new Map<ModelId, { category2dIds: Id64Set; category3dIds: Id64Set }>()),
+        }, new Map<ModelId, Set<CategoryId>>()),
       ),
       allSubModels: this.#modeledElementsCache.getModeledElementsInfo().pipe(map(({ allSubModels }) => allSubModels)),
     }).pipe(
       map(({ modelCategories, allSubModels }) => {
-        const result = new Map<ModelId, { category2dIds: Id64Set; category3dIds: Id64Set; isSubModel: boolean }>();
-        for (const [modelId, modelEntry] of modelCategories) {
+        const result = new Map<ModelId, { categoryIds: Id64Set; isSubModel: boolean }>();
+        modelCategories.forEach((categoryIds, modelId) => {
           const isSubModel = allSubModels.has(modelId);
-          result.set(modelId, { category2dIds: modelEntry.category2dIds, category3dIds: modelEntry.category3dIds, isSubModel });
-        }
+          result.set(modelId, { categoryIds, isSubModel });
+        });
         return result;
       }),
       shareReplay(),
@@ -175,18 +154,24 @@ export class ClassificationsTreeIdsCache implements Disposable {
     return this.#elementModelsCategories;
   }
 
-  public getCategoriesModeledElements(modelId: Id64String, categoryIds: Id64Arg): Observable<Id64Array> {
-    return this.#modeledElementsCache.getCategoriesModeledElements(modelId, categoryIds);
+  public getCategoriesModeledElements(props: { modelId: Id64String; categoryIds: Id64Arg }): Observable<Id64Array> {
+    return this.#modeledElementsCache.getCategoriesModeledElements(props);
   }
 
-  public getCategoriesElementModels(categoryIds: Id64Arg, includeSubModels?: boolean): Observable<{ id: CategoryId; models: Array<ModelId> | undefined }> {
+  public getCategoriesElementModels({
+    categoryIds,
+    includeSubModels,
+  }: {
+    categoryIds: Id64Arg;
+    includeSubModels?: boolean;
+  }): Observable<{ id: CategoryId; models: Array<ModelId> | undefined }> {
     return this.getElementModelsCategories().pipe(
       mergeMap((elementModelsCategories) =>
         from(Id64.iterable(categoryIds)).pipe(
           map((categoryId) => {
             const categoryModels = new Array<ModelId>();
-            elementModelsCategories.forEach(({ category2dIds, category3dIds, isSubModel }, modelId) => {
-              if ((includeSubModels || !isSubModel) && (category2dIds.has(categoryId) || category3dIds.has(categoryId))) {
+            elementModelsCategories.forEach((entry, modelId) => {
+              if ((includeSubModels || !entry.isSubModel) && entry.categoryIds.has(categoryId)) {
                 categoryModels.push(modelId);
               }
             });
@@ -197,28 +182,21 @@ export class ClassificationsTreeIdsCache implements Disposable {
     );
   }
 
-  public getModelCategoryIds(modelId: Id64String): Observable<{ drawing: Id64Array; spatial: Id64Array }> {
+  public getModelCategoryIds(modelId: Id64String): Observable<Id64Set> {
     return this.getElementModelsCategories().pipe(
       map((elementModelsCategories) => {
-        return {
-          drawing: Array.from(elementModelsCategories.get(modelId)?.category2dIds ?? []),
-          spatial: Array.from(elementModelsCategories.get(modelId)?.category3dIds ?? []),
-        };
+        return elementModelsCategories.get(modelId)?.categoryIds ?? new Set([]);
       }),
     );
   }
 
-  public getAllCategories(): Observable<{ drawing: Id64Set; spatial: Id64Set }> {
+  public getAllCategories(): Observable<Id64Set> {
     return this.getElementModelsCategories().pipe(
       mergeMap((modelsCategoriesInfo) => modelsCategoriesInfo.values()),
-      reduce(
-        (acc, { category2dIds, category3dIds }) => {
-          category2dIds.forEach((id) => acc.drawing.add(id));
-          category3dIds.forEach((id) => acc.spatial.add(id));
-          return acc;
-        },
-        { drawing: new Set<Id64String>(), spatial: new Set<Id64String>() },
-      ),
+      reduce((acc, { categoryIds }) => {
+        categoryIds.forEach((id) => acc.add(id));
+        return acc;
+      }, new Set<CategoryId>()),
     );
   }
 
@@ -226,15 +204,14 @@ export class ClassificationsTreeIdsCache implements Disposable {
     return this.#modeledElementsCache.hasSubModel(elementId);
   }
 
-  public getCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Observable<number> {
-    return this.#categoryElementCounts.getCategoryElementsCount(modelId, categoryId);
+  public getCategoryElementsCount(props: { modelId: Id64String; categoryId: Id64String }): Observable<number> {
+    return this.#categoryElementCounts.getCategoryElementsCount(props);
   }
 
   private queryClassifications(): Observable<
     {
       id: Id64String;
-      relatedCategories2d: CategoryId[];
-      relatedCategories3d: CategoryId[];
+      relatedCategories: CategoryId[];
     } & ({ tableId: ClassificationTableId; parentId: undefined } | { tableId: undefined; parentId: ClassificationId })
   > {
     return defer(() => {
@@ -276,20 +253,12 @@ export class ClassificationsTreeIdsCache implements Disposable {
           cl.ParentClassificationId parentId,
           (
             SELECT group_concat(IdToHex(cat.ECInstanceId))
-            FROM ${CLASS_NAME_GeometricElement2d} e
-            JOIN ${CLASS_NAME_DrawingCategory} cat ON cat.ECInstanceId = e.Category.Id
-            JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = e.ECInstanceId
-            WHERE e.Parent.Id IS NULL AND NOT cat.IsPrivate AND ehc.TargetECInstanceId = cl.ClassificationId
-            GROUP BY ehc.TargetECInstanceId
-          ) relatedCategories2d,
-          (
-            SELECT group_concat(IdToHex(cat.ECInstanceId))
             FROM ${CLASS_NAME_GeometricElement3d} e
             JOIN ${CLASS_NAME_SpatialCategory} cat ON cat.ECInstanceId = e.Category.Id
             JOIN ${CLASS_NAME_ElementHasClassifications} ehc ON ehc.SourceECInstanceId = e.ECInstanceId
             WHERE e.Parent.Id IS NULL AND NOT cat.IsPrivate AND ehc.TargetECInstanceId = cl.ClassificationId
             GROUP BY ehc.TargetECInstanceId
-          ) relatedCategories3d
+          ) relatedCategories
         FROM ${CLASSIFICATIONS_CTE} cl
       `;
       return this.#queryExecutor.createQueryReader(
@@ -303,8 +272,7 @@ export class ClassificationsTreeIdsCache implements Disposable {
           id: row.id,
           tableId: row.tableId,
           parentId: row.parentId,
-          relatedCategories2d: row.relatedCategories2d ? (row.relatedCategories2d as string).split(",") : [],
-          relatedCategories3d: row.relatedCategories3d ? (row.relatedCategories3d as string).split(",") : [],
+          relatedCategories: row.relatedCategories ? (row.relatedCategories as string).split(",") : [],
         };
       }),
     );
@@ -312,17 +280,17 @@ export class ClassificationsTreeIdsCache implements Disposable {
 
   private getClassificationsInfo() {
     this.#classificationInfos ??= this.queryClassifications().pipe(
-      reduce((acc, { id, tableId, parentId, relatedCategories2d, relatedCategories3d }) => {
+      reduce((acc, { id, tableId, parentId, relatedCategories }) => {
         const tableOrParentId = tableId ?? parentId;
         let parentInfo = acc.get(tableOrParentId);
         if (!parentInfo) {
-          parentInfo = { childClassificationIds: [], relatedCategories2d: [], relatedCategories3d: [], parentClassificationOrTableId: undefined };
+          parentInfo = { childClassificationIds: [], relatedCategories: [], parentClassificationOrTableId: undefined };
           acc.set(tableOrParentId, parentInfo);
         }
         parentInfo.childClassificationIds.push(id);
         let classificationEntry = acc.get(id);
         if (!classificationEntry) {
-          classificationEntry = { childClassificationIds: [], relatedCategories2d, relatedCategories3d, parentClassificationOrTableId: tableOrParentId };
+          classificationEntry = { childClassificationIds: [], relatedCategories, parentClassificationOrTableId: tableOrParentId };
           acc.set(id, classificationEntry);
         } else {
           classificationEntry.parentClassificationOrTableId = tableOrParentId;
@@ -334,8 +302,8 @@ export class ClassificationsTreeIdsCache implements Disposable {
     return this.#classificationInfos;
   }
 
-  public getAllContainedCategories(classificationOrTableIds: Id64Arg): Observable<{ drawing: Id64Array; spatial: Id64Array }> {
-    const result = { drawing: new Array<CategoryId>(), spatial: new Array<CategoryId>() };
+  public getAllContainedCategories(classificationOrTableIds: Id64Arg): Observable<Id64Array> {
+    const result = new Array<CategoryId>();
     if (Id64.sizeOf(classificationOrTableIds) === 0) {
       return of(result);
     }
@@ -348,22 +316,20 @@ export class ClassificationsTreeIdsCache implements Disposable {
               if (classificationInfo === undefined) {
                 return acc;
               }
-              classificationInfo.relatedCategories2d.forEach((id) => acc.drawing.push(id));
-              classificationInfo.relatedCategories3d.forEach((id) => acc.spatial.push(id));
+              classificationInfo.relatedCategories.forEach((id) => acc.categories.push(id));
               classificationInfo.childClassificationIds.forEach((id) => acc.childClassifications.push(id));
               return acc;
             },
-            { drawing: new Array<Id64String>(), spatial: new Array<Id64String>(), childClassifications: new Array<Id64String>() },
+            { categories: new Array<CategoryId>(), childClassifications: new Array<Id64String>() },
           ),
-          mergeMap(({ drawing, spatial, childClassifications }) => {
+          mergeMap(({ categories, childClassifications }) => {
             if (childClassifications.length === 0) {
-              return of({ drawing, spatial });
+              return of(categories);
             }
             return this.getAllContainedCategories(childClassifications).pipe(
-              map((childResult) => {
-                childResult.drawing.forEach((id) => drawing.push(id));
-                childResult.spatial.forEach((id) => spatial.push(id));
-                return { drawing, spatial };
+              map((childCategories) => {
+                childCategories.forEach((id) => categories.push(id));
+                return categories;
               }),
             );
           }),
@@ -419,56 +385,38 @@ export class ClassificationsTreeIdsCache implements Disposable {
     return this.getClassificationsInfo().pipe(map((classificationsInfo) => [...classificationsInfo.keys()]));
   }
 
-  private getCategoryOfModelsRootElementSelector({ elementIdSelector, type }: { elementIdSelector: string; type: "2d" | "3d" }): string {
-    return `(
-      WITH RECURSIVE
-        ParentWithCategory${type}(id, categoryId, parentId) AS (
-          SELECT e.ECInstanceId, e.Category.Id, e.Parent.Id
-          FROM ${type === "2d" ? CLASS_NAME_GeometricElement2d : CLASS_NAME_GeometricElement3d} e
-          WHERE e.ECInstanceId = ${elementIdSelector}
-          UNION ALL
-          SELECT p.ECInstanceId, p.Category.Id, p.Parent.Id
-          FROM ${type === "2d" ? CLASS_NAME_GeometricElement2d : CLASS_NAME_GeometricElement3d} p
-          JOIN ParentWithCategory${type} c ON p.ECInstanceId = c.parentId
-        )
-      SELECT IdToHex(categoryId)
-      FROM ParentWithCategory${type}
-      WHERE parentId IS NULL
-    )`;
-  }
-
-  private queryFilteredElementsData({ element2dIds, element3dIds }: { element2dIds: Id64Arg; element3dIds: Id64Arg }): Observable<{
+  private queryFilteredElementsData({ elementIds }: { elementIds: Id64Arg }): Observable<{
     modelId: Id64String;
     id: ElementId;
     categoryId: Id64String;
     categoryOfTopMostParentElement: Id64String;
   }> {
     return defer(() => {
-      const queries = new Array<string>();
-      if (Id64.sizeOf(element2dIds) > 0) {
-        queries.push(`
-          SELECT
-            this.Model.Id modelId,
-            this.Category.Id categoryId,
-            this.ECInstanceId id,
-            ${this.getCategoryOfModelsRootElementSelector({ elementIdSelector: "this.ECInstanceId", type: "2d" })} categoryOfTopMostParentElement
-          FROM ${CLASS_NAME_GeometricElement2d} this
-          WHERE ECInstanceId IN (${joinId64Arg(element2dIds, ",")})
-        `);
-      }
-      if (Id64.sizeOf(element3dIds) > 0) {
-        queries.push(`
-          SELECT
-            this.Model.Id modelId,
-            this.Category.Id categoryId,
-            this.ECInstanceId id,
-            ${this.getCategoryOfModelsRootElementSelector({ elementIdSelector: "this.ECInstanceId", type: "3d" })} categoryOfTopMostParentElement
-          FROM ${CLASS_NAME_GeometricElement3d} this
-          WHERE ECInstanceId IN (${joinId64Arg(element3dIds, ",")})
-        `);
-      }
+      const query = `
+        SELECT
+          this.Model.Id modelId,
+          this.Category.Id categoryId,
+          this.ECInstanceId id,
+          (
+            WITH RECURSIVE
+              ParentWithCategory(id, categoryId, parentId) AS (
+                SELECT e.ECInstanceId, e.Category.Id, e.Parent.Id
+                FROM ${CLASS_NAME_GeometricElement3d} e
+                WHERE e.ECInstanceId = this.ECInstanceId
+                UNION ALL
+                SELECT p.ECInstanceId, p.Category.Id, p.Parent.Id
+                FROM ${CLASS_NAME_GeometricElement3d} p
+                JOIN ParentWithCategory c ON p.ECInstanceId = c.parentId
+              )
+            SELECT IdToHex(categoryId)
+            FROM ParentWithCategory
+            WHERE parentId IS NULL
+          ) categoryOfTopMostParentElement
+        FROM ${CLASS_NAME_GeometricElement3d} this
+        WHERE ECInstanceId IN (${joinId64Arg(elementIds, ",")})
+      `;
       return this.#queryExecutor.createQueryReader(
-        { ecsql: queries.join(" UNION ALL ") },
+        { ecsql: query },
         {
           rowFormat: "ECSqlPropertyNames",
           limit: "unbounded",
@@ -489,19 +437,16 @@ export class ClassificationsTreeIdsCache implements Disposable {
   }
 
   public getFilteredElementsData({
-    element2dIds,
-    element3dIds,
+    elementIds,
   }: {
-    element2dIds: Id64Arg;
-    element3dIds: Id64Arg;
+    elementIds: Id64Arg;
   }): Observable<Map<ElementId, { categoryId: Id64String; modelId: Id64String; categoryOfTopMostParentElement: CategoryId }>> {
     const result = new Map<ElementId, { categoryId: Id64String; modelId: Id64String; categoryOfTopMostParentElement: CategoryId }>();
-    if (Id64.sizeOf(element2dIds) === 0 && Id64.sizeOf(element3dIds) === 0) {
+    if (Id64.sizeOf(elementIds) === 0) {
       return of(result);
     }
     this.#filteredElementsData ??= this.queryFilteredElementsData({
-      element2dIds,
-      element3dIds,
+      elementIds,
     }).pipe(
       reduce((acc, { modelId, id, categoryId, categoryOfTopMostParentElement }) => {
         acc.set(id, { modelId, categoryId, categoryOfTopMostParentElement });

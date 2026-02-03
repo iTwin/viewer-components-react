@@ -24,7 +24,6 @@ export namespace ClassificationsTreeNodeInternal {
     node: Pick<HierarchyNode, "extendedData">,
   ): node is Omit<NonGroupingHierarchyNode, "extendedData"> & { key: InstancesNodeKey } & {
     extendedData: {
-      type: "GeometricElement3d" | "GeometricElement2d";
       modelId: Id64String;
       categoryId: Id64String;
       childrenCount: number;

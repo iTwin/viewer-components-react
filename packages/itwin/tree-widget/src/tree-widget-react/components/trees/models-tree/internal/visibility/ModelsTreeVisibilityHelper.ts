@@ -3,9 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, map, mergeMap, of } from "rxjs";
+import { defer, map, mergeMap } from "rxjs";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
-import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
 import { getIdsFromChildrenTree, getParentElementsIdsPath } from "../../../common/internal/Utils.js";
 import { BaseVisibilityHelper } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
@@ -45,12 +44,9 @@ export class ModelsTreeVisibilityHelper extends BaseVisibilityHelper {
   public getSubjectsVisibilityStatus(props: { subjectIds: Id64Arg }): Observable<VisibilityStatus> {
     const result = defer(() => {
       const { subjectIds } = props;
-      if (this.#props.viewport.viewType !== "3d") {
-        return of(createVisibilityStatus("disabled"));
-      }
 
       return this.#props.idsCache.getSubjectModelIds(subjectIds).pipe(
-        mergeMap((modelIds) => this.getModelsVisibilityStatus({ modelIds, type: "GeometricModel3d" })),
+        mergeMap((modelIds) => this.getModelsVisibilityStatus({ modelIds })),
         mergeVisibilityStatuses,
       );
     });
@@ -84,7 +80,6 @@ export class ModelsTreeVisibilityHelper extends BaseVisibilityHelper {
       elementIds,
       modelId,
       categoryId,
-      type: "GeometricElement3d",
       parentElementsIdsPath,
       childrenCount,
       categoryOfTopMostParentElement,

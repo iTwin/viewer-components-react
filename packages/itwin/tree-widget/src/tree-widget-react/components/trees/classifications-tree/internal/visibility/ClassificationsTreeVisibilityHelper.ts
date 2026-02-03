@@ -3,10 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { merge, mergeMap, of, toArray } from "rxjs";
-import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
+import { mergeMap } from "rxjs";
 import { BaseVisibilityHelper } from "../../../common/internal/visibility/BaseVisibilityHelper.js";
-import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 
 import type { Observable } from "rxjs";
 import type { Id64Arg } from "@itwin/core-bentley";
@@ -39,19 +37,12 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
    */
   public getClassificationTablesVisibilityStatus(props: { classificationTableIds: Id64Arg }): Observable<VisibilityStatus> {
     return this.#props.idsCache.getAllContainedCategories(props.classificationTableIds).pipe(
-      mergeMap(({ drawing, spatial }) => {
-        if (
-          this.#props.viewport.viewType === "other" ||
-          (this.#props.viewport.viewType === "2d" && spatial.length > 0) ||
-          (this.#props.viewport.viewType === "3d" && drawing.length > 0)
-        ) {
-          return of(createVisibilityStatus("disabled"));
-        }
-        return merge(
-          of(drawing).pipe(mergeMap((categoryIds) => this.getCategoriesVisibilityStatus({ modelId: undefined, categoryIds, type: "DrawingCategory" }))),
-          of(spatial).pipe(mergeMap((categoryIds) => this.getCategoriesVisibilityStatus({ modelId: undefined, categoryIds, type: "SpatialCategory" }))),
-        ).pipe(mergeVisibilityStatuses);
-      }),
+      mergeMap((categories) =>
+        this.getCategoriesVisibilityStatus({
+          modelId: undefined,
+          categoryIds: categories,
+        }),
+      ),
     );
   }
 
@@ -62,19 +53,12 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
    */
   public getClassificationsVisibilityStatus(props: { classificationIds: Id64Arg }): Observable<VisibilityStatus> {
     return this.#props.idsCache.getAllContainedCategories(props.classificationIds).pipe(
-      mergeMap(({ drawing, spatial }) => {
-        if (
-          this.#props.viewport.viewType === "other" ||
-          (this.#props.viewport.viewType === "2d" && spatial.length > 0) ||
-          (this.#props.viewport.viewType === "3d" && drawing.length > 0)
-        ) {
-          return of(createVisibilityStatus("disabled"));
-        }
-        return merge(
-          of(drawing).pipe(mergeMap((categoryIds) => this.getCategoriesVisibilityStatus({ modelId: undefined, categoryIds, type: "DrawingCategory" }))),
-          of(spatial).pipe(mergeMap((categoryIds) => this.getCategoriesVisibilityStatus({ modelId: undefined, categoryIds, type: "SpatialCategory" }))),
-        ).pipe(mergeVisibilityStatuses);
-      }),
+      mergeMap((categories) =>
+        this.getCategoriesVisibilityStatus({
+          modelId: undefined,
+          categoryIds: categories,
+        }),
+      ),
     );
   }
 
@@ -85,9 +69,13 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
    */
   public changeClassificationTablesVisibilityStatus(props: { classificationTableIds: Id64Arg; on: boolean }): Observable<void> {
     return this.#props.idsCache.getAllContainedCategories(props.classificationTableIds).pipe(
-      mergeMap(({ drawing, spatial }) => merge(drawing, spatial)),
-      toArray(),
-      mergeMap((categoryIds) => this.changeCategoriesVisibilityStatus({ modelId: undefined, categoryIds, on: props.on })),
+      mergeMap((categories) =>
+        this.changeCategoriesVisibilityStatus({
+          modelId: undefined,
+          categoryIds: categories,
+          on: props.on,
+        }),
+      ),
     );
   }
 
@@ -98,9 +86,13 @@ export class ClassificationsTreeVisibilityHelper extends BaseVisibilityHelper {
    */
   public changeClassificationsVisibilityStatus(props: { classificationIds: Id64Arg; on: boolean }): Observable<void> {
     return this.#props.idsCache.getAllContainedCategories(props.classificationIds).pipe(
-      mergeMap(({ drawing, spatial }) => merge(drawing, spatial)),
-      toArray(),
-      mergeMap((categoryIds) => this.changeCategoriesVisibilityStatus({ modelId: undefined, categoryIds, on: props.on })),
+      mergeMap((categories) =>
+        this.changeCategoriesVisibilityStatus({
+          modelId: undefined,
+          categoryIds: categories,
+          on: props.on,
+        }),
+      ),
     );
   }
 }

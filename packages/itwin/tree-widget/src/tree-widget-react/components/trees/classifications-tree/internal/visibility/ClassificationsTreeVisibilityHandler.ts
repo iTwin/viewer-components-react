@@ -3,9 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, defer, EMPTY, from, map, merge, mergeMap, of, toArray } from "rxjs";
+import { concat, defer, EMPTY, from, map, merge, mergeAll, mergeMap, of } from "rxjs";
 import { assert, Id64 } from "@itwin/core-bentley";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
 import { fromWithRelease, getIdsFromChildrenTree, getParentElementsIdsPath, setDifference, setIntersection } from "../../../common/internal/Utils.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
 import { ClassificationsTreeNodeInternal } from "../ClassificationsTreeNodeInternal.js";
@@ -69,7 +70,10 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
 
   public changeSearchTargetsVisibilityStatus(targets: ClassificationsTreeSearchTargets, on: boolean): Observable<void> {
     return defer(() => {
-      const { classificationIds, classificationTableIds, elements2d, elements3d } = targets;
+      if (this.#props.viewport.viewType !== "3d") {
+        return EMPTY;
+      }
+      const { classificationIds, classificationTableIds, elements } = targets;
       const observables = new Array<Observable<void>>();
       if (classificationTableIds?.size) {
         observables.push(this.#visibilityHelper.changeClassificationTablesVisibilityStatus({ classificationTableIds, on }));
@@ -79,12 +83,8 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
         observables.push(this.#visibilityHelper.changeClassificationsVisibilityStatus({ classificationIds, on }));
       }
 
-      if (elements2d?.length) {
-        observables.push(this.changeSearchTargetElementsVisibilityStatus({ elements: elements2d, on, type: "2d" }));
-      }
-
-      if (elements3d?.length) {
-        observables.push(this.changeSearchTargetElementsVisibilityStatus({ elements: elements3d, on, type: "3d" }));
+      if (elements?.length) {
+        observables.push(this.changeSearchTargetElementsVisibilityStatus({ elements, on }));
       }
 
       return merge(...observables);
@@ -94,11 +94,9 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
   private changeSearchTargetElementsVisibilityStatus({
     elements,
     on,
-    type,
   }: {
-    elements: Required<ClassificationsTreeSearchTargets>["elements2d"] | Required<ClassificationsTreeSearchTargets>["elements3d"];
+    elements: Required<ClassificationsTreeSearchTargets>["elements"];
     on: boolean;
-    type: "2d" | "3d";
   }): Observable<void> {
     const searchTargetElements = new Array<Id64String>();
     const elementIdsSet = new Set<Id64String>();
@@ -124,7 +122,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       });
     });
     // Get children for search targets, since non search targets don't have all the children present in the hierarchy.
-    return this.#props.idsCache.getChildElementsTree({ elementIds: searchTargetElements, type }).pipe(
+    return this.#props.idsCache.getChildElementsTree({ elementIds: searchTargetElements }).pipe(
       // Need to filter out and keep only those children ids that are not part of elements that are present in search paths.
       // Elements in search paths will have their visibility changed directly: they will be provided as elementIds to changeElementsVisibilityStatus.
       map((childrenTree) => ({
@@ -158,6 +156,9 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
   }
 
   public getVisibilityStatus(node: HierarchyNode): Observable<VisibilityStatus> {
+    if (this.#props.viewport.viewType !== "3d") {
+      return of(createVisibilityStatus("disabled"));
+    }
     if (ClassificationsTreeNodeInternal.isClassificationTableNode(node)) {
       return this.#visibilityHelper.getClassificationTablesVisibilityStatus({
         classificationTableIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
@@ -178,7 +179,6 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       elementIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
       modelId: node.extendedData.modelId,
       categoryId: node.extendedData.categoryId,
-      type: node.extendedData.type,
       parentElementsIdsPath,
       childrenCount: node.extendedData.childrenCount,
       categoryOfTopMostParentElement: node.extendedData.categoryOfTopMostParentElement,
@@ -188,6 +188,9 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
   /** Changes visibility of the items represented by the tree node. */
   public changeVisibilityStatus(node: HierarchyNode, on: boolean): Observable<void> {
     const changeObs = defer(() => {
+      if (this.#props.viewport.viewType !== "3d") {
+        return EMPTY;
+      }
       if (ClassificationsTreeNodeInternal.isClassificationTableNode(node)) {
         return this.#visibilityHelper.changeClassificationTablesVisibilityStatus({
           classificationTableIds: node.key.instanceKeys.map((instanceKey) => instanceKey.id),
@@ -203,7 +206,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       }
       assert(ClassificationsTreeNodeInternal.isGeometricElementNode(node));
       const elementIds = node.key.instanceKeys.map(({ id }) => id);
-      return this.#props.idsCache.getChildElementsTree({ elementIds, type: node.extendedData.type === "GeometricElement3d" ? "3d" : "2d" }).pipe(
+      return this.#props.idsCache.getChildElementsTree({ elementIds }).pipe(
         map((childrenTree): Id64Set => {
           // Children tree contains provided elementIds, they are at the root of this tree.
           // We want to skip them and only get ids of children.
@@ -229,8 +232,11 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
 
   public getSearchTargetsVisibilityStatus(targets: ClassificationsTreeSearchTargets): Observable<VisibilityStatus> {
     return defer(() => {
-      const { classificationIds, classificationTableIds, elements2d, elements3d } = targets;
+      const { classificationIds, classificationTableIds, elements } = targets;
       const observables = new Array<Observable<VisibilityStatus>>();
+      if (this.#props.viewport.viewType !== "3d") {
+        return of(createVisibilityStatus("disabled"));
+      }
       if (classificationTableIds?.size) {
         observables.push(this.#visibilityHelper.getClassificationTablesVisibilityStatus({ classificationTableIds }));
       }
@@ -238,24 +244,18 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       if (classificationIds?.size) {
         observables.push(this.#visibilityHelper.getClassificationsVisibilityStatus({ classificationIds }));
       }
-      if (elements2d?.length) {
-        observables.push(this.getSearchTargetElementsVisibilityStatus({ elements: elements2d, type: "2d" }));
+      if (elements?.length) {
+        observables.push(this.getSearchTargetElementsVisibilityStatus({ elements }));
       }
 
-      if (elements3d?.length) {
-        observables.push(this.getSearchTargetElementsVisibilityStatus({ elements: elements3d, type: "3d" }));
-      }
-
-      return merge(...observables);
-    }).pipe(mergeVisibilityStatuses);
+      return from(observables).pipe(mergeAll(), mergeVisibilityStatuses);
+    });
   }
 
   private getSearchTargetElementsVisibilityStatus({
     elements,
-    type,
   }: {
-    elements: Required<ClassificationsTreeSearchTargets>["elements2d"] | Required<ClassificationsTreeSearchTargets>["elements3d"];
-    type: "2d" | "3d";
+    elements: Required<ClassificationsTreeSearchTargets>["elements"];
   }): Observable<VisibilityStatus> {
     const searchTargetElements = new Array<Id64String>();
     elements.forEach(({ elements: elementsMap }) =>
@@ -265,7 +265,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
         }
       }),
     );
-    return this.#props.idsCache.getAllChildElementsCount({ elementIds: searchTargetElements, type }).pipe(
+    return this.#props.idsCache.getAllChildElementsCount({ elementIds: searchTargetElements }).pipe(
       mergeMap((elementsChildrenCountMap) =>
         fromWithRelease({ source: elements, releaseOnCount: 50 }).pipe(
           mergeMap(({ modelId, categoryId, elements: elementsMap, pathToElements, categoryOfTopMostParentElement, topMostParentElementId }) => {
@@ -295,7 +295,6 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
                     modelId,
                     categoryId,
                     elementIds: searchTargetIds,
-                    type: type === "3d" ? "GeometricElement3d" : "GeometricElement2d",
                     parentElementsIdsPath,
                     childrenCount: totalSearchTargetsChildrenCount,
                     categoryOfTopMostParentElement,
@@ -309,7 +308,6 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
                     modelId,
                     categoryId,
                     elementIds: nonSearchTargetIds,
-                    type: type === "3d" ? "GeometricElement3d" : "GeometricElement2d",
                     parentElementsIdsPath,
                     childrenCount: undefined,
                     categoryOfTopMostParentElement,
@@ -324,28 +322,20 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
 
   private getCategories(props: Parameters<BaseIdsCache["getCategories"]>[0]): ReturnType<BaseIdsCache["getCategories"]> {
     return from(Id64.iterable(props.modelIds)).pipe(
-      mergeMap((modelId) =>
-        this.#props.idsCache
-          .getModelCategoryIds(modelId)
-          .pipe(map(({ spatial, drawing }) => ({ id: modelId, drawingCategories: drawing, spatialCategories: spatial }))),
-      ),
+      mergeMap((modelId) => this.#props.idsCache.getModelCategoryIds(modelId).pipe(map((categories) => ({ id: modelId, categories })))),
     );
   }
 
   private getAllCategories(): ReturnType<BaseIdsCache["getAllCategories"]> {
-    return this.#props.idsCache.getAllCategories().pipe(
-      map(({ drawing, spatial }) => {
-        return { drawingCategories: drawing, spatialCategories: spatial };
-      }),
-    );
+    return this.#props.idsCache.getAllCategories();
   }
 
   private getElementsCount(props: Parameters<BaseIdsCache["getElementsCount"]>[0]): ReturnType<BaseIdsCache["getElementsCount"]> {
-    return this.#props.idsCache.getCategoryElementsCount(props.modelId, props.categoryId);
+    return this.#props.idsCache.getCategoryElementsCount(props);
   }
 
   private getModels(props: Parameters<BaseIdsCache["getModels"]>[0]): ReturnType<BaseIdsCache["getModels"]> {
-    return this.#props.idsCache.getCategoriesElementModels(props.categoryIds, true);
+    return this.#props.idsCache.getCategoriesElementModels({ categoryIds: props.categoryIds, includeSubModels: true });
   }
 
   private getSubCategories(props: Parameters<BaseIdsCache["getSubCategories"]>[0]): ReturnType<BaseIdsCache["getSubCategories"]> {
@@ -353,11 +343,11 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
   }
 
   private getChildElementsTree(props: Parameters<BaseIdsCache["getChildElementsTree"]>[0]): ReturnType<BaseIdsCache["getChildElementsTree"]> {
-    return this.#props.idsCache.getChildElementsTree({ elementIds: props.elementIds, type: props.type });
+    return this.#props.idsCache.getChildElementsTree({ elementIds: props.elementIds });
   }
 
   private getAllChildElementsCount(props: Parameters<BaseIdsCache["getAllChildElementsCount"]>[0]): ReturnType<BaseIdsCache["getAllChildElementsCount"]> {
-    return this.#props.idsCache.getAllChildElementsCount({ elementIds: props.elementIds, type: props.type });
+    return this.#props.idsCache.getAllChildElementsCount({ elementIds: props.elementIds });
   }
 
   private getSubModels(props: Parameters<BaseIdsCache["getSubModels"]>[0]): ReturnType<BaseIdsCache["getSubModels"]> {
@@ -365,12 +355,12 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       return from(Id64.iterable(props.modelIds)).pipe(
         mergeMap((modelId) => {
           if (props.categoryId) {
-            return this.#props.idsCache.getCategoriesModeledElements(modelId, props.categoryId).pipe(map((subModels) => ({ id: modelId, subModels })));
+            return this.#props.idsCache
+              .getCategoriesModeledElements({ modelId, categoryIds: props.categoryId })
+              .pipe(map((subModels) => ({ id: modelId, subModels })));
           }
           return from(this.#props.idsCache.getModelCategoryIds(modelId)).pipe(
-            mergeMap(({ drawing, spatial }) => merge(drawing, spatial)),
-            toArray(),
-            mergeMap((categoryIds) => this.#props.idsCache.getCategoriesModeledElements(modelId, categoryIds)),
+            mergeMap((categoryIds) => this.#props.idsCache.getCategoriesModeledElements({ modelId, categoryIds })),
             map((subModels) => ({ id: modelId, subModels })),
           );
         }),
@@ -380,18 +370,20 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
     if (props.modelId) {
       return from(Id64.iterable(props.categoryIds)).pipe(
         mergeMap((categoryId) =>
-          this.#props.idsCache.getCategoriesModeledElements(props.modelId!, categoryId).pipe(map((subModels) => ({ id: categoryId, subModels }))),
+          this.#props.idsCache
+            .getCategoriesModeledElements({ modelId: props.modelId!, categoryIds: categoryId })
+            .pipe(map((subModels) => ({ id: categoryId, subModels }))),
         ),
       );
     }
 
-    return this.#props.idsCache.getCategoriesElementModels(props.categoryIds).pipe(
+    return this.#props.idsCache.getCategoriesElementModels({ categoryIds: props.categoryIds }).pipe(
       mergeMap(({ id, models }) => {
         if (!models) {
           return of({ id, subModels: undefined });
         }
         return from(models).pipe(
-          mergeMap((modelId) => this.#props.idsCache.getCategoriesModeledElements(modelId, id)),
+          mergeMap((modelId) => this.#props.idsCache.getCategoriesModeledElements({ modelId, categoryIds: id })),
           map((subModels) => ({ id, subModels })),
         );
       }),
