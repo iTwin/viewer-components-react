@@ -243,6 +243,9 @@ async function createSearchResultsTree(
   });
 }
 
+const cacheSpecific2dProps: { viewType: "2d" } = { viewType: "2d" };
+const cacheSpecific3dProps: { viewType: "3d" } = { viewType: "3d" };
+
 function useCategoriesTreeIdsCache({
   imodel,
   componentId,
@@ -254,13 +257,13 @@ function useCategoriesTreeIdsCache({
 }) {
   const { getCache: get2dCache } = useIdsCache<CategoriesTreeIdsCache, { viewType: "2d" }>({
     imodel,
-    cacheSpecificProps: useMemo(() => ({ viewType: "2d" }), []),
+    cacheSpecificProps: cacheSpecific2dProps,
     componentId,
     createCache,
   });
   const { getCache: get3dCache } = useIdsCache<CategoriesTreeIdsCache, { viewType: "3d" }>({
     imodel,
-    cacheSpecificProps: useMemo(() => ({ viewType: "3d" }), []),
+    cacheSpecificProps: cacheSpecific3dProps,
     componentId,
     createCache,
   });
