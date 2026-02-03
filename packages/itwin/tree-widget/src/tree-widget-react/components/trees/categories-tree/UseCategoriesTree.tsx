@@ -243,8 +243,8 @@ async function createSearchResultsTree(
   });
 }
 
-const cacheSpecific2dProps: { viewType: "2d" } = { viewType: "2d" };
-const cacheSpecific3dProps: { viewType: "3d" } = { viewType: "3d" };
+const CACHE_PROPS_2D = { viewType: "2d" as const };
+const CACHE_PROPS_3D = { viewType: "3d" as const };
 
 function useCategoriesTreeIdsCache({
   imodel,
@@ -255,15 +255,15 @@ function useCategoriesTreeIdsCache({
   activeViewType: "2d" | "3d";
   componentId: GuidString;
 }) {
-  const { getCache: get2dCache } = useIdsCache<CategoriesTreeIdsCache, { viewType: "2d" }>({
+  const { getCache: get2dCache } = useIdsCache({
     imodel,
-    cacheSpecificProps: cacheSpecific2dProps,
+    cacheSpecificProps: CACHE_PROPS_2D,
     componentId,
     createCache,
   });
-  const { getCache: get3dCache } = useIdsCache<CategoriesTreeIdsCache, { viewType: "3d" }>({
+  const { getCache: get3dCache } = useIdsCache({
     imodel,
-    cacheSpecificProps: cacheSpecific3dProps,
+    cacheSpecificProps: CACHE_PROPS_3D,
     componentId,
     createCache,
   });
