@@ -249,7 +249,7 @@ function useCategoriesTreeIdsCache({
   activeViewType,
 }: {
   imodel: IModelConnection;
-  activeViewType: "2d" | "3d" | "other";
+  activeViewType: "2d" | "3d";
   componentId: GuidString;
 }) {
   const { getCache: get2dCache } = useIdsCache<CategoriesTreeIdsCache, { viewType: "2d" }>({
