@@ -265,12 +265,8 @@ function useCategoriesTreeIdsCache({
     createCache,
   });
 
-  const getCache = useCallback(() => {
-    return activeViewType === "2d" ? get2dCache() : get3dCache();
-  }, [activeViewType, get2dCache, get3dCache]);
-
   return {
-    getCache,
+    getCache: activeViewType === "2d" ? get2dCache : get3dCache,
   };
 }
 
