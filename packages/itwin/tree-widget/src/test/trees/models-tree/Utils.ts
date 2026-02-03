@@ -111,7 +111,7 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
       props?.modelCategories?.forEach((categories) => categories.forEach((category) => result.add(category)));
       return of(result);
     }),
-    getCategoryElementsCount: sinon.stub<[Id64String, Id64String], Observable<number>>().callsFake((_, categoryId) => {
+    getCategoryElementsCount: sinon.stub<[{ modelId: Id64String; categoryId: Id64String }], Observable<number>>().callsFake(({ categoryId }) => {
       return of(props?.categoryElements?.get(categoryId)?.length ?? 0);
     }),
     getChildElementsTree: sinon.stub<[{ elementIds: Id64Arg }], Observable<ChildrenTree>>().callsFake(() => {
@@ -121,7 +121,7 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
       return of(new Map());
     }),
     hasSubModel: sinon.stub<[Id64String], Observable<boolean>>().callsFake(() => of(false)),
-    getCategoriesModeledElements: sinon.stub<[Id64String, Id64Arg], Observable<Id64Array>>().callsFake(() => of([])),
+    getCategoriesModeledElements: sinon.stub<[{ modelId: Id64String; categoryIds: Id64Arg }], Observable<Id64Array>>().callsFake(() => of([])),
   });
 }
 

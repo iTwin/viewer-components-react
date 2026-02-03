@@ -9,25 +9,12 @@ import { ClassificationsTreeIdsCache } from "../../../tree-widget-react/componen
 import { ClassificationsTreeVisibilityHandler } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/ClassificationsTreeVisibilityHandler.js";
 import { createClassificationsSearchResultsTree } from "../../../tree-widget-react/components/trees/classifications-tree/internal/visibility/SearchResultsTree.js";
 import { HierarchyVisibilityHandlerImpl } from "../../../tree-widget-react/components/trees/common/internal/useTreeHooks/UseCachedVisibility.js";
-import {
-  buildIModel,
-  insertDrawingCategory,
-  insertDrawingGraphic,
-  insertDrawingModelWithPartition,
-  insertPhysicalElement,
-  insertPhysicalModelWithPartition,
-  insertSpatialCategory,
-} from "../../IModelUtils.js";
+import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../IModelUtils.js";
 import { initializeITwinJs, terminateITwinJs } from "../../Initialize.js";
 import { createIModelAccess } from "../Common.js";
 import { validateHierarchyVisibility } from "../common/VisibilityValidation.js";
 import { createTreeWidgetTestingViewport } from "../TreeUtils.js";
-import {
-  createClassificationHierarchyNode,
-  createClassificationTableHierarchyNode,
-  createDrawingElementHierarchyNode,
-  createPhysicalElementHierarchyNode,
-} from "./HierarchyNodeUtils.js";
+import { createClassificationHierarchyNode, createClassificationTableHierarchyNode, createPhysicalElementHierarchyNode } from "./HierarchyNodeUtils.js";
 import {
   importClassificationSchema,
   insertClassification,
@@ -70,13 +57,13 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     });
   }
 
-  async function createVisibilityTestData({ imodel, view, visibleByDefault }: { imodel: IModelConnection; view: "2d" | "3d"; visibleByDefault?: boolean }) {
+  async function createVisibilityTestData({ imodel, visibleByDefault }: { imodel: IModelConnection; visibleByDefault?: boolean }) {
     const imodelAccess = createIModelAccess(imodel);
     const idsCache = new ClassificationsTreeIdsCache(imodelAccess, { rootClassificationSystemCode });
     const viewport = createTreeWidgetTestingViewport({
       iModel: imodel,
       visibleByDefault,
-      viewType: view,
+      viewType: "3d",
     });
     const handler = createClassificationsTreeVisibilityHandler({ imodelAccess, idsCache, viewport });
     const provider = createProvider({ idsCache, imodelAccess });
@@ -125,49 +112,6 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
       using visibilityTestData = await createVisibilityTestData({
         imodel,
-        view: "3d",
-      });
-      const { handler, provider, viewport } = visibilityTestData;
-
-      await validateClassificationsTreeHierarchyVisibility({
-        provider,
-        handler,
-        viewport,
-        expectations: "all-hidden",
-      });
-    });
-
-    it("by default everything is hidden in 2d view with 2d elements' hierarchy", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
-        await importClassificationSchema(builder);
-
-        const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
-        const table = insertClassificationTable({ builder, parentId: system.id, codeValue: "TestClassificationTable" });
-        const classification = insertClassification({ builder, modelId: table.id, codeValue: "TestClassification" });
-
-        const drawingModel = insertDrawingModelWithPartition({ builder, codeValue: "Test drawing model" });
-        const drawingCategory = insertDrawingCategory({ builder, codeValue: "Test drawing category" });
-        const parentDrawingElement = insertDrawingGraphic({
-          builder,
-          modelId: drawingModel.id,
-          categoryId: drawingCategory.id,
-          codeValue: "Parent 2d element",
-        });
-        insertDrawingGraphic({
-          builder,
-          modelId: drawingModel.id,
-          categoryId: drawingCategory.id,
-          parentId: parentDrawingElement.id,
-          codeValue: "Child 2d element",
-        });
-        insertElementHasClassificationsRelationship({ builder, elementId: parentDrawingElement.id, classificationId: classification.id });
-      });
-
-      const { imodel } = buildIModelResult;
-
-      using visibilityTestData = await createVisibilityTestData({
-        imodel,
-        view: "2d",
       });
       const { handler, provider, viewport } = visibilityTestData;
 
@@ -212,7 +156,6 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
         using visibilityTestData = await createVisibilityTestData({
           imodel,
-          view: "3d",
         });
         const { handler, provider, viewport } = visibilityTestData;
 
@@ -265,7 +208,6 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
         using visibilityTestData = await createVisibilityTestData({
           imodel,
-          view: "3d",
         });
         const { handler, provider, viewport } = visibilityTestData;
 
@@ -344,7 +286,6 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
         using visibilityTestData = await createVisibilityTestData({
           imodel,
-          view: "3d",
         });
         const { handler, provider, viewport } = visibilityTestData;
 
@@ -431,7 +372,6 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
         using visibilityTestData = await createVisibilityTestData({
           imodel,
-          view: "3d",
         });
         const { handler, provider, viewport } = visibilityTestData;
 
@@ -491,51 +431,6 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       const { imodel } = buildIModelResult;
       using visibilityTestData = await createVisibilityTestData({
         imodel,
-        view: "3d",
-        visibleByDefault: true,
-      });
-      const { handler, provider, viewport } = visibilityTestData;
-
-      await validateClassificationsTreeHierarchyVisibility({
-        provider,
-        handler,
-        viewport,
-        expectations: "all-visible",
-      });
-    });
-
-    it("by default everything is visible in 2d view with 2d elements' hierarchy", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
-        await importClassificationSchema(builder);
-
-        const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
-        const table = insertClassificationTable({ builder, parentId: system.id, codeValue: "TestClassificationTable" });
-        const classification = insertClassification({ builder, modelId: table.id, codeValue: "TestClassification" });
-
-        const drawingModel = insertDrawingModelWithPartition({ builder, codeValue: "Test drawing model" });
-        const drawingCategory = insertDrawingCategory({ builder, codeValue: "Test drawing category" });
-        const parentDrawingElement = insertDrawingGraphic({
-          builder,
-          modelId: drawingModel.id,
-          categoryId: drawingCategory.id,
-          codeValue: "Parent 2d element",
-        });
-        const childDrawingElement = insertDrawingGraphic({
-          builder,
-          modelId: drawingModel.id,
-          categoryId: drawingCategory.id,
-          parentId: parentDrawingElement.id,
-          codeValue: "Child 2d element",
-        });
-        insertElementHasClassificationsRelationship({ builder, elementId: parentDrawingElement.id, classificationId: classification.id });
-
-        return { table, classification, drawingModel, drawingCategory, parentDrawingElement, childDrawingElement };
-      });
-
-      const { imodel } = buildIModelResult;
-      using visibilityTestData = await createVisibilityTestData({
-        imodel,
-        view: "2d",
         visibleByDefault: true,
       });
       const { handler, provider, viewport } = visibilityTestData;
@@ -581,7 +476,6 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
         using visibilityTestData = await createVisibilityTestData({
           imodel,
-          view: "3d",
         });
         const { handler, provider, viewport } = visibilityTestData;
 
@@ -662,7 +556,7 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
         using visibilityTestData = await createVisibilityTestData({
           imodel,
-          view: "3d",
+
           visibleByDefault: true,
         });
         const { handler, provider, viewport } = visibilityTestData;
@@ -750,7 +644,6 @@ describe("ClassificationsTreeVisibilityHandler", () => {
 
         using visibilityTestData = await createVisibilityTestData({
           imodel,
-          view: "3d",
           visibleByDefault: true,
         });
         const { handler, provider, viewport } = visibilityTestData;
@@ -783,18 +676,16 @@ describe("ClassificationsTreeVisibilityHandler", () => {
     async function createFilteredVisibilityTestData({
       imodel,
       searchPaths,
-      view,
       visibleByDefault,
     }: Parameters<typeof createVisibilityTestData>[0] & {
       searchPaths: HierarchyNodeIdentifiersPath[];
-      view: "3d" | "2d";
       visibleByDefault?: boolean;
     }) {
       const imodelAccess = createIModelAccess(imodel);
       const idsCache = new ClassificationsTreeIdsCache(imodelAccess, { rootClassificationSystemCode });
       const viewport = createTreeWidgetTestingViewport({
         iModel: imodel,
-        viewType: view,
+        viewType: "3d",
         visibleByDefault,
       });
       const visibilityHandlerWithSearchPaths = createClassificationsTreeVisibilityHandler({ idsCache, searchPaths, imodelAccess, viewport });
@@ -875,7 +766,6 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       using visibilityTestData = await createFilteredVisibilityTestData({
         imodel,
         searchPaths,
-        view: "3d",
       });
       const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
 
@@ -973,7 +863,6 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       using visibilityTestData = await createFilteredVisibilityTestData({
         imodel,
         searchPaths,
-        view: "3d",
       });
       const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
 
@@ -982,203 +871,6 @@ describe("ClassificationsTreeVisibilityHandler", () => {
           id: keys.searchTargetChildElement.id,
           categoryId: keys.spatialCategory.id,
           modelId: keys.physicalModel.id,
-          parentKeys: [keys.table, keys.classification, keys.parentOfSearchTargetElement],
-          search: { isSearchTarget: true },
-        }),
-        true,
-      );
-
-      await validateClassificationsTreeHierarchyVisibility({
-        provider: providerWithSearchPaths,
-        handler: visibilityHandlerWithSearchPaths,
-        viewport,
-        // prettier-ignore
-        expectations: {
-          [keys.table.id]: "partial",
-            [keys.classification.id]: "partial",
-              [keys.parentOfSearchTargetElement.id]: "partial",
-                [keys.searchTargetChildElement.id]: "visible",
-        },
-      });
-
-      await validateClassificationsTreeHierarchyVisibility({
-        provider: defaultProvider,
-        handler: defaultVisibilityHandler,
-        viewport,
-        // prettier-ignore
-        expectations: {
-          [keys.table.id]: "partial",
-            [keys.classification.id]: "partial",
-              [keys.siblingElement.id]: "hidden",
-
-              [keys.parentOfSearchTargetElement.id]: "partial",
-                [keys.searchTargetChildElement.id]: "visible",
-                [keys.childElement.id]: "hidden",
-        },
-      });
-    });
-
-    it("showing parent drawing element of search target changes visibility for nodes in search paths", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
-        await importClassificationSchema(builder);
-
-        const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
-        const table = insertClassificationTable({ builder, parentId: system.id, codeValue: "ClassificationTable" });
-        const classification = insertClassification({ builder, modelId: table.id, codeValue: "Classification" });
-        const drawingModel = insertDrawingModelWithPartition({ builder, codeValue: "drawing model" });
-        const drawingCategory = insertDrawingCategory({ builder, codeValue: "drawing category" });
-        const parentOfSearchTargetElement = insertDrawingGraphic({
-          builder,
-          modelId: drawingModel.id,
-          categoryId: drawingCategory.id,
-          codeValue: "2d parent of search target",
-        });
-        const searchTargetChildElement = insertDrawingGraphic({
-          builder,
-          modelId: drawingModel.id,
-          categoryId: drawingCategory.id,
-          codeValue: "2d search target",
-          parentId: parentOfSearchTargetElement.id,
-        });
-        const childElement = insertDrawingGraphic({
-          builder,
-          modelId: drawingModel.id,
-          categoryId: drawingCategory.id,
-          codeValue: "2d child",
-          parentId: parentOfSearchTargetElement.id,
-        });
-        const siblingElement = insertDrawingGraphic({
-          builder,
-          modelId: drawingModel.id,
-          categoryId: drawingCategory.id,
-          codeValue: "2d sibling",
-        });
-        insertElementHasClassificationsRelationship({ builder, elementId: parentOfSearchTargetElement.id, classificationId: classification.id });
-        insertElementHasClassificationsRelationship({ builder, elementId: siblingElement.id, classificationId: classification.id });
-
-        return {
-          table,
-          classification,
-          drawingModel,
-          drawingCategory,
-          parentOfSearchTargetElement,
-          searchTargetChildElement,
-          childElement,
-          siblingElement,
-          searchPaths: [[table, classification, parentOfSearchTargetElement, searchTargetChildElement]],
-        };
-      });
-
-      const { imodel, searchPaths, ...keys } = buildIModelResult;
-      using visibilityTestData = await createFilteredVisibilityTestData({
-        imodel,
-        searchPaths,
-        view: "2d",
-      });
-      const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
-
-      await visibilityHandlerWithSearchPaths.changeVisibility(
-        createDrawingElementHierarchyNode({
-          id: keys.parentOfSearchTargetElement.id,
-          categoryId: keys.drawingCategory.id,
-          modelId: keys.drawingModel.id,
-          parentKeys: [keys.table, keys.classification],
-          search: {
-            isSearchTarget: false,
-            childrenTargetPaths: [[keys.searchTargetChildElement]],
-          },
-        }),
-        true,
-      );
-
-      await validateClassificationsTreeHierarchyVisibility({
-        provider: providerWithSearchPaths,
-        handler: visibilityHandlerWithSearchPaths,
-        viewport,
-        expectations: "all-visible",
-      });
-
-      await validateClassificationsTreeHierarchyVisibility({
-        provider: defaultProvider,
-        handler: defaultVisibilityHandler,
-        viewport,
-        // prettier-ignore
-        expectations: {
-          [keys.table.id]: "partial",
-            [keys.classification.id]: "partial",
-              [keys.siblingElement.id]: "hidden",
-
-              [keys.parentOfSearchTargetElement.id]: "partial",
-                [keys.searchTargetChildElement.id]: "visible",
-                [keys.childElement.id]: "hidden",
-        },
-      });
-    });
-
-    it("showing search target drawing element changes visibility for nodes in search paths", async function () {
-      await using buildIModelResult = await buildIModel(this, async (builder) => {
-        await importClassificationSchema(builder);
-
-        const system = insertClassificationSystem({ builder, codeValue: rootClassificationSystemCode });
-        const table = insertClassificationTable({ builder, parentId: system.id, codeValue: "ClassificationTable" });
-        const classification = insertClassification({ builder, modelId: table.id, codeValue: "Classification" });
-        const drawingModel = insertDrawingModelWithPartition({ builder, codeValue: "drawing model" });
-        const drawingCategory = insertDrawingCategory({ builder, codeValue: "drawing category" });
-        const parentOfSearchTargetElement = insertDrawingGraphic({
-          builder,
-          modelId: drawingModel.id,
-          categoryId: drawingCategory.id,
-          codeValue: "2d parent of search target",
-        });
-        const searchTargetChildElement = insertDrawingGraphic({
-          builder,
-          modelId: drawingModel.id,
-          categoryId: drawingCategory.id,
-          codeValue: "2d search target",
-          parentId: parentOfSearchTargetElement.id,
-        });
-        const childElement = insertDrawingGraphic({
-          builder,
-          modelId: drawingModel.id,
-          categoryId: drawingCategory.id,
-          codeValue: "2d child",
-          parentId: parentOfSearchTargetElement.id,
-        });
-        const siblingElement = insertDrawingGraphic({
-          builder,
-          modelId: drawingModel.id,
-          categoryId: drawingCategory.id,
-          codeValue: "2d sibling",
-        });
-        insertElementHasClassificationsRelationship({ builder, elementId: parentOfSearchTargetElement.id, classificationId: classification.id });
-        insertElementHasClassificationsRelationship({ builder, elementId: siblingElement.id, classificationId: classification.id });
-
-        return {
-          table,
-          classification,
-          drawingModel,
-          drawingCategory,
-          parentOfSearchTargetElement,
-          searchTargetChildElement,
-          childElement,
-          siblingElement,
-          searchPaths: [[table, classification, parentOfSearchTargetElement, searchTargetChildElement]],
-        };
-      });
-
-      const { imodel, searchPaths, ...keys } = buildIModelResult;
-      using visibilityTestData = await createFilteredVisibilityTestData({
-        imodel,
-        searchPaths,
-        view: "2d",
-      });
-      const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
-
-      await visibilityHandlerWithSearchPaths.changeVisibility(
-        createDrawingElementHierarchyNode({
-          id: keys.searchTargetChildElement.id,
-          categoryId: keys.drawingCategory.id,
-          modelId: keys.drawingModel.id,
           parentKeys: [keys.table, keys.classification, keys.parentOfSearchTargetElement],
           search: { isSearchTarget: true },
         }),
@@ -1282,7 +974,6 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       using visibilityTestData = await createFilteredVisibilityTestData({
         imodel,
         searchPaths,
-        view: "3d",
       });
       const { visibilityHandlerWithSearchPaths, defaultVisibilityHandler, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
       await visibilityHandlerWithSearchPaths.changeVisibility(
@@ -1391,7 +1082,6 @@ describe("ClassificationsTreeVisibilityHandler", () => {
       using visibilityTestData = await createFilteredVisibilityTestData({
         imodel,
         searchPaths,
-        view: "3d",
       });
       const { defaultVisibilityHandler, visibilityHandlerWithSearchPaths, viewport, defaultProvider, providerWithSearchPaths } = visibilityTestData;
       await visibilityHandlerWithSearchPaths.changeVisibility(

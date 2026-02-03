@@ -20,6 +20,7 @@ interface ElementChildrenCacheProps {
   queryExecutor: LimitingECSqlQueryExecutor;
   elementClassName: string;
   componentId?: GuidString;
+  viewType: "2d" | "3d";
 }
 
 /** @internal */
@@ -36,7 +37,7 @@ export class ElementChildrenCache {
     this.#queryExecutor = props.queryExecutor;
     this.#elementClassName = props.elementClassName;
     this.#componentId = props.componentId ?? Guid.createValue();
-    this.#componentName = "ElementChildrenCache";
+    this.#componentName = `ElementChildrenCache${props.viewType}`;
     this.#childElementsMap = new Map();
     this.#childElementsLoadingMap = new Map();
   }

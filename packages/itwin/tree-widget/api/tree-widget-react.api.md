@@ -232,7 +232,6 @@ export namespace ClassificationsTreeNode {
         key: InstancesNodeKey;
     } & {
         extendedData: {
-            type: "GeometricElement3d" | "GeometricElement2d";
             modelId: Id64String;
             categoryId: Id64String;
         };

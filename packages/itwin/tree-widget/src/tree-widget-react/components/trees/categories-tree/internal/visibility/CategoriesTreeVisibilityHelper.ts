@@ -52,7 +52,6 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
           this.getCategoriesVisibilityStatus({
             categoryIds,
             modelId: undefined,
-            type: this.#props.viewport.viewType === "2d" ? "DrawingCategory" : "SpatialCategory",
           }),
         ),
       );
@@ -73,7 +72,6 @@ export class CategoriesTreeVisibilityHelper extends BaseVisibilityHelper {
           elementIds,
           modelId,
           categoryId,
-          type: this.#props.viewport.viewType === "2d" ? "GeometricElement2d" : "GeometricElement3d",
           parentElementsIdsPath: topMostParentElementId
             ? getParentElementsIdsPath({
                 parentInstanceKeys: props.parentKeys.filter((key) => HierarchyNodeKey.isInstances(key)).map((key) => key.instanceKeys),

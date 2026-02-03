@@ -3,9 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, defer, EMPTY, from, map, merge, mergeMap, of } from "rxjs";
+import { concat, defer, EMPTY, from, map, merge, mergeAll, mergeMap, of } from "rxjs";
 import { assert, Guid, Id64 } from "@itwin/core-bentley";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
+import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
 import { HierarchyVisibilityHandlerImpl } from "../../../common/internal/useTreeHooks/UseCachedVisibility.js";
 import { fromWithRelease, getIdsFromChildrenTree, getParentElementsIdsPath, setDifference, setIntersection } from "../../../common/internal/Utils.js";
 import { mergeVisibilityStatuses } from "../../../common/internal/VisibilityUtils.js";
@@ -102,6 +103,9 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
     return defer(() => {
       const { subjectIds, modelIds, categories, elements } = targets;
       const observables = new Array<Observable<void>>();
+      if (this.#props.viewport.viewType !== "3d") {
+        return EMPTY;
+      }
       if (subjectIds?.size) {
         observables.push(this.#visibilityHelper.changeSubjectsVisibilityStatus({ subjectIds, on }));
       }
@@ -189,6 +193,10 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
   }
 
   public getVisibilityStatus(node: HierarchyNode): Observable<VisibilityStatus> {
+    if (this.#props.viewport.viewType !== "3d") {
+      return of(createVisibilityStatus("disabled"));
+    }
+
     if (ModelsTreeNodeInternal.isElementClassGroupingNode(node)) {
       const result = this.#visibilityHelper.getGroupedElementsVisibilityStatus({
         categoryId: node.extendedData.categoryId,
@@ -212,14 +220,13 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
     }
 
     if (ModelsTreeNodeInternal.isModelNode(node)) {
-      return this.#visibilityHelper.getModelsVisibilityStatus({ modelIds: node.key.instanceKeys.map(({ id }) => id), type: "GeometricModel3d" });
+      return this.#visibilityHelper.getModelsVisibilityStatus({ modelIds: node.key.instanceKeys.map(({ id }) => id) });
     }
 
     if (ModelsTreeNodeInternal.isCategoryNode(node)) {
       return this.#visibilityHelper.getCategoriesVisibilityStatus({
         categoryIds: node.key.instanceKeys.map(({ id }) => id),
         modelId: node.extendedData.modelIds[0],
-        type: "SpatialCategory",
       });
     }
 
@@ -232,7 +239,6 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
       elementIds: node.key.instanceKeys.map(({ id }) => id),
       modelId: node.extendedData.modelId,
       categoryId: node.extendedData.categoryId,
-      type: "GeometricElement3d",
       parentElementsIdsPath,
       childrenCount: node.extendedData?.childrenCount,
       categoryOfTopMostParentElement: node.extendedData.categoryOfTopMostParentElement,
@@ -242,6 +248,9 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
   /** Changes visibility of the items represented by the tree node. */
   public changeVisibilityStatus(node: HierarchyNode, on: boolean): Observable<void> {
     const changeObs = defer(() => {
+      if (this.#props.viewport.viewType !== "3d") {
+        return EMPTY;
+      }
       if (ModelsTreeNodeInternal.isElementClassGroupingNode(node)) {
         const result = this.#visibilityHelper.changeGroupedElementsVisibilityStatus({
           categoryId: node.extendedData.categoryId,
@@ -310,12 +319,15 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
     return defer(() => {
       const { subjectIds, modelIds, categories, elements } = targets;
       const observables = new Array<Observable<VisibilityStatus>>();
+      if (this.#props.viewport.viewType !== "3d") {
+        return of(createVisibilityStatus("disabled"));
+      }
       if (subjectIds?.size) {
         observables.push(this.#visibilityHelper.getSubjectsVisibilityStatus({ subjectIds }));
       }
 
       if (modelIds?.size) {
-        observables.push(this.#visibilityHelper.getModelsVisibilityStatus({ modelIds, type: "GeometricModel3d" }));
+        observables.push(this.#visibilityHelper.getModelsVisibilityStatus({ modelIds }));
       }
 
       if (categories?.length) {
@@ -325,7 +337,6 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
               this.#visibilityHelper.getCategoriesVisibilityStatus({
                 categoryIds,
                 modelId,
-                type: "SpatialCategory",
               }),
             ),
           ),
@@ -387,7 +398,6 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
                           modelId,
                           categoryId,
                           elementIds: searchTargetIds,
-                          type: "GeometricElement3d",
                           parentElementsIdsPath,
                           childrenCount: totalSearchTargetsChildrenCount,
                           // Search results tree is created on search paths. Since search paths contain only categories that are directly under models
@@ -403,7 +413,6 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
                           modelId,
                           categoryId,
                           elementIds: nonSearchTargetIds,
-                          type: "GeometricElement3d",
                           parentElementsIdsPath,
                           childrenCount: undefined,
                           // Search results tree is created on search paths. Since search paths contain only categories that are directly under models
@@ -419,13 +428,13 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
         );
       }
 
-      return merge(...observables);
-    }).pipe(mergeVisibilityStatuses);
+      return from(observables).pipe(mergeAll(), mergeVisibilityStatuses);
+    });
   }
 
   private getCategories(props: Parameters<BaseIdsCache["getCategories"]>[0]): ReturnType<BaseIdsCache["getCategories"]> {
     return from(Id64.iterable(props.modelIds)).pipe(
-      mergeMap((modelId) => this.#props.idsCache.getModelCategoryIds(modelId).pipe(map((categoryIds) => ({ id: modelId, spatialCategories: categoryIds })))),
+      mergeMap((modelId) => this.#props.idsCache.getModelCategoryIds(modelId).pipe(map((categoryIds) => ({ id: modelId, categories: categoryIds })))),
     );
   }
 
@@ -434,7 +443,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
   }
 
   private getAllCategories(): ReturnType<BaseIdsCache["getAllCategories"]> {
-    return this.#props.idsCache.getAllCategories().pipe(map((categories) => ({ spatialCategories: categories })));
+    return this.#props.idsCache.getAllCategories();
   }
 
   private getAllChildElementsCount(props: Parameters<BaseIdsCache["getAllChildElementsCount"]>[0]): ReturnType<BaseIdsCache["getAllChildElementsCount"]> {
@@ -442,7 +451,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
   }
 
   private getElementsCount(props: Parameters<BaseIdsCache["getElementsCount"]>[0]): ReturnType<BaseIdsCache["getElementsCount"]> {
-    return this.#props.idsCache.getCategoryElementsCount(props.modelId, props.categoryId);
+    return this.#props.idsCache.getCategoryElementsCount(props);
   }
 
   private getModels(props: Parameters<BaseIdsCache["getModels"]>[0]): ReturnType<BaseIdsCache["getModels"]> {
@@ -458,10 +467,12 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
       return from(Id64.iterable(props.modelIds)).pipe(
         mergeMap((modelId) => {
           if (props.categoryId) {
-            return this.#props.idsCache.getCategoriesModeledElements(modelId, props.categoryId).pipe(map((subModels) => ({ id: modelId, subModels })));
+            return this.#props.idsCache
+              .getCategoriesModeledElements({ modelId, categoryIds: props.categoryId })
+              .pipe(map((subModels) => ({ id: modelId, subModels })));
           }
           return this.#props.idsCache.getModelCategoryIds(modelId).pipe(
-            mergeMap((categoryIds) => this.#props.idsCache.getCategoriesModeledElements(modelId, categoryIds)),
+            mergeMap((categoryIds) => this.#props.idsCache.getCategoriesModeledElements({ modelId, categoryIds })),
             map((subModels) => ({ id: modelId, subModels })),
           );
         }),
@@ -471,7 +482,9 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
     if (props.modelId) {
       return from(Id64.iterable(props.categoryIds)).pipe(
         mergeMap((categoryId) =>
-          this.#props.idsCache.getCategoriesModeledElements(props.modelId!, categoryId).pipe(map((subModels) => ({ id: categoryId, subModels }))),
+          this.#props.idsCache
+            .getCategoriesModeledElements({ modelId: props.modelId!, categoryIds: categoryId })
+            .pipe(map((subModels) => ({ id: categoryId, subModels }))),
         ),
       );
     }
@@ -482,7 +495,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
           return of({ id, subModels: undefined });
         }
         return from(models).pipe(
-          mergeMap((modelId) => this.#props.idsCache.getCategoriesModeledElements(modelId, id)),
+          mergeMap((modelId) => this.#props.idsCache.getCategoriesModeledElements({ modelId, categoryIds: id })),
           map((subModels) => ({ id, subModels })),
         );
       }),

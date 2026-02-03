@@ -64,17 +64,19 @@ export class ModelsTreeIdsCache implements Disposable {
     this.#hierarchyConfig = hierarchyConfig;
     this.#componentId = componentId ?? Guid.createValue();
     this.#componentName = "ModelsTreeIdsCache";
-    this.#categoryElementCounts = new ModelCategoryElementsCountCache(
-      this.#queryExecutor,
-      [this.#hierarchyConfig.elementClassSpecification],
-      this.#componentId,
-    );
+    this.#categoryElementCounts = new ModelCategoryElementsCountCache({
+      elementsClassName: this.#hierarchyConfig.elementClassSpecification,
+      componentId: this.#componentId,
+      queryExecutor: this.#queryExecutor,
+      viewType: "3d",
+    });
     this.#modelKeyPaths = new Map();
     this.#subjectKeyPaths = new Map();
     this.#elementChildrenCache = new ElementChildrenCache({
       queryExecutor: this.#queryExecutor,
       elementClassName: this.#hierarchyConfig.elementClassSpecification,
       componentId: this.#componentId,
+      viewType: "3d",
     });
     this.#subCategoriesCache = new SubCategoriesCache({
       queryExecutor: this.#queryExecutor,
@@ -84,8 +86,9 @@ export class ModelsTreeIdsCache implements Disposable {
     this.#modeledElementsCache = new ModeledElementsCache({
       queryExecutor: this.#queryExecutor,
       componentId: this.#componentId,
-      elementClassNames: [this.#hierarchyConfig.elementClassSpecification],
+      elementClassName: this.#hierarchyConfig.elementClassSpecification,
       modelClassName: CLASS_NAME_Model,
+      viewType: "3d",
     });
   }
 
@@ -408,8 +411,8 @@ export class ModelsTreeIdsCache implements Disposable {
     return this.#modeledElementsCache.hasSubModel(elementId);
   }
 
-  public getCategoriesModeledElements(modelId: Id64String, categoryIds: Id64Arg): Observable<Id64Array> {
-    return this.#modeledElementsCache.getCategoriesModeledElements(modelId, categoryIds);
+  public getCategoriesModeledElements(props: { modelId: Id64String; categoryIds: Id64Arg }): Observable<Id64Array> {
+    return this.#modeledElementsCache.getCategoriesModeledElements(props);
   }
 
   public getCategoriesElementModels(categoryIds: Id64Arg): Observable<{ id: CategoryId; models: Array<ModelId> | undefined }> {
@@ -448,8 +451,8 @@ export class ModelsTreeIdsCache implements Disposable {
     return entry;
   }
 
-  public getCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Observable<number> {
-    return this.#categoryElementCounts.getCategoryElementsCount(modelId, categoryId);
+  public getCategoryElementsCount(props: { modelId: Id64String; categoryId: Id64String }): Observable<number> {
+    return this.#categoryElementCounts.getCategoryElementsCount(props);
   }
 
   public createCategoryInstanceKeyPaths(categoryId: Id64String): Observable<HierarchyNodeIdentifiersPath[]> {

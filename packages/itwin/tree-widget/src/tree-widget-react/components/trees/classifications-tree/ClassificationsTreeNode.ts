@@ -20,10 +20,9 @@ export namespace ClassificationsTreeNode {
     node.extendedData?.type === "Classification";
 
   /**
-   * Checks if the given node represents a `BisCore.GeometricElement` element.
+   * Checks if the given node represents a `BisCore.GeometricElement3d` element.
    *
    * If it does, the node's `extendedData` will contain the following properties:
-   * - `type`: either `GeometricElement2d` or `GeometricElement3d`
    * - `modelId`: `Id64String` of the model containing the element
    * - `categoryId`: `Id64String` of the category of the element
    */
@@ -31,12 +30,10 @@ export namespace ClassificationsTreeNode {
     node: Pick<HierarchyNode, "extendedData">,
   ): node is Omit<NonGroupingHierarchyNode, "extendedData"> & { key: InstancesNodeKey } & {
     extendedData: {
-      type: "GeometricElement3d" | "GeometricElement2d";
       modelId: Id64String;
       categoryId: Id64String;
     };
   } => {
-    const type = node.extendedData?.type;
-    return type === "GeometricElement3d" || type === "GeometricElement2d";
+    return node.extendedData?.type === "GeometricElement3d";
   };
 }
