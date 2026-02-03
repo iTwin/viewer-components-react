@@ -231,23 +231,6 @@ export class ClassificationsTreeDefinition implements HierarchyDefinition {
       : [];
   }
 
-  #createElementChildrenCountSelector(props: { elementIdSelector: string; elementFullClassName: string }): string {
-    return `(
-      WITH RECURSIVE
-        ElementWithParent(id) AS (
-          SELECT e.ECInstanceId
-          FROM ${props.elementFullClassName} e
-          WHERE e.ECInstanceId = ${props.elementIdSelector}
-          UNION ALL
-          SELECT c.ECInstanceId
-          FROM ${props.elementFullClassName} c
-          JOIN ElementWithParent p ON p.id = c.Parent.Id
-        )
-      SELECT COUNT(1) - 1
-      FROM ElementWithParent
-    )`;
-  }
-
   async #createClassificationChildrenQuery(props: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
     const { parentNodeInstanceIds: parentClassificationIds, instanceFilter, parentNode } = props;
     const parentImodelKey = getParentNodeIModelKey(parentNode.key);
