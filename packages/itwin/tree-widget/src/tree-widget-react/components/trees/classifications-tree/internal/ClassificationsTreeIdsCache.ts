@@ -403,6 +403,10 @@ export class ClassificationsTreeIdsCache implements Disposable {
                 SELECT e.ECInstanceId, e.Category.Id, e.Parent.Id
                 FROM ${CLASS_NAME_GeometricElement3d} e
                 WHERE e.ECInstanceId = this.ECInstanceId
+                UNION ALL
+                SELECT p.ECInstanceId, p.Category.Id, p.Parent.Id
+                FROM ${CLASS_NAME_GeometricElement3d} p
+                JOIN ParentWithCategory c ON p.ECInstanceId = c.parentId
               )
             SELECT IdToHex(categoryId)
             FROM ParentWithCategory

@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, defer, EMPTY, from, map, merge, mergeMap, of } from "rxjs";
+import { concat, defer, EMPTY, from, map, merge, mergeAll, mergeMap, of } from "rxjs";
 import { assert, Id64 } from "@itwin/core-bentley";
 import { HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { createVisibilityStatus } from "../../../common/internal/Tooltip.js";
@@ -248,7 +248,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
         observables.push(this.getSearchTargetElementsVisibilityStatus({ elements }));
       }
 
-      return merge(...observables).pipe(mergeVisibilityStatuses);
+      return from(observables).pipe(mergeAll(), mergeVisibilityStatuses);
     });
   }
 

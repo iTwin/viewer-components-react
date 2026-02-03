@@ -30,7 +30,7 @@ describe("classifications tree", () => {
     hierarchyConfig: { rootClassificationSystemCode },
     loadHierarchyProps: { shouldExpand: (node, index) => node.children && index === 0 },
     validateResult: (result) => {
-      expect(result).to.eq(50 /* tables */ + 1000 /* classifications */ + 3 /* classification + spatial category + drawing category */);
+      expect(result).to.eq(50 /* tables */ + 1000 /* classifications */ + 2 /* classification + spatial category */);
     },
   });
 });
@@ -40,14 +40,17 @@ function runClassificationsPerformanceTest({
   hierarchyConfig,
   loadHierarchyProps,
   validateResult,
+  only,
 }: {
   testName: string;
   hierarchyConfig: ConstructorParameters<typeof ClassificationsTreeDefinition>[0]["hierarchyConfig"];
   loadHierarchyProps?: Parameters<StatelessHierarchyProvider["loadHierarchy"]>[0];
   validateResult?: (result: number) => Promise<void> | void;
+  only?: boolean;
 }) {
   return run<{ imodel: SnapshotDb; imodelAccess: IModelAccess; idsCache: ClassificationsTreeIdsCache; hierarchyDefinition: HierarchyDefinition }>({
     testName,
+    only,
     setup: async () => {
       const imodel = SnapshotDb.openFile(Datasets.getIModelPath("50k classifications"));
       const imodelAccess = StatelessHierarchyProvider.createIModelAccess(imodel, "unbounded");
