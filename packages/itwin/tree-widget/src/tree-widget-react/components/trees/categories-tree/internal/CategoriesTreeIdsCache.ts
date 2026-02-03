@@ -65,7 +65,7 @@ export class CategoriesTreeIdsCache implements Disposable {
     this.#categoryElementClass = elementClass;
     this.#categoryModelClass = modelClass;
     this.#componentId = componentId ?? Guid.createValue();
-    this.#componentName = "CategoriesTreeIdsCache";
+    this.#componentName = `CategoriesTreeIdsCache${viewType}`;
     this.#categoryElementCounts = new ModelCategoryElementsCountCache({
       queryExecutor: this.#queryExecutor,
       elementsClassName: elementClass,

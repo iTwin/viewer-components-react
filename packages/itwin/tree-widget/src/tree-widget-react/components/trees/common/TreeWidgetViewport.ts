@@ -16,9 +16,15 @@ export type PerModelCategoryOverride = "show" | "hide" | "none";
  * @beta
  */
 export function createTreeWidgetViewport(viewport: Viewport): TreeWidgetViewport {
+  let activeViewType: "3d" | "2d" | "other" = viewport.view.is2d() ? "2d" : viewport.view.isSpatialView() ? "3d" : "other";
+  viewport.onViewedModelsChanged;
   return {
     get viewType() {
-      return viewport.view.is2d() ? "2d" : viewport.view.isSpatialView() ? "3d" : "other";
+      return activeViewType;
+    },
+    set viewType(newType: "2d" | "3d" | "other") {
+      activeViewType = newType;
+      viewport.onDisplayStyleChanged.raiseEvent(viewport);
     },
     get iModel() {
       return viewport.iModel;

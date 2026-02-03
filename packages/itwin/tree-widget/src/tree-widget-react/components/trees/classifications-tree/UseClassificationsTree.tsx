@@ -65,7 +65,6 @@ export function useClassificationsTree({
     [...Object.values(rest.hierarchyConfig)],
   );
   const componentId = useGuid();
-  const cacheType = activeView.viewType === "2d" ? "2d" : "3d";
 
   const { getCache: getClassificationsTreeIdsCache } = useIdsCache<ClassificationsTreeIdsCache, { hierarchyConfig: ClassificationsTreeHierarchyConfiguration }>(
     {
@@ -73,7 +72,6 @@ export function useClassificationsTree({
       createCache,
       cacheSpecificProps: useMemo(() => ({ hierarchyConfig }), [hierarchyConfig]),
       componentId,
-      cacheType,
     },
   );
 

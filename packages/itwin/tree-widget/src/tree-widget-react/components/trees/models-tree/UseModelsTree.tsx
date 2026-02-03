@@ -148,7 +148,6 @@ export function useModelsTree({
     createCache,
     cacheSpecificProps: useMemo(() => ({ hierarchyConfig: hierarchyConfiguration }), [hierarchyConfiguration]),
     componentId,
-    cacheType: "3d",
   });
 
   const { visibilityHandlerFactory, onSearchPathsChanged } = useCachedVisibility<ModelsTreeIdsCache, ModelsTreeSearchTargets>({
