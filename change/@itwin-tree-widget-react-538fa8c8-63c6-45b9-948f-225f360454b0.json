@@ -1,6 +1,6 @@
 {
   "type": "patch",
-  "comment": "Adjust useTree hooks to not recreate caches when switching views.",
+  "comment": "Adjust useCategoriesTree hook to not recreate cache when view type changes.",
   "packageName": "@itwin/tree-widget-react",
   "email": "100586436+JonasDov@users.noreply.github.com",
   "dependentChangeType": "patch"
