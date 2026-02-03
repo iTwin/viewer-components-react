@@ -81,12 +81,9 @@ export function useCategoriesTree({
 
   // Listen for view type changes
   useEffect(() => {
-    const listener = activeView.onDisplayStyleChanged.addListener(() => {
+    return activeView.onDisplayStyleChanged.addListener(() => {
       setViewType(activeView.viewType === "2d" ? "2d" : "3d");
     });
-    return () => {
-      listener();
-    };
   }, [activeView]);
 
   const { getCache: getCategoriesTreeIdsCache } = useCategoriesTreeIdsCache({
