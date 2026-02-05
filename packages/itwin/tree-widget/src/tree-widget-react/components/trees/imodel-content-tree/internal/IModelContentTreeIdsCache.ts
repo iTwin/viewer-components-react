@@ -241,8 +241,8 @@ function forEachChildSubject(
   const parentSubjectInfo = typeof parentSubject === "string" ? subjectInfos.get(parentSubject) : parentSubject;
   parentSubjectInfo &&
     parentSubjectInfo.childSubjects.forEach((childSubjectId) => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const childSubjectInfo = subjectInfos.get(childSubjectId)!;
+      const childSubjectInfo = subjectInfos.get(childSubjectId);
+      assert(childSubjectInfo !== undefined);
       if (cb(childSubjectId, childSubjectInfo) === "break") {
         return;
       }
