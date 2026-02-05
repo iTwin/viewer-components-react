@@ -44,6 +44,7 @@ describe("iModel content tree", () => {
         backendProps: {
           caching: {
             hierarchies: {
+              // eslint-disable-next-line @typescript-eslint/no-deprecated
               mode: HierarchyCacheMode.Memory,
             },
           },
@@ -60,7 +61,6 @@ describe("iModel content tree", () => {
 
     describe("subjects' children", () => {
       it("creates subjects hierarchy with root subject", async function () {
-        // eslint-disable-next-line deprecation/deprecation
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           const subjectA = insertSubject({ builder, codeValue: "A", parentId: IModel.rootSubjectId });
           const subjectB = insertSubject({ builder, codeValue: "B", parentId: IModel.rootSubjectId });
@@ -105,7 +105,6 @@ describe("iModel content tree", () => {
       });
 
       it("creates subjects hierarchy without root subject", async function () {
-        // eslint-disable-next-line deprecation/deprecation
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           const subjectA = insertSubject({ builder, codeValue: "A", parentId: IModel.rootSubjectId });
           const subjectB = insertSubject({ builder, codeValue: "B", parentId: IModel.rootSubjectId });
@@ -143,7 +142,6 @@ describe("iModel content tree", () => {
       });
 
       it("creates 3d model nodes child nodes", async function () {
-        // eslint-disable-next-line deprecation/deprecation
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "test partition", partitionParentId: IModel.rootSubjectId });
           return { rootSubject, dictionaryModel, physicalModel };
@@ -170,7 +168,6 @@ describe("iModel content tree", () => {
 
     describe("2d models' children", () => {
       it("creates drawing category child nodes", async function () {
-        // eslint-disable-next-line deprecation/deprecation
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           const documentModel = insertModelWithPartition({
             builder,
@@ -257,7 +254,6 @@ describe("iModel content tree", () => {
       });
 
       it("loads only categories with root elements", async function () {
-        // eslint-disable-next-line deprecation/deprecation
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           const documentModel = insertModelWithPartition({
             builder,
@@ -389,7 +385,6 @@ describe("iModel content tree", () => {
 
     describe("3d models' children", () => {
       it("creates spatial category child nodes", async function () {
-        // eslint-disable-next-line deprecation/deprecation
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "physical model" });
           const category = insertSpatialCategory({ builder, codeValue: "test category" });
@@ -454,7 +449,6 @@ describe("iModel content tree", () => {
       });
 
       it("loads only categories with root elements", async function () {
-        // eslint-disable-next-line deprecation/deprecation
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "physical model" });
           const category1 = insertSpatialCategory({ builder, codeValue: "test category 1" });
@@ -549,7 +543,6 @@ describe("iModel content tree", () => {
 
     describe("non-geometric models' children", () => {
       it("creates element child nodes", async function () {
-        // eslint-disable-next-line deprecation/deprecation
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           const documentModel = insertModelWithPartition({
             builder,
@@ -593,7 +586,6 @@ describe("iModel content tree", () => {
 
     describe("groups' children", () => {
       it("creates childless node when group has no child or grouped elements", async function () {
-        // eslint-disable-next-line deprecation/deprecation
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           const groupModel = insertGroupInformationModelWithPartition({ builder, codeValue: "test partition" });
           const groupElement = insertGroupInformationElement({ builder, modelId: groupModel.id, codeValue: "test group" });
@@ -630,7 +622,6 @@ describe("iModel content tree", () => {
       });
 
       it("creates child elements as child nodes", async function () {
-        // eslint-disable-next-line deprecation/deprecation
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           const groupModel = insertGroupInformationModelWithPartition({ builder, codeValue: "test partition" });
           const parentGroup = insertGroupInformationElement({ builder, modelId: groupModel.id, codeValue: "parent group" });
@@ -685,7 +676,6 @@ describe("iModel content tree", () => {
       });
 
       it("creates grouped elements as child nodes", async function () {
-        // eslint-disable-next-line deprecation/deprecation
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           const groupModel = insertGroupInformationModelWithPartition({ builder, codeValue: "group partition" });
           const group = insertGroupInformationElement({ builder, modelId: groupModel.id, codeValue: "group" });
@@ -769,7 +759,6 @@ describe("iModel content tree", () => {
 
     describe("elements' children", () => {
       it("creates childless node when element has no child or modeling elements", async function () {
-        // eslint-disable-next-line deprecation/deprecation
         await using buildIModelResult = await buildIModel(this, async (builder, testSchema) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "test partition" });
           const category = insertSpatialCategory({ builder, codeValue: "test category" });
@@ -840,7 +829,6 @@ describe("iModel content tree", () => {
       });
 
       it("creates child elements as child nodes", async function () {
-        // eslint-disable-next-line deprecation/deprecation
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "test partition" });
           const category = insertSpatialCategory({ builder, codeValue: "test category" });
@@ -917,7 +905,6 @@ describe("iModel content tree", () => {
       });
 
       it("creates modeling elements as child nodes", async function () {
-        // eslint-disable-next-line deprecation/deprecation
         await using buildIModelResult = await buildIModel(this, async (builder) => {
           const documentModel = insertModelWithPartition({
             builder,

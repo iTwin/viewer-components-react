@@ -188,7 +188,7 @@ describe("<ModelsTreeComponent />", () => {
         const { user, getByRole } = render(<ModelsTreeComponent.ShowAllButton models={models} viewport={vpMock.object} density="enlarged" />);
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
-        expect(stubModelsVisibilityHandler.showAllModels).to.be.calledWith(["testModelId1", "testModelId2"], vpMock.object);
+        await waitFor(() => expect(stubModelsVisibilityHandler.showAllModels).to.be.calledWith(["testModelId1", "testModelId2"], vpMock.object));
       });
 
       it("reports when clicked", async () => {
@@ -199,7 +199,7 @@ describe("<ModelsTreeComponent />", () => {
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
         // cspell:disable-next-line
-        expect(onFeatureUsedSpy).to.be.calledWith("models-tree-showall");
+        await waitFor(() => expect(onFeatureUsedSpy).to.be.calledWith("models-tree-showall"));
       });
     });
 
@@ -208,7 +208,7 @@ describe("<ModelsTreeComponent />", () => {
         const { user, getByRole } = render(<ModelsTreeComponent.HideAllButton models={models} viewport={vpMock.object} density="enlarged" />);
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
-        expect(stubModelsVisibilityHandler.hideAllModels).to.be.calledWith(["testModelId1", "testModelId2"], vpMock.object);
+        await waitFor(() => expect(stubModelsVisibilityHandler.hideAllModels).to.be.calledWith(["testModelId1", "testModelId2"], vpMock.object));
       });
 
       it("reports when clicked", async () => {
@@ -219,7 +219,7 @@ describe("<ModelsTreeComponent />", () => {
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
         // cspell:disable-next-line
-        expect(onFeatureUsedSpy).to.be.calledWith("models-tree-hideall");
+        await waitFor(() => expect(onFeatureUsedSpy).to.be.calledWith("models-tree-hideall"));
       });
     });
 
@@ -228,7 +228,7 @@ describe("<ModelsTreeComponent />", () => {
         const { user, getByRole } = render(<ModelsTreeComponent.InvertButton models={models} viewport={vpMock.object} density="enlarged" />);
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
-        expect(stubModelsVisibilityHandler.invertAllModels).to.be.calledWith(["testModelId1", "testModelId2"], vpMock.object);
+        await waitFor(() => expect(stubModelsVisibilityHandler.invertAllModels).to.be.calledWith(["testModelId1", "testModelId2"], vpMock.object));
       });
 
       it("reports when clicked", async () => {
@@ -238,7 +238,7 @@ describe("<ModelsTreeComponent />", () => {
         );
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
-        expect(onFeatureUsedSpy).to.be.calledWith("models-tree-invert");
+        await waitFor(() => expect(onFeatureUsedSpy).to.be.calledWith("models-tree-invert"));
       });
     });
 
@@ -248,7 +248,7 @@ describe("<ModelsTreeComponent />", () => {
           <ModelsTreeComponent.View2DButton models={[{ id: "modelTestId", isPlanProjection: false }]} viewport={mockViewport().object} />,
         );
         const button = await waitFor(() => getByRole("button"));
-        expect(button.getAttribute("aria-disabled")).to.not.be.null;
+        await waitFor(() => expect(button.getAttribute("aria-disabled")).to.not.be.null);
       });
 
       it("on click changes models visibility when models are not visible", async () => {
@@ -258,7 +258,7 @@ describe("<ModelsTreeComponent />", () => {
         );
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
-        vpMock.verify(async (x) => x.addViewedModels(["modelTestId"]), moq.Times.once());
+        await waitFor(() => vpMock.verify(async (x) => x.addViewedModels(["modelTestId"]), moq.Times.once()));
       });
 
       it("on click changes models visibility when models are visible", async () => {
@@ -268,7 +268,7 @@ describe("<ModelsTreeComponent />", () => {
         );
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
-        vpMock.verify((x) => x.changeModelDisplay(["modelTestId"], false), moq.Times.once());
+        await waitFor(() => vpMock.verify((x) => x.changeModelDisplay(["modelTestId"], false), moq.Times.once()));
       });
 
       it("reports when clicked", async () => {
@@ -283,7 +283,7 @@ describe("<ModelsTreeComponent />", () => {
         );
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
-        expect(onFeatureUsedSpy).to.be.calledWith("models-tree-view2d");
+        await waitFor(() => expect(onFeatureUsedSpy).to.be.calledWith("models-tree-view2d"));
       });
     });
 
@@ -293,7 +293,7 @@ describe("<ModelsTreeComponent />", () => {
           <ModelsTreeComponent.View3DButton models={[{ id: "modelTestId", isPlanProjection: true }]} viewport={mockViewport().object} />,
         );
         const button = await waitFor(() => getByRole("button"));
-        expect(button.getAttribute("aria-disabled")).to.not.be.null;
+        await waitFor(() => expect(button.getAttribute("aria-disabled")).to.not.be.null);
       });
 
       it("on click changes models visibility when models are not visible", async () => {
@@ -303,7 +303,7 @@ describe("<ModelsTreeComponent />", () => {
         );
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
-        vpMock.verify(async (x) => x.addViewedModels(["modelTestId"]), moq.Times.once());
+        await waitFor(() => vpMock.verify(async (x) => x.addViewedModels(["modelTestId"]), moq.Times.once()));
       });
 
       it("on click changes models visibility when models are visible", async () => {
@@ -313,7 +313,7 @@ describe("<ModelsTreeComponent />", () => {
         );
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
-        vpMock.verify((x) => x.changeModelDisplay(["modelTestId"], false), moq.Times.once());
+        await waitFor(() => vpMock.verify((x) => x.changeModelDisplay(["modelTestId"], false), moq.Times.once()));
       });
 
       it("reports when clicked", async () => {
@@ -328,7 +328,7 @@ describe("<ModelsTreeComponent />", () => {
         );
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
-        expect(onFeatureUsedSpy).to.be.calledWith("models-tree-view3d");
+        await waitFor(() => expect(onFeatureUsedSpy).to.be.calledWith("models-tree-view3d"));
       });
     });
   });

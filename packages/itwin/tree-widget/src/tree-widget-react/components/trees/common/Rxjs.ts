@@ -42,6 +42,7 @@ export async function collect<T>(obs: ObservableInput<T>): Promise<T[]> {
         resolve(arr);
       },
       error(reason) {
+        // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
         reject(reason);
       },
     });

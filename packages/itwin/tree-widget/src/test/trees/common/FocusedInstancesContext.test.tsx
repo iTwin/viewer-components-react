@@ -33,7 +33,7 @@ describe("FocusedInstancesContext", () => {
 
   it("toggles instances focusing", async () => {
     const { result } = renderHook(useFocusedInstancesContext, {
-      wrapper: ({ children }: PropsWithChildren<{}>) => (
+      wrapper: ({ children }: PropsWithChildren) => (
         <FocusedInstancesContextProvider selectionStorage={selectionStorage} imodelKey={imodelKey}>
           {children}
         </FocusedInstancesContextProvider>
@@ -60,7 +60,7 @@ describe("FocusedInstancesContext", () => {
 
   it("tracks selected instances", async () => {
     const { result } = renderHook(useFocusedInstancesContext, {
-      wrapper: ({ children }: PropsWithChildren<{}>) => (
+      wrapper: ({ children }: PropsWithChildren) => (
         <FocusedInstancesContextProvider selectionStorage={selectionStorage} imodelKey={imodelKey}>
           {children}
         </FocusedInstancesContextProvider>
@@ -87,7 +87,7 @@ describe("FocusedInstancesContext", () => {
 
   it("tracks selected grouping nodes", async () => {
     const { result } = renderHook(useFocusedInstancesContext, {
-      wrapper: ({ children }: PropsWithChildren<{}>) => (
+      wrapper: ({ children }: PropsWithChildren) => (
         <FocusedInstancesContextProvider selectionStorage={selectionStorage} imodelKey={imodelKey}>
           {children}
         </FocusedInstancesContextProvider>
@@ -130,7 +130,7 @@ describe("FocusedInstancesContext", () => {
 
   it("tracks custom selectable instance keys", async () => {
     const { result } = renderHook(useFocusedInstancesContext, {
-      wrapper: ({ children }: PropsWithChildren<{}>) => (
+      wrapper: ({ children }: PropsWithChildren) => (
         <FocusedInstancesContextProvider selectionStorage={selectionStorage} imodelKey={imodelKey}>
           {children}
         </FocusedInstancesContextProvider>
@@ -175,7 +175,7 @@ describe("FocusedInstancesContext", () => {
 
   it("ignores unrelated imodel selection changes", async () => {
     const { result } = renderHook(useFocusedInstancesContext, {
-      wrapper: ({ children }: PropsWithChildren<{}>) => (
+      wrapper: ({ children }: PropsWithChildren) => (
         <FocusedInstancesContextProvider selectionStorage={selectionStorage} imodelKey={imodelKey}>
           {children}
         </FocusedInstancesContextProvider>
@@ -201,7 +201,7 @@ describe("FocusedInstancesContext", () => {
 
   it("listens for selection changes only in root level", async () => {
     const { result } = renderHook(useFocusedInstancesContext, {
-      wrapper: ({ children }: PropsWithChildren<{}>) => (
+      wrapper: ({ children }: PropsWithChildren) => (
         <FocusedInstancesContextProvider selectionStorage={selectionStorage} imodelKey={imodelKey}>
           {children}
         </FocusedInstancesContextProvider>

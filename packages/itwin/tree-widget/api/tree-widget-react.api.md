@@ -18,10 +18,12 @@ import type { Id64String } from '@itwin/core-bentley';
 import type { IDisposable } from '@itwin/core-bentley';
 import type { IModelConnection } from '@itwin/core-frontend';
 import type { InstanceKey } from '@itwin/presentation-shared';
+import { JSX as JSX_2 } from 'react/jsx-runtime';
 import type { Localization } from '@itwin/core-common';
 import type { PresentationHierarchyNode } from '@itwin/presentation-hierarchies-react';
 import type { PresentationTreeNode } from '@itwin/presentation-hierarchies-react';
 import type { PropsWithChildren } from 'react';
+import type { ReactElement } from 'react';
 import type { ReactNode } from 'react';
 import type { RenderedTreeNode } from '@itwin/presentation-hierarchies-react';
 import type { SchemaContext } from '@itwin/ecschema-metadata';
@@ -36,7 +38,7 @@ import type { Widget } from '@itwin/appui-react';
 
 // @public
 export const CategoriesTreeComponent: {
-    (props: CategoriesTreeComponentProps): JSX.Element | null;
+    (props: CategoriesTreeComponentProps): JSX_2.Element | null;
     ShowAllButton: CategoriesTreeHeaderButtonType;
     HideAllButton: CategoriesTreeHeaderButtonType;
     InvertAllButton: CategoriesTreeHeaderButtonType;
@@ -59,7 +61,7 @@ interface CategoriesTreeHeaderButtonProps extends TreeHeaderButtonProps {
 }
 
 // @public (undocumented)
-type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonProps) => JSX.Element | null;
+type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonProps) => ReactElement | null;
 
 // @beta
 interface CategoriesTreeHierarchyConfiguration {
@@ -132,7 +134,7 @@ interface ElementsGroupInfo {
 
 // @beta
 export const ExternalSourcesTreeComponent: {
-    ({ onFeatureUsed, onPerformanceMeasured, ...props }: ExternalSourcesTreeComponentProps): JSX.Element | null;
+    ({ onFeatureUsed, onPerformanceMeasured, ...props }: ExternalSourcesTreeComponentProps): JSX_2.Element | null;
     id: string;
     getLabel(): string;
 };
@@ -170,7 +172,7 @@ interface FocusedInstancesContext {
 export function FocusedInstancesContextProvider({ selectionStorage, imodelKey, children, }: PropsWithChildren<{
     selectionStorage: SelectionStorage;
     imodelKey: string;
-}>): JSX.Element;
+}>): JSX_2.Element;
 
 // @beta (undocumented)
 type FunctionProps<THook extends (props: any) => any> = Parameters<THook>[0];
@@ -217,7 +219,7 @@ interface HighlightInfo {
 
 // @beta
 export const IModelContentTreeComponent: {
-    ({ onFeatureUsed, onPerformanceMeasured, ...props }: IModelContentTreeComponentProps): JSX.Element | null;
+    ({ onFeatureUsed, onPerformanceMeasured, ...props }: IModelContentTreeComponentProps): JSX_2.Element | null;
     id: string;
     getLabel(): string;
 };
@@ -253,7 +255,7 @@ interface ModelInfo {
 
 // @public
 export const ModelsTreeComponent: {
-    (props: ModelsTreeComponentProps): JSX.Element | null;
+    (props: ModelsTreeComponentProps): JSX_2.Element | null;
     ShowAllButton: ModelsTreeHeaderButtonType;
     HideAllButton: ModelsTreeHeaderButtonType;
     InvertButton: ModelsTreeHeaderButtonType;
@@ -279,7 +281,7 @@ interface ModelsTreeHeaderButtonProps extends TreeHeaderButtonProps {
 }
 
 // @public (undocumented)
-type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) => JSX.Element | null;
+type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) => ReactElement | null;
 
 // @beta
 interface ModelsTreeHierarchyConfiguration {
@@ -337,7 +339,7 @@ export interface ModelsTreeVisibilityHandlerOverrides {
 type NormalizedHierarchyFilteringPath = ReturnType<(typeof HierarchyFilteringPath)["normalize"]>;
 
 // @public
-export function SelectableTree(props: SelectableTreeProps): JSX.Element | null;
+export function SelectableTree(props: SelectableTreeProps): JSX_2.Element | null;
 
 // @public
 export interface SelectableTreeDefinition {
@@ -371,7 +373,7 @@ interface SelectableTreeRenderProps {
 }
 
 // @beta (undocumented)
-export function TelemetryContextProvider({ children, onPerformanceMeasured, onFeatureUsed, componentIdentifier, }: PropsWithChildren<TelemetryContextProviderProps>): JSX.Element;
+export function TelemetryContextProvider({ children, onPerformanceMeasured, onFeatureUsed, componentIdentifier, }: PropsWithChildren<TelemetryContextProviderProps>): JSX_2.Element;
 
 // @beta (undocumented)
 interface TelemetryContextProviderProps {
@@ -381,7 +383,7 @@ interface TelemetryContextProviderProps {
 }
 
 // @beta
-export function Tree({ getSchemaContext, hierarchyLevelSizeLimit, selectionStorage, imodelAccess: providedIModelAccess, ...props }: TreeProps): JSX.Element;
+export function Tree({ getSchemaContext, hierarchyLevelSizeLimit, selectionStorage, imodelAccess: providedIModelAccess, ...props }: TreeProps): JSX_2.Element;
 
 // @beta (undocumented)
 interface TreeCheckboxProps {
@@ -441,7 +443,7 @@ type TreeProps = Pick<FunctionProps<typeof useIModelTree>, "getFilteredPaths" | 
 };
 
 // @beta
-export function TreeRenderer({ rootNodes, expandNode, onNodeClick, onNodeKeyDown, onNodeDoubleClick, isNodeSelected, onFilterClick, getIcon, getLabel, getSublabel, getActions, getHierarchyLevelDetails, checkboxProps, filterButtonsVisibility, reloadTree, size, enableVirtualization, ...props }: TreeRendererProps): JSX.Element;
+export function TreeRenderer({ rootNodes, expandNode, onNodeClick, onNodeKeyDown, onNodeDoubleClick, isNodeSelected, onFilterClick, getIcon, getLabel, getSublabel, getActions, getHierarchyLevelDetails, checkboxProps, filterButtonsVisibility, reloadTree, size, enableVirtualization, ...props }: TreeRendererProps): JSX_2.Element;
 
 // @beta (undocumented)
 type TreeRendererProps = Pick<TreeNodeRendererProps, "expandNode" | "onNodeClick" | "onNodeKeyDown" | "onFilterClick" | "getIcon" | "getLabel" | "getSublabel" | "getActions" | "getHierarchyLevelDetails" | "checkboxProps" | "reloadTree" | "filterButtonsVisibility"> & Omit<ComponentPropsWithoutRef<typeof Tree_2<RenderedTreeNode>>, "data" | "nodeRenderer" | "getNode"> & {
@@ -460,7 +462,7 @@ export class TreeWidget {
 }
 
 // @public
-export function TreeWidgetComponent(props: SelectableTreeProps): JSX.Element;
+export function TreeWidgetComponent(props: SelectableTreeProps): JSX_2.Element;
 
 // @public
 interface TreeWidgetProps {
@@ -471,7 +473,7 @@ interface TreeWidgetProps {
 }
 
 // @beta (undocumented)
-export function TreeWithHeader({ filteringProps, buttons, density, children }: PropsWithChildren<TreeWithHeaderProps>): JSX.Element;
+export function TreeWithHeader({ filteringProps, buttons, density, children }: PropsWithChildren<TreeWithHeaderProps>): JSX_2.Element;
 
 // @beta (undocumented)
 interface TreeWithHeaderProps {
@@ -575,7 +577,7 @@ export interface VisibilityStatus {
 }
 
 // @beta
-export function VisibilityTree({ visibilityHandlerFactory, treeRenderer, hierarchyLevelSizeLimit, ...props }: VisibilityTreeProps): JSX.Element;
+export function VisibilityTree({ visibilityHandlerFactory, treeRenderer, hierarchyLevelSizeLimit, ...props }: VisibilityTreeProps): JSX_2.Element;
 
 // @beta (undocumented)
 type VisibilityTreeProps = Omit<TreeProps, "treeRenderer" | "imodelAccess"> & {
@@ -586,7 +588,7 @@ type VisibilityTreeProps = Omit<TreeProps, "treeRenderer" | "imodelAccess"> & {
 };
 
 // @beta
-export function VisibilityTreeRenderer({ getCheckboxState, onCheckboxClicked: onClick, ...props }: VisibilityTreeRendererProps): JSX.Element;
+export function VisibilityTreeRenderer({ getCheckboxState, onCheckboxClicked: onClick, ...props }: VisibilityTreeRendererProps): JSX_2.Element;
 
 // @beta (undocumented)
 type VisibilityTreeRendererProps = TreeRendererProps & TreeCheckboxProps;

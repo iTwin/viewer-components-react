@@ -137,7 +137,7 @@ function DebouncedSearchBox({
     >
       <SearchBox.CollapsedState>
         <SearchBox.ExpandButton
-          title={TreeWidget.translate("header.searchBox.searchForSomething")}
+          label={TreeWidget.translate("header.searchBox.open")}
           aria-label={TreeWidget.translate("header.searchBox.open")}
           size={size}
           styleType="borderless"
@@ -153,6 +153,7 @@ function DebouncedSearchBox({
           }}
           size={size}
           aria-label={TreeWidget.translate("header.searchBox.close")}
+          label={TreeWidget.translate("header.searchBox.close")}
         />
       </SearchBox.ExpandedState>
     </SearchBox>
@@ -212,7 +213,7 @@ function SearchResultStepper(props: SearchResultStepperProps) {
       <span className="searchbox-stepping-count">{`${selectedIndex}/${total}`}</span>
       <Divider orientation="vertical" />
       <SearchBox.Button
-        title={TreeWidget.translate("header.searchBox.previous")}
+        label={TreeWidget.translate("header.searchBox.previous")}
         size={props.size}
         onClick={() => {
           if (selectedIndex > 1) {
@@ -223,7 +224,7 @@ function SearchResultStepper(props: SearchResultStepperProps) {
         <SvgCaretUpSmall />
       </SearchBox.Button>
       <SearchBox.Button
-        title={TreeWidget.translate("header.searchBox.next")}
+        label={TreeWidget.translate("header.searchBox.next")}
         size={props.size}
         onClick={() => {
           if (selectedIndex < total) {

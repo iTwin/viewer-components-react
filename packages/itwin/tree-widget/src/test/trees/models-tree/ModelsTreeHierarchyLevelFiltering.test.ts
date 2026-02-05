@@ -37,6 +37,7 @@ describe("Models tree", () => {
         backendProps: {
           caching: {
             hierarchies: {
+              // eslint-disable-next-line @typescript-eslint/no-deprecated
               mode: HierarchyCacheMode.Memory,
             },
           },
@@ -52,7 +53,6 @@ describe("Models tree", () => {
     });
 
     it("can filter root level", async function () {
-      // eslint-disable-next-line deprecation/deprecation
       await using imodelResult = await buildIModel(this, async (builder) => {
         const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
         const childSubject = insertSubject({ builder, codeValue: "child subject 1", description: "", parentId: rootSubject.id });
@@ -156,7 +156,7 @@ describe("Models tree", () => {
               builder,
               codeValue: `model 3`,
               parentId: rootSubject.id,
-              // eslint-disable-next-line @typescript-eslint/naming-convention
+
               jsonProperties: { PhysicalPartition: { Model: { Content: true } } },
             }).id,
           }).id,
