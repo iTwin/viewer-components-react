@@ -44,7 +44,8 @@ export class IModelAppUserPreferencesStorage implements PreferencesStorage {
         key,
       });
     } catch (error) {
-      Logger.logError(LOGGER_CATEGORY, `Error saving ${key} user preference: ${error}`);
+      const message = error instanceof Error ? error.message : JSON.stringify(error);
+      Logger.logError(LOGGER_CATEGORY, `Error saving ${key} user preference: ${message}`);
     }
   }
 
@@ -62,7 +63,8 @@ export class IModelAppUserPreferencesStorage implements PreferencesStorage {
         key,
       });
     } catch (error) {
-      Logger.logError(LOGGER_CATEGORY, `Error getting ${key} user preference: ${error}`);
+      const message = error instanceof Error ? error.message : JSON.stringify(error);
+      Logger.logError(LOGGER_CATEGORY, `Error getting ${key} user preference: ${message}`);
     }
     return undefined;
   }
