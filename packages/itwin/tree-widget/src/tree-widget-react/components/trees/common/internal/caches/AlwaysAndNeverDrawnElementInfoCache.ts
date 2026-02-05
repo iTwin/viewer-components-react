@@ -17,6 +17,7 @@ import {
   map,
   mergeMap,
   of,
+  race,
   reduce,
   scan,
   share,
@@ -202,11 +203,16 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
     const getIds = setType === "always" ? () => this.#viewport.alwaysDrawn : () => this.#viewport.neverDrawn;
 
     const resultSubject = new BehaviorSubject<CachedNodesMap | undefined>(undefined);
-
-    const obs = fromEventPattern(
+    // Observable listens to viewport always/never drawn set change events.
+    const sharedObs = fromEventPattern(
       (handler) => event.addListener(handler),
       (handler) => event.removeListener(handler),
     ).pipe(
+      // Return undefined when event is raised.
+      map(() => undefined),
+      share(),
+    );
+    const obs = sharedObs.pipe(
       // Fire the observable once at the beginning
       startWith(undefined),
       // Reset result subject as soon as a new event is emitted.
@@ -224,10 +230,19 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
       // Cancel pending request if dispose() is called.
       takeUntil(this.#disposeSubject),
       // If multiple requests are sent at once, preserve only the result of the newest.
-      switchMap(() => this.queryAlwaysOrNeverDrawnElementInfo(getIds(), `${setType}Drawn`)),
+      switchMap(() =>
+        // Race between the event and the query.
+        // In cases where event is raised before query returns, the query result is discarded.
+        race(
+          sharedObs,
+          defer(() => this.queryAlwaysOrNeverDrawnElementInfo(getIds(), setType)),
+        ),
+      ),
       tap((cacheEntry) => {
-        const value = setType === "always" ? this.#alwaysDrawn : this.#neverDrawn;
-        value.latestCacheEntryValue = cacheEntry;
+        if (cacheEntry !== undefined) {
+          const value = setType === "always" ? this.#alwaysDrawn : this.#neverDrawn;
+          value.latestCacheEntryValue = cacheEntry;
+        }
       }),
       // Share the result by using a subject which always emits the saved result.
       share({
@@ -235,7 +250,7 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
         resetOnRefCountZero: false,
       }),
       // Wait until the result is available.
-      first((x): x is CachedNodesMap => !!x, new Map()),
+      first((x): x is CachedNodesMap => !!x),
     );
     return obs;
   }
@@ -246,12 +261,12 @@ export class AlwaysAndNeverDrawnElementInfoCache implements Disposable {
     this.#disposeSubject.next();
   }
 
-  private queryAlwaysOrNeverDrawnElementInfo(set: ReadonlySet<Id64String> | undefined, requestId: string): Observable<CachedNodesMap> {
+  private queryAlwaysOrNeverDrawnElementInfo(set: ReadonlySet<Id64String> | undefined, setType: SetType): Observable<CachedNodesMap> {
     const elementInfo = set?.size
       ? from(set).pipe(
           bufferCount(getOptimalBatchSize({ totalSize: set.size, maximumBatchSize: 5000 })),
           releaseMainThreadOnItemsCount(2),
-          mergeMap((block, index) => this.queryElementInfo(block, `${requestId}-${index}`), 10),
+          mergeMap((block, index) => this.queryElementInfo(block, `${setType}-${index}`), 10),
         )
       : EMPTY;
     return elementInfo.pipe(
