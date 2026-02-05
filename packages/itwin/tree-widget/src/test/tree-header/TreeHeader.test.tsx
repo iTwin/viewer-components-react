@@ -160,7 +160,7 @@ describe("<TreeHeader />", () => {
 
       const button = await waitFor(() => getByRole("button", { name: TreeWidget.translate("header.searchBox.next") }));
       await user.click(button);
-      expect(spy).to.be.calledOnceWithExactly(6);
+      await waitFor(() => expect(spy).to.be.calledOnceWithExactly(6));
     });
 
     it("does not invoke `onSelectedChanged` when 'Next' button is clicked on last index", async () => {
@@ -173,7 +173,7 @@ describe("<TreeHeader />", () => {
 
       const button = await waitFor(() => getByRole("button", { name: TreeWidget.translate("header.searchBox.next") }));
       await user.click(button);
-      expect(spy).to.not.be.called;
+      await waitFor(() => expect(spy).to.not.be.called);
     });
 
     it("invokes `onSelectedChanged` when 'Previous' button is clicked", async () => {
@@ -186,7 +186,7 @@ describe("<TreeHeader />", () => {
 
       const button = await waitFor(() => getByRole("button", { name: TreeWidget.translate("header.searchBox.previous") }));
       await user.click(button);
-      expect(spy).to.be.calledOnceWithExactly(4);
+      await waitFor(() => expect(spy).to.be.calledOnceWithExactly(4));
     });
 
     it("does not invoke `onSelectedChanged` when 'Previous' button is clicked on first index", async () => {
@@ -199,7 +199,7 @@ describe("<TreeHeader />", () => {
 
       const button = await waitFor(() => getByRole("button", { name: TreeWidget.translate("header.searchBox.previous") }));
       await user.click(button);
-      expect(spy).to.not.be.called;
+      await waitFor(() => expect(spy).to.not.be.called);
     });
   });
 });

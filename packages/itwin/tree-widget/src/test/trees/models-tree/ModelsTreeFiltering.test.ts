@@ -36,7 +36,7 @@ import type { ExpectedHierarchyDef } from "../HierarchyValidation.js";
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
-interface TreeFilteringTestCaseDefinition<TIModelSetupResult extends {}> {
+interface TreeFilteringTestCaseDefinition<TIModelSetupResult extends object> {
   name: string;
   only?: boolean;
   setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[1];
@@ -49,7 +49,7 @@ interface TreeFilteringTestCaseDefinition<TIModelSetupResult extends {}> {
 
 namespace TreeFilteringTestCaseDefinition {
   // only need this to get generic type inferred using setupIModel return type
-  export function create<TIModelSetupResult extends {}>(
+  export function create<TIModelSetupResult extends object>(
     name: string,
     setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[1],
     getTargetInstancePaths: (setupResult: TIModelSetupResult) => HierarchyFilteringPath[],
@@ -69,7 +69,7 @@ namespace TreeFilteringTestCaseDefinition {
     };
   }
 
-  export const only: typeof create = function <TIModelSetupResult extends {}>(
+  export const only: typeof create = function <TIModelSetupResult extends object>(
     ...args: Parameters<typeof create<TIModelSetupResult>>
   ): TreeFilteringTestCaseDefinition<TIModelSetupResult> {
     return {
@@ -86,6 +86,7 @@ describe("Models tree", () => {
         backendProps: {
           caching: {
             hierarchies: {
+              // eslint-disable-next-line @typescript-eslint/no-deprecated
               mode: HierarchyCacheMode.Memory,
             },
           },
@@ -486,7 +487,7 @@ describe("Models tree", () => {
             builder,
             codeValue: `matching model 1`,
             parentId: childSubject.id,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
+
             jsonProperties: { PhysicalPartition: { Model: { Content: true } } },
           });
           const model1 = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
@@ -959,14 +960,14 @@ describe("Models tree", () => {
             builder,
             codeValue: `hidden-subject`,
             parentId: rootSubject.id,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
+
             jsonProperties: { Subject: { Job: { Bridge: "Test" } } },
           });
           const partition = insertPhysicalPartition({
             builder,
             codeValue: `hidden-model`,
             parentId: hiddenChildSubject.id,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
+
             jsonProperties: { PhysicalPartition: { Model: { Content: true } } },
           });
           const model = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
@@ -1637,7 +1638,6 @@ describe("Models tree", () => {
         let hierarchyConfig: ModelsTreeHierarchyConfiguration;
 
         before(async function () {
-          // eslint-disable-next-line deprecation/deprecation
           imodel = (
             await buildIModel(this, async (...args) => {
               const imodelSetupResult = await testCase.setupIModel(...args);

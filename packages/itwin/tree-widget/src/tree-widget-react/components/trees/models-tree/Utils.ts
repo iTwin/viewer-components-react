@@ -6,10 +6,10 @@
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 
 /** @internal */
-export type ChildrenTree<T extends object = {}> = Map<string, T & { children?: ChildrenTree<T> }>;
+export type ChildrenTree<T extends object = object> = Map<string, T & { children?: ChildrenTree<T> }>;
 
 /** @internal */
-export function getIdsFromChildrenTree<T extends object = {}>({
+export function getIdsFromChildrenTree<T extends object = object>({
   tree,
   predicate,
 }: {
@@ -38,7 +38,7 @@ export function getIdsFromChildrenTree<T extends object = {}>({
  * - `T` is assigned to each entry using the `additionalPropsGetter` function.
  * @internal
  */
-export function updateChildrenTree<T extends object = {}>({
+export function updateChildrenTree<T extends object = object>({
   tree,
   additionalPropsGetter,
   idsToAdd,

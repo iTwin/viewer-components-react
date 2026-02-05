@@ -113,7 +113,7 @@ describe("<SelectableTree />", () => {
 
     const { container, queryByText } = render(<SelectableTree trees={trees} />);
     await waitFor(() => {
-      const content = container.querySelector(".presentation-components-tree-selector-content-wrapper"); // eslint-disable-line deprecation/deprecation
+      const content = container.querySelector(".presentation-components-tree-selector-content-wrapper");
       expect(content?.children).to.not.be.empty;
     });
 

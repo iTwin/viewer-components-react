@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { BentleyError, BentleyStatus } from "@itwin/core-bentley";
+import { assert, BentleyError, BentleyStatus } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
 
 import type { Localization, TranslationOptions } from "@itwin/core-common";
@@ -56,6 +56,7 @@ export class TreeWidget {
   /** Calls i18n.translateWithNamespace with the "TreeWidget" namespace. Do NOT include the namespace in the key.
    */
   public static translate(key: string | string[], options?: TranslationOptions): string {
+    assert(!Array.isArray(key));
     const stringKey = `${TreeWidget.i18nNamespace}:${key}`;
     return TreeWidget.i18n.getLocalizedString(stringKey, options);
   }
