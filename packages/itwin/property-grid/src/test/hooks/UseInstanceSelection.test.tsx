@@ -91,7 +91,7 @@ describe("useInstanceSelection", () => {
       triggerSelectionChange(props?: Pick<Partial<EventArgs<typeof selectionStorage.selectionChangeEvent>>, "source">) {
         selectionManager.selectionChange.raiseEvent(
           { source: "TestSource", imodel, ...props } as EventArgs<typeof selectionManager.selectionChange>,
-          // eslint-disable-next-line deprecation/deprecation
+          // eslint-disable-next-line @typescript-eslint/no-deprecated
           selectionManager as ISelectionProvider,
         );
       },
@@ -115,7 +115,9 @@ describe("useInstanceSelection", () => {
       });
 
       it("returns instance keys from instance nodes", async () => {
+        // eslint-disable-next-line @typescript-eslint/no-deprecated
         const key: ECInstancesNodeKey = {
+          // eslint-disable-next-line @typescript-eslint/no-deprecated
           type: StandardNodeTypes.ECInstancesNode,
           instanceKeys: [noParentKey],
           pathFromRoot: [],

@@ -113,7 +113,7 @@ export function SettingsDropdownMenu({ settingsMenuItems, dataProvider }: Settin
 
   return (
     <DropdownMenu menuItems={menuItems}>
-      <IconButton styleType="borderless" title={PropertyGridManager.translate("settings.label")}>
+      <IconButton styleType="borderless" label={PropertyGridManager.translate("settings.label")}>
         <SvgMoreVertical />
       </IconButton>
     </DropdownMenu>

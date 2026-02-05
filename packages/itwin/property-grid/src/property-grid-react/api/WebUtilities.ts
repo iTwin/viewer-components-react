@@ -23,10 +23,10 @@ function isiOsDevice(): boolean {
   const iDevices = ["iPad Simulator", "iPhone Simulator", "iPad", "iPhone", "iPod"];
 
   let iOS = false;
-  if (window.navigator.platform !== undefined) { // eslint-disable-line deprecation/deprecation
+  if (window.navigator.platform !== undefined) { // eslint-disable-line @typescript-eslint/no-deprecated
     if (
       iDevices.find(
-        (device: string) => device.indexOf(window.navigator.platform) !== -1, // eslint-disable-line deprecation/deprecation
+        (device: string) => device.indexOf(window.navigator.platform) !== -1, // eslint-disable-line @typescript-eslint/no-deprecated
       )
     ) {
       iOS = true;
@@ -46,7 +46,7 @@ const copyToClipboardWin = (info: string) => {
     document.removeEventListener("copy", listener);
   };
   document.addEventListener("copy", listener);
-  document.execCommand("copy"); // eslint-disable-line deprecation/deprecation
+  document.execCommand("copy"); // eslint-disable-line @typescript-eslint/no-deprecated
 };
 
 const copyToClipboardiOS = (info: string) => {
@@ -69,6 +69,6 @@ const copyToClipboardiOS = (info: string) => {
 
   el.setSelectionRange(0, 999999);
 
-  document.execCommand("copy"); // eslint-disable-line deprecation/deprecation
+  document.execCommand("copy"); // eslint-disable-line @typescript-eslint/no-deprecated
   document.body.removeChild(el);
 };
