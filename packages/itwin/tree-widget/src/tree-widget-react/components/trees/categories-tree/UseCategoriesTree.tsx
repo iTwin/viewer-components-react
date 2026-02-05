@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { Icon } from "@stratakit/foundations";
 import categorySvg from "@stratakit/icons/bis-category-3d.svg";
@@ -24,6 +24,7 @@ import { createCategoriesSearchResultsTree } from "./internal/visibility/SearchR
 
 import type { ReactNode } from "react";
 import type { GuidString, Id64Array } from "@itwin/core-bentley";
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { TreeNode } from "@itwin/presentation-hierarchies-react";
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils.js";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree.js";
@@ -75,14 +76,20 @@ export function useCategoriesTree({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     Object.values(hierarchyConfig ?? {}),
   );
-  const viewType = activeView.viewType === "2d" ? "2d" : "3d";
+  const [viewType, setViewType] = useState<"2d" | "3d">(activeView.viewType === "2d" ? "2d" : "3d");
   const componentId = useGuid();
 
-  const { getCache: getCategoriesTreeIdsCache } = useIdsCache<CategoriesTreeIdsCache, { viewType: "2d" | "3d" }>({
+  // Listen for view type changes
+  useEffect(() => {
+    return activeView.onDisplayStyleChanged.addListener(() => {
+      setViewType(activeView.viewType === "2d" ? "2d" : "3d");
+    });
+  }, [activeView]);
+
+  const { getCache: getCategoriesTreeIdsCache } = useCategoriesTreeIdsCache({
     imodel: activeView.iModel,
-    createCache,
-    cacheSpecificProps: useMemo(() => ({ viewType }), [viewType]),
     componentId,
+    activeViewType: viewType,
   });
 
   const { visibilityHandlerFactory, onSearchPathsChanged } = useCategoriesCachedVisibility({
@@ -95,7 +102,12 @@ export function useCategoriesTree({
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
     (props) => {
-      return new CategoriesTreeDefinition({ ...props, viewType, idsCache: getCategoriesTreeIdsCache(), hierarchyConfig: hierarchyConfiguration });
+      return new CategoriesTreeDefinition({
+        ...props,
+        viewType,
+        idsCache: getCategoriesTreeIdsCache(),
+        hierarchyConfig: hierarchyConfiguration,
+      });
     },
     [viewType, getCategoriesTreeIdsCache, hierarchyConfiguration],
   );
@@ -229,6 +241,36 @@ async function createSearchResultsTree(
     categoryElementClassName: viewClasses.elementClass,
     categoryModelClassName: viewClasses.modelClass,
   });
+}
+
+const CACHE_PROPS_2D = { viewType: "2d" as const };
+const CACHE_PROPS_3D = { viewType: "3d" as const };
+
+function useCategoriesTreeIdsCache({
+  imodel,
+  componentId,
+  activeViewType,
+}: {
+  imodel: IModelConnection;
+  activeViewType: "2d" | "3d";
+  componentId: GuidString;
+}) {
+  const { getCache: get2dCache } = useIdsCache({
+    imodel,
+    cacheSpecificProps: CACHE_PROPS_2D,
+    componentId,
+    createCache,
+  });
+  const { getCache: get3dCache } = useIdsCache({
+    imodel,
+    cacheSpecificProps: CACHE_PROPS_3D,
+    componentId,
+    createCache,
+  });
+
+  return {
+    getCache: activeViewType === "2d" ? get2dCache : get3dCache,
+  };
 }
 
 function createCache(props: CreateCacheProps<{ viewType: "2d" | "3d" }>) {

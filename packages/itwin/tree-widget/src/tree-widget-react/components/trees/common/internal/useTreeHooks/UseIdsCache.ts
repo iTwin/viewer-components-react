@@ -10,14 +10,14 @@ import type { GuidString } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 
 /** @internal */
-export interface CreateCacheProps<TCacheSpecificProps> {
+export interface CreateCacheProps<TCacheSpecificProps extends object = {}> {
   imodel: IModelConnection;
   specificProps: TCacheSpecificProps;
   componentId: GuidString;
 }
 
 /** @internal */
-export interface UseIdsCacheProps<TCache, TCacheSpecificProps> {
+export interface UseIdsCacheProps<TCache, TCacheSpecificProps extends object = {}> {
   imodel: IModelConnection;
   createCache: (props: CreateCacheProps<TCacheSpecificProps>) => TCache;
   cacheSpecificProps: TCacheSpecificProps;
@@ -25,7 +25,7 @@ export interface UseIdsCacheProps<TCache, TCacheSpecificProps> {
 }
 
 /** @internal */
-export function useIdsCache<TCache extends Disposable, TCacheSpecificProps extends object>(
+export function useIdsCache<TCache extends Disposable, TCacheSpecificProps extends object = {}>(
   props: UseIdsCacheProps<TCache, TCacheSpecificProps>,
 ): { getCache: () => TCache } {
   const cacheRef = useRef<TCache | undefined>(undefined);
