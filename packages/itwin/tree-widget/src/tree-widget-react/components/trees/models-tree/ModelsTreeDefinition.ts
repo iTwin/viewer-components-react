@@ -455,10 +455,10 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
               })}
             FROM ${instanceFilterClauses.from} this
             ${instanceFilterClauses.joins}
-            WHERE this.ECInstanceId IN (${categoryIds.map(() => "?").join(",")})
+            WHERE InVirtualSet(?, this.ECInstanceId)
             ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
-          bindings: categoryIds.map((id) => ({ type: "id", value: id })),
+          bindings: [{ type: "idset", value: categoryIds }],
         },
       },
     ];
