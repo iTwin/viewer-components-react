@@ -82,7 +82,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
       getModels: (props) => this.getModels(props),
       getSubCategories: (props) => this.getSubCategories(props),
       getSubModels: (props) => this.getSubModels(props),
-      hasSubModel: (props) => this.#props.idsCache.hasSubModel(props),
+      getSubModelsUnderElement: (props) => this.#props.idsCache.getSubModelsUnderElement(props),
       getAllCategoriesOfElements: () => this.getAllCategoriesOfElements(),
     };
     this.#visibilityHelper = new ModelsTreeVisibilityHelper({

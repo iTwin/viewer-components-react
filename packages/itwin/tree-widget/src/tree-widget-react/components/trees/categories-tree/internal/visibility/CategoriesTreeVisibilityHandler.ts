@@ -69,7 +69,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
       getModels: (props) => this.getModels(props),
       getSubCategories: (props) => this.getSubCategories(props),
       getSubModels: (props) => this.getSubModels(props),
-      hasSubModel: (props) => this.#props.idsCache.hasSubModel(props),
+      getSubModelsUnderElement: (props) => this.#props.idsCache.getSubModelsUnderElement(props),
     };
     this.#visibilityHelper = new CategoriesTreeVisibilityHelper({
       viewport: this.#props.viewport,
