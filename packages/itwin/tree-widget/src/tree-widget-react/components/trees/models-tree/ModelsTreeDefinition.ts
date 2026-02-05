@@ -421,61 +421,39 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       return [];
     }
 
-    const selectClause = await this.#selectQueryFactory.createSelectClause({
-      ecClassId: { selector: "this.ECClassId" },
-      ecInstanceId: { selector: "this.ECInstanceId" },
-      nodeLabel: {
-        selector: await this.#nodeLabelSelectClauseFactory.createSelectClause({
-          classAlias: "this",
-          className: "BisCore.SpatialCategory",
-        }),
+    return [
+      {
+        fullClassName: "BisCore.SpatialCategory",
+        query: {
+          ecsql: `
+            SELECT
+              ${await this.#selectQueryFactory.createSelectClause({
+                ecClassId: { selector: "this.ECClassId" },
+                ecInstanceId: { selector: "this.ECInstanceId" },
+                nodeLabel: {
+                  selector: await this.#nodeLabelSelectClauseFactory.createSelectClause({
+                    classAlias: "this",
+                    className: "BisCore.SpatialCategory",
+                  }),
+                },
+                grouping: { byLabel: { action: "merge", groupId: "category" } },
+                hasChildren: true,
+                extendedData: {
+                  imageId: "icon-layers",
+                  isCategory: true,
+                  modelIds: { selector: createIdsSelector(modelIds) },
+                },
+                supportsFiltering: this.supportsFiltering(),
+              })}
+            FROM ${instanceFilterClauses.from} this
+            ${instanceFilterClauses.joins}
+            WHERE InVirtualSet(?, this.ECInstanceId)
+            ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+          `,
+          bindings: [{ type: "idset", value: categoryIds }],
+        },
       },
-      grouping: { byLabel: { action: "merge", groupId: "category" } },
-      hasChildren: true,
-      extendedData: {
-        imageId: "icon-layers",
-        isCategory: true,
-        modelIds: { selector: createIdsSelector(modelIds) },
-      },
-      supportsFiltering: this.supportsFiltering(),
-    });
-
-    if (categoryIds.length <= 1001) {
-      return [this.getCategoriesLevelDefinition({ categoryIds, instanceFilterClauses, selectClause })];
-    }
-    const batchSize = getOptimalBatchSize({ totalSize: categoryIds.length, maximumBatchSize: 1001 });
-
-    const definitions = new Array<HierarchyNodesDefinition>();
-    for (let i = 0; i < categoryIds.length; i += batchSize) {
-      const batch = categoryIds.slice(i, i + batchSize);
-      definitions.push(this.getCategoriesLevelDefinition({ categoryIds: batch, instanceFilterClauses, selectClause }));
-    }
-    return definitions;
-  }
-
-  private getCategoriesLevelDefinition({
-    categoryIds,
-    instanceFilterClauses,
-    selectClause,
-  }: {
-    categoryIds: Id64Array;
-    instanceFilterClauses: Awaited<ReturnType<NodesQueryClauseFactory["createFilterClauses"]>>;
-    selectClause: string;
-  }): HierarchyNodesDefinition {
-    return {
-      fullClassName: "BisCore.SpatialCategory",
-      query: {
-        ecsql: `
-          SELECT
-            ${selectClause}
-          FROM ${instanceFilterClauses.from} this
-          ${instanceFilterClauses.joins}
-          WHERE this.ECInstanceId IN (${categoryIds.map(() => "?").join(",")})
-          ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
-        `,
-        bindings: categoryIds.map((id) => ({ type: "id", value: id })),
-      },
-    };
+    ];
   }
 
   private createElementChildrenCountSelector(props: { elementIdSelector: string }): string {
