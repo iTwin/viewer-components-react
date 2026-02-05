@@ -39,7 +39,7 @@ import { FilterLimitExceededError } from "../common/TreeErrors.js";
 import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils.js";
 
 import type { Observable } from "rxjs";
-import type { GuidString, Id64Array, Id64String } from "@itwin/core-bentley";
+import type { GuidString, Id64String } from "@itwin/core-bentley";
 import type {
   ClassGroupingNodeKey,
   DefineHierarchyLevelProps,
