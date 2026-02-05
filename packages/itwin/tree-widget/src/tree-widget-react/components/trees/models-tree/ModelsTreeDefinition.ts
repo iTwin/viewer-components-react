@@ -410,11 +410,16 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     parentNodeInstanceIds: modelIds,
     instanceFilter,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    const instanceFilterClauses = await this.#selectQueryFactory.createFilterClauses({
-      filter: instanceFilter,
-      contentClass: { fullName: "BisCore.SpatialCategory", alias: "this" },
-    });
-    const categoryIds = await firstValueFrom(this.#idsCache.getCategoriesOfModelsTopMostElements(modelIds).pipe(map((categoriesSet) => [...categoriesSet])));
+    const [instanceFilterClauses, categoryIds] = await Promise.all([
+      this.#selectQueryFactory.createFilterClauses({
+        filter: instanceFilter,
+        contentClass: { fullName: "BisCore.SpatialCategory", alias: "this" },
+      }),
+      firstValueFrom(this.#idsCache.getCategoriesOfModelsTopMostElements(modelIds).pipe(map((categoriesSet) => [...categoriesSet]))),
+    ]);
+    if (categoryIds.length === 0) {
+      return [];
+    }
     return [
       {
         fullClassName: "BisCore.SpatialCategory",
