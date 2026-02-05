@@ -447,7 +447,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             FROM ${instanceFilterClauses.from} this
             ${instanceFilterClauses.joins}
             WHERE this.ECInstanceId IN (${categoryIds.map(() => "?").join(",")})
-              ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+            ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
           bindings: categoryIds.map((id) => ({ type: "id", value: id })),
         },
