@@ -32,14 +32,8 @@
 /packages/itwin/reports-config-widget  @itwin/viewer-components-reviewers @itwin/insights-and-reporting-platform
 /change/@itwin-reports-config-widget-react*  @itwin/viewer-components-reviewers @itwin/insights-and-reporting-platform
 
-/packages/itwin/breakdown-trees  @itwin/viewer-components-reviewers @DanishMehmood-bit
-/change/@itwin-breakdown-trees-react*  @itwin/viewer-components-reviewers @DanishMehmood-bit
-
 /packages/itwin/geo-tools  @itwin/viewer-components-reviewers @mdastous-bentley
 /change/@itwin-geo-tools-react*  @itwin/viewer-components-reviewers @mdastous-bentley
-
-/packages/itwin/imodel-react-hooks  @itwin/viewer-components-reviewers
-/change/@itwin-imodel-react-hooks*  @itwin/viewer-components-reviewers
 
 /packages/itwin/ec3-widget  @itwin/viewer-components-reviewers @itwin/insights-and-reporting-platform
 /change/@itwin-ec3-widget-react*  @itwin/viewer-components-reviewers @itwin/insights-and-reporting-platform
