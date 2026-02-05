@@ -420,7 +420,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     if (categoryIds.length === 0) {
       return [];
     }
-    
+
     const selectClause = await this.#selectQueryFactory.createSelectClause({
       ecClassId: { selector: "this.ECClassId" },
       ecInstanceId: { selector: "this.ECInstanceId" },
@@ -441,9 +441,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     });
 
     if (categoryIds.length <= 1001) {
-      return [
-        this.getCategoriesLevelDefinition({ categoryIds, instanceFilterClauses, selectClause }),
-      ]
+      return [this.getCategoriesLevelDefinition({ categoryIds, instanceFilterClauses, selectClause })];
     }
     const batchSize = getOptimalBatchSize({ totalSize: categoryIds.length, maximumBatchSize: 1001 });
 
