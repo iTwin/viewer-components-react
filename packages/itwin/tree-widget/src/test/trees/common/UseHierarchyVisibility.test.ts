@@ -4,11 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { act } from "react-dom/test-utils";
 import sinon from "sinon";
 import { BeEvent } from "@itwin/core-bentley";
 import { useHierarchyVisibility } from "../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";
-import { renderHook, waitFor } from "../../TestUtils.js";
+import { act, renderHook, waitFor } from "../../TestUtils.js";
 import { createPresentationHierarchyNode } from "../TreeUtils.js";
 
 import type { HierarchyVisibilityHandler } from "../../../tree-widget-react/components/trees/common/UseHierarchyVisibility.js";

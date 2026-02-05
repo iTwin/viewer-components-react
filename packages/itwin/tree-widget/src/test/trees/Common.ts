@@ -102,7 +102,7 @@ export function createFakeSinonViewport(
 
 export function createIModelAccess(imodel: IModelConnection) {
   const schemas = new SchemaContext();
-  // eslint-disable-next-line @itwin/no-internal
+
   schemas.addLocater(new ECSchemaRpcLocater(imodel.getRpcProps()));
   const schemaProvider = createECSchemaProvider(schemas);
   return {

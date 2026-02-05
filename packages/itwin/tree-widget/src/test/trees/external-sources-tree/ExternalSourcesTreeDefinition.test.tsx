@@ -35,6 +35,7 @@ describe("External sources tree", () => {
         backendProps: {
           caching: {
             hierarchies: {
+              // eslint-disable-next-line @typescript-eslint/no-deprecated
               mode: HierarchyCacheMode.Memory,
             },
           },
@@ -50,7 +51,6 @@ describe("External sources tree", () => {
     });
 
     it("creates auto-expanded root nodes", async function () {
-      // eslint-disable-next-line deprecation/deprecation
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const { externalSource: rootExternalSource } = insertRootExternalSource({
           builder,
@@ -76,7 +76,6 @@ describe("External sources tree", () => {
     });
 
     it("creates external sources as external source group node children", async function () {
-      // eslint-disable-next-line deprecation/deprecation
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const { externalSource: rootExternalSource, repositoryLink: rootRepositoryLink } = insertRootExternalSource({
           builder,
@@ -123,7 +122,6 @@ describe("External sources tree", () => {
     });
 
     it("creates attached external sources as external source node children", async function () {
-      // eslint-disable-next-line deprecation/deprecation
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const { externalSource: rootExternalSource } = insertRootExternalSource({ builder });
         const childExternalSource = insertExternalSource({ builder, codeValue: "Child external source" });
@@ -157,7 +155,6 @@ describe("External sources tree", () => {
     });
 
     it("creates elements as external source node children", async function () {
-      // eslint-disable-next-line deprecation/deprecation
       await using buildIModelResult = await buildIModel(this, async (builder) => {
         const { externalSource: rootExternalSource } = insertRootExternalSource({ builder });
         const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "Model" });

@@ -188,7 +188,7 @@ export function useModelsTree({
             }),
         });
         return paths.map(HierarchyFilteringPath.normalize).map(({ path }) => path);
-      } catch (e) {
+      } catch {
         const newError = "unknownSubTreeError";
         setSubTreeError(newError);
         return [];

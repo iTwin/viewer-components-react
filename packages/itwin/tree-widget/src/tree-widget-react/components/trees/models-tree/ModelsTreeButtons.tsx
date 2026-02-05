@@ -11,6 +11,7 @@ import { useFocusedInstancesContext } from "../common/FocusedInstancesContext.js
 import { useGuid } from "../common/useGuid.js";
 import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, toggleModels } from "./internal/ModelsTreeVisibilityHandler.js";
 
+import type { ReactElement } from "react";
 import type { Id64String } from "@itwin/core-bentley";
 import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
@@ -105,7 +106,7 @@ async function queryModelsForHeaderActions(iModel: IModelConnection) {
 }
 
 /** @public */
-export type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) => JSX.Element | null;
+export type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) => ReactElement | null;
 
 /** @public */
 export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {

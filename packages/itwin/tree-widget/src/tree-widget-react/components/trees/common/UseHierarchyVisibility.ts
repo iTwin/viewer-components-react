@@ -44,7 +44,7 @@ export interface VisibilityStatus {
  * Handler that can be used to determine and change visibility of instances represented by tree nodes.
  * @beta
  */
-// eslint-disable-next-line deprecation/deprecation
+// eslint-disable-next-line @typescript-eslint/no-deprecated
 export interface HierarchyVisibilityHandler extends IDisposable {
   /** Event used to notify tree about visibility changes from outside. */
   readonly onVisibilityChange: BeEvent<() => void>;

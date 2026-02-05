@@ -11,6 +11,7 @@ import { TreeWidget } from "../../../TreeWidget.js";
 import { hideAllCategories, invertAllCategories, loadCategoriesFromViewport, showAllCategories } from "../common/CategoriesVisibilityUtils.js";
 import { useGuid } from "../common/useGuid.js";
 
+import type { ReactElement } from "react";
 import type { GuidString } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader.js";
@@ -61,7 +62,7 @@ export function useCategoriesTreeButtonProps({ viewport }: { viewport: Viewport 
 }
 
 /** @public */
-export type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonProps) => JSX.Element | null;
+export type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonProps) => ReactElement | null;
 
 /** @public */
 export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
