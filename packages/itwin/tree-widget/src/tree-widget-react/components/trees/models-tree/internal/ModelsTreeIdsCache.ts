@@ -563,6 +563,21 @@ export class ModelsTreeIdsCache implements Disposable {
     );
   }
 
+  public getCategoriesOfModelsTopMostElements(modelIds: Id64Array): Observable<Id64Set> {
+    return this.getModelInfos().pipe(
+      mergeMap((modelInfos) =>
+        from(modelIds).pipe(
+          mergeMap((modelId) => modelInfos.get(modelId)?.categories.entries() ?? []),
+          filter(([_, { isRootElementCategory }]) => isRootElementCategory),
+        ),
+      ),
+      reduce((acc, [categoryId]) => {
+        acc.add(categoryId);
+        return acc;
+      }, new Set<Id64String>()),
+    );
+  }
+
   public hasSubModel(elementId: Id64String): Observable<boolean> {
     return this.getModelInfos().pipe(
       map((modelInfos) => {
