@@ -29,6 +29,7 @@ describe("Models tree", () => {
         backendProps: {
           caching: {
             hierarchies: {
+              // eslint-disable-next-line @typescript-eslint/no-deprecated
               mode: HierarchyCacheMode.Memory,
             },
           },
@@ -162,7 +163,7 @@ describe("Models tree", () => {
             builder,
             codeValue: "child subject",
             parentId: rootSubject.id,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
+
             jsonProperties: { Subject: { Model: { Type: "Hierarchy" } } },
           });
           const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: childSubject.id });
@@ -218,7 +219,7 @@ describe("Models tree", () => {
             builder,
             codeValue: "child subject 2",
             parentId: rootSubject.id,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
+
             jsonProperties: { Subject: { Model: { TargetPartition: model.id } } },
           });
           return { rootSubject, childSubject1, childSubject2, model };
@@ -241,7 +242,7 @@ describe("Models tree", () => {
             builder,
             codeValue: "child subject 2",
             parentId: rootSubject.id,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
+
             jsonProperties: { Subject: { Model: { TargetPartition: model.id } } },
           });
           const category = insertSpatialCategory({ builder, codeValue: "category" });
@@ -267,7 +268,7 @@ describe("Models tree", () => {
             builder,
             codeValue: "child subject 2",
             parentId: rootSubject.id,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
+
             jsonProperties: { Subject: { Model: { TargetPartition: model.id } } },
           });
           return { rootSubject, childSubject1, childSubject2, model, category, element };
@@ -333,14 +334,14 @@ describe("Models tree", () => {
             builder,
             codeValue: "hidden subject 1",
             parentId: rootSubject.id,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
+
             jsonProperties: { Subject: { Model: { Type: "Hierarchy" } } },
           });
           const hiddenSubject2 = insertSubject({
             builder,
             codeValue: "hidden subject 2",
             parentId: rootSubject.id,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
+
             jsonProperties: { Subject: { Model: { Type: "Hierarchy" } } },
           });
           const mergedSubject1 = insertSubject({ builder, codeValue: "merged subject", parentId: hiddenSubject1.id });
@@ -407,7 +408,7 @@ describe("Models tree", () => {
             builder,
             codeValue: "model",
             parentId: rootSubject.id,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
+
             jsonProperties: { PhysicalPartition: { Model: { Content: true } } },
           });
           const model = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
@@ -441,7 +442,7 @@ describe("Models tree", () => {
             builder,
             codeValue: "model",
             parentId: rootSubject.id,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
+
             jsonProperties: { GraphicalPartition3d: { Model: { Content: true } } },
           });
           const model = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
@@ -905,21 +906,21 @@ describe("Models tree", () => {
             builder,
             codeValue: "hidden subject 1",
             parentId: rootSubject.id,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
+
             jsonProperties: { Subject: { Model: { Type: "Hierarchy" } } },
           });
           const hiddenSubject2 = insertSubject({
             builder,
             codeValue: "hidden subject 2",
             parentId: rootSubject.id,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
+
             jsonProperties: { Subject: { Model: { Type: "Hierarchy" } } },
           });
           const partition1 = insertPhysicalPartition({
             builder,
             codeValue: "model1",
             parentId: hiddenSubject1.id,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
+
             jsonProperties: { PhysicalPartition: { Model: { Content: true } } },
           });
           const model1 = insertPhysicalSubModel({ builder, modeledElementId: partition1.id });
@@ -928,7 +929,7 @@ describe("Models tree", () => {
             builder,
             codeValue: "model2",
             parentId: hiddenSubject2.id,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
+
             jsonProperties: { PhysicalPartition: { Model: { Content: true } } },
           });
           const model2 = insertPhysicalSubModel({ builder, modeledElementId: partition2.id });

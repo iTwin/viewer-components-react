@@ -4,10 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { act } from "react-dom/test-utils";
 import sinon from "sinon";
 import { useMultiCheckboxHandler } from "../../../tree-widget-react/components/trees/common/UseMultiCheckboxHandler.js";
-import { renderHook, waitFor } from "../../TestUtils.js";
+import { act, renderHook, waitFor } from "../../TestUtils.js";
 import { createPresentationHierarchyNode } from "../TreeUtils.js";
 
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";

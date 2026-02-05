@@ -241,7 +241,8 @@ function forEachChildSubject(
   const parentSubjectInfo = typeof parentSubject === "string" ? subjectInfos.get(parentSubject) : parentSubject;
   parentSubjectInfo &&
     parentSubjectInfo.childSubjects.forEach((childSubjectId) => {
-      const childSubjectInfo = subjectInfos.get(childSubjectId)!;
+      const childSubjectInfo = subjectInfos.get(childSubjectId);
+      assert(childSubjectInfo !== undefined);
       if (cb(childSubjectId, childSubjectInfo) === "break") {
         return;
       }

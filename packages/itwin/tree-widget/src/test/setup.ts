@@ -8,10 +8,8 @@
 import * as chai from "chai";
 import chaiAsPromised from "chai-as-promised";
 import chaiJestSnapshot from "chai-jest-snapshot";
-import chaiSubset from "chai-subset";
 import sinonChai from "sinon-chai";
 chai.use(chaiJestSnapshot);
-chai.use(chaiSubset);
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
 
@@ -19,7 +17,7 @@ chai.use(chaiAsPromised);
 import globalJsdom from "global-jsdom";
 import * as jsdom from "jsdom";
 globalJsdom(undefined, {
-  virtualConsole: new jsdom.VirtualConsole().sendTo(console, { omitJSDOMErrors: true }),
+  virtualConsole: new jsdom.VirtualConsole().forwardTo(console, { jsdomErrors: "none" }),
 });
 
 // setup browser environment
