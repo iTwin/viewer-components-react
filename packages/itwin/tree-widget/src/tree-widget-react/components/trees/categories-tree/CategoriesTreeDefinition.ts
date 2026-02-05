@@ -286,49 +286,48 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     parentNodeInstanceIds: modelIds,
     instanceFilter,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    const instanceFilterClauses = await this.#selectQueryFactory.createFilterClauses({
-      filter: instanceFilter,
-      contentClass: { fullName: this.#categoryClass, alias: "this" },
-    });
+    const [instanceFilterClauses, categoryIds] = await Promise.all([
+      this.#selectQueryFactory.createFilterClauses({
+        filter: instanceFilter,
+        contentClass: { fullName: this.#categoryClass, alias: "this" },
+      }),
+      firstValueFrom(this.#idsCache.getCategoriesOfModelsTopMostElements(modelIds).pipe(map((categoriesSet) => [...categoriesSet]))),
+    ]);
+    if (categoryIds.length === 0) {
+      return [];
+    }
 
     return [
       {
         fullClassName: this.#categoryClass,
         query: {
           ecsql: `
-          SELECT
-            ${await this.#selectQueryFactory.createSelectClause({
-              ecClassId: { selector: "this.ECClassId" },
-              ecInstanceId: { selector: "this.ECInstanceId" },
-              nodeLabel: {
-                selector: await this.#nodeLabelSelectClauseFactory.createSelectClause({
-                  classAlias: "this",
-                  className: this.#categoryClass,
-                }),
-              },
-              grouping: { byLabel: { action: "merge", groupId: "category" } },
-              hasChildren: true,
-              extendedData: {
-                imageId: "icon-layers",
-                isCategory: true,
-                modelIds: { selector: createIdsSelector(modelIds) },
-                isCategoryOfSubModel: true,
-              },
-              supportsFiltering: true,
-            })}
-          FROM ${instanceFilterClauses.from} this
-          ${instanceFilterClauses.joins}
-          WHERE
-            EXISTS (
-              SELECT 1
-              FROM ${this.#categoryElementClass} element
-              WHERE
-                element.Model.Id IN (${modelIds.join(",")})
-                AND element.Category.Id = +this.ECInstanceId
-                AND element.Parent.Id IS NULL
-            )
+            SELECT
+              ${await this.#selectQueryFactory.createSelectClause({
+                ecClassId: { selector: "this.ECClassId" },
+                ecInstanceId: { selector: "this.ECInstanceId" },
+                nodeLabel: {
+                  selector: await this.#nodeLabelSelectClauseFactory.createSelectClause({
+                    classAlias: "this",
+                    className: this.#categoryClass,
+                  }),
+                },
+                grouping: { byLabel: { action: "merge", groupId: "category" } },
+                hasChildren: true,
+                extendedData: {
+                  imageId: "icon-layers",
+                  isCategory: true,
+                  modelIds: { selector: createIdsSelector(modelIds) },
+                  isCategoryOfSubModel: true,
+                },
+                supportsFiltering: true,
+              })}
+            FROM ${instanceFilterClauses.from} this
+            ${instanceFilterClauses.joins}
+            WHERE this.ECInstanceId IN (${categoryIds.map(() => "?").join(",")})
             ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
-        `,
+          `,
+          bindings: categoryIds.map((id) => ({ type: "id", value: id })),
         },
       },
     ];

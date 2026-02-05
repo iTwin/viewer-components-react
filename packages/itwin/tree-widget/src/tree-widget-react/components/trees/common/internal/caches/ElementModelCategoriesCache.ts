@@ -148,6 +148,16 @@ export class ElementModelCategoriesCache {
     );
   }
 
+  public getCategoriesOfModelsTopMostElements(modelIds: Id64Array): Observable<Id64Set> {
+    return this.getElementModelCategories().pipe(
+      mergeMap((modelCategories) => from(modelIds).pipe(mergeMap((modelId) => modelCategories.get(modelId)?.categoriesOfTopMostElements ?? []))),
+      reduce((acc, categoryId) => {
+        acc.add(categoryId);
+        return acc;
+      }, new Set<Id64String>()),
+    );
+  }
+
   public getAllCategoriesOfElements(): Observable<Id64Set> {
     return this.getElementModelCategories().pipe(
       mergeMap((modelCategories) => modelCategories.values()),
