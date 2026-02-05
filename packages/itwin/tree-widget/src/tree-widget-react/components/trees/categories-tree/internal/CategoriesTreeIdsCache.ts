@@ -6,6 +6,7 @@
 import { defer, forkJoin, from, map, mergeMap, of, reduce, shareReplay, toArray } from "rxjs";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { ElementChildrenCache } from "../../common/internal/caches/ElementChildrenCache.js";
+import { ElementModelCategoriesCache } from "../../common/internal/caches/ElementModelCategoriesCache.js";
 import { ModelCategoryElementsCountCache } from "../../common/internal/caches/ModelCategoryElementsCountCache.js";
 import { ModeledElementsCache } from "../../common/internal/caches/ModeledElementsCache.js";
 import { SubCategoriesCache } from "../../common/internal/caches/SubCategoriesCache.js";
@@ -44,7 +45,6 @@ export interface CategoryInfo {
 export class CategoriesTreeIdsCache implements Disposable {
   #definitionContainersInfo: Observable<Map<DefinitionContainerId, DefinitionContainerInfo>> | undefined;
   #modelsCategoriesInfo: Observable<Map<ModelId, CategoriesInfo>> | undefined;
-  #elementModelsCategories: Observable<Map<ModelId, { categoryIds: Id64Set; isSubModel: boolean }>> | undefined;
   readonly #categoryElementCounts: ModelCategoryElementsCountCache;
   #categoryClass: string;
   #categoryElementClass: string;
@@ -52,6 +52,7 @@ export class CategoriesTreeIdsCache implements Disposable {
   #isDefinitionContainerSupported: Observable<boolean> | undefined;
   #filteredElementsModels: Observable<Map<ElementId, ModelId>> | undefined;
   #elementChildrenCache: ElementChildrenCache;
+  #elementModelCategoriesCache: ElementModelCategoriesCache;
   #subCategoriesCache: SubCategoriesCache;
   #modeledElementsCache: ModeledElementsCache;
   #queryExecutor: LimitingECSqlQueryExecutor;
@@ -88,6 +89,14 @@ export class CategoriesTreeIdsCache implements Disposable {
       elementClassName: this.#categoryElementClass,
       modelClassName: this.#categoryModelClass,
       viewType,
+    });
+    this.#elementModelCategoriesCache = new ElementModelCategoriesCache({
+      componentId: this.#componentId,
+      queryExecutor: this.#queryExecutor,
+      elementClassName: this.#categoryElementClass,
+      modelClassName: this.#categoryModelClass,
+      modeledElementsCache: this.#modeledElementsCache,
+      type: viewType,
     });
   }
 
@@ -146,30 +155,6 @@ export class CategoriesTreeIdsCache implements Disposable {
 
   public clearFilteredElementsModels() {
     this.#filteredElementsModels = undefined;
-  }
-
-  private queryElementModelCategories(): Observable<{
-    modelId: Id64String;
-    categoryId: Id64String;
-  }> {
-    return defer(() => {
-      const query = `
-        SELECT this.Model.Id modelId, this.Category.Id categoryId
-        FROM ${this.#categoryModelClass} m
-        JOIN ${this.#categoryElementClass} this ON m.ECInstanceId = this.Model.Id
-        WHERE this.Parent.Id IS NULL AND m.IsPrivate = false
-        GROUP BY modelId, categoryId
-      `;
-      return this.#queryExecutor.createQueryReader(
-        { ecsql: query },
-        { rowFormat: "ECSqlPropertyNames", limit: "unbounded", restartToken: `${this.#componentName}/${this.#componentId}/element-models-and-categories` },
-      );
-    }).pipe(
-      catchBeSQLiteInterrupts,
-      map((row) => {
-        return { modelId: row.modelId, categoryId: row.categoryId };
-      }),
-    );
   }
 
   private queryCategories(): Observable<{
@@ -335,34 +320,6 @@ export class CategoriesTreeIdsCache implements Disposable {
     return this.#modelsCategoriesInfo;
   }
 
-  private getElementModelsCategories() {
-    this.#elementModelsCategories ??= forkJoin({
-      modelCategories: this.queryElementModelCategories().pipe(
-        reduce((acc, queriedCategory) => {
-          let modelEntry = acc.get(queriedCategory.modelId);
-          if (modelEntry === undefined) {
-            modelEntry = { categoryIds: new Set() };
-            acc.set(queriedCategory.modelId, modelEntry);
-          }
-          modelEntry.categoryIds.add(queriedCategory.categoryId);
-          return acc;
-        }, new Map<ModelId, { categoryIds: Id64Set }>()),
-      ),
-      allSubModels: this.#modeledElementsCache.getModeledElementsInfo().pipe(map(({ allSubModels }) => allSubModels)),
-    }).pipe(
-      map(({ modelCategories, allSubModels }) => {
-        const result = new Map<ModelId, { categoryIds: Set<CategoryId>; isSubModel: boolean }>();
-        for (const [modelId, modelEntry] of modelCategories) {
-          const isSubModel = allSubModels.has(modelId);
-          result.set(modelId, { categoryIds: modelEntry.categoryIds, isSubModel });
-        }
-        return result;
-      }),
-      shareReplay(),
-    );
-    return this.#elementModelsCategories;
-  }
-
   public getCategoriesModeledElements(props: { modelId: Id64String; categoryIds: Id64Arg }): Observable<Id64Array> {
     return this.#modeledElementsCache.getCategoriesModeledElements(props);
   }
@@ -437,44 +394,19 @@ export class CategoriesTreeIdsCache implements Disposable {
     );
   }
 
-  public getCategoriesElementModels(categoryIds: Id64Arg, includeSubModels?: boolean): Observable<{ id: CategoryId; models: Array<ModelId> | undefined }> {
-    return this.getElementModelsCategories().pipe(
-      mergeMap((elementModelsCategories) =>
-        from(Id64.iterable(categoryIds)).pipe(
-          map((categoryId) => {
-            const categoryModels = new Array<ModelId>();
-            elementModelsCategories.forEach(({ categoryIds: categories, isSubModel }, modelId) => {
-              if ((includeSubModels || !isSubModel) && categories.has(categoryId)) {
-                categoryModels.push(modelId);
-              }
-            });
-            return { id: categoryId, models: categoryModels.length > 0 ? categoryModels : undefined };
-          }),
-        ),
-      ),
-    );
+  public getCategoriesElementModels(props: {
+    categoryIds: Id64Arg;
+    includeSubModels?: boolean;
+  }): Observable<{ id: CategoryId; models: Array<ModelId> | undefined }> {
+    return this.#elementModelCategoriesCache.getCategoriesElementModels(props);
   }
 
-  public getCategoriesOfElementModel(modelId: Id64String): Observable<Id64Set | undefined> {
-    return this.getElementModelsCategories().pipe(map((elementModelsCategories) => elementModelsCategories.get(modelId)?.categoryIds));
+  public getModelCategoryIds(modelId: Id64String): Observable<Id64Set> {
+    return this.#elementModelCategoriesCache.getModelCategoryIds(modelId);
   }
 
-  public getModelCategoryIds(modelId: Id64String): Observable<Id64Array> {
-    return this.getElementModelsCategories().pipe(
-      map((elementModelsCategories) => {
-        return [...(elementModelsCategories.get(modelId)?.categoryIds ?? [])];
-      }),
-    );
-  }
-
-  public getAllCategories(): Observable<Id64Set> {
-    return this.getModelsCategoriesInfo().pipe(
-      mergeMap((modelsCategoriesInfo) => modelsCategoriesInfo.values()),
-      reduce((acc, { childCategories }) => {
-        childCategories.forEach(({ id }) => acc.add(id));
-        return acc;
-      }, new Set<Id64String>()),
-    );
+  public getAllCategoriesOfElements(): Observable<Id64Set> {
+    return this.#elementModelCategoriesCache.getAllCategoriesOfElements();
   }
 
   public hasSubModel(elementId: Id64String): Observable<boolean> {

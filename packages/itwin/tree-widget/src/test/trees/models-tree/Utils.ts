@@ -103,10 +103,10 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
         toArray(),
       );
     }),
-    getModelCategoryIds: sinon.stub<[Id64String], Observable<Id64Array>>().callsFake((modelId) => {
-      return of(props?.modelCategories?.get(modelId) ?? []);
+    getModelCategoryIds: sinon.stub<[Id64String], Observable<Id64Set>>().callsFake((modelId) => {
+      return of(new Set(props?.modelCategories?.get(modelId) ?? []));
     }),
-    getAllCategories: sinon.stub<[], Observable<Id64Set>>().callsFake(() => {
+    getAllCategoriesOfElements: sinon.stub<[], Observable<Id64Set>>().callsFake(() => {
       const result = new Set<Id64String>();
       props?.modelCategories?.forEach((categories) => categories.forEach((category) => result.add(category)));
       return of(result);

@@ -49,7 +49,7 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
       getAllChildElementsCount: (props) => this.getAllChildElementsCount(props),
       getChildElementsTree: (props) => this.getChildElementsTree(props),
       getCategories: (props) => this.getCategories(props),
-      getAllCategories: () => this.getAllCategories(),
+      getAllCategoriesOfElements: () => this.getAllCategoriesOfElements(),
       getElementsCount: (props) => this.getElementsCount(props),
       getModels: (props) => this.getModels(props),
       getSubCategories: (props) => this.getSubCategories(props),
@@ -326,8 +326,8 @@ export class ClassificationsTreeVisibilityHandler implements Disposable, TreeSpe
     );
   }
 
-  private getAllCategories(): ReturnType<BaseIdsCache["getAllCategories"]> {
-    return this.#props.idsCache.getAllCategories();
+  private getAllCategoriesOfElements(): ReturnType<BaseIdsCache["getAllCategoriesOfElements"]> {
+    return this.#props.idsCache.getAllCategoriesOfElements();
   }
 
   private getElementsCount(props: Parameters<BaseIdsCache["getElementsCount"]>[0]): ReturnType<BaseIdsCache["getElementsCount"]> {
