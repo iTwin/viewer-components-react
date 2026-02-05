@@ -1,31 +1,67 @@
-;
 /*---------------------------------------------------------------------------------------------
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { bufferCount, defaultIfEmpty, defer, firstValueFrom, forkJoin, from, fromEvent, identity, lastValueFrom, map, merge, mergeAll, mergeMap, reduce, switchMap, takeUntil, toArray } from "rxjs";
+import {
+  bufferCount,
+  defaultIfEmpty,
+  defer,
+  firstValueFrom,
+  forkJoin,
+  from,
+  fromEvent,
+  identity,
+  lastValueFrom,
+  map,
+  merge,
+  mergeAll,
+  mergeMap,
+  reduce,
+  switchMap,
+  takeUntil,
+  toArray,
+} from "rxjs";
 import { Guid } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
-import { createNodesQueryClauseFactory, createPredicateBasedHierarchyDefinition, HierarchyFilteringPath, HierarchyNodeKey, NodeSelectClauseColumnNames, ProcessedHierarchyNode } from "@itwin/presentation-hierarchies";
+import {
+  createNodesQueryClauseFactory,
+  createPredicateBasedHierarchyDefinition,
+  HierarchyFilteringPath,
+  HierarchyNodeKey,
+  NodeSelectClauseColumnNames,
+  ProcessedHierarchyNode,
+} from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import { getOptimalBatchSize, releaseMainThreadOnItemsCount } from "../common/internal/Utils.js";
 import { collect } from "../common/Rxjs.js";
 import { FilterLimitExceededError } from "../common/TreeErrors.js";
 import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils.js";
 
-
-
 import type { Observable } from "rxjs";
 import type { GuidString, Id64String } from "@itwin/core-bentley";
-import type { ClassGroupingNodeKey, DefineHierarchyLevelProps, DefineInstanceNodeChildHierarchyLevelProps, GroupingHierarchyNode, HierarchyDefinition, HierarchyLevelDefinition, HierarchyNodesDefinition, LimitingECSqlQueryExecutor, NodesQueryClauseFactory } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlBinding, ECSqlQueryDef, ECSqlQueryRow, IInstanceLabelSelectClauseFactory, InstanceKey } from "@itwin/presentation-shared";
+import type {
+  ClassGroupingNodeKey,
+  DefineHierarchyLevelProps,
+  DefineInstanceNodeChildHierarchyLevelProps,
+  GroupingHierarchyNode,
+  HierarchyDefinition,
+  HierarchyLevelDefinition,
+  HierarchyNodesDefinition,
+  LimitingECSqlQueryExecutor,
+  NodesQueryClauseFactory,
+} from "@itwin/presentation-hierarchies";
+import type {
+  ECClassHierarchyInspector,
+  ECSchemaProvider,
+  ECSqlBinding,
+  ECSqlQueryDef,
+  ECSqlQueryRow,
+  IInstanceLabelSelectClauseFactory,
+  InstanceKey,
+} from "@itwin/presentation-shared";
 import type { NormalizedHierarchyFilteringPath } from "../common/Utils.js";
 import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache.js";
-
-
-
-
 
 /** @beta */
 export type ClassGroupingHierarchyNode = GroupingHierarchyNode & { key: ClassGroupingNodeKey };
