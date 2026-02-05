@@ -410,10 +410,17 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     parentNodeInstanceIds: modelIds,
     instanceFilter,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    const instanceFilterClauses = await this.#selectQueryFactory.createFilterClauses({
-      filter: instanceFilter,
-      contentClass: { fullName: "BisCore.SpatialCategory", alias: "this" },
-    });
+    const [instanceFilterClauses, categoryIds] = await Promise.all([
+      this.#selectQueryFactory.createFilterClauses({
+        filter: instanceFilter,
+        contentClass: { fullName: "BisCore.SpatialCategory", alias: "this" },
+      }),
+      firstValueFrom(this.#idsCache.getCategoriesOfModelsTopMostElements(modelIds).pipe(map((categoriesSet) => [...categoriesSet]))),
+    ]);
+    if (categoryIds.length === 0) {
+      return [];
+    }
+
     return [
       {
         fullClassName: "BisCore.SpatialCategory",
@@ -440,18 +447,10 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
               })}
             FROM ${instanceFilterClauses.from} this
             ${instanceFilterClauses.joins}
-            WHERE
-              EXISTS (
-                SELECT 1
-                FROM ${this.#hierarchyConfig.elementClassSpecification} element
-                WHERE
-                  element.Model.Id IN (${modelIds.map(() => "?").join(",")})
-                  AND element.Category.Id = +this.ECInstanceId
-                  AND element.Parent.Id IS NULL
-              )
-              ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+            WHERE InVirtualSet(?, this.ECInstanceId)
+            ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
-          bindings: modelIds.map((id) => ({ type: "id", value: id })),
+          bindings: [{ type: "idset", value: categoryIds }],
         },
       },
     ];
