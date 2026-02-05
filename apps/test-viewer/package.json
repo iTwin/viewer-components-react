@@ -28,7 +28,7 @@
     "@itwin/imodels-client-management": "^6.0.2",
     "@itwin/itwinui-icons-react": "^2.11.0",
     "@itwin/itwinui-illustrations-react": "^2.1.0",
-    "@itwin/itwinui-react": "3.19.5",
+    "@itwin/itwinui-react": "3.20.1",
     "@itwin/map-layers": "workspace:*",
     "@itwin/map-layers-auth": "^5.5.2",
     "@itwin/map-layers-formats": "^5.5.2",
@@ -82,7 +82,7 @@
     "build": "npm run link:deps && tsc --noEmit",
     "clean": "rimraf dist",
     "dist": "vite build",
-    "lint": "eslint ./src/**/*.{ts,tsx}",
+    "lint": "eslint \"./src/**/*.{ts,tsx}\"",
     "link:deps": "node ./scripts/linkWorkspaceDeps.cjs",
     "link:deps:watch": "node ./scripts/linkWorkspaceDeps.cjs --watch"
   },
@@ -107,7 +107,7 @@
   "pnpm": {
     "overrides": {
       "@itwin/itwinui-react@^2": "2.12.26",
-      "@itwin/itwinui-react@^3": "3.19.5"
+      "@itwin/itwinui-react@^3": "3.20.1"
     }
   }
 }

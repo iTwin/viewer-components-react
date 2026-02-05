@@ -20,7 +20,7 @@ export async function initializeLearningSnippetsTests() {
     backendProps: {
       caching: {
         hierarchies: {
-          // eslint-disable-next-line deprecation/deprecation
+          // eslint-disable-next-line @typescript-eslint/no-deprecated
           mode: HierarchyCacheMode.Memory,
         },
       },

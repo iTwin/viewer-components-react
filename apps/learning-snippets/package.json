@@ -9,7 +9,7 @@
     "build:watch": "tsc -w",
     "clean": "rimraf lib build",
     "cover": "npm run -s test",
-    "lint": "eslint ./src/**/*.{ts,tsx}",
+    "lint": "eslint \"./src/**/*.{ts,tsx}\"",
     "test": "cross-env NODE_OPTIONS=\"--import ../../node-hooks/ignore-styles/register.cjs\" mocha --enable-source-maps --config ./.mocharc.json",
     "docs": "betools extract --fileExt=ts,tsx --extractFrom=./src --recursive --out=./build/docs/extract",
     "link:deps": "node ./scripts/linkWorkspaceDeps.cjs"
