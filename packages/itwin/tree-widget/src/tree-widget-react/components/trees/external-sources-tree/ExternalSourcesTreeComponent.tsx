@@ -11,8 +11,10 @@ import { ExternalSourcesTree } from "./ExternalSourcesTree.js";
 import type { ExternalSourcesTreeProps } from "./ExternalSourcesTree.js";
 
 /** @beta */
-interface ExternalSourcesTreeComponentProps
-  extends Pick<ExternalSourcesTreeProps, "getSchemaContext" | "selectionStorage" | "selectionMode" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
+interface ExternalSourcesTreeComponentProps extends Pick<
+  ExternalSourcesTreeProps,
+  "getSchemaContext" | "selectionStorage" | "selectionMode" | "density" | "hierarchyLevelConfig" | "selectionMode"
+> {
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }
