@@ -64,7 +64,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
       getChildElementsTree: (props) => this.getChildElementsTree(props),
       getAllChildElementsCount: (props) => this.getAllChildElementsCount(props),
       getCategories: (props) => this.getCategories(props),
-      getAllCategories: () => this.getAllCategories(),
+      getAllCategoriesOfElements: () => this.getAllCategoriesOfElements(),
       getElementsCount: (props) => this.getElementsCount(props),
       getModels: (props) => this.getModels(props),
       getSubCategories: (props) => this.getSubCategories(props),
@@ -464,8 +464,8 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
     );
   }
 
-  private getAllCategories(): ReturnType<BaseIdsCache["getAllCategories"]> {
-    return this.#props.idsCache.getAllCategories();
+  private getAllCategoriesOfElements(): ReturnType<BaseIdsCache["getAllCategoriesOfElements"]> {
+    return this.#props.idsCache.getAllCategoriesOfElements();
   }
 
   private getElementsCount(props: Parameters<BaseIdsCache["getElementsCount"]>[0]): ReturnType<BaseIdsCache["getElementsCount"]> {
@@ -473,7 +473,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
   }
 
   private getModels(props: Parameters<BaseIdsCache["getModels"]>[0]): ReturnType<BaseIdsCache["getModels"]> {
-    return this.#props.idsCache.getCategoriesElementModels(props.categoryIds, true);
+    return this.#props.idsCache.getCategoriesElementModels({ categoryIds: props.categoryIds, includeSubModels: true });
   }
 
   private getChildElementsTree(props: Parameters<BaseIdsCache["getChildElementsTree"]>[0]): ReturnType<BaseIdsCache["getChildElementsTree"]> {
@@ -515,7 +515,7 @@ export class CategoriesTreeVisibilityHandler implements Disposable, TreeSpecific
       );
     }
 
-    return this.#props.idsCache.getCategoriesElementModels(props.categoryIds).pipe(
+    return this.#props.idsCache.getCategoriesElementModels({ categoryIds: props.categoryIds }).pipe(
       mergeMap(({ id, models }) => {
         if (!models) {
           return of({ id, subModels: undefined });

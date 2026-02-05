@@ -83,7 +83,7 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
       getSubCategories: (props) => this.getSubCategories(props),
       getSubModels: (props) => this.getSubModels(props),
       hasSubModel: (props) => this.#props.idsCache.hasSubModel(props),
-      getAllCategories: () => this.getAllCategories(),
+      getAllCategoriesOfElements: () => this.getAllCategoriesOfElements(),
     };
     this.#visibilityHelper = new ModelsTreeVisibilityHelper({
       viewport: this.#props.viewport,
@@ -442,8 +442,8 @@ export class ModelsTreeVisibilityHandler implements Disposable, TreeSpecificVisi
     return this.#props.idsCache.getChildElementsTree({ elementIds: props.elementIds });
   }
 
-  private getAllCategories(): ReturnType<BaseIdsCache["getAllCategories"]> {
-    return this.#props.idsCache.getAllCategories();
+  private getAllCategoriesOfElements(): ReturnType<BaseIdsCache["getAllCategoriesOfElements"]> {
+    return this.#props.idsCache.getAllCategoriesOfElements();
   }
 
   private getAllChildElementsCount(props: Parameters<BaseIdsCache["getAllChildElementsCount"]>[0]): ReturnType<BaseIdsCache["getAllChildElementsCount"]> {

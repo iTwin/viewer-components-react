@@ -99,6 +99,9 @@ export class ModeledElementsCache {
   }
 
   public getCategoriesModeledElements({ modelId, categoryIds }: { modelId: Id64String; categoryIds: Id64Arg }): Observable<Id64Array> {
+    if (Id64.sizeOf(categoryIds) === 0) {
+      return of([]);
+    }
     return this.getModeledElementsInfo().pipe(
       mergeMap(({ modelWithCategoryModeledElements }) => {
         const result = new Array<ElementId>();

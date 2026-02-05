@@ -80,7 +80,7 @@ export interface BaseIdsCache {
   getSubModels: (
     props: { modelIds: Id64Arg; categoryId?: Id64String } | { categoryIds: Id64Arg; modelId: Id64String | undefined },
   ) => Observable<{ id: Id64String; subModels: Id64Arg | undefined }>;
-  getAllCategories: () => Observable<Id64Set>;
+  getAllCategoriesOfElements: () => Observable<Id64Set>;
   getChildElementsTree: (props: { elementIds: Id64Arg }) => Observable<ChildrenTree>;
   getAllChildElementsCount: (props: { elementIds: Id64Arg }) => Observable<Map<Id64String, number>>;
 }
@@ -141,7 +141,7 @@ export class BaseVisibilityHelper implements Disposable {
    * - Clears never drawn list;
    * - Removes all per-model category overrides. */
   public removeAlwaysDrawnExclusive(): Observable<void> {
-    return from(this.#props.baseIdsCache.getAllCategories()).pipe(
+    return from(this.#props.baseIdsCache.getAllCategoriesOfElements()).pipe(
       map((categories) => {
         if (categories.size) {
           this.#props.viewport.changeCategoryDisplay({ categoryIds: categories, display: false, enableAllSubCategories: false });
