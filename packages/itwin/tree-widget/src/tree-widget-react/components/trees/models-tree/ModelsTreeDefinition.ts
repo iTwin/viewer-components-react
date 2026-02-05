@@ -915,7 +915,7 @@ function createInstanceKeyPathsFromInstanceLabelObs(
     const elementLabelSelectClause = await labelsFactory.createSelectClause({
       classAlias: "e",
       className: "BisCore.Element",
-
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       selectorsConcatenator: ECSql.createConcatenatedValueStringSelector,
     });
     const ecsql = `
