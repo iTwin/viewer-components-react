@@ -1,4 +1,3 @@
-;
 /*---------------------------------------------------------------------------------------------
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
@@ -13,16 +12,10 @@ import { useDataProvider } from "../../property-grid-react/hooks/UseDataProvider
 import { TelemetryContextProvider } from "../../property-grid-react/hooks/UseTelemetryContext.js";
 import { createPropertyRecord, createResolvablePromise, renderHook, stubFavoriteProperties, stubPresentation } from "../TestUtils.js";
 
-
-
 import type { PropsWithChildren } from "react";
 import type { PropertyData } from "@itwin/components-react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { PerformanceTrackedFeatures } from "../../property-grid-react/hooks/UseTelemetryContext.js";
-
-
-
-
 
 describe("useDataProvider", () => {
   const imodel = {} as IModelConnection;
