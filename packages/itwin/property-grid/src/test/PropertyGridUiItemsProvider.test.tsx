@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { act } from "react-dom/test-utils";
 import sinon from "sinon";
 import * as appuiReactModule from "@itwin/appui-react";
 import { UiFramework } from "@itwin/appui-react";
@@ -20,7 +19,7 @@ import {
   PropertyGridWidget,
   PropertyGridWidgetId,
 } from "../property-grid-react/PropertyGridUiItemsProvider.js";
-import { render, stubSelectionManager, stubSelectionStorage, waitFor } from "./TestUtils.js";
+import { act, render, stubSelectionManager, stubSelectionStorage, waitFor } from "./TestUtils.js";
 
 import type { ReactElement } from "react";
 import type { WidgetDef } from "@itwin/appui-react";
@@ -31,7 +30,7 @@ import type { EventArgs, Props } from "@itwin/presentation-shared";
 import type { Selectable } from "@itwin/unified-selection";
 import type { PropertyGridWidgetProps } from "../property-grid-react/PropertyGridUiItemsProvider.js";
 
-/* eslint-disable deprecation/deprecation */
+/* eslint-disable @typescript-eslint/no-deprecated */
 describe("PropertyGridUiItemsProvider", () => {
   before(async () => {
     await PropertyGridManager.initialize(new EmptyLocalization());
@@ -67,7 +66,7 @@ describe("PropertyGridUiItemsProvider", () => {
       .to.be.empty;
   });
 });
-/* eslint-enable deprecation/deprecation */
+/* eslint-enable @typescript-eslint/no-deprecated */
 
 describe("createPropertyGrid", () => {
   function TestPropertyGridComponent() {
@@ -151,7 +150,7 @@ describe("createPropertyGrid", () => {
         triggerSelectionChange(props?: Pick<Partial<EventArgs<typeof selectionStorage.selectionChangeEvent>>, "source">) {
           selectionManager.selectionChange.raiseEvent(
             { source: "TestSource", imodel, ...props } as EventArgs<typeof selectionManager.selectionChange>,
-            // eslint-disable-next-line deprecation/deprecation
+            // eslint-disable-next-line @typescript-eslint/no-deprecated
             selectionManager as ISelectionProvider,
           );
         },
@@ -222,10 +221,12 @@ describe("createPropertyGrid", () => {
           renderWidget();
 
           widgetDef.setWidgetState.reset();
+          // eslint-disable-next-line @typescript-eslint/no-deprecated
           const key: ECClassGroupingNodeKey = {
             className: "TestSchema.TestClass",
             groupedInstancesCount: 5,
             pathFromRoot: [],
+            // eslint-disable-next-line @typescript-eslint/no-deprecated
             type: StandardNodeTypes.ECClassGroupingNode,
             version: 2,
           };
@@ -267,10 +268,12 @@ describe("createPropertyGrid", () => {
         });
 
         it("opens widget if unified selection non-empty with node keys and `shouldShow` returns true", async () => {
+          // eslint-disable-next-line @typescript-eslint/no-deprecated
           const key: ECClassGroupingNodeKey = {
             className: "TestSchema.TestClass",
             groupedInstancesCount: 5,
             pathFromRoot: [],
+            // eslint-disable-next-line @typescript-eslint/no-deprecated
             type: StandardNodeTypes.ECClassGroupingNode,
             version: 2,
           };

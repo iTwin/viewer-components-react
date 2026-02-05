@@ -10,7 +10,7 @@ import { copyToClipboard } from "../api/WebUtilities.js";
 import { PropertyGridManager } from "../PropertyGridManager.js";
 import { useTelemetryContext } from "./UseTelemetryContext.js";
 
-import type { PropsWithChildren, ReactNode } from "react";
+import type { PropsWithChildren, ReactElement, ReactNode } from "react";
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import type { PropertyGridContextMenuArgs } from "@itwin/components-react";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -210,7 +210,7 @@ export interface UseContentMenuProps extends ContextMenuProps {
 
 interface ContextMenuDefinition {
   position: { x: number; y: number };
-  menuItems: JSX.Element[];
+  menuItems: ReactElement[];
 }
 
 /**

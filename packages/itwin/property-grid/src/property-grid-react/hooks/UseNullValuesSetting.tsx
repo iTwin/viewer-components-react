@@ -13,7 +13,7 @@ import type { PropsWithChildren } from "react";
  * Provides context for `Show\Hide Empty Values` setting.
  * @public
  */
-export function NullValueSettingContext({ children }: PropsWithChildren<{}>) {
+export function NullValueSettingContext({ children }: PropsWithChildren<object>) {
   const { showNullValues, setShowNullValues } = useNullValueSetting();
 
   return <nullValueSettingContext.Provider value={{ showNullValues, setShowNullValues }}>{children}</nullValueSettingContext.Provider>;
