@@ -1779,7 +1779,6 @@ describe("ModelsTreeVisibilityHandler", () => {
       }>;
     }> = [
       {
-        only: true,
         describeName: "with child modeled elements",
         createIModel: async function createIModel(context: Mocha.Context): Promise<{ imodel: IModelConnection } & IModelWithSubModelIds> {
           return buildIModel(context, async (builder, testSchema) => {
