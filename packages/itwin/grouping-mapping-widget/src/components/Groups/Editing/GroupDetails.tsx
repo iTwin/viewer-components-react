@@ -5,6 +5,7 @@
 import { LabeledInput, Text } from "@itwin/itwinui-react";
 import React from "react";
 import type SimpleReactValidator from "simple-react-validator";
+import { GroupingMappingWidget } from "../../../GroupingMappingWidget";
 import { handleInputChange } from "../../../common/utils";
 import { NAME_REQUIREMENTS } from "../../Properties/hooks/useValidator";
 
@@ -23,12 +24,12 @@ export const GroupDetails = ({ details, setDetails, validator }: GroupDetailsPro
   return (
     <>
       <Text variant="small" as="small" className="gmw-field-legend">
-        Asterisk * indicates mandatory fields.
+        {GroupingMappingWidget.translate("common.mandatoryFields")}
       </Text>
       <LabeledInput
         id="groupName"
         name="groupName"
-        label="Name"
+        label={GroupingMappingWidget.translate("common.name")}
         value={details.groupName}
         required
         onChange={(event) => {
@@ -48,7 +49,7 @@ export const GroupDetails = ({ details, setDetails, validator }: GroupDetailsPro
       <LabeledInput
         id="description"
         name="description"
-        label="Description"
+        label={GroupingMappingWidget.translate("common.description")}
         value={details.description}
         onChange={(event) => {
           handleInputChange(event, details, setDetails);

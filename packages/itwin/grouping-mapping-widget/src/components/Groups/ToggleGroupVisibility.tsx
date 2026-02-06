@@ -3,8 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { ToggleSwitch } from "@itwin/itwinui-react";
-import "./ToggleGroupVisibility.scss";
 import React from "react";
+import { GroupingMappingWidget } from "../../GroupingMappingWidget";
+import "./ToggleGroupVisibility.scss";
 
 export interface ToggleGroupVisibilityProps {
   isLoadingQuery: boolean;
@@ -14,7 +15,7 @@ export interface ToggleGroupVisibilityProps {
 
 export const ToggleGroupVisibility = ({ isLoadingQuery, showGroupColor, setShowGroupColor }: ToggleGroupVisibilityProps) => (
   <ToggleSwitch
-    label="Color by Group"
+    label={GroupingMappingWidget.translate("groups.colorByGroup")}
     labelPosition="left"
     className="gmw-toggle"
     disabled={isLoadingQuery}

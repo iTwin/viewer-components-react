@@ -21,6 +21,7 @@ import { PropertyAction } from "../Properties/PropertyAction";
 import { Alert, Button } from "@itwin/itwinui-react";
 import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
 import { IModelApp } from "@itwin/core-frontend";
+import { GroupingMappingWidget } from "../../GroupingMappingWidget";
 
 const createPropertyDataProvider = async (keys: KeySet, iModelConnection: IModelConnection): Promise<PresentationPropertyDataProvider> => {
   const dataProvider = new PresentationPropertyDataProvider({
@@ -108,7 +109,7 @@ export const GroupQueryBuilderCustomUI = ({ updateQuery, isUpdating, resetView }
   return (
     <div className="gmw-select-query-generator-container">
       {!dataProvider || selectionKeySet.size === 0 ? (
-        <Alert type="informational">Please select on an element within the viewer first, then select properties to generate a group query.</Alert>
+        <Alert type="informational">{GroupingMappingWidget.translate("customUI.queryBuilderAlert")}</Alert>
       ) : (
         <>
           <div className="gmw-select-property-grid-container">
@@ -124,7 +125,7 @@ export const GroupQueryBuilderCustomUI = ({ updateQuery, isUpdating, resetView }
           </div>
           <div className="gmw-select-reset-button">
             <Button styleType="default" size="small" onClick={onClickResetButton}>
-              Reset
+              {GroupingMappingWidget.translate("common.reset")}
             </Button>
           </div>
         </>

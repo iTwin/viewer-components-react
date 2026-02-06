@@ -5,6 +5,7 @@
 import { Button, MiddleTextTruncation, Modal, ModalButtonBar, Text } from "@itwin/itwinui-react";
 import { useMutation } from "@tanstack/react-query";
 import React, { useCallback, useState } from "react";
+import { GroupingMappingWidget } from "../../GroupingMappingWidget";
 import "./DeleteModal.scss";
 import { LoadingSpinner } from "./LoadingSpinner";
 
@@ -31,12 +32,12 @@ export const DeleteModal = ({ entityName, onClose, onDelete, confirmationMessage
 
   return (
     <>
-      <Modal title="Confirm" modalRootId="grouping-mapping-widget" isOpen={!!localEntityName} isDismissible={!deleteMutation.isLoading} onClose={onClose}>
+      <Modal title={GroupingMappingWidget.translate("common.confirm")} modalRootId="grouping-mapping-widget" isOpen={!!localEntityName} isDismissible={!deleteMutation.isLoading} onClose={onClose}>
         <div className="gmw-delete-modal-body-text">
           {confirmationMessage ?? (
             <>
               <Text variant="leading" as="h3">
-                Are you sure you want to delete
+                {GroupingMappingWidget.translate("shared.deleteConfirm")}
               </Text>
               <strong>{<MiddleTextTruncation text={`${entityName}?`} />}</strong>
             </>
@@ -49,10 +50,10 @@ export const DeleteModal = ({ entityName, onClose, onDelete, confirmationMessage
             </div>
           )}
           <Button styleType="high-visibility" onClick={deleteCallback} disabled={deleteMutation.isLoading}>
-            Delete
+            {GroupingMappingWidget.translate("common.delete")}
           </Button>
           <Button styleType="default" onClick={onClose} disabled={deleteMutation.isLoading}>
-            Cancel
+            {GroupingMappingWidget.translate("common.cancel")}
           </Button>
         </ModalButtonBar>
       </Modal>

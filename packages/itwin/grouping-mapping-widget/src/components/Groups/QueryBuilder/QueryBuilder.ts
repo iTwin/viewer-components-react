@@ -9,6 +9,7 @@ import { PropertyValueFormat } from "@itwin/appui-abstract";
 import { toaster } from "@itwin/itwinui-react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import { QueryBinder } from "@itwin/core-common";
+import { GroupingMappingWidget } from "../../../GroupingMappingWidget";
 
 export interface Query {
   unions: QueryUnion[];
@@ -100,7 +101,7 @@ export class QueryBuilder {
   public async addProperty(prop: PropertyRecord): Promise<boolean> {
     // TODO: only handle primitive properties now
     if (prop.value?.valueFormat !== PropertyValueFormat.Primitive) {
-      toaster.warning("Only primitive types are supported for now.");
+      toaster.warning(GroupingMappingWidget.translate("errors.primitiveTypesOnly"));
       return false;
     }
     if (prop.value.value === undefined) {
@@ -110,7 +111,7 @@ export class QueryBuilder {
     const propertyField = (await this.dataProvider.getFieldByPropertyRecord(prop)) as PropertiesField;
 
     if (!propertyField) {
-      toaster.negative("Error. Failed to fetch field for this property record.");
+      toaster.negative(GroupingMappingWidget.translate("errors.fetchFieldFailed"));
       return false;
     }
 
@@ -126,7 +127,7 @@ export class QueryBuilder {
 
   private async buildProperty(prop: PropertyRecord, propertiesField: PropertiesField) {
     if (prop.value?.valueFormat !== PropertyValueFormat.Primitive || prop.value.value === undefined) {
-      toaster.negative("Error. An unexpected error has occured while building a query.");
+      toaster.negative(GroupingMappingWidget.translate("errors.queryBuildError"));
       return;
     }
 

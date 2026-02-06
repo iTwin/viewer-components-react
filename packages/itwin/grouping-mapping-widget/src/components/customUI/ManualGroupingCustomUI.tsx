@@ -7,6 +7,7 @@ import { Alert, Button, LabeledTextarea } from "@itwin/itwinui-react";
 import { LoadingSpinner } from "../SharedComponents/LoadingSpinner";
 import "./ManualGroupingCustomUI.scss";
 import type { GroupingCustomUIProps } from "./GroupingMappingCustomUI";
+import { GroupingMappingWidget } from "../../GroupingMappingWidget";
 
 /**
  * A default group query builder for the Grouping Mapping Widget that uses a manual input to generate queries.
@@ -17,19 +18,19 @@ export const ManualGroupingCustomUI = ({ updateQuery, isUpdating, resetView, ini
 
   return (
     <div className="gmw-manual-form">
-      <Alert type="informational">Generate group using an ECSQL query. Please select ECInstanceId and ECClassId columns in the query.</Alert>
+      <Alert type="informational">{GroupingMappingWidget.translate("customUI.manualQueryAlert")}</Alert>
       <LabeledTextarea
-        label="Query"
+        label={GroupingMappingWidget.translate("customUI.manualQueryLabel")}
         required
         value={manualInput}
         onChange={(event) => setManualInput(event.target.value)}
         disabled={isUpdating}
-        placeholder={`E.g. "SELECT ECInstanceId, ECClassId FROM BisCore:PhysicalElement"`}
+        placeholder={GroupingMappingWidget.translate("customUI.manualQueryPlaceholder")}
       />
       <div className="gmw-manual-actions">
         {isUpdating && <LoadingSpinner />}
         <Button disabled={isUpdating} onClick={() => updateQuery(manualInput)}>
-          Apply
+          {GroupingMappingWidget.translate("common.apply")}
         </Button>
         <Button
           disabled={isUpdating}
@@ -41,7 +42,7 @@ export const ManualGroupingCustomUI = ({ updateQuery, isUpdating, resetView, ini
             }
           }}
         >
-          Clear
+          {GroupingMappingWidget.translate("common.clear")}
         </Button>
       </div>
     </div>

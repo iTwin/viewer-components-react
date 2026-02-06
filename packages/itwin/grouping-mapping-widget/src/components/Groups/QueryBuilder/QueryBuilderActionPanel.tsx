@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { Button } from "@itwin/itwinui-react";
 import React from "react";
+import { GroupingMappingWidget } from "../../../GroupingMappingWidget";
 
 export interface QueryBuilderActionPanelProps {
   onClickNext: () => void;
@@ -13,7 +14,7 @@ export interface QueryBuilderActionPanelProps {
 export const QueryBuilderActionPanel = ({ onClickNext, isNextDisabled }: QueryBuilderActionPanelProps) => {
   return (
     <Button styleType="high-visibility" id="save-app" onClick={onClickNext} disabled={isNextDisabled}>
-      Next
+      {GroupingMappingWidget.translate("common.next")}
     </Button>
   );
 };

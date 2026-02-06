@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { GetAccessTokenFn } from "../../context/GroupingApiConfigContext";
 import type { ExtractionMessageData } from "../Extraction/ExtractionMessageModal";
 import type { ExtractionStatusData } from "../Extraction/ExtractionStatusIcon";
+import { GroupingMappingWidget } from "../../../GroupingMappingWidget";
 
 export const useFetchExtractionStatus = ({
   iModelId,
@@ -39,7 +40,7 @@ export const useFetchExtractionStatus = ({
       if (latestExtractionResult.done) {
         extractionStatusIcon = {
           iconStatus: "negative",
-          iconMessage: "No extraction found.",
+          iconMessage: GroupingMappingWidget.translate("extraction.noExtraction"),
         };
       } else {
         if (latestJobStatus?.state === ExtractionState.PartiallySucceeded || latestJobStatus?.state === ExtractionState.Failed) {
@@ -54,12 +55,12 @@ export const useFetchExtractionStatus = ({
             }));
           extractionStatusIcon = {
             iconStatus: "negative",
-            iconMessage: "Extraction contains issues. Click to view extraction logs.",
+            iconMessage: GroupingMappingWidget.translate("extraction.extractionIssues"),
           };
         } else {
           extractionStatusIcon = {
             iconStatus: "positive",
-            iconMessage: "Extraction successful.",
+            iconMessage: GroupingMappingWidget.translate("extraction.extractionSuccessful"),
           };
         }
       }

@@ -10,6 +10,7 @@ import { IconButton, InformationPanelWrapper } from "@itwin/itwinui-react";
 import { GroupInformationPanel } from "./GroupInformationPanel";
 import { SvgProperties } from "@itwin/itwinui-icons-react";
 import "./PropertyMenuWithVisualization.scss";
+import { GroupingMappingWidget } from "../../GroupingMappingWidget";
 
 /**
  * Properties for the {@link PropertyMenuWithVisualization} component.
@@ -32,7 +33,7 @@ export const PropertyMenuWithVisualization = ({ group, color, hideRefreshIcon, d
     <InformationPanelWrapper className="gmw-property-menu-vis-wrapper">
       <div className="gmw-property-menu-vis-toolbar">
         <GroupColorToggle group={group} color={color} labelPosition="left" disableZoom={disableZoom} />
-        <IconButton styleType="borderless" onClick={() => setIsInformationPanelOpen(true)} title="Group Information">
+        <IconButton styleType="borderless" onClick={() => setIsInformationPanelOpen(true)} title={GroupingMappingWidget.translate("properties.groupInformation")}>
           <SvgProperties />
         </IconButton>
       </div>
