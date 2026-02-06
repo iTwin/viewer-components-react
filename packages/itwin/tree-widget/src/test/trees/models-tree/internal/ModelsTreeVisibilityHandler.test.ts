@@ -2102,8 +2102,8 @@ describe("ModelsTreeVisibilityHandler", () => {
       },
     ];
 
-    testCases.forEach(({ describeName, createIModel, cases, only }) => {
-      (only ? describe.only : describe)(describeName, () => {
+    testCases.forEach(({ describeName, createIModel, cases, ...describeProps }) => {
+      (describeProps.only ? describe.only : describe)(describeName, () => {
         let iModel: IModelConnection;
         let createdIds: IModelWithSubModelIds;
 
@@ -2117,8 +2117,8 @@ describe("ModelsTreeVisibilityHandler", () => {
           await iModel.close();
         });
 
-        cases.forEach(({ name, getTargetNode, expectations, only }) => {
-          (only ? it.only : it)(name, async function () {
+        cases.forEach(({ name, getTargetNode, expectations, ...itProps }) => {
+          (itProps.only ? it.only : it)(name, async function () {
             using visibilityTestData = createVisibilityTestData({ imodel: iModel });
             const { handler, provider, viewport } = visibilityTestData;
 
